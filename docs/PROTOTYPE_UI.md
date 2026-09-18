@@ -1,6 +1,6 @@
-# İlk prototip — arayüz ve gezinme v0.2
+# İlk prototip — arayüz ve gezinme v0.3
 
-**Durum:** Faho, prototip için **Hayat / Aile / Ben** başlangıç menüsünü ve **modern + nostaljik karışımı** görsel yönü onayladı. Bu üç sekme nihai menü sınırı DEĞİL: oyun geliştikçe yeni sekmeler (özellikle Sosyal) ve Ben altındaki eylemler eklenecek. Romantik ilişkilerin eski partnerler dahil geçmişi korunacak. Yerleşimin piksel düzeyindeki ayrıntıları, renk kodları ve prototipin teknik kapsamı henüz onaylanmadı; oyun kodu/oynanabilir prototip yok. BitLife'ın özgün metin, ikon, görsel veya ekranını birebir kopyalama.
+**Durum:** Faho, prototipte **Hayat / Aile / Ben** başlangıç menüsünü, **modern + nostaljik karışımı** görsel yönü ve **sevgili edinme → ayrılma → eski sevgili olarak listede kalma** oynanabilir örneğini onayladı. Bunlar bir tasarım/kapsam kararıdır; oyun kodu veya oynanabilir prototip henüz yok. BitLife'ın özgün metin, ikon, görsel veya ekranını birebir kopyalama.
 
 ## 1. Onaylanmış navigasyon ilkesi
 - **İlk prototip alt menüsü: Hayat / Aile / Ben.** Bunlar ilk sürüm için bir başlangıç düzenidir; ileride yalnızca üç sekmeyle sınırlı kalmayacak.
@@ -23,26 +23,28 @@
 - Seçimlerin anlık sonuçları ve anlamlı geçmiş kararları sonraki yaşları etkileyebilir.
 
 ## 4. Aile ve romantik ilişkiler — kalıcı kişi, değişen statü
-Örnek akış: Aile → 'Ayşe — Kız Arkadaş' → ilişkinin detayları → ayrılık olayı/seçimi → **aynı Ayşe kaydı**, Aile içinde 'Ayşe — Eski Kız Arkadaş' olarak kalır. Ayrılık, kişiyi yok etmez veya tanışıklık/hikâye hafızasını silmez. Mevcut ilişki ile geçmiş romantik bağ ayrı anlamlar taşır; geçmişte yaşanan olaylar ileriki uygun hikâyelerde kullanılabilir.
+**Prototipte oynanabilir örnek zorunlu:** Yaşa ve koşullara uygun bir olay/etkileşim üzerinden bir karakterle romantik ilişki başlatılır → kişi **Aile** içinde 'Kız Arkadaş' / uygun sevgili statüsüyle görünür → oyuncunun ilişkiyi bitirebildiği ayrı bir seçim/olay olur → aynı kişi **Aile** içinde **'Eski Kız Arkadaş' / 'Eski Sevgili'** statüsünde kalır. **Kişi kaydı yeniden oluşturulmaz veya silinmez; ilişki geçmişi ve önemli seçimler korunur.** Örnek kişi adı veya kesin yaş kullanıcı tarafından belirlenmedi; hikâye özgün yazılacak ve uygun yaş/koşulda sunulacak.
 
-Ailede ebeveyn ve geniş akrabaların önceki kuralları aynen geçerli: kişi bazlı gerçek akrabalık, ayrı hane, ebeveyn yaşı/mesleği/kendine ait ekonomik durum; hediye, vakit geçirme, doğal ret, aynı yaşta azalan etki. **Aile başlığı altında romantik kişileri göstermenin kabulü, onları kan bağı olan akraba saymak demek değildir.** Veri modelinde kişi kimliği, bağ türü, ilişki statüsü ve hane durumu ayrı tutulması **teknik öneridir, nihai şema değil**.
+**Örnek test yolu (temsili, tek zorunlu hikâye değil):** Aile → 'Ayşe — Kız Arkadaş' → kişi detayı → ayrılık seçimi → Aile → 'Ayşe — Eski Kız Arkadaş'. Bu, ayrılık sonrasında eski sevgilinin aynı evde yaşadığı, hâlâ sevgili olduğu veya sevgiliye özel eylemlerinin açık kaldığı anlamına gelmez.
+
+Ailede ebeveyn ve geniş akrabaların önceki kuralları aynen geçerli: kişi bazlı gerçek akrabalık, ayrı hane, ebeveyn yaşı/mesleği/kendine ait ekonomik durum; hediye, vakit geçirme, doğal ret, aynı yaşta azalan etki. **Aile başlığı altında romantik kişileri göstermenin kabulü, onları kan bağı olan akraba saymak demek değildir.** Veri modelinde kişi kimliği, bağ türü, ilişki statüsü ve hane durumunu ayrı tutmak teknik öneridir, nihai şema değil.
 
 Açık: Aile ekranında kan bağı olanlar, partnerler ve eski partnerler nasıl bölümlenecek? Eski sevgiliyle hangi etkileşimler açık olacak? Yeni partner, eş, çocuk, eski eş gibi statülerin tam kapsamı ve görünümü henüz ayrıca kararlaştırılmadı.
 
 ## 5. Ben eylem merkezi — büyüme planı
 Ben → karakter özeti/değerleri ve yaşa/koşullara uygun faaliyet kategorileri. Geleceğe dönük örnekler: **Spor Salonu, Berber, Seyahat**. Bunlar zamanla gerçekten oynanabilir modüller olarak eklenecek; ilk prototipte tüm kategorileri tamamlanmış gibi sunma. Her eylemin uygunluk, maliyet ve aynı yaşta azalan getirisi genel tasarımla uyumlu olmalı; ayrıntılı ekonomi/etki dengesi henüz yok.
 
-## 6. İlk prototip için önerilen ekran akışı — kapsam ayrıca onaylanacak
-1. İki başlangıç modu → rastgele karakter ve kendi içinde tutarlı aile.
-2. **Hayat / Aile / Ben** arasında çalışır gezinme. Hayat'ta günlük ve Yaş Al; Aile'de kişi listesi/detayı ve en az bir işleyen etkileşim; Ben'de karakter bilgileri ve yalnızca gerçek işleyen eylemler.
-3. Anneyle vakit geçirme → sonuç/etki → tekrarda azalan etki veya bağlamsal ret.
-4. Yaş Al → tek açılış olayı → seçim → sonraki yaşta uygun devamı gösterilebilen küçük özgün hikâye.
-5. Kalıcı romantik kişi ve 'eski sevgili' statüsü için **ilk prototipte örnek akış bulunup bulunmayacağı ayrıca netleşecek**; mimari bunu sonradan eklemeyi engellememeli.
-6. Tam Sosyal/Ün, spor salonu/berber/seyahat içeriklerinin tamamı, geniş etkinlik havuzu ve ekonomi ilk prototip için henüz onaylanmış zorunluluk değildir; sonraki modüller olarak planlanır.
+## 6. İlk prototip — onaylanan kapsama giren örnekler ve açık ayrıntılar
+1. İki başlangıç modu ve rastgele karakter/aile, Hayat / Aile / Ben gezinmesi, aile bilgileri, karakter değerleri ve hayat günlüğü önceki tasarımda bulunur; prototipteki veri derinliği ayrıca planlanacak.
+2. Aileden en az bir etkileşimin olumlu etkisini ve yakın tekrarda azalan etki / olası ret davranışını çalışır durumda göstermek hedeflenir.
+3. **Yaş Al → ilk tek uygun olay → seçim → geçmişe bağlı uygun devam** akışı prototipin temel oyun döngüsüdür.
+4. **YENİ KESİN KAPSAM:** Oyuncunun uygun koşulda bir sevgili edinip Aile listesinde görmesi, sonra ayrılık kararı verebilmesi ve **aynı kişinin eski sevgili statüsüyle listede kalması** çalışır örnek olarak prototipe dahil edilir. Yalnızca sahte ekran veya geleceğe bırakılmış veri alanı yeterli değildir.
+5. Oyun içi ilerlemeye bağlı aralıklı ek olay ve aileyle uzun süre temas yoksa sitem örneğinin ilk teknik sürümde ne derinlikte bulunacağı hâlâ açık.
+6. Tam Sosyal/Ün, spor salonu/berber/seyahat içeriklerinin tamamı, geniş etkinlik havuzu ve ekonomi ilk prototip için zorunlu değildir; ileriki modüller olarak planlanır.
 
-## 7. Doğrulama ve sonraki karar
-- Sekmeler büyümeye uygun; açılmamış modül butonları aldatıcı biçimde aktif değil.
-- Bir kişi sevgiliyken eski sevgiliye geçtiğinde aynı kişiye ait tarihçe kaybolmuyor; mevcut statü doğru gösteriliyor.
-- Ayrı hane/akrabalık/romantik bağlar birbirine karıştırılmıyor; olmayan kişi canlı etkileşimde gösterilmiyor.
-- Yaş Al ilk tek olayı gösteriyor; tekrar etkileşimleri sonsuz stat kazandırmıyor.
-- **Sıradaki ürün kararı:** Prototipte romantik ilişki kurma/ayrılık gösteren küçük bir örnek zincir de yer alsın mı, yoksa veri/ekran yapısı hazırlanıp ilk oynanabilir akış sadece aileyle mi başlasın? Bu tercih henüz belirlenmedi.
+## 7. Doğrulama ve sıradaki iş
+- Üç sekme çalışır, ek menüler için mimari büyüyebilir; henüz işlevsiz modüller aktifmiş gibi görünmez.
+- Bir kişi sevgiliyken eski sevgiliye geçtiğinde **kişi kimliği, tanışıklık ve geçmiş hikâye bilgisi korunur**; güncel statü değişir, diğer ilişkilerle karışmaz.
+- Ayrı hane/akrabalık/romantik bağlar birbirine karıştırılmaz; olmayan kişi canlı etkileşimde gösterilmez.
+- Yaş Al bir yaşı ilerletir, ilk olay tek başına gösterilir; tekrar etkileşimleri sonsuz stat kazandırmaz.
+- **Sıradaki iş:** Claude'a verilecek ilk prototip geliştirme görevini küçük, sınanabilir aşamalara ve kabul kriterlerine ayırmak. Teknik yığın, somut örnek olay metinleri, tasarım renkleri ve kapsamın diğer derinlikleri ayrıca netleştirilecek.
