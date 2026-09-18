@@ -1,30 +1,30 @@
-# Genel oyun döngüsü — v0.2
+# Genel oyun döngüsü — v0.3
 
-**Durum:** Yaş ilerletmenin A modeli Faho tarafından onaylandı. Diğer akış ayrıntıları öneri/açık konu olarak kalır. Henüz oyun kodu veya oynanabilir prototip yok.
+**Durum:** Faho, isteğe bağlı tek tuşla yaş almayı (A) ve tekrarlanan etkileşimlerde azalan olumlu etkiyi (B) onayladı. Hemen yinelenen aile etkileşimlerine bağlamsal ret ve ret halinde küçük mutluluk kaybı ihtimali de kesinleşti. Teknik denge rakamları ve diğer akış ayrıntıları henüz taslak; oyun kodu/prototip yok.
 
-## Kesin karar: oyuncu istediğinde tek tuşla yaş alır
-- Hayat ekranında **Yaş Al** düğmesi bulunacak.
-- Oyuncu, mevcut yaşında istediği **uygun ve erişilebilir** serbest etkileşimleri yapabilir; ardından kendisi hazır olduğunda düğmeye basıp sonraki yaşa geçer.
-- Yaş ilerlemek için o yaşın bütün etkinliklerini veya olaylarını bitirmesi **gerekmez**. Her olayı tamamlamaya zorlayan sistem kullanılmaz.
-- Yaş ilerletme oyuncunun iradesine bağlıdır; gerçek zamanlı otomatik yaşlanma onaylanmadı.
-- Aile etkileşimleri ve aileden gelen gelişmeler, ilgili kişiyle ilişkiyi ve ana karakterin uygun değerlerini değiştirebilir; önemli sonuçlar ileride hatırlanabilir.
+## Kesinleşen ana döngü
+- Hayat ekranında **Yaş Al** düğmesi olur. Oyuncu mevcut yaşında uygun/erişilebilir etkileşimlerini kendi isteğiyle yapar; hazır olduğunda düğmeye basarak bir sonraki yaşa geçer.
+- Bir sonraki yaşa geçmek için o yaşın bütün etkinliklerini veya olaylarını tamamlamak zorunda değildir; gerçek zamanlı otomatik yaşlanma kararlaştırılmadı.
+- Aileyle karşılıklı etkileşimler ilgili ilişkiyi ve ana karakterin uygun değerlerini değiştirebilir; önemli etkiler sonraki yaşlarda hatırlanabilir.
+- **Azalan getiri (B):** Aynı kişiyle aynı tür etkinlik art arda tekrarlandığında olumlu getirisi giderek düşer; tek hareketi durmadan kullanıp değerleri sınırsız artırma yolu olmaz. Bu kural, her yaş için tek tip sabit etkileşim hakkı belirlendiği anlamına gelmez.
+- **Bağlamsal ret:** Örneğin anneyle vakit geçirdikten hemen sonra tekrar istenirse anne bazen 'Daha yeni birlikte vakit geçirdik' diyerek reddedebilir. Ret her denemede otomatik değildir. Gerçekleştiğinde oyuncunun mutluluğu bir miktar düşebilir; kesin puan, ihtimal ve tetikleme koşulları belirlenmedi.
 
-## Önerilen akış — sırası ve ayrıntıları kesinleşmedi
-1. Hayat ekranında yaş, karakter özellikleri, ilişkiler ve son gelişmeler görünür.
-2. Oyuncu Aile sekmesinde hediye verme / birlikte vakit geçirme gibi yaşına ve mevcut koşullarına uygun etkileşimleri seçebilir. İleride okul, arkadaş ve iş sekmeleri eklenebilir.
-3. Etkileşim sonuçları ilgili ilişkiye, karakter değerlerine ve gerektiğinde geçmiş hafızasına işlenir.
-4. Oyuncu **Yaş Al** düğmesine basar; sistem yeni yaşa, mevcut aile/okul/iş durumuna, kişilere ve geçmiş kararlara uygun olayları değerlendirir. NPC gelişmeleri yaş alma sırasında veya başka bir noktada gösterilebilir; zamanlaması henüz belirlenmedi.
-5. Sonuçlar sonraki yaşa taşınır.
+## Örnek etkileşim akışı — yazılmış olay değil
+1. Oyuncu **Aile → Anne → Vakit Geçir** seçer.
+2. Uygun bir sonuç metni gösterilir: 'Annenle sinemaya gittin. Sonrasında oturup uzun uzun dertleştiniz.' İlgili ilişki ve uygun karakter değerleri değişebilir.
+3. Oyuncu kısa süre içinde aynı isteği tekrarlar. Oyun bağlama göre bir **ret sonucu** seçebilir: 'Daha yeni vakit geçirdik, biraz da kendime zaman ayırayım.' Ret gerçekleşirse karakterin mutluluğu az miktarda düşebilir; etkinlik başarılı olmuş gibi tam ödül verilmez.
+4. Ret gerçekleşmez ve etkinlik yeniden yapılırsa aynı etkileşimden sağlanan olumlu etki öncekine göre azalır.
 
-## Sıradaki tasarım kararı: etkileşim sınırı
-Yaş alma serbest olduğu için aynı etkileşimi sürekli tekrarlayıp mutluluk/zeka/ilişki gibi değerleri sınırsız yükseltmeye izin verilip verilmeyeceğini belirlemeliyiz. **Henüz karar verilmedi.** Olası yaklaşımlar: yaş başına sınırlı etkileşim hakkı; aynı etkinlik için azalan etki; para ve durum koşulları; anlamlı etkinliklerde tekrar sınırı. Bu seçenekler öneridir, uygulama talimatı değildir.
+Bu anlatım **örnek metin ve işleyiş taslağıdır**; sinema aktivitesinin her yaşta/şehirde mutlaka bulunacağı ya da her reddin zorunlu puan kaybı yaratacağı kesinleşmedi.
 
-## Diğer açık sorular
-- Yaş Al'a basıldığında kaç olay gösterilir, olaylar hangi sırayla çözülür?
-- Serbest etkileşimler sonuçları anında mı gösterir; geçmiş günlüğüne ne kaydedilir?
-- Önemli ama isteğe bağlı/kaçırılabilir olaylar nasıl sunulur? Oyuncu bütün olayları tamamlamak zorunda değildir.
-- Oyuncu ömrünün bitişi, ölüm ve yeni hayata başlama akışı nasıl olur?
-- Karakter değerlerinin sayısal aralığı ve olay etkileri nasıl dengelenir?
+## Önerilen uygulama yaklaşımı — ONAYLANMADI
+- Tekrar geçmişini **kişi + etkileşim türü + mevcut dönem** bazında izlemek, anneyle vakit geçirmeyi babayla vakit geçirmeyle karıştırmamayı sağlar.
+- Ret olasılığı kişinin güncel durumuna, aradaki süreye, yakın zamandaki deneme sayısına ve ilişkiye göre belirlenebilir. İlk tıklamayı sebepsiz yere cezalandırmamak ve reddi sürekli negatif döngüye dönüştürmemek için denge gerekir.
+- Yaş alma sonrasında tekrar baskısının nasıl gevşeyeceği, aynı yaşta farklı faaliyetlerin tekrar sayılıp sayılmayacağı, mutluluk/ilişki etkilerinin üst-alt sınırları belirlenmeli.
+- Hediye, sohbet, birlikte vakit geçirme gibi farklı etkinliklerin her birine aynı azalma eğrisini uygulamak zorunda değiliz; kesin formül daha sonra seçilecek.
 
-## Durum özeti
-**Ana karakterin ana hatları ve rastgele aile kuralları tasarlandı; genel döngünün tek tuşla isteğe bağlı yaş alma kuralı da kesinleşti.** Şimdi yaş başına etkileşimlerin sınırlanıp sınırlanmayacağını ve yaş alma anındaki olay akışını tasarlıyoruz.
+## Henüz karar vermediğimiz genel akış
+Yaş Al düğmesinden sonra olayların kaç tane ve hangi sırayla gösterileceği; NPC gelişmelerinin ne zaman duyurulacağı; olay günlüğünün ayrıntısı; ölüm ve yeni hayata geçiş; oyuncunun ana değerlerinin rakamsal aralığı henüz açık. Olay motoru yaş ve yaşam koşullarına uygun olmayan sonuçları göstermemeli.
+
+## İlerleme özeti
+**Tasarladık:** Oyun/karakter ana hatları, rastgele aile, ilişki ve hafıza prensipleri, tek tuşla yaş alma, azalan getirili aile etkileşimleri ve olası doğal ret. **Şimdi tasarlıyoruz:** Yaş Al düğmesi sonrasındaki olay sunumu ve denge ayrıntıları. Kod/prototip henüz yok.
