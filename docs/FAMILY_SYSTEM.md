@@ -1,46 +1,46 @@
-# Aile sistemi taslağı — v0.1
+# Aile sistemi taslağı — v0.2
 
-**Durum: Tartışmaya açık taslak; aşağıdaki öneriler otomatik olarak onaylanmış karar değildir.** Kesinleşmiş kurallar `DECISIONS.md` içindedir.
+**Durum:** Kararlaştırılmış aile kuralları ile henüz çözülmemiş teknik ayrıntılar ayrı tutulur. Oyun kodu yazılmadı. Kesin kararların kısa kaydı `DECISIONS.md` içindedir.
 
-## Kısa ilerleme özeti
-**Şimdiye kadar ana hatlarını tasarladık:** Türkiye odaklı ve nostaljiyle günümüzü harmanlayan oyun kimliği, iki modlu rastgele doğum, beş ana karakter değeri, ilişkilere etki eden seçimler, geçmiş karar hafızası ve olayların yaşa uygunluğu. Aile üyelerinin de kendi hayatlarında olaylar yaşayacağı kesinleşti. **Şimdi aile sistemini ayrıntılandırıyoruz.** Oynanabilir oyun, kod veya tamamlanmış olay kütüphanesi henüz yok.
+## Neredeyiz?
+**Ana hatlarını tasarladık:** Türkiye odaklı nostaljik + modern yaşam hissi, iki modlu rastgele doğum, beş karakter değeri, ilişkiler, karar hafızası, yaşa/koşullara uygun olaylar. **Şimdi aile sistemini planlıyoruz:** aile üyeleri ve haneler, aile sekmesi, birlikte etkinlikler ve aile bireylerinin bağımsız hayatları. Eğitim, kariyer, ekonomi ve geniş olay havuzu ileride ayrıntılanacak; henüz oynanabilir oyun yok.
 
-## Kesinleşmiş aile ilkeleri
-- Karakter çok zengin veya çok yoksul ailede doğabilir; gelir seviyesi rastgeledir.
-- Kardeş sayısı sıfır veya çok sayıda olabilir.
-- Evde evcil hayvan bulunabilir ya da bulunmayabilir.
-- Anneanne, babaanne, dede gibi geniş aile bireyleri aynı evde bulunabilir veya bulunmayabilir.
-- Doğum şehri rastgele seçilir; isim/cinsiyet dışında ilk sürümde oyuncu başlangıç koşullarını seçmez.
-- Aile üyeleri oyuncudan bağımsız gelişmeler yaşayabilir; bunlar oyuncunun hayatını etkileyebilir.
-- Aile ilişkileri oyuncunun seçimleriyle değişebilir; yaş ve mevcut hayat koşulları olay uygunluğunu sınırlar.
+## 1. Kesinleşen kurallar: başlangıç aileleri tamamen rastgele
+- Oyuncu tamamen rastgele başlayabilir veya yalnızca **isim ve cinsiyetini** seçebilir; diğer başlangıç koşullarını kendisi belirleyemez.
+- Ailenin tek bir 'ortalama' kalıbı yoktur. Çok varlıklı / çok yoksul ya da ara düzeylerde olabilir. Aile bireylerinin ekonomik durumları **aynı olmak zorunda değildir**: anne varlıklı, baba yoksul olabilir ya da tersi.
+- Anne ve babanın **yaşları rastgele** belirlenir; genç anne/yaşlı baba ya da başka yaş farkları mümkün olabilir. Yaşlar bir örnek aile şablonuna sabitlenmez.
+- Anne-baba birlikte, evli, ayrı ya da boşanmış olabilir; ilişki durumları hayat içinde de değişebilir. Her aileyi zorunlu olarak aynı çatı altında yaşayan evli anne-baba modeliyle kurma.
+- Kardeş sayısı sıfır ya da çok olabilir. Evcil hayvan bulunabilir veya bulunmayabilir. Doğum şehri rastgeledir.
+- Çekirdek aileyle sınırlı kalma: anneanne, babaanne, dedeler, teyze, hala, amca, dayı gibi **geniş aile bireyleri bulunabilir**. Her hayatın bütün akrabalara sahip olması şart değildir; kişi sayısı ve mevcut kişiler rastgele değişir.
+- **Akrabalık bağı ile aynı evde yaşamak farklıdır.** Herkesin aynı evde yaşadığı varsayılmaz; ancak anne/baba, büyükler ve uygun durumlarda teyze, hala, amca veya dayı da aynı hanede yaşayabilir. Kimin nerede yaşadığı başlangıçta rastgele belirlenebilir, ileride olaylarla değişebilir.
+- Rastgelelik tutarlılık gerektirir: var olmayan akrabayla olay çıkmaz, başka evdeki bir kişi evin daimi sakini gibi yazılmaz, ölmüş karakter yaşayan kişi etkileşimi sunmaz. **Yaş, akrabalık, hane ve olay koşulları birbirleriyle uyumlu** olmalı. Rastgele olmak her olasılığın eşit ağırlıklı olacağı anlamına gelmez; oranlar henüz belirlenmedi.
 
-## Tasarım önerisi A — Aileyi canlı karakterler olarak tutmak
-Oyuncuyla ilişkili her önemli kişinin kalıcı bir kimliği (ID), adı, yakınlık türü, hayatta olup olmadığı ve aynı evde yaşayıp yaşamadığı tutulabilir. Aynı evde yaşamayan bir büyükanne de aile ağacında var olabilir; eve taşınmak veya ayrılmak zamanla değişebilir. **Bu veri alanları henüz kesinleşmedi.**
+## 2. Kesinleşen kurallar: aile sekmesi ve etkileşimler
+Oyunda ayrı bir **Aile** sekmesi olacak. Oyuncu aile bireylerini bu sekmede ayrı ayrı görebilecek. Anne ve babanın **yaşları, meslekleri ve kendilerine ait ekonomik durumları** görünür olmalı; diğer üyeler için gösterilecek ayrıntı seviyesi henüz net değil. Mesleği olmayan kişinin mesleği uydurulmaz; işsiz/emekli vb. durumların gösterimi tasarlanacak.
 
-## Tasarım önerisi B — Tutarlı rastgele doğum
-Önce hane ve bakım verenler, sonra kardeşler, geniş aile ve evcil hayvan oluşturulabilir. Rastgele sonuçlar birbiriyle çelişmemeli: aynı evde olmayan kişiye sürekli ev içi olay çıkmamalı; olmayan kardeş oyuncuya seslenmemeli. Her ailenin aynı yapıda olması gerekmez. Gelir seviyesi ayrı olayların olasılıklarını ve erişilebilir seçenekleri etkileyebilir. Olasılık yüzdeleri **belirlenmedi**.
+Oyuncu aile bireyleriyle etkileşim kurabilecek: **hediye vermek, birlikte vakit geçirmek** ve bunlara uygun başka aile etkileşimleri. Karar ve etkileşimler karakter değerlerini ve ilgili kişiyle ilişkiyi etkileyebilir. Etkinlikler oyuncunun yaşına, parasına/erişimine, kişinin yaşayıp yaşamadığına ve gerçek ilişki/hane koşullarına uygun olmalı. Hediye türleri, fiyatları, ilişki puanları ve kullanım sıklığı henüz belirlenmedi.
 
-## Tasarım önerisi C — Ailenin kendi olayları
-Oyuncu yaş alırken aile bireyleri de gelişmeler yaşayabilir. Özgün örnek zincirler:
+## 3. Kesinleşen kurallar: aile de yaşar
+Anne, baba ve diğer aile bireyleri oyuncudan bağımsız gelişmeler yaşayabilir. Meslek değiştirme, işten çıkarılma, maddi durum değişimi, ilişki değişimi, ayrılık/boşanma, bir akrabanın eve taşınması veya evden ayrılması, hastalık ve ölüm gibi olaylar **uygun karakter ve koşullarda** gerçekleşebilir; oyuncunun evini, bütçesini, ilişkilerini ve olay seçeneklerini etkileyebilir. Bunlar mümkün olay türleridir; her hayat için zorunlu bir senaryo değildir.
 
-1. **Baba işini kaybeder:** Hane bütçesi etkilenebilir; çocuğun dershaneye gitme, mahalle aktivitesine katılma veya aileye yardım etme seçenekleri değişebilir. İşten çıkarılmanın gerçekleşme yaşı ve sıklığı henüz belirlenmedi.
-2. **Anne yeni işe başlar:** Aile ekonomisi ve evde geçirilen zaman değişebilir; oyuncunun aile içi ilişkileri mevcut bağlara göre farklı etkilenebilir.
-3. **Kardeş evden ayrılır:** Hane üyeleri değişir; özlem, daha az kalabalık ev veya ziyaret olayları açılabilir.
-4. **Anneanne aynı eve taşınır:** Ev yaşamı ve kuşaklar arası olaylar açılabilir; oyuncuyla ilişkisi başlangıçtaki bağa göre şekillenir.
-5. **Dedenin vefatı:** Aile ağı ve oyuncunun duygusal durumu etkilenebilir; artık yaşayan karakter gerektiren olaylarda görünmez. Ölümün oyun içi sunumu ve sıklığı ayrıca tasarlanmalı.
+### Özgün olay örnekleri (onaylanmış tekil olaylar değil)
+- Aynı evde yaşayan babaanne, oyuncuya eski bir aile fotoğrafını gösterir; birlikte vakit geçirmek ilişkinizi etkiler.
+- Ayrı yaşayan babanla hafta sonu buluşması gündeme gelir; ulaşım ve mevcut ilişkiniz seçenekleri belirler.
+- Teyzen geçici olarak eve taşınır; hane üyeleri ve gündelik olay havuzu değişir.
+- İşini kaybeden annen yeni bir mesleğe yönelir; bu gelişme hanenin koşullarını etkileyebilir.
+- Bayramda aile ziyareti, ziyaret edilebilen akrabalar ve oyuncunun yaşına göre farklılaşır.
 
-Bunlar **tasarım örnekleri**, henüz kodlanmış veya tek tek onaylanmış olaylar değildir.
+## 4. Claude'a aktarılacak önerilen veri yaklaşımı — HENÜZ ONAYLANMADI
+Her önemli aile bireyini kalıcı bir kişi kimliğiyle tutmak; akrabalığı, yaşı, meslek/çalışma durumunu, kendine ait ekonomik kaynaklarını, ilişki durumunu, yaşayıp yaşamadığını ve mevcut hanesini ayrı alanlarda yönetmek mantıklı görünüyor. Oyuncu–kişi ilişki verisi, kişi verisinden ayrı tutulabilir. Aile sekmesi ve ev içi olaylar **aynı veri kaynağını** kullanmalı. Kesin veri şeması ve algoritma henüz tasarlanmadı; Claude bunları onaylanmış teknik karar gibi uygulamamalı.
 
-## Tasarım önerisi D — Türkiye'ye özgü aile olay havuzu
-Bayram ziyaretinde akraba kalabalığı, misafir çocuğunun oyuncak istemesi, aile büyüklerinin harçlık vermesi, anneannenin evinde yaz tatili, sofrada kardeşle son börek için yarışmak, akrabanın evlilik sorusu gibi tanıdık durumlar kullanılabilir. Olaylar özgün yazılmalı, karakterin yaşına ve ailede gerçekten bulunan kişilere uymalıdır. Aile yapıları stereotipleştirilmemelidir.
-
-## Karara bağlanması gereken sorular
-1. Başlangıçta ebeveynler ve bakım verenler için hangi aile yapıları mümkün olacak?
-2. Anne, baba ve diğer NPC'lerin meslek, yaş, sağlık, kişilik, mutluluk gibi hangi özellikleri tutulacak?
-3. Aile ilişkileri yalnızca bir puan mı, yoksa sevgi/güven/yakınlık gibi birden fazla değer mi taşıyacak?
-4. Birlikte yaşama, taşınma, evlilik, ayrılık, yeni kardeş, iş kaybı ve ölüm olaylarının koşulları nasıl tanımlanacak?
-5. Aynı yaşta kaç aile olayı olabilecek; tekrarlar nasıl önlenecek?
-6. Maddi durum ve şehir, aile olaylarını ne ölçüde etkileyecek?
+## 5. Açık sorular — bizimle tartışılacak
+1. Aile sekmesinde her akraba için hangi bilgiler (meslek, yaş, ilişki, maddi durum, aynı evde mi vb.) gösterilecek? Anne-baba için yaş, meslek ve ayrı ekonomik durum kesin.
+2. Çocuk doğduğunda anne/baba dışında bakım veren ilişkileri ve ayrı yaşama nasıl modellenir?
+3. Yaş, ebeveyn–çocuk bağı ve nesiller için hangi **tutarlılık kısıtları** konur? Sabit 'ortalama aile' yapılmayacak.
+4. Kişisel servet, hane bütçesi ve çocuğun kullanabileceği para nasıl ayrılır?
+5. Aile etkileşimlerinin sayısı, bedeli, erişilebilirlik koşulları ve tekrar sınırları nasıl belirlenir?
+6. NPC'lerin evlilik/boşanma, iş, taşınma ve ölüm olaylarının olasılık ve sıklığı nasıl ayarlanır?
+7. Aile sekmesinin görsel düzeni ve akrabaları gruplandırma yöntemi nasıl olacak?
 
 ## Sonraki adım
-Faho ile önce **aile üyelerinin başlangıçta nasıl üretileceği** ve hangi bilgilerin saklanacağı netleştirilecek. Ardından aile olayları için ilk veri şeması hazırlanacak. Onaylanan kurallar `DECISIONS.md` ve `SYSTEMS.md` dosyalarına taşınacak; açık kalanlar `BACKLOG.md` içinde kalacak.
+Aile sekmesinde her akraba için gösterilecek temel bilgiler ile rastgele aile üretiminde gerekli tutarlılık kurallarını netleştirelim; ardından aile etkileşimleri ve olay verisi şemasına geçelim. Yeni onaylanan ayrıntılar `DECISIONS.md` ve `SYSTEMS.md` içine işlenecek; belirsiz ayrıntılar açık kalacak.
