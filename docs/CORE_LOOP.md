@@ -1,32 +1,30 @@
-# Genel oyun döngüsü — tartışma taslağı v0.1
+# Genel oyun döngüsü — v0.2
 
-**Durum:** Bu dosyadaki akış bir ÖNERİDİR, Faho tarafından henüz onaylanmadı. Kesinleşen kurallar `DECISIONS.md` içindedir. Oyun kodu / oynanabilir prototip henüz yok.
+**Durum:** Yaş ilerletmenin A modeli Faho tarafından onaylandı. Diğer akış ayrıntıları öneri/açık konu olarak kalır. Henüz oyun kodu veya oynanabilir prototip yok.
 
-## Nereden nereye?
-- **Ana hatları belirledik:** Özgün Türkiye yaşam simülasyonu, rastgele doğum ve aile, beş ana karakter değeri, kişi bazlı ilişkiler, geçmiş kararların etkisi, yaş ve koşula uygun olaylar.
-- **Aile sisteminin ilk kuralları netleşti:** Aile üyeleri, yaşları, meslekleri, maddi durumları ve aynı evde yaşama ihtimalleri çeşitlidir. Aile sekmesinde kişiler görülebilir, hediye verilebilir, birlikte vakit geçirilebilir.
-- **Yeni kesinleşen kural:** Ailenin oyuncuya davranışı ve karşılıklı etkileşimleri yalnızca ilişkiyi değil, ana karakterin değerlerini de değiştirebilir. Hangi etkinliğin hangi değeri ne kadar değiştirdiği açık.
-- **Şimdi planlıyoruz:** Oyuncunun her yaşta ne yaptığı ve olay/etkileşim/yaş ilerletmenin nasıl bir döngü oluşturduğu.
+## Kesin karar: oyuncu istediğinde tek tuşla yaş alır
+- Hayat ekranında **Yaş Al** düğmesi bulunacak.
+- Oyuncu, mevcut yaşında istediği **uygun ve erişilebilir** serbest etkileşimleri yapabilir; ardından kendisi hazır olduğunda düğmeye basıp sonraki yaşa geçer.
+- Yaş ilerlemek için o yaşın bütün etkinliklerini veya olaylarını bitirmesi **gerekmez**. Her olayı tamamlamaya zorlayan sistem kullanılmaz.
+- Yaş ilerletme oyuncunun iradesine bağlıdır; gerçek zamanlı otomatik yaşlanma onaylanmadı.
+- Aile etkileşimleri ve aileden gelen gelişmeler, ilgili kişiyle ilişkiyi ve ana karakterin uygun değerlerini değiştirebilir; önemli sonuçlar ileride hatırlanabilir.
 
-## Önerilen bir tur akışı
-1. **Hayat ekranı:** Karakterin yaşı, beş ana değeri, güncel kısa yaşam özeti ve yeni gelişmeler görünür.
-2. **Serbest etkileşim:** Oyuncu Aile sekmesine gidip var olan bir akrabayla vakit geçirebilir veya hediye verebilir; ileride okul, arkadaş ve kariyer sekmeleri de benzer biçimde çalışabilir. Yaş, mevcut kişi, aynı evde olup olmama, maddi imkânlar ve olay koşulları dikkate alınır. Her etkinlik her zaman yapılabilir olmak zorunda değildir.
-3. **Etkiler ve hafıza:** Etkileşim hem ilgili ilişkiyi hem oyuncunun uygun değerlerini değiştirebilir; önemli seçimler gelecekte kullanılmak üzere kaydedilebilir. Oyuncunun yapmadığı, aile bireylerinin kendi hayatında gerçekleşen olaylar da onu etkileyebilir.
-4. **Yaş ilerletme:** Oyuncu hazır olduğunda yaşı ilerletir. Olay motoru önce yaşı, aile/okul/iş durumunu, yaşayan ve erişilebilir kişileri, geçmiş kararları kontrol eder; yalnızca uygun olayları gösterir. Seçimlerin etkileri işlenir; aile NPC'lerinin hayatındaki olası değişiklikler de işlenir.
-5. **Yeni hayat durumu:** Sonuçlar hayat günlüğüne yansır; aynı insanlarla ilişkiler ve geçmiş sonuçlar sonraki yaşlara taşınır.
+## Önerilen akış — sırası ve ayrıntıları kesinleşmedi
+1. Hayat ekranında yaş, karakter özellikleri, ilişkiler ve son gelişmeler görünür.
+2. Oyuncu Aile sekmesinde hediye verme / birlikte vakit geçirme gibi yaşına ve mevcut koşullarına uygun etkileşimleri seçebilir. İleride okul, arkadaş ve iş sekmeleri eklenebilir.
+3. Etkileşim sonuçları ilgili ilişkiye, karakter değerlerine ve gerektiğinde geçmiş hafızasına işlenir.
+4. Oyuncu **Yaş Al** düğmesine basar; sistem yeni yaşa, mevcut aile/okul/iş durumuna, kişilere ve geçmiş kararlara uygun olayları değerlendirir. NPC gelişmeleri yaş alma sırasında veya başka bir noktada gösterilebilir; zamanlaması henüz belirlenmedi.
+5. Sonuçlar sonraki yaşa taşınır.
 
-**Bu sıralama, yaş ilerletme düğmesi, olay adedi ve serbest etkileşimlerin hangi aşamada yapılabileceği henüz kesin karar değildir.**
+## Sıradaki tasarım kararı: etkileşim sınırı
+Yaş alma serbest olduğu için aynı etkileşimi sürekli tekrarlayıp mutluluk/zeka/ilişki gibi değerleri sınırsız yükseltmeye izin verilip verilmeyeceğini belirlemeliyiz. **Henüz karar verilmedi.** Olası yaklaşımlar: yaş başına sınırlı etkileşim hakkı; aynı etkinlik için azalan etki; para ve durum koşulları; anlamlı etkinliklerde tekrar sınırı. Bu seçenekler öneridir, uygulama talimatı değildir.
 
-## Bir aile etkileşiminin örnek sonucu (yalnızca anlatım, rakamlar yok)
-Oyuncu anneannesiyle vakit geçirir → anneanneyle ilişki değişebilir → ana karakterin mutluluğu değişebilir → önemli bir ortak anı saklanabilir → ileride anneanneyle ilgili uygun bir olay farklı seçenek sunabilir. Her seçimin mutlaka bütün değerleri değiştirmesi gerekmez; etki, olayın bağlamına bağlıdır. Ailenin oyuncuya yaptığı bir davranış da oyuncu herhangi bir eylem seçmeden uygun bir karakter değerini etkileyebilir.
+## Diğer açık sorular
+- Yaş Al'a basıldığında kaç olay gösterilir, olaylar hangi sırayla çözülür?
+- Serbest etkileşimler sonuçları anında mı gösterir; geçmiş günlüğüne ne kaydedilir?
+- Önemli ama isteğe bağlı/kaçırılabilir olaylar nasıl sunulur? Oyuncu bütün olayları tamamlamak zorunda değildir.
+- Oyuncu ömrünün bitişi, ölüm ve yeni hayata başlama akışı nasıl olur?
+- Karakter değerlerinin sayısal aralığı ve olay etkileri nasıl dengelenir?
 
-## Birlikte netleştireceğimiz genel işleyiş soruları
-1. Oyuncu yaşı **kendi istediğinde tek tuşla mı** ilerletecek?
-2. Yaş ilerletmeden önce kaç serbest etkileşime izin verilecek? Sınırsız etkileşimle değer kasılması nasıl önlenecek?
-3. Bir yaşta kaç zorunlu olay ve kaç isteğe bağlı etkileşim olacak? Kesin sayılar yerine önce tempo kuralı belirlenebilir.
-4. Serbest etkileşim ile rastgele olayın farkı nasıl gösterilecek? Aile bireylerinin bağımsız olayları ne zaman duyurulacak?
-5. Oyuncu kararlarının sonucu hemen mi yoksa yaş sonunda mı gösterilecek? Hayat günlüğü nasıl tutulacak?
-6. Ölüm ve hayatın bitişi nasıl işlenecek; yeni hayata nasıl başlanacak?
-
-## Önerilen ilk karar gündemi
-**Önce 1. soru:** 'Yaş ilerlet' düğmesiyle oyuncu ne zaman isterse yeni yaşa geçsin mi? Bunun yanıtı etkileşim sınırını, olay yoğunluğunu ve ekran düzenini belirleyecek. Faho onaylarsa net kural `DECISIONS.md` dosyasına taşınacak.
+## Durum özeti
+**Ana karakterin ana hatları ve rastgele aile kuralları tasarlandı; genel döngünün tek tuşla isteğe bağlı yaş alma kuralı da kesinleşti.** Şimdi yaş başına etkileşimlerin sınırlanıp sınırlanmayacağını ve yaş alma anındaki olay akışını tasarlıyoruz.
