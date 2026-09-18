@@ -1,63 +1,48 @@
-# İlk prototip — arayüz ve gezinme taslağı v0.1
+# İlk prototip — arayüz ve gezinme v0.2
 
-**Durum: ÖNERİ; Faho'nun 'BitLife gibi bir menü' tercihinden hareketle hazırlanmıştır. Birebir BitLife görünümü, metinleri, ikonları veya varlıkları kopyalanmayacak. Ekran yerleşimi ve görsel dil henüz onaylanmadı. Kod/oynanabilir prototip yok.**
+**Durum:** Faho, prototip için **Hayat / Aile / Ben** başlangıç menüsünü ve **modern + nostaljik karışımı** görsel yönü onayladı. Bu üç sekme nihai menü sınırı DEĞİL: oyun geliştikçe yeni sekmeler (özellikle Sosyal) ve Ben altındaki eylemler eklenecek. Romantik ilişkilerin eski partnerler dahil geçmişi korunacak. Yerleşimin piksel düzeyindeki ayrıntıları, renk kodları ve prototipin teknik kapsamı henüz onaylanmadı; oyun kodu/oynanabilir prototip yok. BitLife'ın özgün metin, ikon, görsel veya ekranını birebir kopyalama.
 
-## Tasarım ilkesi
-Dikey tek elle kullanılabilir mobil yaşam simülasyonu: okunabilir metin, kolay ulaşılabilir eylemler, karakterin yaşı/durumu ve hayat günlüğü odakta. Tanıdık yaşam-simülasyonu gezinme kalıbı ama Bir Ömür'e özgü Türkçe metin, renk, ikon ve bileşenler. Yaş Al ana ekranda kalıcı ve belirgin; diğer ekranlarda geri dönüş açık. Reklam/premium ekranı prototipte yok.
+## 1. Onaylanmış navigasyon ilkesi
+- **İlk prototip alt menüsü: Hayat / Aile / Ben.** Bunlar ilk sürüm için bir başlangıç düzenidir; ileride yalnızca üç sekmeyle sınırlı kalmayacak.
+- **Hayat:** ana yaşam ekranı, yaş, değerler, olaylar, yaşam günlüğü ve belirgin **Yaş Al** eylemi.
+- **Aile:** aile bireyleri ve ilişkilerin görüldüğü bölüm. Oyuncu sevgili/kız arkadaş edindiğinde kişi burada görünür. Ayrılık yaşanırsa kişi listeden silinmez; **Eski Sevgili / Eski Kız Arkadaş** gibi güncel ilişki statüsüyle görülmeye devam eder. Bu bir ilişki geçmişidir; eski partnerin hâlâ oyuncunun hanesinde yaşadığı veya sevgili etkileşimlerine eriştiği varsayılmaz. Aynı kişinin kaydı korunur, statüsü değişir. Diğer romantik ilişki türleri, kişi grupları ve ekran gruplandırması daha sonra ayrıntılanacak.
+- **Ben:** yalnızca özellik/istatistik sayfası değildir; karakterin yapabileceği pek çok **eylemin merkezi** olacak. İleride spor salonu, berber, seyahat gibi faaliyetler burada yer alacak. İlk prototipte henüz çalışmayan faaliyetler sahte tıklanabilir düğme olarak gösterilmez; modüler alanlar genişletilebilir tasarlanır.
+- **Sosyal:** ilerleyen geliştirme aşamasında menüye eklenecek; sosyal medya/ilişkili içerik burada ayrıntılanacak. Sosyal medya içerikleriyle Ün özelliğinin nasıl açıldığı ve ilerlediği ayrı tasarım konusu. Başlangıç prototipinde tam Sosyal menüsü zorunlu değil.
+- Yeni bölümler için alt çubukta kaç simge olacağı, taşan sekmelerin 'Daha Fazla' altında mı gruplanacağı veya farklı bir gezinme çözümü mü kullanılacağı **henüz kararlaştırılmadı**. Prototip navigasyonu, yeni modüller eklenince baştan yazılması gerekmeyecek biçimde kurulmalı.
 
-## Önerilen alt gezinme (ilk prototip)
-- **Hayat:** ana ekran; karakter adı, yaş, doğum şehri, mevcut kısa durum, beş ana değer ve aşağı doğru akan **hayat günlüğü**, uygun tek açılış olayı, kalıcı Yaş Al eylemi.
-- **Aile:** rastgele doğan aile üyeleri listesi; ilişki ve aynı evde olup olmadığı; anne/baba yaşı, mesleği ve bağımsız maddi durumu. Kişiye basınca detay ve Vakit Geçir / Hediye Ver eylemleri. Eksik veya ölmüş akraba canlı etkileşim olarak sunulmaz.
-- **Ben:** ana karakter özellikleri ve güncel yaşam özeti; prototipte sadece gerçekten işleyen temel değerleri göster. Ün başlangıçta görünmez/açık değildir; görünürlük kazanınca ortaya çıkabilen ileriki özellik.
-- **Diğer:** eğitim, iş, sosyal medya, sağlık/spor ve varlıklar için ileride genişleyebilir girişler; **prototipte çalışmayan menüleri tıklanabilir/sahte özellik olarak göstermemek**. Gerekirse bu sekme ilk prototipte hiç görünmeyebilir.
+## 2. Onaylanmış görsel yön: modern + nostaljik
+- Dikey, tek elle erişilebilir, sade ve çağdaş mobil arayüz; okunaklı Türkçe metinler ve belirgin eylem butonları.
+- Türkiye'deki yaşama dair **özgün, ölçülü nostaljik dokunuşlar**: örneğin hayat günlüğünün bir hatıra defteri hissi veya sıcak küçük doku/ikon detayları. Bunlar tasarım önerisidir; belirli renk, font, defter dokusu veya ikon paketi henüz seçilmedi.
+- Esas kullanım sade kalmalı; yoğun nostaljik süsleme olay metninin okunurluğunu ve gezinmeyi bozmamalı.
+- BitLife'a benzer anlaşılır yaşam simülasyonu bilgi mimarisinden yararlan; marka kimliği, ekran çizimi ve içerik **Bir Ömür'e özgün** olsun.
 
-**Alternatif:** Alt çubuk yalnızca Hayat / Aile / Ben olsun; oyun alanları genişledikçe Eylemler/Daha Fazla menüsü eklensin. Kesin alt çubuk sayısı Faho tarafından onaylanmadı.
+## 3. Hayat ekranı — ilk prototip akışı (önerilen ayrıntı)
+- Üst kısımda karakter adı, yaş, şehir ve kısa mevcut yaşam bilgisi; temel değerler ve hayat günlüğü.
+- Ün, henüz açılmamış karakterde görünmez; açılma ve gösterim ayrıntıları başka belgede açık konudur.
+- Ekranda erişilebilir **Yaş Al**; basılınca yeni yaşta **ilk olarak tek uygun olay** gelir. Sonraki olaylar oyuncunun oyun içi ilerleyişinde aralıklı çıkar, gerçek dakika beklemesi yoktur.
+- Seçimlerin anlık sonuçları ve anlamlı geçmiş kararları sonraki yaşları etkileyebilir.
 
-## Önerilen ana ekran iskeleti (orijinal yerleşim; bir görsel tasarım değil)
-```
-┌─────────────────────────────┐
-│ BİR ÖMÜR            [Menü]  │
-│ Karakter Adı • 12 yaş       │
-│ Şehir / kısa hayat durumu   │
-├─────────────────────────────┤
-│ Mutluluk ▰▰▰▱▱  Sağlık ▰▰▰▰▱ │
-│ Zekâ     ▰▰▰▱▱  Karizma ▰▰▱▱▱│
-│ Görünüş  ▰▰▰▱▱              │
-├─────────────────────────────┤
-│ HAYAT GÜNLÜĞÜ               │
-│ 12 yaş • [olayın kısa izi]  │
-│ 11 yaş • [önceki karar]     │
-│ ...                         │
-│                             │
-├─────────────────────────────┤
-│       [  YAŞ AL  ]          │
-│  Hayat     Aile      Ben    │
-└─────────────────────────────┘
-```
-Ün açılmadan çubuk göstermeyiz. Bu ASCII tel-kafes teknik taslak; kesin font, renk ve yüzdeler belirlenmedi.
+## 4. Aile ve romantik ilişkiler — kalıcı kişi, değişen statü
+Örnek akış: Aile → 'Ayşe — Kız Arkadaş' → ilişkinin detayları → ayrılık olayı/seçimi → **aynı Ayşe kaydı**, Aile içinde 'Ayşe — Eski Kız Arkadaş' olarak kalır. Ayrılık, kişiyi yok etmez veya tanışıklık/hikâye hafızasını silmez. Mevcut ilişki ile geçmiş romantik bağ ayrı anlamlar taşır; geçmişte yaşanan olaylar ileriki uygun hikâyelerde kullanılabilir.
 
-## Olay sunumu
-Yaş Al'a basılınca **yalnızca bir** uygun açılış olayı okunaklı olay kartında/tek bir modalde görünür: kısa özgün anlatım, gerekli kişi/koşul, 2–4 seçenek **örnek öneri, zorunlu adet değil**. Seçim sonucu anında geri bildirim ve gerektiğinde hayat günlüğüne kayıt; sonraki olay anında zincirlenmek zorunda değil, oyun içi ilerleme ile aralıklı gelir. Birden fazla bağımsız olay penceresi üst üste açılmaz. Açık olay varken başka sekmelere geçiş davranışı henüz kararlaştırılmadı.
+Ailede ebeveyn ve geniş akrabaların önceki kuralları aynen geçerli: kişi bazlı gerçek akrabalık, ayrı hane, ebeveyn yaşı/mesleği/kendine ait ekonomik durum; hediye, vakit geçirme, doğal ret, aynı yaşta azalan etki. **Aile başlığı altında romantik kişileri göstermenin kabulü, onları kan bağı olan akraba saymak demek değildir.** Veri modelinde kişi kimliği, bağ türü, ilişki statüsü ve hane durumu ayrı tutulması **teknik öneridir, nihai şema değil**.
 
-## Aile ekranı akışı
-Aile → Anne (veya mevcut bir akraba) → kişinin adı, akrabalık türü, yaşı, anne/baba için mesleği ve kişisel maddi durumu, mevcut ilişki → Vakit Geçir → özgün sonuç metni → uygun karakter değeri/ilişki etkisi → Hayat günlüğüne gerektiğinde kayıt. Aynı etkileşim aynı yaşta tekrarlandıkça kazanım azalır ve sonunda sıfırlanır; NPC yakın tekrarı bazen reddedebilir. Genel etkileşim kotası veya gerçek dünya zamanlayıcısı YOK.
+Açık: Aile ekranında kan bağı olanlar, partnerler ve eski partnerler nasıl bölümlenecek? Eski sevgiliyle hangi etkileşimler açık olacak? Yeni partner, eş, çocuk, eski eş gibi statülerin tam kapsamı ve görünümü henüz ayrıca kararlaştırılmadı.
 
-## Prototip kapsamına öneri (onay bekliyor)
-1. İki başlangıç modu ve tutarlı ama ilk aşamada dar içerikli rastgele karakter/aile üretimi.
-2. Hayat, Aile ve Ben ekranları; beş ana değer, kişi bazlı ilişki, hane bilgisi.
-3. Anneyle vakit geçirmenin olumlu sonucu ve yakın tekrarda azalan etki / olası doğal ret.
-4. Yaş Al ile ilk tek olay; önceki kararın sonraki yaşta uygun bir devamını gösterebilen en az bir özgün örnek zincir.
-5. Oyun içi ilerlemeye bağlı aralıklı ek olay / aileyle uzun süre temas yoksa sitem örneği, ilk teknik kapsama alınıp alınmayacağı ayrıca seçilecek.
-6. Gerçek zamanlı bekleme, sosyal medya ve Ün için tam menüler, tüm meslekler/okullar, mağaza/ödeme ve kapsamlı içerik havuzu şimdilik YOK; bunlar ürün vizyonundan çıkarılmadı.
+## 5. Ben eylem merkezi — büyüme planı
+Ben → karakter özeti/değerleri ve yaşa/koşullara uygun faaliyet kategorileri. Geleceğe dönük örnekler: **Spor Salonu, Berber, Seyahat**. Bunlar zamanla gerçekten oynanabilir modüller olarak eklenecek; ilk prototipte tüm kategorileri tamamlanmış gibi sunma. Her eylemin uygunluk, maliyet ve aynı yaşta azalan getirisi genel tasarımla uyumlu olmalı; ayrıntılı ekonomi/etki dengesi henüz yok.
 
-## Kabul kriteri önerileri
-- Ekranların hiçbiri olmayan kişiyi veya açılmamış Ün'ü göstermiyor.
-- Rastgele boşanmış ebeveynler otomatik olarak aynı hanedeymiş gibi gösterilmiyor.
-- Aynı etkileşim sonsuz mutluluk kazandırmıyor.
-- Tek bir Yaş Al tıklaması bir yaş ilerletiyor ve ilk olay tek başına açılıyor.
-- Önceki seçim yeni yaşın uygun olayını etkileyebiliyor; bağımsız olaylar spam olmuyor.
-- Sadece çalışır durumdaki prototip özellikleri tıklanabilir.
+## 6. İlk prototip için önerilen ekran akışı — kapsam ayrıca onaylanacak
+1. İki başlangıç modu → rastgele karakter ve kendi içinde tutarlı aile.
+2. **Hayat / Aile / Ben** arasında çalışır gezinme. Hayat'ta günlük ve Yaş Al; Aile'de kişi listesi/detayı ve en az bir işleyen etkileşim; Ben'de karakter bilgileri ve yalnızca gerçek işleyen eylemler.
+3. Anneyle vakit geçirme → sonuç/etki → tekrarda azalan etki veya bağlamsal ret.
+4. Yaş Al → tek açılış olayı → seçim → sonraki yaşta uygun devamı gösterilebilen küçük özgün hikâye.
+5. Kalıcı romantik kişi ve 'eski sevgili' statüsü için **ilk prototipte örnek akış bulunup bulunmayacağı ayrıca netleşecek**; mimari bunu sonradan eklemeyi engellememeli.
+6. Tam Sosyal/Ün, spor salonu/berber/seyahat içeriklerinin tamamı, geniş etkinlik havuzu ve ekonomi ilk prototip için henüz onaylanmış zorunluluk değildir; sonraki modüller olarak planlanır.
 
-## Onay için iki nokta
-1. Alt gezinme: **Hayat / Aile / Ben** ile mi başlayalım, yoksa **Hayat / İlişkiler / Etkinlikler / Profil** gibi geleceğe dönük geniş çubuk mu? İlk öneri daha yalın.
-2. Stil: sıcak, sade, Türkiye'ye özgü küçük detayları olan modern kartlar mı; yoksa daha nostaljik gazete/defter havası mı? BitLife'tan ayırt edici özgün tasarım gerekli.
+## 7. Doğrulama ve sonraki karar
+- Sekmeler büyümeye uygun; açılmamış modül butonları aldatıcı biçimde aktif değil.
+- Bir kişi sevgiliyken eski sevgiliye geçtiğinde aynı kişiye ait tarihçe kaybolmuyor; mevcut statü doğru gösteriliyor.
+- Ayrı hane/akrabalık/romantik bağlar birbirine karıştırılmıyor; olmayan kişi canlı etkileşimde gösterilmiyor.
+- Yaş Al ilk tek olayı gösteriyor; tekrar etkileşimleri sonsuz stat kazandırmıyor.
+- **Sıradaki ürün kararı:** Prototipte romantik ilişki kurma/ayrılık gösteren küçük bir örnek zincir de yer alsın mı, yoksa veri/ekran yapısı hazırlanıp ilk oynanabilir akış sadece aileyle mi başlasın? Bu tercih henüz belirlenmedi.
