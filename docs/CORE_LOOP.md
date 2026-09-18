@@ -1,45 +1,53 @@
-# Genel oyun döngüsü — v0.4
+# Genel oyun döngüsü — v0.5
 
-**Durum:** Faho tarafından onaylanmış akış kuralları aşağıdadır; teknik seçim yöntemleri, sayılar ve aralıkların uzunluğu henüz belirlenmedi. Henüz oyun kodu veya oynanabilir prototip yok.
+**Durum:** Aşağıdaki «kesinleşen» kurallar Faho tarafından onaylandı. Olay sıklığı, takip verisinin biçimi ve rakamsal dengeler henüz tasarım aşamasında. Oyun kodu veya oynanabilir prototip yok.
 
 ## 1. Kesinleşen ana döngü
-1. Oyuncu bulunduğu yaşta, koşullarına uygun serbest etkileşimleri (ör. Aile → Anne → Vakit Geçir) kendi isteğiyle yapar.
-2. Hazır olduğunda **Yaş Al** butonuna basar; bir sonraki yaşa geçer. Bir yaştaki bütün etkinlikleri tamamlamak zorunda değildir.
-3. **Yaş alındığında ilk olarak oyuncunun karşısına tek bir uygun olay çıkar.** Bir anda peş peşe bağımsız olay pencereleri yağdırılmaz.
-4. Oyuncunun o olayda verdiği seçim, sonucu belirler ve **bir hikâye zincirinin devamını** açabilir. Devam olayı o anda veya sonraki uygun bir zamanda/yaşta ortaya çıkabilir; her seçim zorunlu olarak yeni bir pencere açmaz.
-5. Yeni yaşta oyun devam ederken uygun yeni olaylar **aralıklarla** görünebilir. Olaylar birbiriyle bağlantılı olabilecekleri gibi oyuncunun başka bir yaşam alanından da gelebilir (aile, okul/üniversite, ilişki, ev, araç, sosyal medya vb.). Aynı anda sürekli olay çıkarıp oyuncuyu spam'e boğmayacağız.
-6. Önemli seçimler, ilgili kişi ve hikâye durumları, karakter değerleri ve varsa maddi/yaşam koşulları sonraki yaşlara taşınır. Olay uygunluğu yaş, mevcut durum ve geçmişe göre kontrol edilir.
+1. Oyuncu bulunduğu yaşta, mevcut hayatına uygun serbest etkileşimleri (ör. Aile → Anne → Vakit Geçir) kendi isteğiyle yapar.
+2. Hazır olduğunda **Yaş Al** butonuna basarak sonraki yaşa geçer; mevcut yaştaki her etkinliği bitirmesi gerekmez.
+3. Yeni yaşa geçince karşısına **ilk olarak tek bir**, yaşına ve hayat koşullarına uygun olay çıkar. Aynı anda bağımsız pop-up yağmuru olmaz.
+4. Seçim bir hikâye zincirini devam ettirebilir. Sonuç hemen işlenebilir; devam olayı aynı anda zorunlu olarak açılmaz, uygun bir oyun içi ilerleme noktasında veya sonraki yaşta gelebilir.
+5. Oyuncu aynı yaşta oynamaya devam ettikçe aile, ilişki, okul/üniversite, ev/araç ve eklendiğinde sosyal medya gibi farklı yaşam alanlarından **aralıklı ek olaylar** gelebilir. İlk olay, yaşın tek olayı demek değildir.
+6. Önemli seçimler, ilgili kişiler, açık hikâyeler ve karakterin mevcut yaşam durumu geleceğe taşınır; uygunluk denetlenir.
 
-**Bir yaşta toplam yalnızca bir olay olur kararı ALINMADI:** Tek olay, **Yaş Al'a basılınca çıkan ilk olay** içindir; yaşam ilerledikçe uygun ve aralıklı ek olaylar gelebilir. Olaylar sadece Yaş Al düğmesine basıldığında çıkmak zorunda değildir. Gerçek zamanlı bekleme, dakikalık bildirim, olay sayısı veya belirli saniye/yıl aralığı kararlaştırılmadı.
+## 2. Yeni kesin karar: gerçek dünya dakikaları değil, oyun içi ilerleme
+- **Olayın çıkması için oyuncuyu gerçek hayatta dakika/saat bekletmeyiz.** Uygulamayı açık tutmak, telefon saatinin ilerlemesi veya gerçek zamanlı zamanlayıcı olay motorunun temel tetikleyicisi olmayacak.
+- Yeni olay fırsatları **oyuncunun oyun içindeki ilerlemesiyle** doğar: yaptığı anlamlı etkileşimler, verdiği seçimler, tamamlanan olaylar, Yaş Al ile gerçekleşen yaş değişimi ve bunların değiştirdiği hayat koşulları gibi.
+- İlerleme, her dokunuşta otomatik yeni pencere açılması demek değildir. Olaylar **aralıklı ve bağlama uygun** çıkar; aynı konunun/kişinin üst üste gelmesiyle spam oluşmamalıdır.
+- **Oyuncu hiçbir şey yapmazsa gerçek zaman geçmesi tek başına olay üretmez.** Az etkileşimli bir oyuncu Yaş Al ile ilerlediğinde de hayatın sonuçları ortaya çıkabilir; etkileşim sayısına bağlı tek bir zorunlu eşik henüz belirlenmedi.
 
-## 2. Önceki yaşın hikâyesi sonraki yaşta devam eder
-Geçen yaşta sevgilisiyle sorun yaşayan karakter, yeni yaşında o durumun devamını görebilir. Bir önceki yaşta okulda başlattığı olay da sonraki yaşa taşınabilir. Oyun eski kararları unutmaz; devam olayları **yalnızca hâlâ geçerli koşullarda** çıkar. Örneğin sevgilisiyle ilgili devam için ilişki hâlâ mevcutsa o bağlam kullanılır; ayrılmışlarsa ayrılık sonrası farklı devam yazılabilir. Okuldan ayrılmış karaktere hâlâ o okulun öğrencisiymiş gibi etkinlik gösterilmez.
+## 3. Yeni kesin karar: ihmal edilen ilişkilerin doğal tepkisi
+- Oyun, aile üyeleriyle uzun süredir **oyun içinde** vakit geçirilmemesini / anlamlı temas kurulmamasını hatırlayabilmeli. Buradaki 'uzun süre' gerçek hayattaki dakikalar değil, oyun içindeki ilerleme ve ilişki geçmişidir.
+- Koşullar uygunsa ilgili aile bireyi bazen **sitem eden bir olay veya mesaj** başlatabilir: 'Uzun zamandır birlikte bir şey yapmıyoruz, beni unuttun mu?' gibi. Oyuncu seçim yapabilir; kararın ilişki veya karakter değerleri üzerinde uygun etkileri olabilir.
+- **Her aile bireyi otomatik olarak sitem etmez.** Olay; kişinin gerçekten var olması, hayatta olması, iletişimin mümkün olması, mevcut ilişki ve daha önceki temaslar gibi bağlamlarla uyumlu olmalı; aynı sitem tekrar tekrar yağmamalıdır.
+- Sitemi yok saymanın, gönül almanın, buluşmanın veya farklı cevap vermenin olası sonuçları ayrı tasarlanacaktır. Sırf etkileşim az diye otomatik ve sürekli ceza uygulanması kararlaştırılmadı; oyuncunun serbest yaş alma hakkı korunur.
 
-**Öncelik kuralı:** Devamı bekleyen bir hikâye yeni yaşta açılan ilk olayın adayı olabilir; ancak her yaşta mutlaka devam olayı gösterilmesi veya devamların kesin öncelik oranı henüz belirlenmedi. Birden fazla hikâye aynı anda açık kalabilir; olay motoru uygunluk ve tempo gözetir.
+### Örnek akış — kesinleşmiş kuralı anlatan taslak metin
+22 yaşında üniversitedeki oyuncu bir arkadaş olayı çözer ve okuluyla ilgilenir. Oyun içinde birden fazla yaş/olay ilerlemesi boyunca annesiyle anlamlı temas kurmamıştır. Uygun bir sonraki ilerleme noktasında annesinden 'İki laf etmeyeli epey oldu' mesajı gelebilir. Oyuncu aramayı, sonra buluşmayı veya uygun başka bir yanıtı seçebilir. **Bu örnek, her oyuncuya aynı olayın aynı yaşta çıkacağı anlamına gelmez.**
 
-## 3. Farklı yaşam alanlarından doğal kesişmeler
-22 yaşındaki, üniversite okumaya devam eden oyuncu arkadaşlarıyla ilgili olaylar yaşarken daha sonra ailesiyle ilgili bir haber alabilir. Koşulları uygunsa evini su basması, sahip olduğu aracın çalınması gibi beklenmedik olaylarla karşılaşabilir. Sosyal medya sistemi eklendiğinde oradan da olaylar gelebilir.
+## 4. Önceki yaşın hikâyesi sonraki yaşta devam eder
+Geçen yaşta sevgilisiyle sorun yaşayan karakter yeni yaşında o olayın devamını görebilir; okulda başlattığı hikâye de uygun koşullarda sürebilir. Geçmiş seçimler unutulmaz. İlgili ilişki sona ermiş veya oyuncu okuldan ayrılmışsa olay ya yeni gerçekliğe uyarlanır ya da aday havuzuna girmez. Birden fazla hikâye bekleyebilir; devamların kesin öncelik oranı henüz belirlenmedi.
 
-**Tutarlılık zorunlu:** Evi olmayanın *kendi evi* su basmış gibi anlatılmaz (yaşadığı hane için ayrı olay yazılabilir); aracı olmayanın arabası çalınmaz; üniversitede olmayanın sınıf arkadaşlarıyla üniversite etkinliği çıkmaz. Oyuncunun o anda uğraştığı alan, başka alanlardan olay gelmesini bütünüyle engellemez. Kategori geçişi mantıklı ve aralıklı olmalıdır.
+## 5. Farklı yaşam alanlarının kesişmesi
+Üniversite arkadaşlarıyla ilgili olay yaşanırken daha sonra aileden haber veya başka bir yaşam alanından gelişme gelebilir. Evi olmayanın *kendi evi* su basmaz (yaşadığı hane için uygun olay ayrı yazılabilir); aracı olmayanın arabası çalınmaz; üniversitede olmayanın üniversite sınıf arkadaşı olayı çıkmaz. Kategori değişimi doğal, tutarlı ve aralıklı olmalı.
 
-## 4. Serbest aile etkileşimleri — önceki kararlar geçerli
-- Aile etkileşimleri karakterin uygun değerlerini ve kişiyle ilişkisini etkileyebilir.
-- **B modeli:** Aynı kişiyle aynı tür etkinlik tekrarlandıkça olumlu getirisi azalır; sınırsız stat/ilişki kasma engellenir.
-- Yakın zamanda birlikte vakit geçirilmişse aynı kişi, 'Daha yeni vakit geçirdik' gibi gerekçeyle **bazen** tekrar teklifini reddedebilir; oyuncunun mutluluğu bir miktar düşebilir. Her ret kesin puan kaybı değildir.
-- Tekrar takibi formülü, ret olasılığı ve etkinliğin ne zaman yeniden tam verim vereceği henüz kararlaştırılmadı.
+## 6. Serbest aile etkileşimleri
+- Etkileşimler kişiyle ilişkiyi ve ana karakterin uygun değerlerini etkileyebilir.
+- **Azalan etki (B):** Aynı kişiyle aynı etkinlik tekrarlandıkça olumlu getirisi azalır; sonsuz değer kasma yolu olmaz.
+- Yakın zamanda birlikte vakit geçirilmişse aynı kişi bazen 'Daha yeni vakit geçirdik' diye reddedebilir; ret mutluluğu az miktarda düşürebilir. Her tekrarda zorunlu ret veya her rette zorunlu ceza yoktur.
+- Uzun süreli **temassızlık/sitem** ile **çok sık temas/ret** iki farklı bağlamsal durumdur. Aynı kişiye ait temas geçmişi ikisine de tutarlı biçimde yansıyabilir; bunun veri şeması ve formülü henüz seçilmedi.
 
-## 5. Onaylanmamış teknik tasarım önerileri
-- Olay kayıtlarında hikâye/olay kimliği, açık/beklemede/tamamlandı durumu, ilgili kişi kimlikleri, başlangıç yaşı, son seçim, yaş ve varlık/ilişki/meslek/öğrencilik gibi önkoşullar tutulabilir.
-- Aday havuzunda hem **devam olayları** hem **yeni olaylar** bulunabilir; bir sonraki olay seçimi için tekrar/çok yakın tetikleme önlemleri ve kategori çeşitliliği gözetilebilir.
-- Anlık seçime doğrudan bağlı sonuçlar ile **daha sonra belirli koşullarda gelen** devam olayları ayrılabilir. Bir olay penceresi açıkken ikinci pencereyle üstüne binilmemesi değerlendirilebilir.
-- Aralıklılık için oyun içi eylem/ilerleme bazlı tetikleyiciler, uygun anlar veya başka bir tempo ölçütü tasarlanabilir. **Gerçek zamanlı zamanlayıcı, saniye cinsinden bekleme veya belli sayıda eylem zorunluluğu henüz onaylanmadı.**
+## 7. Onaylanmamış uygulama önerileri — Claude kesin karar sanmasın
+- Kişi bazında 'son anlamlı temasın gerçekleştiği oyun içi ilerleme noktası', yakın dönem etkinlik sayısı ve açık sitem hikâyesi gibi kayıtlar tutulabilir. **Gerçek zaman damgası temel ölçüt olarak kullanılmamalı.**
+- Olay fırsatını her anlamlı adımın sonunda değerlendirmek, uygun adaylar arasından devam/yeni/ihmal temalı olayları dengelemek, birbirine çok yakın pop-up'ları ve aynı sitemin tekrarını engellemek düşünülebilir. Bunun kesin algoritması, her kaç adımda bir fırsat oluşacağı ve sessiz dönemlerin uzunluğu **onaylanmadı**.
+- Bir olay penceresi açıkken başka bir pencereyle üstüne binmemek; NPC'nin kendi olaylarını uygun ilerleme noktalarında işlemek; kritik olayların önceliğini bağlama göre ayarlamak değerlendirilebilir.
 
-## 6. Sonraki tasarım soruları
-1. Yaş Al'dan sonra çıkan ilk olay çözülünce oyuncu serbest ekrana mı döner, yoksa seçime doğrudan bağlı kısa bir devam sahnesi hemen gösterilebilir mi? Hikâye devamı mantığı onaylı; kesin arayüz akışı açık.
-2. Oyuncu aynı yaşta serbestçe ilerlerken **aralıklı olayların tetikleyicisi** ne olur? Sadece düğmeye basınca olay gelsin kuralı yok; gerçek zamanlı beklemeyi de varsaymıyoruz.
-3. Birden fazla bekleyen hikâyenin ve yeni olayların dengesi nasıl kurulur? Aynı kategorinin üst üste gelmesi nasıl azaltılır?
-4. Kaçırılan, koşulları artık geçersiz veya sonlanan hikâyeler nasıl işaretlenir? Yaşlanma sırasında değişen hane, okul ve ilişki durumlarının sırası nasıl çözülür?
-5. Olay sunumu ve sonuçlar hayat günlüğüne nasıl işlenir? Ölüm/yeni hayata geçiş akışı nasıl olur?
+## 8. Sonraki tasarım soruları
+1. İlk olayın çözümünden sonra oyuncu ana ekrana mı döner; doğrudan bağlı kısa devam sahneleri hangi hallerde hemen gösterilir?
+2. Ek olaylar için oyun içi ilerleme ne sayılır: tamamlanan anlamlı eylem, olay sonucu, Yaş Al veya bunların kombinasyonu mu? **Belirli bir adım sayısı henüz kararlaştırılmadı.**
+3. İhmal/sitem için 'uzun süre' nasıl ölçülür ve kimler hangi bağlamda sitem edebilir? Aile dışındaki ilişkiler için de benzer mantık isteyip istemediğimiz açık.
+4. Birden fazla bekleyen hikâye ve yeni olaylar nasıl dengelenir; tekrarlanan sitem nasıl engellenir?
+5. Sonuçlar hayat günlüğüne nasıl yazılır; ölüm ve yeni hayat akışı nasıl ilerler?
 
 ## İlerleme
-**Ana hatlar, rastgele aile, karakter/ilişki/hafıza, tek tuşla yaş alma, azalan etkileşim getirisi ve doğal ret belirlendi. Şimdi bir olayla başlayan, seçimle dallanabilen, yaşlar arasında devam eden ve aralıklı sürprizlerle beslenen olay motorunu tasarlıyoruz.** Henüz kod/prototip yok.
+**Tasarladık:** Ana karakter ve rastgele aile, tek tuşla yaş alma, azalan etkileşim etkisi, doğal ret, tek açılış olayı, geçmişi hatırlayan olay zincirleri, aralıklı farklı yaşam alanları. **Yeni netleştirdik:** Gerçek zamanlı dakika bekleme yok; olaylar oyun içi ilerlemeye bağlı; aileyle uzun süre temas edilmezse uygun koşullarda sitem olayı gelebilir. **Şimdi:** İlerleme adımının ve olay temposunun teknik tanımını, ilk prototip kapsamını planlıyoruz.
