@@ -1,46 +1,52 @@
-# Aile sistemi taslağı — v0.2
+# Aile sistemi taslağı — v0.3
 
-**Durum:** Kararlaştırılmış aile kuralları ile henüz çözülmemiş teknik ayrıntılar ayrı tutulur. Oyun kodu yazılmadı. Kesin kararların kısa kaydı `DECISIONS.md` içindedir.
+**Durum:** Kararlaştırılmış aile kuralları ile açık teknik ayrıntılar ayrı tutulur. Oyun kodu henüz yazılmadı. Kesin kararların kaydı `DECISIONS.md` içindedir.
 
 ## Neredeyiz?
-**Ana hatlarını tasarladık:** Türkiye odaklı nostaljik + modern yaşam hissi, iki modlu rastgele doğum, beş karakter değeri, ilişkiler, karar hafızası, yaşa/koşullara uygun olaylar. **Şimdi aile sistemini planlıyoruz:** aile üyeleri ve haneler, aile sekmesi, birlikte etkinlikler ve aile bireylerinin bağımsız hayatları. Eğitim, kariyer, ekonomi ve geniş olay havuzu ileride ayrıntılanacak; henüz oynanabilir oyun yok.
+**Ana hatlarını tasarladık:** Türkiye odaklı nostaljik + modern yaşam hissi, iki modlu rastgele doğum, beş karakter değeri, ilişkiler, karar hafızası, yaşa/koşullara uygun olaylar. **Aile için netleştirdik:** rastgele aile çeşitliliği, ayrı haneler, Aile sekmesi, birlikte vakit geçirme/hediye ve aile etkilerinin karakter değerlerini değiştirebilmesi. **Şimdi:** etkileşim dengesi ve yaş alırken olay sunumu. Eğitim, kariyer, ekonomi ve geniş olay havuzu daha sonra ayrıntılanacak; henüz oynanabilir oyun yok.
 
 ## 1. Kesinleşen kurallar: başlangıç aileleri tamamen rastgele
 - Oyuncu tamamen rastgele başlayabilir veya yalnızca **isim ve cinsiyetini** seçebilir; diğer başlangıç koşullarını kendisi belirleyemez.
-- Ailenin tek bir 'ortalama' kalıbı yoktur. Çok varlıklı / çok yoksul ya da ara düzeylerde olabilir. Aile bireylerinin ekonomik durumları **aynı olmak zorunda değildir**: anne varlıklı, baba yoksul olabilir ya da tersi.
-- Anne ve babanın **yaşları rastgele** belirlenir; genç anne/yaşlı baba ya da başka yaş farkları mümkün olabilir. Yaşlar bir örnek aile şablonuna sabitlenmez.
-- Anne-baba birlikte, evli, ayrı ya da boşanmış olabilir; ilişki durumları hayat içinde de değişebilir. Her aileyi zorunlu olarak aynı çatı altında yaşayan evli anne-baba modeliyle kurma.
+- Ailenin tek bir 'ortalama' kalıbı yoktur. Çok varlıklı / çok yoksul ya da ara düzeylerde olabilir. Anne varlıklı, baba yoksul olabilir ya da tersi; kişilerin ekonomik durumları farklı olabilir.
+- Anne ve babanın **yaşları rastgele** belirlenir; genç anne/yaşlı baba gibi yaş farkları mümkündür. Anne-baba birlikte, evli, ayrı ya da boşanmış olabilir; durumları hayat içinde değişebilir.
 - Kardeş sayısı sıfır ya da çok olabilir. Evcil hayvan bulunabilir veya bulunmayabilir. Doğum şehri rastgeledir.
-- Çekirdek aileyle sınırlı kalma: anneanne, babaanne, dedeler, teyze, hala, amca, dayı gibi **geniş aile bireyleri bulunabilir**. Her hayatın bütün akrabalara sahip olması şart değildir; kişi sayısı ve mevcut kişiler rastgele değişir.
-- **Akrabalık bağı ile aynı evde yaşamak farklıdır.** Herkesin aynı evde yaşadığı varsayılmaz; ancak anne/baba, büyükler ve uygun durumlarda teyze, hala, amca veya dayı da aynı hanede yaşayabilir. Kimin nerede yaşadığı başlangıçta rastgele belirlenebilir, ileride olaylarla değişebilir.
-- Rastgelelik tutarlılık gerektirir: var olmayan akrabayla olay çıkmaz, başka evdeki bir kişi evin daimi sakini gibi yazılmaz, ölmüş karakter yaşayan kişi etkileşimi sunmaz. **Yaş, akrabalık, hane ve olay koşulları birbirleriyle uyumlu** olmalı. Rastgele olmak her olasılığın eşit ağırlıklı olacağı anlamına gelmez; oranlar henüz belirlenmedi.
+- Anneanne, babaanne, dedeler, teyze, hala, amca, dayı gibi **geniş aile bireyleri** rastgele bulunabilir; her hayatın bütün akrabalara sahip olması gerekmez.
+- **Akrabalık bağı ile aynı evde yaşamak farklıdır.** Herkes aynı hanede değildir; uygun durumlarda anne/baba, büyükler ve teyze, hala, amca veya dayı aynı hanede yaşayabilir. Hane olaylarla değişebilir.
+- Rastgele sonuçlar tutarlı olmalı: var olmayan akraba, yaşamayan kişi veya başka evdeki kişi için yanlış bağlamda etkileşim çıkmaz. Rastgelelik tüm ihtimallerin eşit ağırlıkta olduğu anlamına gelmez; oranlar belirlenmedi.
 
-## 2. Kesinleşen kurallar: aile sekmesi ve etkileşimler
-Oyunda ayrı bir **Aile** sekmesi olacak. Oyuncu aile bireylerini bu sekmede ayrı ayrı görebilecek. Anne ve babanın **yaşları, meslekleri ve kendilerine ait ekonomik durumları** görünür olmalı; diğer üyeler için gösterilecek ayrıntı seviyesi henüz net değil. Mesleği olmayan kişinin mesleği uydurulmaz; işsiz/emekli vb. durumların gösterimi tasarlanacak.
+## 2. Kesinleşen kurallar: Aile sekmesi ve karşılıklı etkileşimler
+Oyunda ayrı bir **Aile** sekmesi vardır. Oyuncu aile bireylerini ayrı ayrı görür. Anne ve babanın yaşları, meslekleri ve kendilerine ait ekonomik durumları görünür; diğer bireylerin ayrıntı seviyesi açık konudur. İşsiz/emekli kişiye uydurma meslek gösterilmez.
 
-Oyuncu aile bireyleriyle etkileşim kurabilecek: **hediye vermek, birlikte vakit geçirmek** ve bunlara uygun başka aile etkileşimleri. Karar ve etkileşimler karakter değerlerini ve ilgili kişiyle ilişkiyi etkileyebilir. Etkinlikler oyuncunun yaşına, parasına/erişimine, kişinin yaşayıp yaşamadığına ve gerçek ilişki/hane koşullarına uygun olmalı. Hediye türleri, fiyatları, ilişki puanları ve kullanım sıklığı henüz belirlenmedi.
+Oyuncu aile bireylerine **hediye verebilir, onlarla vakit geçirebilir** ve uygun başka etkileşimler yapabilir. Aile bireylerinin oyuncuya davranışları ve karşılıklı etkileşimler hem ilgili ilişkiyi hem ana karakterin uygun değerlerini etkileyebilir. Oyuncunun yaşı, maddi imkânı, karşı tarafın hayatta olması, ulaşılabilirliği ve yaşam koşulları dikkate alınır.
+
+### Kesin karar: tekrarın etkisi azalır, bazen ret gelir
+- Oyuncu aynı aile bireyiyle aynı tür olumlu etkileşimi art arda tekrarlarsa **sağladığı olumlu etki giderek azalır**; sınırsız değer kasılamaz.
+- Örneğin **Aile → Anne → Vakit Geçir** seçilir. Olası bir sonuç: 'Annenle sinemaya gittin, ardından sohbet edip dertleştiniz.' Bu etkinlik uygun karakter değerlerini ve anneyle ilişkiyi etkileyebilir.
+- Oyuncu hemen yeniden **Vakit Geçir** isterse anne **bazen** 'Daha yeni vakit geçirdik' diyerek reddedebilir; her tekrarda otomatik ret uygulanmaz.
+- Ret olursa oyuncunun **mutluluğu biraz azalabilir**. Reddedilen etkinlik, başarılı etkinlik gibi tam olumlu ödül vermez.
+- Azalma eğrisi, ret ihtimali, ne kadar zaman sonra tekrar normal getiri olacağı, mutluluk kaybı ve bu davranışın diğer aile etkileşimlerine uyarlanması **henüz rakamsal veya teknik olarak kararlaştırılmadı**. Yaş başına sabit etkileşim kotası da onaylanmadı.
 
 ## 3. Kesinleşen kurallar: aile de yaşar
-Anne, baba ve diğer aile bireyleri oyuncudan bağımsız gelişmeler yaşayabilir. Meslek değiştirme, işten çıkarılma, maddi durum değişimi, ilişki değişimi, ayrılık/boşanma, bir akrabanın eve taşınması veya evden ayrılması, hastalık ve ölüm gibi olaylar **uygun karakter ve koşullarda** gerçekleşebilir; oyuncunun evini, bütçesini, ilişkilerini ve olay seçeneklerini etkileyebilir. Bunlar mümkün olay türleridir; her hayat için zorunlu bir senaryo değildir.
+Anne, baba ve diğer aile bireyleri oyuncudan bağımsız gelişmeler yaşayabilir. Meslek değiştirme, işten çıkarılma, ekonomik/ilişki durumu değişimi, ayrılık/boşanma, eve taşınma, evden ayrılma, hastalık ve ölüm gibi olaylar uygun koşullarda oyuncunun evini, bütçesini, ilişkilerini ve olay seçeneklerini etkileyebilir. Her yaşamda her olayın olması zorunlu değildir.
 
 ### Özgün olay örnekleri (onaylanmış tekil olaylar değil)
-- Aynı evde yaşayan babaanne, oyuncuya eski bir aile fotoğrafını gösterir; birlikte vakit geçirmek ilişkinizi etkiler.
-- Ayrı yaşayan babanla hafta sonu buluşması gündeme gelir; ulaşım ve mevcut ilişkiniz seçenekleri belirler.
-- Teyzen geçici olarak eve taşınır; hane üyeleri ve gündelik olay havuzu değişir.
-- İşini kaybeden annen yeni bir mesleğe yönelir; bu gelişme hanenin koşullarını etkileyebilir.
-- Bayramda aile ziyareti, ziyaret edilebilen akrabalar ve oyuncunun yaşına göre farklılaşır.
+- Aynı evde yaşayan babaanne, eski bir aile fotoğrafını gösterir.
+- Ayrı yaşayan babanla hafta sonu buluşması gündeme gelir.
+- Teyzen geçici olarak eve taşınır; hane üyeleri değişir.
+- İşini kaybeden annen yeni bir mesleğe yönelir.
+- Bayram ziyareti, oyuncunun yaşına ve mevcut akrabalarına göre değişir.
 
 ## 4. Claude'a aktarılacak önerilen veri yaklaşımı — HENÜZ ONAYLANMADI
-Her önemli aile bireyini kalıcı bir kişi kimliğiyle tutmak; akrabalığı, yaşı, meslek/çalışma durumunu, kendine ait ekonomik kaynaklarını, ilişki durumunu, yaşayıp yaşamadığını ve mevcut hanesini ayrı alanlarda yönetmek mantıklı görünüyor. Oyuncu–kişi ilişki verisi, kişi verisinden ayrı tutulabilir. Aile sekmesi ve ev içi olaylar **aynı veri kaynağını** kullanmalı. Kesin veri şeması ve algoritma henüz tasarlanmadı; Claude bunları onaylanmış teknik karar gibi uygulamamalı.
+Her aile bireyinin kalıcı kişi kimliği, akrabalık bağı, yaşı, mesleği/çalışma durumu, kendi ekonomik kaynakları, ilişki durumu, yaşam durumu ve hanesi ayrı tutulabilir. Oyuncu–kişi ilişki verisi ve **kişi + etkileşim türü için yakın geçmiş** de ayrı izlenebilir; böylece anneyle zaman geçirmek babayla zaman geçirmekle karışmaz. Aile sekmesi ve olay motoru aynı kişilerin tutarlı durumunu kullanmalı. Kesin veri şeması, formüller ve eşik değerleri belirlenmedi.
 
-## 5. Açık sorular — bizimle tartışılacak
-1. Aile sekmesinde her akraba için hangi bilgiler (meslek, yaş, ilişki, maddi durum, aynı evde mi vb.) gösterilecek? Anne-baba için yaş, meslek ve ayrı ekonomik durum kesin.
-2. Çocuk doğduğunda anne/baba dışında bakım veren ilişkileri ve ayrı yaşama nasıl modellenir?
-3. Yaş, ebeveyn–çocuk bağı ve nesiller için hangi **tutarlılık kısıtları** konur? Sabit 'ortalama aile' yapılmayacak.
-4. Kişisel servet, hane bütçesi ve çocuğun kullanabileceği para nasıl ayrılır?
-5. Aile etkileşimlerinin sayısı, bedeli, erişilebilirlik koşulları ve tekrar sınırları nasıl belirlenir?
-6. NPC'lerin evlilik/boşanma, iş, taşınma ve ölüm olaylarının olasılık ve sıklığı nasıl ayarlanır?
-7. Aile sekmesinin görsel düzeni ve akrabaları gruplandırma yöntemi nasıl olacak?
+## 5. Açık sorular
+1. Aile sekmesinde diğer akrabalar için hangi bilgiler gösterilecek?
+2. Çocuk doğduğunda ebeveyn dışındaki bakım verenler nasıl modellenir?
+3. Yaş, ebeveyn–çocuk ilişkisi ve nesiller için tutarlılık kısıtları ne olur?
+4. Kişisel servet, hane bütçesi ve çocuğun kullanabildiği para nasıl ayrılır?
+5. Tekrar geçmişi ne zaman sıfırlanır/azalır; ret şansı, azalan etki ve küçük mutluluk kaybı nasıl dengelenir?
+6. NPC'lerin evlilik, boşanma, iş, taşınma ve ölüm olaylarının sıklığı nasıl ayarlanır?
+7. Aile sekmesinin görsel düzeni nasıl olur?
 
 ## Sonraki adım
-Aile sekmesinde her akraba için gösterilecek temel bilgiler ile rastgele aile üretiminde gerekli tutarlılık kurallarını netleştirelim; ardından aile etkileşimleri ve olay verisi şemasına geçelim. Yeni onaylanan ayrıntılar `DECISIONS.md` ve `SYSTEMS.md` içine işlenecek; belirsiz ayrıntılar açık kalacak.
+`docs/CORE_LOOP.md` içindeki **Yaş Al sonrası olayların sunumu** netleşsin. Sonra aile sekmesinin gösterilecek alanları ve olay/etkileşim verisi şemasına geçelim; onaylanan kuralları `DECISIONS.md` içinde tutalım.
