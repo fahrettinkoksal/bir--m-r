@@ -15,6 +15,7 @@ class PlayerCharacter {
     required this.birthCity,
     required this.stats,
     this.fame,
+    this.wallet = 0,
   });
 
   final String id;
@@ -30,6 +31,18 @@ class PlayerCharacter {
   /// Ün (D-027). `null` ise Ün henüz **açılmamıştır** ve arayüzde gösterilmez.
   final int? fame;
 
+  /// Oyuncunun **kendi** cüzdanı (ECO-001).
+  ///
+  /// Ailenin ekonomik durumundan ve ebeveynlerin mal varlığından tamamen
+  /// ayrıdır; aile varlığı oyuncunun harcanabilir parası değildir. Bu
+  /// sürümde kazanma/harcama akışları yoktur, yalnızca bakiye tutulur ve
+  /// olay etkileriyle değişebilir. Para birimi ve başlangıç bakiyesi henüz
+  /// kararlaştırılmadı (prototypeOnly: 0 ile başlar).
+  final int wallet;
+
+  /// Ekranda gösterilecek bakiye metni.
+  String get walletLabel => '$wallet ₺';
+
   bool get fameUnlocked => fame != null;
 
   String get fullName => '$firstName $lastName';
@@ -40,6 +53,7 @@ class PlayerCharacter {
     int? age,
     Stats? stats,
     int? fame,
+    int? wallet,
   }) {
     return PlayerCharacter(
       id: id,
@@ -50,6 +64,7 @@ class PlayerCharacter {
       birthCity: birthCity,
       stats: stats ?? this.stats,
       fame: fame ?? this.fame,
+      wallet: wallet ?? this.wallet,
     );
   }
 }

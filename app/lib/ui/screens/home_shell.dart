@@ -3,57 +3,29 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
 import '../../state/game_scope.dart';
+import '../widgets/bottom_action_bar.dart';
+import '../widgets/character_header.dart';
 import '../widgets/event_dialog.dart';
-import 'family_screen.dart';
 import 'life_screen.dart';
-import 'me_screen.dart';
+import 'sections/activities_screen.dart';
+import 'sections/assets_screen.dart';
+import 'sections/relationships_screen.dart';
+import 'sections/school_career_screen.dart';
 
-/// Alt gezinmede yer alan bir bölüm.
-///
-/// Bölümler listeden okunur; yeni bir alan (örneğin Sosyal) eklemek için
-/// bu listeye bir kayıt eklemek yeterlidir (`docs/PROTOTYPE_UI.md` §1).
-/// Beşten fazla bölüm gerektiğinde 'Daha Fazla' benzeri bir gruplamaya
-/// geçilmesi gerekir; bu gezinme çözümü henüz kararlaştırılmadı.
-class AppSection {
-  const AppSection({
-    required this.label,
-    required this.icon,
-    required this.selectedIcon,
-    required this.builder,
-  });
-
-  final String label;
-  final IconData icon;
-  final IconData selectedIcon;
-  final WidgetBuilder builder;
+/// Ana menü kimlikleri (NAV-001).
+abstract final class TabIds {
+  static const String okulMeslek = 'okul_meslek';
+  static const String varliklar = 'varliklar';
+  static const String iliskiler = 'iliskiler';
+  static const String aktiviteler = 'aktiviteler';
 }
 
-const List<AppSection> kAppSections = <AppSection>[
-  AppSection(
-    label: 'Hayat',
-    icon: Icons.auto_stories_outlined,
-    selectedIcon: Icons.auto_stories,
-    builder: _lifeBuilder,
-  ),
-  AppSection(
-    label: 'Aile',
-    icon: Icons.groups_outlined,
-    selectedIcon: Icons.groups,
-    builder: _familyBuilder,
-  ),
-  AppSection(
-    label: 'Ben',
-    icon: Icons.person_outline,
-    selectedIcon: Icons.person,
-    builder: _meBuilder,
-  ),
-];
-
-Widget _lifeBuilder(BuildContext context) => const LifeScreen();
-Widget _familyBuilder(BuildContext context) => const FamilyScreen();
-Widget _meBuilder(BuildContext context) => const MeScreen();
-
-/// Üç sekmeli ana kabuk.
+/// Uygulamanın ana kabuğu.
+///
+/// Düzen: üstte sabit karakter özeti, ortada hayat günlüğü veya seçilen ana
+/// menünün ekranı, altta sabit gezinme çubuğu. Alt çubukta soldan sağa
+/// `Okul/Meslek` — `Varlıklar` — **Yaş Al** — `İlişkiler` — `Aktiviteler`
+/// bulunur; `Yaş Al` bir sekme değil, ortadaki bağımsız ana eylemdir.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -62,13 +34,12 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
-  int _index = 0;
+  /// Seçili ana menü; `null` ise ana hayat ekranı açıktır.
+  String? _selectedTab;
 
   /// Aynı anda yalnızca tek olay penceresi açılır (D-021).
   bool _eventVisible = false;
 
-  /// Bekleyen olay varsa gösterir. Olay ekranı, açık bir kişi sayfasının
-  /// üstünde kalmasın diye önce o sayfa kapatılır.
   void _showPendingEvent(ActiveEvent event) {
     if (_eventVisible) return;
     _eventVisible = true;
@@ -80,6 +51,19 @@ class _HomeShellState extends State<HomeShell> {
       if (!mounted) return;
       setState(() => _eventVisible = false);
     });
+  }
+
+  void _onTabSelected(String id) {
+    // Seçili menüye tekrar dokunmak hayat ekranına döndürür.
+    setState(() => _selectedTab = _selectedTab == id ? null : id);
+  }
+
+  void _goHome() => setState(() => _selectedTab = null);
+
+  void _ageUp() {
+    GameScope.of(context).ageUp();
+    // Yaş alınca yeni günlük satırı ve olay görünsün diye ana ekrana dönülür.
+    _goHome();
   }
 
   Future<void> _confirmNewLife() async {
@@ -103,42 +87,76 @@ class _HomeShellState extends State<HomeShell> {
         ],
       ),
     );
-    if (yes ?? false) {
-      if (!mounted) return;
+    if ((yes ?? false) && mounted) {
       GameScope.of(context).clearLife();
+    }
+  }
+
+  Widget _body() {
+    switch (_selectedTab) {
+      case TabIds.okulMeslek:
+        return SchoolCareerScreen(onBack: _goHome);
+      case TabIds.varliklar:
+        return AssetsScreen(onBack: _goHome);
+      case TabIds.iliskiler:
+        return RelationshipsScreen(onBack: _goHome);
+      case TabIds.aktiviteler:
+        return ActivitiesScreen(onBack: _goHome);
+      default:
+        return const LifeScreen();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final AppSection section = kAppSections[_index];
     final GameState state = GameScope.of(context).state!;
     final ActiveEvent? pending = state.pendingEvent;
     if (pending != null) _showPendingEvent(pending);
 
+    // Soldaki menü oyuncunun durumuna göre Okul veya Meslek olur (NAV-001).
+    final List<BottomTab> tabs = <BottomTab>[
+      BottomTab(
+        id: TabIds.okulMeslek,
+        label: SchoolCareerScreen.labelFor(state),
+        icon: state.education.isStudent
+            ? Icons.school_outlined
+            : Icons.work_outline,
+        activeIcon:
+            state.education.isStudent ? Icons.school : Icons.work,
+      ),
+      const BottomTab(
+        id: TabIds.varliklar,
+        label: 'Varlıklar',
+        icon: Icons.inventory_2_outlined,
+        activeIcon: Icons.inventory_2,
+      ),
+      const BottomTab(
+        id: TabIds.iliskiler,
+        label: 'İlişkiler',
+        icon: Icons.favorite_outline,
+        activeIcon: Icons.favorite,
+      ),
+      const BottomTab(
+        id: TabIds.aktiviteler,
+        label: 'Aktiviteler',
+        icon: Icons.local_activity_outlined,
+        activeIcon: Icons.local_activity,
+      ),
+    ];
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(section.label),
-        actions: <Widget>[
-          IconButton(
-            tooltip: 'Yeni hayat',
-            onPressed: _confirmNewLife,
-            icon: const Icon(Icons.restart_alt),
-          ),
+      body: Column(
+        children: <Widget>[
+          CharacterHeader(state: state, onRestart: _confirmNewLife),
+          Expanded(child: _body()),
         ],
       ),
-      body: SafeArea(top: false, child: section.builder(context)),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (int i) => setState(() => _index = i),
-        destinations: <Widget>[
-          for (final AppSection s in kAppSections)
-            NavigationDestination(
-              icon: Icon(s.icon),
-              selectedIcon: Icon(s.selectedIcon),
-              label: s.label,
-            ),
-        ],
+      bottomNavigationBar: BottomActionBar(
+        tabs: tabs,
+        selectedId: _selectedTab,
+        onTabSelected: _onTabSelected,
+        onAgeUp: _ageUp,
+        ageUpEnabled: !state.hasPendingEvent,
       ),
     );
   }

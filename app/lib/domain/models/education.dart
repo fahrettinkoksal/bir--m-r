@@ -72,6 +72,14 @@ class EducationState {
     return 'Okula başlamadı';
   }
 
+  /// Üst özet için yaşa göre kısa evre metni.
+  String stageLabel(int age) {
+    if (enrolled) return label;
+    if (finished) return 'Okul bitti';
+    if (age < 6) return 'Okul öncesi';
+    return 'Okul dışı';
+  }
+
   EducationState copyWith({
     bool? enrolled,
     int? grade,

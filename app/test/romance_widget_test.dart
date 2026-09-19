@@ -7,7 +7,6 @@ import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
-import 'package:bir_omur/ui/turkish_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -47,7 +46,7 @@ void main() {
         await tester.pumpAndSettle();
         if (partnerOf(RelationType.sevgili) != null) return;
       }
-      await tester.tap(find.text('Yaş Al'));
+      await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
     }
   }
@@ -72,21 +71,13 @@ void main() {
     final String adSoyad = sevgili.fullName;
     final int yakinlik = sevgili.bond;
 
-    // Aile listesinde sevgili statüsüyle görünür. İlişkiler bölümü listenin
-    // sonunda olduğu için oraya kaydırılır.
-    Future<void> scrollTo(Finder finder) async {
-      await tester.scrollUntilVisible(
-        finder,
-        250,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-    }
-
-    await tester.tap(find.byIcon(Icons.groups_outlined));
+    // İlişkiler → Romantik bağlar alt menüsünde sevgili statüsüyle görünür.
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
     await tester.pumpAndSettle();
-    await scrollTo(find.text(trUpper('İlişkiler')));
-    expect(find.text(trUpper('İlişkiler')), findsOneWidget);
+    expect(find.text('Romantik bağlar'), findsOneWidget);
+
+    await tester.tap(find.text('Romantik bağlar'));
+    await tester.pumpAndSettle();
     expect(find.text(adSoyad), findsOneWidget);
     final String sevgiliEtiketi =
         sevgili.gender == Gender.kadin ? 'Kız arkadaş' : 'Erkek arkadaş';
@@ -106,6 +97,9 @@ void main() {
     // Aynı kayıt, yeni statü.
     final Person eski = controller.state!.personById(kimlik)!;
     expect(eski.relation, RelationType.eskiSevgili);
+    expect(eski.fullName, adSoyad);
+    expect(eski.bond, yakinlik);
+    expect(partnerOf(RelationType.sevgili), isNull);
     // Hikâye izleri de güncellenmeli; yoksa eski sevgili karşılaşma olayının
     // önkoşulu bu yoldan hiç sağlanmaz.
     expect(controller.state!.storyFlags, contains(StoryFlags.romantikBitti));
@@ -113,18 +107,14 @@ void main() {
       controller.state!.storyFlags,
       isNot(contains(StoryFlags.romantikIliskide)),
     );
-    expect(eski.fullName, adSoyad);
-    expect(eski.bond, yakinlik);
-    expect(partnerOf(RelationType.sevgili), isNull);
 
     // Sevgiliye özel eylem artık sunulmaz.
     expect(find.text('Ayrıl'), findsNothing);
     expect(find.text('Vakit Geçir'), findsNothing);
 
-    // Sayfayı kapat ve listede eski sevgili olarak gör.
+    // Sayfayı kapat; listede eski sevgili olarak kalır.
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    await scrollTo(find.text(adSoyad));
     expect(find.text(adSoyad), findsOneWidget);
     final String eskiEtiket = eski.gender == Gender.kadin
         ? 'Eski kız arkadaş'

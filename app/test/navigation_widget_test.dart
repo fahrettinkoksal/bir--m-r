@@ -52,7 +52,7 @@ void main() {
   testWidgets('rastgele mod hayatı başlatır ve Hayat ekranı açılır',
       (WidgetTester tester) async {
     await startRandomLife(tester);
-    expect(find.text('Yaş Al'), findsOneWidget);
+    expect(find.byKey(const Key('age_up_button')), findsOneWidget);
     expect(find.textContaining('0 yaşında'), findsOneWidget);
     expect(find.text(trUpper('Hayat günlüğü')), findsOneWidget);
   });
@@ -73,30 +73,62 @@ void main() {
     expect(controller.state!.player.firstName, 'Nergis');
   });
 
-  testWidgets('üç sekme arasında gezinilir', (WidgetTester tester) async {
-    await startRandomLife(tester);
-
-    await tester.tap(find.byIcon(Icons.groups_outlined));
-    await tester.pumpAndSettle();
-    expect(find.text(trUpper('Çekirdek aile')), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.person_outline));
-    await tester.pumpAndSettle();
-    expect(find.text(trUpper('Karakter değerleri')), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.auto_stories_outlined));
-    await tester.pumpAndSettle();
-    expect(find.text('Yaş Al'), findsOneWidget);
-  });
-
-  testWidgets('Ben ekranı beş değeri gösterir, Ün gösterilmez',
+  testWidgets('dört ana menü arasında gezinilir ve Yaş Al ortada durur',
       (WidgetTester tester) async {
     await startRandomLife(tester);
-    await tester.tap(find.byIcon(Icons.person_outline));
-    await tester.pumpAndSettle();
 
+    // Alt çubukta soldan sağa: Okul/Meslek, Varlıklar, [Yaş Al], İlişkiler,
+    // Aktiviteler (NAV-001).
+    for (final String id in <String>[
+      'tab_okul_meslek',
+      'tab_varliklar',
+      'tab_iliskiler',
+      'tab_aktiviteler',
+    ]) {
+      expect(find.byKey(Key(id)), findsOneWidget, reason: '$id bulunmalı');
+    }
+    expect(find.byKey(const Key('age_up_button')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
+    await tester.pumpAndSettle();
+    expect(find.text('İlişkiler'), findsWidgets);
+
+    await tester.tap(find.byKey(const Key('tab_varliklar')));
+    await tester.pumpAndSettle();
+    expect(find.text('Cüzdan'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+    expect(find.text('Aktiviteler'), findsWidgets);
+
+    // Seçili menüye tekrar dokunmak hayat ekranına döndürür.
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+    expect(find.text(trUpper('Hayat günlüğü')), findsOneWidget);
+  });
+
+  testWidgets('soldaki menü öğrenciyken Okul, değilken Meslek olur',
+      (WidgetTester tester) async {
+    await startRandomLife(tester);
+
+    // Doğumda okula başlanmamıştır: Meslek görünür.
+    expect(controller.state!.education.isStudent, isFalse);
+    expect(find.text('Meslek'), findsOneWidget);
+    expect(find.text('Okul'), findsNothing);
+
+    await ageTo(tester, controller, 7);
+    expect(controller.state!.education.isStudent, isTrue);
+    expect(find.text('Okul'), findsOneWidget);
+    expect(find.text('Meslek'), findsNothing);
+  });
+
+  testWidgets('üst özet beş değeri gösterir, ayrıntıda Ün yoktur',
+      (WidgetTester tester) async {
+    await startRandomLife(tester);
+
+    // Üst şeritte kısa etiketler.
     for (final String label in <String>[
-      'Dış görünüş',
+      'Görünüş',
       'Mutluluk',
       'Sağlık',
       'Zekâ',
@@ -104,6 +136,12 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget, reason: '$label görünmeli');
     }
+
+    // Şeride dokununca tam adlarıyla ayrıntı açılır.
+    await tester.tap(find.text('Mutluluk'));
+    await tester.pumpAndSettle();
+    expect(find.text('Karakter değerleri'), findsOneWidget);
+    expect(find.text('Dış görünüş'), findsOneWidget);
     // Ün açılmadığı sürece hiç gösterilmez (D-027).
     expect(find.text('Ün'), findsNothing);
   });
@@ -112,7 +150,7 @@ void main() {
     await startRandomLife(tester);
     expect(find.textContaining('0 yaşında'), findsOneWidget);
 
-    await tester.tap(find.text('Yaş Al'));
+    await tester.tap(find.byKey(const Key('age_up_button')));
     await tester.pumpAndSettle();
     await answerPendingEvents(tester, controller);
 
@@ -123,7 +161,7 @@ void main() {
   testWidgets('Aile ekranında kişiye dokununca gerçek ayrıntı açılır',
       (WidgetTester tester) async {
     await startRandomLife(tester);
-    await tester.tap(find.byIcon(Icons.groups_outlined));
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
     await tester.pumpAndSettle();
 
     final Person anne = controller.state!.people

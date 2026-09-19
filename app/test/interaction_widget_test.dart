@@ -35,7 +35,7 @@ void main() {
       .firstWhere((Person p) => p.relation == RelationType.anne);
 
   Future<void> openMother(WidgetTester tester) async {
-    await tester.tap(find.byIcon(Icons.groups_outlined));
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
     await tester.pumpAndSettle();
     await tester.tap(find.text(motherOf().fullName).first);
     await tester.pumpAndSettle();
@@ -86,7 +86,7 @@ void main() {
     // Sayfayı kapatıp Hayat sekmesine dön.
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.auto_stories_outlined));
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
     await tester.pumpAndSettle();
 
     expect(find.text(sonuc), findsOneWidget);

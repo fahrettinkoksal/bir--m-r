@@ -188,7 +188,11 @@ class EventEngine {
       charisma: working.player.stats.charisma + choice.charisma,
       appearance: working.player.stats.appearance + choice.appearance,
     );
-    final PlayerCharacter player = working.player.copyWith(stats: stats);
+    final PlayerCharacter player = working.player.copyWith(
+      stats: stats,
+      // Cüzdan eksiye düşmez; borç/eksi bakiye kuralları kararlaştırılmadı.
+      wallet: (working.player.wallet + choice.money).clamp(0, 1 << 31),
+    );
 
     // Etki, olayın kişisine; ilişki başlatan seçimde yeni partnere işlenir.
     final String? bondTargetId = newPersonId ?? active.personId;
