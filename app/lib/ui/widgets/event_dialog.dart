@@ -1,0 +1,106 @@
+import 'package:flutter/material.dart';
+
+import '../../domain/models/game_event.dart';
+import '../../state/game_scope.dart';
+import 'kilim_divider.dart';
+
+/// Yaş alınca çıkan tek olayı ve oyun içi ilerlemeyle gelen ek olayı gösterir.
+///
+/// Seçim yapılmadan kapatılamaz; aynı anda birden fazla olay penceresi
+/// açılmaz (D-021).
+class EventDialog extends StatefulWidget {
+  const EventDialog({super.key, required this.event});
+
+  final ActiveEvent event;
+
+  static Future<void> show(BuildContext context, ActiveEvent event) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (BuildContext context) => EventDialog(event: event),
+    );
+  }
+
+  @override
+  State<EventDialog> createState() => _EventDialogState();
+}
+
+class _EventDialogState extends State<EventDialog> {
+  String? _resultText;
+
+  void _choose(EventChoice choice) {
+    final String? result = GameScope.of(context).chooseEventOption(choice.id);
+    setState(() => _resultText = result ?? choice.resultText);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool answered = _resultText != null;
+
+    return PopScope(
+      canPop: answered,
+      child: Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  widget.event.category.label.toUpperCase(),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.1,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const KilimDivider(),
+                const SizedBox(height: 14),
+                Text(widget.event.text, style: theme.textTheme.bodyLarge),
+                const SizedBox(height: 20),
+                if (!answered)
+                  for (final EventChoice choice in widget.event.choices) ...<Widget>[
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonal(
+                        onPressed: () => _choose(choice),
+                        child: Text(choice.label, textAlign: TextAlign.center),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ]
+                else ...<Widget>[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: theme.colorScheme.secondary.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Text(_resultText!, style: theme.textTheme.bodyMedium),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Devam'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

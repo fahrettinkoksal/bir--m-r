@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/models/game_event.dart';
+import '../../domain/models/game_state.dart';
 import '../../state/game_scope.dart';
+import '../widgets/event_dialog.dart';
 import 'family_screen.dart';
 import 'life_screen.dart';
 import 'me_screen.dart';
@@ -61,6 +64,24 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
+  /// Aynı anda yalnızca tek olay penceresi açılır (D-021).
+  bool _eventVisible = false;
+
+  /// Bekleyen olay varsa gösterir. Olay ekranı, açık bir kişi sayfasının
+  /// üstünde kalmasın diye önce o sayfa kapatılır.
+  void _showPendingEvent(ActiveEvent event) {
+    if (_eventVisible) return;
+    _eventVisible = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
+      await EventDialog.show(context, event);
+      if (!mounted) return;
+      setState(() => _eventVisible = false);
+    });
+  }
+
   Future<void> _confirmNewLife() async {
     final bool? yes = await showDialog<bool>(
       context: context,
@@ -91,6 +112,9 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final AppSection section = kAppSections[_index];
+    final GameState state = GameScope.of(context).state!;
+    final ActiveEvent? pending = state.pendingEvent;
+    if (pending != null) _showPendingEvent(pending);
 
     return Scaffold(
       appBar: AppBar(

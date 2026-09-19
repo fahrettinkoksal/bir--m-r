@@ -8,6 +8,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Aile → kişi detayı → Vakit Geçir akışının gerçekten çalıştığını sınar.
 void main() {
   late GameController controller;
@@ -39,13 +41,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> ageTo(WidgetTester tester, int age) async {
-    while (controller.state!.player.age < age) {
-      await tester.tap(find.text('Yaş Al'));
-      await tester.pumpAndSettle();
-    }
-  }
-
   testWidgets('yaşı uygun değilken etkileşim düğmesi gösterilmez',
       (WidgetTester tester) async {
     await pumpApp(tester);
@@ -59,7 +54,7 @@ void main() {
   testWidgets('Vakit Geçir çalışır ve sonucu ekranda gösterir',
       (WidgetTester tester) async {
     await pumpApp(tester);
-    await ageTo(tester, 8);
+    await ageTo(tester, controller, 8);
     await openMother(tester);
 
     expect(find.text('Vakit Geçir'), findsOneWidget);
@@ -80,12 +75,13 @@ void main() {
 
   testWidgets('sonuç hayat günlüğüne yansır', (WidgetTester tester) async {
     await pumpApp(tester);
-    await ageTo(tester, 8);
+    await ageTo(tester, controller, 8);
     await openMother(tester);
 
     await tester.tap(find.text('Vakit Geçir'));
     await tester.pumpAndSettle();
     final String sonuc = controller.state!.log.last.text;
+    await answerPendingEvents(tester, controller);
 
     // Sayfayı kapatıp Hayat sekmesine dön.
     await tester.tapAt(const Offset(10, 10));
@@ -99,7 +95,7 @@ void main() {
   testWidgets('tekrar edildiğinde kazanç azalır, başka kişi kilitlenmez',
       (WidgetTester tester) async {
     await pumpApp(tester);
-    await ageTo(tester, 8);
+    await ageTo(tester, controller, 8);
 
     final Person anne = motherOf();
     final Person baba = controller.state!.people
@@ -107,10 +103,13 @@ void main() {
 
     int kabulSayisi = 0;
     for (int i = 0; i < 10; i++) {
+      // Etkileşim sırasında ilerlemeye bağlı bir ek olay çıkarsa yanıtla.
+      await answerPendingEvents(tester, controller);
       final InteractionOutcome? o =
           controller.interact(anne.id, InteractionKind.vakitGecir);
-      if (o!.accepted) kabulSayisi++;
+      if (o != null && o.accepted) kabulSayisi++;
     }
+    await answerPendingEvents(tester, controller);
     expect(kabulSayisi, greaterThan(0));
     expect(
       controller.state!.interactionCount(anne.id, InteractionKind.vakitGecir.name),
@@ -121,6 +120,7 @@ void main() {
     // Babayla ilk etkileşim hâlâ açık ve tam faydalı.
     final InteractionOutcome babaIlk =
         controller.interact(baba.id, InteractionKind.vakitGecir)!;
+    await answerPendingEvents(tester, controller);
     expect(babaIlk.accepted, isTrue);
     expect(babaIlk.bondDelta, greaterThan(0));
 

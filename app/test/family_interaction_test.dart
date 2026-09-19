@@ -9,6 +9,8 @@ import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Aşama 2 kabulü: tekrar eden aynı etkinlik sonsuza kadar kazandırmaz,
 /// ret ve kabul yolları çalışır, farklı kişilerin sayaçları karışmaz ve
 /// **genel bir etkileşim kotası yoktur**.
@@ -17,9 +19,7 @@ void main() {
   GameController livingController({int seed = 5, int age = 8}) {
     final GameController controller = GameController(random: Random(seed));
     controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
-    while (controller.state!.player.age < age) {
-      controller.ageUp();
-    }
+    advanceToAge(controller, age);
     return controller;
   }
 
@@ -221,14 +221,17 @@ void main() {
       final GameController controller = livingController(seed: 5, age: 8);
       final Person anne = motherOf(controller);
       for (int i = 0; i < 6; i++) {
+        resolvePendingEvents(controller);
         controller.interact(anne.id, InteractionKind.vakitGecir);
       }
+      resolvePendingEvents(controller);
       expect(
         controller.state!.interactionCount(anne.id, InteractionKind.vakitGecir.name),
         greaterThan(0),
       );
 
       controller.ageUp();
+      resolvePendingEvents(controller);
       expect(controller.state!.interactionCounts, isEmpty,
           reason: 'Tekrar sayaçları yaşa aittir');
 
@@ -249,11 +252,15 @@ void main() {
       final Person anne = motherOf(controller);
       for (int yas = 0; yas < 40; yas++) {
         for (int i = 0; i < 4; i++) {
+          resolvePendingEvents(controller);
           controller.interact(anne.id, InteractionKind.vakitGecir);
+          resolvePendingEvents(controller);
           controller.interact(anne.id, InteractionKind.sohbet);
         }
+        resolvePendingEvents(controller);
         controller.ageUp();
       }
+      resolvePendingEvents(controller);
       final Person son = controller.state!.personById(anne.id)!;
       expect(son.bond, lessThanOrEqualTo(100));
       expect(controller.state!.player.stats.happiness, lessThanOrEqualTo(100));
@@ -409,6 +416,7 @@ void main() {
       final GameController controller = livingController(seed: 5, age: 8);
       final Person anne = motherOf(controller);
 
+      resolvePendingEvents(controller);
       int onceki = controller.state!.log.length;
       final InteractionOutcome ilk =
           controller.interact(anne.id, InteractionKind.vakitGecir)!;
@@ -417,9 +425,12 @@ void main() {
 
       // Faydası bitene kadar tekrarla; sıfır kazançlı tekrar günlüğe yazılmaz.
       for (int i = 0; i < 12; i++) {
+        resolvePendingEvents(controller);
         onceki = controller.state!.log.length;
         final InteractionOutcome o =
             controller.interact(anne.id, InteractionKind.vakitGecir)!;
+        // Etkileşim bir ek olay tetiklediyse günlük sayımını bozmasın diye
+        // olay çözülmeden bakılır.
         final int simdiki = controller.state!.log.length;
         if (o.worthLogging) {
           expect(simdiki, onceki + 1);
@@ -436,9 +447,12 @@ void main() {
           controller.state!.people.map((Person p) => p.id).toList();
       final Person anne = motherOf(controller);
       for (int i = 0; i < 6; i++) {
+        resolvePendingEvents(controller);
         controller.interact(anne.id, InteractionKind.vakitGecir);
+        resolvePendingEvents(controller);
         controller.interact(anne.id, InteractionKind.sohbet);
       }
+      resolvePendingEvents(controller);
       expect(controller.state!.people.map((Person p) => p.id).toList(), ids);
       expect(controller.state!.personById(anne.id)!.relation, RelationType.anne);
     });

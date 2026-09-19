@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Ekranların gerçek görüntüsünü üretir (`test/goldens/`).
 ///
 /// Görüntü karşılaştırması yazı tipine ve platforma duyarlı olduğu için bu
@@ -97,16 +99,32 @@ void main() {
     );
   }, skip: !enabled);
 
+  testWidgets('yaş alınca çıkan tek olay', (WidgetTester tester) async {
+    await pumpPhone(tester);
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+
+    // Olay çıkana kadar yaş al.
+    int guard = 0;
+    while (!controller.state!.hasPendingEvent && guard++ < 30) {
+      await tester.tap(find.text('Yaş Al'));
+      await tester.pumpAndSettle();
+    }
+    expect(controller.state!.hasPendingEvent, isTrue);
+
+    await expectLater(
+      find.byType(BirOmurApp),
+      matchesGoldenFile('goldens/06_olay.png'),
+    );
+  }, skip: !enabled);
+
   testWidgets('kişi detayı ve etkileşim sonucu', (WidgetTester tester) async {
     await pumpPhone(tester);
     await tester.tap(find.text('Rastgele bir hayat'));
     await tester.pumpAndSettle();
 
-    // Etkileşimlerin açıldığı bir yaşa gel.
-    while (controller.state!.player.age < 8) {
-      await tester.tap(find.text('Yaş Al'));
-      await tester.pumpAndSettle();
-    }
+    // Etkileşimlerin açıldığı bir yaşa gel; yoldaki olayları yanıtla.
+    await ageTo(tester, controller, 8);
 
     await tester.tap(find.byIcon(Icons.groups_outlined));
     await tester.pumpAndSettle();

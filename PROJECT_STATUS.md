@@ -1,6 +1,6 @@
 # Proje durumu
 
-**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1 ve Aşama 2 uygulandı** (`app/` klasörü); Aşama 3-5 henüz yapılmadı. **Olay motoru ve sevgili → ayrılık → eski sevgili akışı henüz yoktur.**
+**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2 ve 3 uygulandı** (`app/` klasörü); Aşama 4-5 henüz yapılmadı. **Sevgili → ayrılık → eski sevgili akışı henüz yoktur.**
 
 ## Şu ana kadar ana hatlarını belirledik
 Türkiye/nostalji odaklı özgün oyun kimliği; iki başlangıç modu, rastgele aile/şehir; dış görünüş, mutluluk, sağlık, zekâ, karizma; kişi bazlı ilişkiler; geçmiş karar hafızası; yaşa/koşula uygun olaylar; ailenin bağımsız yaşam gelişmeleri. Kesin karar kaydı: `DECISIONS.md`.
@@ -35,18 +35,33 @@ Aile rastgele çeşitlenir; aynı evde yaşama ile akrabalık ayrı tutulur. Ail
 - Vefat etmiş kişiyle veya yaşı uygun olmayan oyuncuyla etkileşim açılmıyor; düğme gösterilmiyor, gerekçe yazılıyor.
 - Hayat günlüğüne yalnızca anlamlı sonuçlar yazılıyor; sıfır kazançlı tekrar günlüğü şişirmiyor.
 
+## Aşama 3 — yapıldı (kod: `app/lib/domain/events/`, `app/lib/data/event_pool.dart`)
+- **Yaş Al** sonrası yeni yaşın **tek** açılış olayı çıkıyor (D-021); uygun olay yoksa hiç çıkmıyor. Ekranda olay varken yaş ilerlemiyor ve ikinci olay açılmıyor.
+- Genişletilebilir özgün olay verisi: kimlik, kategori, metin, uygunluk (yaş, hayatta olan kişi, hane, okul çağı, hikâye izi, sahip olunan varlık), seçenekler, etkiler ve geleceğe bırakılan iz. **Seçilen teknik şema onaylanmış tasarım kararı değildir.**
+- **Hafıza (D-008, D-022):** bir seçim iz bırakıyor, ileriki uygun yaşta farklı bir devam açıyor. Çalışan zincir: `arkadasi_savunma` → `savundugun_arkadas` **ya da** `sessiz_kaldigin_gun`. İz yoksa devam gösterilmiyor.
+- Uygunsuz olay çıkmıyor: sahip olunmayan bisiklet için bisiklet olayı, üniversiteye gitmemiş karakterde üniversite olayı, hayatta olmayan kişiyle kişili olay çıkmıyor.
+- Ek olaylar **gerçek dünya dakikasıyla değil** oyun içi ilerlemeyle geliyor (D-024): kazanç sağlayan bir aile etkileşimi ilerleme sayılıyor; eşiğe ulaşılınca bir yaşta **en fazla bir** ek olay açılıyor. Zamanlayıcı yok.
+- Olay sonucu karakter değerlerine, gerektiğinde ilgili kişinin ilişkisine ve hayat günlüğüne yansıyor.
+
+### Sitem olayının bu kesitteki derinliği (D-025)
+Uzun süre temas kurulmayan **hane** üyesi sitem edebiliyor. Ölçü oyun içi: kişiyle en son hangi yaşta anlamlı temas kurulduğuna bakılıyor (prototipte 3 yaş fark). Kişinin kendi ruh hâli, olay geçmişi veya farklı sitem kademeleri **modellenmedi**; bu yüzden sistem tam hâliyle var sayılmamalıdır.
+
 ### Çalıştırılan doğrulamalar
-`flutter analyze` temiz; `flutter test` ile **60 test geçti** (aile üretim tutarlılığı, yaş alma, aile etkileşimi/azalan etki/ret, arayüz gezinmesi ve etkileşim akışı). Ekran görüntüleri `app/test/goldens/` altında üretildi.
+`flutter analyze` temiz; `flutter test` ile **79 test geçti** (aile üretim tutarlılığı, yaş alma, aile etkileşimi/azalan etki/ret, olay uygunluğu/hafıza/tempo, arayüz gezinmesi ve etkileşim akışı). Ekran görüntüleri `app/test/goldens/` altında üretildi.
 **Doğrulanamayan:** Android APK derlemesi ve gerçek cihaz/emülatör denemesi — bu ortamda Android SDK indirilemedi (ağ politikası `dl.google.com` erişimini engelliyor). APK derlemesi Faho'nun ortamında denenmelidir.
 
 ## Şimdi yapılacak iş
-Aşama 2 incelendikten sonra **Aşama 3** (Yaş Al sonrası tek açılış olayı, olay verisi ve hafıza) uygulanacak. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
+Aşama 3 incelendikten sonra **Aşama 4** (sevgili edinme → ayrılık → aynı kişinin eski sevgili olarak kalması) uygulanacak. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
 
 ### Faho'nun kararına bırakılan açık noktalar
 - Azalma eğrisi (prototipte 4 tekrarda sıfır), ret olasılıkları ve ret sonrası mutluluk kaybı miktarı.
 - Tekrar sayaçlarının yaş değişiminde **tam** mı kısmi mi yenileneceği (prototipte tam).
 - Etkileşimlerin açıldığı asgari oyuncu yaşı (prototipte 4).
 - "Sohbet Et" etkileşiminin kalıcı bir tür olup olmayacağı; hediye verme ekonomi sistemi tasarlanınca eklenebilir.
+- Olay veri şeması (`GameEvent` / `EventRequirement` / `EventChoice` alanları) ve olay ağırlıkları.
+- Bir yaşta en fazla kaç ek olay çıkacağı (prototipte 1) ve ek olay için gereken ilerleme eşiği (prototipte 3 kazançlı etkileşim).
+- Sitem için gereken oyun içi yaş farkı (prototipte 3) ve sitemin derinliği.
+- `lise_sonrasi` olayındaki "üniversite / çalışma hayatı" seçimi yalnızca bir **hikâye izidir**; eğitim ve kariyer sistemleri tasarlanmadı. Bu izin kalıcı olup olmayacağı Faho'nun kararı.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

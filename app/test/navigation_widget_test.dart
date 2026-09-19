@@ -8,6 +8,8 @@ import 'package:bir_omur/ui/widgets/person_detail_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Üç sekme arasında gerçekten gezinilebildiğini ve ekranların gerçek
 /// durumu gösterdiğini sınar.
 void main() {
@@ -112,6 +114,7 @@ void main() {
 
     await tester.tap(find.text('Yaş Al'));
     await tester.pumpAndSettle();
+    await answerPendingEvents(tester, controller);
 
     expect(find.textContaining('1 yaşında'), findsOneWidget);
     expect(find.text('1 yaşına girdin.'), findsOneWidget);

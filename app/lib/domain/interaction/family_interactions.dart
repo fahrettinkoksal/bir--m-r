@@ -185,9 +185,21 @@ class FamilyInteractions {
     final Map<String, int> counts = Map<String, int>.from(state.interactionCounts)
       ..[GameState.interactionKey(person.id, kind.name)] = done + 1;
 
+    // Anlamlı temas kaydı: sitem olayı gerçek dünya dakikasına değil, oyun
+    // içi ilerlemeye bakar (D-024, D-025).
+    final Map<String, int> lastSeen =
+        Map<String, int>.from(state.lastInteractionAge)
+          ..[person.id] = state.player.age;
+
     return InteractionResult(
       state: _apply(state, person, outcome).copyWith(
         interactionCounts: Map<String, int>.unmodifiable(counts),
+        lastInteractionAge: Map<String, int>.unmodifiable(lastSeen),
+        // Yalnızca gerçekten kazanç sağlayan etkileşim ilerleme sayılır;
+        // boş tekrar ek olay tetiklemez.
+        progressSinceLastEvent: outcome.hasAnyEffect
+            ? state.progressSinceLastEvent + 1
+            : state.progressSinceLastEvent,
       ),
       outcome: outcome,
     );

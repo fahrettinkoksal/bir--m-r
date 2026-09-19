@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import '../../data/name_pool.dart';
+import '../events/event_engine.dart';
+import '../models/game_event.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
@@ -12,16 +14,21 @@ import 'random_util.dart';
 /// Oyuncu hazır olduğunda kendi isteğiyle bir yaş ilerler; bir yaşın bütün
 /// etkinliklerini bitirmesi gerekmez.
 ///
-/// Bu aşamada yaş alma yalnızca zamanı ilerletir: **olay motoru, aile
-/// etkileşimleri ve NPC hayat gelişmeleri (D-010) henüz uygulanmadı**, sonraki
-/// aşamalarda eklenecektir. Burada hiçbir olay üretilmez; gerçek dünya
-/// dakikası da beklenmez (D-024).
+/// Yeni yaşa girildiğinde oyuncunun karşısına **ilk olarak yalnızca tek**
+/// uygun olay çıkar (D-021); art arda bağımsız olay pencereleri açılmaz.
+/// Uygun olay yoksa hiç olay çıkmaz. Gerçek dünya dakikası beklenmez (D-024).
+///
+/// NPC'lerin bağımsız hayat gelişmeleri (D-010) henüz uygulanmadı.
 class LifeProgression {
   LifeProgression(this._rng);
 
   final Random _rng;
 
   GameState advanceOneYear(GameState state) {
+    // Ekranda çözülmemiş bir olay varken yaş ilerlemez: olaylar üst üste
+    // binmez.
+    if (state.hasPendingEvent) return state;
+
     final int newAge = state.player.age + 1;
 
     final List<Person> people = state.people
@@ -37,7 +44,7 @@ class LifeProgression {
       ),
     ];
 
-    return state.copyWith(
+    final GameState advanced = state.copyWith(
       player: state.player.copyWith(age: newAge),
       people: List<Person>.unmodifiable(people),
       log: List<LifeLogEntry>.unmodifiable(log),
@@ -46,7 +53,13 @@ class LifeProgression {
       // (`docs/CORE_LOOP.md`) henüz kararlaştırılmadı; prototipte tam
       // yenileme uygulanır.
       interactionCounts: const <String, int>{},
+      extraEventsThisAge: 0,
+      progressSinceLastEvent: 0,
     );
+
+    // Yeni yaşın tek açılış olayı.
+    final ActiveEvent? opening = const EventEngine().openingEvent(advanced, _rng);
+    return opening == null ? advanced : advanced.copyWith(pendingEvent: opening);
   }
 
   /// Kişinin yaşını bir artırır ve yalnızca yaşa bağlı **tutarlılık**

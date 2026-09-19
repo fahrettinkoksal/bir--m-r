@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'game_event.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
 import 'person.dart';
@@ -21,6 +22,13 @@ class GameState {
     required this.parentalStatus,
     required this.log,
     this.interactionCounts = const <String, int>{},
+    this.lastInteractionAge = const <String, int>{},
+    this.storyFlags = const <String>{},
+    this.possessions = const <String>{},
+    this.seenEventIds = const <String>{},
+    this.pendingEvent,
+    this.progressSinceLastEvent = 0,
+    this.extraEventsThisAge = 0,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -45,6 +53,35 @@ class GameState {
 
   int interactionCount(String personId, String kindName) =>
       interactionCounts[interactionKey(personId, kindName)] ?? 0;
+
+  /// Bir kişiyle **oyun içinde** en son hangi yaşta anlamlı temas kurulduğu.
+  /// Gerçek dünya saati değil, oyun ilerleyişi ölçüsüdür (D-024, D-025).
+  final Map<String, int> lastInteractionAge;
+
+  /// Geçmiş seçimlerin bıraktığı izler (D-008).
+  final Set<String> storyFlags;
+
+  /// Sahip olunan varlıklar; olmayan varlık için olay çıkmaz.
+  final Set<String> possessions;
+
+  /// Bu hayatta görülmüş olaylar; tekrarlanabilir olmayanlar bir kez çıkar.
+  final Set<String> seenEventIds;
+
+  /// Oyuncunun karşısındaki tek olay. Aynı anda ikinci bir olay açılmaz
+  /// (D-021): bu alan doluyken yeni olay üretilmez.
+  final ActiveEvent? pendingEvent;
+
+  /// Son olaydan bu yana yapılan anlamlı oyun içi ilerleme adımı sayısı.
+  final int progressSinceLastEvent;
+
+  /// İçinde bulunulan yaşta açılış olayından **sonra** çıkan ek olay sayısı.
+  final int extraEventsThisAge;
+
+  bool get hasPendingEvent => pendingEvent != null;
+
+  /// Okul çağı. Tam eğitim sistemi henüz tasarlanmadı; bu yalnızca olay
+  /// uygunluğu için kullanılan geçici bir ölçüttür.
+  bool get isSchoolAgeStudent => player.age >= 6 && player.age <= 17;
 
   List<Person> get livingPeople =>
       people.where((Person p) => p.isAlive).toList(growable: false);
@@ -72,6 +109,13 @@ class GameState {
     ParentalStatus? parentalStatus,
     List<LifeLogEntry>? log,
     Map<String, int>? interactionCounts,
+    Map<String, int>? lastInteractionAge,
+    Set<String>? storyFlags,
+    Set<String>? possessions,
+    Set<String>? seenEventIds,
+    Object? pendingEvent = _unsetEvent,
+    int? progressSinceLastEvent,
+    int? extraEventsThisAge,
   }) {
     return GameState(
       seed: seed,
@@ -81,6 +125,18 @@ class GameState {
       parentalStatus: parentalStatus ?? this.parentalStatus,
       log: log ?? this.log,
       interactionCounts: interactionCounts ?? this.interactionCounts,
+      lastInteractionAge: lastInteractionAge ?? this.lastInteractionAge,
+      storyFlags: storyFlags ?? this.storyFlags,
+      possessions: possessions ?? this.possessions,
+      seenEventIds: seenEventIds ?? this.seenEventIds,
+      pendingEvent: pendingEvent == _unsetEvent
+          ? this.pendingEvent
+          : pendingEvent as ActiveEvent?,
+      progressSinceLastEvent:
+          progressSinceLastEvent ?? this.progressSinceLastEvent,
+      extraEventsThisAge: extraEventsThisAge ?? this.extraEventsThisAge,
     );
   }
 }
+
+const Object _unsetEvent = Object();

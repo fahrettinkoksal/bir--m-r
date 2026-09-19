@@ -1,0 +1,201 @@
+import 'dart:math';
+
+import '../../data/event_pool.dart';
+import '../generation/random_util.dart';
+import '../models/game_event.dart';
+import '../models/game_state.dart';
+import '../models/life_log.dart';
+import '../models/person.dart';
+import '../models/player_character.dart';
+import '../models/stats.dart';
+
+/// Olay motoru (D-009, D-021, D-022, D-023, D-024).
+///
+/// Kurallar:
+/// - Yaş alındığında **ilk olarak yalnızca tek** uygun olay çıkar; aynı anda
+///   ikinci bir olay penceresi açılmaz.
+/// - Bir olayın çıkabilmesi için yaş **ve** diğer koşullar sağlanmalıdır:
+///   olayın kişisi yaşıyor olmalı, gereken hikâye izi bulunmalı, sahip
+///   olunmayan varlık için olay üretilmemelidir.
+/// - Ek olaylar **gerçek dünya dakikasıyla değil**, oyuncunun oyun içindeki
+///   anlamlı ilerlemesiyle gelir. Bu prototipte tempo bilerek dar tutulmuştur
+///   (aşağıdaki `prototypeOnly` değerler); kesin tempo algoritması henüz
+///   kararlaştırılmadı.
+class EventEngine {
+  const EventEngine({this.pool = kEventPool});
+
+  final List<GameEvent> pool;
+
+  /// Bir yaş içinde açılış olayından sonra çıkabilecek **en fazla** ek olay.
+  static const int prototypeOnlyMaxExtraEventsPerAge = 1;
+
+  /// Ek olayın açılması için gereken anlamlı ilerleme adımı sayısı.
+  static const int prototypeOnlyProgressPerExtraEvent = 3;
+
+  /// Bir yakının sitem edebilmesi için geçmesi gereken **oyun içi** yaş farkı.
+  static const int prototypeOnlyNeglectAgeGap = 3;
+
+  /// Yeni yaşın tek açılış olayı (D-021). Uygun olay yoksa `null`.
+  ActiveEvent? openingEvent(GameState state, Random rng) =>
+      _pick(state, rng);
+
+  /// Oyun içi ilerlemeye bağlı ek olay (D-023, D-024).
+  ///
+  /// Yalnızca yeterli ilerleme biriktiyse, bu yaşın ek olay sınırı dolmadıysa
+  /// ve ekranda başka olay yokken çıkar.
+  ActiveEvent? progressEvent(GameState state, Random rng) {
+    if (state.hasPendingEvent) return null;
+    if (state.extraEventsThisAge >= prototypeOnlyMaxExtraEventsPerAge) return null;
+    if (state.progressSinceLastEvent < prototypeOnlyProgressPerExtraEvent) {
+      return null;
+    }
+    return _pick(state, rng);
+  }
+
+  /// Uygun olaylar arasından ağırlıklı seçim yapar ve kişisini çözer.
+  ActiveEvent? _pick(GameState state, Random rng) {
+    final List<_Candidate> candidates = <_Candidate>[];
+    for (final GameEvent event in pool) {
+      if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
+      final Person? person = _resolvePerson(state, event, rng);
+      if (!_matches(state, event, person)) continue;
+      candidates.add(_Candidate(event, person));
+    }
+    if (candidates.isEmpty) return null;
+
+    final _Candidate chosen = rng.pickWeighted(
+      candidates,
+      candidates.map((_Candidate c) => c.event.weight.toDouble()).toList(),
+    );
+    return _toActive(state, chosen);
+  }
+
+  /// Olayın koşullarını denetler. Kişi gerekiyorsa [person] dolu olmalıdır.
+  bool _matches(GameState state, GameEvent event, Person? person) {
+    final EventRequirement req = event.requirement;
+    final int age = state.player.age;
+
+    if (age < req.minAge || age > req.maxAge) return false;
+    if (req.requiresSchoolStudent && !state.isSchoolAgeStudent) return false;
+    // Kişi gerektiren olay, uygun kişi bulunamadıysa elenir: aksi hâlde
+    // metindeki yer tutucular boş kalır ve olmayan kişiyle olay çıkar.
+    if (_needsPerson(req) && person == null) return false;
+    if (!state.storyFlags.containsAll(req.requiredFlags)) return false;
+    if (req.forbiddenFlags.any(state.storyFlags.contains)) return false;
+    if (!state.possessions.containsAll(req.requiredPossessions)) return false;
+    return true;
+  }
+
+  static bool _needsPerson(EventRequirement req) =>
+      req.livingRelations.isNotEmpty || req.requiresNeglectedRelative;
+
+  /// Olayın kişisini seçer; uygun kişi yoksa `null` döner ve olay elenir.
+  Person? _resolvePerson(GameState state, GameEvent event, Random rng) {
+    final EventRequirement req = event.requirement;
+
+    if (req.requiresNeglectedRelative) {
+      final List<Person> neglected = state.people.where((Person p) {
+        if (!p.isAlive) return false;
+        if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+        final int? last = state.lastInteractionAge[p.id];
+        if (last == null) {
+          // Hiç temas kurulmamışsa, oyuncunun etkileşim kurabildiği yaştan
+          // itibaren sayılır.
+          return state.player.age >= req.minAge + prototypeOnlyNeglectAgeGap;
+        }
+        return state.player.age - last >= prototypeOnlyNeglectAgeGap;
+      }).toList(growable: false);
+      if (neglected.isEmpty) return null;
+      return neglected[rng.nextInt(neglected.length)];
+    }
+
+    if (req.livingRelations.isEmpty) return null;
+
+    final List<Person> uygun = state.people.where((Person p) {
+      if (!p.isAlive) return false;
+      if (!req.livingRelations.contains(p.relation)) return false;
+      if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+      return true;
+    }).toList(growable: false);
+    if (uygun.isEmpty) return null;
+    return uygun[rng.nextInt(uygun.length)];
+  }
+
+  ActiveEvent _toActive(GameState state, _Candidate candidate) {
+    return ActiveEvent(
+      eventId: candidate.event.id,
+      category: candidate.event.category,
+      text: _fill(candidate.event.text, candidate.person, state.player.age),
+      choices: candidate.event.choices,
+      personId: candidate.person?.id,
+    );
+  }
+
+  static String _fill(String template, Person? person, int playerAge) {
+    if (person == null) return template;
+    return template
+        .replaceAll('{kisi}', person.firstName)
+        .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
+  }
+
+  /// Bekleyen olayı verilen seçimle çözer: etkileri uygular, izi bırakır,
+  /// hayat günlüğüne yazar ve olayı ekrandan kaldırır.
+  GameState resolve(GameState state, String choiceId) {
+    final ActiveEvent? active = state.pendingEvent;
+    if (active == null) return state;
+
+    final EventChoice choice = active.choices.firstWhere(
+      (EventChoice c) => c.id == choiceId,
+      orElse: () => active.choices.first,
+    );
+
+    final Stats stats = state.player.stats.copyWith(
+      happiness: state.player.stats.happiness + choice.happiness,
+      health: state.player.stats.health + choice.health,
+      intelligence: state.player.stats.intelligence + choice.intelligence,
+      charisma: state.player.stats.charisma + choice.charisma,
+      appearance: state.player.stats.appearance + choice.appearance,
+    );
+    final PlayerCharacter player = state.player.copyWith(stats: stats);
+
+    final List<Person> people = active.personId == null || choice.bond == 0
+        ? state.people
+        : state.people
+            .map(
+              (Person p) => p.id == active.personId
+                  ? p.copyWith(bond: (p.bond + choice.bond).clamp(0, 100))
+                  : p,
+            )
+            .toList(growable: false);
+
+    final Person? person =
+        active.personId == null ? null : state.personById(active.personId!);
+    final String resultText = _fill(choice.resultText, person, state.player.age);
+
+    return state.copyWith(
+      player: player,
+      people: List<Person>.unmodifiable(people),
+      storyFlags: <String>{...state.storyFlags, ...choice.addFlags},
+      possessions: <String>{...state.possessions, ...choice.addPossessions},
+      seenEventIds: <String>{...state.seenEventIds, active.eventId},
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: state.player.age,
+          text: resultText,
+          category: LogCategory.kisisel,
+        ),
+      ]),
+      pendingEvent: null,
+      // Olay çözüldü: ek olay için ilerleme yeniden birikmeye başlar.
+      progressSinceLastEvent: 0,
+    );
+  }
+}
+
+class _Candidate {
+  const _Candidate(this.event, this.person);
+
+  final GameEvent event;
+  final Person? person;
+}
