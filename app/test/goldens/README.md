@@ -1,4 +1,4 @@
-# Prototip ekran görüntüleri (Aşama 1-4 + okul paketi)
+# Prototip ekran görüntüleri (menü + arayüz revizyonu)
 
 Bu görüntüler `flutter test --update-goldens` ile **gerçek widget ağacından**
 üretilmiştir. Yeniden üretmek için:
@@ -14,30 +14,33 @@ BIR_OMUR_SCREENSHOTS=1 flutter test --update-goldens test/golden_screens_test.da
 > ortamı ikon yazı tipini yüklemediği için **ikonlar boş kare** görünür;
 > gerçek derlemede normal çizilirler.
 >
-> **Görsel tasarım onaylanmadı.** Bu ekranlar teknik iskeleti gösterir;
-> marka tasarımı olarak sunulmamıştır. Açık tartışma:
-> [`docs/DESIGN_REVIEW_QUEUE.md`](../../../docs/DESIGN_REVIEW_QUEUE.md) → Q-001.
+> **Görsel yön hâlâ onay bekliyor.** Bu düzen NAV-001 gezinme kararını
+> uygulayan bir **öneridir**; marka tasarımı olarak kesinleşmiş değildir.
+> Açık tartışma: [`docs/DESIGN_REVIEW_QUEUE.md`](../../../docs/DESIGN_REVIEW_QUEUE.md) → Q-001.
 
 ## 01 — Başlangıç: iki oyun başlatma modu
 ![Başlangıç ekranı](01_baslangic.png)
 
-## 02 — Hayat: karakter özeti, değerler, hayat günlüğü ve Yaş Al
-![Hayat ekranı](02_hayat.png)
+## 02 — Ana ekran: üst karakter özeti, hayat günlüğü, alt menü ve ortadaki Yaş Al
+![Ana ekran](02_hayat.png)
 
-## 03 — Aile: çekirdek/geniş aile, "Aynı evde" rozeti
-![Aile ekranı](03_aile.png)
+## 03 — İlişkiler: anne ve baba en üstte, altında alt menüler
+![İlişkiler](03_iliskiler.png)
 
-## 04 — Ben: kimlik bilgileri ve beş karakter değeri
-![Ben ekranı](04_ben.png)
+## 04 — Varlıklar: kişisel cüzdan, eşyalar ve evcil hayvanlar
+![Varlıklar](04_varliklar.png)
 
-## 05 — Aile etkileşimi: Vakit Geçir sonucu ve uygulanan değişimler
-![Etkileşim sonucu](05_etkilesim.png)
+## 05 — Okul: kademe paneli ve okul arkadaşları
+![Okul](05_okul.png)
 
-## 06 — Yaş Al sonrası çıkan tek açılış olayı
-![Olay ekranı](06_olay.png)
+## 06 — Aktiviteler: iç içe menü
+![Aktiviteler](06_aktiviteler.png)
 
-## 07 — Ayrılıktan sonra aynı kişi eski sevgili olarak kalıyor
-![Eski sevgili](07_eski_sevgili.png)
+## 07 — Yaş alınca çıkan tek açılış olayı
+![Olay](07_olay.png)
 
-## 08 — Okulda tanışılan arkadaş, Aile listesinde ayrı bölümde
-![Okul arkadaşı](08_okul_arkadasi.png)
+## 08 — Kişi detayı ve etkileşim sonucu
+![Etkileşim](08_etkilesim.png)
+
+## 09 — Ayrılıktan sonra aynı kişi eski sevgili olarak kalıyor
+![Eski sevgili](09_eski_sevgili.png)

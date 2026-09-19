@@ -27,6 +27,12 @@ abstract final class BirOmurColors {
   /// Pirinç sarısı — küçük detaylar.
   static const Color pirinc = Color(0xFFC08A2E);
 
+  /// Alt gezinme çubuğunun sıcak koyu zemini.
+  static const Color koyuAhsap = Color(0xFF3B2E27);
+
+  /// Koyu zemin üzerindeki sönük metin/ikon rengi.
+  static const Color sonukKrem = Color(0xFFCDBBA9);
+
   static const Color geceMurekkep = Color(0xFF16130F);
   static const Color geceYuzey = Color(0xFF221D18);
 }

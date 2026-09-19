@@ -743,6 +743,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         resultText: 'Zarfın yarısıyla eve alışveriş yaptın. Kimse bir şey '
             'demedi, herkes gördü.',
         happiness: 4,
+        money: 1500, // prototypeOnly
       ),
       EventChoice(
         id: 'kendine',
@@ -751,6 +752,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
             'bir şeyin var.',
         happiness: 3,
         charisma: 1,
+        money: 3000, // prototypeOnly
       ),
     ],
   ),

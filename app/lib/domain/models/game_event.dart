@@ -78,6 +78,7 @@ class EventChoice {
     this.charisma = 0,
     this.appearance = 0,
     this.bond = 0,
+    this.money = 0,
     this.addFlags = const <String>{},
     this.removeFlags = const <String>{},
     this.addPossessions = const <String>{},
@@ -100,6 +101,10 @@ class EventChoice {
 
   /// Olayın kişisiyle ilişki değişimi.
   final int bond;
+
+  /// Oyuncunun **kendi** cüzdanındaki değişim (ECO-001). Aile parasıyla
+  /// karışmaz. Miktarlar prototypeOnly'dir.
+  final int money;
 
   /// Geleceğe bırakılan iz (D-008, D-022).
   final Set<String> addFlags;

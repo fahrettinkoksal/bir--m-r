@@ -20,9 +20,6 @@ import 'support/test_flow.dart';
 /// ```
 /// BIR_OMUR_SCREENSHOTS=1 flutter test --update-goldens test/golden_screens_test.dart
 /// ```
-///
-/// Sistemde bir TrueType yazı tipi bulunursa görüntüler okunaklı olur;
-/// bulunmazsa test ortamının yer tutucu yazı tipi kullanılır.
 const String _kSwitch = 'BIR_OMUR_SCREENSHOTS';
 
 const List<String> _fontCandidates = <String>[
@@ -36,7 +33,6 @@ Future<void> _loadReadableFont() async {
     final File file = File(path);
     if (!file.existsSync()) continue;
     final Uint8List bytes = await file.readAsBytes();
-    // Test ortamının varsayılan yazı tipi ailesinin yerine geçer.
     final FontLoader loader = FontLoader('Roboto')
       ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
     await loader.load();
@@ -68,181 +64,146 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('başlangıç ekranı', (WidgetTester tester) async {
-    await pumpPhone(tester);
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/01_baslangic.png'),
-    );
-  }, skip: !enabled);
-
-  testWidgets('hayat, aile ve ben ekranları', (WidgetTester tester) async {
+  Future<void> startLife(WidgetTester tester) async {
     await pumpPhone(tester);
     await tester.tap(find.text('Rastgele bir hayat'));
     await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/02_hayat.png'),
-    );
+  }
 
-    await tester.tap(find.byIcon(Icons.groups_outlined));
+  Future<void> shot(WidgetTester tester, String name) =>
+      expectLater(find.byType(BirOmurApp), matchesGoldenFile('goldens/$name'));
+
+  Future<void> openTab(WidgetTester tester, String id) async {
+    await tester.tap(find.byKey(Key('tab_$id')));
     await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/03_aile.png'),
-    );
+  }
 
-    await tester.tap(find.byIcon(Icons.person_outline));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/04_ben.png'),
-    );
-  }, skip: !enabled);
-
-  testWidgets('yaş alınca çıkan tek olay', (WidgetTester tester) async {
-    await pumpPhone(tester);
-    await tester.tap(find.text('Rastgele bir hayat'));
-    await tester.pumpAndSettle();
-
-    // Olay çıkana kadar yaş al.
-    int guard = 0;
-    while (!controller.state!.hasPendingEvent && guard++ < 30) {
-      await tester.tap(find.text('Yaş Al'));
-      await tester.pumpAndSettle();
+  /// Belirli bir bağdan hayattaki ilk kişi.
+  Person? personWith(RelationType relation) {
+    for (final Person p in controller.state!.people) {
+      if (p.isAlive && p.relation == relation) return p;
     }
-    expect(controller.state!.hasPendingEvent, isTrue);
+    return null;
+  }
 
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/06_olay.png'),
-    );
-  }, skip: !enabled);
-
-  testWidgets('kişi detayı ve etkileşim sonucu', (WidgetTester tester) async {
-    await pumpPhone(tester);
-    await tester.tap(find.text('Rastgele bir hayat'));
-    await tester.pumpAndSettle();
-
-    // Etkileşimlerin açıldığı bir yaşa gel; yoldaki olayları yanıtla.
-    await ageTo(tester, controller, 8);
-
-    await tester.tap(find.byIcon(Icons.groups_outlined));
-    await tester.pumpAndSettle();
-    final Person anne = controller.state!.people
-        .firstWhere((Person p) => p.relation == RelationType.anne);
-    await tester.tap(find.text(anne.fullName).first);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Vakit Geçir'));
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/05_etkilesim.png'),
-    );
-  }, skip: !enabled);
-
-  testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',
-      (WidgetTester tester) async {
-    await pumpPhone(tester);
-    await tester.tap(find.text('Rastgele bir hayat'));
-    await tester.pumpAndSettle();
-
-    Person? partner() {
-      for (final Person p in controller.state!.people) {
-        if (p.relation == RelationType.sevgili) return p;
-      }
-      return null;
-    }
-
+  /// Hedefe ulaşana kadar tercih edilen seçeneklerle ilerler.
+  Future<void> advanceUntil(
+    WidgetTester tester,
+    bool Function() done, {
+    required List<String> prefer,
+    int maxAges = 45,
+  }) async {
     int guard = 0;
-    while (partner() == null && guard++ < 60) {
+    while (!done() && guard++ < maxAges) {
       while (controller.state!.hasPendingEvent) {
         final ActiveEvent event = controller.state!.pendingEvent!;
         final EventChoice choice = event.choices.firstWhere(
-          (EventChoice c) => <String>['selam', 'teklif'].contains(c.id),
+          (EventChoice c) => prefer.contains(c.id),
           orElse: () => event.choices.first,
         );
         await tester.tap(find.text(choice.label));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Devam'));
         await tester.pumpAndSettle();
-        if (partner() != null) break;
+        if (done()) return;
       }
-      if (partner() != null) break;
-      await tester.tap(find.text('Yaş Al'));
+      if (done()) return;
+      await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
     }
-    expect(partner(), isNotNull);
+  }
 
-    final String adSoyad = partner()!.fullName;
-    await tester.tap(find.byIcon(Icons.groups_outlined));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text(adSoyad),
-      250,
-      scrollable: find.byType(Scrollable).first,
+  testWidgets('başlangıç ekranı', (WidgetTester tester) async {
+    await pumpPhone(tester);
+    await shot(tester, '01_baslangic.png');
+  }, skip: !enabled);
+
+  testWidgets('ana ekran: üst özet, günlük, alt menü ve Yaş Al',
+      (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 9);
+    await shot(tester, '02_hayat.png');
+  }, skip: !enabled);
+
+  testWidgets('İlişkiler: anne-baba üstte, alt menüler', (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 9);
+    await openTab(tester, 'iliskiler');
+    await shot(tester, '03_iliskiler.png');
+  }, skip: !enabled);
+
+  testWidgets('Varlıklar: cüzdan ve sahip olunanlar', (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 9);
+    await openTab(tester, 'varliklar');
+    await shot(tester, '04_varliklar.png');
+  }, skip: !enabled);
+
+  testWidgets('Okul: kademe paneli ve okul arkadaşları',
+      (WidgetTester tester) async {
+    await startLife(tester);
+    await advanceUntil(
+      tester,
+      () => personWith(RelationType.arkadas) != null,
+      prefer: <String>['tanis'],
     );
+    await openTab(tester, 'okul_meslek');
+    await shot(tester, '05_okul.png');
+  }, skip: !enabled);
+
+  testWidgets('Aktiviteler: iç içe menü', (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 9);
+    await openTab(tester, 'aktiviteler');
+    await shot(tester, '06_aktiviteler.png');
+  }, skip: !enabled);
+
+  testWidgets('Yaş alınca çıkan tek olay', (WidgetTester tester) async {
+    await startLife(tester);
+    int guard = 0;
+    while (!controller.state!.hasPendingEvent && guard++ < 30) {
+      await tester.tap(find.byKey(const Key('age_up_button')));
+      await tester.pumpAndSettle();
+    }
+    expect(controller.state!.hasPendingEvent, isTrue);
+    await shot(tester, '07_olay.png');
+  }, skip: !enabled);
+
+  testWidgets('kişi detayı ve etkileşim sonucu', (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 9);
+    await openTab(tester, 'iliskiler');
+
+    final Person anne = personWith(RelationType.anne)!;
+    await tester.tap(find.text(anne.fullName));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(adSoyad));
+    await tester.tap(find.text('Vakit Geçir'));
+    await tester.pumpAndSettle();
+    await shot(tester, '08_etkilesim.png');
+  }, skip: !enabled);
+
+  testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',
+      (WidgetTester tester) async {
+    await startLife(tester);
+    await advanceUntil(
+      tester,
+      () => personWith(RelationType.sevgili) != null,
+      prefer: <String>['selam', 'teklif'],
+      maxAges: 60,
+    );
+    final Person? partner = personWith(RelationType.sevgili);
+    expect(partner, isNotNull);
+
+    await openTab(tester, 'iliskiler');
+    await tester.tap(find.text('Romantik bağlar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(partner!.fullName));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ayrıl'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Ayrıl'));
     await tester.pumpAndSettle();
 
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/07_eski_sevgili.png'),
-    );
-  }, skip: !enabled);
-
-  testWidgets('okulda tanışılan arkadaş Aile listesinde', (WidgetTester tester) async {
-    await pumpPhone(tester);
-    await tester.tap(find.text('Rastgele bir hayat'));
-    await tester.pumpAndSettle();
-
-    Person? friend() {
-      for (final Person p in controller.state!.people) {
-        if (p.relation == RelationType.arkadas) return p;
-      }
-      return null;
-    }
-
-    // Okulda arkadaş edinilene kadar tanışma seçeneğini tercih ederek ilerle.
-    int guard = 0;
-    while (friend() == null && guard++ < 40) {
-      while (controller.state!.hasPendingEvent) {
-        final ActiveEvent event = controller.state!.pendingEvent!;
-        final EventChoice choice = event.choices.firstWhere(
-          (EventChoice c) => c.id == 'tanis',
-          orElse: () => event.choices.first,
-        );
-        await tester.tap(find.text(choice.label));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Devam'));
-        await tester.pumpAndSettle();
-        if (friend() != null) break;
-      }
-      if (friend() != null) break;
-      await tester.tap(find.text('Yaş Al'));
-      await tester.pumpAndSettle();
-    }
-    expect(friend(), isNotNull);
-
-    await tester.tap(find.byIcon(Icons.groups_outlined));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text(friend()!.fullName),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-
-    await expectLater(
-      find.byType(BirOmurApp),
-      matchesGoldenFile('goldens/08_okul_arkadasi.png'),
-    );
+    await shot(tester, '09_eski_sevgili.png');
   }, skip: !enabled);
 }

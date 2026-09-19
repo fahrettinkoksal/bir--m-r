@@ -1,0 +1,162 @@
+import 'package:flutter/material.dart';
+
+import '../../../domain/models/game_state.dart';
+import '../../../domain/models/person.dart';
+import '../../../domain/models/relation.dart';
+import '../../../state/game_scope.dart';
+import '../../widgets/person_card.dart';
+import '../../widgets/person_detail_sheet.dart';
+import '../../widgets/section_scaffold.dart';
+
+/// İlişkiler ana menüsü (NAV-001).
+///
+/// Ana ekranda **anne ve baba en üstte** durur; akrabalar, arkadaşlar ve
+/// romantik bağlar alt menülere ayrılır. Uzun tek liste yerine iç içe menü
+/// tercih edilmiştir. Veri yapısı değişmez: kişiler aynı kalıcı kimlikle,
+/// aynı bağ türleriyle okunur.
+enum RelationshipSubPage { akrabalar, arkadaslar, romantik }
+
+class RelationshipsScreen extends StatefulWidget {
+  const RelationshipsScreen({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  State<RelationshipsScreen> createState() => _RelationshipsScreenState();
+}
+
+class _RelationshipsScreenState extends State<RelationshipsScreen> {
+  RelationshipSubPage? _subPage;
+
+  List<Person> _akrabalar(GameState state) => state.people
+      .where((Person p) =>
+          p.relation == RelationType.kardes ||
+          p.relation.group == RelationGroup.genis)
+      .toList(growable: false)
+    ..sort((Person a, Person b) => b.age.compareTo(a.age));
+
+  List<Person> _arkadaslar(GameState state) => state.people
+      .where((Person p) => p.relation == RelationType.arkadas)
+      .toList(growable: false);
+
+  List<Person> _romantikler(GameState state) =>
+      state.byGroup(RelationGroup.romantik);
+
+  Person? _byRelation(GameState state, RelationType relation) {
+    for (final Person p in state.people) {
+      if (p.relation == relation) return p;
+    }
+    return null;
+  }
+
+  void _openPerson(String id) =>
+      PersonDetailSheet.show(context, personId: id);
+
+  @override
+  Widget build(BuildContext context) {
+    final GameState state = GameScope.of(context).state!;
+    final int playerAge = state.player.age;
+
+    if (_subPage != null) {
+      final List<Person> kisiler = switch (_subPage!) {
+        RelationshipSubPage.akrabalar => _akrabalar(state),
+        RelationshipSubPage.arkadaslar => _arkadaslar(state),
+        RelationshipSubPage.romantik => _romantikler(state),
+      };
+      final String baslik = switch (_subPage!) {
+        RelationshipSubPage.akrabalar => 'Akrabalar',
+        RelationshipSubPage.arkadaslar => 'Arkadaşlar',
+        RelationshipSubPage.romantik => 'Romantik bağlar',
+      };
+      final String altBaslik = switch (_subPage!) {
+        RelationshipSubPage.akrabalar =>
+          'Akraba olmak aynı evde yaşamayı gerektirmez.',
+        RelationshipSubPage.arkadaslar =>
+          'Okulda ve hayatta tanıştığın kişiler; akraba değildir.',
+        RelationshipSubPage.romantik =>
+          'İlişki geçmişi; akrabalık ve hane değildir.',
+      };
+
+      return SectionScaffold(
+        title: baslik,
+        subtitle: altBaslik,
+        backLabel: 'İlişkiler',
+        onBack: () => setState(() => _subPage = null),
+        children: <Widget>[
+          for (final Person person in kisiler) ...<Widget>[
+            PersonCard(
+              person: person,
+              playerAge: playerAge,
+              onTap: () => _openPerson(person.id),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ],
+      );
+    }
+
+    final Person? anne = _byRelation(state, RelationType.anne);
+    final Person? baba = _byRelation(state, RelationType.baba);
+    final int akrabaSayisi = _akrabalar(state).length;
+    final int arkadasSayisi = _arkadaslar(state).length;
+    final int romantikSayisi = _romantikler(state).length;
+
+    return SectionScaffold(
+      title: 'İlişkiler',
+      onBack: widget.onBack,
+      children: <Widget>[
+        // Anne ve baba en üstte (NAV-001).
+        for (final Person? ebeveyn in <Person?>[anne, baba])
+          if (ebeveyn != null) ...<Widget>[
+            PersonCard(
+              person: ebeveyn,
+              playerAge: playerAge,
+              onTap: () => _openPerson(ebeveyn.id),
+            ),
+            const SizedBox(height: 10),
+          ],
+        const SizedBox(height: 8),
+        if (akrabaSayisi > 0) ...<Widget>[
+          MenuRow(
+            title: 'Akrabalar',
+            subtitle: 'Kardeşler, büyükler, teyze-amca',
+            icon: Icons.diversity_3_outlined,
+            trailingText: '$akrabaSayisi',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.akrabalar),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (arkadasSayisi > 0) ...<Widget>[
+          MenuRow(
+            title: 'Arkadaşlar',
+            subtitle: 'Okul ve hayat arkadaşların',
+            icon: Icons.handshake_outlined,
+            trailingText: '$arkadasSayisi',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.arkadaslar),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (romantikSayisi > 0) ...<Widget>[
+          MenuRow(
+            title: 'Romantik bağlar',
+            subtitle: 'Sevgili ve eski sevgili',
+            icon: Icons.favorite_outline,
+            trailingText: '$romantikSayisi',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.romantik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (state.pets.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 2),
+          InfoPanel(
+            icon: Icons.pets_outlined,
+            text: 'Evcil hayvanların Varlıklar bölümünde listeleniyor.',
+          ),
+        ],
+      ],
+    );
+  }
+}

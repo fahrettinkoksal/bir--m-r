@@ -23,11 +23,11 @@ class Stats {
 
   /// Ekranda sabit sırayla gösterilecek değer listesi.
   List<StatEntry> get entries => <StatEntry>[
-        StatEntry('Dış görünüş', appearance),
-        StatEntry('Mutluluk', happiness),
-        StatEntry('Sağlık', health),
-        StatEntry('Zekâ', intelligence),
-        StatEntry('Karizma', charisma),
+        StatEntry('Dış görünüş', appearance, short: 'Görünüş'),
+        StatEntry('Mutluluk', happiness, short: 'Mutluluk'),
+        StatEntry('Sağlık', health, short: 'Sağlık'),
+        StatEntry('Zekâ', intelligence, short: 'Zekâ'),
+        StatEntry('Karizma', charisma, short: 'Karizma'),
       ];
 
   Stats copyWith({
@@ -51,8 +51,12 @@ class Stats {
 
 @immutable
 class StatEntry {
-  const StatEntry(this.label, this.value);
+  const StatEntry(this.label, this.value, {String? short})
+      : short = short ?? label;
 
   final String label;
+
+  /// Dar alanlarda kullanılan kısa etiket.
+  final String short;
   final int value;
 }

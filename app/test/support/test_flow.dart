@@ -1,5 +1,6 @@
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Testler için ortak akış yardımcıları.
@@ -43,7 +44,7 @@ Future<void> ageTo(
   while (controller.state!.player.age < targetAge) {
     if (guard++ > 200) fail('Yaş ilerlemiyor.');
     await answerPendingEvents(tester, controller, preferChoiceId: preferChoiceId);
-    await tester.tap(find.text('Yaş Al'));
+    await tester.tap(find.byKey(const Key('age_up_button')));
     await tester.pumpAndSettle();
   }
   await answerPendingEvents(tester, controller, preferChoiceId: preferChoiceId);
