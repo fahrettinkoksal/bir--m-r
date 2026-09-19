@@ -1,8 +1,9 @@
-# Bir Ömür — prototip uygulaması (Aşama 1-4)
+# Bir Ömür — prototip uygulaması (Aşama 1-4 + okul paketi)
 
 Flutter ile Android öncelikli geliştirilen ilk prototip.
 Kapsam `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2, 3 ve 4** ile
-sınırlıdır.
+**temel okul sistemi + küçük okul olay paketi**dir
+(`docs/APPROVED_SCOPE_AND_EVENT_STRATEGY.md`, GEN-001).
 
 ## Gereksinimler
 
@@ -46,7 +47,8 @@ lib/
   data/                    isim, şehir, meslek havuzları
   domain/models/           Person, PlayerCharacter, Stats, GameState ...
   domain/generation/       hayat üretimi (LifeGenerator) ve yaş alma (LifeProgression)
-  domain/interaction/      aile etkileşimleri, azalan etki, doğal ret, ilişki
+  domain/interaction/      aile etkileşimleri, azalan etki, doğal ret,
+                           romantik ilişki, arkadaşlık
   domain/events/           olay motoru: uygunluk, seçim, etki ve hafıza
   state/                   GameController + GameScope
   ui/theme/                Bir Ömür teması (modern + ölçülü nostaljik)
@@ -117,12 +119,29 @@ Durakta tanışma → çıkma teklifi → **sevgili** → ayrılık → **eski s
   etkileşimler kapalıdır ve gerekçesi ekranda yazılıdır.
 - Hikâye her hayatta zorunlu değildir; uygun yaş ve koşulda ortaya çıkar.
 
+## Okul (temel sistem + küçük olay paketi)
+
+- **Öğrencilik yaştan türetilmez.** `EducationState` oyun verisinde tutulur:
+  kayıtlı mı, kaçıncı sınıf, hangi yaşta başladı, bitti mi. Okula başlamamış
+  veya okulu bitirmiş karaktere okul olayı çıkmaz.
+- Basit akış: 6 yaşında 1. sınıf → her yaş bir sınıf → 4+4+4 kademe
+  (ilkokul / ortaokul / lise) → 12. sınıftan sonra okul biter. **Sınav, not,
+  diploma, sınıf tekrarı ve okulu bırakma yoktur.**
+- Okulda tanışılan arkadaş **kalıcı kimlikli gerçek bir kişi kaydıdır**;
+  Aile bölümünde "Arkadaşlar" başlığı altında görünür, akraba sayılmaz ve
+  otomatik olarak haneye yerleştirilmez. Sonraki olaylar aynı kişiyi kullanır.
+- Olay paketi (5 olay): sıra arkadaşıyla tanışma, teneffüs oyun daveti,
+  arkadaşın ödev yardımı isteği, öğretmenin sorusu ve **yardımın karşılığı**.
+  Sonuncusu yalnızca daha önce yardım etmiş oyuncuya çıkar — geçmiş seçim
+  ileride gerçekten hatırlanır.
+- Olaylar `minGrade` / `maxGrade` ile sınıfa da bağlanabilir.
+
 ## Geçici prototip değerleri
 
 Kodda `prototypeOnly` yorumuyla işaretlenmiş sayısal ağırlıklar (aile üretim
 olasılıkları, başlangıç değer aralıkları, çalışma durumu dağılımları, azalma
 eğrisi, ret olasılığı, etkileşimlerin açıldığı asgari yaş, olay ağırlıkları,
 ek olay eşiği, sitem için gereken yaş farkı, romantik olayların yaş aralıkları
-ve partnerin cinsiyetinin oyuncunun karşıtı seçilmesi) yalnızca prototipin
-çalışabilmesi içindir. **Onaylanmış oyun dengesi değildir** ve
+ve partnerin cinsiyetinin oyuncunun karşıtı seçilmesi, okula başlama yaşı ve
+sınıf akışı) yalnızca prototipin çalışabilmesi içindir. **Onaylanmış oyun dengesi değildir** ve
 `DECISIONS.md` içine kural olarak yazılmamıştır.

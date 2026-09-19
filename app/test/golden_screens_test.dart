@@ -197,4 +197,52 @@ void main() {
       matchesGoldenFile('goldens/07_eski_sevgili.png'),
     );
   }, skip: !enabled);
+
+  testWidgets('okulda tanışılan arkadaş Aile listesinde', (WidgetTester tester) async {
+    await pumpPhone(tester);
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+
+    Person? friend() {
+      for (final Person p in controller.state!.people) {
+        if (p.relation == RelationType.arkadas) return p;
+      }
+      return null;
+    }
+
+    // Okulda arkadaş edinilene kadar tanışma seçeneğini tercih ederek ilerle.
+    int guard = 0;
+    while (friend() == null && guard++ < 40) {
+      while (controller.state!.hasPendingEvent) {
+        final ActiveEvent event = controller.state!.pendingEvent!;
+        final EventChoice choice = event.choices.firstWhere(
+          (EventChoice c) => c.id == 'tanis',
+          orElse: () => event.choices.first,
+        );
+        await tester.tap(find.text(choice.label));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Devam'));
+        await tester.pumpAndSettle();
+        if (friend() != null) break;
+      }
+      if (friend() != null) break;
+      await tester.tap(find.text('Yaş Al'));
+      await tester.pumpAndSettle();
+    }
+    expect(friend(), isNotNull);
+
+    await tester.tap(find.byIcon(Icons.groups_outlined));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(friend()!.fullName),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(BirOmurApp),
+      matchesGoldenFile('goldens/08_okul_arkadasi.png'),
+    );
+  }, skip: !enabled);
 }

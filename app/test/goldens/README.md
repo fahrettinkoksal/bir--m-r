@@ -1,4 +1,4 @@
-# Prototip ekran görüntüleri (Aşama 1-4)
+# Prototip ekran görüntüleri (Aşama 1-4 + okul paketi)
 
 Bu görüntüler `flutter test --update-goldens` ile **gerçek widget ağacından**
 üretilmiştir. Yeniden üretmek için:
@@ -38,3 +38,6 @@ BIR_OMUR_SCREENSHOTS=1 flutter test --update-goldens test/golden_screens_test.da
 
 ## 07 — Ayrılıktan sonra aynı kişi eski sevgili olarak kalıyor
 ![Eski sevgili](07_eski_sevgili.png)
+
+## 08 — Okulda tanışılan arkadaş, Aile listesinde ayrı bölümde
+![Okul arkadaşı](08_okul_arkadasi.png)

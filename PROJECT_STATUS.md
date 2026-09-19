@@ -58,6 +58,21 @@ Uzun süre temas kurulmayan **hane** üyesi sitem edebiliyor. Ölçü oyun içi:
 `flutter analyze` temiz; `flutter test` ile **94 test geçti** (aile üretim tutarlılığı, yaş alma, aile etkileşimi/azalan etki/ret, olay uygunluğu/hafıza/tempo, sevgili→ayrılık kimlik korunumu, arayüz gezinmesi ve tam ilişki akışı). Ekran görüntüleri `app/test/goldens/` altında üretildi.
 **Doğrulanamayan:** Android APK derlemesi ve gerçek cihaz/emülatör denemesi — bu ortamda Android SDK indirilemedi (ağ politikası `dl.google.com` erişimini engelliyor). APK derlemesi Faho'nun ortamında denenmelidir.
 
+## Okul paketi — yapıldı (dal: `claude/okul-sistemi-v1`, kod: `app/lib/domain/models/education.dart`, `app/lib/domain/interaction/friendship.dart`)
+GEN-001'deki "küçük, oynanabilir, test edilebilir paket" yaklaşımıyla yapıldı. PR #1'den kod kaybı yok; o dalın üzerine kuruldu.
+
+- **Eğitim durumu oyun verisinde tutuluyor**; öğrencilik artık yaştan türetilmiyor. Okula başlamamış veya okulu bitirmiş karaktere okul olayı çıkmıyor.
+- Basit akış: 6 yaşında 1. sınıf, her yaş bir sınıf, ilkokul/ortaokul/lise kademeleri, 12. sınıftan sonra okul bitiyor. Anlamlı geçişler hayat günlüğüne yazılıyor. **Sınav, not, diploma, sınıf tekrarı, okulu bırakma yok.**
+- Okulda tanışılan arkadaş **kalıcı kimlikli gerçek bir kişi**; Aile bölümünde "Arkadaşlar" başlığında görünüyor, akraba sayılmıyor, otomatik haneye yerleşmiyor. Sonraki olaylar ve ileride sosyal medya aynı kaydı kullanabilir.
+- Beş özgün okul olayı: sıra arkadaşıyla tanışma, teneffüs oyun daveti, ödev yardımı isteği, öğretmenin sorusu, yardımın karşılığı. Sonuncusu **yalnızca daha önce yardım etmiş** oyuncuya çıkıyor; yardım etmemek o devamı açmıyor ve ilişkiyi zayıflatıyor.
+- Aile, romantik ilişki ve Yaş Al sistemleri bozulmadı; testlerle doğrulandı.
+
+### Çalıştırılan doğrulamalar (okul paketi)
+`flutter analyze` temiz; `flutter test` ile **119 test geçti** (5 atlandı: ekran görüntüsü üreteci). Okul paketi için 19 yeni test: eğitim durumunun veride tutulması, kayıt/ilerleme/bitiş, okul olaylarının uygunluğu, arkadaşın kimlik sürekliliği ve seçimlerin sonraki olayda hatırlanması.
+
+### Okul paketinde karar bekleyenler
+`docs/DESIGN_REVIEW_QUEUE.md` → **Q-014** (okula başlama yaşı, kademe akışı, okulu bırakma), **Q-015** (arkadaşlar arayüzde nerede görünsün), **Q-016** (arkadaşlarla etkileşimler aile kurallarına mı tabi), **Q-017** (arkadaş sayısı, arkadaşlığın zayıflaması, olumsuz seçimlerin devamı).
+
 ## Şimdi yapılacak iş
 Aşama 4 incelendikten sonra **Aşama 5** (baştan sona akışın gerçek uygulamada denenmesi, teslim ve durum kaydı) yapılacak. Bu ortamda Android derlemesi mümkün olmadığı için baştan sona deneme şimdilik otomatik testler ve widget akışlarıyla yapılmıştır. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
 
