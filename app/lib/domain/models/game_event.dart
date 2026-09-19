@@ -30,6 +30,8 @@ class EventRequirement {
     this.forbiddenFlags = const <String>{},
     this.requiredPossessions = const <String>{},
     this.requiresSchoolStudent = false,
+    this.minGrade,
+    this.maxGrade,
     this.requiresNeglectedRelative = false,
   });
 
@@ -52,8 +54,12 @@ class EventRequirement {
   /// Sahip olunması gereken varlıklar; olmayan araç için olay çıkmaz.
   final Set<String> requiredPossessions;
 
-  /// Okul çağında olmayı gerektirir.
+  /// Okula devam ediyor olmayı gerektirir (yaş değil, eğitim durumu).
   final bool requiresSchoolStudent;
+
+  /// Sınıf aralığı (1-12). Verilirse oyuncunun o sınıfta olması gerekir.
+  final int? minGrade;
+  final int? maxGrade;
 
   /// Uzun süre oyun içinde temas kurulmamış bir yakın gerektirir (D-025).
   final bool requiresNeglectedRelative;
@@ -77,6 +83,7 @@ class EventChoice {
     this.addPossessions = const <String>{},
     this.startsRomance = false,
     this.endsRomance = false,
+    this.startsSchoolFriendship = false,
   });
 
   final String id;
@@ -108,6 +115,10 @@ class EventChoice {
   /// Bu seçim mevcut ilişkiyi bitirir. Kişi **silinmez**; aynı kimlikle
   /// eski sevgili statüsüne geçer.
   final bool endsRomance;
+
+  /// Bu seçim okulda bir arkadaşlık başlatır: kalıcı kimlikli bir kişi
+  /// kaydı oluşturulur ve sonraki olaylarda aynı kişi kullanılır.
+  final bool startsSchoolFriendship;
 }
 
 /// Olay tanımı. Havuz modülerdir; yeni olay eklemek listeye kayıt eklemektir.

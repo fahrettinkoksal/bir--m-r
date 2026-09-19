@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'education.dart';
 import 'game_event.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
@@ -29,6 +30,7 @@ class GameState {
     this.pendingEvent,
     this.progressSinceLastEvent = 0,
     this.extraEventsThisAge = 0,
+    this.education = const EducationState.notStarted(),
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -77,11 +79,11 @@ class GameState {
   /// İçinde bulunulan yaşta açılış olayından **sonra** çıkan ek olay sayısı.
   final int extraEventsThisAge;
 
-  bool get hasPendingEvent => pendingEvent != null;
+  /// Oyuncunun eğitim durumu. Öğrencilik yaştan türetilmez (bkz.
+  /// [EducationState]); olay uygunluğu bu veriye bakar.
+  final EducationState education;
 
-  /// Okul çağı. Tam eğitim sistemi henüz tasarlanmadı; bu yalnızca olay
-  /// uygunluğu için kullanılan geçici bir ölçüttür.
-  bool get isSchoolAgeStudent => player.age >= 6 && player.age <= 17;
+  bool get hasPendingEvent => pendingEvent != null;
 
   List<Person> get livingPeople =>
       people.where((Person p) => p.isAlive).toList(growable: false);
@@ -116,6 +118,7 @@ class GameState {
     Object? pendingEvent = _unsetEvent,
     int? progressSinceLastEvent,
     int? extraEventsThisAge,
+    EducationState? education,
   }) {
     return GameState(
       seed: seed,
@@ -135,6 +138,7 @@ class GameState {
       progressSinceLastEvent:
           progressSinceLastEvent ?? this.progressSinceLastEvent,
       extraEventsThisAge: extraEventsThisAge ?? this.extraEventsThisAge,
+      education: education ?? this.education,
     );
   }
 }

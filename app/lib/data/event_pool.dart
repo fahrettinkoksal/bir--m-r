@@ -16,6 +16,13 @@ abstract final class StoryFlags {
   static const String universitede = 'universitede';
   static const String calismaHayati = 'calisma_hayati';
 
+  /// Okul hikâyesi izleri.
+  static const String okuldaArkadasEdindi = 'okulda_arkadas_edindi';
+  static const String okuldaCekingen = 'okulda_cekingen';
+  static const String arkadasaYardimEtti = 'arkadasa_yardim_etti';
+  static const String arkadasaYardimEtmedi = 'arkadasa_yardim_etmedi';
+  static const String dersteSozAldi = 'derste_soz_aldi';
+
   /// Romantik hikâye izleri (D-030).
   static const String romantikIlgi = 'romantik_ilgi';
   static const String romantikIliskide = 'romantik_iliskide';
@@ -413,6 +420,181 @@ const List<GameEvent> kEventPool = <GameEvent>[
       ),
     ],
   ),
+  // --- Okul paketi -------------------------------------------------------
+  // Olaylar yaşa değil **eğitim durumuna** bakar: okula başlamamış veya
+  // okulu bitirmiş karaktere okul olayı çıkmaz.
+  GameEvent(
+    id: 'okul_sira_arkadasi',
+    category: EventCategory.okul,
+    text: 'Yan sıradaki çocuk silgisini ikiye bölmüş, yarısını sana '
+        'uzatıyor. "Benimkini kaybedersem seninkini isterim ama" diyor.',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      minGrade: 1,
+      maxGrade: 4,
+      forbiddenFlags: <String>{
+        StoryFlags.okuldaArkadasEdindi,
+        StoryFlags.okuldaCekingen,
+      },
+    ),
+    weight: 6,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'tanis',
+        label: 'Al ve adını sor',
+        resultText: 'Adı {kisi}. O gün teneffüste de yan yana oturdunuz; '
+            'ertesi gün sırayı kimse size sormadan ayırdınız.',
+        happiness: 4,
+        charisma: 2,
+        bond: 8,
+        addFlags: <String>{StoryFlags.okuldaArkadasEdindi},
+        startsSchoolFriendship: true,
+      ),
+      EventChoice(
+        id: 'cekin',
+        label: '"Gerek yok" de',
+        resultText: 'Silgiyi almadın. Çocuk yarısını sıranın kenarına '
+            'bıraktı, sen de almadın; ikiniz de bir şey demediniz.',
+        happiness: -2,
+        addFlags: <String>{StoryFlags.okuldaCekingen},
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'teneffus_oyun_daveti',
+    category: EventCategory.okul,
+    text: 'Zil çaldı, {kisi} kapıda seni bekliyor: "Bahçede yer tuttuk, '
+        'sensiz başlamayız."',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      livingRelations: <RelationType>{RelationType.arkadas},
+    ),
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'katil',
+        label: 'Çantayı bırak, koş',
+        resultText: 'Zil çalana kadar bahçedeydiniz. Dizin sıyrıldı, '
+            'kimse fark etmedi; {kisi} hâlâ gülüyordu.',
+        happiness: 5,
+        health: 1,
+        charisma: 1,
+        bond: 5,
+      ),
+      EventChoice(
+        id: 'calis',
+        label: 'Sırada kal, derse bak',
+        resultText: 'Teneffüsü kitabın başında geçirdin. Konuyu anladın '
+            'ama bahçeden gelen sesler bir yerini tırmaladı.',
+        intelligence: 3,
+        happiness: -2,
+        bond: -2,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'arkadas_odev_yardimi',
+    category: EventCategory.okul,
+    text: '{kisi} defterini önüne koydu: "Bunu hiç anlamadım, yarın '
+        'kontrol var. Bir bakar mısın?"',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      minGrade: 2,
+      maxGrade: 8,
+      livingRelations: <RelationType>{RelationType.arkadas},
+      forbiddenFlags: <String>{
+        StoryFlags.arkadasaYardimEtti,
+        StoryFlags.arkadasaYardimEtmedi,
+      },
+    ),
+    weight: 5,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'yardim',
+        label: 'Otur, birlikte çöz',
+        resultText: 'Teneffüsü verdin ama {kisi} sonunda kendi çözdü. '
+            '"Sen anlatınca oluyor" dedi.',
+        intelligence: 2,
+        charisma: 1,
+        bond: 9,
+        addFlags: <String>{StoryFlags.arkadasaYardimEtti},
+      ),
+      EventChoice(
+        id: 'reddet',
+        label: '"Benim de işim var" de',
+        resultText: '{kisi} defterini sessizce kapattı. Bir şey demedi, '
+            'ertesi gün de sormadı.',
+        happiness: -2,
+        bond: -7,
+        addFlags: <String>{StoryFlags.arkadasaYardimEtmedi},
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'ogretmen_sorusu',
+    category: EventCategory.okul,
+    text: 'Öğretmen tahtadaki soruyu gösterip sınıfa baktı: "Kim '
+        'deneyecek?" Kimse parmak kaldırmıyor, cevabı biliyorsun.',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      minGrade: 2,
+      forbiddenFlags: <String>{StoryFlags.dersteSozAldi},
+    ),
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'kaldir',
+        label: 'Parmak kaldır',
+        resultText: 'Tahtaya kalktın, elin titredi ama soruyu çözdün. '
+            'Yerine otururken sınıf hâlâ sana bakıyordu.',
+        intelligence: 3,
+        charisma: 3,
+        happiness: 2,
+        addFlags: <String>{StoryFlags.dersteSozAldi},
+      ),
+      EventChoice(
+        id: 'sessiz',
+        label: 'Sessiz kal',
+        resultText: 'Başka biri kalktı ve yanlış yaptı. Doğrusu hâlâ '
+            'defterinin kenarında yazılı duruyor.',
+        happiness: -2,
+        intelligence: 1,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'yardimin_karsiligi',
+    category: EventCategory.okul,
+    text: 'Kantinde paran yetmedi. Arkandan {kisi} geldi, bozuklukları '
+        'tezgâha bıraktı: "O gün defterime baktın ya, ödeştik."',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      minGrade: 4,
+      livingRelations: <RelationType>{RelationType.arkadas},
+      requiredFlags: <String>{StoryFlags.arkadasaYardimEtti},
+    ),
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'tesekkur',
+        label: 'Teşekkür et',
+        resultText: 'Bir dahakine senden dediniz. {kisi} ile aranızda '
+            'sayılmayan bir hesap açıldı.',
+        happiness: 5,
+        bond: 6,
+      ),
+      EventChoice(
+        id: 'geri_ver',
+        label: 'Parayı ertesi gün geri ver',
+        resultText: 'Ertesi gün bozuklukları geri verdin. {kisi} aldı ama '
+            '"gerek yoktu" der gibi baktı.',
+        happiness: 2,
+        charisma: 1,
+        bond: 2,
+      ),
+    ],
+  ),
+
   // --- Romantik hikâye: tanışma → sevgili → ayrılık → eski sevgili --------
   GameEvent(
     id: 'ilk_goz_agrisi',

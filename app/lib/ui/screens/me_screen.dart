@@ -37,6 +37,8 @@ class MeScreen extends StatelessWidget {
                 _InfoRow(label: 'Yaş', value: '${state.player.age}'),
                 _InfoRow(label: 'Cinsiyet', value: state.player.gender.label),
                 _InfoRow(label: 'Doğum şehri', value: state.player.birthCity),
+                // Eğitim durumu yaştan türetilmez; gerçek duruma bakar.
+                _InfoRow(label: 'Eğitim', value: state.education.label),
                 _InfoRow(
                   label: 'Hane',
                   value: state.household.isEmpty

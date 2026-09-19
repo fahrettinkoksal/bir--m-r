@@ -70,6 +70,8 @@ class FamilyScreen extends StatelessWidget {
         return null;
       case RelationGroup.genis:
         return 'Akraba olmak aynı evde yaşamayı gerektirmez.';
+      case RelationGroup.arkadaslar:
+        return 'Okulda ve hayatta tanıştığın kişiler; akraba değildir.';
       case RelationGroup.romantik:
         return 'İlişki geçmişi; akrabalık değildir.';
     }

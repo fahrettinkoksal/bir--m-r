@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../data/event_pool.dart';
 import '../generation/random_util.dart';
+import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
 import '../models/game_event.dart';
 import '../models/game_state.dart';
@@ -77,7 +78,15 @@ class EventEngine {
     final int age = state.player.age;
 
     if (age < req.minAge || age > req.maxAge) return false;
-    if (req.requiresSchoolStudent && !state.isSchoolAgeStudent) return false;
+    // Öğrencilik yaştan değil, eğitim durumundan okunur.
+    if (req.requiresSchoolStudent && !state.education.isStudent) return false;
+    final int? grade = state.education.grade;
+    if (req.minGrade != null && (grade == null || grade < req.minGrade!)) {
+      return false;
+    }
+    if (req.maxGrade != null && (grade == null || grade > req.maxGrade!)) {
+      return false;
+    }
     // Kişi gerektiren olay, uygun kişi bulunamadıysa elenir: aksi hâlde
     // metindeki yer tutucular boş kalır ve olmayan kişiyle olay çıkar.
     if (_needsPerson(req) && person == null) return false;
@@ -157,12 +166,19 @@ class EventEngine {
     // etkisi doğru kişiye bağlansın.
     const Romance romance = Romance();
     GameState working = state;
-    String? romanceTargetId;
+    String? newPersonId;
     if (choice.startsRomance) {
       final ({GameState state, Person partner}) started =
           romance.start(working, rng ?? Random());
       working = started.state;
-      romanceTargetId = started.partner.id;
+      newPersonId = started.partner.id;
+    }
+    // Okulda tanışılan arkadaş da kalıcı kimlikli bir kişi olarak eklenir.
+    if (choice.startsSchoolFriendship) {
+      final ({GameState state, Person friend}) started =
+          const Friendship().startSchoolFriend(working, rng ?? Random());
+      working = started.state;
+      newPersonId = started.friend.id;
     }
 
     final Stats stats = working.player.stats.copyWith(
@@ -175,7 +191,7 @@ class EventEngine {
     final PlayerCharacter player = working.player.copyWith(stats: stats);
 
     // Etki, olayın kişisine; ilişki başlatan seçimde yeni partnere işlenir.
-    final String? bondTargetId = romanceTargetId ?? active.personId;
+    final String? bondTargetId = newPersonId ?? active.personId;
     final List<Person> people = bondTargetId == null || choice.bond == 0
         ? working.people
         : working.people

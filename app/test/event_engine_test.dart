@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
@@ -37,7 +38,15 @@ void expectEligible(GameState state, ActiveEvent active) {
   expect(age, lessThanOrEqualTo(req.maxAge), reason: nerede);
 
   if (req.requiresSchoolStudent) {
-    expect(state.isSchoolAgeStudent, isTrue, reason: nerede);
+    expect(state.education.isStudent, isTrue, reason: nerede);
+  }
+  if (req.minGrade != null) {
+    expect(state.education.grade, greaterThanOrEqualTo(req.minGrade!),
+        reason: nerede);
+  }
+  if (req.maxGrade != null) {
+    expect(state.education.grade, lessThanOrEqualTo(req.maxGrade!),
+        reason: nerede);
   }
   for (final String flag in req.requiredFlags) {
     expect(state.storyFlags, contains(flag), reason: nerede);
@@ -185,15 +194,26 @@ void main() {
       expect(engine.openingEvent(ogrenci, Random(1)), isNotNull);
     });
 
-    test('okul çağında olmayan karaktere okul olayı çıkmaz', () {
+    test('okula başlamamış karaktere okul olayı çıkmaz', () {
       final EventEngine engine =
           EventEngine(pool: <GameEvent>[eventById('okul_ilk_gun')]);
       GameState state =
           LifeGenerator.seeded(2).generate(mode: StartMode.tamamenRastgele);
-      // Yaş aralığı uygun ama okul çağı dışı bir durum kurulamaz; bunun
-      // yerine yaş aralığının dışına çıkıldığında olayın elendiğini sınarız.
-      state = state.copyWith(player: state.player.copyWith(age: 20));
+
+      // Yaş uygun ama eğitim durumu 'okula başlamadı': olay çıkmamalı.
+      state = state.copyWith(player: state.player.copyWith(age: 7));
+      expect(state.education.isStudent, isFalse);
       expect(engine.openingEvent(state, Random(1)), isNull);
+
+      // Öğrenci olunca aynı yaşta olay uygun hâle gelir.
+      final GameState ogrenci = state.copyWith(
+        education: const EducationState(
+          enrolled: true,
+          grade: 1,
+          startedAtAge: 6,
+        ),
+      );
+      expect(engine.openingEvent(ogrenci, Random(1)), isNotNull);
     });
 
     test('hayatta olmayan kişi için kişili olay çıkmaz', () {
@@ -240,10 +260,17 @@ void main() {
           ],
         );
 
+    /// Okul olayları eğitim durumuna baktığı için kayıtlı bir öğrenci kurar.
     GameState atAge(int seed, int age) {
       final GameState state =
           LifeGenerator.seeded(seed).generate(mode: StartMode.tamamenRastgele);
-      return state.copyWith(player: state.player.copyWith(age: age));
+      final int grade = (age - 5).clamp(1, 12);
+      return state.copyWith(
+        player: state.player.copyWith(age: age),
+        education: age <= 17
+            ? EducationState(enrolled: true, grade: grade, startedAtAge: 6)
+            : const EducationState.notStarted(),
+      );
     }
 
     test('arkadaşını savunmak ileride farklı bir devam açar', () {
@@ -425,20 +452,17 @@ void main() {
   });
 
   group('Uygun olay bulunamayan yaşlar (Q-005 ölçümü)', () {
-    test('havuzun asgari yaşının altında hiçbir açılış olayı çıkmaz', () {
-      final int enKucukYas = kEventPool
-          .map((GameEvent e) => e.requirement.minAge)
-          .reduce((int a, int b) => a < b ? a : b);
-      expect(enKucukYas, greaterThan(0),
-          reason: 'Havuz 0 yaşından başlamıyor');
-
-      const EventEngine engine = EventEngine();
+    test('ilk yaşlarda uygun aday yok: olay çıkmaz', () {
+      // Havuzdaki en erken olay 5 yaşında; okul olayları ise ancak okula
+      // kayıt olununca uygun hâle gelir. Bu yüzden 1-4 yaş aralığında
+      // hiçbir açılış olayı çıkmaz.
       for (int seed = 0; seed < 40; seed++) {
-        GameState state = LifeGenerator.seeded(seed)
-            .generate(mode: StartMode.tamamenRastgele);
-        for (int age = 0; age < enKucukYas; age++) {
-          state = state.copyWith(player: state.player.copyWith(age: age));
-          expect(engine.openingEvent(state, Random(seed)), isNull,
+        final GameController controller = GameController(random: Random(seed));
+        controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
+        for (int age = 1; age <= 4; age++) {
+          controller.ageUp();
+          expect(controller.state!.player.age, age);
+          expect(controller.state!.hasPendingEvent, isFalse,
               reason: '$age yaşında olay olmamalı');
         }
       }

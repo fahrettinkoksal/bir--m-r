@@ -17,6 +17,7 @@ enum RelationType {
   dayi,
   hala,
   amca,
+  arkadas,
   sevgili,
   eskiSevgili;
 
@@ -38,19 +39,24 @@ enum RelationType {
       case RelationType.hala:
       case RelationType.amca:
         return RelationGroup.genis;
+      case RelationType.arkadas:
+        return RelationGroup.arkadaslar;
       case RelationType.sevgili:
       case RelationType.eskiSevgili:
         return RelationGroup.romantik;
     }
   }
 
-  /// Kan bağı olan akraba mı? Romantik bağlar akrabalık değildir.
-  bool get kanBagi => group != RelationGroup.romantik;
+  /// Kan bağı olan akraba mı? Arkadaşlık ve romantik bağlar akrabalık
+  /// değildir.
+  bool get kanBagi =>
+      group != RelationGroup.romantik && group != RelationGroup.arkadaslar;
 }
 
 enum RelationGroup {
   cekirdek('Çekirdek aile'),
   genis('Geniş aile'),
+  arkadaslar('Arkadaşlar'),
   romantik('İlişkiler');
 
   const RelationGroup(this.title);
@@ -97,6 +103,8 @@ String relationLabel({
       return 'Hala';
     case RelationType.amca:
       return 'Amca';
+    case RelationType.arkadas:
+      return 'Arkadaş';
     case RelationType.sevgili:
       return gender == Gender.kadin ? 'Kız arkadaş' : 'Erkek arkadaş';
     case RelationType.eskiSevgili:
