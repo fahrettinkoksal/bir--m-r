@@ -73,6 +73,23 @@ GEN-001'deki "küçük, oynanabilir, test edilebilir paket" yaklaşımıyla yap�
 ### Okul paketinde karar bekleyenler
 `docs/DESIGN_REVIEW_QUEUE.md` → **Q-014** (okula başlama yaşı, kademe akışı, okulu bırakma), **Q-015** (arkadaşlar arayüzde nerede görünsün), **Q-016** (arkadaşlarla etkileşimler aile kurallarına mı tabi), **Q-017** (arkadaş sayısı, arkadaşlığın zayıflaması, olumsuz seçimlerin devamı).
 
+## Menü + arayüz revizyonu — yapıldı (dal: `claude/arayuz-revizyonu-v1`)
+NAV-001 gezinme kararı uygulandı. Yeni oyun sistemi eklenmedi; aile, yaş alma, ilişkiler ve okul altyapısı korundu.
+
+- **Alt gezinme NAV-001'e göre:** soldan sağa `Okul/Meslek — Varlıklar — [Yaş Al] — İlişkiler — Aktiviteler`. `Yaş Al` sekme değil, ortadaki bağımsız ana eylem düğmesi. Soldaki menü öğrenciyken **Okul**, değilken **Meslek** oluyor.
+- **Ana ekran:** üstte sabit karakter özeti (ad, yaş/evre, şehir, kısa durum, cüzdan, beş değerin okunaklı şeridi), ortada hayat günlüğü, altta sabit menü. Değer şeridine dokununca tam adlarıyla ayrıntı açılıyor; eski sıkışık "Ben" ekranı kaldırıldı.
+- **İlişkiler:** anne ve baba en üstte, altında `Akrabalar`, `Arkadaşlar` ve `Romantik bağlar` alt menüleri (yalnızca kişi varsa görünüyor). Veri yapısı değişmedi.
+- **Aktiviteler:** iç içe menü; gerçekten çalışan tek kategori (birlikte vakit geçirme) gösteriliyor, yazılmamış alanlar için sahte düğme konmadı.
+- **Okul/Meslek:** kademe/sınıf paneli, okul arkadaşları listesi; okul dışı durumda dürüst panel.
+- **Varlıklar:** kişisel cüzdan (aile parasından ayrı), sahip olunan eşyalar ve evcil hayvanlar.
+- **Cüzdan (ECO-001, yalnızca temel):** `PlayerCharacter.wallet` eklendi ve arayüzde gösteriliyor. Kazanma/harcama akışı yazılmadı; bakiye yalnızca olay etkisiyle değişebiliyor.
+
+### Çalıştırılan doğrulamalar (arayüz revizyonu)
+`flutter analyze` temiz; `flutter test` ile **120 test geçti** (6 atlandı: ekran görüntüsü üreteci). Ekran görüntüleri `app/test/goldens/` altında yenilendi.
+
+### Arayüz revizyonunda karar bekleyenler
+`docs/DESIGN_REVIEW_QUEUE.md` → **Q-018** (ana ekrana dönüş davranışı ve üst özet içeriği), **Q-019** (romantik alt menü adı ve kardeşlerin yeri), **Q-020** (Okul/Meslek menüsünün okul öncesi/okul sonrası içeriği), **Q-021** (cüzdan: para birimi, başlangıç bakiyesi, kazanma/harcama), **Q-022** (Aktiviteler kapsamı). Görsel yönün kendisi hâlâ **Q-001**'de açık.
+
 ## Şimdi yapılacak iş
 Aşama 4 incelendikten sonra **Aşama 5** (baştan sona akışın gerçek uygulamada denenmesi, teslim ve durum kaydı) yapılacak. Bu ortamda Android derlemesi mümkün olmadığı için baştan sona deneme şimdilik otomatik testler ve widget akışlarıyla yapılmıştır. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
 

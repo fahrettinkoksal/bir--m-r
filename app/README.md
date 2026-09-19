@@ -52,7 +52,8 @@ lib/
   domain/events/           olay motoru: uygunluk, seçim, etki ve hafıza
   state/                   GameController + GameScope
   ui/theme/                Bir Ömür teması (modern + ölçülü nostaljik)
-  ui/screens/              başlangıç, karakter oluşturma, Hayat / Aile / Ben
+  ui/screens/              başlangıç, karakter oluşturma, ana kabuk
+  ui/screens/sections/     Okul/Meslek, Varlıklar, İlişkiler, Aktiviteler
   ui/widgets/              ortak parçalar
 test/                      üretim, yaş alma ve arayüz testleri
 ```
@@ -119,6 +120,21 @@ Durakta tanışma → çıkma teklifi → **sevgili** → ayrılık → **eski s
   etkileşimler kapalıdır ve gerekçesi ekranda yazılıdır.
 - Hikâye her hayatta zorunlu değildir; uygun yaş ve koşulda ortaya çıkar.
 
+## Gezinme ve ekran düzeni (NAV-001)
+
+- Üstte **sabit karakter özeti**: ad, yaş ve evre, şehir, kısa durum, kişisel
+  cüzdan ve beş değerin okunaklı şeridi (şeride dokununca tam adlarıyla
+  ayrıntı açılır).
+- Ortada **hayat günlüğü / olay akışı** ya da seçilen ana menünün ekranı.
+- Altta sabit çubuk, soldan sağa:
+  **Okul/Meslek — Varlıklar — [Yaş Al] — İlişkiler — Aktiviteler.**
+  `Yaş Al` bir sekme değil, menülerin arasındaki **bağımsız ana eylem**dir.
+- Soldaki menü duruma göre değişir: oyuncu öğrenciyken **Okul**, değilken
+  **Meslek**.
+- Seçili menüye tekrar dokunmak (veya ekrandaki "Hayat" satırı) ana ekrana
+  döndürür.
+- İlişkiler ve Aktiviteler **iç içe menü** mantığıyla çalışır.
+
 ## Okul (temel sistem + küçük olay paketi)
 
 - **Öğrencilik yaştan türetilmez.** `EducationState` oyun verisinde tutulur:
@@ -135,6 +151,14 @@ Durakta tanışma → çıkma teklifi → **sevgili** → ayrılık → **eski s
   Sonuncusu yalnızca daha önce yardım etmiş oyuncuya çıkar — geçmiş seçim
   ileride gerçekten hatırlanır.
 - Olaylar `minGrade` / `maxGrade` ile sınıfa da bağlanabilir.
+
+## Cüzdan (ECO-001 — yalnızca temel)
+
+Oyuncunun **kendi** bakiyesi `PlayerCharacter.wallet` içinde tutulur ve üst
+özette gösterilir. Ailenin ekonomik durumu ayrıdır; aile varlığı oyuncunun
+harcayabileceği para sayılmaz. Bu sürümde kazanma/harcama akışı **yoktur**;
+bakiye yalnızca olay etkileriyle değişebilir. Para birimi, başlangıç bakiyesi
+ve ekonomi kuralları kararlaştırılmadı.
 
 ## Geçici prototip değerleri
 
