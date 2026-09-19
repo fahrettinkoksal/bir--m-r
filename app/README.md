@@ -24,6 +24,9 @@ APK üretmek için:
 flutter build apk --debug
 ```
 
+Telefona kurulabilir hazır APK'yı GitHub Actions üretir. İndirme ve kurulum
+adımları: [`docs/ANDROID_TEST_APK.md`](../docs/ANDROID_TEST_APK.md).
+
 ## Analiz ve testler
 
 ```bash
