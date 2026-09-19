@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/person.dart';
@@ -105,6 +106,13 @@ void main() {
     // Aynı kayıt, yeni statü.
     final Person eski = controller.state!.personById(kimlik)!;
     expect(eski.relation, RelationType.eskiSevgili);
+    // Hikâye izleri de güncellenmeli; yoksa eski sevgili karşılaşma olayının
+    // önkoşulu bu yoldan hiç sağlanmaz.
+    expect(controller.state!.storyFlags, contains(StoryFlags.romantikBitti));
+    expect(
+      controller.state!.storyFlags,
+      isNot(contains(StoryFlags.romantikIliskide)),
+    );
     expect(eski.fullName, adSoyad);
     expect(eski.bond, yakinlik);
     expect(partnerOf(RelationType.sevgili), isNull);

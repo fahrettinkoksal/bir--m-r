@@ -474,7 +474,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         happiness: 8,
         charisma: 2,
         bond: 5,
-        addFlags: <String>{StoryFlags.romantikIliskide},
+        // İlişki izleri Romance içinde yönetilir; burada tekrarlanmaz.
         startsRomance: true,
       ),
       EventChoice(
@@ -510,8 +510,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         resultText: 'Konuşma bitmeden karar verdiniz. {kisi} ile '
             'yollarınız ayrıldı.',
         happiness: -6,
-        removeFlags: <String>{StoryFlags.romantikIliskide},
-        addFlags: <String>{StoryFlags.romantikBitti},
+        // İlişki izleri Romance içinde yönetilir; burada tekrarlanmaz.
         endsRomance: true,
       ),
     ],

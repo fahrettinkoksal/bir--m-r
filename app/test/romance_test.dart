@@ -300,4 +300,101 @@ void main() {
       expect(sonraki.single.relation, RelationType.eskiSevgili);
     });
   });
+
+  group('İki ayrılık yolu aynı hikâye durumunu üretir (regresyon)', () {
+    test('kişi detayından ayrılma da hikâye izlerini günceller', () {
+      final ({GameState state, String partnerId}) once = withPartner(5);
+      expect(once.state.storyFlags, contains(StoryFlags.romantikIliskide));
+
+      final GameState sonra = const Romance().end(once.state, once.partnerId);
+
+      expect(sonra.storyFlags, contains(StoryFlags.romantikBitti));
+      expect(sonra.storyFlags, isNot(contains(StoryFlags.romantikIliskide)));
+      expect(
+        sonra.personById(once.partnerId)!.relation,
+        RelationType.eskiSevgili,
+      );
+    });
+
+    test('düğmeyle ve olayla ayrılmak aynı durumu bırakır', () {
+      // Aynı hayattan iki kopya: biri olay seçeneğiyle, biri düğmeyle ayrılır.
+      final ({GameState state, String partnerId}) once = withPartner(9);
+      final GameState baslangic = once.state.copyWith(
+        player: once.state.player.copyWith(age: 19),
+      );
+
+      final EventEngine engine = romanceEngine();
+      final ActiveEvent? tartisma = engine.openingEvent(baslangic, Random(1));
+      expect(tartisma!.eventId, 'iliski_tartismasi');
+      final GameState olayla = engine.resolve(
+        baslangic.copyWith(pendingEvent: tartisma),
+        'ayril',
+        rng: Random(1),
+      );
+
+      final GameState dugmeyle =
+          const Romance().end(baslangic, once.partnerId);
+
+      // İlişkiye dair durum iki yolda da aynı olmalı.
+      expect(
+        olayla.storyFlags.contains(StoryFlags.romantikBitti),
+        dugmeyle.storyFlags.contains(StoryFlags.romantikBitti),
+      );
+      expect(
+        olayla.storyFlags.contains(StoryFlags.romantikIliskide),
+        dugmeyle.storyFlags.contains(StoryFlags.romantikIliskide),
+      );
+      expect(olayla.storyFlags.contains(StoryFlags.romantikBitti), isTrue);
+      expect(olayla.storyFlags.contains(StoryFlags.romantikIliskide), isFalse);
+      expect(
+        olayla.personById(once.partnerId)!.relation,
+        dugmeyle.personById(once.partnerId)!.relation,
+      );
+      expect(
+        olayla.personById(once.partnerId)!.id,
+        dugmeyle.personById(once.partnerId)!.id,
+      );
+    });
+
+    test('her iki yoldan sonra da eski sevgili karşılaşma olayı açılabilir', () {
+      final EventEngine karsilasmaEngine = EventEngine(
+        pool: <GameEvent>[eventById('eski_sevgili_karsilasma')],
+      );
+      final ({GameState state, String partnerId}) once = withPartner(5);
+      final GameState baslangic = once.state.copyWith(
+        player: once.state.player.copyWith(age: 20),
+      );
+
+      // İlişki sürerken karşılaşma olayı çıkmaz.
+      expect(karsilasmaEngine.openingEvent(baslangic, Random(1)), isNull);
+
+      // Düğmeyle ayrıldıktan sonra çıkar.
+      final GameState dugmeyle =
+          const Romance().end(baslangic, once.partnerId);
+      final ActiveEvent? dugmeSonrasi =
+          karsilasmaEngine.openingEvent(dugmeyle, Random(1));
+      expect(dugmeSonrasi, isNotNull,
+          reason: 'Düğmeyle ayrılma da önkoşulu sağlamalı');
+      expect(dugmeSonrasi!.personId, once.partnerId);
+
+      // Olay seçeneğiyle ayrıldıktan sonra da çıkar.
+      final EventEngine engine = romanceEngine();
+      final ActiveEvent? tartisma = engine.openingEvent(baslangic, Random(1));
+      final GameState olayla = engine.resolve(
+        baslangic.copyWith(pendingEvent: tartisma!),
+        'ayril',
+        rng: Random(1),
+      );
+      final ActiveEvent? olaySonrasi =
+          karsilasmaEngine.openingEvent(olayla, Random(1));
+      expect(olaySonrasi, isNotNull);
+      expect(olaySonrasi!.personId, once.partnerId);
+    });
+
+    test('ilişki başlarken sürüyor izi düğme yolundan bağımsız kurulur', () {
+      final ({GameState state, String partnerId}) once = withPartner(11);
+      expect(once.state.storyFlags, contains(StoryFlags.romantikIliskide));
+      expect(once.state.storyFlags, isNot(contains(StoryFlags.romantikBitti)));
+    });
+  });
 }

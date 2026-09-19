@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../../data/event_pool.dart';
 import '../../data/name_pool.dart';
 import '../generation/random_util.dart';
 import '../models/game_state.dart';
@@ -18,6 +19,12 @@ import '../models/wealth.dart';
 ///
 /// Romantik bağ **akrabalık değildir** ve **hane demek değildir**: oluşturulan
 /// kişi oyuncunun evine yerleştirilmez.
+///
+/// İlişkinin hikâye izleri ([StoryFlags.romantikIliskide],
+/// [StoryFlags.romantikBitti]) **yalnızca burada** yönetilir. Böylece ilişkiyi
+/// olay seçeneğiyle bitirmekle kişi detayındaki düğmeyle bitirmek **aynı**
+/// durumu üretir; izler iki yerde ayrı ayrı güncellenmediği için birbirinden
+/// sapamaz.
 class Romance {
   const Romance();
 
@@ -83,6 +90,7 @@ class Romance {
     return (
       state: state.copyWith(
         people: List<Person>.unmodifiable(<Person>[...state.people, partner]),
+        storyFlags: <String>{...state.storyFlags, StoryFlags.romantikIliskide},
       ),
       partner: partner,
     );
@@ -113,6 +121,14 @@ class Romance {
 
     return state.copyWith(
       people: List<Person>.unmodifiable(people),
+      // Hikâye izleri: ilişki bitti izi eklenir, sürüyor izi kalkar. Eski
+      // sevgiliyle karşılaşma olayının önkoşulu bu ize bağlıdır.
+      storyFlags: <String>{
+        ...state.storyFlags.where(
+          (String flag) => flag != StoryFlags.romantikIliskide,
+        ),
+        StoryFlags.romantikBitti,
+      },
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         LifeLogEntry(

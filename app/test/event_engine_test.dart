@@ -423,4 +423,53 @@ void main() {
       expect(engine.openingEvent(temasli, Random(1)), isNull);
     });
   });
+
+  group('Uygun olay bulunamayan yaşlar (Q-005 ölçümü)', () {
+    test('havuzun asgari yaşının altında hiçbir açılış olayı çıkmaz', () {
+      final int enKucukYas = kEventPool
+          .map((GameEvent e) => e.requirement.minAge)
+          .reduce((int a, int b) => a < b ? a : b);
+      expect(enKucukYas, greaterThan(0),
+          reason: 'Havuz 0 yaşından başlamıyor');
+
+      const EventEngine engine = EventEngine();
+      for (int seed = 0; seed < 40; seed++) {
+        GameState state = LifeGenerator.seeded(seed)
+            .generate(mode: StartMode.tamamenRastgele);
+        for (int age = 0; age < enKucukYas; age++) {
+          state = state.copyWith(player: state.player.copyWith(age: age));
+          expect(engine.openingEvent(state, Random(seed)), isNull,
+              reason: '$age yaşında olay olmamalı');
+        }
+      }
+    });
+
+    test('olaysız yaşlar ölçülebilir ve günlükte yine de iz kalır', () {
+      // Yaş alma her hâlükârda günlüğe yazılır; olay çıkmasa da oyuncu
+      // ilerlemeyi görür. Bu, Q-005'te tartışılan geçici davranıştır.
+      int olaysizYas = 0;
+      int toplamYas = 0;
+      for (int seed = 0; seed < 25; seed++) {
+        final GameController controller = GameController(random: Random(seed));
+        controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
+        for (int i = 0; i < 26; i++) {
+          final int logOnce = controller.state!.log.length;
+          controller.ageUp();
+          toplamYas++;
+          expect(controller.state!.log.length, greaterThan(logOnce),
+              reason: 'Yaş alma her zaman günlüğe yazılmalı');
+          if (!controller.state!.hasPendingEvent) {
+            olaysizYas++;
+          } else {
+            controller.chooseEventOption(
+              controller.state!.pendingEvent!.choices.first.id,
+            );
+          }
+        }
+      }
+      expect(toplamYas, greaterThan(0));
+      // Ölçüm: olaysız yaşlar mevcut havuzda gerçekten oluşuyor.
+      expect(olaysizYas, greaterThan(0));
+    });
+  });
 }
