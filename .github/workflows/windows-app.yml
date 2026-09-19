@@ -21,7 +21,11 @@ concurrency:
 jobs:
   build:
     name: Analiz, test ve Windows sürümü
-    runs-on: windows-latest
+    # windows-latest imajında Visual Studio 2026 (18.x) var; Flutter 3.35.5
+    # bu sürümü tanımadığı için CMake'e kurulu olmayan "Visual Studio 16 2019"
+    # üreticisini veriyor ve derleme "could not find any instance of Visual
+    # Studio" hatasıyla düşüyor. VS 2022 içeren imaja sabitliyoruz.
+    runs-on: windows-2022
     timeout-minutes: 45
 
     defaults:
