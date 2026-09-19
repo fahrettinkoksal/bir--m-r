@@ -17,6 +17,8 @@ enum RelationType {
   dayi,
   hala,
   amca,
+  sinifArkadasi,
+  ogretmen,
   arkadas,
   sevgili,
   eskiSevgili;
@@ -39,6 +41,9 @@ enum RelationType {
       case RelationType.hala:
       case RelationType.amca:
         return RelationGroup.genis;
+      case RelationType.sinifArkadasi:
+      case RelationType.ogretmen:
+        return RelationGroup.okul;
       case RelationType.arkadas:
         return RelationGroup.arkadaslar;
       case RelationType.sevgili:
@@ -47,15 +52,16 @@ enum RelationType {
     }
   }
 
-  /// Kan bağı olan akraba mı? Arkadaşlık ve romantik bağlar akrabalık
-  /// değildir.
+  /// Kan bağı olan akraba mı? Okul tanışıklıkları, arkadaşlık ve romantik
+  /// bağlar akrabalık değildir.
   bool get kanBagi =>
-      group != RelationGroup.romantik && group != RelationGroup.arkadaslar;
+      group == RelationGroup.cekirdek || group == RelationGroup.genis;
 }
 
 enum RelationGroup {
   cekirdek('Çekirdek aile'),
   genis('Geniş aile'),
+  okul('Okul'),
   arkadaslar('Arkadaşlar'),
   romantik('İlişkiler');
 
@@ -103,11 +109,68 @@ String relationLabel({
       return 'Hala';
     case RelationType.amca:
       return 'Amca';
+    case RelationType.sinifArkadasi:
+      return 'Sınıf arkadaşı';
+    case RelationType.ogretmen:
+      return 'Öğretmen';
     case RelationType.arkadas:
       return 'Arkadaş';
     case RelationType.sevgili:
       return gender == Gender.kadin ? 'Kız arkadaş' : 'Erkek arkadaş';
     case RelationType.eskiSevgili:
       return gender == Gender.kadin ? 'Eski kız arkadaş' : 'Eski erkek arkadaş';
+  }
+}
+
+/// Olay ve etkileşim metinlerinde kullanılan **iyelikli** bağ etiketi.
+///
+/// "Deden Kemal eve bisikletle geldi." gibi cümleler için gereklidir; düz
+/// etiket ("Dede (anne tarafı)") cümle içinde kullanılamaz. Dede ve
+/// nineler için anne/baba tarafı ayrımı korunur.
+String relationPossessive({
+  required RelationType relation,
+  required Gender gender,
+  required int personAge,
+  required int playerAge,
+}) {
+  switch (relation) {
+    case RelationType.anne:
+      return 'Annen';
+    case RelationType.baba:
+      return 'Baban';
+    case RelationType.kardes:
+      if (personAge > playerAge) {
+        return gender == Gender.kadin ? 'Ablan' : 'Abin';
+      }
+      if (personAge < playerAge) {
+        return gender == Gender.kadin ? 'Küçük kız kardeşin' : 'Küçük erkek kardeşin';
+      }
+      return gender == Gender.kadin ? 'İkiz kız kardeşin' : 'İkiz erkek kardeşin';
+    case RelationType.anneanne:
+      return 'Anneannen';
+    case RelationType.babaanne:
+      return 'Babaannen';
+    case RelationType.anneTarafiDede:
+      return 'Anne tarafından deden';
+    case RelationType.babaTarafiDede:
+      return 'Baba tarafından deden';
+    case RelationType.teyze:
+      return 'Teyzen';
+    case RelationType.dayi:
+      return 'Dayın';
+    case RelationType.hala:
+      return 'Halan';
+    case RelationType.amca:
+      return 'Amcan';
+    case RelationType.sinifArkadasi:
+      return 'Sınıf arkadaşın';
+    case RelationType.ogretmen:
+      return 'Öğretmenin';
+    case RelationType.arkadas:
+      return 'Arkadaşın';
+    case RelationType.sevgili:
+      return gender == Gender.kadin ? 'Kız arkadaşın' : 'Erkek arkadaşın';
+    case RelationType.eskiSevgili:
+      return gender == Gender.kadin ? 'Eski kız arkadaşın' : 'Eski erkek arkadaşın';
   }
 }

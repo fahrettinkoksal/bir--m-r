@@ -30,6 +30,15 @@ abstract final class StoryFlags {
   static const String romantikGecti = 'romantik_gecti';
 }
 
+/// Hikâyede kimliği sabitlenen kişi rolleri.
+///
+/// Bir olayda kim olduğu belirlenen kişi, yıllar sonraki devam olayında
+/// **aynı kayıtla** karşına çıkar; yeni bir NPC uydurulmaz.
+abstract final class StoryRoles {
+  /// Teneffüste alay edilen ve savunulan/savunulmayan okul arkadaşı.
+  static const String alayEdilenArkadas = 'alay_edilen_arkadas';
+}
+
 /// Sahip olunan varlıklar. Sahip olunmayan varlık için olay çıkmaz.
 abstract final class Possessions {
   static const String bisiklet = 'bisiklet';
@@ -128,12 +137,18 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'arkadasi_savunma',
     category: EventCategory.okul,
-    text: 'Teneffüste sınıftan biri, sessiz bir arkadaşınla alay ediyor. '
+    text: 'Teneffüste sınıftan biri {sahipk} {kisi} ile alay ediyor. '
         'Etraftaki herkes sana bakıyor.',
     requirement: EventRequirement(
       minAge: 9,
       maxAge: 13,
       requiresSchoolStudent: true,
+      // Olay gerçekten var olan bir okul arkadaşına bağlanır; sonraki
+      // devam olayları aynı kişiyi kullanır.
+      livingRelations: <RelationType>{
+        RelationType.arkadas,
+        RelationType.sinifArkadasi,
+      },
       forbiddenFlags: <String>{
         StoryFlags.arkadasiniSavundu,
         StoryFlags.sessizKaldi,
@@ -145,10 +160,12 @@ const List<GameEvent> kEventPool = <GameEvent>[
         id: 'savun',
         label: 'Arkadaşını savun',
         resultText: 'Araya girdin. Ortalık bir an sessizleşti; o gün '
-            'kimse bir şey demedi ama arkadaşın sana baktı.',
+            'kimse bir şey demedi ama {kisi} sana baktı.',
         charisma: 3,
         happiness: 2,
+        bond: 6,
         addFlags: <String>{StoryFlags.arkadasiniSavundu},
+        rememberPersonAs: StoryRoles.alayEdilenArkadas,
       ),
       EventChoice(
         id: 'sus',
@@ -156,7 +173,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
         resultText: 'Başını önüne eğdin. Zil çaldığında herkes dağıldı, '
             'içindeki sıkıntı dağılmadı.',
         happiness: -4,
+        bond: -5,
         addFlags: <String>{StoryFlags.sessizKaldi},
+        rememberPersonAs: StoryRoles.alayEdilenArkadas,
       ),
     ],
   ),
@@ -165,13 +184,15 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'savundugun_arkadas',
     category: EventCategory.okul,
-    text: 'Yıllar önce savunduğun arkadaşın seni buldu. "O gün araya '
+    text: 'Yıllar önce savunduğun {kisi} seni buldu. "O gün araya '
         'girmeseydin okulu bırakacaktım" diyor ve bir işte beraber '
         'çalışmayı teklif ediyor.',
     requirement: EventRequirement(
       minAge: 15,
       maxAge: 20,
       requiredFlags: <String>{StoryFlags.arkadasiniSavundu},
+      // O gün savunduğun kişi kimse, yıllar sonra da aynı kişi gelir.
+      personRole: StoryRoles.alayEdilenArkadas,
     ),
     weight: 4,
     choices: <EventChoice>[
@@ -179,9 +200,10 @@ const List<GameEvent> kEventPool = <GameEvent>[
         id: 'kabul',
         label: 'Teklifi kabul et',
         resultText: 'Birlikte çalışmaya başladınız. İşin kendisinden çok, '
-            'birinin seni hatırlamış olması iyi geldi.',
+            '{kisi} gibi birinin seni hatırlamış olması iyi geldi.',
         happiness: 6,
         charisma: 3,
+        bond: 8,
       ),
       EventChoice(
         id: 'tesekkur',
@@ -195,22 +217,24 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'sessiz_kaldigin_gun',
     category: EventCategory.okul,
-    text: 'O gün alay edilen arkadaşınla yıllar sonra karşılaştın. '
+    text: 'O gün alay edilen {kisi} ile yıllar sonra karşılaştın. '
         'Seni tanıdı, selam verdi ve hızlıca uzaklaştı.',
     requirement: EventRequirement(
       minAge: 15,
       maxAge: 20,
       requiredFlags: <String>{StoryFlags.sessizKaldi},
+      personRole: StoryRoles.alayEdilenArkadas,
     ),
     weight: 4,
     choices: <EventChoice>[
       EventChoice(
         id: 'ozur',
         label: 'Peşinden git ve özür dile',
-        resultText: 'Nefes nefese yetiştin. "Biliyorum" dedi, "çocuktuk." '
-            'İkinizin de yükü biraz hafifledi.',
+        resultText: 'Nefes nefese yetiştin. "Biliyorum" dedi {kisi}, '
+            '"çocuktuk." İkinizin de yükü biraz hafifledi.',
         happiness: 5,
         charisma: 2,
+        bond: 7,
       ),
       EventChoice(
         id: 'birak',
@@ -226,8 +250,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'bisiklet_hediyesi',
     category: EventCategory.aile,
-    text: '{kisi} eve ikinci el ama tertemiz bir bisikletle geldi. '
-        '"{bag} olarak bu kadarını yapabildim" diyor.',
+    text: '{sahip} {kisi} eve ikinci el ama tertemiz bir bisikletle geldi. '
+        '"Elimden bu kadarı geldi, sağlamdır" diyor.',
     requirement: EventRequirement(
       minAge: 8,
       maxAge: 13,
@@ -255,7 +279,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         id: 'sessiz',
         label: 'Sessizce al',
         resultText: 'Teşekkür etmeyi unuttun. Bisiklet senin oldu ama '
-            '{kisi} bir an duraksadı.',
+            '{sahipk} {kisi} bir an duraksadı.',
         happiness: 3,
         bond: -2,
         addPossessions: <String>{Possessions.bisiklet},
@@ -296,18 +320,21 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'bayram_ziyareti',
     category: EventCategory.aile,
-    text: 'Bayram sabahı {kisi} sizi bekliyor. Kapıda kolonya, masada '
+    text: 'Bayram sabahı {sahipk} {kisi} sizi bekliyor. Kapıda kolonya, masada '
         'şeker, ortada herkesin bildiği ama yine anlatılan hikâyeler var.',
     requirement: EventRequirement(
       minAge: 6,
       livingRelations: _buyuklerVeAkrabalar,
     ),
+    // Bayram doğal olarak tekrar eder; ama art arda gelmemesi için
+    // aralarında oyun içi yaş farkı aranır (prototypeOnly).
     repeatable: true,
+    minAgeGap: 4,
     choices: <EventChoice>[
       EventChoice(
         id: 'kal',
         label: 'Akşama kadar kal',
-        resultText: 'Gün boyu kaldın. {kisi} anlattıkça anlattı, sen '
+        resultText: 'Gün boyu kaldın. {sahip} {kisi} anlattıkça anlattı, sen '
             'dinledikçe dinledin.',
         happiness: 4,
         bond: 6,
@@ -315,7 +342,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       EventChoice(
         id: 'kisa',
         label: 'Elini öpüp erken çık',
-        resultText: 'Kısa bir ziyaret oldu. {kisi} bir şey demedi ama '
+        resultText: 'Kısa bir ziyaret oldu. {sahip} {kisi} bir şey demedi ama '
             'kapıda biraz fazla bekledi.',
         happiness: 1,
         bond: 1,
@@ -325,7 +352,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'aile_sitemi',
     category: EventCategory.aile,
-    text: '{kisi} uzun zamandır senden haber alamadığını söylüyor: '
+    text: '{sahip} {kisi} uzun zamandır senden haber alamadığını söylüyor: '
         '"Aynı evdeyiz ama seni günlerdir doğru dürüst görmedim."',
     requirement: EventRequirement(
       minAge: 8,
@@ -333,12 +360,13 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requireSameHousehold: true,
     ),
     repeatable: true,
+    minAgeGap: 5,
     weight: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'otur',
         label: 'Bırak elindekini, otur konuş',
-        resultText: '{kisi} ile uzun uzun oturdunuz. Sitem, yerini '
+        resultText: '{sahipk} {kisi} ile uzun uzun oturdunuz. Sitem, yerini '
             'sohbete bıraktı.',
         happiness: 3,
         bond: 7,
@@ -346,7 +374,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       EventChoice(
         id: 'sonra',
         label: '"Sonra konuşuruz" de',
-        resultText: '{kisi} başını salladı. Konu kapandı ama '
+        resultText: '{sahip} {kisi} başını salladı. Konu kapandı ama '
             'kapanmamış gibi durdu.',
         happiness: -2,
         bond: -4,
@@ -426,12 +454,16 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'okul_sira_arkadasi',
     category: EventCategory.okul,
-    text: 'Yan sıradaki çocuk silgisini ikiye bölmüş, yarısını sana '
-        'uzatıyor. "Benimkini kaybedersem seninkini isterim ama" diyor.',
+    text: 'Yan sıranda oturan {sahipk} {kisi} silgisini ikiye bölmüş, '
+        'yarısını sana uzatıyor. "Benimkini kaybedersem seninkini isterim '
+        'ama" diyor.',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 1,
-      maxGrade: 4,
+      maxGrade: 8,
+      // Tanışıklık gerçek bir sınıf arkadaşıyla kurulur; olmayan bir
+      // çocuk uydurulmaz.
+      livingRelations: <RelationType>{RelationType.sinifArkadasi},
       forbiddenFlags: <String>{
         StoryFlags.okuldaArkadasEdindi,
         StoryFlags.okuldaCekingen,
@@ -442,8 +474,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
       EventChoice(
         id: 'tanis',
         label: 'Al ve adını sor',
-        resultText: 'Adı {kisi}. O gün teneffüste de yan yana oturdunuz; '
-            'ertesi gün sırayı kimse size sormadan ayırdınız.',
+        resultText: '{kisi} ile o gün teneffüste de yan yana oturdunuz; '
+            'ertesi gün sırayı kimse size sormadan ayırdınız. Artık sınıf '
+            'arkadaşından fazlası.',
         happiness: 4,
         charisma: 2,
         bond: 8,
@@ -453,7 +486,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       EventChoice(
         id: 'cekin',
         label: '"Gerek yok" de',
-        resultText: 'Silgiyi almadın. Çocuk yarısını sıranın kenarına '
+        resultText: 'Silgiyi almadın. {kisi} yarısını sıranın kenarına '
             'bıraktı, sen de almadın; ikiniz de bir şey demediniz.',
         happiness: -2,
         addFlags: <String>{StoryFlags.okuldaCekingen},
@@ -463,8 +496,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'teneffus_oyun_daveti',
     category: EventCategory.okul,
-    text: 'Zil çaldı, {kisi} kapıda seni bekliyor: "Bahçede yer tuttuk, '
-        'sensiz başlamayız."',
+    text: 'Zil çaldı, {sahipk} {kisi} kapıda seni bekliyor: "Bahçede yer '
+        'tuttuk, sensiz başlamayız."',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       livingRelations: <RelationType>{RelationType.arkadas},
@@ -495,8 +528,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'arkadas_odev_yardimi',
     category: EventCategory.okul,
-    text: '{kisi} defterini önüne koydu: "Bunu hiç anlamadım, yarın '
-        'kontrol var. Bir bakar mısın?"',
+    text: '{sahip} {kisi} defterini önüne koydu: "Bunu hiç anlamadım, '
+        'yarın kontrol var. Bir bakar mısın?"',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 2,
@@ -533,11 +566,12 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'ogretmen_sorusu',
     category: EventCategory.okul,
-    text: 'Öğretmen tahtadaki soruyu gösterip sınıfa baktı: "Kim '
+    text: '{sahip} {kisi} tahtadaki soruyu gösterip sınıfa baktı: "Kim '
         'deneyecek?" Kimse parmak kaldırmıyor, cevabı biliyorsun.',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 2,
+      livingRelations: <RelationType>{RelationType.ogretmen},
       forbiddenFlags: <String>{StoryFlags.dersteSozAldi},
     ),
     weight: 4,
@@ -546,10 +580,12 @@ const List<GameEvent> kEventPool = <GameEvent>[
         id: 'kaldir',
         label: 'Parmak kaldır',
         resultText: 'Tahtaya kalktın, elin titredi ama soruyu çözdün. '
-            'Yerine otururken sınıf hâlâ sana bakıyordu.',
+            'Yerine otururken {kisi} başını salladı, sınıf hâlâ sana '
+            'bakıyordu.',
         intelligence: 3,
         charisma: 3,
         happiness: 2,
+        bond: 6,
         addFlags: <String>{StoryFlags.dersteSozAldi},
       ),
       EventChoice(
@@ -565,8 +601,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'yardimin_karsiligi',
     category: EventCategory.okul,
-    text: 'Kantinde paran yetmedi. Arkandan {kisi} geldi, bozuklukları '
-        'tezgâha bıraktı: "O gün defterime baktın ya, ödeştik."',
+    text: 'Kantinde paran yetmedi. Arkandan {sahipk} {kisi} geldi, '
+        'bozuklukları tezgâha bıraktı: "O gün defterime baktın ya, ödeştik."',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 4,
@@ -753,6 +789,164 @@ const List<GameEvent> kEventPool = <GameEvent>[
         happiness: 3,
         charisma: 1,
         money: 3000, // prototypeOnly
+      ),
+    ],
+  ),
+
+  // --- Küçük çeşitlilik paketi -------------------------------------------
+  // Amaç havuzu onlarca benzer metinle şişirmek değil; tekrar eden olayların
+  // arasına farklı sahneler koymaktır. Sayılar prototypeOnly'dir.
+  GameEvent(
+    id: 'kar_tatili',
+    category: EventCategory.okul,
+    text: 'Sabah radyoda okulların tatil edildiğini duydun. Cam buğulu, '
+        'sokak bembeyaz, bütün gün senin.',
+    requirement: EventRequirement(requiresSchoolStudent: true, minGrade: 1),
+    repeatable: true,
+    minAgeGap: 4,
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'disari',
+        label: 'Sokağa çık',
+        resultText: 'Eldivenin ıslandı, burnun dondu, yanakların yandı. '
+            'Eve girdiğinde soba kokusu seni karşıladı.',
+        happiness: 6,
+        health: -1,
+      ),
+      EventChoice(
+        id: 'evde',
+        label: 'Evde kal, kitaba dal',
+        resultText: 'Battaniyenin altında bir kitabı bitirdin. Dışarıdaki '
+            'bağırışlar fon sesi gibiydi.',
+        intelligence: 3,
+        happiness: 2,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'ogretmen_veli_notu',
+    category: EventCategory.okul,
+    text: '{sahip} {kisi} ajandana bir not yazdı: "Velisiyle görüşmek '
+        'istiyorum." Nedenini söylemedi.',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      minGrade: 3,
+      livingRelations: <RelationType>{RelationType.ogretmen},
+    ),
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'goster',
+        label: 'Notu eve götür',
+        resultText: 'Notu akşam sofrada uzattın. Görüşme iyi geçmiş; '
+            '{kisi} senin için iyi şeyler söylemiş.',
+        happiness: 3,
+        charisma: 2,
+        bond: 7,
+      ),
+      EventChoice(
+        id: 'sakla',
+        label: 'Ajandayı çantada unut',
+        resultText: 'Not çantanın dibinde kaldı. {sahip} {kisi} ertesi gün '
+            'bir şey sormadı ama not defterini bir daha açmadı.',
+        happiness: -3,
+        bond: -6,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'sinif_fotografi',
+    category: EventCategory.okul,
+    text: 'Bahçede sıraya diziliyorsunuz, fotoğrafçı geldi. {sahip} {kisi} '
+        'yanında yer ayırmış, eliyle çağırıyor.',
+    requirement: EventRequirement(
+      requiresSchoolStudent: true,
+      livingRelations: <RelationType>{
+        RelationType.sinifArkadasi,
+        RelationType.arkadas,
+      },
+    ),
+    repeatable: true,
+    minAgeGap: 5,
+    weight: 2,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'yanina',
+        label: 'Yanına geç',
+        resultText: 'Deklanşöre basıldığı an ikiniz de gülüyordunuz. '
+            'O fotoğraf yıllarca bir çekmecede durdu.',
+        happiness: 4,
+        bond: 5,
+      ),
+      EventChoice(
+        id: 'arkada',
+        label: 'En arkada dur',
+        resultText: 'En arka sırada, yarı görünür bir yerdesin. '
+            'Fotoğrafta seni ancak sen buluyorsun.',
+        happiness: -1,
+        bond: -2,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'aile_aksam_sofrasi',
+    category: EventCategory.aile,
+    text: 'Akşam sofrası kuruldu, televizyonun sesi kısıldı. {sahip} '
+        '{kisi} "anlat bakalım, bugün ne oldu?" diyor.',
+    requirement: EventRequirement(
+      minAge: 7,
+      livingRelations: <RelationType>{
+        RelationType.anne,
+        RelationType.baba,
+        RelationType.kardes,
+      },
+      requireSameHousehold: true,
+    ),
+    repeatable: true,
+    minAgeGap: 3,
+    weight: 2,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'anlat',
+        label: 'Gününü anlat',
+        resultText: 'Anlattıkça anlattın. Yemek soğudu, kimse kalkmadı.',
+        happiness: 4,
+        bond: 6,
+      ),
+      EventChoice(
+        id: 'kisa_kes',
+        label: '"İyiydi" deyip kes',
+        resultText: 'Tek kelimeyle geçiştirdin. Sofrada bir sessizlik '
+            'oldu, sonra televizyonun sesi yeniden açıldı.',
+        happiness: -1,
+        bond: -3,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'bakkal_veresiye',
+    category: EventCategory.mahalle,
+    text: 'Bakkalda ekmek alacaksın ama paran tam çıkmadı. Bakkal '
+        'defteri uzatıyor: "Yaz bakalım, sonra ödersin."',
+    requirement: EventRequirement(minAge: 7, maxAge: 14),
+    weight: 2,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'yaz',
+        label: 'Deftere yazdır',
+        resultText: 'Adını deftere kendi elinle yazdın. Borç küçüktü ama '
+            'sorumluluk büyük hissettirdi.',
+        happiness: 1,
+        intelligence: 2,
+      ),
+      EventChoice(
+        id: 'vazgec',
+        label: 'Ekmeksiz dön',
+        resultText: 'Elin boş döndün. Kapıda kimse kızmadı, sen kendine '
+            'kızdın.',
+        happiness: -2,
+        charisma: -1,
       ),
     ],
   ),

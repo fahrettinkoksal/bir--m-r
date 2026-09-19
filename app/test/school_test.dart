@@ -24,9 +24,14 @@ EventEngine schoolEngine(List<String> ids) =>
 GameState studentAt({required int seed, required int age, required int grade}) {
   final GameState state =
       LifeGenerator.seeded(seed).generate(mode: StartMode.tamamenRastgele);
-  return state.copyWith(
-    player: state.player.copyWith(age: age),
-    education: EducationState(enrolled: true, grade: grade, startedAtAge: 6),
+  // Gerçek oyunda okul kişileri kademe geçişinde üretilir; olayların
+  // gerçek kişiye bağlanabilmesi için testte de eklenir.
+  return withSchoolPeople(
+    state.copyWith(
+      player: state.player.copyWith(age: age),
+      education: EducationState(enrolled: true, grade: grade, startedAtAge: 6),
+    ),
+    seed: seed,
   );
 }
 
@@ -151,13 +156,17 @@ void main() {
 
     test('sınıf aralığı dışında olay çıkmaz', () {
       final EventEngine engine = schoolEngine(<String>['okul_sira_arkadasi']);
-      // 1-4. sınıf aralığı.
+      // 1-8. sınıf aralığı.
       expect(
         engine.openingEvent(studentAt(seed: 6, age: 9, grade: 4), Random(1)),
         isNotNull,
       );
       expect(
-        engine.openingEvent(studentAt(seed: 6, age: 10, grade: 5), Random(1)),
+        engine.openingEvent(studentAt(seed: 6, age: 13, grade: 8), Random(1)),
+        isNotNull,
+      );
+      expect(
+        engine.openingEvent(studentAt(seed: 6, age: 14, grade: 9), Random(1)),
         isNull,
       );
     });

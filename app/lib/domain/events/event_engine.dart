@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/event_pool.dart';
+import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
@@ -59,6 +60,7 @@ class EventEngine {
     final List<_Candidate> candidates = <_Candidate>[];
     for (final GameEvent event in pool) {
       if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
+      if (!_repeatGapPassed(state, event)) continue;
       final Person? person = _resolvePerson(state, event, rng);
       if (!_matches(state, event, person)) continue;
       candidates.add(_Candidate(event, person));
@@ -96,12 +98,33 @@ class EventEngine {
     return true;
   }
 
+  /// Tekrarlanabilir olayın yeniden çıkabilmesi için yeterli yaş farkı
+  /// geçmiş mi? Böylece aynı olay arka arkaya gelmez ama sonsuza dek de
+  /// yasaklanmaz.
+  static bool _repeatGapPassed(GameState state, GameEvent event) {
+    final int? last = state.lastEventAge[event.id];
+    if (last == null) return true;
+    return state.player.age - last >= event.minAgeGap;
+  }
+
   static bool _needsPerson(EventRequirement req) =>
-      req.livingRelations.isNotEmpty || req.requiresNeglectedRelative;
+      req.livingRelations.isNotEmpty ||
+      req.requiresNeglectedRelative ||
+      req.personRole != null;
 
   /// Olayın kişisini seçer; uygun kişi yoksa `null` döner ve olay elenir.
   Person? _resolvePerson(GameState state, GameEvent event, Random rng) {
     final EventRequirement req = event.requirement;
+
+    // Hikâyede kilitlenmiş kişi: yıllar sonra da aynı kimlik kullanılır.
+    final String? role = req.personRole;
+    if (role != null) {
+      final String? personId = state.storyPeople[role];
+      if (personId == null) return null;
+      final Person? person = state.personById(personId);
+      if (person == null || !person.isAlive) return null;
+      return person;
+    }
 
     if (req.requiresNeglectedRelative) {
       final List<Person> neglected = state.people.where((Person p) {
@@ -141,10 +164,22 @@ class EventEngine {
     );
   }
 
+  /// Metindeki yer tutucuları **gerçekten var olan** kişiyle doldurur.
+  ///
+  /// - `{kisi}`   : kişinin adı ("Kemal")
+  /// - `{sahip}`  : cümle başındaki iyelikli bağ ("Deden")
+  /// - `{sahipk}` : cümle içindeki iyelikli bağ ("deden")
+  /// - `{bag}`    : yalın bağ etiketi ("dede")
+  ///
+  /// Kişi yoksa metin olduğu gibi döner; kişi gerektiren olaylar zaten
+  /// [_matches] tarafından elendiği için ekrana boş yer tutucu çıkmaz.
   static String _fill(String template, Person? person, int playerAge) {
     if (person == null) return template;
+    final String sahip = person.possessiveFor(playerAge);
     return template
         .replaceAll('{kisi}', person.firstName)
+        .replaceAll('{sahipk}', trLowerFirst(sahip))
+        .replaceAll('{sahip}', sahip)
         .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
   }
 
@@ -173,12 +208,19 @@ class EventEngine {
       working = started.state;
       newPersonId = started.partner.id;
     }
-    // Okulda tanışılan arkadaş da kalıcı kimlikli bir kişi olarak eklenir.
+    // Okul arkadaşlığı: olayın kişisi varsa **aynı kimlikle** yakın arkadaşa
+    // çevrilir; yoksa kalıcı kimlikli yeni bir arkadaş kaydı açılır.
     if (choice.startsSchoolFriendship) {
-      final ({GameState state, Person friend}) started =
-          const Friendship().startSchoolFriend(working, rng ?? Random());
-      working = started.state;
-      newPersonId = started.friend.id;
+      const Friendship friendship = Friendship();
+      final String? adayId = active.personId;
+      if (adayId != null && working.personById(adayId) != null) {
+        working = friendship.promoteToFriend(working, adayId).state;
+      } else {
+        final ({GameState state, Person friend}) started =
+            friendship.startSchoolFriend(working, rng ?? Random());
+        working = started.state;
+        newPersonId = started.friend.id;
+      }
     }
 
     final Stats stats = working.player.stats.copyWith(
@@ -220,6 +262,18 @@ class EventEngine {
       },
       possessions: <String>{...working.possessions, ...choice.addPossessions},
       seenEventIds: <String>{...working.seenEventIds, active.eventId},
+      // Tekrar aralığı denetimi için olayın çıktığı yaş kaydedilir.
+      lastEventAge: <String, int>{
+        ...working.lastEventAge,
+        active.eventId: working.player.age,
+      },
+      // Seçim bir kişiyi hikâye rolüne kilitlediyse kimliği saklanır.
+      storyPeople: choice.rememberPersonAs == null || bondTargetId == null
+          ? working.storyPeople
+          : <String, String>{
+              ...working.storyPeople,
+              choice.rememberPersonAs!: bondTargetId,
+            },
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...working.log,
         LifeLogEntry(

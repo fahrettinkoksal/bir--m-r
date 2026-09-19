@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'education.dart';
 import 'gender.dart';
 import 'relation.dart';
 import 'wealth.dart';
@@ -24,6 +25,7 @@ class Person {
     required this.wealth,
     required this.bond,
     this.occupation,
+    this.schoolLevel,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -53,6 +55,12 @@ class Person {
   /// `null` olur ve arayüzde hiç gösterilmez; uydurma bir değer üretilmez.
   final WealthTier? wealth;
 
+  /// Okul kişileri için hangi kademede tanışıldığı.
+  ///
+  /// Sınıf arkadaşları ve öğretmenler kademe değişince listelerden düşer
+  /// ama **kayıtları silinmez**; eski kademeye ait oldukları buradan bilinir.
+  final SchoolLevel? schoolLevel;
+
   /// Oyuncuyla ilişki puanı (0-100).
   ///
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
@@ -75,6 +83,14 @@ class Person {
         playerAge: playerAge,
       );
 
+  /// Cümle içinde kullanılan iyelikli etiket: "Deden", "Annen", "Arkadaşın".
+  String possessiveFor(int playerAge) => relationPossessive(
+        relation: relation,
+        gender: gender,
+        personAge: age,
+        playerAge: playerAge,
+      );
+
   Person copyWith({
     String? firstName,
     String? lastName,
@@ -86,6 +102,7 @@ class Person {
     Object? occupation = _unset,
     Object? wealth = _unset,
     int? bond,
+    Object? schoolLevel = _unset,
   }) {
     return Person(
       id: id,
@@ -100,6 +117,9 @@ class Person {
       occupation: occupation == _unset ? this.occupation : occupation as String?,
       wealth: wealth == _unset ? this.wealth : wealth as WealthTier?,
       bond: bond ?? this.bond,
+      schoolLevel: schoolLevel == _unset
+          ? this.schoolLevel
+          : schoolLevel as SchoolLevel?,
     );
   }
 }

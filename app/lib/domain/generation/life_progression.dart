@@ -7,8 +7,10 @@ import '../models/game_event.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
+import 'school_people.dart';
 
 /// **Yaş Al** işleminin durum üzerindeki etkisi (D-018).
 ///
@@ -62,9 +64,20 @@ class LifeProgression {
       age: newAge,
     );
 
+    // Yeni bir okul kademesine geçildiyse o kademenin sınıf arkadaşları ve
+    // öğretmeni kalıcı kişi kaydı olarak eklenir. Eski kademenin kişileri
+    // silinmez; yalnızca güncel sınıf listesinde görünmezler.
+    final List<Person> peopleWithSchool = _addSchoolPeopleIfNeeded(
+      state: state,
+      people: people,
+      education: education,
+      newAge: newAge,
+      log: log,
+    );
+
     final GameState advanced = state.copyWith(
       player: state.player.copyWith(age: newAge),
-      people: List<Person>.unmodifiable(people),
+      people: List<Person>.unmodifiable(peopleWithSchool),
       log: List<LifeLogEntry>.unmodifiable(log),
       // Tekrar sayaçları yaşa aittir: yeni yaşta aynı etkinlik yeniden
       // anlamlı fayda verebilir. Yenilemenin tam mı kısmi mi olacağı
@@ -79,6 +92,49 @@ class LifeProgression {
     // Yeni yaşın tek açılış olayı.
     final ActiveEvent? opening = const EventEngine().openingEvent(advanced, _rng);
     return opening == null ? advanced : advanced.copyWith(pendingEvent: opening);
+  }
+
+  /// Kademe değiştiyse yeni sınıf arkadaşlarını ve öğretmeni üretir.
+  ///
+  /// Aynı kademe için ikinci kez kişi üretilmez; sınıf atlamak (ör. 1'den
+  /// 2'ye) yeni kişi getirmez, kademe değişimi getirir.
+  List<Person> _addSchoolPeopleIfNeeded({
+    required GameState state,
+    required List<Person> people,
+    required EducationState education,
+    required int newAge,
+    required List<LifeLogEntry> log,
+  }) {
+    final SchoolLevel? level = education.level;
+    if (level == null) return people;
+    if (level == state.education.level) return people;
+    if (people.any((Person p) => p.schoolLevel == level)) return people;
+
+    final GameState basis = state.copyWith(
+      player: state.player.copyWith(age: newAge),
+      people: List<Person>.unmodifiable(people),
+    );
+    final List<Person> yeniler = const SchoolPeople().generateFor(
+      state: basis,
+      level: level,
+      rng: _rng,
+    );
+    if (yeniler.isEmpty) return people;
+
+    final Person ogretmen = yeniler.firstWhere(
+      (Person p) => p.relation == RelationType.ogretmen,
+      orElse: () => yeniler.first,
+    );
+    log.add(
+      LifeLogEntry(
+        age: newAge,
+        text: 'Yeni sınıfında öğretmenin ${ogretmen.fullName} oldu; '
+            'sıraları paylaştığın tanıdık yüzler de var.',
+        category: LogCategory.kisisel,
+      ),
+    );
+
+    return <Person>[...people, ...yeniler];
   }
 
   /// Okula başlatır veya bir üst sınıfa geçirir.

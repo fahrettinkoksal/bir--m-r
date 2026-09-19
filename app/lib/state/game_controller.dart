@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
+import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
+import '../domain/models/applied_effect.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
@@ -64,14 +66,18 @@ class GameController extends ChangeNotifier {
 
   /// Ekrandaki olayı verilen seçimle çözer (D-021, D-022).
   ///
-  /// Seçimin oyuncuya gösterilecek özgün sonuç metnini döndürür.
-  String? chooseEventOption(String choiceId) {
+  /// Sonuç metninin yanında **gerçekten uygulanmış** değişimleri de döndürür;
+  /// bunlar niyetten değil, durumun öncesi/sonrası farkından hesaplanır.
+  EventChoiceResult? chooseEventOption(String choiceId) {
     final GameState? current = _state;
     if (current == null || !current.hasPendingEvent) return null;
     final GameState next = _events.resolve(current, choiceId, rng: _random);
     _state = next;
     notifyListeners();
-    return next.log.isEmpty ? null : next.log.last.text;
+    return EventChoiceResult(
+      text: next.log.isEmpty ? '' : next.log.last.text,
+      effects: diffAppliedEffects(current, next),
+    );
   }
 
   /// Bir aile bireyiyle etkileşim kurar ve sonucu döndürür (D-016).
@@ -106,12 +112,25 @@ class GameController extends ChangeNotifier {
 
   /// Etkileşimin şu an mümkün olup olmadığı; arayüz bunu kullanarak
   /// yapılamayacak eylemi düğme olarak göstermez.
-  InteractionAvailability availabilityFor(Person person) {
+  InteractionAvailability availabilityFor(
+    Person person, [
+    InteractionKind? kind,
+  ]) {
     final GameState? current = _state;
     if (current == null) {
       return const InteractionAvailability.blocked('Etkin bir hayat yok.');
     }
-    return _interactions.availability(current, person);
+    return _interactions.availability(current, person, kind);
+  }
+
+  /// Bir kişi için **şu an gerçekten yapılabilen** etkileşimler.
+  ///
+  /// Parası olmayan oyuncuya hediye düğmesi, kendi parası olmayan kişiye
+  /// para isteme düğmesi açılmaz.
+  List<InteractionKind> availableKindsFor(Person person) {
+    final GameState? current = _state;
+    if (current == null) return const <InteractionKind>[];
+    return _interactions.availableKinds(current, person);
   }
 
   /// Sevgiliden ayrılır (D-029).
@@ -133,4 +152,12 @@ class GameController extends ChangeNotifier {
     _state = null;
     notifyListeners();
   }
+}
+
+/// Bir olay seçiminin oyuncuya gösterilecek sonucu.
+class EventChoiceResult {
+  const EventChoiceResult({required this.text, required this.effects});
+
+  final String text;
+  final List<AppliedEffect> effects;
 }

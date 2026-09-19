@@ -33,6 +33,7 @@ class EventRequirement {
     this.minGrade,
     this.maxGrade,
     this.requiresNeglectedRelative = false,
+    this.personRole,
   });
 
   final int minAge;
@@ -63,6 +64,12 @@ class EventRequirement {
 
   /// Uzun süre oyun içinde temas kurulmamış bir yakın gerektirir (D-025).
   final bool requiresNeglectedRelative;
+
+  /// Olayın kişisi, daha önce bir hikâye rolüne kilitlenmiş kişidir.
+  ///
+  /// Devam olayları bunu kullanır: yıllar önce savunduğun arkadaş, yıllar
+  /// sonra **aynı kişi** olarak karşına çıkar. Kişi artık yoksa olay çıkmaz.
+  final String? personRole;
 }
 
 /// Bir olay seçeneği ve sonuçları.
@@ -85,6 +92,7 @@ class EventChoice {
     this.startsRomance = false,
     this.endsRomance = false,
     this.startsSchoolFriendship = false,
+    this.rememberPersonAs,
   });
 
   final String id;
@@ -121,9 +129,17 @@ class EventChoice {
   /// eski sevgili statüsüne geçer.
   final bool endsRomance;
 
-  /// Bu seçim okulda bir arkadaşlık başlatır: kalıcı kimlikli bir kişi
-  /// kaydı oluşturulur ve sonraki olaylarda aynı kişi kullanılır.
+  /// Bu seçim okuldaki tanışıklığı **yakın arkadaşlığa** çevirir.
+  ///
+  /// Olayın kişisi varsa o kişi (aynı kimlikle) arkadaş olur; yoksa kalıcı
+  /// kimlikli yeni bir arkadaş kaydı oluşturulur. Her sınıf arkadaşı
+  /// kendiliğinden yakın arkadaş sayılmaz.
   final bool startsSchoolFriendship;
+
+  /// Bu seçim, olayın kişisini bir hikâye rolüne kilitler.
+  ///
+  /// Sonraki olaylar [EventRequirement.personRole] ile aynı kişiyi bulur.
+  final String? rememberPersonAs;
 }
 
 /// Olay tanımı. Havuz modülerdir; yeni olay eklemek listeye kayıt eklemektir.
@@ -136,8 +152,13 @@ class GameEvent {
     required this.choices,
     this.requirement = const EventRequirement(),
     this.repeatable = false,
+    this.minAgeGap = prototypeOnlyDefaultRepeatGap,
     this.weight = 1,
-  });
+  }) : assert(minAgeGap >= 1, 'Tekrar aralığı en az bir yaş olmalıdır.');
+
+  /// prototypeOnly: tekrar aralığı belirtilmeyen tekrarlanabilir olaylar için
+  /// varsayılan yaş farkı. Kesin tekrar dengesi henüz kararlaştırılmadı.
+  static const int prototypeOnlyDefaultRepeatGap = 3;
 
   final String id;
   final EventCategory category;
@@ -149,6 +170,14 @@ class GameEvent {
 
   /// Aynı hayatta birden çok kez çıkabilir mi?
   final bool repeatable;
+
+  /// Tekrarlanabilir bir olayın yeniden çıkabilmesi için geçmesi gereken
+  /// **oyun içi** yaş farkı.
+  ///
+  /// Doğal olarak tekrar eden olaylar (bayram sabahı gibi) tamamen
+  /// yasaklanmaz; farklı yaşlarda, uygun koşullarda yeniden gelebilir.
+  /// Buradaki sayılar prototypeOnly'dir.
+  final int minAgeGap;
 
   /// Aynı anda uygun olan olaylar arasında görece ağırlık (prototypeOnly).
   final int weight;

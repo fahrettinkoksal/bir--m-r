@@ -63,6 +63,52 @@ const List<String> _doyumGenel = <String>[
       'değildi.',
 ];
 
+const List<String> _hediyeVer = <String>[
+  '{ad} paketi açarken elleri titredi. "Buna ne gerek vardı" dedi ama '
+      'gözü hediyeden ayrılmadı.',
+  '{ad} hediyeyi görünce bir süre konuşmadı, sonra "sen benim..." diye '
+      'başladı ve cümlesini bitiremedi.',
+  'Hediyeyi {ad} ile masaya koydun. Küçük bir şeydi; masadaki en '
+      'değerli şey oldu.',
+];
+
+const List<String> _hediyeIsteKabul = <String>[
+  '{ad} dolabın üst rafına uzandı: "Sende dursun, benden sana."',
+  '{ad} bir şey demeden içeri girdi, elinde onunla çıktı: "Kaybetme ama."',
+  '{ad} "isteyenin bir yüzü kara" dedi, gülerek uzattı.',
+];
+
+const List<String> _paraIsteKabul = <String>[
+  '{ad} cüzdanını çıkardı, katlanmış parayı avucuna sıkıştırdı: '
+      '"Kimseye söyleme."',
+  '{ad} "idareli kullan" diyerek bozuklukları saydı.',
+  '{ad} bir şey sormadı, parayı uzattı; sen de sormadın.',
+];
+
+const List<String> _hediyeRed = <String>[
+  '{ad}: "Bu ay olmaz, biliyorsun."',
+  '{ad} başını iki yana salladı: "Daha geçen gün almadık mı?"',
+  '{ad}: "Şimdi değil. Bir şey lazım olursa söylersin."',
+];
+
+const List<String> _paraRed = <String>[
+  '{ad} cüzdanını açtı, kapattı: "Bugün bende de yok."',
+  '{ad}: "Her istediğinde veremem, alışırsın."',
+  '{ad} bir an düşündü, "Ay sonu" dedi ve konuyu değiştirdi.',
+];
+
+const List<String> _hediyeDoyum = <String>[
+  '{ad}: "Bu kadar hediye yeter bu aralar." Paketi almadın, '
+      'vazgeçtin.',
+  '{ad} ile bakıştınız; ikiniz de bunun fazla olacağını biliyordunuz.',
+];
+
+/// İstenecek hediye kalmadığında gösterilir; sahte bir kazanç yaratılmaz.
+const List<String> _hediyeKalmadi = <String>[
+  '{ad} etrafına bakındı: "Verecek bir şey bulamadım, elim boş kalmasın '
+      'istemezdim."',
+];
+
 /// Kişi ve etkileşim türüne uygun bir metin seçer.
 String interactionText({
   required Random rng,
@@ -74,9 +120,19 @@ String interactionText({
 }) {
   final List<String> pool;
   if (!accepted) {
-    pool = _redGenel;
+    pool = switch (kind) {
+      InteractionKind.paraIste => _paraRed,
+      InteractionKind.hediyeIste || InteractionKind.hediyeVer => _hediyeRed,
+      _ => _redGenel,
+    };
   } else if (noNewBenefit) {
-    pool = _doyumGenel;
+    pool = kind.transfersResource ? _hediyeDoyum : _doyumGenel;
+  } else if (kind == InteractionKind.hediyeVer) {
+    pool = _hediyeVer;
+  } else if (kind == InteractionKind.hediyeIste) {
+    pool = _hediyeIsteKabul;
+  } else if (kind == InteractionKind.paraIste) {
+    pool = _paraIsteKabul;
   } else if (kind == InteractionKind.sohbet) {
     pool = _sohbetGenel;
   } else if (person.relation == RelationType.kardes) {
@@ -92,6 +148,16 @@ String interactionText({
       .replaceAll('{ad}', person.firstName)
       .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
 }
+
+/// Verilecek hediye kalmadığında kullanılacak metin.
+String noGiftLeftText({
+  required Random rng,
+  required Person person,
+  required int playerAge,
+}) =>
+    _hediyeKalmadi[rng.nextInt(_hediyeKalmadi.length)]
+        .replaceAll('{ad}', person.firstName)
+        .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
 
 const Set<RelationType> _buyukler = <RelationType>{
   RelationType.anneanne,
