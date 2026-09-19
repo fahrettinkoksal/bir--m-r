@@ -123,30 +123,28 @@ class GameState {
 
   /// Şu anda devam edilen kademedeki sınıf arkadaşları.
   ///
-  /// Kademe değişince eski sınıf arkadaşları **silinmez**; yalnızca güncel
-  /// listeye girmezler (D-029: kişi kaydı korunur).
-  List<Person> get currentClassmates => _currentSchoolPeople(
-        RelationType.sinifArkadasi,
-      );
+  /// Liste **okul bağına** ([Person.schoolTie]) bakar, yakınlık derecesine
+  /// değil: aynı sınıftaki bir kişi yakın arkadaş olsa da burada kalmaya
+  /// devam eder. Kademe değişince eski sınıf arkadaşları **silinmez**;
+  /// yalnızca güncel listeye girmezler (D-029: kişi kaydı korunur).
+  List<Person> get currentClassmates => people
+      .where((Person p) => p.isClassmateAt(education.level))
+      .toList(growable: false);
 
   /// Şu anda devam edilen kademedeki öğretmenler.
-  List<Person> get currentTeachers => _currentSchoolPeople(RelationType.ogretmen);
-
-  List<Person> _currentSchoolPeople(RelationType relation) {
-    final SchoolLevel? level = education.level;
-    if (level == null) return const <Person>[];
-    return people
-        .where((Person p) =>
-            p.isAlive && p.relation == relation && p.schoolLevel == level)
-        .toList(growable: false);
-  }
+  List<Person> get currentTeachers => people
+      .where((Person p) => p.isTeacherAt(education.level))
+      .toList(growable: false);
 
   /// Geçmiş kademelerden tanınan, hâlâ kayıtlı okul kişileri.
+  ///
+  /// Okul bağı olan ama artık oyuncuyla aynı kademede olmayan kişiler.
+  /// Yakın arkadaş olmuş biri de buraya düşebilir; kaydı korunur.
   List<Person> get pastSchoolPeople {
     final SchoolLevel? level = education.level;
     return people
         .where((Person p) =>
-            p.relation.group == RelationGroup.okul &&
+            p.schoolTie != null &&
             p.schoolLevel != null &&
             p.schoolLevel != level)
         .toList(growable: false);

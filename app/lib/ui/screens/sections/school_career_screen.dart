@@ -71,9 +71,10 @@ class _SchoolViewState extends State<_SchoolView> {
           subtitle: egitim.level?.label,
           people: sinifArkadaslari,
           // Eski kademelerin sınıf arkadaşları silinmez; güncel sınıf
-          // listesinde değil, ayrı başlık altında görünürler.
+          // listesinde değil, ayrı başlık altında görünürler. Filtre okul
+          // bağına bakar: yakın arkadaş olmuş biri de burada kalır.
           past: state.pastSchoolPeople
-              .where((Person p) => p.relation == RelationType.sinifArkadasi)
+              .where((Person p) => p.schoolTie == SchoolTie.sinifArkadasi)
               .toList(growable: false),
           emptyText: 'Şu an kayıtlı bir sınıf arkadaşın yok.',
           playerAge: state.player.age,
@@ -85,7 +86,7 @@ class _SchoolViewState extends State<_SchoolView> {
           subtitle: egitim.level?.label,
           people: ogretmenler,
           past: state.pastSchoolPeople
-              .where((Person p) => p.relation == RelationType.ogretmen)
+              .where((Person p) => p.schoolTie == SchoolTie.ogretmen)
               .toList(growable: false),
           emptyText: 'Bu kademede kayıtlı öğretmenin yok.',
           playerAge: state.player.age,
@@ -127,7 +128,7 @@ class _SchoolViewState extends State<_SchoolView> {
         const SizedBox(height: 12),
         MenuRow(
           title: 'Sınıf Arkadaşları',
-          subtitle: 'Bu kademede tanıdığın kişiler',
+          subtitle: 'Şu an aynı sınıfta olduğun kişiler',
           icon: Icons.groups_outlined,
           trailingText: '${sinifArkadaslari.length}',
           onTap: () => _go(_SchoolPage.sinifArkadaslari),
@@ -143,7 +144,7 @@ class _SchoolViewState extends State<_SchoolView> {
         const SizedBox(height: 10),
         MenuRow(
           title: 'Yakın Arkadaşların',
-          subtitle: 'Tanışıklıktan öteye geçenler',
+          subtitle: 'Tanışıklıktan öteye geçenler; sınıfta da olabilirler',
           icon: Icons.favorite_outline,
           trailingText: '${yakinArkadaslar.length}',
           onTap: () => _go(_SchoolPage.yakinArkadaslar),

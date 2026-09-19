@@ -340,11 +340,15 @@ void main() {
       expect(state.currentClassmates, isNotEmpty);
       for (final Person p in state.currentClassmates) {
         expect(p.schoolLevel, SchoolLevel.ilkokul);
-        expect(p.relation, RelationType.sinifArkadasi);
+        // Sınıf listesi okul bağına bakar; yakınlık derecesi değişebilir.
+        expect(p.schoolTie, SchoolTie.sinifArkadasi);
         expect(p.relation.kanBagi, isFalse);
         expect(p.inPlayerHousehold, isFalse);
-        // Tanışıklık yakın arkadaşlık değildir.
-        expect(p.bond, lessThan(50));
+        // Henüz yakınlaşılmamış sınıf arkadaşı tanışıklık düzeyinde kalır:
+        // sınıf arkadaşı olmak yakın arkadaşlık değildir.
+        if (p.relation == RelationType.sinifArkadasi) {
+          expect(p.bond, lessThan(50));
+        }
       }
       final Person ogretmen = state.currentTeachers.single;
       expect(ogretmen.occupation, 'öğretmen');

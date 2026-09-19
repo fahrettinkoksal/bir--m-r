@@ -76,6 +76,7 @@ class SchoolPeople {
           // Tanışıklık düşük başlar; yakın arkadaşlık ayrı kurulur.
           bond: rng.between(15, 35), // prototypeOnly
           schoolLevel: level,
+          schoolTie: SchoolTie.sinifArkadasi,
         ),
       );
     }
@@ -96,6 +97,7 @@ class SchoolPeople {
         wealth: WealthTier.ortaHalli,
         bond: rng.between(15, 35), // prototypeOnly
         schoolLevel: level,
+        schoolTie: SchoolTie.ogretmen,
       ),
     );
 

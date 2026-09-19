@@ -26,6 +26,7 @@ class Person {
     required this.bond,
     this.occupation,
     this.schoolLevel,
+    this.schoolTie,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -60,6 +61,27 @@ class Person {
   /// Sınıf arkadaşları ve öğretmenler kademe değişince listelerden düşer
   /// ama **kayıtları silinmez**; eski kademeye ait oldukları buradan bilinir.
   final SchoolLevel? schoolLevel;
+
+  /// Kişinin okul bağı (sınıf arkadaşı / öğretmen).
+  ///
+  /// [relation] yakınlık derecesini tutar ve değişebilir (sınıf arkadaşı →
+  /// arkadaş). Okul bağı ise **değişmez**: aynı sınıfta okumaya devam eden
+  /// kişi, yakın arkadaş olsa bile sınıf listesinden düşmez.
+  final SchoolTie? schoolTie;
+
+  /// Oyuncunun şu anki kademesinde sınıf arkadaşı mı?
+  bool isClassmateAt(SchoolLevel? currentLevel) =>
+      isAlive &&
+      schoolTie == SchoolTie.sinifArkadasi &&
+      currentLevel != null &&
+      schoolLevel == currentLevel;
+
+  /// Oyuncunun şu anki kademesinde öğretmeni mi?
+  bool isTeacherAt(SchoolLevel? currentLevel) =>
+      isAlive &&
+      schoolTie == SchoolTie.ogretmen &&
+      currentLevel != null &&
+      schoolLevel == currentLevel;
 
   /// Oyuncuyla ilişki puanı (0-100).
   ///
@@ -103,6 +125,7 @@ class Person {
     Object? wealth = _unset,
     int? bond,
     Object? schoolLevel = _unset,
+    Object? schoolTie = _unset,
   }) {
     return Person(
       id: id,
@@ -120,6 +143,8 @@ class Person {
       schoolLevel: schoolLevel == _unset
           ? this.schoolLevel
           : schoolLevel as SchoolLevel?,
+      schoolTie:
+          schoolTie == _unset ? this.schoolTie : schoolTie as SchoolTie?,
     );
   }
 }
