@@ -3,6 +3,18 @@
 Bilgisayarında **Flutter, Android Studio veya başka bir şey kurmana gerek yok.**
 Zip'i indir, çıkar, `.exe` dosyasına çift tıkla.
 
+**Ölçülen değerler** (19 Eylül 2026, doğrulanmış koşu):
+
+| | |
+| --- | --- |
+| İndirilen zip | **~11,8 MB** (17 dosya) |
+| Derleme süresi | ~4,5 dakika |
+| Flutter / araç zinciri | 3.35.5 · Visual Studio 2022 (v143) |
+| Artifact ömrü | 30 gün |
+
+Paketin içinde Visual C++ çalışma zamanı DLL'leri de bulunur; ayrıca bir şey
+kurman gerekmez.
+
 ---
 
 ## 1. Paketi indir
@@ -11,6 +23,8 @@ Zip'i indir, çıkar, `.exe` dosyasına çift tıkla.
 2. Üstteki **Actions** sekmesine tıkla.
 3. Soldaki listeden **Windows test sürümü** iş akışını seç.
 4. Listeden yeşil ✅ işaretli en son koşuya tıkla.
+   *(Doğrulanmış koşu:
+   [run #3](https://github.com/fahrettinkoksal/bir--m-r/actions/runs/35453833043))*
    *(Elle çalıştırmak istersen: sağdaki **Run workflow** → dal olarak
    `claude/windows-test-v1` → **Run workflow**.)*
 5. Açılan sayfanın **en altındaki `Artifacts`** bölümüne in.
