@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../data/event_pool.dart';
 import '../generation/random_util.dart';
+import '../interaction/romance.dart';
 import '../models/game_event.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
@@ -140,7 +141,10 @@ class EventEngine {
 
   /// Bekleyen olayı verilen seçimle çözer: etkileri uygular, izi bırakır,
   /// hayat günlüğüne yazar ve olayı ekrandan kaldırır.
-  GameState resolve(GameState state, String choiceId) {
+  ///
+  /// Romantik ilişki başlatan veya bitiren seçimler [Romance] üzerinden
+  /// işlenir; kişi kimliği hiçbir aşamada değişmez.
+  GameState resolve(GameState state, String choiceId, {Random? rng}) {
     final ActiveEvent? active = state.pendingEvent;
     if (active == null) return state;
 
@@ -149,39 +153,57 @@ class EventEngine {
       orElse: () => active.choices.first,
     );
 
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness + choice.happiness,
-      health: state.player.stats.health + choice.health,
-      intelligence: state.player.stats.intelligence + choice.intelligence,
-      charisma: state.player.stats.charisma + choice.charisma,
-      appearance: state.player.stats.appearance + choice.appearance,
-    );
-    final PlayerCharacter player = state.player.copyWith(stats: stats);
+    // İlişki başlatan seçim önce kişiyi oluşturur ki sonuç metni ve ilişki
+    // etkisi doğru kişiye bağlansın.
+    const Romance romance = Romance();
+    GameState working = state;
+    String? romanceTargetId;
+    if (choice.startsRomance) {
+      final ({GameState state, Person partner}) started =
+          romance.start(working, rng ?? Random());
+      working = started.state;
+      romanceTargetId = started.partner.id;
+    }
 
-    final List<Person> people = active.personId == null || choice.bond == 0
-        ? state.people
-        : state.people
+    final Stats stats = working.player.stats.copyWith(
+      happiness: working.player.stats.happiness + choice.happiness,
+      health: working.player.stats.health + choice.health,
+      intelligence: working.player.stats.intelligence + choice.intelligence,
+      charisma: working.player.stats.charisma + choice.charisma,
+      appearance: working.player.stats.appearance + choice.appearance,
+    );
+    final PlayerCharacter player = working.player.copyWith(stats: stats);
+
+    // Etki, olayın kişisine; ilişki başlatan seçimde yeni partnere işlenir.
+    final String? bondTargetId = romanceTargetId ?? active.personId;
+    final List<Person> people = bondTargetId == null || choice.bond == 0
+        ? working.people
+        : working.people
             .map(
-              (Person p) => p.id == active.personId
+              (Person p) => p.id == bondTargetId
                   ? p.copyWith(bond: (p.bond + choice.bond).clamp(0, 100))
                   : p,
             )
             .toList(growable: false);
 
-    final Person? person =
-        active.personId == null ? null : state.personById(active.personId!);
-    final String resultText = _fill(choice.resultText, person, state.player.age);
+    final Person? person = bondTargetId == null
+        ? null
+        : working.people.firstWhere((Person p) => p.id == bondTargetId);
+    final String resultText = _fill(choice.resultText, person, working.player.age);
 
-    return state.copyWith(
+    working = working.copyWith(
       player: player,
       people: List<Person>.unmodifiable(people),
-      storyFlags: <String>{...state.storyFlags, ...choice.addFlags},
-      possessions: <String>{...state.possessions, ...choice.addPossessions},
-      seenEventIds: <String>{...state.seenEventIds, active.eventId},
+      storyFlags: <String>{
+        ...working.storyFlags.where((String f) => !choice.removeFlags.contains(f)),
+        ...choice.addFlags,
+      },
+      possessions: <String>{...working.possessions, ...choice.addPossessions},
+      seenEventIds: <String>{...working.seenEventIds, active.eventId},
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-        ...state.log,
+        ...working.log,
         LifeLogEntry(
-          age: state.player.age,
+          age: working.player.age,
           text: resultText,
           category: LogCategory.kisisel,
         ),
@@ -190,6 +212,13 @@ class EventEngine {
       // Olay çözüldü: ek olay için ilerleme yeniden birikmeye başlar.
       progressSinceLastEvent: 0,
     );
+
+    // İlişkiyi bitiren seçim: kişi silinmez, aynı kimlikle eski sevgili olur.
+    if (choice.endsRomance && active.personId != null) {
+      working = romance.end(working, active.personId!, logText: null);
+    }
+
+    return working;
   }
 }
 

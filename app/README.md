@@ -1,7 +1,7 @@
-# Bir Ömür — prototip uygulaması (Aşama 1-3)
+# Bir Ömür — prototip uygulaması (Aşama 1-4)
 
 Flutter ile Android öncelikli geliştirilen ilk prototip.
-Kapsam `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2 ve 3** ile
+Kapsam `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2, 3 ve 4** ile
 sınırlıdır.
 
 ## Gereksinimler
@@ -46,7 +46,7 @@ lib/
   data/                    isim, şehir, meslek havuzları
   domain/models/           Person, PlayerCharacter, Stats, GameState ...
   domain/generation/       hayat üretimi (LifeGenerator) ve yaş alma (LifeProgression)
-  domain/interaction/      aile etkileşimleri, azalan etki ve doğal ret
+  domain/interaction/      aile etkileşimleri, azalan etki, doğal ret, ilişki
   domain/events/           olay motoru: uygunluk, seçim, etki ve hafıza
   state/                   GameController + GameScope
   ui/theme/                Bir Ömür teması (modern + ölçülü nostaljik)
@@ -61,7 +61,6 @@ Aşağıdakiler sonraki aşamalara aittir; sahte düğme veya boş menü olarak 
 konmamıştır:
 
 - Hediye verme ve para gerektiren etkileşimler (ekonomi sistemi henüz yok)
-- Sevgili edinme → ayrılma → eski sevgili akışı (Aşama 4)
 - NPC'lerin bağımsız hayat gelişmeleri (iş değişikliği, taşınma, ölüm)
 - Sosyal sekmesi, Ün sistemi, spor salonu / berber / seyahat, ekonomi
 - Oyunun kaydedilmesi (durum yalnızca bellekte tutulur)
@@ -101,11 +100,29 @@ Aile → kişi → **Vakit Geçir** / **Sohbet Et**. Kurallar:
   yüzeysel bir sürümdür: yalnızca oyuncunun etkileşim geçmişine bakar, kişinin
   kendi ruh hâli veya olay geçmişi modellenmemiştir.
 
+## Romantik ilişki (Aşama 4)
+
+Durakta tanışma → çıkma teklifi → **sevgili** → ayrılık → **eski sevgili**.
+
+- Sevgili, teklif seçimiyle oluşur ve Aile bölümünde **İlişkiler** başlığı
+  altında sevgili statüsüyle listelenir.
+- Ayrılık iki yoldan yapılabilir: kişi detayındaki **Ayrıl** düğmesi veya
+  ilişki tartışması olayındaki ayrılma seçeneği.
+- **Ayrılınca kişi kaydı silinmez ve yeniden yaratılmaz.** Aynı kimlik, aynı
+  isim ve aynı yakınlık değeriyle eski sevgili statüsüne geçer; hayat günlüğü
+  korunur.
+- Sevgili/akraba/hane ayrı kavramlardır: sevgili kan bağı sayılmaz ve
+  otomatik olarak oyuncunun hanesine yerleştirilmez.
+- Eski sevgiliye sevgiliye özel eylemler **koşulsuz sunulmaz**; bu sürümde
+  etkileşimler kapalıdır ve gerekçesi ekranda yazılıdır.
+- Hikâye her hayatta zorunlu değildir; uygun yaş ve koşulda ortaya çıkar.
+
 ## Geçici prototip değerleri
 
 Kodda `prototypeOnly` yorumuyla işaretlenmiş sayısal ağırlıklar (aile üretim
 olasılıkları, başlangıç değer aralıkları, çalışma durumu dağılımları, azalma
 eğrisi, ret olasılığı, etkileşimlerin açıldığı asgari yaş, olay ağırlıkları,
-ek olay eşiği ve sitem için gereken yaş farkı) yalnızca prototipin
+ek olay eşiği, sitem için gereken yaş farkı, romantik olayların yaş aralıkları
+ve partnerin cinsiyetinin oyuncunun karşıtı seçilmesi) yalnızca prototipin
 çalışabilmesi içindir. **Onaylanmış oyun dengesi değildir** ve
 `DECISIONS.md` içine kural olarak yazılmamıştır.

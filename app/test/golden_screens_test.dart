@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -139,6 +140,61 @@ void main() {
     await expectLater(
       find.byType(BirOmurApp),
       matchesGoldenFile('goldens/05_etkilesim.png'),
+    );
+  }, skip: !enabled);
+
+  testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',
+      (WidgetTester tester) async {
+    await pumpPhone(tester);
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+
+    Person? partner() {
+      for (final Person p in controller.state!.people) {
+        if (p.relation == RelationType.sevgili) return p;
+      }
+      return null;
+    }
+
+    int guard = 0;
+    while (partner() == null && guard++ < 60) {
+      while (controller.state!.hasPendingEvent) {
+        final ActiveEvent event = controller.state!.pendingEvent!;
+        final EventChoice choice = event.choices.firstWhere(
+          (EventChoice c) => <String>['selam', 'teklif'].contains(c.id),
+          orElse: () => event.choices.first,
+        );
+        await tester.tap(find.text(choice.label));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Devam'));
+        await tester.pumpAndSettle();
+        if (partner() != null) break;
+      }
+      if (partner() != null) break;
+      await tester.tap(find.text('Yaş Al'));
+      await tester.pumpAndSettle();
+    }
+    expect(partner(), isNotNull);
+
+    final String adSoyad = partner()!.fullName;
+    await tester.tap(find.byIcon(Icons.groups_outlined));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(adSoyad),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(adSoyad));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ayrıl'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Ayrıl'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(BirOmurApp),
+      matchesGoldenFile('goldens/07_eski_sevgili.png'),
     );
   }, skip: !enabled);
 }

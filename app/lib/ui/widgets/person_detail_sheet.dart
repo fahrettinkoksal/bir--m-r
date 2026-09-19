@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/interaction.dart';
 import '../../domain/models/person.dart';
+import '../../domain/models/relation.dart';
 import '../../state/game_scope.dart';
 import 'kilim_divider.dart';
 
@@ -31,12 +32,46 @@ class PersonDetailSheet extends StatefulWidget {
 
 class _PersonDetailSheetState extends State<PersonDetailSheet> {
   InteractionOutcome? _lastOutcome;
+  String? _notice;
 
   void _run(InteractionKind kind) {
     final InteractionOutcome? outcome =
         GameScope.of(context).interact(widget.personId, kind);
     if (outcome == null) return;
-    setState(() => _lastOutcome = outcome);
+    setState(() {
+      _lastOutcome = outcome;
+      _notice = null;
+    });
+  }
+
+  /// Ayrılık (D-029): kişi kaydı silinmez, aynı kimlikle eski sevgili olur.
+  Future<void> _breakUp(Person person) async {
+    final bool? onay = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Ayrılmak istiyor musun?'),
+        content: Text(
+          '${person.firstName} ile ilişkini bitireceksin. '
+          'Kaydı silinmez; Aile bölümünde eski sevgili olarak kalır.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Ayrıl'),
+          ),
+        ],
+      ),
+    );
+    if (onay != true || !mounted) return;
+    final String? sonuc = GameScope.of(context).endRomance(widget.personId);
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc;
+    });
   }
 
   @override
@@ -107,6 +142,28 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 _Actions(onSelected: _run)
               else
                 _Note(text: availability.reason!),
+              // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;
+              // eski sevgiliye sevgiliye özel eylem açılmaz.
+              if (person.isAlive && person.relation == RelationType.sevgili) ...<Widget>[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => _breakUp(person),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      side: BorderSide(
+                        color: theme.colorScheme.error.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: const Text('Ayrıl'),
+                  ),
+                ),
+              ],
+              if (_notice != null) ...<Widget>[
+                const SizedBox(height: 16),
+                _Note(text: _notice!),
+              ],
               if (_lastOutcome != null) ...<Widget>[
                 const SizedBox(height: 16),
                 _OutcomeCard(outcome: _lastOutcome!),

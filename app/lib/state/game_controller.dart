@@ -6,6 +6,7 @@ import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/interaction/family_interactions.dart';
+import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
 import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
@@ -22,6 +23,7 @@ class GameController extends ChangeNotifier {
   final Random _random;
   final FamilyInteractions _interactions = const FamilyInteractions();
   final EventEngine _events = const EventEngine();
+  final Romance _romance = const Romance();
 
   GameState? _state;
 
@@ -66,7 +68,7 @@ class GameController extends ChangeNotifier {
   String? chooseEventOption(String choiceId) {
     final GameState? current = _state;
     if (current == null || !current.hasPendingEvent) return null;
-    final GameState next = _events.resolve(current, choiceId);
+    final GameState next = _events.resolve(current, choiceId, rng: _random);
     _state = next;
     notifyListeners();
     return next.log.isEmpty ? null : next.log.last.text;
@@ -110,6 +112,20 @@ class GameController extends ChangeNotifier {
       return const InteractionAvailability.blocked('Etkin bir hayat yok.');
     }
     return _interactions.availability(current, person);
+  }
+
+  /// Sevgiliden ayrılır (D-029).
+  ///
+  /// Kişi kaydı silinmez; **aynı kimlikle** eski sevgili statüsüne geçer.
+  /// Yalnızca gerçekten sevgili olan kişi için çalışır.
+  String? endRomance(String personId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final GameState next = _romance.end(current, personId);
+    if (identical(next, current)) return null;
+    _state = next;
+    notifyListeners();
+    return next.log.last.text;
   }
 
   /// Hayatı bitirip başlangıç ekranına döner.

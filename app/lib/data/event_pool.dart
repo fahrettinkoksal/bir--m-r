@@ -15,6 +15,12 @@ abstract final class StoryFlags {
   static const String sessizKaldi = 'sessiz_kaldi';
   static const String universitede = 'universitede';
   static const String calismaHayati = 'calisma_hayati';
+
+  /// Romantik hikâye izleri (D-030).
+  static const String romantikIlgi = 'romantik_ilgi';
+  static const String romantikIliskide = 'romantik_iliskide';
+  static const String romantikBitti = 'romantik_bitti';
+  static const String romantikGecti = 'romantik_gecti';
 }
 
 /// Sahip olunan varlıklar. Sahip olunmayan varlık için olay çıkmaz.
@@ -407,6 +413,138 @@ const List<GameEvent> kEventPool = <GameEvent>[
       ),
     ],
   ),
+  // --- Romantik hikâye: tanışma → sevgili → ayrılık → eski sevgili --------
+  GameEvent(
+    id: 'ilk_goz_agrisi',
+    category: EventCategory.kisisel,
+    text: 'Durakta her gün aynı saatte karşılaştığın biri var. Bugün '
+        'otobüs gecikti ve ikiniz de aynı tabelaya bakıyorsunuz.',
+    requirement: EventRequirement(
+      minAge: 15,
+      maxAge: 22,
+      forbiddenFlags: <String>{
+        StoryFlags.romantikIlgi,
+        StoryFlags.romantikGecti,
+      },
+    ),
+    // prototypeOnly: romantik zincir ilk prototipte gerçekten oynanabilmeli
+    // (D-030); yine de her hayatta zorunlu değildir.
+    weight: 5,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'selam',
+        label: 'Selam ver, konuş',
+        resultText: 'İki cümle kurdunuz, otobüs geldi. Ertesi gün yine '
+            'aynı durakta, yine aynı saatte buluştunuz.',
+        charisma: 2,
+        happiness: 2,
+        addFlags: <String>{StoryFlags.romantikIlgi},
+      ),
+      EventChoice(
+        id: 'gec',
+        label: 'Bir şey deme',
+        resultText: 'Otobüse bindin, bakıştınız, o kadar. Bazı cümleler '
+            'kurulmadan biter.',
+        happiness: -1,
+        addFlags: <String>{StoryFlags.romantikGecti},
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'cikma_teklifi',
+    category: EventCategory.kisisel,
+    text: 'Duraktaki sohbetler aylardır sürüyor. Bugün ikiniz de '
+        'konuşmayı uzatmak için bahane arıyorsunuz.',
+    requirement: EventRequirement(
+      minAge: 15,
+      maxAge: 25,
+      requiredFlags: <String>{StoryFlags.romantikIlgi},
+      forbiddenFlags: <String>{
+        StoryFlags.romantikIliskide,
+        StoryFlags.romantikBitti,
+      },
+    ),
+    weight: 6,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'teklif',
+        label: 'Açıl ve teklif et',
+        resultText: 'Adının {kisi} olduğunu o gün öğrendin. Artık '
+            'birliktesiniz; Aile bölümünde onu görebilirsin.',
+        happiness: 8,
+        charisma: 2,
+        bond: 5,
+        addFlags: <String>{StoryFlags.romantikIliskide},
+        startsRomance: true,
+      ),
+      EventChoice(
+        id: 'erteleme',
+        label: 'Bugün de erteledin',
+        resultText: 'Cümleyi yine kuramadın. Otobüs geldi, sen bindin.',
+        happiness: -2,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'iliski_tartismasi',
+    category: EventCategory.kisisel,
+    text: '{kisi} ile uzun zamandır aynı konuda tartışıyorsunuz. Bugün '
+        'konu yine açıldı ve ikiniz de yorgunsunuz.',
+    requirement: EventRequirement(
+      minAge: 15,
+      livingRelations: <RelationType>{RelationType.sevgili},
+    ),
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'konus',
+        label: 'Oturup konuş',
+        resultText: 'Uzun konuştunuz. Mesele bitmedi ama ikiniz de '
+            'birbirinizi daha iyi anladınız.',
+        happiness: 3,
+        bond: 6,
+      ),
+      EventChoice(
+        id: 'ayril',
+        label: 'Ayrılmayı teklif et',
+        resultText: 'Konuşma bitmeden karar verdiniz. {kisi} ile '
+            'yollarınız ayrıldı.',
+        happiness: -6,
+        removeFlags: <String>{StoryFlags.romantikIliskide},
+        addFlags: <String>{StoryFlags.romantikBitti},
+        endsRomance: true,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'eski_sevgili_karsilasma',
+    category: EventCategory.kisisel,
+    text: '{kisi} ile bir caddede karşılaştın. Aynı durak, aynı saat '
+        'değil ama aynı yüz.',
+    requirement: EventRequirement(
+      minAge: 15,
+      livingRelations: <RelationType>{RelationType.eskiSevgili},
+      requiredFlags: <String>{StoryFlags.romantikBitti},
+    ),
+    weight: 2,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'selamlas',
+        label: 'Selamlaş',
+        resultText: 'Kısa konuştunuz. Eski hâliniz değilsiniz ama '
+            'yabancı da değilsiniz.',
+        happiness: 2,
+      ),
+      EventChoice(
+        id: 'gormezden',
+        label: 'Görmezden gel',
+        resultText: 'Karşı kaldırıma geçtin. Arkana bakmadın; bakmak '
+            'istedin.',
+        happiness: -2,
+      ),
+    ],
+  ),
+
   GameEvent(
     id: 'ilk_maas',
     category: EventCategory.yetiskinlik,

@@ -7,6 +7,7 @@ import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
+import '../models/relation.dart';
 import '../models/stats.dart';
 
 /// Etkileşimin hem yeni durumu hem de oyuncuya gösterilecek sonucu.
@@ -60,6 +61,15 @@ class FamilyInteractions {
     if (!person.isAlive) {
       return const InteractionAvailability.blocked(
         'Bu kişi hayatta değil; etkileşim kurulamaz.',
+      );
+    }
+    if (person.relation == RelationType.eskiSevgili) {
+      // Ayrılık sonrası sevgiliye özel eylemler koşulsuz açılmaz
+      // (`docs/CLAUDE_PROTOTYPE_TASK.md` Aşama 4). Eski sevgiliyle hangi
+      // etkileşimlerin açık kalacağı henüz kararlaştırılmadı.
+      return const InteractionAvailability.blocked(
+        'Ayrıldınız. Eski sevgiliyle hangi etkileşimlerin açık kalacağı '
+        'henüz tasarlanmadı.',
       );
     }
     if (state.player.age < prototypeOnlyMinPlayerAge) {

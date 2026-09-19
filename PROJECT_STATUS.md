@@ -1,6 +1,6 @@
 # Proje durumu
 
-**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2 ve 3 uygulandı** (`app/` klasörü); Aşama 4-5 henüz yapılmadı. **Sevgili → ayrılık → eski sevgili akışı henüz yoktur.**
+**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2, 3 ve 4 uygulandı** (`app/` klasörü); Aşama 5 (baştan sona entegrasyon denemesi ve teslim) henüz yapılmadı. D-030'daki **sevgili → ayrılık → eski sevgili** akışı gerçekten oynanabilir durumdadır.
 
 ## Şu ana kadar ana hatlarını belirledik
 Türkiye/nostalji odaklı özgün oyun kimliği; iki başlangıç modu, rastgele aile/şehir; dış görünüş, mutluluk, sağlık, zekâ, karizma; kişi bazlı ilişkiler; geçmiş karar hafızası; yaşa/koşula uygun olaylar; ailenin bağımsız yaşam gelişmeleri. Kesin karar kaydı: `DECISIONS.md`.
@@ -46,12 +46,20 @@ Aile rastgele çeşitlenir; aynı evde yaşama ile akrabalık ayrı tutulur. Ail
 ### Sitem olayının bu kesitteki derinliği (D-025)
 Uzun süre temas kurulmayan **hane** üyesi sitem edebiliyor. Ölçü oyun içi: kişiyle en son hangi yaşta anlamlı temas kurulduğuna bakılıyor (prototipte 3 yaş fark). Kişinin kendi ruh hâli, olay geçmişi veya farklı sitem kademeleri **modellenmedi**; bu yüzden sistem tam hâliyle var sayılmamalıdır.
 
+## Aşama 4 — yapıldı (kod: `app/lib/domain/interaction/romance.dart`)
+- Durakta tanışma → çıkma teklifi → **sevgili** zinciri gerçek seçimlerle işliyor; kişi Aile bölümünde **İlişkiler** başlığı altında sevgili statüsüyle listeleniyor.
+- Ayrılık iki gerçek yoldan yapılabiliyor: kişi detayındaki **Ayrıl** düğmesi (onay soruluyor) ve ilişki tartışması olayındaki ayrılma seçeneği.
+- **Ayrılınca kayıt silinmiyor, yeni kimlikle yeniden yaratılmıyor:** aynı kimlik, aynı isim ve aynı yakınlık değeriyle **Eski Kız Arkadaş / Eski Sevgili** statüsüne geçiyor; hayat günlüğü korunuyor (D-029).
+- Sevgili/akraba/hane ayrı: sevgili kan bağı sayılmıyor, otomatik olarak haneye yerleştirilmiyor.
+- Eski sevgiliye sevgiliye özel eylemler koşulsuz sunulmuyor; etkileşimler kapalı ve gerekçesi ekranda yazılı.
+- Hikâye her hayatta zorunlu değil; uygun yaş ve koşulda ortaya çıkıyor.
+
 ### Çalıştırılan doğrulamalar
-`flutter analyze` temiz; `flutter test` ile **79 test geçti** (aile üretim tutarlılığı, yaş alma, aile etkileşimi/azalan etki/ret, olay uygunluğu/hafıza/tempo, arayüz gezinmesi ve etkileşim akışı). Ekran görüntüleri `app/test/goldens/` altında üretildi.
+`flutter analyze` temiz; `flutter test` ile **94 test geçti** (aile üretim tutarlılığı, yaş alma, aile etkileşimi/azalan etki/ret, olay uygunluğu/hafıza/tempo, sevgili→ayrılık kimlik korunumu, arayüz gezinmesi ve tam ilişki akışı). Ekran görüntüleri `app/test/goldens/` altında üretildi.
 **Doğrulanamayan:** Android APK derlemesi ve gerçek cihaz/emülatör denemesi — bu ortamda Android SDK indirilemedi (ağ politikası `dl.google.com` erişimini engelliyor). APK derlemesi Faho'nun ortamında denenmelidir.
 
 ## Şimdi yapılacak iş
-Aşama 3 incelendikten sonra **Aşama 4** (sevgili edinme → ayrılık → aynı kişinin eski sevgili olarak kalması) uygulanacak. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
+Aşama 4 incelendikten sonra **Aşama 5** (baştan sona akışın gerçek uygulamada denenmesi, teslim ve durum kaydı) yapılacak. Bu ortamda Android derlemesi mümkün olmadığı için baştan sona deneme şimdilik otomatik testler ve widget akışlarıyla yapılmıştır. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
 
 ### Faho'nun kararına bırakılan açık noktalar
 - Azalma eğrisi (prototipte 4 tekrarda sıfır), ret olasılıkları ve ret sonrası mutluluk kaybı miktarı.
@@ -62,6 +70,10 @@ Aşama 3 incelendikten sonra **Aşama 4** (sevgili edinme → ayrılık → ayn�
 - Bir yaşta en fazla kaç ek olay çıkacağı (prototipte 1) ve ek olay için gereken ilerleme eşiği (prototipte 3 kazançlı etkileşim).
 - Sitem için gereken oyun içi yaş farkı (prototipte 3) ve sitemin derinliği.
 - `lise_sonrasi` olayındaki "üniversite / çalışma hayatı" seçimi yalnızca bir **hikâye izidir**; eğitim ve kariyer sistemleri tasarlanmadı. Bu izin kalıcı olup olmayacağı Faho'nun kararı.
+- **Partnerin cinsiyeti** prototipte oyuncunun karşıtı seçiliyor (`docs/PROTOTYPE_UI.md` §4'teki örneğe uygun). Yönelim ve eşleşme kuralları kararlaştırılmadı.
+- Romantik olayların yaş aralıkları (tanışma 15-22, teklif 15-25) ve zincirin bir hayatta yalnızca bir kez kurulabilmesi.
+- **Eski sevgiliyle hangi etkileşimlerin açık kalacağı** (`docs/PROTOTYPE_UI.md` §4 açık sorusu); şimdilik tamamı kapalı.
+- Aile ekranında kan bağı olanlar, partnerler ve eski partnerlerin nasıl bölümleneceği; prototipte Çekirdek / Geniş / İlişkiler gruplaması kullanılıyor.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

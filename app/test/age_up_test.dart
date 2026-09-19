@@ -53,7 +53,13 @@ void main() {
     final List<String> ids =
         controller.state!.people.map((Person p) => p.id).toList();
     advanceToAge(controller, 20);
-    expect(controller.state!.people.map((Person p) => p.id).toList(), ids);
+
+    // Hayat ilerledikçe yeni kişiler (örneğin sevgili) eklenebilir; mevcut
+    // kişilerin kimlikleri ve sırası değişmez, hiçbiri silinmez.
+    final List<String> sonra =
+        controller.state!.people.map((Person p) => p.id).toList();
+    expect(sonra.length, greaterThanOrEqualTo(ids.length));
+    expect(sonra.sublist(0, ids.length), ids);
   });
 
   test('her yaş almada günlüğe tam bir satır eklenir ve olay yağmuru olmaz', () {

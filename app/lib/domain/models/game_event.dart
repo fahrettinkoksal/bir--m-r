@@ -73,7 +73,10 @@ class EventChoice {
     this.appearance = 0,
     this.bond = 0,
     this.addFlags = const <String>{},
+    this.removeFlags = const <String>{},
     this.addPossessions = const <String>{},
+    this.startsRomance = false,
+    this.endsRomance = false,
   });
 
   final String id;
@@ -93,7 +96,18 @@ class EventChoice {
 
   /// Geleceğe bırakılan iz (D-008, D-022).
   final Set<String> addFlags;
+
+  /// Artık geçerli olmayan izler (örneğin ilişki bittiğinde).
+  final Set<String> removeFlags;
   final Set<String> addPossessions;
+
+  /// Bu seçim yeni bir romantik ilişki başlatır: kişi oluşturulur ve
+  /// **sevgili** statüsüyle Aile'de listelenir (D-029, D-030).
+  final bool startsRomance;
+
+  /// Bu seçim mevcut ilişkiyi bitirir. Kişi **silinmez**; aynı kimlikle
+  /// eski sevgili statüsüne geçer.
+  final bool endsRomance;
 }
 
 /// Olay tanımı. Havuz modülerdir; yeni olay eklemek listeye kayıt eklemektir.
