@@ -73,9 +73,16 @@ jobs:
 
           # Visual C++ çalışma zamanı DLL'leri: kullanıcının bilgisayarında
           # eksikse uygulama açılmaz. Runner'daki redist klasöründen kopyalanır.
+          #
+          # Seçim önemli: uygulama v143 araç setiyle derleniyor, bu yüzden
+          # eski VC142 DLL'leri exe'nin yanına konursa çalışma anında eksik
+          # giriş noktası hatası verebilir. 'onecore' sürümleri de masaüstü
+          # için uygun değildir. Bu yüzden onecore hariç tutulur ve en yüksek
+          # sürümlü x64 klasörü seçilir.
           $crt = Get-ChildItem -Path "C:/Program Files/Microsoft Visual Studio/2022" `
             -Filter "Microsoft.VC*.CRT" -Recurse -Directory -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
+            Where-Object { $_.FullName -notmatch "onecore" -and $_.FullName -match "\\x64\\" } |
+            Sort-Object FullName -Descending | Select-Object -First 1
           if ($crt) {
             Write-Host "CRT klasörü: $($crt.FullName)"
             foreach ($dll in @("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")) {
