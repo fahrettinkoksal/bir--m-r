@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+
+import '../data/save/save_service.dart';
 
 import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
@@ -20,18 +23,115 @@ import '../domain/models/person.dart';
 /// Harici bir durum yönetimi paketine bağlı değildir; yeni sekmeler ve
 /// sistemler eklendiğinde bu sınıfın üzerine modül eklenebilir.
 class GameController extends ChangeNotifier {
-  GameController({Random? random}) : _random = random ?? Random();
+  GameController({Random? random, SaveService? saveService})
+      : _random = random ?? Random(),
+        _saveService = saveService;
 
   final Random _random;
   final FamilyInteractions _interactions = const FamilyInteractions();
   final EventEngine _events = const EventEngine();
   final Romance _romance = const Romance();
 
+  /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
+  final SaveService? _saveService;
+
   GameState? _state;
+
+  /// Yazma işlemleri sıraya alınır: iki kayıt birbirinin üzerine binmez.
+  Future<void> _saveChain = Future<void>.value();
+
+  /// Okunamayan bir kayıt bulunduğunda otomatik kayıt durdurulur.
+  ///
+  /// Böylece bozuk dosyanın üzerine habersizce yazılmaz; kullanıcı yeni bir
+  /// hayat başlatmayı onaylayana kadar dosyaya dokunulmaz.
+  bool _autoSaveBlocked = false;
+
+  /// Cihazda kayıt var mı? Açılışta [checkForSavedLife] ile doldurulur.
+  bool _hasSavedLife = false;
+
+  /// Okunamayan kayıt için kullanıcıya gösterilecek açıklama.
+  String? _saveProblem;
 
   GameState? get state => _state;
 
   bool get hasLife => _state != null;
+
+  /// Cihazda devam edilebilecek bir kayıt bulundu mu?
+  bool get hasSavedLife => _hasSavedLife;
+
+  /// Kayıt okunamadıysa nedeni; sorun yoksa `null`.
+  String? get saveProblem => _saveProblem;
+
+  /// Kayıt sistemi etkin mi?
+  bool get savingEnabled => _saveService != null;
+
+  /// Açılışta kayıt olup olmadığına bakar.
+  Future<void> checkForSavedLife() async {
+    final SaveService? service = _saveService;
+    if (service == null) return;
+    _hasSavedLife = await service.hasSave();
+    notifyListeners();
+  }
+
+  /// Kayıtlı hayatı yükler ve sonucu bildirir.
+  ///
+  /// Kayıt bozuksa durum değişmez, dosyaya dokunulmaz ve sebep
+  /// [saveProblem] üzerinden okunabilir.
+  Future<SaveLoadStatus> restoreSavedLife() async {
+    final SaveService? service = _saveService;
+    if (service == null) return SaveLoadStatus.yok;
+
+    final SaveLoadResult result = await service.load();
+    switch (result.status) {
+      case SaveLoadStatus.yuklendi:
+        _state = result.state;
+        _hasSavedLife = true;
+        _saveProblem = null;
+        _autoSaveBlocked = false;
+      case SaveLoadStatus.bozuk:
+        // Bozuk kaydın üzerine yazma: kullanıcı karar verene kadar dokunma.
+        _hasSavedLife = true;
+        _saveProblem = result.message;
+        _autoSaveBlocked = true;
+      case SaveLoadStatus.yok:
+        _hasSavedLife = false;
+        _saveProblem = null;
+    }
+    notifyListeners();
+    return result.status;
+  }
+
+  /// Kayıtlı hayatı **açıkça** siler. Yalnızca kullanıcı onayıyla çağrılır.
+  Future<void> deleteSavedLife() async {
+    final SaveService? service = _saveService;
+    if (service == null) return;
+    await _saveChain;
+    await service.clear();
+    _hasSavedLife = false;
+    _saveProblem = null;
+    _autoSaveBlocked = false;
+    notifyListeners();
+  }
+
+  /// Oyun durumunu değiştiren her anlamlı işlemden sonra otomatik kayıt.
+  ///
+  /// Arayüzü bekletmemek için eşzamansız çalışır; testler [flushSaves] ile
+  /// yazmanın bitmesini bekleyebilir.
+  void _autoSave() {
+    final SaveService? service = _saveService;
+    final GameState? current = _state;
+    if (service == null || current == null || _autoSaveBlocked) return;
+    _hasSavedLife = true;
+    _saveChain = _saveChain.then((_) => service.save(current)).catchError(
+      (Object error) {
+        // Kayıt yazılamadıysa oyun durmaz; sorun kullanıcıya bildirilir.
+        _saveProblem = 'Oyun kaydedilemedi: $error';
+      },
+    );
+  }
+
+  /// Bekleyen kayıt yazmalarının bitmesini bekler.
+  Future<void> flushSaves() => _saveChain;
 
   /// Yeni bir hayat başlatır (D-005 iki başlangıç modu).
   ///
@@ -50,6 +150,11 @@ class GameController extends ChangeNotifier {
       chosenFirstName: mode == StartMode.isimVeCinsiyet ? firstName : null,
       chosenGender: mode == StartMode.isimVeCinsiyet ? gender : null,
     );
+    // Yeni hayat, bozuk kayıt engelini kaldırır: oyuncu bilerek baştan
+    // başladı, artık yazmak güvenli.
+    _autoSaveBlocked = false;
+    _saveProblem = null;
+    _autoSave();
     notifyListeners();
   }
 
@@ -61,6 +166,7 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return;
     _state = LifeProgression(_random).advanceOneYear(current);
+    _autoSave();
     notifyListeners();
   }
 
@@ -73,6 +179,7 @@ class GameController extends ChangeNotifier {
     if (current == null || !current.hasPendingEvent) return null;
     final GameState next = _events.resolve(current, choiceId, rng: _random);
     _state = next;
+    _autoSave();
     notifyListeners();
     return EventChoiceResult(
       text: next.log.isEmpty ? '' : next.log.last.text,
@@ -106,6 +213,7 @@ class GameController extends ChangeNotifier {
     }
 
     _state = next;
+    _autoSave();
     notifyListeners();
     return result.outcome;
   }
@@ -143,11 +251,15 @@ class GameController extends ChangeNotifier {
     final GameState next = _romance.end(current, personId);
     if (identical(next, current)) return null;
     _state = next;
+    _autoSave();
     notifyListeners();
     return next.log.last.text;
   }
 
-  /// Hayatı bitirip başlangıç ekranına döner.
+  /// Hayatı ekrandan kaldırıp başlangıç ekranına döner.
+  ///
+  /// **Kaydı silmez**: oyuncu başlangıç ekranından "Devam Et" ile aynı
+  /// hayata geri dönebilir. Kaydı silmek için [deleteSavedLife] gerekir.
   void clearLife() {
     _state = null;
     notifyListeners();

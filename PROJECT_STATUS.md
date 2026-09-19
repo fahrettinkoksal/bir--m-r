@@ -107,6 +107,14 @@ Aşama 4 incelendikten sonra **Aşama 5** (baştan sona akışın gerçek uygula
 - **Eski sevgiliyle hangi etkileşimlerin açık kalacağı** (`docs/PROTOTYPE_UI.md` §4 açık sorusu); şimdilik tamamı kapalı.
 - Aile ekranında kan bağı olanlar, partnerler ve eski partnerlerin nasıl bölümleneceği; prototipte Çekirdek / Geniş / İlişkiler gruplaması kullanılıyor.
 
+## Kayıt / yükleme (uygulandı)
+Faho'nun talimatıyla kayıt sistemi yazıldı: tek aktif hayat kaydı, cihazın
+uygulamaya ait yerel veri klasöründe JSON, sürüm numarası, yarıda kesilmeye
+dayanıklı yazma (geçici dosya + yedek + tek adımda taşıma) ve bozuk kayıtta
+çökmeden uyarı. Başlangıç ekranına **Devam Et** eklendi; yeni hayat kaydın
+üzerine yazacağı için önce onay soruluyor. Ayrıntı: `docs/SAVE_SYSTEM.md`.
+Açık kalan sorular karar kuyruğunda **Q-035** altında.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
