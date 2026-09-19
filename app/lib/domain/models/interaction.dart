@@ -1,18 +1,32 @@
 import 'package:flutter/foundation.dart';
 
+import 'applied_effect.dart';
+
 /// Aile bireyleriyle yapılabilen etkileşim türleri (D-016).
 ///
 /// Birden fazla tür bulunması, bir faaliyetin aynı yaşta faydasının bitmesinin
 /// **diğer faaliyetleri kilitlemediğini** göstermek için gereklidir
-/// (`docs/CORE_LOOP.md`). Hediye verme gibi para gerektiren etkileşimler,
-/// ekonomi sistemi henüz tasarlanmadığı için bu aşamada yoktur.
+/// (`docs/CORE_LOOP.md`).
+///
+/// Para ve eşya taşıyan türler (hediye, para isteme) yalnızca **oyuncunun
+/// kendi cüzdanıyla** çalışır (ECO-001): ailenin ekonomik durumu oyuncunun
+/// parası değildir, yalnızca karşı tarafın verebileceği miktarı etkiler.
+/// Para veya hediye gerçekten el değiştirmediyse eylem olmuş gibi
+/// gösterilmez.
 enum InteractionKind {
   vakitGecir('Vakit Geçir'),
-  sohbet('Sohbet Et');
+  sohbet('Sohbet Et'),
+  hediyeVer('Hediye Ver'),
+  hediyeIste('Hediye İste'),
+  paraIste('Para İste');
 
   const InteractionKind(this.label);
 
   final String label;
+
+  /// Para veya eşya el değiştiren türler.
+  bool get transfersResource =>
+      this == hediyeVer || this == hediyeIste || this == paraIste;
 }
 
 /// Bir etkileşimin yapılıp yapılamayacağı ve yapılamıyorsa gerekçesi.
@@ -43,7 +57,10 @@ class InteractionOutcome {
     this.bondDelta = 0,
     this.happinessDelta = 0,
     this.charismaDelta = 0,
+    this.moneyDelta = 0,
+    this.gainedPossession,
     this.noNewBenefit = false,
+    this.effects = const <AppliedEffect>[],
   });
 
   final InteractionKind kind;
@@ -55,10 +72,40 @@ class InteractionOutcome {
   final int bondDelta;
   final int happinessDelta;
   final int charismaDelta;
+
+  /// Oyuncunun **kendi** cüzdanındaki değişim (ECO-001).
+  final int moneyDelta;
+
+  /// Etkileşim sonucu gerçekten eline geçen eşyanın kimliği.
+  final String? gainedPossession;
+
   final bool noNewBenefit;
 
+  /// Durumun öncesi ile sonrası karşılaştırılarak bulunan, **gerçekten
+  /// uygulanmış** değişimler. Ekranda bunlar gösterilir.
+  final List<AppliedEffect> effects;
+
+  InteractionOutcome withEffects(List<AppliedEffect> applied) =>
+      InteractionOutcome(
+        kind: kind,
+        personId: personId,
+        accepted: accepted,
+        text: text,
+        bondDelta: bondDelta,
+        happinessDelta: happinessDelta,
+        charismaDelta: charismaDelta,
+        moneyDelta: moneyDelta,
+        gainedPossession: gainedPossession,
+        noNewBenefit: noNewBenefit,
+        effects: applied,
+      );
+
   bool get hasAnyEffect =>
-      bondDelta != 0 || happinessDelta != 0 || charismaDelta != 0;
+      bondDelta != 0 ||
+      happinessDelta != 0 ||
+      charismaDelta != 0 ||
+      moneyDelta != 0 ||
+      gainedPossession != null;
 
   /// Hayat günlüğüne yalnızca anlamlı sonuçlar yazılır.
   bool get worthLogging => !accepted || hasAnyEffect;

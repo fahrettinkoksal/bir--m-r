@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'education.dart';
 import 'gender.dart';
 import 'relation.dart';
 import 'wealth.dart';
@@ -24,6 +25,8 @@ class Person {
     required this.wealth,
     required this.bond,
     this.occupation,
+    this.schoolLevel,
+    this.schoolTie,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -53,6 +56,33 @@ class Person {
   /// `null` olur ve arayüzde hiç gösterilmez; uydurma bir değer üretilmez.
   final WealthTier? wealth;
 
+  /// Okul kişileri için hangi kademede tanışıldığı.
+  ///
+  /// Sınıf arkadaşları ve öğretmenler kademe değişince listelerden düşer
+  /// ama **kayıtları silinmez**; eski kademeye ait oldukları buradan bilinir.
+  final SchoolLevel? schoolLevel;
+
+  /// Kişinin okul bağı (sınıf arkadaşı / öğretmen).
+  ///
+  /// [relation] yakınlık derecesini tutar ve değişebilir (sınıf arkadaşı →
+  /// arkadaş). Okul bağı ise **değişmez**: aynı sınıfta okumaya devam eden
+  /// kişi, yakın arkadaş olsa bile sınıf listesinden düşmez.
+  final SchoolTie? schoolTie;
+
+  /// Oyuncunun şu anki kademesinde sınıf arkadaşı mı?
+  bool isClassmateAt(SchoolLevel? currentLevel) =>
+      isAlive &&
+      schoolTie == SchoolTie.sinifArkadasi &&
+      currentLevel != null &&
+      schoolLevel == currentLevel;
+
+  /// Oyuncunun şu anki kademesinde öğretmeni mi?
+  bool isTeacherAt(SchoolLevel? currentLevel) =>
+      isAlive &&
+      schoolTie == SchoolTie.ogretmen &&
+      currentLevel != null &&
+      schoolLevel == currentLevel;
+
   /// Oyuncuyla ilişki puanı (0-100).
   ///
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
@@ -75,6 +105,14 @@ class Person {
         playerAge: playerAge,
       );
 
+  /// Cümle içinde kullanılan iyelikli etiket: "Deden", "Annen", "Arkadaşın".
+  String possessiveFor(int playerAge) => relationPossessive(
+        relation: relation,
+        gender: gender,
+        personAge: age,
+        playerAge: playerAge,
+      );
+
   Person copyWith({
     String? firstName,
     String? lastName,
@@ -86,6 +124,8 @@ class Person {
     Object? occupation = _unset,
     Object? wealth = _unset,
     int? bond,
+    Object? schoolLevel = _unset,
+    Object? schoolTie = _unset,
   }) {
     return Person(
       id: id,
@@ -100,6 +140,11 @@ class Person {
       occupation: occupation == _unset ? this.occupation : occupation as String?,
       wealth: wealth == _unset ? this.wealth : wealth as WealthTier?,
       bond: bond ?? this.bond,
+      schoolLevel: schoolLevel == _unset
+          ? this.schoolLevel
+          : schoolLevel as SchoolLevel?,
+      schoolTie:
+          schoolTie == _unset ? this.schoolTie : schoolTie as SchoolTie?,
     );
   }
 }

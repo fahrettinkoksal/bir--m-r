@@ -265,11 +265,14 @@ void main() {
       final GameState state =
           LifeGenerator.seeded(seed).generate(mode: StartMode.tamamenRastgele);
       final int grade = (age - 5).clamp(1, 12);
-      return state.copyWith(
-        player: state.player.copyWith(age: age),
-        education: age <= 17
-            ? EducationState(enrolled: true, grade: grade, startedAtAge: 6)
-            : const EducationState.notStarted(),
+      return withSchoolPeople(
+        state.copyWith(
+          player: state.player.copyWith(age: age),
+          education: age <= 17
+              ? EducationState(enrolled: true, grade: grade, startedAtAge: 6)
+              : const EducationState.notStarted(),
+        ),
+        seed: seed,
       );
     }
 

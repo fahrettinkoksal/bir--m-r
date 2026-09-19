@@ -70,7 +70,9 @@ void main() {
     expect(motherOf().bond, greaterThan(bondBefore));
     expect(controller.state!.player.stats.happiness,
         greaterThan(happinessBefore));
-    expect(find.textContaining('Yakınlık +'), findsOneWidget);
+    // Etki rozeti artık kimle yakınlaştığını yazar: "Annen Ayşe ile
+    // yakınlık +7" gibi.
+    expect(find.textContaining('ile yakınlık +'), findsOneWidget);
   });
 
   testWidgets('sonuç hayat günlüğüne yansır', (WidgetTester tester) async {

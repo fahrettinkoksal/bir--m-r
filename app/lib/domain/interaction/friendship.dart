@@ -31,6 +31,37 @@ class Friendship {
         (Person p) => p.isAlive && p.relation == RelationType.arkadas,
       );
 
+  /// prototypeOnly: tanışıklıktan yakın arkadaşlığa geçişte eklenen yakınlık.
+  static const int prototypeOnlyPromotionBond = 15;
+
+  /// Var olan bir sınıf arkadaşını **aynı kimlikle** yakın arkadaşa çevirir.
+  ///
+  /// Kayıt silinip yenisi açılmaz; kişinin adı, geçmişi ve yakınlığı korunur.
+  /// Okul kademesi bilgisi de kalır, böylece nerede tanışıldığı unutulmaz.
+  ({GameState state, Person friend}) promoteToFriend(
+    GameState state,
+    String personId,
+  ) {
+    final Person? mevcut = state.personById(personId);
+    if (mevcut == null) {
+      throw ArgumentError.value(personId, 'personId', 'Kişi bulunamadı');
+    }
+    final Person friend = mevcut.copyWith(
+      relation: RelationType.arkadas,
+      bond: (mevcut.bond + prototypeOnlyPromotionBond).clamp(0, 100),
+    );
+    return (
+      state: state.copyWith(
+        people: List<Person>.unmodifiable(
+          state.people
+              .map((Person p) => p.id == personId ? friend : p)
+              .toList(growable: false),
+        ),
+      ),
+      friend: friend,
+    );
+  }
+
   /// Okuldan bir sınıf arkadaşı ekler ve oluşturulan kişiyi döndürür.
   ///
   /// Cinsiyet rastgeledir; arkadaşlıkta eşleşme kuralı yoktur. Yaş oyuncuyla

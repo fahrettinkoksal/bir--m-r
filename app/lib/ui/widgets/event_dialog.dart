@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/models/applied_effect.dart';
 import '../../domain/models/game_event.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
+import 'effect_chips.dart';
 import 'kilim_divider.dart';
 
 /// Yaş alınca çıkan tek olayı ve oyun içi ilerlemeyle gelen ek olayı gösterir.
@@ -28,10 +31,15 @@ class EventDialog extends StatefulWidget {
 
 class _EventDialogState extends State<EventDialog> {
   String? _resultText;
+  List<AppliedEffect> _effects = const <AppliedEffect>[];
 
   void _choose(EventChoice choice) {
-    final String? result = GameScope.of(context).chooseEventOption(choice.id);
-    setState(() => _resultText = result ?? choice.resultText);
+    final EventChoiceResult? result =
+        GameScope.of(context).chooseEventOption(choice.id);
+    setState(() {
+      _resultText = result?.text ?? choice.resultText;
+      _effects = result?.effects ?? const <AppliedEffect>[];
+    });
   }
 
   @override
@@ -85,7 +93,16 @@ class _EventDialogState extends State<EventDialog> {
                         color: theme.colorScheme.secondary.withValues(alpha: 0.35),
                       ),
                     ),
-                    child: Text(_resultText!, style: theme.textTheme.bodyMedium),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(_resultText!, style: theme.textTheme.bodyMedium),
+                        if (_effects.isNotEmpty) ...<Widget>[
+                          const SizedBox(height: 12),
+                          EffectChips(effects: _effects),
+                        ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 14),
                   SizedBox(

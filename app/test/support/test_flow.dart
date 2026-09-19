@@ -1,4 +1,10 @@
+import 'dart:math';
+
+import 'package:bir_omur/domain/generation/school_people.dart';
+import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,4 +85,24 @@ void advanceToAge(
     controller.ageUp();
   }
   resolvePendingEvents(controller, preferChoiceId: preferChoiceId);
+}
+
+/// Testte okul kişilerini (sınıf arkadaşları + öğretmen) duruma ekler.
+///
+/// Gerçek oyunda bu kişiler kademe değişiminde üretilir; elle kurulan test
+/// durumlarında aynı gerçekliği sağlamak için kullanılır.
+GameState withSchoolPeople(GameState state, {int seed = 1}) {
+  final SchoolLevel? level = state.education.level;
+  if (level == null) return state;
+  if (state.people.any((Person p) => p.schoolLevel == level)) return state;
+  return state.copyWith(
+    people: List<Person>.unmodifiable(<Person>[
+      ...state.people,
+      ...const SchoolPeople().generateFor(
+        state: state,
+        level: level,
+        rng: Random(seed),
+      ),
+    ]),
+  );
 }

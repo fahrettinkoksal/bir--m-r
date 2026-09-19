@@ -27,6 +27,8 @@ class GameState {
     this.storyFlags = const <String>{},
     this.possessions = const <String>{},
     this.seenEventIds = const <String>{},
+    this.lastEventAge = const <String, int>{},
+    this.storyPeople = const <String, String>{},
     this.pendingEvent,
     this.progressSinceLastEvent = 0,
     this.extraEventsThisAge = 0,
@@ -69,6 +71,21 @@ class GameState {
   /// Bu hayatta görülmüş olaylar; tekrarlanabilir olmayanlar bir kez çıkar.
   final Set<String> seenEventIds;
 
+  /// Tekrarlanabilir olayların **en son hangi yaşta** çıktığı:
+  /// `'<olayKimliği>' -> yaş`.
+  ///
+  /// Tekrar aralığı buradan denetlenir; böylece bayram sabahı gibi doğal
+  /// olarak tekrar eden olaylar art arda değil, uygun yaş farkıyla gelir
+  /// (bkz. [GameEvent.minAgeGap]).
+  final Map<String, int> lastEventAge;
+
+  /// Hikâye rolüne kilitlenmiş kişiler: `'<rol>' -> kişiKimliği`.
+  ///
+  /// Bir olayda kim olduğu belirlenen kişi (ör. teneffüste savunduğun
+  /// arkadaş) yıllar sonraki devam olayında **aynı kimlikle** kullanılır;
+  /// olmayan bir kişi uydurulmaz.
+  final Map<String, String> storyPeople;
+
   /// Oyuncunun karşısındaki tek olay. Aynı anda ikinci bir olay açılmaz
   /// (D-021): bu alan doluyken yeni olay üretilmez.
   final ActiveEvent? pendingEvent;
@@ -104,6 +121,35 @@ class GameState {
       .where((Person p) => p.relation.group == group)
       .toList(growable: false);
 
+  /// Şu anda devam edilen kademedeki sınıf arkadaşları.
+  ///
+  /// Liste **okul bağına** ([Person.schoolTie]) bakar, yakınlık derecesine
+  /// değil: aynı sınıftaki bir kişi yakın arkadaş olsa da burada kalmaya
+  /// devam eder. Kademe değişince eski sınıf arkadaşları **silinmez**;
+  /// yalnızca güncel listeye girmezler (D-029: kişi kaydı korunur).
+  List<Person> get currentClassmates => people
+      .where((Person p) => p.isClassmateAt(education.level))
+      .toList(growable: false);
+
+  /// Şu anda devam edilen kademedeki öğretmenler.
+  List<Person> get currentTeachers => people
+      .where((Person p) => p.isTeacherAt(education.level))
+      .toList(growable: false);
+
+  /// Geçmiş kademelerden tanınan, hâlâ kayıtlı okul kişileri.
+  ///
+  /// Okul bağı olan ama artık oyuncuyla aynı kademede olmayan kişiler.
+  /// Yakın arkadaş olmuş biri de buraya düşebilir; kaydı korunur.
+  List<Person> get pastSchoolPeople {
+    final SchoolLevel? level = education.level;
+    return people
+        .where((Person p) =>
+            p.schoolTie != null &&
+            p.schoolLevel != null &&
+            p.schoolLevel != level)
+        .toList(growable: false);
+  }
+
   GameState copyWith({
     PlayerCharacter? player,
     List<Person>? people,
@@ -115,6 +161,8 @@ class GameState {
     Set<String>? storyFlags,
     Set<String>? possessions,
     Set<String>? seenEventIds,
+    Map<String, int>? lastEventAge,
+    Map<String, String>? storyPeople,
     Object? pendingEvent = _unsetEvent,
     int? progressSinceLastEvent,
     int? extraEventsThisAge,
@@ -132,6 +180,8 @@ class GameState {
       storyFlags: storyFlags ?? this.storyFlags,
       possessions: possessions ?? this.possessions,
       seenEventIds: seenEventIds ?? this.seenEventIds,
+      lastEventAge: lastEventAge ?? this.lastEventAge,
+      storyPeople: storyPeople ?? this.storyPeople,
       pendingEvent: pendingEvent == _unsetEvent
           ? this.pendingEvent
           : pendingEvent as ActiveEvent?,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../turkish_text.dart';
+import '../../text/turkish_text.dart';
 
 /// Bölüm başlığı ve isteğe bağlı açıklaması.
 class SectionHeader extends StatelessWidget {

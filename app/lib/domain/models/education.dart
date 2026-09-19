@@ -24,6 +24,18 @@ enum SchoolLevel {
   int gradeWithinLevel(int grade) => grade - firstGrade + 1;
 }
 
+/// Bir kişinin **okul bağı**: oyuncuyla aynı sınıfta mı, öğretmeni mi?
+///
+/// Bu bağ, [RelationType] ile tutulan **yakınlık derecesinden bağımsızdır**.
+/// Sınıf arkadaşıyla yakın arkadaş olmak, o kişiyi sınıftan çıkarmaz: bağ
+/// `sinifArkadasi` kalır, yakınlık `arkadas`a yükselir. Böylece aynı kişi
+/// hem Sınıf Arkadaşları hem Yakın Arkadaşların listesinde görünür ve
+/// ikinci bir kayıt oluşmaz.
+enum SchoolTie {
+  sinifArkadasi,
+  ogretmen,
+}
+
 /// Oyuncunun eğitim durumu.
 ///
 /// **Öğrencilik yaştan türetilmez**, oyun verisinde tutulur: okula başlamamış

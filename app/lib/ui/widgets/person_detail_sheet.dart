@@ -5,6 +5,7 @@ import '../../domain/models/interaction.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../state/game_scope.dart';
+import 'effect_chips.dart';
 import 'kilim_divider.dart';
 
 /// Kişi ayrıntısı ve aile etkileşimleri.
@@ -84,6 +85,12 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     final int playerAge = state.player.age;
     final InteractionAvailability availability =
         GameScope.of(context).availabilityFor(person);
+    // Yalnızca gerçekten yapılabilen eylemler düğme olur; kalanlar
+    // gerekçesiyle birlikte soluk gösterilir.
+    final List<InteractionKind> available =
+        availability.isAllowed
+            ? GameScope.of(context).availableKindsFor(person)
+            : const <InteractionKind>[];
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -139,7 +146,12 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               ],
               const SizedBox(height: 20),
               if (availability.isAllowed)
-                _Actions(onSelected: _run)
+                _Actions(
+                  available: available,
+                  blockedReason: (InteractionKind kind) =>
+                      GameScope.of(context).availabilityFor(person, kind).reason,
+                  onSelected: _run,
+                )
               else
                 _Note(text: availability.reason!),
               // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;
@@ -177,20 +189,61 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
 }
 
 class _Actions extends StatelessWidget {
-  const _Actions({required this.onSelected});
+  const _Actions({
+    required this.available,
+    required this.blockedReason,
+    required this.onSelected,
+  });
 
+  final List<InteractionKind> available;
+  final String? Function(InteractionKind kind) blockedReason;
   final void Function(InteractionKind kind) onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+    final ThemeData theme = Theme.of(context);
+    final List<InteractionKind> kapali = InteractionKind.values
+        .where((InteractionKind k) => !available.contains(k))
+        .toList(growable: false);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        for (final InteractionKind kind in InteractionKind.values)
-          FilledButton.tonal(
-            onPressed: () => onSelected(kind),
-            child: Text(kind.label),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: <Widget>[
+            for (final InteractionKind kind in available)
+              FilledButton.tonal(
+                onPressed: () => onSelected(kind),
+                child: Text(kind.label),
+              ),
+          ],
+        ),
+        // Koşulu sağlanmayan eylem gizlenmez ama tıklanamaz: oyuncu neyin
+        // neden kapalı olduğunu görür, olmamış bir işlem gösterilmez.
+        for (final InteractionKind kind in kapali)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(
+                  Icons.lock_outline,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${kind.label}: ${blockedReason(kind) ?? 'Şu an kapalı.'}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
       ],
     );
@@ -221,20 +274,9 @@ class _OutcomeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(outcome.text, style: theme.textTheme.bodyMedium),
-          if (outcome.hasAnyEffect) ...<Widget>[
+          if (outcome.effects.isNotEmpty) ...<Widget>[
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: <Widget>[
-                if (outcome.bondDelta != 0)
-                  _Chip(label: 'Yakınlık', delta: outcome.bondDelta),
-                if (outcome.happinessDelta != 0)
-                  _Chip(label: 'Mutluluk', delta: outcome.happinessDelta),
-                if (outcome.charismaDelta != 0)
-                  _Chip(label: 'Karizma', delta: outcome.charismaDelta),
-              ],
-            ),
+            EffectChips(effects: outcome.effects),
           ],
           if (outcome.accepted && outcome.noNewBenefit) ...<Widget>[
             const SizedBox(height: 10),
@@ -247,35 +289,6 @@ class _OutcomeCard extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.label, required this.delta});
-
-  final String label;
-  final int delta;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool positive = delta > 0;
-    final Color color =
-        positive ? theme.colorScheme.secondary : theme.colorScheme.error;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        '$label ${positive ? '+' : ''}$delta',
-        style: theme.textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: theme.colorScheme.onSurface,
-        ),
       ),
     );
   }

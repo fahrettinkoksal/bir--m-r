@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/possession_names.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -14,12 +15,6 @@ class AssetsScreen extends StatelessWidget {
   const AssetsScreen({super.key, required this.onBack});
 
   final VoidCallback onBack;
-
-  /// Sahip olunan eşyaların okunaklı adları.
-  static const Map<String, ({String ad, IconData ikon})> _esyaAdlari =
-      <String, ({String ad, IconData ikon})>{
-    'bisiklet': (ad: 'Bisiklet', ikon: Icons.pedal_bike_outlined),
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +33,8 @@ class AssetsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           for (final String esya in esyalar) ...<Widget>[
             _AssetTile(
-              title: _esyaAdlari[esya]?.ad ?? esya,
-              icon: _esyaAdlari[esya]?.ikon ?? Icons.inventory_2_outlined,
+              title: possessionName(esya),
+              icon: possessionIcon(esya),
             ),
             const SizedBox(height: 10),
           ],
