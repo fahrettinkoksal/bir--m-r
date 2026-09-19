@@ -1,0 +1,134 @@
+name: Windows test sürümü
+
+# Amaç: Bir Ömür'ü Windows bilgisayarda çalıştırmak için, hiçbir şey kurmadan
+# açılabilen taşınabilir bir sürüm üretmek. Başarılı olursa gerekli bütün
+# dosyalar tek bir indirilebilir artifact olarak yüklenir.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+concurrency:
+  group: windows-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Analiz, test ve Windows sürümü
+    # windows-latest imajında Visual Studio 2026 (18.x) var; Flutter 3.35.5
+    # bu sürümü tanımadığı için CMake'e kurulu olmayan "Visual Studio 16 2019"
+    # üreticisini veriyor ve derleme "could not find any instance of Visual
+    # Studio" hatasıyla düşüyor. VS 2022 içeren imaja sabitliyoruz.
+    runs-on: windows-2022
+    timeout-minutes: 45
+
+    defaults:
+      run:
+        working-directory: app
+        shell: pwsh
+
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Flutter kur
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+          cache: true
+
+      - name: Windows masaüstü desteğini aç
+        run: flutter config --enable-windows-desktop
+
+      - name: Sürüm bilgisi
+        run: flutter --version
+
+      - name: Bağımlılıkları indir
+        run: flutter pub get
+
+      - name: Statik analiz
+        run: flutter analyze
+
+      - name: Testler
+        run: flutter test
+
+      - name: Windows sürümünü derle
+        run: flutter build windows --release
+
+      - name: Paketi hazırla
+        run: |
+          $release = "build/windows/x64/runner/Release"
+          if (-not (Test-Path $release)) { throw "Derleme çıktısı bulunamadı: $release" }
+
+          $dist = "../dist/BirOmur"
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+          Copy-Item -Path "$release/*" -Destination $dist -Recurse -Force
+
+          # Visual C++ çalışma zamanı DLL'leri: kullanıcının bilgisayarında
+          # eksikse uygulama açılmaz. Runner'daki redist klasöründen kopyalanır.
+          #
+          # Seçim önemli: uygulama v143 araç setiyle derleniyor, bu yüzden
+          # eski VC142 DLL'leri exe'nin yanına konursa çalışma anında eksik
+          # giriş noktası hatası verebilir. 'onecore' sürümleri de masaüstü
+          # için uygun değildir. Bu yüzden onecore hariç tutulur ve en yüksek
+          # sürümlü x64 klasörü seçilir.
+          $crt = Get-ChildItem -Path "C:/Program Files/Microsoft Visual Studio/2022" `
+            -Filter "Microsoft.VC*.CRT" -Recurse -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch "onecore" -and $_.FullName -match "\\x64\\" } |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if ($crt) {
+            Write-Host "CRT klasörü: $($crt.FullName)"
+            foreach ($dll in @("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")) {
+              $src = Join-Path $crt.FullName $dll
+              if (Test-Path $src) {
+                Copy-Item $src -Destination $dist -Force
+                Write-Host "Kopyalandı: $dll"
+              } else {
+                Write-Warning "Bulunamadi: $dll"
+              }
+            }
+          } else {
+            Write-Warning "Visual C++ redist klasoru bulunamadi; CRT DLL'leri pakete eklenmedi."
+          }
+
+          Get-ChildItem $dist | Format-Table Name, Length
+
+      - name: Kullanım talimatını ekle
+        run: |
+          $lines = @(
+            "BIR OMUR - Windows test surumu",
+            "==============================",
+            "",
+            "1. Bu klasoru bilgisayarina cikar (zip icinden calistirma).",
+            "2. bir_omur.exe dosyasina cift tikla.",
+            "",
+            "Windows 'Bilinmeyen bir uygulama' uyarisi verirse:",
+            "  Daha fazla bilgi -> Yine de calistir",
+            "(Imzasiz test surumlerinde normaldir.)",
+            "",
+            "Onemli:",
+            "- data klasoru ve .dll dosyalari exe ile ayni klasorde kalmali.",
+            "- Oyun kaydi yoktur; uygulamayi kapatinca hayat bastan baslar.",
+            "- Bu bir test surumudur, gorsel tasarim henuz onaylanmadi."
+          )
+          Set-Content -Path "../dist/BirOmur/OKU-BENI.txt" -Value $lines -Encoding UTF8
+
+      - name: Paketi artifact olarak yükle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bir-omur-windows
+          path: dist/**
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Hata durumunda ortam bilgisi
+        if: failure()
+        run: flutter doctor -v
