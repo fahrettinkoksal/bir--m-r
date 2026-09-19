@@ -8,6 +8,18 @@ APK **debug** sürümüdür: imzası geliştirme anahtarıyla atılmıştır, Pl
 Store'a yüklenemez, sadece test içindir. Oyun durumu **kaydedilmez**;
 uygulamayı kapatınca hayat sıfırlanır.
 
+**Ölçülen değerler** (19 Eylül 2026, ilk başarılı koşu):
+
+| | |
+| --- | --- |
+| APK boyutu | **135 MB** (debug, bütün işlemci mimarileri bir arada) |
+| İndirilen zip | **~63 MB** |
+| Derleme süresi | ~7,5 dakika (Gradle adımı 295 sn) |
+| Artifact ömrü | 30 gün |
+
+Debug APK büyüktür; ileride `--release` ile derlenen sürüm çok daha küçük
+olacaktır. Telefonda **en az ~400 MB boş alan** bulundur.
+
 ---
 
 ## Yol 1 — GitHub Actions'tan APK indirmek

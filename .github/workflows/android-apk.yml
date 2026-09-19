@@ -10,6 +10,10 @@ on:
     branches:
       - main
       - 'claude/**'
+    # Yalnızca belge değişen gönderimlerde APK yeniden derlenmesin.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 # Aynı dalda üst üste tetiklenen koşularda eskisini iptal et.
 concurrency:
