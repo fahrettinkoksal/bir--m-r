@@ -61,8 +61,12 @@ class Person {
   String get fullName => '$firstName $lastName';
 
   /// Çalışma durumunun ekranda gösterilecek hâli. Uydurma meslek üretmez.
-  String get occupationLabel =>
-      employment == EmploymentStatus.calisiyor ? (occupation ?? 'Çalışıyor') : employment.label;
+  String get occupationLabel {
+    if (employment != EmploymentStatus.calisiyor) return employment.label;
+    final String? job = occupation;
+    if (job == null || job.isEmpty) return 'Çalışıyor';
+    return job[0].toUpperCase() + job.substring(1);
+  }
 
   String labelFor(int playerAge) => relationLabel(
         relation: relation,

@@ -21,6 +21,9 @@ abstract final class BirOmurColors {
   /// Çini yeşili — ikincil vurgu.
   static const Color cini = Color(0xFF1F6F63);
 
+  /// Çini yeşilinin açık tonu — ikincil eylem düğmeleri.
+  static const Color ciniAcik = Color(0xFFD9E6E1);
+
   /// Pirinç sarısı — küçük detaylar.
   static const Color pirinc = Color(0xFFC08A2E);
 
@@ -40,6 +43,9 @@ abstract final class BirOmurTheme {
           surface: BirOmurColors.kagit,
           surfaceContainerHighest: BirOmurColors.kagitKoyu,
           onSurface: BirOmurColors.murekkep,
+          // Eylem düğmeleri kâğıt paletiyle uyumlu kalsın.
+          secondaryContainer: BirOmurColors.ciniAcik,
+          onSecondaryContainer: BirOmurColors.murekkep,
         ),
       );
 
@@ -121,6 +127,17 @@ abstract final class BirOmurTheme {
             fontSize: 16,
           ),
         ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
       ),
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant.withValues(alpha: 0.6),

@@ -41,6 +41,11 @@ class LifeProgression {
       player: state.player.copyWith(age: newAge),
       people: List<Person>.unmodifiable(people),
       log: List<LifeLogEntry>.unmodifiable(log),
+      // Tekrar sayaçları yaşa aittir: yeni yaşta aynı etkinlik yeniden
+      // anlamlı fayda verebilir. Yenilemenin tam mı kısmi mi olacağı
+      // (`docs/CORE_LOOP.md`) henüz kararlaştırılmadı; prototipte tam
+      // yenileme uygulanır.
+      interactionCounts: const <String, int>{},
     );
   }
 

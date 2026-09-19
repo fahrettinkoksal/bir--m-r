@@ -4,8 +4,11 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
+import '../domain/interaction/family_interactions.dart';
 import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
+import '../domain/models/interaction.dart';
+import '../domain/models/person.dart';
 
 /// Uygulamanın tek durum sahibi.
 ///
@@ -15,6 +18,7 @@ class GameController extends ChangeNotifier {
   GameController({Random? random}) : _random = random ?? Random();
 
   final Random _random;
+  final FamilyInteractions _interactions = const FamilyInteractions();
 
   GameState? _state;
 
@@ -48,6 +52,34 @@ class GameController extends ChangeNotifier {
     if (current == null) return;
     _state = LifeProgression(_random).advanceOneYear(current);
     notifyListeners();
+  }
+
+  /// Bir aile bireyiyle etkileşim kurar ve sonucu döndürür (D-016).
+  ///
+  /// Genel bir etkileşim kotası yoktur; sınır yalnızca aynı kişiyle aynı
+  /// etkinliğin aynı yaştaki **getirisinde** işler (D-026).
+  InteractionOutcome? interact(String personId, InteractionKind kind) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final InteractionResult result = _interactions.perform(
+      state: current,
+      personId: personId,
+      kind: kind,
+      rng: _random,
+    );
+    _state = result.state;
+    notifyListeners();
+    return result.outcome;
+  }
+
+  /// Etkileşimin şu an mümkün olup olmadığı; arayüz bunu kullanarak
+  /// yapılamayacak eylemi düğme olarak göstermez.
+  InteractionAvailability availabilityFor(Person person) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _interactions.availability(current, person);
   }
 
   /// Hayatı bitirip başlangıç ekranına döner.

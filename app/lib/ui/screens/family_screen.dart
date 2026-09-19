@@ -39,11 +39,7 @@ class FamilyScreen extends StatelessWidget {
           PersonCard(
             person: person,
             playerAge: playerAge,
-            onTap: () => PersonDetailSheet.show(
-              context,
-              person: person,
-              playerAge: playerAge,
-            ),
+            onTap: () => PersonDetailSheet.show(context, personId: person.id),
           ),
           const SizedBox(height: 10),
         ],

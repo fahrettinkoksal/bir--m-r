@@ -1,6 +1,6 @@
 # Proje durumu
 
-**Aşama:** Kodlama başladı. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1 uygulandı** (`app/` klasörü); Aşama 2-5 henüz yapılmadı. **Oynanabilir tam döngü (aile etkileşimi, olay motoru, sevgili/ayrılık) henüz yoktur.**
+**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1 ve Aşama 2 uygulandı** (`app/` klasörü); Aşama 3-5 henüz yapılmadı. **Olay motoru ve sevgili → ayrılık → eski sevgili akışı henüz yoktur.**
 
 ## Şu ana kadar ana hatlarını belirledik
 Türkiye/nostalji odaklı özgün oyun kimliği; iki başlangıç modu, rastgele aile/şehir; dış görünüş, mutluluk, sağlık, zekâ, karizma; kişi bazlı ilişkiler; geçmiş karar hafızası; yaşa/koşula uygun olaylar; ailenin bağımsız yaşam gelişmeleri. Kesin karar kaydı: `DECISIONS.md`.
@@ -27,12 +27,26 @@ Aile rastgele çeşitlenir; aynı evde yaşama ile akrabalık ayrı tutulur. Ail
 - **Ün** açılmadığı için hiçbir ekranda gösterilmez (D-027). Yazılmamış eylemler sahte düğme olarak konmadı.
 - Görsel yön: Bir Ömür'e özgü modern + ölçülü nostaljik tema (kâğıt tonları, nar kırmızısı/çini yeşili, ince kilim şeridi).
 
+## Aşama 2 — yapıldı (kod: `app/lib/domain/interaction/`)
+- Aile → kişi detayı → **Vakit Geçir** ve **Sohbet Et** gerçekten çalışıyor; sonuç özgün Türkçe metinle ve uygulanan değişimlerle (yakınlık, mutluluk, karizma) gösteriliyor.
+- **Genel etkileşim kotası yok (D-026).** Tekrar sayacı kişi + etkileşim türü bazında ve **yalnızca içinde bulunulan yaşa ait**. Anneyle vakit geçirmek babayı ya da aynı kişiyle sohbeti kilitlemiyor.
+- Aynı yaşta aynı kişiyle aynı etkinliğin getirisi azalıyor ve o yaş için **sıfır ek kazanca** iniyor (D-019). Fayda bitince etkinlik kapanmıyor; sonuç metni gelmeye devam ediyor.
+- Yakın tekrarda kişi **bazen** doğal gerekçeyle reddediyor; ret hâlinde küçük mutluluk kaybı **olabiliyor**, her ret ceza değil (D-020). İlk istek hiç reddedilmiyor.
+- Vefat etmiş kişiyle veya yaşı uygun olmayan oyuncuyla etkileşim açılmıyor; düğme gösterilmiyor, gerekçe yazılıyor.
+- Hayat günlüğüne yalnızca anlamlı sonuçlar yazılıyor; sıfır kazançlı tekrar günlüğü şişirmiyor.
+
 ### Çalıştırılan doğrulamalar
-`flutter analyze` temiz; `flutter test` ile 41 test geçti (üretim tutarlılığı, yaş alma, arayüz gezinme). Ekran görüntüleri `app/test/goldens/` altında üretildi.
+`flutter analyze` temiz; `flutter test` ile **60 test geçti** (aile üretim tutarlılığı, yaş alma, aile etkileşimi/azalan etki/ret, arayüz gezinmesi ve etkileşim akışı). Ekran görüntüleri `app/test/goldens/` altında üretildi.
 **Doğrulanamayan:** Android APK derlemesi ve gerçek cihaz/emülatör denemesi — bu ortamda Android SDK indirilemedi (ağ politikası `dl.google.com` erişimini engelliyor). APK derlemesi Faho'nun ortamında denenmelidir.
 
 ## Şimdi yapılacak iş
-Aşama 1 incelenip onaylandıktan sonra `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 2** (aile etkileşimi, azalan etki, doğal ret) uygulanacak. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
+Aşama 2 incelendikten sonra **Aşama 3** (Yaş Al sonrası tek açılış olayı, olay verisi ve hafıza) uygulanacak. Kodda `prototypeOnly` olarak işaretlenen sayısal ağırlıklar geçicidir; kesin denge Faho onayıyla belirlenecek ve `DECISIONS.md` yalnızca onaylanan kararlarla güncellenecek.
+
+### Faho'nun kararına bırakılan açık noktalar
+- Azalma eğrisi (prototipte 4 tekrarda sıfır), ret olasılıkları ve ret sonrası mutluluk kaybı miktarı.
+- Tekrar sayaçlarının yaş değişiminde **tam** mı kısmi mi yenileneceği (prototipte tam).
+- Etkileşimlerin açıldığı asgari oyuncu yaşı (prototipte 4).
+- "Sohbet Et" etkileşiminin kalıcı bir tür olup olmayacağı; hediye verme ekonomi sistemi tasarlanınca eklenebilir.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

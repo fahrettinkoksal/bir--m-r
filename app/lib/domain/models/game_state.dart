@@ -20,6 +20,7 @@ class GameState {
     required this.pets,
     required this.parentalStatus,
     required this.log,
+    this.interactionCounts = const <String, int>{},
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -30,6 +31,20 @@ class GameState {
   final List<Pet> pets;
   final ParentalStatus parentalStatus;
   final List<LifeLogEntry> log;
+
+  /// **Yalnızca içinde bulunulan yaşa ait** tekrar geçmişi:
+  /// `'<kişiKimliği>|<etkileşimTürü>' -> kaç kez gerçekleşti`.
+  ///
+  /// Sayaç kişi ve etkileşim türü bazındadır; bu yüzden anneyle vakit
+  /// geçirmek babayla vakit geçirmeyi ya da aynı kişiyle sohbeti etkilemez
+  /// (D-026: genel etkileşim kotası yoktur). Yaş değişince sıfırlanır.
+  final Map<String, int> interactionCounts;
+
+  static String interactionKey(String personId, String kindName) =>
+      '$personId|$kindName';
+
+  int interactionCount(String personId, String kindName) =>
+      interactionCounts[interactionKey(personId, kindName)] ?? 0;
 
   List<Person> get livingPeople =>
       people.where((Person p) => p.isAlive).toList(growable: false);
@@ -56,6 +71,7 @@ class GameState {
     List<Pet>? pets,
     ParentalStatus? parentalStatus,
     List<LifeLogEntry>? log,
+    Map<String, int>? interactionCounts,
   }) {
     return GameState(
       seed: seed,
@@ -64,6 +80,7 @@ class GameState {
       pets: pets ?? this.pets,
       parentalStatus: parentalStatus ?? this.parentalStatus,
       log: log ?? this.log,
+      interactionCounts: interactionCounts ?? this.interactionCounts,
     );
   }
 }

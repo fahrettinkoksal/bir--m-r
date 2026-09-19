@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -92,6 +94,33 @@ void main() {
     await expectLater(
       find.byType(BirOmurApp),
       matchesGoldenFile('goldens/04_ben.png'),
+    );
+  }, skip: !enabled);
+
+  testWidgets('kişi detayı ve etkileşim sonucu', (WidgetTester tester) async {
+    await pumpPhone(tester);
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+
+    // Etkileşimlerin açıldığı bir yaşa gel.
+    while (controller.state!.player.age < 8) {
+      await tester.tap(find.text('Yaş Al'));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.tap(find.byIcon(Icons.groups_outlined));
+    await tester.pumpAndSettle();
+    final Person anne = controller.state!.people
+        .firstWhere((Person p) => p.relation == RelationType.anne);
+    await tester.tap(find.text(anne.fullName).first);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Vakit Geçir'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(BirOmurApp),
+      matchesGoldenFile('goldens/05_etkilesim.png'),
     );
   }, skip: !enabled);
 }
