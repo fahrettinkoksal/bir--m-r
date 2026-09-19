@@ -1,0 +1,85 @@
+name: Android debug APK
+
+# Amaç: Bir Ömür prototipinin telefona kurulabilir bir test APK'sını üretmek.
+# Derleme başarılı olursa APK, workflow artifact olarak indirilebilir hâle gelir.
+
+on:
+  # Elle çalıştırma: Actions sekmesi → bu iş akışı → "Run workflow".
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    # Yalnızca belge değişen gönderimlerde APK yeniden derlenmesin.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+# Aynı dalda üst üste tetiklenen koşularda eskisini iptal et.
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Analiz, test ve debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    defaults:
+      run:
+        # Flutter projesi deponun kökünde değil, app/ klasöründe.
+        working-directory: app
+
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      # Android Gradle Plugin 8.x, Gradle'ın JDK 17 ile çalışmasını ister.
+      - name: JDK 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Flutter kur
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+          cache: true
+
+      - name: Sürüm bilgisi
+        run: |
+          flutter --version
+          java -version
+
+      - name: Bağımlılıkları indir
+        run: flutter pub get
+
+      - name: Statik analiz
+        run: flutter analyze
+
+      - name: Testler
+        run: flutter test
+
+      - name: Debug APK derle
+        run: flutter build apk --debug
+
+      - name: APK bilgisi
+        if: success()
+        run: ls -lh build/app/outputs/flutter-apk/
+
+      - name: APK'yı artifact olarak yükle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bir-omur-debug-apk
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      # Derleme patlarsa tanı için ortam bilgisi bırak.
+      - name: Hata durumunda ortam bilgisi
+        if: failure()
+        run: flutter doctor -v
