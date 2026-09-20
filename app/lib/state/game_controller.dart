@@ -190,9 +190,14 @@ class GameController extends ChangeNotifier {
   ///
   /// Ekranda çözülmemiş bir olay varken çalışmaz; böylece olaylar üst üste
   /// binmez.
+  /// Oyuncu vefat etti mi? Hayat tamamlanmışsa yaş ilerlemez.
+  bool get isDeceased => _state?.deceased ?? false;
+
   void ageUp() {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return;
+    // Hayat tamamlandıysa yaş ilerlemez.
+    if (current.deceased) return;
     _state = LifeProgression(_random).advanceOneYear(current);
     _autoSave();
     notifyListeners();

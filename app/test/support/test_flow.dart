@@ -48,6 +48,8 @@ Future<void> ageTo(
 }) async {
   int guard = 0;
   while (controller.state!.player.age < targetAge) {
+    // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
+    if (controller.state!.deceased) return;
     if (guard++ > 200) fail('Yaş ilerlemiyor.');
     await answerPendingEvents(tester, controller, preferChoiceId: preferChoiceId);
     await tester.tap(find.byKey(const Key('age_up_button')));
@@ -80,6 +82,8 @@ void advanceToAge(
 }) {
   int guard = 0;
   while (controller.state!.player.age < targetAge) {
+    // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
+    if (controller.state!.deceased) return;
     if (guard++ > 500) throw StateError('Yaş ilerlemiyor.');
     resolvePendingEvents(controller, preferChoiceId: preferChoiceId);
     controller.ageUp();

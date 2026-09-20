@@ -28,7 +28,12 @@ Future<GameController> startWith(
   await answerPendingEvents(tester, controller);
 
   GameState state = controller.state!;
-  state = state.copyWith(player: state.player.copyWith(wallet: wallet));
+  state = state.copyWith(
+    player: state.player.copyWith(wallet: wallet),
+    // Bu testler yalnızca aşağıda verilen eşyayı inceler; miras veya olayla
+    // gelmiş eşyalar listeyi karıştırmasın diye envanter sıfırlanır.
+    items: const <OwnedItem>[],
+  );
   state = state.grantItems(
     typeIds,
     source: ItemSource.hediye,

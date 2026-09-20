@@ -16,6 +16,7 @@ import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/models/career.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -390,12 +391,24 @@ void main() {
       expect(sonra.player.wallet, cuzdan);
     });
 
-    test('ailenin parası oyuncunun cüzdanına geçmez', () {
+    test('yaşayan ailenin parası oyuncunun cüzdanına geçmez', () {
       final GameState state = graduate(34);
       expect(state.player.wallet, 0);
       final GameState sonra =
           LifeProgression(Random(2)).advanceOneYear(state);
-      expect(sonra.player.wallet, 0);
+
+      // Cüzdan yalnızca gerçekten gerçekleşmiş bir olayla (miras) değişir;
+      // hayatta olan ailenin varlığı sessizce oyuncuya geçmez.
+      final bool mirasVar = sonra.settledEstates.isNotEmpty;
+      if (!mirasVar) {
+        expect(sonra.player.wallet, 0);
+      } else {
+        expect(
+          sonra.log.any((LifeLogEntry e) => e.text.contains('miras')),
+          isTrue,
+          reason: 'Cüzdan değiştiyse gerekçesi günlükte olmalı',
+        );
+      }
     });
   });
 

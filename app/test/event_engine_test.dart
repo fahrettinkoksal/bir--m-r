@@ -84,6 +84,8 @@ void main() {
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
 
         for (int i = 0; i < 25; i++) {
+          // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
+          if (controller.state!.deceased) break;
           final int onceki = controller.state!.player.age;
           controller.ageUp();
           expect(controller.state!.player.age, onceki + 1);

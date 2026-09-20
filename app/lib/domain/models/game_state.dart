@@ -52,6 +52,10 @@ class GameState {
     this.wagerThisAge = 0,
     this.licenses = const <String>{},
     this.pendingLicenseExam,
+    this.settledEstates = const <String>{},
+    this.deceased = false,
+    this.deathAge,
+    this.deathCause,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -245,6 +249,29 @@ class GameState {
 
   bool get hasPendingLicenseExam => pendingLicenseExam != null;
 
+  /// Mirası **dağıtılmış** kişilerin kimlikleri.
+  ///
+  /// Aynı miras iki kez dağıtılmaz.
+  final Set<String> settledEstates;
+
+  /// Oyuncu vefat etti mi? Hayat tamamlanmış sayılır.
+  final bool deceased;
+
+  /// Oyuncunun vefat ettiği yaş.
+  final int? deathAge;
+
+  /// Kısa ölüm gerekçesi.
+  final String? deathCause;
+
+  /// Hayatta olan hane üyeleri.
+  List<Person> get householdMembers => people
+      .where((Person p) => p.isAlive && p.inPlayerHousehold)
+      .toList(growable: false);
+
+  /// Vefat etmiş kişiler; kayıtları **silinmez**.
+  List<Person> get deceasedPeople =>
+      people.where((Person p) => !p.isAlive).toList(growable: false);
+
   /// **Bu yaşta** kumarhanede oynanan toplam bahis.
   ///
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
@@ -377,6 +404,10 @@ class GameState {
     int? wagerThisAge,
     Set<String>? licenses,
     Object? pendingLicenseExam = _unsetEvent,
+    Set<String>? settledEstates,
+    bool? deceased,
+    int? deathAge,
+    String? deathCause,
   }) {
     return GameState(
       seed: seed,
@@ -414,6 +445,10 @@ class GameState {
       pendingLicenseExam: pendingLicenseExam == _unsetEvent
           ? this.pendingLicenseExam
           : pendingLicenseExam as PendingLicenseExam?,
+      settledEstates: settledEstates ?? this.settledEstates,
+      deceased: deceased ?? this.deceased,
+      deathAge: deathAge ?? this.deathAge,
+      deathCause: deathCause ?? this.deathCause,
     );
   }
 }

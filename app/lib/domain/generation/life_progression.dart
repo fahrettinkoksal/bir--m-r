@@ -7,9 +7,12 @@ import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
+import '../life/inheritance.dart';
+import '../life/mortality.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 import 'school_people.dart';
@@ -35,6 +38,9 @@ class LifeProgression {
 
   /// Son sınıf. 4+4+4 yapısında lise 12. sınıfta biter.
   static const int lastGrade = 12;
+
+  /// prototypeOnly: hanede bakım verebilecek sayılan yetişkinlik yaşı.
+  static const int prototypeOnlyAdultAge = 18;
 
   GameState advanceOneYear(GameState state) {
     // Ekranda çözülmemiş bir olay varken yaş ilerlemez: olaylar üst üste
@@ -92,6 +98,15 @@ class LifeProgression {
     );
     final List<Person> peopleWithSchool = okulSonucu.people;
 
+    // Ölümler: hayatın sonlu olduğunu hissettiren, yaşa bağlı bir eğilim.
+    // Kayıtlar silinmez; kişi vefat etmiş olarak işaretlenir.
+    final ({List<Person> people, int happinessLoss}) olumSonucu = _applyDeaths(
+      state: state,
+      people: peopleWithSchool,
+      newAge: newAge,
+      log: log,
+    );
+
     // Maaş yeni yaşa geçerken **bir kez** ödenir.
     final ({GameState state, String? logText}) maas =
         const JobMarket().paySalaryFor(
@@ -111,7 +126,7 @@ class LifeProgression {
     final GameState advanced = state.copyWith(
       // Maaş ödemesi cüzdanı ve ödeme dönemini günceller.
       player: maas.state.player.copyWith(age: newAge),
-      people: List<Person>.unmodifiable(peopleWithSchool),
+      people: List<Person>.unmodifiable(olumSonucu.people),
       log: List<LifeLogEntry>.unmodifiable(log),
       // Tekrar sayaçları yaşa aittir: yeni yaşta aynı etkinlik yeniden
       // anlamlı fayda verebilir. Yenilemenin tam mı kısmi mi olacağı
@@ -126,8 +141,32 @@ class LifeProgression {
       career: maas.state.career,
     );
 
+    // Kaybın etkisi: mutluluk düşer.
+    GameState afterDeaths = olumSonucu.happinessLoss == 0
+        ? advanced
+        : advanced.copyWith(
+            player: advanced.player.copyWith(
+              stats: advanced.player.stats.copyWith(
+                happiness: (advanced.player.stats.happiness -
+                        olumSonucu.happinessLoss)
+                    .clamp(0, 100),
+              ),
+            ),
+          );
+
+    // Miras: yalnızca bu yıl vefat edenler için ve **bir kez**.
+    afterDeaths = _settleEstates(afterDeaths, newAge);
+
+    // Hane bakımı: küçük yaştaki oyuncu haneyi boş bırakmaz.
+    afterDeaths = _ensureCaregiver(afterDeaths, newAge);
+
+    // Oyuncunun ölümü: hayat tamamlanır, başka işlem yapılmaz.
+    if (_playerDies(afterDeaths)) {
+      return _endLife(afterDeaths, newAge);
+    }
+
     // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
-    final GameState withTrack = _applyTrackBonus(advanced);
+    final GameState withTrack = _applyTrackBonus(afterDeaths);
 
     // Yeni yaşın tek açılış olayı.
     final ActiveEvent? opening =
@@ -138,6 +177,163 @@ class LifeProgression {
   }
 
   /// Lise alanının yıllık küçük katkısı.
+  /// Bu yıl vefat edenleri işaretler ve günlüğe yazar.
+  ///
+  /// Kişi kaydı **silinmez**: yalnızca [Person.isAlive] false olur ve kişi
+  /// hane listesinden düşer. Her yıl birinin ölmesi gerekmez.
+  ({List<Person> people, int happinessLoss}) _applyDeaths({
+    required GameState state,
+    required List<Person> people,
+    required int newAge,
+    required List<LifeLogEntry> log,
+  }) {
+    int mutlulukKaybi = 0;
+    final List<Person> sonuc = <Person>[];
+
+    for (final Person person in people) {
+      if (!person.isAlive) {
+        sonuc.add(person);
+        continue;
+      }
+      if (!Mortality.diesThisYear(person.age, _rng)) {
+        sonuc.add(person);
+        continue;
+      }
+
+      final String gerekce = Mortality.causeFor(person.age, _rng);
+      sonuc.add(person.copyWith(isAlive: false, inPlayerHousehold: false));
+      mutlulukKaybi += Mortality.prototypeOnlyHappinessLoss(person);
+
+      final String etiket = person.possessiveFor(newAge);
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: '${etiket[0].toUpperCase()}${etiket.substring(1)} '
+              '${person.fullName} $gerekce nedeniyle vefat etti.',
+          category: LogCategory.aile,
+        ),
+      );
+    }
+
+    return (people: sonuc, happinessLoss: mutlulukKaybi);
+  }
+
+  /// Bu yıl vefat edenlerin mirasını **bir kez** dağıtır.
+  GameState _settleEstates(GameState state, int newAge) {
+    GameState next = state;
+    for (final Person person in state.people) {
+      if (person.isAlive) continue;
+      if (next.settledEstates.contains(person.id)) continue;
+
+      final ({GameState state, List<String> logLines}) sonuc =
+          Inheritance.settle(next, person);
+      next = sonuc.state;
+      for (final String satir in sonuc.logLines) {
+        next = next.copyWith(
+          log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+            ...next.log,
+            LifeLogEntry(
+              age: newAge,
+              text: satir,
+              category: LogCategory.aile,
+            ),
+          ]),
+        );
+      }
+    }
+    return next;
+  }
+
+  /// Küçük yaştaki oyuncu hanede yetişkinsiz kalmaz.
+  ///
+  /// **Yeni kişi üretilmez**: hayatta olan yakın bir yetişkin (büyükanne,
+  /// büyükbaba, teyze/dayı/hala/amca ya da yetişkin kardeş) haneye geçer.
+  /// Hiç yoksa yalnızca günlüğe açıklayıcı bir satır yazılır; oyuncu
+  /// mantıksız bir haneye taşınmaz. Velayetin tam kuralları karar
+  /// kuyruğundadır (Q-059).
+  GameState _ensureCaregiver(GameState state, int newAge) {
+    if (state.player.age >= prototypeOnlyAdultAge) return state;
+    final bool yetiskinVar = state.people.any((Person p) =>
+        p.isAlive && p.inPlayerHousehold && p.age >= prototypeOnlyAdultAge);
+    if (yetiskinVar) return state;
+
+    const Set<RelationType> bakimVerebilir = <RelationType>{
+      RelationType.anneanne,
+      RelationType.babaanne,
+      RelationType.anneTarafiDede,
+      RelationType.babaTarafiDede,
+      RelationType.teyze,
+      RelationType.dayi,
+      RelationType.hala,
+      RelationType.amca,
+      RelationType.kardes,
+    };
+
+    final int index = state.people.indexWhere((Person p) =>
+        p.isAlive &&
+        !p.inPlayerHousehold &&
+        p.age >= prototypeOnlyAdultAge &&
+        bakimVerebilir.contains(p.relation));
+
+    if (index < 0) {
+      // Uygun yakın yoksa uydurma bir kişi eklenmez.
+      return state.copyWith(
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(
+            age: newAge,
+            text: 'Evde sana bakabilecek bir yetişkin kalmadı; '
+                'bundan sonrası zor olacak.',
+            category: LogCategory.aile,
+          ),
+        ]),
+      );
+    }
+
+    final List<Person> people = <Person>[...state.people];
+    final Person bakan = people[index].copyWith(inPlayerHousehold: true);
+    people[index] = bakan;
+    final String etiket = bakan.possessiveFor(newAge);
+
+    return state.copyWith(
+      people: List<Person>.unmodifiable(people),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: newAge,
+          text: '${etiket[0].toUpperCase()}${etiket.substring(1)} '
+              '${bakan.fullName} sana bakmak için yanına taşındı.',
+          category: LogCategory.aile,
+        ),
+      ]),
+    );
+  }
+
+  bool _playerDies(GameState state) => Mortality.diesThisYear(
+        state.player.age,
+        _rng,
+        health: state.player.stats.health,
+      );
+
+  /// Oyuncunun hayatını tamamlar.
+  GameState _endLife(GameState state, int newAge) {
+    final String gerekce = Mortality.causeFor(newAge, _rng);
+    return state.copyWith(
+      deceased: true,
+      deathAge: newAge,
+      deathCause: gerekce,
+      pendingEvent: null,
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: newAge,
+          text: '$newAge yaşında $gerekce nedeniyle hayatını kaybettin.',
+          category: LogCategory.yasDegisimi,
+        ),
+      ]),
+    );
+  }
+
   GameState _applyTrackBonus(GameState state) {
     final EducationTrackInfo? alan = state.education.trackInfo;
     if (alan == null || !state.education.isSchoolStudent) return state;
