@@ -3,34 +3,43 @@
 Bu belge **öneridir**, karar değildir (CLAUDE.md: tasarım Faho ile ChatGPT
 tarafından kararlaştırılır). Kuyruk başlığı: **Q-062**.
 
-## 1) Neden doğrudan kodlanamadı
+## 1) Neden doğrudan kodlanamamıştı (ve şimdi durum ne)
 
 "Çocuğum olarak devam et" sistemi, oyuncunun **çocuğu olmasını** gerektirir.
-Bugünkü oyunda:
+Belgenin ilk hâlinde oyunda evlilik de çocuk da yoktu; bu yüzden kuşak
+sistemi doğrudan kodlanamıyordu:
 
-- **Evlilik yok.** `RelationType` içinde `es` (eş) bağı yok; yalnızca
-  `sevgili` ve `eskiSevgili` var (D-029, D-030).
-- **Çocuk yok.** Oyuncunun çocuğu olabileceği hiçbir akış yok; `kardes`
-  bağı yalnızca doğuşta üretiliyor.
+- **Evlilik yoktu.** `RelationType` içinde `es` bağı yoktu; yalnızca
+  `sevgili` ve `eskiSevgili` vardı (D-029, D-030).
+- **Çocuk yoktu.** Oyuncunun çocuğu olabileceği hiçbir akış yoktu.
 - Miras kuralı (D-037) **"gerçek evlilik kaydı yokken sevgili eş
-  sayılmaz"** diyor; yani oyunda bir evlilik kaydı kavramı bekleniyor ama
-  henüz tanımlı değil.
+  sayılmaz"** diyor; yani bir evlilik kaydı kavramı bekleniyordu ama
+  tanımlı değildi.
 - D-037 ayrıca kuşak sistemi için **"şu anda otomatik olarak ekleme"**
   diyor.
 
-Bu yüzden bu turda kuşak sistemi kodlanmadı. Bunun yerine, kodlanabilmesi
-için gereken kararlar aşağıda somut seçeneklerle sunuluyor.
+**Güncel durum:** Faho'nun "kodlamaya başla" talimatıyla E1 (evlilik) ve
+E2 (çocuklar) kodlandı: `RelationType.es`, `RelationType.eskiEs`,
+`RelationType.cocuk` ve `GameState.marriage` artık var, miras bunlara göre
+işliyor. Kullanılan bütün yaş/tutar/oran değerleri `prototypeOnly`'dir ve
+**Q-063 ile Q-064** altında karar bekliyor; `DECISIONS.md`'ye kalıcı kural
+yazılmadı. **E3 (kuşak devamı) hâlâ kodlanmadı**; gereken kararlar 5.
+bölümde.
 
-## 2) Önerilen sıra
+## 2) Önerilen sıra ve durum
 
-1. **Paket E1 — Evlilik ve birliktelik** (ön koşul)
-2. **Paket E2 — Çocuklar** (ön koşul)
-3. **Paket E3 — Kuşak devamı** ("çocuğum olarak devam et")
+1. **Paket E1 — Evlilik ve birliktelik** (ön koşul) — **kodlandı**
+   (Faho'nun "kodlamaya başla" talimatıyla; bütün değerler `prototypeOnly`,
+   ayrıntılar **Q-063**'te karar bekliyor).
+2. **Paket E2 — Çocuklar** (ön koşul) — **kodlandı** (aynı şekilde;
+   ayrıntılar **Q-064**).
+3. **Paket E3 — Kuşak devamı** ("çocuğum olarak devam et") — **kodlanmadı**,
+   aşağıdaki 5. bölümdeki kararlar bekleniyor.
 
 Her paket kendi PR'ında, mevcut kayıt/aile/miras sistemleriyle uyumlu
 ilerler. E3 tek başına anlamlı değildir.
 
-## 3) Paket E1 — Evlilik ve birliktelik (öneri)
+## 3) Paket E1 — Evlilik ve birliktelik (kodlandı)
 
 **Amaç:** D-037'nin beklediği "gerçek evlilik kaydı"nı oluşturmak.
 
@@ -49,7 +58,7 @@ ilerler. E3 tek başına anlamlı değildir.
 boşanmanın ekonomik sonucu (mal paylaşımı) olacak mı, eşin NPC olarak
 hayatı (iş, ölüm, kendi mal varlığı — bunlar zaten var).
 
-## 4) Paket E2 — Çocuklar (öneri)
+## 4) Paket E2 — Çocuklar (kodlandı)
 
 - `RelationType.cocuk` eklenir. Çocuk sahibi olmak **isteğe bağlı** bir
   eylem/olaydır; ilişki durumuna ve yaşa bağlıdır.
@@ -64,7 +73,12 @@ hayatı (iş, ölüm, kendi mal varlığı — bunlar zaten var).
 çocuk sayısı, evlat edinme, çocuk bakımının ekonomiye etkisi (gider kalemi),
 çocukla etkileşimler (mevcut aile etkileşimleri yeniden kullanılabilir).
 
-## 5) Paket E3 — Kuşak devamı (öneri)
+## 5) Paket E3 — Kuşak devamı (öneri — kodlanmadı)
+
+E1 ve E2 kodlandığı için teknik ön koşul artık var: gerçek bir evlilik
+kaydı (`GameState.marriage`) ve gerçek çocuk kayıtları (`RelationType.cocuk`)
+bulunuyor. Geriye **tasarım kararları** kaldı; aşağıdaki sorular
+yanıtlanmadan kodlanmaz.
 
 - Oyuncu öldüğünde hayat özeti ekranında **hayatta bir çocuğu varsa**
   "Çocuğum olarak devam et" seçeneği çıkar. Çocuk yoksa seçenek

@@ -77,7 +77,23 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.sevgili:
       return _arkadas;
 
+    // Eşle vakit geçirilir, sohbet edilir, hediyeleşilir; aynı hanede
+    // yaşadığınız için "para iste" anlamlı değildir.
+    case RelationType.es:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+        InteractionKind.hediyeVer,
+        InteractionKind.hediyeIste,
+      };
+
+    // Çocukla vakit geçirilir ve hediye verilir; çocuktan hediye ya da
+    // para istemek bu prototipte açılmaz (Q-064).
+    case RelationType.cocuk:
+      return _arkadas;
+
     case RelationType.eskiSevgili:
+    case RelationType.eskiEs:
       return _yok;
   }
 }

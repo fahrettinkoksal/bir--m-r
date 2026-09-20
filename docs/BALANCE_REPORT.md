@@ -322,11 +322,42 @@ yaşayan bir garsonun yıllık birikiminin (65.250 ₺) üstünde. Yani ikinci b
 ev, düşük gelirli bir karakter için anlamlı bir gelir kapısı oluyor; bu
 oranın doğru olup olmadığı Q-060'ta Faho'nun kararına bırakıldı.
 
+## 7) Aile ekonomisi: evlilik ve çocuk (Paket E1-E2)
+
+Evlilik ve çocuk **oyuncunun seçtiği** adımlardır; simülasyon bunları
+oynamadığı için §6'daki ölüm ve kriz ölçümleri **değişmedi** (yeniden
+ölçüldü: ortalama 74,8 · 0-18 %0,8 · 90+ %13,4 · ebeveyn kaybı %9,6 ·
+hayat başına 1,01 kriz). Aşağıdaki tablo, evlenip kendi hanesini kuran
+karakterin yıllık birikimidir (kirada düzeni, hepsi `prototypeOnly`).
+
+| Meslek | Çocuksuz | 1 çocuk | 2 çocuk | 3 çocuk |
+|---|---|---|---|---|
+| Mağaza çalışanı | 78.000 ₺ | 48.600 ₺ | 19.200 ₺ | **-10.200 ₺** |
+| Garson | 65.250 ₺ | 36.300 ₺ | 7.350 ₺ | **-21.600 ₺** |
+| Teknik servis çalışanı | 146.000 ₺ | 114.200 ₺ | 82.400 ₺ | 50.600 ₺ |
+| Ressam / tasarımcı | 180.000 ₺ | 147.000 ₺ | 114.000 ₺ | 81.000 ₺ |
+| Yazılım geliştirici | 537.000 ₺ | 491.400 ₺ | 445.800 ₺ | 400.200 ₺ |
+| Öğretmen | 282.000 ₺ | 245.400 ₺ | 208.800 ₺ | 172.200 ₺ |
+
+Tek seferlik masraflar: nikâh **60.000 ₺**, doğum **20.000 ₺**, boşanmada
+nakdin **%25'i** eşe kalıyor. Çocuk gideri kalemi: taban 24.000 ₺ +
+gelirin %3'ü, hanedeki 18 yaş altı çocuk sayısıyla çarpılıyor ve çocuk
+25 yaşında evden çıkınca sona eriyor.
+
+**Dikkat çeken nokta:** düşük gelirli meslekte **üçüncü çocuk** birikimi
+eksiye çeviriyor; cüzdan eksiye düşmüyor ama her yıl geçim sıkıntısı
+sayacı artıyor. Bu, gerçekçi bir sonuç olabilir de fazla sert olabilir de;
+çocuk gideri büyüklüğü **Q-064'ün 4. sorusu** olarak Faho'nun kararına
+bırakıldı. Gizlemek için maaş veya fiyat değiştirilmedi.
+
 ## Ölçümün sınırları
 
 - Simülasyon, oyuncunun **iş bulduğu senaryoyu oynamaz**: tablolar "bu maaşla
   çalışıldığında" varsayımıyla hesaplanmış oran tablolarıdır.
 - Kumar, miras ve hediye gelirleri tablolara dâhil değildir; bunlar ekonomiyi
   ayrıca hızlandırır.
-- Ölüm dağılımı, mevcut olasılık eğrisinin ölçümüdür; olay tabanlı ölümler
-  (kaza/hastalık) henüz yoktur (D-036).
+- Ölüm dağılımı, mevcut olasılık eğrisinin ve sağlık krizlerinin (D-044)
+  birlikte ölçümüdür.
+- Aile tabloları oyuncunun **evlenip çocuk sahibi olduğu** senaryonun oran
+  hesabıdır; simülasyon bu adımları kendiliğinden oynamaz. Eşin geliri
+  hane bütçesine katılmıyor (Q-063, 4. soru).

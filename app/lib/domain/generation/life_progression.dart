@@ -11,6 +11,8 @@ import '../economy/housing.dart';
 import '../economy/living_costs.dart';
 import '../../data/health_crisis_catalog.dart';
 import '../life/health_crisis_engine.dart';
+import '../interaction/marriage_engine.dart';
+import '../interaction/parenthood.dart';
 import '../life/inheritance.dart';
 import '../life/mortality.dart';
 import '../models/game_settings.dart';
@@ -178,8 +180,16 @@ class LifeProgression {
     // döner.
     afterDeaths = _easeGrief(afterDeaths, olumSonucu.happinessLoss > 0);
 
+    // Eş vefat ettiyse evlilik kaydı **dul** durumuna geçer; kayıt
+    // silinmez, miras hâlâ gerçek bir evliliğe dayanır (D-037).
+    afterDeaths = const MarriageEngine().settleWidowhood(afterDeaths, newAge);
+
     // Miras: yalnızca bu yıl vefat edenler için ve **bir kez**.
     afterDeaths = _settleEstates(afterDeaths, newAge);
+
+    // Büyüyen çocuklar kendi hayatlarını kurar: haneden çıkarlar ama
+    // kayıtları silinmez, görüşülmeye devam edilir.
+    afterDeaths = _childrenLeaveHome(afterDeaths, newAge);
 
     // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).
     afterDeaths = _applyRentIncome(afterDeaths, newAge);
@@ -308,6 +318,44 @@ class LifeProgression {
       player: state.player.copyWith(
         wallet: state.player.wallet + toplam,
       ),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        ...satirlar,
+      ]),
+    );
+  }
+
+  /// Yetişkin olan çocukları haneden çıkarır.
+  ///
+  /// Kişi kaydı **silinmez**; yalnızca hane bilgisi değişir. Böylece çocuk
+  /// gideri ömür boyu sürmez, çocuk ilişkiler listesinde kalmaya devam
+  /// eder. Yaş sınırı `prototypeOnly`'dir (Q-064).
+  GameState _childrenLeaveHome(GameState state, int newAge) {
+    final List<Person> people = <Person>[...state.people];
+    final List<LifeLogEntry> satirlar = <LifeLogEntry>[];
+    bool degisti = false;
+
+    for (int i = 0; i < people.length; i++) {
+      final Person p = people[i];
+      if (p.relation != RelationType.cocuk) continue;
+      if (!p.isAlive || !p.inPlayerHousehold) continue;
+      if (p.age < Parenthood.prototypeOnlyLeaveHomeAge) continue;
+
+      people[i] = p.copyWith(inPlayerHousehold: false);
+      degisti = true;
+      satirlar.add(
+        LifeLogEntry(
+          age: newAge,
+          text: '${p.fullName} kendi evine taşındı; artık kendi hayatını '
+              'kuruyor.',
+          category: LogCategory.aile,
+        ),
+      );
+    }
+
+    if (!degisti) return state;
+    return state.copyWith(
+      people: List<Person>.unmodifiable(people),
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         ...satirlar,

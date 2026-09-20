@@ -21,7 +21,10 @@ enum RelationType {
   ogretmen,
   arkadas,
   sevgili,
-  eskiSevgili;
+  eskiSevgili,
+  es,
+  eskiEs,
+  cocuk;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -31,6 +34,9 @@ enum RelationType {
       case RelationType.anne:
       case RelationType.baba:
       case RelationType.kardes:
+      // Eş ve çocuklar çekirdek ailedir; eski eş ilişki geçmişine düşer.
+      case RelationType.es:
+      case RelationType.cocuk:
         return RelationGroup.cekirdek;
       case RelationType.anneanne:
       case RelationType.babaanne:
@@ -48,14 +54,21 @@ enum RelationType {
         return RelationGroup.arkadaslar;
       case RelationType.sevgili:
       case RelationType.eskiSevgili:
+      case RelationType.eskiEs:
         return RelationGroup.romantik;
     }
   }
 
   /// Kan bağı olan akraba mı? Okul tanışıklıkları, arkadaşlık ve romantik
   /// bağlar akrabalık değildir.
+  ///
+  /// **Eş çekirdek ailedendir ama kan bağı değildir**; çocuk ise kan bağıdır.
   bool get kanBagi =>
-      group == RelationGroup.cekirdek || group == RelationGroup.genis;
+      this != RelationType.es &&
+      (group == RelationGroup.cekirdek || group == RelationGroup.genis);
+
+  /// Birlikte hane kurulan bağ mı? (Eş ve çocuklar.)
+  bool get haneBagi => this == RelationType.es || this == RelationType.cocuk;
 }
 
 enum RelationGroup {
@@ -119,6 +132,12 @@ String relationLabel({
       return gender == Gender.kadin ? 'Kız arkadaş' : 'Erkek arkadaş';
     case RelationType.eskiSevgili:
       return gender == Gender.kadin ? 'Eski kız arkadaş' : 'Eski erkek arkadaş';
+    case RelationType.es:
+      return 'Eş';
+    case RelationType.eskiEs:
+      return 'Eski eş';
+    case RelationType.cocuk:
+      return gender == Gender.kadin ? 'Kız' : 'Oğul';
   }
 }
 
@@ -172,5 +191,11 @@ String relationPossessive({
       return gender == Gender.kadin ? 'Kız arkadaşın' : 'Erkek arkadaşın';
     case RelationType.eskiSevgili:
       return gender == Gender.kadin ? 'Eski kız arkadaşın' : 'Eski erkek arkadaşın';
+    case RelationType.es:
+      return 'Eşin';
+    case RelationType.eskiEs:
+      return 'Eski eşin';
+    case RelationType.cocuk:
+      return gender == Gender.kadin ? 'Kızın' : 'Oğlun';
   }
 }

@@ -326,9 +326,26 @@ Kriz ölümle biterse hayat olağan yoldan tamamlanıyor ve arşiv çalışıyor
 Sağlık çok düşünce bir kez uyarı veriliyor. Temel ölüm eğrisi, krizlerin
 eklediği ölümü dengelemek için ölçümle düşürüldü.
 
-Kayıt biçimi **sürüm 14**. Kuşak sistemi kodlanmadı: ön koşulu olan
-evlilik/çocuk sistemi henüz tasarlanmadı; öneri `docs/GENERATION_PROPOSAL.md`
-ve kuyrukta **Q-062**.
+## Evlilik ve çocuklar (uygulandı — onay bekliyor)
+**Evlilik (Paket E1):** sevgiliyle evlenilebiliyor; kişi kaydı silinmiyor,
+**aynı kimlik** eş oluyor. Koşullar ve tutarlar `prototypeOnly`: 18 yaş,
+yakınlık 60, nikâh 60.000 ₺. Evlenmek kendi haneni kurmak demek; eş haneye
+katılıyor ve gider "kirada" düzenine geçiyor. Boşanmada eş **aynı kimlikle**
+eski eş oluyor, nakdin %25'i ona kalıyor. Eş vefat edince kayıt "dul"
+oluyor ve miras D-037'ye göre işliyor.
+
+**Çocuklar (Paket E2):** çocuk sahibi olmak isteğe bağlı bir eylem; evlilik
+şartı var, aynı yıl ikinci bebek olmuyor, en fazla 4 çocuk. Çocuk kaydı
+diğer kişilerle aynı yapıyı kullanıyor (kalıcı kimlik, yaş, hane, ölüm,
+miras); ayrı bir çocuk sistemi kurulmadı. Hanedeki 18 yaş altı her çocuk
+için yıllık gider kalemi var; çocuk 25 yaşında evden çıkınca kalem bitiyor
+ve kaydı korunuyor.
+
+Kayıt biçimi **sürüm 15**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
+ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
+ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**
+altında Faho'nun kararını bekliyor; `DECISIONS.md`'ye yeni kalıcı kural
+yazılmadı.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

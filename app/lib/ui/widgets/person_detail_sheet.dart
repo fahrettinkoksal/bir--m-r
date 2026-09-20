@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../data/item_catalog.dart';
 
+import '../../domain/interaction/marriage_engine.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/interaction.dart';
+import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../state/game_scope.dart';
@@ -77,6 +79,79 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     });
   }
 
+  /// Evlilik (Paket E1): sevgili **aynı kimlikle** eş olur.
+  Future<void> _marry(Person person) async {
+    final bool? onay = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Evlenmek istiyor musun?'),
+        content: Text(
+          '${person.firstName} ile evleneceksin. Nikâh masrafı '
+          '${MarriageEngine.prototypeOnlyWeddingCost} \u20BA cüzdanından '
+          'çıkacak ve kendi haneni kuracaksın.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Evlen'),
+          ),
+        ],
+      ),
+    );
+    if (onay != true || !mounted) return;
+    final FamilyOutcome? sonuc = GameScope.of(context).marry(widget.personId);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
+  /// Boşanma (Paket E1): kişi kaydı silinmez, eski eş olur.
+  Future<void> _divorce(Person person) async {
+    final bool? onay = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Boşanmak istiyor musun?'),
+        content: Text(
+          '${person.firstName} ile evliliğin bitecek. Kaydı silinmez; '
+          'İlişkiler bölümünde eski eş olarak kalır.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Boşan'),
+          ),
+        ],
+      ),
+    );
+    if (onay != true || !mounted) return;
+    final FamilyOutcome? sonuc = GameScope.of(context).divorce();
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
+  /// Çocuk sahibi olmak (Paket E2).
+  void _haveChild() {
+    final FamilyOutcome? sonuc = GameScope.of(context).haveChild();
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -120,6 +195,13 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     person.isAlive ? '${person.age}' : '${person.age} (vefat etti)',
               ),
               _Row(label: 'Cinsiyet', value: person.gender.label),
+              // Evlilik kaydı gerçek bir kayıttır; eş ve eski eşte görünür.
+              if (state.marriage != null &&
+                  state.marriage!.spouseId == person.id)
+                _Row(
+                  label: 'Evlilik',
+                  value: _marriageLabel(state.marriage!),
+                ),
               _Row(label: 'Durum', value: person.occupationLabel),
               if (person.wealth != null)
                 _Row(label: 'Kendi maddi durumu', value: person.wealth!.label),
@@ -168,6 +250,64 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 )
               else
                 _Actions(available: available, onSelected: _run),
+              // Evlilik yalnızca sevgilide sunulur; koşul sağlanmıyorsa
+              // düğme yerine gerekçe yazılır (sahte düğme olmaz).
+              if (person.isAlive &&
+                  person.relation == RelationType.sevgili) ...<Widget>[
+                const SizedBox(height: 12),
+                if (GameScope.of(context)
+                    .marriageAvailability(widget.personId)
+                    .isAllowed)
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      key: const Key('person_marry_button'),
+                      onPressed: () => _marry(person),
+                      icon: const Icon(Icons.favorite),
+                      label: const Text('Evlen'),
+                    ),
+                  )
+                else
+                  _Note(
+                    text: 'Evlenmek için: '
+                        '${GameScope.of(context).marriageAvailability(widget.personId).reason}',
+                  ),
+              ],
+
+              // Eşe özel eylemler: çocuk sahibi olmak ve boşanma.
+              if (person.isAlive && person.relation == RelationType.es) ...<Widget>[
+                const SizedBox(height: 12),
+                if (GameScope.of(context).childAvailability().isAllowed)
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      key: const Key('person_child_button'),
+                      onPressed: _haveChild,
+                      icon: const Icon(Icons.child_friendly_outlined),
+                      label: const Text('Çocuk sahibi olun'),
+                    ),
+                  )
+                else
+                  _Note(
+                    text: 'Çocuk sahibi olmak için: '
+                        '${GameScope.of(context).childAvailability().reason}',
+                  ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    key: const Key('person_divorce_button'),
+                    onPressed: () => _divorce(person),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      side: BorderSide(
+                        color: theme.colorScheme.error.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: const Text('Boşan'),
+                  ),
+                ),
+              ],
               // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;
               // eski sevgiliye sevgiliye özel eylem açılmaz.
               if (person.isAlive && person.relation == RelationType.sevgili) ...<Widget>[
@@ -199,6 +339,20 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
         ),
       ),
     );
+  }
+}
+
+/// Evlilik kaydının okunur hâli.
+String _marriageLabel(Marriage marriage) {
+  switch (marriage.status) {
+    case MarriageStatus.evli:
+      return '${marriage.marriedAtAge} yaşında evlendiniz';
+    case MarriageStatus.bosandi:
+      return '${marriage.marriedAtAge} yaşında evlendiniz, '
+          '${marriage.endedAtAge} yaşında boşandınız';
+    case MarriageStatus.dul:
+      return '${marriage.marriedAtAge} yaşında evlendiniz, '
+          '${marriage.endedAtAge} yaşında kaybettin';
   }
 }
 

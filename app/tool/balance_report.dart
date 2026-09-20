@@ -18,6 +18,8 @@ import 'package:bir_omur/domain/casino/casino_rules.dart';
 import 'package:bir_omur/domain/life/health_crisis_engine.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/interaction/marriage_engine.dart';
+import 'package:bir_omur/domain/interaction/parenthood.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/person.dart';
@@ -246,6 +248,33 @@ void _rapor() {
         '$ailede ₺'.padLeft(14) +
         '$kirada ₺'.padLeft(14) +
         '$kendi ₺'.padLeft(16));
+  }
+
+  // Evlilik ve çocuk: kendi hanesini kuran karakterin yükü (Q-063, Q-064).
+  print('');
+  print('=== AİLE EKONOMİSİ: EVLİLİK VE ÇOCUK (Paket E1-E2) ===');
+  print('Nikâh masrafı: ${MarriageEngine.prototypeOnlyWeddingCost} ₺ · '
+      'doğum masrafı: ${Parenthood.prototypeOnlyBirthCost} ₺ · '
+      'boşanmada nakit payı: '
+      '%${(MarriageEngine.prototypeOnlyDivorceShare * 100).toStringAsFixed(0)}');
+  print('Evli karakter kendi hanesini kurar; aşağıdaki birikim '
+      '"kirada" düzenine göredir.');
+  print('');
+  print('Meslek'.padRight(22) +
+      'çocuksuz'.padLeft(14) +
+      '1 çocuk'.padLeft(14) +
+      '2 çocuk'.padLeft(14) +
+      '3 çocuk'.padLeft(14));
+  for (final JobType job in kJobCatalog) {
+    final int taban =
+        job.yearlySalary - giderFor(LivingSituation.kirada, job.yearlySalary);
+    final int cocukGideri =
+        LivingCosts.prototypeOnlyChildCost.amountFor(job.yearlySalary);
+    print(job.name.padRight(22) +
+        '$taban ₺'.padLeft(14) +
+        '${taban - cocukGideri} ₺'.padLeft(14) +
+        '${taban - cocukGideri * 2} ₺'.padLeft(14) +
+        '${taban - cocukGideri * 3} ₺'.padLeft(14));
   }
 
   print('');

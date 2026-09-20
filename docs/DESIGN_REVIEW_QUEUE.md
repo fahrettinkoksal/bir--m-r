@@ -1121,7 +1121,7 @@ güçlü bir içerik olur ve ayrı bir pakette ele alınabilir.
 yazıldı.
 
 ### Q-062 — Kuşak sistemi ve ön koşulu: evlilik ve çocuk
-**Durum:** **Karar bekliyor — kodlanmadı.** **Kaynak:** `docs/GENERATION_PROPOSAL.md`. **Bağlantılı:** Q-059 (D-037), Q-058.
+**Durum:** **Ön koşullar kodlandı (E1 evlilik, E2 çocuklar); kuşak devamı (E3) hâlâ karar bekliyor.** **Kaynak:** `docs/GENERATION_PROPOSAL.md`. **Bağlantılı:** Q-059 (D-037), Q-058.
 
 **Sorun:** "Çocuğum olarak devam et" kuşak sistemi, oyuncunun **çocuğu
 olmasını** gerektirir. Oyunda şu an **evlilik, birliktelik ve çocuk sistemi
@@ -1148,8 +1148,83 @@ tasarlanıp kodlansın; kuşak devamı onun üstüne küçük bir paket olarak g
 Geçmiş Hayatlar arşivi (D-037) bu geçiş için gereken altyapının bir kısmını
 zaten sağlıyor.
 
-**Varsayılan işlem:** Hiçbir şey kodlanmadı; oyunda evlilik/çocuk sistemi
-yokken kuşak sistemi eklenmedi (D-037'ye uygun).
+**Varsayılan işlem:** Faho'nun "kodlamaya başla" talimatıyla **yalnızca E1
+(evlilik) ve E2 (çocuklar)** kodlandı; bütün sayısal değerler `prototypeOnly`
+işaretli ve ayrıntıları Q-063/Q-064'te karar bekliyor. **E3 (çocuğum olarak
+devam et) kodlanmadı**: yukarıdaki 5. ve 6. sorular yanıtlanmadan hangi
+kişilerin, hangi varlıkların ve hangi ilişkilerin yeni kuşağa taşınacağı
+uydurulmaz.
+
+### Q-063 — Evlilik kurallarının ayrıntıları
+**Durum:** Kodlandı, **karar bekliyor** (bütün değerler `prototypeOnly`). **Kaynak:** Paket E1. **Bağlantılı:** Q-062, Q-055 (gider), Q-059 (miras).
+
+**Şu an kodda olan (geçici) kurallar:**
+- Evlenmek sevgiliyle olur; kişi kaydı **silinmez**, aynı kimlik `es` olur.
+- Koşullar: iki taraf da **18 yaş**, yakınlık **en az 60**, nikâh masrafı
+  **60.000 ₺** (cüzdanda yoksa düğme yerine gerekçe yazılır).
+- Evlenmek **kendi haneni kurmaktır**: eş haneye katılır, oyuncu artık
+  "ailenin yanında" sayılmaz ve kirada gideri öder (D-033/D-043).
+- Boşanmada eş **aynı kimlikle** `eskiEs` olur; nakdin **%25'i** eşe kalır.
+  Eşya ve mülk paylaşımı **yoktur**; çocuklar oyuncunun hanesinde kalır.
+- Eş vefat edince kayıt **dul** durumuna geçer, silinmez; miras D-037'ye
+  göre işler (çocuk yoksa tamamı, varsa %25 eşe).
+- Eski eşle etkileşimler kapalıdır (eski sevgilideki gibi, gerekçe yazılı).
+
+**Karar soruları:**
+1. Evlenme yaşı, yakınlık eşiği ve düğün masrafı bu değerlerde kalsın mı?
+2. Evlenme teklifi her koşulda kabul mü edilsin, yoksa yakınlığa bağlı bir
+   ret ihtimali olsun mu?
+3. Boşanmada mal paylaşımı olacak mı (ev, araç, birikim) ve oranı ne olsun?
+4. Eşin geliri hane bütçesine katılsın mı (şu an eş kendi giderini
+   karşılıyor sayılıyor, oyuncunun bütçesine katkı vermiyor)?
+5. Dul veya boşanmış karakter yeniden evlenebilsin mi? **Şu an açıkça
+   kapalı**: ikinci evlilik, ilk evlilik kaydının üzerine yazmak anlamına
+   geleceği için engellendi ve gerekçesi ekranda yazılıyor. Açılacaksa
+   evlilik kaydının **liste** hâline gelmesi gerekir.
+6. Eski eşle hangi etkileşimler açık kalsın (özellikle ortak çocuk varsa)?
+
+**Claude'un önerisi (yalnızca öneri):** Eşin gelirinin ortak bütçeye
+katılması ekonomiyi belirgin biçimde değiştirir; önce 4. sorunun yanıtı
+gelsin, sonra denge yeniden ölçülsün.
+
+**Varsayılan işlem:** Hiçbir değer `DECISIONS.md`'ye kalıcı kural olarak
+yazılmadı.
+
+### Q-064 — Çocuk kurallarının ayrıntıları
+**Durum:** Kodlandı, **karar bekliyor** (bütün değerler `prototypeOnly`). **Kaynak:** Paket E2. **Bağlantılı:** Q-062, Q-063.
+
+**Şu an kodda olan (geçici) kurallar:**
+- Çocuk **isteğe bağlıdır**: kendiliğinden olmaz, eş kartındaki eylemle olur.
+- Koşullar: evli olmak, iki taraf da 18 yaş, çiftteki kadın **45**, erkek
+  **60** yaşına kadar; aynı yıl ikinci bebek yok; en fazla **4 çocuk**;
+  doğum masrafı **20.000 ₺**.
+- Çocuk kaydı diğer kişilerle **aynı** yapıdadır: kalıcı kimlik, yaş, hane,
+  ölüm, miras. Ayrı bir "çocuk sistemi" kurulmadı (D-038).
+- Hanedeki her **18 yaş altı** çocuk için yıllık gider kalemi eklenir
+  (taban 24.000 ₺ + gelirin %3'ü, çocuk sayısıyla çarpılır).
+- Çocuk **25 yaşında** haneden çıkar; kaydı silinmez, görüşülmeye devam
+  edilir ve gider kalemi sona erer.
+- Çocukla etkileşimler: vakit geçir, sohbet, hediye ver. Çocuktan para ya
+  da hediye istemek açılmadı.
+
+**Karar soruları:**
+1. Yaş sınırları, en fazla çocuk sayısı ve doğum masrafı böyle kalsın mı?
+2. Evlat edinme olacak mı (aynı cinsiyetteki çiftler ve ileri yaş için tek
+   yol budur; şu an ikisi de kapalı ve gerekçesi yazılıyor)?
+3. Evlilik dışı çocuk mümkün olsun mu?
+4. Çocuk gideri (24.000 ₺ + %3) doğru büyüklükte mi; okul/üniversite gibi
+   ayrı kalemler gelsin mi?
+5. Çocuklar okul ve meslek sistemine girsin mi, yoksa yalnızca yaş ve
+   meslek etiketiyle mi büyüsünler (şu an ikincisi)?
+6. Çocuğun evden çıkma yaşı 25 doğru mu; evlenince çıkma gibi bir kural
+   olsun mu?
+
+**Claude'un önerisi (yalnızca öneri):** Çocukların okul sistemine girmesi
+büyük bir paket olur; önce yaş + meslek etiketiyle büyümeleri yeterli.
+
+**Varsayılan işlem:** Hiçbir değer `DECISIONS.md`'ye kalıcı kural olarak
+yazılmadı; ileri yaş ve aynı cinsiyet çiftlerinde uydurma bir kural
+uygulanmadı, gerekçe yazıldı.
 
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
