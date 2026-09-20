@@ -195,6 +195,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
     };
 
 Map<String, Object?> _encodeLifeSummary(LifeSummary l) => <String, Object?>{
+      'familyLine': l.familyLine,
       'fullName': l.fullName,
       'birthCity': l.birthCity,
       'deathAge': l.deathAge,
@@ -218,6 +219,9 @@ LifeSummary _decodeLifeSummary(Map<String, Object?> json) => LifeSummary(
       itemCount: _int(json, 'itemCount'),
       licenseCount: _int(json, 'licenseCount'),
       highlights: List<String>.unmodifiable(_stringList(json, 'highlights')),
+      // Eski arşiv kayıtlarında aile satırı yoktur; `null` kalır ve
+      // ekranda hiç gösterilmez. Arşiv silinmez.
+      familyLine: _stringOrNull(json, 'familyLine'),
     );
 
 Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
@@ -341,6 +345,19 @@ GameState decodeGameState(Map<String, Object?> json) {
           'Kayıtta aynı eşya kimliği birden fazla kez geçiyor: $id',
         );
       }
+    }
+  }
+
+  // Evlilik kaydı, listede gerçekten bulunan bir kişiyi göstermeli;
+  // aksi hâlde "eşi olan ama eşi olmayan" bir hayat yüklenirdi.
+  final Object? hamEvlilik = json['marriage'];
+  if (hamEvlilik is Map) {
+    final Object? spouseId = hamEvlilik['spouseId'];
+    if (spouseId is String &&
+        !people.any((Person p) => p.id == spouseId)) {
+      throw SaveFormatException(
+        'Kayıttaki evlilik, bulunmayan bir kişiyi gösteriyor: $spouseId',
+      );
     }
   }
 

@@ -116,6 +116,12 @@ abstract final class Mortality {
         temel = 10;
       case RelationType.sevgili:
         temel = 18;
+      // Eş ve çocuk kaybı en ağır hissedilen kayıplardır; bu satır
+      // olmadan ikisi de "uzak tanıdık" seviyesinde kalıyordu.
+      case RelationType.es:
+        temel = 24;
+      case RelationType.cocuk:
+        temel = 26;
       case RelationType.arkadas:
         temel = 8;
       default:

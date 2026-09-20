@@ -36,6 +36,7 @@ import '../domain/models/blackjack_game.dart';
 import '../domain/models/game_settings.dart';
 import '../domain/models/life_log.dart';
 import '../domain/models/life_summary.dart';
+import '../domain/models/marriage.dart';
 import '../domain/social/social_engine.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
@@ -922,7 +923,9 @@ class GameController extends ChangeNotifier {
 
   FamilyOutcome? _runFamily(FamilyResult Function(GameState) islem) {
     final GameState? current = _state;
-    if (current == null || current.hasPendingEvent) return null;
+    if (current == null || current.hasPendingEvent || current.deceased) {
+      return null;
+    }
     final FamilyResult sonuc = islem(current);
     if (!sonuc.outcome.applied) return sonuc.outcome;
     _state = sonuc.state;
@@ -995,9 +998,40 @@ class GameController extends ChangeNotifier {
               ? satirlar.sublist(satirlar.length - 8)
               : satirlar,
         ),
+        familyLine: _familyLine(current),
       ),
     );
     return arsiv;
+  }
+
+  /// Arşive yazılacak aile özeti; evlilik de çocuk da yoksa `null`.
+  ///
+  /// Uydurma bilgi yazılmaz: yalnızca gerçek evlilik kaydı ve gerçek çocuk
+  /// kayıtları okunur.
+  static String? _familyLine(GameState state) {
+    final List<String> parcalar = <String>[];
+    final Marriage? evlilik = state.marriage;
+    if (evlilik != null) {
+      final Person? es = state.personById(evlilik.spouseId);
+      final String ad = es?.fullName ?? 'bilinmiyor';
+      switch (evlilik.status) {
+        case MarriageStatus.evli:
+          parcalar.add('Eşi: $ad (${evlilik.marriedAtAge} yaşında evlendi)');
+        case MarriageStatus.bosandi:
+          parcalar.add('Eski eşi: $ad '
+              '(${evlilik.marriedAtAge}-${evlilik.endedAtAge} yaş)');
+        case MarriageStatus.dul:
+          parcalar.add('Eşi: $ad (${evlilik.endedAtAge} yaşında kaybetti)');
+      }
+    }
+    final int cocuk = state.children.length;
+    if (cocuk > 0) {
+      final int hayatta = state.livingChildren.length;
+      parcalar.add(
+        hayatta == cocuk ? '$cocuk çocuk' : '$cocuk çocuk ($hayatta hayatta)',
+      );
+    }
+    return parcalar.isEmpty ? null : parcalar.join(' · ');
   }
 
   /// Oyuncu ayarlarını günceller (D-032).

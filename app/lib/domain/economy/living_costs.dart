@@ -103,10 +103,16 @@ abstract final class LivingCosts {
   static const CostItem prototypeOnlyChildCost =
       CostItem(label: 'Çocuk gideri', base: 24000, incomeShare: 0.03);
 
-  /// Oyuncu bu yaşta hane içinde bir yetişkinle mi yaşıyor?
+  /// Oyuncu **ailesinin** yanında mı yaşıyor?
+  ///
+  /// Eş ve çocuklar sayılmaz: onlarla kurulan hane oyuncunun kendi
+  /// hanesidir (Housing.hasAdultAtFamilyHome ile aynı ölçüt).
   static bool livesWithFamily(GameState state) => state.people.any(
         (Person p) =>
-            p.isAlive && p.inPlayerHousehold && p.age >= prototypeOnlyAdultAge,
+            p.isAlive &&
+            p.inPlayerHousehold &&
+            !p.relation.haneBagi &&
+            p.age >= prototypeOnlyAdultAge,
       );
 
   /// Oyuncunun kendi konutu var mı?

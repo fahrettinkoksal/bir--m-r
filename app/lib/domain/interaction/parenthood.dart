@@ -133,11 +133,18 @@ class Parenthood {
         .toList(growable: false);
     if (bos.isNotEmpty) isim = rng.pick(bos);
 
+    // Soyadı: prototipte çocuk **babanın** soyadını alır. Evlenince eşin
+    // soyadının değişip değişmeyeceği ayrı bir tasarım sorusudur (Q-063);
+    // kimsenin kaydı bu yüzden değiştirilmez.
+    final Person es = state.spouse!;
+    final String soyad = state.player.gender == Gender.erkek
+        ? state.player.lastName
+        : es.lastName;
+
     final Person cocuk = Person(
       id: nextChildId(state),
       firstName: isim,
-      // Soyadı oyuncunun soyadıdır; eşin soyadı değişmez (kayıt korunur).
-      lastName: state.player.lastName,
+      lastName: soyad,
       gender: gender,
       relation: RelationType.cocuk,
       age: 0,

@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 15;
+const int kSaveFormatVersion = 16;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -69,8 +69,15 @@ abstract final class SaveMigrations {
     if (from <= 12) guncel = _v12ToV13(guncel);
     if (from <= 13) guncel = _v13ToV14(guncel);
     if (from <= 14) guncel = _v14ToV15(guncel);
+    if (from <= 15) guncel = _v15ToV16(guncel);
     return guncel;
   }
+
+  /// Sürüm 15 → 16: geçmiş hayat özetine aile satırı eklendi.
+  ///
+  /// Eski arşiv kayıtlarında bu satır yoktur; `null` kalır ve ekranda hiç
+  /// gösterilmez. **Hiçbir arşiv kaydı silinmez veya değiştirilmez.**
+  static Map<String, Object?> _v15ToV16(Map<String, Object?> body) => body;
 
   /// Sürüm 14 → 15: evlilik ve çocuklar eklendi.
   ///
