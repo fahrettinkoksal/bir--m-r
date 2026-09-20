@@ -767,6 +767,10 @@ sınır; bunlar maaş ve gider dengesiyle (Q-055) birlikte belirlenecek.
 dalında tamamlandı: kumarhane ayarlardan kapatılabiliyor, oyuncu kendine
 yıllık bahis limiti koyabiliyor, kalan hak vurgusu nötr bilgiye çevrildi.
 
+**Denge güncellemesi (D-040):** Sabit 500-25.000 ₺ bahis ve 150.000 ₺ yıllık
+sınır kaldırıldı. Bahis bütçesi artık gider sonrası kullanılabilir gelir ve
+cüzdandan hesaplanıyor; en küçük bahis 100 ₺. Ölçüm: `docs/BALANCE_REPORT.md` §5.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-055 — Ortak ekonomi ölçeği: fiyatlar ve maaşlar
@@ -825,6 +829,11 @@ kalıcı denge kuralı ilan edilmeyecek**.
 yanında, bağımsız kirada ve kendi evinde farklı). Cüzdan eksiye düşmüyor;
 geçim sıkıntısı durumu var. Güncel ölçüm `docs/BALANCE_REPORT.md` §4'te.
 
+**Denge güncellemesi (D-039):** Gider sabit tutar olmaktan çıkıp taban +
+gelir payına dönüştü ve kalem kalem tutuluyor. Bağımsız yaşayan garson artık
+yılda 65.250 ₺ birikim yapabiliyor (önce 25.000 ₺). Ölçüm:
+`docs/BALANCE_REPORT.md` §5.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-056 — Araç sahipliği, ehliyet ve taşınma
@@ -872,6 +881,9 @@ olarak ayrı bir pakette ele alınsın.
 **Uygulama notu:** Galeride araç satın alma yaşı 18'e çekildi. Aksesuar
 yaşları (kask 16, tavan bagajı 17) kararda geçmediği için değiştirilmedi;
 Faho'nun tercihi bekleniyor.
+
+**Denge güncellemesi (D-042):** Otomobile özgü aksesuarların satın alma yaşı
+18 oldu; motosiklet kaskı ve motosiklet parçaları 16'da kaldı.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
@@ -977,6 +989,11 @@ oranı Faho'nun onayıyla ayarlanacak.
 yıl mutluluğa geri dönüyor). Ölüm olasılıkları değiştirilmedi; güncel
 ölçüm `docs/BALANCE_REPORT.md` §4'te ve yaşlı uç ile çocukken ebeveyn
 kaybı oranı hâlâ Faho'nun kararını bekliyor.
+
+**Denge güncellemesi (D-041):** Ebeveyn yaşları üçgen dağılımdan seçiliyor ve
+85 üstü ölüm eğrisi hafifçe yükseltildi. 5.000 hayatlık ölçümde 90+ oranı
+%19,2'den %12,6'ya, çocukken ebeveyn kaybı %19,4'ten %12,3'e indi; genç
+yetişkin ölümleri artırılmadı. Ölçüm: `docs/BALANCE_REPORT.md` §5.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 

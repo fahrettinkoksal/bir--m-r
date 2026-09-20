@@ -31,12 +31,19 @@ abstract final class Mortality {
       temel = 0.028;
     } else if (age < 85) {
       temel = 0.075;
+    } else if (age < 90) {
+      // 85 üstü eğri, çok ileri yaşların olağanlaşmaması için ölçümle
+      // ayarlandı (D-036, `docs/BALANCE_REPORT.md`). Genç yetişkin ölümü
+      // artırılmadı.
+      temel = 0.22;
     } else if (age < 95) {
-      temel = 0.17;
+      temel = 0.30;
+    } else if (age < 100) {
+      temel = 0.42;
     } else if (age < 105) {
-      temel = 0.32;
-    } else {
       temel = 0.55;
+    } else {
+      temel = 0.70;
     }
 
     // Sağlık yalnızca oyuncuda ölçülür; NPC'lerde sağlık değeri yoktur ve

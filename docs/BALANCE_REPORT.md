@@ -177,6 +177,103 @@ Faho'nun onayıyla ayarlanacak (C1).
   çok daha büyük (23x): gider sabit olduğu için düşük gelirde orantısız
   ağırlaşıyor. Gideri gelire göre kısmen oranlamak bu makası daraltır.
 
+## 5) Dört denge kararından sonra (D-039 – D-042)
+
+Ölçüm: `claude/denge-q053-q059`, **5.000 simüle hayat** (önceki turlar 500
+hayattı; sayılar bu yüzden daha kararlı).
+
+### 5.1 Yıllık gider: taban + gelir payı (D-039)
+
+| Yaşam düzeni | Taban | Gelir payı |
+|---|---|---|
+| Çocuk | 0 ₺ | — |
+| Ailenin yanında | 20.000 ₺ | %8 |
+| Kirada, kendi başına | 75.000 ₺ | %15 |
+| Kendi evinde | 45.000 ₺ | %12 |
+
+Kalemler ayrı tutuluyor (kira/aidat, beslenme, fatura ve diğer); ileride
+ekranda tek tek gösterilebilir.
+
+### 5.2 Gider sonrası yıllık birikim
+
+| Meslek | Ailede | Kirada | Kendi evinde |
+|---|---|---|---|
+| Garson | 131.800 ₺ | **65.250 ₺** | 100.200 ₺ |
+| Mağaza çalışanı | 145.600 ₺ | 78.000 ₺ | 113.400 ₺ |
+| Teknik servis | 219.200 ₺ | 146.000 ₺ | 183.800 ₺ |
+| Ressam / tasarımcı | 256.000 ₺ | 180.000 ₺ | 219.000 ₺ |
+| Öğretmen | 366.400 ₺ | 282.000 ₺ | 324.600 ₺ |
+| Yazılım geliştirici | 642.400 ₺ | 537.000 ₺ | 588.600 ₺ |
+
+Önceki sabit gidere göre kirada yaşayan garsonun birikimi **25.000 ₺ →
+65.250 ₺**'ye çıktı; yazılımcının maaşının **%25'i** gidere gidiyor, yani
+bütün maaş otomatik birikmiyor.
+
+### 5.3 Erişim süreleri (bisiklet / ikinci el otomobil / küçük daire)
+
+**Ailenin yanında**
+
+| Meslek | Bisiklet | İkinci el otomobil | Küçük daire |
+|---|---|---|---|
+| Garson | 0,1 yıl | 2,4 yıl | 13,7 yıl |
+| Mağaza çalışanı | 0,1 yıl | 2,2 yıl | 12,4 yıl |
+| Öğretmen | 0,0 yıl | 0,9 yıl | 4,9 yıl |
+| Yazılım geliştirici | 0,0 yıl | 0,5 yıl | 2,8 yıl |
+
+**Kirada, kendi başına**
+
+| Meslek | Bisiklet | İkinci el otomobil | Küçük daire |
+|---|---|---|---|
+| Garson | 0,1 yıl | **4,9 yıl** | **27,6 yıl** (önce ~72) |
+| Mağaza çalışanı | 0,1 yıl | 4,1 yıl | 23,1 yıl |
+| Teknik servis | 0,1 yıl | 2,2 yıl | 12,3 yıl |
+| Öğretmen | 0,0 yıl | 1,1 yıl | 6,4 yıl |
+| Yazılım geliştirici | 0,0 yıl | 0,6 yıl | 3,4 yıl |
+
+**Kendi evinde** (kira yok): garson 3,2 yıl / 18,0 yıl · yazılımcı 0,5 yıl /
+3,1 yıl.
+
+### 5.4 Ölüm yaşı ve ebeveyn kaybı (D-041)
+
+| Ölçüt | Önce (500 hayat) | Sonra (5.000 hayat) |
+|---|---|---|
+| Ortalama ölüm yaşı | 77,3 | 75,5 |
+| Medyan | 79 | 78 |
+| 0-18 yaş | %0,6 | **%0,9** |
+| 18-40 yaş | %2,2 | %2,2 |
+| 40-60 yaş | %8,2 | %9,0 |
+| 70-80 yaş | %28,4 | %26,4 |
+| 80-90 yaş | %29,6 | %34,0 |
+| **90+** | **%19,2** | **%12,6** |
+| 100+ | %2,8 | %0,6 |
+| **18 yaşından önce ebeveyn kaybı** | **%19,4** | **%12,3** |
+
+Kuşak farkları tutarlı kalmaya devam ediyor: 16 yaşından küçükken ebeveyn
+olan kayıt **0**, iki kuşak arası en küçük fark 35 yıl. Ebeveyn-oyuncu yaş
+farkı ortalaması 35,3 → **33,1**; aralık 17-60 olarak korundu.
+
+Genç yetişkin ölümleri artırılmadı: 18-40 aralığı %2,2'de sabit kaldı;
+düzelme yalnızca ileri yaş ucundan ve ebeveyn yaş dağılımından geldi.
+
+*Bu oranlar bir oyun dengesi çalışmasının sonucudur; gerçek yaşam
+istatistiği olarak sunulmaz.*
+
+### 5.5 Yıllık bahis bütçesi (D-040)
+
+| Durum | Yıllık bütçe | Tek bahis üst sınırı | Hazır adımlar |
+|---|---|---|---|
+| Garson (kirada, cüzdan 20.000 ₺) | 10.788 ₺ | 2.158 ₺ | 100 / 200 / 500 / 1.100 / 2.158 ₺ |
+| Mağaza çalışanı (aynı koşul) | 12.700 ₺ | 2.540 ₺ | 100 / 300 / 600 / 1.300 / 2.500 ₺ |
+| Öğretmen | 43.300 ₺ | 8.660 ₺ | 400 / 900 / 2.200 / 4.300 / 8.660 ₺ |
+| Yazılım geliştirici | 81.550 ₺ | 16.310 ₺ | 800 / 1.600 / 4.100 / 8.200 / 16.300 ₺ |
+| İşsiz, cüzdan 5.000 ₺ | 2.000 ₺ (taban) | 400 ₺ | 100 / 200 / 400 ₺ |
+| İşsiz mirasçı, cüzdan 500.000 ₺ | 25.000 ₺ | 5.000 ₺ | 300 / 500 / 1.300 / 2.500 / 5.000 ₺ |
+| İşsiz mirasçı, cüzdan 3.000.000 ₺ | 150.000 ₺ (tavan) | 30.000 ₺ | 1.500 … 30.000 ₺ |
+
+Düşük gelirli karakter **100 ₺ ile oynayabiliyor** ve büyük bahislere
+yönlendirilmiyor; maaşsız mirasçı tamamen engellenmiyor; oyuncunun kendi
+limiti bu bütçeden düşükse **o** geçerli oluyor.
+
 ## Ölçümün sınırları
 
 - Simülasyon, oyuncunun **iş bulduğu senaryoyu oynamaz**: tablolar "bu maaşla

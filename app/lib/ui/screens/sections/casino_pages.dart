@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/casino/blackjack.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/casino/roulette.dart';
 import '../../../domain/models/blackjack_game.dart';
@@ -75,12 +76,13 @@ class _CasinoPageState extends State<CasinoPage> {
         const SizedBox(height: 12),
         InfoPanel(
           icon: Icons.savings_outlined,
-          text: 'Bu yıl oynadığın toplam bahis: ${state.wagerThisAge} ₺.'
+          text: 'Bu yıl oynadığın toplam bahis: ${state.wagerThisAge} ₺. '
+              'Gelirine ve cüzdanına göre bu yılki bahis bütçen '
+              '${CasinoAccess.yearlyBudget(state)} ₺'
               '${state.settings.wagerLimitPerAge == null ? '' : ' '
-                  'Kendi yıllık sınırın: '
-                  '${state.settings.wagerLimitPerAge} ₺.'}'
-              ' Bahis en az ${CasinoRules.prototypeOnlyMinBet} ₺, '
-              'en fazla ${CasinoRules.prototypeOnlyMaxBet} ₺.',
+                  '(kendi sınırın: ${state.settings.wagerLimitPerAge} ₺)'}'
+              '. Bahis en az ${CasinoRules.prototypeOnlyMinBet} ₺, '
+              'en fazla ${CasinoAccess.maxBet(state)} ₺.',
         ),
       ],
     );
@@ -97,11 +99,14 @@ class _BetSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GameController controller = GameScope.of(context);
+    // Adımlar oyuncunun bu yılki bütçesinden türetilir; sabit yüksek
+    // tutarlar gösterilmez (D-040).
+    final List<int> adimlar = controller.betSteps();
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: <Widget>[
-        for (final int adim in CasinoRules.prototypeOnlyBetSteps)
+        for (final int adim in adimlar)
           ChoiceChip(
             key: Key('bet_$adim'),
             label: Text('$adim ₺'),
@@ -126,7 +131,7 @@ class BlackjackTablePage extends StatefulWidget {
 }
 
 class _BlackjackTablePageState extends State<BlackjackTablePage> {
-  int _bahis = CasinoRules.prototypeOnlyBetSteps.first;
+  int? _secilenBahis;
   String? _sonMesaj;
 
   @override
@@ -134,6 +139,12 @@ class _BlackjackTablePageState extends State<BlackjackTablePage> {
     final GameController controller = GameScope.of(context);
     final GameState state = controller.state!;
     final BlackjackGame? oyun = state.blackjack;
+    // Bahis adımları oyuncunun bu yılki bütçesinden gelir; seçim yoksa en
+    // küçük adım kullanılır.
+    final List<int> adimlar = controller.betSteps();
+    final int bahis = _secilenBahis != null && adimlar.contains(_secilenBahis)
+        ? _secilenBahis!
+        : adimlar.first;
 
     return SectionScaffold(
       title: 'Blackjack',
@@ -150,21 +161,21 @@ class _BlackjackTablePageState extends State<BlackjackTablePage> {
           Text('Bahsini seç', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
           _BetSelector(
-            bet: _bahis,
-            onChanged: (int v) => setState(() => _bahis = v),
+            bet: bahis,
+            onChanged: (int v) => setState(() => _secilenBahis = v),
           ),
           const SizedBox(height: 14),
-          _BlockReason(controller.betAvailability(_bahis)),
+          _BlockReason(controller.betAvailability(bahis)),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               key: const Key('blackjack_deal'),
-              onPressed: controller.betAvailability(_bahis).isAllowed
+              onPressed: controller.betAvailability(bahis).isAllowed
                   ? () => setState(() {
-                        _sonMesaj = controller.dealBlackjack(_bahis)?.text;
+                        _sonMesaj = controller.dealBlackjack(bahis)?.text;
                       })
                   : null,
-              child: Text('$_bahis ₺ ile el aç'),
+              child: Text('$bahis ₺ ile el aç'),
             ),
           ),
         ] else ...<Widget>[
@@ -412,7 +423,7 @@ class RouletteTablePage extends StatefulWidget {
 }
 
 class _RouletteTablePageState extends State<RouletteTablePage> {
-  int _bahis = CasinoRules.prototypeOnlyBetSteps.first;
+  int? _secilenBahis;
   RouletteBetType _tur = RouletteBetType.kirmizi;
   int _sayi = 7;
   String? _sonMesaj;
@@ -422,6 +433,10 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
     final GameController controller = GameScope.of(context);
     final GameState state = controller.state!;
     final ThemeData theme = Theme.of(context);
+    final List<int> adimlar = controller.betSteps();
+    final int bahis = _secilenBahis != null && adimlar.contains(_secilenBahis)
+        ? _secilenBahis!
+        : adimlar.first;
 
     return SectionScaffold(
       title: 'Rulet',
@@ -470,23 +485,23 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
         Text('Bahis miktarı', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
         _BetSelector(
-          bet: _bahis,
-          onChanged: (int v) => setState(() => _bahis = v),
+          bet: bahis,
+          onChanged: (int v) => setState(() => _secilenBahis = v),
         ),
         const SizedBox(height: 14),
-        _BlockReason(controller.betAvailability(_bahis)),
+        _BlockReason(controller.betAvailability(bahis)),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
             key: const Key('roulette_spin'),
-            onPressed: controller.betAvailability(_bahis).isAllowed
+            onPressed: controller.betAvailability(bahis).isAllowed
                 ? () => setState(() {
                       _sonMesaj = controller
-                          .spinRoulette(_tur, _bahis, number: _sayi)
+                          .spinRoulette(_tur, bahis, number: _sayi)
                           ?.text;
                     })
                 : null,
-            child: Text('$_bahis ₺ oyna'),
+            child: Text('$bahis ₺ oyna'),
           ),
         ),
         if (_sonMesaj != null) ...<Widget>[

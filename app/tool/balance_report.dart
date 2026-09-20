@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/domain/casino/casino_rules.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
@@ -65,7 +66,7 @@ void main() {
 }
 
 void _rapor() {
-  const int hayatSayisi = 500;
+  const int hayatSayisi = 5000;
 
   // ===================================================================
   // 1) Ölüm yaşı dağılımı (Q-058)
@@ -167,74 +168,110 @@ void _rapor() {
   }
 
   // ===================================================================
-  // 2) Ekonomi ölçeği (Q-055)
+  // 2) Ekonomi: gider sonrası birikim ve erişim süresi (Q-055, D-039)
   // ===================================================================
   print('');
-  print('=== EKONOMİ ÖLÇEĞİ: KAÇ YILLIK MAAŞ? ===');
+  print('=== YILLIK GIDER VE BIRIKIM (D-039) ===');
+  print('Durum'.padRight(22) +
+      'taban'.padLeft(10) +
+      'gelir payı'.padLeft(12));
+  for (final LivingSituation durum in LivingSituation.values) {
+    final List<CostItem> kalemler = LivingCosts.prototypeOnlyItems[durum]!;
+    final int taban =
+        kalemler.fold(0, (int t, CostItem k) => t + k.base);
+    final double oran =
+        kalemler.fold(0.0, (double t, CostItem k) => t + k.incomeShare);
+    print(durum.label.padRight(22) +
+        '$taban ₺'.padLeft(10) +
+        '${(oran * 100).toStringAsFixed(0)}%'.padLeft(12));
+  }
+
+  int giderFor(LivingSituation durum, int gelir) =>
+      LivingCosts.prototypeOnlyItems[durum]!
+          .fold(0, (int t, CostItem k) => t + k.amountFor(gelir));
+
+  print('');
+  print('Meslek'.padRight(22) +
+      'ailede'.padLeft(14) +
+      'kirada'.padLeft(14) +
+      'kendi evinde'.padLeft(16));
+  for (final JobType job in kJobCatalog) {
+    final int ailede =
+        job.yearlySalary - giderFor(LivingSituation.aileYaninda, job.yearlySalary);
+    final int kirada =
+        job.yearlySalary - giderFor(LivingSituation.kirada, job.yearlySalary);
+    final int kendi = job.yearlySalary -
+        giderFor(LivingSituation.kendiEvinde, job.yearlySalary);
+    print(job.name.padRight(22) +
+        '$ailede ₺'.padLeft(14) +
+        '$kirada ₺'.padLeft(14) +
+        '$kendi ₺'.padLeft(16));
+  }
+
+  print('');
+  print('=== KAÇ YILLIK BIRIKIMLE? (bisiklet / ikinci el oto / küçük daire) ===');
   const List<String> hedefler = <String>[
     'bisiklet',
-    'telefon',
-    'motosiklet_ekonomik',
     'otomobil_ikinci_el',
-    'otomobil_ekonomik',
     'kucuk_daire',
-    'standart_daire',
   ];
-
-  // Gider yok (bugünkü durum) ve giderin maaşın %50'si / %70'i olduğu
-  // iki örnek senaryo. Gider sistemi henüz yazılmadı; bu yalnızca ölçüm.
-  for (final double giderOrani in <double>[0.0, 0.5, 0.7]) {
+  for (final LivingSituation durum in <LivingSituation>[
+    LivingSituation.aileYaninda,
+    LivingSituation.kirada,
+    LivingSituation.kendiEvinde,
+  ]) {
     print('');
-    print('--- Yillik gider: maasin yuzde '
-        '${(giderOrani * 100).round()} kadari ---');
+    print('--- ${durum.label} ---');
     final StringBuffer baslik = StringBuffer('Meslek'.padRight(22));
     for (final String id in hedefler) {
-      baslik.write(itemTypeOrFallback(id).name.padLeft(20));
+      baslik.write(itemTypeOrFallback(id).name.padLeft(22));
     }
     print(baslik);
-
     for (final JobType job in kJobCatalog) {
-      final double birikim = job.yearlySalary * (1 - giderOrani);
+      final int birikim =
+          job.yearlySalary - giderFor(durum, job.yearlySalary);
       final StringBuffer satir = StringBuffer(job.name.padRight(22));
       for (final String id in hedefler) {
         final int fiyat = itemTypeOrFallback(id).baseValue;
         final String deger = birikim <= 0
-            ? 'ulaşılamaz'
+            ? 'birikim yok'
             : '${(fiyat / birikim).toStringAsFixed(1)} yıl';
-        satir.write(deger.padLeft(20));
+        satir.write(deger.padLeft(22));
       }
       print(satir);
     }
   }
 
   // ===================================================================
-  // 2b) Uygulanan gerçek yaşam gideri (D-033)
+  // 2c) Bahis bütçesi (D-040)
   // ===================================================================
   print('');
-  print('=== UYGULANAN YILLIK GEÇİM GİDERİ (D-033) ===');
-  print('Çocuk (18 yaş altı)            : 0 ₺');
-  print('Ailesinin yanında yetişkin     : '
-      '${LivingCosts.prototypeOnlyWithFamily} ₺');
-  print('Bağımsız, kirada               : '
-      '${LivingCosts.prototypeOnlyIndependent} ₺');
-  print('Bağımsız, kendi evinde         : '
-      '${LivingCosts.prototypeOnlyOwnHome} ₺');
-  print('');
-  print('Meslek'.padRight(24) +
-      'ailede kalan'.padLeft(16) +
-      'bağımsız kalan'.padLeft(18) +
-      'kendi evinde'.padLeft(16));
-  for (final JobType job in kJobCatalog) {
-    final int ailede =
-        job.yearlySalary - LivingCosts.prototypeOnlyWithFamily;
-    final int bagimsiz =
-        job.yearlySalary - LivingCosts.prototypeOnlyIndependent;
-    final int kendiEvi = job.yearlySalary - LivingCosts.prototypeOnlyOwnHome;
-    print(job.name.padRight(24) +
-        '$ailede ₺'.padLeft(16) +
-        '$bagimsiz ₺'.padLeft(18) +
-        '$kendiEvi ₺'.padLeft(16));
+  print('=== YILLIK BAHIS BÜTÇESI (D-040) ===');
+  print('Durum'.padRight(34) +
+      'bütçe'.padLeft(12) +
+      'tek bahis'.padLeft(12) +
+      'adımlar'.padLeft(30));
+  void butceSatiri(String etiket, int kullanilabilirGelir, int cuzdan) {
+    final int butce = CasinoRules.prototypeOnlyYearlyBudget(
+      disposableIncome: kullanilabilirGelir,
+      wallet: cuzdan,
+    );
+    final int enFazla = CasinoRules.prototypeOnlyMaxBet(butce);
+    final List<int> adimlar = CasinoRules.prototypeOnlyBetSteps(enFazla);
+    print(etiket.padRight(34) +
+        '$butce ₺'.padLeft(12) +
+        '$enFazla ₺'.padLeft(12) +
+        adimlar.join('/').padLeft(30));
   }
+
+  for (final JobType job in kJobCatalog) {
+    final int kirada =
+        job.yearlySalary - giderFor(LivingSituation.kirada, job.yearlySalary);
+    butceSatiri('${job.name} (kirada, cüzdan 20k)', kirada, 20000);
+  }
+  butceSatiri('İşsiz, cüzdan 5.000 ₺', 0, 5000);
+  butceSatiri('İşsiz mirasçı, cüzdan 500.000 ₺', 0, 500000);
+  butceSatiri('İşsiz mirasçı, cüzdan 3.000.000 ₺', 0, 3000000);
 
   // ===================================================================
   // 3) Meslekler arası fark (Q-055)

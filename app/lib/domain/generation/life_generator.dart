@@ -29,6 +29,16 @@ enum StartMode {
 /// **yalnızca prototip içindir** (`prototypeOnly`), onaylanmış oyun dengesi
 /// değildir.
 class LifeGenerator {
+  /// prototypeOnly: oyuncu doğduğunda annenin yaş aralığı ve tepe noktası.
+  static const int prototypeOnlyMotherAgeMin = 17;
+  static const int prototypeOnlyMotherAgePeak = 28;
+  static const int prototypeOnlyMotherAgeMax = 45;
+
+  /// prototypeOnly: oyuncu doğduğunda babanın yaş aralığı ve tepe noktası.
+  static const int prototypeOnlyFatherAgeMin = 18;
+  static const int prototypeOnlyFatherAgePeak = 31;
+  static const int prototypeOnlyFatherAgeMax = 60;
+
   LifeGenerator({int? seed})
       : seed = seed ?? Random().nextInt(1 << 32),
         _rng = Random(seed ?? Random().nextInt(1 << 32));
@@ -75,8 +85,19 @@ class LifeGenerator {
     // --- Ebeveynler -------------------------------------------------------
     // Yaşlar oyuncunun doğumuna göre tutarlı: anne en az 17, baba en az 18
     // yaşındayken oyuncu doğmuş olur.
-    final int motherAge = _rng.between(17, 45);
-    final int fatherAge = _rng.between(18, 60);
+    // Ebeveyn yaşları üçgen dağılımdan gelir: çok genç veya ileri yaşta
+    // ebeveynle doğmak mümkün, ama uç yaşlar seyrek (D-041). Uniform
+    // dağılım, çocukken ebeveyn kaybını gereğinden sık üretiyordu.
+    final int motherAge = _rng.triangular(
+      prototypeOnlyMotherAgeMin,
+      prototypeOnlyMotherAgePeak,
+      prototypeOnlyMotherAgeMax,
+    );
+    final int fatherAge = _rng.triangular(
+      prototypeOnlyFatherAgeMin,
+      prototypeOnlyFatherAgePeak,
+      prototypeOnlyFatherAgeMax,
+    );
 
     final bool motherAlive = !_rng.chance(_prototypeOnlyDeceasedMotherChance);
     final bool fatherAlive = !_rng.chance(_prototypeOnlyDeceasedFatherChance);

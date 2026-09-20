@@ -68,8 +68,13 @@ void main() {
 
     // İlk istek reddedilmez: gerçek bir kazanç görülmeli.
     expect(motherOf().bond, greaterThan(bondBefore));
-    expect(controller.state!.player.stats.happiness,
-        greaterThan(happinessBefore));
+    // Mutluluk tavandaysa artamaz; tavanın altındaysa gerçekten artmalı.
+    if (happinessBefore < 100) {
+      expect(controller.state!.player.stats.happiness,
+          greaterThan(happinessBefore));
+    } else {
+      expect(controller.state!.player.stats.happiness, 100);
+    }
     // Etki rozeti artık kimle yakınlaştığını yazar: "Annen Ayşe ile
     // yakınlık +7" gibi.
     expect(find.textContaining('ile yakınlık +'), findsOneWidget);
