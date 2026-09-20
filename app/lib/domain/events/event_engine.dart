@@ -126,6 +126,12 @@ class EventEngine {
       if (personId == null) return null;
       final Person? person = state.personById(personId);
       if (person == null || !person.isAlive) return null;
+      if (req.personMinAge != null && person.age < req.personMinAge!) {
+        return null;
+      }
+      if (req.personMaxAge != null && person.age > req.personMaxAge!) {
+        return null;
+      }
       return person;
     }
 
@@ -151,6 +157,10 @@ class EventEngine {
       if (!p.isAlive) return false;
       if (!req.livingRelations.contains(p.relation)) return false;
       if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+      if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+      // Kişinin kendi yaşı: çocuk olayları doğru yaşa bağlanır.
+      if (req.personMinAge != null && p.age < req.personMinAge!) return false;
+      if (req.personMaxAge != null && p.age > req.personMaxAge!) return false;
       return true;
     }).toList(growable: false);
     if (uygun.isEmpty) return null;

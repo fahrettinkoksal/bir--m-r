@@ -857,11 +857,20 @@ class LifeProgression {
       );
     }
 
+    // Oyuncunun çocuğu büyürken okul kademesi yaşıyla birlikte ilerler;
+    // böylece 22 yaşındaki çocuk "ilkokul öğrencisi" görünmez. Okul
+    // arkadaşlarının kademesi **değişmez**: o bilgi "hangi kademede
+    // tanışıldığı"dır.
+    final SchoolLevel? kademe = person.relation == RelationType.cocuk
+        ? Parenthood.schoolLevelForAge(age)
+        : person.schoolLevel;
+
     return person.copyWith(
       age: age,
       employment: employment,
       occupation: occupation,
       wealth: wealth,
+      schoolLevel: kademe,
     );
   }
 }

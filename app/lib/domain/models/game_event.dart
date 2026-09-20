@@ -34,6 +34,9 @@ class EventRequirement {
     this.maxGrade,
     this.requiresNeglectedRelative = false,
     this.personRole,
+    this.personMinAge,
+    this.personMaxAge,
+    this.requireOutsideHousehold = false,
   });
 
   final int minAge;
@@ -64,6 +67,19 @@ class EventRequirement {
 
   /// Uzun süre oyun içinde temas kurulmamış bir yakın gerektirir (D-025).
   final bool requiresNeglectedRelative;
+
+  /// Olayın **kişisinin** yaş aralığı (oyuncunun değil).
+  ///
+  /// Çocukla ilgili olaylar bununla doğru yaşa bağlanır: bebeklik olayı
+  /// 15 yaşındaki çocukta çıkmaz.
+  final int? personMinAge;
+  final int? personMaxAge;
+
+  /// Olayın kişisinin oyuncuyla **ayrı evde** yaşaması gerekir.
+  ///
+  /// Ziyaret olayları bunu kullanır: aynı evde yaşanan kişiye "ziyarete
+  /// geldi" denmez.
+  final bool requireOutsideHousehold;
 
   /// Olayın kişisi, daha önce bir hikâye rolüne kilitlenmiş kişidir.
   ///

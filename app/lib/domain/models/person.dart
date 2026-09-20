@@ -115,7 +115,13 @@ class Person {
   String get fullName => '$firstName $lastName';
 
   /// Çalışma durumunun ekranda gösterilecek hâli. Uydurma meslek üretmez.
+  ///
+  /// Öğrencinin kademesi biliniyorsa yazılır ("İlkokul öğrencisi"); bu
+  /// kayıtta gerçekten duran bilgidir, yaştan uydurulmaz.
   String get occupationLabel {
+    if (employment == EmploymentStatus.ogrenci && schoolLevel != null) {
+      return '${schoolLevel!.label} öğrencisi';
+    }
     if (employment != EmploymentStatus.calisiyor) return employment.label;
     final String? job = occupation;
     if (job == null || job.isEmpty) return 'Çalışıyor';

@@ -69,6 +69,19 @@ void expectEligible(GameState state, ActiveEvent active) {
     if (req.requireSameHousehold) {
       expect(person.inPlayerHousehold, isTrue, reason: nerede);
     }
+    if (req.requireOutsideHousehold) {
+      expect(person.inPlayerHousehold, isFalse, reason: nerede);
+    }
+  }
+  // Kişinin kendi yaşı koşulu (çocuk olayları).
+  if (active.personId != null) {
+    final Person kisi = state.personById(active.personId!)!;
+    if (req.personMinAge != null) {
+      expect(kisi.age, greaterThanOrEqualTo(req.personMinAge!), reason: nerede);
+    }
+    if (req.personMaxAge != null) {
+      expect(kisi.age, lessThanOrEqualTo(req.personMaxAge!), reason: nerede);
+    }
   }
   if (req.requiresNeglectedRelative) {
     expect(active.personId, isNotNull, reason: nerede);
