@@ -16,7 +16,7 @@ import '../../widgets/section_scaffold.dart';
 /// burada toplanır. Ailenin ekonomik durumu buraya karıştırılmaz: aile
 /// varlığı oyuncunun harcanabilir parası değildir.
 /// Varlıklar alt sayfaları.
-enum _AssetsPage { kok, magaza }
+enum _AssetsPage { kok, magazalar, kategori }
 
 class AssetsScreen extends StatefulWidget {
   const AssetsScreen({super.key, required this.onBack});
@@ -29,6 +29,7 @@ class AssetsScreen extends StatefulWidget {
 
 class _AssetsScreenState extends State<AssetsScreen> {
   _AssetsPage _page = _AssetsPage.kok;
+  ShopCategory? _kategori;
   ItemOutcome? _sonMagazaSonucu;
 
   void _buy(ShopProduct product) {
@@ -41,22 +42,43 @@ class _AssetsScreenState extends State<AssetsScreen> {
   Widget build(BuildContext context) {
     final GameState state = GameScope.of(context).state!;
 
-    if (_page == _AssetsPage.magaza) {
+    if (_page == _AssetsPage.kategori && _kategori != null) {
       return _ShopView(
         state: state,
+        category: _kategori!,
         lastOutcome: _sonMagazaSonucu,
         onBuy: _buy,
         onBack: () => setState(() {
-          _page = _AssetsPage.kok;
+          _page = _AssetsPage.magazalar;
+          _kategori = null;
           _sonMagazaSonucu = null;
         }),
+      );
+    }
+
+    if (_page == _AssetsPage.magazalar) {
+      return _ShopCategoryList(
+        state: state,
+        onOpen: (ShopCategory c) => setState(() {
+          _kategori = c;
+          _page = _AssetsPage.kategori;
+          _sonMagazaSonucu = null;
+        }),
+        onBack: () => setState(() => _page = _AssetsPage.kok),
       );
     }
 
     // Eşyalar okunaklı olsun diye türe göre sıralanır.
     final List<OwnedItem> esyalar = state.items.toList(growable: true)
       ..sort((OwnedItem a, OwnedItem b) => a.name.compareTo(b.name));
-    final List<ShopProduct> urunler = shopProductsFor(state.player.age);
+    final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
+    final List<OwnedItem> araclar =
+        esyalar.where((OwnedItem i) => i.isVehicle).toList(growable: false);
+    final List<OwnedItem> mulkler =
+        esyalar.where((OwnedItem i) => i.isProperty).toList(growable: false);
+    final List<OwnedItem> digerleri = esyalar
+        .where((OwnedItem i) => !i.isVehicle && !i.isProperty)
+        .toList(growable: false);
 
     return SectionScaffold(
       title: 'Varlıklar',
@@ -64,20 +86,44 @@ class _AssetsScreenState extends State<AssetsScreen> {
       children: <Widget>[
         _WalletCard(balance: state.player.walletLabel),
         const SizedBox(height: 12),
-        if (urunler.isNotEmpty) ...<Widget>[
+        if (magazalar.isNotEmpty) ...<Widget>[
           MenuRow(
-            title: 'Mağaza',
-            subtitle: 'Küçük alışveriş: aksesuar ve birkaç eşya',
+            title: 'Mağazalar',
+            subtitle: 'Genel mağaza, elektronik, spor, araç ve emlak',
             icon: Icons.storefront_outlined,
-            trailingText: '${urunler.length}',
-            onTap: () => setState(() => _page = _AssetsPage.magaza),
+            trailingText: '${magazalar.length}',
+            onTap: () => setState(() => _page = _AssetsPage.magazalar),
           ),
           const SizedBox(height: 12),
         ],
-        if (esyalar.isNotEmpty) ...<Widget>[
+        if (mulkler.isNotEmpty) ...<Widget>[
+          const _GroupTitle('Mülkler'),
+          const SizedBox(height: 8),
+          for (final OwnedItem mulk in mulkler) ...<Widget>[
+            _ItemTile(
+              item: mulk,
+              onTap: () => ItemDetailSheet.show(context, itemId: mulk.id),
+            ),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 4),
+        ],
+        if (araclar.isNotEmpty) ...<Widget>[
+          const _GroupTitle('Araçlar'),
+          const SizedBox(height: 8),
+          for (final OwnedItem arac in araclar) ...<Widget>[
+            _ItemTile(
+              item: arac,
+              onTap: () => ItemDetailSheet.show(context, itemId: arac.id),
+            ),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 4),
+        ],
+        if (digerleri.isNotEmpty) ...<Widget>[
           const _GroupTitle('Eşyalar'),
           const SizedBox(height: 8),
-          for (final OwnedItem esya in esyalar) ...<Widget>[
+          for (final OwnedItem esya in digerleri) ...<Widget>[
             _ItemTile(
               item: esya,
               onTap: () => ItemDetailSheet.show(context, itemId: esya.id),
@@ -110,16 +156,64 @@ class _AssetsScreenState extends State<AssetsScreen> {
   }
 }
 
-/// Mağaza sayfası: yaşa uygun birkaç ürün.
+/// Mağaza listesi: yaşa uygun ürünü olan kategoriler.
+///
+/// Boş kategori gösterilmez; olmayan bir dükkân için sahte düğme konmaz.
+class _ShopCategoryList extends StatelessWidget {
+  const _ShopCategoryList({
+    required this.state,
+    required this.onOpen,
+    required this.onBack,
+  });
+
+  final GameState state;
+  final void Function(ShopCategory category) onOpen;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
+    return SectionScaffold(
+      title: 'Mağazalar',
+      subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
+      backLabel: 'Varlıklar',
+      onBack: onBack,
+      children: <Widget>[
+        for (final ShopCategory kategori in magazalar) ...<Widget>[
+          MenuRow(
+            title: kategori.label,
+            subtitle: kategori.description,
+            icon: kategori.icon,
+            trailingText:
+                '${shopProductsIn(kategori, state.player.age).length}',
+            onTap: () => onOpen(kategori),
+          ),
+          const SizedBox(height: 10),
+        ],
+        const SizedBox(height: 4),
+        const InfoPanel(
+          icon: Icons.info_outline,
+          text: 'Ev satın almak o eve taşındığın anlamına gelmez; mülk '
+              'sahipliği ile hangi hanede yaşadığın ayrı tutulur. Kredi, '
+              'kira ve taşınma henüz yazılmadı.',
+        ),
+      ],
+    );
+  }
+}
+
+/// Tek bir mağazanın sayfası: yaşa uygun ürünler.
 class _ShopView extends StatelessWidget {
   const _ShopView({
     required this.state,
+    required this.category,
     required this.lastOutcome,
     required this.onBuy,
     required this.onBack,
   });
 
   final GameState state;
+  final ShopCategory category;
   final ItemOutcome? lastOutcome;
   final void Function(ShopProduct product) onBuy;
   final VoidCallback onBack;
@@ -127,12 +221,13 @@ class _ShopView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<ShopProduct> urunler = shopProductsFor(state.player.age);
+    final List<ShopProduct> urunler =
+        shopProductsIn(category, state.player.age);
 
     return SectionScaffold(
-      title: 'Mağaza',
+      title: category.label,
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
-      backLabel: 'Varlıklar',
+      backLabel: 'Mağazalar',
       onBack: onBack,
       children: <Widget>[
         for (final ShopProduct urun in urunler) ...<Widget>[
@@ -191,10 +286,17 @@ class _ShopView extends StatelessWidget {
           _ShopOutcome(outcome: lastOutcome!),
         ],
         const SizedBox(height: 10),
-        const InfoPanel(
+        InfoPanel(
           icon: Icons.info_outline,
-          text: 'Aldığın aksesuarı takmak için Varlıklar\'tan ilgili eşyaya '
-              'gir. Geniş mağaza, kredi ve taşıt alımı henüz yazılmadı.',
+          text: category == ShopCategory.aracGalerisi
+              ? 'Araç satın almak için ehliyet gerekmez; aracı kullanmak '
+                  'için gerekir. Aksesuarı takmak için Varlıklar\'tan '
+                  'araca gir.'
+              : category == ShopCategory.emlakci
+                  ? 'Ev satın almak o eve taşındığın anlamına gelmez. '
+                      'Kira, taşınma ve kredi henüz yazılmadı.'
+                  : 'Aldığın aksesuarı takmak için Varlıklar\'tan ilgili '
+                      'eşyaya gir.',
         ),
       ],
     );

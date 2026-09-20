@@ -60,14 +60,14 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'Mağaza çalışanı',
     description: 'Raf düzeni, kasa ve ayakta geçen uzun saatler.',
     minAge: 16,
-    yearlySalary: 21000, // prototypeOnly
+    yearlySalary: 180000, // prototypeOnly
   ),
   JobType(
     id: 'garson',
     name: 'Garson',
     description: 'Tepsi, sipariş, akşam vardiyası.',
     minAge: 16,
-    yearlySalary: 19500, // prototypeOnly
+    yearlySalary: 165000, // prototypeOnly
     minCharisma: 35,
   ),
   JobType(
@@ -75,7 +75,7 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'Teknik servis çalışanı',
     description: 'Arızalı cihazlar, tornavida ve sabır.',
     minAge: 18,
-    yearlySalary: 34000, // prototypeOnly
+    yearlySalary: 260000, // prototypeOnly
     education: JobEducation.lise,
     tracks: <EducationTrack>{
       EducationTrack.teknikMeslek,
@@ -89,7 +89,7 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'Ressam / tasarımcı',
     description: 'Siparişle çalışan, portföyüyle iş alan bir meslek.',
     minAge: 18,
-    yearlySalary: 42000, // prototypeOnly
+    yearlySalary: 300000, // prototypeOnly
     education: JobEducation.lise,
     tracks: <EducationTrack>{
       EducationTrack.guzelSanatlar,
@@ -104,7 +104,7 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'Yazılım geliştirici',
     description: 'Ekran başında çözülen problemler.',
     minAge: 20,
-    yearlySalary: 96000, // prototypeOnly
+    yearlySalary: 720000, // prototypeOnly
     education: JobEducation.lise,
     tracks: <EducationTrack>{EducationTrack.bilisim},
     programs: <String>{'bilgisayar', 'muhendislik'},
@@ -115,7 +115,7 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'Öğretmen',
     description: 'Sınıfın önünde durmak; bir zamanlar sıradaydın.',
     minAge: 22,
-    yearlySalary: 62000, // prototypeOnly
+    yearlySalary: 420000, // prototypeOnly
     education: JobEducation.universite,
     programs: <String>{'egitim'},
     minIntelligence: 50,

@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 8;
+const int kSaveFormatVersion = 9;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -62,7 +62,19 @@ abstract final class SaveMigrations {
     if (from <= 5) guncel = _v5ToV6(guncel);
     if (from <= 6) guncel = _v6ToV7(guncel);
     if (from <= 7) guncel = _v7ToV8(guncel);
+    if (from <= 8) guncel = _v8ToV9(guncel);
     return guncel;
+  }
+
+  /// Sürüm 8 → 9: eşyalara satın alma fiyatı ve konum, oyuncuya ehliyet
+  /// listesi eklendi.
+  ///
+  /// Eski kayıtlarda bu alanlar yoktur: satın alma fiyatı ve konum boş
+  /// kalır (eşyanın değeri katalogdan hesaplanmaya devam eder), ehliyet
+  /// listesi boş açılır. **Hiçbir eşya silinmez.**
+  static Map<String, Object?> _v8ToV9(Map<String, Object?> body) {
+    body['licenses'] ??= <Object?>[];
+    return body;
   }
 
   /// Sürüm 7 → 8: kumarhane masası ve yıllık bahis toplamı eklendi.

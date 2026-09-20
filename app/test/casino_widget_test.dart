@@ -15,7 +15,7 @@ void main() {
   setUp(() => controller = GameController(random: Random(21)));
   tearDown(() => controller.dispose());
 
-  GameState yetiskin({int age = 25, int wallet = 10000}) {
+  GameState yetiskin({int age = 25, int wallet = 100000}) {
     final GameState base =
         LifeGenerator.seeded(21).generate(mode: StartMode.tamamenRastgele);
     return base.copyWith(
@@ -56,14 +56,14 @@ void main() {
     expect(find.textContaining('Krupiye 17 ve üstünde durur'), findsOneWidget);
 
     final int cuzdanOnce = controller.state!.player.wallet;
-    await tester.tap(find.byKey(const Key('bet_100')));
+    await tester.tap(find.byKey(const Key('bet_1000')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('blackjack_deal')));
     await tester.pumpAndSettle();
 
     expect(controller.blackjack, isNotNull);
     expect(controller.state!.player.wallet,
-        cuzdanOnce - 100 + controller.blackjack!.payout,
+        cuzdanOnce - 1000 + controller.blackjack!.payout,
         reason: 'Bahis bir kez düşmeli');
 
     if (!controller.blackjack!.isFinished) {
@@ -90,33 +90,33 @@ void main() {
     final int once = controller.state!.player.wallet;
     await tester.tap(find.byKey(const Key('roulette_siyah')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('bet_100')));
+    await tester.tap(find.byKey(const Key('bet_1000')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('roulette_spin')));
     await tester.pumpAndSettle();
 
     final int sonra = controller.state!.player.wallet;
-    expect(sonra == once - 100 || sonra == once + 100, isTrue,
-        reason: 'Siyah bahsi ya 100 kaybettirir ya 100 kazandırır');
-    expect(controller.wagerThisAge, 100);
+    expect(sonra == once - 1000 || sonra == once + 1000, isTrue,
+        reason: 'Siyah bahsi ya 1000 kaybettirir ya 1000 kazandırır');
+    expect(controller.wagerThisAge, 1000);
     expect(find.textContaining('çark'), findsOneWidget);
   });
 
   testWidgets('parası yetmeyen bahis düğmesi kapalıdır',
       (WidgetTester tester) async {
-    await pumpApp(tester, yetiskin(wallet: 60));
+    await pumpApp(tester, yetiskin(wallet: 600));
 
     await tester.tap(find.text('Kumarhane'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Blackjack'));
     await tester.pumpAndSettle();
 
-    // 50 ₺ oynanabilir, 100 ₺ oynanamaz.
+    // 500 ₺ oynanabilir, 1000 ₺ oynanamaz.
     expect(controller.betAvailability(CasinoRules.prototypeOnlyMinBet).isAllowed,
         isTrue);
-    expect(controller.betAvailability(100).isAllowed, isFalse);
+    expect(controller.betAvailability(1000).isAllowed, isFalse);
 
-    await tester.tap(find.byKey(const Key('bet_50')));
+    await tester.tap(find.byKey(const Key('bet_500')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('blackjack_deal')));
     await tester.pumpAndSettle();

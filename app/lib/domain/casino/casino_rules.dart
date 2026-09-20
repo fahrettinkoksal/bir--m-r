@@ -11,19 +11,25 @@ abstract final class CasinoRules {
   static const int prototypeOnlyMinAge = 18;
 
   /// prototypeOnly: en küçük bahis.
-  static const int prototypeOnlyMinBet = 50;
+  static const int prototypeOnlyMinBet = 500;
 
   /// prototypeOnly: en büyük bahis.
-  static const int prototypeOnlyMaxBet = 5000;
+  static const int prototypeOnlyMaxBet = 25000;
 
   /// prototypeOnly: bir yaşta toplam oynanabilecek bahis üst sınırı.
   ///
   /// Oyuncuyu daha fazla oynamaya iten bir mekanik değildir; tam tersine
   /// bir yılda ne kadar oynanabileceğini sınırlar.
-  static const int prototypeOnlyYearlyWagerLimit = 25000;
+  static const int prototypeOnlyYearlyWagerLimit = 150000;
 
   /// Masada seçilebilen hazır bahis adımları.
-  static const List<int> prototypeOnlyBetSteps = <int>[50, 100, 250, 500, 1000];
+  static const List<int> prototypeOnlyBetSteps = <int>[
+    500,
+    1000,
+    2500,
+    5000,
+    10000,
+  ];
 
   /// Krupiye 17 ve üstünde durur (yumuşak 17 dâhil).
   static const int dealerStandsOn = 17;

@@ -200,6 +200,28 @@ eksiye düşmüyor. Bahis 50-5000 ₺ arası; bir yaşta toplam 25.000 ₺ bahis
 sınırı var (hepsi `prototypeOnly`). Bahis ve sonuçlar hayat günlüğüne
 yazılıyor. Kayıt biçimi **sürüm 8**.
 
+## Mağazalar, araçlar, emlak ve ekonomi ölçeği (uygulandı)
+Varlıklar → **Mağazalar** beş alt mağazaya ayrıldı: genel mağaza,
+elektronik, spor ve hobi, **araç galerisi** ve **emlakçı**. Ürün sayısı
+44'e çıktı; yaşa uygun olmayan mağaza menüde görünmüyor.
+
+**Araçlar:** iki motosiklet, dört otomobil. Her araç gerçek bir varlık
+kaydı: kalıcı kimlik, tür/model, satın alma fiyatı, kondisyon, sahip,
+takılı aksesuarlar ve güncel satış değeri. Sürme, temizleme, bakım,
+uygun aksesuar takma ve satma çalışıyor. **Araç sürmek ilgili ehliyeti
+istiyor; araç sahibi olmak istemiyor.** Aksesuarlar türüne bağlı:
+bisiklet zili otomobile, kask otomobile takılamıyor.
+
+**Emlak:** dört konut türü. Mülk kaydında kalıcı kimlik, fiyat, sahip,
+konum ve güncel değer var. **Ev satın almak o eve taşınmak değil**: mülk
+sahipliği ile hangi hanede yaşandığı ayrı tutuluyor.
+
+**Ekonomi ölçeği:** `lib/data/economy.dart` içinde ortak bir tablo var;
+eşya fiyatları, araç/konut fiyatları ve yıllık maaşlar aynı para birimi
+ve aynı dönem üzerinden yeniden ölçeklendi. Kumarhane bahis sınırları da
+bu ölçeğe taşındı. Tablo gerçek piyasa fiyatlarının kopyası değil; tamamı
+`prototypeOnly`. Kayıt biçimi **sürüm 9**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

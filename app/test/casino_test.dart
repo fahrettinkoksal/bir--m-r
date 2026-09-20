@@ -100,17 +100,17 @@ void main() {
     test('18 yaşından küçük oynayamaz', () {
       final GameState kucuk = oyuncu(3, age: 16);
       expect(CasinoAccess.check(kucuk).isAllowed, isFalse);
-      final CasinoResult r = blackjack.deal(kucuk, 100, Random(1));
+      final CasinoResult r = blackjack.deal(kucuk, 1000, Random(1));
       expect(r.outcome.applied, isFalse);
       expect(r.state.blackjack, isNull);
       expect(r.state.player.wallet, kucuk.player.wallet);
     });
 
     test('bakiyesi yetmeyen bahis oynanamaz', () {
-      final GameState fakir = oyuncu(4, wallet: 40);
-      final CasinoResult r = blackjack.deal(fakir, 100, Random(1));
+      final GameState fakir = oyuncu(4, wallet: 400);
+      final CasinoResult r = blackjack.deal(fakir, 1000, Random(1));
       expect(r.outcome.applied, isFalse);
-      expect(r.state.player.wallet, 40, reason: 'Cüzdan değişmemeli');
+      expect(r.state.player.wallet, 400, reason: 'Cüzdan değişmemeli');
       expect(r.state.player.wallet, greaterThanOrEqualTo(0));
     });
 
@@ -131,7 +131,7 @@ void main() {
     });
 
     test('yıllık bahis sınırı aşılamaz ve yaş dönünce yenilenir', () {
-      GameState state = oyuncu(6, wallet: 500000);
+      GameState state = oyuncu(6, wallet: 5000000);
       int oynanan = 0;
       for (int i = 0; i < 100; i++) {
         final CasinoResult r = roulette.spin(
@@ -147,14 +147,22 @@ void main() {
       expect(oynanan, CasinoRules.prototypeOnlyYearlyWagerLimit);
       expect(state.wagerThisAge, CasinoRules.prototypeOnlyYearlyWagerLimit);
       expect(
-        roulette.spinAvailability(state, 100).isAllowed,
+        roulette
+            .spinAvailability(state, CasinoRules.prototypeOnlyMinBet)
+            .isAllowed,
         isFalse,
+        reason: 'Yıllık sınıra ulaşınca en küçük bahis bile açılmamalı',
       );
 
       // Yaş ilerleyince sayaç sıfırlanır.
       final GameState seneye = LifeProgression(Random(1)).advanceOneYear(state);
       expect(seneye.wagerThisAge, 0);
-      expect(roulette.spinAvailability(seneye, 100).isAllowed, isTrue);
+      expect(
+        roulette
+            .spinAvailability(seneye, CasinoRules.prototypeOnlyMinBet)
+            .isAllowed,
+        isTrue,
+      );
     });
   });
 
@@ -163,17 +171,17 @@ void main() {
   // ===================================================================
   group('Blackjack', () {
     test('el açılınca bahis cüzdandan bir kez düşer', () {
-      final GameState state = oyuncu(10, wallet: 5000);
-      final CasinoResult r = blackjack.deal(state, 500, Random(7));
+      final GameState state = oyuncu(10, wallet: 50000);
+      final CasinoResult r = blackjack.deal(state, 5000, Random(7));
       expect(r.outcome.applied, isTrue);
       final BlackjackGame oyun = r.state.blackjack!;
-      expect(r.state.player.wallet, 5000 - 500 + oyun.payout,
+      expect(r.state.player.wallet, 50000 - 5000 + oyun.payout,
           reason: 'Bahis tam bir kez düşmeli');
-      expect(oyun.bet, 500);
+      expect(oyun.bet, 5000);
       expect(oyun.playerCards.length, 2);
       expect(oyun.dealerCards.length, 2);
       expect(oyun.deck.length, 48);
-      expect(r.state.wagerThisAge, 500);
+      expect(r.state.wagerThisAge, 5000);
     });
 
     test('oyuncunun sırasında krupiyenin ikinci kartı gizlidir', () {
@@ -190,11 +198,11 @@ void main() {
 
     test('21 aşılınca el kaybedilir ve ödeme yapılmaz', () {
       final GameState state = masa(
-        oyuncu(12, wallet: 1000),
+        oyuncu(12, wallet: 10000),
         oyuncuKartlari: <PlayingCard>[kart(10), kart(9)],
         krupiyeKartlari: <PlayingCard>[kart(10), kart(7)],
         deste: <PlayingCard>[kart(5, CardSuit.kupa)],
-        bet: 100,
+        bet: 1000,
       );
       final int once = state.player.wallet;
       final CasinoResult r = blackjack.hit(state);
@@ -206,20 +214,20 @@ void main() {
     });
 
     test('doğal blackjack 3:2 öder', () {
-      final GameState state = oyuncu(13, wallet: 10000);
+      final GameState state = oyuncu(13, wallet: 100000);
       // As + papaz = doğal blackjack; krupiyede doğal yok.
       final GameState kurulu = masa(
         state,
         oyuncuKartlari: <PlayingCard>[kart(1), kart(13)],
         krupiyeKartlari: <PlayingCard>[kart(10), kart(7)],
-        bet: 200,
+        bet: 2000,
       );
       final int cuzdan = kurulu.player.wallet;
       final CasinoResult r = blackjack.stand(kurulu);
 
       expect(r.state.blackjack!.result, BlackjackResult.oyuncuBlackjack);
-      expect(r.state.blackjack!.payout, 200 + 300);
-      expect(r.state.player.wallet, cuzdan + 500);
+      expect(r.state.blackjack!.payout, 2000 + 3000);
+      expect(r.state.player.wallet, cuzdan + 5000);
     });
 
     test('krupiye 17 ve üstünde durur', () {
@@ -242,38 +250,38 @@ void main() {
 
     test('krupiye 21 aşarsa oyuncu 1:1 kazanır', () {
       final GameState kurulu = masa(
-        oyuncu(15, wallet: 3000),
+        oyuncu(15, wallet: 30000),
         oyuncuKartlari: <PlayingCard>[kart(10), kart(7)],
         krupiyeKartlari: <PlayingCard>[kart(10), kart(6)],
         deste: <PlayingCard>[kart(10, CardSuit.kupa)],
-        bet: 300,
+        bet: 3000,
       );
       final int cuzdan = kurulu.player.wallet;
       final CasinoResult r = blackjack.stand(kurulu);
       expect(r.state.blackjack!.result, BlackjackResult.krupiyeBatti);
-      expect(r.state.player.wallet, cuzdan + 600);
+      expect(r.state.player.wallet, cuzdan + 6000);
     });
 
     test('beraberlikte bahis geri gelir', () {
       final GameState kurulu = masa(
-        oyuncu(16, wallet: 2000),
+        oyuncu(16, wallet: 20000),
         oyuncuKartlari: <PlayingCard>[kart(10), kart(8)],
         krupiyeKartlari: <PlayingCard>[kart(10), kart(8)],
-        bet: 400,
+        bet: 4000,
       );
       final int cuzdan = kurulu.player.wallet;
       final CasinoResult r = blackjack.stand(kurulu);
       expect(r.state.blackjack!.result, BlackjackResult.berabere);
-      expect(r.state.player.wallet, cuzdan + 400);
+      expect(r.state.player.wallet, cuzdan + 4000);
       expect(r.state.blackjack!.netGain, 0);
     });
 
     test('ödeme iki kez uygulanmaz', () {
       final GameState kurulu = masa(
-        oyuncu(17, wallet: 2000),
+        oyuncu(17, wallet: 20000),
         oyuncuKartlari: <PlayingCard>[kart(10), kart(9)],
         krupiyeKartlari: <PlayingCard>[kart(10), kart(7)],
-        bet: 200,
+        bet: 2000,
       );
       final CasinoResult ilk = blackjack.stand(kurulu);
       expect(ilk.state.blackjack!.settled, isTrue);
@@ -314,17 +322,17 @@ void main() {
         krupiyeKartlari: <PlayingCard>[kart(9), kart(7)],
       );
       final int cuzdan = kurulu.player.wallet;
-      final CasinoResult r = blackjack.deal(kurulu, 100, Random(1));
+      final CasinoResult r = blackjack.deal(kurulu, 1000, Random(1));
       expect(r.outcome.applied, isFalse);
       expect(r.state.player.wallet, cuzdan);
     });
 
     test('cüzdan hiçbir elde eksiye düşmez', () {
-      GameState state = oyuncu(20, wallet: 300);
+      GameState state = oyuncu(20, wallet: 3000);
       for (int i = 0; i < 20; i++) {
-        final CasinoResult acilis = blackjack.deal(state, 100, Random(i));
+        final CasinoResult acilis = blackjack.deal(state, 1000, Random(i));
         if (!acilis.outcome.applied) break;
-        state = acilis.outcome.walletDelta == -100
+        state = acilis.outcome.walletDelta == -1000
             ? blackjack.stand(acilis.state).state
             : acilis.state;
         state = state.blackjack == null
@@ -344,9 +352,9 @@ void main() {
       final Set<int> gelenler = <int>{};
       for (int i = 0; i < 400; i++) {
         final CasinoResult r = roulette.spin(
-          oyuncu(30, wallet: 100000),
+          oyuncu(30, wallet: 1000000),
           RouletteBetType.kirmizi,
-          50,
+          500,
           Random(i),
         );
         expect(r.outcome.applied, isTrue);
@@ -364,19 +372,19 @@ void main() {
     test('renk ve tek/çift bahisleri 1:1 öder', () {
       // Aynı tohumla gelen sayıyı bulup beklenen ödemeyi hesaplıyoruz.
       for (int seed = 0; seed < 25; seed++) {
-        final GameState state = oyuncu(31, wallet: 50000);
+        final GameState state = oyuncu(31, wallet: 500000);
         final int gelen = Random(seed).nextInt(Roulette.pockets);
         final CasinoResult r = roulette.spin(
           state,
           RouletteBetType.kirmizi,
-          100,
+          1000,
           Random(seed),
         );
         final bool kazanmali =
             gelen != 0 && kRouletteRedNumbers.contains(gelen);
         expect(
           r.state.player.wallet,
-          kazanmali ? state.player.wallet + 100 : state.player.wallet - 100,
+          kazanmali ? state.player.wallet + 1000 : state.player.wallet - 1000,
           reason: 'Gelen sayı: $gelen',
         );
       }
@@ -384,20 +392,20 @@ void main() {
 
     test('sayıya bahis 35:1 öder', () {
       for (int seed = 0; seed < 40; seed++) {
-        final GameState state = oyuncu(32, wallet: 50000);
+        final GameState state = oyuncu(32, wallet: 500000);
         final int gelen = Random(seed).nextInt(Roulette.pockets);
         final CasinoResult r = roulette.spin(
           state,
           RouletteBetType.sayi,
-          100,
+          1000,
           Random(seed),
           number: 17,
         );
         expect(
           r.state.player.wallet,
           gelen == 17
-              ? state.player.wallet + 3500
-              : state.player.wallet - 100,
+              ? state.player.wallet + 35000
+              : state.player.wallet - 1000,
           reason: 'Gelen sayı: $gelen',
         );
       }
@@ -417,23 +425,23 @@ void main() {
         RouletteBetType.tek,
         RouletteBetType.cift,
       ]) {
-        final GameState state = oyuncu(33, wallet: 10000);
+        final GameState state = oyuncu(33, wallet: 100000);
         final CasinoResult r =
-            roulette.spin(state, tur, 200, Random(sifirTohum!));
-        expect(r.state.player.wallet, state.player.wallet - 200,
+            roulette.spin(state, tur, 2000, Random(sifirTohum!));
+        expect(r.state.player.wallet, state.player.wallet - 2000,
             reason: '${tur.label} bahsi 0 gelince kaybeder');
       }
 
       // 0'a oynanan sayı bahsi kazanır.
-      final GameState state = oyuncu(33, wallet: 10000);
+      final GameState state = oyuncu(33, wallet: 100000);
       final CasinoResult r = roulette.spin(
         state,
         RouletteBetType.sayi,
-        200,
+        2000,
         Random(sifirTohum!),
         number: 0,
       );
-      expect(r.state.player.wallet, state.player.wallet + 7000);
+      expect(r.state.player.wallet, state.player.wallet + 70000);
     });
 
     test('sayı bahsinde geçersiz sayı reddedilir', () {
@@ -441,7 +449,7 @@ void main() {
       final CasinoResult r = roulette.spin(
         state,
         RouletteBetType.sayi,
-        100,
+        1000,
         Random(1),
         number: 37,
       );
@@ -470,9 +478,9 @@ void main() {
     });
 
     test('bahis ve sonuç hayat günlüğüne yazılır', () {
-      final GameState state = oyuncu(35, wallet: 5000);
+      final GameState state = oyuncu(35, wallet: 50000);
       final CasinoResult r =
-          roulette.spin(state, RouletteBetType.siyah, 100, Random(2));
+          roulette.spin(state, RouletteBetType.siyah, 1000, Random(2));
       expect(r.state.log.last.text, contains('Rulet'));
       expect(r.state.log.length, state.log.length + 1);
     });
@@ -483,13 +491,13 @@ void main() {
   // ===================================================================
   group('Kumarhane kaydı', () {
     test('açık el kaydedilip aynı kartlarla geri gelir', () async {
-      final GameState state = oyuncu(40, wallet: 8000);
-      final GameState acik = blackjack.deal(state, 250, Random(9)).state;
+      final GameState state = oyuncu(40, wallet: 80000);
+      final GameState acik = blackjack.deal(state, 2500, Random(9)).state;
       // Doğal blackjack denk gelirse el biter; açık el arıyoruz.
       final GameState devam = acik.blackjack!.isFinished
           ? blackjack.deal(
               blackjack.closeHand(acik).state,
-              250,
+              2500,
               Random(11),
             ).state
           : acik;
@@ -514,11 +522,11 @@ void main() {
     test('yeniden açmak sonucu değiştirmez ve bahsi tekrar tahsil etmez',
         () async {
       final GameState acik = masa(
-        oyuncu(41, wallet: 6000),
+        oyuncu(41, wallet: 60000),
         oyuncuKartlari: <PlayingCard>[kart(10), kart(6)],
         krupiyeKartlari: <PlayingCard>[kart(9), kart(7)],
         deste: <PlayingCard>[kart(4, CardSuit.karo), kart(8, CardSuit.kupa)],
-        bet: 300,
+        bet: 3000,
       );
 
       final SaveService service = SaveService(MemorySaveStore());
