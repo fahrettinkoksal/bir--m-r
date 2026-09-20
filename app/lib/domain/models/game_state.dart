@@ -49,6 +49,7 @@ class GameState {
     this.pendingInterview,
     this.blackjack,
     this.wagerThisAge = 0,
+    this.licenses = const <String>{},
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -126,6 +127,8 @@ class GameState {
     required ItemSource source,
     String? fromPersonId,
     int condition = OwnedItem.defaultCondition,
+    int? purchasePrice,
+    String? location,
   }) {
     if (typeIds.isEmpty) return this;
     final Set<String> mevcut = <String>{for (final OwnedItem i in items) i.id};
@@ -141,6 +144,8 @@ class GameState {
           source: source,
           fromPersonId: fromPersonId,
           condition: condition,
+          purchasePrice: purchasePrice,
+          location: location,
         ),
       );
     }
@@ -224,6 +229,14 @@ class GameState {
   final BlackjackGame? blackjack;
 
   bool get hasOpenHand => blackjack != null;
+
+  /// Sahip olunan ehliyetler (`lib/data/license_catalog.dart`).
+  ///
+  /// Araç **sahibi olmak** ile aracı **kullanmak** ayrı koşullardır:
+  /// ehliyet yalnızca sürme eyleminde aranır.
+  final Set<String> licenses;
+
+  bool hasLicense(String licenseId) => licenses.contains(licenseId);
 
   /// **Bu yaşta** kumarhanede oynanan toplam bahis.
   ///
@@ -355,6 +368,7 @@ class GameState {
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
+    Set<String>? licenses,
   }) {
     return GameState(
       seed: seed,
@@ -388,6 +402,7 @@ class GameState {
           ? this.blackjack
           : blackjack as BlackjackGame?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
+      licenses: licenses ?? this.licenses,
     );
   }
 }

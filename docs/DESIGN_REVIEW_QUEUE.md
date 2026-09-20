@@ -741,5 +741,71 @@ bozar, şimdilik eklenmesin.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
+### Q-055 — Ortak ekonomi ölçeği: fiyatlar ve maaşlar
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/economy.dart`, `app/lib/data/item_catalog.dart`, `app/lib/data/job_catalog.dart`. **Bağlantılı:** Q-021, Q-041, Q-046, Q-048, Q-054.
+
+**Sorun:** İlk maaşlar, eşya fiyatları ve yeni eklenen araç/konut fiyatları
+farklı ölçeklerdeydi (yıllık maaş 21.000 ₺ iken bisiklet 2.500 ₺). Tek bir
+tabloya taşındı.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`, yıllık ₺):**
+- Aileden küçük para 150-600; bayram harçlığı olayı 1.500-3.000.
+- Küçük eşya 20-900; kıyafet/ayakkabı/spor 450-1.500; saat/kulaklık 900-2.200.
+- Telefon 18.000, konsol 22.000, bilgisayar 32.000.
+- Bisiklet 9.000; motosiklet 75.000-190.000; otomobil 320.000-3.400.000.
+- Konut 1.800.000-9.500.000.
+- Yıllık maaşlar: garson 165.000, mağaza 180.000, teknik servis 260.000,
+  ressam/tasarımcı 300.000, öğretmen 420.000, yazılım 720.000.
+- Kumarhane bahsi 500-25.000; yıllık toplam 150.000.
+
+**Karar soruları:**
+1. Ölçek doğru mu? Bir yıllık en düşük maaş bir telefon + birkaç küçük eşya
+   alıyor; ikinci el otomobil ~2 yıl, küçük daire uzun yıllar sürüyor.
+2. Enflasyon/yıllara göre fiyat değişimi olacak mı, yoksa sabit mi kalsın?
+3. Yaşam gideri (kira, fatura, yemek) eklenecek mi? Şu an hiç gider yok;
+   maaşın tamamı birikiyor.
+4. Kredi/taksit sistemi gelsin mi (özellikle konut için)?
+5. Meslekler arası maaş farkı bu kadar açık olsun mu (yazılım, garsonun
+   4,4 katı)?
+6. Miras, hediye ve kumar kazancı bu ölçeğe göre yeniden ayarlanmalı mı?
+
+**Claude'un önerisi (yalnızca öneri):** Yaşam gideri olmadan ekonomi çok
+cömert; küçük bir yıllık gider kalemi (kira/geçim) eklenirse birikim
+anlamlı olur. Kredi, konut alımını erişilebilir kılmak için ilk aday.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
+### Q-056 — Araç sahipliği, ehliyet ve taşınma
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/license_catalog.dart`, `app/lib/domain/interaction/item_actions.dart`, `app/lib/data/shop_catalog.dart`. **Bağlantılı:** Q-041, Q-055.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- **Araç satın almak ehliyet istemiyor; aracı kullanmak istiyor.** Motosiklet
+  ehliyeti otomobil kullandırmıyor.
+- Araç satın alma yaşı: motosiklet 16/18, otomobil 17 (galeri listesinde).
+- Konut satın alma yaşı 18.
+- **Ev satın almak taşınma değil:** mülk sahipliği ile hane ayrı tutuluyor;
+  taşınma, kira ve kiraya verme yazılmadı (sahte düğme de konmadı).
+- Konutun konumu satın alındığı şehir olarak kaydediliyor (oyuncunun doğum
+  şehri); şehir değiştirme sistemi yok.
+
+**Karar soruları:**
+1. Ehliyeti olmayan biri araç **sahibi** olabilsin mi? (Şu an olabiliyor:
+   miras, hediye veya erken alım mümkün.) Yoksa satın alma da ehliyete mi
+   bağlansın?
+2. Araç satın alma yaşları ne olsun; ehliyet yaşlarıyla aynı mı olsun?
+3. Taşınma sistemi ne zaman gelsin? Ev alınca "taşın" seçeneği mi sunulsun,
+   yoksa taşınma ayrı bir olay mı olsun?
+4. Kiraya verme ve kira geliri gelsin mi (Q-055 ile birlikte)?
+5. Konutun konumu için gerçek bir şehir sistemi mi olsun (şehirler arası
+   taşınma, farklı fiyat seviyeleri)?
+6. Araç kullanımı yalnızca kondisyonu mu etkilesin, yoksa kaza riski,
+   yakıt gideri gibi kalemler de gelsin mi?
+
+**Claude'un önerisi (yalnızca öneri):** Sahiplik ile kullanım ayrı kalsın
+(miras ve hediye için gerekli). Taşınma, konut sisteminin ikinci adımı
+olarak ayrı bir pakette ele alınsın.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

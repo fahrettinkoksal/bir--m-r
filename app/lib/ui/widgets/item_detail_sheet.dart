@@ -157,6 +157,24 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
               _Row(label: 'Kondisyon', value: '${item.condition}/100'),
               _Row(label: 'Edinme', value: item.source.label),
               _Row(label: 'Edinildiği yaş', value: '${item.acquiredAtAge}'),
+              if (item.purchasePrice != null)
+                _Row(
+                  label: 'Satın alma fiyatı',
+                  value: '${item.purchasePrice} ₺',
+                ),
+              if (item.location != null)
+                _Row(label: 'Konum', value: item.location!),
+              if (item.isVehicle || item.isProperty) ...<Widget>[
+                _Row(label: 'Tür', value: item.type.name),
+                _Row(
+                  label: 'Sahip',
+                  value: controller.state!.player.fullName,
+                ),
+                _Row(
+                  label: 'Güncel satış değeri',
+                  value: '${controller.estimatedPriceFor(item)} ₺',
+                ),
+              ],
               if (item.attachments.isNotEmpty)
                 _Row(
                   label: 'Takılı aksesuarlar',

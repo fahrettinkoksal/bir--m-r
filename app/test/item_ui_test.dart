@@ -121,7 +121,9 @@ void main() {
       age: 14,
     );
     await openAssets(tester);
-    await tester.tap(find.text('Mağaza'));
+    await tester.tap(find.text('Mağazalar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Genel mağaza'));
     await tester.pumpAndSettle();
 
     await scrollTo(tester, find.text('Paran yetmiyor').first);
@@ -139,7 +141,9 @@ void main() {
       age: 14,
     );
     await openAssets(tester);
-    await tester.tap(find.text('Mağaza'));
+    await tester.tap(find.text('Mağazalar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Genel mağaza'));
     await tester.pumpAndSettle();
 
     await scrollTo(tester, find.text('Satın al').first);

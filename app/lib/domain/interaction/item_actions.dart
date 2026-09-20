@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import '../../data/economy.dart';
 import '../../data/item_catalog.dart';
+import '../../data/license_catalog.dart';
 import '../../data/shop_catalog.dart';
 import '../effects/effect_diff.dart';
 import '../models/applied_effect.dart';
@@ -89,7 +91,10 @@ class ItemActions {
   static const int prototypeOnlyBrokenBelow = 10;
 
   /// prototypeOnly: bu değerin üstündeki eşyalar "değerli" sayılır.
-  static const int prototypeOnlyValuableThreshold = 300;
+  ///
+  /// Ortak ekonomi ölçeğinden gelir (`lib/data/economy.dart`).
+  static const int prototypeOnlyValuableThreshold =
+      Economy.prototypeOnlyValuableThreshold;
 
   /// prototypeOnly: değerli eşya satabilmek için gereken yaş.
   ///
@@ -136,6 +141,14 @@ class ItemActions {
         if (item.condition < prototypeOnlyBrokenBelow) {
           return const InteractionAvailability.blocked(
             'Çok yıpranmış; önce bakım gerekiyor.',
+          );
+        }
+        // Araç kullanmak ehliyet ister; araç **sahibi olmak** istemez.
+        final LicenseType? gereken = licenseRequiredFor(item);
+        if (gereken != null && !state.hasLicense(gereken.id)) {
+          return InteractionAvailability.blocked(
+            '${item.name} kullanmak için ${gereken.label.toLowerCase()} '
+            'gerekiyor.',
           );
         }
         return const InteractionAvailability.allowed();
@@ -436,9 +449,15 @@ class ItemActions {
 
     final PlayerCharacter player =
         state.player.copyWith(wallet: state.player.wallet - product.price);
-    final GameState next = state
-        .copyWith(player: player)
-        .grantItems(<String>[product.typeId], source: ItemSource.satinAlma);
+    // Konutta satın alınan şehir kaydedilir; **taşınma anlamına gelmez**.
+    final GameState next = state.copyWith(player: player).grantItems(
+      <String>[product.typeId],
+      source: ItemSource.satinAlma,
+      purchasePrice: product.price,
+      location: product.type.kind == ItemKind.konut
+          ? state.player.birthCity
+          : null,
+    );
 
     final String metin =
         '${product.name} satın alındı. ${product.price} ₺ ödedin.';

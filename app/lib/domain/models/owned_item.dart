@@ -31,6 +31,8 @@ class OwnedItem {
     this.fromPersonId,
     this.condition = defaultCondition,
     this.attachments = const <String>[],
+    this.purchasePrice,
+    this.location,
   }) : assert(condition >= 0 && condition <= 100);
 
   /// prototypeOnly: yeni edinilen eşyanın kondisyonu.
@@ -67,7 +69,26 @@ class OwnedItem {
   /// görünmez.
   final List<String> attachments;
 
+  /// Satın alındıysa **ödenen fiyat**.
+  ///
+  /// Araç ve konut kayıtlarında "satın alma fiyatı" olarak gösterilir.
+  /// Hediye veya olayla gelen eşyalarda boştur.
+  final int? purchasePrice;
+
+  /// Konum/şehir. Konutlarda satın alındığı şehri tutar.
+  ///
+  /// **Mülk sahibi olmak, o evde yaşamak demek değildir**: hangi hanede
+  /// yaşandığı kişi kayıtlarından gelir, bu alandan değil.
+  final String? location;
+
   ItemType get type => itemTypeOrFallback(typeId);
+
+  bool get isVehicle =>
+      type.kind == ItemKind.bisiklet ||
+      type.kind == ItemKind.motosiklet ||
+      type.kind == ItemKind.otomobil;
+
+  bool get isProperty => type.kind == ItemKind.konut;
 
   String get name => type.name;
 
@@ -83,6 +104,8 @@ class OwnedItem {
   OwnedItem copyWith({
     int? condition,
     List<String>? attachments,
+    int? purchasePrice,
+    String? location,
   }) {
     return OwnedItem(
       id: id,
@@ -92,6 +115,8 @@ class OwnedItem {
       fromPersonId: fromPersonId,
       condition: (condition ?? this.condition).clamp(0, 100),
       attachments: attachments ?? this.attachments,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
+      location: location ?? this.location,
     );
   }
 }

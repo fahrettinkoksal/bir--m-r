@@ -70,6 +70,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
       'wagerThisAge': state.wagerThisAge,
+      'licenses': state.licenses.toList(growable: false),
     };
 
 /// Kumarhane eli: deste **olduğu gibi** yazılır, böylece kayıt geri
@@ -154,6 +155,8 @@ Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
       'fromPersonId': i.fromPersonId,
       'condition': i.condition,
       'attachments': i.attachments,
+      'purchasePrice': i.purchasePrice,
+      'location': i.location,
     };
 
 Map<String, Object?> _encodeGift(GiftRecord g) => <String, Object?>{
@@ -336,6 +339,12 @@ GameState decodeGameState(Map<String, Object?> json) {
         ? null
         : _decodeBlackjack(_asMap(json['blackjack'], 'blackjack')),
     wagerThisAge: json['wagerThisAge'] == null ? 0 : _int(json, 'wagerThisAge'),
+    // Eski kayıtlarda ehliyet yoktur; boş kümeyle açılır.
+    licenses: Set<String>.unmodifiable(
+      json['licenses'] == null
+          ? const <String>{}
+          : _stringSet(json, 'licenses'),
+    ),
   );
 }
 
@@ -507,6 +516,9 @@ OwnedItem _decodeItem(Map<String, Object?> json) {
     fromPersonId: _stringOrNull(json, 'fromPersonId'),
     condition: condition,
     attachments: List<String>.unmodifiable(_stringList(json, 'attachments')),
+    // Eski kayıtlarda bu alanlar yoktur; boş kalır, eşya silinmez.
+    purchasePrice: _intOrNull(json, 'purchasePrice'),
+    location: _stringOrNull(json, 'location'),
   );
 }
 
