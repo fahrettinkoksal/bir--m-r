@@ -13,6 +13,7 @@ class CareerState {
     this.startedAtAge,
     this.lastPaidAge,
     this.pastJobIds = const <String>[],
+    this.jobCity,
   });
 
   const CareerState.none() : this();
@@ -29,6 +30,17 @@ class CareerState {
   /// Daha önce çalışılan işler; kayıt silinmez.
   final List<String> pastJobIds;
 
+  /// İşin bulunduğu şehir (Paket 3).
+  ///
+  /// Şehir değiştiren çalışanın işine **kendiliğinden son verilmez**: bu
+  /// bilgi yalnızca durumu doğru göstermek için tutulur. Şehir değişince
+  /// işin ne olacağı kararı kuyrukta (Q-065). Eski kayıtlarda `null`'dır.
+  final String? jobCity;
+
+  /// İş, oyuncunun yaşadığı şehirden farklı bir şehirde mi?
+  bool isInAnotherCity(String currentCity) =>
+      isEmployed && jobCity != null && jobCity != currentCity;
+
   bool get isEmployed => jobId != null;
 
   JobType? get job => jobId == null ? null : jobById(jobId!);
@@ -40,6 +52,7 @@ class CareerState {
     Object? startedAtAge = _unsetCareer,
     Object? lastPaidAge = _unsetCareer,
     List<String>? pastJobIds,
+    Object? jobCity = _unsetCareer,
   }) {
     return CareerState(
       jobId: jobId == _unsetCareer ? this.jobId : jobId as String?,
@@ -49,6 +62,7 @@ class CareerState {
       lastPaidAge:
           lastPaidAge == _unsetCareer ? this.lastPaidAge : lastPaidAge as int?,
       pastJobIds: pastJobIds ?? this.pastJobIds,
+      jobCity: jobCity == _unsetCareer ? this.jobCity : jobCity as String?,
     );
   }
 }

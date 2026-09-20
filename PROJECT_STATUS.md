@@ -361,7 +361,15 @@ verilen söz yıllar sonra, eşle konuşulan gece ileride. Olay koşullarına
 arayüzü kopyalanmıyor. Etkileşim metinleri eşe, çocuğun yaşına ve kişinin
 hane durumuna göre değişiyor (ayrı evde yaşayanla görüşmek ziyaret).
 
-Kayıt biçimi **sürüm 16**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
+**Paket 3 — şehir, okul, iş ve sosyal çevre (uygulandı):** kişilere ve işe
+şehir bağı eklendi; okul/sınıf kimlikleri şehre bağlandı. Şehir değiştiren
+öğrenci için okul nakli akışı var (eğitim geçmişi korunur, eski okul
+kişileri silinmez, aynı anda iki okulda görünülmez). Başka şehirde kalan
+arkadaş gündelik listelerden düşer ama kaydı ve yakınlığı durur; yakın
+aile etkilenmez. İşin şehri kaydediliyor ve gösteriliyor; **şehir değişince
+işe kendiliğinden son verilmiyor** (karar Q-065'te).
+
+Kayıt biçimi **sürüm 17**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
 ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
 ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**
 altında Faho'nun kararını bekliyor; `DECISIONS.md`'ye yeni kalıcı kural

@@ -310,10 +310,17 @@ class LifeGenerator {
       fame: null,
     );
 
+    // Aile ve akrabalar doğum şehrinde yaşar. Oyuncu ileride başka şehre
+    // taşınsa da bu kayıtlar silinmez; yalnızca gündelik erişilebilirlik
+    // değişir (Paket 3).
+    final List<Person> sehirliKisiler = people
+        .map((Person p) => p.copyWith(city: city))
+        .toList(growable: false);
+
     final GameState state = GameState(
       seed: seed,
       player: player,
-      people: List<Person>.unmodifiable(people),
+      people: List<Person>.unmodifiable(sehirliKisiler),
       pets: List<Pet>.unmodifiable(pets),
       parentalStatus: parentalStatus,
       log: const <LifeLogEntry>[],

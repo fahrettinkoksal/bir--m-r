@@ -1234,5 +1234,41 @@ tanıdıkla aynıydı), evli karakterin karşısına yeni tanışma olayı çık
 `livesWithFamily` ölçütünün eşi "aile" sayması, çocuğun soyadı ve geçmiş
 hayat arşivinde aile bilgisinin hiç tutulmaması.
 
+### Q-065 — Şehir değişiminin okul, iş ve çevreye etkisi
+**Durum:** Altyapı kuruldu, **karar bekliyor** (değerler ve kurallar `prototypeOnly`). **Kaynak:** Paket 3. **Bağlantılı:** Q-060 (taşınma), Q-063.
+
+**Şu an kodda olan (geçici) davranış:**
+- Doğum şehri hiç değişmiyor; yaşanan şehir taşınmayla güncelleniyor.
+- Okullar ve sınıflar artık **şehre bağlı** kimliklerle kuruluyor; oyuncu
+  aynı anda iki okulda görünemiyor.
+- Şehir değiştiren **öğrenci** için okul nakli akışı var: yeni şehirde yeni
+  sınıf ve öğretmen tanınıyor, eğitim geçmişi (sınıf, lise alanı, puanlar)
+  korunuyor, eski okulun kişileri **silinmiyor** — yalnızca güncel
+  listelerden düşüyorlar.
+- Başka şehirde kalan okul/hayat arkadaşı gündelik listelerde görünmüyor
+  ama kaydı ve yakınlığı duruyor; **yakın aile** (anne, baba, kardeş, eş,
+  çocuk) şehir değişse de erişilebilir kalıyor.
+- İşin şehri kaydediliyor ve ekranda gösteriliyor. **Şehir değişince işe
+  kendiliğinden son verilmiyor**; yalnızca "işin hâlâ X şehrinde" satırı
+  yazılıyor.
+
+**Karar soruları:**
+1. Şehir değiştiren çalışanın işi ne olmalı (devam, uzaktan, istifa,
+   şehirler arası iş piyasası)?
+2. Reşit olmayan oyuncu **ailesiyle birlikte** taşınabilmeli mi? Şu an
+   taşınma 18 yaş koşuluna bağlı olduğu için okul nakli akışı pratikte
+   yalnızca ileride gelecek bir "aile taşınması" mekaniğiyle tetiklenir.
+3. Üniversite öğrencisi şehir değiştirirse ne olmalı (nakil, kayıt
+   dondurma, uzaktan)?
+4. Başka şehirdeki yakın arkadaşla yeniden karşılaşma olayı olsun mu?
+5. Şehirlerin birbirinden farkı olacak mı (kira, maaş, iş çeşitliliği)?
+   Şu an şehirler yalnızca isim düzeyinde farklı.
+
+**Claude'un önerisi (yalnızca öneri):** Şehirler arası ekonomik fark
+(kira/maaş) büyük bir denge işidir; önce 1. ve 2. sorular yanıtlansın.
+
+**Varsayılan işlem:** Hiçbir otomatik işten çıkarma veya okul silme kuralı
+uydurulmadı; `DECISIONS.md`'ye yeni kural yazılmadı.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

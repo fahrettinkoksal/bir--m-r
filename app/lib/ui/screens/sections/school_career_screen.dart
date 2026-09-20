@@ -281,6 +281,15 @@ class _CareerViewState extends State<_CareerView> {
                   label: 'Başlangıç',
                   value: '${state.career.startedAtAge} yaşında',
                 ),
+              // İşin şehri yalnızca gerçekten biliniyorsa yazılır; şehir
+              // değişince işe kendiliğinden son verilmez (Q-065).
+              if (state.career.jobCity != null)
+                (
+                  label: 'İşin şehri',
+                  value: state.career.isInAnotherCity(state.player.currentCity)
+                      ? '${state.career.jobCity} (başka şehirde)'
+                      : state.career.jobCity!,
+                ),
               (label: 'Cüzdan', value: state.player.walletLabel),
             ],
           )

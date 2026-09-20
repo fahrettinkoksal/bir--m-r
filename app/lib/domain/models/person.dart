@@ -29,6 +29,7 @@ class Person {
     this.schoolTie,
     this.schoolId,
     this.classId,
+    this.city,
     this.estate = const <String>[],
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
@@ -98,6 +99,14 @@ class Person {
       currentSchoolId != null &&
       schoolId == currentSchoolId;
 
+  /// Kişinin oyuncunun hayatındaki **şehri**.
+  ///
+  /// Oyuncu başka şehre taşındığında kayıt silinmez; yalnızca gündelik
+  /// hayatta erişilebilirlik değişir (D-025). Eski kayıtlarda ve şehir
+  /// bilgisi anlamlı olmayan kişilerde `null`'dır ve o zaman şehir
+  /// koşulu hiç uygulanmaz.
+  final String? city;
+
   /// Kişinin sahip olduğu eşyaların **tür** kimlikleri.
   ///
   /// Yetişkinlerde ekonomik duruma göre başlar, **hayat boyunca değişir**
@@ -158,6 +167,7 @@ class Person {
     Object? schoolTie = _unset,
     Object? schoolId = _unset,
     Object? classId = _unset,
+    Object? city = _unset,
     List<String>? estate,
   }) {
     return Person(
@@ -180,6 +190,7 @@ class Person {
           schoolTie == _unset ? this.schoolTie : schoolTie as SchoolTie?,
       schoolId: schoolId == _unset ? this.schoolId : schoolId as String?,
       classId: classId == _unset ? this.classId : classId as String?,
+      city: city == _unset ? this.city : city as String?,
       estate: estate ?? this.estate,
     );
   }

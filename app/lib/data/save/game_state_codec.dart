@@ -180,6 +180,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'lastName': p.lastName,
       'gender': p.gender.name,
       'relation': p.relation.name,
+      'city': p.city,
       'age': p.age,
       'isAlive': p.isAlive,
       'inPlayerHousehold': p.inPlayerHousehold,
@@ -272,6 +273,7 @@ Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
     };
 
 Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
+      'jobCity': c.jobCity,
       'jobId': c.jobId,
       'startedAtAge': c.startedAtAge,
       'lastPaidAge': c.lastPaidAge,
@@ -652,6 +654,9 @@ Person _decodePerson(Map<String, Object?> json) {
     ),
     schoolId: _stringOrNull(json, 'schoolId'),
     classId: _stringOrNull(json, 'classId'),
+    // Eski kayıtlarda kişinin şehri yoktur; `null` kalır ve şehir koşulu
+    // hiç uygulanmaz (kimse listeden düşmez).
+    city: _stringOrNull(json, 'city'),
     // Eski kayıtlarda kişinin mal varlığı yoktur; boş listeyle açılır.
     estate: List<String>.unmodifiable(
       json['estate'] == null ? const <String>[] : _stringList(json, 'estate'),
@@ -678,6 +683,9 @@ PendingInterview _decodeInterview(Map<String, Object?> json) =>
     );
 
 CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
+      // Eski kayıtlarda işin şehri yoktur; `null` kalır ve hiçbir uyarı
+      // gösterilmez.
+      jobCity: _stringOrNull(json, 'jobCity'),
       jobId: _stringOrNull(json, 'jobId'),
       startedAtAge: _intOrNull(json, 'startedAtAge'),
       lastPaidAge: _intOrNull(json, 'lastPaidAge'),

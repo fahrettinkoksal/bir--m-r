@@ -84,6 +84,8 @@ class Romance {
           ? rng.pick(meslekler)
           : null,
       wealth: age >= 18 ? WealthTier.ortaHalli : null,
+      // Tanışma oyuncunun yaşadığı şehirde olur (Paket 3).
+      city: state.player.currentCity,
       bond: rng.between(55, 70), // prototypeOnly
     );
 
