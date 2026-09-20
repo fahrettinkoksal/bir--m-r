@@ -29,6 +29,7 @@ class Person {
     this.schoolTie,
     this.schoolId,
     this.classId,
+    this.estate = const <String>[],
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -97,6 +98,14 @@ class Person {
       currentSchoolId != null &&
       schoolId == currentSchoolId;
 
+  /// Kişinin sahip olduğu eşyaların **tür** kimlikleri.
+  ///
+  /// Yetişkinlerde ekonomik duruma göre üretilir ve kişi ekranında
+  /// gösterilir; vefat edince mirasçılara bu liste paylaştırılır. Böylece
+  /// miras uydurulmuş değil, kişinin gerçekten sahip olduğu şeylerden
+  /// gelir. Değerler `prototypeOnly` (Q-059).
+  final List<String> estate;
+
   /// Oyuncuyla ilişki puanı (0-100).
   ///
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
@@ -142,6 +151,7 @@ class Person {
     Object? schoolTie = _unset,
     Object? schoolId = _unset,
     Object? classId = _unset,
+    List<String>? estate,
   }) {
     return Person(
       id: id,
@@ -163,6 +173,7 @@ class Person {
           schoolTie == _unset ? this.schoolTie : schoolTie as SchoolTie?,
       schoolId: schoolId == _unset ? this.schoolId : schoolId as String?,
       classId: classId == _unset ? this.classId : classId as String?,
+      estate: estate ?? this.estate,
     );
   }
 }

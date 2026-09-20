@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 10;
+const int kSaveFormatVersion = 11;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -64,7 +64,19 @@ abstract final class SaveMigrations {
     if (from <= 7) guncel = _v7ToV8(guncel);
     if (from <= 8) guncel = _v8ToV9(guncel);
     if (from <= 9) guncel = _v9ToV10(guncel);
+    if (from <= 10) guncel = _v10ToV11(guncel);
     return guncel;
+  }
+
+  /// Sürüm 10 → 11: ölüm, miras ve kişilerin mal varlığı eklendi.
+  ///
+  /// Eski kayıtta kimse vefat etmiş olarak açılmaz: `deceased` alanı yoksa
+  /// hayat sürüyor sayılır, kişilerin `isAlive` değeri olduğu gibi korunur,
+  /// mal varlığı listesi boş başlar ve dağıtılmış miras kaydı boştur.
+  static Map<String, Object?> _v10ToV11(Map<String, Object?> body) {
+    body['settledEstates'] ??= <Object?>[];
+    body['deceased'] ??= false;
+    return body;
   }
 
   /// Sürüm 9 → 10: cevap bekleyen ehliyet sınavı eklendi.

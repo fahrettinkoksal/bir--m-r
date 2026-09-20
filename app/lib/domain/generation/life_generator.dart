@@ -321,6 +321,7 @@ class LifeGenerator {
     required bool inHome,
   }) {
     final EmploymentStatus employment = _employmentForAge(age);
+    final WealthTier? varlik = _wealthForAge(age);
     return Person(
       id: _nextId(idPrefix),
       firstName: firstName,
@@ -334,7 +335,8 @@ class LifeGenerator {
       employment: employment,
       occupation: employment == EmploymentStatus.calisiyor ? _rng.pick(meslekler) : null,
       // Kişilerin ekonomik durumu birbirinden bağımsızdır (D-013).
-      wealth: _wealthForAge(age),
+      wealth: varlik,
+      estate: _estateFor(varlik, age),
       bond: inHome ? _rng.between(55, 90) : _rng.between(35, 75),
     );
   }
@@ -351,6 +353,7 @@ class LifeGenerator {
     final int age = childAge + _rng.between(18, 44);
     final bool alive = _rng.chance(_aliveChanceForAge(age));
     final EmploymentStatus employment = _employmentForAge(age);
+    final WealthTier? buyukVarlik = _wealthForAge(age);
     return Person(
       id: _nextId(relation.name),
       firstName: _rng.pick(gender == Gender.kadin ? kadinIsimleri : erkekIsimleri),
@@ -363,7 +366,8 @@ class LifeGenerator {
       inPlayerHousehold: alive && parentInHome && _rng.chance(0.18),
       employment: employment,
       occupation: employment == EmploymentStatus.calisiyor ? _rng.pick(meslekler) : null,
-      wealth: _wealthForAge(age),
+      wealth: buyukVarlik,
+      estate: _estateFor(buyukVarlik, age),
       bond: _rng.between(35, 80),
     );
   }
@@ -407,6 +411,7 @@ class LifeGenerator {
       final Gender gender = _rng.pick(Gender.values);
       final bool alive = _rng.chance(_aliveChanceForAge(age));
       final EmploymentStatus employment = _employmentForAge(age);
+      final WealthTier? akrabaVarlik = _wealthForAge(age);
       result.add(
         Person(
           id: _nextId(gender == Gender.kadin ? femaleRelation.name : maleRelation.name),
@@ -419,7 +424,8 @@ class LifeGenerator {
           inPlayerHousehold: alive && parentInHome && _rng.chance(0.07),
           employment: employment,
           occupation: employment == EmploymentStatus.calisiyor ? _rng.pick(meslekler) : null,
-          wealth: _wealthForAge(age),
+          wealth: akrabaVarlik,
+          estate: _estateFor(akrabaVarlik, age),
           bond: _rng.between(30, 75),
         ),
       );
@@ -436,6 +442,38 @@ class LifeGenerator {
   /// Reşit olmayan kişinin kendine ait ekonomik durumu tutulmaz; uydurma
   /// bir değer üretmek yerine `null` bırakılır.
   WealthTier? _wealthForAge(int age) => age >= 18 ? _randomWealth() : null;
+
+  /// prototypeOnly: yetişkinin sahip olduğu eşyalar.
+  ///
+  /// Ekonomik duruma göre üretilir ve kişi kaydında saklanır; kişi
+  /// ekranında görünür, vefat edince mirasçılara bu liste paylaştırılır.
+  /// Böylece miras, kişinin gerçekten sahip olduğu şeylerden gelir.
+  List<String> _estateFor(WealthTier? wealth, int age) {
+    if (wealth == null || age < 18) return const <String>[];
+    switch (wealth) {
+      case WealthTier.cokYoksul:
+        return const <String>[];
+      case WealthTier.yoksul:
+        return <String>[_rng.pick(<String>['kol_saati', 'radyo'])];
+      case WealthTier.ortaHalli:
+        return <String>[
+          _rng.pick(<String>['kol_saati', 'telefon']),
+          _rng.pick(<String>['cay_takimi', 'bisiklet']),
+        ];
+      case WealthTier.varlikli:
+        return <String>[
+          'antika_saat',
+          _rng.pick(<String>['otomobil_ikinci_el', 'otomobil_ekonomik']),
+          _rng.pick(<String>['bilgisayar', 'telefon']),
+        ];
+      case WealthTier.cokVarlikli:
+        return <String>[
+          'antika_saat',
+          _rng.pick(<String>['otomobil_orta', 'otomobil_luks']),
+          _rng.pick(<String>['kucuk_daire', 'standart_daire']),
+        ];
+    }
+  }
 
   WealthTier _randomWealth() => _rng.pickWeighted(
         WealthTier.values,

@@ -80,6 +80,10 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'askedAtAge': state.pendingLicenseExam!.askedAtAge,
               'feePaid': state.pendingLicenseExam!.feePaid,
             },
+      'settledEstates': state.settledEstates.toList(growable: false),
+      'deceased': state.deceased,
+      'deathAge': state.deathAge,
+      'deathCause': state.deathCause,
     };
 
 /// Kumarhane eli: deste **olduğu gibi** yazılır, böylece kayıt geri
@@ -154,6 +158,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'schoolTie': p.schoolTie?.name,
       'schoolId': p.schoolId,
       'classId': p.classId,
+      'estate': p.estate,
     };
 
 Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
@@ -359,6 +364,16 @@ GameState decodeGameState(Map<String, Object?> json) {
         : _decodeLicenseExam(
             _asMap(json['pendingLicenseExam'], 'pendingLicenseExam'),
           ),
+    // Eski kayıtlarda ölüm ve miras alanları yoktur; hayat sürüyor sayılır
+    // ve kimse vefat etmiş olarak açılmaz.
+    settledEstates: Set<String>.unmodifiable(
+      json['settledEstates'] == null
+          ? const <String>{}
+          : _stringSet(json, 'settledEstates'),
+    ),
+    deceased: json['deceased'] == true,
+    deathAge: _intOrNull(json, 'deathAge'),
+    deathCause: _stringOrNull(json, 'deathCause'),
   );
 }
 
@@ -496,6 +511,10 @@ Person _decodePerson(Map<String, Object?> json) {
     ),
     schoolId: _stringOrNull(json, 'schoolId'),
     classId: _stringOrNull(json, 'classId'),
+    // Eski kayıtlarda kişinin mal varlığı yoktur; boş listeyle açılır.
+    estate: List<String>.unmodifiable(
+      json['estate'] == null ? const <String>[] : _stringList(json, 'estate'),
+    ),
   );
 }
 

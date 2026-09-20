@@ -7,6 +7,7 @@ enum ItemSource {
   hediye('Hediye'),
   satinAlma('Satın alındı'),
   olay('Olayla edinildi'),
+  miras('Miras kaldı'),
   bilinmiyor('Bilinmiyor');
 
   const ItemSource(this.label);

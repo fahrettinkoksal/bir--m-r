@@ -7,6 +7,7 @@ import '../widgets/bottom_action_bar.dart';
 import '../widgets/character_header.dart';
 import '../widgets/event_dialog.dart';
 import 'life_screen.dart';
+import 'life_summary_screen.dart';
 import 'sections/activities_screen.dart';
 import 'sections/assets_screen.dart';
 import 'sections/relationships_screen.dart';
@@ -71,9 +72,12 @@ class _HomeShellState extends State<HomeShell> {
       context: context,
       builder: (BuildContext context) => AlertDialog(
         title: const Text('Yeni hayat'),
-        content: const Text(
-          'Bu hayatı bırakıp yeni bir hayata başlamak istiyor musun? '
-          'Şu anki hayatın kaydedilmez.',
+        content: Text(
+          GameScope.of(context).isDeceased
+              ? 'Tamamlanan hayatın yerine yeni bir hayat başlatılacak. '
+                  'Bu hayatın kaydı silinir. Devam edilsin mi?'
+              : 'Bu hayatı bırakıp yeni bir hayata başlamak istiyor musun? '
+                  'Şu anki hayatın kaydedilmez.',
         ),
         actions: <Widget>[
           TextButton(
@@ -110,6 +114,17 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final GameState state = GameScope.of(context).state!;
+
+    // Hayat tamamlandıysa özet ekranı gösterilir; yaş alma ve menüler
+    // kapanır. Kayıt silinmez, yeni hayat ancak onayla başlar.
+    if (state.deceased) {
+      return Scaffold(
+        body: SafeArea(
+          child: LifeSummaryScreen(onNewLife: _confirmNewLife),
+        ),
+      );
+    }
+
     final ActiveEvent? pending = state.pendingEvent;
     if (pending != null) _showPendingEvent(pending);
 

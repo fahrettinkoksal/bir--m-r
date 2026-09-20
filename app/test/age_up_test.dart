@@ -36,14 +36,26 @@ void main() {
       final Map<String, int> agesBefore = <String, int>{
         for (final Person p in before.people) p.id: p.age,
       };
+      final Map<String, bool> aliveBefore = <String, bool>{
+        for (final Person p in before.people) p.id: p.isAlive,
+      };
 
       controller.ageUp();
       final GameState after = controller.state!;
 
-      expect(after.people.length, before.people.length);
+      expect(after.people.length, before.people.length,
+          reason: 'Vefat eden kişinin kaydı silinmez');
       for (final Person p in after.people) {
         final int previous = agesBefore[p.id]!;
-        expect(p.age, p.isAlive ? previous + 1 : previous);
+        if (p.isAlive) {
+          expect(p.age, previous + 1);
+        } else if (aliveBefore[p.id]!) {
+          // Bu yıl vefat etti: o yaşı yaşadı, sonra vefat etti.
+          expect(p.age, previous + 1);
+        } else {
+          // Zaten vefat etmişti: yaşı sabit kalır.
+          expect(p.age, previous);
+        }
       }
     }
   });

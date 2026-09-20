@@ -234,6 +234,33 @@ uygulanmıyor. Aynı yaşta sınırlı deneme hakkı var ve her denemede ücret
 yeniden alınıyor. Araç sürme eylemi ilgili ehliyeti kontrol ediyor.
 Kayıt biçimi **sürüm 10**.
 
+## Ölüm, aile değişimleri ve miras (uygulandı)
+Hayat artık sonlu: yaşa bağlı bir eğilimle NPC'ler ve oyuncu vefat
+edebiliyor. Küçük yaşlarda ölüm çok seyrek, ileri yaşta belirgin. Ölüm
+gerekçeleri kısa ve yaşa uygun; ayrıntılı tasvir yok.
+
+**Kayıtlar korunuyor:** vefat eden kişi silinmiyor, yalnızca
+`isAlive: false` oluyor, haneden düşüyor ve yaşı sabitleniyor. Vefat
+edenle yeni sohbet/hediye/para isteme açılmıyor; olay motoru onu canlı
+gibi kullanmıyor.
+
+**Hane ve bakım:** hane sayısı doğru güncelleniyor. Çocuk yaştaki oyuncu
+hanede yetişkinsiz kalırsa **yeni NPC uydurulmuyor**: hayattaki yakın bir
+yetişkin (büyükanne/büyükbaba, teyze/dayı/hala/amca ya da yetişkin
+kardeş) haneye geçiyor; kimse yoksa durum yalnızca günlüğe yazılıyor.
+
+**Miras:** kişilerin kendi mal varlığı (`Person.estate`) ve ekonomik
+durumu üzerinden hesaplanıyor; nakit, eşya, araç ve konut kalabiliyor.
+Basitleştirilmiş oyun içi paylaşım kuralı (eş + çocuklar → anne-baba →
+kardeşler) kullanılıyor; zengin annenin serveti olduğu gibi oyuncuya
+geçmiyor. Aynı miras iki kez dağıtılmıyor, aynı eşya iki mirasçıya
+kopyalanmıyor, miras hayat günlüğüne yazılıyor ve Varlıklar'da görünüyor.
+
+**Oyuncunun ölümü:** hayat tamamlanıyor, yaş ilerlemiyor ve bir hayat
+özeti ekranı açılıyor (ad, ölüm yaşı, eğitim/meslek, aile, varlıklar,
+hayattan satırlar). Kayıt silinmiyor; yeni hayat ancak onayla başlıyor.
+Kayıt biçimi **sürüm 11**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
