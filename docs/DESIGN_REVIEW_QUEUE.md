@@ -680,7 +680,7 @@ payı yeniden eklenmesin (oyuncunun kararı sonucu belirlesin).
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-053 — Paylaşım sınırının kapsamı
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/social/social_engine.dart`. **Bağlantılı:** Q-050.
+**Durum:** **Kısmen karara bağlandı** (D-031). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/domain/social/social_engine.dart`. **Bağlantılı:** Q-050.
 
 **Sorun:** Yıllık paylaşım sayacı bütün platformlar için ortaktı; Instagram'da
 sınıra ulaşmak YouTube'u da kapatıyordu. Sayaç platform başına ayrıldı.
@@ -705,10 +705,18 @@ sınıra ulaşmak YouTube'u da kapatıyordu. Sayaç platform başına ayrıldı.
 anlaşılır; içerik türü başına ayrı sınır eklemek yerine ileride ortak bir
 zaman kaynağı gelirse o kullanılsın.
 
+**Karara bağlananlar (D-031):**
+- Sınır **platform başına bağımsız**; bir platformda dolması diğerlerini etkilemez.
+- Aynı platformdaki farklı içerik türleri **ortak platform sayacını** kullanır.
+- Ayrı bir **enerji sistemi eklenmeyecek**. İleride profesyonel içerik üreticiliği
+  ve zaman yönetimi sistemi gelirse kapasite yeniden ele alınacak.
+
+**Geçici kalan (denge kararı değil):** platform başına yaş başına **6** paylaşım.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-054 — Kumarhane: yaş sınırı, bahis ölçeği ve yayın koşulları
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/casino/`, `app/lib/ui/screens/sections/casino_pages.dart`. **Bağlantılı:** Q-021, Q-048.
+**Durum:** **Kısmen karara bağlandı** (D-032). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/domain/casino/`, `app/lib/ui/screens/sections/casino_pages.dart`. **Bağlantılı:** Q-021, Q-048.
 
 **Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
 - Kumarhane **18 yaşında** açılıyor.
@@ -739,10 +747,26 @@ ayarlardan kapatılabilir bir modül olarak tasarlansın; bu, bölgesel yayın
 koşullarını en az riskle karşılar. Sigorta/bölme gibi kurallar sadeliği
 bozar, şimdilik eklenmesin.
 
+**Karara bağlananlar (D-032):**
+- Kumarhane **isteğe bağlı** bir aktivite; yalnızca **sanal para**. Gerçek para,
+  gerçek ödül, ödeme sistemi, reklam karşılığı bahis ve **borçla bahis yok**.
+- **Ayarlardan tamamen gizlenebilir/kapatılabilir bir modül** olacak.
+- Oyun içi yaş sınırı şimdilik **18**; bu bir **yayın uygunluğu garantisi değil**.
+  Hedef ülke ve mağaza koşulları yayın öncesi ayrıca kontrol edilecek.
+- Oyuncu kendisi için **isteğe bağlı harcama limiti** belirleyebilecek; limit
+  dolunca **daha fazla oynamaya teşvik eden mesaj gösterilmeyecek**.
+- Blackjack'te **bölme, sigorta ve ikiye katlama eklenmeyecek**; rulet ve
+  blackjack'in açık kuralları korunacak.
+- Kumar kazancı sağlık/mutluluk/karizmada **otomatik büyük artış sağlamayacak**;
+  **borç sistemi eklenmeyecek**.
+
+**Geçici kalan (denge kararı değil):** bahis alt/üst sınırı ve yıllık toplam
+sınır; bunlar maaş ve gider dengesiyle (Q-055) birlikte belirlenecek.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-055 — Ortak ekonomi ölçeği: fiyatlar ve maaşlar
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/economy.dart`, `app/lib/data/item_catalog.dart`, `app/lib/data/job_catalog.dart`. **Bağlantılı:** Q-021, Q-041, Q-046, Q-048, Q-054.
+**Durum:** **Kısmen karara bağlandı** (D-033). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/data/economy.dart`, `app/lib/data/item_catalog.dart`, `app/lib/data/job_catalog.dart`. **Bağlantılı:** Q-021, Q-041, Q-046, Q-048, Q-054.
 
 **Sorun:** İlk maaşlar, eşya fiyatları ve yeni eklenen araç/konut fiyatları
 farklı ölçeklerdeydi (yıllık maaş 21.000 ₺ iken bisiklet 2.500 ₺). Tek bir
@@ -773,10 +797,30 @@ tabloya taşındı.
 cömert; küçük bir yıllık gider kalemi (kira/geçim) eklenirse birikim
 anlamlı olur. Kredi, konut alımını erişilebilir kılmak için ilk aday.
 
+**Karara bağlananlar (D-033):**
+- Bütün para akışları **tek ekonomi ölçeğine** bağlı ve **yıllık** ölçekte.
+- **Yıllık temel yaşam gideri gelecek**: barınma, beslenme, faturalar; karakterin
+  **gerçekten yaşadığı hane ve yaşam koşullarına** göre hesaplanacak.
+- **Çocuğa yetişkin gideri yüklenmeyecek**; ailesiyle yaşayan ile bağımsız
+  yaşayanın gideri farklı olacak.
+- Maaşın tamamı otomatik birikmeyecek; giderler cüzdanı **sessizce eksiye
+  düşürmeyecek**. Para yetmezse **açık sonuç** ve genişletilebilir bir
+  **geçim sıkıntısı durumu** olacak.
+- İlk sürümde fiyatlar **sabit**; enflasyon ve ayrıntılı kredi/taksit sonraya.
+  Konutu kolaylaştırmak için **sınırsız kredi eklenmeyecek**.
+- Meslekler arasında **anlamlı gelir farkı** olacak, ama **tek meslek diğerlerini
+  anlamsızlaştırmayacak**.
+- Miras, hediye, araç, ev, maaş ve kumar bahisleri **aynı değerleme sistemine**
+  bağlı olacak.
+
+**Geçici kalan (denge kararı değil):** bütün fiyatlar, maaşlar ve gider oranları.
+Ölçüm raporu: `docs/BALANCE_REPORT.md`. Kesin sayılar **Faho'nun onayı olmadan
+kalıcı denge kuralı ilan edilmeyecek**.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-056 — Araç sahipliği, ehliyet ve taşınma
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/license_catalog.dart`, `app/lib/domain/interaction/item_actions.dart`, `app/lib/data/shop_catalog.dart`. **Bağlantılı:** Q-041, Q-055.
+**Durum:** **Kısmen karara bağlandı** (D-034). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/data/license_catalog.dart`, `app/lib/domain/interaction/item_actions.dart`, `app/lib/data/shop_catalog.dart`. **Bağlantılı:** Q-041, Q-055.
 
 **Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
 - **Araç satın almak ehliyet istemiyor; aracı kullanmak istiyor.** Motosiklet
@@ -805,10 +849,22 @@ anlamlı olur. Kredi, konut alımını erişilebilir kılmak için ilk aday.
 (miras ve hediye için gerekli). Taşınma, konut sisteminin ikinci adımı
 olarak ayrı bir pakette ele alınsın.
 
+**Karara bağlananlar (D-034):**
+- **Sahiplik ile kullanım ayrı**: küçük yaşta miras/hediye araç olabilir, ama
+  ilgili ehliyet ve uygun yaş olmadan **sürülemez**.
+- Galeriden **normal satın alma için şimdilik 18 yaş** prototip sınırı.
+- **Ev almak otomatik taşınmak değil**; mülk sahipliği ile hane ayrı kalacak.
+- İleride evin detayında ayrı bir **"Taşın"** eylemi olacak. Şehir değiştirme,
+  kiraya verme ve kira geliri **taşınma altyapısına bağlı ayrı bir paket**.
+- Araç kondisyonu, bakım masrafı ve satış değeri **mevcut eşya sistemiyle
+  tutarlı** olacak; **yakıt ve kaza sistemleri şimdilik genişletilmeyecek**.
+
+**Geçici kalan (denge kararı değil):** satın alma yaş eşikleri ve araç fiyatları.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-057 — Ehliyet: yaş, sınıf sistemi, ücret ve tekrar kuralı
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/license_catalog.dart`, `app/lib/data/license_questions.dart`, `app/lib/domain/licensing/license_office.dart`. **Bağlantılı:** Q-055, Q-056.
+**Durum:** **Kısmen karara bağlandı** (D-035). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/data/license_catalog.dart`, `app/lib/data/license_questions.dart`, `app/lib/domain/licensing/license_office.dart`. **Bağlantılı:** Q-055, Q-056.
 
 **Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
 - İki ehliyet: motosiklet (en az 16 yaş, 4.000 ₺) ve otomobil (en az 18
@@ -839,10 +895,24 @@ olarak ayrı bir pakette ele alınsın.
 hissedildiği bir yapıda yeterli; 3 soruluk tur eklenecekse ücret
 düşürülsün. Ehliyetin kaybı ancak bir kaza/ihlal sistemi gelirse anlamlı.
 
+**Karara bağlananlar (D-035):**
+- **İki bağımsız ehliyet** (motosiklet, otomobil) şimdilik yeterli.
+- Geçici yaş eşikleri **motosiklet 16, otomobil 18**; **resmî belge sınıflarının
+  birebir karşılığı olarak sunulmayacak**.
+- Sınav **3 kısa soru** sorar; **en az 2 doğru** ile geçilir. Sonuçta **doğru
+  cevaplar ve kısa açıklamaları** gösterilir.
+- Her başvuruda **ücret bir kez** kesilir.
+- Oyun sınav ortasında kapatılırsa **aynı sorulardan devam edilir**.
+- Sürücü kursu, direksiyon sınavı, ehliyet kaybı ve ayrıntılı belge sınıfları
+  **sonraya bırakıldı**.
+
+**Geçici kalan (denge kararı değil):** yıllık deneme sayısı (şu an 2) ve sınav
+ücretleri.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-058 — Ölüm eğrisi ve kaybın etkileri
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/life/mortality.dart`, `app/lib/domain/generation/life_progression.dart`. **Bağlantılı:** Q-047, Q-059.
+**Durum:** **Kısmen karara bağlandı** (D-036). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/domain/life/mortality.dart`, `app/lib/domain/generation/life_progression.dart`. **Bağlantılı:** Q-047, Q-059.
 
 **Kodun şu anki geçici çözümü (hepsi `prototypeOnly`, yıllık ihtimal):**
 - 0-1 yaş %0,4 · 1-15 %0,04 · 15-40 %0,12 · 40-55 %0,4 · 55-65 %1,1 ·
@@ -869,10 +939,28 @@ düşürülsün. Ehliyetin kaybı ancak bir kaza/ihlal sistemi gelirse anlamlı.
 olay tabanlı ölümler ayrı bir pakette ele alınsın. Ölümün yaklaştığını
 sezdiren bir sağlık uyarısı oyuncuya hazırlık imkânı verir.
 
+**Karara bağlananlar (D-036):**
+- Ölüm simülasyonun doğal parçası; oyun **sürekli trajediyle cezalandırmayacak**.
+- Çocuklukta **seyrek**, ileri yaşta daha olası; **her yıl birinin ölmesi
+  gerekmiyor**.
+- Sağlık riski etkileyebilir, ama **sağlık 100 diye ölümsüzlük yok**.
+- **NPC yaşları ve kuşak farkları tutarlı** olacak.
+- Kaza/hastalık kaynaklı **özel ölüm olayları ayrı içerik paketi**; şimdi
+  rastgele ağır olay eklenmeyecek.
+- Kayıp mutluluğu ilişkiye göre etkileyebilir; **yas zamanla hafifleyecek ve
+  kalıcı, geri dönülemez bir değer cezasına dönüşmeyecek**.
+- Ölüm metinleri **kısa, saygılı, bağlama uygun**. Sağlığı belirgin kötüleşen
+  karakter için uyarı düşünülebilir, ama **her ölüm önceden haber verilmeyecek**.
+
+**Geçici kalan (denge kararı değil):** yaşa göre ölüm olasılıkları. Ölçüm raporu:
+`docs/BALANCE_REPORT.md` (500 hayat: ortalama ölüm yaşı 76,4; 18 yaş altı %0,8;
+90+ %17,6; 18 yaşından önce ebeveyn kaybı %16,4). Yaşlı uç ve ebeveyn kaybı
+oranı Faho'nun onayıyla ayarlanacak.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-059 — Miras, velayet ve mülk devri
-**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/life/inheritance.dart`, `app/lib/domain/generation/life_generator.dart`. **Bağlantılı:** Q-055, Q-056, Q-058.
+**Durum:** **Kısmen karara bağlandı** (D-037). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/domain/life/inheritance.dart`, `app/lib/domain/generation/life_generator.dart`. **Bağlantılı:** Q-055, Q-056, Q-058.
 
 **Kodun şu anki geçici çözümü (hepsi `prototypeOnly`, gerçek hukuk kuralı
 değildir ve öyle sunulmaz):**
@@ -903,6 +991,28 @@ değildir ve öyle sunulmaz):**
 **Claude'un önerisi (yalnızca öneri):** Vasiyet ve borç mirası ilk sürüm
 için erken; kuşak sistemi düşünülüyorsa oyuncunun mirasının nereye gittiği
 şimdiden kararlaştırılsın.
+
+**Karara bağlananlar (D-037):**
+- **Basitleştirilmiş oyun içi model**; gerçek miras hukukunun açıklaması olarak
+  sunulmayacak.
+- Miras **yalnızca ölenin gerçekten sahip olduğu** nakit ve varlıklardan;
+  **aynı para veya eşya iki kez dağıtılamaz**.
+- **Eş ve çocuklar öncelikli**; yoksa yakın aile. **Gerçek evlilik kaydı yokken
+  sevgili eş gibi değerlendirilmeyecek.**
+- Kişilerin mal varlıkları **hayat boyunca değişebilecek** şekilde tasarlanacak;
+  miras ilk doğumda donmuş bir servet listesine dayanmayacak (ayrı küçük paket).
+- **Vasiyet, borç mirası ve miras vergisi şimdilik eklenmeyecek.**
+- **Miras kalan evin sahibi oyuncu olabilir, ama otomatik taşınma yok.**
+- Çocuk yaşta hanede yetişkin kalmazsa önce **hayatta olan uygun aile büyüğü**
+  bakım veren olur; kimse yoksa oyuncu açıklamasız bırakılmaz, **açık bir
+  alternatif bakım durumu** oluşturulur. Aile üyeleri silinmez, **sahte akrabalık
+  üretilmez**.
+- Oyuncu ölünce hayat özeti **"Geçmiş Hayatlar" arşivine** güvenle kaydedilebilecek
+  altyapı planlanacak; **yeni hayat başlatmak geçmiş özeti habersizce silmeyecek**.
+- **"Çocuğum olarak devam et" kuşak sistemi şimdi eklenmeyecek.**
+
+**Geçici kalan (denge kararı değil):** miras tutarları, paylaşım oranları ve
+bakım veren seçim kuralının ayrıntıları.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 

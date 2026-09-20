@@ -1,3 +1,8 @@
+analyzer:
+  exclude:
+    # Ölçüm aracı; oyunun kodunun parçası değil, raporu konsola yazar.
+    - tool/**
+
 # This file configures the analyzer, which statically analyzes Dart code to
 # check for errors, warnings, and lints.
 #
