@@ -1366,5 +1366,39 @@ oyuncunun geçmişi uydurulmadan taşınabilir.
 **Varsayılan işlem:** `DECISIONS.md`'ye hiçbir kural yazılmadı; bütün
 değerler `prototypeOnly` ve geri alınabilir.
 
+### Q-068 — Arayüz cilası: günlük düzeni, para biçimi ve değer renkleri
+**Durum:** Uygulandı, **karar bekliyor** (hepsi görünüm tercihidir ve geri alınabilir). **Kaynak:** Paket F2 ("oyunu güncelleştir ve güzelleştir" talimatı). **Bağlantılı:** `docs/PROTOTYPE_UI.md`.
+
+**Şu an ekranda olan (geçici) düzen:**
+1. **Hayat günlüğü yaşa göre kümelendi.** Eskiden her satırın solunda yaş
+   tekrar yazılıyordu ("49 yaş" arka arkaya on kez). Artık bir yıl tek
+   kartta toplanıyor, içinde bulunulan yıl "bu yıl" etiketiyle öne
+   çıkıyor ve her satırın başında konusunu (aile/kişisel/yaş) gösteren
+   küçük bir simge var. Uzun hayatlarda kartlar tembel kuruluyor.
+2. **Para biçimi:** tutarlar Türkçe binlik ayırıcıyla yazılıyor
+   (`163400 ₺` → `163.400 ₺`). Hem ekranda hem hayat günlüğünde.
+3. **Karakter değerleri renkleniyor:** 30 altı uyarı rengi, 30-54 arası
+   pirinç, 55 üstü çini yeşili. Çubuklar değer değişince yumuşak geçiyor.
+4. **Olay penceresi:** kategori simgesi eklendi, seçenekten sonuca geçiş
+   yumuşatıldı.
+5. **Açılış ekranı:** ortadaki boşluğa oyunu üç satırda anlatan bir kart
+   kondu.
+
+**Bu turda düzeltilen gerçek hata:** Türkçe büyük harf. `toUpperCase()`
+"Aile" kelimesini "AILE" yapıyordu (doğrusu "AİLE"); "işçi" de "Işçi"
+oluyordu. Artık Türkçe kuralına uygun çevriliyor.
+
+**Karar soruları:**
+1. Günlük yaşa göre kümelenmiş hâliyle mi kalsın, yoksa düz akış mı
+   tercih edilir?
+2. Değer renkleri eşikleri (30/55) uygun mu? Renk körlüğü için yalnızca
+   renge dayanmayan bir işaret gerekir mi?
+3. Para biçimi "163.400 ₺" doğru mu; kuruş veya kısaltma (163,4 B ₺)
+   istenir mi?
+4. Açılış kartındaki üç satır bu şekilde mi kalsın?
+
+**Varsayılan işlem:** Hepsi görünüm katmanındadır; oyun kuralı
+değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
