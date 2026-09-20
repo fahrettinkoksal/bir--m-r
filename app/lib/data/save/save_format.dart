@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 2;
+const int kSaveFormatVersion = 3;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -56,7 +56,68 @@ abstract final class SaveMigrations {
     }
     Map<String, Object?> guncel = body;
     if (from <= 1) guncel = _v1ToV2(guncel);
+    if (from <= 2) guncel = _v2ToV3(guncel);
     return guncel;
+  }
+
+  /// Sürüm 2 → 3: eşyalar tür kümesinden **gerçek eşya örneklerine** geçti.
+  ///
+  /// Eski kayıtta yalnızca `possessions` (tür kimlikleri kümesi) vardı.
+  /// Her tür için **tek** bir eşya örneği oluşturulur — gereksiz kopya
+  /// üretilmez. Hediye geçmişi varsa edinilme yolu, veren kişi ve yaş
+  /// oradan doldurulur; böylece oyuncunun eşyaları ve geçmişi kaybolmaz.
+  static Map<String, Object?> _v2ToV3(Map<String, Object?> body) {
+    if (body['items'] != null) return body;
+
+    final Object? possessions = body['possessions'];
+    final List<String> turler = <String>[
+      if (possessions is List)
+        for (final Object? e in possessions)
+          if (e is String) e,
+    ];
+
+    // Hediye geçmişinden "bu türü kim, kaç yaşında verdi" bilgisini çıkar.
+    final Map<String, Map<String, Object?>> hediyeler =
+        <String, Map<String, Object?>>{};
+    final Object? gifts = body['gifts'];
+    if (gifts is List) {
+      for (final Object? g in gifts) {
+        if (g is! Map) continue;
+        if (g['toId'] != 'oyuncu') continue;
+        final Object? itemId = g['itemId'];
+        if (itemId is String) {
+          hediyeler[itemId] = <String, Object?>{
+            'fromPersonId': g['fromId'],
+            'age': g['age'],
+          };
+        }
+      }
+    }
+
+    final Object? player = body['player'];
+    final int yas = player is Map && player['age'] is int
+        ? player['age']! as int
+        : 0;
+
+    final List<Map<String, Object?>> items = <Map<String, Object?>>[];
+    int n = 1;
+    for (final String tur in turler) {
+      final Map<String, Object?>? hediye = hediyeler[tur];
+      items.add(<String, Object?>{
+        'id': 'esya-${n++}',
+        'typeId': tur,
+        'acquiredAtAge': hediye?['age'] ?? yas,
+        'source': hediye == null ? 'bilinmiyor' : 'hediye',
+        'fromPersonId': hediye?['fromPersonId'],
+        // Eşyanın geçmişi bilinmediği için makul bir orta kondisyon.
+        'condition': 75,
+        'attachments': <String>[],
+      });
+    }
+
+    body['items'] = items;
+    body.remove('possessions');
+    return body;
   }
 
   /// Sürüm 1 → 2: okul kişileri kademeye değil **okula ve sınıfa** bağlandı.

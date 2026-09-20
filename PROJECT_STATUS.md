@@ -127,6 +127,15 @@ gerçek eşya kataloğuna bağlandı; kim kime ne verdi kaydediliyor. Olay
 metinleri gerçekçilik açısından gözden geçirildi. Kayıt biçimi **sürüm 2**;
 sürüm 1 kayıtları göçle açılıyor.
 
+## Eşyalar ve temel ekonomi (uygulandı)
+Varlıklar'daki eşyalar gerçek oyun nesnesi oldu: her eşya kendi kimliği,
+kondisyonu, edinilme yolu ve takılı aksesuarlarıyla envanterde duruyor
+(`GameState.items`). Bisiklete binme, temizlik, ücretli bakım, uyumlu
+aksesuar takma ve onaylı satış çalışıyor; küçük bir mağaza eklendi. Satış
+bedeli tür, kondisyon, aksesuar ve antika niteliğe göre hesaplanıyor.
+Kayıt biçimi **sürüm 3**; sürüm 1 ve 2 kayıtları göçle açılıyor. Ayrıntı:
+`docs/ITEM_SYSTEM.md`.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

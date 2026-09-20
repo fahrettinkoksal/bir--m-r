@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'education.dart';
 import 'game_event.dart';
 import 'gift_record.dart';
+import 'owned_item.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
 import 'person.dart';
@@ -26,7 +27,7 @@ class GameState {
     this.interactionCounts = const <String, int>{},
     this.lastInteractionAge = const <String, int>{},
     this.storyFlags = const <String>{},
-    this.possessions = const <String>{},
+    this.items = const <OwnedItem>[],
     this.seenEventIds = const <String>{},
     this.lastEventAge = const <String, int>{},
     this.storyPeople = const <String, String>{},
@@ -67,8 +68,87 @@ class GameState {
   /// Geçmiş seçimlerin bıraktığı izler (D-008).
   final Set<String> storyFlags;
 
-  /// Sahip olunan varlıklar; olmayan varlık için olay çıkmaz.
-  final Set<String> possessions;
+  /// Envanterdeki eşya örnekleri.
+  ///
+  /// Aynı türden iki eşya iki ayrı örnektir; her birinin kendi kimliği,
+  /// kondisyonu ve takılı aksesuarları vardır.
+  final List<OwnedItem> items;
+
+  /// Sahip olunan eşya **türleri**. Olay motoru bu kümeye bakar: olmayan
+  /// varlık için olay çıkmaz.
+  ///
+  /// Envanterden türetilir; ayrı bir liste tutulmaz, böylece iki yerde
+  /// farklı gerçeklik oluşmaz.
+  Set<String> get possessions =>
+      <String>{for (final OwnedItem item in items) item.typeId};
+
+  /// Kimlikten eşya örneği.
+  OwnedItem? itemById(String id) {
+    for (final OwnedItem item in items) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
+  /// Verilen türden sahip olunan örnekler.
+  List<OwnedItem> itemsOfType(String typeId) =>
+      items.where((OwnedItem i) => i.typeId == typeId).toList(growable: false);
+
+  /// Yeni eşya örneği için çakışmayan kimlik üretir.
+  String nextItemId() => _nextItemId(<String>{for (final OwnedItem i in items) i.id});
+
+  static String _nextItemId(Set<String> mevcut) {
+    int n = mevcut.length + 1;
+    while (mevcut.contains('esya-$n')) {
+      n++;
+    }
+    return 'esya-$n';
+  }
+
+  /// Envantere yeni eşya örnekleri ekler.
+  ///
+  /// Aynı türden ikinci bir eşya ayrı bir örnek olur; kimlikler çakışmaz.
+  GameState grantItems(
+    Iterable<String> typeIds, {
+    required ItemSource source,
+    String? fromPersonId,
+    int condition = OwnedItem.defaultCondition,
+  }) {
+    if (typeIds.isEmpty) return this;
+    final Set<String> mevcut = <String>{for (final OwnedItem i in items) i.id};
+    final List<OwnedItem> yeni = <OwnedItem>[...items];
+    for (final String typeId in typeIds) {
+      final String id = _nextItemId(mevcut);
+      mevcut.add(id);
+      yeni.add(
+        OwnedItem(
+          id: id,
+          typeId: typeId,
+          acquiredAtAge: player.age,
+          source: source,
+          fromPersonId: fromPersonId,
+          condition: condition,
+        ),
+      );
+    }
+    return copyWith(items: List<OwnedItem>.unmodifiable(yeni));
+  }
+
+  /// Bir eşya örneğini envanterden çıkarır (satış, tüketim).
+  GameState removeItem(String itemId) => copyWith(
+        items: List<OwnedItem>.unmodifiable(
+          items.where((OwnedItem i) => i.id != itemId).toList(growable: false),
+        ),
+      );
+
+  /// Bir eşya örneğini günceller.
+  GameState updateItem(OwnedItem updated) => copyWith(
+        items: List<OwnedItem>.unmodifiable(
+          items
+              .map((OwnedItem i) => i.id == updated.id ? updated : i)
+              .toList(growable: false),
+        ),
+      );
 
   /// Bu hayatta görülmüş olaylar; tekrarlanabilir olmayanlar bir kez çıkar.
   final Set<String> seenEventIds;
@@ -196,7 +276,7 @@ class GameState {
     Map<String, int>? interactionCounts,
     Map<String, int>? lastInteractionAge,
     Set<String>? storyFlags,
-    Set<String>? possessions,
+    List<OwnedItem>? items,
     Set<String>? seenEventIds,
     Map<String, int>? lastEventAge,
     Map<String, String>? storyPeople,
@@ -216,7 +296,7 @@ class GameState {
       interactionCounts: interactionCounts ?? this.interactionCounts,
       lastInteractionAge: lastInteractionAge ?? this.lastInteractionAge,
       storyFlags: storyFlags ?? this.storyFlags,
-      possessions: possessions ?? this.possessions,
+      items: items ?? this.items,
       seenEventIds: seenEventIds ?? this.seenEventIds,
       lastEventAge: lastEventAge ?? this.lastEventAge,
       storyPeople: storyPeople ?? this.storyPeople,

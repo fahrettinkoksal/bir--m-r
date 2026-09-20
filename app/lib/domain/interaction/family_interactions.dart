@@ -8,6 +8,7 @@ import '../models/game_state.dart';
 import '../models/gift_record.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
+import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
 import '../models/relation.dart';
@@ -499,16 +500,20 @@ class FamilyInteractions {
               ),
           ];
 
-    return state.copyWith(
+    final GameState next = state.copyWith(
       player: player,
       people: List<Person>.unmodifiable(people),
       log: List<LifeLogEntry>.unmodifiable(log),
-      // Yalnızca oyuncunun **aldığı** hediye envantere girer; verilen hediye
-      // karşı tarafa geçer ve oyuncunun eşyası olmaz.
-      possessions: kazanilan == null
-          ? state.possessions
-          : <String>{...state.possessions, kazanilan},
       gifts: List<GiftRecord>.unmodifiable(gifts),
+    );
+
+    // Yalnızca oyuncunun **aldığı** hediye envantere girer; verilen hediye
+    // karşı tarafa geçer ve oyuncunun eşyası olmaz.
+    if (kazanilan == null) return next;
+    return next.grantItems(
+      <String>[kazanilan],
+      source: ItemSource.hediye,
+      fromPersonId: person.id,
     );
   }
 

@@ -14,6 +14,7 @@ import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
+import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -137,7 +138,6 @@ void main() {
         interactionCounts: const <String, int>{'anne|vakitGecir': 2},
         lastInteractionAge: const <String, int>{'anne': 16},
         storyFlags: const <String>{'a_izi', 'b_izi'},
-        possessions: const <String>{'bisiklet', 'defter'},
         seenEventIds: const <String>{'olay_1', 'olay_2'},
         lastEventAge: const <String, int>{'olay_1': 12},
         storyPeople: const <String, String>{'rol': 'anne'},
@@ -145,7 +145,12 @@ void main() {
         extraEventsThisAge: 1,
       );
 
-      final GameState sonra = await roundTrip(dolu);
+      // Eşyalar artık gerçek örnekler; tür kümesi bundan türetilir.
+      final GameState esyali = dolu.grantItems(
+        <String>['bisiklet', 'defter'],
+        source: ItemSource.hediye,
+      );
+      final GameState sonra = await roundTrip(esyali);
       expect(sonra.player.age, 17);
       expect(sonra.player.wallet, 1234);
       expect(sonra.player.fame, 9);
@@ -162,7 +167,15 @@ void main() {
       expect(sonra.interactionCounts, dolu.interactionCounts);
       expect(sonra.lastInteractionAge, dolu.lastInteractionAge);
       expect(sonra.storyFlags, dolu.storyFlags);
-      expect(sonra.possessions, dolu.possessions);
+      expect(sonra.possessions, esyali.possessions);
+      expect(sonra.items.length, esyali.items.length);
+      for (final OwnedItem beklenen in esyali.items) {
+        final OwnedItem bulunan = sonra.itemById(beklenen.id)!;
+        expect(bulunan.typeId, beklenen.typeId);
+        expect(bulunan.condition, beklenen.condition);
+        expect(bulunan.source, beklenen.source);
+        expect(bulunan.acquiredAtAge, beklenen.acquiredAtAge);
+      }
       expect(sonra.seenEventIds, dolu.seenEventIds);
       expect(sonra.lastEventAge, dolu.lastEventAge);
       expect(sonra.storyPeople, dolu.storyPeople);
