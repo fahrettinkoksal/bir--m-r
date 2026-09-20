@@ -115,7 +115,8 @@ jobs:
             "",
             "Onemli:",
             "- data klasoru ve .dll dosyalari exe ile ayni klasorde kalmali.",
-            "- Oyun kaydi yoktur; uygulamayi kapatinca hayat bastan baslar.",
+            "- Hayatin otomatik kaydedilir; uygulamayi kapatip acinca",
+            "  baslangic ekranindan 'Devam Et' ile ayni hayata donersin.",
             "- Bu bir test surumudur, gorsel tasarim henuz onaylanmadi."
           )
           Set-Content -Path "../dist/BirOmur/OKU-BENI.txt" -Value $lines -Encoding UTF8

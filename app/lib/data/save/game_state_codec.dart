@@ -350,6 +350,15 @@ GameState decodeGameState(Map<String, Object?> json) {
     }
   }
 
+  // Eş bağı taşıyan kişi varsa evlilik kaydı da olmalı; aksi hâlde
+  // "eşi olan ama evliliği olmayan" tutarsız bir hayat yüklenirdi.
+  if (json['marriage'] == null &&
+      people.any((Person p) => p.relation == RelationType.es)) {
+    throw const SaveFormatException(
+      'Kayıtta eş bağı var ama evlilik kaydı yok; dosya tutarsız.',
+    );
+  }
+
   // Evlilik kaydı, listede gerçekten bulunan bir kişiyi göstermeli;
   // aksi hâlde "eşi olan ama eşi olmayan" bir hayat yüklenirdi.
   final Object? hamEvlilik = json['marriage'];

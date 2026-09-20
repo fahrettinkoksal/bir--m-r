@@ -380,6 +380,17 @@ kullanılmıyor. Beş yeni karar zinciri ileride hatırlanıyor. Tekrar
 aralıkları ölçüme göre büyütüldü (en sık olay hayat başına 9,92'den
 3,83'e indi).
 
+**Son aşama — uçtan uca test ve kayıt uyumu (uygulandı):**
+`test/end_to_end_test.dart` sekiz senaryoyu kapsıyor: eğitim hattı
+(doğum → ilkokul → ortaokul → lise → mezuniyet), aile hattı (tanışma →
+evlilik → çocuk → taşınma → ölüm → arşiv), ekonomi hattı (alım → kiraya
+verme → yıllık hesap → kaydet/yükle), sosyal medya sınırının platform
+başına yenilenmesi, bekleyen olay/ehliyet sınavı/sağlık krizi sırasında
+kapat-yükle (işlem bir kez uygulanıyor), **sürüm 1-17 göç zinciri**
+(sentetik), kayıp/boşanma/yeni hayat sonrası bütünlük ve 300 hayatlık
+toplu simülasyon. Ekran görüntüsü testleri bu ortamda çalıştırıldı ve
+`test/goldens/` yenilendi.
+
 Kayıt biçimi **sürüm 17**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
 ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
 ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**
