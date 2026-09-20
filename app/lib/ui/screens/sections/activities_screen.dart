@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
+import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -9,6 +10,7 @@ import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
+import 'casino_pages.dart';
 import 'social_pages.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
@@ -27,7 +29,15 @@ class ActivitiesScreen extends StatefulWidget {
 }
 
 /// Aktiviteler alt sayfaları.
-enum _ActivityPage { kok, sosyal, berber, spor, kutuphane, sosyalMedya }
+enum _ActivityPage {
+  kok,
+  sosyal,
+  berber,
+  spor,
+  kutuphane,
+  sosyalMedya,
+  kumarhane,
+}
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
   _ActivityPage _page = _ActivityPage.kok;
@@ -67,6 +77,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return LibraryPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyalMedya:
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.kumarhane:
+        return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -142,6 +154,18 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 : '${state.totalFollowers} takipçi',
             icon: Icons.public_outlined,
             onTap: () => _go(_ActivityPage.sosyalMedya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Kumarhane yetişkin yaşında açılır; öncesinde menüde yoktur.
+        if (state.player.age >= CasinoRules.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Kumarhane',
+            subtitle: state.hasOpenHand
+                ? 'Masada devam eden bir elin var'
+                : 'Blackjack ve rulet — yalnızca oyun parası',
+            icon: Icons.casino_outlined,
+            onTap: () => _go(_ActivityPage.kumarhane),
           ),
           const SizedBox(height: 10),
         ],

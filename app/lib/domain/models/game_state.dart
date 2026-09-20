@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../data/social_catalog.dart';
 
+import 'blackjack_game.dart';
 import 'education.dart';
 import 'book_progress.dart';
 import 'career.dart';
@@ -46,6 +47,8 @@ class GameState {
     this.books = const <BookProgress>[],
     this.socialAccounts = const <SocialAccount>[],
     this.pendingInterview,
+    this.blackjack,
+    this.wagerThisAge = 0,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -215,6 +218,18 @@ class GameState {
 
   bool get hasPendingInterview => pendingInterview != null;
 
+  /// Kumarhane masasında devam eden ya da yeni bitmiş el.
+  ///
+  /// Kaydedilir: oyun kapatılıp açılınca aynı el aynı kartlarla sürer.
+  final BlackjackGame? blackjack;
+
+  bool get hasOpenHand => blackjack != null;
+
+  /// **Bu yaşta** kumarhanede oynanan toplam bahis.
+  ///
+  /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
+  final int wagerThisAge;
+
   /// Bir platformdaki hesap; açılmamışsa `null`.
   SocialAccount? accountFor(SocialPlatform platform) {
     for (final SocialAccount a in socialAccounts) {
@@ -338,6 +353,8 @@ class GameState {
     List<BookProgress>? books,
     List<SocialAccount>? socialAccounts,
     Object? pendingInterview = _unsetEvent,
+    Object? blackjack = _unsetEvent,
+    int? wagerThisAge,
   }) {
     return GameState(
       seed: seed,
@@ -367,6 +384,10 @@ class GameState {
       pendingInterview: pendingInterview == _unsetEvent
           ? this.pendingInterview
           : pendingInterview as PendingInterview?,
+      blackjack: blackjack == _unsetEvent
+          ? this.blackjack
+          : blackjack as BlackjackGame?,
+      wagerThisAge: wagerThisAge ?? this.wagerThisAge,
     );
   }
 }

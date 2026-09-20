@@ -10,6 +10,7 @@ library;
 
 import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
+import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
@@ -22,6 +23,7 @@ import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_interview.dart';
 import '../../domain/models/person.dart';
+import '../../domain/models/playing_card.dart';
 import '../../domain/models/social_account.dart';
 import '../../domain/models/player_character.dart';
 import '../../domain/models/relation.dart';
@@ -65,6 +67,25 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'books': state.books.map(_encodeBook).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
+      'blackjack':
+          state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
+      'wagerThisAge': state.wagerThisAge,
+    };
+
+/// Kumarhane eli: deste **olduğu gibi** yazılır, böylece kayıt geri
+/// yüklenince aynı el aynı kartlarla sürer.
+Map<String, Object?> _encodeBlackjack(BlackjackGame g) => <String, Object?>{
+      'bet': g.bet,
+      'deck': g.deck.map((PlayingCard c) => c.code).toList(growable: false),
+      'playerCards':
+          g.playerCards.map((PlayingCard c) => c.code).toList(growable: false),
+      'dealerCards':
+          g.dealerCards.map((PlayingCard c) => c.code).toList(growable: false),
+      'phase': g.phase.name,
+      'startedAtAge': g.startedAtAge,
+      'result': g.result?.name,
+      'payout': g.payout,
+      'settled': g.settled,
     };
 
 Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
@@ -310,6 +331,48 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
           .toList(growable: false),
     ),
+    // Eski kayıtlarda kumarhane yoktur; masa boş açılır.
+    blackjack: json['blackjack'] == null
+        ? null
+        : _decodeBlackjack(_asMap(json['blackjack'], 'blackjack')),
+    wagerThisAge: json['wagerThisAge'] == null ? 0 : _int(json, 'wagerThisAge'),
+  );
+}
+
+BlackjackGame _decodeBlackjack(Map<String, Object?> json) {
+  List<PlayingCard> kartlar(String alan) => List<PlayingCard>.unmodifiable(
+        _list(json, alan)
+            .map((Object? e) {
+              final PlayingCard? card = PlayingCard.fromCode('$e');
+              if (card == null) {
+                throw const SaveFormatException(
+                  'Kumarhane kaydındaki kart okunamadı.',
+                );
+              }
+              return card;
+            })
+            .toList(growable: false),
+      );
+
+  final String? sonucAdi = _stringOrNull(json, 'result');
+  return BlackjackGame(
+    bet: _int(json, 'bet'),
+    deck: kartlar('deck'),
+    playerCards: kartlar('playerCards'),
+    dealerCards: kartlar('dealerCards'),
+    phase: BlackjackPhase.values.firstWhere(
+      (BlackjackPhase p) => p.name == _string(json, 'phase'),
+      orElse: () => BlackjackPhase.oyuncu,
+    ),
+    startedAtAge: _int(json, 'startedAtAge'),
+    result: sonucAdi == null
+        ? null
+        : BlackjackResult.values.firstWhere(
+            (BlackjackResult r) => r.name == sonucAdi,
+            orElse: () => BlackjackResult.berabere,
+          ),
+    payout: _int(json, 'payout'),
+    settled: json['settled'] == true,
   );
 }
 

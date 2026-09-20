@@ -118,6 +118,8 @@ class LifeProgression {
       // (`docs/CORE_LOOP.md`) henüz kararlaştırılmadı; prototipte tam
       // yenileme uygulanır.
       interactionCounts: const <String, int>{},
+      // Kumarhanenin yıllık bahis sınırı da yaşa aittir.
+      wagerThisAge: 0,
       extraEventsThisAge: 0,
       progressSinceLastEvent: 0,
       education: okulSonucu.education,

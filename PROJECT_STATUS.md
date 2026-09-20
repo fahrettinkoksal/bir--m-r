@@ -179,6 +179,27 @@ işe alma sonucu otomatik kayda giriyor; oyun kapanıp açılınca soru
 değişmiyor ve cevap iki kez uygulanmıyor. Aynı yaşta başvuru sayısı
 sınırlı ve aynı soru tekrarlanmıyor. Kayıt biçimi **sürüm 7**.
 
+## Kumarhane: blackjack ve rulet (uygulandı)
+Aktiviteler altında **Kumarhane** var; 18 yaşından (prototip sınırı)
+itibaren açılıyor. **Yalnızca oyunun sanal cüzdanıyla** oynanıyor: gerçek
+para yatırma/çekme, uygulama içi satın alma, reklam karşılığı bahis veya
+ödüle dönüştürme **yok**.
+
+**Blackjack:** standart 52 kartlık deste, kart çek / dur, As 1 ya da 11,
+krupiye 17 ve üstünde duruyor, doğal blackjack 3:2 ödüyor, beraberlikte
+bahis geri geliyor. Deste ve el kayda yazılıyor; oyun kapatılıp açılınca
+aynı el aynı kartlarla sürüyor.
+
+**Rulet:** tek sıfırlı Avrupa ruleti (0-36); kırmızı/siyah ve tek/çift
+1:1, sayıya bahis 35:1. 0 gelince renk ve tek/çift bahisleri kaybediyor.
+Sonuç tek bir rastgele çekilişle belirleniyor; gizlice kazandırma ya da
+kaybettirme yok.
+
+Bahis cüzdandan **bir kez** düşüyor, kazanç **bir kez** ekleniyor, cüzdan
+eksiye düşmüyor. Bahis 50-5000 ₺ arası; bir yaşta toplam 25.000 ₺ bahis
+sınırı var (hepsi `prototypeOnly`). Bahis ve sonuçlar hayat günlüğüne
+yazılıyor. Kayıt biçimi **sürüm 8**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
