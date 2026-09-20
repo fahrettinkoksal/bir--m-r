@@ -4,6 +4,7 @@ import '../../data/interview_catalog.dart';
 import '../../data/job_catalog.dart';
 import '../models/career.dart';
 import '../models/education.dart';
+import '../../data/event_pool.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
@@ -278,6 +279,14 @@ class JobMarket {
             // İş, oyuncunun o an yaşadığı şehirdedir (Paket 3).
             jobCity: kapali.player.currentCity,
           ),
+          // Çalışma hayatına girildi: bu iz, iş hayatıyla ilgili
+          // olayların önkoşuludur. Daha önce yalnızca bir olay seçeneğiyle
+          // bırakılıyordu; normal yoldan işe giren oyuncu bu olayları hiç
+          // görmüyordu (Paket 4 ölçümü).
+          storyFlags: <String>{
+            ...kapali.storyFlags,
+            StoryFlags.calismaHayati,
+          },
         ),
         metin,
       ),

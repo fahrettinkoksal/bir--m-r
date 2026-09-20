@@ -369,6 +369,17 @@ arkadaş gündelik listelerden düşer ama kaydı ve yakınlığı durur; yakın
 aile etkilenmez. İşin şehri kaydediliyor ve gösteriliyor; **şehir değişince
 işe kendiliğinden son verilmiyor** (karar Q-065'te).
 
+**Paket 4 — hayat olayları ve tekrar kalitesi (uygulandı):** olay kataloğu
+ölçüldü (`app/tool/event_report.dart`), 0-4 yaş aralığında hiç olay
+olmadığı ve 55 yaş sonrası kapsamın düştüğü görüldü. 33 yeni olay eklendi
+(bebeklik, mahalle/okul, ergenlik, ilk ev/iş/geçim, meslek, mülk, sağlık,
+emeklilik, yaşlılık). Olay koşullarına sosyal medya hesabı, ehliyet ve
+gündelik erişilebilirlik eklendi: hesabı olmayana mesaj gelmiyor, ehliyeti
+olmayan direksiyona geçmiyor, erişilemeyen kişi gündelik olayda
+kullanılmıyor. Beş yeni karar zinciri ileride hatırlanıyor. Tekrar
+aralıkları ölçüme göre büyütüldü (en sık olay hayat başına 9,92'den
+3,83'e indi).
+
 Kayıt biçimi **sürüm 17**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
 ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
 ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**

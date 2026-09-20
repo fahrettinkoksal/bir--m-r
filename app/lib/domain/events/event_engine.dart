@@ -98,6 +98,16 @@ class EventEngine {
     if (!state.storyFlags.containsAll(req.requiredFlags)) return false;
     if (req.forbiddenFlags.any(state.storyFlags.contains)) return false;
     if (!state.possessions.containsAll(req.requiredPossessions)) return false;
+    // Ehliyet ve sosyal medya hesabı: olmayan şeyle olay kurulmaz.
+    if (!state.licenses.containsAll(req.requiredLicenses)) return false;
+    if (req.requiresSocialAccount && state.socialAccounts.isEmpty) {
+      return false;
+    }
+    // Gündelik erişilebilirlik isteyen olaylarda kişi gerçekten
+    // ulaşılabilir olmalı.
+    if (req.requireReachable && person != null && !state.isReachable(person)) {
+      return false;
+    }
     return true;
   }
 

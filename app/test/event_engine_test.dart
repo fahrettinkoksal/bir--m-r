@@ -473,20 +473,27 @@ void main() {
   });
 
   group('Uygun olay bulunamayan yaşlar (Q-005 ölçümü)', () {
-    test('ilk yaşlarda uygun aday yok: olay çıkmaz', () {
-      // Havuzdaki en erken olay 5 yaşında; okul olayları ise ancak okula
-      // kayıt olununca uygun hâle gelir. Bu yüzden 1-4 yaş aralığında
-      // hiçbir açılış olayı çıkmaz.
+    test('ilk yaşlarda çıkan olaylar yaşa uygundur', () {
+      // Paket 4'ten önce 0-4 yaş aralığında hiç olay yoktu (ölçüm:
+      // tool/event_report.dart). Artık bebeklik olayları var; bu testin
+      // işi, çıkan olayların gerçekten o yaşa uygun olduğunu denetlemek.
+      int cikanOlay = 0;
       for (int seed = 0; seed < 40; seed++) {
         final GameController controller = GameController(random: Random(seed));
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int age = 1; age <= 4; age++) {
           controller.ageUp();
           expect(controller.state!.player.age, age);
-          expect(controller.state!.hasPendingEvent, isFalse,
-              reason: '$age yaşında olay olmamalı');
+          final ActiveEvent? olay = controller.state!.pendingEvent;
+          if (olay == null) continue;
+          cikanOlay++;
+          expectEligible(controller.state!, olay);
+          controller.chooseEventOption(olay.choices.first.id);
+          expect(controller.state!.hasPendingEvent, isFalse);
         }
       }
+      expect(cikanOlay, greaterThan(0),
+          reason: 'Bebeklik olayları hiç çıkmıyorsa kapsam boşluğu sürüyor');
     });
 
     test('olaysız yaşlar ölçülebilir ve günlükte yine de iz kalır', () {

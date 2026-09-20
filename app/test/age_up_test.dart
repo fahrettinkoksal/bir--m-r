@@ -19,12 +19,25 @@ void main() {
     return controller;
   }
 
+  /// Ekranda olay varken yaş ilerlemez (D-021); olay çözülür.
+  void olayiKapat(GameController controller) {
+    while (controller.state!.hasPendingEvent) {
+      controller.chooseEventOption(
+        controller.state!.pendingEvent!.choices.first.id,
+      );
+    }
+  }
+
   test('yaş al bir yaş ilerletir', () {
     final GameController controller = controllerWithLife();
     expect(controller.state!.player.age, 0);
     controller.ageUp();
     expect(controller.state!.player.age, 1);
+    // Bebeklik olayları eklendiğinden (Paket 4) ilk yaşlarda da olay
+    // çıkabilir; yaş ilerlemesi için olayın çözülmesi gerekir.
+    olayiKapat(controller);
     controller.ageUp();
+    olayiKapat(controller);
     controller.ageUp();
     expect(controller.state!.player.age, 3);
   });

@@ -8,6 +8,7 @@ library;
 
 import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
+import 'event_pool_stages.dart';
 
 /// Hikâye izleri (D-008). Seçimler bu izleri bırakır, sonraki olaylar arar.
 abstract final class StoryFlags {
@@ -358,7 +359,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
     // Bayram doğal olarak tekrar eder; ama art arda gelmemesi için
     // aralarında oyun içi yaş farkı aranır (prototypeOnly).
     repeatable: true,
-    minAgeGap: 4,
+    minAgeGap: 9,
     choices: <EventChoice>[
       EventChoice(
         id: 'kal',
@@ -389,7 +390,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requireSameHousehold: true,
     ),
     repeatable: true,
-    minAgeGap: 5,
+    minAgeGap: 9,
     weight: 2,
     choices: <EventChoice>[
       EventChoice(
@@ -837,7 +838,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         'sokak bembeyaz, bütün gün senin.',
     requirement: EventRequirement(requiresSchoolStudent: true, minGrade: 1),
     repeatable: true,
-    minAgeGap: 4,
+    minAgeGap: 8,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -903,7 +904,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       },
     ),
     repeatable: true,
-    minAgeGap: 5,
+    minAgeGap: 6,
     weight: 2,
     choices: <EventChoice>[
       EventChoice(
@@ -939,7 +940,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requireSameHousehold: true,
     ),
     repeatable: true,
-    minAgeGap: 3,
+    minAgeGap: 8,
     weight: 2,
     choices: <EventChoice>[
       EventChoice(
@@ -1006,7 +1007,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requireSameHousehold: true,
     ),
     repeatable: true,
-    minAgeGap: 2,
+    minAgeGap: 3,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(
@@ -1080,7 +1081,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       personMaxAge: 17,
     ),
     repeatable: true,
-    minAgeGap: 3,
+    minAgeGap: 5,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(
@@ -1112,7 +1113,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       personMaxAge: 16,
     ),
     repeatable: true,
-    minAgeGap: 4,
+    minAgeGap: 6,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1380,7 +1381,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requiredFlags: <String>{StoryFlags.esleKonusuldu},
     ),
     repeatable: true,
-    minAgeGap: 8,
+    minAgeGap: 15,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1409,7 +1410,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       minAge: 25,
     ),
     repeatable: true,
-    minAgeGap: 10,
+    minAgeGap: 18,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1448,7 +1449,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requireOutsideHousehold: true,
     ),
     repeatable: true,
-    minAgeGap: 5,
+    minAgeGap: 9,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1470,4 +1471,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       ),
     ],
   ),
+
+  // Hayat evrelerine dağıtılmış paket (Paket 4).
+  ...kLifeStageEvents,
 ];

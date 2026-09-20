@@ -37,6 +37,9 @@ class EventRequirement {
     this.personMinAge,
     this.personMaxAge,
     this.requireOutsideHousehold = false,
+    this.requireReachable = false,
+    this.requiresSocialAccount = false,
+    this.requiredLicenses = const <String>{},
   });
 
   final int minAge;
@@ -80,6 +83,23 @@ class EventRequirement {
   /// Ziyaret olayları bunu kullanır: aynı evde yaşanan kişiye "ziyarete
   /// geldi" denmez.
   final bool requireOutsideHousehold;
+
+  /// Olayın kişisi, gündelik hayatta **gerçekten erişilebilir** olmalı.
+  ///
+  /// Yıllar önce tanışılmış, başka şehirde kalmış biri "her gün görüşülen
+  /// kişi" gibi kullanılmaz (D-025, Paket 3). Bayram/ziyaret gibi uzak
+  /// yakınları anlatan olaylar bunu **kullanmaz**.
+  final bool requireReachable;
+
+  /// En az bir sosyal medya hesabı gerektirir.
+  ///
+  /// Hesabı olmayan oyuncuya sosyal medya üzerinden mesaj gelmez.
+  final bool requiresSocialAccount;
+
+  /// Sahip olunması gereken ehliyetler.
+  ///
+  /// Aracı olan ama ehliyeti olmayan oyuncuya "direksiyona geçtin" denmez.
+  final Set<String> requiredLicenses;
 
   /// Olayın kişisi, daha önce bir hikâye rolüne kilitlenmiş kişidir.
   ///

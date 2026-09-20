@@ -350,6 +350,51 @@ sayacı artıyor. Bu, gerçekçi bir sonuç olabilir de fazla sert olabilir de;
 çocuk gideri büyüklüğü **Q-064'ün 4. sorusu** olarak Faho'nun kararına
 bırakıldı. Gizlemek için maaş veya fiyat değiştirilmedi.
 
+## 8) Olay kapsamı ve tekrar (Paket 4)
+
+Ölçüm aracı: `app/tool/event_report.dart` (300 hayat, gerçek motorlarla
+oynanıyor: iş, evlilik, çocuk, ev, sosyal medya, araç).
+
+### 8.1 Yaş aralığına göre olay çıkma oranı
+
+| Yaş | Önce | Sonra |
+|---|---|---|
+| 0-4 | **%0** | **%98** |
+| 5-54 | %92-100 | %99-100 |
+| 55-59 | %80 | %97 |
+| 60-69 | %70-79 | %89-98 |
+| 70-79 | %53-66 | %83-96 |
+| 80-89 | %26-44 | %44-61 |
+| 90+ | %15-20 | %25-40 |
+
+0-4 yaş aralığında **hiç olay yoktu**; bebeklik paketiyle dolduruldu.
+İleri yaşlarda oran hâlâ düşüyor (o yaşa ulaşan hayat sayısı da azalıyor),
+ama artık 70'li yaşlarda hayat sessiz kalmıyor.
+
+### 8.2 Tekrar
+
+| Olay | Önce (hayat başına) | Sonra |
+|---|---|---|
+| aile_aksam_sofrasi | **9,92** | 3,46 |
+| aile_sitemi | 8,45 | 3,80 |
+| aile_ziyareti | 6,00 | 3,02 |
+| bayram_ziyareti | 4,26 | ~2 |
+
+Tekrar aralıkları (`minAgeGap`) ölçüme bakılarak büyütüldü; hepsi
+`prototypeOnly`. Testte bir olayın tek hayatta **8 kereden fazla**
+çıkmaması kilitlendi.
+
+### 8.3 Katalog
+
+| | Önce | Sonra |
+|---|---|---|
+| Olay sayısı | 41 | **74** |
+| Yaş başına olay oranı | %82,8 | %95,7 |
+
+Ölçümde "hiç gösterilmeyen" kalan olaylar, simülasyonun her olayda **ilk
+seçeneği** işaretlemesinden kaynaklanıyor (devam olayları ikinci seçeneğe
+bağlı); bunlar ayrı testlerle tek tek doğrulanıyor.
+
 ## Ölçümün sınırları
 
 - Simülasyon, oyuncunun **iş bulduğu senaryoyu oynamaz**: tablolar "bu maaşla
