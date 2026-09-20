@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 4;
+const int kSaveFormatVersion = 5;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -58,7 +58,17 @@ abstract final class SaveMigrations {
     if (from <= 1) guncel = _v1ToV2(guncel);
     if (from <= 2) guncel = _v2ToV3(guncel);
     if (from <= 3) guncel = _v3ToV4(guncel);
+    if (from <= 4) guncel = _v4ToV5(guncel);
     return guncel;
+  }
+
+  /// Sürüm 4 → 5: aktiviteler (kitap ilerlemesi ve saç stili) eklendi.
+  ///
+  /// Eski kayıtlarda bunlar yoktur; boş değerlerle açılır ve oyuncunun
+  /// hayatı olduğu gibi korunur.
+  static Map<String, Object?> _v4ToV5(Map<String, Object?> body) {
+    body['books'] ??= <Object?>[];
+    return body;
   }
 
   /// Sürüm 3 → 4: lise alanı, üniversite ve meslek alanları eklendi.

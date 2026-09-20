@@ -145,6 +145,14 @@ kendi yolunu seç. Altı bölümlü küçük üniversite prototipi, altı işlik
 pazarı, başvuru-kabul/ret akışı ve yaş alırken **bir kez** ödenen maaş
 eklendi. Kayıt biçimi **sürüm 4**.
 
+## Aktiviteler (uygulandı)
+Aktiviteler menüsünde üç çalışan alt sistem var: **berber** (saç kestir,
+stil değiştir, bakım), **spor salonu** (koşu, ağırlık, esneme) ve
+**kütüphane** (yaşa uygun kitap seç, aç, sayfa çevirerek oku, bitir).
+Ücretler cüzdandan gerçekten düşüyor, etkiler eyleme uygun ve aynı yaşta
+tekrar sınırı var. Kitap ilerlemesi gerçek oyun verisi; bitirme kazancı
+**bir kez** uygulanıyor. Kayıt biçimi **sürüm 5**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'education.dart';
+import 'book_progress.dart';
 import 'career.dart';
 import 'game_event.dart';
 import 'gift_record.dart';
@@ -38,6 +39,7 @@ class GameState {
     this.extraEventsThisAge = 0,
     this.education = const EducationState.notStarted(),
     this.career = const CareerState.none(),
+    this.books = const <BookProgress>[],
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -193,6 +195,17 @@ class GameState {
   /// Oyuncunun çalışma durumu ve maaş geçmişi.
   final CareerState career;
 
+  /// Okunan kitapların ilerlemesi. Bitirilen kitap bir daha kazanç vermez.
+  final List<BookProgress> books;
+
+  /// Bir kitabın ilerlemesi; hiç açılmamışsa `null`.
+  BookProgress? bookProgress(String bookId) {
+    for (final BookProgress b in books) {
+      if (b.bookId == bookId) return b;
+    }
+    return null;
+  }
+
   bool get hasPendingEvent => pendingEvent != null;
 
   List<Person> get livingPeople =>
@@ -291,6 +304,7 @@ class GameState {
     int? extraEventsThisAge,
     EducationState? education,
     CareerState? career,
+    List<BookProgress>? books,
   }) {
     return GameState(
       seed: seed,
@@ -315,6 +329,7 @@ class GameState {
       extraEventsThisAge: extraEventsThisAge ?? this.extraEventsThisAge,
       education: education ?? this.education,
       career: career ?? this.career,
+      books: books ?? this.books,
     );
   }
 }

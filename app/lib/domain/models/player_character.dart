@@ -16,6 +16,7 @@ class PlayerCharacter {
     required this.stats,
     this.fame,
     this.wallet = 0,
+    this.hairStyle,
   });
 
   final String id;
@@ -40,6 +41,10 @@ class PlayerCharacter {
   /// kararlaştırılmadı (prototypeOnly: 0 ile başlar).
   final int wallet;
 
+  /// Berberde seçilen saç stili. Görsel karakter sistemi henüz yok;
+  /// seçim metin olarak saklanır ve Ben ekranında görünür.
+  final String? hairStyle;
+
   /// Ekranda gösterilecek bakiye metni.
   String get walletLabel => '$wallet ₺';
 
@@ -54,6 +59,7 @@ class PlayerCharacter {
     Stats? stats,
     int? fame,
     int? wallet,
+    String? hairStyle,
   }) {
     return PlayerCharacter(
       id: id,
@@ -65,6 +71,7 @@ class PlayerCharacter {
       stats: stats ?? this.stats,
       fame: fame ?? this.fame,
       wallet: wallet ?? this.wallet,
+      hairStyle: hairStyle ?? this.hairStyle,
     );
   }
 }
