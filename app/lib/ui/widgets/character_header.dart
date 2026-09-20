@@ -239,55 +239,15 @@ class _StatDetailSheet extends StatelessWidget {
             Text('Karakter değerleri', style: theme.textTheme.titleLarge),
             const SizedBox(height: 14),
             for (final StatEntry entry in state.player.stats.entries) ...<Widget>[
-              _DetailRow(entry: entry),
+              StatBar(label: entry.label, value: entry.value),
               const SizedBox(height: 14),
             ],
             // Ün açılmadıysa hiç gösterilmez (D-027).
             if (state.player.fameUnlocked)
-              _DetailRow(entry: StatEntry('Ün', state.player.fame!)),
+              StatBar(label: 'Ün', value: state.player.fame!),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.entry});
-
-  final StatEntry entry;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(entry.label, style: theme.textTheme.bodyLarge),
-            Text(
-              '${entry.value}',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: entry.value / 100,
-            minHeight: 8,
-            backgroundColor:
-                theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
-            valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-          ),
-        ),
-      ],
     );
   }
 }
