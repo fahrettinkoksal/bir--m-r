@@ -12,6 +12,7 @@ import 'owned_item.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
 import 'pending_interview.dart';
+import 'pending_license_exam.dart';
 import 'person.dart';
 import 'social_account.dart';
 import 'player_character.dart';
@@ -50,6 +51,7 @@ class GameState {
     this.blackjack,
     this.wagerThisAge = 0,
     this.licenses = const <String>{},
+    this.pendingLicenseExam,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -238,6 +240,11 @@ class GameState {
 
   bool hasLicense(String licenseId) => licenses.contains(licenseId);
 
+  /// Cevap bekleyen ehliyet sınavı.
+  final PendingLicenseExam? pendingLicenseExam;
+
+  bool get hasPendingLicenseExam => pendingLicenseExam != null;
+
   /// **Bu yaşta** kumarhanede oynanan toplam bahis.
   ///
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
@@ -369,6 +376,7 @@ class GameState {
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
     Set<String>? licenses,
+    Object? pendingLicenseExam = _unsetEvent,
   }) {
     return GameState(
       seed: seed,
@@ -403,6 +411,9 @@ class GameState {
           : blackjack as BlackjackGame?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
       licenses: licenses ?? this.licenses,
+      pendingLicenseExam: pendingLicenseExam == _unsetEvent
+          ? this.pendingLicenseExam
+          : pendingLicenseExam as PendingLicenseExam?,
     );
   }
 }

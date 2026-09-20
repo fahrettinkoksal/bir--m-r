@@ -22,6 +22,7 @@ import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_interview.dart';
+import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/playing_card.dart';
 import '../../domain/models/social_account.dart';
@@ -71,6 +72,14 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
       'wagerThisAge': state.wagerThisAge,
       'licenses': state.licenses.toList(growable: false),
+      'pendingLicenseExam': state.pendingLicenseExam == null
+          ? null
+          : <String, Object?>{
+              'licenseId': state.pendingLicenseExam!.licenseId,
+              'questionId': state.pendingLicenseExam!.questionId,
+              'askedAtAge': state.pendingLicenseExam!.askedAtAge,
+              'feePaid': state.pendingLicenseExam!.feePaid,
+            },
     };
 
 /// Kumarhane eli: deste **olduğu gibi** yazılır, böylece kayıt geri
@@ -345,6 +354,11 @@ GameState decodeGameState(Map<String, Object?> json) {
           ? const <String>{}
           : _stringSet(json, 'licenses'),
     ),
+    pendingLicenseExam: json['pendingLicenseExam'] == null
+        ? null
+        : _decodeLicenseExam(
+            _asMap(json['pendingLicenseExam'], 'pendingLicenseExam'),
+          ),
   );
 }
 
@@ -484,6 +498,14 @@ Person _decodePerson(Map<String, Object?> json) {
     classId: _stringOrNull(json, 'classId'),
   );
 }
+
+PendingLicenseExam _decodeLicenseExam(Map<String, Object?> json) =>
+    PendingLicenseExam(
+      licenseId: _string(json, 'licenseId'),
+      questionId: _string(json, 'questionId'),
+      askedAtAge: _int(json, 'askedAtAge'),
+      feePaid: _int(json, 'feePaid'),
+    );
 
 PendingInterview _decodeInterview(Map<String, Object?> json) =>
     PendingInterview(

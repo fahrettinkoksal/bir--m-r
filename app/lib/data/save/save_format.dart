@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 9;
+const int kSaveFormatVersion = 10;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -63,8 +63,15 @@ abstract final class SaveMigrations {
     if (from <= 6) guncel = _v6ToV7(guncel);
     if (from <= 7) guncel = _v7ToV8(guncel);
     if (from <= 8) guncel = _v8ToV9(guncel);
+    if (from <= 9) guncel = _v9ToV10(guncel);
     return guncel;
   }
+
+  /// Sürüm 9 → 10: cevap bekleyen ehliyet sınavı eklendi.
+  ///
+  /// Eski kayıtlarda açık sınav yoktur; alan boş kalır. Sahip olunan
+  /// ehliyetler sürüm 9'dan beri korunur.
+  static Map<String, Object?> _v9ToV10(Map<String, Object?> body) => body;
 
   /// Sürüm 8 → 9: eşyalara satın alma fiyatı ve konum, oyuncuya ehliyet
   /// listesi eklendi.

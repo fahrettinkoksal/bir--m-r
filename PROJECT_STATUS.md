@@ -222,6 +222,18 @@ ve aynı dönem üzerinden yeniden ölçeklendi. Kumarhane bahis sınırları da
 bu ölçeğe taşındı. Tablo gerçek piyasa fiyatlarının kopyası değil; tamamı
 `prototypeOnly`. Kayıt biçimi **sürüm 9**.
 
+## Ehliyet işlemleri (uygulandı)
+Aktiviteler → **Ehliyet İşlemleri**. Motosiklet ve otomobil ehliyeti ayrı
+ayrı alınıyor; biri diğerini vermiyor. Başvuruda sınav ücreti cüzdandan
+bir kez düşüyor ve mesleğe göre ayrı havuzlardan kısa, çoktan seçmeli bir
+soru açılıyor (motosiklet 5, otomobil 6 soru). Doğru cevapta ehliyet
+kalıcı olarak ekleniyor ve günlüğe yazılıyor; yanlış cevapta ehliyet
+verilmiyor, doğru cevap ve kısa açıklama gösteriliyor. Yarıda kalan sınav
+kayıttan **aynı soruyla** geri geliyor; ücret ve cevap iki kez
+uygulanmıyor. Aynı yaşta sınırlı deneme hakkı var ve her denemede ücret
+yeniden alınıyor. Araç sürme eylemi ilgili ehliyeti kontrol ediyor.
+Kayıt biçimi **sürüm 10**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
