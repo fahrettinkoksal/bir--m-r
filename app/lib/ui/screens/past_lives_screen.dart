@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/life_summary.dart';
 import '../widgets/section_scaffold.dart';
+import '../../text/turkish_text.dart';
 
 /// Geçmiş Hayatlar arşivi (D-037).
 ///
@@ -96,7 +97,7 @@ class PastLivesScreen extends StatelessWidget {
                   Text('Meslek: ${hayat.careerLabel}',
                       style: theme.textTheme.bodySmall),
                   Text(
-                    'Cüzdan: ${hayat.wallet} ₺ · '
+                    'Cüzdan: ${trMoney(hayat.wallet)} · '
                     'Eşya: ${hayat.itemCount} · '
                     'Ehliyet: ${hayat.licenseCount}',
                     style: theme.textTheme.bodySmall,

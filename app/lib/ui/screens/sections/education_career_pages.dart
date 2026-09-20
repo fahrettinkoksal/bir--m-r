@@ -10,6 +10,7 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/interview_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../text/turkish_text.dart';
 
 /// Lise alanı seçimi.
 ///
@@ -507,7 +508,7 @@ class _JobCard extends StatelessWidget {
                   child: Text(job.name, style: theme.textTheme.titleMedium),
                 ),
                 Text(
-                  '${job.yearlySalary} ₺/yıl',
+                  '${trMoney(job.yearlySalary)}/yıl',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),

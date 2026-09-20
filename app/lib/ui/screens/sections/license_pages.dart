@@ -9,6 +9,7 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/license_exam_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../text/turkish_text.dart';
 
 /// Ehliyet işlemleri sayfası.
 ///
@@ -132,7 +133,7 @@ class _LicenseCard extends StatelessWidget {
             Text(
               owned
                   ? 'Bu ehliyet sende. İlgili aracı kullanabilirsin.'
-                  : 'Sınav ücreti: $ucret ₺ · En az '
+                  : 'Sınav ücreti: ${trMoney(ucret)} · En az '
                       '${type.prototypeOnlyMinAge} yaş',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,

@@ -9,6 +9,7 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/pending_interview.dart';
+import '../../text/turkish_text.dart';
 
 class JobOutcome {
   const JobOutcome({
@@ -353,7 +354,7 @@ class JobMarket {
         career: state.career.copyWith(lastPaidAge: newAge),
       ),
       logText: '${job.name} olarak bir yılın doldu; '
-          '${job.yearlySalary} ₺ cüzdanına girdi.',
+          '${trMoney(job.yearlySalary)} cüzdanına girdi.',
     );
   }
 

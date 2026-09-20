@@ -4,6 +4,7 @@ import 'education.dart';
 import 'gender.dart';
 import 'relation.dart';
 import 'wealth.dart';
+import '../../text/turkish_text.dart';
 
 /// Oyun dünyasındaki bir kişi (NPC).
 ///
@@ -134,7 +135,7 @@ class Person {
     if (employment != EmploymentStatus.calisiyor) return employment.label;
     final String? job = occupation;
     if (job == null || job.isEmpty) return 'Çalışıyor';
-    return job[0].toUpperCase() + job.substring(1);
+    return trUpperFirst(job);
   }
 
   String labelFor(int playerAge) => relationLabel(

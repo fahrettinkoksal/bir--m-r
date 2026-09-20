@@ -9,6 +9,7 @@ import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/interview_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'education_career_pages.dart';
+import '../../../text/turkish_text.dart';
 
 /// Okul / Meslek ana menüsü (NAV-001).
 ///
@@ -274,7 +275,7 @@ class _CareerViewState extends State<_CareerView> {
             rows: <({String label, String value})>[
               (
                 label: 'Yıllık maaş',
-                value: '${state.career.job?.yearlySalary ?? 0} ₺',
+                value: trMoney(state.career.job?.yearlySalary ?? 0),
               ),
               if (state.career.startedAtAge != null)
                 (

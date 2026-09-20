@@ -11,6 +11,7 @@ import '../models/person.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'marriage_engine.dart';
+import '../../text/turkish_text.dart';
 
 /// Çocuk sahibi olmak (Paket E2, `docs/GENERATION_PROPOSAL.md`).
 ///
@@ -94,7 +95,7 @@ class Parenthood {
           'deneyebilirsin.';
     }
     if (state.player.wallet < prototypeOnlyBirthCost) {
-      return 'Doğum ve hazırlık masrafı $prototypeOnlyBirthCost ₺; '
+      return 'Doğum ve hazırlık masrafı ${trMoney(prototypeOnlyBirthCost)}; '
           'cüzdanında yeterli para yok.';
     }
     return '';
@@ -179,7 +180,7 @@ class Parenthood {
         ...state.log,
         LifeLogEntry(
           age: state.player.age,
-          text: '$metin Doğum masrafı $prototypeOnlyBirthCost ₺ tuttu.',
+          text: '$metin Doğum masrafı ${trMoney(prototypeOnlyBirthCost)} tuttu.',
           category: LogCategory.aile,
         ),
       ]),

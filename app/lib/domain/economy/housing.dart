@@ -2,6 +2,7 @@ import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import '../../text/turkish_text.dart';
 
 /// Oyuncunun nerede yaşadığı (D-043).
 ///
@@ -120,7 +121,7 @@ class Housing {
       return 'Bu ev kirada; önce kiracıyı çıkarman gerekiyor.';
     }
     if (state.player.wallet < prototypeOnlyMoveCost) {
-      return 'Taşınma masrafı $prototypeOnlyMoveCost ₺; cüzdanında yeterli '
+      return 'Taşınma masrafı ${trMoney(prototypeOnlyMoveCost)}; cüzdanında yeterli '
           'para yok.';
     }
     return '';
@@ -167,7 +168,7 @@ class Housing {
     if (state.player.wallet < prototypeOnlyMoveCost) {
       return _blocked(
         state,
-        'Taşınma masrafı $prototypeOnlyMoveCost ₺; cüzdanında yeterli para yok.',
+        'Taşınma masrafı ${trMoney(prototypeOnlyMoveCost)}; cüzdanında yeterli para yok.',
       );
     }
 
@@ -228,7 +229,7 @@ class Housing {
     if (engel.isNotEmpty) return _blocked(state, engel);
 
     final int kira = yearlyRentOf(home);
-    final String metin = '${home.name} kiraya verildi; yılda $kira ₺ kira '
+    final String metin = '${home.name} kiraya verildi; yılda ${trMoney(kira)} kira '
         'geliri bekleniyor.';
     final GameState next =
         state.updateItem(home.copyWith(rentedOut: true));

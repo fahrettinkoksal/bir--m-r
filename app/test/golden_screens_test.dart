@@ -95,7 +95,13 @@ void main() {
   }) async {
     int guard = 0;
     while (!done() && guard++ < maxAges) {
+      // Sağlık krizi olay penceresinden önce gelir (D-044); kriz açıkken
+      // olay düğmeleri ekranda olmaz.
+      await answerPendingCrisis(tester, controller);
       while (controller.state!.hasPendingEvent) {
+        if (controller.state!.deceased) return;
+        await answerPendingCrisis(tester, controller);
+        await tester.pumpAndSettle();
         final ActiveEvent event = controller.state!.pendingEvent!;
         final EventChoice choice = event.choices.firstWhere(
           (EventChoice c) => prefer.contains(c.id),
@@ -108,6 +114,7 @@ void main() {
         if (done()) return;
       }
       if (done()) return;
+      if (controller.state!.deceased) return;
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
     }
@@ -184,6 +191,11 @@ void main() {
 
   testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',
       (WidgetTester tester) async {
+    // Bu ekran romantik zincirin tamamlandığı bir hayat ister. 7 numaralı
+    // tohumda hayat kriz yüzünden erken bitiyor; bu tek test için sabit
+    // başka bir tohum kullanılır.
+    controller.dispose();
+    controller = GameController(random: Random(11));
     await startLife(tester);
     await advanceUntil(
       tester,

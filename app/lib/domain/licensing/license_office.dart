@@ -6,6 +6,7 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/pending_license_exam.dart';
+import '../../text/turkish_text.dart';
 
 /// Ehliyet başvurusunun sonucu.
 /// Sınav bittiğinde gösterilen tek soruluk değerlendirme.
@@ -116,7 +117,7 @@ class LicenseOffice {
     final int ucret = prototypeOnlyExamFee(type);
     if (state.player.wallet < ucret) {
       return InteractionAvailability.blocked(
-        'Sınav ücreti $ucret ₺; cüzdanında yeterli para yok.',
+        'Sınav ücreti ${trMoney(ucret)}; cüzdanında yeterli para yok.',
       );
     }
     if (questionsForLicense(type.id).length < questionsPerExam) {
@@ -177,7 +178,7 @@ class LicenseOffice {
     };
 
     final String metin = '${type.label} için başvurdun; sınav ücreti '
-        '$ucret ₺ ödendi. $questionsPerExam soru soruluyor, '
+        '${trMoney(ucret)} ödendi. $questionsPerExam soru soruluyor, '
         'en az $passingCorrectAnswers doğru gerekiyor.';
     final GameState next = state.copyWith(
       player: state.player.copyWith(wallet: state.player.wallet - ucret),

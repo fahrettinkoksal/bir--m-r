@@ -4,6 +4,7 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import 'blackjack.dart';
+import '../../text/turkish_text.dart';
 
 /// Rulette oynanabilen bahis türleri.
 enum RouletteBetType {
@@ -96,7 +97,7 @@ class Roulette {
     final int net = odeme - bet;
     final String sonucMetni = 'Rulet: çark ${_numberLabel(gelen)} '
         'üzerinde durdu. '
-        '${net > 0 ? '$net ₺ kazandın.' : '$bet ₺ kaybettin.'}';
+        '${net > 0 ? '${trMoney(net)} kazandın.' : '${trMoney(bet)} kaybettin.'}';
     next = _log(next, sonucMetni);
 
     return CasinoResult(

@@ -114,7 +114,11 @@ class _StartScreenState extends State<StartScreen> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              const Spacer(flex: 3),
+              const Spacer(),
+              // Açılışta ortada büyük bir boşluk kalıyordu; oyunun ne
+              // olduğunu üç satırda anlatan küçük bir kart konuldu.
+              const _NasilOynanir(),
+              const Spacer(flex: 2),
               if (!controller.savingEnabled) ...<Widget>[
                 const _SaveProblemNote(
                   text: 'Bu cihazda kayıt klasörü açılamadı, oyun '
@@ -163,6 +167,61 @@ class _StartScreenState extends State<StartScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Açılışta oyunu üç satırda anlatan kart.
+class _NasilOynanir extends StatelessWidget {
+  const _NasilOynanir();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    const List<(IconData, String)> satirlar = <(IconData, String)>[
+      (Icons.cake_outlined, 'Her yaş bir karar getirir.'),
+      (Icons.diversity_3_outlined,
+          'Kararların ilişkilerini ve geleceğini değiştirir.'),
+      (Icons.menu_book_outlined,
+          'Hiçbir kayıt silinmez; hayatın arşivde kalır.'),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.65,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          for (int i = 0; i < satirlar.length; i++) ...<Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(
+                  satirlar[i].$1,
+                  size: 18,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    satirlar[i].$2,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+            if (i != satirlar.length - 1) const SizedBox(height: 10),
+          ],
+        ],
       ),
     );
   }

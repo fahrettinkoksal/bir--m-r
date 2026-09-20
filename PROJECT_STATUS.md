@@ -415,6 +415,15 @@ olayın temizlenmemesi, seçenek etiketlerindeki yer tutucuların ham
 kalması ve eşya koşulunun tek ürün kimliğine bağlı olması. Ayrıntı:
 `docs/BALANCE_REPORT.md` §9.
 
+**Arayüz cilası (Paket F2):** hayat günlüğü yaşa göre kümelendi ("bu yıl"
+etiketi, konu simgeleri, uzun hayatlarda tembel liste), tutarlar Türkçe
+binlik ayırıcıyla yazılıyor (`163.400 ₺`), karakter değerleri seviyeye
+göre renkleniyor ve çubuklar yumuşak geçiyor, olay penceresine kategori
+simgesi ve yumuşak geçiş eklendi, açılış ekranına oyunu üç satırda anlatan
+kart kondu. **Türkçe büyük harf hatası düzeltildi:** `toUpperCase()`
+"Aile" → "AILE" yazıyordu, artık "AİLE". Görünüm tercihleri **Q-068**
+altında karar bekliyor; ekran görüntüsü testleri yenilendi.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

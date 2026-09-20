@@ -5,6 +5,7 @@ import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir vefatın ardından oyuncuya düşen pay.
 class InheritanceShare {
@@ -284,8 +285,8 @@ abstract final class Inheritance {
         ),
       );
       satirlar.add(
-        '${kisi[0].toUpperCase()}${kisi.substring(1)} '
-        '${deceased.fullName} mirasından payına ${pay.money} ₺ düştü.',
+        '${trUpperFirst(kisi)} '
+        '${deceased.fullName} mirasından payına ${trMoney(pay.money)} düştü.',
       );
     }
 
@@ -298,7 +299,7 @@ abstract final class Inheritance {
       );
       for (final String typeId in pay.itemTypeIds) {
         satirlar.add(
-          '${kisi[0].toUpperCase()}${kisi.substring(1)} '
+          '${trUpperFirst(kisi)} '
           '${deceased.fullName} vefatının ardından sana '
           '${itemTypeOrFallback(typeId).name} miras kaldı.',
         );

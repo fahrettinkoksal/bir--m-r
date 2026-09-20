@@ -13,6 +13,7 @@ import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/player_character.dart';
 import '../models/stats.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir eşya eyleminin sonucu.
 class ItemOutcome {
@@ -171,7 +172,7 @@ class ItemActions {
         final int ucret = repairCost(state, item);
         if (state.player.wallet < ucret) {
           return InteractionAvailability.blocked(
-            'Bakım için $ucret ₺ gerekiyor; cüzdanında yeterli para yok.',
+            'Bakım için ${trMoney(ucret)} gerekiyor; cüzdanında yeterli para yok.',
           );
         }
         return const InteractionAvailability.allowed();
@@ -349,7 +350,7 @@ class ItemActions {
     final GameState next =
         state.copyWith(player: player).updateItem(guncel);
 
-    final String metin = '${item.name} bakımdan geçti. $ucret ₺ ödedin; '
+    final String metin = '${item.name} bakımdan geçti. ${trMoney(ucret)} ödedin; '
         'yeni gibi olmadı ama işini görüyor.';
     return ItemActionResult(
       state: _withLog(next, metin),
@@ -418,7 +419,7 @@ class ItemActions {
     final GameState next =
         state.copyWith(player: player).removeItem(item.id);
 
-    final String metin = '${item.name} $bedel ₺ karşılığında satıldı.';
+    final String metin = '${item.name} ${trMoney(bedel)} karşılığında satıldı.';
     return ItemActionResult(
       state: _withLog(next, metin),
       outcome: ItemOutcome(
@@ -444,7 +445,7 @@ class ItemActions {
     if (state.player.wallet < product.price) {
       return _blocked(
         state,
-        '${product.name} için ${product.price} ₺ gerekiyor; '
+        '${product.name} için ${trMoney(product.price)} gerekiyor; '
         'cüzdanında yeterli para yok.',
       );
     }
@@ -464,7 +465,7 @@ class ItemActions {
     );
 
     final String metin =
-        '${product.name} satın alındı. ${product.price} ₺ ödedin.';
+        '${product.name} satın alındı. ${trMoney(product.price)} ödedin.';
     return ItemActionResult(
       state: _withLog(next, metin),
       outcome: ItemOutcome(

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'gender.dart';
 import 'stats.dart';
+import '../../text/turkish_text.dart';
 
 /// Ana karakter.
 @immutable
@@ -52,7 +53,7 @@ class PlayerCharacter {
   final String? hairStyle;
 
   /// Ekranda gösterilecek bakiye metni.
-  String get walletLabel => '$wallet ₺';
+  String get walletLabel => trMoney(wallet);
 
   bool get fameUnlocked => fame != null;
 

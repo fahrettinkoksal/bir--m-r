@@ -9,6 +9,7 @@ import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import 'effect_chips.dart';
 import 'kilim_divider.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir eşyanın ayrıntısı ve türüne uygun eylemleri.
 ///
@@ -86,7 +87,7 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
       builder: (BuildContext context) => AlertDialog(
         title: Text('${item.name} satılsın mı?'),
         content: Text(
-          'Teklif edilen tutar: $bedel ₺\n'
+          'Teklif edilen tutar: ${trMoney(bedel)}\n'
           'Durumu: ${item.conditionLabel}'
           '${item.attachments.isEmpty ? '' : '\nTakılı aksesuarlar da '
               'eşyayla birlikte gider.'}\n\n'
@@ -99,7 +100,7 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('$bedel ₺ karşılığında sat'),
+            child: Text('${trMoney(bedel)} karşılığında sat'),
           ),
         ],
       ),
@@ -161,7 +162,7 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
               if (item.purchasePrice != null)
                 _Row(
                   label: 'Satın alma fiyatı',
-                  value: '${item.purchasePrice} ₺',
+                  value: trMoney(item.purchasePrice!),
                 ),
               if (item.location != null)
                 _Row(label: 'Konum', value: item.location!),
@@ -172,7 +173,7 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
                       ? 'Bu evde yaşıyorsun'
                       : item.rentedOut
                           ? 'Kirada (yılda '
-                              '${Housing.yearlyRentOf(item)} ₺)'
+                              '${trMoney(Housing.yearlyRentOf(item))})'
                           : 'Boş duruyor',
                 ),
               ],
@@ -184,7 +185,7 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
                 ),
                 _Row(
                   label: 'Güncel satış değeri',
-                  value: '${controller.estimatedPriceFor(item)} ₺',
+                  value: trMoney(controller.estimatedPriceFor(item)),
                 ),
               ],
               if (item.attachments.isNotEmpty)
@@ -268,9 +269,9 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
     final String temel = actionLabel(action, item.type.kind);
     switch (action) {
       case ItemActionKind.bakim:
-        return '$temel (${controller.repairCostFor(item)} ₺)';
+        return '$temel (${trMoney(controller.repairCostFor(item))})';
       case ItemActionKind.sat:
-        return '$temel (${controller.estimatedPriceFor(item)} ₺)';
+        return '$temel (${trMoney(controller.estimatedPriceFor(item))})';
       default:
         return temel;
     }
@@ -410,7 +411,7 @@ class _HousingActionsState extends State<_HousingActions> {
                         })
                     : null,
                 child: Text(
-                  'Bu eve taşın (${Housing.prototypeOnlyMoveCost} ₺)',
+                  'Bu eve taşın (${trMoney(Housing.prototypeOnlyMoveCost)})',
                 ),
               ),
             ),
@@ -435,7 +436,7 @@ class _HousingActionsState extends State<_HousingActions> {
                   guncel.rentedOut
                       ? 'Kirayı bitir'
                       : 'Kiraya ver (yılda '
-                          '${Housing.yearlyRentOf(guncel)} ₺)',
+                          '${trMoney(Housing.yearlyRentOf(guncel))})',
                 ),
               ),
             ),

@@ -18,6 +18,7 @@ import '../models/stats.dart';
 import '../models/wealth.dart';
 import 'life_progression.dart';
 import 'random_util.dart';
+import '../../text/turkish_text.dart';
 
 /// Kuşak devamı: **"Çocuğum olarak devam et"** (Paket E3,
 /// `docs/GENERATION_PROPOSAL.md` §5).
@@ -238,7 +239,7 @@ abstract final class GenerationContinuation {
         LifeLogEntry(
           age: cocuk.age,
           text: '$ebeveynEtiketi ${ebeveyn.fullName} mirasından payına '
-              '$cocukPayi ₺ düştü.',
+              '${trMoney(cocukPayi)} düştü.',
           category: LogCategory.aile,
         ),
       );

@@ -3,6 +3,7 @@ import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import 'housing.dart';
+import '../../text/turkish_text.dart';
 
 /// Oyuncunun yaşam düzeni.
 ///
@@ -207,7 +208,7 @@ abstract final class LivingCosts {
           player: state.player.copyWith(wallet: cuzdan - gider),
           hardshipYears: 0,
         ),
-        logText: 'Yıllık geçim giderin $gider ₺ cüzdanından çıktı.',
+        logText: 'Yıllık geçim giderin ${trMoney(gider)} cüzdanından çıktı.',
       );
     }
 
@@ -218,8 +219,8 @@ abstract final class LivingCosts {
         player: state.player.copyWith(wallet: 0),
         hardshipYears: state.hardshipYears + 1,
       ),
-      logText: 'Geçim giderin $gider ₺ tuttu, cüzdanında $cuzdan ₺ vardı. '
-          '$eksik ₺ açık kaldı; bu yıl geçim sıkıntısı çektin.',
+      logText: 'Geçim giderin ${trMoney(gider)} tuttu, cüzdanında ${trMoney(cuzdan)} vardı. '
+          '${trMoney(eksik)} açık kaldı; bu yıl geçim sıkıntısı çektin.',
     );
   }
 }

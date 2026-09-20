@@ -4,6 +4,7 @@ import '../../domain/models/game_settings.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import 'kilim_divider.dart';
+import '../../text/turkish_text.dart';
 
 /// Oyuncu ayarları.
 ///
@@ -99,7 +100,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     for (final int? limit in _limitSecenekleri)
                       ChoiceChip(
                         key: Key('settings_limit_${limit ?? 'yok'}'),
-                        label: Text(limit == null ? 'Sınır yok' : '$limit ₺'),
+                        label: Text(limit == null ? 'Sınır yok' : trMoney(limit)),
                         selected: ayarlar.wagerLimitPerAge == limit,
                         onSelected: (_) {
                           controller.updateSettings(

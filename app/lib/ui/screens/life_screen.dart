@@ -17,25 +17,42 @@ class LifeScreen extends StatelessWidget {
     final GameState state = GameScope.of(context).state!;
     final ThemeData theme = Theme.of(context);
 
-    return ListView(
+    // Uzun hayatlarda günlük yüzlerce satır olabiliyor; bloklar tembel
+    // kurulur, böylece 90 yaşındaki bir hayatın ekranı da akıcı kalır.
+    final List<LifeLogBlock> bloklar = groupLogByAge(state.log);
+
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-      children: <Widget>[
-        const SectionHeader(
-          title: 'Hayat günlüğü',
-          subtitle: 'Başından geçenlerin kaydı',
-        ),
-        const SizedBox(height: 10),
-        LifeLogView(entries: state.log),
-        const SizedBox(height: 14),
-        Text(
-          'Hazır olduğunda alttaki Yaş Al düğmesine bas; bir yaşın her '
-          'şeyini bitirmek zorunda değilsin.',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
+      itemCount: bloklar.length + 2,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0) {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: SectionHeader(
+              title: 'Hayat günlüğü',
+              subtitle: 'Başından geçenlerin kaydı',
+            ),
+          );
+        }
+        if (index == bloklar.length + 1) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: Text(
+              'Hazır olduğunda alttaki Yaş Al düğmesine bas; bir yaşın her '
+              'şeyini bitirmek zorunda değilsin.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+        final int i = index - 1;
+        return Padding(
+          padding: EdgeInsets.only(bottom: i == bloklar.length - 1 ? 0 : 10),
+          child: LifeLogAgeBlock(block: bloklar[i], isCurrentAge: i == 0),
+        );
+      },
     );
   }
 }

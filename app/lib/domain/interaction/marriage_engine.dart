@@ -4,6 +4,7 @@ import '../models/marriage.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 import '../../data/event_pool.dart';
+import '../../text/turkish_text.dart';
 
 /// Aile eylemlerinin (evlilik, boşanma, çocuk) ortak sonucu.
 class FamilyOutcome {
@@ -84,7 +85,7 @@ class MarriageEngine {
           '(yakınlık ${person.bond}, gereken $prototypeOnlyMinBond).';
     }
     if (state.player.wallet < prototypeOnlyWeddingCost) {
-      return 'Nikâh ve düğün masrafı $prototypeOnlyWeddingCost ₺; '
+      return 'Nikâh ve düğün masrafı ${trMoney(prototypeOnlyWeddingCost)}; '
           'cüzdanında yeterli para yok.';
     }
     return '';
@@ -112,7 +113,7 @@ class MarriageEngine {
         .toList(growable: false);
 
     final String metin = '${partner.fullName} ile evlendin. '
-        'Nikâh masrafı $prototypeOnlyWeddingCost ₺ cüzdanından çıktı.';
+        'Nikâh masrafı ${trMoney(prototypeOnlyWeddingCost)} cüzdanından çıktı.';
 
     final GameState next = state.copyWith(
       people: List<Person>.unmodifiable(people),
@@ -172,7 +173,7 @@ class MarriageEngine {
         .toList(growable: false);
 
     final String metin = pay > 0
-        ? '${spouse.fullName} ile boşandın. Anlaşma gereği $pay ₺ '
+        ? '${spouse.fullName} ile boşandın. Anlaşma gereği ${trMoney(pay)} '
             'cüzdanından çıktı; kaydı İlişkiler bölümünde eski eş olarak '
             'kalıyor.'
         : '${spouse.fullName} ile boşandın. Kaydı İlişkiler bölümünde '

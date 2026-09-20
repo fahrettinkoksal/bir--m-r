@@ -13,6 +13,7 @@ import '../../../state/game_scope.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../text/turkish_text.dart';
 
 /// Varlıklar ana menüsü (NAV-001, ECO-001).
 ///
@@ -106,7 +107,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
           text: LivingCosts.yearlyCost(state) == 0
               ? LivingCosts.labelFor(state)
               : '${LivingCosts.labelFor(state)} Yıllık geçim giderin: '
-                  '${LivingCosts.yearlyCost(state)} ₺.'
+                  '${trMoney(LivingCosts.yearlyCost(state))}.'
                   '${state.hardshipYears > 0 ? ' Bu yıl geçim sıkıntısı '
                       'çekiyorsun.' : ''}',
         ),
@@ -304,7 +305,7 @@ class _ShopView extends StatelessWidget {
                             style: theme.textTheme.titleMedium),
                       ),
                       Text(
-                        '${urun.price} ₺',
+                        trMoney(urun.price),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
@@ -599,7 +600,7 @@ class _ResidenceCardState extends State<_ResidenceCard> {
             if (kiraGeliri > 0) ...<Widget>[
               const SizedBox(height: 4),
               Text(
-                'Kiraya verdiğin evlerden yıllık $kiraGeliri ₺ kira geliri '
+                'Kiraya verdiğin evlerden yıllık ${trMoney(kiraGeliri)} kira geliri '
                 'bekleniyor.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,

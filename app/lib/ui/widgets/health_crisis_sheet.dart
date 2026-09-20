@@ -6,6 +6,7 @@ import '../../domain/models/pending_crisis.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import 'kilim_divider.dart';
+import '../../text/turkish_text.dart';
 
 /// Sağlık krizi penceresi (D-044).
 ///
@@ -61,7 +62,7 @@ class _HealthCrisisSheetState extends State<HealthCrisisSheet> {
               if ((_sonuc?.cost ?? 0) > 0) ...<Widget>[
                 const SizedBox(height: 8),
                 Text(
-                  'Tedavi için ${_sonuc!.cost} ₺ ödedin.',
+                  'Tedavi için ${trMoney(_sonuc!.cost)} ödedin.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -127,7 +128,7 @@ class _HealthCrisisSheetState extends State<HealthCrisisSheet> {
                     child: Text(
                       kriz.choices[i].cost > 0
                           ? '${kriz.choices[i].label} '
-                              '(${kriz.choices[i].cost} ₺)'
+                              '(${trMoney(kriz.choices[i].cost)})'
                           : kriz.choices[i].label,
                     ),
                   ),

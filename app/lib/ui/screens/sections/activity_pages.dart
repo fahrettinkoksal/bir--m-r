@@ -9,6 +9,7 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../text/turkish_text.dart';
 
 /// Berber veya spor salonu sayfası.
 ///
@@ -89,7 +90,7 @@ class _ActionCard extends StatelessWidget {
                   child: Text(action.label, style: theme.textTheme.titleMedium),
                 ),
                 Text(
-                  action.cost == 0 ? 'Ücretsiz' : '${action.cost} ₺',
+                  action.cost == 0 ? 'Ücretsiz' : trMoney(action.cost),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),

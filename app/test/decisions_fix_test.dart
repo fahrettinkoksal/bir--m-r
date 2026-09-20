@@ -21,6 +21,7 @@ import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 GameState hayat(int seed, {int age = 30, int wallet = 0}) {
@@ -103,7 +104,8 @@ void main() {
           LivingCosts.apply(state);
 
       expect(sonuc.state.player.wallet, 500000 - gider);
-      expect(sonuc.logText, contains('$gider'));
+      // Tutar günlükte Türkçe binlik ayırıcıyla yazılır (20.000 ₺).
+      expect(sonuc.logText, contains(trMoney(gider)));
       expect(sonuc.state.hardshipYears, 0);
     });
 

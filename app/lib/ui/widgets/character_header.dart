@@ -5,6 +5,7 @@ import '../../domain/models/game_state.dart';
 import '../../domain/models/stats.dart';
 import 'kilim_divider.dart';
 import 'settings_sheet.dart';
+import 'stat_bar.dart';
 
 /// Ekranın üstünde sabit duran karakter özeti.
 ///
@@ -197,19 +198,13 @@ class _StatPill extends StatelessWidget {
             '${entry.value}',
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w800,
+              color: statColor(theme, entry.value),
             ),
           ),
           const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: entry.value / 100,
-              minHeight: 5,
-              backgroundColor:
-                  theme.colorScheme.outlineVariant.withValues(alpha: 0.45),
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-            ),
+          AnimatedStatBar(
+            value: entry.value,
+            color: statColor(theme, entry.value),
           ),
           const SizedBox(height: 4),
           Text(

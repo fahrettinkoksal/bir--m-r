@@ -10,6 +10,7 @@ import '../../../domain/models/playing_card.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../text/turkish_text.dart';
 
 /// Kumarhane ana sayfası: masalar ve kurallar.
 ///
@@ -76,13 +77,13 @@ class _CasinoPageState extends State<CasinoPage> {
         const SizedBox(height: 12),
         InfoPanel(
           icon: Icons.savings_outlined,
-          text: 'Bu yıl oynadığın toplam bahis: ${state.wagerThisAge} ₺. '
+          text: 'Bu yıl oynadığın toplam bahis: ${trMoney(state.wagerThisAge)}. '
               'Gelirine ve cüzdanına göre bu yılki bahis bütçen '
-              '${CasinoAccess.yearlyBudget(state)} ₺'
+              '${trMoney(CasinoAccess.yearlyBudget(state))}'
               '${state.settings.wagerLimitPerAge == null ? '' : ' '
-                  '(kendi sınırın: ${state.settings.wagerLimitPerAge} ₺)'}'
-              '. Bahis en az ${CasinoRules.prototypeOnlyMinBet} ₺, '
-              'en fazla ${CasinoAccess.maxBet(state)} ₺.',
+                  '(kendi sınırın: ${trMoney(state.settings.wagerLimitPerAge!)})'}'
+              '. Bahis en az ${trMoney(CasinoRules.prototypeOnlyMinBet)}, '
+              'en fazla ${trMoney(CasinoAccess.maxBet(state))}.',
         ),
       ],
     );
@@ -109,7 +110,7 @@ class _BetSelector extends StatelessWidget {
         for (final int adim in adimlar)
           ChoiceChip(
             key: Key('bet_$adim'),
-            label: Text('$adim ₺'),
+            label: Text(trMoney(adim)),
             selected: bet == adim,
             onSelected: controller.betAvailability(adim).isAllowed
                 ? (_) => onChanged(adim)
@@ -175,7 +176,7 @@ class _BlackjackTablePageState extends State<BlackjackTablePage> {
                         _sonMesaj = controller.dealBlackjack(bahis)?.text;
                       })
                   : null,
-              child: Text('$bahis ₺ ile el aç'),
+              child: Text('${trMoney(bahis)} ile el aç'),
             ),
           ),
         ] else ...<Widget>[
@@ -372,9 +373,9 @@ class _ResultPanel extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               net > 0
-                  ? '$net ₺ kazandın.'
+                  ? '${trMoney(net)} kazandın.'
                   : net < 0
-                      ? '${-net} ₺ kaybettin.'
+                      ? '${trMoney(-net)} kaybettin.'
                       : 'Bahsin geri geldi.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: net > 0
@@ -501,7 +502,7 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
                           ?.text;
                     })
                 : null,
-            child: Text('$bahis ₺ oyna'),
+            child: Text('${trMoney(bahis)} oyna'),
           ),
         ),
         if (_sonMesaj != null) ...<Widget>[

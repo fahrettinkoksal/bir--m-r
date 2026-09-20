@@ -7,6 +7,7 @@ import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/playing_card.dart';
 import 'casino_rules.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir kumarhane işleminin sonucu.
 class CasinoOutcome {
@@ -75,7 +76,7 @@ class Blackjack {
       ),
       wagerThisAge: state.wagerThisAge + bet,
     );
-    next = _log(next, 'Blackjack masasında $bet ₺ bahis oynadın.');
+    next = _log(next, 'Blackjack masasında ${trMoney(bet)} bahis oynadın.');
 
     // İlk iki kartta 21 varsa el hemen sonuçlanır.
     final BlackjackGame oyun = next.blackjack!;
@@ -200,7 +201,7 @@ class Blackjack {
     final int net = odeme - oyun.bet;
     final String metin = '${sonuc.label} — sen $oyuncuToplam, '
         'krupiye $krupiyeToplam. '
-        '${net > 0 ? '$net ₺ kazandın.' : net < 0 ? '${-net} ₺ kaybettin.' : 'Bahsin geri geldi.'}';
+        '${net > 0 ? '${trMoney(net)} kazandın.' : net < 0 ? '${trMoney(-net)} kaybettin.' : 'Bahsin geri geldi.'}';
 
     GameState next = state.copyWith(
       player: state.player.copyWith(wallet: state.player.wallet + odeme),
@@ -272,13 +273,13 @@ abstract final class CasinoAccess {
   static InteractionAvailability checkBet(GameState state, int bet) {
     if (bet < CasinoRules.prototypeOnlyMinBet) {
       return InteractionAvailability.blocked(
-        'En az ${CasinoRules.prototypeOnlyMinBet} ₺ bahis oynanır.',
+        'En az ${trMoney(CasinoRules.prototypeOnlyMinBet)} bahis oynanır.',
       );
     }
     final int enFazla = maxBet(state);
     if (bet > enFazla) {
       return InteractionAvailability.blocked(
-        'Bu yılki durumunda en fazla $enFazla ₺ bahis oynanır.',
+        'Bu yılki durumunda en fazla ${trMoney(enFazla)} bahis oynanır.',
       );
     }
     if (state.player.wallet < bet) {
@@ -292,8 +293,8 @@ abstract final class CasinoAccess {
           state.settings.wagerLimitPerAge! <= butce;
       return InteractionAvailability.blocked(
         kendiLimiti
-            ? 'Kendine koyduğun $butce ₺ yıllık sınıra ulaştın.'
-            : 'Bu yıl için ayırdığın $butce ₺ bahis bütçesi doldu.',
+            ? 'Kendine koyduğun ${trMoney(butce)} yıllık sınıra ulaştın.'
+            : 'Bu yıl için ayırdığın ${trMoney(butce)} bahis bütçesi doldu.',
       );
     }
     return const InteractionAvailability.allowed();

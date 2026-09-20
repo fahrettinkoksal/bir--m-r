@@ -9,6 +9,7 @@ import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/player_character.dart';
 import '../models/stats.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir aktivitenin sonucu.
 class ActivityOutcome {
@@ -71,7 +72,7 @@ class ActivityEngine {
     }
     if (state.player.wallet < action.cost) {
       return InteractionAvailability.blocked(
-        '${action.cost} ₺ gerekiyor; cüzdanında yeterli para yok.',
+        '${trMoney(action.cost)} gerekiyor; cüzdanında yeterli para yok.',
       );
     }
     return const InteractionAvailability.allowed();
@@ -128,9 +129,9 @@ class ActivityEngine {
 
     final String metin = action.changesHairStyle
         ? '${action.label}: artık saçın "$yeniStil". '
-            '${action.cost} ₺ ödedin.'
+            '${trMoney(action.cost)} ödedin.'
         : '${action.label} tamamlandı.'
-            '${action.cost > 0 ? ' ${action.cost} ₺ ödedin.' : ''}';
+            '${action.cost > 0 ? ' ${trMoney(action.cost)} ödedin.' : ''}';
 
     return ActivityResult(
       state: _log(next, metin),

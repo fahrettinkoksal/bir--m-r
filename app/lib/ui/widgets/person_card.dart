@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/models/person.dart';
+import '../../text/turkish_text.dart';
 
 /// Aile listesindeki kişi satırı.
 ///
@@ -100,7 +101,7 @@ class _Initial extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        person.firstName.characters.first.toUpperCase(),
+        trUpper(person.firstName.characters.first),
         style: TextStyle(
           fontWeight: FontWeight.w700,
           fontSize: 18,

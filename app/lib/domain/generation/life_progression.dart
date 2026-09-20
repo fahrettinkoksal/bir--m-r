@@ -24,6 +24,7 @@ import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 import 'school_people.dart';
+import '../../text/turkish_text.dart';
 
 /// **Yaş Al** işleminin durum üzerindeki etkisi (D-018).
 ///
@@ -270,7 +271,7 @@ class LifeProgression {
       log.add(
         LifeLogEntry(
           age: newAge,
-          text: '${etiket[0].toUpperCase()}${etiket.substring(1)} '
+          text: '${trUpperFirst(etiket)} '
               '${person.fullName} $gerekce nedeniyle vefat etti.',
           category: LogCategory.aile,
         ),
@@ -308,7 +309,7 @@ class LifeProgression {
       satirlar.add(
         LifeLogEntry(
           age: newAge,
-          text: '${ev.name} için yıllık $kira ₺ kira geliri aldın.',
+          text: '${ev.name} için yıllık ${trMoney(kira)} kira geliri aldın.',
           category: LogCategory.kisisel,
         ),
       );
@@ -508,7 +509,7 @@ class LifeProgression {
         ...state.log,
         LifeLogEntry(
           age: newAge,
-          text: '${etiket[0].toUpperCase()}${etiket.substring(1)} '
+          text: '${trUpperFirst(etiket)} '
               '${bakan.fullName} sana bakmak için yanına taşındı.',
           category: LogCategory.aile,
         ),
