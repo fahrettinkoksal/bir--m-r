@@ -261,6 +261,16 @@ kopyalanmıyor, miras hayat günlüğüne yazılıyor ve Varlıklar'da görünü
 hayattan satırlar). Kayıt silinmiyor; yeni hayat ancak onayla başlıyor.
 Kayıt biçimi **sürüm 11**.
 
+## Q-053–Q-059 kararları (alındı)
+Faho ve ChatGPT bu turda Q-053–Q-059 başlıklarını karara bağladı; ilkeler
+`DECISIONS.md` içinde **D-031 – D-038** olarak kayıtlı. Sayısal denge
+(fiyatlar, maaşlar, gider oranları, ölüm olasılıkları, bahis sınırları,
+sınav ücretleri) **geçici** kaldı ve Faho'nun onayına bağlı.
+
+Ölçüm sonuçları `docs/BALANCE_REPORT.md` içinde. Kararlarla mevcut kod
+arasındaki uyumsuzluklar ve veri kaybı riski `docs/FIX_REPORT_Q053_Q059.md`
+içinde listelendi; bunlar ayrı bir düzeltme PR'ında ele alınacak.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
