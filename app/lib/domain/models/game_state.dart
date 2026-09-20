@@ -71,6 +71,7 @@ class GameState {
     this.lastCrisisAge,
     this.healthWarned = false,
     this.marriage,
+    this.generation = 1,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -325,6 +326,17 @@ class GameState {
   /// buraya bakar (D-037).
   final Marriage? marriage;
 
+  /// Kaçıncı kuşağın hayatı oynanıyor (Paket E3).
+  ///
+  /// İlk hayat 1. kuşaktır. "Çocuğum olarak devam et" ile geçilen her
+  /// hayatta bir artar; eski kayıtlarda alan yoktur ve 1 kabul edilir.
+  /// Kuşak sayısının bir üst sınırı olup olmayacağı henüz kararlaştırılmadı
+  /// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-067).
+  final int generation;
+
+  /// Bu hayat bir önceki kuşaktan devam mı ediyor?
+  bool get isContinuedGeneration => generation > 1;
+
   /// Eşin kişi kaydı; evlilik kaydı yoksa `null`.
   ///
   /// Boşanılmış veya vefat etmiş eş de bu kimlikten okunur; kişi listeden
@@ -530,6 +542,7 @@ class GameState {
     int? lastCrisisAge,
     bool? healthWarned,
     Object? marriage = _unsetEvent,
+    int? generation,
   }) {
     return GameState(
       seed: seed,
@@ -587,6 +600,7 @@ class GameState {
       healthWarned: healthWarned ?? this.healthWarned,
       marriage:
           marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
+      generation: generation ?? this.generation,
     );
   }
 }

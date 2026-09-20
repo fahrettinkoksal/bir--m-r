@@ -155,6 +155,9 @@ class Parenthood {
       // Çocuğun kendi ekonomik durumu yoktur; uydurma değer yazılmaz.
       wealth: null,
       bond: prototypeOnlyNewbornBond,
+      // Çocuk, ailenin o sırada yaşadığı şehirde doğar; taşınma bu kaydı
+      // değiştirmez (doğum şehri kalıcıdır, D-004 ile aynı ilke).
+      city: state.player.currentCity,
     );
 
     final String metin = gender == Gender.kadin

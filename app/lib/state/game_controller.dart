@@ -12,6 +12,7 @@ import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
 import '../data/university_catalog.dart';
 
+import '../domain/generation/generation_continuation.dart';
 import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
 import '../domain/effects/effect_diff.dart';
@@ -209,6 +210,45 @@ class GameController extends ChangeNotifier {
     _saveProblem = null;
     _autoSave();
     notifyListeners();
+  }
+
+  /// Kuşak devamında seçilebilecek çocuklar (Paket E3).
+  ///
+  /// Hayat tamamlanmadıysa veya hayatta çocuk yoksa liste boştur; arayüz
+  /// o zaman hiçbir seçenek göstermez (sahte düğme olmaz, D-038).
+  List<Person> get generationHeirs {
+    final GameState? state = _state;
+    return state == null
+        ? const <Person>[]
+        : GenerationContinuation.heirs(state);
+  }
+
+  bool get canContinueGeneration => generationHeirs.isNotEmpty;
+
+  /// **Çocuğum olarak devam et** (Paket E3).
+  ///
+  /// Tamamlanan hayat önce arşivlenir, sonra seçilen çocuğun kaydıyla
+  /// devam edilir. Engel varsa durum **değişmez** ve gerekçe döner; boş
+  /// metin başarı demektir.
+  String continueAsChild(String childId) {
+    final GameState? state = _state;
+    if (state == null) return 'Devam edilecek bir hayat yok.';
+
+    final List<LifeSummary> arsiv = _archiveWithCurrentLife();
+    final ({GameState? state, String blockReason}) sonuc =
+        GenerationContinuation.continueAs(state, childId, _random);
+    final GameState? yeni = sonuc.state;
+    if (yeni == null) return sonuc.blockReason;
+
+    _state = yeni.copyWith(
+      pastLives: List<LifeSummary>.unmodifiable(arsiv),
+    );
+    // Yeni kuşak bilinçli bir seçimdir; kayıt yazmak güvenli.
+    _autoSaveBlocked = false;
+    _saveProblem = null;
+    _autoSave();
+    notifyListeners();
+    return '';
   }
 
   /// **Yaş Al** (D-018).
@@ -1030,6 +1070,7 @@ class GameController extends ChangeNotifier {
               : satirlar,
         ),
         familyLine: _familyLine(current),
+        generation: current.generation,
       ),
     );
     return arsiv;

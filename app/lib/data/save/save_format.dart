@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 17;
+const int kSaveFormatVersion = 18;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -71,8 +71,17 @@ abstract final class SaveMigrations {
     if (from <= 14) guncel = _v14ToV15(guncel);
     if (from <= 15) guncel = _v15ToV16(guncel);
     if (from <= 16) guncel = _v16ToV17(guncel);
+    if (from <= 17) guncel = _v17ToV18(guncel);
     return guncel;
   }
+
+  /// Sürüm 17 → 18: kuşak sayacı eklendi (Paket E3).
+  ///
+  /// Eski kayıtlar tek kuşaklık hayatlardır: alan yoksa **1. kuşak** kabul
+  /// edilir. Arşivdeki geçmiş hayatlarda da kuşak bilgisi yoktur; `null`
+  /// kalır ve ekranda hiç gösterilmez. Hiçbir kayıt silinmez, hiçbir alan
+  /// yeniden yazılmaz.
+  static Map<String, Object?> _v17ToV18(Map<String, Object?> body) => body;
 
   /// Sürüm 16 → 17: kişilere şehir, işe şehir bağı eklendi.
   ///

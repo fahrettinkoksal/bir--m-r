@@ -212,7 +212,7 @@ class LifeProgression {
     }
 
     // Hane bakımı: küçük yaştaki oyuncu haneyi boş bırakmaz.
-    afterDeaths = _ensureCaregiver(afterDeaths, newAge);
+    afterDeaths = ensureCaregiver(afterDeaths, newAge);
 
     // Oyuncunun ölümü: hayat tamamlanır, başka işlem yapılmaz.
     if (_playerDies(afterDeaths)) {
@@ -449,7 +449,11 @@ class LifeProgression {
   /// Hiç yoksa yalnızca günlüğe açıklayıcı bir satır yazılır; oyuncu
   /// mantıksız bir haneye taşınmaz. Velayetin tam kuralları karar
   /// kuyruğundadır (Q-059).
-  GameState _ensureCaregiver(GameState state, int newAge) {
+  /// Hanede yetişkin kalmadığında bakım durumunu düzeltir.
+  ///
+  /// Kuşak devamında da (Paket E3) aynı kural geçerli olsun diye statiktir:
+  /// küçük yaşta devam eden çocuk, açıklamasız bir hanede bırakılmaz.
+  static GameState ensureCaregiver(GameState state, int newAge) {
     if (state.player.age >= prototypeOnlyAdultAge) return state;
     final bool yetiskinVar = state.people.any((Person p) =>
         p.isAlive && p.inPlayerHousehold && p.age >= prototypeOnlyAdultAge);

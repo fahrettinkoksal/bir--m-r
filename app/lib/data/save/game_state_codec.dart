@@ -101,6 +101,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'healthWarned': state.healthWarned,
       'residenceItemId': state.residenceItemId,
       'movedOut': state.movedOut,
+      'generation': state.generation,
       'marriage': state.marriage == null
           ? null
           : <String, Object?>{
@@ -197,6 +198,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
 
 Map<String, Object?> _encodeLifeSummary(LifeSummary l) => <String, Object?>{
       'familyLine': l.familyLine,
+      'generation': l.generation,
       'fullName': l.fullName,
       'birthCity': l.birthCity,
       'deathAge': l.deathAge,
@@ -223,6 +225,9 @@ LifeSummary _decodeLifeSummary(Map<String, Object?> json) => LifeSummary(
       // Eski arşiv kayıtlarında aile satırı yoktur; `null` kalır ve
       // ekranda hiç gösterilmez. Arşiv silinmez.
       familyLine: _stringOrNull(json, 'familyLine'),
+      // Eski arşiv kayıtlarında kuşak bilgisi yoktur; `null` kalır ve
+      // ekranda hiç gösterilmez.
+      generation: _intOrNull(json, 'generation'),
     );
 
 Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
@@ -497,6 +502,8 @@ GameState decodeGameState(Map<String, Object?> json) {
     marriage: json['marriage'] == null
         ? null
         : _decodeMarriage(_asMap(json['marriage'], 'marriage')),
+    // Eski kayıtlarda kuşak bilgisi yoktur: o hayatlar ilk kuşaktır.
+    generation: _intOrNull(json, 'generation') ?? 1,
     hardshipYears:
         json['hardshipYears'] == null ? 0 : _int(json, 'hardshipYears'),
     settings: json['settings'] == null

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
+import '../../domain/models/person.dart';
 import '../../state/game_scope.dart';
 import '../widgets/bottom_action_bar.dart';
 import '../widgets/character_header.dart';
@@ -118,6 +119,63 @@ class _HomeShellState extends State<HomeShell> {
     }
   }
 
+  /// **Çocuğum olarak devam et** (Paket E3).
+  ///
+  /// Hayatta çocuk yoksa bu akış hiç açılmaz; seçenek de gösterilmez.
+  Future<void> _continueAsChild() async {
+    final GameState? mevcut = GameScope.of(context).state;
+    final List<Person> cocuklar = GameScope.of(context).generationHeirs;
+    if (mevcut == null || cocuklar.isEmpty) return;
+    final int oyuncuYasi = mevcut.deathAge ?? mevcut.player.age;
+
+    final String? secilen = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Kimin hayatıyla devam edilsin?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(
+              'Hayatın arşive yazılır ve seçtiğin çocuğun hayatından '
+              'devam edersin. Mirasın payına düşen kısmı ona geçer; '
+              'mesleğin, eğitimin ve ünün taşınmaz.',
+            ),
+            const SizedBox(height: 12),
+            for (final Person cocuk in cocuklar)
+              ListTile(
+                key: Key('continue_child_${cocuk.id}'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(cocuk.fullName),
+                subtitle: Text('${cocuk.labelFor(oyuncuYasi)} · '
+                    '${cocuk.age} yaşında'),
+                onTap: () => Navigator.of(context).pop(cocuk.id),
+              ),
+          ],
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Vazgeç'),
+          ),
+        ],
+      ),
+    );
+
+    if (secilen == null || !mounted) return;
+    final String engel = GameScope.of(context).continueAsChild(secilen);
+    if (!mounted) return;
+    if (engel.isNotEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(engel)));
+      return;
+    }
+    setState(() {
+      _archiveVisible = false;
+      _selectedTab = null;
+    });
+  }
+
   Widget _body() {
     switch (_selectedTab) {
       case TabIds.okulMeslek:
@@ -150,6 +208,7 @@ class _HomeShellState extends State<HomeShell> {
                 )
               : LifeSummaryScreen(
                   onNewLife: _confirmNewLife,
+                  onContinueAsChild: _continueAsChild,
                   onShowArchive: () =>
                       setState(() => _archiveVisible = true),
                 ),

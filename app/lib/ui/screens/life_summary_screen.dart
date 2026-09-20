@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/generation/generation_continuation.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
@@ -19,9 +20,16 @@ class LifeSummaryScreen extends StatelessWidget {
     super.key,
     required this.onNewLife,
     required this.onShowArchive,
+    this.onContinueAsChild,
   });
 
   final VoidCallback onNewLife;
+
+  /// **Çocuğum olarak devam et** akışı (Paket E3).
+  ///
+  /// `null` ise ya da hayatta çocuk yoksa düğme **hiç gösterilmez**:
+  /// çalışmayan sahte düğme olmaz (D-038).
+  final VoidCallback? onContinueAsChild;
 
   /// Geçmiş Hayatlar arşivini açar.
   final VoidCallback onShowArchive;
@@ -37,6 +45,9 @@ class LifeSummaryScreen extends StatelessWidget {
         .where((Person p) =>
             p.relation.kanBagi || p.relation == RelationType.es)
         .toList(growable: false);
+    final List<Person> devamCocuklari = GenerationContinuation.heirs(state);
+    final bool devamVar =
+        onContinueAsChild != null && devamCocuklari.isNotEmpty;
     final List<LifeLogEntry> donumNoktalari = state.log
         .where((LifeLogEntry e) => e.category != LogCategory.yasDegisimi)
         .toList(growable: false);
@@ -72,6 +83,11 @@ class LifeSummaryScreen extends StatelessWidget {
                 const SizedBox(height: 14),
                 const KilimDivider(),
                 const SizedBox(height: 14),
+                if (state.isContinuedGeneration)
+                  _Satir(
+                    label: 'Kuşak',
+                    value: '${state.generation}. kuşak',
+                  ),
                 _Satir(label: 'Doğum şehri', value: state.player.birthCity),
                 _Satir(label: 'Eğitim', value: state.education.label),
                 if (state.education.program != null)
@@ -142,13 +158,36 @@ class LifeSummaryScreen extends StatelessWidget {
             ),
           const SizedBox(height: 14),
         ],
+        if (devamVar) ...<Widget>[
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('life_summary_continue_generation'),
+              onPressed: onContinueAsChild,
+              icon: const Icon(Icons.child_care_outlined),
+              label: Text(
+                devamCocuklari.length == 1
+                    ? '${devamCocuklari.single.firstName} olarak devam et'
+                    : 'Çocuğum olarak devam et',
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
         SizedBox(
           width: double.infinity,
-          child: FilledButton(
-            key: const Key('life_summary_new_life'),
-            onPressed: onNewLife,
-            child: const Text('Yeni bir hayata başla'),
-          ),
+          // Kuşak devamı varken ana eylem odur; yeni hayat ikincil kalır.
+          child: devamVar
+              ? OutlinedButton(
+                  key: const Key('life_summary_new_life'),
+                  onPressed: onNewLife,
+                  child: const Text('Yeni bir hayata başla'),
+                )
+              : FilledButton(
+                  key: const Key('life_summary_new_life'),
+                  onPressed: onNewLife,
+                  child: const Text('Yeni bir hayata başla'),
+                ),
         ),
         const SizedBox(height: 10),
         SizedBox(

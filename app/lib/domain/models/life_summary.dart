@@ -19,6 +19,7 @@ class LifeSummary {
     required this.licenseCount,
     required this.highlights,
     this.familyLine,
+    this.generation,
   });
 
   final String fullName;
@@ -45,4 +46,11 @@ class LifeSummary {
   /// kayıtlarında** `null` olur; o zaman ekranda hiç gösterilmez
   /// (uydurma bilgi yazılmaz).
   final String? familyLine;
+
+  /// Bu hayatın kaçıncı kuşak olduğu (Paket E3).
+  ///
+  /// "Çocuğum olarak devam et" ile oynanan hayatlarda 2 ve üzeridir.
+  /// **Eski arşiv kayıtlarında** `null` olur; o zaman ekranda kuşak satırı
+  /// hiç gösterilmez (uydurma bilgi yazılmaz).
+  final int? generation;
 }

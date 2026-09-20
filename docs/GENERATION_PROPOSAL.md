@@ -16,15 +16,16 @@ sistemi doğrudan kodlanamıyordu:
   sayılmaz"** diyor; yani bir evlilik kaydı kavramı bekleniyordu ama
   tanımlı değildi.
 - D-037 ayrıca kuşak sistemi için **"şu anda otomatik olarak ekleme"**
-  diyor.
+  diyor: sistem kendiliğinden değil, Faho'nun açık talimatıyla eklendi ve
+  oyuncuya **seçenek** olarak sunulur; kimse zorla yeni kuşağa geçmez.
 
 **Güncel durum:** Faho'nun "kodlamaya başla" talimatıyla E1 (evlilik) ve
-E2 (çocuklar) kodlandı: `RelationType.es`, `RelationType.eskiEs`,
+E2 (çocuklar), "kuşak sistemini kodla" talimatıyla da E3 kodlandı: `RelationType.es`, `RelationType.eskiEs`,
 `RelationType.cocuk` ve `GameState.marriage` artık var, miras bunlara göre
 işliyor. Kullanılan bütün yaş/tutar/oran değerleri `prototypeOnly`'dir ve
 **Q-063 ile Q-064** altında karar bekliyor; `DECISIONS.md`'ye kalıcı kural
 yazılmadı. **E3 (kuşak devamı) hâlâ kodlanmadı**; gereken kararlar 5.
-bölümde.
+bölümde. E3'ün kodlanmış hâli aynı bölümde işaretlendi.
 
 ## 2) Önerilen sıra ve durum
 
@@ -33,8 +34,9 @@ bölümde.
    ayrıntılar **Q-063**'te karar bekliyor).
 2. **Paket E2 — Çocuklar** (ön koşul) — **kodlandı** (aynı şekilde;
    ayrıntılar **Q-064**).
-3. **Paket E3 — Kuşak devamı** ("çocuğum olarak devam et") — **kodlanmadı**,
-   aşağıdaki 5. bölümdeki kararlar bekleniyor.
+3. **Paket E3 — Kuşak devamı** ("çocuğum olarak devam et") — **kodlandı**
+   (Faho'nun "kuşak sistemini kodla" talimatıyla). Bölüm 5'teki akış
+   uygulandı; açık tasarım soruları **Q-067**'de karar bekliyor.
 
 Her paket kendi PR'ında, mevcut kayıt/aile/miras sistemleriyle uyumlu
 ilerler. E3 tek başına anlamlı değildir.
@@ -73,12 +75,13 @@ hayatı (iş, ölüm, kendi mal varlığı — bunlar zaten var).
 çocuk sayısı, evlat edinme, çocuk bakımının ekonomiye etkisi (gider kalemi),
 çocukla etkileşimler (mevcut aile etkileşimleri yeniden kullanılabilir).
 
-## 5) Paket E3 — Kuşak devamı (öneri — kodlanmadı)
+## 5) Paket E3 — Kuşak devamı (kodlandı)
 
-E1 ve E2 kodlandığı için teknik ön koşul artık var: gerçek bir evlilik
-kaydı (`GameState.marriage`) ve gerçek çocuk kayıtları (`RelationType.cocuk`)
-bulunuyor. Geriye **tasarım kararları** kaldı; aşağıdaki sorular
-yanıtlanmadan kodlanmaz.
+E1 ve E2'nin ardından teknik ön koşul hazırdı: gerçek bir evlilik kaydı
+(`GameState.marriage`) ve gerçek çocuk kayıtları (`RelationType.cocuk`).
+Aşağıdaki akış `lib/domain/generation/generation_continuation.dart`
+içinde kodlandı; bütün değerler ve "neyin taşınacağı" ayrıntısı
+`prototypeOnly`'dir ve **Q-067**'de karar bekler.
 
 - Oyuncu öldüğünde hayat özeti ekranında **hayatta bir çocuğu varsa**
   "Çocuğum olarak devam et" seçeneği çıkar. Çocuk yoksa seçenek
@@ -94,14 +97,17 @@ yanıtlanmadan kodlanmaz.
 - Alternatif (daha küçük ilk adım): devam etmek yerine yalnızca "mirasın
   kime kaldığı" hayat özetinde gösterilir.
 
-**Karar gereken:** hangi çocukla devam edileceği (oyuncu seçer mi), dünyanın
-ne kadarının taşınacağı, kaç kuşak sürebileceği, arşivde kuşakların nasıl
-gösterileceği.
+**Kodlanan geçici davranış:** çocuğu oyuncu seçer; yalnızca kan bağı ve
+sağ kalan ebeveyn taşınır; kuşak sayısında sınır yoktur; arşivde "2. kuşak"
+rozeti görünür. Dördü de **karar bekliyor (Q-067)**; hiçbiri
+`DECISIONS.md`'ye yazılmadı.
 
 ## 6) Riskler
 
 - **Kayıt büyüklüğü:** her kuşakta kişi listesi büyür; eski kuşakların
-  kişileri arşive taşınmazsa kayıt şişer.
+  kişileri arşive taşınmazsa kayıt şişer. **Kodlanan çözüm:** yeni kuşağa
+  yalnızca aile bağı olan kişiler geçer, tamamlanan hayat arşivde
+  özet olarak durur.
 - **Tutarlılık:** vefat etmiş oyuncunun kaydı, yeni oyuncunun ebeveyni
   olarak doğru görünmeli; yaş ve kuşak farkları tutarlı kalmalı (D-041).
 - **Kapsam:** evlilik ve çocuk, oyunun en geniş sistemlerinden biri olur;

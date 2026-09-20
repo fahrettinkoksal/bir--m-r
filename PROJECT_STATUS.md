@@ -391,11 +391,18 @@ kapat-yükle (işlem bir kez uygulanıyor), **sürüm 1-17 göç zinciri**
 toplu simülasyon. Ekran görüntüsü testleri bu ortamda çalıştırıldı ve
 `test/goldens/` yenilendi.
 
-Kayıt biçimi **sürüm 17**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
-ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
-ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**
-altında Faho'nun kararını bekliyor; `DECISIONS.md`'ye yeni kalıcı kural
-yazılmadı.
+Kayıt biçimi **sürüm 18**. **Kuşak devamı (E3) kodlandı** (Faho'nun "kuşak
+sistemini kodla" talimatıyla): oyuncu vefat ettiğinde hayatta çocuğu varsa
+hayat özetinde **"Çocuğum olarak devam et"** çıkar, tamamlanan hayat arşive
+yazılır ve seçilen çocuğun kaydıyla devam edilir. Aile bağları bir kuşak
+yukarı kayar (eş → anne/baba, diğer çocuklar → kardeş, büyükler →
+büyükanne/dede, kardeşler → teyze/dayı/hala/amca), eski oyuncu **vefat
+etmiş ebeveyn** olarak kayıtta kalır, miras D-037 oranlarıyla dağıtılır ve
+ev/araç **aynı eşya kimliğiyle** geçer; ün, meslek, ehliyet ve eğitim
+taşınmaz. Neyin taşınacağı, kaç kuşak süreceği ve çocuğun özellik devralıp
+almayacağı **Q-067**'de karar bekliyor. Evlilik/çocuk ayrıntıları **Q-063**
+ve **Q-064** altında Faho'nun kararını bekliyor; `DECISIONS.md`'ye yeni
+kalıcı kural yazılmadı.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

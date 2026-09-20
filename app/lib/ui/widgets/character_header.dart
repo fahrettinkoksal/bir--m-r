@@ -86,7 +86,11 @@ class CharacterHeader extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                '${state.player.age} yaşında · $evre · ${state.player.birthCity}',
+                '${state.player.age} yaşında · $evre · '
+                '${state.player.birthCity}'
+                // Kuşak bilgisi yalnızca gerçekten devam eden hayatlarda
+                // yazılır; ilk kuşakta hiç görünmez.
+                '${state.isContinuedGeneration ? ' · ${state.generation}. kuşak' : ''}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
