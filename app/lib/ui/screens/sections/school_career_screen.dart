@@ -7,6 +7,7 @@ import '../../../state/game_scope.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import 'education_career_pages.dart';
 
 /// Okul / Meslek ana menüsü (NAV-001).
 ///
@@ -39,7 +40,7 @@ class SchoolCareerScreen extends StatelessWidget {
 ///
 /// Burada yalnızca **okulla ilgili** gruplar bulunur. Arkadaşlık düzeyi ve
 /// özel ilişkiler İlişkiler menüsünden yönetilir.
-enum _SchoolPage { kok, sinifArkadaslari, ogretmenler }
+enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, liseTercihi }
 
 class _SchoolView extends StatefulWidget {
   const _SchoolView({required this.state, required this.onBack});
@@ -91,6 +92,8 @@ class _SchoolViewState extends State<_SchoolView> {
           playerAge: state.player.age,
           onBack: () => _go(_SchoolPage.kok),
         );
+      case _SchoolPage.liseTercihi:
+        return TrackChoicePage(onBack: () => _go(_SchoolPage.kok));
       case _SchoolPage.kok:
         break;
     }
@@ -105,6 +108,10 @@ class _SchoolViewState extends State<_SchoolView> {
           title: egitim.level?.label ?? 'Okul',
           rows: <({String label, String value})>[
             (label: 'Sınıf', value: '${egitim.grade}. sınıf'),
+            if (egitim.trackInfo != null)
+              (label: 'Alan', value: egitim.trackInfo!.label),
+            if (egitim.placementScore != null)
+              (label: 'Yerleştirme puanı', value: '${egitim.placementScore}'),
             if (egitim.startedAtAge != null)
               (label: 'Başlangıç', value: '${egitim.startedAtAge} yaşında'),
             (
@@ -114,6 +121,16 @@ class _SchoolViewState extends State<_SchoolView> {
           ],
         ),
         const SizedBox(height: 12),
+        // Lise alanı seçimi bekliyorsa en üstte durur.
+        if (egitim.awaitingTrackChoice) ...<Widget>[
+          MenuRow(
+            title: 'Lise alanını seç',
+            subtitle: 'Yerleştirme puanın: ${egitim.placementScore ?? 0}',
+            icon: Icons.alt_route_outlined,
+            onTap: () => _go(_SchoolPage.liseTercihi),
+          ),
+          const SizedBox(height: 10),
+        ],
         MenuRow(
           title: 'Sınıf Arkadaşları',
           subtitle: 'Şu an aynı sınıfta olduğun kişiler',
@@ -205,30 +222,79 @@ class _PeoplePage extends StatelessWidget {
   }
 }
 
-class _CareerView extends StatelessWidget {
+/// Meslek ekranının alt sayfaları.
+enum _CareerPage { kok, mezuniyetSonrasi, isArama }
+
+class _CareerView extends StatefulWidget {
   const _CareerView({required this.state, required this.onBack});
 
   final GameState state;
   final VoidCallback onBack;
 
   @override
+  State<_CareerView> createState() => _CareerViewState();
+}
+
+class _CareerViewState extends State<_CareerView> {
+  _CareerPage _page = _CareerPage.kok;
+  String? _sonuc;
+
+  void _go(_CareerPage page) => setState(() {
+        _page = page;
+        _sonuc = null;
+      });
+
+  @override
   Widget build(BuildContext context) {
+    final GameState state = widget.state;
     final EducationState egitim = state.education;
     final bool okulOncesi = !egitim.finished && state.player.age < 6;
+
+    switch (_page) {
+      case _CareerPage.mezuniyetSonrasi:
+        return AfterSchoolPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.isArama:
+        return JobSearchPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.kok:
+        break;
+    }
+
+    final bool isAranabilir = egitim.finished || egitim.universityFinished;
 
     return SectionScaffold(
       title: 'Meslek',
       subtitle: egitim.stageLabel(state.player.age),
-      onBack: onBack,
+      onBack: widget.onBack,
       children: <Widget>[
-        if (egitim.finished)
+        if (state.career.isEmployed)
+          _PanelCard(
+            icon: Icons.badge_outlined,
+            title: state.career.label,
+            rows: <({String label, String value})>[
+              (
+                label: 'Yıllık maaş',
+                value: '${state.career.job?.yearlySalary ?? 0} ₺',
+              ),
+              if (state.career.startedAtAge != null)
+                (
+                  label: 'Başlangıç',
+                  value: '${state.career.startedAtAge} yaşında',
+                ),
+              (label: 'Cüzdan', value: state.player.walletLabel),
+            ],
+          )
+        else if (egitim.finished || egitim.universityFinished)
           _PanelCard(
             icon: Icons.workspace_premium_outlined,
             title: 'Eğitim geçmişi',
             rows: <({String label, String value})>[
-              (label: 'Durum', value: 'Lise bitti'),
-              if (egitim.startedAtAge != null)
-                (label: 'Okula başlangıç', value: '${egitim.startedAtAge} yaşında'),
+              (label: 'Durum', value: egitim.label),
+              if (egitim.trackInfo != null)
+                (label: 'Lise alanı', value: egitim.trackInfo!.label),
+              if (egitim.program != null)
+                (label: 'Bölüm', value: egitim.program!.name),
+              if (egitim.placementScore != null)
+                (label: 'Yerleştirme puanı', value: '${egitim.placementScore}'),
             ],
           )
         else
@@ -241,13 +307,50 @@ class _CareerView extends StatelessWidget {
             ],
           ),
         const SizedBox(height: 12),
-        InfoPanel(
-          icon: Icons.work_outline,
-          text: okulOncesi
-              ? 'Okul çağına gelince bu bölüm okul bilgilerini gösterecek.'
-              : 'İş arama, meslek ve kariyer sistemi henüz yazılmadı; '
-                  'yazılmamış eylemler burada düğme olarak gösterilmiyor.',
-        ),
+        if (egitim.awaitingAfterSchoolChoice) ...<Widget>[
+          MenuRow(
+            title: 'Mezuniyet sonrası',
+            subtitle: 'Üniversiteye başvur veya iş hayatına gir',
+            icon: Icons.alt_route_outlined,
+            onTap: () => _go(_CareerPage.mezuniyetSonrasi),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (isAranabilir) ...<Widget>[
+          MenuRow(
+            title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
+            subtitle: state.career.isEmployed
+                ? 'Önce mevcut işinden ayrılman gerekir'
+                : 'Koşullarını sağladığın işler',
+            icon: Icons.work_outline,
+            onTap: () => _go(_CareerPage.isArama),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (state.career.isEmployed) ...<Widget>[
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                final String? metin = GameScope.of(context).quitJob()?.text;
+                setState(() => _sonuc = metin);
+              },
+              child: const Text('İşten ayrıl'),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (_sonuc != null) ...<Widget>[
+          InfoPanel(icon: Icons.info_outline, text: _sonuc!),
+          const SizedBox(height: 10),
+        ],
+        if (!isAranabilir)
+          InfoPanel(
+            icon: Icons.work_outline,
+            text: okulOncesi
+                ? 'Okul çağına gelince bu bölüm okul bilgilerini gösterecek.'
+                : 'İş arama liseyi bitirdikten sonra açılır.',
+          ),
       ],
     );
   }

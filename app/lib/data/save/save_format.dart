@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 3;
+const int kSaveFormatVersion = 4;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -57,7 +57,27 @@ abstract final class SaveMigrations {
     Map<String, Object?> guncel = body;
     if (from <= 1) guncel = _v1ToV2(guncel);
     if (from <= 2) guncel = _v2ToV3(guncel);
+    if (from <= 3) guncel = _v3ToV4(guncel);
     return guncel;
+  }
+
+  /// Sürüm 3 → 4: lise alanı, üniversite ve meslek alanları eklendi.
+  ///
+  /// Eski kayıtlarda bunlar yoktur; boş değerlerle doldurulur. Oyuncunun
+  /// hayatı, cüzdanı, kişileri ve eşyaları aynen korunur.
+  static Map<String, Object?> _v3ToV4(Map<String, Object?> body) {
+    final Object? education = body['education'];
+    if (education is Map) {
+      // Eski kayıtta bu alanlar hiç yoktu; boş değerlerle açılır.
+      education['universityFinished'] ??= false;
+    }
+    body['career'] ??= <String, Object?>{
+      'jobId': null,
+      'startedAtAge': null,
+      'lastPaidAge': null,
+      'pastJobIds': <String>[],
+    };
+    return body;
   }
 
   /// Sürüm 2 → 3: eşyalar tür kümesinden **gerçek eşya örneklerine** geçti.
