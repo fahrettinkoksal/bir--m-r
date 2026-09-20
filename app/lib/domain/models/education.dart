@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/education_tracks.dart';
+import '../../data/university_catalog.dart';
+
 /// Okul kademesi. Türkiye'deki 4+4+4 yapısına karşılık gelir.
 enum SchoolLevel {
   ilkokul('İlkokul', 1, 4),
@@ -51,6 +54,11 @@ class EducationState {
     this.finished = false,
     this.schoolId,
     this.classId,
+    this.track,
+    this.placementScore,
+    this.universityProgramId,
+    this.universityYear,
+    this.universityFinished = false,
   }) : assert(
           !enrolled || grade != null,
           'Okula kayıtlı öğrencinin sınıfı olmalı.',
@@ -84,7 +92,47 @@ class EducationState {
   /// değişiminde herkesin değişmesi zorunlu olmaz.
   final String? classId;
 
-  bool get isStudent => enrolled;
+  /// Seçilen lise alanı. 9. sınıfa geçince oyuncu seçer; kozmetik değildir,
+  /// üniversite bölümlerini ve iş seçeneklerini etkiler.
+  final EducationTrack? track;
+
+  /// 8. sınıf sonunda hesaplanan yerleştirme puanı (0-100, prototypeOnly).
+  final int? placementScore;
+
+  /// Kayıtlı olunan üniversite bölümü.
+  final String? universityProgramId;
+
+  /// Üniversitede kaçıncı yıl (1'den başlar).
+  final int? universityYear;
+
+  /// Üniversite bitirildi mi?
+  final bool universityFinished;
+
+  /// Okula (lise veya üniversiteye) devam ediliyor mu?
+  bool get isStudent => enrolled || isUniversityStudent;
+
+  /// Yalnızca 1-12. sınıf öğrenciliği. Okul olayları buna bakar.
+  bool get isSchoolStudent => enrolled;
+
+  bool get isUniversityStudent =>
+      universityProgramId != null && !universityFinished;
+
+  UniversityProgram? get program => universityProgramId == null
+      ? null
+      : universityProgramById(universityProgramId!);
+
+  /// Lise bitti ama henüz bir yol seçilmedi mi?
+  bool get awaitingAfterSchoolChoice =>
+      finished && universityProgramId == null && !universityFinished;
+
+  /// Lise alanı seçilmeyi bekliyor mu? (9. sınıfa geçildi, alan boş.)
+  bool get awaitingTrackChoice =>
+      enrolled && (grade ?? 0) >= 9 && track == null;
+
+  EducationTrackInfo? get trackInfo =>
+      track == null ? null : kEducationTracks.firstWhere(
+            (EducationTrackInfo t) => t.track == track,
+          );
 
   SchoolLevel? get level => grade == null ? null : SchoolLevel.forGrade(grade!);
 
@@ -92,16 +140,22 @@ class EducationState {
   String get label {
     if (enrolled && grade != null) {
       final SchoolLevel? current = level;
-      if (current == null) return '$grade. sınıf';
-      return '${current.label} ${current.gradeWithinLevel(grade!)}. sınıf';
+      final String alan = trackInfo == null ? '' : ' · ${trackInfo!.label}';
+      if (current == null) return '$grade. sınıf$alan';
+      return '${current.label} ${current.gradeWithinLevel(grade!)}. sınıf$alan';
     }
+    if (isUniversityStudent) {
+      return '${program?.name ?? 'Üniversite'} $universityYear. sınıf';
+    }
+    if (universityFinished) return '${program?.name ?? 'Üniversite'} mezunu';
     if (finished) return 'Liseyi bitirdi';
     return 'Okula başlamadı';
   }
 
   /// Üst özet için yaşa göre kısa evre metni.
   String stageLabel(int age) {
-    if (enrolled) return label;
+    if (enrolled || isUniversityStudent) return label;
+    if (universityFinished) return label;
     if (finished) return 'Okul bitti';
     if (age < 6) return 'Okul öncesi';
     return 'Okul dışı';
@@ -114,6 +168,11 @@ class EducationState {
     bool? finished,
     Object? schoolId = _unsetEdu,
     Object? classId = _unsetEdu,
+    Object? track = _unsetEdu,
+    Object? placementScore = _unsetEdu,
+    Object? universityProgramId = _unsetEdu,
+    Object? universityYear = _unsetEdu,
+    bool? universityFinished,
   }) {
     return EducationState(
       enrolled: enrolled ?? this.enrolled,
@@ -122,6 +181,16 @@ class EducationState {
       finished: finished ?? this.finished,
       schoolId: schoolId == _unsetEdu ? this.schoolId : schoolId as String?,
       classId: classId == _unsetEdu ? this.classId : classId as String?,
+      track: track == _unsetEdu ? this.track : track as EducationTrack?,
+      placementScore: placementScore == _unsetEdu
+          ? this.placementScore
+          : placementScore as int?,
+      universityProgramId: universityProgramId == _unsetEdu
+          ? this.universityProgramId
+          : universityProgramId as String?,
+      universityYear:
+          universityYear == _unsetEdu ? this.universityYear : universityYear as int?,
+      universityFinished: universityFinished ?? this.universityFinished,
     );
   }
 
@@ -131,6 +200,11 @@ class EducationState {
         enrolled: false,
         startedAtAge: startedAtAge,
         finished: true,
+        track: track,
+        placementScore: placementScore,
+        universityProgramId: universityProgramId,
+        universityYear: universityYear,
+        universityFinished: universityFinished,
       );
 }
 

@@ -82,7 +82,9 @@ class EventEngine {
 
     if (age < req.minAge || age > req.maxAge) return false;
     // Öğrencilik yaştan değil, eğitim durumundan okunur.
-    if (req.requiresSchoolStudent && !state.education.isStudent) return false;
+    if (req.requiresSchoolStudent && !state.education.isSchoolStudent) {
+      return false;
+    }
     final int? grade = state.education.grade;
     if (req.minGrade != null && (grade == null || grade < req.minGrade!)) {
       return false;

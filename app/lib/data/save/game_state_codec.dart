@@ -8,6 +8,8 @@
 /// ileride enum sırası değişse bile eski kayıtlar bozulmaz.
 library;
 
+import '../../data/education_tracks.dart';
+import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
@@ -48,6 +50,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'progressSinceLastEvent': state.progressSinceLastEvent,
       'extraEventsThisAge': state.extraEventsThisAge,
       'education': _encodeEducation(state.education),
+      'career': _encodeCareer(state.career),
     };
 
 Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
@@ -123,6 +126,18 @@ Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
       'finished': e.finished,
       'schoolId': e.schoolId,
       'classId': e.classId,
+      'track': e.track?.name,
+      'placementScore': e.placementScore,
+      'universityProgramId': e.universityProgramId,
+      'universityYear': e.universityYear,
+      'universityFinished': e.universityFinished,
+    };
+
+Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
+      'jobId': c.jobId,
+      'startedAtAge': c.startedAtAge,
+      'lastPaidAge': c.lastPaidAge,
+      'pastJobIds': c.pastJobIds,
     };
 
 /// Bekleyen olay **tüm seçenekleriyle** yazılır.
@@ -245,6 +260,7 @@ GameState decodeGameState(Map<String, Object?> json) {
     progressSinceLastEvent: _int(json, 'progressSinceLastEvent'),
     extraEventsThisAge: _int(json, 'extraEventsThisAge'),
     education: _decodeEducation(_map(json, 'education')),
+    career: _decodeCareer(_map(json, 'career')),
   );
 }
 
@@ -319,6 +335,14 @@ Person _decodePerson(Map<String, Object?> json) {
   );
 }
 
+CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
+      jobId: _stringOrNull(json, 'jobId'),
+      startedAtAge: _intOrNull(json, 'startedAtAge'),
+      lastPaidAge: _intOrNull(json, 'lastPaidAge'),
+      pastJobIds:
+          List<String>.unmodifiable(_stringList(json, 'pastJobIds')),
+    );
+
 OwnedItem _decodeItem(Map<String, Object?> json) {
   final int condition = _int(json, 'condition');
   if (condition < 0 || condition > 100) {
@@ -377,6 +401,15 @@ EducationState _decodeEducation(Map<String, Object?> json) {
     finished: _bool(json, 'finished'),
     schoolId: _stringOrNull(json, 'schoolId'),
     classId: _stringOrNull(json, 'classId'),
+    track: _enumByNameOrNull(
+      EducationTrack.values,
+      _stringOrNull(json, 'track'),
+      'education.track',
+    ),
+    placementScore: _intOrNull(json, 'placementScore'),
+    universityProgramId: _stringOrNull(json, 'universityProgramId'),
+    universityYear: _intOrNull(json, 'universityYear'),
+    universityFinished: _bool(json, 'universityFinished'),
   );
 }
 

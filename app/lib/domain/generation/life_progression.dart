@@ -1,7 +1,10 @@
 import 'dart:math';
 
 import '../../data/name_pool.dart';
+import '../career/job_market.dart';
+import '../education/education_path.dart';
 import '../events/event_engine.dart';
+import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
 import '../models/game_state.dart';
@@ -55,7 +58,13 @@ class LifeProgression {
 
     // Eğitim durumu yaştan türetilmez; burada açıkça ilerletilir ve
     // anlamlı geçişler hayat günlüğüne yazılır.
-    final EducationState education = _advanceEducation(state.education, newAge);
+    EducationState education = _advanceEducation(state.education, newAge);
+    education = _applyPlacementExam(
+      state: state,
+      education: education,
+      newAge: newAge,
+      log: log,
+    );
     _logEducationChange(
       log: log,
       before: state.education,
@@ -76,8 +85,25 @@ class LifeProgression {
     );
     final List<Person> peopleWithSchool = okulSonucu.people;
 
+    // Maaş yeni yaşa geçerken **bir kez** ödenir.
+    final ({GameState state, String? logText}) maas =
+        const JobMarket().paySalaryFor(
+      state.copyWith(player: state.player.copyWith(age: newAge)),
+      newAge,
+    );
+    if (maas.logText != null) {
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: maas.logText!,
+          category: LogCategory.kisisel,
+        ),
+      );
+    }
+
     final GameState advanced = state.copyWith(
-      player: state.player.copyWith(age: newAge),
+      // Maaş ödemesi cüzdanı ve ödeme dönemini günceller.
+      player: maas.state.player.copyWith(age: newAge),
       people: List<Person>.unmodifiable(peopleWithSchool),
       log: List<LifeLogEntry>.unmodifiable(log),
       // Tekrar sayaçları yaşa aittir: yeni yaşta aynı etkinlik yeniden
@@ -88,11 +114,34 @@ class LifeProgression {
       extraEventsThisAge: 0,
       progressSinceLastEvent: 0,
       education: okulSonucu.education,
+      career: maas.state.career,
     );
 
+    // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
+    final GameState withTrack = _applyTrackBonus(advanced);
+
     // Yeni yaşın tek açılış olayı.
-    final ActiveEvent? opening = const EventEngine().openingEvent(advanced, _rng);
-    return opening == null ? advanced : advanced.copyWith(pendingEvent: opening);
+    final ActiveEvent? opening =
+        const EventEngine().openingEvent(withTrack, _rng);
+    return opening == null
+        ? withTrack
+        : withTrack.copyWith(pendingEvent: opening);
+  }
+
+  /// Lise alanının yıllık küçük katkısı.
+  GameState _applyTrackBonus(GameState state) {
+    final EducationTrackInfo? alan = state.education.trackInfo;
+    if (alan == null || !state.education.isSchoolStudent) return state;
+    return state.copyWith(
+      player: state.player.copyWith(
+        stats: state.player.stats.copyWith(
+          intelligence:
+              state.player.stats.intelligence + alan.intelligenceBonus,
+          charisma: state.player.stats.charisma + alan.charismaBonus,
+          appearance: state.player.stats.appearance + alan.appearanceBonus,
+        ),
+      ),
+    );
   }
 
   /// Yeni bir sınıf ortamı gerekiyorsa kurar.
@@ -175,6 +224,17 @@ class LifeProgression {
   /// Basit akış: belirlenen yaşta 1. sınıfa başlanır, her yaş bir sınıf
   /// ilerler, son sınıftan sonra okul biter. Sınav, not ve diploma yoktur.
   EducationState _advanceEducation(EducationState current, int newAge) {
+    // Üniversite öğrencisi her yıl bir sınıf ilerler ve süre dolunca mezun
+    // olur. Lise kaydı burada değişmez.
+    if (current.isUniversityStudent) {
+      final int yil = (current.universityYear ?? 1) + 1;
+      final int sure = current.program?.durationYears ?? 4;
+      if (yil > sure) {
+        return current.copyWith(universityFinished: true, universityYear: sure);
+      }
+      return current.copyWith(universityYear: yil);
+    }
+
     if (current.finished) return current;
 
     if (!current.enrolled) {
@@ -192,6 +252,32 @@ class LifeProgression {
     final int nextGrade = (current.grade ?? 1) + 1;
     if (nextGrade > lastGrade) return current.asFinished();
     return current.copyWith(grade: nextGrade);
+  }
+
+  /// 8. sınıftan 9. sınıfa geçerken yerleştirme puanını hesaplar.
+  ///
+  /// Puan bir kez hesaplanır ve eğitim geçmişine yazılır; lise alanı seçimi
+  /// bu puana bakar.
+  EducationState _applyPlacementExam({
+    required GameState state,
+    required EducationState education,
+    required int newAge,
+    required List<LifeLogEntry> log,
+  }) {
+    if (education.placementScore != null) return education;
+    if (!education.enrolled) return education;
+    if ((education.grade ?? 0) != 9) return education;
+
+    final int puan = const EducationPath().placementScore(state, _rng);
+    log.add(
+      LifeLogEntry(
+        age: newAge,
+        text: 'Ortaokul bitti. Yerleştirme puanın $puan. '
+            'Artık lise alanını seçebilirsin.',
+        category: LogCategory.kisisel,
+      ),
+    );
+    return education.copyWith(placementScore: puan);
   }
 
   /// Okula başlama, kademe değişimi ve okulun bitişini günlüğe yazar.

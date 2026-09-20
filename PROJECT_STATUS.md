@@ -136,6 +136,15 @@ bedeli tür, kondisyon, aksesuar ve antika niteliğe göre hesaplanıyor.
 Kayıt biçimi **sürüm 3**; sürüm 1 ve 2 kayıtları göçle açılıyor. Ayrıntı:
 `docs/ITEM_SYSTEM.md`.
 
+## Eğitim, lise tercihi, üniversite ve meslek (uygulandı)
+8. sınıf sonunda yerleştirme puanı hesaplanıyor ve 9. sınıfta **lise alanı**
+seçiliyor (9 alan, puanı düşük oyuncuya da en az üç seçenek). Alan eğitim
+geçmişine yazılıyor; üniversite bölümlerini ve iş koşullarını etkiliyor.
+12. sınıf sonunda kimse otomatik üniversiteye gitmiyor: başvur / iş ara /
+kendi yolunu seç. Altı bölümlü küçük üniversite prototipi, altı işlik iş
+pazarı, başvuru-kabul/ret akışı ve yaş alırken **bir kez** ödenen maaş
+eklendi. Kayıt biçimi **sürüm 4**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

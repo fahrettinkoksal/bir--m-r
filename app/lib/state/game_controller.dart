@@ -3,9 +3,12 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../data/education_tracks.dart';
 import '../data/item_catalog.dart';
+import '../data/job_catalog.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
+import '../data/university_catalog.dart';
 
 import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
@@ -13,6 +16,8 @@ import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
 import '../domain/interaction/family_interactions.dart';
+import '../domain/career/job_market.dart';
+import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
@@ -36,6 +41,8 @@ class GameController extends ChangeNotifier {
   final EventEngine _events = const EventEngine();
   final Romance _romance = const Romance();
   final ItemActions _items = const ItemActions();
+  final EducationPath _education = const EducationPath();
+  final JobMarket _jobs = const JobMarket();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -329,6 +336,94 @@ class GameController extends ChangeNotifier {
       return result.outcome;
     }
 
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Eğitim ve meslek
+  // =====================================================================
+
+  /// Puanın yettiği lise alanları.
+  List<EducationTrackInfo> availableTracks() {
+    final GameState? current = _state;
+    if (current == null) return const <EducationTrackInfo>[];
+    return _education.availableTracks(current);
+  }
+
+  /// Lise alanını seçer.
+  EducationOutcome? chooseTrack(EducationTrack track) => _runEducation(
+        (GameState current) => _education.chooseTrack(current, track),
+      );
+
+  /// Başvurulabilecek üniversite bölümleri.
+  List<UniversityProgram> availablePrograms() {
+    final GameState? current = _state;
+    if (current == null) return const <UniversityProgram>[];
+    return _education.availablePrograms(current);
+  }
+
+  /// Üniversiteye başvurur; kabul garanti değildir.
+  EducationOutcome? applyToUniversity(UniversityProgram program) =>
+      _runEducation(
+        (GameState current) =>
+            _education.applyToUniversity(current, program, _random),
+      );
+
+  /// Üniversiteye gitmeyip iş hayatına yönelir.
+  EducationOutcome? skipUniversity() => _runEducation(
+        (GameState current) => _education.skipUniversity(current),
+      );
+
+  EducationOutcome? _runEducation(EducationResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final EducationResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  /// Başvurulabilecek işler.
+  List<JobType> openJobs() {
+    final GameState? current = _state;
+    if (current == null) return const <JobType>[];
+    return _jobs.openJobs(current);
+  }
+
+  /// Koşulu sağlanmayan işler ve gerekçeleri.
+  Map<JobType, String> lockedJobs() {
+    final GameState? current = _state;
+    if (current == null) return const <JobType, String>{};
+    return _jobs.lockedJobs(current);
+  }
+
+  /// Başvurunun şu an mümkün olup olmadığı.
+  InteractionAvailability jobApplicationAvailability(JobType job) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _jobs.applicationAvailability(current, job);
+  }
+
+  /// İşe başvurur.
+  JobOutcome? applyForJob(JobType job) => _runJob(
+        (GameState current) => _jobs.apply(current, job, _random),
+      );
+
+  /// İşten ayrılır.
+  JobOutcome? quitJob() => _runJob((GameState current) => _jobs.quit(current));
+
+  JobOutcome? _runJob(JobResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final JobResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
     notifyListeners();

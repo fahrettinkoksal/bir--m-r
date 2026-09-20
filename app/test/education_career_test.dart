@@ -1,0 +1,490 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:bir_omur/data/education_tracks.dart';
+import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/data/save/save_format.dart';
+import 'package:bir_omur/data/save/save_service.dart';
+import 'package:bir_omur/data/save/save_store.dart';
+import 'package:bir_omur/data/university_catalog.dart';
+import 'package:bir_omur/domain/career/job_market.dart';
+import 'package:bir_omur/domain/education/education_path.dart';
+import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/generation/life_progression.dart';
+import 'package:bir_omur/domain/models/career.dart';
+import 'package:bir_omur/domain/models/education.dart';
+import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/state/game_controller.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
+
+const EducationPath path = EducationPath();
+const JobMarket market = JobMarket();
+
+GameState life(int seed, {int age = 14, int wallet = 0, int intelligence = 60}) {
+  final GameState state =
+      LifeGenerator.seeded(seed).generate(mode: StartMode.tamamenRastgele);
+  return state.copyWith(
+    player: state.player.copyWith(
+      age: age,
+      wallet: wallet,
+      stats: state.player.stats.copyWith(intelligence: intelligence),
+    ),
+  );
+}
+
+/// Lise çağında, puanı belli bir öğrenci.
+GameState highSchooler(
+  int seed, {
+  int grade = 9,
+  int score = 80,
+  int age = 14,
+  EducationTrack? track,
+}) {
+  return life(seed, age: age).copyWith(
+    education: EducationState(
+      enrolled: true,
+      grade: grade,
+      startedAtAge: 6,
+      placementScore: score,
+      track: track,
+    ),
+  );
+}
+
+/// Lise mezunu.
+GameState graduate(
+  int seed, {
+  EducationTrack? track,
+  int score = 80,
+  int age = 18,
+  int intelligence = 70,
+  int charisma = 60,
+}) {
+  final GameState base = life(seed, age: age, intelligence: intelligence);
+  return base.copyWith(
+    player: base.player
+        .copyWith(stats: base.player.stats.copyWith(charisma: charisma)),
+    education: EducationState(
+      startedAtAge: 6,
+      finished: true,
+      placementScore: score,
+      track: track,
+    ),
+  );
+}
+
+void main() {
+  // ===================================================================
+  // Lise tercihi
+  // ===================================================================
+  group('Lise tercihi', () {
+    test('8. sınıftan 9. sınıfa geçince yerleştirme puanı oluşur', () {
+      final GameController c = GameController(random: Random(5));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 5);
+      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 7);
+      resolvePendingEvents(c);
+      expect(c.state!.education.grade, 8);
+      expect(c.state!.education.placementScore, isNull);
+
+      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 8);
+      resolvePendingEvents(c);
+      expect(c.state!.education.grade, 9);
+      expect(c.state!.education.placementScore, isNotNull);
+      expect(c.state!.education.placementScore, inInclusiveRange(0, 100));
+      expect(c.state!.education.awaitingTrackChoice, isTrue);
+      expect(
+        c.state!.log.any((dynamic e) =>
+            (e.text as String).contains('Yerleştirme puanın')),
+        isTrue,
+      );
+    });
+
+    test('puan düşük olsa bile en az üç alan açık kalır', () {
+      for (final int puan in <int>[0, 10, 30, 50, 100]) {
+        final List<EducationTrackInfo> acik = tracksFor(puan);
+        expect(acik.length, greaterThanOrEqualTo(3),
+            reason: '$puan puanla seçenek kalmamalı değil');
+      }
+      expect(tracksFor(100).length, kEducationTracks.length);
+    });
+
+    test('puanı yetmeyen alan seçilemez', () {
+      final GameState state = highSchooler(6, score: 20);
+      final EducationResult r =
+          path.chooseTrack(state, EducationTrack.fenBilim);
+      expect(r.outcome.applied, isFalse);
+      expect(r.state.education.track, isNull);
+    });
+
+    test('seçilen alan kalıcı olarak kaydedilir', () {
+      final GameState state = highSchooler(7, score: 90);
+      final EducationResult r =
+          path.chooseTrack(state, EducationTrack.bilisim);
+      expect(r.outcome.accepted, isTrue);
+      expect(r.state.education.track, EducationTrack.bilisim);
+      expect(r.state.education.awaitingTrackChoice, isFalse);
+      expect(r.state.log.last.text, contains('Bilişim'));
+
+      // İkinci kez seçilemez.
+      final EducationResult ikinci =
+          path.chooseTrack(r.state, EducationTrack.muzik);
+      expect(ikinci.outcome.applied, isFalse);
+      expect(ikinci.state.education.track, EducationTrack.bilisim);
+    });
+
+    test('lise alanı mezuniyette de korunur', () {
+      GameState state = highSchooler(8, grade: 12, score: 90, age: 17);
+      state = path.chooseTrack(state, EducationTrack.tasarim).state;
+      final EducationState mezun = state.education.asFinished();
+      expect(mezun.track, EducationTrack.tasarim);
+      expect(mezun.placementScore, 90);
+    });
+
+    test('lise alanı yıllık küçük kazanç verir', () {
+      final GameState state = highSchooler(9, grade: 9, score: 95,
+          track: EducationTrack.fenBilim, age: 14);
+      final int zekaOnce = state.player.stats.intelligence;
+      final GameState sonra = LifeProgression(Random(1)).advanceOneYear(state);
+      expect(sonra.player.stats.intelligence, greaterThan(zekaOnce));
+    });
+  });
+
+  // ===================================================================
+  // Üniversite
+  // ===================================================================
+  group('Üniversite', () {
+    test('12. sınıftan sonra otomatik üniversiteye gidilmez', () {
+      final GameController c = GameController(random: Random(11));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 11);
+      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 12);
+      resolvePendingEvents(c);
+
+      expect(c.state!.education.finished, isTrue);
+      expect(c.state!.education.universityProgramId, isNull,
+          reason: 'Kimse otomatik üniversiteye yazılmaz');
+      expect(c.state!.education.awaitingAfterSchoolChoice, isTrue);
+    });
+
+    test('bölüme kabul eğitim geçmişine bağlıdır', () {
+      final UniversityProgram muh = universityProgramById('muhendislik')!;
+      final GameState uygun = graduate(12,
+          track: EducationTrack.fenBilim, score: 85, intelligence: 85);
+      final GameState uygunsuz =
+          graduate(12, track: EducationTrack.elSanatlari, score: 20,
+              intelligence: 30);
+
+      expect(path.admissionScore(uygun, muh, Random(1)),
+          greaterThan(path.admissionScore(uygunsuz, muh, Random(1))));
+
+      final EducationResult red =
+          path.applyToUniversity(uygunsuz, muh, Random(1));
+      expect(red.outcome.accepted, isFalse);
+      expect(red.state.education.universityProgramId, isNull);
+
+      final EducationResult kabul =
+          path.applyToUniversity(uygun, muh, Random(1));
+      expect(kabul.outcome.accepted, isTrue);
+      expect(kabul.state.education.universityProgramId, 'muhendislik');
+      expect(kabul.state.education.universityYear, 1);
+    });
+
+    test('düşük puanlı öğrenciye de açık bölüm bulunur', () {
+      final GameState zayif = graduate(13,
+          track: EducationTrack.elSanatlari, score: 35, intelligence: 40);
+      final UniversityProgram isletme = universityProgramById('isletme')!;
+      final EducationResult r =
+          path.applyToUniversity(zayif, isletme, Random(3));
+      expect(r.outcome.applied, isTrue);
+    });
+
+    test('üniversite yılları ilerler ve mezuniyetle biter', () {
+      GameState state = graduate(14,
+          track: EducationTrack.fenBilim, score: 90, intelligence: 90);
+      state = path
+          .applyToUniversity(
+            state,
+            universityProgramById('muhendislik')!,
+            Random(1),
+          )
+          .state;
+      expect(state.education.isUniversityStudent, isTrue);
+
+      final LifeProgression ilerleme = LifeProgression(Random(2));
+      for (int i = 0; i < 4; i++) {
+        state = ilerleme.advanceOneYear(state);
+        state = state.copyWith(pendingEvent: null);
+      }
+      expect(state.education.universityFinished, isTrue);
+      expect(state.education.isUniversityStudent, isFalse);
+      expect(state.education.label, contains('mezunu'));
+    });
+
+    test('üniversiteye gitmeyen oyuncu oyuna devam eder', () {
+      final GameState state = graduate(15, track: EducationTrack.teknikMeslek);
+      final EducationResult r = path.skipUniversity(state);
+      expect(r.outcome.accepted, isTrue);
+      expect(r.state.storyFlags, contains(EducationPath.universiteyeGitmediFlag));
+      expect(r.state.education.universityProgramId, isNull);
+      // İş aramaya devam edebilir.
+      expect(market.openJobs(r.state), isNotEmpty);
+    });
+  });
+
+  // ===================================================================
+  // Meslek
+  // ===================================================================
+  group('Meslek', () {
+    test('yaşı veya eğitimi yetmeyen işe başvurulamaz', () {
+      final GameState cocuk = life(21, age: 12);
+      expect(market.openJobs(cocuk), isEmpty);
+
+      final GameState mezun = graduate(21, track: EducationTrack.genelAkademik);
+      final JobType yazilim = jobById('yazilim_gelistirici')!;
+      expect(market.meetsRequirements(mezun, yazilim), isFalse,
+          reason: 'Bilişim geçmişi olmadan yazılımcı olunmaz');
+      expect(market.requirementReason(mezun, yazilim), isNotEmpty);
+
+      final JobType magaza = jobById('magaza_calisani')!;
+      expect(market.meetsRequirements(mezun, magaza), isTrue);
+    });
+
+    test('öğrenciyken tam zamanlı işe başvurulmaz', () {
+      final GameState ogrenci = highSchooler(22, grade: 11, age: 17);
+      expect(market.openJobs(ogrenci), isEmpty);
+    });
+
+    test('eğitim otomatik kabul garantisi değildir', () {
+      final GameState mezun = graduate(23,
+          track: EducationTrack.bilisim, intelligence: 80, age: 21);
+      final JobType yazilim = jobById('yazilim_gelistirici')!;
+      expect(market.meetsRequirements(mezun, yazilim), isTrue);
+      expect(market.acceptanceChance(mezun, yazilim),
+          lessThan(1.0));
+
+      // Bazı denemelerde reddedilmeli.
+      int red = 0;
+      for (int i = 0; i < 30; i++) {
+        final JobResult r = market.apply(mezun, yazilim, Random(i));
+        if (!r.outcome.accepted) red++;
+      }
+      expect(red, greaterThan(0), reason: 'İş asla garanti olmamalı');
+    });
+
+    test('kabul edilince iş kaydı oluşur', () {
+      final GameState mezun = graduate(24, track: EducationTrack.bilisim,
+          intelligence: 85, age: 21);
+      final JobType yazilim = jobById('yazilim_gelistirici')!;
+      JobResult? kabul;
+      for (int i = 0; i < 40 && kabul == null; i++) {
+        final JobResult r = market.apply(mezun, yazilim, Random(i));
+        if (r.outcome.accepted) kabul = r;
+      }
+      expect(kabul, isNotNull);
+
+      final CareerState career = kabul!.state.career;
+      expect(career.jobId, 'yazilim_gelistirici');
+      expect(career.startedAtAge, 21);
+      expect(career.lastPaidAge, 21, reason: 'İşe girilen yıl maaş ödenmez');
+      expect(kabul.state.log.last.text, contains('işe alındın'));
+    });
+
+    test('aynı yaşta sınırsız başvuru yapılamaz', () {
+      GameState state = graduate(25, track: EducationTrack.genelAkademik);
+      final JobType magaza = jobById('magaza_calisani')!;
+      int basarili = 0;
+      for (int i = 0; i < 10; i++) {
+        final JobResult r = market.apply(state, magaza, Random(100 + i));
+        if (r.outcome.applied) {
+          basarili++;
+          state = r.state;
+          if (state.career.isEmployed) break;
+        }
+      }
+      expect(basarili,
+          lessThanOrEqualTo(JobMarket.prototypeOnlyMaxApplicationsPerAge));
+    });
+
+    test('işten ayrılma geçmişi korur', () {
+      GameState state = graduate(26, track: EducationTrack.genelAkademik)
+          .copyWith(
+        career: const CareerState(
+          jobId: 'magaza_calisani',
+          startedAtAge: 18,
+          lastPaidAge: 18,
+        ),
+      );
+      final JobResult r = market.quit(state);
+      expect(r.outcome.applied, isTrue);
+      expect(r.state.career.isEmployed, isFalse);
+      expect(r.state.career.pastJobIds, contains('magaza_calisani'));
+
+      // Ayrıldıktan sonra yeniden başvurabilir.
+      state = r.state;
+      expect(market.openJobs(state), isNotEmpty);
+    });
+  });
+
+  // ===================================================================
+  // Maaş
+  // ===================================================================
+  group('Maaş', () {
+    GameState employed(int seed, {int age = 20, int lastPaid = 20}) =>
+        graduate(seed, age: age, track: EducationTrack.genelAkademik).copyWith(
+          career: CareerState(
+            jobId: 'magaza_calisani',
+            startedAtAge: age,
+            lastPaidAge: lastPaid,
+          ),
+        );
+
+    test('maaş yaş alınca bir kez ödenir', () {
+      final GameState state = employed(31);
+      final int cuzdanOnce = state.player.wallet;
+      final int maas = jobById('magaza_calisani')!.yearlySalary;
+
+      final GameState sonra =
+          LifeProgression(Random(1)).advanceOneYear(state);
+      expect(sonra.player.wallet, cuzdanOnce + maas);
+      expect(sonra.career.lastPaidAge, 21);
+      expect(
+        sonra.log.any((dynamic e) => (e.text as String).contains('cüzdanına')),
+        isTrue,
+      );
+    });
+
+    test('aynı dönem maaşı iki kez ödenmez', () {
+      final GameState state = employed(32);
+      final ({GameState state, String? logText}) ilk =
+          market.paySalaryFor(state.copyWith(
+        player: state.player.copyWith(age: 21),
+      ), 21);
+      expect(ilk.logText, isNotNull);
+
+      final ({GameState state, String? logText}) ikinci =
+          market.paySalaryFor(ilk.state, 21);
+      expect(ikinci.logText, isNull);
+      expect(ikinci.state.player.wallet, ilk.state.player.wallet,
+          reason: 'İkinci ödeme yapılmamalı');
+    });
+
+    test('işsizken maaş ödenmez', () {
+      final GameState state = graduate(33);
+      final int cuzdan = state.player.wallet;
+      final GameState sonra =
+          LifeProgression(Random(1)).advanceOneYear(state);
+      expect(sonra.player.wallet, cuzdan);
+    });
+
+    test('ailenin parası oyuncunun cüzdanına geçmez', () {
+      final GameState state = graduate(34);
+      expect(state.player.wallet, 0);
+      final GameState sonra =
+          LifeProgression(Random(2)).advanceOneYear(state);
+      expect(sonra.player.wallet, 0);
+    });
+  });
+
+  // ===================================================================
+  // Kayıt uyumu ve okul kişileri
+  // ===================================================================
+  group('Kayıt ve okul kişileri', () {
+    test('sürüm 3 kaydı eğitim/meslek alanları eklenerek açılır', () async {
+      final GameController c = GameController(random: Random(41));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 41);
+      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 2);
+      resolvePendingEvents(c);
+      final GameState orijinal = c.state!;
+
+      final Map<String, Object?> body = encodeGameState(orijinal);
+      // Sürüm 3'te bu alanlar yoktu.
+      (body['education']! as Map<String, Object?>)
+        ..remove('track')
+        ..remove('placementScore')
+        ..remove('universityProgramId')
+        ..remove('universityYear')
+        ..remove('universityFinished');
+      body.remove('career');
+
+      final SaveLoadResult result = await SaveService(
+        MemorySaveStore(
+          initial: jsonEncode(
+            <String, Object?>{'formatVersion': 3, 'state': body},
+          ),
+        ),
+      ).load();
+      expect(result.isLoaded, isTrue, reason: result.message);
+
+      final GameState yuklenen = result.state!;
+      expect(yuklenen.player.id, orijinal.player.id);
+      expect(yuklenen.player.age, orijinal.player.age);
+      expect(yuklenen.people.length, orijinal.people.length);
+      expect(yuklenen.currentClassmates.length,
+          orijinal.currentClassmates.length);
+      expect(yuklenen.education.track, isNull);
+      expect(yuklenen.career.isEmployed, isFalse);
+      expect(yuklenen.items.length, orijinal.items.length);
+    });
+
+    test('eğitim ve meslek kaydedilip geri okunur', () async {
+      GameState state = graduate(42, track: EducationTrack.bilisim, age: 22);
+      state = path
+          .applyToUniversity(
+            state,
+            universityProgramById('bilgisayar')!,
+            Random(1),
+          )
+          .state;
+      state = state.copyWith(
+        career: const CareerState(
+          jobId: 'magaza_calisani',
+          startedAtAge: 20,
+          lastPaidAge: 21,
+          pastJobIds: <String>['garson'],
+        ),
+      );
+
+      final MemorySaveStore store = MemorySaveStore();
+      final SaveService service = SaveService(store);
+      await service.save(state);
+      final SaveLoadResult result = await service.load();
+      expect(result.isLoaded, isTrue);
+
+      final GameState sonra = result.state!;
+      expect(sonra.education.track, EducationTrack.bilisim);
+      expect(sonra.education.placementScore, state.education.placementScore);
+      expect(sonra.education.universityProgramId,
+          state.education.universityProgramId);
+      expect(sonra.education.universityYear, state.education.universityYear);
+      expect(sonra.career.jobId, 'magaza_calisani');
+      expect(sonra.career.lastPaidAge, 21);
+      expect(sonra.career.pastJobIds, <String>['garson']);
+    });
+
+    test('lise boyunca okul kişileri korunur', () {
+      final GameController c = GameController(random: Random(43));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 43);
+      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 8);
+      resolvePendingEvents(c);
+      final Set<String> liseliler =
+          c.state!.currentClassmates.map((Person p) => p.id).toSet();
+      expect(liseliler, isNotEmpty);
+
+      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 12);
+      resolvePendingEvents(c);
+      for (final String id in liseliler) {
+        expect(c.state!.personById(id), isNotNull, reason: 'Kayıt silinmez');
+      }
+      final List<String> ids =
+          c.state!.people.map((Person p) => p.id).toList();
+      expect(ids.toSet().length, ids.length, reason: 'İkinci NPC üretilmez');
+    });
+
+    test('kayıt sürümü yükseltildi', () {
+      expect(kSaveFormatVersion, greaterThanOrEqualTo(4));
+    });
+  });
+}
