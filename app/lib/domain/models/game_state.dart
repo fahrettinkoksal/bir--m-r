@@ -452,26 +452,38 @@ class GameState {
       people.where(isReachable).toList(growable: false);
 
   /// Bir kişi şu an gündelik hayatta erişilebilir mi?
+  ///
+  /// Şehir de bir ölçüttür (Paket 3): başka şehirde kalan okul/hayat
+  /// arkadaşı gündelik listelerde görünmez. **Kaydı silinmez**, yakınlığı
+  /// sıfırlanmaz ve yakın aile bu kuraldan etkilenmez.
   bool isReachable(Person person) {
     if (!person.isAlive) return false;
     // Aynı evde yaşayanlar her zaman erişilebilir.
     if (person.inPlayerHousehold) return true;
+
+    // Kişinin şehri bilinmiyorsa (eski kayıtlar) şehir koşulu uygulanmaz.
+    final bool baskaSehirde =
+        person.city != null && person.city != player.currentCity;
     // Güncel okul çevresi.
     if (person.isClassmateIn(education.classId)) return true;
     if (person.isTeacherIn(education.schoolId)) return true;
     // Yakın arkadaşlar ve romantik bağlar görüşmeye devam eder.
     switch (person.relation) {
-      case RelationType.arkadas:
-      case RelationType.sevgili:
       // Eş ve çocuklar evden ayrılsalar da görüşülmeye devam eder.
       case RelationType.es:
       case RelationType.cocuk:
         return true;
+      // Arkadaşlık ve romantik bağ sürer ama başka şehirdeki kişi her gün
+      // görüşülen biri değildir; yeniden karşılaşma olayla gelir.
+      case RelationType.arkadas:
+      case RelationType.sevgili:
+        return !baskaSehirde;
       default:
         break;
     }
-    // Hane dışındaki yakın akrabalar (anne/baba/kardeş) görüşülmeye devam
-    // eder; uzak akrabalar bayram/ziyaret olaylarıyla gelir.
+    // Hane dışındaki yakın akrabalar (anne/baba/kardeş) başka şehirde de
+    // görüşülmeye devam eder; uzak akrabalar bayram/ziyaret olaylarıyla
+    // gelir.
     return person.relation == RelationType.anne ||
         person.relation == RelationType.baba ||
         person.relation == RelationType.kardes;

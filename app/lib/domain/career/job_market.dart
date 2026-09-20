@@ -275,6 +275,8 @@ class JobMarket {
             startedAtAge: kapali.player.age,
             // İşe girilen yıl için maaş ödenmez; ilk ödeme sonraki yaşta.
             lastPaidAge: kapali.player.age,
+            // İş, oyuncunun o an yaşadığı şehirdedir (Paket 3).
+            jobCity: kapali.player.currentCity,
           ),
         ),
         metin,
@@ -308,6 +310,7 @@ class JobMarket {
           career: career.copyWith(
             jobId: null,
             startedAtAge: null,
+            jobCity: null,
             pastJobIds: List<String>.unmodifiable(
               <String>[...career.pastJobIds, job.id],
             ),

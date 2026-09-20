@@ -26,6 +26,7 @@ import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
 import '../data/health_crisis_catalog.dart';
 import '../domain/economy/housing.dart';
+import '../domain/education/school_transfer.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
 import '../domain/casino/casino_rules.dart';
@@ -718,10 +719,40 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return null;
     final HousingResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+
+    GameState next = result.state;
+    String metin = result.outcome.text;
+
+    // Şehir değiştiyse okul ve iş bağları da güncellenir (Paket 3).
+    if (next.player.currentCity != current.player.currentCity) {
+      final ({GameState state, String? logText}) nakil =
+          const SchoolTransfer().transferIfNeeded(next, _random);
+      next = nakil.state;
+      if (nakil.logText != null) metin = '$metin\n${nakil.logText}';
+
+      // Çalışan karakterin işine kendiliğinden son verilmez; yalnızca
+      // durum açıkça yazılır (Q-065).
+      if (next.career.isInAnotherCity(next.player.currentCity)) {
+        final String isMetni = '${next.career.job?.name ?? 'İşin'} hâlâ '
+            '${next.career.jobCity} şehrinde; işine devam ediyorsun.';
+        next = next.copyWith(
+          log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+            ...next.log,
+            LifeLogEntry(
+              age: next.player.age,
+              text: isMetni,
+              category: LogCategory.kisisel,
+            ),
+          ]),
+        );
+        metin = '$metin\n$isMetni';
+      }
+    }
+
+    _state = next;
     _autoSave();
     notifyListeners();
-    return result.outcome;
+    return HousingOutcome(applied: true, text: metin);
   }
 
   // =====================================================================

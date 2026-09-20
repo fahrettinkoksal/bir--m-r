@@ -48,11 +48,35 @@ class SchoolPeople {
   /// prototypeOnly: bir okulda kaç öğretmen tanınır.
   static const int prototypeOnlyTeacherCount = 1;
 
-  /// Kademe için okul kimliği.
-  static String schoolIdFor(SchoolLevel level) => 'okul-${level.name}';
+  /// Kademe ve **şehir** için okul kimliği.
+  ///
+  /// Şehir kimliğin parçasıdır: başka şehre taşınan öğrenci aynı okulda
+  /// görünmez. Şehir verilmezse eski (şehirsiz) kimlik üretilir; böylece
+  /// eski kayıtlar olduğu gibi çalışmaya devam eder.
+  static String schoolIdFor(SchoolLevel level, [String? city]) =>
+      city == null ? 'okul-${level.name}' : 'okul-$city-${level.name}';
 
-  /// Kademe için sınıf kimliği.
-  static String classIdFor(SchoolLevel level) => 'sinif-${level.name}';
+  /// Kademe ve şehir için sınıf kimliği.
+  static String classIdFor(SchoolLevel level, [String? city]) =>
+      city == null ? 'sinif-${level.name}' : 'sinif-$city-${level.name}';
+
+  /// Bu kimlik, şehirden bağımsız olarak bu kademeye mi ait?
+  ///
+  /// Eski kayıtlardaki şehirsiz kimlikler de bu kademeye ait sayılır;
+  /// oyuncu sebepsiz yere okul değiştirmiş olmaz.
+  static bool isClassOfLevel(String? classId, SchoolLevel level) =>
+      classId != null &&
+      (classId == 'sinif-${level.name}' ||
+          classId.endsWith('-${level.name}') && classId.startsWith('sinif-'));
+
+  /// Bir sınıf kimliğinin şehri; şehirsiz eski kimliklerde `null`.
+  static String? cityOfClassId(String? classId) {
+    if (classId == null) return null;
+    final List<String> parcalar = classId.split('-');
+    return parcalar.length >= 3
+        ? parcalar.sublist(1, parcalar.length - 1).join('-')
+        : null;
+  }
 
   /// Yeni bir sınıf ortamı kurar.
   ///
@@ -64,9 +88,10 @@ class SchoolPeople {
     required SchoolLevel level,
     required Random rng,
     List<Person> previousClassmates = const <Person>[],
+    String? city,
   }) {
-    final String schoolId = schoolIdFor(level);
-    final String classId = classIdFor(level);
+    final String schoolId = schoolIdFor(level, city);
+    final String classId = classIdFor(level, city);
 
     // Eski sınıftan devam edenler.
     final List<Person> adaylar = List<Person>.from(
@@ -89,16 +114,19 @@ class SchoolPeople {
       classId: classId,
       classmateCount: uretilecek,
       rng: rng,
+      city: city,
     );
 
     return ClassRoster(newPeople: yeniler, movedIds: tasinanlar);
   }
 
   /// Bir kişiyi **aynı kimlikle** yeni sınıfa taşır.
-  Person moveToClass(Person person, SchoolLevel level) => person.copyWith(
+  Person moveToClass(Person person, SchoolLevel level, [String? city]) =>
+      person.copyWith(
         schoolLevel: level,
-        schoolId: schoolIdFor(level),
-        classId: classIdFor(level),
+        schoolId: schoolIdFor(level, city),
+        classId: classIdFor(level, city),
+        city: city ?? person.city,
       );
 
   List<Person> _generatePeople({
@@ -108,6 +136,7 @@ class SchoolPeople {
     required String classId,
     required int classmateCount,
     required Random rng,
+    String? city,
   }) {
     final List<Person> people = <Person>[];
     final Set<String> kullanilanIsimler = <String>{
@@ -172,6 +201,7 @@ class SchoolPeople {
           schoolTie: SchoolTie.sinifArkadasi,
           schoolId: schoolId,
           classId: classId,
+          city: city,
         ),
       );
     }
@@ -197,6 +227,7 @@ class SchoolPeople {
           schoolTie: SchoolTie.ogretmen,
           schoolId: schoolId,
           classId: classId,
+          city: city,
         ),
       );
     }

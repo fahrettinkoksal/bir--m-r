@@ -626,12 +626,22 @@ class LifeProgression {
       return (people: people, education: education);
     }
 
-    final String schoolId = SchoolPeople.schoolIdFor(level);
-    final String classId = SchoolPeople.classIdFor(level);
+    // Okul, oyuncunun **yaşadığı şehre** bağlıdır (Paket 3).
+    final String sehir = state.player.currentCity;
+    final String schoolId = SchoolPeople.schoolIdFor(level, sehir);
+    final String classId = SchoolPeople.classIdFor(level, sehir);
 
-    // Sınıf zaten kuruluysa dokunma.
-    if (education.classId == classId &&
-        people.any((Person p) => p.classId == classId)) {
+    // Sınıf zaten kuruluysa dokunma. Eski kayıtlardaki şehirsiz sınıf
+    // kimliği de "bu kademenin sınıfı" sayılır; oyuncu sebepsiz yere
+    // okul değiştirmiş olmaz.
+    final String? mevcutSehir =
+        SchoolPeople.cityOfClassId(education.classId);
+    final bool ayniKademe =
+        SchoolPeople.isClassOfLevel(education.classId, level);
+    final bool ayniSehir = mevcutSehir == null || mevcutSehir == sehir;
+    if (ayniKademe &&
+        ayniSehir &&
+        people.any((Person p) => p.classId == education.classId)) {
       return (people: people, education: education);
     }
 
@@ -652,13 +662,14 @@ class LifeProgression {
       level: level,
       rng: _rng,
       previousClassmates: oncekiSinif,
+      city: sehir,
     );
 
     // Taşınanlar aynı kimlikle yeni sınıfa geçer; kayıt kopyalanmaz.
     final Set<String> tasinan = roster.movedIds.toSet();
     final List<Person> guncel = people
         .map((Person p) =>
-            tasinan.contains(p.id) ? okul.moveToClass(p, level) : p)
+            tasinan.contains(p.id) ? okul.moveToClass(p, level, sehir) : p)
         .toList(growable: false);
 
     final Iterable<Person> ogretmenler = roster.newPeople
