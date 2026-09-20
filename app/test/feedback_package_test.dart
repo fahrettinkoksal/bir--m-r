@@ -16,6 +16,7 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
+import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
@@ -637,12 +638,13 @@ void main() {
       ).map((GiftItem g) => g.id).toSet();
       expect(hepsi, isNotEmpty);
 
-      final GameState hazir = temel.copyWith(
-        possessions: hepsi,
-        people: temel.people
-            .map((Person p) => p.id == anne.id ? p.copyWith(bond: 95) : p)
-            .toList(growable: false),
-      );
+      final GameState hazir = temel
+          .copyWith(
+            people: temel.people
+                .map((Person p) => p.id == anne.id ? p.copyWith(bond: 95) : p)
+                .toList(growable: false),
+          )
+          .grantItems(hepsi, source: ItemSource.hediye);
       expect(
         interactions
             .availability(hazir, hazir.personById(anne.id)!,

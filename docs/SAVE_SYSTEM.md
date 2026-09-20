@@ -20,15 +20,17 @@ Kullanıcının belgelerine veya ortak klasörlere yazılmaz.
 
 ## Dosya biçimi
 ```json
-{ "formatVersion": 1, "savedAt": "...", "state": { ... } }
+{ "formatVersion": 3, "savedAt": "...", "state": { ... } }
 ```
 
 - `formatVersion` **en dış katmandadır**; içerik şeması değişse bile dosyanın
   hangi sürüme ait olduğu her zaman okunabilir.
 - Enum değerleri **adlarıyla** yazılır (sıra numarasıyla değil), böylece
   ileride enum sırası değişse eski kayıtlar bozulmaz.
-- Eski sürümleri güncel şemaya taşımak için `SaveMigrations.migrate` kancası
-  hazırdır; şu an tek sürüm olduğu için adım yoktur.
+- Eski sürümleri güncel şemaya taşımak için `SaveMigrations.migrate` zinciri
+  kullanılır. Bugüne kadarki adımlar: **1 → 2** okul kişileri okula/sınıfa
+  bağlandı, **2 → 3** eşyalar tür kümesinden gerçek eşya örneklerine geçti
+  (bkz. `docs/ITEM_SYSTEM.md`).
 - Kayıt **daha yeni** bir sürümden geliyorsa açılmaz; kullanıcıya oyunu
   güncellemesi gerektiği söylenir ve dosyaya dokunulmaz.
 

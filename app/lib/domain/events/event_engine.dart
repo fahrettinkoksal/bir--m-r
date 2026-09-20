@@ -8,6 +8,7 @@ import '../interaction/romance.dart';
 import '../models/game_event.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
+import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
 import '../models/stats.dart';
@@ -260,7 +261,6 @@ class EventEngine {
         ...working.storyFlags.where((String f) => !choice.removeFlags.contains(f)),
         ...choice.addFlags,
       },
-      possessions: <String>{...working.possessions, ...choice.addPossessions},
       seenEventIds: <String>{...working.seenEventIds, active.eventId},
       // Tekrar aralığı denetimi için olayın çıktığı yaş kaydedilir.
       lastEventAge: <String, int>{
@@ -286,6 +286,15 @@ class EventEngine {
       // Olay çözüldü: ek olay için ilerleme yeniden birikmeye başlar.
       progressSinceLastEvent: 0,
     );
+
+    // Olayla kazanılan eşyalar gerçek envanter örneği olarak eklenir.
+    if (choice.addPossessions.isNotEmpty) {
+      working = working.grantItems(
+        choice.addPossessions,
+        source: ItemSource.olay,
+        fromPersonId: bondTargetId,
+      );
+    }
 
     // İlişkiyi bitiren seçim: kişi silinmez, aynı kimlikle eski sevgili olur.
     if (choice.endsRomance && active.personId != null) {

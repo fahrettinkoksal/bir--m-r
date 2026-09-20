@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'gift_catalog.dart';
+import 'item_catalog.dart';
 
-/// Sahip olunan eşyaların okunaklı adları ve simgeleri.
+/// Eşya türünün okunaklı adı.
 ///
-/// Hediye kataloğundaki eşyalar adlarını oradan alır; burada yalnızca
-/// katalog dışından edinilen eşyalar tanımlanır. Böylece aynı eşya iki yerde
-/// farklı adla görünmez.
-const Map<String, ({String ad, IconData ikon})> kPossessionNames =
-    <String, ({String ad, IconData ikon})>{
-  'bisiklet': (ad: 'Bisiklet', ikon: Icons.pedal_bike_outlined),
-};
+/// Tek kaynak `item_catalog.dart`'tır; ad ve simge iki yerde farklı olmaz.
+String possessionName(String typeId) => itemTypeOrFallback(typeId).name;
 
-String possessionName(String id) =>
-    kPossessionNames[id]?.ad ?? giftById(id)?.name ?? id;
-
-IconData possessionIcon(String id) =>
-    kPossessionNames[id]?.ikon ??
-    giftById(id)?.icon ??
-    Icons.inventory_2_outlined;
+IconData possessionIcon(String typeId) => itemTypeOrFallback(typeId).icon;

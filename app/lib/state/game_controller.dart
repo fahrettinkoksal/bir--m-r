@@ -3,7 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../data/item_catalog.dart';
 import '../data/save/save_service.dart';
+import '../data/shop_catalog.dart';
 
 import '../domain/generation/life_generator.dart';
 import '../domain/generation/life_progression.dart';
@@ -11,11 +13,13 @@ import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
 import '../domain/interaction/family_interactions.dart';
+import '../domain/interaction/item_actions.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
 import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
 import '../domain/models/interaction.dart';
+import '../domain/models/owned_item.dart';
 import '../domain/models/person.dart';
 
 /// Uygulamanın tek durum sahibi.
@@ -31,6 +35,7 @@ class GameController extends ChangeNotifier {
   final FamilyInteractions _interactions = const FamilyInteractions();
   final EventEngine _events = const EventEngine();
   final Romance _romance = const Romance();
+  final ItemActions _items = const ItemActions();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -241,6 +246,95 @@ class GameController extends ChangeNotifier {
     return _interactions.availableKinds(current, person);
   }
 
+  // =====================================================================
+  // Eşyalar (Varlıklar)
+  // =====================================================================
+
+  /// Bir eşyada şu an gerçekten yapılabilecek eylemler.
+  List<ItemActionKind> itemActionsFor(OwnedItem item) {
+    final GameState? current = _state;
+    if (current == null) return const <ItemActionKind>[];
+    return _items.availableActions(current, item);
+  }
+
+  /// Eylemin neden kapalı olduğunu açıklar.
+  InteractionAvailability itemAvailability(
+    OwnedItem item,
+    ItemActionKind action,
+  ) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _items.availability(current, item, action);
+  }
+
+  /// Bu eşyaya takılabilecek, envanterdeki aksesuarlar.
+  List<OwnedItem> compatibleAccessoriesFor(OwnedItem item) {
+    final GameState? current = _state;
+    if (current == null) return const <OwnedItem>[];
+    return _items.compatibleAccessories(current, item);
+  }
+
+  /// Bakım ücreti.
+  int repairCostFor(OwnedItem item) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _items.repairCost(current, item);
+  }
+
+  /// Satışta teklif edilecek tutar.
+  int estimatedPriceFor(OwnedItem item) => _items.estimatedPrice(item);
+
+  /// Eşya eylemini uygular (kullan / temizle / bakım).
+  ItemOutcome? performItemAction(String itemId, ItemActionKind action) =>
+      _runItemAction(
+        (GameState current) => _items.perform(
+          state: current,
+          itemId: itemId,
+          action: action,
+          rng: _random,
+        ),
+      );
+
+  /// Uyumlu aksesuarı eşyaya takar.
+  ItemOutcome? attachAccessory(String itemId, String accessoryItemId) =>
+      _runItemAction(
+        (GameState current) => _items.attachAccessory(
+          state: current,
+          itemId: itemId,
+          accessoryItemId: accessoryItemId,
+        ),
+      );
+
+  /// Eşyayı satar. Onay arayüzde alınır; burada tek bir satış uygulanır.
+  ItemOutcome? sellItem(String itemId) => _runItemAction(
+        (GameState current) => _items.sell(state: current, itemId: itemId),
+      );
+
+  /// Mağazadan ürün alır.
+  ItemOutcome? buyProduct(ShopProduct product) => _runItemAction(
+        (GameState current) => _items.buy(state: current, product: product),
+      );
+
+  /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum
+  /// gerçekten değiştiyse kaydeder.
+  ItemOutcome? _runItemAction(ItemActionResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+
+    final ItemActionResult result = islem(current);
+    if (!result.outcome.applied) {
+      // İşlem gerçekleşmedi: durum ve kayıt dosyası değişmez.
+      return result.outcome;
+    }
+
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
   /// Sevgiliden ayrılır (D-029).
   ///
   /// Kişi kaydı silinmez; **aynı kimlikle** eski sevgili statüsüne geçer.
@@ -254,6 +348,13 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return next.log.last.text;
+  }
+
+  /// Yalnızca testler için: durumu doğrudan ayarlar.
+  @visibleForTesting
+  void debugSetState(GameState state) {
+    _state = state;
+    notifyListeners();
   }
 
   /// Hayatı ekrandan kaldırıp başlangıç ekranına döner.

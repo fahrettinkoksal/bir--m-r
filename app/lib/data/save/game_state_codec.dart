@@ -14,6 +14,7 @@ import '../../domain/models/game_state.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
+import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/player_character.dart';
@@ -36,7 +37,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'interactionCounts': state.interactionCounts,
       'lastInteractionAge': state.lastInteractionAge,
       'storyFlags': state.storyFlags.toList(growable: false),
-      'possessions': state.possessions.toList(growable: false),
+      'items': state.items.map(_encodeItem).toList(growable: false),
       'seenEventIds': state.seenEventIds.toList(growable: false),
       'lastEventAge': state.lastEventAge,
       'storyPeople': state.storyPeople,
@@ -84,6 +85,16 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'schoolTie': p.schoolTie?.name,
       'schoolId': p.schoolId,
       'classId': p.classId,
+    };
+
+Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
+      'id': i.id,
+      'typeId': i.typeId,
+      'acquiredAtAge': i.acquiredAtAge,
+      'source': i.source.name,
+      'fromPersonId': i.fromPersonId,
+      'condition': i.condition,
+      'attachments': i.attachments,
     };
 
 Map<String, Object?> _encodeGift(GiftRecord g) => <String, Object?>{
@@ -169,6 +180,21 @@ GameState decodeGameState(Map<String, Object?> json) {
     }
   }
 
+  // Aynı eşya kimliğinden iki kayıt, aynı eşyanın ikiye bölünmesi demektir.
+  final Object? hamEsyalar = json['items'];
+  if (hamEsyalar is List) {
+    final Set<String> gorulenEsyalar = <String>{};
+    for (final Object? e in hamEsyalar) {
+      if (e is! Map) continue;
+      final Object? id = e['id'];
+      if (id is String && !gorulenEsyalar.add(id)) {
+        throw SaveFormatException(
+          'Kayıtta aynı eşya kimliği birden fazla kez geçiyor: $id',
+        );
+      }
+    }
+  }
+
   final Object? pending = json['pendingEvent'];
 
   return GameState(
@@ -195,7 +221,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     lastInteractionAge:
         Map<String, int>.unmodifiable(_intMap(json, 'lastInteractionAge')),
     storyFlags: Set<String>.unmodifiable(_stringSet(json, 'storyFlags')),
-    possessions: Set<String>.unmodifiable(_stringSet(json, 'possessions')),
+    items: List<OwnedItem>.unmodifiable(
+      _list(json, 'items')
+          .map((Object? e) => _decodeItem(_asMap(e, 'items[]')))
+          .toList(growable: false),
+    ),
     seenEventIds: Set<String>.unmodifiable(_stringSet(json, 'seenEventIds')),
     lastEventAge: Map<String, int>.unmodifiable(_intMap(json, 'lastEventAge')),
     storyPeople: Map<String, String>.unmodifiable(
@@ -286,6 +316,25 @@ Person _decodePerson(Map<String, Object?> json) {
     ),
     schoolId: _stringOrNull(json, 'schoolId'),
     classId: _stringOrNull(json, 'classId'),
+  );
+}
+
+OwnedItem _decodeItem(Map<String, Object?> json) {
+  final int condition = _int(json, 'condition');
+  if (condition < 0 || condition > 100) {
+    throw SaveFormatException(
+      'Kayıttaki eşyanın kondisyonu geçersiz: $condition '
+      '(${_string(json, 'id')}).',
+    );
+  }
+  return OwnedItem(
+    id: _string(json, 'id'),
+    typeId: _string(json, 'typeId'),
+    acquiredAtAge: _int(json, 'acquiredAtAge'),
+    source: _enumByName(ItemSource.values, _string(json, 'source'), 'item.source'),
+    fromPersonId: _stringOrNull(json, 'fromPersonId'),
+    condition: condition,
+    attachments: List<String>.unmodifiable(_stringList(json, 'attachments')),
   );
 }
 
@@ -433,6 +482,15 @@ bool _bool(Map<String, Object?> json, String key) {
   final Object? value = json[key];
   if (value is bool) return value;
   _eksik(key, 'evet/hayır');
+}
+
+List<String> _stringList(Map<String, Object?> json, String key) {
+  final List<String> sonuc = <String>[];
+  for (final Object? e in _list(json, key)) {
+    if (e is! String) _eksik(key, 'metin listesi');
+    sonuc.add(e);
+  }
+  return sonuc;
 }
 
 Set<String> _stringSet(Map<String, Object?> json, String key) {

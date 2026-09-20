@@ -6,6 +6,7 @@ import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
@@ -175,8 +176,10 @@ void main() {
       expect(state.possessions, isEmpty);
       expect(sadeceZincir.openingEvent(state, Random(1)), isNull);
 
-      final GameState bisikletli =
-          state.copyWith(possessions: <String>{Possessions.bisiklet});
+      final GameState bisikletli = state.grantItems(
+        <String>[Possessions.bisiklet],
+        source: ItemSource.olay,
+      );
       expect(sadeceZincir.openingEvent(bisikletli, Random(1)), isNotNull);
     });
 
