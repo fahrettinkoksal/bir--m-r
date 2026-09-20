@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/item_catalog.dart';
 import 'relation.dart';
 
 /// Olayın hangi yaşam alanından geldiği (D-023).
@@ -29,6 +30,7 @@ class EventRequirement {
     this.requiredFlags = const <String>{},
     this.forbiddenFlags = const <String>{},
     this.requiredPossessions = const <String>{},
+    this.requiredPossessionKinds = const <ItemKind>{},
     this.requiresSchoolStudent = false,
     this.minGrade,
     this.maxGrade,
@@ -59,7 +61,16 @@ class EventRequirement {
   final Set<String> forbiddenFlags;
 
   /// Sahip olunması gereken varlıklar; olmayan araç için olay çıkmaz.
+  ///
+  /// Tam **tür kimliği** arar: yalnızca o eşyaya özgü olaylar içindir.
   final Set<String> requiredPossessions;
+
+  /// Sahip olunması gereken eşya **çeşitleri**.
+  ///
+  /// "Herhangi bir otomobil" gibi koşullar içindir: tek bir ürün kimliğine
+  /// bağlanan olay, oyuncunun başka model araba almasıyla hiç çıkmaz hâle
+  /// geliyordu. Listedeki her çeşitten **en az bir** eşya gerekir.
+  final Set<ItemKind> requiredPossessionKinds;
 
   /// Okula devam ediyor olmayı gerektirir (yaş değil, eğitim durumu).
   final bool requiresSchoolStudent;
@@ -176,6 +187,30 @@ class EventChoice {
   ///
   /// Sonraki olaylar [EventRequirement.personRole] ile aynı kişiyi bulur.
   final String? rememberPersonAs;
+
+  /// Yalnızca etiketi değişmiş bir kopya.
+  ///
+  /// Seçenek metnindeki `{kisi}` gibi yer tutucular ekrana gelmeden
+  /// doldurulsun diye vardır; sonuçlar aynen korunur.
+  EventChoice withLabel(String newLabel) => EventChoice(
+        id: id,
+        label: newLabel,
+        resultText: resultText,
+        happiness: happiness,
+        health: health,
+        intelligence: intelligence,
+        charisma: charisma,
+        appearance: appearance,
+        bond: bond,
+        money: money,
+        addFlags: addFlags,
+        removeFlags: removeFlags,
+        addPossessions: addPossessions,
+        startsRomance: startsRomance,
+        endsRomance: endsRomance,
+        startsSchoolFriendship: startsSchoolFriendship,
+        rememberPersonAs: rememberPersonAs,
+      );
 }
 
 /// Olay tanımı. Havuz modülerdir; yeni olay eklemek listeye kayıt eklemektir.

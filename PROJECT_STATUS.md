@@ -404,6 +404,17 @@ almayacağı **Q-067**'de karar bekliyor. Evlilik/çocuk ayrıntıları **Q-063*
 ve **Q-064** altında Faho'nun kararını bekliyor; `DECISIONS.md`'ye yeni
 kalıcı kural yazılmadı.
 
+**Olay havuzu (Paket F1):** katalog **74 → 113 olay**. 80 yaş üstünde olay
+oranı %63/%47/%34/%30 iken **%93/%84/%81/%83** oldu; hayatın son yılları
+artık sessiz kalmıyor. Beş yeni sonuç zinciri eklendi (fidan → ağaç,
+emanet para → güven/gölge, komşu gerginliği → yardım/soğukluk, sokak
+hayvanı → dönüş, ergenlik defteri → eski defter). Ölçüm aracı düzeltildi
+(artık seçenekler rastgele işaretleniyor, devam olayları da ölçülüyor).
+Bu turda üç gerçek hata düzeltildi: kriz yolundan gelen ölümde ekrandaki
+olayın temizlenmemesi, seçenek etiketlerindeki yer tutucuların ham
+kalması ve eşya koşulunun tek ürün kimliğine bağlı olması. Ayrıntı:
+`docs/BALANCE_REPORT.md` §9.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

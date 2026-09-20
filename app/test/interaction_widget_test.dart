@@ -109,12 +109,20 @@ void main() {
         .firstWhere((Person p) => p.relation == RelationType.baba);
 
     int kabulSayisi = 0;
-    for (int i = 0; i < 10; i++) {
+    // Sayaca en az üç tekrar işlenene kadar denenir. Sabit deneme sayısı,
+    // olay havuzu büyüdükçe araya giren ek olaylar yüzünden kırılgandı;
+    // sınanan şey deneme sayısı değil, **tekrarların sayaca işlenmesi**.
+    for (int i = 0; i < 40; i++) {
       // Etkileşim sırasında ilerlemeye bağlı bir ek olay çıkarsa yanıtla.
       await answerPendingEvents(tester, controller);
       final InteractionOutcome? o =
           controller.interact(anne.id, InteractionKind.vakitGecir);
       if (o != null && o.accepted) kabulSayisi++;
+      if (controller.state!
+              .interactionCount(anne.id, InteractionKind.vakitGecir.name) >=
+          3) {
+        break;
+      }
     }
     await answerPendingEvents(tester, controller);
     expect(kabulSayisi, greaterThan(0));

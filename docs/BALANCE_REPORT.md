@@ -406,3 +406,58 @@ bağlı); bunlar ayrı testlerle tek tek doğrulanıyor.
 - Aile tabloları oyuncunun **evlenip çocuk sahibi olduğu** senaryonun oran
   hesabıdır; simülasyon bu adımları kendiliğinden oynamaz. Eşin geliri
   hane bütçesine katılmıyor (Q-063, 4. soru).
+
+## 9) Olay havuzunun büyütülmesi (Paket F1)
+
+Ölçüm aracı aynı: `app/tool/event_report.dart` (300 hayat). Bu turda araç
+da düzeltildi: önceden her olayda **ilk seçenek** işaretleniyordu, bu
+yüzden sonucu başka seçeneklere bağlı devam olayları ölçümde hiç
+görünmüyordu. Artık seçenek rastgele seçiliyor, ölçüm dalları da kapsıyor.
+
+### 9.1 Katalog
+
+| | Paket 4 sonu | Paket F1 sonu |
+|---|---|---|
+| Olay sayısı | 74 | **113** |
+| Yaş başına olay oranı | %95,0 | **%98,5** |
+| Hiç çıkmayan olay | 5 | **1** (`gece_muzigi`, kulaklık gerektirir) |
+
+Hiç çıkmayan 5 olayın dördü aslında **ölçüm hatasıydı**: ilk seçenek
+sabitlendiği için devam olayları tetiklenmiyordu.
+
+### 9.2 İleri yaş (asıl boşluk)
+
+| Yaş | Paket 4 sonu | Paket F1 sonu |
+|---|---|---|
+| 75-79 | %89 | **%94** |
+| 80-84 | %63 | **%93** |
+| 85-89 | %47 | **%84** |
+| 90-94 | %34 | **%81** |
+| 95-99 | %30 | **%83** |
+
+İleri yaşta hayat artık sessizleşmiyor: sabah yürüyüşü, hastane kuyruğu,
+telefon dolandırıcılığı, unutulan isim, fotoğraf kutusu, komşu kapısı,
+yardım teklifi ve evin anahtarı gibi olaylar eklendi.
+
+### 9.3 Yeni sonuç zincirleri
+
+Geçmiş kararın ileride karşına çıktığı beş yeni zincir:
+fidan → ağaç, emanet para → güven/gölge, komşu gerginliği →
+yardım/soğukluk, beslenen sokak hayvanı → dönüş, ergenlik defteri →
+eski defter. Her biri testle kilitlendi.
+
+### 9.4 Bu turda bulunan gerçek hatalar
+
+- **Kriz yolundan gelen ölümde ekrandaki olay temizlenmiyordu**: oyuncu
+  vefat ettiği hâlde kayıtta yanıtlanmamış bir olay kalıyordu (yaşa bağlı
+  ölümde zaten temizleniyordu). Düzeltildi ve teste bağlandı.
+- **Seçenek etiketlerindeki yer tutucular doldurulmuyordu**: `{kisi}`
+  yazan bir seçenek etiketi ekranda ham hâliyle görünürdü. Artık olay
+  metniyle aynı şekilde dolduruluyor.
+- **Eşya koşulu tek ürün kimliğine bağlıydı**: "arabası olan" koşulu
+  yalnızca tek bir araba modeliyle çalışıyordu. Artık eşya **çeşidi**
+  (`ItemKind`) ile de koşul yazılabiliyor; başka model araba alan oyuncu
+  o olayların dışında kalmıyor.
+
+Bütün sayılar `prototypeOnly`; tekrar aralıkları ve yoğunluk kararı
+**Q-066** altında bekliyor.

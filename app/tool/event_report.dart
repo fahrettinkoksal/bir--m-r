@@ -76,8 +76,14 @@ void _rapor() {
         olayAdedi[olay.eventId] = (olayAdedi[olay.eventId] ?? 0) + 1;
         buHayatta[olay.eventId] = (buHayatta[olay.eventId] ?? 0) + 1;
         yasBasinaOlay[yas] = (yasBasinaOlay[yas] ?? 0) + 1;
-        state = const EventEngine()
-            .resolve(state, olay.choices.first.id, rng: rng);
+        // Seçenek **rastgele** seçilir: hep ilk seçenek işaretlenseydi,
+        // sonucu başka seçeneklere bağlı olan devam olayları ölçümde hiç
+        // görünmezdi.
+        state = const EventEngine().resolve(
+          state,
+          olay.choices[rng.nextInt(olay.choices.length)].id,
+          rng: rng,
+        );
       }
 
       // Hayatın olağan akışı: iş, evlilik, çocuk, ev.

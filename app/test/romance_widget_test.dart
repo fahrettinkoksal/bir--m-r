@@ -2,13 +2,14 @@ import 'dart:math';
 
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/data/event_pool.dart';
-import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 /// `docs/PROTOTYPE_UI.md` §4'teki temsilî test yolu:
 /// Aile → "… — Kız Arkadaş" → kişi detayı → ayrılık → Aile → "… — Eski Kız
@@ -17,7 +18,10 @@ void main() {
   late GameController controller;
 
   setUp(() {
-    controller = GameController(random: Random(7));
+    // Tohum sabittir: bu hayatta romantik zincir tamamlanıyor. Olay havuzu
+    // büyüdükçe rastgele akış değiştiği için tohum değiştirildi (7 ile hayat
+    // kriz yüzünden erken bitiyordu).
+    controller = GameController(random: Random(11));
   });
 
   tearDown(() => controller.dispose());
@@ -34,18 +38,17 @@ void main() {
     int guard = 0;
     while (partnerOf(RelationType.sevgili) == null) {
       if (guard++ > 60) fail('Sevgili edinilemedi.');
-      while (controller.state!.hasPendingEvent) {
-        final ActiveEvent event = controller.state!.pendingEvent!;
-        final EventChoice choice = event.choices.firstWhere(
-          (EventChoice c) => <String>['selam', 'teklif'].contains(c.id),
-          orElse: () => event.choices.first,
-        );
-        await tester.tap(find.text(choice.label));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Devam'));
-        await tester.pumpAndSettle();
-        if (partnerOf(RelationType.sevgili) != null) return;
-      }
+      // Sağlık krizi olay penceresinden önce gelir (D-044); kriz açıkken
+      // olay düğmeleri ekranda olmaz. Ortak yardımcı ikisini de yanıtlar.
+      await answerPendingEvents(
+        tester,
+        controller,
+        preferChoiceIds: <String>{'selam', 'teklif'},
+      );
+      if (partnerOf(RelationType.sevgili) != null) return;
+      // Hayat bu seed'de kriz yüzünden erken biterse test yanıltıcı bir
+      // yerde takılmasın.
+      if (controller.state!.deceased) fail('Sevgili edinilmeden hayat bitti.');
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
     }

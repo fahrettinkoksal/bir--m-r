@@ -155,6 +155,10 @@ class HealthCrisisEngine {
         deceased: true,
         deathAge: state.player.age,
         deathCause: gerekce,
+        // Hayat tamamlandı: ekranda yanıtlanmamış olay kalmaz. Yaşa bağlı
+        // ölümde (LifeProgression) zaten temizleniyordu; kriz yolunda
+        // kalıyor ve vefat eden oyuncuya olay soruluyordu.
+        pendingEvent: null,
       );
       return CrisisResult(
         state: _log(next, metin),

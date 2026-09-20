@@ -21,20 +21,32 @@ Future<void> answerPendingEvents(
   WidgetTester tester,
   GameController controller, {
   String? preferChoiceId,
+  Set<String> preferChoiceIds = const <String>{},
 }) async {
   await tester.pumpAndSettle();
   // Sağlık krizi olay penceresinden önce gelir (D-044); önce o yanıtlanır.
   await answerPendingCrisis(tester, controller);
   int guard = 0;
   while (controller.state!.hasPendingEvent) {
+    // Hayat tamamlandıysa olay ekranı açılmaz; vefat eden oyuncuya olay
+    // sorulmaz.
+    if (controller.state!.deceased) return;
     if (guard++ > 20) {
       fail('Olaylar kapanmıyor: sonsuz döngü koruması devreye girdi.');
     }
     final ActiveEvent event = controller.state!.pendingEvent!;
     final EventChoice choice = event.choices.firstWhere(
-      (EventChoice c) => c.id == preferChoiceId,
+      (EventChoice c) =>
+          c.id == preferChoiceId || preferChoiceIds.contains(c.id),
       orElse: () => event.choices.first,
     );
+    // Olay penceresi açılmadan düğme aranmaz; kriz penceresi kapandıktan
+    // sonra açılması bir kare sürebiliyor.
+    await tester.pumpAndSettle();
+    if (find.text(choice.label).evaluate().isEmpty) {
+      await answerPendingCrisis(tester, controller);
+      await tester.pumpAndSettle();
+    }
     await tester.tap(find.text(choice.label));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Devam'));

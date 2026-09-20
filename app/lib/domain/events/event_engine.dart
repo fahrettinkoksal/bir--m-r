@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/event_pool.dart';
+import '../../data/item_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
 import '../interaction/friendship.dart';
@@ -98,6 +99,14 @@ class EventEngine {
     if (!state.storyFlags.containsAll(req.requiredFlags)) return false;
     if (req.forbiddenFlags.any(state.storyFlags.contains)) return false;
     if (!state.possessions.containsAll(req.requiredPossessions)) return false;
+    // "Herhangi bir araba/konut" koşulu: eşyanın çeşidine bakılır, tek bir
+    // ürün kimliğine bağlanmaz.
+    for (final ItemKind kind in req.requiredPossessionKinds) {
+      final bool varMi = state.items.any(
+        (OwnedItem i) => itemTypeOrFallback(i.typeId).kind == kind,
+      );
+      if (!varMi) return false;
+    }
     // Ehliyet ve sosyal medya hesabı: olmayan şeyle olay kurulmaz.
     if (!state.licenses.containsAll(req.requiredLicenses)) return false;
     if (req.requiresSocialAccount && state.socialAccounts.isEmpty) {
@@ -182,7 +191,15 @@ class EventEngine {
       eventId: candidate.event.id,
       category: candidate.event.category,
       text: _fill(candidate.event.text, candidate.person, state.player.age),
-      choices: candidate.event.choices,
+      // Seçenek etiketlerindeki yer tutucular da doldurulur; ekranda
+      // "{kisi}" yazmaz.
+      choices: List<EventChoice>.unmodifiable(<EventChoice>[
+        for (final EventChoice c in candidate.event.choices)
+          if (c.label.contains('{'))
+            c.withLabel(_fill(c.label, candidate.person, state.player.age))
+          else
+            c,
+      ]),
       personId: candidate.person?.id,
     );
   }
