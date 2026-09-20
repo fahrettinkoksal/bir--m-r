@@ -1303,5 +1303,62 @@ ekranıyla doldurulabilir. Bu bir tasarım kararıdır, değiştirilmedi.
 **Varsayılan işlem:** Yalnızca ölçümle görülen açık boşluklar (0-4 yaş,
 ileri yaş, spam tekrar) kapatıldı; `DECISIONS.md`'ye yeni kural yazılmadı.
 
+### Q-067 — Kuşak devamı: neyin taşınacağı ve kaç kuşak
+**Durum:** Kodlandı, **karar bekliyor** (bütün değerler ve taşıma kuralları `prototypeOnly`). **Kaynak:** Paket E3 ("kuşak sistemini kodla" talimatı). **Bağlantılı:** Q-062 (kuşak sistemi), Q-063 (evlilik), Q-064 (çocuk), Q-059 (miras).
+
+**Şu an kodda olan (geçici) davranış — `GenerationContinuation`:**
+- Seçenek yalnızca oyuncu vefat ettiğinde ve **hayatta bir çocuğu varsa**
+  hayat özeti ekranında çıkar. Çocuk yoksa hiç gösterilmez (D-038).
+- Oyuncu **hangi çocukla** devam edeceğini seçer (birden fazlaysa liste).
+- Taşınanlar: çocuğun kendi kaydı (ad, yaş, cinsiyet, şehir), sağ kalan
+  ebeveyn (eski eş, boşanmış olsa da **anne/baba** olur), diğer çocuklar
+  (**kardeş**), eski oyuncunun anne-babası (**büyükanne/büyükbaba**) ve
+  kardeşleri (**teyze/dayı/hala/amca**).
+- Taşınmayanlar: eski oyuncunun arkadaşları, öğretmenleri, sınıf
+  arkadaşları, romantik geçmişi, hikâye izleri, olay geçmişi, evcil
+  hayvanları (yaşları tutulmadığı için ölümsüz hayvan üretirdi). O hayat
+  **Geçmiş Hayatlar arşivinde** durur; kayıt şişmez.
+- Eski oyuncu kayıtta **vefat etmiş ebeveyn** olarak kalır; mesleği son
+  işinden yazılır, mal varlığı dağıtıldığı için boştur.
+- Miras: sağ kalan eş varsa nakdin %25'ini alır (Q-059 ile aynı oran),
+  kalan hayattaki çocuklara eşit bölünür. Eşyalar bölünmez, sırayla
+  dağıtılır; devam eden çocuğa geçenler **aynı eşya kimliğiyle** geçer,
+  başkasına düşenler o kişinin mal varlığına yazılır. **Borç miras
+  kalmaz** (eksi bakiye 0 sayılır). Aynı miras iki kez dağıtılmaz.
+- Ün, meslek, ehliyet, sosyal medya ve eğitim geçmişi taşınmaz.
+- Yeni oyuncunun özellikleri (görünüş, zekâ, karizma...) **yeniden
+  çizilir**; ebeveynden özellik aktarımı yoktur.
+- Eğitim yaşa göre kurulur: 6 yaş altı okula başlamamış, 6-17 yaşına uygun
+  sınıfta, 18 ve üstü lise mezunu.
+- Taşınan kişilerin yakınlık puanı nötre (55) doğru çekilir: eski
+  oyuncunun yakınlığı yeni kuşağın yakınlığı sayılmaz ama sıfırlanmaz da.
+- Kuşak sayacı (`GameState.generation`) tutulur, arşivde rozetle görünür;
+  **üst sınır yoktur**.
+
+**Karar soruları:**
+1. Devam edilecek çocuğu oyuncu mu seçmeli, yoksa en büyük çocuk mu
+   otomatik devralmalı?
+2. Dünyanın ne kadarı taşınmalı? (Şu an yalnızca kan bağı ve sağ kalan
+   ebeveyn taşınıyor; eski oyuncunun yakın arkadaşları da taşınsın mı?)
+3. Kaç kuşak sürebilmeli? Sınır olmalı mı?
+4. Çocuk ebeveynden özellik (zekâ, görünüş, sağlık) devralmalı mı?
+5. Yetişkin çocukla devam edilince meslek ve eğitim gerçekten sıfırdan mı
+   başlamalı? (Şu an 40 yaşında devam eden çocuk "lise mezunu, işsiz"
+   oluyor; NPC'lerin eğitim/iş geçmişi tutulmuyor.)
+6. Kuşak devam ederken eski hayatın evi/parası dışında **aile itibarı**
+   gibi bir şey taşınmalı mı?
+7. Küçük yaştaki çocukla devam edilebilmeli mi, yoksa asgari bir yaş mı
+   olmalı? (Şu an her yaştaki hayattaki çocuk seçilebiliyor; 8 yaşındaki
+   çocukla devam edilirse mevcut bakım kuralları devreye giriyor.)
+8. Arşivde kuşaklar nasıl gösterilsin? (Şu an yalnızca "2. kuşak" rozeti
+   var; soy ağacı ekranı ayrı bir iş.)
+
+**Claude'un önerisi (yalnızca öneri):** 5. madde en görünür boşluk; çocuk
+NPC'lerine basit bir "eğitim/iş geçmişi" alanı eklenirse devam eden
+oyuncunun geçmişi uydurulmadan taşınabilir.
+
+**Varsayılan işlem:** `DECISIONS.md`'ye hiçbir kural yazılmadı; bütün
+değerler `prototypeOnly` ve geri alınabilir.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
