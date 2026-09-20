@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 14;
+const int kSaveFormatVersion = 15;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -68,7 +68,19 @@ abstract final class SaveMigrations {
     if (from <= 11) guncel = _v11ToV12(guncel);
     if (from <= 12) guncel = _v12ToV13(guncel);
     if (from <= 13) guncel = _v13ToV14(guncel);
+    if (from <= 14) guncel = _v14ToV15(guncel);
     return guncel;
+  }
+
+  /// Sürüm 14 → 15: evlilik ve çocuklar eklendi.
+  ///
+  /// Eski kayıtta evlilik kaydı yoktur: hayat bekâr olarak sürer, sevgili
+  /// ve bütün kişiler **aynı kimlikle** korunur, çocuk üretilmez. Miras,
+  /// gider ve hane hesapları olduğu gibi çalışmaya devam eder.
+  static Map<String, Object?> _v14ToV15(Map<String, Object?> body) {
+    // Evlilik kaydı yeni bir alandır; eski kayıtta bulunmaz ve okurken
+    // `null` kabul edilir. Taşınacak veri yoktur, hiçbir alan silinmez.
+    return body;
   }
 
   /// Sürüm 13 → 14: sağlık krizleri (hastalık ve kaza) eklendi.

@@ -1,3 +1,4 @@
+import '../interaction/parenthood.dart';
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
@@ -94,6 +95,14 @@ abstract final class LivingCosts {
     ],
   };
 
+  /// prototypeOnly: hanede bakılan her çocuğun yıllık gideri.
+  ///
+  /// Çocuk gideri yaşam düzeninden bağımsızdır ve **çocuk sayısıyla**
+  /// çarpılır. Eşin kendi geliri kendi giderini karşılar sayılır; eşin
+  /// hane ekonomisine katkısı ve ortak bütçe henüz tasarlanmadı (Q-063).
+  static const CostItem prototypeOnlyChildCost =
+      CostItem(label: 'Çocuk gideri', base: 24000, incomeShare: 0.03);
+
   /// Oyuncu bu yaşta hane içinde bir yetişkinle mi yaşıyor?
   static bool livesWithFamily(GameState state) => state.people.any(
         (Person p) =>
@@ -129,15 +138,26 @@ abstract final class LivingCosts {
       (state.career.job?.yearlySalary ?? 0) + Housing.yearlyRentIncome(state);
 
   /// Bu yılın gider dökümü.
+  ///
+  /// Hanede bakılan çocuk varsa ayrı bir kalem eklenir; gerçek çocuk
+  /// kayıtlarından sayılır, uydurma bir sayaç tutulmaz (D-038).
   static CostBreakdown breakdownFor(GameState state) {
     final LivingSituation durum = situationOf(state);
     final int gelir = yearlyIncome(state);
+    final int cocukSayisi = Parenthood.dependentChildren(state).length;
     return CostBreakdown(
       situation: durum,
       income: gelir,
       items: <({String label, int amount})>[
         for (final CostItem kalem in prototypeOnlyItems[durum]!)
           (label: kalem.label, amount: kalem.amountFor(gelir)),
+        if (cocukSayisi > 0)
+          (
+            label: cocukSayisi == 1
+                ? prototypeOnlyChildCost.label
+                : '${prototypeOnlyChildCost.label} ($cocukSayisi çocuk)',
+            amount: prototypeOnlyChildCost.amountFor(gelir) * cocukSayisi,
+          ),
       ],
     );
   }

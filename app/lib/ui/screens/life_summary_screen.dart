@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
+import '../../domain/models/relation.dart';
 import '../../domain/models/person.dart';
 import '../../state/game_scope.dart';
 import '../widgets/kilim_divider.dart';
@@ -30,8 +31,11 @@ class LifeSummaryScreen extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final GameState state = GameScope.of(context).state!;
 
+    // Eş kan bağı değildir ama hayatın ailesindedir; çocuklar zaten
+    // kan bağıyla listeye girer.
     final List<Person> aile = state.people
-        .where((Person p) => p.relation.kanBagi)
+        .where((Person p) =>
+            p.relation.kanBagi || p.relation == RelationType.es)
         .toList(growable: false);
     final List<LifeLogEntry> donumNoktalari = state.log
         .where((LifeLogEntry e) => e.category != LogCategory.yasDegisimi)

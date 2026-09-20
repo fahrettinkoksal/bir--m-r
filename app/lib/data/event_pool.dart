@@ -28,6 +28,13 @@ abstract final class StoryFlags {
   static const String romantikIliskide = 'romantik_iliskide';
   static const String romantikBitti = 'romantik_bitti';
   static const String romantikGecti = 'romantik_gecti';
+
+  /// Evlilik izleri (Paket E1).
+  static const String evlendi = 'evlendi';
+  static const String bosandi = 'bosandi';
+
+  /// Çocuk sahibi olma izi (Paket E2).
+  static const String cocukSahibi = 'cocuk_sahibi';
 }
 
 /// Hikâyede kimliği sabitlenen kişi rolleri.

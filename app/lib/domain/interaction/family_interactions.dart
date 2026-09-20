@@ -115,6 +115,14 @@ class FamilyInteractions {
         'Bu kişi hayatta değil; etkileşim kurulamaz.',
       );
     }
+    if (person.relation == RelationType.eskiEs) {
+      // Boşanma sonrası hangi etkileşimlerin açık kalacağı henüz
+      // kararlaştırılmadı (Q-063); uydurma bir kural uygulanmaz.
+      return const InteractionAvailability.blocked(
+        'Boşandınız. Eski eşle hangi etkileşimlerin açık kalacağı henüz '
+        'tasarlanmadı.',
+      );
+    }
     if (person.relation == RelationType.eskiSevgili) {
       // Ayrılık sonrası sevgiliye özel eylemler koşulsuz açılmaz
       // (`docs/CLAUDE_PROTOTYPE_TASK.md` Aşama 4). Eski sevgiliyle hangi

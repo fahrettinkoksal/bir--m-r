@@ -12,6 +12,7 @@ import 'gift_record.dart';
 import 'owned_item.dart';
 import 'life_log.dart';
 import 'life_summary.dart';
+import 'marriage.dart';
 import 'parental_status.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
@@ -69,6 +70,7 @@ class GameState {
     this.pendingCrisis,
     this.lastCrisisAge,
     this.healthWarned = false,
+    this.marriage,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -316,6 +318,41 @@ class GameState {
   /// Düşük sağlık uyarısı verildi mi? Aynı uyarı her yıl tekrarlanmaz.
   final bool healthWarned;
 
+  /// Oyuncunun evlilik kaydı; hiç evlenilmediyse `null` (D-045 önerisi).
+  ///
+  /// Kayıt boşanmadan veya eşin vefatından sonra da **silinmez**; yalnızca
+  /// durumu değişir. Miras hesabı "gerçek birliktelik kaydı" ararken
+  /// buraya bakar (D-037).
+  final Marriage? marriage;
+
+  /// Eşin kişi kaydı; evlilik kaydı yoksa `null`.
+  ///
+  /// Boşanılmış veya vefat etmiş eş de bu kimlikten okunur; kişi listeden
+  /// silinmez.
+  Person? get spouse {
+    final Marriage? kayit = marriage;
+    if (kayit == null) return null;
+    return personById(kayit.spouseId);
+  }
+
+  /// Şu anda yürüyen bir evlilik var mı? (Eş hayatta ve kayıt etkin.)
+  bool get isMarried {
+    final Marriage? kayit = marriage;
+    if (kayit == null || !kayit.isActive) return false;
+    final Person? es = spouse;
+    return es != null && es.isAlive;
+  }
+
+  /// Oyuncunun çocukları; vefat edenler de listede kalır.
+  List<Person> get children => people
+      .where((Person p) => p.relation == RelationType.cocuk)
+      .toList(growable: false);
+
+  /// Hayattaki çocuklar.
+  List<Person> get livingChildren => people
+      .where((Person p) => p.relation == RelationType.cocuk && p.isAlive)
+      .toList(growable: false);
+
   /// Oyuncu aile evinden ayrıldı mı?
   ///
   /// Kirada yaşamak ile ailenin yanında yaşamayı ayırır; hanede yetişkin
@@ -426,6 +463,9 @@ class GameState {
     switch (person.relation) {
       case RelationType.arkadas:
       case RelationType.sevgili:
+      // Eş ve çocuklar evden ayrılsalar da görüşülmeye devam eder.
+      case RelationType.es:
+      case RelationType.cocuk:
         return true;
       default:
         break;
@@ -477,6 +517,7 @@ class GameState {
     Object? pendingCrisis = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
+    Object? marriage = _unsetEvent,
   }) {
     return GameState(
       seed: seed,
@@ -532,6 +573,8 @@ class GameState {
           : pendingCrisis as PendingCrisis?,
       lastCrisisAge: lastCrisisAge ?? this.lastCrisisAge,
       healthWarned: healthWarned ?? this.healthWarned,
+      marriage:
+          marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
     );
   }
 }

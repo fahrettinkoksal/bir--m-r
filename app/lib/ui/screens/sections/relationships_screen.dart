@@ -14,7 +14,7 @@ import '../../widgets/section_scaffold.dart';
 /// romantik bağlar alt menülere ayrılır. Uzun tek liste yerine iç içe menü
 /// tercih edilmiştir. Veri yapısı değişmez: kişiler aynı kalıcı kimlikle,
 /// aynı bağ türleriyle okunur.
-enum RelationshipSubPage { akrabalar, arkadaslar, romantik }
+enum RelationshipSubPage { akrabalar, arkadaslar, romantik, cocuklar }
 
 class RelationshipsScreen extends StatefulWidget {
   const RelationshipsScreen({super.key, required this.onBack});
@@ -42,6 +42,10 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
   List<Person> _romantikler(GameState state) =>
       state.byGroup(RelationGroup.romantik);
 
+  /// Çocuklar en büyükten küçüğe. Vefat edenler de listede kalır (D-029).
+  List<Person> _cocuklar(GameState state) => <Person>[...state.children]
+    ..sort((Person a, Person b) => b.age.compareTo(a.age));
+
   Person? _byRelation(GameState state, RelationType relation) {
     for (final Person p in state.people) {
       if (p.relation == relation) return p;
@@ -62,11 +66,13 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.akrabalar => _akrabalar(state),
         RelationshipSubPage.arkadaslar => _arkadaslar(state),
         RelationshipSubPage.romantik => _romantikler(state),
+        RelationshipSubPage.cocuklar => _cocuklar(state),
       };
       final String baslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar => 'Akrabalar',
         RelationshipSubPage.arkadaslar => 'Arkadaşlar',
         RelationshipSubPage.romantik => 'Romantik bağlar',
+        RelationshipSubPage.cocuklar => 'Çocuklar',
       };
       final String altBaslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar =>
@@ -75,6 +81,8 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           'Okulda ve hayatta tanıştığın kişiler; akraba değildir.',
         RelationshipSubPage.romantik =>
           'İlişki geçmişi; akrabalık ve hane değildir.',
+        RelationshipSubPage.cocuklar =>
+          'Büyüyen çocuklar evden çıkar; kayıtları silinmez.',
       };
 
       return SectionScaffold(
@@ -95,8 +103,10 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
       );
     }
 
+    final Person? es = state.spouse;
     final Person? anne = _byRelation(state, RelationType.anne);
     final Person? baba = _byRelation(state, RelationType.baba);
+    final int cocukSayisi = _cocuklar(state).length;
     final int akrabaSayisi = _akrabalar(state).length;
     final int arkadasSayisi = _arkadaslar(state).length;
     final int romantikSayisi = _romantikler(state).length;
@@ -105,6 +115,15 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
       title: 'İlişkiler',
       onBack: widget.onBack,
       children: <Widget>[
+        // Eş en üstte durur; kendi hanenin diğer yarısıdır (Paket E1).
+        if (es != null && es.relation == RelationType.es) ...<Widget>[
+          PersonCard(
+            person: es,
+            playerAge: playerAge,
+            onTap: () => _openPerson(es.id),
+          ),
+          const SizedBox(height: 10),
+        ],
         // Anne ve baba en üstte (NAV-001).
         for (final Person? ebeveyn in <Person?>[anne, baba])
           if (ebeveyn != null) ...<Widget>[
@@ -116,6 +135,18 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             const SizedBox(height: 10),
           ],
         const SizedBox(height: 8),
+        if (cocukSayisi > 0) ...<Widget>[
+          MenuRow(
+            key: const Key('relationships_children_row'),
+            title: 'Çocuklar',
+            subtitle: 'Kendi çocukların',
+            icon: Icons.child_care_outlined,
+            trailingText: '$cocukSayisi',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.cocuklar),
+          ),
+          const SizedBox(height: 10),
+        ],
         if (akrabaSayisi > 0) ...<Widget>[
           MenuRow(
             title: 'Akrabalar',
@@ -141,7 +172,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         if (romantikSayisi > 0) ...<Widget>[
           MenuRow(
             title: 'Romantik bağlar',
-            subtitle: 'Sevgili ve eski sevgili',
+            subtitle: 'Sevgili, eski sevgili ve eski eş',
             icon: Icons.favorite_outline,
             trailingText: '$romantikSayisi',
             onTap: () =>

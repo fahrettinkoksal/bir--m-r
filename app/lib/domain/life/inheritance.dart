@@ -1,5 +1,6 @@
 import '../../data/item_catalog.dart';
 import '../models/game_state.dart';
+import '../models/marriage.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
@@ -124,7 +125,22 @@ abstract final class Inheritance {
           playerIsHeir: true,
         );
 
-      // Diğer bağlarda (arkadaş, öğretmen, uzak akraba) miras yoktur.
+      // Eşin mirası: sağ kalan eş (oyuncu) ve çocuklar.
+      case RelationType.es:
+        return (
+          others: ara(<RelationType>{RelationType.cocuk}),
+          playerIsHeir: true,
+        );
+
+      // Çocuğun mirası: anne-baba, yani oyuncu ve (hayattaysa) eşi.
+      case RelationType.cocuk:
+        return (
+          others: ara(<RelationType>{RelationType.es}),
+          playerIsHeir: true,
+        );
+
+      // Diğer bağlarda (arkadaş, öğretmen, uzak akraba, **eski eş**)
+      // miras yoktur: boşanmış eş mirasçı değildir (D-037).
       default:
         return (others: const <Person>[], playerIsHeir: false);
     }
@@ -146,6 +162,47 @@ abstract final class Inheritance {
     }
 
     final int toplamNakit = prototypeOnlyEstateMoney(deceased.wealth);
+
+    // Eşin mirası: yalnızca **gerçek evlilik kaydı** varsa pay verilir
+    // (D-037). Boşanmış eş mirasçı değildir.
+    if (deceased.relation == RelationType.es) {
+      final Marriage? kayit = state.marriage;
+      final bool gercekEvlilik = kayit != null &&
+          kayit.spouseId == deceased.id &&
+          kayit.status != MarriageStatus.bosandi;
+      if (!gercekEvlilik) {
+        return InheritanceShare(
+          money: 0,
+          itemTypeIds: const <String>[],
+          heirCount: mirascilar.others.length,
+        );
+      }
+
+      final int cocukSayisi = mirascilar.others
+          .where((Person p) => p.relation == RelationType.cocuk)
+          .length;
+      // Çocuk yoksa mirasın tamamı eşe kalır; varsa eş payını alır,
+      // kalanı çocuklar arasında bölünür.
+      final int oyuncununPayi = cocukSayisi == 0
+          ? toplamNakit
+          : (toplamNakit * prototypeOnlySpouseShare).round();
+
+      return InheritanceShare(
+        money: oyuncununPayi,
+        itemTypeIds: _splitItems(deceased.estate, 1 + cocukSayisi),
+        heirCount: 1 + cocukSayisi,
+      );
+    }
+
+    // Çocuğun mirası: anne-baba arasında eşit bölünür.
+    if (deceased.relation == RelationType.cocuk) {
+      final int mirasciSayisi = 1 + mirascilar.others.length;
+      return InheritanceShare(
+        money: (toplamNakit / mirasciSayisi).floor(),
+        itemTypeIds: _splitItems(deceased.estate, mirasciSayisi),
+        heirCount: mirasciSayisi,
+      );
+    }
 
     // Eş payı yalnızca ebeveynler **gerçekten birlikteyse** uygulanır:
     // ayrı yaşayan veya boşanmış ebeveyn eş gibi değerlendirilmez (D-037).
@@ -179,16 +236,23 @@ abstract final class Inheritance {
         mirascilar.others
             .where((Person p) => p.relation == RelationType.kardes)
             .length;
-    final List<String> oyuncuyaKalan = <String>[];
-    for (int i = 0; i < deceased.estate.length; i++) {
-      if (i % esyaMirasciSayisi == 0) oyuncuyaKalan.add(deceased.estate[i]);
-    }
-
     return InheritanceShare(
       money: oyuncuNakit,
-      itemTypeIds: List<String>.unmodifiable(oyuncuyaKalan),
+      itemTypeIds: _splitItems(deceased.estate, esyaMirasciSayisi),
       heirCount: 1 + mirascilar.others.length,
     );
+  }
+
+  /// Eşyaları mirasçılara sırayla dağıtır; oyuncu ilk sıradadır.
+  ///
+  /// Eşyalar **bölünmez**: her biri tek bir mirasçıya gider.
+  static List<String> _splitItems(List<String> estate, int heirCount) {
+    if (heirCount < 1) return const <String>[];
+    final List<String> oyuncuyaKalan = <String>[];
+    for (int i = 0; i < estate.length; i++) {
+      if (i % heirCount == 0) oyuncuyaKalan.add(estate[i]);
+    }
+    return List<String>.unmodifiable(oyuncuyaKalan);
   }
 
   /// Mirası **bir kez** uygular ve günlük satırlarını döndürür.

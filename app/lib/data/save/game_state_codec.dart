@@ -26,6 +26,7 @@ import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
+import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/playing_card.dart';
 import '../../domain/models/social_account.dart';
@@ -100,6 +101,14 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'healthWarned': state.healthWarned,
       'residenceItemId': state.residenceItemId,
       'movedOut': state.movedOut,
+      'marriage': state.marriage == null
+          ? null
+          : <String, Object?>{
+              'spouseId': state.marriage!.spouseId,
+              'marriedAtAge': state.marriage!.marriedAtAge,
+              'status': state.marriage!.status.name,
+              'endedAtAge': state.marriage!.endedAtAge,
+            },
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
@@ -455,6 +464,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     healthWarned: json['healthWarned'] == true,
     residenceItemId: _stringOrNull(json, 'residenceItemId'),
     movedOut: json['movedOut'] == true,
+    // Eski kayıtlarda evlilik kaydı yoktur; hayat bekâr sürer, kişiler
+    // olduğu gibi korunur.
+    marriage: json['marriage'] == null
+        ? null
+        : _decodeMarriage(_asMap(json['marriage'], 'marriage')),
     hardshipYears:
         json['hardshipYears'] == null ? 0 : _int(json, 'hardshipYears'),
     settings: json['settings'] == null
@@ -559,6 +573,19 @@ BookProgress _decodeBook(Map<String, Object?> json) => BookProgress(
       pagesRead: _int(json, 'pagesRead'),
       finished: _bool(json, 'finished'),
       startedAtAge: _intOrNull(json, 'startedAtAge'),
+    );
+
+/// Evlilik kaydı. Eşin kendisi kişi listesinden okunur; burada yalnızca
+/// birlikteliğin kaydı vardır.
+Marriage _decodeMarriage(Map<String, Object?> json) => Marriage(
+      spouseId: _string(json, 'spouseId'),
+      marriedAtAge: _int(json, 'marriedAtAge'),
+      status: _enumByName(
+        MarriageStatus.values,
+        _string(json, 'status'),
+        'marriage.status',
+      ),
+      endedAtAge: _intOrNull(json, 'endedAtAge'),
     );
 
 Person _decodePerson(Map<String, Object?> json) {

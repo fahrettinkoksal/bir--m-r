@@ -37,6 +37,8 @@ import '../domain/models/game_settings.dart';
 import '../domain/models/life_log.dart';
 import '../domain/models/life_summary.dart';
 import '../domain/social/social_engine.dart';
+import '../domain/interaction/marriage_engine.dart';
+import '../domain/interaction/parenthood.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
 import '../domain/models/game_state.dart';
@@ -59,6 +61,8 @@ class GameController extends ChangeNotifier {
   final FamilyInteractions _interactions = const FamilyInteractions();
   final EventEngine _events = const EventEngine();
   final Romance _romance = const Romance();
+  final MarriageEngine _marriages = const MarriageEngine();
+  final Parenthood _parenthood = const Parenthood();
   final ItemActions _items = const ItemActions();
   final EducationPath _education = const EducationPath();
   final JobMarket _jobs = const JobMarket();
@@ -857,6 +861,74 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return next.log.last.text;
+  }
+
+  // =====================================================================
+  // Evlilik ve çocuklar (Paket E1-E2)
+  // =====================================================================
+
+  /// Bu kişiyle evlenilebilir mi? Engel varsa gerekçesiyle döner.
+  InteractionAvailability marriageAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final Person? person = current.personById(personId);
+    if (person == null) {
+      return const InteractionAvailability.blocked('Bu kişi kayıtlarda yok.');
+    }
+    final String engel = _marriages.marryBlockReason(current, person);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Sevgiliyle evlenir. Kişi kimliği değişmez; kayıt silinmez.
+  FamilyOutcome? marry(String personId) =>
+      _runFamily((GameState current) => _marriages.marry(current, personId));
+
+  /// Boşanmaya engel var mı?
+  InteractionAvailability divorceAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final String engel = _marriages.divorceBlockReason(current);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Boşanır: eş **aynı kimlikle** eski eş olur.
+  FamilyOutcome? divorce() =>
+      _runFamily((GameState current) => _marriages.divorce(current));
+
+  /// Çocuk sahibi olmaya engel var mı?
+  InteractionAvailability childAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final String engel = _parenthood.blockReason(current);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Çocuk sahibi olur: kalıcı kimlikli yeni bir kişi kaydı açılır.
+  FamilyOutcome? haveChild() => _runFamily(
+        (GameState current) => _parenthood.haveChild(current, _random),
+      );
+
+  FamilyOutcome? _runFamily(FamilyResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FamilyResult sonuc = islem(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
   }
 
   /// Yalnızca testler için: durumu doğrudan ayarlar.

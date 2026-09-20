@@ -50,10 +50,16 @@ class Housing {
   /// prototypeOnly: kiracının bulunamadığı, gelirin gelmediği yıl ihtimali.
   static const double prototypeOnlyVacancyChance = 0.12;
 
-  /// Oyuncunun hanesinde hayatta bir yetişkin var mı?
+  /// Oyuncunun **aile evinde** hayatta bir yetişkin var mı?
+  ///
+  /// Eş ve çocuklar sayılmaz: onlarla kurulan hane, ailenin yanında
+  /// yaşamak değil, oyuncunun kendi hanesidir.
   static bool hasAdultAtFamilyHome(GameState state) => state.people.any(
         (Person p) =>
-            p.isAlive && p.inPlayerHousehold && p.age >= prototypeOnlyMinAge,
+            p.isAlive &&
+            p.inPlayerHousehold &&
+            !p.relation.haneBagi &&
+            p.age >= prototypeOnlyMinAge,
       );
 
   /// Oyuncunun oturduğu ev (varsa).
