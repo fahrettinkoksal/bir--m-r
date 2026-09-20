@@ -93,17 +93,57 @@ class EducationPath {
     );
   }
 
-  /// Bir bölüme başvuru puanı.
-  int admissionScore(GameState state, UniversityProgram program, Random rng) {
+  /// Lise bitince **bir kez** hesaplanan üniversite sınav puanı.
+  ///
+  /// Lise yerleştirme puanından ayrı bir değerdir: lise başarısı ve zekâ
+  /// birlikte sayılır, sınav gününün şansı eklenir. Hesaplandıktan sonra
+  /// saklanır; her başvuruda yeniden hesaplanmaz, böylece oyuncu kendi
+  /// puanını ekranda görebilir.
+  int computeUniversityExamScore(GameState state, Random rng) {
     final int taban =
         state.education.placementScore ?? state.player.stats.intelligence;
     int puan = ((taban + state.player.stats.intelligence) / 2).round();
-    final EducationTrack? track = state.education.track;
-    if (track != null && program.preferredTracks.contains(track)) {
-      puan += prototypeOnlyTrackBonus;
-    }
-    puan += rng.nextInt(11); // prototypeOnly: sınav günü şansı
+    puan += rng.nextInt(11); // prototypeOnly: sınav günü
     return puan.clamp(0, 100);
+  }
+
+  /// Oyuncunun üniversite sınav puanı; henüz hesaplanmadıysa `null`.
+  int? universityExamScore(GameState state) =>
+      state.education.universityExamScore;
+
+  /// Bir bölüme başvururken geçerli olan **etkin** puan.
+  ///
+  /// Sınav puanına, bölümün tercih ettiği alandan geliyorsa alan uyumu
+  /// eklenir. Rastgelelik içermez: ekranda gösterilen puan ile başvuruda
+  /// kullanılan puan aynıdır.
+  int effectiveScore(GameState state, UniversityProgram program) {
+    final int taban = state.education.universityExamScore ?? 0;
+    return (taban + trackBonusFor(state, program)).clamp(0, 100);
+  }
+
+  /// Bölümün tercih ettiği alandan geliniyorsa eklenen puan.
+  int trackBonusFor(GameState state, UniversityProgram program) {
+    final EducationTrack? track = state.education.track;
+    if (track == null) return 0;
+    return program.preferredTracks.contains(track)
+        ? prototypeOnlyTrackBonus
+        : 0;
+  }
+
+  /// Başvurunun neden mümkün olmadığını açıklar; uygunsa boş metin döner.
+  String eligibilityReason(GameState state, UniversityProgram program) {
+    if (!state.education.finished) return 'Önce liseyi bitirmen gerekiyor.';
+    if (state.education.universityProgramId != null) {
+      return 'Zaten bir bölüme kayıtlısın.';
+    }
+    if (state.education.universityExamScore == null) {
+      return 'Üniversite sınav puanın henüz hesaplanmadı.';
+    }
+    final int puan = effectiveScore(state, program);
+    if (puan < program.minScore) {
+      return 'Puanın yetmiyor: $puan / ${program.minScore}.';
+    }
+    return '';
   }
 
   /// Başvurulabilecek bölümler: lise bitmiş ve kayıt yapılmamış olmalı.
@@ -115,25 +155,40 @@ class EducationPath {
     return kUniversityPrograms;
   }
 
-  /// Üniversiteye başvurur. Kabul garanti değildir.
+  /// Üniversite sınav puanı yoksa hesaplayıp duruma yazar.
+  ///
+  /// Eski kayıtlarda (ve liseyi yeni bitirenlerde) puan eksik olabilir;
+  /// başvuru ekranı açılmadan önce bir kez hesaplanır.
+  GameState ensureUniversityExamScore(GameState state, Random rng) {
+    if (!state.education.finished) return state;
+    if (state.education.universityExamScore != null) return state;
+    return state.copyWith(
+      education: state.education.copyWith(
+        universityExamScore: computeUniversityExamScore(state, rng),
+      ),
+    );
+  }
+
+  /// Üniversiteye başvurur.
+  ///
+  /// Sonuç, ekranda gösterilen puanla birebir aynı hesaba dayanır.
   EducationResult applyToUniversity(
     GameState state,
     UniversityProgram program,
     Random rng,
   ) {
-    if (!state.education.finished) {
-      return _blocked(state, 'Önce liseyi bitirmen gerekiyor.');
-    }
-    if (state.education.universityProgramId != null) {
-      return _blocked(state, 'Zaten bir bölüme kayıtlısın.');
+    final GameState hazir = ensureUniversityExamScore(state, rng);
+    final String engel = eligibilityReason(hazir, program);
+    if (engel.isNotEmpty && !engel.startsWith('Puanın yetmiyor')) {
+      return _blocked(hazir, engel);
     }
 
-    final int puan = admissionScore(state, program, rng);
+    final int puan = effectiveScore(hazir, program);
     if (puan < program.minScore) {
       final String metin = '${program.name} başvurun kabul edilmedi. '
           'Puanın $puan, gereken ${program.minScore}.';
       return EducationResult(
-        state: _log(state, metin),
+        state: _log(hazir, metin),
         outcome: EducationOutcome(applied: true, text: metin),
       );
     }
@@ -141,8 +196,8 @@ class EducationPath {
     final String metin = '${program.name} bölümüne yerleştin. Puanın $puan.';
     return EducationResult(
       state: _log(
-        state.copyWith(
-          education: state.education.copyWith(
+        hazir.copyWith(
+          education: hazir.education.copyWith(
             universityProgramId: program.id,
             universityYear: 1,
             universityFinished: false,

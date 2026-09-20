@@ -8,6 +8,7 @@ import '../../../domain/education/education_path.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../widgets/interview_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 
 /// Lise alanı seçimi.
@@ -133,10 +134,21 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
   String? _sonuc;
 
   @override
+  void initState() {
+    super.initState();
+    // Eski kayıtlarda ve yeni mezunlarda puan eksik olabilir; ekran
+    // açılmadan önce bir kez hesaplanır.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) GameScope.of(context).ensureUniversityExamScore();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final GameController controller = GameScope.of(context);
     final GameState state = controller.state!;
     final List<UniversityProgram> bolumler = controller.availablePrograms();
+    final int? sinavPuani = controller.universityExamScore;
 
     return SectionScaffold(
       title: 'Mezuniyet sonrası',
@@ -146,6 +158,13 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
       backLabel: 'Meslek',
       onBack: widget.onBack,
       children: <Widget>[
+        // Oyuncunun kendi puanı en üstte, açıkça.
+        _ScoreCard(
+          examScore: sinavPuani,
+          placementScore: state.education.placementScore,
+          trackLabel: state.education.trackInfo?.label,
+        ),
+        const SizedBox(height: 12),
         const InfoPanel(
           icon: Icons.alt_route_outlined,
           text: 'Herkes üniversiteye gitmek zorunda değil. İster bir bölüme '
@@ -164,6 +183,9 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
           for (final UniversityProgram bolum in bolumler) ...<Widget>[
             _ProgramCard(
               program: bolum,
+              myScore: controller.programScore(bolum),
+              trackBonus: controller.programTrackBonus(bolum),
+              blockReason: controller.programBlockReason(bolum),
               onApply: () {
                 final String? metin =
                     controller.applyToUniversity(bolum)?.text;
@@ -195,15 +217,110 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
   }
 }
 
+/// Oyuncunun kendi puanlarını gösteren kart.
+///
+/// Lise yerleştirme puanı ile üniversite sınav puanı **ayrı** adlarla
+/// sunulur; ikisi farklı değerlerdir.
+class _ScoreCard extends StatelessWidget {
+  const _ScoreCard({
+    required this.examScore,
+    required this.placementScore,
+    required this.trackLabel,
+  });
+
+  final int? examScore;
+  final int? placementScore;
+  final String? trackLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.assignment_turned_in_outlined,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 10),
+                Text('Puanların', style: theme.textTheme.titleMedium),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              examScore == null
+                  ? 'Üniversite sınav puanın hesaplanıyor…'
+                  : 'Üniversite sınav puanın: $examScore',
+              key: const Key('university_exam_score'),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (placementScore != null)
+              Text(
+                'Lise yerleştirme puanın: $placementScore '
+                '(8. sınıf sonunda alınmıştı)',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            if (trackLabel != null) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(
+                'Lise alanın: $trackLabel',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              'Başvuruda kullanılan puan, sınav puanına bölümün tercih '
+              'ettiği alandan gelen ek puanın eklenmesiyle bulunur. '
+              'Üniversite not ortalaması sistemi henüz yok.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ProgramCard extends StatelessWidget {
-  const _ProgramCard({required this.program, required this.onApply});
+  const _ProgramCard({
+    required this.program,
+    required this.myScore,
+    required this.trackBonus,
+    required this.blockReason,
+    required this.onApply,
+  });
 
   final UniversityProgram program;
+
+  /// Oyuncunun bu bölüm için geçerli puanı (alan uyumu dahil).
+  final int myScore;
+  final int trackBonus;
+
+  /// Başvuru mümkün değilse gerekçe; uygunsa boş.
+  final String blockReason;
   final VoidCallback onApply;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool yeterli = myScore >= program.minScore;
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -219,18 +336,41 @@ class _ProgramCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
+            // Karşılaştırma açıkça yazılır.
+            Text(
+              'Senin puanın: $myScore  /  Taban puan: ${program.minScore}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: yeterli
+                    ? theme.colorScheme.secondary
+                    : theme.colorScheme.error,
+              ),
+            ),
+            if (trackBonus > 0) ...<Widget>[
+              const SizedBox(height: 2),
+              Text(
+                'Lise alanın bu bölümle uyumlu: +$trackBonus puan dahil',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
             Row(
               children: <Widget>[
-                Text(
-                  'Taban puan ${program.minScore} · ${program.durationYears} yıl',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                Expanded(
+                  child: Text(
+                    blockReason.isEmpty
+                        ? '${program.durationYears} yıl'
+                        : blockReason,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 FilledButton.tonal(
-                  onPressed: onApply,
-                  child: const Text('Başvur'),
+                  onPressed: blockReason.isEmpty ? onApply : null,
+                  child: Text(blockReason.isEmpty ? 'Başvur' : 'Uygun değil'),
                 ),
               ],
             ),
@@ -279,9 +419,17 @@ class _JobSearchPageState extends State<JobSearchPage> {
           _JobCard(
             job: job,
             availability: controller.jobApplicationAvailability(job),
-            onApply: () {
+            onApply: () async {
               final JobOutcome? outcome = controller.applyForJob(job);
-              setState(() => _sonuc = outcome?.text);
+              if (outcome == null) return;
+              if (outcome.interviewStarted && context.mounted) {
+                // Başvuru doğrudan sonuçlanmaz: önce mülakat.
+                await InterviewSheet.show(context);
+                if (!context.mounted) return;
+                setState(() => _sonuc = null);
+                return;
+              }
+              setState(() => _sonuc = outcome.text);
             },
           ),
           const SizedBox(height: 10),

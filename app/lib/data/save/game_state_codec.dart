@@ -20,6 +20,7 @@ import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
+import '../../domain/models/pending_interview.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/social_account.dart';
 import '../../domain/models/player_character.dart';
@@ -54,6 +55,13 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'extraEventsThisAge': state.extraEventsThisAge,
       'education': _encodeEducation(state.education),
       'career': _encodeCareer(state.career),
+      'pendingInterview': state.pendingInterview == null
+          ? null
+          : <String, Object?>{
+              'jobId': state.pendingInterview!.jobId,
+              'questionId': state.pendingInterview!.questionId,
+              'askedAtAge': state.pendingInterview!.askedAtAge,
+            },
       'books': state.books.map(_encodeBook).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
@@ -155,6 +163,7 @@ Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
       'classId': e.classId,
       'track': e.track?.name,
       'placementScore': e.placementScore,
+      'universityExamScore': e.universityExamScore,
       'universityProgramId': e.universityProgramId,
       'universityYear': e.universityYear,
       'universityFinished': e.universityFinished,
@@ -288,6 +297,9 @@ GameState decodeGameState(Map<String, Object?> json) {
     extraEventsThisAge: _int(json, 'extraEventsThisAge'),
     education: _decodeEducation(_map(json, 'education')),
     career: _decodeCareer(_map(json, 'career')),
+    pendingInterview: json['pendingInterview'] == null
+        ? null
+        : _decodeInterview(_asMap(json['pendingInterview'], 'pendingInterview')),
     books: List<BookProgress>.unmodifiable(
       _list(json, 'books')
           .map((Object? e) => _decodeBook(_asMap(e, 'books[]')))
@@ -401,6 +413,13 @@ Person _decodePerson(Map<String, Object?> json) {
   );
 }
 
+PendingInterview _decodeInterview(Map<String, Object?> json) =>
+    PendingInterview(
+      jobId: _string(json, 'jobId'),
+      questionId: _string(json, 'questionId'),
+      askedAtAge: _int(json, 'askedAtAge'),
+    );
+
 CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
       jobId: _stringOrNull(json, 'jobId'),
       startedAtAge: _intOrNull(json, 'startedAtAge'),
@@ -473,6 +492,7 @@ EducationState _decodeEducation(Map<String, Object?> json) {
       'education.track',
     ),
     placementScore: _intOrNull(json, 'placementScore'),
+    universityExamScore: _intOrNull(json, 'universityExamScore'),
     universityProgramId: _stringOrNull(json, 'universityProgramId'),
     universityYear: _intOrNull(json, 'universityYear'),
     universityFinished: _bool(json, 'universityFinished'),

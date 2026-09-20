@@ -56,6 +56,7 @@ class EducationState {
     this.classId,
     this.track,
     this.placementScore,
+    this.universityExamScore,
     this.universityProgramId,
     this.universityYear,
     this.universityFinished = false,
@@ -96,8 +97,17 @@ class EducationState {
   /// üniversite bölümlerini ve iş seçeneklerini etkiler.
   final EducationTrack? track;
 
-  /// 8. sınıf sonunda hesaplanan yerleştirme puanı (0-100, prototypeOnly).
+  /// 8. sınıf sonunda hesaplanan **lise yerleştirme puanı**
+  /// (0-100, prototypeOnly). Lise alanını bu puan belirler.
   final int? placementScore;
+
+  /// Lise bitince hesaplanan **üniversite sınav puanı**
+  /// (0-100, prototypeOnly).
+  ///
+  /// Lise yerleştirme puanından ayrı bir değerdir ve bir kez hesaplanıp
+  /// saklanır; böylece oyuncu başvuru ekranında kendi puanını görebilir ve
+  /// puan her başvuruda değişmez.
+  final int? universityExamScore;
 
   /// Kayıtlı olunan üniversite bölümü.
   final String? universityProgramId;
@@ -170,6 +180,7 @@ class EducationState {
     Object? classId = _unsetEdu,
     Object? track = _unsetEdu,
     Object? placementScore = _unsetEdu,
+    Object? universityExamScore = _unsetEdu,
     Object? universityProgramId = _unsetEdu,
     Object? universityYear = _unsetEdu,
     bool? universityFinished,
@@ -185,6 +196,9 @@ class EducationState {
       placementScore: placementScore == _unsetEdu
           ? this.placementScore
           : placementScore as int?,
+      universityExamScore: universityExamScore == _unsetEdu
+          ? this.universityExamScore
+          : universityExamScore as int?,
       universityProgramId: universityProgramId == _unsetEdu
           ? this.universityProgramId
           : universityProgramId as String?,
@@ -202,6 +216,7 @@ class EducationState {
         finished: true,
         track: track,
         placementScore: placementScore,
+        universityExamScore: universityExamScore,
         universityProgramId: universityProgramId,
         universityYear: universityYear,
         universityFinished: universityFinished,

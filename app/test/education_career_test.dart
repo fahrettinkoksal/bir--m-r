@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:bir_omur/data/education_tracks.dart';
+import 'package:bir_omur/data/interview_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/data/save/save_format.dart';
@@ -63,6 +64,7 @@ GameState graduate(
   int age = 18,
   int intelligence = 70,
   int charisma = 60,
+  int? examScore,
 }) {
   final GameState base = life(seed, age: age, intelligence: intelligence);
   return base.copyWith(
@@ -72,9 +74,20 @@ GameState graduate(
       startedAtAge: 6,
       finished: true,
       placementScore: score,
+      universityExamScore: examScore ?? score,
       track: track,
     ),
   );
+}
+
+/// Mülakatı doğru cevaplayarak işe girer; başaramazsa `null` döner.
+GameState? hire(GameState state, JobType job) {
+  final JobResult basvuru = market.apply(state, job, Random(1));
+  if (!basvuru.outcome.interviewStarted) return null;
+  final InterviewQuestion soru = basvuru.state.pendingInterview!.question!;
+  final JobResult cevap =
+      market.answerInterview(basvuru.state, soru.correctIndex);
+  return cevap.outcome.accepted ? cevap.state : null;
 }
 
 void main() {
@@ -177,8 +190,11 @@ void main() {
           graduate(12, track: EducationTrack.elSanatlari, score: 20,
               intelligence: 30);
 
-      expect(path.admissionScore(uygun, muh, Random(1)),
-          greaterThan(path.admissionScore(uygunsuz, muh, Random(1))));
+      // Etkin puan rastgelelik içermez: ekranda görünen puan ile başvuruda
+      // kullanılan puan aynıdır.
+      expect(path.effectiveScore(uygun, muh),
+          greaterThan(path.effectiveScore(uygunsuz, muh)));
+      expect(path.effectiveScore(uygun, muh), path.effectiveScore(uygun, muh));
 
       final EducationResult red =
           path.applyToUniversity(uygunsuz, muh, Random(1));
@@ -257,39 +273,33 @@ void main() {
       expect(market.openJobs(ogrenci), isEmpty);
     });
 
-    test('eğitim otomatik kabul garantisi değildir', () {
+    test('başvuru doğrudan kabulle sonuçlanmaz, mülakat açılır', () {
       final GameState mezun = graduate(23,
           track: EducationTrack.bilisim, intelligence: 80, age: 21);
       final JobType yazilim = jobById('yazilim_gelistirici')!;
       expect(market.meetsRequirements(mezun, yazilim), isTrue);
-      expect(market.acceptanceChance(mezun, yazilim),
-          lessThan(1.0));
 
-      // Bazı denemelerde reddedilmeli.
-      int red = 0;
-      for (int i = 0; i < 30; i++) {
-        final JobResult r = market.apply(mezun, yazilim, Random(i));
-        if (!r.outcome.accepted) red++;
-      }
-      expect(red, greaterThan(0), reason: 'İş asla garanti olmamalı');
+      final JobResult r = market.apply(mezun, yazilim, Random(1));
+      expect(r.outcome.interviewStarted, isTrue);
+      expect(r.outcome.accepted, isFalse,
+          reason: 'Başvuru tek başına işe almaz');
+      expect(r.state.career.isEmployed, isFalse);
+      expect(r.state.pendingInterview, isNotNull);
     });
 
-    test('kabul edilince iş kaydı oluşur', () {
+    test('mülakat doğru cevaplanınca iş kaydı oluşur', () {
       final GameState mezun = graduate(24, track: EducationTrack.bilisim,
           intelligence: 85, age: 21);
       final JobType yazilim = jobById('yazilim_gelistirici')!;
-      JobResult? kabul;
-      for (int i = 0; i < 40 && kabul == null; i++) {
-        final JobResult r = market.apply(mezun, yazilim, Random(i));
-        if (r.outcome.accepted) kabul = r;
-      }
-      expect(kabul, isNotNull);
+      final GameState? ise = hire(mezun, yazilim);
+      expect(ise, isNotNull);
 
-      final CareerState career = kabul!.state.career;
+      final CareerState career = ise!.career;
       expect(career.jobId, 'yazilim_gelistirici');
       expect(career.startedAtAge, 21);
       expect(career.lastPaidAge, 21, reason: 'İşe girilen yıl maaş ödenmez');
-      expect(kabul.state.log.last.text, contains('işe alındın'));
+      expect(ise.log.last.text, contains('işe alındın'));
+      expect(ise.pendingInterview, isNull);
     });
 
     test('aynı yaşta sınırsız başvuru yapılamaz', () {
@@ -298,11 +308,12 @@ void main() {
       int basarili = 0;
       for (int i = 0; i < 10; i++) {
         final JobResult r = market.apply(state, magaza, Random(100 + i));
-        if (r.outcome.applied) {
-          basarili++;
-          state = r.state;
-          if (state.career.isEmployed) break;
-        }
+        if (!r.outcome.applied) break;
+        basarili++;
+        // Yanlış cevap vererek başvuruyu tüket.
+        final InterviewQuestion soru = r.state.pendingInterview!.question!;
+        final int yanlis = (soru.correctIndex + 1) % soru.options.length;
+        state = market.answerInterview(r.state, yanlis).state;
       }
       expect(basarili,
           lessThanOrEqualTo(JobMarket.prototypeOnlyMaxApplicationsPerAge));

@@ -59,6 +59,13 @@ class LifeProgression {
     // Eğitim durumu yaştan türetilmez; burada açıkça ilerletilir ve
     // anlamlı geçişler hayat günlüğüne yazılır.
     EducationState education = _advanceEducation(state.education, newAge);
+    education = _applyUniversityExam(
+      state: state,
+      before: state.education,
+      education: education,
+      newAge: newAge,
+      log: log,
+    );
     education = _applyPlacementExam(
       state: state,
       education: education,
@@ -252,6 +259,34 @@ class LifeProgression {
     final int nextGrade = (current.grade ?? 1) + 1;
     if (nextGrade > lastGrade) return current.asFinished();
     return current.copyWith(grade: nextGrade);
+  }
+
+  /// Lise bitince üniversite sınav puanını **bir kez** hesaplar.
+  ///
+  /// Lise yerleştirme puanından ayrı bir değerdir; hesaplanıp saklanır ve
+  /// başvuru ekranında oyuncuya olduğu gibi gösterilir.
+  EducationState _applyUniversityExam({
+    required GameState state,
+    required EducationState before,
+    required EducationState education,
+    required int newAge,
+    required List<LifeLogEntry> log,
+  }) {
+    if (before.finished || !education.finished) return education;
+    if (education.universityExamScore != null) return education;
+
+    final int puan = const EducationPath().computeUniversityExamScore(
+      state.copyWith(education: education),
+      _rng,
+    );
+    log.add(
+      LifeLogEntry(
+        age: newAge,
+        text: 'Üniversite sınavından $puan puan aldın.',
+        category: LogCategory.kisisel,
+      ),
+    );
+    return education.copyWith(universityExamScore: puan);
   }
 
   /// 8. sınıftan 9. sınıfa geçerken yerleştirme puanını hesaplar.

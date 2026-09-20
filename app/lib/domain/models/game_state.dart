@@ -10,6 +10,7 @@ import 'gift_record.dart';
 import 'owned_item.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
+import 'pending_interview.dart';
 import 'person.dart';
 import 'social_account.dart';
 import 'player_character.dart';
@@ -44,6 +45,7 @@ class GameState {
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
     this.socialAccounts = const <SocialAccount>[],
+    this.pendingInterview,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -206,6 +208,13 @@ class GameState {
   /// hesabı olmayan platformdan paylaşım veya olay gelmez.
   final List<SocialAccount> socialAccounts;
 
+  /// Cevap bekleyen iş mülakatı; yoksa `null`.
+  ///
+  /// Kaydedilir: uygulama kapatılıp açılınca aynı soru geri gelir.
+  final PendingInterview? pendingInterview;
+
+  bool get hasPendingInterview => pendingInterview != null;
+
   /// Bir platformdaki hesap; açılmamışsa `null`.
   SocialAccount? accountFor(SocialPlatform platform) {
     for (final SocialAccount a in socialAccounts) {
@@ -328,6 +337,7 @@ class GameState {
     CareerState? career,
     List<BookProgress>? books,
     List<SocialAccount>? socialAccounts,
+    Object? pendingInterview = _unsetEvent,
   }) {
     return GameState(
       seed: seed,
@@ -354,6 +364,9 @@ class GameState {
       career: career ?? this.career,
       books: books ?? this.books,
       socialAccounts: socialAccounts ?? this.socialAccounts,
+      pendingInterview: pendingInterview == _unsetEvent
+          ? this.pendingInterview
+          : pendingInterview as PendingInterview?,
     );
   }
 }
