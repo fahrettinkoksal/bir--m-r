@@ -841,5 +841,70 @@ düşürülsün. Ehliyetin kaybı ancak bir kaza/ihlal sistemi gelirse anlamlı.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
+### Q-058 — Ölüm eğrisi ve kaybın etkileri
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/life/mortality.dart`, `app/lib/domain/generation/life_progression.dart`. **Bağlantılı:** Q-047, Q-059.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`, yıllık ihtimal):**
+- 0-1 yaş %0,4 · 1-15 %0,04 · 15-40 %0,12 · 40-55 %0,4 · 55-65 %1,1 ·
+  65-75 %2,8 · 75-85 %7,5 · 85-95 %17 · 95-105 %32 · 105+ %55.
+- Oyuncuda sağlık değeri riski en çok iki katına çıkarıyor, en az yarıya
+  indiriyor. NPC'lerde sağlık değeri yok; uydurulmuyor.
+- Kaybın mutluluk etkisi yakınlık ve bağ puanına göre 1-30 arası.
+- Ölüm gerekçeleri yaşa göre kısa metinler; ayrıntılı tasvir yok.
+
+**Karar soruları:**
+1. Eğri doğru mu? Bir hayat ortalama kaç yıl sürmeli?
+2. Sağlık, meslek, alışkanlıklar (spor, kitap, kumar) ölüm riskini
+   etkilesin mi?
+3. Kaza, hastalık gibi **olay tabanlı** ölümler eklensin mi (şu an yalnızca
+   sessiz bir yıllık eğilim var)?
+4. Yas dönemi modellensin mi (birkaç yıl süren mutluluk etkisi, anma
+   olayları)?
+5. Oyuncunun ölümü tamamen rastgele mi kalsın, yoksa sağlık düşerse uyarı
+   veren bir aşama mı olsun?
+6. Ölüm metinleri hangi tonla yazılsın; çocukken ebeveyn kaybı nasıl
+   anlatılsın?
+
+**Claude'un önerisi (yalnızca öneri):** Sağlık değerinin etkisi kalsın,
+olay tabanlı ölümler ayrı bir pakette ele alınsın. Ölümün yaklaştığını
+sezdiren bir sağlık uyarısı oyuncuya hazırlık imkânı verir.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
+### Q-059 — Miras, velayet ve mülk devri
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/life/inheritance.dart`, `app/lib/domain/generation/life_generator.dart`. **Bağlantılı:** Q-055, Q-056, Q-058.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`, gerçek hukuk kuralı
+değildir ve öyle sunulmaz):**
+- Mirasçılar: önce eş ve çocuklar, yoksa anne-baba, yoksa kardeşler.
+- Eş varsa nakdin dörtte birini alır, kalanı çocuklara eşit bölünür.
+- Eşya, araç ve konut bölünmez: her biri tek bir mirasçıya gider.
+- Nakit, kişinin ekonomik durumundan geliyor: çok yoksul 0 ₺, dar gelirli
+  25.000 ₺, orta halli 180.000 ₺, varlıklı 900.000 ₺, çok varlıklı
+  3.500.000 ₺.
+- Eşyalar kişinin **gerçekten sahip olduğu** `Person.estate` listesinden
+  geliyor; bu liste ekonomik duruma göre hayat başında üretiliyor.
+- Aynı miras iki kez dağıtılmıyor (`GameState.settledEstates`).
+- **Velayet:** hanede yetişkin kalmazsa hayattaki yakın bir yetişkin haneye
+  geçiyor; yeni kişi uydurulmuyor. Kimse yoksa yalnızca günlüğe yazılıyor.
+
+**Karar soruları:**
+1. Paylaşım kuralı böyle mi kalsın? Vasiyet, reddi miras, borç mirası gibi
+   kavramlar oyuna girsin mi?
+2. Miras vergisi veya masraf olsun mu?
+3. Kişilerin mal varlığı hayat boyunca değişsin mi (alıp satabilsinler mi),
+   yoksa hayat başında belirlenip sabit mi kalsın?
+4. Velayet sistemi nasıl genişlesin: koruyucu aile, yurt, taşınma?
+   Ebeveyn kaybı okul ve ekonomiyi nasıl etkilesin?
+5. Miras kalan ev, oyuncunun **taşındığı** ev olsun mu (Q-056 ile birlikte)?
+6. Oyuncunun ölümünde mirası kime kalsın; gelecekte "çocuk olarak devam et"
+   gibi bir kuşak sistemi düşünülüyor mu?
+
+**Claude'un önerisi (yalnızca öneri):** Vasiyet ve borç mirası ilk sürüm
+için erken; kuşak sistemi düşünülüyorsa oyuncunun mirasının nereye gittiği
+şimdiden kararlaştırılsın.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
