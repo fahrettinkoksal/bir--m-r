@@ -60,8 +60,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'mahalle_ilk_oyun',
     category: EventCategory.mahalle,
-    text: 'Sokakta senden büyük çocuklar oyun kuruyor. Biri sana dönüp '
-        '"sen de var mısın?" diye soruyor.',
+    text: 'Sokakta senden birkaç yaş büyük çocuklar takım kuruyor. '
+        'İçlerinden biri sana dönüp "eksiğimiz var, oynar mısın?" diyor.',
     requirement: EventRequirement(minAge: 5, maxAge: 8),
     choices: <EventChoice>[
       EventChoice(
@@ -85,8 +85,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'komsu_televizyonu',
     category: EventCategory.mahalle,
-    text: 'Elektrikler kesilince bütün sokak apartman girişinde toplandı. '
-        'Birileri mum yaktı, birileri hikâye anlatmaya başladı.',
+    text: 'Elektrikler kesildi, bütün apartman merdiven başında toplandı. '
+        'Bir komşu mum yaktı, yaşlı bir amca anlatmaya başladı.',
     requirement: EventRequirement(minAge: 6, maxAge: 13),
     choices: <EventChoice>[
       EventChoice(
@@ -119,8 +119,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
       EventChoice(
         id: 'on_sira',
         label: 'En öne otur',
-        resultText: 'Ön sırada tahtaya en yakın yerdesin. Öğretmen adını '
-            'ilk günden öğrendi.',
+        resultText: 'Ön sırada, tahtaya en yakın yerdesin. Yoklamada adın '
+            'okunurken elini kaldırdın; ilk günden tanındın.',
         intelligence: 3,
         happiness: 1,
       ),
@@ -320,8 +320,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'bayram_ziyareti',
     category: EventCategory.aile,
-    text: 'Bayram sabahı {sahipk} {kisi} sizi bekliyor. Kapıda kolonya, masada '
-        'şeker, ortada herkesin bildiği ama yine anlatılan hikâyeler var.',
+    text: 'Bayram sabahı {sahipk} {kisi} kapıda sizi bekliyor. Elinde '
+        'kolonya, masada şeker, ortada herkesin bildiği ama yine anlatılan '
+        'hikâyeler var.',
     requirement: EventRequirement(
       minAge: 6,
       livingRelations: _buyuklerVeAkrabalar,
@@ -454,9 +455,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'okul_sira_arkadasi',
     category: EventCategory.okul,
-    text: 'Yan sıranda oturan {sahipk} {kisi} silgisini ikiye bölmüş, '
-        'yarısını sana uzatıyor. "Benimkini kaybedersem seninkini isterim '
-        'ama" diyor.',
+    text: 'Silgin yok. Yan sıranda oturan {sahipk} {kisi} kendi silgisini '
+        'ikiye bölüp yarısını sana uzatıyor: "Benimki biterse seninkini '
+        'isterim ama."',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 1,
@@ -601,8 +602,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'yardimin_karsiligi',
     category: EventCategory.okul,
-    text: 'Kantinde paran yetmedi. Arkandan {sahipk} {kisi} geldi, '
-        'bozuklukları tezgâha bıraktı: "O gün defterime baktın ya, ödeştik."',
+    text: 'Kantinde sıradasın, paran yetmedi. Arkandan {sahipk} {kisi} '
+        'yetişip bozuklukları tezgâha bıraktı: "O gün defterime baktın ya, '
+        'ödeştik."',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 4,
@@ -775,20 +777,20 @@ const List<GameEvent> kEventPool = <GameEvent>[
     choices: <EventChoice>[
       EventChoice(
         id: 'eve',
-        label: 'Eve bir şeyler al',
-        resultText: 'Zarfın yarısıyla eve alışveriş yaptın. Kimse bir şey '
-            'demedi, herkes gördü.',
+        label: 'Yarısıyla eve alışveriş yap',
+        resultText: 'Zarfın yarısıyla eve alışveriş yaptın, kalanı cebinde. '
+            'Kimse bir şey demedi ama herkes gördü.',
         happiness: 4,
-        money: 1500, // prototypeOnly
+        money: 1500, // prototypeOnly: zarfın oyuncuda kalan yarısı
       ),
       EventChoice(
         id: 'kendine',
-        label: 'Kendine sakla',
-        resultText: 'Zarfı olduğu gibi kaldırdın. İlk defa kendine ait '
-            'bir şeyin var.',
+        label: 'Zarfı olduğu gibi sakla',
+        resultText: 'Zarfı açmadan kaldırdın. İlk defa yalnızca sana ait '
+            'bir birikmiş paran var.',
         happiness: 3,
         charisma: 1,
-        money: 3000, // prototypeOnly
+        money: 3000, // prototypeOnly: zarfın tamamı
       ),
     ],
   ),
@@ -827,8 +829,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'ogretmen_veli_notu',
     category: EventCategory.okul,
-    text: '{sahip} {kisi} ajandana bir not yazdı: "Velisiyle görüşmek '
-        'istiyorum." Nedenini söylemedi.',
+    text: 'Ders bitiminde {sahipk} {kisi} seni yanına çağırdı ve katlanmış '
+        'bir kâğıt verdi: "Bunu evde verirsin, velinle görüşmek istiyorum." '
+        'Nedenini söylemedi.',
     requirement: EventRequirement(
       requiresSchoolStudent: true,
       minGrade: 3,
@@ -838,8 +841,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
     choices: <EventChoice>[
       EventChoice(
         id: 'goster',
-        label: 'Notu eve götür',
-        resultText: 'Notu akşam sofrada uzattın. Görüşme iyi geçmiş; '
+        label: 'Kâğıdı eve götür',
+        resultText: 'Kâğıdı akşam sofrada uzattın. Görüşme iyi geçmiş; '
             '{kisi} senin için iyi şeyler söylemiş.',
         happiness: 3,
         charisma: 2,
@@ -847,9 +850,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
       ),
       EventChoice(
         id: 'sakla',
-        label: 'Ajandayı çantada unut',
-        resultText: 'Not çantanın dibinde kaldı. {sahip} {kisi} ertesi gün '
-            'bir şey sormadı ama not defterini bir daha açmadı.',
+        label: 'Çantanın dibinde unut',
+        resultText: 'Kâğıt çantanın dibinde buruştu. {sahip} {kisi} ertesi '
+            'gün bir şey sormadı, bir daha da çağırmadı.',
         happiness: -3,
         bond: -6,
       ),
@@ -927,24 +930,25 @@ const List<GameEvent> kEventPool = <GameEvent>[
   GameEvent(
     id: 'bakkal_veresiye',
     category: EventCategory.mahalle,
-    text: 'Bakkalda ekmek alacaksın ama paran tam çıkmadı. Bakkal '
-        'defteri uzatıyor: "Yaz bakalım, sonra ödersin."',
+    text: 'Bakkalda ekmek alacaksın, paran tam çıkmadı. Bakkal tezgâhın '
+        'altından veresiye defterini çıkarıp açıyor: "Babanın hesabına '
+        'yazayım mı?"',
     requirement: EventRequirement(minAge: 7, maxAge: 14),
     weight: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'yaz',
-        label: 'Deftere yazdır',
-        resultText: 'Adını deftere kendi elinle yazdın. Borç küçüktü ama '
-            'sorumluluk büyük hissettirdi.',
+        label: 'Yazmasını iste',
+        resultText: 'Bakkal tarihi ve tutarı yazdı, sen de altını '
+            'okudun. Borç küçüktü ama sorumluluk büyük hissettirdi.',
         happiness: 1,
         intelligence: 2,
       ),
       EventChoice(
         id: 'vazgec',
-        label: 'Ekmeksiz dön',
-        resultText: 'Elin boş döndün. Kapıda kimse kızmadı, sen kendine '
-            'kızdın.',
+        label: 'Vazgeç, elin boş dön',
+        resultText: 'Ekmeği tezgâhta bıraktın. Eve vardığında kimse '
+            'kızmadı; sen kendine kızdın.',
         happiness: -2,
         charisma: -1,
       ),

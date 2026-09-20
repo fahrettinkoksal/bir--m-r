@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import '../../data/gift_catalog.dart';
 import '../../data/interaction_texts.dart';
 import '../effects/effect_diff.dart';
 import '../generation/random_util.dart';
 import '../models/game_state.dart';
+import '../models/gift_record.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
@@ -11,6 +13,7 @@ import '../models/player_character.dart';
 import '../models/relation.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
+import 'interaction_policy.dart';
 
 /// Etkileşimin hem yeni durumu hem de oyuncuya gösterilecek sonucu.
 class InteractionResult {
@@ -59,9 +62,11 @@ class FamilyInteractions {
     InteractionKind.paraIste: _Reward(bond: 1, happiness: 2),
   };
 
-  /// prototypeOnly: oyuncunun **kendi cüzdanından** çıkan hediye bedeli.
-  /// Kapsamlı bir mağaza ve fiyat listesi henüz tasarlanmadı.
-  static const int prototypeOnlyGiftCost = 50;
+  /// prototypeOnly: oyuncunun hediye için ayırabileceği en düşük bütçe.
+  ///
+  /// Hediyenin gerçek bedeli katalogdan gelir; bu yalnızca "hiç para yokken
+  /// hediye düğmesi açılmasın" eşiğidir.
+  static const int prototypeOnlyMinGiftBudget = 20;
 
   /// prototypeOnly: karşı tarafın verebileceği harçlık, kendi ekonomik
   /// durumuna göre. Bu, kişinin servetinin oyuncuya geçmesi **değildir**;
@@ -83,22 +88,18 @@ class FamilyInteractions {
   static const List<double> prototypeOnlyAskRefusalChance =
       <double>[0.15, 0.45, 0.70, 0.85];
 
-  /// prototypeOnly: hediye olarak verilebilecek küçük eşyalar.
-  /// Kapsamlı hediye kataloğu değildir.
-  static const List<String> prototypeOnlyGiftItems = <String>[
-    'defter',
-    'bilye',
-    'kol_saati',
-  ];
 
   /// Bir kişi için ekranda gösterilecek etkileşimler.
   ///
   /// Koşulu sağlanmayan tür listelenmez; böylece hiçbir zaman
   /// gerçekleşemeyecek bir eylem tıklanabilir görünmez.
-  List<InteractionKind> availableKinds(GameState state, Person person) =>
-      InteractionKind.values
-          .where((InteractionKind k) => availability(state, person, k).isAllowed)
-          .toList(growable: false);
+  List<InteractionKind> availableKinds(GameState state, Person person) {
+    final Set<InteractionKind> anlamli = meaningfulKindsFor(person.relation);
+    return InteractionKind.values
+        .where((InteractionKind k) =>
+            anlamli.contains(k) && availability(state, person, k).isAllowed)
+        .toList(growable: false);
+  }
 
   /// Etkileşimin şu an mümkün olup olmadığı.
   ///
@@ -140,16 +141,27 @@ class FamilyInteractions {
     Person person,
     InteractionKind kind,
   ) {
+    // Tür bu ilişkide hiç anlamlı değilse listelenmez.
+    if (!meaningfulKindsFor(person.relation).contains(kind)) {
+      return const InteractionAvailability.blocked(
+        'Bu kişiyle yapılabilecek bir etkileşim değil.',
+      );
+    }
+
     switch (kind) {
       case InteractionKind.vakitGecir:
       case InteractionKind.sohbet:
         return const InteractionAvailability.allowed();
 
       case InteractionKind.hediyeVer:
-        if (state.player.wallet < prototypeOnlyGiftCost) {
-          return InteractionAvailability.blocked(
-            'Cüzdanında yeterli para yok. Hediye için '
-            '$prototypeOnlyGiftCost ₺ gerekiyor.',
+        if (state.player.wallet < prototypeOnlyMinGiftBudget) {
+          return const InteractionAvailability.blocked(
+            'Hediye alacak paran yok.',
+          );
+        }
+        if (_giftsPlayerCanBuy(state, person).isEmpty) {
+          return const InteractionAvailability.blocked(
+            'Cüzdanındaki parayla ona uygun bir hediye bulunmuyor.',
           );
         }
         return const InteractionAvailability.allowed();
@@ -172,14 +184,29 @@ class FamilyInteractions {
           );
         }
         if (kind == InteractionKind.hediyeIste &&
-            _remainingGifts(state).isEmpty) {
+            _giftsPersonCanGive(state, person).isEmpty) {
           return const InteractionAvailability.blocked(
-            'İstenecek bir şey kalmadı; eşya sistemi henüz genişletilmedi.',
+            'Şu an sana uygun, alabileceği bir hediye yok.',
           );
         }
         return const InteractionAvailability.allowed();
     }
   }
+
+  /// Karşı tarafın oyuncuya alabileceği, henüz sahip olunmayan hediyeler.
+  ///
+  /// Yaş, verenin ekonomik durumu ve eldeki eşyalar birlikte değerlendirilir.
+  List<GiftItem> _giftsPersonCanGive(GameState state, Person person) => giftsFor(
+        receiverAge: state.player.age,
+        giverWealth: person.wealth,
+        excluded: state.possessions,
+      );
+
+  /// Oyuncunun kendi cüzdanıyla o kişiye alabileceği hediyeler.
+  List<GiftItem> _giftsPlayerCanBuy(GameState state, Person person) => giftsFor(
+        receiverAge: person.age,
+        maxValue: state.player.wallet,
+      );
 
   /// Hediye/para istenebilecek kişiler: **yetişkin** yakınlar.
   ///
@@ -192,10 +219,6 @@ class FamilyInteractions {
         person.relation.group == RelationGroup.genis;
   }
 
-  /// Oyuncunun henüz sahip olmadığı hediyelik eşyalar.
-  static List<String> _remainingGifts(GameState state) => prototypeOnlyGiftItems
-      .where((String id) => !state.possessions.contains(id))
-      .toList(growable: false);
 
   /// Etkileşimi uygular ve yeni durumu döndürür.
   ///
@@ -315,31 +338,33 @@ class FamilyInteractions {
 
     // Para ve eşya devri: yalnızca gerçekten mümkünse yapılır.
     int moneyDelta = 0;
-    String? gainedItem;
+    GiftItem? alinanHediye;
+    GiftItem? verilenHediye;
     switch (kind) {
       case InteractionKind.hediyeVer:
-        // Para oyuncunun kendi cüzdanından çıkar.
-        moneyDelta = -prototypeOnlyGiftCost;
+        // Hediye oyuncunun **kendi cüzdanından** alınır; bedeli katalogdan.
+        final List<GiftItem> uygun = _giftsPlayerCanBuy(state, person);
+        if (uygun.isEmpty) {
+          // Alınabilecek hediye yoksa para harcanmaz, işlem olmuş gibi
+          // gösterilmez.
+          return _noGiftAvailable(state: state, person: person, rng: rng);
+        }
+        verilenHediye = uygun[rng.nextInt(uygun.length)];
+        moneyDelta = -verilenHediye.value;
       case InteractionKind.paraIste:
-        final int base =
-            prototypeOnlyAllowanceByWealth[person.wealth] ?? 0;
+        final int base = prototypeOnlyAllowanceByWealth[person.wealth] ?? 0;
         moneyDelta = _scaled(base, factor);
         if (moneyDelta == 0) {
           // Verilecek para çıkmadıysa eylem olmuş gibi gösterilmez.
-          return _refuse(
-            state: state,
-            person: person,
-            kind: kind,
-            rng: rng,
-          );
+          return _refuse(state: state, person: person, kind: kind, rng: rng);
         }
       case InteractionKind.hediyeIste:
-        final List<String> kalanlar = _remainingGifts(state);
-        if (kalanlar.isEmpty) {
+        final List<GiftItem> uygun = _giftsPersonCanGive(state, person);
+        if (uygun.isEmpty) {
           // Verilecek bir şey yoksa sahte kazanç üretilmez.
-          return _noGiftLeft(state: state, person: person, rng: rng);
+          return _noGiftAvailable(state: state, person: person, rng: rng);
         }
-        gainedItem = kalanlar[rng.nextInt(kalanlar.length)];
+        alinanHediye = uygun[rng.nextInt(uygun.length)];
       case InteractionKind.vakitGecir:
       case InteractionKind.sohbet:
         break;
@@ -349,7 +374,8 @@ class FamilyInteractions {
         happinessDelta == 0 &&
         charismaDelta == 0 &&
         moneyDelta == 0 &&
-        gainedItem == null;
+        alinanHediye == null &&
+        verilenHediye == null;
 
     final InteractionOutcome outcome = InteractionOutcome(
       kind: kind,
@@ -362,12 +388,14 @@ class FamilyInteractions {
         accepted: true,
         noNewBenefit: noNewBenefit,
         playerAge: state.player.age,
+        giftName: (alinanHediye ?? verilenHediye)?.name,
       ),
       bondDelta: bondDelta,
       happinessDelta: happinessDelta,
       charismaDelta: charismaDelta,
       moneyDelta: moneyDelta,
-      gainedPossession: gainedItem,
+      gainedPossession: alinanHediye?.id,
+      givenPossession: verilenHediye?.id,
       noNewBenefit: noNewBenefit,
     );
 
@@ -395,8 +423,8 @@ class FamilyInteractions {
     );
   }
 
-  /// İstenecek hediye kalmadığında: durum değişmez, sahte kazanç üretilmez.
-  InteractionResult _noGiftLeft({
+  /// Uygun hediye bulunamadığında: durum değişmez, sahte kazanç üretilmez.
+  InteractionResult _noGiftAvailable({
     required GameState state,
     required Person person,
     required Random rng,
@@ -448,14 +476,39 @@ class FamilyInteractions {
           ]
         : state.log;
 
+    // Gerçekten el değiştiren hediyeler kaydedilir: kim, kime, ne verdi.
     final String? kazanilan = outcome.gainedPossession;
+    final String? verilen = outcome.givenPossession;
+    final List<GiftRecord> gifts = kazanilan == null && verilen == null
+        ? state.gifts
+        : <GiftRecord>[
+            ...state.gifts,
+            if (kazanilan != null)
+              GiftRecord(
+                itemId: kazanilan,
+                fromId: person.id,
+                toId: GiftRecord.playerId,
+                age: state.player.age,
+              ),
+            if (verilen != null)
+              GiftRecord(
+                itemId: verilen,
+                fromId: GiftRecord.playerId,
+                toId: person.id,
+                age: state.player.age,
+              ),
+          ];
+
     return state.copyWith(
       player: player,
       people: List<Person>.unmodifiable(people),
       log: List<LifeLogEntry>.unmodifiable(log),
+      // Yalnızca oyuncunun **aldığı** hediye envantere girer; verilen hediye
+      // karşı tarafa geçer ve oyuncunun eşyası olmaz.
       possessions: kazanilan == null
           ? state.possessions
           : <String>{...state.possessions, kazanilan},
+      gifts: List<GiftRecord>.unmodifiable(gifts),
     );
   }
 

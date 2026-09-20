@@ -49,6 +49,8 @@ class EducationState {
     this.grade,
     this.startedAtAge,
     this.finished = false,
+    this.schoolId,
+    this.classId,
   }) : assert(
           !enrolled || grade != null,
           'Okula kayıtlı öğrencinin sınıfı olmalı.',
@@ -68,6 +70,19 @@ class EducationState {
 
   /// Lise bitirildi mi?
   final bool finished;
+
+  /// Şu an devam edilen okulun kimliği.
+  ///
+  /// Kademeden ayrı tutulur: ileride aynı kademede okul değiştirmek
+  /// (taşınma, nakil) mümkün olsun diye kişiler kademeye değil **okula ve
+  /// sınıfa** bağlanır.
+  final String? schoolId;
+
+  /// Şu an devam edilen sınıfın kimliği.
+  ///
+  /// Sınıf arkadaşlığı bu kimlikle takip edilir; böylece her sınıf
+  /// değişiminde herkesin değişmesi zorunlu olmaz.
+  final String? classId;
 
   bool get isStudent => enrolled;
 
@@ -97,19 +112,26 @@ class EducationState {
     int? grade,
     int? startedAtAge,
     bool? finished,
+    Object? schoolId = _unsetEdu,
+    Object? classId = _unsetEdu,
   }) {
     return EducationState(
       enrolled: enrolled ?? this.enrolled,
       grade: grade ?? this.grade,
       startedAtAge: startedAtAge ?? this.startedAtAge,
       finished: finished ?? this.finished,
+      schoolId: schoolId == _unsetEdu ? this.schoolId : schoolId as String?,
+      classId: classId == _unsetEdu ? this.classId : classId as String?,
     );
   }
 
   /// Okuldan ayrılmış/bitirmiş durum: sınıf bilgisi kalmaz.
+  /// Okul bitti: sınıf ve okul kimliği düşer, kişiler silinmez.
   EducationState asFinished() => EducationState(
         enrolled: false,
         startedAtAge: startedAtAge,
         finished: true,
       );
 }
+
+const Object _unsetEdu = Object();

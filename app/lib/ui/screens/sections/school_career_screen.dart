@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../domain/models/education.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
-import '../../../domain/models/relation.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
@@ -36,7 +35,11 @@ class SchoolCareerScreen extends StatelessWidget {
 }
 
 /// Okul alt menüleri. Kişiler ayrı sayfalarda listelenir.
-enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, yakinArkadaslar }
+/// Okul ekranının alt sayfaları.
+///
+/// Burada yalnızca **okulla ilgili** gruplar bulunur. Arkadaşlık düzeyi ve
+/// özel ilişkiler İlişkiler menüsünden yönetilir.
+enum _SchoolPage { kok, sinifArkadaslari, ogretmenler }
 
 class _SchoolView extends StatefulWidget {
   const _SchoolView({required this.state, required this.onBack});
@@ -60,10 +63,6 @@ class _SchoolViewState extends State<_SchoolView> {
 
     final List<Person> sinifArkadaslari = state.currentClassmates;
     final List<Person> ogretmenler = state.currentTeachers;
-    final List<Person> yakinArkadaslar = state.people
-        .where((Person p) => p.isAlive && p.relation == RelationType.arkadas)
-        .toList(growable: false);
-
     switch (_page) {
       case _SchoolPage.sinifArkadaslari:
         return _PeoplePage(
@@ -89,17 +88,6 @@ class _SchoolViewState extends State<_SchoolView> {
               .where((Person p) => p.schoolTie == SchoolTie.ogretmen)
               .toList(growable: false),
           emptyText: 'Bu kademede kayıtlı öğretmenin yok.',
-          playerAge: state.player.age,
-          onBack: () => _go(_SchoolPage.kok),
-        );
-      case _SchoolPage.yakinArkadaslar:
-        return _PeoplePage(
-          title: 'Yakın Arkadaşların',
-          subtitle: 'Okulda tanışıp yakınlaştığın kişiler',
-          people: yakinArkadaslar,
-          past: const <Person>[],
-          emptyText: 'Henüz yakın arkadaşlık kurmadın. Sınıf arkadaşı olmak '
-              'tek başına yakın arkadaşlık sayılmaz.',
           playerAge: state.player.age,
           onBack: () => _go(_SchoolPage.kok),
         );
@@ -141,19 +129,13 @@ class _SchoolViewState extends State<_SchoolView> {
           trailingText: '${ogretmenler.length}',
           onTap: () => _go(_SchoolPage.ogretmenler),
         ),
-        const SizedBox(height: 10),
-        MenuRow(
-          title: 'Yakın Arkadaşların',
-          subtitle: 'Tanışıklıktan öteye geçenler; sınıfta da olabilirler',
-          icon: Icons.favorite_outline,
-          trailingText: '${yakinArkadaslar.length}',
-          onTap: () => _go(_SchoolPage.yakinArkadaslar),
-        ),
         const SizedBox(height: 12),
         const InfoPanel(
           icon: Icons.menu_book_outlined,
           text: 'Okul olayları yaş aldıkça ve gün içinde ilerledikçe '
-              'karşına çıkar. Sınav, not ve diploma sistemi henüz yazılmadı.',
+              'karşına çıkar. Arkadaşlık düzeyini İlişkiler bölümünden '
+              'takip edebilirsin. Sınav, not ve diploma sistemi henüz '
+              'yazılmadı.',
         ),
       ],
     );

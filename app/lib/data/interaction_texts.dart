@@ -64,18 +64,19 @@ const List<String> _doyumGenel = <String>[
 ];
 
 const List<String> _hediyeVer = <String>[
-  '{ad} paketi açarken elleri titredi. "Buna ne gerek vardı" dedi ama '
-      'gözü hediyeden ayrılmadı.',
-  '{ad} hediyeyi görünce bir süre konuşmadı, sonra "sen benim..." diye '
-      'başladı ve cümlesini bitiremedi.',
-  'Hediyeyi {ad} ile masaya koydun. Küçük bir şeydi; masadaki en '
+  '{ad} için {esya} aldın. Paketi açarken "buna ne gerek vardı" dedi ama '
+      'gözünü ondan ayırmadı.',
+  '{ad} aldığın {esya} karşısında bir süre konuşmadı, sonra "sen benim..." '
+      'diye başlayıp cümlesini bitiremedi.',
+  '{ad} için aldığın {esya} masada duruyor. Küçük bir şeydi; masadaki en '
       'değerli şey oldu.',
 ];
 
 const List<String> _hediyeIsteKabul = <String>[
-  '{ad} dolabın üst rafına uzandı: "Sende dursun, benden sana."',
-  '{ad} bir şey demeden içeri girdi, elinde onunla çıktı: "Kaybetme ama."',
-  '{ad} "isteyenin bir yüzü kara" dedi, gülerek uzattı.',
+  '{ad} dolabın üst rafına uzandı: "Sende dursun." Sana bir {esya} hediye '
+      'etti.',
+  '{ad} bir şey demeden içeri girdi, elinde {esya} ile çıktı: "Kaybetme ama."',
+  '{ad} "isteyenin bir yüzü kara" dedi ve sana bir {esya} aldı.',
 ];
 
 const List<String> _paraIsteKabul = <String>[
@@ -117,6 +118,10 @@ String interactionText({
   required bool accepted,
   required bool noNewBenefit,
   required int playerAge,
+
+  /// Hediye taşıyan etkileşimlerde eşyanın adı; metinde `{esya}` yerine
+  /// geçer. Hediye gerçekten el değiştirmediyse `null`'dır.
+  String? giftName,
 }) {
   final List<String> pool;
   if (!accepted) {
@@ -144,9 +149,14 @@ String interactionText({
   }
 
   final String raw = pool[rng.nextInt(pool.length)];
-  return raw
+  final String metin = raw
       .replaceAll('{ad}', person.firstName)
       .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
+  // Eşya adı yoksa `{esya}` içeren metin hiç kullanılmaz; yine de ekrana
+  // doldurulmamış yer tutucu çıkmasın diye burada da güvenceye alınır.
+  return giftName == null
+      ? metin.replaceAll('{esya}', 'küçük bir hediye')
+      : metin.replaceAll('{esya}', giftName.toLowerCase());
 }
 
 /// Verilecek hediye kalmadığında kullanılacak metin.

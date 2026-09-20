@@ -9,25 +9,104 @@ import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 
+/// Yeni bir sınıf ortamı kurulduğunda oluşan kişiler ve taşınan kayıtlar.
+class ClassRoster {
+  const ClassRoster({required this.newPeople, required this.movedIds});
+
+  /// İlk kez oluşturulan kişiler.
+  final List<Person> newPeople;
+
+  /// Eski sınıftan **aynı kimlikle** yeni sınıfa geçen kişilerin kimlikleri.
+  final List<String> movedIds;
+}
+
 /// Okuldaki kalıcı kimlikli kişileri üretir.
 ///
-/// Her kademe (ilkokul / ortaokul / lise) kendi sınıf arkadaşlarını ve
-/// öğretmenini getirir. Kademe değişince **eski kişiler silinmez**; yalnızca
-/// [Person.schoolLevel] alanları sayesinde güncel sınıf listesinde
-/// görünmezler.
+/// Kişiler kademeye değil **okula ve sınıfa** bağlanır
+/// ([Person.schoolId], [Person.classId]); böylece ileride aynı kademede
+/// okul/sınıf değişimi de modellenebilir.
+///
+/// Kademe değiştiğinde sınıfın tamamı yenilenmez: bir bölümü aynı kimlikle
+/// yeni sınıfa taşınır (gerçek hayatta çoğu arkadaş birlikte devam eder),
+/// kalanlar eski sınıfta kayıtlı kalır ve ileride yeniden karşılaşılabilir.
+/// Hiçbir kayıt silinmez (D-029).
 ///
 /// Sınıf arkadaşı olmak **yakın arkadaş olmak değildir**: tanışıklık düşük
 /// bir yakınlıkla başlar, yakın arkadaşlık ayrı bir olayla kurulur.
 class SchoolPeople {
   const SchoolPeople();
 
-  /// prototypeOnly: bir kademede üretilecek sınıf arkadaşı sayısı.
-  static const int prototypeOnlyClassmateCount = 4;
+  /// prototypeOnly: oyuncu hariç bir sınıftaki arkadaş sayısı.
+  ///
+  /// Nihai oyun kuralı değildir; sınıf mevcudu Faho'nun kararıyla
+  /// değişebilir (`docs/DESIGN_REVIEW_QUEUE.md`, Q-024).
+  static const int prototypeOnlyClassmateCount = 10;
 
-  /// Verilen kademe için sınıf arkadaşlarını ve öğretmeni üretir.
-  List<Person> generateFor({
+  /// prototypeOnly: kademe geçişinde yeni sınıfa taşınan arkadaş oranı.
+  static const double prototypeOnlyCarryOverRatio = 0.4;
+
+  /// prototypeOnly: bir okulda kaç öğretmen tanınır.
+  static const int prototypeOnlyTeacherCount = 1;
+
+  /// Kademe için okul kimliği.
+  static String schoolIdFor(SchoolLevel level) => 'okul-${level.name}';
+
+  /// Kademe için sınıf kimliği.
+  static String classIdFor(SchoolLevel level) => 'sinif-${level.name}';
+
+  /// Yeni bir sınıf ortamı kurar.
+  ///
+  /// [previousClassmates] verilirse bir bölümü yeni sınıfa taşınır ve
+  /// kimlikleri [ClassRoster.movedIds] içinde döner; geri kalan mevcut yeni
+  /// kişilerle tamamlanır.
+  ClassRoster buildClass({
     required GameState state,
     required SchoolLevel level,
+    required Random rng,
+    List<Person> previousClassmates = const <Person>[],
+  }) {
+    final String schoolId = schoolIdFor(level);
+    final String classId = classIdFor(level);
+
+    // Eski sınıftan devam edenler.
+    final List<Person> adaylar = List<Person>.from(
+      previousClassmates.where((Person p) => p.isAlive),
+    )..shuffle(rng);
+    final int tasinacak = min(
+      adaylar.length,
+      (prototypeOnlyClassmateCount * prototypeOnlyCarryOverRatio).round(),
+    );
+    final List<String> tasinanlar = adaylar
+        .take(tasinacak)
+        .map((Person p) => p.id)
+        .toList(growable: false);
+
+    final int uretilecek = prototypeOnlyClassmateCount - tasinanlar.length;
+    final List<Person> yeniler = _generatePeople(
+      state: state,
+      level: level,
+      schoolId: schoolId,
+      classId: classId,
+      classmateCount: uretilecek,
+      rng: rng,
+    );
+
+    return ClassRoster(newPeople: yeniler, movedIds: tasinanlar);
+  }
+
+  /// Bir kişiyi **aynı kimlikle** yeni sınıfa taşır.
+  Person moveToClass(Person person, SchoolLevel level) => person.copyWith(
+        schoolLevel: level,
+        schoolId: schoolIdFor(level),
+        classId: classIdFor(level),
+      );
+
+  List<Person> _generatePeople({
+    required GameState state,
+    required SchoolLevel level,
+    required String schoolId,
+    required String classId,
+    required int classmateCount,
     required Random rng,
   }) {
     final List<Person> people = <Person>[];
@@ -35,11 +114,14 @@ class SchoolPeople {
       for (final Person p in state.people) p.firstName,
       state.player.firstName,
     };
+    final Set<String> kullanilanKimlikler = <String>{
+      for (final Person p in state.people) p.id,
+    };
 
     String benzersizIsim(Gender gender) {
       final List<String> havuz =
           gender == Gender.kadin ? kadinIsimleri : erkekIsimleri;
-      for (int deneme = 0; deneme < 20; deneme++) {
+      for (int deneme = 0; deneme < 30; deneme++) {
         final String aday = rng.pick(havuz);
         if (!kullanilanIsimler.contains(aday)) {
           kullanilanIsimler.add(aday);
@@ -57,11 +139,21 @@ class SchoolPeople {
       return aday;
     }
 
-    for (int i = 0; i < prototypeOnlyClassmateCount; i++) {
+    /// Kimlikler hiçbir zaman çakışmaz; aynı kişi ikiye bölünmez.
+    String benzersizKimlik(String onek) {
+      int n = 1;
+      while (kullanilanKimlikler.contains('$onek-$n')) {
+        n++;
+      }
+      kullanilanKimlikler.add('$onek-$n');
+      return '$onek-$n';
+    }
+
+    for (int i = 0; i < classmateCount; i++) {
       final Gender gender = rng.pick(Gender.values);
       people.add(
         Person(
-          id: 'sinif-${level.name}-${i + 1}',
+          id: benzersizKimlik('sinif-${level.name}'),
           firstName: benzersizIsim(gender),
           lastName: soyad(),
           gender: gender,
@@ -69,37 +161,45 @@ class SchoolPeople {
           // Aynı sınıfta oldukları için yaşları oyuncuyla aynı kuşakta.
           age: (state.player.age + rng.between(-1, 1)).clamp(5, 120),
           isAlive: true,
+          // Sınıf arkadaşı olmak aynı evde yaşamak demek değildir (D-014).
           inPlayerHousehold: false,
           employment: EmploymentStatus.ogrenci,
           occupation: null,
           wealth: null,
           // Tanışıklık düşük başlar; yakın arkadaşlık ayrı kurulur.
-          bond: rng.between(15, 35), // prototypeOnly
+          bond: rng.between(10, 30), // prototypeOnly
           schoolLevel: level,
           schoolTie: SchoolTie.sinifArkadasi,
+          schoolId: schoolId,
+          classId: classId,
         ),
       );
     }
 
-    final Gender ogretmenCinsiyeti = rng.pick(Gender.values);
-    people.add(
-      Person(
-        id: 'ogretmen-${level.name}',
-        firstName: benzersizIsim(ogretmenCinsiyeti),
-        lastName: soyad(),
-        gender: ogretmenCinsiyeti,
-        relation: RelationType.ogretmen,
-        age: rng.between(28, 58),
-        isAlive: true,
-        inPlayerHousehold: false,
-        employment: EmploymentStatus.calisiyor,
-        occupation: 'öğretmen',
-        wealth: WealthTier.ortaHalli,
-        bond: rng.between(15, 35), // prototypeOnly
-        schoolLevel: level,
-        schoolTie: SchoolTie.ogretmen,
-      ),
-    );
+    for (int i = 0; i < prototypeOnlyTeacherCount; i++) {
+      final Gender gender = rng.pick(Gender.values);
+      people.add(
+        Person(
+          id: benzersizKimlik('ogretmen-${level.name}'),
+          firstName: benzersizIsim(gender),
+          lastName: soyad(),
+          gender: gender,
+          relation: RelationType.ogretmen,
+          age: rng.between(28, 58),
+          isAlive: true,
+          // Öğretmen de yalnızca tanışıklık nedeniyle haneye eklenmez.
+          inPlayerHousehold: false,
+          employment: EmploymentStatus.calisiyor,
+          occupation: 'öğretmen',
+          wealth: WealthTier.ortaHalli,
+          bond: rng.between(10, 30), // prototypeOnly
+          schoolLevel: level,
+          schoolTie: SchoolTie.ogretmen,
+          schoolId: schoolId,
+          classId: classId,
+        ),
+      );
+    }
 
     return List<Person>.unmodifiable(people);
   }

@@ -59,6 +59,7 @@ class InteractionOutcome {
     this.charismaDelta = 0,
     this.moneyDelta = 0,
     this.gainedPossession,
+    this.givenPossession,
     this.noNewBenefit = false,
     this.effects = const <AppliedEffect>[],
   });
@@ -79,6 +80,9 @@ class InteractionOutcome {
   /// Etkileşim sonucu gerçekten eline geçen eşyanın kimliği.
   final String? gainedPossession;
 
+  /// Oyuncunun gerçekten verdiği hediyenin eşya kimliği.
+  final String? givenPossession;
+
   final bool noNewBenefit;
 
   /// Durumun öncesi ile sonrası karşılaştırılarak bulunan, **gerçekten
@@ -96,6 +100,7 @@ class InteractionOutcome {
         charismaDelta: charismaDelta,
         moneyDelta: moneyDelta,
         gainedPossession: gainedPossession,
+        givenPossession: givenPossession,
         noNewBenefit: noNewBenefit,
         effects: applied,
       );
@@ -105,7 +110,8 @@ class InteractionOutcome {
       happinessDelta != 0 ||
       charismaDelta != 0 ||
       moneyDelta != 0 ||
-      gainedPossession != null;
+      gainedPossession != null ||
+      givenPossession != null;
 
   /// Hayat günlüğüne yalnızca anlamlı sonuçlar yazılır.
   bool get worthLogging => !accepted || hasAnyEffect;

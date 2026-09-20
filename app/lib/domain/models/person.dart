@@ -27,6 +27,8 @@ class Person {
     this.occupation,
     this.schoolLevel,
     this.schoolTie,
+    this.schoolId,
+    this.classId,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -62,6 +64,15 @@ class Person {
   /// ama **kayıtları silinmez**; eski kademeye ait oldukları buradan bilinir.
   final SchoolLevel? schoolLevel;
 
+  /// Tanışıldığı okulun kimliği. Kademeden bağımsızdır.
+  final String? schoolId;
+
+  /// Tanışıldığı sınıfın kimliği.
+  ///
+  /// Güncel sınıf arkadaşlığı bu kimlikle belirlenir; kademe geçişinde
+  /// bazı kişiler aynı sınıfa taşınır, bazıları eski sınıfta kalır.
+  final String? classId;
+
   /// Kişinin okul bağı (sınıf arkadaşı / öğretmen).
   ///
   /// [relation] yakınlık derecesini tutar ve değişebilir (sınıf arkadaşı →
@@ -69,19 +80,22 @@ class Person {
   /// kişi, yakın arkadaş olsa bile sınıf listesinden düşmez.
   final SchoolTie? schoolTie;
 
-  /// Oyuncunun şu anki kademesinde sınıf arkadaşı mı?
-  bool isClassmateAt(SchoolLevel? currentLevel) =>
+  /// Oyuncunun **şu anki sınıfında** sınıf arkadaşı mı?
+  ///
+  /// Yakınlık derecesi ([relation]) burada rol oynamaz: yakın arkadaş olan
+  /// bir sınıf arkadaşı da sınıfta görünmeye devam eder.
+  bool isClassmateIn(String? currentClassId) =>
       isAlive &&
       schoolTie == SchoolTie.sinifArkadasi &&
-      currentLevel != null &&
-      schoolLevel == currentLevel;
+      currentClassId != null &&
+      classId == currentClassId;
 
-  /// Oyuncunun şu anki kademesinde öğretmeni mi?
-  bool isTeacherAt(SchoolLevel? currentLevel) =>
+  /// Oyuncunun **şu anki okulunda** öğretmeni mi?
+  bool isTeacherIn(String? currentSchoolId) =>
       isAlive &&
       schoolTie == SchoolTie.ogretmen &&
-      currentLevel != null &&
-      schoolLevel == currentLevel;
+      currentSchoolId != null &&
+      schoolId == currentSchoolId;
 
   /// Oyuncuyla ilişki puanı (0-100).
   ///
@@ -126,6 +140,8 @@ class Person {
     int? bond,
     Object? schoolLevel = _unset,
     Object? schoolTie = _unset,
+    Object? schoolId = _unset,
+    Object? classId = _unset,
   }) {
     return Person(
       id: id,
@@ -145,6 +161,8 @@ class Person {
           : schoolLevel as SchoolLevel?,
       schoolTie:
           schoolTie == _unset ? this.schoolTie : schoolTie as SchoolTie?,
+      schoolId: schoolId == _unset ? this.schoolId : schoolId as String?,
+      classId: classId == _unset ? this.classId : classId as String?,
     );
   }
 }

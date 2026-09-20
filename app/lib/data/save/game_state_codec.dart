@@ -12,6 +12,7 @@ import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/gender.dart';
+import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/person.dart';
@@ -39,6 +40,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'seenEventIds': state.seenEventIds.toList(growable: false),
       'lastEventAge': state.lastEventAge,
       'storyPeople': state.storyPeople,
+      'gifts': state.gifts.map(_encodeGift).toList(growable: false),
       'pendingEvent': state.pendingEvent == null
           ? null
           : _encodeActiveEvent(state.pendingEvent!),
@@ -80,6 +82,15 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'bond': p.bond,
       'schoolLevel': p.schoolLevel?.name,
       'schoolTie': p.schoolTie?.name,
+      'schoolId': p.schoolId,
+      'classId': p.classId,
+    };
+
+Map<String, Object?> _encodeGift(GiftRecord g) => <String, Object?>{
+      'itemId': g.itemId,
+      'fromId': g.fromId,
+      'toId': g.toId,
+      'age': g.age,
     };
 
 Map<String, Object?> _encodePet(Pet pet) => <String, Object?>{
@@ -99,6 +110,8 @@ Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
       'grade': e.grade,
       'startedAtAge': e.startedAtAge,
       'finished': e.finished,
+      'schoolId': e.schoolId,
+      'classId': e.classId,
     };
 
 /// Bekleyen olay **tüm seçenekleriyle** yazılır.
@@ -188,6 +201,14 @@ GameState decodeGameState(Map<String, Object?> json) {
     storyPeople: Map<String, String>.unmodifiable(
       _stringMap(json, 'storyPeople'),
     ),
+    // Eski kayıtlarda hediye geçmişi yoktur; boş liste ile açılır.
+    gifts: List<GiftRecord>.unmodifiable(
+      json['gifts'] == null
+          ? const <GiftRecord>[]
+          : _list(json, 'gifts')
+              .map((Object? e) => _decodeGift(_asMap(e, 'gifts[]')))
+              .toList(growable: false),
+    ),
     pendingEvent: pending == null
         ? null
         : _decodeActiveEvent(_asMap(pending, 'pendingEvent')),
@@ -263,8 +284,17 @@ Person _decodePerson(Map<String, Object?> json) {
       _stringOrNull(json, 'schoolTie'),
       'person.schoolTie',
     ),
+    schoolId: _stringOrNull(json, 'schoolId'),
+    classId: _stringOrNull(json, 'classId'),
   );
 }
+
+GiftRecord _decodeGift(Map<String, Object?> json) => GiftRecord(
+      itemId: _string(json, 'itemId'),
+      fromId: _string(json, 'fromId'),
+      toId: _string(json, 'toId'),
+      age: _int(json, 'age'),
+    );
 
 Pet _decodePet(Map<String, Object?> json) => Pet(
       id: _string(json, 'id'),
@@ -296,6 +326,8 @@ EducationState _decodeEducation(Map<String, Object?> json) {
     grade: grade,
     startedAtAge: _intOrNull(json, 'startedAtAge'),
     finished: _bool(json, 'finished'),
+    schoolId: _stringOrNull(json, 'schoolId'),
+    classId: _stringOrNull(json, 'classId'),
   );
 }
 

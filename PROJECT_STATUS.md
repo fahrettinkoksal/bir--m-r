@@ -115,6 +115,18 @@ dayanıklı yazma (geçici dosya + yedek + tek adımda taşıma) ve bozuk kayıt
 üzerine yazacağı için önce onay soruluyor. Ayrıntı: `docs/SAVE_SYSTEM.md`.
 Açık kalan sorular karar kuyruğunda **Q-035** altında.
 
+## Paket 1 — okul, kişi ve hediye düzeltmeleri (uygulandı)
+Sınıf mevcudu oyuncu hariç 10'a çıkarıldı; okul kişileri kademeye değil
+**okula ve sınıfa** bağlandı (`Person.schoolId` / `classId`), kademe
+geçişinde bir bölüm arkadaş aynı kimlikle yeni sınıfa taşınıyor, kalanlar
+silinmeden eski sınıfta kalıyor. Okul ekranından "Yakın Arkadaşların"
+kaldırıldı. Kişiye uygun olmayan etkileşim artık kilitli satır olarak
+gösterilmiyor (`interaction_policy.dart`). Aktiviteler listesi yalnızca
+gündelik hayatta gerçekten erişilebilen kişileri gösteriyor. Hediyeler
+gerçek eşya kataloğuna bağlandı; kim kime ne verdi kaydediliyor. Olay
+metinleri gerçekçilik açısından gözden geçirildi. Kayıt biçimi **sürüm 2**;
+sürüm 1 kayıtları göçle açılıyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
