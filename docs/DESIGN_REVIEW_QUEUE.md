@@ -1388,6 +1388,11 @@ değerler `prototypeOnly` ve geri alınabilir.
 "Aile" kelimesini "AILE" yapıyordu (doğrusu "AİLE"); "işçi" de "Işçi"
 oluyordu. Artık Türkçe kuralına uygun çevriliyor.
 
+**Paket F3 eki:** karanlık temada "iyi" (çini) ile "orta" (pirinç)
+renkleri birbirine karışıyordu; koyu zemin için ayrı tonlar tanımlandı ve
+karanlık mod ekran görüntüsü testine eklendi. Karanlık modun bütün
+ekranlarda gözden geçirilmesi ayrı bir iştir.
+
 **Karar soruları:**
 1. Günlük yaşa göre kümelenmiş hâliyle mi kalsın, yoksa düz akış mı
    tercih edilir?
