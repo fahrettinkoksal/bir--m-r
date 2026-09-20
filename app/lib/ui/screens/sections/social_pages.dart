@@ -199,7 +199,8 @@ class _PlatformPage extends StatelessWidget {
     return SectionScaffold(
       title: platform.label,
       subtitle: '${account.followers} ${platform.audienceWord} · '
-          '${account.postCount} paylaşım',
+          '${account.postCount} paylaşım · '
+          'bu yıl kalan: ${controller.remainingSocialPosts(platform)}',
       backLabel: 'Sosyal medya',
       onBack: onBack,
       children: <Widget>[

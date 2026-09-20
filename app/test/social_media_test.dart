@@ -9,6 +9,7 @@ import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/applied_effect.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/social_account.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -195,6 +196,134 @@ void main() {
         social.postAvailability(state, content('mizah')).isAllowed,
         isFalse,
       );
+    });
+
+    test('platformun sınırı diğer platformları kapatmaz', () {
+      // Her platform çifti için: birinde sınıra ulaş, diğerinde ilk
+      // paylaşımını yap.
+      const Map<SocialPlatform, String> ornekIcerik = <SocialPlatform, String>{
+        SocialPlatform.video: 'eglence_videosu',
+        SocialPlatform.foto: 'fotograf',
+        SocialPlatform.mikroblog: 'mizah',
+      };
+
+      for (final SocialPlatform dolan in SocialPlatform.values) {
+        for (final SocialPlatform digeri in SocialPlatform.values) {
+          if (dolan == digeri) continue;
+
+          // İki hesap da açık.
+          GameState state = withAccount(life(60, age: 20), dolan);
+          state = withAccount(state, digeri);
+
+          // Birinci platformda sınıra kadar paylaş.
+          int yapilan = 0;
+          for (int i = 0; i < 20; i++) {
+            final SocialResult r =
+                social.post(state, content(ornekIcerik[dolan]!), Random(i));
+            if (!r.outcome.applied) break;
+            state = r.state;
+            yapilan++;
+          }
+          expect(yapilan, SocialEngine.prototypeOnlyMaxPostsPerAge,
+              reason: '${dolan.label} sınırına ulaşılmalı');
+          expect(
+            social.postAvailability(state, content(ornekIcerik[dolan]!))
+                .isAllowed,
+            isFalse,
+          );
+
+          // Diğer platformda hiç paylaşım yapılmadı: hâlâ açık olmalı.
+          expect(
+            social.postAvailability(state, content(ornekIcerik[digeri]!))
+                .isAllowed,
+            isTrue,
+            reason: '${dolan.label} dolunca ${digeri.label} kapanmamalı',
+          );
+          expect(social.remainingPosts(state, digeri),
+              SocialEngine.prototypeOnlyMaxPostsPerAge);
+
+          final SocialResult ilk =
+              social.post(state, content(ornekIcerik[digeri]!), Random(1));
+          expect(ilk.outcome.applied, isTrue,
+              reason: '${digeri.label} üzerindeki ilk paylaşım çalışmalı');
+          expect(ilk.state.accountFor(digeri)!.postCount, 1);
+          expect(
+            ilk.state.accountFor(dolan)!.postCount,
+            SocialEngine.prototypeOnlyMaxPostsPerAge,
+            reason: 'Diğer platformun geçmişi değişmemeli',
+          );
+        }
+      }
+    });
+
+    test('sınır dolunca gerekçe platformu adıyla anlatır', () {
+      GameState state = withAccount(life(61, age: 20), SocialPlatform.foto);
+      for (int i = 0; i < SocialEngine.prototypeOnlyMaxPostsPerAge; i++) {
+        state = social.post(state, content('fotograf'), Random(i)).state;
+      }
+      final InteractionAvailability durum =
+          social.postAvailability(state, content('fotograf'));
+      expect(durum.isAllowed, isFalse);
+      expect(durum.reason, contains(SocialPlatform.foto.label));
+      expect(social.remainingPosts(state, SocialPlatform.foto), 0);
+    });
+
+    test('takipçi ve içerik geçmişi platformlar arasında karışmaz', () {
+      GameState state = withAccount(life(62, age: 20), SocialPlatform.video,
+          followers: 300);
+      state = withAccount(state, SocialPlatform.foto);
+
+      final int videoOnce = state.accountFor(SocialPlatform.video)!.followers;
+      final SocialResult r =
+          social.post(state, content('fotograf'), Random(3));
+
+      expect(r.state.accountFor(SocialPlatform.video)!.followers, videoOnce,
+          reason: 'Instagram paylaşımı YouTube abonesini değiştirmemeli');
+      expect(r.state.accountFor(SocialPlatform.video)!.posts, isEmpty);
+      expect(r.state.accountFor(SocialPlatform.foto)!.posts.length, 1);
+    });
+
+    test('yaş ilerleyince her platformun sayacı yenilenir', () {
+      GameState state = withAccount(life(63, age: 20), SocialPlatform.foto);
+      state = withAccount(state, SocialPlatform.mikroblog);
+      for (int i = 0; i < SocialEngine.prototypeOnlyMaxPostsPerAge; i++) {
+        state = social.post(state, content('fotograf'), Random(i)).state;
+      }
+      expect(social.remainingPosts(state, SocialPlatform.foto), 0);
+
+      // Bir yaş ilerle: sayaç paylaşım geçmişinden okunduğu için yenilenir.
+      final GameState seneye =
+          state.copyWith(player: state.player.copyWith(age: 21));
+      expect(social.remainingPosts(seneye, SocialPlatform.foto),
+          SocialEngine.prototypeOnlyMaxPostsPerAge);
+      expect(social.remainingPosts(seneye, SocialPlatform.mikroblog),
+          SocialEngine.prototypeOnlyMaxPostsPerAge);
+      expect(social.postAvailability(seneye, content('fotograf')).isAllowed,
+          isTrue);
+      expect(seneye.accountFor(SocialPlatform.foto)!.postCount,
+          SocialEngine.prototypeOnlyMaxPostsPerAge,
+          reason: 'Geçmiş paylaşımlar silinmemeli');
+    });
+
+    test('kaydedilip yüklenen hayatta sayaçlar platform başına korunur',
+        () async {
+      GameState state = withAccount(life(64, age: 20), SocialPlatform.foto);
+      state = withAccount(state, SocialPlatform.video);
+      for (int i = 0; i < SocialEngine.prototypeOnlyMaxPostsPerAge; i++) {
+        state = social.post(state, content('fotograf'), Random(i)).state;
+      }
+
+      final SaveService service = SaveService(MemorySaveStore());
+      await service.save(state);
+      final SaveLoadResult result = await service.load();
+      expect(result.isLoaded, isTrue, reason: result.message);
+      final GameState geri = result.state!;
+
+      expect(social.remainingPosts(geri, SocialPlatform.foto), 0);
+      expect(social.remainingPosts(geri, SocialPlatform.video),
+          SocialEngine.prototypeOnlyMaxPostsPerAge);
+      expect(social.postAvailability(geri, content('eglence_videosu')).isAllowed,
+          isTrue);
     });
 
     test('karakter özellikleri sonucu etkiler', () {

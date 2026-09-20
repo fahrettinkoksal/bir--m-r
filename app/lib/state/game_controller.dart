@@ -556,6 +556,16 @@ class GameController extends ChangeNotifier {
   }
 
   /// Paylaşımın şu an mümkün olup olmadığı.
+  /// Bu yıl **bu platformda** kalan paylaşım hakkı.
+  ///
+  /// Sayaç platform başına ayrıdır; bir platformun dolması diğerini
+  /// etkilemez.
+  int remainingSocialPosts(SocialPlatform platform) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _social.remainingPosts(current, platform);
+  }
+
   InteractionAvailability socialPostAvailability(SocialContent content) {
     final GameState? current = _state;
     if (current == null) {
