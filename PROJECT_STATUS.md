@@ -153,6 +153,15 @@ stil değiştir, bakım), **spor salonu** (koşu, ağırlık, esneme) ve
 tekrar sınırı var. Kitap ilerlemesi gerçek oyun verisi; bitirme kazancı
 **bir kez** uygulanıyor. Kayıt biçimi **sürüm 5**.
 
+## Sosyal medya ve Ün (uygulandı)
+16 yaşından itibaren **isteğe bağlı** hesap açılabiliyor (YouTube,
+Instagram, X — arayüz Bir Ömür'e özgü, logo/tasarım kopyalanmıyor). Her
+platformun ayrı takipçi sayısı ve içerik geçmişi var; hesabı olmayan
+platformda paylaşım yapılamıyor. On içerik türü; sonuç içerik türüne,
+mevcut kitleye, karakter özelliklerine, geçmiş paylaşımlara ve şansa göre
+değişiyor — bazı paylaşımlar takipçi kaybettiriyor. **Ün** ancak gerçek bir
+kitle oluşunca açılıyor (D-027). Kayıt biçimi **sürüm 6**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

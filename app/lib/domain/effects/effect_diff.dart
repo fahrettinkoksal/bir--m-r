@@ -32,6 +32,15 @@ List<AppliedEffect> diffAppliedEffects(GameState before, GameState after) {
     );
   }
 
+  // --- Ün (D-027): yalnızca açıldıktan sonra görünür -------------------
+  final int? onceFame = before.player.fame;
+  final int? sonraFame = after.player.fame;
+  if (sonraFame != null && sonraFame != (onceFame ?? 0)) {
+    effects.add(
+      AppliedEffect(label: 'Ün', delta: sonraFame - (onceFame ?? 0)),
+    );
+  }
+
   // --- Kişilerle yakınlık ---------------------------------------------
   final Map<String, Person> oncekiKisiler = <String, Person>{
     for (final Person p in before.people) p.id: p,

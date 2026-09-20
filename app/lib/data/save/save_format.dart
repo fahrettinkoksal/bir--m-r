@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 5;
+const int kSaveFormatVersion = 6;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -59,7 +59,17 @@ abstract final class SaveMigrations {
     if (from <= 2) guncel = _v2ToV3(guncel);
     if (from <= 3) guncel = _v3ToV4(guncel);
     if (from <= 4) guncel = _v4ToV5(guncel);
+    if (from <= 5) guncel = _v5ToV6(guncel);
     return guncel;
+  }
+
+  /// Sürüm 5 → 6: sosyal medya hesapları eklendi.
+  ///
+  /// Eski kayıtlarda hesap yoktur; boş listeyle açılır. Hesabı olmayan
+  /// oyuncuya o platformdan paylaşım veya olay gelmez.
+  static Map<String, Object?> _v5ToV6(Map<String, Object?> body) {
+    body['socialAccounts'] ??= <Object?>[];
+    return body;
   }
 
   /// Sürüm 4 → 5: aktiviteler (kitap ilerlemesi ve saç stili) eklendi.
