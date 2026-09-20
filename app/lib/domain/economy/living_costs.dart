@@ -2,31 +2,96 @@ import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 
-/// Yıllık temel yaşam gideri (D-033).
+/// Oyuncunun yaşam düzeni.
 ///
-/// Barınma, beslenme ve faturalar gibi kalemler **karakterin gerçekten
-/// yaşadığı hane ve yaşam koşullarına** göre hesaplanır:
-/// - Çocuğa yetişkin gideri yüklenmez.
-/// - Ailesiyle yaşayan yetişkin ile bağımsız yaşayanın gideri aynı değildir.
-/// - Kendi evi olan bağımsız yetişkin kira ödemez.
+/// Gider bu düzene göre değişir (D-033): çocuğa yetişkin gideri yüklenmez,
+/// ailesinin yanında yaşayan ile bağımsız yaşayanın gideri aynı değildir,
+/// kendi evinde oturan kira ödemez.
+enum LivingSituation {
+  cocuk('Çocuk'),
+  aileYaninda('Ailenin yanında'),
+  kirada('Kirada, kendi başına'),
+  kendiEvinde('Kendi evinde');
+
+  const LivingSituation(this.label);
+
+  final String label;
+}
+
+/// Tek bir gider kalemi.
 ///
+/// Gider **taban tutar + gelire bağlı pay** şeklinde hesaplanır; böylece
+/// düşük gelirli karakter sabit bir yük altında ezilmez, yüksek gelirlinin
+/// de bütün maaşı otomatik birikmez (D-039). Kalemler ayrı tutulur, böylece
+/// ileride ekranda tek tek gösterilebilir.
+class CostItem {
+  const CostItem({
+    required this.label,
+    required this.base,
+    required this.incomeShare,
+  });
+
+  final String label;
+
+  /// prototypeOnly: yıllık taban tutar (₺).
+  final int base;
+
+  /// prototypeOnly: yıllık gelirden alınan pay.
+  final double incomeShare;
+
+  int amountFor(int income) => base + (income * incomeShare).round();
+}
+
+/// Bir yılın gider dökümü.
+class CostBreakdown {
+  const CostBreakdown({
+    required this.situation,
+    required this.income,
+    required this.items,
+  });
+
+  final LivingSituation situation;
+
+  /// Gidere esas alınan yıllık gelir.
+  final int income;
+
+  /// Kalem kalem giderler (barınma, beslenme, diğer).
+  final List<({String label, int amount})> items;
+
+  int get total =>
+      items.fold(0, (int toplam, ({String label, int amount}) e) => toplam + e.amount);
+}
+
+/// Yıllık temel yaşam gideri (D-033, D-039).
+///
+/// Hesap: her kalem için **taban tutar + yıllık gelirin belirli bir payı**.
 /// Giderler cüzdanı **sessizce eksiye düşürmez**: para yetmezse cüzdan
 /// sıfırda kalır, açık bir sonuç yazılır ve **geçim sıkıntısı** sayacı
-/// artar. Bütün tutarlar `prototypeOnly`'dir (Q-055).
+/// artar. Bütün tutarlar ve oranlar `prototypeOnly`'dir (Q-055).
 abstract final class LivingCosts {
   /// prototypeOnly: giderin başladığı yaş.
   static const int prototypeOnlyAdultAge = 18;
 
-  /// prototypeOnly: ailesinin yanında yaşayan yetişkinin katkısı.
-  static const int prototypeOnlyWithFamily = 45000;
-
-  /// prototypeOnly: bağımsız yaşayan, kirada oturan yetişkinin gideri.
-  static const int prototypeOnlyIndependent = 140000;
-
-  /// prototypeOnly: kendi evinde oturan bağımsız yetişkinin gideri.
-  ///
-  /// Kira kalemi düşer; beslenme, fatura ve bakım kalır.
-  static const int prototypeOnlyOwnHome = 90000;
+  /// prototypeOnly: yaşam düzenine göre gider kalemleri.
+  static const Map<LivingSituation, List<CostItem>> prototypeOnlyItems =
+      <LivingSituation, List<CostItem>>{
+    LivingSituation.cocuk: <CostItem>[],
+    LivingSituation.aileYaninda: <CostItem>[
+      CostItem(label: 'Eve katkı', base: 6000, incomeShare: 0.02),
+      CostItem(label: 'Beslenme', base: 10000, incomeShare: 0.04),
+      CostItem(label: 'Diğer giderler', base: 4000, incomeShare: 0.02),
+    ],
+    LivingSituation.kirada: <CostItem>[
+      CostItem(label: 'Kira', base: 45000, incomeShare: 0.07),
+      CostItem(label: 'Beslenme', base: 22000, incomeShare: 0.05),
+      CostItem(label: 'Fatura ve diğer', base: 8000, incomeShare: 0.03),
+    ],
+    LivingSituation.kendiEvinde: <CostItem>[
+      CostItem(label: 'Aidat ve bakım', base: 15000, incomeShare: 0.03),
+      CostItem(label: 'Beslenme', base: 22000, incomeShare: 0.05),
+      CostItem(label: 'Fatura ve diğer', base: 8000, incomeShare: 0.04),
+    ],
+  };
 
   /// Oyuncu bu yaşta hane içinde bir yetişkinle mi yaşıyor?
   static bool livesWithFamily(GameState state) => state.people.any(
@@ -38,22 +103,51 @@ abstract final class LivingCosts {
   static bool ownsHome(GameState state) =>
       state.items.any((OwnedItem i) => i.isProperty);
 
-  /// Bu yaş için yıllık gider.
-  static int yearlyCost(GameState state) {
-    if (state.player.age < prototypeOnlyAdultAge) return 0;
-    if (livesWithFamily(state)) return prototypeOnlyWithFamily;
-    return ownsHome(state) ? prototypeOnlyOwnHome : prototypeOnlyIndependent;
+  /// Oyuncunun yaşam düzeni.
+  static LivingSituation situationOf(GameState state) {
+    if (state.player.age < prototypeOnlyAdultAge) return LivingSituation.cocuk;
+    if (livesWithFamily(state)) return LivingSituation.aileYaninda;
+    return ownsHome(state)
+        ? LivingSituation.kendiEvinde
+        : LivingSituation.kirada;
   }
+
+  /// Gidere esas alınan yıllık gelir.
+  ///
+  /// Şimdilik yalnızca maaş; kira geliri gibi kalemler eklendiğinde buraya
+  /// katılacak.
+  static int yearlyIncome(GameState state) =>
+      state.career.job?.yearlySalary ?? 0;
+
+  /// Bu yılın gider dökümü.
+  static CostBreakdown breakdownFor(GameState state) {
+    final LivingSituation durum = situationOf(state);
+    final int gelir = yearlyIncome(state);
+    return CostBreakdown(
+      situation: durum,
+      income: gelir,
+      items: <({String label, int amount})>[
+        for (final CostItem kalem in prototypeOnlyItems[durum]!)
+          (label: kalem.label, amount: kalem.amountFor(gelir)),
+      ],
+    );
+  }
+
+  /// Bu yaş için yıllık toplam gider.
+  static int yearlyCost(GameState state) => breakdownFor(state).total;
 
   /// Giderin ekranda görünen kısa açıklaması.
   static String labelFor(GameState state) {
-    if (state.player.age < prototypeOnlyAdultAge) {
-      return 'Bu yaşta geçim giderin yok.';
+    switch (situationOf(state)) {
+      case LivingSituation.cocuk:
+        return 'Bu yaşta geçim giderin yok.';
+      case LivingSituation.aileYaninda:
+        return 'Ailenin yanında yaşıyorsun.';
+      case LivingSituation.kirada:
+        return 'Kirada, kendi başına yaşıyorsun.';
+      case LivingSituation.kendiEvinde:
+        return 'Kendi evinde yaşıyorsun; kira ödemiyorsun.';
     }
-    if (livesWithFamily(state)) return 'Ailenin yanında yaşıyorsun.';
-    return ownsHome(state)
-        ? 'Kendi evinde yaşıyorsun; kira ödemiyorsun.'
-        : 'Kirada, kendi başına yaşıyorsun.';
   }
 
   /// Gideri uygular.

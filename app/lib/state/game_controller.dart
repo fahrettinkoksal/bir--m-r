@@ -24,6 +24,7 @@ import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
+import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
 import '../domain/casino/roulette.dart';
@@ -684,6 +685,22 @@ class GameController extends ChangeNotifier {
       return const InteractionAvailability.blocked('Etkin bir hayat yok.');
     }
     return CasinoAccess.check(current);
+  }
+
+  /// Bu yılki bahis bütçesi (D-040).
+  int casinoYearlyBudget() {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return CasinoAccess.yearlyBudget(current);
+  }
+
+  /// Masada gösterilecek hazır bahis adımları.
+  List<int> betSteps() {
+    final GameState? current = _state;
+    if (current == null) {
+      return <int>[CasinoRules.prototypeOnlyMinBet];
+    }
+    return CasinoRules.prototypeOnlyBetSteps(CasinoAccess.maxBet(current));
   }
 
   /// Bu bahis şu an oynanabilir mi?

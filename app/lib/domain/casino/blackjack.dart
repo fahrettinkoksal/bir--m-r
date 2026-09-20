@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../economy/living_costs.dart';
 import '../models/blackjack_game.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
@@ -238,16 +239,46 @@ abstract final class CasinoAccess {
     return const InteractionAvailability.allowed();
   }
 
+  /// Bu oyuncunun bu yılki bahis bütçesi (D-040).
+  ///
+  /// Gider sonrası kullanılabilir gelir ve mevcut cüzdan üzerinden
+  /// hesaplanır; oyuncunun kendi koyduğu limit daha düşükse o geçerlidir.
+  static int yearlyBudget(GameState state) =>
+      CasinoRules.prototypeOnlyYearlyBudget(
+        disposableIncome: disposableIncome(state),
+        wallet: state.player.wallet,
+        playerLimit: state.settings.wagerLimitPerAge,
+      );
+
+  /// Gider sonrası yıllık kullanılabilir gelir.
+  static int disposableIncome(GameState state) {
+    final int gelir = LivingCosts.yearlyIncome(state);
+    if (gelir <= 0) return 0;
+    final int gider = LivingCosts.yearlyCost(state);
+    final int kalan = gelir - gider;
+    return kalan < 0 ? 0 : kalan;
+  }
+
+  /// Bu yıl oynanabilecek en büyük tek bahis.
+  static int maxBet(GameState state) =>
+      CasinoRules.prototypeOnlyMaxBet(yearlyBudget(state));
+
+  /// Bu yıl kalan bahis hakkı.
+  static int remainingBudget(GameState state) {
+    final int kalan = yearlyBudget(state) - state.wagerThisAge;
+    return kalan < 0 ? 0 : kalan;
+  }
+
   static InteractionAvailability checkBet(GameState state, int bet) {
     if (bet < CasinoRules.prototypeOnlyMinBet) {
       return InteractionAvailability.blocked(
         'En az ${CasinoRules.prototypeOnlyMinBet} ₺ bahis oynanır.',
       );
     }
-    if (bet > CasinoRules.prototypeOnlyMaxBet) {
+    final int enFazla = maxBet(state);
+    if (bet > enFazla) {
       return InteractionAvailability.blocked(
-        'Bu masada en fazla ${CasinoRules.prototypeOnlyMaxBet} ₺ '
-        'bahis oynanır.',
+        'Bu yılki durumunda en fazla $enFazla ₺ bahis oynanır.',
       );
     }
     if (state.player.wallet < bet) {
@@ -255,18 +286,14 @@ abstract final class CasinoAccess {
         'Cüzdanında bu bahis için yeterli para yok.',
       );
     }
-    // Oyuncunun kendi belirlediği isteğe bağlı limit (D-032).
-    final int? kendiLimit = state.settings.wagerLimitPerAge;
-    if (kendiLimit != null && state.wagerThisAge + bet > kendiLimit) {
+    final int butce = yearlyBudget(state);
+    if (state.wagerThisAge + bet > butce) {
+      final bool kendiLimiti = state.settings.wagerLimitPerAge != null &&
+          state.settings.wagerLimitPerAge! <= butce;
       return InteractionAvailability.blocked(
-        'Kendine koyduğun $kendiLimit ₺ yıllık sınıra ulaştın.',
-      );
-    }
-    if (state.wagerThisAge + bet >
-        CasinoRules.prototypeOnlyYearlyWagerLimit) {
-      return InteractionAvailability.blocked(
-        'Bu yıl kumarhanede oynanabilecek '
-        '${CasinoRules.prototypeOnlyYearlyWagerLimit} ₺ sınırına ulaştın.',
+        kendiLimiti
+            ? 'Kendine koyduğun $butce ₺ yıllık sınıra ulaştın.'
+            : 'Bu yıl için ayırdığın $butce ₺ bahis bütçesi doldu.',
       );
     }
     return const InteractionAvailability.allowed();

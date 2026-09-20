@@ -297,6 +297,19 @@ Kayıt biçimi **sürüm 12**; sürüm 11 ve öncesi kayıtlar güvenli
 varsayılanlarla açılıyor ve hiçbir hayat silinmiyor. Sayısal değerler
 (gider tutarları, ölüm olasılıkları, bahis sınırları) **geçici**.
 
+## Denge turu: D-039 – D-042 (uygulandı)
+Dört denge kararı kodlandı: gider artık **taban + gelire bağlı pay** ve
+kalem kalem tutuluyor; ebeveyn yaşları **üçgen dağılımdan** seçiliyor ve
+85 üstü ölüm eğrisi hafifçe yükseltildi; otomobil aksesuarlarının satın
+alma yaşı 18 oldu; kumarhane bahis bütçesi **gelire ve cüzdana göre**
+hesaplanıyor (en küçük bahis 100 ₺, oyuncunun kendi limiti daha düşükse o
+geçerli).
+
+5.000 hayatlık ölçüm: 90+ oranı %19,2 → **%12,6**, çocukken ebeveyn kaybı
+%19,4 → **%12,3**, kirada yaşayan garsonun yıllık birikimi 25.000 ₺ →
+**65.250 ₺**. Ayrıntı: `docs/BALANCE_REPORT.md` §5. Bütün sayılar
+`prototypeOnly`.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

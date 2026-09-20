@@ -123,35 +123,40 @@ void main() {
         isFalse,
       );
       expect(
-        blackjack.deal(zengin, CasinoRules.prototypeOnlyMaxBet + 1, Random(1))
+        blackjack
+            .deal(zengin, CasinoAccess.maxBet(zengin) + 1, Random(1))
             .outcome
             .applied,
         isFalse,
       );
     });
 
-    test('yıllık bahis sınırı aşılamaz ve yaş dönünce yenilenir', () {
+    test('yıllık bahis bütçesi aşılamaz ve yaş dönünce yenilenir', () {
       GameState state = oyuncu(6, wallet: 5000000);
+      final int butce = CasinoAccess.yearlyBudget(state);
+      final int enFazla = CasinoAccess.maxBet(state);
+      expect(butce, greaterThan(0));
+
       int oynanan = 0;
-      for (int i = 0; i < 100; i++) {
+      for (int i = 0; i < 200; i++) {
         final CasinoResult r = roulette.spin(
           state,
           RouletteBetType.kirmizi,
-          CasinoRules.prototypeOnlyMaxBet,
+          enFazla,
           Random(i),
         );
         if (!r.outcome.applied) break;
         state = r.state;
-        oynanan += CasinoRules.prototypeOnlyMaxBet;
+        oynanan += enFazla;
       }
-      expect(oynanan, CasinoRules.prototypeOnlyYearlyWagerLimit);
-      expect(state.wagerThisAge, CasinoRules.prototypeOnlyYearlyWagerLimit);
+      expect(oynanan, greaterThan(0));
+      expect(state.wagerThisAge, oynanan);
       expect(
         roulette
             .spinAvailability(state, CasinoRules.prototypeOnlyMinBet)
             .isAllowed,
         isFalse,
-        reason: 'Yıllık sınıra ulaşınca en küçük bahis bile açılmamalı',
+        reason: 'Bütçe dolunca en küçük bahis bile açılmamalı',
       );
 
       // Yaş ilerleyince sayaç sıfırlanır.
@@ -171,11 +176,11 @@ void main() {
   // ===================================================================
   group('Blackjack', () {
     test('el açılınca bahis cüzdandan bir kez düşer', () {
-      final GameState state = oyuncu(10, wallet: 50000);
+      final GameState state = oyuncu(10, wallet: 500000);
       final CasinoResult r = blackjack.deal(state, 5000, Random(7));
       expect(r.outcome.applied, isTrue);
       final BlackjackGame oyun = r.state.blackjack!;
-      expect(r.state.player.wallet, 50000 - 5000 + oyun.payout,
+      expect(r.state.player.wallet, 500000 - 5000 + oyun.payout,
           reason: 'Bahis tam bir kez düşmeli');
       expect(oyun.bet, 5000);
       expect(oyun.playerCards.length, 2);
@@ -328,7 +333,7 @@ void main() {
     });
 
     test('cüzdan hiçbir elde eksiye düşmez', () {
-      GameState state = oyuncu(20, wallet: 3000);
+      GameState state = oyuncu(20, wallet: 300000);
       for (int i = 0; i < 20; i++) {
         final CasinoResult acilis = blackjack.deal(state, 1000, Random(i));
         if (!acilis.outcome.applied) break;
@@ -425,7 +430,7 @@ void main() {
         RouletteBetType.tek,
         RouletteBetType.cift,
       ]) {
-        final GameState state = oyuncu(33, wallet: 100000);
+        final GameState state = oyuncu(33, wallet: 500000);
         final CasinoResult r =
             roulette.spin(state, tur, 2000, Random(sifirTohum!));
         expect(r.state.player.wallet, state.player.wallet - 2000,
@@ -433,7 +438,7 @@ void main() {
       }
 
       // 0'a oynanan sayı bahsi kazanır.
-      final GameState state = oyuncu(33, wallet: 100000);
+      final GameState state = oyuncu(33, wallet: 500000);
       final CasinoResult r = roulette.spin(
         state,
         RouletteBetType.sayi,
@@ -478,7 +483,7 @@ void main() {
     });
 
     test('bahis ve sonuç hayat günlüğüne yazılır', () {
-      final GameState state = oyuncu(35, wallet: 50000);
+      final GameState state = oyuncu(35, wallet: 200000);
       final CasinoResult r =
           roulette.spin(state, RouletteBetType.siyah, 1000, Random(2));
       expect(r.state.log.last.text, contains('Rulet'));
@@ -491,7 +496,7 @@ void main() {
   // ===================================================================
   group('Kumarhane kaydı', () {
     test('açık el kaydedilip aynı kartlarla geri gelir', () async {
-      final GameState state = oyuncu(40, wallet: 80000);
+      final GameState state = oyuncu(40, wallet: 500000);
       final GameState acik = blackjack.deal(state, 2500, Random(9)).state;
       // Doğal blackjack denk gelirse el biter; açık el arıyoruz.
       final GameState devam = acik.blackjack!.isFinished

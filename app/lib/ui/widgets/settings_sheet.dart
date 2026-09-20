@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/casino/casino_rules.dart';
 import '../../domain/models/game_settings.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
@@ -85,9 +84,9 @@ class _SettingsSheetState extends State<SettingsSheet> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'İstersen kendine bir sınır koyabilirsin. Oyunun geçici '
-                  'üst sınırı ayrıca '
-                  '${CasinoRules.prototypeOnlyYearlyWagerLimit} ₺.',
+                  'İstersen kendine bir sınır koyabilirsin. Oyun ayrıca '
+                  'gelirine ve cüzdanına göre bir yıllık bütçe hesaplar; '
+                  'hangisi düşükse o geçerli olur.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

@@ -69,8 +69,9 @@ void main() {
       );
       final int bagimsizGider = LivingCosts.yearlyCost(bagimsiz);
 
-      expect(aileGideri, LivingCosts.prototypeOnlyWithFamily);
-      expect(bagimsizGider, LivingCosts.prototypeOnlyIndependent);
+      expect(LivingCosts.situationOf(aileYaninda),
+          LivingSituation.aileYaninda);
+      expect(LivingCosts.situationOf(bagimsiz), LivingSituation.kirada);
       expect(bagimsizGider, greaterThan(aileGideri));
     });
 
@@ -85,9 +86,9 @@ void main() {
       );
       final int kendiEvi = LivingCosts.yearlyCost(bagimsiz);
 
-      expect(kirada, LivingCosts.prototypeOnlyIndependent);
-      expect(kendiEvi, LivingCosts.prototypeOnlyOwnHome);
-      expect(kendiEvi, lessThan(kirada));
+      expect(LivingCosts.situationOf(bagimsiz), LivingSituation.kendiEvinde);
+      expect(kendiEvi, lessThan(kirada),
+          reason: 'Kendi evinde kira ödenmez');
     });
 
     test('gider cüzdandan bir kez düşer ve günlüğe yazılır', () {
@@ -414,17 +415,21 @@ void main() {
         settings: const GameSettings(wagerLimitPerAge: 10000),
       );
 
+      // Kendi limiti 10.000 ₺ olduğu için tek bahis en fazla 2.000 ₺ olur.
+      final int enFazla = CasinoAccess.maxBet(state);
+      expect(enFazla, 2000);
+
       int oynanan = 0;
       for (int i = 0; i < 20; i++) {
         final CasinoResult r = roulette.spin(
           state,
           RouletteBetType.siyah,
-          5000,
+          enFazla,
           Random(i),
         );
         if (!r.outcome.applied) break;
         state = r.state;
-        oynanan += 5000;
+        oynanan += enFazla;
       }
 
       expect(oynanan, 10000, reason: 'Kendi limiti aşılamaz');

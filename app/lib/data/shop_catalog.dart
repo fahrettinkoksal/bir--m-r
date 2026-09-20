@@ -5,7 +5,12 @@
 /// yerde farklı fiyatlanmaz ve ikinci bir envanter/ekonomi sistemi oluşmaz.
 /// Ölçek `lib/data/economy.dart` tablosuna dayanır.
 ///
-/// Araçlar galeriden **18 yaşından itibaren** satın alınabilir (D-034);
+/// Araçlar ve **otomobile özgü aksesuarlar** galeriden 18 yaşından itibaren
+/// satın alınabilir (D-034, D-042). Motosiklet kaskı ve motosiklete özgü
+/// parçalar 16 yaşında alınabilir. Aksesuar almak veya araç sahibi olmak
+/// **araç sürme hakkı vermez**: sürmek ehliyet ister.
+///
+/// Eski açıklama: araçlar galeriden **18 yaşından itibaren** alınabilir (D-034);
 /// miras veya hediye yoluyla daha küçük yaşta araç sahibi olmak mümkündür,
 /// ancak aracı kullanmak ehliyet ister.
 ///
@@ -283,7 +288,7 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     typeId: 'arac_kamerasi',
     description: 'Otomobile takılır; yol kaydı tutar.',
     category: ShopCategory.aracGalerisi,
-    minAge: 17,
+    minAge: 18,
   ),
   ShopProduct(
     typeId: 'bebek_koltugu',
@@ -295,7 +300,7 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     typeId: 'tavan_bagaji',
     description: 'Otomobile takılır; uzun yolda yer açar.',
     category: ShopCategory.aracGalerisi,
-    minAge: 17,
+    minAge: 18,
   ),
 
   // --- Emlakçı ----------------------------------------------------------
