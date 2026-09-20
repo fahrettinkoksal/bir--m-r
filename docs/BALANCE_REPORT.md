@@ -274,6 +274,54 @@ Düşük gelirli karakter **100 ₺ ile oynayabiliyor** ve büyük bahislere
 yönlendirilmiyor; maaşsız mirasçı tamamen engellenmiyor; oyuncunun kendi
 limiti bu bütçeden düşükse **o** geçerli oluyor.
 
+## 6) Konut ve sağlık krizleri sonrası (D-043, D-044)
+
+Ölçüm: `claude/paketA-tasinma-kira`, **5.000 simüle hayat**. Krizler
+simülasyonda ödenebilir bir seçenekle yanıtlanıyor.
+
+### 6.1 Ölüm yaşı: krizler devredeyken
+
+| Yaş aralığı | Krizsiz (§5) | Krizler eklendi (ham) | **Temel eğri ayarlandı** |
+|---|---|---|---|
+| 0-18 | %0,9 | %1,6 | **%0,8** |
+| 18-40 | %2,2 | %4,7 | %3,0 |
+| 40-60 | %9,0 | %12,8 | %11,2 |
+| 70-80 | %26,4 | %26,5 | %25,0 |
+| 80-90 | %34,0 | %29,7 | %32,9 |
+| 90+ | %12,6 | %7,5 | **%13,4** |
+| Ortalama ölüm yaşı | 75,5 | 71,2 | **74,8** |
+| 18'den önce ebeveyn kaybı | %12,3 | %10,9 | **%9,6** |
+
+Krizler eklenince toplam ölüm beklendiği gibi yukarı kaydı; bu yüzden temel
+ölüm eğrisi **0,8 ile çarpıldı** (D-044: krizler ölümün *bir sebebidir*,
+üstüne eklenen ayrı bir yük değil). Sonuçta dağılım §5'teki ayarlı hâline
+yakın kaldı, ama artık ölümlerin bir kısmının **anlatılabilir bir sebebi**
+var.
+
+### 6.2 Kriz sıklığı
+
+| Ölçüt | Değer |
+|---|---|
+| Hayat başına ortalama sağlık krizi | **1,01** |
+| Krizle sonuçlanan hayat oranı | **%13,1** |
+| İki kriz arasındaki en az yaş farkı | 4 |
+
+Hayat başına ~1 kriz, "oyuncuyu sürekli trajediyle cezalandırmama" ölçütüne
+uygun. Krizlerin %87'si atlatılıyor.
+
+### 6.3 Konut ve kira
+
+| Kalem | Değer (prototypeOnly) |
+|---|---|
+| Taşınma masrafı | 12.000 ₺ (tek seferlik) |
+| Yıllık kira getirisi | konut değerinin %4,5'i |
+| Kiracı bulunamama ihtimali | %12 / yıl |
+
+Örnek: küçük daire (1.800.000 ₺) yılda **81.000 ₺** kira getiriyor — kirada
+yaşayan bir garsonun yıllık birikiminin (65.250 ₺) üstünde. Yani ikinci bir
+ev, düşük gelirli bir karakter için anlamlı bir gelir kapısı oluyor; bu
+oranın doğru olup olmadığı Q-060'ta Faho'nun kararına bırakıldı.
+
 ## Ölçümün sınırları
 
 - Simülasyon, oyuncunun **iş bulduğu senaryoyu oynamaz**: tablolar "bu maaşla

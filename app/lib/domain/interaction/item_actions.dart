@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/economy.dart';
 import '../../data/item_catalog.dart';
 import '../../data/license_catalog.dart';
+import '../economy/housing.dart';
 import '../../data/shop_catalog.dart';
 import '../effects/effect_diff.dart';
 import '../models/applied_effect.dart';
@@ -432,6 +433,7 @@ class ItemActions {
   ItemActionResult buy({
     required GameState state,
     required ShopProduct product,
+    String? location,
   }) {
     if (state.player.age < product.minAge) {
       return _blocked(
@@ -454,8 +456,10 @@ class ItemActions {
       <String>[product.typeId],
       source: ItemSource.satinAlma,
       purchasePrice: product.price,
+      // Konutta satın alınan şehir kaydedilir (D-043); belirtilmezse
+      // oyuncunun yaşadığı şehir kullanılır.
       location: product.type.kind == ItemKind.konut
-          ? state.player.birthCity
+          ? (location ?? Housing.cityOf(state))
           : null,
     );
 

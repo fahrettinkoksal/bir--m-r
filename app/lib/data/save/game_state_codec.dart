@@ -23,6 +23,7 @@ import '../../domain/models/life_log.dart';
 import '../../domain/models/life_summary.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
+import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/person.dart';
@@ -89,6 +90,16 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'careStatus': state.careStatus.name,
       'grief': state.grief,
       'hardshipYears': state.hardshipYears,
+      'pendingCrisis': state.pendingCrisis == null
+          ? null
+          : <String, Object?>{
+              'crisisId': state.pendingCrisis!.crisisId,
+              'age': state.pendingCrisis!.age,
+            },
+      'lastCrisisAge': state.lastCrisisAge,
+      'healthWarned': state.healthWarned,
+      'residenceItemId': state.residenceItemId,
+      'movedOut': state.movedOut,
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
@@ -121,6 +132,7 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'gender': p.gender.name,
       'age': p.age,
       'birthCity': p.birthCity,
+      'currentCity': p.currentCity,
       'stats': <String, Object?>{
         'appearance': p.stats.appearance,
         'happiness': p.stats.happiness,
@@ -209,6 +221,7 @@ Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
       'attachments': i.attachments,
       'purchasePrice': i.purchasePrice,
       'location': i.location,
+      'rentedOut': i.rentedOut,
     };
 
 Map<String, Object?> _encodeGift(GiftRecord g) => <String, Object?>{
@@ -426,6 +439,22 @@ GameState decodeGameState(Map<String, Object?> json) {
         ) ??
         CareStatus.aileYaninda,
     grief: json['grief'] == null ? 0 : _int(json, 'grief'),
+    // Eski kayıtlarda oturma bilgisi yoktur; oyuncu ailesinin yanında
+    // sayılır ve mülkleri olduğu gibi korunur.
+    // Eski kayıtlarda sağlık krizi yoktur; boş açılır.
+    pendingCrisis: json['pendingCrisis'] == null
+        ? null
+        : PendingCrisis(
+            crisisId: _string(
+              _asMap(json['pendingCrisis'], 'pendingCrisis'),
+              'crisisId',
+            ),
+            age: _int(_asMap(json['pendingCrisis'], 'pendingCrisis'), 'age'),
+          ),
+    lastCrisisAge: _intOrNull(json, 'lastCrisisAge'),
+    healthWarned: json['healthWarned'] == true,
+    residenceItemId: _stringOrNull(json, 'residenceItemId'),
+    movedOut: json['movedOut'] == true,
     hardshipYears:
         json['hardshipYears'] == null ? 0 : _int(json, 'hardshipYears'),
     settings: json['settings'] == null
@@ -489,6 +518,8 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     gender: _enumByName(Gender.values, _string(json, 'gender'), '$path.gender'),
     age: _int(json, 'age'),
     birthCity: _string(json, 'birthCity'),
+    // Eski kayıtlarda yaşanan şehir yoktur; doğum şehri kullanılır.
+    currentCity: _stringOrNull(json, 'currentCity'),
     stats: Stats(
       appearance: _int(stats, 'appearance'),
       happiness: _int(stats, 'happiness'),
@@ -629,6 +660,7 @@ OwnedItem _decodeItem(Map<String, Object?> json) {
     // Eski kayıtlarda bu alanlar yoktur; boş kalır, eşya silinmez.
     purchasePrice: _intOrNull(json, 'purchasePrice'),
     location: _stringOrNull(json, 'location'),
+    rentedOut: json['rentedOut'] == true,
   );
 }
 

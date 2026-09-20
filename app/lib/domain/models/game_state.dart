@@ -14,6 +14,7 @@ import 'life_log.dart';
 import 'life_summary.dart';
 import 'parental_status.dart';
 import 'pending_interview.dart';
+import 'pending_crisis.dart';
 import 'pending_license_exam.dart';
 import 'person.dart';
 import 'social_account.dart';
@@ -63,6 +64,11 @@ class GameState {
     this.grief = 0,
     this.hardshipYears = 0,
     this.settings = const GameSettings(),
+    this.residenceItemId,
+    this.movedOut = false,
+    this.pendingCrisis,
+    this.lastCrisisAge,
+    this.healthWarned = false,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -293,6 +299,29 @@ class GameState {
   /// Oyuncunun kendi ayarları (D-032).
   final GameSettings settings;
 
+  /// Oyuncunun **oturduğu** konutun eşya kimliği (D-043).
+  ///
+  /// Mülk sahipliğinden ayrıdır: oyuncu evi olup ailesinin yanında
+  /// yaşayabilir. `null` ise kendi evinde oturmuyordur.
+  final String? residenceItemId;
+
+  /// Cevap bekleyen sağlık krizi (D-044).
+  final PendingCrisis? pendingCrisis;
+
+  bool get hasPendingCrisis => pendingCrisis != null;
+
+  /// Son sağlık krizinin çıktığı yaş; krizler seyrek olsun diye tutulur.
+  final int? lastCrisisAge;
+
+  /// Düşük sağlık uyarısı verildi mi? Aynı uyarı her yıl tekrarlanmaz.
+  final bool healthWarned;
+
+  /// Oyuncu aile evinden ayrıldı mı?
+  ///
+  /// Kirada yaşamak ile ailenin yanında yaşamayı ayırır; hanede yetişkin
+  /// kalmadığında da oyuncu otomatik "kirada" sayılır.
+  final bool movedOut;
+
   /// Hayatta olan hane üyeleri.
   List<Person> get householdMembers => people
       .where((Person p) => p.isAlive && p.inPlayerHousehold)
@@ -443,6 +472,11 @@ class GameState {
     int? grief,
     int? hardshipYears,
     GameSettings? settings,
+    Object? residenceItemId = _unsetEvent,
+    bool? movedOut,
+    Object? pendingCrisis = _unsetEvent,
+    int? lastCrisisAge,
+    bool? healthWarned,
   }) {
     return GameState(
       seed: seed,
@@ -489,6 +523,15 @@ class GameState {
       grief: grief ?? this.grief,
       hardshipYears: hardshipYears ?? this.hardshipYears,
       settings: settings ?? this.settings,
+      residenceItemId: residenceItemId == _unsetEvent
+          ? this.residenceItemId
+          : residenceItemId as String?,
+      movedOut: movedOut ?? this.movedOut,
+      pendingCrisis: pendingCrisis == _unsetEvent
+          ? this.pendingCrisis
+          : pendingCrisis as PendingCrisis?,
+      lastCrisisAge: lastCrisisAge ?? this.lastCrisisAge,
+      healthWarned: healthWarned ?? this.healthWarned,
     );
   }
 }

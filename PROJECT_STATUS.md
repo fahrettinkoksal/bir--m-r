@@ -310,6 +310,26 @@ geçerli).
 **65.250 ₺**. Ayrıntı: `docs/BALANCE_REPORT.md` §5. Bütün sayılar
 `prototypeOnly`.
 
+## Taşınma, kira geliri ve sağlık krizleri (uygulandı)
+**Konut (D-043):** mülk sahipliği ile oturulan ev ayrı. 18 yaşından
+itibaren kendi evine taşınma, kiralık eve çıkma ve (hanede yetişkin varsa)
+aile evine dönme var; taşınmanın masrafı cüzdandan bir kez düşüyor.
+Oturulan ev kiraya verilemiyor, kiradaki eve taşınılamıyor. Kiraya verilen
+konut yılda bir kez kira geliri getiriyor (bazı yıllar kiracı bulunmuyor) ve
+bu gelir gider hesabına ve kumarhane bütçesine katılıyor. Emlakçıda şehir
+seçilebiliyor; başka şehirdeki eve taşınmak yaşanan şehri değiştiriyor.
+
+**Sağlık krizleri (D-044):** altı hastalık/kaza krizi; seyrek, yaşa ve
+sağlığa bağlı, art arda çıkmıyor. Oyuncunun kararı (tedavi/erteleme)
+sonucu etkiliyor ama garanti etmiyor; tedavi bedeli bir kez düşüyor.
+Kriz ölümle biterse hayat olağan yoldan tamamlanıyor ve arşiv çalışıyor.
+Sağlık çok düşünce bir kez uyarı veriliyor. Temel ölüm eğrisi, krizlerin
+eklediği ölümü dengelemek için ölçümle düşürüldü.
+
+Kayıt biçimi **sürüm 14**. Kuşak sistemi kodlanmadı: ön koşulu olan
+evlilik/çocuk sistemi henüz tasarlanmadı; öneri `docs/GENERATION_PROPOSAL.md`
+ve kuyrukta **Q-062**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

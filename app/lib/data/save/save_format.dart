@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 12;
+const int kSaveFormatVersion = 14;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -66,7 +66,28 @@ abstract final class SaveMigrations {
     if (from <= 9) guncel = _v9ToV10(guncel);
     if (from <= 10) guncel = _v10ToV11(guncel);
     if (from <= 11) guncel = _v11ToV12(guncel);
+    if (from <= 12) guncel = _v12ToV13(guncel);
+    if (from <= 13) guncel = _v13ToV14(guncel);
     return guncel;
+  }
+
+  /// Sürüm 13 → 14: sağlık krizleri (hastalık ve kaza) eklendi.
+  ///
+  /// Eski kayıtta bekleyen kriz yoktur, kriz geçmişi boştur ve düşük
+  /// sağlık uyarısı verilmemiş sayılır. Hayat olduğu gibi sürer.
+  static Map<String, Object?> _v13ToV14(Map<String, Object?> body) {
+    body['healthWarned'] ??= false;
+    return body;
+  }
+
+  /// Sürüm 12 → 13: taşınma, kiraya verme ve yaşanan şehir eklendi.
+  ///
+  /// Eski kayıtta oyuncu **ailesinin yanında** sayılır, hiçbir konut
+  /// kiraya verilmiş değildir ve yaşanan şehir doğum şehridir. Mülkler,
+  /// cüzdan ve hayat olduğu gibi korunur.
+  static Map<String, Object?> _v12ToV13(Map<String, Object?> body) {
+    body['movedOut'] ??= false;
+    return body;
   }
 
   /// Sürüm 11 → 12: geçmiş hayat arşivi, bakım durumu, yas, geçim sıkıntısı,

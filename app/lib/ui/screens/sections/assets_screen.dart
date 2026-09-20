@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../data/shop_catalog.dart';
 import '../../../domain/interaction/item_actions.dart';
+import '../../../data/name_pool.dart';
+import '../../../domain/economy/housing.dart';
 import '../../../domain/economy/living_costs.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/owned_item.dart';
 import '../../../domain/models/person.dart';
+import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
@@ -33,8 +36,12 @@ class _AssetsScreenState extends State<AssetsScreen> {
   ShopCategory? _kategori;
   ItemOutcome? _sonMagazaSonucu;
 
+  /// Emlakçıda seçilen şehir; diğer mağazalarda kullanılmaz.
+  String? _secilenSehir;
+
   void _buy(ShopProduct product) {
-    final ItemOutcome? outcome = GameScope.of(context).buyProduct(product);
+    final ItemOutcome? outcome = GameScope.of(context)
+        .buyProduct(product, location: _secilenSehir);
     if (outcome == null) return;
     setState(() => _sonMagazaSonucu = outcome);
   }
@@ -48,6 +55,9 @@ class _AssetsScreenState extends State<AssetsScreen> {
         state: state,
         category: _kategori!,
         lastOutcome: _sonMagazaSonucu,
+        selectedCity: _secilenSehir ?? Housing.cityOf(state),
+        onCityChanged: (String sehir) =>
+            setState(() => _secilenSehir = sehir),
         onBuy: _buy,
         onBack: () => setState(() {
           _page = _AssetsPage.magazalar;
@@ -86,6 +96,9 @@ class _AssetsScreenState extends State<AssetsScreen> {
       onBack: widget.onBack,
       children: <Widget>[
         _WalletCard(balance: state.player.walletLabel),
+        const SizedBox(height: 10),
+        const SizedBox(height: 2),
+        _ResidenceCard(state: state),
         const SizedBox(height: 10),
         // Yıllık geçim gideri gerçek hesaptan okunur (D-033).
         InfoPanel(
@@ -220,6 +233,8 @@ class _ShopView extends StatelessWidget {
     required this.state,
     required this.category,
     required this.lastOutcome,
+    required this.selectedCity,
+    required this.onCityChanged,
     required this.onBuy,
     required this.onBack,
   });
@@ -227,6 +242,10 @@ class _ShopView extends StatelessWidget {
   final GameState state;
   final ShopCategory category;
   final ItemOutcome? lastOutcome;
+
+  /// Emlakçıda seçili şehir.
+  final String selectedCity;
+  final ValueChanged<String> onCityChanged;
   final void Function(ShopProduct product) onBuy;
   final VoidCallback onBack;
 
@@ -242,6 +261,33 @@ class _ShopView extends StatelessWidget {
       backLabel: 'Mağazalar',
       onBack: onBack,
       children: <Widget>[
+        // Emlakçıda konutun hangi şehirde alındığı seçilir (D-043).
+        if (category == ShopCategory.emlakci) ...<Widget>[
+          Text('Şehir', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(
+            'Seçtiğin şehirdeki ev mülk kaydına o şehirle yazılır. '
+            'Ev almak taşınmak değildir; taşınmak için evin detayına gir.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              for (final String sehir in sehirler)
+                ChoiceChip(
+                  key: Key('city_$sehir'),
+                  label: Text(sehir),
+                  selected: selectedCity == sehir,
+                  onSelected: (_) => onCityChanged(sehir),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+        ],
         for (final ShopProduct urun in urunler) ...<Widget>[
           Card(
             child: Padding(
@@ -496,6 +542,105 @@ class _AssetTile extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Nerede yaşandığını gösteren kart ve taşınma eylemleri (D-043).
+class _ResidenceCard extends StatefulWidget {
+  const _ResidenceCard({required this.state});
+
+  final GameState state;
+
+  @override
+  State<_ResidenceCard> createState() => _ResidenceCardState();
+}
+
+class _ResidenceCardState extends State<_ResidenceCard> {
+  String? _sonuc;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final GameState state = controller.state ?? widget.state;
+    final ResidenceKind durum = Housing.residenceOf(state);
+    final OwnedItem? ev = Housing.residenceHome(state);
+    final int kiraGeliri = Housing.yearlyRentIncome(state);
+    final bool yetiskin = state.player.age >= Housing.prototypeOnlyMinAge;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(Icons.home_outlined, color: theme.colorScheme.secondary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text('Yaşadığın yer',
+                      style: theme.textTheme.titleMedium),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              ev == null
+                  ? '${durum.label} · ${Housing.cityOf(state)}'
+                  : '${ev.name} · ${Housing.cityOf(state)}',
+              key: const Key('residence_label'),
+              style: theme.textTheme.bodyMedium,
+            ),
+            if (kiraGeliri > 0) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(
+                'Kiraya verdiğin evlerden yıllık $kiraGeliri ₺ kira geliri '
+                'bekleniyor.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (yetiskin) ...<Widget>[
+              const SizedBox(height: 12),
+              Row(
+                children: <Widget>[
+                  if (durum != ResidenceKind.kirada)
+                    Expanded(
+                      child: OutlinedButton(
+                        key: const Key('move_to_rental'),
+                        onPressed: () => setState(() {
+                          _sonuc = controller.moveToRental()?.text;
+                        }),
+                        child: const Text('Kiralık eve çık'),
+                      ),
+                    ),
+                  if (durum != ResidenceKind.kirada &&
+                      durum != ResidenceKind.aileYaninda)
+                    const SizedBox(width: 10),
+                  if (durum != ResidenceKind.aileYaninda &&
+                      Housing.hasAdultAtFamilyHome(state))
+                    Expanded(
+                      child: OutlinedButton(
+                        key: const Key('move_to_family'),
+                        onPressed: () => setState(() {
+                          _sonuc = controller.moveBackToFamily()?.text;
+                        }),
+                        child: const Text('Ailenin yanına dön'),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+            if (_sonuc != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(_sonuc!, style: theme.textTheme.bodySmall),
+            ],
           ],
         ),
       ),

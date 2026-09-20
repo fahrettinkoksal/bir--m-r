@@ -13,7 +13,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/domain/casino/casino_rules.dart';
+import 'package:bir_omur/domain/life/health_crisis_engine.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
@@ -22,15 +24,21 @@ import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 
 /// Tek bir hayatı ölümüne kadar simüle eder.
-({int deathAge, int parentLossBefore18, int familyDeaths}) _simulateLife(
-  int seed,
-) {
+({
+  int deathAge,
+  int parentLossBefore18,
+  int familyDeaths,
+  int crises,
+  int crisisDeaths,
+}) _simulateLife(int seed) {
   GameState state =
       LifeGenerator.seeded(seed).generate(mode: StartMode.tamamenRastgele);
   final LifeProgression progression = LifeProgression(Random(seed));
 
   int ebeveynKaybi = 0;
   int aileKaybi = 0;
+  int krizSayisi = 0;
+  int krizOlumu = 0;
 
   while (!state.deceased && state.player.age < 130) {
     final Set<String> oncekiOlu = <String>{
@@ -41,6 +49,23 @@ import 'package:bir_omur/domain/models/relation.dart';
     // Ekrandaki olay yaş ilerlemesini durdurur; ilk seçenekle çözülür.
     state = state.copyWith(pendingEvent: null);
     state = progression.advanceOneYear(state);
+
+    // Sağlık krizi çıktıysa ödenebilir bir seçenekle yanıtlanır (D-044).
+    if (state.hasPendingCrisis) {
+      krizSayisi++;
+      const HealthCrisisEngine motor = HealthCrisisEngine();
+      final HealthCrisis kriz = state.pendingCrisis!.crisis!;
+      final CrisisChoice secim = kriz.choices.firstWhere(
+        (CrisisChoice c) => motor.canChoose(state, c),
+        orElse: () => kriz.choices.last,
+      );
+      final CrisisResult sonuc =
+          motor.respond(state, secim.id, Random(seed * 31 + krizSayisi));
+      state = sonuc.outcome.applied
+          ? sonuc.state
+          : state.copyWith(pendingCrisis: null);
+      if (state.deceased) krizOlumu++;
+    }
 
     for (final Person p in state.people) {
       if (p.isAlive || oncekiOlu.contains(p.id)) continue;
@@ -55,6 +80,8 @@ import 'package:bir_omur/domain/models/relation.dart';
     deathAge: state.deathAge ?? state.player.age,
     parentLossBefore18: ebeveynKaybi,
     familyDeaths: aileKaybi,
+    crises: krizSayisi,
+    crisisDeaths: krizOlumu,
   );
 }
 
@@ -74,13 +101,22 @@ void _rapor() {
   final List<int> yaslar = <int>[];
   int ebeveynKaybiOlanHayat = 0;
   int toplamAileKaybi = 0;
+  int toplamKriz = 0;
+  int krizOlumu = 0;
 
   for (int seed = 0; seed < hayatSayisi; seed++) {
-    final ({int deathAge, int parentLossBefore18, int familyDeaths}) sonuc =
-        _simulateLife(seed);
+    final ({
+      int deathAge,
+      int parentLossBefore18,
+      int familyDeaths,
+      int crises,
+      int crisisDeaths,
+    }) sonuc = _simulateLife(seed);
     yaslar.add(sonuc.deathAge);
     if (sonuc.parentLossBefore18 > 0) ebeveynKaybiOlanHayat++;
     toplamAileKaybi += sonuc.familyDeaths;
+    toplamKriz += sonuc.crises;
+    krizOlumu += sonuc.crisisDeaths;
   }
   yaslar.sort();
 
@@ -115,6 +151,10 @@ void _rapor() {
       '$ebeveynKaybiOlanHayat (${_yuzde(ebeveynKaybiOlanHayat, hayatSayisi)})');
   print('Hayat başına ortalama yakın aile kaybı      : '
       '${(toplamAileKaybi / hayatSayisi).toStringAsFixed(1)}');
+  print('Hayat başına ortalama sağlık krizi          : '
+      '${(toplamKriz / hayatSayisi).toStringAsFixed(2)}');
+  print('Krizle sonuçlanan ölüm oranı                : '
+      '${_yuzde(krizOlumu, hayatSayisi)}');
 
   // ===================================================================
   // 1b) Kuşak farkları (Q-058: NPC yaşları tutarlı olmalı)

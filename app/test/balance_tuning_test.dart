@@ -113,9 +113,15 @@ void main() {
       final GameState ailede =
           calisan(4, jobId: 'ogretmen', wallet: 0, aileYaninda: true);
       final GameState kirada = calisan(4, jobId: 'ogretmen', wallet: 0);
-      final GameState kendiEvi = kirada.grantItems(
+      // Ev sahibi olmak yetmez: oyuncunun o eve **taşınmış** olması gerekir
+      // (D-043).
+      final GameState evSahibi = kirada.grantItems(
         <String>['kucuk_daire'],
         source: ItemSource.miras,
+      );
+      final GameState kendiEvi = evSahibi.copyWith(
+        residenceItemId: evSahibi.items.last.id,
+        movedOut: true,
       );
 
       final int a = LivingCosts.yearlyCost(ailede);

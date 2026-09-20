@@ -24,6 +24,10 @@ import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
+import '../data/health_crisis_catalog.dart';
+import '../domain/economy/housing.dart';
+import '../domain/life/health_crisis_engine.dart';
+import '../domain/models/pending_crisis.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
@@ -63,6 +67,8 @@ class GameController extends ChangeNotifier {
   final Blackjack _blackjack = const Blackjack();
   final Roulette _roulette = const Roulette();
   final LicenseOffice _licenses = const LicenseOffice();
+  final Housing _housing = const Housing();
+  final HealthCrisisEngine _crises = const HealthCrisisEngine();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -354,8 +360,17 @@ class GameController extends ChangeNotifier {
       );
 
   /// Mağazadan ürün alır.
-  ItemOutcome? buyProduct(ShopProduct product) => _runItemAction(
-        (GameState current) => _items.buy(state: current, product: product),
+  /// Mağazadan ürün alır.
+  ///
+  /// [location] yalnızca konutlarda anlamlıdır: hangi şehirden alındığı
+  /// mülk kaydına yazılır (D-043).
+  ItemOutcome? buyProduct(ShopProduct product, {String? location}) =>
+      _runItemAction(
+        (GameState current) => _items.buy(
+          state: current,
+          product: product,
+          location: location,
+        ),
       );
 
   /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum
@@ -615,6 +630,88 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final SocialResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Sağlık krizleri (D-044)
+  // =====================================================================
+
+  /// Cevap bekleyen sağlık krizi.
+  PendingCrisis? get pendingCrisis => _state?.pendingCrisis;
+
+  /// Bu seçenek şu an seçilebilir mi (bedeli ödenebiliyor mu)?
+  bool canChooseCrisis(CrisisChoice choice) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return _crises.canChoose(current, choice);
+  }
+
+  /// Krize yanıt verir; sonuç bir kez uygulanır.
+  CrisisOutcome? respondToCrisis(String choiceId) {
+    final GameState? current = _state;
+    if (current == null || current.pendingCrisis == null) return null;
+    final CrisisResult result =
+        _crises.respond(current, choiceId, _random);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Konut: taşınma ve kiraya verme (D-043)
+  // =====================================================================
+
+  /// Oyuncunun oturduğu ev (varsa).
+  OwnedItem? get residenceHome =>
+      _state == null ? null : Housing.residenceHome(_state!);
+
+  /// Oyuncunun yaşam düzeni.
+  ResidenceKind get residence =>
+      _state == null ? ResidenceKind.aileYaninda : Housing.residenceOf(_state!);
+
+  /// Oyuncunun yaşadığı şehir.
+  String get currentCity =>
+      _state == null ? '' : Housing.cityOf(_state!);
+
+  /// Kiraya verilen konutların yıllık toplam geliri.
+  int get yearlyRentIncome =>
+      _state == null ? 0 : Housing.yearlyRentIncome(_state!);
+
+  /// Bu eve taşınmanın engeli; yoksa boş metin.
+  String moveBlockReason(OwnedItem home) =>
+      _state == null ? 'Etkin bir hayat yok.' : _housing.moveBlockReason(_state!, home);
+
+  /// Bu evi kiraya vermenin engeli; yoksa boş metin.
+  String rentOutBlockReason(OwnedItem home) => _state == null
+      ? 'Etkin bir hayat yok.'
+      : _housing.rentOutBlockReason(_state!, home);
+
+  HousingOutcome? moveInto(OwnedItem home) =>
+      _runHousing((GameState current) => _housing.moveInto(current, home));
+
+  HousingOutcome? moveToRental() =>
+      _runHousing((GameState current) => _housing.moveToRental(current));
+
+  HousingOutcome? moveBackToFamily() =>
+      _runHousing((GameState current) => _housing.moveBackToFamily(current));
+
+  HousingOutcome? rentOutHome(OwnedItem home) =>
+      _runHousing((GameState current) => _housing.rentOut(current, home));
+
+  HousingOutcome? endLease(OwnedItem home) =>
+      _runHousing((GameState current) => _housing.endLease(current, home));
+
+  HousingOutcome? _runHousing(HousingResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final HousingResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();

@@ -7,12 +7,16 @@ import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
+import '../economy/housing.dart';
 import '../economy/living_costs.dart';
+import '../../data/health_crisis_catalog.dart';
+import '../life/health_crisis_engine.dart';
 import '../life/inheritance.dart';
 import '../life/mortality.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
+import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
@@ -43,6 +47,9 @@ class LifeProgression {
 
   /// prototypeOnly: hanede bakım verebilecek sayılan yetişkinlik yaşı.
   static const int prototypeOnlyAdultAge = 18;
+
+  /// prototypeOnly: bu sağlık değerinin altında uyarı verilir.
+  static const int prototypeOnlyHealthWarningBelow = 25;
 
   /// prototypeOnly: her yıl mutluluğa geri dönen yas oranı.
   static const double prototypeOnlyGriefRecoveryRatio = 1 / 3;
@@ -174,6 +181,9 @@ class LifeProgression {
     // Miras: yalnızca bu yıl vefat edenler için ve **bir kez**.
     afterDeaths = _settleEstates(afterDeaths, newAge);
 
+    // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).
+    afterDeaths = _applyRentIncome(afterDeaths, newAge);
+
     // Yıllık geçim gideri: hane ve yaşam koşuluna göre, **bir kez** (D-033).
     final ({GameState state, String? logText}) gider =
         LivingCosts.apply(afterDeaths);
@@ -198,6 +208,14 @@ class LifeProgression {
     if (_playerDies(afterDeaths)) {
       return _endLife(afterDeaths, newAge);
     }
+
+    // Sağlık krizi: hastalık veya kaza (D-044). Seyrektir ve sonucunu
+    // oyuncunun seçimi etkiler; bu yüzden ölüm burada uygulanmaz, kriz
+    // ekrana gelir.
+    afterDeaths = _maybeHealthCrisis(afterDeaths, newAge);
+
+    // Sağlığı belirgin kötüleşen karaktere anlaşılır bir uyarı (D-036).
+    afterDeaths = _maybeHealthWarning(afterDeaths, newAge);
 
     // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
     final GameState withTrack = _applyTrackBonus(afterDeaths);
@@ -250,6 +268,51 @@ class LifeProgression {
     }
 
     return (people: sonuc, happinessLoss: mutlulukKaybi);
+  }
+
+  /// Kiraya verilen konutların yıllık kira gelirini **bir kez** öder.
+  ///
+  /// Her yıl kiracı bulunmayabilir; gelir garanti değildir. Gelir gerçek
+  /// mülk kaydından hesaplanır, uydurulmaz.
+  GameState _applyRentIncome(GameState state, int newAge) {
+    final List<OwnedItem> kiradakiler = state.items
+        .where((OwnedItem i) => i.isProperty && i.rentedOut)
+        .toList(growable: false);
+    if (kiradakiler.isEmpty) return state;
+
+    int toplam = 0;
+    final List<LifeLogEntry> satirlar = <LifeLogEntry>[];
+    for (final OwnedItem ev in kiradakiler) {
+      if (_rng.nextDouble() < Housing.prototypeOnlyVacancyChance) {
+        satirlar.add(
+          LifeLogEntry(
+            age: newAge,
+            text: '${ev.name} bu yıl boş kaldı; kira geliri gelmedi.',
+            category: LogCategory.kisisel,
+          ),
+        );
+        continue;
+      }
+      final int kira = Housing.yearlyRentOf(ev);
+      toplam += kira;
+      satirlar.add(
+        LifeLogEntry(
+          age: newAge,
+          text: '${ev.name} için yıllık $kira ₺ kira geliri aldın.',
+          category: LogCategory.kisisel,
+        ),
+      );
+    }
+
+    return state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet + toplam,
+      ),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        ...satirlar,
+      ]),
+    );
   }
 
   /// Kişilerin mal varlığı hayat boyunca değişir (D-037).
@@ -423,6 +486,38 @@ class LifeProgression {
               (state.player.stats.happiness + geriVerilen).clamp(0, 100),
         ),
       ),
+    );
+  }
+
+  /// Yeni yaşta sağlık krizi çıkabilir (D-044).
+  ///
+  /// Kriz seyrektir; çıkarsa ekranda oyuncunun kararını bekler.
+  GameState _maybeHealthCrisis(GameState state, int newAge) {
+    const HealthCrisisEngine motor = HealthCrisisEngine();
+    final HealthCrisis? kriz = motor.rollCrisis(state, newAge, _rng);
+    if (kriz == null) return state;
+    return motor.open(state, kriz, newAge);
+  }
+
+  /// Sağlık belirgin biçimde düştüyse bir kez uyarır.
+  ///
+  /// Uyarı her ölümü haber vermez; yalnızca durumu görünür kılar.
+  GameState _maybeHealthWarning(GameState state, int newAge) {
+    if (state.player.stats.health > prototypeOnlyHealthWarningBelow) {
+      return state.healthWarned ? state.copyWith(healthWarned: false) : state;
+    }
+    if (state.healthWarned) return state;
+    return state.copyWith(
+      healthWarned: true,
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: newAge,
+          text: 'Sağlığın belirgin biçimde kötüleşti; kendine dikkat '
+              'etmen gerekiyor.',
+          category: LogCategory.kisisel,
+        ),
+      ]),
     );
   }
 

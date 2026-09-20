@@ -34,6 +34,7 @@ class OwnedItem {
     this.attachments = const <String>[],
     this.purchasePrice,
     this.location,
+    this.rentedOut = false,
   }) : assert(condition >= 0 && condition <= 100);
 
   /// prototypeOnly: yeni edinilen eşyanın kondisyonu.
@@ -82,6 +83,12 @@ class OwnedItem {
   /// yaşandığı kişi kayıtlarından gelir, bu alandan değil.
   final String? location;
 
+  /// Konut **kiraya verilmiş** mi? (D-043)
+  ///
+  /// Kiraya verilen evde oturulmaz; oturulan ev kiraya verilemez. Kira
+  /// geliri yıllık olarak cüzdana girer.
+  final bool rentedOut;
+
   ItemType get type => itemTypeOrFallback(typeId);
 
   bool get isVehicle =>
@@ -107,6 +114,7 @@ class OwnedItem {
     List<String>? attachments,
     int? purchasePrice,
     String? location,
+    bool? rentedOut,
   }) {
     return OwnedItem(
       id: id,
@@ -118,6 +126,7 @@ class OwnedItem {
       attachments: attachments ?? this.attachments,
       purchasePrice: purchasePrice ?? this.purchasePrice,
       location: location ?? this.location,
+      rentedOut: rentedOut ?? this.rentedOut,
     );
   }
 }
