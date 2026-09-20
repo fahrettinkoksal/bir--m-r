@@ -9,6 +9,7 @@ import '../data/item_catalog.dart';
 import '../data/job_catalog.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
+import '../data/social_catalog.dart';
 import '../data/university_catalog.dart';
 
 import '../domain/generation/life_generator.dart';
@@ -21,6 +22,7 @@ import '../domain/activities/activity_engine.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
+import '../domain/social/social_engine.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
 import '../domain/models/game_state.dart';
@@ -46,6 +48,7 @@ class GameController extends ChangeNotifier {
   final EducationPath _education = const EducationPath();
   final JobMarket _jobs = const JobMarket();
   final ActivityEngine _activities = const ActivityEngine();
+  final SocialEngine _social = const SocialEngine();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -483,6 +486,49 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final ActivityResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Sosyal medya
+  // =====================================================================
+
+  /// Hesap açmanın şu an mümkün olup olmadığı.
+  InteractionAvailability socialAccountAvailability(SocialPlatform platform) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _social.accountAvailability(current, platform);
+  }
+
+  /// Paylaşımın şu an mümkün olup olmadığı.
+  InteractionAvailability socialPostAvailability(SocialContent content) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _social.postAvailability(current, content);
+  }
+
+  /// Sosyal medya hesabı açar.
+  SocialOutcome? openSocialAccount(SocialPlatform platform) => _runSocial(
+        (GameState current) => _social.openAccount(current, platform),
+      );
+
+  /// Paylaşım yapar.
+  SocialOutcome? postContent(SocialContent content) => _runSocial(
+        (GameState current) => _social.post(current, content, _random),
+      );
+
+  SocialOutcome? _runSocial(SocialResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final SocialResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();

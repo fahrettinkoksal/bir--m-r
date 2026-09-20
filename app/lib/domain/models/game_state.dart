@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/social_catalog.dart';
+
 import 'education.dart';
 import 'book_progress.dart';
 import 'career.dart';
@@ -9,6 +11,7 @@ import 'owned_item.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
 import 'person.dart';
+import 'social_account.dart';
 import 'player_character.dart';
 import 'relation.dart';
 
@@ -40,6 +43,7 @@ class GameState {
     this.education = const EducationState.notStarted(),
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
+    this.socialAccounts = const <SocialAccount>[],
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -198,6 +202,24 @@ class GameState {
   /// Okunan kitapların ilerlemesi. Bitirilen kitap bir daha kazanç vermez.
   final List<BookProgress> books;
 
+  /// Açılmış sosyal medya hesapları. Hesap açmak **zorunlu değildir**;
+  /// hesabı olmayan platformdan paylaşım veya olay gelmez.
+  final List<SocialAccount> socialAccounts;
+
+  /// Bir platformdaki hesap; açılmamışsa `null`.
+  SocialAccount? accountFor(SocialPlatform platform) {
+    for (final SocialAccount a in socialAccounts) {
+      if (a.platform == platform) return a;
+    }
+    return null;
+  }
+
+  /// Bütün platformlardaki toplam takipçi.
+  int get totalFollowers => socialAccounts.fold(
+        0,
+        (int toplam, SocialAccount a) => toplam + a.followers,
+      );
+
   /// Bir kitabın ilerlemesi; hiç açılmamışsa `null`.
   BookProgress? bookProgress(String bookId) {
     for (final BookProgress b in books) {
@@ -305,6 +327,7 @@ class GameState {
     EducationState? education,
     CareerState? career,
     List<BookProgress>? books,
+    List<SocialAccount>? socialAccounts,
   }) {
     return GameState(
       seed: seed,
@@ -330,6 +353,7 @@ class GameState {
       education: education ?? this.education,
       career: career ?? this.career,
       books: books ?? this.books,
+      socialAccounts: socialAccounts ?? this.socialAccounts,
     );
   }
 }

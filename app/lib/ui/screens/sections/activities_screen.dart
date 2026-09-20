@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/activity_catalog.dart';
+import '../../../data/social_catalog.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -8,6 +9,7 @@ import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
+import 'social_pages.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
 ///
@@ -25,7 +27,7 @@ class ActivitiesScreen extends StatefulWidget {
 }
 
 /// Aktiviteler alt sayfaları.
-enum _ActivityPage { kok, sosyal, berber, spor, kutuphane }
+enum _ActivityPage { kok, sosyal, berber, spor, kutuphane, sosyalMedya }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
   _ActivityPage _page = _ActivityPage.kok;
@@ -63,6 +65,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         );
       case _ActivityPage.kutuphane:
         return LibraryPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.sosyalMedya:
+        return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -128,7 +132,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           icon: Icons.local_library_outlined,
           onTap: () => _go(_ActivityPage.kutuphane),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+        // Sosyal medya 16 yaşından itibaren açılır; öncesinde menüde yok.
+        if (state.player.age >= kSocialMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Sosyal medya',
+            subtitle: state.socialAccounts.isEmpty
+                ? 'Hesap açmak isteğe bağlı'
+                : '${state.totalFollowers} takipçi',
+            icon: Icons.public_outlined,
+            onTap: () => _go(_ActivityPage.sosyalMedya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        const SizedBox(height: 2),
         const InfoPanel(
           icon: Icons.construction_outlined,
           text: 'Seyahat gibi alanlar bu bölüme sonra eklenecek. Henüz '

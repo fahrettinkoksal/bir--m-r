@@ -9,6 +9,7 @@
 library;
 
 import '../../data/education_tracks.dart';
+import '../../data/social_catalog.dart';
 import '../../domain/models/book_progress.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
@@ -20,6 +21,7 @@ import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/person.dart';
+import '../../domain/models/social_account.dart';
 import '../../domain/models/player_character.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/models/stats.dart';
@@ -53,6 +55,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'education': _encodeEducation(state.education),
       'career': _encodeCareer(state.career),
       'books': state.books.map(_encodeBook).toList(growable: false),
+      'socialAccounts':
+          state.socialAccounts.map(_encodeAccount).toList(growable: false),
     };
 
 Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
@@ -72,6 +76,19 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'fame': p.fame,
       'wallet': p.wallet,
       'hairStyle': p.hairStyle,
+    };
+
+Map<String, Object?> _encodeAccount(SocialAccount a) => <String, Object?>{
+      'platform': a.platform.name,
+      'createdAtAge': a.createdAtAge,
+      'followers': a.followers,
+      'posts': a.posts
+          .map((SocialPost p) => <String, Object?>{
+                'contentId': p.contentId,
+                'age': p.age,
+                'followerDelta': p.followerDelta,
+              })
+          .toList(growable: false),
     };
 
 Map<String, Object?> _encodeBook(BookProgress b) => <String, Object?>{
@@ -276,6 +293,11 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeBook(_asMap(e, 'books[]')))
           .toList(growable: false),
     ),
+    socialAccounts: List<SocialAccount>.unmodifiable(
+      _list(json, 'socialAccounts')
+          .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
+          .toList(growable: false),
+    ),
   );
 }
 
@@ -300,6 +322,27 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     hairStyle: _stringOrNull(json, 'hairStyle'),
   );
 }
+
+SocialAccount _decodeAccount(Map<String, Object?> json) => SocialAccount(
+      platform: _enumByName(
+        SocialPlatform.values,
+        _string(json, 'platform'),
+        'socialAccount.platform',
+      ),
+      createdAtAge: _int(json, 'createdAtAge'),
+      followers: _int(json, 'followers'),
+      posts: List<SocialPost>.unmodifiable(
+        _list(json, 'posts')
+            .map((Object? e) => _decodePost(_asMap(e, 'posts[]')))
+            .toList(growable: false),
+      ),
+    );
+
+SocialPost _decodePost(Map<String, Object?> json) => SocialPost(
+      contentId: _string(json, 'contentId'),
+      age: _int(json, 'age'),
+      followerDelta: _int(json, 'followerDelta'),
+    );
 
 BookProgress _decodeBook(Map<String, Object?> json) => BookProgress(
       bookId: _string(json, 'bookId'),
