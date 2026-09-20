@@ -55,17 +55,25 @@ void main() {
 
   tearDown(() => controller.dispose());
 
-  Future<void> pumpPhone(WidgetTester tester) async {
+  Future<void> pumpPhone(
+    WidgetTester tester, {
+    ThemeMode themeMode = ThemeMode.light,
+  }) async {
     tester.view.physicalSize = const Size(1080, 2280);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(BirOmurApp(controller: controller));
+    await tester.pumpWidget(
+      BirOmurApp(controller: controller, themeMode: themeMode),
+    );
     await tester.pumpAndSettle();
   }
 
-  Future<void> startLife(WidgetTester tester) async {
-    await pumpPhone(tester);
+  Future<void> startLife(
+    WidgetTester tester, {
+    ThemeMode themeMode = ThemeMode.light,
+  }) async {
+    await pumpPhone(tester, themeMode: themeMode);
     await tester.tap(find.text('Rastgele bir hayat'));
     await tester.pumpAndSettle();
   }
@@ -187,6 +195,13 @@ void main() {
     await tester.tap(find.text('Vakit Geçir'));
     await tester.pumpAndSettle();
     await shot(tester, '08_etkilesim.png');
+  }, skip: !enabled);
+
+  testWidgets('karanlık mod: ana ekran okunaklı kalır',
+      (WidgetTester tester) async {
+    await startLife(tester, themeMode: ThemeMode.dark);
+    await ageTo(tester, controller, 9);
+    await shot(tester, '10_karanlik_mod.png');
   }, skip: !enabled);
 
   testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',

@@ -461,3 +461,25 @@ eski defter. Her biri testle kilitlendi.
 
 Bütün sayılar `prototypeOnly`; tekrar aralıkları ve yoğunluk kararı
 **Q-066** altında bekliyor.
+
+### 9.5 Tekrar ayarı ve erişilebilirlik (Paket F3)
+
+Paket F1 ölçümünde en sık çıkan yeni olayların tekrar aralıkları
+büyütüldü (hepsi `prototypeOnly`):
+
+| Olay | Önce | Sonra | Hayat başına |
+|---|---|---|---|
+| mahalle_dugunu | 10 | 16 | 3,00 → **2,53** |
+| market_kuyrugu | 7 | 12 | 2,55 → **2,22** |
+| is_yerinde_yeni_gelen | 9 | 13 | 2,35 → **2,09** |
+| kaybolan_esya | 9 | 14 | 2,24 → **2,03** |
+| asansor_arizasi | 12 | 17 | 2,25 → **1,99** |
+| is_cikisinda_yagmur | 7 | 12 | 2,17 → **1,93** |
+| zam_istegi | 11 | 15 | 2,09 → **2,02** |
+
+`gece_muzigi` olayı yalnızca "kulaklık" eşyasına bağlıydı ve 300 hayatta
+**hiç çıkmamıştı**; artık herhangi bir elektronik eşyayla açılıyor.
+Bu turdan sonra **hiç çıkmayan olay kalmadı**.
+
+Yaş başına olay oranı %98,6; ileri yaş: 80-84 **%94**, 85-89 **%85**,
+90-94 **%78**, 95-99 **%68**.

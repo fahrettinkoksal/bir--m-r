@@ -8,10 +8,18 @@ import 'ui/theme/bir_omur_theme.dart';
 
 /// Uygulamanın kökü.
 class BirOmurApp extends StatefulWidget {
-  const BirOmurApp({super.key, this.controller});
+  const BirOmurApp({
+    super.key,
+    this.controller,
+    this.themeMode = ThemeMode.system,
+  });
 
   /// Testlerde sabit tohumlu bir denetleyici verilebilir.
   final GameController? controller;
+
+  /// Açık/koyu tema seçimi. Varsayılan olarak **cihazın** ayarı kullanılır;
+  /// testlerde koyu tema doğrudan verilebilir.
+  final ThemeMode themeMode;
 
   @override
   State<BirOmurApp> createState() => _BirOmurAppState();
@@ -36,6 +44,7 @@ class _BirOmurAppState extends State<BirOmurApp> {
         debugShowCheckedModeBanner: false,
         theme: BirOmurTheme.light(),
         darkTheme: BirOmurTheme.dark(),
+        themeMode: widget.themeMode,
         home: const _Root(),
       ),
     );

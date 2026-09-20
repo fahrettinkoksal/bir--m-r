@@ -35,6 +35,14 @@ abstract final class BirOmurColors {
 
   static const Color geceMurekkep = Color(0xFF16130F);
   static const Color geceYuzey = Color(0xFF221D18);
+
+  /// Koyu zeminde okunan karakter değeri renkleri.
+  ///
+  /// Açık temanın çini/pirinç tonları koyu zeminde birbirine yaklaşıyor ve
+  /// "iyi" ile "orta" ayırt edilemiyordu.
+  static const Color geceCini = Color(0xFF6FC0AE);
+  static const Color gecePirinc = Color(0xFFE0B25E);
+  static const Color geceUyari = Color(0xFFE98A8A);
 }
 
 abstract final class BirOmurTheme {

@@ -372,7 +372,9 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 13,
       maxAge: 24,
-      requiredPossessions: <String>{'kulaklik'},
+      // Kulaklık kimliğine bağlıyken oyuncuların çoğunda hiç çıkmıyordu;
+      // müzik dinlenen herhangi bir cihaz yeterli.
+      requiredPossessionKinds: <ItemKind>{ItemKind.elektronik},
     ),
     repeatable: true,
     minAgeGap: 5,
@@ -586,7 +588,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       requiredFlags: <String>{'calisma_hayati'},
     ),
     repeatable: true,
-    minAgeGap: 9,
+    minAgeGap: 13,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(
@@ -615,7 +617,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       requiredFlags: <String>{'calisma_hayati'},
     ),
     repeatable: true,
-    minAgeGap: 11,
+    minAgeGap: 15,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(
@@ -646,7 +648,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       requiredFlags: <String>{'calisma_hayati'},
     ),
     repeatable: true,
-    minAgeGap: 7,
+    minAgeGap: 12,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1121,7 +1123,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         'senin sepetin dolu.',
     requirement: EventRequirement(minAge: 16),
     repeatable: true,
-    minAgeGap: 7,
+    minAgeGap: 12,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1147,7 +1149,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         'ama kapı açılmıyor.',
     requirement: EventRequirement(minAge: 14),
     repeatable: true,
-    minAgeGap: 12,
+    minAgeGap: 17,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -1175,7 +1177,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         'şarkılar.',
     requirement: EventRequirement(minAge: 10),
     repeatable: true,
-    minAgeGap: 10,
+    minAgeGap: 16,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(
@@ -1203,7 +1205,7 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         'hatırlamıyorsun. Aramak bütün günü aldı.',
     requirement: EventRequirement(minAge: 20),
     repeatable: true,
-    minAgeGap: 9,
+    minAgeGap: 14,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(

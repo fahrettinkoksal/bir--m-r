@@ -424,6 +424,15 @@ kart kondu. **Türkçe büyük harf hatası düzeltildi:** `toUpperCase()`
 "Aile" → "AILE" yazıyordu, artık "AİLE". Görünüm tercihleri **Q-068**
 altında karar bekliyor; ekran görüntüsü testleri yenilendi.
 
+**Karanlık mod ve denge ayarı (Paket F3):** karanlık temada karakter
+değerlerinin "iyi" ve "orta" renkleri birbirine karışıyordu; koyu zemin
+için ayrı tonlar tanımlandı ve karanlık mod ekran görüntüsü testine
+eklendi (`10_karanlik_mod.png`). En sık tekrarlayan yedi olayın tekrar
+aralığı büyütüldü (en yüksek tekrar 3,00 → 2,53) ve tek ürün kimliğine
+bağlı olduğu için hiç çıkmayan `gece_muzigi` olayı erişilebilir hâle
+getirildi; artık **hiç çıkmayan olay kalmadı**. Ayrıntı:
+`docs/BALANCE_REPORT.md` §9.5.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -121,8 +121,33 @@ void main() {
       );
 
       expect(statColor(theme, 10), theme.colorScheme.error);
-      expect(statColor(theme, 45), theme.colorScheme.tertiary);
-      expect(statColor(theme, 90), theme.colorScheme.secondary);
+      expect(statColor(theme, 45), BirOmurColors.pirinc);
+      expect(statColor(theme, 90), BirOmurColors.cini);
+    });
+
+    testWidgets('karanlık temada renkler birbirinden ayırt edilebilir',
+        (WidgetTester tester) async {
+      late ThemeData koyu;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.dark(),
+          home: Builder(
+            builder: (BuildContext context) {
+              koyu = Theme.of(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+
+      final Color dusuk = statColor(koyu, 10);
+      final Color orta = statColor(koyu, 45);
+      final Color yuksek = statColor(koyu, 90);
+      // Koyu temada "iyi" ile "orta" aynı sarıya düşüyordu.
+      expect(yuksek, isNot(orta));
+      expect(yuksek, isNot(dusuk));
+      expect(orta, isNot(dusuk));
+      expect(yuksek, BirOmurColors.geceCini);
     });
   });
 }

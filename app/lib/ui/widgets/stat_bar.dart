@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../theme/bir_omur_theme.dart';
+
 /// Karakter değerinin **seviyesine göre** rengi.
 ///
 /// Sayıya bakmadan da durum anlaşılsın diye: düşük değer uyarı rengine,
 /// yüksek değer çini yeşiline yaklaşır. Eşikler `prototypeOnly`'dir.
 Color statColor(ThemeData theme, int value) {
-  if (value < 30) return theme.colorScheme.error;
-  if (value < 55) return theme.colorScheme.tertiary;
-  return theme.colorScheme.secondary;
+  // Koyu temada çini yeşili ile pirinç sarısı birbirine yaklaşıp ayırt
+  // edilemiyordu; koyu zemin için daha açık karşılıkları kullanılır.
+  final bool koyu = theme.brightness == Brightness.dark;
+  if (value < 30) {
+    return koyu ? BirOmurColors.geceUyari : theme.colorScheme.error;
+  }
+  if (value < 55) {
+    return koyu ? BirOmurColors.gecePirinc : BirOmurColors.pirinc;
+  }
+  return koyu ? BirOmurColors.geceCini : BirOmurColors.cini;
 }
 
 /// Değeri **yumuşak geçişle** gösteren ince çubuk.
