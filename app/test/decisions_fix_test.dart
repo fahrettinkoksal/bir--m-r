@@ -84,6 +84,11 @@ void main() {
         <String>['kucuk_daire'],
         source: ItemSource.satinAlma,
       );
+      // Ev almak taşınmak değildir; oturmak için taşınmak gerekir (D-043).
+      bagimsiz = bagimsiz.copyWith(
+        residenceItemId: bagimsiz.items.last.id,
+        movedOut: true,
+      );
       final int kendiEvi = LivingCosts.yearlyCost(bagimsiz);
 
       expect(LivingCosts.situationOf(bagimsiz), LivingSituation.kendiEvinde);

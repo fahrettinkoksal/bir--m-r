@@ -126,6 +126,7 @@ void main() {
       age: 14,
     );
     await openAssets(tester);
+    await scrollTo(tester, find.text('Mağazalar'));
     await tester.tap(find.text('Mağazalar'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Genel mağaza'));
@@ -146,6 +147,7 @@ void main() {
       age: 14,
     );
     await openAssets(tester);
+    await scrollTo(tester, find.text('Mağazalar'));
     await tester.tap(find.text('Mağazalar'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Genel mağaza'));

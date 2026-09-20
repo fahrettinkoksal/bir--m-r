@@ -1,6 +1,7 @@
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import 'housing.dart';
 
 /// Oyuncunun yaşam düzeni.
 ///
@@ -104,20 +105,28 @@ abstract final class LivingCosts {
       state.items.any((OwnedItem i) => i.isProperty);
 
   /// Oyuncunun yaşam düzeni.
+  ///
+  /// Nerede **oturulduğu** esastır (D-043): evi olup ailesinin yanında
+  /// yaşayan kira ödemez ama ev gideri de yoktur; evini kiraya verip
+  /// kirada oturan kira öder.
   static LivingSituation situationOf(GameState state) {
     if (state.player.age < prototypeOnlyAdultAge) return LivingSituation.cocuk;
-    if (livesWithFamily(state)) return LivingSituation.aileYaninda;
-    return ownsHome(state)
-        ? LivingSituation.kendiEvinde
-        : LivingSituation.kirada;
+    switch (Housing.residenceOf(state)) {
+      case ResidenceKind.aileYaninda:
+        return LivingSituation.aileYaninda;
+      case ResidenceKind.kendiEvinde:
+        return LivingSituation.kendiEvinde;
+      case ResidenceKind.kirada:
+        return LivingSituation.kirada;
+    }
   }
 
   /// Gidere esas alınan yıllık gelir.
   ///
-  /// Şimdilik yalnızca maaş; kira geliri gibi kalemler eklendiğinde buraya
-  /// katılacak.
+  /// Maaş ve **kira geliri** birlikte sayılır (D-033: bütün para akışları
+  /// aynı ekonomiye bağlıdır).
   static int yearlyIncome(GameState state) =>
-      state.career.job?.yearlySalary ?? 0;
+      (state.career.job?.yearlySalary ?? 0) + Housing.yearlyRentIncome(state);
 
   /// Bu yılın gider dökümü.
   static CostBreakdown breakdownFor(GameState state) {

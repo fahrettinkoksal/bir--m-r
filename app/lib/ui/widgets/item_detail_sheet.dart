@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/item_catalog.dart';
+import '../../domain/economy/housing.dart';
 import '../../domain/interaction/item_actions.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/owned_item.dart';
@@ -164,6 +165,17 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
                 ),
               if (item.location != null)
                 _Row(label: 'Konum', value: item.location!),
+              if (item.isProperty) ...<Widget>[
+                _Row(
+                  label: 'Oturum',
+                  value: controller.state!.residenceItemId == item.id
+                      ? 'Bu evde yaşıyorsun'
+                      : item.rentedOut
+                          ? 'Kirada (yılda '
+                              '${Housing.yearlyRentOf(item)} ₺)'
+                          : 'Boş duruyor',
+                ),
+              ],
               if (item.isVehicle || item.isProperty) ...<Widget>[
                 _Row(label: 'Tür', value: item.type.name),
                 _Row(
@@ -209,6 +221,10 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
                     ),
                 ],
               ),
+              if (item.isProperty) ...<Widget>[
+                const SizedBox(height: 4),
+                _HousingActions(item: item),
+              ],
               for (final ItemActionKind action in kapali)
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
@@ -350,6 +366,97 @@ class _Row extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Konuta özgü eylemler: taşınma ve kiraya verme (D-043).
+///
+/// Mülk sahipliği ile oturulan ev ayrıdır; bu yüzden eylemler ayrı
+/// gösterilir ve engel varsa gerekçesi yazılır.
+class _HousingActions extends StatefulWidget {
+  const _HousingActions({required this.item});
+
+  final OwnedItem item;
+
+  @override
+  State<_HousingActions> createState() => _HousingActionsState();
+}
+
+class _HousingActionsState extends State<_HousingActions> {
+  String? _sonuc;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final OwnedItem? guncel = controller.state?.itemById(widget.item.id);
+    if (guncel == null) return const SizedBox.shrink();
+
+    final String tasinmaEngeli = controller.moveBlockReason(guncel);
+    final String kiraEngeli = controller.rentOutBlockReason(guncel);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: FilledButton.tonal(
+                key: const Key('home_move_in'),
+                onPressed: tasinmaEngeli.isEmpty
+                    ? () => setState(() {
+                          _sonuc = controller.moveInto(guncel)?.text;
+                        })
+                    : null,
+                child: Text(
+                  'Bu eve taşın (${Housing.prototypeOnlyMoveCost} ₺)',
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: OutlinedButton(
+                key: const Key('home_rent_toggle'),
+                onPressed: guncel.rentedOut
+                    ? () => setState(() {
+                          _sonuc = controller.endLease(guncel)?.text;
+                        })
+                    : (kiraEngeli.isEmpty
+                        ? () => setState(() {
+                              _sonuc = controller.rentOutHome(guncel)?.text;
+                            })
+                        : null),
+                child: Text(
+                  guncel.rentedOut
+                      ? 'Kirayı bitir'
+                      : 'Kiraya ver (yılda '
+                          '${Housing.yearlyRentOf(guncel)} ₺)',
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (tasinmaEngeli.isNotEmpty || (kiraEngeli.isNotEmpty && !guncel.rentedOut))
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              tasinmaEngeli.isNotEmpty ? tasinmaEngeli : kiraEngeli,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        if (_sonuc != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(_sonuc!, style: theme.textTheme.bodySmall),
+          ),
+      ],
     );
   }
 }

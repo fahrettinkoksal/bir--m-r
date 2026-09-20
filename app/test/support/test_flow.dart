@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/domain/generation/school_people.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
@@ -22,6 +23,8 @@ Future<void> answerPendingEvents(
   String? preferChoiceId,
 }) async {
   await tester.pumpAndSettle();
+  // Sağlık krizi olay penceresinden önce gelir (D-044); önce o yanıtlanır.
+  await answerPendingCrisis(tester, controller);
   int guard = 0;
   while (controller.state!.hasPendingEvent) {
     if (guard++ > 20) {
@@ -36,6 +39,38 @@ Future<void> answerPendingEvents(
     await tester.pumpAndSettle();
     await tester.tap(find.text('Devam'));
     await tester.pumpAndSettle();
+  }
+}
+
+/// Ekranda sağlık krizi varsa ilk seçilebilir seçeneği seçerek kapatır.
+Future<void> answerPendingCrisis(
+  WidgetTester tester,
+  GameController controller,
+) async {
+  int guard = 0;
+  while (controller.state!.hasPendingCrisis) {
+    if (guard++ > 10) fail('Sağlık krizi kapanmıyor.');
+    final HealthCrisis kriz = controller.pendingCrisis!.crisis!;
+    final CrisisChoice secim = kriz.choices.firstWhere(
+      controller.canChooseCrisis,
+      orElse: () => kriz.choices.last,
+    );
+
+    // Kriz penceresi açıldıysa düğmeye basılır; henüz açılmadıysa yanıt
+    // doğrudan verilir. İki yol da aynı sonucu uygular.
+    final Finder secenek = find.byKey(Key('crisis_choice_${secim.id}'));
+    if (secenek.evaluate().isNotEmpty) {
+      await tester.tap(secenek);
+      await tester.pumpAndSettle();
+      final Finder kapat = find.text('Kapat');
+      if (kapat.evaluate().isNotEmpty) {
+        await tester.tap(kapat.last);
+        await tester.pumpAndSettle();
+      }
+    } else {
+      controller.respondToCrisis(secim.id);
+      await tester.pumpAndSettle();
+    }
   }
 }
 
@@ -60,6 +95,20 @@ Future<void> ageTo(
 
 /// Arayüzsüz (domain) testler için: ekranda olay varsa seçim yaparak kapatır.
 void resolvePendingEvents(GameController controller, {String? preferChoiceId}) {
+  // Arayüzsüz testlerde sağlık krizi de doğrudan yanıtlanır.
+  int crisisGuard = 0;
+  while (controller.state!.hasPendingCrisis) {
+    if (crisisGuard++ > 10) {
+      throw StateError('Sağlık krizi kapanmıyor.');
+    }
+    final HealthCrisis kriz = controller.pendingCrisis!.crisis!;
+    final CrisisChoice secim = kriz.choices.firstWhere(
+      controller.canChooseCrisis,
+      orElse: () => kriz.choices.last,
+    );
+    controller.respondToCrisis(secim.id);
+  }
+
   int guard = 0;
   while (controller.state!.hasPendingEvent) {
     if (guard++ > 50) {

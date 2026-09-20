@@ -485,6 +485,8 @@ void main() {
         final GameController controller = GameController(random: Random(seed));
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 26; i++) {
+          // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
+          if (controller.state!.deceased) break;
           final int logOnce = controller.state!.log.length;
           controller.ageUp();
           toplamYas++;

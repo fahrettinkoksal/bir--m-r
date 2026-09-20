@@ -13,11 +13,12 @@ class PlayerCharacter {
     required this.gender,
     required this.age,
     required this.birthCity,
+    String? currentCity,
     required this.stats,
     this.fame,
     this.wallet = 0,
     this.hairStyle,
-  });
+  }) : currentCity = currentCity ?? birthCity;
 
   final String id;
   final String firstName;
@@ -27,6 +28,11 @@ class PlayerCharacter {
 
   /// Doğum şehri rastgele belirlenir (D-004). Doğum **yılı** yoktur (D-003).
   final String birthCity;
+
+  /// Oyuncunun **şu an yaşadığı** şehir (D-043).
+  ///
+  /// Taşınana kadar doğum şehridir.
+  final String currentCity;
   final Stats stats;
 
   /// Ün (D-027). `null` ise Ün henüz **açılmamıştır** ve arayüzde gösterilmez.
@@ -60,6 +66,7 @@ class PlayerCharacter {
     int? fame,
     int? wallet,
     String? hairStyle,
+    String? currentCity,
   }) {
     return PlayerCharacter(
       id: id,
@@ -68,6 +75,7 @@ class PlayerCharacter {
       gender: gender,
       age: age ?? this.age,
       birthCity: birthCity,
+      currentCity: currentCity ?? this.currentCity,
       stats: stats ?? this.stats,
       fame: fame ?? this.fame,
       wallet: wallet ?? this.wallet,

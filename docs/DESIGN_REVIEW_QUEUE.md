@@ -1058,5 +1058,98 @@ uygulandı. Vasiyet, borç mirası, miras vergisi ve kuşak sistemi eklenmedi.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
+### Q-060 — Konut: taşınma, kira geliri ve şehir
+**Durum:** **Kısmen karara bağlandı** (D-043). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/domain/economy/housing.dart`, `app/lib/ui/screens/sections/assets_screen.dart`. **Bağlantılı:** Q-055, Q-056.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- Taşınma yaşı 18; taşınma masrafı 12.000 ₺ (tek seferlik).
+- Kira geliri konut değerinin yılda **%4,5'i**; her yıl **%12** ihtimalle
+  kiracı bulunamaz ve o yıl gelir gelmez.
+- Oturulan ev kiraya verilemez; kiraya verilmiş eve taşınılamaz.
+- Emlakçıda 20 şehirden biri seçilerek konut alınabilir; başka şehirdeki
+  kendi evine taşınmak oyuncunun yaşadığı şehri değiştirir.
+- Aile evine dönüş yalnızca hanede hayatta bir yetişkin varsa mümkündür.
+
+**Karar soruları:**
+1. Kira getirisi %4,5 doğru mu? Konut türüne göre değişmeli mi (küçük daire
+   daha yüksek getiri, villa daha düşük)?
+2. Kiracı bulunamama ihtimali kalsın mı; kiracı kaynaklı olaylar (hasar,
+   kira ödememe) eklensin mi?
+3. Taşınma masrafı sabit mi kalsın, şehirler arası taşınmada artsın mı?
+4. Şehir değiştirmek başka neleri etkilemeli (iş, okul, arkadaşlar)?
+   Şu an yalnızca "yaşanan şehir" bilgisi değişiyor.
+5. Kiralık evde yaşarken kira ayrı bir kalem olarak mı gösterilsin (gider
+   dökümü buna hazır), yoksa toplam gider yeterli mi?
+6. Aile evinden ayrılmanın ilişkilere etkisi olmalı mı?
+
+**Claude'un önerisi (yalnızca öneri):** Kiracı olayları ve şehir değiştirmenin
+iş/okul etkisi ayrı bir pakete bırakılsın; önce mevcut akışın oyunda nasıl
+hissettirdiği görülsün.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye yalnızca ilkeler
+yazıldı.
+
+### Q-061 — Hastalık ve kaza krizleri
+**Durum:** **Kısmen karara bağlandı** (D-044). İlkeler kesinleşti; sayısal denge geçici. **Kaynak:** `app/lib/data/health_crisis_catalog.dart`, `app/lib/domain/life/health_crisis_engine.dart`. **Bağlantılı:** Q-058.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- Altı kriz: ateşli hastalık, trafik kazası, kalp uyarısı, iş kazası,
+  zatürre, evde düşme. Her birinin yaş aralığı ve iki seçeneği var.
+- Yıllık kriz ihtimali: 16 yaş altı %0,3 · 16-40 %0,7 · 40-60 %1,8 ·
+  60-75 %3,0 · 75+ %4,0; sağlık düştükçe artar (en çok iki kat).
+- İki kriz arasında en az **4 yaş** olur; ekranda kriz varken yenisi çıkmaz.
+- Atlatma ihtimali %72-95 arasında; tedavi seçeneği ihtimali artırır,
+  ertelemek düşürür. Tedavi bedelleri 3.000-40.000 ₺.
+- Ölçüm (5.000 hayat): hayat başına **1,01** kriz, hayatların **%13,1'i**
+  krizle sonuçlanıyor. Temel ölüm eğrisi bunu dengelemek için **0,8** ile
+  çarpıldı.
+
+**Karar soruları:**
+1. Kriz sayısı (hayat başına ~1) ve ölümlü sonuç oranı (%13) doğru mu?
+2. Krizler yalnızca oyuncuda mı olsun, yakınlar için de olay çıksın mı
+   (ör. "annen hastalandı, tedaviye katkıda bulunur musun")?
+3. Kriz sonrası kalıcı etki olmalı mı (sakatlık, kronik hastalık)?
+4. Sağlık sigortası / devlet desteği gibi bir kalem gelsin mi (D-033 ile)?
+5. Krizler meslekle ilişkili olmalı mı (iş kazası yalnızca çalışanlarda)?
+6. Metin sayısı altı ile yeterli mi; yaşa göre daha çeşitli metin gerekir mi?
+
+**Claude'un önerisi (yalnızca öneri):** İş kazası yalnızca çalışan
+karakterlerde çıksın; yakınların hastalığı, para/ilişki kararı içerdiği için
+güçlü bir içerik olur ve ayrı bir pakette ele alınabilir.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye yalnızca ilkeler
+yazıldı.
+
+### Q-062 — Kuşak sistemi ve ön koşulu: evlilik ve çocuk
+**Durum:** **Karar bekliyor — kodlanmadı.** **Kaynak:** `docs/GENERATION_PROPOSAL.md`. **Bağlantılı:** Q-059 (D-037), Q-058.
+
+**Sorun:** "Çocuğum olarak devam et" kuşak sistemi, oyuncunun **çocuğu
+olmasını** gerektirir. Oyunda şu an **evlilik, birliktelik ve çocuk sistemi
+yok**: yalnızca sevgili/eski sevgili bağı var (D-029, D-030) ve miras
+kurallarında "gerçek evlilik kaydı yokken sevgili eş sayılmaz" deniyor
+(D-037). Yani kuşak sistemi doğrudan kodlanamaz; önce evlilik ve çocuk
+tasarımı gerekir ve bu **oyun tasarımı kararıdır**, Claude'un uyduracağı bir
+şey değildir.
+
+**Karar soruları (ayrıntılı öneri `docs/GENERATION_PROPOSAL.md` içinde):**
+1. Evlilik/birliktelik oyunda nasıl kurulacak (sevgiliden evliliğe geçiş,
+   yaş ve ilişki koşulları, düğün, boşanma)?
+2. Çocuk nasıl olacak (isteğe bağlı mı, ilişki durumuna bağlı mı, kaç
+   çocuk, evlat edinme)?
+3. Çocuklar NPC olarak nasıl büyüyecek; okul/meslek sistemine girecek mi?
+4. Oyuncu ölünce miras çocuklara nasıl dağıtılacak (D-037 paylaşımıyla)?
+5. "Çocuğum olarak devam et" seçeneği ne zaman sunulacak; çocuk yokken ne
+   olacak? Yeni hayat, mevcut dünyanın devamı mı yoksa tamamen yeni bir
+   dünya mı olacak?
+6. Devam edilen hayatta neler taşınacak (miras, ev, aile bağları, Ün)?
+
+**Claude'un önerisi (yalnızca öneri):** Önce **evlilik + çocuk** paketi
+tasarlanıp kodlansın; kuşak devamı onun üstüne küçük bir paket olarak gelsin.
+Geçmiş Hayatlar arşivi (D-037) bu geçiş için gereken altyapının bir kısmını
+zaten sağlıyor.
+
+**Varsayılan işlem:** Hiçbir şey kodlanmadı; oyunda evlilik/çocuk sistemi
+yokken kuşak sistemi eklenmedi (D-037'ye uygun).
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

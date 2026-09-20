@@ -6,6 +6,7 @@ import '../../state/game_scope.dart';
 import '../widgets/bottom_action_bar.dart';
 import '../widgets/character_header.dart';
 import '../widgets/event_dialog.dart';
+import '../widgets/health_crisis_sheet.dart';
 import 'life_screen.dart';
 import 'life_summary_screen.dart';
 import 'past_lives_screen.dart';
@@ -44,6 +45,23 @@ class _HomeShellState extends State<HomeShell> {
 
   /// Hayat tamamlandığında Geçmiş Hayatlar arşivi açık mı?
   bool _archiveVisible = false;
+
+  /// Aynı anda yalnızca tek sağlık krizi penceresi açılır.
+  bool _crisisVisible = false;
+
+  void _showCrisis() {
+    if (_crisisVisible) return;
+    _crisisVisible = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final NavigatorState navigator =
+          Navigator.of(context, rootNavigator: true);
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
+      await HealthCrisisSheet.show(context);
+      if (!mounted) return;
+      setState(() => _crisisVisible = false);
+    });
+  }
 
   void _showPendingEvent(ActiveEvent event) {
     if (_eventVisible) return;
@@ -139,8 +157,11 @@ class _HomeShellState extends State<HomeShell> {
       );
     }
 
+    // Sağlık krizi, olaylardan önce ekrana gelir (D-044).
+    if (state.hasPendingCrisis) _showCrisis();
+
     final ActiveEvent? pending = state.pendingEvent;
-    if (pending != null) _showPendingEvent(pending);
+    if (pending != null && !state.hasPendingCrisis) _showPendingEvent(pending);
 
     // Soldaki menü oyuncunun durumuna göre Okul veya Meslek olur (NAV-001).
     final List<BottomTab> tabs = <BottomTab>[

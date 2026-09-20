@@ -11,6 +11,14 @@ import '../models/relation.dart';
 ///
 /// Bütün sayılar `prototypeOnly`'dir (`docs/DESIGN_REVIEW_QUEUE.md`, Q-058).
 abstract final class Mortality {
+  /// prototypeOnly: sağlık krizlerinin (D-044) eklediği ölümleri dengeleyen
+  /// çarpan.
+  ///
+  /// Krizler ölümün **bir sebebi**dir, toplam ölümün üstüne eklenen ayrı
+  /// bir yük değil; bu yüzden temel eğri ölçümle bir miktar düşürüldü
+  /// (`docs/BALANCE_REPORT.md` §6).
+  static const double prototypeOnlyCrisisOffset = 0.8;
+
   /// prototypeOnly: yaşa göre yıllık ölüm ihtimali.
   ///
   /// Eğri kabaca gerçek hayattaki eğilimi izler: çocuklukta çok düşük,
@@ -48,6 +56,10 @@ abstract final class Mortality {
 
     // Sağlık yalnızca oyuncuda ölçülür; NPC'lerde sağlık değeri yoktur ve
     // uydurulmaz.
+    // Sağlık krizleri ayrı bir ölüm yolu açtığı için temel eğri bir miktar
+    // düşürülür; toplam dağılım ölçümle korunur.
+    temel *= prototypeOnlyCrisisOffset;
+
     if (health != null) {
       // 50 sağlık nötr; düşük sağlık riski en çok iki katına çıkarır.
       final double carpan = (1.5 - health / 100).clamp(0.5, 2.0);
