@@ -600,5 +600,84 @@ Kaynak: `claude/arayuz-revizyonu-v1` dalı. NAV-001'in **karara bağladığı** 
 
 **Varsayılan işlem:** Bütün sayılar geçici; gelir/sponsorluk/mesajlaşma yazılmadı ve sahte düğme konmadı.
 
+### Q-051 — Üniversite puanının hesabı ve not ortalaması
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/education/education_path.dart`, `app/lib/ui/screens/sections/education_career_pages.dart`. **Bağlantılı:** Q-047, Q-030.
+
+**Sorun:** Oyuncu başvuru ekranında bölümlerin taban puanını görüyordu ama
+kendi puanını göremiyordu. Eski kodda kalıcı bir "başvuru puanı" yoktu;
+puan her başvuruda rastgelelikle yeniden hesaplanıyordu, bu yüzden
+gösterilebilecek tek bir doğru sayı da yoktu.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- Lise bitince **bir kez** üniversite sınav puanı hesaplanıp kaydediliyor:
+  `((lise yerleştirme puanı + zekâ) / 2) + 0..10 sınav günü şansı`, 0-100
+  arası. Yerleştirme puanı yoksa zekâ taban alınıyor.
+- Başvuruda kullanılan puan = kayıtlı sınav puanı + bölümün tercih ettiği
+  alandan gelen **+12** katkı. Rastgelelik yok; ekranda yazan puan ile
+  kabul kararındaki puan aynı.
+- 8. sınıf **lise yerleştirme puanı** ile **üniversite sınav puanı** ayrı
+  alanlar, ekranda ayrı isimlerle gösteriliyor.
+- **Üniversite not ortalaması sistemi yok.** Uydurulmadı; ekranda
+  "not ortalaması sistemi henüz yok" notu var.
+
+**Karar soruları:**
+1. Üniversite puanı gerçek bir sınav olayı olarak mı kurgulansın (hazırlık,
+   deneme, sınav günü stresi), yoksa bu sessiz formül yeterli mi?
+2. Formül ne olmalı — zekâ ağırlığı, çalışma/ders seçimlerinin katkısı,
+   şans payı? Şu anki ±10 şans payı kabul edilebilir mi?
+3. Alan katkısı +12 doğru ölçek mi; alan dışı tercihe **ceza** verilsin mi?
+4. Puan 0-100 ölçeğinde mi kalsın, yoksa gerçek sınavlara benzer daha geniş
+   bir ölçek mi (ör. 100-500) kullanılsın?
+5. Üniversitede not ortalaması sistemi gelecek mi? Gelirse mezuniyet
+   derecesi iş bulmayı etkilesin mi?
+6. Sınavı bir kez daha deneme (ertesi yıl tekrar sınav) hakkı olacak mı?
+
+**Claude'un önerisi (yalnızca öneri):** Puan ölçeği 0-100 olarak kalsın,
+ertesi yıl tekrar sınav hakkı ileride "bir yıl kaybı" karşılığında
+eklensin. Not ortalaması ancak üniversite yılları gerçek bir oynanışa
+kavuşursa anlamlı olur; o zamana kadar uydurulmasın.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
+### Q-052 — Mülakat soruları: kapsam, zorluk ve tekrar sınırı
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/interview_catalog.dart`, `app/lib/domain/career/job_market.dart`, `app/lib/ui/widgets/interview_sheet.dart`. **Bağlantılı:** Q-048.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- Her meslek için **3-5 özgün soru**; başvuruda biri seçiliyor. Sorular
+  mesleğe özgü (yazılım: hata ayıklama, teknik servis: arıza bulma,
+  ressam/tasarımcı: renk ve tasarım, garson: sipariş ve iletişim, mağaza:
+  stok ve kasa, öğretmen: öğrenciye anlatma).
+- Çoktan seçmeli, **tek doğru cevap**; seçenek sırası sabit (kayıttan
+  geri yüklenince soru ve seçenekler değişmesin diye karıştırılmıyor).
+- Yanlış cevapta doğru seçenek ve kısa açıklama gösteriliyor.
+- Doğru cevap tek başına yetmiyor: nitelik koşulları cevap anında yeniden
+  denetleniyor.
+- Aynı yaşta aynı işe en fazla **2 başvuru** (önceden 3); sayaç başvuru
+  anında artıyor, mülakattan vazgeçmek hakkı geri vermiyor. Aynı yaşta
+  daha önce sorulmamış soru tercih ediliyor.
+- Mülakat penceresi açıkken başka işe başvurulamıyor.
+
+**Karar soruları:**
+1. Soru sayısı meslek başına 3-5 yeterli mi, yoksa ezberi zorlaştırmak için
+   8-10'a mı çıkarılsın?
+2. Zorluk karakterin zekâsına göre değişsin mi (düşük zekâda daha çok
+   çeldirici), yoksa herkese aynı mı sorulsun?
+3. Bir başvuruda tek soru mu, yoksa 2-3 soruluk kısa bir tur mu olsun?
+4. Yanlış cevabın maliyeti ne olmalı — yalnızca ret mi, yoksa o işe bir
+   süre başvuramama mı?
+5. Yıllık 2 başvuru sınırı doğru mu? Farklı işlere başvuru toplamı ayrıca
+   sınırlansın mı?
+6. Nitelik koşulu sağlanıyorsa mülakat **tek** karar noktası mı olsun,
+   yoksa karizma/şans gibi ek bir pay da kalsın mı? (Şu an ek pay yok:
+   doğru cevap + koşullar = kabul.)
+7. Mülakat metinleri ileride meslek dışı (staj, terfi, üniversite mülakatı)
+   durumlarda da kullanılsın mı?
+
+**Claude'un önerisi (yalnızca öneri):** Soru havuzu meslek başına 6-8'e
+çıkarılsın; tek soru ve "doğru cevap = kabul" sadeliği korunsun, karizma
+payı yeniden eklenmesin (oyuncunun kararı sonucu belirlesin).
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
