@@ -62,6 +62,10 @@ class PastLivesScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // Aile satırı yalnızca gerçekten varsa gösterilir.
+                  if (hayat.familyLine != null)
+                    Text(hayat.familyLine!,
+                        style: theme.textTheme.bodySmall),
                   Text('Eğitim: ${hayat.educationLabel}',
                       style: theme.textTheme.bodySmall),
                   Text('Meslek: ${hayat.careerLabel}',

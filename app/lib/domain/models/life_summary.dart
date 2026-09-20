@@ -18,6 +18,7 @@ class LifeSummary {
     required this.itemCount,
     required this.licenseCount,
     required this.highlights,
+    this.familyLine,
   });
 
   final String fullName;
@@ -37,4 +38,11 @@ class LifeSummary {
 
   /// Hayat günlüğünden seçilmiş satırlar ("yaş: metin").
   final List<String> highlights;
+
+  /// Evlilik ve çocuk özeti ("Eşi: Ayşe Demir · 2 çocuk").
+  ///
+  /// Hiç evlenmemiş ve çocuğu olmamış hayatlarda ve **eski arşiv
+  /// kayıtlarında** `null` olur; o zaman ekranda hiç gösterilmez
+  /// (uydurma bilgi yazılmaz).
+  final String? familyLine;
 }

@@ -341,7 +341,16 @@ miras); ayrı bir çocuk sistemi kurulmadı. Hanedeki 18 yaş altı her çocuk
 için yıllık gider kalemi var; çocuk 25 yaşında evden çıkınca kalem bitiyor
 ve kaydı korunuyor.
 
-Kayıt biçimi **sürüm 15**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
+**Paket 1 — entegrasyon turu (uygulandı):** evlilik/çocuk sistemi bütün
+sistemlerle birlikte sınandı. Düzeltilenler: eş ve çocuk kaybının duygusal
+ağırlığı (uzak tanıdıkla aynıydı), evli karakterin karşısına yeni romantik
+tanışma olayının çıkabilmesi, "ailenin yanında" ölçütünün eşi aile sayması,
+çocuğun soyadı, hayat özeti arşivinde aile bilgisinin tutulmaması ve eşi
+kayıtlarda bulunmayan bozuk kaydın sessizce yüklenmesi. Ortak tutarlılık
+denetimi (`test/support/invariants.dart`) 200 aile hayatında her yıl
+çalıştırılıyor.
+
+Kayıt biçimi **sürüm 16**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
 ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
 ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**
 altında Faho'nun kararını bekliyor; `DECISIONS.md`'ye yeni kalıcı kural

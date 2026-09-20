@@ -14,6 +14,7 @@ import 'package:bir_omur/domain/interaction/parenthood.dart';
 import 'package:bir_omur/domain/interaction/romance.dart';
 import 'package:bir_omur/domain/life/inheritance.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
@@ -327,7 +328,14 @@ void main() {
       expect(cocuk.relation, RelationType.cocuk);
       expect(cocuk.isAlive, isTrue);
       expect(cocuk.inPlayerHousehold, isTrue);
-      expect(cocuk.lastName, r.state.player.lastName);
+      // Soyadı babadan gelir (prototypeOnly, Q-063).
+      final Person es = r.state.spouse!;
+      expect(
+        cocuk.lastName,
+        r.state.player.gender == Gender.erkek
+            ? r.state.player.lastName
+            : es.lastName,
+      );
       expect(cocuk.wealth, isNull, reason: 'Çocuğa uydurma servet yazılmaz');
       expect(cocuk.occupation, isNull);
       expect(cocuk.relation.kanBagi, isTrue);

@@ -1182,6 +1182,8 @@ uydurulmaz.
    geleceği için engellendi ve gerekçesi ekranda yazılıyor. Açılacaksa
    evlilik kaydının **liste** hâline gelmesi gerekir.
 6. Eski eşle hangi etkileşimler açık kalsın (özellikle ortak çocuk varsa)?
+7. Evlenince eşin soyadı değişsin mi? **Şu an değişmiyor**: kimsenin kaydı
+   değiştirilmiyor, çocuk ise babanın soyadını alıyor (prototypeOnly).
 
 **Claude'un önerisi (yalnızca öneri):** Eşin gelirinin ortak bütçeye
 katılması ekonomiyi belirgin biçimde değiştirir; önce 4. sorunun yanıtı
@@ -1225,6 +1227,12 @@ büyük bir paket olur; önce yaş + meslek etiketiyle büyümeleri yeterli.
 **Varsayılan işlem:** Hiçbir değer `DECISIONS.md`'ye kalıcı kural olarak
 yazılmadı; ileri yaş ve aynı cinsiyet çiftlerinde uydurma bir kural
 uygulanmadı, gerekçe yazıldı.
+
+**Paket 1 entegrasyon turunda düzeltilenler (kural değişikliği değil,
+tutarlılık):** eş ve çocuk kaybının duygusal ağırlığı (daha önce uzak bir
+tanıdıkla aynıydı), evli karakterin karşısına yeni tanışma olayı çıkması,
+`livesWithFamily` ölçütünün eşi "aile" sayması, çocuğun soyadı ve geçmiş
+hayat arşivinde aile bilgisinin hiç tutulmaması.
 
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

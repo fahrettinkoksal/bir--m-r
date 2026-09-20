@@ -652,6 +652,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
       forbiddenFlags: <String>{
         StoryFlags.romantikIlgi,
         StoryFlags.romantikGecti,
+        // Evli karakterin karşısına yeni bir tanışma zinciri çıkmaz;
+        // böylece ikinci bir romantik kişi kaydı da üretilmez.
+        StoryFlags.evlendi,
       },
     ),
     // prototypeOnly: romantik zincir ilk prototipte gerçekten oynanabilmeli
@@ -689,6 +692,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       forbiddenFlags: <String>{
         StoryFlags.romantikIliskide,
         StoryFlags.romantikBitti,
+        StoryFlags.evlendi,
       },
     ),
     weight: 6,
