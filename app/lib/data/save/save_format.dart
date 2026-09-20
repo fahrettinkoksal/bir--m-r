@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 7;
+const int kSaveFormatVersion = 8;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -61,7 +61,18 @@ abstract final class SaveMigrations {
     if (from <= 4) guncel = _v4ToV5(guncel);
     if (from <= 5) guncel = _v5ToV6(guncel);
     if (from <= 6) guncel = _v6ToV7(guncel);
+    if (from <= 7) guncel = _v7ToV8(guncel);
     return guncel;
+  }
+
+  /// Sürüm 7 → 8: kumarhane masası ve yıllık bahis toplamı eklendi.
+  ///
+  /// Eski kayıtlarda açık bir el yoktur; masa boş, yıllık bahis toplamı 0
+  /// olarak açılır. Oyuncunun cüzdanı, eşyaları ve hayatı korunur.
+  static Map<String, Object?> _v7ToV8(Map<String, Object?> body) {
+    body['wagerThisAge'] ??= 0;
+    // `blackjack` alanı boş bırakılır; okuyucu `null` durumunu ele alır.
+    return body;
   }
 
   /// Sürüm 6 → 7: üniversite sınav puanı ve bekleyen mülakat eklendi.

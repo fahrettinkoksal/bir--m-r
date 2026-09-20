@@ -707,5 +707,39 @@ zaman kaynağı gelirse o kullanılsın.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
+### Q-054 — Kumarhane: yaş sınırı, bahis ölçeği ve yayın koşulları
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/casino/`, `app/lib/ui/screens/sections/casino_pages.dart`. **Bağlantılı:** Q-021, Q-048.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- Kumarhane **18 yaşında** açılıyor.
+- Bahis 50-5000 ₺; hazır adımlar 50/100/250/500/1000.
+- Bir yaşta toplam **25.000 ₺** bahis sınırı; yaş dönünce sıfırlanıyor.
+- Blackjack: krupiye 17'de duruyor (yumuşak 17 dâhil), doğal blackjack 3:2.
+  Sigorta, bölme ve ikiye katlama **yok**.
+- Rulet: tek sıfırlı Avrupa düzeni; renk ve tek/çift 1:1, sayı 35:1.
+- Yalnızca sanal para; gerçek para, ödül veya reklam karşılığı bahis yok.
+
+**Karar soruları:**
+1. Oyun içi yaş sınırı 18 mi kalsın? Mağaza yaş derecelendirmesi ve
+   **bölgesel yayın koşulları** (bazı ülkelerde sanal kumar içeriği yaş
+   derecesini yükseltir veya mağaza kurallarına takılır) nasıl ele alınsın?
+   Kumarhane bazı bölgelerde kapatılabilir bir modül mü olsun?
+2. Bahis ölçeği maaşlara göre doğru mu (Q-048 ile birlikte)? 5000 ₺ üst
+   sınırı maaş ölçeği değişirse yeniden ayarlanmalı.
+3. Yıllık 25.000 ₺ sınırı kalsın mı; oyuncunun kendi belirlediği isteğe
+   bağlı bir harcama limiti eklensin mi?
+4. Kumar kaybı mutluluk/sağlık gibi değerleri etkilesin mi, borç sistemi
+   gelsin mi? (Şu an yalnızca cüzdanı etkiliyor.)
+5. Blackjack'e sigorta/bölme/ikiye katlama eklensin mi?
+6. Kumarhanenin hikâye tarafı (bağımlılık teması, aile tepkisi) işlensin mi;
+   işlenecekse hangi çerçevede?
+
+**Claude'un önerisi (yalnızca öneri):** Yaş sınırı 18 kalsın ve kumarhane
+ayarlardan kapatılabilir bir modül olarak tasarlansın; bu, bölgesel yayın
+koşullarını en az riskle karşılar. Sigorta/bölme gibi kurallar sadeliği
+bozar, şimdilik eklenmesin.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

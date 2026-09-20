@@ -22,6 +22,9 @@ import '../domain/activities/activity_engine.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
+import '../domain/casino/blackjack.dart';
+import '../domain/casino/roulette.dart';
+import '../domain/models/blackjack_game.dart';
 import '../domain/social/social_engine.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
@@ -50,6 +53,8 @@ class GameController extends ChangeNotifier {
   final JobMarket _jobs = const JobMarket();
   final ActivityEngine _activities = const ActivityEngine();
   final SocialEngine _social = const SocialEngine();
+  final Blackjack _blackjack = const Blackjack();
+  final Roulette _roulette = const Roulette();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -588,6 +593,69 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final SocialResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Kumarhane (yalnızca oyunun sanal parası)
+  // =====================================================================
+
+  /// Masada devam eden ya da yeni bitmiş el.
+  BlackjackGame? get blackjack => _state?.blackjack;
+
+  /// Bu yaşta kumarhanede oynanan toplam bahis.
+  int get wagerThisAge => _state?.wagerThisAge ?? 0;
+
+  /// Kumarhaneye girilebilir mi?
+  InteractionAvailability casinoAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return CasinoAccess.check(current);
+  }
+
+  /// Bu bahis şu an oynanabilir mi?
+  InteractionAvailability betAvailability(int bet) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return CasinoAccess.checkBet(current, bet);
+  }
+
+  /// Blackjack eli açar.
+  CasinoOutcome? dealBlackjack(int bet) => _runCasino(
+        (GameState current) => _blackjack.deal(current, bet, _random),
+      );
+
+  /// Kart çeker.
+  CasinoOutcome? hitBlackjack() =>
+      _runCasino((GameState current) => _blackjack.hit(current));
+
+  /// Durur; krupiye oynar ve el sonuçlanır.
+  CasinoOutcome? standBlackjack() =>
+      _runCasino((GameState current) => _blackjack.stand(current));
+
+  /// Biten eli masadan kaldırır.
+  CasinoOutcome? closeBlackjackHand() =>
+      _runCasino((GameState current) => _blackjack.closeHand(current));
+
+  /// Rulette bahis oynar.
+  CasinoOutcome? spinRoulette(RouletteBetType type, int bet, {int? number}) =>
+      _runCasino(
+        (GameState current) =>
+            _roulette.spin(current, type, bet, _random, number: number),
+      );
+
+  CasinoOutcome? _runCasino(CasinoResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final CasinoResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
