@@ -1270,5 +1270,38 @@ hayat arşivinde aile bilgisinin hiç tutulmaması.
 **Varsayılan işlem:** Hiçbir otomatik işten çıkarma veya okul silme kuralı
 uydurulmadı; `DECISIONS.md`'ye yeni kural yazılmadı.
 
+### Q-066 — Olay yoğunluğu, tekrar aralıkları ve içerik dengesi
+**Durum:** Ölçüldü ve ayarlandı, **karar bekliyor** (bütün sayılar `prototypeOnly`). **Kaynak:** Paket 4. **Bağlantılı:** Q-005 (olaysız yaşlar).
+
+**Ölçüm (300 hayat, `app/tool/event_report.dart`):**
+- Katalog 41 → **74** olay; yaş başına olay oranı %82,8 → **%95,7**.
+- 0-4 yaş aralığında **hiç olay yoktu**; şimdi %98.
+- 80 yaş üstünde oran hâlâ düşük (%25-61). O yaşa ulaşan hayat sayısı da
+  azalıyor, ama içerik de sınırlı.
+- En sık olay hayat başına 9,92 → **3,83**.
+
+**Şu an kodda olan (geçici) değerler:**
+- Tekrar aralıkları (`minAgeGap`): aile akşam sofrası 8, aile sitemi 9,
+  bayram ziyareti 9, aile ziyareti 9, sağlık kontrolü 6, eşle anma 15,
+  eşin iş kararı 18, çocuk karnesi 5, bebek gece ağlaması 3.
+- Testte bir olayın tek hayatta **8 kereden fazla** çıkmaması kilitlendi.
+
+**Karar soruları:**
+1. Her yaşta olay çıkması mı iyi, yoksa sessiz yıllar da olmalı mı?
+   (Şu an %95,7; yani neredeyse her yıl bir olay var.)
+2. 80 yaş üstü için ayrı bir içerik paketi gerekir mi?
+3. Tekrar aralıkları doğru mu; bayram gibi doğal tekrar eden olaylar daha
+   sık dönebilir mi?
+4. Nostalji-güncel dengesi: yeni olaylarda mahalle/sokak ağırlığı fazla mı?
+5. Olayların yaş evrelerine dağılımı (bebeklik 5, çocukluk 4, ergenlik 4,
+   genç yetişkinlik 6, 30+ 14) doğru ağırlıkta mı?
+
+**Claude'un önerisi (yalnızca öneri):** Sessiz yıllar oyunun temposu için
+iyi olabilir; %95 yerine %75-85 hedeflenip aradaki fark "yaş aldın" özet
+ekranıyla doldurulabilir. Bu bir tasarım kararıdır, değiştirilmedi.
+
+**Varsayılan işlem:** Yalnızca ölçümle görülen açık boşluklar (0-4 yaş,
+ileri yaş, spam tekrar) kapatıldı; `DECISIONS.md`'ye yeni kural yazılmadı.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
