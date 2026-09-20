@@ -1052,8 +1052,8 @@ const List<GameEvent> kLifeStageEvents = <GameEvent>[
       EventChoice(
         id: 'uzat',
         label: 'Eğilip uzat',
-        resultText: 'Topu eline verdin. "Teşekkür ederim amca" dedi; '
-            'o kelimeye alışmak zaman aldı.',
+        resultText: 'Topu eline verdin. Teşekkür ederken kullandığı hitap '
+            'yaşını sana hatırlattı; alışmak zaman aldı.',
         happiness: 2,
       ),
     ],
