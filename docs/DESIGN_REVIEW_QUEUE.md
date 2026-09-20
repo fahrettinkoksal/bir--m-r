@@ -679,5 +679,33 @@ payı yeniden eklenmesin (oyuncunun kararı sonucu belirlesin).
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
+### Q-053 — Paylaşım sınırının kapsamı
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/domain/social/social_engine.dart`. **Bağlantılı:** Q-050.
+
+**Sorun:** Yıllık paylaşım sayacı bütün platformlar için ortaktı; Instagram'da
+sınıra ulaşmak YouTube'u da kapatıyordu. Sayaç platform başına ayrıldı.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- Her platformun kendi yıllık sınırı var: yaş başına **6 paylaşım**.
+- Sınır **platformun toplamı** üzerinden işliyor; aynı platformdaki farklı
+  içerik türleri aynı sayacı paylaşıyor.
+- Sayaç hesabın paylaşım geçmişinden okunuyor, ayrı bir alanda tutulmuyor.
+
+**Karar soruları:**
+1. Sınır platform başına 6 olarak mı kalsın? Üç hesabı olan oyuncu yılda 18
+   paylaşım yapabiliyor; bu çok mu?
+2. İçerik türü başına ayrı sınır olsun mu (ör. vlog 2, kısa video 3), yoksa
+   platform toplamı yeterli mi?
+3. Platformlar arasında ortak bir "zaman/enerji" kaynağı gelirse sınır ona mı
+   bağlansın?
+4. Sınır yaşa göre değişsin mi (öğrenciyken az, tam zamanlı içerik üreticisi
+   olunca çok)?
+
+**Claude'un önerisi (yalnızca öneri):** Platform başına toplam sınır sade ve
+anlaşılır; içerik türü başına ayrı sınır eklemek yerine ileride ortak bir
+zaman kaynağı gelirse o kullanılsın.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
