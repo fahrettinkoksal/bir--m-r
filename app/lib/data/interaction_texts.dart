@@ -37,6 +37,69 @@ const List<String> _vakitGecirKardes = <String>[
       'izlediniz.',
 ];
 
+/// Bebeklik (0-3): oyun değil bakım; oyuncunun yaptığı gerçek şeyler.
+const List<String> _vakitGecirBebek = <String>[
+  '{ad} kucağında uyuyakaldı. Kolun uyuştu, kıpırdamadın.',
+  '{ad} ile yer minderinde oturdunuz; elindeki oyuncağı üç kez sana '
+      'verip üç kez geri aldı.',
+  "{ad} yemek yerken yarısı önlüğe gitti. İkiniz de güldünüz.",
+  '{ad} ilk kez senin adını andı; tam çıkmadı ama sayıldı.',
+];
+
+/// Okul çağı (4-12).
+const List<String> _vakitGecirCocukKucuk = <String>[
+  '{ad} ile parka gittiniz; salıncakta "bir kere daha" beş kere oldu.',
+  '{ad} ile yere kâğıt serip resim yaptınız. Senin çizdiğin ev eğri '
+      'çıktı, o beğendi.',
+  '{ad} ile ödevine oturdunuz; sonunda ikiniz de bir şey öğrendiniz.',
+  '{ad} ile bisiklet sürmeyi çalıştınız. Arkasından koştun, bıraktığın '
+      'anı fark etmedi.',
+];
+
+/// Ergenlik (13-17): yakınlık kurmak daha zor, sonuç daha kıymetli.
+const List<String> _vakitGecirErgen = <String>[
+  '{ad} ile arabada radyo açık, kimse konuşmadan gittiniz. İnerken '
+      '"iyiydi" dedi.',
+  '{ad} ile maç izlediniz. İki cümle kurdunuz, ikisi de gol anında.',
+  '{ad} ile market alışverişine çıktınız; sepete koyduğu şeyleri geri '
+      'koymadın.',
+];
+
+/// Eş: aynı hanede kurulan gündelik yakınlık.
+const List<String> _vakitGecirEs = <String>[
+  '{ad} ile akşam mutfakta kaldınız; bulaşık sonraya kaldı, sohbet '
+      'kalmadı.',
+  '{ad} ile balkonda oturup sokağı seyrettiniz. Kimse telefona bakmadı.',
+  '{ad} ile yıllar önce gittiğiniz yere bir kez daha gittiniz; orası '
+      'değişmiş, siz de.',
+];
+
+/// Ayrı evde yaşayan yakınla görüşmek bir **ziyarettir**.
+const List<String> _vakitGecirZiyaret = <String>[
+  '{ad} ile görüşmek için yol yaptın. Kapıda "geleceğini bilsem '
+      'hazırlanırdım" dedi.',
+  "{ad} için yola çıktın; çay demlendi, gitme vaktin iki kez ertelendi.",
+  '{ad} ile dışarıda buluştunuz. Aynı evde yaşamıyorsunuz, o yüzden '
+      'her cümle biraz daha özenliydi.',
+];
+
+const List<String> _sohbetEs = <String>[
+  '{ad} ile gün içinde olanları anlattınız; küçük şeylerdi, sıkılmadınız.',
+  '{ad} ile ileriye dair konuştunuz. Plan yapmadınız, ihtimalleri '
+      'konuşmak yetti.',
+  '{ad} bugün seni dinledi; söylediğin şeyi zaten fark etmiş ama '
+      'senden duymayı beklemiş.',
+];
+
+const List<String> _sohbetCocuk = <String>[
+  '{ad} okulda olanları anlattı; hikâyenin yarısı gerçek, yarısı '
+      'abartıydı, ikisi de güzeldi.',
+  '{ad} sana bir soru sordu, cevabını bilmiyordun. "Bakarız" dedin, '
+      'gerçekten baktınız.',
+  '{ad} ile korkularından konuştunuz; ciddiye alındığını anlayınca '
+      'rahatladı.',
+];
+
 const List<String> _sohbetGenel = <String>[
   '{ad} ile uzun uzun konuştunuz; söylemek isteyip söyleyemediğin şeyi '
       'sonunda söyledin.',
@@ -139,7 +202,34 @@ String interactionText({
   } else if (kind == InteractionKind.paraIste) {
     pool = _paraIsteKabul;
   } else if (kind == InteractionKind.sohbet) {
-    pool = _sohbetGenel;
+    // Sohbet de kişiye göre değişir: eşle konuşmakla çocukla konuşmak
+    // aynı şey değildir.
+    if (person.relation == RelationType.es) {
+      pool = _sohbetEs;
+    } else if (person.relation == RelationType.cocuk && person.age <= 12) {
+      pool = _sohbetCocuk;
+    } else {
+      pool = _sohbetGenel;
+    }
+  } else if (person.relation == RelationType.es) {
+    pool = _vakitGecirEs;
+  } else if (person.relation == RelationType.cocuk) {
+    // Çocukla yapılan etkinlik **çocuğun yaşına** göre seçilir.
+    if (person.age <= 3) {
+      pool = _vakitGecirBebek;
+    } else if (person.age <= 12) {
+      pool = _vakitGecirCocukKucuk;
+    } else if (person.age <= 17) {
+      pool = _vakitGecirErgen;
+    } else if (!person.inPlayerHousehold) {
+      pool = _vakitGecirZiyaret;
+    } else {
+      pool = _vakitGecirGenel;
+    }
+  } else if (!person.inPlayerHousehold && playerAge >= 18) {
+    // Ayrı evde yaşayan yakınla görüşmek ziyarettir; aynı evdekiyle
+    // kurulan gündelik temasla aynı bağlamda anlatılmaz.
+    pool = _vakitGecirZiyaret;
   } else if (person.relation == RelationType.kardes) {
     pool = _vakitGecirKardes;
   } else if (_buyukler.contains(person.relation)) {

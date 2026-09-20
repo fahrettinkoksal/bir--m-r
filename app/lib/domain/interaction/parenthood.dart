@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/event_pool.dart';
 import '../../data/name_pool.dart';
 import '../generation/random_util.dart';
+import '../models/education.dart';
 import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../models/life_log.dart';
@@ -185,6 +186,18 @@ class Parenthood {
       state: next,
       outcome: FamilyOutcome(applied: true, text: metin),
     );
+  }
+
+  /// Çocuğun yaşına karşılık gelen okul kademesi.
+  ///
+  /// Oyuncunun okul sistemi **kopyalanmaz**: çocuk için yalnızca kademe
+  /// bilgisi tutulur, sınav ve tercih akışı yoktur. Yaş aralıkları
+  /// `prototypeOnly`'dir (Q-064).
+  static SchoolLevel? schoolLevelForAge(int age) {
+    if (age >= 6 && age <= 9) return SchoolLevel.ilkokul;
+    if (age >= 10 && age <= 13) return SchoolLevel.ortaokul;
+    if (age >= 14 && age <= 17) return SchoolLevel.lise;
+    return null;
   }
 
   /// Hanede bakılan (gideri oyuncuya ait) çocuklar.

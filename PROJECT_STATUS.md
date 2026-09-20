@@ -350,6 +350,17 @@ kayıtlarda bulunmayan bozuk kaydın sessizce yüklenmesi. Ortak tutarlılık
 denetimi (`test/support/invariants.dart`) 200 aile hayatında her yıl
 çalıştırılıyor.
 
+**Paket 2 — aile hayatı ve çocuk etkileşimleri (uygulandı):** 13 yeni aile
+olayı (bebeklik, okulun ilk günü, karne, okul sorunu, söz verme, ergenlik,
+meslek seçimi, evden ayrılma, eşle tartışma/anma/iş kararı, ziyaret). Üç
+karar zinciri geçmişi hatırlıyor: okulun ilk günündeki destek ergenlikte,
+verilen söz yıllar sonra, eşle konuşulan gece ileride. Olay koşullarına
+**kişinin kendi yaşı** ve **hane dışında olma** eklendi; çocuk olayları
+çocuğun yaşına bağlanıyor. Çocuğun okul kademesi yaşıyla ilerliyor
+(22 yaşındaki çocuk "ilkokul öğrencisi" görünmüyor) ve oyuncunun okul
+arayüzü kopyalanmıyor. Etkileşim metinleri eşe, çocuğun yaşına ve kişinin
+hane durumuna göre değişiyor (ayrı evde yaşayanla görüşmek ziyaret).
+
 Kayıt biçimi **sürüm 16**. **Kuşak devamı (E3) kodlanmadı**: hangi kişilerin
 ve varlıkların yeni kuşağa taşınacağı karar bekliyor — `docs/GENERATION_PROPOSAL.md`
 ve kuyrukta **Q-062**. Evlilik/çocuk ayrıntıları **Q-063** ve **Q-064**

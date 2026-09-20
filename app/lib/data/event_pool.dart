@@ -35,6 +35,19 @@ abstract final class StoryFlags {
 
   /// Çocuk sahibi olma izi (Paket E2).
   static const String cocukSahibi = 'cocuk_sahibi';
+
+  /// Ebeveynlik izleri (Paket 2). Geçmiş kararlar ileride hatırlanır.
+  static const String cocukIlkGunDestek = 'cocuk_ilk_gun_destek';
+  static const String cocukIlkGunYalniz = 'cocuk_ilk_gun_yalniz';
+  static const String cocugaSozVerildi = 'cocuga_soz_verildi';
+  static const String cocugaSozTutuldu = 'cocuga_soz_tutuldu';
+  static const String cocugaSozUnutuldu = 'cocuga_soz_unutuldu';
+  static const String cocukKendiSecti = 'cocuk_kendi_secti';
+  static const String bebekBakimiPaylasildi = 'bebek_bakimi_paylasildi';
+
+  /// Evlilik izleri (Paket 2).
+  static const String esleKonusuldu = 'esle_konusuldu';
+  static const String esleSusuldu = 'esle_susuldu';
 }
 
 /// Hikâyede kimliği sabitlenen kişi rolleri.
@@ -44,6 +57,14 @@ abstract final class StoryFlags {
 abstract final class StoryRoles {
   /// Teneffüste alay edilen ve savunulan/savunulmayan okul arkadaşı.
   static const String alayEdilenArkadas = 'alay_edilen_arkadas';
+
+  /// Okulun ilk gününde yanında olunan (ya da olunmayan) çocuk.
+  ///
+  /// Birden fazla çocuk varsa devam olayları **aynı çocukla** kurulur.
+  static const String ilkOkulCocugu = 'ilk_okul_cocugu';
+
+  /// Kendisine bir söz verilen çocuk.
+  static const String sozVerilenCocuk = 'soz_verilen_cocuk';
 }
 
 /// Sahip olunan varlıklar. Sahip olunmayan varlık için olay çıkmaz.
@@ -962,6 +983,490 @@ const List<GameEvent> kEventPool = <GameEvent>[
             'kızmadı; sen kendine kızdın.',
         happiness: -2,
         charisma: -1,
+      ),
+    ],
+  ),
+  // =====================================================================
+  // Aile hayatı: eş ve çocuklar (Paket 2)
+  //
+  // Bu olaylar **gerçek kayıtlara** bağlıdır: eşi olmayan oyuncuya eş
+  // olayı, çocuğu olmayana çocuk olayı çıkmaz. Çocuk olayları çocuğun
+  // kendi yaşına göre seçilir (personMinAge/personMaxAge).
+  // =====================================================================
+
+  // --- Bebeklik ----------------------------------------------------------
+  GameEvent(
+    id: 'bebek_gece_aglamasi',
+    category: EventCategory.aile,
+    text: 'Gece yarısı {sahipk} {kisi} ağlıyor. Yorgunsun, yarın da erken '
+        'kalkacaksın.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMaxAge: 2,
+      requireSameHousehold: true,
+    ),
+    repeatable: true,
+    minAgeGap: 2,
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'kucagina_al',
+        label: 'Kucağına al, sabaha kadar dolaş',
+        resultText: 'Odanın içinde yavaşça yürüdün. Bir süre sonra ağlama '
+            'kesildi, omzunda uyudu. Sen uyuyamadın.',
+        happiness: 3,
+        health: -2,
+        bond: 8,
+      ),
+      EventChoice(
+        id: 'sirayla',
+        label: 'Eşinle sırayla kalkmayı konuş',
+        resultText: 'Bu gece sen, yarın o. Konuşunca ikiniz de rahatladı; '
+            'bebek de sırayı fark etmedi.',
+        happiness: 2,
+        bond: 4,
+        addFlags: <String>{StoryFlags.bebekBakimiPaylasildi},
+      ),
+    ],
+  ),
+
+  // --- Okulun ilk günü: ileride hatırlanacak karar -----------------------
+  GameEvent(
+    id: 'cocuk_ilk_okul_gunu',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} bugün okula başlıyor. Okul bahçesinde elini '
+        'tutuyor ve bırakmak istemiyor. İşe de geç kalıyorsun.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMinAge: 6,
+      personMaxAge: 7,
+    ),
+    weight: 8,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'kal',
+        label: 'Zil çalana kadar yanında kal',
+        resultText: 'Zil çalana kadar bahçede durdun. Sıraya girerken bir '
+            'kez daha döndü, el salladı. İşe geç kaldın, kimse ölmedi.',
+        happiness: 4,
+        bond: 10,
+        money: -500,
+        addFlags: <String>{StoryFlags.cocukIlkGunDestek},
+        rememberPersonAs: StoryRoles.ilkOkulCocugu,
+      ),
+      EventChoice(
+        id: 'birak',
+        label: 'Öğretmene teslim edip işe git',
+        resultText: 'Öğretmenin elini tuttu, sen kapıdan çıktın. Akşam '
+            'anlattıklarının hepsi güzeldi ama ilk cümlesi '
+            '"beni bırakıp gittin" oldu.',
+        happiness: -3,
+        bond: -4,
+        addFlags: <String>{StoryFlags.cocukIlkGunYalniz},
+        rememberPersonAs: StoryRoles.ilkOkulCocugu,
+      ),
+    ],
+  ),
+
+  // --- Okul hayatı -------------------------------------------------------
+  GameEvent(
+    id: 'cocuk_karne_gunu',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} karnesiyle geldi. Kapıda duruyor, karneyi '
+        'arkasında tutuyor.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMinAge: 7,
+      personMaxAge: 17,
+    ),
+    repeatable: true,
+    minAgeGap: 3,
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'kutla',
+        label: 'Notlara bakmadan sarıl',
+        resultText: 'Önce sarıldın, sonra baktın. Karnede iki zayıf vardı '
+            'ama o gün konuşulan konu bu olmadı.',
+        happiness: 4,
+        bond: 8,
+      ),
+      EventChoice(
+        id: 'incele',
+        label: 'Tek tek incele',
+        resultText: 'Ders ders konuştunuz. Bazı yerlerde haklıydın, '
+            'bazı yerlerde karşındaki yedi yaşındaydı.',
+        intelligence: 2,
+        bond: -2,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'cocuk_okul_sorunu',
+    category: EventCategory.aile,
+    text: 'Okuldan aradılar: {sahipk} {kisi} teneffüste bir tartışmaya '
+        'karışmış. Öğretmen seni bekliyor.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMinAge: 8,
+      personMaxAge: 16,
+    ),
+    repeatable: true,
+    minAgeGap: 4,
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'once_dinle',
+        label: 'Önce çocuğunu dinle',
+        resultText: 'Eve dönerken anlattı. Haklı olduğu bir yer vardı, '
+            'haksız olduğu iki yer. İkisini de konuştunuz.',
+        happiness: 2,
+        bond: 6,
+        intelligence: 1,
+      ),
+      EventChoice(
+        id: 'ogretmene_hak_ver',
+        label: 'Öğretmenin yanında ona çık',
+        resultText: 'Öğretmenin önünde azarladın. Mesele orada kapandı; '
+            'eve kadar tek kelime konuşulmadı.',
+        happiness: -2,
+        bond: -7,
+      ),
+    ],
+  ),
+
+  // --- Söz verme zinciri: ileride hatırlanır ------------------------------
+  GameEvent(
+    id: 'cocuk_bisiklet_istegi',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} vitrindeki bisikletin önünde durdu. Bir şey '
+        'istemiyor, sadece bakıyor.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMinAge: 6,
+      personMaxAge: 12,
+      forbiddenFlags: <String>{StoryFlags.cocugaSozVerildi},
+    ),
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'simdi_al',
+        label: 'Bugün al',
+        resultText: 'Kutusuyla eve taşıdınız. Akşam sokakta iki tur attı, '
+            'üçüncüde düştü, dördüncüde yine bindi.',
+        happiness: 5,
+        bond: 10,
+        money: -9000,
+      ),
+      EventChoice(
+        id: 'soz_ver',
+        label: 'Doğum gününde alacağına söz ver',
+        resultText: 'Söz verdin. Elini sıktı, çok ciddiydi. Bu sözün '
+            'tutulup tutulmadığını unutmayacak.',
+        happiness: 1,
+        bond: 3,
+        addFlags: <String>{StoryFlags.cocugaSozVerildi},
+        rememberPersonAs: StoryRoles.sozVerilenCocuk,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'cocuk_sozun_hatirlatilmasi',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} bir şey istemiyor ama takvime bakıp duruyor. '
+        'Geçen yıl verdiğin sözü ikiniz de hatırlıyorsunuz.',
+    requirement: EventRequirement(
+      personRole: StoryRoles.sozVerilenCocuk,
+      requiredFlags: <String>{StoryFlags.cocugaSozVerildi},
+      forbiddenFlags: <String>{
+        StoryFlags.cocugaSozTutuldu,
+        StoryFlags.cocugaSozUnutuldu,
+      },
+    ),
+    weight: 7,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'sozu_tut',
+        label: 'Sözünü tut',
+        resultText: 'Bisiklet kapının önünde duruyordu. "Unutmadın" dedi. '
+            'Unutmamıştın.',
+        happiness: 6,
+        bond: 12,
+        money: -9000,
+        addFlags: <String>{StoryFlags.cocugaSozTutuldu},
+      ),
+      EventChoice(
+        id: 'ertele',
+        label: 'Bu yıl da ertele',
+        resultText: 'Gerekçen geçerliydi. Bir şey demedi; bir daha da '
+            'sormadı.',
+        happiness: -4,
+        bond: -10,
+        addFlags: <String>{StoryFlags.cocugaSozUnutuldu},
+      ),
+    ],
+  ),
+
+  // --- Ergenlik: ilk okul günü kararının hatırlandığı yer ----------------
+  GameEvent(
+    id: 'cocuk_ergen_sessizlik',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} günlerdir odasından çıkmıyor. Kapı kapalı, '
+        'müzik açık.',
+    requirement: EventRequirement(
+      personRole: StoryRoles.ilkOkulCocugu,
+      personMinAge: 13,
+      personMaxAge: 17,
+      forbiddenFlags: <String>{StoryFlags.cocukIlkGunDestek},
+    ),
+    weight: 5,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'kapiyi_cal',
+        label: 'Kapıyı çal, ısrar etme',
+        resultText: 'Kapıyı araladın, "buradayım" dedin ve kapattın. '
+            'İki gün sonra kendisi geldi.',
+        happiness: 2,
+        bond: 6,
+      ),
+      EventChoice(
+        id: 'zorla',
+        label: 'Kapıyı aç ve konuşmasını iste',
+        resultText: 'Konuşmadı. Kapı bir kez daha kapandı, bu sefer '
+            'senin yüzüne.',
+        happiness: -3,
+        bond: -6,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'cocuk_ergen_guven',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} akşam mutfağa geldi, karşına oturdu. '
+        '"Bir şey anlatacağım" dedi. Yıllar önce okulun ilk günü elini '
+        'bırakmamıştın; bugün o kendi isteğiyle geldi.',
+    requirement: EventRequirement(
+      personRole: StoryRoles.ilkOkulCocugu,
+      personMinAge: 13,
+      personMaxAge: 18,
+      requiredFlags: <String>{StoryFlags.cocukIlkGunDestek},
+    ),
+    weight: 6,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'dinle',
+        label: 'Sonuna kadar dinle',
+        resultText: 'Uzun sürdü. Bir kez bile araya girmedin. Kalkarken '
+            '"iyi ki anlattım" dedi.',
+        happiness: 6,
+        bond: 12,
+      ),
+      EventChoice(
+        id: 'akil_ver',
+        label: 'Hemen ne yapması gerektiğini söyle',
+        resultText: 'Cümlesini bitirmeden çözümü söyledin. Başını salladı, '
+            'kalktı. Anlatacağı asıl şeyi anlatamadı.',
+        happiness: -1,
+        bond: -4,
+      ),
+    ],
+  ),
+
+  // --- Yetişkinlik ve evden ayrılma --------------------------------------
+  GameEvent(
+    id: 'cocuk_meslek_secimi',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} ne okuyacağına karar veremiyor. Senin ne '
+        'düşündüğünü soruyor ama cevabı çoktan aklında gibi.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMinAge: 17,
+      personMaxAge: 20,
+    ),
+    weight: 5,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'kendi_secsin',
+        label: 'Kendi seçmesini söyle',
+        resultText: 'Seçimi kendisi yaptı. Doğru mu bilmiyorsun ama '
+            'sorumluluğu da kendisinde.',
+        happiness: 3,
+        bond: 7,
+        addFlags: <String>{StoryFlags.cocukKendiSecti},
+      ),
+      EventChoice(
+        id: 'yonlendir',
+        label: 'Sağlam bir meslek öner',
+        resultText: 'Senin dediğini yazdı. Kazandı da. Yıllar sonra o '
+            'günü konuştuğunuzda ikiniz de farklı hatırlayacaksınız.',
+        happiness: 1,
+        intelligence: 1,
+        bond: -3,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'cocuk_evden_ayrilma',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} kendi evine çıkmaktan söz ediyor. Kutular '
+        'daha ortada yok ama karar verilmiş.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.cocuk},
+      personMinAge: 22,
+      personMaxAge: 25,
+      requireSameHousehold: true,
+    ),
+    weight: 6,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'destek',
+        label: 'Depozitoya destek ol',
+        resultText: 'Parayı sayarken "borcum olsun" dedi, "olmaz" dedin. '
+            'İlk gece seni aradı; ev sessizmiş.',
+        happiness: 3,
+        bond: 9,
+        money: -25000,
+      ),
+      EventChoice(
+        id: 'kendi_bilsin',
+        label: 'Kendi ayakları üstünde dursun',
+        resultText: 'Taşındı. İlk aylar zor geçti, sonra alıştı. '
+            'Aranızdaki mesafe bir süre ev kirasından fazla oldu.',
+        happiness: -2,
+        bond: -5,
+      ),
+    ],
+  ),
+
+  // --- Eş ----------------------------------------------------------------
+  GameEvent(
+    id: 'es_ile_tartisma',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} ile aynı konuyu üçüncü kez konuşuyorsunuz. '
+        'Konu aslında o konu değil, ikiniz de biliyorsunuz.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.es},
+      forbiddenFlags: <String>{StoryFlags.esleKonusuldu},
+    ),
+    weight: 4,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'konus',
+        label: 'Asıl meseleyi konuş',
+        resultText: 'Gece yarısını geçti. Mesele bitmedi ama ilk kez '
+            'doğru yerinden tutuldu.',
+        happiness: 3,
+        bond: 8,
+        addFlags: <String>{StoryFlags.esleKonusuldu},
+      ),
+      EventChoice(
+        id: 'sus',
+        label: 'Tartışmayı kapat',
+        resultText: 'Konuyu kapattın. Ev sessizleşti; sessizlik de bir '
+            'cevaptır.',
+        happiness: -3,
+        bond: -6,
+        addFlags: <String>{StoryFlags.esleSusuldu},
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'es_ile_eski_konusma',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} yıllar önce oturup konuştuğunuz o geceyi '
+        'hatırlattı: "O gün kaçmasaydın bugün burada olmazdık."',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.es},
+      requiredFlags: <String>{StoryFlags.esleKonusuldu},
+    ),
+    repeatable: true,
+    minAgeGap: 8,
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'hatirla',
+        label: 'Sen de hatırla',
+        resultText: 'İkiniz de aynı geceyi farklı hatırlıyordunuz; '
+            'önemli olan kısmı aynıydı.',
+        happiness: 5,
+        bond: 7,
+      ),
+      EventChoice(
+        id: 'gec',
+        label: 'Konuyu değiştir',
+        resultText: 'Güldün, konuyu değiştirdin. O da üstelemedi.',
+        happiness: -1,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'es_is_karari',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} işini değiştirmeyi düşünüyor. Yeni iş daha '
+        'az güvenli ama gözleri parlıyor.',
+    requirement: EventRequirement(
+      livingRelations: <RelationType>{RelationType.es},
+      minAge: 25,
+    ),
+    repeatable: true,
+    minAgeGap: 10,
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'destekle',
+        label: 'Destekle',
+        resultText: 'İlk aylar zor geçti. Sonra eve dönerken yüzündeki '
+            'ifade değişti; o kadarı bile kârdı.',
+        happiness: 4,
+        bond: 9,
+        money: -12000,
+      ),
+      EventChoice(
+        id: 'karsi_cik',
+        label: 'Riski hatırlat',
+        resultText: 'Haklıydın, vazgeçti. Bazen haklı olmak yetmiyor.',
+        happiness: -2,
+        bond: -5,
+      ),
+    ],
+  ),
+
+  // --- Ziyaret: ayrı evde yaşayan yakınlar -------------------------------
+  GameEvent(
+    id: 'aile_ziyareti',
+    category: EventCategory.aile,
+    text: '{sahip} {kisi} haber vermeden kapıda: elinde poşet, '
+        '"yoldan geçiyordum" diyor.',
+    requirement: EventRequirement(
+      minAge: 18,
+      livingRelations: <RelationType>{
+        RelationType.anne,
+        RelationType.baba,
+        RelationType.kardes,
+        RelationType.cocuk,
+      },
+      requireOutsideHousehold: true,
+    ),
+    repeatable: true,
+    minAgeGap: 5,
+    weight: 3,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'sofra_kur',
+        label: 'Sofrayı kur, kalsın',
+        resultText: 'Akşam yemeği uzadı. Gitmeden önce mutfakta bir şeyleri '
+            'yerini değiştirdi; itiraz etmedin.',
+        happiness: 4,
+        bond: 8,
+        money: -800,
+      ),
+      EventChoice(
+        id: 'kisa_kes',
+        label: 'Kısa kes, işin var',
+        resultText: 'Çayını içti, kalktı. Kapıda "bir ara uğrarım" dedi; '
+            'uğramadı.',
+        happiness: -2,
+        bond: -4,
       ),
     ],
   ),
