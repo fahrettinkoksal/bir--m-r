@@ -9,6 +9,7 @@
 library;
 
 import '../../data/education_tracks.dart';
+import '../../domain/models/book_progress.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
@@ -51,6 +52,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'extraEventsThisAge': state.extraEventsThisAge,
       'education': _encodeEducation(state.education),
       'career': _encodeCareer(state.career),
+      'books': state.books.map(_encodeBook).toList(growable: false),
     };
 
 Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
@@ -69,6 +71,14 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       },
       'fame': p.fame,
       'wallet': p.wallet,
+      'hairStyle': p.hairStyle,
+    };
+
+Map<String, Object?> _encodeBook(BookProgress b) => <String, Object?>{
+      'bookId': b.bookId,
+      'pagesRead': b.pagesRead,
+      'finished': b.finished,
+      'startedAtAge': b.startedAtAge,
     };
 
 Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
@@ -261,6 +271,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     extraEventsThisAge: _int(json, 'extraEventsThisAge'),
     education: _decodeEducation(_map(json, 'education')),
     career: _decodeCareer(_map(json, 'career')),
+    books: List<BookProgress>.unmodifiable(
+      _list(json, 'books')
+          .map((Object? e) => _decodeBook(_asMap(e, 'books[]')))
+          .toList(growable: false),
+    ),
   );
 }
 
@@ -282,8 +297,16 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     ),
     fame: _intOrNull(json, 'fame'),
     wallet: _int(json, 'wallet'),
+    hairStyle: _stringOrNull(json, 'hairStyle'),
   );
 }
+
+BookProgress _decodeBook(Map<String, Object?> json) => BookProgress(
+      bookId: _string(json, 'bookId'),
+      pagesRead: _int(json, 'pagesRead'),
+      finished: _bool(json, 'finished'),
+      startedAtAge: _intOrNull(json, 'startedAtAge'),
+    );
 
 Person _decodePerson(Map<String, Object?> json) {
   final EmploymentStatus employment = _enumByName(

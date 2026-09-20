@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../data/activity_catalog.dart';
 import '../data/education_tracks.dart';
 import '../data/item_catalog.dart';
 import '../data/job_catalog.dart';
@@ -16,6 +17,7 @@ import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
 import '../domain/interaction/family_interactions.dart';
+import '../domain/activities/activity_engine.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
@@ -43,6 +45,7 @@ class GameController extends ChangeNotifier {
   final ItemActions _items = const ItemActions();
   final EducationPath _education = const EducationPath();
   final JobMarket _jobs = const JobMarket();
+  final ActivityEngine _activities = const ActivityEngine();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -423,6 +426,63 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final JobResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Aktiviteler (berber, spor salonu, kütüphane)
+  // =====================================================================
+
+  /// Mekânda şu an gerçekten yapılabilen eylemler.
+  List<ActivityAction> availableActivities(ActivityVenue venue) {
+    final GameState? current = _state;
+    if (current == null) return const <ActivityAction>[];
+    return _activities.availableActions(current, venue);
+  }
+
+  /// Eylemin neden kapalı olduğunu açıklar.
+  InteractionAvailability activityAvailability(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _activities.availability(current, action);
+  }
+
+  /// Berber veya spor salonu eylemini uygular.
+  ActivityOutcome? performActivity(ActivityAction action) => _runActivity(
+        (GameState current) => _activities.perform(
+          state: current,
+          action: action,
+          rng: _random,
+        ),
+      );
+
+  /// Yaşa uygun kitaplar.
+  List<BookInfo> availableBooks() {
+    final GameState? current = _state;
+    if (current == null) return const <BookInfo>[];
+    return _activities.availableBooks(current);
+  }
+
+  /// Kitabı açar.
+  ActivityOutcome? openBook(BookInfo book) => _runActivity(
+        (GameState current) => _activities.openBook(current, book),
+      );
+
+  /// Bir sayfa çevirir.
+  ActivityOutcome? turnBookPage(BookInfo book) => _runActivity(
+        (GameState current) => _activities.turnPage(current, book),
+      );
+
+  ActivityOutcome? _runActivity(ActivityResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ActivityResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
