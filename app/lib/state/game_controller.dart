@@ -22,7 +22,10 @@ import '../domain/activities/activity_engine.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/item_actions.dart';
+import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
+import '../domain/licensing/license_office.dart';
+import '../domain/models/pending_license_exam.dart';
 import '../domain/casino/roulette.dart';
 import '../domain/models/blackjack_game.dart';
 import '../domain/social/social_engine.dart';
@@ -55,6 +58,7 @@ class GameController extends ChangeNotifier {
   final SocialEngine _social = const SocialEngine();
   final Blackjack _blackjack = const Blackjack();
   final Roulette _roulette = const Roulette();
+  final LicenseOffice _licenses = const LicenseOffice();
 
   /// Kayıt servisi. `null` ise oyun yalnızca bellekte çalışır (testler).
   final SaveService? _saveService;
@@ -593,6 +597,52 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final SocialResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
+
+  // =====================================================================
+  // Ehliyet işlemleri
+  // =====================================================================
+
+  /// Cevap bekleyen ehliyet sınavı.
+  PendingLicenseExam? get pendingLicenseExam => _state?.pendingLicenseExam;
+
+  /// Sahip olunan ehliyetler.
+  Set<String> get licenses => _state?.licenses ?? const <String>{};
+
+  bool hasLicense(LicenseType type) => licenses.contains(type.id);
+
+  /// Başvuru şu an mümkün mü?
+  InteractionAvailability licenseAvailability(LicenseType type) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return _licenses.applicationAvailability(current, type);
+  }
+
+  /// Ehliyet başvurusu yapar; ücret bir kez alınır ve sınav açılır.
+  LicenseOutcome? applyForLicense(LicenseType type) => _runLicense(
+        (GameState current) => _licenses.apply(current, type, _random),
+      );
+
+  /// Sınav sorusunu cevaplar.
+  LicenseOutcome? answerLicenseExam(int optionIndex) => _runLicense(
+        (GameState current) => _licenses.answer(current, optionIndex),
+      );
+
+  /// Sınavdan vazgeçer.
+  LicenseOutcome? cancelLicenseExam() =>
+      _runLicense((GameState current) => _licenses.cancel(current));
+
+  LicenseOutcome? _runLicense(LicenseResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final LicenseResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();

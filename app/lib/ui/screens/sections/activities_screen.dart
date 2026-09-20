@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
+import '../../../data/license_catalog.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
@@ -11,6 +12,7 @@ import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
 import 'casino_pages.dart';
+import 'license_pages.dart';
 import 'social_pages.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
@@ -37,6 +39,7 @@ enum _ActivityPage {
   kutuphane,
   sosyalMedya,
   kumarhane,
+  ehliyet,
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
@@ -79,6 +82,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.ehliyet:
+        return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -154,6 +159,21 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 : '${state.totalFollowers} takipçi',
             icon: Icons.public_outlined,
             onTap: () => _go(_ActivityPage.sosyalMedya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Ehliyet işlemleri en erken başvuru yaşında görünür.
+        if (state.player.age >=
+            LicenseType.motosiklet.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Ehliyet İşlemleri',
+            subtitle: state.hasPendingLicenseExam
+                ? 'Devam eden bir sınavın var'
+                : state.licenses.isEmpty
+                    ? 'Motosiklet ve otomobil ehliyeti'
+                    : '${state.licenses.length} ehliyetin var',
+            icon: Icons.badge_outlined,
+            onTap: () => _go(_ActivityPage.ehliyet),
           ),
           const SizedBox(height: 10),
         ],
