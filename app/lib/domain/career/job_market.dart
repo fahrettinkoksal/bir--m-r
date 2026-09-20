@@ -1,22 +1,38 @@
 import 'dart:math';
 
+import '../../data/interview_catalog.dart';
 import '../../data/job_catalog.dart';
 import '../models/career.dart';
 import '../models/education.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
+import '../models/pending_interview.dart';
 
 class JobOutcome {
   const JobOutcome({
     required this.applied,
     required this.text,
     this.accepted = false,
+    this.interviewStarted = false,
+    this.correctAnswer,
+    this.explanation,
   });
 
   final bool applied;
   final String text;
+
+  /// İşe kabul edildi mi?
   final bool accepted;
+
+  /// Başvuru bir mülakat açtı mı?
+  final bool interviewStarted;
+
+  /// Yanlış cevaptan sonra gösterilen doğru seçenek.
+  final String? correctAnswer;
+
+  /// Doğru cevabın kısa açıklaması.
+  final String? explanation;
 }
 
 class JobResult {
@@ -47,7 +63,9 @@ class JobMarket {
   static const double prototypeOnlyMaxChance = 0.9;
 
   /// prototypeOnly: bir yaşta aynı işe yapılabilecek en fazla başvuru.
-  static const int prototypeOnlyMaxApplicationsPerAge = 3;
+  ///
+  /// Mülakat sorularının ezberlenip tekrar denenmesini sınırlar.
+  static const int prototypeOnlyMaxApplicationsPerAge = 2;
 
   /// Oyuncunun **başvurabileceği** işler.
   ///
@@ -119,53 +137,131 @@ class JobMarket {
         'Bu yıl bu işe yeterince başvurdun; seneye tekrar dene.',
       );
     }
+    if (state.hasPendingInterview) {
+      return const InteractionAvailability.blocked(
+        'Devam eden bir mülakatın var.',
+      );
+    }
+    if (questionsForJob(job.id).isEmpty) {
+      return const InteractionAvailability.blocked(
+        'Bu iş için mülakat soruları henüz yazılmadı.',
+      );
+    }
     return const InteractionAvailability.allowed();
   }
 
   int _applicationsThisAge(GameState state, JobType job) =>
       state.interactionCount(job.id, 'isBasvurusu');
 
-  /// Kabul olasılığı: koşullar sağlansa bile 1.0 değildir.
-  double acceptanceChance(GameState state, JobType job) {
-    double sans = prototypeOnlyBaseChance;
-    final EducationState egitim = state.education;
-    if (egitim.track != null && job.tracks.contains(egitim.track)) {
-      sans += prototypeOnlyEducationBonus;
-    }
-    if (egitim.universityFinished &&
-        job.programs.contains(egitim.universityProgramId)) {
-      sans += prototypeOnlyEducationBonus;
-    }
-    if (state.player.stats.intelligence >= job.minIntelligence + 15) {
-      sans += prototypeOnlyStatBonus;
-    }
-    if (state.player.stats.charisma >= job.minCharisma + 15) {
-      sans += prototypeOnlyStatBonus / 2;
-    }
-    return sans.clamp(0.05, prototypeOnlyMaxChance);
+  /// Bu yaşta bu soru kaç kez soruldu?
+  int _questionAskedThisAge(GameState state, InterviewQuestion q) =>
+      state.interactionCount(q.id, 'mulakat');
+
+  /// Mülakat sorusu seçer.
+  ///
+  /// Aynı yaşta daha önce sorulmamış bir soru varsa o tercih edilir;
+  /// böylece tekrar başvuruda aynı soru ezberlenmez.
+  InterviewQuestion _pickQuestion(
+    GameState state,
+    JobType job,
+    Random rng,
+  ) {
+    final List<InterviewQuestion> hepsi = questionsForJob(job.id);
+    final List<InterviewQuestion> sorulmamis = hepsi
+        .where((InterviewQuestion q) => _questionAskedThisAge(state, q) == 0)
+        .toList(growable: false);
+    final List<InterviewQuestion> havuz =
+        sorulmamis.isEmpty ? hepsi : sorulmamis;
+    return havuz[rng.nextInt(havuz.length)];
   }
 
-  /// İşe başvurur.
+  /// İşe başvurur ve **mülakatı açar**.
+  ///
+  /// Başvuru doğrudan kabul/ret ile sonuçlanmaz: önce mesleğe uygun kısa
+  /// bir soru sorulur. Başvuru sayacı burada artar, böylece mülakatı yarıda
+  /// bırakmak sınırı aşmaya yaramaz.
   JobResult apply(GameState state, JobType job, Random rng) {
     final InteractionAvailability check = applicationAvailability(state, job);
     if (!check.isAllowed) return _blocked(state, check.reason!);
 
-    // Başvuru sayacı her durumda artar: tekrar istismarı engellenir.
+    final InterviewQuestion soru = _pickQuestion(state, job, rng);
     final Map<String, int> counts = <String, int>{
       ...state.interactionCounts,
       GameState.interactionKey(job.id, 'isBasvurusu'):
           _applicationsThisAge(state, job) + 1,
+      GameState.interactionKey(soru.id, 'mulakat'):
+          _questionAskedThisAge(state, soru) + 1,
     };
-    final GameState basvurulmus = state.copyWith(
-      interactionCounts: Map<String, int>.unmodifiable(counts),
-    );
 
-    if (rng.nextDouble() >= acceptanceChance(state, job)) {
-      final String metin = '${job.name} başvurun olumsuz sonuçlandı. '
-          '"Şimdilik uygun bir pozisyonumuz yok" dediler.';
+    final String metin = '${job.name} için mülakata çağrıldın.';
+    return JobResult(
+      state: state.copyWith(
+        interactionCounts: Map<String, int>.unmodifiable(counts),
+        pendingInterview: PendingInterview(
+          jobId: job.id,
+          questionId: soru.id,
+          askedAtAge: state.player.age,
+        ),
+      ),
+      outcome: JobOutcome(
+        applied: true,
+        text: metin,
+        interviewStarted: true,
+      ),
+    );
+  }
+
+  /// Mülakat sorusunu cevaplar.
+  ///
+  /// Doğru cevap **ve** başvuru koşulları birlikte aranır: mülakatı doğru
+  /// cevaplamak, gerekli eğitimi olmayan birini uzman mesleğe sokmaz.
+  /// Cevap verildikten sonra mülakat kapanır; ikinci kez uygulanamaz.
+  JobResult answerInterview(GameState state, int optionIndex) {
+    final PendingInterview? mulakat = state.pendingInterview;
+    if (mulakat == null) {
+      return _blocked(state, 'Devam eden bir mülakat yok.');
+    }
+    final JobType? job = mulakat.job;
+    final InterviewQuestion? soru = mulakat.question;
+    if (job == null || soru == null) {
+      // Kayıt bozulmuş olabilir; mülakat kapatılır, iş verilmez.
       return JobResult(
-        state: _log(basvurulmus, metin),
+        state: state.copyWith(pendingInterview: null),
+        outcome: const JobOutcome(
+          applied: true,
+          text: 'Mülakat kaydı okunamadı, görüşme iptal edildi.',
+        ),
+      );
+    }
+    if (optionIndex < 0 || optionIndex >= soru.options.length) {
+      return _blocked(state, 'Geçersiz seçenek.');
+    }
+
+    final GameState kapali = state.copyWith(pendingInterview: null);
+    final bool dogru = optionIndex == soru.correctIndex;
+
+    // Koşullar cevap anında yeniden denetlenir.
+    final String engel = requirementReason(state, job);
+    if (engel.isNotEmpty || state.career.isEmployed) {
+      final String metin = '${job.name} başvurun sonuçlanmadı: '
+          '${state.career.isEmployed ? 'Zaten bir işin var.' : engel}';
+      return JobResult(
+        state: _log(kapali, metin),
         outcome: JobOutcome(applied: true, text: metin),
+      );
+    }
+
+    if (!dogru) {
+      final String metin = '${job.name} mülakatı olumsuz sonuçlandı. '
+          '"Teşekkür ederiz, sizi arayacağız" dediler.';
+      return JobResult(
+        state: _log(kapali, metin),
+        outcome: JobOutcome(
+          applied: true,
+          text: metin,
+          correctAnswer: soru.correctOption,
+          explanation: soru.explanation,
+        ),
       );
     }
 
@@ -173,17 +269,29 @@ class JobMarket {
         'İlk maaşın bir yıl sonra cebinde olacak.';
     return JobResult(
       state: _log(
-        basvurulmus.copyWith(
-          career: basvurulmus.career.copyWith(
+        kapali.copyWith(
+          career: kapali.career.copyWith(
             jobId: job.id,
-            startedAtAge: basvurulmus.player.age,
+            startedAtAge: kapali.player.age,
             // İşe girilen yıl için maaş ödenmez; ilk ödeme sonraki yaşta.
-            lastPaidAge: basvurulmus.player.age,
+            lastPaidAge: kapali.player.age,
           ),
         ),
         metin,
       ),
       outcome: JobOutcome(applied: true, text: metin, accepted: true),
+    );
+  }
+
+  /// Mülakatı yarıda bırakır. Başvuru hakkı harcanmış sayılır.
+  JobResult cancelInterview(GameState state) {
+    if (!state.hasPendingInterview) {
+      return _blocked(state, 'Devam eden bir mülakat yok.');
+    }
+    const String metin = 'Mülakattan vazgeçtin.';
+    return JobResult(
+      state: _log(state.copyWith(pendingInterview: null), metin),
+      outcome: const JobOutcome(applied: true, text: metin),
     );
   }
 

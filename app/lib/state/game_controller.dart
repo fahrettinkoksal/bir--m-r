@@ -29,6 +29,7 @@ import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
 import '../domain/models/interaction.dart';
 import '../domain/models/owned_item.dart';
+import '../domain/models/pending_interview.dart';
 import '../domain/models/person.dart';
 
 /// Uygulamanın tek durum sahibi.
@@ -407,6 +408,54 @@ class GameController extends ChangeNotifier {
     if (current == null) return const <JobType, String>{};
     return _jobs.lockedJobs(current);
   }
+
+  /// Oyuncunun üniversite sınav puanı; hesaplanmadıysa `null`.
+  int? get universityExamScore => _state?.education.universityExamScore;
+
+  /// Bir bölüme başvururken geçerli olan etkin puan (alan uyumu dahil).
+  int programScore(UniversityProgram program) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _education.effectiveScore(current, program);
+  }
+
+  /// Bölümün tercih ettiği alandan geliniyorsa eklenen puan.
+  int programTrackBonus(UniversityProgram program) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _education.trackBonusFor(current, program);
+  }
+
+  /// Başvurunun neden mümkün olmadığı; uygunsa boş metin.
+  String programBlockReason(UniversityProgram program) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return _education.eligibilityReason(current, program);
+  }
+
+  /// Sınav puanı eksikse hesaplar (eski kayıtlar ve yeni mezunlar için).
+  void ensureUniversityExamScore() {
+    final GameState? current = _state;
+    if (current == null) return;
+    final GameState next = _education.ensureUniversityExamScore(current, _random);
+    if (identical(next, current)) return;
+    _state = next;
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Cevap bekleyen mülakat.
+  PendingInterview? get pendingInterview => _state?.pendingInterview;
+
+  /// Mülakat sorusunu cevaplar.
+  JobOutcome? answerInterview(int optionIndex) => _runJob(
+        (GameState current) => _jobs.answerInterview(current, optionIndex),
+      );
+
+  /// Mülakatı yarıda bırakır.
+  JobOutcome? cancelInterview() => _runJob(
+        (GameState current) => _jobs.cancelInterview(current),
+      );
 
   /// Başvurunun şu an mümkün olup olmadığı.
   InteractionAvailability jobApplicationAvailability(JobType job) {

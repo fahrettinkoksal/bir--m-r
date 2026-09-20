@@ -162,6 +162,23 @@ mevcut kitleye, karakter özelliklerine, geçmiş paylaşımlara ve şansa göre
 değişiyor — bazı paylaşımlar takipçi kaybettiriyor. **Ün** ancak gerçek bir
 kitle oluşunca açılıyor (D-027). Kayıt biçimi **sürüm 6**.
 
+## Puan görünürlüğü ve mülakatlı iş başvurusu (uygulandı)
+Üniversite başvuru ekranı artık oyuncunun **kendi puanını** gösteriyor:
+lise bitince bir kez hesaplanıp kaydedilen **üniversite sınav puanı**, 8.
+sınıftaki **lise yerleştirme puanından ayrı bir isimle** sunuluyor; her
+bölüm kartında "Senin puanın: X / Taban puan: Y" karşılaştırması ve
+uygun olmayan bölüm için gerekçe yazıyor. Başvuruda kullanılan puan
+ekranda yazan puanla aynı (rastgelelik yok). **Üniversite not ortalaması
+sistemi yok; uydurulmuyor** — ekranda bu açıkça belirtiliyor.
+
+İşe başvuru artık doğrudan kabul/ret vermiyor: mesleğe uygun kısa bir
+**mülakat sorusu** açılıyor (her meslek için 3-5 özgün soru, tek doğru
+cevap). Doğru cevap **ve** nitelik koşulları birlikte aranıyor; yanlış
+cevapta doğru seçenek ve kısa açıklama gösteriliyor. Soru, seçenekler ve
+işe alma sonucu otomatik kayda giriyor; oyun kapanıp açılınca soru
+değişmiyor ve cevap iki kez uygulanmıyor. Aynı yaşta başvuru sayısı
+sınırlı ve aynı soru tekrarlanmıyor. Kayıt biçimi **sürüm 7**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

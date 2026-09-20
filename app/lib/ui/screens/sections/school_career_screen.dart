@@ -6,6 +6,7 @@ import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
+import '../../widgets/interview_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'education_career_pages.dart';
 
@@ -291,10 +292,23 @@ class _CareerViewState extends State<_CareerView> {
               (label: 'Durum', value: egitim.label),
               if (egitim.trackInfo != null)
                 (label: 'Lise alanı', value: egitim.trackInfo!.label),
-              if (egitim.program != null)
-                (label: 'Bölüm', value: egitim.program!.name),
               if (egitim.placementScore != null)
-                (label: 'Yerleştirme puanı', value: '${egitim.placementScore}'),
+                (
+                  label: 'Lise yerleştirme puanı',
+                  value: '${egitim.placementScore}',
+                ),
+              if (egitim.universityExamScore != null)
+                (
+                  label: 'Üniversite sınav puanı',
+                  value: '${egitim.universityExamScore}',
+                ),
+              if (egitim.program != null)
+                (
+                  label: egitim.universityFinished
+                      ? 'Mezun olduğu bölüm'
+                      : 'Okuduğu bölüm',
+                  value: egitim.program!.name,
+                ),
             ],
           )
         else
@@ -313,6 +327,16 @@ class _CareerViewState extends State<_CareerView> {
             subtitle: 'Üniversiteye başvur veya iş hayatına gir',
             icon: Icons.alt_route_outlined,
             onTap: () => _go(_CareerPage.mezuniyetSonrasi),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Cevap bekleyen mülakat varsa en üstte.
+        if (state.hasPendingInterview) ...<Widget>[
+          MenuRow(
+            title: 'Mülakata devam et',
+            subtitle: state.pendingInterview?.job?.name ?? '',
+            icon: Icons.record_voice_over_outlined,
+            onTap: () => InterviewSheet.show(context),
           ),
           const SizedBox(height: 10),
         ],

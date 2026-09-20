@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 6;
+const int kSaveFormatVersion = 7;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -60,7 +60,18 @@ abstract final class SaveMigrations {
     if (from <= 3) guncel = _v3ToV4(guncel);
     if (from <= 4) guncel = _v4ToV5(guncel);
     if (from <= 5) guncel = _v5ToV6(guncel);
+    if (from <= 6) guncel = _v6ToV7(guncel);
     return guncel;
+  }
+
+  /// Sürüm 6 → 7: üniversite sınav puanı ve bekleyen mülakat eklendi.
+  ///
+  /// Eski kayıtlarda bu alanlar yoktur. Sınav puanı boş kalır ve başvuru
+  /// ekranı açıldığında **bir kez** hesaplanır; oyuncunun hayatı korunur.
+  static Map<String, Object?> _v6ToV7(Map<String, Object?> body) {
+    // Yeni alanların ikisi de boş olabilir; okuyucu `null` durumunu zaten
+    // ele aldığı için ek bir dönüştürme gerekmez.
+    return body;
   }
 
   /// Sürüm 5 → 6: sosyal medya hesapları eklendi.
