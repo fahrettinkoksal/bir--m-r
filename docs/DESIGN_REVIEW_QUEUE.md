@@ -1296,6 +1296,12 @@ uydurulmadı; `DECISIONS.md`'ye yeni kural yazılmadı.
 5. Olayların yaş evrelerine dağılımı (bebeklik 5, çocukluk 4, ergenlik 4,
    genç yetişkinlik 6, 30+ 14) doğru ağırlıkta mı?
 
+**Paket F1 güncellemesi (ölçüm, karar değil):** katalog **113 olaya**
+çıktı, yaş başına oran **%98,5** oldu; 80 yaş üstündeki boşluk kapatıldı
+(%63/%47/%34/%30 → %93/%84/%81/%83). Bu, 1. sorunun cevabını daha da
+aciliyetli hâle getiriyor: **neredeyse her yıl bir olay çıkıyor.** Sessiz
+yıl istenirse bu bir ayar meselesidir, içerik silmeyi gerektirmez.
+
 **Claude'un önerisi (yalnızca öneri):** Sessiz yıllar oyunun temposu için
 iyi olabilir; %95 yerine %75-85 hedeflenip aradaki fark "yaş aldın" özet
 ekranıyla doldurulabilir. Bu bir tasarım kararıdır, değiştirilmedi.
