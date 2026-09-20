@@ -46,10 +46,6 @@ class _CasinoPageState extends State<CasinoPage> {
         break;
     }
 
-    final int kalan = (CasinoRules.prototypeOnlyYearlyWagerLimit -
-            state.wagerThisAge)
-        .clamp(0, CasinoRules.prototypeOnlyYearlyWagerLimit);
-
     return SectionScaffold(
       title: 'Kumarhane',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',
@@ -79,9 +75,11 @@ class _CasinoPageState extends State<CasinoPage> {
         const SizedBox(height: 12),
         InfoPanel(
           icon: Icons.savings_outlined,
-          text: 'Bu yıl oynadığın toplam bahis: ${state.wagerThisAge} ₺. '
-              'Yıllık sınıra kalan: $kalan ₺. '
-              'Bahis en az ${CasinoRules.prototypeOnlyMinBet} ₺, '
+          text: 'Bu yıl oynadığın toplam bahis: ${state.wagerThisAge} ₺.'
+              '${state.settings.wagerLimitPerAge == null ? '' : ' '
+                  'Kendi yıllık sınırın: '
+                  '${state.settings.wagerLimitPerAge} ₺.'}'
+              ' Bahis en az ${CasinoRules.prototypeOnlyMinBet} ₺, '
               'en fazla ${CasinoRules.prototypeOnlyMaxBet} ₺.',
         ),
       ],

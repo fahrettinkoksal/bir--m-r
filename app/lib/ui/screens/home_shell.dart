@@ -8,6 +8,7 @@ import '../widgets/character_header.dart';
 import '../widgets/event_dialog.dart';
 import 'life_screen.dart';
 import 'life_summary_screen.dart';
+import 'past_lives_screen.dart';
 import 'sections/activities_screen.dart';
 import 'sections/assets_screen.dart';
 import 'sections/relationships_screen.dart';
@@ -40,6 +41,9 @@ class _HomeShellState extends State<HomeShell> {
 
   /// Aynı anda yalnızca tek olay penceresi açılır (D-021).
   bool _eventVisible = false;
+
+  /// Hayat tamamlandığında Geçmiş Hayatlar arşivi açık mı?
+  bool _archiveVisible = false;
 
   void _showPendingEvent(ActiveEvent event) {
     if (_eventVisible) return;
@@ -120,7 +124,17 @@ class _HomeShellState extends State<HomeShell> {
     if (state.deceased) {
       return Scaffold(
         body: SafeArea(
-          child: LifeSummaryScreen(onNewLife: _confirmNewLife),
+          child: _archiveVisible
+              ? PastLivesScreen(
+                  lives: state.pastLives,
+                  backLabel: 'Hayat özeti',
+                  onBack: () => setState(() => _archiveVisible = false),
+                )
+              : LifeSummaryScreen(
+                  onNewLife: _confirmNewLife,
+                  onShowArchive: () =>
+                      setState(() => _archiveVisible = true),
+                ),
         ),
       );
     }

@@ -178,7 +178,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           const SizedBox(height: 10),
         ],
         // Kumarhane yetişkin yaşında açılır; öncesinde menüde yoktur.
-        if (state.player.age >= CasinoRules.prototypeOnlyMinAge) ...<Widget>[
+        if (state.settings.casinoEnabled &&
+            state.player.age >= CasinoRules.prototypeOnlyMinAge) ...<Widget>[
           MenuRow(
             title: 'Kumarhane',
             subtitle: state.hasOpenHand

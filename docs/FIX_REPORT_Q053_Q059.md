@@ -1,10 +1,15 @@
 # Tespit raporu — Q-053–Q-059 kararlarına göre PR #14–#18
 
 Bu rapor, **D-031…D-038** kararları alındıktan sonra PR #14–#18'deki kodun
-tarandığı sonuçları içerir. **Bu turda kod değiştirilmedi**; burada listelenen
-maddeler ayrı bir düzeltme PR'ında ele alınacaktır.
+tarandığı sonuçları içerir.
 
 Taranan kod: `claude/paket5-olum-miras` (PR #18) — beş paketin tamamı.
+
+> **Durum güncellemesi:** Faho'nun "devam et" onayıyla bu maddelerin tamamı
+> `claude/duzeltmeler-d031-d038` dalında **uygulandı**. Her maddenin altında
+> ne yapıldığı yazılıdır. Sayısal değerler (gider tutarları, ölüm
+> olasılıkları, bahis sınırları) hâlâ **geçicidir** ve Faho'nun onayına
+> bağlıdır.
 
 Öncelik ölçütü:
 - **A — Veri kaybı riski**
@@ -29,7 +34,12 @@ kalıcı olarak kayboluyor**. Şu an ekranda "Bu hayatın kaydı silinir. Devam
 edilsin mi?" onayı var, yani sessiz silme değil; ama D-037'nin istediği arşiv
 altyapısı yok.
 
-**Önerilen düzeltme (ayrı PR):** Kayıt dosyasında tek aktif hayatın yanında
+**UYGULANDI.** `GameState.pastLives` + `LifeSummary` eklendi; `startNewLife`
+ve `clearLife` tamamlanan hayatın özetini **önce arşive yazıyor**. Hayat özeti
+ekranında "Geçmiş Hayatlar" düğmesi ve ayrı bir arşiv ekranı var. Kayıt
+biçimi sürüm 12.
+
+**Özgün öneri:** Kayıt dosyasında tek aktif hayatın yanında
 `pastLives` listesi tutan bir arşiv alanı (özet verisi: ad, ölüm yaşı ve sebebi,
 eğitim/meslek, varlık özeti, günlükten seçilmiş satırlar). Yeni hayat
 başlatılırken tamamlanan hayatın özeti **önce arşive yazılır**, sonra aktif kayıt
@@ -49,7 +59,11 @@ sınav ortasında kapatılırsa **aynı sorulardan devam edilir**."
 `answer(...)` tek cevapla sınavı sonuçlandırıyor.
 `app/lib/ui/widgets/license_exam_sheet.dart` tek soru gösteriyor.
 
-**Önerilen düzeltme:** `PendingLicenseExam` üç soruluk kimlik listesi + verilen
+**UYGULANDI.** Sınav 3 soru soruyor, en az 2 doğru ile geçiliyor; sonuçta üç
+sorunun da doğru cevabı ve açıklaması listeleniyor. Sorular ve verilen
+cevaplar kayda yazılıyor, yarıda kalan sınav aynı sorulardan sürüyor.
+
+**Özgün öneri:** `PendingLicenseExam` üç soruluk kimlik listesi + verilen
 cevapların listesini tutsun (kayıt sürümü artar). `answer(index)` cevabı sıraya
 ekleyip son soruda sonucu hesaplasın (≥2 doğru = geçti). Sonuç ekranı üç sorunun
 doğru cevabını ve açıklamasını listelesin. Soru havuzları zaten yeterli
@@ -63,7 +77,11 @@ sınırı kullanılacak."
 **Kod:** `app/lib/data/shop_catalog.dart`:
 `motosiklet_ekonomik` 16, `otomobil_ikinci_el/ekonomik/orta/luks` 17.
 
-**Önerilen düzeltme:** Araçların `minAge` değeri 18'e çekilsin. Aksesuarların
+**UYGULANDI.** Altı aracın da galeri yaşı 18. Aksesuarlar (kask 16, tavan
+bagajı 17) kararda geçmediği için değiştirilmedi — Faho'ya soru olarak
+kalıyor. Miras/hediye yoluyla küçük yaşta araç sahibi olmak serbest.
+
+**Özgün öneri:** Araçların `minAge` değeri 18'e çekilsin. Aksesuarların
 (kask 16, tavan bagajı 17) yaşı ayrı bir tercih; kararda geçmiyor, Faho'ya
 sorulabilir. Miras/hediye yoluyla küçük yaşta araç sahibi olmak **serbest
 kalmalı** (D-034) — bu yol zaten yaş kontrolüne tabi değil.
@@ -77,7 +95,11 @@ mutluluktan tek seferlik düşüş uygulanıyor (`Mortality.prototypeOnlyHappine
 sonrasında hiçbir şey bu düşüşü geri getirmiyor. Arka arkaya birkaç kayıp,
 mutluluğu kalıcı olarak dibe çekebilir.
 
-**Önerilen düzeltme:** Kaybı kalıcı değil, **azalan bir yas etkisi** olarak
+**UYGULANDI.** `GameState.grief` eklendi: kayıpta düşen mutluluk yas olarak
+saklanıyor ve her yıl kalanın üçte biri (en az 2 puan) mutluluğa geri
+dönüyor. Yas kalıcı ceza değil.
+
+**Özgün öneri:** Kaybı kalıcı değil, **azalan bir yas etkisi** olarak
 modelle: oyuncu durumunda `grief` (kalan yas puanı ve başlangıç yaşı) tutulsun;
 her yaş dönüşünde belirli oranda azalsın ve azalan kısım mutluluğa geri
 eklensin. Kayıt sürümü artar; sayısal değerler `prototypeOnly` kalır.
@@ -94,7 +116,11 @@ değerlerini tutuyor; boşanmış ebeveyn eş sayılmamalı.
 **Not:** Sevgili (`RelationType.sevgili`) mirasta **doğru biçimde** mirasçı
 sayılmıyor; bu yönüyle karara uygun.
 
-**Önerilen düzeltme:** Eş payı yalnızca `parentalStatus.birlikteMi` (evli veya
+**UYGULANDI.** Eş payı yalnızca ebeveynler evli/birlikteyken uygulanıyor;
+ayrı veya boşanmışsa nakit doğrudan çocuklara bölünüyor. Regresyon testi
+eklendi.
+
+**Özgün öneri:** Eş payı yalnızca `parentalStatus.birlikteMi` (evli veya
 birlikte) durumunda uygulansın; `ayri` ve `bosanmis` durumunda nakit doğrudan
 çocuklara bölünsün. Regresyon testi eklenmeli.
 
@@ -107,7 +133,12 @@ belirleyebilecek."
 zaman görünüyor. Oyuncunun belirleyebileceği bir limit yok; yalnızca sabit
 `prototypeOnlyYearlyWagerLimit` var.
 
-**Önerilen düzeltme:** Küçük bir ayarlar ekranı (kayıtta saklanan iki alan:
+**UYGULANDI.** Karakter başlığındaki dişli düğmesi Ayarlar penceresini
+açıyor: kumarhane açık/kapalı ve isteğe bağlı yıllık bahis limiti. Kapalıyken
+kumarhane menüde hiç görünmüyor ve masa açılmıyor. Kalan hak vurgusu nötr
+bilgiye çevrildi (C2).
+
+**Özgün öneri:** Küçük bir ayarlar ekranı (kayıtta saklanan iki alan:
 `casinoEnabled`, `playerWagerLimit`). Kapalıyken Aktiviteler menüsünde kumarhane
 **hiç görünmesin** (sahte düğme olmasın). Limit dolduğunda yalnızca nötr bir
 bilgi gösterilsin.
@@ -121,7 +152,13 @@ gideri yüklenmeyecek… maaşın tamamı otomatik birikmeyecek… giderler cüz
 Ölçüm raporu (`docs/BALANCE_REPORT.md`) bunun ekonomiyi nasıl cömertleştirdiğini
 gösteriyor: yazılımcı 2,5 yılda küçük daire alıyor.
 
-**Önerilen düzeltme (en büyük kalem, ayrı paket):** Yaş dönüşünde hane ve yaşam
+**UYGULANDI.** `LivingCosts`: çocukta 0, ailesinin yanında 45.000 ₺,
+bağımsız kirada 140.000 ₺, kendi evinde 90.000 ₺ (hepsi prototypeOnly).
+Yaş dönüşünde bir kez uygulanıyor, cüzdan eksiye düşmüyor, para yetmezse
+geçim sıkıntısı sayacı artıyor ve günlüğe açık satır yazılıyor. Varlıklar
+ekranında gider ve durum görünüyor. Ölçüm: `docs/BALANCE_REPORT.md` §4.
+
+**Özgün öneri (en büyük kalem, ayrı paket):** Yaş dönüşünde hane ve yaşam
 koşuluna göre hesaplanan yıllık gider; çocukta 0, ailesiyle yaşayan yetişkinde
 düşük, bağımsız yaşayanda yüksek. Para yetmezse cüzdan eksiye düşmesin;
 açık sonuç + genişletilebilir "geçim sıkıntısı" durumu. Bütün sayılar Faho
@@ -136,7 +173,10 @@ gösterilir" diyor; ancak `lib/ui` içinde `estate` alanını okuyan **hiçbir y
 yok**. Miras hesabı bu listeyi kullanıyor, oyuncu ise kişinin neye sahip
 olduğunu göremiyor.
 
-**Önerilen düzeltme:** Ya kişi detayında "Sahip oldukları" satırı eklensin
+**UYGULANDI.** Kişi detayında "Sahip oldukları" satırı eklendi ve kod
+açıklaması gerçeğe uyduruldu.
+
+**Özgün öneri:** Ya kişi detayında "Sahip oldukları" satırı eklensin
 (tercih edilen), ya da açıklama gerçeğe uydurulsun. Tercihi Faho versin.
 
 ### B8 — Kişilerin mal varlığı doğumda donuyor
@@ -147,7 +187,11 @@ listesine dayanmasın."
 **Kod:** `LifeGenerator._estateFor(...)` listeyi hayatın başında üretiyor ve bir
 daha değişmiyor; `wealth` de sabit.
 
-**Önerilen düzeltme (ayrı küçük paket):** NPC'lerin mal varlığı yıllar içinde
+**UYGULANDI.** Yetişkin NPC'ler her yıl küçük bir ihtimalle bir şey alıyor
+ya da elden çıkarıyor (ihtimaller ekonomik duruma bağlı, prototypeOnly).
+Miras artık doğumda donmuş listeye dayanmıyor.
+
+**Özgün öneri (ayrı küçük paket):** NPC'lerin mal varlığı yıllar içinde
 değişebilsin (iş/gelir durumuna göre küçük alım-satımlar). Kararda da "ayrı,
 küçük bir paketle genişlet" deniyor.
 
@@ -160,7 +204,11 @@ oluştur."
 "Evde sana bakabilecek bir yetişkin kalmadı" satırı yazıyor; oyun durumunda
 bunu temsil eden bir alan yok.
 
-**Önerilen düzeltme:** Kayıtta açık bir `careStatus` (ör. `aileYaninda`,
+**UYGULANDI.** `CareStatus` (ailesinin yanında / yakın akrabasının yanında /
+kurum bakımında) kayda yazılıyor ve karakter başlığında görünüyor. Sahte
+kişi üretilmiyor.
+
+**Özgün öneri:** Kayıtta açık bir `careStatus` (ör. `aileYaninda`,
 `yakinAkraba`, `kurumBakimi`) alanı; ilk sürümde yalnızca durum saklansın ve
 ekranda görünsün, ayrıntılı sistem sonra gelsin. **Sahte kişi üretilmemeli**
 (D-037/D-038) — mevcut kod bu yönüyle doğru.
@@ -174,7 +222,7 @@ ekranda görünsün, ayrıntılı sistem sonra gelsin. **Sahte kişi üretilmeme
 D-036 "çok ileri yaşlar olağan hâle gelmesin" diyor. Sayılar geçici; ayar
 Faho'nun onayına bağlı (`docs/BALANCE_REPORT.md`).
 
-### C2 — Kumarhanede "yıllık sınıra kalan" bilgisi
+### C2 — Kumarhanede "yıllık sınıra kalan" bilgisi — **düzeltildi**
 D-032 "limit dolunca daha fazla oynamaya teşvik eden mesaj gösterilmesin" diyor.
 Mevcut metin nötr ("Bu yıl oynadığın toplam bahis… Yıllık sınıra kalan…"), ancak
 kalan hakkı vurgulaması teşvik gibi okunabilir. Ayarlar/limit çalışmasıyla
@@ -184,7 +232,7 @@ birlikte gözden geçirilmeli.
 D-032: sınırlar maaş ve giderlerle birlikte dengelenecek. Yaşam gideri (B6)
 girmeden ayarlamak erken; B6 sonrası yeniden ölçülmeli.
 
-### C4 — Sosyal medyada yaş başına 6 paylaşım
+### C4 — Sosyal medyada yaş başına 6 paylaşım (değişiklik gerekmedi)
 D-031 bunu açıkça geçici bıraktı; şu an kodla uyumlu, düzeltme gerekmiyor.
 
 ### C5 — Meslekler arası fark

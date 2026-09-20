@@ -57,16 +57,23 @@ void main() {
     await tester.tap(find.byKey(const Key('license_apply_otomobil')));
     await tester.pumpAndSettle();
 
-    final LicenseQuestion soru = controller.pendingLicenseExam!.question!;
-    expect(find.text(soru.text), findsOneWidget);
+    final LicenseQuestion ilkSoru =
+        controller.pendingLicenseExam!.currentQuestion!;
+    expect(find.text(ilkSoru.text), findsOneWidget);
+    expect(find.byKey(const Key('license_progress')), findsOneWidget);
     expect(
       controller.state!.player.wallet,
       cuzdanOnce - prototypeOnlyExamFee(LicenseType.otomobil),
       reason: 'Ücret bir kez kesilmeli',
     );
 
-    await tester.tap(find.byKey(Key('license_option_${soru.correctIndex}')));
-    await tester.pumpAndSettle();
+    // Üç soru: hepsini doğru cevapla.
+    while (controller.pendingLicenseExam != null) {
+      final LicenseQuestion soru =
+          controller.pendingLicenseExam!.currentQuestion!;
+      await tester.tap(find.byKey(Key('license_option_${soru.correctIndex}')));
+      await tester.pumpAndSettle();
+    }
 
     expect(controller.hasLicense(LicenseType.otomobil), isTrue);
     expect(controller.hasLicense(LicenseType.motosiklet), isFalse);
@@ -86,14 +93,21 @@ void main() {
     await tester.tap(find.byKey(const Key('license_apply_motosiklet')));
     await tester.pumpAndSettle();
 
-    final LicenseQuestion soru = controller.pendingLicenseExam!.question!;
-    final int yanlis = (soru.correctIndex + 1) % soru.options.length;
-    await tester.tap(find.byKey(Key('license_option_$yanlis')));
-    await tester.pumpAndSettle();
+    // Bütün soruları yanlış cevapla.
+    final List<LicenseQuestion> sorular =
+        controller.pendingLicenseExam!.questions;
+    while (controller.pendingLicenseExam != null) {
+      final LicenseQuestion soru =
+          controller.pendingLicenseExam!.currentQuestion!;
+      final int yanlis = (soru.correctIndex + 1) % soru.options.length;
+      await tester.tap(find.byKey(Key('license_option_$yanlis')));
+      await tester.pumpAndSettle();
+    }
 
     expect(controller.hasLicense(LicenseType.motosiklet), isFalse);
-    expect(find.textContaining('Doğru cevap:'), findsOneWidget);
-    expect(find.textContaining(soru.explanation), findsOneWidget);
+    // Sonuçta bütün soruların doğru cevabı ve açıklaması görünür.
+    expect(find.textContaining('Doğru cevap:'), findsNWidgets(sorular.length));
+    expect(find.textContaining(sorular.first.explanation), findsOneWidget);
   });
 
   testWidgets('parası yetmeyen başvuru düğmesi kapalıdır',

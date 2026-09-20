@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
@@ -204,6 +205,35 @@ void _rapor() {
       }
       print(satir);
     }
+  }
+
+  // ===================================================================
+  // 2b) Uygulanan gerçek yaşam gideri (D-033)
+  // ===================================================================
+  print('');
+  print('=== UYGULANAN YILLIK GEÇİM GİDERİ (D-033) ===');
+  print('Çocuk (18 yaş altı)            : 0 ₺');
+  print('Ailesinin yanında yetişkin     : '
+      '${LivingCosts.prototypeOnlyWithFamily} ₺');
+  print('Bağımsız, kirada               : '
+      '${LivingCosts.prototypeOnlyIndependent} ₺');
+  print('Bağımsız, kendi evinde         : '
+      '${LivingCosts.prototypeOnlyOwnHome} ₺');
+  print('');
+  print('Meslek'.padRight(24) +
+      'ailede kalan'.padLeft(16) +
+      'bağımsız kalan'.padLeft(18) +
+      'kendi evinde'.padLeft(16));
+  for (final JobType job in kJobCatalog) {
+    final int ailede =
+        job.yearlySalary - LivingCosts.prototypeOnlyWithFamily;
+    final int bagimsiz =
+        job.yearlySalary - LivingCosts.prototypeOnlyIndependent;
+    final int kendiEvi = job.yearlySalary - LivingCosts.prototypeOnlyOwnHome;
+    print(job.name.padRight(24) +
+        '$ailede ₺'.padLeft(16) +
+        '$bagimsiz ₺'.padLeft(18) +
+        '$kendiEvi ₺'.padLeft(16));
   }
 
   // ===================================================================

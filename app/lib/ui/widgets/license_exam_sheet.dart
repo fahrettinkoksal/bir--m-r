@@ -9,8 +9,10 @@ import 'kilim_divider.dart';
 
 /// Ehliyet sınavı penceresi.
 ///
-/// İş mülakatıyla aynı tasarım dilini kullanır. Soru ve seçenekler oyun
-/// durumundan okunur; kayıt geri yüklendiğinde aynı soru gelir.
+/// Sınav **3 kısa sorudan** oluşur ve **en az 2 doğru** cevapla geçilir
+/// (D-035). Sorular oyun durumundan okunur: uygulama sınavın ortasında
+/// kapatılıp açılsa bile aynı sorulardan devam edilir. Sonuçta bütün
+/// soruların doğru cevabı ve kısa açıklaması gösterilir.
 class LicenseExamSheet extends StatefulWidget {
   const LicenseExamSheet({super.key});
 
@@ -35,7 +37,10 @@ class _LicenseExamSheetState extends State<LicenseExamSheet> {
   void _answer(int index) {
     final LicenseOutcome? outcome =
         GameScope.of(context).answerLicenseExam(index);
-    setState(() => _sonuc = outcome);
+    setState(() {
+      // Sınav sürerken sonuç paneli gösterilmez; yalnızca bittiğinde.
+      _sonuc = outcome != null && outcome.review.isNotEmpty ? outcome : null;
+    });
   }
 
   @override
@@ -44,77 +49,9 @@ class _LicenseExamSheetState extends State<LicenseExamSheet> {
     final GameController controller = GameScope.of(context);
     final PendingLicenseExam? sinav = controller.pendingLicenseExam;
 
-    if (sinav == null) {
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                _sonuc?.granted == true ? 'Ehliyetin hazır' : 'Sınav bitti',
-                key: const Key('license_result_title'),
-                style: theme.textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 12),
-              const KilimDivider(),
-              const SizedBox(height: 14),
-              Text(
-                _sonuc?.text ?? 'Sınav kapandı.',
-                style: theme.textTheme.bodyMedium,
-              ),
-              if (_sonuc?.correctAnswer != null) ...<Widget>[
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: theme.colorScheme.outlineVariant
-                          .withValues(alpha: 0.7),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'Doğru cevap: ${_sonuc!.correctAnswer}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (_sonuc!.explanation != null) ...<Widget>[
-                        const SizedBox(height: 6),
-                        Text(
-                          _sonuc!.explanation!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Kapat'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    if (sinav == null) return _sonucPaneli(context, theme);
 
-    final LicenseQuestion? soru = sinav.question;
+    final LicenseQuestion? soru = sinav.currentQuestion;
     if (soru == null) return const SizedBox.shrink();
 
     return SafeArea(
@@ -131,7 +68,10 @@ class _LicenseExamSheetState extends State<LicenseExamSheet> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Sınav görevlisi bir soru soruyor.',
+                '${sinav.currentIndex}. soru / ${sinav.questionCount} · '
+                'Geçmek için en az '
+                '${LicenseOffice.passingCorrectAnswers} doğru gerekiyor.',
+                key: const Key('license_progress'),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -166,6 +106,110 @@ class _LicenseExamSheetState extends State<LicenseExamSheet> {
                   Navigator.of(context).pop();
                 },
                 child: const Text('Sınavdan vazgeç'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Sınav bitince: sonuç, doğru cevaplar ve açıklamalar.
+  Widget _sonucPaneli(BuildContext context, ThemeData theme) {
+    final LicenseOutcome? sonuc = _sonuc;
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                sonuc?.granted == true ? 'Ehliyetin hazır' : 'Sınav bitti',
+                key: const Key('license_result_title'),
+                style: theme.textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 12),
+              const KilimDivider(),
+              const SizedBox(height: 14),
+              Text(
+                sonuc?.text ?? 'Sınav kapandı.',
+                style: theme.textTheme.bodyMedium,
+              ),
+              if (sonuc != null && sonuc.review.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 16),
+                for (final ExamAnswerReview inceleme in sonuc.review) ...<Widget>[
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: inceleme.isCorrect
+                            ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                            : theme.colorScheme.error.withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Icon(
+                              inceleme.isCorrect
+                                  ? Icons.check_circle_outline
+                                  : Icons.cancel_outlined,
+                              size: 18,
+                              color: inceleme.isCorrect
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.error,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                inceleme.question.text,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Senin cevabın: ${inceleme.givenOption}',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Doğru cevap: ${inceleme.correctOption}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          inceleme.question.explanation,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Kapat'),
+                ),
               ),
             ],
           ),

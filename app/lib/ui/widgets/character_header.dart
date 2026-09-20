@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/models/game_settings.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/stats.dart';
 import 'kilim_divider.dart';
+import 'settings_sheet.dart';
 
 /// Ekranın üstünde sabit duran karakter özeti.
 ///
@@ -60,6 +62,16 @@ class CharacterHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   _WalletPill(label: state.player.walletLabel),
+                  IconButton(
+                    key: const Key('open_settings'),
+                    tooltip: 'Ayarlar',
+                    iconSize: 18,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.only(left: 6),
+                    constraints: const BoxConstraints(),
+                    onPressed: () => SettingsSheet.show(context),
+                    icon: const Icon(Icons.settings_outlined),
+                  ),
                   if (onRestart != null)
                     IconButton(
                       tooltip: 'Yeni hayat',
@@ -111,8 +123,18 @@ class CharacterHeader extends StatelessWidget {
 
   static String _durumSatiri(GameState state) {
     final int hane = state.household.length;
-    if (hane == 0) return 'Evde seninle yaşayan kimse yok';
-    return 'Evde seninle $hane kişi yaşıyor';
+    final String haneMetni = hane == 0
+        ? 'Evde seninle yaşayan kimse yok'
+        : 'Evde seninle $hane kişi yaşıyor';
+
+    // Bakım durumu ve geçim sıkıntısı gerçek kayıtlardan okunur (D-033,
+    // D-037); yalnızca olağandışı durumlarda yazılır.
+    final List<String> ekler = <String>[
+      if (state.careStatus != CareStatus.aileYaninda)
+        state.careStatus.label.toLowerCase(),
+      if (state.hardshipYears > 0) 'geçim sıkıntısı',
+    ];
+    return ekler.isEmpty ? haneMetni : '$haneMetni · ${ekler.join(' · ')}';
   }
 }
 

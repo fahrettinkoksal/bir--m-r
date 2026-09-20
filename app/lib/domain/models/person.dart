@@ -100,10 +100,11 @@ class Person {
 
   /// Kişinin sahip olduğu eşyaların **tür** kimlikleri.
   ///
-  /// Yetişkinlerde ekonomik duruma göre üretilir ve kişi ekranında
-  /// gösterilir; vefat edince mirasçılara bu liste paylaştırılır. Böylece
-  /// miras uydurulmuş değil, kişinin gerçekten sahip olduğu şeylerden
-  /// gelir. Değerler `prototypeOnly` (Q-059).
+  /// Yetişkinlerde ekonomik duruma göre başlar, **hayat boyunca değişir**
+  /// (alım/satım) ve kişi detayında "Sahip oldukları" satırında görünür.
+  /// Vefat edince mirasçılara bu liste paylaştırılır; böylece miras
+  /// uydurulmuş değil, kişinin gerçekten sahip olduğu şeylerden gelir
+  /// (D-037). Değerler `prototypeOnly` (Q-059).
   final List<String> estate;
 
   /// Oyuncuyla ilişki puanı (0-100).

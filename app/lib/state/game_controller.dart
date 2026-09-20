@@ -28,6 +28,9 @@ import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
 import '../domain/casino/roulette.dart';
 import '../domain/models/blackjack_game.dart';
+import '../domain/models/game_settings.dart';
+import '../domain/models/life_log.dart';
+import '../domain/models/life_summary.dart';
 import '../domain/social/social_engine.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
@@ -171,13 +174,22 @@ class GameController extends ChangeNotifier {
     Gender? gender,
     int? seed,
   }) {
+    // Tamamlanmış hayat varsa özeti **önce arşivlenir**; yeni hayat geçmiş
+    // hayat özetini silmez (D-037).
+    final List<LifeSummary> arsiv = _archiveWithCurrentLife();
+
     final int usedSeed = seed ?? _random.nextInt(1 << 32);
     final LifeGenerator generator = LifeGenerator.seeded(usedSeed);
-    _state = generator.generate(
-      mode: mode,
-      chosenFirstName: mode == StartMode.isimVeCinsiyet ? firstName : null,
-      chosenGender: mode == StartMode.isimVeCinsiyet ? gender : null,
-    );
+    _state = generator
+        .generate(
+          mode: mode,
+          chosenFirstName: mode == StartMode.isimVeCinsiyet ? firstName : null,
+          chosenGender: mode == StartMode.isimVeCinsiyet ? gender : null,
+        )
+        .copyWith(
+          pastLives: List<LifeSummary>.unmodifiable(arsiv),
+          settings: _state?.settings ?? const GameSettings(),
+        );
     // Yeni hayat, bozuk kayıt engelini kaldırır: oyuncu bilerek baştan
     // başladı, artık yazmak güvenli.
     _autoSaveBlocked = false;
@@ -744,10 +756,78 @@ class GameController extends ChangeNotifier {
   ///
   /// **Kaydı silmez**: oyuncu başlangıç ekranından "Devam Et" ile aynı
   /// hayata geri dönebilir. Kaydı silmek için [deleteSavedLife] gerekir.
+  /// Aktif hayatı bırakır.
+  ///
+  /// Tamamlanmış bir hayat varsa özeti **arşive yazılır**; arşiv bir
+  /// sonraki hayata taşınır ve habersizce silinmez (D-037).
   void clearLife() {
+    _pendingArchive = _archiveWithCurrentLife();
     _state = null;
     notifyListeners();
   }
+
+  /// Geçmiş hayat özetleri (en yenisi sonda).
+  List<LifeSummary> get pastLives =>
+      _state?.pastLives ?? _pendingArchive ?? const <LifeSummary>[];
+
+  /// Aktif hayat yokken taşınan arşiv.
+  List<LifeSummary>? _pendingArchive;
+
+  /// Mevcut hayat tamamlandıysa özetini arşive ekleyip listeyi döndürür.
+  List<LifeSummary> _archiveWithCurrentLife() {
+    final GameState? current = _state;
+    final List<LifeSummary> arsiv = <LifeSummary>[
+      ...?current?.pastLives ?? _pendingArchive,
+    ];
+    if (current == null || !current.deceased) return arsiv;
+
+    final List<String> satirlar = <String>[
+      for (final LifeLogEntry e in current.log)
+        if (e.category != LogCategory.yasDegisimi) '${e.age}: ${e.text}',
+    ];
+
+    arsiv.add(
+      LifeSummary(
+        fullName: current.player.fullName,
+        birthCity: current.player.birthCity,
+        deathAge: current.deathAge ?? current.player.age,
+        deathCause: current.deathCause ?? 'bilinmiyor',
+        educationLabel: current.education.program == null
+            ? current.education.label
+            : '${current.education.label} · '
+                '${current.education.program!.name}',
+        careerLabel: current.career.isEmployed
+            ? current.career.label
+            : current.career.pastJobIds.isEmpty
+                ? 'Çalışmadı'
+                : 'Son iş: ${current.career.label}',
+        wallet: current.player.wallet,
+        itemCount: current.items.length,
+        licenseCount: current.licenses.length,
+        highlights: List<String>.unmodifiable(
+          satirlar.length > 8
+              ? satirlar.sublist(satirlar.length - 8)
+              : satirlar,
+        ),
+      ),
+    );
+    return arsiv;
+  }
+
+  /// Oyuncu ayarlarını günceller (D-032).
+  void updateSettings(GameSettings settings) {
+    final GameState? current = _state;
+    if (current == null) return;
+    _state = current.copyWith(settings: settings);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Oyuncunun kendi belirlediği yıllık bahis limiti.
+  int? get wagerLimitPerAge => _state?.settings.wagerLimitPerAge;
+
+  /// Kumarhane modülü açık mı?
+  bool get casinoEnabled => _state?.settings.casinoEnabled ?? true;
 }
 
 /// Bir olay seçiminin oyuncuya gösterilecek sonucu.

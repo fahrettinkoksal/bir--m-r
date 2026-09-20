@@ -8,28 +8,54 @@ import '../models/life_log.dart';
 import '../models/pending_license_exam.dart';
 
 /// Ehliyet başvurusunun sonucu.
+/// Sınav bittiğinde gösterilen tek soruluk değerlendirme.
+class ExamAnswerReview {
+  const ExamAnswerReview({required this.question, required this.givenIndex});
+
+  final LicenseQuestion question;
+
+  /// Oyuncunun seçtiği şık.
+  final int givenIndex;
+
+  bool get isCorrect => givenIndex == question.correctIndex;
+
+  String get givenOption => question.options[givenIndex];
+
+  String get correctOption => question.correctOption;
+}
+
 class LicenseOutcome {
   const LicenseOutcome({
     required this.applied,
     required this.text,
     this.examStarted = false,
     this.granted = false,
-    this.correctAnswer,
-    this.explanation,
+    this.correctCount = 0,
+    this.questionCount = 0,
+    this.answeredCount = 0,
+    this.review = const <ExamAnswerReview>[],
   });
 
   final bool applied;
   final String text;
 
-  /// Başvuru bir sınav sorusu açtı mı?
+  /// Başvuru sınavı açtı mı?
   final bool examStarted;
 
   /// Ehliyet verildi mi?
   final bool granted;
 
-  /// Yanlış cevaptan sonra gösterilen doğru seçenek.
-  final String? correctAnswer;
-  final String? explanation;
+  /// Doğru cevap sayısı (sınav bittiğinde).
+  final int correctCount;
+
+  /// Sınavdaki toplam soru sayısı.
+  final int questionCount;
+
+  /// Şu ana kadar cevaplanan soru sayısı.
+  final int answeredCount;
+
+  /// Sınav bittiğinde bütün soruların doğru cevabı ve açıklaması.
+  final List<ExamAnswerReview> review;
 }
 
 class LicenseResult {
@@ -45,6 +71,12 @@ class LicenseResult {
 /// değerler `prototypeOnly`'dir (`docs/DESIGN_REVIEW_QUEUE.md`, Q-057).
 class LicenseOffice {
   const LicenseOffice();
+
+  /// Sınavdaki soru sayısı (D-035).
+  static const int questionsPerExam = 3;
+
+  /// Sınavı geçmek için gereken en az doğru sayısı (D-035).
+  static const int passingCorrectAnswers = 2;
 
   /// prototypeOnly: bir yaşta aynı ehliyete yapılabilecek en fazla başvuru.
   ///
@@ -87,9 +119,9 @@ class LicenseOffice {
         'Sınav ücreti $ucret ₺; cüzdanında yeterli para yok.',
       );
     }
-    if (questionsForLicense(type.id).isEmpty) {
+    if (questionsForLicense(type.id).length < questionsPerExam) {
       return const InteractionAvailability.blocked(
-        'Bu ehliyet için sınav soruları henüz yazılmadı.',
+        'Bu ehliyet için yeterli sınav sorusu henüz yazılmadı.',
       );
     }
     return const InteractionAvailability.allowed();
@@ -101,15 +133,30 @@ class LicenseOffice {
   int _questionAskedThisAge(GameState state, LicenseQuestion q) =>
       state.interactionCount(q.id, _questionKind);
 
-  /// Bu yaşta sorulmamış bir soru varsa onu tercih eder.
-  LicenseQuestion _pickQuestion(GameState state, LicenseType type, Random rng) {
+  /// Sınavın [questionsPerExam] sorusunu seçer.
+  ///
+  /// Aynı yaşta daha önce sorulmamış sorular tercih edilir; aynı sınavda
+  /// bir soru iki kez sorulmaz.
+  List<LicenseQuestion> _pickQuestions(
+    GameState state,
+    LicenseType type,
+    Random rng,
+  ) {
     final List<LicenseQuestion> hepsi = questionsForLicense(type.id);
-    final List<LicenseQuestion> sorulmamis = hepsi
-        .where((LicenseQuestion q) => _questionAskedThisAge(state, q) == 0)
-        .toList(growable: false);
-    final List<LicenseQuestion> havuz =
-        sorulmamis.isEmpty ? hepsi : sorulmamis;
-    return havuz[rng.nextInt(havuz.length)];
+    final List<LicenseQuestion> sorulmamis = <LicenseQuestion>[
+      for (final LicenseQuestion q in hepsi)
+        if (_questionAskedThisAge(state, q) == 0) q,
+    ]..shuffle(rng);
+    final List<LicenseQuestion> kalan = <LicenseQuestion>[
+      for (final LicenseQuestion q in hepsi)
+        if (_questionAskedThisAge(state, q) > 0) q,
+    ]..shuffle(rng);
+
+    final List<LicenseQuestion> secilen = <LicenseQuestion>[
+      ...sorulmamis,
+      ...kalan,
+    ].take(questionsPerExam).toList(growable: false);
+    return secilen;
   }
 
   /// Başvurur: ücreti **bir kez** alır ve sınav sorusunu açar.
@@ -119,23 +166,28 @@ class LicenseOffice {
     if (!check.isAllowed) return _blocked(state, check.reason!);
 
     final int ucret = prototypeOnlyExamFee(type);
-    final LicenseQuestion soru = _pickQuestion(state, type, rng);
+    final List<LicenseQuestion> sorular = _pickQuestions(state, type, rng);
     final Map<String, int> counts = <String, int>{
       ...state.interactionCounts,
       GameState.interactionKey(type.id, _interactionKind):
           _attemptsThisAge(state, type) + 1,
-      GameState.interactionKey(soru.id, _questionKind):
-          _questionAskedThisAge(state, soru) + 1,
+      for (final LicenseQuestion soru in sorular)
+        GameState.interactionKey(soru.id, _questionKind):
+            _questionAskedThisAge(state, soru) + 1,
     };
 
     final String metin = '${type.label} için başvurdun; sınav ücreti '
-        '$ucret ₺ ödendi.';
+        '$ucret ₺ ödendi. $questionsPerExam soru soruluyor, '
+        'en az $passingCorrectAnswers doğru gerekiyor.';
     final GameState next = state.copyWith(
       player: state.player.copyWith(wallet: state.player.wallet - ucret),
       interactionCounts: Map<String, int>.unmodifiable(counts),
       pendingLicenseExam: PendingLicenseExam(
         licenseId: type.id,
-        questionId: soru.id,
+        questionIds: List<String>.unmodifiable(
+          sorular.map((LicenseQuestion q) => q.id).toList(growable: false),
+        ),
+        answers: const <int>[],
         askedAtAge: state.player.age,
         feePaid: ucret,
       ),
@@ -157,8 +209,9 @@ class LicenseOffice {
       return _blocked(state, 'Devam eden bir ehliyet sınavı yok.');
     }
     final LicenseType? type = sinav.license;
-    final LicenseQuestion? soru = sinav.question;
-    if (type == null || soru == null) {
+    final LicenseQuestion? soru = sinav.currentQuestion;
+    if (type == null || soru == null || sinav.questions.length !=
+        sinav.questionIds.length) {
       return LicenseResult(
         state: state.copyWith(pendingLicenseExam: null),
         outcome: const LicenseOutcome(
@@ -171,32 +224,64 @@ class LicenseOffice {
       return _blocked(state, 'Geçersiz seçenek.');
     }
 
-    final GameState kapali = state.copyWith(pendingLicenseExam: null);
-
-    // Ehliyet zaten alınmışsa ikinci kez eklenmez.
+    // Ehliyet zaten alınmışsa sınav kapanır, ikinci kez eklenmez.
     if (state.hasLicense(type.id)) {
       final String metin = '${type.label} zaten sende.';
       return LicenseResult(
-        state: kapali,
+        state: state.copyWith(pendingLicenseExam: null),
         outcome: LicenseOutcome(applied: true, text: metin),
       );
     }
 
-    if (optionIndex != soru.correctIndex) {
-      final String metin = '${type.label} sınavını geçemedin. '
-          'Bu sefer olmadı; tekrar başvurabilirsin.';
+    final PendingLicenseExam guncel = sinav.copyWith(
+      answers: List<int>.unmodifiable(<int>[...sinav.answers, optionIndex]),
+    );
+
+    // Sınav bitmediyse sıradaki soruya geçilir; ehliyet henüz verilmez.
+    if (!guncel.isComplete) {
+      return LicenseResult(
+        state: state.copyWith(pendingLicenseExam: guncel),
+        outcome: LicenseOutcome(
+          applied: true,
+          text: '${guncel.currentIndex}. soru.',
+          answeredCount: guncel.answers.length,
+          questionCount: guncel.questionCount,
+        ),
+      );
+    }
+
+    // Sınav bitti: en az [passingCorrectAnswers] doğru gerekir.
+    final int dogru = guncel.correctCount;
+    final bool gecti = dogru >= passingCorrectAnswers;
+    final List<ExamAnswerReview> inceleme = <ExamAnswerReview>[
+      for (int i = 0; i < guncel.questionIds.length; i++)
+        ExamAnswerReview(
+          question: guncel.questions[i],
+          givenIndex: guncel.answers[i],
+        ),
+    ];
+
+    final GameState kapali = state.copyWith(pendingLicenseExam: null);
+
+    if (!gecti) {
+      final String metin = '${type.label} sınavını geçemedin: '
+          '$dogru/${guncel.questionCount} doğru. '
+          'En az $passingCorrectAnswers doğru gerekiyordu.';
       return LicenseResult(
         state: _log(kapali, metin),
         outcome: LicenseOutcome(
           applied: true,
           text: metin,
-          correctAnswer: soru.correctOption,
-          explanation: soru.explanation,
+          correctCount: dogru,
+          questionCount: guncel.questionCount,
+          answeredCount: guncel.answers.length,
+          review: inceleme,
         ),
       );
     }
 
-    final String metin = '${type.label} sınavını geçtin; ehliyetin artık var.';
+    final String metin = '${type.label} sınavını geçtin '
+        '($dogru/${guncel.questionCount} doğru); ehliyetin artık var.';
     return LicenseResult(
       state: _log(
         kapali.copyWith(
@@ -206,7 +291,15 @@ class LicenseOffice {
         ),
         metin,
       ),
-      outcome: LicenseOutcome(applied: true, text: metin, granted: true),
+      outcome: LicenseOutcome(
+        applied: true,
+        text: metin,
+        granted: true,
+        correctCount: dogru,
+        questionCount: guncel.questionCount,
+        answeredCount: guncel.answers.length,
+        review: inceleme,
+      ),
     );
   }
 

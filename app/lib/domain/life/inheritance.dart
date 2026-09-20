@@ -34,6 +34,9 @@ class InheritanceShare {
 /// Kurallar:
 /// - Mirasçılar önce **eş ve çocuklar**, yoksa **anne-baba**, yoksa
 ///   **kardeşler** arasından belirlenir.
+/// - Eş payı yalnızca **gerçek bir birliktelik kaydı** varsa uygulanır
+///   (D-037): ayrı yaşayan veya boşanmış ebeveyn eş sayılmaz, sevgili de
+///   hiçbir durumda eş sayılmaz.
 /// - Eş varsa nakdin dörtte birini alır, kalanı çocuklara eşit bölünür.
 /// - Eşya ve araçlar **bölünmez**: her biri tek bir mirasçıya gider.
 /// - Aynı miras iki kez dağıtılmaz ([GameState.settledEstates]).
@@ -143,12 +146,17 @@ abstract final class Inheritance {
     }
 
     final int toplamNakit = prototypeOnlyEstateMoney(deceased.wealth);
-    final bool esVar = deceased.relation == RelationType.anne ||
-        deceased.relation == RelationType.baba
-            ? mirascilar.others.any((Person p) =>
-                p.relation == RelationType.anne ||
-                p.relation == RelationType.baba)
-            : false;
+
+    // Eş payı yalnızca ebeveynler **gerçekten birlikteyse** uygulanır:
+    // ayrı yaşayan veya boşanmış ebeveyn eş gibi değerlendirilmez (D-037).
+    final bool ebeveynMirasi = deceased.relation == RelationType.anne ||
+        deceased.relation == RelationType.baba;
+    final bool sagKalanEs = ebeveynMirasi &&
+        state.parentalStatus.birlikteMi &&
+        mirascilar.others.any((Person p) =>
+            p.relation == RelationType.anne ||
+            p.relation == RelationType.baba);
+    final bool esVar = sagKalanEs;
 
     // Oyuncu + diğer çocuklar.
     final int cocukSayisi = 1 +
