@@ -121,16 +121,30 @@ class SocialEngine {
         'Önce ${content.platform.label} hesabı açman gerekiyor.',
       );
     }
-    if (_postsThisAge(state) >= prototypeOnlyMaxPostsPerAge) {
-      return const InteractionAvailability.blocked(
-        'Bu yıl yeterince paylaşım yaptın; seneye devam.',
+    if (_postsThisAge(state, account) >= prototypeOnlyMaxPostsPerAge) {
+      return InteractionAvailability.blocked(
+        'Bu yıl ${content.platform.label} üzerinde yeterince paylaşım '
+        'yaptın; seneye devam. Diğer platformlar etkilenmez.',
       );
     }
     return const InteractionAvailability.allowed();
   }
 
-  int _postsThisAge(GameState state) =>
-      state.interactionCount('sosyal', 'paylasim');
+  /// Bu yaşta **bu platformda** yapılan paylaşım sayısı.
+  ///
+  /// Sayaç platform başına ayrıdır ve hesabın kendi paylaşım geçmişinden
+  /// okunur; bir platformun sınırı diğerini kapatmaz, yaş ilerleyince her
+  /// platformun sayacı kendiliğinden yenilenir.
+  int _postsThisAge(GameState state, SocialAccount account) =>
+      account.postsAtAge(state.player.age);
+
+  /// Bu yaşta bu platformda kaç paylaşım hakkı kaldı?
+  int remainingPosts(GameState state, SocialPlatform platform) {
+    final SocialAccount? account = state.accountFor(platform);
+    if (account == null) return 0;
+    return (prototypeOnlyMaxPostsPerAge - _postsThisAge(state, account))
+        .clamp(0, prototypeOnlyMaxPostsPerAge);
+  }
 
   /// Paylaşım yapar.
   ///
@@ -162,11 +176,6 @@ class SocialEngine {
             .map((SocialAccount a) => a.platform == content.platform ? guncel : a)
             .toList(growable: false),
       ),
-      interactionCounts: Map<String, int>.unmodifiable(<String, int>{
-        ...state.interactionCounts,
-        GameState.interactionKey('sosyal', 'paylasim'):
-            _postsThisAge(state) + 1,
-      }),
     );
     next = _updateFame(next, content);
 

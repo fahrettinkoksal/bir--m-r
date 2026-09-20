@@ -48,6 +48,20 @@ class SocialAccount {
 
   int get postCount => posts.length;
 
+  /// Bu yaşta bu platformda yapılan paylaşım sayısı.
+  ///
+  /// Yıllık paylaşım sınırı **platform başına** işler: Instagram'da sınıra
+  /// ulaşmak YouTube'u kapatmaz. Sayı paylaşım geçmişinden okunduğu için
+  /// yaş ilerleyince kendiliğinden yenilenir ve eski kayıtlar da doğru
+  /// sayılır.
+  int postsAtAge(int age) {
+    int sayi = 0;
+    for (final SocialPost p in posts) {
+      if (p.age == age) sayi++;
+    }
+    return sayi;
+  }
+
   /// Son paylaşımlarda bu içerik türü kaç kez geçti?
   ///
   /// Aynı içeriği üst üste paylaşmak kazancı düşürür.
