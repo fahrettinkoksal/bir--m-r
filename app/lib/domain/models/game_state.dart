@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'education.dart';
 import 'game_event.dart';
+import 'gift_record.dart';
 import 'life_log.dart';
 import 'parental_status.dart';
 import 'person.dart';
@@ -29,6 +30,7 @@ class GameState {
     this.seenEventIds = const <String>{},
     this.lastEventAge = const <String, int>{},
     this.storyPeople = const <String, String>{},
+    this.gifts = const <GiftRecord>[],
     this.pendingEvent,
     this.progressSinceLastEvent = 0,
     this.extraEventsThisAge = 0,
@@ -86,6 +88,12 @@ class GameState {
   /// olmayan bir kişi uydurulmaz.
   final Map<String, String> storyPeople;
 
+  /// Gerçekleşmiş hediyeleşmeler: kim, kime, ne verdi.
+  ///
+  /// Yalnızca gerçekten el değiştiren hediyeler yazılır; reddedilen istek
+  /// buraya girmez.
+  final List<GiftRecord> gifts;
+
   /// Oyuncunun karşısındaki tek olay. Aynı anda ikinci bir olay açılmaz
   /// (D-021): bu alan doluyken yeni olay üretilmez.
   final ActiveEvent? pendingEvent;
@@ -121,33 +129,62 @@ class GameState {
       .where((Person p) => p.relation.group == group)
       .toList(growable: false);
 
-  /// Şu anda devam edilen kademedeki sınıf arkadaşları.
+  /// Şu anda devam edilen **sınıftaki** arkadaşlar.
   ///
-  /// Liste **okul bağına** ([Person.schoolTie]) bakar, yakınlık derecesine
-  /// değil: aynı sınıftaki bir kişi yakın arkadaş olsa da burada kalmaya
-  /// devam eder. Kademe değişince eski sınıf arkadaşları **silinmez**;
-  /// yalnızca güncel listeye girmezler (D-029: kişi kaydı korunur).
+  /// Liste okul bağına ve **sınıf kimliğine** bakar, yakınlık derecesine
+  /// değil: aynı sınıftaki bir kişi yakın arkadaş olsa da burada kalır.
+  /// Kademe değişince eski sınıf arkadaşları **silinmez**; yalnızca güncel
+  /// listeye girmezler (D-029: kişi kaydı korunur).
   List<Person> get currentClassmates => people
-      .where((Person p) => p.isClassmateAt(education.level))
+      .where((Person p) => p.isClassmateIn(education.classId))
       .toList(growable: false);
 
-  /// Şu anda devam edilen kademedeki öğretmenler.
+  /// Şu anda devam edilen **okuldaki** öğretmenler.
   List<Person> get currentTeachers => people
-      .where((Person p) => p.isTeacherAt(education.level))
+      .where((Person p) => p.isTeacherIn(education.schoolId))
       .toList(growable: false);
 
-  /// Geçmiş kademelerden tanınan, hâlâ kayıtlı okul kişileri.
+  /// Geçmişte tanışılmış, artık güncel sınıfta/okulda olmayan okul kişileri.
   ///
-  /// Okul bağı olan ama artık oyuncuyla aynı kademede olmayan kişiler.
-  /// Yakın arkadaş olmuş biri de buraya düşebilir; kaydı korunur.
-  List<Person> get pastSchoolPeople {
-    final SchoolLevel? level = education.level;
-    return people
-        .where((Person p) =>
-            p.schoolTie != null &&
-            p.schoolLevel != null &&
-            p.schoolLevel != level)
-        .toList(growable: false);
+  /// Yakın arkadaş olmuş biri de buraya düşebilir; kaydı korunur ve ileride
+  /// yeniden karşılaşma mümkündür.
+  List<Person> get pastSchoolPeople => people
+      .where((Person p) =>
+          p.schoolTie != null &&
+          !p.isClassmateIn(education.classId) &&
+          !p.isTeacherIn(education.schoolId))
+      .toList(growable: false);
+
+  /// Oyuncunun **şu anki hayatında gerçekten erişebildiği** kişiler.
+  ///
+  /// Gündelik etkileşim listeleri bunu kullanır. Yıllar önce tanışılmış bir
+  /// ilkokul öğretmeni, hayatta kalmaya devam etse bile her gün görüşülen
+  /// biri değildir; kaydı silinmez ama gündelik listeye girmez. Yeniden
+  /// karşılaşma ileride özel bir olayla mümkün olacak.
+  List<Person> get reachablePeople =>
+      people.where(isReachable).toList(growable: false);
+
+  /// Bir kişi şu an gündelik hayatta erişilebilir mi?
+  bool isReachable(Person person) {
+    if (!person.isAlive) return false;
+    // Aynı evde yaşayanlar her zaman erişilebilir.
+    if (person.inPlayerHousehold) return true;
+    // Güncel okul çevresi.
+    if (person.isClassmateIn(education.classId)) return true;
+    if (person.isTeacherIn(education.schoolId)) return true;
+    // Yakın arkadaşlar ve romantik bağlar görüşmeye devam eder.
+    switch (person.relation) {
+      case RelationType.arkadas:
+      case RelationType.sevgili:
+        return true;
+      default:
+        break;
+    }
+    // Hane dışındaki yakın akrabalar (anne/baba/kardeş) görüşülmeye devam
+    // eder; uzak akrabalar bayram/ziyaret olaylarıyla gelir.
+    return person.relation == RelationType.anne ||
+        person.relation == RelationType.baba ||
+        person.relation == RelationType.kardes;
   }
 
   GameState copyWith({
@@ -163,6 +200,7 @@ class GameState {
     Set<String>? seenEventIds,
     Map<String, int>? lastEventAge,
     Map<String, String>? storyPeople,
+    List<GiftRecord>? gifts,
     Object? pendingEvent = _unsetEvent,
     int? progressSinceLastEvent,
     int? extraEventsThisAge,
@@ -182,6 +220,7 @@ class GameState {
       seenEventIds: seenEventIds ?? this.seenEventIds,
       lastEventAge: lastEventAge ?? this.lastEventAge,
       storyPeople: storyPeople ?? this.storyPeople,
+      gifts: gifts ?? this.gifts,
       pendingEvent: pendingEvent == _unsetEvent
           ? this.pendingEvent
           : pendingEvent as ActiveEvent?,

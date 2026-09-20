@@ -7,7 +7,6 @@ import '../models/game_event.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
-import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 import 'school_people.dart';
@@ -67,13 +66,15 @@ class LifeProgression {
     // Yeni bir okul kademesine geçildiyse o kademenin sınıf arkadaşları ve
     // öğretmeni kalıcı kişi kaydı olarak eklenir. Eski kademenin kişileri
     // silinmez; yalnızca güncel sınıf listesinde görünmezler.
-    final List<Person> peopleWithSchool = _addSchoolPeopleIfNeeded(
+    final ({List<Person> people, EducationState education}) okulSonucu =
+        _setUpClassIfNeeded(
       state: state,
       people: people,
       education: education,
       newAge: newAge,
       log: log,
     );
+    final List<Person> peopleWithSchool = okulSonucu.people;
 
     final GameState advanced = state.copyWith(
       player: state.player.copyWith(age: newAge),
@@ -86,7 +87,7 @@ class LifeProgression {
       interactionCounts: const <String, int>{},
       extraEventsThisAge: 0,
       progressSinceLastEvent: 0,
-      education: education,
+      education: okulSonucu.education,
     );
 
     // Yeni yaşın tek açılış olayı.
@@ -94,11 +95,12 @@ class LifeProgression {
     return opening == null ? advanced : advanced.copyWith(pendingEvent: opening);
   }
 
-  /// Kademe değiştiyse yeni sınıf arkadaşlarını ve öğretmeni üretir.
+  /// Yeni bir sınıf ortamı gerekiyorsa kurar.
   ///
-  /// Aynı kademe için ikinci kez kişi üretilmez; sınıf atlamak (ör. 1'den
-  /// 2'ye) yeni kişi getirmez, kademe değişimi getirir.
-  List<Person> _addSchoolPeopleIfNeeded({
+  /// Sınıf atlamak (ör. 1'den 2'ye) yeni sınıf kurmaz; **kademe değişimi**
+  /// kurar. Eski sınıftan bir bölüm arkadaş aynı kimlikle yeni sınıfa
+  /// taşınır, kalanlar eski sınıfta kayıtlı kalır ve silinmez.
+  ({List<Person> people, EducationState education}) _setUpClassIfNeeded({
     required GameState state,
     required List<Person> people,
     required EducationState education,
@@ -106,35 +108,66 @@ class LifeProgression {
     required List<LifeLogEntry> log,
   }) {
     final SchoolLevel? level = education.level;
-    if (level == null) return people;
-    if (level == state.education.level) return people;
-    if (people.any((Person p) => p.schoolLevel == level)) return people;
+    if (level == null) {
+      return (people: people, education: education);
+    }
 
+    final String schoolId = SchoolPeople.schoolIdFor(level);
+    final String classId = SchoolPeople.classIdFor(level);
+
+    // Sınıf zaten kuruluysa dokunma.
+    if (education.classId == classId &&
+        people.any((Person p) => p.classId == classId)) {
+      return (people: people, education: education);
+    }
+
+    const SchoolPeople okul = SchoolPeople();
     final GameState basis = state.copyWith(
       player: state.player.copyWith(age: newAge),
       people: List<Person>.unmodifiable(people),
     );
-    final List<Person> yeniler = const SchoolPeople().generateFor(
+    final List<Person> oncekiSinif = people
+        .where((Person p) =>
+            p.schoolTie == SchoolTie.sinifArkadasi &&
+            p.classId != null &&
+            p.classId == state.education.classId)
+        .toList(growable: false);
+
+    final ClassRoster roster = okul.buildClass(
       state: basis,
       level: level,
       rng: _rng,
-    );
-    if (yeniler.isEmpty) return people;
-
-    final Person ogretmen = yeniler.firstWhere(
-      (Person p) => p.relation == RelationType.ogretmen,
-      orElse: () => yeniler.first,
-    );
-    log.add(
-      LifeLogEntry(
-        age: newAge,
-        text: 'Yeni sınıfında öğretmenin ${ogretmen.fullName} oldu; '
-            'sıraları paylaştığın tanıdık yüzler de var.',
-        category: LogCategory.kisisel,
-      ),
+      previousClassmates: oncekiSinif,
     );
 
-    return <Person>[...people, ...yeniler];
+    // Taşınanlar aynı kimlikle yeni sınıfa geçer; kayıt kopyalanmaz.
+    final Set<String> tasinan = roster.movedIds.toSet();
+    final List<Person> guncel = people
+        .map((Person p) =>
+            tasinan.contains(p.id) ? okul.moveToClass(p, level) : p)
+        .toList(growable: false);
+
+    final Iterable<Person> ogretmenler = roster.newPeople
+        .where((Person p) => p.schoolTie == SchoolTie.ogretmen);
+    if (ogretmenler.isNotEmpty) {
+      final Person ogretmen = ogretmenler.first;
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: tasinan.isEmpty
+              ? 'Yeni sınıfında öğretmenin ${ogretmen.fullName} oldu; '
+                  'bütün yüzler yabancı.'
+              : 'Yeni sınıfında öğretmenin ${ogretmen.fullName} oldu; '
+                  '${tasinan.length} tanıdık yüz de seninle aynı sınıfta.',
+          category: LogCategory.kisisel,
+        ),
+      );
+    }
+
+    return (
+      people: <Person>[...guncel, ...roster.newPeople],
+      education: education.copyWith(schoolId: schoolId, classId: classId),
+    );
   }
 
   /// Okula başlatır veya bir üst sınıfa geçirir.

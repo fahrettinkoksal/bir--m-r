@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/game_state.dart';
-import '../../../domain/models/interaction.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/person_card.dart';
@@ -26,12 +25,16 @@ class ActivitiesScreen extends StatefulWidget {
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
   bool _sosyalAcik = false;
 
-  /// Şu an etkileşim kurulabilecek kişiler.
+  /// Şu an gündelik hayatta gerçekten erişilebilen ve etkileşim kurulabilen
+  /// kişiler.
+  ///
+  /// Yıllar önce tanışılmış bir ilkokul öğretmeni kayıtta kalır ama her gün
+  /// görüşülen biri değildir; bu liste [GameState.isReachable] koşullarını
+  /// kullanır. Yeniden karşılaşma ileride özel bir olayla gelecek.
   List<Person> _uygunKisiler(BuildContext context, GameState state) {
-    return state.people
+    return state.reachablePeople
         .where((Person p) =>
-            p.isAlive &&
-            GameScope.of(context).availabilityFor(p).isAllowed)
+            GameScope.of(context).availableKindsFor(p).isNotEmpty)
         .toList(growable: false);
   }
 
@@ -43,8 +46,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     if (_sosyalAcik) {
       return SectionScaffold(
         title: 'Birlikte vakit geçir',
-        subtitle: 'Kimi seçersen onunla ${InteractionKind.vakitGecir.label} '
-            've ${InteractionKind.sohbet.label} yapabilirsin.',
+        subtitle: 'Hayatında şu an gerçekten görüştüğün kişiler. '
+            'Herkesle aynı etkileşimler açık değildir.',
         backLabel: 'Aktiviteler',
         onBack: () => setState(() => _sosyalAcik = false),
         children: <Widget>[

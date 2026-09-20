@@ -89,20 +89,28 @@ void advanceToAge(
 
 /// Testte okul kişilerini (sınıf arkadaşları + öğretmen) duruma ekler.
 ///
-/// Gerçek oyunda bu kişiler kademe değişiminde üretilir; elle kurulan test
-/// durumlarında aynı gerçekliği sağlamak için kullanılır.
+/// Gerçek oyunda bu kişiler kademe geçişinde üretilir; elle kurulan test
+/// durumlarında aynı gerçekliği sağlamak için kullanılır. Eğitim durumuna
+/// okul/sınıf kimliği de yazılır, böylece güncel sınıf listeleri çalışır.
 GameState withSchoolPeople(GameState state, {int seed = 1}) {
   final SchoolLevel? level = state.education.level;
   if (level == null) return state;
-  if (state.people.any((Person p) => p.schoolLevel == level)) return state;
+  final String classId = SchoolPeople.classIdFor(level);
+  if (state.people.any((Person p) => p.classId == classId)) return state;
+
+  final ClassRoster roster = const SchoolPeople().buildClass(
+    state: state,
+    level: level,
+    rng: Random(seed),
+  );
   return state.copyWith(
     people: List<Person>.unmodifiable(<Person>[
       ...state.people,
-      ...const SchoolPeople().generateFor(
-        state: state,
-        level: level,
-        rng: Random(seed),
-      ),
+      ...roster.newPeople,
     ]),
+    education: state.education.copyWith(
+      schoolId: SchoolPeople.schoolIdFor(level),
+      classId: classId,
+    ),
   );
 }

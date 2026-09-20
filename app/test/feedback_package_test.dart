@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bir_omur/data/event_pool.dart';
+import 'package:bir_omur/data/gift_catalog.dart';
 import 'package:bir_omur/data/possession_names.dart';
 import 'package:bir_omur/domain/effects/effect_diff.dart';
 import 'package:bir_omur/domain/events/event_engine.dart';
@@ -13,6 +14,7 @@ import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
+import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
@@ -177,21 +179,22 @@ void main() {
   // ======================================================================
   group('Uygulanan etkiler', () {
     test('olay seçimi para ve eşya kazancını rozet olarak bildirir', () {
-      final GameController controller = GameController(random: Random(12));
-      controller.startNewLife(mode: StartMode.tamamenRastgele, seed: 12);
-
       EventChoiceResult? bisikletSonucu;
-      for (int i = 0; i < 80 && bisikletSonucu == null; i++) {
-        final GameState state = controller.state!;
-        if (state.hasPendingEvent) {
-          final ActiveEvent olay = state.pendingEvent!;
-          final bool bisiklet = olay.eventId == 'bisiklet_hediyesi';
-          final EventChoiceResult? sonuc = controller.chooseEventOption(
-            bisiklet ? 'sarilarak' : olay.choices.first.id,
-          );
-          if (bisiklet) bisikletSonucu = sonuc;
-        } else {
-          controller.ageUp();
+      for (int seed = 0; seed < 40 && bisikletSonucu == null; seed++) {
+        final GameController controller = GameController(random: Random(seed));
+        controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
+        for (int i = 0; i < 60 && bisikletSonucu == null; i++) {
+          final GameState state = controller.state!;
+          if (state.hasPendingEvent) {
+            final ActiveEvent olay = state.pendingEvent!;
+            final bool bisiklet = olay.eventId == 'bisiklet_hediyesi';
+            final EventChoiceResult? sonuc = controller.chooseEventOption(
+              bisiklet ? 'sarilarak' : olay.choices.first.id,
+            );
+            if (bisiklet) bisikletSonucu = sonuc;
+          } else {
+            controller.ageUp();
+          }
         }
       }
 
@@ -371,19 +374,29 @@ void main() {
       final GameState state = controller.state!;
       expect(state.education.level, SchoolLevel.ortaokul);
 
+      // Hiçbir kayıt silinmez.
       for (final String id in ilkokulKimlikleri) {
         expect(state.personById(id), isNotNull, reason: 'Kayıt silinmemeli');
       }
+
       final Set<String> guncel =
           state.currentClassmates.map((Person p) => p.id).toSet();
-      for (final String id in ilkokulKimlikleri) {
-        expect(guncel, isNot(contains(id)),
-            reason: 'Eski sınıf arkadaşı güncel sınıfta görünmemeli');
+      final Set<String> gecmis =
+          state.pastSchoolPeople.map((Person p) => p.id).toSet();
+
+      // Bir bölümü aynı kimlikle yeni sınıfa taşınır, geri kalanı eski
+      // sınıfta kayıtlı kalır. Her sınıf değişiminde herkes değişmez.
+      final Set<String> tasinan = ilkokulKimlikleri.toSet().intersection(guncel);
+      final Set<String> kalan = ilkokulKimlikleri.toSet().difference(guncel);
+      expect(tasinan, isNotEmpty,
+          reason: 'Bazı arkadaşlar yeni sınıfa birlikte geçmeli');
+      expect(kalan, isNotEmpty, reason: 'Bazıları eski sınıfta kalmalı');
+      expect(gecmis, containsAll(kalan),
+          reason: 'Eski sınıfta kalanlar geçmiş tanıdıklar arasında olmalı');
+      for (final String id in tasinan) {
+        expect(state.personById(id)!.schoolLevel, SchoolLevel.ortaokul,
+            reason: 'Taşınan kişi aynı kimlikle yeni sınıfta olmalı');
       }
-      expect(
-        state.pastSchoolPeople.map((Person p) => p.id).toSet(),
-        containsAll(ilkokulKimlikleri),
-      );
     });
 
     test('aynı kademede ikinci kez kişi üretilmez', () {
@@ -457,7 +470,7 @@ void main() {
         InteractionKind.hediyeVer,
       );
       expect(uygunluk.isAllowed, isFalse);
-      expect(uygunluk.reason, contains('Cüzdanında yeterli para yok'));
+      expect(uygunluk.reason, contains('paran yok'));
       expect(
         interactions.availableKinds(state, anne),
         isNot(contains(InteractionKind.hediyeVer)),
@@ -475,14 +488,27 @@ void main() {
       );
 
       expect(sonuc.outcome.accepted, isTrue);
-      expect(
-        sonuc.state.player.wallet,
-        300 - FamilyInteractions.prototypeOnlyGiftCost,
-      );
+      // Hediyenin bedeli katalogdan gelir; sabit değildir.
+      final String verilen = sonuc.outcome.givenPossession!;
+      final GiftItem hediye = giftById(verilen)!;
+      expect(sonuc.state.player.wallet, 300 - hediye.value);
       expect(sonuc.state.personById(anne.id)!.bond, greaterThan(anne.bond));
       expect(
         sonuc.outcome.effects.map((AppliedEffect e) => e.text),
-        contains('Cüzdan -${FamilyInteractions.prototypeOnlyGiftCost} ₺'),
+        contains('Cüzdan -${hediye.value} ₺'),
+      );
+      // Hediyenin adı sonuç metninde geçer.
+      expect(sonuc.outcome.text.toLowerCase(),
+          contains(hediye.name.toLowerCase()));
+      // Verilen hediye oyuncunun envanterine girmez; karşı tarafa geçer.
+      expect(sonuc.state.possessions, isNot(contains(verilen)));
+      expect(
+        sonuc.state.gifts.any((GiftRecord g) =>
+            g.itemId == verilen &&
+            g.fromId == GiftRecord.playerId &&
+            g.toId == anne.id),
+        isTrue,
+        reason: 'Kim kime ne verdi kaydedilmeli',
       );
     });
 
@@ -575,12 +601,23 @@ void main() {
         oyun = sonuc.state;
         if (sonuc.outcome.gainedPossession != null) {
           alindiMi = true;
-          expect(oyun.possessions, contains(sonuc.outcome.gainedPossession));
+          final String id = sonuc.outcome.gainedPossession!;
+          expect(oyun.possessions, contains(id));
           expect(
             sonuc.outcome.effects.map((AppliedEffect e) => e.text),
-            contains(
-              '${possessionName(sonuc.outcome.gainedPossession!)} kazanıldı',
-            ),
+            contains('${possessionName(id)} kazanıldı'),
+          );
+          // Ne hediye edildiği metinde açıkça yazar.
+          expect(sonuc.outcome.text.toLowerCase(),
+              contains(giftById(id)!.name.toLowerCase()));
+          // Hediye yaşa uygun olmalı.
+          expect(giftById(id)!.fitsAge(oyun.player.age), isTrue);
+          expect(
+            oyun.gifts.any((GiftRecord g) =>
+                g.itemId == id &&
+                g.fromId == anne.id &&
+                g.toId == GiftRecord.playerId),
+            isTrue,
           );
         } else {
           // Alınmadıysa eşya listesi büyümez.
@@ -591,18 +628,25 @@ void main() {
     });
 
     test('verilecek hediye kalmadıysa eylem hiç sunulmaz', () {
-      final GameState state = aileli(36).copyWith(
-        possessions: FamilyInteractions.prototypeOnlyGiftItems.toSet(),
-      );
-      final Person anne = yetiskinYakin(state);
-      final GameState hazir = state.copyWith(
-        people: state.people
+      final GameState temel = aileli(36);
+      final Person anne = yetiskinYakin(temel);
+      // Yaşına ve annenin ekonomik durumuna uyan her hediyeye zaten sahip.
+      final Set<String> hepsi = giftsFor(
+        receiverAge: temel.player.age,
+        giverWealth: anne.wealth,
+      ).map((GiftItem g) => g.id).toSet();
+      expect(hepsi, isNotEmpty);
+
+      final GameState hazir = temel.copyWith(
+        possessions: hepsi,
+        people: temel.people
             .map((Person p) => p.id == anne.id ? p.copyWith(bond: 95) : p)
             .toList(growable: false),
       );
       expect(
         interactions
-            .availability(hazir, anne, InteractionKind.hediyeIste)
+            .availability(hazir, hazir.personById(anne.id)!,
+                InteractionKind.hediyeIste)
             .isAllowed,
         isFalse,
       );
@@ -613,6 +657,7 @@ void main() {
       final Person anne = yetiskinYakin(oyun);
 
       int sonCuzdan = oyun.player.wallet;
+      int harcamaSayisi = 0;
       for (int i = 0; i < 8; i++) {
         final InteractionResult sonuc = interactions.perform(
           state: oyun,
@@ -625,19 +670,20 @@ void main() {
         if (harcanan == 0) {
           // Fayda bittiğinde hiçbir şey gösterilmez ve para gitmez.
           expect(sonuc.outcome.effects, isEmpty);
+          expect(sonuc.outcome.givenPossession, isNull);
         } else {
-          expect(harcanan, FamilyInteractions.prototypeOnlyGiftCost);
+          harcamaSayisi++;
+          expect(harcanan, giftById(sonuc.outcome.givenPossession!)!.value,
+              reason: 'Harcanan tutar hediyenin bedeli olmalı');
         }
         sonCuzdan = oyun.player.wallet;
       }
 
-      // Sınırsız tekrar cüzdanı boşaltmaz.
+      // Sınırsız tekrar cüzdanı boşaltmaz: azalan etki kuralı hediye
+      // vermeyi de sınırlar.
       expect(
-        1000 - oyun.player.wallet,
-        lessThanOrEqualTo(
-          FamilyInteractions.prototypeOnlyGiftCost *
-              FamilyInteractions.prototypeOnlyRewardCurve.length,
-        ),
+        harcamaSayisi,
+        lessThan(FamilyInteractions.prototypeOnlyRewardCurve.length),
       );
     });
 

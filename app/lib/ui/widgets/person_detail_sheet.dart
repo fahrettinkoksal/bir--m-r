@@ -121,10 +121,14 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               _Row(label: 'Durum', value: person.occupationLabel),
               if (person.wealth != null)
                 _Row(label: 'Kendi maddi durumu', value: person.wealth!.label),
+              // Hane bilgisi bağ türünden bağımsızdır (D-014): tanışıklık,
+              // arkadaşlık veya akrabalık kimseyi hanene eklemez.
               _Row(
                 label: 'Hane',
                 value: person.isAlive
-                    ? (person.inPlayerHousehold ? 'Seninle aynı evde' : 'Ayrı evde')
+                    ? (person.inPlayerHousehold
+                        ? 'Seninle aynı evde yaşıyor'
+                        : 'Ayrı evde yaşıyor')
                     : '—',
               ),
               if (person.isAlive) ...<Widget>[
@@ -145,15 +149,14 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 ),
               ],
               const SizedBox(height: 20),
-              if (availability.isAllowed)
-                _Actions(
-                  available: available,
-                  blockedReason: (InteractionKind kind) =>
-                      GameScope.of(context).availabilityFor(person, kind).reason,
-                  onSelected: _run,
+              if (!availability.isAllowed)
+                _Note(text: availability.reason!)
+              else if (available.isEmpty)
+                const _Note(
+                  text: 'Şu an bu kişiyle yapabileceğin bir etkileşim yok.',
                 )
               else
-                _Note(text: availability.reason!),
+                _Actions(available: available, onSelected: _run),
               // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;
               // eski sevgiliye sevgiliye özel eylem açılmaz.
               if (person.isAlive && person.relation == RelationType.sevgili) ...<Widget>[
@@ -189,61 +192,25 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
 }
 
 class _Actions extends StatelessWidget {
-  const _Actions({
-    required this.available,
-    required this.blockedReason,
-    required this.onSelected,
-  });
+  const _Actions({required this.available, required this.onSelected});
 
+  /// Yalnızca **gerçekten yapılabilen** etkileşimler.
+  ///
+  /// Kişiye uygun olmayan tür hiç gösterilmez: okul arkadaşının kartında
+  /// kilitli bir "Para İste" satırı çıkmaz.
   final List<InteractionKind> available;
-  final String? Function(InteractionKind kind) blockedReason;
   final void Function(InteractionKind kind) onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final List<InteractionKind> kapali = InteractionKind.values
-        .where((InteractionKind k) => !available.contains(k))
-        .toList(growable: false);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
       children: <Widget>[
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: <Widget>[
-            for (final InteractionKind kind in available)
-              FilledButton.tonal(
-                onPressed: () => onSelected(kind),
-                child: Text(kind.label),
-              ),
-          ],
-        ),
-        // Koşulu sağlanmayan eylem gizlenmez ama tıklanamaz: oyuncu neyin
-        // neden kapalı olduğunu görür, olmamış bir işlem gösterilmez.
-        for (final InteractionKind kind in kapali)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Icon(
-                  Icons.lock_outline,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${kind.label}: ${blockedReason(kind) ?? 'Şu an kapalı.'}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        for (final InteractionKind kind in available)
+          FilledButton.tonal(
+            onPressed: () => onSelected(kind),
+            child: Text(kind.label),
           ),
       ],
     );
