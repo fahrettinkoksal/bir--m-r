@@ -7,8 +7,10 @@ import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
+import '../economy/living_costs.dart';
 import '../life/inheritance.dart';
 import '../life/mortality.dart';
+import '../models/game_settings.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
@@ -41,6 +43,9 @@ class LifeProgression {
 
   /// prototypeOnly: hanede bakım verebilecek sayılan yetişkinlik yaşı.
   static const int prototypeOnlyAdultAge = 18;
+
+  /// prototypeOnly: her yıl mutluluğa geri dönen yas oranı.
+  static const double prototypeOnlyGriefRecoveryRatio = 1 / 3;
 
   GameState advanceOneYear(GameState state) {
     // Ekranda çözülmemiş bir olay varken yaş ilerlemez: olaylar üst üste
@@ -98,11 +103,15 @@ class LifeProgression {
     );
     final List<Person> peopleWithSchool = okulSonucu.people;
 
+    // Kişilerin mal varlığı yıllar içinde değişir; miras donmuş bir
+    // listeye dayanmaz (D-037).
+    final List<Person> peopleWithEstates = _driftEstates(peopleWithSchool);
+
     // Ölümler: hayatın sonlu olduğunu hissettiren, yaşa bağlı bir eğilim.
     // Kayıtlar silinmez; kişi vefat etmiş olarak işaretlenir.
     final ({List<Person> people, int happinessLoss}) olumSonucu = _applyDeaths(
       state: state,
-      people: peopleWithSchool,
+      people: peopleWithEstates,
       newAge: newAge,
       log: log,
     );
@@ -141,21 +150,46 @@ class LifeProgression {
       career: maas.state.career,
     );
 
-    // Kaybın etkisi: mutluluk düşer.
-    GameState afterDeaths = olumSonucu.happinessLoss == 0
-        ? advanced
-        : advanced.copyWith(
-            player: advanced.player.copyWith(
-              stats: advanced.player.stats.copyWith(
-                happiness: (advanced.player.stats.happiness -
-                        olumSonucu.happinessLoss)
+    // Kaybın etkisi: mutluluk düşer, ama bu **kalıcı bir ceza değildir**.
+    // Düşen miktar yas olarak saklanır ve sonraki yıllarda geri verilir
+    // (D-036).
+    GameState afterDeaths = advanced;
+    if (olumSonucu.happinessLoss > 0) {
+      afterDeaths = advanced.copyWith(
+        player: advanced.player.copyWith(
+          stats: advanced.player.stats.copyWith(
+            happiness:
+                (advanced.player.stats.happiness - olumSonucu.happinessLoss)
                     .clamp(0, 100),
-              ),
-            ),
-          );
+          ),
+        ),
+        grief: advanced.grief + olumSonucu.happinessLoss,
+      );
+    }
+
+    // Yas zamanla hafifler: her yıl kalan yasın bir bölümü mutluluğa geri
+    // döner.
+    afterDeaths = _easeGrief(afterDeaths, olumSonucu.happinessLoss > 0);
 
     // Miras: yalnızca bu yıl vefat edenler için ve **bir kez**.
     afterDeaths = _settleEstates(afterDeaths, newAge);
+
+    // Yıllık geçim gideri: hane ve yaşam koşuluna göre, **bir kez** (D-033).
+    final ({GameState state, String? logText}) gider =
+        LivingCosts.apply(afterDeaths);
+    afterDeaths = gider.state;
+    if (gider.logText != null) {
+      afterDeaths = afterDeaths.copyWith(
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...afterDeaths.log,
+          LifeLogEntry(
+            age: newAge,
+            text: gider.logText!,
+            category: LogCategory.kisisel,
+          ),
+        ]),
+      );
+    }
 
     // Hane bakımı: küçük yaştaki oyuncu haneyi boş bırakmaz.
     afterDeaths = _ensureCaregiver(afterDeaths, newAge);
@@ -218,6 +252,59 @@ class LifeProgression {
     return (people: sonuc, happinessLoss: mutlulukKaybi);
   }
 
+  /// Kişilerin mal varlığı hayat boyunca değişir (D-037).
+  ///
+  /// Miras hesabı doğumda donmuş bir servet listesine dayanmaz: çalışan
+  /// yetişkinler ara sıra bir şey alır, dar gelirliler ara sıra elden
+  /// çıkarır. Yeni kişi veya sahte kayıt üretilmez; yalnızca mevcut
+  /// kişinin listesi değişir. Oranlar `prototypeOnly`.
+  List<Person> _driftEstates(List<Person> people) {
+    const List<String> alinabilir = <String>[
+      'kol_saati',
+      'telefon',
+      'radyo',
+      'cay_takimi',
+      'bisiklet',
+      'bilgisayar',
+    ];
+
+    return people.map((Person p) {
+      if (!p.isAlive || p.age < prototypeOnlyAdultAge) return p;
+      if (p.wealth == null) return p;
+
+      // prototypeOnly: her yıl küçük bir ihtimalle alım ya da satım.
+      final double alimSansi = switch (p.wealth!) {
+        WealthTier.cokYoksul => 0.01,
+        WealthTier.yoksul => 0.03,
+        WealthTier.ortaHalli => 0.06,
+        WealthTier.varlikli => 0.09,
+        WealthTier.cokVarlikli => 0.12,
+      };
+      final double satisSansi = switch (p.wealth!) {
+        WealthTier.cokYoksul => 0.10,
+        WealthTier.yoksul => 0.07,
+        WealthTier.ortaHalli => 0.04,
+        WealthTier.varlikli => 0.02,
+        WealthTier.cokVarlikli => 0.01,
+      };
+
+      if (p.estate.isNotEmpty && _rng.nextDouble() < satisSansi) {
+        final List<String> kalan = <String>[...p.estate]
+          ..removeAt(_rng.nextInt(p.estate.length));
+        return p.copyWith(estate: List<String>.unmodifiable(kalan));
+      }
+      if (p.estate.length < 6 && _rng.nextDouble() < alimSansi) {
+        return p.copyWith(
+          estate: List<String>.unmodifiable(<String>[
+            ...p.estate,
+            alinabilir[_rng.nextInt(alinabilir.length)],
+          ]),
+        );
+      }
+      return p;
+    }).toList(growable: false);
+  }
+
   /// Bu yıl vefat edenlerin mirasını **bir kez** dağıtır.
   GameState _settleEstates(GameState state, int newAge) {
     GameState next = state;
@@ -276,14 +363,18 @@ class LifeProgression {
         bakimVerebilir.contains(p.relation));
 
     if (index < 0) {
-      // Uygun yakın yoksa uydurma bir kişi eklenmez.
+      // Uygun yakın yoksa **uydurma bir kişi eklenmez**; bunun yerine açık
+      // bir bakım durumuna geçilir (D-037). Ayrıntılı velayet sistemi
+      // sonraki paketlerde genişletilecek.
+      if (state.careStatus == CareStatus.kurumBakimi) return state;
       return state.copyWith(
+        careStatus: CareStatus.kurumBakimi,
         log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
           ...state.log,
           LifeLogEntry(
             age: newAge,
             text: 'Evde sana bakabilecek bir yetişkin kalmadı; '
-                'bundan sonrası zor olacak.',
+                'bakımın kurum tarafından üstlenildi.',
             category: LogCategory.aile,
           ),
         ]),
@@ -297,6 +388,7 @@ class LifeProgression {
 
     return state.copyWith(
       people: List<Person>.unmodifiable(people),
+      careStatus: CareStatus.yakinAkraba,
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         LifeLogEntry(
@@ -306,6 +398,31 @@ class LifeProgression {
           category: LogCategory.aile,
         ),
       ]),
+    );
+  }
+
+  /// Yası hafifletir (D-036).
+  ///
+  /// Her yıl kalan yasın bir bölümü mutluluğa geri döner; yas kalıcı ve
+  /// geri dönülemez bir ceza değildir. Kaybın yaşandığı yıl geri verme
+  /// yapılmaz.
+  GameState _easeGrief(GameState state, bool lossThisYear) {
+    if (state.grief <= 0 || lossThisYear) return state;
+
+    // prototypeOnly: kalan yasın üçte biri, en az 2 puan geri döner.
+    final int geriVerilen =
+        max(2, (state.grief * prototypeOnlyGriefRecoveryRatio).round())
+            .clamp(0, state.grief);
+    if (geriVerilen <= 0) return state;
+
+    return state.copyWith(
+      grief: state.grief - geriVerilen,
+      player: state.player.copyWith(
+        stats: state.player.stats.copyWith(
+          happiness:
+              (state.player.stats.happiness + geriVerilen).clamp(0, 100),
+        ),
+      ),
     );
   }
 

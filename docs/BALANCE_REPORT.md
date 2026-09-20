@@ -9,7 +9,10 @@ eder ve sayıları raporlar.
 **Buradaki sayılar ölçüm sonucudur, onaylanmış denge kararı değildir.**
 Kesin değerler Faho'nun onayıyla belirlenecektir (D-033, D-036).
 
-Ölçüm tarihi: PR #18 kodu (`claude/paket5-olum-miras`), 500 simüle hayat.
+İlk ölçüm: PR #18 kodu (`claude/paket5-olum-miras`), 500 simüle hayat.
+**Güncelleme:** D-031 – D-038 düzeltmeleri uygulandıktan sonra (yaşam gideri,
+yas azalması, mal varlığı değişimi) ölçüm yenilendi; aşağıdaki "güncel"
+bölümler bu sürüme aittir.
 
 ---
 
@@ -120,6 +123,59 @@ diğerlerini anlamsızlaştırmıyor (D-033).
   yüksek**. Kesin oranlar Faho'nun kararı.
 
 ---
+
+## 4) Güncel ölçüm — D-031 – D-038 düzeltmelerinden sonra
+
+Yaşam gideri, yas azalması ve NPC mal varlığı değişimi eklendikten sonra
+500 hayat yeniden simüle edildi.
+
+### Ölüm yaşı (güncel)
+
+| Ölçüt | İlk ölçüm | Güncel |
+|---|---|---|
+| Ortalama ölüm yaşı | 76,4 | **77,3** |
+| Medyan | 79 | 79 |
+| 0-18 yaş | %0,8 | **%0,6** |
+| 18-40 yaş | %1,6 | %2,2 |
+| 70-80 yaş | %25,0 | %28,4 |
+| 90+ | %17,6 | **%19,2** |
+| 18 yaşından önce ebeveyn kaybı | %16,4 | **%19,4** |
+
+Fark, rastgelelik akışının değişmesinden kaynaklanıyor (aynı eğri, farklı
+çekilişler). **İki gözlem aynı kaldı:** çocukluk ölümü çok seyrek; yaşlı uç
+ve çocukken ebeveyn kaybı biraz yüksek. Bunlar hâlâ **geçici** değerler ve
+Faho'nun onayıyla ayarlanacak (C1).
+
+### Uygulanan yıllık geçim gideri (D-033)
+
+| Durum | Yıllık gider |
+|---|---|
+| Çocuk (18 yaş altı) | 0 ₺ |
+| Ailesinin yanında yetişkin | 45.000 ₺ |
+| Bağımsız, kirada | 140.000 ₺ |
+| Bağımsız, kendi evinde | 90.000 ₺ |
+
+**Gider sonrası yıllık birikim:**
+
+| Meslek | Ailede | Bağımsız (kira) | Kendi evinde |
+|---|---|---|---|
+| Garson | 120.000 ₺ | **25.000 ₺** | 75.000 ₺ |
+| Mağaza çalışanı | 135.000 ₺ | **40.000 ₺** | 90.000 ₺ |
+| Teknik servis | 215.000 ₺ | 120.000 ₺ | 170.000 ₺ |
+| Ressam / tasarımcı | 255.000 ₺ | 160.000 ₺ | 210.000 ₺ |
+| Öğretmen | 375.000 ₺ | 280.000 ₺ | 330.000 ₺ |
+| Yazılım geliştirici | 675.000 ₺ | 580.000 ₺ | 630.000 ₺ |
+
+**Yorum (öneri, karar değil):**
+- Ailesinin yanında yaşayan bir mağaza çalışanı küçük daireye **~13 yılda**
+  ulaşıyor; okunaklı bir hedef.
+- **Bağımsız yaşayan düşük gelirli için birikim çok ince** (garson 25.000 ₺/yıl
+  → küçük daire ~72 yıl). Üç ayardan biri gerekebilir: bağımsız gideri
+  düşürmek, düşük maaşları yükseltmek ya da konut fiyatını indirmek.
+  Karar Faho'nun.
+- Yazılımcı ile garson arasındaki **birikim** farkı, maaş farkından (4,4x)
+  çok daha büyük (23x): gider sabit olduğu için düşük gelirde orantısız
+  ağırlaşıyor. Gideri gelire göre kısmen oranlamak bu makası daraltır.
 
 ## Ölçümün sınırları
 

@@ -10,6 +10,7 @@ import 'package:bir_omur/data/save/save_service.dart';
 import 'package:bir_omur/data/save/save_store.dart';
 import 'package:bir_omur/data/university_catalog.dart';
 import 'package:bir_omur/domain/career/job_market.dart';
+import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/education/education_path.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
@@ -360,7 +361,9 @@ void main() {
 
       final GameState sonra =
           LifeProgression(Random(1)).advanceOneYear(state);
-      expect(sonra.player.wallet, cuzdanOnce + maas);
+      // Maaş bir kez ödenir; yıllık geçim gideri (D-033) bir kez düşer.
+      final int gider = LivingCosts.yearlyCost(sonra);
+      expect(sonra.player.wallet, cuzdanOnce + maas - gider);
       expect(sonra.career.lastPaidAge, 21);
       expect(
         sonra.log.any((dynamic e) => (e.text as String).contains('cüzdanına')),
@@ -398,16 +401,17 @@ void main() {
           LifeProgression(Random(2)).advanceOneYear(state);
 
       // Cüzdan yalnızca gerçekten gerçekleşmiş bir olayla (miras) değişir;
-      // hayatta olan ailenin varlığı sessizce oyuncuya geçmez.
-      final bool mirasVar = sonra.settledEstates.isNotEmpty;
-      if (!mirasVar) {
-        expect(sonra.player.wallet, 0);
+      // hayatta olan ailenin varlığı sessizce oyuncuya geçmez. Geçim gideri
+      // cüzdanı eksiye düşürmez (D-033).
+      expect(sonra.player.wallet, greaterThanOrEqualTo(0));
+      final bool mirasSatiri =
+          sonra.log.any((LifeLogEntry e) => e.text.contains('miras'));
+      if (!mirasSatiri) {
+        expect(sonra.player.wallet, 0,
+            reason: 'Miras yoksa cüzdan kendiliğinden dolmamalı');
       } else {
-        expect(
-          sonra.log.any((LifeLogEntry e) => e.text.contains('miras')),
-          isTrue,
-          reason: 'Cüzdan değiştiyse gerekçesi günlükte olmalı',
-        );
+        expect(sonra.player.wallet, greaterThan(0),
+            reason: 'Günlükte miras varsa cüzdana gerçekten girmeli');
       }
     });
   });

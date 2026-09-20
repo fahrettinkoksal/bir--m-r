@@ -14,9 +14,16 @@ import '../widgets/section_scaffold.dart';
 /// uygulama kapatılıp açılınca da görünür. Yeni hayat yalnızca oyuncu
 /// açıkça isterse başlar.
 class LifeSummaryScreen extends StatelessWidget {
-  const LifeSummaryScreen({super.key, required this.onNewLife});
+  const LifeSummaryScreen({
+    super.key,
+    required this.onNewLife,
+    required this.onShowArchive,
+  });
 
   final VoidCallback onNewLife;
+
+  /// Geçmiş Hayatlar arşivini açar.
+  final VoidCallback onShowArchive;
 
   @override
   Widget build(BuildContext context) {
@@ -140,10 +147,23 @@ class LifeSummaryScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            key: const Key('life_summary_archive'),
+            onPressed: onShowArchive,
+            child: Text(
+              state.pastLives.isEmpty
+                  ? 'Geçmiş Hayatlar'
+                  : 'Geçmiş Hayatlar (${state.pastLives.length})',
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
         const InfoPanel(
           icon: Icons.save_outlined,
-          text: 'Bu hayatın kaydı duruyor. Yeni hayat, sen onayladığında '
-              'başlar.',
+          text: 'Bu hayatın özeti, yeni hayata başlasan bile Geçmiş '
+              'Hayatlar arşivinde saklanır.',
         ),
       ],
     );

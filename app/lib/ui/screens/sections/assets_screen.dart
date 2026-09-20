@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/shop_catalog.dart';
 import '../../../domain/interaction/item_actions.dart';
+import '../../../domain/economy/living_costs.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/owned_item.dart';
 import '../../../domain/models/person.dart';
@@ -85,6 +86,17 @@ class _AssetsScreenState extends State<AssetsScreen> {
       onBack: widget.onBack,
       children: <Widget>[
         _WalletCard(balance: state.player.walletLabel),
+        const SizedBox(height: 10),
+        // Yıllık geçim gideri gerçek hesaptan okunur (D-033).
+        InfoPanel(
+          icon: Icons.receipt_long_outlined,
+          text: LivingCosts.yearlyCost(state) == 0
+              ? LivingCosts.labelFor(state)
+              : '${LivingCosts.labelFor(state)} Yıllık geçim giderin: '
+                  '${LivingCosts.yearlyCost(state)} ₺.'
+                  '${state.hardshipYears > 0 ? ' Bu yıl geçim sıkıntısı '
+                      'çekiyorsun.' : ''}',
+        ),
         const SizedBox(height: 12),
         if (magazalar.isNotEmpty) ...<Widget>[
           MenuRow(

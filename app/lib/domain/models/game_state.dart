@@ -7,9 +7,11 @@ import 'education.dart';
 import 'book_progress.dart';
 import 'career.dart';
 import 'game_event.dart';
+import 'game_settings.dart';
 import 'gift_record.dart';
 import 'owned_item.dart';
 import 'life_log.dart';
+import 'life_summary.dart';
 import 'parental_status.dart';
 import 'pending_interview.dart';
 import 'pending_license_exam.dart';
@@ -56,6 +58,11 @@ class GameState {
     this.deceased = false,
     this.deathAge,
     this.deathCause,
+    this.pastLives = const <LifeSummary>[],
+    this.careStatus = CareStatus.aileYaninda,
+    this.grief = 0,
+    this.hardshipYears = 0,
+    this.settings = const GameSettings(),
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -263,6 +270,29 @@ class GameState {
   /// Kısa ölüm gerekçesi.
   final String? deathCause;
 
+  /// Tamamlanmış hayatların arşivi (D-037).
+  ///
+  /// Yeni hayat başlatmak bu listeyi **silmez**; hayatlar üst üste birikir.
+  final List<LifeSummary> pastLives;
+
+  /// Oyuncunun bakım durumu (D-037).
+  ///
+  /// Çocuk yaşta hanede yetişkin kalmadığında açık bir duruma geçilir;
+  /// oyuncu açıklamasız bırakılmaz.
+  final CareStatus careStatus;
+
+  /// Kalan **yas** yükü (D-036).
+  ///
+  /// Kayıp anında mutluluktan düşülen değerin henüz geri verilmemiş kısmı.
+  /// Her yaşta bir bölümü geri verilir; yas kalıcı bir ceza değildir.
+  final int grief;
+
+  /// Üst üste geçim sıkıntısı çekilen yıl sayısı (D-033).
+  final int hardshipYears;
+
+  /// Oyuncunun kendi ayarları (D-032).
+  final GameSettings settings;
+
   /// Hayatta olan hane üyeleri.
   List<Person> get householdMembers => people
       .where((Person p) => p.isAlive && p.inPlayerHousehold)
@@ -408,6 +438,11 @@ class GameState {
     bool? deceased,
     int? deathAge,
     String? deathCause,
+    List<LifeSummary>? pastLives,
+    CareStatus? careStatus,
+    int? grief,
+    int? hardshipYears,
+    GameSettings? settings,
   }) {
     return GameState(
       seed: seed,
@@ -449,6 +484,11 @@ class GameState {
       deceased: deceased ?? this.deceased,
       deathAge: deathAge ?? this.deathAge,
       deathCause: deathCause ?? this.deathCause,
+      pastLives: pastLives ?? this.pastLives,
+      careStatus: careStatus ?? this.careStatus,
+      grief: grief ?? this.grief,
+      hardshipYears: hardshipYears ?? this.hardshipYears,
+      settings: settings ?? this.settings,
     );
   }
 }

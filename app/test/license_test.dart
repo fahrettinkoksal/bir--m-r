@@ -29,15 +29,39 @@ GameState oyuncu(int seed, {int age = 20, int wallet = 1000000}) {
   );
 }
 
-/// Sınavı doğru cevaplayarak ehliyeti alır.
-GameState ehliyetAl(GameState state, LicenseType type) {
-  final LicenseResult basvuru = office.apply(state, type, Random(1));
+/// Sınavın bütün sorularını doğru cevaplar.
+///
+/// [wrongAnswers] kadar soruya bilerek yanlış cevap verir.
+LicenseResult sinaviCevapla(
+  GameState state,
+  LicenseType type, {
+  int wrongAnswers = 0,
+  int seed = 1,
+}) {
+  final LicenseResult basvuru = office.apply(state, type, Random(seed));
   expect(basvuru.outcome.examStarted, isTrue, reason: basvuru.outcome.text);
-  final LicenseQuestion soru = basvuru.state.pendingLicenseExam!.question!;
-  final LicenseResult cevap =
-      office.answer(basvuru.state, soru.correctIndex);
-  expect(cevap.outcome.granted, isTrue);
-  return cevap.state;
+
+  GameState current = basvuru.state;
+  LicenseResult sonuc = basvuru;
+  int kalanYanlis = wrongAnswers;
+
+  while (current.pendingLicenseExam != null) {
+    final LicenseQuestion soru = current.pendingLicenseExam!.currentQuestion!;
+    final int secim = kalanYanlis > 0
+        ? (soru.correctIndex + 1) % soru.options.length
+        : soru.correctIndex;
+    if (kalanYanlis > 0) kalanYanlis--;
+    sonuc = office.answer(current, secim);
+    current = sonuc.state;
+  }
+  return sonuc;
+}
+
+/// Sınavı geçerek ehliyeti alır.
+GameState ehliyetAl(GameState state, LicenseType type) {
+  final LicenseResult sonuc = sinaviCevapla(state, type);
+  expect(sonuc.outcome.granted, isTrue, reason: sonuc.outcome.text);
+  return sonuc.state;
 }
 
 void main() {
@@ -48,6 +72,10 @@ void main() {
     test('her ehliyetin ayrı ve yeterli soru havuzu var', () {
       for (final LicenseType type in LicenseType.values) {
         final List<LicenseQuestion> sorular = questionsForLicense(type.id);
+        expect(sorular.length,
+            greaterThanOrEqualTo(LicenseOffice.questionsPerExam + 1),
+            reason: '${type.label}: sınavdaki soru sayısından fazla soru '
+                'olmalı');
         expect(sorular.length, greaterThanOrEqualTo(4),
             reason: '${type.label} için en az 4 soru olmalı');
         for (final LicenseQuestion q in sorular) {
@@ -99,7 +127,7 @@ void main() {
       expect(r.state.player.wallet, 100);
     });
 
-    test('başvuru ücreti bir kez kesilir ve sınav açılır', () {
+    test('başvuru ücreti bir kez kesilir ve üç soruluk sınav açılır', () {
       final GameState state = oyuncu(3);
       final int ucret = prototypeOnlyExamFee(LicenseType.otomobil);
       final LicenseResult r =
@@ -112,11 +140,67 @@ void main() {
       expect(sinav, isNotNull);
       expect(sinav!.licenseId, LicenseType.otomobil.id);
       expect(sinav.feePaid, ucret);
-      expect(sinav.question, isNotNull);
+      expect(sinav.questionIds.length, LicenseOffice.questionsPerExam);
+      expect(sinav.questionIds.toSet().length, sinav.questionIds.length,
+          reason: 'Aynı sınavda aynı soru iki kez sorulmaz');
+      expect(sinav.answers, isEmpty);
+      expect(sinav.currentQuestion, isNotNull);
       expect(r.state.licenses, isEmpty, reason: 'Cevapsız ehliyet verilmez');
     });
 
-    test('doğru cevap ehliyeti kalıcı olarak verir ve günlüğe yazar', () {
+    test('iki doğru yetiyor, bir doğru yetmiyor', () {
+      // 3 soruda 1 yanlış → 2 doğru → geçer.
+      final LicenseResult gecti = sinaviCevapla(
+        oyuncu(30),
+        LicenseType.otomobil,
+        wrongAnswers: 1,
+      );
+      expect(gecti.outcome.granted, isTrue);
+      expect(gecti.outcome.correctCount, 2);
+      expect(gecti.outcome.questionCount, LicenseOffice.questionsPerExam);
+
+      // 2 yanlış → 1 doğru → kalır.
+      final LicenseResult kaldi = sinaviCevapla(
+        oyuncu(31),
+        LicenseType.otomobil,
+        wrongAnswers: 2,
+      );
+      expect(kaldi.outcome.granted, isFalse);
+      expect(kaldi.outcome.correctCount, 1);
+      expect(kaldi.state.licenses, isEmpty);
+    });
+
+    test('ehliyet sınav bitmeden verilmez', () {
+      final LicenseResult basvuru =
+          office.apply(oyuncu(32), LicenseType.motosiklet, Random(4));
+      final LicenseQuestion ilk =
+          basvuru.state.pendingLicenseExam!.currentQuestion!;
+      final LicenseResult ilkCevap =
+          office.answer(basvuru.state, ilk.correctIndex);
+
+      expect(ilkCevap.outcome.granted, isFalse);
+      expect(ilkCevap.state.licenses, isEmpty);
+      expect(ilkCevap.state.pendingLicenseExam, isNotNull);
+      expect(ilkCevap.state.pendingLicenseExam!.answers.length, 1);
+      expect(ilkCevap.state.pendingLicenseExam!.currentIndex, 2);
+    });
+
+    test('sonuçta bütün soruların doğru cevabı ve açıklaması gösterilir', () {
+      final LicenseResult sonuc = sinaviCevapla(
+        oyuncu(33),
+        LicenseType.motosiklet,
+        wrongAnswers: 3,
+      );
+      expect(sonuc.outcome.granted, isFalse);
+      expect(sonuc.outcome.review.length, LicenseOffice.questionsPerExam);
+      for (final ExamAnswerReview inceleme in sonuc.outcome.review) {
+        expect(inceleme.correctOption, inceleme.question.correctOption);
+        expect(inceleme.question.explanation.trim(), isNotEmpty);
+        expect(inceleme.isCorrect, isFalse);
+      }
+    });
+
+    test('sınavı geçmek ehliyeti kalıcı olarak verir ve günlüğe yazar', () {
       final GameState state = oyuncu(4);
       final GameState ehliyetli = ehliyetAl(state, LicenseType.motosiklet);
 
@@ -125,33 +209,26 @@ void main() {
       expect(ehliyetli.log.last.text, contains('ehliyetin artık var'));
     });
 
-    test('yanlış cevapta ehliyet verilmez, doğru cevap gösterilir', () {
-      final GameState state = oyuncu(5);
-      final LicenseResult basvuru =
-          office.apply(state, LicenseType.otomobil, Random(3));
-      final LicenseQuestion soru = basvuru.state.pendingLicenseExam!.question!;
-      final int yanlis = (soru.correctIndex + 1) % soru.options.length;
-      final LicenseResult cevap = office.answer(basvuru.state, yanlis);
-
-      expect(cevap.outcome.granted, isFalse);
-      expect(cevap.state.licenses, isEmpty);
-      expect(cevap.outcome.correctAnswer, soru.correctOption);
-      expect(cevap.outcome.explanation, soru.explanation);
-      expect(cevap.state.pendingLicenseExam, isNull);
+    test('sınav kalınca ehliyet verilmez ve doğru cevaplar gösterilir', () {
+      final LicenseResult sonuc = sinaviCevapla(
+        oyuncu(5),
+        LicenseType.otomobil,
+        wrongAnswers: 3,
+      );
+      expect(sonuc.outcome.granted, isFalse);
+      expect(sonuc.state.licenses, isEmpty);
+      expect(sonuc.outcome.review, isNotEmpty);
+      expect(sonuc.state.pendingLicenseExam, isNull);
     });
 
     test('cevap iki kez uygulanmaz, ücret tekrar kesilmez', () {
-      final GameState state = oyuncu(6);
-      final LicenseResult basvuru =
-          office.apply(state, LicenseType.motosiklet, Random(1));
-      final LicenseQuestion soru = basvuru.state.pendingLicenseExam!.question!;
       final LicenseResult ilk =
-          office.answer(basvuru.state, soru.correctIndex);
+          sinaviCevapla(oyuncu(6), LicenseType.motosiklet);
+      expect(ilk.outcome.granted, isTrue);
 
       final int cuzdan = ilk.state.player.wallet;
       final int gunluk = ilk.state.log.length;
-      final LicenseResult ikinci =
-          office.answer(ilk.state, soru.correctIndex);
+      final LicenseResult ikinci = office.answer(ilk.state, 0);
 
       expect(ikinci.outcome.applied, isFalse);
       expect(ikinci.state.player.wallet, cuzdan);
@@ -224,17 +301,29 @@ void main() {
         final LicenseResult r =
             office.apply(state, LicenseType.otomobil, Random(i));
         if (!r.outcome.applied) break;
-        final LicenseQuestion soru = r.state.pendingLicenseExam!.question!;
-        sorulan.add(soru.id);
-        final int yanlis = (soru.correctIndex + 1) % soru.options.length;
-        state = office.answer(r.state, yanlis).state;
+        sorulan.addAll(r.state.pendingLicenseExam!.questionIds);
+        GameState current = r.state;
+        while (current.pendingLicenseExam != null) {
+          final LicenseQuestion soru =
+              current.pendingLicenseExam!.currentQuestion!;
+          current = office
+              .answer(current, (soru.correctIndex + 1) % soru.options.length)
+              .state;
+        }
+        state = current;
       }
 
-      expect(sorulan.length, LicenseOffice.prototypeOnlyMaxAttemptsPerAge);
-      expect(sorulan.toSet().length, sorulan.length,
-          reason: 'Aynı yaşta aynı soru tekrarlanmamalı');
-      expect(state.player.wallet, cuzdanOnce - ucret * sorulan.length,
-          reason: 'Her denemede ücret bir kez alınmalı');
+      expect(
+        sorulan.length,
+        LicenseOffice.prototypeOnlyMaxAttemptsPerAge *
+            LicenseOffice.questionsPerExam,
+      );
+      expect(
+        state.player.wallet,
+        cuzdanOnce -
+            ucret * LicenseOffice.prototypeOnlyMaxAttemptsPerAge,
+        reason: 'Her denemede ücret bir kez alınmalı',
+      );
       expect(
         office.applicationAvailability(state, LicenseType.otomobil).isAllowed,
         isFalse,
@@ -244,12 +333,12 @@ void main() {
     test('yaş ilerleyince tekrar başvurulabilir', () {
       GameState state = oyuncu(21, age: 20);
       for (int i = 0; i < LicenseOffice.prototypeOnlyMaxAttemptsPerAge; i++) {
-        final LicenseResult r =
-            office.apply(state, LicenseType.motosiklet, Random(i));
-        final LicenseQuestion soru = r.state.pendingLicenseExam!.question!;
-        state = office
-            .answer(r.state, (soru.correctIndex + 1) % soru.options.length)
-            .state;
+        state = sinaviCevapla(
+          state,
+          LicenseType.motosiklet,
+          wrongAnswers: LicenseOffice.questionsPerExam,
+          seed: i,
+        ).state;
       }
       expect(
         office.applicationAvailability(state, LicenseType.motosiklet).isAllowed,
@@ -338,19 +427,23 @@ void main() {
 
       final PendingLicenseExam sonra = geri.pendingLicenseExam!;
       expect(sonra.licenseId, once.licenseId);
-      expect(sonra.questionId, once.questionId);
+      expect(sonra.questionIds, once.questionIds);
+      expect(sonra.answers, once.answers);
       expect(sonra.askedAtAge, once.askedAtAge);
       expect(sonra.feePaid, once.feePaid);
-      expect(sonra.question!.text, once.question!.text);
-      expect(sonra.question!.options, once.question!.options);
+      expect(sonra.currentQuestion!.text, once.currentQuestion!.text);
+      expect(sonra.currentQuestion!.options, once.currentQuestion!.options);
       expect(geri.player.wallet, basvuru.state.player.wallet,
           reason: 'Yükleme ücreti ikinci kez kesmemeli');
 
-      // Yükledikten sonra verilen cevap normal sonuçlanır.
-      final LicenseResult cevap =
-          office.answer(geri, sonra.question!.correctIndex);
-      expect(cevap.outcome.granted, isTrue);
-      expect(cevap.state.hasLicense(LicenseType.otomobil.id), isTrue);
+      // Yükledikten sonra sınav kaldığı yerden sürer ve sonuçlanır.
+      GameState current = geri;
+      while (current.pendingLicenseExam != null) {
+        final LicenseQuestion soru =
+            current.pendingLicenseExam!.currentQuestion!;
+        current = office.answer(current, soru.correctIndex).state;
+      }
+      expect(current.hasLicense(LicenseType.otomobil.id), isTrue);
     });
 
     test('alınan ehliyet kaydedilip geri okunur', () async {

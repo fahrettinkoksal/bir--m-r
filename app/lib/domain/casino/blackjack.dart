@@ -222,6 +222,13 @@ class Blackjack {
 /// Kumarhaneye giriş ve bahis koşulları.
 abstract final class CasinoAccess {
   static InteractionAvailability check(GameState state) {
+    // Kumarhane isteğe bağlı bir modüldür; kapalıysa hiçbir masa açılmaz
+    // (D-032).
+    if (!state.settings.casinoEnabled) {
+      return const InteractionAvailability.blocked(
+        'Kumarhane ayarlardan kapatılmış.',
+      );
+    }
     if (state.player.age < CasinoRules.prototypeOnlyMinAge) {
       return InteractionAvailability.blocked(
         'Kumarhane ${CasinoRules.prototypeOnlyMinAge} yaşından itibaren '
@@ -246,6 +253,13 @@ abstract final class CasinoAccess {
     if (state.player.wallet < bet) {
       return const InteractionAvailability.blocked(
         'Cüzdanında bu bahis için yeterli para yok.',
+      );
+    }
+    // Oyuncunun kendi belirlediği isteğe bağlı limit (D-032).
+    final int? kendiLimit = state.settings.wagerLimitPerAge;
+    if (kendiLimit != null && state.wagerThisAge + bet > kendiLimit) {
+      return InteractionAvailability.blocked(
+        'Kendine koyduğun $kendiLimit ₺ yıllık sınıra ulaştın.',
       );
     }
     if (state.wagerThisAge + bet >

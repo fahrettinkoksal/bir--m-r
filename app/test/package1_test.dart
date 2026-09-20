@@ -81,10 +81,19 @@ void main() {
         expect(p.classId, c.state!.education.classId);
         expect(p.schoolId, c.state!.education.schoolId);
       }
-      // Hepsi kendiliğinden yakın arkadaş olmaz.
+      // Sınıf listesi okul bağına dayanır: yakınlık derecesi değişse bile
+      // kişi sınıfta kalır, ama sınıfa alakasız bir bağ (akraba, sevgili)
+      // sızmaz.
       expect(
-        sinif.every((Person p) => p.relation == RelationType.sinifArkadasi),
+        sinif.every((Person p) =>
+            p.relation == RelationType.sinifArkadasi ||
+            p.relation == RelationType.arkadas),
         isTrue,
+      );
+      // Hepsi kendiliğinden yakın arkadaşa dönüşmez.
+      expect(
+        sinif.where((Person p) => p.relation == RelationType.arkadas).length,
+        lessThan(sinif.length),
       );
     });
 

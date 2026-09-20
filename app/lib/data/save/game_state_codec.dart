@@ -15,10 +15,12 @@ import '../../domain/models/book_progress.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
+import '../../domain/models/game_settings.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
+import '../../domain/models/life_summary.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_interview.dart';
@@ -76,11 +78,21 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           ? null
           : <String, Object?>{
               'licenseId': state.pendingLicenseExam!.licenseId,
-              'questionId': state.pendingLicenseExam!.questionId,
+              'questionIds': state.pendingLicenseExam!.questionIds,
+              'answers': state.pendingLicenseExam!.answers,
               'askedAtAge': state.pendingLicenseExam!.askedAtAge,
               'feePaid': state.pendingLicenseExam!.feePaid,
             },
       'settledEstates': state.settledEstates.toList(growable: false),
+      'pastLives':
+          state.pastLives.map(_encodeLifeSummary).toList(growable: false),
+      'careStatus': state.careStatus.name,
+      'grief': state.grief,
+      'hardshipYears': state.hardshipYears,
+      'settings': <String, Object?>{
+        'casinoEnabled': state.settings.casinoEnabled,
+        'wagerLimitPerAge': state.settings.wagerLimitPerAge,
+      },
       'deceased': state.deceased,
       'deathAge': state.deathAge,
       'deathCause': state.deathCause,
@@ -160,6 +172,32 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'classId': p.classId,
       'estate': p.estate,
     };
+
+Map<String, Object?> _encodeLifeSummary(LifeSummary l) => <String, Object?>{
+      'fullName': l.fullName,
+      'birthCity': l.birthCity,
+      'deathAge': l.deathAge,
+      'deathCause': l.deathCause,
+      'educationLabel': l.educationLabel,
+      'careerLabel': l.careerLabel,
+      'wallet': l.wallet,
+      'itemCount': l.itemCount,
+      'licenseCount': l.licenseCount,
+      'highlights': l.highlights,
+    };
+
+LifeSummary _decodeLifeSummary(Map<String, Object?> json) => LifeSummary(
+      fullName: _string(json, 'fullName'),
+      birthCity: _string(json, 'birthCity'),
+      deathAge: _int(json, 'deathAge'),
+      deathCause: _string(json, 'deathCause'),
+      educationLabel: _string(json, 'educationLabel'),
+      careerLabel: _string(json, 'careerLabel'),
+      wallet: _int(json, 'wallet'),
+      itemCount: _int(json, 'itemCount'),
+      licenseCount: _int(json, 'licenseCount'),
+      highlights: List<String>.unmodifiable(_stringList(json, 'highlights')),
+    );
 
 Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{
       'id': i.id,
@@ -372,6 +410,34 @@ GameState decodeGameState(Map<String, Object?> json) {
           : _stringSet(json, 'settledEstates'),
     ),
     deceased: json['deceased'] == true,
+    // Eski kayıtlarda arşiv, bakım durumu, yas ve ayarlar yoktur; güvenli
+    // varsayılanlarla açılır ve hiçbir hayat silinmez.
+    pastLives: List<LifeSummary>.unmodifiable(
+      json['pastLives'] == null
+          ? const <LifeSummary>[]
+          : _list(json, 'pastLives')
+              .map((Object? e) => _decodeLifeSummary(_asMap(e, 'pastLives[]')))
+              .toList(growable: false),
+    ),
+    careStatus: _enumByNameOrNull(
+          CareStatus.values,
+          _stringOrNull(json, 'careStatus'),
+          'careStatus',
+        ) ??
+        CareStatus.aileYaninda,
+    grief: json['grief'] == null ? 0 : _int(json, 'grief'),
+    hardshipYears:
+        json['hardshipYears'] == null ? 0 : _int(json, 'hardshipYears'),
+    settings: json['settings'] == null
+        ? const GameSettings()
+        : GameSettings(
+            casinoEnabled:
+                _asMap(json['settings'], 'settings')['casinoEnabled'] != false,
+            wagerLimitPerAge: _intOrNull(
+              _asMap(json['settings'], 'settings'),
+              'wagerLimitPerAge',
+            ),
+          ),
     deathAge: _intOrNull(json, 'deathAge'),
     deathCause: _stringOrNull(json, 'deathCause'),
   );
@@ -521,7 +587,10 @@ Person _decodePerson(Map<String, Object?> json) {
 PendingLicenseExam _decodeLicenseExam(Map<String, Object?> json) =>
     PendingLicenseExam(
       licenseId: _string(json, 'licenseId'),
-      questionId: _string(json, 'questionId'),
+      questionIds: List<String>.unmodifiable(_stringList(json, 'questionIds')),
+      answers: List<int>.unmodifiable(
+        _list(json, 'answers').map((Object? e) => e! as int),
+      ),
       askedAtAge: _int(json, 'askedAtAge'),
       feePaid: _int(json, 'feePaid'),
     );

@@ -763,6 +763,10 @@ bozar, şimdilik eklenmesin.
 **Geçici kalan (denge kararı değil):** bahis alt/üst sınırı ve yıllık toplam
 sınır; bunlar maaş ve gider dengesiyle (Q-055) birlikte belirlenecek.
 
+**Uygulama notu:** Kararın kod tarafı `claude/duzeltmeler-d031-d038`
+dalında tamamlandı: kumarhane ayarlardan kapatılabiliyor, oyuncu kendine
+yıllık bahis limiti koyabiliyor, kalan hak vurgusu nötr bilgiye çevrildi.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-055 — Ortak ekonomi ölçeği: fiyatlar ve maaşlar
@@ -817,6 +821,10 @@ anlamlı olur. Kredi, konut alımını erişilebilir kılmak için ilk aday.
 Ölçüm raporu: `docs/BALANCE_REPORT.md`. Kesin sayılar **Faho'nun onayı olmadan
 kalıcı denge kuralı ilan edilmeyecek**.
 
+**Uygulama notu:** Yıllık geçim gideri uygulandı (çocukta 0; ailesinin
+yanında, bağımsız kirada ve kendi evinde farklı). Cüzdan eksiye düşmüyor;
+geçim sıkıntısı durumu var. Güncel ölçüm `docs/BALANCE_REPORT.md` §4'te.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-056 — Araç sahipliği, ehliyet ve taşınma
@@ -860,6 +868,10 @@ olarak ayrı bir pakette ele alınsın.
   tutarlı** olacak; **yakıt ve kaza sistemleri şimdilik genişletilmeyecek**.
 
 **Geçici kalan (denge kararı değil):** satın alma yaş eşikleri ve araç fiyatları.
+
+**Uygulama notu:** Galeride araç satın alma yaşı 18'e çekildi. Aksesuar
+yaşları (kask 16, tavan bagajı 17) kararda geçmediği için değiştirilmedi;
+Faho'nun tercihi bekleniyor.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
@@ -909,6 +921,10 @@ düşürülsün. Ehliyetin kaybı ancak bir kaza/ihlal sistemi gelirse anlamlı.
 **Geçici kalan (denge kararı değil):** yıllık deneme sayısı (şu an 2) ve sınav
 ücretleri.
 
+**Uygulama notu:** Sınav 3 soru / en az 2 doğru olarak uygulandı; sonuçta
+bütün doğru cevaplar ve açıklamalar gösteriliyor, yarıda kalan sınav aynı
+sorulardan sürüyor.
+
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
 ### Q-058 — Ölüm eğrisi ve kaybın etkileri
@@ -956,6 +972,11 @@ sezdiren bir sağlık uyarısı oyuncuya hazırlık imkânı verir.
 `docs/BALANCE_REPORT.md` (500 hayat: ortalama ölüm yaşı 76,4; 18 yaş altı %0,8;
 90+ %17,6; 18 yaşından önce ebeveyn kaybı %16,4). Yaşlı uç ve ebeveyn kaybı
 oranı Faho'nun onayıyla ayarlanacak.
+
+**Uygulama notu:** Yas artık zamanla hafifliyor (kalan yasın üçte biri her
+yıl mutluluğa geri dönüyor). Ölüm olasılıkları değiştirilmedi; güncel
+ölçüm `docs/BALANCE_REPORT.md` §4'te ve yaşlı uç ile çocukken ebeveyn
+kaybı oranı hâlâ Faho'nun kararını bekliyor.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
@@ -1013,6 +1034,10 @@ için erken; kuşak sistemi düşünülüyorsa oyuncunun mirasının nereye gitt
 
 **Geçici kalan (denge kararı değil):** miras tutarları, paylaşım oranları ve
 bakım veren seçim kuralının ayrıntıları.
+
+**Uygulama notu:** Geçmiş Hayatlar arşivi, bakım durumu alanı, eş payının
+evlilik kaydına bağlanması ve NPC mal varlığının hayat boyunca değişmesi
+uygulandı. Vasiyet, borç mirası, miras vergisi ve kuşak sistemi eklenmedi.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 

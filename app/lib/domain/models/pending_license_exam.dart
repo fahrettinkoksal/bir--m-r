@@ -3,22 +3,30 @@ import 'package:flutter/foundation.dart';
 import '../../data/license_catalog.dart';
 import '../../data/license_questions.dart';
 
-/// Cevap bekleyen ehliyet sınavı.
+/// Devam eden ehliyet sınavı.
 ///
-/// Kaydedilir: uygulama kapatılıp açıldığında **aynı soru ve aynı aşama**
-/// geri gelir. Ücret başvuruda bir kez alınır ve [feePaid] içinde saklanır;
-/// aynı başvuru için ikinci kez tahsil edilmez.
+/// Sınav **3 kısa sorudan** oluşur ve **en az 2 doğru** cevapla geçilir
+/// (D-035). Sorular ve verilen cevaplar kaydedilir: uygulama sınavın
+/// ortasında kapatılıp açılsa bile **aynı sorulardan devam edilir**,
+/// ücret ikinci kez alınmaz ve verilen cevaplar korunur.
 @immutable
 class PendingLicenseExam {
   const PendingLicenseExam({
     required this.licenseId,
-    required this.questionId,
+    required this.questionIds,
+    required this.answers,
     required this.askedAtAge,
     required this.feePaid,
   });
 
   final String licenseId;
-  final String questionId;
+
+  /// Sınavın soruları; sıra sabittir.
+  final List<String> questionIds;
+
+  /// Verilen cevapların seçenek sırası; soru sırasıyla aynı hizadadır.
+  final List<int> answers;
+
   final int askedAtAge;
 
   /// Başvuruda ödenen bedel.
@@ -26,5 +34,40 @@ class PendingLicenseExam {
 
   LicenseType? get license => licenseTypeById(licenseId);
 
-  LicenseQuestion? get question => licenseQuestionById(questionId);
+  /// Sınavdaki bütün sorular.
+  List<LicenseQuestion> get questions => <LicenseQuestion>[
+        for (final String id in questionIds)
+          if (licenseQuestionById(id) != null) licenseQuestionById(id)!,
+      ];
+
+  /// Sıradaki cevaplanmamış soru; sınav bittiyse `null`.
+  LicenseQuestion? get currentQuestion =>
+      answers.length >= questionIds.length
+          ? null
+          : licenseQuestionById(questionIds[answers.length]);
+
+  /// Kaçıncı sorudayız (1'den başlar).
+  int get currentIndex => answers.length + 1;
+
+  int get questionCount => questionIds.length;
+
+  /// Şu ana kadarki doğru cevap sayısı.
+  int get correctCount {
+    int dogru = 0;
+    for (int i = 0; i < answers.length && i < questionIds.length; i++) {
+      final LicenseQuestion? soru = licenseQuestionById(questionIds[i]);
+      if (soru != null && soru.correctIndex == answers[i]) dogru++;
+    }
+    return dogru;
+  }
+
+  bool get isComplete => answers.length >= questionIds.length;
+
+  PendingLicenseExam copyWith({List<int>? answers}) => PendingLicenseExam(
+        licenseId: licenseId,
+        questionIds: questionIds,
+        answers: answers ?? this.answers,
+        askedAtAge: askedAtAge,
+        feePaid: feePaid,
+      );
 }

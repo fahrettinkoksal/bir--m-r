@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 11;
+const int kSaveFormatVersion = 12;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -65,7 +65,28 @@ abstract final class SaveMigrations {
     if (from <= 8) guncel = _v8ToV9(guncel);
     if (from <= 9) guncel = _v9ToV10(guncel);
     if (from <= 10) guncel = _v10ToV11(guncel);
+    if (from <= 11) guncel = _v11ToV12(guncel);
     return guncel;
+  }
+
+  /// Sürüm 11 → 12: geçmiş hayat arşivi, bakım durumu, yas, geçim sıkıntısı,
+  /// oyuncu ayarları ve üç soruluk ehliyet sınavı eklendi.
+  ///
+  /// Eski kayıtlarda arşiv boştur ve **hiçbir hayat silinmez**. Bakım
+  /// durumu "ailesinin yanında", yas ve geçim sıkıntısı sıfır, kumarhane
+  /// açık kabul edilir. Sürüm 11'de kalmış **tek soruluk** bir ehliyet
+  /// sınavı varsa, ücreti ikinci kez alınmasın diye sınav kapatılır;
+  /// oyuncu aynı yıl yeniden başvurabilir.
+  static Map<String, Object?> _v11ToV12(Map<String, Object?> body) {
+    body['pastLives'] ??= <Object?>[];
+    body['grief'] ??= 0;
+    body['hardshipYears'] ??= 0;
+
+    final Object? sinav = body['pendingLicenseExam'];
+    if (sinav is Map<String, Object?> && sinav['questionIds'] == null) {
+      body['pendingLicenseExam'] = null;
+    }
+    return body;
   }
 
   /// Sürüm 10 → 11: ölüm, miras ve kişilerin mal varlığı eklendi.

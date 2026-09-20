@@ -271,6 +271,32 @@ sınav ücretleri) **geçici** kaldı ve Faho'nun onayına bağlı.
 arasındaki uyumsuzluklar ve veri kaybı riski `docs/FIX_REPORT_Q053_Q059.md`
 içinde listelendi; bunlar ayrı bir düzeltme PR'ında ele alınacak.
 
+## D-031 – D-038 düzeltmeleri (uygulandı)
+Kararların kodla çeliştiği maddeler düzeltildi:
+
+- **Geçmiş Hayatlar arşivi:** tamamlanan hayatın özeti yeni hayat
+  başlatılırken **önce arşive yazılıyor**; arşiv kayıtta saklanıyor ve
+  hayat özeti ekranından açılıyor.
+- **Yıllık geçim gideri:** çocukta yok; ailesinin yanında, bağımsız kirada
+  ve kendi evinde farklı. Cüzdan eksiye düşmüyor; para yetmezse geçim
+  sıkıntısı durumu oluşuyor ve günlüğe yazılıyor.
+- **Ehliyet sınavı 3 soru / en az 2 doğru;** sonuçta bütün doğru cevaplar
+  ve açıklamaları görünüyor, yarıda kalan sınav aynı sorulardan sürüyor.
+- **Yas zamanla hafifliyor;** kalıcı mutluluk cezası değil.
+- **Miras:** eş payı yalnızca ebeveynler evli/birlikteyken uygulanıyor;
+  sevgili eş sayılmıyor. NPC'lerin mal varlığı hayat boyunca değişiyor ve
+  kişi detayında görünüyor.
+- **Bakım durumu** (ailesinin yanında / yakın akraba / kurum bakımı) açık
+  bir alan olarak saklanıyor; sahte kişi üretilmiyor.
+- **Ayarlar:** kumarhane tamamen kapatılabiliyor, oyuncu kendine yıllık
+  bahis limiti koyabiliyor.
+- **Araç galerisinde satın alma yaşı 18;** miras/hediye yoluyla küçük yaşta
+  araç sahibi olmak serbest, kullanmak ehliyete bağlı.
+
+Kayıt biçimi **sürüm 12**; sürüm 11 ve öncesi kayıtlar güvenli
+varsayılanlarla açılıyor ve hiçbir hayat silinmiyor. Sayısal değerler
+(gider tutarları, ölüm olasılıkları, bahis sınırları) **geçici**.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

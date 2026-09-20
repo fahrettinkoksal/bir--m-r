@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../data/item_catalog.dart';
+
 import '../../domain/models/game_state.dart';
 import '../../domain/models/interaction.dart';
 import '../../domain/models/person.dart';
@@ -121,6 +123,15 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               _Row(label: 'Durum', value: person.occupationLabel),
               if (person.wealth != null)
                 _Row(label: 'Kendi maddi durumu', value: person.wealth!.label),
+              // Kişinin gerçekten sahip olduğu eşyalar; miras bu listeden
+              // dağıtılır (D-037, D-038).
+              if (person.estate.isNotEmpty)
+                _Row(
+                  label: 'Sahip oldukları',
+                  value: person.estate
+                      .map((String t) => itemTypeOrFallback(t).name)
+                      .join(', '),
+                ),
               // Hane bilgisi bağ türünden bağımsızdır (D-014): tanışıklık,
               // arkadaşlık veya akrabalık kimseyi hanene eklemez.
               _Row(

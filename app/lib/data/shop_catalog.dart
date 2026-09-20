@@ -5,6 +5,10 @@
 /// yerde farklı fiyatlanmaz ve ikinci bir envanter/ekonomi sistemi oluşmaz.
 /// Ölçek `lib/data/economy.dart` tablosuna dayanır.
 ///
+/// Araçlar galeriden **18 yaşından itibaren** satın alınabilir (D-034);
+/// miras veya hediye yoluyla daha küçük yaşta araç sahibi olmak mümkündür,
+/// ancak aracı kullanmak ehliyet ister.
+///
 /// Değerler `prototypeOnly` (`docs/DESIGN_REVIEW_QUEUE.md`, Q-041, Q-055).
 library;
 
@@ -225,7 +229,7 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     typeId: 'motosiklet_ekonomik',
     description: 'Küçük motorlu, ekonomik bir motosiklet.',
     category: ShopCategory.aracGalerisi,
-    minAge: 16,
+    minAge: 18,
   ),
   ShopProduct(
     typeId: 'motosiklet_guclu',
@@ -237,25 +241,25 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     typeId: 'otomobil_ikinci_el',
     description: 'Yaşını almış ama yolda kalmayan bir otomobil.',
     category: ShopCategory.aracGalerisi,
-    minAge: 17,
+    minAge: 18,
   ),
   ShopProduct(
     typeId: 'otomobil_ekonomik',
     description: 'Yeni, ekonomik bir otomobil.',
     category: ShopCategory.aracGalerisi,
-    minAge: 17,
+    minAge: 18,
   ),
   ShopProduct(
     typeId: 'otomobil_orta',
     description: 'Orta sınıf; donanımı biraz daha iyi.',
     category: ShopCategory.aracGalerisi,
-    minAge: 17,
+    minAge: 18,
   ),
   ShopProduct(
     typeId: 'otomobil_luks',
     description: 'Lüks bir otomobil. Pahalı ve göz alıcı.',
     category: ShopCategory.aracGalerisi,
-    minAge: 17,
+    minAge: 18,
   ),
   ShopProduct(
     typeId: 'kask',
