@@ -807,5 +807,39 @@ olarak ayrı bir pakette ele alınsın.
 
 **Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
 
+### Q-057 — Ehliyet: yaş, sınıf sistemi, ücret ve tekrar kuralı
+**Durum:** Karar bekliyor. **Kaynak:** `app/lib/data/license_catalog.dart`, `app/lib/data/license_questions.dart`, `app/lib/domain/licensing/license_office.dart`. **Bağlantılı:** Q-055, Q-056.
+
+**Kodun şu anki geçici çözümü (hepsi `prototypeOnly`):**
+- İki ehliyet: motosiklet (en az 16 yaş, 4.000 ₺) ve otomobil (en az 18
+  yaş, 8.000 ₺). Ehliyetler bağımsız; biri diğerini vermiyor.
+- Sınav tek soruyla yapılıyor; motosiklet havuzunda 5, otomobil havuzunda
+  6 özgün soru var (basit trafik bilgisi, güvenli sürüş, araç kontrolü).
+- Doğru cevap = ehliyet. Yanlış cevapta ehliyet yok; doğru cevap ve kısa
+  açıklama gösteriliyor.
+- Aynı yaşta aynı ehliyet için **2 deneme**; her denemede ücret yeniden
+  alınıyor, vazgeçmek iade getirmiyor.
+- **Gerçek dünyadaki resmî sürücü belgesi sınıfları ve yaş sınırları
+  doğrulanmış bilgi olarak sunulmuyor**; oyun içi basit bir model.
+
+**Karar soruları:**
+1. Yaş eşikleri (16/18) böyle mi kalsın? Gerçek sınıf sistemi (A1, A2, B…)
+   modellenecek mi, yoksa oyun içi iki tür yeterli mi?
+2. Sınav tek soru mu olsun, yoksa 3-5 soruluk kısa bir tur mu (ör. 5
+   sorudan 4 doğru)?
+3. Ücret ölçeği doğru mu (Q-055)? Başarısız denemede kısmi iade olsun mu?
+4. Kurs/direksiyon dersi gibi bir hazırlık adımı eklensin mi (para ve
+   zaman karşılığı başarı şansını artıran)?
+5. Ehliyet kaybedilebilsin mi (ceza, kaza, ihlal)? Kaza sistemi gelirse
+   ehliyetle nasıl bağlanacak?
+6. Ehliyet ekranı Aktiviteler altında mı kalsın, yoksa "Ben"/kimlik
+   ekranında bir belge listesi mi olsun?
+
+**Claude'un önerisi (yalnızca öneri):** Tek soru, ücretin gerçekten
+hissedildiği bir yapıda yeterli; 3 soruluk tur eklenecekse ücret
+düşürülsün. Ehliyetin kaybı ancak bir kaza/ihlal sistemi gelirse anlamlı.
+
+**Varsayılan işlem:** Bütün sayılar geçici; `DECISIONS.md`'ye eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
