@@ -13,7 +13,6 @@ import 'package:bir_omur/domain/generation/school_people.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
