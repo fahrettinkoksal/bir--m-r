@@ -14,6 +14,9 @@ enum NoticeKind {
   /// Okul hayatının dönüm noktası: okula başlama, kademe değişimi,
   /// mezuniyet (Paket 17).
   okul,
+
+  /// Bebeğin doğumu (Paket 26).
+  dogum,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

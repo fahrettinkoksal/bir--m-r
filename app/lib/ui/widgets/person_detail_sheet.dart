@@ -10,6 +10,7 @@ import '../../domain/models/game_state.dart';
 import '../../domain/models/interaction.dart';
 import '../../domain/models/marriage.dart';
 import '../../domain/models/pending_wedding.dart';
+import '../../domain/models/pregnancy.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/interaction/shared_history.dart';
@@ -212,6 +213,23 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
   /// "Çocuk sahibi olun" düğmesinin yerini aldı: basınca doğrudan çocuk
   /// olmuyor. Korunma tercihi oyuncunun; korunmazsa çocuk bir
   /// **ihtimal**.
+  /// Süren hamilelik varsa kişi kartında açıkça yazılır.
+  ///
+  /// Sessizce bekleyen bir durum olmamalı: oyuncu bebeğin yolda
+  /// olduğunu ve bir sonraki yaşta doğacağını görebilmeli (Paket 26).
+  Widget? _pregnancyNote(GameState state, Person person) {
+    final Pregnancy? bekleyen = state.pregnancy;
+    if (bekleyen == null || bekleyen.partnerId != person.id) return null;
+    final String metin = bekleyen.expecting == ExpectingParty.oyuncu
+        ? 'Hamilesin. Bebeğiniz bir sonraki yaşta doğacak.'
+        : '${person.firstName} hamile. Bebeğiniz bir sonraki yaşta '
+            'doğacak.';
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: _Note(key: const Key('person_pregnancy_note'), text: metin),
+    );
+  }
+
   Future<void> _intimacy(Person person) async {
     final Protection? secim = await showModalBottomSheet<Protection>(
       context: context,
@@ -468,6 +486,7 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 // sahibi olunabilir. Ama artık "çocuk yap" düğmesiyle
                 // değil, korunmadan yakınlaşmanın ihtimaliyle
                 // (Paket 25).
+                ?_pregnancyNote(state, person),
                 const SizedBox(height: 12),
                 if (GameScope.of(context)
                     .intimacyAvailability(widget.personId)
@@ -490,6 +509,7 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
 
               // Eşe özel eylemler: çocuk sahibi olmak ve boşanma.
               if (person.isAlive && person.relation == RelationType.es) ...<Widget>[
+                ?_pregnancyNote(state, person),
                 const SizedBox(height: 12),
                 if (GameScope.of(context)
                     .intimacyAvailability(widget.personId)
@@ -643,7 +663,7 @@ class _OutcomeCard extends StatelessWidget {
 }
 
 class _Note extends StatelessWidget {
-  const _Note({required this.text});
+  const _Note({super.key, required this.text});
 
   final String text;
 

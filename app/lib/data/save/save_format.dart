@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 29;
+const int kSaveFormatVersion = 30;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 ///
@@ -19,7 +19,7 @@ const int kSaveFormatVersion = 29;
 /// kaymaz, yoksa eski kayıtlar sessizce açılamaz hâle gelir. Daha eski
 /// bir kayıt açılmak istenirse oyuncuya anlaşılır bir mesaj gösterilir
 /// ve **kayıt silinmez**.
-const int kMinReadableSaveVersion = 24;
+const int kMinReadableSaveVersion = 25;
 
 /// Kayıt dosyası okunamadığında atılır.
 ///
@@ -66,13 +66,19 @@ abstract final class SaveMigrations {
       );
     }
     Map<String, Object?> guncel = body;
-    if (from <= 24) guncel = _v24ToV25(guncel);
     if (from <= 25) guncel = _v25ToV26(guncel);
     if (from <= 26) guncel = _v26ToV27(guncel);
     if (from <= 27) guncel = _v27ToV28(guncel);
     if (from <= 28) guncel = _v28ToV29(guncel);
+    if (from <= 29) guncel = _v29ToV30(guncel);
     return guncel;
   }
+
+  /// Sürüm 29 → 30: hamilelik bir süreç oldu (Paket 26).
+  ///
+  /// Eski kayıtlarda süren hamilelik yoktur. **Geriye dönük bebek
+  /// beklenmez:** alan boş kalır, var olan çocuklar olduğu gibi korunur.
+  static Map<String, Object?> _v29ToV30(Map<String, Object?> body) => body;
 
   /// Sürüm 28 → 29: teklif/düğün ayrımı, korunma ve doğurganlık
   /// (Paket 25).
@@ -118,17 +124,11 @@ abstract final class SaveMigrations {
   /// yalnızca doğduğu yıl oluşur.
   static Map<String, Object?> _v25ToV26(Map<String, Object?> body) => body;
 
-  /// Sürüm 24 → 25: kısa seyahat ve yakınlarla gezi eklendi (Paket 11).
-  ///
-  /// Eski kayıtlarda gezi yoktur; liste boş açılır ve **geriye dönük gezi
-  /// uydurulmaz**. Oyuncunun yaşadığı ve doğduğu şehir değişmez.
-  static Map<String, Object?> _v24ToV25(Map<String, Object?> body) => body;
-
   // ---------------------------------------------------------------
   // Daha eski sürümler
   //
   // **Faho'nun kararı (Paket 12):** geriye dönük olarak yalnızca son beş
-  // sürüm taşınır ve bunu kalıcı bir test zorunlu kılar. Sürüm 23 ve
+  // sürüm taşınır ve bunu kalıcı bir test zorunlu kılar. Sürüm 24 ve
   // öncesine ait dönüştürme adımları bu yüzden kaldırıldı; gerekirse
   // sürüm geçmişinden geri alınabilirler.
   // Taban (`kMinReadableSaveVersion`) düşürülmeden bu adımlar zaten hiç

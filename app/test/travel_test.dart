@@ -442,13 +442,15 @@ void main() {
       expect(sonra.player.wallet, greaterThanOrEqualTo(cuzdan - 200000));
     });
 
-    test('kayıt sürümü 29 ve eski kayıtta gezi listesi boş açılır', () {
-      expect(kSaveFormatVersion, 29);
+    test('kayıt sürümü 30 ve eski kayıtta gezi listesi boş açılır', () {
+      expect(kSaveFormatVersion, 30);
       final GameState s = gezgin();
       final Map<String, Object?> body =
           Map<String, Object?>.from(encodeGameState(s))..remove('trips');
+      // Okunabilir taban Paket 26'da 25'e yükseldi (beş sürümlük
+      // pencere kuralı).
       final GameState geri =
-          decodeGameState(SaveMigrations.migrate(body, 24));
+          decodeGameState(SaveMigrations.migrate(body, 25));
       expect(geri.trips, isEmpty);
       expect(geri.player.currentCity, s.player.currentCity);
     });

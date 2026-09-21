@@ -405,9 +405,9 @@ void main() {
       body.remove('sponsorDeals');
 
       // Okunabilir taban Paket 25'te 24'e yükseldi (beş sürümlük
-      // pencere kuralı); sürüm 23 artık açılmıyor.
+      // pencere kuralı); Paket 26'da 25 oldu.
       final GameState geri =
-          decodeGameState(SaveMigrations.migrate(body, 24));
+          decodeGameState(SaveMigrations.migrate(body, 25));
       expect(geri.socialAccounts.single.followers,
           r.state.socialAccounts.single.followers);
       // Geriye dönük gelir uydurulmaz.

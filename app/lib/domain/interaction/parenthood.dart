@@ -68,7 +68,15 @@ class Parenthood {
   /// Evlilik zorunlu değildir (D-047): eş yoksa **hayattaki sevgili**
   /// değerlendirilir. Akraba hiçbir durumda bu listeye girmez; yalnızca
   /// romantik bağlar sayılır.
-  static Person? coParent(GameState state) {
+  static Person? coParent(GameState state, {String? preferredId}) {
+    // Hamilelik kaydında diğer ebeveyn belliyse **o** kullanılır: bebek
+    // bekleme sırasında ayrılık olsa bile başka birinin çocuğu olmaz
+    // (Paket 26).
+    if (preferredId != null) {
+      final Person? kayitli = state.personById(preferredId);
+      if (kayitli != null && kayitli.isAlive) return kayitli;
+      return null;
+    }
     if (state.isMarried) return state.spouse;
     for (final Person p in state.people) {
       if (p.isAlive && p.relation == RelationType.sevgili) return p;
@@ -77,8 +85,8 @@ class Parenthood {
   }
 
   /// Çocuk sahibi olmaya engel; engel yoksa boş metin.
-  String blockReason(GameState state) {
-    final Person? partner = coParent(state);
+  String blockReason(GameState state, {String? coParentId}) {
+    final Person? partner = coParent(state, preferredId: coParentId);
     if (partner == null) {
       return 'Çocuk sahibi olmak için eşin ya da sevgilin olmalı.';
     }
@@ -139,8 +147,12 @@ class Parenthood {
   }
 
   /// Çocuk sahibi olur: kalıcı kimlikli yeni bir kişi kaydı açılır.
-  FamilyResult haveChild(GameState state, Random rng) {
-    final String engel = blockReason(state);
+  FamilyResult haveChild(
+    GameState state,
+    Random rng, {
+    String? coParentId,
+  }) {
+    final String engel = blockReason(state, coParentId: coParentId);
     if (engel.isNotEmpty) {
       return FamilyResult(
         state: state,
@@ -165,7 +177,7 @@ class Parenthood {
     // Soyadı: prototipte çocuk **babanın** soyadını alır. Evlenince eşin
     // soyadının değişip değişmeyeceği ayrı bir tasarım sorusudur (Q-063);
     // kimsenin kaydı bu yüzden değiştirilmez.
-    final Person es = coParent(state)!;
+    final Person es = coParent(state, preferredId: coParentId)!;
     final String soyad = state.player.gender == Gender.erkek
         ? state.player.lastName
         : es.lastName;

@@ -4,11 +4,14 @@ import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/romance.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 /// Evlilik ve çocuk akışının arayüzde gerçekten çalıştığını sınar:
 /// İlişkiler → sevgili → Evlen → eş kartı → Çocuk sahibi olun → Çocuklar.
@@ -151,16 +154,17 @@ void main() {
     await kisiyiAc(tester, veri.partner.fullName);
     await teklifEtVeKabulEttir(tester, veri.partner.fullName);
 
-    // Eş kartından baş başa kalınır. Çocuk **garanti değil**, ihtimal
-    // (Paket 25): olana kadar yıl ilerletilerek denenir.
+    // Eş kartından baş başa kalınır. Hamilelik **garanti değil**,
+    // ihtimal (Paket 25); bebek de hemen gelmez, bir sonraki yaşta
+    // doğar (Paket 26).
     for (int deneme = 0;
-        deneme < 30 && controller.state!.children.isEmpty;
+        deneme < 30 && !controller.state!.isExpecting;
         deneme++) {
       await tester.tap(find.byKey(const Key('person_intimacy_button')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('protection_korunmadan')));
       await tester.pumpAndSettle();
-      if (controller.state!.children.isNotEmpty) break;
+      if (controller.state!.isExpecting) break;
       // Aynı yıl ihtimal bir kez hesaplanır; yaş ilerletilir. Kişi kartı
       // açık kalır, durum değişince kendini yeniler.
       controller.debugSetState(
@@ -171,11 +175,41 @@ void main() {
       );
       await tester.pumpAndSettle();
     }
+    expect(controller.state!.isExpecting, isTrue, reason: 'Hamilelik olmadı');
+    // Hamilelik kişi kartında açıkça yazılır.
+    expect(find.byKey(const Key('person_pregnancy_note')), findsOneWidget);
+
+    // Bebek bir sonraki yaşta doğar.
+    await sheetKapat(tester);
+    // Yaş ilerletilir; arada kare çizdirilmez ki doğum bildirimi kipi
+    // açılıp ekranı kilitlemesin. Bildirimin **kuyruğa girdiği** aşağıda
+    // doğrulanıyor.
+    controller.ageUp();
     expect(controller.state!.children.length, 1);
+    expect(controller.state!.isExpecting, isFalse);
+    // Doğum ekranda bildirimle duyurulur.
+    expect(
+      controller.state!.notices.any(
+        (PendingNotice n) => n.kind == NoticeKind.dogum,
+      ),
+      isTrue,
+    );
 
     final Person cocuk = controller.state!.children.single;
-    await sheetKapat(tester);
+    // Bildirim ve olay kapatılıp temiz bir ekrana dönülür.
+    final GameState temiz = controller.state!.copyWith(
+      notices: const <PendingNotice>[],
+      pendingEvent: null,
+    );
+    controller.debugSetState(temiz);
+    await tester.pumpAndSettle();
+    // Ekran hâlâ "Romantik bağlar" alt sayfasında; köke dönülür.
     await iliskilereDon(tester);
+    // Liste uzun; satır ekranın altında kalmış olabilir.
+    await scrollToFinder(
+      tester,
+      find.byKey(const Key('relationships_children_row')),
+    );
     await tester.tap(find.byKey(const Key('relationships_children_row')));
     await tester.pumpAndSettle();
     expect(find.text(cocuk.fullName), findsOneWidget);

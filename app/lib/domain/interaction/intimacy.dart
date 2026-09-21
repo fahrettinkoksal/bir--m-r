@@ -13,6 +13,9 @@
 ///   modellenmedi — Q-093).
 /// - Korunmazsa gebelik **ihtimallidir**: yaşa bağlıdır ve çiftten biri
 ///   kısırsa hiç olmaz.
+/// - **Gebelik bir süreçtir (Paket 26).** Korunmadan yakınlaşma çocuğu
+///   aynı anda getirmez: önce hamilelik başlar, bebek **bir sonraki yaş
+///   ilerlemesinde** doğar. Hamilelik kayda girer ve ekranda görünür.
 /// - Kısırlık **gizlidir**. Oyuncuya baştan söylenmez; denedikçe
 ///   anlaşılır. Belli bir denemeden sonra "olmuyor" denir ve hekime
 ///   gitmek önerilir (sağlık menüsü ve tüp bebek henüz tasarlanmadı).
@@ -27,6 +30,7 @@ import 'dart:math';
 import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../models/person.dart';
+import '../models/pregnancy.dart';
 import '../models/relation.dart';
 import 'marriage_engine.dart';
 import 'parenthood.dart';
@@ -94,9 +98,18 @@ abstract final class Intimacy {
 
   /// Bu yıl gebelik hesabı yapılabilir mi?
   ///
-  /// Aynı yıl ikinci bir deneme ihtimali katlamaz.
+  /// Aynı yıl ikinci bir deneme ihtimali katlamaz ve süren bir hamilelik
+  /// varken yeni gebelik hesaplanmaz.
   static bool canConceiveThisYear(GameState state) =>
-      state.lastConceptionTryAge != state.player.age;
+      !state.isExpecting && state.lastConceptionTryAge != state.player.age;
+
+  /// Hamile olan taraf: oyuncu mu, partner mi?
+  ///
+  /// Aynı cinsiyetteki çiftlerde bu yol zaten kapalıdır (Q-064).
+  static ExpectingParty expectingSide(GameState state) =>
+      state.player.gender == Gender.kadin
+          ? ExpectingParty.oyuncu
+          : ExpectingParty.partner;
 
   /// Korunmadan bir denemede gebelik ihtimali.
   ///
@@ -220,18 +233,29 @@ class IntimacyEngine {
 
     final double sans = Intimacy.conceptionChance(next, partner);
     if (rng.nextDouble() < sans) {
-      final FamilyResult dogum = const Parenthood().haveChild(next, rng);
-      if (dogum.outcome.applied) {
-        return FamilyResult(
-          // Bebek oldu: deneme sayacı sıfırlanır.
-          state: dogum.state.copyWith(unprotectedTries: 0),
-          outcome: FamilyOutcome(
-            applied: true,
-            text: 'Baş başa bir akşam geçirdiniz. ${dogum.outcome.text}',
-          ),
-        );
-      }
-      return dogum;
+      // **Bebek hemen gelmez (Paket 26).** Hamilelik başlar; doğum bir
+      // sonraki yaş ilerlemesinde olur.
+      final ExpectingParty taraf = Intimacy.expectingSide(next);
+      final GameState hamile = next.copyWith(
+        pregnancy: Pregnancy(
+          partnerId: personId,
+          startedAtAge: next.player.age,
+          expecting: taraf,
+        ),
+        // Bekleyen bebek var: deneme sayacı sıfırlanır.
+        unprotectedTries: 0,
+      );
+      return FamilyResult(
+        state: hamile,
+        outcome: FamilyOutcome(
+          applied: true,
+          text: taraf == ExpectingParty.oyuncu
+              ? 'Baş başa bir akşam geçirdiniz. Birkaç hafta sonra '
+                  'öğrendin: hamilesin.'
+              : 'Baş başa bir akşam geçirdiniz. Birkaç hafta sonra '
+                  '${partner.firstName} haberi verdi: bebek yolda.',
+        ),
+      );
     }
 
     final int denemeler = next.unprotectedTries + 1;

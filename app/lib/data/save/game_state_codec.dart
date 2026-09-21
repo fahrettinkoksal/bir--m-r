@@ -25,6 +25,7 @@ import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
+import '../../domain/models/pregnancy.dart';
 import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/marriage.dart';
@@ -148,6 +149,15 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           : <String, Object?>{
               'spouseId': state.pendingWedding!.spouseId,
               'acceptedAtAge': state.pendingWedding!.acceptedAtAge,
+            },
+      // Süren hamilelik kayda girer: uygulama kapansa da bekleyen bebek
+      // kaybolmaz (Paket 26).
+      'pregnancy': state.pregnancy == null
+          ? null
+          : <String, Object?>{
+              'partnerId': state.pregnancy!.partnerId,
+              'startedAtAge': state.pregnancy!.startedAtAge,
+              'expecting': state.pregnancy!.expecting.name,
             },
       'unprotectedTries': state.unprotectedTries,
       'lastConceptionTryAge': state.lastConceptionTryAge,
@@ -695,6 +705,11 @@ GameState decodeGameState(Map<String, Object?> json) {
         : _decodePendingWedding(
             _asMap(json['pendingWedding'], 'pendingWedding'),
           ),
+    // Eski kayıtlarda hamilelik yoktur; **geriye dönük bebek
+    // beklenmez** (Paket 26).
+    pregnancy: json['pregnancy'] == null
+        ? null
+        : _decodePregnancy(_asMap(json['pregnancy'], 'pregnancy')),
     // Eski kayıtlarda deneme sayacı yoktur; sıfırdan başlar.
     unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
     lastConceptionTryAge: _intOrNull(json, 'lastConceptionTryAge'),
@@ -922,6 +937,16 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
       happinessDelta:
           json['happinessDelta'] == null ? 0 : _int(json, 'happinessDelta'),
       funeralCost: json['funeralCost'] == null ? 0 : _int(json, 'funeralCost'),
+    );
+
+Pregnancy _decodePregnancy(Map<String, Object?> json) => Pregnancy(
+      partnerId: _string(json, 'partnerId'),
+      startedAtAge: _int(json, 'startedAtAge'),
+      expecting: _enumByName(
+        ExpectingParty.values,
+        _string(json, 'expecting'),
+        'pregnancy.expecting',
+      ),
     );
 
 PendingWedding _decodePendingWedding(Map<String, Object?> json) =>

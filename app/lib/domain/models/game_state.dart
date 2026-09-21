@@ -18,6 +18,7 @@ import 'pending_notice.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
 import 'pending_wedding.dart';
+import 'pregnancy.dart';
 import 'pending_license_exam.dart';
 import 'person.dart';
 import 'social_account.dart';
@@ -43,6 +44,7 @@ class GameState {
     this.interactionCounts = const <String, int>{},
     this.lastInteractionAge = const <String, int>{},
     this.pendingWedding,
+    this.pregnancy,
     this.unprotectedTries = 0,
     this.lastConceptionTryAge,
     this.storyFlags = const <String>{},
@@ -122,6 +124,13 @@ class GameState {
   final PendingWedding? pendingWedding;
 
   bool get hasPendingWedding => pendingWedding != null;
+
+  /// Süren hamilelik (Paket 26).
+  ///
+  /// Kayda girer; doğum bir sonraki yaş ilerlemesinde olur.
+  final Pregnancy? pregnancy;
+
+  bool get isExpecting => pregnancy != null;
 
   /// Korunmadan geçen, çocukla sonuçlanmamış deneme sayısı (Paket 25).
   ///
@@ -621,6 +630,7 @@ class GameState {
     Map<String, int>? interactionCounts,
     Map<String, int>? lastInteractionAge,
     Object? pendingWedding = _unsetEvent,
+    Object? pregnancy = _unsetEvent,
     int? unprotectedTries,
     Object? lastConceptionTryAge = _unsetEvent,
     Set<String>? storyFlags,
@@ -677,6 +687,9 @@ class GameState {
       pendingWedding: pendingWedding == _unsetEvent
           ? this.pendingWedding
           : pendingWedding as PendingWedding?,
+      pregnancy: pregnancy == _unsetEvent
+          ? this.pregnancy
+          : pregnancy as Pregnancy?,
       unprotectedTries: unprotectedTries ?? this.unprotectedTries,
       lastConceptionTryAge: lastConceptionTryAge == _unsetEvent
           ? this.lastConceptionTryAge

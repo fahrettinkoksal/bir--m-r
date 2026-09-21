@@ -26,6 +26,8 @@ import '../models/game_settings.dart';
 import '../models/game_state.dart';
 import '../interaction/bond_decay.dart';
 import '../models/life_log.dart';
+import '../models/gender.dart';
+import '../models/pregnancy.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../life/aging.dart';
@@ -399,6 +401,9 @@ class LifeProgression {
 
     // Sağlığı belirgin kötüleşen karaktere anlaşılır bir uyarı (D-036).
     afterDeaths = _maybeHealthWarning(afterDeaths, newAge);
+
+    // Bekleyen doğum (Paket 26): hamilelik bu yıl bebekle sonuçlanır.
+    afterDeaths = _applyBirth(afterDeaths, newAge);
 
     // İlgisizlikten zayıflayan bağlar (Paket 24). Bağ yalnızca
     // yükselmemeli: uzun süre görüşülmeyen kişiyle araya mesafe girer.
@@ -868,6 +873,55 @@ class LifeProgression {
           age: newAge,
           text: '$newAge yaşında $gerekce nedeniyle hayatını kaybettin.',
           category: LogCategory.yasDegisimi,
+        ),
+      ]),
+    );
+  }
+
+  /// Süren hamileliği doğumla sonuçlandırır (Paket 26).
+  ///
+  /// Bebek **bir sonraki yaşta** doğar. Diğer ebeveyn hamilelik kaydında
+  /// tutulan kişidir; uydurma bir ebeveyn yazılmaz. O kişi artık hayatta
+  /// değilse ya da kayıttan düşmüşse doğum gerçekleşmez ve hamilelik
+  /// sessizce kapanmaz: günlüğe yazılır.
+  GameState _applyBirth(GameState state, int newAge) {
+    final Pregnancy? bekleyen = state.pregnancy;
+    if (bekleyen == null) return state;
+
+    final Person? diger = state.personById(bekleyen.partnerId);
+    if (diger == null || !diger.isAlive) {
+      return _logLine(
+        state.copyWith(pregnancy: null),
+        newAge,
+        'Bekleyen bebek dünyaya gelemedi.',
+      );
+    }
+
+    final FamilyResult dogum = const Parenthood().haveChild(
+      state.copyWith(pregnancy: null),
+      _rng,
+      coParentId: bekleyen.partnerId,
+    );
+    if (!dogum.outcome.applied) {
+      // Sınır (ör. en fazla çocuk sayısı) engelledi; hamilelik kapanır
+      // ama sebebi günlüğe yazılır, sessizce kaybolmaz.
+      return _logLine(
+        state.copyWith(pregnancy: null),
+        newAge,
+        dogum.outcome.text,
+      );
+    }
+
+    final Person bebek = dogum.state.children.last;
+    return dogum.state.copyWith(
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...dogum.state.notices,
+        Notices.birth(
+          playerAge: newAge,
+          childId: bebek.id,
+          childName: bebek.firstName,
+          isGirl: bebek.gender == Gender.kadin,
+          otherParentName: diger.firstName,
         ),
       ]),
     );

@@ -189,6 +189,33 @@ abstract final class Notices {
   // bitirmek ekranda açıkça bildirilir. Bildirim **bilgilendirmedir**:
   // seçim sormaz, hiçbir değeri değiştirmez.
 
+  /// Doğum bildirimi (Paket 26): her çocuk için bir kez.
+  static String birthNoticeId(String childId) => 'dogum-$childId';
+
+  /// Bebek doğdu.
+  ///
+  /// Metin yalnızca **gerçekten olan** bilgiyi yazar: çocuğun adı ve
+  /// diğer ebeveynin adı. Uydurma ayrıntı eklenmez.
+  static PendingNotice birth({
+    required int playerAge,
+    required String childId,
+    required String childName,
+    required bool isGirl,
+    String? otherParentName,
+  }) =>
+      PendingNotice(
+        id: birthNoticeId(childId),
+        kind: NoticeKind.dogum,
+        age: playerAge,
+        title: isGirl ? 'Kızınız oldu' : 'Oğlunuz oldu',
+        text: otherParentName == null
+            ? '$childName doğdu. Bugünden sonra hayatında bir kişi daha '
+                'var.'
+            : '$childName doğdu. Sen ve $otherParentName bir yıldır '
+                'bunu bekliyordunuz.',
+        personId: childId,
+      );
+
   static const String schoolStartNoticeId = 'okul-baslangic';
   static const String highSchoolStartNoticeId = 'okul-lise-gecis';
   static const String highSchoolEndNoticeId = 'okul-lise-bitis';

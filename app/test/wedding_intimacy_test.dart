@@ -4,6 +4,7 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/data/save/save_format.dart';
 import 'package:bir_omur/data/wedding_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/domain/interaction/romance.dart';
@@ -63,6 +64,23 @@ GameState kabulEttir(GameState state, String partnerId, {String stil = 'sade'}) 
           );
   }
   return akan;
+}
+
+/// Hamilelik başlayana kadar dener, sonra yaş ilerleterek doğurtur.
+GameState dogumaKadar(GameState state, String partnerId) {
+  GameState akan = state;
+  for (int i = 0; i < 40 && !akan.isExpecting; i++) {
+    akan = yakinlasma
+        .perform(akan, partnerId, Protection.korunmadan, Random(i))
+        .state;
+    if (akan.isExpecting) break;
+    akan = akan.copyWith(
+      player: akan.player.copyWith(age: akan.player.age + 1),
+    );
+  }
+  if (!akan.isExpecting) return akan;
+  // Bebek bir sonraki yaş ilerlemesinde doğar.
+  return LifeProgression(Random(5)).advanceOneYear(akan);
 }
 
 void main() {
@@ -214,20 +232,23 @@ void main() {
         );
       }
       expect(akan.children, isEmpty);
+      expect(akan.isExpecting, isFalse);
     });
 
-    test('korunmazsa çocuk bir ihtimaldir, garanti değil', () {
-      int cocuklu = 0;
+    test('korunmazsa hamilelik bir ihtimaldir, garanti değil', () {
+      int hamile = 0;
       const int n = 40;
       for (int seed = 0; seed < n; seed++) {
         final ({GameState state, Person partner}) v = sevgiliyle(seed: seed);
         final GameState sonra = yakinlasma
             .perform(v.state, v.partner.id, Protection.korunmadan, Random(seed))
             .state;
-        if (sonra.children.isNotEmpty) cocuklu++;
+        // Bebek **hemen** gelmez; hamilelik başlar (Paket 26).
+        expect(sonra.children, isEmpty);
+        if (sonra.isExpecting) hamile++;
       }
-      expect(cocuklu, greaterThan(0), reason: 'Hiç çocuk olmuyor');
-      expect(cocuklu, lessThan(n), reason: 'Her seferinde çocuk oluyor');
+      expect(hamile, greaterThan(0), reason: 'Hiç hamilelik olmuyor');
+      expect(hamile, lessThan(n), reason: 'Her seferinde hamile kalınıyor');
     });
 
     test('kısır çiftte çocuk hiç olmaz', () {
@@ -306,33 +327,24 @@ void main() {
     test('çocuk olunca masraf cüzdanda ne varsa o kadar düşer', () {
       // "Paran yok, o yüzden hamile kalmadın" diye bir şey yok.
       final ({GameState state, Person partner}) v = sevgiliyle(wallet: 500);
-      GameState akan = v.state;
-      for (int i = 0; i < 40 && akan.children.isEmpty; i++) {
-        akan = yakinlasma
-            .perform(akan, v.partner.id, Protection.korunmadan, Random(i))
-            .state;
-        if (akan.children.isNotEmpty) break;
-        akan = akan.copyWith(
-          player: akan.player.copyWith(age: akan.player.age + 1),
-        );
-      }
+      final GameState akan = dogumaKadar(v.state, v.partner.id);
       expect(akan.children, isNotEmpty, reason: 'Hiç çocuk olmadı');
       expect(akan.player.wallet, 0, reason: 'Bakiye eksiye inmez');
     });
 
-    test('çocuk olunca deneme sayacı sıfırlanır', () {
+    test('hamile kalınca deneme sayacı sıfırlanır', () {
       final ({GameState state, Person partner}) v = sevgiliyle();
       GameState akan = v.state.copyWith(unprotectedTries: 3);
-      for (int i = 0; i < 40 && akan.children.isEmpty; i++) {
+      for (int i = 0; i < 40 && !akan.isExpecting; i++) {
         akan = yakinlasma
             .perform(akan, v.partner.id, Protection.korunmadan, Random(i))
             .state;
-        if (akan.children.isNotEmpty) break;
+        if (akan.isExpecting) break;
         akan = akan.copyWith(
           player: akan.player.copyWith(age: akan.player.age + 1),
         );
       }
-      expect(akan.children, isNotEmpty);
+      expect(akan.isExpecting, isTrue);
       expect(akan.unprotectedTries, 0);
     });
 
@@ -390,8 +402,8 @@ void main() {
       expect(geri.people.every((Person p) => !p.infertile), isTrue);
     });
 
-    test('kayıt sürümü 29 ve beş sürümlük pencere korunur', () {
-      expect(kSaveFormatVersion, 29);
+    test('kayıt sürümü 30 ve beş sürümlük pencere korunur', () {
+      expect(kSaveFormatVersion, 30);
       expect(kSaveFormatVersion - kMinReadableSaveVersion, 5);
     });
   });
