@@ -695,6 +695,55 @@ başarısız**. Atlanan 12 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
 çalışan ekran görüntüsü testleridir. **Gerçek Windows veya Android
 cihazda oynanmadı.**
 
+
+## Paket 20-24 — beş maddelik genel geliştirme (21 Eylül 2026)
+
+Faho'nun onayıyla ("bugün ChatGPT yok, hepsini yap") beş madde uygulandı.
+Hepsi **ayrı PR** olarak üst üste yığılı; hiçbiri main'e birleştirilmedi.
+Bütün sayılar `prototypeOnly`, sorular `docs/DESIGN_REVIEW_QUEUE.md`
+içinde Q-088…Q-092.
+
+**1. Olay tekrarı (Paket 20, PR #52).** Aynı olay bir hayatta üç kez
+çıkabiliyordu; 12 hayatta en sık olay 39 kez görüldü. Tekrar sönümü
+eklendi ve 28-58 yaş için 25 yeni olay yazıldı. 30-49 yaşta yılda uygun
+olay **1-2'den 21-22'ye** çıktı, en çok tekrar **39'dan 18'e** indi.
+
+**2. Yıla kilitli içerik (Paket 21, PR #53).** Yılda tek olay çıktığı
+için sınav yılı olayları havuzda kayboluyordu. Olaylara `priority` alanı
+eklendi (sıra kapma değil ağırlık artırımı). 8. sınıfta sınav olayı
+görme **%38'den %100'e**, 12. sınıfta **%28'den %100'e** çıktı. Öncelik
+yalnızca penceresi 3 yıl veya daha dar olaylara verilebilir; bu kural
+kalıcı bir testle korunuyor.
+
+**3. Hayat sonu değerlendirmesi (Paket 22, PR #54).** Özet ekranı yalnızca
+liste veriyordu. Artık hayatın bir adı ("Emekle geçen bir hayat"), dört
+ekseni (Bağlar, Emek, Deneyim, Huzur), "İlkler" ve "Hiç olmadı" listesi
+var. Ad arşive de yazılıyor. Kayıt biçim sürümü **artmadı** (alan
+eklemeli). Yan düzeltme: `zatürre` krizinin iki seçeneği de para
+istiyordu; 60 yaşından sonra parası olmayan oyuncu **kilitleniyordu**.
+
+**4. Romantik ilişkinin erişilebilirliği (Paket 23, PR #55).** 176 olayın
+yalnızca **biri** ilişki başlatabiliyordu ve **26 yaşından sonra evlilik
+imkânsızdı**; bir kez ayrılmak da ömür boyu kapatıyordu. Altı yetişkinlik
+kapısı eklendi, kalıcı yasaklar kaldırıldı. Hayatında hiç sevgilisi olan
+oyuncu oranı (rastgele seçen oyuncuda) **2/60'tan 44/60'a** çıktı. Bekâr
+hayat için de beş olay yazıldı. **Not:** bu maddeyi önce "içerik romantizm
+zincirine kilitli" diye teşhis etmiştim; ölçüm bunu doğrulamadı, asıl
+sorun erişilebilirlikti.
+
+**5. İlgisizlikten zayıflayan bağlar (Paket 24, PR #56).** Yakınlık
+yalnızca yükseliyordu; İlişkiler ekranını ziyaret etmenin karşılığı
+yoktu. Artık 3 yıllık hoşgörüden sonra bağ yılda 3 (kan bağında 2) puan
+düşer. Kan bağında **taban 20** vardır: anne annedir. Aynı evde yaşayan
+ve erişilemeyen kişi zayıflamaz. Oyuncu bunu kişi sayfasındaki uyarıdan
+görür.
+
+**Test durumu (Paket 24 sonrası, gerçekten çalıştırıldı):**
+`flutter analyze` temiz; `flutter test` **1082 geçti, 13 atlandı, 0
+başarısız**. Atlanan 13 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
+çalışan ekran görüntüsü testleridir. **Gerçek Windows veya Android
+cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
