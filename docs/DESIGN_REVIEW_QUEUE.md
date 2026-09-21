@@ -1616,5 +1616,26 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Ayrıca bu pakette:** ilk yılların (0-4 yaş) olayları genişletildi. **Not:** ilk adım, ilk kelime, aşı günü, komşu ziyareti ve ilk oyuncak paylaşımı olayları **zaten vardı**; tekrar yazılmadı. Eklenenler: uykusuz geceler, ateşli gece, ilk ayrılık, "neden" soruları, ilk doğum günü ve yıllar sonra anlatılan bebeklik hikâyesi.
 
+### Q-083 — Ses efektleri: hangi anlar, ne kadar, hangi karakter
+**Durum:** Yön **Faho tarafından istendi** ("oyuna ufak müzik efektleri ekle: kart açılınca, seçim yapınca"); **ayrıntılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 15.
+
+**Şu an kodda olan (geçici) çözüm:**
+- **Yedi kısa efekt**, hepsi bu proje için üretildi; dışarıdan alınmış ses yok: `tap` (menü/kart dokunuşu), `select` (seçim onayı), `back` (geri), `age_up` (yaş alma), `good` (olumlu sonuç), `bad` (olumsuz sonuç), `notice` (bildirim çanı).
+- Sesler yumuşak sinüs tonlarından oluşuyor; olumsuz ses bilerek **cezalandırıcı değil**, kısa bir "olmadı" tonu.
+- **Ayarlarda açma/kapama** var; kapalıyken oyun tamamen sessiz ve ayar kayıtla saklanıyor.
+- İki ses arasında en az 60 ms var: hızlı dokunuşlarda sesler üst üste binmiyor.
+- Ses çalmak oyunun akışını **hiçbir zaman engellemiyor**: platformda ses yoksa sessizce geçiliyor.
+- Şu an bağlı olduğu yerler: menü satırları, kişi kartları, alt gezinme sekmeleri, Yaş Al, olay seçimi, geri dönüş, bildirim penceresi.
+
+**Karar soruları:**
+1. Efektlerin karakteri uygun mu (yumuşak tonlar), yoksa daha "oyunumsu" mu olmalı?
+2. Hangi anlarda ses olmalı? Şu an olumlu/olumsuz sonuç sesleri (`good`/`bad`) **üretildi ama hiçbir yere bağlanmadı** — zam kabulü, burs, sınavda kalma gibi anlara bağlansın mı?
+3. **Arka plan müziği** olmalı mı? Şu an yok; yalnızca kısa efektler var.
+4. Ses seviyesi (şu an %60) ayarlanabilir olmalı mı, yoksa aç/kapa yeterli mi?
+5. Titreşim (haptik geri bildirim) eklensin mi?
+6. Ölüm, doğum, evlilik gibi büyük anlara özel ses olmalı mı?
+
+**Varsayılan işlem:** Efektler `assets/sounds/` altında, tanımları tek dosyada (`GameSound`). İstenirse ses dosyaları değiştirilebilir ya da tamamen kaldırılabilir.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
