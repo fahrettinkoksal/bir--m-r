@@ -19,6 +19,7 @@ class PlayerCharacter {
     this.fame,
     this.wallet = 0,
     this.hairStyle,
+    this.infertile = false,
   }) : currentCity = currentCity ?? birthCity;
 
   final String id;
@@ -48,6 +49,13 @@ class PlayerCharacter {
   /// kararlaştırılmadı (prototypeOnly: 0 ile başlar).
   final int wallet;
 
+  /// Oyuncu kısır mı? (Paket 25)
+  ///
+  /// Hayat başında **gizlice** belirlenir ve oyuncuya söylenmez; ancak
+  /// denedikçe anlaşılır. Sağlık menüsündeki tedaviler (tüp bebek)
+  /// henüz tasarlanmadı (Q-093).
+  final bool infertile;
+
   /// Berberde seçilen saç stili. Görsel karakter sistemi henüz yok;
   /// seçim metin olarak saklanır ve Ben ekranında görünür.
   final String? hairStyle;
@@ -68,6 +76,7 @@ class PlayerCharacter {
     int? wallet,
     String? hairStyle,
     String? currentCity,
+    bool? infertile,
   }) {
     return PlayerCharacter(
       id: id,
@@ -81,6 +90,7 @@ class PlayerCharacter {
       fame: fame ?? this.fame,
       wallet: wallet ?? this.wallet,
       hairStyle: hairStyle ?? this.hairStyle,
+      infertile: infertile ?? this.infertile,
     );
   }
 }

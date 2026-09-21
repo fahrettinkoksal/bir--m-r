@@ -24,6 +24,7 @@ import '../../domain/models/life_summary.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
+import '../../domain/models/pending_wedding.dart';
 import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/marriage.dart';
@@ -140,6 +141,16 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'status': state.marriage!.status.name,
               'endedAtAge': state.marriage!.endedAtAge,
             },
+      // Yarıda kalan "evet" kaybolmaz: düğün seçimi kayda girer
+      // (Paket 25).
+      'pendingWedding': state.pendingWedding == null
+          ? null
+          : <String, Object?>{
+              'spouseId': state.pendingWedding!.spouseId,
+              'acceptedAtAge': state.pendingWedding!.acceptedAtAge,
+            },
+      'unprotectedTries': state.unprotectedTries,
+      'lastConceptionTryAge': state.lastConceptionTryAge,
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
@@ -184,6 +195,7 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'fame': p.fame,
       'wallet': p.wallet,
       'hairStyle': p.hairStyle,
+      'infertile': p.infertile,
     };
 
 Map<String, Object?> _encodeAccount(SocialAccount a) => <String, Object?>{
@@ -228,6 +240,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'schoolId': p.schoolId,
       'classId': p.classId,
       'estate': p.estate,
+      'infertile': p.infertile,
       // Kişinin kendi hayatı (D-045); yalnızca kaydı olanlarda doludur.
       'development': p.development == null
           ? null
@@ -675,6 +688,16 @@ GameState decodeGameState(Map<String, Object?> json) {
     marriage: json['marriage'] == null
         ? null
         : _decodeMarriage(_asMap(json['marriage'], 'marriage')),
+    // Eski kayıtlarda bekleyen düğün yoktur; boş açılır ve **uydurma bir
+    // evlilik üretilmez** (Paket 25).
+    pendingWedding: json['pendingWedding'] == null
+        ? null
+        : _decodePendingWedding(
+            _asMap(json['pendingWedding'], 'pendingWedding'),
+          ),
+    // Eski kayıtlarda deneme sayacı yoktur; sıfırdan başlar.
+    unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
+    lastConceptionTryAge: _intOrNull(json, 'lastConceptionTryAge'),
     // Eski kayıtlarda kuşak bilgisi yoktur: o hayatlar ilk kuşaktır.
     generation: _intOrNull(json, 'generation') ?? 1,
     // Eski kayıtlarda teklif geçmişi yoktur; boş açılır.
@@ -770,6 +793,8 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     fame: _intOrNull(json, 'fame'),
     wallet: _int(json, 'wallet'),
     hairStyle: _stringOrNull(json, 'hairStyle'),
+    // Eski kayıtlarda doğurganlık bilgisi yoktur; kısır sayılmaz.
+    infertile: _boolOr(json, 'infertile'),
   );
 }
 
@@ -899,6 +924,12 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
       funeralCost: json['funeralCost'] == null ? 0 : _int(json, 'funeralCost'),
     );
 
+PendingWedding _decodePendingWedding(Map<String, Object?> json) =>
+    PendingWedding(
+      spouseId: _string(json, 'spouseId'),
+      acceptedAtAge: _int(json, 'acceptedAtAge'),
+    );
+
 Person _decodePerson(Map<String, Object?> json) {
   final EmploymentStatus employment = _enumByName(
     EmploymentStatus.values,
@@ -936,6 +967,9 @@ Person _decodePerson(Map<String, Object?> json) {
       'person.wealth',
     ),
     bond: _int(json, 'bond'),
+    // Eski kayıtlarda doğurganlık bilgisi yoktur; **kısır sayılmaz**.
+    // Geriye dönük gizli bir engel yazılmaz.
+    infertile: _boolOr(json, 'infertile'),
     schoolLevel: _enumByNameOrNull(
       SchoolLevel.values,
       _stringOrNull(json, 'schoolLevel'),
@@ -1225,6 +1259,14 @@ int? _intOrNull(Map<String, Object?> json, String key) {
   if (value == null) return null;
   if (value is int) return value;
   _eksik(key, 'tam sayı veya boş');
+}
+
+/// Eski kayıtlarda olmayan evet/hayır alanı; yoksa [varsayilan] kalır.
+bool _boolOr(Map<String, Object?> json, String key, {bool varsayilan = false}) {
+  final Object? value = json[key];
+  if (value == null) return varsayilan;
+  if (value is bool) return value;
+  _eksik(key, 'evet/hayır veya boş');
 }
 
 bool _bool(Map<String, Object?> json, String key) {

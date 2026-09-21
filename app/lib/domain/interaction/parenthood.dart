@@ -90,12 +90,12 @@ class Parenthood {
     if (spouse.age < prototypeOnlyMinAge) {
       return '${spouse.firstName} bunun için henüz çok genç.';
     }
-    // Evli değilken ilişkinin gerçekten yürüyor olması aranır (D-047).
-    if (!state.isMarried && spouse.bond < prototypeOnlyUnmarriedMinBond) {
-      return 'İlişkiniz bunun için yeterince yakın değil '
-          '(yakınlık ${spouse.bond}, gereken '
-          '$prototypeOnlyUnmarriedMinBond).';
-    }
+    // **Yakınlık eşiği kaldırıldı (Paket 25).** Çocuk artık "çocuk yap"
+    // düğmesiyle değil, korunmadan yakınlaşmanın bir **ihtimali** olarak
+    // geliyor. Böyle bir akışta yakınlık eşiği gebeliği sessizce
+    // engeller; oyuncu neden olmadığını anlayamaz. Evlilik dışı çocuk
+    // zaten serbesttir (D-047). Eşik sayısı `prototypeOnly`'ydi (Q-064);
+    // kaldırılması Q-093'te sorulmuştur.
 
     // Yaş sınırı çiftteki kadına ve erkeğe ayrı uygulanır.
     final bool oyuncuKadin = state.player.gender == Gender.kadin;
@@ -122,10 +122,9 @@ class Parenthood {
       return 'Bu yıl bir bebeğiniz oldu; bir sonraki yaşta yeniden '
           'deneyebilirsin.';
     }
-    if (state.player.wallet < prototypeOnlyBirthCost) {
-      return 'Doğum ve hazırlık masrafı ${trMoney(prototypeOnlyBirthCost)}; '
-          'cüzdanında yeterli para yok.';
-    }
+    // **Para engeli kaldırıldı (Paket 25).** "Paran yok, o yüzden
+    // hamile kalmadın" diye bir şey yok. Masraf doğumda tahsil edilir ve
+    // **cüzdanda ne varsa o kadarı** düşer; borç yazılmaz (Q-093).
     return '';
   }
 
@@ -216,6 +215,11 @@ class Parenthood {
         ? '$isim adında bir kızınız oldu.'
         : '$isim adında bir oğlunuz oldu.';
 
+    // Masraf **cüzdanda ne varsa o kadar** düşer; borç yazılmaz ve
+    // bakiye eksiye inmez (Paket 25).
+    final int odenen =
+        prototypeOnlyBirthCost.clamp(0, state.player.wallet.clamp(0, 1 << 31));
+
     final GameState next = state.copyWith(
       people: List<Person>.unmodifiable(<Person>[
         for (final Person p in state.people)
@@ -223,7 +227,7 @@ class Parenthood {
         cocuk,
       ]),
       player: state.player.copyWith(
-        wallet: state.player.wallet - prototypeOnlyBirthCost,
+        wallet: state.player.wallet - odenen,
         stats: state.player.stats.copyWith(
           happiness:
               (state.player.stats.happiness + prototypeOnlyBirthHappiness)
@@ -240,7 +244,10 @@ class Parenthood {
         ...state.log,
         LifeLogEntry(
           age: state.player.age,
-          text: '$metin Doğum masrafı ${trMoney(prototypeOnlyBirthCost)} tuttu.',
+          text: odenen >= prototypeOnlyBirthCost
+              ? '$metin Doğum masrafı ${trMoney(odenen)} tuttu.'
+              : '$metin Masrafı zor denkleştirdiniz; elinizdeki '
+                  '${trMoney(odenen)} gitti.',
           category: LogCategory.aile,
         ),
       ]),

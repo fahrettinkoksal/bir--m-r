@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/interaction/adoption.dart';
+import 'package:bir_omur/data/wedding_catalog.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/domain/interaction/parenthood.dart';
 import 'package:bir_omur/domain/interaction/romance.dart';
@@ -110,7 +111,9 @@ void main() {
         final FamilyResult r =
             evlilik.propose(v.state, v.partner.id, Random(seed));
         expect(r.outcome.applied, isTrue);
-        if (r.state.isMarried) {
+        // Kabul artık doğrudan evlilik değil, **bekleyen düğün**
+        // demektir (Paket 25): düğün ayrı bir adım.
+        if (r.state.hasPendingWedding) {
           kabul++;
         } else {
           ret++;
@@ -204,14 +207,17 @@ void main() {
       for (int seed = 0; seed < 30 && !state.isMarried; seed++) {
         final GameState deneme =
             evlilik.propose(state, v.partner.id, Random(seed)).state;
-        state = deneme.isMarried
-            ? deneme
-            : deneme.copyWith(
-                player: deneme.player.copyWith(
-                  age: deneme.player.age +
-                      MarriageEngine.prototypeOnlyProposalCooldown,
-                ),
-              );
+        if (deneme.hasPendingWedding) {
+          // "Evet" alındı; evlilik düğünle kurulur (Paket 25).
+          state = evlilik.holdWedding(deneme, kFreeWedding.id).state;
+        } else {
+          state = deneme.copyWith(
+            player: deneme.player.copyWith(
+              age: deneme.player.age +
+                  MarriageEngine.prototypeOnlyProposalCooldown,
+            ),
+          );
+        }
       }
       expect(state.isMarried, isTrue);
       expect(state.people.length, kisiSayisi, reason: 'İkinci kişi üretilmez');

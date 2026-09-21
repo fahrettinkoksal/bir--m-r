@@ -17,6 +17,7 @@ import 'parental_status.dart';
 import 'pending_notice.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
+import 'pending_wedding.dart';
 import 'pending_license_exam.dart';
 import 'person.dart';
 import 'social_account.dart';
@@ -41,6 +42,9 @@ class GameState {
     required this.log,
     this.interactionCounts = const <String, int>{},
     this.lastInteractionAge = const <String, int>{},
+    this.pendingWedding,
+    this.unprotectedTries = 0,
+    this.lastConceptionTryAge,
     this.storyFlags = const <String>{},
     this.items = const <OwnedItem>[],
     this.seenEventIds = const <String>{},
@@ -110,6 +114,26 @@ class GameState {
   /// Bir kişiyle **oyun içinde** en son hangi yaşta anlamlı temas kurulduğu.
   /// Gerçek dünya saati değil, oyun ilerleyişi ölçüsüdür (D-024, D-025).
   final Map<String, int> lastInteractionAge;
+
+  /// Teklifi kabul edilmiş ama düğünü henüz yapılmamış evlilik
+  /// (Paket 25).
+  ///
+  /// Kayda girer: yarıda kalan bir "evet" uygulama kapansa da kaybolmaz.
+  final PendingWedding? pendingWedding;
+
+  bool get hasPendingWedding => pendingWedding != null;
+
+  /// Korunmadan geçen, çocukla sonuçlanmamış deneme sayısı (Paket 25).
+  ///
+  /// Doğumla sıfırlanır. Belli bir sayıdan sonra oyuncuya "olmuyor"
+  /// denir; kısırlık böyle **anlaşılır**, baştan söylenmez.
+  final int unprotectedTries;
+
+  /// Bu yıl gebelik ihtimalinin denendiği yaş (Paket 25).
+  ///
+  /// Aynı yıl üst üste denemekle ihtimal katlanmaz; yıl başına bir kez
+  /// hesaplanır.
+  final int? lastConceptionTryAge;
 
   /// Geçmiş seçimlerin bıraktığı izler (D-008).
   final Set<String> storyFlags;
@@ -596,6 +620,9 @@ class GameState {
     List<LifeLogEntry>? log,
     Map<String, int>? interactionCounts,
     Map<String, int>? lastInteractionAge,
+    Object? pendingWedding = _unsetEvent,
+    int? unprotectedTries,
+    Object? lastConceptionTryAge = _unsetEvent,
     Set<String>? storyFlags,
     List<OwnedItem>? items,
     Set<String>? seenEventIds,
@@ -647,6 +674,13 @@ class GameState {
       log: log ?? this.log,
       interactionCounts: interactionCounts ?? this.interactionCounts,
       lastInteractionAge: lastInteractionAge ?? this.lastInteractionAge,
+      pendingWedding: pendingWedding == _unsetEvent
+          ? this.pendingWedding
+          : pendingWedding as PendingWedding?,
+      unprotectedTries: unprotectedTries ?? this.unprotectedTries,
+      lastConceptionTryAge: lastConceptionTryAge == _unsetEvent
+          ? this.lastConceptionTryAge
+          : lastConceptionTryAge as int?,
       storyFlags: storyFlags ?? this.storyFlags,
       items: items ?? this.items,
       seenEventIds: seenEventIds ?? this.seenEventIds,

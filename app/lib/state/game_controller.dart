@@ -51,6 +51,7 @@ import '../domain/activities/travel.dart';
 import '../domain/models/sponsorship.dart';
 import '../domain/models/trip.dart';
 import '../domain/social/social_engine.dart';
+import '../domain/interaction/intimacy.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
 import '../domain/interaction/romance.dart';
@@ -1263,8 +1264,52 @@ class GameController extends ChangeNotifier {
   ///
   /// Sonuç **her zaman kabul değildir**; ret ilişkiyi bitirmez ve yanıt
   /// kayda girer.
-  FamilyOutcome? propose(String personId) => _runFamily(
-        (GameState current) => _marriages.propose(current, personId, _random),
+  FamilyOutcome? propose(String personId, {String styleId = 'sade'}) =>
+      _runFamily(
+        (GameState current) => _marriages.propose(
+          current,
+          personId,
+          _random,
+          styleId: styleId,
+        ),
+      );
+
+  /// Bekleyen düğünü yapar (Paket 25).
+  ///
+  /// Teklif kabul edildikten sonra oyuncu cüzdanına göre bir düğün seçer;
+  /// evlilik ancak burada kurulur. Bedelsiz seçenek her zaman vardır.
+  FamilyOutcome? holdWedding(String styleId) => _runFamily(
+        (GameState current) => _marriages.holdWedding(current, styleId),
+      );
+
+  /// Bu kişiyle yakınlaşmaya engel var mı? (Paket 25)
+  InteractionAvailability intimacyAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final Person? person = current.personById(personId);
+    if (person == null) {
+      return const InteractionAvailability.blocked('Bu kişi kayıtlarda yok.');
+    }
+    final String engel = Intimacy.blockReason(current, person);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Eş veya sevgiliyle baş başa kalır (Paket 25).
+  ///
+  /// Korunma tercihi oyuncunundur. Korunmazsa çocuk bir **ihtimaldir**;
+  /// garanti değildir.
+  FamilyOutcome? beIntimate(String personId, Protection protection) =>
+      _runFamily(
+        (GameState current) => const IntimacyEngine().perform(
+          current,
+          personId,
+          protection,
+          _random,
+        ),
       );
 
   /// Evlat edinme başvurusuna engel var mı?

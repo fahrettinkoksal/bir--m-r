@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import '../models/game_state.dart';
+import '../models/pending_wedding.dart';
+import '../../data/wedding_catalog.dart';
 import '../models/life_log.dart';
 import '../models/marriage.dart';
 import '../models/person.dart';
@@ -67,7 +69,14 @@ class MarriageEngine {
   static const double prototypeOnlyMinAcceptChance = 0.08;
   static const double prototypeOnlyMaxAcceptChance = 0.95;
 
-  /// prototypeOnly: nikâh ve düğün masrafı (₺).
+  /// prototypeOnly: **artık kullanılmıyor** (Paket 25).
+  ///
+  /// Tek ve sabit bir nikâh masrafı vardı; sevgilisi olan hayatların
+  /// çoğu bu duvara takılıp hiç evlenemiyordu (ölçüm: 44 hayattan 25'i
+  /// teklif verebilecek duruma geliyordu, engel neredeyse hep paraydı).
+  /// Yerine cüzdana göre seçilen düğün geldi (`kWeddingStyles`). Sabit
+  /// alan, eski kayıtlarla ve testlerle uyum için duruyor.
+  @Deprecated('Paket 25: yerine kWeddingStyles geldi.')
   static const int prototypeOnlyWeddingCost = 60000;
 
   /// prototypeOnly: boşanmada eşe kalan nakit payı.
@@ -106,16 +115,103 @@ class MarriageEngine {
       return 'İlişkiniz evlilik teklifi için yeterince yakın değil '
           '(yakınlık ${person.bond}, gereken $prototypeOnlyMinBond).';
     }
-    if (state.player.wallet < prototypeOnlyWeddingCost) {
-      return 'Nikâh ve düğün masrafı ${trMoney(prototypeOnlyWeddingCost)}; '
-          'cüzdanında yeterli para yok.';
-    }
+    // **Para koşulu kaldırıldı (Paket 25, Faho'nun kararı).** Teklif
+    // etmek bedelsizdir. Para, "evet" alındıktan sonra **düğün
+    // seçiminde** devreye girer ve orada da her cüzdana uyan bir
+    // seçenek vardır (`kWeddingStyles`). Böylece "paran yoksa hiç
+    // evlenemezsin" duvarı kalkar.
     return '';
   }
 
-  /// Sevgiliyle evlenir.
+  /// Düğünü yapar ve evliliği kurar (Paket 25).
   ///
   /// Kişi listeden çıkarılmaz, yeni kişi üretilmez: aynı kimlik `es` olur.
+  /// Masraf **seçilen düğüne** göredir; bedelsiz seçenek her zaman
+  /// vardır, yani "evet" almış hiçbir oyuncu evlenemeden kalmaz.
+  FamilyResult holdWedding(GameState state, String styleId) {
+    final PendingWedding? bekleyen = state.pendingWedding;
+    if (bekleyen == null) {
+      return _blocked(state, 'Bekleyen bir düğün yok.');
+    }
+    final WeddingStyle? stil = weddingStyleById(styleId);
+    if (stil == null) return _blocked(state, 'Böyle bir düğün seçeneği yok.');
+    if (stil.prototypeOnlyCost > state.player.wallet) {
+      return _blocked(
+        state,
+        '${stil.label} için ${trMoney(stil.prototypeOnlyCost)} gerekiyor; '
+        'cüzdanında yeterli para yok.',
+      );
+    }
+    final Person? partner = state.personById(bekleyen.spouseId);
+    if (partner == null) {
+      return _blocked(state, 'Bu kişi kayıtlarda yok.');
+    }
+    if (!partner.isAlive) {
+      // "Evet" almıştın ama düğünden önce vefat etti; kayıt silinmez,
+      // bekleyen düğün kapanır.
+      return FamilyResult(
+        state: state.copyWith(pendingWedding: null),
+        outcome: FamilyOutcome(
+          applied: true,
+          text: '${partner.firstName} ile düğün gerçekleşemedi.',
+        ),
+      );
+    }
+
+    final List<Person> people = state.people
+        .map((Person p) => p.id == partner.id
+            ? p.copyWith(
+                relation: RelationType.es,
+                inPlayerHousehold: true,
+                bond: (p.bond + stil.prototypeOnlyBond).clamp(0, 100),
+              )
+            : p)
+        .toList(growable: false);
+
+    final String metin = stil.prototypeOnlyCost == 0
+        ? '${partner.fullName} ile ${stil.logText}'
+        : '${partner.fullName} ile ${stil.logText} '
+            'Masrafı ${trMoney(stil.prototypeOnlyCost)} tuttu.';
+
+    final GameState next = state.copyWith(
+      people: List<Person>.unmodifiable(people),
+      player: state.player.copyWith(
+        wallet: state.player.wallet - stil.prototypeOnlyCost,
+        stats: state.player.stats.copyWith(
+          happiness: (state.player.stats.happiness +
+                  stil.prototypeOnlyHappiness)
+              .clamp(0, 100),
+          charisma: (state.player.stats.charisma +
+                  stil.prototypeOnlyCharisma)
+              .clamp(0, 100),
+        ),
+        // Ün kapalıysa **açılmaz** (D-027): düğün Ün doğurmaz.
+        fame: state.player.fameUnlocked && stil.prototypeOnlyFame > 0
+            ? (state.player.fame! + stil.prototypeOnlyFame).clamp(0, 100)
+            : null,
+      ),
+      marriage: Marriage(
+        spouseId: partner.id,
+        marriedAtAge: state.player.age,
+        status: MarriageStatus.evli,
+      ),
+      // Evlenmek kendi haneni kurmaktır: artık ailenin yanında sayılmazsın.
+      movedOut: true,
+      pendingWedding: null,
+      storyFlags: <String>{...state.storyFlags, StoryFlags.evlendi},
+    );
+
+    return FamilyResult(
+      state: _log(next, metin, LogCategory.aile),
+      outcome: FamilyOutcome(applied: true, text: metin),
+    );
+  }
+
+  /// Sevgiliyle **doğrudan** evlenir (düğün seçimi olmadan).
+  ///
+  /// Yalnızca bedelsiz nikâh uygulanır. Arayüz akışı artık teklif →
+  /// düğün seçimi biçimindedir; bu yol eski çağrılar ve testler için
+  /// durur.
   FamilyResult marry(GameState state, String personId) {
     final Person? partner = state.personById(personId);
     if (partner == null) {
@@ -123,43 +219,14 @@ class MarriageEngine {
     }
     final String engel = marryBlockReason(state, partner);
     if (engel.isNotEmpty) return _blocked(state, engel);
-
-    final List<Person> people = state.people
-        .map((Person p) => p.id == personId
-            ? p.copyWith(
-                relation: RelationType.es,
-                inPlayerHousehold: true,
-                bond: (p.bond + prototypeOnlyWeddingBond).clamp(0, 100),
-              )
-            : p)
-        .toList(growable: false);
-
-    final String metin = '${partner.fullName} ile evlendin. '
-        'Nikâh masrafı ${trMoney(prototypeOnlyWeddingCost)} cüzdanından çıktı.';
-
-    final GameState next = state.copyWith(
-      people: List<Person>.unmodifiable(people),
-      player: state.player.copyWith(
-        wallet: state.player.wallet - prototypeOnlyWeddingCost,
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  prototypeOnlyWeddingHappiness)
-              .clamp(0, 100),
+    return holdWedding(
+      state.copyWith(
+        pendingWedding: PendingWedding(
+          spouseId: personId,
+          acceptedAtAge: state.player.age,
         ),
       ),
-      marriage: Marriage(
-        spouseId: personId,
-        marriedAtAge: state.player.age,
-        status: MarriageStatus.evli,
-      ),
-      // Evlenmek kendi haneni kurmaktır: artık ailenin yanında sayılmazsın.
-      movedOut: true,
-      storyFlags: <String>{...state.storyFlags, StoryFlags.evlendi},
-    );
-
-    return FamilyResult(
-      state: _log(next, metin, LogCategory.aile),
-      outcome: FamilyOutcome(applied: true, text: metin),
+      kFreeWedding.id,
     );
   }
 
@@ -218,40 +285,83 @@ class MarriageEngine {
   /// ilişki **zorunlu olarak bitmez**: kısa bir yanıt ve gerçekten
   /// uygulanan bir yakınlık/mutluluk etkisi olur. Yanıt kayda girer;
   /// oyunu yeniden yükleyerek sonuç değiştirilemez.
-  FamilyResult propose(GameState state, String personId, Random rng) {
+  FamilyResult propose(
+    GameState state,
+    String personId,
+    Random rng, {
+    String styleId = 'sade',
+  }) {
     final Person? partner = state.personById(personId);
     if (partner == null) return _blocked(state, 'Bu kişi kayıtlarda yok.');
 
     final String engel = proposeBlockReason(state, partner);
     if (engel.isNotEmpty) return _blocked(state, engel);
 
-    final bool kabul = rng.nextDouble() < prototypeOnlyAcceptChance(state, partner);
+    final ProposalStyle? stil = proposalStyleById(styleId);
+    if (stil == null) return _blocked(state, 'Böyle bir teklif seçeneği yok.');
+    if (stil.prototypeOnlyCost > state.player.wallet) {
+      return _blocked(
+        state,
+        '${stil.label} için ${trMoney(stil.prototypeOnlyCost)} gerekiyor; '
+        'cüzdanında yeterli para yok.',
+      );
+    }
+
+    // Hazırlık masrafı **her hâlükârda** ödenir: teklif reddedilse de
+    // ayrılan masa, alınan bilet geri gelmez.
+    final GameState odenmis = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet - stil.prototypeOnlyCost,
+      ),
+    );
+
+    final double sans =
+        (prototypeOnlyAcceptChance(state, partner) + stil.prototypeOnlyAcceptBonus)
+            .clamp(prototypeOnlyMinAcceptChance, prototypeOnlyMaxAcceptChance);
+    final bool kabul = rng.nextDouble() < sans;
     final Map<String, int> teklifler = <String, int>{
       ...state.proposalAges,
       personId: state.player.age,
     };
 
     if (kabul) {
-      final FamilyResult sonuc = marry(
-        state.copyWith(
-          proposalAges: Map<String, int>.unmodifiable(teklifler),
+      // **Düğün ayrı bir adımdır (Paket 25).** "Evet" alındı; sıra
+      // cüzdana göre düğün seçmekte. Bu bekleyen durum kayda girer,
+      // yarıda kalmaz.
+      final List<Person> people = odenmis.people
+          .map((Person p) => p.id == personId
+              ? p.copyWith(
+                  bond: (p.bond + stil.prototypeOnlyBond).clamp(0, 100),
+                )
+              : p)
+          .toList(growable: false);
+      final String metin = '${partner.firstName} "evet" dedi. '
+          'Sıra düğünde: bütçene göre nasıl bir düğün istediğini seç.';
+      final GameState next = odenmis.copyWith(
+        people: List<Person>.unmodifiable(people),
+        proposalAges: Map<String, int>.unmodifiable(teklifler),
+        player: odenmis.player.copyWith(
+          stats: odenmis.player.stats.copyWith(
+            happiness: (odenmis.player.stats.happiness +
+                    stil.prototypeOnlyHappiness)
+                .clamp(0, 100),
+          ),
         ),
-        personId,
+        pendingWedding: PendingWedding(
+          spouseId: personId,
+          acceptedAtAge: odenmis.player.age,
+        ),
       );
-      if (!sonuc.outcome.applied) return sonuc;
       return FamilyResult(
-        state: sonuc.state,
-        outcome: FamilyOutcome(
-          applied: true,
-          text: '${partner.firstName} "evet" dedi. ${sonuc.outcome.text}',
-        ),
+        state: _log(next, metin, LogCategory.aile),
+        outcome: FamilyOutcome(applied: true, text: metin),
       );
     }
 
     // Ret: ilişki bitmez, kayıt silinmez.
     final String metin = '${partner.firstName} hazır olmadığını söyledi. '
         'İlişkiniz bitmedi ama aranızda bir sessizlik kaldı.';
-    final List<Person> people = state.people
+    final List<Person> people = odenmis.people
         .map((Person p) => p.id == personId
             ? p.copyWith(
                 bond: (p.bond - prototypeOnlyRejectBondLoss).clamp(0, 100),
@@ -259,13 +369,13 @@ class MarriageEngine {
             : p)
         .toList(growable: false);
 
-    final GameState next = state.copyWith(
+    final GameState next = odenmis.copyWith(
       people: List<Person>.unmodifiable(people),
       proposalAges: Map<String, int>.unmodifiable(teklifler),
-      player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
+      player: odenmis.player.copyWith(
+        stats: odenmis.player.stats.copyWith(
           happiness:
-              state.player.stats.happiness + prototypeOnlyRejectHappiness,
+              odenmis.player.stats.happiness + prototypeOnlyRejectHappiness,
         ),
       ),
     );

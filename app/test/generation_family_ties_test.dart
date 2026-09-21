@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:bir_omur/domain/generation/generation_continuation.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/adoption.dart';
+import 'package:bir_omur/data/wedding_catalog.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/domain/interaction/parenthood.dart';
 import 'package:bir_omur/domain/interaction/romance.dart';
@@ -124,14 +125,17 @@ void main() {
     for (int seed = 0; seed < 30 && !state.isMarried; seed++) {
       final GameState deneme =
           evlilik.propose(state, v.partner.id, Random(seed)).state;
-      state = deneme.isMarried
-          ? deneme
-          : deneme.copyWith(
-              player: deneme.player.copyWith(
-                age: deneme.player.age +
-                    MarriageEngine.prototypeOnlyProposalCooldown,
-              ),
-            );
+      if (deneme.hasPendingWedding) {
+        // "Evet" alındı; evlilik düğünle kurulur (Paket 25).
+        state = evlilik.holdWedding(deneme, kFreeWedding.id).state;
+      } else {
+        state = deneme.copyWith(
+          player: deneme.player.copyWith(
+            age: deneme.player.age +
+                MarriageEngine.prototypeOnlyProposalCooldown,
+          ),
+        );
+      }
     }
     expect(state.isMarried, isTrue);
     state = ebeveynlik.haveChild(state, Random(5)).state;

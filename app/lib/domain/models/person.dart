@@ -35,10 +35,18 @@ class Person {
     this.city,
     this.estate = const <String>[],
     this.development,
+    this.infertile = false,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
         );
+
+  /// Bu kişi kısır mı? (Paket 25)
+  ///
+  /// Romantik bağ kurulurken **gizlice** belirlenir; oyuncuya söylenmez,
+  /// ancak denedikçe anlaşılır. Romantik olmayan kişilerde anlamsızdır
+  /// ve hep `false` kalır.
+  final bool infertile;
 
   /// Hayat boyu değişmeyen kişi kimliği.
   final String id;
@@ -195,6 +203,7 @@ class Person {
     Object? city = _unset,
     List<String>? estate,
     Object? development = _unset,
+    bool? infertile,
   }) {
     return Person(
       id: id,
@@ -223,6 +232,7 @@ class Person {
       development: development == _unset
           ? this.development
           : development as PersonDevelopment?,
+      infertile: infertile ?? this.infertile,
     );
   }
 }

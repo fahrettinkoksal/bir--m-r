@@ -7,6 +7,7 @@ import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
+import 'intimacy.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 
@@ -87,6 +88,9 @@ class Romance {
       // Tanışma oyuncunun yaşadığı şehirde olur (Paket 3).
       city: state.player.currentCity,
       bond: rng.between(55, 70), // prototypeOnly
+      // Partnerin doğurganlığı da **gizlice** belirlenir; oyuncuya
+      // söylenmez (Paket 25).
+      infertile: Intimacy.rollPartnerInfertility(rng),
     );
 
     return (

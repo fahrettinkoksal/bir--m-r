@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 28;
+const int kSaveFormatVersion = 29;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 ///
@@ -19,7 +19,7 @@ const int kSaveFormatVersion = 28;
 /// kaymaz, yoksa eski kayıtlar sessizce açılamaz hâle gelir. Daha eski
 /// bir kayıt açılmak istenirse oyuncuya anlaşılır bir mesaj gösterilir
 /// ve **kayıt silinmez**.
-const int kMinReadableSaveVersion = 23;
+const int kMinReadableSaveVersion = 24;
 
 /// Kayıt dosyası okunamadığında atılır.
 ///
@@ -66,13 +66,25 @@ abstract final class SaveMigrations {
       );
     }
     Map<String, Object?> guncel = body;
-    if (from <= 23) guncel = _v23ToV24(guncel);
     if (from <= 24) guncel = _v24ToV25(guncel);
     if (from <= 25) guncel = _v25ToV26(guncel);
     if (from <= 26) guncel = _v26ToV27(guncel);
     if (from <= 27) guncel = _v27ToV28(guncel);
+    if (from <= 28) guncel = _v28ToV29(guncel);
     return guncel;
   }
+
+  /// Sürüm 28 → 29: teklif/düğün ayrımı, korunma ve doğurganlık
+  /// (Paket 25).
+  ///
+  /// Eski kayıtlarda bekleyen düğün, deneme sayacı ve doğurganlık bilgisi
+  /// yoktur. **Hiçbiri geriye dönük uydurulmaz:** bekleyen düğün boş
+  /// kalır, sayaç sıfırdan başlar, kimse kısır sayılmaz. Kurulmuş
+  /// evlilikler olduğu gibi korunur.
+  ///
+  /// Alanların hepsi eklemeli olduğu için gövdeye dokunulmaz; sürüm
+  /// yalnızca kaydın hangi şemayla yazıldığını belgelemek için artar.
+  static Map<String, Object?> _v28ToV29(Map<String, Object?> body) => body;
 
   /// Sürüm 27 → 28: olayların kaç kez çıktığı sayılmaya başlandı
   /// (Paket 20).
@@ -112,26 +124,13 @@ abstract final class SaveMigrations {
   /// uydurulmaz**. Oyuncunun yaşadığı ve doğduğu şehir değişmez.
   static Map<String, Object?> _v24ToV25(Map<String, Object?> body) => body;
 
-  /// Sürüm 23 → 24: sosyal medya geliri ve sponsorluk eklendi (Paket 10).
-  ///
-  /// Eski kayıtlarda paylaşımların kazancı yoktur; **geriye dönük gelir
-  /// üretilmez** (kazanç 0 kalır) ve bekleyen sponsorluk olmaz. Takipçi,
-  /// içerik geçmişi ve Ün değerleri olduğu gibi korunur.
-  static Map<String, Object?> _v23ToV24(Map<String, Object?> body) => body;
-
-  /// Sürüm 22 → 23: kariyer geçmişi, görev seviyesi ve iş arkadaşları
-  /// eklendi (Paket 9).
-  ///
-  /// Eski kayıtlarda görev seviyesi 0, maaş katalog maaşı ve kariyer
-  /// geçmişi boştur. **Geriye dönük iş geçmişi uydurulmaz**: oyuncunun
-  /// önceki işleri `pastJobIds` içinde durduğu gibi kalır. İş arkadaşı da
-  /// geriye dönük üretilmez; yeni işe girildiğinde tanışılır.
   // ---------------------------------------------------------------
   // Daha eski sürümler
   //
   // **Faho'nun kararı (Paket 12):** geriye dönük olarak yalnızca son beş
-  // sürüm taşınır. Sürüm 22 ve öncesine ait dönüştürme adımları bu
-  // yüzden kaldırıldı; gerekirse sürüm geçmişinden geri alınabilirler.
+  // sürüm taşınır ve bunu kalıcı bir test zorunlu kılar. Sürüm 23 ve
+  // öncesine ait dönüştürme adımları bu yüzden kaldırıldı; gerekirse
+  // sürüm geçmişinden geri alınabilirler.
   // Taban (`kMinReadableSaveVersion`) düşürülmeden bu adımlar zaten hiç
   // çalışmıyordu.
   // ---------------------------------------------------------------

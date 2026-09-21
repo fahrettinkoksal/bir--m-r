@@ -6,6 +6,7 @@ import '../models/gender.dart';
 import '../models/life_log.dart';
 import '../models/parental_status.dart';
 import '../models/person.dart';
+import '../interaction/intimacy.dart';
 import '../models/player_character.dart';
 import '../models/relation.dart';
 import '../models/stats.dart';
@@ -308,6 +309,9 @@ class LifeGenerator {
       ),
       // Ün başlangıçta açık değildir (D-027).
       fame: null,
+      // Doğurganlık hayat başında **gizlice** belirlenir; oyuncuya
+      // söylenmez, ancak denedikçe anlaşılır (Paket 25).
+      infertile: Intimacy.rollPlayerInfertility(_rng),
     );
 
     // Aile ve akrabalar doğum şehrinde yaşar. Oyuncu ileride başka şehre

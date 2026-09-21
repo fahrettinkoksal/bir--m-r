@@ -98,13 +98,20 @@ void main() {
         contains('yakın değil'),
       );
 
+      // **Para artık engel değil (Paket 25).** Teklif bedelsiz, düğün
+      // seçeneklerinden biri de bedelsiz: parasızlık yüzünden
+      // evlenemeyen kimse kalmaz.
       final ({GameState state, Person partner}) parasiz =
           sevgiliEkle(oyuncu(4, wallet: 100));
       expect(
         evlilik.marryBlockReason(parasiz.state, parasiz.partner),
-        contains('para yok'),
+        isEmpty,
       );
       expect(parasiz.state.isMarried, isFalse);
+      final GameState evlendi =
+          evlilik.marry(parasiz.state, parasiz.partner.id).state;
+      expect(evlendi.isMarried, isTrue);
+      expect(evlendi.player.wallet, 100, reason: 'Nikâhın masrafı yok');
     });
 
     test('evlenince kişi aynı kimlikle eş olur, yeni kişi üretilmez', () {
@@ -124,16 +131,15 @@ void main() {
       expect(evli.spouse!.id, s.partner.id);
     });
 
-    test('nikâh masrafı bir kez düşer ve kendi hanen kurulur', () {
+    test('bedelsiz nikâhta cüzdan değişmez ve kendi hanen kurulur', () {
       final ({GameState state, Person partner}) s = sevgiliEkle(oyuncu(6));
       final int cuzdan = s.state.player.wallet;
 
+      // `marry` artık bedelsiz nikâhı uygular; masraflı düğünler
+      // `holdWedding` ile seçilir (Paket 25).
       final GameState evli = evlilik.marry(s.state, s.partner.id).state;
 
-      expect(
-        evli.player.wallet,
-        cuzdan - MarriageEngine.prototypeOnlyWeddingCost,
-      );
+      expect(evli.player.wallet, cuzdan);
       expect(evli.spouse!.inPlayerHousehold, isTrue);
       expect(evli.movedOut, isTrue);
       expect(Housing.residenceOf(evli), ResidenceKind.kirada,
@@ -322,10 +328,11 @@ void main() {
       expect(olumlu.state.marriage, isNull);
       expect(olumlu.state.isMarried, isFalse);
 
-      // Yeni başlamış, yakınlığı düşük ilişkide olmaz.
+      // **Yakınlık eşiği kaldırıldı (Paket 25).** Çocuk artık bir düğmeyle
+      // değil, korunmadan yakınlaşmanın ihtimaliyle geliyor; böyle bir
+      // akışta eşik gebeliği sessizce engeller.
       final GameState uzak = sevgiliEkle(oyuncu(15), bond: 30).state;
-      expect(ebeveynlik.blockReason(uzak), contains('yakın değil'));
-      expect(ebeveynlik.haveChild(uzak, Random(1)).outcome.applied, isFalse);
+      expect(ebeveynlik.blockReason(uzak), isEmpty);
     });
 
     test('sevgili de eş de yoksa çocuk sahibi olunamaz', () {

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../data/item_catalog.dart';
+import '../../data/wedding_catalog.dart';
+import '../../domain/interaction/intimacy.dart';
 
 import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/interaction.dart';
 import '../../domain/models/marriage.dart';
+import '../../domain/models/pending_wedding.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/interaction/shared_history.dart';
@@ -84,32 +87,88 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     });
   }
 
-  /// Evlenme teklifi (D-048): yanıt her zaman "evet" değildir.
+  /// Evlenme teklifi (D-048, Paket 25): yanıt her zaman "evet" değildir.
+  ///
+  /// **Teklif etmek bedelsizdir.** Oyuncu nasıl teklif edeceğini seçer;
+  /// pahalı seçenek yanıtı satın almaz, yalnızca ihtimali biraz artırır.
   Future<void> _marry(Person person) async {
-    final bool? onay = await showDialog<bool>(
+    final int cuzdan = GameScope.of(context).state!.player.wallet;
+    final ProposalStyle? stil = await showModalBottomSheet<ProposalStyle>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Evlenme teklifi'),
-        content: Text(
-          '${person.firstName} ile evlenmeyi teklif edeceksin. Yanıtı '
-          'ilişkinize bağlı; hayır da diyebilir. Kabul ederse nikâh '
-          'masrafı ${trMoney(MarriageEngine.prototypeOnlyWeddingCost)} '
-          'cüzdanından çıkacak ve kendi haneni kuracaksın.',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Teklif et'),
-          ),
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (BuildContext context) => _StyleSheet(
+        title: '${person.firstName} ile evlenmeyi teklif edeceksin',
+        subtitle: 'Nasıl soracağını sen seçiyorsun. Teklif etmek '
+            'bedelsizdir; hazırlık yapmak ihtimali biraz artırır ama '
+            'yanıtı satın almaz.',
+        wallet: cuzdan,
+        options: <_StyleOption>[
+          for (final ProposalStyle o in kProposalStyles)
+            _StyleOption(
+              key: o.id,
+              label: o.label,
+              description: o.description,
+              cost: o.prototypeOnlyCost,
+              icon: o.icon,
+              value: o,
+            ),
         ],
       ),
     );
-    if (onay != true || !mounted) return;
-    final FamilyOutcome? sonuc = GameScope.of(context).propose(widget.personId);
+    if (stil == null || !mounted) return;
+    final FamilyOutcome? sonuc =
+        GameScope.of(context).propose(widget.personId, styleId: stil.id);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+    if (!mounted) return;
+    // Kabul edildiyse sıra düğünde.
+    if (GameScope.of(context).state!.hasPendingWedding) {
+      await _wedding();
+    }
+  }
+
+  /// Düğün seçimi (Paket 25): cüzdana göre.
+  ///
+  /// Bedelsiz seçenek her zaman vardır; "evet" almış oyuncu parasızlık
+  /// yüzünden evlenemeden kalmaz.
+  Future<void> _wedding() async {
+    final GameState state = GameScope.of(context).state!;
+    final PendingWedding? bekleyen = state.pendingWedding;
+    if (bekleyen == null) return;
+    final Person? es = state.personById(bekleyen.spouseId);
+    final int cuzdan = state.player.wallet;
+    final WeddingStyle? stil = await showModalBottomSheet<WeddingStyle>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      // Düğün seçimi yarıda bırakılabilir; kayıtta durur, sonra devam
+      // edilir. Bu yüzden kapatmak serbesttir.
+      builder: (BuildContext context) => _StyleSheet(
+        title: es == null
+            ? 'Sıra düğünde'
+            : '${es.firstName} "evet" dedi. Sıra düğünde',
+        subtitle: 'Bütçene uymayan seçenekler kapalı. Nikâhın masrafı '
+            'yok: parasızlık yüzünden evlenemeden kalmazsın.',
+        wallet: cuzdan,
+        options: <_StyleOption>[
+          for (final WeddingStyle o in kWeddingStyles)
+            _StyleOption(
+              key: o.id,
+              label: o.label,
+              description: o.description,
+              cost: o.prototypeOnlyCost,
+              icon: o.icon,
+              value: o,
+            ),
+        ],
+      ),
+    );
+    if (stil == null || !mounted) return;
+    final FamilyOutcome? sonuc = GameScope.of(context).holdWedding(stil.id);
     if (sonuc == null) return;
     setState(() {
       _lastOutcome = null;
@@ -148,9 +207,20 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     });
   }
 
-  /// Çocuk sahibi olmak (Paket E2).
-  void _haveChild() {
-    final FamilyOutcome? sonuc = GameScope.of(context).haveChild();
+  /// Baş başa kalmak (Paket 25).
+  ///
+  /// "Çocuk sahibi olun" düğmesinin yerini aldı: basınca doğrudan çocuk
+  /// olmuyor. Korunma tercihi oyuncunun; korunmazsa çocuk bir
+  /// **ihtimal**.
+  Future<void> _intimacy(Person person) async {
+    final Protection? secim = await showModalBottomSheet<Protection>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext context) => _ProtectionSheet(person: person),
+    );
+    if (secim == null || !mounted) return;
+    final FamilyOutcome? sonuc =
+        GameScope.of(context).beIntimate(widget.personId, secim);
     if (sonuc == null) return;
     setState(() {
       _lastOutcome = null;
@@ -365,7 +435,19 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               if (person.isAlive &&
                   person.relation == RelationType.sevgili) ...<Widget>[
                 const SizedBox(height: 12),
-                if (GameScope.of(context)
+                // "Evet" alınmış ama düğün seçilmemişse akış burada
+                // kaldığı yerden sürer; yarıda kalan evlilik kaybolmaz.
+                if (state.pendingWedding?.spouseId == widget.personId)
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      key: const Key('person_wedding_button'),
+                      onPressed: _wedding,
+                      icon: const Icon(Icons.celebration_rounded),
+                      label: const Text('Düğününüzü seçin'),
+                    ),
+                  )
+                else if (GameScope.of(context)
                     .proposalAvailability(widget.personId)
                     .isAllowed)
                   SizedBox(
@@ -383,42 +465,48 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                         '${GameScope.of(context).proposalAvailability(widget.personId).reason}',
                   ),
                 // Evlilik şart değildir (D-047): sevgiliyle de çocuk
-                // sahibi olunabilir.
+                // sahibi olunabilir. Ama artık "çocuk yap" düğmesiyle
+                // değil, korunmadan yakınlaşmanın ihtimaliyle
+                // (Paket 25).
                 const SizedBox(height: 12),
-                if (GameScope.of(context).childAvailability().isAllowed)
+                if (GameScope.of(context)
+                    .intimacyAvailability(widget.personId)
+                    .isAllowed)
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      key: const Key('person_child_button_partner'),
-                      onPressed: _haveChild,
-                      icon: const Icon(Icons.child_friendly_outlined),
-                      label: const Text('Çocuk sahibi olun'),
+                      key: const Key('person_intimacy_button_partner'),
+                      onPressed: () => _intimacy(person),
+                      icon: const Icon(Icons.favorite_rounded),
+                      label: const Text('Baş başa kalın 💞'),
                     ),
                   )
                 else
                   _Note(
-                    text: 'Çocuk sahibi olmak için: '
-                        '${GameScope.of(context).childAvailability().reason}',
+                    text: 'Baş başa kalmak için: '
+                        '${GameScope.of(context).intimacyAvailability(widget.personId).reason}',
                   ),
               ],
 
               // Eşe özel eylemler: çocuk sahibi olmak ve boşanma.
               if (person.isAlive && person.relation == RelationType.es) ...<Widget>[
                 const SizedBox(height: 12),
-                if (GameScope.of(context).childAvailability().isAllowed)
+                if (GameScope.of(context)
+                    .intimacyAvailability(widget.personId)
+                    .isAllowed)
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      key: const Key('person_child_button'),
-                      onPressed: _haveChild,
-                      icon: const Icon(Icons.child_friendly_outlined),
-                      label: const Text('Çocuk sahibi olun'),
+                      key: const Key('person_intimacy_button'),
+                      onPressed: () => _intimacy(person),
+                      icon: const Icon(Icons.favorite_rounded),
+                      label: const Text('Baş başa kalın 💞'),
                     ),
                   )
                 else
                   _Note(
-                    text: 'Çocuk sahibi olmak için: '
-                        '${GameScope.of(context).childAvailability().reason}',
+                    text: 'Baş başa kalmak için: '
+                        '${GameScope.of(context).intimacyAvailability(widget.personId).reason}',
                   ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -690,6 +778,214 @@ class _SharedMomentRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+/// Seçenek listesi için tek satırlık veri.
+class _StyleOption {
+  const _StyleOption({
+    required this.key,
+    required this.label,
+    required this.description,
+    required this.cost,
+    required this.icon,
+    required this.value,
+  });
+
+  final String key;
+  final String label;
+  final String description;
+  final int cost;
+  final IconData icon;
+  final Object value;
+}
+
+/// Teklif ve düğün seçeneklerini gösteren ortak sayfa.
+///
+/// Bütçeye uymayan seçenek **gizlenmez**, kapalı gösterilir ve nedeni
+/// yazılır: oyuncu neyin neye mal olduğunu görebilmeli.
+class _StyleSheet extends StatelessWidget {
+  const _StyleSheet({
+    required this.title,
+    required this.subtitle,
+    required this.wallet,
+    required this.options,
+  });
+
+  final String title;
+  final String subtitle;
+  final int wallet;
+  final List<_StyleOption> options;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(title, style: theme.textTheme.titleLarge),
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const KilimDivider(),
+              const SizedBox(height: 14),
+              for (final _StyleOption o in options) ...<Widget>[
+                _StyleRow(option: o, affordable: o.cost <= wallet),
+                const SizedBox(height: 10),
+              ],
+              Text(
+                'Cüzdanında ${trMoney(wallet)} var.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StyleRow extends StatelessWidget {
+  const _StyleRow({required this.option, required this.affordable});
+
+  final _StyleOption option;
+  final bool affordable;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        key: Key('style_option_${option.key}'),
+        onPressed:
+            affordable ? () => Navigator.of(context).pop(option.value) : null,
+        style: OutlinedButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(option.icon, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    option.cost == 0
+                        ? '${option.label} · masrafsız'
+                        : '${option.label} · ${trMoney(option.cost)}',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    option.description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (!affordable) ...<Widget>[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Cüzdanında yeterli para yok.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Korunma tercihi sayfası (Paket 25).
+///
+/// Metin kapalı ve ölçülüdür; sahne anlatılmaz. Ne kastedildiği
+/// başlıktaki simgeden ve seçeneklerin kendisinden anlaşılır.
+class _ProtectionSheet extends StatelessWidget {
+  const _ProtectionSheet({required this.person});
+
+  final Person person;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              '${person.firstName} ile baş başa 💞',
+              style: theme.textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Korunup korunmayacağınıza sen karar veriyorsun. '
+              'Korunmazsanız çocuk ihtimal dahilinde; garanti değil.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 14),
+            const KilimDivider(),
+            const SizedBox(height: 14),
+            for (final Protection p in Protection.values) ...<Widget>[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: Key('protection_${p.name}'),
+                  onPressed: () => Navigator.of(context).pop(p),
+                  style: OutlinedButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(p.label, style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 2),
+                      Text(
+                        p.hint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        ),
       ),
     );
   }

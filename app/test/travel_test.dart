@@ -442,8 +442,8 @@ void main() {
       expect(sonra.player.wallet, greaterThanOrEqualTo(cuzdan - 200000));
     });
 
-    test('kayıt sürümü 28 ve eski kayıtta gezi listesi boş açılır', () {
-      expect(kSaveFormatVersion, 28);
+    test('kayıt sürümü 29 ve eski kayıtta gezi listesi boş açılır', () {
+      expect(kSaveFormatVersion, 29);
       final GameState s = gezgin();
       final Map<String, Object?> body =
           Map<String, Object?>.from(encodeGameState(s))..remove('trips');

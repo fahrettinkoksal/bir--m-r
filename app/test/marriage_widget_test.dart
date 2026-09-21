@@ -74,10 +74,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Teklif eder; kabul edilmezse kişi kartını yeniden açıp tekrar dener.
+  /// Teklif eder ve kabul edilene kadar dener; sonra düğünü seçer.
   ///
-  /// Teklif artık her zaman kabul edilmiyor (D-048); test bu yüzden
-  /// sonucu kilitlemek için kabul edilene kadar dener.
+  /// Akış artık iki adımlı (Paket 25): teklif **bedelsiz**, düğün
+  /// cüzdana göre ayrıca seçiliyor. Teklif her zaman kabul edilmiyor
+  /// (D-048), o yüzden test kabul edilene kadar deniyor.
   Future<void> teklifEtVeKabulEttir(
     WidgetTester tester,
     String adSoyad,
@@ -99,8 +100,14 @@ void main() {
       }
       await tester.tap(find.byKey(const Key('person_marry_button')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Teklif et'));
+      // Teklif biçimi: bedelsiz olanı seç.
+      await tester.tap(find.byKey(const Key('style_option_sade')));
       await tester.pumpAndSettle();
+      // Kabul edildiyse düğün sayfası kendiliğinden açılır.
+      if (find.byKey(const Key('style_option_nikah')).evaluate().isNotEmpty) {
+        await tester.tap(find.byKey(const Key('style_option_nikah')));
+        await tester.pumpAndSettle();
+      }
     }
     expect(controller.state!.isMarried, isTrue,
         reason: 'Teklif hiç kabul edilmedi');
@@ -108,7 +115,9 @@ void main() {
 
   testWidgets('evlenme düğmesi koşul sağlanmadan gösterilmez',
       (WidgetTester tester) async {
-    final ({GameState state, Person partner}) veri = sevgili(wallet: 1000);
+    // Para artık engel değil (Paket 25); engel yakınlıktır.
+    final ({GameState state, Person partner}) veri =
+        sevgili(wallet: 1000, bond: 30);
     await pumpApp(tester, veri.state);
     await kisiyiAc(tester, veri.partner.fullName);
 
@@ -142,9 +151,26 @@ void main() {
     await kisiyiAc(tester, veri.partner.fullName);
     await teklifEtVeKabulEttir(tester, veri.partner.fullName);
 
-    // Eş kartından çocuk sahibi olunur.
-    await tester.tap(find.byKey(const Key('person_child_button')));
-    await tester.pumpAndSettle();
+    // Eş kartından baş başa kalınır. Çocuk **garanti değil**, ihtimal
+    // (Paket 25): olana kadar yıl ilerletilerek denenir.
+    for (int deneme = 0;
+        deneme < 30 && controller.state!.children.isEmpty;
+        deneme++) {
+      await tester.tap(find.byKey(const Key('person_intimacy_button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('protection_korunmadan')));
+      await tester.pumpAndSettle();
+      if (controller.state!.children.isNotEmpty) break;
+      // Aynı yıl ihtimal bir kez hesaplanır; yaş ilerletilir. Kişi kartı
+      // açık kalır, durum değişince kendini yeniler.
+      controller.debugSetState(
+        controller.state!.copyWith(
+          player: controller.state!.player
+              .copyWith(age: controller.state!.player.age + 1),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
     expect(controller.state!.children.length, 1);
 
     final Person cocuk = controller.state!.children.single;
