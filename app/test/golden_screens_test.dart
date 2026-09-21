@@ -7,6 +7,12 @@ import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
+import 'package:bir_omur/domain/models/gender.dart';
+import 'package:bir_omur/domain/models/player_character.dart';
+import 'package:bir_omur/domain/models/stats.dart';
+import 'package:bir_omur/ui/theme/bir_omur_theme.dart';
+import 'package:bir_omur/ui/widgets/character_face.dart';
+import 'package:bir_omur/ui/widgets/comic.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
@@ -59,19 +65,24 @@ Future<void> _loadReadableFont() async {
     'regular': '$_flutterFonts/MaterialIcons-Regular.otf',
   });
 
-  // Roboto'nun tüm kalınlıkları: w400 ile w800 arasındaki fark ekranda
-  // gerçekten görünsün.
-  final bool roboto = await _loadFamily('Roboto', <String, String>{
-    'light': '$_flutterFonts/Roboto-Light.ttf',
-    'regular': '$_flutterFonts/Roboto-Regular.ttf',
-    'medium': '$_flutterFonts/Roboto-Medium.ttf',
-    'bold': '$_flutterFonts/Roboto-Bold.ttf',
-    'black': '$_flutterFonts/Roboto-Black.ttf',
+  // Oyunun kendi yazı tipleri (Paket 19). Bunlar yüklenmezse ekran
+  // görüntülerinde bütün yazılar boş kutu çıkıyor ve tasarım
+  // değerlendirilemiyor.
+  final bool baloo = await _loadFamily('Baloo2', <String, String>{
+    'w400': 'assets/fonts/Baloo2-400.ttf',
+    'w500': 'assets/fonts/Baloo2-500.ttf',
+    'w600': 'assets/fonts/Baloo2-600.ttf',
+    'w700': 'assets/fonts/Baloo2-700.ttf',
+    'w800': 'assets/fonts/Baloo2-800.ttf',
   });
-  if (roboto) return;
+  await _loadFamily('PatrickHand', <String, String>{
+    'regular': 'assets/fonts/PatrickHand-Regular.ttf',
+  });
+  if (baloo) return;
 
+  // Yazı tipleri bulunamazsa okunabilir bir yedek yüklenir.
   for (final String path in _fallbackFonts) {
-    if (await _loadFamily('Roboto', <String, String>{'regular': path})) return;
+    if (await _loadFamily('Baloo2', <String, String>{'regular': path})) return;
   }
 }
 
@@ -309,5 +320,107 @@ void main() {
     await tester.pumpAndSettle();
 
     await shot(tester, '09_eski_sevgili.png');
+  }, skip: !enabled);
+
+  testWidgets('karakter yüzü: yaşa, cinsiyete ve ruh haline göre',
+      (WidgetTester tester) async {
+    // Yüz koddan çizilir; bu ekran görüntüsü yaşa, saç stiline, mutluluğa
+    // ve sağlığa göre gerçekten değiştiğini gözle doğrulamak içindir.
+    tester.view.physicalSize = const Size(1080, 1620);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    PlayerCharacter yuz({
+      required int age,
+      required Gender gender,
+      int happiness = 70,
+      int health = 75,
+      String? hair,
+    }) =>
+        PlayerCharacter(
+          id: 'x',
+          firstName: 'Deniz',
+          lastName: 'Yılmaz',
+          gender: gender,
+          age: age,
+          birthCity: 'Gaziantep',
+          hairStyle: hair,
+          stats: Stats(
+            appearance: 50,
+            happiness: happiness,
+            health: health,
+            intelligence: 50,
+            charisma: 50,
+          ),
+        );
+
+    final List<({String etiket, PlayerCharacter kisi})> ornekler =
+        <({String etiket, PlayerCharacter kisi})>[
+      (etiket: '1 yaş', kisi: yuz(age: 1, gender: Gender.kadin)),
+      (etiket: '7 yaş', kisi: yuz(age: 7, gender: Gender.erkek)),
+      (
+        etiket: '16 · dağınık',
+        kisi: yuz(age: 16, gender: Gender.erkek, hair: 'Dağınık')
+      ),
+      (
+        etiket: '25 · uzun',
+        kisi: yuz(age: 25, gender: Gender.kadin, hair: 'Uzun ve toplu')
+      ),
+      (etiket: 'mutsuz', kisi: yuz(age: 30, gender: Gender.kadin, happiness: 5)),
+      (etiket: 'hasta', kisi: yuz(age: 34, gender: Gender.erkek, health: 10)),
+      (etiket: '60 yaş', kisi: yuz(age: 60, gender: Gender.erkek)),
+      (etiket: '78 yaş', kisi: yuz(age: 78, gender: Gender.kadin)),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: BirOmurTheme.light(),
+        home: PaperBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Wrap(
+                spacing: 18,
+                runSpacing: 18,
+                alignment: WrapAlignment.center,
+                children: <Widget>[
+                  for (final ({String etiket, PlayerCharacter kisi}) o
+                      in ornekler)
+                    SizedBox(
+                      width: 148,
+                      child: ComicCard(
+                        padding: const EdgeInsets.fromLTRB(8, 10, 8, 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            CharacterFace(player: o.kisi, size: 92),
+                            const SizedBox(height: 6),
+                            Text(
+                              o.etiket,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: BirOmurTheme.yaziTipi,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/12_karakter_yuzu.png'),
+    );
   }, skip: !enabled);
 }

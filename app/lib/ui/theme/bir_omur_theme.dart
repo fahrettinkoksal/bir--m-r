@@ -1,317 +1,273 @@
 import 'package:flutter/material.dart';
 
-/// Bir Ömür'ün görsel yönü: **canlı, çağdaş ve yüksek karşıtlıklı**.
+/// Bir Ömür'ün görsel yönü: **çizgi roman / çıkartma**.
 ///
-/// Paket 16'da palet baştan kuruldu. Önceki sürüm soluk bir "eski kâğıt"
-/// zemini üzerine her satırı ayrı bir pastel tonla boyuyordu; bu hem
-/// karşıtlığı düşürüyor hem de ekranı tek tip, karaktersiz gösteriyordu.
-/// Yeni yön şudur:
+/// Paket 19'da tasarım üçüncü kez ve bu sefer baştan kuruldu. Önceki iki
+/// deneme de "yapay zekâ işi gibi" bulundu; ikisinin de ortak yanı,
+/// herhangi bir uygulamaya yapıştırılabilecek **genel** bir arayüz dili
+/// olmasıydı: degradeler, yumuşak gölgeler, ince çizgiler, hazır ikonlar.
 ///
-/// * **Zemin sakin, renk vurguda.** Gövde neredeyse renksiz (açık temada
-///   beyaz kart / soğuk gri zemin, koyu temada mürekkep moru); renk
-///   ikonlarda, rozetlerde ve başlık şeritlerinde doygun biçimde çıkar.
-/// * **Üst başlık ve alt çubuk koyu bir degrade taşır.** Ekranın üstü ve
-///   altı çerçeve gibi durur, içerik bu çerçevenin arasında nefes alır.
-/// * **Renkler doygun.** Nar, çini ve pirinç isimleri korundu ama tonlar
-///   belirgin biçimde canlandırıldı.
+/// Bu sürümün kuralları bilerek serttir ve hepsi o genel dili kırmak
+/// içindir:
+///
+/// 1. **Degrade yok.** Her yüzey tek ve düz bir renk.
+/// 2. **Her yüzeyin kalın mürekkep konturu var.** Kart, düğme, rozet,
+///    ikon kutusu — hepsi çizilmiş gibi durur.
+/// 3. **Gölge bulanık değil, kaydırılmıştır.** `blurRadius: 0`; kartlar
+///    kâğıda yapıştırılmış çıkartma gibi durur.
+/// 4. **Düğmeler basınca gerçekten çöker.** Gölge kadar aşağı iner.
+/// 5. **Yazı tipi oyunun kendi sesidir.** Baloo 2 (kalın, yuvarlak) ve
+///    el yazısı aksanlar için Patrick Hand.
+/// 6. **Renkler afiş rengidir:** doygun, düz, birbirinden açıkça ayrı.
 ///
 /// **Renkler bu prototip için seçilmiştir (`prototypeOnly`); kesin marka
 /// paleti henüz kararlaştırılmadı** — bkz. `docs/DESIGN_REVIEW_QUEUE.md`
-/// **Q-077** ve **Q-084**. Renk değerleri tek yerde toplandığı için
-/// istenirse tek commit'le geri alınabilir.
+/// **Q-087**.
 abstract final class BirOmurColors {
   // -----------------------------------------------------------------
-  // Gövde zeminleri
+  // Kâğıt ve mürekkep
   // -----------------------------------------------------------------
 
-  /// Açık temanın zemini: hafif soğuk, neredeyse beyaz.
-  static const Color zemin = Color(0xFFF1F2F7);
+  /// Açık temanın zemini: sıcak, hafif sarımsı bir çizim kâğıdı.
+  static const Color kagit = Color(0xFFFFF3E2);
 
-  /// Açık temada kartların zemini.
+  /// Kâğıdın gölgeli tonu (doku, oyuk alanlar).
+  static const Color kagitKoyu = Color(0xFFF3E3C8);
+
+  /// Kartların zemini.
   static const Color kart = Color(0xFFFFFFFF);
 
-  /// Açık temada ikinci derece yüzey (rozet, ayırıcı dolgusu).
-  static const Color yumusakZemin = Color(0xFFE9EAF2);
+  /// Mürekkep: bütün konturlar, gölgeler ve ana yazı bu renktedir.
+  static const Color murekkep = Color(0xFF2A2233);
 
-  /// Mürekkep: ana metin rengi.
-  static const Color murekkep = Color(0xFF14131F);
-
-  /// İkincil metin.
-  static const Color sonukMurekkep = Color(0xFF6B6883);
-
-  /// İnce çizgi.
-  static const Color cizgi = Color(0xFFE2E2ED);
+  /// İkincil yazı.
+  static const Color soluk = Color(0xFF7A6E86);
 
   // -----------------------------------------------------------------
-  // Koyu tema
+  // Gece
   // -----------------------------------------------------------------
 
-  static const Color geceZemin = Color(0xFF0C0B15);
-  static const Color geceKart = Color(0xFF191826);
-  static const Color geceYumusak = Color(0xFF221F31);
-  static const Color geceCizgi = Color(0xFF2F2C40);
-  static const Color geceMetin = Color(0xFFF2F1F8);
-  static const Color geceSonuk = Color(0xFFA09DB6);
+  /// Koyu temada kontur kartın kendisinden **daha koyudur**; çizgi
+  /// böylece koyu zeminde de görünür.
+  static const Color geceZemin = Color(0xFF1B1526);
+  static const Color geceKart = Color(0xFF2F2742);
+  static const Color geceMurekkep = Color(0xFF0D0A14);
+  static const Color geceMetin = Color(0xFFF8F1E6);
+  static const Color geceSoluk = Color(0xFFB3A6C4);
 
   // -----------------------------------------------------------------
-  // Kimlik renkleri
+  // Afiş renkleri
   // -----------------------------------------------------------------
 
-  /// Nar kırmızısı — ana vurgu. Doygunluğu belirgin biçimde artırıldı.
-  static const Color nar = Color(0xFFE4224B);
-  static const Color narKoyu = Color(0xFFA30F35);
-  static const Color narAcik = Color(0xFFFF5E80);
-
-  /// Çini turkuazı — ikincil vurgu.
-  static const Color cini = Color(0xFF00A99B);
-  static const Color ciniKoyu = Color(0xFF00776C);
-  static const Color ciniAcik = Color(0xFF3FD8C3);
-
-  /// Pirinç sarısı — para, seçili durum ve küçük detaylar.
-  static const Color pirinc = Color(0xFFF5A623);
-  static const Color pirincKoyu = Color(0xFFC97C00);
-  static const Color pirincAcik = Color(0xFFFFC85C);
-
-  // -----------------------------------------------------------------
-  // Koyu çerçeve: üst başlık ve alt gezinme çubuğu
-  // -----------------------------------------------------------------
-
-  /// Üst karakter başlığının degradesi (sol üst → sağ alt).
-  static const Color basligUst = Color(0xFF3B1E86);
-  static const Color basligAlt = Color(0xFFB02A63);
-
-  /// Alt gezinme çubuğunun degradesi.
-  static const Color cubukUst = Color(0xFF1D1436);
-  static const Color cubukAlt = Color(0xFF120B22);
-
-  /// Koyu zemin üzerindeki sönük metin/ikon rengi.
-  static const Color sonukKrem = Color(0xFFB9B2D4);
+  static const Color kirmizi = Color(0xFFFF4D5B);
+  static const Color kirmiziKoyu = Color(0xFFD42A3C);
+  static const Color turuncu = Color(0xFFFF9327);
+  static const Color turuncuKoyu = Color(0xFFE0700A);
+  static const Color sari = Color(0xFFFFC93C);
+  static const Color sariKoyu = Color(0xFFDFA200);
+  static const Color yesil = Color(0xFF46C97A);
+  static const Color yesilKoyu = Color(0xFF229A55);
+  static const Color turkuaz = Color(0xFF2FC4C9);
+  static const Color turkuazKoyu = Color(0xFF10999E);
+  static const Color mavi = Color(0xFF4E8CFF);
+  static const Color maviKoyu = Color(0xFF2765DC);
+  static const Color mor = Color(0xFF9B6BFF);
+  static const Color morKoyu = Color(0xFF7343E0);
+  static const Color pembe = Color(0xFFFF6FB0);
+  static const Color pembeKoyu = Color(0xFFE0468C);
 
   /// Koyu zemin üzerinde okunan açık ton.
-  static const Color krem = Color(0xFFFFFFFF);
+  static const Color krem = Color(0xFFFFF8EC);
 
   // -----------------------------------------------------------------
   // Karakter değeri renkleri
   // -----------------------------------------------------------------
-  //
-  // Koyu başlık şeridinin üzerinde de okunabilsin diye parlak tutulur.
 
-  static const Color degerDusuk = Color(0xFFFF5470);
-  static const Color degerOrta = Color(0xFFFFB524);
-  static const Color degerYuksek = Color(0xFF17D4B4);
-
-  /// Koyu zeminde okunan karşılıkları.
-  static const Color geceUyari = Color(0xFFFF7A90);
-  static const Color gecePirinc = Color(0xFFFFC55C);
-  static const Color geceCini = Color(0xFF4EE3C6);
+  static const Color degerDusuk = kirmizi;
+  static const Color degerOrta = sari;
+  static const Color degerYuksek = yesil;
 }
 
-/// Menü satırlarının ve rozetlerin renk kimliği.
+/// Çizgi roman düzeninin ölçüleri.
 ///
-/// Her menü kendi rengini taşır; böylece uzun listelerde göz aradığını
-/// daha çabuk bulur. Açık ve koyu tema için ayrı tonlar tutulur, çünkü
-/// koyu zeminde aynı renk okunmuyor.
+/// Tek yerde durur; kalınlık ya da gölge derinliği değiştirilecekse
+/// bütün ekranlar aynı anda değişir.
+abstract final class Comic {
+  /// Kontur kalınlığı.
+  static const double kontur = 2.5;
+
+  /// İnce kontur (küçük rozetler).
+  static const double inceKontur = 2;
+
+  /// Gölgenin kaydırma miktarı.
+  static const double golge = 4;
+
+  /// Küçük ögelerin gölgesi.
+  static const double kucukGolge = 3;
+
+  static const double yaricapBuyuk = 22;
+  static const double yaricap = 16;
+  static const double yaricapKucuk = 12;
+
+  /// Zeminin üzerindeki konturun rengi.
+  static Color konturOf(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? BirOmurColors.geceMurekkep
+          : BirOmurColors.murekkep;
+}
+
+/// Bir menünün / bölümün rengi.
+///
+/// Afiş renkleri koyu zeminde de aynı kaldığı için tek ton yeter: kontur
+/// zaten her zaman mürekkeptir ve rengi çerçeveler.
 @immutable
 class BirOmurAccent {
-  const BirOmurAccent(this._light, this._dark, this._lightDeep, this._darkDeep);
+  const BirOmurAccent(this.color, this.deep);
 
-  final Color _light;
-  final Color _dark;
-  final Color _lightDeep;
-  final Color _darkDeep;
+  /// Düz dolgu rengi.
+  final Color color;
 
-  /// Zemine göre ana ton.
-  Color of(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark ? _dark : _light;
+  /// Aynı rengin koyu tonu: basılı durum ve yazı için.
+  final Color deep;
 
-  /// Degradenin koyu ucu.
-  Color deepOf(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark ? _darkDeep : _lightDeep;
+  Color of(BuildContext context) => color;
+  Color deepOf(BuildContext context) => deep;
 
-  /// İkon kutusunun ve başlık şeridinin degradesi.
-  LinearGradient gradientOf(BuildContext context) => LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: <Color>[of(context), deepOf(context)],
+  /// Rengin kâğıt üzerindeki çok açık tonu (rozet zemini).
+  Color softOf(BuildContext context) => Color.alphaBlend(
+        color.withValues(alpha: 0.22),
+        Theme.of(context).brightness == Brightness.dark
+            ? BirOmurColors.geceKart
+            : BirOmurColors.kart,
       );
 
-  /// Bölüm başlığı kartının degradesi.
+  /// Bu renkli zeminin üzerine yazılacak metnin rengi.
   ///
-  /// Başlık kartında yazı her zaman beyazdır, bu yüzden degrade temadan
-  /// bağımsız olarak açık temanın doygun tonlarını kullanır. Koyu uç
-  /// tam `deep` değil, ana rengin yarı yolu kadardır: tam koyu uç
-  /// turuncu gibi renklerde kahverengiye düşüyordu.
-  LinearGradient get heroGradient => LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: <Color>[
-          _light,
-          Color.lerp(_light, _lightDeep, 0.5)!,
-        ],
-      );
-
-  /// Başlık kartının gölgesi için ana ton.
-  Color get heroShadow => _light;
-
-  /// Rozet ve yumuşak zeminler için rengin çok açık karşılığı.
-  Color softOf(BuildContext context) {
-    final bool gece = Theme.of(context).brightness == Brightness.dark;
-    return of(context).withValues(alpha: gece ? 0.18 : 0.12);
-  }
+  /// Sarı gibi açık renklerde beyaz okunmuyor; mürekkep kullanılır.
+  Color get onColor => color.computeLuminance() > 0.55
+      ? BirOmurColors.murekkep
+      : BirOmurColors.krem;
 }
 
-/// Menülerde kullanılan renk ailesi (`prototypeOnly`, Q-077/Q-084).
-///
-/// Tonlar canlı seçildi: soluk pastel bir dizi yerine doygun, birbirinden
-/// açıkça ayrılan sekiz renk.
+/// Menülerde kullanılan renk ailesi (`prototypeOnly`, Q-087).
 abstract final class BirOmurAccents {
-  static const BirOmurAccent nar = BirOmurAccent(
-    Color(0xFFE4224B),
-    Color(0xFFFF5E80),
-    Color(0xFFA30F35),
-    Color(0xFFC81E45),
-  );
-  static const BirOmurAccent cini = BirOmurAccent(
-    Color(0xFF00A99B),
-    Color(0xFF2FD3BE),
-    Color(0xFF00695F),
-    Color(0xFF009C8C),
-  );
-  static const BirOmurAccent pirinc = BirOmurAccent(
-    Color(0xFFF5A623),
-    Color(0xFFFFC24D),
-    Color(0xFFC06A00),
-    Color(0xFFE09A1E),
-  );
-  static const BirOmurAccent mor = BirOmurAccent(
-    Color(0xFF7C4DFF),
-    Color(0xFFA98BFF),
-    Color(0xFF4A19CC),
-    Color(0xFF7B4DE8),
-  );
-  static const BirOmurAccent mavi = BirOmurAccent(
-    Color(0xFF2D7FF9),
-    Color(0xFF6BA9FF),
-    Color(0xFF0B4CC0),
-    Color(0xFF2F7DE0),
-  );
-  static const BirOmurAccent yesil = BirOmurAccent(
-    Color(0xFF16B364),
-    Color(0xFF48D992),
-    Color(0xFF07753F),
-    Color(0xFF17A45C),
-  );
-  static const BirOmurAccent turuncu = BirOmurAccent(
-    Color(0xFFFF6A2B),
-    Color(0xFFFF9260),
-    Color(0xFFC23E00),
-    Color(0xFFE85F24),
-  );
-  static const BirOmurAccent gul = BirOmurAccent(
-    Color(0xFFF0479B),
-    Color(0xFFFF7CBC),
-    Color(0xFFB30F68),
-    Color(0xFFDB3F8C),
-  );
+  static const BirOmurAccent nar =
+      BirOmurAccent(BirOmurColors.kirmizi, BirOmurColors.kirmiziKoyu);
+  static const BirOmurAccent cini =
+      BirOmurAccent(BirOmurColors.turkuaz, BirOmurColors.turkuazKoyu);
+  static const BirOmurAccent pirinc =
+      BirOmurAccent(BirOmurColors.sari, BirOmurColors.sariKoyu);
+  static const BirOmurAccent mor =
+      BirOmurAccent(BirOmurColors.mor, BirOmurColors.morKoyu);
+  static const BirOmurAccent mavi =
+      BirOmurAccent(BirOmurColors.mavi, BirOmurColors.maviKoyu);
+  static const BirOmurAccent yesil =
+      BirOmurAccent(BirOmurColors.yesil, BirOmurColors.yesilKoyu);
+  static const BirOmurAccent turuncu =
+      BirOmurAccent(BirOmurColors.turuncu, BirOmurColors.turuncuKoyu);
+  static const BirOmurAccent gul =
+      BirOmurAccent(BirOmurColors.pembe, BirOmurColors.pembeKoyu);
 }
 
 abstract final class BirOmurTheme {
+  /// Arayüzün yazı tipi.
+  static const String yaziTipi = 'Baloo2';
+
+  /// El yazısı aksanlar.
+  static const String elYazisi = 'PatrickHand';
+
   static ThemeData light() => _build(
-        ColorScheme.fromSeed(
-          seedColor: BirOmurColors.nar,
-          brightness: Brightness.light,
-        ).copyWith(
-          primary: BirOmurColors.nar,
+        const ColorScheme.light(
+          primary: BirOmurColors.kirmizi,
           onPrimary: BirOmurColors.krem,
-          primaryContainer: const Color(0xFFFFE0E6),
-          onPrimaryContainer: BirOmurColors.narKoyu,
-          secondary: BirOmurColors.cini,
+          primaryContainer: Color(0xFFFFDCDF),
+          onPrimaryContainer: BirOmurColors.kirmiziKoyu,
+          secondary: BirOmurColors.turkuaz,
           onSecondary: BirOmurColors.krem,
-          secondaryContainer: const Color(0xFFD3F6F0),
-          onSecondaryContainer: const Color(0xFF00554D),
-          tertiary: BirOmurColors.pirinc,
+          secondaryContainer: Color(0xFFCFF3F4),
+          onSecondaryContainer: BirOmurColors.turkuazKoyu,
+          tertiary: BirOmurColors.sari,
           onTertiary: BirOmurColors.murekkep,
-          surface: BirOmurColors.zemin,
+          surface: BirOmurColors.kagit,
+          onSurface: BirOmurColors.murekkep,
+          onSurfaceVariant: BirOmurColors.soluk,
           surfaceContainerHighest: BirOmurColors.kart,
           surfaceContainerHigh: BirOmurColors.kart,
-          surfaceContainer: BirOmurColors.yumusakZemin,
-          onSurface: BirOmurColors.murekkep,
-          onSurfaceVariant: BirOmurColors.sonukMurekkep,
-          outlineVariant: BirOmurColors.cizgi,
-          error: const Color(0xFFE02B4F),
+          surfaceContainer: BirOmurColors.kagitKoyu,
+          outline: BirOmurColors.murekkep,
+          outlineVariant: BirOmurColors.murekkep,
+          error: BirOmurColors.kirmiziKoyu,
+          onError: BirOmurColors.krem,
         ),
       );
 
   static ThemeData dark() => _build(
-        ColorScheme.fromSeed(
-          seedColor: BirOmurColors.nar,
-          brightness: Brightness.dark,
-        ).copyWith(
-          primary: BirOmurColors.narAcik,
-          onPrimary: const Color(0xFF3A0011),
-          primaryContainer: const Color(0xFF5E0C26),
-          onPrimaryContainer: const Color(0xFFFFD9E0),
-          secondary: BirOmurColors.ciniAcik,
-          onSecondary: const Color(0xFF00322C),
-          secondaryContainer: const Color(0xFF00453E),
-          onSecondaryContainer: const Color(0xFFB8F5EB),
-          tertiary: BirOmurColors.pirincAcik,
-          onTertiary: const Color(0xFF3A2400),
+        const ColorScheme.dark(
+          primary: BirOmurColors.kirmizi,
+          onPrimary: BirOmurColors.krem,
+          primaryContainer: Color(0xFF5B1C26),
+          onPrimaryContainer: Color(0xFFFFD6DA),
+          secondary: BirOmurColors.turkuaz,
+          onSecondary: BirOmurColors.murekkep,
+          secondaryContainer: Color(0xFF134A4C),
+          onSecondaryContainer: Color(0xFFBDF0F1),
+          tertiary: BirOmurColors.sari,
+          onTertiary: BirOmurColors.murekkep,
           surface: BirOmurColors.geceZemin,
+          onSurface: BirOmurColors.geceMetin,
+          onSurfaceVariant: BirOmurColors.geceSoluk,
           surfaceContainerHighest: BirOmurColors.geceKart,
           surfaceContainerHigh: BirOmurColors.geceKart,
-          surfaceContainer: BirOmurColors.geceYumusak,
-          onSurface: BirOmurColors.geceMetin,
-          onSurfaceVariant: BirOmurColors.geceSonuk,
-          outlineVariant: BirOmurColors.geceCizgi,
-          error: BirOmurColors.geceUyari,
+          surfaceContainer: Color(0xFF261F35),
+          outline: BirOmurColors.geceMurekkep,
+          outlineVariant: BirOmurColors.geceMurekkep,
+          error: BirOmurColors.kirmizi,
+          onError: BirOmurColors.krem,
         ),
       );
 
   static ThemeData _build(ColorScheme scheme) {
-    final bool gece = scheme.brightness == Brightness.dark;
     final ThemeData base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      fontFamily: yaziTipi,
       scaffoldBackgroundColor: scheme.surface,
     );
 
+    // Baloo 2'nin kendi satır yüksekliği geniş; başlıklarda sıkılaştırılır.
+    TextStyle s(double size, FontWeight w, {double h = 1.2, double ls = 0}) =>
+        TextStyle(
+          fontFamily: yaziTipi,
+          fontSize: size,
+          fontWeight: w,
+          height: h,
+          letterSpacing: ls,
+          color: scheme.onSurface,
+        );
+
     return base.copyWith(
       textTheme: base.textTheme.copyWith(
-        // Başlıklar iri ve sıkı: ekranın hiyerarşisi yazı boyundan okunur.
-        headlineMedium: base.textTheme.headlineMedium?.copyWith(
-          fontWeight: FontWeight.w900,
-          letterSpacing: -1,
-        ),
-        headlineSmall: base.textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.8,
-        ),
-        titleLarge: base.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.4,
-        ),
-        titleMedium: base.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.2,
-        ),
-        bodyMedium: base.textTheme.bodyMedium?.copyWith(height: 1.45),
-        bodySmall: base.textTheme.bodySmall?.copyWith(height: 1.4),
-        // Küçük etiketler harf aralıklı ve kalın: rozet dili.
-        labelSmall: base.textTheme.labelSmall?.copyWith(
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
-        ),
+        displaySmall: s(38, FontWeight.w800, h: 1.05),
+        headlineMedium: s(29, FontWeight.w800, h: 1.1),
+        headlineSmall: s(25, FontWeight.w800, h: 1.1),
+        titleLarge: s(21, FontWeight.w700, h: 1.15),
+        titleMedium: s(17, FontWeight.w700, h: 1.2),
+        titleSmall: s(15, FontWeight.w600, h: 1.2),
+        bodyLarge: s(16.5, FontWeight.w400, h: 1.45),
+        bodyMedium: s(15, FontWeight.w400, h: 1.45),
+        bodySmall: s(13.5, FontWeight.w400, h: 1.4),
+        labelLarge: s(15, FontWeight.w700),
+        labelMedium: s(13, FontWeight.w700),
+        labelSmall: s(11.5, FontWeight.w700, ls: 0.4),
       ),
+      // Material'ın kendi kartı kullanılmaz; her kart ComicCard'dır.
       cardTheme: CardThemeData(
         elevation: 0,
         color: scheme.surfaceContainerHighest,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22),
-          side: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: gece ? 0.9 : 0.75),
-          ),
+          borderRadius: BorderRadius.circular(Comic.yaricapBuyuk),
+          side: BorderSide(color: scheme.outline, width: Comic.kontur),
         ),
       ),
       appBarTheme: AppBarTheme(
@@ -319,82 +275,63 @@ abstract final class BirOmurTheme {
         foregroundColor: scheme.onSurface,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: base.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w800,
-          color: scheme.onSurface,
-          letterSpacing: -0.3,
-        ),
+        titleTextStyle: s(21, FontWeight.w800),
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surfaceContainerHighest,
-        indicatorColor: scheme.primary.withValues(alpha: 0.16),
-        elevation: 0,
-        labelTextStyle: WidgetStatePropertyAll<TextStyle>(
-          base.textTheme.labelMedium!.copyWith(fontWeight: FontWeight.w700),
-        ),
-      ),
+      // Tema düğmeleri yalnızca yardımcı yerlerde kalır; ana eylemler
+      // StickerButton kullanır.
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 17),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          // Düğmeler düz: gölge, açık zeminli (tonal) düğmelerin
-          // çevresinde gri bir halka bırakıyordu.
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Comic.yaricap),
+            side: BorderSide(color: scheme.outline, width: Comic.kontur),
+          ),
           elevation: 0,
           shadowColor: Colors.transparent,
-          textStyle: base.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-            letterSpacing: 0,
-          ),
+          textStyle: s(16, FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          side: BorderSide(
-            color: scheme.primary.withValues(alpha: 0.5),
-            width: 1.6,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Comic.yaricap),
           ),
-          foregroundColor: scheme.primary,
-          textStyle: base.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
+          side: BorderSide(color: scheme.outline, width: Comic.kontur),
+          foregroundColor: scheme.onSurface,
+          textStyle: s(16, FontWeight.w700),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: scheme.primary,
-          textStyle: base.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+          foregroundColor: scheme.onSurface,
+          textStyle: s(15, FontWeight.w700),
         ),
       ),
       chipTheme: base.chipTheme.copyWith(
+        labelStyle: s(13, FontWeight.w600),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
-          side: BorderSide(color: scheme.outlineVariant),
+          side: BorderSide(color: scheme.outline, width: Comic.inceKontur),
         ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: scheme.surfaceContainerHighest,
         surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          side: BorderSide(color: scheme.outline, width: Comic.kontur),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: scheme.surfaceContainerHighest,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(Comic.yaricapBuyuk),
+          side: BorderSide(color: scheme.outline, width: Comic.kontur + 0.5),
         ),
       ),
-      dividerTheme: DividerThemeData(
-        color: scheme.outlineVariant,
-        thickness: 1,
-      ),
+      dividerTheme: DividerThemeData(color: scheme.outline, thickness: 2),
     );
   }
 }

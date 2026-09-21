@@ -4,8 +4,10 @@ import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/person.dart';
 import '../../state/game_scope.dart';
+import '../theme/bir_omur_theme.dart';
 import '../widgets/bottom_action_bar.dart';
 import '../widgets/character_header.dart';
+import '../widgets/comic.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
 import '../widgets/notice_sheet.dart';
@@ -262,6 +264,7 @@ class _HomeShellState extends State<HomeShell> {
       BottomTab(
         id: TabIds.okulMeslek,
         label: SchoolCareerScreen.labelFor(state),
+        accent: BirOmurAccents.mavi,
         icon: state.education.isStudent
             ? Icons.school_outlined
             : Icons.work_outline,
@@ -271,29 +274,35 @@ class _HomeShellState extends State<HomeShell> {
       const BottomTab(
         id: TabIds.varliklar,
         label: 'Varlıklar',
+        accent: BirOmurAccents.yesil,
         icon: Icons.inventory_2_outlined,
         activeIcon: Icons.inventory_2,
       ),
       const BottomTab(
         id: TabIds.iliskiler,
         label: 'İlişkiler',
+        accent: BirOmurAccents.gul,
         icon: Icons.favorite_outline,
         activeIcon: Icons.favorite,
       ),
       const BottomTab(
         id: TabIds.aktiviteler,
         label: 'Aktiviteler',
+        accent: BirOmurAccents.turuncu,
         icon: Icons.local_activity_outlined,
         activeIcon: Icons.local_activity,
       ),
     ];
 
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          CharacterHeader(state: state, onRestart: _confirmNewLife),
-          Expanded(child: _body()),
-        ],
+      // Bütün gövde çizim kâğıdının üzerinde durur (Paket 19).
+      body: PaperBackground(
+        child: Column(
+          children: <Widget>[
+            CharacterHeader(state: state, onRestart: _confirmNewLife),
+            Expanded(child: _body()),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomActionBar(
         tabs: tabs,

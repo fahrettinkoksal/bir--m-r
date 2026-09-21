@@ -5,7 +5,7 @@ import '../../domain/generation/life_generator.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import '../theme/bir_omur_theme.dart';
-import '../widgets/kilim_divider.dart';
+import '../widgets/comic.dart';
 import 'creation_screen.dart';
 
 /// Açılış ekranı: kayıtlı hayata devam etme ve iki başlangıç modu (D-005).
@@ -88,52 +88,32 @@ class _StartScreenState extends State<StartScreen> {
     final bool devamEdilebilir = controller.hasSavedLife && sorun == null;
 
     return Scaffold(
-      // Açılış ekranı oyunun kapağıdır: tüm ekranı kaplayan koyu degrade,
-      // beyaz yazı ve açık renkli düğmeler (Paket 16).
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[
-              BirOmurColors.basligUst,
-              BirOmurColors.basligAlt,
-            ],
-          ),
-        ),
+      // Açılış ekranı oyunun kapağıdır: çizim kâğıdı, el yazısıyla
+      // yazılmış bir ad ve basınca çöken kocaman çıkartma düğmeler
+      // (Paket 19).
+      body: PaperBackground(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+          // Yazı tipi büyük ve düğmeler kalın; küçük ekranlarda içerik
+          // sığmıyordu. Ekran kaydırılabilir.
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(22, 6, 22, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const Spacer(flex: 2),
-                Text(
-                  'Bir Ömür',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -1.5,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const KilimDivider(height: 12, onDark: true),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
+                const _Logo(),
+                const SizedBox(height: 10),
                 Text(
                   'Bir hayat başlıyor. Nerede doğacağın, kimlerle '
                   'büyüyeceğin ve neyle uğraşacağın önceden belli değil.',
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
-                    height: 1.45,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Spacer(),
-                // Açılışta ortada büyük bir boşluk kalıyordu; oyunun ne
-                // olduğunu üç satırda anlatan küçük bir kart konuldu.
+                const SizedBox(height: 14),
                 const _NasilOynanir(),
-                const Spacer(flex: 2),
+                const SizedBox(height: 14),
                 if (!controller.savingEnabled) ...<Widget>[
                   const _SaveProblemNote(
                     text: 'Bu cihazda kayıt klasörü açılamadı, oyun '
@@ -146,29 +126,63 @@ class _StartScreenState extends State<StartScreen> {
                   const SizedBox(height: 16),
                 ],
                 if (devamEdilebilir) ...<Widget>[
-                  _StartButton(
-                    itemKey: const Key('continue_button'),
-                    label: 'Devam Et',
-                    primary: true,
+                  StickerButton(
+                    key: const Key('continue_button'),
+                    expand: true,
+                    color: BirOmurColors.yesil,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     onPressed: _busy ? null : _continue,
+                    child: const Text(
+                      'Devam Et',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: BirOmurColors.krem,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _StartButton(
-                    label: 'Yeni hayat (rastgele)',
+                  const SizedBox(height: 10),
+                  StickerButton(
+                    expand: true,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                     onPressed: _busy ? null : _randomLife,
+                    child: Text(
+                      'Yeni hayat (rastgele)',
+                      style: theme.textTheme.titleMedium,
+                    ),
                   ),
                 ] else
-                  _StartButton(
-                    label: 'Rastgele bir hayat',
-                    primary: true,
+                  StickerButton(
+                    expand: true,
+                    color: BirOmurColors.kirmizi,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
                     onPressed: _busy ? null : _randomLife,
+                    child: const Text(
+                      'Rastgele bir hayat',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: BirOmurColors.krem,
+                      ),
+                    ),
                   ),
-                const SizedBox(height: 12),
-                _StartButton(
-                  label: 'İsmimi ve cinsiyetimi seçeyim',
+                const SizedBox(height: 10),
+                StickerButton(
+                  expand: true,
+                  color: BirOmurColors.sari,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   onPressed: _busy ? null : _customLife,
+                  child: const Text(
+                    'İsmimi ve cinsiyetimi seçeyim',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: BirOmurColors.murekkep,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Text(
                   devamEdilebilir
                       ? 'Kaldığın yerden devam edebilirsin. Yeni bir hayat '
@@ -177,10 +191,9 @@ class _StartScreenState extends State<StartScreen> {
                           'başlangıç koşulları rastgele belirlenir.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Spacer(),
               ],
             ),
           ),
@@ -190,55 +203,36 @@ class _StartScreenState extends State<StartScreen> {
   }
 }
 
-/// Açılış ekranının düğmesi.
-///
-/// Zemin koyu degrade olduğu için tema düğmeleri okunmuyordu: ana eylem
-/// dolu beyaz, ikincil eylem ince beyaz çerçevelidir.
-class _StartButton extends StatelessWidget {
-  const _StartButton({
-    required this.label,
-    required this.onPressed,
-    this.primary = false,
-    this.itemKey,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final bool primary;
-  final Key? itemKey;
+/// Oyunun adı: eğik duran, konturlu bir tabela.
+class _Logo extends StatelessWidget {
+  const _Logo();
 
   @override
   Widget build(BuildContext context) {
-    final bool aktif = onPressed != null;
-    return Material(
-      key: itemKey,
-      color: primary
-          ? Colors.white.withValues(alpha: aktif ? 1 : 0.5)
-          : Colors.white.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: primary
-                ? null
-                : Border.all(
-                    color: Colors.white.withValues(alpha: 0.45),
-                    width: 1.4,
-                  ),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: primary ? BirOmurColors.basligUst : Colors.white,
+    return Center(
+      child: ComicCard(
+        color: BirOmurColors.kirmizi,
+        tilt: -2.5,
+        radius: Comic.yaricapBuyuk,
+        shadowOffset: 6,
+        padding: const EdgeInsets.fromLTRB(22, 7, 22, 9),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const HandwrittenText(
+              'Bir Ömür',
+              size: 38,
+              color: BirOmurColors.krem,
             ),
-          ),
+            const SizedBox(height: 2),
+            Text(
+              'bir hayat simülasyonu',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    letterSpacing: 1.6,
+                    color: BirOmurColors.krem.withValues(alpha: 0.85),
+                  ),
+            ),
+          ],
         ),
       ),
     );
@@ -260,13 +254,9 @@ class _NasilOynanir extends StatelessWidget {
           'Hiçbir kayıt silinmez; hayatın arşivde kalır.'),
     ];
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-      ),
+    return ComicCard(
+      tilt: 0.8,
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -274,23 +264,25 @@ class _NasilOynanir extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Icon(
-                  satirlar[i].$1,
-                  size: 18,
-                  color: BirOmurColors.pirincAcik,
+                ComicIconTile(
+                  icon: satirlar[i].$1,
+                  accent: <BirOmurAccent>[
+                    BirOmurAccents.nar,
+                    BirOmurAccents.cini,
+                    BirOmurAccents.pirinc,
+                  ][i],
+                  size: 26,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     satirlar[i].$2,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.92),
-                    ),
+                    style: theme.textTheme.bodyMedium,
                   ),
                 ),
               ],
             ),
-            if (i != satirlar.length - 1) const SizedBox(height: 10),
+            if (i != satirlar.length - 1) const SizedBox(height: 7),
           ],
         ],
       ),
@@ -314,19 +306,20 @@ class _SaveProblemNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.26),
-        borderRadius: BorderRadius.circular(16),
+        color: BirOmurColors.kirmizi.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(Comic.yaricap),
         border: Border.all(
-          color: BirOmurColors.geceUyari.withValues(alpha: 0.55),
+          color: Comic.konturOf(context),
+          width: Comic.inceKontur,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Icon(Icons.warning_amber_rounded,
-              size: 20, color: BirOmurColors.geceUyari),
+              size: 20, color: BirOmurColors.kirmiziKoyu),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -334,10 +327,7 @@ class _SaveProblemNote extends StatelessWidget {
                   ? '$text\n\nKayıt dosyasına dokunulmadı. Yeni bir hayat '
                       'başlatırsan bu kayıt silinir.'
                   : text,
-              style: theme.textTheme.bodySmall?.copyWith(
-                height: 1.4,
-                color: Colors.white.withValues(alpha: 0.92),
-              ),
+              style: theme.textTheme.bodySmall,
             ),
           ),
         ],

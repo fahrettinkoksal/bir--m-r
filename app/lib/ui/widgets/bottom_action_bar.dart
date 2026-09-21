@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../sound/sound_scope.dart';
 import '../sound/sound_service.dart';
 import '../theme/bir_omur_theme.dart';
+import 'comic.dart';
 
 /// Alt gezinmedeki bir ana menü.
 class BottomTab {
@@ -11,12 +12,16 @@ class BottomTab {
     required this.label,
     required this.icon,
     required this.activeIcon,
+    this.accent = BirOmurAccents.mavi,
   });
 
   final String id;
   final String label;
   final IconData icon;
   final IconData activeIcon;
+
+  /// Seçiliyken arkasında beliren çıkartmanın rengi.
+  final BirOmurAccent accent;
 }
 
 /// Alt sabit gezinme çubuğu (NAV-001).
@@ -25,8 +30,9 @@ class BottomTab {
 /// iki ana menü. `Yaş Al` bir sekme değildir; menülerin arasında duran ana
 /// oyun eylemidir ve seçili sekmeyi değiştirmez.
 ///
-/// Görsel dil Bir Ömür'e özgüdür: koyu mor-mürekkep zemin, açık ikonlar ve
-/// ortada nar kırmızısı, pirinç halkalı yükseltilmiş eylem düğmesi.
+/// Görsel dil çizgi romandır (Paket 19): kâğıt zemin, üstte kalın mürekkep
+/// çizgisi, seçili sekmenin arkasında renkli bir çıkartma ve ortada
+/// basınca çöken kırmızı bir düğme.
 class BottomActionBar extends StatelessWidget {
   const BottomActionBar({
     super.key,
@@ -49,42 +55,41 @@ class BottomActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(tabs.length == 4, 'Alt gezinmede dört ana menü olmalı (NAV-001).');
+    final ThemeData theme = Theme.of(context);
     final List<BottomTab> sol = tabs.sublist(0, 2);
     final List<BottomTab> sag = tabs.sublist(2);
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[
-            BirOmurColors.cubukUst,
-            BirOmurColors.cubukAlt,
-          ],
-        ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
         border: Border(
-          top: BorderSide(color: Color(0x4DF5A623), width: 1.2),
+          top: BorderSide(color: Comic.konturOf(context), width: Comic.kontur),
         ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Color(0x59000000),
-            blurRadius: 20,
-            offset: Offset(0, -6),
-          ),
-        ],
       ),
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 78,
+          height: 80,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               for (final BottomTab tab in sol)
-                Expanded(child: _TabButton(tab: tab, onTap: onTabSelected, selectedId: selectedId)),
+                Expanded(
+                  child: _TabButton(
+                    tab: tab,
+                    onTap: onTabSelected,
+                    selectedId: selectedId,
+                  ),
+                ),
               _AgeUpButton(onPressed: ageUpEnabled ? onAgeUp : null),
               for (final BottomTab tab in sag)
-                Expanded(child: _TabButton(tab: tab, onTap: onTabSelected, selectedId: selectedId)),
+                Expanded(
+                  child: _TabButton(
+                    tab: tab,
+                    onTap: onTabSelected,
+                    selectedId: selectedId,
+                  ),
+                ),
             ],
           ),
         ),
@@ -106,9 +111,8 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final bool secili = selectedId == tab.id;
-    final Color renk =
-        secili ? BirOmurColors.pirincAcik : BirOmurColors.sonukKrem;
 
     return Semantics(
       selected: secili,
@@ -119,31 +123,35 @@ class _TabButton extends StatelessWidget {
           SoundScope.play(context, GameSound.tap);
           onTap(tab.id);
         },
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Seçili sekmenin ikonu renkli bir hapın içinde durur; hangi
-            // menüde olunduğu ilk bakışta görülür.
+            // Seçili sekmenin ikonu renkli bir çıkartmanın içinde durur.
             AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
+              duration: const Duration(milliseconds: 150),
               curve: Curves.easeOut,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              width: 42,
+              height: 34,
               decoration: BoxDecoration(
-                // Seçili sekmenin hapı beyazın kısılmışıdır: pirinç
-                // sarısının kendisi koyu mor zeminde kahverengiye düşüyordu.
-                color: secili
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(999),
+                color: secili ? tab.accent.color : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: secili
+                      ? Comic.konturOf(context)
+                      : Colors.transparent,
+                  width: Comic.inceKontur,
+                ),
               ),
               child: Icon(
                 secili ? tab.activeIcon : tab.icon,
-                size: 22,
-                color: renk,
+                size: 21,
+                color: secili
+                    ? tab.accent.onColor
+                    : theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Text(
@@ -151,11 +159,12 @@ class _TabButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontSize: 11,
-                  height: 1.1,
-                  color: renk,
                   fontWeight: secili ? FontWeight.w800 : FontWeight.w600,
+                  color: secili
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -174,70 +183,34 @@ class _AgeUpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool aktif = onPressed != null;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Semantics(
         button: true,
         label: 'Yaş Al',
-        child: InkWell(
+        child: StickerButton(
           key: const Key('age_up_button'),
-          onTap: onPressed == null
-              ? null
-              : () {
-                  SoundScope.play(context, GameSound.ageUp);
-                  onPressed!();
-                },
-          borderRadius: BorderRadius.circular(999),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 78,
-            height: 62,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: aktif
-                    ? const <Color>[
-                        BirOmurColors.narAcik,
-                        BirOmurColors.nar,
-                      ]
-                    : <Color>[
-                        BirOmurColors.nar.withValues(alpha: 0.32),
-                        BirOmurColors.narKoyu.withValues(alpha: 0.32),
-                      ],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: BirOmurColors.pirinc.withValues(alpha: aktif ? 0.9 : 0.25),
-                width: 2,
-              ),
-              boxShadow: aktif
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color: BirOmurColors.nar.withValues(alpha: 0.65),
-                        blurRadius: 22,
-                        offset: const Offset(0, 8),
-                      ),
-                    ]
-                  : const <BoxShadow>[],
-            ),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(Icons.cake_outlined, color: BirOmurColors.krem, size: 23),
-                SizedBox(height: 2),
-                Text(
-                  'Yaş Al',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.2,
-                    color: BirOmurColors.krem,
-                  ),
+          onPressed: onPressed,
+          color: BirOmurColors.kirmizi,
+          radius: 20,
+          sound: GameSound.ageUp,
+          shadowOffset: 5,
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 7),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.cake_rounded, color: BirOmurColors.krem, size: 24),
+              SizedBox(height: 1),
+              Text(
+                'Yaş Al',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  color: BirOmurColors.krem,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

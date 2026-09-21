@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/state/game_controller.dart';
-import 'package:bir_omur/ui/turkish_text.dart';
 import 'package:bir_omur/ui/widgets/person_detail_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,7 +53,7 @@ void main() {
     await startRandomLife(tester);
     expect(find.byKey(const Key('age_up_button')), findsOneWidget);
     expect(find.textContaining('0 yaşında'), findsOneWidget);
-    expect(find.text(trUpper('Hayat günlüğü')), findsOneWidget);
+    expect(find.text('Hayat günlüğü'), findsOneWidget);
   });
 
   testWidgets('isim/cinsiyet modunda seçilen isim oyuna geçer',
@@ -104,7 +103,7 @@ void main() {
     // Seçili menüye tekrar dokunmak hayat ekranına döndürür.
     await tester.tap(find.byKey(const Key('tab_aktiviteler')));
     await tester.pumpAndSettle();
-    expect(find.text(trUpper('Hayat günlüğü')), findsOneWidget);
+    expect(find.text('Hayat günlüğü'), findsOneWidget);
   });
 
   testWidgets('soldaki menü öğrenciyken Okul, değilken Meslek olur',

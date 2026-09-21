@@ -3,6 +3,7 @@ import 'package:bir_omur/text/turkish_text.dart';
 import 'package:bir_omur/ui/widgets/life_log_view.dart';
 import 'package:bir_omur/ui/widgets/stat_bar.dart';
 import 'package:bir_omur/ui/theme/bir_omur_theme.dart';
+import 'package:bir_omur/ui/widgets/comic.dart';
 import 'package:bir_omur/ui/widgets/section_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -121,10 +122,10 @@ void main() {
         ),
       );
 
-      // Açık zeminde okunaklı olsun diye koyu uçlar kullanılır (Paket 16).
-      expect(statColor(theme, 10), BirOmurColors.nar);
-      expect(statColor(theme, 45), BirOmurColors.pirincKoyu);
-      expect(statColor(theme, 90), BirOmurColors.ciniKoyu);
+      // Afiş renkleri iki temada da aynı okunur (Paket 19).
+      expect(statColor(theme, 10), BirOmurColors.degerDusuk);
+      expect(statColor(theme, 45), BirOmurColors.degerOrta);
+      expect(statColor(theme, 90), BirOmurColors.degerYuksek);
     });
 
     testWidgets('karanlık temada renkler birbirinden ayırt edilebilir',
@@ -149,7 +150,7 @@ void main() {
       expect(yuksek, isNot(orta));
       expect(yuksek, isNot(dusuk));
       expect(orta, isNot(dusuk));
-      expect(yuksek, BirOmurColors.geceCini);
+      expect(yuksek, BirOmurColors.degerYuksek);
     });
   });
 
@@ -192,7 +193,7 @@ void main() {
       expect(find.text('Kütüphane'), findsOneWidget);
       expect(find.text('Yaşına uygun kitap seç'), findsOneWidget);
       expect(find.text('7'), findsOneWidget);
-      expect(find.byType(AccentIconTile), findsOneWidget);
+      expect(find.byType(ComicIconTile), findsOneWidget);
     });
 
     testWidgets('dokunma eylemi çalışır', (WidgetTester tester) async {
@@ -229,7 +230,7 @@ void main() {
       expect(mavi, isNot(gul));
     });
 
-    testWidgets('koyu temada renk açık temadakinden farklıdır',
+    testWidgets('afiş rengi iki temada da aynı kalır',
         (WidgetTester tester) async {
       late Color acik;
       late Color koyu;
@@ -257,11 +258,13 @@ void main() {
       );
       // MaterialApp tema geçişini animasyonla yapar; son kareyi bekle.
       await tester.pumpAndSettle();
-      // Koyu zeminde aynı ton okunmuyordu; her rengin gece karşılığı var.
-      expect(acik, isNot(koyu));
+      // Çizgi roman dilinde renkleri kontur çerçevelediği için afiş
+      // tonları iki temada da okunur; ayrı bir gece paleti gerekmiyor
+      // (Paket 19).
+      expect(acik, koyu);
     });
 
-    testWidgets('bölüm başlığında geri dönüş ve renk şeridi bulunur',
+    testWidgets('bölüm başlığında geri dönüş bulunur',
         (WidgetTester tester) async {
       bool geri = false;
       await pump(
@@ -293,44 +296,62 @@ void main() {
   // birbirinden ayrılıyor mu.
   // ===================================================================
   group('Paket 16 görsel kimlik', () {
-    testWidgets('menü satırının zemini vurgu rengiyle boyanmaz',
+    testWidgets('menü satırı çıkartma düğmesidir ve rengini ikonda taşır',
         (WidgetTester tester) async {
-      late ThemeData theme;
       await tester.pumpWidget(
         MaterialApp(
           theme: BirOmurTheme.light(),
-          home: Builder(
-            builder: (BuildContext context) {
-              theme = Theme.of(context);
-              return Scaffold(
-                body: MenuRow(
-                  title: 'Seyahat',
-                  icon: Icons.luggage_outlined,
-                  accent: BirOmurAccents.gul,
-                  onTap: () {},
-                ),
-              );
-            },
+          home: Scaffold(
+            body: MenuRow(
+              title: 'Seyahat',
+              icon: Icons.luggage_outlined,
+              accent: BirOmurAccents.gul,
+              onTap: () {},
+            ),
           ),
         ),
       );
 
-      // Satırın Material zemini kart rengidir; eskiden her satır kendi
-      // renginin bir tonuyla boyanıyordu.
-      final Material govde = tester.widget<Material>(
-        find
-            .descendant(
-              of: find.byType(MenuRow),
-              matching: find.byType(Material),
-            )
-            .first,
-      );
-      expect(govde.color, theme.colorScheme.surfaceContainerHighest);
-      // Renk ikon kutusunda durmaya devam eder.
-      expect(find.byType(AccentIconTile), findsOneWidget);
+      // Satır basılabilir bir çıkartmadır; renk ikon kutusundadır.
+      expect(find.byType(StickerButton), findsOneWidget);
+      expect(find.byType(ComicIconTile), findsOneWidget);
+      final ComicIconTile kutu =
+          tester.widget<ComicIconTile>(find.byType(ComicIconTile));
+      expect(kutu.accent.color, BirOmurAccents.gul.color);
     });
 
-    testWidgets('bölüm başlık kartı başlığı ve simgesini gösterir',
+    testWidgets('kartlarda degrade kullanılmaz', (WidgetTester tester) async {
+      // Degrade, iki kez reddedilen "genel uygulama" görüntüsünün en
+      // belirgin işaretiydi; çizgi roman dilinde hiç kullanılmaz.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.light(),
+          home: Scaffold(
+            body: SectionScaffold(
+              title: 'Seyahat',
+              icon: Icons.luggage_rounded,
+              accent: BirOmurAccents.mavi,
+              children: <Widget>[
+                MenuRow(
+                  title: 'Otobüs',
+                  icon: Icons.directions_bus_rounded,
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      for (final Element e in find.byType(Container).evaluate()) {
+        final Decoration? d = (e.widget as Container).decoration;
+        if (d is BoxDecoration) {
+          expect(d.gradient, isNull, reason: 'Degrade bulundu.');
+        }
+      }
+    });
+
+    testWidgets('bölüm başlığı başlığı ve simgesini gösterir',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -347,19 +368,19 @@ void main() {
         ),
       );
 
-      expect(find.byType(SectionHeroCard), findsOneWidget);
+      expect(find.byType(SectionTitle), findsOneWidget);
       expect(find.text('Seyahat'), findsOneWidget);
       expect(find.text('Kısa bir gezi'), findsOneWidget);
       expect(
         find.descendant(
-          of: find.byType(SectionHeroCard),
+          of: find.byType(SectionTitle),
           matching: find.byIcon(Icons.luggage_rounded),
         ),
         findsOneWidget,
       );
     });
 
-    testWidgets('açık temada kart zemini sayfa zemininden açıktır',
+    testWidgets('kart zemini sayfa zemininden ayrıdır',
         (WidgetTester tester) async {
       late ThemeData theme;
       await tester.pumpWidget(
@@ -374,15 +395,16 @@ void main() {
         ),
       );
 
-      // Kart ile zemin arasında gerçek bir fark olmalı: eskiden ikisi de
-      // aynı krem tondaydı ve kartların sınırı seçilmiyordu.
+      // Kart ile zemin arasında gerçek bir fark olmalı; ayrıca her kartın
+      // mürekkep konturu vardır.
       final Color zemin = theme.colorScheme.surface;
       final Color kart = theme.colorScheme.surfaceContainerHighest;
       expect(kart, isNot(zemin));
       expect(kart.computeLuminance(), greaterThan(zemin.computeLuminance()));
+      expect(theme.colorScheme.outline, BirOmurColors.murekkep);
     });
 
-    test('koyu başlık şeridinde üç değer aralığı ayrı renk alır', () {
+    test('üç değer aralığı ayrı renk alır', () {
       final Color dusuk = statColorOnDark(10);
       final Color orta = statColorOnDark(45);
       final Color yuksek = statColorOnDark(90);

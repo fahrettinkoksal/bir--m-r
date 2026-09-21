@@ -670,6 +670,31 @@ başarısız**. Atlanan 11 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
 değişmedi. **Gerçek Windows veya Android cihazda oynanmadı**; sesler
 de duyulmadı.
 
+**Görsel yön üçüncü kez kuruldu — çizgi roman (Paket 19):** İlk iki deneme
+de Faho tarafından "yapay zekâ işi gibi" bulundu; ikisinin de ortak yanı
+herhangi bir uygulamaya yapıştırılabilecek **genel** bir arayüz diliydi.
+Bu sürüm o dili bilerek kırıyor: **degrade yok**, her yüzeyde kalın
+mürekkep konturu, **bulanık değil kaydırılmış** gölge, basınca gerçekten
+çöken düğmeler, çizim kâğıdı dokulu zemin. Oyunun artık **kendi yazı
+tipi** var: arayüzde **Baloo 2**, el yazısı aksanlarda **Patrick Hand**
+(ikisi de SIL OFL, tam Türkçe, oyunun kullandığı karakterlere
+indirgenmiş — `app/tool/fetch_fonts.py`). **Karakterin bir yüzü var:**
+hazır görsel değil, yaş, saç stili, mutluluk, sağlık ve cinsiyetten
+**koddan çizilen** bir karikatür. Alt menü sırası ve **Yaş Al**'ın yeri
+değişmedi (NAV-001). Yön ve ayrıntılar **prototypeOnly**; sorular
+**Q-087**'de. `docs/PROTOTYPE_UI.md` §2'deki "modern + ölçülü nostaljik"
+ifadesiyle çelişiyor; onay gelmeden o belgeye dokunulmadı.
+
+Yan düzeltme (gerçek hata): olay penceresinde uzun metinlerde **"Devam"
+düğmesi ekranın altına kaçıp dokunulamaz oluyordu**; eylem düğmeleri
+artık kaydırma alanının dışında.
+
+**Test durumu (Paket 19 sonrası, gerçekten çalıştırıldı):**
+`flutter analyze` temiz; `flutter test` **1026 geçti, 12 atlandı, 0
+başarısız**. Atlanan 12 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
+çalışan ekran görüntüsü testleridir. **Gerçek Windows veya Android
+cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_settings.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/stats.dart';
+import '../../domain/models/player_character.dart';
 import '../theme/bir_omur_theme.dart';
-import 'kilim_divider.dart';
+import 'character_face.dart';
+import 'comic.dart';
 import 'settings_sheet.dart';
 import 'stat_bar.dart';
 
@@ -34,102 +36,108 @@ class CharacterHeader extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final String evre = state.education.stageLabel(state.player.age);
 
-    // Ekranın en çok bakılan yeri: koyu, doygun bir degrade şerit. Gövde
-    // açık kaldığı için ekranın üstü çerçeve gibi durur ve karakter
-    // bilgisi günlükle karışmaz (Paket 16).
+    // Üst özet artık renkli bir şerit değil, kâğıda yapıştırılmış bir
+    // künye kartı: solda karakterin çizilmiş yüzü, sağında adı ve
+    // değerleri (Paket 19).
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            BirOmurColors.basligUst,
-            BirOmurColors.basligAlt,
-          ],
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 18,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
+      color: theme.colorScheme.surface,
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 10, 14, 13),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      state.player.fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                        color: Colors.white,
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+          child: ComicCard(
+            padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _FaceBadge(player: state.player),
+                    const SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Flexible(
+                                child: Text(
+                                  state.player.fullName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleLarge,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              ComicTag(
+                                text: state.player.walletLabel,
+                                color: BirOmurColors.sari,
+                                tilt: -2,
+                                fontSize: 12.5,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${state.player.age} yaşında · $evre'
+                            '${state.isContinuedGeneration ? ' · ${state.generation}. kuşak' : ''}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          Text(
+                            '${state.player.birthCity} · ${_durumSatiri(state)}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  _WalletPill(label: state.player.walletLabel),
-                  const SizedBox(width: 2),
-                  _HeaderIconButton(
-                    itemKey: const Key('open_settings'),
-                    tooltip: 'Ayarlar',
-                    icon: Icons.settings_rounded,
-                    onPressed: () => SettingsSheet.show(context),
-                  ),
-                  if (onRestart != null)
-                    _HeaderIconButton(
-                      itemKey: const Key('new_life_button'),
-                      tooltip: 'Yeni hayat',
-                      icon: Icons.restart_alt_rounded,
-                      onPressed: onRestart,
+                    const SizedBox(width: 8),
+                    Column(
+                      children: <Widget>[
+                        _RoundIconButton(
+                          itemKey: const Key('open_settings'),
+                          tooltip: 'Ayarlar',
+                          icon: Icons.settings_rounded,
+                          onPressed: () => SettingsSheet.show(context),
+                        ),
+                        if (onRestart != null) ...<Widget>[
+                          const SizedBox(height: 4),
+                          _RoundIconButton(
+                            itemKey: const Key('new_life_button'),
+                            tooltip: 'Yeni hayat',
+                            icon: Icons.restart_alt_rounded,
+                            onPressed: onRestart,
+                          ),
+                        ],
+                      ],
                     ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${state.player.age} yaşında · $evre · '
-                '${state.player.birthCity}'
-                // Kuşak bilgisi yalnızca gerçekten devam eden hayatlarda
-                // yazılır; ilk kuşakta hiç görünmez.
-                '${state.isContinuedGeneration ? ' · ${state.generation}. kuşak' : ''}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.82),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                _durumSatiri(state),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.62),
-                ),
-              ),
-              const SizedBox(height: 9),
-              const KilimDivider(height: 8, onDark: true),
-              const SizedBox(height: 9),
-              InkWell(
-                onTap: () => _showStatDetails(context),
-                borderRadius: BorderRadius.circular(14),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    children: <Widget>[
-                      for (final StatEntry entry in state.player.stats.entries)
-                        Expanded(child: _StatPill(entry: entry)),
-                    ],
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () => _showStatDetails(context),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      children: <Widget>[
+                        for (final StatEntry entry in state.player.stats.entries)
+                          Expanded(child: _StatPill(entry: entry)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -153,59 +161,39 @@ class CharacterHeader extends StatelessWidget {
   }
 }
 
-class _WalletPill extends StatelessWidget {
-  const _WalletPill({required this.label});
+/// Karakterin yüzünü taşıyan yuvarlak künye.
+class _FaceBadge extends StatelessWidget {
+  const _FaceBadge({required this.player});
 
-  final String label;
+  final PlayerCharacter player;
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      width: 62,
+      height: 62,
       decoration: BoxDecoration(
-        // Cüzdan her temada pirinç rengidir; başlık zemini koyu olduğu
-        // için doğrudan palet kullanılır.
-        gradient: const LinearGradient(
-          colors: <Color>[
-            BirOmurColors.pirincAcik,
-            BirOmurColors.pirinc,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(999),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: BirOmurColors.pirinc.withValues(alpha: 0.45),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: theme.brightness == Brightness.dark
+            ? BirOmurColors.geceZemin
+            : BirOmurColors.kagitKoyu,
+        shape: BoxShape.circle,
+        border: Border.all(color: Comic.konturOf(context), width: Comic.kontur),
+        boxShadow: comicShadow(context, offset: Comic.kucukGolge),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const Icon(
-            Icons.account_balance_wallet_rounded,
-            size: 15,
-            color: Color(0xFF4A2A00),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF3A2000),
-            ),
-          ),
-        ],
+      child: ClipOval(
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: CharacterFace(player: player, size: 54),
+        ),
       ),
     );
   }
 }
 
-/// Başlık şeridindeki küçük, yuvarlak düğme.
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({
+/// Başlıktaki küçük, yuvarlak düğme.
+class _RoundIconButton extends StatelessWidget {
+  const _RoundIconButton({
     required this.tooltip,
     required this.icon,
     required this.onPressed,
@@ -219,19 +207,18 @@ class _HeaderIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      key: itemKey,
-      tooltip: tooltip,
-      iconSize: 19,
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.all(7),
-      constraints: const BoxConstraints(),
-      style: IconButton.styleFrom(
-        backgroundColor: Colors.white.withValues(alpha: 0.14),
-        foregroundColor: Colors.white,
+    final ThemeData theme = Theme.of(context);
+    return Tooltip(
+      message: tooltip,
+      child: StickerButton(
+        key: itemKey,
+        onPressed: onPressed,
+        color: theme.colorScheme.surfaceContainer,
+        radius: 999,
+        shadowOffset: 2.5,
+        padding: const EdgeInsets.all(7),
+        child: Icon(icon, size: 17, color: theme.colorScheme.onSurface),
       ),
-      onPressed: onPressed,
-      icon: Icon(icon),
     );
   }
 }
@@ -244,8 +231,7 @@ class _StatPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Başlık zemini her temada koyudur; değer renkleri koyu zemin
-    // karşılıklarından seçilir.
+    final ThemeData theme = Theme.of(context);
     final Color renk = statColorOnDark(entry.value);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -253,28 +239,21 @@ class _StatPill extends StatelessWidget {
         children: <Widget>[
           Text(
             '${entry.value}',
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.1,
-              fontWeight: FontWeight.w900,
-              color: renk,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1,
             ),
           ),
-          const SizedBox(height: 5),
-          AnimatedStatBar(
-            value: entry.value,
-            color: renk,
-            trackColor: Colors.white.withValues(alpha: 0.18),
-          ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
+          AnimatedStatBar(value: entry.value, color: renk, minHeight: 11),
+          const SizedBox(height: 4),
           Text(
             entry.short,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 10.5,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: 0.72),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

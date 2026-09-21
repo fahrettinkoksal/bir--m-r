@@ -2,67 +2,67 @@ import 'package:flutter/material.dart';
 
 import '../theme/bir_omur_theme.dart';
 
-/// Ölçülü nostaljik detay: ince, özgün bir kilim şeridi.
+/// Elle çizilmiş gibi duran ayırıcı.
 ///
-/// Süsleme okunurluğu bozmayacak ölçüde kalır (`docs/PROTOTYPE_UI.md` §2).
+/// Düz bir çizgi yerine hafifçe dalgalanan, kalın bir mürekkep şeridi:
+/// cetvelle çizilmemiş hissi verir (Paket 19).
 class KilimDivider extends StatelessWidget {
   const KilimDivider({super.key, this.height = 10, this.onDark = false});
 
   final double height;
 
-  /// Koyu bir zeminin üzerinde mi duruyor? Üst karakter başlığı gibi
-  /// degrade zeminlerde tema renkleri okunmuyor; açık tonlar kullanılır.
+  /// Koyu bir zeminin üzerinde mi duruyor?
   final bool onDark;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: height,
       width: double.infinity,
       child: CustomPaint(
-        painter: _KilimPainter(
+        painter: _InkLinePainter(
           color: onDark
-              ? Colors.white.withValues(alpha: 0.28)
-              : scheme.primary.withValues(alpha: 0.35),
-          accent: onDark
-              ? BirOmurColors.pirincAcik.withValues(alpha: 0.85)
-              : scheme.tertiary.withValues(alpha: 0.75),
+              ? BirOmurColors.krem.withValues(alpha: 0.85)
+              : Comic.konturOf(context),
         ),
       ),
     );
   }
 }
 
-class _KilimPainter extends CustomPainter {
-  _KilimPainter({required this.color, required this.accent});
+class _InkLinePainter extends CustomPainter {
+  _InkLinePainter({required this.color});
 
   final Color color;
-  final Color accent;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint stroke = Paint()
+    final Paint kalem = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    final Paint dot = Paint()..color = accent;
+      ..strokeWidth = 2.6
+      ..strokeCap = StrokeCap.round;
 
-    const double step = 14;
-    final Path path = Path()..moveTo(0, size.height);
-    bool up = true;
-    for (double x = 0; x <= size.width + step; x += step / 2) {
-      path.lineTo(x, up ? 1 : size.height - 1);
-      up = !up;
+    // Elle çekilmiş bir çizgi tam düz olmaz; kontrol noktaları hafifçe
+    // yukarı-aşağı kayar.
+    final double y = size.height / 2;
+    final Path yol = Path()..moveTo(2, y);
+    const double adim = 46;
+    bool yukari = true;
+    for (double x = adim; x < size.width; x += adim) {
+      yol.quadraticBezierTo(
+        x - adim / 2,
+        yukari ? y - 2.2 : y + 2.2,
+        x,
+        y,
+      );
+      yukari = !yukari;
     }
-    canvas.drawPath(path, stroke);
-
-    for (double x = step / 2; x < size.width; x += step * 2) {
-      canvas.drawCircle(Offset(x, size.height / 2), 1.6, dot);
-    }
+    yol.lineTo(size.width - 2, y);
+    canvas.drawPath(yol, kalem);
   }
 
   @override
-  bool shouldRepaint(_KilimPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.accent != accent;
+  bool shouldRepaint(_InkLinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

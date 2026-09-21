@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/life_log.dart';
 import '../theme/bir_omur_theme.dart';
+import 'comic.dart';
+import 'kilim_divider.dart';
 
 /// Hayat günlüğünün **bir yaşa ait** bloğu.
 ///
@@ -66,85 +68,49 @@ class LifeLogAgeBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool gece = theme.brightness == Brightness.dark;
 
+    // Günlük bir deftere yapıştırılmış sayfa gibi durur: yaş etiketi el
+    // yazısıyla yazılmış eğik bir çıkartma, satırlar renkli birer işaret
+    // (Paket 19).
     return Container(
       key: Key('log_age_${block.age}'),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Comic.yaricapBuyuk),
         border: Border.all(
-          color: isCurrentAge
-              ? BirOmurColors.nar.withValues(alpha: gece ? 0.55 : 0.35)
-              : theme.colorScheme.outlineVariant,
-          width: isCurrentAge ? 1.5 : 1,
+          color: Comic.konturOf(context),
+          width: isCurrentAge ? Comic.kontur + 1 : Comic.kontur,
         ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: gece
-                ? Colors.black.withValues(alpha: 0.4)
-                : const Color(0xFF1B1A2E)
-                    .withValues(alpha: isCurrentAge ? 0.09 : 0.05),
-            blurRadius: isCurrentAge ? 18 : 12,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: comicShadow(
+          context,
+          offset: isCurrentAge ? Comic.golge + 1 : Comic.golge,
+        ),
       ),
-      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              // Yaş rozeti: bu yıl dolu nar kırmızısı, geçmiş yıllar
-              // sakin bir gri. Günlükte "şimdi" hemen bulunur.
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  gradient: isCurrentAge
-                      ? const LinearGradient(
-                          colors: <Color>[
-                            BirOmurColors.narAcik,
-                            BirOmurColors.nar,
-                          ],
-                        )
-                      : null,
-                  color: isCurrentAge
-                      ? null
-                      : theme.colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '${block.age} yaş',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.2,
-                    color: isCurrentAge
-                        ? Colors.white
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
+              ComicTag(
+                text: '${block.age} yaş',
+                handwritten: true,
+                fontSize: 13,
+                tilt: -3,
+                color: isCurrentAge
+                    ? BirOmurColors.sari
+                    : theme.colorScheme.surfaceContainer,
               ),
               const SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                  height: 1,
-                  color: theme.colorScheme.outlineVariant,
-                ),
-              ),
+              Expanded(child: KilimDivider(height: 8)),
               if (isCurrentAge) ...<Widget>[
-                const SizedBox(width: 10),
-                Text(
-                  'BU YIL',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: BirOmurColors.nar,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.1,
-                    fontSize: 10,
-                  ),
+                const SizedBox(width: 8),
+                const ComicTag(
+                  text: 'BU YIL',
+                  color: BirOmurColors.kirmizi,
+                  textColor: BirOmurColors.krem,
+                  tilt: 3,
+                  fontSize: 10.5,
                 ),
               ],
             ],
@@ -152,23 +118,28 @@ class LifeLogAgeBlock extends StatelessWidget {
           const SizedBox(height: 10),
           for (final LifeLogEntry e in block.entries)
             Padding(
-              padding: const EdgeInsets.only(bottom: 7),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  // Kategori simgesi kendi renginden yumuşak bir kutunun
-                  // içinde durur; satırlar arasında göz kayması azalır.
+                  // Satır başındaki renkli işaret: kategorisi bir bakışta
+                  // belli olur.
                   Container(
-                    margin: const EdgeInsets.only(top: 1, right: 10),
-                    padding: const EdgeInsets.all(5),
+                    margin: const EdgeInsets.only(top: 3, right: 10),
+                    width: 24,
+                    height: 24,
                     decoration: BoxDecoration(
-                      color: _renk(theme, e.category).withValues(alpha: 0.13),
+                      color: _renk(theme, e.category),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Comic.konturOf(context),
+                        width: 1.8,
+                      ),
                     ),
                     child: Icon(
                       _icon(e.category),
                       size: 13,
-                      color: _renk(theme, e.category),
+                      color: BirOmurColors.murekkep,
                     ),
                   ),
                   Expanded(
@@ -185,28 +156,25 @@ class LifeLogAgeBlock extends StatelessWidget {
   static IconData _icon(LogCategory category) {
     switch (category) {
       case LogCategory.dogum:
-        return Icons.auto_awesome_outlined;
+        return Icons.auto_awesome_rounded;
       case LogCategory.aile:
-        return Icons.people_outline;
+        return Icons.people_rounded;
       case LogCategory.kisisel:
-        return Icons.person_outline;
+        return Icons.person_rounded;
       case LogCategory.yasDegisimi:
-        return Icons.cake_outlined;
+        return Icons.cake_rounded;
     }
   }
 
   static Color _renk(ThemeData theme, LogCategory category) {
-    final bool gece = theme.brightness == Brightness.dark;
     switch (category) {
       case LogCategory.dogum:
       case LogCategory.yasDegisimi:
-        return gece ? BirOmurColors.pirincAcik : BirOmurColors.pirincKoyu;
+        return BirOmurColors.sari;
       case LogCategory.aile:
-        return gece ? BirOmurColors.ciniAcik : BirOmurColors.cini;
+        return BirOmurColors.turkuaz;
       case LogCategory.kisisel:
-        return gece
-            ? const Color(0xFFA98BFF)
-            : const Color(0xFF6C4BD8);
+        return BirOmurColors.mor;
     }
   }
 }

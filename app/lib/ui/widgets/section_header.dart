@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../text/turkish_text.dart';
+import '../theme/bir_omur_theme.dart';
+import 'comic.dart';
 
 /// Bölüm başlığı ve isteğe bağlı açıklaması.
+///
+/// Ana ekranda "Hayat günlüğü" gibi başlıklar için: el yazısıyla yazılmış
+/// bir başlık ve altında kısa bir açıklama (Paket 19).
 class SectionHeader extends StatelessWidget {
   const SectionHeader({super.key, required this.title, this.subtitle});
 
@@ -15,13 +19,20 @@ class SectionHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          trUpper(title),
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.1,
-            color: theme.colorScheme.primary,
-          ),
+        Row(
+          children: <Widget>[
+            HandwrittenText(title, size: 26, tilt: -1.5),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                height: 3,
+                decoration: BoxDecoration(
+                  color: Comic.konturOf(context).withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          ],
         ),
         if (subtitle != null) ...<Widget>[
           const SizedBox(height: 2),

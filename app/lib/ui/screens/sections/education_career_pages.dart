@@ -711,10 +711,16 @@ class _HistoryRow extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            value,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+          const SizedBox(width: 10),
+          // Değer uzun olabilir (ör. uzun bir unvan); satır taşmasın diye
+          // esner ve sağa yaslanır.
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

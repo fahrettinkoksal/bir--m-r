@@ -68,6 +68,28 @@ flutter:
   assets:
     - assets/sounds/
 
+  # Oyunun yazı tipleri. İkisi de SIL Open Font License 1.1; lisans
+  # metinleri assets/fonts/ altında. Dosyalar oyunun kullandığı
+  # karakterlere indirgendi (bkz. tool/fetch_fonts.py).
+  fonts:
+    # Arayüzün tamamı: kalın, yuvarlak, oyuncu bir karakter.
+    - family: Baloo2
+      fonts:
+        - asset: assets/fonts/Baloo2-400.ttf
+          weight: 400
+        - asset: assets/fonts/Baloo2-500.ttf
+          weight: 500
+        - asset: assets/fonts/Baloo2-600.ttf
+          weight: 600
+        - asset: assets/fonts/Baloo2-700.ttf
+          weight: 700
+        - asset: assets/fonts/Baloo2-800.ttf
+          weight: 800
+    # El yazısı aksanlar: oyunun adı, yaş etiketleri, günlük başlıkları.
+    - family: PatrickHand
+      fonts:
+        - asset: assets/fonts/PatrickHand-Regular.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
