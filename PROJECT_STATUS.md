@@ -626,6 +626,50 @@ sentetik kayıtlarla** sınandı; gerçek cihazdan alınmış eski kayıt
 dosyası kullanılmadı. **Gerçek Windows veya Android cihazda
 oynanmadı.**
 
+**Görsel kimlik yenilendi (Paket 16):** Faho arayüzü "çok yapay zekâ
+duruyor" diye tanımladı ve canlı renk istedi. Palet doygunlaştırıldı
+(nar, çini, pirinç ve sekiz menü rengi). Gövde sakinleşti: açık temada
+soğuk gri zemin + **beyaz** kart, koyu temada mürekkep moru zemin.
+**Kart zeminleri artık vurgu rengiyle boyanmıyor**; renk ikon
+kutusunda, rozetlerde ve bölüm başlık kartında duruyor. Üst karakter
+şeridi, alt gezinme çubuğu ve açılış ekranı koyu degrade taşıyor. Her
+bölüm renkli bir başlık kartıyla açılıyor. Menü satırı, kişi kartı ve
+bilgi panelleri tek kart diline taşındı; düğmelerin gri gölge halkası
+kaldırıldı. Alt menü sırası ve **Yaş Al**'ın yeri değişmedi (NAV-001).
+Renk değerleri **prototypeOnly**; sorular **Q-084**'te. Yan düzeltme:
+ses servisi oynatıcıyı artık ilk ses çalınana kadar kurmuyor.
+Ekran görüntüsü testleri gerçek Roboto ve Material Icons dosyalarını
+yüklüyor; goldenlar artık tasarımı gerçekten temsil ediyor.
+
+**Okul dönüm noktaları ve sınav yılı (Paket 17):** Okula başlama,
+liseye geçiş, lise bitişi ve üniversite mezuniyeti artık ekranda
+**bildiriliyor** (yeni `NoticeKind.okul`). Bildirim bilgilendirmedir:
+seçim sormaz, hiçbir değeri değiştirmez, kayıtta saklanır ve iki kez
+açılmaz; puan yalnızca gerçekten hesaplanmışsa yazılır. 8. ve 12. sınıf
+artık **sınav yılı**: okul ekranında ayrı bir panel var ve sekiz yeni
+olay (sınav takvimi, deneme sonucu, gece kaygısı, son hafta/son ay,
+aile baskısı) çıkıyor. İkisi önceki kararı hatırlıyor. Seçimler
+yerleştirme ve üniversite sınav puanını **gerçekten** değiştiriyor;
+çok çalışmak mutluluk ve sağlık düşürüyor, kaygı kalıcı ceza değil.
+İki sınav ayrı tutuluyor. Sayılar **prototypeOnly**; sorular **Q-085**.
+
+**Aktivitelere üç yeni alan (Paket 18):** **Sağlık Merkezi** (kontrol,
+diş, göz, mevsim aşısı, bir uzmanla konuşmak), **Eğlence** (parkta
+yürüyüş — ücretsiz, sinema, kafe, maç, konser) ve **Kurslar** (resim,
+müzik, dil, bilgisayar). Dil ve bilgisayar kursu zekâyı yükseltiyor.
+Üçü de mevcut aktivite altyapısını kullanıyor: parası yetmeyen işlem
+gerçekleşmiyor, aynı yaşta tekrarın getirisi azalıyor ve sınıra gelince
+eylem kapanıyor, her alan yalnızca yaşına uyduğu andan itibaren menüde
+görünüyor. Yeni ana menü açılmadı. Ücretler **prototypeOnly**; sorular
+**Q-086**.
+
+**Test durumu (Paket 16-18 sonrası, gerçekten çalıştırıldı):**
+`flutter analyze` temiz; `flutter test` **1012 geçti, 11 atlandı, 0
+başarısız**. Atlanan 11 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
+çalışan ekran görüntüsü testleridir. Kayıt biçimi **sürüm 27**
+değişmedi. **Gerçek Windows veya Android cihazda oynanmadı**; sesler
+de duyulmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
