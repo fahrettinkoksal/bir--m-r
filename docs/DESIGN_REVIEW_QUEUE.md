@@ -1885,5 +1885,38 @@ Yani **26 yaşını bekâr geçiren ya da bir kez ayrılan oyuncu, ömrünün ge
 
 **Yan düzeltme (test):** `package1_test.dart` içindeki "yeni sınıf en az 10 kişi" beklentisi tohuma bağlıydı. Sınıf **her zaman** 10 kişiye tamamlanıyor, ama aralarından biri o yıl vefat ederse güncel liste 9 veriyor. Test artık sınıfın tam mevcuda tamamlandığını sınıyor, yaşayan sayısına değil.
 
+
+### Q-092 — İlgisizlikten zayıflayan bağlar
+**Durum:** Yön **Faho tarafından onaylandı** (21 Eylül 2026; ChatGPT o gün yoktu, Faho "hepsini yap, mantıklı geldi" dedi). **Sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 24, `app/lib/domain/interaction/bond_decay.dart`.
+
+**Sorun neydi:** Yakınlık yalnızca **yükseliyordu**. Bir kişiyle bir kez güzel bir an yaşandıktan sonra oyuncu onu ömrünün geri kalanında hiç aramasa bile bağ olduğu yerde duruyordu. Bu yüzden İlişkiler ekranını düzenli ziyaret etmenin bir karşılığı yoktu: bir kez yükselen bağ bedava kalıcıydı. İlişkilere emek vermekle vermemek arasında hiçbir fark yoktu.
+
+**Şu an kodda olan (geçici) çözüm:** Uzun süre görüşülmeyen kişiyle yakınlık her yıl **yavaşça** düşer. Kurallar bilerek ihtiyatlı:
+
+* **Hoşgörü süresi 3 yıl.** Bir-iki yıl görüşmemek ihmal değildir.
+* **Yıllık kayıp 3 puan**, kan bağında **2 puan** (daha yavaş).
+* **Kan bağında taban 20.** Anne annedir: uzaklaşır ama yabancıya dönmez. Olay veya seçim kaynaklı düşüşler bu tabana takılmaz; **yalnızca ilgisizlik** takılır. Kan bağı dışında taban 0'dır.
+* **Aynı evde yaşayan zayıflamaz.** Her gün görülen biriyle "görüşmemek" diye bir şey yok.
+* **Erişilemeyen kişi zayıflamaz.** Yıllar önceki ilkokul öğretmeni ya da başka şehirdeki eski bir sınıf arkadaşı zaten aranamıyor; oyuncu elinden gelmeyen bir şey için cezalandırılmaz.
+* **Geriye dönük geçmiş uydurulmaz.** Hiç temas kaydı olmayan kişide sayaç, kişi haneden ayrıldığı (ya da oyuncu evden çıktığı) ilk yıl başlar — aynı evde yaşanırken zaten her gün görülüyordu.
+* **Günlük dolup taşmaz.** Her yıl kişi adı sayılmaz; yalnızca araya belirgin bir mesafe girdiğinde (yakınlık 30'un altına inince) tek bir satır düşülür.
+* İlişkiler ekranında kişinin sayfasında "**N yıldır görüşmediniz; araya mesafe giriyor**" uyarısı görünür. Sessizce düşen bir sayı olmamalı: oyuncu elinden bir şey geldiğini görmeli.
+
+**Ölçüm** (30 hayat, 80 yaşa kadar, seçimler rastgele, **İlişkiler ekranı hiç kullanılmadan**):
+
+| | Sonuç |
+|---|---|
+| Bir bağın zayıfladığı hayat | **30/30** |
+| Bir hayattaki en büyük yakınlık kaybı | 12 ile 74 arası (ortanca ~30) |
+| Hiç aranmayan annenin son yakınlığı | tabana, **20**'ye kadar |
+
+**Karar soruları:**
+1. Hoşgörü süresi 3 yıl uygun mu? Daha uzun mu olmalı (örneğin 5)?
+2. Yıllık kayıp (3 / kan bağında 2) doğru hızda mı? 80 yıllık bir hayatta hiç aranmayan bir arkadaşın bağının sıfıra inmesi isteniyor mu?
+3. Kan bağı tabanı **20** doğru mu? Anne-baba için daha yüksek (örneğin 30), uzak akraba için daha düşük mü olmalı?
+4. Eş ve çocuklar evden ayrıldıktan sonra da zayıflamalı mı? Şu an zayıflıyorlar (erişilebilirler ama hanede değiller).
+5. Zayıflayan bağ yeniden görüşmekle **hızla** geri kazanılabilmeli mi, yoksa kaybedilen emek geri gelmemeli mi? Şu an normal etkileşim kazancıyla geri gelir, özel bir "araya girmiş mesafeyi kapatma" mekaniği yok.
+6. Bağ belli bir eşiğin altına inince bir **olay** çıkmalı mı ("çok uzaklaştınız")? Şu an yalnızca günlüğe satır düşüyor.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
