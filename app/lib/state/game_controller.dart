@@ -703,13 +703,24 @@ class GameController extends ChangeNotifier {
     return _activities.availability(current, action);
   }
 
-  /// Berber veya spor salonu eylemini uygular.
+  /// Bir aktivite eylemini uygular.
+  ///
+  /// Fal eylemlerinin sonucu sabit değil **rastgele bir metindir** ve
+  /// mutluluğu düşürebilir de; bu yüzden ayrı yoldan geçer (Paket 27).
+  /// Yönlendirme tek yerde yapılır ki arayüz hangi eylemin fal olduğunu
+  /// bilmek zorunda kalmasın.
   ActivityOutcome? performActivity(ActivityAction action) => _runActivity(
-        (GameState current) => _activities.perform(
-          state: current,
-          action: action,
-          rng: _random,
-        ),
+        (GameState current) => ActivityEngine.isFortune(action)
+            ? _activities.tellFortune(
+                state: current,
+                action: action,
+                rng: _random,
+              )
+            : _activities.perform(
+                state: current,
+                action: action,
+                rng: _random,
+              ),
       );
 
   /// Yaşa uygun kitaplar.

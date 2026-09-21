@@ -21,7 +21,10 @@ enum ActivityVenue {
   eglence('Eğlence', Icons.celebration_rounded),
 
   /// Paket 18: okul dışında öğrenilen şeyler.
-  kurs('Kurslar', Icons.palette_rounded);
+  kurs('Kurslar', Icons.palette_rounded),
+
+  /// Paket 27: kahve falı, tarot ve burç yorumu.
+  falTarot('Fal ve Tarot', Icons.auto_awesome_rounded);
 
   const ActivityVenue(this.label, this.icon);
 
@@ -92,6 +95,39 @@ class ActivityAction {
 }
 
 const List<ActivityAction> kActivityActions = <ActivityAction>[
+  // --- Fal ve Tarot (Paket 27) -----------------------------------------
+  // Sonuç metni rastgele seçilir ve mutluluğu **hem artırabilir hem
+  // düşürebilir**; bu yüzden etkiler burada sıfırdır, motor uygular.
+  ActivityAction(
+    id: 'kahve_fali',
+    venue: ActivityVenue.falTarot,
+    label: 'Kahve falına baktır',
+    description: 'Fincan ters çevrilir, beklenir, sonra biri bakar.',
+    icon: Icons.coffee_rounded,
+    cost: 150, // prototypeOnly
+    minAge: 14,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'tarot_actir',
+    venue: ActivityVenue.falTarot,
+    label: 'Tarot açtır',
+    description: 'Deste karılır, tek kart çekilir. Gerisi yoruma kalmış.',
+    icon: Icons.style_rounded,
+    cost: 400, // prototypeOnly
+    minAge: 16,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'burc_yorumu',
+    venue: ActivityVenue.falTarot,
+    label: 'Burç yorumunu oku',
+    description: 'Ücretsiz. Gazetede, telefonda, her yerde.',
+    icon: Icons.nights_stay_rounded,
+    minAge: 10,
+    maxPerAge: 3,
+  ),
+
   // --- Berber -----------------------------------------------------------
   ActivityAction(
     id: 'sac_kestir',

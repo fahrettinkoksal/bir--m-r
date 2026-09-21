@@ -87,6 +87,8 @@ BirOmurAccent accentForVenue(ActivityVenue venue) {
       return BirOmurAccents.turuncu;
     case ActivityVenue.kurs:
       return BirOmurAccents.mor;
+    case ActivityVenue.falTarot:
+      return BirOmurAccents.gul;
   }
 }
 

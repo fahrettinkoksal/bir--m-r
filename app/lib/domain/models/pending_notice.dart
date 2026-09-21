@@ -17,6 +17,9 @@ enum NoticeKind {
 
   /// Bebeğin doğumu (Paket 26).
   dogum,
+
+  /// Burçsal dönem (Paket 27).
+  burc,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

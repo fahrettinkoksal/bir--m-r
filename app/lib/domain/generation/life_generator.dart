@@ -8,6 +8,7 @@ import '../models/parental_status.dart';
 import '../models/person.dart';
 import '../interaction/intimacy.dart';
 import '../models/player_character.dart';
+import '../models/zodiac.dart';
 import '../models/relation.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
@@ -292,6 +293,7 @@ class LifeGenerator {
       );
     }
 
+    final int dogumAyi = _rng.nextInt(12) + 1;
     final PlayerCharacter player = PlayerCharacter(
       id: 'oyuncu',
       firstName: playerFirstName,
@@ -312,6 +314,12 @@ class LifeGenerator {
       // Doğurganlık hayat başında **gizlice** belirlenir; oyuncuya
       // söylenmez, ancak denedikçe anlaşılır (Paket 25).
       infertile: Intimacy.rollPlayerInfertility(_rng),
+      // Doğum ayı ve günü (Paket 27). **Yıl yoktur** (D-003): burç
+      // hesabı için gün ve ay yeter, tarihsel takvim eklenmedi.
+      birthDate: BirthDate(
+        month: dogumAyi,
+        day: _rng.nextInt(BirthDate.daysInMonth(dogumAyi)) + 1,
+      ),
     );
 
     // Aile ve akrabalar doğum şehrinde yaşar. Oyuncu ileride başka şehre

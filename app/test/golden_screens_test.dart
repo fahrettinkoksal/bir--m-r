@@ -522,4 +522,5 @@ void main() {
       matchesGoldenFile('goldens/13_hayat_degerlendirmesi.png'),
     );
   }, skip: !enabled);
+
 }

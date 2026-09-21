@@ -2,6 +2,8 @@ import '../../text/turkish_text.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/pending_notice.dart';
+import '../models/zodiac.dart';
+import '../../data/fortune_catalog.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 
@@ -214,6 +216,30 @@ abstract final class Notices {
             : '$childName doğdu. Sen ve $otherParentName bir yıldır '
                 'bunu bekliyordunuz.',
         personId: childId,
+      );
+
+  /// Burçsal dönem bildirimi (Paket 27): aynı dönem aynı yaşta bir kez.
+  static String zodiacNoticeId(String periodId, int age) =>
+      'burc-$periodId-$age';
+
+  /// "Şu dönem geldi, şu burçlar etkileniyor."
+  ///
+  /// Mutluluk etkisi bildirimde **gerçekten uygulanan** değerdir; sahte
+  /// bir puan gösterilmez.
+  static PendingNotice zodiacPeriod({
+    required int playerAge,
+    required ZodiacPeriod period,
+    required Zodiac zodiac,
+    required int happinessDelta,
+  }) =>
+      PendingNotice(
+        id: zodiacNoticeId(period.id, playerAge),
+        kind: NoticeKind.burc,
+        age: playerAge,
+        title: period.name,
+        text: '${period.text}\n\nSen ${zodiac.display} burcusun; bu '
+            'dönemden etkilenenlerdensin.',
+        happinessDelta: happinessDelta,
       );
 
   static const String schoolStartNoticeId = 'okul-baslangic';

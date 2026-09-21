@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'gender.dart';
 import 'stats.dart';
+import 'zodiac.dart';
 import '../../text/turkish_text.dart';
 
 /// Ana karakter.
@@ -20,6 +21,7 @@ class PlayerCharacter {
     this.wallet = 0,
     this.hairStyle,
     this.infertile = false,
+    this.birthDate,
   }) : currentCity = currentCity ?? birthCity;
 
   final String id;
@@ -56,6 +58,13 @@ class PlayerCharacter {
   /// henüz tasarlanmadı (Q-093).
   final bool infertile;
 
+  /// Doğum ayı ve günü (Paket 27). **Yıl yoktur** (D-003).
+  ///
+  /// Burç bundan hesaplanır. Eski kayıtlarda boştur; o zaman hayatın
+  /// tohumundan **deterministik** olarak türetilir, böylece aynı hayat
+  /// her açılışta aynı burcu gösterir.
+  final BirthDate? birthDate;
+
   /// Berberde seçilen saç stili. Görsel karakter sistemi henüz yok;
   /// seçim metin olarak saklanır ve Ben ekranında görünür.
   final String? hairStyle;
@@ -77,6 +86,7 @@ class PlayerCharacter {
     String? hairStyle,
     String? currentCity,
     bool? infertile,
+    BirthDate? birthDate,
   }) {
     return PlayerCharacter(
       id: id,
@@ -91,6 +101,7 @@ class PlayerCharacter {
       wallet: wallet ?? this.wallet,
       hairStyle: hairStyle ?? this.hairStyle,
       infertile: infertile ?? this.infertile,
+      birthDate: birthDate ?? this.birthDate,
     );
   }
 }

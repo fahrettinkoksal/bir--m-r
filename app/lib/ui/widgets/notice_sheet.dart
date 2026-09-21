@@ -215,6 +215,8 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.school_rounded;
       case NoticeKind.dogum:
         return Icons.child_friendly_rounded;
+      case NoticeKind.burc:
+        return Icons.auto_awesome_rounded;
     }
   }
 }

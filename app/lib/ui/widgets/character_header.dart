@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/life/astrology.dart';
 import '../../domain/models/game_settings.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/stats.dart';
@@ -90,7 +91,12 @@ class CharacterHeader extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${state.player.birthCity} · ${_durumSatiri(state)}',
+                            // Burç bu satırda: üst satır zaten yaş ve
+                            // eğitim evresiyle dolu, oraya eklenince
+                            // kırpılıyordu (Paket 27).
+                            '${state.player.birthCity} · '
+                            '${Astrology.zodiacOf(state).display} · '
+                            '${_durumSatiri(state)}',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(

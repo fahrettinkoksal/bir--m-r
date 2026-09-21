@@ -26,6 +26,9 @@ import '../models/game_settings.dart';
 import '../models/game_state.dart';
 import '../interaction/bond_decay.dart';
 import '../models/life_log.dart';
+import '../models/zodiac.dart';
+import '../life/astrology.dart';
+import '../../data/fortune_catalog.dart';
 import '../models/gender.dart';
 import '../models/pregnancy.dart';
 import '../models/owned_item.dart';
@@ -404,6 +407,10 @@ class LifeProgression {
 
     // Bekleyen doğum (Paket 26): hamilelik bu yıl bebekle sonuçlanır.
     afterDeaths = _applyBirth(afterDeaths, newAge);
+
+    // Burçsal dönem (Paket 27): bazı yıllarda oyuncunun burcuna denk
+    // gelen bir dönem çıkar ve mutluluğu gerçekten etkiler.
+    afterDeaths = _applyZodiacPeriod(afterDeaths, newAge);
 
     // İlgisizlikten zayıflayan bağlar (Paket 24). Bağ yalnızca
     // yükselmemeli: uzun süre görüşülmeyen kişiyle araya mesafe girer.
@@ -873,6 +880,57 @@ class LifeProgression {
           age: newAge,
           text: '$newAge yaşında $gerekce nedeniyle hayatını kaybettin.',
           category: LogCategory.yasDegisimi,
+        ),
+      ]),
+    );
+  }
+
+  /// prototypeOnly: bir yılda burçsal dönem çıkma ihtimali.
+  ///
+  /// Her yıl çıkmaz: yoksa bildirim sıradanlaşır ve mutluluk sürekli
+  /// oynar.
+  static const double prototypeOnlyZodiacChance = 0.22;
+
+  /// prototypeOnly: burç yorumlarının başladığı yaş.
+  ///
+  /// Küçük çocuğun karşısına "Satürn dönüşü" çıkmaz.
+  static const int prototypeOnlyZodiacMinAge = 12;
+
+  /// Burçsal dönem uygular (Paket 27).
+  ///
+  /// Yalnızca oyuncunun burcunu **gerçekten** etkileyen dönemler çıkar;
+  /// "seni etkilemiyor" diye bir bildirim gösterilmez. Mutluluk etkisi
+  /// bildirimde yazan değerle aynıdır.
+  GameState _applyZodiacPeriod(GameState state, int newAge) {
+    if (newAge < prototypeOnlyZodiacMinAge) return state;
+    if (_rng.nextDouble() >= prototypeOnlyZodiacChance) return state;
+
+    final Zodiac burc = Astrology.zodiacOf(state);
+    final List<ZodiacPeriod> uygun = kZodiacPeriods
+        .where((ZodiacPeriod p) => p.affects(burc))
+        .toList(growable: false);
+    if (uygun.isEmpty) return state;
+
+    final ZodiacPeriod donem = uygun[_rng.nextInt(uygun.length)];
+    final String id = Notices.zodiacNoticeId(donem.id, newAge);
+    if (state.notices.any((PendingNotice n) => n.id == id)) return state;
+
+    final int once = state.player.stats.happiness;
+    final int sonra =
+        (once + donem.prototypeOnlyHappiness).clamp(0, 100);
+    final int gercek = sonra - once;
+
+    return state.copyWith(
+      player: state.player.copyWith(
+        stats: state.player.stats.copyWith(happiness: sonra),
+      ),
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...state.notices,
+        Notices.zodiacPeriod(
+          playerAge: newAge,
+          period: donem,
+          zodiac: burc,
+          happinessDelta: gercek,
         ),
       ]),
     );

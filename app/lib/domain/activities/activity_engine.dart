@@ -5,6 +5,9 @@ import '../effects/effect_diff.dart';
 import '../models/applied_effect.dart';
 import '../models/book_progress.dart';
 import '../models/game_state.dart';
+import '../models/zodiac.dart';
+import '../life/astrology.dart';
+import '../../data/fortune_catalog.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/player_character.dart';
@@ -144,6 +147,101 @@ class ActivityEngine {
         noNewBenefit: factor == 0,
       ),
     );
+  }
+
+  // =====================================================================
+  // Fal ve Tarot (Paket 27)
+  // =====================================================================
+
+  /// Bu eylem bir fal mı? Sonuç metni rastgele seçilir.
+  static bool isFortune(ActivityAction action) =>
+      action.venue == ActivityVenue.falTarot;
+
+  /// Fala baktırır.
+  ///
+  /// **Sonuç rastgeledir ve iyi de kötü de çıkabilir.** Oyunun olaylarını
+  /// yönlendirmez, kesin bir gelecek söylemez; yalnızca biraz keyif ya da
+  /// biraz hayal kırıklığı getirir. Tekrar edildikçe kazanç azalır
+  /// (D-019 ile aynı ilke), ama **kötü sonuç sönümlenmez**: hoşuna
+  /// gitmeyen falı tekrar tekrar baktırıp etkisiz hâle getiremezsin.
+  ActivityResult tellFortune({
+    required GameState state,
+    required ActivityAction action,
+    required Random rng,
+  }) {
+    final InteractionAvailability check = availability(state, action);
+    if (!check.isAllowed) return _blocked(state, check.reason!);
+
+    final int done = timesDone(state, action);
+    final double factor =
+        prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
+
+    final ({String text, int happiness}) okuma =
+        _readingFor(state, action, rng);
+    // Olumlu etki tekrar edildikçe azalır; olumsuz etki **tam** uygulanır.
+    final int delta = okuma.happiness >= 0
+        ? _scaled(okuma.happiness, factor)
+        : okuma.happiness;
+
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet - action.cost,
+        stats: state.player.stats.copyWith(
+          happiness: state.player.stats.happiness + delta,
+        ),
+      ),
+      interactionCounts: Map<String, int>.unmodifiable(<String, int>{
+        ...state.interactionCounts,
+        GameState.interactionKey('aktivite', action.id): done + 1,
+      }),
+    );
+
+    return ActivityResult(
+      state: _log(next, okuma.text),
+      outcome: ActivityOutcome(
+        applied: true,
+        text: okuma.text,
+        effects: diffAppliedEffects(state, next),
+        // Olumsuz fal "kazanç kalmadı" sayılmaz; sonuç gerçek.
+        noNewBenefit: factor == 0 && okuma.happiness >= 0,
+      ),
+    );
+  }
+
+  ({String text, int happiness}) _readingFor(
+    GameState state,
+    ActivityAction action,
+    Random rng,
+  ) {
+    switch (action.id) {
+      case 'kahve_fali':
+        final FortuneReading r =
+            kCoffeeReadings[rng.nextInt(kCoffeeReadings.length)];
+        return (text: r.text, happiness: r.prototypeOnlyHappiness);
+      case 'tarot_actir':
+        final TarotCard k = kTarotCards[rng.nextInt(kTarotCards.length)];
+        return (
+          text: '${k.name} kartı çıktı. ${k.text}',
+          happiness: k.prototypeOnlyHappiness,
+        );
+      case 'burc_yorumu':
+        final Zodiac burc = Astrology.zodiacOf(state);
+        final List<FortuneReading> liste =
+            kHoroscopes[burc] ?? const <FortuneReading>[];
+        if (liste.isEmpty) {
+          return (
+            text: '${burc.display} için bu dönem bir şey yazmamışlar.',
+            happiness: 0,
+          );
+        }
+        final FortuneReading r = liste[rng.nextInt(liste.length)];
+        return (
+          text: '${burc.display} yorumu: ${r.text}',
+          happiness: r.prototypeOnlyHappiness,
+        );
+      default:
+        return (text: '${action.label} tamamlandı.', happiness: 0);
+    }
   }
 
   // =====================================================================

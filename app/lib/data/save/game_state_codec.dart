@@ -26,6 +26,7 @@ import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
 import '../../domain/models/pregnancy.dart';
+import '../../domain/models/zodiac.dart';
 import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/marriage.dart';
@@ -206,6 +207,9 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'wallet': p.wallet,
       'hairStyle': p.hairStyle,
       'infertile': p.infertile,
+      // Doğum ayı ve günü (Paket 27). **Yıl yoktur** (D-003).
+      'birthMonth': p.birthDate?.month,
+      'birthDay': p.birthDate?.day,
     };
 
 Map<String, Object?> _encodeAccount(SocialAccount a) => <String, Object?>{
@@ -810,6 +814,15 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     hairStyle: _stringOrNull(json, 'hairStyle'),
     // Eski kayıtlarda doğurganlık bilgisi yoktur; kısır sayılmaz.
     infertile: _boolOr(json, 'infertile'),
+    // Eski kayıtlarda doğum ayı/günü yoktur; boş kalır. Burç o zaman
+    // hayatın tohumundan **deterministik** türetilir (Paket 27), yani
+    // eski hayat da burcunu görür ve her açılışta aynı burcu görür.
+    birthDate: json['birthMonth'] == null || json['birthDay'] == null
+        ? null
+        : BirthDate(
+            month: _int(json, 'birthMonth'),
+            day: _int(json, 'birthDay'),
+          ),
   );
 }
 

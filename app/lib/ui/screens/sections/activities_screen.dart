@@ -5,6 +5,7 @@ import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
+import '../../../domain/life/astrology.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
@@ -43,6 +44,7 @@ enum _ActivityPage {
   saglik,
   eglence,
   kurs,
+  falTarot,
   sosyalMedya,
   kumarhane,
   ehliyet,
@@ -100,6 +102,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       case _ActivityPage.kurs:
         return VenuePage(
           venue: ActivityVenue.kurs,
+          onBack: () => _go(_ActivityPage.kok),
+        );
+      case _ActivityPage.falTarot:
+        return VenuePage(
+          venue: ActivityVenue.falTarot,
           onBack: () => _go(_ActivityPage.kok),
         );
       case _ActivityPage.sosyalMedya:
@@ -222,6 +229,18 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.palette_outlined,
             accent: BirOmurAccents.mor,
             onTap: () => _go(_ActivityPage.kurs),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (state.player.age >= ActivityVenue.falTarot.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_fal'),
+            title: ActivityVenue.falTarot.label,
+            subtitle: 'Kahve falı, tarot ve '
+                '${Astrology.zodiacOf(state).display} yorumu',
+            icon: Icons.auto_awesome_outlined,
+            accent: BirOmurAccents.gul,
+            onTap: () => _go(_ActivityPage.falTarot),
           ),
           const SizedBox(height: 10),
         ],
