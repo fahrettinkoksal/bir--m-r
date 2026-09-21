@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/item_catalog.dart';
 
+import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/interaction.dart';
@@ -324,6 +325,30 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                       theme.colorScheme.secondary,
                     ),
                   ),
+                ),
+                // İlgisizlikten zayıflayan bağ oyuncuya **görünür**
+                // olmalı; yoksa sessizce düşen bir sayı olur ve oyuncu
+                // elinden bir şey gelmediğini sanır (Paket 24).
+                Builder(
+                  builder: (BuildContext context) {
+                    final int? gecen =
+                        BondDecay.yearsSinceContact(state, person);
+                    if (gecen == null ||
+                        !BondDecay.decays(state, person) ||
+                        gecen <= BondDecay.prototypeOnlyGraceYears) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        '$gecen yıldır görüşmediniz; araya mesafe giriyor.',
+                        key: const Key('person_neglect_note'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
               const SizedBox(height: 20),

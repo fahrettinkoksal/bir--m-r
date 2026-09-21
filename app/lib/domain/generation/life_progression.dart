@@ -24,6 +24,7 @@ import '../life/inheritance.dart';
 import '../life/mortality.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
+import '../interaction/bond_decay.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
@@ -398,6 +399,10 @@ class LifeProgression {
 
     // Sağlığı belirgin kötüleşen karaktere anlaşılır bir uyarı (D-036).
     afterDeaths = _maybeHealthWarning(afterDeaths, newAge);
+
+    // İlgisizlikten zayıflayan bağlar (Paket 24). Bağ yalnızca
+    // yükselmemeli: uzun süre görüşülmeyen kişiyle araya mesafe girer.
+    afterDeaths = _applyBondDecay(afterDeaths, newAge);
 
     // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
     final GameState withTrack = _applyTrackBonus(afterDeaths);
@@ -866,6 +871,22 @@ class LifeProgression {
         ),
       ]),
     );
+  }
+
+  /// Bir yıllık ilgisizliği uygular (Paket 24).
+  ///
+  /// Günlüğe her yıl kişi adı yazılmaz; yalnızca araya belirgin bir
+  /// mesafe girdiğinde tek bir satır düşülür.
+  GameState _applyBondDecay(GameState state, int newAge) {
+    final BondDecayResult sonuc = BondDecay.applyYear(state);
+    final GameState next = state.copyWith(
+      people: sonuc.people,
+      lastInteractionAge: sonuc.lastInteractionAge,
+    );
+    if (!sonuc.changed) return next;
+    final String? satir = BondDecay.logLineFor(state, sonuc);
+    if (satir == null) return next;
+    return _logLine(next, newAge, satir);
   }
 
   GameState _applyTrackBonus(GameState state) {
