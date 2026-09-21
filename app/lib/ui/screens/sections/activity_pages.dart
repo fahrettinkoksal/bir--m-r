@@ -577,3 +577,158 @@ class _AdoptionPageState extends State<AdoptionPage> {
     );
   }
 }
+
+/// **Vasiyet** sayfası (D-052).
+///
+/// Oyuncu hayattaki çocuklarından birini mirasçı seçebilir. Seçim isteğe
+/// bağlıdır, değiştirilebilir ve kaldırılabilir; hiç seçim yapılmazsa
+/// miras çocuklar arasında eşit bölünür. Çocuğu olmayan oyuncuya
+/// çalışmayan düğme gösterilmez (D-038).
+class WillPage extends StatefulWidget {
+  const WillPage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  State<WillPage> createState() => _WillPageState();
+}
+
+class _WillPageState extends State<WillPage> {
+  String? _notice;
+
+  void _sec(String childId) {
+    final String? metin = GameScope.of(context).chooseHeir(childId);
+    setState(() => _notice = metin);
+  }
+
+  void _kaldir() {
+    final String? metin = GameScope.of(context).clearHeir();
+    setState(() => _notice = metin);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameState state = GameScope.of(context).state!;
+    final InteractionAvailability durum =
+        GameScope.of(context).willAvailability();
+    final Person? mirasci = GameScope.of(context).heirChild;
+    final List<Person> cocuklar = state.livingChildren;
+
+    return SectionScaffold(
+      title: 'Vasiyet',
+      subtitle: 'Mirasçı olarak bir çocuğunu seçebilirsin',
+      backLabel: 'Aktiviteler',
+      onBack: widget.onBack,
+      children: <Widget>[
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Nasıl işler?', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 10),
+                Text(
+                  '• Seçim isteğe bağlıdır; yapmazsan miras çocukların '
+                  'arasında eşit bölünür.\n'
+                  '• Mirasçı seçtiğinde çocuklara kalan paranın büyük '
+                  'bölümü ona geçer, eşya paylaşımında ilk sırada olur; '
+                  'diğer çocuklar mirastan tamamen çıkarılmaz.\n'
+                  '• Eşinin payı bundan etkilenmez.\n'
+                  '• Seçimi istediğin zaman değiştirebilir ya da '
+                  'kaldırabilirsin.\n'
+                  '• Mirasçı seçmek, ölümünden sonra hangi çocuğunla devam '
+                  'edeceğini belirlemez; o seçim sana kalır.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (!durum.isAllowed)
+          InfoPanel(icon: Icons.info_outline, text: durum.reason!)
+        else ...<Widget>[
+          Container(
+            key: const Key('will_current'),
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.35),
+              ),
+            ),
+            child: Text(
+              mirasci == null
+                  ? 'Şu an mirasçı seçilmedi; miras eşit bölünecek.'
+                  : 'Mirasçın: ${mirasci.fullName}',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text('Çocukların', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          for (final Person cocuk in cocuklar) ...<Widget>[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            cocuk.fullName,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${cocuk.labelFor(state.player.age)} · '
+                            '${cocuk.age} yaşında',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (mirasci?.id == cocuk.id)
+                      Chip(
+                        key: Key('will_badge_${cocuk.id}'),
+                        label: const Text('Mirasçı'),
+                        visualDensity: VisualDensity.compact,
+                      )
+                    else
+                      FilledButton.tonal(
+                        key: Key('will_choose_${cocuk.id}'),
+                        onPressed: () => _sec(cocuk.id),
+                        child: const Text('Mirasçı yap'),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (mirasci != null)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                key: const Key('will_clear'),
+                onPressed: _kaldir,
+                child: const Text('Mirasçı seçimini kaldır'),
+              ),
+            ),
+        ],
+        if (_notice != null) ...<Widget>[
+          const SizedBox(height: 12),
+          InfoPanel(icon: Icons.history_edu_outlined, text: _notice!),
+        ],
+      ],
+    );
+  }
+}

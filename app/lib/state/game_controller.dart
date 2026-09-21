@@ -24,6 +24,7 @@ import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/adoption.dart';
 import '../domain/life/notices.dart';
+import '../domain/life/will.dart';
 import '../domain/models/pending_notice.dart';
 import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
@@ -961,6 +962,54 @@ class GameController extends ChangeNotifier {
   /// Sevgiliyle evlenir. Kişi kimliği değişmez; kayıt silinmez.
   FamilyOutcome? marry(String personId) =>
       _runFamily((GameState current) => _marriages.marry(current, personId));
+
+  // =====================================================================
+  // Vasiyet (D-052)
+  // =====================================================================
+
+  /// Vasiyet yazmaya engel var mı?
+  InteractionAvailability willAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final String engel = Will.blockReason(current);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Vasiyette **gerçekten geçerli** mirasçı; yoksa `null`.
+  Person? get heirChild {
+    final GameState? current = _state;
+    return current == null ? null : Will.effectiveHeir(current);
+  }
+
+  /// Mirasçı olarak bir çocuk seçer.
+  String? chooseHeir(String childId) {
+    final GameState? current = _state;
+    if (current == null || current.deceased) return null;
+    final ({GameState state, String text, bool applied}) sonuc =
+        Will.choose(current, childId);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
+
+  /// Mirasçı seçimini kaldırır.
+  String? clearHeir() {
+    final GameState? current = _state;
+    if (current == null || current.deceased) return null;
+    final ({GameState state, String text, bool applied}) sonuc =
+        Will.clear(current);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
 
   // =====================================================================
   // Bildirimler (D-050)

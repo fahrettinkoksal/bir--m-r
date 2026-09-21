@@ -512,6 +512,18 @@ kayıt gibi kuruldu (yeni alanlar gövdeden çıkarılıyor) ve bu sayede
 Ölçüm: 300 hayatlık toplu simülasyon 18 saniyede tamamlanıyor; arka plan
 gelişimi ağır döngü oluşturmuyor. Alt menü sırası değişmedi.
 
+**Vasiyet — mirasçı çocuk seçimi (Paket 6, D-052):** Aktiviteler'e
+**Vasiyet** sayfası eklendi. Oyuncu hayattaki çocuklarından birini
+mirasçı seçebiliyor, seçimi değiştirebiliyor ve kaldırabiliyor; seçim
+isteğe bağlı ve hiç yapılmayabilir. Mirasçı, çocuklara kalan nakdin
+%60'ını alıyor ve eşya paylaşımında ilk sırada oluyor; diğer çocuklar
+mirastan tamamen çıkmıyor, eşin payı korunuyor. Seçilen çocuk vefat
+ederse seçim kendiliğinden düşüyor ve miras eşit bölünüyor. Vasiyet
+"Çocuğum olarak devam et" seçimini zorunlu kılmıyor; devam listesinde
+yalnızca **önerilen** olarak işaretleniyor. Çocuğu olmayan oyuncuda menü
+hiç görünmüyor. Kayıt biçimi **sürüm 22**. Oran ve koşullar **Q-076**'da
+karar bekliyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

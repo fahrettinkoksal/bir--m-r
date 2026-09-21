@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/generation/generation_continuation.dart';
+import '../../domain/life/will.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
@@ -83,6 +84,13 @@ class LifeSummaryScreen extends StatelessWidget {
                 const SizedBox(height: 14),
                 const KilimDivider(),
                 const SizedBox(height: 14),
+                // Vasiyette geçerli bir mirasçı varsa yazılır; vefat
+                // etmiş kişi mirasçı olarak gösterilmez (D-052).
+                if (Will.effectiveHeir(state) != null)
+                  _Satir(
+                    label: 'Vasiyet',
+                    value: 'Mirasçı: ${Will.effectiveHeir(state)!.fullName}',
+                  ),
                 if (state.isContinuedGeneration)
                   _Satir(
                     label: 'Kuşak',

@@ -459,6 +459,8 @@ void main() {
           'careStatus',
         ]);
       }
+      // Sürüm 22 öncesi: vasiyet seçimi yok.
+      if (surum < 22) kaldir(<String>['heirChildId']);
       // Sürüm 21 öncesi: bildirim kuyruğu yok.
       if (surum < 21) kaldir(<String>['notices']);
       // Sürüm 20 öncesi: teklif/başvuru geçmişi yok.

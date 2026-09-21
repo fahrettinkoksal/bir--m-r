@@ -75,6 +75,7 @@ class GameState {
     this.generation = 1,
     this.proposalAges = const <String, int>{},
     this.notices = const <PendingNotice>[],
+    this.heirChildId,
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -329,6 +330,13 @@ class GameState {
   /// buraya bakar (D-037).
   final Marriage? marriage;
 
+  /// Vasiyetinde mirasçı olarak seçilen çocuğun kimliği (D-052).
+  ///
+  /// Seçim isteğe bağlıdır; `null` ise miras çocuklar arasında eşit
+  /// bölünür. Seçilen çocuk vefat ederse kayıt silinmez ama seçim
+  /// **geçersiz** sayılır (bkz. `Will.effectiveHeirId`).
+  final String? heirChildId;
+
   /// Oyuncuya gösterilmeyi bekleyen önemli haberler (D-050).
   ///
   /// Ölüm, miras ve cenaze bildirimleri sırayla gösterilir; bekleyen
@@ -571,6 +579,7 @@ class GameState {
     int? generation,
     Map<String, int>? proposalAges,
     List<PendingNotice>? notices,
+    Object? heirChildId = _unsetEvent,
   }) {
     return GameState(
       seed: seed,
@@ -631,6 +640,9 @@ class GameState {
       generation: generation ?? this.generation,
       proposalAges: proposalAges ?? this.proposalAges,
       notices: notices ?? this.notices,
+      heirChildId: heirChildId == _unsetEvent
+          ? this.heirChildId
+          : heirChildId as String?,
     );
   }
 }

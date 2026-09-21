@@ -9,6 +9,7 @@ import '../widgets/character_header.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
 import '../widgets/notice_sheet.dart';
+import '../../domain/life/will.dart';
 import '../../domain/models/pending_notice.dart';
 import 'life_screen.dart';
 import 'life_summary_screen.dart';
@@ -150,6 +151,9 @@ class _HomeShellState extends State<HomeShell> {
     final List<Person> cocuklar = GameScope.of(context).generationHeirs;
     if (mevcut == null || cocuklar.isEmpty) return;
     final int oyuncuYasi = mevcut.deathAge ?? mevcut.player.age;
+    // Vasiyetteki mirasçı yalnızca **önerilen** olarak işaretlenir;
+    // oyuncu istediği çocuğu seçmekte serbesttir (D-052).
+    final String? mirasciId = Will.effectiveHeirId(mevcut);
 
     final String? secilen = await showDialog<String>(
       context: context,
@@ -170,8 +174,10 @@ class _HomeShellState extends State<HomeShell> {
                 key: Key('continue_child_${cocuk.id}'),
                 contentPadding: EdgeInsets.zero,
                 title: Text(cocuk.fullName),
-                subtitle: Text('${cocuk.labelFor(oyuncuYasi)} · '
-                    '${cocuk.age} yaşında'),
+                subtitle: Text(
+                  '${cocuk.labelFor(oyuncuYasi)} · ${cocuk.age} yaşında'
+                  '${cocuk.id == mirasciId ? ' · vasiyetinde mirasçı' : ''}',
+                ),
                 onTap: () => Navigator.of(context).pop(cocuk.id),
               ),
           ],

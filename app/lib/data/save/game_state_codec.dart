@@ -105,6 +105,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'movedOut': state.movedOut,
       'generation': state.generation,
       'proposalAges': state.proposalAges,
+      'heirChildId': state.heirChildId,
       'notices': <Map<String, Object?>>[
         for (final PendingNotice n in state.notices)
           <String, Object?>{
@@ -605,6 +606,8 @@ GameState decodeGameState(Map<String, Object?> json) {
           ? const <String, int>{}
           : _intMap(json, 'proposalAges'),
     ),
+    // Eski kayıtlarda vasiyet seçimi yoktur; `null` kalır.
+    heirChildId: _stringOrNull(json, 'heirChildId'),
     // Eski kayıtlarda bildirim kuyruğu yoktur; boş açılır ve geriye
     // dönük bildirim üretilmez.
     notices: List<PendingNotice>.unmodifiable(<PendingNotice>[

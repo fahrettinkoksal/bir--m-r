@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../data/item_catalog.dart';
 import '../life/inheritance.dart';
+import '../life/will.dart';
 import '../life/mortality.dart';
 import '../models/education.dart';
 import '../models/game_settings.dart';
@@ -106,11 +107,12 @@ abstract final class GenerationContinuation {
     final Person? sagKalanEs = _survivingSpouse(state);
     // Borç miras kalmaz: eksi bakiye yeni kuşağa geçmez (prototypeOnly).
     final int nakit = eskiOyuncu.wallet > 0 ? eskiOyuncu.wallet : 0;
-    final int cocukSayisi = state.livingChildren.length;
     final int esPayi = sagKalanEs == null
         ? 0
         : (nakit * Inheritance.prototypeOnlySpouseShare).round();
-    final int cocukPayi = ((nakit - esPayi) / cocukSayisi).floor();
+    // Vasiyette mirasçı seçildiyse pay ona göre hesaplanır; seçim yoksa
+    // çocuklar arasında eşit bölünür (D-052).
+    final int cocukPayi = Will.cashShareFor(state, cocuk, nakit - esPayi);
 
     // Eşyalar bölünmez: sırayla mirasçılara dağıtılır. Çocuğa düşenler
     // **aynı kimlikle** geçer; başkasına düşenler o kişinin mal varlığına
@@ -320,12 +322,18 @@ abstract final class GenerationContinuation {
   // Yardımcılar
   // --------------------------------------------------------------------
 
-  /// Mirasçı sırası: sağ kalan eş ve hayattaki çocuklar (D-037).
+  /// Eşya paylaşım sırası: vasiyetteki mirasçı, sağ kalan eş, çocuklar.
+  ///
+  /// Vasiyette mirasçı seçildiyse eşya dağıtımında **ilk sırada** olur
+  /// (D-052); eşin nakit payı bundan etkilenmez (D-037).
   static List<Person> _heirOrder(GameState state) {
     final Person? es = _survivingSpouse(state);
+    final Person? mirasci = Will.effectiveHeir(state);
     return <Person>[
+      if (mirasci != null) mirasci,
       if (es != null) es,
-      ...state.livingChildren,
+      for (final Person c in state.livingChildren)
+        if (c.id != mirasci?.id) c,
     ];
   }
 

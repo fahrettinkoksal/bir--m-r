@@ -42,6 +42,7 @@ enum _ActivityPage {
   kumarhane,
   ehliyet,
   evlatEdinme,
+  vasiyet,
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
@@ -88,6 +89,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.evlatEdinme:
         return AdoptionPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.vasiyet:
+        return WillPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -191,6 +194,19 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 : '${state.children.length} çocuğun var',
             icon: Icons.volunteer_activism_outlined,
             onTap: () => _go(_ActivityPage.evlatEdinme),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Vasiyet yalnızca hayatta çocuğu olan oyuncuda görünür (D-052);
+        // çocuğu olmayana çalışmayan düğme gösterilmez.
+        if (state.livingChildren.isNotEmpty) ...<Widget>[
+          MenuRow(
+            title: 'Vasiyet',
+            subtitle: GameScope.of(context).heirChild == null
+                ? 'Mirasçı seçilmedi'
+                : 'Mirasçın: ${GameScope.of(context).heirChild!.firstName}',
+            icon: Icons.history_edu_outlined,
+            onTap: () => _go(_ActivityPage.vasiyet),
           ),
           const SizedBox(height: 10),
         ],
