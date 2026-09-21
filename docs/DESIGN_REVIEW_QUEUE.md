@@ -1569,5 +1569,30 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Ücretler ve etkiler tek dosyada (`Travel`) toplandı. Kalıcı taşınma sistemi hiç değiştirilmedi.
 
+### Q-081 — İleri yaş: emeklilik, aylık ve torunlar
+**Durum:** Yön **Faho tarafından istendi** ("ileri yaş ve emeklilik paketini kuralım"); **sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 12. **Bağlantılı:** Q-048 (maaş), Q-078 (meslekte ilerleme), Q-064 (çocuk kuralları).
+
+**Önceki durum:** Oyuncu hiç emekli olamıyordu; 90 yaşında bile aynı işte çalışıp maaş alabiliyordu. NPC'ler 65'te emekli oluyordu, oyuncu olamıyordu.
+
+**Şu an kodda olan (geçici) çözüm:**
+- **Emeklilik yaşı:** tam 65, erken 60. Erken ayrılışta aylık **×0,8**.
+- **Aylık:** son maaş × (0,35 + çalışılan yıl × 0,01), üst sınır **%75**. On yıldan az çalışana **asgari aylık 60.000 ₺** bağlanır (parasız kalmasın diye; gerçek bir sosyal yardım iddiası değildir).
+- Emekli olunca süren iş kariyer geçmişine "Emekli oldu" olarak kapanır; zam, terfi, iş arama ve işten ayrılma menüden kalkar. **Emeklilik şimdilik geri alınamaz.**
+- Aylık maaşla aynı ödeme dönemini kullanır: ikisi birden alınamaz, yılda bir kez yatar.
+- **Torunlar:** yetişkin çocuğun (24-42 yaş) her yıl **%12** ihtimalle çocuğu olur, çocuk başına en fazla **3**. Torun gerçek kişi kaydıdır; kendi özellikleri çocuğun değerlerinden türer, oyuncunun hanesinde yaşamaz, başka şehirde de görüşülür ve kendi hayatını yaşar (okula başlar, büyür). Doğum yılında mutluluk **+8**.
+- **İleri yaş olayları:** 8 yeni olay (emekliliğin ilk sabahı, eski iş yeri, torunla gün, torunun büyümesi, sağlık kontrolü, mahalle, geçmişe bakış, emeklilikte küçük iş).
+
+**Karar soruları:**
+1. Emeklilik yaşları (60/65) ve aylık formülü uygun mu?
+2. **Emeklilikten işe dönülebilmeli mi?** Şu an dönülemiyor.
+3. Zorunlu emeklilik olmalı mı? Şu an yok: oyuncu isterse 90 yaşında da çalışabilir.
+4. Asgari aylık 60.000 ₺ uygun mu; hiç çalışmamışa aylık bağlanmalı mı?
+5. Torun doğum ihtimali %12 ve çocuk başına en fazla 3 uygun mu?
+6. **Torun mirastan pay almalı mı?** Şu an almıyor; miras yalnızca çocuklara gidiyor (D-037, D-052).
+7. Torunla kuşak devam ettirilebilmeli mi? Şu an yalnızca çocuklarla devam ediliyor.
+8. Vefat eden çocuğun torunlarıyla ilişki ne olmalı? Şu an kayıt duruyor ve görüşme sürüyor.
+
+**Ayrıca bu pakette uygulanan karar (Faho):** kayıt dosyası göçü geriye dönük **son beş sürümle** sınırlandı (`kMinReadableSaveVersion = 21`). Daha eski kayıtlar açılmıyor; oyuncuya dosyanın **silinmediği** söyleniyor. Sürüm 20 ve öncesine ait göç adımları ve onlara bağlı testler kaldırıldı — gerekirse sürüm geçmişinden geri alınabilir.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
