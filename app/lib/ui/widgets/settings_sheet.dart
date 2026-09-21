@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../sound/sound_scope.dart';
+import '../sound/sound_service.dart';
+
 import '../../domain/models/game_settings.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
@@ -57,6 +60,32 @@ class _SettingsSheetState extends State<SettingsSheet> {
               const SizedBox(height: 12),
               const KilimDivider(),
               const SizedBox(height: 14),
+              // Ses efektleri (Paket 15): kapatıldığında oyun tamamen
+              // sessiz çalışır ve ayar kayıtla birlikte saklanır.
+              SwitchListTile(
+                key: const Key('settings_sound_toggle'),
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Ses efektleri'),
+                subtitle: Text(
+                  ayarlar.soundEnabled
+                      ? 'Menü, seçim ve bildirim sesleri açık.'
+                      : 'Oyun tamamen sessiz çalışıyor.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                value: ayarlar.soundEnabled,
+                onChanged: (bool acik) {
+                  controller.updateSettings(
+                    ayarlar.copyWith(soundEnabled: acik),
+                  );
+                  SoundScope.maybeOf(context)?.enabled = acik;
+                  // Açıldığını duyurmak için kısa bir ses.
+                  if (acik) SoundScope.play(context, GameSound.select);
+                  setState(() {});
+                },
+              ),
+              const SizedBox(height: 4),
               SwitchListTile(
                 key: const Key('settings_casino_toggle'),
                 contentPadding: EdgeInsets.zero,

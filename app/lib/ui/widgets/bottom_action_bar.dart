@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../sound/sound_scope.dart';
+import '../sound/sound_service.dart';
 import '../theme/bir_omur_theme.dart';
 
 /// Alt gezinmedeki bir ana menü.
@@ -113,7 +115,10 @@ class _TabButton extends StatelessWidget {
       button: true,
       child: InkWell(
         key: Key('tab_${tab.id}'),
-        onTap: () => onTap(tab.id),
+        onTap: () {
+          SoundScope.play(context, GameSound.tap);
+          onTap(tab.id);
+        },
         borderRadius: BorderRadius.circular(18),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -175,7 +180,12 @@ class _AgeUpButton extends StatelessWidget {
         label: 'Yaş Al',
         child: InkWell(
           key: const Key('age_up_button'),
-          onTap: onPressed,
+          onTap: onPressed == null
+              ? null
+              : () {
+                  SoundScope.play(context, GameSound.ageUp);
+                  onPressed!();
+                },
           borderRadius: BorderRadius.circular(999),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),

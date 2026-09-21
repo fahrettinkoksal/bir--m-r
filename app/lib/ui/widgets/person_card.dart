@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
+import '../sound/sound_scope.dart';
+import '../sound/sound_service.dart';
 import '../theme/bir_omur_theme.dart';
 import '../../text/turkish_text.dart';
 
@@ -53,7 +55,10 @@ class PersonCard extends StatelessWidget {
               ),
         borderRadius: BorderRadius.circular(22),
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            SoundScope.play(context, GameSound.tap);
+            onTap();
+          },
           borderRadius: BorderRadius.circular(22),
           child: Container(
             decoration: BoxDecoration(

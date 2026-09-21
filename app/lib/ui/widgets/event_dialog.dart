@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../sound/sound_scope.dart';
+import '../sound/sound_service.dart';
+
 import '../../domain/models/applied_effect.dart';
 import '../../domain/models/game_event.dart';
 import '../../state/game_controller.dart';
@@ -35,6 +38,7 @@ class _EventDialogState extends State<EventDialog> {
   List<AppliedEffect> _effects = const <AppliedEffect>[];
 
   void _choose(EventChoice choice) {
+    SoundScope.play(context, GameSound.select);
     final EventChoiceResult? result = GameScope.of(
       context,
     ).chooseEventOption(choice.id);

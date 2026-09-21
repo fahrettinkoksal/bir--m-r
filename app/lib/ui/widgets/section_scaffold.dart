@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../sound/sound_scope.dart';
+import '../sound/sound_service.dart';
 import '../theme/bir_omur_theme.dart';
 
 /// Ana menülerin iç ekranları için ortak çerçeve.
@@ -99,7 +101,10 @@ class _BackPill extends StatelessWidget {
       color: color.withValues(alpha: 0.10),
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          SoundScope.play(context, GameSound.back);
+          onTap();
+        },
         borderRadius: BorderRadius.circular(999),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(8, 7, 14, 7),
@@ -176,7 +181,10 @@ class MenuRow extends StatelessWidget {
               ),
         borderRadius: BorderRadius.circular(22),
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            SoundScope.play(context, GameSound.tap);
+            onTap();
+          },
           borderRadius: BorderRadius.circular(22),
           child: Container(
             decoration: BoxDecoration(

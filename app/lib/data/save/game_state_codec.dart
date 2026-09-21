@@ -142,6 +142,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
+        'soundEnabled': state.settings.soundEnabled,
       },
       'deceased': state.deceased,
       'deathAge': state.deathAge,
@@ -695,6 +696,9 @@ GameState decodeGameState(Map<String, Object?> json) {
               _asMap(json['settings'], 'settings'),
               'wagerLimitPerAge',
             ),
+            // Eski kayıtlarda ses ayarı yoktur; açık kabul edilir.
+            soundEnabled:
+                _asMap(json['settings'], 'settings')['soundEnabled'] != false,
           ),
     deathAge: _intOrNull(json, 'deathAge'),
     deathCause: _stringOrNull(json, 'deathCause'),

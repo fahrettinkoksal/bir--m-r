@@ -9,10 +9,17 @@ class GameSettings {
   const GameSettings({
     this.casinoEnabled = true,
     this.wagerLimitPerAge,
+    this.soundEnabled = true,
   });
 
   /// Kumarhane modülü açık mı?
   final bool casinoEnabled;
+
+  /// Ses efektleri açık mı? (Paket 15)
+  ///
+  /// Kapatıldığında oyun tamamen sessiz çalışır; ayar kayıtla birlikte
+  /// saklanır.
+  final bool soundEnabled;
 
   /// Oyuncunun kendisi için belirlediği **isteğe bağlı** yıllık bahis
   /// limiti. `null` ise yalnızca oyunun geçici üst sınırı geçerlidir.
@@ -21,9 +28,11 @@ class GameSettings {
   GameSettings copyWith({
     bool? casinoEnabled,
     Object? wagerLimitPerAge = _unset,
+    bool? soundEnabled,
   }) =>
       GameSettings(
         casinoEnabled: casinoEnabled ?? this.casinoEnabled,
+        soundEnabled: soundEnabled ?? this.soundEnabled,
         wagerLimitPerAge: wagerLimitPerAge == _unset
             ? this.wagerLimitPerAge
             : wagerLimitPerAge as int?,

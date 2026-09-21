@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../sound/sound_scope.dart';
+import '../sound/sound_service.dart';
+
 import '../../domain/life/notices.dart';
 import '../../domain/models/pending_notice.dart';
 import '../../state/game_scope.dart';
@@ -17,6 +20,8 @@ class NoticeSheet extends StatefulWidget {
   final PendingNotice notice;
 
   static Future<void> show(BuildContext context, PendingNotice notice) {
+    // Bildirim sakin bir çanla açılır (Paket 15).
+    SoundScope.play(context, GameSound.notice);
     return showModalBottomSheet<void>(
       context: context,
       isDismissible: false,
