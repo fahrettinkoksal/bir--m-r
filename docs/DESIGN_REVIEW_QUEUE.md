@@ -1442,5 +1442,26 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Karar gereken sayılar:** düşüşün başladığı yaş, yaş aralıklarına göre yıllık düşüş miktarı, karakterden karaktere değişen payın büyüklüğü, sağlığın ve bakım aktivitelerinin etkisi, alt sınır (görünüş en fazla ne kadar düşebilir).
 
+### Q-076 — Vasiyet: mirasçı payı ve koşullar
+**Durum:** Kural **karara bağlandı (D-052)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 6 (Faho'nun "mirasçı olarak bir çocuğumu seçebileyim" talimatı). **Bağlantılı:** Q-059 (miras), Q-067 (kuşak devamı).
+
+**Şu an kodda olan (geçici) davranış:**
+- Mirasçı seçimi Aktiviteler → **Vasiyet** sayfasından yapılır; seçim isteğe bağlıdır, değiştirilebilir ve kaldırılabilir.
+- Seçilen çocuk, çocuklara kalan nakdin **%60**'ını alır; kalan %40 diğer çocuklar arasında eşit bölünür. Çocuk tekse zaten tamamını alır.
+- Eşya paylaşımında mirasçı **ilk sıradadır** (sıralı dağıtımda ilk payı o alır).
+- Eşin payı (%25) korunur; vasiyet eşin payını azaltmaz.
+- Seçilen çocuk vefat ederse seçim düşer ve miras eşit bölünür.
+- Vasiyet, kuşak devamında yalnızca **önerilen** olarak işaretlenir; oyuncu başka çocuğu seçebilir.
+
+**Karar soruları:**
+1. Mirasçı payı %60 uygun mu; yoksa oran seçilebilir mi (ör. %50/%75/%100)?
+2. Vasiyet eşin payını etkileyebilmeli mi? (Şu an etkilemiyor.)
+3. Birden fazla mirasçı seçilebilmeli mi, pay dağıtımı yapılabilmeli mi?
+4. Vasiyetin bir masrafı veya yaş koşulu olmalı mı? (Şu an yok; yalnızca hayatta çocuk gerekiyor.)
+5. Vasiyet değişikliği çocuklarla ilişkiyi etkilemeli mi (ör. dışlanan çocuğun yakınlığı düşsün mü)? Şu an **hiçbir ilişki etkisi yok**.
+6. Eş, kardeş veya vakıf gibi çocuk dışı mirasçılar eklenmeli mi?
+
+**Varsayılan işlem:** Hiçbir ilişki cezası veya masraf uydurulmadı; oran tek sabitte tutuldu.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
