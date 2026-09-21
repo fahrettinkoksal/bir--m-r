@@ -1993,5 +1993,39 @@ Düğünlerin çoğunun nikâh olması beklenen sonuç: evlenme yaşında cüzda
 
 **Yan karar (kural gereği):** Kayıt biçimi **30**'a çıktı; beş sürümlük pencere kuralı gereği okunabilir taban 24'ten **25**'e yükseldi. Sürüm 24 kayıtları artık açılmıyor — dosya **silinmiyor**, anlaşılır mesaj gösteriliyor. Eski kayıtlarda bekleyen bebek yoktur; **geriye dönük hamilelik uydurulmaz**.
 
+
+### Q-095 — Burçlar, fal/tarot ve burçsal dönemler
+**Durum:** **Faho'nun kararı** (21 Eylül 2026: "aktivite kısmına fal tarot ekle, herkesin doğduğu aya göre burcu olsun, burçsal nedenleri de ekle"). **Sayılar, metinler ve açık uçlar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 27, `app/lib/domain/models/zodiac.dart`, `app/lib/data/fortune_catalog.dart`, `app/lib/domain/life/astrology.dart`.
+
+**Doğum yılı hâlâ yok (D-003).** Burç yalnızca doğum **ayı ve gününden** hesaplanıyor; tarihsel takvim, dönem motoru veya doğum yılı seçimi eklenmedi. Şubat her zaman 28 gün: yıl olmadığı için artık yıl da yok.
+
+**Şu an kodda olan:**
+
+*1. Burç.* Hayat üretilirken doğum ayı ve günü belirleniyor ve kayda giriyor. Burç bundan hesaplanıyor; yılın 365 gününün tamamı bir burca düşüyor, boşluk yok. Burç, karakter başlığında şehirle aynı satırda görünüyor.
+
+*2. Fal ve Tarot mekânı.* Aktiviteler menüsünde yeni alan, üç eylem: **Kahve falına baktır** (150 ₺, 14 yaş), **Tarot açtır** (400 ₺, 16 yaş), **Burç yorumunu oku** (ücretsiz, 10 yaş).
+
+*3. Sonuçlar rastgele ve iki yönlü.* 10 kahve falı metni, 10 tarot kartı, her burç için yorumlar. Sonuç mutluluğu **artırabilir de düşürebilir de**. Olumlu etki tekrar edildikçe azalıyor ama **olumsuz etki tam uygulanıyor**: hoşuna gitmeyen falı tekrar baktırıp etkisiz hâle getiremezsin. Eylem `maxPerAge` sınırında zaten kapanıyor.
+
+*4. Burçsal dönemler.* Yedi dönem: Merkür retrosu, Dolunay, Venüs geçişi, Mars etkisi, Satürn dönüşü, Jüpiter bolluğu, Ay tutulması. Her dönem **element** üzerinden yazıldı (ateş/toprak/hava/su), böylece her dönem üç burcu birden kapsıyor ve **her burç en az bir dönemden etkileniyor** — kalıcı bir test bunu koruyor. Yılda **%22** ihtimalle, **12 yaşından sonra**, yalnızca oyuncunun burcunu gerçekten etkileyen bir dönem çıkıyor ve ekranda bildirimle duyuruluyor. Mutluluk etkisi bildirimde yazan değerle **aynı**; sahte puan gösterilmiyor.
+
+**Ton:** Fal ve burç yorumları **oyun içi eğlencedir**. Metinler kesin bir gelecek söylemiyor ("şunu yapacaksın" demiyor), oyunun olaylarını yönlendirmiyor ve hayatı belirlemiyor. Etkiler küçük.
+
+**Yol boyunca çıkan iki şey:**
+1. Burç önce karakter başlığının **üst satırına** eklenmişti; satır taşıp "Başa…" diye kırpılıyordu. Şehirle aynı satıra alındı.
+2. Burç **simgeleri** (♈ ♉ …) ekranda **boş kutu** çiziliyordu: oyunun yazı tipleri (Baloo 2, Patrick Hand) U+2648-2653 aralığını içermiyor. Simgeler veri olarak duruyor ama **gösterilmiyor**; simgeleri olan bir yazı tipi eklenirse geri gelebilir.
+
+**Karar soruları:**
+1. Burç **gün** hassasiyetinde hesaplanıyor (21 Mart Koç, 20 Mart Balık). Sen "doğduğu aya göre" demiştin — ay yeterli mi, yoksa gün doğru mu?
+2. Dönem çıkma ihtimali **%22** ve en küçük yaş **12** uygun mu?
+3. Dönemlerin mutluluk etkileri (+6 ile −6 arası) fazla mı?
+4. Yedi dönem yeterli mi? Element yerine tek tek burçlara özel dönemler de yazılabilir.
+5. Fal ücretleri (150 ₺ / 400 ₺) ve yaş sınırları (14 / 16 / 10) uygun mu?
+6. **Fal oyunun olaylarını etkilemeli mi?** Şu an yalnızca mutluluğu değiştiriyor; "falda çıkan şey gerçekten başına geliyor" diye bir bağ **bilerek** kurulmadı.
+7. Kişilerin burcu **kalıcı kimliklerinden** deterministik türetiliyor, kayda ayrıca yazılmıyor. Burçlar ilişkilerde bir şey ifade etmeli mi (burç uyumu gibi)?
+8. Metin sayısı yeterli mi? 10 kahve falı ve 10 tarot kartı bir hayatta tekrar edebilir.
+
+**Yan not (kayıt):** Doğum ayı ve günü `player` içine **eklemeli** olarak yazıldı; eksik olduğunda hayatın tohumundan **deterministik** türetiliyor, yani eski kayıtlar da burcunu görüyor ve her açılışta **aynı** burcu görüyor. Bu yüzden kayıt sürümü **artırılmadı**: hiçbir eski kayıt okunamaz hâle gelmiyor ve beş sürümlük pencere boşa harcanmıyor. Sürümü yalnızca gerçekten gerektiğinde artırmak gerektiği için bu bilinçli bir tercihtir.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
