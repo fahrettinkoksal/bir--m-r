@@ -606,10 +606,17 @@ class LifeProgression {
         return p.copyWith(estate: List<String>.unmodifiable(kalan));
       }
       if (p.estate.length < 6 && _rng.nextDouble() < alimSansi) {
+        // Kişi zaten sahip olduğu türü ikinci kez almaz: aynı eşya
+        // listede iki kez görünüyordu ve miras da onu iki kez
+        // dağıtıyordu (Paket 14'te bulundu).
+        final List<String> eksikler = alinabilir
+            .where((String tur) => !p.estate.contains(tur))
+            .toList(growable: false);
+        if (eksikler.isEmpty) return p;
         return p.copyWith(
           estate: List<String>.unmodifiable(<String>[
             ...p.estate,
-            alinabilir[_rng.nextInt(alinabilir.length)],
+            eksikler[_rng.nextInt(eksikler.length)],
           ]),
         );
       }

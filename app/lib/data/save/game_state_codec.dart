@@ -377,7 +377,8 @@ Map<String, Object?> _encodeLogEntry(LifeLogEntry e) => <String, Object?>{
       'age': e.age,
       'text': e.text,
       'category': e.category.name,
-    };
+          'personId': e.personId,
+};
 
 Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
       'enrolled': e.enrolled,
@@ -1057,6 +1058,9 @@ Pet _decodePet(Map<String, Object?> json) => Pet(
 LifeLogEntry _decodeLogEntry(Map<String, Object?> json) => LifeLogEntry(
       age: _int(json, 'age'),
       text: _string(json, 'text'),
+      // Eski kayıtlarda günlük satırı kişiye bağlı değildir; geriye
+      // dönük kişi bağlanmaz (Paket 14).
+      personId: _stringOrNull(json, 'personId'),
       category: _enumByName(
         LogCategory.values,
         _string(json, 'category'),

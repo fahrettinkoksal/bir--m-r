@@ -364,6 +364,9 @@ class EventEngine {
           age: working.player.age,
           text: resultText,
           category: LogCategory.kisisel,
+          // Olay bir kişiyle kurulduysa günlük satırı o kişiye bağlanır
+          // (Paket 14); ortak geçmiş bu bağdan okunur.
+          personId: bondTargetId,
         ),
       ]),
       pendingEvent: null,

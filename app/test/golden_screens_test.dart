@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/models/gift_record.dart';
+import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -187,14 +189,47 @@ void main() {
     await shot(tester, '07_olay.png');
   }, skip: !enabled);
 
+  testWidgets('kişi detayında ortak geçmiş', (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 14);
+    // Ortak geçmiş gerçek kayıtlardan doğar; bu ekran için hediye ve
+    // günlük satırı eklenir.
+    final Person anne = personWith(RelationType.anne)!;
+    controller.debugSetState(
+      controller.state!.copyWith(
+        gifts: <GiftRecord>[
+          GiftRecord(
+            itemId: 'yoyo',
+            fromId: anne.id,
+            toId: GiftRecord.playerId,
+            age: 6,
+          ),
+        ],
+        log: <LifeLogEntry>[
+          ...controller.state!.log,
+          LifeLogEntry(
+            age: 9,
+            text: '${anne.firstName} ile pazara gittiniz; '
+                'dönüşte poşetleri sen taşıdın.',
+            category: LogCategory.aile,
+            personId: anne.id,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await openTab(tester, 'iliskiler');
+    await tapMenuRow(tester, anne.fullName);
+    await shot(tester, '11_ortak_gecmis.png');
+  }, skip: !enabled);
+
   testWidgets('kişi detayı ve etkileşim sonucu', (WidgetTester tester) async {
     await startLife(tester);
     await ageTo(tester, controller, 9);
     await openTab(tester, 'iliskiler');
 
     final Person anne = personWith(RelationType.anne)!;
-    await tester.tap(find.text(anne.fullName));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, anne.fullName);
     await tester.tap(find.text('Vakit Geçir'));
     await tester.pumpAndSettle();
     await shot(tester, '08_etkilesim.png');
@@ -225,13 +260,13 @@ void main() {
     expect(partner, isNotNull);
 
     await openTab(tester, 'iliskiler');
-    await tester.tap(find.text('Romantik bağlar'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(partner!.fullName));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Ayrıl'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Ayrıl'));
+    // İlişkiler menüsü büyüdü; satırlar kaydırılarak açılır.
+    await tapMenuRow(tester, 'Romantik bağlar');
+    await tapMenuRow(tester, partner!.fullName);
+    // Kişi kartı ortak geçmişle birlikte uzadı; eylem satırı
+    // kaydırılarak açılır.
+    await tapMenuRow(tester, 'Ayrıl');
+    await tester.tap(find.widgetWithText(FilledButton, 'Ayrıl').last);
     await tester.pumpAndSettle();
 
     await shot(tester, '09_eski_sevgili.png');

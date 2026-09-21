@@ -8,6 +8,8 @@ import '../../domain/models/interaction.dart';
 import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
+import '../../domain/interaction/shared_history.dart';
+import '../theme/bir_omur_theme.dart';
 import '../../state/game_scope.dart';
 import 'effect_chips.dart';
 import 'kilim_divider.dart';
@@ -277,6 +279,35 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                         ? 'Seninle aynı evde yaşıyor'
                         : 'Ayrı evde yaşıyor')
                     : '—',
+              ),
+              // Ortak geçmişiniz (Paket 14): yalnızca kayıtlarda gerçekten
+              // duran anlar. Kayıt yoksa bölüm hiç gösterilmez.
+              Builder(
+                builder: (BuildContext context) {
+                  // Az önce ekranda gösterilen sonuç, hemen altında
+                  // ikinci kez yazılmasın diye listeden çıkarılır.
+                  final String? sonSonuc = _lastOutcome?.text;
+                  final List<SharedMoment> anlar = SharedHistory.of(
+                    state,
+                    person,
+                  )
+                      .where((SharedMoment m) => m.text != sonSonuc)
+                      .toList(growable: false);
+                  if (anlar.isEmpty) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Ortak geçmişiniz',
+                        style: theme.textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      for (final SharedMoment an in anlar)
+                        _SharedMomentRow(moment: an),
+                    ],
+                  );
+                },
               ),
               if (person.isAlive) ...<Widget>[
                 const SizedBox(height: 16),
@@ -564,6 +595,73 @@ class _Row extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+/// Ortak geçmişteki tek bir an.
+class _SharedMomentRow extends StatelessWidget {
+  const _SharedMomentRow({required this.moment});
+
+  final SharedMoment moment;
+
+  /// Anın türüne göre küçük bir ikon ve renk.
+  ({IconData icon, BirOmurAccent accent}) get _stil => switch (moment.kind) {
+        SharedMomentKind.hediye =>
+          (icon: Icons.card_giftcard_outlined, accent: BirOmurAccents.pirinc),
+        SharedMomentKind.gezi =>
+          (icon: Icons.luggage_outlined, accent: BirOmurAccents.mavi),
+        SharedMomentKind.kilometreTasi =>
+          (icon: Icons.star_outline, accent: BirOmurAccents.gul),
+        SharedMomentKind.olay =>
+          (icon: Icons.chat_bubble_outline, accent: BirOmurAccents.cini),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ({IconData icon, BirOmurAccent accent}) stil = _stil;
+    final Color renk = stil.accent.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              color: renk.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(stil.icon, size: 15, color: renk),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  '${moment.age} yaşında',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: renk,
+                  ),
+                ),
+                Text(
+                  moment.text,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

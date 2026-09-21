@@ -481,6 +481,7 @@ class FamilyInteractions {
               age: state.player.age,
               text: outcome.text,
               category: LogCategory.aile,
+              personId: person.id,
             ),
           ]
         : state.log;
