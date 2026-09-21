@@ -1,20 +1,44 @@
-/// Aktivite katalogları: berber, spor salonu ve kütüphane.
+/// Aktivite katalogları: berber, spor salonu, kütüphane, sağlık merkezi,
+/// eğlence ve kurslar.
 ///
 /// Ücretler, etkiler ve tekrar sınırları `prototypeOnly`'dir
-/// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-049).
+/// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-049 ve Q-086).
 library;
 
 import 'package:flutter/material.dart';
 
 /// Aktivitenin hangi alanda olduğu.
 enum ActivityVenue {
-  berber('Berber / Kuaför'),
-  sporSalonu('Spor salonu'),
-  kutuphane('Kütüphane');
+  berber('Berber / Kuaför', Icons.content_cut_rounded),
+  sporSalonu('Spor salonu', Icons.fitness_center_rounded),
+  kutuphane('Kütüphane', Icons.local_library_rounded),
 
-  const ActivityVenue(this.label);
+  /// Paket 18: gündelik sağlık bakımı. Kriz beklemeden sağlığa bakmanın
+  /// bir yolu yoktu.
+  saglikMerkezi('Sağlık Merkezi', Icons.medical_services_rounded),
+
+  /// Paket 18: mutluluğu gerçekten yükselten gündelik eğlenceler.
+  eglence('Eğlence', Icons.celebration_rounded),
+
+  /// Paket 18: okul dışında öğrenilen şeyler.
+  kurs('Kurslar', Icons.palette_rounded);
+
+  const ActivityVenue(this.label, this.icon);
 
   final String label;
+  final IconData icon;
+
+  /// Bu mekânda en erken hangi yaşta bir şey yapılabilir?
+  ///
+  /// Menüde yaşına hiç uymayan bir alan gösterilmesin diye kullanılır:
+  /// çalışmayan düğme konmaz.
+  int get minAge {
+    int enKucuk = 120;
+    for (final ActivityAction a in actionsAt(this)) {
+      if (a.minAge < enKucuk) enKucuk = a.minAge;
+    }
+    return enKucuk;
+  }
 }
 
 /// Tek bir aktivite eylemi.
@@ -32,6 +56,7 @@ class ActivityAction {
     this.charisma = 0,
     this.happiness = 0,
     this.health = 0,
+    this.intelligence = 0,
     this.maxPerAge = 2,
     this.changesHairStyle = false,
   });
@@ -53,6 +78,9 @@ class ActivityAction {
   final int charisma;
   final int happiness;
   final int health;
+
+  /// prototypeOnly: kurslarda öğrenilen şeyin zekâya katkısı.
+  final int intelligence;
 
   /// prototypeOnly: aynı yaşta kaç kez anlamlı sonuç verir.
   ///
@@ -140,6 +168,194 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     health: 2,
     happiness: 2,
     maxPerAge: 3,
+  ),
+
+  // --- Sağlık Merkezi (Paket 18) ----------------------------------------
+  //
+  // Oyunda sağlığa ancak kriz çıkınca dokunulabiliyordu. Burası, sağlığı
+  // **kriz beklemeden** koruma yeri. Hiçbiri tıbbi tavsiye değildir;
+  // oyun içi kurgudur.
+  ActivityAction(
+    id: 'genel_kontrol',
+    venue: ActivityVenue.saglikMerkezi,
+    label: 'Genel sağlık kontrolü',
+    description: 'Tansiyon, tahlil, kısa bir muayene. Çoğu yıl bir şey '
+        'çıkmaz; çıkarsa erken çıkar.',
+    icon: Icons.monitor_heart_outlined,
+    cost: 900, // prototypeOnly
+    minAge: 3,
+    health: 5,
+    maxPerAge: 1,
+  ),
+  ActivityAction(
+    id: 'dis_kontrol',
+    venue: ActivityVenue.saglikMerkezi,
+    label: 'Diş kontrolü',
+    description: 'Koltuk arkaya yatar, ışık gözüne gelir, on dakikada biter.',
+    icon: Icons.sentiment_satisfied_outlined,
+    cost: 650, // prototypeOnly
+    minAge: 5,
+    appearance: 3,
+    health: 2,
+    maxPerAge: 1,
+  ),
+  ActivityAction(
+    id: 'goz_muayenesi',
+    venue: ActivityVenue.saglikMerkezi,
+    label: 'Göz muayenesi',
+    description: 'Duvardaki harfler gittikçe küçülüyor. En alt satır herkese '
+        'aynı şeyi sormuyor.',
+    icon: Icons.remove_red_eye_outlined,
+    cost: 450, // prototypeOnly
+    minAge: 6,
+    health: 2,
+    maxPerAge: 1,
+  ),
+  ActivityAction(
+    id: 'mevsim_asisi',
+    venue: ActivityVenue.saglikMerkezi,
+    label: 'Mevsim aşısı',
+    description: 'Kısa bir iğne, bir gün kolun ağrır, kış biraz daha kolay '
+        'geçer.',
+    icon: Icons.vaccines_outlined,
+    cost: 300, // prototypeOnly
+    minAge: 1,
+    health: 3,
+    maxPerAge: 1,
+  ),
+  ActivityAction(
+    id: 'ruh_sagligi',
+    venue: ActivityVenue.saglikMerkezi,
+    label: 'Bir uzmanla konuş',
+    description: 'Kırk beş dakika boyunca yalnızca sen konuşuyorsun ve '
+        'kimse sözünü kesmiyor.',
+    icon: Icons.psychology_outlined,
+    cost: 1400, // prototypeOnly
+    minAge: 12,
+    happiness: 9,
+    health: 1,
+    maxPerAge: 2,
+  ),
+
+  // --- Eğlence (Paket 18) ------------------------------------------------
+  //
+  // Mutluluğu yükseltmenin tek yolu olayların rastgele iyi gitmesiydi.
+  // Burası mutluluğa **kendi isteğinle** dokunabildiğin yer.
+  ActivityAction(
+    id: 'parkta_yuruyus',
+    venue: ActivityVenue.eglence,
+    label: 'Parkta yürüyüş',
+    description: 'Ücretsiz, yakın ve her yaşa uygun. Bir tur, iki tur, '
+        'sonra bir bank.',
+    icon: Icons.park_outlined,
+    cost: 0,
+    minAge: 4,
+    happiness: 2,
+    health: 1,
+    maxPerAge: 3,
+  ),
+  ActivityAction(
+    id: 'sinema',
+    venue: ActivityVenue.eglence,
+    label: 'Sinemaya git',
+    description: 'Işıklar sönüyor, koltuk arkaya yaslanıyor, iki saat '
+        'boyunca başka bir hayat.',
+    icon: Icons.movie_outlined,
+    cost: 250, // prototypeOnly
+    minAge: 5,
+    happiness: 5,
+    maxPerAge: 3,
+  ),
+  ActivityAction(
+    id: 'kafede_otur',
+    venue: ActivityVenue.eglence,
+    label: 'Kafede otur',
+    description: 'Bir çay, uzun bir sohbet ve camdan dışarıyı seyretmek.',
+    icon: Icons.local_cafe_outlined,
+    cost: 200, // prototypeOnly
+    minAge: 11,
+    happiness: 3,
+    charisma: 1,
+    maxPerAge: 3,
+  ),
+  ActivityAction(
+    id: 'maca_git',
+    venue: ActivityVenue.eglence,
+    label: 'Maça git',
+    description: 'Tribün ayakta, ses kulağında, sonuç ne olursa olsun akşam '
+        'konuşulacak bir şey var.',
+    icon: Icons.sports_soccer_outlined,
+    cost: 550, // prototypeOnly
+    minAge: 8,
+    happiness: 7,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'konsere_git',
+    venue: ActivityVenue.eglence,
+    label: 'Konsere git',
+    description: 'Kalabalık, ışık ve herkesin aynı sözü bildiği o an.',
+    icon: Icons.music_note_outlined,
+    cost: 950, // prototypeOnly
+    minAge: 13,
+    happiness: 9,
+    charisma: 1,
+    maxPerAge: 2,
+  ),
+
+  // --- Kurslar (Paket 18) ------------------------------------------------
+  //
+  // Okul dışında bir şey öğrenmenin yolu yoktu; kütüphane yalnızca
+  // okumaydı.
+  ActivityAction(
+    id: 'resim_atolyesi',
+    venue: ActivityVenue.kurs,
+    label: 'Resim atölyesi',
+    description: 'Önlük, fırça ve kuruması beklenen bir tuval.',
+    icon: Icons.brush_outlined,
+    cost: 1600, // prototypeOnly
+    minAge: 6,
+    happiness: 4,
+    charisma: 1,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'muzik_kursu',
+    venue: ActivityVenue.kurs,
+    label: 'Müzik kursu',
+    description: 'İlk hafta parmaklar acıyor, üçüncü hafta bir şeye '
+        'benziyor.',
+    icon: Icons.piano_outlined,
+    cost: 2200, // prototypeOnly
+    minAge: 7,
+    charisma: 3,
+    happiness: 3,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'dil_kursu',
+    venue: ActivityVenue.kurs,
+    label: 'Dil kursu',
+    description: 'Yeni bir dilde ilk cümleni kurmak, ilk cümleni kurduğun '
+        'günkü kadar tuhaf.',
+    icon: Icons.translate_outlined,
+    cost: 2800, // prototypeOnly
+    minAge: 10,
+    intelligence: 4,
+    charisma: 1,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'bilgisayar_kursu',
+    venue: ActivityVenue.kurs,
+    label: 'Bilgisayar kursu',
+    description: 'Ekranda çalışmayan bir şey var ve sebebini bulmak '
+        'sandığından uzun sürüyor.',
+    icon: Icons.terminal_outlined,
+    cost: 3200, // prototypeOnly
+    minAge: 13,
+    intelligence: 5,
+    maxPerAge: 2,
   ),
 ];
 

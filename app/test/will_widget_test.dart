@@ -9,6 +9,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 import 'support/generation_fixtures.dart';
 
 /// Aktiviteler → Vasiyet akışı (D-052).
@@ -42,10 +44,11 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, yasayan());
 
+    // Aktiviteler menüsü uzadı; satır önce görünür hale getirilir.
+    await scrollToMenuRow(tester, 'Vasiyet');
     expect(find.text('Vasiyet'), findsOneWidget);
     expect(find.text('Mirasçı seçilmedi'), findsOneWidget);
-    await tester.tap(find.text('Vasiyet'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Vasiyet');
 
     await tester.tap(find.byKey(const Key('will_choose_cocuk-1')));
     await tester.pumpAndSettle();

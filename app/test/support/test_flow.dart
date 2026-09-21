@@ -232,6 +232,23 @@ GameState withSchoolPeople(GameState state, {int seed = 1}) {
 ///
 /// Aktiviteler menüsü büyüdükçe alttaki satırlar ilk ekranda çizilmiyor;
 /// gerçek oyuncu da aşağı kaydırıyor. Test de aynısını yapar.
+/// Menü satırını **dokunmadan** görünür hale getirir.
+///
+/// Uzun menülerde `ListView` ekran dışındaki satırı hiç kurmadığı için
+/// `find.text(...)` boş dönüyor; varlık sınamasından önce kaydırmak
+/// gerekiyor.
+Future<void> scrollToMenuRow(WidgetTester tester, String label) async {
+  final Finder hedef = find.text(label);
+  if (hedef.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      hedef,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  await tester.pumpAndSettle();
+}
+
 Future<void> tapMenuRow(WidgetTester tester, String label) async {
   final Finder hedef = find.text(label);
   if (hedef.evaluate().isEmpty) {

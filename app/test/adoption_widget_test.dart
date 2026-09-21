@@ -45,6 +45,8 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, hayat());
 
+    // Aktiviteler menüsü uzadı; satır önce görünür hale getirilir.
+    await scrollToMenuRow(tester, 'Evlat Edinme');
     expect(find.text('Evlat Edinme'), findsOneWidget);
     await tapMenuRow(tester, 'Evlat Edinme');
 

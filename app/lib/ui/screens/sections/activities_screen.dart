@@ -40,6 +40,9 @@ enum _ActivityPage {
   berber,
   spor,
   kutuphane,
+  saglik,
+  eglence,
+  kurs,
   sosyalMedya,
   kumarhane,
   ehliyet,
@@ -84,6 +87,21 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         );
       case _ActivityPage.kutuphane:
         return LibraryPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.saglik:
+        return VenuePage(
+          venue: ActivityVenue.saglikMerkezi,
+          onBack: () => _go(_ActivityPage.kok),
+        );
+      case _ActivityPage.eglence:
+        return VenuePage(
+          venue: ActivityVenue.eglence,
+          onBack: () => _go(_ActivityPage.kok),
+        );
+      case _ActivityPage.kurs:
+        return VenuePage(
+          venue: ActivityVenue.kurs,
+          onBack: () => _go(_ActivityPage.kok),
+        );
       case _ActivityPage.sosyalMedya:
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
@@ -170,6 +188,43 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           onTap: () => _go(_ActivityPage.kutuphane),
         ),
         const SizedBox(height: 10),
+        // Paket 18: sağlığa kriz beklemeden bakmanın, mutluluğu kendi
+        // isteğinle yükseltmenin ve okul dışında bir şey öğrenmenin yolu
+        // yoktu. Her alan yaşına uygun olduğu andan itibaren görünür;
+        // çalışmayan düğme konmaz.
+        if (state.player.age >= ActivityVenue.eglence.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_eglence'),
+            title: ActivityVenue.eglence.label,
+            subtitle: 'Sinema, maç, konser, parkta yürüyüş',
+            icon: Icons.celebration_outlined,
+            accent: BirOmurAccents.turuncu,
+            onTap: () => _go(_ActivityPage.eglence),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (state.player.age >= ActivityVenue.saglikMerkezi.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_saglik'),
+            title: ActivityVenue.saglikMerkezi.label,
+            subtitle: 'Kontroller, aşı ve bir uzmanla konuşmak',
+            icon: Icons.medical_services_outlined,
+            accent: BirOmurAccents.nar,
+            onTap: () => _go(_ActivityPage.saglik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (state.player.age >= ActivityVenue.kurs.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_kurs'),
+            title: ActivityVenue.kurs.label,
+            subtitle: 'Resim, müzik, dil ve bilgisayar',
+            icon: Icons.palette_outlined,
+            accent: BirOmurAccents.mor,
+            onTap: () => _go(_ActivityPage.kurs),
+          ),
+          const SizedBox(height: 10),
+        ],
         // Seyahat, tek başına yola çıkılabilecek yaştan itibaren görünür
         // (Paket 11). Kalıcı taşınmadan ayrıdır.
         if (state.player.age >= Travel.prototypeOnlyMinAge) ...<Widget>[

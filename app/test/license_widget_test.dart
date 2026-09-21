@@ -9,6 +9,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Ehliyet işlemlerinin arayüzde gerçekten çalıştığını sınar.
 void main() {
   late GameController controller;
@@ -48,8 +50,7 @@ void main() {
   testWidgets('doğru cevap ehliyeti verir', (WidgetTester tester) async {
     await pumpApp(tester, hayat());
 
-    await tester.tap(find.text('Ehliyet İşlemleri'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Ehliyet İşlemleri');
     expect(find.text('Motosiklet ehliyeti'), findsOneWidget);
     expect(find.text('Otomobil ehliyeti'), findsOneWidget);
 
@@ -88,8 +89,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, hayat());
 
-    await tester.tap(find.text('Ehliyet İşlemleri'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Ehliyet İşlemleri');
     await tester.tap(find.byKey(const Key('license_apply_motosiklet')));
     await tester.pumpAndSettle();
 
@@ -114,8 +114,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, hayat(wallet: 100));
 
-    await tester.tap(find.text('Ehliyet İşlemleri'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Ehliyet İşlemleri');
 
     expect(controller.licenseAvailability(LicenseType.otomobil).isAllowed,
         isFalse);

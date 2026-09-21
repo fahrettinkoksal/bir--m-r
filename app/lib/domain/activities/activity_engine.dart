@@ -102,6 +102,8 @@ class ActivityEngine {
       charisma: state.player.stats.charisma + _scaled(action.charisma, factor),
       happiness: state.player.stats.happiness + _scaled(action.happiness, factor),
       health: state.player.stats.health + _scaled(action.health, factor),
+      intelligence:
+          state.player.stats.intelligence + _scaled(action.intelligence, factor),
     );
 
     // Saç stili değişiyorsa mevcut stilden farklı biri seçilir.

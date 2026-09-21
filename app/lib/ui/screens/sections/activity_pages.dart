@@ -19,7 +19,8 @@ import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
 
-/// Berber veya spor salonu sayfası.
+/// Eylem listesi olan bir mekân sayfası (berber, spor salonu, sağlık
+/// merkezi, eğlence, kurslar).
 ///
 /// Yalnızca gerçekten yapılabilen eylemler düğme olur; kapalı olanlar
 /// gerekçesiyle gösterilir.
@@ -43,12 +44,8 @@ class _VenuePageState extends State<VenuePage> {
     final List<ActivityAction> tumEylemler = actionsAt(widget.venue);
 
     return SectionScaffold(
-      icon: widget.venue == ActivityVenue.berber
-          ? Icons.content_cut_rounded
-          : Icons.fitness_center_rounded,
-      accent: widget.venue == ActivityVenue.berber
-          ? BirOmurAccents.mor
-          : BirOmurAccents.yesil,
+      icon: widget.venue.icon,
+      accent: accentForVenue(widget.venue),
       title: widget.venue.label,
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
       backLabel: 'Aktiviteler',
@@ -75,6 +72,24 @@ class _VenuePageState extends State<VenuePage> {
   }
 }
 
+/// Mekânın rengi. Menüdeki satır ile sayfanın başlığı aynı rengi taşır.
+BirOmurAccent accentForVenue(ActivityVenue venue) {
+  switch (venue) {
+    case ActivityVenue.berber:
+      return BirOmurAccents.mor;
+    case ActivityVenue.sporSalonu:
+      return BirOmurAccents.yesil;
+    case ActivityVenue.kutuphane:
+      return BirOmurAccents.mavi;
+    case ActivityVenue.saglikMerkezi:
+      return BirOmurAccents.nar;
+    case ActivityVenue.eglence:
+      return BirOmurAccents.turuncu;
+    case ActivityVenue.kurs:
+      return BirOmurAccents.mor;
+  }
+}
+
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
     required this.action,
@@ -90,15 +105,17 @@ class _ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool acik = availability.isAllowed;
-    return Card(
+    final BirOmurAccent renk = accentForVenue(action.venue);
+    return Container(
+      decoration: panelDecoration(context, radius: 20),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(action.icon, color: theme.colorScheme.secondary),
+                AccentIconTile(icon: action.icon, accent: renk, size: 38),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(action.label, style: theme.textTheme.titleMedium),
