@@ -9,6 +9,7 @@ import '../../../domain/models/interaction.dart';
 import '../../../domain/models/playing_card.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
 
@@ -49,6 +50,7 @@ class _CasinoPageState extends State<CasinoPage> {
     }
 
     return SectionScaffold(
+      accent: BirOmurAccents.nar,
       title: 'Kumarhane',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',
       backLabel: 'Aktiviteler',
@@ -65,6 +67,7 @@ class _CasinoPageState extends State<CasinoPage> {
               ? 'Masada devam eden bir elin var'
               : '21’e en çok yaklaşan kazanır',
           icon: Icons.style_outlined,
+          accent: BirOmurAccents.yesil,
           onTap: () => setState(() => _masa = _CasinoTable.blackjack),
         ),
         const SizedBox(height: 10),
@@ -72,6 +75,7 @@ class _CasinoPageState extends State<CasinoPage> {
           title: 'Rulet',
           subtitle: 'Tek sıfırlı Avrupa ruleti',
           icon: Icons.casino_outlined,
+          accent: BirOmurAccents.nar,
           onTap: () => setState(() => _masa = _CasinoTable.rulet),
         ),
         const SizedBox(height: 12),

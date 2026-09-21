@@ -4,6 +4,7 @@ import '../../../domain/models/education.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/interview_sheet.dart';
@@ -102,6 +103,7 @@ class _SchoolViewState extends State<_SchoolView> {
 
     return SectionScaffold(
       title: 'Okul',
+      accent: BirOmurAccents.mavi,
       subtitle: egitim.label,
       onBack: widget.onBack,
       children: <Widget>[
@@ -129,6 +131,7 @@ class _SchoolViewState extends State<_SchoolView> {
             title: 'Lise alanını seç',
             subtitle: 'Yerleştirme puanın: ${egitim.placementScore ?? 0}',
             icon: Icons.alt_route_outlined,
+            accent: BirOmurAccents.mor,
             onTap: () => _go(_SchoolPage.liseTercihi),
           ),
           const SizedBox(height: 10),
@@ -137,6 +140,7 @@ class _SchoolViewState extends State<_SchoolView> {
           title: 'Sınıf Arkadaşları',
           subtitle: 'Şu an aynı sınıfta olduğun kişiler',
           icon: Icons.groups_outlined,
+          accent: BirOmurAccents.cini,
           trailingText: '${sinifArkadaslari.length}',
           onTap: () => _go(_SchoolPage.sinifArkadaslari),
         ),
@@ -145,6 +149,7 @@ class _SchoolViewState extends State<_SchoolView> {
           title: 'Öğretmenler',
           subtitle: 'Dersine girenler',
           icon: Icons.record_voice_over_outlined,
+          accent: BirOmurAccents.pirinc,
           trailingText: '${ogretmenler.length}',
           onTap: () => _go(_SchoolPage.ogretmenler),
         ),
@@ -264,6 +269,7 @@ class _CareerViewState extends State<_CareerView> {
     final bool isAranabilir = egitim.finished || egitim.universityFinished;
 
     return SectionScaffold(
+      accent: BirOmurAccents.mor,
       title: 'Meslek',
       subtitle: egitim.stageLabel(state.player.age),
       onBack: widget.onBack,
@@ -271,6 +277,7 @@ class _CareerViewState extends State<_CareerView> {
         if (state.career.isEmployed)
           _PanelCard(
             icon: Icons.badge_outlined,
+            accent: BirOmurAccents.mor,
             title: state.career.label,
             rows: <({String label, String value})>[
               (
@@ -297,6 +304,7 @@ class _CareerViewState extends State<_CareerView> {
         else if (egitim.finished || egitim.universityFinished)
           _PanelCard(
             icon: Icons.workspace_premium_outlined,
+            accent: BirOmurAccents.pirinc,
             title: 'Eğitim geçmişi',
             rows: <({String label, String value})>[
               (label: 'Durum', value: egitim.label),
@@ -336,6 +344,7 @@ class _CareerViewState extends State<_CareerView> {
             title: 'Mezuniyet sonrası',
             subtitle: 'Üniversiteye başvur veya iş hayatına gir',
             icon: Icons.alt_route_outlined,
+            accent: BirOmurAccents.mavi,
             onTap: () => _go(_CareerPage.mezuniyetSonrasi),
           ),
           const SizedBox(height: 10),
@@ -346,6 +355,7 @@ class _CareerViewState extends State<_CareerView> {
             title: 'Mülakata devam et',
             subtitle: state.pendingInterview?.job?.name ?? '',
             icon: Icons.record_voice_over_outlined,
+            accent: BirOmurAccents.pirinc,
             onTap: () => InterviewSheet.show(context),
           ),
           const SizedBox(height: 10),
@@ -357,6 +367,7 @@ class _CareerViewState extends State<_CareerView> {
                 ? 'Önce mevcut işinden ayrılman gerekir'
                 : 'Koşullarını sağladığın işler',
             icon: Icons.work_outline,
+            accent: BirOmurAccents.mor,
             onTap: () => _go(_CareerPage.isArama),
           ),
           const SizedBox(height: 10),
@@ -411,16 +422,38 @@ class _PanelCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.rows,
+    this.accent = BirOmurAccents.mavi,
   });
 
   final IconData icon;
   final String title;
   final List<({String label, String value})> rows;
 
+  /// Panelin rengi; bulunduğu bölümün rengiyle aynı olur.
+  final BirOmurAccent accent;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Card(
+    // Bilgi panelleri de menü satırlarıyla aynı görsel dili konuşur.
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(
+              accent.of(context).withValues(alpha: 0.10),
+              theme.colorScheme.surfaceContainerHighest,
+            ),
+            theme.colorScheme.surfaceContainerHighest,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: accent.of(context).withValues(alpha: 0.26),
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -428,8 +461,8 @@ class _PanelCard extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(icon, size: 20, color: theme.colorScheme.primary),
-                const SizedBox(width: 10),
+                AccentIconTile(icon: icon, accent: accent, size: 38),
+                const SizedBox(width: 12),
                 Text(title, style: theme.textTheme.titleMedium),
               ],
             ),

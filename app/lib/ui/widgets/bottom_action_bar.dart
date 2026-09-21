@@ -51,11 +51,30 @@ class BottomActionBar extends StatelessWidget {
     final List<BottomTab> sag = tabs.sublist(2);
 
     return Container(
-      decoration: const BoxDecoration(color: BirOmurColors.koyuAhsap),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[
+            BirOmurColors.koyuAhsap,
+            BirOmurColors.koyuAhsapDip,
+          ],
+        ),
+        border: Border(
+          top: BorderSide(color: Color(0x33D69A2B), width: 1.2),
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Color(0x40000000),
+            blurRadius: 16,
+            offset: Offset(0, -4),
+          ),
+        ],
+      ),
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 74,
+          height: 78,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -95,11 +114,29 @@ class _TabButton extends StatelessWidget {
       child: InkWell(
         key: Key('tab_${tab.id}'),
         onTap: () => onTap(tab.id),
+        borderRadius: BorderRadius.circular(18),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(secili ? tab.activeIcon : tab.icon, size: 23, color: renk),
-            const SizedBox(height: 4),
+            // Seçili sekmenin ikonu renkli bir hapın içinde durur; hangi
+            // menüde olunduğu ilk bakışta görülür.
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              decoration: BoxDecoration(
+                color: secili
+                    ? BirOmurColors.pirinc.withValues(alpha: 0.20)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Icon(
+                secili ? tab.activeIcon : tab.icon,
+                size: 22,
+                color: renk,
+              ),
+            ),
+            const SizedBox(height: 3),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Text(
@@ -140,30 +177,48 @@ class _AgeUpButton extends StatelessWidget {
           key: const Key('age_up_button'),
           onTap: onPressed,
           borderRadius: BorderRadius.circular(999),
-          child: Container(
-            width: 74,
-            height: 60,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: 78,
+            height: 62,
             decoration: BoxDecoration(
-              color: aktif
-                  ? BirOmurColors.nar
-                  : BirOmurColors.nar.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(22),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: aktif
+                    ? const <Color>[BirOmurColors.nar, BirOmurColors.narKoyu]
+                    : <Color>[
+                        BirOmurColors.nar.withValues(alpha: 0.35),
+                        BirOmurColors.narKoyu.withValues(alpha: 0.35),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: BirOmurColors.pirinc.withValues(alpha: aktif ? 0.85 : 0.3),
+                color: BirOmurColors.pirinc.withValues(alpha: aktif ? 0.9 : 0.25),
                 width: 2,
               ),
+              boxShadow: aktif
+                  ? <BoxShadow>[
+                      BoxShadow(
+                        color: BirOmurColors.nar.withValues(alpha: 0.55),
+                        blurRadius: 16,
+                        offset: const Offset(0, 5),
+                      ),
+                    ]
+                  : const <BoxShadow>[],
             ),
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.cake_outlined, color: Color(0xFFFDF6EC), size: 22),
+                Icon(Icons.cake_outlined, color: BirOmurColors.krem, size: 23),
                 SizedBox(height: 2),
                 Text(
                   'Yaş Al',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFFFDF6EC),
+                    letterSpacing: 0.2,
+                    color: BirOmurColors.krem,
                   ),
                 ),
               ],

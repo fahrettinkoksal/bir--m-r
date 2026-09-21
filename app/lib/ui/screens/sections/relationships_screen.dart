@@ -4,6 +4,7 @@ import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../domain/models/relation.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
@@ -113,6 +114,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
 
     return SectionScaffold(
       title: 'İlişkiler',
+      accent: BirOmurAccents.gul,
       onBack: widget.onBack,
       children: <Widget>[
         // Eş en üstte durur; kendi hanenin diğer yarısıdır (Paket E1).
@@ -141,6 +143,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             title: 'Çocuklar',
             subtitle: 'Kendi çocukların',
             icon: Icons.child_care_outlined,
+            accent: BirOmurAccents.mavi,
             trailingText: '$cocukSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.cocuklar),
@@ -152,6 +155,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             title: 'Akrabalar',
             subtitle: 'Kardeşler, büyükler, teyze-amca',
             icon: Icons.diversity_3_outlined,
+            accent: BirOmurAccents.cini,
             trailingText: '$akrabaSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.akrabalar),
@@ -163,6 +167,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             title: 'Arkadaşlar',
             subtitle: 'Okul ve hayat arkadaşların',
             icon: Icons.handshake_outlined,
+            accent: BirOmurAccents.turuncu,
             trailingText: '$arkadasSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.arkadaslar),
@@ -174,6 +179,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             title: 'Romantik bağlar',
             subtitle: 'Sevgili, eski sevgili ve eski eş',
             icon: Icons.favorite_outline,
+            accent: BirOmurAccents.gul,
             trailingText: '$romantikSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.romantik),

@@ -7,6 +7,7 @@ import '../../../domain/models/social_account.dart';
 import '../../../domain/social/social_engine.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/section_scaffold.dart';
 
@@ -50,6 +51,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
     }
 
     return SectionScaffold(
+      accent: BirOmurAccents.cini,
       title: 'Sosyal medya',
       subtitle: state.socialAccounts.isEmpty
           ? 'Hesap açmak zorunda değilsin.'
@@ -197,6 +199,7 @@ class _PlatformPage extends StatelessWidget {
     final List<SocialContent> icerikler = contentsFor(platform);
 
     return SectionScaffold(
+      accent: BirOmurAccents.cini,
       title: platform.label,
       subtitle: '${account.followers} ${platform.audienceWord} · '
           '${account.postCount} paylaşım · '

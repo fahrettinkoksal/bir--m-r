@@ -3,6 +3,7 @@ import 'package:bir_omur/text/turkish_text.dart';
 import 'package:bir_omur/ui/widgets/life_log_view.dart';
 import 'package:bir_omur/ui/widgets/stat_bar.dart';
 import 'package:bir_omur/ui/theme/bir_omur_theme.dart';
+import 'package:bir_omur/ui/widgets/section_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -148,6 +149,137 @@ void main() {
       expect(yuksek, isNot(dusuk));
       expect(orta, isNot(dusuk));
       expect(yuksek, BirOmurColors.geceCini);
+    });
+  });
+
+  // ===================================================================
+  // Menü görünümü (Paket 8): renkli, dokunması kolay satırlar.
+  //
+  // Renk değerleri `prototypeOnly` (Q-077); testler renk kodunu değil,
+  // **davranışı** sınar: her satır kendi rengini taşıyor mu, açık ve
+  // koyu temada farklı ton kullanılıyor mu, içerik yerinde mi.
+  // ===================================================================
+  group('Menü satırı', () {
+    Future<void> pump(
+      WidgetTester tester,
+      Widget child, {
+      Brightness brightness = Brightness.light,
+    }) =>
+        tester.pumpWidget(
+          MaterialApp(
+            theme: brightness == Brightness.dark
+                ? BirOmurTheme.dark()
+                : BirOmurTheme.light(),
+            home: Scaffold(body: child),
+          ),
+        );
+
+    testWidgets('başlık, açıklama ve sayaç birlikte görünür',
+        (WidgetTester tester) async {
+      await pump(
+        tester,
+        MenuRow(
+          title: 'Kütüphane',
+          subtitle: 'Yaşına uygun kitap seç',
+          icon: Icons.local_library_outlined,
+          trailingText: '7',
+          accent: BirOmurAccents.mavi,
+          onTap: () {},
+        ),
+      );
+
+      expect(find.text('Kütüphane'), findsOneWidget);
+      expect(find.text('Yaşına uygun kitap seç'), findsOneWidget);
+      expect(find.text('7'), findsOneWidget);
+      expect(find.byType(AccentIconTile), findsOneWidget);
+    });
+
+    testWidgets('dokunma eylemi çalışır', (WidgetTester tester) async {
+      int dokunma = 0;
+      await pump(
+        tester,
+        MenuRow(
+          title: 'Vasiyet',
+          icon: Icons.history_edu_outlined,
+          onTap: () => dokunma++,
+        ),
+      );
+
+      await tester.tap(find.text('Vasiyet'));
+      await tester.pumpAndSettle();
+      expect(dokunma, 1);
+    });
+
+    testWidgets('her satır kendi rengini taşır', (WidgetTester tester) async {
+      late Color mavi;
+      late Color gul;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.light(),
+          home: Builder(
+            builder: (BuildContext context) {
+              mavi = BirOmurAccents.mavi.of(context);
+              gul = BirOmurAccents.gul.of(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      expect(mavi, isNot(gul));
+    });
+
+    testWidgets('koyu temada renk açık temadakinden farklıdır',
+        (WidgetTester tester) async {
+      late Color acik;
+      late Color koyu;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.light(),
+          home: Builder(
+            builder: (BuildContext context) {
+              acik = BirOmurAccents.mor.of(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.dark(),
+          home: Builder(
+            builder: (BuildContext context) {
+              koyu = BirOmurAccents.mor.of(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      // MaterialApp tema geçişini animasyonla yapar; son kareyi bekle.
+      await tester.pumpAndSettle();
+      // Koyu zeminde aynı ton okunmuyordu; her rengin gece karşılığı var.
+      expect(acik, isNot(koyu));
+    });
+
+    testWidgets('bölüm başlığında geri dönüş ve renk şeridi bulunur',
+        (WidgetTester tester) async {
+      bool geri = false;
+      await pump(
+        tester,
+        SectionScaffold(
+          title: 'Aktiviteler',
+          subtitle: 'Bu yıl yapabileceklerin',
+          backLabel: 'Hayat',
+          accent: BirOmurAccents.turuncu,
+          onBack: () => geri = true,
+          children: const <Widget>[Text('içerik')],
+        ),
+      );
+
+      expect(find.text('Aktiviteler'), findsOneWidget);
+      expect(find.text('içerik'), findsOneWidget);
+      await tester.tap(find.text('Hayat'));
+      await tester.pumpAndSettle();
+      expect(geri, isTrue);
     });
   });
 }

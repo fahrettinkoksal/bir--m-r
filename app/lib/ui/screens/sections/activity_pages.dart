@@ -7,6 +7,7 @@ import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/interaction/marriage_engine.dart';
 import '../../../domain/models/person.dart';
@@ -40,6 +41,9 @@ class _VenuePageState extends State<VenuePage> {
     final List<ActivityAction> tumEylemler = actionsAt(widget.venue);
 
     return SectionScaffold(
+      accent: widget.venue == ActivityVenue.berber
+          ? BirOmurAccents.mor
+          : BirOmurAccents.yesil,
       title: widget.venue.label,
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
       backLabel: 'Aktiviteler',
@@ -172,6 +176,7 @@ class _LibraryPageState extends State<LibraryPage> {
     final List<BookInfo> kitaplar = controller.availableBooks();
 
     return SectionScaffold(
+      accent: BirOmurAccents.mavi,
       title: 'Kütüphane',
       subtitle: 'Yaşına uygun ${kitaplar.length} kitap var.',
       backLabel: 'Aktiviteler',
@@ -305,6 +310,7 @@ class _ReaderView extends StatelessWidget {
     final bool bitti = progress?.finished ?? false;
 
     return SectionScaffold(
+      accent: BirOmurAccents.mavi,
       title: book.title,
       subtitle: '${book.author} · ${book.kind.label}',
       backLabel: 'Kütüphane',
@@ -493,6 +499,7 @@ class _AdoptionPageState extends State<AdoptionPage> {
     final List<Person> cocuklar = state.children;
 
     return SectionScaffold(
+      accent: BirOmurAccents.gul,
       title: 'Evlat Edinme',
       subtitle: 'Bir çocuğa aile olmak',
       backLabel: 'Aktiviteler',
@@ -616,6 +623,7 @@ class _WillPageState extends State<WillPage> {
     final List<Person> cocuklar = state.livingChildren;
 
     return SectionScaffold(
+      accent: BirOmurAccents.pirinc,
       title: 'Vasiyet',
       subtitle: 'Mirasçı olarak bir çocuğunu seçebilirsin',
       backLabel: 'Aktiviteler',

@@ -8,6 +8,7 @@ import '../../../domain/interaction/adoption.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
@@ -98,6 +99,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
     if (_page == _ActivityPage.sosyal) {
       return SectionScaffold(
+        accent: BirOmurAccents.gul,
         title: 'Birlikte vakit geçir',
         subtitle: 'Hayatında şu an gerçekten görüştüğün kişiler. '
             'Herkesle aynı etkileşimler açık değildir.',
@@ -119,6 +121,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
     return SectionScaffold(
       title: 'Aktiviteler',
+      accent: BirOmurAccents.turuncu,
       onBack: widget.onBack,
       children: <Widget>[
         if (kisiler.isNotEmpty)
@@ -126,6 +129,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             title: 'Birlikte vakit geçir',
             subtitle: 'Ailen ve arkadaşlarınla',
             icon: Icons.groups_2_outlined,
+            accent: BirOmurAccents.gul,
             trailingText: '${kisiler.length}',
             onTap: () => _go(_ActivityPage.sosyal),
           )
@@ -140,6 +144,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           title: ActivityVenue.berber.label,
           subtitle: 'Saç kestir, stil değiştir, bakım yaptır',
           icon: Icons.content_cut_outlined,
+          accent: BirOmurAccents.mor,
           onTap: () => _go(_ActivityPage.berber),
         ),
         const SizedBox(height: 10),
@@ -147,6 +152,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           title: ActivityVenue.sporSalonu.label,
           subtitle: 'Koşu, ağırlık ve temel egzersiz',
           icon: Icons.fitness_center_outlined,
+          accent: BirOmurAccents.yesil,
           onTap: () => _go(_ActivityPage.spor),
         ),
         const SizedBox(height: 10),
@@ -154,6 +160,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           title: ActivityVenue.kutuphane.label,
           subtitle: 'Yaşına uygun kitap seç ve oku',
           icon: Icons.local_library_outlined,
+          accent: BirOmurAccents.mavi,
           onTap: () => _go(_ActivityPage.kutuphane),
         ),
         const SizedBox(height: 10),
@@ -165,6 +172,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 ? 'Hesap açmak isteğe bağlı'
                 : '${state.totalFollowers} takipçi',
             icon: Icons.public_outlined,
+            accent: BirOmurAccents.cini,
             onTap: () => _go(_ActivityPage.sosyalMedya),
           ),
           const SizedBox(height: 10),
@@ -180,6 +188,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     ? 'Motosiklet ve otomobil ehliyeti'
                     : '${state.licenses.length} ehliyetin var',
             icon: Icons.badge_outlined,
+            accent: BirOmurAccents.turuncu,
             onTap: () => _go(_ActivityPage.ehliyet),
           ),
           const SizedBox(height: 10),
@@ -193,6 +202,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 ? 'Bir çocuğa aile olmak'
                 : '${state.children.length} çocuğun var',
             icon: Icons.volunteer_activism_outlined,
+            accent: BirOmurAccents.gul,
             onTap: () => _go(_ActivityPage.evlatEdinme),
           ),
           const SizedBox(height: 10),
@@ -206,6 +216,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 ? 'Mirasçı seçilmedi'
                 : 'Mirasçın: ${GameScope.of(context).heirChild!.firstName}',
             icon: Icons.history_edu_outlined,
+            accent: BirOmurAccents.pirinc,
             onTap: () => _go(_ActivityPage.vasiyet),
           ),
           const SizedBox(height: 10),
@@ -219,6 +230,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 ? 'Masada devam eden bir elin var'
                 : 'Blackjack ve rulet — yalnızca oyun parası',
             icon: Icons.casino_outlined,
+            accent: BirOmurAccents.nar,
             onTap: () => _go(_ActivityPage.kumarhane),
           ),
           const SizedBox(height: 10),

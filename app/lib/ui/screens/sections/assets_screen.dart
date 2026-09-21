@@ -10,6 +10,7 @@ import '../../../domain/models/owned_item.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
@@ -94,6 +95,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
 
     return SectionScaffold(
       title: 'Varlıklar',
+      accent: BirOmurAccents.yesil,
       onBack: widget.onBack,
       children: <Widget>[
         _WalletCard(balance: state.player.walletLabel),
@@ -117,6 +119,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
             title: 'Mağazalar',
             subtitle: 'Genel mağaza, elektronik, spor, araç ve emlak',
             icon: Icons.storefront_outlined,
+            accent: BirOmurAccents.turuncu,
             trailingText: '${magazalar.length}',
             onTap: () => setState(() => _page = _AssetsPage.magazalar),
           ),
@@ -200,6 +203,7 @@ class _ShopCategoryList extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
     return SectionScaffold(
+      accent: BirOmurAccents.turuncu,
       title: 'Mağazalar',
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
       backLabel: 'Varlıklar',
@@ -453,7 +457,25 @@ class _WalletCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Card(
+    // Cüzdan, Varlıklar ekranının ana kartıdır: menü satırlarıyla aynı
+    // renkli dili kullanır.
+    const BirOmurAccent renk = BirOmurAccents.yesil;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(
+              renk.of(context).withValues(alpha: 0.12),
+              theme.colorScheme.surfaceContainerHighest,
+            ),
+            theme.colorScheme.surfaceContainerHighest,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: renk.of(context).withValues(alpha: 0.28)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -461,21 +483,22 @@ class _WalletCard extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(
-                  Icons.account_balance_wallet_outlined,
-                  size: 20,
-                  color: theme.colorScheme.primary,
+                const AccentIconTile(
+                  icon: Icons.account_balance_wallet_outlined,
+                  accent: renk,
+                  size: 38,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Text('Cüzdan', style: theme.textTheme.titleMedium),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Text(
               balance,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
+                color: renk.deepOf(context),
               ),
             ),
             const SizedBox(height: 6),

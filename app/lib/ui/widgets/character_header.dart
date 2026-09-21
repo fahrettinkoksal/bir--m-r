@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_settings.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/stats.dart';
+import '../theme/bir_omur_theme.dart';
 import 'kilim_divider.dart';
 import 'settings_sheet.dart';
 import 'stat_bar.dart';
@@ -33,12 +34,29 @@ class CharacterHeader extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final String evre = state.education.stageLabel(state.player.age);
 
+    // Üst özet, ekranın en çok bakılan yeri: düz zemin yerine sıcak bir
+    // degrade ve ince bir nar çizgisi ile ayrılır.
+    final bool gece = theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(
+              BirOmurColors.nar.withValues(alpha: gece ? 0.10 : 0.07),
+              theme.colorScheme.surfaceContainerHighest,
+            ),
+            Color.alphaBlend(
+              BirOmurColors.pirinc.withValues(alpha: gece ? 0.07 : 0.10),
+              theme.colorScheme.surfaceContainerHighest,
+            ),
+          ],
+        ),
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
+            color: BirOmurColors.nar.withValues(alpha: 0.35),
+            width: 1.4,
           ),
         ),
       ),
@@ -154,11 +172,22 @@ class _WalletPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.tertiary.withValues(alpha: 0.16),
+        // Cüzdan her temada pirinç rengidir; koyu temada da para
+        // rengi değişmesin diye şema yerine doğrudan palet kullanılır.
+        gradient: const LinearGradient(
+          colors: <Color>[Color(0x4DD69A2B), Color(0x26D69A2B)],
+        ),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: theme.colorScheme.tertiary.withValues(alpha: 0.45),
+          color: BirOmurColors.pirinc.withValues(alpha: 0.55),
         ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: BirOmurColors.pirinc.withValues(alpha: 0.22),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

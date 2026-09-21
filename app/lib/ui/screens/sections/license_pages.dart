@@ -7,6 +7,7 @@ import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/license_exam_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
@@ -44,6 +45,7 @@ class _LicenseOfficePageState extends State<LicenseOfficePage> {
     final GameState state = controller.state!;
 
     return SectionScaffold(
+      accent: BirOmurAccents.turuncu,
       title: 'Ehliyet İşlemleri',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',
       backLabel: 'Aktiviteler',
@@ -54,6 +56,7 @@ class _LicenseOfficePageState extends State<LicenseOfficePage> {
             title: 'Sınava devam et',
             subtitle: state.pendingLicenseExam?.license?.label ?? '',
             icon: Icons.assignment_outlined,
+            accent: BirOmurAccents.turuncu,
             onTap: () async {
               await LicenseExamSheet.show(context);
               if (mounted) setState(() {});
