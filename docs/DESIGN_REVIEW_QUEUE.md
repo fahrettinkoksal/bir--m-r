@@ -1814,5 +1814,35 @@ Aynı hata `okul_ilk_gun` (6-8 yaş) için daha sessiz bir biçimde tekrarlandı
 4. Asıl sınır **yılda tek olay** kuralı. Dönüm noktası yıllarında (okula başlama, sınav yılı, okul bitişi) **iki olay** gösterilsin mi? Öncelik, tek yuvayı paylaştırmaya çalışan bir yama; iki yuva bu soruyu kökünden çözerdi.
 5. Sınav olaylarının etkisi (odaklanma +9, dengeli +5, savsaklama −10, kaygı −4, destek +4 puan) yerleştirme ve üniversite sınav puanında doğru ağırlıkta mı?
 
+
+### Q-090 — Hayat sonu değerlendirmesi: "nasıl bir hayattı?"
+**Durum:** Yön **Faho tarafından onaylandı** (21 Eylül 2026; ChatGPT o gün yoktu, Faho "hepsini yap, mantıklı geldi" dedi). **Sayılar, eksen adları ve metinler karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 22, `app/lib/domain/life/life_verdict.dart`, `app/lib/ui/widgets/life_verdict_panel.dart`.
+
+**Sorun neydi:** Hayat bitince ekran yalnızca **liste** veriyordu — cüzdan, eşya sayısı, ehliyet sayısı, günlükten son sekiz satır. Oyuncunun bütün bir ömür boyunca verdiği kararların hiçbir **karşılığı** yoktu; ekran "ne oldu" diyordu ama "nasıl bir hayattı" demiyordu.
+
+**Şu an kodda olan (geçici) çözüm:** Özetin **üstüne** bir değerlendirme paneli geldi. Dört parçası var:
+
+*1. Hayatın adı.* "Emekle geçen bir hayat", "Kalabalık bir hayat", "Gezip görülen bir hayat", "Kendi hâlinde bir hayat", 18 yaşından önce vefatta "Yarıda kalan bir hayat". Bu ad arşive de yazılıyor; Geçmiş Hayatlar listesinde her hayatın artık bir adı var.
+
+*2. Dört eksen.* Bağlar, Emek, Deneyim, Huzur. **Puan değil ayna:** oyuncu kazanmaz veya kaybetmez, çubuklar hayatın hangi yöne ağır bastığını gösterir. Her eksenin yanında sayı değil cümle var ("3 kişi seni yakından tanıdı", "Hayatın hep aynı sokaklarda geçti").
+
+*3. İlkler.* Yaşı **gerçekten kayıtlı** anlar, yaşa göre sıralı: okula başlama, ilk iş, ilk şehir dışı, evlilik, ilk çocuk, emeklilik. Yaşı bilinmeyen hiçbir an listeye girmiyor; uydurma yaş yazılmıyor.
+
+*4. Hiç olmadı.* Yaşanmamış şeyler: hiç evlenmedin, hiç çocuğun olmadı, hiç çalışmadın, üniversite okumadın, hiç şehir dışına çıkmadın, hiç kitap bitirmedin, hiç ehliyet almadın, hiç ev sahibi olmadın, hiç yakın arkadaşın olmadı.
+
+**Yol boyunca düzeltilen bir tasarım hatası:** Başlık önce en yüksek puanlı eksenden geliyordu. Huzur doğrudan 0-100 arası bir istatistikten geldiği, somut eksenler ise seyrek olaylardan toplandığı için huzur neredeyse her zaman kazanıyordu: **38 yıl öğretmenlik yapıp 53 yıl evli kalmış bir hayat, yalnızca keyfi yerinde öldüğü için "Kendi hâlinde bir hayat" sayılıyordu.** Kural değişti: huzur bir **ruh hâlidir**, hayat başka bir şeyle anılabiliyorsa onunla anılır; huzur ancak somut eksenlerin hepsi zayıfken hayata adını verir.
+
+**Karar soruları:**
+1. Dört eksen doğru mu? "Emek" yerine "Başarı" mı olmalı, yoksa beşinci bir eksen (örneğin "İz" — geride kalanlar) eklenmeli mi?
+2. "Hiç olmadı" listesi doğru tonda mı? Oyuncuyu **suçlamak** istemiyoruz; şu anki metinler ("Hiç evlenmedin.") sitem gibi okunuyor olabilir. "Evlenmedi." gibi üçüncü şahıs mı daha iyi?
+3. Eksen ağırlıkları uygun mu? Şu an: yakın kişi başına 16 (tavan 48), evlilik 14, çocuk başına 6 (tavan 18); çalışılan iki yıla 1 puan (tavan 34), emeklilik 10, 250.000 ₺ üzeri birikim 16; şehir başına 7, biten kitap başına 6.
+4. Hayat adları listesi genişletilsin mi? Şu an altı ad var; "Zor geçen bir hayat", "Kalabalığın içinde yalnız bir hayat" gibi karşılıklar eksik.
+5. Huzur ekseni **ölüm anındaki** mutluluk ve sağlıktan hesaplanıyor — yani bir anlık görüntü, bütün bir hayat değil. Hayat boyu ortalama tutulsun mu? (Bu, kayda yeni bir alan ister.)
+6. Değerlendirme yalnızca ekranda mı kalsın, yoksa paylaşılabilir bir kart olarak dışa aktarılsın mı?
+
+**Yan düzeltme (gerçek hata):** `zatürre` sağlık krizinin **iki seçeneği de para istiyordu** (22.000 ₺ ve 3.000 ₺). Diğer beş krizin hepsinde bedelsiz bir çıkış var; zatürre tek istisnaydı. 60 yaşından sonra cüzdanında 3.000 ₺'den azı olan oyuncu, **hiçbir düğmesi etkin olmayan** bir kriz penceresinde kilitleniyordu — oyun oradan devam edemiyordu. "Evde ilaçla idare et" bedelsiz yapıldı; hayatta kalma katkısı (+0,03) ve sağlık etkisi (−15) olduğu gibi bırakıldı, yeni denge sayısı uydurulmadı. Artık kalıcı bir test her krizde parasız seçilebilecek en az bir seçenek olmasını zorunlu kılıyor.
+
+**Yan not:** Arşiv kaydına `verdictTitle` alanı eklendi. **Eski arşiv satırlarında boş kalır ve hiç gösterilmez**; geriye dönük değerlendirme üretilmez, çünkü o hayatların verisi artık elde yok. Kayıt biçim sürümü artmadı: alan tamamen eklemeli ve eksikken `null` okunuyor.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
