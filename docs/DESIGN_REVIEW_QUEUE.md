@@ -1663,5 +1663,36 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 **Varsayılan işlem:** Bütün renk değerleri tek dosyada (`bir_omur_theme.dart`) toplandığı için palet tek commit'le geri alınabilir. Onay gelene dek bu palet kalıcı marka kararı sayılmaz.
 
 
+### Q-085 — Okul dönüm noktası bildirimleri ve sınav yılı
+**Durum:** Yön **Faho tarafından istendi** ("ilk okula başlarken veya ortaokul bittiğinde liseye geçtiğinde ve lise bittiğinde bildirimler ver; ekrana sınav stresi konusunu ekle"); **ayrıntılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 17, `app/lib/domain/life/notices.dart`, `app/lib/data/event_pool_exam.dart`, `app/lib/domain/education/education_path.dart`.
+
+**Şu an kodda olan (geçici) çözüm:**
+
+*Bildirimler* — yeni bir bildirim türü (`NoticeKind.okul`) eklendi. Bilgilendirmedir: seçim sormaz, hiçbir değeri değiştirmez, kayıtta saklanır ve aynı bildirim iki kez açılmaz.
+- **Okula başlama** (ilkokul 1. sınıf).
+- **Ortaokul bitti, lise başlıyor** — yerleştirme puanı hesaplanmışsa metne yazılır.
+- **Lise bitti** — üniversite sınav puanı hesaplanmışsa metne yazılır.
+- **Üniversite mezuniyeti** — Faho bunu ayrıca istemedi; lise bitişi bildirilirken üniversitenin bildirilmemesi tutarsız duracağı için eklendi.
+- **İlkokul → ortaokul geçişi bildirilmiyor**: istenen üç dönüm noktası arasında yoktu, günlükte satır olarak kalıyor.
+
+*Sınav yılı* — 8. ve 12. sınıf artık diğer yıllardan ayrılıyor.
+- Okul ekranında **"Sınav yılı" paneli**: hangi sınavın olduğunu ve o yıl verilen kararların hazırlığa hangi yönde etki ettiğini yazar. **Sayı göstermez**, çünkü puan sınav günü hesaplanır ve şans da içerir.
+- **Sekiz yeni olay** (dördü 8. sınıf, dördü 12. sınıf): sınav takvimi, deneme sonucu, gece kaygısı, son hafta / son ay, aile baskısı. İkisi **önceki kararı hatırlar**: yalnızca yılı sınava adamış oyuncuda çıkar.
+- Seçimler puanı **gerçekten** değiştiriyor (`prototypeOnly`): odaklanmak **+9**, dengeli çalışmak **+5**, savsaklamak **−10**, kaygı **−4**, öğretmen/aile desteği **+4**. Toplam etki sınırlı: zekâ ve not ortalaması ana bileşen olarak kalıyor.
+- Çok çalışmak bedava değil: mutluluk ve sağlık düşebiliyor. Kaygı **kalıcı ceza değil**, tek sınavlık bir iz.
+- İki sınav **ayrı tutuluyor**: 8. sınıfta bırakılan iz, dört yıl sonraki üniversite sınavını etkilemiyor.
+- Hiçbir olay gerçek bir sınavın adını taşımıyor; kurgusal anlatılıyor.
+
+**Karar soruları:**
+1. Bildirim sayısı doğru mu? İlkokul → ortaokul geçişi de bildirilsin mi? Üniversite mezuniyeti kalsın mı?
+2. Sınav puanı etkileri (+9 / +5 / −10 / −4 / +4) denge açısından uygun mu? Savsaklamanın cezası odaklanmanın ödülünden büyük — bu doğru mu?
+3. Odaklanmanın mutluluk bedeli (12. sınıfta −8) fazla mı? "Çalışmak mutsuz eder" mesajı istenir mi?
+4. Sınav yılı paneli **sayı** göstermeli mi (ör. "hazırlık: iyi/orta/zayıf"), yoksa şu anki cümle yeterli mi?
+5. Dershane, özel ders, deneme sınavı satın alma gibi **paralı** hazırlık seçenekleri eklensin mi? Şu an yok.
+6. Sınav sonucu düşükse **ikinci kez sınava girme** (bir yıl bekleme) seçeneği olmalı mı? Şu an yok.
+
+**Varsayılan işlem:** Bütün sayısal değerler `EducationPath` içinde tek yerde; onay gelene dek kalıcı kural sayılmaz.
+
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
