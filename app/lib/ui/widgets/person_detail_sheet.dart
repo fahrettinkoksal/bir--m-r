@@ -207,7 +207,10 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               _Row(label: 'Durum', value: person.occupationLabel),
               // Kendi hayatı izlenen kişilerde (oyuncunun çocukları, D-045)
               // eğitim, birikim ve ilgi alanları gerçek kayıttan okunur.
-              if (person.development != null) ...<Widget>[
+              // Diğer kişilerde yalnızca özellik kaydı olabilir (D-046);
+              // onlarda eğitim/birikim satırı gösterilmez.
+              if (person.relation == RelationType.cocuk &&
+                  person.development != null) ...<Widget>[
                 _Row(
                   label: 'Eğitim',
                   value: person.development!.educationLabel,
@@ -234,7 +237,8 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 ),
               // Kendi hayatındaki dönüm noktaları: gerçekten yaşandıkları
               // yılla birlikte saklanır, sonradan yaştan uydurulmaz.
-              if ((person.development?.milestones.isNotEmpty ?? false)) ...<Widget>[
+              if (person.relation == RelationType.cocuk &&
+                  (person.development?.milestones.isNotEmpty ?? false)) ...<Widget>[
                 const SizedBox(height: 14),
                 Text('Hayatından', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 6),

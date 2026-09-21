@@ -83,7 +83,7 @@ abstract final class ChildProgression {
   /// yaşından kurulur, çünkü bu bilgi zaten ekranda gösteriliyordu.
   static PersonDevelopment ensureRecord(Person person, Random rng) {
     final PersonDevelopment? mevcut = person.development;
-    if (mevcut != null) return mevcut;
+    if (mevcut != null && mevcut.tracksLife) return mevcut;
 
     final int age = person.age;
     SchoolLevel? kademe;
@@ -109,7 +109,9 @@ abstract final class ChildProgression {
     }
 
     return PersonDevelopment(
-      stats: _prototypeOnlyNeutralStats(rng),
+      // Eski kayıttan gelen çocuğun hayatı bundan sonra izlenir.
+      tracksLife: true,
+      stats: mevcut?.stats ?? _prototypeOnlyNeutralStats(rng),
       schoolLevel: kademe,
       grade: sinif,
       finishedSchool: liseBitti,

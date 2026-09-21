@@ -203,6 +203,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
 
 Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
     <String, Object?>{
+      'tracksLife': d.tracksLife,
       'stats': <String, Object?>{
         'appearance': d.stats.appearance,
         'happiness': d.stats.happiness,
@@ -230,6 +231,7 @@ Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
 PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
   final Map<String, Object?> stats = _asMap(json['stats'], 'development.stats');
   return PersonDevelopment(
+    tracksLife: json['tracksLife'] == true,
     stats: Stats(
       appearance: _int(stats, 'appearance'),
       happiness: _int(stats, 'happiness'),

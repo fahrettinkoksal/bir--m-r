@@ -9,7 +9,7 @@ import '../models/gender.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
 import '../models/person_development.dart';
-import '../models/stats.dart';
+import '../generation/trait_inheritance.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'marriage_engine.dart';
@@ -145,6 +145,11 @@ class Parenthood {
         ? state.player.lastName
         : es.lastName;
 
+    // Diğer biyolojik ebeveynin özellikleri bilinmiyorsa **bir kez**
+    // oluşturulup kalıcı olarak saklanır; her doğumda yeniden çizilmez
+    // (D-046).
+    final Person esKaydi = TraitInheritance.ensureTraits(es, rng);
+
     final Person cocuk = Person(
       id: nextChildId(state),
       firstName: isim,
@@ -164,7 +169,15 @@ class Parenthood {
       // Çocuk kendi hayatını yaşamaya doğduğu anda başlar (D-045):
       // özellikleri, eğitimi, işi ve birikimi kendi kaydında tutulur.
       development: PersonDevelopment(
-        stats: _prototypeOnlyNewbornStats(rng),
+        // Çocuğun hayatı arka planda gerçekten izlenir (D-045).
+        tracksLife: true,
+        // Başlangıç değerleri iki biyolojik ebeveynden kısmen gelir ve
+        // doğumda **bir kez** çizilir (D-046).
+        stats: TraitInheritance.newbornStats(
+          rng: rng,
+          first: state.player.stats,
+          second: TraitInheritance.statsOf(esKaydi),
+        ),
         milestones: <LifeMilestone>[
           LifeMilestone(age: 0, text: '$isim dünyaya geldi.'),
         ],
@@ -176,7 +189,11 @@ class Parenthood {
         : '$isim adında bir oğlunuz oldu.';
 
     final GameState next = state.copyWith(
-      people: List<Person>.unmodifiable(<Person>[...state.people, cocuk]),
+      people: List<Person>.unmodifiable(<Person>[
+        for (final Person p in state.people)
+          if (p.id == esKaydi.id) esKaydi else p,
+        cocuk,
+      ]),
       player: state.player.copyWith(
         wallet: state.player.wallet - prototypeOnlyBirthCost,
         stats: state.player.stats.copyWith(
@@ -201,18 +218,6 @@ class Parenthood {
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }
-
-  /// prototypeOnly: yeni doğanın başlangıç değerleri.
-  ///
-  /// Paket E2'de nötr aralıktan çizilir; ebeveynlerden özellik aktarımı
-  /// ayrı bir karardır (D-046).
-  static Stats _prototypeOnlyNewbornStats(Random rng) => Stats(
-        appearance: rng.between(25, 85),
-        happiness: rng.between(45, 85),
-        health: rng.between(40, 90),
-        intelligence: rng.between(25, 85),
-        charisma: rng.between(25, 85),
-      );
 
   /// Çocuğun yaşına karşılık gelen okul kademesi.
   ///

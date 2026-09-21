@@ -40,6 +40,7 @@ Person cocukKisi({
     ).copyWith(
       development: development ??
           PersonDevelopment(
+            tracksLife: true,
             stats: Stats(
               appearance: 55,
               happiness: 60,
@@ -229,6 +230,7 @@ void main() {
     test('çalışan çocuk birikim yapar ve meslek kaydı görünür', () {
       Person cocuk = cocukKisi(age: 24).copyWith(
         development: PersonDevelopment(
+          tracksLife: true,
           stats: const Stats(
             appearance: 50,
             happiness: 50,
@@ -292,6 +294,7 @@ void main() {
         isAlive: false,
         wealth: WealthTier.cokVarlikli,
         development: PersonDevelopment(
+          tracksLife: true,
           stats: const Stats(
             appearance: 50,
             happiness: 50,
@@ -323,6 +326,7 @@ void main() {
         (JobType j) => j.education == JobEducation.universite,
       );
       final PersonDevelopment dev = PersonDevelopment(
+        tracksLife: true,
         stats: const Stats(
           appearance: 62,
           happiness: 71,
@@ -394,6 +398,7 @@ void main() {
       people: <Person>[
         cocukKisi(age: 20).copyWith(
           development: PersonDevelopment(
+            tracksLife: true,
             stats: const Stats(
               appearance: 40,
               happiness: 50,

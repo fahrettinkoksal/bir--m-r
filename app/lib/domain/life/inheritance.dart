@@ -3,6 +3,7 @@ import '../models/game_state.dart';
 import '../models/marriage.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import '../models/person_development.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import '../../text/turkish_text.dart';
@@ -165,8 +166,10 @@ abstract final class Inheritance {
     // Kendi hayatı izlenen kişilerde (oyuncunun çocukları, D-045) miras
     // **gerçekten biriktirdiği** paradan dağıtılır; ekonomik durumdan
     // tahmin edilen tutar yalnızca kaydı olmayan kişiler içindir.
-    final int toplamNakit = deceased.development?.money ??
-        prototypeOnlyEstateMoney(deceased.wealth);
+    final PersonDevelopment? gelisim = deceased.development;
+    final int toplamNakit = gelisim != null && gelisim.tracksLife
+        ? gelisim.money
+        : prototypeOnlyEstateMoney(deceased.wealth);
 
     // Eşin mirası: yalnızca **gerçek evlilik kaydı** varsa pay verilir
     // (D-037). Boşanmış eş mirasçı değildir.

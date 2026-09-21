@@ -448,6 +448,19 @@ oyuncunun mesleği, ehliyetleri ve sosyal medyası kopyalanmıyor. Miras da
 eski kayıtlardaki çocuklara geçmiş uydurulmuyor, kayıt ilk yaş
 ilerlemesinde boş geçmişle açılıyor. Sayılar **Q-069**'da karar bekliyor.
 
+**Özellik aktarımı (Paket 2, D-046):** Biyolojik çocuğun başlangıç
+değerleri (görünüş, sağlık, zekâ, karizma) iki ebeveynden **kısmen**
+geliyor: ebeveyn ortalaması nötre doğru çekiliyor ve üstüne rastgele sapma
+biniyor. Düşük zekâlı ebeveynlerin çocuğu genelde daha düşük başlıyor ama
+yüksek doğma ihtimali duruyor; yüksek özellikli ebeveynlerin çocuğu da
+mutlaka yüksek doğmuyor. Mutluluk aktarılmıyor. Değerler **doğumda bir
+kez** çizilip kaydediliyor; kayıttan dönünce veya kuşak değişince yeniden
+rastgele belirlenmiyor ve 0-100 sınırı aşılmıyor. Diğer ebeveynin özellik
+bilgisi yoksa uydurulmuyor: karışıma girmiyor, kişiye bir kez kalıcı bir
+özellik kaydı açılıyor ve o kayıt bir daha çizilmiyor. Hazır kaydı olan
+kişinin (ör. evlat edinilecek çocuk) özellikleri **değiştirilmiyor**.
+Sayılar **Q-070**'te karar bekliyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -43,6 +43,7 @@ enum UniversityStatus {
 class PersonDevelopment {
   const PersonDevelopment({
     required this.stats,
+    this.tracksLife = false,
     this.schoolLevel,
     this.grade,
     this.finishedSchool = false,
@@ -59,6 +60,15 @@ class PersonDevelopment {
 
   /// Kişinin kendi karakter değerleri (D-046 ile doğumda oluşturulur).
   final Stats stats;
+
+  /// Bu kişinin **hayatı gerçekten izleniyor mu?**
+  ///
+  /// Oyuncunun çocuklarında `true`'dur: eğitim, meslek ve birikim yıl yıl
+  /// işlenir, miras bu gerçek birikimden dağıtılır. Yalnızca özellik
+  /// kaydı açılmış kişilerde (ör. çocuğun diğer ebeveyni, D-046) `false`
+  /// kalır; onların ekonomik durumu eskisi gibi tahminle gösterilir ve
+  /// **uydurma bir birikim** yazılmaz.
+  final bool tracksLife;
 
   /// Devam edilen okul kademesi; okumuyorsa `null`.
   final SchoolLevel? schoolLevel;
@@ -132,6 +142,7 @@ class PersonDevelopment {
 
   PersonDevelopment copyWith({
     Stats? stats,
+    bool? tracksLife,
     Object? schoolLevel = _unsetDev,
     Object? grade = _unsetDev,
     bool? finishedSchool,
@@ -147,6 +158,7 @@ class PersonDevelopment {
   }) {
     return PersonDevelopment(
       stats: stats ?? this.stats,
+      tracksLife: tracksLife ?? this.tracksLife,
       schoolLevel: schoolLevel == _unsetDev
           ? this.schoolLevel
           : schoolLevel as SchoolLevel?,
