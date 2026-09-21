@@ -1546,5 +1546,28 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Gelir hesabı tek dosyada (`SocialIncome`) toplandı; hiçbir tutar kalıcı kural sayılmadı. Vergi, marka anlaşması sözleşmesi veya gerçek reklam entegrasyonu eklenmedi.
 
+### Q-080 — Seyahat: ücretler, sınırlar ve kimlerle gidilebileceği
+**Durum:** Yön **Faho tarafından istendi** ("Aktiviteler menüsüne gerçekten oynanabilir bir Seyahat alt menüsü ekle; kalıcı taşınmadan ayrı olacak"); **sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 11. **Bağlantılı:** Q-065 (şehir değişince iş), D-043 (taşınma).
+
+**Şu an kodda olan (geçici) çözüm:**
+- **Yolculuk türleri ve gidiş-dönüş ücretleri:** otobüs 2.200 ₺, tren 3.400 ₺, uçak 7.800 ₺, kendi arabasıyla 3.000 ₺. Yanına biri alınırsa ücret **1,8 katı**.
+- **Kendi arabasıyla** seçeneği yalnızca gerçekten arabası olan, **otomobil ehliyeti** bulunan ve aracın kondisyonu **25'in üzerinde** olan oyuncuya açılır; yoksa hiç gösterilmez. Yola çıkınca araçtan 3 kondisyon düşer.
+- **Yaş ve sıklık:** 16 yaşından itibaren, yılda en fazla 2 gezi.
+- **Etkiler:** mutluluk +4…+9, sağlık −1, birlikte gidilen kişide yakınlık +7 (100'deyse artırılmaz).
+- **Kimlerle:** eş, sevgili, çocuk, arkadaş, anne, baba. Hayatta olma, erişilebilirlik ve **en az 7 yaş** koşulu aranır.
+- **Anılar:** her gezi için 10 farklı kısa sahneden biri kaydedilir; yıllar sonra (en az 5 yıl) aynı kişiyle yapılan gezi 4 gezi olayından biriyle hatırlanabilir.
+- Gezi, oyuncunun **yaşadığı veya doğduğu şehri değiştirmez** ve Yaş Al akışına dokunmaz.
+
+**Karar soruları:**
+1. Ücretler maaşlarla dengeli mi? (Karşılaştırma: mağaza çalışanı yıllık 180.000 ₺.)
+2. Yılda 2 gezi sınırı uygun mu; yoksa yalnızca para mı sınırlamalı?
+3. Çocuk için 7 yaş sınırı doğru mu? Daha küçük çocuk **ailesiyle** gidebilmeli mi? (Şu an gidemiyor.)
+4. Birden fazla kişiyle (ör. bütün aile) gezi olmalı mı? **Şu an tek yoldaş.**
+5. Gezi sırasında iş/okul devamsızlığı gibi bir bedel olmalı mı? **Şu an yok.**
+6. Uzak şehir–yakın şehir ayrımı yapılmalı mı? Şu an bütün şehirler aynı ücrete gidiliyor (mesafe modellenmedi).
+7. Yurt dışı seyahati ileride eklenecek mi? **Bu sürümde yok.**
+
+**Varsayılan işlem:** Ücretler ve etkiler tek dosyada (`Travel`) toplandı. Kalıcı taşınma sistemi hiç değiştirilmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
