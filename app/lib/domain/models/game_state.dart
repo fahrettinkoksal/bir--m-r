@@ -513,6 +513,10 @@ class GameState {
     // Güncel okul çevresi.
     if (person.isClassmateIn(education.classId)) return true;
     if (person.isTeacherIn(education.schoolId)) return true;
+    // Güncel iş çevresi: yalnızca **o işte çalışılırken** ve iş aynı
+    // şehirdeyken görüşülür. İşten ayrılınca kayıt silinmez, sadece
+    // gündelik listelerden düşer (Paket 9).
+    if (person.isColleagueAt(career.jobId)) return !baskaSehirde;
     // Yakın arkadaşlar ve romantik bağlar görüşmeye devam eder.
     switch (person.relation) {
       // Eş ve çocuklar evden ayrılsalar da görüşülmeye devam eder.

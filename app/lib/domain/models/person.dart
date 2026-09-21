@@ -31,6 +31,7 @@ class Person {
     this.schoolTie,
     this.schoolId,
     this.classId,
+    this.workplaceId,
     this.city,
     this.estate = const <String>[],
     this.development,
@@ -68,6 +69,19 @@ class Person {
   /// Sınıf arkadaşları ve öğretmenler kademe değişince listelerden düşer
   /// ama **kayıtları silinmez**; eski kademeye ait oldukları buradan bilinir.
   final SchoolLevel? schoolLevel;
+
+  /// Birlikte çalışılan işin kimliği (iş arkadaşları için).
+  ///
+  /// Oyuncu o işten ayrılınca kişi **silinmez**; yalnızca gündelik
+  /// erişilebilirliği biter. Arkadaşlığa dönüşen iş arkadaşında bağ türü
+  /// değişir, bu alan geçmişin kaydı olarak kalır.
+  final String? workplaceId;
+
+  /// Bu kişi şu an çalışılan iş yerinden mi?
+  bool isColleagueAt(String? currentJobId) =>
+      relation == RelationType.isArkadasi &&
+      currentJobId != null &&
+      workplaceId == currentJobId;
 
   /// Tanışıldığı okulun kimliği. Kademeden bağımsızdır.
   final String? schoolId;
@@ -177,6 +191,7 @@ class Person {
     Object? schoolTie = _unset,
     Object? schoolId = _unset,
     Object? classId = _unset,
+    Object? workplaceId = _unset,
     Object? city = _unset,
     List<String>? estate,
     Object? development = _unset,
@@ -201,6 +216,8 @@ class Person {
           schoolTie == _unset ? this.schoolTie : schoolTie as SchoolTie?,
       schoolId: schoolId == _unset ? this.schoolId : schoolId as String?,
       classId: classId == _unset ? this.classId : classId as String?,
+      workplaceId:
+          workplaceId == _unset ? this.workplaceId : workplaceId as String?,
       city: city == _unset ? this.city : city as String?,
       estate: estate ?? this.estate,
       development: development == _unset

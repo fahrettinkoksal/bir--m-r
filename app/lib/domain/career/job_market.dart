@@ -3,6 +3,8 @@ import 'dart:math';
 import '../../data/interview_catalog.dart';
 import '../../data/job_catalog.dart';
 import '../models/career.dart';
+import '../models/person.dart';
+import 'colleagues.dart';
 import '../models/education.dart';
 import '../../data/event_pool.dart';
 import '../models/game_state.dart';
@@ -218,7 +220,13 @@ class JobMarket {
   /// Doğru cevap **ve** başvuru koşulları birlikte aranır: mülakatı doğru
   /// cevaplamak, gerekli eğitimi olmayan birini uzman mesleğe sokmaz.
   /// Cevap verildikten sonra mülakat kapanır; ikinci kez uygulanamaz.
-  JobResult answerInterview(GameState state, int optionIndex) {
+  /// [rng] verilmezse iş arkadaşları rastgele üretilir; belirli bir sonuç
+  /// isteyen çağrılar kendi tohumunu geçirir.
+  JobResult answerInterview(
+    GameState state,
+    int optionIndex, [
+    Random? rng,
+  ]) {
     final PendingInterview? mulakat = state.pendingInterview;
     if (mulakat == null) {
       return _blocked(state, 'Devam eden bir mülakat yok.');
@@ -269,16 +277,38 @@ class JobMarket {
 
     final String metin = '${job.name} olarak işe alındın. '
         'İlk maaşın bir yıl sonra cebinde olacak.';
+    final GameState iseAlinmis = kapali.copyWith(
+      career: kapali.career.copyWith(
+        jobId: job.id,
+        startedAtAge: kapali.player.age,
+        // İşe girilen yıl için maaş ödenmez; ilk ödeme sonraki yaşta.
+        lastPaidAge: kapali.player.age,
+        // İş, oyuncunun o an yaşadığı şehirdedir (Paket 3).
+        jobCity: kapali.player.currentCity,
+        // Giriş seviyesi ve katalog maaşı (Paket 9).
+        level: 0,
+        salary: job.yearlySalary,
+        milestones: const <CareerMilestone>[],
+        lastRaiseAge: null,
+        lastPromotionAge: null,
+      ),
+    );
+    // İşe girince birkaç iş arkadaşıyla tanışılır; kalıcı kimlikleri olur.
+    final List<Person> isArkadaslari = Colleagues.generate(
+      state: iseAlinmis,
+      job: job,
+      rng: rng ?? Random(),
+    );
     return JobResult(
       state: _log(
-        kapali.copyWith(
-          career: kapali.career.copyWith(
-            jobId: job.id,
-            startedAtAge: kapali.player.age,
-            // İşe girilen yıl için maaş ödenmez; ilk ödeme sonraki yaşta.
-            lastPaidAge: kapali.player.age,
-            // İş, oyuncunun o an yaşadığı şehirdedir (Paket 3).
-            jobCity: kapali.player.currentCity,
+        iseAlinmis.copyWith(
+          people: List<Person>.unmodifiable(<Person>[
+            ...iseAlinmis.people,
+            ...isArkadaslari,
+          ]),
+          career: iseAlinmis.career.withMilestone(
+            iseAlinmis.player.age,
+            '${job.name} olarak işe başladın.',
           ),
           // Çalışma hayatına girildi: bu iz, iş hayatıyla ilgili
           // olayların önkoşuludur. Daha önce yalnızca bir olay seçeneğiyle
@@ -313,22 +343,30 @@ class JobMarket {
     final JobType? job = career.job;
     if (job == null) return _blocked(state, 'Şu an bir işin yok.');
 
+    // İş arkadaşlarından yakın olanlar arkadaşa dönüşür; kimse silinmez.
+    final ({List<Person> people, List<String> becameFriends}) sonuc =
+        Colleagues.onLeavingJob(state, job.id);
+
     final String metin = '${job.name} işinden ayrıldın.';
-    return JobResult(
-      state: _log(
-        state.copyWith(
-          career: career.copyWith(
-            jobId: null,
-            startedAtAge: null,
-            jobCity: null,
-            pastJobIds: List<String>.unmodifiable(
-              <String>[...career.pastJobIds, job.id],
-            ),
+    final String tamMetin = sonuc.becameFriends.isEmpty
+        ? metin
+        : '$metin İş arkadaşlarından '
+            '${sonuc.becameFriends.length} kişiyle görüşmeye devam '
+            'ediyorsun.';
+
+    GameState sonraki = state.copyWith(
+      people: sonuc.people,
+      career: career
+          .withMilestone(state.player.age, 'Bu işten kendi isteğinle ayrıldın.')
+          .closeCurrentJob(
+            endedAtAge: state.player.age,
+            reason: JobEndReason.istifa,
           ),
-        ),
-        metin,
-      ),
-      outcome: JobOutcome(applied: true, text: metin, accepted: true),
+    );
+    sonraki = _log(sonraki, tamMetin);
+    return JobResult(
+      state: sonraki,
+      outcome: JobOutcome(applied: true, text: tamMetin, accepted: true),
     );
   }
 
@@ -349,12 +387,12 @@ class JobMarket {
     return (
       state: state.copyWith(
         player: state.player.copyWith(
-          wallet: state.player.wallet + job.yearlySalary,
+          wallet: state.player.wallet + state.career.yearlySalary,
         ),
         career: state.career.copyWith(lastPaidAge: newAge),
       ),
-      logText: '${job.name} olarak bir yılın doldu; '
-          '${trMoney(job.yearlySalary)} cüzdanına girdi.',
+      logText: '${state.career.title} olarak bir yılın doldu; '
+          '${trMoney(state.career.yearlySalary)} cüzdanına girdi.',
     );
   }
 

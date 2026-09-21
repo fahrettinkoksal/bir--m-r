@@ -112,6 +112,13 @@ class EventEngine {
     if (req.requiresSocialAccount && state.socialAccounts.isEmpty) {
       return false;
     }
+    // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
+    if (req.requiresEmployed && !state.career.isEmployed) return false;
+    if (req.requiresMinYearsInJob > 0 &&
+        state.career.yearsInJob(state.player.age) <
+            req.requiresMinYearsInJob) {
+      return false;
+    }
     // Gündelik erişilebilirlik isteyen olaylarda kişi gerçekten
     // ulaşılabilir olmalı.
     if (req.requireReachable && person != null && !state.isReachable(person)) {

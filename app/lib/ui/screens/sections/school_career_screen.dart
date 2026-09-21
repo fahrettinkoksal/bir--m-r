@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/education.dart';
+import '../../../domain/models/interaction.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -230,7 +231,7 @@ class _PeoplePage extends StatelessWidget {
 }
 
 /// Meslek ekranının alt sayfaları.
-enum _CareerPage { kok, mezuniyetSonrasi, isArama }
+enum _CareerPage { kok, mezuniyetSonrasi, isArama, kariyerGecmisi }
 
 class _CareerView extends StatefulWidget {
   const _CareerView({required this.state, required this.onBack});
@@ -262,6 +263,8 @@ class _CareerViewState extends State<_CareerView> {
         return AfterSchoolPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.isArama:
         return JobSearchPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.kariyerGecmisi:
+        return CareerHistoryPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.kok:
         break;
     }
@@ -278,16 +281,25 @@ class _CareerViewState extends State<_CareerView> {
           _PanelCard(
             icon: Icons.badge_outlined,
             accent: BirOmurAccents.mor,
-            title: state.career.label,
+            // Görev adı seviyeye göre değişir: terfi eden oyuncu
+            // ekranda da kıdemli görünür (Paket 9).
+            title: state.career.title,
             rows: <({String label, String value})>[
+              if (state.career.title != state.career.label)
+                (label: 'Meslek', value: state.career.label),
               (
                 label: 'Yıllık maaş',
-                value: trMoney(state.career.job?.yearlySalary ?? 0),
+                value: trMoney(state.career.yearlySalary),
               ),
               if (state.career.startedAtAge != null)
                 (
                   label: 'Başlangıç',
                   value: '${state.career.startedAtAge} yaşında',
+                ),
+              if (state.career.startedAtAge != null)
+                (
+                  label: 'Bu işteki süren',
+                  value: '${state.career.yearsInJob(state.player.age)} yıl',
                 ),
               // İşin şehri yalnızca gerçekten biliniyorsa yazılır; şehir
               // değişince işe kendiliğinden son verilmez (Q-065).
@@ -369,6 +381,81 @@ class _CareerViewState extends State<_CareerView> {
             icon: Icons.work_outline,
             accent: BirOmurAccents.mor,
             onTap: () => _go(_CareerPage.isArama),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Zam ve terfi gerçek birer etkileşimdir; koşulu sağlanmıyorsa
+        // düğme yerine gerekçe gösterilir (sahte düğme yok).
+        if (state.career.isEmployed) ...<Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              final InteractionAvailability zam =
+                  GameScope.of(context).raiseAvailability();
+              if (!zam.isAllowed) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: InfoPanel(
+                    icon: Icons.trending_up_outlined,
+                    text: 'Zam isteyemezsin: ${zam.reason}',
+                  ),
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: MenuRow(
+                  key: const Key('career_raise_row'),
+                  title: 'Zam iste',
+                  subtitle: 'Yöneticinle maaşını konuş',
+                  icon: Icons.trending_up_outlined,
+                  accent: BirOmurAccents.yesil,
+                  onTap: () {
+                    final String? metin = GameScope.of(context).askForRaise();
+                    setState(() => _sonuc = metin);
+                  },
+                ),
+              );
+            },
+          ),
+          Builder(
+            builder: (BuildContext context) {
+              final InteractionAvailability terfi =
+                  GameScope.of(context).promotionAvailability();
+              if (!terfi.isAllowed) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: InfoPanel(
+                    icon: Icons.military_tech_outlined,
+                    text: 'Terfi isteyemezsin: ${terfi.reason}',
+                  ),
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: MenuRow(
+                  key: const Key('career_promotion_row'),
+                  title: 'Terfi iste',
+                  subtitle: 'Bir üst göreve geçmeyi konuş',
+                  icon: Icons.military_tech_outlined,
+                  accent: BirOmurAccents.pirinc,
+                  onTap: () {
+                    final String? metin =
+                        GameScope.of(context).askForPromotion();
+                    setState(() => _sonuc = metin);
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+        // Kariyer geçmişi: eski işler silinmez.
+        if (state.career.allEntries().isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('career_history_row'),
+            title: 'Kariyer geçmişi',
+            subtitle: '${state.career.allEntries().length} çalışma kaydı',
+            icon: Icons.history_outlined,
+            accent: BirOmurAccents.cini,
+            onTap: () => _go(_CareerPage.kariyerGecmisi),
           ),
           const SizedBox(height: 10),
         ],
@@ -463,7 +550,11 @@ class _PanelCard extends StatelessWidget {
               children: <Widget>[
                 AccentIconTile(icon: icon, accent: accent, size: 38),
                 const SizedBox(width: 12),
-                Text(title, style: theme.textTheme.titleMedium),
+                // Unvan uzun olabilir (ör. "Kıdemli mağaza çalışanı");
+                // satır taşmasın diye sarılır.
+                Expanded(
+                  child: Text(title, style: theme.textTheme.titleMedium),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -480,10 +571,14 @@ class _PanelCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      row.value,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        row.value,
+                        textAlign: TextAlign.right,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],

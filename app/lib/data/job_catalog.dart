@@ -32,6 +32,7 @@ class JobType {
     this.programs = const <String>{},
     this.minIntelligence = 0,
     this.minCharisma = 0,
+    this.levels = const <String>[],
   });
 
   final String id;
@@ -52,6 +53,26 @@ class JobType {
 
   final int minIntelligence;
   final int minCharisma;
+
+  /// Bu meslekteki görev basamakları (giriş seviyesinden yukarı).
+  ///
+  /// İlk sıra işe girildiğinde geçerli olan unvandır. Boş bırakılırsa
+  /// mesleğin adı tek unvan sayılır. Basamaklar `prototypeOnly`'dir
+  /// (Q-078); meslek kataloğu büyütülmeden yalnızca unvan eklenir.
+  final List<String> levels;
+
+  /// Bu meslekte çıkılabilecek en üst basamak.
+  int get maxLevel => levels.isEmpty ? 0 : levels.length - 1;
+}
+
+/// Bir meslekte [level] basamağındaki görev adı.
+///
+/// Seviye listesi yoksa ya da aralık dışındaysa mesleğin kendi adı
+/// kullanılır; uydurma unvan üretilmez.
+String jobTitleFor(JobType job, int level) {
+  if (job.levels.isEmpty) return job.name;
+  final int i = level.clamp(0, job.levels.length - 1);
+  return job.levels[i];
 }
 
 const List<JobType> kJobCatalog = <JobType>[
@@ -61,6 +82,11 @@ const List<JobType> kJobCatalog = <JobType>[
     description: 'Raf düzeni, kasa ve ayakta geçen uzun saatler.',
     minAge: 16,
     yearlySalary: 180000, // prototypeOnly
+    levels: <String>[
+      'Mağaza çalışanı',
+      'Kıdemli mağaza çalışanı',
+      'Mağaza sorumlusu',
+    ],
   ),
   JobType(
     id: 'garson',
@@ -69,6 +95,11 @@ const List<JobType> kJobCatalog = <JobType>[
     minAge: 16,
     yearlySalary: 165000, // prototypeOnly
     minCharisma: 35,
+    levels: <String>[
+      'Garson',
+      'Deneyimli garson',
+      'Servis şefi',
+    ],
   ),
   JobType(
     id: 'teknik_servis',
@@ -83,6 +114,11 @@ const List<JobType> kJobCatalog = <JobType>[
       EducationTrack.fenBilim,
     },
     minIntelligence: 45,
+    levels: <String>[
+      'Teknik servis çalışanı',
+      'Kıdemli teknisyen',
+      'Servis sorumlusu',
+    ],
   ),
   JobType(
     id: 'ressam_tasarimci',
@@ -98,6 +134,11 @@ const List<JobType> kJobCatalog = <JobType>[
       EducationTrack.elSanatlari,
     },
     programs: <String>{'guzel_sanatlar'},
+    levels: <String>[
+      'Ressam / tasarımcı',
+      'Deneyimli tasarımcı',
+      'Sanat yönetmeni',
+    ],
   ),
   JobType(
     id: 'yazilim_gelistirici',
@@ -109,6 +150,11 @@ const List<JobType> kJobCatalog = <JobType>[
     tracks: <EducationTrack>{EducationTrack.bilisim},
     programs: <String>{'bilgisayar', 'muhendislik'},
     minIntelligence: 60,
+    levels: <String>[
+      'Yazılım geliştirici',
+      'Kıdemli geliştirici',
+      'Takım lideri',
+    ],
   ),
   JobType(
     id: 'ogretmen',
@@ -120,6 +166,11 @@ const List<JobType> kJobCatalog = <JobType>[
     programs: <String>{'egitim'},
     minIntelligence: 50,
     minCharisma: 40,
+    levels: <String>[
+      'Öğretmen',
+      'Kıdemli öğretmen',
+      'Zümre başkanı',
+    ],
   ),
 ];
 

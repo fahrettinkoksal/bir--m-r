@@ -200,6 +200,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'lastName': p.lastName,
       'gender': p.gender.name,
       'relation': p.relation.name,
+      'workplaceId': p.workplaceId,
       'city': p.city,
       'age': p.age,
       'isAlive': p.isAlive,
@@ -387,6 +388,32 @@ Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
       'startedAtAge': c.startedAtAge,
       'lastPaidAge': c.lastPaidAge,
       'pastJobIds': c.pastJobIds,
+      // Kariyer derinliği (Paket 9): görev seviyesi, gerçek maaş, önemli
+      // anlar ve bitmiş çalışma kayıtları.
+      'level': c.level,
+      'salary': c.salary,
+      'milestones': c.milestones.map(_encodeCareerMilestone).toList(
+            growable: false,
+          ),
+      'history': c.history.map(_encodeJobHistory).toList(growable: false),
+      'lastRaiseAge': c.lastRaiseAge,
+      'lastPromotionAge': c.lastPromotionAge,
+      'lastJobLossAge': c.lastJobLossAge,
+    };
+
+Map<String, Object?> _encodeCareerMilestone(CareerMilestone m) =>
+    <String, Object?>{'age': m.age, 'text': m.text};
+
+Map<String, Object?> _encodeJobHistory(JobHistoryEntry e) => <String, Object?>{
+      'jobId': e.jobId,
+      'startedAtAge': e.startedAtAge,
+      'endedAtAge': e.endedAtAge,
+      'endReason': e.endReason?.name,
+      'level': e.level,
+      'salary': e.salary,
+      'city': e.city,
+      'milestones':
+          e.milestones.map(_encodeCareerMilestone).toList(growable: false),
     };
 
 /// Bekleyen olay **tüm seçenekleriyle** yazılır.
@@ -787,6 +814,8 @@ Person _decodePerson(Map<String, Object?> json) {
     age: _int(json, 'age'),
     isAlive: _bool(json, 'isAlive'),
     inPlayerHousehold: _bool(json, 'inPlayerHousehold'),
+    // Eski kayıtlarda iş arkadaşı yoktur; alan boş kalır.
+    workplaceId: _stringOrNull(json, 'workplaceId'),
     employment: employment,
     occupation: occupation,
     wealth: _enumByNameOrNull(
@@ -849,7 +878,42 @@ CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
       lastPaidAge: _intOrNull(json, 'lastPaidAge'),
       pastJobIds:
           List<String>.unmodifiable(_stringList(json, 'pastJobIds')),
+      // Kariyer derinliği eski kayıtlarda yoktur: seviye 0, maaş `null`
+      // (katalog maaşı geçerli) ve geçmiş boş açılır. Hiçbir iş kaydı
+      // uydurulmaz.
+      level: _intOrNull(json, 'level') ?? 0,
+      salary: _intOrNull(json, 'salary'),
+      milestones: List<CareerMilestone>.unmodifiable(
+        _optionalList(json, 'milestones').map(_decodeCareerMilestone),
+      ),
+      history: List<JobHistoryEntry>.unmodifiable(
+        _optionalList(json, 'history').map(_decodeJobHistory),
+      ),
+      lastRaiseAge: _intOrNull(json, 'lastRaiseAge'),
+      lastPromotionAge: _intOrNull(json, 'lastPromotionAge'),
+      lastJobLossAge: _intOrNull(json, 'lastJobLossAge'),
     );
+
+CareerMilestone _decodeCareerMilestone(Map<String, Object?> json) =>
+    CareerMilestone(age: _int(json, 'age'), text: _string(json, 'text'));
+
+JobHistoryEntry _decodeJobHistory(Map<String, Object?> json) {
+  final String? neden = _stringOrNull(json, 'endReason');
+  return JobHistoryEntry(
+    jobId: _string(json, 'jobId'),
+    startedAtAge: _int(json, 'startedAtAge'),
+    endedAtAge: _intOrNull(json, 'endedAtAge'),
+    endReason: neden == null
+        ? null
+        : _enumByName(JobEndReason.values, neden, 'career.endReason'),
+    level: _intOrNull(json, 'level') ?? 0,
+    salary: _intOrNull(json, 'salary'),
+    city: _stringOrNull(json, 'city'),
+    milestones: List<CareerMilestone>.unmodifiable(
+      _optionalList(json, 'milestones').map(_decodeCareerMilestone),
+    ),
+  );
+}
 
 OwnedItem _decodeItem(Map<String, Object?> json) {
   final int condition = _int(json, 'condition');
@@ -991,6 +1055,19 @@ Map<String, Object?> _asMap(Object? value, String key) {
 
 Map<String, Object?> _map(Map<String, Object?> json, String key) =>
     _asMap(json[key], key);
+
+/// Eski kayıtlarda bulunmayan listeler için: yoksa boş liste döner.
+List<Map<String, Object?>> _optionalList(
+  Map<String, Object?> json,
+  String key,
+) {
+  final Object? value = json[key];
+  if (value == null) return const <Map<String, Object?>>[];
+  if (value is! List) _eksik(key, 'liste');
+  return <Map<String, Object?>>[
+    for (final Object? e in value) _asMap(e, key),
+  ];
+}
 
 List<Object?> _list(Map<String, Object?> json, String key) {
   final Object? value = json[key];

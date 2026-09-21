@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/name_pool.dart';
+import '../career/career_progress.dart';
 import '../career/job_market.dart';
 import '../education/education_path.dart';
 import '../events/event_engine.dart';
@@ -157,8 +158,7 @@ class LifeProgression {
     );
 
     // Maaş yeni yaşa geçerken **bir kez** ödenir.
-    final ({GameState state, String? logText}) maas =
-        const JobMarket().paySalaryFor(
+    ({GameState state, String? logText}) maas = const JobMarket().paySalaryFor(
       state.copyWith(player: state.player.copyWith(age: newAge)),
       newAge,
     );
@@ -170,6 +170,21 @@ class LifeProgression {
           category: LogCategory.kisisel,
         ),
       );
+    }
+
+    // Maaş ödendikten **sonra** işten çıkarılma denenir: çalışılan yılın
+    // ücreti ödenir, yeni yıla işsiz girilir (Paket 9).
+    final ({GameState state, String? logText}) isKaybi =
+        CareerProgress.maybeLayoff(maas.state, newAge, _rng);
+    if (isKaybi.logText != null) {
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: isKaybi.logText!,
+          category: LogCategory.kisisel,
+        ),
+      );
+      maas = (state: isKaybi.state, logText: maas.logText);
     }
 
     final GameState advanced = state.copyWith(

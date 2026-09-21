@@ -20,6 +20,9 @@ enum RelationType {
   sinifArkadasi,
   ogretmen,
   arkadas,
+  // İş arkadaşı: kalıcı kimliği olan, işten ayrılınca kaydı silinmeyen
+  // kişi (Paket 9). Arkadaşlığa dönüşebilir.
+  isArkadasi,
   sevgili,
   eskiSevgili,
   es,
@@ -51,6 +54,7 @@ enum RelationType {
       case RelationType.ogretmen:
         return RelationGroup.okul;
       case RelationType.arkadas:
+      case RelationType.isArkadasi:
         return RelationGroup.arkadaslar;
       case RelationType.sevgili:
       case RelationType.eskiSevgili:
@@ -128,6 +132,8 @@ String relationLabel({
       return 'Öğretmen';
     case RelationType.arkadas:
       return 'Arkadaş';
+    case RelationType.isArkadasi:
+      return 'İş arkadaşı';
     case RelationType.sevgili:
       return gender == Gender.kadin ? 'Kız arkadaş' : 'Erkek arkadaş';
     case RelationType.eskiSevgili:
@@ -187,6 +193,8 @@ String relationPossessive({
       return 'Öğretmenin';
     case RelationType.arkadas:
       return 'Arkadaşın';
+    case RelationType.isArkadasi:
+      return 'İş arkadaşın';
     case RelationType.sevgili:
       return gender == Gender.kadin ? 'Kız arkadaşın' : 'Erkek arkadaşın';
     case RelationType.eskiSevgili:

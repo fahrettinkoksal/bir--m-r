@@ -20,6 +20,7 @@ import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
+import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/adoption.dart';
@@ -541,7 +542,8 @@ class GameController extends ChangeNotifier {
 
   /// Mülakat sorusunu cevaplar.
   JobOutcome? answerInterview(int optionIndex) => _runJob(
-        (GameState current) => _jobs.answerInterview(current, optionIndex),
+        (GameState current) =>
+            _jobs.answerInterview(current, optionIndex, _random),
       );
 
   /// Mülakatı yarıda bırakır.
@@ -565,6 +567,50 @@ class GameController extends ChangeNotifier {
 
   /// İşten ayrılır.
   JobOutcome? quitJob() => _runJob((GameState current) => _jobs.quit(current));
+
+  // -------------------------------------------------------------------
+  // Meslekte ilerleme (Paket 9)
+  // -------------------------------------------------------------------
+
+  /// Zam istemek şu an mümkün mü?
+  InteractionAvailability raiseAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun yüklenmedi.');
+    }
+    return CareerProgress.raiseAvailability(current);
+  }
+
+  /// Terfi istemek şu an mümkün mü?
+  InteractionAvailability promotionAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun yüklenmedi.');
+    }
+    return CareerProgress.promotionAvailability(current);
+  }
+
+  /// Zam ister; sonucu metin olarak döner.
+  String? askForRaise() => _runCareerRequest(
+        (GameState current) => CareerProgress.askForRaise(current, _random),
+      );
+
+  /// Terfi ister; sonucu metin olarak döner.
+  String? askForPromotion() => _runCareerRequest(
+        (GameState current) =>
+            CareerProgress.askForPromotion(current, _random),
+      );
+
+  String? _runCareerRequest(CareerRequestResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final CareerRequestResult sonuc = islem(current);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
 
   JobOutcome? _runJob(JobResult Function(GameState) islem) {
     final GameState? current = _state;

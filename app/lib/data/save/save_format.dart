@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 22;
+const int kSaveFormatVersion = 23;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -76,8 +76,18 @@ abstract final class SaveMigrations {
     if (from <= 19) guncel = _v19ToV20(guncel);
     if (from <= 20) guncel = _v20ToV21(guncel);
     if (from <= 21) guncel = _v21ToV22(guncel);
+    if (from <= 22) guncel = _v22ToV23(guncel);
     return guncel;
   }
+
+  /// Sürüm 22 → 23: kariyer geçmişi, görev seviyesi ve iş arkadaşları
+  /// eklendi (Paket 9).
+  ///
+  /// Eski kayıtlarda görev seviyesi 0, maaş katalog maaşı ve kariyer
+  /// geçmişi boştur. **Geriye dönük iş geçmişi uydurulmaz**: oyuncunun
+  /// önceki işleri `pastJobIds` içinde durduğu gibi kalır. İş arkadaşı da
+  /// geriye dönük üretilmez; yeni işe girildiğinde tanışılır.
+  static Map<String, Object?> _v22ToV23(Map<String, Object?> body) => body;
 
   /// Sürüm 21 → 22: vasiyette mirasçı çocuk seçimi eklendi (D-052).
   ///

@@ -5,10 +5,12 @@ import '../../../data/job_catalog.dart';
 import '../../../data/university_catalog.dart';
 import '../../../domain/career/job_market.dart';
 import '../../../domain/education/education_path.dart';
+import '../../../domain/models/career.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../widgets/interview_sheet.dart';
+import '../../theme/bir_omur_theme.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
 
@@ -554,3 +556,179 @@ class _JobCard extends StatelessWidget {
 /// dışa aktarılır; arayüz katmanı kendi kopyasını üretmez.
 const EducationPath educationPath = EducationPath();
 const JobMarket jobMarket = JobMarket();
+
+/// Kariyer geçmişi: çalışılan bütün işler ve oradaki önemli anlar.
+///
+/// İş değiştirince eski kayıt **silinmez** (Paket 9). Kayıt yoksa uydurma
+/// bir geçmiş gösterilmez.
+class CareerHistoryPage extends StatelessWidget {
+  const CareerHistoryPage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final GameState state = GameScope.of(context).state!;
+    final List<JobHistoryEntry> kayitlar =
+        state.career.allEntries().reversed.toList(growable: false);
+
+    return SectionScaffold(
+      accent: BirOmurAccents.cini,
+      title: 'Kariyer geçmişi',
+      subtitle: kayitlar.isEmpty
+          ? 'Henüz çalışma kaydın yok.'
+          : 'Çalıştığın işler, görevlerin ve oradaki önemli anlar.',
+      backLabel: 'Meslek',
+      onBack: onBack,
+      children: <Widget>[
+        if (kayitlar.isEmpty)
+          const InfoPanel(
+            icon: Icons.work_outline,
+            text: 'Henüz bir işte çalışmadın. İlk işine girdiğinde bu '
+                'bölümde görünecek.',
+          )
+        else
+          for (final JobHistoryEntry kayit in kayitlar) ...<Widget>[
+            _HistoryCard(entry: kayit, playerAge: state.player.age),
+            const SizedBox(height: 10),
+          ],
+      ],
+    );
+  }
+}
+
+class _HistoryCard extends StatelessWidget {
+  const _HistoryCard({required this.entry, required this.playerAge});
+
+  final JobHistoryEntry entry;
+  final int playerAge;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool suruyor = entry.endedAtAge == null;
+    final BirOmurAccent renk =
+        suruyor ? BirOmurAccents.mor : BirOmurAccents.cini;
+    final int yil = entry.endedAtAge == null
+        ? playerAge - entry.startedAtAge
+        : entry.years!;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(
+              renk.of(context).withValues(alpha: 0.10),
+              theme.colorScheme.surfaceContainerHighest,
+            ),
+            theme.colorScheme.surfaceContainerHighest,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: renk.of(context).withValues(alpha: 0.26)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              AccentIconTile(
+                icon: suruyor
+                    ? Icons.work_outline
+                    : Icons.work_history_outlined,
+                accent: renk,
+                size: 38,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(entry.title, style: theme.textTheme.titleMedium),
+                    Text(
+                      suruyor
+                          ? '${entry.startedAtAge} yaşından beri · $yil yıl'
+                          : '${entry.startedAtAge}-${entry.endedAtAge} yaş · '
+                              '$yil yıl',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (entry.salary != null)
+            _HistoryRow(
+              label: suruyor ? 'Yıllık maaş' : 'Son maaş',
+              value: trMoney(entry.salary!),
+            ),
+          if (entry.city != null)
+            _HistoryRow(label: 'Şehir', value: entry.city!),
+          if (entry.endReason != null)
+            _HistoryRow(label: 'Ayrılış', value: entry.endReason!.label),
+          if (entry.milestones.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 8),
+            Text(
+              'Bu işteki önemli anlar',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: renk.of(context),
+              ),
+            ),
+            const SizedBox(height: 4),
+            for (final CareerMilestone an in entry.milestones)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(
+                  '${an.age} yaş · ${an.text}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryRow extends StatelessWidget {
+  const _HistoryRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -137,6 +137,8 @@ BirOmurAccent _accentFor(Person person) {
     case RelationType.arkadas:
     case RelationType.sinifArkadasi:
       return BirOmurAccents.turuncu;
+    case RelationType.isArkadasi:
+      return BirOmurAccents.mor;
     case RelationType.ogretmen:
       return BirOmurAccents.mor;
     case RelationType.anneanne:

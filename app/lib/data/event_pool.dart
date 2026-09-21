@@ -9,6 +9,7 @@ library;
 import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 import 'event_pool_extra.dart';
+import 'event_pool_work.dart';
 import 'event_pool_stages.dart';
 
 /// Hikâye izleri (D-008). Seçimler bu izleri bırakır, sonraki olaylar arar.
@@ -1481,4 +1482,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
 
   // İleri yaş, iş hayatı, komşuluk ve sonuç zincirleri (Paket F1).
   ...kExtraEvents,
+
+  // Meslek hayatı: iş arkadaşları, sorumluluk ve zam görüşmeleri (Paket 9).
+  ...kWorkEvents,
 ];

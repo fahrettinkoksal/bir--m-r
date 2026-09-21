@@ -42,6 +42,8 @@ class EventRequirement {
     this.requireReachable = false,
     this.requiresSocialAccount = false,
     this.requiredLicenses = const <String>{},
+    this.requiresEmployed = false,
+    this.requiresMinYearsInJob = 0,
   });
 
   final int minAge;
@@ -111,6 +113,16 @@ class EventRequirement {
   ///
   /// Aracı olan ama ehliyeti olmayan oyuncuya "direksiyona geçtin" denmez.
   final Set<String> requiredLicenses;
+
+  /// Oyuncunun **şu an bir işte çalışıyor** olmasını gerektirir.
+  ///
+  /// İşsiz oyuncuya iş yerinde geçen olay çıkmaz (Paket 9).
+  final bool requiresEmployed;
+
+  /// Şu anki işte geçmiş olması gereken en az yıl.
+  ///
+  /// İşe girdiği gün "yıllardır buradasın" denmesin diye kullanılır.
+  final int requiresMinYearsInJob;
 
   /// Olayın kişisi, daha önce bir hikâye rolüne kilitlenmiş kişidir.
   ///
