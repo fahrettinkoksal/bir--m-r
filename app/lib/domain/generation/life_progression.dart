@@ -9,6 +9,7 @@ import '../social/social_income.dart';
 import '../models/sponsorship.dart';
 import '../career/job_market.dart';
 import '../education/education_path.dart';
+import '../education/school_performance.dart';
 import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
 import '../models/education.dart';
@@ -132,7 +133,12 @@ class LifeProgression {
 
     // Eğitim durumu yaştan türetilmez; burada açıkça ilerletilir ve
     // anlamlı geçişler hayat günlüğüne yazılır.
-    EducationState education = _advanceEducation(state.education, newAge);
+    EducationState education = _advanceEducation(
+      state.education,
+      newAge,
+      intelligence: state.player.stats.intelligence,
+      log: log,
+    );
     education = _applyUniversityExam(
       state: state,
       before: state.education,
@@ -338,6 +344,14 @@ class LifeProgression {
     // Sosyal medya: süresi dolan sponsorluklar kapanır, koşullar
     // uygunsa yeni bir teklif gelir (Paket 10).
     afterDeaths = _applySponsorships(afterDeaths, newAge);
+
+    // Burs: not ortalaması yüksek öğrenciye yılda bir kez ödenir
+    // (Paket 13).
+    final ({GameState state, String logText})? burs =
+        SchoolPerformance.payScholarship(afterDeaths, newAge);
+    if (burs != null) {
+      afterDeaths = _logLine(burs.state, newAge, burs.logText);
+    }
 
     // Yıllık geçim gideri: hane ve yaşam koşuluna göre, **bir kez** (D-033).
     final ({GameState state, String? logText}) gider =
@@ -939,7 +953,12 @@ class LifeProgression {
   ///
   /// Basit akış: belirlenen yaşta 1. sınıfa başlanır, her yaş bir sınıf
   /// ilerler, son sınıftan sonra okul biter. Sınav, not ve diploma yoktur.
-  EducationState _advanceEducation(EducationState current, int newAge) {
+  EducationState _advanceEducation(
+    EducationState current,
+    int newAge, {
+    required int intelligence,
+    required List<LifeLogEntry> log,
+  }) {
     // Üniversite öğrencisi her yıl bir sınıf ilerler ve süre dolunca mezun
     // olur. Lise kaydı burada değişmez.
     if (current.isUniversityStudent) {
@@ -962,12 +981,62 @@ class LifeProgression {
         enrolled: true,
         grade: 1,
         startedAtAge: newAge,
+        // İlk not ortalaması okula başlarken oluşur; öncesinde not yok.
+        gradeAverage: (intelligence * 0.8).round().clamp(0, 100),
+      );
+    }
+
+    // Yıl sonu: not ortalaması güncellenir, gerekirse sınıf tekrarlanır
+    // (Paket 13).
+    final int ortalama = SchoolPerformance.prototypeOnlyYearEndAverage(
+      current: current.gradeAverage ?? 50,
+      intelligence: intelligence,
+      rng: _rng,
+    );
+
+    final int mevcutSinif = current.grade ?? 1;
+    if (ortalama < SchoolPerformance.prototypeOnlyFailAverage &&
+        mevcutSinif >= SchoolPerformance.prototypeOnlyFailMinGrade) {
+      final int tekrar = current.repeatedYears + 1;
+      // Küçük çocuk okuldan atılmaz; sınıfı tekrarlar.
+      final bool ayrilir =
+          tekrar > SchoolPerformance.prototypeOnlyMaxRepeats &&
+              newAge >= SchoolPerformance.prototypeOnlyDropOutMinAge;
+      if (ayrilir) {
+        log.add(
+          LifeLogEntry(
+            age: newAge,
+            text: 'Notların toparlanmadı ve okulla yolların ayrıldı. '
+                'Eğitim geçmişin kayıtlarda duruyor.',
+            category: LogCategory.kisisel,
+          ),
+        );
+        return current.copyWith(
+          enrolled: false,
+          droppedOut: true,
+          gradeAverage: ortalama,
+          repeatedYears: tekrar,
+        );
+      }
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: 'Not ortalaman $ortalama; sınıfta kaldın. '
+              '${current.grade}. sınıfı tekrar okuyacaksın.',
+          category: LogCategory.kisisel,
+        ),
+      );
+      return current.copyWith(
+        gradeAverage: ortalama,
+        repeatedYears: tekrar,
       );
     }
 
     final int nextGrade = (current.grade ?? 1) + 1;
-    if (nextGrade > lastGrade) return current.asFinished();
-    return current.copyWith(grade: nextGrade);
+    if (nextGrade > lastGrade) {
+      return current.asFinished().copyWith(gradeAverage: ortalama);
+    }
+    return current.copyWith(grade: nextGrade, gradeAverage: ortalama);
   }
 
   /// Lise bitince üniversite sınav puanını **bir kez** hesaplar.

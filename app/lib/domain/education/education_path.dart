@@ -55,7 +55,12 @@ class EducationPath {
   /// şans da etkiler. Puan ne olursa olsun en az üç alan açık kalır.
   int placementScore(GameState state, Random rng) {
     final int zeka = state.player.stats.intelligence;
-    int puan = (zeka * prototypeOnlyIntelligenceWeight).round();
+    // Not ortalaması varsa zekâyla birlikte sayılır: okulda çalışmak
+    // yerleştirme puanını gerçekten değiştirir (Paket 13).
+    final int? ortalama = state.education.gradeAverage;
+    final int taban =
+        ortalama == null ? zeka : ((zeka + ortalama * 2) / 3).round();
+    int puan = (taban * prototypeOnlyIntelligenceWeight).round();
     if (state.storyFlags.contains('derste_soz_aldi')) {
       puan += prototypeOnlyStudyBonus;
     }
@@ -102,7 +107,11 @@ class EducationPath {
   int computeUniversityExamScore(GameState state, Random rng) {
     final int taban =
         state.education.placementScore ?? state.player.stats.intelligence;
-    int puan = ((taban + state.player.stats.intelligence) / 2).round();
+    // Lise not ortalaması sınav puanının üçüncü bileşenidir.
+    final int ortalama =
+        state.education.gradeAverage ?? state.player.stats.intelligence;
+    int puan =
+        ((taban + state.player.stats.intelligence + ortalama) / 3).round();
     puan += rng.nextInt(11); // prototypeOnly: sınav günü
     return puan.clamp(0, 100);
   }

@@ -189,6 +189,18 @@ void main() {
           if (state.hasPendingEvent) {
             final ActiveEvent olay = state.pendingEvent!;
             final bool bisiklet = olay.eventId == 'bisiklet_hediyesi';
+            if (bisiklet) {
+              // Rozet "gerçekten uygulanan" etkiyi gösterir: mutluluk
+              // zaten 100'deyse artış yazılmaz (D-035). Bu test artışı
+              // sınadığı için tavan altından başlatılır.
+              controller.debugSetState(
+                state.copyWith(
+                  player: state.player.copyWith(
+                    stats: state.player.stats.copyWith(happiness: 60),
+                  ),
+                ),
+              );
+            }
             final EventChoiceResult? sonuc = controller.chooseEventOption(
               bisiklet ? 'sarilarak' : olay.choices.first.id,
             );

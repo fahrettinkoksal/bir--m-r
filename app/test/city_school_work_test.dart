@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/data/save/save_format.dart';
 import 'package:bir_omur/data/save/save_service.dart';
 import 'package:bir_omur/data/save/save_store.dart';
 import 'package:bir_omur/data/shop_catalog.dart';
@@ -329,7 +330,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 21, 'state': body},
+            <String, Object?>{'formatVersion': kMinReadableSaveVersion, 'state': body},
           ),
         ),
       ).load();

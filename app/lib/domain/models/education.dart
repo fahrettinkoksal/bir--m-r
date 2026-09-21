@@ -60,6 +60,10 @@ class EducationState {
     this.universityProgramId,
     this.universityYear,
     this.universityFinished = false,
+    this.gradeAverage,
+    this.repeatedYears = 0,
+    this.droppedOut = false,
+    this.scholarshipSinceAge,
   }) : assert(
           !enrolled || grade != null,
           'Okula kayıtlı öğrencinin sınıfı olmalı.',
@@ -117,6 +121,23 @@ class EducationState {
 
   /// Üniversite bitirildi mi?
   final bool universityFinished;
+
+  /// prototypeOnly: 0-100 arası not ortalaması (Paket 13).
+  ///
+  /// Okula başlamadan önce ve okul dışında `null`'dır; uydurma not
+  /// yazılmaz. Ders çalışmak, okul olayları ve zekâ ortalamayı değiştirir.
+  final int? gradeAverage;
+
+  /// Aynı sınıfı kaç kez tekrarladı?
+  final int repeatedYears;
+
+  /// Okuldan ayrılmak zorunda kaldı mı? (Bkz. Q-082.)
+  ///
+  /// Ayrılan oyuncunun geçmişi silinmez; yalnızca okul kaydı kapanır.
+  final bool droppedOut;
+
+  /// Burs almaya başladığı yaş; hiç almadıysa `null`.
+  final int? scholarshipSinceAge;
 
   /// Okula (lise veya üniversiteye) devam ediliyor mu?
   bool get isStudent => enrolled || isUniversityStudent;
@@ -184,6 +205,10 @@ class EducationState {
     Object? universityProgramId = _unsetEdu,
     Object? universityYear = _unsetEdu,
     bool? universityFinished,
+    Object? gradeAverage = _unsetEdu,
+    int? repeatedYears,
+    bool? droppedOut,
+    Object? scholarshipSinceAge = _unsetEdu,
   }) {
     return EducationState(
       enrolled: enrolled ?? this.enrolled,
@@ -205,6 +230,14 @@ class EducationState {
       universityYear:
           universityYear == _unsetEdu ? this.universityYear : universityYear as int?,
       universityFinished: universityFinished ?? this.universityFinished,
+      gradeAverage: gradeAverage == _unsetEdu
+          ? this.gradeAverage
+          : gradeAverage as int?,
+      repeatedYears: repeatedYears ?? this.repeatedYears,
+      droppedOut: droppedOut ?? this.droppedOut,
+      scholarshipSinceAge: scholarshipSinceAge == _unsetEdu
+          ? this.scholarshipSinceAge
+          : scholarshipSinceAge as int?,
     );
   }
 
@@ -220,6 +253,12 @@ class EducationState {
         universityProgramId: universityProgramId,
         universityYear: universityYear,
         universityFinished: universityFinished,
+        // Not ortalaması ve burs geçmişi mezuniyette de korunur; uydurma
+        // değer yazılmaz (Paket 13).
+        gradeAverage: gradeAverage,
+        repeatedYears: repeatedYears,
+        droppedOut: droppedOut,
+        scholarshipSinceAge: scholarshipSinceAge,
       );
 }
 

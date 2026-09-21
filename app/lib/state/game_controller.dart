@@ -24,6 +24,7 @@ import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
 import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
+import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
 import '../domain/life/notices.dart';
 import '../domain/life/will.dart';
@@ -592,6 +593,31 @@ class GameController extends ChangeNotifier {
       return const InteractionAvailability.blocked('Oyun yüklenmedi.');
     }
     return CareerProgress.promotionAvailability(current);
+  }
+
+  // -------------------------------------------------------------------
+  // Okul başarısı (Paket 13)
+  // -------------------------------------------------------------------
+
+  /// Ders çalışmak şu an mümkün mü?
+  InteractionAvailability studyAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun yüklenmedi.');
+    }
+    return SchoolPerformance.studyAvailability(current);
+  }
+
+  /// Ders çalışır; sonucu metin olarak döner.
+  String? study() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final StudyResult sonuc = SchoolPerformance.study(current, _random);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
   }
 
   /// Emeklilik şu an mümkün mü?

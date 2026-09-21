@@ -300,8 +300,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('tab_okul_meslek')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Sınıf Arkadaşları'));
-      await tester.pumpAndSettle();
+      await tapMenuRow(tester, 'Sınıf Arkadaşları');
 
       final Person sinifArkadasi = controller.state!.currentClassmates.first;
       await tester.tap(find.text(sinifArkadasi.fullName).first);

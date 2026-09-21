@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 26;
+const int kSaveFormatVersion = 27;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 ///
@@ -19,7 +19,7 @@ const int kSaveFormatVersion = 26;
 /// kaymaz, yoksa eski kayıtlar sessizce açılamaz hâle gelir. Daha eski
 /// bir kayıt açılmak istenirse oyuncuya anlaşılır bir mesaj gösterilir
 /// ve **kayıt silinmez**.
-const int kMinReadableSaveVersion = 21;
+const int kMinReadableSaveVersion = 22;
 
 /// Kayıt dosyası okunamadığında atılır.
 ///
@@ -66,13 +66,20 @@ abstract final class SaveMigrations {
       );
     }
     Map<String, Object?> guncel = body;
-    if (from <= 21) guncel = _v21ToV22(guncel);
     if (from <= 22) guncel = _v22ToV23(guncel);
     if (from <= 23) guncel = _v23ToV24(guncel);
     if (from <= 24) guncel = _v24ToV25(guncel);
     if (from <= 25) guncel = _v25ToV26(guncel);
+    if (from <= 26) guncel = _v26ToV27(guncel);
     return guncel;
   }
+
+  /// Sürüm 26 → 27: okul başarısı eklendi (Paket 13).
+  ///
+  /// Eski kayıtlarda not ortalaması yoktur; **geriye dönük not
+  /// uydurulmaz**. Öğrenci sınıfta kalmış sayılmaz, burs geçmişi boş
+  /// başlar ve eğitim durumu olduğu gibi korunur.
+  static Map<String, Object?> _v26ToV27(Map<String, Object?> body) => body;
 
   /// Sürüm 25 → 26: emeklilik ve torunlar eklendi (Paket 12).
   ///
@@ -102,13 +109,6 @@ abstract final class SaveMigrations {
   /// önceki işleri `pastJobIds` içinde durduğu gibi kalır. İş arkadaşı da
   /// geriye dönük üretilmez; yeni işe girildiğinde tanışılır.
   static Map<String, Object?> _v22ToV23(Map<String, Object?> body) => body;
-
-  /// Sürüm 21 → 22: vasiyette mirasçı çocuk seçimi eklendi (D-052).
-  ///
-  /// Eski kayıtlarda seçim yoktur; `null` kalır ve miras eskisi gibi
-  /// çocuklar arasında eşit bölünür. Hiçbir kişi veya miras kaydı
-  /// değişmez.
-  static Map<String, Object?> _v21ToV22(Map<String, Object?> body) => body;
 
   // ---------------------------------------------------------------
   // Daha eski sürümler

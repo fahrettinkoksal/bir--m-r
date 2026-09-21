@@ -11,6 +11,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Puan görünürlüğü ve mülakat penceresinin gerçekten çalıştığını sınar.
 void main() {
   late GameController controller;
@@ -70,8 +72,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, mezunDurum());
 
-    await tester.tap(find.text('Mezuniyet sonrası'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Mezuniyet sonrası');
 
     expect(find.byKey(const Key('university_exam_score')), findsOneWidget);
     expect(find.textContaining('Üniversite sınav puanın: 74'), findsOneWidget);
@@ -84,8 +85,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, mezunDurum());
 
-    await tester.tap(find.text('İş ara'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'İş ara');
     await tester.tap(find.text('Başvur').first);
     await tester.pumpAndSettle();
 
@@ -112,8 +112,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, mezunDurum());
 
-    await tester.tap(find.text('İş ara'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'İş ara');
     await tester.tap(find.text('Başvur').first);
     await tester.pumpAndSettle();
 

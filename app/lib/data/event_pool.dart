@@ -10,6 +10,7 @@ import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_extra.dart';
+import 'event_pool_infancy.dart';
 import 'event_pool_social.dart';
 import 'event_pool_travel.dart';
 import 'event_pool_work.dart';
@@ -1497,4 +1498,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
 
   // İleri yaş, emeklilik ve torunlar (Paket 12).
   ...kElderEvents,
+
+  // İlk yıllar: 0-4 yaş (Paket 13).
+  ...kInfancyEvents,
 ];

@@ -71,9 +71,18 @@ void main() {
       );
     });
 
-    test('her yaşta bir sınıf ilerler ve kademeler doğru geçer', () {
+    test('notu yeterli öğrenci her yaşta bir sınıf ilerler', () {
       final GameController controller = GameController(random: Random(3));
       controller.startNewLife(mode: StartMode.tamamenRastgele, seed: 3);
+      // Paket 13'ten beri lisede sınıfta kalmak mümkün; bu test sınıf
+      // ilerleyişini sınadığı için notu yüksek bir öğrenci kurulur.
+      controller.debugSetState(
+        controller.state!.copyWith(
+          player: controller.state!.player.copyWith(
+            stats: controller.state!.player.stats.copyWith(intelligence: 90),
+          ),
+        ),
+      );
 
       const int baslangic = LifeProgression.prototypeOnlySchoolStartAge;
       for (int sinif = 1; sinif <= LifeProgression.lastGrade; sinif++) {
@@ -91,6 +100,14 @@ void main() {
     test('son sınıftan sonra okul biter, öğrencilik sona erer', () {
       final GameController controller = GameController(random: Random(3));
       controller.startNewLife(mode: StartMode.tamamenRastgele, seed: 3);
+      // Sınıfta kalma bu testin konusu değil; notu yüksek öğrenci.
+      controller.debugSetState(
+        controller.state!.copyWith(
+          player: controller.state!.player.copyWith(
+            stats: controller.state!.player.stats.copyWith(intelligence: 90),
+          ),
+        ),
+      );
 
       const int bitisYasi = LifeProgression.prototypeOnlySchoolStartAge +
           LifeProgression.lastGrade;

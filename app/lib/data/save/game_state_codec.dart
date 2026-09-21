@@ -392,7 +392,12 @@ Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
       'universityProgramId': e.universityProgramId,
       'universityYear': e.universityYear,
       'universityFinished': e.universityFinished,
-    };
+          // Okul başarısı (Paket 13).
+      'gradeAverage': e.gradeAverage,
+      'repeatedYears': e.repeatedYears,
+      'droppedOut': e.droppedOut,
+      'scholarshipSinceAge': e.scholarshipSinceAge,
+};
 
 Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
       'jobCity': c.jobCity,
@@ -1085,6 +1090,12 @@ EducationState _decodeEducation(Map<String, Object?> json) {
     universityProgramId: _stringOrNull(json, 'universityProgramId'),
     universityYear: _intOrNull(json, 'universityYear'),
     universityFinished: _bool(json, 'universityFinished'),
+    // Eski kayıtlarda not ortalaması yoktur; geriye dönük not
+    // uydurulmaz ve öğrenci sınıfta kalmış sayılmaz (Paket 13).
+    gradeAverage: _intOrNull(json, 'gradeAverage'),
+    repeatedYears: _intOrNull(json, 'repeatedYears') ?? 0,
+    droppedOut: json['droppedOut'] == true,
+    scholarshipSinceAge: _intOrNull(json, 'scholarshipSinceAge'),
   );
 }
 

@@ -522,8 +522,12 @@ void main() {
         }
       }
       expect(toplamYas, greaterThan(0));
-      // Ölçüm: olaysız yaşlar mevcut havuzda gerçekten oluşuyor.
-      expect(olaysizYas, greaterThan(0));
+      // Ölçüm (Q-005): olaysız yıl oranı. Havuz büyüdükçe bu oran
+      // düşüyor; Paket 13'ten sonra ilk 26 yıl tamamen dolabiliyor.
+      // Bu yüzden "olaysız yıl mutlaka olmalı" beklentisi kaldırıldı;
+      // ölçülen şey artık kapsamın yeterliliği.
+      expect(olaysizYas, lessThanOrEqualTo((toplamYas * 0.5).round()),
+          reason: 'Yılların yarısından fazlası olaysız geçmemeli');
     });
   });
 }

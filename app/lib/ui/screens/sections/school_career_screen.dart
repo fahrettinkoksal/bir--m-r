@@ -61,7 +61,13 @@ class _SchoolView extends StatefulWidget {
 class _SchoolViewState extends State<_SchoolView> {
   _SchoolPage _page = _SchoolPage.kok;
 
-  void _go(_SchoolPage page) => setState(() => _page = page);
+  /// Son eylemin ekranda gösterilen sonucu (ders çalışma gibi).
+  String? _sonuc;
+
+  void _go(_SchoolPage page) => setState(() {
+        _page = page;
+        _sonuc = null;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +121,20 @@ class _SchoolViewState extends State<_SchoolView> {
           title: egitim.level?.label ?? 'Okul',
           rows: <({String label, String value})>[
             (label: 'Sınıf', value: '${egitim.grade}. sınıf'),
+            // Not ortalaması yalnızca gerçekten oluştuysa gösterilir
+            // (Paket 13); uydurma not yazılmaz.
+            if (egitim.gradeAverage != null)
+              (label: 'Not ortalaman', value: '${egitim.gradeAverage}'),
+            if (egitim.repeatedYears > 0)
+              (
+                label: 'Sınıf tekrarı',
+                value: '${egitim.repeatedYears} kez',
+              ),
+            if (egitim.scholarshipSinceAge != null)
+              (
+                label: 'Burs',
+                value: '${egitim.scholarshipSinceAge} yaşından beri',
+              ),
             if (egitim.trackInfo != null)
               (label: 'Alan', value: egitim.trackInfo!.label),
             if (egitim.placementScore != null)
@@ -128,6 +148,38 @@ class _SchoolViewState extends State<_SchoolView> {
           ],
         ),
         const SizedBox(height: 12),
+        // Ders çalışmak gerçek bir eylem: not ortalamasını ve zekâyı
+        // değiştirir, biraz da yorar (Paket 13).
+        Builder(
+          builder: (BuildContext context) {
+            final GameController controller = GameScope.of(context);
+            final InteractionAvailability uygunluk =
+                controller.studyAvailability();
+            if (!uygunluk.isAllowed) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: InfoPanel(
+                  icon: Icons.menu_book_outlined,
+                  text: 'Ders çalışamazsın: ${uygunluk.reason}',
+                ),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: MenuRow(
+                key: const Key('school_study_row'),
+                title: 'Ders çalış',
+                subtitle: 'Not ortalamanı yükseltir, biraz yorar',
+                icon: Icons.menu_book_outlined,
+                accent: BirOmurAccents.yesil,
+                onTap: () {
+                  final String? metin = controller.study();
+                  setState(() => _sonuc = metin);
+                },
+              ),
+            );
+          },
+        ),
         // Lise alanı seçimi bekliyorsa en üstte durur.
         if (egitim.awaitingTrackChoice) ...<Widget>[
           MenuRow(
@@ -156,6 +208,10 @@ class _SchoolViewState extends State<_SchoolView> {
           trailingText: '${ogretmenler.length}',
           onTap: () => _go(_SchoolPage.ogretmenler),
         ),
+        if (_sonuc != null) ...<Widget>[
+          InfoPanel(icon: Icons.info_outline, text: _sonuc!),
+          const SizedBox(height: 10),
+        ],
         const SizedBox(height: 12),
         const InfoPanel(
           icon: Icons.menu_book_outlined,

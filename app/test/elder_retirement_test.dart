@@ -162,8 +162,8 @@ void main() {
       expect(Retirement.payPension(geri, 65).logText, isNull);
     });
 
-    test('kayıt sürümü 26 ve eski kayıtta emeklilik yoktur', () {
-      expect(kSaveFormatVersion, 26);
+    test('kayıt sürümü 27 ve eski kayıtta emeklilik yoktur', () {
+      expect(kSaveFormatVersion, 27);
       final GameState s = calisan(age: 65);
       final Map<String, Object?> body =
           Map<String, Object?>.from(encodeGameState(s));
@@ -174,7 +174,7 @@ void main() {
       body['career'] = career;
 
       final GameState geri =
-          decodeGameState(SaveMigrations.migrate(body, 25));
+          decodeGameState(SaveMigrations.migrate(body, 26));
       expect(geri.career.isRetired, isFalse);
       expect(geri.career.pension, isNull);
     });
