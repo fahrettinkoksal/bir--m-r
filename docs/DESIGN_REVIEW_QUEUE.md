@@ -1594,5 +1594,27 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Ayrıca bu pakette uygulanan karar (Faho):** kayıt dosyası göçü geriye dönük **son beş sürümle** sınırlandı (`kMinReadableSaveVersion = 21`). Daha eski kayıtlar açılmıyor; oyuncuya dosyanın **silinmediği** söyleniyor. Sürüm 20 ve öncesine ait göç adımları ve onlara bağlı testler kaldırıldı — gerekirse sürüm geçmişinden geri alınabilir.
 
+### Q-082 — Okul başarısı: not ortalaması, burs ve sınıfta kalma
+**Durum:** Yön **Faho tarafından istendi** ("okul tarafına dediklerini yapalım, okuldan atılma, burs gibi sistemler"); **sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 13. **Bağlantılı:** Q-040 (eğitim), Q-048 (ekonomi).
+
+**Şu an kodda olan (geçici) çözüm:**
+- **Not ortalaması** 0-100 arası; okula başlarken zekâdan türer (zekâ × 0,8 + şans). Okul dışında `null`'dır, **geriye dönük not uydurulmaz**.
+- Her yıl sonunda ortalama zekâya doğru kayar (fark × 0,25) ve ±6 dalgalanır: çalışmayan zeki öğrenci ortalamaya döner, çalışan kazandığını korur.
+- **Ders çalış:** yılda 2 kez, ortalamaya +6 (yüksek ortalamada +4/+2), zekâya +1, mutluluğa −2.
+- **Burs:** lise 9. sınıftan itibaren ortalama **≥ 80** ise yılda **45.000 ₺**. Okuldan ayrılan burs almaz.
+- **Sınıfta kalma:** ortalama **< 35** ise sınıf tekrarı — ama **yalnızca lisede (9. sınıf ve üstü)**. İlkokul ve ortaokulda düşük not sınıfta bırakmaz.
+- **Okuldan ayrılma:** üst üste **2 sınıf tekrarından sonra** ve yalnızca **15 yaş ve üstünde**. Eğitim geçmişi silinmez; oyuncu çalışma hayatına geçebilir.
+- Ortalama artık **yerleştirme puanını** ve **üniversite sınav puanını** gerçekten etkiliyor: okulda çalışmak sonuç doğuruyor.
+
+**Karar soruları:**
+1. Ortalama 0-100 ölçeği mi kalsın, yoksa 4'lük/5'lik sisteme mi çevrilsin?
+2. Burs eşiği 80 ve tutar 45.000 ₺ uygun mu? Üniversitede burs farklı olmalı mı?
+3. Sınıfta kalma lisede başlasın mı, yoksa ortaokulda da olsun mu?
+4. Okuldan ayrılan oyuncu **geri dönebilmeli mi** (açık lise gibi)? Şu an dönemiyor.
+5. Ders çalışmanın mutluluk bedeli (−2) doğru mu; "çalışmak mutsuz eder" mesajı istenir mi?
+6. Devamsızlık, sınav haftası, özel ders gibi ayrı mekanikler eklenmeli mi? Şu an yok.
+
+**Ayrıca bu pakette:** ilk yılların (0-4 yaş) olayları genişletildi. **Not:** ilk adım, ilk kelime, aşı günü, komşu ziyareti ve ilk oyuncak paylaşımı olayları **zaten vardı**; tekrar yazılmadı. Eklenenler: uykusuz geceler, ateşli gece, ilk ayrılık, "neden" soruları, ilk doğum günü ve yıllar sonra anlatılan bebeklik hikâyesi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
