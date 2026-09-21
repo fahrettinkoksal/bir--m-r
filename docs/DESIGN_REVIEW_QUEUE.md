@@ -1412,6 +1412,14 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Bütün değerler `prototypeOnly` sabitleriyle tek yerde tutuldu; değiştirmek tek satırlık iştir.
 
+
+**Paket 7 güncellemesi (2026-09-21).** Kendi hayatı izlenen kişi (çocuk, kuşak adayı) artık **liseye geçtiği yıl alanını seçer**; alan zekâ/karizma ve küçük bir rastgelelikten türetilir, bir daha değişmez ve kuşak devamında oyuncunun eğitim kaydına taşınır. Üniversite bölümü seçiminde alanla uyumlu bölümlerin ağırlığı `prototypeOnly` **%70**. Ayrıca yaşlanmanın dış görünüşe etkisi (D-051) bu kişilere de **oyuncuyla aynı kuralla** işler.
+
+**Ek karar soruları:**
+1. NPC'nin lise alanı oyuncudaki yerleştirme sınavıyla aynı mantığa mı bağlanmalı, yoksa bu sadeleştirme yeterli mi?
+2. Alanın bölüm tercihine etkisi %70 uygun mu?
+3. NPC'nin dış görünüşü oyuncu ekranlarında ne kadar görünür olmalı?
+
 ### Q-070 — Özellik aktarımının formülü
 **Durum:** Kural **karara bağlandı (D-046)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 2.
 
@@ -1436,6 +1444,18 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 **Durum:** Kural **karara bağlandı (D-050)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 4.
 
 **Karar gereken sayılar:** cenaze katkı tutarı (kişiye/varlığa göre değişsin mi), katkının ilişki ve mutluluk etkisi, hangi bağlar için bildirim çıkar (şu an eş, anne, baba, çocuk, kardeş), bildirim penceresinin hangi sırayla açılacağı.
+
+**Paket 7 güncellemesi (2026-09-21).** Cenaze akışı iki adıma ayrıldı ve bildirim kapsamı genişletildi. Şu an kodda olan (geçici) davranış:
+- **Katılmak ile katkıda bulunmak ayrı seçimlerdir.** Önce "Cenazeye katıl / Katılamıyorum", sonra katkı miktarı sorulur. Katkı vermemek katılmayı engellemez; katılamamak katkıda bulunmayı engellemez.
+- Katılmanın mutluluk etkisi **+2**, katılamamanın **−3**, katkının **+3** (`prototypeOnly`). Etkiler toplanır ve yalnızca gerçekten uygulanan kadarı yazılır.
+- Cenazede bulunmak hayattaki **kan bağlarının** yakınlığını **+2** artırır; arkadaşlık gibi kan bağı olmayan bağlar etkilenmez.
+- Bildirim kapsamı: eş, anne, baba, çocuk, kardeş, anneanne/babaanne/dede **her hâlükârde**; sevgili, arkadaş, eski eş, teyze/dayı/hala/amca ise yalnızca yakınlık **≥ 60** ise (`prototypeOnly`).
+
+**Ek karar soruları:**
+1. Katılım/katılamama mutluluk etkileri (+2 / −3) uygun mu; katılamamanın bir etkisi olmalı mı?
+2. Cenazede bulunmanın yakınlık etkisi (+2) yalnızca kan bağlarına mı işlemeli, yoksa yakın arkadaşlara da mı?
+3. Bildirim eşiği 60 uygun mu; bağ türüne göre farklı eşikler mi olmalı?
+4. Oyuncunun cenazeye katılamamasının bir gerekçesi (şehir, sağlık, hapis) olmalı mı, yoksa serbest seçim mi kalmalı?
 
 ### Q-075 — Yaşlanmanın görünüşe etkisi
 **Durum:** Kural **karara bağlandı (D-051)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 5.
