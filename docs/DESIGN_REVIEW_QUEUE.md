@@ -1751,5 +1751,40 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 **Yan düzeltme (gerçek hata):** Olay penceresinde eylem düğmeleri kaydırma alanının içindeydi; uzun olay metinlerinde **"Devam" düğmesi ekranın altına kaçıp dokunulamaz hale geliyordu**. Düğmeler artık kaydırma alanının dışında, her zaman görünür.
 
 
+### Q-088 — Olay çeşitliliği: tekrar sönümü ve orta yaş içeriği
+**Durum:** Yön **Faho tarafından onaylandı** (21 Eylül 2026; ChatGPT o gün yoktu, Faho "hepsini yap, mantıklı geldi" dedi). **Sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 20, `app/lib/domain/events/event_engine.dart`, `app/lib/data/event_pool_midlife.dart`.
+
+**Ölçüm — sorun neydi:** 12 tam hayat simüle edildi.
+- Aynı olay bir hayatta **üç kez** çıkıyordu; 12 hayatta en sık olay **39 kez** görüldü.
+- 151 olayın yalnızca **94'ü** hiç görülüyordu.
+- Asıl sebep ağırlık değil **seçenek yokluğuydu:** 30-49 yaş arasında bir yılda ortalama yalnızca **1-2 uygun olay** vardı ve çoğu daha önce görülmüştü. Hayatın en uzun bölümü içerik olarak boştu.
+
+**Şu an kodda olan (geçici) çözüm — iki parça:**
+
+*1. Tekrar sönümü.* Bir olay her çıkışında ağırlığı **0,30 ile çarpılır** (taban: kendi ağırlığının %4'ü, olay tamamen kaybolmaz) ve tekrar aralığı **her görülmede 6 yıl büyür** (tavan 35 yıl). Sayaç kayda girer; eski kayıtlarda görülmüş her olay **bir kez** görülmüş sayılır, uydurma sayı yazılmaz.
+
+*2. Orta yetişkinlik paketi.* 28-58 yaş için **25 yeni olay**: kira zammı, borç isteyen tanıdık, beklenmedik masraf, birikim kararı, sınıf buluşması, uykusuz gece, aynada ilk beyaz, kırk yaş kararları, yeni bir uğraş, tanıdık düğünü, daralan çevre, taşınan komşu, çocukluk eşyası, unutulan doğum günü, uzak taziye, sağlığı erteleme, gönüllü çağrısı, teknolojinin gerisinde kalmak, ev sahibinin satması, boş hafta sonu, yarım kalan kitap, sabah yolu, ek iş teklifi. **İkisi önceki kararı hatırlıyor:** biriktiren oyuncuya birikimin karşılığı, sağlığını erteleyene ertelemenin bedeli çıkıyor.
+
+**Sonuç (aynı ölçümle):**
+| | Önce | Sonra |
+|---|---|---|
+| 30-49'da uygun olay / yıl | 1-2 | **21-22** |
+| Bunların hiç görülmemişi | 0,3-1,9 | **15-20** |
+| En çok tekrar (12 hayat) | 39 | **18** |
+| Farklı olay görüldü | 94/151 | **120/176** |
+| Olaysız yıl | %0 | %1 |
+
+**Karar soruları:**
+1. Tekrar sönümü sayıları (×0,30 ağırlık, +6 yıl aralık) uygun mu? Daha sert olsun mu — aynı olayı bir hayatta **hiç** iki kez görmemek istenir mi?
+2. Orta yaş olaylarının para tutarları (kira zammı −6.000 ₺, ek iş +14.000 ₺, ertelenen sağlığın bedeli −18.000 ₺) ekonomiyle uyumlu mu?
+3. "Sağlığı erteleme → yıllar sonra bedeli" zinciri fazla cezalandırıcı mı? Şu an ikinci kez ertelemek sağlığı 7 puan düşürüyor.
+4. Bu 25 olay Türkiye'deki orta yaşı doğru anlatıyor mu? Eksik kalan tipik anlar var mı?
+5. Aynı ölçüm **0-29 yaş** için 3-8 olay gösteriyor; çocukluk ve gençlik de genişletilsin mi?
+
+**Yan karar:** Kayıt biçimi 28'e çıktı; **beş sürümlük pencere kuralı gereği** okunabilir taban 22'den **23'e** yükseldi. Sürüm 22 kayıtları artık açılmıyor — dosya silinmiyor, anlaşılır mesaj gösteriliyor.
+
+**Not:** Testlerin tohumları artık sabit değil. Olay havuzu her büyüdüğünde rastgele akış değişiyor ve romantik zincir testleri elle güncellenmek zorunda kalıyordu; bu testler artık koşulu sağlayan ilk tohumu kendileri buluyor.
+
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
