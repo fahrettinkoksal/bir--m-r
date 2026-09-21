@@ -7,7 +7,12 @@ import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
+import '../../../domain/interaction/adoption.dart';
+import '../../../domain/interaction/marriage_engine.dart';
+import '../../../domain/models/person.dart';
 import '../../widgets/effect_chips.dart';
+import '../../widgets/person_card.dart';
+import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
 
@@ -424,6 +429,151 @@ class _OutcomeCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// **Evlat Edinme** sayfası (D-049).
+///
+/// Başvuru koşulları açıkça yazılır; koşul sağlanmıyorsa gerekçe gösterilir
+/// ve çalışmayan düğme konmaz (D-038). Başvurunun sonucu — olumlu ya da
+/// olumsuz — gerçek bir sonuçtur ve kayda girer.
+class AdoptionPage extends StatefulWidget {
+  const AdoptionPage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  State<AdoptionPage> createState() => _AdoptionPageState();
+}
+
+class _AdoptionPageState extends State<AdoptionPage> {
+  String? _sonuc;
+  bool _olumlu = false;
+
+  Future<void> _basvur() async {
+    final bool? onay = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Evlat edinme başvurusu'),
+        content: Text(
+          'Başvuru ve hazırlık masrafı ${trMoney(Adoption.prototypeOnlyCost)}. '
+          'Bu masraf yalnızca başvurun kabul edilirse düşer. Sonuç olumlu '
+          'olmayabilir.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Başvur'),
+          ),
+        ],
+      ),
+    );
+    if (onay != true || !mounted) return;
+
+    final ({FamilyOutcome outcome, bool adopted})? sonuc =
+        GameScope.of(context).adopt();
+    if (sonuc == null || !mounted) return;
+    setState(() {
+      _sonuc = sonuc.outcome.text;
+      _olumlu = sonuc.adopted;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameState state = GameScope.of(context).state!;
+    final InteractionAvailability durum =
+        GameScope.of(context).adoptionAvailability();
+    final List<Person> cocuklar = state.children;
+
+    return SectionScaffold(
+      title: 'Evlat Edinme',
+      subtitle: 'Bir çocuğa aile olmak',
+      backLabel: 'Aktiviteler',
+      onBack: widget.onBack,
+      children: <Widget>[
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Başvuru koşulları',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '• En az ${Adoption.prototypeOnlyMinAge} yaşında olmak\n'
+                  '• Başvuru masrafını karşılayabilmek '
+                  '(${trMoney(Adoption.prototypeOnlyCost)})\n'
+                  '• Çocuğun bakımını sağlayabilecek düzenli gelir ya da '
+                  'birikim\n'
+                  '• Evli olmak şart değildir',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (durum.isAllowed)
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('adoption_apply_button'),
+              onPressed: _basvur,
+              icon: const Icon(Icons.volunteer_activism_outlined),
+              label: const Text('Başvur'),
+            ),
+          )
+        else
+          InfoPanel(
+            icon: Icons.info_outline,
+            text: 'Şu an başvuramazsın: ${durum.reason}',
+          ),
+        if (_sonuc != null) ...<Widget>[
+          const SizedBox(height: 12),
+          Container(
+            key: const Key('adoption_result'),
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: (_olumlu
+                      ? theme.colorScheme.secondary
+                      : theme.colorScheme.tertiary)
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: (_olumlu
+                        ? theme.colorScheme.secondary
+                        : theme.colorScheme.tertiary)
+                    .withValues(alpha: 0.4),
+              ),
+            ),
+            child: Text(_sonuc!, style: theme.textTheme.bodyMedium),
+          ),
+        ],
+        if (cocuklar.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 16),
+          Text('Çocukların', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          for (final Person cocuk in cocuklar) ...<Widget>[
+            PersonCard(
+              person: cocuk,
+              playerAge: state.player.age,
+              onTap: () => PersonDetailSheet.show(context, personId: cocuk.id),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ],
+      ],
     );
   }
 }

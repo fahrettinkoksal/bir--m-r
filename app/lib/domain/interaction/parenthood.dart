@@ -42,6 +42,12 @@ class Parenthood {
   /// prototypeOnly: bu prototipte en fazla çocuk sayısı.
   static const int prototypeOnlyMaxChildren = 4;
 
+  /// prototypeOnly: evlilik dışı çocuk için gereken asgari yakınlık.
+  ///
+  /// Evlilik zorunlu değildir (D-047); ilişkinin gerçekten yürüdüğü bu
+  /// eşikle aranır.
+  static const int prototypeOnlyUnmarriedMinBond = 60;
+
   /// prototypeOnly: doğum ve hazırlık masrafı (₺).
   static const int prototypeOnlyBirthCost = 20000;
 
@@ -57,18 +63,38 @@ class Parenthood {
   /// prototypeOnly: hanedeki her çocuğun yıllık gideri için üst yaş.
   static const int prototypeOnlyDependentAge = 18;
 
+  /// Çocuğun diğer biyolojik ebeveyni olabilecek kişi.
+  ///
+  /// Evlilik zorunlu değildir (D-047): eş yoksa **hayattaki sevgili**
+  /// değerlendirilir. Akraba hiçbir durumda bu listeye girmez; yalnızca
+  /// romantik bağlar sayılır.
+  static Person? coParent(GameState state) {
+    if (state.isMarried) return state.spouse;
+    for (final Person p in state.people) {
+      if (p.isAlive && p.relation == RelationType.sevgili) return p;
+    }
+    return null;
+  }
+
   /// Çocuk sahibi olmaya engel; engel yoksa boş metin.
   String blockReason(GameState state) {
-    if (!state.isMarried) {
-      return 'Çocuk sahibi olmak için evli olman gerekiyor.';
+    final Person? partner = coParent(state);
+    if (partner == null) {
+      return 'Çocuk sahibi olmak için eşin ya da sevgilin olmalı.';
     }
     if (state.player.age < prototypeOnlyMinAge) {
       return '$prototypeOnlyMinAge yaşından itibaren çocuk sahibi '
           'olabilirsin.';
     }
-    final Person spouse = state.spouse!;
+    final Person spouse = partner;
     if (spouse.age < prototypeOnlyMinAge) {
       return '${spouse.firstName} bunun için henüz çok genç.';
+    }
+    // Evli değilken ilişkinin gerçekten yürüyor olması aranır (D-047).
+    if (!state.isMarried && spouse.bond < prototypeOnlyUnmarriedMinBond) {
+      return 'İlişkiniz bunun için yeterince yakın değil '
+          '(yakınlık ${spouse.bond}, gereken '
+          '$prototypeOnlyUnmarriedMinBond).';
     }
 
     // Yaş sınırı çiftteki kadına ve erkeğe ayrı uygulanır.
@@ -140,7 +166,7 @@ class Parenthood {
     // Soyadı: prototipte çocuk **babanın** soyadını alır. Evlenince eşin
     // soyadının değişip değişmeyeceği ayrı bir tasarım sorusudur (Q-063);
     // kimsenin kaydı bu yüzden değiştirilmez.
-    final Person es = state.spouse!;
+    final Person es = coParent(state)!;
     final String soyad = state.player.gender == Gender.erkek
         ? state.player.lastName
         : es.lastName;
@@ -202,7 +228,12 @@ class Parenthood {
                   .clamp(0, 100),
         ),
       ),
-      storyFlags: <String>{...state.storyFlags, StoryFlags.cocukSahibi},
+      storyFlags: <String>{
+        ...state.storyFlags,
+        StoryFlags.cocukSahibi,
+        // Evlilik dışı doğum ayrı bir izdir; ileride olaylar buna bakabilir.
+        if (!state.isMarried) StoryFlags.evlilikDisiCocuk,
+      },
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         LifeLogEntry(

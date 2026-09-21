@@ -74,6 +74,38 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Teklif eder; kabul edilmezse kişi kartını yeniden açıp tekrar dener.
+  ///
+  /// Teklif artık her zaman kabul edilmiyor (D-048); test bu yüzden
+  /// sonucu kilitlemek için kabul edilene kadar dener.
+  Future<void> teklifEtVeKabulEttir(
+    WidgetTester tester,
+    String adSoyad,
+  ) async {
+    for (int deneme = 0; deneme < 12; deneme++) {
+      if (controller.state!.isMarried) return;
+      if (find.byKey(const Key('person_marry_button')).evaluate().isEmpty) {
+        // Bekleme süresi dolsun diye yaş ilerletilir.
+        await sheetKapat(tester);
+        controller.debugSetState(
+          controller.state!.copyWith(
+            player: controller.state!.player
+                .copyWith(age: controller.state!.player.age + 2),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await kisiyiAc(tester, adSoyad);
+        continue;
+      }
+      await tester.tap(find.byKey(const Key('person_marry_button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Teklif et'));
+      await tester.pumpAndSettle();
+    }
+    expect(controller.state!.isMarried, isTrue,
+        reason: 'Teklif hiç kabul edilmedi');
+  }
+
   testWidgets('evlenme düğmesi koşul sağlanmadan gösterilmez',
       (WidgetTester tester) async {
     final ({GameState state, Person partner}) veri = sevgili(wallet: 1000);
@@ -81,7 +113,7 @@ void main() {
     await kisiyiAc(tester, veri.partner.fullName);
 
     expect(find.byKey(const Key('person_marry_button')), findsNothing);
-    expect(find.textContaining('Evlenmek için:'), findsOneWidget);
+    expect(find.textContaining('Evlenme teklifi için:'), findsOneWidget);
     expect(controller.state!.isMarried, isFalse);
   });
 
@@ -91,10 +123,7 @@ void main() {
     await pumpApp(tester, veri.state);
     await kisiyiAc(tester, veri.partner.fullName);
 
-    await tester.tap(find.byKey(const Key('person_marry_button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Evlen'));
-    await tester.pumpAndSettle();
+    await teklifEtVeKabulEttir(tester, veri.partner.fullName);
 
     expect(controller.state!.isMarried, isTrue);
     expect(controller.state!.spouse!.id, veri.partner.id);
@@ -111,10 +140,7 @@ void main() {
     final ({GameState state, Person partner}) veri = sevgili();
     await pumpApp(tester, veri.state);
     await kisiyiAc(tester, veri.partner.fullName);
-    await tester.tap(find.byKey(const Key('person_marry_button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Evlen'));
-    await tester.pumpAndSettle();
+    await teklifEtVeKabulEttir(tester, veri.partner.fullName);
 
     // Eş kartından çocuk sahibi olunur.
     await tester.tap(find.byKey(const Key('person_child_button')));
@@ -134,10 +160,7 @@ void main() {
     final ({GameState state, Person partner}) veri = sevgili();
     await pumpApp(tester, veri.state);
     await kisiyiAc(tester, veri.partner.fullName);
-    await tester.tap(find.byKey(const Key('person_marry_button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Evlen'));
-    await tester.pumpAndSettle();
+    await teklifEtVeKabulEttir(tester, veri.partner.fullName);
 
     await tester.tap(find.byKey(const Key('person_divorce_button')));
     await tester.pumpAndSettle();

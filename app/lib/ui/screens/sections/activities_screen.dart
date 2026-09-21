@@ -4,6 +4,7 @@ import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
 import '../../../domain/casino/casino_rules.dart';
+import '../../../domain/interaction/adoption.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -40,6 +41,7 @@ enum _ActivityPage {
   sosyalMedya,
   kumarhane,
   ehliyet,
+  evlatEdinme,
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
@@ -84,6 +86,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.ehliyet:
         return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.evlatEdinme:
+        return AdoptionPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -174,6 +178,19 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                     : '${state.licenses.length} ehliyetin var',
             icon: Icons.badge_outlined,
             onTap: () => _go(_ActivityPage.ehliyet),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Evlat edinme yetişkin yaşında açılır (D-049); evli olmak şart
+        // değildir.
+        if (state.player.age >= Adoption.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Evlat Edinme',
+            subtitle: state.children.isEmpty
+                ? 'Bir çocuğa aile olmak'
+                : '${state.children.length} çocuğun var',
+            icon: Icons.volunteer_activism_outlined,
+            onTap: () => _go(_ActivityPage.evlatEdinme),
           ),
           const SizedBox(height: 10),
         ],

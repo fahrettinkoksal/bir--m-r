@@ -309,12 +309,31 @@ void main() {
   // Çocuklar
   // ===================================================================
   group('Çocuklar (Paket E2)', () {
-    test('evli olmadan çocuk sahibi olunamaz', () {
-      final GameState state = sevgiliEkle(oyuncu(15)).state;
-      expect(ebeveynlik.blockReason(state), contains('evli'));
-      final FamilyResult r = ebeveynlik.haveChild(state, Random(1));
-      expect(r.outcome.applied, isFalse);
-      expect(r.state.children, isEmpty);
+    test('evlilik dışı çocuk mümkündür ama ilişki gerçek olmalıdır (D-047)',
+        () {
+      // Yakın bir ilişkide evlilik şart değildir.
+      final GameState yakin = sevgiliEkle(oyuncu(15), bond: 80).state;
+      expect(ebeveynlik.blockReason(yakin), isEmpty);
+      final FamilyResult olumlu = ebeveynlik.haveChild(yakin, Random(1));
+      expect(olumlu.outcome.applied, isTrue);
+      expect(olumlu.state.children.length, 1);
+      // Evlilik kaydı **oluşmaz**: sevgili kendiliğinden eş yapılmaz.
+      expect(olumlu.state.marriage, isNull);
+      expect(olumlu.state.isMarried, isFalse);
+
+      // Yeni başlamış, yakınlığı düşük ilişkide olmaz.
+      final GameState uzak = sevgiliEkle(oyuncu(15), bond: 30).state;
+      expect(ebeveynlik.blockReason(uzak), contains('yakın değil'));
+      expect(ebeveynlik.haveChild(uzak, Random(1)).outcome.applied, isFalse);
+    });
+
+    test('sevgili de eş de yoksa çocuk sahibi olunamaz', () {
+      final GameState yalniz = oyuncu(15);
+      expect(ebeveynlik.blockReason(yalniz), contains('sevgilin'));
+      expect(
+        ebeveynlik.haveChild(yalniz, Random(1)).outcome.applied,
+        isFalse,
+      );
     });
 
     test('çocuk gerçek ve kalıcı bir kişi kaydıdır', () {

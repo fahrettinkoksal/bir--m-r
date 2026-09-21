@@ -72,6 +72,7 @@ class GameState {
     this.healthWarned = false,
     this.marriage,
     this.generation = 1,
+    this.proposalAges = const <String, int>{},
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -326,6 +327,17 @@ class GameState {
   /// buraya bakar (D-037).
   final Marriage? marriage;
 
+  /// Teklif ve başvuru geçmişi: `anahtar -> yaş`.
+  ///
+  /// Anahtar bir **kişi kimliğidir** (evlenme teklifi, D-048) ya da
+  /// ayrılmış bir başvuru anahtarıdır (evlat edinme başvurusu, D-049).
+  /// Sonuç kayda girer: aynı adım hemen tekrarlanamaz ve oyunu yeniden
+  /// yükleyerek sonuç değiştirilemez.
+  final Map<String, int> proposalAges;
+
+  /// Bu kişiye en son kaç yaşında teklif edildi? Hiç edilmediyse `null`.
+  int? lastProposalAge(String personId) => proposalAges[personId];
+
   /// Kaçıncı kuşağın hayatı oynanıyor (Paket E3).
   ///
   /// İlk hayat 1. kuşaktır. "Çocuğum olarak devam et" ile geçilen her
@@ -543,6 +555,7 @@ class GameState {
     bool? healthWarned,
     Object? marriage = _unsetEvent,
     int? generation,
+    Map<String, int>? proposalAges,
   }) {
     return GameState(
       seed: seed,
@@ -601,6 +614,7 @@ class GameState {
       marriage:
           marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
       generation: generation ?? this.generation,
+      proposalAges: proposalAges ?? this.proposalAges,
     );
   }
 }

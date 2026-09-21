@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/marriage.dart';
@@ -42,8 +44,28 @@ class MarriageEngine {
   /// prototypeOnly: evlenmek için asgari yaş (iki taraf için de).
   static const int prototypeOnlyMinAge = 18;
 
-  /// prototypeOnly: evlenmek için gereken asgari yakınlık.
-  static const int prototypeOnlyMinBond = 60;
+  /// prototypeOnly: **teklif edebilmek** için gereken asgari yakınlık.
+  ///
+  /// Eşik teklif için düşüktür: kötü giden bir ilişkide de teklif
+  /// edilebilir, ama kabul edilme ihtimali düşüktür (D-048).
+  static const int prototypeOnlyMinBond = 45;
+
+  /// prototypeOnly: teklifin kesin kabul edildiği yakınlık.
+  static const int prototypeOnlyCertainBond = 95;
+
+  /// prototypeOnly: aynı kişiye yeniden teklif için beklenecek yıl.
+  static const int prototypeOnlyProposalCooldown = 2;
+
+  /// prototypeOnly: reddedilen teklifin yakınlık ve mutluluk etkisi.
+  static const int prototypeOnlyRejectBondLoss = 6;
+  static const int prototypeOnlyRejectHappiness = -8;
+
+  /// prototypeOnly: daha önce reddedilmiş olmanın kabul ihtimaline etkisi.
+  static const double prototypeOnlyPreviousRejectionPenalty = 0.15;
+
+  /// prototypeOnly: kabul ihtimalinin alt ve üst sınırı.
+  static const double prototypeOnlyMinAcceptChance = 0.08;
+  static const double prototypeOnlyMaxAcceptChance = 0.95;
 
   /// prototypeOnly: nikâh ve düğün masrafı (₺).
   static const int prototypeOnlyWeddingCost = 60000;
@@ -81,7 +103,7 @@ class MarriageEngine {
       return '${person.firstName} evlenmek için henüz çok genç.';
     }
     if (person.bond < prototypeOnlyMinBond) {
-      return 'İlişkiniz evlilik için yeterince yakın değil '
+      return 'İlişkiniz evlilik teklifi için yeterince yakın değil '
           '(yakınlık ${person.bond}, gereken $prototypeOnlyMinBond).';
     }
     if (state.player.wallet < prototypeOnlyWeddingCost) {
@@ -133,6 +155,119 @@ class MarriageEngine {
       // Evlenmek kendi haneni kurmaktır: artık ailenin yanında sayılmazsın.
       movedOut: true,
       storyFlags: <String>{...state.storyFlags, StoryFlags.evlendi},
+    );
+
+    return FamilyResult(
+      state: _log(next, metin, LogCategory.aile),
+      outcome: FamilyOutcome(applied: true, text: metin),
+    );
+  }
+
+  // ------------------------------------------------------------------
+  // Evlenme teklifi (D-048)
+  // ------------------------------------------------------------------
+
+  /// Teklif etmeye engel; engel yoksa boş metin.
+  ///
+  /// Evlilik koşullarına ek olarak **bekleme süresi** aranır: reddedilen
+  /// teklif kayda girer ve aynı kişiye hemen yeniden teklif edilemez.
+  String proposeBlockReason(GameState state, Person person) {
+    final String engel = marryBlockReason(state, person);
+    if (engel.isNotEmpty) return engel;
+
+    final int? sonTeklif = state.lastProposalAge(person.id);
+    if (sonTeklif != null &&
+        state.player.age - sonTeklif < prototypeOnlyProposalCooldown) {
+      final int kalan =
+          prototypeOnlyProposalCooldown - (state.player.age - sonTeklif);
+      return 'Teklifin üzerinden yeterli zaman geçmedi; $kalan yıl sonra '
+          'yeniden deneyebilirsin.';
+    }
+    return '';
+  }
+
+  /// prototypeOnly: teklifin kabul edilme ihtimali.
+  ///
+  /// Tek bir sayıya indirgenmez: yakınlığın yanında **ilişki geçmişi** de
+  /// hesaba katılır (daha önce reddedilmiş bir teklif ihtimali düşürür).
+  double prototypeOnlyAcceptChance(GameState state, Person person) {
+    final double yakinlik = ((person.bond - prototypeOnlyMinBond) /
+            (prototypeOnlyCertainBond - prototypeOnlyMinBond))
+        .clamp(0.0, 1.0);
+    double sans = prototypeOnlyMinAcceptChance +
+        yakinlik * (prototypeOnlyMaxAcceptChance - prototypeOnlyMinAcceptChance);
+
+    // Geçmişte reddedilmiş bir teklif varsa ikna etmek zorlaşır.
+    if (state.lastProposalAge(person.id) != null) {
+      sans -= prototypeOnlyPreviousRejectionPenalty;
+    }
+    // Uzun süredir görüşülmeyen sevgili "evet" demeye daha uzaktır.
+    final int? sonTemas = state.lastInteractionAge[person.id];
+    if (sonTemas != null && state.player.age - sonTemas >= 3) {
+      sans -= 0.1;
+    }
+    return sans.clamp(
+      prototypeOnlyMinAcceptChance,
+      prototypeOnlyMaxAcceptChance,
+    );
+  }
+
+  /// Evlenme teklifi eder (D-048).
+  ///
+  /// Kabul edilirse kişi **aynı kimlikle** eşe dönüşür. Reddedilirse
+  /// ilişki **zorunlu olarak bitmez**: kısa bir yanıt ve gerçekten
+  /// uygulanan bir yakınlık/mutluluk etkisi olur. Yanıt kayda girer;
+  /// oyunu yeniden yükleyerek sonuç değiştirilemez.
+  FamilyResult propose(GameState state, String personId, Random rng) {
+    final Person? partner = state.personById(personId);
+    if (partner == null) return _blocked(state, 'Bu kişi kayıtlarda yok.');
+
+    final String engel = proposeBlockReason(state, partner);
+    if (engel.isNotEmpty) return _blocked(state, engel);
+
+    final bool kabul = rng.nextDouble() < prototypeOnlyAcceptChance(state, partner);
+    final Map<String, int> teklifler = <String, int>{
+      ...state.proposalAges,
+      personId: state.player.age,
+    };
+
+    if (kabul) {
+      final FamilyResult sonuc = marry(
+        state.copyWith(
+          proposalAges: Map<String, int>.unmodifiable(teklifler),
+        ),
+        personId,
+      );
+      if (!sonuc.outcome.applied) return sonuc;
+      return FamilyResult(
+        state: sonuc.state,
+        outcome: FamilyOutcome(
+          applied: true,
+          text: '${partner.firstName} "evet" dedi. ${sonuc.outcome.text}',
+        ),
+      );
+    }
+
+    // Ret: ilişki bitmez, kayıt silinmez.
+    final String metin = '${partner.firstName} hazır olmadığını söyledi. '
+        'İlişkiniz bitmedi ama aranızda bir sessizlik kaldı.';
+    final List<Person> people = state.people
+        .map((Person p) => p.id == personId
+            ? p.copyWith(
+                bond: (p.bond - prototypeOnlyRejectBondLoss).clamp(0, 100),
+              )
+            : p)
+        .toList(growable: false);
+
+    final GameState next = state.copyWith(
+      people: List<Person>.unmodifiable(people),
+      proposalAges: Map<String, int>.unmodifiable(teklifler),
+      player: state.player.copyWith(
+        stats: state.player.stats.copyWith(
+          happiness:
+              state.player.stats.happiness + prototypeOnlyRejectHappiness,
+        ),
+      ),
     );
 
     return FamilyResult(

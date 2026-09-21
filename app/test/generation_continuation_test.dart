@@ -352,11 +352,11 @@ void main() {
       expect(geri.isContinuedGeneration, isFalse);
     });
 
-    test('kayıt sürümü 19 ve göç zinciri kuşak alanını bozmaz', () {
-      expect(kSaveFormatVersion, 19);
+    test('kayıt sürümü 20 ve göç zinciri kuşak alanını bozmaz', () {
+      expect(kSaveFormatVersion, 20);
       final Map<String, Object?> body =
           Map<String, Object?>.from(encodeGameState(devamEt(olenOyuncu(), 'cocuk-1')));
-      final Map<String, Object?> gocmus = SaveMigrations.migrate(body, 18);
+      final Map<String, Object?> gocmus = SaveMigrations.migrate(body, 19);
       expect(decodeGameState(gocmus).generation, 2);
     });
   });

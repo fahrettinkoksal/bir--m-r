@@ -81,16 +81,17 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     });
   }
 
-  /// Evlilik (Paket E1): sevgili **aynı kimlikle** eş olur.
+  /// Evlenme teklifi (D-048): yanıt her zaman "evet" değildir.
   Future<void> _marry(Person person) async {
     final bool? onay = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Evlenmek istiyor musun?'),
+        title: const Text('Evlenme teklifi'),
         content: Text(
-          '${person.firstName} ile evleneceksin. Nikâh masrafı '
-          '${MarriageEngine.prototypeOnlyWeddingCost} \u20BA cüzdanından '
-          'çıkacak ve kendi haneni kuracaksın.',
+          '${person.firstName} ile evlenmeyi teklif edeceksin. Yanıtı '
+          'ilişkinize bağlı; hayır da diyebilir. Kabul ederse nikâh '
+          'masrafı ${trMoney(MarriageEngine.prototypeOnlyWeddingCost)} '
+          'cüzdanından çıkacak ve kendi haneni kuracaksın.',
         ),
         actions: <Widget>[
           TextButton(
@@ -99,13 +100,13 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Evlen'),
+            child: const Text('Teklif et'),
           ),
         ],
       ),
     );
     if (onay != true || !mounted) return;
-    final FamilyOutcome? sonuc = GameScope.of(context).marry(widget.personId);
+    final FamilyOutcome? sonuc = GameScope.of(context).propose(widget.personId);
     if (sonuc == null) return;
     setState(() {
       _lastOutcome = null;
@@ -296,7 +297,7 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                   person.relation == RelationType.sevgili) ...<Widget>[
                 const SizedBox(height: 12),
                 if (GameScope.of(context)
-                    .marriageAvailability(widget.personId)
+                    .proposalAvailability(widget.personId)
                     .isAllowed)
                   SizedBox(
                     width: double.infinity,
@@ -304,13 +305,31 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                       key: const Key('person_marry_button'),
                       onPressed: () => _marry(person),
                       icon: const Icon(Icons.favorite),
-                      label: const Text('Evlen'),
+                      label: const Text('Evlenme teklif et'),
                     ),
                   )
                 else
                   _Note(
-                    text: 'Evlenmek için: '
-                        '${GameScope.of(context).marriageAvailability(widget.personId).reason}',
+                    text: 'Evlenme teklifi için: '
+                        '${GameScope.of(context).proposalAvailability(widget.personId).reason}',
+                  ),
+                // Evlilik şart değildir (D-047): sevgiliyle de çocuk
+                // sahibi olunabilir.
+                const SizedBox(height: 12),
+                if (GameScope.of(context).childAvailability().isAllowed)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      key: const Key('person_child_button_partner'),
+                      onPressed: _haveChild,
+                      icon: const Icon(Icons.child_friendly_outlined),
+                      label: const Text('Çocuk sahibi olun'),
+                    ),
+                  )
+                else
+                  _Note(
+                    text: 'Çocuk sahibi olmak için: '
+                        '${GameScope.of(context).childAvailability().reason}',
                   ),
               ],
 

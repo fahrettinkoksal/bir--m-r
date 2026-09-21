@@ -103,6 +103,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'residenceItemId': state.residenceItemId,
       'movedOut': state.movedOut,
       'generation': state.generation,
+      'proposalAges': state.proposalAges,
       'marriage': state.marriage == null
           ? null
           : <String, Object?>{
@@ -580,6 +581,10 @@ GameState decodeGameState(Map<String, Object?> json) {
         : _decodeMarriage(_asMap(json['marriage'], 'marriage')),
     // Eski kayıtlarda kuşak bilgisi yoktur: o hayatlar ilk kuşaktır.
     generation: _intOrNull(json, 'generation') ?? 1,
+    // Eski kayıtlarda teklif geçmişi yoktur; boş açılır.
+    proposalAges: Map<String, int>.unmodifiable(
+      _intMap(json, 'proposalAges'),
+    ),
     hardshipYears:
         json['hardshipYears'] == null ? 0 : _int(json, 'hardshipYears'),
     settings: json['settings'] == null

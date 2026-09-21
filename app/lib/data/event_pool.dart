@@ -38,6 +38,9 @@ abstract final class StoryFlags {
   /// Çocuk sahibi olma izi (Paket E2).
   static const String cocukSahibi = 'cocuk_sahibi';
 
+  /// Evlilik dışı çocuk izi (D-047).
+  static const String evlilikDisiCocuk = 'evlilik_disi_cocuk';
+
   /// Ebeveynlik izleri (Paket 2). Geçmiş kararlar ileride hatırlanır.
   static const String cocukIlkGunDestek = 'cocuk_ilk_gun_destek';
   static const String cocukIlkGunYalniz = 'cocuk_ilk_gun_yalniz';

@@ -461,6 +461,21 @@ bilgisi yoksa uydurulmuyor: karışıma girmiyor, kişiye bir kez kalıcı bir
 kişinin (ör. evlat edinilecek çocuk) özellikleri **değiştirilmiyor**.
 Sayılar **Q-070**'te karar bekliyor.
 
+**İlişki ve aile kurma (Paket 3, D-047/D-048/D-049):** Evlilik artık
+zorunlu değil — yetişkin oyuncu, yakın bir ilişkisi olan yetişkin
+sevgilisiyle de çocuk sahibi olabiliyor; sevgili kendiliğinden eş
+yapılmıyor ve iki biyolojik ebeveyn de kayıtta kalıyor. **Evlenme teklifi**
+eklendi: yanıt her zaman "evet" değil, yakınlık ve ilişki geçmişi kabul
+ihtimalini belirliyor, ret ilişkiyi bitirmiyor ama yakınlığa ve mutluluğa
+işliyor; yanıt kayda giriyor, yeniden yükleyerek değiştirilemiyor ve aynı
+kişiye hemen yeniden teklif edilemiyor. Aktiviteler menüsüne **Evlat
+Edinme** geldi: maddi durum ve bakım koşulu değerlendiriliyor, yalnızca
+zengin olmak otomatik kabul anlamına gelmiyor, evli olmak şart değil,
+evlat edinilen çocuk gerçek ve kalıcı bir kişi kaydı oluyor (özellikleri
+yeniden çizilmiyor) ve aynı başvuru iki kez çocuk veya ücret üretmiyor.
+Kayıt biçimi **sürüm 20** (teklif/başvuru geçmişi). Sayılar **Q-071,
+Q-072, Q-073**'te karar bekliyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

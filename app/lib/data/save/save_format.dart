@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 19;
+const int kSaveFormatVersion = 20;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -73,8 +73,15 @@ abstract final class SaveMigrations {
     if (from <= 16) guncel = _v16ToV17(guncel);
     if (from <= 17) guncel = _v17ToV18(guncel);
     if (from <= 18) guncel = _v18ToV19(guncel);
+    if (from <= 19) guncel = _v19ToV20(guncel);
     return guncel;
   }
+
+  /// Sürüm 19 → 20: evlenme teklifi kaydı eklendi (D-048).
+  ///
+  /// Eski kayıtlarda teklif geçmişi yoktur; boş harita ile açılır. Hiçbir
+  /// evlilik kaydı değişmez, kimse silinmez.
+  static Map<String, Object?> _v19ToV20(Map<String, Object?> body) => body;
 
   /// Sürüm 18 → 19: kişilere kendi hayat kaydı eklendi (D-045).
   ///

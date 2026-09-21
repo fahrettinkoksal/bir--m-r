@@ -22,6 +22,7 @@ import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
+import '../domain/interaction/adoption.dart';
 import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
@@ -958,6 +959,61 @@ class GameController extends ChangeNotifier {
   /// Sevgiliyle evlenir. Kişi kimliği değişmez; kayıt silinmez.
   FamilyOutcome? marry(String personId) =>
       _runFamily((GameState current) => _marriages.marry(current, personId));
+
+  /// Bu kişiye evlenme teklifi edilebilir mi?
+  InteractionAvailability proposalAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final Person? person = current.personById(personId);
+    if (person == null) {
+      return const InteractionAvailability.blocked('Bu kişi kayıtlarda yok.');
+    }
+    final String engel = _marriages.proposeBlockReason(current, person);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Evlenme teklifi eder (D-048).
+  ///
+  /// Sonuç **her zaman kabul değildir**; ret ilişkiyi bitirmez ve yanıt
+  /// kayda girer.
+  FamilyOutcome? propose(String personId) => _runFamily(
+        (GameState current) => _marriages.propose(current, personId, _random),
+      );
+
+  /// Evlat edinme başvurusuna engel var mı?
+  InteractionAvailability adoptionAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final String engel = const Adoption().blockReason(current);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Evlat edinme başvurusu yapar (D-049).
+  ///
+  /// Dönen kayıtta `adopted` başvurunun kabul edilip edilmediğini söyler;
+  /// olumsuz sonuç da gerçek bir sonuçtur ve kayda girer.
+  ({FamilyOutcome outcome, bool adopted})? adopt() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent || current.deceased) {
+      return null;
+    }
+    final AdoptionResult sonuc = const Adoption().apply(current, _random);
+    if (!sonuc.outcome.applied) {
+      return (outcome: sonuc.outcome, adopted: false);
+    }
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (outcome: sonuc.outcome, adopted: sonuc.adopted);
+  }
 
   /// Boşanmaya engel var mı?
   InteractionAvailability divorceAvailability() {
