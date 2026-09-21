@@ -1786,5 +1786,33 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 **Not:** Testlerin tohumları artık sabit değil. Olay havuzu her büyüdüğünde rastgele akış değişiyor ve romantik zincir testleri elle güncellenmek zorunda kalıyordu; bu testler artık koşulu sağlayan ilk tohumu kendileri buluyor.
 
 
+
+### Q-089 — Dar pencereli olayların önceliği: sınav yılı havuzda kayboluyordu
+**Durum:** Yön **Faho tarafından onaylandı** (21 Eylül 2026; ChatGPT o gün yoktu, Faho "hepsini yap, mantıklı geldi" dedi). **Sayılar ve kapsam karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 21, `app/lib/domain/events/event_engine.dart`, `app/lib/domain/models/game_event.dart`, `app/lib/data/event_pool_exam.dart`.
+
+**Ölçüm — sorun neydi:** Oyunda **yılda yalnızca bir olay** çıkıyor. Paket 17'de eklenen sınav yılı olayları (8. ve 12. sınıf) ise sadece **tek bir yıl** uygun; o yılın tek yuvası havuzdaki onlarca genel olaydan birine gidince sınav stresi hiç yaşanmadan okul bitiyordu.
+
+| | Önce | Sonra |
+|---|---|---|
+| 8. sınıfa gelen hayatta sınav olayı gördü | %38 | **%100** (60/60) |
+| 12. sınıfa gelen hayatta sınav olayı gördü | %28 | **%100** (56/56) |
+
+**Şu an kodda olan (geçici) çözüm:** Olaylara `priority` alanı eklendi. Bu **sıra kapma değil, ağırlık artırımıdır**: öncelikli olay havuzdan diğerlerini atmaz, yalnızca ağırlığı `120^öncelik` ile çarpılır. Diğer olaylar hâlâ çıkabilir; motorun geri kalanı (tekrar sönümü, tekrar aralığı, koşullar) aynen işler. Öncelik 2: sekiz sınav olayı. Öncelik 1: `lise_sonrasi` (okul bitti, şimdi ne olacak).
+
+**Yol boyunca bulunan iki gerçek hata:**
+
+*1. Öncelik önce "sıra kapma" olarak yazılmıştı.* Öncelikli bir olay varken diğer bütün adaylar eleniyordu. Bu, havuzu açlığa sürükledi ve 15 testi kırdı. Ağırlık artırımına çevrildi.
+
+*2. Geniş pencereli olaylara öncelik vermek oyunu bozuyor.* `ilk_ev_ilk_gece` (18-32), `ilk_maas` (18-24) ve `universite_ilk_hafta` (18-24) önceliklendirildiğinde **25 tohumun hiçbirinde sevgili edinilemedi**: geniş pencereli öncelikli olaylar romantik zincirin bütün penceresini yutuyor. Kural şu oldu ve **kalıcı bir testle korunuyor**: öncelik yalnızca penceresi **3 yıl veya daha dar** ya da tek bir sınıfa kilitli olaylara verilebilir.
+
+Aynı hata `okul_ilk_gun` (6-8 yaş) için daha sessiz bir biçimde tekrarlandı: pencere kurala uyuyordu ama olay, okulun ilk yılındaki tek yuvayı kapıp sıra arkadaşıyla tanışmayı bastırıyordu. Ölçümde **okulda arkadaş edinen hayat oranı 44/60'tan 34/60'a**, 32 yaşına kadar sevgilisi olan hayat oranı **15/60'tan 8/60'a** düştü. Önceliği kaldırıldı; okula başlama zaten Paket 17'nin ekran bildirimiyle duyuruluyor.
+
+**Karar soruları:**
+1. Öncelik çarpanı (`120^öncelik`) uygun mu? Sınav yılını **%100** görmek isteniyor mu, yoksa "çoğu hayatta ama her hayatta değil" (örneğin %80) daha mı doğal?
+2. `lise_sonrasi` önceliği kalsın mı? Önceliksizken bu olay **60 hayatın yalnızca 11'inde** çıkıyordu — üniversite/çalışma ayrımı hayatların çoğunda hiç sorulmadan geçiyordu.
+3. Başka hangi olaylar "hayatta bir kez ve dar pencerede" sayılmalı? Aday olarak: ilk maaş, askerlik, ilk ev. (Bunlar şu an **bilerek** önceliksiz; pencereleri geniş.)
+4. Asıl sınır **yılda tek olay** kuralı. Dönüm noktası yıllarında (okula başlama, sınav yılı, okul bitişi) **iki olay** gösterilsin mi? Öncelik, tek yuvayı paylaştırmaya çalışan bir yama; iki yuva bu soruyu kökünden çözerdi.
+5. Sınav olaylarının etkisi (odaklanma +9, dengeli +5, savsaklama −10, kaygı −4, destek +4 puan) yerleştirme ve üniversite sınav puanında doğru ağırlıkta mı?
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
