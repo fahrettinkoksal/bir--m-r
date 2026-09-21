@@ -1504,5 +1504,26 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Renk değerleri tek dosyada (`app/lib/ui/theme/bir_omur_theme.dart`) toplandı; istenirse tek commit ile geri alınabilir. Alt menü sırası ve hiçbir metin değiştirilmedi.
 
+### Q-078 — Meslekte ilerleme: görev basamakları, zam ve işten çıkarılma
+**Durum:** Yön **Faho tarafından istendi** ("oyuncu yıllarca aynı maaşı alan, hiç değişmeyen bir karakter olarak kalmasın"); **sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 9. **Bağlantılı:** Q-048 (maaş ve iş koşulları), Q-065 (şehir değişince iş).
+
+**Şu an kodda olan (geçici) çözüm:**
+- Her meslekte **üç görev basamağı** var (ör. Mağaza çalışanı → Kıdemli mağaza çalışanı → Mağaza sorumlusu). Meslek kataloğu büyütülmedi, yalnızca unvan eklendi.
+- **Zam:** işte en az 1 yıl, iki zam arası 2 yıl, yılda bir talep. Kabul edilirse maaş **%8** artar.
+- **Terfi:** işte en az 3 yıl, iki terfi arası 4 yıl. Kabul edilirse maaş **%22** artar ve unvan değişir.
+- **Kabul ihtimali** garanti değil: taban %35 (zam) / %25 (terfi), işte geçen her yıl +%5, zekâ-karizma ortalaması en fazla +%25, "sorumluluk aldı" izi +%12, "işi savsakladı" izi −%15, her üst basamak −%8. Sonuç %5-%85 arasına sıkıştırılır.
+- **İşten çıkarılma:** yılda %3,5 ihtimal, yalnızca 2 yıldan uzun süredir çalışanlarda ve iki kayıp arasında en az 8 yıl. Eski iş kaydı silinmez.
+- **İş arkadaşı:** her işte 3 kişi, başlangıç yakınlığı 35; işten ayrılırken yakınlığı 60 ve üstü olanlar arkadaşa dönüşür.
+
+**Karar soruları:**
+1. Üç basamak yeterli mi; bazı mesleklerde daha fazla/az olmalı mı?
+2. Zam %8 ve terfi %22 oranları uygun mu; meslek başına değişmeli mi?
+3. İşten çıkarılma hiç olmalı mı? (Şu an ihtimal düşük ve uzun aralıklı.) Kıdem tazminatı gibi bir ödeme olmalı mı? **Şu an hiçbir tazminat ödenmiyor.**
+4. Emeklilik yaşı ve emekli maaşı bu turda **eklenmedi**; ayrı bir karar konusu.
+5. İş arkadaşı sayısı 3 uygun mu; işten ayrılınca arkadaşlığa dönme eşiği 60 doğru mu?
+6. Şehir değişince işin ne olacağı hâlâ açık (Q-065); bu pakette değiştirilmedi.
+
+**Varsayılan işlem:** Hiçbir sayı kalıcı kural sayılmadı; tamamı `CareerProgress` ve `job_catalog.dart` içinde tek tek `prototypeOnly` olarak işaretlendi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
