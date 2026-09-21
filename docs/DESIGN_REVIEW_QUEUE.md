@@ -2027,5 +2027,47 @@ Düğünlerin çoğunun nikâh olması beklenen sonuç: evlenme yaşında cüzda
 
 **Yan not (kayıt):** Doğum ayı ve günü `player` içine **eklemeli** olarak yazıldı; eksik olduğunda hayatın tohumundan **deterministik** türetiliyor, yani eski kayıtlar da burcunu görüyor ve her açılışta **aynı** burcu görüyor. Bu yüzden kayıt sürümü **artırılmadı**: hiçbir eski kayıt okunamaz hâle gelmiyor ve beş sürümlük pencere boşa harcanmıyor. Sürümü yalnızca gerçekten gerektiğinde artırmak gerektiği için bu bilinçli bir tercihtir.
 
+
+### Q-096 — Bildirim sesleri, menü düzeni ve genel kontrol
+**Durum:** **Faho'nun kararı** (21 Eylül 2026: "genel kontrol yap, bildirim seslerini değiştir, menüleri düzgün listele"). **Sesler ve gruplama karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 28, `app/tool/make_sounds.py`, `app/lib/ui/widgets/section_scaffold.dart`.
+
+**1. Sesler yeniden üretildi.** Ölçüm: eski yedi sesin **hepsi tek frekanslı düz sinüs tonuydu** ve tepe seviyesi ~%20'ydi — kulağa "bip" gibi geliyordu, oyunun el çizimi tonuna uymuyordu.
+
+Yeniler marimba/tahta ve yumuşak çan modellenerek üretildi: her sesin **birden çok harmoniği**, doğal sönümü ve kısa bir vuruş anı var. Tepe seviyesi %62.
+
+| Ses | Ne oldu | Süre |
+|---|---|---|
+| tap | tahta tıkırtısı (gürültü vuruşu + 880 Hz) | 90 ms |
+| select | iki nota yukarı (mi → la) | 255 ms |
+| back | iki nota aşağı, daha yumuşak | 280 ms |
+| age_up | üç nota yukarı, çan kuyruklu — küçük bir kutlama | 750 ms |
+| good | parlak majör arpej | 620 ms |
+| bad | alçak, boğuk iki vuruş — **bilerek yumuşak**, ceza değil | 430 ms |
+| **notice** | yumuşak kapı çanı, iki tonlu (sol → do) | 830 ms |
+
+Sesler **koddan üretiliyor** ve üretici betik depoda: `app/tool/make_sounds.py`. Bağımlılığı yok (yalnızca standart kütüphane), yani her zaman yeniden üretilebilir. Dışarıdan alınmış ses yok.
+
+**2. Aktiviteler menüsü gruplandı.** Kök menü on dört satıra kadar çıkıyordu ve hepsi düz bir listeydi; aradığını bulmak için bütün ekranı kaydırmak gerekiyordu. Dört gruba ayrıldı:
+
+- **Kendine bak** — Berber, Spor salonu, Sağlık Merkezi
+- **Öğren** — Kütüphane, Kurslar
+- **Keyfine bak** — Eğlence, Fal ve Tarot, Seyahat, Kumarhane
+- **Hayat işleri** — Sosyal medya, Ehliyet, Evlat Edinme, Vasiyet
+
+"Birlikte vakit geçir" grupların üstünde kaldı: mekân değil, kişiler. Menü satırları da biraz kısaldı (ikon 46 → 40), böylece bir ekrana daha fazla satır sığıyor.
+
+**3. Genel kontrolde bulunan gerçek hata.** "Hayat günlüğü" başlığı 360 px genişlikteki ekranda satırı **24 piksel taşırıyordu**: başlık esnek değildi, yanındaki çizgiyle birlikte sığmıyordu. Taşan içerik **çizilmiyor**, yerine hata şeridi geliyor. Hiçbir test bunu yakalamıyordu.
+
+Başlık esnek yapıldı. Ayrıca **kalıcı bir koruma** eklendi (`test/layout_overflow_test.dart`): iki gerçek telefon genişliğinde (360 ve 390 px) bütün sekmeler gezilip sonuna kadar kaydırılıyor ve **tek bir taşma bile olsa** test düşüyor. Uzun ad + büyük cüzdan durumu da ayrıca sınanıyor.
+
+**4. Karakter başlığı.** Cüzdan rozeti adla aynı satırdaydı ve uzun adlar "Tolga Er…" diye kırpılıyordu. Rozet biraz küçültüldü; burç da üst satıra değil şehir satırına alındı.
+
+**Karar soruları:**
+1. Sesler yerinde mi? Özellikle **bildirim sesi** (830 ms, iki tonlu çan) — daha kısa mı olmalı?
+2. "Olumsuz sonuç" sesi bilerek yumuşak tutuldu. Daha belirgin olmalı mı?
+3. Grup adları ("Kendine bak", "Öğren", "Keyfine bak", "Hayat işleri") uygun mu?
+4. Gruplama doğru mu? Kumarhane "Keyfine bak" içinde; "Hayat işleri"ne mi girmeli?
+5. Ses seviyesi (%62 tepe) telefonda doğru mu? Bunu ancak cihazda dinleyerek anlarız.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
