@@ -292,7 +292,7 @@ void main() {
       expect(r.state.pendingCrisis, isNull);
     });
 
-    test('sürüm 13 kaydı kriz alanları olmadan açılır', () async {
+    test('desteklenen en eski sürümün kaydı kriz alanları olmadan açılır', () async {
       final GameState state = hayat(22, age: 40);
       final Map<String, Object?> body = encodeGameState(state);
       body
@@ -303,7 +303,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 13, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

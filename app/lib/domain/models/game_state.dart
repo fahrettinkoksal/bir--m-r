@@ -557,6 +557,8 @@ class GameState {
       // Eş ve çocuklar evden ayrılsalar da görüşülmeye devam eder.
       case RelationType.es:
       case RelationType.cocuk:
+      // Torunla da başka şehirde olsanız görüşülür (Paket 12).
+      case RelationType.torun:
         return true;
       // Arkadaşlık ve romantik bağ sürer ama başka şehirdeki kişi her gün
       // görüşülen biri değildir; yeniden karşılaşma olayla gelir.

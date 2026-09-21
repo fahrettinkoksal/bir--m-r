@@ -5,6 +5,7 @@ import 'package:bir_omur/app.dart';
 import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/data/gift_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/data/save/save_format.dart';
 import 'package:bir_omur/data/save/save_service.dart';
 import 'package:bir_omur/data/save/save_store.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
@@ -523,25 +524,17 @@ void main() {
   // 6) Kayıt uyumu
   // ===================================================================
   group('Kayıt uyumu', () {
-    test('sürüm 1 kaydı okul bilgisi kaybolmadan açılır', () async {
+    test('desteklenen en eski sürümün kaydı okul bilgisi kaybolmadan açılır', () async {
       final GameController c = schoolAged(31, untilAge: 9);
       final GameState state = c.state!;
       expect(state.currentClassmates, isNotEmpty);
 
-      // Sürüm 1 kaydını taklit et: okul/sınıf kimlikleri yok.
-      final Map<String, Object?> govde = encodeGameState(state);
-      for (final Object? kisi in govde['people']! as List<Object?>) {
-        (kisi! as Map<String, Object?>).remove('schoolId');
-        (kisi as Map<String, Object?>).remove('classId');
-      }
-      (govde['education']! as Map<String, Object?>)
-        ..remove('schoolId')
-        ..remove('classId');
-      govde.remove('gifts');
-
+      // Paket 12'den beri geriye dönük yalnızca son beş sürüm taşınır;
+      // okul kimliklerinin hiç olmadığı sürümler artık desteklenmiyor.
+      // Bu test desteklenen en eski sürümü sınar.
       final String eski = jsonEncode(<String, Object?>{
-        'formatVersion': 1,
-        'state': govde,
+        'formatVersion': kMinReadableSaveVersion,
+        'state': encodeGameState(state),
       });
 
       final SaveLoadResult result =
@@ -554,7 +547,7 @@ void main() {
           state.currentClassmates.map((Person p) => p.id).toSet());
       expect(yuklenen.currentTeachers.map((Person p) => p.id).toSet(),
           state.currentTeachers.map((Person p) => p.id).toSet());
-      expect(yuklenen.gifts, isEmpty);
+      expect(yuklenen.gifts.length, state.gifts.length);
     });
 
     test('yeni alanlar kaydedilip geri okunur', () async {

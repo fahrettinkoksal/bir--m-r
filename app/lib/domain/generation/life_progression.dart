@@ -2,6 +2,8 @@ import 'dart:math';
 
 import '../../data/name_pool.dart';
 import '../career/career_progress.dart';
+import '../career/retirement.dart';
+import 'grandchildren.dart';
 import '../social/social_engine.dart';
 import '../social/social_income.dart';
 import '../models/sponsorship.dart';
@@ -81,7 +83,11 @@ class LifeProgression {
     // ilerleme gerçekleştiği yılda kaydedilir; vefat edenlere dokunulmaz.
     final List<String> cocukHaberleri = <String>[];
     final List<Person> peopleWithChildren = people.map((Person person) {
-      if (!person.isAlive || person.relation != RelationType.cocuk) {
+      // Torunlar da kendi hayatlarını yaşar (Paket 12): okula başlar,
+      // büyür. Vefat edenlere dokunulmaz.
+      final bool kendiHayati = person.relation == RelationType.cocuk ||
+          person.relation == RelationType.torun;
+      if (!person.isAlive || !kendiHayati) {
         return person;
       }
       final ({Person person, List<String> news}) sonuc =
@@ -90,6 +96,29 @@ class LifeProgression {
       return sonuc.person;
     }).toList(growable: false);
 
+    // Yetişkin çocukların kendi çocukları olabilir (Paket 12). Torun
+    // gerçek bir kişi kaydıdır ve doğduğu yıl oluşturulur.
+    final List<Person> yeniTorunlar = <Person>[];
+    final List<String> torunHaberleri = <String>[];
+    for (final Person cocuk in peopleWithChildren) {
+      final Person? torun = Grandchildren.maybeBorn(
+        state: state.copyWith(
+          people: List<Person>.unmodifiable(<Person>[
+            ...peopleWithChildren,
+            ...yeniTorunlar,
+          ]),
+        ),
+        child: cocuk,
+        rng: _rng,
+      );
+      if (torun == null) continue;
+      yeniTorunlar.add(torun);
+      torunHaberleri.add(
+        '${cocuk.firstName} bir çocuk sahibi oldu: ${torun.firstName}. '
+        'Artık dede/nine oldun.',
+      );
+    }
+
     final List<LifeLogEntry> log = <LifeLogEntry>[
       ...state.log,
       LifeLogEntry(
@@ -97,6 +126,8 @@ class LifeProgression {
         text: '$newAge yaşına girdin.',
         category: LogCategory.yasDegisimi,
       ),
+      for (final String haber in torunHaberleri)
+        LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
     ];
 
     // Eğitim durumu yaştan türetilmez; burada açıkça ilerletilir ve
@@ -145,7 +176,10 @@ class LifeProgression {
 
     // Kişilerin mal varlığı yıllar içinde değişir; miras donmuş bir
     // listeye dayanmaz (D-037).
-    final List<Person> peopleWithEstates = _driftEstates(peopleWithSchool);
+    final List<Person> peopleWithEstates = <Person>[
+      ..._driftEstates(peopleWithSchool),
+      ...yeniTorunlar,
+    ];
 
     // Ölümler: hayatın sonlu olduğunu hissettiren, yaşa bağlı bir eğilim.
     // Kayıtlar silinmez; kişi vefat etmiş olarak işaretlenir.
@@ -173,6 +207,21 @@ class LifeProgression {
           category: LogCategory.kisisel,
         ),
       );
+    }
+
+    // Emekli aylığı da yeni yaşa geçerken **bir kez** ödenir (Paket 12).
+    // Emekli oyuncunun işi olmadığı için maaşla çakışmaz.
+    final ({GameState state, String? logText}) aylik =
+        Retirement.payPension(maas.state, newAge);
+    if (aylik.logText != null) {
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: aylik.logText!,
+          category: LogCategory.kisisel,
+        ),
+      );
+      maas = (state: aylik.state, logText: maas.logText);
     }
 
     // Maaş ödendikten **sonra** işten çıkarılma denenir: çalışılan yılın
@@ -212,6 +261,17 @@ class LifeProgression {
     // Düşen miktar yas olarak saklanır ve sonraki yıllarda geri verilir
     // (D-036).
     GameState afterDeaths = advanced;
+    // Torun sevinci: gerçekten doğduğu yıl uygulanır.
+    if (yeniTorunlar.isNotEmpty) {
+      afterDeaths = afterDeaths.copyWith(
+        player: afterDeaths.player.copyWith(
+          stats: afterDeaths.player.stats.copyWith(
+            happiness: afterDeaths.player.stats.happiness +
+                Grandchildren.prototypeOnlyHappiness * yeniTorunlar.length,
+          ),
+        ),
+      );
+    }
     if (olumSonucu.happinessLoss > 0) {
       afterDeaths = advanced.copyWith(
         player: advanced.player.copyWith(

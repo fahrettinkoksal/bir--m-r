@@ -152,8 +152,8 @@ void main() {
       expect(geri.career.yearlySalary, magaza.yearlySalary);
     });
 
-    test('kayıt sürümü 25 ve kariyer geçmişi kayda girer', () {
-      expect(kSaveFormatVersion, 25);
+    test('kayıt sürümü 26 ve kariyer geçmişi kayda girer', () {
+      expect(kSaveFormatVersion, 26);
       GameState s = iseGir(mezun(age: 25), magaza);
       s = kabulEdilenTalep(s, terfi: false);
       s = market.quit(s).state;

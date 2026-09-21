@@ -442,16 +442,15 @@ void main() {
       expect(sonra.player.fame, state.player.fame);
     });
 
-    test('sürüm 5 kaydı sosyal medya alanı eklenerek açılır', () async {
+    test('desteklenen en eski sürümün kaydı sosyal medya alanı eklenerek açılır', () async {
       final GameState orijinal = life(32, age: 22);
-      final Map<String, Object?> body = encodeGameState(orijinal);
-      body.remove('socialAccounts');
 
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
-          initial: jsonEncode(
-            <String, Object?>{'formatVersion': 5, 'state': body},
-          ),
+          initial: jsonEncode(<String, Object?>{
+            'formatVersion': kMinReadableSaveVersion,
+            'state': encodeGameState(orijinal),
+          }),
         ),
       ).load();
       expect(result.isLoaded, isTrue, reason: result.message);

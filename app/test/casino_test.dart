@@ -549,7 +549,7 @@ void main() {
       expect(b.state.player.wallet, a.state.player.wallet);
     });
 
-    test('sürüm 7 kaydı kumarhane alanları olmadan açılır', () async {
+    test('desteklenen en eski sürümün kaydı kumarhane alanları olmadan açılır', () async {
       final GameState state = oyuncu(42, wallet: 1234);
       final Map<String, Object?> body = encodeGameState(state);
       body.remove('blackjack');
@@ -558,7 +558,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 7, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

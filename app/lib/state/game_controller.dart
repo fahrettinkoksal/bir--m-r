@@ -22,6 +22,7 @@ import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
+import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/adoption.dart';
 import '../domain/life/notices.dart';
@@ -591,6 +592,34 @@ class GameController extends ChangeNotifier {
       return const InteractionAvailability.blocked('Oyun yüklenmedi.');
     }
     return CareerProgress.promotionAvailability(current);
+  }
+
+  /// Emeklilik şu an mümkün mü?
+  InteractionAvailability retirementAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun yüklenmedi.');
+    }
+    return Retirement.availability(current);
+  }
+
+  /// prototypeOnly: şu an emekli olunsa bağlanacak yıllık aylık.
+  int pensionPreview() {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return Retirement.prototypeOnlyPensionFor(current);
+  }
+
+  /// Emekli eder; sonucu metin olarak döner.
+  String? retire() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final RetirementResult sonuc = Retirement.retire(current);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
   }
 
   /// Zam ister; sonucu metin olarak döner.

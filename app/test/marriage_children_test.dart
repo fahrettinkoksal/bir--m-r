@@ -514,7 +514,7 @@ void main() {
       );
     });
 
-    test('sürüm 14 kaydı bekâr olarak açılır, kişiler korunur', () async {
+    test('desteklenen en eski sürümün kaydı bekâr olarak açılır, kişiler korunur', () async {
       final GameState state = sevgiliEkle(oyuncu(24)).state;
       final Map<String, Object?> body = encodeGameState(state)
         ..remove('marriage');
@@ -522,7 +522,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 14, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

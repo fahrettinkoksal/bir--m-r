@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/career/retirement.dart';
 import '../../../domain/models/education.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
+import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
@@ -277,7 +279,29 @@ class _CareerViewState extends State<_CareerView> {
       subtitle: egitim.stageLabel(state.player.age),
       onBack: widget.onBack,
       children: <Widget>[
-        if (state.career.isEmployed)
+        // Emekliyse çalışma paneli yerine emeklilik paneli gösterilir.
+        if (state.career.isRetired)
+          _PanelCard(
+            icon: Icons.self_improvement_outlined,
+            accent: BirOmurAccents.cini,
+            title: 'Emeklilik',
+            rows: <({String label, String value})>[
+              (
+                label: 'Emekli olduğun yaş',
+                value: '${state.career.retiredAtAge}',
+              ),
+              (
+                label: 'Yıllık aylığın',
+                value: trMoney(state.career.pension ?? 0),
+              ),
+              (
+                label: 'Toplam çalışma',
+                value: '${state.career.totalWorkYears(state.player.age)} yıl',
+              ),
+              (label: 'Cüzdan', value: state.player.walletLabel),
+            ],
+          )
+        else if (state.career.isEmployed)
           _PanelCard(
             icon: Icons.badge_outlined,
             accent: BirOmurAccents.mor,
@@ -372,7 +396,7 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 10),
         ],
-        if (isAranabilir) ...<Widget>[
+        if (isAranabilir && !state.career.isRetired) ...<Widget>[
           MenuRow(
             title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
             subtitle: state.career.isEmployed
@@ -386,7 +410,7 @@ class _CareerViewState extends State<_CareerView> {
         ],
         // Zam ve terfi gerçek birer etkileşimdir; koşulu sağlanmıyorsa
         // düğme yerine gerekçe gösterilir (sahte düğme yok).
-        if (state.career.isEmployed) ...<Widget>[
+        if (state.career.isEmployed && !state.career.isRetired) ...<Widget>[
           Builder(
             builder: (BuildContext context) {
               final InteractionAvailability zam =
@@ -447,6 +471,33 @@ class _CareerViewState extends State<_CareerView> {
             },
           ),
         ],
+        // Emeklilik (Paket 12): koşul dolmadıysa satır yerine gerekçe
+        // gösterilmez — menü gereksiz uyarıyla dolmasın diye yalnızca
+        // uygun yaşta görünür.
+        if (!state.career.isRetired &&
+            state.player.age >= Retirement.prototypeOnlyEarlyAge) ...<Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              final GameController controller = GameScope.of(context);
+              final int aylik = controller.pensionPreview();
+              final bool erken =
+                  state.player.age < Retirement.prototypeOnlyFullAge;
+              return MenuRow(
+                key: const Key('career_retire_row'),
+                title: erken ? 'Erken emekli ol' : 'Emekli ol',
+                subtitle: 'Yıllık aylığın ${trMoney(aylik)} olur'
+                    '${erken ? ' (erken ayrılış kesintisiyle)' : ''}',
+                icon: Icons.self_improvement_outlined,
+                accent: BirOmurAccents.cini,
+                onTap: () {
+                  final String? metin = controller.retire();
+                  setState(() => _sonuc = metin);
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+        ],
         // Kariyer geçmişi: eski işler silinmez.
         if (state.career.allEntries().isNotEmpty) ...<Widget>[
           MenuRow(
@@ -459,7 +510,7 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 10),
         ],
-        if (state.career.isEmployed) ...<Widget>[
+        if (state.career.isEmployed && !state.career.isRetired) ...<Widget>[
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(

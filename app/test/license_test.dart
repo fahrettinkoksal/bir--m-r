@@ -456,7 +456,7 @@ void main() {
       expect(geri.hasLicense(LicenseType.motosiklet.id), isTrue);
     });
 
-    test('sürüm 9 kaydı açık sınav alanı olmadan açılır', () async {
+    test('desteklenen en eski sürümün kaydı açık sınav alanı olmadan açılır', () async {
       final GameState state = oyuncu(42);
       final Map<String, Object?> body = encodeGameState(state);
       body.remove('pendingLicenseExam');
@@ -464,7 +464,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 9, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

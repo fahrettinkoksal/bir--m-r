@@ -27,7 +27,10 @@ enum RelationType {
   eskiSevgili,
   es,
   eskiEs,
-  cocuk;
+  cocuk,
+  // Torun: çocuğun çocuğu (Paket 12). Kalıcı kimliği vardır, kendi
+  // yaşını yaşar ve ilişkiler ekranında ayrı listelenir.
+  torun;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -41,6 +44,8 @@ enum RelationType {
       case RelationType.es:
       case RelationType.cocuk:
         return RelationGroup.cekirdek;
+      case RelationType.torun:
+        return RelationGroup.genis;
       case RelationType.anneanne:
       case RelationType.babaanne:
       case RelationType.anneTarafiDede:
@@ -144,6 +149,8 @@ String relationLabel({
       return 'Eski eş';
     case RelationType.cocuk:
       return gender == Gender.kadin ? 'Kız' : 'Oğul';
+    case RelationType.torun:
+      return gender == Gender.kadin ? 'Torun (kız)' : 'Torun (erkek)';
   }
 }
 
@@ -205,5 +212,7 @@ String relationPossessive({
       return 'Eski eşin';
     case RelationType.cocuk:
       return gender == Gender.kadin ? 'Kızın' : 'Oğlun';
+    case RelationType.torun:
+      return 'Torunun';
   }
 }

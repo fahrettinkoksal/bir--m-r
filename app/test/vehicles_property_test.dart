@@ -412,7 +412,7 @@ void main() {
       expect(geri.player.wallet, state.player.wallet);
     });
 
-    test('sürüm 8 kaydı eski eşyaları bozmadan açılır', () async {
+    test('desteklenen en eski sürümün kaydı eski eşyaları bozmadan açılır', () async {
       final GameState state = satinAl(oyuncu(31), 'bisiklet');
       final Map<String, Object?> body = encodeGameState(state);
       for (final Object? e in body['items']! as List<Object?>) {
@@ -425,7 +425,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 8, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

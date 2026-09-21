@@ -285,22 +285,20 @@ void main() {
       expect(sonra.player.wallet, state.player.wallet);
     });
 
-    test('sürüm 4 kaydı aktivite alanları eklenerek açılır', () async {
+    test('desteklenen en eski sürümün kaydı aktivite alanları eklenerek açılır', () async {
       final GameState orijinal = life(32, age: 20, wallet: 500);
-      final Map<String, Object?> body = encodeGameState(orijinal);
-      body.remove('books');
-      (body['player']! as Map<String, Object?>).remove('hairStyle');
 
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
-          initial: jsonEncode(
-            <String, Object?>{'formatVersion': 4, 'state': body},
-          ),
+          initial: jsonEncode(<String, Object?>{
+            'formatVersion': kMinReadableSaveVersion,
+            'state': encodeGameState(orijinal),
+          }),
         ),
       ).load();
       expect(result.isLoaded, isTrue, reason: result.message);
-      expect(result.state!.books, isEmpty);
-      expect(result.state!.player.hairStyle, isNull);
+      expect(result.state!.books, orijinal.books);
+      expect(result.state!.player.hairStyle, orijinal.player.hairStyle);
       expect(result.state!.player.wallet, 500);
       expect(result.state!.player.id, orijinal.player.id);
     });

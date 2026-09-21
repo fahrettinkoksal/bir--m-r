@@ -24,7 +24,6 @@ import 'package:bir_omur/domain/models/life_summary.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/person.dart';
-import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -513,8 +512,7 @@ void main() {
       return body;
     }
 
-    test('sürüm 1 ile güncel sürüm arasındaki her giriş noktası açılır',
-        () async {
+    test('desteklenen her sürümden giriş yapılabilir', () async {
       // Zengin bir hayat: kişiler, eşyalar, evlilik, çocuk, arşiv.
       GameState state = LifeGenerator.seeded(18)
           .generate(mode: StartMode.tamamenRastgele)
@@ -554,7 +552,11 @@ void main() {
         ],
       );
 
-      for (int surum = 1; surum <= kSaveFormatVersion; surum++) {
+      // Faho'nun kararı (Paket 12): geriye dönük yalnızca son beş sürüm
+      // taşınır. Daha eskisi anlaşılır bir mesajla reddedilir.
+      for (int surum = kMinReadableSaveVersion;
+          surum <= kSaveFormatVersion;
+          surum++) {
         final SaveLoadResult sonuc = await SaveService(
           MemorySaveStore(
             initial: jsonEncode(<String, Object?>{
@@ -569,30 +571,34 @@ void main() {
         final GameState geri = sonuc.state!;
         expect(geri.player.fullName, state.player.fullName,
             reason: 'Sürüm $surum');
-        final int beklenenKisi = surum >= 15
-            ? state.people.length
-            : state.people
-                .where((Person p) =>
-                    p.relation != RelationType.es &&
-                    p.relation != RelationType.eskiEs &&
-                    p.relation != RelationType.cocuk)
-                .length;
-        expect(geri.people.length, beklenenKisi,
+        expect(geri.people.length, state.people.length,
             reason: 'Sürüm $surum: kişi kaybı');
         expect(checkInvariants(geri, where: 'sürüm $surum'), isEmpty);
-        // Sürüm 3 ve sonrasında eşya örnekleri korunur.
-        if (surum >= 3) {
-          expect(geri.items.length, state.items.length,
-              reason: 'Sürüm $surum: eşya kaybı');
-        } else {
-          expect(geri.possessions, state.possessions,
-              reason: 'Sürüm $surum: eşya türü kaybı');
-        }
+        expect(geri.items.length, state.items.length,
+            reason: 'Sürüm $surum: eşya kaybı');
         // Arşiv hiçbir sürümde silinmez.
-        if (surum >= 12) {
-          expect(geri.pastLives, hasLength(1), reason: 'Sürüm $surum');
-        }
+        expect(geri.pastLives, hasLength(1), reason: 'Sürüm $surum');
       }
+    });
+
+    test('tabanın altındaki çok eski kayıt anlaşılır mesajla reddedilir',
+        () async {
+      final GameState state =
+          LifeGenerator.seeded(19).generate(mode: StartMode.tamamenRastgele);
+      final SaveLoadResult sonuc = await SaveService(
+        MemorySaveStore(
+          initial: jsonEncode(<String, Object?>{
+            'formatVersion': kMinReadableSaveVersion - 1,
+            'state': encodeGameState(state),
+          }),
+        ),
+      ).load();
+
+      expect(sonuc.isLoaded, isFalse);
+      expect(sonuc.message, isNotNull);
+      // Oyuncuya dosyanın silindiği söylenmez.
+      expect(sonuc.message, contains('silinmedi'));
+      expect(sonuc.message, isNot(contains('bozuk')));
     });
 
     test('gelecek sürümlü kayıt bozuk sayılmaz, anlaşılır mesaj verir',

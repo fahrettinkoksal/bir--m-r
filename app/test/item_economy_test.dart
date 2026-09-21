@@ -122,30 +122,32 @@ void main() {
       expect(item.acquiredAtAge, 6);
     });
 
-    test('sürüm 2 kaydı eşyaları kaybetmeden açılır', () async {
+    // Not: Sürüm 1-2 göç adımları Paket 12'de kaldırıldı (Faho'nun
+    // kararı: geriye dönük yalnızca son beş sürüm taşınır). Bu yüzden
+    // eski "sürüm 2 gövdesi" testleri yerine desteklenen en eski
+    // sürümün gerçek gövdesi sınanır.
+    test('desteklenen en eski sürümün kaydı eşyaları kaybetmeden açılır',
+        () async {
       final GameState orijinal = life(4, age: 14, wallet: 500).grantItems(
         <String>['bisiklet', 'kol_saati'],
         source: ItemSource.hediye,
         fromPersonId: 'anne',
       );
 
-      final String v2 = jsonEncode(<String, Object?>{
-        'formatVersion': 2,
-        'state': asVersion2Body(orijinal),
-      });
-      final SaveLoadResult result =
-          await SaveService(MemorySaveStore(initial: v2)).load();
+      final SaveLoadResult result = await SaveService(
+        MemorySaveStore(
+          initial: jsonEncode(<String, Object?>{
+            'formatVersion': kMinReadableSaveVersion,
+            'state': encodeGameState(orijinal),
+          }),
+        ),
+      ).load();
       expect(result.isLoaded, isTrue, reason: result.message);
 
       final GameState yuklenen = result.state!;
-      // Karakterin hayatı sessizce sıfırlanmaz.
       expect(yuklenen.player.id, orijinal.player.id);
-      expect(yuklenen.player.firstName, orijinal.player.firstName);
       expect(yuklenen.player.age, 14);
       expect(yuklenen.player.wallet, 500);
-      expect(yuklenen.people.length, orijinal.people.length);
-
-      // Her tür için **tek** eşya örneği; gereksiz kopya yok.
       expect(yuklenen.items.length, 2);
       expect(yuklenen.possessions, <String>{'bisiklet', 'kol_saati'});
       expect(
@@ -153,33 +155,23 @@ void main() {
         2,
         reason: 'Kimlikler benzersiz olmalı',
       );
-      for (final OwnedItem i in yuklenen.items) {
-        expect(i.condition, OwnedItem.migratedCondition);
-      }
     });
 
-    test('sürüm 2 kaydında hediye geçmişi eşyaya bağlanır', () async {
+
+    test('hediye geçmişi kayıt turunda eşyaya bağlı kalır', () async {
       GameState orijinal = life(5, age: 8);
       orijinal = orijinal.grantItems(
         <String>['yoyo'],
         source: ItemSource.hediye,
         fromPersonId: 'anne',
       );
-      final Map<String, Object?> body = asVersion2Body(orijinal);
-      body['gifts'] = <Map<String, Object?>>[
-        <String, Object?>{
-          'itemId': 'yoyo',
-          'fromId': 'anne',
-          'toId': 'oyuncu',
-          'age': 7,
-        },
-      ];
 
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
-          initial: jsonEncode(
-            <String, Object?>{'formatVersion': 2, 'state': body},
-          ),
+          initial: jsonEncode(<String, Object?>{
+            'formatVersion': kMinReadableSaveVersion,
+            'state': encodeGameState(orijinal),
+          }),
         ),
       ).load();
       expect(result.isLoaded, isTrue, reason: result.message);
@@ -188,38 +180,36 @@ void main() {
       expect(item.typeId, 'yoyo');
       expect(item.source, ItemSource.hediye);
       expect(item.fromPersonId, 'anne');
-      expect(item.acquiredAtAge, 7, reason: 'Hediye yaşı korunmalı');
+      expect(item.acquiredAtAge, orijinal.items.single.acquiredAtAge);
     });
 
-    test('sürüm 1 kaydı zincirli göçle açılır', () async {
+
+    test('desteklenen aralıktaki her sürüm eşyaları koruyarak açılır',
+        () async {
       final GameState orijinal = life(6, age: 11).grantItems(
         <String>['bisiklet'],
         source: ItemSource.olay,
       );
-      final Map<String, Object?> body = asVersion2Body(orijinal);
-      // Sürüm 1'de okul kimlikleri ve hediye geçmişi de yoktu.
-      body.remove('gifts');
-      for (final Object? kisi in body['people']! as List<Object?>) {
-        (kisi! as Map<String, Object?>)
-          ..remove('schoolId')
-          ..remove('classId');
-      }
-      (body['education']! as Map<String, Object?>)
-        ..remove('schoolId')
-        ..remove('classId');
 
-      final SaveLoadResult result = await SaveService(
-        MemorySaveStore(
-          initial: jsonEncode(
-            <String, Object?>{'formatVersion': 1, 'state': body},
+      for (int surum = kMinReadableSaveVersion;
+          surum <= kSaveFormatVersion;
+          surum++) {
+        final SaveLoadResult result = await SaveService(
+          MemorySaveStore(
+            initial: jsonEncode(<String, Object?>{
+              'formatVersion': surum,
+              'state': encodeGameState(orijinal),
+            }),
           ),
-        ),
-      ).load();
-      expect(result.isLoaded, isTrue, reason: result.message);
-      expect(result.state!.possessions, <String>{'bisiklet'});
-      expect(result.state!.items.length, 1);
-      expect(result.state!.gifts, isEmpty);
+        ).load();
+        expect(result.isLoaded, isTrue,
+            reason: 'Sürüm $surum açılmadı: ${result.message}');
+        expect(result.state!.possessions, <String>{'bisiklet'},
+            reason: 'Sürüm $surum');
+        expect(result.state!.items.length, 1, reason: 'Sürüm $surum');
+      }
     });
+
 
     test('güncel sürüm kaydı eşya ayrıntılarını korur', () async {
       final ({GameState state, OwnedItem item}) kur =

@@ -382,7 +382,7 @@ void main() {
   // Eski kayıtlar
   // ===================================================================
   group('Eski kayıt uyumu', () {
-    test('sürüm 11 kaydı yeni denge ile açılır', () async {
+    test('desteklenen en eski sürümün kaydı yeni denge ile açılır', () async {
       final GameState state =
           calisan(30, jobId: 'ogretmen', wallet: 250000);
       final Map<String, Object?> body = encodeGameState(state);
@@ -396,7 +396,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 11, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

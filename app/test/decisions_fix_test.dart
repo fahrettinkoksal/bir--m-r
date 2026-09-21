@@ -516,7 +516,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 11, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();
@@ -533,28 +533,10 @@ void main() {
       expect(geri.people.length, state.people.length);
     });
 
-    test('tek soruluk eski sınav ücret kesmeden kapatılır', () async {
-      final GameState state = hayat(81, age: 20, wallet: 100000);
-      final Map<String, Object?> body = encodeGameState(state);
-      body['pendingLicenseExam'] = <String, Object?>{
-        'licenseId': 'otomobil_ehliyeti',
-        'questionId': 'oto_emniyet',
-        'askedAtAge': 20,
-        'feePaid': 8000,
-      };
-
-      final SaveLoadResult result = await SaveService(
-        MemorySaveStore(
-          initial: jsonEncode(
-            <String, Object?>{'formatVersion': 11, 'state': body},
-          ),
-        ),
-      ).load();
-      expect(result.isLoaded, isTrue, reason: result.message);
-      expect(result.state!.pendingLicenseExam, isNull,
-          reason: 'Eski biçimdeki sınav kapatılır');
-      expect(result.state!.player.wallet, 100000,
-          reason: 'Ücret ikinci kez kesilmez');
-    });
+    // Not: "tek soruluk eski sınav" biçimi yalnızca sürüm 21 öncesinde
+    // vardı. Paket 12'de geriye dönük destek son beş sürümle
+    // sınırlandığı için (Faho'nun kararı) o biçim artık hiçbir
+    // desteklenen kayıtta bulunamaz; ilgili göç adımı ve testi
+    // kaldırıldı. Güncel biçimdeki bekleyen sınav testi yukarıda duruyor.
   });
 }

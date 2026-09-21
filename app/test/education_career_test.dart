@@ -420,28 +420,22 @@ void main() {
   // Kayıt uyumu ve okul kişileri
   // ===================================================================
   group('Kayıt ve okul kişileri', () {
-    test('sürüm 3 kaydı eğitim/meslek alanları eklenerek açılır', () async {
+    test('desteklenen en eski sürümün kaydı eğitim/meslek alanları eklenerek açılır', () async {
       final GameController c = GameController(random: Random(41));
       c.startNewLife(mode: StartMode.tamamenRastgele, seed: 41);
       advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 2);
       resolvePendingEvents(c);
       final GameState orijinal = c.state!;
 
-      final Map<String, Object?> body = encodeGameState(orijinal);
-      // Sürüm 3'te bu alanlar yoktu.
-      (body['education']! as Map<String, Object?>)
-        ..remove('track')
-        ..remove('placementScore')
-        ..remove('universityProgramId')
-        ..remove('universityYear')
-        ..remove('universityFinished');
-      body.remove('career');
-
+      // Paket 12'den beri geriye dönük yalnızca son beş sürüm taşınır;
+      // eğitim/meslek alanlarının hiç olmadığı sürümler artık
+      // desteklenmiyor. Bu test desteklenen en eski sürümü sınar.
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
-          initial: jsonEncode(
-            <String, Object?>{'formatVersion': 3, 'state': body},
-          ),
+          initial: jsonEncode(<String, Object?>{
+            'formatVersion': kMinReadableSaveVersion,
+            'state': encodeGameState(orijinal),
+          }),
         ),
       ).load();
       expect(result.isLoaded, isTrue, reason: result.message);

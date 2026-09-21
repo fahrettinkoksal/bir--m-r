@@ -196,7 +196,7 @@ void main() {
     expect(checkInvariants(geri), isEmpty);
   });
 
-  test('sürüm 1 ile güncel sürüm arasındaki her giriş noktası açılır', () {
+  test('desteklenen her sürümden giriş yapılabilir', () {
     // Güncel bir kayıt üretip yeni alanları sürüm sürüm çıkararak eski
     // kayıt taklidi yapılır. **Gerçek eski kullanıcı kaydı yoktur;
     // bu sınama yalnızca sentetiktir.**
@@ -205,6 +205,8 @@ void main() {
     final Map<String, Object?> guncel =
         Map<String, Object?>.from(encodeGameState(base));
 
+    // Faho'nun kararı (Paket 12): geriye dönük yalnızca son beş sürüm
+    // taşınır; taban `kMinReadableSaveVersion`.
     for (int from = kMinReadableSaveVersion;
         from <= kSaveFormatVersion;
         from++) {
@@ -225,9 +227,7 @@ void main() {
               ..remove('lastJobLossAge');
         govde['career'] = career;
       }
-      if (from <= 21) govde.remove('heirChildId');
-      if (from <= 20) govde.remove('notices');
-      if (from <= 19) govde.remove('proposalAges');
+      if (from <= 25) govde['career'] = _emekliliksiz(govde);
 
       final GameState acilan =
           decodeGameState(SaveMigrations.migrate(govde, from));
@@ -236,4 +236,14 @@ void main() {
       expect(checkInvariants(acilan), isEmpty, reason: 'Sürüm $from tutarsız');
     }
   });
+}
+
+
+/// Emeklilik alanları olmayan (sürüm 25 ve öncesi) kariyer gövdesi.
+Map<String, Object?> _emekliliksiz(Map<String, Object?> govde) {
+  final Map<String, Object?> career =
+      Map<String, Object?>.from(govde['career']! as Map<String, Object?>)
+        ..remove('retiredAtAge')
+        ..remove('pension');
+  return career;
 }

@@ -156,7 +156,7 @@ void main() {
       expect(geri.education.universityExamScore, 81);
     });
 
-    test('sürüm 6 kaydı üniversite puanı olmadan açılır', () async {
+    test('desteklenen en eski sürümün kaydı üniversite puanı olmadan açılır', () async {
       final GameState orijinal = mezun(11, placement: 70, exam: 70);
       final Map<String, Object?> body = encodeGameState(orijinal);
       // Sürüm 6'da bu alanlar yoktu.
@@ -167,7 +167,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 6, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

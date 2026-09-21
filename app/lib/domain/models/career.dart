@@ -6,6 +6,7 @@ import '../../data/job_catalog.dart';
 enum JobEndReason {
   istifa('Kendi isteğiyle ayrıldı'),
   cikarildi('İşten çıkarıldı'),
+  emeklilik('Emekli oldu'),
   kusakDevami('Kuşak devamında bırakıldı');
 
   const JobEndReason(this.label);
@@ -89,6 +90,8 @@ class CareerState {
     this.lastRaiseAge,
     this.lastPromotionAge,
     this.lastJobLossAge,
+    this.retiredAtAge,
+    this.pension,
   });
 
   const CareerState.none() : this();
@@ -138,6 +141,27 @@ class CareerState {
 
   /// En son işini kaybettiği yaş; art arda işten çıkarılmayı engeller.
   final int? lastJobLossAge;
+
+  /// Emekli olunan yaş; henüz emekli değilse `null` (Paket 12).
+  final int? retiredAtAge;
+
+  /// prototypeOnly: yıllık emekli aylığı (₺).
+  final int? pension;
+
+  /// Oyuncu emekli mi?
+  bool get isRetired => retiredAtAge != null;
+
+  /// Çalışma hayatı boyunca geçen toplam yıl.
+  ///
+  /// Biten kayıtlar ile süren iş birlikte sayılır; uydurma yıl eklenmez.
+  int totalWorkYears(int currentAge) {
+    int toplam = 0;
+    for (final JobHistoryEntry e in history) {
+      toplam += e.years ?? 0;
+    }
+    if (startedAtAge != null) toplam += currentAge - startedAtAge!;
+    return toplam;
+  }
 
   /// İş, oyuncunun yaşadığı şehirden farklı bir şehirde mi?
   bool isInAnotherCity(String currentCity) =>
@@ -234,6 +258,8 @@ class CareerState {
     Object? lastRaiseAge = _unsetCareer,
     Object? lastPromotionAge = _unsetCareer,
     Object? lastJobLossAge = _unsetCareer,
+    Object? retiredAtAge = _unsetCareer,
+    Object? pension = _unsetCareer,
   }) {
     return CareerState(
       jobId: jobId == _unsetCareer ? this.jobId : jobId as String?,
@@ -257,6 +283,10 @@ class CareerState {
       lastJobLossAge: lastJobLossAge == _unsetCareer
           ? this.lastJobLossAge
           : lastJobLossAge as int?,
+      retiredAtAge: retiredAtAge == _unsetCareer
+          ? this.retiredAtAge
+          : retiredAtAge as int?,
+      pension: pension == _unsetCareer ? this.pension : pension as int?,
     );
   }
 }

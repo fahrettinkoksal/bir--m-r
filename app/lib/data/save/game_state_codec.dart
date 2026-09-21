@@ -411,6 +411,9 @@ Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
       'lastRaiseAge': c.lastRaiseAge,
       'lastPromotionAge': c.lastPromotionAge,
       'lastJobLossAge': c.lastJobLossAge,
+      // Emeklilik (Paket 12).
+      'retiredAtAge': c.retiredAtAge,
+      'pension': c.pension,
     };
 
 Map<String, Object?> _encodeCareerMilestone(CareerMilestone m) =>
@@ -984,6 +987,9 @@ CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
       lastRaiseAge: _intOrNull(json, 'lastRaiseAge'),
       lastPromotionAge: _intOrNull(json, 'lastPromotionAge'),
       lastJobLossAge: _intOrNull(json, 'lastJobLossAge'),
+      // Eski kayıtlarda emeklilik yoktur; oyuncu emekli sayılmaz.
+      retiredAtAge: _intOrNull(json, 'retiredAtAge'),
+      pension: _intOrNull(json, 'pension'),
     );
 
 CareerMilestone _decodeCareerMilestone(Map<String, Object?> json) =>

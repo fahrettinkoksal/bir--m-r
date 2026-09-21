@@ -118,6 +118,8 @@ class EventEngine {
     if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
       return false;
     }
+    // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
+    if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
     if (req.requiresMinYearsInJob > 0 &&

@@ -143,7 +143,9 @@ class Friendship {
       employment: age >= 65
           ? EmploymentStatus.emekli
           : EmploymentStatus.calisiyor,
-      occupation: rng.pick(meslekler),
+      // Emekliye meslek yazılmaz; çalışmayan kişiye meslek atanmaz
+      // kuralı kişi kaydının değişmez koşuludur.
+      occupation: age >= 65 ? null : rng.pick(meslekler),
       wealth: WealthTier.ortaHalli,
       bond: rng.between(30, 45), // prototypeOnly: yeni tanışıklık
       // Aynı şehirde tanışılır; şehir kuralları doğru işlesin.

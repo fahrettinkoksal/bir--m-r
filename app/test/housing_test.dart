@@ -236,7 +236,7 @@ void main() {
           reason: 'Yükleme masrafı yeniden kesmemeli');
     });
 
-    test('sürüm 12 kaydı ailenin yanında açılır', () async {
+    test('desteklenen en eski sürümün kaydı ailenin yanında açılır', () async {
       final GameState state = evAl(oyuncu(21));
       final Map<String, Object?> body = encodeGameState(state);
       body
@@ -250,7 +250,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 12, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

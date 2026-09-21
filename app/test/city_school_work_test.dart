@@ -318,7 +318,7 @@ void main() {
       expect(checkInvariants(geri), isEmpty);
     });
 
-    test('sürüm 16 kaydı şehirsiz açılır ve okul bozulmaz', () async {
+    test('desteklenen en eski sürümün kaydı şehirsiz açılır ve okul bozulmaz', () async {
       final GameState state = ogrenci(312);
       final Map<String, Object?> body = encodeGameState(state);
       for (final Object? e in body['people']! as List<Object?>) {
@@ -329,7 +329,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 16, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();

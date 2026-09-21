@@ -129,6 +129,7 @@ BirOmurAccent _accentFor(Person person) {
     case RelationType.eskiEs:
       return BirOmurAccents.gul;
     case RelationType.cocuk:
+    case RelationType.torun:
       return BirOmurAccents.mavi;
     case RelationType.anne:
     case RelationType.baba:

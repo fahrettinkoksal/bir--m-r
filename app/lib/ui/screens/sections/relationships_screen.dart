@@ -15,7 +15,13 @@ import '../../widgets/section_scaffold.dart';
 /// romantik bağlar alt menülere ayrılır. Uzun tek liste yerine iç içe menü
 /// tercih edilmiştir. Veri yapısı değişmez: kişiler aynı kalıcı kimlikle,
 /// aynı bağ türleriyle okunur.
-enum RelationshipSubPage { akrabalar, arkadaslar, romantik, cocuklar }
+enum RelationshipSubPage {
+  akrabalar,
+  arkadaslar,
+  romantik,
+  cocuklar,
+  torunlar,
+}
 
 class RelationshipsScreen extends StatefulWidget {
   const RelationshipsScreen({super.key, required this.onBack});
@@ -32,7 +38,10 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
   List<Person> _akrabalar(GameState state) => state.people
       .where((Person p) =>
           p.relation == RelationType.kardes ||
-          p.relation.group == RelationGroup.genis)
+          // Torunların kendi sayfası var; akraba listesinde tekrar
+          // gösterilmez.
+          (p.relation.group == RelationGroup.genis &&
+              p.relation != RelationType.torun))
       .toList(growable: false)
     ..sort((Person a, Person b) => b.age.compareTo(a.age));
 
@@ -45,6 +54,12 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
 
   /// Çocuklar en büyükten küçüğe. Vefat edenler de listede kalır (D-029).
   List<Person> _cocuklar(GameState state) => <Person>[...state.children]
+    ..sort((Person a, Person b) => b.age.compareTo(a.age));
+
+  /// Torunlar en büyükten küçüğe. Vefat edenler de listede kalır.
+  List<Person> _torunlar(GameState state) => state.people
+      .where((Person p) => p.relation == RelationType.torun)
+      .toList(growable: false)
     ..sort((Person a, Person b) => b.age.compareTo(a.age));
 
   Person? _byRelation(GameState state, RelationType relation) {
@@ -68,12 +83,14 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.arkadaslar => _arkadaslar(state),
         RelationshipSubPage.romantik => _romantikler(state),
         RelationshipSubPage.cocuklar => _cocuklar(state),
+        RelationshipSubPage.torunlar => _torunlar(state),
       };
       final String baslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar => 'Akrabalar',
         RelationshipSubPage.arkadaslar => 'Arkadaşlar',
         RelationshipSubPage.romantik => 'Romantik bağlar',
         RelationshipSubPage.cocuklar => 'Çocuklar',
+        RelationshipSubPage.torunlar => 'Torunlar',
       };
       final String altBaslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar =>
@@ -84,7 +101,9 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           'İlişki geçmişi; akrabalık ve hane değildir.',
         RelationshipSubPage.cocuklar =>
           'Büyüyen çocuklar evden çıkar; kayıtları silinmez.',
-      };
+              RelationshipSubPage.torunlar =>
+          'Çocuklarının çocukları. Kendi hayatlarını yaşarlar.',
+};
 
       return SectionScaffold(
         title: baslik,
@@ -147,6 +166,19 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             trailingText: '$cocukSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.cocuklar),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (_torunlar(state).isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('relationships_grandchildren_row'),
+            title: 'Torunlar',
+            subtitle: 'Çocuklarının çocukları',
+            icon: Icons.child_friendly_outlined,
+            accent: BirOmurAccents.pirinc,
+            trailingText: '${_torunlar(state).length}',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.torunlar),
           ),
           const SizedBox(height: 10),
         ],

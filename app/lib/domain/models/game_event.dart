@@ -46,6 +46,7 @@ class EventRequirement {
     this.requiresMinYearsInJob = 0,
     this.minFame = 0,
     this.requiresTripMemory = false,
+    this.requiresRetired = false,
   });
 
   final int minAge;
@@ -115,6 +116,9 @@ class EventRequirement {
   ///
   /// Aracı olan ama ehliyeti olmayan oyuncuya "direksiyona geçtin" denmez.
   final Set<String> requiredLicenses;
+
+  /// Oyuncunun **emekli olmuş** olmasını gerektirir (Paket 12).
+  final bool requiresRetired;
 
   /// Yıllar önce **birlikte** yapılmış, kişisi hâlâ hayatta olan bir gezi
   /// gerektirir (Paket 11).

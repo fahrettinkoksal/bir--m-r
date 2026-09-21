@@ -396,7 +396,7 @@ void main() {
   // Kayıt uyumu
   // ===================================================================
   group('Eski kayıtlar', () {
-    test('sürüm 10 kaydında kimse sebepsiz ölmüş görünmez', () async {
+    test('desteklenen en eski sürümün kaydında kimse sebepsiz ölmüş görünmez', () async {
       final GameState state = hayat(40, age: 30);
       final Map<String, Object?> body = encodeGameState(state);
       body
@@ -411,7 +411,7 @@ void main() {
       final SaveLoadResult result = await SaveService(
         MemorySaveStore(
           initial: jsonEncode(
-            <String, Object?>{'formatVersion': 10, 'state': body},
+            <String, Object?>{'formatVersion': 21, 'state': body},
           ),
         ),
       ).load();
