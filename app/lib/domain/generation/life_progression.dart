@@ -2,6 +2,9 @@ import 'dart:math';
 
 import '../../data/name_pool.dart';
 import '../career/career_progress.dart';
+import '../social/social_engine.dart';
+import '../social/social_income.dart';
+import '../models/sponsorship.dart';
 import '../career/job_market.dart';
 import '../education/education_path.dart';
 import '../events/event_engine.dart';
@@ -272,6 +275,10 @@ class LifeProgression {
     // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).
     afterDeaths = _applyRentIncome(afterDeaths, newAge);
 
+    // Sosyal medya: süresi dolan sponsorluklar kapanır, koşullar
+    // uygunsa yeni bir teklif gelir (Paket 10).
+    afterDeaths = _applySponsorships(afterDeaths, newAge);
+
     // Yıllık geçim gideri: hane ve yaşam koşuluna göre, **bir kez** (D-033).
     final ({GameState state, String? logText}) gider =
         LivingCosts.apply(afterDeaths);
@@ -374,6 +381,36 @@ class LifeProgression {
   ///
   /// Her yıl kiracı bulunmayabilir; gelir garanti değildir. Gelir gerçek
   /// mülk kaydından hesaplanır, uydurulmaz.
+  /// Sponsorluk yükümlülüklerini ve yeni teklifleri işler.
+  ///
+  /// Yapılmayan paylaşım için ödeme yapılmaz; süresi dolan anlaşma
+  /// "düştü" olarak kapanır ve günlüğe yazılır.
+  GameState _applySponsorships(GameState state, int newAge) {
+    const SocialEngine sosyal = SocialEngine();
+    final ({GameState state, List<String> logTexts}) suresiDolan =
+        sosyal.expireDeals(state, newAge);
+    GameState sonraki = suresiDolan.state;
+    for (final String satir in suresiDolan.logTexts) {
+      sonraki = _logLine(sonraki, newAge, satir);
+    }
+
+    final SponsorOffer? teklif = SocialIncome.maybeOffer(sonraki, _rng);
+    if (teklif == null) return sonraki;
+    return _logLine(
+      sonraki.copyWith(sponsorOffer: teklif),
+      newAge,
+      'Sosyal medyada bir ${teklif.label} sponsorluk teklif etti. '
+      'Aktiviteler → Sosyal medya bölümünden yanıtlayabilirsin.',
+    );
+  }
+
+  GameState _logLine(GameState state, int age, String text) => state.copyWith(
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(age: age, text: text, category: LogCategory.kisisel),
+        ]),
+      );
+
   GameState _applyRentIncome(GameState state, int newAge) {
     final List<OwnedItem> kiradakiler = state.items
         .where((OwnedItem i) => i.isProperty && i.rentedOut)

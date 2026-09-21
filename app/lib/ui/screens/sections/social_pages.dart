@@ -4,12 +4,15 @@ import '../../../data/social_catalog.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/social_account.dart';
+import '../../../domain/models/sponsorship.dart';
 import '../../../domain/social/social_engine.dart';
+import '../../../domain/social/social_income.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../text/turkish_text.dart';
 
 /// Sosyal medya ana sayfası: platformlar ve hesap durumu.
 ///
@@ -59,6 +62,31 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
+        // Bekleyen sponsorluk teklifi en üstte durur (Paket 10).
+        if (controller.sponsorOffer != null) ...<Widget>[
+          _SponsorOfferCard(
+            offer: controller.sponsorOffer!,
+            onAccept: () {
+              final SocialOutcome? sonuc = controller.acceptSponsor();
+              setState(() => _sonuc = sonuc);
+            },
+            onDecline: () {
+              final SocialOutcome? sonuc = controller.declineSponsor();
+              setState(() => _sonuc = sonuc);
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Kabul edilmiş ama paylaşımı yapılmamış sponsorluklar.
+        for (final SponsorDeal deal in controller.openSponsorDeals) ...<Widget>[
+          InfoPanel(
+            icon: Icons.assignment_turned_in_outlined,
+            text: '${trUpperFirst(deal.label)} sponsorluğunu kabul ettin. '
+                'Ücret (${trMoney(deal.fee)}), ${deal.platform.label} '
+                'üzerinde bir paylaşım yapınca ödenecek.',
+          ),
+          const SizedBox(height: 12),
+        ],
         for (final SocialPlatform platform in SocialPlatform.values) ...<Widget>[
           _PlatformCard(
             platform: platform,
@@ -81,10 +109,21 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           InfoPanel(icon: Icons.campaign_outlined, text: _sonuc!.text),
         ],
         const SizedBox(height: 12),
+        if (state.totalSocialEarnings > 0) ...<Widget>[
+          InfoPanel(
+            icon: Icons.payments_outlined,
+            text: 'Sosyal medyadan bugüne kadar '
+                '${trMoney(state.totalSocialEarnings)} kazandın. Gelir, '
+                'paylaşımın gerçekten ilgi görmesine bağlıdır; her '
+                'paylaşım para kazandırmaz.',
+          ),
+          const SizedBox(height: 12),
+        ],
         const InfoPanel(
           icon: Icons.info_outline,
-          text: 'Gelir, sponsorluk ve mesajlaşma henüz yazılmadı; '
-              'yazılmamış özellikler düğme olarak gösterilmiyor.',
+          text: 'Mesajlaşma henüz yazılmadı; yazılmamış özellikler düğme '
+              'olarak gösterilmiyor. Sponsorlar kurgusaldır ve bütün '
+              'tutarlar oyun parasıdır.',
         ),
       ],
     );
@@ -302,6 +341,99 @@ class _PlatformPage extends StatelessWidget {
             ),
         ],
       ],
+    );
+  }
+}
+
+
+/// Bekleyen sponsorluk teklifi kartı.
+///
+/// Sponsorlar kurgusaldır; gerçek marka adı veya logosu kullanılmaz.
+class _SponsorOfferCard extends StatelessWidget {
+  const _SponsorOfferCard({
+    required this.offer,
+    required this.onAccept,
+    required this.onDecline,
+  });
+
+  final SponsorOffer offer;
+  final VoidCallback onAccept;
+  final VoidCallback onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    const BirOmurAccent renk = BirOmurAccents.pirinc;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(
+              renk.of(context).withValues(alpha: 0.12),
+              theme.colorScheme.surfaceContainerHighest,
+            ),
+            theme.colorScheme.surfaceContainerHighest,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: renk.of(context).withValues(alpha: 0.30)),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const AccentIconTile(
+                icon: Icons.handshake_outlined,
+                accent: renk,
+                size: 38,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Sponsorluk teklifi',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            SocialIncome.offerText(offer),
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ücret: ${trMoney(offer.fee)} — paylaşımı yapınca ödenir.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: renk.deepOf(context),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('sponsor_accept'),
+              onPressed: onAccept,
+              child: const Text('Kabul et'),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const Key('sponsor_decline'),
+              onPressed: onDecline,
+              child: const Text('Teşekkür et, reddet'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

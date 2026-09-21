@@ -112,6 +112,10 @@ class EventEngine {
     if (req.requiresSocialAccount && state.socialAccounts.isEmpty) {
       return false;
     }
+    // Ün gerektiren olaylar: kitle gerçekten oluşmadan çıkmaz.
+    if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
+      return false;
+    }
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
     if (req.requiresMinYearsInJob > 0 &&
@@ -257,6 +261,14 @@ class EventEngine {
     }
     // Okul arkadaşlığı: olayın kişisi varsa **aynı kimlikle** yakın arkadaşa
     // çevrilir; yoksa kalıcı kimlikli yeni bir arkadaş kaydı açılır.
+    // Ün üzerinden tanışma: kişi yalnızca bu seçim yapılırsa üretilir.
+    if (choice.startsFriendship) {
+      const Friendship friendship = Friendship();
+      final ({GameState state, Person friend}) started =
+          friendship.startAcquaintance(working, rng ?? Random());
+      working = started.state;
+      newPersonId = started.friend.id;
+    }
     if (choice.startsSchoolFriendship) {
       const Friendship friendship = Friendship();
       final String? adayId = active.personId;

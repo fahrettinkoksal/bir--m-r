@@ -9,6 +9,8 @@ class SocialPost {
     required this.contentId,
     required this.age,
     required this.followerDelta,
+    this.earned = 0,
+    this.sponsorId,
   });
 
   final String contentId;
@@ -18,6 +20,16 @@ class SocialPost {
 
   /// Takipçi değişimi (eksi olabilir).
   final int followerDelta;
+
+  /// Bu paylaşımdan gerçekten kazanılan tutar (₺).
+  ///
+  /// Kazanç paylaşımın kendi kaydına yazılır; böylece aynı paylaşımın
+  /// geliri kapat-aç ile ikinci kez ödenemez (Paket 10).
+  final int earned;
+
+  /// Bu paylaşım bir sponsorluk yükümlülüğünü yerine getirdiyse onun
+  /// kimliği.
+  final String? sponsorId;
 
   SocialContent? get content => socialContentById(contentId);
 

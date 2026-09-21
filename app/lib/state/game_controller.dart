@@ -44,6 +44,7 @@ import '../domain/models/game_settings.dart';
 import '../domain/models/life_log.dart';
 import '../domain/models/life_summary.dart';
 import '../domain/models/marriage.dart';
+import '../domain/models/sponsorship.dart';
 import '../domain/social/social_engine.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
@@ -716,6 +717,25 @@ class GameController extends ChangeNotifier {
   SocialOutcome? openSocialAccount(SocialPlatform platform) => _runSocial(
         (GameState current) => _social.openAccount(current, platform),
       );
+
+  // -------------------------------------------------------------------
+  // Sponsorluk (Paket 10)
+  // -------------------------------------------------------------------
+
+  /// Yanıt bekleyen sponsorluk teklifi.
+  SponsorOffer? get sponsorOffer => _state?.sponsorOffer;
+
+  /// Yerine getirilmemiş sponsorluk yükümlülükleri.
+  List<SponsorDeal> get openSponsorDeals =>
+      _state?.openDeals ?? const <SponsorDeal>[];
+
+  /// Teklifi kabul eder; ücret paylaşım yapılınca ödenir.
+  SocialOutcome? acceptSponsor() =>
+      _runSocial((GameState current) => _social.acceptSponsor(current));
+
+  /// Teklifi reddeder; hiçbir gelir oluşmaz.
+  SocialOutcome? declineSponsor() =>
+      _runSocial((GameState current) => _social.declineSponsor(current));
 
   /// Paylaşım yapar.
   SocialOutcome? postContent(SocialContent content) => _runSocial(

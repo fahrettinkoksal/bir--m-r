@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 23;
+const int kSaveFormatVersion = 24;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -77,8 +77,16 @@ abstract final class SaveMigrations {
     if (from <= 20) guncel = _v20ToV21(guncel);
     if (from <= 21) guncel = _v21ToV22(guncel);
     if (from <= 22) guncel = _v22ToV23(guncel);
+    if (from <= 23) guncel = _v23ToV24(guncel);
     return guncel;
   }
+
+  /// Sürüm 23 → 24: sosyal medya geliri ve sponsorluk eklendi (Paket 10).
+  ///
+  /// Eski kayıtlarda paylaşımların kazancı yoktur; **geriye dönük gelir
+  /// üretilmez** (kazanç 0 kalır) ve bekleyen sponsorluk olmaz. Takipçi,
+  /// içerik geçmişi ve Ün değerleri olduğu gibi korunur.
+  static Map<String, Object?> _v23ToV24(Map<String, Object?> body) => body;
 
   /// Sürüm 22 → 23: kariyer geçmişi, görev seviyesi ve iş arkadaşları
   /// eklendi (Paket 9).

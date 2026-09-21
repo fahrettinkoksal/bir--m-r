@@ -7,6 +7,9 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/social_account.dart';
+import '../models/sponsorship.dart';
+import 'social_income.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir sosyal medya işleminin sonucu.
 class SocialOutcome {
@@ -15,6 +18,7 @@ class SocialOutcome {
     required this.text,
     this.effects = const <AppliedEffect>[],
     this.followerDelta = 0,
+    this.earned = 0,
   });
 
   final bool applied;
@@ -23,6 +27,9 @@ class SocialOutcome {
 
   /// Paylaşımın takipçi değişimi; eksi olabilir.
   final int followerDelta;
+
+  /// Bu işlemden cüzdana giren tutar (₺); kazanç yoksa 0.
+  final int earned;
 }
 
 class SocialResult {
@@ -158,6 +165,23 @@ class SocialEngine {
     final int delta = _followerDelta(state, account, content, rng);
 
     final int yeniTakipci = (account.followers + delta).clamp(0, 1 << 30);
+    final int gercekDelta = yeniTakipci - account.followers;
+
+    // İçerik geliri: kitlesi olan hesapta, gerçekten ilgi gören
+    // paylaşımda ve garanti olmadan (Paket 10).
+    final int kazanc = SocialIncome.earningsFor(
+      state: state,
+      account: account,
+      content: content,
+      followerDelta: gercekDelta,
+      rng: rng,
+    );
+
+    // Açık bir sponsorluk varsa ve paylaşım o platformdaysa yükümlülük
+    // **bu paylaşımla** yerine gelir; ücret bir kez ödenir.
+    final SponsorDeal? sponsor = _openDealFor(state, content.platform);
+    final int sponsorUcreti = sponsor?.fee ?? 0;
+
     final SocialAccount guncel = account.copyWith(
       followers: yeniTakipci,
       posts: List<SocialPost>.unmodifiable(<SocialPost>[
@@ -165,7 +189,9 @@ class SocialEngine {
         SocialPost(
           contentId: content.id,
           age: state.player.age,
-          followerDelta: yeniTakipci - account.followers,
+          followerDelta: gercekDelta,
+          earned: kazanc + sponsorUcreti,
+          sponsorId: sponsor?.id,
         ),
       ]),
     );
@@ -179,17 +205,141 @@ class SocialEngine {
     );
     next = _updateFame(next, content);
 
-    final int gercekDelta = yeniTakipci - account.followers;
+    // Para cüzdana gerçekten işlenir.
+    if (kazanc + sponsorUcreti > 0) {
+      next = next.copyWith(
+        player: next.player.copyWith(
+          wallet: next.player.wallet + kazanc + sponsorUcreti,
+        ),
+      );
+    }
+    if (sponsor != null) {
+      next = next.copyWith(
+        sponsorDeals: List<SponsorDeal>.unmodifiable(
+          next.sponsorDeals
+              .map((SponsorDeal d) => d.id == sponsor.id
+                  ? d.copyWith(completedAtAge: next.player.age)
+                  : d)
+              .toList(growable: false),
+        ),
+      );
+    }
+
     final String metin = _postText(content, gercekDelta, account.platform);
 
+    // Günlükte paranın **nereden** geldiği ayrı ayrı yazılır.
+    GameState kayitli = gercekDelta.abs() >= 1 ? _log(next, metin) : next;
+    if (kazanc > 0) {
+      kayitli = _log(
+        kayitli,
+        '${SocialIncome.earningText(
+          content: content,
+          platform: account.platform,
+          followerDelta: gercekDelta,
+          amount: kazanc,
+        )} ${trMoney(kazanc)} cüzdanına girdi.',
+      );
+    }
+    if (sponsor != null) {
+      kayitli = _log(
+        kayitli,
+        '${sponsor.label} sponsorluğunun paylaşımını yaptın; '
+        '${trMoney(sponsor.fee)} ödendi.',
+      );
+    }
+
     return SocialResult(
-      state: gercekDelta.abs() >= 1 ? _log(next, metin) : next,
+      state: kayitli,
       outcome: SocialOutcome(
         applied: true,
         text: metin,
-        effects: diffAppliedEffects(state, next),
+        effects: diffAppliedEffects(state, kayitli),
         followerDelta: gercekDelta,
+        earned: kazanc + sponsorUcreti,
       ),
+    );
+  }
+
+  /// Bu platformda açık bekleyen sponsorluk.
+  SponsorDeal? _openDealFor(GameState state, SocialPlatform platform) {
+    for (final SponsorDeal d in state.sponsorDeals) {
+      if (d.isOpen && d.platform == platform) return d;
+    }
+    return null;
+  }
+
+  // ===================================================================
+  // Sponsorluk
+  // ===================================================================
+
+  /// Teklifi kabul eder: yükümlülük açılır, **ödeme henüz yapılmaz**.
+  SocialResult acceptSponsor(GameState state) {
+    final SponsorOffer? teklif = state.sponsorOffer;
+    if (teklif == null) {
+      return _blocked(state, 'Bekleyen bir sponsorluk teklifi yok.');
+    }
+    final String metin = '${teklif.label} ile anlaştın. '
+        'Ücret, ${teklif.platform.label} üzerinde paylaşımı yapınca '
+        'ödenecek.';
+    final GameState next = state.copyWith(
+      sponsorOffer: null,
+      sponsorDeals: List<SponsorDeal>.unmodifiable(<SponsorDeal>[
+        ...state.sponsorDeals,
+        SponsorDeal(
+          id: teklif.id,
+          categoryId: teklif.categoryId,
+          platform: teklif.platform,
+          fee: teklif.fee,
+          acceptedAtAge: state.player.age,
+        ),
+      ]),
+    );
+    return SocialResult(
+      state: _log(next, metin),
+      outcome: SocialOutcome(applied: true, text: metin),
+    );
+  }
+
+  /// Teklifi reddeder: hiçbir gelir oluşmaz.
+  SocialResult declineSponsor(GameState state) {
+    final SponsorOffer? teklif = state.sponsorOffer;
+    if (teklif == null) {
+      return _blocked(state, 'Bekleyen bir sponsorluk teklifi yok.');
+    }
+    final String metin = '${teklif.label} teklifini kabul etmedin.';
+    return SocialResult(
+      state: _log(state.copyWith(sponsorOffer: null), metin),
+      outcome: SocialOutcome(applied: true, text: metin),
+    );
+  }
+
+  /// Yıl geçerken süresi dolan sponsorlukları kapatır.
+  ///
+  /// Yapılmayan paylaşım için **ödeme yapılmaz**; yükümlülük sessizce
+  /// silinmez, "süresi doldu" olarak kapanır.
+  ({GameState state, List<String> logTexts}) expireDeals(
+    GameState state,
+    int newAge,
+  ) {
+    final List<String> satirlar = <String>[];
+    final List<SponsorDeal> guncel = state.sponsorDeals.map((SponsorDeal d) {
+      if (!d.isOpen) return d;
+      if (newAge - d.acceptedAtAge < SocialIncome.prototypeOnlyDealDeadline) {
+        return d;
+      }
+      satirlar.add(
+        '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma düştü '
+        've ödeme olmadı.',
+      );
+      return d.copyWith(expired: true);
+    }).toList(growable: false);
+
+    if (satirlar.isEmpty) return (state: state, logTexts: satirlar);
+    return (
+      state: state.copyWith(
+        sponsorDeals: List<SponsorDeal>.unmodifiable(guncel),
+      ),
+      logTexts: satirlar,
     );
   }
 

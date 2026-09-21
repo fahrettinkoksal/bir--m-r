@@ -21,10 +21,19 @@ class Friendship {
 
   /// Arkadaş kimliklerini çakışmadan üretir.
   static String _nextId(GameState state) {
-    final int mevcut = state.people
-        .where((Person p) => p.relation == RelationType.arkadas)
-        .length;
-    return 'arkadas-${mevcut + 1}';
+    final Set<String> kullanilan = <String>{
+      for (final Person p in state.people) p.id,
+    };
+    // Sayaç, arkadaşlığa dönüşen iş arkadaşlarını da sayabildiği için
+    // kimliğin gerçekten boş olduğu doğrulanır.
+    int sira = state.people
+            .where((Person p) => p.relation == RelationType.arkadas)
+            .length +
+        1;
+    while (kullanilan.contains('arkadas-$sira')) {
+      sira++;
+    }
+    return 'arkadas-$sira';
   }
 
   bool hasSchoolFriend(GameState state) => state.people.any(
@@ -93,6 +102,52 @@ class Friendship {
       // Reşit olmayan kişiye kendi ekonomik durumu atanmaz.
       wealth: age >= 18 ? WealthTier.ortaHalli : null,
       bond: rng.between(35, 55), // prototypeOnly: yeni tanışıklık
+    );
+
+    return (
+      state: state.copyWith(
+        people: List<Person>.unmodifiable(<Person>[...state.people, friend]),
+      ),
+      friend: friend,
+    );
+  }
+
+  /// Okul dışında tanışılan, **her yaşa uygun** yeni bir arkadaş.
+  ///
+  /// Ün üzerinden gelen tanışma olayları bunu kullanır. Kişi yalnızca
+  /// tanışma **gerçekten olduğunda** üretilir; gerçekleşmeyen tanışma için
+  /// kayıt açılmaz. Yeni tanışıklık romantik ilişki değildir.
+  ({GameState state, Person friend}) startAcquaintance(
+    GameState state,
+    Random rng,
+  ) {
+    final Gender gender = rng.pick(Gender.values);
+    final int age = (state.player.age + rng.between(-5, 5)).clamp(16, 100);
+
+    String lastName = rng.pick(soyisimler);
+    while (lastName == state.player.lastName) {
+      lastName = rng.pick(soyisimler);
+    }
+
+    final Person friend = Person(
+      id: _nextId(state),
+      firstName:
+          rng.pick(gender == Gender.kadin ? kadinIsimleri : erkekIsimleri),
+      lastName: lastName,
+      gender: gender,
+      relation: RelationType.arkadas,
+      age: age,
+      isAlive: true,
+      inPlayerHousehold: false,
+      // Yaşına uygun durum: emekli/çalışan ayrımı uydurulmaz.
+      employment: age >= 65
+          ? EmploymentStatus.emekli
+          : EmploymentStatus.calisiyor,
+      occupation: rng.pick(meslekler),
+      wealth: WealthTier.ortaHalli,
+      bond: rng.between(30, 45), // prototypeOnly: yeni tanışıklık
+      // Aynı şehirde tanışılır; şehir kuralları doğru işlesin.
+      city: state.player.currentCity,
     );
 
     return (

@@ -20,6 +20,7 @@ import 'pending_crisis.dart';
 import 'pending_license_exam.dart';
 import 'person.dart';
 import 'social_account.dart';
+import 'sponsorship.dart';
 import 'player_character.dart';
 import 'relation.dart';
 
@@ -52,6 +53,8 @@ class GameState {
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
     this.socialAccounts = const <SocialAccount>[],
+    this.sponsorOffer,
+    this.sponsorDeals = const <SponsorDeal>[],
     this.pendingInterview,
     this.blackjack,
     this.wagerThisAge = 0,
@@ -241,6 +244,30 @@ class GameState {
   /// Açılmış sosyal medya hesapları. Hesap açmak **zorunlu değildir**;
   /// hesabı olmayan platformdan paylaşım veya olay gelmez.
   final List<SocialAccount> socialAccounts;
+
+  /// Yanıt bekleyen sponsorluk teklifi (Paket 10).
+  ///
+  /// Aynı anda yalnızca bir teklif bekler; kabul veya ret verilene kadar
+  /// yenisi gelmez.
+  final SponsorOffer? sponsorOffer;
+
+  /// Kabul edilmiş sponsorluk yükümlülükleri ve geçmişi.
+  final List<SponsorDeal> sponsorDeals;
+
+  /// Henüz yerine getirilmemiş sponsorluklar.
+  List<SponsorDeal> get openDeals =>
+      sponsorDeals.where((SponsorDeal d) => d.isOpen).toList(growable: false);
+
+  /// Sosyal medyadan bugüne kadar kazanılan toplam tutar.
+  int get totalSocialEarnings {
+    int toplam = 0;
+    for (final SocialAccount a in socialAccounts) {
+      for (final SocialPost p in a.posts) {
+        toplam += p.earned;
+      }
+    }
+    return toplam;
+  }
 
   /// Cevap bekleyen iş mülakatı; yoksa `null`.
   ///
@@ -560,6 +587,8 @@ class GameState {
     CareerState? career,
     List<BookProgress>? books,
     List<SocialAccount>? socialAccounts,
+    Object? sponsorOffer = _unsetEvent,
+    List<SponsorDeal>? sponsorDeals,
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
@@ -610,6 +639,10 @@ class GameState {
       career: career ?? this.career,
       books: books ?? this.books,
       socialAccounts: socialAccounts ?? this.socialAccounts,
+      sponsorOffer: sponsorOffer == _unsetEvent
+          ? this.sponsorOffer
+          : sponsorOffer as SponsorOffer?,
+      sponsorDeals: sponsorDeals ?? this.sponsorDeals,
       pendingInterview: pendingInterview == _unsetEvent
           ? this.pendingInterview
           : pendingInterview as PendingInterview?,

@@ -44,6 +44,7 @@ class EventRequirement {
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
     this.requiresMinYearsInJob = 0,
+    this.minFame = 0,
   });
 
   final int minAge;
@@ -114,6 +115,11 @@ class EventRequirement {
   /// Aracı olan ama ehliyeti olmayan oyuncuya "direksiyona geçtin" denmez.
   final Set<String> requiredLicenses;
 
+  /// Gerekli en az Ün değeri.
+  ///
+  /// Ün açılmamışsa (hiç kitle yoksa) bu olaylar çıkmaz (D-027).
+  final int minFame;
+
   /// Oyuncunun **şu an bir işte çalışıyor** olmasını gerektirir.
   ///
   /// İşsiz oyuncuya iş yerinde geçen olay çıkmaz (Paket 9).
@@ -151,6 +157,7 @@ class EventChoice {
     this.startsRomance = false,
     this.endsRomance = false,
     this.startsSchoolFriendship = false,
+    this.startsFriendship = false,
     this.rememberPersonAs,
   });
 
@@ -194,6 +201,13 @@ class EventChoice {
   /// kimlikli yeni bir arkadaş kaydı oluşturulur. Her sınıf arkadaşı
   /// kendiliğinden yakın arkadaş sayılmaz.
   final bool startsSchoolFriendship;
+
+  /// Bu seçim, okul dışında **yeni bir arkadaş** kaydı açar.
+  ///
+  /// Kişi yalnızca tanışma gerçekten olduğunda üretilir; reddedilen ya da
+  /// gerçekleşmeyen tanışma için kayıt açılmaz. Yeni tanışıklık romantik
+  /// ilişki değildir.
+  final bool startsFriendship;
 
   /// Bu seçim, olayın kişisini bir hikâye rolüne kilitler.
   ///

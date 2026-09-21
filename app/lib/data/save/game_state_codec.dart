@@ -31,6 +31,7 @@ import '../../domain/models/person.dart';
 import '../../domain/models/person_development.dart';
 import '../../domain/models/playing_card.dart';
 import '../../domain/models/social_account.dart';
+import '../../domain/models/sponsorship.dart';
 import '../../domain/models/player_character.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/models/stats.dart';
@@ -74,6 +75,12 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'books': state.books.map(_encodeBook).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
+      // Sponsorluk teklifi ve anlaşmaları (Paket 10).
+      'sponsorOffer': state.sponsorOffer == null
+          ? null
+          : _encodeSponsorOffer(state.sponsorOffer!),
+      'sponsorDeals':
+          state.sponsorDeals.map(_encodeSponsorDeal).toList(growable: false),
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
       'wagerThisAge': state.wagerThisAge,
@@ -183,6 +190,8 @@ Map<String, Object?> _encodeAccount(SocialAccount a) => <String, Object?>{
                 'contentId': p.contentId,
                 'age': p.age,
                 'followerDelta': p.followerDelta,
+                'earned': p.earned,
+                'sponsorId': p.sponsorId,
               })
           .toList(growable: false),
     };
@@ -446,6 +455,7 @@ Map<String, Object?> _encodeChoice(EventChoice c) => <String, Object?>{
       'startsRomance': c.startsRomance,
       'endsRomance': c.endsRomance,
       'startsSchoolFriendship': c.startsSchoolFriendship,
+      'startsFriendship': c.startsFriendship,
       'rememberPersonAs': c.rememberPersonAs,
     };
 
@@ -571,6 +581,13 @@ GameState decodeGameState(Map<String, Object?> json) {
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
           .toList(growable: false),
+    ),
+    // Eski kayıtlarda sponsorluk yoktur; boş açılır.
+    sponsorOffer: json['sponsorOffer'] == null
+        ? null
+        : _decodeSponsorOffer(_map(json, 'sponsorOffer')),
+    sponsorDeals: List<SponsorDeal>.unmodifiable(
+      _optionalList(json, 'sponsorDeals').map(_decodeSponsorDeal),
     ),
     // Eski kayıtlarda kumarhane yoktur; masa boş açılır.
     blackjack: json['blackjack'] == null
@@ -747,6 +764,53 @@ SocialPost _decodePost(Map<String, Object?> json) => SocialPost(
       contentId: _string(json, 'contentId'),
       age: _int(json, 'age'),
       followerDelta: _int(json, 'followerDelta'),
+      // Eski kayıtlarda gelir yoktur; geriye dönük kazanç uydurulmaz.
+      earned: _intOrNull(json, 'earned') ?? 0,
+      sponsorId: _stringOrNull(json, 'sponsorId'),
+    );
+
+Map<String, Object?> _encodeSponsorOffer(SponsorOffer o) => <String, Object?>{
+      'id': o.id,
+      'categoryId': o.categoryId,
+      'platform': o.platform.name,
+      'fee': o.fee,
+      'offeredAtAge': o.offeredAtAge,
+    };
+
+SponsorOffer _decodeSponsorOffer(Map<String, Object?> json) => SponsorOffer(
+      id: _string(json, 'id'),
+      categoryId: _string(json, 'categoryId'),
+      platform: _enumByName(
+        SocialPlatform.values,
+        _string(json, 'platform'),
+        'sponsorOffer.platform',
+      ),
+      fee: _int(json, 'fee'),
+      offeredAtAge: _int(json, 'offeredAtAge'),
+    );
+
+Map<String, Object?> _encodeSponsorDeal(SponsorDeal d) => <String, Object?>{
+      'id': d.id,
+      'categoryId': d.categoryId,
+      'platform': d.platform.name,
+      'fee': d.fee,
+      'acceptedAtAge': d.acceptedAtAge,
+      'completedAtAge': d.completedAtAge,
+      'expired': d.expired,
+    };
+
+SponsorDeal _decodeSponsorDeal(Map<String, Object?> json) => SponsorDeal(
+      id: _string(json, 'id'),
+      categoryId: _string(json, 'categoryId'),
+      platform: _enumByName(
+        SocialPlatform.values,
+        _string(json, 'platform'),
+        'sponsorDeal.platform',
+      ),
+      fee: _int(json, 'fee'),
+      acceptedAtAge: _int(json, 'acceptedAtAge'),
+      completedAtAge: _intOrNull(json, 'completedAtAge'),
+      expired: json['expired'] == true,
     );
 
 BookProgress _decodeBook(Map<String, Object?> json) => BookProgress(
@@ -1030,6 +1094,8 @@ EventChoice _decodeChoice(Map<String, Object?> json) => EventChoice(
       startsRomance: _bool(json, 'startsRomance'),
       endsRomance: _bool(json, 'endsRomance'),
       startsSchoolFriendship: _bool(json, 'startsSchoolFriendship'),
+      // Eski kayıtlarda bu alan yok; varsayılan false.
+      startsFriendship: json['startsFriendship'] == true,
       rememberPersonAs: _stringOrNull(json, 'rememberPersonAs'),
     );
 
