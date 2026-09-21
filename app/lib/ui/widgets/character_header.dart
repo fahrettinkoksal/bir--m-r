@@ -34,76 +34,68 @@ class CharacterHeader extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final String evre = state.education.stageLabel(state.player.age);
 
-    // Üst özet, ekranın en çok bakılan yeri: düz zemin yerine sıcak bir
-    // degrade ve ince bir nar çizgisi ile ayrılır.
-    final bool gece = theme.brightness == Brightness.dark;
+    // Ekranın en çok bakılan yeri: koyu, doygun bir degrade şerit. Gövde
+    // açık kaldığı için ekranın üstü çerçeve gibi durur ve karakter
+    // bilgisi günlükle karışmaz (Paket 16).
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[
-            Color.alphaBlend(
-              BirOmurColors.nar.withValues(alpha: gece ? 0.10 : 0.07),
-              theme.colorScheme.surfaceContainerHighest,
-            ),
-            Color.alphaBlend(
-              BirOmurColors.pirinc.withValues(alpha: gece ? 0.07 : 0.10),
-              theme.colorScheme.surfaceContainerHighest,
-            ),
+            BirOmurColors.basligUst,
+            BirOmurColors.basligAlt,
           ],
         ),
-        border: Border(
-          bottom: BorderSide(
-            color: BirOmurColors.nar.withValues(alpha: 0.35),
-            width: 1.4,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 18,
+            offset: Offset(0, 6),
           ),
-        ),
+        ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
+          padding: const EdgeInsets.fromLTRB(18, 10, 14, 13),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
                     child: Text(
                       state.player.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   _WalletPill(label: state.player.walletLabel),
-                  IconButton(
-                    key: const Key('open_settings'),
+                  const SizedBox(width: 2),
+                  _HeaderIconButton(
+                    itemKey: const Key('open_settings'),
                     tooltip: 'Ayarlar',
-                    iconSize: 18,
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.only(left: 6),
-                    constraints: const BoxConstraints(),
+                    icon: Icons.settings_rounded,
                     onPressed: () => SettingsSheet.show(context),
-                    icon: const Icon(Icons.settings_outlined),
                   ),
                   if (onRestart != null)
-                    IconButton(
+                    _HeaderIconButton(
+                      itemKey: const Key('new_life_button'),
                       tooltip: 'Yeni hayat',
-                      iconSize: 18,
-                      visualDensity: VisualDensity.compact,
-                      padding: const EdgeInsets.only(left: 6),
-                      constraints: const BoxConstraints(),
+                      icon: Icons.restart_alt_rounded,
                       onPressed: onRestart,
-                      icon: const Icon(Icons.restart_alt),
                     ),
                 ],
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 '${state.player.age} yaşında · $evre · '
                 '${state.player.birthCity}'
@@ -111,22 +103,22 @@ class CharacterHeader extends StatelessWidget {
                 // yazılır; ilk kuşakta hiç görünmez.
                 '${state.isContinuedGeneration ? ' · ${state.generation}. kuşak' : ''}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: Colors.white.withValues(alpha: 0.82),
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 1),
               Text(
                 _durumSatiri(state),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: Colors.white.withValues(alpha: 0.62),
                 ),
               ),
-              const SizedBox(height: 10),
-              const KilimDivider(height: 8),
-              const SizedBox(height: 10),
+              const SizedBox(height: 9),
+              const KilimDivider(height: 8, onDark: true),
+              const SizedBox(height: 9),
               InkWell(
                 onTap: () => _showStatDetails(context),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Row(
@@ -168,44 +160,78 @@ class _WalletPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        // Cüzdan her temada pirinç rengidir; koyu temada da para
-        // rengi değişmesin diye şema yerine doğrudan palet kullanılır.
+        // Cüzdan her temada pirinç rengidir; başlık zemini koyu olduğu
+        // için doğrudan palet kullanılır.
         gradient: const LinearGradient(
-          colors: <Color>[Color(0x4DD69A2B), Color(0x26D69A2B)],
+          colors: <Color>[
+            BirOmurColors.pirincAcik,
+            BirOmurColors.pirinc,
+          ],
         ),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: BirOmurColors.pirinc.withValues(alpha: 0.55),
-        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: BirOmurColors.pirinc.withValues(alpha: 0.22),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: BirOmurColors.pirinc.withValues(alpha: 0.45),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(
-            Icons.account_balance_wallet_outlined,
+          const Icon(
+            Icons.account_balance_wallet_rounded,
             size: 15,
-            color: theme.colorScheme.onSurface,
+            color: Color(0xFF4A2A00),
           ),
           const SizedBox(width: 6),
           Text(
             label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF3A2000),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Başlık şeridindeki küçük, yuvarlak düğme.
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+    this.itemKey,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final Key? itemKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: itemKey,
+      tooltip: tooltip,
+      iconSize: 19,
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.all(7),
+      constraints: const BoxConstraints(),
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.white.withValues(alpha: 0.14),
+        foregroundColor: Colors.white,
+      ),
+      onPressed: onPressed,
+      icon: Icon(icon),
     );
   }
 }
@@ -218,30 +244,37 @@ class _StatPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    // Başlık zemini her temada koyudur; değer renkleri koyu zemin
+    // karşılıklarından seçilir.
+    final Color renk = statColorOnDark(entry.value);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 3),
       child: Column(
         children: <Widget>[
           Text(
             '${entry.value}',
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: statColor(theme, entry.value),
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.1,
+              fontWeight: FontWeight.w900,
+              color: renk,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 5),
           AnimatedStatBar(
             value: entry.value,
-            color: statColor(theme, entry.value),
+            color: renk,
+            trackColor: Colors.white.withValues(alpha: 0.18),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 5),
           Text(
             entry.short,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.72),
             ),
           ),
         ],

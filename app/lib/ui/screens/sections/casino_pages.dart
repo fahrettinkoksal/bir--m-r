@@ -50,6 +50,7 @@ class _CasinoPageState extends State<CasinoPage> {
     }
 
     return SectionScaffold(
+      icon: Icons.casino_rounded,
       accent: BirOmurAccents.nar,
       title: 'Kumarhane',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',
@@ -152,6 +153,7 @@ class _BlackjackTablePageState extends State<BlackjackTablePage> {
         : adimlar.first;
 
     return SectionScaffold(
+      icon: Icons.style_rounded,
       title: 'Blackjack',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',
       backLabel: 'Kumarhane',
@@ -444,6 +446,7 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
         : adimlar.first;
 
     return SectionScaffold(
+      icon: Icons.donut_large_rounded,
       title: 'Rulet',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',
       backLabel: 'Kumarhane',

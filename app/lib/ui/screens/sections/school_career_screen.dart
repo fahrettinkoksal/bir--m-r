@@ -111,6 +111,7 @@ class _SchoolViewState extends State<_SchoolView> {
     }
 
     return SectionScaffold(
+      icon: Icons.school_rounded,
       title: 'Okul',
       accent: BirOmurAccents.mavi,
       subtitle: egitim.label,
@@ -248,6 +249,7 @@ class _PeoplePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionScaffold(
+      icon: Icons.groups_rounded,
       title: title,
       subtitle: subtitle,
       onBack: onBack,
@@ -330,6 +332,7 @@ class _CareerViewState extends State<_CareerView> {
     final bool isAranabilir = egitim.finished || egitim.universityFinished;
 
     return SectionScaffold(
+      icon: Icons.work_rounded,
       accent: BirOmurAccents.mor,
       title: 'Meslek',
       subtitle: egitim.stageLabel(state.player.age),
@@ -631,23 +634,7 @@ class _PanelCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     // Bilgi panelleri de menü satırlarıyla aynı görsel dili konuşur.
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color.alphaBlend(
-              accent.of(context).withValues(alpha: 0.10),
-              theme.colorScheme.surfaceContainerHighest,
-            ),
-            theme.colorScheme.surfaceContainerHighest,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: accent.of(context).withValues(alpha: 0.26),
-        ),
-      ),
+      decoration: panelDecoration(context, radius: 22),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

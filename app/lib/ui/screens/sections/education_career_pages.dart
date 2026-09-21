@@ -38,6 +38,7 @@ class _TrackChoicePageState extends State<TrackChoicePage> {
     final List<EducationTrackInfo> acik = controller.availableTracks();
 
     return SectionScaffold(
+      icon: Icons.alt_route_rounded,
       title: 'Lise alanı seç',
       subtitle: 'Yerleştirme puanın: $puan',
       backLabel: 'Okul',
@@ -154,6 +155,7 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
     final int? sinavPuani = controller.universityExamScore;
 
     return SectionScaffold(
+      icon: Icons.school_rounded,
       title: 'Mezuniyet sonrası',
       subtitle: state.education.trackInfo == null
           ? 'Lise bitti.'
@@ -405,6 +407,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
     final Map<JobType, String> kapali = controller.lockedJobs();
 
     return SectionScaffold(
+      icon: Icons.person_search_rounded,
       title: 'İş ara',
       subtitle: state.career.isEmployed
           ? 'Şu an ${state.career.label} olarak çalışıyorsun.'
@@ -573,6 +576,7 @@ class CareerHistoryPage extends StatelessWidget {
         state.career.allEntries().reversed.toList(growable: false);
 
     return SectionScaffold(
+      icon: Icons.work_history_rounded,
       accent: BirOmurAccents.cini,
       title: 'Kariyer geçmişi',
       subtitle: kayitlar.isEmpty
@@ -614,21 +618,7 @@ class _HistoryCard extends StatelessWidget {
         : entry.years!;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color.alphaBlend(
-              renk.of(context).withValues(alpha: 0.10),
-              theme.colorScheme.surfaceContainerHighest,
-            ),
-            theme.colorScheme.surfaceContainerHighest,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: renk.of(context).withValues(alpha: 0.26)),
-      ),
+      decoration: panelDecoration(context, radius: 22),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

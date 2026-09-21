@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../theme/bir_omur_theme.dart';
+
 /// Ölçülü nostaljik detay: ince, özgün bir kilim şeridi.
 ///
 /// Süsleme okunurluğu bozmayacak ölçüde kalır (`docs/PROTOTYPE_UI.md` §2).
 class KilimDivider extends StatelessWidget {
-  const KilimDivider({super.key, this.height = 10});
+  const KilimDivider({super.key, this.height = 10, this.onDark = false});
 
   final double height;
+
+  /// Koyu bir zeminin üzerinde mi duruyor? Üst karakter başlığı gibi
+  /// degrade zeminlerde tema renkleri okunmuyor; açık tonlar kullanılır.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +22,12 @@ class KilimDivider extends StatelessWidget {
       width: double.infinity,
       child: CustomPaint(
         painter: _KilimPainter(
-          color: scheme.primary.withValues(alpha: 0.35),
-          accent: scheme.tertiary.withValues(alpha: 0.55),
+          color: onDark
+              ? Colors.white.withValues(alpha: 0.28)
+              : scheme.primary.withValues(alpha: 0.35),
+          accent: onDark
+              ? BirOmurColors.pirincAcik.withValues(alpha: 0.85)
+              : scheme.tertiary.withValues(alpha: 0.75),
         ),
       ),
     );

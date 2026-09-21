@@ -43,6 +43,9 @@ class _VenuePageState extends State<VenuePage> {
     final List<ActivityAction> tumEylemler = actionsAt(widget.venue);
 
     return SectionScaffold(
+      icon: widget.venue == ActivityVenue.berber
+          ? Icons.content_cut_rounded
+          : Icons.fitness_center_rounded,
       accent: widget.venue == ActivityVenue.berber
           ? BirOmurAccents.mor
           : BirOmurAccents.yesil,
@@ -178,6 +181,7 @@ class _LibraryPageState extends State<LibraryPage> {
     final List<BookInfo> kitaplar = controller.availableBooks();
 
     return SectionScaffold(
+      icon: Icons.local_library_rounded,
       accent: BirOmurAccents.mavi,
       title: 'Kütüphane',
       subtitle: 'Yaşına uygun ${kitaplar.length} kitap var.',
@@ -312,6 +316,7 @@ class _ReaderView extends StatelessWidget {
     final bool bitti = progress?.finished ?? false;
 
     return SectionScaffold(
+      icon: Icons.menu_book_rounded,
       accent: BirOmurAccents.mavi,
       title: book.title,
       subtitle: '${book.author} · ${book.kind.label}',
@@ -501,6 +506,7 @@ class _AdoptionPageState extends State<AdoptionPage> {
     final List<Person> cocuklar = state.children;
 
     return SectionScaffold(
+      icon: Icons.volunteer_activism_rounded,
       accent: BirOmurAccents.gul,
       title: 'Evlat Edinme',
       subtitle: 'Bir çocuğa aile olmak',
@@ -625,6 +631,7 @@ class _WillPageState extends State<WillPage> {
     final List<Person> cocuklar = state.livingChildren;
 
     return SectionScaffold(
+      icon: Icons.history_edu_rounded,
       accent: BirOmurAccents.pirinc,
       title: 'Vasiyet',
       subtitle: 'Mirasçı olarak bir çocuğunu seçebilirsin',
@@ -783,6 +790,7 @@ class _TravelPageState extends State<TravelPage> {
           );
 
     return SectionScaffold(
+      icon: Icons.luggage_rounded,
       accent: BirOmurAccents.mavi,
       title: 'Seyahat',
       subtitle: 'Kısa bir gezi. Taşınma değil: yaşadığın şehir değişmez. '
@@ -953,7 +961,7 @@ class _TravelModeCard extends StatelessWidget {
     return Material(
       color: selected
           ? Color.alphaBlend(
-              renk.of(context).withValues(alpha: 0.12),
+              renk.softOf(context),
               theme.colorScheme.surfaceContainerHighest,
             )
           : theme.colorScheme.surfaceContainerHighest,

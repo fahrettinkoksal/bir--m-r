@@ -54,6 +54,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
     }
 
     return SectionScaffold(
+      icon: Icons.public_rounded,
       accent: BirOmurAccents.cini,
       title: 'Sosyal medya',
       subtitle: state.socialAccounts.isEmpty
@@ -238,6 +239,7 @@ class _PlatformPage extends StatelessWidget {
     final List<SocialContent> icerikler = contentsFor(platform);
 
     return SectionScaffold(
+      icon: Icons.trending_up_rounded,
       accent: BirOmurAccents.cini,
       title: platform.label,
       subtitle: '${account.followers} ${platform.audienceWord} · '
@@ -366,21 +368,7 @@ class _SponsorOfferCard extends StatelessWidget {
     const BirOmurAccent renk = BirOmurAccents.pirinc;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color.alphaBlend(
-              renk.of(context).withValues(alpha: 0.12),
-              theme.colorScheme.surfaceContainerHighest,
-            ),
-            theme.colorScheme.surfaceContainerHighest,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: renk.of(context).withValues(alpha: 0.30)),
-      ),
+      decoration: panelDecoration(context, radius: 22),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -31,7 +31,6 @@ class PersonCard extends StatelessWidget {
     // Kişi kartı da menü satırlarıyla aynı dili konuşur: yumuşak gölge,
     // renkli baş harf ve okunaklı rozetler.
     final bool gece = theme.brightness == Brightness.dark;
-    final Color renk = _accentFor(person).of(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -39,20 +38,15 @@ class PersonCard extends StatelessWidget {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: gece
-                ? Colors.black.withValues(alpha: 0.30)
-                : renk.withValues(alpha: alive ? 0.12 : 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+                ? Colors.black.withValues(alpha: 0.45)
+                : const Color(0xFF1B1A2E).withValues(alpha: 0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Material(
-        color: gece
-            ? theme.colorScheme.surfaceContainerHigh
-            : Color.alphaBlend(
-                renk.withValues(alpha: alive ? 0.04 : 0.0),
-                theme.colorScheme.surfaceContainerHighest,
-              ),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(22),
         child: InkWell(
           onTap: () {
@@ -64,7 +58,9 @@ class PersonCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                color: renk.withValues(alpha: alive ? 0.22 : 0.12),
+                color: gece
+                    ? theme.colorScheme.outlineVariant
+                    : const Color(0xFFECECF3),
               ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
@@ -83,6 +79,8 @@ class PersonCard extends StatelessWidget {
                       Text(
                         person.fullName,
                         style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15.5,
                           color: alive
                               ? theme.colorScheme.onSurface
                               : theme.colorScheme.onSurfaceVariant,
@@ -111,7 +109,12 @@ class PersonCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.chevron_right, size: 22, color: renk),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: theme.colorScheme.onSurfaceVariant
+                      .withValues(alpha: 0.55),
+                ),
               ],
             ),
           ),
@@ -218,14 +221,17 @@ class _HouseholdBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.tertiary.withValues(alpha: 0.16),
+        color: BirOmurColors.pirinc.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         'Aynı evde',
         style: theme.textTheme.labelSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.1,
+          color: theme.brightness == Brightness.dark
+              ? BirOmurColors.pirincAcik
+              : BirOmurColors.pirincKoyu,
         ),
       ),
     );

@@ -57,6 +57,7 @@ class LifeSummaryScreen extends StatelessWidget {
         : donumNoktalari;
 
     return SectionScaffold(
+      icon: Icons.local_florist_rounded,
       title: 'Bir ömür tamamlandı',
       subtitle: state.player.fullName,
       children: <Widget>[

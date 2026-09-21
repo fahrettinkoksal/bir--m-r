@@ -106,6 +106,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
 };
 
       return SectionScaffold(
+        icon: Icons.groups_rounded,
         title: baslik,
         subtitle: altBaslik,
         backLabel: 'İlişkiler',
@@ -132,6 +133,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
     final int romantikSayisi = _romantikler(state).length;
 
     return SectionScaffold(
+      icon: Icons.favorite_rounded,
       title: 'İlişkiler',
       accent: BirOmurAccents.gul,
       onBack: widget.onBack,

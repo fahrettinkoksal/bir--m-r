@@ -7,8 +7,8 @@ import '../../domain/models/applied_effect.dart';
 import '../../domain/models/game_event.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
+import '../theme/bir_omur_theme.dart';
 import 'effect_chips.dart';
-import 'kilim_divider.dart';
 import '../../text/turkish_text.dart';
 
 /// Yaş alınca çıkan tek olayı ve oyun içi ilerlemeyle gelen ek olayı gösterir.
@@ -64,28 +64,44 @@ class _EventDialogState extends State<EventDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                // Olayın hangi alandan geldiği renkli bir rozette durur;
+                // pencere açılır açılmaz bağlam bellidir.
                 Row(
                   children: <Widget>[
-                    Icon(
-                      _kategoriSimgesi(widget.event.category),
-                      size: 17,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 7),
-                    Text(
-                      trUpper(widget.event.category.label),
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.1,
-                        color: theme.colorScheme.primary,
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
+                      decoration: BoxDecoration(
+                        gradient: _kategoriRengi(widget.event.category)
+                            .heroGradient,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            _kategoriSimgesi(widget.event.category),
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 7),
+                          Text(
+                            trUpper(widget.event.category.label),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                const KilimDivider(),
-                const SizedBox(height: 14),
-                Text(widget.event.text, style: theme.textTheme.bodyLarge),
+                const SizedBox(height: 16),
+                Text(
+                  widget.event.text,
+                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
+                ),
                 const SizedBox(height: 20),
                 // Seçenekten sonuca geçiş yumuşak olsun: pencere birden
                 // değişmez.
@@ -103,15 +119,10 @@ class _EventDialogState extends State<EventDialog> {
                         if (!answered)
                           for (final EventChoice choice
                               in widget.event.choices) ...<Widget>[
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton.tonal(
-                                onPressed: () => _choose(choice),
-                                child: Text(
-                                  choice.label,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
+                            _ChoiceButton(
+                              label: choice.label,
+                              accent: _kategoriRengi(widget.event.category),
+                              onTap: () => _choose(choice),
                             ),
                             const SizedBox(height: 10),
                           ]
@@ -120,15 +131,8 @@ class _EventDialogState extends State<EventDialog> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.secondary.withValues(
-                                alpha: 0.08,
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: theme.colorScheme.secondary.withValues(
-                                  alpha: 0.35,
-                                ),
-                              ),
+                              color: theme.colorScheme.surfaceContainer,
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,6 +169,22 @@ class _EventDialogState extends State<EventDialog> {
     );
   }
 
+  /// Olay alanının rengi.
+  static BirOmurAccent _kategoriRengi(EventCategory category) {
+    switch (category) {
+      case EventCategory.aile:
+        return BirOmurAccents.nar;
+      case EventCategory.okul:
+        return BirOmurAccents.mavi;
+      case EventCategory.mahalle:
+        return BirOmurAccents.turuncu;
+      case EventCategory.kisisel:
+        return BirOmurAccents.mor;
+      case EventCategory.yetiskinlik:
+        return BirOmurAccents.cini;
+    }
+  }
+
   static IconData _kategoriSimgesi(EventCategory category) {
     switch (category) {
       case EventCategory.aile:
@@ -178,5 +198,52 @@ class _EventDialogState extends State<EventDialog> {
       case EventCategory.yetiskinlik:
         return Icons.work_outline;
     }
+  }
+}
+
+/// Olay penceresindeki tek seçenek düğmesi.
+///
+/// Tonal düğme yerine kendi kartı: geniş dokunma alanı, olayın rengini
+/// taşıyan ince çerçeve ve ortalanmış kalın yazı.
+class _ChoiceButton extends StatelessWidget {
+  const _ChoiceButton({
+    required this.label,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final String label;
+  final BirOmurAccent accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color renk = accent.of(context);
+    return Material(
+      color: accent.softOf(context),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: renk.withValues(alpha: 0.45), width: 1.4),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: accent.deepOf(context),
+              fontWeight: FontWeight.w800,
+              fontSize: 15.5,
+              height: 1.25,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

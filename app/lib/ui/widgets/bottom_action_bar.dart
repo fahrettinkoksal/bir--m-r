@@ -25,7 +25,7 @@ class BottomTab {
 /// iki ana menü. `Yaş Al` bir sekme değildir; menülerin arasında duran ana
 /// oyun eylemidir ve seçili sekmeyi değiştirmez.
 ///
-/// Görsel dil Bir Ömür'e özgüdür: sıcak koyu ahşap zemin, krem ikonlar ve
+/// Görsel dil Bir Ömür'e özgüdür: koyu mor-mürekkep zemin, açık ikonlar ve
 /// ortada nar kırmızısı, pirinç halkalı yükseltilmiş eylem düğmesi.
 class BottomActionBar extends StatelessWidget {
   const BottomActionBar({
@@ -58,18 +58,18 @@ class BottomActionBar extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: <Color>[
-            BirOmurColors.koyuAhsap,
-            BirOmurColors.koyuAhsapDip,
+            BirOmurColors.cubukUst,
+            BirOmurColors.cubukAlt,
           ],
         ),
         border: Border(
-          top: BorderSide(color: Color(0x33D69A2B), width: 1.2),
+          top: BorderSide(color: Color(0x4DF5A623), width: 1.2),
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Color(0x40000000),
-            blurRadius: 16,
-            offset: Offset(0, -4),
+            color: Color(0x59000000),
+            blurRadius: 20,
+            offset: Offset(0, -6),
           ),
         ],
       ),
@@ -108,7 +108,7 @@ class _TabButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool secili = selectedId == tab.id;
     final Color renk =
-        secili ? BirOmurColors.pirinc : BirOmurColors.sonukKrem;
+        secili ? BirOmurColors.pirincAcik : BirOmurColors.sonukKrem;
 
     return Semantics(
       selected: secili,
@@ -130,8 +130,10 @@ class _TabButton extends StatelessWidget {
               curve: Curves.easeOut,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
               decoration: BoxDecoration(
+                // Seçili sekmenin hapı beyazın kısılmışıdır: pirinç
+                // sarısının kendisi koyu mor zeminde kahverengiye düşüyordu.
                 color: secili
-                    ? BirOmurColors.pirinc.withValues(alpha: 0.20)
+                    ? Colors.white.withValues(alpha: 0.15)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(999),
               ),
@@ -196,10 +198,13 @@ class _AgeUpButton extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: aktif
-                    ? const <Color>[BirOmurColors.nar, BirOmurColors.narKoyu]
+                    ? const <Color>[
+                        BirOmurColors.narAcik,
+                        BirOmurColors.nar,
+                      ]
                     : <Color>[
-                        BirOmurColors.nar.withValues(alpha: 0.35),
-                        BirOmurColors.narKoyu.withValues(alpha: 0.35),
+                        BirOmurColors.nar.withValues(alpha: 0.32),
+                        BirOmurColors.narKoyu.withValues(alpha: 0.32),
                       ],
               ),
               borderRadius: BorderRadius.circular(24),
@@ -210,9 +215,9 @@ class _AgeUpButton extends StatelessWidget {
               boxShadow: aktif
                   ? <BoxShadow>[
                       BoxShadow(
-                        color: BirOmurColors.nar.withValues(alpha: 0.55),
-                        blurRadius: 16,
-                        offset: const Offset(0, 5),
+                        color: BirOmurColors.nar.withValues(alpha: 0.65),
+                        blurRadius: 22,
+                        offset: const Offset(0, 8),
                       ),
                     ]
                   : const <BoxShadow>[],

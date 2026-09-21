@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/models/life_log.dart';
+import '../theme/bir_omur_theme.dart';
 
 /// Hayat günlüğünün **bir yaşa ait** bloğu.
 ///
@@ -65,80 +66,108 @@ class LifeLogAgeBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color vurgu = isCurrentAge
-        ? theme.colorScheme.primary
-        : theme.colorScheme.outlineVariant;
+    final bool gece = theme.brightness == Brightness.dark;
 
     return Container(
       key: Key('log_age_${block.age}'),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isCurrentAge
-              ? theme.colorScheme.primary.withValues(alpha: 0.45)
-              : theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
-          width: isCurrentAge ? 1.4 : 1,
+              ? BirOmurColors.nar.withValues(alpha: gece ? 0.55 : 0.35)
+              : theme.colorScheme.outlineVariant,
+          width: isCurrentAge ? 1.5 : 1,
         ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: gece
+                ? Colors.black.withValues(alpha: 0.4)
+                : const Color(0xFF1B1A2E)
+                    .withValues(alpha: isCurrentAge ? 0.09 : 0.05),
+            blurRadius: isCurrentAge ? 18 : 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: const EdgeInsets.fromLTRB(14, 13, 14, 13),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
+              // Yaş rozeti: bu yıl dolu nar kırmızısı, geçmiş yıllar
+              // sakin bir gri. Günlükte "şimdi" hemen bulunur.
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
+                  horizontal: 11,
+                  vertical: 4,
                 ),
                 decoration: BoxDecoration(
+                  gradient: isCurrentAge
+                      ? const LinearGradient(
+                          colors: <Color>[
+                            BirOmurColors.narAcik,
+                            BirOmurColors.nar,
+                          ],
+                        )
+                      : null,
                   color: isCurrentAge
-                      ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                      : theme.colorScheme.surfaceContainerHighest,
+                      ? null
+                      : theme.colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   '${block.age} yaş',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
                     color: isCurrentAge
-                        ? theme.colorScheme.primary
+                        ? Colors.white
                         : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Container(
                   height: 1,
-                  color: vurgu.withValues(alpha: 0.5),
+                  color: theme.colorScheme.outlineVariant,
                 ),
               ),
               if (isCurrentAge) ...<Widget>[
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
-                  'bu yıl',
+                  'BU YIL',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
+                    color: BirOmurColors.nar,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.1,
+                    fontSize: 10,
                   ),
                 ),
               ],
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           for (final LifeLogEntry e in block.entries)
             Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(bottom: 7),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2, right: 8),
+                  // Kategori simgesi kendi renginden yumuşak bir kutunun
+                  // içinde durur; satırlar arasında göz kayması azalır.
+                  Container(
+                    margin: const EdgeInsets.only(top: 1, right: 10),
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: _renk(theme, e.category).withValues(alpha: 0.13),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Icon(
                       _icon(e.category),
-                      size: 15,
+                      size: 13,
                       color: _renk(theme, e.category),
                     ),
                   ),
@@ -167,14 +196,17 @@ class LifeLogAgeBlock extends StatelessWidget {
   }
 
   static Color _renk(ThemeData theme, LogCategory category) {
+    final bool gece = theme.brightness == Brightness.dark;
     switch (category) {
       case LogCategory.dogum:
       case LogCategory.yasDegisimi:
-        return theme.colorScheme.tertiary;
+        return gece ? BirOmurColors.pirincAcik : BirOmurColors.pirincKoyu;
       case LogCategory.aile:
-        return theme.colorScheme.secondary;
+        return gece ? BirOmurColors.ciniAcik : BirOmurColors.cini;
       case LogCategory.kisisel:
-        return theme.colorScheme.onSurfaceVariant;
+        return gece
+            ? const Color(0xFFA98BFF)
+            : const Color(0xFF6C4BD8);
     }
   }
 }

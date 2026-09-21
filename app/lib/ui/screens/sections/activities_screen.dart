@@ -103,6 +103,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
     if (_page == _ActivityPage.sosyal) {
       return SectionScaffold(
+        icon: Icons.groups_2_rounded,
         accent: BirOmurAccents.gul,
         title: 'Birlikte vakit geçir',
         subtitle: 'Hayatında şu an gerçekten görüştüğün kişiler. '
@@ -124,6 +125,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     }
 
     return SectionScaffold(
+      icon: Icons.local_activity_rounded,
       title: 'Aktiviteler',
       accent: BirOmurAccents.turuncu,
       onBack: widget.onBack,

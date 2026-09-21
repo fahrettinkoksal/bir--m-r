@@ -179,7 +179,7 @@ void main() {
       (WidgetTester tester) async {
     await startRandomLife(tester);
 
-    await tester.tap(find.byIcon(Icons.restart_alt));
+    await tester.tap(find.byKey(const Key('new_life_button')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Yeni hayat'));
     await tester.pumpAndSettle();

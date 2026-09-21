@@ -8,6 +8,7 @@ import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,21 +25,53 @@ import 'support/test_flow.dart';
 /// ```
 const String _kSwitch = 'BIR_OMUR_SCREENSHOTS';
 
-const List<String> _fontCandidates = <String>[
+/// Ekran görüntüleri gerçek uygulamaya benzesin diye Flutter'ın kendi
+/// Roboto ve Material Icons dosyaları yüklenir. Aksi halde yazılar tek tip
+/// kalınlıkta, ikonlar ise boş kare olarak çıkıyordu ve tasarım
+/// değerlendirilemiyordu.
+const String _flutterFonts =
+    '/opt/flutter/bin/cache/artifacts/material_fonts';
+
+const List<String> _fallbackFonts = <String>[
   '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
   '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
   '/System/Library/Fonts/Supplemental/Arial.ttf',
 ];
 
-Future<void> _loadReadableFont() async {
-  for (final String path in _fontCandidates) {
-    final File file = File(path);
+Future<bool> _loadFamily(String family, Map<String, String> files) async {
+  final FontLoader loader = FontLoader(family);
+  bool any = false;
+  for (final MapEntry<String, String> entry in files.entries) {
+    final File file = File(entry.value);
     if (!file.existsSync()) continue;
+    any = true;
     final Uint8List bytes = await file.readAsBytes();
-    final FontLoader loader = FontLoader('Roboto')
-      ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
-    await loader.load();
-    return;
+    loader.addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+  }
+  if (!any) return false;
+  await loader.load();
+  return true;
+}
+
+Future<void> _loadReadableFont() async {
+  // Material ikon yazı tipi: menü ve düğme ikonları görünsün diye.
+  await _loadFamily('MaterialIcons', <String, String>{
+    'regular': '$_flutterFonts/MaterialIcons-Regular.otf',
+  });
+
+  // Roboto'nun tüm kalınlıkları: w400 ile w800 arasındaki fark ekranda
+  // gerçekten görünsün.
+  final bool roboto = await _loadFamily('Roboto', <String, String>{
+    'light': '$_flutterFonts/Roboto-Light.ttf',
+    'regular': '$_flutterFonts/Roboto-Regular.ttf',
+    'medium': '$_flutterFonts/Roboto-Medium.ttf',
+    'bold': '$_flutterFonts/Roboto-Bold.ttf',
+    'black': '$_flutterFonts/Roboto-Black.ttf',
+  });
+  if (roboto) return;
+
+  for (final String path in _fallbackFonts) {
+    if (await _loadFamily('Roboto', <String, String>{'regular': path})) return;
   }
 }
 
@@ -66,7 +99,13 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      BirOmurApp(controller: controller, themeMode: themeMode),
+      BirOmurApp(
+        controller: controller,
+        themeMode: themeMode,
+        // Ekran görüntüsü alırken ses eklentisi yok; sessiz servis
+        // verilmezse oynatıcı kurulmaya çalışılıyor.
+        sound: SoundService.silent(),
+      ),
     );
     await tester.pumpAndSettle();
   }

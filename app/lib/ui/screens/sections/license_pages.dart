@@ -45,6 +45,7 @@ class _LicenseOfficePageState extends State<LicenseOfficePage> {
     final GameState state = controller.state!;
 
     return SectionScaffold(
+      icon: Icons.badge_rounded,
       accent: BirOmurAccents.turuncu,
       title: 'Ehliyet İşlemleri',
       subtitle: 'Cüzdanın: ${state.player.walletLabel}',

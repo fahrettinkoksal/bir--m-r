@@ -63,7 +63,7 @@ void main() {
 
   /// Alt sayfadan İlişkiler ana listesine döner.
   Future<void> iliskilereDon(WidgetTester tester) async {
-    await tester.tap(find.byIcon(Icons.chevron_left).first);
+    await tester.tap(find.byKey(const Key('section_back')).first);
     await tester.pumpAndSettle();
   }
 

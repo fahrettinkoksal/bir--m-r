@@ -94,6 +94,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
         .toList(growable: false);
 
     return SectionScaffold(
+      icon: Icons.account_balance_wallet_rounded,
       title: 'Varlıklar',
       accent: BirOmurAccents.yesil,
       onBack: widget.onBack,
@@ -203,6 +204,7 @@ class _ShopCategoryList extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
     return SectionScaffold(
+      icon: Icons.storefront_rounded,
       accent: BirOmurAccents.turuncu,
       title: 'Mağazalar',
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
@@ -261,6 +263,7 @@ class _ShopView extends StatelessWidget {
         shopProductsIn(category, state.player.age);
 
     return SectionScaffold(
+      icon: Icons.shopping_bag_rounded,
       title: category.label,
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
       backLabel: 'Mağazalar',
@@ -461,21 +464,7 @@ class _WalletCard extends StatelessWidget {
     // renkli dili kullanır.
     const BirOmurAccent renk = BirOmurAccents.yesil;
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color.alphaBlend(
-              renk.of(context).withValues(alpha: 0.12),
-              theme.colorScheme.surfaceContainerHighest,
-            ),
-            theme.colorScheme.surfaceContainerHighest,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: renk.of(context).withValues(alpha: 0.28)),
-      ),
+      decoration: panelDecoration(context, radius: 22),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(

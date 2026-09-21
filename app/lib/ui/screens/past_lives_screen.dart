@@ -27,6 +27,7 @@ class PastLivesScreen extends StatelessWidget {
     final List<LifeSummary> sirali = lives.reversed.toList(growable: false);
 
     return SectionScaffold(
+      icon: Icons.auto_stories_rounded,
       title: 'Geçmiş Hayatlar',
       subtitle: lives.isEmpty
           ? 'Henüz tamamlanmış bir hayat yok.'

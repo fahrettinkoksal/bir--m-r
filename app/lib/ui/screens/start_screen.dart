@@ -4,6 +4,7 @@ import '../../data/save/save_service.dart';
 import '../../domain/generation/life_generator.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
+import '../theme/bir_omur_theme.dart';
 import '../widgets/kilim_divider.dart';
 import 'creation_screen.dart';
 
@@ -87,84 +88,156 @@ class _StartScreenState extends State<StartScreen> {
     final bool devamEdilebilir = controller.hasSavedLife && sorun == null;
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const Spacer(flex: 2),
-              Text(
-                'Bir Ömür',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const KilimDivider(height: 12),
-              const SizedBox(height: 10),
-              Text(
-                'Bir hayat başlıyor. Nerede doğacağın, kimlerle büyüyeceğin '
-                've neyle uğraşacağın önceden belli değil.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const Spacer(),
-              // Açılışta ortada büyük bir boşluk kalıyordu; oyunun ne
-              // olduğunu üç satırda anlatan küçük bir kart konuldu.
-              const _NasilOynanir(),
-              const Spacer(flex: 2),
-              if (!controller.savingEnabled) ...<Widget>[
-                const _SaveProblemNote(
-                  text: 'Bu cihazda kayıt klasörü açılamadı, oyun '
-                      'kaydedilemiyor.',
-                  showUntouchedNote: false,
-                ),
-                const SizedBox(height: 16),
-              ] else if (sorun != null) ...<Widget>[
-                _SaveProblemNote(text: sorun),
-                const SizedBox(height: 16),
-              ],
-              if (devamEdilebilir) ...<Widget>[
-                FilledButton(
-                  key: const Key('continue_button'),
-                  onPressed: _busy ? null : _continue,
-                  child: const Text('Devam Et'),
+      // Açılış ekranı oyunun kapağıdır: tüm ekranı kaplayan koyu degrade,
+      // beyaz yazı ve açık renkli düğmeler (Paket 16).
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              BirOmurColors.basligUst,
+              BirOmurColors.basligAlt,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const Spacer(flex: 2),
+                Text(
+                  'Bir Ömür',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.5,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: _busy ? null : _randomLife,
-                  child: const Text('Yeni hayat (rastgele)'),
+                const KilimDivider(height: 12, onDark: true),
+                const SizedBox(height: 12),
+                Text(
+                  'Bir hayat başlıyor. Nerede doğacağın, kimlerle '
+                  'büyüyeceğin ve neyle uğraşacağın önceden belli değil.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    height: 1.45,
+                  ),
                 ),
-              ] else
-                FilledButton(
-                  onPressed: _busy ? null : _randomLife,
-                  child: const Text('Rastgele bir hayat'),
+                const Spacer(),
+                // Açılışta ortada büyük bir boşluk kalıyordu; oyunun ne
+                // olduğunu üç satırda anlatan küçük bir kart konuldu.
+                const _NasilOynanir(),
+                const Spacer(flex: 2),
+                if (!controller.savingEnabled) ...<Widget>[
+                  const _SaveProblemNote(
+                    text: 'Bu cihazda kayıt klasörü açılamadı, oyun '
+                        'kaydedilemiyor.',
+                    showUntouchedNote: false,
+                  ),
+                  const SizedBox(height: 16),
+                ] else if (sorun != null) ...<Widget>[
+                  _SaveProblemNote(text: sorun),
+                  const SizedBox(height: 16),
+                ],
+                if (devamEdilebilir) ...<Widget>[
+                  _StartButton(
+                    itemKey: const Key('continue_button'),
+                    label: 'Devam Et',
+                    primary: true,
+                    onPressed: _busy ? null : _continue,
+                  ),
+                  const SizedBox(height: 12),
+                  _StartButton(
+                    label: 'Yeni hayat (rastgele)',
+                    onPressed: _busy ? null : _randomLife,
+                  ),
+                ] else
+                  _StartButton(
+                    label: 'Rastgele bir hayat',
+                    primary: true,
+                    onPressed: _busy ? null : _randomLife,
+                  ),
+                const SizedBox(height: 12),
+                _StartButton(
+                  label: 'İsmimi ve cinsiyetimi seçeyim',
+                  onPressed: _busy ? null : _customLife,
                 ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: _busy ? null : _customLife,
-                child: const Text('İsmimi ve cinsiyetimi seçeyim'),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                devamEdilebilir
-                    ? 'Kaldığın yerden devam edebilirsin. Yeni bir hayat '
-                        'başlatmak kayıtlı hayatını siler.'
-                    : 'Her iki modda da doğum şehri, aile ve diğer başlangıç '
-                        'koşulları rastgele belirlenir.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 16),
+                Text(
+                  devamEdilebilir
+                      ? 'Kaldığın yerden devam edebilirsin. Yeni bir hayat '
+                          'başlatmak kayıtlı hayatını siler.'
+                      : 'Her iki modda da doğum şehri, aile ve diğer '
+                          'başlangıç koşulları rastgele belirlenir.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.6),
+                  ),
                 ),
-              ),
-              const Spacer(),
-            ],
+                const Spacer(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Açılış ekranının düğmesi.
+///
+/// Zemin koyu degrade olduğu için tema düğmeleri okunmuyordu: ana eylem
+/// dolu beyaz, ikincil eylem ince beyaz çerçevelidir.
+class _StartButton extends StatelessWidget {
+  const _StartButton({
+    required this.label,
+    required this.onPressed,
+    this.primary = false,
+    this.itemKey,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool primary;
+  final Key? itemKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool aktif = onPressed != null;
+    return Material(
+      key: itemKey,
+      color: primary
+          ? Colors.white.withValues(alpha: aktif ? 1 : 0.5)
+          : Colors.white.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: primary
+                ? null
+                : Border.all(
+                    color: Colors.white.withValues(alpha: 0.45),
+                    width: 1.4,
+                  ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: primary ? BirOmurColors.basligUst : Colors.white,
+            ),
           ),
         ),
       ),
@@ -190,13 +263,9 @@ class _NasilOynanir extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.65,
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
-        ),
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,13 +277,15 @@ class _NasilOynanir extends StatelessWidget {
                 Icon(
                   satirlar[i].$1,
                   size: 18,
-                  color: theme.colorScheme.secondary,
+                  color: BirOmurColors.pirincAcik,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     satirlar[i].$2,
-                    style: theme.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
                   ),
                 ),
               ],
@@ -245,17 +316,17 @@ class _SaveProblemNote extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
+        color: Colors.black.withValues(alpha: 0.26),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.error.withValues(alpha: 0.4),
+          color: BirOmurColors.geceUyari.withValues(alpha: 0.55),
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(Icons.warning_amber_outlined,
-              size: 20, color: theme.colorScheme.error),
+          const Icon(Icons.warning_amber_rounded,
+              size: 20, color: BirOmurColors.geceUyari),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -263,7 +334,10 @@ class _SaveProblemNote extends StatelessWidget {
                   ? '$text\n\nKayıt dosyasına dokunulmadı. Yeni bir hayat '
                       'başlatırsan bu kayıt silinir.'
                   : text,
-              style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+              style: theme.textTheme.bodySmall?.copyWith(
+                height: 1.4,
+                color: Colors.white.withValues(alpha: 0.92),
+              ),
             ),
           ),
         ],

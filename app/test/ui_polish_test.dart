@@ -80,8 +80,8 @@ void main() {
       expect(find.text('1 yaş'), findsOneWidget);
       expect(find.text('2 yaş'), findsOneWidget);
       expect(find.text('0 yaş'), findsOneWidget);
-      // En yeni yaş "bu yıl" diye işaretlenir.
-      expect(find.text('bu yıl'), findsOneWidget);
+      // En yeni yaş "BU YIL" diye işaretlenir.
+      expect(find.text('BU YIL'), findsOneWidget);
       expect(find.byKey(const Key('log_age_2')), findsOneWidget);
       // Metinler kaybolmaz.
       expect(find.text('İlk adımını attın.'), findsOneWidget);
@@ -121,9 +121,10 @@ void main() {
         ),
       );
 
-      expect(statColor(theme, 10), theme.colorScheme.error);
-      expect(statColor(theme, 45), BirOmurColors.pirinc);
-      expect(statColor(theme, 90), BirOmurColors.cini);
+      // Açık zeminde okunaklı olsun diye koyu uçlar kullanılır (Paket 16).
+      expect(statColor(theme, 10), BirOmurColors.nar);
+      expect(statColor(theme, 45), BirOmurColors.pirincKoyu);
+      expect(statColor(theme, 90), BirOmurColors.ciniKoyu);
     });
 
     testWidgets('karanlık temada renkler birbirinden ayırt edilebilir',
@@ -280,6 +281,114 @@ void main() {
       await tester.tap(find.text('Hayat'));
       await tester.pumpAndSettle();
       expect(geri, isTrue);
+    });
+  });
+
+  // ===================================================================
+  // Görsel kimlik (Paket 16): canlı renkler, renksiz kartlar.
+  //
+  // Renk kodları `prototypeOnly` (Q-077/Q-084); testler tek tek ton
+  // sınamaz, kuralı sınar: kart zemini vurgu rengiyle boyanmıyor mu,
+  // başlık kartı gerçekten görünüyor mu, koyu başlıkta değerler
+  // birbirinden ayrılıyor mu.
+  // ===================================================================
+  group('Paket 16 görsel kimlik', () {
+    testWidgets('menü satırının zemini vurgu rengiyle boyanmaz',
+        (WidgetTester tester) async {
+      late ThemeData theme;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.light(),
+          home: Builder(
+            builder: (BuildContext context) {
+              theme = Theme.of(context);
+              return Scaffold(
+                body: MenuRow(
+                  title: 'Seyahat',
+                  icon: Icons.luggage_outlined,
+                  accent: BirOmurAccents.gul,
+                  onTap: () {},
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      // Satırın Material zemini kart rengidir; eskiden her satır kendi
+      // renginin bir tonuyla boyanıyordu.
+      final Material govde = tester.widget<Material>(
+        find
+            .descendant(
+              of: find.byType(MenuRow),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      expect(govde.color, theme.colorScheme.surfaceContainerHighest);
+      // Renk ikon kutusunda durmaya devam eder.
+      expect(find.byType(AccentIconTile), findsOneWidget);
+    });
+
+    testWidgets('bölüm başlık kartı başlığı ve simgesini gösterir',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.light(),
+          home: Scaffold(
+            body: SectionScaffold(
+              title: 'Seyahat',
+              subtitle: 'Kısa bir gezi',
+              icon: Icons.luggage_rounded,
+              accent: BirOmurAccents.mavi,
+              children: const <Widget>[Text('içerik')],
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(SectionHeroCard), findsOneWidget);
+      expect(find.text('Seyahat'), findsOneWidget);
+      expect(find.text('Kısa bir gezi'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(SectionHeroCard),
+          matching: find.byIcon(Icons.luggage_rounded),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('açık temada kart zemini sayfa zemininden açıktır',
+        (WidgetTester tester) async {
+      late ThemeData theme;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: BirOmurTheme.light(),
+          home: Builder(
+            builder: (BuildContext context) {
+              theme = Theme.of(context);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+
+      // Kart ile zemin arasında gerçek bir fark olmalı: eskiden ikisi de
+      // aynı krem tondaydı ve kartların sınırı seçilmiyordu.
+      final Color zemin = theme.colorScheme.surface;
+      final Color kart = theme.colorScheme.surfaceContainerHighest;
+      expect(kart, isNot(zemin));
+      expect(kart.computeLuminance(), greaterThan(zemin.computeLuminance()));
+    });
+
+    test('koyu başlık şeridinde üç değer aralığı ayrı renk alır', () {
+      final Color dusuk = statColorOnDark(10);
+      final Color orta = statColorOnDark(45);
+      final Color yuksek = statColorOnDark(90);
+      expect(dusuk, isNot(orta));
+      expect(orta, isNot(yuksek));
+      expect(dusuk, isNot(yuksek));
     });
   });
 }
