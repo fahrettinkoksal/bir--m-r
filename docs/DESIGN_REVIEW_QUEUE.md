@@ -1723,5 +1723,33 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 **Varsayılan işlem:** Bütün eylemler tek katalog dosyasında; istenirse tek tek çıkarılabilir ya da ücretleri değiştirilebilir. Onay gelene dek kalıcı kural sayılmaz.
 
 
+### Q-087 — Görsel yön üçüncü kez kuruldu: çizgi roman / çıkartma dili
+**Durum:** Yön **Faho tarafından istendi** ("bu tasarımı hiç beğenmiyorum, komple baştan tasarla, özgün olsun, yapay zekâsal şeylerden çık, cartoon modda bile yapabilirsin"); **ayrıntılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 19, `app/lib/ui/theme/bir_omur_theme.dart`, `app/lib/ui/widgets/{comic,character_face}.dart`, `app/assets/fonts/`, `app/test/goldens/`.
+
+**Neden üçüncü kez:** İlk iki deneme de reddedildi ve ikisinin de ortak yanı aynıydı — herhangi bir uygulamaya yapıştırılabilecek **genel** bir arayüz dili: degradeler, yumuşak gölgeler, ince çizgiler, hazır Material ikonları, sistem yazı tipi. Bu üçüncü sürüm o dili bilerek ve sertçe kırıyor.
+
+**Şu an kodda olan (geçici) çözüm — altı kural:**
+1. **Degrade yok.** Her yüzey tek ve düz bir renk. (Bir test bunu sınıyor: ekranda degrade bulunursa test kırılır.)
+2. **Her yüzeyin kalın mürekkep konturu var** (2,5 px): kart, düğme, rozet, ikon kutusu, değer çubuğu.
+3. **Gölge bulanık değil, kaydırılmış** (`blurRadius: 0`). Kartlar kâğıda yapıştırılmış çıkartma gibi durur.
+4. **Düğmeler basınca gerçekten çöker**: gölge kadar aşağı iner ve gölgesini bırakır.
+5. **Oyunun kendi yazı tipi var.** Arayüzün tamamı **Baloo 2** (kalın, yuvarlak, oyuncu); oyunun adı, yaş etiketleri ve günlük başlıkları **Patrick Hand** (el yazısı). İkisi de SIL Open Font License; Türkçe harflerin tamamını taşıyorlar ve yalnızca oyunun kullandığı karakterlere indirgendiler (toplam ~400 KB). Yeniden üretmek için `app/tool/fetch_fonts.py`.
+6. **Zemin çizim kâğıdı**: sıcak krem, üzerinde soluk şaşırtmalı nokta dokusu.
+
+**Ve en büyük eksik kapatıldı: karakterin bir yüzü var.** Hazır görsel değil, her karede oyunun kendi verisinden **çiziliyor**: yaş kafanın oranını, saç rengini ve yüz çizgilerini; berberde seçilen saç stili saçı; mutluluk ağzın eğrisini ve kaşların açısını; sağlık ten tonunu ve gözlerin açıklığını; cinsiyet saç hacmini belirliyor. Bebeğin tek tutamı, gencin dağınık saçı, yaşlının beyaz saçı ve göz kenarı çizgileri hep gerçek kayıttan okunuyor — uydurma yok. Ekran görüntüsü: `app/test/goldens/12_karakter_yuzu.png`.
+
+**Karar soruları:**
+1. **Bu yön doğru mu?** Çizgi roman / çıkartma dili devam etsin mi, yoksa başka bir yön mü denensin? (Bu sefer beğenilmezse, yönü sen tarif edersen daha isabetli olur: hangi oyunun görüntüsü hoşuna gidiyor?)
+2. **Yazı tipi:** Baloo 2 oyunun sesi olarak uygun mu? Daha sert/geometrik ya da daha çocuksu bir alternatif istenir mi?
+3. **El yazısı aksanlar** (oyunun adı, yaş etiketleri) kalsın mı, yoksa her şey tek yazı tipiyle mi olsun?
+4. **Karakter yüzü:** ayrıntı düzeyi yeterli mi? Ten tonu, göz rengi, gözlük, sakal, kıyafet gibi ayrıntılar eklensin mi? Yüz kişi kartlarında da (anne, baba, arkadaşlar) kullanılsın mı — şu an yalnızca oyuncunun yüzü var.
+5. **Kâğıt dokusu** (nokta deseni) kalsın mı, yoksa düz zemin mi?
+6. **`docs/PROTOTYPE_UI.md` §2 ile çelişki:** orada onaylanmış yön "modern + ölçülü nostaljik" yazıyor. Çizgi roman yönü onaylanırsa o belge güncellenmeli. **Onay gelmeden o belgeye dokunulmadı.**
+
+**Varsayılan işlem:** Bütün ölçüler (kontur kalınlığı, gölge derinliği, köşe yarıçapları) `Comic` sınıfında, bütün renkler `BirOmurColors` içinde tek yerde. Yön beğenilmezse tek commit'le geri alınabilir. Onay gelene dek kalıcı marka kararı sayılmaz.
+
+**Yan düzeltme (gerçek hata):** Olay penceresinde eylem düğmeleri kaydırma alanının içindeydi; uzun olay metinlerinde **"Devam" düğmesi ekranın altına kaçıp dokunulamaz hale geliyordu**. Düğmeler artık kaydırma alanının dışında, her zaman görünür.
+
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
