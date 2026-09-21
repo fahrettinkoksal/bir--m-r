@@ -502,6 +502,16 @@ yalnızca belirgin yıpranma yıllarında günlüğe kısa bir satır giriyor.
 Yaşlanma tek başına mutluluğu veya zekâyı düşürmüyor. 2000 hayatlık ölçüm
 `docs/BALANCE_REPORT.md` §10'da; aralıklar **Q-075**'te karar bekliyor.
 
+**Zorunlu kontroller (bu tur):** Kuşak geçişinde **üç çocuk türü de**
+(biyolojik, evlilik dışı, evlat edinilmiş) doğru aile bağlarıyla
+korunuyor — evlilik dışı doğan çocuğun diğer biyolojik ebeveyni artık
+çocuğun kendi kaydında tutuluyor ve kuşak geçişinde anne/baba oluyor;
+evlilik yoksa "evli" uydurulmuyor. Kayıt göç zinciri testi gerçek eski
+kayıt gibi kuruldu (yeni alanlar gövdeden çıkarılıyor) ve bu sayede
+**sürüm 19 ve öncesi kayıtların açılmadığı bir hata bulunup düzeltildi**.
+Ölçüm: 300 hayatlık toplu simülasyon 18 saniyede tamamlanıyor; arka plan
+gelişimi ağır döngü oluşturmuyor. Alt menü sırası değişmedi.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
