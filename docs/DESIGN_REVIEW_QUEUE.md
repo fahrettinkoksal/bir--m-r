@@ -1405,5 +1405,42 @@ ekranlarda gözden geçirilmesi ayrı bir iştir.
 **Varsayılan işlem:** Hepsi görünüm katmanındadır; oyun kuralı
 değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
+### Q-069 — Çocuğun arka plan gelişiminin sayıları
+**Durum:** Kural **karara bağlandı (D-045)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 1. **Bağlantılı:** Q-064 (çocuk kuralları), Q-067 (kuşak devamı).
+
+**Karar gereken sayılar:** liseyi bitirme ve üniversiteye başlama olasılığının zekâya bağlanma eğrisi, üniversiteyi bitirme şansı, iş bulma olasılığı ve iş seçiminde eğitim/zekâ ağırlığı, NPC'nin yıllık birikim oranı ve yaşam gideri, ilgi alanı edinme sıklığı, kaç yaşam geçmişi satırının saklanacağı.
+
+**Varsayılan işlem:** Bütün değerler `prototypeOnly` sabitleriyle tek yerde tutuldu; değiştirmek tek satırlık iştir.
+
+### Q-070 — Özellik aktarımının formülü
+**Durum:** Kural **karara bağlandı (D-046)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 2.
+
+**Karar gereken sayılar:** ebeveyn ortalamasının ağırlığı ile rastgele payın ağırlığı, sapma aralığı, hangi özelliklerin aktarılacağı (şu an zekâ, görünüş, sağlık, karizma; mutluluk aktarılmıyor), tek ebeveyn bilindiğinde kullanılacak yol, alt/üst sınırların (ör. 10-90) dar mı geniş mi olacağı.
+
+### Q-071 — Evlilik dışı çocuk: velayet, hane ve görüşme
+**Durum:** Kural **karara bağlandı (D-047)**; ayrıntılar **karar bekliyor**. **Kaynak:** Paket 3A.
+
+**Karar gereken:** çocuk hangi hanede büyür (şu an prototipte oyuncunun hanesinde), sevgiliden ayrılınca çocukla bağ nasıl sürer, velayet sistemi olacak mı, evlilik dışı çocuğun gideri ve mirası farklı mı (şu an aynı), ikinci bir sevgiliden çocuk mümkün mü.
+
+### Q-072 — Evlenme teklifi: kabul eşiği ve ret sonuçları
+**Durum:** Kural **karara bağlandı (D-048)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 3B.
+
+**Karar gereken sayılar:** teklif için asgari yakınlık, kabul olasılığı eğrisi, ilişki geçmişinin ağırlığı, ret sonrası yakınlık etkisi, aynı kişiye yeniden teklif için beklenecek yıl sayısı, reddin ilişkiyi bitirme ihtimali olup olmayacağı.
+
+### Q-073 — Evlat edinme: uygunluk, masraf ve bekleme
+**Durum:** Kural **karara bağlandı (D-049)**; ayrıntılar **karar bekliyor**. **Kaynak:** Paket 3C.
+
+**Karar gereken:** asgari yaş ve gelir/birikim ölçütü, hane koşulu (kendi evi şart mı), başvuru ücreti ve masraf, başvurunun reddedilme olasılığı, evlat edinilen çocuğun yaş aralığı, bekleme süresi, en fazla kaç çocuk. Gerçek hukuk kuralları **iddia edilmedi**; ölçütler oyun içi ve geri alınabilir.
+
+### Q-074 — Ölüm bildirimi ve cenaze masrafı
+**Durum:** Kural **karara bağlandı (D-050)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 4.
+
+**Karar gereken sayılar:** cenaze katkı tutarı (kişiye/varlığa göre değişsin mi), katkının ilişki ve mutluluk etkisi, hangi bağlar için bildirim çıkar (şu an eş, anne, baba, çocuk, kardeş), bildirim penceresinin hangi sırayla açılacağı.
+
+### Q-075 — Yaşlanmanın görünüşe etkisi
+**Durum:** Kural **karara bağlandı (D-051)**; sayılar **karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 5.
+
+**Karar gereken sayılar:** düşüşün başladığı yaş, yaş aralıklarına göre yıllık düşüş miktarı, karakterden karaktere değişen payın büyüklüğü, sağlığın ve bakım aktivitelerinin etkisi, alt sınır (görünüş en fazla ne kadar düşebilir).
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
