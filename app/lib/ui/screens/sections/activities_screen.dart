@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
+import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/models/game_state.dart';
@@ -44,6 +45,7 @@ enum _ActivityPage {
   ehliyet,
   evlatEdinme,
   vasiyet,
+  seyahat,
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
@@ -92,6 +94,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return AdoptionPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.vasiyet:
         return WillPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.seyahat:
+        return TravelPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -164,6 +168,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           onTap: () => _go(_ActivityPage.kutuphane),
         ),
         const SizedBox(height: 10),
+        // Seyahat, tek başına yola çıkılabilecek yaştan itibaren görünür
+        // (Paket 11). Kalıcı taşınmadan ayrıdır.
+        if (state.player.age >= Travel.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Seyahat',
+            subtitle: state.trips.isEmpty
+                ? 'Başka bir şehre kısa bir gezi'
+                : '${state.trips.length} gezi yaptın',
+            icon: Icons.luggage_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => _go(_ActivityPage.seyahat),
+          ),
+          const SizedBox(height: 10),
+        ],
         // Sosyal medya 16 yaşından itibaren açılır; öncesinde menüde yok.
         if (state.player.age >= kSocialMinAge) ...<Widget>[
           MenuRow(
@@ -238,8 +256,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         const SizedBox(height: 2),
         const InfoPanel(
           icon: Icons.construction_outlined,
-          text: 'Seyahat gibi alanlar bu bölüme sonra eklenecek. Henüz '
-              'yazılmadıkları için düğme olarak gösterilmiyorlar.',
+          text: 'Bu bölüme yeni alanlar zamanla eklenecek. Henüz '
+              'yazılmamış özellikler düğme olarak gösterilmiyor.',
         ),
       ],
     );

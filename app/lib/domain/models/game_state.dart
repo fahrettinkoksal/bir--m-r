@@ -21,6 +21,7 @@ import 'pending_license_exam.dart';
 import 'person.dart';
 import 'social_account.dart';
 import 'sponsorship.dart';
+import 'trip.dart';
 import 'player_character.dart';
 import 'relation.dart';
 
@@ -55,6 +56,7 @@ class GameState {
     this.socialAccounts = const <SocialAccount>[],
     this.sponsorOffer,
     this.sponsorDeals = const <SponsorDeal>[],
+    this.trips = const <TripRecord>[],
     this.pendingInterview,
     this.blackjack,
     this.wagerThisAge = 0,
@@ -253,6 +255,12 @@ class GameState {
 
   /// Kabul edilmiş sponsorluk yükümlülükleri ve geçmişi.
   final List<SponsorDeal> sponsorDeals;
+
+  /// Yapılmış geziler (Paket 11).
+  ///
+  /// Gezi kalıcı taşınmadan ayrıdır: yaşanan veya doğulan şehri
+  /// değiştirmez. Kayıtlar silinmez.
+  final List<TripRecord> trips;
 
   /// Henüz yerine getirilmemiş sponsorluklar.
   List<SponsorDeal> get openDeals =>
@@ -589,6 +597,7 @@ class GameState {
     List<SocialAccount>? socialAccounts,
     Object? sponsorOffer = _unsetEvent,
     List<SponsorDeal>? sponsorDeals,
+    List<TripRecord>? trips,
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
@@ -643,6 +652,7 @@ class GameState {
           ? this.sponsorOffer
           : sponsorOffer as SponsorOffer?,
       sponsorDeals: sponsorDeals ?? this.sponsorDeals,
+      trips: trips ?? this.trips,
       pendingInterview: pendingInterview == _unsetEvent
           ? this.pendingInterview
           : pendingInterview as PendingInterview?,

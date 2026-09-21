@@ -7,7 +7,9 @@ import '../generation/random_util.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
 import '../models/game_event.dart';
+import '../activities/travel.dart';
 import '../models/game_state.dart';
+import '../models/trip.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
@@ -143,11 +145,20 @@ class EventEngine {
   static bool _needsPerson(EventRequirement req) =>
       req.livingRelations.isNotEmpty ||
       req.requiresNeglectedRelative ||
+      req.requiresTripMemory ||
       req.personRole != null;
 
   /// Olayın kişisini seçer; uygun kişi yoksa `null` döner ve olay elenir.
   Person? _resolvePerson(GameState state, GameEvent event, Random rng) {
     final EventRequirement req = event.requirement;
+
+    // Gezi anısı: olayın kişisi, yıllar önce birlikte yola çıktığın
+    // kişidir. Gezi yoksa ya da kişi vefat ettiyse olay çıkmaz.
+    if (req.requiresTripMemory) {
+      final TripRecord? gezi = Travel.memorableTrip(state);
+      if (gezi == null) return null;
+      return state.personById(gezi.companionId!);
+    }
 
     // Hikâyede kilitlenmiş kişi: yıllar sonra da aynı kimlik kullanılır.
     final String? role = req.personRole;
@@ -201,7 +212,11 @@ class EventEngine {
     return ActiveEvent(
       eventId: candidate.event.id,
       category: candidate.event.category,
-      text: _fill(candidate.event.text, candidate.person, state.player.age),
+      text: _fillTrip(
+        _fill(candidate.event.text, candidate.person, state.player.age),
+        state,
+        candidate.event,
+      ),
       // Seçenek etiketlerindeki yer tutucular da doldurulur; ekranda
       // "{kisi}" yazmaz.
       choices: List<EventChoice>.unmodifiable(<EventChoice>[
@@ -213,6 +228,15 @@ class EventEngine {
       ]),
       personId: candidate.person?.id,
     );
+  }
+
+  /// Gezi anısı olaylarında `{sehir}` yer tutucusunu gerçek gezi
+  /// kaydından doldurur; uydurma şehir yazılmaz.
+  static String _fillTrip(String text, GameState state, GameEvent event) {
+    if (!event.requirement.requiresTripMemory) return text;
+    final TripRecord? gezi = Travel.memorableTrip(state);
+    if (gezi == null) return text;
+    return text.replaceAll('{sehir}', gezi.city);
   }
 
   /// Metindeki yer tutucuları **gerçekten var olan** kişiyle doldurur.

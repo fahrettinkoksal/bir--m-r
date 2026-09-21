@@ -8,6 +8,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Kumarhane masalarının arayüzde gerçekten çalıştığını sınar.
 void main() {
   late GameController controller;
@@ -47,8 +49,7 @@ void main() {
   testWidgets('blackjack eli açılır ve oynanır', (WidgetTester tester) async {
     await pumpApp(tester, yetiskin());
 
-    await tester.tap(find.text('Kumarhane'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Kumarhane');
     expect(find.textContaining('sanal parasıyla'), findsOneWidget);
 
     await tester.tap(find.text('Blackjack'));
@@ -84,8 +85,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, yetiskin());
 
-    await tester.tap(find.text('Kumarhane'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Kumarhane');
     await tester.tap(find.text('Rulet'));
     await tester.pumpAndSettle();
 
@@ -110,8 +110,7 @@ void main() {
     // Maaşı yok, cüzdanı küçük: bütçe taban seviyede kalır.
     await pumpApp(tester, yetiskin(wallet: 5000));
 
-    await tester.tap(find.text('Kumarhane'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Kumarhane');
     await tester.tap(find.text('Blackjack'));
     await tester.pumpAndSettle();
 

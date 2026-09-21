@@ -9,6 +9,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Aktiviteler → Evlat Edinme akışının gerçekten çalıştığını sınar (D-049).
 void main() {
   late GameController controller;
@@ -44,8 +46,7 @@ void main() {
     await pumpApp(tester, hayat());
 
     expect(find.text('Evlat Edinme'), findsOneWidget);
-    await tester.tap(find.text('Evlat Edinme'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Evlat Edinme');
 
     expect(find.byKey(const Key('adoption_apply_button')), findsOneWidget);
     await tester.tap(find.byKey(const Key('adoption_apply_button')));
@@ -66,8 +67,7 @@ void main() {
       (WidgetTester tester) async {
     await pumpApp(tester, hayat(wallet: 500));
 
-    await tester.tap(find.text('Evlat Edinme'));
-    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Evlat Edinme');
 
     expect(find.byKey(const Key('adoption_apply_button')), findsNothing);
     expect(find.textContaining('Şu an başvuramazsın'), findsOneWidget);

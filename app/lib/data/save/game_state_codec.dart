@@ -32,6 +32,7 @@ import '../../domain/models/person_development.dart';
 import '../../domain/models/playing_card.dart';
 import '../../domain/models/social_account.dart';
 import '../../domain/models/sponsorship.dart';
+import '../../domain/models/trip.dart';
 import '../../domain/models/player_character.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/models/stats.dart';
@@ -81,6 +82,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           : _encodeSponsorOffer(state.sponsorOffer!),
       'sponsorDeals':
           state.sponsorDeals.map(_encodeSponsorDeal).toList(growable: false),
+      // Geziler (Paket 11): kayıt silinmez, ücret ikinci kez düşmez.
+      'trips': state.trips.map(_encodeTrip).toList(growable: false),
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
       'wagerThisAge': state.wagerThisAge,
@@ -586,6 +589,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     sponsorOffer: json['sponsorOffer'] == null
         ? null
         : _decodeSponsorOffer(_map(json, 'sponsorOffer')),
+    // Eski kayıtlarda gezi yoktur; boş açılır ve geriye dönük gezi
+    // uydurulmaz.
+    trips: List<TripRecord>.unmodifiable(
+      _optionalList(json, 'trips').map(_decodeTrip),
+    ),
     sponsorDeals: List<SponsorDeal>.unmodifiable(
       _optionalList(json, 'sponsorDeals').map(_decodeSponsorDeal),
     ),
@@ -767,6 +775,26 @@ SocialPost _decodePost(Map<String, Object?> json) => SocialPost(
       // Eski kayıtlarda gelir yoktur; geriye dönük kazanç uydurulmaz.
       earned: _intOrNull(json, 'earned') ?? 0,
       sponsorId: _stringOrNull(json, 'sponsorId'),
+    );
+
+Map<String, Object?> _encodeTrip(TripRecord t) => <String, Object?>{
+      'id': t.id,
+      'city': t.city,
+      'age': t.age,
+      'mode': t.mode.name,
+      'cost': t.cost,
+      'companionId': t.companionId,
+      'note': t.note,
+    };
+
+TripRecord _decodeTrip(Map<String, Object?> json) => TripRecord(
+      id: _string(json, 'id'),
+      city: _string(json, 'city'),
+      age: _int(json, 'age'),
+      mode: _enumByName(TravelMode.values, _string(json, 'mode'), 'trip.mode'),
+      cost: _int(json, 'cost'),
+      companionId: _stringOrNull(json, 'companionId'),
+      note: _stringOrNull(json, 'note'),
     );
 
 Map<String, Object?> _encodeSponsorOffer(SponsorOffer o) => <String, Object?>{

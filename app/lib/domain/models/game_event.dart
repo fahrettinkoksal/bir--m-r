@@ -45,6 +45,7 @@ class EventRequirement {
     this.requiresEmployed = false,
     this.requiresMinYearsInJob = 0,
     this.minFame = 0,
+    this.requiresTripMemory = false,
   });
 
   final int minAge;
@@ -114,6 +115,13 @@ class EventRequirement {
   ///
   /// Aracı olan ama ehliyeti olmayan oyuncuya "direksiyona geçtin" denmez.
   final Set<String> requiredLicenses;
+
+  /// Yıllar önce **birlikte** yapılmış, kişisi hâlâ hayatta olan bir gezi
+  /// gerektirir (Paket 11).
+  ///
+  /// Olayın kişisi o gezinin yoldaşıdır; metindeki `{sehir}` gidilen
+  /// şehirle doldurulur. Böyle bir gezi yoksa olay çıkmaz.
+  final bool requiresTripMemory;
 
   /// Gerekli en az Ün değeri.
   ///

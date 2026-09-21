@@ -227,3 +227,24 @@ GameState withSchoolPeople(GameState state, {int seed = 1}) {
     ),
   );
 }
+
+/// Kaydırılabilir menüde bir satırı görünür yapıp dokunur.
+///
+/// Aktiviteler menüsü büyüdükçe alttaki satırlar ilk ekranda çizilmiyor;
+/// gerçek oyuncu da aşağı kaydırıyor. Test de aynısını yapar.
+Future<void> tapMenuRow(WidgetTester tester, String label) async {
+  final Finder hedef = find.text(label);
+  if (hedef.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      hedef,
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+  } else {
+    await tester.ensureVisible(hedef.first);
+    await tester.pumpAndSettle();
+  }
+  await tester.tap(hedef.first);
+  await tester.pumpAndSettle();
+}

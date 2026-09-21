@@ -74,7 +74,10 @@ void main() {
       for (final GameEvent e in kEventPool) {
         final bool kisiVar = e.requirement.livingRelations.isNotEmpty ||
             e.requirement.personRole != null ||
-            e.requirement.requiresNeglectedRelative;
+            e.requirement.requiresNeglectedRelative ||
+            // Gezi anısı olaylarının kişisi, o gezinin yoldaşıdır; gezi
+            // yoksa olay hiç çıkmaz (Paket 11).
+            e.requirement.requiresTripMemory;
         final String hepsi =
             e.text + e.choices.map((EventChoice c) => c.resultText).join();
         final bool yerTutucu = hepsi.contains('{kisi}') ||
@@ -84,7 +87,7 @@ void main() {
         // Kişiyi kendisi oluşturan seçimler (tanışma, arkadaşlık) de
         // yer tutucu kullanabilir: kişi o anda gerçekten yaratılır.
         final bool kisiUretiyor = e.choices.any((EventChoice c) =>
-            c.startsRomance || c.startsSchoolFriendship);
+            c.startsRomance || c.startsSchoolFriendship || c.startsFriendship);
         if (yerTutucu) {
           expect(kisiVar || kisiUretiyor, isTrue,
               reason: '${e.id} kişi yer tutucusu kullanıyor ama kişi '

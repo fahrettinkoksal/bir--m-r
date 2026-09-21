@@ -44,7 +44,9 @@ import '../domain/models/game_settings.dart';
 import '../domain/models/life_log.dart';
 import '../domain/models/life_summary.dart';
 import '../domain/models/marriage.dart';
+import '../domain/activities/travel.dart';
 import '../domain/models/sponsorship.dart';
+import '../domain/models/trip.dart';
 import '../domain/social/social_engine.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
@@ -736,6 +738,62 @@ class GameController extends ChangeNotifier {
   /// Teklifi reddeder; hiçbir gelir oluşmaz.
   SocialOutcome? declineSponsor() =>
       _runSocial((GameState current) => _social.declineSponsor(current));
+
+  // -------------------------------------------------------------------
+  // Seyahat (Paket 11)
+  // -------------------------------------------------------------------
+
+  /// Gidilebilecek şehirler.
+  List<String> travelDestinations() =>
+      _state == null ? const <String>[] : Travel.destinations(_state!);
+
+  /// Şu an açık olan yolculuk türleri.
+  List<TravelMode> travelModes() =>
+      _state == null ? const <TravelMode>[] : Travel.availableModes(_state!);
+
+  /// Birlikte gidilebilecek yakınlar.
+  List<Person> travelCompanions() =>
+      _state == null ? const <Person>[] : Travel.companions(_state!);
+
+  /// Gezi şu an mümkün mü?
+  InteractionAvailability travelAvailability({
+    required TravelMode mode,
+    required String city,
+    String? companionId,
+  }) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun yüklenmedi.');
+    }
+    return Travel.availability(
+      current,
+      mode: mode,
+      city: city,
+      companionId: companionId,
+    );
+  }
+
+  /// Geziyi yapar; ücret bir kez düşer.
+  TripOutcome? takeTrip({
+    required TravelMode mode,
+    required String city,
+    String? companionId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final TripResult sonuc = Travel.take(
+      current,
+      mode: mode,
+      city: city,
+      companionId: companionId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
 
   /// Paylaşım yapar.
   SocialOutcome? postContent(SocialContent content) => _runSocial(

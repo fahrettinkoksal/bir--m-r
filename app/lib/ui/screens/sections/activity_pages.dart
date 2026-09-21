@@ -6,6 +6,8 @@ import '../../../domain/models/book_progress.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
+import '../../../domain/activities/travel.dart';
+import '../../../domain/models/trip.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../../domain/interaction/adoption.dart';
@@ -737,6 +739,274 @@ class _WillPageState extends State<WillPage> {
           InfoPanel(icon: Icons.history_edu_outlined, text: _notice!),
         ],
       ],
+    );
+  }
+}
+
+/// Aktiviteler → Seyahat (Paket 11).
+///
+/// Kısa gezi planlanır: şehir, yolculuk türü ve istenirse bir yakın
+/// seçilir. Ücret **önceden görünür**, cüzdan yetmiyorsa düğme yerine
+/// gerekçe yazılır. Gezi kalıcı taşınma değildir; yaşanan şehir değişmez.
+class TravelPage extends StatefulWidget {
+  const TravelPage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  State<TravelPage> createState() => _TravelPageState();
+}
+
+class _TravelPageState extends State<TravelPage> {
+  String? _sehir;
+  TravelMode _tur = TravelMode.otobus;
+  String? _yoldasId;
+  String? _sonuc;
+
+  @override
+  Widget build(BuildContext context) {
+    final GameController controller = GameScope.of(context);
+    final GameState state = controller.state!;
+    final List<String> sehirler = controller.travelDestinations();
+    final List<TravelMode> turler = controller.travelModes();
+    final List<Person> yoldaslar = controller.travelCompanions();
+
+    // Seçili tür artık açık değilse (araba satıldı gibi) otobüse döner.
+    final TravelMode tur = turler.contains(_tur) ? _tur : TravelMode.otobus;
+    final int ucret = Travel.costOf(tur, withCompanion: _yoldasId != null);
+    final InteractionAvailability uygunluk = _sehir == null
+        ? const InteractionAvailability.blocked('Önce bir şehir seç.')
+        : controller.travelAvailability(
+            mode: tur,
+            city: _sehir!,
+            companionId: _yoldasId,
+          );
+
+    return SectionScaffold(
+      accent: BirOmurAccents.mavi,
+      title: 'Seyahat',
+      subtitle: 'Kısa bir gezi. Taşınma değil: yaşadığın şehir değişmez. '
+          'Cüzdanında ${state.player.walletLabel} var.',
+      backLabel: 'Aktiviteler',
+      onBack: widget.onBack,
+      children: <Widget>[
+        const _TravelSectionTitle('Nereye?'),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: <Widget>[
+            for (final String sehir in sehirler)
+              ChoiceChip(
+                key: Key('trip_city_$sehir'),
+                label: Text(sehir),
+                selected: _sehir == sehir,
+                onSelected: (_) => setState(() {
+                  _sehir = sehir;
+                  _sonuc = null;
+                }),
+              ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        const _TravelSectionTitle('Nasıl?'),
+        const SizedBox(height: 8),
+        for (final TravelMode secenek in turler) ...<Widget>[
+          _TravelModeCard(
+            mode: secenek,
+            selected: secenek == tur,
+            cost: Travel.costOf(secenek, withCompanion: _yoldasId != null),
+            onTap: () => setState(() {
+              _tur = secenek;
+              _sonuc = null;
+            }),
+          ),
+          const SizedBox(height: 8),
+        ],
+        const SizedBox(height: 10),
+        const _TravelSectionTitle('Kiminle?'),
+        const SizedBox(height: 8),
+        if (yoldaslar.isEmpty)
+          const InfoPanel(
+            icon: Icons.person_outline,
+            text: 'Şu an birlikte yola çıkabileceğin kimse yok. Vefat '
+                'edenler, çok küçük çocuklar ve başka şehirdeki tanıdıklar '
+                'bu listede görünmez.',
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              ChoiceChip(
+                key: const Key('trip_alone'),
+                label: const Text('Yalnız'),
+                selected: _yoldasId == null,
+                onSelected: (_) => setState(() {
+                  _yoldasId = null;
+                  _sonuc = null;
+                }),
+              ),
+              for (final Person kisi in yoldaslar)
+                ChoiceChip(
+                  key: Key('trip_companion_${kisi.id}'),
+                  label: Text(
+                    '${kisi.firstName} · '
+                    '${kisi.labelFor(state.player.age).toLowerCase()}',
+                  ),
+                  selected: _yoldasId == kisi.id,
+                  onSelected: (_) => setState(() {
+                    _yoldasId = kisi.id;
+                    _sonuc = null;
+                  }),
+                ),
+            ],
+          ),
+        const SizedBox(height: 18),
+        // Ücret her zaman önceden görünür.
+        InfoPanel(
+          icon: Icons.payments_outlined,
+          text: 'Bu yolculuk ${trMoney(ucret)} tutuyor'
+              '${_yoldasId == null ? '' : ' (iki kişilik)'}. '
+              'Ücret yalnızca bir kez düşer.',
+        ),
+        const SizedBox(height: 12),
+        if (uygunluk.isAllowed)
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('trip_go'),
+              onPressed: () {
+                final TripOutcome? sonuc = controller.takeTrip(
+                  mode: tur,
+                  city: _sehir!,
+                  companionId: _yoldasId,
+                );
+                setState(() => _sonuc = sonuc?.text);
+              },
+              child: const Text('Yola çık'),
+            ),
+          )
+        else
+          InfoPanel(
+            icon: Icons.info_outline,
+            text: uygunluk.reason ?? 'Şu an yola çıkamazsın.',
+          ),
+        if (_sonuc != null) ...<Widget>[
+          const SizedBox(height: 12),
+          InfoPanel(icon: Icons.luggage_outlined, text: _sonuc!),
+        ],
+        if (state.trips.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 18),
+          const _TravelSectionTitle('Gezi anıların'),
+          const SizedBox(height: 8),
+          for (final TripRecord gezi in state.trips.reversed.take(6))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: InfoPanel(
+                icon: Icons.photo_album_outlined,
+                text: '${gezi.age} yaş · ${gezi.city} · '
+                    '${gezi.companionId == null ? 'yalnız' : (state.personById(gezi.companionId!)?.firstName ?? 'biriyle')} · '
+                    '${trMoney(gezi.cost)}'
+                    '${gezi.note == null ? '' : '\n${gezi.note}'}',
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _TravelSectionTitle extends StatelessWidget {
+  const _TravelSectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Text(
+      text,
+      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+    );
+  }
+}
+
+class _TravelModeCard extends StatelessWidget {
+  const _TravelModeCard({
+    required this.mode,
+    required this.selected,
+    required this.cost,
+    required this.onTap,
+  });
+
+  final TravelMode mode;
+  final bool selected;
+  final int cost;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    const BirOmurAccent renk = BirOmurAccents.mavi;
+
+    return Material(
+      color: selected
+          ? Color.alphaBlend(
+              renk.of(context).withValues(alpha: 0.12),
+              theme.colorScheme.surfaceContainerHighest,
+            )
+          : theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        key: Key('trip_mode_${mode.name}'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: renk.of(context).withValues(alpha: selected ? 0.45 : 0.18),
+              width: selected ? 1.8 : 1,
+            ),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                size: 20,
+                color: renk.of(context),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(mode.label, style: theme.textTheme.titleMedium),
+                    Text(
+                      mode.description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                trMoney(cost),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: renk.deepOf(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

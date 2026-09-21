@@ -10,6 +10,7 @@ import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 import 'event_pool_extra.dart';
 import 'event_pool_social.dart';
+import 'event_pool_travel.dart';
 import 'event_pool_work.dart';
 import 'event_pool_stages.dart';
 
@@ -1489,4 +1490,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
 
   // Ün ve sosyal medya (Paket 10).
   ...kSocialFameEvents,
+
+  // Gezi sahneleri ve anıları (Paket 11).
+  ...kTravelEvents,
 ];

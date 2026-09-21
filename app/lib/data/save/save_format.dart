@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 24;
+const int kSaveFormatVersion = 25;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -78,8 +78,15 @@ abstract final class SaveMigrations {
     if (from <= 21) guncel = _v21ToV22(guncel);
     if (from <= 22) guncel = _v22ToV23(guncel);
     if (from <= 23) guncel = _v23ToV24(guncel);
+    if (from <= 24) guncel = _v24ToV25(guncel);
     return guncel;
   }
+
+  /// Sürüm 24 → 25: kısa seyahat ve yakınlarla gezi eklendi (Paket 11).
+  ///
+  /// Eski kayıtlarda gezi yoktur; liste boş açılır ve **geriye dönük gezi
+  /// uydurulmaz**. Oyuncunun yaşadığı ve doğduğu şehir değişmez.
+  static Map<String, Object?> _v24ToV25(Map<String, Object?> body) => body;
 
   /// Sürüm 23 → 24: sosyal medya geliri ve sponsorluk eklendi (Paket 10).
   ///
