@@ -1694,5 +1694,34 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 **Varsayılan işlem:** Bütün sayısal değerler `EducationPath` içinde tek yerde; onay gelene dek kalıcı kural sayılmaz.
 
 
+### Q-086 — Aktivitelere eklenen üç yeni alan: Sağlık Merkezi, Eğlence, Kurslar
+**Durum:** Yön **Faho tarafından istendi** ("aktiviteler kısmına benim unuttuğum şeyleri ekleyebilirsin"); **içerik ve sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 18, `app/lib/data/activity_catalog.dart`, `app/lib/ui/screens/sections/activities_screen.dart`.
+
+**Neden bu üçü:** Mevcut Aktiviteler menüsünde üç boşluk vardı.
+- **Sağlığa kriz beklemeden bakmanın yolu yoktu.** Spor salonu dışında sağlık yalnızca sağlık krizi çıkınca gündeme geliyordu.
+- **Mutluluğu kendi isteğinle yükseltmenin yolu yoktu.** Mutluluk yalnızca olayların rastgele iyi gitmesiyle artıyordu.
+- **Okul dışında bir şey öğrenmenin yolu yoktu.** Kütüphane yalnızca okumaydı.
+
+**Şu an kodda olan (geçici) çözüm** — hepsi mevcut aktivite altyapısını kullanıyor; yeni ana menü açılmadı, alt menü sırası değişmedi:
+
+*Sağlık Merkezi* (1 yaşından itibaren) — genel sağlık kontrolü (900 ₺), diş kontrolü (650 ₺), göz muayenesi (450 ₺), mevsim aşısı (300 ₺), bir uzmanla konuşmak (1.400 ₺). Hiçbiri tıbbi tavsiye değil; oyun içi kurgu.
+
+*Eğlence* (4 yaşından itibaren) — parkta yürüyüş (**ücretsiz**), sinema (250 ₺), kafede oturmak (200 ₺), maça gitmek (550 ₺), konsere gitmek (950 ₺).
+
+*Kurslar* (6 yaşından itibaren) — resim atölyesi (1.600 ₺), müzik kursu (2.200 ₺), dil kursu (2.800 ₺), bilgisayar kursu (3.200 ₺). Dil ve bilgisayar kursu **zekâyı** yükseltiyor; aktivite altyapısına bunun için zekâ alanı eklendi.
+
+*Korunan kurallar:* parası yetmeyen işlem gerçekleşmez, aynı yaşta tekrarın getirisi azalır ve sınıra gelince eylem kapanır, sahte "+puan" yazılmaz, her alan yalnızca yaşına uyduğu andan itibaren menüde görünür (çalışmayan düğme yok).
+
+**Karar soruları:**
+1. Ücretler doğru ölçekte mi? Kurslar (1.600–3.200 ₺) bir gence göre pahalı; aile bütçesinden karşılanan bir "aile öder" seçeneği olmalı mı?
+2. Sağlık kontrolü bazen **bir şey bulmalı** mı (erken teşhis → ileride sağlık krizi olasılığı düşer)? Şu an yalnızca sağlığı yükseltiyor.
+3. Kurslar kalıcı bir **hobi/beceri kimliği** bırakmalı mı ("müzikle uğraşıyor" gibi), yoksa yalnızca değer artışı yeterli mi?
+4. Eğlenceye **biriyle birlikte gitmek** eklensin mi? Şu an tek başına; "Birlikte vakit geçir" ayrı bir menü.
+5. Bu üç alan mı yeterli, yoksa başka eksikler var mı (gönüllülük, tatil köyü, hayvan sahiplenme, ehliyetli araç kullanımı…)?
+6. Sağlık Merkezi'nin 1 yaşından itibaren açık olması doğru mu? Küçük yaşta kararı aile veriyor; oyun bunu oyuncuya sorarak anlatıyor.
+
+**Varsayılan işlem:** Bütün eylemler tek katalog dosyasında; istenirse tek tek çıkarılabilir ya da ücretleri değiştirilebilir. Onay gelene dek kalıcı kural sayılmaz.
+
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
