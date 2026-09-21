@@ -1966,5 +1966,32 @@ Düğünlerin çoğunun nikâh olması beklenen sonuç: evlenme yaşında cüzda
 
 **Yan karar (kural gereği):** Kayıt biçimi **29**'a çıktı. Kalıcı testin zorunlu kıldığı **beş sürümlük pencere** kuralı gereği okunabilir taban 23'ten **24**'e yükseldi. Sürüm 23 kayıtları artık açılmıyor — dosya **silinmiyor**, anlaşılır mesaj gösteriliyor. Eski kayıtlarda bekleyen düğün yoktur, deneme sayacı sıfırdan başlar ve **kimse kısır sayılmaz**; geriye dönük gizli bir engel yazılmaz.
 
+
+### Q-094 — Hamilelik bir süreç oldu
+**Durum:** **Faho'nun kararı** (21 Eylül 2026: "hamilelik süreci olsun"). **Sayılar ve açık uçlar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 26, `app/lib/domain/models/pregnancy.dart`, `app/lib/domain/interaction/intimacy.dart`, `app/lib/domain/generation/life_progression.dart`.
+
+**Önceki hâli (Paket 25):** Korunmadan yakınlaşma aynı anda bebeği getiriyordu. Q-093'ün 6. sorusu buydu; Faho "olsun" dedi.
+
+**Şu an kodda olan:** Korunmadan yakınlaşma **hamilelik** başlatıyor; bebek **bir sonraki yaş ilerlemesinde** doğuyor.
+
+- Hamilelik **kayda girer**: uygulama kapatılıp açılsa da bekleyen bebek kaybolmaz.
+- Hamileyken **ikinci gebelik başlamaz**; aynı hamilelik sürer.
+- Bebeğin diğer ebeveyni **hamilelik kaydındaki kişidir**. Bekleme sırasında ayrılık olsa bile bebek başkasının çocuğu olmaz.
+- Diğer ebeveyn bekleme sırasında **vefat ederse** doğum olmaz; bu **sessizce** geçmez, günlüğe yazılır.
+- Doğum ekranda **bildirimle** duyurulur (D-050): "Kızınız oldu" / "Oğlunuz oldu".
+- Kişi kartında hamilelik açıkça yazılır: "Hamilesin. Bebeğiniz bir sonraki yaşta doğacak." — sessizce bekleyen bir durum olmamalı.
+- Hamile olan taraf oyuncunun cinsiyetine göre belirlenir; aynı cinsiyetteki çiftlerde bu yol zaten kapalı (Q-064).
+
+**Karar soruları:**
+1. Hamilelik **bir yıl** sürüyor (bir yaş ilerlemesi). Oyunun zaman birimi yıl olduğu için en küçük süre bu. Doğru mu, yoksa "aynı yaşta doğsun" mu isteniyordu?
+2. **Hamilelik olayları** olsun mu? Şu an bekleme yılı boş geçiyor: ultrason, isim tartışması, kreş/beşik hazırlığı, iş yerinde izin gibi anlar yazılabilir.
+3. **Düşük ve riskli gebelik** modellenmeli mi? Şu an hamilelik **her zaman** sağlıklı bir bebekle sonuçlanıyor (diğer ebeveyn vefat etmedikçe). Ağır bir konu; **bilerek eklenmedi**, karar Faho'nun.
+4. Hamilelik oyuncunun **sağlığını veya mutluluğunu** etkilemeli mi? Şu an hiçbir etkisi yok.
+5. **İkiz** olabilmeli mi?
+6. Hamileyken yakınlaşma hâlâ serbest ve yakınlığı artırıyor; doğru mu?
+7. Bebek doğduğu yıl oyuncu yaş aldığı için, çocuk sınırına (en fazla 4) dayanan hayatta hamilelik başlamıyor. Bu sınırın kendisi hâlâ `prototypeOnly` (Q-064).
+
+**Yan karar (kural gereği):** Kayıt biçimi **30**'a çıktı; beş sürümlük pencere kuralı gereği okunabilir taban 24'ten **25**'e yükseldi. Sürüm 24 kayıtları artık açılmıyor — dosya **silinmiyor**, anlaşılır mesaj gösteriliyor. Eski kayıtlarda bekleyen bebek yoktur; **geriye dönük hamilelik uydurulmaz**.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
