@@ -1844,5 +1844,46 @@ Aynı hata `okul_ilk_gun` (6-8 yaş) için daha sessiz bir biçimde tekrarlandı
 
 **Yan not:** Arşiv kaydına `verdictTitle` alanı eklendi. **Eski arşiv satırlarında boş kalır ve hiç gösterilmez**; geriye dönük değerlendirme üretilmez, çünkü o hayatların verisi artık elde yok. Kayıt biçim sürümü artmadı: alan tamamen eklemeli ve eksikken `null` okunuyor.
 
+
+### Q-091 — Romantik ilişki tek bir kapıya bağlıydı: 26 yaşından sonra evlilik imkânsızdı
+**Durum:** Yön **Faho tarafından onaylandı** (21 Eylül 2026; ChatGPT o gün yoktu, Faho "hepsini yap, mantıklı geldi" dedi). **Sayılar ve eşleşme kuralları karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 23, `app/lib/data/event_pool_romance.dart`, `app/lib/data/event_pool.dart`.
+
+**Önce bir düzeltme — kendi teşhisim yanlıştı.** Beş maddelik listede bu maddeyi *"içeriğin çoğu romantizm→evlilik→çocuk zincirine kilitli"* diye yazmıştım. **Ölçüm bunu doğrulamadı:** 176 olayın yalnızca **17'si** romantik zincire bağlı; Paket 20'deki 25 orta yaş olayından sonra bekâr hayatla evli hayat arasında içerik farkı neredeyse kalmamış (yılda uygun olay 22'ye 23, bir hayatta görülen farklı olay 66'ya 70). Sorun **içerik dağılımı değilmiş**.
+
+**Asıl sorun bambaşkaydı:** 176 olayın **yalnızca biri** (`cikma_teklifi`) romantik ilişki başlatabiliyordu. Ve o tek kapı çok dardı:
+
+* Önce `ilk_goz_agrisi` olayının **15-22 yaş** arasında çıkması gerekiyordu,
+* orada "selam ver" seçilmeliydi — "otobüse bin" denirse `romantik_gecti` izi **ömür boyu** kapıyı kapatıyordu,
+* sonra `cikma_teklifi` **26 yaşından önce** çıkmalıydı,
+* bir kez ayrılındıysa `romantik_bitti` izi yine **ömür boyu** kapatıyordu.
+
+Yani **26 yaşını bekâr geçiren ya da bir kez ayrılan oyuncu, ömrünün geri kalanında evlenemiyordu.** Bununla birlikte evlilik motoru, çocuklar, torunlar, miras ve "çocuğum olarak devam et" akışının tamamı erişilmez kalıyordu.
+
+**Ölçüm** (60 hayat, sonuna kadar, seçimler **rastgele**):
+
+| | Önce | Sonra |
+|---|---|---|
+| Hayatında hiç sevgilisi oldu | **2/60** | **44/60** |
+| İlişki başlatabilen olay sayısı | 1 | **7** |
+| İlişki kapısının kapandığı yaş | 26 | **84** |
+
+*(Hep "evet" diyen bir oyuncuda tavan 58/60; bekâr kalmak hâlâ gerçek bir sonuç.)*
+
+**Şu an kodda olan (geçici) çözüm — iki parça:**
+
+*1. Yetişkinlik kapıları.* Altı yeni tanışma olayı: iş yerinde (24-52, çalışıyor olmayı ister), arkadaş aracılığıyla (24-58, yakın arkadaş ister), düğünde (24-60), kursta (26-64), komşulukta (28-66) ve ileri yaşta parkta (58-84). Hiçbiri `romantik_gecti` veya `romantik_bitti` izine bakmaz; hepsi `romantik_iliskide` ve `evlendi` izlerinde kapalıdır, yani ikinci bir romantik kişi kaydı üretilmez. `cikma_teklifi` üzerindeki kalıcı `romantik_bitti` yasağı da kaldırıldı.
+
+*2. Bekâr hayat içeriği.* Evlenmeyen ömrün de anlatacak şeyleri olsun diye beş olay: yemekte gelen "sen ne zaman" sorusu, yalnız bayram sabahı, markette iki kişilik paket, kimseye haber vermeden geçen hafta sonu, gece yarısı mutfakta gelen soru.
+
+**Karar soruları:**
+1. **44/60 doğru oran mı?** Yani rastgele oynayan oyuncuların yaklaşık dörtte üçünün hayatında bir ilişki olması fazla mı? Bekâr kalmak ne sıklıkta bir sonuç olmalı?
+2. **İkinci gerçek engel para.** Sevgilisi olan 44 hayatın yalnızca **25'i** evlenme teklifi verebilecek duruma geliyor; engel neredeyse her zaman **60.000 ₺'lik nikâh masrafı**. Sevgili olunduğu an cüzdanın ortancası **0 ₺**. Bu kasıtlı bir oyun kuralı mı (evlenmek için çalışmak gerekir), yoksa masraf düşürülmeli mi / taksitlendirilmeli mi?
+3. Kapıların yaş aralıkları ve ağırlıkları (iş yeri 4, arkadaş 4, düğün 3, kurs 3, komşu 3, ileri yaş 3) uygun mu?
+4. İleri yaşta (58-84) yeni bir ilişki kurulabilmesi isteniyor mu? Şu an "parkta aynı bank" olayı bunu açıyor.
+5. Boşanmış ya da eşini kaybetmiş oyuncu yeniden evlenebilmeli mi? Şu an **ikinci evlilik yok** (Q-063); yeni sevgili edinebilir ama evlenemez. Bu zincir yarım kalıyor.
+6. Eşleşme ve yönelim kuralları hâlâ kararlaştırılmadı: `Romance.start` partnerin cinsiyetini oyuncunun karşıtı seçiyor (`prototypeOnly`).
+
+**Yan düzeltme (test):** `package1_test.dart` içindeki "yeni sınıf en az 10 kişi" beklentisi tohuma bağlıydı. Sınıf **her zaman** 10 kişiye tamamlanıyor, ama aralarından biri o yıl vefat ederse güncel liste 9 veriyor. Test artık sınıfın tam mevcuda tamamlandığını sınıyor, yaşayan sayısına değil.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
