@@ -1637,5 +1637,31 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Efektler `assets/sounds/` altında, tanımları tek dosyada (`GameSound`). İstenirse ses dosyaları değiştirilebilir ya da tamamen kaldırılabilir.
 
+### Q-084 — Görsel kimlik yenilemesi: canlı palet, koyu başlık şeridi, renksiz kartlar
+**Durum:** Yön **Faho tarafından istendi** ("menüler ve oyun tasarımı çok yapay zeka duruyor; daha iyi işler çıkart ve canlı renkleri kullan"); **ayrıntılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 16, `app/lib/ui/theme/bir_omur_theme.dart`, `app/lib/ui/widgets/`, `app/test/goldens/`.
+
+**Neden değişti:** Önceki sürüm soluk bir "eski kâğıt" zemini üzerine **her menü satırını ayrı bir pastel tonla** boyuyordu. Yan yana gelince ekran hem düşük karşıtlıklı hem de karaktersiz duruyordu; Faho bu görüntüyü "yapay zekâ işi" diye tanımladı.
+
+**Şu an kodda olan (geçici) çözüm:**
+- **Palet doygunlaştırıldı.** Nar `#B53142` → `#E4224B`, çini `#12897A` → `#00A99B`, pirinç `#D69A2B` → `#F5A623`. Menü renk ailesi (mor, mavi, yeşil, turuncu, gül) de belirgin biçimde canlandı.
+- **Zemin sakinleşti, renk vurguya taşındı.** Açık temada gövde soğuk açık gri (`#F1F2F7`), kartlar **beyaz**; koyu temada gövde mürekkep moru (`#0C0B15`), kartlar `#191826`. Kart zeminleri **artık vurgu rengiyle boyanmıyor**.
+- **Üst karakter şeridi ve açılış ekranı koyu degrade oldu** (`#3B1E86` → `#B02A63`), yazı beyaz. Ekranın üstü ve altı çerçeve gibi duruyor, içerik arada nefes alıyor.
+- **Her bölüm renkli bir başlık kartıyla açılıyor:** degrade zemin, beyaz başlık, sağda yarı saydam bölüm simgesi.
+- **Menü satırı yeniden kuruldu:** beyaz kart, doygun degrade ikon kutusu ve altında kendi renginden bir ışık, nötr gri ok.
+- **Düğmeler düzleşti** (gölge kaldırıldı); olay penceresinde seçenekler tonal düğme yerine olayın rengini taşıyan kendi kartlarında.
+- **Hayat günlüğü:** içinde bulunulan yıl dolu nar rozeti ve "BU YIL" etiketiyle öne çıkıyor; kategori simgeleri kendi renginde yumuşak kutularda.
+- Alt menü sırası ve **Yaş Al**'ın yeri değişmedi (NAV-001).
+
+**Karar soruları:**
+1. Üst şeridin ve açılış ekranının **mor → bordo** degradesi doğru kimlik mi? Alternatif: nar kırmızısı ağırlıklı tek renk, ya da tamamen koyu lacivert.
+2. Menü kartları **renksiz** mi kalsın, yoksa hafif bir renk tonu geri gelsin mi? (Şu an renk yalnızca ikon kutusunda.)
+3. Sekiz renkli menü ailesi çok mu? Üç-dört renge indirilsin mi?
+4. **Yazı tipi hâlâ sistem yazı tipi** (Android'de Roboto, Windows'ta Segoe UI). Oyuna özel bir yazı tipi istenirse dosyanın projeye eklenmesi gerekiyor; bu ortamdan indirilemedi. İstenir mi, isteniyorsa hangi karakterde?
+5. Bölüm başlık kartı her alt sayfada görünmeli mi, yoksa yalnızca ana menülerde mi?
+6. Kilim şeridi bu palette kalsın mı, yoksa başka bir özgün doku mu denensin?
+
+**Varsayılan işlem:** Bütün renk değerleri tek dosyada (`bir_omur_theme.dart`) toplandığı için palet tek commit'le geri alınabilir. Onay gelene dek bu palet kalıcı marka kararı sayılmaz.
+
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
