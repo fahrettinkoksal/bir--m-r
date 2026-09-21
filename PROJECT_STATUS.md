@@ -524,6 +524,32 @@ yalnızca **önerilen** olarak işaretleniyor. Çocuğu olmayan oyuncuda menü
 hiç görünmüyor. Kayıt biçimi **sürüm 22**. Oran ve koşullar **Q-076**'da
 karar bekliyor.
 
+**Bilinen eksiklerin kapatılması (Paket 7):** Önceki paketlerde açık
+bıraktığım noktalar kapatıldı. (1) **Cenazeye katılmak ile masrafa
+katkıda bulunmak artık ayrı iki seçim**: bildirim önce katılımı, sonra
+katkıyı soruyor; katkı vermeyen de cenazede olabiliyor, katılamayan da
+katkıda bulunabiliyor ve metin ikisini ayrı cümleyle yazıyor. Cenazede
+bulunmak hayattaki kan bağlarının yakınlığını küçük ölçüde artırıyor;
+katılamamak küçük bir burukluk bırakıyor, kalıcı ceza değil. (2)
+**Bildirim kapsamı genişledi**: çekirdek aile yakınlıktan bağımsız,
+sevgili/arkadaş/eski eş/teyze-dayı-hala-amca ise yalnızca gerçekten
+yakınsa bildiriliyor; uzak tanıdık için bildirim çıkmıyor. (3) **Kendi
+hayatı izlenen kişi liseye geçtiği yıl alanını seçiyor** — alan
+sonradan uydurulmuyor, üniversite bölümü tercihini etkiliyor ve kuşak
+devamında oyuncunun eğitim kaydına taşınıyor. (4) **Yaşlanmanın dış
+görünüşe etkisi bu kişilere de oyuncuyla aynı kuralla** işliyor;
+çocuklukta otomatik düşüş yok, değerler 0-100 arasında kalıyor. (5)
+**Evlat edinilen çocuk kaydında işaretli**: kişi kartında "Aileye
+katılışı: Evlat edinildi" ve varsa "Diğer ebeveyni" görünüyor, uydurma
+biyolojik ebeveyn yazılmıyor. Yeni sayılar **Q-069** ve **Q-074**'te
+karar bekliyor; kayıt biçimi sürüm 22'de kaldı.
+
+**Test durumu (bu tur, gerçekten çalıştırıldı):** `flutter analyze`
+temiz; `flutter test` **788 geçti, 10 atlandı, 0 başarısız**. Atlanan 10
+test, yalnızca `BIR_OMUR_SCREENSHOTS=1` ile çalışan ekran görüntüsü
+testleridir. Kayıt göçü testleri **yapay (sentetik) kayıtlarla** yapıldı;
+gerçek cihazdan alınmış eski kayıt dosyasıyla sınanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
