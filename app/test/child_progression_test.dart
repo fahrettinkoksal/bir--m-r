@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:bir_omur/data/education_tracks.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/generation/child_progression.dart';
@@ -439,5 +440,132 @@ void main() {
       cocuk.development!.milestones.length,
       lessThanOrEqualTo(ChildProgression.prototypeOnlyMaxMilestones),
     );
+  });
+
+  // ===================================================================
+  // Lise alanı (D-045): alan **o yıl** seçilir, sonradan uydurulmaz.
+  // ===================================================================
+  group('NPC lise alanı', () {
+    test('lise öncesi alan yazılmaz', () {
+      Person cocuk = cocukKisi(age: 0);
+      cocuk = ilerlet(cocuk, 10, Random(11)).person; // 10 yaşında
+      expect(cocuk.development!.track, isNull);
+      expect(cocuk.development!.schoolLevel, isNot(SchoolLevel.lise));
+    });
+
+    test('liseye geçen çocuk o yıl alanını seçer ve günlüğe yazılır', () {
+      Person cocuk = cocukKisi(age: 0);
+      final ({Person person, List<String> news}) sonuc =
+          ilerlet(cocuk, 16, Random(12));
+      cocuk = sonuc.person;
+      expect(cocuk.development!.track, isNotNull);
+      expect(
+        sonuc.news.where((String h) => h.contains('alanını seçti')),
+        hasLength(1),
+      );
+      // Dönüm noktası da aynı yıl kaydedilir.
+      expect(
+        cocuk.development!.milestones
+            .where((LifeMilestone m) => m.text.contains('alanını seçti')),
+        hasLength(1),
+      );
+    });
+
+    test('seçilen alan bir daha değişmez', () {
+      Person cocuk = cocukKisi(age: 0);
+      cocuk = ilerlet(cocuk, 16, Random(13)).person;
+      final EducationTrack? ilk = cocuk.development!.track;
+      expect(ilk, isNotNull);
+      cocuk = ilerlet(cocuk, 10, Random(14)).person;
+      expect(cocuk.development!.track, ilk);
+    });
+
+    test('zekâsı düşük çocuk da bir alana yerleşir', () {
+      Person cocuk = cocukKisi(age: 0, intelligence: 20, charisma: 20);
+      cocuk = ilerlet(cocuk, 16, Random(15)).person;
+      expect(cocuk.development!.track, isNotNull);
+    });
+
+    test('alan eğitim özetinde görünür', () {
+      Person cocuk = cocukKisi(age: 0);
+      cocuk = ilerlet(cocuk, 16, Random(16)).person;
+      final PersonDevelopment dev = cocuk.development!;
+      expect(dev.educationLabel, contains(dev.trackDetails!.label));
+    });
+
+    test('kuşak devamında alan da taşınır', () {
+      Person cocuk = cocukKisi(id: 'cocuk-1', age: 0);
+      cocuk = ilerlet(cocuk, 17, Random(17)).person;
+      final EducationTrack? alan = cocuk.development!.track;
+      expect(alan, isNotNull);
+
+      final GameState state = olenOyuncu().copyWith(
+        people: <Person>[cocuk],
+        marriage: null,
+      );
+      final ({GameState? state, String blockReason}) sonuc =
+          GenerationContinuation.continueAs(state, 'cocuk-1', Random(19));
+      expect(sonuc.state, isNotNull);
+      expect(sonuc.state!.education.track, alan);
+    });
+
+    test('alan kayıtla birlikte saklanır', () {
+      Person cocuk = cocukKisi(id: 'cocuk-1', age: 0);
+      cocuk = ilerlet(cocuk, 17, Random(18)).person;
+      final EducationTrack? alan = cocuk.development!.track;
+      final GameState state = olenOyuncu().copyWith(
+        deceased: false,
+        people: <Person>[cocuk],
+        marriage: null,
+      );
+      final GameState geri = decodeGameState(encodeGameState(state));
+      expect(geri.personById('cocuk-1')!.development!.track, alan);
+    });
+  });
+
+  // ===================================================================
+  // Yaşlanma (D-051): kendi hayatı izlenen kişiler de yıllar içinde
+  // değişir; bu bir değer yargısı değildir.
+  // ===================================================================
+  group('NPC dış görünüşü', () {
+    test('çocuklukta otomatik düşüş yoktur', () {
+      Person cocuk = cocukKisi(age: 0);
+      final int basla = cocuk.development!.stats.appearance;
+      cocuk = ilerlet(cocuk, 18, Random(21)).person;
+      expect(
+        cocuk.development!.stats.appearance,
+        greaterThanOrEqualTo(basla),
+      );
+    });
+
+    test('ileri yaşta genel eğilim düşüştür', () {
+      int dusen = 0;
+      for (int tohum = 0; tohum < 20; tohum++) {
+        Person cocuk = cocukKisi(id: 'c-$tohum', age: 40);
+        final int basla = cocuk.development!.stats.appearance;
+        cocuk = ilerlet(cocuk, 30, Random(100 + tohum)).person;
+        if (cocuk.development!.stats.appearance < basla) dusen++;
+      }
+      expect(dusen, greaterThan(15));
+    });
+
+    test('herkes aynı değere inmez', () {
+      final Set<int> degerler = <int>{};
+      for (int tohum = 0; tohum < 12; tohum++) {
+        Person cocuk = cocukKisi(id: 'c-$tohum', age: 40);
+        cocuk = ilerlet(cocuk, 35, Random(200 + tohum)).person;
+        degerler.add(cocuk.development!.stats.appearance);
+      }
+      expect(degerler.length, greaterThan(1));
+    });
+
+    test('değer 0-100 sınırlarının dışına çıkmaz', () {
+      for (int tohum = 0; tohum < 10; tohum++) {
+        Person cocuk = cocukKisi(id: 'c-$tohum', age: 30);
+        cocuk = ilerlet(cocuk, 60, Random(300 + tohum)).person;
+        final int deger = cocuk.development!.stats.appearance;
+        expect(deger, inInclusiveRange(0, 100));
+      }
+    });
   });
 }

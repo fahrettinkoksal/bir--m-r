@@ -77,6 +77,14 @@ void main() {
     await pumpApp(tester, state);
     final int cuzdan = controller.state!.player.wallet;
 
+    // Önce katılım sorulur; katılmak ile katkı ayrı seçimlerdir.
+    expect(find.byKey(const Key('funeral_attend_katildi')), findsOneWidget);
+    expect(find.byKey(const Key('funeral_attend_katilamadi')), findsOneWidget);
+    expect(find.byKey(const Key('funeral_choice_tamKatki')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('funeral_attend_katildi')));
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('funeral_choice_tamKatki')), findsOneWidget);
     expect(find.byKey(const Key('funeral_choice_katkiYok')), findsOneWidget);
     await tester.tap(find.byKey(const Key('funeral_choice_tamKatki')));
@@ -104,6 +112,9 @@ void main() {
       ),
     ]);
     await pumpApp(tester, state);
+
+    await tester.tap(find.byKey(const Key('funeral_attend_katilamadi')));
+    await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('funeral_choice_tamKatki')), findsNothing);
     expect(find.byKey(const Key('funeral_choice_kismiKatki')), findsOneWidget);

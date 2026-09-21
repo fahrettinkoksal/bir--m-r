@@ -1045,12 +1045,18 @@ class GameController extends ChangeNotifier {
     return Notices.amountFor(current, notice, choice);
   }
 
-  /// Cenaze masrafı seçimini uygular; ödeme **bir kez** düşer.
-  String? respondToFuneral(FuneralChoice choice) {
+  /// Cenazeye katılım ve masraf seçimini uygular.
+  ///
+  /// Katılmak ile katkıda bulunmak ayrı seçimlerdir; ödeme **bir kez**
+  /// düşer ve cüzdan eksiye düşmez.
+  String? respondToFuneral(
+    FuneralChoice choice, {
+    FuneralAttendance attendance = FuneralAttendance.katildi,
+  }) {
     final GameState? current = _state;
     if (current == null || !current.hasNotice) return null;
     final ({GameState state, String text}) sonuc =
-        Notices.respondToFuneral(current, choice);
+        Notices.respondToFuneral(current, choice, attendance: attendance);
     _state = sonuc.state;
     _autoSave();
     notifyListeners();

@@ -225,6 +225,19 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     label: 'İlgi alanları',
                     value: person.development!.interests.join(', '),
                   ),
+                // Evlat edinilen çocuk her bakımdan çocuktur; kayıt
+                // yalnızca doğru anlatılır (D-049).
+                if (person.development!.adopted)
+                  const _Row(label: 'Aileye katılışı', value: 'Evlat edinildi'),
+                // Diğer biyolojik ebeveyn kayıtlıysa gösterilir (D-047).
+                if (person.development!.otherParentId != null &&
+                    state.personById(person.development!.otherParentId!) != null)
+                  _Row(
+                    label: 'Diğer ebeveyni',
+                    value: state
+                        .personById(person.development!.otherParentId!)!
+                        .fullName,
+                  ),
               ] else if (person.wealth != null)
                 _Row(label: 'Kendi maddi durumu', value: person.wealth!.label),
               // Kişinin gerçekten sahip olduğu eşyalar; miras bu listeden

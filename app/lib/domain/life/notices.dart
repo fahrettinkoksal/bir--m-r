@@ -5,6 +5,19 @@ import '../models/pending_notice.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 
+/// Cenazeye katılım seçenekleri (D-050).
+///
+/// Katılmak ile masrafa katkıda bulunmak **ayrı şeylerdir**: para
+/// vermeyen oyuncu cenazeye katılabilir, katılamayan oyuncu da katkıda
+/// bulunabilir.
+enum FuneralAttendance {
+  /// Cenazeye katıldı.
+  katildi,
+
+  /// Cenazeye katılamadı.
+  katilamadi,
+}
+
 /// Cenaze katkısı seçenekleri.
 enum FuneralChoice {
   /// Tam katkı.
@@ -36,7 +49,22 @@ abstract final class Notices {
   /// prototypeOnly: katkıda bulunmanın mutluluk etkisi.
   static const int prototypeOnlyContributionHappiness = 3;
 
-  /// Ölümü bildirilecek bağlar.
+  /// prototypeOnly: cenazeye katılmanın mutluluk etkisi.
+  ///
+  /// Vedalaşmak iyi gelir; katılamamak küçük bir burukluk bırakır.
+  /// İkisi de kalıcı ceza değildir.
+  static const int prototypeOnlyAttendanceHappiness = 2;
+  static const int prototypeOnlyAbsenceHappiness = -3;
+
+  /// prototypeOnly: cenazeye katılmanın hayattaki yakınlarla yakınlığa
+  /// etkisi.
+  static const int prototypeOnlyAttendanceBond = 2;
+
+  /// prototypeOnly: çekirdek aile dışındaki bağlarda bildirim için
+  /// gereken yakınlık.
+  static const int prototypeOnlyCloseBond = 60;
+
+  /// Yakınlığa bakılmaksızın bildirilen bağlar.
   static const Set<RelationType> noticeRelations = <RelationType>{
     RelationType.es,
     RelationType.anne,
@@ -48,6 +76,27 @@ abstract final class Notices {
     RelationType.anneTarafiDede,
     RelationType.babaTarafiDede,
   };
+
+  /// Yakınlık yüksekse bildirilen diğer bağlar.
+  ///
+  /// Hayatındaki sevgili, yakın arkadaş ve yakın akraba da "yakın biri"
+  /// sayılır; uzak tanıdık için bildirim çıkmaz.
+  static const Set<RelationType> bondBasedRelations = <RelationType>{
+    RelationType.sevgili,
+    RelationType.arkadas,
+    RelationType.eskiEs,
+    RelationType.teyze,
+    RelationType.dayi,
+    RelationType.hala,
+    RelationType.amca,
+  };
+
+  /// Bu kişinin vefatı bildirilir mi?
+  static bool shouldNotify(Person person) {
+    if (noticeRelations.contains(person.relation)) return true;
+    return bondBasedRelations.contains(person.relation) &&
+        person.bond >= prototypeOnlyCloseBond;
+  }
 
   /// Cenaze katkısı sorulan bağlar.
   static const Set<RelationType> funeralRelations = <RelationType>{
@@ -190,8 +239,9 @@ abstract final class Notices {
   /// bulunmamak cenazeye katılmayı engellemez ve mirası etkilemez.
   static ({GameState state, String text}) respondToFuneral(
     GameState state,
-    FuneralChoice choice,
-  ) {
+    FuneralChoice choice, {
+    FuneralAttendance attendance = FuneralAttendance.katildi,
+  }) {
     if (state.notices.isEmpty ||
         state.notices.first.kind != NoticeKind.cenaze) {
       return (state: state, text: 'Bekleyen bir cenaze bildirimi yok.');
@@ -202,21 +252,42 @@ abstract final class Notices {
     final String ad = kisi?.firstName ?? 'yakının';
 
     final int tutar = amountFor(state, notice, choice);
-    final String metin = tutar > 0
-        ? '$ad için cenaze masraflarına ${trMoney(tutar)} katkıda bulundun.'
-        : '$ad için cenaze masraflarına katkıda bulunamadın; '
-            'cenazedeydin.';
+    final bool katildi = attendance == FuneralAttendance.katildi;
+
+    // Katılım ve katkı **ayrı** anlatılır; biri diğerinin yerine geçmez.
+    final String katilimMetni = katildi
+        ? '$ad için cenazedeydin.'
+        : '$ad için cenazeye katılamadın.';
+    final String katkiMetni = tutar > 0
+        ? ' Masraflara ${trMoney(tutar)} katkıda bulundun.'
+        : ' Masraflara katkıda bulunmadın.';
+    final String metin = '$katilimMetni$katkiMetni';
 
     GameState next = dismissFirst(state);
-    if (tutar > 0) {
-      next = next.copyWith(
-        player: next.player.copyWith(
-          wallet: next.player.wallet - tutar,
-          stats: next.player.stats.copyWith(
-            happiness:
-                next.player.stats.happiness + prototypeOnlyContributionHappiness,
-          ),
+
+    final int mutlulukEtkisi =
+        (katildi ? prototypeOnlyAttendanceHappiness : prototypeOnlyAbsenceHappiness) +
+            (tutar > 0 ? prototypeOnlyContributionHappiness : 0);
+
+    next = next.copyWith(
+      player: next.player.copyWith(
+        wallet: next.player.wallet - tutar,
+        stats: next.player.stats.copyWith(
+          happiness: next.player.stats.happiness + mutlulukEtkisi,
         ),
+      ),
+    );
+
+    // Cenazede bulunmak hayattaki yakınlarla araya bir şey katar.
+    if (katildi) {
+      next = next.copyWith(
+        people: next.people
+            .map((Person p) => p.isAlive && p.relation.kanBagi
+                ? p.copyWith(
+                    bond: (p.bond + prototypeOnlyAttendanceBond).clamp(0, 100),
+                  )
+                : p)
+            .toList(growable: false),
       );
     }
 

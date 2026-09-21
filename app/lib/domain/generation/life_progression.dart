@@ -216,7 +216,7 @@ class LifeProgression {
           in olumSonucu.deaths) {
         final int uygulanan = olum.loss.clamp(0, kalanMutluluk);
         kalanMutluluk -= uygulanan;
-        if (!Notices.noticeRelations.contains(olum.person.relation)) continue;
+        if (!Notices.shouldNotify(olum.person)) continue;
         bildirimler.add(
           Notices.death(
             person: olum.person,

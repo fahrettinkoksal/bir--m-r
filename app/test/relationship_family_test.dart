@@ -319,6 +319,36 @@ void main() {
       expect(geri.children.single.development!.stats.intelligence, zeka);
     });
 
+    test('evlat edinilen çocuk kaydında işaretlidir ve işaret saklanır', () {
+      final GameState zengin = oyuncu(63, wallet: 3000000);
+      AdoptionResult? basarili;
+      for (int seed = 0; seed < 40 && basarili == null; seed++) {
+        final AdoptionResult r = evlatEdinme.apply(zengin, Random(seed));
+        if (r.adopted) basarili = r;
+      }
+      final GameState sonra = basarili!.state;
+      final Person cocuk = sonra.children.single;
+
+      // Kayıt doğru anlatılır: evlat edinildiği bellidir...
+      expect(cocuk.development!.adopted, isTrue);
+      // ...ama uydurma bir biyolojik ebeveyn yazılmaz (D-049).
+      expect(cocuk.development!.otherParentId, isNull);
+
+      final GameState geri = decodeGameState(encodeGameState(sonra));
+      expect(geri.children.single.development!.adopted, isTrue);
+    });
+
+    test('biyolojik çocuk evlat edinilmiş sayılmaz', () {
+      final ({GameState state, Person partner}) v = sevgiliyle(30, bond: 80);
+      final GameState sonra =
+          ebeveynlik.haveChild(v.state, Random(3)).state;
+      final Person bebek = sonra.children.single;
+      expect(bebek.development!.adopted, isFalse);
+      // Diğer biyolojik ebeveyn gerçekten kayıtlıdır (D-047).
+      expect(bebek.development!.otherParentId, v.partner.id);
+      expect(sonra.personById(bebek.development!.otherParentId!), isNotNull);
+    });
+
     test('evlat edinilen çocuk mirasta ve hanede sayılır', () {
       final GameState zengin = oyuncu(66, wallet: 3000000);
       AdoptionResult? basarili;

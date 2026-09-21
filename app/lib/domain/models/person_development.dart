@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/education_tracks.dart';
 import '../../data/job_catalog.dart';
 import '../../data/university_catalog.dart';
 import 'education.dart';
@@ -57,6 +58,8 @@ class PersonDevelopment {
     this.interests = const <String>[],
     this.milestones = const <LifeMilestone>[],
     this.otherParentId,
+    this.track,
+    this.adopted = false,
   });
 
   /// Kişinin kendi karakter değerleri (D-046 ile doğumda oluşturulur).
@@ -118,6 +121,19 @@ class PersonDevelopment {
   /// yazılmaz).
   final String? otherParentId;
 
+  /// Lisede seçtiği alan (D-045).
+  ///
+  /// Alan, 9. sınıfa geçilen yıl **gerçekten seçilir**; üniversite
+  /// bölümünü ve kuşak devamında oyuncunun eğitim kaydını etkiler.
+  final EducationTrack? track;
+
+  /// Bu kişi **evlat edinildi mi?**
+  ///
+  /// Evlat edinilen çocuk her bakımdan çocuktur: hanede, giderde,
+  /// mirasta ve vasiyette eşittir (D-049). Bu alan yalnızca kaydın
+  /// doğru anlatılması içindir; uydurma bir biyolojik ebeveyn yazılmaz.
+  final bool adopted;
+
   bool get isStudent => grade != null;
   bool get isUniversityStudent => university == UniversityStatus.okuyor;
   bool get isEmployed => jobId != null;
@@ -129,12 +145,18 @@ class PersonDevelopment {
       ? null
       : universityProgramById(universityProgramId!);
 
+  /// Seçtiği alanın bilgisi; seçilmediyse `null`.
+  EducationTrackInfo? get trackDetails =>
+      track == null ? null : trackInfo(track!);
+
   /// Ekranda gösterilecek eğitim özeti.
   String get educationLabel {
     if (grade != null) {
       final SchoolLevel? kademe = schoolLevel;
-      if (kademe == null) return '$grade. sınıf';
-      return '${kademe.label} ${kademe.gradeWithinLevel(grade!)}. sınıf';
+      final String alan =
+          trackDetails == null ? '' : ' · ${trackDetails!.label}';
+      if (kademe == null) return '$grade. sınıf$alan';
+      return '${kademe.label} ${kademe.gradeWithinLevel(grade!)}. sınıf$alan';
     }
     switch (university) {
       case UniversityStatus.okuyor:
@@ -166,6 +188,8 @@ class PersonDevelopment {
     List<String>? interests,
     List<LifeMilestone>? milestones,
     Object? otherParentId = _unsetDev,
+    Object? track = _unsetDev,
+    bool? adopted,
   }) {
     return PersonDevelopment(
       stats: stats ?? this.stats,
@@ -195,6 +219,8 @@ class PersonDevelopment {
       otherParentId: otherParentId == _unsetDev
           ? this.otherParentId
           : otherParentId as String?,
+      track: track == _unsetDev ? this.track : track as EducationTrack?,
+      adopted: adopted ?? this.adopted,
     );
   }
 

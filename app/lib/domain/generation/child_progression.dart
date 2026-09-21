@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import '../../data/education_tracks.dart';
 import '../../data/job_catalog.dart';
 import '../../data/university_catalog.dart';
+import '../life/aging.dart';
 import '../models/education.dart';
 import '../models/person.dart';
 import '../models/person_development.dart';
@@ -188,6 +190,13 @@ abstract final class ChildProgression {
         if (yeni != null && yeni != eski) {
           kaydet('$ad ${yeni.label.toLowerCase()} sıralarına geçti.');
         }
+        // Liseye geçen çocuk alanını **o yıl** seçer; sonradan
+        // uydurulmaz (D-045).
+        if (yeni == SchoolLevel.lise && dev.track == null) {
+          final EducationTrackInfo alan = _pickTrack(dev, rng);
+          dev = dev.copyWith(track: alan.track);
+          kaydet('$ad lisede ${alan.label.toLowerCase()} alanını seçti.');
+        }
       }
     }
 
@@ -306,19 +315,53 @@ abstract final class ChildProgression {
     return (person: _sync(person, dev), news: haberler);
   }
 
+  /// prototypeOnly: NPC'nin lisede seçeceği alan.
+  ///
+  /// Oyuncunun yerleştirme sınavı burada tekrarlanmaz; alan, kişinin
+  /// **kendi değerlerinden** türetilen bir puana göre seçilir.
+  static EducationTrackInfo _pickTrack(PersonDevelopment dev, Random rng) {
+    final int puan = ((dev.stats.intelligence * 0.7) +
+            (dev.stats.charisma * 0.3) +
+            rng.between(-10, 10))
+        .round()
+        .clamp(0, 100);
+    final List<EducationTrackInfo> uygun = kEducationTracks
+        .where((EducationTrackInfo t) => puan >= t.minScore)
+        .toList(growable: false);
+    if (uygun.isEmpty) {
+      return kEducationTracks.firstWhere(
+        (EducationTrackInfo t) => t.track == EducationTrack.genelAkademik,
+      );
+    }
+    return rng.pick(uygun);
+  }
+
   /// prototypeOnly: NPC'nin okuyacağı bölüm.
   ///
-  /// Zekâsı yüksek kişi daha yüksek puanlı bölümlere yönelir; yine de
-  /// seçim garanti değildir.
+  /// Zekâsı yüksek kişi daha yüksek puanlı bölümlere yönelir; lisede
+  /// seçtiği alanla uyumlu bölümler öne çıkar. Seçim yine de garanti
+  /// değildir.
   static UniversityProgram _pickProgram(PersonDevelopment dev, Random rng) {
     final List<UniversityProgram> uygun = kUniversityPrograms
         .where((UniversityProgram p) => dev.stats.intelligence + 15 >= p.minScore)
         .toList(growable: false);
     if (uygun.isEmpty) return rng.pick(kUniversityPrograms);
+
+    // Lisede seçtiği alan bölüm tercihini etkiler.
+    final EducationTrack? alan = dev.track;
+    if (alan != null) {
+      final List<UniversityProgram> alanla = uygun
+          .where((UniversityProgram p) => p.preferredTracks.contains(alan))
+          .toList(growable: false);
+      if (alanla.isNotEmpty && rng.chance(0.7)) return rng.pick(alanla);
+    }
     return rng.pick(uygun);
   }
 
   /// Eğitim ve yaşa göre küçük özellik değişimi.
+  ///
+  /// Yaşlanmanın dış görünüşe etkisi **oyuncuyla aynı kuralla** işler
+  /// (D-051): kendi hayatı izlenen kişiler de yıllar içinde değişir.
   static Stats _driftStats(PersonDevelopment dev, int age, Random rng) {
     Stats stats = dev.stats;
     if ((dev.isStudent || dev.isUniversityStudent) && rng.chance(0.35)) {
@@ -326,6 +369,15 @@ abstract final class ChildProgression {
     }
     if (age > 50 && rng.chance(0.4)) {
       stats = stats.copyWith(health: stats.health - 1);
+    }
+    final int gorunus = Aging.yearlyDelta(
+      age: age,
+      appearance: stats.appearance,
+      health: stats.health,
+      rng: rng,
+    );
+    if (gorunus != 0) {
+      stats = stats.copyWith(appearance: stats.appearance + gorunus);
     }
     return stats;
   }

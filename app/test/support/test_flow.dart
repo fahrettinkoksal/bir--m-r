@@ -100,6 +100,12 @@ Future<void> answerPendingNotices(
   while (controller.state!.hasNotice) {
     if (guard++ > 20) fail('Bildirimler kapanmıyor.');
     await tester.pumpAndSettle();
+    // Cenaze akışı iki adımlıdır: önce katılım, sonra katkı (D-050).
+    final Finder katilim = find.byKey(const Key('funeral_attend_katildi'));
+    if (katilim.evaluate().isNotEmpty) {
+      await tester.tap(katilim);
+      await tester.pumpAndSettle();
+    }
     final Finder katkisiz =
         find.byKey(const Key('funeral_choice_katkiYok'));
     final Finder kapat = find.byKey(const Key('notice_close'));

@@ -4,6 +4,7 @@ import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/adoption.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -71,6 +72,32 @@ void main() {
     expect(find.byKey(const Key('adoption_apply_button')), findsNothing);
     expect(find.textContaining('Şu an başvuramazsın'), findsOneWidget);
     expect(controller.state!.children, isEmpty);
+  });
+
+  testWidgets('evlat edinilen çocuğun kaydı ilişkilerde doğru anlatılır',
+      (WidgetTester tester) async {
+    // Gerçek bir kabul üretilir; ekran bu kayıttan okunur.
+    final GameState zengin = hayat(age: 34);
+    AdoptionResult? basarili;
+    for (int seed = 0; seed < 40 && basarili == null; seed++) {
+      final AdoptionResult r = const Adoption().apply(zengin, Random(seed));
+      if (r.adopted) basarili = r;
+    }
+    expect(basarili, isNotNull);
+
+    await pumpApp(tester, basarili!.state);
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
+    await tester.pumpAndSettle();
+    // Evlat edinilen çocuk da İlişkiler → Çocuklar altında görünür.
+    await tester.tap(find.text('Çocuklar').first);
+    await tester.pumpAndSettle();
+
+    final Person cocuk = controller.state!.children.single;
+    await tester.tap(find.text(cocuk.fullName).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aileye katılışı'), findsOneWidget);
+    expect(find.text('Evlat edinildi'), findsOneWidget);
   });
 
   testWidgets('küçük yaşta menüde görünmez', (WidgetTester tester) async {

@@ -226,6 +226,9 @@ class Adoption {
       development: PersonDevelopment(
         // Hayatı bundan sonra izlenir (D-045).
         tracksLife: true,
+        // Kayıt doğru anlatılsın diye işaretlenir; bu çocuk her bakımdan
+        // çocuktur (D-049).
+        adopted: true,
         // Kendi özellikleri: evlat edinme sırasında yeniden çizilmez.
         stats: Stats(
           appearance: rng.between(25, 85),

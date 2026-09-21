@@ -34,13 +34,24 @@ class NoticeSheet extends StatefulWidget {
 class _NoticeSheetState extends State<NoticeSheet> {
   String? _sonuc;
 
+  /// Cenaze akışında önce katılım sorulur (D-050): katılmak ile masrafa
+  /// katkıda bulunmak aynı şey değildir.
+  FuneralAttendance? _katilim;
+
   void _kapat() {
     GameScope.of(context).dismissNotice();
     Navigator.of(context).pop();
   }
 
+  void _katilimSec(FuneralAttendance secim) {
+    setState(() => _katilim = secim);
+  }
+
   void _cenaze(FuneralChoice secim) {
-    final String? metin = GameScope.of(context).respondToFuneral(secim);
+    final String? metin = GameScope.of(context).respondToFuneral(
+      secim,
+      attendance: _katilim ?? FuneralAttendance.katildi,
+    );
     setState(() => _sonuc = metin);
   }
 
@@ -49,6 +60,7 @@ class _NoticeSheetState extends State<NoticeSheet> {
     final ThemeData theme = Theme.of(context);
     final PendingNotice notice = widget.notice;
     final bool cenaze = notice.kind == NoticeKind.cenaze && _sonuc == null;
+    final bool katilimSorulacak = cenaze && _katilim == null;
 
     return SafeArea(
       child: Padding(
@@ -105,7 +117,42 @@ class _NoticeSheetState extends State<NoticeSheet> {
                 Text('$ad sana kaldı.', style: theme.textTheme.bodyMedium),
             ],
             const SizedBox(height: 18),
-            if (cenaze) ...<Widget>[
+            if (katilimSorulacak) ...<Widget>[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonal(
+                  key: const Key('funeral_attend_katildi'),
+                  onPressed: () => _katilimSec(FuneralAttendance.katildi),
+                  child: const Text('Cenazeye katıl'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonal(
+                  key: const Key('funeral_attend_katilamadi'),
+                  onPressed: () => _katilimSec(FuneralAttendance.katilamadi),
+                  child: const Text('Katılamıyorum'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Cenazeye katılmak ile masraflara katkıda bulunmak ayrı '
+                'şeylerdir; ikisini de ayrı ayrı seçeceksin.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ] else if (cenaze) ...<Widget>[
+              Text(
+                _katilim == FuneralAttendance.katildi
+                    ? 'Cenazeye katılıyorsun. Masraflara katkıda bulunmak '
+                        'ister misin?'
+                    : 'Cenazeye katılamıyorsun. Masraflara katkıda bulunmak '
+                        'ister misin?',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
               for (final FuneralChoice secim in FuneralChoice.values)
                 if (GameScope.of(context).canChooseFuneral(secim)) ...<Widget>[
                   SizedBox(
@@ -119,8 +166,7 @@ class _NoticeSheetState extends State<NoticeSheet> {
                   const SizedBox(height: 10),
                 ],
               Text(
-                'Katkıda bulunmasan da cenazedesin; bu bir borç değildir ve '
-                'mirası etkilemez.',
+                'Katkı bir borç değildir ve mirası etkilemez.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

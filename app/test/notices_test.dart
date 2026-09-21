@@ -211,6 +211,7 @@ void main() {
           Notices.respondToFuneral(state, FuneralChoice.katkiYok);
       expect(sonuc.state.player.wallet, state.player.wallet);
       expect(sonuc.text, contains('cenazedeydin'));
+      expect(sonuc.text, contains('katkıda bulunmadın'));
     });
 
     test('parası yetmeyen oyuncu cüzdanını eksiye düşürmez', () {
@@ -313,6 +314,176 @@ void main() {
       expect(geri.notices.first.id, 'cenaze-anne-1');
     });
   });
+  // ===================================================================
+  // Bildirim kapsamı (D-050): çekirdek aile her hâlükârde, diğer bağlar
+  // gerçekten yakınsa bildirilir.
+  // ===================================================================
+  group('Bildirim kapsamı', () {
+    Person bagli(RelationType relation, int bond) => kisi(
+          id: 'k-${relation.name}-$bond',
+          relation: relation,
+          gender: Gender.kadin,
+          age: 60,
+          bond: bond,
+        );
+
+    test('çekirdek aile yakınlıktan bağımsız bildirilir', () {
+      expect(Notices.shouldNotify(bagli(RelationType.anne, 5)), isTrue);
+      expect(Notices.shouldNotify(bagli(RelationType.cocuk, 0)), isTrue);
+      expect(Notices.shouldNotify(bagli(RelationType.es, 10)), isTrue);
+    });
+
+    test('yakın olunan sevgili ve arkadaş da bildirilir', () {
+      expect(Notices.shouldNotify(bagli(RelationType.sevgili, 80)), isTrue);
+      expect(Notices.shouldNotify(bagli(RelationType.arkadas, 75)), isTrue);
+      expect(Notices.shouldNotify(bagli(RelationType.teyze, 70)), isTrue);
+    });
+
+    test('uzak tanıdık için bildirim çıkmaz', () {
+      expect(Notices.shouldNotify(bagli(RelationType.arkadas, 30)), isFalse);
+      expect(Notices.shouldNotify(bagli(RelationType.sevgili, 20)), isFalse);
+      expect(
+        Notices.shouldNotify(bagli(RelationType.sinifArkadasi, 95)),
+        isFalse,
+      );
+      expect(Notices.shouldNotify(bagli(RelationType.ogretmen, 95)), isFalse);
+    });
+
+    test('eşik tam sınırda da tutarlıdır', () {
+      final int esik = Notices.prototypeOnlyCloseBond;
+      expect(
+        Notices.shouldNotify(bagli(RelationType.arkadas, esik)),
+        isTrue,
+      );
+      expect(
+        Notices.shouldNotify(bagli(RelationType.arkadas, esik - 1)),
+        isFalse,
+      );
+    });
+  });
+
+  // ===================================================================
+  // Cenazeye katılmak ile masrafa katkıda bulunmak **ayrı** şeylerdir
+  // (D-050).
+  // ===================================================================
+  group('Cenazeye katılım', () {
+    GameState cenazeli({int wallet = 300000, int kardesBagi = 50}) {
+      final GameState state = hayat(
+        wallet: wallet,
+        people: <Person>[
+          kisi(
+            id: 'anne-1',
+            relation: RelationType.anne,
+            gender: Gender.kadin,
+            age: 70,
+            firstName: 'Hatice',
+            alive: false,
+          ),
+          kisi(
+            id: 'kardes-1',
+            relation: RelationType.kardes,
+            gender: Gender.erkek,
+            age: 38,
+            firstName: 'Mert',
+            bond: kardesBagi,
+          ),
+          kisi(
+            id: 'arkadas-1',
+            relation: RelationType.arkadas,
+            gender: Gender.kadin,
+            age: 41,
+            firstName: 'Sevda',
+            bond: 50,
+          ),
+        ],
+      );
+      return Notices.enqueue(state, <PendingNotice>[
+        Notices.funeral(person: state.personById('anne-1')!, playerAge: 40),
+      ]);
+    }
+
+    test('katkı vermeden katılmak mümkündür', () {
+      final GameState state = cenazeli();
+      final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+        state,
+        FuneralChoice.katkiYok,
+        attendance: FuneralAttendance.katildi,
+      );
+      expect(sonuc.state.player.wallet, state.player.wallet);
+      expect(sonuc.text, contains('cenazedeydin'));
+      expect(sonuc.text, contains('katkıda bulunmadın'));
+      expect(
+        sonuc.state.player.stats.happiness,
+        state.player.stats.happiness + Notices.prototypeOnlyAttendanceHappiness,
+      );
+      expect(checkInvariants(sonuc.state), isEmpty);
+    });
+
+    test('katılamayan oyuncu yine de katkıda bulunabilir', () {
+      final GameState state = cenazeli();
+      final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+        state,
+        FuneralChoice.tamKatki,
+        attendance: FuneralAttendance.katilamadi,
+      );
+      expect(
+        sonuc.state.player.wallet,
+        state.player.wallet - Notices.prototypeOnlyFuneralCost,
+      );
+      expect(sonuc.text, contains('katılamadın'));
+      expect(
+        sonuc.text,
+        contains(trMoneyKontrol(Notices.prototypeOnlyFuneralCost)),
+      );
+      expect(checkInvariants(sonuc.state), isEmpty);
+    });
+
+    test('katılmak hayattaki kan bağlarına küçük bir yakınlık katar', () {
+      final GameState state = cenazeli(kardesBagi: 50);
+      final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+        state,
+        FuneralChoice.katkiYok,
+        attendance: FuneralAttendance.katildi,
+      );
+      expect(
+        sonuc.state.personById('kardes-1')!.bond,
+        50 + Notices.prototypeOnlyAttendanceBond,
+      );
+      // Arkadaşlık kan bağı değildir; etkilenmez.
+      expect(sonuc.state.personById('arkadas-1')!.bond, 50);
+    });
+
+    test('katılmamak kalıcı ceza değildir, küçük bir burukluktur', () {
+      final GameState state = cenazeli();
+      final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+        state,
+        FuneralChoice.katkiYok,
+        attendance: FuneralAttendance.katilamadi,
+      );
+      final int fark =
+          sonuc.state.player.stats.happiness - state.player.stats.happiness;
+      expect(fark, Notices.prototypeOnlyAbsenceHappiness);
+      expect(fark, greaterThan(-10));
+      // Yakınlık yükselmez ama düşmez de.
+      expect(sonuc.state.personById('kardes-1')!.bond, 50);
+    });
+
+    test('mutluluğu sıfır olan oyuncuda katılmamak eksiye düşürmez', () {
+      final GameState state = cenazeli().copyWith(
+        player: cenazeli().player.copyWith(
+              stats: cenazeli().player.stats.copyWith(happiness: 0),
+            ),
+      );
+      final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+        state,
+        FuneralChoice.katkiYok,
+        attendance: FuneralAttendance.katilamadi,
+      );
+      expect(sonuc.state.player.stats.happiness, greaterThanOrEqualTo(0));
+      expect(checkInvariants(sonuc.state), isEmpty);
+    });
+  });
+
 }
 
 /// Testte para metnini kontrol etmek için küçük yardımcı.

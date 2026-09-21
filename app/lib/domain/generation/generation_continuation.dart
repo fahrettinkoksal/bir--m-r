@@ -454,6 +454,8 @@ abstract final class GenerationContinuation {
         enrolled: true,
         grade: dev.grade,
         startedAtAge: 6,
+        // Lisede seçtiği alan da taşınır; sonradan uydurulmaz.
+        track: dev.track,
       );
     }
     switch (dev.university) {
@@ -461,6 +463,7 @@ abstract final class GenerationContinuation {
         return EducationState(
           finished: true,
           startedAtAge: 6,
+          track: dev.track,
           universityProgramId: dev.universityProgramId,
           universityYear: dev.universityYear ?? 1,
         );
@@ -468,6 +471,7 @@ abstract final class GenerationContinuation {
         return EducationState(
           finished: true,
           startedAtAge: 6,
+          track: dev.track,
           universityProgramId: dev.universityProgramId,
           universityFinished: true,
         );
@@ -476,7 +480,11 @@ abstract final class GenerationContinuation {
         break;
     }
     if (dev.finishedSchool) {
-      return const EducationState(finished: true, startedAtAge: 6);
+      return EducationState(
+        finished: true,
+        startedAtAge: 6,
+        track: dev.track,
+      );
     }
     return _educationForAge(age);
   }
