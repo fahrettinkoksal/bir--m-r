@@ -10,6 +10,10 @@ enum NoticeKind {
 
   /// Cenaze masrafına katkı seçimi.
   cenaze,
+
+  /// Okul hayatının dönüm noktası: okula başlama, kademe değişimi,
+  /// mezuniyet (Paket 17).
+  okul,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

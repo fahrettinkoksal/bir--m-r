@@ -18,14 +18,31 @@ Future<GameController> startWith(
   int seed = 51,
   int condition = 60,
 }) async {
-  final GameController controller = GameController(random: Random(seed));
-  await tester.pumpWidget(BirOmurApp(controller: controller));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Rastgele bir hayat'));
-  await tester.pumpAndSettle();
-  await answerPendingEvents(tester, controller);
-  await ageTo(tester, controller, age);
-  await answerPendingEvents(tester, controller);
+  // Olay havuzu büyüdükçe aynı tohumdaki hayatın gidişatı değişiyor ve
+  // bazı hayatlar hedef yaştan önce bitiyor. Bu testler eşya ekranını
+  // sınar, belirli bir hayatı değil: hedef yaşa **sağ** ulaşan ilk tohum
+  // kullanılır. Tohumlar sırayla denendiği için sonuç yine tekrarlanabilir.
+  late GameController controller;
+  int deneme = 0;
+  while (true) {
+    controller = GameController(random: Random(seed + deneme));
+    // Anahtar denemeye göre değişir: aksi hâlde Flutter aynı State'i
+    // koruyor ve yeni denetleyici hiç kullanılmıyordu.
+    await tester.pumpWidget(
+      BirOmurApp(key: ValueKey<int>(deneme), controller: controller),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+    await answerPendingEvents(tester, controller);
+    await ageTo(tester, controller, age);
+    await answerPendingEvents(tester, controller);
+    if (!controller.state!.deceased && controller.state!.player.age >= age) {
+      break;
+    }
+    controller.dispose();
+    if (deneme++ > 20) fail('Hedef yaşa ulaşan hayat bulunamadı.');
+  }
 
   GameState state = controller.state!;
   state = state.copyWith(

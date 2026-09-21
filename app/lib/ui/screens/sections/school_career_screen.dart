@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/event_pool_exam.dart';
 import '../../../domain/career/retirement.dart';
+import '../../../domain/education/education_path.dart';
 import '../../../domain/models/education.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/game_state.dart';
@@ -149,6 +151,15 @@ class _SchoolViewState extends State<_SchoolView> {
           ],
         ),
         const SizedBox(height: 12),
+        // Sınav yılı ayrı gösterilir (Paket 17): 8. ve 12. sınıf, okul
+        // hayatının diğer yıllarından farklı geçer.
+        if (ExamYear.isExamGrade(egitim.grade)) ...<Widget>[
+          _ExamYearPanel(
+            grade: egitim.grade!,
+            flags: state.storyFlags,
+          ),
+          const SizedBox(height: 12),
+        ],
         // Ders çalışmak gerçek bir eylem: not ortalamasını ve zekâyı
         // değiştirir, biraz da yorar (Paket 13).
         Builder(
@@ -680,6 +691,76 @@ class _PanelCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+/// Sınav yılı paneli (Paket 17).
+///
+/// Yalnızca **gerçekten olmuş** şeyleri yazar: sınav yılında olduğunu ve
+/// bu yıl verdiğin kararların puana ne yönde etki ettiğini. Sayı
+/// gösterilmez, çünkü puan sınav günü hesaplanır ve şans da içerir.
+class _ExamYearPanel extends StatelessWidget {
+  const _ExamYearPanel({required this.grade, required this.flags});
+
+  final int grade;
+  final Set<String> flags;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool universite = grade == 12;
+    final int etki = EducationPath.prototypeOnlyExamPrep(
+      flags,
+      university: universite,
+    );
+    final String sinav = universite
+        ? 'Üniversite sınavı'
+        : 'Lise yerleştirme sınavı';
+
+    final String durum;
+    if (etki > 0) {
+      durum = 'Bu yıl verdiğin kararlar sınava hazırlığına iyi geldi.';
+    } else if (etki < 0) {
+      durum = 'Bu yıl verdiğin kararlar sınava hazırlığını geriletti.';
+    } else {
+      durum = 'Bu yıl sınavla ilgili bir karar henüz çıkmadı.';
+    }
+
+    return Container(
+      decoration: panelDecoration(context, radius: 22),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const AccentIconTile(
+            icon: Icons.event_note_rounded,
+            accent: BirOmurAccents.nar,
+            size: 38,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Sınav yılı',
+                  style: theme.textTheme.titleMedium,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Bu yılın sonunda $sinav var. $durum',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

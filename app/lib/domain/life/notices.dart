@@ -180,6 +180,100 @@ abstract final class Notices {
     );
   }
 
+  // -----------------------------------------------------------------
+  // Okul dönüm noktaları (Paket 17)
+  // -----------------------------------------------------------------
+  //
+  // Bu anlar günlüğe tek satır olarak da yazılıyordu ama oyuncu çoğu kez
+  // fark etmeden geçiyordu. Okula başlamak, liseye geçmek ve okulu
+  // bitirmek ekranda açıkça bildirilir. Bildirim **bilgilendirmedir**:
+  // seçim sormaz, hiçbir değeri değiştirmez.
+
+  static const String schoolStartNoticeId = 'okul-baslangic';
+  static const String highSchoolStartNoticeId = 'okul-lise-gecis';
+  static const String highSchoolEndNoticeId = 'okul-lise-bitis';
+  static const String universityEndNoticeId = 'okul-universite-bitis';
+
+  /// İlkokul birinci sınıf.
+  static PendingNotice schoolStart({required int playerAge}) => PendingNotice(
+        id: schoolStartNoticeId,
+        kind: NoticeKind.okul,
+        age: playerAge,
+        title: 'Okul başlıyor',
+        text: 'Bugün ilkokul birinci sınıfa başlıyorsun. Çantan dünden '
+            'hazır, önlüğün ütülü. Sınıfta seni tanımadığın yirmi kişi '
+            've hiç duymadığın bir öğretmen adı bekliyor.',
+      );
+
+  /// Ortaokul bitti, lise başlıyor.
+  ///
+  /// [placementScore] gerçekten hesaplanmış yerleştirme puanıdır;
+  /// hesaplanmadıysa puan satırı hiç yazılmaz.
+  static PendingNotice highSchoolStart({
+    required int playerAge,
+    int? placementScore,
+  }) {
+    final StringBuffer metin = StringBuffer(
+      'Ortaokul bitti. Sekiz yılın ardından sıra lisede: yeni bir bina, '
+      'yeni bir sınıf listesi, daha uzun ders saatleri.',
+    );
+    if (placementScore != null) {
+      metin.write(
+        ' Yerleştirme puanın $placementScore. Artık lise alanını '
+        'seçebilirsin.',
+      );
+    }
+    return PendingNotice(
+      id: highSchoolStartNoticeId,
+      kind: NoticeKind.okul,
+      age: playerAge,
+      title: 'Lise başlıyor',
+      text: metin.toString(),
+    );
+  }
+
+  /// Lise bitti.
+  static PendingNotice highSchoolEnd({
+    required int playerAge,
+    int? examScore,
+  }) {
+    final StringBuffer metin = StringBuffer(
+      'Lise bitti. Defterleri bir kutuya koydun, sıranın üstündeki yazılar '
+      'artık başkasının olacak.',
+    );
+    if (examScore != null) {
+      metin.write(
+        ' Üniversite sınavından $examScore puan aldın; ne yapacağını '
+        'artık sen seçeceksin.',
+      );
+    } else {
+      metin.write(' Bundan sonrasını sen seçeceksin.');
+    }
+    return PendingNotice(
+      id: highSchoolEndNoticeId,
+      kind: NoticeKind.okul,
+      age: playerAge,
+      title: 'Lise bitti',
+      text: metin.toString(),
+    );
+  }
+
+  /// Üniversite bitti.
+  static PendingNotice universityEnd({
+    required int playerAge,
+    String? programName,
+  }) {
+    final String bolum = programName == null ? '' : ' $programName';
+    return PendingNotice(
+      id: universityEndNoticeId,
+      kind: NoticeKind.okul,
+      age: playerAge,
+      title: 'Mezun oldun',
+      text: 'Üniversite$bolum bölümünden mezun oldun. Diploman elinde; '
+          'okul kapısından son kez öğrenci olarak çıktın.',
+    );
+  }
+
   /// Bildirimleri kuyruğa ekler.
   ///
   /// Aynı kimlikli bildirim zaten kuyruktaysa **tekrar eklenmez**; mevcut

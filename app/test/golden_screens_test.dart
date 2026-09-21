@@ -198,14 +198,14 @@ void main() {
     await shot(tester, '04_varliklar.png');
   }, skip: !enabled);
 
-  testWidgets('Okul: kademe paneli ve okul arkadaşları',
+  testWidgets('Okul: kademe paneli, sınav yılı ve okul arkadaşları',
       (WidgetTester tester) async {
     await startLife(tester);
-    await advanceUntil(
-      tester,
-      () => personWith(RelationType.arkadas) != null,
-      prefer: <String>['tanis'],
-    );
+    // 13 yaş = ortaokulun son sınıfı: hem kademe paneli hem de sınav yılı
+    // paneli (Paket 17) ekranda olur. Eskiden "arkadaş edinilene kadar
+    // ilerle" deniyordu; olay havuzu büyüdükçe bu bazen 45 yaşa kadar
+    // gidiyor ve okul ekranı hiç görünmüyordu.
+    await ageTo(tester, controller, 13);
     await openTab(tester, 'okul_meslek');
     await shot(tester, '05_okul.png');
   }, skip: !enabled);
@@ -283,11 +283,11 @@ void main() {
 
   testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',
       (WidgetTester tester) async {
-    // Bu ekran romantik zincirin tamamlandığı bir hayat ister. 7 numaralı
-    // tohumda hayat kriz yüzünden erken bitiyor; bu tek test için sabit
-    // başka bir tohum kullanılır.
+    // Bu ekran romantik zincirin tamamlandığı bir hayat ister. Olay
+    // havuzu büyüdükçe aynı tohumdaki akış değiştiği için bu tek test
+    // sabit ve ayrı bir tohum kullanır (7 ve 11 ile zincir tamamlanmıyor).
     controller.dispose();
-    controller = GameController(random: Random(11));
+    controller = GameController(random: Random(12));
     await startLife(tester);
     await advanceUntil(
       tester,

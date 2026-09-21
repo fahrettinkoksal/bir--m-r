@@ -211,6 +211,8 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.card_giftcard_outlined;
       case NoticeKind.cenaze:
         return Icons.volunteer_activism_outlined;
+      case NoticeKind.okul:
+        return Icons.school_rounded;
     }
   }
 }

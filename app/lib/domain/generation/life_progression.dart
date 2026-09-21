@@ -159,6 +159,15 @@ class LifeProgression {
       age: newAge,
     );
 
+    // Okulun dönüm noktaları ekranda açıkça bildirilir (Paket 17).
+    // Günlüğe tek satır yazmak yetmiyordu; oyuncu çoğu kez fark etmeden
+    // geçiyordu.
+    final List<PendingNotice> okulBildirimleri = _schoolNotices(
+      before: state.education,
+      after: education,
+      age: newAge,
+    );
+
     // Yeni bir okul kademesine geçildiyse o kademenin sınıf arkadaşları ve
     // öğretmeni kalıcı kişi kaydı olarak eklenir. Eski kademenin kişileri
     // silinmez; yalnızca güncel sınıf listesinde görünmezler.
@@ -316,6 +325,10 @@ class LifeProgression {
         }
       }
       afterDeaths = Notices.enqueue(afterDeaths, bildirimler);
+    }
+
+    if (okulBildirimleri.isNotEmpty) {
+      afterDeaths = Notices.enqueue(afterDeaths, okulBildirimleri);
     }
 
     // Yas zamanla hafifler: her yıl kalan yasın bir bölümü mutluluğa geri
@@ -1098,6 +1111,55 @@ class LifeProgression {
       ),
     );
     return education.copyWith(placementScore: puan);
+  }
+
+  /// Okulun dönüm noktaları için bildirim üretir (Paket 17).
+  ///
+  /// Yalnızca **gerçekten olmuş** geçişler bildirilir: okula başlama,
+  /// ortaokuldan liseye geçiş, lisenin ve üniversitenin bitişi. Puanlar
+  /// hesaplanmışsa metne yazılır, hesaplanmadıysa hiç yazılmaz — uydurma
+  /// puan gösterilmez.
+  List<PendingNotice> _schoolNotices({
+    required EducationState before,
+    required EducationState after,
+    required int age,
+  }) {
+    final List<PendingNotice> bildirimler = <PendingNotice>[];
+
+    if (!before.enrolled && after.enrolled && before.startedAtAge == null) {
+      bildirimler.add(Notices.schoolStart(playerAge: age));
+    }
+
+    // Ortaokuldan liseye geçiş: kademe gerçekten değişmiş olmalı.
+    if (before.level == SchoolLevel.ortaokul &&
+        after.level == SchoolLevel.lise) {
+      bildirimler.add(
+        Notices.highSchoolStart(
+          playerAge: age,
+          placementScore: after.placementScore,
+        ),
+      );
+    }
+
+    if (!before.finished && after.finished && before.enrolled) {
+      bildirimler.add(
+        Notices.highSchoolEnd(
+          playerAge: age,
+          examScore: after.universityExamScore,
+        ),
+      );
+    }
+
+    if (!before.universityFinished && after.universityFinished) {
+      bildirimler.add(
+        Notices.universityEnd(
+          playerAge: age,
+          programName: after.program?.name,
+        ),
+      );
+    }
+
+    return bildirimler;
   }
 
   /// Okula başlama, kademe değişimi ve okulun bitişini günlüğe yazar.

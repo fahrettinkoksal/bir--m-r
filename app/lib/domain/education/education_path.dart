@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/education_tracks.dart';
+import '../../data/event_pool_exam.dart';
 import '../../data/university_catalog.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
@@ -49,6 +50,71 @@ class EducationPath {
   /// prototypeOnly: üniversite başvurusunda tercih edilen alandan gelen ek.
   static const int prototypeOnlyTrackBonus = 12;
 
+  // -----------------------------------------------------------------
+  // Sınav dönemi (Paket 17)
+  // -----------------------------------------------------------------
+  //
+  // Sınav yılında verilen kararlar puanı **gerçekten** değiştirir; aksi
+  // hâlde olaylar yalnızca metin olurdu. Değerler `prototypeOnly`
+  // (Q-085) ve toplamı sınırlıdır: sınav yılı tek başına hayatı
+  // belirlemez, zekâ ve not ortalaması ana bileşen olarak kalır.
+
+  /// Yılı tamamen sınava ayırmanın puana katkısı.
+  static const int prototypeOnlyExamFocusBonus = 9;
+
+  /// Programlı ama dengeli çalışmanın katkısı.
+  static const int prototypeOnlyExamBalancedBonus = 5;
+
+  /// Sınav yılını savsaklamanın puana etkisi.
+  static const int prototypeOnlyExamNeglectPenalty = -10;
+
+  /// Sınav kaygısının puana etkisi.
+  ///
+  /// Kalıcı bir ceza değildir: yalnızca o sınavı etkiler ve dengede
+  /// kalan oyuncuda hiç oluşmaz.
+  static const int prototypeOnlyExamAnxietyPenalty = -4;
+
+  /// Öğretmen ya da aile desteğinin katkısı.
+  static const int prototypeOnlyExamSupportBonus = 4;
+
+  /// Sınav dönemi kararlarının puana toplam etkisi.
+  ///
+  /// [university] doğruysa 12. sınıf izleri, değilse 8. sınıf izleri
+  /// okunur: iki sınav ayrı tutulur, ortaokulda bırakılan iz dört yıl
+  /// sonraki sınavı etkilemez.
+  static int prototypeOnlyExamPrep(
+    Set<String> flags, {
+    required bool university,
+  }) {
+    int etki = 0;
+    if (flags.contains(
+      university ? ExamFlags.liseOdaklandi : ExamFlags.ortaokulOdaklandi,
+    )) {
+      etki += prototypeOnlyExamFocusBonus;
+    }
+    if (flags.contains(
+      university ? ExamFlags.liseDengeli : ExamFlags.ortaokulDengeli,
+    )) {
+      etki += prototypeOnlyExamBalancedBonus;
+    }
+    if (flags.contains(
+      university ? ExamFlags.liseSavsakladi : ExamFlags.ortaokulSavsakladi,
+    )) {
+      etki += prototypeOnlyExamNeglectPenalty;
+    }
+    if (flags.contains(
+      university ? ExamFlags.liseKaygi : ExamFlags.ortaokulKaygi,
+    )) {
+      etki += prototypeOnlyExamAnxietyPenalty;
+    }
+    if (flags.contains(
+      university ? ExamFlags.liseDestek : ExamFlags.ortaokulDestek,
+    )) {
+      etki += prototypeOnlyExamSupportBonus;
+    }
+    return etki;
+  }
+
   /// 8. sınıf sonunda yerleştirme puanını hesaplar.
   ///
   /// Zekâ ağırlıklıdır ama tek belirleyici değildir: geçmiş kararlar ve biraz
@@ -67,6 +133,8 @@ class EducationPath {
     if (state.storyFlags.contains('arkadasa_yardim_etti')) {
       puan += prototypeOnlyStudyBonus ~/ 2;
     }
+    // Sınav yılında verilen kararlar (Paket 17).
+    puan += prototypeOnlyExamPrep(state.storyFlags, university: false);
     puan += rng.nextInt(prototypeOnlyLuckRange + 1);
     return puan.clamp(0, 100);
   }
@@ -112,6 +180,8 @@ class EducationPath {
         state.education.gradeAverage ?? state.player.stats.intelligence;
     int puan =
         ((taban + state.player.stats.intelligence + ortalama) / 3).round();
+    // Lise son yılında verilen kararlar (Paket 17).
+    puan += prototypeOnlyExamPrep(state.storyFlags, university: true);
     puan += rng.nextInt(11); // prototypeOnly: sınav günü
     return puan.clamp(0, 100);
   }

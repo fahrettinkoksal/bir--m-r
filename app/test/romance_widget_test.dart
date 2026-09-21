@@ -19,9 +19,10 @@ void main() {
 
   setUp(() {
     // Tohum sabittir: bu hayatta romantik zincir tamamlanıyor. Olay havuzu
-    // büyüdükçe rastgele akış değiştiği için tohum değiştirildi (7 ile hayat
-    // kriz yüzünden erken bitiyordu).
-    controller = GameController(random: Random(11));
+    // büyüdükçe rastgele akış değiştiği için tohum zaman zaman
+    // güncelleniyor (7 ile hayat kriz yüzünden erken bitiyordu; 11 ile
+    // Paket 17'den sonra hiç sevgili çıkmaz oldu).
+    controller = GameController(random: Random(12));
   });
 
   tearDown(() => controller.dispose());
