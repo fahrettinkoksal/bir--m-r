@@ -1525,5 +1525,26 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Hiçbir sayı kalıcı kural sayılmadı; tamamı `CareerProgress` ve `job_catalog.dart` içinde tek tek `prototypeOnly` olarak işaretlendi.
 
+### Q-079 — Sosyal medya geliri ve sponsorluk
+**Durum:** Yön **Faho tarafından istendi** ("yeterli kitleye ulaşan oyuncu içeriklerinden oyun içi gelir elde edebilsin"); **sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 10. **Bağlantılı:** Q-050 (sosyal medya dengesi), Q-048 (maaş ve ekonomi).
+
+**Şu an kodda olan (geçici) çözüm:**
+- **Gelir eşiği:** o platformda en az **1.000 takipçi** ve hesabın en az **1 yaşında** olması. Yeni açılmış hesap, takipçisi olsa bile ödeme almaz.
+- **Gelir garanti değil:** taban ihtimal %45, kitle büyüdükçe en fazla +%30. Takipçi kaybettiren ya da hiç ilgi görmeyen paylaşım **hiç** kazandırmaz.
+- **Tutar:** her yeni takipçi 45 ₺ + mevcut kitlenin takipçi başına 0,9 ₺'si; içerik türüne göre 0,6-1,08 katsayı ve 0,7-1,3 dalgalanma. Tek paylaşımın üst sınırı 150.000 ₺.
+- **Sponsorluk:** kurgusal 6 iş kolu (mahalle kafe zinciri, kırtasiye markası, sporcu içeceği üreticisi, bağımsız mobil oyun stüdyosu, çevrim içi kitap kulübü, elektronik mağazası). Gerçek marka adı, logo veya reklam ağı **kullanılmadı**; gerçek para/uygulama içi satın alma **yok**.
+- Teklif yılda %35 ihtimalle gelir, aynı anda tek teklif bekler. Ücret = taban + (fazla takipçi × 1,2 ₺). Kabul edilirse **ödeme paylaşım yapılınca** işler; 2 yıl içinde paylaşım yapılmazsa anlaşma ödenmeden düşer.
+- **Ün olayları:** Ün 3/4/5/8 eşiklerinde tanışma, yorum kalabalığı, etkinlik ve iş daveti olayları. Tanışmada kişi **yalnızca buluşma kabul edilirse** üretilir; hiçbiri romantik teklif değildir.
+
+**Karar soruları:**
+1. Gelir eşiği 1.000 takipçi uygun mu; platform başına farklı mı olmalı?
+2. Takipçi başına 45 ₺ / 0,9 ₺ oranları ekonomiyle uyumlu mu? (Karşılaştırma: mağaza çalışanının yıllık maaşı 180.000 ₺.) Sosyal medya bir mesleğin yerini alabilmeli mi?
+3. Tek paylaşım üst sınırı 150.000 ₺ uygun mu?
+4. Sponsorluk ücretleri ve 2 yıllık süre uygun mu? Süresi dolan anlaşmanın bir bedeli (ün/itibar kaybı) olmalı mı? **Şu an hiçbir ceza yok.**
+5. Sponsorluk reddedilirse yeni teklif ne kadar sonra gelmeli? (Şu an ertesi yıl gelebilir.)
+6. Ün eşikleri (3/4/5/8) uygun mu; Ün düşebilmeli mi? **Şu an Ün düşmüyor.**
+
+**Varsayılan işlem:** Gelir hesabı tek dosyada (`SocialIncome`) toplandı; hiçbir tutar kalıcı kural sayılmadı. Vergi, marka anlaşması sözleşmesi veya gerçek reklam entegrasyonu eklenmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
