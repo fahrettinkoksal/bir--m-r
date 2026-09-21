@@ -20,6 +20,7 @@ import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import 'child_progression.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
@@ -68,6 +69,19 @@ class LifeProgression {
         .map((Person person) => person.isAlive ? _agePerson(person) : person)
         .toList(growable: false);
 
+    // Çocuklar arka planda kendi hayatlarını yaşar (D-045). Önemli
+    // ilerleme gerçekleştiği yılda kaydedilir; vefat edenlere dokunulmaz.
+    final List<String> cocukHaberleri = <String>[];
+    final List<Person> peopleWithChildren = people.map((Person person) {
+      if (!person.isAlive || person.relation != RelationType.cocuk) {
+        return person;
+      }
+      final ({Person person, List<String> news}) sonuc =
+          ChildProgression.advance(person, _rng);
+      cocukHaberleri.addAll(sonuc.news);
+      return sonuc.person;
+    }).toList(growable: false);
+
     final List<LifeLogEntry> log = <LifeLogEntry>[
       ...state.log,
       LifeLogEntry(
@@ -106,12 +120,20 @@ class LifeProgression {
     final ({List<Person> people, EducationState education}) okulSonucu =
         _setUpClassIfNeeded(
       state: state,
-      people: people,
+      people: peopleWithChildren,
       education: education,
       newAge: newAge,
       log: log,
     );
     final List<Person> peopleWithSchool = okulSonucu.people;
+
+    // Çocukların bu yıl yaşadığı önemli gelişmeler aile haberi olarak
+    // günlüğe girer; kişinin kendi geçmişinde zaten kayıtlıdır.
+    for (final String haber in cocukHaberleri) {
+      log.add(
+        LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
+      );
+    }
 
     // Kişilerin mal varlığı yıllar içinde değişir; miras donmuş bir
     // listeye dayanmaz (D-037).
@@ -841,6 +863,11 @@ class LifeProgression {
   /// durum uydurulmaz: çalışmayan kişiye meslek atanmaz.
   Person _agePerson(Person person) {
     final int age = person.age + 1;
+    // Oyuncunun çocuğu kendi gelişim sistemiyle ilerler (D-045): okul,
+    // meslek ve ekonomik durum burada rastgele atanmaz.
+    if (person.relation == RelationType.cocuk) {
+      return person.copyWith(age: age);
+    }
     EmploymentStatus employment = person.employment;
     String? occupation = person.occupation;
     WealthTier? wealth = person.wealth;

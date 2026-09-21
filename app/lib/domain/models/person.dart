@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'education.dart';
 import 'gender.dart';
+import 'person_development.dart';
 import 'relation.dart';
 import 'wealth.dart';
 import '../../text/turkish_text.dart';
@@ -32,6 +33,7 @@ class Person {
     this.classId,
     this.city,
     this.estate = const <String>[],
+    this.development,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -117,6 +119,13 @@ class Person {
   /// (D-037). Değerler `prototypeOnly` (Q-059).
   final List<String> estate;
 
+  /// Kişinin **kendi hayatı**: eğitim, meslek, birikim, özellikler ve
+  /// yaşanmış dönüm noktaları (D-045).
+  ///
+  /// Şimdilik yalnızca oyuncunun çocuklarında doludur; diğer kişilerde
+  /// `null`'dır ve hiçbir yerde uydurma bilgi gösterilmez.
+  final PersonDevelopment? development;
+
   /// Oyuncuyla ilişki puanı (0-100).
   ///
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
@@ -170,6 +179,7 @@ class Person {
     Object? classId = _unset,
     Object? city = _unset,
     List<String>? estate,
+    Object? development = _unset,
   }) {
     return Person(
       id: id,
@@ -193,6 +203,9 @@ class Person {
       classId: classId == _unset ? this.classId : classId as String?,
       city: city == _unset ? this.city : city as String?,
       estate: estate ?? this.estate,
+      development: development == _unset
+          ? this.development
+          : development as PersonDevelopment?,
     );
   }
 }

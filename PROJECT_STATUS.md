@@ -433,6 +433,21 @@ bağlı olduğu için hiç çıkmayan `gece_muzigi` olayı erişilebilir hâle
 getirildi; artık **hiç çıkmayan olay kalmadı**. Ayrıntı:
 `docs/BALANCE_REPORT.md` §9.5.
 
+**Çocukların arka planda gelişmesi (Paket 1, D-045):** Oyuncunun çocuğu
+artık kendi kalıcı kaydında yaşıyor: `PersonDevelopment` içinde özellikler,
+okul/sınıf, üniversite ve bölüm, meslek, birikim, ilgi alanları ve
+**gerçekleştiği yılda yazılan** dönüm noktaları tutuluyor. Çocuk 6 yaşında
+okula başlıyor, sınıf atlıyor, liseyi bitiriyor, zekâsına bağlı bir
+ihtimalle üniversiteye gidiyor (bölümü o yıl gerçekten seçiliyor), iş
+buluyor ve maaşından kendi gideri düşülerek birikim yapıyor; **her çocuk
+otomatik olarak başarılı veya zengin olmuyor**. Vefat etmiş çocukta hiçbir
+gelişim işlemi yapılmıyor. Kuşak devamında bu kaydın tamamı korunuyor:
+40 yaşında öğretmen olan çocuk artık "lise mezunu, işsiz" olmuyor; eski
+oyuncunun mesleği, ehliyetleri ve sosyal medyası kopyalanmıyor. Miras da
+çocuğun **gerçek birikiminden** dağıtılıyor. Kayıt biçimi **sürüm 19**;
+eski kayıtlardaki çocuklara geçmiş uydurulmuyor, kayıt ilk yaş
+ilerlemesinde boş geçmişle açılıyor. Sayılar **Q-069**'da karar bekliyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

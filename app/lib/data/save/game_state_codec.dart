@@ -28,6 +28,7 @@ import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
+import '../../domain/models/person_development.dart';
 import '../../domain/models/playing_card.dart';
 import '../../domain/models/social_account.dart';
 import '../../domain/models/player_character.dart';
@@ -194,7 +195,80 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'schoolId': p.schoolId,
       'classId': p.classId,
       'estate': p.estate,
+      // Kişinin kendi hayatı (D-045); yalnızca kaydı olanlarda doludur.
+      'development': p.development == null
+          ? null
+          : _encodeDevelopment(p.development!),
     };
+
+Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
+    <String, Object?>{
+      'stats': <String, Object?>{
+        'appearance': d.stats.appearance,
+        'happiness': d.stats.happiness,
+        'health': d.stats.health,
+        'intelligence': d.stats.intelligence,
+        'charisma': d.stats.charisma,
+      },
+      'schoolLevel': d.schoolLevel?.name,
+      'grade': d.grade,
+      'finishedSchool': d.finishedSchool,
+      'university': d.university?.name,
+      'universityYear': d.universityYear,
+      'universityProgramId': d.universityProgramId,
+      'jobId': d.jobId,
+      'jobStartedAtAge': d.jobStartedAtAge,
+      'pastJobIds': d.pastJobIds,
+      'money': d.money,
+      'interests': d.interests,
+      'milestones': <Map<String, Object?>>[
+        for (final LifeMilestone m in d.milestones)
+          <String, Object?>{'age': m.age, 'text': m.text},
+      ],
+    };
+
+PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
+  final Map<String, Object?> stats = _asMap(json['stats'], 'development.stats');
+  return PersonDevelopment(
+    stats: Stats(
+      appearance: _int(stats, 'appearance'),
+      happiness: _int(stats, 'happiness'),
+      health: _int(stats, 'health'),
+      intelligence: _int(stats, 'intelligence'),
+      charisma: _int(stats, 'charisma'),
+    ),
+    schoolLevel: _enumByNameOrNull(
+      SchoolLevel.values,
+      _stringOrNull(json, 'schoolLevel'),
+      'development.schoolLevel',
+    ),
+    grade: _intOrNull(json, 'grade'),
+    finishedSchool: json['finishedSchool'] == true,
+    university: _enumByNameOrNull(
+      UniversityStatus.values,
+      _stringOrNull(json, 'university'),
+      'development.university',
+    ),
+    universityYear: _intOrNull(json, 'universityYear'),
+    universityProgramId: _stringOrNull(json, 'universityProgramId'),
+    jobId: _stringOrNull(json, 'jobId'),
+    jobStartedAtAge: _intOrNull(json, 'jobStartedAtAge'),
+    pastJobIds: List<String>.unmodifiable(
+      json['pastJobIds'] == null ? const <String>[] : _stringList(json, 'pastJobIds'),
+    ),
+    money: json['money'] == null ? 0 : _int(json, 'money'),
+    interests: List<String>.unmodifiable(
+      json['interests'] == null ? const <String>[] : _stringList(json, 'interests'),
+    ),
+    milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
+      for (final Object? e in (json['milestones'] as List<Object?>? ?? const <Object?>[]))
+        LifeMilestone(
+          age: _int(_asMap(e, 'milestone'), 'age'),
+          text: _string(_asMap(e, 'milestone'), 'text'),
+        ),
+    ]),
+  );
+}
 
 Map<String, Object?> _encodeLifeSummary(LifeSummary l) => <String, Object?>{
       'familyLine': l.familyLine,
@@ -677,6 +751,11 @@ Person _decodePerson(Map<String, Object?> json) {
     estate: List<String>.unmodifiable(
       json['estate'] == null ? const <String>[] : _stringList(json, 'estate'),
     ),
+    // Eski kayıtlarda kişinin kendi hayat kaydı yoktur; `null` kalır ve
+    // ilk yaş ilerlemesinde geçmiş uydurulmadan açılır (sürüm 19).
+    development: json['development'] == null
+        ? null
+        : _decodeDevelopment(_asMap(json['development'], 'person.development')),
   );
 }
 

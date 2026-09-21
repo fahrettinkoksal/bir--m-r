@@ -281,6 +281,10 @@ void main() {
       GameState state = evlen(oyuncu(14));
       state = ebeveynlik.haveChild(state, Random(2)).state;
       final Person cocuk = state.children.single;
+      // Çocuğun kendi hayatı izlendiği için miras **gerçekten
+      // biriktirdiği** paradan dağıtılır (D-045); ekonomik durum tahmini
+      // yalnızca kaydı olmayan kişiler içindir.
+      const int birikim = 240000;
       final GameState olum = state.copyWith(
         people: state.people
             .map((Person p) => p.id == cocuk.id
@@ -288,6 +292,7 @@ void main() {
                     isAlive: false,
                     age: 30,
                     wealth: WealthTier.ortaHalli,
+                    development: p.development!.copyWith(money: birikim),
                   )
                 : p)
             .toList(growable: false),
@@ -296,11 +301,7 @@ void main() {
       final InheritanceShare pay =
           Inheritance.shareFor(olum, olum.personById(cocuk.id)!);
       expect(pay.heirCount, 2, reason: 'Oyuncu ve eşi');
-      expect(
-        pay.money,
-        (Inheritance.prototypeOnlyEstateMoney(WealthTier.ortaHalli) / 2)
-            .floor(),
-      );
+      expect(pay.money, birikim ~/ 2);
     });
   });
 

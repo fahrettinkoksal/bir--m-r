@@ -317,7 +317,14 @@ void main() {
       final String id = state.children.single.id;
       state = state.copyWith(
         people: state.people
-            .map((Person p) => p.id == id ? p.copyWith(age: 25) : p)
+            .map((Person p) => p.id == id
+                ? p.copyWith(
+                    age: 25,
+                    // Çocuk kendi hayatında birikim yaptı (D-045); miras
+                    // bu gerçek paradan dağıtılır.
+                    development: p.development!.copyWith(money: 300000),
+                  )
+                : p)
             .toList(growable: false),
       );
       state = kisiyiOldur(state, id, wealth: WealthTier.ortaHalli);

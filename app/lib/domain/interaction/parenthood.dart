@@ -8,6 +8,8 @@ import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
+import '../models/person_development.dart';
+import '../models/stats.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'marriage_engine.dart';
@@ -159,6 +161,14 @@ class Parenthood {
       // Çocuk, ailenin o sırada yaşadığı şehirde doğar; taşınma bu kaydı
       // değiştirmez (doğum şehri kalıcıdır, D-004 ile aynı ilke).
       city: state.player.currentCity,
+      // Çocuk kendi hayatını yaşamaya doğduğu anda başlar (D-045):
+      // özellikleri, eğitimi, işi ve birikimi kendi kaydında tutulur.
+      development: PersonDevelopment(
+        stats: _prototypeOnlyNewbornStats(rng),
+        milestones: <LifeMilestone>[
+          LifeMilestone(age: 0, text: '$isim dünyaya geldi.'),
+        ],
+      ),
     );
 
     final String metin = gender == Gender.kadin
@@ -191,6 +201,18 @@ class Parenthood {
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }
+
+  /// prototypeOnly: yeni doğanın başlangıç değerleri.
+  ///
+  /// Paket E2'de nötr aralıktan çizilir; ebeveynlerden özellik aktarımı
+  /// ayrı bir karardır (D-046).
+  static Stats _prototypeOnlyNewbornStats(Random rng) => Stats(
+        appearance: rng.between(25, 85),
+        happiness: rng.between(45, 85),
+        health: rng.between(40, 90),
+        intelligence: rng.between(25, 85),
+        charisma: rng.between(25, 85),
+      );
 
   /// Çocuğun yaşına karşılık gelen okul kademesi.
   ///

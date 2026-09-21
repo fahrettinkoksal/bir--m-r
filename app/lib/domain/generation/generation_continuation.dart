@@ -9,7 +9,9 @@ import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../models/life_log.dart';
 import '../models/marriage.dart';
+import '../models/career.dart';
 import '../models/owned_item.dart';
+import '../models/person_development.dart';
 import '../models/parental_status.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
@@ -188,6 +190,19 @@ abstract final class GenerationContinuation {
     // --- Yeni oyuncu -----------------------------------------------------
     final String sehir = cocuk.city ?? eskiOyuncu.currentCity;
     final int kayipAcisi = Mortality.prototypeOnlyHappinessLoss(ebeveyn);
+    // Çocuğun kendi hayatı (D-045): özellikleri, eğitimi, işi ve birikimi
+    // arka planda gerçekten yaşandı; kuşak geçişinde sıfırlanmaz.
+    final PersonDevelopment? gelisim = cocuk.development;
+    final Stats kendiOzellikleri = gelisim?.stats ??
+        Stats(
+          // Eski kayıtlardan gelen, gelişim kaydı olmayan çocuk için
+          // nötr aralık kullanılır; uydurma geçmiş yazılmaz.
+          appearance: rng.between(25, 85),
+          happiness: rng.between(45, 85),
+          health: rng.between(40, 90),
+          intelligence: rng.between(25, 85),
+          charisma: rng.between(25, 85),
+        );
     final PlayerCharacter yeniOyuncu = PlayerCharacter(
       id: 'oyuncu',
       firstName: cocuk.firstName,
@@ -196,18 +211,15 @@ abstract final class GenerationContinuation {
       age: cocuk.age,
       birthCity: sehir,
       currentCity: _currentCity(state, cocuk),
-      // Yeni kuşak kendi hayatını yaşar: özellikler yeniden çizilir.
-      // Ebeveynden özellik aktarımı olup olmayacağı karar bekliyor (Q-067).
-      stats: Stats(
-        appearance: rng.between(25, 85),
-        happiness: (rng.between(45, 85) - kayipAcisi).clamp(0, 100),
-        health: rng.between(40, 90),
-        intelligence: rng.between(25, 85),
-        charisma: rng.between(25, 85),
+      // Çocuğun kendi özellikleri korunur; yalnızca kaybın acısı işlenir.
+      stats: kendiOzellikleri.copyWith(
+        happiness: kendiOzellikleri.happiness - kayipAcisi,
       ),
       // Ün taşınmaz (D-027: baştan kapalıdır).
       fame: null,
-      wallet: cocukPayi,
+      // Kendi birikimi + mirastan payına düşen. İki kalem ayrı kaynaktır,
+      // aynı para iki kez üretilmez.
+      wallet: (gelisim?.money ?? 0) + cocukPayi,
     );
 
     // --- Hane ve konut ---------------------------------------------------
@@ -227,6 +239,14 @@ abstract final class GenerationContinuation {
     // --- Günlük ----------------------------------------------------------
     final String ebeveynEtiketi = anneTarafi ? 'Annen' : 'Baban';
     final List<LifeLogEntry> gunluk = <LifeLogEntry>[
+      // Çocuğun arka planda gerçekten yaşadıkları yeni hayatın geçmişidir;
+      // yaşandıkları yaşla birlikte günlüğe girer.
+      for (final LifeMilestone an in gelisim?.milestones ?? const <LifeMilestone>[])
+        LifeLogEntry(
+          age: an.age,
+          text: an.text,
+          category: LogCategory.kisisel,
+        ),
       LifeLogEntry(
         age: cocuk.age,
         text: '$ebeveynEtiketi ${ebeveyn.fullName} $olumYasi yaşında '
@@ -267,7 +287,9 @@ abstract final class GenerationContinuation {
           : ParentalStatus.evli,
       log: List<LifeLogEntry>.unmodifiable(gunluk),
       items: List<OwnedItem>.unmodifiable(cocugaKalan),
-      education: _educationForAge(cocuk.age),
+      education: _educationFor(gelisim, cocuk.age),
+      // Çocuğun kendi işi korunur; eski oyuncunun mesleği kopyalanmaz.
+      career: _careerFor(gelisim, cocuk),
       // Eski kuşakta dağıtılmış mirasların ikinci kez dağıtılmaması için
       // işaretler taşınır; eski oyuncunun mirası da burada kapanır. Yeni
       // kayıtta bulunmayan kişilerin işareti taşınmaz (kayıt şişmesin).
@@ -378,6 +400,62 @@ abstract final class GenerationContinuation {
   static String _currentCity(GameState state, Person cocuk) {
     if (cocuk.inPlayerHousehold) return state.player.currentCity;
     return cocuk.city ?? state.player.currentCity;
+  }
+
+  /// Çocuğun kendi eğitim geçmişinden oyuncunun eğitim kaydını kurar.
+  ///
+  /// Gelişim kaydı yoksa (eski kayıtlar) yaşa uygun güvenli bir durum
+  /// kullanılır.
+  static EducationState _educationFor(PersonDevelopment? dev, int age) {
+    if (dev == null) return _educationForAge(age);
+    if (dev.grade != null) {
+      return EducationState(
+        enrolled: true,
+        grade: dev.grade,
+        startedAtAge: 6,
+      );
+    }
+    switch (dev.university) {
+      case UniversityStatus.okuyor:
+        return EducationState(
+          finished: true,
+          startedAtAge: 6,
+          universityProgramId: dev.universityProgramId,
+          universityYear: dev.universityYear ?? 1,
+        );
+      case UniversityStatus.bitirdi:
+        return EducationState(
+          finished: true,
+          startedAtAge: 6,
+          universityProgramId: dev.universityProgramId,
+          universityFinished: true,
+        );
+      case UniversityStatus.birakti:
+      case null:
+        break;
+    }
+    if (dev.finishedSchool) {
+      return const EducationState(finished: true, startedAtAge: 6);
+    }
+    return _educationForAge(age);
+  }
+
+  /// Çocuğun kendi işinden oyuncunun meslek kaydını kurar.
+  static CareerState _careerFor(PersonDevelopment? dev, Person cocuk) {
+    if (dev == null || dev.jobId == null) {
+      return CareerState(
+        pastJobIds: List<String>.unmodifiable(dev?.pastJobIds ?? const <String>[]),
+      );
+    }
+    return CareerState(
+      jobId: dev.jobId,
+      startedAtAge: dev.jobStartedAtAge,
+      // Maaş bu yıl için zaten NPC birikiminde sayıldı; aynı yıl ikinci kez
+      // ödenmez.
+      lastPaidAge: cocuk.age,
+      pastJobIds: List<String>.unmodifiable(dev.pastJobIds),
+      jobCity: cocuk.city,
+    );
   }
 
   /// Yaşa uygun eğitim durumu (prototypeOnly, Q-067).

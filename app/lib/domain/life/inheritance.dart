@@ -162,7 +162,11 @@ abstract final class Inheritance {
       );
     }
 
-    final int toplamNakit = prototypeOnlyEstateMoney(deceased.wealth);
+    // Kendi hayatı izlenen kişilerde (oyuncunun çocukları, D-045) miras
+    // **gerçekten biriktirdiği** paradan dağıtılır; ekonomik durumdan
+    // tahmin edilen tutar yalnızca kaydı olmayan kişiler içindir.
+    final int toplamNakit = deceased.development?.money ??
+        prototypeOnlyEstateMoney(deceased.wealth);
 
     // Eşin mirası: yalnızca **gerçek evlilik kaydı** varsa pay verilir
     // (D-037). Boşanmış eş mirasçı değildir.

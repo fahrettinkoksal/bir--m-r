@@ -11,6 +11,8 @@ import '../../domain/models/relation.dart';
 import '../../state/game_scope.dart';
 import 'effect_chips.dart';
 import 'kilim_divider.dart';
+import '../../domain/models/person_development.dart';
+import '../../text/turkish_text.dart';
 
 /// Kişi ayrıntısı ve aile etkileşimleri.
 ///
@@ -203,7 +205,23 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                   value: _marriageLabel(state.marriage!),
                 ),
               _Row(label: 'Durum', value: person.occupationLabel),
-              if (person.wealth != null)
+              // Kendi hayatı izlenen kişilerde (oyuncunun çocukları, D-045)
+              // eğitim, birikim ve ilgi alanları gerçek kayıttan okunur.
+              if (person.development != null) ...<Widget>[
+                _Row(
+                  label: 'Eğitim',
+                  value: person.development!.educationLabel,
+                ),
+                _Row(
+                  label: 'Kendi birikimi',
+                  value: trMoney(person.development!.money),
+                ),
+                if (person.development!.interests.isNotEmpty)
+                  _Row(
+                    label: 'İlgi alanları',
+                    value: person.development!.interests.join(', '),
+                  ),
+              ] else if (person.wealth != null)
                 _Row(label: 'Kendi maddi durumu', value: person.wealth!.label),
               // Kişinin gerçekten sahip olduğu eşyalar; miras bu listeden
               // dağıtılır (D-037, D-038).
@@ -214,6 +232,24 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                       .map((String t) => itemTypeOrFallback(t).name)
                       .join(', '),
                 ),
+              // Kendi hayatındaki dönüm noktaları: gerçekten yaşandıkları
+              // yılla birlikte saklanır, sonradan yaştan uydurulmaz.
+              if ((person.development?.milestones.isNotEmpty ?? false)) ...<Widget>[
+                const SizedBox(height: 14),
+                Text('Hayatından', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                for (final LifeMilestone an in _sonAnlar(person.development!))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      '${an.age} yaş · ${an.text}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 10),
+              ],
               // Hane bilgisi bağ türünden bağımsızdır (D-014): tanışıklık,
               // arkadaşlık veya akrabalık kimseyi hanene eklemez.
               _Row(
@@ -452,6 +488,15 @@ class _Note extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Kişi kartında gösterilecek son dönüm noktaları (en yenisi altta).
+List<LifeMilestone> _sonAnlar(PersonDevelopment dev) {
+  const int kEnFazla = 6;
+  final List<LifeMilestone> hepsi = dev.milestones;
+  return hepsi.length <= kEnFazla
+      ? hepsi
+      : hepsi.sublist(hepsi.length - kEnFazla);
 }
 
 class _Row extends StatelessWidget {

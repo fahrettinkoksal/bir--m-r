@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 18;
+const int kSaveFormatVersion = 19;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -72,8 +72,18 @@ abstract final class SaveMigrations {
     if (from <= 15) guncel = _v15ToV16(guncel);
     if (from <= 16) guncel = _v16ToV17(guncel);
     if (from <= 17) guncel = _v17ToV18(guncel);
+    if (from <= 18) guncel = _v18ToV19(guncel);
     return guncel;
   }
+
+  /// Sürüm 18 → 19: kişilere kendi hayat kaydı eklendi (D-045).
+  ///
+  /// Eski kayıtlardaki çocuklarda gelişim kaydı yoktur ve **geçmiş
+  /// uydurulmaz**: kayıt ilk yaş ilerlemesinde yaşına uygun biçimde açılır,
+  /// dönüm noktası listesi boş başlar, birikim sıfırdır. Eski kayıttaki
+  /// serbest metin meslek katalogdaki bir işe karşılık geliyorsa bağlanır;
+  /// gelmiyorsa iş kaydı açılmaz. Hiçbir kişi silinmez.
+  static Map<String, Object?> _v18ToV19(Map<String, Object?> body) => body;
 
   /// Sürüm 17 → 18: kuşak sayacı eklendi (Paket E3).
   ///
