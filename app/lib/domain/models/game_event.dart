@@ -263,6 +263,7 @@ class GameEvent {
     this.repeatable = false,
     this.minAgeGap = prototypeOnlyDefaultRepeatGap,
     this.weight = 1,
+    this.priority = 0,
   }) : assert(minAgeGap >= 1, 'Tekrar aralığı en az bir yaş olmalıdır.');
 
   /// prototypeOnly: tekrar aralığı belirtilmeyen tekrarlanabilir olaylar için
@@ -290,6 +291,20 @@ class GameEvent {
 
   /// Aynı anda uygun olan olaylar arasında görece ağırlık (prototypeOnly).
   final int weight;
+
+  /// Dönüm noktası önceliği (Paket 21).
+  ///
+  /// Tek bir yıla bağlı olaylar — sınav yılı, okulun ilk günü, işe ilk
+  /// gün — bütün havuzla yarıştıkları için çoğu hayatta hiç çıkmıyordu:
+  /// ölçümde sınav yılı olayları oyuncuların ancak **%38'inde**
+  /// görülüyordu. Önceliği sıfırdan büyük bir olay uygun olduğunda, o yıl
+  /// **yalnızca en yüksek öncelikli olaylar** yarışır; sıradan olaylar
+  /// o yılı beklemek zorunda kalır.
+  ///
+  /// Öncelik, olayın çıkacağını **garanti etmez**: koşulları tutmuyorsa
+  /// yine elenir ve aynı öncelikte birden çok olay varsa aralarında
+  /// ağırlıkla seçim yapılır.
+  final int priority;
 }
 
 /// Oyuncunun karşısına çıkmış, kişisi ve metni çözülmüş olay.

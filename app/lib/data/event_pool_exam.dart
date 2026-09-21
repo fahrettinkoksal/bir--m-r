@@ -73,6 +73,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
       },
     ),
     weight: 9,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'kilitlen',
@@ -118,6 +119,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
     repeatable: true,
     minAgeGap: 4,
     weight: 7,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'yanlislari_cik',
@@ -160,6 +162,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
     repeatable: true,
     minAgeGap: 4,
     weight: 6,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'uyu',
@@ -195,6 +198,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
       requiredFlags: <String>{ExamFlags.ortaokulOdaklandi},
     ),
     weight: 8,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'dinlen',
@@ -238,6 +242,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
       },
     ),
     weight: 9,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'kilitlen',
@@ -282,6 +287,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
       requireSameHousehold: true,
     ),
     weight: 7,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'kendi_karari',
@@ -324,6 +330,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
     repeatable: true,
     minAgeGap: 4,
     weight: 7,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'analiz',
@@ -366,6 +373,7 @@ const List<GameEvent> kExamEvents = <GameEvent>[
       requiredFlags: <String>{ExamFlags.liseOdaklandi},
     ),
     weight: 8,
+    priority: 2,
     choices: <EventChoice>[
       EventChoice(
         id: 'ara_ver',

@@ -155,6 +155,11 @@ const List<GameEvent> kEventPool = <GameEvent>[
     text: 'Okulun ilk günü. Sıranın hangi tarafına oturacağını bile '
         'bilmiyorsun; herkes birbirine bakıyor.',
     requirement: EventRequirement(minAge: 6, maxAge: 8, requiresSchoolStudent: true),
+    // **Bilerek önceliksiz (Paket 21).** Öncelik verildiğinde okulun ilk
+    // yılındaki tek olay yuvasını kapıyor ve sıra arkadaşıyla tanışma
+    // olayını bastırıyordu: ölçümde okulda arkadaş edinen hayat oranı
+    // 44/60'tan 34/60'a düştü. Okula başlama zaten ekranda bildirimle
+    // duyuruluyor (Paket 17), bu olayın ayrıca öne çekilmesi gerekmiyor.
     choices: <EventChoice>[
       EventChoice(
         id: 'on_sira',
@@ -438,6 +443,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
       },
     ),
     weight: 5,
+    priority: 1,
     choices: <EventChoice>[
       EventChoice(
         id: 'universite',

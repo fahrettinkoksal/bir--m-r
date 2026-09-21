@@ -59,7 +59,8 @@ void main() {
   group('Tekrar sönümü', () {
     test('görülmemiş olay tam ağırlığıyla yarışır', () {
       final GameState s = hayat();
-      final GameEvent e = kEventPool.first;
+      final GameEvent e =
+          kEventPool.firstWhere((GameEvent e) => e.priority == 0);
       expect(
         EventEngine.prototypeOnlyEffectiveWeight(s, e),
         e.weight.toDouble(),
@@ -67,7 +68,7 @@ void main() {
     });
 
     test('her tekrarda ağırlık düşer ama sıfırlanmaz', () {
-      final GameEvent e = kEventPool.firstWhere((GameEvent e) => e.weight >= 5);
+      final GameEvent e = kEventPool.firstWhere((GameEvent e) => e.weight >= 5 && e.priority == 0);
       final double taban = e.weight * EventEngine.prototypeOnlyMinWeightRatio;
       double onceki = e.weight.toDouble();
       for (int kez = 1; kez <= 5; kez++) {
@@ -94,7 +95,7 @@ void main() {
     });
 
     test('ağırlık taban oranın altına inmez', () {
-      final GameEvent e = kEventPool.firstWhere((GameEvent e) => e.weight >= 5);
+      final GameEvent e = kEventPool.firstWhere((GameEvent e) => e.weight >= 5 && e.priority == 0);
       final GameState s = hayat().copyWith(
         eventSeenCounts: <String, int>{e.id: 40},
       );
@@ -106,7 +107,7 @@ void main() {
 
     test('tekrar aralığı her görülmede büyür ve bir tavanla sınırlıdır', () {
       final GameEvent e =
-          kEventPool.firstWhere((GameEvent e) => e.repeatable);
+          kEventPool.firstWhere((GameEvent e) => e.repeatable && e.priority == 0);
       int onceki = EventEngine.prototypeOnlyEffectiveGap(
         hayat().copyWith(eventSeenCounts: const <String, int>{}),
         e,

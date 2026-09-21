@@ -67,13 +67,40 @@ class EventEngine {
   /// Tekrar aralığının çıkabileceği en büyük değer.
   static const int prototypeOnlyMaxRepeatGap = 35;
 
+  // -----------------------------------------------------------------
+  // Dönüm noktası önceliği (Paket 21)
+  // -----------------------------------------------------------------
+  //
+  // Ölçüm: tek bir yıla bağlı olaylar bütün havuzla yarıştıkları için
+  // çoğu hayatta hiç çıkmıyordu; sınav yılı olayları oyuncuların ancak
+  // **%38'inde** görülüyordu.
+  //
+  // İlk denenen çözüm "öncelikli olay varsa yalnızca o yarışsın"dı ama
+  // geniş pencereli bir dönüm noktası (ör. 18-32 yaş arası ilk ev) o
+  // yılları tamamen boğuyordu. Bunun yerine öncelik, ağırlığı **çok
+  // güçlü biçimde artırır**: dönüm noktası neredeyse kesin çıkar ama
+  // havuzun kalanı yine mümkün kalır.
+
+  /// Her öncelik kademesinin ağırlığı çarptığı kat (`prototypeOnly`).
+  ///
+  /// İki kademe kullanılır: **1** geniş pencereli dönüm noktaları için
+  /// ("güçlü biçimde tercih edilir"), **2** tek bir yıla kilitli olaylar
+  /// için ("o yıl neredeyse kesin çıkar").
+  static const double prototypeOnlyPriorityBoost = 120;
+
   /// Olayın **bu hayatta kaç kez çıktığına** göre azalan ağırlığı.
   static double prototypeOnlyEffectiveWeight(GameState state, GameEvent event) {
+    // Dönüm noktaları bütün havuzun önüne geçer (Paket 21).
+    final double oncelik = event.priority == 0
+        ? 1
+        : pow(prototypeOnlyPriorityBoost, event.priority).toDouble();
+
     final int gorulme = state.eventSeenCount(event.id);
-    if (gorulme == 0) return event.weight.toDouble();
+    if (gorulme == 0) return event.weight * oncelik;
     final double oran =
         pow(prototypeOnlyRepeatWeightDecay, gorulme).toDouble();
     return event.weight *
+        oncelik *
         (oran < prototypeOnlyMinWeightRatio
             ? prototypeOnlyMinWeightRatio
             : oran);
@@ -137,6 +164,26 @@ class EventEngine {
     }
     if (!_repeatGapPassed(state, event)) return false;
     return _matches(state, event, null);
+  }
+
+  /// Yalnızca testler içindir: şu an **çıkabilecek** bütün olayların
+  /// kimlikleri.
+  ///
+  /// Testler bunu "hangi olaylar mümkün" sorusu için kullanır. Aynı
+  /// soruyu yüzlerce tohumla çekiliş yaparak yanıtlamak yanıltıcıydı:
+  /// dönüm noktası ağırlıkları devreye girince (Paket 21) çekilişi hep
+  /// aynı olay kazanıyor ve diğerleri "imkânsız" gibi görünüyordu.
+  @visibleForTesting
+  Set<String> debugEligibleIds(GameState state, Random rng) {
+    final Set<String> sonuc = <String>{};
+    for (final GameEvent event in pool) {
+      if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
+      if (!_repeatGapPassed(state, event)) continue;
+      final Person? person = _resolvePerson(state, event, rng);
+      if (!_matches(state, event, person)) continue;
+      sonuc.add(event.id);
+    }
+    return sonuc;
   }
 
   /// Olayın koşullarını denetler. Kişi gerekiyorsa [person] dolu olmalıdır.

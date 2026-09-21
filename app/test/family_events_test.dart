@@ -24,12 +24,18 @@ const Parenthood ebeveynlik = Parenthood();
 const FamilyInteractions etkilesim = FamilyInteractions();
 
 /// Bu durumda **çıkabilecek** olayların kimlikleri.
-Set<String> olasiOlaylar(GameState state, {int deneme = 300}) {
+/// Şu an **çıkabilecek** olayların kimlikleri.
+///
+/// Eskiden bu yüzlerce tohumla çekiliş yapılarak bulunuyordu; dönüm
+/// noktası ağırlıkları devreye girince (Paket 21) çekilişi hep aynı olay
+/// kazanıyor ve diğerleri "imkânsız" gibi görünüyordu. Artık koşullar
+/// doğrudan denetleniyor: hem doğru hem hızlı.
+Set<String> olasiOlaylar(GameState state, {int deneme = 40}) {
   final Set<String> sonuc = <String>{};
   for (int i = 0; i < deneme; i++) {
-    final ActiveEvent? olay =
-        motor.openingEvent(state.copyWith(pendingEvent: null), Random(i));
-    if (olay != null) sonuc.add(olay.eventId);
+    sonuc.addAll(
+      motor.debugEligibleIds(state.copyWith(pendingEvent: null), Random(i)),
+    );
   }
   return sonuc;
 }

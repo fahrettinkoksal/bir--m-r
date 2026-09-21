@@ -447,6 +447,8 @@ void main() {
         for (int i = 0; i < 25; i++) {
           final int yasOnce = controller.state!.player.age;
           resolvePendingEvents(controller);
+          // Hayat bu tohumda erken bitebilir; vefat edenin yaşı ilerlemez.
+          if (controller.state!.deceased) break;
           controller.ageUp();
           expect(controller.state!.player.age, yasOnce + 1);
         }
