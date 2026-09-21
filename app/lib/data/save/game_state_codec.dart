@@ -601,7 +601,9 @@ GameState decodeGameState(Map<String, Object?> json) {
     generation: _intOrNull(json, 'generation') ?? 1,
     // Eski kayıtlarda teklif geçmişi yoktur; boş açılır.
     proposalAges: Map<String, int>.unmodifiable(
-      _intMap(json, 'proposalAges'),
+      json['proposalAges'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'proposalAges'),
     ),
     // Eski kayıtlarda bildirim kuyruğu yoktur; boş açılır ve geriye
     // dönük bildirim üretilmez.

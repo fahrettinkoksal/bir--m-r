@@ -459,6 +459,18 @@ void main() {
           'careStatus',
         ]);
       }
+      // Sürüm 21 öncesi: bildirim kuyruğu yok.
+      if (surum < 21) kaldir(<String>['notices']);
+      // Sürüm 20 öncesi: teklif/başvuru geçmişi yok.
+      if (surum < 20) kaldir(<String>['proposalAges']);
+      // Sürüm 19 öncesi: kişilerin kendi hayat kaydı yok.
+      if (surum < 19) {
+        for (final Object? p in body['people']! as List<Object?>) {
+          (p! as Map<String, Object?>).remove('development');
+        }
+      }
+      // Sürüm 18 öncesi: kuşak sayacı yok.
+      if (surum < 18) kaldir(<String>['generation']);
       if (surum < 11) {
         kaldir(<String>[
           'settledEstates',
@@ -499,7 +511,8 @@ void main() {
       return body;
     }
 
-    test('sürüm 1-17 arasındaki her giriş noktası açılır', () async {
+    test('sürüm 1 ile güncel sürüm arasındaki her giriş noktası açılır',
+        () async {
       // Zengin bir hayat: kişiler, eşyalar, evlilik, çocuk, arşiv.
       GameState state = LifeGenerator.seeded(18)
           .generate(mode: StartMode.tamamenRastgele)
