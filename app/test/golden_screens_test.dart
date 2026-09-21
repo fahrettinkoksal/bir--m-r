@@ -104,11 +104,14 @@ void main() {
     int guard = 0;
     while (!done() && guard++ < maxAges) {
       // Sağlık krizi olay penceresinden önce gelir (D-044); kriz açıkken
-      // olay düğmeleri ekranda olmaz.
+      // olay düğmeleri ekranda olmaz. Bildirimler de olaydan önce gelir
+      // (D-050).
       await answerPendingCrisis(tester, controller);
+      await answerPendingNotices(tester, controller);
       while (controller.state!.hasPendingEvent) {
         if (controller.state!.deceased) return;
         await answerPendingCrisis(tester, controller);
+        await answerPendingNotices(tester, controller);
         await tester.pumpAndSettle();
         final ActiveEvent event = controller.state!.pendingEvent!;
         final EventChoice choice = event.choices.firstWhere(
