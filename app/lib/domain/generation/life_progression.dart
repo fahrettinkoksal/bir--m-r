@@ -20,6 +20,7 @@ import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import '../life/aging.dart';
 import '../life/notices.dart';
 import '../models/pending_notice.dart';
 import 'child_progression.dart';
@@ -236,6 +237,11 @@ class LifeProgression {
     // Yas zamanla hafifler: her yıl kalan yasın bir bölümü mutluluğa geri
     // döner.
     afterDeaths = _easeGrief(afterDeaths, olumSonucu.happinessLoss > 0);
+
+    // Yaşlanmanın dış görünüşe etkisi (D-051): yetişkinlikte başlar,
+    // kademelidir ve kişiden kişiye değişir. Yalnızca gerçek değer
+    // değişir; mutluluk ve zekâ bundan etkilenmez.
+    afterDeaths = _applyAging(afterDeaths, newAge);
 
     // Eş vefat ettiyse evlilik kaydı **dul** durumuna geçer; kayıt
     // silinmez, miras hâlâ gerçek bir evliliğe dayanır (D-037).
@@ -594,6 +600,41 @@ class LifeProgression {
           text: '${trUpperFirst(etiket)} '
               '${bakan.fullName} sana bakmak için yanına taşındı.',
           category: LogCategory.aile,
+        ),
+      ]),
+    );
+  }
+
+  /// Yaşlanmanın dış görünüşe etkisini uygular (D-051).
+  ///
+  /// Etki yılda **bir kez**, yaş ilerletmenin içinde uygulanır; oyunu
+  /// kapatıp açmak aynı yılın etkisini ikinci kez uygulamaz.
+  GameState _applyAging(GameState state, int newAge) {
+    final int delta = Aging.yearlyDelta(
+      age: newAge,
+      appearance: state.player.stats.appearance,
+      health: state.player.stats.health,
+      rng: _rng,
+    );
+    if (delta == 0) return state;
+
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        stats: state.player.stats.copyWith(
+          appearance: state.player.stats.appearance + delta,
+        ),
+      ),
+    );
+    if (!Aging.worthLogging(delta)) return next;
+
+    return next.copyWith(
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...next.log,
+        LifeLogEntry(
+          age: newAge,
+          text: 'Aynada bu yıl birkaç yeni çizgi gördün; dış görünüşün '
+              '${next.player.stats.appearance}.',
+          category: LogCategory.kisisel,
         ),
       ]),
     );

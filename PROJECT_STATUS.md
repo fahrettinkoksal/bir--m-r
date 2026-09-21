@@ -492,6 +492,16 @@ geliyor, bekleyen olayı ezmiyor, iki kez açılmıyor ve kayıtla birlikte
 saklanıyor. Kayıt biçimi **sürüm 21**. Tutarlar **Q-074**'te karar
 bekliyor.
 
+**Yaşlanma ve dış görünüş (Paket 5, D-051):** Dış görünüş artık yaşla
+birlikte değişiyor: 30 yaşından önce hiç düşüş yok, sonrasında kademeli,
+hafif ve kişiden kişiye değişen bir etki uygulanıyor. Sağlık etkiyi
+değiştiriyor (sağlıklı karakter daha yavaş yıpranıyor), taban 15 —
+yaşlanma karakteri sıfıra indirmiyor. Değişim gerçek değer kaydına
+işleniyor, yılda bir kez uygulanıyor (kapat-aç aynı yılı tekrarlamıyor) ve
+yalnızca belirgin yıpranma yıllarında günlüğe kısa bir satır giriyor.
+Yaşlanma tek başına mutluluğu veya zekâyı düşürmüyor. 2000 hayatlık ölçüm
+`docs/BALANCE_REPORT.md` §10'da; aralıklar **Q-075**'te karar bekliyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

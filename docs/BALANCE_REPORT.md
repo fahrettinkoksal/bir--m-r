@@ -483,3 +483,25 @@ Bu turdan sonra **hiç çıkmayan olay kalmadı**.
 
 Yaş başına olay oranı %98,6; ileri yaş: 80-84 **%94**, 85-89 **%85**,
 90-94 **%78**, 95-99 **%68**.
+
+## 10) Yaşlanmanın dış görünüşe etkisi (Paket 5, D-051)
+
+Ölçüm: 2000 hayat, yalnızca yaşlanma kuralı (oyun akışından bağımsız),
+başlangıç görünüşü 60.
+
+| Sağlık | 40 yaş | 60 yaş | 80 yaş | 95 yaş |
+|---|---|---|---|---|
+| 30 | 56,6 | 46,8 | 29,6 | 16,6 |
+| 60 | 57,6 | 49,6 | 34,6 | 21,4 |
+| 90 | 58,6 | 52,5 | 39,7 | 28,1 |
+
+Okunuşu:
+- **30 yaşından önce hiç düşüş yok.**
+- 40 yaşında düşüş 1,4-3,4 puan: belirgin bir çöküş yok.
+- 60 yaşında 7-13 puan, 80 yaşında 20-30 puan: kademeli ve fark edilir.
+- Sağlık gerçekten fark yaratıyor (80 yaşında 10 puana yakın fark).
+- Taban 15: yaşlanma karakteri sıfıra indirmiyor.
+- Her karakter aynı yaşta aynı değere düşmüyor (60 hayatta 5'ten fazla
+  farklı sonuç).
+
+Bütün aralıklar ve miktarlar `prototypeOnly` (Q-075).
