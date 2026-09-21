@@ -16,6 +16,8 @@
 - Esas kullanım sade kalmalı; yoğun nostaljik süsleme olay metninin okunurluğunu ve gezinmeyi bozmamalı.
 - BitLife'a benzer anlaşılır yaşam simülasyonu bilgi mimarisinden yararlan; marka kimliği, ekran çizimi ve içerik **Bir Ömür'e özgün** olsun.
 
+**Paket 8 notu (2026-09-21).** Faho'nun "menüler güncel ve renkli olsun" talimatıyla menü arayüzü yenilendi: her menü kendi rengini taşıyan degradeli ikon kutusu ve sayaç rozetiyle görünüyor, bölüm başlıklarının altında renk şeridi var, alt gezinme çubuğu degrade zemin ve seçili sekme hapı kullanıyor, düğmeler daha yuvarlak ve hafif yükseltilmiş. **Kesin palet hâlâ seçilmedi**; kullanılan renk değerleri `prototypeOnly` ve **Q-077**'de karar bekliyor. Renk hiçbir yerde tek bilgi taşıyıcısı değildir; bağ, sayı ve durum bilgisi yazıyla da verilir. Alt menü sırası (Okul/Meslek – Varlıklar – Yaş Al – İlişkiler – Aktiviteler) değişmedi.
+
 ## 3. Hayat ekranı — ilk prototip akışı (önerilen ayrıntı)
 - Üst kısımda karakter adı, yaş, şehir ve kısa mevcut yaşam bilgisi; temel değerler ve hayat günlüğü.
 - Ün, henüz açılmamış karakterde görünmez; açılma ve gösterim ayrıntıları başka belgede açık konudur.

@@ -1483,5 +1483,26 @@ değişmedi, `DECISIONS.md`'ye bir şey yazılmadı.
 
 **Varsayılan işlem:** Hiçbir ilişki cezası veya masraf uydurulmadı; oran tek sabitte tutuldu.
 
+### Q-077 — Menü arayüzünün rengi ve düğme dili
+**Durum:** Yön **Faho tarafından istendi** ("menü UI'larını güzel hale getir, tasarımı biraz güncel ve renkli yap"); **kesin palet karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 8 (arayüz yenileme). **Bağlantılı:** `docs/PROTOTYPE_UI.md` §2 (onaylanmış görsel yön: modern + ölçülü nostaljik).
+
+**Şu an kodda olan (geçici) çözüm:**
+- Kimlik renkleri korundu ama canlandırıldı: nar `#B53142`, çini `#12897A`, pirinç `#D69A2B`, kâğıt `#FBF7F0`.
+- Menülere **renk ailesi** eklendi (`BirOmurAccents`): nar, çini, pirinç, mor, mavi, yeşil, turuncu, gül. Her rengin açık ve koyu tema için ayrı tonu var.
+- Her menü satırı kendi rengini taşıyor: degradeli ikon kutusu, renkli sayaç rozeti, yumuşak gölge ve ince renkli çerçeve.
+- Bölüm başlığının altında o bölümün rengiyle kısa bir şerit; geri dönüş satırı renkli bir hap.
+- Alt gezinme çubuğu degrade zemin + üstte ince pirinç çizgi; seçili sekmenin ikonu renkli hapın içinde; **Yaş Al** degradeli ve hafif parıltılı.
+- Düğmeler: köşe yarıçapı 18, daha kalın yazı, hafif yükseklik (basılınca düzleşir), nötr gölge.
+- Renk **hiçbir yerde tek bilgi taşıyıcısı değil**: bağ türü, sayaç, hane ve durum bilgisi yazıyla da veriliyor.
+
+**Karar soruları:**
+1. Sekiz renkli aile fazla mı; menü başına sabit renk yerine tek vurgu rengi mi tercih edilir?
+2. Hangi bölüm hangi rengi alsın? (Şu an: Okul mavi, Meslek mor, Varlıklar yeşil, İlişkiler gül, Aktiviteler turuncu, Kumarhane nar, Vasiyet pirinç.)
+3. Kişi kartlarının bağ türüne göre renklenmesi doğru mu, yoksa herkes aynı renk mi olsun?
+4. Canlandırılan kimlik renkleri (özellikle nar ve pirinç) onaylanıyor mu, yoksa eski sönük tonlara mı dönülsün?
+5. Yazı tipi hâlâ sistem yazı tipi; özel bir yazı tipi istenir mi?
+
+**Varsayılan işlem:** Renk değerleri tek dosyada (`app/lib/ui/theme/bir_omur_theme.dart`) toplandı; istenirse tek commit ile geri alınabilir. Alt menü sırası ve hiçbir metin değiştirilmedi.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
