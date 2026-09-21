@@ -265,3 +265,28 @@ Future<void> tapMenuRow(WidgetTester tester, String label) async {
   await tester.tap(hedef.first);
   await tester.pumpAndSettle();
 }
+
+/// Uzun bölüm listelerinde bir öğeyi görünür olana kadar kaydırır.
+///
+/// `SectionScaffold` bir `ListView` kullanır: ekranın çok altındaki
+/// öğeler henüz **inşa edilmemiş** olabilir, bu yüzden `ensureVisible`
+/// yetmez. Zaten görünüyorsa hiç kaydırmaz.
+Future<void> scrollToFinder(
+  WidgetTester tester,
+  Finder hedef, {
+  double delta = 220,
+  int maxScrolls = 40,
+}) async {
+  if (hedef.evaluate().isNotEmpty) {
+    await tester.ensureVisible(hedef.first);
+    await tester.pumpAndSettle();
+    return;
+  }
+  await tester.scrollUntilVisible(
+    hedef,
+    delta,
+    scrollable: find.byType(Scrollable).first,
+    maxScrolls: maxScrolls,
+  );
+  await tester.pumpAndSettle();
+}

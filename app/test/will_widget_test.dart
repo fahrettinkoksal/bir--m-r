@@ -26,7 +26,10 @@ void main() {
       );
 
   Future<void> pumpApp(WidgetTester tester, GameState state) async {
-    tester.view.physicalSize = const Size(1200, 4000);
+    // Hayat özeti değerlendirme paneliyle birlikte uzadı (Paket 22);
+    // `findsNothing` beklentileri anlamını korusun diye bütün ekran
+    // görünür alana sığdırılır.
+    tester.view.physicalSize = const Size(1200, 7000);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);

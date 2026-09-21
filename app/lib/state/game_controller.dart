@@ -27,6 +27,7 @@ import '../domain/education/education_path.dart';
 import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
 import '../domain/life/notices.dart';
+import '../domain/life/life_verdict.dart';
 import '../domain/life/will.dart';
 import '../domain/models/pending_notice.dart';
 import '../domain/interaction/item_actions.dart';
@@ -1409,6 +1410,7 @@ class GameController extends ChangeNotifier {
         ),
         familyLine: _familyLine(current),
         generation: current.generation,
+        verdictTitle: LifeVerdictBuilder.build(current).title,
       ),
     );
     return arsiv;

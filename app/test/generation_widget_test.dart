@@ -20,7 +20,10 @@ void main() {
   tearDown(() => controller.dispose());
 
   Future<void> pumpApp(WidgetTester tester, GameState state) async {
-    tester.view.physicalSize = const Size(1200, 4200);
+    // Hayat özeti değerlendirme paneliyle birlikte uzadı (Paket 22);
+    // `findsNothing` beklentileri anlamını korusun diye bütün ekran
+    // görünür alana sığdırılır.
+    tester.view.physicalSize = const Size(1200, 7200);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);

@@ -213,14 +213,19 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
         healthChange: -10,
         needsMoney: true,
       ),
+      // **Parasız da seçilebilir olmalı.** Her krizin bedelsiz bir
+      // çıkışı var; zatürre bunun tek istisnasıydı ve 60 yaşından
+      // sonra cüzdanında 3.000 ₺'den azı olan oyuncu, hiçbir düğmesi
+      // etkin olmayan bir kriz penceresinde kilitleniyordu. Kurtarıcı
+      // yol yoksa oyun kilitleniyor; bu yüzden bedel kaldırıldı.
+      // Hayatta kalma katkısı ve sağlık etkisi olduğu gibi bırakıldı.
       CrisisChoice(
         id: 'evde',
         label: 'Evde ilaçla idare et',
         resultText: 'İlaçlar yavaş da olsa işe yaradı.',
-        cost: 3000,
+        cost: 0,
         survivalBonus: 0.03,
         healthChange: -15,
-        needsMoney: true,
       ),
     ],
   ),

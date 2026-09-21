@@ -2,7 +2,14 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/life/life_verdict.dart';
+import 'package:bir_omur/domain/models/career.dart';
+import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/marriage.dart';
+import 'package:bir_omur/domain/models/trip.dart';
 import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
@@ -13,6 +20,7 @@ import 'package:bir_omur/domain/models/stats.dart';
 import 'package:bir_omur/ui/theme/bir_omur_theme.dart';
 import 'package:bir_omur/ui/widgets/character_face.dart';
 import 'package:bir_omur/ui/widgets/comic.dart';
+import 'package:bir_omur/ui/widgets/life_verdict_panel.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
@@ -430,6 +438,88 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/12_karakter_yuzu.png'),
+    );
+  }, skip: !enabled);
+
+  testWidgets('13 — hayat sonu değerlendirmesi', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 3400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    // Dolu bir hayat: evlilik, çocuk, iş, gezi ve okul kaydı olsun ki
+    // değerlendirme gerçekten anlatacak bir şey bulsun.
+    final GameState temel =
+        LifeGenerator.seeded(8).generate(mode: StartMode.tamamenRastgele);
+    final Person es = temel.people.first.copyWith(
+      firstName: 'Nurten',
+      relation: RelationType.es,
+      bond: 82,
+      age: 76,
+    );
+    final GameState hayat = temel.copyWith(
+      player: temel.player.copyWith(age: 79, wallet: 320000),
+      people: <Person>[
+        es,
+        ...temel.people.skip(1).map((Person p) => p.copyWith(bond: 55)),
+      ],
+      marriage: Marriage(
+        spouseId: es.id,
+        marriedAtAge: 26,
+        status: MarriageStatus.evli,
+      ),
+      education: const EducationState(finished: true, startedAtAge: 6),
+      career: CareerState(
+        pastJobIds: const <String>['ogretmen'],
+        history: <JobHistoryEntry>[
+          const JobHistoryEntry(
+            jobId: 'ogretmen',
+            startedAtAge: 23,
+            endedAtAge: 61,
+          ),
+        ],
+        retiredAtAge: 61,
+      ),
+      trips: <TripRecord>[
+        const TripRecord(
+          id: 'g1',
+          city: 'Trabzon',
+          age: 34,
+          mode: TravelMode.otobus,
+          cost: 2200,
+        ),
+        const TripRecord(
+          id: 'g2',
+          city: 'Antalya',
+          age: 52,
+          mode: TravelMode.ucak,
+          cost: 7800,
+        ),
+      ],
+      deceased: true,
+      deathAge: 79,
+      deathCause: 'yaşlılığa bağlı nedenler',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: BirOmurTheme.light(),
+        home: Scaffold(
+          body: PaperBackground(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: LifeVerdictPanel(
+                verdict: LifeVerdictBuilder.build(hayat),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/13_hayat_degerlendirmesi.png'),
     );
   }, skip: !enabled);
 }

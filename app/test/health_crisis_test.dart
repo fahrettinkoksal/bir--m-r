@@ -41,6 +41,22 @@ void main() {
   // Katalog
   // ===================================================================
   group('Kriz kataloğu (D-044)', () {
+    // **Kalıcı koruma.** Cüzdanı boş bir oyuncunun hiçbir seçeneği
+    // seçemediği kriz, ekranda etkin düğmesi olmayan bir pencere
+    // demektir ve oyunu kilitler. `zatürre` bir süre böyleydi: iki
+    // seçeneği de para istiyordu.
+    test('parası olmayan oyuncu her krizde bir seçenek seçebilir', () {
+      final GameState parasiz = hayat(1, wallet: 0);
+      for (final HealthCrisis kriz in kHealthCrises) {
+        expect(
+          kriz.choices.any((CrisisChoice c) => motor.canChoose(parasiz, c)),
+          isTrue,
+          reason: '${kriz.id} krizinde parasız seçilebilecek seçenek yok; '
+              'oyun kilitlenir.',
+        );
+      }
+    });
+
     test('her krizin yaş aralığı ve seçenekleri tutarlı', () {
       final Set<String> idler = <String>{};
       for (final HealthCrisis kriz in kHealthCrises) {

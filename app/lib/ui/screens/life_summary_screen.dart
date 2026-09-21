@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/generation/generation_continuation.dart';
+import '../../domain/life/life_verdict.dart';
 import '../../domain/life/will.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/life_log.dart';
@@ -9,6 +10,7 @@ import '../../domain/models/relation.dart';
 import '../../domain/models/person.dart';
 import '../../state/game_scope.dart';
 import '../widgets/kilim_divider.dart';
+import '../widgets/life_verdict_panel.dart';
 import '../widgets/section_scaffold.dart';
 
 /// Oyuncu vefat ettiğinde gösterilen hayat özeti.
@@ -61,6 +63,10 @@ class LifeSummaryScreen extends StatelessWidget {
       title: 'Bir ömür tamamlandı',
       subtitle: state.player.fullName,
       children: <Widget>[
+        // Ekranın ilk söylediği şey kaç eşya bırakıldığı değil,
+        // hayatın nasıl geçtiğidir (Paket 22).
+        LifeVerdictPanel(verdict: LifeVerdictBuilder.build(state)),
+        const SizedBox(height: 14),
         Card(
           key: const Key('life_summary_card'),
           child: Padding(

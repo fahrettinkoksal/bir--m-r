@@ -328,6 +328,7 @@ Map<String, Object?> _encodeLifeSummary(LifeSummary l) => <String, Object?>{
       'itemCount': l.itemCount,
       'licenseCount': l.licenseCount,
       'highlights': l.highlights,
+      'verdictTitle': l.verdictTitle,
     };
 
 LifeSummary _decodeLifeSummary(Map<String, Object?> json) => LifeSummary(
@@ -347,6 +348,9 @@ LifeSummary _decodeLifeSummary(Map<String, Object?> json) => LifeSummary(
       // Eski arşiv kayıtlarında kuşak bilgisi yoktur; `null` kalır ve
       // ekranda hiç gösterilmez.
       generation: _intOrNull(json, 'generation'),
+      // Eski arşiv kayıtlarında değerlendirme adı yoktur; `null` kalır ve
+      // satırda hiç gösterilmez. Geriye dönük ad üretilmez.
+      verdictTitle: _stringOrNull(json, 'verdictTitle'),
     );
 
 Map<String, Object?> _encodeItem(OwnedItem i) => <String, Object?>{

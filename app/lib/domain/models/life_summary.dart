@@ -20,6 +20,7 @@ class LifeSummary {
     required this.highlights,
     this.familyLine,
     this.generation,
+    this.verdictTitle,
   });
 
   final String fullName;
@@ -53,4 +54,12 @@ class LifeSummary {
   /// **Eski arşiv kayıtlarında** `null` olur; o zaman ekranda kuşak satırı
   /// hiç gösterilmez (uydurma bilgi yazılmaz).
   final int? generation;
+
+  /// Hayat sonu değerlendirmesinin kısa adı: "Kalabalık bir hayat" gibi
+  /// (Paket 22).
+  ///
+  /// **Eski arşiv kayıtlarında** `null` olur; o zaman arşiv satırında hiç
+  /// gösterilmez. Geriye dönük değerlendirme **üretilmez**: eski hayatın
+  /// verisi artık elde yok, uydurma ad yazılmaz.
+  final String? verdictTitle;
 }

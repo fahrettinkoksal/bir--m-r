@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/models/life_summary.dart';
-import '../widgets/section_scaffold.dart';
 import '../../text/turkish_text.dart';
+import '../widgets/comic.dart';
+import '../widgets/section_scaffold.dart';
 
 /// Geçmiş Hayatlar arşivi (D-037).
 ///
@@ -80,6 +81,16 @@ class PastLivesScreen extends StatelessWidget {
                         ),
                     ],
                   ),
+                  // Değerlendirme adı yalnızca gerçekten kaydedildiyse
+                  // gösterilir; eski arşiv satırları olduğu gibi kalır.
+                  if (hayat.verdictTitle != null) ...<Widget>[
+                    const SizedBox(height: 4),
+                    HandwrittenText(
+                      hayat.verdictTitle!,
+                      size: 19,
+                      tilt: -0.8,
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Text(
                     '${hayat.birthCity} · ${hayat.deathAge} yaşında '
