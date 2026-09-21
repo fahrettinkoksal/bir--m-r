@@ -550,6 +550,30 @@ test, yalnızca `BIR_OMUR_SCREENSHOTS=1` ile çalışan ekran görüntüsü
 testleridir. Kayıt göçü testleri **yapay (sentetik) kayıtlarla** yapıldı;
 gerçek cihazdan alınmış eski kayıt dosyasıyla sınanmadı.
 
+**Menü arayüzü yenilendi (Paket 8):** Faho'nun "menüler güncel ve
+renkli olsun, butonlar güzel olsun" talimatıyla görünüm elden geçirildi.
+Her menü satırı kendi rengini taşıyor (degradeli ikon kutusu, renkli
+sayaç rozeti, yumuşak gölge); bölüm başlığının altında o bölümün
+rengiyle kısa bir şerit var; geri dönüş satırı renkli bir hap oldu.
+Kişi kartları bağ türüne göre renkleniyor, vefat edenler soluk kalıyor.
+Alt gezinme çubuğu degrade zemin ve seçili sekme hapı kullanıyor,
+**Yaş Al** degradeli ve halkalı. Düğmeler daha yuvarlak, yazıları daha
+kalın ve basılınca düzleşen hafif bir yüksekliğe sahip. Kimlik renkleri
+(nar, çini, pirinç, kâğıt) korundu ama canlandırıldı; menüler için sekiz
+renkli bir aile eklendi ve her rengin koyu tema karşılığı var.
+**Renk hiçbir yerde tek bilgi taşıyıcısı değil**: bağ türü, sayaç, hane
+ve durum bilgisi yazıyla da veriliyor. **Alt menü sırası, metinler,
+akışlar ve oyun kuralları değişmedi.** Renk değerleri `prototypeOnly`
+ve **Q-077**'de karar bekliyor; tümü tek dosyada toplandığı için tek
+commit ile geri alınabilir.
+
+**Test durumu (Paket 8 sonrası, gerçekten çalıştırıldı):**
+`flutter analyze` temiz; `flutter test` **793 geçti, 10 atlandı, 0
+başarısız**. On ekran görüntüsü (`app/test/goldens/`) yeni görünümle
+yeniden üretildi ve gözle kontrol edildi; bunlar test yazı tipi
+kullandığı için ikonlar kutu olarak görünür, gerçek uygulamada ikonlar
+çizilir. **Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
