@@ -71,12 +71,15 @@ class CharacterHeader extends StatelessWidget {
                                   style: theme.textTheme.titleLarge,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 7),
+                              // Paket 28: rozet biraz küçüldü; "Tolga
+                              // Erdoğan · 250.000 ₺" gibi dolu bir
+                              // satırda ad kırpılmasın diye.
                               ComicTag(
                                 text: state.player.walletLabel,
                                 color: BirOmurColors.sari,
                                 tilt: -2,
-                                fontSize: 12.5,
+                                fontSize: 11.5,
                               ),
                             ],
                           ),
@@ -91,8 +94,8 @@ class CharacterHeader extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            // Burç bu satırda: üst satır zaten yaş ve
-                            // eğitim evresiyle dolu, oraya eklenince
+                            // Burç bu satırda: üst satır yaş ve eğitim
+                            // evresiyle dolu, oraya eklenince
                             // kırpılıyordu (Paket 27).
                             '${state.player.birthCity} · '
                             '${Astrology.zodiacOf(state).display} · '

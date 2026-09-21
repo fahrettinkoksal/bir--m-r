@@ -179,6 +179,64 @@ class _MarkerPainter extends CustomPainter {
 ///
 /// Kâğıda yapıştırılmış bir çıkartmadır: kalın kontur, keskin gölge ve
 /// basınca gerçekten çöken bir gövde.
+/// Uzun menülerde satırları gruplayan küçük başlık (Paket 28).
+///
+/// Aktiviteler kökü on dört satıra kadar çıkabiliyordu ve hepsi düz bir
+/// liste hâlindeydi; aradığını bulmak için bütün ekranı kaydırmak
+/// gerekiyordu. Başlıklar listeyi okunur hâle getirir.
+class MenuGroupTitle extends StatelessWidget {
+  const MenuGroupTitle({
+    super.key,
+    required this.text,
+    this.accent = BirOmurAccents.cini,
+  });
+
+  final String text;
+  final BirOmurAccent accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 11,
+            height: 11,
+            decoration: BoxDecoration(
+              color: accent.color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Comic.konturOf(context),
+                width: Comic.inceKontur,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              height: 2,
+              decoration: BoxDecoration(
+                color: accent.color.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class MenuRow extends StatelessWidget {
   const MenuRow({
     super.key,
@@ -207,11 +265,13 @@ class MenuRow extends StatelessWidget {
       onPressed: onTap,
       expand: true,
       radius: Comic.yaricapBuyuk,
-      padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
+      // Paket 28: satırlar biraz kısaltıldı, böylece uzun menülerde bir
+      // ekrana daha fazla satır sığıyor.
+      padding: const EdgeInsets.fromLTRB(11, 9, 13, 9),
       child: Row(
         children: <Widget>[
-          ComicIconTile(icon: icon, accent: accent, size: 46),
-          const SizedBox(width: 13),
+          ComicIconTile(icon: icon, accent: accent, size: 40),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -10,6 +10,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Sosyal medya ekranındaki sponsorluk akışı (Paket 10).
 void main() {
   late GameController controller;
@@ -55,6 +57,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('tab_aktiviteler')));
     await tester.pumpAndSettle();
+    // Aktiviteler menüsü gruplandı ve uzadı (Paket 28); satır ekranın
+    // altında kalabiliyor.
+    await scrollToFinder(tester, find.text('Sosyal medya'));
     await tester.tap(find.text('Sosyal medya'));
     await tester.pumpAndSettle();
   }

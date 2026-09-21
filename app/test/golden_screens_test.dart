@@ -12,6 +12,7 @@ import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/trip.dart';
 import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
+import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/gender.dart';
@@ -523,4 +524,36 @@ void main() {
     );
   }, skip: !enabled);
 
+
+  testWidgets('14 — aktiviteler menüsü (yetişkin, tam liste)',
+      (WidgetTester tester) async {
+    // Menü uzundur; gruplanmış hâli bir bakışta görünmeli.
+    tester.view.physicalSize = const Size(1080, 4200);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      BirOmurApp(
+        key: ValueKey<int>(pumpDeneme++),
+        controller: controller,
+        sound: SoundService.silent(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+
+    final GameState temel = controller.state!;
+    controller.debugSetState(
+      temel.copyWith(
+        pendingEvent: null,
+        notices: const <PendingNotice>[],
+        player: temel.player.copyWith(age: 30, wallet: 250000),
+        licenses: <String>{'otomobil_ehliyeti'},
+      ),
+    );
+    await tester.pumpAndSettle();
+    await openTab(tester, 'aktiviteler');
+    await shot(tester, '14_aktiviteler_menu.png');
+  }, skip: !enabled);
 }

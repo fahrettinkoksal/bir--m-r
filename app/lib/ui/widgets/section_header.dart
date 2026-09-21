@@ -21,7 +21,18 @@ class SectionHeader extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            HandwrittenText(title, size: 26, tilt: -1.5),
+            // **Esnek olmalı (Paket 28).** Sabit genişlikte bırakılınca
+            // "Hayat günlüğü" başlığı 360 px'lik ekranda satırı 24 px
+            // taşırıyordu; taşan kısım çizilmiyor ve hata şeridi
+            // görünüyordu.
+            Flexible(
+              child: HandwrittenText(
+                title,
+                size: 26,
+                tilt: -1.5,
+                maxLines: 1,
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Container(

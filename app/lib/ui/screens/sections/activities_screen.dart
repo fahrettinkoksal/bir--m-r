@@ -171,6 +171,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 'Bu yaşta etkileşimler henüz açılmamış olabilir.',
           ),
         const SizedBox(height: 12),
+        // Paket 28: uzun liste gruplara ayrıldı. Aradığını bulmak için
+        // bütün ekranı kaydırmak gerekmiyor.
+        const MenuGroupTitle(
+          text: 'Kendine bak',
+          accent: BirOmurAccents.yesil,
+        ),
         MenuRow(
           title: ActivityVenue.berber.label,
           subtitle: 'Saç kestir, stil değiştir, bakım yaptır',
@@ -187,29 +193,6 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           onTap: () => _go(_ActivityPage.spor),
         ),
         const SizedBox(height: 10),
-        MenuRow(
-          title: ActivityVenue.kutuphane.label,
-          subtitle: 'Yaşına uygun kitap seç ve oku',
-          icon: Icons.local_library_outlined,
-          accent: BirOmurAccents.mavi,
-          onTap: () => _go(_ActivityPage.kutuphane),
-        ),
-        const SizedBox(height: 10),
-        // Paket 18: sağlığa kriz beklemeden bakmanın, mutluluğu kendi
-        // isteğinle yükseltmenin ve okul dışında bir şey öğrenmenin yolu
-        // yoktu. Her alan yaşına uygun olduğu andan itibaren görünür;
-        // çalışmayan düğme konmaz.
-        if (state.player.age >= ActivityVenue.eglence.minAge) ...<Widget>[
-          MenuRow(
-            key: const Key('activity_eglence'),
-            title: ActivityVenue.eglence.label,
-            subtitle: 'Sinema, maç, konser, parkta yürüyüş',
-            icon: Icons.celebration_outlined,
-            accent: BirOmurAccents.turuncu,
-            onTap: () => _go(_ActivityPage.eglence),
-          ),
-          const SizedBox(height: 10),
-        ],
         if (state.player.age >= ActivityVenue.saglikMerkezi.minAge) ...<Widget>[
           MenuRow(
             key: const Key('activity_saglik'),
@@ -221,6 +204,18 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
+        const MenuGroupTitle(
+          text: 'Öğren',
+          accent: BirOmurAccents.mavi,
+        ),
+        MenuRow(
+          title: ActivityVenue.kutuphane.label,
+          subtitle: 'Yaşına uygun kitap seç ve oku',
+          icon: Icons.local_library_outlined,
+          accent: BirOmurAccents.mavi,
+          onTap: () => _go(_ActivityPage.kutuphane),
+        ),
+        const SizedBox(height: 10),
         if (state.player.age >= ActivityVenue.kurs.minAge) ...<Widget>[
           MenuRow(
             key: const Key('activity_kurs'),
@@ -229,6 +224,21 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.palette_outlined,
             accent: BirOmurAccents.mor,
             onTap: () => _go(_ActivityPage.kurs),
+          ),
+          const SizedBox(height: 10),
+        ],
+        const MenuGroupTitle(
+          text: 'Keyfine bak',
+          accent: BirOmurAccents.turuncu,
+        ),
+        if (state.player.age >= ActivityVenue.eglence.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_eglence'),
+            title: ActivityVenue.eglence.label,
+            subtitle: 'Sinema, maç, konser, parkta yürüyüş',
+            icon: Icons.celebration_outlined,
+            accent: BirOmurAccents.turuncu,
+            onTap: () => _go(_ActivityPage.eglence),
           ),
           const SizedBox(height: 10),
         ],
@@ -244,6 +254,10 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
+        // Paket 18: sağlığa kriz beklemeden bakmanın, mutluluğu kendi
+        // isteğinle yükseltmenin ve okul dışında bir şey öğrenmenin yolu
+        // yoktu. Her alan yaşına uygun olduğu andan itibaren görünür;
+        // çalışmayan düğme konmaz.
         // Seyahat, tek başına yola çıkılabilecek yaştan itibaren görünür
         // (Paket 11). Kalıcı taşınmadan ayrıdır.
         if (state.player.age >= Travel.prototypeOnlyMinAge) ...<Widget>[
@@ -258,6 +272,24 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
+        // Kumarhane yetişkin yaşında açılır; öncesinde menüde yoktur.
+        if (state.settings.casinoEnabled &&
+            state.player.age >= CasinoRules.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Kumarhane',
+            subtitle: state.hasOpenHand
+                ? 'Masada devam eden bir elin var'
+                : 'Blackjack ve rulet — yalnızca oyun parası',
+            icon: Icons.casino_outlined,
+            accent: BirOmurAccents.nar,
+            onTap: () => _go(_ActivityPage.kumarhane),
+          ),
+          const SizedBox(height: 10),
+        ],
+        const MenuGroupTitle(
+          text: 'Hayat işleri',
+          accent: BirOmurAccents.mor,
+        ),
         // Sosyal medya 16 yaşından itibaren açılır; öncesinde menüde yok.
         if (state.player.age >= kSocialMinAge) ...<Widget>[
           MenuRow(
@@ -312,20 +344,6 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.history_edu_outlined,
             accent: BirOmurAccents.pirinc,
             onTap: () => _go(_ActivityPage.vasiyet),
-          ),
-          const SizedBox(height: 10),
-        ],
-        // Kumarhane yetişkin yaşında açılır; öncesinde menüde yoktur.
-        if (state.settings.casinoEnabled &&
-            state.player.age >= CasinoRules.prototypeOnlyMinAge) ...<Widget>[
-          MenuRow(
-            title: 'Kumarhane',
-            subtitle: state.hasOpenHand
-                ? 'Masada devam eden bir elin var'
-                : 'Blackjack ve rulet — yalnızca oyun parası',
-            icon: Icons.casino_outlined,
-            accent: BirOmurAccents.nar,
-            onTap: () => _go(_ActivityPage.kumarhane),
           ),
           const SizedBox(height: 10),
         ],

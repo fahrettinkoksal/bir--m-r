@@ -339,6 +339,7 @@ class HandwrittenText extends StatelessWidget {
     this.color,
     this.tilt = 0,
     this.textAlign,
+    this.maxLines,
   });
 
   final String text;
@@ -347,11 +348,16 @@ class HandwrittenText extends StatelessWidget {
   final double tilt;
   final TextAlign? textAlign;
 
+  /// En fazla kaç satır? Verilirse taşan kısım "…" ile kısaltılır.
+  final int? maxLines;
+
   @override
   Widget build(BuildContext context) {
     final Widget yazi = Text(
       text,
       textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
       style: TextStyle(
         fontFamily: BirOmurTheme.elYazisi,
         fontSize: size,
