@@ -13,6 +13,7 @@ import 'event_pool_extra.dart';
 import 'event_pool_exam.dart';
 import 'event_pool_infancy.dart';
 import 'event_pool_midlife.dart';
+import 'event_pool_romance.dart';
 import 'event_pool_social.dart';
 import 'event_pool_travel.dart';
 import 'event_pool_work.dart';
@@ -696,6 +697,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
         StoryFlags.evlendi,
       },
     ),
+    // **Not (Paket 23):** Bu olay gençliğin kapısıdır ve dar kalması
+    // bilerek. Burayı kaçıran ya da geçen oyuncu artık ömür boyu kapalı
+    // kalmıyor: yetişkinlik kapıları `event_pool_romance.dart` içinde.
     // prototypeOnly: romantik zincir ilk prototipte gerçekten oynanabilmeli
     // (D-030); yine de her hayatta zorunlu değildir.
     weight: 5,
@@ -730,10 +734,13 @@ const List<GameEvent> kEventPool = <GameEvent>[
       requiredFlags: <String>{StoryFlags.romantikIlgi},
       forbiddenFlags: <String>{
         StoryFlags.romantikIliskide,
-        StoryFlags.romantikBitti,
         StoryFlags.evlendi,
       },
     ),
+    // **`romantik_bitti` yasağı kaldırıldı (Paket 23).** Bir kez ayrılmak
+    // ömrün geri kalanında yeniden ilişki kurmayı imkânsız kılıyordu;
+    // ölçümde 60 hayatın yalnızca 15'inde hiç sevgili oluyordu. Zincir
+    // hâlâ `romantik_ilgi` izini ve 15-25 yaş penceresini istiyor.
     weight: 6,
     choices: <EventChoice>[
       EventChoice(
@@ -1511,4 +1518,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
   ...kInfancyEvents,
   ...kExamEvents,
   ...kMidlifeEvents,
+
+  // Yetişkinlikte tanışma ve bekâr hayat (Paket 23).
+  ...kRomanceEvents,
 ];

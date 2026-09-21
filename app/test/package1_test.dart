@@ -125,7 +125,22 @@ void main() {
 
       expect(state.education.level, SchoolLevel.ortaokul);
       expect(state.education.classId, isNot(ilkSinif));
-      expect(state.currentClassmates.length, greaterThanOrEqualTo(10));
+
+      // Yeni sınıf **her zaman** tam mevcuda tamamlanır: taşınanlar +
+      // yeni üretilenler. Aralarında o yıl vefat eden biri olabilir;
+      // `currentClassmates` yalnızca yaşayanları verdiği için ona bakan
+      // bir sayım tohuma göre 9 da çıkabilir (Paket 23'te görüldü).
+      final int siniftakiler = state.people
+          .where((Person p) =>
+              p.schoolTie == SchoolTie.sinifArkadasi &&
+              p.classId == state.education.classId)
+          .length;
+      expect(siniftakiler, SchoolPeople.prototypeOnlyClassmateCount);
+      expect(state.currentClassmates, isNotEmpty);
+      expect(
+        state.currentClassmates.length,
+        lessThanOrEqualTo(SchoolPeople.prototypeOnlyClassmateCount),
+      );
 
       final Set<String> guncel =
           state.currentClassmates.map((Person p) => p.id).toSet();
