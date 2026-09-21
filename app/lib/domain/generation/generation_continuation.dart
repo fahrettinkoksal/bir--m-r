@@ -148,6 +148,7 @@ abstract final class GenerationContinuation {
         person: kisi,
         marriage: state.marriage,
         motherLine: anneTarafi,
+        otherParentId: cocuk.development?.otherParentId,
       );
       if (yeniBag == null) continue; // yeni kuşakta bağı yok
       yeniKisiler.add(
@@ -282,9 +283,9 @@ abstract final class GenerationContinuation {
       // Evcil hayvanların yaşı tutulmuyor; kuşaklar arası taşımak ölümsüz
       // hayvan üretirdi (Q-067).
       pets: const <Pet>[],
-      parentalStatus: state.marriage?.status == MarriageStatus.bosandi
-          ? ParentalStatus.bosanmis
-          : ParentalStatus.evli,
+      // Ebeveynlerin durumu gerçeğe dayanır: evlilik kaydı yoksa evli
+      // yazılmaz (D-047).
+      parentalStatus: _parentalStatusFor(state, cocuk),
       log: List<LifeLogEntry>.unmodifiable(gunluk),
       items: List<OwnedItem>.unmodifiable(cocugaKalan),
       education: _educationFor(gelisim, cocuk.age),
@@ -357,7 +358,16 @@ abstract final class GenerationContinuation {
     required Person person,
     required Marriage? marriage,
     required bool motherLine,
+    String? otherParentId,
   }) {
+    // Çocuğun kaydında yazan diğer biyolojik ebeveyn her durumda
+    // ebeveyndir: evlilik olmadan doğan çocuğun da iki ebeveyni vardır
+    // (D-047).
+    if (otherParentId != null && person.id == otherParentId) {
+      return person.gender == Gender.kadin
+          ? RelationType.anne
+          : RelationType.baba;
+    }
     // Evlilik kaydındaki eş, çocuğun diğer ebeveynidir (boşanmış olsa da).
     if (marriage != null && person.id == marriage.spouseId) {
       return person.gender == Gender.kadin
@@ -400,6 +410,29 @@ abstract final class GenerationContinuation {
   static String _currentCity(GameState state, Person cocuk) {
     if (cocuk.inPlayerHousehold) return state.player.currentCity;
     return cocuk.city ?? state.player.currentCity;
+  }
+
+  /// Yeni oyuncunun ebeveynlerinin birbirleriyle durumu.
+  ///
+  /// Evlilik kaydı yoksa "evli" uydurulmaz: diğer ebeveyn hanedeyse
+  /// birlikte, değilse ayrı sayılır.
+  static ParentalStatus _parentalStatusFor(GameState state, Person cocuk) {
+    final Marriage? evlilik = state.marriage;
+    final String? digerEbeveyn = cocuk.development?.otherParentId;
+    if (evlilik != null &&
+        (digerEbeveyn == null || evlilik.spouseId == digerEbeveyn)) {
+      return evlilik.status == MarriageStatus.bosandi
+          ? ParentalStatus.bosanmis
+          : ParentalStatus.evli;
+    }
+    if (digerEbeveyn != null) {
+      final Person? kisi = state.personById(digerEbeveyn);
+      if (kisi != null && kisi.isAlive && kisi.inPlayerHousehold) {
+        return ParentalStatus.birlikte;
+      }
+      return ParentalStatus.ayri;
+    }
+    return ParentalStatus.evli;
   }
 
   /// Çocuğun kendi eğitim geçmişinden oyuncunun eğitim kaydını kurar.

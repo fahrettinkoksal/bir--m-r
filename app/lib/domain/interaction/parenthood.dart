@@ -207,6 +207,8 @@ class Parenthood {
         milestones: <LifeMilestone>[
           LifeMilestone(age: 0, text: '$isim dünyaya geldi.'),
         ],
+        // Diğer biyolojik ebeveyn: evli olunmasa da kayda geçer (D-047).
+        otherParentId: esKaydi.id,
       ),
     );
 

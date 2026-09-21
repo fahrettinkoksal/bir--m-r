@@ -56,6 +56,7 @@ class PersonDevelopment {
     this.money = 0,
     this.interests = const <String>[],
     this.milestones = const <LifeMilestone>[],
+    this.otherParentId,
   });
 
   /// Kişinin kendi karakter değerleri (D-046 ile doğumda oluşturulur).
@@ -108,6 +109,15 @@ class PersonDevelopment {
   /// Yaşanmış dönüm noktaları (en eskisi başta).
   final List<LifeMilestone> milestones;
 
+  /// Çocuğun **diğer biyolojik ebeveyninin** kişi kimliği.
+  ///
+  /// Evlilik dışı doğan çocukta da (D-047) iki ebeveyn kayıtlıdır; bu
+  /// bağ evlilik kaydına değil, doğum anındaki gerçek ebeveyne dayanır ve
+  /// kuşak geçişinde aile bağlarının doğru kurulmasını sağlar. Evlat
+  /// edinilen çocukta `null`'dır (uydurma bir biyolojik ebeveyn
+  /// yazılmaz).
+  final String? otherParentId;
+
   bool get isStudent => grade != null;
   bool get isUniversityStudent => university == UniversityStatus.okuyor;
   bool get isEmployed => jobId != null;
@@ -155,6 +165,7 @@ class PersonDevelopment {
     int? money,
     List<String>? interests,
     List<LifeMilestone>? milestones,
+    Object? otherParentId = _unsetDev,
   }) {
     return PersonDevelopment(
       stats: stats ?? this.stats,
@@ -181,6 +192,9 @@ class PersonDevelopment {
       money: money ?? this.money,
       interests: interests ?? this.interests,
       milestones: milestones ?? this.milestones,
+      otherParentId: otherParentId == _unsetDev
+          ? this.otherParentId
+          : otherParentId as String?,
     );
   }
 

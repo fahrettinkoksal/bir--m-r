@@ -239,6 +239,7 @@ Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
       'pastJobIds': d.pastJobIds,
       'money': d.money,
       'interests': d.interests,
+      'otherParentId': d.otherParentId,
       'milestones': <Map<String, Object?>>[
         for (final LifeMilestone m in d.milestones)
           <String, Object?>{'age': m.age, 'text': m.text},
@@ -279,6 +280,7 @@ PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
     interests: List<String>.unmodifiable(
       json['interests'] == null ? const <String>[] : _stringList(json, 'interests'),
     ),
+    otherParentId: _stringOrNull(json, 'otherParentId'),
     milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
       for (final Object? e in (json['milestones'] as List<Object?>? ?? const <Object?>[]))
         LifeMilestone(
