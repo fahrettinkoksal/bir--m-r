@@ -574,6 +574,58 @@ yeniden üretildi ve gözle kontrol edildi; bunlar test yazı tipi
 kullandığı için ikonlar kutu olarak görünür, gerçek uygulamada ikonlar
 çizilir. **Gerçek Windows veya Android cihazda oynanmadı.**
 
+**Meslek hayatı derinleşti (Paket 9):** Her iş için kalıcı çalışma kaydı
+tutuluyor: meslek, başlangıç yaşı, ayrılış yaşı ve nedeni, görev
+seviyesi, maaş ve o işteki önemli anlar. İş değiştirince eski kayıt
+silinmiyor; Meslek → **Kariyer geçmişi** sayfasından görülebiliyor. Altı
+mesleğin hepsine üçer görev basamağı eklendi. **"Zam iste"** ve **"Terfi
+iste"** gerçek birer etkileşim; kabul garanti değil, işte geçen süre,
+zekâ/karizma ve iş hayatında verilen kararlar etkili. Aynı yıl ikinci kez
+talep edilemiyor. İstifa mümkün; işten çıkarılma da mümkün ama nadir
+(en az 2 yıl çalışmış olmak, iki kayıp arasında en az 8 yıl, yılda %3,5).
+İş değişiminde çift maaş oluşmuyor. **İş arkadaşı** yeni bir bağ türü:
+kalıcı kimliği var, işin şehrinde yaşıyor, aynı evde yaşıyormuş gibi
+gösterilmiyor; işten ayrılınca kaydı silinmiyor, yakınlığı yeterliyse
+arkadaşlığa dönüşüyor. İş hayatına 8 özgün olay eklendi; ikisi önceki
+kararı hatırlıyor. Kayıt biçimi **sürüm 23**. Sayılar **Q-078**'de.
+
+**Sosyal medya gelirle bağlandı (Paket 10):** Yeterli kitleye ulaşan
+oyuncu içeriklerinden oyun parası kazanıyor. Gelir takipçi sayısına körü
+körüne eşit değil; paylaşımın gerçek etkileşimine bağlı, her paylaşımda
+garanti değil ve yeni açılmış hesap gelir üretmiyor. Para cüzdana
+gerçekten işleniyor, günlükte nereden geldiği yazılıyor ve aynı
+paylaşımın geliri iki kez ödenmiyor. **Sponsorluk** eklendi: altı
+**kurgusal** iş kolu (gerçek marka, logo, reklam ağı ve gerçek para
+sistemi yok). Kabul edilirse ücret **paylaşım yapılınca** ödeniyor;
+iki yıl içinde paylaşım yapılmazsa anlaşma ödenmeden düşüyor. Ünün
+küçük sosyal etkileri için dört olay eklendi; tanışmada kişi yalnızca
+buluşma kabul edilirse üretiliyor ve hiçbiri romantik teklif değil.
+Platform başına paylaşım sayacı bağımsız kalmaya devam ediyor. Kayıt
+biçimi **sürüm 24**. Sayılar **Q-079**'da.
+
+**Aktiviteler → Seyahat (Paket 11):** Kısa gezi sistemi eklendi; kalıcı
+taşınmadan **ayrı**. Şehir, yolculuk türü (otobüs/tren/uçak) ve
+istenirse bir yakın seçiliyor; ücret önceden görünüyor, cüzdan
+yetmiyorsa düğme yerine gerekçe çıkıyor. "Kendi arabanla" seçeneği
+yalnızca gerçekten arabası, otomobil ehliyeti ve yeterli araç
+kondisyonu olan oyuncuya açılıyor. Eş, sevgili, çocuk, arkadaş, anne
+veya babayla gidilebiliyor; vefat etmiş kişi, bebek çocuk ve başka
+şehirdeki tanıdık listede görünmüyor. Her gezi günlüğe şehir, yaş,
+kiminle gidildiği, gerçek harcama ve kısa bir anıyla yazılıyor; dört
+özgün gezi olayı yıllar sonra aynı kişiyle yapılan geziyi
+hatırlatabiliyor. Gezi yaşanan veya doğulan şehri **değiştirmiyor**.
+Kayıt biçimi **sürüm 25**. Sayılar **Q-080**'de.
+
+**Test durumu (Paket 9-11 sonrası, gerçekten çalıştırıldı):**
+`flutter analyze` temiz; `flutter test` **884 geçti, 10 atlandı, 0
+başarısız**. Atlanan 10 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
+çalışan ekran görüntüsü testleridir. Uçtan uca zincir (eğitim → iş →
+maaş → zam → iş değişimi → sosyal medya → gelir → sponsorluk → gezi →
+yaş alma → kapat/aç) tek testte sınanıyor. Kayıt göçü **yalnızca
+sentetik kayıtlarla** sınandı; gerçek cihazdan alınmış eski kayıt
+dosyası kullanılmadı. **Gerçek Windows veya Android cihazda
+oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
