@@ -1918,5 +1918,53 @@ Yani **26 yaşını bekâr geçiren ya da bir kez ayrılan oyuncu, ömrünün ge
 5. Zayıflayan bağ yeniden görüşmekle **hızla** geri kazanılabilmeli mi, yoksa kaybedilen emek geri gelmemeli mi? Şu an normal etkileşim kazancıyla geri gelir, özel bir "araya girmiş mesafeyi kapatma" mekaniği yok.
 6. Bağ belli bir eşiğin altına inince bir **olay** çıkmalı mı ("çok uzaklaştınız")? Şu an yalnızca günlüğe satır düşüyor.
 
+
+### Q-093 — Teklif/düğün ayrımı, yakınlaşma ve gebelik ihtimali
+**Durum:** Yön ve akış **Faho tarafından kararlaştırıldı** (21 Eylül 2026, doğrudan talimat). **Sayılar, metinler ve açık uçlar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 25, `app/lib/data/wedding_catalog.dart`, `app/lib/domain/interaction/intimacy.dart`, `app/lib/domain/interaction/marriage_engine.dart`.
+
+**Faho'nun talimatı (özet):** Evlenme teklifi **ücretsiz** olsun; kabul edilirse **paraya göre düğün seçenekleri** gelsin (salon, arkadaşlarla parti, aile arasında). Böylece 60.000 ₺ duvarı kalksın. Teklif için de seçenekler olsun (romantik yemek, tatilde, arkadaşlarla küçük organizasyon). "Çocuk yap" yerine daha makul bir seçenek gelsin — "ilişkiye gir" sert kalır, emojiyle ne olduğu vurgulansın. Yakınlaşmada **korunarak / korunmadan** seçimi olsun. "Çocuk yap" deyince doğrudan çocuk olması iyi değil: **ihtimal** olmalı, oyuncu veya eşi **kısır** olabilmeli. İleride Aktiviteler içinde sağlık menüsü ve **tüp bebek tedavisi** olabilir.
+
+**Uygulanan akış:**
+
+*1. Teklif (bedelsiz).* Dört biçim: **Sade bir an** (masrafsız), **Romantik bir yemek** (3.500 ₺), **Arkadaşlarınla küçük bir sürpriz** (7.000 ₺), **Tatile götür, orada sor** (22.000 ₺). Hazırlık kabul ihtimaline sırasıyla +0 / +0,08 / +0,12 / +0,18 ekler — **yanıtı satın almaz**. Masraf **reddedilse de ödenir**: ayrılan masa, alınan bilet geri gelmez.
+
+*2. Düğün (kabulden sonra, cüzdana göre).* **Sadece nikâh** (masrafsız), **Aile arasında** (18.000 ₺), **Arkadaşlarınla parti** (45.000 ₺), **Düğün salonu** (90.000 ₺). Pahalı seçenekler gizlenmez, **kapalı gösterilir ve nedeni yazılır**. Evlilik ancak düğünle kurulur; "evet" ile düğün arasındaki durum **kayda girer**, uygulama kapansa da kaybolmaz.
+
+*3. Yakınlaşma.* "Çocuk sahibi olun" düğmesi kaldırıldı; yerine **"Baş başa kalın 💞"** geldi. Sahne anlatılmaz. Ardından **Korunarak** / **Korunmadan** seçimi çıkar.
+
+*4. Gebelik ihtimali.* Korunulursa gebelik olmaz. Korunmazsa temel ihtimal **%45**; kadının yaşına göre çarpan 29'a kadar 1,0 · 30-34 arası 0,8 · 35-39 arası 0,5 · 40-44 arası 0,25 · 45'ten sonra 0. Aynı yıl ikinci deneme ihtimali **katlamaz**.
+
+*5. Kısırlık.* Oyuncu hayat başında, partner ilişki kurulurken **%8** ihtimalle kısır belirlenir. **Gizlidir:** oyuncuya söylenmez, denedikçe anlaşılır. Dört başarısız denemeden sonra "bir süredir deniyorsunuz ama olmuyor; bir hekime görünmek iyi gelebilir" denir — **"kısırsın" denmez**.
+
+**Kaldırılan iki duvar:**
+- Evlenmenin **60.000 ₺** koşulu. (Ölçüm: sevgilisi olan 44 hayattan yalnızca 25'i teklif verebilecek duruma geliyordu, engel neredeyse hep paraydı.)
+- Çocuğun **20.000 ₺** koşulu. "Paran yok, o yüzden hamile kalmadın" diye bir şey olmaz; masraf doğumda **cüzdanda ne varsa o kadar** tahsil edilir, borç yazılmaz ve bakiye eksiye inmez.
+- Evlilik dışı çocuk için aranan **yakınlık 60** eşiği. Çocuk artık bir düğmeyle değil ihtimalle geldiği için eşik gebeliği *sessizce* engelliyordu; evlilik dışı çocuk zaten serbest (D-047).
+
+**Ölçüm** (60 hayat, sonuna kadar, olay seçimleri rastgele; oyuncu evlenmek ve çocuk sahibi olmak istiyor):
+
+| | Önce | Sonra |
+|---|---|---|
+| Hayatında sevgilisi oldu | 44/60 | 44/60 |
+| **Evlendi** | teklif verebilen 25/60 | **36/60** |
+| Çocuğu oldu | — | **20/60** (1-4 çocuk) |
+| Seçilen düğün | — | 33 nikâh, 2 salon, 1 parti |
+
+Düğünlerin çoğunun nikâh olması beklenen sonuç: evlenme yaşında cüzdan genelde boş. Önemli olan artık **kimsenin parasızlık yüzünden evlenemeden kalmaması**.
+
+**Karar soruları:**
+1. Tutarlar uygun mu? Teklif 3.500 / 7.000 / 22.000 ₺; düğün 0 / 18.000 / 45.000 / 90.000 ₺.
+2. Hazırlığın kabul ihtimaline katkısı (+0,08 / +0,12 / +0,18) fazla mı? Şu an tatilde teklif, sade teklife göre belirgin biçimde daha çok kabul alıyor.
+3. **Korunmanın başarısızlığı modellenmeli mi?** Şu an korunulursa gebelik **hiç** olmuyor. Küçük bir ihtimal (ör. %2) gerçekçi olur ama beklenmedik çocuk doğurur.
+4. Gebelik ihtimali %45 ve yaş çarpanları doğru mu? Bir yıl = bir deneme sayılıyor.
+5. Kısırlık oranı **%8 + %8** (yani çiftlerin yaklaşık %15'i) uygun mu? Gerçeğe yakın ama oyunda ağır gelebilir.
+6. **Gebelik süreci istenir mi?** Şu an "korunmadan yakınlaşma → o yıl bebek". Dokuz aylık bir hamilelik durumu (ve buna bağlı olaylar) ayrı bir tasarım işi.
+7. Doğum masrafının "cüzdanda ne varsa o kadar" tahsil edilmesi doğru mu, yoksa borç mu yazılmalı?
+8. **Tüp bebek (Faho'nun notu: "ileride"):** Aktiviteler → Sağlık menüsü ve tedavi henüz **yapılmadı**. Tedavinin bedeli, başarı ihtimali ve kaç kez denenebileceği kararlaştırılmalı. Şu an kısır bir çiftin hiçbir çıkış yolu yok; evlat edinme (D-049) duruyor.
+9. Düğün, Ün açıksa küçük bir Ün payı veriyor (parti +1, salon +2); Ün kapalıysa **açılmıyor** (D-027). Düğün Ün doğurmalı mı?
+10. Boşanan ya da dul kalan yeniden evlenemiyor (Q-063, ikinci evlilik yok). Yeni akışla birlikte bu eksiklik daha görünür oldu.
+
+**Yan karar (kural gereği):** Kayıt biçimi **29**'a çıktı. Kalıcı testin zorunlu kıldığı **beş sürümlük pencere** kuralı gereği okunabilir taban 23'ten **24**'e yükseldi. Sürüm 23 kayıtları artık açılmıyor — dosya **silinmiyor**, anlaşılır mesaj gösteriliyor. Eski kayıtlarda bekleyen düğün yoktur, deneme sayacı sıfırdan başlar ve **kimse kısır sayılmaz**; geriye dönük gizli bir engel yazılmaz.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
