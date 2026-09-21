@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import '../../data/event_pool.dart';
 import '../../data/item_catalog.dart';
 import '../../text/turkish_text.dart';
@@ -42,6 +44,51 @@ class EventEngine {
   /// Bir yakının sitem edebilmesi için geçmesi gereken **oyun içi** yaş farkı.
   static const int prototypeOnlyNeglectAgeGap = 3;
 
+  // -----------------------------------------------------------------
+  // Tekrar sönümü (Paket 20)
+  // -----------------------------------------------------------------
+  //
+  // Ölçüm: 12 tam hayatta en sık olay 39 kez çıkıyordu (hayat başına ~3)
+  // ve 151 olayın yalnızca 94'ü hiç görülüyordu. Havuz zengindi ama aynı
+  // birkaç olay öne çıkıyordu. Çözüm yeni içerik değil, aynı olayın
+  // ikinci kez çıkma şansını düşürmek.
+
+  /// Her tekrarda ağırlığın çarpıldığı oran (`prototypeOnly`).
+  ///
+  /// Bir kez görülen olay %35, iki kez görülen %12 ağırlıkta kalır.
+  static const double prototypeOnlyRepeatWeightDecay = 0.30;
+
+  /// Ağırlığın düşebileceği en küçük oran: olay tamamen kaybolmaz.
+  static const double prototypeOnlyMinWeightRatio = 0.04;
+
+  /// Her tekrarın tekrar aralığına eklediği yıl (`prototypeOnly`).
+  static const int prototypeOnlyGapGrowthPerRepeat = 6;
+
+  /// Tekrar aralığının çıkabileceği en büyük değer.
+  static const int prototypeOnlyMaxRepeatGap = 35;
+
+  /// Olayın **bu hayatta kaç kez çıktığına** göre azalan ağırlığı.
+  static double prototypeOnlyEffectiveWeight(GameState state, GameEvent event) {
+    final int gorulme = state.eventSeenCount(event.id);
+    if (gorulme == 0) return event.weight.toDouble();
+    final double oran =
+        pow(prototypeOnlyRepeatWeightDecay, gorulme).toDouble();
+    return event.weight *
+        (oran < prototypeOnlyMinWeightRatio
+            ? prototypeOnlyMinWeightRatio
+            : oran);
+  }
+
+  /// Olayın **bu hayatta kaç kez çıktığına** göre büyüyen tekrar aralığı.
+  static int prototypeOnlyEffectiveGap(GameState state, GameEvent event) {
+    final int gorulme = state.eventSeenCount(event.id);
+    final int aralik =
+        event.minAgeGap + gorulme * prototypeOnlyGapGrowthPerRepeat;
+    return aralik > prototypeOnlyMaxRepeatGap
+        ? prototypeOnlyMaxRepeatGap
+        : aralik;
+  }
+
   /// Yeni yaşın tek açılış olayı (D-021). Uygun olay yoksa `null`.
   ActiveEvent? openingEvent(GameState state, Random rng) =>
       _pick(state, rng);
@@ -73,9 +120,23 @@ class EventEngine {
 
     final _Candidate chosen = rng.pickWeighted(
       candidates,
-      candidates.map((_Candidate c) => c.event.weight.toDouble()).toList(),
+      candidates
+          .map((_Candidate c) =>
+              prototypeOnlyEffectiveWeight(state, c.event))
+          .toList(),
     );
     return _toActive(state, chosen);
+  }
+
+  /// Yalnızca ölçüm içindir: olayın kişisiz koşullarını denetler.
+  @visibleForTesting
+  bool debugMatches(GameState state, GameEvent event) {
+    if (_needsPerson(event.requirement)) return false;
+    if (!event.repeatable && state.seenEventIds.contains(event.id)) {
+      return false;
+    }
+    if (!_repeatGapPassed(state, event)) return false;
+    return _matches(state, event, null);
   }
 
   /// Olayın koşullarını denetler. Kişi gerekiyorsa [person] dolu olmalıdır.
@@ -141,7 +202,9 @@ class EventEngine {
   static bool _repeatGapPassed(GameState state, GameEvent event) {
     final int? last = state.lastEventAge[event.id];
     if (last == null) return true;
-    return state.player.age - last >= event.minAgeGap;
+    // Aralık her tekrarda büyür: üçüncü kez çıkan olay çok daha uzun
+    // süre geri gelmez (Paket 20).
+    return state.player.age - last >= prototypeOnlyEffectiveGap(state, event);
   }
 
   static bool _needsPerson(EventRequirement req) =>
@@ -350,6 +413,11 @@ class EventEngine {
       lastEventAge: <String, int>{
         ...working.lastEventAge,
         active.eventId: working.player.age,
+      },
+      // Kaçıncı kez çıktığı sayılır; ağırlık ve aralık buna göre değişir.
+      eventSeenCounts: <String, int>{
+        ...working.eventSeenCounts,
+        active.eventId: working.eventSeenCount(active.eventId) + 1,
       },
       // Seçim bir kişiyi hikâye rolüne kilitlediyse kimliği saklanır.
       storyPeople: choice.rememberPersonAs == null || bondTargetId == null

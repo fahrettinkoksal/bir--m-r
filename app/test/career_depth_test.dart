@@ -128,7 +128,9 @@ void main() {
     });
 
     test('eski kayıtta kariyer geçmişi yok ama iş kaydı bozulmaz', () {
-      // Sürüm 22 kaydı: seviye, maaş ve geçmiş alanları hiç yok.
+      // Desteklenen en eski kayıt (sürüm 23): seviye, maaş ve geçmiş
+      // alanları hiç yok. Taban beş sürümlük pencereyle birlikte
+      // yükseldiği için sürüm numarası da güncellenir.
       final GameState calisan = iseGir(mezun(), magaza);
       final Map<String, Object?> body =
           Map<String, Object?>.from(encodeGameState(calisan));
@@ -144,7 +146,7 @@ void main() {
       body['career'] = career;
 
       final GameState geri =
-          decodeGameState(SaveMigrations.migrate(body, 22));
+          decodeGameState(SaveMigrations.migrate(body, kMinReadableSaveVersion));
       expect(geri.career.jobId, magaza.id);
       expect(geri.career.level, 0);
       expect(geri.career.history, isEmpty);
@@ -152,8 +154,8 @@ void main() {
       expect(geri.career.yearlySalary, magaza.yearlySalary);
     });
 
-    test('kayıt sürümü 27 ve kariyer geçmişi kayda girer', () {
-      expect(kSaveFormatVersion, 27);
+    test('kayıt sürümü 28 ve kariyer geçmişi kayda girer', () {
+      expect(kSaveFormatVersion, 28);
       GameState s = iseGir(mezun(age: 25), magaza);
       s = kabulEdilenTalep(s, terfi: false);
       s = market.quit(s).state;

@@ -45,6 +45,7 @@ class GameState {
     this.items = const <OwnedItem>[],
     this.seenEventIds = const <String>{},
     this.lastEventAge = const <String, int>{},
+    this.eventSeenCounts = const <String, int>{},
     this.storyPeople = const <String, String>{},
     this.gifts = const <GiftRecord>[],
     this.pendingEvent,
@@ -209,6 +210,17 @@ class GameState {
   /// olarak tekrar eden olaylar art arda değil, uygun yaş farkıyla gelir
   /// (bkz. [GameEvent.minAgeGap]).
   final Map<String, int> lastEventAge;
+
+  /// Her olayın bu hayatta **kaç kez** çıktığı (Paket 20).
+  ///
+  /// `seenEventIds` yalnızca "çıktı mı" sorusunu yanıtlıyordu; tekrar eden
+  /// olaylar bu yüzden bir hayatta üç dört kez görülebiliyordu. Sayaç,
+  /// olayın ağırlığını her tekrarda düşürmek ve tekrar aralığını büyütmek
+  /// için kullanılır.
+  final Map<String, int> eventSeenCounts;
+
+  /// Bir olayın bu hayatta kaç kez çıktığı.
+  int eventSeenCount(String eventId) => eventSeenCounts[eventId] ?? 0;
 
   /// Hikâye rolüne kilitlenmiş kişiler: `'<rol>' -> kişiKimliği`.
   ///
@@ -588,6 +600,7 @@ class GameState {
     List<OwnedItem>? items,
     Set<String>? seenEventIds,
     Map<String, int>? lastEventAge,
+    Map<String, int>? eventSeenCounts,
     Map<String, String>? storyPeople,
     List<GiftRecord>? gifts,
     Object? pendingEvent = _unsetEvent,
@@ -638,6 +651,7 @@ class GameState {
       items: items ?? this.items,
       seenEventIds: seenEventIds ?? this.seenEventIds,
       lastEventAge: lastEventAge ?? this.lastEventAge,
+      eventSeenCounts: eventSeenCounts ?? this.eventSeenCounts,
       storyPeople: storyPeople ?? this.storyPeople,
       gifts: gifts ?? this.gifts,
       pendingEvent: pendingEvent == _unsetEvent

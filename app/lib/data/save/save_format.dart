@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 27;
+const int kSaveFormatVersion = 28;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 ///
@@ -19,7 +19,7 @@ const int kSaveFormatVersion = 27;
 /// kaymaz, yoksa eski kayıtlar sessizce açılamaz hâle gelir. Daha eski
 /// bir kayıt açılmak istenirse oyuncuya anlaşılır bir mesaj gösterilir
 /// ve **kayıt silinmez**.
-const int kMinReadableSaveVersion = 22;
+const int kMinReadableSaveVersion = 23;
 
 /// Kayıt dosyası okunamadığında atılır.
 ///
@@ -66,12 +66,30 @@ abstract final class SaveMigrations {
       );
     }
     Map<String, Object?> guncel = body;
-    if (from <= 22) guncel = _v22ToV23(guncel);
     if (from <= 23) guncel = _v23ToV24(guncel);
     if (from <= 24) guncel = _v24ToV25(guncel);
     if (from <= 25) guncel = _v25ToV26(guncel);
     if (from <= 26) guncel = _v26ToV27(guncel);
+    if (from <= 27) guncel = _v27ToV28(guncel);
     return guncel;
+  }
+
+  /// Sürüm 27 → 28: olayların kaç kez çıktığı sayılmaya başlandı
+  /// (Paket 20).
+  ///
+  /// Eski kayıtlarda sayaç yok. Görülmüş her olay **bir kez** görülmüş
+  /// sayılır; böylece devam eden hayatlarda tekrar sönümü sıfırdan
+  /// başlamaz ama uydurma bir sayı da yazılmaz.
+  static Map<String, Object?> _v27ToV28(Map<String, Object?> body) {
+    if (body.containsKey('eventSeenCounts')) return body;
+    final Object? gorulen = body['seenEventIds'];
+    final Map<String, int> sayaclar = <String, int>{};
+    if (gorulen is List) {
+      for (final Object? id in gorulen) {
+        if (id is String) sayaclar[id] = 1;
+      }
+    }
+    return <String, Object?>{...body, 'eventSeenCounts': sayaclar};
   }
 
   /// Sürüm 26 → 27: okul başarısı eklendi (Paket 13).
@@ -108,13 +126,11 @@ abstract final class SaveMigrations {
   /// geçmişi boştur. **Geriye dönük iş geçmişi uydurulmaz**: oyuncunun
   /// önceki işleri `pastJobIds` içinde durduğu gibi kalır. İş arkadaşı da
   /// geriye dönük üretilmez; yeni işe girildiğinde tanışılır.
-  static Map<String, Object?> _v22ToV23(Map<String, Object?> body) => body;
-
   // ---------------------------------------------------------------
   // Daha eski sürümler
   //
   // **Faho'nun kararı (Paket 12):** geriye dönük olarak yalnızca son beş
-  // sürüm taşınır. Sürüm 20 ve öncesine ait dönüştürme adımları bu
+  // sürüm taşınır. Sürüm 22 ve öncesine ait dönüştürme adımları bu
   // yüzden kaldırıldı; gerekirse sürüm geçmişinden geri alınabilirler.
   // Taban (`kMinReadableSaveVersion`) düşürülmeden bu adımlar zaten hiç
   // çalışmıyordu.

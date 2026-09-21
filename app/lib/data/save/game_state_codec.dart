@@ -57,6 +57,7 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'items': state.items.map(_encodeItem).toList(growable: false),
       'seenEventIds': state.seenEventIds.toList(growable: false),
       'lastEventAge': state.lastEventAge,
+      'eventSeenCounts': state.eventSeenCounts,
       'storyPeople': state.storyPeople,
       'gifts': state.gifts.map(_encodeGift).toList(growable: false),
       'pendingEvent': state.pendingEvent == null
@@ -564,6 +565,8 @@ GameState decodeGameState(Map<String, Object?> json) {
     ),
     seenEventIds: Set<String>.unmodifiable(_stringSet(json, 'seenEventIds')),
     lastEventAge: Map<String, int>.unmodifiable(_intMap(json, 'lastEventAge')),
+    eventSeenCounts:
+        Map<String, int>.unmodifiable(_intMap(json, 'eventSeenCounts')),
     storyPeople: Map<String, String>.unmodifiable(
       _stringMap(json, 'storyPeople'),
     ),

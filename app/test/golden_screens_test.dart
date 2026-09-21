@@ -101,6 +101,11 @@ void main() {
 
   tearDown(() => controller.dispose());
 
+  // Denetleyici değiştirilip yeniden pump edildiğinde Flutter aynı
+  // State'i koruyor ve yeni denetleyici hiç kullanılmıyordu; anahtar
+  // denemeye göre değişir.
+  int pumpDeneme = 0;
+
   Future<void> pumpPhone(
     WidgetTester tester, {
     ThemeMode themeMode = ThemeMode.light,
@@ -111,6 +116,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       BirOmurApp(
+        key: ValueKey<int>(pumpDeneme++),
         controller: controller,
         themeMode: themeMode,
         // Ekran görüntüsü alırken ses eklentisi yok; sessiz servis
@@ -295,19 +301,22 @@ void main() {
   testWidgets('ayrılıktan sonra aynı kişi eski sevgili olarak kalır',
       (WidgetTester tester) async {
     // Bu ekran romantik zincirin tamamlandığı bir hayat ister. Olay
-    // havuzu büyüdükçe aynı tohumdaki akış değiştiği için bu tek test
-    // sabit ve ayrı bir tohum kullanır (7 ve 11 ile zincir tamamlanmıyor).
-    controller.dispose();
-    controller = GameController(random: Random(12));
-    await startLife(tester);
-    await advanceUntil(
-      tester,
-      () => personWith(RelationType.sevgili) != null,
-      prefer: <String>['selam', 'teklif'],
-      maxAges: 60,
-    );
-    final Person? partner = personWith(RelationType.sevgili);
-    expect(partner, isNotNull);
+    // havuzu her büyüdüğünde aynı tohumdaki akış değiştiği için tohum
+    // sabitlenmez: zinciri tamamlayan ilk tohum kullanılır.
+    Person? partner;
+    for (int deneme = 0; deneme < 25 && partner == null; deneme++) {
+      controller.dispose();
+      controller = GameController(random: Random(12 + deneme));
+      await startLife(tester);
+      await advanceUntil(
+        tester,
+        () => personWith(RelationType.sevgili) != null,
+        prefer: <String>['selam', 'teklif'],
+        maxAges: 60,
+      );
+      partner = personWith(RelationType.sevgili);
+    }
+    expect(partner, isNotNull, reason: 'Hiçbir tohumda sevgili edinilemedi.');
 
     await openTab(tester, 'iliskiler');
     // İlişkiler menüsü büyüdü; satırlar kaydırılarak açılır.

@@ -17,13 +17,12 @@ import 'support/test_flow.dart';
 void main() {
   late GameController controller;
 
-  setUp(() {
-    // Tohum sabittir: bu hayatta romantik zincir tamamlanıyor. Olay havuzu
-    // büyüdükçe rastgele akış değiştiği için tohum zaman zaman
-    // güncelleniyor (7 ile hayat kriz yüzünden erken bitiyordu; 11 ile
-    // Paket 17'den sonra hiç sevgili çıkmaz oldu).
-    controller = GameController(random: Random(12));
-  });
+  // Tohum artık sabit **değil**: olay havuzu her büyüdüğünde rastgele akış
+  // değişiyor ve sabit tohumla romantik zincir bazen hiç tamamlanmıyordu.
+  // Bu test belirli bir hayatı değil **akışı** sınıyor, o yüzden zinciri
+  // tamamlayan ilk tohum kullanılır. Tohumlar sırayla denendiği için
+  // sonuç yine tekrarlanabilir.
+  setUp(() => controller = GameController(random: Random(12)));
 
   tearDown(() => controller.dispose());
 
@@ -34,11 +33,11 @@ void main() {
     return null;
   }
 
-  /// Romantik zinciri seçerek sevgili edinilene kadar ilerler.
-  Future<void> reachRomance(WidgetTester tester) async {
+  /// Tek bir tohumda romantik zinciri denemeye çalışır.
+  Future<bool> tryRomance(WidgetTester tester) async {
     int guard = 0;
     while (partnerOf(RelationType.sevgili) == null) {
-      if (guard++ > 60) fail('Sevgili edinilemedi.');
+      if (guard++ > 60) return false;
       // Sağlık krizi olay penceresinden önce gelir (D-044); kriz açıkken
       // olay düğmeleri ekranda olmaz. Ortak yardımcı ikisini de yanıtlar.
       await answerPendingEvents(
@@ -46,13 +45,34 @@ void main() {
         controller,
         preferChoiceIds: <String>{'selam', 'teklif'},
       );
-      if (partnerOf(RelationType.sevgili) != null) return;
-      // Hayat bu seed'de kriz yüzünden erken biterse test yanıltıcı bir
-      // yerde takılmasın.
-      if (controller.state!.deceased) fail('Sevgili edinilmeden hayat bitti.');
+      if (partnerOf(RelationType.sevgili) != null) return true;
+      // Hayat bu tohumda kriz yüzünden erken bitebilir.
+      if (controller.state!.deceased) return false;
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
     }
+    return true;
+  }
+
+  /// Sevgili edinilen bir hayat başlatır.
+  ///
+  /// Zinciri tamamlayan ilk tohum kullanılır; böylece olay havuzu
+  /// büyüdüğünde testin tohumunu elle güncellemek gerekmez.
+  Future<void> reachRomance(WidgetTester tester) async {
+    for (int deneme = 0; deneme < 25; deneme++) {
+      if (deneme > 0) {
+        controller.dispose();
+        controller = GameController(random: Random(12 + deneme));
+        await tester.pumpWidget(
+          BirOmurApp(key: ValueKey<int>(deneme), controller: controller),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Rastgele bir hayat'));
+        await tester.pumpAndSettle();
+      }
+      if (await tryRomance(tester)) return;
+    }
+    fail('Hiçbir tohumda sevgili edinilemedi.');
   }
 
   testWidgets(

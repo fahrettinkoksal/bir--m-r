@@ -288,7 +288,13 @@ void main() {
       oyun = engine.resolve(oyun.copyWith(pendingEvent: ilk), 'kal');
       expect(oyun.lastEventAge['bayram_ziyareti'], 10);
 
-      for (int yas = 11; yas < 10 + bayram.minAgeGap; yas++) {
+      // Aralık her tekrarda büyür (Paket 20): bir kez görülmüş olay için
+      // beklenen aralık, olayın kendi aralığı **artı** büyüme payıdır.
+      final int beklenenAralik =
+          EventEngine.prototypeOnlyEffectiveGap(oyun, bayram);
+      expect(beklenenAralik, greaterThan(bayram.minAgeGap));
+
+      for (int yas = 11; yas < 10 + beklenenAralik; yas++) {
         final GameState ara =
             oyun.copyWith(player: oyun.player.copyWith(age: yas));
         expect(engine.openingEvent(ara, Random(yas)), isNull,
@@ -296,7 +302,7 @@ void main() {
       }
 
       final GameState sonra = oyun.copyWith(
-        player: oyun.player.copyWith(age: 10 + bayram.minAgeGap),
+        player: oyun.player.copyWith(age: 10 + beklenenAralik),
       );
       expect(engine.openingEvent(sonra, Random(1)), isNotNull,
           reason: 'Aralık dolunca doğal tekrar yeniden mümkün olmalı');

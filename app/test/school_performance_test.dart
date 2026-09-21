@@ -276,8 +276,8 @@ void main() {
       expect(geri.education.droppedOut, isFalse);
     });
 
-    test('kayıt sürümü 27 ve eski kayıtta not ortalaması yoktur', () {
-      expect(kSaveFormatVersion, 27);
+    test('kayıt sürümü 28 ve eski kayıtta not ortalaması yoktur', () {
+      expect(kSaveFormatVersion, 28);
       final GameState s = ogrenci(age: 17, grade: 11, average: 70);
       final Map<String, Object?> body =
           Map<String, Object?>.from(encodeGameState(s));
