@@ -14,6 +14,7 @@ import 'life_log.dart';
 import 'life_summary.dart';
 import 'marriage.dart';
 import 'parental_status.dart';
+import 'pending_notice.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
 import 'pending_license_exam.dart';
@@ -73,6 +74,7 @@ class GameState {
     this.marriage,
     this.generation = 1,
     this.proposalAges = const <String, int>{},
+    this.notices = const <PendingNotice>[],
   });
 
   /// Üretimde kullanılan tohum. Tekrarlanabilir test senaryosu içindir;
@@ -327,6 +329,18 @@ class GameState {
   /// buraya bakar (D-037).
   final Marriage? marriage;
 
+  /// Oyuncuya gösterilmeyi bekleyen önemli haberler (D-050).
+  ///
+  /// Ölüm, miras ve cenaze bildirimleri sırayla gösterilir; bekleyen
+  /// bildirim kayıtla birlikte saklanır ve uygulama kapatılıp açılınca
+  /// kaybolmaz. Aynı bildirim iki kez kuyruğa girmez.
+  final List<PendingNotice> notices;
+
+  bool get hasNotice => notices.isNotEmpty;
+
+  /// Sıradaki bildirim; yoksa `null`.
+  PendingNotice? get nextNotice => notices.isEmpty ? null : notices.first;
+
   /// Teklif ve başvuru geçmişi: `anahtar -> yaş`.
   ///
   /// Anahtar bir **kişi kimliğidir** (evlenme teklifi, D-048) ya da
@@ -556,6 +570,7 @@ class GameState {
     Object? marriage = _unsetEvent,
     int? generation,
     Map<String, int>? proposalAges,
+    List<PendingNotice>? notices,
   }) {
     return GameState(
       seed: seed,
@@ -615,6 +630,7 @@ class GameState {
           marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
       generation: generation ?? this.generation,
       proposalAges: proposalAges ?? this.proposalAges,
+      notices: notices ?? this.notices,
     );
   }
 }

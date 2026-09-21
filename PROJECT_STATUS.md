@@ -476,6 +476,22 @@ yeniden çizilmiyor) ve aynı başvuru iki kez çocuk veya ücret üretmiyor.
 Kayıt biçimi **sürüm 20** (teklif/başvuru geçmişi). Sayılar **Q-071,
 Q-072, Q-073**'te karar bekliyor.
 
+**Ölüm, cenaze ve miras bildirimleri (Paket 4, D-050):** Oyuncuyu
+doğrudan etkileyen kayıplar artık günlüğe sessizce satır eklemekle
+kalmıyor: ekranda kısa ve saygılı bir bildirim çıkıyor, kişinin adı ve
+gerçek bağı yazıyor. Miras bildirimi **yalnızca gerçekten bir şey
+kaldığında** çıkıyor ve hangi kişiden ne kadar para/hangi eşya kaldığını
+söylüyor. Eş, anne, baba, çocuk ve kardeş vefatında **cenaze masrafına
+katkı** soruluyor: tutar önceden görünüyor, ödeme cüzdandan bir kez
+düşüyor ve cüzdan eksiye düşmüyor (parası yetmeyene kısmi katkı seçeneği
+çıkıyor, hiç parası yoksa yalnızca "katkıda bulunma" kalıyor). Katkı
+zorunlu borç değil, mirasın ön koşulu değil ve cenazeye katılmayı
+engellemiyor. Mutluluk etkisi **yalnızca gerçekten uygulandığı kadar**
+gösteriliyor (mutluluk 0 ise sahte "-puan" yok). Bildirimler sırayla
+geliyor, bekleyen olayı ezmiyor, iki kez açılmıyor ve kayıtla birlikte
+saklanıyor. Kayıt biçimi **sürüm 21**. Tutarlar **Q-074**'te karar
+bekliyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

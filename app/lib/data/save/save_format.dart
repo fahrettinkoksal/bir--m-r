@@ -7,7 +7,7 @@ library;
 /// artırılır ve [SaveMigrations] içine bir dönüştürme adımı eklenir.
 /// Sürüm bilgisi kayıt dosyasının **en dış** katmanındadır; böylece içerik
 /// şeması değişse bile dosyanın hangi sürüme ait olduğu her zaman okunabilir.
-const int kSaveFormatVersion = 20;
+const int kSaveFormatVersion = 21;
 
 /// Bu sürümün okuyabildiği **en eski** biçim.
 const int kMinReadableSaveVersion = 1;
@@ -74,8 +74,16 @@ abstract final class SaveMigrations {
     if (from <= 17) guncel = _v17ToV18(guncel);
     if (from <= 18) guncel = _v18ToV19(guncel);
     if (from <= 19) guncel = _v19ToV20(guncel);
+    if (from <= 20) guncel = _v20ToV21(guncel);
     return guncel;
   }
+
+  /// Sürüm 20 → 21: bekleyen bildirim kuyruğu eklendi (D-050).
+  ///
+  /// Eski kayıtlarda bildirim yoktur; kuyruk boş açılır. Geçmişte
+  /// yaşanmış ölümler için **geriye dönük bildirim üretilmez**: o olaylar
+  /// zaten hayat günlüğünde durur.
+  static Map<String, Object?> _v20ToV21(Map<String, Object?> body) => body;
 
   /// Sürüm 19 → 20: evlenme teklifi kaydı eklendi (D-048).
   ///

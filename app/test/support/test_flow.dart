@@ -26,6 +26,8 @@ Future<void> answerPendingEvents(
   await tester.pumpAndSettle();
   // Sağlık krizi olay penceresinden önce gelir (D-044); önce o yanıtlanır.
   await answerPendingCrisis(tester, controller);
+  // Önemli haberler (ölüm, miras, cenaze) krizle olay arasında gelir.
+  await answerPendingNotices(tester, controller);
   int guard = 0;
   while (controller.state!.hasPendingEvent) {
     // Hayat tamamlandıysa olay ekranı açılmaz; vefat eden oyuncuya olay
@@ -86,6 +88,40 @@ Future<void> answerPendingCrisis(
   }
 }
 
+/// Ekranda bekleyen bildirim varsa kapatır (D-050).
+///
+/// Cenaze bildiriminde **katkıda bulunmama** seçeneği işaretlenir; böylece
+/// testler cüzdanı beklenmedik şekilde değiştirmez.
+Future<void> answerPendingNotices(
+  WidgetTester tester,
+  GameController controller,
+) async {
+  int guard = 0;
+  while (controller.state!.hasNotice) {
+    if (guard++ > 20) fail('Bildirimler kapanmıyor.');
+    await tester.pumpAndSettle();
+    final Finder katkisiz =
+        find.byKey(const Key('funeral_choice_katkiYok'));
+    final Finder kapat = find.byKey(const Key('notice_close'));
+    if (katkisiz.evaluate().isNotEmpty) {
+      await tester.tap(katkisiz);
+      await tester.pumpAndSettle();
+      // Seçimden sonra pencere "Tamam" ile kapanır.
+      if (find.byKey(const Key('notice_close')).evaluate().isNotEmpty) {
+        await tester.tap(find.byKey(const Key('notice_close')));
+        await tester.pumpAndSettle();
+      }
+    } else if (kapat.evaluate().isNotEmpty) {
+      await tester.tap(kapat);
+      await tester.pumpAndSettle();
+    } else {
+      // Pencere henüz açılmadıysa doğrudan yanıtlanır.
+      controller.dismissNotice();
+      await tester.pumpAndSettle();
+    }
+  }
+}
+
 /// Hedef yaşa, yol boyunca çıkan olayları yanıtlayarak ilerler.
 Future<void> ageTo(
   WidgetTester tester,
@@ -107,6 +143,12 @@ Future<void> ageTo(
 
 /// Arayüzsüz (domain) testler için: ekranda olay varsa seçim yaparak kapatır.
 void resolvePendingEvents(GameController controller, {String? preferChoiceId}) {
+  // Arayüzsüz testlerde bildirimler doğrudan kapatılır.
+  int noticeGuard = 0;
+  while (controller.state!.hasNotice) {
+    if (noticeGuard++ > 30) fail('Bildirimler kapanmıyor.');
+    controller.dismissNotice();
+  }
   // Arayüzsüz testlerde sağlık krizi de doğrudan yanıtlanır.
   int crisisGuard = 0;
   while (controller.state!.hasPendingCrisis) {

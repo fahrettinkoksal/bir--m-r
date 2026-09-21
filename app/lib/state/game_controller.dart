@@ -23,6 +23,8 @@ import '../domain/activities/activity_engine.dart';
 import '../domain/career/job_market.dart';
 import '../domain/education/education_path.dart';
 import '../domain/interaction/adoption.dart';
+import '../domain/life/notices.dart';
+import '../domain/models/pending_notice.dart';
 import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
@@ -959,6 +961,52 @@ class GameController extends ChangeNotifier {
   /// Sevgiliyle evlenir. Kişi kimliği değişmez; kayıt silinmez.
   FamilyOutcome? marry(String personId) =>
       _runFamily((GameState current) => _marriages.marry(current, personId));
+
+  // =====================================================================
+  // Bildirimler (D-050)
+  // =====================================================================
+
+  /// Sıradaki önemli haber; yoksa `null`.
+  PendingNotice? get pendingNotice => _state?.nextNotice;
+
+  /// Bilgilendirme bildirimini kapatır.
+  ///
+  /// Aynı bildirim bir daha açılmaz; kuyruktaki sıradaki habere geçilir.
+  void dismissNotice() {
+    final GameState? current = _state;
+    if (current == null || !current.hasNotice) return;
+    _state = Notices.dismissFirst(current);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Bu cenaze seçeneği şu an sunulabilir mi?
+  bool canChooseFuneral(FuneralChoice choice) {
+    final GameState? current = _state;
+    final PendingNotice? notice = current?.nextNotice;
+    if (current == null || notice == null) return false;
+    return Notices.canChoose(current, notice, choice);
+  }
+
+  /// Seçeneğin gerçekten ödenecek tutarı.
+  int funeralAmount(FuneralChoice choice) {
+    final GameState? current = _state;
+    final PendingNotice? notice = current?.nextNotice;
+    if (current == null || notice == null) return 0;
+    return Notices.amountFor(current, notice, choice);
+  }
+
+  /// Cenaze masrafı seçimini uygular; ödeme **bir kez** düşer.
+  String? respondToFuneral(FuneralChoice choice) {
+    final GameState? current = _state;
+    if (current == null || !current.hasNotice) return null;
+    final ({GameState state, String text}) sonuc =
+        Notices.respondToFuneral(current, choice);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
 
   /// Bu kişiye evlenme teklifi edilebilir mi?
   InteractionAvailability proposalAvailability(String personId) {

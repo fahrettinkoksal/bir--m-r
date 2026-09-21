@@ -36,6 +36,7 @@ import '../../domain/models/relation.dart';
 import '../../domain/models/stats.dart';
 import '../../domain/models/wealth.dart';
 import 'save_format.dart';
+import '../../domain/models/pending_notice.dart';
 
 // =====================================================================
 // Yazma
@@ -104,6 +105,21 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'movedOut': state.movedOut,
       'generation': state.generation,
       'proposalAges': state.proposalAges,
+      'notices': <Map<String, Object?>>[
+        for (final PendingNotice n in state.notices)
+          <String, Object?>{
+            'id': n.id,
+            'kind': n.kind.name,
+            'age': n.age,
+            'title': n.title,
+            'text': n.text,
+            'personId': n.personId,
+            'money': n.money,
+            'itemNames': n.itemNames,
+            'happinessDelta': n.happinessDelta,
+            'funeralCost': n.funeralCost,
+          },
+      ],
       'marriage': state.marriage == null
           ? null
           : <String, Object?>{
@@ -585,6 +601,13 @@ GameState decodeGameState(Map<String, Object?> json) {
     proposalAges: Map<String, int>.unmodifiable(
       _intMap(json, 'proposalAges'),
     ),
+    // Eski kayıtlarda bildirim kuyruğu yoktur; boş açılır ve geriye
+    // dönük bildirim üretilmez.
+    notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+      for (final Object? e
+          in (json['notices'] as List<Object?>? ?? const <Object?>[]))
+        _decodeNotice(_asMap(e, 'notice')),
+    ]),
     hardshipYears:
         json['hardshipYears'] == null ? 0 : _int(json, 'hardshipYears'),
     settings: json['settings'] == null
@@ -702,6 +725,24 @@ Marriage _decodeMarriage(Map<String, Object?> json) => Marriage(
         'marriage.status',
       ),
       endedAtAge: _intOrNull(json, 'endedAtAge'),
+    );
+
+PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
+      id: _string(json, 'id'),
+      kind: _enumByName(NoticeKind.values, _string(json, 'kind'), 'notice.kind'),
+      age: _int(json, 'age'),
+      title: _string(json, 'title'),
+      text: _string(json, 'text'),
+      personId: _stringOrNull(json, 'personId'),
+      money: json['money'] == null ? 0 : _int(json, 'money'),
+      itemNames: List<String>.unmodifiable(
+        json['itemNames'] == null
+            ? const <String>[]
+            : _stringList(json, 'itemNames'),
+      ),
+      happinessDelta:
+          json['happinessDelta'] == null ? 0 : _int(json, 'happinessDelta'),
+      funeralCost: json['funeralCost'] == null ? 0 : _int(json, 'funeralCost'),
     );
 
 Person _decodePerson(Map<String, Object?> json) {

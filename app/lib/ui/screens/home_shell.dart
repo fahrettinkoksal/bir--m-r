@@ -8,6 +8,8 @@ import '../widgets/bottom_action_bar.dart';
 import '../widgets/character_header.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
+import '../widgets/notice_sheet.dart';
+import '../../domain/models/pending_notice.dart';
 import 'life_screen.dart';
 import 'life_summary_screen.dart';
 import 'past_lives_screen.dart';
@@ -49,6 +51,27 @@ class _HomeShellState extends State<HomeShell> {
 
   /// Aynı anda yalnızca tek sağlık krizi penceresi açılır.
   bool _crisisVisible = false;
+
+  /// Aynı anda yalnızca tek bildirim penceresi açılır (D-050).
+  bool _noticeVisible = false;
+
+  /// Bekleyen önemli haberi gösterir.
+  ///
+  /// Sağlık krizinden **sonra**, olay penceresinden **önce** gelir; mevcut
+  /// bekleyen olay ezilmez, sırayla gösterilir.
+  void _showNotice(PendingNotice notice) {
+    if (_noticeVisible) return;
+    _noticeVisible = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final NavigatorState navigator =
+          Navigator.of(context, rootNavigator: true);
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
+      await NoticeSheet.show(context, notice);
+      if (!mounted) return;
+      setState(() => _noticeVisible = false);
+    });
+  }
 
   void _showCrisis() {
     if (_crisisVisible) return;
@@ -219,8 +242,14 @@ class _HomeShellState extends State<HomeShell> {
     // Sağlık krizi, olaylardan önce ekrana gelir (D-044).
     if (state.hasPendingCrisis) _showCrisis();
 
+    // Önemli haberler (ölüm, miras, cenaze) krizden sonra, olaydan önce.
+    final PendingNotice? notice = state.nextNotice;
+    if (notice != null && !state.hasPendingCrisis) _showNotice(notice);
+
     final ActiveEvent? pending = state.pendingEvent;
-    if (pending != null && !state.hasPendingCrisis) _showPendingEvent(pending);
+    if (pending != null && !state.hasPendingCrisis && !state.hasNotice) {
+      _showPendingEvent(pending);
+    }
 
     // Soldaki menü oyuncunun durumuna göre Okul veya Meslek olur (NAV-001).
     final List<BottomTab> tabs = <BottomTab>[

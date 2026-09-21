@@ -20,12 +20,15 @@ import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import '../life/notices.dart';
+import '../models/pending_notice.dart';
 import 'child_progression.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 import 'school_people.dart';
 import '../../text/turkish_text.dart';
+import '../../data/item_catalog.dart';
 
 /// **Yaş Al** işleminin durum üzerindeki etkisi (D-018).
 ///
@@ -141,7 +144,11 @@ class LifeProgression {
 
     // Ölümler: hayatın sonlu olduğunu hissettiren, yaşa bağlı bir eğilim.
     // Kayıtlar silinmez; kişi vefat etmiş olarak işaretlenir.
-    final ({List<Person> people, int happinessLoss}) olumSonucu = _applyDeaths(
+    final ({
+      List<Person> people,
+      int happinessLoss,
+      List<({Person person, String cause, int loss})> deaths,
+    }) olumSonucu = _applyDeaths(
       state: state,
       people: peopleWithEstates,
       newAge: newAge,
@@ -197,6 +204,33 @@ class LifeProgression {
         ),
         grief: advanced.grief + olumSonucu.happinessLoss,
       );
+    }
+
+    // Önemli kayıplar açıkça bildirilir (D-050). Mutluluğa **gerçekten**
+    // uygulanan düşüş yazılır: mutluluk zaten 0 ise sahte "-puan" olmaz.
+    if (olumSonucu.deaths.isNotEmpty) {
+      int kalanMutluluk = advanced.player.stats.happiness;
+      final List<PendingNotice> bildirimler = <PendingNotice>[];
+      for (final ({Person person, String cause, int loss}) olum
+          in olumSonucu.deaths) {
+        final int uygulanan = olum.loss.clamp(0, kalanMutluluk);
+        kalanMutluluk -= uygulanan;
+        if (!Notices.noticeRelations.contains(olum.person.relation)) continue;
+        bildirimler.add(
+          Notices.death(
+            person: olum.person,
+            playerAge: newAge,
+            cause: olum.cause,
+            happinessDelta: -uygulanan,
+          ),
+        );
+        if (Notices.funeralRelations.contains(olum.person.relation)) {
+          bildirimler.add(
+            Notices.funeral(person: olum.person, playerAge: newAge),
+          );
+        }
+      }
+      afterDeaths = Notices.enqueue(afterDeaths, bildirimler);
     }
 
     // Yas zamanla hafifler: her yıl kalan yasın bir bölümü mutluluğa geri
@@ -266,7 +300,11 @@ class LifeProgression {
   ///
   /// Kişi kaydı **silinmez**: yalnızca [Person.isAlive] false olur ve kişi
   /// hane listesinden düşer. Her yıl birinin ölmesi gerekmez.
-  ({List<Person> people, int happinessLoss}) _applyDeaths({
+  ({
+    List<Person> people,
+    int happinessLoss,
+    List<({Person person, String cause, int loss})> deaths,
+  }) _applyDeaths({
     required GameState state,
     required List<Person> people,
     required int newAge,
@@ -274,6 +312,8 @@ class LifeProgression {
   }) {
     int mutlulukKaybi = 0;
     final List<Person> sonuc = <Person>[];
+    final List<({Person person, String cause, int loss})> olenler =
+        <({Person person, String cause, int loss})>[];
 
     for (final Person person in people) {
       if (!person.isAlive) {
@@ -287,7 +327,9 @@ class LifeProgression {
 
       final String gerekce = Mortality.causeFor(person.age, _rng);
       sonuc.add(person.copyWith(isAlive: false, inPlayerHousehold: false));
-      mutlulukKaybi += Mortality.prototypeOnlyHappinessLoss(person);
+      final int kayip = Mortality.prototypeOnlyHappinessLoss(person);
+      mutlulukKaybi += kayip;
+      olenler.add((person: person, cause: gerekce, loss: kayip));
 
       final String etiket = person.possessiveFor(newAge);
       log.add(
@@ -300,7 +342,11 @@ class LifeProgression {
       );
     }
 
-    return (people: sonuc, happinessLoss: mutlulukKaybi);
+    return (
+      people: sonuc,
+      happinessLoss: mutlulukKaybi,
+      deaths: olenler,
+    );
   }
 
   /// Kiraya verilen konutların yıllık kira gelirini **bir kez** öder.
@@ -446,9 +492,23 @@ class LifeProgression {
       if (person.isAlive) continue;
       if (next.settledEstates.contains(person.id)) continue;
 
+      // Bildirim için oyuncuya **gerçekten** ne kaldığı okunur; hiçbir
+      // şey kalmadıysa miras bildirimi çıkmaz.
+      final InheritanceShare pay = Inheritance.shareFor(next, person);
       final ({GameState state, List<String> logLines}) sonuc =
           Inheritance.settle(next, person);
       next = sonuc.state;
+      final PendingNotice? mirasBildirimi = Notices.inheritance(
+        person: person,
+        playerAge: newAge,
+        money: pay.money,
+        itemNames: <String>[
+          for (final String t in pay.itemTypeIds) itemTypeOrFallback(t).name,
+        ],
+      );
+      if (mirasBildirimi != null) {
+        next = Notices.enqueue(next, <PendingNotice>[mirasBildirimi]);
+      }
       for (final String satir in sonuc.logLines) {
         next = next.copyWith(
           log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
