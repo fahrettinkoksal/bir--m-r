@@ -2132,13 +2132,48 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 **Yan düzeltme.** Karakter başlığındaki cüzdan rozeti büyük tutarlarda adı kırpıyordu ("Tolga Erd…"). Başlıkta artık **kısaltılmış** para biçimi kullanılıyor: 10.000 ₺'ye kadar tam, üstünde **B** (bin) ve **M** (milyon). Yalnızca gösterim içindir; hesaplarda kullanılmaz, tam tutar Varlıklar ekranında yazar.
 
 **Karar soruları:**
-1. Kasanın payı **%12** uygun mu? Rulette tek sıfırın payı yaklaşık %2,7; at yarışı bundan belirgin biçimde daha pahalı.
+1. ~~Kasanın payı **%12** uygun mu?~~ **Faho karar verdi:** "Kumarda fark kasıtlı olsun, yani genel kumar kuralı neyse öyle olsun." Yani rulet ile at yarışı arasındaki fark **bilerek** duruyor ve gerçek kumar oranlarına yaklaşıyor: tek sıfırlı rulette kasa payı **%2,7**, at yarışında bahis havuzundan kesilen pay gerçekte çok daha yüksektir (yerine göre %15-25). Oyundaki **%12** bu yüzden gerçeğinden bile **cömert** kalıyor. Soru kapandı; ayrıca ayarlama istenirse yeniden açılır.
 2. Oran aralığı **1,8x – 12,0x** ve **beş at** doğru mu?
 3. Koşu **3 saniye**, çark **2,6 saniye** sürüyor. Çok uzun mu?
 4. "Yeni kadro" düğmesi bedelsiz ve sınırsız: oyuncu beğenmediği oranları yenileyebiliyor. Sınırlanmalı mı?
 5. At yarışı için ayrı bir **yıllık bütçe** mi olmalı, yoksa kumarhaneyle ortak mı kalsın? Şu an ortak.
 6. Yarış sonucu hayat günlüğüne yazılıyor; her koşu bir satır. Günlük şişer mi?
 7. Başlıktaki kısaltma (400 B ₺) okunur mu, yoksa tam tutar mı görünmeli? Uzun ad + tam tutar aynı satıra sığmıyor.
+
+### Q-099 — Askerlik tecili ve bakaya (askerden kaçma)
+
+**Durum:** Faho'nun isteğine göre kodlandı; sayıların onayı bekleniyor. Kod: Paket 31 (`lib/domain/career/military_service.dart`, `lib/domain/models/military.dart`, `lib/ui/screens/sections/military_page.dart`).
+
+**Faho'nun isteği:** "20 yaşına gelip okumuyorsa askerliğe çağrılsın bildirim paneli olarak gelsin… tecil ettirme hakkı olsun 2 yıllık tecil, eğer okuyorsa otomatik okul okuduğu dönem boyunca tecil edilsin fakat bu bildirim panelinde bildirilsin… okul bittiğinde direkt çağırsın… 3 seçenek olsun: bedelli parasını öde, zorunlu askerliğini yap, tecil bitmiş olsa bile askerden kaçabilsin fakat yakalanabilsin, normal Türkiye'deki gibi."
+
+**Araştırma notu (gerçek hayattan, birebir kopya değil):** Türkiye'de yoklama kaçağı/bakaya durumu cezai değil **idari para cezası** ile karşılanıyor; ceza geciken süreyle birlikte büyüyor ve **kendiliğinden başvuran, yakalanana göre daha az** ödüyor. Tekrarlayan yakalanmalarda dosya ağırlaşıyor. Öğrenciler okudukları süre boyunca tecilli sayılıyor, okul bitince sevk sırası geliyor. Oyun bu mantığı taklit ediyor, resmî tutarları değil.
+
+**Kodlanan kurallar:**
+
+*Tecil*
+- Çağrılan yükümlü tecil ettirebiliyor: **2 hak, her biri 2 yıl** (`prototypeOnlyMaxDeferrals = 2`, `prototypeOnlyDeferralYears = 2`).
+- Okuyan biri **otomatik** tecil ediliyor ve bu artık **sessiz değil**: bildirim panelinde "askerliğin geldi, okulun tecil ettirdi" yazıyor. Okul tecili **hak harcamıyor**.
+- Askerlik menüsünde durum "Tecilli — okul bitene kadar" / "Tecilli — 24 yaşına kadar" diye görünüyor.
+- Tecil bitince ya da okul bitince **doğrudan yeniden çağrı** geliyor, yine bildirim paneliyle.
+
+*Bakaya (kaçma)*
+- Çağrıldıktan sonra kaçılabiliyor; tecil hakkı bitmiş olsa da.
+- Yakalanma ihtimali ilk yıl **%30**, her kaçak yıl **+%10** (üst sınırla).
+- İdari ceza kaçılan gün üzerinden büyüyor: kendiliğinden teslim olan **günde 50 ₺**, yakalanan **günde 100 ₺** (tam iki katı).
+- Yakalanınca ceza kesiliyor, yeniden çağrılıyor, `caughtCount` artıyor. Cüzdan eksiye inmiyor.
+- Bakayanın bedellisi **her kaçak yıl için +60.000 ₺** ek bedelle pahalanıyor.
+- Yükümlülük yaşı geçince dosya kapanıyor (durum "yükümlü değil").
+
+**Karar soruları:**
+1. **Tecil hakkı sayısı çelişkili geldi.** İstekte önce "1 kere tecil ettirme hakkı olsun 2 yıllık tecil", sonra "gene 2 sefer tecil hakkı olsun 2 senelik" yazıyor. **2 hak × 2 yıl** olarak kodlandı. Doğrusu bu mu, yoksa 1 hak mı olsun?
+2. Yakalanma ihtimali **%30 + yılda %10** uygun mu? Bu haliyle ortalama 3-4 yılda yakalanılıyor; ömür boyu kaçmak neredeyse imkânsız. Kaçabilen bir azınlık olsun mu?
+3. Günlük ceza (**50 ₺ / yakalanınca 100 ₺**) ve bedelli ek bedeli (**yılda 60.000 ₺**) doğru ağırlıkta mı? Şu an 3 yıl kaçmak yaklaşık 55.000 ₺ ceza, bedelli ise 180.000 ₺ zamlanıyor.
+4. Kaçakken **iş bulmak, evlenmek, yurt dışına çıkmak** engellenmeli mi? Şu an hiçbiri engellenmiyor — yalnızca para ve yakalanma riski var.
+5. Yakalanma **kaç kez** olabilmeli? Şu an sınırsız; her seferinde yeniden çağrılıyor ve tekrar kaçılabiliyor. Belli sayıdan sonra zorunlu sevk mi olsun?
+6. Okul tecili **hak harcamıyor**; üniversite + yüksek lisans okuyan biri 2 hakkını hiç kullanmadan 28'e geliyor. Böyle mi kalsın?
+7. Kaçaklık **mutluluk/itibar** düşürmeli mi? Şu an yalnızca para etkisi var, ruh hâline dokunmuyor.
+
+---
 
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
