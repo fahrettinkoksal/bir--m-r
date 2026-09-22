@@ -194,6 +194,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
         'caughtCount': state.military.caughtCount,
       },
       'unprotectedTries': state.unprotectedTries,
+      // Tüp bebek denemeleri (Paket 35). Alan eklemeli.
+      'ivfAttempts': state.ivfAttempts,
       'lastConceptionTryAge': state.lastConceptionTryAge,
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
@@ -803,6 +805,7 @@ GameState decodeGameState(Map<String, Object?> json) {
         : _decodeMilitary(_asMap(json['military'], 'military')),
     // Eski kayıtlarda deneme sayacı yoktur; sıfırdan başlar.
     unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
+    ivfAttempts: _intOrNull(json, 'ivfAttempts') ?? 0,
     lastConceptionTryAge: _intOrNull(json, 'lastConceptionTryAge'),
     // Eski kayıtlarda kuşak bilgisi yoktur: o hayatlar ilk kuşaktır.
     generation: _intOrNull(json, 'generation') ?? 1,
