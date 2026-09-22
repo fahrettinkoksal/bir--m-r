@@ -2206,5 +2206,33 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-101 — Milli Piyango: bilet, ikramiye basamakları ve kasa payı
+
+**Durum:** Faho'nun isteğine göre kodlandı; sayıların onayı bekleniyor. Kod: Paket 33 (`lib/data/lottery_catalog.dart`, `lib/domain/casino/lottery.dart`, `lib/ui/screens/sections/lottery_page.dart`).
+
+**Faho'nun isteği:** "Milli piyango bileti de olsun, bilet satın alabilsin, ikramiye vurabilsin."
+
+**Araştırma notu:** Milli Piyango bileti gerçekte **tam, yarım ve çeyrek** olarak satılıyor; çeyrek bilet ikramiyenin dörtte birini alıyor. Yılbaşı çekilişi ayrı ve çok daha büyük (2026 yılbaşında tam bilet 800 ₺, büyük ikramiye 800 milyon ₺). İkramiye basamaklarının altında **amorti** var: bilet parasını geri veriyor. Oyun bu yapıyı taklit ediyor, resmî tutarları değil.
+
+**Kodlanan kurallar:**
+- İki çekiliş: **olağan** (tam 200 ₺, yılda en çok 12 bilet) ve **yılbaşı** (tam 800 ₺, yılda en çok 4 bilet).
+- Basamaklar: büyük, ikinci, üçüncü, dördüncü ikramiye, teselli ve amorti. İhtimaller ekranda **açıkça yazılı** (1/500.000 gibi); gizlenmiyor.
+- Bilet yıl içinde alınıyor, **çekiliş yaş ilerlerken** yapılıyor, sonuç bildirim panelinde çıkıyor. Bilet kayda giriyor.
+- **Kasanın payı bilerek büyük:** kuramsal geri dönüş **%56** (kasa payı %44). Rulette %2,7, at yarışında %12 — piyango en pahalısı. Bu, Faho'nun Q-098/1 kararının doğrudan uygulanmasıdır.
+- Piyango da kumar sayılıyor: yıllık bahis kaydına giriyor ve **ayarlardan kumar kapatılınca bayi de kapanıyor**.
+- 18 yaşından küçüğe bilet satılmıyor.
+
+**Karar soruları:**
+1. Kasanın payı **%44** (geri dönüş %56) uygun mu? Gerçek piyangolarda geri dönüş yaklaşık yarıdır; oyunda da öyle duruyor.
+2. Büyük ikramiye tutarları (**olağan 20 milyon ₺**, **yılbaşı 800 milyon ₺**) oyunun ekonomisini bozar mı? Vuran oyuncu bir anda her şeyi satın alabilir hâle geliyor; hayatın gerisi anlamsızlaşır mı?
+3. Yıllık bilet sınırı (**olağan 12, yılbaşı 4**) doğru mu?
+4. Piyango parası **yıllık bahis bütçesine** yazılıyor ama bütçeyle **sınırlanmıyor** — yalnızca bilet sayısıyla sınırlı. Kumarhane bütçesini de yemeli mi?
+5. **Ayarlardan kumar kapatılınca piyango da kapanıyor.** Doğru mu, yoksa piyango "kumar" sayılmayıp açık mı kalsın?
+6. Çekiliş **yıl sonunda** toplu yapılıyor; oyuncu bileti alıp yaş ilerletince sonucu görüyor. Çekiliş anı için bir **animasyon** (çark/top) istenir mi?
+7. Büyük ikramiye vurunca ayrı bir **hayat olayı** (akrabaların araması, dolandırıcılar, yeni "arkadaşlar") çıksın mı?
+8. Bilet numarası şu an rastgele. Oyuncu **kendi numarasını seçebilsin** mi?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
