@@ -28,6 +28,7 @@ import '../interaction/bond_decay.dart';
 import '../models/life_log.dart';
 import '../models/zodiac.dart';
 import '../career/military_service.dart';
+import '../casino/lottery.dart';
 import '../life/astrology.dart';
 import '../../data/fortune_catalog.dart';
 import '../models/gender.dart';
@@ -415,6 +416,10 @@ class LifeProgression {
     afterDeaths = MilitaryService.advanceFugitive(afterDeaths, newAge, _rng);
     afterDeaths = MilitaryService.applyDeferralEnd(afterDeaths, newAge);
     afterDeaths = MilitaryService.applyCallUp(afterDeaths, newAge);
+
+    // Milli Piyango (Paket 33): yıl içinde alınan biletlerin çekilişi
+    // burada yapılır ve sonuç bildirim paneline düşer.
+    afterDeaths = Lottery.drawAll(afterDeaths, newAge, _rng);
 
     // Burçsal dönem (Paket 27): bazı yıllarda oyuncunun burcuna denk
     // gelen bir dönem çıkar ve mutluluğu gerçekten etkiler.

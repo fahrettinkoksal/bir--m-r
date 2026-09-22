@@ -13,6 +13,8 @@ import '../../data/social_catalog.dart';
 import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
 import '../../domain/models/martial_progress.dart';
+import '../../domain/models/lottery_ticket.dart';
+import '../lottery_catalog.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
@@ -84,6 +86,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // liste okunur, sürüm yükseltmesi gerekmez.
       'martialArts':
           state.martialArts.map(_encodeMartial).toList(growable: false),
+      // Piyango biletleri (Paket 33). Alan eklemeli.
+      'lotteryTickets':
+          state.lotteryTickets.map(_encodeTicket).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
@@ -261,6 +266,14 @@ Map<String, Object?> _encodeMartial(MartialProgress m) => <String, Object?>{
       'lessons': m.lessons,
       'startedAtAge': m.startedAtAge,
       'topRankAtAge': m.topRankAtAge,
+    };
+
+Map<String, Object?> _encodeTicket(LotteryTicket t) => <String, Object?>{
+      'drawId': t.drawId,
+      'share': t.share.name,
+      'number': t.number,
+      'boughtAtAge': t.boughtAtAge,
+      'price': t.price,
     };
 
 Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
@@ -658,6 +671,11 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
           .toList(growable: false),
     ),
+    lotteryTickets: List<LotteryTicket>.unmodifiable(
+      (json['lotteryTickets'] as List<Object?>? ?? const <Object?>[])
+          .map((Object? e) => _decodeTicket(_asMap(e, 'lotteryTickets[]')))
+          .toList(growable: false),
+    ),
     socialAccounts: List<SocialAccount>.unmodifiable(
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
@@ -965,6 +983,14 @@ MartialProgress _decodeMartial(Map<String, Object?> json) => MartialProgress(
       lessons: _int(json, 'lessons'),
       startedAtAge: _intOrNull(json, 'startedAtAge'),
       topRankAtAge: _intOrNull(json, 'topRankAtAge'),
+    );
+
+LotteryTicket _decodeTicket(Map<String, Object?> json) => LotteryTicket(
+      drawId: _string(json, 'drawId'),
+      share: ticketShareByName(_string(json, 'share')) ?? TicketShare.tam,
+      number: _string(json, 'number'),
+      boughtAtAge: _int(json, 'boughtAtAge'),
+      price: _int(json, 'price'),
     );
 
 /// Evlilik kaydı. Eşin kendisi kişi listesinden okunur; burada yalnızca

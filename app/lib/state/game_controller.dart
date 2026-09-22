@@ -23,6 +23,9 @@ import '../domain/activities/activity_engine.dart';
 import '../domain/models/martial_progress.dart';
 import '../domain/activities/martial_arts_engine.dart';
 import '../data/martial_arts_catalog.dart';
+import '../domain/models/lottery_ticket.dart';
+import '../domain/casino/lottery.dart';
+import '../data/lottery_catalog.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
 import '../domain/career/retirement.dart';
@@ -728,6 +731,45 @@ class GameController extends ChangeNotifier {
                 rng: _random,
               ),
       );
+
+  // --- Milli Piyango (Paket 33) -----------------------------------------
+
+  /// Çekilişi bekleyen biletler.
+  List<LotteryTicket> get lotteryTickets =>
+      _state?.lotteryTickets ?? const <LotteryTicket>[];
+
+  /// Bu yıl bu çekiliş için kaç bilet alındı?
+  int lotteryTicketsThisAge(LotteryDraw draw) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return Lottery.ticketsThisAge(current, draw);
+  }
+
+  /// Bilet alınabilir mi?
+  InteractionAvailability lotteryAvailability(
+    LotteryDraw draw,
+    TicketShare share,
+  ) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return Lottery.availability(current, draw, share);
+  }
+
+  /// Bilet alır; sonuç metnini döner.
+  String? buyLotteryTicket(LotteryDraw draw, TicketShare share) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) sonuc =
+        Lottery.buy(state: current, draw: draw, share: share, rng: _random);
+    if (sonuc.applied) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc.text;
+  }
 
   // --- Dövüş sanatları (Paket 32) ---------------------------------------
 

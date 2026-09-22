@@ -23,6 +23,9 @@ enum NoticeKind {
 
   /// Askerlik celbi ve terhis (Paket 29).
   askerlik,
+
+  /// Milli Piyango çekilişi (Paket 33).
+  piyango,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

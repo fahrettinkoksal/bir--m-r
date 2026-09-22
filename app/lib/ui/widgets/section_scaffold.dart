@@ -214,11 +214,17 @@ class MenuGroupTitle extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            text,
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurfaceVariant,
+          // Uzun başlık dar ekranda satırı taşırıyordu (Paket 33);
+          // artık esner ve gerekirse kısalır.
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(width: 10),

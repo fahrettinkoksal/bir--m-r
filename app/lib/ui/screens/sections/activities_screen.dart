@@ -4,6 +4,7 @@ import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
 import '../../../data/martial_arts_catalog.dart';
+import '../../../data/lottery_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/life/astrology.dart';
@@ -18,6 +19,7 @@ import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
 import 'casino_pages.dart';
 import 'martial_arts_page.dart';
+import 'lottery_page.dart';
 import 'license_pages.dart';
 import 'social_pages.dart';
 
@@ -50,6 +52,7 @@ enum _ActivityPage {
   dovus,
   sosyalMedya,
   kumarhane,
+  piyango,
   ehliyet,
   evlatEdinme,
   vasiyet,
@@ -138,6 +141,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.piyango:
+        return LotteryPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.ehliyet:
         return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.evlatEdinme:
@@ -308,6 +313,22 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.casino_outlined,
             accent: BirOmurAccents.nar,
             onTap: () => _go(_ActivityPage.kumarhane),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Piyango da kumar ayarına bağlıdır: kumar kapalıysa bayi de
+        // menüde görünmez (Paket 33).
+        if (state.settings.casinoEnabled &&
+            state.player.age >= kLotteryMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_piyango'),
+            title: 'Milli Piyango',
+            subtitle: state.lotteryTickets.isEmpty
+                ? 'Bilet al, çekilişi yıl sonunda bekle'
+                : '${state.lotteryTickets.length} biletin çekilişi bekliyor',
+            icon: Icons.confirmation_number_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => _go(_ActivityPage.piyango),
           ),
           const SizedBox(height: 10),
         ],

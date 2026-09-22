@@ -219,6 +219,8 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.auto_awesome_rounded;
       case NoticeKind.askerlik:
         return Icons.military_tech_rounded;
+      case NoticeKind.piyango:
+        return Icons.confirmation_number_rounded;
     }
   }
 }

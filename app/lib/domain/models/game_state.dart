@@ -6,6 +6,7 @@ import 'blackjack_game.dart';
 import 'education.dart';
 import 'book_progress.dart';
 import 'martial_progress.dart';
+import 'lottery_ticket.dart';
 import 'career.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
@@ -64,6 +65,7 @@ class GameState {
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
     this.martialArts = const <MartialProgress>[],
+    this.lotteryTickets = const <LotteryTicket>[],
     this.socialAccounts = const <SocialAccount>[],
     this.sponsorOffer,
     this.sponsorDeals = const <SponsorDeal>[],
@@ -297,6 +299,9 @@ class GameState {
 
   /// Paket 32: dövüş sanatlarındaki ilerleme (karate, kung fu, güreş).
   final List<MartialProgress> martialArts;
+
+  /// Paket 33: çekilişi bekleyen Milli Piyango biletleri.
+  final List<LotteryTicket> lotteryTickets;
 
   /// Açılmış sosyal medya hesapları. Hesap açmak **zorunlu değildir**;
   /// hesabı olmayan platformdan paylaşım veya olay gelmez.
@@ -658,6 +663,7 @@ class GameState {
     CareerState? career,
     List<BookProgress>? books,
     List<MartialProgress>? martialArts,
+    List<LotteryTicket>? lotteryTickets,
     List<SocialAccount>? socialAccounts,
     Object? sponsorOffer = _unsetEvent,
     List<SponsorDeal>? sponsorDeals,
@@ -724,6 +730,7 @@ class GameState {
       career: career ?? this.career,
       books: books ?? this.books,
       martialArts: martialArts ?? this.martialArts,
+      lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       socialAccounts: socialAccounts ?? this.socialAccounts,
       sponsorOffer: sponsorOffer == _unsetEvent
           ? this.sponsorOffer
