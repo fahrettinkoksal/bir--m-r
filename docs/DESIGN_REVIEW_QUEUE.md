@@ -2108,5 +2108,37 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 **Yan not (kayıt):** Askerlik alanı `military` olarak **eklemeli** yazıldı; eksik olduğunda "yapılmadı" olarak açılıyor. Kayıt sürümü **artırılmadı**: hiçbir eski kayıt okunamaz hâle gelmiyor ve beş sürümlük pencere boşa harcanmıyor. **Geriye dönük askerlik uydurulmaz.**
 
+
+### Q-098 — Rulet animasyonu ve at yarışı
+**Durum:** **Faho'nun kararı** (21 Eylül 2026: "rulet tarafında animasyon ekle, dümdüz rulet olmasın, ayrıca at yarışı da ekleyelim"). **Sayılar karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 30, `app/lib/domain/casino/horse_race.dart`, `app/lib/ui/widgets/roulette_wheel.dart`, `app/lib/ui/widgets/race_track.dart`.
+
+**Kumarhanenin ortak kuralı sürüyor:** yalnızca oyunun sanal cüzdanıyla oynanır; gerçek para yatırma, çekme, ödüle dönüştürme, uygulama içi satın alma veya reklam karşılığı bahis hakkı **yoktur**.
+
+**1. Rulet çarkı.** Ekranda dönen bir çark var: 37 bölme, gerçek Avrupa ruletinin **sıra dizilimi** (0, 32, 15, 19, …) ve ters yönde dönen bir top. Çark yavaşlayıp seçilen sayının üzerinde duruyor, kazanan bölme sarıyla çerçeveleniyor.
+
+**Animasyon sonucu belirlemez.** Sayı alanda (`Roulette.spinDetailed`) tek bir `rng.nextInt(37)` ile zaten çekiliyor; çark yalnızca o sayıya iniyor. **Sonuç metni çark durmadan yazılmıyor** — dönerken sonucu okumak oyunu bozardı.
+
+**2. At yarışı.** Yeni masa. Beş at, adları ve oranları ekranda. Oyuncu birine oynuyor, atlar pistte koşuyor ve bitiş sırasına göre varıyorlar.
+
+- Oranlar rastgele ağırlıklardan türetiliyor, **1,8x ile 12,0x** arasında.
+- Kasanın payı **%12**: oranların işaret ettiği ihtimallerin toplamı 1'i bu kadar aşıyor. (Rulette kasa payı 0'a oynamaktan gelir; burada açıkça yazılı.)
+- **Kazanan bahisten bağımsız çekiliyor.** Aynı tohumla hangi ata oynanırsa oynansın kazanan değişmiyor; kalıcı bir test bunu koruyor.
+- Pist yalnızca çekilmiş sonucu gösteriyor: varış sırası hiçbir zaman değişmiyor, yol boyunca küçük dalgalanmalar sadece görsel.
+- Sonuç metni koşu bitmeden yazılmıyor.
+- 16 Türkçe at adı havuzu (Rüzgârkıran, Doludizgin, Al Yazmalım…) — metinler bu proje için yazıldı.
+
+**Emoji kullanılmadı.** Atlar için 🐎 denendi ama oyunun yazı tipleri emoji içermiyor ve her cihazda aynı görünmüyor; yerine kulvar numarasını taşıyan renkli jokey işareti çiziliyor.
+
+**Yan düzeltme.** Karakter başlığındaki cüzdan rozeti büyük tutarlarda adı kırpıyordu ("Tolga Erd…"). Başlıkta artık **kısaltılmış** para biçimi kullanılıyor: 10.000 ₺'ye kadar tam, üstünde **B** (bin) ve **M** (milyon). Yalnızca gösterim içindir; hesaplarda kullanılmaz, tam tutar Varlıklar ekranında yazar.
+
+**Karar soruları:**
+1. Kasanın payı **%12** uygun mu? Rulette tek sıfırın payı yaklaşık %2,7; at yarışı bundan belirgin biçimde daha pahalı.
+2. Oran aralığı **1,8x – 12,0x** ve **beş at** doğru mu?
+3. Koşu **3 saniye**, çark **2,6 saniye** sürüyor. Çok uzun mu?
+4. "Yeni kadro" düğmesi bedelsiz ve sınırsız: oyuncu beğenmediği oranları yenileyebiliyor. Sınırlanmalı mı?
+5. At yarışı için ayrı bir **yıllık bütçe** mi olmalı, yoksa kumarhaneyle ortak mı kalsın? Şu an ortak.
+6. Yarış sonucu hayat günlüğüne yazılıyor; her koşu bir satır. Günlük şişer mi?
+7. Başlıktaki kısaltma (400 B ₺) okunur mu, yoksa tam tutar mı görünmeli? Uzun ad + tam tutar aynı satıra sığmıyor.
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
