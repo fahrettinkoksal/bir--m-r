@@ -184,19 +184,30 @@ void main() {
       expect(tekrar.state.player.wallet, sonra.player.wallet);
     });
 
-    test('boşandıktan sonra ikinci evlilik kaydı ezmez', () {
+    // Paket 36: ikinci evlilik artık yapılabiliyor. Korunan ilke
+    // değişmedi — **ilk kayıt ezilmez** — ama mekanizma değişti: eski
+    // kayıt engellenerek değil, geçmişe taşınarak korunuyor.
+    test('boşandıktan sonra ikinci evlilik yapılır, ilk kayıt ezilmez', () {
       final GameState bosandi = evlilik.divorce(evlen(oyuncu(25))).state;
       final Marriage ilkKayit = bosandi.marriage!;
 
       final ({GameState state, Person partner}) yeni =
           sevgiliEkle(bosandi, seed: 9);
-      expect(evlilik.marryBlockReason(yeni.state, yeni.partner), isNotEmpty);
+      expect(evlilik.marryBlockReason(yeni.state, yeni.partner), isEmpty);
 
       final FamilyResult r = evlilik.marry(yeni.state, yeni.partner.id);
-      expect(r.outcome.applied, isFalse);
-      expect(r.state.marriage!.spouseId, ilkKayit.spouseId,
-          reason: 'İlk evlilik kaydı korunur');
-      expect(r.state.marriage!.marriedAtAge, ilkKayit.marriedAtAge);
+      expect(r.outcome.applied, isTrue);
+      expect(r.state.marriage!.spouseId, yeni.partner.id,
+          reason: 'Yürüyen evlilik artık yeni eştir');
+
+      // İlk kayıt silinmedi, üzerine yazılmadı: geçmişte aynen duruyor.
+      expect(r.state.pastMarriages, hasLength(1));
+      expect(r.state.pastMarriages.first.spouseId, ilkKayit.spouseId);
+      expect(r.state.pastMarriages.first.marriedAtAge,
+          ilkKayit.marriedAtAge);
+      expect(r.state.pastMarriages.first.status, MarriageStatus.bosandi);
+      expect(r.state.marriageWith(ilkKayit.spouseId), isNotNull,
+          reason: 'Eski eşin evlilik kaydı hâlâ okunabilmeli');
     });
 
     test('eski eşle etkileşim gerekçesiyle kapalıdır', () {

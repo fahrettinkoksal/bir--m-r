@@ -94,6 +94,7 @@ class GameState {
     this.lastCrisisAge,
     this.healthWarned = false,
     this.marriage,
+    this.pastMarriages = const <Marriage>[],
     this.generation = 1,
     this.proposalAges = const <String, int>{},
     this.notices = const <PendingNotice>[],
@@ -441,6 +442,25 @@ class GameState {
   /// buraya bakar (D-037).
   final Marriage? marriage;
 
+  /// Sona ermiş **önceki** evlilikler (Paket 36).
+  ///
+  /// İkinci evlilikte eski kayıt silinmez, buraya taşınır: "kiminle, kaç
+  /// yaşında evlenildi, nasıl bitti" bilgisi hayat boyu durur.
+  final List<Marriage> pastMarriages;
+
+  /// Bu kişiyle olan evlilik kaydı — şimdiki ya da geçmiş.
+  Marriage? marriageWith(String personId) {
+    final Marriage? simdiki = marriage;
+    if (simdiki != null && simdiki.spouseId == personId) return simdiki;
+    for (final Marriage m in pastMarriages) {
+      if (m.spouseId == personId) return m;
+    }
+    return null;
+  }
+
+  /// Bu hayatta kaç kez evlenildi?
+  int get marriageCount => pastMarriages.length + (marriage == null ? 0 : 1);
+
   /// Vasiyetinde mirasçı olarak seçilen çocuğun kimliği (D-052).
   ///
   /// Seçim isteğe bağlıdır; `null` ise miras çocuklar arasında eşit
@@ -707,6 +727,7 @@ class GameState {
     int? lastCrisisAge,
     bool? healthWarned,
     Object? marriage = _unsetEvent,
+    List<Marriage>? pastMarriages,
     int? generation,
     Map<String, int>? proposalAges,
     List<PendingNotice>? notices,
@@ -790,6 +811,7 @@ class GameState {
       healthWarned: healthWarned ?? this.healthWarned,
       marriage:
           marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
+      pastMarriages: pastMarriages ?? this.pastMarriages,
       generation: generation ?? this.generation,
       proposalAges: proposalAges ?? this.proposalAges,
       notices: notices ?? this.notices,

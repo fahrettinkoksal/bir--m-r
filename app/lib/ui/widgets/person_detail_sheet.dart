@@ -290,11 +290,12 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               ),
               _Row(label: 'Cinsiyet', value: person.gender.label),
               // Evlilik kaydı gerçek bir kayıttır; eş ve eski eşte görünür.
-              if (state.marriage != null &&
-                  state.marriage!.spouseId == person.id)
+              // İkinci evlilikten sonra da eski eşin kaydı kaybolmaz
+              // (Paket 36): geçmiş evlilikler listesinden okunur.
+              if (state.marriageWith(person.id) != null)
                 _Row(
                   label: 'Evlilik',
-                  value: _marriageLabel(state.marriage!),
+                  value: _marriageLabel(state.marriageWith(person.id)!),
                 ),
               _Row(label: 'Durum', value: person.occupationLabel),
               // Kendi hayatı izlenen kişilerde (oyuncunun çocukları, D-045)

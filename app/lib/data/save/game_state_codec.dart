@@ -160,6 +160,15 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'status': state.marriage!.status.name,
               'endedAtAge': state.marriage!.endedAtAge,
             },
+      // Önceki evlilikler (Paket 36). Alan eklemeli; kayıt silinmez.
+      'pastMarriages': state.pastMarriages
+          .map((Marriage m) => <String, Object?>{
+                'spouseId': m.spouseId,
+                'marriedAtAge': m.marriedAtAge,
+                'status': m.status.name,
+                'endedAtAge': m.endedAtAge,
+              })
+          .toList(growable: false),
       // Yarıda kalan "evet" kaybolmaz: düğün seçimi kayda girer
       // (Paket 25).
       'pendingWedding': state.pendingWedding == null
@@ -786,6 +795,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     marriage: json['marriage'] == null
         ? null
         : _decodeMarriage(_asMap(json['marriage'], 'marriage')),
+    pastMarriages: List<Marriage>.unmodifiable(
+      (json['pastMarriages'] as List<Object?>? ?? const <Object?>[])
+          .map((Object? e) => _decodeMarriage(_asMap(e, 'pastMarriages[]')))
+          .toList(growable: false),
+    ),
     // Eski kayıtlarda bekleyen düğün yoktur; boş açılır ve **uydurma bir
     // evlilik üretilmez** (Paket 25).
     pendingWedding: json['pendingWedding'] == null
