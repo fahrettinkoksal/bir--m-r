@@ -28,6 +28,7 @@ import '../domain/casino/lottery.dart';
 import '../data/lottery_catalog.dart';
 import '../domain/models/finger_profile.dart';
 import '../domain/interaction/finger.dart';
+import '../domain/interaction/fertility_treatment.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
 import '../domain/career/retirement.dart';
@@ -831,6 +832,38 @@ class GameController extends ChangeNotifier {
       notifyListeners();
     }
     return sonuc.text;
+  }
+
+  // --- Tüp bebek tedavisi (Paket 35) ------------------------------------
+
+  /// Tedaviye engel; engel yoksa boş metin.
+  String get fertilityBlockReason {
+    final GameState? current = _state;
+    if (current == null) return 'Oyun başlamadı.';
+    return FertilityTreatment.blockReason(current);
+  }
+
+  /// Oyuncuya gösterilen yaklaşık başarı oranı (%).
+  int get fertilityChancePercent {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return FertilityTreatment.displayChancePercent(current);
+  }
+
+  /// Bugüne kadar yapılan deneme sayısı.
+  int get fertilityAttempts => _state?.ivfAttempts ?? 0;
+
+  /// Bir tedavi denemesi yapar.
+  FamilyOutcome? tryFertilityTreatment() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FamilyResult result =
+        FertilityTreatment.attempt(current, _random);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
   }
 
   // --- Dövüş sanatları (Paket 32) ---------------------------------------

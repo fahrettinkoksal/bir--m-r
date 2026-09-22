@@ -252,15 +252,19 @@ void main() {
       state = kisiyiOldur(state, ilk.spouseId);
       state = evlilik.settleWidowhood(state, state.player.age);
 
+      // Paket 36: dul kalan yeniden evlenebilir. Korunan ilke aynı —
+      // ilk kayıt ezilmez — ama artık engelle değil, arşivle korunuyor.
       final ({GameState state, Person partner}) yeni =
           const Romance().start(state, Random(9));
-      expect(
-        evlilik.marry(yeni.state, yeni.partner.id).outcome.applied,
-        isFalse,
-        reason: 'İkinci evlilik ilk kaydı ezmemeli',
-      );
-      expect(state.marriage!.spouseId, ilk.spouseId);
-      expect(state.marriage!.status, MarriageStatus.dul);
+      final FamilyResult ikinci =
+          evlilik.marry(yeni.state, yeni.partner.id);
+      expect(ikinci.outcome.applied, isTrue);
+      expect(ikinci.state.marriage!.spouseId, yeni.partner.id);
+
+      expect(ikinci.state.pastMarriages, hasLength(1));
+      expect(ikinci.state.pastMarriages.first.spouseId, ilk.spouseId);
+      expect(ikinci.state.pastMarriages.first.status, MarriageStatus.dul,
+          reason: 'Vefatla biten evlilik "dul" olarak arşivlenmeli');
     });
   });
 

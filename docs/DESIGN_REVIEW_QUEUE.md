@@ -2262,5 +2262,62 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-103 — Tüp bebek tedavisi
+
+**Durum:** `BACKLOG.md` içinde "Faho'nun işaret ettiği, henüz yapılmayanlar" başlığı altında duruyordu; kodlandı, sayıların onayı bekleniyor. Kod: Paket 35 (`lib/domain/interaction/fertility_treatment.dart`, `lib/ui/screens/sections/fertility_page.dart`).
+
+**Faho'nun isteği:** "İleride aktiviteler menüsünün içerisine sağlık menüsü olacak, tüp bebek tedavisi eklenebilir."
+
+**Neden gerekliydi:** Paket 25'te kısırlık gerçek bir sonuç oldu — oyuncu ya da eşi %8 ihtimalle kısır olabiliyor ve bunu ancak deneyerek anlıyor. O günden beri kısır bir çiftin **tıbbi hiçbir çıkış yolu yoktu**; yalnızca evlat edinme (D-049) duruyordu.
+
+**Araştırma notu:** Tüp bebekte canlı doğum oranı yaşla birlikte keskin biçimde düşüyor: 35 altında yaklaşık %42-52, 35-37 arası %37-41, 38-39 arası %28-32, 40-42 arası %16-20, 43-44'te %5, 44 üstünde %2'nin altı. Üç denemede kümülatif oran %60-70'e çıkabiliyor. Oyundaki basamaklar bu aralıkları izliyor; tutarlar ve ücret oyunun kendi ekonomisine göre konuldu.
+
+**Kodlanan kurallar:**
+- **Aktiviteler → Sağlık Merkezi → Tüp bebek tedavisi.** Yalnızca eşi/sevgilisi olan oyuncuya görünüyor.
+- Bir deneme **120.000 ₺**; ücret **her hâlükârda** ödeniyor.
+- Başarı oranı taşıyacak tarafın yaşına göre: 35 altı %45, 35-37 %38, 38-39 %30, 40-42 %18, 43-44 %6, 45-46 %2, sonrası sıfır.
+- Çiftten biri kısırsa oran **0,6 ile çarpılıyor** — düşüyor ama **sıfırlanmıyor**. Tedavinin bütün anlamı bu.
+- **Kapı, oyuncunun zaten gördüğü uyarıyla aynı eşikte açılıyor:** dört başarısız denemeden sonra çıkan "bir süredir deniyorsunuz ama olmuyor; bir hekime görünmek iyi gelebilir" cümlesi artık gerçek bir yolu işaret ediyor.
+- Yılda bir deneme (gerçekte bir döngü aylar sürer).
+- Başarısızlık mutluluğu **8**, eşle yakınlığı **2** düşürüyor; başarı mutluluğu **12** artırıyor.
+- Başarı hamilelik başlatıyor, bebek bir sonraki yaşta doğuyor (Paket 26 akışı).
+- **Hiçbir metin "kısırsın" demiyor** (Paket 25 kuralı); kalıcı bir test bunu koruyor.
+
+**Karar soruları:**
+1. Deneme ücreti **120.000 ₺** doğru mu? Karşılaştırma: bedelli askerlik 280.000 ₺, salonda düğün 90.000 ₺, yıllık maaşlar 180.000-560.000 ₺.
+2. Kısırlık çarpanı **0,6** uygun mu? Daha düşük olursa tedavi umutsuzlaşır, daha yüksek olursa kısırlık anlamsızlaşır.
+3. **Deneme sayısına üst sınır** olmalı mı? Şu an sınırsız (yılda bir). Parası olan oyuncu yıllarca deneyebiliyor.
+4. Gerçekte SGK belli koşullarda sınırlı sayıda denemeyi karşılıyor. Oyuna **devlet katkısı** girsin mi, yoksa tek fiyat mı kalsın?
+5. Başarısızlığın mutluluk ve yakınlık cezası (**-8 / -2**) fazla mı, az mı? Süreç gerçekte ağır; oyun bunu ne kadar taşımalı?
+6. Tedaviden **ikiz** çıkabilmeli mi? Gerçekte tüp bebekte ikiz oranı belirgin biçimde yüksek. (Q-094'teki ikiz sorusuyla birlikte düşünülmeli.)
+7. Tedavi için **yaş üst sınırı 46**; sonrası sıfır. Doğru mu?
+8. Tedavi süreci **olay üretmeli mi** (iğneler, bekleme, aileden gelen sorular)? Şu an tek bir düğme.
+
+---
+
+### Q-104 — İkinci evlilik
+
+**Durum:** `BACKLOG.md` içinde duruyordu, Q-063'ün konusuydu; kodlandı, onay bekliyor. Kod: Paket 36 (`lib/domain/interaction/marriage_engine.dart`, `lib/domain/models/game_state.dart`).
+
+**Önceki hâli:** Boşanan ya da eşini kaybeden oyuncu yeni sevgili edinebiliyor ama **evlenemiyordu**. Ekranda "Bu prototipte ikinci evlilik yok; ilk evliliğin kaydı korunuyor" yazıyordu. Sebep teknikti: yeni bir kayıt açmak eskisinin üzerine yazmak olurdu ve bu projede kayıt asla silinmez.
+
+**Kodlanan kurallar:**
+- Yürüyen evlilikte ikinci evlilik **hâlâ engelli** ("Zaten evlisin").
+- Kayıt boşanmış ya da dul ise **yeniden evlenilebiliyor**.
+- Düğünde sona ermiş kayıt `pastMarriages` listesine **taşınıyor**, üzerine yazılmıyor. Kiminle, kaç yaşında evlenildiği ve nasıl bittiği hayat boyu duruyor.
+- Eski eşin evlilik kaydı kişi ekranında **hâlâ görünüyor**.
+- Üçüncü, dördüncü evlilikte geçmiş birikiyor.
+- Miras kuralı (D-037) ve ebeveyn durumu **yürüyen** kayıttan okunmaya devam ediyor.
+
+**Karar soruları:**
+1. İkinci evlilik için **bekleme süresi** olmalı mı? Şu an boşandıktan sonraki yıl yeniden evlenilebiliyor.
+2. Önceki evlilikler yeni teklifin **kabul ihtimalini** etkilemeli mi? Şu an etkilemiyor; üç kez boşanmış biri ilk kez evlenecek biriyle aynı şansa sahip.
+3. **Nafaka / mal paylaşımı** olmalı mı? Şu an boşanmanın hiçbir parasal sonucu yok — ikinci evlilik açılınca bu boşluk daha görünür hâle geliyor.
+4. Önceki evlilikten olan **çocukların** yeni eşle ilişkisi modellenmeli mi? Şu an hiçbir şey olmuyor.
+5. Evlilik geçmişi oyuncuya **nerede** gösterilmeli? Şu an yalnızca ilgili kişinin ekranında. Ayrı bir "evlilik geçmişi" bölümü ya da hayat sonu değerlendirmesinde bir satır ister misin?
+6. Boşanma şu an serbest ve bedelsiz. İkinci evlilik açıldığına göre boşanmaya bir **koşul** gelmeli mi?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

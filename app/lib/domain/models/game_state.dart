@@ -51,6 +51,7 @@ class GameState {
     this.pregnancy,
     this.military = const MilitaryState(),
     this.unprotectedTries = 0,
+    this.ivfAttempts = 0,
     this.lastConceptionTryAge,
     this.storyFlags = const <String>{},
     this.items = const <OwnedItem>[],
@@ -93,6 +94,7 @@ class GameState {
     this.lastCrisisAge,
     this.healthWarned = false,
     this.marriage,
+    this.pastMarriages = const <Marriage>[],
     this.generation = 1,
     this.proposalAges = const <String, int>{},
     this.notices = const <PendingNotice>[],
@@ -149,6 +151,12 @@ class GameState {
   /// Doğumla sıfırlanır. Belli bir sayıdan sonra oyuncuya "olmuyor"
   /// denir; kısırlık böyle **anlaşılır**, baştan söylenmez.
   final int unprotectedTries;
+
+  /// Bugüne kadar yapılan tüp bebek denemesi sayısı (Paket 35).
+  ///
+  /// Kayda girer; başarılı denemeden sonra da sıfırlanmaz, çünkü kaç kez
+  /// denendiği hayatın bir parçasıdır.
+  final int ivfAttempts;
 
   /// Bu yıl gebelik ihtimalinin denendiği yaş (Paket 25).
   ///
@@ -434,6 +442,25 @@ class GameState {
   /// buraya bakar (D-037).
   final Marriage? marriage;
 
+  /// Sona ermiş **önceki** evlilikler (Paket 36).
+  ///
+  /// İkinci evlilikte eski kayıt silinmez, buraya taşınır: "kiminle, kaç
+  /// yaşında evlenildi, nasıl bitti" bilgisi hayat boyu durur.
+  final List<Marriage> pastMarriages;
+
+  /// Bu kişiyle olan evlilik kaydı — şimdiki ya da geçmiş.
+  Marriage? marriageWith(String personId) {
+    final Marriage? simdiki = marriage;
+    if (simdiki != null && simdiki.spouseId == personId) return simdiki;
+    for (final Marriage m in pastMarriages) {
+      if (m.spouseId == personId) return m;
+    }
+    return null;
+  }
+
+  /// Bu hayatta kaç kez evlenildi?
+  int get marriageCount => pastMarriages.length + (marriage == null ? 0 : 1);
+
   /// Vasiyetinde mirasçı olarak seçilen çocuğun kimliği (D-052).
   ///
   /// Seçim isteğe bağlıdır; `null` ise miras çocuklar arasında eşit
@@ -657,6 +684,7 @@ class GameState {
     Object? pregnancy = _unsetEvent,
     MilitaryState? military,
     int? unprotectedTries,
+    int? ivfAttempts,
     Object? lastConceptionTryAge = _unsetEvent,
     Set<String>? storyFlags,
     List<OwnedItem>? items,
@@ -699,6 +727,7 @@ class GameState {
     int? lastCrisisAge,
     bool? healthWarned,
     Object? marriage = _unsetEvent,
+    List<Marriage>? pastMarriages,
     int? generation,
     Map<String, int>? proposalAges,
     List<PendingNotice>? notices,
@@ -721,6 +750,7 @@ class GameState {
           : pregnancy as Pregnancy?,
       military: military ?? this.military,
       unprotectedTries: unprotectedTries ?? this.unprotectedTries,
+      ivfAttempts: ivfAttempts ?? this.ivfAttempts,
       lastConceptionTryAge: lastConceptionTryAge == _unsetEvent
           ? this.lastConceptionTryAge
           : lastConceptionTryAge as int?,
@@ -781,6 +811,7 @@ class GameState {
       healthWarned: healthWarned ?? this.healthWarned,
       marriage:
           marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
+      pastMarriages: pastMarriages ?? this.pastMarriages,
       generation: generation ?? this.generation,
       proposalAges: proposalAges ?? this.proposalAges,
       notices: notices ?? this.notices,

@@ -95,12 +95,9 @@ class MarriageEngine {
   /// Bu kişiyle evlenmeye engel; engel yoksa boş metin.
   String marryBlockReason(GameState state, Person person) {
     if (state.isMarried) return 'Zaten evlisin.';
-    // İkinci evlilik henüz tasarlanmadı (Q-063). Yeni bir kayıt açmak eski
-    // evlilik kaydının üzerine yazmak olurdu; kayıt asla silinmez.
-    if (state.marriage != null) {
-      return 'Bu prototipte ikinci evlilik yok; ilk evliliğin kaydı '
-          'korunuyor.';
-    }
+    // İkinci evlilik açıldı (Paket 36). Eski kayıt **silinmez**:
+    // düğünde `pastMarriages` listesine taşınır, böylece "kiminle, kaç
+    // yaşında evlenildi, nasıl bitti" bilgisi hayat boyu durur.
     if (!person.isAlive) return 'Bu kişi hayatta değil.';
     if (person.relation != RelationType.sevgili) {
       return 'Yalnızca sevgilinle evlenebilirsin.';
@@ -195,6 +192,8 @@ class MarriageEngine {
         marriedAtAge: state.player.age,
         status: MarriageStatus.evli,
       ),
+      // Sona ermiş önceki evlilik geçmişe taşınır, üzerine yazılmaz.
+      pastMarriages: _archive(state),
       // Evlenmek kendi haneni kurmaktır: artık ailenin yanında sayılmazsın.
       movedOut: true,
       pendingWedding: null,
@@ -205,6 +204,26 @@ class MarriageEngine {
       state: _log(next, metin, LogCategory.aile),
       outcome: FamilyOutcome(applied: true, text: metin),
     );
+  }
+
+  /// Sona ermiş mevcut evlilik kaydını geçmişe taşır (Paket 36).
+  ///
+  /// Yürüyen bir evlilik **asla** arşivlenmez: oraya ancak boşanmış ya da
+  /// eşini kaybetmiş biri gelir, çünkü yürüyen evlilikte ikinci evlilik
+  /// zaten engellidir. Aynı kayıt iki kez eklenmez.
+  static List<Marriage> _archive(GameState state) {
+    final Marriage? onceki = state.marriage;
+    if (onceki == null || onceki.isActive) return state.pastMarriages;
+    final bool zatenVar = state.pastMarriages.any(
+      (Marriage m) =>
+          m.spouseId == onceki.spouseId &&
+          m.marriedAtAge == onceki.marriedAtAge,
+    );
+    if (zatenVar) return state.pastMarriages;
+    return List<Marriage>.unmodifiable(<Marriage>[
+      ...state.pastMarriages,
+      onceki,
+    ]);
   }
 
   /// Sevgiliyle **doğrudan** evlenir (düğün seçimi olmadan).

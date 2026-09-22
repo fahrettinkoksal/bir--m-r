@@ -10,6 +10,8 @@ import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/life/astrology.dart';
 import '../../../domain/interaction/adoption.dart';
+import '../../../domain/interaction/intimacy.dart';
+import '../../../domain/interaction/parenthood.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -22,6 +24,7 @@ import 'casino_pages.dart';
 import 'martial_arts_page.dart';
 import 'lottery_page.dart';
 import 'finger_page.dart';
+import 'fertility_page.dart';
 import 'license_pages.dart';
 import 'social_pages.dart';
 
@@ -52,6 +55,7 @@ enum _ActivityPage {
   kurs,
   falTarot,
   dovus,
+  tupBebek,
   sosyalMedya,
   kumarhane,
   piyango,
@@ -124,7 +128,23 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return VenuePage(
           venue: ActivityVenue.saglikMerkezi,
           onBack: () => _go(_ActivityPage.kok),
+          extraRows: <Widget>[
+            // Tüp bebek yalnızca bir eş/sevgili varken görünür; çalışmayan
+            // düğme konmaz (Paket 35).
+            if (Intimacy.partnerOf(state) != null &&
+                state.player.age >= Parenthood.prototypeOnlyMinAge)
+              MenuRow(
+                key: const Key('saglik_tup_bebek'),
+                title: 'Tüp bebek tedavisi',
+                subtitle: 'Sonuç alınamayan çiftler için',
+                icon: Icons.child_friendly_outlined,
+                accent: BirOmurAccents.nar,
+                onTap: () => _go(_ActivityPage.tupBebek),
+              ),
+          ],
         );
+      case _ActivityPage.tupBebek:
+        return FertilityPage(onBack: () => _go(_ActivityPage.saglik));
       case _ActivityPage.eglence:
         return VenuePage(
           venue: ActivityVenue.eglence,
