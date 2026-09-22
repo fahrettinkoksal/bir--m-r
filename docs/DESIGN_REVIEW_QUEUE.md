@@ -2319,5 +2319,28 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-105 — Hayat sonu değerlendirmesi yeni sistemleri görüyor
+
+**Durum:** Kendi tespitim, Faho'nun doğrudan isteği değil — onay bekliyor. Kod: Paket 37 (`lib/domain/life/life_verdict.dart`).
+
+**Bulunan boşluk:** Paket 29-36 arasında askerlik, dövüş sanatları ve ikinci evlilik eklendi. Hayat sonu değerlendirmesi (Q-090) bunlardan **hiçbirini görmüyordu**. Ölçüde şu çıkıyordu: başpehlivanlığa çıkmış ya da binbaşı olarak terhis olmuş bir hayat, hiç salona gitmemiş ve hiç askere gitmemiş bir hayatla **aynı** puanı alıyordu. Eklenen sistemler menüde duruyor ama hayatın anlatısına girmiyordu.
+
+**Kodlanan kurallar (hepsi `prototypeOnly`):**
+- **Emek** eksenine askerlik: terhis **+8**, her hizmet yılı **+2** (en çok 10), rütbeli yol (astsubay/subay) **+8**. Bedelli ödemek hizmet sayılmıyor; kaçmak hiç sayılmıyor.
+- **Deneyim** eksenine dövüş sanatları: her dal için `ulaşılan basamak / dalın toplam basamağı` oranının **18 katı**, toplamda en çok **30**. Basamak sayısı değil, **ne kadar yükselindiği** sayılıyor — böylece dokuz basamaklı güreşle on iki basamaklı karate adil karşılaştırılıyor.
+- **İlkler** listesine: terhis (rütbesiyle), dövüş sanatlarında en üst basamak, ve **bütün evlilikler** (Paket 36'dan sonra birden fazla olabiliyor; önceden yalnızca sonuncusu yazılıyordu).
+- "Yaşı bilinmeyen bir an ilkler listesine girmez" kuralı korundu: terhis yaşı ya da zirve yaşı kayıtlı değilse satır yazılmıyor.
+
+**Karar soruları:**
+1. Askerliğin **Emek** ekseninde olması doğru mu, yoksa kendi ekseni mi olmalı? Şu an iş hayatıyla aynı kefede.
+2. **Bedelli ödemek hiç sayılmıyor.** Doğru mu? Bedelli de bir yükümlülüğün yerine getirilmesi; sıfır mı olmalı, yoksa küçük bir puan mı?
+3. **Kaçak kalmak hiç sayılmıyor** ama **ceza da almıyor**. Ömrü boyunca bakaya kalmış biri değerlendirmede bunu hiç görmüyor. Eksi puan ya da ayrı bir satır ister misin?
+4. Dövüş sanatlarının **Deneyim**'de olması doğru mu? Başpehlivanlık bir deneyim mi, yoksa bir **emek** mi?
+5. Ağırlıklar (askerlik en çok **26**, dövüş en çok **30**) diğer kalemlerle kıyaslandığında yerinde mi? Karşılaştırma: şehir gezmek en çok 28, kitap 24, ehliyet 12.
+6. **Piyango ve tüp bebek değerlendirmede hiç yok.** Büyük ikramiye vurmuş bir hayat ya da tüp bebekle çocuk sahibi olmuş bir hayat ayrıca anılmalı mı? (Tüp bebekte şu an **yaş kaydı tutulmadığı** için "ilkler" listesine giremiyor; istenirse kayda yaş eklenir.)
+7. Finger üzerinden tanışıp evlenmek ayrıca anılmalı mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
