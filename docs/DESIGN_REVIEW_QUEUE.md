@@ -2069,5 +2069,44 @@ Başlık esnek yapıldı. Ayrıca **kalıcı bir koruma** eklendi (`test/layout_
 4. Gruplama doğru mu? Kumarhane "Keyfine bak" içinde; "Hayat işleri"ne mi girmeli?
 5. Ses seviyesi (%62 tepe) telefonda doğru mu? Bunu ancak cihazda dinleyerek anlarız.
 
+
+### Q-097 — Askerlik: yükümlülük, bedelli ve rütbeli yollar
+**Durum:** **Faho'nun kararı** (21 Eylül 2026, doğrudan talimat). **Sayılar ve kapsam karar bekliyor** (`prototypeOnly`). **Kaynak:** Paket 29, `app/lib/data/military_catalog.dart`, `app/lib/domain/career/military_service.dart`.
+
+**Faho'nun talimatı (özet):** Askerlik meslek kısmına **ayrı bir menü** olarak eklensin. 18 yaşından sonra katılınabilsin. Erkek okumuyorsa 20 yaşında zorunlu askerlik için çağrılsın veya bedelli ödesin. Bedelli ücretini **aileden ödemesini isteyebilsin**: ailede zengin biri varsa ve arası iyiyse ödeyebilir. Dileyen **subay, astsubay gibi rütbelere başvurabilsin**.
+
+**Uygulanan:**
+
+*1. Ayrı menü.* Meslek bölümünde **Askerlik** satırı. 18 yaşından itibaren ya da askerlikle ilgili bir kayıt varsa görünür; durumu (celp geldi / askerde / terhis / bedelli) satırda yazar.
+
+*2. Yükümlülük ve celp.* Okumayan yükümlü **20 yaşında** çağrılır. Çağrı **sessizce** gelmez: ekranda bildirim çıkar (D-050) ve günlüğe yazılır. Okuyan öğrenci çağrılmaz (tecil). **41 yaşından sonra** celp gelmez. Aynı celp iki kez kuyruğa girmez.
+
+*3. Üç yol.*
+
+| Yol | Koşul | Süre | Yıllık maaş |
+|---|---|---|---|
+| Er olarak yap | yükümlü olmak | 1 yıl | yok |
+| Astsubay ol | lise mezunu | 4 yıl | 420.000 ₺ |
+| Subay ol | üniversite mezunu | 5 yıl | 560.000 ₺ |
+
+Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağlıkla yükselir (taban astsubay 0,45 · subay 0,30). Görevde iki yılda bir rütbe yükselir: Er → Onbaşı; Astsubay Çavuş → Üstçavuş → Başçavuş; Teğmen → Üsteğmen → Yüzbaşı → Binbaşı.
+
+*4. Bedelli.* Ücret **280.000 ₺**. Kendi cebinden ödenebilir ya da **aileden istenebilir**. İstenebilecek kişi: hayatta, kan bağı ya da eş, serveti **varlıklı/çok varlıklı** ve yakınlık **en az 55**. Kabul ihtimali yakınlık ve servetle yükselir (taban 0,20). **Ret gerçektir**; "her zaman evet" yok. Aile öderse oyuncunun cüzdanından **tek kuruş çıkmaz** ve ödeyen kişi kayda geçer. Ödeyebilecek yakın yoksa **çalışmayan düğme konmaz**, gerekçesi yazılır.
+
+*5. Hizmet etkileri (yıllık).* Sağlık +4, karizma +3, mutluluk −3; terhiste mutluluk +8.
+
+**Karar soruları:**
+1. **Zorunluluk bu prototipte yalnızca erkekler için.** Kadın oyuncu çağrılmıyor ama gönüllü olarak astsubay/subay başvurusu yapabiliyor. Doğru mu, yoksa oyunda bu ayrım hiç olmamalı mı?
+2. Süreler (er 1 yıl, astsubay 4, subay 5) ve maaşlar uygun mu? Gerçek mevzuat zamanla değişiyor; oyun kendi sayısını seçmeli.
+3. Bedelli **280.000 ₺** doğru mu? Oyunun ekonomisinde bu, 20 yaşındaki biri için çok yüksek olabilir — zaten aileden isteme yolu bu yüzden var.
+4. Aile ödediğinde **ödeyenin serveti azalmıyor**. NPC nakdi ayrıntılı tutulmadığı için böyle; servet basamağı düşürülmeli mi?
+5. Reddedilen bedelli isteğinde **hiçbir ceza yok** (yakınlık düşmüyor). Sitem etmeli mi?
+6. Askerlik **işi engellemiyor**: görevdeyken iş arama hâlâ açık. Kapatılmalı mı?
+7. Askerliğe hiç gitmemenin bir sonucu yok. Yükümlülüğünü yerine getirmeyen için bir yaptırım (iş bulamama gibi) istenir mi?
+8. Rütbeli askerlik ayrı bir "meslek" sayılmalı mı? Şu an kariyer kaydından bağımsız ilerliyor; maaş doğrudan cüzdana yatıyor.
+9. Hizmet sırasında **olay** çıkmalı mı? Şu an askerlik yılları olaysız geçiyor.
+
+**Yan not (kayıt):** Askerlik alanı `military` olarak **eklemeli** yazıldı; eksik olduğunda "yapılmadı" olarak açılıyor. Kayıt sürümü **artırılmadı**: hiçbir eski kayıt okunamaz hâle gelmiyor ve beş sürümlük pencere boşa harcanmıyor. **Geriye dönük askerlik uydurulmaz.**
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
