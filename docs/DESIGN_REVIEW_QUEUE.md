@@ -2175,5 +2175,36 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-100 — Dövüş sanatları: karate, kung fu, yağlı güreş ve eğitmenlik
+
+**Durum:** Faho'nun isteğine göre kodlandı; sayıların onayı bekleniyor. Kod: Paket 32 (`lib/data/martial_arts_catalog.dart`, `lib/domain/activities/martial_arts_engine.dart`, `lib/ui/screens/sections/martial_arts_page.dart`).
+
+**Faho'nun isteği:** "Aktivitelerde spor içerisine kungfu dersleri koyalım, ders başı ücret az olsun. Orada aldığım eğitimde çok ustalaşırsam… kungfunun son seviyesi vb. iş imkânı olarak kungfu eğitmeni olabileyim. Aynısını karateye de ekleyelim, güreş de ekleyelim. Onlarda da seviyeleri internetten araştır; üst seviyeye geldiğinde iş imkânı olarak eğitmenliğini yapabilelim."
+
+**Araştırma notu (basamak adları gerçek, sayılar değil):**
+- **Karate:** öğrenci dereceleri *kyu* (aşağıya doğru sayılır), ustalık dereceleri *dan*. Kahverengi kuşak siyaha geçiş sayıldığı için 3., 2. ve 1. kyu diye üçe ayrılıyor. Oyunda beyaz (9. kyu) → siyah kuşak 3. Dan.
+- **Kung fu / wushu:** okullarda beyazdan siyaha kuşak (sash) düzeni yaygın; üstünde Çin Wushu Federasyonu'nun *duanwei* dereceleri var. Oyunda beyaz kuşak → siyah kuşak → 1./2./3. Duan.
+- **Yağlı güreş:** Kırkpınar'da boy sıralaması minikten başa gider: minik, teşvik, tozkoparan, ayak, deste, küçük orta, büyük orta, başaltı, baş (başpehlivan). Oyun bu sırayı izliyor.
+
+**Kodlanan kurallar:**
+- Bölüm **spor salonunun içinde**: Aktiviteler → Spor salonu → Dövüş sanatları.
+- Ders ücreti düşük: karate 180 ₺, kung fu 200 ₺, güreş 150 ₺.
+- **Ustalık parayla değil yılla geliyor:** bir yaşta en fazla **20 ders** alınabiliyor. Karatede siyah kuşak 110 ders, yani en az 5-6 yıl; en üst basamak 10 yılı buluyor. Kalıcı bir test "en üst basamak en az 5 yıl sürer" diye koruyor.
+- Her ders sağlık +2, mutluluk +1; basamak atlayınca ek sağlık/mutluluk/karizma ve hayat günlüğüne satır.
+- Dallar birbirinin yıllık kotasını yemiyor.
+- **Eğitmenlik:** karate siyah kuşak (1. Dan), kung fu siyah kuşak, güreş başaltı basamağında meslek kataloğunda bir iş açılıyor (Karate eğitmeni, Kung fu eğitmeni, Güreş antrenörü). Kuşağı olmayan başvuramıyor, bir daldaki kuşak başka dalı açmıyor, üçünün de kendi mülakat soruları var. Yan karakterlere rastgele dağıtılmıyor.
+
+**Karar soruları:**
+1. **Eğitmenlik eşiği "üst seviye" mi olmalı, yoksa siyah kuşak yetmeli mi?** İstekte "üst seviyeye geldiğinde" deniyor; gerçekte eğitmenlik genellikle siyah kuşakla başlıyor, en üst dan derecesiyle değil. Şu an **siyah kuşak / başaltı** eşiği kodlandı. En üst basamağa mı çekilsin?
+2. Ders ücretleri (**150-200 ₺**) ve yıllık ders sınırı (**20**) doğru mu? Bu haliyle yılda 3.000-4.000 ₺ harcanıyor ve siyah kuşak 5-6 yıl sürüyor.
+3. Eğitmenlik maaşları (**270.000-300.000 ₺/yıl**) diğer mesleklere göre yerinde mi?
+4. Güreşte **başpehlivanlık** yalnızca ders sayısıyla mı gelmeli? Gerçekte Kırkpınar'da güreşilip kazanılıyor. Sonradan bir **turnuva olayı** eklensin mi?
+5. Dövüş sanatı **olaylara** yansımalı mı? Şu an yalnızca sağlık/mutluluk/karizma veriyor; kavga, taciz ya da hırsızlık olaylarında ayrı bir seçenek açmıyor.
+6. Sakatlanma olmalı mı? Şu an ders hiçbir zaman zarar vermiyor.
+7. Bir dalda ilerlerken başka dala da aynı anda devam edilebiliyor. Sınırlanmalı mı (aynı anda tek dal)?
+8. Bölüm spor salonunun **içine** kondu. Ana aktivite menüsünde ayrı satır mı olsun?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
