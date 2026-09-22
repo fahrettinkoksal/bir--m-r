@@ -23,10 +23,10 @@ kurman gerekmez.
 2. Üstteki **Actions** sekmesine tıkla.
 3. Soldaki listeden **Windows test sürümü** iş akışını seç.
 4. Listeden yeşil ✅ işaretli en son koşuya tıkla.
-   *(Doğrulanmış koşu:
-   [run #3](https://github.com/fahrettinkoksal/bir--m-r/actions/runs/35453833043))*
+   *(Paket 25-34 birleştikten sonraki koşu:
+   [run #73](https://github.com/fahrettinkoksal/bir--m-r/actions/runs/35703448721))*
    *(Elle çalıştırmak istersen: sağdaki **Run workflow** → dal olarak
-   `claude/windows-test-v1` → **Run workflow**.)*
+   `main` → **Run workflow**.)*
 5. Açılan sayfanın **en altındaki `Artifacts`** bölümüne in.
 6. **`bir-omur-windows`** dosyasına tıkla — bilgisayarına bir **.zip** iner.
 
@@ -82,7 +82,13 @@ Bu, imzasız test uygulamalarında normaldir.
 ## Bilinen sınırlar
 
 - Bu bir **test sürümüdür**: dijital imzası yoktur, kurulum sihirbazı yoktur.
-- **Oyun kaydı yok** — uygulamayı kapatınca hayat baştan başlar.
+- **Oyun kaydı artık var** ama **Windows'ta hiç doğrulanmadı.** Bu belge
+  yazıldıktan (19 Eylül 16:15) birkaç saat sonra kayıt/yükleme sistemi
+  eklendi (aynı gün 22:13). Kayıt `%APPDATA%` altındaki uygulama klasörüne
+  yazılır; klasör açılamazsa oyun yine başlar, yalnızca kayıt devre dışı
+  kalır ve bu **başlangıç ekranında bildirilir**. Uygulamayı kapatıp
+  açtığında aynı hayata devam edip etmediğin **test edilmesi gereken
+  maddelerden biridir**.
 - Arayüz telefon ölçüsüne göre tasarlandı; masaüstünde pencereyi dar tutmak
   daha doğru bir görünüm verir.
 - Görsel tasarım hâlâ onay bekliyor (`docs/DESIGN_REVIEW_QUEUE.md` → Q-001).
