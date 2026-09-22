@@ -4,7 +4,12 @@ library;
 import '../models/book_progress.dart';
 import '../models/career.dart';
 import '../models/game_state.dart';
+import '../models/gender.dart';
+import '../../data/martial_arts_catalog.dart';
+import '../../data/military_catalog.dart';
 import '../models/marriage.dart';
+import '../models/martial_progress.dart';
+import '../models/military.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
@@ -197,8 +202,15 @@ abstract final class LifeVerdictBuilder {
     }
     if (state.career.milestones.isNotEmpty) puan += 6;
 
+    // Askerlik de emektir (Paket 37). Paket 29-31'den beri hizmet
+    // veriliyordu ama değerlendirme bunu hiç görmüyordu: terhis olmuş
+    // bir binbaşı ile hiç askere gitmemiş biri aynı sayılıyordu.
+    puan += _askerlikPuani(state);
+
     final String not;
-    if (gecmis.isEmpty) {
+    if (gecmis.isEmpty && state.military.status == MilitaryStatus.tamamlandi) {
+      not = 'Hiçbir işte çalışmadın ama askerliğini tamamladın.';
+    } else if (gecmis.isEmpty) {
       not = 'Hiç bir işte çalışmadın.';
     } else if (gecmis.length == 1) {
       not = 'Tek bir işte $calisilanYil yıl geçirdin.';
@@ -230,8 +242,17 @@ abstract final class LifeVerdictBuilder {
     puan += (farkliOlay ~/ 4).clamp(0, 18);
     if (state.player.currentCity != state.player.birthCity) puan += 6;
 
+    // Yıllarca salona gidip kuşak yükseltmek de bir deneyimdir
+    // (Paket 37). Paket 32'den beri bu emek hiçbir yere yazılmıyordu.
+    final int dovus = _dovusPuani(state);
+    puan += dovus;
+
+    final MartialProgress? enIyi = _enIleriDal(state);
     final String not;
-    if (sehirler.isEmpty && bitenKitap == 0) {
+    if (enIyi != null && enIyi.level >= (enIyi.art?.instructorFromLevel ?? 99)) {
+      not = '${enIyi.art!.label} yolunda "${enIyi.rankName}" basamağına '
+          'çıktın.';
+    } else if (sehirler.isEmpty && bitenKitap == 0 && dovus == 0) {
       not = 'Hayatın hep aynı sokaklarda geçti.';
     } else if (sehirler.isEmpty) {
       not = 'Hiç şehir dışına çıkmadın ama $bitenKitap kitap bitirdin.';
@@ -279,6 +300,50 @@ abstract final class LifeVerdictBuilder {
   // İlkler ve hiç olmayanlar
   // -----------------------------------------------------------------
 
+  /// prototypeOnly: askerliğin Emek eksenine katkısı.
+  ///
+  /// Yalnızca **gerçekten olmuş** durumlar sayılır: tamamlanan hizmet ve
+  /// ulaşılan rütbe. Bedelli ödemek hizmet sayılmaz; kaçmak hiç sayılmaz.
+  static int _askerlikPuani(GameState state) {
+    final MilitaryState a = state.military;
+    if (a.status != MilitaryStatus.tamamlandi) return 0;
+
+    int puan = 8;
+    final int? bas = a.startedAtAge;
+    final int? bitis = a.finishedAtAge;
+    if (bas != null && bitis != null && bitis > bas) {
+      puan += ((bitis - bas) * 2).clamp(0, 10);
+    }
+    // Rütbeli yollar uzun ve maaşlıdır; karşılığı da büyüktür.
+    final MilitaryTrack? yol = a.track;
+    if (yol != null && yol != MilitaryTrack.er) puan += 8;
+    return puan;
+  }
+
+  /// prototypeOnly: dövüş sanatlarının Deneyim eksenine katkısı.
+  ///
+  /// Basamak sayısı değil, **ne kadar yükselindiği** sayılır: her dalın
+  /// kendi basamak sayısına oranla.
+  static int _dovusPuani(GameState state) {
+    double toplam = 0;
+    for (final MartialProgress p in state.martialArts) {
+      final MartialArt? dal = p.art;
+      if (dal == null || dal.topLevel <= 0) continue;
+      toplam += (p.level / dal.topLevel) * 18;
+    }
+    return toplam.round().clamp(0, 30);
+  }
+
+  /// En ileri gidilen dövüş dalı; hiç ders alınmadıysa `null`.
+  static MartialProgress? _enIleriDal(GameState state) {
+    MartialProgress? enIyi;
+    for (final MartialProgress p in state.martialArts) {
+      if (p.art == null || p.lessons == 0) continue;
+      if (enIyi == null || p.level > enIyi.level) enIyi = p;
+    }
+    return enIyi;
+  }
+
   static List<VerdictFirst> _ilkler(GameState state, int olumYasi) {
     final List<VerdictFirst> ilkler = <VerdictFirst>[];
 
@@ -311,14 +376,21 @@ abstract final class LifeVerdictBuilder {
       ));
     }
 
-    final Marriage? evlilik = state.marriage;
-    if (evlilik != null) {
-      final Person? es = state.personById(evlilik.spouseId);
+    // Paket 36'dan beri birden fazla evlilik olabiliyor; hepsi yazılır,
+    // yalnızca sonuncusu değil.
+    final List<Marriage> evlilikler = <Marriage>[
+      ...state.pastMarriages,
+      if (state.marriage != null) state.marriage!,
+    ];
+    for (int i = 0; i < evlilikler.length; i++) {
+      final Marriage m = evlilikler[i];
+      final Person? es = state.personById(m.spouseId);
+      final String kim = es == null ? '' : '${es.firstName} ile ';
       ilkler.add(VerdictFirst(
-        age: evlilik.marriedAtAge,
-        text: es == null
-            ? 'Evlendin.'
-            : '${es.firstName} ile evlendin.',
+        age: m.marriedAtAge,
+        text: i == 0
+            ? '${kim}evlendin.'
+            : '${kim}yeniden evlendin.',
       ));
     }
 
@@ -336,11 +408,40 @@ abstract final class LifeVerdictBuilder {
       if (enErken != null) {
         ilkler.add(VerdictFirst(
           age: enErken,
+          // "Baba/anne oldun" iki cinsiyete birden yazılmış bir metindi;
+          // oyuncunun cinsiyetine göre düzeltildi (Paket 37).
           text: cocuklar.length == 1
-              ? 'Baba/anne oldun.'
+              ? (state.player.gender == Gender.kadin
+                  ? 'Anne oldun.'
+                  : 'Baba oldun.')
               : 'İlk çocuğun doğdu.',
         ));
       }
+    }
+
+    // Askerlik (Paket 37): yalnızca terhis yaşı kayıtlıysa yazılır.
+    final MilitaryState asker = state.military;
+    if (asker.status == MilitaryStatus.tamamlandi &&
+        asker.finishedAtAge != null) {
+      final MilitaryRank? rutbe = asker.rank;
+      ilkler.add(VerdictFirst(
+        age: asker.finishedAtAge!,
+        text: rutbe == null
+            ? 'Askerliğini tamamladın.'
+            : '${rutbe.label} olarak terhis oldun.',
+      ));
+    }
+
+    // Dövüş sanatlarında en üst basamak (Paket 37). Yaş kayıtlı
+    // olmayan basamaklar yazılmaz.
+    for (final MartialProgress p in state.martialArts) {
+      final MartialArt? dal = p.art;
+      if (dal == null || p.topRankAtAge == null) continue;
+      ilkler.add(VerdictFirst(
+        age: p.topRankAtAge!,
+        text: '${dal.label} yolunda en üst basamağa çıktın: '
+            '${dal.ranks.last.name}.',
+      ));
     }
 
     final int? emeklilik = state.career.retiredAtAge;
