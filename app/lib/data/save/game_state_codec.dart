@@ -14,6 +14,7 @@ import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
 import '../../domain/models/martial_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
+import '../../domain/models/finger_profile.dart';
 import '../lottery_catalog.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
@@ -89,6 +90,11 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
+      // Finger profilleri (Paket 34). Alan eklemeli.
+      'fingerDeck':
+          state.fingerDeck.map(_encodeFinger).toList(growable: false),
+      'fingerMatches':
+          state.fingerMatches.map(_encodeFinger).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
@@ -274,6 +280,20 @@ Map<String, Object?> _encodeTicket(LotteryTicket t) => <String, Object?>{
       'number': t.number,
       'boughtAtAge': t.boughtAtAge,
       'price': t.price,
+    };
+
+Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
+      'id': p.id,
+      'firstName': p.firstName,
+      'lastName': p.lastName,
+      'gender': p.gender.name,
+      'age': p.age,
+      'city': p.city,
+      'bio': p.bio,
+      'interests': p.interests,
+      'occupation': p.occupation,
+      'matchedAtAge': p.matchedAtAge,
+      'metPersonId': p.metPersonId,
     };
 
 Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
@@ -676,6 +696,16 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeTicket(_asMap(e, 'lotteryTickets[]')))
           .toList(growable: false),
     ),
+    fingerDeck: List<FingerProfile>.unmodifiable(
+      (json['fingerDeck'] as List<Object?>? ?? const <Object?>[])
+          .map((Object? e) => _decodeFinger(_asMap(e, 'fingerDeck[]')))
+          .toList(growable: false),
+    ),
+    fingerMatches: List<FingerProfile>.unmodifiable(
+      (json['fingerMatches'] as List<Object?>? ?? const <Object?>[])
+          .map((Object? e) => _decodeFinger(_asMap(e, 'fingerMatches[]')))
+          .toList(growable: false),
+    ),
     socialAccounts: List<SocialAccount>.unmodifiable(
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
@@ -991,6 +1021,24 @@ LotteryTicket _decodeTicket(Map<String, Object?> json) => LotteryTicket(
       number: _string(json, 'number'),
       boughtAtAge: _int(json, 'boughtAtAge'),
       price: _int(json, 'price'),
+    );
+
+FingerProfile _decodeFinger(Map<String, Object?> json) => FingerProfile(
+      id: _string(json, 'id'),
+      firstName: _string(json, 'firstName'),
+      lastName: _string(json, 'lastName'),
+      gender: _enumByName(Gender.values, _string(json, 'gender'), 'gender'),
+      age: _int(json, 'age'),
+      city: _string(json, 'city'),
+      bio: _string(json, 'bio'),
+      interests: List<String>.unmodifiable(
+        (json['interests'] as List<Object?>? ?? const <Object?>[])
+            .map((Object? e) => e.toString())
+            .toList(growable: false),
+      ),
+      occupation: json['occupation'] as String?,
+      matchedAtAge: _intOrNull(json, 'matchedAtAge'),
+      metPersonId: json['metPersonId'] as String?,
     );
 
 /// Evlilik kaydı. Eşin kendisi kişi listesinden okunur; burada yalnızca

@@ -26,6 +26,8 @@ import '../data/martial_arts_catalog.dart';
 import '../domain/models/lottery_ticket.dart';
 import '../domain/casino/lottery.dart';
 import '../data/lottery_catalog.dart';
+import '../domain/models/finger_profile.dart';
+import '../domain/interaction/finger.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
 import '../domain/career/retirement.dart';
@@ -731,6 +733,66 @@ class GameController extends ChangeNotifier {
                 rng: _random,
               ),
       );
+
+  // --- Finger tanışma uygulaması (Paket 34) -----------------------------
+
+  List<FingerProfile> get fingerDeck =>
+      _state?.fingerDeck ?? const <FingerProfile>[];
+
+  List<FingerProfile> get fingerMatches =>
+      _state?.fingerMatches ?? const <FingerProfile>[];
+
+  int get fingerSwipesThisAge {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return Finger.swipesThisAge(current);
+  }
+
+  InteractionAvailability get fingerSwipeAvailability {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return Finger.swipeAvailability(current);
+  }
+
+  /// Eşleşme ihtimali (ekranda açıkça gösterilir).
+  double get fingerMatchChance {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return Finger.matchChance(current);
+  }
+
+  /// Desteyi gerekirse doldurur. Ekran açılırken çağrılır.
+  void fillFingerDeck() {
+    final GameState? current = _state;
+    if (current == null) return;
+    final GameState next = Finger.ensureDeck(current, _random);
+    if (identical(next, current)) return;
+    _state = next;
+    _autoSave();
+    notifyListeners();
+  }
+
+  FingerOutcome? passFingerProfile(String profileId) =>
+      _runFinger((GameState s) => Finger.pass(s, profileId, _random));
+
+  FingerOutcome? likeFingerProfile(String profileId) =>
+      _runFinger((GameState s) => Finger.like(s, profileId, _random));
+
+  FingerOutcome? meetFingerMatch(String profileId) =>
+      _runFinger((GameState s) => Finger.meet(s, profileId, _random));
+
+  FingerOutcome? _runFinger(FingerResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FingerResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
 
   // --- Milli Piyango (Paket 33) -----------------------------------------
 

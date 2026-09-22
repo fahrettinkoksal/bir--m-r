@@ -5,6 +5,7 @@ import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
 import '../../../data/martial_arts_catalog.dart';
 import '../../../data/lottery_catalog.dart';
+import '../../../data/finger_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/life/astrology.dart';
@@ -20,6 +21,7 @@ import 'activity_pages.dart';
 import 'casino_pages.dart';
 import 'martial_arts_page.dart';
 import 'lottery_page.dart';
+import 'finger_page.dart';
 import 'license_pages.dart';
 import 'social_pages.dart';
 
@@ -53,6 +55,7 @@ enum _ActivityPage {
   sosyalMedya,
   kumarhane,
   piyango,
+  finger,
   ehliyet,
   evlatEdinme,
   vasiyet,
@@ -143,6 +146,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.piyango:
         return LotteryPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.finger:
+        return FingerPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.ehliyet:
         return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.evlatEdinme:
@@ -329,6 +334,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.confirmation_number_outlined,
             accent: BirOmurAccents.pirinc,
             onTap: () => _go(_ActivityPage.piyango),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Finger: tanışma uygulaması (Paket 34).
+        if (state.player.age >= kFingerMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_finger'),
+            title: 'Finger',
+            subtitle: state.fingerMatches.isEmpty
+                ? 'Tanışma uygulaması — profillere bak, eşleş'
+                : '${state.fingerMatches.length} eşleşmen var',
+            icon: Icons.favorite_border_rounded,
+            accent: BirOmurAccents.gul,
+            onTap: () => _go(_ActivityPage.finger),
           ),
           const SizedBox(height: 10),
         ],

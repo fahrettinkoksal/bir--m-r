@@ -225,6 +225,66 @@ void main() {
     });
   }
 
+  // Finger sayfası da menüden içeride; profil kartı ve ilgi rozetleri
+  // dar ekranda sıkışır (Paket 34).
+  for (final Size boyut in genislikler) {
+    final double mantiksal = boyut.width / 3;
+
+    testWidgets('${mantiksal.round()} px genişlikte Finger sayfası taşmaz',
+        (WidgetTester tester) async {
+      yakala();
+      addTearDown(birak);
+
+      final GameController controller = GameController(random: Random(55));
+      addTearDown(controller.dispose);
+      tester.view.physicalSize = boyut;
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        BirOmurApp(controller: controller, sound: SoundService.silent()),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rastgele bir hayat'));
+      await tester.pumpAndSettle();
+
+      final GameState temel = controller.state!;
+      controller.debugSetState(
+        temel.copyWith(
+          pendingEvent: null,
+          notices: const <PendingNotice>[],
+          player: temel.player.copyWith(age: 27),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+      await tester.pumpAndSettle();
+      await scrollToFinder(tester, find.byKey(const Key('activity_finger')));
+      await tester.tap(find.byKey(const Key('activity_finger')));
+      await tester.pumpAndSettle();
+
+      // Birkaç beğeni: eşleşme satırları da kurulur.
+      for (int i = 0; i < 6; i++) {
+        await scrollToFinder(tester, find.byKey(const Key('finger_begen')));
+        await tester.tap(find.byKey(const Key('finger_begen')));
+        await tester.pumpAndSettle();
+      }
+
+      final Finder liste = find.byType(Scrollable).first;
+      for (int i = 0; i < 12; i++) {
+        await tester.drag(liste, const Offset(0, -300));
+        await tester.pumpAndSettle();
+      }
+
+      expect(
+        hatalar,
+        isEmpty,
+        reason: 'Düzen taşması:\n${hatalar.join('\n')}',
+      );
+    });
+  }
+
   testWidgets('uzun ad ve büyük cüzdanla başlık taşmaz', (
     WidgetTester tester,
   ) async {
