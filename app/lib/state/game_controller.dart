@@ -1402,6 +1402,16 @@ class GameController extends ChangeNotifier {
   MilitaryResult? payBedelli() =>
       _runMilitary(MilitaryService.payBedelli);
 
+  /// Askerliği tecil ettirir (Paket 31).
+  MilitaryResult? deferMilitary() => _runMilitary(MilitaryService.defer);
+
+  /// Çağrıya gitmez: bakaya kalır (Paket 31).
+  MilitaryResult? fleeMilitary() => _runMilitary(MilitaryService.flee);
+
+  /// Bakayayken kendiliğinden teslim olur.
+  MilitaryResult? surrenderMilitary() =>
+      _runMilitary(MilitaryService.surrender);
+
   /// Bedelli ücretini bir yakından ister.
   MilitaryResult? askFamilyForBedelli(String personId) =>
       _runMilitary((GameState c) =>

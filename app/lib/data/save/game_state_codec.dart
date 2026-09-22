@@ -170,6 +170,12 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
         'startedAtAge': state.military.startedAtAge,
         'finishedAtAge': state.military.finishedAtAge,
         'paidByPersonId': state.military.paidByPersonId,
+        'deferralsUsed': state.military.deferralsUsed,
+        'deferredUntilAge': state.military.deferredUntilAge,
+        'studentDeferral': state.military.studentDeferral,
+        'fugitiveSinceAge': state.military.fugitiveSinceAge,
+        'fineTotal': state.military.fineTotal,
+        'caughtCount': state.military.caughtCount,
       },
       'unprotectedTries': state.unprotectedTries,
       'lastConceptionTryAge': state.lastConceptionTryAge,
@@ -980,6 +986,14 @@ MilitaryState _decodeMilitary(Map<String, Object?> json) => MilitaryState(
       startedAtAge: _intOrNull(json, 'startedAtAge'),
       finishedAtAge: _intOrNull(json, 'finishedAtAge'),
       paidByPersonId: _stringOrNull(json, 'paidByPersonId'),
+      // Paket 31 alanları; eski kayıtlarda yoktur ve **geriye dönük
+      // tecil ya da ceza uydurulmaz**.
+      deferralsUsed: _intOrNull(json, 'deferralsUsed') ?? 0,
+      deferredUntilAge: _intOrNull(json, 'deferredUntilAge'),
+      studentDeferral: _boolOr(json, 'studentDeferral'),
+      fugitiveSinceAge: _intOrNull(json, 'fugitiveSinceAge'),
+      fineTotal: _intOrNull(json, 'fineTotal') ?? 0,
+      caughtCount: _intOrNull(json, 'caughtCount') ?? 0,
     );
 
 Pregnancy _decodePregnancy(Map<String, Object?> json) => Pregnancy(

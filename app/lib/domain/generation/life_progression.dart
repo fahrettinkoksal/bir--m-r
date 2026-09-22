@@ -412,6 +412,8 @@ class LifeProgression {
     // Askerlik (Paket 29): görevdeyse yıl işler ve süresi dolduysa
     // terhis olur; okumayan yükümlü yaşı gelince çağrılır.
     afterDeaths = MilitaryService.advanceYear(afterDeaths, newAge);
+    afterDeaths = MilitaryService.advanceFugitive(afterDeaths, newAge, _rng);
+    afterDeaths = MilitaryService.applyDeferralEnd(afterDeaths, newAge);
     afterDeaths = MilitaryService.applyCallUp(afterDeaths, newAge);
 
     // Burçsal dönem (Paket 27): bazı yıllarda oyuncunun burcuna denk

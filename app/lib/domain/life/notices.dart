@@ -247,15 +247,56 @@ abstract final class Notices {
   static const String militaryDischargeNoticeId = 'askerlik-terhis';
 
   /// Celp geldi.
-  static PendingNotice militaryCall({required int playerAge}) => PendingNotice(
-        id: militaryCallNoticeId,
+  ///
+  /// [afterDeferral] tecil bittikten sonraki çağrıdır; aynı yaşta iki
+  /// ayrı bildirim çakışmasın diye kimliği de farklıdır.
+  static PendingNotice militaryCall({
+    required int playerAge,
+    bool afterDeferral = false,
+  }) =>
+      PendingNotice(
+        id: afterDeferral
+            ? '$militaryCallNoticeId-tecil-sonu-$playerAge'
+            : militaryCallNoticeId,
         kind: NoticeKind.askerlik,
         age: playerAge,
-        title: 'Askerlik celbi',
-        text: 'Askerlik çağrın geldi. Meslek bölümündeki Askerlik '
-            'menüsünden er olarak gidebilir, bedelli ödeyebilir ya da '
-            'koşulların uygunsa astsubay veya subay olarak '
-            'başvurabilirsin.',
+        title: afterDeferral ? 'Tecilin bitti' : 'Askerlik celbi',
+        text: '${afterDeferral ? 'Askerlik tecilin sona erdi ve yeniden '
+            'çağrıldın. ' : 'Askerlik çağrın geldi. '}'
+            'Meslek bölümündeki Askerlik menüsünden er olarak gidebilir, '
+            'bedelli ödeyebilir, tecil hakkın varsa erteleyebilir ya da '
+            'gitmeyip bakaya kalabilirsin — ama bakaya kalırsan ceza '
+            'birikir ve yakalanabilirsin.',
+      );
+
+  /// Okul yüzünden otomatik tecil (Paket 31).
+  ///
+  /// Bu **sessizce** olmaz: oyuncu askerliğinin geldiğini ve okulun
+  /// tecil ettirdiğini ekranda görür.
+  static PendingNotice militaryStudentDeferral({required int playerAge}) =>
+      PendingNotice(
+        id: 'askerlik-okul-tecili',
+        kind: NoticeKind.askerlik,
+        age: playerAge,
+        title: 'Askerliğin tecil edildi',
+        text: 'Askerlik çağrın geldi, ama okuduğun için okulun seni '
+            'otomatik tecil ettirdi. Okulun bitene kadar askerliğin '
+            'tecilli. Okul bittiğinde doğrudan çağrılacaksın.',
+      );
+
+  /// Bakaya kalanın yakalanması.
+  static PendingNotice militaryCaught({
+    required int playerAge,
+    required int fine,
+  }) =>
+      PendingNotice(
+        id: 'askerlik-yakalandi-$playerAge',
+        kind: NoticeKind.askerlik,
+        age: playerAge,
+        title: 'Yakalandın',
+        text: 'Bakaya olduğun tespit edildi. İdari para cezan kesildi ve '
+            'yeniden çağrıldın.',
+        money: -fine,
       );
 
   /// Terhis oldu.

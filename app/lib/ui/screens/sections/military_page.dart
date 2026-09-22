@@ -75,7 +75,56 @@ class _MilitaryPageState extends State<MilitaryPage> {
             text: 'Şu an görevdesin. Süren dolunca terhis olacaksın; '
                 'her yaş ilerlemesinde bir yıl geçer.',
           )
-        else if (askerlik.status.kapandi)
+        else if (askerlik.isDeferred) ...<Widget>[
+          InfoPanel(
+            icon: Icons.pause_circle_outline,
+            text: askerlik.studentDeferral
+                ? 'Askerliğin okul yüzünden tecilli. Okulun bittiğinde '
+                    'doğrudan çağrılacaksın.'
+                : 'Askerliğin ${askerlik.deferredUntilAge} yaşına kadar '
+                    'tecilli. O yaşta yeniden çağrılacaksın.',
+          ),
+          const SizedBox(height: 10),
+          InfoPanel(
+            icon: Icons.confirmation_number_outlined,
+            text: 'Kalan tecil hakkın: '
+                '${MilitaryService.remainingDeferrals(state)}',
+          ),
+        ] else if (askerlik.isFugitive) ...<Widget>[
+          // Bakaya: ceza birikiyor ve yakalanma ihtimali her yıl artıyor.
+          InfoPanel(
+            icon: Icons.running_with_errors_outlined,
+            text: 'Bakayasın. '
+                '${MilitaryService.fugitiveYears(state)} yıldır '
+                'gitmedin. Kendin başvurursan ceza '
+                '${trMoney(MilitaryService.prototypeOnlyFineFor(state, caught: false))}; '
+                'yakalanırsan iki katı. Yakalanma ihtimali her yıl '
+                'artıyor.',
+          ),
+          const SizedBox(height: 10),
+          MenuRow(
+            key: const Key('military_surrender'),
+            title: 'Kendin başvur',
+            subtitle: 'Cezayı öde, yeniden çağrıl',
+            icon: Icons.handshake_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () =>
+                _uygula(GameScope.of(context).surrenderMilitary()),
+          ),
+          const SizedBox(height: 10),
+          if (bedelli.isAllowed)
+            MenuRow(
+              key: const Key('military_bedelli_late'),
+              title: 'Bedelli öde (ek bedelli)',
+              subtitle: 'Ücret: '
+                  '${trMoney(MilitaryService.bedelliCostFor(state))} · '
+                  'Kaçtığın her yıl için ek bedel var',
+              icon: Icons.payments_outlined,
+              accent: BirOmurAccents.pirinc,
+              onTap: () => _uygula(GameScope.of(context).payBedelli()),
+            ),
+          const SizedBox(height: 10),
+        ] else if (askerlik.status.kapandi)
           InfoPanel(
             icon: Icons.check_circle_outline,
             text: askerlik.status == MilitaryStatus.bedelli
@@ -83,6 +132,45 @@ class _MilitaryPageState extends State<MilitaryPage> {
                 : 'Askerlik meselen kapandı: ${askerlik.status.label}.',
           )
         else ...<Widget>[
+          // Çağrıldıysa üç yol var: git, öde ya da kaç (Paket 31).
+          if (askerlik.isCalled) ...<Widget>[
+            const InfoPanel(
+              icon: Icons.mark_email_unread_outlined,
+              text: 'Celbin geldi. Askere gidebilir, bedelli ödeyebilir, '
+                  'tecil hakkın varsa erteleyebilir ya da gitmeyip '
+                  'bakaya kalabilirsin. Bakaya kalırsan ceza birikir ve '
+                  'yakalanabilirsin.',
+            ),
+            const SizedBox(height: 10),
+            if (MilitaryService.canDefer(state))
+              MenuRow(
+                key: const Key('military_defer'),
+                title: 'Tecil ettir',
+                subtitle:
+                    '${MilitaryService.prototypeOnlyDeferralYears} yıl · '
+                    'Kalan hak: '
+                    '${MilitaryService.remainingDeferrals(state)}',
+                icon: Icons.pause_circle_outline,
+                accent: BirOmurAccents.mavi,
+                onTap: () =>
+                    _uygula(GameScope.of(context).deferMilitary()),
+              )
+            else
+              const InfoPanel(
+                icon: Icons.pause_circle_outline,
+                text: 'Tecil hakkın kalmadı.',
+              ),
+            const SizedBox(height: 10),
+            MenuRow(
+              key: const Key('military_flee'),
+              title: 'Gitme, bakaya kal',
+              subtitle: 'Ceza birikir ve yakalanabilirsin',
+              icon: Icons.directions_run_rounded,
+              accent: BirOmurAccents.nar,
+              onTap: () => _uygula(GameScope.of(context).fleeMilitary()),
+            ),
+            const SizedBox(height: 10),
+          ],
           const MenuGroupTitle(
             text: 'Katılma yolları',
             accent: BirOmurAccents.yesil,
@@ -133,7 +221,7 @@ class _MilitaryPageState extends State<MilitaryPage> {
               key: const Key('military_bedelli_self'),
               title: 'Bedelli öde',
               subtitle: 'Ücret: '
-                  '${trMoney(MilitaryService.prototypeOnlyBedelliCost)} · '
+                  '${trMoney(MilitaryService.bedelliCostFor(state))} · '
                   'Cüzdanında ${state.player.walletLabel}',
               icon: Icons.payments_outlined,
               accent: BirOmurAccents.pirinc,
@@ -208,6 +296,14 @@ class _DurumKarti extends StatelessWidget {
         (label: 'Başlangıç', value: '${a.startedAtAge} yaşında'),
       if (a.finishedAtAge != null)
         (label: 'Bitiş', value: '${a.finishedAtAge} yaşında'),
+      (
+        label: 'Tecil hakkı',
+        value: '${MilitaryService.remainingDeferrals(state)} kaldı',
+      ),
+      if (a.caughtCount > 0)
+        (label: 'Yakalanma', value: '${a.caughtCount} kez'),
+      if (a.fineTotal > 0)
+        (label: 'Ödenen ceza', value: trMoney(a.fineTotal)),
     ];
 
     return ComicCard(

@@ -60,6 +60,31 @@ abstract final class MilitaryService {
   /// prototypeOnly: bedelli askerlik ücreti (₺).
   static const int prototypeOnlyBedelliCost = 280000;
 
+  /// prototypeOnly: kaç kez tecil hakkı var (Paket 31).
+  static const int prototypeOnlyMaxDeferrals = 2;
+
+  /// prototypeOnly: bir tecil kaç yıl sürer.
+  static const int prototypeOnlyDeferralYears = 2;
+
+  /// prototypeOnly: bakaya kalanın bir yılda yakalanma ihtimali.
+  ///
+  /// Her geçen yıl artar: saklanmak zamanla zorlaşır.
+  static const double prototypeOnlyCatchChance = 0.30;
+  static const double prototypeOnlyCatchGrowth = 0.10;
+
+  /// prototypeOnly: bakaya cezasının **günlük** tutarı (₺).
+  ///
+  /// Türkiye'de idari para cezası günlük hesaplanır ve **yakalananlara
+  /// iki katı** uygulanır; kendiliğinden başvuran daha azını öder.
+  /// Buradaki tutarlar oyunun ekonomisine göre seçildi, gerçek mevzuat
+  /// tutarı değildir (Q-099).
+  static const int prototypeOnlyDailyFineSelf = 50;
+  static const int prototypeOnlyDailyFineCaught = 100;
+
+  /// prototypeOnly: bakaya kalanın bedelliye eklenen **ek bedeli**
+  /// (kaçtığı her yıl için).
+  static const int prototypeOnlyLateBedelliPerYear = 60000;
+
   /// prototypeOnly: aileden bedelli istemek için gereken en az yakınlık.
   static const int prototypeOnlyFamilyMinBond = 55;
 
@@ -86,24 +111,67 @@ abstract final class MilitaryService {
   static bool isObliged(GameState state) =>
       state.player.gender == Gender.erkek;
 
-  /// Şu an çağrılabilir mi?
+  /// Yaşı geldi ve yükümlülük hâlâ açık mı?
   ///
-  /// Okuyan öğrenci çağrılmaz (tecil); yükümlülüğü kapanmış olan da
-  /// çağrılmaz.
+  /// **Okuyan öğrenci de çağrılır** ama çağrı otomatik tecile dönüşür
+  /// (Paket 31): oyuncu ekranda "askerliğin geldi, okulun tecil ettirdi"
+  /// bildirimini görür.
   static bool canBeCalled(GameState state) {
     if (!isObliged(state)) return false;
     if (state.military.status != MilitaryStatus.yok) return false;
-    if (state.education.isStudent) return false;
     if (state.player.age < prototypeOnlyCallAge) return false;
     if (state.player.age >= prototypeOnlyExemptAge) return false;
     return true;
   }
+
+  /// Tecil hakkı kaldı mı?
+  static bool canDefer(GameState state) {
+    final MilitaryState a = state.military;
+    if (a.status != MilitaryStatus.cagrildi) return false;
+    return a.deferralsUsed < prototypeOnlyMaxDeferrals;
+  }
+
+  /// Kalan tecil hakkı.
+  static int remainingDeferrals(GameState state) =>
+      (prototypeOnlyMaxDeferrals - state.military.deferralsUsed)
+          .clamp(0, prototypeOnlyMaxDeferrals);
 
   /// Yıllık ilerlemede celbi uygular.
   ///
   /// Çağrı ekranda bildirimle duyurulur; sessizce durum değiştirmez.
   static GameState applyCallUp(GameState state, int newAge) {
     if (!canBeCalled(state)) return state;
+
+    // Okuyan öğrenci **otomatik** tecil edilir; ama bu sessizce olmaz,
+    // ekranda bildirilir (Paket 31).
+    if (state.education.isStudent) {
+      final PendingNotice bildirim =
+          Notices.militaryStudentDeferral(playerAge: newAge);
+      if (state.notices.any((PendingNotice n) => n.id == bildirim.id)) {
+        return state;
+      }
+      return state.copyWith(
+        military: state.military.copyWith(
+          status: MilitaryStatus.tecilli,
+          calledAtAge: newAge,
+          studentDeferral: true,
+          deferredUntilAge: null,
+        ),
+        notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+          ...state.notices,
+          bildirim,
+        ]),
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(
+            age: newAge,
+            text: 'Askerlik celbin geldi; okuduğun için tecil edildi.',
+            category: LogCategory.kisisel,
+          ),
+        ]),
+      );
+    }
+
     final PendingNotice bildirim = Notices.militaryCall(playerAge: newAge);
     if (state.notices.any((PendingNotice n) => n.id == bildirim.id)) {
       return state;
@@ -128,6 +196,227 @@ abstract final class MilitaryService {
     );
   }
 
+  /// Tecili biten ya da okulu biten yükümlüyü yeniden çağırır.
+  static GameState applyDeferralEnd(GameState state, int newAge) {
+    final MilitaryState a = state.military;
+    if (a.status != MilitaryStatus.tecilli) return state;
+    if (newAge >= prototypeOnlyExemptAge) return state;
+
+    final bool bitti = a.studentDeferral
+        ? !state.education.isStudent
+        : (a.deferredUntilAge != null && newAge >= a.deferredUntilAge!);
+    if (!bitti) return state;
+
+    final PendingNotice bildirim = Notices.militaryCall(
+      playerAge: newAge,
+      afterDeferral: true,
+    );
+    if (state.notices.any((PendingNotice n) => n.id == bildirim.id)) {
+      return state;
+    }
+    return state.copyWith(
+      military: a.copyWith(
+        status: MilitaryStatus.cagrildi,
+        calledAtAge: newAge,
+        studentDeferral: false,
+        deferredUntilAge: null,
+      ),
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...state.notices,
+        bildirim,
+      ]),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: newAge,
+          text: a.studentDeferral
+              ? 'Okulun bitti; askerlik tecilin sona erdi.'
+              : 'Askerlik tecilin sona erdi.',
+          category: LogCategory.kisisel,
+        ),
+      ]),
+    );
+  }
+
+  /// Tecil ettirir (Paket 31).
+  ///
+  /// Hak bitince bir daha ertelenemez.
+  static MilitaryResult defer(GameState state) {
+    if (state.military.status != MilitaryStatus.cagrildi) {
+      return MilitaryResult(
+        state: state,
+        applied: false,
+        text: 'Şu an tecil edilecek bir çağrın yok.',
+      );
+    }
+    if (!canDefer(state)) {
+      return MilitaryResult(
+        state: state,
+        applied: false,
+        text: 'Tecil hakkın kalmadı; $prototypeOnlyMaxDeferrals kez '
+            'kullandın.',
+      );
+    }
+    final int bitis = state.player.age + prototypeOnlyDeferralYears;
+    final String metin = 'Askerliğini $prototypeOnlyDeferralYears yıl '
+        'tecil ettirdin; $bitis yaşında yeniden çağrılacaksın.';
+    return MilitaryResult(
+      state: _log(
+        state.copyWith(
+          military: state.military.copyWith(
+            status: MilitaryStatus.tecilli,
+            deferralsUsed: state.military.deferralsUsed + 1,
+            deferredUntilAge: bitis,
+            studentDeferral: false,
+          ),
+        ),
+        metin,
+      ),
+      applied: true,
+      text: metin,
+    );
+  }
+
+  // -----------------------------------------------------------------
+  // Bakaya (askerden kaçmak)
+  // -----------------------------------------------------------------
+
+  /// Kaçmaya engel; engel yoksa boş metin.
+  static String fleeBlockReason(GameState state) {
+    final MilitaryState a = state.military;
+    if (a.isFugitive) return 'Zaten bakayasın.';
+    if (a.status != MilitaryStatus.cagrildi) {
+      return 'Kaçılacak bir çağrın yok.';
+    }
+    return '';
+  }
+
+  /// Çağrıya gitmez: bakaya kalır.
+  static MilitaryResult flee(GameState state) {
+    final String engel = fleeBlockReason(state);
+    if (engel.isNotEmpty) {
+      return MilitaryResult(state: state, applied: false, text: engel);
+    }
+    const String metin = 'Sevk tarihinde gitmedin; bakaya kaldın. '
+        'Ceza her geçen yıl büyüyor ve yakalanabilirsin.';
+    return MilitaryResult(
+      state: _log(
+        state.copyWith(
+          military: state.military.copyWith(
+            status: MilitaryStatus.kacak,
+            fugitiveSinceAge: state.player.age,
+          ),
+        ),
+        metin,
+      ),
+      applied: true,
+      text: metin,
+    );
+  }
+
+  /// Kaçılan yıl sayısı.
+  static int fugitiveYears(GameState state) {
+    final int? bas = state.military.fugitiveSinceAge;
+    if (bas == null) return 0;
+    return (state.player.age - bas).clamp(0, 120);
+  }
+
+  /// Şu ana kadar birikmiş ceza.
+  ///
+  /// Kendiliğinden başvuran günlük düşük tutarı, yakalanan iki katını
+  /// öder.
+  static int prototypeOnlyFineFor(GameState state, {required bool caught}) {
+    final int yil = fugitiveYears(state);
+    final int gunluk =
+        caught ? prototypeOnlyDailyFineCaught : prototypeOnlyDailyFineSelf;
+    return yil * 365 * gunluk;
+  }
+
+  /// Bakaya kalanın bu yıl yakalanma ihtimali.
+  static double prototypeOnlyCatchChanceFor(GameState state) {
+    final int yil = fugitiveYears(state);
+    return (prototypeOnlyCatchChance + yil * prototypeOnlyCatchGrowth)
+        .clamp(0.0, 0.95);
+  }
+
+  /// Kendiliğinden teslim olur: ceza daha az olur ve yeniden çağrılır.
+  static MilitaryResult surrender(GameState state) {
+    if (!state.military.isFugitive) {
+      return MilitaryResult(
+        state: state,
+        applied: false,
+        text: 'Bakaya değilsin.',
+      );
+    }
+    final int ceza = prototypeOnlyFineFor(state, caught: false);
+    final int odenen = ceza.clamp(0, state.player.wallet.clamp(0, 1 << 31));
+    final String metin = 'Kendin başvurdun. İdari para cezan '
+        '${trMoney(ceza)}; ${trMoney(odenen)} ödedin. Yeniden '
+        'çağrıldın.';
+    return MilitaryResult(
+      state: _log(
+        state.copyWith(
+          player: state.player.copyWith(
+            wallet: state.player.wallet - odenen,
+          ),
+          military: state.military.copyWith(
+            status: MilitaryStatus.cagrildi,
+            fugitiveSinceAge: null,
+            fineTotal: state.military.fineTotal + odenen,
+          ),
+        ),
+        metin,
+      ),
+      applied: true,
+      text: metin,
+    );
+  }
+
+  /// Yıllık ilerlemede bakaya durumunu işler.
+  static GameState advanceFugitive(GameState state, int newAge, Random rng) {
+    if (!state.military.isFugitive) return state;
+    if (newAge >= prototypeOnlyExemptAge) {
+      // Yükümlülük yaşı geçti: dosya kapanır ama kayıt kalır.
+      return _log(
+        state.copyWith(
+          military: state.military.copyWith(
+            status: MilitaryStatus.yukumluDegil,
+            fugitiveSinceAge: null,
+            finishedAtAge: newAge,
+          ),
+        ),
+        'Askerlik yaşın geçti; bakaya dosyan kapandı.',
+      );
+    }
+    if (rng.nextDouble() >= prototypeOnlyCatchChanceFor(state)) return state;
+
+    final int ceza = prototypeOnlyFineFor(state, caught: true);
+    final int odenen = ceza.clamp(0, state.player.wallet.clamp(0, 1 << 31));
+    final GameState yakalandi = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet - odenen,
+      ),
+      military: state.military.copyWith(
+        status: MilitaryStatus.cagrildi,
+        fugitiveSinceAge: null,
+        fineTotal: state.military.fineTotal + odenen,
+        caughtCount: state.military.caughtCount + 1,
+      ),
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...state.notices,
+        Notices.militaryCaught(
+          playerAge: newAge,
+          fine: odenen,
+        ),
+      ]),
+    );
+    return _log(
+      yakalandi,
+      'Bakaya olduğun için yakalandın. ${trMoney(odenen)} idari para '
+      'cezası ödedin ve yeniden çağrıldın.',
+    );
+  }
+
   // -----------------------------------------------------------------
   // Katılma
   // -----------------------------------------------------------------
@@ -139,6 +428,8 @@ abstract final class MilitaryService {
     if (askerlik.status.kapandi) {
       return 'Askerlik meselen kapandı: ${askerlik.status.label}.';
     }
+    // Bakaya kalan da gidip yükümlülüğünü kapatabilir; cezası ayrıca
+    // hesaplanır (Paket 31).
     if (state.player.age < prototypeOnlyMinAge) {
       return '$prototypeOnlyMinAge yaşından itibaren katılabilirsin.';
     }
@@ -247,11 +538,20 @@ abstract final class MilitaryService {
       return 'Askerlik meselen kapandı: ${askerlik.status.label}.';
     }
     if (!isObliged(state)) return 'Bu hayatta askerlik yükümlülüğü yok.';
+    // Bakaya kalan da bedelli ödeyebilir; ek bedelle (Paket 31).
     if (state.player.age < prototypeOnlyMinAge) {
       return '$prototypeOnlyMinAge yaşından itibaren ödenebilir.';
     }
     return '';
   }
+
+  /// Bu oyuncunun ödeyeceği bedelli ücreti.
+  ///
+  /// Bakaya kalanlar **ek bedel** öder: kaçtıkları her yıl için ayrı
+  /// bir tutar eklenir (Paket 31).
+  static int bedelliCostFor(GameState state) =>
+      prototypeOnlyBedelliCost +
+      fugitiveYears(state) * prototypeOnlyLateBedelliPerYear;
 
   /// Bedelliyi **kendi cebinden** öder.
   static MilitaryResult payBedelli(GameState state) {
@@ -259,25 +559,27 @@ abstract final class MilitaryService {
     if (engel.isNotEmpty) {
       return MilitaryResult(state: state, applied: false, text: engel);
     }
-    if (state.player.wallet < prototypeOnlyBedelliCost) {
+    final int ucret = bedelliCostFor(state);
+    if (state.player.wallet < ucret) {
       return MilitaryResult(
         state: state,
         applied: false,
-        text: 'Bedelli ücreti ${trMoney(prototypeOnlyBedelliCost)}; '
+        text: 'Bedelli ücreti ${trMoney(ucret)}; '
             'cüzdanında yeterli para yok. Ailenden isteyebilirsin.',
       );
     }
     final String metin = 'Bedelli askerlik ücretini ödedin: '
-        '${trMoney(prototypeOnlyBedelliCost)}.';
+        '${trMoney(ucret)}.';
     return MilitaryResult(
       state: _log(
         state.copyWith(
           player: state.player.copyWith(
-            wallet: state.player.wallet - prototypeOnlyBedelliCost,
+            wallet: state.player.wallet - ucret,
           ),
           military: state.military.copyWith(
             status: MilitaryStatus.bedelli,
             finishedAtAge: state.player.age,
+            fugitiveSinceAge: null,
           ),
         ),
         metin,
@@ -351,7 +653,7 @@ abstract final class MilitaryService {
     }
 
     final String metin = '${kisi.firstName} bedelli ücretini ödedi: '
-        '${trMoney(prototypeOnlyBedelliCost)}. Cebinden tek kuruş çıkmadı.';
+        '${trMoney(bedelliCostFor(state))}. Cebinden tek kuruş çıkmadı.';
     return MilitaryResult(
       state: _log(
         state.copyWith(
@@ -359,6 +661,7 @@ abstract final class MilitaryService {
             status: MilitaryStatus.bedelli,
             finishedAtAge: state.player.age,
             paidByPersonId: personId,
+            fugitiveSinceAge: null,
           ),
         ),
         metin,

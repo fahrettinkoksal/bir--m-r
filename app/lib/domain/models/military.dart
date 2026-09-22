@@ -13,6 +13,12 @@ enum MilitaryStatus {
   /// Celp geldi: yükümlülük başladı, henüz gidilmedi.
   cagrildi('Celp geldi'),
 
+  /// Tecilli: çağrı ertelendi (okul ya da tecil hakkı).
+  tecilli('Tecilli'),
+
+  /// Bakaya: çağrıldı ama gitmedi.
+  kacak('Bakaya'),
+
   /// Şu an görevde.
   gorevde('Askerde'),
 
@@ -50,6 +56,12 @@ class MilitaryState {
     this.startedAtAge,
     this.finishedAtAge,
     this.paidByPersonId,
+    this.deferralsUsed = 0,
+    this.deferredUntilAge,
+    this.studentDeferral = false,
+    this.fugitiveSinceAge,
+    this.fineTotal = 0,
+    this.caughtCount = 0,
   });
 
   final MilitaryStatus status;
@@ -75,6 +87,30 @@ class MilitaryState {
   /// yazılmaz.
   final String? paidByPersonId;
 
+  /// Kaç kez tecil hakkı kullanıldı (Paket 31).
+  ///
+  /// Okul tecili bu sayıya **girmez**: o kendiliğinden olur.
+  final int deferralsUsed;
+
+  /// Tecilin bittiği yaş. Okul tecilinde `null`'dır: okul bitince biter.
+  final int? deferredUntilAge;
+
+  /// Tecil okuldan mı geliyor?
+  final bool studentDeferral;
+
+  /// Bakaya kalınan yaş; kaçılmadıysa `null`.
+  final int? fugitiveSinceAge;
+
+  /// Birikmiş idari para cezası (₺).
+  final int fineTotal;
+
+  /// Kaç kez yakalandı.
+  final int caughtCount;
+
+  bool get isDeferred => status == MilitaryStatus.tecilli;
+
+  bool get isFugitive => status == MilitaryStatus.kacak;
+
   MilitaryTrack? get track =>
       trackName == null ? null : militaryTrackByName(trackName!);
 
@@ -90,6 +126,18 @@ class MilitaryState {
 
   /// Ekranda gösterilecek kısa durum.
   String get label {
+    if (status == MilitaryStatus.tecilli) {
+      if (studentDeferral) return 'Tecilli · okul bitene kadar';
+      if (deferredUntilAge != null) {
+        return 'Tecilli · $deferredUntilAge yaşına kadar';
+      }
+      return 'Tecilli';
+    }
+    if (status == MilitaryStatus.kacak) {
+      return fugitiveSinceAge == null
+          ? 'Bakaya'
+          : 'Bakaya · $fugitiveSinceAge yaşından beri';
+    }
     final MilitaryRank? r = rank;
     if (r == null) return status.label;
     switch (status) {
@@ -110,6 +158,12 @@ class MilitaryState {
     Object? startedAtAge = _unset,
     Object? finishedAtAge = _unset,
     Object? paidByPersonId = _unset,
+    int? deferralsUsed,
+    Object? deferredUntilAge = _unset,
+    bool? studentDeferral,
+    Object? fugitiveSinceAge = _unset,
+    int? fineTotal,
+    int? caughtCount,
   }) {
     return MilitaryState(
       status: status ?? this.status,
@@ -124,6 +178,16 @@ class MilitaryState {
       paidByPersonId: paidByPersonId == _unset
           ? this.paidByPersonId
           : paidByPersonId as String?,
+      deferralsUsed: deferralsUsed ?? this.deferralsUsed,
+      deferredUntilAge: deferredUntilAge == _unset
+          ? this.deferredUntilAge
+          : deferredUntilAge as int?,
+      studentDeferral: studentDeferral ?? this.studentDeferral,
+      fugitiveSinceAge: fugitiveSinceAge == _unset
+          ? this.fugitiveSinceAge
+          : fugitiveSinceAge as int?,
+      fineTotal: fineTotal ?? this.fineTotal,
+      caughtCount: caughtCount ?? this.caughtCount,
     );
   }
 }

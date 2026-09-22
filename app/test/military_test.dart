@@ -57,7 +57,8 @@ void main() {
       }
     });
 
-    test('okuyan öğrenci çağrılmaz', () {
+    test('okuyan öğrenci otomatik tecil edilir ve bu bildirilir', () {
+      // Sessizce tecil edilmez: oyuncu ekranda görür (Paket 31).
       final GameState ogrenci = hayat(
         age: 22,
         egitim: const EducationState(
@@ -67,7 +68,14 @@ void main() {
         ),
       );
       expect(ogrenci.education.isStudent, isTrue);
-      expect(MilitaryService.canBeCalled(ogrenci), isFalse);
+      final GameState sonra = MilitaryService.applyCallUp(ogrenci, 22);
+      expect(sonra.military.status, MilitaryStatus.tecilli);
+      expect(sonra.military.studentDeferral, isTrue);
+      expect(sonra.military.deferralsUsed, 0,
+          reason: 'Okul tecili hakkı harcamaz');
+      final PendingNotice bildirim = sonra.notices
+          .firstWhere((PendingNotice n) => n.kind == NoticeKind.askerlik);
+      expect(bildirim.text, contains('okul'));
     });
 
     test('okumayan yükümlü 20 yaşında çağrılır', () {
@@ -127,6 +135,235 @@ void main() {
       final GameState yasli =
           hayat(age: MilitaryService.prototypeOnlyExemptAge);
       expect(MilitaryService.canBeCalled(yasli), isFalse);
+    });
+  });
+
+  group('Tecil (Paket 31)', () {
+    test('çağrılan yükümlü tecil ettirebilir', () {
+      GameState s = hayat(age: 20);
+      s = MilitaryService.applyCallUp(s, 20);
+      expect(MilitaryService.canDefer(s), isTrue);
+
+      final MilitaryResult r = MilitaryService.defer(s);
+      expect(r.applied, isTrue);
+      expect(r.state.military.status, MilitaryStatus.tecilli);
+      expect(
+        r.state.military.deferredUntilAge,
+        20 + MilitaryService.prototypeOnlyDeferralYears,
+      );
+      expect(r.state.military.deferralsUsed, 1);
+    });
+
+    test('tecil hakkı biter ve bir daha ertelenemez', () {
+      GameState s = hayat(age: 20);
+      s = MilitaryService.applyCallUp(s, 20);
+      for (int i = 0; i < MilitaryService.prototypeOnlyMaxDeferrals; i++) {
+        s = MilitaryService.defer(s).state;
+        final int bitis = s.military.deferredUntilAge!;
+        s = s.copyWith(player: s.player.copyWith(age: bitis));
+        s = MilitaryService.applyDeferralEnd(s, bitis);
+      }
+      expect(s.military.status, MilitaryStatus.cagrildi);
+      expect(MilitaryService.remainingDeferrals(s), 0);
+      final MilitaryResult r = MilitaryService.defer(s);
+      expect(r.applied, isFalse);
+      expect(r.text, contains('Tecil hakkın kalmadı'));
+    });
+
+    test('tecil bitince yeniden çağrılır ve bildirim gelir', () {
+      GameState s = hayat(age: 20);
+      s = MilitaryService.applyCallUp(s, 20);
+      s = MilitaryService.defer(s).state;
+      final int bitis = s.military.deferredUntilAge!;
+
+      // Bitiş yaşından önce çağrı gelmez.
+      final GameState erken = MilitaryService.applyDeferralEnd(
+        s.copyWith(player: s.player.copyWith(age: bitis - 1)),
+        bitis - 1,
+      );
+      expect(erken.military.status, MilitaryStatus.tecilli);
+
+      final GameState zamani = MilitaryService.applyDeferralEnd(
+        s.copyWith(
+          player: s.player.copyWith(age: bitis),
+          notices: const <PendingNotice>[],
+        ),
+        bitis,
+      );
+      expect(zamani.military.status, MilitaryStatus.cagrildi);
+      expect(
+        zamani.notices.any((PendingNotice n) => n.kind == NoticeKind.askerlik),
+        isTrue,
+      );
+    });
+
+    test('okul tecili okul bitene kadar sürer, sonra çağrı gelir', () {
+      const EducationState okuyor = EducationState(
+        finished: true,
+        startedAtAge: 6,
+        universityProgramId: 'x',
+      );
+      GameState s = hayat(age: 20, egitim: okuyor);
+      s = MilitaryService.applyCallUp(s, 20);
+      expect(s.military.studentDeferral, isTrue);
+
+      // Okurken çağrı gelmez.
+      final GameState okurken = MilitaryService.applyDeferralEnd(s, 22);
+      expect(okurken.military.status, MilitaryStatus.tecilli);
+
+      // Okul bitince çağrılır.
+      final GameState mezun = MilitaryService.applyDeferralEnd(
+        s.copyWith(
+          education: const EducationState(
+            finished: true,
+            startedAtAge: 6,
+            universityProgramId: 'x',
+            universityFinished: true,
+          ),
+          player: s.player.copyWith(age: 24),
+          notices: const <PendingNotice>[],
+        ),
+        24,
+      );
+      expect(mezun.military.status, MilitaryStatus.cagrildi);
+      expect(mezun.military.deferralsUsed, 0,
+          reason: 'Okul tecili hak harcamaz');
+    });
+  });
+
+  group('Bakaya (Paket 31)', () {
+    test('çağrıldıktan sonra kaçılabilir', () {
+      GameState s = hayat(age: 20);
+      s = MilitaryService.applyCallUp(s, 20);
+      final MilitaryResult r = MilitaryService.flee(s);
+      expect(r.applied, isTrue);
+      expect(r.state.military.status, MilitaryStatus.kacak);
+      expect(r.state.military.fugitiveSinceAge, 20);
+    });
+
+    test('çağrı yokken kaçılamaz', () {
+      final GameState s = hayat(age: 20);
+      expect(MilitaryService.flee(s).applied, isFalse);
+    });
+
+    test('ceza kaçılan yılla birlikte büyür ve yakalanınca iki katıdır', () {
+      GameState s = hayat(age: 20, wallet: 10000000);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      final GameState ucYil =
+          s.copyWith(player: s.player.copyWith(age: 23));
+
+      expect(MilitaryService.fugitiveYears(ucYil), 3);
+      final int kendi =
+          MilitaryService.prototypeOnlyFineFor(ucYil, caught: false);
+      final int yakalanan =
+          MilitaryService.prototypeOnlyFineFor(ucYil, caught: true);
+      expect(yakalanan, kendi * 2);
+      expect(kendi, greaterThan(0));
+    });
+
+    test('yakalanma ihtimali her yıl artar', () {
+      GameState s = hayat(age: 20);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      final double ilk = MilitaryService.prototypeOnlyCatchChanceFor(s);
+      final double sonra = MilitaryService.prototypeOnlyCatchChanceFor(
+        s.copyWith(player: s.player.copyWith(age: 26)),
+      );
+      expect(sonra, greaterThan(ilk));
+    });
+
+    test('yakalanınca ceza ödenir ve yeniden çağrılır', () {
+      GameState s = hayat(age: 20, wallet: 10000000);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      s = s.copyWith(
+        player: s.player.copyWith(age: 24),
+        notices: const <PendingNotice>[],
+      );
+      final int once = s.player.wallet;
+
+      // Yakalanana kadar dene.
+      for (int seed = 0; seed < 60; seed++) {
+        final GameState sonuc =
+            MilitaryService.advanceFugitive(s, 24, Random(seed));
+        if (sonuc.military.status != MilitaryStatus.cagrildi) continue;
+        expect(sonuc.player.wallet, lessThan(once));
+        expect(sonuc.military.caughtCount, 1);
+        expect(sonuc.military.fugitiveSinceAge, isNull);
+        expect(
+          sonuc.notices.any((PendingNotice n) => n.title == 'Yakalandın'),
+          isTrue,
+        );
+        return;
+      }
+      fail('Hiç yakalanmadı');
+    });
+
+    test('cüzdan eksiye inmez', () {
+      GameState s = hayat(age: 20, wallet: 500);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      s = s.copyWith(player: s.player.copyWith(age: 30));
+      for (int seed = 0; seed < 60; seed++) {
+        final GameState sonuc =
+            MilitaryService.advanceFugitive(s, 30, Random(seed));
+        if (sonuc.military.status != MilitaryStatus.cagrildi) continue;
+        expect(sonuc.player.wallet, 0);
+        return;
+      }
+      fail('Hiç yakalanmadı');
+    });
+
+    test('kendiliğinden teslim olmak daha ucuzdur', () {
+      GameState s = hayat(age: 20, wallet: 10000000);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      s = s.copyWith(player: s.player.copyWith(age: 23));
+
+      final MilitaryResult r = MilitaryService.surrender(s);
+      expect(r.applied, isTrue);
+      expect(r.state.military.status, MilitaryStatus.cagrildi);
+      final int odenen = s.player.wallet - r.state.player.wallet;
+      expect(
+        odenen,
+        MilitaryService.prototypeOnlyFineFor(s, caught: false),
+      );
+      expect(
+        odenen,
+        lessThan(MilitaryService.prototypeOnlyFineFor(s, caught: true)),
+      );
+    });
+
+    test('bakayanın bedellisi ek bedelle pahalanır', () {
+      GameState s = hayat(age: 20, wallet: 10000000);
+      final int normal = MilitaryService.bedelliCostFor(s);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      s = s.copyWith(player: s.player.copyWith(age: 24));
+      expect(MilitaryService.bedelliCostFor(s), greaterThan(normal));
+
+      final MilitaryResult r = MilitaryService.payBedelli(s);
+      expect(r.applied, isTrue);
+      expect(r.state.military.status, MilitaryStatus.bedelli);
+      expect(r.state.military.fugitiveSinceAge, isNull);
+    });
+
+    test('yükümlülük yaşı geçince bakaya dosyası kapanır', () {
+      GameState s = hayat(age: 20);
+      s = MilitaryService.flee(MilitaryService.applyCallUp(s, 20)).state;
+      final int gec = MilitaryService.prototypeOnlyExemptAge;
+      final GameState sonra = MilitaryService.advanceFugitive(
+        s.copyWith(player: s.player.copyWith(age: gec)),
+        gec,
+        Random(1),
+      );
+      expect(sonra.military.status, MilitaryStatus.yukumluDegil);
+      expect(sonra.military.fugitiveSinceAge, isNull);
+    });
+
+    test('tecil, bakaya ve ceza kayda girer', () {
+      GameState s = hayat(age: 20, wallet: 10000000);
+      s = MilitaryService.applyCallUp(s, 20);
+      s = MilitaryService.defer(s).state;
+      final GameState geri = decodeGameState(encodeGameState(s));
+      expect(geri.military.status, MilitaryStatus.tecilli);
+      expect(geri.military.deferralsUsed, 1);
+      expect(geri.military.deferredUntilAge, s.military.deferredUntilAge);
     });
   });
 
