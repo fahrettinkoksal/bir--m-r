@@ -2,6 +2,8 @@ import 'dart:math';
 
 import '../../data/interview_catalog.dart';
 import '../../data/job_catalog.dart';
+import '../../data/martial_arts_catalog.dart';
+import '../activities/martial_arts_engine.dart';
 import '../models/career.dart';
 import '../models/person.dart';
 import 'colleagues.dart';
@@ -121,6 +123,17 @@ class JobMarket {
     }
     if (state.player.stats.charisma < job.minCharisma) {
       return 'Bu iş için karizman yeterli görülmüyor.';
+    }
+    // Dövüş sanatı eğitmenliği (Paket 32): kuşağı/boyu olmayan öğretemez.
+    final String? sanatId = job.martialArtId;
+    if (sanatId != null) {
+      final MartialArt? sanat = martialArtById(sanatId);
+      if (sanat == null) return 'Bu iş şu an açık değil.';
+      const MartialArtsEngine motor = MartialArtsEngine();
+      if (!motor.progressOf(state, sanat).canTeach) {
+        return 'Bu iş için en az "${sanat.instructorRankName}" '
+            'basamağına gelmen gerekiyor.';
+      }
     }
     return '';
   }

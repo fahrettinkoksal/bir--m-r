@@ -386,6 +386,9 @@ abstract final class ChildProgression {
   static JobType? _findJob(PersonDevelopment dev, int age, Random rng) {
     final List<JobType> uygun = kJobCatalog.where((JobType job) {
       if (age < job.minAge) return false;
+      // Dövüş sanatı eğitmenliği oyuncunun yıllarca çalışmasıyla açılır;
+      // yan karakterlere rastgele dağıtılmaz (Paket 32).
+      if (job.martialArtId != null) return false;
       if (dev.stats.intelligence < job.minIntelligence) return false;
       if (dev.stats.charisma < job.minCharisma) return false;
       switch (job.education) {

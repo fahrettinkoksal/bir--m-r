@@ -5,6 +5,7 @@ import '../../data/social_catalog.dart';
 import 'blackjack_game.dart';
 import 'education.dart';
 import 'book_progress.dart';
+import 'martial_progress.dart';
 import 'career.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
@@ -62,6 +63,7 @@ class GameState {
     this.education = const EducationState.notStarted(),
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
+    this.martialArts = const <MartialProgress>[],
     this.socialAccounts = const <SocialAccount>[],
     this.sponsorOffer,
     this.sponsorDeals = const <SponsorDeal>[],
@@ -292,6 +294,9 @@ class GameState {
 
   /// Okunan kitapların ilerlemesi. Bitirilen kitap bir daha kazanç vermez.
   final List<BookProgress> books;
+
+  /// Paket 32: dövüş sanatlarındaki ilerleme (karate, kung fu, güreş).
+  final List<MartialProgress> martialArts;
 
   /// Açılmış sosyal medya hesapları. Hesap açmak **zorunlu değildir**;
   /// hesabı olmayan platformdan paylaşım veya olay gelmez.
@@ -652,6 +657,7 @@ class GameState {
     EducationState? education,
     CareerState? career,
     List<BookProgress>? books,
+    List<MartialProgress>? martialArts,
     List<SocialAccount>? socialAccounts,
     Object? sponsorOffer = _unsetEvent,
     List<SponsorDeal>? sponsorDeals,
@@ -717,6 +723,7 @@ class GameState {
       education: education ?? this.education,
       career: career ?? this.career,
       books: books ?? this.books,
+      martialArts: martialArts ?? this.martialArts,
       socialAccounts: socialAccounts ?? this.socialAccounts,
       sponsorOffer: sponsorOffer == _unsetEvent
           ? this.sponsorOffer

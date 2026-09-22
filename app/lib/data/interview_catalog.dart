@@ -287,6 +287,110 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
     correctIndex: 0,
     explanation: 'Önce sakinleştirip iki tarafı da dinlemek gerekir.',
   ),
+
+  // --- Dövüş sanatları eğitmenliği (Paket 32) ---------------------------
+  InterviewQuestion(
+    id: 'karate_egitmeni_1',
+    jobId: 'karate_egitmeni',
+    text: 'Karatede öğrenci dereceleri hangi adla sayılır?',
+    options: <String>['Dan', 'Kyu', 'Duan', 'Boy'],
+    correctIndex: 1,
+    explanation: 'Öğrenci dereceleri kyu, ustalık dereceleri dandır.',
+  ),
+  InterviewQuestion(
+    id: 'karate_egitmeni_2',
+    jobId: 'karate_egitmeni',
+    text: 'Yeni başlayan bir çocuk ilk derste kata öğrenmek istiyor. '
+        'Ne yaparsın?',
+    options: <String>[
+      'Hemen ileri bir kata öğretirim',
+      'Önce duruş ve nefesle başlarım, katayı sırası gelince veririm',
+      'Katayı hiç öğretmem',
+      'Kendi başına çalışsın derim',
+    ],
+    correctIndex: 1,
+    explanation: 'Temel oturmadan kata öğretmek sakatlık ve kötü alışkanlık '
+        'getirir.',
+  ),
+  InterviewQuestion(
+    id: 'karate_egitmeni_3',
+    jobId: 'karate_egitmeni',
+    text: 'Eşleşmeli çalışmada bir öğrenci kontrolsüz vuruyor. İlk tepkin?',
+    options: <String>[
+      'Çalışmayı durdurup kontrolü anlatırım',
+      'Karşısındakine de sert vurmasını söylerim',
+      'Görmezden gelirim',
+      'Öğrenciyi salondan atarım',
+    ],
+    correctIndex: 0,
+    explanation: 'Kontrol öğretilir; salonda amaç zarar vermek değildir.',
+  ),
+
+  InterviewQuestion(
+    id: 'kungfu_egitmeni_1',
+    jobId: 'kungfu_egitmeni',
+    text: 'Çin wushu derecelendirmesinde kullanılan düzenin adı nedir?',
+    options: <String>['Kyu', 'Duanwei', 'Kıspet', 'Poomsae'],
+    correctIndex: 1,
+    explanation: 'Duanwei, duan derecelerinden oluşan resmî düzendir.',
+  ),
+  InterviewQuestion(
+    id: 'kungfu_egitmeni_2',
+    jobId: 'kungfu_egitmeni',
+    text: 'Temel hareket çalışmasına (jibengong) neden vakit ayrılır?',
+    options: <String>[
+      'Gösteriş olsun diye',
+      'Duruş, denge ve dayanıklılık formların temelidir',
+      'Dersi uzatmak için',
+      'Gerekmez, doğrudan forma geçilir',
+    ],
+    correctIndex: 1,
+    explanation: 'Formlar temel üstüne kurulur; temel zayıfsa form da zayıftır.',
+  ),
+  InterviewQuestion(
+    id: 'kungfu_egitmeni_3',
+    jobId: 'kungfu_egitmeni',
+    text: 'Yaşlı bir öğrenci esnemekte zorlanıyor. Nasıl ilerletirsin?',
+    options: <String>[
+      'Zorla bastırıp açarım',
+      'Sınıftan çıkarırım',
+      'Kendi sınırında, kademeli ve düzenli çalıştırırım',
+      'Esnemeyi tamamen bırakmasını söylerim',
+    ],
+    correctIndex: 2,
+    explanation: 'Esneklik kademeyle gelir; zorlama sakatlar.',
+  ),
+
+  InterviewQuestion(
+    id: 'gures_antrenoru_1',
+    jobId: 'gures_antrenoru',
+    text: 'Kırkpınar\'da en üst boy hangisidir?',
+    options: <String>['Başaltı', 'Büyük orta', 'Baş (başpehlivan)', 'Deste'],
+    correctIndex: 2,
+    explanation: 'Boyların en üstü baştır; kazanan başpehlivan olur.',
+  ),
+  InterviewQuestion(
+    id: 'gures_antrenoru_2',
+    jobId: 'gures_antrenoru',
+    text: 'Yağlı güreşte pehlivanın giydiği deri kıyafetin adı nedir?',
+    options: <String>['Kıspet', 'Şalvar', 'Kemer', 'Zıbın'],
+    correctIndex: 0,
+    explanation: 'Kıspet, dana derisinden dikilen güreş kıyafetidir.',
+  ),
+  InterviewQuestion(
+    id: 'gures_antrenoru_3',
+    jobId: 'gures_antrenoru',
+    text: 'Küçük yaştaki bir güreşçiyi hangi boyda çalıştırmaya başlarsın?',
+    options: <String>[
+      'Doğrudan başaltında',
+      'Yaşına ve gelişimine uygun küçük boylarda',
+      'Baş boyunda',
+      'Boy fark etmez',
+    ],
+    correctIndex: 1,
+    explanation: 'Boylar yaş ve gelişime göre ayrılır; atlamak sakatlık '
+        'getirir.',
+  ),
 ];
 
 /// Bir mesleğin soruları.

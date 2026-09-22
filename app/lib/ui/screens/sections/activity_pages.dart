@@ -25,10 +25,21 @@ import '../../../text/turkish_text.dart';
 /// Yalnızca gerçekten yapılabilen eylemler düğme olur; kapalı olanlar
 /// gerekçesiyle gösterilir.
 class VenuePage extends StatefulWidget {
-  const VenuePage({super.key, required this.venue, required this.onBack});
+  const VenuePage({
+    super.key,
+    required this.venue,
+    required this.onBack,
+    this.extraRows = const <Widget>[],
+  });
 
   final ActivityVenue venue;
   final VoidCallback onBack;
+
+  /// Mekânın kendi eylemlerinin **üstünde** gösterilen ek satırlar.
+  ///
+  /// Spor salonunda dövüş sanatları bölümüne geçiş böyle konur (Paket 32);
+  /// mekân sayfası genel kalır.
+  final List<Widget> extraRows;
 
   @override
   State<VenuePage> createState() => _VenuePageState();
@@ -51,6 +62,10 @@ class _VenuePageState extends State<VenuePage> {
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
+        for (final Widget row in widget.extraRows) ...<Widget>[
+          row,
+          const SizedBox(height: 10),
+        ],
         for (final ActivityAction eylem in tumEylemler) ...<Widget>[
           _ActionCard(
             action: eylem,
@@ -65,7 +80,7 @@ class _VenuePageState extends State<VenuePage> {
         ],
         if (_sonuc != null) ...<Widget>[
           const SizedBox(height: 4),
-          _OutcomeCard(outcome: _sonuc!),
+          OutcomeCard(outcome: _sonuc!),
         ],
       ],
     );
@@ -432,8 +447,8 @@ class _PageLines extends StatelessWidget {
   }
 }
 
-class _OutcomeCard extends StatelessWidget {
-  const _OutcomeCard({required this.outcome});
+class OutcomeCard extends StatelessWidget {
+  const OutcomeCard({super.key, required this.outcome});
 
   final ActivityOutcome outcome;
 

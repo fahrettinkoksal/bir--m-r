@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
+import '../../../data/martial_arts_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/life/astrology.dart';
@@ -16,6 +17,7 @@ import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
 import 'casino_pages.dart';
+import 'martial_arts_page.dart';
 import 'license_pages.dart';
 import 'social_pages.dart';
 
@@ -45,12 +47,22 @@ enum _ActivityPage {
   eglence,
   kurs,
   falTarot,
+  dovus,
   sosyalMedya,
   kumarhane,
   ehliyet,
   evlatEdinme,
   vasiyet,
   seyahat,
+}
+
+/// Dövüş sanatlarına en erken hangi yaşta başlanabilir?
+int get _enKucukDovusYasi {
+  int enKucuk = 120;
+  for (final MartialArt a in MartialArt.values) {
+    if (a.minAge < enKucuk) enKucuk = a.minAge;
+  }
+  return enKucuk;
 }
 
 class _ActivitiesScreenState extends State<ActivitiesScreen> {
@@ -86,7 +98,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return VenuePage(
           venue: ActivityVenue.sporSalonu,
           onBack: () => _go(_ActivityPage.kok),
+          extraRows: <Widget>[
+            if (state.player.age >= _enKucukDovusYasi)
+              MenuRow(
+                key: const Key('spor_dovus'),
+                title: 'Dövüş sanatları',
+                subtitle: 'Karate, kung fu ve yağlı güreş dersleri',
+                icon: Icons.sports_martial_arts_outlined,
+                accent: BirOmurAccents.nar,
+                onTap: () => _go(_ActivityPage.dovus),
+              ),
+          ],
         );
+      case _ActivityPage.dovus:
+        return MartialArtsPage(onBack: () => _go(_ActivityPage.spor));
       case _ActivityPage.kutuphane:
         return LibraryPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.saglik:

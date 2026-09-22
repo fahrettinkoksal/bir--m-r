@@ -12,6 +12,7 @@ import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
 import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
+import '../../domain/models/martial_progress.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
@@ -79,6 +80,10 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'askedAtAge': state.pendingInterview!.askedAtAge,
             },
       'books': state.books.map(_encodeBook).toList(growable: false),
+      // Dövüş sanatları (Paket 32). Alan eklemeli; eski kayıtta yoksa boş
+      // liste okunur, sürüm yükseltmesi gerekmez.
+      'martialArts':
+          state.martialArts.map(_encodeMartial).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
@@ -249,6 +254,13 @@ Map<String, Object?> _encodeBook(BookProgress b) => <String, Object?>{
       'pagesRead': b.pagesRead,
       'finished': b.finished,
       'startedAtAge': b.startedAtAge,
+    };
+
+Map<String, Object?> _encodeMartial(MartialProgress m) => <String, Object?>{
+      'artId': m.artId,
+      'lessons': m.lessons,
+      'startedAtAge': m.startedAtAge,
+      'topRankAtAge': m.topRankAtAge,
     };
 
 Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
@@ -641,6 +653,11 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeBook(_asMap(e, 'books[]')))
           .toList(growable: false),
     ),
+    martialArts: List<MartialProgress>.unmodifiable(
+      (json['martialArts'] as List<Object?>? ?? const <Object?>[])
+          .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
+          .toList(growable: false),
+    ),
     socialAccounts: List<SocialAccount>.unmodifiable(
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
@@ -941,6 +958,13 @@ BookProgress _decodeBook(Map<String, Object?> json) => BookProgress(
       pagesRead: _int(json, 'pagesRead'),
       finished: _bool(json, 'finished'),
       startedAtAge: _intOrNull(json, 'startedAtAge'),
+    );
+
+MartialProgress _decodeMartial(Map<String, Object?> json) => MartialProgress(
+      artId: _string(json, 'artId'),
+      lessons: _int(json, 'lessons'),
+      startedAtAge: _intOrNull(json, 'startedAtAge'),
+      topRankAtAge: _intOrNull(json, 'topRankAtAge'),
     );
 
 /// Evlilik kaydı. Eşin kendisi kişi listesinden okunur; burada yalnızca

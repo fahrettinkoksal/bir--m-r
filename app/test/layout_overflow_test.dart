@@ -8,6 +8,7 @@ import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
 
 /// Ekranların **taşmadığını** sınar (Paket 28).
 ///
@@ -46,8 +47,9 @@ void main() {
   for (final Size boyut in genislikler) {
     final double mantiksal = boyut.width / 3;
 
-    testWidgets('${mantiksal.round()} px genişlikte hiçbir sekme taşmaz',
-        (WidgetTester tester) async {
+    testWidgets('${mantiksal.round()} px genişlikte hiçbir sekme taşmaz', (
+      WidgetTester tester,
+    ) async {
       yakala();
       addTearDown(birak);
 
@@ -93,16 +95,76 @@ void main() {
         }
       }
 
-      expect(
-        hatalar,
-        isEmpty,
-        reason: 'Düzen taşması:\n${hatalar.join('\n')}',
-      );
+      expect(hatalar, isEmpty, reason: 'Düzen taşması:\n${hatalar.join('\n')}');
     });
   }
 
-  testWidgets('uzun ad ve büyük cüzdanla başlık taşmaz',
-      (WidgetTester tester) async {
+  // Dövüş sanatları sayfası menüden iki adım içeride kaldığı için
+  // yukarıdaki sekme gezintisine girmiyor; ayrıca sınanır (Paket 32).
+  for (final Size boyut in genislikler) {
+    final double mantiksal = boyut.width / 3;
+    // Parası olan da olmayan da sınanır: "Şu an kapalı" düğmesi ve sebep
+    // metni en uzun hâlleridir. Her biri kendi testinde, temiz bir
+    // uygulamayla açılır.
+    for (final int cuzdan in <int>[250000, 5]) {
+      testWidgets('${mantiksal.round()} px genişlikte dövüş sanatları sayfası '
+          'taşmaz (cüzdan $cuzdan)', (WidgetTester tester) async {
+        yakala();
+        addTearDown(birak);
+
+        final GameController controller = GameController(random: Random(33));
+        addTearDown(controller.dispose);
+        tester.view.physicalSize = boyut;
+        tester.view.devicePixelRatio = 3;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          BirOmurApp(controller: controller, sound: SoundService.silent()),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Rastgele bir hayat'));
+        await tester.pumpAndSettle();
+
+        final GameState temel = controller.state!;
+        controller.debugSetState(
+          temel.copyWith(
+            pendingEvent: null,
+            notices: const <PendingNotice>[],
+            player: temel.player.copyWith(age: 30, wallet: cuzdan),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+        await tester.pumpAndSettle();
+        await tapMenuRow(tester, 'Spor salonu');
+        await tester.tap(find.byKey(const Key('spor_dovus')));
+        await tester.pumpAndSettle();
+
+        // Bütün basamak listeleri açılır: en uzun içerik böyle kurulur.
+        while (find.text('Basamaklar').evaluate().isNotEmpty) {
+          await scrollToFinder(tester, find.text('Basamaklar').first);
+          await tester.tap(find.text('Basamaklar').first);
+          await tester.pumpAndSettle();
+        }
+        final Finder liste = find.byType(Scrollable).first;
+        for (int i = 0; i < 20; i++) {
+          await tester.drag(liste, const Offset(0, -300));
+          await tester.pumpAndSettle();
+        }
+
+        expect(
+          hatalar,
+          isEmpty,
+          reason: 'Düzen taşması:\n${hatalar.join('\n')}',
+        );
+      });
+    }
+  }
+
+  testWidgets('uzun ad ve büyük cüzdanla başlık taşmaz', (
+    WidgetTester tester,
+  ) async {
     yakala();
     addTearDown(birak);
 

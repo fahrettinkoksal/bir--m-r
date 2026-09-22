@@ -33,6 +33,7 @@ class JobType {
     this.minIntelligence = 0,
     this.minCharisma = 0,
     this.levels = const <String>[],
+    this.martialArtId,
   });
 
   final String id;
@@ -60,6 +61,12 @@ class JobType {
   /// mesleğin adı tek unvan sayılır. Basamaklar `prototypeOnly`'dir
   /// (Q-078); meslek kataloğu büyütülmeden yalnızca unvan eklenir.
   final List<String> levels;
+
+  /// Bu iş bir dövüş sanatı eğitmenliğiyse o sanatın kimliği (Paket 32).
+  ///
+  /// Doluysa iş yalnızca o sanatta eğitmenlik basamağına gelmiş oyuncuya
+  /// açılır; katalogdaki eşik `MartialArt.instructorFromLevel`'dir.
+  final String? martialArtId;
 
   /// Bu meslekte çıkılabilecek en üst basamak.
   int get maxLevel => levels.isEmpty ? 0 : levels.length - 1;
@@ -170,6 +177,52 @@ const List<JobType> kJobCatalog = <JobType>[
       'Öğretmen',
       'Kıdemli öğretmen',
       'Zümre başkanı',
+    ],
+  ),
+
+  // --- Dövüş sanatları eğitmenliği (Paket 32) ---------------------------
+  //
+  // Bu üç iş ilan panosunda **sürekli durmaz**: ancak salonda yıllarca
+  // çalışıp basamağı yükselten oyuncuya açılır. Diplomayla değil,
+  // kuşakla/boyla girilir.
+  JobType(
+    id: 'karate_egitmeni',
+    name: 'Karate eğitmeni',
+    description: 'Kendi kuşağını aldın; şimdi salonun çocuklarını '
+        'çalıştırıyorsun.',
+    minAge: 18,
+    yearlySalary: 300000, // prototypeOnly
+    martialArtId: 'karate',
+    levels: <String>[
+      'Yardımcı antrenör',
+      'Karate eğitmeni',
+      'Baş eğitmen',
+    ],
+  ),
+  JobType(
+    id: 'kungfu_egitmeni',
+    name: 'Kung fu eğitmeni',
+    description: 'Formları sen öğrendin, şimdi sen öğretiyorsun.',
+    minAge: 18,
+    yearlySalary: 290000, // prototypeOnly
+    martialArtId: 'kung_fu',
+    levels: <String>[
+      'Yardımcı antrenör',
+      'Kung fu eğitmeni',
+      'Salon hocası',
+    ],
+  ),
+  JobType(
+    id: 'gures_antrenoru',
+    name: 'Güreş antrenörü',
+    description: 'Çayırdan sahaya: kıspeti astın, pehlivan yetiştiriyorsun.',
+    minAge: 18,
+    yearlySalary: 270000, // prototypeOnly
+    martialArtId: 'gures',
+    levels: <String>[
+      'Çırak antrenör',
+      'Güreş antrenörü',
+      'Kulüp baş antrenörü',
     ],
   ),
 ];

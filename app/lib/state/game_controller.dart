@@ -20,6 +20,9 @@ import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
+import '../domain/models/martial_progress.dart';
+import '../domain/activities/martial_arts_engine.dart';
+import '../data/martial_arts_catalog.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
 import '../domain/career/retirement.dart';
@@ -724,6 +727,39 @@ class GameController extends ChangeNotifier {
                 action: action,
                 rng: _random,
               ),
+      );
+
+  // --- Dövüş sanatları (Paket 32) ---------------------------------------
+
+  static const MartialArtsEngine _martial = MartialArtsEngine();
+
+  /// Bir dövüş sanatındaki ilerleme.
+  MartialProgress martialProgress(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return MartialProgress(artId: art.id, lessons: 0);
+    return _martial.progressOf(current, art);
+  }
+
+  /// Bu sanattan ders alınabilir mi?
+  InteractionAvailability martialAvailability(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return _martial.availability(current, art);
+  }
+
+  /// Bu yaşta bu sanattan kaç ders alındı?
+  int martialLessonsThisAge(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _martial.lessonsThisAge(current, art);
+  }
+
+  /// Bir ders alır.
+  ActivityOutcome? takeMartialLesson(MartialArt art) => _runActivity(
+        (GameState current) =>
+            _martial.takeLesson(state: current, art: art),
       );
 
   /// Yaşa uygun kitaplar.
