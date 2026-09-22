@@ -20,6 +20,9 @@ enum NoticeKind {
 
   /// Burçsal dönem (Paket 27).
   burc,
+
+  /// Askerlik celbi ve terhis (Paket 29).
+  askerlik,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

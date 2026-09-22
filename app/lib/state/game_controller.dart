@@ -51,6 +51,8 @@ import '../domain/activities/travel.dart';
 import '../domain/models/sponsorship.dart';
 import '../domain/models/trip.dart';
 import '../domain/social/social_engine.dart';
+import '../data/military_catalog.dart';
+import '../domain/career/military_service.dart';
 import '../domain/interaction/intimacy.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
@@ -1292,6 +1294,65 @@ class GameController extends ChangeNotifier {
   FamilyOutcome? holdWedding(String styleId) => _runFamily(
         (GameState current) => _marriages.holdWedding(current, styleId),
       );
+
+  // =====================================================================
+  // Askerlik (Paket 29)
+  // =====================================================================
+
+  /// Bu askerlik yoluna başvurmaya engel var mı?
+  InteractionAvailability militaryAvailability(MilitaryTrack track) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return MilitaryService.availability(current, track);
+  }
+
+  /// Bedelli ödemeye engel var mı?
+  InteractionAvailability bedelliAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final String engel = MilitaryService.bedelliBlockReason(current);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Bedelliyi ödeyebilecek yakınlar.
+  List<Person> bedelliPayers() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return MilitaryService.possiblePayers(current);
+  }
+
+  /// Askerliğe katılır ya da rütbeli yola başvurur.
+  MilitaryResult? enlistMilitary(MilitaryTrack track) =>
+      _runMilitary((GameState c) =>
+          MilitaryService.enlist(c, track, _random));
+
+  /// Bedelliyi kendi cebinden öder.
+  MilitaryResult? payBedelli() =>
+      _runMilitary(MilitaryService.payBedelli);
+
+  /// Bedelli ücretini bir yakından ister.
+  MilitaryResult? askFamilyForBedelli(String personId) =>
+      _runMilitary((GameState c) =>
+          MilitaryService.askFamilyForBedelli(c, personId, _random));
+
+  MilitaryResult? _runMilitary(MilitaryResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent || current.deceased) {
+      return null;
+    }
+    final MilitaryResult sonuc = islem(current);
+    if (!sonuc.applied) return sonuc;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc;
+  }
 
   /// Bu kişiyle yakınlaşmaya engel var mı? (Paket 25)
   InteractionAvailability intimacyAvailability(String personId) {

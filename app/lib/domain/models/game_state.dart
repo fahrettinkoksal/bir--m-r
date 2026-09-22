@@ -17,6 +17,7 @@ import 'parental_status.dart';
 import 'pending_notice.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
+import 'military.dart';
 import 'pending_wedding.dart';
 import 'pregnancy.dart';
 import 'pending_license_exam.dart';
@@ -45,6 +46,7 @@ class GameState {
     this.lastInteractionAge = const <String, int>{},
     this.pendingWedding,
     this.pregnancy,
+    this.military = const MilitaryState(),
     this.unprotectedTries = 0,
     this.lastConceptionTryAge,
     this.storyFlags = const <String>{},
@@ -131,6 +133,9 @@ class GameState {
   final Pregnancy? pregnancy;
 
   bool get isExpecting => pregnancy != null;
+
+  /// Askerlik durumu (Paket 29).
+  final MilitaryState military;
 
   /// Korunmadan geçen, çocukla sonuçlanmamış deneme sayısı (Paket 25).
   ///
@@ -631,6 +636,7 @@ class GameState {
     Map<String, int>? lastInteractionAge,
     Object? pendingWedding = _unsetEvent,
     Object? pregnancy = _unsetEvent,
+    MilitaryState? military,
     int? unprotectedTries,
     Object? lastConceptionTryAge = _unsetEvent,
     Set<String>? storyFlags,
@@ -690,6 +696,7 @@ class GameState {
       pregnancy: pregnancy == _unsetEvent
           ? this.pregnancy
           : pregnancy as Pregnancy?,
+      military: military ?? this.military,
       unprotectedTries: unprotectedTries ?? this.unprotectedTries,
       lastConceptionTryAge: lastConceptionTryAge == _unsetEvent
           ? this.lastConceptionTryAge

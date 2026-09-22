@@ -242,6 +242,37 @@ abstract final class Notices {
         happinessDelta: happinessDelta,
       );
 
+  /// Askerlik bildirimleri (Paket 29).
+  static const String militaryCallNoticeId = 'askerlik-celp';
+  static const String militaryDischargeNoticeId = 'askerlik-terhis';
+
+  /// Celp geldi.
+  static PendingNotice militaryCall({required int playerAge}) => PendingNotice(
+        id: militaryCallNoticeId,
+        kind: NoticeKind.askerlik,
+        age: playerAge,
+        title: 'Askerlik celbi',
+        text: 'Askerlik çağrın geldi. Meslek bölümündeki Askerlik '
+            'menüsünden er olarak gidebilir, bedelli ödeyebilir ya da '
+            'koşulların uygunsa astsubay veya subay olarak '
+            'başvurabilirsin.',
+      );
+
+  /// Terhis oldu.
+  static PendingNotice militaryDischarge({
+    required int playerAge,
+    String? rankLabel,
+  }) =>
+      PendingNotice(
+        id: militaryDischargeNoticeId,
+        kind: NoticeKind.askerlik,
+        age: playerAge,
+        title: 'Terhis',
+        text: rankLabel == null
+            ? 'Askerliğin bitti. Bugünden sonra bu iş kapandı.'
+            : '$rankLabel olarak görev süren tamamlandı.',
+      );
+
   static const String schoolStartNoticeId = 'okul-baslangic';
   static const String highSchoolStartNoticeId = 'okul-lise-gecis';
   static const String highSchoolEndNoticeId = 'okul-lise-bitis';

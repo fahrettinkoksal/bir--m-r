@@ -13,6 +13,9 @@ import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/interview_sheet.dart';
+import '../../../domain/career/military_service.dart';
+import '../../../domain/models/military.dart';
+import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
 import 'education_career_pages.dart';
 import '../../../text/turkish_text.dart';
@@ -302,7 +305,7 @@ class _PeoplePage extends StatelessWidget {
 }
 
 /// Meslek ekranının alt sayfaları.
-enum _CareerPage { kok, mezuniyetSonrasi, isArama, kariyerGecmisi }
+enum _CareerPage { kok, mezuniyetSonrasi, isArama, kariyerGecmisi, askerlik }
 
 class _CareerView extends StatefulWidget {
   const _CareerView({required this.state, required this.onBack});
@@ -330,6 +333,8 @@ class _CareerViewState extends State<_CareerView> {
     final bool okulOncesi = !egitim.finished && state.player.age < 6;
 
     switch (_page) {
+      case _CareerPage.askerlik:
+        return MilitaryPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.mezuniyetSonrasi:
         return AfterSchoolPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.isArama:
@@ -463,6 +468,22 @@ class _CareerViewState extends State<_CareerView> {
             icon: Icons.record_voice_over_outlined,
             accent: BirOmurAccents.pirinc,
             onTap: () => InterviewSheet.show(context),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Askerlik ayrı bir menüdür (Paket 29). Yükümlülük kapanmışsa
+        // da görünür: ne olduğu okunabilmeli.
+        if (state.player.age >= MilitaryService.prototypeOnlyMinAge ||
+            state.military.status != MilitaryStatus.yok) ...<Widget>[
+          MenuRow(
+            key: const Key('career_military_row'),
+            title: 'Askerlik',
+            subtitle: state.military.isCalled
+                ? 'Celbin geldi; bir karar vermen gerekiyor'
+                : state.military.label,
+            icon: Icons.military_tech_outlined,
+            accent: BirOmurAccents.yesil,
+            onTap: () => _go(_CareerPage.askerlik),
           ),
           const SizedBox(height: 10),
         ],

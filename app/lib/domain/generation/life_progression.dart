@@ -27,6 +27,7 @@ import '../models/game_state.dart';
 import '../interaction/bond_decay.dart';
 import '../models/life_log.dart';
 import '../models/zodiac.dart';
+import '../career/military_service.dart';
 import '../life/astrology.dart';
 import '../../data/fortune_catalog.dart';
 import '../models/gender.dart';
@@ -407,6 +408,11 @@ class LifeProgression {
 
     // Bekleyen doğum (Paket 26): hamilelik bu yıl bebekle sonuçlanır.
     afterDeaths = _applyBirth(afterDeaths, newAge);
+
+    // Askerlik (Paket 29): görevdeyse yıl işler ve süresi dolduysa
+    // terhis olur; okumayan yükümlü yaşı gelince çağrılır.
+    afterDeaths = MilitaryService.advanceYear(afterDeaths, newAge);
+    afterDeaths = MilitaryService.applyCallUp(afterDeaths, newAge);
 
     // Burçsal dönem (Paket 27): bazı yıllarda oyuncunun burcuna denk
     // gelen bir dönem çıkar ve mutluluğu gerçekten etkiler.

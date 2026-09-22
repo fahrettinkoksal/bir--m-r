@@ -25,6 +25,7 @@ import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
+import '../../domain/models/military.dart';
 import '../../domain/models/pregnancy.dart';
 import '../../domain/models/zodiac.dart';
 import '../../domain/models/pending_interview.dart';
@@ -160,6 +161,16 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'startedAtAge': state.pregnancy!.startedAtAge,
               'expecting': state.pregnancy!.expecting.name,
             },
+      // Askerlik kaydı (Paket 29); yarım kalan hizmet kaybolmaz.
+      'military': <String, Object?>{
+        'status': state.military.status.name,
+        'trackName': state.military.trackName,
+        'rankId': state.military.rankId,
+        'calledAtAge': state.military.calledAtAge,
+        'startedAtAge': state.military.startedAtAge,
+        'finishedAtAge': state.military.finishedAtAge,
+        'paidByPersonId': state.military.paidByPersonId,
+      },
       'unprotectedTries': state.unprotectedTries,
       'lastConceptionTryAge': state.lastConceptionTryAge,
       'settings': <String, Object?>{
@@ -714,6 +725,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     pregnancy: json['pregnancy'] == null
         ? null
         : _decodePregnancy(_asMap(json['pregnancy'], 'pregnancy')),
+    // Eski kayıtlarda askerlik kaydı yoktur; **geriye dönük askerlik
+    // uydurulmaz**, durum "yapılmadı" olarak açılır (Paket 29).
+    military: json['military'] == null
+        ? const MilitaryState()
+        : _decodeMilitary(_asMap(json['military'], 'military')),
     // Eski kayıtlarda deneme sayacı yoktur; sıfırdan başlar.
     unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
     lastConceptionTryAge: _intOrNull(json, 'lastConceptionTryAge'),
@@ -950,6 +966,20 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
       happinessDelta:
           json['happinessDelta'] == null ? 0 : _int(json, 'happinessDelta'),
       funeralCost: json['funeralCost'] == null ? 0 : _int(json, 'funeralCost'),
+    );
+
+MilitaryState _decodeMilitary(Map<String, Object?> json) => MilitaryState(
+      status: _enumByName(
+        MilitaryStatus.values,
+        _string(json, 'status'),
+        'military.status',
+      ),
+      trackName: _stringOrNull(json, 'trackName'),
+      rankId: _stringOrNull(json, 'rankId'),
+      calledAtAge: _intOrNull(json, 'calledAtAge'),
+      startedAtAge: _intOrNull(json, 'startedAtAge'),
+      finishedAtAge: _intOrNull(json, 'finishedAtAge'),
+      paidByPersonId: _stringOrNull(json, 'paidByPersonId'),
     );
 
 Pregnancy _decodePregnancy(Map<String, Object?> json) => Pregnancy(
