@@ -744,6 +744,72 @@ başarısız**. Atlanan 13 test yalnızca `BIR_OMUR_SCREENSHOTS=1` ile
 çalışan ekran görüntüsü testleridir. **Gerçek Windows veya Android
 cihazda oynanmadı.**
 
+## Paket 25-34 ve main'e birleştirme (22 Eylül 2026)
+
+**Faho'nun isteğiyle bütün yığın `main`'e birleştirildi** (`27b83eb..e24a56b`,
+ileri sarma, 141 commit). #27-#66 arası 40 PR'ın içeriği artık `main`'de;
+PR'lar kapatıldı. Birleştirme öncesi `main` üzerinde doğrulandı:
+`flutter analyze` temiz, **1292 test geçti, 15 atlandı, 0 başarısız**
+(atlananlar yalnızca `BIR_OMUR_SCREENSHOTS=1` ile çalışan golden testler).
+
+**Paket 25 — Teklif ve düğün (PR #57).** Evlenmenin 60.000 ₺ koşulu kalktı.
+Teklif dört biçimde yapılabiliyor (sade bedelsiz), kabul sonrası düğün
+cüzdana göre seçiliyor (nikâh bedelsiz). "Çocuk yap" düğmesi kaldırıldı;
+yerine yakınlaşma ve korunma seçimi geldi. Çocuk artık garanti değil;
+kısırlık gizli ve ancak denedikçe anlaşılıyor.
+
+**Paket 26 — Hamilelik (PR #58).** Bebek aynı anda gelmiyor; bir sonraki
+yaş ilerlemesinde doğuyor ve bildirim paneline düşüyor. Kayıt biçimi 30.
+
+**Paket 27 — Burçlar ve fal (PR #59).** Doğum ay/gününden burç, kahve falı,
+tarot ve burçsal dönemler. **Doğum yılı hâlâ yok** (D-003). Yazı tipleri
+burç simgelerini içermediği için simgeler gösterilmiyor, veri olarak duruyor.
+
+**Paket 28 — Sesler ve menü (PR #60).** Yedi ses yeniden üretildi
+(`app/tool/make_sounds.py`); aktiviteler menüsü dört gruba ayrıldı.
+Genel kontrolde 360 px'te gerçek bir taşma bulundu ve kalıcı taşma testi
+eklendi (`test/layout_overflow_test.dart`).
+
+**Paket 29 — Askerlik (PR #61).** Meslek altında ayrı menü: celp, er/astsubay/
+subay yolları, bedelli ve bedelli ücretini aileden isteme (reddedilebilir).
+
+**Paket 30 — Rulet ve at yarışı (PR #62).** Gerçek Avrupa ruleti sıra
+dizilimiyle dönen çark; beş atlı yarış. Animasyon sonucu belirlemiyor.
+
+**Paket 31 — Askerlik tecili ve bakaya (PR #63).** 2 hak × 2 yıl tecil;
+okul tecili **bildirim panelinde** duyuruluyor ve hak harcamıyor. Kaçmak
+mümkün: yakalanma ihtimali yılda artıyor, ceza süreyle büyüyor, teslim
+olan yarısını ödüyor.
+
+**Paket 32 — Dövüş sanatları (PR #64).** Spor salonu içinde karate
+(kyu/dan), kung fu (kuşak + duanwei) ve yağlı güreş (Kırkpınar boyları).
+Basamak adları gerçek düzenlerden derlendi. Ders ucuz ama yılda en fazla
+20 ders alınabiliyor: ustalık parayla değil yılla geliyor. Eşiğe gelince
+eğitmenlik mesleği açılıyor.
+
+**Paket 33 — Milli Piyango (PR #65).** Tam/yarım/çeyrek bilet, olağan ve
+yılbaşı çekilişi, amortiye kadar ikramiye basamakları. Çekiliş yaş
+ilerlerken yapılıyor. Kasa payı **%44** (kuramsal geri dönüş %56) —
+Faho'nun "genel kumar kuralı neyse öyle olsun" kararının uygulaması.
+Kumar ayarı kapalıyken bayi de kapalı.
+
+**Paket 34 — Finger (PR #66).** Tanışma uygulaması: profil, beğen/geç,
+eşleşme. Beğeninin karşılık bulma ihtimali %22-67 arası, görünüş ve
+karizmaya bağlı ve ekranda yazılı. **Eşleşmek tanışmak değil**;
+tanışıldığında kişi kalıcı kimlikle hayata giriyor. Sevgilisi olan biri
+eşleşmeyle yeni sevgili edinemiyor (arkadaş oluyor) — bu **varsayılan**,
+onaylanmış kural değil.
+
+**Karar bekleyenler:** `docs/DESIGN_REVIEW_QUEUE.md` → Q-093 … Q-102.
+Öne çıkanlar: tecil hakkı sayısı (Q-099/1), eğitmenlik eşiği (Q-100/1),
+büyük ikramiyenin ekonomiyi bozup bozmayacağı (Q-101/2), sevgilisi varken
+eşleşmenin ne anlama geleceği (Q-102/3).
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **1292 geçti, 15 atlandı, 0 başarısız**. CI `main` üzerinde
+Android debug APK ve Windows sürümünü derledi. **Gerçek Windows veya
+Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
