@@ -41,6 +41,7 @@ import '../domain/models/pending_crisis.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
+import '../domain/casino/horse_race.dart';
 import '../domain/casino/roulette.dart';
 import '../domain/models/blackjack_game.dart';
 import '../domain/models/game_settings.dart';
@@ -1100,12 +1101,77 @@ class GameController extends ChangeNotifier {
   CasinoOutcome? closeBlackjackHand() =>
       _runCasino((GameState current) => _blackjack.closeHand(current));
 
+  /// Rulette **en son** çıkan sayı (Paket 30).
+  ///
+  /// Arayüz çarkı bu sayının üzerine indirir. Animasyon sonucu
+  /// belirlemez; sonuç zaten çekilmiştir.
+  int? _sonRuletSayisi;
+
+  int? get lastRouletteNumber => _sonRuletSayisi;
+
   /// Rulette bahis oynar.
-  CasinoOutcome? spinRoulette(RouletteBetType type, int bet, {int? number}) =>
-      _runCasino(
-        (GameState current) =>
-            _roulette.spin(current, type, bet, _random, number: number),
-      );
+  CasinoOutcome? spinRoulette(RouletteBetType type, int bet, {int? number}) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ({CasinoResult result, int? number}) cikti = _roulette.spinDetailed(
+      current,
+      type,
+      bet,
+      _random,
+      number: number,
+    );
+    if (!cikti.result.outcome.applied) return cikti.result.outcome;
+    _sonRuletSayisi = cikti.number;
+    _state = cikti.result.state;
+    _autoSave();
+    notifyListeners();
+    return cikti.result.outcome;
+  }
+
+  // =====================================================================
+  // At yarışı (Paket 30)
+  // =====================================================================
+
+  /// Masadaki güncel kadro; sayfa açıldığında kurulur.
+  List<RaceHorse> _yarisKadrosu = const <RaceHorse>[];
+
+  /// Son koşunun sonucu; animasyon bunu gösterir.
+  RaceResult? _sonKosu;
+
+  List<RaceHorse> get raceField => _yarisKadrosu;
+  RaceResult? get lastRace => _sonKosu;
+
+  /// Yeni bir kadro kurar.
+  List<RaceHorse> newRaceField() {
+    _yarisKadrosu = HorseRacing.buildField(_random);
+    _sonKosu = null;
+    notifyListeners();
+    return _yarisKadrosu;
+  }
+
+  /// At yarışında bahis oynar.
+  CasinoOutcome? betOnHorse(int lane, int bet) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    if (_yarisKadrosu.isEmpty) newRaceField();
+    final ({CasinoResult result, RaceResult? race}) cikti =
+        HorseRacing.placeBet(current, _yarisKadrosu, lane, bet, _random);
+    if (!cikti.result.outcome.applied) return cikti.result.outcome;
+    _sonKosu = cikti.race;
+    _state = cikti.result.state;
+    _autoSave();
+    notifyListeners();
+    return cikti.result.outcome;
+  }
+
+  /// At yarışında bahse engel var mı?
+  InteractionAvailability horseBetAvailability(int bet) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return HorseRacing.betAvailability(current, bet);
+  }
 
   CasinoOutcome? _runCasino(CasinoResult Function(GameState) islem) {
     final GameState? current = _state;

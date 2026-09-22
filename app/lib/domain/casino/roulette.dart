@@ -65,9 +65,40 @@ class Roulette {
     return CasinoAccess.checkBet(state, bet);
   }
 
-  /// Bahsi oynar ve çarkı çevirir.
+  /// Bahsi oynar ve **çıkan sayıyı da** döndürür.
   ///
   /// [number] yalnızca [RouletteBetType.sayi] için gereklidir.
+  ///
+  /// Arayüz çarkı döndürürken bu sayıya ihtiyaç duyar: animasyon sonucu
+  /// belirlemez, **zaten belirlenmiş** sonucu gösterir (Paket 30).
+  ({CasinoResult result, int? number}) spinDetailed(
+    GameState state,
+    RouletteBetType type,
+    int bet,
+    Random rng, {
+    int? number,
+  }) {
+    final InteractionAvailability check = spinAvailability(state, bet);
+    if (!check.isAllowed) {
+      return (result: _blocked(state, check.reason!), number: null);
+    }
+    if (type == RouletteBetType.sayi &&
+        (number == null || number < 0 || number > 36)) {
+      return (
+        result: _blocked(state, '0 ile 36 arasında bir sayı seçmen gerekiyor.'),
+        number: null,
+      );
+    }
+    final int gelen = rng.nextInt(pockets);
+    return (
+      result: _settle(state, type, bet, number, gelen),
+      number: gelen,
+    );
+  }
+
+  /// Bahsi oynar ve çarkı çevirir.
+  ///
+  /// Çıkan sayıya ihtiyaç duymayan çağrılar için kısa yol.
   CasinoResult spin(
     GameState state,
     RouletteBetType type,
@@ -83,6 +114,17 @@ class Roulette {
     }
 
     final int gelen = rng.nextInt(pockets);
+    return _settle(state, type, bet, number, gelen);
+  }
+
+  /// Çekilmiş sayıyı ödemeye çevirir.
+  CasinoResult _settle(
+    GameState state,
+    RouletteBetType type,
+    int bet,
+    int? number,
+    int gelen,
+  ) {
     final bool kazandi = _wins(type, number, gelen);
     final int odeme = kazandi ? bet + bet * type.payoutRatio : 0;
 

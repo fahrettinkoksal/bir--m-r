@@ -15,6 +15,34 @@ String trNumber(int value) {
 /// Para tutarı: 163400 → "163.400 ₺".
 String trMoney(int amount) => '${trNumber(amount)} ₺';
 
+/// Dar yerler için **kısaltılmış** para biçimi (Paket 30).
+///
+/// Karakter başlığındaki cüzdan rozeti gibi yerlerde tam tutar satırı
+/// taşırıp adı kırpıyordu ("Tolga Erd…"). 10.000 ₺'ye kadar tam yazılır;
+/// üstünde **B** (bin) ve **M** (milyon) kısaltması kullanılır.
+///
+/// Yalnızca **gösterim** içindir: hesaplarda hiçbir zaman kullanılmaz,
+/// tam tutar her zaman cüzdan ekranında görünür.
+String trMoneyShort(int amount) {
+  final int mutlak = amount.abs();
+  if (mutlak < 10000) return trMoney(amount);
+  final String isaret = amount < 0 ? '-' : '';
+  if (mutlak < 1000000) {
+    return '$isaret${_kisalt(mutlak / 1000)} B ₺';
+  }
+  return '$isaret${_kisalt(mutlak / 1000000)} M ₺';
+}
+
+/// Bir ondalık basamakla kısaltır; yuvarlama 100'e taşırsa tam sayıya
+/// döner (99.999 ₺ "100,0 B" değil "100 B" olur).
+String _kisalt(double deger) {
+  final String birOndalik = deger.toStringAsFixed(1);
+  if (double.parse(birOndalik) >= 100) {
+    return deger.round().toString();
+  }
+  return birOndalik.replaceAll('.', ',');
+}
+
 /// Türkçe'ye uygun büyük harfe çevirme.
 ///
 /// Dart'ın varsayılan `toUpperCase()` çağrısı 'i' harfini 'I' yapar; Türkçe'de

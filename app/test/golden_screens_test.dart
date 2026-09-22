@@ -556,4 +556,43 @@ void main() {
     await openTab(tester, 'aktiviteler');
     await shot(tester, '14_aktiviteler_menu.png');
   }, skip: !enabled);
+
+  testWidgets('15 — rulet çarkı ve at yarışı', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 3400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      BirOmurApp(
+        key: ValueKey<int>(pumpDeneme++),
+        controller: controller,
+        sound: SoundService.silent(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+
+    final GameState temel = controller.state!;
+    controller.debugSetState(
+      temel.copyWith(
+        pendingEvent: null,
+        notices: const <PendingNotice>[],
+        player: temel.player.copyWith(age: 30, wallet: 400000),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await openTab(tester, 'aktiviteler');
+    await scrollToFinder(tester, find.text('Kumarhane'));
+    await tester.tap(find.text('Kumarhane'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('casino_horse_row')));
+    await tester.pumpAndSettle();
+    // Koşuyu oynat ve bitir: pist sonucu gösterirken çekilir.
+    await scrollToFinder(tester, find.byKey(const Key('horse_race_start')));
+    await tester.tap(find.byKey(const Key('horse_race_start')));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await shot(tester, '15_at_yarisi.png');
+  }, skip: !enabled);
 }

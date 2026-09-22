@@ -91,12 +91,17 @@ void main() {
 
     final int once = controller.state!.player.wallet;
     final int bahis = controller.betSteps().first;
+    // Çark eklendi (Paket 30); sayfa uzadı.
+    await scrollToFinder(tester, find.byKey(const Key('roulette_siyah')));
     await tester.tap(find.byKey(const Key('roulette_siyah')));
     await tester.pumpAndSettle();
+    await scrollToFinder(tester, find.byKey(Key('bet_$bahis')));
     await tester.tap(find.byKey(Key('bet_$bahis')));
     await tester.pumpAndSettle();
+    await scrollToFinder(tester, find.byKey(const Key('roulette_spin')));
     await tester.tap(find.byKey(const Key('roulette_spin')));
-    await tester.pumpAndSettle();
+    // Çark dönerken sonuç yazılmaz; animasyonun bitmesi beklenir.
+    await tester.pumpAndSettle(const Duration(seconds: 4));
 
     final int sonra = controller.state!.player.wallet;
     expect(sonra == once - bahis || sonra == once + bahis, isTrue,

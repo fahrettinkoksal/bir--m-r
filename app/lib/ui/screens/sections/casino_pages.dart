@@ -10,6 +10,9 @@ import '../../../domain/models/playing_card.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
+import '../../widgets/roulette_wheel.dart';
+import '../../../domain/casino/horse_race.dart';
+import '../../widgets/race_track.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
 
@@ -26,7 +29,7 @@ class CasinoPage extends StatefulWidget {
   State<CasinoPage> createState() => _CasinoPageState();
 }
 
-enum _CasinoTable { kok, blackjack, rulet }
+enum _CasinoTable { kok, blackjack, rulet, atYarisi }
 
 class _CasinoPageState extends State<CasinoPage> {
   _CasinoTable _masa = _CasinoTable.kok;
@@ -43,6 +46,10 @@ class _CasinoPageState extends State<CasinoPage> {
         );
       case _CasinoTable.rulet:
         return RouletteTablePage(
+          onBack: () => setState(() => _masa = _CasinoTable.kok),
+        );
+      case _CasinoTable.atYarisi:
+        return HorseRacePage(
           onBack: () => setState(() => _masa = _CasinoTable.kok),
         );
       case _CasinoTable.kok:
@@ -73,11 +80,21 @@ class _CasinoPageState extends State<CasinoPage> {
         ),
         const SizedBox(height: 10),
         MenuRow(
+          key: const Key('casino_roulette_row'),
           title: 'Rulet',
           subtitle: 'Tek sıfırlı Avrupa ruleti',
           icon: Icons.casino_outlined,
           accent: BirOmurAccents.nar,
           onTap: () => setState(() => _masa = _CasinoTable.rulet),
+        ),
+        const SizedBox(height: 10),
+        MenuRow(
+          key: const Key('casino_horse_row'),
+          title: 'At yarışı',
+          subtitle: 'Beş at koşar, sen birine oynarsın',
+          icon: Icons.emoji_events_outlined,
+          accent: BirOmurAccents.turuncu,
+          onTap: () => setState(() => _masa = _CasinoTable.atYarisi),
         ),
         const SizedBox(height: 12),
         InfoPanel(
@@ -435,6 +452,31 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
   int _sayi = 7;
   String? _sonMesaj;
 
+  /// Çarkın duracağı sayı ve her çevirmede artan kimlik (Paket 30).
+  ///
+  /// Sonuç **alanda** belirlenir; animasyon yalnızca onu gösterir.
+  int? _inecekSayi;
+  int _cevirmeNo = 0;
+
+  /// Çark dönerken sonuç metni **gizlenir**: çevirmeden önce sonucu
+  /// okumak oyunu bozar.
+  bool _donuyor = false;
+
+  void _cevir(GameController controller, int bahis) {
+    final CasinoOutcome? sonuc =
+        controller.spinRoulette(_tur, bahis, number: _sayi);
+    if (sonuc == null || !sonuc.applied) {
+      setState(() => _sonMesaj = sonuc?.text);
+      return;
+    }
+    setState(() {
+      _sonMesaj = sonuc.text;
+      _inecekSayi = controller.lastRouletteNumber;
+      _cevirmeNo++;
+      _donuyor = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final GameController controller = GameScope.of(context);
@@ -456,7 +498,18 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
           icon: Icons.rule_outlined,
           text: CasinoRules.rouletteRulesText,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
+        Center(
+          child: RouletteWheel(
+            key: const Key('roulette_wheel'),
+            landOn: _inecekSayi,
+            spinId: _cevirmeNo,
+            onFinished: () {
+              if (mounted) setState(() => _donuyor = false);
+            },
+          ),
+        ),
+        const SizedBox(height: 14),
         Text('Bahis türü', style: theme.textTheme.titleMedium),
         const SizedBox(height: 10),
         Wrap(
@@ -502,19 +555,166 @@ class _RouletteTablePageState extends State<RouletteTablePage> {
           width: double.infinity,
           child: FilledButton(
             key: const Key('roulette_spin'),
-            onPressed: controller.betAvailability(bahis).isAllowed
-                ? () => setState(() {
-                      _sonMesaj = controller
-                          .spinRoulette(_tur, bahis, number: _sayi)
-                          ?.text;
-                    })
+            onPressed: !_donuyor && controller.betAvailability(bahis).isAllowed
+                ? () => _cevir(controller, bahis)
                 : null,
-            child: Text('${trMoney(bahis)} oyna'),
+            child: Text(_donuyor ? 'Çark dönüyor…' : '${trMoney(bahis)} oyna'),
           ),
         ),
-        if (_sonMesaj != null) ...<Widget>[
+        // Sonuç ancak çark durunca yazılır.
+        if (_sonMesaj != null && !_donuyor) ...<Widget>[
           const SizedBox(height: 12),
           InfoPanel(icon: Icons.casino_outlined, text: _sonMesaj!),
+        ],
+      ],
+    );
+  }
+}
+
+
+/// At yarışı masası (Paket 30).
+///
+/// Kazanan at bahisten **bağımsız** olarak çekilir; pist yalnızca o
+/// sonucu gösterir.
+class HorseRacePage extends StatefulWidget {
+  const HorseRacePage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  State<HorseRacePage> createState() => _HorseRacePageState();
+}
+
+class _HorseRacePageState extends State<HorseRacePage> {
+  int? _secilenBahis;
+  int _kulvar = 1;
+  String? _sonMesaj;
+  int _kosuNo = 0;
+  bool _kosuyor = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sayfa açılınca kadro kurulur.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (GameScope.of(context).raceField.isEmpty) {
+        GameScope.of(context).newRaceField();
+      }
+    });
+  }
+
+  void _kos(GameController controller, int bahis) {
+    final CasinoOutcome? sonuc = controller.betOnHorse(_kulvar, bahis);
+    if (sonuc == null || !sonuc.applied) {
+      setState(() => _sonMesaj = sonuc?.text);
+      return;
+    }
+    setState(() {
+      _sonMesaj = sonuc.text;
+      _kosuNo++;
+      _kosuyor = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final GameController controller = GameScope.of(context);
+    final GameState state = controller.state!;
+    final ThemeData theme = Theme.of(context);
+    final List<int> adimlar = controller.betSteps();
+    final int bahis = _secilenBahis != null && adimlar.contains(_secilenBahis)
+        ? _secilenBahis!
+        : adimlar.first;
+    final List<RaceHorse> kadro = controller.raceField;
+
+    return SectionScaffold(
+      icon: Icons.emoji_events_rounded,
+      title: 'At yarışı',
+      subtitle: 'Cüzdanın: ${state.player.walletLabel}',
+      backLabel: 'Kumarhane',
+      onBack: widget.onBack,
+      children: <Widget>[
+        const InfoPanel(
+          icon: Icons.rule_outlined,
+          text: HorseRacing.rulesText,
+        ),
+        const SizedBox(height: 14),
+        if (kadro.isEmpty)
+          const InfoPanel(
+            icon: Icons.hourglass_empty_rounded,
+            text: 'Kadro hazırlanıyor…',
+          )
+        else ...<Widget>[
+          RaceTrack(
+            key: const Key('race_track'),
+            horses: kadro,
+            result: controller.lastRace,
+            raceId: _kosuNo,
+            betLane: _kulvar,
+            onFinished: () {
+              if (mounted) setState(() => _kosuyor = false);
+            },
+          ),
+          const SizedBox(height: 14),
+          Text('Hangi ata oynuyorsun?', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              for (final RaceHorse at in kadro)
+                ChoiceChip(
+                  key: Key('horse_lane_${at.lane}'),
+                  label: Text('${at.name} · ${at.oddsLabel}'),
+                  selected: _kulvar == at.lane,
+                  onSelected:
+                      _kosuyor ? null : (_) => setState(() => _kulvar = at.lane),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text('Bahis miktarı', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 10),
+          _BetSelector(
+            bet: bahis,
+            onChanged: (int v) => setState(() => _secilenBahis = v),
+          ),
+          const SizedBox(height: 14),
+          _BlockReason(controller.horseBetAvailability(bahis)),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('horse_race_start'),
+              onPressed:
+                  !_kosuyor && controller.horseBetAvailability(bahis).isAllowed
+                      ? () => _kos(controller, bahis)
+                      : null,
+              child: Text(
+                _kosuyor ? 'Koşu sürüyor…' : '${trMoney(bahis)} oyna',
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const Key('horse_race_new_field'),
+              onPressed: _kosuyor
+                  ? null
+                  : () => setState(() {
+                        controller.newRaceField();
+                        _kulvar = 1;
+                        _sonMesaj = null;
+                      }),
+              child: const Text('Yeni kadro'),
+            ),
+          ),
+          // Sonuç ancak koşu bitince yazılır.
+          if (_sonMesaj != null && !_kosuyor) ...<Widget>[
+            const SizedBox(height: 12),
+            InfoPanel(icon: Icons.emoji_events_outlined, text: _sonMesaj!),
+          ],
         ],
       ],
     );

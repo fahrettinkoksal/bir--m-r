@@ -5,6 +5,7 @@ import '../../domain/models/game_settings.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/stats.dart';
 import '../../domain/models/player_character.dart';
+import '../../text/turkish_text.dart';
 import '../theme/bir_omur_theme.dart';
 import 'character_face.dart';
 import 'comic.dart';
@@ -76,7 +77,10 @@ class CharacterHeader extends StatelessWidget {
                               // Erdoğan · 250.000 ₺" gibi dolu bir
                               // satırda ad kırpılmasın diye.
                               ComicTag(
-                                text: state.player.walletLabel,
+                                // Kısaltılmış: tam tutar Varlıklar
+                                // ekranında yazar. Uzun tutar burada adı
+                                // kırpıyordu (Paket 30).
+                                text: trMoneyShort(state.player.wallet),
                                 color: BirOmurColors.sari,
                                 tilt: -2,
                                 fontSize: 11.5,

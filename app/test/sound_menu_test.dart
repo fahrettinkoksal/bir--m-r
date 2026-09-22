@@ -7,6 +7,7 @@ import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +41,8 @@ import 'support/test_flow.dart';
 }
 
 void main() {
+  _kisaParaTestleri();
+
   group('Ses dosyaları (Paket 28)', () {
     test('her ses için gerçek bir dosya var', () {
       for (final GameSound s in GameSound.values) {
@@ -187,6 +190,45 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('activity_fal')), findsNothing);
       expect(ActivityVenue.falTarot.minAge, greaterThan(8));
+    });
+  });
+}
+
+/// Kısaltılmış para biçimi (Paket 30).
+void _kisaParaTestleri() {
+  group('Kısaltılmış para biçimi', () {
+    test('küçük tutarlar tam yazılır', () {
+      expect(trMoneyShort(0), trMoney(0));
+      expect(trMoneyShort(9999), trMoney(9999));
+    });
+
+    test('binler B ile kısalır', () {
+      expect(trMoneyShort(10000), '10,0 B ₺');
+      expect(trMoneyShort(399800), '400 B ₺');
+    });
+
+    test('milyonlar M ile kısalır', () {
+      expect(trMoneyShort(1500000), '1,5 M ₺');
+      expect(trMoneyShort(987654321), '988 M ₺');
+    });
+
+    test('eksi tutarlarda işaret korunur', () {
+      expect(trMoneyShort(-250000), startsWith('-'));
+    });
+
+    test('kısaltma hiçbir zaman tam tutardan uzun olmaz', () {
+      for (final int tutar in <int>[
+        10000,
+        99999,
+        250000,
+        1500000,
+        987654321,
+      ]) {
+        expect(
+          trMoneyShort(tutar).length,
+          lessThanOrEqualTo(trMoney(tutar).length),
+        );
+      }
     });
   });
 }
