@@ -2234,5 +2234,33 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-102 — Finger: tanışma uygulaması
+
+**Durum:** Faho'nun isteğine göre kodlandı; kurallar ve sayılar karar bekliyor. Kod: Paket 34 (`lib/data/finger_catalog.dart`, `lib/domain/interaction/finger.dart`, `lib/ui/screens/sections/finger_page.dart`).
+
+**Faho'nun isteği:** "Oyun içerisine gene aktiviteler bölümüne dating app koyalım, adı Finger olsun, içerisinde bildiğin Tinder gibi ilişki arayan insanlar olsun, eşleştiğin ile tanış vb."
+
+**Kodlanan kurallar:**
+- **Aktiviteler → Finger**, 18 yaşından itibaren.
+- Profilde ad, yaş, şehir, meslek, kısa tanıtım ve 2-4 ilgi alanı var. **Gerçek fotoğraf yok**; baş harfler gösteriliyor.
+- **Beğen / Geç.** Beğeni her zaman karşılık bulmuyor: taban ihtimal %22, görünüş ve karizma yükseldikçe %67'ye kadar çıkıyor. Oran ekranda açıkça yazılı.
+- Bir yılda **25 profile** bakılabiliyor; sonsuz kaydırma yok.
+- **Eşleşmek tanışmak değildir.** Eşleşme bir listeye düşüyor; "Tanış" denince kişi oyunun kişi listesine **kalıcı kimlikle** giriyor ve oradan sonra normal ilişki kurallarıyla işliyor.
+- **Bekârsa** tanışılan kişi sevgili, **sevgilisi/eşi varsa** arkadaş oluyor. Uygulama var olan ilişkiyi kendiliğinden bitirmiyor.
+- Bütün profil metinleri bu proje için yazıldı.
+
+**Karar soruları:**
+1. Eşleşme ihtimali (**%22 taban, görünüş+karizmayla %67'ye kadar**) doğru mu? Çok cömert mi?
+2. Yıllık **25 profil** sınırı yerinde mi?
+3. **Sevgilisi varken** eşleşen kişiyle tanışınca **arkadaş** oluyor. Bunun yerine "aldatma" seçeneği mi olmalı? Şu an oyun aldatmayı hiç ele almıyor; bu ayrı ve büyük bir karar.
+4. Profiller şu an **karşı cinsten** üretiliyor — `Romance.start` ile aynı geçici varsayım. Yönelim ve eşleşme kuralları hâlâ karara bağlı (Q-0xx romantik ilişki başlığıyla birlikte düşünülmeli).
+5. Uygulama **ücretsiz**. Gerçeğindeki gibi ücretli bir "üst paket" (daha çok beğeni, kimin beğendiğini görme) eklensin mi?
+6. Eşleşip **hiç tanışılmayan** profiller listede sonsuza kadar duruyor. Bir süre sonra "yazışma söndü" diye düşsün mü?
+7. Tanışılan kişiyle ilk buluşma şu an **kesin** başarılı. Kötü geçen bir buluşma ihtimali olsun mu?
+8. Uygulamanın kendisi mutluluğu etkilemiyor. Sürekli geçilen/karşılık bulmayan beğeniler moral düşürsün mü?
+9. Adı **Finger** olarak kondu (Faho'nun isteği). Uygulama içi metinlerde marka çağrışımı yapmamaya dikkat edildi; başka bir ad istenirse kolayca değişir.
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
