@@ -2439,5 +2439,29 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-110 — Olay havuzu dengesi ve okuma merdiveni
+
+**Durum:** Paket 47'nin ölçüm sonuçlarından çıkan öneriler. **Hiçbiri uygulanmadı**; sayısal denge kararı Faho'nun. Ölçüm: `docs/EVENT_CONTENT_REPORT.md` (500 hayat, gerçek oyun akışıyla).
+
+**Ölçülen durum:**
+- 200 olaydan **194'ü** en az bir hayatta çıkıyor; bir hayat ortalama **116 farklı** olay görüyor.
+- İki rastgele hayatın olay kümesi **%57,5** örtüşüyor; **115** olay hayatların yarısından çoğunda çıkıyor.
+- Yıl başına **~1,9** olay. 0-5 yaşta bu oran %104'e, 80 yaş üstünde %173'e iniyor.
+- Konu payları: koşulsuz %67,7 · kişili %18,2 · aile %15,6 · okul %8,5 · kariyer %3,8 · hobi %3,0 · ilişki %2,1 · hayvan %1,3.
+- **Seçim gerektirmeyen olay yok** (0/200): her olayın en az iki gerçek seçeneği var.
+
+**Bulunan ve düzeltilen hata:** `hobi_okuma_gecesi` olayı hobinin 2. basamağını (8 deneyim) istiyordu; "okumak" hobisini yalnızca bitirilen kitaplar besliyor ve kütüphanede **7 kitap** var, bitmiş kitap yeniden okunamıyor. Olay hiçbir hayatta çıkamıyordu. Şart 1. basamağa indirildi ve bu hata sınıfını yakalayan kalıcı bir test eklendi.
+
+**Karar soruları:**
+1. **Okuma merdiveni ile kitap sayısı uyuşmuyor.** Basamak eşikleri 0/3/8/18/35, kütüphanede 7 kitap var: son üç basamak hiç ulaşılamıyor. Hangisi olsun — kütüphaneye kitap mı eklensin (kaç tane?), eşikler mi düşürülsün, yoksa bitmiş kitap yeniden okunup **az** kazanç mı versin?
+2. **0-5 yaş boş.** Yılda ~1 olay çıkıyor, ek olay yolu o yaşta pratikte kapalı. Bebeklik/erken çocukluk havuzu genişletilsin mi, yoksa bu yaşların sakin olması bilerek mi kalsın?
+3. **80 yaş üstü inceliyor** (%173). İleri yaş havuzu genişletilsin mi?
+4. **Hayatların örtüşmesi %57,5.** Bu yeterince farklı mı? Örtüşmeyi düşürmenin yolu koşullu olayların (kişili, kariyerli, hobili) payını artırmak; bugün havuzun **%67,7'si koşulsuz**. Hedef bir oran var mı?
+5. `mahalle_dugunu` bir hayatta ortalama **2,10** kez çıkıyor; ilk on olayın hepsi hayat başına 1,5'in üzerinde. Tekrar sönümü (Paket 20) yeterince sert mi?
+6. **Ün olayları hiç görülmüyor.** Ölçümde sosyal medya hesabı açılıyor ama düzenli paylaşım yapılmıyor; Ün eşiği gerçek oyunda ne kadar erişilebilir? Ölçüm aracına düzenli paylaşım eklenmeli mi, yoksa eşik mi yüksek?
+7. Kariyer olaylarının payı **%3,8**. Oyuncunun hayatının 40 yılı işte geçiyor; bu oran az mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
