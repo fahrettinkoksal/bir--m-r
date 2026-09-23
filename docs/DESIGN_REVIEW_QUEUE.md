@@ -2396,5 +2396,32 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-108 — Eğlence aktivitelerinin gerçek kişilerle yapılması
+
+**Durum:** Issue #67'nin üçüncü kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 41 (`lib/domain/activities/outing.dart`, `lib/domain/activities/activity_engine.dart`).
+
+**Mevcut kesin kural:** İkinci bir aktivite sistemi kurulmayacak. Kimse uydurulmayacak: yanına gelen kişi kayıtta gerçekten duran, yaşayan, erişilebilen biri olacak (D-024, Paket 3 erişilebilirlik kuralı). Kayıt ikilenmeyecek.
+
+**Kodlanan kurallar (hepsi `prototypeOnly`):**
+- Yalnızca **Eğlence** eylemleri birlikte yapılıyor (park, sinema, kafe, maç, konser). Berberde ya da sağlık ocağında "yanına biri" gelmiyor.
+- Katılabilen bağlar: eş, sevgili, çocuk, anne, baba, kardeş ve bağı **45 ve üzeri** olan arkadaş.
+- Çocuk için ayrıca **4 yaş** alt sınırı; ayrıca herkes için eylemin kendi yaş sınırı geçerli (konser 13, maç 8, kafe 11).
+- Ücret **bir kez**: birlikte gitmek yalnız gitmekle aynı parayı götürüyor.
+- Birlikte gitmek mutluluğa **+3**, bağa **+6** ekliyor; aynı yıl aynı kişiyle tekrar çıkıldıkça 1,0 → 0,6 → 0,3 katına iniyor (bağ artışı en az 1'de kalıyor).
+- Ortak geçmişe **tek** satır düşüyor ve kişiye bağlanıyor.
+- Sahne hem eyleme hem bağ türüne göre seçiliyor; 30'un üzerinde özgün metin var.
+
+**Karar soruları:**
+1. Birlikte gidince bilet **iki kişilik** olmalı mı? Şu an tek ücret alınıyor (basitlik için). Gerçekçi olan iki bilet; ama o zaman "birlikte gitmek" cezalandırılmış gibi olur.
+2. "Yakın arkadaş" eşiği **45 bağ** doğru mu?
+3. Kişi **reddedebilmeli mi**? Şu an çağırdığın herkes geliyor. Bağı düşük olan ya da küs olan reddetsin mi?
+4. Bağ artışı **+6** yerinde mi? Karşılaştırma: Vakit Geçir etkileşimi +7 civarında ve ücretsiz.
+5. Aynı anda **birden fazla kişi** götürülebilmeli mi? (Bütün aileyle sinemaya gitmek.)
+6. Eğlence dışında hangi eylemler birlikte yapılabilmeli? Öneri: spor salonu (arkadaşla), seyahat (eşle). Şu an ikisi de kapalı.
+7. Ortak geçmişe düşen satır hayat günlüğünde de görünüyor. İkisi ayrılmalı mı, yoksa böyle kalsın mı?
+8. Yaşı geçmiş ebeveynle (85 yaşında anneyle konsere) gitmeye bir üst yaş sınırı gelsin mi? Şu an yalnızca alt sınır var.
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

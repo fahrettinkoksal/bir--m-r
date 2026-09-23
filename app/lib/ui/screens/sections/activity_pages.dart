@@ -48,6 +48,11 @@ class VenuePage extends StatefulWidget {
 class _VenuePageState extends State<VenuePage> {
   ActivityOutcome? _sonuc;
 
+  /// Eylem kimliği → birlikte gidilecek kişinin kimliği.
+  ///
+  /// Boşsa yalnız gidilir. Seçim yalnızca ekranda tutulur; kayda girmez.
+  final Map<String, String> _kiminle = <String, String>{};
+
   @override
   Widget build(BuildContext context) {
     final GameController controller = GameScope.of(context);
@@ -67,13 +72,35 @@ class _VenuePageState extends State<VenuePage> {
           const SizedBox(height: 10),
         ],
         for (final ActivityAction eylem in tumEylemler) ...<Widget>[
-          _ActionCard(
-            action: eylem,
-            availability: controller.activityAvailability(eylem),
-            onTap: () {
-              final ActivityOutcome? outcome =
-                  controller.performActivity(eylem);
-              setState(() => _sonuc = outcome);
+          Builder(
+            builder: (BuildContext context) {
+              // Birlikte gidilebilecek kişiler gerçek kayıttan okunur;
+              // kimse uydurulmaz (Paket 41).
+              final List<Person> kisiler =
+                  controller.outingCompanions(eylem);
+              final String? secili = _kiminle[eylem.id];
+              final Person? yoldas = kisiler
+                  .where((Person p) => p.id == secili)
+                  .firstOrNull;
+              return _ActionCard(
+                action: eylem,
+                availability: controller.activityAvailability(eylem),
+                companions: kisiler,
+                selected: yoldas,
+                playerAge: state.player.age,
+                onSelect: (Person? p) => setState(() {
+                  if (p == null) {
+                    _kiminle.remove(eylem.id);
+                  } else {
+                    _kiminle[eylem.id] = p.id;
+                  }
+                }),
+                onTap: () {
+                  final ActivityOutcome? outcome =
+                      controller.performActivity(eylem, companion: yoldas);
+                  setState(() => _sonuc = outcome);
+                },
+              );
             },
           ),
           const SizedBox(height: 10),
@@ -112,11 +139,21 @@ class _ActionCard extends StatelessWidget {
     required this.action,
     required this.availability,
     required this.onTap,
+    this.companions = const <Person>[],
+    this.selected,
+    this.playerAge = 0,
+    this.onSelect,
   });
 
   final ActivityAction action;
   final InteractionAvailability availability;
   final VoidCallback onTap;
+
+  /// Birlikte gidilebilecek gerçek kişiler; boşsa seçim hiç gösterilmez.
+  final List<Person> companions;
+  final Person? selected;
+  final int playerAge;
+  final void Function(Person?)? onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -152,22 +189,61 @@ class _ActionCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    acik ? '' : (availability.reason ?? ''),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+            // Kiminle gidileceği (Paket 41). Yalnızca gerçekten
+            // katılabilecek kişiler listelenir; kimse yoksa bölüm hiç
+            // görünmez, sahte düğme olmaz.
+            if (companions.isNotEmpty && onSelect != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                'Kiminle?',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: <Widget>[
+                  ChoiceChip(
+                    key: Key('birlikte_${action.id}_yalniz'),
+                    label: const Text('Yalnız'),
+                    selected: selected == null,
+                    onSelected: (_) => onSelect!(null),
+                  ),
+                  for (final Person kisi in companions)
+                    ChoiceChip(
+                      key: Key('birlikte_${action.id}_${kisi.id}'),
+                      label: Text(
+                        '${kisi.firstName} · '
+                        '${kisi.labelFor(playerAge).toLowerCase()}',
+                      ),
+                      selected: selected?.id == kisi.id,
+                      onSelected: (_) => onSelect!(kisi),
                     ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 10),
+            // Dar ekranda gerekçe ile düğme yan yana sıkışmasın diye
+            // gerekçe kendi satırında durur.
+            if (!acik)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  availability.reason ?? '',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                FilledButton.tonal(
-                  onPressed: acik ? onTap : null,
-                  child: Text(acik ? 'Yap' : 'Şu an kapalı'),
-                ),
-              ],
+              ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                key: Key('aktivite_${action.id}_yap'),
+                onPressed: acik ? onTap : null,
+                child: Text(acik ? 'Yap' : 'Şu an kapalı'),
+              ),
             ),
           ],
         ),
