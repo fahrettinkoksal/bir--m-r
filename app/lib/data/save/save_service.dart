@@ -17,7 +17,7 @@ enum SaveLoadStatus {
   /// Kayıt okundu.
   yuklendi,
 
-  /// Kayıt var ama okunamıyor (bozuk veya desteklenmeyen surum).
+  /// Kayıt var ama okunamıyor (bozuk veya desteklenmeyen sürüm).
   bozuk,
 }
 
@@ -42,7 +42,7 @@ class SaveLoadResult {
 
 /// Tek aktif hayat kaydını yöneten servis.
 ///
-/// Çoklu kayıt yuvası **bilinçli olarak** yoktur; bu surumde tek hayat
+/// Çoklu kayıt yuvası **bilinçli olarak** yoktur; bu sürümde tek hayat
 /// saklanır (`docs/DESIGN_REVIEW_QUEUE.md`, Q-033).
 class SaveService {
   SaveService(this.store);
@@ -98,7 +98,10 @@ class SaveService {
 
       final Object? surum = dosya['formatVersion'];
       if (surum is! int) {
-        return (state: null, error: 'Kayıt dosyasında surum bilgisi yok.');
+        return (
+          state: null,
+          error: 'Kayıt dosyasında sürüm bilgisi yok.',
+        );
       }
 
       final Object? govde = dosya['state'];

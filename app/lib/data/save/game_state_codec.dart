@@ -422,7 +422,7 @@ PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
     ),
     adopted: json['adopted'] == true,
     milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
-      for (final Object? e in (json['milestones'] as List<Object?>? ?? const <Object?>[]))
+      for (final Object? e in _optionalRawList(json, 'milestones'))
         LifeMilestone(
           age: _int(_asMap(e, 'milestone'), 'age'),
           text: _string(_asMap(e, 'milestone'), 'text'),
@@ -723,27 +723,27 @@ GameState decodeGameState(Map<String, Object?> json) {
           .toList(growable: false),
     ),
     hobbies: List<HobbyProgress>.unmodifiable(
-      (json['hobbies'] as List<Object?>? ?? const <Object?>[])
+      _optionalRawList(json, 'hobbies')
           .map((Object? e) => _decodeHobby(_asMap(e, 'hobbies[]')))
           .toList(growable: false),
     ),
     martialArts: List<MartialProgress>.unmodifiable(
-      (json['martialArts'] as List<Object?>? ?? const <Object?>[])
+      _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
           .toList(growable: false),
     ),
     lotteryTickets: List<LotteryTicket>.unmodifiable(
-      (json['lotteryTickets'] as List<Object?>? ?? const <Object?>[])
+      _optionalRawList(json, 'lotteryTickets')
           .map((Object? e) => _decodeTicket(_asMap(e, 'lotteryTickets[]')))
           .toList(growable: false),
     ),
     fingerDeck: List<FingerProfile>.unmodifiable(
-      (json['fingerDeck'] as List<Object?>? ?? const <Object?>[])
+      _optionalRawList(json, 'fingerDeck')
           .map((Object? e) => _decodeFinger(_asMap(e, 'fingerDeck[]')))
           .toList(growable: false),
     ),
     fingerMatches: List<FingerProfile>.unmodifiable(
-      (json['fingerMatches'] as List<Object?>? ?? const <Object?>[])
+      _optionalRawList(json, 'fingerMatches')
           .map((Object? e) => _decodeFinger(_asMap(e, 'fingerMatches[]')))
           .toList(growable: false),
     ),
@@ -826,7 +826,7 @@ GameState decodeGameState(Map<String, Object?> json) {
         ? null
         : _decodeMarriage(_asMap(json['marriage'], 'marriage')),
     pastMarriages: List<Marriage>.unmodifiable(
-      (json['pastMarriages'] as List<Object?>? ?? const <Object?>[])
+      _optionalRawList(json, 'pastMarriages')
           .map((Object? e) => _decodeMarriage(_asMap(e, 'pastMarriages[]')))
           .toList(growable: false),
     ),
@@ -865,7 +865,7 @@ GameState decodeGameState(Map<String, Object?> json) {
     // dönük bildirim üretilmez.
     notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
       for (final Object? e
-          in (json['notices'] as List<Object?>? ?? const <Object?>[]))
+          in _optionalRawList(json, 'notices'))
         _decodeNotice(_asMap(e, 'notice')),
     ]),
     hardshipYears:
@@ -1079,13 +1079,13 @@ FingerProfile _decodeFinger(Map<String, Object?> json) => FingerProfile(
       city: _string(json, 'city'),
       bio: _string(json, 'bio'),
       interests: List<String>.unmodifiable(
-        (json['interests'] as List<Object?>? ?? const <Object?>[])
+        _optionalRawList(json, 'interests')
             .map((Object? e) => e.toString())
             .toList(growable: false),
       ),
-      occupation: json['occupation'] as String?,
+      occupation: _stringOrNull(json, 'occupation'),
       matchedAtAge: _intOrNull(json, 'matchedAtAge'),
-      metPersonId: json['metPersonId'] as String?,
+      metPersonId: _stringOrNull(json, 'metPersonId'),
     );
 
 HobbyProgress _decodeHobby(Map<String, Object?> json) => HobbyProgress(
@@ -1094,7 +1094,7 @@ HobbyProgress _decodeHobby(Map<String, Object?> json) => HobbyProgress(
       experience: _int(json, 'experience'),
       lastPracticedAge: _int(json, 'lastPracticedAge'),
       memories: List<HobbyMemory>.unmodifiable(
-        (json['memories'] as List<Object?>? ?? const <Object?>[])
+        _optionalRawList(json, 'memories')
             .map((Object? e) {
           final Map<String, Object?> m = _asMap(e, 'hobbies[].memories[]');
           return HobbyMemory(age: _int(m, 'age'), text: _string(m, 'text'));
@@ -1339,13 +1339,13 @@ Pet _decodePet(Map<String, Object?> json) => Pet(
       id: _string(json, 'id'),
       name: _string(json, 'name'),
       species: _string(json, 'species'),
-      age: json['age'] as int? ?? 0,
-      adoptedAtPlayerAge: json['adoptedAtPlayerAge'] as int?,
-      inPlayerHousehold: json['inPlayerHousehold'] as bool? ?? true,
-      diedAtAge: json['diedAtAge'] as int?,
-      diedAtPlayerAge: json['diedAtPlayerAge'] as int?,
-      lastCareChargedPlayerAge: json['lastCareChargedPlayerAge'] as int?,
-      bond: json['bond'] as int? ?? 50,
+      age: _intOr(json, 'age', 0),
+      adoptedAtPlayerAge: _intOrNull(json, 'adoptedAtPlayerAge'),
+      inPlayerHousehold: _boolOr(json, 'inPlayerHousehold', varsayilan: true),
+      diedAtAge: _intOrNull(json, 'diedAtAge'),
+      diedAtPlayerAge: _intOrNull(json, 'diedAtPlayerAge'),
+      lastCareChargedPlayerAge: _intOrNull(json, 'lastCareChargedPlayerAge'),
+      bond: _intOr(json, 'bond', 50),
     );
 
 LifeLogEntry _decodeLogEntry(Map<String, Object?> json) => LifeLogEntry(
@@ -1463,6 +1463,25 @@ Map<String, Object?> _asMap(Object? value, String key) {
 
 Map<String, Object?> _map(Map<String, Object?> json, String key) =>
     _asMap(json[key], key);
+
+/// Eski kayıtlarda bulunmayan ham listeler için: yoksa boş liste döner.
+///
+/// Alan varsa **liste olmak zorundadır**; metin ya da sayı gelirse ham bir
+/// Dart hatası yerine anlaşılır bir `SaveFormatException` atılır (Paket 44).
+List<Object?> _optionalRawList(Map<String, Object?> json, String key) {
+  final Object? value = json[key];
+  if (value == null) return const <Object?>[];
+  if (value is! List) _eksik(key, 'liste');
+  return value;
+}
+
+/// Eski kayıtlarda bulunmayan tam sayı alanı; yoksa [fallback].
+int _intOr(Map<String, Object?> json, String key, int fallback) {
+  final Object? value = json[key];
+  if (value == null) return fallback;
+  if (value is int) return value;
+  _eksik(key, 'tam sayı');
+}
 
 /// Eski kayıtlarda bulunmayan listeler için: yoksa boş liste döner.
 List<Map<String, Object?>> _optionalList(
