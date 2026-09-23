@@ -333,4 +333,39 @@ void main() {
     json.remove('hobbies');
     expect(decodeGameState(json).hobbies, isEmpty);
   });
+
+  group('Ulaşılabilirlik', () {
+    /// Bir hobinin **en fazla** kaç deneyim biriktirebileceği.
+    ///
+    /// Aktivitelerle beslenen hobiler yıllara yayıldığı için sınırsızdır;
+    /// "okumak" yalnızca **bitirilen kitaplarla** beslenir ve bitmiş kitap
+    /// yeniden okunamaz, yani tavanı kütüphanedeki kitap sayısıdır.
+    int? tavan(HobbyKind hobi) =>
+        hobi == HobbyKind.okuma ? kBookCatalog.length : null;
+
+    test('okuma hobisinin tavanı kütüphanedeki kitap sayısıdır', () {
+      expect(kBookCatalog, isNotEmpty);
+      expect(tavan(HobbyKind.okuma), kBookCatalog.length);
+    });
+
+    test('hiçbir hobi olayı ulaşılamayacak bir basamak istemiyor', () {
+      // Paket 47'de ölçüldü: "okuma gecesi" olayı 8 deneyim istiyordu ama
+      // kütüphanede 7 kitap vardı; olay hiçbir hayatta çıkamıyordu.
+      for (final GameEvent e in kHobbyEvents) {
+        final String? id = e.requirement.requiredHobbyId;
+        if (id == null) continue;
+        final HobbyKind hobi = hobbyById(id)!;
+        final int? enFazla = tavan(hobi);
+        if (enFazla == null) continue;
+        final int ulasilanBasamak = hobi.stageFor(enFazla);
+        expect(
+          e.requirement.minHobbyStage,
+          lessThanOrEqualTo(ulasilanBasamak),
+          reason: '${e.id}: ${hobi.label} en çok $enFazla deneyime '
+              'ulaşabiliyor (basamak $ulasilanBasamak), olay ise '
+              '${e.requirement.minHobbyStage}. basamağı istiyor',
+        );
+      }
+    });
+  });
 }
