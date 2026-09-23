@@ -2423,5 +2423,21 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-109 — Vefat etmiş eşin bağ etiketi
+
+**Durum:** Paket 43'te bulunan bir hatanın yan sorusu; teknik düzeltme yapıldı, **söz seçimi onay bekliyor.** Kod: `lib/domain/interaction/marriage_engine.dart`.
+
+**Bulunan hata:** Boşanan oyuncunun eski eşi aynı kimlikle `eskiEs` oluyordu; **eşini kaybedip yeniden evlenen** oyuncuda bu yapılmıyordu. Kayıtta iki kişi birden "Eş" kalıyor, bütün metinler ikisine birden "Eşin" diyordu ve İlişkiler ekranında iki eş yan yana görünüyordu.
+
+**Yapılan teknik düzeltme:** Yeni düğünde, önceki eş aynı kimlikle `eskiEs` oluyor. Kayıt silinmiyor, evlilik geçmişi korunuyor, tek bir aktif eş kalıyor.
+
+**Karar soruları:**
+1. Vefat etmiş önceki eşe "**Eski eş**" demek doğru mu? Boşanmayla vefatı aynı sözle anmak Türkçede biraz sert duruyor.
+2. Ayrı bir etiket ister misin — "Rahmetli eşin", "Merhum eşin", "İlk eşin" gibi? Bu yeni bir bağ türü demek olur (`eskiEs` yanında ikinci bir durum) ve kayıt biçimini etkiler, o yüzden kendi başıma yapmadım.
+3. Boşanmış eski eş ile vefat etmiş eski eş İlişkiler ekranında **ayrı başlıklar** altında mı görünsün?
+4. Üçüncü evlilikte iki eski eş olacak. Sıralama neye göre olsun — evlilik yılı mı, son görüşme mi?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
