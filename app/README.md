@@ -1,9 +1,12 @@
-# Bir Ömür — prototip uygulaması (Aşama 1-4 + okul paketi)
+# Bir Ömür — prototip uygulaması
 
-Flutter ile Android öncelikli geliştirilen ilk prototip.
-Kapsam `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2, 3 ve 4** ile
-**temel okul sistemi + küçük okul olay paketi**dir
-(`docs/APPROVED_SCOPE_AND_EVENT_STRATEGY.md`, GEN-001).
+Flutter ile Android öncelikli geliştirilen prototip.
+
+`docs/CLAUDE_PROTOTYPE_TASK.md` içindeki Aşama 1-4 ile başlandı; o günden
+bu yana okul, kariyer, ekonomi, eşya, konut, ilişkiler, evlilik, çocuk,
+kuşak devamı, sağlık krizleri, askerlik, dövüş sanatları, kumarhane,
+piyango, Finger, sosyal medya, seyahat, kalıcı hobiler ve evcil hayvanlar
+eklendi. Güncel kapsam ve yapılmayanlar için `PROJECT_STATUS.md`.
 
 ## Gereksinimler
 

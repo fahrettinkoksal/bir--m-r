@@ -17,6 +17,12 @@ kurman gerekmez.
 
 ---
 
+> **CI notu (Paket 48).** GitHub Actions şu anda hesabın ödeme/harcama
+> limiti nedeniyle **hiçbir işi başlatmıyor** — iş akışı tek bir adım
+> çalışmadan saniyeler içinde düşüyor. Bu engel kalkana kadar aşağıdaki
+> "Actions'tan indir" yolu çalışmaz ve yeni bir Windows paketi üretilemez.
+> Engelin sebebi kod ya da iş akışı yapılandırması değildir.
+
 ## 1. Paketi indir
 
 1. GitHub'da depoyu aç: `fahrettinkoksal/bir--m-r`

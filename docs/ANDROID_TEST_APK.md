@@ -5,8 +5,16 @@ Bu belge, prototipi gerçek bir Android telefona kurup denemek içindir.
 **Windows bilgisayarda yerel derleme** (Actions çalışmazsa).
 
 APK **debug** sürümüdür: imzası geliştirme anahtarıyla atılmıştır, Play
-Store'a yüklenemez, sadece test içindir. Oyun durumu **kaydedilmez**;
-uygulamayı kapatınca hayat sıfırlanır.
+Store'a yüklenemez, sadece test içindir.
+
+> **Güncelleme (Paket 48).** Bu belge ilk yazıldığında oyun durumu
+> kaydedilmiyordu. Kayıt sistemi 19 Eylül 2026 akşamı eklendi: hayat
+> cihazda saklanıyor ve uygulama yeniden açıldığında kaldığı yerden
+> devam ediyor. **Kayıt gerçek bir Android cihazda doğrulanmadı.**
+
+> **CI notu.** GitHub Actions şu anda hesabın ödeme/harcama limiti
+> nedeniyle hiçbir işi başlatmıyor; aşağıdaki "Actions'tan APK indir"
+> yolu bu engel kalkana kadar çalışmaz.
 
 **Ölçülen değerler** (19 Eylül 2026, ilk başarılı koşu):
 
