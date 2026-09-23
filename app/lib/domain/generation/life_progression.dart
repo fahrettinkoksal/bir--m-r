@@ -45,6 +45,7 @@ import 'random_util.dart';
 import 'school_people.dart';
 import '../../text/turkish_text.dart';
 import '../../data/item_catalog.dart';
+import '../pets/pet_care.dart';
 
 /// **Yaş Al** işleminin durum üzerindeki etkisi (D-018).
 ///
@@ -416,6 +417,11 @@ class LifeProgression {
     afterDeaths = MilitaryService.advanceFugitive(afterDeaths, newAge, _rng);
     afterDeaths = MilitaryService.applyDeferralEnd(afterDeaths, newAge);
     afterDeaths = MilitaryService.applyCallUp(afterDeaths, newAge);
+
+    // Evcil hayvanlar (Paket 40): yaşlanır, yıllık bakım gideri **bir
+    // kez** alınır ve yaşı gelen hayvan doğal yoldan kaybedilir. Parasızlık
+    // hayvanı öldürmez.
+    afterDeaths = PetCare.advanceYear(afterDeaths, newAge, _rng);
 
     // Milli Piyango (Paket 33): yıl içinde alınan biletlerin çekilişi
     // burada yapılır ve sonuç bildirim paneline düşer.

@@ -6,12 +6,14 @@ import '../../../data/license_catalog.dart';
 import '../../../data/martial_arts_catalog.dart';
 import '../../../data/lottery_catalog.dart';
 import '../../../data/finger_catalog.dart';
+import '../../../data/pet_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/life/astrology.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/interaction/intimacy.dart';
 import '../../../domain/interaction/parenthood.dart';
+import '../../../domain/pets/pet_care.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -26,6 +28,7 @@ import 'lottery_page.dart';
 import 'finger_page.dart';
 import 'fertility_page.dart';
 import 'license_pages.dart';
+import 'pets_page.dart';
 import 'social_pages.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
@@ -62,8 +65,21 @@ enum _ActivityPage {
   finger,
   ehliyet,
   evlatEdinme,
+  evcilHayvan,
   vasiyet,
   seyahat,
+}
+
+/// Evcil hayvan menüsünün alt metni: gerçek kayda bakar.
+String _hayvanAltMetni(GameState state) {
+  final List<Pet> yasayan = PetCare.livingPets(state);
+  if (yasayan.isEmpty) {
+    return adoptablePetSpecies.map((PetSpecies s) => s.label).join(' ya da ');
+  }
+  if (yasayan.length == 1) {
+    return '${yasayan.first.name} seninle yaşıyor';
+  }
+  return '${yasayan.length} hayvana bakıyorsun';
 }
 
 /// Dövüş sanatlarına en erken hangi yaşta başlanabilir?
@@ -172,6 +188,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.evlatEdinme:
         return AdoptionPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.evcilHayvan:
+        return PetsPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.vasiyet:
         return WillPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.seyahat:
@@ -415,6 +433,19 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.volunteer_activism_outlined,
             accent: BirOmurAccents.gul,
             onTap: () => _go(_ActivityPage.evlatEdinme),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Evcil hayvanlar (Paket 40). Yeni ana menü açılmadı; mevcut
+        // Aktiviteler menüsünün altında bir sayfadır.
+        if (state.player.age >= PetCare.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_hayvan'),
+            title: 'Evcil hayvanlar',
+            subtitle: _hayvanAltMetni(state),
+            icon: Icons.pets_outlined,
+            accent: BirOmurAccents.turuncu,
+            onTap: () => _go(_ActivityPage.evcilHayvan),
           ),
           const SizedBox(height: 10),
         ],

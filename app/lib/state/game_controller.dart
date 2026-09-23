@@ -74,6 +74,8 @@ import '../domain/models/interaction.dart';
 import '../domain/models/owned_item.dart';
 import '../domain/models/pending_interview.dart';
 import '../domain/models/person.dart';
+import '../data/pet_catalog.dart';
+import '../domain/pets/pet_care.dart';
 
 /// Uygulamanın tek durum sahibi.
 ///
@@ -793,6 +795,70 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  // --- Evcil hayvanlar (Paket 40) ---------------------------------------
+
+  /// Kayıttaki bütün hayvanlar; vefat edenler de listede kalır.
+  List<Pet> get pets => _state?.pets ?? const <Pet>[];
+
+  /// Şu an yaşayan hayvanlar.
+  List<Pet> get livingPets =>
+      _state == null ? const <Pet>[] : PetCare.livingPets(_state!);
+
+  /// Bu türden hayvan sahiplenilebilir mi?
+  InteractionAvailability petAdoptionAvailability(PetSpecies species) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return PetCare.adoptionAvailability(current, species);
+  }
+
+  /// Hayvan sahiplenir; sonuç metnini döner.
+  String? adoptPet(PetSpecies species, String name) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) sonuc = PetCare.adopt(
+      state: current,
+      species: species,
+      name: name,
+      rng: _random,
+    );
+    if (sonuc.applied) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc.text;
+  }
+
+  /// Bu etkileşim şu an yapılabilir mi?
+  InteractionAvailability petActionAvailability(Pet pet, PetAction action) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return PetCare.availability(current, pet, action);
+  }
+
+  /// Hayvanla etkileşim kurar; sonuç metnini döner.
+  String? petInteract(Pet pet, PetAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) sonuc =
+        PetCare.interact(
+      state: current,
+      pet: pet,
+      action: action,
+      rng: _random,
+    );
+    if (sonuc.applied) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc.text;
   }
 
   // --- Milli Piyango (Paket 33) -----------------------------------------

@@ -13,6 +13,7 @@ import '../models/relation.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
+import '../../data/pet_catalog.dart';
 
 /// Başlangıç modları (D-005).
 enum StartMode {
@@ -284,11 +285,19 @@ class LifeGenerator {
     // --- Evcil hayvan -----------------------------------------------------
     final List<Pet> pets = <Pet>[];
     if (_rng.chance(0.26)) {
+      final String tur = _rng.pick(evcilHayvanTurleri);
+      final PetSpecies? bilgi = petSpeciesById(tur);
       pets.add(
         Pet(
           id: _nextId('hayvan'),
           name: _rng.pick(evcilHayvanIsimleri),
-          species: _rng.pick(evcilHayvanTurleri),
+          species: tur,
+          // Doğduğunda evde olan hayvanın kendi yaşı vardır (Paket 40);
+          // sıfır yazmak her hayvanı oyuncuyla yaşıt yapardı.
+          age: bilgi == null
+              ? 0
+              : _rng.between(0, (bilgi.typicalLifespan / 2).floor()),
+          // Sahiplenme yaşı bilinmiyor: uydurulmaz, boş bırakılır.
         ),
       );
     }

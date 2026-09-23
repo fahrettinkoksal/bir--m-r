@@ -222,9 +222,10 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         ],
         if (state.pets.isNotEmpty) ...<Widget>[
           const SizedBox(height: 2),
-          InfoPanel(
+          const InfoPanel(
             icon: Icons.pets_outlined,
-            text: 'Evcil hayvanların Varlıklar bölümünde listeleniyor.',
+            text: 'Evcil hayvanların Varlıklar bölümünde listeleniyor; '
+                'onlarla Aktiviteler menüsünden vakit geçirebilirsin.',
           ),
         ],
       ],

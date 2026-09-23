@@ -14,6 +14,7 @@ import '../models/game_state.dart';
 import '../models/hobby_progress.dart';
 import '../hobby/hobby_tracker.dart';
 import '../../data/hobby_catalog.dart';
+import '../../data/pet_catalog.dart';
 import '../models/trip.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
@@ -244,6 +245,10 @@ class EventEngine {
       }
     }
 
+    // Evcil hayvan olayları yalnızca gerçekten bir hayvanı olan oyuncuya
+    // çıkar (Paket 40). Vefat etmiş ya da hanede olmayan hayvan sayılmaz.
+    if (req.requiresLivingPet && _eventPet(state, req) == null) return false;
+
     // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
@@ -342,8 +347,12 @@ class EventEngine {
     return ActiveEvent(
       eventId: candidate.event.id,
       category: candidate.event.category,
-      text: _fillTrip(
-        _fill(candidate.event.text, candidate.person, state.player.age),
+      text: _fillPet(
+        _fillTrip(
+          _fill(candidate.event.text, candidate.person, state.player.age),
+          state,
+          candidate.event,
+        ),
         state,
         candidate.event,
       ),
@@ -358,6 +367,38 @@ class EventEngine {
       ]),
       personId: candidate.person?.id,
     );
+  }
+
+  /// Olayın anlattığı evcil hayvan; koşulu sağlayan hayvan yoksa `null`.
+  ///
+  /// Kayıtta gerçekten duran hayvanlardan seçilir; uydurma hayvan üretilmez.
+  static Pet? _eventPet(GameState state, EventRequirement req) {
+    for (final Pet pet in state.pets) {
+      if (!pet.isAlive || !pet.inPlayerHousehold) continue;
+      if (pet.age < req.minPetAge) continue;
+      final int? baslangic = pet.adoptedAtPlayerAge;
+      if (req.minPetYearsTogether > 0) {
+        // Sahiplenme yaşı bilinmeyen hayvan (doğduğunda evde olan) için
+        // birliktelik süresi oyuncunun yaşıdır.
+        final int birlikte = baslangic == null
+            ? state.player.age
+            : state.player.age - baslangic;
+        if (birlikte < req.minPetYearsTogether) continue;
+      }
+      return pet;
+    }
+    return null;
+  }
+
+  /// Hayvan olaylarında `{hayvan}` yer tutucusunu **gerçek** hayvanın
+  /// adıyla doldurur.
+  static String _fillPet(String text, GameState state, GameEvent event) {
+    if (!event.requirement.requiresLivingPet) return text;
+    final Pet? pet = _eventPet(state, event.requirement);
+    if (pet == null) return text;
+    return text
+        .replaceAll('{hayvan}', pet.name)
+        .replaceAll('{tur}', petSpeciesLabel(pet.species));
   }
 
   /// Gezi anısı olaylarında `{sehir}` yer tutucusunu gerçek gezi
