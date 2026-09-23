@@ -8,6 +8,9 @@ import '../models/gender.dart';
 import '../../data/martial_arts_catalog.dart';
 import '../../data/military_catalog.dart';
 import '../models/marriage.dart';
+import '../models/hobby_progress.dart';
+import '../hobby/hobby_tracker.dart';
+import '../../data/hobby_catalog.dart';
 import '../models/martial_progress.dart';
 import '../models/military.dart';
 import '../models/owned_item.dart';
@@ -247,9 +250,18 @@ abstract final class LifeVerdictBuilder {
     final int dovus = _dovusPuani(state);
     puan += dovus;
 
+    // Yıllarca sürdürülen hobi (Paket 39): kaç yıl sürdüğü ve nereye
+    // kadar gidildiği sayılır. Bir kez denemek sayılmaz.
+    puan += _hobiPuani(state);
+
+    final HobbyProgress? anaHobi = HobbyTracker.mainHobby(state);
     final MartialProgress? enIyi = _enIleriDal(state);
     final String not;
-    if (enIyi != null && enIyi.level >= (enIyi.art?.instructorFromLevel ?? 99)) {
+    if (anaHobi != null && anaHobi.isSerious && anaHobi.hobby != null) {
+      not = '${anaHobi.hobby!.label} ile ${anaHobi.years} yıl uğraştın '
+          '(${anaHobi.stageLabel}).';
+    } else if (enIyi != null &&
+        enIyi.level >= (enIyi.art?.instructorFromLevel ?? 99)) {
       not = '${enIyi.art!.label} yolunda "${enIyi.rankName}" basamağına '
           'çıktın.';
     } else if (sehirler.isEmpty && bitenKitap == 0 && dovus == 0) {
@@ -332,6 +344,21 @@ abstract final class LifeVerdictBuilder {
       toplam += (p.level / dal.topLevel) * 18;
     }
     return toplam.round().clamp(0, 30);
+  }
+
+  /// prototypeOnly: hobilerin Deneyim eksenine katkısı.
+  ///
+  /// Yalnızca **sürdürülmüş** hobiler sayılır: bir kez kursa gitmek
+  /// puan getirmez.
+  static int _hobiPuani(GameState state) {
+    double toplam = 0;
+    for (final HobbyProgress h in state.hobbies) {
+      final HobbyKind? tur = h.hobby;
+      if (tur == null || tur.topStage <= 0) continue;
+      toplam += (h.stage / tur.topStage) * 12;
+      toplam += (h.years * 0.6).clamp(0, 8);
+    }
+    return toplam.round().clamp(0, 26);
   }
 
   /// En ileri gidilen dövüş dalı; hiç ders alınmadıysa `null`.
@@ -417,6 +444,16 @@ abstract final class LifeVerdictBuilder {
               : 'İlk çocuğun doğdu.',
         ));
       }
+    }
+
+    // Uzun sürmüş hobiye başlama anı (Paket 39). Kısa denemeler
+    // yazılmaz; yaş gerçek kayıttan gelir.
+    for (final HobbyProgress h in state.hobbies) {
+      if (!h.isSerious || h.hobby == null) continue;
+      ilkler.add(VerdictFirst(
+        age: h.startedAtAge,
+        text: '${h.hobby!.label} ile uğraşmaya başladın.',
+      ));
     }
 
     // Askerlik (Paket 37): yalnızca terhis yaşı kayıtlıysa yazılır.

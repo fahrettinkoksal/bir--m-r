@@ -6,6 +6,7 @@ import 'blackjack_game.dart';
 import 'education.dart';
 import 'book_progress.dart';
 import 'martial_progress.dart';
+import 'hobby_progress.dart';
 import 'lottery_ticket.dart';
 import 'finger_profile.dart';
 import 'career.dart';
@@ -67,6 +68,7 @@ class GameState {
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
     this.martialArts = const <MartialProgress>[],
+    this.hobbies = const <HobbyProgress>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
     this.fingerMatches = const <FingerProfile>[],
@@ -310,6 +312,11 @@ class GameState {
 
   /// Paket 32: dövüş sanatlarındaki ilerleme (karate, kung fu, güreş).
   final List<MartialProgress> martialArts;
+
+  /// Paket 39: kalıcı hobi geçmişi (müzik, resim, okuma, spor).
+  ///
+  /// Mevcut aktivitelerden beslenir; ayrı bir aktivite sistemi değildir.
+  final List<HobbyProgress> hobbies;
 
   /// Paket 33: çekilişi bekleyen Milli Piyango biletleri.
   final List<LotteryTicket> lotteryTickets;
@@ -700,6 +707,7 @@ class GameState {
     CareerState? career,
     List<BookProgress>? books,
     List<MartialProgress>? martialArts,
+    List<HobbyProgress>? hobbies,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
     List<FingerProfile>? fingerMatches,
@@ -771,6 +779,7 @@ class GameState {
       career: career ?? this.career,
       books: books ?? this.books,
       martialArts: martialArts ?? this.martialArts,
+      hobbies: hobbies ?? this.hobbies,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,
       fingerMatches: fingerMatches ?? this.fingerMatches,

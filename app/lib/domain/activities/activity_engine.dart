@@ -8,6 +8,8 @@ import '../models/game_state.dart';
 import '../models/zodiac.dart';
 import '../life/astrology.dart';
 import '../../data/fortune_catalog.dart';
+import '../../data/hobby_catalog.dart';
+import '../hobby/hobby_tracker.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/player_character.dart';
@@ -124,13 +126,17 @@ class ActivityEngine {
       hairStyle: yeniStil,
     );
 
-    final GameState next = state.copyWith(
+    GameState next = state.copyWith(
       player: player,
       interactionCounts: Map<String, int>.unmodifiable(<String, int>{
         ...state.interactionCounts,
         GameState.interactionKey('aktivite', action.id): done + 1,
       }),
     );
+
+    // Kalıcı hobi geçmişi (Paket 39). Eylemin kendisi değişmez; yalnızca
+    // beslediği bir hobi varsa geçmişe iz düşer.
+    next = HobbyTracker.creditActivity(next, action.id);
 
     final String metin = action.changesHairStyle
         ? '${action.label}: artık saçın "$yeniStil". '
@@ -323,6 +329,9 @@ class ActivityEngine {
         ),
       );
     }
+
+    // Bitirilen her kitap "okumak" hobisini besler (Paket 39).
+    if (bitti) next = HobbyTracker.credit(next, HobbyKind.okuma);
 
     final String metin = bitti
         ? '${book.title} bitti. Son sayfayı kapattığında bir süre '

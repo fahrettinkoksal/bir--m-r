@@ -47,7 +47,25 @@ class EventRequirement {
     this.minFame = 0,
     this.requiresTripMemory = false,
     this.requiresRetired = false,
+    this.requiredHobbyId,
+    this.minHobbyYears = 0,
+    this.minHobbyStage = 0,
+    this.requiresActiveHobby = false,
   });
+
+  /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
+  ///
+  /// Hobi geçmişi **gerçek kayıttan** okunur; uydurulmaz.
+  final String? requiredHobbyId;
+
+  /// prototypeOnly: hobinin kaç yıl sürmüş olması gerektiği.
+  final int minHobbyYears;
+
+  /// prototypeOnly: hobide ulaşılmış olması gereken basamak.
+  final int minHobbyStage;
+
+  /// Hobi **hâlâ sürüyor** sayılmalı mı? (Uzun süredir bırakılmışsa çıkmaz.)
+  final bool requiresActiveHobby;
 
   final int minAge;
   final int maxAge;
