@@ -483,6 +483,9 @@ void main() {
       state = state.copyWith(
         player: state.player.copyWith(wallet: 900000),
         pendingEvent: null,
+        // Sınanan şey geçim gideri formülü; evcil hayvan bakımı (Paket 40)
+        // ayrı bir gider kalemidir ve kendi testinde ölçülür.
+        pets: const <Pet>[],
       );
 
       final int cuzdan = state.player.wallet;

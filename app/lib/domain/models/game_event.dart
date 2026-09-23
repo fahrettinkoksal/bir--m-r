@@ -50,6 +50,9 @@ class EventRequirement {
     this.requiredHobbyId,
     this.minHobbyYears = 0,
     this.minHobbyStage = 0,
+    this.requiresLivingPet = false,
+    this.minPetAge = 0,
+    this.minPetYearsTogether = 0,
     this.requiresActiveHobby = false,
   });
 
@@ -63,6 +66,17 @@ class EventRequirement {
 
   /// prototypeOnly: hobide ulaşılmış olması gereken basamak.
   final int minHobbyStage;
+
+  /// Olay yalnızca **yaşayan ve hanede olan** bir evcil hayvanı olan
+  /// oyuncuya çıkar (Paket 40). Metindeki `{hayvan}` o hayvanın gerçek
+  /// adıyla doldurulur.
+  final bool requiresLivingPet;
+
+  /// Hayvanın kendi yaşı en az kaç olmalı?
+  final int minPetAge;
+
+  /// Oyuncuyla hayvan en az kaç yıldır birlikte olmalı?
+  final int minPetYearsTogether;
 
   /// Hobi **hâlâ sürüyor** sayılmalı mı? (Uzun süredir bırakılmışsa çıkmaz.)
   final bool requiresActiveHobby;

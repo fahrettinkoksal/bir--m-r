@@ -493,6 +493,15 @@ Map<String, Object?> _encodePet(Pet pet) => <String, Object?>{
       'id': pet.id,
       'name': pet.name,
       'species': pet.species,
+      // Paket 40 alanları: tamamen ekleme, eski kayıtta yoksa varsayılan
+      // okunur (kayıt biçimi sürümü değişmedi).
+      'age': pet.age,
+      'adoptedAtPlayerAge': pet.adoptedAtPlayerAge,
+      'inPlayerHousehold': pet.inPlayerHousehold,
+      'diedAtAge': pet.diedAtAge,
+      'diedAtPlayerAge': pet.diedAtPlayerAge,
+      'lastCareChargedPlayerAge': pet.lastCareChargedPlayerAge,
+      'bond': pet.bond,
     };
 
 Map<String, Object?> _encodeLogEntry(LifeLogEntry e) => <String, Object?>{
@@ -1330,6 +1339,13 @@ Pet _decodePet(Map<String, Object?> json) => Pet(
       id: _string(json, 'id'),
       name: _string(json, 'name'),
       species: _string(json, 'species'),
+      age: json['age'] as int? ?? 0,
+      adoptedAtPlayerAge: json['adoptedAtPlayerAge'] as int?,
+      inPlayerHousehold: json['inPlayerHousehold'] as bool? ?? true,
+      diedAtAge: json['diedAtAge'] as int?,
+      diedAtPlayerAge: json['diedAtPlayerAge'] as int?,
+      lastCareChargedPlayerAge: json['lastCareChargedPlayerAge'] as int?,
+      bond: json['bond'] as int? ?? 50,
     );
 
 LifeLogEntry _decodeLogEntry(Map<String, Object?> json) => LifeLogEntry(

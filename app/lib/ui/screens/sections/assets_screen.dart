@@ -15,6 +15,7 @@ import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
+import '../../../data/pet_catalog.dart';
 
 /// Varlıklar ana menüsü (NAV-001, ECO-001).
 ///
@@ -165,11 +166,16 @@ class _AssetsScreenState extends State<AssetsScreen> {
         if (state.pets.isNotEmpty) ...<Widget>[
           const _GroupTitle('Evcil hayvanlar'),
           const SizedBox(height: 8),
+          // Vefat eden hayvanın kaydı silinmez (Paket 40); listede kalır
+          // ve öyle işaretlenir.
           for (final Pet pet in state.pets) ...<Widget>[
             _AssetTile(
               title: pet.name,
-              subtitle: pet.species,
-              icon: Icons.pets_outlined,
+              subtitle: pet.isAlive
+                  ? '${petSpeciesLabel(pet.species)} · ${pet.age} yaşında'
+                  : '${petSpeciesLabel(pet.species)} · '
+                      '${pet.diedAtAge} yaşında vefat etti',
+              icon: pet.isAlive ? Icons.pets_outlined : Icons.spa_outlined,
             ),
             const SizedBox(height: 10),
           ],

@@ -240,11 +240,88 @@ class Person {
 const Object _unset = Object();
 
 /// Evcil hayvan (D-004). Kişi değildir; mesleği veya hane dışı yaşamı yoktur.
+///
+/// Paket 40'ta gerçek bir kimlik kazandı: kendi yaşı, sahiplenildiği yaş,
+/// hanede olup olmadığı ve **vefat kaydı**. Kayıt asla silinmez; ölen
+/// hayvan `diedAtAge` ile işaretlenir ve geçmişte durur.
 @immutable
 class Pet {
-  const Pet({required this.id, required this.name, required this.species});
+  const Pet({
+    required this.id,
+    required this.name,
+    required this.species,
+    this.age = 0,
+    this.adoptedAtPlayerAge,
+    this.inPlayerHousehold = true,
+    this.diedAtAge,
+    this.diedAtPlayerAge,
+    this.lastCareChargedPlayerAge,
+    this.bond = 50,
+  });
 
   final String id;
   final String name;
+
+  /// Tür kimliği (`pet_catalog.dart` içindeki `PetSpecies.id`).
   final String species;
+
+  /// Hayvanın **kendi** yaşı.
+  final int age;
+
+  /// Sahiplenildiğinde oyuncunun yaşı.
+  ///
+  /// `null` ise hayvan oyuncu doğduğunda evde vardı; uydurma bir
+  /// sahiplenme yaşı yazılmaz.
+  final int? adoptedAtPlayerAge;
+
+  /// Oyuncunun hanesinde mi yaşıyor?
+  ///
+  /// Kuşak değişiminde yalnızca **aynı hanede** olan hayvan devam eder;
+  /// sahte yeni hayvan üretilmez.
+  final bool inPlayerHousehold;
+
+  /// Vefat ettiyse hayvanın kendi yaşı.
+  final int? diedAtAge;
+
+  /// Vefat ettiyse oyuncunun o andaki yaşı.
+  final int? diedAtPlayerAge;
+
+  /// Yıllık bakım gideri **en son** oyuncunun hangi yaşında alındı?
+  ///
+  /// Aynı yılın gideri ikinci kez alınmasın diye tutulur.
+  final int? lastCareChargedPlayerAge;
+
+  /// prototypeOnly: 0-100 arası bağ.
+  final int bond;
+
+  bool get isAlive => diedAtAge == null;
+
+  Pet copyWith({
+    String? name,
+    int? age,
+    Object? adoptedAtPlayerAge = _unset,
+    bool? inPlayerHousehold,
+    Object? diedAtAge = _unset,
+    Object? diedAtPlayerAge = _unset,
+    Object? lastCareChargedPlayerAge = _unset,
+    int? bond,
+  }) =>
+      Pet(
+        id: id,
+        name: name ?? this.name,
+        species: species,
+        age: age ?? this.age,
+        adoptedAtPlayerAge: adoptedAtPlayerAge == _unset
+            ? this.adoptedAtPlayerAge
+            : adoptedAtPlayerAge as int?,
+        inPlayerHousehold: inPlayerHousehold ?? this.inPlayerHousehold,
+        diedAtAge: diedAtAge == _unset ? this.diedAtAge : diedAtAge as int?,
+        diedAtPlayerAge: diedAtPlayerAge == _unset
+            ? this.diedAtPlayerAge
+            : diedAtPlayerAge as int?,
+        lastCareChargedPlayerAge: lastCareChargedPlayerAge == _unset
+            ? this.lastCareChargedPlayerAge
+            : lastCareChargedPlayerAge as int?,
+        bond: bond ?? this.bond,
+      );
 }

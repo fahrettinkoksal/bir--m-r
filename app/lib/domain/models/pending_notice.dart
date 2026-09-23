@@ -26,6 +26,9 @@ enum NoticeKind {
 
   /// Milli Piyango çekilişi (Paket 33).
   piyango,
+
+  /// Evcil hayvanın vefatı (Paket 40).
+  hayvan,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

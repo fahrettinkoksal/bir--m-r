@@ -128,7 +128,10 @@ void main() {
     });
 
     test('yaş alırken maaş ve gider bir kez uygulanır', () {
-      final GameState state = hayat(6, age: 25, wallet: 300000);
+      // Evcil hayvan bakımı (Paket 40) ayrı bir gider kalemidir; burada
+      // yalnızca maaş ve geçim gideri ölçülür.
+      final GameState state =
+          hayat(6, age: 25, wallet: 300000).copyWith(pets: const <Pet>[]);
       final GameState sonra =
           LifeProgression(Random(1)).advanceOneYear(state);
 

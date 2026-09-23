@@ -2369,5 +2369,32 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-107 — Evcil hayvanlar
+
+**Durum:** Issue #67'nin ikinci kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 40 (`lib/data/pet_catalog.dart`, `lib/domain/pets/pet_care.dart`, `lib/data/event_pool_pet.dart`).
+
+**Mevcut kesin kural:** İkinci bir evcil hayvan sistemi kurulmayacak; `GameState.pets` kullanılacak. v1'de yalnızca kedi ve köpek sahiplenilebilir. Evcil hayvan miras kalemi değildir. Kayıt asla silinmez. Bu paket, `Q-067`'deki "hayvanın yaşı tutulmuyor, kuşaklar arası taşımak ölümsüz hayvan üretirdi" gerekçesini de kapatıyor: artık gerçek yaş var.
+
+**Kodlanan kurallar (hepsi `prototypeOnly`):**
+- Sahiplenme 7 yaşından itibaren, aynı anda en çok 3 hayvan.
+- Kedi: 900 ₺ sahiplenme, 4.800 ₺ yıllık bakım, 1.500 ₺ veteriner, olağan ömür 15 (üst sınır 21). Köpek: 1.200 ₺ / 7.200 ₺ / 2.200 ₺, olağan ömür 12 (üst sınır 18).
+- Dört etkileşim: vakit geçir (yılda 3), oyun oyna (3), bakım yap (2, 250 ₺), veterinere götür (1, tür ücreti). Aynı yıl tekrar edildikçe kazanç 1,0 → 0,6 → 0,3 katına iniyor.
+- Bakım gideri yılda **bir kez**. Para yetmezse eldeki kadarı harcanıyor, cüzdan eksiye düşmüyor, mutluluk -4 ve bağ -3; hayvan **ölmüyor**.
+- Doğal vefat olağan ömrün yarısından sonra artan bir eğriyle geliyor, üst sınırda kesinleşiyor. Mutluluk kaybı bağa göre -8 ile -18 arasında.
+- Hayat başında evde bulunabilen kuş, kaplumbağa ve balık kayıtta kalıyor, yaşlanıyor ve vefat ediyor; sahiplenme menüsünde görünmüyorlar.
+
+**Karar soruları:**
+1. Bakım giderleri doğru ölçekte mi? Karşılaştırma: yıllık öğretmen maaşı 180.000 ₺ civarı, resim atölyesi 1.600 ₺, salonda düğün 90.000 ₺.
+2. Aynı anda **3 hayvan** sınırı uygun mu?
+3. Parasızlıkta hayvan ölmüyor, yalnızca mutluluk ve bağ düşüyor. Doğru mu, yoksa hayvanın sahiplendirilmesi gibi bir sonuç mu olmalı? (Ölüm bilerek yazılmadı: oyuncuyu cezalandırmanın en acı yolu olurdu.)
+4. Hayvanın **sağlığı** ayrı bir sayı olmalı mı? Şu an yalnızca yaş ve bağ var; veteriner ziyareti ömrü uzatmıyor. Uzatmalı mı?
+5. Hayvan **kaybolup bir daha dönmeyebilmeli mi**? Şu an olayda mutlaka bulunuyor.
+6. Kedi ve köpek dışında bir tür v1'e eklensin mi? (Kuş, kaplumbağa ve balık kayıt düzeyinde zaten var; yalnızca sahiplenme kapalı.)
+7. Hayvan **hayat sonu değerlendirmesinde** anılmalı mı? Şu an hiç görünmüyor; 14 yıl birlikte yaşanmış bir köpek ile hiç hayvan beslememiş bir hayat aynı puanı alıyor.
+8. Kuşak değişiminde hayvan hanede kalıyorsa devam ediyor. Yeni oyuncunun onunla **bağı** ne olmalı? Şu an eski bağ olduğu gibi taşınıyor.
+9. Hayvanla ilgili etkileşimler kişi ekranındaki gibi bir "hayvan detay" sayfasına mı taşınmalı? Şu an hepsi tek listede.
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

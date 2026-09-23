@@ -22,6 +22,7 @@ import '../models/wealth.dart';
 import 'life_progression.dart';
 import 'random_util.dart';
 import '../../text/turkish_text.dart';
+import '../pets/pet_care.dart';
 
 /// Kuşak devamı: **"Çocuğum olarak devam et"** (Paket E3,
 /// `docs/GENERATION_PROPOSAL.md` §5).
@@ -282,9 +283,11 @@ abstract final class GenerationContinuation {
       seed: state.seed,
       player: yeniOyuncu,
       people: List<Person>.unmodifiable(yeniKisiler),
-      // Evcil hayvanların yaşı tutulmuyor; kuşaklar arası taşımak ölümsüz
-      // hayvan üretirdi (Q-067).
-      pets: const <Pet>[],
+      // Paket 40: hayvanın artık gerçek bir yaşı ve sonu var. Aynı hanede
+      // yaşayan hayvan yeni kuşakla **devam eder**; kimliği, adı ve yaşı
+      // korunur, sahte yeni hayvan üretilmez. Vefat etmiş ya da hanede
+      // olmayan hayvan taşınmaz: evcil hayvan miras kalemi değildir.
+      pets: PetCare.carryOver(state.pets),
       // Ebeveynlerin durumu gerçeğe dayanır: evlilik kaydı yoksa evli
       // yazılmaz (D-047).
       parentalStatus: _parentalStatusFor(state, cocuk),

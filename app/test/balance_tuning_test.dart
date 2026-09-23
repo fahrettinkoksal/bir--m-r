@@ -153,8 +153,11 @@ void main() {
           calisan(6, jobId: 'ogretmen', wallet: 500000, age: 30);
       final int maas = jobById('ogretmen')!.yearlySalary;
 
-      final GameState sonra = LifeProgression(Random(1))
-          .advanceOneYear(oyuncu.copyWith(pendingEvent: null));
+      final GameState sonra = LifeProgression(Random(1)).advanceOneYear(
+        // Evcil hayvan bakımı (Paket 40) ayrı bir gider kalemidir; burada
+        // yalnızca geçim gideri ölçülür.
+        oyuncu.copyWith(pendingEvent: null, pets: const <Pet>[]),
+      );
       final int gider = LivingCosts.yearlyCost(sonra);
 
       expect(sonra.player.wallet, 500000 + maas - gider);

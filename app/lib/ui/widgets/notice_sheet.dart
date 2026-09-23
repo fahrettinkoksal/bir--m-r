@@ -82,13 +82,20 @@ class _NoticeSheetState extends State<NoticeSheet> {
                   color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  trUpper(notice.title),
-                  key: const Key('notice_title'),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
-                    color: theme.colorScheme.primary,
+                // Uzun başlık dar ekranda satırı taşırıyordu (Paket 40'ta
+                // ölçüldü: 360 px'de 4,4 px taşma). Başlık artık kendi
+                // alanına sığar ve gerekirse alt satıra iner.
+                Expanded(
+                  child: Text(
+                    trUpper(notice.title),
+                    key: const Key('notice_title'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.1,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ),
               ],
@@ -221,6 +228,8 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.military_tech_rounded;
       case NoticeKind.piyango:
         return Icons.confirmation_number_rounded;
+      case NoticeKind.hayvan:
+        return Icons.pets_rounded;
     }
   }
 }
