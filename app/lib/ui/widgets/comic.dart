@@ -226,6 +226,11 @@ class ComicTag extends StatelessWidget {
       ),
       child: Text(
         text,
+        // Büyük yazı ayarında (textScale 1.5) rozet satırı taşırıyordu:
+        // rozet tek satırda kalır ve sığmazsa kırpılır (Paket 45).
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontFamily:
               handwritten ? BirOmurTheme.elYazisi : BirOmurTheme.yaziTipi,

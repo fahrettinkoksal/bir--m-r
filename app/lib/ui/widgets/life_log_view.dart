@@ -90,27 +90,33 @@ class LifeLogAgeBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          // Büyük yazı ayarında (textScale 1.5) bu satır 24 px taşıyordu:
+          // iki rozet de artık esniyor ve gerekirse kırpılıyor (Paket 45).
           Row(
             children: <Widget>[
-              ComicTag(
-                text: '${block.age} yaş',
-                handwritten: true,
-                fontSize: 13,
-                tilt: -3,
-                color: isCurrentAge
-                    ? BirOmurColors.sari
-                    : theme.colorScheme.surfaceContainer,
+              Flexible(
+                child: ComicTag(
+                  text: '${block.age} yaş',
+                  handwritten: true,
+                  fontSize: 13,
+                  tilt: -3,
+                  color: isCurrentAge
+                      ? BirOmurColors.sari
+                      : theme.colorScheme.surfaceContainer,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(child: KilimDivider(height: 8)),
               if (isCurrentAge) ...<Widget>[
                 const SizedBox(width: 8),
-                const ComicTag(
-                  text: 'BU YIL',
-                  color: BirOmurColors.kirmizi,
-                  textColor: BirOmurColors.krem,
-                  tilt: 3,
-                  fontSize: 10.5,
+                const Flexible(
+                  child: ComicTag(
+                    text: 'BU YIL',
+                    color: BirOmurColors.kirmizi,
+                    textColor: BirOmurColors.krem,
+                    tilt: 3,
+                    fontSize: 10.5,
+                  ),
                 ),
               ],
             ],

@@ -203,6 +203,8 @@ class _DrawCard extends StatelessWidget {
                         : null,
                     child: Text(
                       '${share.label} · ${trMoney(draw.priceFor(share))}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
               ],
@@ -231,26 +233,41 @@ class _PrizeTable extends StatelessWidget {
         for (final LotteryPrize p in draw.prizes)
           Padding(
             padding: const EdgeInsets.only(bottom: 3),
+            // Büyük yazı ayarında (textScale 1.5) sayı sütunları satırı
+            // taşırıyordu; üç sütun da artık esniyor (Paket 45).
             child: Row(
               children: <Widget>[
                 Expanded(
+                  flex: 3,
                   child: Text(
                     p.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  '1/${p.oneIn}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                Flexible(
+                  child: Text(
+                    '1/${p.oneIn}',
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  trMoneyShort(p.fullTicketAmount),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: Text(
+                    trMoneyShort(p.fullTicketAmount),
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
