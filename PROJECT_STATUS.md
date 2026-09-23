@@ -1,19 +1,33 @@
 # Proje durumu
 
-**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1, 2, 3 ve 4 uygulandı** (`app/` klasörü); Aşama 5 (baştan sona entegrasyon denemesi ve teslim) henüz yapılmadı. D-030'daki **sevgili → ayrılık → eski sevgili** akışı gerçekten oynanabilir durumdadır.
+**Aşama:** Kodlama sürüyor. Teknoloji olarak **Flutter + Android önceliği Faho tarafından onaylandı**. `docs/CLAUDE_PROTOTYPE_TASK.md` içindeki **Aşama 1-4 uygulandı** (`app/` klasörü) ve o günden bu yana çok sayıda paket eklendi; bu dosyanın sonundaki paket kayıtları güncel durumu anlatır.
+
+**Aşama 5 (baştan sona deneme ve teslim) yarım:** baştan sona bir hayatı
+oynayan bütünleşik senaryo testi yazıldı (Paket 42) ve otomatik testlerle
+doğrulandı, ama **gerçek bir Android telefonda veya gerçek bir Windows
+bilgisayarda oynanmadı**. Teslim adımı bu yüzden tamamlanmış sayılmaz.
+
+D-030'daki **sevgili → ayrılık → eski sevgili** akışı gerçekten oynanabilir
+durumdadır.
+
+> **Bu dosyanın ilk bölümleri tarihsel kayıttır.** Aşağıdaki "Aşama 1-4" ve
+> ilk paket bölümleri yazıldıkları günkü durumu anlatır; oradaki test
+> sayıları, menü adları ve "henüz yok" ifadeleri o günün kaydıdır, bugünün
+> durumu değildir. Güncel durum için dosyanın sonundaki paket kayıtlarına
+> bakın.
 
 ## Şu ana kadar ana hatlarını belirledik
 Türkiye/nostalji odaklı özgün oyun kimliği; iki başlangıç modu, rastgele aile/şehir; dış görünüş, mutluluk, sağlık, zekâ, karizma; kişi bazlı ilişkiler; geçmiş karar hafızası; yaşa/koşula uygun olaylar; ailenin bağımsız yaşam gelişmeleri. Kesin karar kaydı: `DECISIONS.md`.
 
 ## Aile ve genel işleyiş: netleşenler
-Aile rastgele çeşitlenir; aynı evde yaşama ile akrabalık ayrı tutulur. Aile sekmesinde kişiler görülür, hediye verilir, birlikte vakit geçirilir; aile etkileşimleri ana karakteri etkiler. Uzun süre oyun içinde görüşülmeyen aile bireyi bazen sitem edebilir.
+Aile rastgele çeşitlenir; aynı evde yaşama ile akrabalık ayrı tutulur. **İlişkiler** sekmesinde kişiler görülür, hediye verilir, birlikte vakit geçirilir; aile etkileşimleri ana karakteri etkiler. Uzun süre oyun içinde görüşülmeyen aile bireyi bazen sitem edebilir. (Bu bölüm ilk yazıldığında sekmenin adı "Aile" idi; NAV-001 ile "İlişkiler" oldu.)
 
 **Yaş Al** isteğe bağlıdır ve yeni yaşta ilk olarak bir uygun olay çıkar. Sonraki olaylar oyun içi ilerlemeye göre aralıklı gelir; gerçek dünya dakikaları beklenmez. Geçmiş hikâyeler seçimlere göre devam eder. Yakın zamanda yinelenen aile davetini kişi bazen reddedebilir. Genel etkileşim/hak kotası yoktur; aynı yaşta aynı etkinliğin olumlu getirisi giderek azalır ve sıfıra iner.
 
 **Ün**, herkeste başlangıçta görünmeyen; sosyal medya/takipçi veya uygun görünürlük sağlayan olaylarla düşük seviyeden açılabilen özelliktir. Ayrıntılı sosyal medya ve Ün sistemi henüz tasarlanmadı.
 
 ## İlk prototip — onaylanan yön
-- Başlangıç alt menüsü **Hayat / Aile / Ben**; ileride Sosyal sekmesi, Ben altında spor salonu, berber, seyahat gibi eylemler eklenecek. Üç sekme kalıcı sınır değil.
+- Başlangıç alt menüsü **Hayat / Aile / Ben** olarak onaylanmıştı. **Bu düzen NAV-001 ile değişti:** alt çubuk bugün soldan sağa **Okul/Meslek — Varlıklar — Yaş Al — İlişkiler — Aktiviteler** biçimindedir; `Yaş Al` bir sekme değil, ortadaki bağımsız ana eylemdir.
 - Görsel yön **modern + ölçülü nostaljik detaylar**, Bir Ömür'e özgün arayüzdür.
 - **Kesin oynanabilir test:** uygun kişiyle sevgili olma → kişinin Aile'de sevgili görünmesi → ayrılık → aynı kişinin silinmeden **eski sevgili** statüsünde kalması. Romantik ilişki, akrabalık ve aynı evde yaşama birbirine karıştırılmaz.
 - `docs/PROTOTYPE_UI.md` ekran/kapsam belgesidir. **`docs/CLAUDE_PROTOTYPE_TASK.md` Claude için hazırlanmış aşamalı uygulama görevi ve test matrisidir.** Görev belgesini oluşturmak kodun yazılması veya Claude tarafından çalıştırılması anlamına gelmez.
@@ -868,6 +882,56 @@ dosyası eklenmişti. Faho'nun GitHub hesabında **Billing & plans**
 bölümünden ödeme/harcama limiti düzeltilene kadar hiçbir CI çalışması
 başlamayacak; dolayısıyla bu turda Windows sürümü ve Android APK
 üretilemedi.
+
+## Paket 43-48 — kalite ve içerik derinliği turu (23 Eylül 2026)
+
+Yeni büyük oyun sistemi eklenmedi. Mevcut sistemler denetlendi, gerçek
+hatalar düzeltildi, testler güçlendirildi ve ölçüm yapıldı. Hepsi yığılmış
+PR olarak `main`'in **dışında** duruyor.
+
+**Paket 43 — Türkçe metin ve bağlam tutarlılığı (PR #74).** Ortak geçmiş,
+vefat eden kişinin ölüm yılını **uyduruyordu** (her zaman "şu anki yaş");
+evlat edinilen çocuğun aileye katılışını **doğduğu yıla** yazıyordu ve
+olayı iki kez gösteriyordu; eşini kaybedip yeniden evlenen oyuncuda
+kayıtta **iki kişi birden "Eş"** kalıyordu. Üçü de düzeltildi. Sonuç
+metinlerinde `{hayvan}`/`{sehir}` yer tutucuları doldurulmuyordu; o da
+kapatıldı. 21 yeni regression testi.
+
+**Paket 44 — Kayıt dayanıklılığı (PR #75).** Sonradan eklenen alanların
+bir bölümü denetimsiz tür dönüşümüyle okunuyordu; bozuk bir kayıt ham
+Dart hatasıyla düşüyordu. Hepsi denetimli okumaya geçirildi. 17 senaryo
+kaydedilip yükleniyor, 50 rastgele hayatta `encode → decode → encode`
+karşılaştırılıyor, 61 alanın her biri tek tek siliniyor ve bozuluyor.
+**Gerçek bir eski cihaz kaydı yok; göç sınamaları sentetiktir.**
+
+**Paket 45 — Dar ekran ve büyük yazı (PR #76).** 320/360/390 px × yazı
+ölçeği 1,0/1,3/1,5. Üç gerçek taşma bulundu ve düzeltildi (karakter
+başlığındaki cüzdan rozeti, hayat günlüğü yaş başlığı, piyango ikramiye
+tablosu). 27 yeni test.
+
+**Paket 46 — Hayat tutarlılığı taraması (PR #77).** 100 hayat doğumdan
+ölüme oynanıp her yaşta kişi/evlilik/çocuk/para/eşya/gezi/hayvan/hobi/
+günlük değişmezleri denetlendi. **17.885 denetim noktasında hiçbir
+çelişki bulunmadı**; bu pakette davranış değiştiren tek satır yok.
+
+**Paket 47 — İçerik kalitesi ölçümü (PR #78).** Ölçüm aracı gerçek oyun
+akışıyla (etkileşimler, hobi, hayvan, gezi, emeklilik) çalışacak biçimde
+yeniden yazıldı. Sonuçlar ve denge önerileri `docs/EVENT_CONTENT_REPORT.md`
+ve `docs/DESIGN_REVIEW_QUEUE.md` (Q-110) içinde.
+
+**Paket 48 — Belge gerçeklik denetimi (PR #79).** Kodla çelişen eski
+ifadeler düzeltildi; sonraki büyük sistem önerileri
+`docs/NEXT_DEVELOPMENT_OPTIONS.md` dosyasında **yalnızca öneri** olarak
+toplandı.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **1539 geçti, 15 atlandı, 0 başarısız**. Atlananların
+tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleridir.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+**CI:** GitHub Actions hesabın ödeme/harcama limiti nedeniyle hiçbir işi
+başlatmıyor; bu turda da yeni Windows sürümü veya Android APK
+üretilemedi. Engelin sebebi kod ya da iş akışı yapılandırması değildir.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

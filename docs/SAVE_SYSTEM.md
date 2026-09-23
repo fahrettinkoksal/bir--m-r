@@ -20,7 +20,7 @@ Kullanıcının belgelerine veya ortak klasörlere yazılmaz.
 
 ## Dosya biçimi
 ```json
-{ "formatVersion": 3, "savedAt": "...", "state": { ... } }
+{ "formatVersion": 30, "savedAt": "...", "state": { ... } }
 ```
 
 - `formatVersion` **en dış katmandadır**; içerik şeması değişse bile dosyanın
@@ -28,9 +28,16 @@ Kullanıcının belgelerine veya ortak klasörlere yazılmaz.
 - Enum değerleri **adlarıyla** yazılır (sıra numarasıyla değil), böylece
   ileride enum sırası değişse eski kayıtlar bozulmaz.
 - Eski sürümleri güncel şemaya taşımak için `SaveMigrations.migrate` zinciri
-  kullanılır. Bugüne kadarki adımlar: **1 → 2** okul kişileri okula/sınıfa
-  bağlandı, **2 → 3** eşyalar tür kümesinden gerçek eşya örneklerine geçti
-  (bkz. `docs/ITEM_SYSTEM.md`).
+  kullanılır. **Güncel biçim sürümü 30; okunabilen en eski sürüm 25**
+  (`kSaveFormatVersion`, `kMinReadableSaveVersion`). Faho'nun kararı gereği
+  geriye dönük yalnızca **son beş sürüm** taşınır; bunu kalıcı bir test
+  zorunlu kılar. Daha eski bir kayıt açılamaz ama **silinmez**, oyuncuya
+  anlaşılır bir mesaj gösterilir.
+- Sonradan eklenen alanların hepsi **eklemelidir ve null-güvenli okunur**;
+  bu yüzden çoğu paket sürüm numarasını artırmadan alan ekleyebildi.
+- Alan eksik ya da yanlış türdeyse ham bir Dart hatası değil, hangi alanın
+  bozuk olduğunu söyleyen Türkçe bir `SaveFormatException` atılır
+  (Paket 44).
 - Kayıt **daha yeni** bir sürümden geliyorsa açılmaz; kullanıcıya oyunu
   güncellemesi gerektiği söylenir ve dosyaya dokunulmaz.
 

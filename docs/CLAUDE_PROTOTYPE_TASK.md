@@ -1,6 +1,6 @@
 # Claude geliştirme görevi — Bir Ömür ilk oynanabilir prototip v0.1
 
-**Belge türü:** Kodlama için görev devri; bu belge bir kod teslimi değildir. **Durum:** Hazırlanmış, Claude'a henüz yürütülmek üzere verilmemiştir. Oyun kodu/prototip mevcut değil. **Depo sınırı: YALNIZCA `fahrettinkoksal/bir--m-r`. Hipopotamya organizasyonu ve depolarına hiçbir şekilde dokunma.**
+**Belge türü:** Kodlama için görev devri; bu belge bir kod teslimi değildir. **Durum:** Yürütüldü. Aşama 1-4 uygulandı ve o günden bu yana çok sayıda paket eklendi; `app/` altında oynanabilir bir prototip vardır. Bu belgedeki "kod mevcut değil" varsayımı artık geçerli değildir; güncel durum için `PROJECT_STATUS.md`. **Depo sınırı: YALNIZCA `fahrettinkoksal/bir--m-r`. Hipopotamya organizasyonu ve depolarına hiçbir şekilde dokunma.**
 
 ## 0. Başlangıç ve karar kaynakları
 
