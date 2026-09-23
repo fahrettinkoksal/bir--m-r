@@ -242,7 +242,12 @@ const List<GameEvent> kHobbyEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 14,
       requiredHobbyId: 'okuma',
-      minHobbyStage: 2,
+      // Paket 47 ölçümü: "okumak" hobisini yalnızca **bitirilen kitaplar**
+      // besliyor ve kütüphanede 7 kitap var. Basamak 2'nin eşiği 8 deneyim
+      // olduğu için bu olay hiçbir hayatta çıkamıyordu. Şart, verinin
+      // gerçekten ulaşabildiği basamağa indirildi. Kitap sayısı ile hobi
+      // merdiveni arasındaki uyumsuzluk Q-110'da karara sunuldu.
+      minHobbyStage: 1,
       requiresActiveHobby: true,
     ),
     repeatable: true,
