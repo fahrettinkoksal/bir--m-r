@@ -15,6 +15,8 @@ import '../models/life_log.dart';
 import '../models/player_character.dart';
 import '../models/stats.dart';
 import '../../text/turkish_text.dart';
+import 'outing.dart';
+import '../models/person.dart';
 
 /// Bir aktivitenin sonucu.
 class ActivityOutcome {
@@ -89,14 +91,25 @@ class ActivityEngine {
           .where((ActivityAction a) => availability(state, a).isAllowed)
           .toList(growable: false);
 
-  /// Berber veya spor salonu eylemini uygular.
+  /// Bir aktivite eylemini uygular.
+  ///
+  /// [companion] verilirse eylem **birlikte** yapılır (Paket 41). Ücret,
+  /// yaş sınırı ve yıllık kota aynı yerde kaldığı için birlikte gitmek
+  /// ikinci kez para götürmez ve ikinci bir kayıt açmaz; yalnızca sonuç
+  /// metni, bağ ve ortak geçmiş değişir.
   ActivityResult perform({
     required GameState state,
     required ActivityAction action,
     required Random rng,
+    Person? companion,
   }) {
     final InteractionAvailability check = availability(state, action);
     if (!check.isAllowed) return _blocked(state, check.reason!);
+    if (companion != null) {
+      final InteractionAvailability birlikte =
+          Outing.companionAvailability(state, action, companion);
+      if (!birlikte.isAllowed) return _blocked(state, birlikte.reason!);
+    }
 
     final int done = timesDone(state, action);
     final double factor =
@@ -138,6 +151,22 @@ class ActivityEngine {
     // beslediği bir hobi varsa geçmişe iz düşer.
     next = HobbyTracker.creditActivity(next, action.id);
 
+    // Birlikte gidildiyse sahne, bağ ve ortak geçmiş burada işlenir
+    // (Paket 41). Tek çıkış noktası: çifte kayıt oluşamaz.
+    if (companion != null) {
+      next = _applyCompanion(state, next, action, companion, rng);
+      final String sahne = next.log.last.text;
+      return ActivityResult(
+        state: next,
+        outcome: ActivityOutcome(
+          applied: true,
+          text: sahne,
+          effects: diffAppliedEffects(state, next),
+          noNewBenefit: factor == 0,
+        ),
+      );
+    }
+
     final String metin = action.changesHairStyle
         ? '${action.label}: artık saçın "$yeniStil". '
             '${trMoney(action.cost)} ödedin.'
@@ -153,6 +182,67 @@ class ActivityEngine {
         noNewBenefit: factor == 0,
       ),
     );
+  }
+
+  /// Birlikte gidilen eylemin kişiye bağlı sonuçları.
+  ///
+  /// Bağ ve fazladan mutluluk aynı yıl aynı kişiyle tekrar çıkıldıkça
+  /// azalır: aynı kişiyle üst üste sinemaya giderek bağ kasılamaz.
+  /// Ortak geçmişe **tek** bir satır düşer.
+  GameState _applyCompanion(
+    GameState before,
+    GameState after,
+    ActivityAction action,
+    Person companion,
+    Random rng,
+  ) {
+    final int birlikte = Outing.timesWith(before, action, companion);
+    final double oran = Outing.prototypeOnlyRepeatCurve[
+        min(birlikte, Outing.prototypeOnlyRepeatCurve.length - 1)];
+    final int bagArtisi =
+        max(1, (Outing.prototypeOnlyCompanionBond * oran).round());
+    final int mutlulukArtisi =
+        (Outing.prototypeOnlyCompanionHappiness * oran).round();
+
+    final String sahne = Outing.sceneFor(action, companion, rng);
+
+    GameState next = after.copyWith(
+      player: after.player.copyWith(
+        stats: after.player.stats.copyWith(
+          happiness: after.player.stats.happiness + mutlulukArtisi,
+        ),
+      ),
+      people: after.people
+          .map((Person p) => p.id == companion.id
+              ? p.copyWith(bond: (p.bond + bagArtisi).clamp(0, 100))
+              : p)
+          .toList(growable: false),
+      interactionCounts: Map<String, int>.unmodifiable(<String, int>{
+        ...after.interactionCounts,
+        GameState.interactionKey('birlikte-${companion.id}', action.id):
+            birlikte + 1,
+      }),
+      // Anlamlı temas: birlikte çıkmak da görüşmektir, bağ sönümlenmesi
+      // bunu görmeli (D-024).
+      lastInteractionAge: Map<String, int>.unmodifiable(<String, int>{
+        ...after.lastInteractionAge,
+        companion.id: after.player.age,
+      }),
+    );
+
+    // Ortak geçmişe düşen tek satır; kişiye bağlıdır.
+    next = next.copyWith(
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...next.log,
+        LifeLogEntry(
+          age: next.player.age,
+          text: sahne,
+          category: LogCategory.kisisel,
+          personId: companion.id,
+        ),
+      ]),
+    );
+    return next;
   }
 
   // =====================================================================

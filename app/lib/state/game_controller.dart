@@ -76,6 +76,7 @@ import '../domain/models/pending_interview.dart';
 import '../domain/models/person.dart';
 import '../data/pet_catalog.dart';
 import '../domain/pets/pet_care.dart';
+import '../domain/activities/outing.dart';
 
 /// Uygulamanın tek durum sahibi.
 ///
@@ -723,7 +724,14 @@ class GameController extends ChangeNotifier {
   /// mutluluğu düşürebilir de; bu yüzden ayrı yoldan geçer (Paket 27).
   /// Yönlendirme tek yerde yapılır ki arayüz hangi eylemin fal olduğunu
   /// bilmek zorunda kalmasın.
-  ActivityOutcome? performActivity(ActivityAction action) => _runActivity(
+  /// [companion] verilirse eylem **birlikte** yapılır (Paket 41). Ücret ve
+  /// yıllık kota tek yerde kaldığı için birlikte gitmek ikinci kez para
+  /// götürmez.
+  ActivityOutcome? performActivity(
+    ActivityAction action, {
+    Person? companion,
+  }) =>
+      _runActivity(
         (GameState current) => ActivityEngine.isFortune(action)
             ? _activities.tellFortune(
                 state: current,
@@ -734,8 +742,23 @@ class GameController extends ChangeNotifier {
                 state: current,
                 action: action,
                 rng: _random,
+                companion: companion,
               ),
       );
+
+  /// Bu eyleme şu an gerçekten katılabilecek kişiler (Paket 41).
+  List<Person> outingCompanions(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null || !Outing.supports(action)) return const <Person>[];
+    return Outing.companionsFor(current, action);
+  }
+
+  /// Bu yıl bu kişiyle bu eylem kaç kez yapıldı?
+  int outingTimesWith(ActivityAction action, Person person) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return Outing.timesWith(current, action, person);
+  }
 
   // --- Finger tanışma uygulaması (Paket 34) -----------------------------
 
