@@ -1,4 +1,6 @@
 import '../../data/martial_arts_catalog.dart';
+import '../../data/hobby_catalog.dart';
+import '../hobby/hobby_tracker.dart';
 import '../../text/turkish_text.dart';
 import '../effects/effect_diff.dart';
 import '../models/game_state.dart';
@@ -134,6 +136,10 @@ class MartialArtsEngine {
             lessonsThisAge(state, art) + 1,
       }),
     );
+
+    // Dövüş dersi de spor hobisini besler (Paket 39): salona gitmek
+    // hangi kapıdan olursa olsun spordur.
+    next = HobbyTracker.credit(next, HobbyKind.spor);
 
     final String metin = _metin(art, kayit, atladi: atladi, zirve: zirve);
     if (atladi) next = _log(next, metin);

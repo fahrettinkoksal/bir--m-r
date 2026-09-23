@@ -13,6 +13,7 @@ import '../../data/social_catalog.dart';
 import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
 import '../../domain/models/martial_progress.dart';
+import '../../domain/models/hobby_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
 import '../../domain/models/finger_profile.dart';
 import '../lottery_catalog.dart';
@@ -87,6 +88,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // liste okunur, sürüm yükseltmesi gerekmez.
       'martialArts':
           state.martialArts.map(_encodeMartial).toList(growable: false),
+      // Hobi geçmişi (Paket 39). Alan eklemeli.
+      'hobbies': state.hobbies.map(_encodeHobby).toList(growable: false),
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -305,6 +308,19 @@ Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
       'occupation': p.occupation,
       'matchedAtAge': p.matchedAtAge,
       'metPersonId': p.metPersonId,
+    };
+
+Map<String, Object?> _encodeHobby(HobbyProgress h) => <String, Object?>{
+      'hobbyId': h.hobbyId,
+      'startedAtAge': h.startedAtAge,
+      'experience': h.experience,
+      'lastPracticedAge': h.lastPracticedAge,
+      'memories': h.memories
+          .map((HobbyMemory m) => <String, Object?>{
+                'age': m.age,
+                'text': m.text,
+              })
+          .toList(growable: false),
     };
 
 Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
@@ -697,6 +713,11 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeBook(_asMap(e, 'books[]')))
           .toList(growable: false),
     ),
+    hobbies: List<HobbyProgress>.unmodifiable(
+      (json['hobbies'] as List<Object?>? ?? const <Object?>[])
+          .map((Object? e) => _decodeHobby(_asMap(e, 'hobbies[]')))
+          .toList(growable: false),
+    ),
     martialArts: List<MartialProgress>.unmodifiable(
       (json['martialArts'] as List<Object?>? ?? const <Object?>[])
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
@@ -1056,6 +1077,20 @@ FingerProfile _decodeFinger(Map<String, Object?> json) => FingerProfile(
       occupation: json['occupation'] as String?,
       matchedAtAge: _intOrNull(json, 'matchedAtAge'),
       metPersonId: json['metPersonId'] as String?,
+    );
+
+HobbyProgress _decodeHobby(Map<String, Object?> json) => HobbyProgress(
+      hobbyId: _string(json, 'hobbyId'),
+      startedAtAge: _int(json, 'startedAtAge'),
+      experience: _int(json, 'experience'),
+      lastPracticedAge: _int(json, 'lastPracticedAge'),
+      memories: List<HobbyMemory>.unmodifiable(
+        (json['memories'] as List<Object?>? ?? const <Object?>[])
+            .map((Object? e) {
+          final Map<String, Object?> m = _asMap(e, 'hobbies[].memories[]');
+          return HobbyMemory(age: _int(m, 'age'), text: _string(m, 'text'));
+        }).toList(growable: false),
+      ),
     );
 
 /// Evlilik kaydı. Eşin kendisi kişi listesinden okunur; burada yalnızca

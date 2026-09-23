@@ -11,6 +11,9 @@ import '../interaction/romance.dart';
 import '../models/game_event.dart';
 import '../activities/travel.dart';
 import '../models/game_state.dart';
+import '../models/hobby_progress.dart';
+import '../hobby/hobby_tracker.dart';
+import '../../data/hobby_catalog.dart';
 import '../models/trip.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
@@ -226,6 +229,21 @@ class EventEngine {
     if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
       return false;
     }
+    // Hobi olayları yalnızca gerçekten o hobiyle uğraşmış oyuncuya
+    // çıkar (Paket 39). Geçmiş kayıttan okunur, uydurulmaz.
+    final String? hobiId = req.requiredHobbyId;
+    if (hobiId != null) {
+      final HobbyKind? hobi = hobbyById(hobiId);
+      if (hobi == null) return false;
+      final HobbyProgress? ilerleme = HobbyTracker.progressOf(state, hobi);
+      if (ilerleme == null) return false;
+      if (ilerleme.years < req.minHobbyYears) return false;
+      if (ilerleme.stage < req.minHobbyStage) return false;
+      if (req.requiresActiveHobby && !ilerleme.isActiveAt(state.player.age)) {
+        return false;
+      }
+    }
+
     // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.

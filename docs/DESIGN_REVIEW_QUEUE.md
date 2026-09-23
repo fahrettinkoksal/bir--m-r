@@ -2342,5 +2342,32 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-106 — Kalıcı hobiler
+
+**Durum:** Issue #67'nin birinci kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 39 (`lib/data/hobby_catalog.dart`, `lib/domain/hobby/hobby_tracker.dart`, `lib/data/event_pool_hobby.dart`).
+
+**Mevcut kesin kural:** İkinci bir aktivite sistemi kurulmayacak; mevcut Kurslar, Kütüphane, Spor salonu, Resim ve Müzik altyapısı kullanılacak. Yeni meslek ağacı ya da profesyonel sanatçı yolu açılmayacak (Issue #67 sınırı). Kayıt asla silinmez.
+
+**Kodlanan kurallar (hepsi `prototypeOnly`):**
+- Dört hobi var ve **yalnızca gerçekten var olan eylemlerle** besleniyor: müzik (müzik kursu), resim (resim atölyesi), okumak (kütüphanede **bitirilen** kitap), spor (koşu, ağırlık, esneme ve dövüş dersleri).
+- Her hobi beş basamak: Heveslendin → Meraklı → Düzenli → Tutkulu → Ustalaşmış. Eşikler müzik/resimde 0-6-18-40-80, okumada 0-3-8-18-35, sporda 0-8-25-55-110.
+- Basamak yükseldiğinde geçmişe **bir** anı düşüyor, gerçek yaşıyla. Uydurma anı üretilmiyor.
+- Hobi **silinmiyor**. 5 yıldan uzun süre uğraşılmazsa "sürüyor" sayılmıyor, ama kayıtta duruyor ve geçmişe dönüş olayı buna bakıyor.
+- Olaylarda "ciddi hobi" eşiği **3 yıl**.
+- Hiçbir eylemin ücreti, yaş sınırı ya da yıllık kotası değişmedi; hobi yalnızca zaten izin verilen bir eylem yapıldığında ilerliyor.
+
+**Karar soruları:**
+1. Dört hobi yeterli mi? Eksik gördüğün ve **mevcut bir eylemle beslenebilecek** başka bir hobi var mı? (Olmayan bir eylem için sahte düğme açılmadı.)
+2. Eşikler doğru mu? Müzik kursu yılda en çok 2 kez yapılabiliyor; "Ustalaşmış" için 80 deneyim demek pratikte **40 yıl** demek. Çok mu uzun?
+3. Basamak adları uygun mu? ("Heveslendin", "Tutkulu", "Ustalaşmış")
+4. **5 yıl** ara verince "sürüyor" sayılmamak doğru mu? Daha kısa mı, daha uzun mu?
+5. Hobi ekranda **nerede** görünmeli? Şu an yalnızca hayat sonu değerlendirmesinde ve olay şartlarında var; oyuncu hobisinin hangi basamakta olduğunu göremiyor. Yeni ana menü açmadım, NAV sırasına dokunmadım — ayrı bir bölüm ister misin, yoksa mevcut bir ekranın içine mi girsin?
+6. Hobi **başka kimlere** görünmeli? Şu an iş, arkadaşlık, romantik ve çocuk olaylarında karşılık buluyor. Ebeveyn ya da kardeşle de bir sahne olsun mu?
+7. Hobinin **stat etkisi** olmalı mı? Şu an hobi hiçbir stata doğrudan katkı yapmıyor (eylemin kendi katkısı zaten var). Kasıtlı olarak böyle bırakıldı; "yıllardır müzikle uğraşan" biri karizmada ayrıca kazanmalı mı?
+8. Hayat sonu değerlendirmesinde hobinin ağırlığı (Deneyim ekseninde toplam en çok **26**) yerinde mi? Karşılaştırma: dövüş sanatları 30, şehir gezmek 28, kitap 24.
+9. Bir hobi **bırakılabilmeli mi**? Şu an bırakma düğmesi yok; uğraşılmadıkça kendiliğinden soluyor.
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
