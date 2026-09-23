@@ -810,6 +810,65 @@ eşleşmenin ne anlama geleceği (Q-102/3).
 Android debug APK ve Windows sürümünü derledi. **Gerçek Windows veya
 Android cihazda oynanmadı.**
 
+**Paket 39-42 — Issue #67 (PR #70, #71, #72, #73).** Yığılmış dört PR;
+hiçbiri `main`'e birleştirilmedi, Faho'nun onayı bekleniyor.
+
+- **Paket 39 — Kalıcı hobiler (PR #70).** Mevcut Kurslar, Kütüphane ve
+  Spor salonu eylemleri artık kalıcı iz bırakıyor: hobi türü, başlama
+  yaşı, deneyim, son uğraşılan yaş ve basamak anıları kayda giriyor.
+  7 özgün hobi olayı; ikisi geçmişi doğrudan hatırlıyor. Hayat sonu
+  değerlendirmesi ciddi hobiyi görüyor. **İkinci bir aktivite sistemi
+  kurulmadı, yeni meslek ağacı açılmadı.**
+- **Paket 40 — Evcil hayvanlar (PR #71).** Mevcut `GameState.pets` kaydı
+  gerçek bir kimlik kazandı: yaş, sahiplenme yaşı, hane, bağ ve vefat
+  kaydı. v1'de kedi ve köpek sahiplenilebiliyor. Dört etkileşim, yılda
+  bir kez alınan bakım gideri, parasızlıkta ölmeyen hayvan, doğal vefat
+  ve silinmeyen kayıt, kuşak değişiminde aynı kimlikle devam. 6 özgün
+  olay.
+- **Paket 41 — Birlikte eğlence (PR #72).** Eğlence eylemleri artık eş,
+  sevgili, çocuk, anne, baba, kardeş ve yakın arkadaşla yapılabiliyor.
+  Kimse uydurulmuyor: kişi yaşıyor, kayıtta duruyor, erişilebilir ve yaşı
+  uyuyor. Ücret bir kez alınıyor, ortak geçmişe tek satır düşüyor.
+  30'un üzerinde özgün sahne.
+- **Paket 42 — Bütünleşik test (PR #73).** Bir hayatı baştan sona oynayan
+  senaryo testi ve 65 hayatlık kilitlenme taramasının yeni sistemleri de
+  kapsayacak biçimde genişletilmesi.
+
+Yol boyunca bulunan **gerçek hatalar**: bildirim panelinin başlık satırı
+uzun başlıkta taşıyordu (360 px'de 4,4 px); aktivite kartında gerekçe
+metni ile düğme dar ekranda sıkışıyordu. İkisi de düzeltildi.
+
+**Karar bekleyenler:** `docs/DESIGN_REVIEW_QUEUE.md` → Q-106, Q-107,
+Q-108. Öne çıkanlar: hobi eşiklerinin gerçek oyun hızına göre çok uzun
+olup olmadığı (Q-106/2), hayvanın hayat sonu değerlendirmesinde anılıp
+anılmayacağı (Q-107/7), birlikte gidilince biletin tek mi çift mi
+sayılacağı (Q-108/1).
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **1450 geçti, 15 atlandı, 0 başarısız**. Atlananların
+tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleri.
+**Android ve Windows CI çalıştırılamadı:** GitHub Actions işleri
+faturalandırma/harcama limiti nedeniyle hiç başlamıyor (aşağıya bakın).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+### CI durumu — faturalandırma engeli
+Android APK iş akışı üç denemede de (push, yeniden çalıştırma,
+`workflow_dispatch`) **tek bir adım bile çalışmadan** 3-4 saniyede
+düştü. Kayıtlar (log) 404 dönüyordu; sebep `check-run` açıklama
+kaydından okundu:
+
+> The job was not started because recent account payments have failed or
+> your spending limit needs to be increased. Please check the
+> 'Billing & plans' section in your settings
+
+Bu **kod ya da iş akışı yapılandırması hatası değil**. Aynı işlemde
+Windows iş akışı (aynı `flutter analyze` + `flutter test` adımlarını
+çalıştırıyor) başarıyla tamamlanmıştı ve o işlemde yalnızca bir test
+dosyası eklenmişti. Faho'nun GitHub hesabında **Billing & plans**
+bölümünden ödeme/harcama limiti düzeltilene kadar hiçbir CI çalışması
+başlamayacak; dolayısıyla bu turda Windows sürümü ve Android APK
+üretilemedi.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
