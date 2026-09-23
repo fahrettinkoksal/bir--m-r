@@ -166,7 +166,7 @@ class MartialArtsEngine {
     }
     if (atladi) {
       final String ek = p.canTeach
-          ? ' Artık ${art.label.toLowerCase()} eğitmenliğine başvurabilirsin.'
+          ? ' Artık ${trLower(art.label)} eğitmenliğine başvurabilirsin.'
           : '';
       return '${art.label}: yeni basamak — ${p.rankName}. '
           '${art.ranks[p.level].note}$ek';

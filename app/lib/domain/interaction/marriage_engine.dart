@@ -155,15 +155,24 @@ class MarriageEngine {
       );
     }
 
-    final List<Person> people = state.people
-        .map((Person p) => p.id == partner.id
-            ? p.copyWith(
-                relation: RelationType.es,
-                inPlayerHousehold: true,
-                bond: (p.bond + stil.prototypeOnlyBond).clamp(0, 100),
-              )
-            : p)
-        .toList(growable: false);
+    // Önceki eş, aynı kimlikle **eski eş** olur (Paket 43).
+    //
+    // Boşanmada bu zaten yapılıyordu; eşini kaybedip yeniden evlenen
+    // oyuncuda yapılmıyordu ve kayıtta iki kişi birden "Eş" diye
+    // görünüyordu. Kayıt silinmez, yalnızca bağ etiketi düzelir.
+    final List<Person> people = state.people.map((Person p) {
+      if (p.id == partner.id) {
+        return p.copyWith(
+          relation: RelationType.es,
+          inPlayerHousehold: true,
+          bond: (p.bond + stil.prototypeOnlyBond).clamp(0, 100),
+        );
+      }
+      if (p.relation == RelationType.es) {
+        return p.copyWith(relation: RelationType.eskiEs);
+      }
+      return p;
+    }).toList(growable: false);
 
     final String metin = stil.prototypeOnlyCost == 0
         ? '${partner.fullName} ile ${stil.logText}'

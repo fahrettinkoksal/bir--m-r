@@ -369,6 +369,14 @@ class EventEngine {
     );
   }
 
+  /// Havuzdaki olay kaydı; bilinmeyen kimlikte `null`.
+  GameEvent? _eventById(String id) {
+    for (final GameEvent e in pool) {
+      if (e.id == id) return e;
+    }
+    return null;
+  }
+
   /// Olayın anlattığı evcil hayvan; koşulu sağlayan hayvan yoksa `null`.
   ///
   /// Kayıtta gerçekten duran hayvanlardan seçilir; uydurma hayvan üretilmez.
@@ -426,7 +434,7 @@ class EventEngine {
         .replaceAll('{kisi}', person.firstName)
         .replaceAll('{sahipk}', trLowerFirst(sahip))
         .replaceAll('{sahip}', sahip)
-        .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
+        .replaceAll('{bag}', trLower(person.labelFor(playerAge)));
   }
 
   /// Bekleyen olayı verilen seçimle çözer: etkileri uygular, izi bırakır,
@@ -505,7 +513,18 @@ class EventEngine {
     final Person? person = bondTargetId == null
         ? null
         : working.people.firstWhere((Person p) => p.id == bondTargetId);
-    final String resultText = _fill(choice.resultText, person, working.player.age);
+    // Sonuç metni de olay metniyle aynı yer tutucuları destekler
+    // (Paket 43): yalnızca `{kisi}` doldurulduğu için `{hayvan}` ya da
+    // `{sehir}` içeren bir sonuç metni ekrana ham yer tutucuyla çıkardı.
+    final GameEvent? katalog = _eventById(active.eventId);
+    String resultText = _fill(choice.resultText, person, working.player.age);
+    if (katalog != null) {
+      resultText = _fillPet(
+        _fillTrip(resultText, state, katalog),
+        state,
+        katalog,
+      );
+    }
 
     working = working.copyWith(
       player: player,

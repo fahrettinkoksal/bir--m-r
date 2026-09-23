@@ -489,6 +489,9 @@ class LifeProgression {
           text: '${trUpperFirst(etiket)} '
               '${person.fullName} $gerekce nedeniyle vefat etti.',
           category: LogCategory.aile,
+          // Kayıt kişiye bağlanır (Paket 43): ortak geçmiş vefatın
+          // **gerçek** yılını buradan okur, uydurmaz.
+          personId: person.id,
         ),
       );
     }

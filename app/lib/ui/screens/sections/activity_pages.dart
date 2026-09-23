@@ -216,7 +216,7 @@ class _ActionCard extends StatelessWidget {
                       key: Key('birlikte_${action.id}_${kisi.id}'),
                       label: Text(
                         '${kisi.firstName} · '
-                        '${kisi.labelFor(playerAge).toLowerCase()}',
+                        '${trLower(kisi.labelFor(playerAge))}',
                       ),
                       selected: selected?.id == kisi.id,
                       onSelected: (_) => onSelect!(kisi),
@@ -970,7 +970,7 @@ class _TravelPageState extends State<TravelPage> {
                   key: Key('trip_companion_${kisi.id}'),
                   label: Text(
                     '${kisi.firstName} · '
-                    '${kisi.labelFor(state.player.age).toLowerCase()}',
+                    '${trLower(kisi.labelFor(state.player.age))}',
                   ),
                   selected: _yoldasId == kisi.id,
                   onSelected: (_) => setState(() {

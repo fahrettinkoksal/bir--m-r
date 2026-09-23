@@ -67,17 +67,20 @@ abstract final class SharedHistory {
     }
 
     // Çocuk ve torunun doğumu, oyuncunun o yaşına yazılır.
+    //
+    // Evlat edinilen çocukta bu satır **yazılmaz** (Paket 43): onun aileye
+    // katıldığı yıl kendi kilometre taşı kaydında duruyor. Burada
+    // yazılsaydı katılım, çocuğun doğduğu yıla — yani oyuncunun hiç
+    // yaşamadığı bir ana — düşerdi ve aynı olay iki kez görünürdü.
     if (person.relation == RelationType.cocuk ||
         person.relation == RelationType.torun) {
+      final bool evlatlik = person.development?.adopted ?? false;
       final int dogumYasi = state.player.age - person.age;
-      if (dogumYasi >= 0) {
-        final bool evlatlik = person.development?.adopted ?? false;
+      if (!evlatlik && dogumYasi >= 0) {
         anlar.add(
           SharedMoment(
             age: dogumYasi,
-            text: evlatlik
-                ? '${person.firstName} aileye katıldı.'
-                : '${person.firstName} dünyaya geldi.',
+            text: '${person.firstName} dünyaya geldi.',
             kind: SharedMomentKind.kilometreTasi,
           ),
         );
@@ -101,15 +104,9 @@ abstract final class SharedHistory {
       }
     }
 
-    if (!person.isAlive) {
-      anlar.add(
-        SharedMoment(
-          age: state.player.age,
-          text: '${person.firstName} vefat etti.',
-          kind: SharedMomentKind.kilometreTasi,
-        ),
-      );
-    }
+    // Vefat, **gerçekten olduğu yılla** hayat günlüğünden okunur
+    // (`_logMoments`). Buraya "şu anki yaş" yazmak uydurma bir tarihti ve
+    // her yaş almada kayıyordu (Paket 43).
     return anlar;
   }
 

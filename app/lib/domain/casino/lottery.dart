@@ -48,7 +48,7 @@ abstract final class Lottery {
     }
     if (ticketsThisAge(state, draw) >= draw.maxTicketsPerAge) {
       return InteractionAvailability.blocked(
-        'Bu yıl ${draw.label.toLowerCase()} için yeterince bilet aldın.',
+        'Bu yıl ${trLower(draw.label)} için yeterince bilet aldın.',
       );
     }
     final int fiyat = draw.priceFor(share);
@@ -96,7 +96,7 @@ abstract final class Lottery {
     return (
       state: next,
       applied: true,
-      text: '${draw.label} için ${share.label.toLowerCase()} aldın. '
+      text: '${draw.label} için ${trLower(share.label)} aldın. '
           'Numaran ${bilet.number}. Çekiliş yıl sonunda.',
     );
   }

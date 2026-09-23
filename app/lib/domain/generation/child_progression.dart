@@ -10,6 +10,7 @@ import '../models/person_development.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
+import '../../text/turkish_text.dart';
 
 /// Çocuğun **arka planda gerçekten büyümesi** (D-045).
 ///
@@ -188,14 +189,14 @@ abstract final class ChildProgression {
         final SchoolLevel? yeni = SchoolLevel.forGrade(yeniSinif);
         dev = dev.copyWith(grade: yeniSinif, schoolLevel: yeni);
         if (yeni != null && yeni != eski) {
-          kaydet('$ad ${yeni.label.toLowerCase()} sıralarına geçti.');
+          kaydet('$ad ${trLower(yeni.label)} sıralarına geçti.');
         }
         // Liseye geçen çocuk alanını **o yıl** seçer; sonradan
         // uydurulmaz (D-045).
         if (yeni == SchoolLevel.lise && dev.track == null) {
           final EducationTrackInfo alan = _pickTrack(dev, rng);
           dev = dev.copyWith(track: alan.track);
-          kaydet('$ad lisede ${alan.label.toLowerCase()} alanını seçti.');
+          kaydet('$ad lisede ${trLower(alan.label)} alanını seçti.');
         }
       }
     }
@@ -238,7 +239,7 @@ abstract final class ChildProgression {
           universityYear: 1,
           universityProgramId: bolum.id,
         );
-        kaydet('$ad ${bolum.name.toLowerCase()} bölümünde okumaya başladı.');
+        kaydet('$ad ${trLower(bolum.name)} bölümünde okumaya başladı.');
       }
     }
 
@@ -278,7 +279,7 @@ abstract final class ChildProgression {
       final JobType? bulunan = _findJob(dev, age, rng);
       if (bulunan != null) {
         dev = dev.copyWith(jobId: bulunan.id, jobStartedAtAge: age);
-        kaydet('$ad ${bulunan.name.toLowerCase()} olarak işe başladı.');
+        kaydet('$ad ${trLower(bulunan.name)} olarak işe başladı.');
       }
     }
 

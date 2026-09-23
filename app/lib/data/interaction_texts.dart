@@ -9,6 +9,7 @@ import 'dart:math';
 import '../domain/models/interaction.dart';
 import '../domain/models/person.dart';
 import '../domain/models/relation.dart';
+import '../text/turkish_text.dart';
 
 const List<String> _vakitGecirGenel = <String>[
   '{ad} ile çay demleyip balkonda oturdunuz; konu bir yerden eski '
@@ -241,12 +242,12 @@ String interactionText({
   final String raw = pool[rng.nextInt(pool.length)];
   final String metin = raw
       .replaceAll('{ad}', person.firstName)
-      .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
+      .replaceAll('{bag}', trLower(person.labelFor(playerAge)));
   // Eşya adı yoksa `{esya}` içeren metin hiç kullanılmaz; yine de ekrana
   // doldurulmamış yer tutucu çıkmasın diye burada da güvenceye alınır.
   return giftName == null
       ? metin.replaceAll('{esya}', 'küçük bir hediye')
-      : metin.replaceAll('{esya}', giftName.toLowerCase());
+      : metin.replaceAll('{esya}', trLower(giftName));
 }
 
 /// Verilecek hediye kalmadığında kullanılacak metin.
@@ -257,7 +258,7 @@ String noGiftLeftText({
 }) =>
     _hediyeKalmadi[rng.nextInt(_hediyeKalmadi.length)]
         .replaceAll('{ad}', person.firstName)
-        .replaceAll('{bag}', person.labelFor(playerAge).toLowerCase());
+        .replaceAll('{bag}', trLower(person.labelFor(playerAge)));
 
 const Set<RelationType> _buyukler = <RelationType>{
   RelationType.anneanne,
