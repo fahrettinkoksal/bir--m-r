@@ -76,14 +76,20 @@ class CharacterHeader extends StatelessWidget {
                               // Paket 28: rozet biraz küçüldü; "Tolga
                               // Erdoğan · 250.000 ₺" gibi dolu bir
                               // satırda ad kırpılmasın diye.
-                              ComicTag(
-                                // Kısaltılmış: tam tutar Varlıklar
-                                // ekranında yazar. Uzun tutar burada adı
-                                // kırpıyordu (Paket 30).
-                                text: trMoneyShort(state.player.wallet),
-                                color: BirOmurColors.sari,
-                                tilt: -2,
-                                fontSize: 11.5,
+                              //
+                              // Paket 45: büyük yazı ayarında rozet
+                              // satırı 7,8 px taşırıyordu; artık o da
+                              // esniyor.
+                              Flexible(
+                                child: ComicTag(
+                                  // Kısaltılmış: tam tutar Varlıklar
+                                  // ekranında yazar. Uzun tutar burada
+                                  // adı kırpıyordu (Paket 30).
+                                  text: trMoneyShort(state.player.wallet),
+                                  color: BirOmurColors.sari,
+                                  tilt: -2,
+                                  fontSize: 11.5,
+                                ),
                               ),
                             ],
                           ),
