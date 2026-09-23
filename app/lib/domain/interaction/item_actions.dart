@@ -149,7 +149,7 @@ class ItemActions {
         final LicenseType? gereken = licenseRequiredFor(item);
         if (gereken != null && !state.hasLicense(gereken.id)) {
           return InteractionAvailability.blocked(
-            '${item.name} kullanmak için ${gereken.label.toLowerCase()} '
+            '${item.name} kullanmak için ${trLower(gereken.label)} '
             'gerekiyor.',
           );
         }

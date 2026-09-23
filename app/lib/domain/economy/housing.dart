@@ -138,7 +138,7 @@ class Housing {
     final String sehir = home.location ?? state.player.currentCity;
     final String metin = sehir == state.player.currentCity
         ? '${home.name} artık senin evin; eşyalarını taşıdın.'
-        : '$sehir şehrindeki ${home.name.toLowerCase()} evine taşındın.';
+        : '$sehir şehrindeki ${trLower(home.name)} evine taşındın.';
 
     final GameState next = state.copyWith(
       player: state.player.copyWith(

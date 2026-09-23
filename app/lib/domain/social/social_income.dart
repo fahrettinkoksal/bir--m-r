@@ -153,8 +153,12 @@ abstract final class SocialIncome {
   }
 
   /// Teklifin ekranda gösterilecek metni.
-  static String offerText(SponsorOffer offer) =>
-      'Bir ${offer.label} sana ulaştı. ${offer.category?.pitch ?? ''} '
-      'Karşılığında ${offer.platform.label} üzerinde bir paylaşım '
-      'yapman gerekiyor.';
+  static String offerText(SponsorOffer offer) {
+    // Kategori tanıtımı yoksa araya çift boşluk girmesin (Paket 43).
+    final String tanitim = offer.category?.pitch ?? '';
+    final String arada = tanitim.isEmpty ? '' : '$tanitim ';
+    return 'Bir ${offer.label} sana ulaştı. $arada'
+        'Karşılığında ${offer.platform.label} üzerinde bir paylaşım '
+        'yapman gerekiyor.';
+  }
 }

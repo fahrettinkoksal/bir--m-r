@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'gender.dart';
+import '../../text/turkish_text.dart';
 
 /// "Finger" uygulamasındaki bir profil (Paket 34).
 ///
@@ -45,8 +46,7 @@ class FingerProfile {
 
   /// Profil resmi yerine kullanılan baş harfler.
   String get initials =>
-      '${firstName.characters.first}${lastName.characters.first}'
-          .toUpperCase();
+      trUpper('${firstName.characters.first}${lastName.characters.first}');
 
   bool get isMet => metPersonId != null;
 

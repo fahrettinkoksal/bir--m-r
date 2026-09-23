@@ -167,7 +167,7 @@ class CharacterHeader extends StatelessWidget {
     // D-037); yalnızca olağandışı durumlarda yazılır.
     final List<String> ekler = <String>[
       if (state.careStatus != CareStatus.aileYaninda)
-        state.careStatus.label.toLowerCase(),
+        trLower(state.careStatus.label),
       if (state.hardshipYears > 0) 'geçim sıkıntısı',
     ];
     return ekler.isEmpty ? haneMetni : '$haneMetni · ${ekler.join(' · ')}';

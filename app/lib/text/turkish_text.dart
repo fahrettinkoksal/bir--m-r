@@ -88,3 +88,30 @@ String trLowerFirst(String input) {
       return ilk.toLowerCase() + kalan;
   }
 }
+
+/// Bütün metni Türkçe'ye uygun küçük harfe çevirir.
+///
+/// Dart'ın `toLowerCase()` çağrısı **'I' harfini 'ı' değil 'i' yapar**:
+/// "Işık" → "işık", "IŞIK" → "işik". Oyunda etiketler ("İlkokul",
+/// "İş arkadaşı", "İkiz kız kardeşin", şehir ve marka adları) cümle içine
+/// girerken küçültülüyor ve bu dönüşümden geçiyordu. Ölçümde bugünkü veri
+/// havuzunda görünür bir örneği yoktu; yine de doğru dönüşüm tek yerde
+/// toplandı ki 'Isparta' ya da 'Instagram' gibi bir etiket cümleye
+/// girdiğinde bozuk yazım çıkmasın (Paket 43).
+///
+/// ('İ' harfini Dart doğru biçimde 'i' yapıyor; bu işlev o davranışı
+/// korur, yalnızca 'I' için doğrusunu yazar.)
+String trLower(String input) {
+  final StringBuffer buffer = StringBuffer();
+  for (final String ch in input.split('')) {
+    switch (ch) {
+      case 'İ':
+        buffer.write('i');
+      case 'I':
+        buffer.write('ı');
+      default:
+        buffer.write(ch.toLowerCase());
+    }
+  }
+  return buffer.toString();
+}

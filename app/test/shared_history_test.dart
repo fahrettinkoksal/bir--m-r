@@ -166,17 +166,68 @@ void main() {
       expect(dogum.text, contains('dünyaya geldi'));
     });
 
-    test('vefat kilometre taşı olarak görünür', () {
+    test('vefat, olduğu yılla görünür ve yaş ilerledikçe kaymaz', () {
+      // Paket 43 öncesinde vefat satırı "şu anki yaş" ile yazılıyordu:
+      // annesini 30 yaşında kaybeden oyuncu 60 yaşına geldiğinde ortak
+      // geçmişte annesini 60 yaşındayken kaybetmiş görünüyordu. Artık
+      // yıl **gerçek kayıttan** okunuyor.
       GameState s = hayat();
+      final int olumYasi = s.player.age;
       s = s.copyWith(
         people: s.people
             .map((Person p) =>
                 p.id == 'anne-1' ? p.copyWith(isAlive: false) : p)
             .toList(growable: false),
+        log: <LifeLogEntry>[
+          ...s.log,
+          LifeLogEntry(
+            age: olumYasi,
+            text: 'Annen Sema Yılmaz hastalık nedeniyle vefat etti.',
+            category: LogCategory.aile,
+            personId: 'anne-1',
+          ),
+        ],
       );
-      final List<SharedMoment> anlar =
-          SharedHistory.of(s, s.personById('anne-1')!);
-      expect(anlar.any((SharedMoment m) => m.text.contains('vefat')), isTrue);
+
+      List<SharedMoment> vefat(GameState durum) => SharedHistory.of(
+            durum,
+            durum.personById('anne-1')!,
+          ).where((SharedMoment m) => m.text.contains('vefat')).toList();
+
+      expect(vefat(s), hasLength(1));
+      expect(vefat(s).single.age, olumYasi);
+
+      // Yıllar geçsin: satır hâlâ aynı yılda durmalı.
+      final GameState sonra = s.copyWith(
+        player: s.player.copyWith(age: olumYasi + 30),
+      );
+      expect(vefat(sonra), hasLength(1));
+      expect(
+        vefat(sonra).single.age,
+        olumYasi,
+        reason: 'Vefat yılı yaş ilerledikçe kaymamalı',
+      );
+    });
+
+    test('gerçek ölüm akışı vefatı kişiye bağlar', () {
+      // Uydurma bir kayıt değil, motorun kendi yazdığı satır sınanır.
+      GameState s = hayat(age: 40);
+      s = s.copyWith(
+        people: s.people
+            .map((Person p) => p.id == 'anne-1'
+                ? p.copyWith(age: 118) // yaşı gelmiş: bu yıl vefat eder
+                : p)
+            .toList(growable: false),
+      );
+      final GameState sonra = LifeProgression(Random(3)).advanceOneYear(s);
+      final Person anne = sonra.personById('anne-1')!;
+      expect(anne.isAlive, isFalse, reason: 'Bu yaşta vefat etmeliydi');
+
+      final List<SharedMoment> vefat = SharedHistory.of(sonra, anne)
+          .where((SharedMoment m) => m.text.contains('vefat'))
+          .toList();
+      expect(vefat, hasLength(1));
+      expect(vefat.single.age, sonra.player.age);
     });
 
     test('anlar eskiden yeniye sıralanır ve sayısı sınırlıdır', () {
