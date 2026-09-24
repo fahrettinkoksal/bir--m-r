@@ -1025,6 +1025,13 @@ taşınıyor. Ünlüye yılda iki kez yazılabiliyor ve geri takip edenler
 İlişkiler ekranında "Ünlüler ve tanıdıklar" başlığında duruyor. Takipçi
 sayıları Türkçe binlik ayracıyla yazılıyor (2.232).
 
+**Paket L — Finger: niyet, flört ve süzgeç (D-107).** Tanışmak artık
+sevgili olmak değil: araya **flört** basamağı girdi. Hem oyuncunun hem
+adayın "ne aradığı" profilde yazıyor ve buluşmanın sonucu ikisine birden
+bakıyor. Flört kendiliğinden sevgiliye dönmüyor; oyuncu teklif ediyor ve
+yakınlık yeterliyse resmîleşiyor. Adaylar ekonomik duruma göre
+süzülebiliyor. Beğeni kotası yılda 5'ten 12'ye çıktı, premium 30 kaldı.
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1093,12 +1100,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-125 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-126 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1923 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1935 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

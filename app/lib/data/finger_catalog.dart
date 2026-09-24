@@ -7,6 +7,32 @@
 /// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-102).
 library;
 
+/// Bir profilin **ne aradığı** (D-107).
+///
+/// Faho bildirdi: "eşleşince ne istediğim sorulsun; tanışmak sevgili
+/// olmak demek değil". Niyet hem oyuncunun kendi profilinde hem de
+/// karşıdaki profilde bulunur; buluşmanın sonucu ikisine birden bakar.
+enum FingerIntent {
+  ciddi('Ciddi bir ilişki', 'Uzun soluklu bir şey arıyor.'),
+  arkadaslik('Arkadaşlık', 'Şimdilik yalnızca tanışmak istiyor.'),
+  belirsiz('Henüz bilmiyorum', 'Nereye varacağına bakmak istiyor.');
+
+  const FingerIntent(this.label, this.description);
+
+  final String label;
+  final String description;
+}
+
+/// prototypeOnly: üretilen profillerde niyet dağılımı.
+///
+/// Uygulamada çoğunluk "ciddi" yazar ama gerçekte kararsızlar da az
+/// değildir; oyun bunu yansıtır.
+const Map<FingerIntent, double> kFingerIntentWeights = <FingerIntent, double>{
+  FingerIntent.ciddi: 0.45,
+  FingerIntent.arkadaslik: 0.25,
+  FingerIntent.belirsiz: 0.30,
+};
+
 /// Profillerde görünen kısa tanıtım yazıları.
 const List<String> kFingerBios = <String>[
   'Kahveyi sade içerim, sohbeti uzun severim.',
@@ -83,7 +109,10 @@ const int kFingerMaxSwipesPerAge = 25;
 /// premium satın alalım". Oyun gün gün değil yıl yıl ilerlediği için
 /// "günde 5" oyunun ölçeğine **yılda 5 beğeni** olarak taşındı; geçmek
 /// sınırsızdır, sınır yalnızca beğeniye konur.
-const int kFingerMaxLikesPerAge = 5;
+///
+/// Faho'nun Q-121 kararı: yılda **5** beğeni azdı, **12** oldu; premium
+/// üyelikte **30** kaldı (D-107).
+const int kFingerMaxLikesPerAge = 12;
 
 /// prototypeOnly: premium üyelikte bir yıldaki beğeni sayısı.
 const int kFingerPremiumLikesPerAge = 30;

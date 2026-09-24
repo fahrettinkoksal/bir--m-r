@@ -10,6 +10,7 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../domain/models/wealth.dart';
 
 /// "Finger" tanışma uygulaması (Paket 34).
 ///
@@ -70,6 +71,9 @@ class _FingerPageState extends State<FingerPage> {
         _SelfProfileCard(
           onSaved: (FingerOutcome? o) => setState(() => _sonuc = o),
         ),
+        const SizedBox(height: 12),
+        // Ne aradığın ve kimleri görmek istediğin (D-107).
+        _IntentCard(onChanged: () => setState(() {})),
         const SizedBox(height: 12),
         // Premium (D-081): beğeni hakkını artırır, sınırsız yapmaz.
         if (!controller.hasFingerPremium) ...<Widget>[
@@ -211,6 +215,16 @@ class _ProfileCard extends StatelessWidget {
                             : '${profile.city} · ${profile.occupation}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      // Ne aradığı ve ekonomik durumu gizli değildir
+                      // (D-107); profilde yazar.
+                      Text(
+                        '${profile.intent.label} · ${profile.wealth.label}',
+                        key: Key('finger_intent_${profile.id}'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
@@ -548,6 +562,86 @@ class _SecimSatiri extends StatelessWidget {
             Expanded(
               child: Text(metin, style: theme.textTheme.bodySmall),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Oyuncunun **ne aradığı** ve aday süzgeci (D-107).
+///
+/// Niyet gerçek bir kural değiştirir: buluşmanın sonucu hem buna hem
+/// karşı tarafın niyetine bakar. Süzgeç de gerçektir; kapalıyken bütün
+/// adaylar gösterilir.
+class _IntentCard extends StatelessWidget {
+  const _IntentCard({required this.onChanged});
+
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+
+    return Container(
+      key: const Key('finger_intent_card'),
+      decoration: panelDecoration(context, radius: 22),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Ne arıyorsun?', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 2),
+            Text(
+              'Buluşmanın sonucu hem senin hem karşı tarafın niyetine '
+              'bakar. Tanışmak sevgili olmak demek değildir.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final FingerIntent i in FingerIntent.values)
+              _SecimSatiri(
+                key: Key('finger_intent_${i.name}'),
+                secili: controller.fingerIntent == i,
+                metin: i.label,
+                onTap: () {
+                  controller.setFingerIntent(i);
+                  onChanged();
+                },
+              ),
+            const SizedBox(height: 10),
+            Text('Kimleri göreyim?', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 2),
+            Text(
+              'Süzgeç açıkken yalnızca seçtiğin ekonomik durumdaki '
+              'adaylar gösterilir.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _SecimSatiri(
+              key: const Key('finger_wealth_hepsi'),
+              secili: controller.fingerWealthFilter == null,
+              metin: 'Fark etmez',
+              onTap: () {
+                controller.setFingerWealthFilter(null);
+                onChanged();
+              },
+            ),
+            for (final WealthTier t in WealthTier.values)
+              _SecimSatiri(
+                key: Key('finger_wealth_${t.name}'),
+                secili: controller.fingerWealthFilter == t,
+                metin: t.label,
+                onTap: () {
+                  controller.setFingerWealthFilter(t);
+                  onChanged();
+                },
+              ),
           ],
         ),
       ),

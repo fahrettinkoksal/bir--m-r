@@ -45,7 +45,16 @@ enum RelationType {
   // silinirdi; bu projede kayıt silinmez.
   //
   // Yeni değer listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
-  yegen;
+  yegen,
+
+  // Flört: tanışıldı, görüşülüyor, ama daha "sevgili" denmedi (D-107).
+  //
+  // Faho bildirdi: "tanışmak sevgili olmak demek değil". Finger'da
+  // buluşmak artık doğrudan sevgili yapmıyor; arada bu basamak var.
+  // Flört ilerleyebilir (sevgili olur) ya da biter.
+  //
+  // Yeni değer listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  flort;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -84,6 +93,9 @@ enum RelationType {
       case RelationType.sevgili:
       case RelationType.eskiSevgili:
       case RelationType.eskiEs:
+      // Flört de romantik bölümde listelenir; henüz sevgili değildir
+      // ama arkadaş da değildir (D-107).
+      case RelationType.flort:
         return RelationGroup.romantik;
     }
   }
@@ -161,6 +173,8 @@ String relationLabel({
       return 'Arkadaş';
     case RelationType.isArkadasi:
       return 'İş arkadaşı';
+    case RelationType.flort:
+      return 'Flört';
     case RelationType.sevgili:
       return gender == Gender.kadin ? 'Kız arkadaş' : 'Erkek arkadaş';
     case RelationType.eskiSevgili:
@@ -228,6 +242,8 @@ String relationPossessive({
       return 'Arkadaşın';
     case RelationType.isArkadasi:
       return 'İş arkadaşın';
+    case RelationType.flort:
+      return 'Flörtün';
     case RelationType.sevgili:
       return gender == Gender.kadin ? 'Kız arkadaşın' : 'Erkek arkadaşın';
     case RelationType.eskiSevgili:

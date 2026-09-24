@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/finger_catalog.dart';
 import 'gender.dart';
+import 'wealth.dart';
 import '../../text/turkish_text.dart';
 
 /// "Finger" uygulamasındaki bir profil (Paket 34).
@@ -20,6 +22,8 @@ class FingerProfile {
     required this.bio,
     required this.interests,
     required this.occupation,
+    this.intent = FingerIntent.belirsiz,
+    this.wealth = WealthTier.ortaHalli,
     this.matchedAtAge,
     this.metPersonId,
   });
@@ -35,6 +39,15 @@ class FingerProfile {
 
   /// Çalışmıyorsa boş kalır; meslek uydurulmaz.
   final String? occupation;
+
+  /// Bu kişinin **ne aradığı** (D-107). Buluşmanın sonucu buna bakar.
+  final FingerIntent intent;
+
+  /// Kişinin ekonomik durumu (D-107).
+  ///
+  /// Oyuncu isterse adayları buna göre süzebilir. Değer profilde
+  /// görünür; gizli bir şey değildir.
+  final WealthTier wealth;
 
   /// Eşleşildiyse hangi yaşta eşleşildiği.
   final int? matchedAtAge;
@@ -61,6 +74,8 @@ class FingerProfile {
         bio: bio,
         interests: interests,
         occupation: occupation,
+        intent: intent,
+        wealth: wealth,
         matchedAtAge: matchedAtAge ?? this.matchedAtAge,
         metPersonId: metPersonId ?? this.metPersonId,
       );

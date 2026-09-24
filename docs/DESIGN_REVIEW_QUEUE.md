@@ -2883,5 +2883,34 @@ Faho bildirdi: "sponsorluk için platform başına en az 5.000 takipçi olsun ve
 
 ---
 
+### Q-126 — Flört basamağı, niyet ve Finger süzgeci
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-107 (Q-121'in kararları) · `app/lib/domain/interaction/finger.dart`, `app/lib/data/finger_catalog.dart`, `app/lib/domain/models/relation.dart` · Test: `app/test/package_l_test.dart`
+
+Faho bildirdi: "eşleşince ne istediğim sorulsun", "tanışmak sevgili olmak demek değil, flört durumu olsun", "zenginlik filtresi olsun", "beğeni 12/yıl normal, 30 premium olsun". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Niyetin sonucu.**
+
+| Oyuncu | Karşı taraf | Sonuç |
+|---|---|---|
+| Ciddi | Ciddi | Flört |
+| Ciddi | Belirsiz | Flört |
+| Belirsiz | Belirsiz | Flört |
+| Herhangi | Arkadaşlık | Arkadaş |
+| Arkadaşlık | Herhangi | Arkadaş |
+| Hayatında biri var | — | Arkadaş |
+
+**Sayılar.** Flörtün sevgiliye dönmesi için gereken yakınlık **60**. Beğeni kotası **12**, premiumda **30**. Aday varlık dağılımı: çok yoksul %6, dar gelirli %16, orta halli %50, varlıklı %22, çok varlıklı %6.
+
+**Karar soruları:**
+1. Flörtün sevgiliye dönmesi için **60 yakınlık** doğru mu? Buluşma 45-62 arası bir yakınlıkla başlıyor, yani bazı flörtler ilk yıl resmîleşebiliyor.
+2. Flört **kendiliğinden bitmeli mi**? Şu an yalnızca oyuncu ilerletebiliyor; ilgilenilmeyen flört yıllarca flört kalıyor (ilgisizlik yakınlığı düşürüyor ama bağ kopmuyor).
+3. Flört sırasında yakınlaşma (D-054 kapsamı) açık olmalı mı? Şu an yalnızca sevgiliyle açık.
+4. Süzgeç **ücretsiz** mi kalmalı, yoksa premium özelliği mi olmalı?
+5. Süzgeç açıkken üretilen adayların **hepsi** o kademeden oluyor. Bu, "çok varlıklı" süzgecini gerçekçi olmayan biçimde kolaylaştırıyor mu? Alternatif: süzgeci bir eğilim yapmak (o kademeden daha çok, ama yalnızca o değil).
+6. Beğeni kotası **12** doğru mu?
+7. Niyet seçenekleri üç tane. "Evlilik düşünüyorum" gibi dördüncü bir basamak gerekir mi?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

@@ -19,6 +19,7 @@ import '../../domain/models/book_progress.dart';
 import '../../domain/models/martial_progress.dart';
 import '../../domain/models/hobby_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
+import '../finger_catalog.dart';
 import '../../domain/models/finger_profile.dart';
 import '../lottery_catalog.dart';
 import '../../domain/models/career.dart';
@@ -109,6 +110,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'fingerBio': state.fingerBio,
       'fingerInterests': state.fingerInterests,
       'fingerPremiumUntilAge': state.fingerPremiumUntilAge,
+      // Oyuncunun niyeti ve süzgeci (D-107); alan eklemeli.
+      'fingerIntent': state.fingerIntent.name,
+      'fingerWealthFilter': state.fingerWealthFilter?.name,
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
       // Ünlülerle kurulan temaslar. Eski kayıtlarda bu alan yoktur;
@@ -395,6 +399,10 @@ Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
       'bio': p.bio,
       'interests': p.interests,
       'occupation': p.occupation,
+      // Niyet ve ekonomik durum alan eklemeli (D-107); eski kayıtta
+      // yoktur ve varsayılanla okunur.
+      'intent': p.intent.name,
+      'wealth': p.wealth.name,
       'matchedAtAge': p.matchedAtAge,
       'metPersonId': p.metPersonId,
     };
@@ -860,6 +868,20 @@ GameState decodeGameState(Map<String, Object?> json) {
           : _stringList(json, 'fingerInterests'),
     ),
     fingerPremiumUntilAge: _intOrNull(json, 'fingerPremiumUntilAge'),
+    fingerIntent: json['fingerIntent'] == null
+        ? FingerIntent.belirsiz
+        : _enumByName(
+            FingerIntent.values,
+            _string(json, 'fingerIntent'),
+            'fingerIntent',
+          ),
+    fingerWealthFilter: json['fingerWealthFilter'] == null
+        ? null
+        : _enumByName(
+            WealthTier.values,
+            _string(json, 'fingerWealthFilter'),
+            'fingerWealthFilter',
+          ),
     socialAccounts: List<SocialAccount>.unmodifiable(
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
@@ -1242,6 +1264,20 @@ FingerProfile _decodeFinger(Map<String, Object?> json) => FingerProfile(
             .toList(growable: false),
       ),
       occupation: _stringOrNull(json, 'occupation'),
+      intent: json['intent'] == null
+          ? FingerIntent.belirsiz
+          : _enumByName(
+              FingerIntent.values,
+              _string(json, 'intent'),
+              'finger.intent',
+            ),
+      wealth: json['wealth'] == null
+          ? WealthTier.ortaHalli
+          : _enumByName(
+              WealthTier.values,
+              _string(json, 'wealth'),
+              'finger.wealth',
+            ),
       matchedAtAge: _intOrNull(json, 'matchedAtAge'),
       metPersonId: _stringOrNull(json, 'metPersonId'),
     );

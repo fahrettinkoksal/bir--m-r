@@ -94,6 +94,15 @@ abstract final class Finger {
   }
 
   /// Bu profil oyuncunun yaşına hâlâ uygun mu?
+  /// Profil oyuncunun süzgecinden geçiyor mu? (D-107)
+  ///
+  /// Süzgeç kapalıysa herkes geçer. Süzgeç gerçek bir kısıttır: dar
+  /// tutmak deste üretimini zorlaştırır ama kapıyı kapatmaz, çünkü yeni
+  /// adaylar süzgece göre üretilir.
+  static bool fitsFilter(GameState state, FingerProfile profile) =>
+      state.fingerWealthFilter == null ||
+      profile.wealth == state.fingerWealthFilter;
+
   static bool fitsAge(GameState state, FingerProfile profile) =>
       profile.age >= minCandidateAge(state.player.age) &&
       profile.age <= maxCandidateAge(state.player.age);
@@ -225,7 +234,7 @@ abstract final class Finger {
     // gösteriyordu. Faho'nun bildirdiği durum buydu. Artık her açılışta
     // yaşa uymayanlar atılır ve yerlerine uygun profil üretilir.
     final List<FingerProfile> deste = state.fingerDeck
-        .where((FingerProfile p) => fitsAge(state, p))
+        .where((FingerProfile p) => fitsAge(state, p) && fitsFilter(state, p))
         .toList(growable: true);
 
     if (deste.length >= kFingerDeckSize &&
@@ -250,7 +259,7 @@ abstract final class Finger {
   /// profillerden de temizlenir.
   static GameState _ensureIncoming(GameState state, Random rng) {
     final List<FingerProfile> gelen = state.fingerIncoming
-        .where((FingerProfile p) => fitsAge(state, p))
+        .where((FingerProfile p) => fitsAge(state, p) && fitsFilter(state, p))
         .toList(growable: true);
 
     final int hedef = _incomingTarget(state);
@@ -431,8 +440,15 @@ abstract final class Finger {
 
     const Romance romance = Romance();
     final bool bosta = !romance.hasPartner(state) && state.marriage == null;
+
+    // Tanışmak sevgili olmak değildir (D-107). Buluşmanın sonucu iki
+    // tarafın da **ne aradığına** bakar; oyun kimseyi kimsenin sevgilisi
+    // yapmaz.
+    final bool arkadasKalir = !bosta ||
+        state.fingerIntent == FingerIntent.arkadaslik ||
+        profil.intent == FingerIntent.arkadaslik;
     final RelationType iliski =
-        bosta ? RelationType.sevgili : RelationType.arkadas;
+        arkadasKalir ? RelationType.arkadas : RelationType.flort;
 
     final String kimlik = _nextPersonId(state);
     final Person kisi = Person(
@@ -451,7 +467,7 @@ abstract final class Finger {
       wealth: profil.age >= 18 ? WealthTier.ortaHalli : null,
       city: profil.city,
       bond: rng.between(45, 62), // prototypeOnly
-      infertile: iliski == RelationType.sevgili
+      infertile: iliski == RelationType.flort
           ? Intimacy.rollPartnerInfertility(rng)
           : false,
     );
@@ -461,16 +477,14 @@ abstract final class Finger {
             p.id == profileId ? p.copyWith(metPersonId: kimlik) : p)
         .toList(growable: false);
 
-    final String metin = bosta
-        ? '${profil.firstName} ile buluştunuz. Artık sevgilisiniz.'
-        : '${profil.firstName} ile buluştunuz. Arkadaş oldunuz.';
+    final String metin = _meetText(state, profil, iliski);
 
     GameState next = state.copyWith(
       people: List<Person>.unmodifiable(<Person>[...state.people, kisi]),
       fingerMatches: List<FingerProfile>.unmodifiable(eslesmeler),
-      storyFlags: bosta
-          ? <String>{...state.storyFlags, StoryFlags.romantikIliskide}
-          : state.storyFlags,
+      // Flört romantik bir ilişki **değildir**; hikâye işareti yalnızca
+      // sevgili olununca konur (D-107).
+      storyFlags: state.storyFlags,
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         LifeLogEntry(
@@ -486,6 +500,94 @@ abstract final class Finger {
       outcome: FingerOutcome(applied: true, text: metin, person: kisi),
     );
   }
+
+  /// Buluşmanın sonucunu **iki tarafın niyetiyle birlikte** anlatır.
+  static String _meetText(
+    GameState state,
+    FingerProfile profil,
+    RelationType iliski,
+  ) {
+    if (iliski == RelationType.flort) {
+      return '${profil.firstName} ile buluştunuz. İyi geçti; '
+          'görüşmeye devam ediyorsunuz. Henüz "sevgili" demediniz.';
+    }
+    if (state.fingerIntent == FingerIntent.arkadaslik ||
+        profil.intent == FingerIntent.arkadaslik) {
+      return '${profil.firstName} ile buluştunuz. İkinizden biri '
+          'şimdilik arkadaşlık arıyordu; arkadaş kaldınız.';
+    }
+    return '${profil.firstName} ile buluştunuz. Hayatında zaten biri '
+        'olduğu için arkadaş kaldınız.';
+  }
+
+  /// Flörtü sevgiliye çevirir (D-107).
+  ///
+  /// Kendiliğinden olmaz: oyuncu **isteyecek** ve karşı tarafın yakınlığı
+  /// yeterli olacak. Hayatında biri varken flört sevgiliye dönüşmez.
+  static FingerResult makeOfficial(GameState state, String personId) {
+    final Person? kisi = state.personById(personId);
+    if (kisi == null || kisi.relation != RelationType.flort) {
+      return FingerResult(
+        state: state,
+        outcome: const FingerOutcome(
+          applied: false,
+          text: 'Böyle bir flörtün yok.',
+        ),
+      );
+    }
+    if (!kisi.isAlive) {
+      return FingerResult(
+        state: state,
+        outcome: const FingerOutcome(applied: false, text: 'Artık mümkün değil.'),
+      );
+    }
+    const Romance romance = Romance();
+    if (romance.hasPartner(state) || state.marriage != null) {
+      return FingerResult(
+        state: state,
+        outcome: const FingerOutcome(
+          applied: false,
+          text: 'Hayatında zaten biri var.',
+        ),
+      );
+    }
+    if (kisi.bond < prototypeOnlyOfficialBond) {
+      return FingerResult(
+        state: state,
+        outcome: FingerOutcome(
+          applied: false,
+          text: '${kisi.firstName} henüz o kadar yakın hissetmiyor. '
+              'Biraz daha vakit geçirmeniz gerekiyor '
+              '(yakınlık $prototypeOnlyOfficialBond olmalı, '
+              'şu an ${kisi.bond}).',
+        ),
+      );
+    }
+
+    final Person yeni = kisi.copyWith(relation: RelationType.sevgili);
+    final String metin = '${kisi.firstName} ile artık sevgilisiniz.';
+    final GameState next = state.copyWith(
+      people: List<Person>.unmodifiable(
+        state.people.map((Person p) => p.id == personId ? yeni : p),
+      ),
+      storyFlags: <String>{...state.storyFlags, StoryFlags.romantikIliskide},
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: state.player.age,
+          text: metin,
+          category: LogCategory.aile,
+        ),
+      ]),
+    );
+    return FingerResult(
+      state: next,
+      outcome: FingerOutcome(applied: true, text: metin, person: yeni),
+    );
+  }
+
+  /// prototypeOnly: flörtün sevgiliye dönmesi için gereken yakınlık.
+  static const int prototypeOnlyOfficialBond = 60;
 
   // --- İç işler ---------------------------------------------------------
 
@@ -546,6 +648,34 @@ abstract final class Finger {
   /// Karşı cinsten profil gösterilir. **Bu bir oyun tasarımı kararı
   /// değildir**; yönelim ve eşleşme kuralları Faho ile kararlaştırılacak
   /// (`Romance.start` ile aynı geçici varsayım).
+  /// prototypeOnly: aday profillerin varlık dağılımı.
+  ///
+  /// Gerçek hayatta olduğu gibi orta kademe en kalabalıktır.
+  static const Map<WealthTier, double> prototypeOnlyWealthWeights =
+      <WealthTier, double>{
+    WealthTier.cokYoksul: 0.06,
+    WealthTier.yoksul: 0.16,
+    WealthTier.ortaHalli: 0.50,
+    WealthTier.varlikli: 0.22,
+    WealthTier.cokVarlikli: 0.06,
+  };
+
+  static FingerIntent _rollIntent(Random rng) =>
+      _weightedPick(kFingerIntentWeights, rng);
+
+  static WealthTier _rollWealth(Random rng) =>
+      _weightedPick(prototypeOnlyWealthWeights, rng);
+
+  static T _weightedPick<T>(Map<T, double> weights, Random rng) {
+    final double toplam = weights.values.fold<double>(0, (double a, double b) => a + b);
+    double kalan = rng.nextDouble() * toplam;
+    for (final MapEntry<T, double> e in weights.entries) {
+      kalan -= e.value;
+      if (kalan <= 0) return e.key;
+    }
+    return weights.keys.last;
+  }
+
   static FingerProfile _uret(GameState state, Random rng, int index) {
     final Gender gender =
         state.player.gender == Gender.kadin ? Gender.erkek : Gender.kadin;
@@ -573,6 +703,11 @@ abstract final class Finger {
       bio: rng.pick(kFingerBios),
       interests: List<String>.unmodifiable(ilgiler),
       occupation: calisiyor ? rng.pick(meslekler) : null,
+      // Herkes aynı şeyi aramaz (D-107).
+      intent: _rollIntent(rng),
+      // Süzgeç açıksa üretilen aday da ona uyar; yoksa uygulama
+      // oyuncuya hiç uygun profil göstermezdi.
+      wealth: state.fingerWealthFilter ?? _rollWealth(rng),
     );
   }
 }

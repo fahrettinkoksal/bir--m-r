@@ -80,6 +80,8 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
 
     case RelationType.arkadas:
     case RelationType.sevgili:
+    // Flörtle de vakit geçirilir, sohbet edilir, hediye alınır (D-107).
+    case RelationType.flort:
       return _arkadas;
 
     // İş arkadaşıyla vakit geçirilir ve sohbet edilir; para istemek iş

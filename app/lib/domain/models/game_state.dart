@@ -8,7 +8,9 @@ import 'book_progress.dart';
 import 'martial_progress.dart';
 import 'hobby_progress.dart';
 import 'lottery_ticket.dart';
+import '../../data/finger_catalog.dart';
 import 'finger_profile.dart';
+import 'wealth.dart';
 import 'career.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
@@ -93,6 +95,8 @@ class GameState {
     this.fingerBio,
     this.fingerInterests = const <String>[],
     this.fingerPremiumUntilAge,
+    this.fingerIntent = FingerIntent.belirsiz,
+    this.fingerWealthFilter,
     this.lastSportAge,
     this.lastGroomingAge,
     this.lastLearningAge,
@@ -634,6 +638,18 @@ class GameState {
   /// Premium üyeliğin geçerli olduğu son yaş; üyelik yoksa `null`.
   final int? fingerPremiumUntilAge;
 
+  /// Oyuncunun Finger'da **ne aradığı** (D-107).
+  ///
+  /// Buluşmanın sonucu hem buna hem karşı tarafın niyetine bakar:
+  /// tanışmak kendiliğinden sevgili olmak değildir.
+  final FingerIntent fingerIntent;
+
+  /// Adayları ekonomik duruma göre süzme tercihi (D-107).
+  ///
+  /// `null` ise süzgeç kapalıdır ve bütün adaylar gösterilir. Süzgeç
+  /// gerçek bir kısıttır: dar tutmak deste üretimini zorlaştırır.
+  final WealthTier? fingerWealthFilter;
+
   /// Premium üyelik şu an geçerli mi?
   bool get hasFingerPremium =>
       fingerPremiumUntilAge != null && player.age <= fingerPremiumUntilAge!;
@@ -847,6 +863,8 @@ class GameState {
     String? fingerBio,
     List<String>? fingerInterests,
     int? fingerPremiumUntilAge,
+    FingerIntent? fingerIntent,
+    Object? fingerWealthFilter = _unsetEvent,
     int? lastSportAge,
     int? lastGroomingAge,
     int? lastLearningAge,
@@ -944,6 +962,10 @@ class GameState {
       fingerInterests: fingerInterests ?? this.fingerInterests,
       fingerPremiumUntilAge:
           fingerPremiumUntilAge ?? this.fingerPremiumUntilAge,
+      fingerIntent: fingerIntent ?? this.fingerIntent,
+      fingerWealthFilter: fingerWealthFilter == _unsetEvent
+          ? this.fingerWealthFilter
+          : fingerWealthFilter as WealthTier?,
       lastSportAge: lastSportAge ?? this.lastSportAge,
       lastGroomingAge: lastGroomingAge ?? this.lastGroomingAge,
       lastLearningAge: lastLearningAge ?? this.lastLearningAge,

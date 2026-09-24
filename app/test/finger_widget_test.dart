@@ -112,9 +112,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.state!.people.length, once + 1);
+    // Tanışmak sevgili olmak değildir (D-107): sonuç, iki tarafın
+    // niyetine göre flört ya da arkadaşlıktır — ama asla doğrudan
+    // sevgililik değildir.
     expect(
       controller.state!.people.last.relation,
-      RelationType.sevgili,
+      anyOf(RelationType.flort, RelationType.arkadas),
+    );
+    expect(
+      controller.state!.people.last.relation,
+      isNot(RelationType.sevgili),
     );
   });
 

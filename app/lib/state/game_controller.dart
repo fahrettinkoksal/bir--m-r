@@ -21,6 +21,8 @@ import '../domain/generation/life_progression.dart';
 import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
+import '../data/finger_catalog.dart';
+import '../domain/models/wealth.dart';
 import '../data/media_catalog.dart';
 import '../domain/social/media_opportunities.dart';
 import '../domain/interaction/child_naming.dart';
@@ -1080,6 +1082,39 @@ class GameController extends ChangeNotifier {
 
   FingerOutcome? meetFingerMatch(String profileId) =>
       _runFinger((GameState s) => Finger.meet(s, profileId, _random));
+
+  /// Flörtü sevgiliye çevirir (D-107).
+  FingerOutcome? makeRelationshipOfficial(String personId) =>
+      _runFinger((GameState s) => Finger.makeOfficial(s, personId));
+
+  /// Oyuncunun Finger'da ne aradığı (D-107).
+  FingerIntent get fingerIntent =>
+      _state?.fingerIntent ?? FingerIntent.belirsiz;
+
+  /// Niyeti değiştirir; sonraki buluşmalarda gerçekten kullanılır.
+  void setFingerIntent(FingerIntent intent) {
+    final GameState? current = _state;
+    if (current == null || current.fingerIntent == intent) return;
+    _state = current.copyWith(fingerIntent: intent);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Ekonomik durum süzgeci; `null` ise süzgeç kapalıdır (D-107).
+  WealthTier? get fingerWealthFilter => _state?.fingerWealthFilter;
+
+  /// Süzgeci değiştirir ve desteyi yeni süzgece göre yeniler.
+  void setFingerWealthFilter(WealthTier? tier) {
+    final GameState? current = _state;
+    if (current == null || current.fingerWealthFilter == tier) return;
+    // Süzgeç değişince eski deste geçersizdir; yeni adaylar üretilir.
+    _state = Finger.ensureDeck(
+      current.copyWith(fingerWealthFilter: tier),
+      _random,
+    );
+    _autoSave();
+    notifyListeners();
+  }
 
   FingerOutcome? _runFinger(FingerResult Function(GameState) islem) {
     final GameState? current = _state;

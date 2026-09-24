@@ -21,6 +21,7 @@ import 'effect_chips.dart';
 import 'kilim_divider.dart';
 import '../../domain/models/person_development.dart';
 import '../../text/turkish_text.dart';
+import '../../domain/interaction/finger.dart';
 
 /// Kişi ayrıntısı ve aile etkileşimleri.
 ///
@@ -574,6 +575,27 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                       ),
                     ),
                     child: const Text('Boşan'),
+                  ),
+                ),
+              ],
+              // Flörtü sevgiliye çevirmek (D-107): kendiliğinden olmaz,
+              // oyuncu ister ve yakınlık yeterli olmalıdır.
+              if (person.isAlive &&
+                  person.relation == RelationType.flort) ...<Widget>[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonal(
+                    key: const Key('make_official'),
+                    onPressed: () {
+                      final FingerOutcome? o = GameScope.of(context)
+                          .makeRelationshipOfficial(person.id);
+                      setState(() {
+                        _notice = o?.text;
+                        _lastOutcome = null;
+                      });
+                    },
+                    child: const Text('Sevgili olmayı teklif et'),
                   ),
                 ),
               ],
