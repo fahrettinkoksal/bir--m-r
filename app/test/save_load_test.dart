@@ -321,6 +321,8 @@ void main() {
       controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
       for (int i = 0; i < 30; i++) {
         if (controller.state!.hasPendingEvent) return controller.state!;
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveTrackChoice(controller);
         controller.ageUp();
       }
       fail('Bekleyen olaylı bir duruma ulaşılamadı');

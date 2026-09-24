@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bir_omur/data/health_crisis_catalog.dart';
+import 'package:bir_omur/data/education_tracks.dart';
 import 'package:bir_omur/domain/generation/school_people.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
@@ -128,6 +129,18 @@ Future<void> answerPendingNotices(
   }
 }
 
+/// Lise alanı seçimi bekliyorsa oyuncunun yerine bir alan seçer (D-094).
+///
+/// Gerçek oyunda bu kararı oyuncu verir ve seçim yapılmadan yaş atlanmaz;
+/// otomatik ilerleyen testlerde aynı adımı burası atar. Puanın yettiği ilk
+/// alan seçilir — puan ne olursa olsun en az bir alan açıktır.
+void resolveTrackChoice(GameController controller) {
+  if (!controller.needsTrackChoice) return;
+  final List<EducationTrackInfo> acik = controller.availableTracks();
+  if (acik.isEmpty) return;
+  controller.chooseTrack(acik.first.track);
+}
+
 /// Hedef yaşa, yol boyunca çıkan olayları yanıtlayarak ilerler.
 Future<void> ageTo(
   WidgetTester tester,
@@ -141,6 +154,9 @@ Future<void> ageTo(
     if (controller.state!.deceased) return;
     if (guard++ > 200) fail('Yaş ilerlemiyor.');
     await answerPendingEvents(tester, controller, preferChoiceId: preferChoiceId);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('age_up_button')));
     await tester.pumpAndSettle();
   }
@@ -195,6 +211,8 @@ void advanceToAge(
     if (controller.state!.deceased) return;
     if (guard++ > 500) throw StateError('Yaş ilerlemiyor.');
     resolvePendingEvents(controller, preferChoiceId: preferChoiceId);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
   }
   resolvePendingEvents(controller, preferChoiceId: preferChoiceId);

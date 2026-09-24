@@ -303,6 +303,8 @@ void main() {
         aday.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 40 && friendId == null; i++) {
           resolvePendingEvents(aday, preferChoiceId: 'tanis');
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveTrackChoice(aday);
           aday.ageUp();
           resolvePendingEvents(aday, preferChoiceId: 'tanis');
           if (aday.state == null || aday.state!.deceased) break;
@@ -322,6 +324,8 @@ void main() {
       final int bondOnce = c.state!.personById(friendId!)!.bond;
       for (int i = 0; i < 10; i++) {
         resolvePendingEvents(c, preferChoiceId: 'tanis');
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveTrackChoice(c);
         c.ageUp();
       }
       resolvePendingEvents(c, preferChoiceId: 'tanis');
@@ -516,6 +520,8 @@ void main() {
           resolvePendingEvents(controller);
           // Hayat bu tohumda erken bitebilir; vefat edenin yaşı ilerlemez.
           if (controller.state!.deceased) break;
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveTrackChoice(controller);
           controller.ageUp();
           expect(controller.state!.player.age, yasOnce + 1);
         }

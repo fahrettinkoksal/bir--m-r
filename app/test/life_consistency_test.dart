@@ -24,6 +24,8 @@ import 'package:bir_omur/domain/pets/pet_care.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Hayat tutarlılığı / çelişki taraması (Paket 46).
 ///
 /// Mevcut kilitlenme taramasını (`life_invariants_test.dart`) **tamamlar**;
@@ -405,6 +407,8 @@ void main() {
         controller.adoptPet(PetSpecies.kedi, 'Zeytin');
       }
 
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
     }
 

@@ -4,6 +4,7 @@ import '../sound/sound_scope.dart';
 import '../sound/sound_service.dart';
 
 import '../../domain/life/notices.dart';
+import '../../domain/interaction/child_naming.dart';
 import '../../domain/models/pending_notice.dart';
 import '../../state/game_scope.dart';
 import '../../text/turkish_text.dart';
@@ -52,6 +53,28 @@ class _NoticeSheetState extends State<NoticeSheet> {
   /// katkıda bulunmak aynı şey değildir.
   FuneralAttendance? _katilim;
 
+  /// Doğum bildiriminde bebeğin adı (D-095).
+  final TextEditingController _isimAlani = TextEditingController();
+
+  /// İsim alanı bir kez doldurulur; her çizimde yazılan silinmesin.
+  bool _isimHazir = false;
+
+  /// İsim denemesinin sonucu: onay ya da sebebiyle birlikte ret.
+  String? _isimNotu;
+
+  @override
+  void dispose() {
+    _isimAlani.dispose();
+    super.dispose();
+  }
+
+  /// Bebeğe girilen adı verir; sonuç ekranda yazılı kalır (D-095).
+  void _isimVer(String childId) {
+    final ({bool applied, String message}) sonuc =
+        GameScope.of(context).nameChild(childId, _isimAlani.text);
+    setState(() => _isimNotu = sonuc.message);
+  }
+
   void _kapat() {
     GameScope.of(context).dismissNotice();
     Navigator.of(context).pop();
@@ -75,6 +98,18 @@ class _NoticeSheetState extends State<NoticeSheet> {
     final PendingNotice notice = widget.notice;
     final bool cenaze = notice.kind == NoticeKind.cenaze && _sonuc == null;
     final bool katilimSorulacak = cenaze && _katilim == null;
+
+    // Doğum bildiriminde bebeğe isim verilebilir (D-095). Ad zaten
+    // önerilmiştir; oyuncu isterse değiştirir, istemezse "Tamam" der.
+    final String? bebekId = notice.personId;
+    final bool isimVerilebilir = notice.kind == NoticeKind.dogum &&
+        bebekId != null &&
+        GameScope.of(context).canNameChild(bebekId);
+    if (isimVerilebilir && !_isimHazir) {
+      _isimHazir = true;
+      _isimAlani.text =
+          GameScope.of(context).state?.personById(bebekId)?.firstName ?? '';
+    }
 
     return SafeArea(
       child: Padding(
@@ -144,6 +179,43 @@ class _NoticeSheetState extends State<NoticeSheet> {
                         key: const Key('notice_effects'),
                         effects: notice.effects,
                       ),
+                    ],
+                    if (isimVerilebilir) ...<Widget>[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Bebeğin adını sen koyabilirsin.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        key: const Key('birth_name_field'),
+                        controller: _isimAlani,
+                        maxLength: ChildNaming.maxLength,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          labelText: 'Bebeğin adı',
+                          counterText: '',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonal(
+                          key: const Key('birth_name_save'),
+                          onPressed: () => _isimVer(bebekId),
+                          child: const Text('İsmi kaydet'),
+                        ),
+                      ),
+                      if (_isimNotu != null) ...<Widget>[
+                        const SizedBox(height: 8),
+                        Text(
+                          _isimNotu!,
+                          key: const Key('birth_name_note'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ],
                     if (_sonuc == null &&
                         notice.kind == NoticeKind.miras) ...<Widget>[

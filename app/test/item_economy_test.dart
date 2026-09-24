@@ -23,6 +23,8 @@ import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 const ItemActions actions = ItemActions();
 
 GameState life(int seed, {int age = 12, int wallet = 0}) {
@@ -792,6 +794,8 @@ void main() {
           if (c.state!.hasPendingEvent) {
             c.chooseEventOption(c.state!.pendingEvent!.choices.first.id);
           } else {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveTrackChoice(c);
             c.ageUp();
           }
           final List<String> ids =

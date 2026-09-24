@@ -11,6 +11,8 @@ import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Dönüm noktası önceliği (Paket 21).
 ///
 /// Ölçüm, tek bir yıla bağlı olayların bütün havuzla yarıştıkları için
@@ -201,6 +203,8 @@ void main() {
             final PendingCrisis k = c.state!.pendingCrisis!;
             c.respondToCrisis(k.crisis!.choices.first.id);
           }
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveTrackChoice(c);
           c.ageUp();
         }
         if (v8) ulasan8++;

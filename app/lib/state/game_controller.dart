@@ -21,6 +21,7 @@ import '../domain/generation/life_progression.dart';
 import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
+import '../domain/interaction/child_naming.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
 import '../domain/models/martial_progress.dart';
@@ -340,11 +341,19 @@ class GameController extends ChangeNotifier {
   /// Oyuncu vefat etti mi? Hayat tamamlanmışsa yaş ilerlemez.
   bool get isDeceased => _state?.deceased ?? false;
 
+  /// Lise alanı seçimi bekliyor mu? (D-094)
+  ///
+  /// Liseye geçildiği yıl alan seçimi **zorunludur**; seçim yapılmadan yaş
+  /// alınamaz. Sessizce varsayılan alan seçilmez, oyuncu karar verir.
+  bool get needsTrackChoice => _state?.education.awaitingTrackChoice ?? false;
+
   void ageUp() {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return;
     // Hayat tamamlandıysa yaş ilerlemez.
     if (current.deceased) return;
+    // Lise alanı seçilmeden yeni yaşa geçilmez (D-094).
+    if (current.education.awaitingTrackChoice) return;
     _state = LifeProgression(_random).advanceOneYear(current);
     _autoSave();
     notifyListeners();
@@ -1951,6 +1960,33 @@ class GameController extends ChangeNotifier {
     _state = Notices.dismissFirst(current);
     _autoSave();
     notifyListeners();
+  }
+
+  /// Yeni doğan bebeğe isim verilebilir mi? (D-095)
+  bool canNameChild(String childId) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return ChildNaming.canName(current, childId);
+  }
+
+  /// Yeni doğan bebeğin adını değiştirir (D-095).
+  ///
+  /// Sonuç metni her hâlde döner: ad değiştiyse yeni ad, değişmediyse
+  /// sebebi. Sessizce başarısız olmaz.
+  ({bool applied, String message}) nameChild(String childId, String name) {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Hayat başlamadı.');
+    }
+    final ({GameState? state, String message}) sonuc =
+        ChildNaming.rename(current, childId, name);
+    if (sonuc.state == null) {
+      return (applied: false, message: sonuc.message);
+    }
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.message);
   }
 
   /// Bu cenaze seçeneği şu an sunulabilir mi?

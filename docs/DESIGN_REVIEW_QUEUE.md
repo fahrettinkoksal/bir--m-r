@@ -2758,5 +2758,22 @@ Faho istedi: "araç galerisi kısmını ayır, 3 adet galeri ekle... ucuz araçl
 
 ---
 
+### Q-122 — Lise alan seçimi ve doğumda isim verme
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-094, D-095 · `app/lib/ui/widgets/track_choice_sheet.dart`, `app/lib/domain/interaction/child_naming.dart`, `app/lib/domain/education/education_path.dart` · Test: `app/test/track_choice_test.dart`, `app/test/child_naming_test.dart`
+
+Faho iki şey istedi: "Oyuncu liseye geçtiğinde alan seçimi yapılmadan yaş atlanamasın" ve "çocuk doğduğunda isim verilebilsin". İkisi de **kodlandı**; aşağıdaki sayılar ve ayrıntılar `prototypeOnly` ve **onay bekliyor.**
+
+**Kodlanan hâli.** Alan seçimi 9. sınıfta zorunlu hâle geldi: seçim yapılmadan **Yaş Al** çalışmaz, düğmeye basınca seçim penceresi açılır ve pencere seçim yapılmadan kapanmaz. Puanı yetmeyen alanlar gizlenmez, gerekçesiyle soluk durur. Bebeğin adı doğum bildiriminin içinden değiştirilebilir; yalnızca doğum yılında, 2-16 harf, yalnızca harf.
+
+**Karar soruları:**
+1. Alan seçimi penceresi **hiç kapanmasın mı**, yoksa "sonra karar ver" diye bir kapı bırakılsın mı? Şu an kapı yok: karar verilmeden yıl geçmiyor.
+2. Mevcut kayıtlarda 9. sınıfı geçmiş ama alanı boş bir karakter varsa ilk **Yaş Al**'da pencere açılıyor. Bu doğru mu, yoksa eski kayıtlarda alan boş kalabilmeli mi?
+3. İsim uzunluğu **2-16 harf** doğru mu? Uzun Türkçe adlar (ör. "Abdurrahman") sığıyor, iki adlı kullanım ("Ayşe Nur") 16 harfe kadar mümkün.
+4. İsim yalnızca **doğum yılında** değiştirilebiliyor. Oyuncunun sonradan fikir değiştirmesi (ör. ilk yaşta) için bir pencere açılsın mı?
+5. Evlat edinilen çocuğa da isim verilebilmeli mi? Şu an yalnızca **doğan** bebek için açık.
+6. Oyuncunun kendi adı hâlâ hayat başlangıcında üretiliyor; oradan da değiştirilebilsin mi?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

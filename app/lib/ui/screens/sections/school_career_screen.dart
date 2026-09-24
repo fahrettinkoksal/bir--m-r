@@ -17,6 +17,7 @@ import '../../../domain/career/military_service.dart';
 import '../../../domain/models/military.dart';
 import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../widgets/track_choice_sheet.dart';
 import 'education_career_pages.dart';
 import '../../../text/turkish_text.dart';
 
@@ -51,7 +52,7 @@ class SchoolCareerScreen extends StatelessWidget {
 ///
 /// Burada yalnızca **okulla ilgili** gruplar bulunur. Arkadaşlık düzeyi ve
 /// özel ilişkiler İlişkiler menüsünden yönetilir.
-enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, liseTercihi }
+enum _SchoolPage { kok, sinifArkadaslari, ogretmenler }
 
 class _SchoolView extends StatefulWidget {
   const _SchoolView({required this.state, required this.onBack});
@@ -109,8 +110,6 @@ class _SchoolViewState extends State<_SchoolView> {
           playerAge: state.player.age,
           onBack: () => _go(_SchoolPage.kok),
         );
-      case _SchoolPage.liseTercihi:
-        return TrackChoicePage(onBack: () => _go(_SchoolPage.kok));
       case _SchoolPage.kok:
         break;
     }
@@ -196,7 +195,7 @@ class _SchoolViewState extends State<_SchoolView> {
             subtitle: 'Yerleştirme puanın: ${egitim.placementScore ?? 0}',
             icon: Icons.alt_route_outlined,
             accent: BirOmurAccents.mor,
-            onTap: () => _go(_SchoolPage.liseTercihi),
+            onTap: () => TrackChoiceSheet.show(context),
           ),
           const SizedBox(height: 10),
         ],

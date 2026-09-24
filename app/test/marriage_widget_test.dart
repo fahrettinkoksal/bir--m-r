@@ -184,6 +184,8 @@ void main() {
     // Yaş ilerletilir; arada kare çizdirilmez ki doğum bildirimi kipi
     // açılıp ekranı kilitlemesin. Bildirimin **kuyruğa girdiği** aşağıda
     // doğrulanıyor.
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     expect(controller.state!.children.length, 1);
     expect(controller.state!.isExpecting, isFalse);

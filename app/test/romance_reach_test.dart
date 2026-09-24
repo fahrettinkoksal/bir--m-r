@@ -9,6 +9,8 @@ import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Romantik ilişki başlatabilen bütün olaylar.
 List<GameEvent> get kapilar => kEventPool
     .where((GameEvent e) => e.choices.any((EventChoice c) => c.startsRomance))
@@ -43,6 +45,8 @@ bool sevgiliOldu(int seed) {
         oldu = true;
       }
     }
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(c);
     c.ageUp();
   }
   return oldu;

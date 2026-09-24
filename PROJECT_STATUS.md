@@ -972,6 +972,24 @@ Faho on iki tasarım sorusunun tamamını karara bağladı; kararlar
 - **Kütüphane 8 → 23 kitap**, okuma eşikleri 0/3/7/12/20; hobi
   basamak adları ve süreleri karara uyduruldu.
 
+**Paket G — bildirilen gerçek hatalar (D-087…D-093).** Kuşak devamında
+torunlar kayboluyordu; `RelationType.yegen` eklenerek düzeltildi. Finger
+ekranındaki donmanın gerçek sebebi bulundu (menü bileşeni uzun metni
+sınırsız genişlikte yerleştiriyordu) ve dar ekran testi eklendi. At
+yarışı bahsi emanete alınıp sonuç atomik kesinleşiyor; blackjack'te el
+sonunda tekrar oynanabiliyor. Aynı işe aynı yıl ikinci başvuru kapandı.
+Finans olayları gerçek mali duruma bakıyor. İlgisizlik artık hızlanarak
+yakınlık düşürüyor ve uzaklaşan yakın için sitem olayı eklendi.
+
+**Paket H — lise alan seçimi ve doğumda isim (D-094, D-095).** Liseye
+geçen oyuncu alan seçmeden yaş atlayamıyor: **Yaş Al** düğmesi sessiz
+kalmıyor, seçim penceresi açılıyor ve seçim yapılmadan kapanmıyor.
+Seçilen alan günlüğe yazılıyor, sonuç aynı pencerede gösteriliyor ve
+üniversite koşullarında gerçek kaynak oluyor. Bebek doğduğunda adı
+doğum bildiriminin içinden değiştirilebiliyor; ad yalnızca doğum
+yılında, 2-16 harf ve yalnızca harf olarak kabul ediliyor, soyadı
+değişmiyor.
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1040,12 +1058,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-121 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-122 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1829 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1872 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

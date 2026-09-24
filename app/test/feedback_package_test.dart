@@ -67,6 +67,8 @@ void main() {
             expect(sonuc!.text, isNot(contains('{')),
                 reason: '${event.eventId} sonucunda yer tutucu kaldı');
           } else {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveTrackChoice(controller);
             controller.ageUp();
           }
         }
@@ -206,6 +208,8 @@ void main() {
             );
             if (bisiklet) bisikletSonucu = sonuc;
           } else {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveTrackChoice(controller);
             controller.ageUp();
           }
         }
@@ -317,6 +321,8 @@ void main() {
         for (int i = 0; i < 160; i++) {
           final GameState state = controller.state!;
           if (!state.hasPendingEvent) {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveTrackChoice(controller);
             controller.ageUp();
             continue;
           }

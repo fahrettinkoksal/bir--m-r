@@ -31,13 +31,19 @@ void main() {
   test('yaş al bir yaş ilerletir', () {
     final GameController controller = controllerWithLife();
     expect(controller.state!.player.age, 0);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     expect(controller.state!.player.age, 1);
     // Bebeklik olayları eklendiğinden (Paket 4) ilk yaşlarda da olay
     // çıkabilir; yaş ilerlemesi için olayın çözülmesi gerekir.
     olayiKapat(controller);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     olayiKapat(controller);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     expect(controller.state!.player.age, 3);
   });
@@ -53,6 +59,8 @@ void main() {
         for (final Person p in before.people) p.id: p.isAlive,
       };
 
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
       final GameState after = controller.state!;
 
@@ -90,6 +98,8 @@ void main() {
   test('her yaş almada günlüğe tam bir satır eklenir ve olay yağmuru olmaz', () {
     final GameController controller = controllerWithLife(seed: 3);
     final int before = controller.state!.log.length;
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     final List<LifeLogEntry> log = controller.state!.log;
     expect(log.length, before + 1);
@@ -146,23 +156,31 @@ void main() {
     // Olay çıkana kadar ilerle.
     int guard = 0;
     while (!controller.state!.hasPendingEvent && guard++ < 40) {
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
     }
     expect(controller.state!.hasPendingEvent, isTrue,
         reason: 'Yaşa uygun bir olay çıkmalı');
 
     final int age = controller.state!.player.age;
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     expect(controller.state!.player.age, age,
         reason: 'Olay çözülmeden yaş ilerlememeli');
 
     resolvePendingEvents(controller);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     expect(controller.state!.player.age, age + 1);
   });
 
   test('yeni hayat başlatmak önceki durumu değiştirmez, temizlemek sıfırlar', () {
     final GameController controller = controllerWithLife(seed: 21);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveTrackChoice(controller);
     controller.ageUp();
     final String firstName = controller.state!.player.fullName;
 

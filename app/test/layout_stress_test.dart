@@ -399,6 +399,8 @@ void main() {
     while (!controller.state!.deceased) {
       if (guard++ > 120) break;
       resolvePendingEvents(controller);
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);

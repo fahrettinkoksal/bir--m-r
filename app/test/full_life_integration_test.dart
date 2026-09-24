@@ -92,6 +92,8 @@ void main() {
       controller.performActivity(eylem('muzik_kursu'));
       controller.performActivity(eylem('muzik_kursu'));
       if (controller.state!.player.age < yas + 1) {
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveTrackChoice(controller);
         controller.ageUp();
       }
       if (controller.state!.deceased) break;
@@ -191,6 +193,8 @@ void main() {
     // Doğum bir sonraki yaşta gerçekleşebilir; birkaç yıl ilerlenir.
     for (int i = 0; i < 4 && controller.state!.children.isEmpty; i++) {
       resolvePendingEvents(controller);
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);
@@ -233,6 +237,8 @@ void main() {
     while (!controller.state!.deceased) {
       if (guard++ > 150) fail('Oyuncu hiç ölmedi.');
       resolvePendingEvents(controller);
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);

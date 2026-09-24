@@ -15,6 +15,8 @@ import 'package:bir_omur/domain/pets/pet_care.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Hayat boyu **hiçbir zaman bozulmaması gereken** kurallar (Paket 38).
 ///
 /// Tek tek ekranları sınamak yerine, çok sayıda hayatı doğumdan ölüme
@@ -246,6 +248,8 @@ void main() {
         }
       }
 
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveTrackChoice(controller);
       controller.ageUp();
     }
 

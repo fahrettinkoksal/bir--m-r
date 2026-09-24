@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/person.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import '../theme/bir_omur_theme.dart';
 import '../widgets/bottom_action_bar.dart';
@@ -11,6 +12,7 @@ import '../widgets/comic.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
 import '../widgets/notice_sheet.dart';
+import '../widgets/track_choice_sheet.dart';
 import '../../domain/life/will.dart';
 import '../../domain/models/pending_notice.dart';
 import 'life_screen.dart';
@@ -110,8 +112,28 @@ class _HomeShellState extends State<HomeShell> {
 
   void _goHome() => setState(() => _selectedTab = null);
 
+  /// Aynı anda yalnızca tek alan seçimi penceresi açılır (D-094).
+  bool _trackChoiceVisible = false;
+
+  /// Lise alanı seçim penceresini açar (D-094).
+  Future<void> _showTrackChoice() async {
+    if (_trackChoiceVisible) return;
+    _trackChoiceVisible = true;
+    await TrackChoiceSheet.show(context);
+    if (!mounted) return;
+    setState(() => _trackChoiceVisible = false);
+  }
+
   void _ageUp() {
-    GameScope.of(context).ageUp();
+    final GameController controller = GameScope.of(context);
+    // Lise alanı seçilmeden yaş atlanamaz; düğme sessiz kalmaz, seçim
+    // ekranı açılır (D-094).
+    if (controller.needsTrackChoice) {
+      _goHome();
+      _showTrackChoice();
+      return;
+    }
+    controller.ageUp();
     // Yaş alınca yeni günlük satırı ve olay görünsün diye ana ekrana dönülür.
     _goHome();
   }
