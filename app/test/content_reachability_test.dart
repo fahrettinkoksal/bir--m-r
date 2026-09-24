@@ -11,6 +11,7 @@ library;
 
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/education_tracks.dart';
+import 'package:bir_omur/data/hobby_catalog.dart';
 import 'package:bir_omur/data/interview_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/martial_arts_catalog.dart';
@@ -76,6 +77,54 @@ void main() {
       for (final JobType job in kJobCatalog) {
         expect(job.minIntelligence, lessThanOrEqualTo(100), reason: job.id);
         expect(job.minCharisma, lessThanOrEqualTo(100), reason: job.id);
+      }
+    });
+
+    test('hobiyle açılan işler gerçek bir hobiye bağlı', () {
+      for (final JobType job in kJobCatalog) {
+        final String? hobiId = job.hobbyId;
+        if (hobiId == null) continue;
+        expect(
+          hobbyById(hobiId),
+          isNotNull,
+          reason: '${job.id} olmayan bir hobiye bağlı: $hobiId',
+        );
+      }
+    });
+
+    test('hobiyle açılan iş ulaşılamayacak bir basamak istemiyor', () {
+      // Q-110'da ölçüldü: "okumak" hobisini yalnızca bitirilen kitaplar
+      // besliyor ve bitmiş kitap yeniden okunamıyor. Yani o hobinin
+      // tavanı kütüphanedeki kitap sayısıdır. Tavanın üstünde bir
+      // basamak isteyen iş, ilan panosunda görünüp hiç açılmaz.
+      int? tavan(HobbyKind hobi) =>
+          hobi == HobbyKind.okuma ? kBookCatalog.length : null;
+
+      for (final JobType job in kJobCatalog) {
+        final String? hobiId = job.hobbyId;
+        if (hobiId == null) continue;
+        final HobbyKind hobi = hobbyById(hobiId)!;
+        expect(
+          job.minHobbyStage,
+          lessThan(hobi.stages.length),
+          reason: '${job.id} olmayan bir basamak istiyor',
+        );
+        final int? enFazla = tavan(hobi);
+        if (enFazla == null) continue;
+        expect(
+          job.minHobbyStage,
+          lessThanOrEqualTo(hobi.stageFor(enFazla)),
+          reason:
+              '${job.id}: ${hobi.label} en çok $enFazla deneyime '
+              'ulaşabiliyor, iş ise ${job.minHobbyStage}. basamağı '
+              'istiyor',
+        );
+      }
+    });
+
+    test('görünüş eşiği ulaşılabilir', () {
+      for (final JobType job in kJobCatalog) {
+        expect(job.minAppearance, lessThanOrEqualTo(100), reason: job.id);
       }
     });
 

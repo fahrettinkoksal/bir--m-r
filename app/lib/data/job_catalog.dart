@@ -32,8 +32,11 @@ class JobType {
     this.programs = const <String>{},
     this.minIntelligence = 0,
     this.minCharisma = 0,
+    this.minAppearance = 0,
     this.levels = const <String>[],
     this.martialArtId,
+    this.hobbyId,
+    this.minHobbyStage = 0,
   });
 
   final String id;
@@ -55,6 +58,11 @@ class JobType {
   final int minIntelligence;
   final int minCharisma;
 
+  /// prototypeOnly: işe girmek için gereken en az görünüş.
+  ///
+  /// Yalnızca görünüşün mesleğin kendisi olduğu işlerde kullanılır.
+  final int minAppearance;
+
   /// Bu meslekteki görev basamakları (giriş seviyesinden yukarı).
   ///
   /// İlk sıra işe girildiğinde geçerli olan unvandır. Boş bırakılırsa
@@ -67,6 +75,16 @@ class JobType {
   /// Doluysa iş yalnızca o sanatta eğitmenlik basamağına gelmiş oyuncuya
   /// açılır; katalogdaki eşik `MartialArt.instructorFromLevel`'dir.
   final String? martialArtId;
+
+  /// Bu iş bir hobinin birikmesiyle açılıyorsa o hobinin kimliği.
+  ///
+  /// [martialArtId] ile aynı mantık: diplomayla değil, yıllarca
+  /// yapılmış bir uğraşla girilen meslekler içindir. Yazarlık okuma,
+  /// müzisyenlik müzik hobisine bağlıdır.
+  final String? hobbyId;
+
+  /// prototypeOnly: [hobbyId] hobisinde ulaşılmış olması gereken basamak.
+  final int minHobbyStage;
 
   /// Bu meslekte çıkılabilecek en üst basamak.
   int get maxLevel => levels.isEmpty ? 0 : levels.length - 1;
@@ -102,11 +120,7 @@ const List<JobType> kJobCatalog = <JobType>[
     minAge: 16,
     yearlySalary: 165000, // prototypeOnly
     minCharisma: 35,
-    levels: <String>[
-      'Garson',
-      'Deneyimli garson',
-      'Servis şefi',
-    ],
+    levels: <String>['Garson', 'Deneyimli garson', 'Servis şefi'],
   ),
   JobType(
     id: 'teknik_servis',
@@ -173,11 +187,83 @@ const List<JobType> kJobCatalog = <JobType>[
     programs: <String>{'egitim'},
     minIntelligence: 50,
     minCharisma: 40,
-    levels: <String>[
-      'Öğretmen',
-      'Kıdemli öğretmen',
-      'Zümre başkanı',
-    ],
+    levels: <String>['Öğretmen', 'Kıdemli öğretmen', 'Zümre başkanı'],
+  ),
+
+  // --- Giriş seviyesi meslekler -----------------------------------------
+  JobType(
+    id: 'asci',
+    name: 'Aşçı',
+    description: 'Sıcak mutfak, hızlı tempo ve akşama kadar aynı tabak.',
+    minAge: 18,
+    yearlySalary: 230000, // prototypeOnly
+    levels: <String>['Aşçı yardımcısı', 'Aşçı', 'Mutfak şefi'],
+  ),
+  JobType(
+    id: 'kuafor',
+    name: 'Kuaför',
+    description: 'Makas, ayna ve bütün gün ayakta süren sohbetler.',
+    minAge: 18,
+    yearlySalary: 210000, // prototypeOnly
+    minCharisma: 40,
+    levels: <String>['Kuaför çırağı', 'Kuaför', 'Salon sahibi'],
+  ),
+  JobType(
+    id: 'muhasebeci',
+    name: 'Muhasebeci',
+    description: 'Fatura, beyanname ve ayın son günü bitmeyen mesai.',
+    minAge: 22,
+    yearlySalary: 460000, // prototypeOnly
+    education: JobEducation.universite,
+    programs: <String>{'isletme'},
+    minIntelligence: 55,
+    levels: <String>['Muhasebeci', 'Kıdemli muhasebeci', 'Mali müşavir'],
+  ),
+
+  // --- Görünüşün mesleğin kendisi olduğu iş ------------------------------
+  //
+  // Mankenlik diplomayla değil görünüşle girilen bir meslek. Yaşlanma
+  // görünüşü düşürdüğü için (Paket 22) bu iş ömür boyu açık kalmaz;
+  // ilerleyen yaşta yeni başvuru zorlaşır. Eşikler prototypeOnly (Q-113).
+  JobType(
+    id: 'manken',
+    name: 'Manken',
+    description: 'Podyum, ışık ve tek bir kare için geçen uzun saatler.',
+    minAge: 18,
+    yearlySalary: 340000, // prototypeOnly
+    minCharisma: 45,
+    minAppearance: 70, // prototypeOnly
+    levels: <String>['Manken', 'Podyum mankeni', 'Yüzü afişe basılan manken'],
+  ),
+
+  // --- Hobinin birikmesiyle açılan meslekler -----------------------------
+  //
+  // Dövüş eğitmenliğiyle (Paket 32) aynı mantık: bu işlere diplomayla
+  // değil, yıllarca sürdürülmüş bir uğraşla girilir. İlan panosunda
+  // sürekli durmazlar.
+  JobType(
+    id: 'yazar',
+    name: 'Yazar',
+    description:
+        'Okuduklarının birikmesiyle başlayan, tek başına '
+        'yapılan iş.',
+    minAge: 20,
+    yearlySalary: 280000, // prototypeOnly
+    minIntelligence: 55,
+    hobbyId: 'okuma',
+    minHobbyStage: 1, // prototypeOnly
+    levels: <String>['Yazar', 'Kitabı basılan yazar', 'Adı bilinen yazar'],
+  ),
+  JobType(
+    id: 'muzisyen',
+    name: 'Müzisyen',
+    description: 'Prova, sahne ve çalmayı hiç bırakmamış bir hayat.',
+    minAge: 18,
+    yearlySalary: 260000, // prototypeOnly
+    minCharisma: 40,
+    hobbyId: 'muzik',
+    minHobbyStage: 2, // prototypeOnly
+    levels: <String>['Müzisyen', 'Sahne müzisyeni', 'Kendi grubunun müzisyeni'],
   ),
 
   // --- Dövüş sanatları eğitmenliği (Paket 32) ---------------------------
@@ -188,16 +274,13 @@ const List<JobType> kJobCatalog = <JobType>[
   JobType(
     id: 'karate_egitmeni',
     name: 'Karate eğitmeni',
-    description: 'Kendi kuşağını aldın; şimdi salonun çocuklarını '
+    description:
+        'Kendi kuşağını aldın; şimdi salonun çocuklarını '
         'çalıştırıyorsun.',
     minAge: 18,
     yearlySalary: 300000, // prototypeOnly
     martialArtId: 'karate',
-    levels: <String>[
-      'Yardımcı antrenör',
-      'Karate eğitmeni',
-      'Baş eğitmen',
-    ],
+    levels: <String>['Yardımcı antrenör', 'Karate eğitmeni', 'Baş eğitmen'],
   ),
   JobType(
     id: 'kungfu_egitmeni',
@@ -206,11 +289,7 @@ const List<JobType> kJobCatalog = <JobType>[
     minAge: 18,
     yearlySalary: 290000, // prototypeOnly
     martialArtId: 'kung_fu',
-    levels: <String>[
-      'Yardımcı antrenör',
-      'Kung fu eğitmeni',
-      'Salon hocası',
-    ],
+    levels: <String>['Yardımcı antrenör', 'Kung fu eğitmeni', 'Salon hocası'],
   ),
   JobType(
     id: 'gures_antrenoru',

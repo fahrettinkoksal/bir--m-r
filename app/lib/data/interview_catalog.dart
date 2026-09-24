@@ -44,7 +44,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'magaza_1',
     jobId: 'magaza_calisani',
-    text: 'Müşteri 180 ₺ tutan alışveriş için 200 ₺ verdi. '
+    text:
+        'Müşteri 180 ₺ tutan alışveriş için 200 ₺ verdi. '
         'Para üstü ne kadar?',
     options: <String>['10 ₺', '20 ₺', '30 ₺', '25 ₺'],
     correctIndex: 1,
@@ -53,7 +54,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'magaza_2',
     jobId: 'magaza_calisani',
-    text: 'Rafta son kullanma tarihi yakın ürünlerle yeni gelenler var. '
+    text:
+        'Rafta son kullanma tarihi yakın ürünlerle yeni gelenler var. '
         'Hangisi öne dizilir?',
     options: <String>[
       'Yeni gelenler',
@@ -75,7 +77,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Hiçbir şey yapmam, ertesi gün düzelir',
     ],
     correctIndex: 1,
-    explanation: 'Fark bildirilir ve sayım tekrarlanır; kayıt keyfî '
+    explanation:
+        'Fark bildirilir ve sayım tekrarlanır; kayıt keyfî '
         'değiştirilmez.',
   ),
 
@@ -83,7 +86,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'garson_1',
     jobId: 'garson',
-    text: 'Müşteri "bu yemekte fındık var mı?" diye soruyor ama emin '
+    text:
+        'Müşteri "bu yemekte fındık var mı?" diye soruyor ama emin '
         'değilsin. Ne yaparsın?',
     options: <String>[
       'Yoktur derim, çoğunda olmuyor',
@@ -92,7 +96,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Başka bir yemek öneririm',
     ],
     correctIndex: 1,
-    explanation: 'Alerji sorusunda tahmin yürütülmez; mutfaktan kesin '
+    explanation:
+        'Alerji sorusunda tahmin yürütülmez; mutfaktan kesin '
         'bilgi alınır.',
   ),
   InterviewQuestion(
@@ -106,7 +111,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'En çok bahşiş bırakan masaya öncelik veririm',
     ],
     correctIndex: 1,
-    explanation: 'Bekleyen masaya görüldüğünü hissettirmek şikâyeti '
+    explanation:
+        'Bekleyen masaya görüldüğünü hissettirmek şikâyeti '
         'azaltır.',
   ),
   InterviewQuestion(
@@ -135,13 +141,15 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Müşteriye yenisini öneririm',
     ],
     correctIndex: 1,
-    explanation: 'Arıza aramaya en basit ve en olası nedenden başlanır: '
+    explanation:
+        'Arıza aramaya en basit ve en olası nedenden başlanır: '
         'güç.',
   ),
   InterviewQuestion(
     id: 'teknik_2',
     jobId: 'teknik_servis',
-    text: 'Cihaz bazen çalışıp bazen kesiliyor. Bu belirti en çok neyi '
+    text:
+        'Cihaz bazen çalışıp bazen kesiliyor. Bu belirti en çok neyi '
         'düşündürür?',
     options: <String>[
       'Yazılım ayarı',
@@ -150,7 +158,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Renk ayarı',
     ],
     correctIndex: 1,
-    explanation: 'Kesintili arıza genellikle temassızlık veya gevşek '
+    explanation:
+        'Kesintili arıza genellikle temassızlık veya gevşek '
         'bağlantıdan gelir.',
   ),
   InterviewQuestion(
@@ -179,7 +188,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'tasarim_2',
     jobId: 'ressam_tasarimci',
-    text: 'Renk çemberinde kırmızının karşısındaki tamamlayıcı renk '
+    text:
+        'Renk çemberinde kırmızının karşısındaki tamamlayıcı renk '
         'hangisidir?',
     options: <String>['Mavi', 'Yeşil', 'Turuncu', 'Sarı'],
     correctIndex: 1,
@@ -203,7 +213,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'yazilim_1',
     jobId: 'yazilim_gelistirici',
-    text: 'Bir döngü `i = 0` ile başlayıp `i < 5` olduğu sürece çalışıyor '
+    text:
+        'Bir döngü `i = 0` ile başlayıp `i < 5` olduğu sürece çalışıyor '
         've her adımda `i` bir artıyor. Döngü kaç kez çalışır?',
     options: <String>['4', '5', '6', 'Sonsuz'],
     correctIndex: 1,
@@ -212,7 +223,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'yazilim_2',
     jobId: 'yazilim_gelistirici',
-    text: 'Bir listenin 3 elemanı var. Sıfırdan başlayan dizinde son '
+    text:
+        'Bir listenin 3 elemanı var. Sıfırdan başlayan dizinde son '
         'elemanın dizini kaçtır?',
     options: <String>['1', '2', '3', '4'],
     correctIndex: 1,
@@ -221,7 +233,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'yazilim_3',
     jobId: 'yazilim_gelistirici',
-    text: 'Program çalışırken beklenmedik bir değerde çöküyor. Hata '
+    text:
+        'Program çalışırken beklenmedik bir değerde çöküyor. Hata '
         'ayıklamaya nasıl başlarsın?',
     options: <String>[
       'Hatayı yeniden üreten en küçük durumu bulurum',
@@ -250,7 +263,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'ogretmen_1',
     jobId: 'ogretmen',
-    text: 'Bir öğrenci konuyu anlamadığını söylüyor. İlk yaklaşımın ne '
+    text:
+        'Bir öğrenci konuyu anlamadığını söylüyor. İlk yaklaşımın ne '
         'olur?',
     options: <String>[
       'Aynı anlatımı daha yüksek sesle tekrarlarım',
@@ -288,6 +302,269 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
     explanation: 'Önce sakinleştirip iki tarafı da dinlemek gerekir.',
   ),
 
+  // --- Aşçı ---------------------------------------------------------------
+  InterviewQuestion(
+    id: 'asci_1',
+    jobId: 'asci',
+    text: 'Çiğ tavuğu doğradığın tahtayı sonra ne için kullanırsın?',
+    options: <String>[
+      'Salata doğramak için, yıkamadan',
+      'Hiçbiri; yıkanıp ayrı tahta kullanılır',
+      'Ekmek dilimlemek için',
+      'Peynir kesmek için',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Çiğ et tahtası ayrı tutulur; çapraz bulaşma böyle '
+        'önlenir.',
+  ),
+  InterviewQuestion(
+    id: 'asci_2',
+    jobId: 'asci',
+    text: 'Dört kişilik tarifte 300 g pirinç var. On kişi için ne kadar?',
+    options: <String>['600 g', '750 g', '900 g', '1200 g'],
+    correctIndex: 1,
+    explanation: '300 ÷ 4 = 75 g kişi başı; 75 × 10 = 750 g.',
+  ),
+  InterviewQuestion(
+    id: 'asci_3',
+    jobId: 'asci',
+    text: 'Servise çıkacak çorbanın tuzu fazla kaçtı. İlk ne yaparsın?',
+    options: <String>[
+      'Olduğu gibi gönderirim, fark etmezler',
+      'Şefe söyleyip miktarı artırarak dengelemeyi denerim',
+      'Üstüne bol su ekleyip kapatırım',
+      'Müşteriye tuzsuz olduğunu söylerim',
+    ],
+    correctIndex: 1,
+    explanation: 'Hata saklanmaz; mutfakta söylenir ve düzeltilir.',
+  ),
+
+  // --- Kuaför -------------------------------------------------------------
+  InterviewQuestion(
+    id: 'kuafor_1',
+    jobId: 'kuafor',
+    text:
+        'Müşteri "çok kısa istemiyorum" dedi ama tarif ettiği model '
+        'kısa. Ne yaparsın?',
+    options: <String>[
+      'Modeli olduğu gibi uygularım',
+      'Kesmeden önce ne kadar kısalacağını gösterip onayını alırım',
+      'Kendi bildiğim modeli yaparım',
+      'İşi almam',
+    ],
+    correctIndex: 1,
+    explanation: 'Makas değmeden önce beklenti netleştirilir.',
+  ),
+  InterviewQuestion(
+    id: 'kuafor_2',
+    jobId: 'kuafor',
+    text: 'Boya öncesi küçük bir tutamda deneme yapılmasının sebebi ne?',
+    options: <String>[
+      'Boyadan tasarruf etmek',
+      'Renk tutuşunu ve alerjiyi önceden görmek',
+      'Müşteriyi oyalamak',
+      'Saçı yumuşatmak',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Tutam denemesi hem rengi hem cilt tepkisini önceden '
+        'gösterir.',
+  ),
+  InterviewQuestion(
+    id: 'kuafor_3',
+    jobId: 'kuafor',
+    text:
+        'Randevulu müşteri gelmişken sırasız biri "beş dakika sürer" '
+        'diyor. Ne yaparsın?',
+    options: <String>[
+      'Randevusuzu alırım, hızlı olur',
+      'Randevuluyu bitirir, sonra bakarım',
+      'İkisini aynı anda yaparım',
+      'Randevuluya beklemesini söylerim',
+    ],
+    correctIndex: 1,
+    explanation: 'Randevu bir sözdür; sırayı bozmak bekleyene haksızlık.',
+  ),
+
+  // --- Muhasebeci ---------------------------------------------------------
+  InterviewQuestion(
+    id: 'muhasebeci_1',
+    jobId: 'muhasebeci',
+    text: '10.000 ₺ mal bedeline %20 KDV eklenirse fatura toplamı kaç olur?',
+    options: <String>['10.200 ₺', '11.000 ₺', '12.000 ₺', '12.500 ₺'],
+    correctIndex: 2,
+    explanation: '10.000 × 0,20 = 2.000; toplam 12.000 ₺.',
+  ),
+  InterviewQuestion(
+    id: 'muhasebeci_2',
+    jobId: 'muhasebeci',
+    text:
+        'Çift taraflı kayıtta bir tutar borca yazıldıysa aynı tutar '
+        'nereye yazılır?',
+    options: <String>[
+      'Hiçbir yere',
+      'Aynı hesabın borcuna tekrar',
+      'Başka bir hesabın alacağına',
+      'Ertesi aya',
+    ],
+    correctIndex: 2,
+    explanation:
+        'Her borç kaydının karşılığında eşit tutarda alacak '
+        'kaydı vardır.',
+  ),
+  InterviewQuestion(
+    id: 'muhasebeci_3',
+    jobId: 'muhasebeci',
+    text: 'Patron gideri olduğundan yüksek göstermeni istiyor. Ne yaparsın?',
+    options: <String>[
+      'İsteneni yaparım, sorumluluk onun',
+      'Yapmam; kaydı gerçeğe uygun tutarım',
+      'Yarısı kadar şişiririm',
+      'Belgeyi kaybederim',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Kayıt gerçeği gösterir; bu meslekte tartışılmaz olan '
+        'budur.',
+  ),
+
+  // --- Manken -------------------------------------------------------------
+  InterviewQuestion(
+    id: 'manken_1',
+    jobId: 'manken',
+    text: 'Defile provasında sana yürüyüş sırası veriliyor. Neden önemli?',
+    options: <String>[
+      'Önemli değil, herkes istediği gibi çıkar',
+      'Koleksiyonun anlatım sırası ve sahnede çakışmama için',
+      'Ücret sıraya göre belirlendiği için',
+      'Fotoğrafçılar ilk çıkanı çektiği için',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Sıra koleksiyonun anlatımıdır; ayrıca sahnede '
+        'çakışmayı önler.',
+  ),
+  InterviewQuestion(
+    id: 'manken_2',
+    jobId: 'manken',
+    text: 'Çekim sözleşmesinde "kullanım alanı" neyi belirler?',
+    options: <String>[
+      'Çekimin kaç saat süreceğini',
+      'Fotoğrafın nerede ve ne kadar süre yayımlanabileceğini',
+      'Kaç kişilik ekip geleceğini',
+      'Kıyafeti kimin seçeceğini',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Kullanım alanı, görüntünün nerede ve ne kadar süre '
+        'yayımlanacağını belirler; ücreti de bu belirler.',
+  ),
+  InterviewQuestion(
+    id: 'manken_3',
+    jobId: 'manken',
+    text:
+        'Çekim günü sana sözleşmede olmayan bir poz isteniyor ve '
+        'rahatsız hissediyorsun. Ne yaparsın?',
+    options: <String>[
+      'Yaparım, iş kaçmasın',
+      'Sözleşmede olmadığını söyler, kabul etmem',
+      'Sessizce çekimden ayrılırım',
+      'Ajansı sonra ararım, o an yaparım',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Sözleşme dışı istek reddedilebilir; sınır o an '
+        'söylenir.',
+  ),
+
+  // --- Yazar --------------------------------------------------------------
+  InterviewQuestion(
+    id: 'yazar_1',
+    jobId: 'yazar',
+    text: 'Yayınevine gönderilen dosyada "telif" neyi anlatır?',
+    options: <String>[
+      'Kitabın kaç sayfa olacağını',
+      'Eserin kime ait olduğunu ve satıştan yazara düşen payı',
+      'Kapağın rengini',
+      'Baskı sayısını',
+    ],
+    correctIndex: 1,
+    explanation: 'Telif hem eserin sahipliği hem yazarın payıdır.',
+  ),
+  InterviewQuestion(
+    id: 'yazar_2',
+    jobId: 'yazar',
+    text:
+        'Başkasının cümlesini kendi kitabına kaynak göstermeden almak '
+        'nedir?',
+    options: <String>['İlham', 'İntihal', 'Alıntı', 'Derleme'],
+    correctIndex: 1,
+    explanation:
+        'Kaynak gösterilmeden alınan metin intihaldir; '
+        'gösterilirse alıntıdır.',
+  ),
+  InterviewQuestion(
+    id: 'yazar_3',
+    jobId: 'yazar',
+    text:
+        'Editör, çok sevdiğin bir bölümün kitaba bir şey katmadığını '
+        'söylüyor. Ne yaparsın?',
+    options: <String>[
+      'Reddederim, benim kitabım',
+      'Gerekçesini dinler, bölümü kitaba katkısına göre yeniden '
+          'değerlendiririm',
+      'Bütün kitabı baştan yazarım',
+      'Başka yayınevi ararım',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Editörün işi budur; karar yine yazarındır ama '
+        'gerekçe dinlenir.',
+  ),
+
+  // --- Müzisyen -----------------------------------------------------------
+  InterviewQuestion(
+    id: 'muzisyen_1',
+    jobId: 'muzisyen',
+    text: '4/4 ölçüde bir tam nota kaç vuruş sürer?',
+    options: <String>['1', '2', '4', '8'],
+    correctIndex: 2,
+    explanation:
+        '4/4 ölçüde tam nota ölçünün tamamını, yani dört '
+        'vuruşu doldurur.',
+  ),
+  InterviewQuestion(
+    id: 'muzisyen_2',
+    jobId: 'muzisyen',
+    text: 'Sahneye çıkmadan önce akort neden yapılır?',
+    options: <String>[
+      'Alışkanlıktan',
+      'Enstrümanın sesi sıcaklık ve taşımayla kaydığı için',
+      'Seyirci beklesin diye',
+      'Teller yenilensin diye',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Sıcaklık, nem ve taşıma akordu kaydırır; sahne '
+        'öncesi düzeltilir.',
+  ),
+  InterviewQuestion(
+    id: 'muzisyen_3',
+    jobId: 'muzisyen',
+    text: 'Konserde bir arkadaşın ölçüyü kaçırdı. Ne yaparsın?',
+    options: <String>[
+      'Durup baştan başlarım',
+      'Tempoyu koruyup onun dönmesini beklerim',
+      'Sahnede uyarırım',
+      'Ben de kaçırırım, belli olmasın',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Tempoyu tutan kalır; kaçıran bir sonraki ölçüde '
+        'döner.',
+  ),
+
   // --- Dövüş sanatları eğitmenliği (Paket 32) ---------------------------
   InterviewQuestion(
     id: 'karate_egitmeni_1',
@@ -300,7 +577,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
   InterviewQuestion(
     id: 'karate_egitmeni_2',
     jobId: 'karate_egitmeni',
-    text: 'Yeni başlayan bir çocuk ilk derste kata öğrenmek istiyor. '
+    text:
+        'Yeni başlayan bir çocuk ilk derste kata öğrenmek istiyor. '
         'Ne yaparsın?',
     options: <String>[
       'Hemen ileri bir kata öğretirim',
@@ -309,7 +587,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Kendi başına çalışsın derim',
     ],
     correctIndex: 1,
-    explanation: 'Temel oturmadan kata öğretmek sakatlık ve kötü alışkanlık '
+    explanation:
+        'Temel oturmadan kata öğretmek sakatlık ve kötü alışkanlık '
         'getirir.',
   ),
   InterviewQuestion(
@@ -345,7 +624,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Gerekmez, doğrudan forma geçilir',
     ],
     correctIndex: 1,
-    explanation: 'Formlar temel üstüne kurulur; temel zayıfsa form da zayıftır.',
+    explanation:
+        'Formlar temel üstüne kurulur; temel zayıfsa form da zayıftır.',
   ),
   InterviewQuestion(
     id: 'kungfu_egitmeni_3',
@@ -388,7 +668,8 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
       'Boy fark etmez',
     ],
     correctIndex: 1,
-    explanation: 'Boylar yaş ve gelişime göre ayrılır; atlamak sakatlık '
+    explanation:
+        'Boylar yaş ve gelişime göre ayrılır; atlamak sakatlık '
         'getirir.',
   ),
 ];

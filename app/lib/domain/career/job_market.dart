@@ -2,8 +2,11 @@ import 'dart:math';
 
 import '../../data/interview_catalog.dart';
 import '../../data/job_catalog.dart';
+import '../../data/hobby_catalog.dart';
 import '../../data/martial_arts_catalog.dart';
 import '../activities/martial_arts_engine.dart';
+import '../hobby/hobby_tracker.dart';
+import '../models/hobby_progress.dart';
 import '../models/career.dart';
 import '../models/person.dart';
 import 'colleagues.dart';
@@ -82,9 +85,9 @@ class JobMarket {
 
   /// Koşulları sağlanmayan işler ve gerekçeleri (bilgilendirme için).
   Map<JobType, String> lockedJobs(GameState state) => <JobType, String>{
-        for (final JobType job in kJobCatalog)
-          if (!meetsRequirements(state, job)) job: requirementReason(state, job),
-      };
+    for (final JobType job in kJobCatalog)
+      if (!meetsRequirements(state, job)) job: requirementReason(state, job),
+  };
 
   bool meetsRequirements(GameState state, JobType job) =>
       requirementReason(state, job).isEmpty;
@@ -111,7 +114,8 @@ class JobMarket {
     if (job.tracks.isNotEmpty || job.programs.isNotEmpty) {
       final bool alanUygun =
           egitim.track != null && job.tracks.contains(egitim.track);
-      final bool bolumUygun = egitim.universityFinished &&
+      final bool bolumUygun =
+          egitim.universityFinished &&
           egitim.universityProgramId != null &&
           job.programs.contains(egitim.universityProgramId);
       if (!alanUygun && !bolumUygun) {
@@ -123,6 +127,23 @@ class JobMarket {
     }
     if (state.player.stats.charisma < job.minCharisma) {
       return 'Bu iş için karizman yeterli görülmüyor.';
+    }
+    if (state.player.stats.appearance < job.minAppearance) {
+      return 'Bu iş görünüşle giriliyor ve seni uygun bulmadılar.';
+    }
+    // Hobiyle açılan meslekler (yazarlık, müzisyenlik): diploma değil,
+    // yıllarca sürdürülmüş gerçek bir uğraş aranır. Kayıt uydurulmaz;
+    // hobi geçmişi gerçekten varsa açılır.
+    final String? hobiId = job.hobbyId;
+    if (hobiId != null) {
+      final HobbyKind? hobi = hobbyById(hobiId);
+      if (hobi == null) return 'Bu iş şu an açık değil.';
+      final HobbyProgress? ilerleme = HobbyTracker.progressOf(state, hobi);
+      if (ilerleme == null || ilerleme.stage < job.minHobbyStage) {
+        return '${hobi.label} uğraşında en az '
+            '"${hobi.stages[job.minHobbyStage].label}" basamağına '
+            'gelmen gerekiyor.';
+      }
     }
     // Dövüş sanatı eğitmenliği (Paket 32): kuşağı/boyu olmayan öğretemez.
     final String? sanatId = job.martialArtId;
@@ -149,7 +170,8 @@ class JobMarket {
     }
     final String reason = requirementReason(state, job);
     if (reason.isNotEmpty) return InteractionAvailability.blocked(reason);
-    if (_applicationsThisAge(state, job) >= prototypeOnlyMaxApplicationsPerAge) {
+    if (_applicationsThisAge(state, job) >=
+        prototypeOnlyMaxApplicationsPerAge) {
       return const InteractionAvailability.blocked(
         'Bu yıl bu işe yeterince başvurdun; seneye tekrar dene.',
       );
@@ -178,17 +200,14 @@ class JobMarket {
   ///
   /// Aynı yaşta daha önce sorulmamış bir soru varsa o tercih edilir;
   /// böylece tekrar başvuruda aynı soru ezberlenmez.
-  InterviewQuestion _pickQuestion(
-    GameState state,
-    JobType job,
-    Random rng,
-  ) {
+  InterviewQuestion _pickQuestion(GameState state, JobType job, Random rng) {
     final List<InterviewQuestion> hepsi = questionsForJob(job.id);
     final List<InterviewQuestion> sorulmamis = hepsi
         .where((InterviewQuestion q) => _questionAskedThisAge(state, q) == 0)
         .toList(growable: false);
-    final List<InterviewQuestion> havuz =
-        sorulmamis.isEmpty ? hepsi : sorulmamis;
+    final List<InterviewQuestion> havuz = sorulmamis.isEmpty
+        ? hepsi
+        : sorulmamis;
     return havuz[rng.nextInt(havuz.length)];
   }
 
@@ -220,11 +239,7 @@ class JobMarket {
           askedAtAge: state.player.age,
         ),
       ),
-      outcome: JobOutcome(
-        applied: true,
-        text: metin,
-        interviewStarted: true,
-      ),
+      outcome: JobOutcome(applied: true, text: metin, interviewStarted: true),
     );
   }
 
@@ -235,11 +250,7 @@ class JobMarket {
   /// Cevap verildikten sonra mülakat kapanır; ikinci kez uygulanamaz.
   /// [rng] verilmezse iş arkadaşları rastgele üretilir; belirli bir sonuç
   /// isteyen çağrılar kendi tohumunu geçirir.
-  JobResult answerInterview(
-    GameState state,
-    int optionIndex, [
-    Random? rng,
-  ]) {
+  JobResult answerInterview(GameState state, int optionIndex, [Random? rng]) {
     final PendingInterview? mulakat = state.pendingInterview;
     if (mulakat == null) {
       return _blocked(state, 'Devam eden bir mülakat yok.');
@@ -266,7 +277,8 @@ class JobMarket {
     // Koşullar cevap anında yeniden denetlenir.
     final String engel = requirementReason(state, job);
     if (engel.isNotEmpty || state.career.isEmployed) {
-      final String metin = '${job.name} başvurun sonuçlanmadı: '
+      final String metin =
+          '${job.name} başvurun sonuçlanmadı: '
           '${state.career.isEmployed ? 'Zaten bir işin var.' : engel}';
       return JobResult(
         state: _log(kapali, metin),
@@ -275,7 +287,8 @@ class JobMarket {
     }
 
     if (!dogru) {
-      final String metin = '${job.name} mülakatı olumsuz sonuçlandı. '
+      final String metin =
+          '${job.name} mülakatı olumsuz sonuçlandı. '
           '"Teşekkür ederiz, sizi arayacağız" dediler.';
       return JobResult(
         state: _log(kapali, metin),
@@ -288,7 +301,8 @@ class JobMarket {
       );
     }
 
-    final String metin = '${job.name} olarak işe alındın. '
+    final String metin =
+        '${job.name} olarak işe alındın. '
         'İlk maaşın bir yıl sonra cebinde olacak.';
     final GameState iseAlinmis = kapali.copyWith(
       career: kapali.career.copyWith(
@@ -327,10 +341,7 @@ class JobMarket {
           // olayların önkoşuludur. Daha önce yalnızca bir olay seçeneğiyle
           // bırakılıyordu; normal yoldan işe giren oyuncu bu olayları hiç
           // görmüyordu (Paket 4 ölçümü).
-          storyFlags: <String>{
-            ...kapali.storyFlags,
-            StoryFlags.calismaHayati,
-          },
+          storyFlags: <String>{...kapali.storyFlags, StoryFlags.calismaHayati},
         ),
         metin,
       ),
@@ -364,8 +375,8 @@ class JobMarket {
     final String tamMetin = sonuc.becameFriends.isEmpty
         ? metin
         : '$metin İş arkadaşlarından '
-            '${sonuc.becameFriends.length} kişiyle görüşmeye devam '
-            'ediyorsun.';
+              '${sonuc.becameFriends.length} kişiyle görüşmeye devam '
+              'ediyorsun.';
 
     GameState sonraki = state.copyWith(
       people: sonuc.people,
@@ -404,24 +415,25 @@ class JobMarket {
         ),
         career: state.career.copyWith(lastPaidAge: newAge),
       ),
-      logText: '${state.career.title} olarak bir yılın doldu; '
+      logText:
+          '${state.career.title} olarak bir yılın doldu; '
           '${trMoney(state.career.yearlySalary)} cüzdanına girdi.',
     );
   }
 
   JobResult _blocked(GameState state, String reason) => JobResult(
-        state: state,
-        outcome: JobOutcome(applied: false, text: reason),
-      );
+    state: state,
+    outcome: JobOutcome(applied: false, text: reason),
+  );
 
   GameState _log(GameState state, String text) => state.copyWith(
-        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-          ...state.log,
-          LifeLogEntry(
-            age: state.player.age,
-            text: text,
-            category: LogCategory.kisisel,
-          ),
-        ]),
-      );
+    log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+      ...state.log,
+      LifeLogEntry(
+        age: state.player.age,
+        text: text,
+        category: LogCategory.kisisel,
+      ),
+    ]),
+  );
 }

@@ -2520,5 +2520,39 @@ Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığar
 
 ---
 
+### Q-113 — Yeni meslekler: görünüş ve hobiyle açılan işler
+
+**Durum:** Faho "meslek tarafında mankenlik, yazarlık vb. şeyler de eklensin" dedi. Altı meslek kodlandı; **maaşlar ve eşikler prototypeOnly, onay bekliyor.** Kod: `lib/data/job_catalog.dart`, `lib/domain/career/job_market.dart`. İlgili: Q-048, Q-078, Q-110.
+
+**Önceki durum:** Katalogda **dokuz** iş vardı ve altısı genel, üçü dövüş eğitmenliğiydi. Bir ömür boyunca seçilebilecek meslek sayısı azdı.
+
+**Eklenenler (hepsi üç mülakat sorusuyla birlikte):**
+
+| İş | Kapı | Yıllık maaş | Not |
+|---|---|---|---|
+| Aşçı | yok | 230.000 ₺ | Giriş seviyesi |
+| Kuaför | karizma 40 | 210.000 ₺ | Giriş seviyesi |
+| Muhasebeci | üniversite · işletme · zekâ 55 | 460.000 ₺ | |
+| Manken | görünüş 70 · karizma 45 | 340.000 ₺ | Yeni kapı türü |
+| Yazar | okuma hobisi 1. basamak · zekâ 55 | 280.000 ₺ | Yeni kapı türü |
+| Müzisyen | müzik hobisi 2. basamak · karizma 40 | 260.000 ₺ | Yeni kapı türü |
+
+**İki yeni kapı türü açıldı** (ikisi de dövüş eğitmenliğinin — Paket 32 — aynı deseni):
+- `minAppearance`: işe görünüşle giriliyor.
+- `hobbyId` + `minHobbyStage`: işe yıllarca sürdürülmüş bir uğraşla giriliyor.
+
+**Neden bu basamaklar seçildi.** Yazarlık için **1.** basamak (3 bitirilmiş kitap) alındı çünkü Q-110'da ölçüldüğü gibi "okumak" hobisini yalnızca bitirilen kitaplar besliyor ve kütüphanede 8 kitap var: 3. basamak (18 deneyim) **hiçbir hayatta** ulaşılamıyor. Müzisyenlik için 2. basamak (18 deneyim) alındı; müzik kursu yılda iki kez alınabildiği için bu 9 yıl demek. Bu eşiklerin ulaşılabilirliğini kalıcı bir test denetliyor.
+
+**Karar soruları:**
+1. Maaşlar mevcut ekonomiye oturuyor mu? (Kıyas: yazılım geliştirici 720.000 ₺, öğretmen 420.000 ₺, mağaza çalışanı 180.000 ₺.)
+2. Mankenlik eşiği **görünüş 70** doğru mu? Yaşlanma görünüşü düşürdüğü için bu iş kendiliğinden ileri yaşta kapanıyor — bu istenen davranış mı, yoksa mankenliğe ayrı bir yaş üst sınırı mı konsun?
+3. Mankenlik **Ün**'e de bağlanmalı mı? Şu an sosyal medyayla hiç ilişkisi yok; oysa ikisi doğal olarak birbirini besler.
+4. Yazarlık 3 bitirilmiş kitapla açılıyor. Az mı? Açılması için kütüphaneye kitap eklenip eşik yükseltilsin mi (Q-110/1 ile aynı konu)?
+5. Yazar ve müzisyen **iş kurar gibi** mi çalışsın (gelir dalgalı), yoksa şimdiki gibi sabit yıllık maaş mı alsın? Şu an ikisi de maaşlı.
+6. Aşçı/kuaför gibi giriş seviyesi işlerden kaç tane daha olsun? Şu an katalog 15 işte.
+7. Hobiyle açılan iş, hobi **bırakılırsa** kapanmalı mı? Şu an bir kez ulaşılan basamak kalıcı; işe girdikten sonra okumayı bırakmak işi etkilemiyor.
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
