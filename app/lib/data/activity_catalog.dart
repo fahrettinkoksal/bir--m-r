@@ -35,12 +35,16 @@ enum ActivityVenue {
   ///
   /// Menüde yaşına hiç uymayan bir alan gösterilmesin diye kullanılır:
   /// çalışmayan düğme konmaz.
+  /// Eylem listesi boş olan mekân (kütüphane kendi kitap akışıyla
+  /// çalışır) **0** döndürür. Eskiden 120 dönüyordu: menü bu değeri
+  /// "yaşın yetmiyor" diye okuduğu için, eylemsiz bir mekâna bir gün
+  /// yaş koşulu eklenirse o mekân hiçbir yaşta açılmazdı.
   int get minAge {
     int enKucuk = 120;
     for (final ActivityAction a in actionsAt(this)) {
       if (a.minAge < enKucuk) enKucuk = a.minAge;
     }
-    return enKucuk;
+    return enKucuk == 120 ? 0 : enKucuk;
   }
 }
 
@@ -145,7 +149,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'sac_stili',
     venue: ActivityVenue.berber,
     label: 'Saç stilini değiştir',
-    description: 'Yeni bir model dene. Bazen iyi gider, bazen saç uzamasını '
+    description:
+        'Yeni bir model dene. Bazen iyi gider, bazen saç uzamasını '
         'beklersin.',
     icon: Icons.auto_fix_high_outlined,
     cost: 260, // prototypeOnly
@@ -215,7 +220,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'genel_kontrol',
     venue: ActivityVenue.saglikMerkezi,
     label: 'Genel sağlık kontrolü',
-    description: 'Tansiyon, tahlil, kısa bir muayene. Çoğu yıl bir şey '
+    description:
+        'Tansiyon, tahlil, kısa bir muayene. Çoğu yıl bir şey '
         'çıkmaz; çıkarsa erken çıkar.',
     icon: Icons.monitor_heart_outlined,
     cost: 900, // prototypeOnly
@@ -239,7 +245,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'goz_muayenesi',
     venue: ActivityVenue.saglikMerkezi,
     label: 'Göz muayenesi',
-    description: 'Duvardaki harfler gittikçe küçülüyor. En alt satır herkese '
+    description:
+        'Duvardaki harfler gittikçe küçülüyor. En alt satır herkese '
         'aynı şeyi sormuyor.',
     icon: Icons.remove_red_eye_outlined,
     cost: 450, // prototypeOnly
@@ -251,7 +258,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'mevsim_asisi',
     venue: ActivityVenue.saglikMerkezi,
     label: 'Mevsim aşısı',
-    description: 'Kısa bir iğne, bir gün kolun ağrır, kış biraz daha kolay '
+    description:
+        'Kısa bir iğne, bir gün kolun ağrır, kış biraz daha kolay '
         'geçer.',
     icon: Icons.vaccines_outlined,
     cost: 300, // prototypeOnly
@@ -263,7 +271,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'ruh_sagligi',
     venue: ActivityVenue.saglikMerkezi,
     label: 'Bir uzmanla konuş',
-    description: 'Kırk beş dakika boyunca yalnızca sen konuşuyorsun ve '
+    description:
+        'Kırk beş dakika boyunca yalnızca sen konuşuyorsun ve '
         'kimse sözünü kesmiyor.',
     icon: Icons.psychology_outlined,
     cost: 1400, // prototypeOnly
@@ -281,7 +290,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'parkta_yuruyus',
     venue: ActivityVenue.eglence,
     label: 'Parkta yürüyüş',
-    description: 'Ücretsiz, yakın ve her yaşa uygun. Bir tur, iki tur, '
+    description:
+        'Ücretsiz, yakın ve her yaşa uygun. Bir tur, iki tur, '
         'sonra bir bank.',
     icon: Icons.park_outlined,
     cost: 0,
@@ -294,7 +304,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'sinema',
     venue: ActivityVenue.eglence,
     label: 'Sinemaya git',
-    description: 'Işıklar sönüyor, koltuk arkaya yaslanıyor, iki saat '
+    description:
+        'Işıklar sönüyor, koltuk arkaya yaslanıyor, iki saat '
         'boyunca başka bir hayat.',
     icon: Icons.movie_outlined,
     cost: 250, // prototypeOnly
@@ -318,7 +329,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'maca_git',
     venue: ActivityVenue.eglence,
     label: 'Maça git',
-    description: 'Tribün ayakta, ses kulağında, sonuç ne olursa olsun akşam '
+    description:
+        'Tribün ayakta, ses kulağında, sonuç ne olursa olsun akşam '
         'konuşulacak bir şey var.',
     icon: Icons.sports_soccer_outlined,
     cost: 550, // prototypeOnly
@@ -359,7 +371,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'muzik_kursu',
     venue: ActivityVenue.kurs,
     label: 'Müzik kursu',
-    description: 'İlk hafta parmaklar acıyor, üçüncü hafta bir şeye '
+    description:
+        'İlk hafta parmaklar acıyor, üçüncü hafta bir şeye '
         'benziyor.',
     icon: Icons.piano_outlined,
     cost: 2200, // prototypeOnly
@@ -372,7 +385,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'dil_kursu',
     venue: ActivityVenue.kurs,
     label: 'Dil kursu',
-    description: 'Yeni bir dilde ilk cümleni kurmak, ilk cümleni kurduğun '
+    description:
+        'Yeni bir dilde ilk cümleni kurmak, ilk cümleni kurduğun '
         'günkü kadar tuhaf.',
     icon: Icons.translate_outlined,
     cost: 2800, // prototypeOnly
@@ -385,7 +399,8 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'bilgisayar_kursu',
     venue: ActivityVenue.kurs,
     label: 'Bilgisayar kursu',
-    description: 'Ekranda çalışmayan bir şey var ve sebebini bulmak '
+    description:
+        'Ekranda çalışmayan bir şey var ve sebebini bulmak '
         'sandığından uzun sürüyor.',
     icon: Icons.terminal_outlined,
     cost: 3200, // prototypeOnly
