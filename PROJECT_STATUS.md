@@ -1117,6 +1117,22 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
+**Ölçümler (gerçekten çalıştırıldı — `app/test/measurements_test.dart`).**
+
+| Ölçüm | Sonuç |
+|---|---|
+| 100 hayat, ortalama ömür | 72,4 |
+| Hayat sonunda ortalama görünüş | 31,1 (en düşük 3, en yüksek 71) |
+| Hayat sonunda ortalama mutluluk | 66,4 (1 – 89) |
+| Hayat sonunda ortalama sağlık | 20,6 (0 – 73) |
+| Hayat sonunda ortalama zekâ | 78,0 (40 – 93) |
+| Hayat sonunda ortalama karizma | 72,0 (27 – 92) |
+| 100'e dayanan değer sayısı | **0** |
+| Görünüş: 20 yaş → 80 yaş | 51,9 → 19,5 |
+| Sağlık: 20 yaş → 80 yaş | 56,4 → 16,0 |
+| Görüşülmeyen çocukla yakınlık | 1 yıl 100 · 5 yıl 94 · 10 yıl 74 · 15 yıl 44 · 20 yıl 20 (taban) |
+| Tek yılda en çok bildirim | 7 (üç vefat, üç cenaze, tek toplu miras); ortalama 0,39 |
+
 **Açık kalan sayılar:** Q-116 … Q-128 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
