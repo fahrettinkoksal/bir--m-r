@@ -97,11 +97,31 @@ void main() {
       );
     });
 
-    test('v1: yalnızca kedi ve köpek sahiplenilebilir', () {
-      expect(
-        adoptablePetSpecies.map((PetSpecies s) => s.id).toSet(),
-        <String>{'kedi', 'köpek'},
-      );
+    test('tür listesi genişledi ama balık gibi türler dışarıda kalmadı',
+        () {
+      // D-082, D-058'in "yalnızca kedi ve köpek" hükmünü değiştirdi:
+      // Faho muhabbet kuşu, papağan, kanarya, timsah gibi türleri
+      // istedi. Test artık tam listeyi değil, **kuralı** sabitliyor.
+      final Set<String> sahiplenilebilir =
+          adoptablePetSpecies.map((PetSpecies s) => s.id).toSet();
+      expect(sahiplenilebilir, contains('kedi'));
+      expect(sahiplenilebilir, contains('köpek'));
+      expect(sahiplenilebilir, contains('muhabbet kuşu'));
+      expect(sahiplenilebilir, contains('papağan'));
+      expect(sahiplenilebilir, contains('kanarya'));
+      expect(sahiplenilebilir.length, greaterThanOrEqualTo(8));
+    });
+
+    test('özel izin gerektiren tür açıkça uyarı taşır', () {
+      // Timsah gerçek hayatta sıradan bir evcil hayvan değildir; oyun
+      // bunu normal bir tercih gibi sunmaz (D-082).
+      final Iterable<PetSpecies> izinliler = PetSpecies.values
+          .where((PetSpecies s) => s.requiresPermit);
+      expect(izinliler, isNotEmpty);
+      for (final PetSpecies s in izinliler) {
+        expect(s.warning, isNotNull, reason: '${s.label} uyarısız');
+        expect(s.warning!.length, greaterThan(30), reason: s.label);
+      }
     });
 
     test('aynı hayvan iki kez oluşturulmaz: her sahiplenme ayrı kimlik', () {

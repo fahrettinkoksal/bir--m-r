@@ -967,6 +967,51 @@ class GameController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Oyuncuyu kendiliğinden beğenmiş profiller (D-081).
+  List<FingerProfile> get fingerIncoming =>
+      _state?.fingerIncoming ?? const <FingerProfile>[];
+
+  /// Bu yıl kalan beğeni hakkı.
+  int get fingerLikesLeft {
+    final GameState? current = _state;
+    return current == null ? 0 : Finger.likesLeft(current);
+  }
+
+  /// Bu yıl atılabilecek toplam beğeni.
+  int get fingerLikeLimit {
+    final GameState? current = _state;
+    return current == null ? 0 : Finger.likeLimit(current);
+  }
+
+  bool get hasFingerPremium => _state?.hasFingerPremium ?? false;
+
+  InteractionAvailability get fingerLikeAvailability {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return Finger.likeAvailability(current);
+  }
+
+  InteractionAvailability get fingerPremiumAvailability {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return Finger.premiumAvailability(current);
+  }
+
+  FingerOutcome? buyFingerPremium() =>
+      _runFinger((GameState s) => Finger.buyPremium(s));
+
+  FingerOutcome? saveFingerProfile({
+    required String bio,
+    required List<String> interests,
+  }) =>
+      _runFinger(
+        (GameState s) => Finger.saveProfile(s, bio: bio, interests: interests),
+      );
+
   FingerOutcome? passFingerProfile(String profileId) =>
       _runFinger((GameState s) => Finger.pass(s, profileId, _random));
 

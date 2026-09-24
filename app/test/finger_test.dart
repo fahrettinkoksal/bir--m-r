@@ -183,6 +183,11 @@ void main() {
       GameState s = eslesmisHayat();
       // Önce biriyle tanışıp sevgili ol.
       s = Finger.meet(s, s.fingerMatches.first.id, Random(3)).state;
+      // D-081 ile bir yılda atılabilecek beğeni sayısı sınırlandı.
+      // Bu test tanışma kuralını sınıyor, beğeni kotasını değil; bu
+      // yüzden ikinci eşleşmeyi kurmak için premium üyelik kullanılır
+      // (oyunda da açık olan yol).
+      s = s.copyWith(fingerPremiumUntilAge: s.player.age);
       // Sonra ikinci bir eşleşme kur.
       for (int seed = 0; seed < 200 && s.fingerMatches.length < 2; seed++) {
         s = Finger.like(s, s.fingerDeck.first.id, Random(seed)).state;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../data/finger_catalog.dart';
 import '../../../domain/interaction/finger.dart';
+import '../../../domain/models/game_state.dart';
+import '../../../text/turkish_text.dart';
 import '../../../domain/models/finger_profile.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
@@ -50,7 +52,8 @@ class _FingerPageState extends State<FingerPage> {
       icon: Icons.favorite_rounded,
       accent: BirOmurAccents.gul,
       title: 'Finger',
-      subtitle: 'Bu yıl ${kalan < 0 ? 0 : kalan} profile daha bakabilirsin.',
+      subtitle: 'Bu yıl ${kalan < 0 ? 0 : kalan} profile daha bakabilirsin '
+          '· ${controller.fingerLikesLeft} beğeni hakkın var.',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
@@ -58,11 +61,44 @@ class _FingerPageState extends State<FingerPage> {
           icon: Icons.percent_rounded,
           text: 'Beğenilerinin yaklaşık '
               '%${(controller.fingerMatchChance * 100).round()}\'i karşılık '
-              'buluyor. Görünüş ve karizma yükseldikçe bu oran artar. '
-              'Eşleşmek tanışmak değildir: buluşana kadar kimse hayatına '
-              'girmez.',
+              'buluyor. Görünüş, karizma ve **doldurulmuş profil** bu '
+              'oranı yükseltir. Eşleşmek tanışmak değildir: buluşana '
+              'kadar kimse hayatına girmez.',
         ),
         const SizedBox(height: 12),
+        // Kendi profilin (D-081): boş profili kimse beğenmez.
+        _SelfProfileCard(
+          onSaved: (FingerOutcome? o) => setState(() => _sonuc = o),
+        ),
+        const SizedBox(height: 12),
+        // Premium (D-081): beğeni hakkını artırır, sınırsız yapmaz.
+        if (!controller.hasFingerPremium) ...<Widget>[
+          _PremiumCard(
+            onBuy: () => setState(
+              () => _sonuc = controller.buyFingerPremium(),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Seni beğenenler: buradan gelen beğeni kesin eşleşir.
+        if (controller.fingerIncoming.isNotEmpty) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Seni beğenenler',
+            accent: BirOmurAccents.gul,
+          ),
+          for (final FingerProfile p in controller.fingerIncoming) ...<Widget>[
+            _MatchRow(
+              key: Key('incoming_${p.id}'),
+              profile: p,
+              actionLabel: 'Sen de beğen',
+              onMeet: () => setState(
+                () => _sonuc = controller.likeFingerProfile(p.id),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 8),
+        ],
         if (!izin.isAllowed) ...<Widget>[
           InfoPanel(
             icon: Icons.hourglass_bottom_rounded,
@@ -235,10 +271,20 @@ class _ProfileCard extends StatelessWidget {
 }
 
 class _MatchRow extends StatelessWidget {
-  const _MatchRow({required this.profile, required this.onMeet});
+  const _MatchRow({
+    super.key,
+    required this.profile,
+    required this.onMeet,
+    this.actionLabel,
+  });
 
   final FingerProfile profile;
   final VoidCallback onMeet;
+
+  /// Düğmenin yazısı; boşsa "Tanış" kullanılır.
+  ///
+  /// "Seni beğenenler" listesinde düğme tanıştırmaz, **beğenir**.
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -276,10 +322,183 @@ class _MatchRow extends StatelessWidget {
             FilledButton.tonal(
               key: Key('finger_tanis_${profile.id}'),
               onPressed: profile.isMet ? null : onMeet,
-              child: Text(profile.isMet ? 'Tanıştın' : 'Tanış'),
+              child: Text(
+                profile.isMet ? 'Tanıştın' : (actionLabel ?? 'Tanış'),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Oyuncunun kendi Finger profili (D-081).
+///
+/// Faho'nun isteği: "bir finger profili oluşturalım, hobilerimi falan
+/// sorsun, ona göre insanlar da beni beğenebilsin". Profil doldurmadan
+/// kimse oyuncuyu kendiliğinden beğenmez.
+class _SelfProfileCard extends StatefulWidget {
+  const _SelfProfileCard({required this.onSaved});
+
+  final void Function(FingerOutcome?) onSaved;
+
+  @override
+  State<_SelfProfileCard> createState() => _SelfProfileCardState();
+}
+
+class _SelfProfileCardState extends State<_SelfProfileCard> {
+  bool _acik = false;
+  String? _bio;
+  late Set<String> _ilgiler;
+  bool _yuklendi = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final GameState state = controller.state!;
+
+    if (!_yuklendi) {
+      _bio = state.fingerBio;
+      _ilgiler = <String>{...state.fingerInterests};
+      _yuklendi = true;
+    }
+
+    return Container(
+      decoration: panelDecoration(context, radius: 16),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  state.hasFingerProfile ? 'Profilin' : 'Profilin boş',
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              TextButton(
+                key: const Key('finger_profil_ac'),
+                onPressed: () => setState(() => _acik = !_acik),
+                child: Text(_acik ? 'Kapat' : 'Düzenle'),
+              ),
+            ],
+          ),
+          if (!_acik)
+            Text(
+              state.hasFingerProfile
+                  ? '${state.fingerBio ?? ''}\n'
+                      '${state.fingerInterests.join(', ')}'
+                  : 'Profilini doldurmadan kimse seni kendiliğinden '
+                      'beğenmez.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          if (_acik) ...<Widget>[
+            const SizedBox(height: 8),
+            Text('Kendini anlat', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 6),
+            for (final String metin in kFingerBios.take(6))
+              RadioMenuButton<String>(
+                value: metin,
+                groupValue: _bio,
+                onChanged: (String? v) => setState(() => _bio = v),
+                child: Text(metin, style: theme.textTheme.bodySmall),
+              ),
+            const SizedBox(height: 10),
+            Text('İlgi alanların', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: <Widget>[
+                for (final String ilgi in kFingerInterests)
+                  FilterChip(
+                    key: Key('finger_ilgi_$ilgi'),
+                    label: Text(ilgi),
+                    selected: _ilgiler.contains(ilgi),
+                    onSelected: (bool secili) => setState(() {
+                      if (secili) {
+                        _ilgiler.add(ilgi);
+                      } else {
+                        _ilgiler.remove(ilgi);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                key: const Key('finger_profil_kaydet'),
+                onPressed: () {
+                  final FingerOutcome? o = controller.saveFingerProfile(
+                    bio: _bio ?? '',
+                    interests: _ilgiler.toList(growable: false),
+                  );
+                  setState(() => _acik = false);
+                  widget.onSaved(o);
+                },
+                child: const Text('Profili kaydet'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Premium üyelik kartı (D-081).
+class _PremiumCard extends StatelessWidget {
+  const _PremiumCard({required this.onBuy});
+
+  final VoidCallback onBuy;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final InteractionAvailability izin = controller.fingerPremiumAvailability;
+
+    return Container(
+      decoration: panelDecoration(context, radius: 16),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('Premium üyelik', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Text(
+            'Yılda $kFingerMaxLikesPerAge beğeni yerine '
+            '$kFingerPremiumLikesPerAge beğeni. '
+            'Ücreti ${trMoney(kFingerPremiumYearlyCost)}, bir yıl geçerli.',
+            style: theme.textTheme.bodySmall,
+          ),
+          if (!izin.isAllowed)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                izin.reason!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonal(
+              key: const Key('finger_premium_al'),
+              onPressed: izin.isAllowed ? onBuy : null,
+              child: const Text('Premium al'),
+            ),
+          ),
+        ],
       ),
     );
   }

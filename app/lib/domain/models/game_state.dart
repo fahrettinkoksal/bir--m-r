@@ -83,6 +83,10 @@ class GameState {
     this.blackjack,
     this.wagerThisAge = 0,
     this.loans = const <Loan>[],
+    this.fingerIncoming = const <FingerProfile>[],
+    this.fingerBio,
+    this.fingerInterests = const <String>[],
+    this.fingerPremiumUntilAge,
     this.lastSportAge,
     this.lastGroomingAge,
     this.lastLearningAge,
@@ -578,6 +582,32 @@ class GameState {
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
   final int wagerThisAge;
 
+  /// Oyuncuyu **kendiliğinden beğenmiş** profiller (D-081).
+  ///
+  /// Karşılıklı beğeni için: oyuncu bu profillerden birini beğenirse
+  /// eşleşme **kesindir**, çünkü karşı taraf zaten beğenmiştir.
+  final List<FingerProfile> fingerIncoming;
+
+  /// Oyuncunun kendi Finger profilindeki tanıtım yazısı (D-081).
+  ///
+  /// Boşsa profil doldurulmamıştır ve eşleşme ihtimali düşüktür.
+  final String? fingerBio;
+
+  /// Oyuncunun kendi profilinde yazan ilgi alanları (D-081).
+  final List<String> fingerInterests;
+
+  /// Premium üyeliğin geçerli olduğu son yaş; üyelik yoksa `null`.
+  final int? fingerPremiumUntilAge;
+
+  /// Premium üyelik şu an geçerli mi?
+  bool get hasFingerPremium =>
+      fingerPremiumUntilAge != null && player.age <= fingerPremiumUntilAge!;
+
+  /// Oyuncunun profili doldurulmuş mu?
+  bool get hasFingerProfile =>
+      (fingerBio != null && fingerBio!.isNotEmpty) ||
+      fingerInterests.isNotEmpty;
+
   /// Çekilmiş krediler (D-080).
   ///
   /// Kapanmış krediler de listede kalır: borç geçmişi silinmez, yeni
@@ -774,6 +804,10 @@ class GameState {
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
     List<Loan>? loans,
+    List<FingerProfile>? fingerIncoming,
+    String? fingerBio,
+    List<String>? fingerInterests,
+    int? fingerPremiumUntilAge,
     int? lastSportAge,
     int? lastGroomingAge,
     int? lastLearningAge,
@@ -857,6 +891,11 @@ class GameState {
           : blackjack as BlackjackGame?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
       loans: loans ?? this.loans,
+      fingerIncoming: fingerIncoming ?? this.fingerIncoming,
+      fingerBio: fingerBio ?? this.fingerBio,
+      fingerInterests: fingerInterests ?? this.fingerInterests,
+      fingerPremiumUntilAge:
+          fingerPremiumUntilAge ?? this.fingerPremiumUntilAge,
       lastSportAge: lastSportAge ?? this.lastSportAge,
       lastGroomingAge: lastGroomingAge ?? this.lastGroomingAge,
       lastLearningAge: lastLearningAge ?? this.lastLearningAge,

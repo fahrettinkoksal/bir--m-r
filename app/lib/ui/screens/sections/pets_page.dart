@@ -312,6 +312,17 @@ class _AdoptCardState extends State<_AdoptCard> {
               ],
             ),
             const SizedBox(height: 6),
+            // Özel izin gerektiren tür açıkça uyarılır (D-082): oyun
+            // bunu sıradan bir tercih gibi sunmaz.
+            if (tur.warning != null) ...<Widget>[
+              Text(
+                tur.warning!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
             Text(
               'Sahiplenme ${trMoney(tur.adoptionCost)} · yıllık bakım '
               '${trMoney(tur.yearlyCareCost)}',

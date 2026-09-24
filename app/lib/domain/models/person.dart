@@ -273,7 +273,12 @@ class Pet {
     this.diedAtPlayerAge,
     this.lastCareChargedPlayerAge,
     this.bond = 50,
+    this.health = prototypeOnlyDefaultPetHealth,
+    this.missingSinceAge,
   });
+
+  /// prototypeOnly: yeni ve eski kayıttan okunan hayvanın sağlığı.
+  static const int prototypeOnlyDefaultPetHealth = 75;
 
   final String id;
   final String name;
@@ -295,6 +300,21 @@ class Pet {
   /// Kuşak değişiminde yalnızca **aynı hanede** olan hayvan devam eder;
   /// sahte yeni hayvan üretilmez.
   final bool inPlayerHousehold;
+
+  /// Hayvanın sağlığı (D-058, D-082).
+  ///
+  /// Veteriner ziyareti gerçek anlam taşır: hastalanan hayvanın sağlığı
+  /// düşer, tedavi yükseltir. Uzun süre düşük kalan sağlık ömrü kısaltır.
+  final int health;
+
+  /// Evden kaçtıysa **oyuncunun** o zamanki yaşı (D-082).
+  ///
+  /// Kaçan hayvan kayıttan silinmez ve yok olmaz (D-058): geri
+  /// dönebilir. `null` ise hayvan evdedir.
+  final int? missingSinceAge;
+
+  /// Hayvan şu an kayıp mı?
+  bool get isMissing => missingSinceAge != null && diedAtAge == null;
 
   /// Vefat ettiyse hayvanın kendi yaşı.
   final int? diedAtAge;
@@ -321,6 +341,8 @@ class Pet {
     Object? diedAtPlayerAge = _unset,
     Object? lastCareChargedPlayerAge = _unset,
     int? bond,
+    int? health,
+    Object? missingSinceAge = _unset,
   }) =>
       Pet(
         id: id,
@@ -339,5 +361,9 @@ class Pet {
             ? this.lastCareChargedPlayerAge
             : lastCareChargedPlayerAge as int?,
         bond: bond ?? this.bond,
+        health: (health ?? this.health).clamp(0, 100),
+        missingSinceAge: missingSinceAge == _unset
+            ? this.missingSinceAge
+            : missingSinceAge as int?,
       );
 }

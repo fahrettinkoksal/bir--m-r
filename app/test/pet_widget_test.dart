@@ -138,6 +138,10 @@ void main() {
       ),
     );
 
+    // D-082 ile sahiplenilebilir tür sayısı arttı; anma bölümü
+    // listenin daha aşağısında kalıyor ve tembel liste onu henüz
+    // kurmamış oluyor. Bölüme kaydırılır.
+    await scrollToFinder(tester, find.text('Anılarda kalanlar'));
     expect(find.text('Anılarda kalanlar'), findsOneWidget);
     expect(find.text('Paşa'), findsWidgets);
     expect(find.byKey(const Key('hayvan_hayvan-1_oyun')), findsNothing);

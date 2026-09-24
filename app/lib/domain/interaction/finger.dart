@@ -59,6 +59,45 @@ abstract final class Finger {
   static int swipesThisAge(GameState state) =>
       state.interactionCount('finger', 'kaydirma');
 
+  /// Bu yıl kaç beğeni atıldı? (D-081)
+  static int likesThisAge(GameState state) =>
+      state.interactionCount('finger', 'begeni');
+
+  /// Bu yıl atılabilecek beğeni sayısı.
+  ///
+  /// Premium üyelik sınırı yükseltir; sınırsız yapmaz.
+  static int likeLimit(GameState state) => state.hasFingerPremium
+      ? kFingerPremiumLikesPerAge
+      : kFingerMaxLikesPerAge;
+
+  /// Bu yıl kalan beğeni hakkı.
+  static int likesLeft(GameState state) =>
+      (likeLimit(state) - likesThisAge(state)).clamp(0, 999);
+
+  /// Oyuncunun yaşına uygun **en küçük** aday yaşı (D-081).
+  ///
+  /// Faho bildirdi: "47 yaşında birisine 17 yaşında birisi çıkmamalı".
+  /// Alt sınır iki koşulun **daha yükseği**dir: oyuncunun on yaş altı ve
+  /// yaygın olarak kullanılan "yaşının yarısı artı yedi" ölçütü. İkisinin
+  /// de altına inilmez ve hiçbir koşulda 18'in altına düşülmez.
+  static int minCandidateAge(int playerAge) {
+    final int onYasAlt = playerAge - 10;
+    final int yarimArtiYedi = playerAge ~/ 2 + 7;
+    final int alt = onYasAlt > yarimArtiYedi ? onYasAlt : yarimArtiYedi;
+    return alt < kFingerMinAge ? kFingerMinAge : alt;
+  }
+
+  /// Oyuncunun yaşına uygun **en büyük** aday yaşı.
+  static int maxCandidateAge(int playerAge) {
+    final int ust = playerAge + 10;
+    return ust > 80 ? 80 : ust;
+  }
+
+  /// Bu profil oyuncunun yaşına hâlâ uygun mu?
+  static bool fitsAge(GameState state, FingerProfile profile) =>
+      profile.age >= minCandidateAge(state.player.age) &&
+      profile.age <= maxCandidateAge(state.player.age);
+
   /// Uygulama açılabilir mi?
   static InteractionAvailability availability(GameState state) {
     if (state.player.age < kFingerMinAge) {
@@ -81,21 +120,166 @@ abstract final class Finger {
     return const InteractionAvailability.allowed();
   }
 
+  /// Beğeni atılabilir mi? (D-081)
+  ///
+  /// Geçmek sınırsızdır; sınır yalnızca **beğeniye** konur. Sınır
+  /// dolduğunda gerekçe premium seçeneğini de söyler, çünkü kapalı
+  /// düğmenin sebebi görünür olmalı (D-038).
+  static InteractionAvailability likeAvailability(GameState state) {
+    final InteractionAvailability temel = swipeAvailability(state);
+    if (!temel.isAllowed) return temel;
+    if (likesThisAge(state) >= likeLimit(state)) {
+      return InteractionAvailability.blocked(
+        state.hasFingerPremium
+            ? 'Premium beğeni hakkın da bu yıl bitti.'
+            : 'Bu yıl $kFingerMaxLikesPerAge beğeni hakkını kullandın. '
+                'Premium üyelikle yılda $kFingerPremiumLikesPerAge '
+                'beğeni atabilirsin.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Premium üyelik alınabilir mi?
+  static InteractionAvailability premiumAvailability(GameState state) {
+    final InteractionAvailability temel = availability(state);
+    if (!temel.isAllowed) return temel;
+    if (state.hasFingerPremium) {
+      return const InteractionAvailability.blocked(
+        'Premium üyeliğin zaten sürüyor.',
+      );
+    }
+    if (state.player.wallet < kFingerPremiumYearlyCost) {
+      return const InteractionAvailability.blocked(
+        'Premium üyelik için cüzdanında yeterli para yok.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Premium üyelik satın alır.
+  ///
+  /// Ücret **bir kez** düşer ve üyelik o yıl dâhil bir yıl sürer.
+  static FingerResult buyPremium(GameState state) {
+    final InteractionAvailability check = premiumAvailability(state);
+    if (!check.isAllowed) {
+      return FingerResult(
+        state: state,
+        outcome: FingerOutcome(applied: false, text: check.reason!),
+      );
+    }
+    return FingerResult(
+      state: state.copyWith(
+        player: state.player.copyWith(
+          wallet: state.player.wallet - kFingerPremiumYearlyCost,
+        ),
+        fingerPremiumUntilAge: state.player.age,
+      ),
+      outcome: FingerOutcome(
+        applied: true,
+        text: 'Premium üyelik alındı. Bu yıl '
+            '$kFingerPremiumLikesPerAge beğeni hakkın var.',
+      ),
+    );
+  }
+
+  /// Oyuncunun kendi profilini kaydeder (D-081).
+  ///
+  /// Faho'nun isteği: "bir finger profili oluşturalım, hobilerimi falan
+  /// sorsun, ona göre insanlar da beni beğenebilsin". Profil doldurmak
+  /// eşleşme ihtimalini yükseltir ve ortak ilgi alanı ayrıca katkı yapar.
+  static FingerResult saveProfile(
+    GameState state, {
+    required String bio,
+    required List<String> interests,
+  }) {
+    final InteractionAvailability check = availability(state);
+    if (!check.isAllowed) {
+      return FingerResult(
+        state: state,
+        outcome: FingerOutcome(applied: false, text: check.reason!),
+      );
+    }
+    return FingerResult(
+      state: state.copyWith(
+        fingerBio: bio,
+        fingerInterests: List<String>.unmodifiable(interests),
+      ),
+      outcome: const FingerOutcome(
+        applied: true,
+        text: 'Profilin kaydedildi.',
+      ),
+    );
+  }
+
   /// Desteyi gerekirse doldurur.
   ///
   /// Zaten profil varsa dokunmaz: ekran her açılışta yeniden karılmaz.
   static GameState ensureDeck(GameState state, Random rng) {
     if (state.player.age < kFingerMinAge) return state;
-    if (state.fingerDeck.length >= kFingerDeckSize) return state;
 
-    final List<FingerProfile> deste = <FingerProfile>[...state.fingerDeck];
+    // Yaşa uymayan profiller desteden **düşer** (D-081).
+    //
+    // Eskiden deste bir kez kurulup öylece duruyordu: yirmi yaşında
+    // kurulan deste kırk yedi yaşında hâlâ yirmilik profiller
+    // gösteriyordu. Faho'nun bildirdiği durum buydu. Artık her açılışta
+    // yaşa uymayanlar atılır ve yerlerine uygun profil üretilir.
+    final List<FingerProfile> deste = state.fingerDeck
+        .where((FingerProfile p) => fitsAge(state, p))
+        .toList(growable: true);
+
+    if (deste.length >= kFingerDeckSize &&
+        deste.length == state.fingerDeck.length) {
+      return _ensureIncoming(state, rng);
+    }
+
     int sayac = _nextIndex(state);
     while (deste.length < kFingerDeckSize) {
       deste.add(_uret(state, rng, sayac++));
     }
-    return state.copyWith(
-      fingerDeck: List<FingerProfile>.unmodifiable(deste),
+    return _ensureIncoming(
+      state.copyWith(fingerDeck: List<FingerProfile>.unmodifiable(deste)),
+      rng,
     );
+  }
+
+  /// "Seni beğenenler" listesini doldurur (D-081).
+  ///
+  /// Kimlerin oyuncuyu beğendiği **profiline bakar**: profil
+  /// doldurulmamışsa kimse kendiliğinden beğenmez. Liste yaşa uymayan
+  /// profillerden de temizlenir.
+  static GameState _ensureIncoming(GameState state, Random rng) {
+    final List<FingerProfile> gelen = state.fingerIncoming
+        .where((FingerProfile p) => fitsAge(state, p))
+        .toList(growable: true);
+
+    final int hedef = _incomingTarget(state);
+    if (gelen.length == state.fingerIncoming.length &&
+        gelen.length >= hedef) {
+      return state;
+    }
+
+    int sayac = _nextIndex(state) + 500;
+    while (gelen.length < hedef) {
+      gelen.add(_uret(state, rng, sayac++));
+    }
+    return state.copyWith(
+      fingerIncoming: List<FingerProfile>.unmodifiable(gelen),
+    );
+  }
+
+  /// Kaç kişinin oyuncuyu kendiliğinden beğeneceği.
+  ///
+  /// Profil yoksa sıfır: kimse boş profili beğenmez. Profil doldukça ve
+  /// cazibe yükseldikçe artar.
+  static int _incomingTarget(GameState state) {
+    if (!state.hasFingerProfile) return 0;
+    final double cazibe =
+        (state.player.stats.appearance + state.player.stats.charisma) / 200;
+    final int taban = state.fingerInterests.isEmpty ? 1 : 2;
+    return (taban + (cazibe * kFingerMaxIncoming))
+        .round()
+        .clamp(1, kFingerMaxIncoming);
   }
 
   /// Profili geçer: deste yenilenir, eşleşme olmaz.
@@ -119,15 +303,19 @@ abstract final class Finger {
   }
 
   /// Profili beğenir. Karşılık gelirse eşleşme listesine düşer.
+  ///
+  /// Profil "seni beğenenler" listesindeyse eşleşme **kesindir**: karşı
+  /// taraf zaten beğenmiştir, zar atmanın anlamı yok (D-081).
   static FingerResult like(GameState state, String profileId, Random rng) {
-    final InteractionAvailability check = swipeAvailability(state);
+    final InteractionAvailability check = likeAvailability(state);
     if (!check.isAllowed) {
       return FingerResult(
         state: state,
         outcome: FingerOutcome(applied: false, text: check.reason!),
       );
     }
-    final FingerProfile? profil = _fromDeck(state, profileId);
+    final FingerProfile? gelen = _fromIncoming(state, profileId);
+    final FingerProfile? profil = gelen ?? _fromDeck(state, profileId);
     if (profil == null) {
       return FingerResult(
         state: state,
@@ -138,8 +326,9 @@ abstract final class Finger {
       );
     }
 
-    final bool eslesti = rng.nextDouble() < matchChance(state);
-    GameState next = _consume(state, profileId);
+    final bool eslesti =
+        gelen != null || rng.nextDouble() < matchChance(state, profil);
+    GameState next = _consumeLike(state, profileId, fromIncoming: gelen != null);
 
     if (eslesti) {
       next = next.copyWith(
@@ -156,19 +345,63 @@ abstract final class Finger {
       outcome: FingerOutcome(
         applied: true,
         matched: eslesti,
-        text: eslesti ? rng.pick(kFingerMatchLines) : rng.pick(kFingerNoMatchLines),
+        text: gelen != null
+            ? '${gelen.firstName} seni zaten beğenmişti. Eşleştiniz.'
+            : eslesti
+                ? rng.pick(kFingerMatchLines)
+                : rng.pick(kFingerNoMatchLines),
       ),
+    );
+  }
+
+  /// "Seni beğenenler" listesindeki profil.
+  static FingerProfile? _fromIncoming(GameState state, String id) =>
+      state.fingerIncoming.where((FingerProfile p) => p.id == id).firstOrNull;
+
+  /// Beğeniyi harcar ve profili listeden düşürür.
+  static GameState _consumeLike(
+    GameState state,
+    String profileId, {
+    required bool fromIncoming,
+  }) {
+    GameState next = fromIncoming
+        ? state.copyWith(
+            fingerIncoming: List<FingerProfile>.unmodifiable(
+              state.fingerIncoming
+                  .where((FingerProfile p) => p.id != profileId),
+            ),
+          )
+        : _consume(state, profileId);
+    return next.copyWith(
+      interactionCounts: Map<String, int>.unmodifiable(<String, int>{
+        ...next.interactionCounts,
+        GameState.interactionKey('finger', 'begeni'):
+            likesThisAge(next) + 1,
+      }),
     );
   }
 
   /// prototypeOnly: beğeninin karşılık bulma ihtimali.
   ///
   /// Görünüş ve karizma yükseldikçe artar; kimse sıfır ihtimalle kalmaz.
-  static double matchChance(GameState state) {
+  /// **Doldurulmuş profil** ve **ortak ilgi alanı** ayrıca katkı yapar
+  /// (D-081): kendini anlatan profil karşılık bulur.
+  static double matchChance(GameState state, [FingerProfile? profile]) {
     final double cazibe =
         (state.player.stats.appearance + state.player.stats.charisma) / 200;
-    return (kFingerBaseMatchChance + cazibe * kFingerCharmBonus)
-        .clamp(0.05, 0.9);
+    double sans = kFingerBaseMatchChance + cazibe * kFingerCharmBonus;
+
+    if (state.hasFingerProfile) sans += kFingerProfileBonus;
+    if (state.hasFingerPremium) sans += kFingerPremiumMatchBonus;
+
+    if (profile != null && state.fingerInterests.isNotEmpty) {
+      final int ortak = profile.interests
+          .where((String i) => state.fingerInterests.contains(i))
+          .length;
+      sans += ortak * kFingerSharedInterestBonus;
+    }
+
+    return sans.clamp(0.05, 0.9);
   }
 
   /// Eşleşilen kişiyle tanışır: kişi artık oyunun kişi listesindedir.
@@ -316,7 +549,11 @@ abstract final class Finger {
   static FingerProfile _uret(GameState state, Random rng, int index) {
     final Gender gender =
         state.player.gender == Gender.kadin ? Gender.erkek : Gender.kadin;
-    final int age = (state.player.age + rng.between(-5, 6)).clamp(18, 75);
+    // Yaş **oyuncunun bandından** seçilir (D-081): 47 yaşındakine 17
+    // yaşında biri çıkmaz.
+    final int alt = minCandidateAge(state.player.age);
+    final int ust = maxCandidateAge(state.player.age);
+    final int age = ust <= alt ? alt : alt + rng.nextInt(ust - alt + 1);
     final bool calisiyor = age > 23 || rng.nextDouble() < 0.4;
 
     final Set<String> ilgiler = <String>{};

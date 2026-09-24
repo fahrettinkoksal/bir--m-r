@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../generation/random_util.dart';
+
 import '../../data/pet_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../models/game_state.dart';
@@ -40,6 +42,23 @@ abstract final class PetCare {
   /// prototypeOnly: hayvanın vefatının mutluluğa etkisi (bağa göre artar).
   static const int prototypeOnlyDeathHappinessBase = -8;
   static const int prototypeOnlyDeathHappinessExtra = -10;
+
+  /// prototypeOnly: kayıp hayvanın bir yılda geri dönme ihtimali (D-082).
+  ///
+  /// Yüksek tutuldu: kaçan hayvan kalıcı olarak yok olmaz (D-058).
+  static const double prototypeOnlyReturnChance = 0.6;
+
+  /// prototypeOnly: bir yılda hastalanma ihtimali.
+  static const double prototypeOnlyIllnessChance = 0.12;
+
+  /// prototypeOnly: hastalığın sağlığa verdiği zarar.
+  static const int prototypeOnlyIllnessDamage = 18;
+
+  /// prototypeOnly: veteriner ziyaretinin sağlığa katkısı.
+  static const int prototypeOnlyVetHealthGain = 22;
+
+  /// prototypeOnly: sağlığın vefat ihtimaline etkisinin üst sınırı.
+  static const double prototypeOnlyHealthDeathFactor = 1.6;
 
   // -------------------------------------------------------------------
   // Okuma yardımcıları
@@ -216,8 +235,13 @@ abstract final class PetCare {
       );
     }
 
+    // Veteriner ziyareti hayvanın **kendi sağlığını** yükseltir
+    // (D-058): gerçek bir anlamı olsun diye.
     final Pet guncel = pet.copyWith(
       bond: (pet.bond + bag).clamp(0, 100),
+      health: action == PetAction.veteriner
+          ? pet.health + prototypeOnlyVetHealthGain
+          : pet.health,
     );
 
     final GameState next = state.copyWith(
@@ -288,6 +312,86 @@ abstract final class PetCare {
           );
         }
         guncel = guncel.copyWith(lastCareChargedPlayerAge: newAge);
+      }
+
+      // --- Kaçma ve dönüş (D-082) ---------------------------------------
+      //
+      // Faho'nun isteği: "bazen evden kaçabilir, hastalanabilir".
+      // Kaçan hayvan **yok olmaz** (D-058): kayıtta kalır ve büyük
+      // ihtimalle döner. Kayıpken bakım gideri işlemez, yaşlanmaya
+      // devam eder.
+      if (guncel.isMissing) {
+        if (rng.chance(prototypeOnlyReturnChance)) {
+          guncel = guncel.copyWith(missingSinceAge: null);
+          gunluk.add(
+            LifeLogEntry(
+              age: newAge,
+              text: '${guncel.name} eve döndü.',
+              category: LogCategory.aile,
+            ),
+          );
+          bildirimler.add(
+            PendingNotice(
+              id: 'hayvan-dondu-${guncel.id}-$newAge',
+              kind: NoticeKind.hayvan,
+              age: newAge,
+              title: '${guncel.name} döndü',
+              text: '${guncel.name} kapının önünde bekliyordu. '
+                  'Sağ salim geri geldi.',
+            ),
+          );
+        }
+      } else if (rng.chance(tur.escapeRisk)) {
+        guncel = guncel.copyWith(missingSinceAge: newAge);
+        gunluk.add(
+          LifeLogEntry(
+            age: newAge,
+            text: '${guncel.name} evden kaçtı.',
+            category: LogCategory.aile,
+          ),
+        );
+        bildirimler.add(
+          PendingNotice(
+            id: 'hayvan-kacti-${guncel.id}-$newAge',
+            kind: NoticeKind.hayvan,
+            age: newAge,
+            title: '${guncel.name} kayıp',
+            text: '${guncel.name} evden kaçtı. Mahalleye ilan astın; '
+                'dönmesini bekliyorsun.',
+          ),
+        );
+      }
+
+      // --- Hastalık (D-082) ----------------------------------------------
+      //
+      // Hasta hayvanın sağlığı düşer. Veteriner ziyareti gerçekten işe
+      // yarar; bakılmayan hayvanın sağlığı yıllar içinde erir ve doğal
+      // vefat ihtimali artar. Parası yetmeyen oyuncu cezalandırılmaz,
+      // ama hayvanın durumu iyileşmez.
+      if (!guncel.isMissing && rng.chance(prototypeOnlyIllnessChance)) {
+        guncel = guncel.copyWith(
+          health: guncel.health - prototypeOnlyIllnessDamage,
+        );
+        gunluk.add(
+          LifeLogEntry(
+            age: newAge,
+            text: '${guncel.name} hastalandı; veterinere görünmesi '
+                'gerekiyor.',
+            category: LogCategory.aile,
+          ),
+        );
+        bildirimler.add(
+          PendingNotice(
+            id: 'hayvan-hasta-${guncel.id}-$newAge',
+            kind: NoticeKind.hayvan,
+            age: newAge,
+            title: '${guncel.name} hasta',
+            text: '${guncel.name} bu yıl hastalandı. Sağlığı '
+                '${guncel.health}. Aktiviteler → Evcil Hayvanlar\'dan '
+                'veterinere götürebilirsin '
+                '(${tur.vetCost} ₺).',
+          ),
+        );
       }
 
       // --- Doğal vefat ---------------------------------------------------
@@ -399,8 +503,13 @@ abstract final class PetCare {
     if (pet.age < tur.typicalLifespan ~/ 2) return false;
     final double oran =
         (pet.age - tur.typicalLifespan / 2) / (tur.maxLifespan - tur.typicalLifespan / 2);
+    // Sağlık ölüm eğrisini besler (D-058): bakılan hayvan daha uzun
+    // yaşar, bakılmayan daha erken gider. Sağlık 75 nötrdür.
+    final double saglikCarpani =
+        (1 + (Pet.prototypeOnlyDefaultPetHealth - pet.health) / 100)
+            .clamp(0.5, prototypeOnlyHealthDeathFactor);
     // prototypeOnly: olağan ömrün yarısında ~%0, üst sınırda %100.
-    return rng.nextDouble() < oran * oran;
+    return rng.nextDouble() < oran * oran * saglikCarpani;
   }
 
   static String _birlikteMetni(Pet pet, int playerAge) {

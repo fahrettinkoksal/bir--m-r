@@ -101,6 +101,12 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           state.fingerDeck.map(_encodeFinger).toList(growable: false),
       'fingerMatches':
           state.fingerMatches.map(_encodeFinger).toList(growable: false),
+      // Karşılıklı beğeni, profil ve premium (D-081). Alan eklemeli.
+      'fingerIncoming':
+          state.fingerIncoming.map(_encodeFinger).toList(growable: false),
+      'fingerBio': state.fingerBio,
+      'fingerInterests': state.fingerInterests,
+      'fingerPremiumUntilAge': state.fingerPremiumUntilAge,
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
       // Ünlülerle kurulan temaslar. Eski kayıtlarda bu alan yoktur;
@@ -540,6 +546,9 @@ Map<String, Object?> _encodePet(Pet pet) => <String, Object?>{
       'diedAtPlayerAge': pet.diedAtPlayerAge,
       'lastCareChargedPlayerAge': pet.lastCareChargedPlayerAge,
       'bond': pet.bond,
+      // Hayvan sağlığı ve kayıp durumu (D-082). Alan eklemeli.
+      'health': pet.health,
+      'missingSinceAge': pet.missingSinceAge,
     };
 
 Map<String, Object?> _encodeLogEntry(LifeLogEntry e) => <String, Object?>{
@@ -793,6 +802,18 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeFinger(_asMap(e, 'fingerMatches[]')))
           .toList(growable: false),
     ),
+    fingerIncoming: List<FingerProfile>.unmodifiable(
+      _optionalRawList(json, 'fingerIncoming')
+          .map((Object? e) => _decodeFinger(_asMap(e, 'fingerIncoming[]')))
+          .toList(growable: false),
+    ),
+    fingerBio: _stringOrNull(json, 'fingerBio'),
+    fingerInterests: List<String>.unmodifiable(
+      json['fingerInterests'] == null
+          ? const <String>[]
+          : _stringList(json, 'fingerInterests'),
+    ),
+    fingerPremiumUntilAge: _intOrNull(json, 'fingerPremiumUntilAge'),
     socialAccounts: List<SocialAccount>.unmodifiable(
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
@@ -1456,6 +1477,9 @@ Pet _decodePet(Map<String, Object?> json) => Pet(
       diedAtPlayerAge: _intOrNull(json, 'diedAtPlayerAge'),
       lastCareChargedPlayerAge: _intOrNull(json, 'lastCareChargedPlayerAge'),
       bond: _intOr(json, 'bond', 50),
+      // Eski kayıtta hayvan sağlığı yoktur; nötr okunur (D-082).
+      health: _intOr(json, 'health', Pet.prototypeOnlyDefaultPetHealth),
+      missingSinceAge: _intOrNull(json, 'missingSinceAge'),
     );
 
 LifeLogEntry _decodeLogEntry(Map<String, Object?> json) => LifeLogEntry(

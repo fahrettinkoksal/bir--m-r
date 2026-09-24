@@ -77,6 +77,39 @@ const int kFingerMinAge = 18;
 /// prototypeOnly: bir yılda kaç profile bakılabilir.
 const int kFingerMaxSwipesPerAge = 25;
 
+/// prototypeOnly: bir yılda atılabilecek **beğeni** sayısı (D-081).
+///
+/// Faho'nun isteği: "günde 5 like atabilelim ve fazla like atabilmek için
+/// premium satın alalım". Oyun gün gün değil yıl yıl ilerlediği için
+/// "günde 5" oyunun ölçeğine **yılda 5 beğeni** olarak taşındı; geçmek
+/// sınırsızdır, sınır yalnızca beğeniye konur.
+const int kFingerMaxLikesPerAge = 5;
+
+/// prototypeOnly: premium üyelikte bir yıldaki beğeni sayısı.
+const int kFingerPremiumLikesPerAge = 30;
+
+/// prototypeOnly: premium üyeliğin yıllık ücreti (2026 ₺).
+///
+/// Gerçek tanışma uygulamalarının aylık aboneliği bu ölçekte; yıllığa
+/// çevrilmiş hâli.
+const int kFingerPremiumYearlyCost = 4800;
+
+/// prototypeOnly: premium üyeliğin eşleşme ihtimaline katkısı.
+const double kFingerPremiumMatchBonus = 0.08;
+
+/// prototypeOnly: doldurulmuş profilin eşleşme ihtimaline katkısı.
+///
+/// Boş profil kimseye bir şey söylemez; kendini anlatan profil karşılık
+/// bulur.
+const double kFingerProfileBonus = 0.12;
+
+/// prototypeOnly: ortak ilgi alanı başına eşleşme katkısı.
+const double kFingerSharedInterestBonus = 0.05;
+
+/// prototypeOnly: bir yılda kaç kişinin oyuncuyu kendiliğinden
+/// beğenebileceği.
+const int kFingerMaxIncoming = 3;
+
 /// prototypeOnly: destede aynı anda kaç profil durur.
 const int kFingerDeckSize = 8;
 
