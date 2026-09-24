@@ -92,19 +92,22 @@ class LifeProgression {
     // Çocuklar arka planda kendi hayatlarını yaşar (D-045). Önemli
     // ilerleme gerçekleştiği yılda kaydedilir; vefat edenlere dokunulmaz.
     final List<String> cocukHaberleri = <String>[];
-    final List<Person> peopleWithChildren = people.map((Person person) {
-      // Torunlar da kendi hayatlarını yaşar (Paket 12): okula başlar,
-      // büyür. Vefat edenlere dokunulmaz.
-      final bool kendiHayati = person.relation == RelationType.cocuk ||
-          person.relation == RelationType.torun;
-      if (!person.isAlive || !kendiHayati) {
-        return person;
-      }
-      final ({Person person, List<String> news}) sonuc =
-          ChildProgression.advance(person, _rng);
-      cocukHaberleri.addAll(sonuc.news);
-      return sonuc.person;
-    }).toList(growable: false);
+    final List<Person> peopleWithChildren = people
+        .map((Person person) {
+          // Torunlar da kendi hayatlarını yaşar (Paket 12): okula başlar,
+          // büyür. Vefat edenlere dokunulmaz.
+          final bool kendiHayati =
+              person.relation == RelationType.cocuk ||
+              person.relation == RelationType.torun;
+          if (!person.isAlive || !kendiHayati) {
+            return person;
+          }
+          final ({Person person, List<String> news}) sonuc =
+              ChildProgression.advance(person, _rng);
+          cocukHaberleri.addAll(sonuc.news);
+          return sonuc.person;
+        })
+        .toList(growable: false);
 
     // Yetişkin çocukların kendi çocukları olabilir (Paket 12). Torun
     // gerçek bir kişi kaydıdır ve doğduğu yıl oluşturulur.
@@ -182,12 +185,12 @@ class LifeProgression {
     // silinmez; yalnızca güncel sınıf listesinde görünmezler.
     final ({List<Person> people, EducationState education}) okulSonucu =
         _setUpClassIfNeeded(
-      state: state,
-      people: peopleWithChildren,
-      education: education,
-      newAge: newAge,
-      log: log,
-    );
+          state: state,
+          people: peopleWithChildren,
+          education: education,
+          newAge: newAge,
+          log: log,
+        );
     final List<Person> peopleWithSchool = okulSonucu.people;
 
     // Çocukların bu yıl yaşadığı önemli gelişmeler aile haberi olarak
@@ -211,7 +214,8 @@ class LifeProgression {
       List<Person> people,
       int happinessLoss,
       List<({Person person, String cause, int loss})> deaths,
-    }) olumSonucu = _applyDeaths(
+    })
+    olumSonucu = _applyDeaths(
       state: state,
       people: peopleWithEstates,
       newAge: newAge,
@@ -235,8 +239,10 @@ class LifeProgression {
 
     // Emekli aylığı da yeni yaşa geçerken **bir kez** ödenir (Paket 12).
     // Emekli oyuncunun işi olmadığı için maaşla çakışmaz.
-    final ({GameState state, String? logText}) aylik =
-        Retirement.payPension(maas.state, newAge);
+    final ({GameState state, String? logText}) aylik = Retirement.payPension(
+      maas.state,
+      newAge,
+    );
     if (aylik.logText != null) {
       log.add(
         LifeLogEntry(
@@ -290,7 +296,8 @@ class LifeProgression {
       afterDeaths = afterDeaths.copyWith(
         player: afterDeaths.player.copyWith(
           stats: afterDeaths.player.stats.copyWith(
-            happiness: afterDeaths.player.stats.happiness +
+            happiness:
+                afterDeaths.player.stats.happiness +
                 Grandchildren.prototypeOnlyHappiness * yeniTorunlar.length,
           ),
         ),
@@ -376,8 +383,9 @@ class LifeProgression {
     }
 
     // Yıllık geçim gideri: hane ve yaşam koşuluna göre, **bir kez** (D-033).
-    final ({GameState state, String? logText}) gider =
-        LivingCosts.apply(afterDeaths);
+    final ({GameState state, String? logText}) gider = LivingCosts.apply(
+      afterDeaths,
+    );
     afterDeaths = gider.state;
     if (gider.logText != null) {
       afterDeaths = afterDeaths.copyWith(
@@ -439,8 +447,10 @@ class LifeProgression {
     final GameState withTrack = _applyTrackBonus(afterDeaths);
 
     // Yeni yaşın tek açılış olayı.
-    final ActiveEvent? opening =
-        const EventEngine().openingEvent(withTrack, _rng);
+    final ActiveEvent? opening = const EventEngine().openingEvent(
+      withTrack,
+      _rng,
+    );
     return opening == null
         ? withTrack
         : withTrack.copyWith(pendingEvent: opening);
@@ -455,7 +465,8 @@ class LifeProgression {
     List<Person> people,
     int happinessLoss,
     List<({Person person, String cause, int loss})> deaths,
-  }) _applyDeaths({
+  })
+  _applyDeaths({
     required GameState state,
     required List<Person> people,
     required int newAge,
@@ -486,7 +497,8 @@ class LifeProgression {
       log.add(
         LifeLogEntry(
           age: newAge,
-          text: '${trUpperFirst(etiket)} '
+          text:
+              '${trUpperFirst(etiket)} '
               '${person.fullName} $gerekce nedeniyle vefat etti.',
           category: LogCategory.aile,
           // Kayıt kişiye bağlanır (Paket 43): ortak geçmiş vefatın
@@ -496,11 +508,7 @@ class LifeProgression {
       );
     }
 
-    return (
-      people: sonuc,
-      happinessLoss: mutlulukKaybi,
-      deaths: olenler,
-    );
+    return (people: sonuc, happinessLoss: mutlulukKaybi, deaths: olenler);
   }
 
   /// Kiraya verilen konutların yıllık kira gelirini **bir kez** öder.
@@ -513,10 +521,23 @@ class LifeProgression {
   /// "düştü" olarak kapanır ve günlüğe yazılır.
   GameState _applySponsorships(GameState state, int newAge) {
     const SocialEngine sosyal = SocialEngine();
-    final ({GameState state, List<String> logTexts}) suresiDolan =
-        sosyal.expireDeals(state, newAge);
+    final ({GameState state, List<String> logTexts}) suresiDolan = sosyal
+        .expireDeals(state, newAge);
     GameState sonraki = suresiDolan.state;
     for (final String satir in suresiDolan.logTexts) {
+      sonraki = _logLine(sonraki, newAge, satir);
+    }
+
+    // Hesaplar yıl geçerken kendiliğinden değişir: kitlesi büyük olan
+    // büyür, yıllardır dokunulmayan erir (Faho'nun isteği). Eskiden
+    // yıllık ilerleme sosyal medyaya hiç dokunmuyordu; takipçi sayısı
+    // yalnızca paylaşım yapıldığı an değişiyordu.
+    final ({GameState state, List<String> logTexts}) kitle = sosyal.advanceYear(
+      sonraki,
+      newAge,
+    );
+    sonraki = kitle.state;
+    for (final String satir in kitle.logTexts) {
       sonraki = _logLine(sonraki, newAge, satir);
     }
 
@@ -531,11 +552,11 @@ class LifeProgression {
   }
 
   GameState _logLine(GameState state, int age, String text) => state.copyWith(
-        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-          ...state.log,
-          LifeLogEntry(age: age, text: text, category: LogCategory.kisisel),
-        ]),
-      );
+    log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+      ...state.log,
+      LifeLogEntry(age: age, text: text, category: LogCategory.kisisel),
+    ]),
+  );
 
   GameState _applyRentIncome(GameState state, int newAge) {
     final List<OwnedItem> kiradakiler = state.items
@@ -568,9 +589,7 @@ class LifeProgression {
     }
 
     return state.copyWith(
-      player: state.player.copyWith(
-        wallet: state.player.wallet + toplam,
-      ),
+      player: state.player.copyWith(wallet: state.player.wallet + toplam),
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         ...satirlar,
@@ -599,7 +618,8 @@ class LifeProgression {
       satirlar.add(
         LifeLogEntry(
           age: newAge,
-          text: '${p.fullName} kendi evine taşındı; artık kendi hayatını '
+          text:
+              '${p.fullName} kendi evine taşındı; artık kendi hayatını '
               'kuruyor.',
           category: LogCategory.aile,
         ),
@@ -632,48 +652,50 @@ class LifeProgression {
       'bilgisayar',
     ];
 
-    return people.map((Person p) {
-      if (!p.isAlive || p.age < prototypeOnlyAdultAge) return p;
-      if (p.wealth == null) return p;
+    return people
+        .map((Person p) {
+          if (!p.isAlive || p.age < prototypeOnlyAdultAge) return p;
+          if (p.wealth == null) return p;
 
-      // prototypeOnly: her yıl küçük bir ihtimalle alım ya da satım.
-      final double alimSansi = switch (p.wealth!) {
-        WealthTier.cokYoksul => 0.01,
-        WealthTier.yoksul => 0.03,
-        WealthTier.ortaHalli => 0.06,
-        WealthTier.varlikli => 0.09,
-        WealthTier.cokVarlikli => 0.12,
-      };
-      final double satisSansi = switch (p.wealth!) {
-        WealthTier.cokYoksul => 0.10,
-        WealthTier.yoksul => 0.07,
-        WealthTier.ortaHalli => 0.04,
-        WealthTier.varlikli => 0.02,
-        WealthTier.cokVarlikli => 0.01,
-      };
+          // prototypeOnly: her yıl küçük bir ihtimalle alım ya da satım.
+          final double alimSansi = switch (p.wealth!) {
+            WealthTier.cokYoksul => 0.01,
+            WealthTier.yoksul => 0.03,
+            WealthTier.ortaHalli => 0.06,
+            WealthTier.varlikli => 0.09,
+            WealthTier.cokVarlikli => 0.12,
+          };
+          final double satisSansi = switch (p.wealth!) {
+            WealthTier.cokYoksul => 0.10,
+            WealthTier.yoksul => 0.07,
+            WealthTier.ortaHalli => 0.04,
+            WealthTier.varlikli => 0.02,
+            WealthTier.cokVarlikli => 0.01,
+          };
 
-      if (p.estate.isNotEmpty && _rng.nextDouble() < satisSansi) {
-        final List<String> kalan = <String>[...p.estate]
-          ..removeAt(_rng.nextInt(p.estate.length));
-        return p.copyWith(estate: List<String>.unmodifiable(kalan));
-      }
-      if (p.estate.length < 6 && _rng.nextDouble() < alimSansi) {
-        // Kişi zaten sahip olduğu türü ikinci kez almaz: aynı eşya
-        // listede iki kez görünüyordu ve miras da onu iki kez
-        // dağıtıyordu (Paket 14'te bulundu).
-        final List<String> eksikler = alinabilir
-            .where((String tur) => !p.estate.contains(tur))
-            .toList(growable: false);
-        if (eksikler.isEmpty) return p;
-        return p.copyWith(
-          estate: List<String>.unmodifiable(<String>[
-            ...p.estate,
-            eksikler[_rng.nextInt(eksikler.length)],
-          ]),
-        );
-      }
-      return p;
-    }).toList(growable: false);
+          if (p.estate.isNotEmpty && _rng.nextDouble() < satisSansi) {
+            final List<String> kalan = <String>[...p.estate]
+              ..removeAt(_rng.nextInt(p.estate.length));
+            return p.copyWith(estate: List<String>.unmodifiable(kalan));
+          }
+          if (p.estate.length < 6 && _rng.nextDouble() < alimSansi) {
+            // Kişi zaten sahip olduğu türü ikinci kez almaz: aynı eşya
+            // listede iki kez görünüyordu ve miras da onu iki kez
+            // dağıtıyordu (Paket 14'te bulundu).
+            final List<String> eksikler = alinabilir
+                .where((String tur) => !p.estate.contains(tur))
+                .toList(growable: false);
+            if (eksikler.isEmpty) return p;
+            return p.copyWith(
+              estate: List<String>.unmodifiable(<String>[
+                ...p.estate,
+                eksikler[_rng.nextInt(eksikler.length)],
+              ]),
+            );
+          }
+          return p;
+        })
+        .toList(growable: false);
   }
 
   /// Bu yıl vefat edenlerin mirasını **bir kez** dağıtır.
@@ -704,11 +726,7 @@ class LifeProgression {
         next = next.copyWith(
           log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
             ...next.log,
-            LifeLogEntry(
-              age: newAge,
-              text: satir,
-              category: LogCategory.aile,
-            ),
+            LifeLogEntry(age: newAge, text: satir, category: LogCategory.aile),
           ]),
         );
       }
@@ -729,8 +747,10 @@ class LifeProgression {
   /// küçük yaşta devam eden çocuk, açıklamasız bir hanede bırakılmaz.
   static GameState ensureCaregiver(GameState state, int newAge) {
     if (state.player.age >= prototypeOnlyAdultAge) return state;
-    final bool yetiskinVar = state.people.any((Person p) =>
-        p.isAlive && p.inPlayerHousehold && p.age >= prototypeOnlyAdultAge);
+    final bool yetiskinVar = state.people.any(
+      (Person p) =>
+          p.isAlive && p.inPlayerHousehold && p.age >= prototypeOnlyAdultAge,
+    );
     if (yetiskinVar) return state;
 
     const Set<RelationType> bakimVerebilir = <RelationType>{
@@ -745,11 +765,13 @@ class LifeProgression {
       RelationType.kardes,
     };
 
-    final int index = state.people.indexWhere((Person p) =>
-        p.isAlive &&
-        !p.inPlayerHousehold &&
-        p.age >= prototypeOnlyAdultAge &&
-        bakimVerebilir.contains(p.relation));
+    final int index = state.people.indexWhere(
+      (Person p) =>
+          p.isAlive &&
+          !p.inPlayerHousehold &&
+          p.age >= prototypeOnlyAdultAge &&
+          bakimVerebilir.contains(p.relation),
+    );
 
     if (index < 0) {
       // Uygun yakın yoksa **uydurma bir kişi eklenmez**; bunun yerine açık
@@ -762,7 +784,8 @@ class LifeProgression {
           ...state.log,
           LifeLogEntry(
             age: newAge,
-            text: 'Evde sana bakabilecek bir yetişkin kalmadı; '
+            text:
+                'Evde sana bakabilecek bir yetişkin kalmadı; '
                 'bakımın kurum tarafından üstlenildi.',
             category: LogCategory.aile,
           ),
@@ -782,7 +805,8 @@ class LifeProgression {
         ...state.log,
         LifeLogEntry(
           age: newAge,
-          text: '${trUpperFirst(etiket)} '
+          text:
+              '${trUpperFirst(etiket)} '
               '${bakan.fullName} sana bakmak için yanına taşındı.',
           category: LogCategory.aile,
         ),
@@ -817,7 +841,8 @@ class LifeProgression {
         ...next.log,
         LifeLogEntry(
           age: newAge,
-          text: 'Aynada bu yıl birkaç yeni çizgi gördün; dış görünüşün '
+          text:
+              'Aynada bu yıl birkaç yeni çizgi gördün; dış görünüşün '
               '${next.player.stats.appearance}.',
           category: LogCategory.kisisel,
         ),
@@ -834,17 +859,17 @@ class LifeProgression {
     if (state.grief <= 0 || lossThisYear) return state;
 
     // prototypeOnly: kalan yasın üçte biri, en az 2 puan geri döner.
-    final int geriVerilen =
-        max(2, (state.grief * prototypeOnlyGriefRecoveryRatio).round())
-            .clamp(0, state.grief);
+    final int geriVerilen = max(
+      2,
+      (state.grief * prototypeOnlyGriefRecoveryRatio).round(),
+    ).clamp(0, state.grief);
     if (geriVerilen <= 0) return state;
 
     return state.copyWith(
       grief: state.grief - geriVerilen,
       player: state.player.copyWith(
         stats: state.player.stats.copyWith(
-          happiness:
-              (state.player.stats.happiness + geriVerilen).clamp(0, 100),
+          happiness: (state.player.stats.happiness + geriVerilen).clamp(0, 100),
         ),
       ),
     );
@@ -874,7 +899,8 @@ class LifeProgression {
         ...state.log,
         LifeLogEntry(
           age: newAge,
-          text: 'Sağlığın belirgin biçimde kötüleşti; kendine dikkat '
+          text:
+              'Sağlığın belirgin biçimde kötüleşti; kendine dikkat '
               'etmen gerekiyor.',
           category: LogCategory.kisisel,
         ),
@@ -883,10 +909,10 @@ class LifeProgression {
   }
 
   bool _playerDies(GameState state) => Mortality.diesThisYear(
-        state.player.age,
-        _rng,
-        health: state.player.stats.health,
-      );
+    state.player.age,
+    _rng,
+    health: state.player.stats.health,
+  );
 
   /// Oyuncunun hayatını tamamlar.
   GameState _endLife(GameState state, int newAge) {
@@ -938,8 +964,7 @@ class LifeProgression {
     if (state.notices.any((PendingNotice n) => n.id == id)) return state;
 
     final int once = state.player.stats.happiness;
-    final int sonra =
-        (once + donem.prototypeOnlyHappiness).clamp(0, 100);
+    final int sonra = (once + donem.prototypeOnlyHappiness).clamp(0, 100);
     final int gercek = sonra - once;
 
     return state.copyWith(
@@ -1063,10 +1088,11 @@ class LifeProgression {
     // Sınıf zaten kuruluysa dokunma. Eski kayıtlardaki şehirsiz sınıf
     // kimliği de "bu kademenin sınıfı" sayılır; oyuncu sebepsiz yere
     // okul değiştirmiş olmaz.
-    final String? mevcutSehir =
-        SchoolPeople.cityOfClassId(education.classId);
-    final bool ayniKademe =
-        SchoolPeople.isClassOfLevel(education.classId, level);
+    final String? mevcutSehir = SchoolPeople.cityOfClassId(education.classId);
+    final bool ayniKademe = SchoolPeople.isClassOfLevel(
+      education.classId,
+      level,
+    );
     final bool ayniSehir = mevcutSehir == null || mevcutSehir == sehir;
     if (ayniKademe &&
         ayniSehir &&
@@ -1080,10 +1106,12 @@ class LifeProgression {
       people: List<Person>.unmodifiable(people),
     );
     final List<Person> oncekiSinif = people
-        .where((Person p) =>
-            p.schoolTie == SchoolTie.sinifArkadasi &&
-            p.classId != null &&
-            p.classId == state.education.classId)
+        .where(
+          (Person p) =>
+              p.schoolTie == SchoolTie.sinifArkadasi &&
+              p.classId != null &&
+              p.classId == state.education.classId,
+        )
         .toList(growable: false);
 
     final ClassRoster roster = okul.buildClass(
@@ -1097,12 +1125,15 @@ class LifeProgression {
     // Taşınanlar aynı kimlikle yeni sınıfa geçer; kayıt kopyalanmaz.
     final Set<String> tasinan = roster.movedIds.toSet();
     final List<Person> guncel = people
-        .map((Person p) =>
-            tasinan.contains(p.id) ? okul.moveToClass(p, level, sehir) : p)
+        .map(
+          (Person p) =>
+              tasinan.contains(p.id) ? okul.moveToClass(p, level, sehir) : p,
+        )
         .toList(growable: false);
 
-    final Iterable<Person> ogretmenler = roster.newPeople
-        .where((Person p) => p.schoolTie == SchoolTie.ogretmen);
+    final Iterable<Person> ogretmenler = roster.newPeople.where(
+      (Person p) => p.schoolTie == SchoolTie.ogretmen,
+    );
     if (ogretmenler.isNotEmpty) {
       final Person ogretmen = ogretmenler.first;
       log.add(
@@ -1110,9 +1141,9 @@ class LifeProgression {
           age: newAge,
           text: tasinan.isEmpty
               ? 'Yeni sınıfında öğretmenin ${ogretmen.fullName} oldu; '
-                  'bütün yüzler yabancı.'
+                    'bütün yüzler yabancı.'
               : 'Yeni sınıfında öğretmenin ${ogretmen.fullName} oldu; '
-                  '${tasinan.length} tanıdık yüz de seninle aynı sınıfta.',
+                    '${tasinan.length} tanıdık yüz de seninle aynı sınıfta.',
           category: LogCategory.kisisel,
         ),
       );
@@ -1176,12 +1207,13 @@ class LifeProgression {
       // Küçük çocuk okuldan atılmaz; sınıfı tekrarlar.
       final bool ayrilir =
           tekrar > SchoolPerformance.prototypeOnlyMaxRepeats &&
-              newAge >= SchoolPerformance.prototypeOnlyDropOutMinAge;
+          newAge >= SchoolPerformance.prototypeOnlyDropOutMinAge;
       if (ayrilir) {
         log.add(
           LifeLogEntry(
             age: newAge,
-            text: 'Notların toparlanmadı ve okulla yolların ayrıldı. '
+            text:
+                'Notların toparlanmadı ve okulla yolların ayrıldı. '
                 'Eğitim geçmişin kayıtlarda duruyor.',
             category: LogCategory.kisisel,
           ),
@@ -1196,15 +1228,13 @@ class LifeProgression {
       log.add(
         LifeLogEntry(
           age: newAge,
-          text: 'Not ortalaman $ortalama; sınıfta kaldın. '
+          text:
+              'Not ortalaman $ortalama; sınıfta kaldın. '
               '${current.grade}. sınıfı tekrar okuyacaksın.',
           category: LogCategory.kisisel,
         ),
       );
-      return current.copyWith(
-        gradeAverage: ortalama,
-        repeatedYears: tekrar,
-      );
+      return current.copyWith(gradeAverage: ortalama, repeatedYears: tekrar);
     }
 
     final int nextGrade = (current.grade ?? 1) + 1;
@@ -1260,7 +1290,8 @@ class LifeProgression {
     log.add(
       LifeLogEntry(
         age: newAge,
-        text: 'Ortaokul bitti. Yerleştirme puanın $puan. '
+        text:
+            'Ortaokul bitti. Yerleştirme puanın $puan. '
             'Artık lise alanını seçebilirsin.',
         category: LogCategory.kisisel,
       ),
@@ -1307,10 +1338,7 @@ class LifeProgression {
 
     if (!before.universityFinished && after.universityFinished) {
       bildirimler.add(
-        Notices.universityEnd(
-          playerAge: age,
-          programName: after.program?.name,
-        ),
+        Notices.universityEnd(playerAge: age, programName: after.program?.name),
       );
     }
 

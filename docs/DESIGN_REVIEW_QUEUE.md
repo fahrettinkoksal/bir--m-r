@@ -2488,5 +2488,37 @@ Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığar
 
 ---
 
+### Q-112 — Sosyal medyada platformlar arası yayılma ve yıllık büyüme
+
+**Durum:** Faho'nun iki somut isteği kodlandı; **sayılar prototypeOnly ve onay bekliyor.** Kod: `lib/domain/social/social_engine.dart`, `lib/domain/generation/life_progression.dart`. İlgili: Q-050.
+
+**İstek (Faho'nun sözleriyle):** "sosyal medyada takipçim artarsa örneğin X'de takipçi sayım arttı diğer platformlarda da artsın, eğer takipçim fazlaysa her yıl geçtiğinde takipçi sayım artsın".
+
+**Önceki durum:** Takipçi sayısı **yalnızca** paylaşım yapıldığı an değişiyordu. Yıllık ilerleme sosyal medyaya hiç dokunmuyordu; platformlar birbirinden tamamen bağımsızdı.
+
+**Yapılanlar ve sayıları:**
+
+| Kural | Değer | Not |
+|---|---|---|
+| Çapraz yansıma payı | `prototypeOnlyCrossShare = 0,25` | Kazancın dörtte biri diğer **açık** hesaplara |
+| Yansıma için en az kazanç | `prototypeOnlyCrossMinGain = 4` | Küçük dalgalanma yayılmaz |
+| Yıllık büyüme eşiği | `prototypeOnlyOrganicThreshold = 1000` | Altındaki hesap kendi kendine büyümez |
+| Yıllık büyüme oranı | `prototypeOnlyOrganicRate = %6` | Kitleyle orantılı |
+| Durgunluk süresi | `prototypeOnlyDormantAfterYears = 4` yıl | Bu kadar süre paylaşım yoksa |
+| Durgun hesabın yıllık erimesi | `prototypeOnlyDormantDecay = %5` | |
+
+**Kendi başıma eklediğim kural — onayını istiyorum.** İstekte durgunluk yoktu. Ama yalnızca "takipçisi çoksa her yıl büyüsün" kuralı konursa, hesabı bir kez büyüten oyuncu **hiçbir şey yapmadan** ömür boyu büyümeye devam ediyor: 50.000 takipçi 40 yılda yarım milyonu geçiyor ve Ün kendiliğinden tavana çıkıyor. Bunu engellemek için 4 yıldır dokunulmayan hesabın yavaşça erimesini ekledim. Bu bir **teknik gereklilik varsayımı**, onaylanmış oyun kuralı değil.
+
+**Karar soruları:**
+1. Çapraz yansıma payı %25 doğru mu? Daha az mı (%10), daha çok mu (%50)?
+2. Yansıma **her platforma eşit** mi olsun, yoksa platform çiftine göre değişsin mi (ör. Instagram → X yakın, YouTube → X uzak)?
+3. **Kayıp yayılmıyor**, yalnızca kazanç. Simetrik mi olmalı? Bir platformda tökezlemek diğerlerindeki kitleyi de azaltsın mı?
+4. Yıllık büyüme eşiği 1.000 takipçi doğru mu? Bu eşik "artık kendi kendine yürüyor" sayılan nokta.
+5. **Durgunluk kuralı kalsın mı?** Kalacaksa 4 yıl ve %5 doğru mu? Kalmayacaksa kontrolsüz büyümeyi ne durduracak?
+6. Ün şu an yalnızca **yukarı** taşınıyor: takipçi kaybedince Ün düşmüyor (D-027'nin "yaşanmış tanınmışlık silinmez" okuması). Erime varken bu doğru mu?
+7. Yıllık büyüme günlüğe satır yazıyor ("YouTube hesabın kendiliğinden büyüdü: 3.000 abone eklendi"). Her yıl bu satırı görmek fazla gürültü mü?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
