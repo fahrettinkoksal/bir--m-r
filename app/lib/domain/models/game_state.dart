@@ -56,6 +56,7 @@ class GameState {
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
     this.lastConceptionTryAge,
+    this.conceptionTriesAtAge = 0,
     this.storyFlags = const <String>{},
     this.items = const <OwnedItem>[],
     this.seenEventIds = const <String>{},
@@ -176,6 +177,14 @@ class GameState {
   /// Aynı yıl üst üste denemekle ihtimal katlanmaz; yıl başına bir kez
   /// hesaplanır.
   final int? lastConceptionTryAge;
+
+  /// [lastConceptionTryAge] yaşında yapılan gebelik denemesi sayısı
+  /// (D-086).
+  ///
+  /// Sayaç **yaşa bağlıdır**: oyuncunun yaşı değiştiği anda kendiliğinden
+  /// geçersiz olur, çünkü okurken `lastConceptionTryAge` ile bugünkü yaş
+  /// karşılaştırılır. Böylece ayrı bir sıfırlama adımına gerek kalmaz.
+  final int conceptionTriesAtAge;
 
   /// Geçmiş seçimlerin bıraktığı izler (D-008).
   final Set<String> storyFlags;
@@ -777,6 +786,7 @@ class GameState {
     int? unprotectedTries,
     int? ivfAttempts,
     Object? lastConceptionTryAge = _unsetEvent,
+    int? conceptionTriesAtAge,
     Set<String>? storyFlags,
     List<OwnedItem>? items,
     Set<String>? seenEventIds,
@@ -855,6 +865,7 @@ class GameState {
       lastConceptionTryAge: lastConceptionTryAge == _unsetEvent
           ? this.lastConceptionTryAge
           : lastConceptionTryAge as int?,
+      conceptionTriesAtAge: conceptionTriesAtAge ?? this.conceptionTriesAtAge,
       storyFlags: storyFlags ?? this.storyFlags,
       items: items ?? this.items,
       seenEventIds: seenEventIds ?? this.seenEventIds,

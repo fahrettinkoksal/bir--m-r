@@ -251,6 +251,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // Tüp bebek denemeleri (Paket 35). Alan eklemeli.
       'ivfAttempts': state.ivfAttempts,
       'lastConceptionTryAge': state.lastConceptionTryAge,
+      // Yıl içindeki deneme sayısı (D-086). Alan eklemeli.
+      'conceptionTriesAtAge': state.conceptionTriesAtAge,
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
@@ -926,6 +928,7 @@ GameState decodeGameState(Map<String, Object?> json) {
     unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
     ivfAttempts: _intOrNull(json, 'ivfAttempts') ?? 0,
     lastConceptionTryAge: _intOrNull(json, 'lastConceptionTryAge'),
+    conceptionTriesAtAge: _intOr(json, 'conceptionTriesAtAge', 0),
     // Eski kayıtlarda kuşak bilgisi yoktur: o hayatlar ilk kuşaktır.
     generation: _intOrNull(json, 'generation') ?? 1,
     // Eski kayıtlarda teklif geçmişi yoktur; boş açılır.

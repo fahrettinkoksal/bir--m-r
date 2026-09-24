@@ -292,19 +292,54 @@ void main() {
       expect(son, isNot(contains('kısır')));
     });
 
-    test('aynı yıl ikinci deneme ihtimali katlamaz', () {
+    test('aynı yıl tekrarlanan deneme sayılır ama ihtimal azalır', () {
+      // D-086: Faho "senede 1 kez değil, azalarak" dedi. Eskiden yılda
+      // tek bir gebelik hesabı yapılıyor, ikinci kez baş başa kalmanın
+      // hiçbir karşılığı olmuyordu. Artık her deneme sayılıyor ama üst
+      // üste tıklayarak gebelik garantiye alınamıyor.
       final ({GameState state, Person partner}) v = sevgiliyle();
+
+      // İlk deneme tam ihtimalle işler.
+      final double ilkSans =
+          Intimacy.conceptionChance(v.state, v.partner);
+      expect(ilkSans, greaterThan(0));
+
       final GameState ilk = yakinlasma
           .perform(v.state, v.partner.id, Protection.korunmadan, Random(0))
           .state;
       expect(ilk.lastConceptionTryAge, v.state.player.age);
-      final FamilyResult ikinci = yakinlasma.perform(
-        ilk,
-        v.partner.id,
-        Protection.korunmadan,
-        Random(0),
-      );
-      expect(ikinci.outcome.text, contains('zaten denediniz'));
+      expect(Intimacy.conceptionTriesThisAge(ilk), 1);
+
+      // İkinci deneme **kapalı değil**, ama ihtimali düşük.
+      if (!ilk.isExpecting) {
+        final double ikinciSans = Intimacy.conceptionChance(ilk, v.partner);
+        expect(ikinciSans, greaterThan(0),
+            reason: 'İkinci deneme tamamen kapanmamalı');
+        expect(ikinciSans, lessThan(ilkSans),
+            reason: 'Tekrarlanan denemede ihtimal azalmalı');
+      }
+
+      // Azalma eğrisi monoton düşer ve sonunda o yıl için kapanır.
+      final List<double> egri = Intimacy.prototypeOnlyRepeatDecay;
+      for (int i = 1; i < egri.length; i++) {
+        expect(egri[i], lessThan(egri[i - 1]));
+      }
+
+      GameState s = ilk;
+      for (int i = 1; i < egri.length && !s.isExpecting; i++) {
+        s = yakinlasma
+            .perform(s, v.partner.id, Protection.korunmadan, Random(i))
+            .state;
+      }
+      if (!s.isExpecting) {
+        final FamilyResult fazla = yakinlasma.perform(
+          s,
+          v.partner.id,
+          Protection.korunmadan,
+          Random(99),
+        );
+        expect(fazla.outcome.text, contains('yeterince'));
+      }
     });
 
     test('kadının yaşı ilerledikçe ihtimal düşer', () {
