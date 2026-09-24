@@ -993,6 +993,61 @@ Windows test sürümü `claude/paket54-belge-denetimi` dalının
 bu ortamda hâlâ üretilemiyor (Android SDK indirilemiyor).
 **Hiçbir sürüm gerçek Windows ya da Android cihazda oynanmadı.**
 
+## Paket A-F: Faho'nun 24 Eylül listesi (D-067 … D-085)
+
+Faho'nun uzun revizyon listesi altı pakette kodlandı. Her paket ayrı
+commit; hepsi `claude/stoic-maxwell-6rkrit` dalında.
+
+**Paket A — bildirilen beş hata (D-067…D-071).** Ev sahibi olan
+oyuncuya kira zammı olayı çıkması, çalışmayana iş yeri olayı çıkması,
+gebeliğin 46 yaşta tamamen kapanması, yıllarca ilgilenilmeyen eşle
+yakınlığın tam kalması, bedelli sonrası subay/astsubay yolunun da
+kapanması.
+
+**Paket B — statlar yaşla düşer, bakım karşılık verir (D-072, D-073).**
+Beş değerin her birinin kendi başlangıç yaşı ve tabanı var. Spor,
+berber ve okumak kaybı belirgin biçimde yavaşlatıyor. Erkeklerde saç
+dökülmesi eklendi; oran androjenetik alopesinin yaygın epidemiyolojik
+özetine göre seçildi ve test bunu ölçüyor.
+
+**Paket C — sağlık bildirimleri, göz mini oyunu, estetik, hastalık
+(D-076…D-078).** Check-up altı vücut sistemi için gerçek duruma dayalı
+rapor üretiyor ve gerekirse tahlile yönlendiriyor. Göz muayenesi mini
+oyun oldu. Estetik bölümü eklendi; fiyatlar Türkiye piyasasından
+2026 ölçeğine taşındı. Hastalanınca işe gidilemiyor, raporun ilk iki
+günü ödenmiyor ve işveren uzun raporu sorun ediyor.
+
+**Paket D — aktivite bildirimleri, kişi keyfi, boşanmada mal paylaşımı
+(D-074, D-075).** Eğlence programının sonucu ekran bildirimi olarak,
+kime ne kattığı satır satır yazılıyor. Kişilerin yakınlıktan ayrı bir
+keyfi var ve D-059'un "davet edilen reddedebilir" kuralı artık gerçekten
+çalışıyor. Boşanmada evlilik içinde edinilen mallar paylaşılıyor.
+
+**Paket E — mağaza ayrımı, araç masrafı, banka (D-079, D-080).** Üç
+otomobil galerisi, iki motosiklet galerisi, ayrı aksesuarcılar, orta ve
+lüks emlakçı. Motorlu araçlar masraf çıkarıyor. Fakbank ve Bankavrupa;
+faiz oranları 2026 ihtiyaç kredisi bandından alındı.
+
+**Paket F — Finger, hayvanlar, seyahat, Son Kararlar (D-081…D-085).**
+Finger'da yaş bandı hatası düzeltildi (deste yaşla yenilenmiyordu),
+beğeni kotası, premium ve kendi profilin eklendi. Hayvan türleri
+genişledi; kaçma ve hastalık eklendi. Seyahat "Tatil yap" ve "Taşın"
+diye ikiye ayrıldı. Vasiyet menüsü "Son Kararlar" oldu ve hayatın sonuna
+dair karar oraya eklendi.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** suç ve hapis sistemi
+(Faho "ileride gelecek" dedi), hayvan detayı ekranı, çoklu kişiyle
+aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
+eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
+
+**Açık kalan sayılar:** Q-116 … Q-121 (`docs/DESIGN_REVIEW_QUEUE.md`).
+Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
+kadar kesin denge değeri sayılmaz.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **1829 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
