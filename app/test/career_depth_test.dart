@@ -456,7 +456,13 @@ void main() {
     test('aynı işe dönünce ikinci kez iş arkadaşı üretilmez', () {
       GameState s = iseGir(mezun(age: 25), magaza);
       final int ilkSayi = s.people.length;
-      s = s.copyWith(player: s.player.copyWith(age: 30));
+      // D-091 ile aynı işe yılda **bir** başvuru hakkı var. Gerçek
+      // oyunda tekrar sayaçları yaş ilerleyince sıfırlanır; burada yaş
+      // elle değiştirildiği için sayaç da elle sıfırlanıyor.
+      s = s.copyWith(
+        player: s.player.copyWith(age: 30),
+        interactionCounts: const <String, int>{},
+      );
       s = market.quit(s).state;
       s = iseGir(s, magaza, 11);
 

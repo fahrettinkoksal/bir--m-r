@@ -106,9 +106,11 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.cocuk:
       return _arkadas;
 
-    // Torunla vakit geçirilir, sohbet edilir ve hediye verilir; torundan
-    // para veya hediye istemek anlamlı değildir (Paket 12).
+    // Torun ve yeğenle vakit geçirilir, sohbet edilir ve hediye verilir;
+    // onlardan para veya hediye istemek anlamlı değildir (Paket 12,
+    // D-087).
     case RelationType.torun:
+    case RelationType.yegen:
       return const <InteractionKind>{
         InteractionKind.vakitGecir,
         InteractionKind.sohbet,

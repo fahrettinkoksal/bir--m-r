@@ -15,6 +15,7 @@ library;
 import 'dart:math';
 
 import '../models/game_state.dart';
+import '../models/pending_race.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../../text/turkish_text.dart';
@@ -203,21 +204,83 @@ abstract final class HorseRacing {
       );
     }
 
+    if (state.hasPendingRace) {
+      return (
+        result: CasinoResult(
+          state: state,
+          outcome: const CasinoOutcome(
+            applied: false,
+            text: 'Önceki yarışın sonucu henüz kesinleşmedi.',
+          ),
+        ),
+        race: null,
+      );
+    }
+
     final RaceResult kosu = run(horses, rng);
     final RaceHorse oynanan =
         horses.firstWhere((RaceHorse h) => h.lane == lane);
     final bool kazandi = kosu.winnerLane == lane;
     final int odeme = kazandi ? (bet * oynanan.odds).round() : 0;
-    final int net = odeme - bet;
 
-    final String metin = 'At yarışı: ${kosu.winner.name} birinci geldi. '
-        '${kazandi ? '${trMoney(net)} kazandın.' : '${trMoney(bet)} kaybettin.'}';
+    // **Yalnızca bahis tutarı** cüzdandan çıkar (emanet). Ödeme burada
+    // yapılmaz; koşu bitip sonuç gösterilene kadar bekler (D-089).
+    // Günlüğe de burada yazılmaz: henüz anlatılacak bir sonuç yok.
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(wallet: state.player.wallet - bet),
+      wagerThisAge: state.wagerThisAge + bet,
+      pendingRace: PendingRace(
+        id: 'yaris-${state.player.age}-${state.wagerThisAge}-$lane-$bet',
+        lane: lane,
+        bet: bet,
+        winnerLane: kosu.winnerLane,
+        payout: odeme,
+        horseName: oynanan.name,
+        winnerName: kosu.winner.name,
+        oddsLabel: oynanan.oddsLabel,
+        atAge: state.player.age,
+      ),
+    );
+
+    return (
+      result: CasinoResult(
+        state: next,
+        outcome: CasinoOutcome(
+          applied: true,
+          text: '${oynanan.name} (${oynanan.oddsLabel}) üzerine '
+              '${trMoney(bet)} yatırdın. Koşu başlıyor.',
+          walletDelta: -bet,
+        ),
+      ),
+      race: kosu,
+    );
+  }
+
+  /// Bekleyen bahsi **tek ve atomik** işlemle sonuçlandırır (D-089).
+  ///
+  /// Animasyon bittiğinde çağrılır. Bekleyen bahis yoksa **hiçbir şey
+  /// olmaz**: bu yüzden animasyon yarıda kapatılsa da, ekran iki kez
+  /// açılsa da çift ödeme ya da çift kayıp oluşamaz.
+  static CasinoResult settle(GameState state) {
+    final PendingRace? bekleyen = state.pendingRace;
+    if (bekleyen == null) {
+      return CasinoResult(
+        state: state,
+        outcome: const CasinoOutcome(
+          applied: false,
+          text: 'Sonuçlanmayı bekleyen bahis yok.',
+        ),
+      );
+    }
+
+    final String metin = 'At yarışı: ${bekleyen.winnerName} birinci geldi. '
+        '${bekleyen.won ? '${trMoney(bekleyen.net)} kazandın.' : '${trMoney(bekleyen.bet)} kaybettin.'}';
 
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet - bet + odeme,
+        wallet: state.player.wallet + bekleyen.payout,
       ),
-      wagerThisAge: state.wagerThisAge + bet,
+      pendingRace: null,
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         LifeLogEntry(
@@ -228,16 +291,13 @@ abstract final class HorseRacing {
       ]),
     );
 
-    return (
-      result: CasinoResult(
-        state: next,
-        outcome: CasinoOutcome(
-          applied: true,
-          text: '${oynanan.name} (${oynanan.oddsLabel}) · $metin',
-          walletDelta: net,
-        ),
+    return CasinoResult(
+      state: next,
+      outcome: CasinoOutcome(
+        applied: true,
+        text: '${bekleyen.horseName} (${bekleyen.oddsLabel}) · $metin',
+        walletDelta: bekleyen.payout,
       ),
-      race: kosu,
     );
   }
 }

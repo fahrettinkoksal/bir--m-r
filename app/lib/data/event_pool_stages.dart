@@ -12,6 +12,7 @@
 ///   dönüşmez.
 library;
 
+import '../domain/economy/financial_strain.dart';
 import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 import 'event_pool.dart';
@@ -572,6 +573,9 @@ const List<GameEvent> kLifeStageEvents = <GameEvent>[
       minAge: 20,
       maxAge: 45,
       requiresTenant: true,
+      // Cüzdanında milyonlar olan oyuncuya "hesap tam çıkmıyor" denmez
+      // (D-092). Durum gerçek hesaptan okunur.
+      maxComfort: FinancialComfort.idare,
     ),
     repeatable: true,
     minAgeGap: 7,

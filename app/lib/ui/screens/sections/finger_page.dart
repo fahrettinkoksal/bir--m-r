@@ -401,12 +401,17 @@ class _SelfProfileCardState extends State<_SelfProfileCard> {
             const SizedBox(height: 8),
             Text('Kendini anlat', style: theme.textTheme.labelLarge),
             const SizedBox(height: 6),
+            // RadioMenuButton kullanılmıştı; o bir **menü** bileşeni ve
+            // etiketini sınırsız genişlikte yerleştiriyor. Uzun tanıtım
+            // cümleleri satırı 271-325 piksel taşırıyordu (D-088).
+            // Yerine metni saran, kendi satırında duran bir seçim satırı
+            // kondu.
             for (final String metin in kFingerBios.take(6))
-              RadioMenuButton<String>(
-                value: metin,
-                groupValue: _bio,
-                onChanged: (String? v) => setState(() => _bio = v),
-                child: Text(metin, style: theme.textTheme.bodySmall),
+              _SecimSatiri(
+                key: Key('finger_bio_${kFingerBios.indexOf(metin)}'),
+                secili: _bio == metin,
+                metin: metin,
+                onTap: () => setState(() => _bio = metin),
               ),
             const SizedBox(height: 10),
             Text('İlgi alanların', style: theme.textTheme.labelLarge),
@@ -499,6 +504,52 @@ class _PremiumCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Metni saran, tek satıra sıkışmayan seçim satırı (D-088).
+///
+/// Menü bileşenleri (RadioMenuButton, MenuItemButton) etiketlerini
+/// sınırsız genişlikte yerleştirir ve uzun metinle ekranı taşırır. Bu
+/// satır `Expanded` ile sarar, böylece dar telefonda da bozulmaz.
+class _SecimSatiri extends StatelessWidget {
+  const _SecimSatiri({
+    super.key,
+    required this.secili,
+    required this.metin,
+    required this.onTap,
+  });
+
+  final bool secili;
+  final String metin;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(
+              secili
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              size: 18,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(metin, style: theme.textTheme.bodySmall),
+            ),
+          ],
+        ),
       ),
     );
   }

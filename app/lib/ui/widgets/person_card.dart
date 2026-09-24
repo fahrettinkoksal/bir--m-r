@@ -100,6 +100,7 @@ BirOmurAccent _accentFor(Person person) {
     case RelationType.unlu:
       return BirOmurAccents.pirinc;
     case RelationType.torun:
+    case RelationType.yegen:
       return BirOmurAccents.mavi;
     case RelationType.anne:
     case RelationType.baba:

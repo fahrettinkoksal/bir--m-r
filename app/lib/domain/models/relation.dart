@@ -35,7 +35,17 @@ enum RelationType {
   // Ünlü: sosyal medyada temas kurulup **karşılık alınmış** bir isim
   // (Faho'nun isteği). Kataloğa yazılı her ünlü burada görünmez;
   // yalnızca geri takip edenler kalıcı kişi olur.
-  unlu;
+  unlu,
+
+  // Yeğen: kardeşin çocuğu (D-087).
+  //
+  // Kuşak değişiminde gerekti: eski oyuncunun torunlarından **devam
+  // edilen çocuğa ait olanlar** yeni oyuncunun çocuğu olur, diğer
+  // çocuklara ait olanlar yeğeni olur. Bu bağ olmasaydı o kayıtlar
+  // silinirdi; bu projede kayıt silinmez.
+  //
+  // Yeni değer listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  yegen;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -50,6 +60,7 @@ enum RelationType {
       case RelationType.cocuk:
         return RelationGroup.cekirdek;
       case RelationType.torun:
+      case RelationType.yegen:
         return RelationGroup.genis;
       case RelationType.anneanne:
       case RelationType.babaanne:
@@ -159,6 +170,8 @@ String relationLabel({
       return gender == Gender.kadin ? 'Kız' : 'Oğul';
     case RelationType.torun:
       return gender == Gender.kadin ? 'Torun (kız)' : 'Torun (erkek)';
+    case RelationType.yegen:
+      return gender == Gender.kadin ? 'Yeğen (kız)' : 'Yeğen (erkek)';
     case RelationType.unlu:
       return 'Ünlü';
   }
@@ -224,6 +237,8 @@ String relationPossessive({
       return gender == Gender.kadin ? 'Kızın' : 'Oğlun';
     case RelationType.torun:
       return 'Torunun';
+    case RelationType.yegen:
+      return 'Yeğenin';
     case RelationType.unlu:
       return 'Tanıdığın ünlü';
   }

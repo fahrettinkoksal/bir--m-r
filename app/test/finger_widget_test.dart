@@ -137,4 +137,42 @@ void main() {
 
     expect(find.byKey(const Key('activity_finger')), findsNothing);
   });
+
+  // D-088: profil düzenleyicide RadioMenuButton kullanılmıştı. O bir
+  // menü bileşeni ve etiketini sınırsız genişlikte yerleştiriyor; uzun
+  // tanıtım cümleleri satırı 271-325 piksel taşırıyordu. Faho'nun
+  // "Finger ekranına girince oyun donuyor" bildiriminin sebebi buydu.
+  testWidgets('profil düzenleyici açılır ve taşma üretmez',
+      (WidgetTester tester) async {
+    await fingeriAc(tester, hayat());
+    await scrollToFinder(tester, find.byKey(const Key('finger_profil_ac')));
+    await tester.tap(find.byKey(const Key('finger_profil_ac')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('finger_profil_kaydet')), findsOneWidget);
+    // Seçim satırları gerçekten gösteriliyor ve metni sarıyor.
+    expect(find.byKey(const Key('finger_bio_0')), findsOneWidget);
+  });
+
+  testWidgets('profil kaydedilince kayıt gerçekten değişir',
+      (WidgetTester tester) async {
+    await fingeriAc(tester, hayat());
+    expect(controller.state!.hasFingerProfile, isFalse);
+
+    await scrollToFinder(tester, find.byKey(const Key('finger_profil_ac')));
+    await tester.tap(find.byKey(const Key('finger_profil_ac')));
+    await tester.pumpAndSettle();
+    await scrollToFinder(tester, find.byKey(const Key('finger_bio_0')));
+    await tester.tap(find.byKey(const Key('finger_bio_0')));
+    await tester.pumpAndSettle();
+    await scrollToFinder(
+      tester,
+      find.byKey(const Key('finger_profil_kaydet')),
+    );
+    await tester.tap(find.byKey(const Key('finger_profil_kaydet')));
+    await tester.pumpAndSettle();
+
+    expect(controller.state!.hasFingerProfile, isTrue);
+    expect(controller.state!.fingerBio, isNotNull);
+  });
 }

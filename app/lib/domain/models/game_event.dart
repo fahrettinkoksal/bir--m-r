@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../data/item_catalog.dart';
+import '../economy/financial_strain.dart';
 import 'relation.dart';
 
 /// Olayın hangi yaşam alanından geldiği (D-023).
@@ -45,6 +46,8 @@ class EventRequirement {
     this.requiresEmployed = false,
     this.requiresTenant = false,
     this.forbidsProperty = false,
+    this.maxComfort,
+    this.minComfort,
     this.forbidsVehicle = false,
     this.requiresMinYearsInJob = 0,
     this.minFame = 0,
@@ -62,6 +65,17 @@ class EventRequirement {
   /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
   ///
   /// Hobi geçmişi **gerçek kayıttan** okunur; uydurulmaz.
+  /// Olayın çıkabileceği **en rahat** mali kademe (D-092).
+  ///
+  /// Yoksulluk anlatan olaylar buna bağlanır: cüzdanında milyonlar olan
+  /// oyuncuya "ay sonunu zor getirdin" çıkmaz. `null` ise kısıt yoktur.
+  final FinancialComfort? maxComfort;
+
+  /// Olayın çıkabileceği **en dar** mali kademe (D-092).
+  ///
+  /// Varlık gerektiren olaylar buna bağlanır. `null` ise kısıt yoktur.
+  final FinancialComfort? minComfort;
+
   /// Oyuncunun **hiç konutu olmaması** gerekiyor mu? (D-085)
   ///
   /// Eşin ev istediği olay, zaten evi olan oyuncuya çıkmaz.

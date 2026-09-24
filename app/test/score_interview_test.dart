@@ -361,7 +361,66 @@ void main() {
       final InteractionAvailability durum =
           market.applicationAvailability(state, magaza);
       expect(durum.isAllowed, isFalse);
-      expect(durum.reason, contains('seneye'));
+      // D-091: gerekçe artık işin adını ve ne zaman açılacağını yazıyor.
+      expect(durum.reason, contains('gelecek yılı'));
+      expect(durum.reason, contains(magaza.name));
+      // Başka mesleklere başvuru kapanmaz.
+      expect(durum.reason, contains('Başka mesleklere'));
+    });
+
+    test('bir mülakat kaybedince aynı iş o yıl kapanır, diğerleri açık kalır',
+        () {
+      // Faho'nun isteği: "mülakatta başarısız olduysam aynı yıl aynı işe
+      // yeniden başvuramayayım".
+      GameState state = mezun(30);
+      final JobResult r = market.apply(state, magaza, Random(1));
+      expect(r.outcome.applied, isTrue);
+      final InterviewQuestion soru = r.state.pendingInterview!.question!;
+      final int yanlis = (soru.correctIndex + 1) % soru.options.length;
+      state = market.answerInterview(r.state, yanlis).state;
+
+      expect(
+        market.applicationAvailability(state, magaza).isAllowed,
+        isFalse,
+        reason: 'Kaybedilen iş o yıl kapanmalı',
+      );
+
+      // Başka bir iş hâlâ açık olmalı.
+      final List<JobType> digerleri = market
+          .openJobs(state)
+          .where((JobType j) => j.id != magaza.id)
+          .toList(growable: false);
+      expect(digerleri, isNotEmpty);
+      expect(
+        market.applicationAvailability(state, digerleri.first).isAllowed,
+        isTrue,
+        reason: 'Başka mesleklere başvuru kapanmamalı',
+      );
+    });
+
+    test('kilit kapat-aç ile korunur ve yeni yaşta açılır', () {
+      GameState state = mezun(30);
+      final JobResult r = market.apply(state, magaza, Random(2));
+      final InterviewQuestion soru = r.state.pendingInterview!.question!;
+      final int yanlis = (soru.correctIndex + 1) % soru.options.length;
+      state = market.answerInterview(r.state, yanlis).state;
+
+      final GameState geri = decodeGameState(encodeGameState(state));
+      expect(
+        market.applicationAvailability(geri, magaza).isAllowed,
+        isFalse,
+        reason: 'Kilit kayıtta korunmalı',
+      );
+
+      // Yeni yaşta sayaç sıfırlanır.
+      final GameState yeniYas = geri.copyWith(
+        player: geri.player.copyWith(age: geri.player.age + 1),
+        interactionCounts: const <String, int>{},
+      );
+      expect(
+        market.applicationAvailability(yeniYas, magaza).isAllowed,
+        isTrue,
+      );
     });
   });
 

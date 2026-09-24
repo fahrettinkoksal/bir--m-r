@@ -42,6 +42,7 @@ import '../domain/economy/banking.dart';
 import '../domain/life/eye_exam.dart';
 import '../domain/life/life_end_choice.dart';
 import '../domain/models/loan.dart';
+import '../domain/models/pending_race.dart';
 import '../text/turkish_text.dart';
 import '../domain/life/notices.dart';
 import '../domain/life/life_verdict.dart';
@@ -1804,6 +1805,24 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return cikti.result.outcome;
+  }
+
+  /// Bekleyen (sonuçlanmamış) at yarışı bahsi (D-089).
+  PendingRace? get pendingRace => _state?.pendingRace;
+
+  /// Bekleyen bahsi sonuçlandırır (D-089).
+  ///
+  /// Animasyon bitince çağrılır. Bekleyen bahis yoksa hiçbir şey olmaz,
+  /// bu yüzden iki kez çağrılması güvenlidir: çift ödeme oluşmaz.
+  CasinoOutcome? settleRace() {
+    final GameState? current = _state;
+    if (current == null || !current.hasPendingRace) return null;
+    final CasinoResult sonuc = HorseRacing.settle(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
   }
 
   /// At yarışında bahse engel var mı?

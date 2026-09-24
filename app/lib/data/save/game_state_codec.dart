@@ -9,6 +9,7 @@
 library;
 
 import '../../domain/models/loan.dart';
+import '../../domain/models/pending_race.dart';
 import '../../domain/models/applied_effect.dart';
 import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
@@ -124,6 +125,21 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'trips': state.trips.map(_encodeTrip).toList(growable: false),
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
+      // Sonuçlanmamış at yarışı bahsi (D-089). Alan eklemeli; eski
+      // kayıtta yoktur.
+      'pendingRace': state.pendingRace == null
+          ? null
+          : <String, Object?>{
+              'id': state.pendingRace!.id,
+              'lane': state.pendingRace!.lane,
+              'bet': state.pendingRace!.bet,
+              'winnerLane': state.pendingRace!.winnerLane,
+              'payout': state.pendingRace!.payout,
+              'horseName': state.pendingRace!.horseName,
+              'winnerName': state.pendingRace!.winnerName,
+              'oddsLabel': state.pendingRace!.oddsLabel,
+              'atAge': state.pendingRace!.atAge,
+            },
       'wagerThisAge': state.wagerThisAge,
       // Krediler (D-080). Alan eklemeli; eski kayıtta boş liste okunur.
       'loans': <Map<String, Object?>>[
@@ -843,6 +859,9 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeLoan(_asMap(e, 'loan')))
           .toList(growable: false),
     ),
+    pendingRace: json['pendingRace'] == null
+        ? null
+        : _decodePendingRace(_asMap(json['pendingRace'], 'pendingRace')),
     lastSportAge: _intOrNull(json, 'lastSportAge'),
     lastGroomingAge: _intOrNull(json, 'lastGroomingAge'),
     lastLearningAge: _intOrNull(json, 'lastLearningAge'),
@@ -1239,6 +1258,18 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
             .map((Object? e) => _decodeAppliedEffect(_asMap(e, 'effect')))
             .toList(growable: false),
       ),
+    );
+
+PendingRace _decodePendingRace(Map<String, Object?> json) => PendingRace(
+      id: _string(json, 'id'),
+      lane: _int(json, 'lane'),
+      bet: _int(json, 'bet'),
+      winnerLane: _int(json, 'winnerLane'),
+      payout: _int(json, 'payout'),
+      horseName: _string(json, 'horseName'),
+      winnerName: _string(json, 'winnerName'),
+      oddsLabel: _string(json, 'oddsLabel'),
+      atAge: _int(json, 'atAge'),
     );
 
 Loan _decodeLoan(Map<String, Object?> json) => Loan(

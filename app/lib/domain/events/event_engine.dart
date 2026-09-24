@@ -18,6 +18,7 @@ import '../../data/hobby_catalog.dart';
 import '../../data/pet_catalog.dart';
 import '../models/trip.dart';
 import '../models/life_log.dart';
+import '../economy/financial_strain.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
@@ -254,6 +255,19 @@ class EventEngine {
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
+    // Mali durum kapıları (D-092): varlıklı oyuncuya yoksulluk metni,
+    // parasız oyuncuya varlık metni çıkmaz. Durum mutlak bir işaretten
+    // değil, **gerçek hesaptan** okunur.
+    if (req.maxComfort != null || req.minComfort != null) {
+      final FinancialComfort durum = FinancialStrain.comfortOf(state);
+      if (req.maxComfort != null && durum.index > req.maxComfort!.index) {
+        return false;
+      }
+      if (req.minComfort != null && durum.index < req.minComfort!.index) {
+        return false;
+      }
+    }
+
     // Evi olan oyuncuya "eşin ev istiyor" olayı çıkmaz (D-085).
     if (req.forbidsProperty &&
         state.items.any((OwnedItem i) => i.isProperty)) {
@@ -330,6 +344,18 @@ class EventEngine {
       final List<Person> neglected = state.people.where((Person p) {
         if (!p.isAlive) return false;
         if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+        // **Gerçek hata (D-093):** bu seçici yalnızca hane koşuluna
+        // bakıyordu; `requireOutsideHousehold` ve `requireReachable`
+        // koşullarını yok sayıyordu. Yani "uzaktaki yakınla" kurulan bir
+        // olay, aynı evde yaşayan ya da hiç erişilemeyen biriyle
+        // kurulabiliyordu. Aşağıdaki iki satır o boşluğu kapatır.
+        if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+        if (req.requireReachable && !state.isReachable(p)) return false;
+        // Bağ türü belirtilmişse ona da uyulur.
+        if (req.livingRelations.isNotEmpty &&
+            !req.livingRelations.contains(p.relation)) {
+          return false;
+        }
         final int? last = state.lastInteractionAge[p.id];
         if (last == null) {
           // Hiç temas kurulmamışsa, oyuncunun etkileşim kurabildiği yaştan

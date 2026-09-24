@@ -437,6 +437,9 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
     text:
         'Bir tanıdık, birkaç haftalığına sende dursun diye zarfla para '
         'bıraktı. Zarf çekmecede duruyor ve ay sonuna daha var.',
+    // Emanete dokunmamak her bütçede anlamlıdır; olay kapatılmaz.
+    // Kapatılan şey **yoksulluk iddiası**: sonuç metni artık oyuncunun
+    // ay sonunu zor getirdiğini söylemiyor (D-092).
     requirement: EventRequirement(minAge: 20),
     weight: 4,
     choices: <EventChoice>[
@@ -444,8 +447,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         id: 'dokunma',
         label: 'Zarfa hiç dokunma',
         resultText:
-            'Ay sonunu zor getirdin ama zarf olduğu gibi el değiştirdi. '
-            'Bunu kimseye anlatmadın.',
+            'Zarf çekmecede durduğu gibi el değiştirdi. Bunu kimseye '
+            'anlatmadın.',
         happiness: 3,
         addFlags: <String>{ExtraFlags.emanetTutuldu},
       ),

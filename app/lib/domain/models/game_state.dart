@@ -16,6 +16,7 @@ import 'gift_record.dart';
 import 'owned_item.dart';
 import 'life_log.dart';
 import 'loan.dart';
+import 'pending_race.dart';
 import 'life_summary.dart';
 import 'marriage.dart';
 import 'parental_status.dart';
@@ -82,6 +83,7 @@ class GameState {
     this.trips = const <TripRecord>[],
     this.pendingInterview,
     this.blackjack,
+    this.pendingRace,
     this.wagerThisAge = 0,
     this.loans = const <Loan>[],
     this.fingerIncoming = const <FingerProfile>[],
@@ -586,6 +588,15 @@ class GameState {
   List<Person> get deceasedPeople =>
       people.where((Person p) => !p.isAlive).toList(growable: false);
 
+  /// Sonuçlanmayı bekleyen at yarışı bahsi (D-089).
+  ///
+  /// Bahis tutarı cüzdandan çıkmış, ödeme **henüz yapılmamıştır**.
+  /// Animasyon bitince tek ve atomik bir işlemle kesinleşir.
+  final PendingRace? pendingRace;
+
+  /// Sonuçlanmamış bir bahis var mı?
+  bool get hasPendingRace => pendingRace != null;
+
   /// **Bu yaşta** kumarhanede oynanan toplam bahis.
   ///
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
@@ -812,6 +823,7 @@ class GameState {
     List<TripRecord>? trips,
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
+    Object? pendingRace = _unsetEvent,
     int? wagerThisAge,
     List<Loan>? loans,
     List<FingerProfile>? fingerIncoming,
@@ -900,6 +912,9 @@ class GameState {
       blackjack: blackjack == _unsetEvent
           ? this.blackjack
           : blackjack as BlackjackGame?,
+      pendingRace: pendingRace == _unsetEvent
+          ? this.pendingRace
+          : pendingRace as PendingRace?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
       loans: loans ?? this.loans,
       fingerIncoming: fingerIncoming ?? this.fingerIncoming,

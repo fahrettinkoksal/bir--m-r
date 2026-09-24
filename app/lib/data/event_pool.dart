@@ -466,6 +466,61 @@ const List<GameEvent> kEventPool = <GameEvent>[
     ],
   ),
 
+  // --- Uzak kalmış yakın: sitem (D-093) ---------------------------------
+  //
+  // Faho'nun isteği: "ayrıca sitem olayları ekle: 'Kızınla uzun süredir
+  // görüşmüyorsun.' Seçenekler: Ara / Ziyaret et / Biraz daha ertele.
+  // Gerçek sonuç: yakınlık / kişi keyfi değişsin."
+  //
+  // Mevcut `aile_sitemi` aynı evde yaşayanlar içindi. Bu olay **evden
+  // ayrılmış** yakın içindir: yetişkin çocuk, ebeveyn, kardeş.
+  GameEvent(
+    id: 'uzak_yakin_sitemi',
+    category: EventCategory.aile,
+    text:
+        'Telefon çaldı. {sahip} {kisi} aradı ve sesindeki şey sitemdi: '
+        '"Aramayı hep ben mi yapacağım?"',
+    requirement: EventRequirement(
+      minAge: 20,
+      requiresNeglectedRelative: true,
+      requireOutsideHousehold: true,
+      requireReachable: true,
+    ),
+    repeatable: true,
+    minAgeGap: 12,
+    weight: 1,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'hemen_konus',
+        label: 'Ara ve uzun uzun konuş',
+        resultText:
+            '{sahipk} {kisi} ile bir saat konuştunuz. Aradaki mesafe '
+            'kapanmadı ama ilk adım atıldı.',
+        happiness: 2,
+        bond: 8,
+      ),
+      EventChoice(
+        id: 'ziyaret',
+        label: 'Ziyarete git',
+        resultText:
+            'Yola çıktın. {sahip} {kisi} kapıda seni görünce bir şey '
+            'demedi, sadece kenara çekildi.',
+        happiness: 4,
+        bond: 14,
+        money: -3500,
+      ),
+      EventChoice(
+        id: 'ertele',
+        label: 'Biraz daha ertele',
+        resultText:
+            '"Bu hafta çok yoğunum" dedin. {sahip} {kisi} "tabii" dedi '
+            've telefonu kapattı.',
+        happiness: -3,
+        bond: -8,
+      ),
+    ],
+  ),
+
   // --- Yetişkinliğe giriş: öğrenci olmayana üniversite olayı çıkmaz ------
   GameEvent(
     id: 'lise_sonrasi',

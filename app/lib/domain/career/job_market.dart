@@ -72,10 +72,17 @@ class JobMarket {
   /// prototypeOnly: en yüksek kabul olasılığı; iş asla garanti değildir.
   static const double prototypeOnlyMaxChance = 0.9;
 
-  /// prototypeOnly: bir yaşta aynı işe yapılabilecek en fazla başvuru.
+  /// prototypeOnly: bir yaşta aynı işe yapılabilecek en fazla başvuru
+  /// (D-091).
   ///
-  /// Mülakat sorularının ezberlenip tekrar denenmesini sınırlar.
-  static const int prototypeOnlyMaxApplicationsPerAge = 2;
+  /// Faho'nun isteği: "bir işin mülakatında başarısız olduysam aynı
+  /// yıl içinde aynı işe yeniden başvuramayayım". Eskiden iki hak
+  /// vardı ve mülakat sorusu ezberlenip ikinci denemede geçilebiliyordu.
+  ///
+  /// Sınır **işe özeldir**: başka mesleklere başvuru kapanmaz. Sayaç
+  /// yaşa aittir, yeni yaşta kendiliğinden sıfırlanır ve kapat-aç ile
+  /// korunur.
+  static const int prototypeOnlyMaxApplicationsPerAge = 1;
 
   /// Oyuncunun **başvurabileceği** işler.
   ///
@@ -180,8 +187,10 @@ class JobMarket {
     if (reason.isNotEmpty) return InteractionAvailability.blocked(reason);
     if (_applicationsThisAge(state, job) >=
         prototypeOnlyMaxApplicationsPerAge) {
-      return const InteractionAvailability.blocked(
-        'Bu yıl bu işe yeterince başvurdun; seneye tekrar dene.',
+      return InteractionAvailability.blocked(
+        'Bu yıl ${job.name} işine başvurdun ve kabul edilmedin. Yeni bir '
+        'başvuru için gelecek yılı beklemelisin. Başka mesleklere '
+        'başvurabilirsin.',
       );
     }
     if (state.hasPendingInterview) {

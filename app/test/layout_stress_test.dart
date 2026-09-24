@@ -276,6 +276,26 @@ void main() {
     temiz();
   });
 
+  // D-088: Finger profil düzenleyicisi dar ekranda taşıyordu; artık
+  // sınanıyor.
+  testWidgets('Finger profil düzenleyici 320 px / yazı ×1.5 taşmaz',
+      (WidgetTester tester) async {
+    yakala();
+    addTearDown(birak);
+    await hazirla(tester, genislik: 320, yaziOlcegi: 1.5);
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Finger');
+    await sonunaKaydir(tester, adim: 12);
+    final Finder ac = find.byKey(const Key('finger_profil_ac'));
+    if (ac.evaluate().isNotEmpty) {
+      await tester.tap(ac.first);
+      await tester.pumpAndSettle();
+      await sonunaKaydir(tester, adim: 30);
+    }
+    temiz();
+  });
+
   // D-083: taşınma ayrı bir sayfa oldu; o da dar ekranda sınanır.
   testWidgets('taşınma sayfası 320 px / yazı ×1.5 taşmaz',
       (WidgetTester tester) async {

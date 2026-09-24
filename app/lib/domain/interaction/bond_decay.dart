@@ -53,16 +53,45 @@ class BondDecayResult {
 }
 
 abstract final class BondDecay {
-  /// İhmal sayılmadan önce geçmesi gereken yıl.
+  /// İhmal sayılmadan önce geçmesi gereken yıl (D-093).
   ///
-  /// Bir yıl görüşmemek ihmal değildir; hayat böyle.
-  static const int prototypeOnlyGraceYears = 3;
+  /// Bir-iki yıl görüşmemek ihmal değildir; hayat böyle. Faho'nun
+  /// isteğiyle üç yıldan ikiye indi.
+  static const int prototypeOnlyGraceYears = 2;
 
   /// Erişilebilir ama görüşülmeyen kişide yıllık kayıp.
   static const int prototypeOnlyYearlyLoss = 3;
 
   /// Kan bağında yıllık kayıp (daha yavaş).
   static const int prototypeOnlyBloodLoss = 2;
+
+  /// Uzayan ilgisizlikte kaybın hızlanma çarpanları (D-093).
+  ///
+  /// **Faho'nun bildirdiği hata:** "16 yıldır görüşmediğim kızımla
+  /// yakınlığım neredeyse 100." Sebebi düşüşün sabit ve yavaş olmasıydı:
+  /// yılda iki puan, on altı yılda ancak yirmi altı puan eder.
+  ///
+  /// Artık kayıp zamanla **hızlanır**. Kan bağı yine tamamen kopmaz —
+  /// taban korunur (anne annedir) — ama on yıl görüşülmemiş bir çocukla
+  /// doksan yakınlıkta kalmak mümkün değildir.
+  ///
+  /// Sıralı eşikler: ihmalin kaçıncı yılından itibaren hangi çarpan.
+  static const List<({int fromYear, double factor})>
+      prototypeOnlyAccelerationSteps = <({int fromYear, double factor})>[
+    (fromYear: 0, factor: 1.0),
+    (fromYear: 4, factor: 2.0),
+    (fromYear: 9, factor: 3.0),
+  ];
+
+  /// İhmalin kaçıncı yılında olunduğuna göre kayıp çarpanı.
+  static double accelerationFor(int yearsNeglected) {
+    double carpan = 1.0;
+    for (final ({int fromYear, double factor}) adim
+        in prototypeOnlyAccelerationSteps) {
+      if (yearsNeglected >= adim.fromYear) carpan = adim.factor;
+    }
+    return carpan;
+  }
 
   /// Kan bağında ilgisizliğin indirebileceği **en düşük** yakınlık.
   ///
@@ -116,12 +145,23 @@ abstract final class BondDecay {
         : prototypeOnlyFloor;
   }
 
-  /// Bu kişinin yıllık kaybı.
-  static int lossFor(Person person) {
+  /// Bu kişinin taban yıllık kaybı (hızlanma uygulanmadan).
+  static int baseLossFor(Person person) {
     if (isHouseholdPartner(person)) return prototypeOnlyPartnerLoss;
     return person.relation.kanBagi
         ? prototypeOnlyBloodLoss
         : prototypeOnlyYearlyLoss;
+  }
+
+  /// Bu kişinin bu yılki kaybı (D-093).
+  ///
+  /// [yearsNeglected] ihmalin kaçıncı yılında olunduğudur. Uzadıkça
+  /// kayıp hızlanır.
+  static int lossFor(Person person, {int yearsNeglected = 0}) {
+    final int taban = baseLossFor(person);
+    final double carpan = accelerationFor(yearsNeglected);
+    final int kayip = (taban * carpan).round();
+    return kayip < 1 ? 1 : kayip;
   }
 
   /// Bu kişide ihmal sayılmadan önce geçmesi gereken yıl.
@@ -173,7 +213,10 @@ abstract final class BondDecay {
 
       final int taban = floorFor(p);
       if (p.bond <= taban) return p;
-      final int yeni = (p.bond - lossFor(p)).clamp(taban, 100);
+      // İhmalin kaçıncı yılı? Hoşgörü bittikten sonra sayılır (D-093).
+      final int ihmalYili = gecen - graceFor(p);
+      final int yeni =
+          (p.bond - lossFor(p, yearsNeglected: ihmalYili)).clamp(taban, 100);
       if (yeni == p.bond) return p;
       zayiflayan.add(p.id);
       return p.copyWith(bond: yeni);
