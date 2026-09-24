@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/name_pool.dart';
 import '../career/career_progress.dart';
 import '../career/retirement.dart';
+import '../life/year_review.dart';
 import 'grandchildren.dart';
 import '../social/social_engine.dart';
 import '../social/social_income.dart';
@@ -89,6 +90,13 @@ class LifeProgression {
     // Ekranda çözülmemiş bir olay varken yaş ilerlemez: olaylar üst üste
     // binmez.
     if (state.hasPendingEvent) return state;
+
+    // Biten yılın özeti yaşlanmadan **önce** hesaplanır: fotoğraf yılın
+    // başında alınmıştır, karşılaştırma yılın sonundaki hâlle yapılır
+    // (D-096). Özet yoksa (ilk yıl, yeni kayıt) `null` kalır.
+    // Hiçbir şey değişmediyse özet üretilmez; eski yılın özeti ekranda
+    // bırakılmaz.
+    final YearSummary? yilOzeti = YearReview.summarize(state.yearMark, state);
 
     final int newAge = state.player.age + 1;
 
@@ -264,7 +272,10 @@ class LifeProgression {
     // Hastalık maaştan **sonra**, işten çıkarılmadan **önce** işler
     // (D-078): çalışılan yılın ücreti ödenir, raporun ödenmeyen günleri
     // o ücretten düşer, uyarı birikmişse çıkarılma ihtimaline katılır.
-    maas = _applySickLeave(maas, newAge, log);
+    // Kritik iş haberleri yalnızca günlüğe yazılıp geçilmez; ekranda
+    // bildirim olarak da gösterilir (D-097).
+    final List<PendingNotice> kariyerBildirimleri = <PendingNotice>[];
+    maas = _applySickLeave(maas, newAge, log, kariyerBildirimleri);
 
     // Maaş ödendikten **sonra** işten çıkarılma denenir: çalışılan yılın
     // ücreti ödenir, yeni yıla işsiz girilir (Paket 9).
@@ -276,6 +287,15 @@ class LifeProgression {
           age: newAge,
           text: isKaybi.logText!,
           category: LogCategory.kisisel,
+        ),
+      );
+      kariyerBildirimleri.add(
+        PendingNotice(
+          id: 'kariyer-isten-cikarma-$newAge',
+          kind: NoticeKind.kariyer,
+          age: newAge,
+          title: 'İşten çıkarıldın',
+          text: isKaybi.logText!,
         ),
       );
       maas = (state: isKaybi.state, logText: maas.logText);
@@ -359,6 +379,11 @@ class LifeProgression {
       afterDeaths = Notices.enqueue(afterDeaths, okulBildirimleri);
     }
 
+    // Kritik iş haberleri (D-097).
+    if (kariyerBildirimleri.isNotEmpty) {
+      afterDeaths = Notices.enqueue(afterDeaths, kariyerBildirimleri);
+    }
+
     // Yas zamanla hafifler: her yıl kalan yasın bir bölümü mutluluğa geri
     // döner.
     afterDeaths = _easeGrief(afterDeaths, olumSonucu.happinessLoss > 0);
@@ -373,11 +398,24 @@ class LifeProgression {
 
     // Kredi taksitleri (D-080): ödenebilen düşer, ödenemeyen kaçar ve
     // borç faiziyle büyür. Cüzdan eksiye inmez.
-    final ({GameState state, List<String> messages}) kredi =
-        Banking.advanceYear(afterDeaths);
+    final ({GameState state, List<String> messages, List<String> missed})
+        kredi = Banking.advanceYear(afterDeaths);
     afterDeaths = kredi.state;
     for (final String satir in kredi.messages) {
       afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
+    // Kaçan taksit kritik haberdir: borç faiziyle büyüdüğü için oyuncu
+    // bunu günlükte aramak zorunda kalmaz (D-097).
+    if (kredi.missed.isNotEmpty) {
+      afterDeaths = Notices.enqueue(afterDeaths, <PendingNotice>[
+        PendingNotice(
+          id: 'banka-kacan-taksit-$newAge',
+          kind: NoticeKind.banka,
+          age: newAge,
+          title: 'Taksit ödenemedi',
+          text: kredi.missed.join(' '),
+        ),
+      ]);
     }
 
     // Eş vefat ettiyse evlilik kaydı **dul** durumuna geçer; kayıt
@@ -468,7 +506,15 @@ class LifeProgression {
     afterDeaths = _applyBondDecay(afterDeaths, newAge);
 
     // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
-    final GameState withTrack = _applyTrackBonus(afterDeaths);
+    GameState withTrack = _applyTrackBonus(afterDeaths);
+
+    // Biten yılın özeti (D-096): oyuncu hayat günlüğünü taramadan yılın
+    // nasıl geçtiğini görebilsin. Özet yılın **başındaki** fotoğrafla
+    // bugünün farkından üretilir; yeni yıl için yeni fotoğraf alınır.
+    withTrack = withTrack.copyWith(
+      lastYearSummary: yilOzeti,
+      yearMark: YearMark.of(withTrack),
+    );
 
     // Yeni yaşın tek açılış olayı.
     final ActiveEvent? opening = const EventEngine().openingEvent(
@@ -725,6 +771,9 @@ class LifeProgression {
   /// Bu yıl vefat edenlerin mirasını **bir kez** dağıtır.
   GameState _settleEstates(GameState state, int newAge) {
     GameState next = state;
+    // Aynı yıl gelen miras payları tek bildirimde toplanır (D-097);
+    // üst üste açılan pencere sayısı azalır, hiçbir pay kaybolmaz.
+    final List<PendingNotice> mirasBildirimleri = <PendingNotice>[];
     for (final Person person in state.people) {
       if (person.isAlive) continue;
       if (next.settledEstates.contains(person.id)) continue;
@@ -744,7 +793,7 @@ class LifeProgression {
         ],
       );
       if (mirasBildirimi != null) {
-        next = Notices.enqueue(next, <PendingNotice>[mirasBildirimi]);
+        mirasBildirimleri.add(mirasBildirimi);
       }
       for (final String satir in sonuc.logLines) {
         next = next.copyWith(
@@ -754,6 +803,13 @@ class LifeProgression {
           ]),
         );
       }
+    }
+    final PendingNotice? toplu = Notices.combinedInheritance(
+      playerAge: newAge,
+      shares: mirasBildirimleri,
+    );
+    if (toplu != null) {
+      next = Notices.enqueue(next, <PendingNotice>[toplu]);
     }
     return next;
   }
@@ -901,6 +957,7 @@ class LifeProgression {
     ({GameState state, String? logText}) girdi,
     int newAge,
     List<LifeLogEntry> log,
+    List<PendingNotice> bildirimler,
   ) {
     final GameState state = girdi.state;
     final SickLeave hastalik = SickLeaves.roll(
@@ -927,6 +984,19 @@ class LifeProgression {
       next = next.copyWith(
         career: next.career.copyWith(
           employerWarnings: next.career.employerWarnings + 1,
+        ),
+      );
+      // İşveren uyarısı kaçırılmaması gereken bir haberdir: tek başına
+      // kimseyi işten atmaz ama çıkarılma ihtimalini artırır (D-078).
+      bildirimler.add(
+        PendingNotice(
+          id: 'kariyer-uyari-$newAge',
+          kind: NoticeKind.kariyer,
+          age: newAge,
+          title: 'İş yerinden uyarı',
+          text: '${hastalik.text} İşveren bu kadar rapordan memnun '
+              'değil. Uyarı tek başına işten çıkarmaz ama birikirse '
+              'riski artırır.',
         ),
       );
     }
@@ -1129,10 +1199,33 @@ class LifeProgression {
     final int sonra = (once + donem.prototypeOnlyHappiness).clamp(0, 100);
     final int gercek = sonra - once;
 
-    return state.copyWith(
+    final GameState etkili = state.copyWith(
       player: state.player.copyWith(
         stats: state.player.stats.copyWith(happiness: sonra),
       ),
+    );
+
+    // Bir yakınını kaybettiği yılda oyuncuya burç penceresi açılmaz
+    // (D-097): etki yine uygulanır ve günlüğe yazılır, ama acılı bir
+    // yılın üstüne süs bildirimi binmez.
+    final bool aciliYil = state.notices.any(
+      (PendingNotice n) =>
+          n.kind == NoticeKind.olum || n.kind == NoticeKind.cenaze,
+    );
+    if (aciliYil) {
+      return _logLine(
+        etkili,
+        newAge,
+        Notices.zodiacPeriod(
+          playerAge: newAge,
+          period: donem,
+          zodiac: burc,
+          happinessDelta: gercek,
+        ).text,
+      );
+    }
+
+    return etkili.copyWith(
       notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
         ...state.notices,
         Notices.zodiacPeriod(

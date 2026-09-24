@@ -23,6 +23,7 @@ import 'life_progression.dart';
 import 'random_util.dart';
 import '../../text/turkish_text.dart';
 import '../pets/pet_care.dart';
+import '../life/year_review.dart';
 
 /// Kuşak devamı: **"Çocuğum olarak devam et"** (Paket E3,
 /// `docs/GENERATION_PROPOSAL.md` §5).
@@ -328,6 +329,10 @@ abstract final class GenerationContinuation {
 
     // Küçük yaşta devam eden çocuk açıklamasız bir hanede bırakılmaz.
     yeni = LifeProgression.ensureCaregiver(yeni, cocuk.age);
+
+    // Yeni kuşak kendi yılının başından sayar; eski oyuncunun fotoğrafı
+    // taşınmaz ve eski yılın özeti ekranda kalmaz (D-096).
+    yeni = yeni.copyWith(yearMark: YearMark.of(yeni), lastYearSummary: null);
 
     return (state: yeni, blockReason: '');
   }

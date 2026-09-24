@@ -341,13 +341,15 @@ void main() {
 
       // Cüzdan boşaltılır: taksit ödenemez.
       s = s.copyWith(player: s.player.copyWith(wallet: 0));
-      final ({GameState state, List<String> messages}) r =
-          Banking.advanceYear(s);
+      final ({GameState state, List<String> messages, List<String> missed})
+          r = Banking.advanceYear(s);
 
       expect(r.state.loans.single.missedPayments, 1);
       expect(r.state.loans.single.outstanding, greaterThan(oncekiBorc));
       expect(r.state.player.wallet, 0, reason: 'Cüzdan eksiye düşmez');
       expect(r.messages, isNotEmpty);
+      // Kaçan taksit kritik haber listesine de girer (D-097).
+      expect(r.missed, isNotEmpty);
     });
 
     test('kaçan taksit sonraki başvuruyu zorlaştırır', () {

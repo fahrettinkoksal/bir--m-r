@@ -2775,5 +2775,29 @@ Faho iki şey istedi: "Oyuncu liseye geçtiğinde alan seçimi yapılmadan yaş 
 
 ---
 
+### Q-123 — Yıl sonu özeti ve bildirim yoğunluğu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-096, D-097, D-098 · `app/lib/domain/life/year_review.dart`, `app/lib/domain/generation/life_progression.dart`, `app/lib/domain/life/notices.dart` · Test: `app/test/year_summary_test.dart`, `app/test/critical_notice_test.dart`, `app/test/event_choice_effect_test.dart`
+
+Faho bildirdi: "olayların sonucu ekranda görünsün", "yıl sonunda statların özeti çıksın", "kritik şeyler anında bildirilsin", "oyuncu ne olduğunu anlamak için hayat günlüğünü kurcalamak zorunda kalmasın".
+
+**Kodlanan hâli.** Yaş alındığında biten yılın özeti ana ekranın üstünde bir kart olur (kart, pencere değil: yılda bir modal daha açmak istemedik). Özette yalnızca oyuncunun kendi değerleri var. Kritik iş ve kredi haberleri bildirim oldu. Bildirim yoğunluğu ölçüldü ve iki noktada azaltıldı.
+
+**Ölçüm (100 hayat, ~9.000 yıl):**
+
+| Ölçüm | Önce | Sonra |
+|---|---|---|
+| Tek yılda aynı anda açılan en çok pencere | 7 | 6 |
+| Yıl başına ortalama pencere | 0,41 | 0,39 |
+
+**Karar soruları:**
+1. Yıl özeti **kart** olarak doğru mu, yoksa yaş alır almaz bir **pencere** olarak mı açılsın? Kart oyuncuyu durdurmuyor; pencere kaçırılmıyor ama her yıl bir tık daha istiyor.
+2. Özette yalnızca oyuncunun kendi değerleri var. **Yakınlık değişimleri** de girsin mi? (Örn. "Kızın Elif ile yakınlık −6".) Girerse kart uzar; girmezse ilgisizliğin bedeli yalnızca günlükte kalır.
+3. Cüzdan satırı her yıl çıkıyor (geçim gideri ve maaş yüzünden). Küçük tutarlar için bir alt sınır konsun mu?
+4. En kötü yıl hâlâ **altı pencere** (iki vefat, iki cenaze, toplu miras, bir haber). Ölüm ve cenaze de birleştirilsin mi, yoksa her kayıp kendi anını hak ediyor mu?
+5. Acılı yılda **burç bildirimi** gösterilmiyor (etki yine uygulanıyor, günlüğe yazılıyor). Doğru mu?
+6. Kritik sayılan haberler şimdilik üç tane: işten çıkarılma, işveren uyarısı, kaçan kredi taksiti. Başka ne eklenmeli? (Örn. büyük para kaybı, ciddi sağlık düşüşü, evden çıkarılma.)
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

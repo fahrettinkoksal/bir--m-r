@@ -312,12 +312,20 @@ abstract final class Banking {
   /// Ödenebilen taksit cüzdandan düşer. Ödenemeyen taksit **kaçar**:
   /// kalan borç bir yıllık faiziyle büyür ve kaçan taksit sayacı artar.
   /// Cüzdan **eksiye düşmez**.
-  static ({GameState state, List<String> messages}) advanceYear(
-    GameState state,
-  ) {
-    if (state.loans.isEmpty) return (state: state, messages: const <String>[]);
+  static ({GameState state, List<String> messages, List<String> missed})
+      advanceYear(GameState state) {
+    if (state.loans.isEmpty) {
+      return (
+        state: state,
+        messages: const <String>[],
+        missed: const <String>[],
+      );
+    }
 
     final List<String> satirlar = <String>[];
+    // Kaçan taksitler ayrı tutulur: oyuncunun kaçırmaması gereken kritik
+    // haberdir, yalnızca günlüğe yazılıp geçilmez (D-097).
+    final List<String> kacanlar = <String>[];
     int cuzdan = state.player.wallet;
     final List<Loan> guncel = <Loan>[];
 
@@ -345,9 +353,10 @@ abstract final class Banking {
           outstanding: buyumus,
           missedPayments: l.missedPayments + 1,
         ));
-        satirlar.add(
-          '${l.bank.label} taksitini ödeyemedin; borç faiziyle büyüdü.',
-        );
+        final String metin =
+            '${l.bank.label} taksitini ödeyemedin; borç faiziyle büyüdü.';
+        satirlar.add(metin);
+        kacanlar.add(metin);
       }
     }
 
@@ -357,6 +366,7 @@ abstract final class Banking {
         loans: List<Loan>.unmodifiable(guncel),
       ),
       messages: List<String>.unmodifiable(satirlar),
+      missed: List<String>.unmodifiable(kacanlar),
     );
   }
 

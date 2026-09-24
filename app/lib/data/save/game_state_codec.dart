@@ -10,6 +10,7 @@ library;
 
 import '../../domain/models/loan.dart';
 import '../../domain/models/pending_race.dart';
+import '../../domain/life/year_review.dart';
 import '../../domain/models/applied_effect.dart';
 import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
@@ -139,6 +140,33 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'winnerName': state.pendingRace!.winnerName,
               'oddsLabel': state.pendingRace!.oddsLabel,
               'atAge': state.pendingRace!.atAge,
+            },
+      // Yıl özeti ve yılın başındaki fotoğraf (D-096). Alan eklemeli;
+      // eski kayıtta yoktur ve özetsiz açılır.
+      'yearMark': state.yearMark == null
+          ? null
+          : <String, Object?>{
+              'age': state.yearMark!.age,
+              'appearance': state.yearMark!.stats.appearance,
+              'happiness': state.yearMark!.stats.happiness,
+              'health': state.yearMark!.stats.health,
+              'intelligence': state.yearMark!.stats.intelligence,
+              'charisma': state.yearMark!.stats.charisma,
+              'wallet': state.yearMark!.wallet,
+              'fame': state.yearMark!.fame,
+            },
+      'lastYearSummary': state.lastYearSummary == null
+          ? null
+          : <String, Object?>{
+              'age': state.lastYearSummary!.age,
+              'effects': <Map<String, Object?>>[
+                for (final AppliedEffect e in state.lastYearSummary!.effects)
+                  <String, Object?>{
+                    'label': e.label,
+                    'delta': e.delta,
+                    'unit': e.unit,
+                  },
+              ],
             },
       'wagerThisAge': state.wagerThisAge,
       // Krediler (D-080). Alan eklemeli; eski kayıtta boş liste okunur.
@@ -862,6 +890,15 @@ GameState decodeGameState(Map<String, Object?> json) {
     pendingRace: json['pendingRace'] == null
         ? null
         : _decodePendingRace(_asMap(json['pendingRace'], 'pendingRace')),
+    // Yıl özeti alanları eklemeli; eski kayıtta yoktur (D-096).
+    yearMark: json['yearMark'] == null
+        ? null
+        : _decodeYearMark(_asMap(json['yearMark'], 'yearMark')),
+    lastYearSummary: json['lastYearSummary'] == null
+        ? null
+        : _decodeYearSummary(
+            _asMap(json['lastYearSummary'], 'lastYearSummary'),
+          ),
     lastSportAge: _intOrNull(json, 'lastSportAge'),
     lastGroomingAge: _intOrNull(json, 'lastGroomingAge'),
     lastLearningAge: _intOrNull(json, 'lastLearningAge'),
@@ -1258,6 +1295,34 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
             .map((Object? e) => _decodeAppliedEffect(_asMap(e, 'effect')))
             .toList(growable: false),
       ),
+    );
+
+YearMark _decodeYearMark(Map<String, Object?> json) => YearMark(
+      age: _int(json, 'age'),
+      stats: Stats(
+        appearance: _int(json, 'appearance'),
+        happiness: _int(json, 'happiness'),
+        health: _int(json, 'health'),
+        intelligence: _int(json, 'intelligence'),
+        charisma: _int(json, 'charisma'),
+      ),
+      wallet: _int(json, 'wallet'),
+      fame: _intOrNull(json, 'fame'),
+    );
+
+YearSummary _decodeYearSummary(Map<String, Object?> json) => YearSummary(
+      age: _int(json, 'age'),
+      effects: List<AppliedEffect>.unmodifiable(<AppliedEffect>[
+        for (final Map<String, Object?> e
+            in _optionalRawList(json, 'effects').map(
+          (Object? raw) => _asMap(raw, 'lastYearSummary.effects'),
+        ))
+          AppliedEffect(
+            label: _string(e, 'label'),
+            delta: _intOrNull(e, 'delta'),
+            unit: e['unit'] is String ? e['unit']! as String : '',
+          ),
+      ]),
     );
 
 PendingRace _decodePendingRace(Map<String, Object?> json) => PendingRace(

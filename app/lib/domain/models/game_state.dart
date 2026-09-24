@@ -17,6 +17,7 @@ import 'owned_item.dart';
 import 'life_log.dart';
 import 'loan.dart';
 import 'pending_race.dart';
+import '../life/year_review.dart';
 import 'life_summary.dart';
 import 'marriage.dart';
 import 'parental_status.dart';
@@ -84,6 +85,8 @@ class GameState {
     this.pendingInterview,
     this.blackjack,
     this.pendingRace,
+    this.yearMark,
+    this.lastYearSummary,
     this.wagerThisAge = 0,
     this.loans = const <Loan>[],
     this.fingerIncoming = const <FingerProfile>[],
@@ -597,6 +600,18 @@ class GameState {
   /// Sonuçlanmamış bir bahis var mı?
   bool get hasPendingRace => pendingRace != null;
 
+  /// İçinde bulunulan yılın başındaki değerlerin fotoğrafı (D-096).
+  ///
+  /// Yıl sonunda "ne değişti" sorusu bununla yanıtlanır; uydurma bir
+  /// başlangıç değeri kullanılmaz.
+  final YearMark? yearMark;
+
+  /// Biten yılın özeti (D-096).
+  ///
+  /// Oyuncu hayat günlüğünü taramadan yılın nasıl geçtiğini görebilsin
+  /// diye ana ekranda gösterilir.
+  final YearSummary? lastYearSummary;
+
   /// **Bu yaşta** kumarhanede oynanan toplam bahis.
   ///
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
@@ -824,6 +839,8 @@ class GameState {
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
     Object? pendingRace = _unsetEvent,
+    Object? yearMark = _unsetEvent,
+    Object? lastYearSummary = _unsetEvent,
     int? wagerThisAge,
     List<Loan>? loans,
     List<FingerProfile>? fingerIncoming,
@@ -915,6 +932,11 @@ class GameState {
       pendingRace: pendingRace == _unsetEvent
           ? this.pendingRace
           : pendingRace as PendingRace?,
+      yearMark:
+          yearMark == _unsetEvent ? this.yearMark : yearMark as YearMark?,
+      lastYearSummary: lastYearSummary == _unsetEvent
+          ? this.lastYearSummary
+          : lastYearSummary as YearSummary?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
       loans: loans ?? this.loans,
       fingerIncoming: fingerIncoming ?? this.fingerIncoming,

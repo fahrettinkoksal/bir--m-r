@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/life/year_review.dart';
 import '../../domain/models/game_state.dart';
 import '../../state/game_scope.dart';
+import '../widgets/effect_chips.dart';
 import '../widgets/life_log_view.dart';
 import '../widgets/section_header.dart';
 
@@ -21,11 +23,22 @@ class LifeScreen extends StatelessWidget {
     // kurulur, böylece 90 yaşındaki bir hayatın ekranı da akıcı kalır.
     final List<LifeLogBlock> bloklar = groupLogByAge(state.log);
 
+    // Biten yılın özeti günlüğün üstünde durur (D-096): oyuncu satırları
+    // taramadan yılın nasıl geçtiğini görür.
+    final YearSummary? ozet = state.lastYearSummary;
+    final int basliklar = ozet == null ? 1 : 2;
+
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
-      itemCount: bloklar.length + 2,
+      itemCount: bloklar.length + basliklar + 1,
       itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
+        if (ozet != null && index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _YearSummaryCard(summary: ozet),
+          );
+        }
+        if (index == basliklar - 1) {
           return const Padding(
             padding: EdgeInsets.only(bottom: 10),
             child: SectionHeader(
@@ -34,7 +47,7 @@ class LifeScreen extends StatelessWidget {
             ),
           );
         }
-        if (index == bloklar.length + 1) {
+        if (index == bloklar.length + basliklar) {
           return Padding(
             padding: const EdgeInsets.only(top: 14),
             child: Text(
@@ -47,12 +60,62 @@ class LifeScreen extends StatelessWidget {
             ),
           );
         }
-        final int i = index - 1;
+        final int i = index - basliklar;
         return Padding(
           padding: EdgeInsets.only(bottom: i == bloklar.length - 1 ? 0 : 10),
           child: LifeLogAgeBlock(block: bloklar[i], isCurrentAge: i == 0),
         );
       },
+    );
+  }
+}
+
+/// Biten yılın özeti kartı (D-096).
+///
+/// Buradaki satırlar **gerçekten uygulanmış** değişimlerdir: yılın
+/// başındaki değerlerle bugünkü değerler karşılaştırılarak üretilir, bu
+/// yüzden gerçekleşmemiş bir kazanç yazamaz.
+class _YearSummaryCard extends StatelessWidget {
+  const _YearSummaryCard({required this.summary});
+
+  final YearSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Card(
+      key: const Key('year_summary_card'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.summarize_outlined,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${summary.age} yaşın böyle geçti',
+                    key: const Key('year_summary_title'),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            EffectChips(
+              key: const Key('year_summary_effects'),
+              effects: summary.effects,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

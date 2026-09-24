@@ -182,6 +182,38 @@ abstract final class Notices {
     );
   }
 
+  /// Aynı yıl birden fazla mirasın **tek** bildirimi (D-097).
+  ///
+  /// İki yakınını aynı yıl kaybeden oyuncuya art arda altı pencere
+  /// açılıyordu. Ölüm ve cenaze kişiye özeldir, ayrı kalır; miras ise
+  /// tek bir haberde toplanır. Hiçbir pay kaybolmaz: her satır kendi
+  /// kişisiyle yazılır, tutarlar ve eşyalar toplanır.
+  static PendingNotice? combinedInheritance({
+    required int playerAge,
+    required List<PendingNotice> shares,
+  }) {
+    if (shares.isEmpty) return null;
+    if (shares.length == 1) return shares.single;
+
+    final int toplam = shares.fold<int>(
+      0,
+      (int acc, PendingNotice n) => acc + n.money,
+    );
+    final List<String> esyalar = <String>[
+      for (final PendingNotice n in shares) ...n.itemNames,
+    ];
+    return PendingNotice(
+      id: 'miras-toplu-$playerAge',
+      kind: NoticeKind.miras,
+      age: playerAge,
+      title: 'Miras',
+      text: 'Bu yıl birden fazla mirastan pay aldın. '
+          '${shares.map((PendingNotice n) => n.text).join(' ')}',
+      money: toplam,
+      itemNames: List<String>.unmodifiable(esyalar),
+    );
+  }
+
   // -----------------------------------------------------------------
   // Okul dönüm noktaları (Paket 17)
   // -----------------------------------------------------------------

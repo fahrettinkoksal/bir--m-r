@@ -48,6 +48,11 @@ enum NoticeKind {
 
   /// Banka kredisi: onay, ret ve taksit (D-080).
   banka,
+
+  /// İşle ilgili kritik haber: işten çıkarılma, işveren uyarısı (D-097).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  kariyer,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

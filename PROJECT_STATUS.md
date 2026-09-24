@@ -990,6 +990,18 @@ doğum bildiriminin içinden değiştirilebiliyor; ad yalnızca doğum
 yılında, 2-16 harf ve yalnızca harf olarak kabul ediliyor, soyadı
 değişmiyor.
 
+**Paket I — geri bildirim ve sonuç görünürlüğü (D-096…D-098).** Yaş
+alındığında biten yılın özeti ana ekranın üstünde kart olarak duruyor:
+"23 yaşın böyle geçti". Satırlar yılın başındaki fotoğrafla bugünün
+farkından üretiliyor, uydurma kazanç yazamıyor. Kritik iş ve kredi
+haberleri (işten çıkarılma, işveren uyarısı, kaçan taksit) artık
+bildirim oluyor. Bildirim yoğunluğu 100 hayat üzerinde ölçüldü: en kötü
+yıl yedi pencereydi, aynı yıl gelen miras payları tek bildirimde
+toplanarak ve acılı yılda burç penceresi kapatılarak altıya indi
+(ortalama 0,39/yıl). Olay havuzundaki 467 seçimin tamamı denetlendi:
+etkisiz seçim yok, yalnızca görünmez işaret bırakan seçim yok; kural
+testle sabitlendi.
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1058,12 +1070,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-122 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-123 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1872 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1888 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri
