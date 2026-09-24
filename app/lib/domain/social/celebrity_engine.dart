@@ -8,7 +8,7 @@
 /// - Ünlü **kendiliğinden** İlişkiler ekranına girmez. Ancak geri takip
 ///   ettiğinde kalıcı bir kişi kaydı açılır: o an gerçekten bir bağ
 ///   kurulmuştur.
-/// - Bir ünlüye **yılda bir kez** yazılabilir. Üst üste yazmak
+/// - Bir ünlüye **yılda en fazla iki kez** yazılabilir. Üst üste yazmak
 ///   "ısrarcı" sayılır ve karşılık ihtimalini düşürür.
 /// - Kazanılan takipçi uydurulmaz: oyuncunun mevcut kitlesine ve ünlünün
 ///   büyüklüğüne bağlı hesaplanır, cüzdana ve kitleye **gerçekten**
@@ -79,7 +79,11 @@ class CelebrityResult {
 
 abstract final class CelebrityEngine {
   /// prototypeOnly: bir ünlüye yılda kaç kez yazılabilir.
-  static const int prototypeOnlyTriesPerAge = 1;
+  ///
+  /// Faho'nun Q-115 kararı: yılda **bir** azdı, **iki** oldu. Israrın
+  /// bedeli duruyor: ikinci deneme birinciden belirgin olarak zor
+  /// (D-106).
+  static const int prototypeOnlyTriesPerAge = 2;
 
   /// prototypeOnly: eylemin taban karşılık çarpanı.
   ///
@@ -144,8 +148,9 @@ abstract final class CelebrityEngine {
           'kullanıyor; önce orada hesabın olması gerekiyor.';
     }
     if (triesThisAge(state, celebrity) >= prototypeOnlyTriesPerAge) {
-      return 'Bu yıl ${celebrity.firstName} ile bir kez iletişime geçtin. '
-          'Üst üste yazmak işe yaramıyor.';
+      return 'Bu yıl ${celebrity.firstName} ile '
+          '$prototypeOnlyTriesPerAge kez iletişime geçtin; bu yıllık '
+          'hakkın. Üst üste yazmak işe yaramıyor.';
     }
     if (action == CelebrityAction.isBirligi) {
       final int un = state.player.fame ?? 0;

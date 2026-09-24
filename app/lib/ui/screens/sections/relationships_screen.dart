@@ -21,6 +21,9 @@ enum RelationshipSubPage {
   romantik,
   cocuklar,
   torunlar,
+  // Faho'nun Q-115 kararı: geri takip eden ünlüler arkadaş listesine
+  // karışmaz, kendi başlığında durur (D-106).
+  tanidiklar,
 }
 
 class RelationshipsScreen extends StatefulWidget {
@@ -51,6 +54,10 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
 
   List<Person> _romantikler(GameState state) =>
       state.byGroup(RelationGroup.romantik);
+
+  /// Geri takip eden ünlüler ve benzeri tanışıklıklar (D-106).
+  List<Person> _tanidiklar(GameState state) =>
+      state.byGroup(RelationGroup.tanidiklar);
 
   /// Çocuklar en büyükten küçüğe. Vefat edenler de listede kalır (D-029).
   List<Person> _cocuklar(GameState state) => <Person>[...state.children]
@@ -84,6 +91,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.romantik => _romantikler(state),
         RelationshipSubPage.cocuklar => _cocuklar(state),
         RelationshipSubPage.torunlar => _torunlar(state),
+        RelationshipSubPage.tanidiklar => _tanidiklar(state),
       };
       final String baslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar => 'Akrabalar',
@@ -91,6 +99,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.romantik => 'Romantik bağlar',
         RelationshipSubPage.cocuklar => 'Çocuklar',
         RelationshipSubPage.torunlar => 'Torunlar',
+        RelationshipSubPage.tanidiklar => 'Ünlüler ve tanıdıklar',
       };
       final String altBaslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar =>
@@ -103,6 +112,8 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           'Büyüyen çocuklar evden çıkar; kayıtları silinmez.',
               RelationshipSubPage.torunlar =>
           'Çocuklarının çocukları. Kendi hayatlarını yaşarlar.',
+        RelationshipSubPage.tanidiklar =>
+          'Sana geri dönen ünlüler. Arkadaş değiller; tanışıklık.',
 };
 
       return SectionScaffold(
@@ -130,6 +141,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
     final int cocukSayisi = _cocuklar(state).length;
     final int akrabaSayisi = _akrabalar(state).length;
     final int arkadasSayisi = _arkadaslar(state).length;
+    final int tanidikSayisi = _tanidiklar(state).length;
     final int romantikSayisi = _romantikler(state).length;
 
     return SectionScaffold(
@@ -205,6 +217,18 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             trailingText: '$arkadasSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.arkadaslar),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (tanidikSayisi > 0) ...<Widget>[
+          MenuRow(
+            title: 'Ünlüler ve tanıdıklar',
+            subtitle: 'Sana geri dönen ünlüler',
+            icon: Icons.star_outline_rounded,
+            accent: BirOmurAccents.pirinc,
+            trailingText: '$tanidikSayisi',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.tanidiklar),
           ),
           const SizedBox(height: 10),
         ],

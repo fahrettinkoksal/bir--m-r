@@ -1013,6 +1013,18 @@ Hastalık artık sağlığı da düşürüyor. Dövüş sanatı spor bakımına 
 Görünüş düşüşü yaklaşık dörtte bir yumuşatıldı. Saç dökülmesi karizmayı
 değil görünüşü etkiliyor; saç ekimi ileri basamaktan iki kademe düşürüyor.
 
+**Paket K — sosyal medya, sponsorluk ve Ün (D-103…D-106).** Aktiviteler
+altında **Ün ve Medya Fırsatları** bölümü açıldı; Ün 40 olmadan menüde
+hiç görünmüyor. Yedi kurgusal medya işi var (dergi röportajından reklam
+yüzü olmaya). Sponsorluk için platform başına en az 5.000 takipçi
+gerekiyor ve ücret kitlenin tamamıyla ölçekleniyor: 5.000 → 32.500 ₺,
+500.000 → 478.000 ₺. Kabul edilip paylaşılmayan sponsorlukta ödeme yok,
+mutluluk düşüyor ve o platformdaki kitlenin %4'ü gidiyor. Tanınan biri
+yeni hesabı sıfırdan açmıyor: mevcut kitlesinin %8'i (en çok 40.000)
+taşınıyor. Ünlüye yılda iki kez yazılabiliyor ve geri takip edenler
+İlişkiler ekranında "Ünlüler ve tanıdıklar" başlığında duruyor. Takipçi
+sayıları Türkçe binlik ayracıyla yazılıyor (2.232).
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1081,12 +1093,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-124 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-125 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1908 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1923 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

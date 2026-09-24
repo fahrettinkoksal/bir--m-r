@@ -2841,5 +2841,47 @@ Faho bildirdi: "statlar gerçekten hissedilsin", "kalıcı 100 olmasın", "check
 
 ---
 
+### Q-125 — Medya fırsatları, sponsorluk ölçeği ve yeni hesabın kitlesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-103, D-104, D-105, D-106 (Q-115'in kararları) · `app/lib/data/media_catalog.dart`, `app/lib/domain/social/media_opportunities.dart`, `app/lib/data/sponsor_catalog.dart`, `app/lib/domain/social/social_income.dart` · Test: `app/test/package_k_test.dart`
+
+Faho bildirdi: "sponsorluk için platform başına en az 5.000 takipçi olsun ve ücret ölçeklensin", "sponsorluk paylaşılmadan para ödenmesin, yapmazsan tepki olsun", "takipçi sayıları 2.232 gibi yazılsın", "Ün 40'ı geçince Ün/Medya Fırsatları bölümü açılsın", "ünlüyken yeni hesap sıfır takipçiyle başlamasın", "ünlüye yılda 2 kez yazılabilsin ve ünlüler ayrı bölümde dursun". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Medya işleri (2026 ₺, net asgari ücret çıpasıyla).**
+
+| İş | Gereken Ün | Ücret | Ün | Kitle payı |
+|---|---|---|---|---|
+| Dergi röportajı | 40 | 4 aylık asgari ücret (112.300 ₺) | +2 | %3 |
+| Radyo programı | 45 | 6 aylık (168.450 ₺) | +3 | %4 |
+| Podcast konukluğu | 50 | 8 aylık (224.600 ₺) | +3 | %6 |
+| Televizyon programı | 55 | 16 aylık (449.200 ₺) | +5 | %8 |
+| Belgesel seslendirme | 60 | 20 aylık (561.500 ₺) | +3 | %3 |
+| Reklam yüzü olmak | 65 | 45 aylık (1.263.375 ₺) | +6 | %10 |
+| Kitap teklifi | 70 | 30 aylık (842.250 ₺) | +4 | %5 |
+
+**Sponsorluk ücreti (en küçük kategori, taban 28.000 ₺ + takipçi başına 0,9 ₺).**
+
+| Takipçi | Ücret |
+|---|---|
+| 5.000 | 32.500 ₺ |
+| 20.000 | 46.000 ₺ |
+| 100.000 | 118.000 ₺ |
+| 500.000 | 478.000 ₺ |
+
+**Yeni hesaba taşınan kitle:** mevcut toplamın **%8'i**, en çok **40.000**, en az 2.000 toplam kitle şartıyla. Ölçüm: 120.000 takipçili oyuncu yeni hesabı **9.600** takipçiyle açıyor.
+
+**Sözünü tutmamanın bedeli:** süresi dolan sponsorlukta ödeme yok, mutluluk **−4**, o platformdaki kitlenin **%4'ü** gidiyor.
+
+**Karar soruları:**
+1. Medya işlerinin ücretleri doğru mu? Reklam yüzü olmak 45 aylık asgari ücret; bu, oyunun en büyük tek seferlik gelirlerinden biri.
+2. Ün eşikleri (40-70) doğru mu? Ün en fazla kaç olabiliyorsa (şu an 100) buna göre yedi iş yeterli mi, yoksa daha çok ara basamak mı gerekir?
+3. Medya işleri **yılda bir kez** yapılabiliyor ve teklif kendiliğinden gelmiyor; oyuncu bölüme girip seçiyor. Teklif olarak da gelmeli mi (sponsorluk gibi)?
+4. Sponsorluk eşiği **5.000** ve ücret takipçi başına **0,9 ₺**. Türkiye'deki gerçek aralık geniş; oyun ortayı mı tutmalı, yoksa kategoriye göre çok mu değişmeli?
+5. Sözünü tutmamanın bedeli kitlenin **%4'ü**. Az mı, çok mu? Tekrarlanırsa birikmeli mi?
+6. Yeni hesaba taşınan **%8** ve tavan **40.000** doğru mu?
+7. Ünlüye **yılda iki** temas doğru mu, yoksa üç mü olmalı?
+8. "Ünlüler ve tanıdıklar" bölümüne ileride başka kimler girmeli? (Örn. iş dünyasından tanışıklıklar, eski öğretmenler.)
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

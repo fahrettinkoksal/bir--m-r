@@ -76,10 +76,11 @@ enum RelationType {
         return RelationGroup.okul;
       case RelationType.arkadas:
       case RelationType.isArkadasi:
-      // Ünlü, aile ya da okul bağı değil; tanışıklık olarak arkadaşlar
-      // bölümünde listelenir.
-      case RelationType.unlu:
         return RelationGroup.arkadaslar;
+      // Faho'nun Q-115 kararı: geri takip eden ünlü arkadaş listesine
+      // karışmaz, **kendi başlığında** durur (D-106).
+      case RelationType.unlu:
+        return RelationGroup.tanidiklar;
       case RelationType.sevgili:
       case RelationType.eskiSevgili:
       case RelationType.eskiEs:
@@ -104,7 +105,9 @@ enum RelationGroup {
   genis('Geniş aile'),
   okul('Okul'),
   arkadaslar('Arkadaşlar'),
-  romantik('İlişkiler');
+  romantik('İlişkiler'),
+  // Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  tanidiklar('Ünlüler ve tanıdıklar');
 
   const RelationGroup(this.title);
 

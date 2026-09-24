@@ -31,6 +31,9 @@ import 'fertility_page.dart';
 import 'license_pages.dart';
 import 'pets_page.dart';
 import 'social_pages.dart';
+import '../../../text/turkish_text.dart';
+import '../../../domain/social/media_opportunities.dart';
+import 'media_page.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
 ///
@@ -63,6 +66,7 @@ enum _ActivityPage {
   gozMuayenesi,
   estetik,
   sosyalMedya,
+  medya,
   kumarhane,
   piyango,
   finger,
@@ -198,6 +202,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         );
       case _ActivityPage.sosyalMedya:
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.medya:
+        return MediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.piyango:
@@ -447,10 +453,22 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             title: 'Sosyal medya',
             subtitle: state.socialAccounts.isEmpty
                 ? 'Hesap açmak isteğe bağlı'
-                : '${state.totalFollowers} takipçi',
+                : '${trNumber(state.totalFollowers)} takipçi',
             icon: Icons.public_outlined,
             accent: BirOmurAccents.cini,
             onTap: () => _go(_ActivityPage.sosyalMedya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Ün ve Medya Fırsatları yalnızca Ün eşiği geçilince görünür
+        // (D-103); altındaki oyuncuya çalışmayan kapı gösterilmez.
+        if (MediaOpportunities.sectionVisible(state)) ...<Widget>[
+          MenuRow(
+            title: 'Ün ve Medya Fırsatları',
+            subtitle: 'Ünün ${state.player.fame}; seni arayanlar var',
+            icon: Icons.stars_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => _go(_ActivityPage.medya),
           ),
           const SizedBox(height: 10),
         ],

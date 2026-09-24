@@ -75,5 +75,21 @@ Faho'nun onayı bekleniyor.
 ## Faho'nun işaret ettiği, henüz yapılmayanlar
 - Şu an bu başlıkta bekleyen madde yok. Yeni istekler geldikçe buraya yazılır.
 
+## Boşanmanın hukuki tarafı — bilerek ertelendi (Q-118 kararı)
+Faho'nun kararı: boşanmada **mal paylaşımı kalsın** (D-075), ama
+**nafaka ve velayet şimdilik yazılmasın**. Bunlar oyunun bugünkü
+kapsamının dışında ve doğru yapılması ayrı bir tasarım turu ister:
+- **Nafaka:** yoksulluk nafakası ile iştirak nafakası ayrı şeylerdir;
+  süre, tutar ve kesilme koşulları gelir ve velayete bağlıdır. Yıllık
+  bir cüzdan kesintisi olarak eklemek kolay ama yanlış olur.
+- **Velayet:** çocuğun hangi ebeveynde kalacağı, görüşme düzeni ve bunun
+  hane/yakınlık sistemine etkisi. Oyunda hane ve yakınlık zaten var, bu
+  yüzden yarım bir velayet sistemi mevcut kuralları bozar.
+- **Mal rejimi sözleşmesi, katkı payı, değer artış payı:** D-075 bunları
+  bilerek dışarıda bırakıyor.
+Bunlar yazılana kadar oyun bir hukuk simülasyonu olduğunu **iddia
+etmiyor**; boşanma bildirimi hangi kalemin kime gittiğini yazıyor ve
+orada duruyor.
+
 ## İleride değerlendirilir
 Premium şehir seçimi; tarihsel takvim/doğum yılı temelli içerik; diğer para kazanma yöntemleri. Şimdilik uygulama kapsamına dahil değiller.

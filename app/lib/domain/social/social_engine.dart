@@ -70,6 +70,24 @@ class SocialEngine {
   /// prototypeOnly: Ünün açılması için gereken toplam takipçi.
   static const int prototypeOnlyFameThreshold = 500;
 
+  /// prototypeOnly: tanınan biri yeni hesap açarken mevcut kitlesinin
+  /// bu oranı kadarıyla başlar (D-105).
+  ///
+  /// Faho bildirdi: "500 bin takipçim varken yeni hesap açınca sıfırdan
+  /// başlıyorum." Gerçekte tanınan biri yeni bir platforma açıldığında
+  /// kitlesinin bir kısmı peşinden gelir. Tamamı gelmez: her platformun
+  /// kendi kitlesi vardır.
+  static const double prototypeOnlyCarryOverRatio = 0.08;
+
+  /// prototypeOnly: taşınan kitlenin üst sınırı.
+  ///
+  /// Çok büyük hesapların yeni platformu tek hamlede doldurması
+  /// engellenir; büyüme yine emek ister.
+  static const int prototypeOnlyCarryOverCap = 40000;
+
+  /// prototypeOnly: taşınmanın işlemesi için gereken en az toplam kitle.
+  static const int prototypeOnlyCarryOverThreshold = 2000;
+
   /// prototypeOnly: Ün hesabında kaç takipçi bir Ün puanına denk gelir.
   static const int prototypeOnlyFollowersPerFame = 900;
 
@@ -156,13 +174,24 @@ class SocialEngine {
     final InteractionAvailability check = accountAvailability(state, platform);
     if (!check.isAllowed) return _blocked(state, check.reason!);
 
-    final String metin =
-        '${platform.label} hesabı açtın. '
-        'İlk ${platform.audienceWord}lerin tanıdıkların olacak.';
+    // Tanınan biri sıfırdan başlamaz (D-105): mevcut kitlesinin bir
+    // kısmı yeni platforma taşınır. Tanınmayan oyuncu sıfırdan başlar.
+    final int tasinan = _carryOverFollowers(state);
+
+    final String metin = tasinan > 0
+        ? '${platform.label} hesabı açtın. Seni tanıyanların bir kısmı '
+            'hemen buldu: ${trNumber(tasinan)} ${platform.audienceWord} '
+            'ile başlıyorsun.'
+        : '${platform.label} hesabı açtın. '
+            'İlk ${platform.audienceWord}lerin tanıdıkların olacak.';
     final GameState next = state.copyWith(
       socialAccounts: List<SocialAccount>.unmodifiable(<SocialAccount>[
         ...state.socialAccounts,
-        SocialAccount(platform: platform, createdAtAge: state.player.age),
+        SocialAccount(
+          platform: platform,
+          createdAtAge: state.player.age,
+          followers: tasinan,
+        ),
       ]),
     );
     return SocialResult(
@@ -309,7 +338,7 @@ class SocialEngine {
       kayitli = _log(
         kayitli,
         '${e.key.label} tarafında da fark edildin: '
-        '${e.value} ${e.key.audienceWord} kazandın.',
+        '${trNumber(e.value)} ${e.key.audienceWord} kazandın.',
       );
     }
     if (kazanc > 0) {
@@ -401,6 +430,7 @@ class SocialEngine {
     int newAge,
   ) {
     final List<String> satirlar = <String>[];
+    final List<SponsorDeal> dusen = <SponsorDeal>[];
     final List<SponsorDeal> guncel = state.sponsorDeals
         .map((SponsorDeal d) {
           if (!d.isOpen) return d;
@@ -408,21 +438,49 @@ class SocialEngine {
               SocialIncome.prototypeOnlyDealDeadline) {
             return d;
           }
-          satirlar.add(
-            '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma düştü '
-            've ödeme olmadı.',
-          );
+          dusen.add(d);
           return d.copyWith(expired: true);
         })
         .toList(growable: false);
 
-    if (satirlar.isEmpty) return (state: state, logTexts: satirlar);
-    return (
-      state: state.copyWith(
-        sponsorDeals: List<SponsorDeal>.unmodifiable(guncel),
-      ),
-      logTexts: satirlar,
+    if (dusen.isEmpty) return (state: state, logTexts: satirlar);
+
+    GameState sonraki = state.copyWith(
+      sponsorDeals: List<SponsorDeal>.unmodifiable(guncel),
     );
+
+    // Sözünü tutmamanın bir bedeli vardır (D-104). Marka küser, konu
+    // kitleye yansır: takipçi kaybı **gerçekten** uygulanır ve yalnızca
+    // uygulanan kadar yazılır.
+    for (final SponsorDeal d in dusen) {
+      final SocialAccount? hesap = sonraki.accountFor(d.platform);
+      final int kayip = hesap == null
+          ? 0
+          : (hesap.followers * SocialIncome.prototypeOnlyBrokenDealFollowerLoss)
+              .round();
+      if (kayip > 0) {
+        sonraki = _applyFollowerDeltas(sonraki, <SocialPlatform, int>{
+          d.platform: -kayip,
+        });
+      }
+      sonraki = sonraki.copyWith(
+        player: sonraki.player.copyWith(
+          stats: sonraki.player.stats.gain(
+            happiness: SocialIncome.prototypeOnlyBrokenDealHappiness,
+          ),
+        ),
+      );
+      satirlar.add(
+        kayip > 0
+            ? '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
+                'düştü, ödeme olmadı ve konu kitlene yansıdı: '
+                '${trNumber(kayip)} ${d.platform.audienceWord} kaybettin.'
+            : '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
+                'düştü ve ödeme olmadı.',
+      );
+    }
+
+    return (state: sonraki, logTexts: satirlar);
   }
 
   /// Takipçi değişimi.
@@ -486,6 +544,18 @@ class SocialEngine {
       sonuc[hesap.platform] = pay;
     }
     return sonuc;
+  }
+
+  /// Yeni açılan hesaba taşınan kitle (D-105).
+  ///
+  /// Uydurma değildir: **mevcut** toplam kitleden hesaplanır. Kitlesi
+  /// olmayan oyuncuda sıfırdır.
+  int _carryOverFollowers(GameState state) {
+    final int toplam = state.totalFollowers;
+    if (toplam < prototypeOnlyCarryOverThreshold) return 0;
+    return (toplam * prototypeOnlyCarryOverRatio)
+        .round()
+        .clamp(0, prototypeOnlyCarryOverCap);
   }
 
   /// Verilen platformlara takipçi ekler/çıkarır.
@@ -630,11 +700,11 @@ class SocialEngine {
   String _postText(SocialContent content, int delta, SocialPlatform platform) {
     if (delta > 0) {
       return '${content.label}: paylaşım ilgi gördü, '
-          '$delta ${platform.audienceWord} kazandın.';
+          '${trNumber(delta)} ${platform.audienceWord} kazandın.';
     }
     if (delta < 0) {
       return '${content.label}: beklediğin olmadı, '
-          '${-delta} ${platform.audienceWord} kaybettin.';
+          '${trNumber(-delta)} ${platform.audienceWord} kaybettin.';
     }
     return '${content.label}: kimse fark etmedi.';
   }

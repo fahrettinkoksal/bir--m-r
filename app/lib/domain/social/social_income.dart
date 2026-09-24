@@ -6,6 +6,7 @@ import '../generation/random_util.dart';
 import '../models/game_state.dart';
 import '../models/social_account.dart';
 import '../models/sponsorship.dart';
+import '../../text/turkish_text.dart';
 
 /// Sosyal medya geliri ve sponsorluk teklifleri (Paket 10).
 ///
@@ -50,8 +51,24 @@ abstract final class SocialIncome {
   /// prototypeOnly: kabul edilen sponsorluğun tamamlanması için süre (yıl).
   static const int prototypeOnlyDealDeadline = 2;
 
-  /// prototypeOnly: sponsorluk ücretinin kitleye göre büyüme katsayısı.
-  static const double prototypeOnlyFeePerFollower = 3.2;
+  /// prototypeOnly: sponsorluk ücretinin takipçi başına payı (₺).
+  ///
+  /// Eskiden ücret, kategorinin eşiğini **aşan** takipçi başına 3,2 ₺
+  /// üzerinden hesaplanıyordu; eşiği yeni geçen hesapla eşiğin çok
+  /// üstündeki hesap arasındaki fark anlamsız biçimde büyüyordu.
+  /// Faho'nun kararı: ücret **kitlenin tamamıyla** ölçeklensin.
+  /// Türkiye'de 2026'da bir gönderi için kabaca takipçi başına 1 ₺
+  /// civarı konuşuluyor; oyunda 0,9 ₺ kullanılıyor (D-104).
+  static const double prototypeOnlyFeePerFollower = 0.9;
+
+  /// prototypeOnly: süresi dolan sponsorluğun kitleye maliyeti.
+  ///
+  /// Kabul edip paylaşmamanın bir bedeli vardır: marka küser, takipçi
+  /// güveni sarsılır (D-104).
+  static const double prototypeOnlyBrokenDealFollowerLoss = 0.04;
+
+  /// prototypeOnly: süresi dolan sponsorluğun mutluluğa etkisi.
+  static const int prototypeOnlyBrokenDealHappiness = -4;
 
   // -------------------------------------------------------------------
   // Paylaşım geliri
@@ -100,7 +117,7 @@ abstract final class SocialIncome {
     required int amount,
   }) =>
       '${platform.label}: "${content.label}" paylaşımın '
-      '$followerDelta ${platform.audienceWord} getirdi; '
+      '${trNumber(followerDelta)} ${platform.audienceWord} getirdi; '
       'içerik gelirinden kazandın.';
 
   // -------------------------------------------------------------------
@@ -145,11 +162,14 @@ abstract final class SocialIncome {
     );
   }
 
-  /// prototypeOnly: teklif ücreti — taban + kitleye bağlı pay.
+  /// prototypeOnly: teklif ücreti — taban + **bütün kitleye** bağlı pay.
+  ///
+  /// Ölçek (en küçük kategori, taban 28.000 ₺):
+  /// 5.000 → 32.500 ₺ · 20.000 → 46.000 ₺ · 100.000 → 118.000 ₺ ·
+  /// 500.000 → 478.000 ₺ (D-104).
   static int feeFor(SponsorCategory category, SocialAccount account) {
-    final int fazla =
-        (account.followers - category.minFollowers).clamp(0, 1 << 30);
-    return category.baseFee + (fazla * prototypeOnlyFeePerFollower).round();
+    final int kitle = account.followers.clamp(0, 1 << 30);
+    return category.baseFee + (kitle * prototypeOnlyFeePerFollower).round();
   }
 
   /// Teklifin ekranda gösterilecek metni.

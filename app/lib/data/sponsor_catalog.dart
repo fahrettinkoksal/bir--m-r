@@ -12,6 +12,14 @@ import 'package:flutter/foundation.dart';
 import '../domain/models/social_account.dart';
 import 'social_catalog.dart';
 
+/// Sponsorluk teklifi için gereken **en az takipçi** (D-104).
+///
+/// Faho'nun kararı: bir marka, platformda **5.000 takipçisi olmayan**
+/// birine sponsorluk teklif etmez. Eşik kategoriye değil, platformun
+/// kendisine bakar: iki platformda 3.000'er takipçi, tek platformda
+/// 5.000 yerine geçmez.
+const int kSponsorMinFollowers = 5000;
+
 @immutable
 class SponsorCategory {
   const SponsorCategory({
@@ -41,8 +49,12 @@ class SponsorCategory {
   final Set<SocialPlatform> platforms;
 
   /// Bu kategori [account] için uygun mu?
+  ///
+  /// Kategori kendi eşiğini koyabilir ama **hiçbiri** genel alt sınırın
+  /// (D-104) altına inemez.
   bool fits(SocialAccount account) =>
       account.followers >= minFollowers &&
+      account.followers >= kSponsorMinFollowers &&
       (platforms.isEmpty || platforms.contains(account.platform));
 }
 
@@ -51,14 +63,14 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     id: 'mahalle_kafe',
     label: 'mahalle kafe zinciri',
     pitch: 'Yeni şubelerini duyurmak istiyorlar; bir paylaşım yeterli.',
-    minFollowers: 1000,
+    minFollowers: 5000,
     baseFee: 28000,
   ),
   SponsorCategory(
     id: 'kirtasiye',
     label: 'kırtasiye markası',
     pitch: 'Okul sezonu için bir paylaşım istiyorlar.',
-    minFollowers: 1500,
+    minFollowers: 6000,
     baseFee: 38000,
   ),
   SponsorCategory(
@@ -67,7 +79,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     pitch:
         'Antrenman içeriğinin yanına küçük bir tanıtım koymanı '
         'istiyorlar.',
-    minFollowers: 3000,
+    minFollowers: 9000,
     baseFee: 70000,
     platforms: <SocialPlatform>{
       SocialPlatform.video,
@@ -87,7 +99,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     id: 'kitap_kulubu',
     label: 'çevrim içi kitap kulübü',
     pitch: 'Okuduğun bir kitaptan söz etmeni istiyorlar.',
-    minFollowers: 2500,
+    minFollowers: 7500,
     baseFee: 50000,
     platforms: <SocialPlatform>{SocialPlatform.mikroblog, SocialPlatform.video},
   ),
@@ -95,7 +107,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     id: 'yerel_lezzet',
     label: 'yerel lezzet markası',
     pitch: 'Ürünlerini kısa bir videoda denemeni istiyorlar.',
-    minFollowers: 4000,
+    minFollowers: 12000,
     baseFee: 85000,
     platforms: <SocialPlatform>{SocialPlatform.kisaVideo, SocialPlatform.foto},
   ),
@@ -103,7 +115,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     id: 'elektronik',
     label: 'elektronik mağazası',
     pitch: 'Bir ürünlerini tanıtmanı istiyorlar.',
-    minFollowers: 8000,
+    minFollowers: 20000,
     baseFee: 190000,
   ),
 ];

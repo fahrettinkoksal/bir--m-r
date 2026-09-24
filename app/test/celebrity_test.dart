@@ -158,15 +158,24 @@ void main() {
       expect(engel, contains(c.platform.label));
     });
 
-    test('yılda bir kez yazılabilir', () {
+    test('yılda en fazla iki kez yazılabilir (Q-115 kararı)', () {
       final Celebrity c = unlu('tolga_esmer');
       GameState s = hesapli(hayat(), c.platform, 5000);
-      s = CelebrityEngine.contact(
-        state: s,
-        celebrity: c,
-        action: CelebrityAction.mesaj,
-        rng: Random(1),
-      ).state;
+
+      // İlk iki deneme açık.
+      for (int i = 0; i < CelebrityEngine.prototypeOnlyTriesPerAge; i++) {
+        expect(
+          CelebrityEngine.blockReason(s, c, CelebrityAction.mesaj),
+          isEmpty,
+          reason: '${i + 1}. deneme açık olmalı',
+        );
+        s = CelebrityEngine.contact(
+          state: s,
+          celebrity: c,
+          action: CelebrityAction.mesaj,
+          rng: Random(i + 1),
+        ).state;
+      }
 
       final String engel = CelebrityEngine.blockReason(
         s,
@@ -174,7 +183,7 @@ void main() {
         CelebrityAction.mesaj,
       );
       expect(engel, isNotEmpty);
-      expect(engel, contains('bir kez'));
+      expect(engel, contains('yıllık hakkın'));
     });
 
     test('yaş ilerleyince yeniden yazılabilir', () {

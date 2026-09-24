@@ -79,7 +79,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       title: 'Sosyal medya',
       subtitle: state.socialAccounts.isEmpty
           ? 'Hesap açmak zorunda değilsin.'
-          : 'Toplam ${state.totalFollowers} takipçi',
+          : 'Toplam ${trNumber(state.totalFollowers)} takipçi',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
@@ -197,7 +197,8 @@ class _PlatformCard extends StatelessWidget {
                   ),
                   if (hesapVar)
                     Text(
-                      '${account!.followers} ${platform.audienceWord}',
+                      '${trNumber(account!.followers)} '
+                      '${platform.audienceWord}',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -272,7 +273,7 @@ class _PlatformPage extends StatelessWidget {
       accent: BirOmurAccents.cini,
       title: platform.label,
       subtitle:
-          '${account.followers} ${platform.audienceWord} · '
+          '${trNumber(account.followers)} ${platform.audienceWord} · '
           '${account.postCount} paylaşım · '
           'bu yıl kalan: ${controller.remainingSocialPosts(platform)}',
       backLabel: 'Sosyal medya',
@@ -392,7 +393,8 @@ class _PlatformPage extends StatelessWidget {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 '${post.age} yaşında · ${post.label} · '
-                '${post.followerDelta >= 0 ? '+' : ''}${post.followerDelta} '
+                '${post.followerDelta >= 0 ? '+' : ''}'
+                '${trNumber(post.followerDelta)} '
                 '${platform.audienceWord}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,

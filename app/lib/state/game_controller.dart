@@ -21,6 +21,8 @@ import '../domain/generation/life_progression.dart';
 import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
+import '../data/media_catalog.dart';
+import '../domain/social/media_opportunities.dart';
 import '../domain/interaction/child_naming.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
@@ -1960,6 +1962,37 @@ class GameController extends ChangeNotifier {
     _state = Notices.dismissFirst(current);
     _autoSave();
     notifyListeners();
+  }
+
+  // -------------------------------------------------------------------
+  // Ün ve Medya Fırsatları (D-103)
+  // -------------------------------------------------------------------
+
+  /// Medya fırsatları bölümü görünür mü? (Ün eşiği)
+  bool get mediaSectionVisible {
+    final GameState? current = _state;
+    return current != null && MediaOpportunities.sectionVisible(current);
+  }
+
+  /// Bu medya işi şu an yapılabilir mi? Yapılamıyorsa sebebi yazılır.
+  InteractionAvailability mediaAvailability(MediaOpportunity job) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return MediaOpportunities.availability(current, job);
+  }
+
+  /// Medya işini kabul eder; sonuç **gerçekten uygulanan** değişimlerdir.
+  MediaResult? acceptMediaJob(MediaOpportunity job) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final MediaResult sonuc = MediaOpportunities.accept(current, job);
+    if (!sonuc.applied) return sonuc;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc;
   }
 
   /// Yeni doğan bebeğe isim verilebilir mi? (D-095)
