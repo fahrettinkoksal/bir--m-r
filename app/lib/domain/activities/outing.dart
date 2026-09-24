@@ -60,6 +60,105 @@ abstract final class Outing {
   /// prototypeOnly: birlikte gitmenin bağa kattığı puan.
   static const int prototypeOnlyCompanionBond = 6;
 
+  /// Yoldaşın bu programdan aldığı keyif (D-074).
+  ///
+  /// Eylemin kendi mutluluk değerine dayanır: parkta yürümek ile konsere
+  /// gitmek aynı keyfi vermez. Tekrar eğrisi oyuncununkiyle **aynıdır**;
+  /// aynı kişiyle üst üste çıkarak keyif kasılamaz.
+  static int companionHappinessGain(ActivityAction action, double oran) {
+    final int taban = action.happiness > 0
+        ? action.happiness
+        : prototypeOnlyCompanionHappiness;
+    final int deger = (taban * oran).round();
+    return deger < 0 ? 0 : deger;
+  }
+
+  /// prototypeOnly: keyfi bu değerin altındaki kişi daveti reddedebilir.
+  static const int prototypeOnlyLowHappiness = 35;
+
+  /// prototypeOnly: keyfi düşük kişinin ret ihtimalinin tabanı.
+  static const double prototypeOnlyRefusalBase = 0.5;
+
+  /// prototypeOnly: aynı yıl aynı programa tekrar davet edilmenin ret
+  /// ihtimaline kattığı pay.
+  static const double prototypeOnlyRepeatRefusal = 0.18;
+
+  /// prototypeOnly: ret ihtimalinin üst sınırı.
+  ///
+  /// Kapı hiçbir zaman tamamen kapanmaz: küskün biri bile bazen gelir.
+  static const double prototypeOnlyMaxRefusal = 0.75;
+
+  /// Bu davetin reddedilme ihtimali (D-059).
+  ///
+  /// Üç şey birlikte bakılır: **yakınlık** (ilişkinin gücü), **keyif**
+  /// (kişinin şu anki hâli) ve **aynı yıl kaç kez çağrıldığı**. Bağı da
+  /// keyfi de yerinde olan, bu yıl ilk kez çağrılan kişi reddetmez.
+  static double refusalChance(
+    GameState state,
+    ActivityAction action,
+    Person person,
+  ) {
+    double sans = 0;
+
+    // Yakınlık: 50'nin altında her puan küçük bir tereddüt ekler.
+    if (person.bond < 50) sans += (50 - person.bond) * 0.008;
+
+    // Keyif: düşük keyifli kişi programa gelmek istemez.
+    if (person.happiness < prototypeOnlyLowHappiness) {
+      final double eksik =
+          (prototypeOnlyLowHappiness - person.happiness) / prototypeOnlyLowHappiness;
+      sans += prototypeOnlyRefusalBase * eksik;
+    }
+
+    // Aynı yıl tekrar tekrar aynı programa çağrılmak.
+    sans += timesWith(state, action, person) * prototypeOnlyRepeatRefusal;
+
+    return sans.clamp(0.0, prototypeOnlyMaxRefusal);
+  }
+
+  /// Ret gerekçesi; davet kabul edilecekse `null`.
+  ///
+  /// Gerekçe **gerçek sebebi** söyler: uydurma bir mazeret üretilmez.
+  ///
+  /// **Rastgele sayı kullanılmaz, bilerek.** Kararın tohumu oyuncunun
+  /// yaşı, kişinin kimliği ve eylemden türetilir; böylece oyuncu aynı
+  /// daveti art arda tıklayıp "evet" çıkana kadar zar atamaz. Karar yıl
+  /// içinde sabittir, yeni yaşta yeniden verilir.
+  static String? refusalReason(
+    GameState state,
+    ActivityAction action,
+    Person person,
+  ) {
+    final double sans = refusalChance(state, action, person);
+    if (sans <= 0) return null;
+    if (_kararTohumu(state, action, person) >= sans) return null;
+
+    if (person.happiness < prototypeOnlyLowHappiness) {
+      return '${person.firstName} bugün pek havasında değil; '
+          'bu sefer gelmek istemedi.';
+    }
+    if (timesWith(state, action, person) > 0) {
+      return '${person.firstName} bu yıl yeterince gittiğinizi söyledi.';
+    }
+    return '${person.firstName} bu sefer gelemeyeceğini söyledi.';
+  }
+
+  /// Davet kararının 0-1 arası sabit tohumu.
+  static double _kararTohumu(
+    GameState state,
+    ActivityAction action,
+    Person person,
+  ) {
+    final String anahtar =
+        '${state.player.id}|${state.player.age}|${person.id}|${action.id}';
+    // Basit ve kararlı bir karma; kriptografik olması gerekmiyor.
+    int h = 0x811c9dc5;
+    for (final int kod in anahtar.codeUnits) {
+      h = (h ^ kod) * 0x01000193 & 0x7fffffff;
+    }
+    return (h % 100000) / 100000.0;
+  }
+
   /// Aynı yıl aynı kişiyle tekrar çıkıldıkça azalan kazanç eğrisi.
   static const List<double> prototypeOnlyRepeatCurve = <double>[1.0, 0.6, 0.3];
 

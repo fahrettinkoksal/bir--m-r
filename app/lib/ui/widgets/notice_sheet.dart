@@ -7,6 +7,7 @@ import '../../domain/life/notices.dart';
 import '../../domain/models/pending_notice.dart';
 import '../../state/game_scope.dart';
 import '../../text/turkish_text.dart';
+import 'effect_chips.dart';
 import 'kilim_divider.dart';
 
 /// Önemli haber penceresi (D-050).
@@ -116,6 +117,15 @@ class _NoticeSheetState extends State<NoticeSheet> {
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: theme.colorScheme.error,
                 ),
+              ),
+            ],
+            // Gerçekten uygulanmış değişimler (D-074): "bana 5, kızıma 5"
+            // gibi bir sonucun iki satırı da burada görünür.
+            if (_sonuc == null && notice.effects.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 12),
+              EffectChips(
+                key: const Key('notice_effects'),
+                effects: notice.effects,
               ),
             ],
             if (_sonuc == null && notice.kind == NoticeKind.miras) ...<Widget>[
@@ -230,6 +240,12 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.confirmation_number_rounded;
       case NoticeKind.hayvan:
         return Icons.pets_rounded;
+      case NoticeKind.aktivite:
+        return Icons.celebration_rounded;
+      case NoticeKind.bosanma:
+        return Icons.heart_broken_outlined;
+      case NoticeKind.saglik:
+        return Icons.monitor_heart_outlined;
     }
   }
 }

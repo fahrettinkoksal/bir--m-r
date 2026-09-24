@@ -12,7 +12,9 @@ import '../../data/hobby_catalog.dart';
 import '../hobby/hobby_tracker.dart';
 import '../life/upkeep_tracker.dart';
 import '../models/interaction.dart';
+import '../life/notices.dart';
 import '../models/life_log.dart';
+import '../models/pending_notice.dart';
 import '../models/player_character.dart';
 import '../models/stats.dart';
 import '../../text/turkish_text.dart';
@@ -110,6 +112,10 @@ class ActivityEngine {
       final InteractionAvailability birlikte =
           Outing.companionAvailability(state, action, companion);
       if (!birlikte.isAllowed) return _blocked(state, birlikte.reason!);
+      // Davet edilen kişi reddedebilir (D-059). Ret **para götürmez** ve
+      // yıllık kotayı harcamaz: gerçekleşmeyen program ücretlendirilmez.
+      final String? ret = Outing.refusalReason(state, action, companion);
+      if (ret != null) return _blocked(state, ret);
     }
 
     // Faho'nun Q-108 kararı: iki kişi gidiyorsa iki kişilik gerçek
@@ -173,12 +179,14 @@ class ActivityEngine {
     if (companion != null) {
       next = _applyCompanion(state, next, action, companion, rng);
       final String sahne = next.log.last.text;
+      final List<AppliedEffect> etkiler = diffAppliedEffects(state, next);
+      next = _announce(state, next, action, sahne, etkiler, companion);
       return ActivityResult(
         state: next,
         outcome: ActivityOutcome(
           applied: true,
           text: sahne,
-          effects: diffAppliedEffects(state, next),
+          effects: etkiler,
           noNewBenefit: factor == 0,
         ),
       );
@@ -190,15 +198,61 @@ class ActivityEngine {
         : '${action.label} tamamlandı.'
             '${odenecek > 0 ? ' ${trMoney(odenecek)} ödedin.' : ''}';
 
+    GameState sonDurum = _log(next, metin);
+    final List<AppliedEffect> etkiler = diffAppliedEffects(state, sonDurum);
+    sonDurum = _announce(state, sonDurum, action, metin, etkiler, null);
+
     return ActivityResult(
-      state: _log(next, metin),
+      state: sonDurum,
       outcome: ActivityOutcome(
         applied: true,
         text: metin,
-        effects: diffAppliedEffects(state, next),
+        effects: etkiler,
         noNewBenefit: factor == 0,
       ),
     );
+  }
+
+  /// Eğlence programlarının sonucunu **ekran bildirimi** olarak kuyruğa
+  /// alır (D-074).
+  ///
+  /// Faho'nun isteği: "parka git, sinemaya git dediğimde bildirim olarak
+  /// karşıma çıksın; bana 5, kızıma 5 mutluluk, onunla aramdaki ilişki
+  /// iyileşti gibi". Bildirimde yazan her satır durumun öncesi ile
+  /// sonrası karşılaştırılarak üretilir; gerçekleşmemiş bir kazanç
+  /// yazamaz.
+  ///
+  /// Yalnızca **Eğlence** mekânı bildirim üretir: berberde saç kestirmek
+  /// ekranı kesmeye değmez, kartındaki sonuç yeterlidir.
+  GameState _announce(
+    GameState before,
+    GameState after,
+    ActivityAction action,
+    String metin,
+    List<AppliedEffect> effects,
+    Person? companion,
+  ) {
+    if (action.venue != ActivityVenue.eglence) return after;
+    if (effects.isEmpty) return after;
+
+    // Kimlik tekrar sayısını da içerir: aynı yıl ikinci kez gidildiğinde
+    // bildirim "zaten kuyrukta" diye düşmez.
+    final int sira = timesDone(after, action);
+    final String kimlik = companion == null
+        ? 'aktivite-${action.id}-${after.player.age}-$sira'
+        : 'aktivite-${action.id}-${companion.id}-${after.player.age}-$sira';
+
+    return Notices.enqueue(after, <PendingNotice>[
+      PendingNotice(
+        id: kimlik,
+        kind: NoticeKind.aktivite,
+        age: after.player.age,
+        title: action.label,
+        text: metin,
+        personId: companion?.id,
+        effects: List<AppliedEffect>.unmodifiable(effects),
+      ),
+    ]);
   }
 
   /// Birlikte gidilen eylemin kişiye bağlı sonuçları.
@@ -231,7 +285,13 @@ class ActivityEngine {
       ),
       people: after.people
           .map((Person p) => p.id == companion.id
-              ? p.copyWith(bond: (p.bond + bagArtisi).clamp(0, 100))
+              ? p.copyWith(
+                  bond: (p.bond + bagArtisi).clamp(0, 100),
+                  // Yoldaş da keyif alır (D-074). Oyuncunun aldığı payla
+                  // aynı eğriden gelir; kimse tek taraflı eğlenmez.
+                  happiness: p.happiness +
+                      Outing.companionHappinessGain(action, oran),
+                )
               : p)
           .toList(growable: false),
       interactionCounts: Map<String, int>.unmodifiable(<String, int>{

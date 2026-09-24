@@ -1,6 +1,11 @@
 import 'dart:math';
 
+import '../effects/effect_diff.dart';
+import 'divorce_settlement.dart';
+import '../life/notices.dart';
 import '../models/game_state.dart';
+import '../models/owned_item.dart';
+import '../models/pending_notice.dart';
 import '../models/pending_wedding.dart';
 import '../../data/wedding_catalog.dart';
 import '../models/life_log.dart';
@@ -81,8 +86,10 @@ class MarriageEngine {
 
   /// prototypeOnly: boşanmada eşe kalan nakit payı.
   ///
-  /// Eşya ve mülk paylaşımı **yoktur**; nasıl yapılacağı karar kuyruğunda
-  /// (Q-063). Uydurma bir mal paylaşımı uygulanmaz.
+  /// Eşya ve mülk paylaşımı artık **vardır** (D-075): evlilik içinde
+  /// satın alınarak edinilen eşyalar `DivorceSettlement` ile bölünür.
+  /// Nakit payı bu orandadır; nakdin ne kadarının evlilik içinde
+  /// biriktiği izlenmediği için oran olduğu gibi bırakıldı (Q-118).
   static const double prototypeOnlyDivorceShare = 0.25;
 
   /// prototypeOnly: evlilik ve boşanmanın mutluluk etkisi.
@@ -422,38 +429,57 @@ class MarriageEngine {
 
   /// Boşanır: eş **aynı kimlikle** eski eş olur.
   ///
-  /// Nakdin bir bölümü eşe kalır; eşya ve mülk paylaşımı uygulanmaz
-  /// (Q-063). Çocuklar oyuncunun hanesinde kalır — velayet kuralları da
-  /// karar kuyruğundadır.
+  /// Nakdin bir bölümü ve evlilik içinde edinilen malların yarısına
+  /// yakını eşe kalır (D-075). Sonuç yalnızca günlüğe yazılmaz, ekranda
+  /// **bildirim** olarak gösterilir. Çocuklar oyuncunun hanesinde kalır;
+  /// velayet kuralları karar kuyruğundadır.
   FamilyResult divorce(GameState state) {
     final String engel = divorceBlockReason(state);
     if (engel.isNotEmpty) return _blocked(state, engel);
 
     final Person spouse = state.spouse!;
-    final int pay =
-        (state.player.wallet * prototypeOnlyDivorceShare).round().clamp(
-              0,
-              state.player.wallet,
-            );
+
+    // Mal paylaşımı (D-075): evlilik içinde **satın alınarak** edinilen
+    // eşyalar bölünür; evlilikten önceki, miras ve hediye eşya kişisel
+    // maldır ve paylaşıma girmez.
+    final DivorceSettlement paylasim = DivorceSettlement.compute(
+      items: state.items,
+      marriedAtAge: state.marriage!.marriedAtAge,
+      wallet: state.player.wallet,
+      cashShare: prototypeOnlyDivorceShare,
+    );
+    final int pay = paylasim.cashToSpouse;
+    final Set<String> gidenler = <String>{
+      for (final OwnedItem i in paylasim.toSpouse) i.id,
+    };
 
     final List<Person> people = state.people
         .map((Person p) => p.id == spouse.id
             ? p.copyWith(
                 relation: RelationType.eskiEs,
                 inPlayerHousehold: false,
+                // Eşe geçen eşyalar onun kaydında görünür; kaybolmaz.
+                estate: List<String>.unmodifiable(<String>[
+                  ...p.estate,
+                  for (final OwnedItem i in paylasim.toSpouse) i.type.name,
+                ]),
               )
             : p)
         .toList(growable: false);
 
-    final String metin = pay > 0
-        ? '${spouse.fullName} ile boşandın. Anlaşma gereği ${trMoney(pay)} '
-            'cüzdanından çıktı; kaydı İlişkiler bölümünde eski eş olarak '
-            'kalıyor.'
-        : '${spouse.fullName} ile boşandın. Kaydı İlişkiler bölümünde '
-            'eski eş olarak kalıyor.';
+    final List<String> satirlar = paylasim.summaryLines(spouse.firstName);
+    final String metin = <String>[
+      '${spouse.fullName} ile boşandın.',
+      if (pay > 0) 'Anlaşma gereği ${trMoney(pay)} cüzdanından çıktı.',
+      ...satirlar,
+      'Kaydı İlişkiler bölümünde eski eş olarak kalıyor.',
+    ].join(' ');
 
     final GameState next = state.copyWith(
       people: List<Person>.unmodifiable(people),
+      items: List<OwnedItem>.unmodifiable(
+        state.items.where((OwnedItem i) => !gidenler.contains(i.id)),
+      ),
       player: state.player.copyWith(
         wallet: state.player.wallet - pay,
         stats: state.player.stats.copyWith(
@@ -475,8 +501,31 @@ class MarriageEngine {
       },
     );
 
+    GameState sonDurum = _log(next, metin, LogCategory.aile);
+
+    // Boşanma ekranda bildirilir (D-075): günlüğe satır atmak yetmiyordu.
+    // Satırlar durumun öncesi/sonrası farkından değil, uygulanan
+    // paylaşımdan gelir; yazan her kalem gerçekten el değiştirmiştir.
+    sonDurum = Notices.enqueue(sonDurum, <PendingNotice>[
+      PendingNotice(
+        id: 'bosanma-${spouse.id}-${state.player.age}',
+        kind: NoticeKind.bosanma,
+        age: state.player.age,
+        title: 'Boşandınız',
+        text: metin,
+        personId: spouse.id,
+        money: pay,
+        itemNames: List<String>.unmodifiable(
+          paylasim.toSpouse.map((OwnedItem i) => i.type.name),
+        ),
+        happinessDelta: sonDurum.player.stats.happiness -
+            state.player.stats.happiness,
+        effects: diffAppliedEffects(state, sonDurum),
+      ),
+    ]);
+
     return FamilyResult(
-      state: _log(next, metin, LogCategory.aile),
+      state: sonDurum,
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }

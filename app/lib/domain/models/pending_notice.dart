@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'applied_effect.dart';
+
 /// Bildirim türü (D-050).
 enum NoticeKind {
   /// Yakın birinin vefatı.
@@ -29,6 +31,17 @@ enum NoticeKind {
 
   /// Evcil hayvanın vefatı (Paket 40).
   hayvan,
+
+  /// Birlikte yapılan bir program ve kime ne kattığı (D-074).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  aktivite,
+
+  /// Boşanma ve mal paylaşımı (D-075).
+  bosanma,
+
+  /// Sağlık işleminin sonucu: muayene, aşı, tahlil, kontrol (D-076).
+  saglik,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).
@@ -50,6 +63,7 @@ class PendingNotice {
     this.itemNames = const <String>[],
     this.happinessDelta = 0,
     this.funeralCost = 0,
+    this.effects = const <AppliedEffect>[],
   });
 
   /// Bildirimin benzersiz kimliği (ör. `olum-anne-1`).
@@ -81,4 +95,13 @@ class PendingNotice {
 
   /// Cenaze bildiriminde önerilen katkı tutarı.
   final int funeralCost;
+
+  /// Bildirimde satır satır gösterilecek **gerçekten uygulanmış**
+  /// değişimler.
+  ///
+  /// Durumun öncesi ile sonrası karşılaştırılarak üretilir
+  /// (`diffAppliedEffects`), bu yüzden burada gerçekleşmemiş bir kazanç
+  /// yazamaz. "Bana 5, kızıma 5" gibi bir sonucun iki satırı da buradan
+  /// gelir.
+  final List<AppliedEffect> effects;
 }

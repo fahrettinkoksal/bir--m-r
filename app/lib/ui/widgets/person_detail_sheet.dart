@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/item_catalog.dart';
 import '../../data/wedding_catalog.dart';
+import '../../domain/activities/outing.dart';
 import '../../domain/interaction/intimacy.dart';
 
 import '../../domain/interaction/bond_decay.dart';
@@ -400,6 +401,37 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 },
               ),
               if (person.isAlive) ...<Widget>[
+                const SizedBox(height: 16),
+                // Keyif, yakınlıktan ayrı bir şeydir (D-074): yakınlık
+                // ilişkinin gücü, keyif kişinin şu anki hâlidir. Keyfi
+                // düşük kişi davetleri reddedebilir, bu yüzden oyuncu
+                // bunu görebilmeli.
+                Text('Keyfi', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    key: const Key('person_happiness'),
+                    value: person.happiness / 100,
+                    minHeight: 8,
+                    backgroundColor:
+                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+                if (person.happiness < Outing.prototypeOnlyLowHappiness)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '${person.firstName} bu aralar keyifsiz; '
+                      'davetlerini geri çevirebilir.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 16),
                 Text('Yakınlık', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 6),

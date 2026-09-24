@@ -26,6 +26,7 @@ class Person {
     required this.employment,
     required this.wealth,
     required this.bond,
+    this.happiness = prototypeOnlyDefaultHappiness,
     this.occupation,
     this.schoolLevel,
     this.schoolTie,
@@ -153,6 +154,19 @@ class Person {
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
   final int bond;
 
+  /// Kişinin **kendi** keyfi (D-074).
+  ///
+  /// Bağdan ayrıdır: yakınlık ilişkinin gücüdür, keyif o kişinin şu anki
+  /// hâlidir. Birlikte geçirilen iyi bir gün ikisini de yükseltir; uzun
+  /// ilgisizlik ikisini de düşürür. Oyuncu bunu kişi kartında görür ve
+  /// keyfi düşük kişi daveti **gerçekten reddedebilir** (D-059).
+  ///
+  /// Eski kayıtlarda yoktur; nötr başlangıçla okunur.
+  final int happiness;
+
+  /// prototypeOnly: yeni kişinin ve eski kayıttan okunan kişinin keyfi.
+  static const int prototypeOnlyDefaultHappiness = 60;
+
   String get fullName => '$firstName $lastName';
 
   /// Çalışma durumunun ekranda gösterilecek hâli. Uydurma meslek üretmez.
@@ -195,6 +209,7 @@ class Person {
     Object? occupation = _unset,
     Object? wealth = _unset,
     int? bond,
+    int? happiness,
     Object? schoolLevel = _unset,
     Object? schoolTie = _unset,
     Object? schoolId = _unset,
@@ -218,6 +233,7 @@ class Person {
       occupation: occupation == _unset ? this.occupation : occupation as String?,
       wealth: wealth == _unset ? this.wealth : wealth as WealthTier?,
       bond: bond ?? this.bond,
+      happiness: (happiness ?? this.happiness).clamp(0, 100),
       schoolLevel: schoolLevel == _unset
           ? this.schoolLevel
           : schoolLevel as SchoolLevel?,

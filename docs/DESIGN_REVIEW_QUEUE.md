@@ -2667,5 +2667,23 @@ Faho istedi: "erkek kullanıcılarının ihtimal dahilinde 30 yaşından sonra s
 
 ---
 
+### Q-118 — Boşanmada mal paylaşımı, nafaka ve davet reddi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-074, D-075 · Q-063'ün yerini alır · `app/lib/domain/interaction/divorce_settlement.dart`, `app/lib/domain/activities/outing.dart` · Test: `app/test/activity_notice_test.dart`
+
+Faho istedi: "boşandığımda ... mal varlığından şu kadar ona gitti, ev ona gitti vb gibi yazmalı" ve "parka git dediğimde bildirim olarak karşıma çıksın ... bana 5, kızıma 5 mutluluk".
+
+**Şu an kodda olan:** Evlilik içinde **satın alınarak** edinilen eşyalar paylaşılıyor; evlilikten önceki, miras ve hediye eşya kişisel mal sayılıp paylaşıma girmiyor. Bölünemeyen eşyalar değere göre dengeli dağıtılıyor, eşitlikte oyuncu alıyor. Nakit payı **%25**'te kaldı. Sonuç ekranda bildirim olarak gösteriliyor.
+
+**Karar soruları:**
+1. **Nafaka yok.** Eklenecek mi? Eklenirse yıllık bir gider mi olsun, tek seferlik mi?
+2. Nakit payı **%25**; edinilmiş mal rejiminin mantığına göre evlilik içinde biriken nakdin yarısı olmalıydı. Nakdin ne kadarının evlilik içinde biriktiğini izlemiyoruz. İzlensin mi, yoksa %25 sabit mi kalsın?
+3. **Oturulan ev** paylaşımda ayrıcalıklı olmalı mı? Şu an tek ev evlilik içinde alındıysa bir tarafa gidiyor ve oyuncu evsiz kalabiliyor.
+4. **Velayet** yok: çocuklar oyuncunun hanesinde kalıyor. Ayrı bir kural gerekli mi?
+5. Aracın, evin ve diğer eşyanın **satın alma fiyatı** üzerinden bölünüyor; yıpranma hesaba katılmıyor. Yeterli mi?
+6. **Davet reddi:** keyfi düşük kişi daveti geri çevirebiliyor, ret ihtimalinin tavanı **%75**. Bu tavan doğru mu? Ret gerekçesinin metinleri yeterince yumuşak mı?
+7. Kişilerin **keyfi** şu an yalnızca birlikte yapılan programlardan yükseliyor ve her yıl nötre kayıyor. Başka neler keyfi etkilemeli — hediye, kavga, oyuncunun başarısı, kendi hayatındaki olaylar?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

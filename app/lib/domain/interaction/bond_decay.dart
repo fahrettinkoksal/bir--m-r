@@ -158,6 +158,10 @@ abstract final class BondDecay {
         Map<String, int>.from(state.lastInteractionAge);
 
     final List<Person> guncel = state.people.map((Person p) {
+      // Keyif her yıl kendi nötrüne doğru bir adım kayar (D-074). Böylece
+      // keyif **birikimli bir puan değil, o anki hâl** olur: güzel bir
+      // yılın etkisi zamanla söner, kötü bir yıl kalıcı ceza olmaz.
+      p = _keyifKay(p);
       if (!decays(state, p)) return p;
       if (!temas.containsKey(p.id)) {
         // Sayaç bu yıl başlıyor; bu yıl kayıp yok.
@@ -179,6 +183,20 @@ abstract final class BondDecay {
       people: List<Person>.unmodifiable(guncel),
       weakened: List<String>.unmodifiable(zayiflayan),
       lastInteractionAge: Map<String, int>.unmodifiable(temas),
+    );
+  }
+
+  /// prototypeOnly: keyfin her yıl nötre doğru kaydığı adım.
+  static const int prototypeOnlyHappinessDrift = 1;
+
+  /// Kişinin keyfini bir adım nötre yaklaştırır.
+  static Person _keyifKay(Person p) {
+    if (!p.isAlive) return p;
+    const int notr = Person.prototypeOnlyDefaultHappiness;
+    if (p.happiness == notr) return p;
+    final int yon = p.happiness > notr ? -1 : 1;
+    return p.copyWith(
+      happiness: p.happiness + yon * prototypeOnlyHappinessDrift,
     );
   }
 

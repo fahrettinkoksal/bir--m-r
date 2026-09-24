@@ -8,6 +8,7 @@
 /// ileride enum sırası değişse bile eski kayıtlar bozulmaz.
 library;
 
+import '../../domain/models/applied_effect.dart';
 import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
 import '../../domain/models/blackjack_game.dart';
@@ -164,6 +165,14 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'itemNames': n.itemNames,
             'happinessDelta': n.happinessDelta,
             'funeralCost': n.funeralCost,
+            'effects': <Map<String, Object?>>[
+              for (final AppliedEffect e in n.effects)
+                <String, Object?>{
+                  'label': e.label,
+                  'delta': e.delta,
+                  'unit': e.unit,
+                },
+            ],
           },
       ],
       'marriage': state.marriage == null
@@ -350,6 +359,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'occupation': p.occupation,
       'wealth': p.wealth?.name,
       'bond': p.bond,
+      'happiness': p.happiness,
       'schoolLevel': p.schoolLevel?.name,
       'schoolTie': p.schoolTie?.name,
       'schoolId': p.schoolId,
@@ -1176,6 +1186,18 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
       happinessDelta:
           json['happinessDelta'] == null ? 0 : _int(json, 'happinessDelta'),
       funeralCost: json['funeralCost'] == null ? 0 : _int(json, 'funeralCost'),
+      // Eski kayıtlarda etki satırı yoktur; boş liste okunur.
+      effects: List<AppliedEffect>.unmodifiable(
+        _optionalRawList(json, 'effects')
+            .map((Object? e) => _decodeAppliedEffect(_asMap(e, 'effect')))
+            .toList(growable: false),
+      ),
+    );
+
+AppliedEffect _decodeAppliedEffect(Map<String, Object?> json) => AppliedEffect(
+      label: _string(json, 'label'),
+      delta: _intOrNull(json, 'delta'),
+      unit: json['unit'] == null ? '' : _string(json, 'unit'),
     );
 
 MilitaryState _decodeMilitary(Map<String, Object?> json) => MilitaryState(
@@ -1253,6 +1275,12 @@ Person _decodePerson(Map<String, Object?> json) {
       'person.wealth',
     ),
     bond: _int(json, 'bond'),
+    // Eski kayıtlarda kişinin kendi keyfi yoktur; nötr okunur (D-074).
+    happiness: _intOr(
+      json,
+      'happiness',
+      Person.prototypeOnlyDefaultHappiness,
+    ),
     // Eski kayıtlarda doğurganlık bilgisi yoktur; **kısır sayılmaz**.
     // Geriye dönük gizli bir engel yazılmaz.
     infertile: _boolOr(json, 'infertile'),
