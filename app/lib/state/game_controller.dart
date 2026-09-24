@@ -10,6 +10,9 @@ import '../data/job_catalog.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
+import '../domain/social/celebrity_engine.dart';
+import '../domain/models/celebrity_contact.dart';
+import '../data/celebrity_catalog.dart';
 import '../data/university_catalog.dart';
 
 import '../domain/generation/generation_continuation.dart';
@@ -1157,6 +1160,56 @@ class GameController extends ChangeNotifier {
   SocialOutcome? postContent(SocialContent content) => _runSocial(
     (GameState current) => _social.post(current, content, _random),
   );
+
+  // =====================================================================
+  // Ünlülerle temas (Faho'nun isteği)
+  // =====================================================================
+
+  /// Bu platformda temas kurulabilecek ünlüler.
+  List<Celebrity> celebritiesOnPlatform(SocialPlatform platform) =>
+      celebritiesOn(platform);
+
+  /// Bu ünlüyle daha önce kurulmuş temasın kaydı.
+  CelebrityContact? celebrityContact(Celebrity celebrity) =>
+      _state?.contactWith(celebrity.id);
+
+  InteractionAvailability celebrityAvailability(
+    Celebrity celebrity,
+    CelebrityAction action,
+  ) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat yok.');
+    }
+    return CelebrityEngine.availability(current, celebrity, action);
+  }
+
+  /// Karşılık bulma ihtimalinin yüzdesi; oyuncudan gizlenmez.
+  int celebrityChancePercent(Celebrity celebrity, CelebrityAction action) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return CelebrityEngine.displayChancePercent(current, celebrity, action);
+  }
+
+  /// Ünlüyle temas kurar.
+  CelebrityResult? contactCelebrity(
+    Celebrity celebrity,
+    CelebrityAction action,
+  ) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final CelebrityResult sonuc = CelebrityEngine.contact(
+      state: current,
+      celebrity: celebrity,
+      action: action,
+      rng: _random,
+    );
+    if (!sonuc.applied) return sonuc;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc;
+  }
 
   SocialOutcome? _runSocial(SocialResult Function(GameState) islem) {
     final GameState? current = _state;

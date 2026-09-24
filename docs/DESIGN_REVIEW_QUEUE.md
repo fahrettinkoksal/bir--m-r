@@ -2584,5 +2584,42 @@ Dallar birbirini dışlıyor ve hiçbir dal "doğru" diye işaretlenmiyor: emane
 
 ---
 
+### Q-115 — Ünlülerle temas ve TikTok
+
+**Durum:** Faho iki şey istedi: sosyal medyaya TikTok eklenmesi ve "ünlü ile diyaloğa gir gibi bir şey". İkisi de **kodlandı**; sayısal değerler `prototypeOnly` ve **onay bekliyor.** Kod: `lib/data/celebrity_catalog.dart`, `lib/domain/social/celebrity_engine.dart`, `lib/data/social_catalog.dart`. İlgili: Q-112, D-063.
+
+**Yapılanlar.** Dördüncü platform olarak TikTok eklendi (dört özgün içerik). Ünlüler kurgusaldır; gerçek kişilerin adı, hesabı ya da sözü kullanılmaz. Oyuncu bir ünlüye **yorum yapabilir, mesaj atabilir ya da iş birliği teklif edebilir**. Karşılık garanti değildir.
+
+| Kural | Değer |
+|---|---|
+| Bir ünlüye yılda kaç kez yazılabilir | 1 |
+| Eylem çarpanı (yorum / mesaj / iş birliği) | 0,55 / 1,0 / 0,45 |
+| Karizmanın katkısı | %25 |
+| Ünün katkısı | %30 |
+| Her ısrarlı denemenin cezası | −%12 (en fazla dörtte bire iner) |
+| En yüksek karşılık ihtimali | %85 (asla %100 değil) |
+| İş birliği için gereken en az Ün | 25 |
+| Ünlünün kitlesinden geçen pay | %0,16 |
+| Sonuç çarpanı (beğendi / cevap / geri takip / iş birliği) | 0,25 / 0,60 / 1,30 / 2,40 |
+| Ters cevabın kitleye kaybı | %5 |
+
+**Tasarım kararları (kodlanmış hâliyle):**
+- Ünlü **kendiliğinden İlişkiler ekranına girmez**. Yalnızca **geri takip ettiğinde** kalıcı bir kişi kaydı açılır; o an gerçekten bir bağ kurulmuştur. Yeni bir bağ türü eklendi: `RelationType.unlu`.
+- Karşılıksız denemeler **günlüğe yazılmaz**; günlük dolmasın diye.
+- Israrcı olup hâlâ karşılık alamayan oyuncu, nadiren **alenen ters cevap** alabilir ve takipçi kaybeder.
+- Ünlüyle gündelik hayatta vakit geçirilmez; etkileşim listesinde yalnızca sohbet açıktır.
+
+**Karar soruları:**
+1. Ulaşılabilirlik sayıları doğru mu? Şu an en küçük isim %45, en büyük isim %9 tabanla başlıyor.
+2. Yılda **bir** temas az mı? Oyuncu bir ünlüye ancak yılda bir yazabiliyor.
+3. **Ters cevap** kalsın mı? Israr edip karşılık alamayan oyuncunun alenen paylaşılması sert bir sonuç; oyunun tonuna uyuyor mu?
+4. Geri takip eden ünlünün İlişkiler ekranında **Arkadaşlar** bölümünde listelenmesi doğru mu, yoksa ayrı bir "Tanıdıklar / Ünlüler" başlığı mı olmalı?
+5. İş birliği ücreti ünlünün takipçi sayısının %6'sı (2026 ₺). En büyük isimle iş birliği ~450.000 ₺ getiriyor — bu, bir yıllık ortalama maaşın yarısı. Fazla mı?
+6. Ünlü sayısı **on bir**. Yeterli mi, yoksa her platformda daha fazla isim mi olsun?
+7. Ünlülerle ilgili **olay** yazılmalı mı? Şu an yalnızca oyuncunun başlattığı temas var; ünlünün kendiliğinden yazması ya da bir olayda görünmesi yok.
+8. TikTok içeriklerinin karakteri (yüksek erişim, yüksek kayıp riski) doğru mu?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

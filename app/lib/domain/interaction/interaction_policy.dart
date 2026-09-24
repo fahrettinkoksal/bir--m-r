@@ -70,6 +70,11 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.sinifArkadasi:
       return _temel.union(<InteractionKind>{InteractionKind.hediyeVer});
 
+    // Ünlüyle gündelik hayatta vakit geçirilmez; temas sosyal medya
+    // üzerinden kurulur. Burada yalnızca sohbet anlamlıdır.
+    case RelationType.unlu:
+      return const <InteractionKind>{InteractionKind.sohbet};
+
     case RelationType.ogretmen:
       return _ogretmen;
 

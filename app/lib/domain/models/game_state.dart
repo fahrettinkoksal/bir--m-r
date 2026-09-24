@@ -26,6 +26,7 @@ import 'pending_wedding.dart';
 import 'pregnancy.dart';
 import 'pending_license_exam.dart';
 import 'person.dart';
+import 'celebrity_contact.dart';
 import 'social_account.dart';
 import 'sponsorship.dart';
 import 'trip.dart';
@@ -73,6 +74,7 @@ class GameState {
     this.fingerDeck = const <FingerProfile>[],
     this.fingerMatches = const <FingerProfile>[],
     this.socialAccounts = const <SocialAccount>[],
+    this.celebrityContacts = const <CelebrityContact>[],
     this.sponsorOffer,
     this.sponsorDeals = const <SponsorDeal>[],
     this.trips = const <TripRecord>[],
@@ -330,6 +332,20 @@ class GameState {
   /// Açılmış sosyal medya hesapları. Hesap açmak **zorunlu değildir**;
   /// hesabı olmayan platformdan paylaşım veya olay gelmez.
   final List<SocialAccount> socialAccounts;
+
+  /// Ünlülerle kurulan temasların kalıcı kaydı (Faho'nun isteği).
+  ///
+  /// Yalnızca **gerçekten denenmiş** ünlüler burada durur; katalogdaki
+  /// her ünlü kayda girmez.
+  final List<CelebrityContact> celebrityContacts;
+
+  /// Bu ünlüyle daha önce temas kuruldu mu?
+  CelebrityContact? contactWith(String celebrityId) {
+    for (final CelebrityContact c in celebrityContacts) {
+      if (c.celebrityId == celebrityId) return c;
+    }
+    return null;
+  }
 
   /// Yanıt bekleyen sponsorluk teklifi (Paket 10).
   ///
@@ -712,6 +728,7 @@ class GameState {
     List<FingerProfile>? fingerDeck,
     List<FingerProfile>? fingerMatches,
     List<SocialAccount>? socialAccounts,
+    List<CelebrityContact>? celebrityContacts,
     Object? sponsorOffer = _unsetEvent,
     List<SponsorDeal>? sponsorDeals,
     List<TripRecord>? trips,
@@ -784,6 +801,7 @@ class GameState {
       fingerDeck: fingerDeck ?? this.fingerDeck,
       fingerMatches: fingerMatches ?? this.fingerMatches,
       socialAccounts: socialAccounts ?? this.socialAccounts,
+      celebrityContacts: celebrityContacts ?? this.celebrityContacts,
       sponsorOffer: sponsorOffer == _unsetEvent
           ? this.sponsorOffer
           : sponsorOffer as SponsorOffer?,

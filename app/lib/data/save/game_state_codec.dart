@@ -39,6 +39,7 @@ import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/person_development.dart';
 import '../../domain/models/playing_card.dart';
+import '../../domain/models/celebrity_contact.dart';
 import '../../domain/models/social_account.dart';
 import '../../domain/models/sponsorship.dart';
 import '../../domain/models/trip.dart';
@@ -100,6 +101,11 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           state.fingerMatches.map(_encodeFinger).toList(growable: false),
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
+      // Ünlülerle kurulan temaslar. Eski kayıtlarda bu alan yoktur;
+      // okuma tarafı isteğe bağlı okuduğu için kayıt sürümü değişmedi.
+      'celebrityContacts': state.celebrityContacts
+          .map(_encodeCelebrityContact)
+          .toList(growable: false),
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
       'sponsorOffer': state.sponsorOffer == null
           ? null
@@ -737,6 +743,12 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeTicket(_asMap(e, 'lotteryTickets[]')))
           .toList(growable: false),
     ),
+    celebrityContacts: List<CelebrityContact>.unmodifiable(
+      _optionalRawList(json, 'celebrityContacts')
+          .map((Object? e) =>
+              _decodeCelebrityContact(_asMap(e, 'celebrityContacts[]')))
+          .toList(growable: false),
+    ),
     fingerDeck: List<FingerProfile>.unmodifiable(
       _optionalRawList(json, 'fingerDeck')
           .map((Object? e) => _decodeFinger(_asMap(e, 'fingerDeck[]')))
@@ -959,6 +971,28 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
           ),
   );
 }
+
+Map<String, Object?> _encodeCelebrityContact(CelebrityContact c) =>
+    <String, Object?>{
+      'celebrityId': c.celebrityId,
+      'attempts': c.attempts,
+      'replied': c.replied,
+      'followsBack': c.followsBack,
+      'collaborated': c.collaborated,
+      'firstContactAge': c.firstContactAge,
+      'lastContactAge': c.lastContactAge,
+    };
+
+CelebrityContact _decodeCelebrityContact(Map<String, Object?> json) =>
+    CelebrityContact(
+      celebrityId: _string(json, 'celebrityId'),
+      attempts: _intOr(json, 'attempts', 0),
+      replied: _boolOr(json, 'replied', varsayilan: false),
+      followsBack: _boolOr(json, 'followsBack', varsayilan: false),
+      collaborated: _boolOr(json, 'collaborated', varsayilan: false),
+      firstContactAge: _intOrNull(json, 'firstContactAge'),
+      lastContactAge: _intOrNull(json, 'lastContactAge'),
+    );
 
 SocialAccount _decodeAccount(Map<String, Object?> json) => SocialAccount(
       platform: _enumByName(
