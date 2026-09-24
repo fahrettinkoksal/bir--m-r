@@ -924,14 +924,44 @@ ifadeler düzeltildi; sonraki büyük sistem önerileri
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` dosyasında **yalnızca öneri** olarak
 toplandı.
 
+**Paket 49 — Faho'nun oyun içi geri bildirimleri.** PC'de oynanan
+sürümden çıkan altı madde işlendi:
+
+1. **Askerlik hatası düzeltildi.** Kadın oyuncu 18 yaşından sonra
+   "Askerlik · Yapılmadı" satırını görüyordu; zorunlu askerliği yokken
+   yerine getirilmemiş bir yükümlülük varmış gibi okunuyordu. Kayıt
+   değişmedi (değişseydi gönüllü subaylık yolu da kapanırdı), görüntü
+   düzeltildi.
+2. **Kalıcı pasif seçenek denetimi.** Açık düğmelerin hepsi gerekçesini
+   zaten yazıyordu; asıl risk ekranda durup hiç açılamayan içerikti.
+   `test/content_reachability_test.dart` bunu kalıcı hâle getirdi.
+3. **Dövüş sanatı eğitimi.** Karate siyah kuşağı 110 ders ve yılda en
+   fazla 20 ders demek: 110 ayrı tıklama. "Yılı çalış" eylemi eklendi;
+   ücret, yıllık sınır ve basamak eşikleri **birebir aynı**. Süre kararı
+   Q-111'de.
+4. **Sosyal medya.** Bir platformdaki kazanç artık diğer açık hesaplara
+   yansıyor ve kitlesi büyük hesap yıl geçtikçe kendiliğinden büyüyor.
+   Durgun hesabın erimesi **Claude'un eklediği varsayımdır**, Q-112'de
+   onaya sunuldu.
+5. **Meslek kataloğu 9'dan 15'e.** Aşçı, kuaför, muhasebeci, manken,
+   yazar, müzisyen. Mankenlik görünüşle, yazarlık okuma hobisiyle,
+   müzisyenlik müzik hobisiyle açılıyor. Sayılar Q-113'te.
+6. **Olay zincirleri.** Yıllara yayılan 4 zincir, 17 olay, 8 dal.
+   Sayılar Q-114'te.
+
+Bu pakette **hiçbir sayısal denge değeri kendi başına değiştirilmedi**;
+hepsi `prototypeOnly` kaldı ve kararlar Q-111…Q-114 olarak kuyrukta.
+
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1539 geçti, 15 atlandı, 0 başarısız**. Atlananların
+`flutter test` **1599 geçti, 15 atlandı, 0 başarısız**. Atlananların
 tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleridir.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
-**CI:** GitHub Actions hesabın ödeme/harcama limiti nedeniyle hiçbir işi
-başlatmıyor; bu turda da yeni Windows sürümü veya Android APK
-üretilemedi. Engelin sebebi kod ya da iş akışı yapılandırması değildir.
+**CI:** Depo public yapıldıktan sonra GitHub Actions normal çalışıyor.
+Windows test sürümü `claude/paket54-belge-denetimi` dalının
+`6f3a852` commitinden üretildi ve artifact olarak yüklendi. Android APK
+bu ortamda hâlâ üretilemiyor (Android SDK indirilemiyor).
+**Hiçbir sürüm gerçek Windows ya da Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

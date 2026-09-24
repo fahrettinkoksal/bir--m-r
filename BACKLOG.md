@@ -58,6 +58,20 @@ Faho'nun onayı bekleniyor.
 - ~~**İkinci evlilik.**~~ **Yapıldı (Paket 36).** Boşanan ya da dul kalan yeniden evlenebiliyor; eski kayıt engellenerek değil, geçmişe taşınarak korunuyor. Sorular — **Q-104**.
 - ~~**Hamilelik süreci.**~~ **Yapıldı (Paket 26).** Korunmadan yakınlaşma artık hamilelik başlatıyor, bebek bir sonraki yaşta doğuyor. Sorular — Q-094.
 
+## Faho'nun PC'de oynarken işaret ettikleri — yapılanlar (Paket 49)
+- ~~**Kadına zorunlu askerlik görünüyor.**~~ **Düzeltildi.** Kayıt değil,
+  görüntü hatasıydı; gönüllü subaylık yolu korundu.
+- ~~**Bazı seçimler pasif kalıyor.**~~ **Denetlendi.** Kapalı düğmelerin
+  hepsi gerekçesini yazıyor; kalıcı ulaşılmaz içeriğe karşı test eklendi.
+- ~~**Karate vb. eğitimler çok uzun.**~~ **Tıklama yükü düzeltildi**
+  ("Yılı çalış"). Süre kararı — **Q-111**.
+- ~~**Sosyal medyada çapraz ve yıllık takipçi artışı.**~~ **Kodlandı.**
+  Sayılar ve durgunluk kuralı — **Q-112**.
+- ~~**Mankenlik, yazarlık vb. meslekler.**~~ **Kodlandı** (katalog 9 → 15).
+  Maaşlar ve eşikler — **Q-113**.
+- ~~**Olay zincirlerini derinleştir.**~~ **Kodlandı** (4 zincir, 17 olay).
+  Sayılar — **Q-114**.
+
 ## Faho'nun işaret ettiği, henüz yapılmayanlar
 - Şu an bu başlıkta bekleyen madde yok. Yeni istekler geldikçe buraya yazılır.
 
