@@ -316,6 +316,16 @@ class EducationPath {
   /// Üniversiteye gitmeme kararının hikâye izi.
   static const String universiteyeGitmediFlag = 'universiteye_gitmedi';
 
+  /// Lise bittikten sonraki yol **hâlâ seçilmeyi bekliyor mu?** (D-111)
+  ///
+  /// `EducationState.awaitingAfterSchoolChoice` yalnızca eğitim kaydına
+  /// bakabildiği için "üniversiteye gitmemeye karar verdim" durumunu
+  /// göremez; o karar bir hikâye izidir. Karar verilmiş bir oyuncuyu
+  /// sonsuza dek bekletmemek için kilit bu yardımcıdan okunur.
+  static bool needsAfterSchoolChoice(GameState state) =>
+      state.education.awaitingAfterSchoolChoice &&
+      !state.storyFlags.contains(universiteyeGitmediFlag);
+
   EducationResult _blocked(GameState state, String reason) => EducationResult(
         state: state,
         outcome: EducationOutcome(applied: false, text: reason),

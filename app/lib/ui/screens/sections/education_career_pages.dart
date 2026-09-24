@@ -96,12 +96,23 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
             },
             child: const Text('Üniversiteye gitmeyeceğim, iş arayacağım'),
           ),
-        ] else
+        ] else ...<Widget>[
           const InfoPanel(
             icon: Icons.info_outline,
-            text: 'Üniversite başvurusu için uygun bir durum yok. '
-                'İş aramaya Meslek bölümünden devam edebilirsin.',
+            text: 'Puanınla başvurabileceğin bir bölüm yok. '
+                'İş hayatına geçmeyi seçebilirsin.',
           ),
+          const SizedBox(height: 10),
+          // Uygun bölüm yokken de bu kapı açık kalmalı: karar verilmeden
+          // yaş alınamadığı için (D-111) kapalı olsaydı oyuncu kilitlenirdi.
+          OutlinedButton(
+            onPressed: () {
+              final String? metin = controller.skipUniversity()?.text;
+              setState(() => _sonuc = metin);
+            },
+            child: const Text('Üniversiteye gitmeyeceğim, iş arayacağım'),
+          ),
+        ],
         if (_sonuc != null) ...<Widget>[
           const SizedBox(height: 12),
           InfoPanel(icon: Icons.campaign_outlined, text: _sonuc!),

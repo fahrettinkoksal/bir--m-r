@@ -37,6 +37,8 @@ class JobType {
     required this.description,
     required this.minAge,
     required this.yearlySalary,
+    this.maxAge,
+    this.maxAgeNote,
     required this.band,
     this.education = JobEducation.yok,
     this.tracks = const <EducationTrack>{},
@@ -55,6 +57,17 @@ class JobType {
   final String name;
   final String description;
   final int minAge;
+
+  /// İşe **girişte** aranan üst yaş sınırı (D-113).
+  ///
+  /// Yalnızca Türkiye'de gerçekten yasal/idari bir üst sınırı olan
+  /// mesleklerde doludur. Çoğu işte üst sınır **yoktur** ve burası boş
+  /// kalır; oyun uydurma bir sınır koymaz. Sınır yalnızca **ilk girişi**
+  /// bağlar: işe girmiş biri yaşı geçince kovulmaz.
+  final int? maxAge;
+
+  /// Üst sınırın dayanağı; ekranda oyuncuya gösterilir.
+  final String? maxAgeNote;
 
   /// Bir oyun yılında cüzdana giren giriş seviyesi tutarı
   /// (₺, 2026 alım gücü).
@@ -541,6 +554,11 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'Polis',
     description: 'Vardiya, tutanak ve her çağrıda bilinmeyen bir kapı.',
     minAge: 21,
+    // POMEM ve PMYO giriş sınavlarında üst yaş sınırı 30'dur (sınavın
+    // yapıldığı yılın 1 Ocak'ı esas alınır). Faho bildirdi: "50 yaşında
+    // polis olmaz".
+    maxAge: 30,
+    maxAgeNote: 'Polis alımlarında (POMEM/PMYO) üst yaş sınırı 30.',
     yearlySalary: 720000,
     band: SalaryBand.ofisUzmanlik,
     education: JobEducation.lise,
@@ -552,6 +570,10 @@ const List<JobType> kJobCatalog = <JobType>[
     name: 'İtfaiyeci',
     description: 'Bekleyiş, siren ve geri dönmeyi herkese borçlu olmak.',
     minAge: 21,
+    // Belediye itfaiye eri alımlarında üst yaş sınırı 30'dur; sebebi
+    // işin gerektirdiği fiziksel parkur.
+    maxAge: 30,
+    maxAgeNote: 'İtfaiye eri alımlarında üst yaş sınırı 30.',
     yearlySalary: 660000,
     band: SalaryBand.ofisUzmanlik,
     education: JobEducation.lise,

@@ -49,7 +49,7 @@ Map<String, int> hayatOyna(int seed, {int maxAge = 95}) {
       c.respondToCrisis(k.crisis!.choices.first.id);
     }
     // Lise alanı seçilmeden yaş atlanmaz (D-094).
-    resolveTrackChoice(c);
+    resolveEducationChoices(c);
     c.ageUp();
   }
   c.dispose();
@@ -138,7 +138,7 @@ void main() {
       int guard = 0;
       while (!c.state!.hasPendingEvent && guard++ < 20) {
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       expect(c.state!.hasPendingEvent, isTrue);

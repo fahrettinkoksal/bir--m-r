@@ -37,6 +37,33 @@ class MartialArtsEngine {
   static const int prototypeOnlyRankHappiness = 6;
   static const int prototypeOnlyRankCharisma = 2;
 
+  /// prototypeOnly: **derslerden** bir yılda kazanılabilecek en çok sağlık
+  /// ve mutluluk puanı (D-115).
+  ///
+  /// Faho bildirdi: "20 dersi birden aldığımda mutluluğum ve sağlığım çok
+  /// fazla artıyor". Ders sayısı sınırlıydı ([kMaxMartialLessonsPerAge] =
+  /// 20) ama **kazancın toplamı** sınırlı değildi: bir yılda ham 40 sağlık
+  /// ve 20 mutluluk alınabiliyordu — yaşlanmanın aldığının kat kat üstü.
+  /// D-100'deki Sağlık Merkezi açığının aynısı.
+  ///
+  /// Kapı kapanmıyor: ders almaya devam edilebilir, basamak yine ilerler.
+  /// Sınırlanan yalnızca bir yılda toplanabilecek **stat** kazancıdır.
+  /// Spor yapmak insanı bir yılda bambaşka biri yapmaz.
+  static const int prototypeOnlyLessonYearlyHealthCap = 4;
+  static const int prototypeOnlyLessonYearlyHappinessCap = 3;
+
+  /// Bu yıl derslerden kazanılan sağlık/mutluluk sayaçlarının anahtarı.
+  static const String lessonHealthCounterId = 'dovus_kazanc_saglik';
+  static const String lessonHappinessCounterId = 'dovus_kazanc_mutluluk';
+
+  /// Bu yıl derslerden kazanılan sağlık puanı.
+  int lessonHealthGained(GameState state) =>
+      state.interactionCount('aktivite', lessonHealthCounterId);
+
+  /// Bu yıl derslerden kazanılan mutluluk puanı.
+  int lessonHappinessGained(GameState state) =>
+      state.interactionCount('aktivite', lessonHappinessCounterId);
+
   /// Bir sanattaki ilerleme (hiç başlanmadıysa sıfır ilerleme döner).
   MartialProgress progressOf(GameState state, MartialArt art) {
     for (final MartialProgress p in state.martialArts) {
@@ -220,9 +247,23 @@ class MartialArtsEngine {
       kayit,
     ];
 
+    // Yıllık tavan **yalnızca derslerin damla kazancına** uygulanır
+    // (D-115). Basamak atlamanın ödülü nadirdir ve hayatta birkaç kez
+    // olur; o tavanın dışındadır.
+    final int saglikHakki =
+        (prototypeOnlyLessonYearlyHealthCap - lessonHealthGained(state))
+            .clamp(0, prototypeOnlyLessonYearlyHealthCap);
+    final int mutlulukHakki =
+        (prototypeOnlyLessonYearlyHappinessCap - lessonHappinessGained(state))
+            .clamp(0, prototypeOnlyLessonYearlyHappinessCap);
+    final int dersSaglik =
+        prototypeOnlyHealthPerLesson.clamp(0, saglikHakki);
+    final int dersMutluluk =
+        prototypeOnlyHappinessPerLesson.clamp(0, mutlulukHakki);
+
     final Stats stats = state.player.stats.gain(
-      health: prototypeOnlyHealthPerLesson + (atladi ? prototypeOnlyRankHealth : 0),
-      happiness: prototypeOnlyHappinessPerLesson + (atladi ? prototypeOnlyRankHappiness : 0),
+      health: dersSaglik + (atladi ? prototypeOnlyRankHealth : 0),
+      happiness: dersMutluluk + (atladi ? prototypeOnlyRankHappiness : 0),
       charisma: (atladi ? prototypeOnlyRankCharisma : 0),
     );
 
@@ -238,6 +279,10 @@ class MartialArtsEngine {
         ...state.interactionCounts,
         GameState.interactionKey('dovus', art.id):
             lessonsThisAge(state, art) + 1,
+        GameState.interactionKey('aktivite', lessonHealthCounterId):
+            lessonHealthGained(state) + dersSaglik,
+        GameState.interactionKey('aktivite', lessonHappinessCounterId):
+            lessonHappinessGained(state) + dersMutluluk,
       }),
     );
 

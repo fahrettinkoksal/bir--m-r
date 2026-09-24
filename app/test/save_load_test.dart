@@ -322,7 +322,7 @@ void main() {
       for (int i = 0; i < 30; i++) {
         if (controller.state!.hasPendingEvent) return controller.state!;
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(controller);
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
       fail('Bekleyen olaylı bir duruma ulaşılamadı');

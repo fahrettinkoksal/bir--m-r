@@ -63,7 +63,7 @@ void main() {
   testWidgets('ölümden sonra yaş ilerlemez', (WidgetTester tester) async {
     await pumpApp(tester, tamamlanmisHayat());
     // Lise alanı seçilmeden yaş atlanmaz (D-094).
-    resolveTrackChoice(controller);
+    resolveEducationChoices(controller);
     controller.ageUp();
     await tester.pumpAndSettle();
     expect(controller.state!.player.age, 81);

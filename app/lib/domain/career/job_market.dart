@@ -106,6 +106,15 @@ class JobMarket {
     if (state.player.age < job.minAge) {
       return '${job.minAge} yaşından itibaren başvurulabilir.';
     }
+    // İşe **girişte** üst yaş sınırı (D-113). Yalnızca gerçekten sınırı
+    // olan mesleklerde doludur; uydurma sınır konmaz. Sınır yalnızca ilk
+    // girişi bağlar — çalışan biri yaşı geçince işini kaybetmez.
+    final int? ustSinir = job.maxAge;
+    if (ustSinir != null && state.player.age > ustSinir) {
+      final String dayanak = job.maxAgeNote ?? 'Üst yaş sınırı $ustSinir.';
+      return '$dayanak Şu an ${state.player.age} yaşındasın; '
+          'bu işe artık başvuramazsın.';
+    }
     if (egitim.isSchoolStudent) {
       return 'Okula devam ederken tam zamanlı işe başvurulmaz.';
     }

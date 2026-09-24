@@ -795,7 +795,7 @@ void main() {
             c.chooseEventOption(c.state!.pendingEvent!.choices.first.id);
           } else {
             // Lise alanı seçilmeden yaş atlanmaz (D-094).
-            resolveTrackChoice(c);
+            resolveEducationChoices(c);
             c.ageUp();
           }
           final List<String> ids =

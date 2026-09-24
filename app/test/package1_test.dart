@@ -174,7 +174,7 @@ void main() {
         for (int i = 0; i < 20; i++) {
           resolvePendingEvents(c);
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
-          resolveTrackChoice(c);
+          resolveEducationChoices(c);
           c.ageUp();
           final List<String> ids =
               c.state!.people.map((Person p) => p.id).toList();
@@ -195,7 +195,7 @@ void main() {
         for (int i = 0; i < 20; i++) {
           resolvePendingEvents(c);
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
-          resolveTrackChoice(c);
+          resolveEducationChoices(c);
           c.ageUp();
           for (final Person p in c.state!.people) {
             if (p.schoolTie != null) {

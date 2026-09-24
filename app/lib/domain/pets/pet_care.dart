@@ -537,10 +537,15 @@ abstract final class PetCare {
             kind: NoticeKind.hayvan,
             age: newAge,
             title: '${guncel.name} hasta',
-            text: '${guncel.name} bu yıl hastalandı. Sağlığı '
-                '${guncel.health}. Aktiviteler → Evcil Hayvanlar\'dan '
+            // Sayı cümle sonunda kalınca "Sağlığı 57. Aktiviteler"
+            // sıra sayısı gibi okunuyordu (Faho bildirdi). Sayı artık
+            // parantez içinde; ardından nokta gelmiyor. Türkçe ek de
+            // kullanılmıyor, çünkü ek son hanenin ünlüsüne göre değişir
+            // (57'ye ama 60'a) ve sayı değişkendir.
+            text: '${guncel.name} bu yıl hastalandı (sağlığı '
+                '${guncel.health}). Aktiviteler → Evcil Hayvanlar\'dan '
                 'veterinere götürebilirsin '
-                '(${tur.vetCost} ₺).',
+                '(${trMoney(tur.vetCost)}).',
           ),
         );
       }

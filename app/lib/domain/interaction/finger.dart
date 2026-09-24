@@ -589,6 +589,132 @@ abstract final class Finger {
   /// prototypeOnly: flörtün sevgiliye dönmesi için gereken yakınlık.
   static const int prototypeOnlyOfficialBond = 60;
 
+  /// Arkadaşa çıkma teklif etmek için gereken en az yakınlık (D-112).
+  ///
+  /// Sevgili olmaktan düşüktür: önce flört, sonra sevgili.
+  static const int prototypeOnlyAskOutBond = 50;
+
+  /// Flörtü sevgiliye çevirmenin **önceden görünen** koşulu (D-112).
+  ///
+  /// Faho bildirdi: "nasıl sevgili olacağım... ilerisi yok". Koşul
+  /// yalnızca düğmeye basınca yazıyordu; artık kart açıldığında da
+  /// okunuyor ve kaç yakınlık gerektiği ile şu anki yakınlık birlikte
+  /// görünüyor (D-063: hiçbir seçenek sebepsiz pasif kalmaz).
+  static InteractionAvailability officialAvailability(
+    GameState state,
+    String personId,
+  ) {
+    final Person? kisi = state.personById(personId);
+    if (kisi == null || kisi.relation != RelationType.flort) {
+      return const InteractionAvailability.blocked('Böyle bir flörtün yok.');
+    }
+    if (!kisi.isAlive) {
+      return const InteractionAvailability.blocked('Artık mümkün değil.');
+    }
+    const Romance romance = Romance();
+    if (romance.hasPartner(state) || state.marriage != null) {
+      return const InteractionAvailability.blocked('Hayatında zaten biri var.');
+    }
+    if (kisi.bond < prototypeOnlyOfficialBond) {
+      return InteractionAvailability.blocked(
+        'Yakınlık $prototypeOnlyOfficialBond olmalı, şu an ${kisi.bond}. '
+        'Birlikte vakit geçirdikçe artar.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Arkadaşa çıkma teklif edilebilir mi? (D-112)
+  ///
+  /// Finger'da tanışılan herkes flört olmuyor: iki taraftan biri
+  /// arkadaşlık arıyorsa arkadaş kalınıyor (D-107). Bu, ilişkinin
+  /// **sonu** değildir; arkadaşlık zamanla başka bir şeye dönüşebilir.
+  static InteractionAvailability askOutAvailability(
+    GameState state,
+    String personId,
+  ) {
+    final Person? kisi = state.personById(personId);
+    if (kisi == null || kisi.relation != RelationType.arkadas) {
+      return const InteractionAvailability.blocked(
+        'Bu kişiye çıkma teklif edilemez.',
+      );
+    }
+    if (!kisi.isAlive) {
+      return const InteractionAvailability.blocked('Artık mümkün değil.');
+    }
+    const Romance romance = Romance();
+    if (romance.hasPartner(state) || state.marriage != null) {
+      return const InteractionAvailability.blocked('Hayatında zaten biri var.');
+    }
+    if (state.player.age < 16 || kisi.age < 16) {
+      return const InteractionAvailability.blocked(
+        'Bu yaşta böyle bir teklif yapılmaz.',
+      );
+    }
+    if (kisi.bond < prototypeOnlyAskOutBond) {
+      return InteractionAvailability.blocked(
+        'Yakınlık $prototypeOnlyAskOutBond olmalı, şu an ${kisi.bond}. '
+        'Birlikte vakit geçirdikçe artar.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Arkadaşa çıkma teklif eder; kabul edilirse flört başlar (D-112).
+  ///
+  /// Teklif **garanti değildir**: karşı taraf yakınlığa bağlı bir olasılıkla
+  /// kabul eder. Reddedilirse ilişki arkadaşlıkta kalır ve yakınlık bir
+  /// miktar düşer — teklif etmek bedelsiz değildir.
+  static FingerResult askOut(GameState state, String personId, Random rng) {
+    final InteractionAvailability uygun = askOutAvailability(state, personId);
+    if (!uygun.isAllowed) {
+      return FingerResult(
+        state: state,
+        outcome: FingerOutcome(applied: false, text: uygun.reason ?? 'Şu an mümkün değil.'),
+      );
+    }
+    final Person kisi = state.personById(personId)!;
+
+    // Kabul şansı yakınlıkla artar: 50 yakınlıkta %40, 100'de %90.
+    final int sans = 40 + ((kisi.bond - prototypeOnlyAskOutBond) * 1).round();
+    final bool kabul = rng.nextInt(100) < sans.clamp(40, 90);
+
+    if (!kabul) {
+      final Person soguk =
+          kisi.copyWith(bond: (kisi.bond - 6).clamp(0, 100));
+      final String ret = '${kisi.firstName} teklifini kibarca geri çevirdi. '
+          'Arkadaş kaldınız.';
+      return FingerResult(
+        state: _replace(state, soguk, ret),
+        outcome: FingerOutcome(applied: true, text: ret, person: soguk),
+      );
+    }
+
+    final Person yeni = kisi.copyWith(relation: RelationType.flort);
+    final String metin = '${kisi.firstName} teklifini kabul etti. '
+        'Artık flört ediyorsunuz.';
+    return FingerResult(
+      state: _replace(state, yeni, metin),
+      outcome: FingerOutcome(applied: true, text: metin, person: yeni),
+    );
+  }
+
+  /// Kişiyi yerine koyar ve hayat günlüğüne satır düşer.
+  static GameState _replace(GameState state, Person kisi, String metin) =>
+      state.copyWith(
+        people: List<Person>.unmodifiable(
+          state.people.map((Person p) => p.id == kisi.id ? kisi : p),
+        ),
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(
+            age: state.player.age,
+            text: metin,
+            category: LogCategory.aile,
+          ),
+        ]),
+      );
+
   // --- İç işler ---------------------------------------------------------
 
   static FingerProfile? _fromDeck(GameState state, String id) {

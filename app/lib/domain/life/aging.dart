@@ -181,6 +181,20 @@ abstract final class StatAging {
   static const int prototypeOnlyAppearanceFloor = Aging.prototypeOnlyFloor;
   static const int prototypeOnlyCharismaFloor = 15;
   static const int prototypeOnlyHealthFloor = 30;
+
+  /// Hastalıktan toparlanmanın aşamayacağı sağlık tavanı (D-116).
+  ///
+  /// Toparlanma hastalığın açtığı çukuru kapatır, **yaşlanmanın kalıcı
+  /// kaybını geri vermez**. Bu yüzden tavan yaşla düşer: yirmi yaşındaki
+  /// beden hastalık sonrası neredeyse tamamen toparlanır, yetmişindeki
+  /// toparlanmaz.
+  static int prototypeOnlyHealthCeilingFor(int age) {
+    if (age <= 30) return 90;
+    if (age <= 45) return 80;
+    if (age <= 60) return 68;
+    if (age <= 70) return 55;
+    return 0; // Bu yaştan sonra toparlanma yok.
+  }
   static const int prototypeOnlyIntelligenceFloor = 30;
   static const int prototypeOnlyHappinessFloor = 25;
 

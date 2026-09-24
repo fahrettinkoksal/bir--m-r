@@ -46,7 +46,7 @@ bool sevgiliOldu(int seed) {
       }
     }
     // Lise alanı seçilmeden yaş atlanmaz (D-094).
-    resolveTrackChoice(c);
+    resolveEducationChoices(c);
     c.ageUp();
   }
   return oldu;

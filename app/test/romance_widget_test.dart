@@ -48,8 +48,12 @@ void main() {
       if (partnerOf(RelationType.sevgili) != null) return true;
       // Hayat bu tohumda kriz yüzünden erken bitebilir.
       if (controller.state!.deceased) return false;
+      // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111): karar
+      // penceresi açıkken "Yaş Al" düğmesi zaten basılamaz.
+      await resolveEducationSheets(tester, controller);
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
+      await resolveEducationSheets(tester, controller);
     }
     return true;
   }

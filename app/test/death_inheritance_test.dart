@@ -371,7 +371,7 @@ void main() {
       final GameController c = GameController(random: Random(1));
       c.debugSetState(state);
       // Lise alanı seçilmeden yaş atlanmaz (D-094).
-      resolveTrackChoice(c);
+      resolveEducationChoices(c);
       c.ageUp();
       expect(c.state!.player.age, yas);
       expect(c.state!.deceased, isTrue);

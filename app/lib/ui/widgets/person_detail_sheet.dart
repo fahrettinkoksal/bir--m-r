@@ -579,24 +579,95 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 ),
               ],
               // Flörtü sevgiliye çevirmek (D-107): kendiliğinden olmaz,
-              // oyuncu ister ve yakınlık yeterli olmalıdır.
+              // oyuncu ister ve yakınlık yeterli olmalıdır. Koşul
+              // **basmadan önce** yazar (D-112): Faho "ilerisi yok" dedi,
+              // çünkü gereken yakınlık ancak düğmeye basınca görünüyordu.
               if (person.isAlive &&
                   person.relation == RelationType.flort) ...<Widget>[
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.tonal(
-                    key: const Key('make_official'),
-                    onPressed: () {
-                      final FingerOutcome? o = GameScope.of(context)
-                          .makeRelationshipOfficial(person.id);
-                      setState(() {
-                        _notice = o?.text;
-                        _lastOutcome = null;
-                      });
-                    },
-                    child: const Text('Sevgili olmayı teklif et'),
-                  ),
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).officialAvailability(person.id);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('make_official'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FingerOutcome? o =
+                                        GameScope.of(context)
+                                            .makeRelationshipOfficial(
+                                                person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Sevgili olmayı teklif et'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(
+                            text: uygun.reason ?? 'Şu an mümkün değil.',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Arkadaşlık bir son değil (D-112). Finger'da tanışılan
+              // herkes flört olmuyor; arkadaş kalan biriyle de zamanla
+              // yol açılabilir.
+              if (person.isAlive &&
+                  person.relation == RelationType.arkadas) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).askOutAvailability(person.id);
+                    // Hayatında biri varken bu kapı hiç gösterilmez;
+                    // kilitli bir satır olarak da durmaz.
+                    if (uygun.reason == 'Hayatında zaten biri var.' ||
+                        uygun.reason == 'Bu kişiye çıkma teklif edilemez.') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('ask_out'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FingerOutcome? o =
+                                        GameScope.of(context)
+                                            .askOut(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Çıkma teklif et'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(
+                            text: uygun.reason ?? 'Şu an mümkün değil.',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ],
               // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;

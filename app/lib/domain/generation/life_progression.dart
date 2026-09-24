@@ -965,7 +965,30 @@ class LifeProgression {
       rng: _rng,
       isStudent: state.education.isSchoolStudent,
     );
-    if (!hastalik.happened) return girdi;
+    if (!hastalik.happened) {
+      // Hastalanılmayan yılda beden toparlanır (D-116).
+      //
+      // Hastalığın bedeli −10'a çıkınca gerekti: toparlanma olmadan
+      // kayıplar birikiyor ve sağlık kırk yaşında sıfıra yapışıyordu
+      // (ölçüldü: 100 hayat, 40 yaşta ortalama sağlık 0,8). Toparlanma
+      // yaşlanmanın kalıcı kaybını geri vermez; tavanı yaşa göre düşen
+      // bir sınırdır, yalnızca hastalığın açtığı çukuru kapatır.
+      final int tavan = StatAging.prototypeOnlyHealthCeilingFor(newAge);
+      final int pay = SickLeaves.recoveryFor(
+        age: newAge,
+        health: state.player.stats.health,
+        ceiling: tavan,
+      );
+      if (pay <= 0) return girdi;
+      return (
+        state: state.copyWith(
+          player: state.player.copyWith(
+            stats: state.player.stats.gain(health: pay),
+          ),
+        ),
+        logText: girdi.logText,
+      );
+    }
 
     final int kayip = hastalik.wageLoss.clamp(0, state.player.wallet);
     GameState next = state.copyWith(
@@ -1011,6 +1034,25 @@ class LifeProgression {
           age: newAge,
           text: hastalik.text,
           category: LogCategory.kisisel,
+        ),
+      );
+    }
+
+    // Hastalık artık sağlıktan ciddi biçimde götürüyor (D-116); bu
+    // kaçırılmaması gereken bir haberdir ve ekranda gösterilir (D-114).
+    // İşveren uyarısı ayrı bir bildirim olarak zaten çıktıysa ikinci kez
+    // pencere açılmaz.
+    if (!hastalik.employerUpset) {
+      bildirimler.add(
+        PendingNotice(
+          id: 'hastalik-$newAge',
+          kind: NoticeKind.saglik,
+          age: newAge,
+          title: 'Hastalandın',
+          text: '${hastalik.text} Bu, '
+              '${SickLeaves.severityLabel(hastalik.days)} geçen bir '
+              'hastalıktı; bedeni yordu.',
+          effects: diffAppliedEffects(state, next),
         ),
       );
     }

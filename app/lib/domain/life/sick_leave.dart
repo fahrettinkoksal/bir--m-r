@@ -83,11 +83,56 @@ abstract final class SickLeaves {
   /// ödenmez; oyun bunu böyle basitleştirir.
   static const int prototypeOnlyUnpaidDays = 2;
 
-  /// prototypeOnly: kısa hastalığın sağlığa bedeli.
-  static const int prototypeOnlyShortHealthCost = 1;
+  /// prototypeOnly: hastalığın sağlığa bedeli, **ciddiyetine göre**
+  /// (D-116).
+  ///
+  /// Faho bildirdi: "hastalıkta -1-2-3 değil de en az -10 sağlık düşmeli
+  /// ve hastalığının ciddiyetine göre bu artmalı". Eski değerler (1-3)
+  /// hastalığı bir bildirim metninden ibaret bırakıyordu; yaşlanmanın
+  /// aldığının yanında hissedilmiyordu.
+  ///
+  /// Ciddiyet **rapor süresinden** okunur; uydurma bir ölçü eklenmedi.
+  static const int prototypeOnlyMildHealthCost = 10; // 3-4 gün
+  static const int prototypeOnlyModerateHealthCost = 14; // 5-6 gün
+  static const int prototypeOnlySevereHealthCost = 18; // 7 gün ve üstü
 
-  /// prototypeOnly: uzun hastalığın (uyarı eşiğindeki) sağlığa bedeli.
-  static const int prototypeOnlyLongHealthCost = 2;
+  /// prototypeOnly: orta ve ağır hastalığın gün eşikleri.
+  static const int prototypeOnlyModerateDays = 5;
+  static const int prototypeOnlySevereDays = 7;
+
+  /// prototypeOnly: hastalanılmayan bir yılda bedenin **toparlanması**
+  /// (D-116).
+  ///
+  /// Hastalığın bedeli ölçüldükten sonra gerekti: toparlanma olmadan
+  /// −10'luk kayıplar birikiyor ve sağlık kırk yaşında sıfıra
+  /// yapışıyordu (ölçüm: 100 hayat, 40 yaşta ortalama sağlık 0,8).
+  /// İnsan hastalıktan **iyileşir**; kalıcı olan yıpranma yaşlanmadır.
+  ///
+  /// Toparlanma bir tavana kadar çalışır: yaşlanmanın aldığını geri
+  /// vermez, yalnızca hastalığın açtığı çukuru kapatır.
+  static const int prototypeOnlyRecoveryPerYear = 7;
+
+  /// prototypeOnly: toparlanmanın çalıştığı en yüksek yaş.
+  ///
+  /// İleri yaşta beden aynı hızla toparlanmaz.
+  static const int prototypeOnlyRecoveryMaxAge = 70;
+
+  /// Bu yıl hastalanılmadıysa bedenin toparlanma payı (D-116).
+  ///
+  /// [ceiling] toparlanmanın aşamayacağı sınırdır; yaşlanmanın kalıcı
+  /// kaybını geri vermemesi için çağıran taraf verir.
+  static int recoveryFor({
+    required int age,
+    required int health,
+    required int ceiling,
+  }) {
+    if (age > prototypeOnlyRecoveryMaxAge) return 0;
+    if (health >= ceiling) return 0;
+    final int fark = ceiling - health;
+    return fark < prototypeOnlyRecoveryPerYear
+        ? fark
+        : prototypeOnlyRecoveryPerYear;
+  }
 
   /// prototypeOnly: sağlığı bu değerin altındaysa hastalık bir puan
   /// daha yıpratır; zayıf beden daha zor toparlar.
@@ -185,11 +230,9 @@ abstract final class SickLeaves {
         'İş yerinde sorun çıkmadı.',
     ].join(' ');
 
-    // Hastalığın bedende karşılığı vardır (D-101).
-    final int saglikKaybi = (gun >= prototypeOnlyUpsetDays
-            ? prototypeOnlyLongHealthCost
-            : prototypeOnlyShortHealthCost) +
-        (health < prototypeOnlyFragileHealth ? 1 : 0);
+    // Hastalığın bedende karşılığı vardır (D-101) ve ciddiyetine göre
+    // ağırlaşır (D-116).
+    final int saglikKaybi = healthCostFor(days: gun, health: health);
 
     return SickLeave(
       days: gun,
@@ -200,6 +243,26 @@ abstract final class SickLeaves {
       text: metin,
     );
   }
+
+  /// Hastalığın sağlığa bedeli (D-116).
+  ///
+  /// Ciddiyet rapor süresinden okunur. Sağlığı zaten düşük olan biri
+  /// hastalıktan daha ağır etkilenir (D-101'den gelen kural korundu).
+  static int healthCostFor({required int days, required int health}) {
+    final int taban = days >= prototypeOnlySevereDays
+        ? prototypeOnlySevereHealthCost
+        : days >= prototypeOnlyModerateDays
+            ? prototypeOnlyModerateHealthCost
+            : prototypeOnlyMildHealthCost;
+    return taban + (health < prototypeOnlyFragileHealth ? 3 : 0);
+  }
+
+  /// Hastalığın ciddiyet etiketi; bildirimde oyuncuya yazılır.
+  static String severityLabel(int days) => days >= prototypeOnlySevereDays
+      ? 'ağır'
+      : days >= prototypeOnlyModerateDays
+          ? 'orta'
+          : 'hafif';
 
   /// Uyarıların işten çıkarılma ihtimaline kattığı pay.
   static double layoffBonus(int warnings) =>

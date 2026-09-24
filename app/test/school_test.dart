@@ -304,7 +304,7 @@ void main() {
         for (int i = 0; i < 40 && friendId == null; i++) {
           resolvePendingEvents(aday, preferChoiceId: 'tanis');
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
-          resolveTrackChoice(aday);
+          resolveEducationChoices(aday);
           aday.ageUp();
           resolvePendingEvents(aday, preferChoiceId: 'tanis');
           if (aday.state == null || aday.state!.deceased) break;
@@ -325,7 +325,7 @@ void main() {
       for (int i = 0; i < 10; i++) {
         resolvePendingEvents(c, preferChoiceId: 'tanis');
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c, preferChoiceId: 'tanis');
@@ -521,7 +521,7 @@ void main() {
           // Hayat bu tohumda erken bitebilir; vefat edenin yaşı ilerlemez.
           if (controller.state!.deceased) break;
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
-          resolveTrackChoice(controller);
+          resolveEducationChoices(controller);
           controller.ageUp();
           expect(controller.state!.player.age, yasOnce + 1);
         }

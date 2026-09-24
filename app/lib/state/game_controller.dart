@@ -351,6 +351,20 @@ class GameController extends ChangeNotifier {
   /// alınamaz. Sessizce varsayılan alan seçilmez, oyuncu karar verir.
   bool get needsTrackChoice => _state?.education.awaitingTrackChoice ?? false;
 
+  /// Lise bitti, sonraki yol seçimi bekliyor mu? (D-111)
+  ///
+  /// Faho bildirdi: "üni olayında da aynı şekilde ilk önce üni bölümümü
+  /// seçtikten sonra hayatta geri kalan aktivitelere karar vermeliyim".
+  /// Üniversiteye gitmemek de bir karardır ve kilidi açar.
+  bool get needsAfterSchoolChoice {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return EducationPath.needsAfterSchoolChoice(current);
+  }
+
+  /// Yaş almadan önce kapatılması gereken bir eğitim kararı var mı?
+  bool get needsEducationChoice => needsTrackChoice || needsAfterSchoolChoice;
+
   void ageUp() {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return;
@@ -358,6 +372,8 @@ class GameController extends ChangeNotifier {
     if (current.deceased) return;
     // Lise alanı seçilmeden yeni yaşa geçilmez (D-094).
     if (current.education.awaitingTrackChoice) return;
+    // Lise bittikten sonraki yol seçilmeden de geçilmez (D-111).
+    if (EducationPath.needsAfterSchoolChoice(current)) return;
     _state = LifeProgression(_random).advanceOneYear(current);
     _autoSave();
     notifyListeners();
@@ -538,6 +554,45 @@ class GameController extends ChangeNotifier {
 
   /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum
   /// gerçekten değiştiyse kaydeder.
+
+  // =====================================================================
+  // Her sonuç ekranda görünür (D-114)
+  // =====================================================================
+
+  /// Aktivite sonucunu **pop-up** bildirime çevirir (D-114).
+  ///
+  /// Faho bildirdi: "TÜM AMA TÜM BİLDİRİMLER POP UP OLMALI ... KULLANICI
+  /// ANLAMALI". Sonuç metni sayfanın içinde küçük bir panelde kalıyordu;
+  /// oyuncu ne olduğunu görmeden başka ekrana geçebiliyordu. Artık her
+  /// uygulanmış eylem kuyruğa bir bildirim koyar.
+  ///
+  /// Etkiler **uydurulmaz**: eylemin öncesi ve sonrası karşılaştırılarak
+  /// hesaplanır, bu yüzden tavana dayanmış bir değer için sahte artış
+  /// yazılamaz (D-074, D-096 ile aynı kural).
+  GameState _announce(
+    GameState before,
+    GameState after,
+    String text, {
+    String title = 'Sonuç',
+    String tag = 'eylem',
+  }) {
+    if (text.trim().isEmpty) return after;
+    _noticeSeq++;
+    return Notices.enqueue(after, <PendingNotice>[
+      PendingNotice(
+        id: 'aktivite-$tag-${after.player.age}-$_noticeSeq',
+        kind: NoticeKind.aktivite,
+        age: after.player.age,
+        title: title,
+        text: text,
+        effects: diffAppliedEffects(before, after),
+      ),
+    ]);
+  }
+
+  /// Aynı yıl içinde açılan bildirimlerin kimliği çakışmasın diye sayaç.
+  int _noticeSeq = 0;
+
   ItemOutcome? _runItemAction(ItemActionResult Function(GameState) islem) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
@@ -548,7 +603,8 @@ class GameController extends ChangeNotifier {
       return result.outcome;
     }
 
-    _state = result.state;
+    _state = _announce(current, result.state, result.outcome.text,
+        title: 'Eşya', tag: 'esya');
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -657,11 +713,16 @@ class GameController extends ChangeNotifier {
   /// Mülakat sorusunu cevaplar.
   JobOutcome? answerInterview(int optionIndex) => _runJob(
     (GameState current) => _jobs.answerInterview(current, optionIndex, _random),
+    // Mülakatın sonucu ve doğru cevabın açıklaması mülakat penceresinde
+    // yazar; üstüne bildirim koymak o açıklamayı kapatır (D-114).
+    announce: false,
   );
 
   /// Mülakatı yarıda bırakır.
-  JobOutcome? cancelInterview() =>
-      _runJob((GameState current) => _jobs.cancelInterview(current));
+  JobOutcome? cancelInterview() => _runJob(
+        (GameState current) => _jobs.cancelInterview(current),
+        announce: false,
+      );
 
   /// Başvurunun şu an mümkün olup olmadığı.
   InteractionAvailability jobApplicationAvailability(JobType job) {
@@ -769,18 +830,28 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return null;
     final CareerRequestResult sonuc = islem(current);
     if (!sonuc.applied) return sonuc.text;
-    _state = sonuc.state;
+    _state = _announce(current, sonuc.state, sonuc.text,
+        title: 'İş yerinden yanıt', tag: 'kariyer');
     _autoSave();
     notifyListeners();
     return sonuc.text;
   }
 
-  JobOutcome? _runJob(JobResult Function(GameState) islem) {
+  JobOutcome? _runJob(
+    JobResult Function(GameState) islem, {
+    /// Sonucu kendi penceresinde gösteren akışlar bildirim istemez.
+    bool announce = true,
+  }) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final JobResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+    // Mülakat penceresi açıldıysa sonucu **o pencere** anlatır; üstüne
+    // bir bildirim daha koymak ekranı kapatır (D-114).
+    _state = (!announce || result.state.hasPendingInterview)
+        ? result.state
+        : _announce(current, result.state, result.outcome.text,
+            title: 'Meslek', tag: 'meslek');
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -1095,6 +1166,28 @@ class GameController extends ChangeNotifier {
   FingerOutcome? makeRelationshipOfficial(String personId) =>
       _runFinger((GameState s) => Finger.makeOfficial(s, personId));
 
+  /// Flörtü sevgiliye çevirmenin koşulu, **basmadan önce** (D-112).
+  InteractionAvailability officialAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return Finger.officialAvailability(current, personId);
+  }
+
+  /// Arkadaşa çıkma teklif edilebilir mi? (D-112)
+  InteractionAvailability askOutAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return Finger.askOutAvailability(current, personId);
+  }
+
+  /// Arkadaşa çıkma teklif eder (D-112).
+  FingerOutcome? askOut(String personId) =>
+      _runFinger((GameState s) => Finger.askOut(s, personId, _random));
+
   /// Oyuncunun Finger'da ne aradığı (D-107).
   FingerIntent get fingerIntent =>
       _state?.fingerIntent ?? FingerIntent.belirsiz;
@@ -1129,7 +1222,14 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return null;
     final FingerResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+    // Her kaydırma için pencere açılmaz: beğenmek, geçmek ve profil
+    // düzenlemek kendi ekranında zaten görünür. Bildirim yalnızca
+    // **bir kişiyle ilgili gerçek bir değişim** olduğunda çıkar:
+    // tanışma, flört, sevgili olma (D-114).
+    _state = result.outcome.person == null
+        ? result.state
+        : _announce(current, result.state, result.outcome.text,
+            title: 'Finger', tag: 'finger');
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -1363,7 +1463,8 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return null;
     final ActivityResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+    _state = _announce(current, result.state, result.outcome.text,
+        title: 'Aktivite', tag: 'aktivite');
     _autoSave();
     notifyListeners();
     return result.outcome;

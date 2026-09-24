@@ -179,7 +179,7 @@ void main() {
       for (int i = 0; i < 4 && c.state!.children.isEmpty; i++) {
         resolvePendingEvents(c);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -262,7 +262,7 @@ void main() {
       for (int i = 0; i < 5 && c.state!.children.isEmpty; i++) {
         resolvePendingEvents(c);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -273,7 +273,7 @@ void main() {
         if (guard++ > 150) fail('Oyuncu hiç ölmedi.');
         resolvePendingEvents(c);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -329,7 +329,7 @@ void main() {
         if (guard++ > 40) fail('Hiç olay çıkmadı.');
         resolvePendingEvents(c);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       final GameState once = c.state!;
@@ -360,7 +360,7 @@ void main() {
           continue;
         }
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       if (!c.state!.hasPendingCrisis) return; // kriz çıkmadıysa sınanacak şey yok
@@ -417,7 +417,7 @@ void main() {
         if (guard++ > 200) break;
         resolvePendingEvents(c);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
       }
       if (c.state!.settledEstates.isEmpty) return;

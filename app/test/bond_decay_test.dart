@@ -210,7 +210,7 @@ void main() {
         c.interact(anne.id, InteractionKind.vakitGecir);
         resolvePendingEvents(c);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(c);
+        resolveEducationChoices(c);
         c.ageUp();
         resolvePendingEvents(c);
       }

@@ -185,7 +185,7 @@ void main() {
     // açılıp ekranı kilitlemesin. Bildirimin **kuyruğa girdiği** aşağıda
     // doğrulanıyor.
     // Lise alanı seçilmeden yaş atlanmaz (D-094).
-    resolveTrackChoice(controller);
+    resolveEducationChoices(controller);
     controller.ageUp();
     expect(controller.state!.children.length, 1);
     expect(controller.state!.isExpecting, isFalse);

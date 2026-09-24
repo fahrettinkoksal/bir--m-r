@@ -231,7 +231,7 @@ void main() {
       );
 
       // Lise alanı seçilmeden yaş atlanmaz (D-094).
-      resolveTrackChoice(controller);
+      resolveEducationChoices(controller);
       controller.ageUp();
       resolvePendingEvents(controller);
       expect(controller.state!.interactionCounts, isEmpty,
@@ -261,7 +261,7 @@ void main() {
         }
         resolvePendingEvents(controller);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(controller);
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
       resolvePendingEvents(controller);

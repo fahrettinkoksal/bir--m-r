@@ -6,6 +6,7 @@ import '../sound/sound_service.dart';
 import '../../domain/life/notices.dart';
 import '../../domain/interaction/child_naming.dart';
 import '../../domain/models/pending_notice.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import '../../text/turkish_text.dart';
 import 'effect_chips.dart';
@@ -75,9 +76,36 @@ class _NoticeSheetState extends State<NoticeSheet> {
     setState(() => _isimNotu = sonuc.message);
   }
 
+  /// Bildirimi kapatır.
+  ///
+  /// Doğum bildirimindeyse **önce yazılan ad uygulanır**. Faho bildirdi:
+  /// adı yazıp "Tamam"a basınca ad kayboluyordu, çünkü ad yalnızca ayrı
+  /// "İsmi kaydet" düğmesiyle işleniyordu. Yazılan ad sessizce atılmaz:
+  /// geçerliyse uygulanır, geçersizse pencere **kapanmaz** ve sebebi
+  /// ekranda yazar.
   void _kapat() {
+    if (!_adiUygula()) return;
     GameScope.of(context).dismissNotice();
     Navigator.of(context).pop();
+  }
+
+  /// Yazılan adı uygular. Kapatmaya devam edilebilirse `true` döner.
+  bool _adiUygula() {
+    final String bebekId = widget.notice.personId ?? '';
+    if (widget.notice.kind != NoticeKind.dogum || bebekId.isEmpty) return true;
+    final GameController controller = GameScope.of(context);
+    if (!controller.canNameChild(bebekId)) return true;
+    final String yazilan = _isimAlani.text.trim();
+    if (yazilan.isEmpty) return true;
+    // Ad zaten buysa boşuna günlüğe satır düşürmeyelim.
+    final String mevcut =
+        controller.state?.personById(bebekId)?.firstName ?? '';
+    if (ChildNaming.normalize(yazilan) == mevcut) return true;
+    final ({bool applied, String message}) sonuc =
+        controller.nameChild(bebekId, yazilan);
+    if (sonuc.applied) return true;
+    setState(() => _isimNotu = sonuc.message);
+    return false;
   }
 
   void _katilimSec(FuneralAttendance secim) {

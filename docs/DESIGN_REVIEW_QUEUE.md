@@ -2970,3 +2970,93 @@ Faho bildirdi: "evcil hayvanı sahiplendirebilelim, aktif ve geçmiş ayrılsın
 
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
+
+---
+
+### Q-129 — Dövüş dersinin yıllık stat tavanı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-115 · `app/lib/domain/activities/martial_arts_engine.dart` · Test: `app/test/package_p_test.dart`
+
+Faho bildirdi: "20 dersi birden aldığımda mutluluğum ve sağlığım çok fazla artıyor". Sebep **ölçüldü**: yıllık ders sayısı sınırlıydı (20) ama kazancın toplamı değildi — bir yılda ham **40 sağlık** ve **20 mutluluk**. Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Değer |
+|---|---|
+| Derslerden bir yılda kazanılabilecek sağlık | 4 |
+| Derslerden bir yılda kazanılabilecek mutluluk | 3 |
+| Basamak atlama ödülü | Tavanın **dışında** (sağlık +3, mutluluk +6, karizma +2) |
+| Yıllık ders hakkı | 20 (değişmedi) |
+
+**Karar soruları:**
+1. 4 sağlık / 3 mutluluk doğru mu? Spor salonu ve Sağlık Merkezi'nin yıllık tavanı 6; dövüş bundan düşük tutuldu çünkü ayrıca hobi ve bakım da besliyor.
+2. Basamak atlama ödülü tavanın dışında kalmalı mı, yoksa o da mı sayılmalı?
+3. Ders hakkı 20 kalsın mı? Stat kazancı kesildikten sonra 20 dersin tek anlamı basamak ilerlemesi oluyor; tekrar tıklama yükü sürüyor. "Bu yıl kalan dersleri toplu al" gibi tek dokunuşluk bir yol açılsın mı?
+
+---
+
+### Q-130 — Finger: arkadaşlıktan flörte, flörtten sevgiliye
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-112 · `app/lib/domain/interaction/finger.dart` · Test: `app/test/package_o_test.dart`
+
+Faho bildirdi: "Finger'da tanıştığım birisi ile nasıl sevgili olacağım... ilerisi yok". İki sebep ölçüldü: tanışmaların **%35'i** arkadaşlıkla bitiyor ve arkadaşta romantik yol hiç yoktu; flörtlerin **%74'ü** ise sevgili olma eşiğinin (60) altında başlıyor. Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Değer |
+|---|---|
+| Çıkma teklifi için en az yakınlık | 50 |
+| Kabul şansı | Yakınlık 50'de %40, 100'de %90 |
+| Reddedilince yakınlık kaybı | −6 |
+| Sevgili olmak için en az yakınlık | 60 (değişmedi) |
+| Teklif için en küçük yaş | 16 (iki taraf da) |
+
+**Karar soruları:**
+1. Çıkma teklifi eşiği 50 doğru mu? Flört başlangıç yakınlığı zaten 45-62; yani bazı arkadaşlara ilk yıl teklif edilebiliyor.
+2. Reddedilince −6 yakınlık doğru mu, yoksa teklif bedelsiz mi olmalı?
+3. Yılda kaç kez teklif edilebilsin? Şu an sınır yok; yakınlık düştükçe şans da düşüyor ama üst üste denenebiliyor.
+4. Arkadaşa teklif **yalnızca Finger'da tanışılan** kişiye mi açık olmalı, yoksa okul/iş arkadaşına da mı? Şu an her uygun arkadaşa açık.
+5. Flört ilgilenilmezse kendiliğinden bitmeli mi? (Bu ayrıca Faho'nun istediği bir şey; henüz kodlanmadı.)
+
+---
+
+### Q-131 — Hastalığın bedeli ve toparlanma
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-116 · `app/lib/domain/life/sick_leave.dart`, `app/lib/domain/life/aging.dart` · Test: `app/test/package_p_test.dart`
+
+Faho bildirdi: "hastalıkta -1-2-3 değil de en az -10 sağlık düşmeli ve hastalığının ciddiyetine göre bu artmalı". Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Ciddiyet | Rapor | Sağlık bedeli |
+|---|---|---|
+| Hafif | 3-4 gün | −10 |
+| Orta | 5-6 gün | −14 |
+| Ağır | 7 gün | −18 |
+| Sağlığı 40'ın altındaysa | — | 3 puan daha |
+
+**Toparlanma neden eklendi.** İstenen bedel tek başına uygulandığında **ölçüldü ve oyunu bozdu**: toparlanma olmadığı için kayıplar birikiyor ve 100 hayatta **40 yaşta ortalama sağlık 0,8'e** düşüyordu. Bu yüzden hastalanılmayan yılda yılda **7 puan** toparlanma eklendi, bir **tavana** kadar:
+
+| Yaş | Toparlanma tavanı |
+|---|---|
+| 30'a kadar | 90 |
+| 45'e kadar | 80 |
+| 60'a kadar | 68 |
+| 70'e kadar | 55 |
+| 70 üstü | Toparlanma yok |
+
+**Ölçüm (100 hayat):** 40 yaşta ortalama sağlık **54,7** · 60 yaşta **31,1** · ortalama ömür **74,2** (önce 72,4).
+
+**Karar soruları:**
+1. −10/−14/−18 doğru mu, yoksa daha da ağır mı olmalı?
+2. Toparlanma bu projede **yeni bir mekanizma**. Kabul ediliyor mu? Alternatif: toparlanma olmasın ama hastalık daha seyrek gelsin.
+3. Toparlanma tavanları doğru mu? Şu an 30 yaşındaki biri hastalıktan sonra 90'a kadar toparlanıyor.
+4. Toparlanma spor/bakım yapana daha hızlı olsun mu? Şu an herkese aynı.
+5. 70 yaşından sonra hiç toparlanmama doğru mu?
+
+---
+
+### Q-132 — Her şey pop-up: nerede durmalı?
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-114 · `app/lib/state/game_controller.dart` · Test: `app/test/package_q_test.dart`
+
+Faho bildirdi: "TÜM AMA TÜM BİLDİRİMLER POP UP OLMALI ... KULLANICI ANLAMALI". Kodlandı: uygulanmış her eylem artık ekranda pencere açıyor.
+
+**Ölçüm:** yıl başına ortalama pencere **0,39 → 0,71**, en kötü yıl **7 → 6**. (Aktivite pencereleri oyuncunun kendi dokunuşuyla açıldığı için bu sayıya girmiyor; sayı yıl geçerken kendiliğinden açılanları ölçüyor.)
+
+**İki istisna bırakıldı**, ikisi de aynı gerekçeyle — sonucu zaten kendi penceresi anlatıyor: **mülakat cevabı** ve **eğitim seçimleri**. Ayrıca Finger'da her kaydırma pencere açmıyor; yalnızca tanışma/flört/sevgili olma açıyor.
+
+**Karar soruları:**
+1. Bu iki istisna kabul mü, yoksa onlar da mı pencere açsın?
+2. Finger kaydırmaları gerçekten pencere açmamalı mı? (Yılda 12 beğeni hakkı var; her biri pencere açsaydı uygulama kullanılamaz olurdu.)
+3. Aynı anda birden çok pencere açıldığında üst üste mi gösterilsin, yoksa tek pencerede mi toplansın? Şu an sırayla açılıyor.

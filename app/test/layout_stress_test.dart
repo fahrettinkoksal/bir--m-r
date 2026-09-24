@@ -400,7 +400,7 @@ void main() {
       if (guard++ > 120) break;
       resolvePendingEvents(controller);
       // Lise alanı seçilmeden yaş atlanmaz (D-094).
-      resolveTrackChoice(controller);
+      resolveEducationChoices(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);

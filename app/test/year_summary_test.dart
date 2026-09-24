@@ -35,7 +35,7 @@ void main() {
   test('yaş alınca biten yılın özeti üretilir', () {
     final GameController controller = yeniHayat();
     final int yas = controller.state!.player.age;
-    resolveTrackChoice(controller);
+    resolveEducationChoices(controller);
     controller.ageUp();
 
     final GameState sonra = controller.state!;
@@ -112,7 +112,7 @@ void main() {
 
   test('özet kayıt açılıp kapandığında korunur', () {
     final GameController controller = yeniHayat();
-    resolveTrackChoice(controller);
+    resolveEducationChoices(controller);
     controller.ageUp();
 
     final GameState geri = decodeGameState(encodeGameState(controller.state!));

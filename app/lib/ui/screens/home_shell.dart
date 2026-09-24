@@ -12,6 +12,7 @@ import '../widgets/comic.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
 import '../widgets/notice_sheet.dart';
+import '../widgets/after_school_choice_sheet.dart';
 import '../widgets/track_choice_sheet.dart';
 import '../../domain/life/will.dart';
 import '../../domain/models/pending_notice.dart';
@@ -112,30 +113,47 @@ class _HomeShellState extends State<HomeShell> {
 
   void _goHome() => setState(() => _selectedTab = null);
 
-  /// Aynı anda yalnızca tek alan seçimi penceresi açılır (D-094).
-  bool _trackChoiceVisible = false;
+  /// Aynı anda yalnızca tek eğitim seçimi penceresi açılır (D-094, D-111).
+  bool _educationChoiceVisible = false;
 
-  /// Lise alanı seçim penceresini açar (D-094).
-  Future<void> _showTrackChoice() async {
-    if (_trackChoiceVisible) return;
-    _trackChoiceVisible = true;
-    await TrackChoiceSheet.show(context);
+  /// Bekleyen eğitim kararını **hemen** sorar (D-094, D-111).
+  ///
+  /// Faho bildirdi: karar bir sonraki "Yaş Al"a kalıyordu, yani oyuncu
+  /// lise alanını seçmeden o yılın bütün aktivitelerini yapabiliyordu.
+  /// Karar artık ortaya çıktığı anda sorulur.
+  Future<void> _showEducationChoice() async {
+    if (_educationChoiceVisible) return;
+    final GameController controller = GameScope.of(context);
+    if (!controller.needsEducationChoice) return;
+    _educationChoiceVisible = true;
+    if (controller.needsTrackChoice) {
+      await TrackChoiceSheet.show(context);
+    } else {
+      await AfterSchoolChoiceSheet.show(context);
+    }
     if (!mounted) return;
-    setState(() => _trackChoiceVisible = false);
+    setState(() => _educationChoiceVisible = false);
   }
 
   void _ageUp() {
     final GameController controller = GameScope.of(context);
-    // Lise alanı seçilmeden yaş atlanamaz; düğme sessiz kalmaz, seçim
-    // ekranı açılır (D-094).
-    if (controller.needsTrackChoice) {
+    // Eğitim kararı verilmeden yaş atlanamaz; düğme sessiz kalmaz, seçim
+    // ekranı açılır (D-094, D-111).
+    if (controller.needsEducationChoice) {
       _goHome();
-      _showTrackChoice();
+      _showEducationChoice();
       return;
     }
     controller.ageUp();
     // Yaş alınca yeni günlük satırı ve olay görünsün diye ana ekrana dönülür.
     _goHome();
+    // Bu yıl liseye ya da mezuniyete gelindiyse karar **hemen** sorulur;
+    // bir sonraki yıla ertelenmez.
+    if (controller.needsEducationChoice) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showEducationChoice();
+      });
+    }
   }
 
   Future<void> _confirmNewLife() async {

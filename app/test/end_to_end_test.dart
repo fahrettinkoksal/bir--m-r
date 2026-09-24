@@ -52,7 +52,7 @@ void yasAl(GameController controller) {
     );
   }
   // Lise alanı seçilmeden yaş atlanmaz (D-094).
-  resolveTrackChoice(controller);
+  resolveEducationChoices(controller);
   controller.ageUp();
   while (controller.state!.hasPendingCrisis) {
     if (guard++ > 60) fail('Kriz kapanmıyor.');
@@ -381,7 +381,7 @@ void main() {
           controller.state!.copyWith(pendingEvent: null),
         );
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(controller);
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
 

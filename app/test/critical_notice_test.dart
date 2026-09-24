@@ -51,7 +51,7 @@ void main() {
       int guard = 0;
       while (!controller.state!.deceased && guard++ < 100) {
         final int oncekiYas = controller.state!.player.age;
-        resolveTrackChoice(controller);
+        resolveEducationChoices(controller);
         controller.ageUp();
         if (controller.state!.player.age == oncekiYas) break;
 

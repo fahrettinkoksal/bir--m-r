@@ -249,7 +249,7 @@ void main() {
       }
 
       // Lise alanı seçilmeden yaş atlanmaz (D-094).
-      resolveTrackChoice(controller);
+      resolveEducationChoices(controller);
       controller.ageUp();
     }
 

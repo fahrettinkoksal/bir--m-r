@@ -204,7 +204,7 @@ void main() {
             c.respondToCrisis(k.crisis!.choices.first.id);
           }
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
-          resolveTrackChoice(c);
+          resolveEducationChoices(c);
           c.ageUp();
         }
         if (v8) ulasan8++;

@@ -258,7 +258,7 @@ void main() {
         while (!controller.state!.deceased && guard++ < 130) {
           resolvePendingEvents(controller);
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
-          resolveTrackChoice(controller);
+          resolveEducationChoices(controller);
           controller.ageUp();
         }
         if (!controller.state!.deceased) continue;
@@ -284,7 +284,7 @@ void main() {
       while (!controller.state!.deceased && guard++ < 130) {
         resolvePendingEvents(controller);
         // Lise alanı seçilmeden yaş atlanmaz (D-094).
-        resolveTrackChoice(controller);
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
       expect(controller.state!.deceased, isTrue);
