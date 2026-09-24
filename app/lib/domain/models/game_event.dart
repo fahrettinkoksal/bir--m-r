@@ -348,10 +348,18 @@ class ActiveEvent {
     required this.text,
     required this.choices,
     this.personId,
+    this.isContinuation = false,
   });
 
   final String eventId;
   final EventCategory category;
+
+  /// Bu olay geçmiş bir seçimin devamı mı?
+  ///
+  /// Faho'nun Q-114 kararı: oyuncuya büyük bir "QUEST" etiketi
+  /// konmayacak ama devam olayında küçük, doğal bir işaret olabilir.
+  /// Ekranda "Geçmişten" rozeti olarak görünür.
+  final bool isContinuation;
 
   /// Yer tutucuları doldurulmuş, ekranda gösterilecek metin.
   final String text;

@@ -111,6 +111,18 @@ class ActivityEngine {
       if (!birlikte.isAllowed) return _blocked(state, birlikte.reason!);
     }
 
+    // Faho'nun Q-108 kararı: iki kişi gidiyorsa iki kişilik gerçek
+    // maliyet hesaba katılır. Park gibi ücretsiz aktivite ücretsiz
+    // kalır, çünkü sıfırın iki katı da sıfırdır.
+    final int odenecek = Outing.costFor(action, withCompanion: companion != null);
+    if (state.player.wallet < odenecek) {
+      return _blocked(
+        state,
+        '${trMoney(odenecek)} gerekiyor; cüzdanında yeterli para yok. '
+        'İki kişilik bilet tek kişilikten pahalı.',
+      );
+    }
+
     final int done = timesDone(state, action);
     final double factor =
         prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
@@ -135,7 +147,7 @@ class ActivityEngine {
 
     final PlayerCharacter player = state.player.copyWith(
       stats: stats,
-      wallet: state.player.wallet - action.cost,
+      wallet: state.player.wallet - odenecek,
       hairStyle: yeniStil,
     );
 
@@ -169,9 +181,9 @@ class ActivityEngine {
 
     final String metin = action.changesHairStyle
         ? '${action.label}: artık saçın "$yeniStil". '
-            '${trMoney(action.cost)} ödedin.'
+            '${trMoney(odenecek)} ödedin.'
         : '${action.label} tamamlandı.'
-            '${action.cost > 0 ? ' ${trMoney(action.cost)} ödedin.' : ''}';
+            '${odenecek > 0 ? ' ${trMoney(odenecek)} ödedin.' : ''}';
 
     return ActivityResult(
       state: _log(next, metin),

@@ -42,6 +42,12 @@ abstract final class FertilityTreatment {
   /// işaret ediyor.
   static int get prototypeOnlyMinTries => Intimacy.prototypeOnlyWorryAfter;
 
+  /// Hayat boyu yapılabilecek en fazla deneme (Faho'nun Q-103 kararı).
+  ///
+  /// Tedavi hem pahalı hem yıpratıcı; sınırsız denemek hem gerçeğe hem
+  /// oyunun dengesine aykırıydı.
+  static const int maxLifetimeTries = 5;
+
   /// prototypeOnly: bir yılda kaç deneme yapılabilir.
   ///
   /// Gerçekte bir tedavi döngüsü aylar sürer; yılda birden fazlası olmaz.
@@ -103,6 +109,10 @@ abstract final class FertilityTreatment {
     if (state.unprotectedTries < prototypeOnlyMinTries) {
       return 'Hekim önce bir süre kendiniz denemenizi istiyor. '
           'Sonuç alamazsanız kapı açık.';
+    }
+    if (state.ivfAttempts >= maxLifetimeTries) {
+      return 'Hekim daha fazla deneme önermiyor; $maxLifetimeTries deneme '
+          'yaptınız.';
     }
     if (triesThisAge(state) >= prototypeOnlyTriesPerAge) {
       return 'Bu yıl bir deneme yaptınız; tedavi aylar sürüyor, '

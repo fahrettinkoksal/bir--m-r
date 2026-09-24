@@ -366,6 +366,9 @@ class EventEngine {
             c,
       ]),
       personId: candidate.person?.id,
+      // Geçmiş bir seçimin ya da kişinin devamıysa işaretlenir.
+      isContinuation: candidate.event.requirement.requiredFlags.isNotEmpty ||
+          candidate.event.requirement.personRole != null,
     );
   }
 

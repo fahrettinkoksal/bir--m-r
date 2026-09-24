@@ -223,7 +223,7 @@ HobbyKind? hobbyForActivity(String activityId) {
 ///
 /// Bundan uzun süre hiç uğraşılmayan hobi **silinmez** — geçmişte durur,
 /// yalnızca "şu an ilgileniyor" sayılmaz.
-const int kHobbyActiveWithinYears = 5;
+const int kHobbyActiveWithinYears = 3;
 
 /// prototypeOnly: bir hobinin olaylarda "ciddi" sayılması için gereken yıl.
 const int kHobbySeriousYears = 3;

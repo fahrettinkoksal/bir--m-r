@@ -89,7 +89,7 @@ class SocialEngine {
   ///
   /// Yalnızca kazanç yayılır, kayıp yayılmaz: bir platformda tökezlemek
   /// diğerlerindeki kitleyi silmemeli.
-  static const double prototypeOnlyCrossShare = 0.25;
+  static const double prototypeOnlyCrossShare = 0.15;
 
   /// prototypeOnly: yayılmanın oluşması için kaynak hesapta gereken
   /// en az kazanç.
@@ -97,7 +97,7 @@ class SocialEngine {
 
   /// prototypeOnly: kendiliğinden yıllık büyümenin başladığı takipçi
   /// sayısı. Bunun altındaki hesap kendi kendine büyümez.
-  static const int prototypeOnlyOrganicThreshold = 1000;
+  static const int prototypeOnlyOrganicThreshold = 5000;
 
   /// prototypeOnly: kendiliğinden yıllık büyüme oranı.
   static const double prototypeOnlyOrganicRate = 0.06;
@@ -111,6 +111,26 @@ class SocialEngine {
 
   /// prototypeOnly: durgun hesabın yıllık takipçi kaybı oranı.
   static const double prototypeOnlyDormantDecay = 0.05;
+
+  /// Yıllık değişimin günlüğe yazılması için gereken en az takipçi.
+  ///
+  /// Faho'nun Q-112 kararı: "Instagram'ın 183 takipçi büyüdü" gibi her
+  /// yıl tekrarlanan satırlar günlüğü boğuyordu. Yalnızca **anlamlı**
+  /// büyüme, önemli eşiğin aşılması ya da Ün seviyesinin değişmesi
+  /// yazılır.
+  static const int prototypeOnlyLogWorthyDelta = 2000;
+
+  /// Günlüğe yazılmayı hak eden takipçi eşikleri.
+  ///
+  /// Bu sayıların aşıldığı yıl, değişim küçük olsa da yazılır: "on bini
+  /// geçtin" cümlesi oyuncu için gerçekten bir olaydır.
+  static const List<int> prototypeOnlyMilestones = <int>[
+    10000,
+    50000,
+    100000,
+    500000,
+    1000000,
+  ];
 
   // ===================================================================
   // Hesap
@@ -532,14 +552,27 @@ class SocialEngine {
           final int yeni = (a.followers + delta).clamp(0, 1 << 30);
           final int gercek = yeni - a.followers;
           if (gercek == 0) return a;
-          satirlar.add(
-            gercek > 0
-                ? '${a.platform.label} hesabın kendiliğinden büyüdü: '
-                      '$gercek ${a.platform.audienceWord} eklendi.'
-                : '${a.platform.label} hesabına uzun süredir bir şey '
-                      'koymadın; ${-gercek} ${a.platform.audienceWord} '
-                      'kaybettin.',
-          );
+          // Her yıl satır yazmak günlüğü boğuyordu (Q-112). Yalnızca
+          // anlamlı büyüme ya da aşılan bir eşik yazılır; küçük
+          // dalgalanma sessizce işlenir.
+          final int? esik = _gecilenEsik(a.followers, yeni);
+          if (esik != null) {
+            satirlar.add(
+              '${a.platform.label} hesabın ${trNumber(esik)} '
+              '${a.platform.audienceWord} sınırını geçti.',
+            );
+          } else if (gercek >= prototypeOnlyLogWorthyDelta) {
+            satirlar.add(
+              '${a.platform.label} hesabın kendiliğinden büyüdü: '
+              '$gercek ${a.platform.audienceWord} eklendi.',
+            );
+          } else if (-gercek >= prototypeOnlyLogWorthyDelta) {
+            satirlar.add(
+              '${a.platform.label} hesabına uzun süredir bir şey '
+              'koymadın; ${-gercek} ${a.platform.audienceWord} '
+              'kaybettin.',
+            );
+          }
           return a.copyWith(followers: yeni);
         })
         .toList(growable: false);
@@ -549,6 +582,15 @@ class SocialEngine {
     );
     sonraki = _refreshFame(sonraki);
     return (state: sonraki, logTexts: satirlar);
+  }
+
+  /// Bu yıl aşılan takipçi eşiği; aşılmadıysa `null`.
+  int? _gecilenEsik(int onceki, int simdiki) {
+    if (simdiki <= onceki) return null;
+    for (final int esik in prototypeOnlyMilestones) {
+      if (onceki < esik && simdiki >= esik) return esik;
+    }
+    return null;
   }
 
   /// Kitle değiştikten sonra Ünü tazeler.

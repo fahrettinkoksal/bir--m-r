@@ -166,8 +166,9 @@ void main() {
 
     expect(
       controller.state!.player.wallet,
-      cuzdanSinemaOnce - sinema.cost,
-      reason: 'Birlikte gitmek ikinci kez para götürmemeli',
+      cuzdanSinemaOnce - sinema.cost * 2,
+      reason: 'İki kişilik bilet ödenir (Q-108), ama tek seferde: '
+          'aynı ücret ikinci kez işlenmemeli',
     );
     expect(controller.state!.personById('es-1')!.bond, greaterThan(esBagiOnce));
     expect(

@@ -47,6 +47,14 @@ abstract final class Outing {
   static const int prototypeOnlyMinChildAge = 4;
 
   /// prototypeOnly: birlikte gitmenin mutluluğa kattığı fazladan pay.
+  /// Yoldaşın da bileti ödenir: iki kişilik maliyet.
+  ///
+  /// Faho'nun Q-108 kararı. Ücretsiz aktivite (park) ücretsiz kalır.
+  static int costFor(ActivityAction action, {required bool withCompanion}) {
+    if (action.cost <= 0) return 0;
+    return withCompanion ? action.cost * 2 : action.cost;
+  }
+
   static const int prototypeOnlyCompanionHappiness = 3;
 
   /// prototypeOnly: birlikte gitmenin bağa kattığı puan.

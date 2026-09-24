@@ -114,7 +114,7 @@ void main() {
     expect(find.byKey(const Key('birlikte_konsere_git_es-1')), findsOneWidget);
   });
 
-  testWidgets('birlikte gidince ücret bir kez alınır, bağ artar ve '
+  testWidgets('birlikte gidince iki kişilik ücret düşer, bağ artar ve '
       'ortak geçmişe tek satır düşer', (WidgetTester tester) async {
     await eglenceyiAc(tester);
 
@@ -135,7 +135,9 @@ void main() {
     await tester.tap(find.byKey(const Key('aktivite_sinema_yap')));
     await tester.pumpAndSettle();
 
-    expect(controller.state!.player.wallet, cuzdan - ucret);
+    // Faho'nun Q-108 kararı: iki kişi gidiyorsa iki kişilik bilet.
+    // Cüzdandan **tek bir kez** ama iki katı tutarında para çıkar.
+    expect(controller.state!.player.wallet, cuzdan - ucret * 2);
     expect(controller.state!.personById('cocuk-1')!.bond, greaterThan(bag));
     expect(controller.state!.log.length, gunlukUzunlugu + 1);
     expect(controller.state!.log.last.personId, 'cocuk-1');
