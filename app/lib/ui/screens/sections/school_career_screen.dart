@@ -70,9 +70,9 @@ class _SchoolViewState extends State<_SchoolView> {
   String? _sonuc;
 
   void _go(_SchoolPage page) => setState(() {
-        _page = page;
-        _sonuc = null;
-      });
+    _page = page;
+    _sonuc = null;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -132,10 +132,7 @@ class _SchoolViewState extends State<_SchoolView> {
             if (egitim.gradeAverage != null)
               (label: 'Not ortalaman', value: '${egitim.gradeAverage}'),
             if (egitim.repeatedYears > 0)
-              (
-                label: 'Sınıf tekrarı',
-                value: '${egitim.repeatedYears} kez',
-              ),
+              (label: 'Sınıf tekrarı', value: '${egitim.repeatedYears} kez'),
             if (egitim.scholarshipSinceAge != null)
               (
                 label: 'Burs',
@@ -157,10 +154,7 @@ class _SchoolViewState extends State<_SchoolView> {
         // Sınav yılı ayrı gösterilir (Paket 17): 8. ve 12. sınıf, okul
         // hayatının diğer yıllarından farklı geçer.
         if (ExamYear.isExamGrade(egitim.grade)) ...<Widget>[
-          _ExamYearPanel(
-            grade: egitim.grade!,
-            flags: state.storyFlags,
-          ),
+          _ExamYearPanel(grade: egitim.grade!, flags: state.storyFlags),
           const SizedBox(height: 12),
         ],
         // Ders çalışmak gerçek bir eylem: not ortalamasını ve zekâyı
@@ -168,8 +162,8 @@ class _SchoolViewState extends State<_SchoolView> {
         Builder(
           builder: (BuildContext context) {
             final GameController controller = GameScope.of(context);
-            final InteractionAvailability uygunluk =
-                controller.studyAvailability();
+            final InteractionAvailability uygunluk = controller
+                .studyAvailability();
             if (!uygunluk.isAllowed) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -230,7 +224,8 @@ class _SchoolViewState extends State<_SchoolView> {
         const SizedBox(height: 12),
         const InfoPanel(
           icon: Icons.menu_book_outlined,
-          text: 'Okul olayları yaş aldıkça ve gün içinde ilerledikçe '
+          text:
+              'Okul olayları yaş aldıkça ve gün içinde ilerledikçe '
               'karşına çıkar. Arkadaşlık düzeyini İlişkiler bölümünden '
               'takip edebilirsin. Sınav, not ve diploma sistemi henüz '
               'yazılmadı.',
@@ -286,7 +281,8 @@ class _PeoplePage extends StatelessWidget {
           const SizedBox(height: 4),
           const InfoPanel(
             icon: Icons.history,
-            text: 'Kademe değişse de tanıdığın kişiler kaybolmaz; '
+            text:
+                'Kademe değişse de tanıdığın kişiler kaybolmaz; '
                 'güncel sınıfında olmadıkları için ayrı listelenirler.',
           ),
           const SizedBox(height: 10),
@@ -322,9 +318,9 @@ class _CareerViewState extends State<_CareerView> {
   String? _sonuc;
 
   void _go(_CareerPage page) => setState(() {
-        _page = page;
-        _sonuc = null;
-      });
+    _page = page;
+    _sonuc = null;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -386,10 +382,7 @@ class _CareerViewState extends State<_CareerView> {
             rows: <({String label, String value})>[
               if (state.career.title != state.career.label)
                 (label: 'Meslek', value: state.career.label),
-              (
-                label: 'Yıllık maaş',
-                value: trMoney(state.career.yearlySalary),
-              ),
+              (label: 'Yıllık maaş', value: trMoney(state.career.yearlySalary)),
               if (state.career.startedAtAge != null)
                 (
                   label: 'Başlangıç',
@@ -478,9 +471,7 @@ class _CareerViewState extends State<_CareerView> {
           MenuRow(
             key: const Key('career_military_row'),
             title: 'Askerlik',
-            subtitle: state.military.isCalled
-                ? 'Celbin geldi; bir karar vermen gerekiyor'
-                : state.military.label,
+            subtitle: MilitaryService.menuSubtitle(state),
             icon: Icons.military_tech_outlined,
             accent: BirOmurAccents.yesil,
             onTap: () => _go(_CareerPage.askerlik),
@@ -504,8 +495,9 @@ class _CareerViewState extends State<_CareerView> {
         if (state.career.isEmployed && !state.career.isRetired) ...<Widget>[
           Builder(
             builder: (BuildContext context) {
-              final InteractionAvailability zam =
-                  GameScope.of(context).raiseAvailability();
+              final InteractionAvailability zam = GameScope.of(
+                context,
+              ).raiseAvailability();
               if (!zam.isAllowed) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -533,8 +525,9 @@ class _CareerViewState extends State<_CareerView> {
           ),
           Builder(
             builder: (BuildContext context) {
-              final InteractionAvailability terfi =
-                  GameScope.of(context).promotionAvailability();
+              final InteractionAvailability terfi = GameScope.of(
+                context,
+              ).promotionAvailability();
               if (!terfi.isAllowed) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -553,8 +546,9 @@ class _CareerViewState extends State<_CareerView> {
                   icon: Icons.military_tech_outlined,
                   accent: BirOmurAccents.pirinc,
                   onTap: () {
-                    final String? metin =
-                        GameScope.of(context).askForPromotion();
+                    final String? metin = GameScope.of(
+                      context,
+                    ).askForPromotion();
                     setState(() => _sonuc = metin);
                   },
                 ),
@@ -576,7 +570,8 @@ class _CareerViewState extends State<_CareerView> {
               return MenuRow(
                 key: const Key('career_retire_row'),
                 title: erken ? 'Erken emekli ol' : 'Emekli ol',
-                subtitle: 'Yıllık aylığın ${trMoney(aylik)} olur'
+                subtitle:
+                    'Yıllık aylığın ${trMoney(aylik)} olur'
                     '${erken ? ' (erken ayrılış kesintisiyle)' : ''}',
                 icon: Icons.self_improvement_outlined,
                 accent: BirOmurAccents.cini,
@@ -717,7 +712,6 @@ class _PanelCard extends StatelessWidget {
   }
 }
 
-
 /// Sınav yılı paneli (Paket 17).
 ///
 /// Yalnızca **gerçekten olmuş** şeyleri yazar: sınav yılında olduğunu ve
@@ -766,10 +760,7 @@ class _ExamYearPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'Sınav yılı',
-                  style: theme.textTheme.titleMedium,
-                ),
+                Text('Sınav yılı', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 3),
                 Text(
                   'Bu yılın sonunda $sinav var. $durum',
