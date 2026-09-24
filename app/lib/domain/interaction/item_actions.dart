@@ -435,28 +435,32 @@ class ItemActions {
     required GameState state,
     required ShopProduct product,
     String? location,
+    int? price,
   }) {
+    // İlan panosundan gelen fiyat şehir katsayısını taşır; katalog
+    // fiyatı yalnızca ilan dışı satın almalarda kullanılır.
+    final int fiyat = price ?? product.price;
     if (state.player.age < product.minAge) {
       return _blocked(
         state,
         'Bu ürünü ${product.minAge} yaşından itibaren alabilirsin.',
       );
     }
-    if (state.player.wallet < product.price) {
+    if (state.player.wallet < fiyat) {
       return _blocked(
         state,
-        '${product.name} için ${trMoney(product.price)} gerekiyor; '
+        '${product.name} için ${trMoney(fiyat)} gerekiyor; '
         'cüzdanında yeterli para yok.',
       );
     }
 
     final PlayerCharacter player =
-        state.player.copyWith(wallet: state.player.wallet - product.price);
+        state.player.copyWith(wallet: state.player.wallet - fiyat);
     // Konutta satın alınan şehir kaydedilir; **taşınma anlamına gelmez**.
     final GameState next = state.copyWith(player: player).grantItems(
       <String>[product.typeId],
       source: ItemSource.satinAlma,
-      purchasePrice: product.price,
+      purchasePrice: fiyat,
       // Konutta satın alınan şehir kaydedilir (D-043); belirtilmezse
       // oyuncunun yaşadığı şehir kullanılır.
       location: product.type.kind == ItemKind.konut
@@ -465,7 +469,7 @@ class ItemActions {
     );
 
     final String metin =
-        '${product.name} satın alındı. ${trMoney(product.price)} ödedin.';
+        '${product.name} satın alındı. ${trMoney(fiyat)} ödedin.';
     return ItemActionResult(
       state: _withLog(next, metin),
       outcome: ItemOutcome(

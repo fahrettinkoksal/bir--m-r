@@ -44,6 +44,7 @@ import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
 import '../data/health_crisis_catalog.dart';
 import '../domain/economy/housing.dart';
+import '../domain/economy/property_market.dart';
 import '../domain/education/school_transfer.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
@@ -435,10 +436,35 @@ class GameController extends ChangeNotifier {
   ///
   /// [location] yalnızca konutlarda anlamlıdır: hangi şehirden alındığı
   /// mülk kaydına yazılır (D-043).
-  ItemOutcome? buyProduct(ShopProduct product, {String? location}) =>
+  ItemOutcome? buyProduct(
+    ShopProduct product, {
+    String? location,
+    int? price,
+  }) =>
       _runItemAction(
-        (GameState current) =>
-            _items.buy(state: current, product: product, location: location),
+        (GameState current) => _items.buy(
+          state: current,
+          product: product,
+          location: location,
+          price: price,
+        ),
+      );
+
+  /// Oyuncunun **yaşadığı ildeki** ev/araç ilanları.
+  ///
+  /// Başka ilin ilanı listeye girmez (Faho'nun kesin kararı). Taşınınca
+  /// havuz kendiliğinden yenilenir.
+  List<PropertyListing> listings(ShopCategory category) {
+    final GameState? current = _state;
+    if (current == null) return const <PropertyListing>[];
+    return PropertyMarket.listingsFor(current, category);
+  }
+
+  /// İlan panosundan satın alır: fiyat ve şehir ilandan gelir.
+  ItemOutcome? buyListing(PropertyListing listing) => buyProduct(
+        listing.product,
+        location: listing.city,
+        price: listing.price,
       );
 
   /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum

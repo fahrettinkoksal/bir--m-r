@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/shop_catalog.dart';
+import '../../../domain/economy/property_market.dart';
 import '../../../domain/interaction/item_actions.dart';
-import '../../../data/name_pool.dart';
 import '../../../domain/economy/housing.dart';
 import '../../../domain/economy/living_costs.dart';
 import '../../../domain/models/game_state.dart';
@@ -39,12 +39,15 @@ class _AssetsScreenState extends State<AssetsScreen> {
   ShopCategory? _kategori;
   ItemOutcome? _sonMagazaSonucu;
 
-  /// Emlakçıda seçilen şehir; diğer mağazalarda kullanılmaz.
-  String? _secilenSehir;
-
   void _buy(ShopProduct product) {
-    final ItemOutcome? outcome = GameScope.of(context)
-        .buyProduct(product, location: _secilenSehir);
+    final ItemOutcome? outcome = GameScope.of(context).buyProduct(product);
+    if (outcome == null) return;
+    setState(() => _sonMagazaSonucu = outcome);
+  }
+
+  /// İlan panosundan satın alır: fiyat ve şehir ilandan gelir.
+  void _buyListing(PropertyListing listing) {
+    final ItemOutcome? outcome = GameScope.of(context).buyListing(listing);
     if (outcome == null) return;
     setState(() => _sonMagazaSonucu = outcome);
   }
@@ -58,9 +61,8 @@ class _AssetsScreenState extends State<AssetsScreen> {
         state: state,
         category: _kategori!,
         lastOutcome: _sonMagazaSonucu,
-        selectedCity: _secilenSehir ?? Housing.cityOf(state),
-        onCityChanged: (String sehir) =>
-            setState(() => _secilenSehir = sehir),
+        listings: GameScope.of(context).listings(_kategori!),
+        onBuyListing: _buyListing,
         onBuy: _buy,
         onBack: () => setState(() {
           _page = _AssetsPage.magazalar;
@@ -246,8 +248,8 @@ class _ShopView extends StatelessWidget {
     required this.state,
     required this.category,
     required this.lastOutcome,
-    required this.selectedCity,
-    required this.onCityChanged,
+    required this.listings,
+    required this.onBuyListing,
     required this.onBuy,
     required this.onBack,
   });
@@ -256,9 +258,9 @@ class _ShopView extends StatelessWidget {
   final ShopCategory category;
   final ItemOutcome? lastOutcome;
 
-  /// Emlakçıda seçili şehir.
-  final String selectedCity;
-  final ValueChanged<String> onCityChanged;
+  /// Yaşanan ildeki ev/araç ilanları; diğer mağazalarda boştur.
+  final List<PropertyListing> listings;
+  final void Function(PropertyListing listing) onBuyListing;
   final void Function(ShopProduct product) onBuy;
   final VoidCallback onBack;
 
@@ -267,6 +269,11 @@ class _ShopView extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final List<ShopProduct> urunler =
         shopProductsIn(category, state.player.age);
+    // Emlakçı ve araç galerisi ilan panosuyla çalışır; diğer mağazalar
+    // katalog fiyatıyla.
+    final bool ilanli = category == ShopCategory.emlakci ||
+        category == ShopCategory.aracGalerisi;
+    final List<PropertyListing> ilanlar = listings;
 
     return SectionScaffold(
       icon: Icons.shopping_bag_rounded,
@@ -275,34 +282,77 @@ class _ShopView extends StatelessWidget {
       backLabel: 'Mağazalar',
       onBack: onBack,
       children: <Widget>[
-        // Emlakçıda konutun hangi şehirde alındığı seçilir (D-043).
-        if (category == ShopCategory.emlakci) ...<Widget>[
-          Text('Şehir', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(
-            'Seçtiğin şehirdeki ev mülk kaydına o şehirle yazılır. '
-            'Ev almak taşınmak değildir; taşınmak için evin detayına gir.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+        // Ev ve araç ilanları **yalnızca oyuncunun yaşadığı ilde**
+        // gösterilir (Faho'nun kesin kararı). Eskiden emlakçıda 20
+        // şehirlik bir seçici vardı ve oyuncu Amasya'da yaşarken
+        // İstanbul'dan ev alabiliyordu; "Türkiye geneli" liste kalktı.
+        if (ilanli) ...<Widget>[
+          InfoPanel(
+            icon: Icons.place_outlined,
+            text: '${state.player.currentCity} ilanları gösteriliyor. '
+                'Başka ildeki ilanlar burada listelenmez; taşınırsan '
+                'ilanlar yeni şehrine göre yenilenir.',
           ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: <Widget>[
-              for (final String sehir in sehirler)
-                ChoiceChip(
-                  key: Key('city_$sehir'),
-                  label: Text(sehir),
-                  selected: selectedCity == sehir,
-                  onSelected: (_) => onCityChanged(sehir),
+          const SizedBox(height: 12),
+          for (final PropertyListing ilan in ilanlar) ...<Widget>[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Icon(
+                          ilan.product.type.icon,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            ilan.name,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ),
+                        Text(
+                          trMoney(ilan.price),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${ilan.city} · ${ilan.note}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton.tonal(
+                        key: Key('ilan_${ilan.id}'),
+                        onPressed: state.player.wallet >= ilan.price
+                            ? () => onBuyListing(ilan)
+                            : null,
+                        child: Text(
+                          state.player.wallet >= ilan.price
+                              ? 'Satın al'
+                              : 'Paran yetmiyor',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
-          const SizedBox(height: 14),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
         ],
-        for (final ShopProduct urun in urunler) ...<Widget>[
+        if (!ilanli)
+          for (final ShopProduct urun in urunler) ...<Widget>[
           Card(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
