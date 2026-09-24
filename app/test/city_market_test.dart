@@ -79,7 +79,7 @@ void main() {
       final GameState s = sehirde('Amasya');
       final List<PropertyListing> ilanlar = PropertyMarket.listingsFor(
         s,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       );
       expect(ilanlar, isNotEmpty);
       for (final PropertyListing i in ilanlar) {
@@ -91,7 +91,7 @@ void main() {
       final GameState s = sehirde('Amasya');
       final List<PropertyListing> ilanlar = PropertyMarket.listingsFor(
         s,
-        ShopCategory.aracGalerisi,
+        ShopCategory.galeriOrta,
       );
       expect(ilanlar, isNotEmpty);
       for (final PropertyListing i in ilanlar) {
@@ -103,7 +103,7 @@ void main() {
       final GameState amasya = sehirde('Amasya');
       final List<PropertyListing> once = PropertyMarket.listingsFor(
         amasya,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       );
 
       final GameState istanbul = amasya.copyWith(
@@ -111,7 +111,7 @@ void main() {
       );
       final List<PropertyListing> sonra = PropertyMarket.listingsFor(
         istanbul,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       );
 
       expect(sonra.every((PropertyListing i) => i.city == 'İstanbul'), isTrue);
@@ -132,7 +132,7 @@ void main() {
       GameState s = sehirde('Ankara');
       final List<PropertyListing> ankara = PropertyMarket.listingsFor(
         s,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       );
       s = s.grantItems(
         <String>[ankara.first.product.typeId],
@@ -155,7 +155,7 @@ void main() {
       // Ama yeni ilan listesine Ankara karışmıyor.
       for (final PropertyListing i in PropertyMarket.listingsFor(
         tasindi,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       )) {
         expect(i.city, 'Amasya');
       }
@@ -165,10 +165,10 @@ void main() {
       final GameState s = sehirde('Amasya');
       final List<PropertyListing> ilanlar = PropertyMarket.listingsFor(
         s,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       );
       final int konutTuru = kShopCatalog
-          .where((ShopProduct p) => p.category == ShopCategory.emlakci)
+          .where((ShopProduct p) => p.category == ShopCategory.emlakciOrta)
           .length;
 
       // Her tür için birden fazla varyant üretiliyor: liste tür
@@ -193,14 +193,14 @@ void main() {
       final List<String> ilk = <String>[
         for (final PropertyListing i in PropertyMarket.listingsFor(
           a,
-          ShopCategory.emlakci,
+          ShopCategory.emlakciOrta,
         ))
           '${i.id}:${i.price}',
       ];
       final List<String> ikinci = <String>[
         for (final PropertyListing i in PropertyMarket.listingsFor(
           b,
-          ShopCategory.emlakci,
+          ShopCategory.emlakciOrta,
         ))
           '${i.id}:${i.price}',
       ];
@@ -212,11 +212,11 @@ void main() {
       final GameState pahali = sehirde('İstanbul');
       final int amasya = PropertyMarket.listingsFor(
         ucuz,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       ).first.price;
       final int istanbul = PropertyMarket.listingsFor(
         pahali,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       ).first.price;
       expect(istanbul, greaterThan(amasya));
       expect(istanbul / amasya, greaterThan(1.5));
@@ -225,7 +225,7 @@ void main() {
     test('ilanlar ucuzdan pahalıya sıralı', () {
       final List<PropertyListing> ilanlar = PropertyMarket.listingsFor(
         sehirde('Konya'),
-        ShopCategory.aracGalerisi,
+        ShopCategory.galeriOrta,
       );
       for (int i = 1; i < ilanlar.length; i++) {
         expect(ilanlar[i].price, greaterThanOrEqualTo(ilanlar[i - 1].price));
@@ -234,9 +234,9 @@ void main() {
 
     test('ilan panosu yalnızca ev ve araç için çalışır', () {
       final GameState s = sehirde('Bursa');
-      expect(PropertyMarket.listingsFor(s, ShopCategory.emlakci), isNotEmpty);
+      expect(PropertyMarket.listingsFor(s, ShopCategory.emlakciOrta), isNotEmpty);
       expect(
-        PropertyMarket.listingsFor(s, ShopCategory.aracGalerisi),
+        PropertyMarket.listingsFor(s, ShopCategory.galeriOrta),
         isNotEmpty,
       );
       // Diğer kategorilerde de çalışır ama ekran onları katalogla
@@ -250,7 +250,7 @@ void main() {
       GameState s = sehirde('Trabzon');
       final PropertyListing ilan = PropertyMarket.listingsFor(
         s,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       ).first;
       s = s.grantItems(
         <String>[ilan.product.typeId],
@@ -267,7 +267,7 @@ void main() {
       final GameState s = sehirde('İstanbul');
       final PropertyListing ilan = PropertyMarket.listingsFor(
         s,
-        ShopCategory.emlakci,
+        ShopCategory.emlakciOrta,
       ).first;
       final ItemType tur = PropertyMarket.typeOf(ilan);
       expect(

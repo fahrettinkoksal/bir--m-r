@@ -38,7 +38,10 @@ import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
 import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
+import '../domain/economy/banking.dart';
 import '../domain/life/eye_exam.dart';
+import '../domain/models/loan.dart';
+import '../text/turkish_text.dart';
 import '../domain/life/notices.dart';
 import '../domain/life/life_verdict.dart';
 import '../domain/life/will.dart';
@@ -816,6 +819,99 @@ class GameController extends ChangeNotifier {
           ),
         );
       });
+
+  // =====================================================================
+  // Banka ve kredi (D-080)
+  // =====================================================================
+
+  /// Şu an açık olan krediler.
+  List<Loan> get activeLoans {
+    final GameState? current = _state;
+    return current == null ? const <Loan>[] : Banking.activeLoans(current);
+  }
+
+  /// Toplam kalan borç.
+  int get totalDebt {
+    final GameState? current = _state;
+    return current == null ? 0 : Banking.totalDebt(current);
+  }
+
+  /// Yıllık taksit yükü.
+  int get annualLoanBurden {
+    final GameState? current = _state;
+    return current == null ? 0 : Banking.annualBurden(current);
+  }
+
+  /// Bir başvurunun sonucunu **uygulamadan** gösterir.
+  ///
+  /// Oyuncu düğmeye basmadan önce ne olacağını görebilsin diye var;
+  /// durumu değiştirmez.
+  LoanDecision previewLoan({
+    required Bank bank,
+    required int amount,
+    required int termYears,
+  }) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const LoanDecision(approved: false, reason: 'Etkin bir hayat yok.');
+    }
+    return Banking.evaluate(
+      current,
+      bank: bank,
+      amount: amount,
+      termYears: termYears,
+    );
+  }
+
+  /// Kredi başvurusu yapar.
+  ///
+  /// Onaylanmazsa durum **hiç değişmez**; gerekçe döner.
+  LoanDecision? applyForLoan({
+    required Bank bank,
+    required int amount,
+    required int termYears,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ({GameState state, LoanDecision decision}) sonuc = Banking.borrow(
+      current,
+      bank: bank,
+      amount: amount,
+      termYears: termYears,
+    );
+    if (!sonuc.decision.approved) return sonuc.decision;
+
+    _state = Notices.enqueue(sonuc.state, <PendingNotice>[
+      PendingNotice(
+        id: 'kredi-${bank.name}-${current.player.age}-${current.loans.length}',
+        kind: NoticeKind.banka,
+        age: current.player.age,
+        title: '${bank.label} kredisi',
+        text: '${sonuc.decision.reason} Cüzdanına '
+            '${trMoney(sonuc.decision.offeredAmount)} geçti. '
+            'Yılda ${trMoney(sonuc.decision.annualPayment)} taksit '
+            'ödeyeceksin; vade $termYears yıl.',
+        money: sonuc.decision.offeredAmount,
+        effects: diffAppliedEffects(current, sonuc.state),
+      ),
+    ]);
+    _autoSave();
+    notifyListeners();
+    return sonuc.decision;
+  }
+
+  /// Krediyi erken kapatır; sonucu anlatan metni döner.
+  String payOffLoan(String loanId) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    final ({GameState state, String message}) sonuc =
+        Banking.payOff(current, loanId);
+    if (identical(sonuc.state, current)) return sonuc.message;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.message;
+  }
 
   /// Bu eyleme şu an gerçekten katılabilecek kişiler (Paket 41).
   List<Person> outingCompanions(ActivityAction action) {

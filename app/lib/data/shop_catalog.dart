@@ -26,14 +26,85 @@ enum ShopCategory {
   genel('Genel mağaza', 'Gündelik eşya, kitap, kıyafet', Icons.storefront_outlined),
   elektronik('Elektronik', 'Telefon, bilgisayar, konsol', Icons.devices_outlined),
   sporHobi('Spor ve hobi', 'Spor ekipmanı, müzik, kamp', Icons.sports_basketball_outlined),
-  aracGalerisi('Araç galerisi', 'Motosiklet ve otomobil', Icons.directions_car_outlined),
-  emlakci('Emlakçı', 'Daire, müstakil ev, villa', Icons.apartment_outlined);
+  // --- Araç galerileri (D-079) -----------------------------------------
+  //
+  // Tek bir "Araç galerisi" hem ikinci el otomobili hem lüks otomobili
+  // aynı rafta gösteriyordu. Galeriler kademeye ayrıldı: oyuncu bütçesine
+  // uyan yere gidiyor ve ucuz galerinin **gerçek bir bedeli** var
+  // (masraf olayları).
+  galeriUcuz(
+    'Uygun fiyatlı galeri',
+    'İkinci el ve yıpranmış otomobiller',
+    Icons.car_repair_outlined,
+  ),
+  galeriOrta(
+    'Orta sınıf galeri',
+    'Ekonomik, aile ve orta sınıf otomobiller',
+    Icons.directions_car_outlined,
+  ),
+  galeriLuks(
+    'Lüks galeri',
+    'Lüks, spor ve prestij otomobilleri',
+    Icons.car_rental_outlined,
+  ),
+  motorUcuz(
+    'Motosiklet galerisi',
+    'Scooter ve ekonomik motosikletler',
+    Icons.two_wheeler_outlined,
+  ),
+  motorLuks(
+    'Büyük motosiklet galerisi',
+    'Güçlü ve tur motosikletleri',
+    Icons.motorcycle_outlined,
+  ),
+  otoAksesuar(
+    'Oto aksesuarcısı',
+    'Otomobile takılan parçalar',
+    Icons.settings_outlined,
+  ),
+  motorAksesuar(
+    'Motosiklet aksesuarcısı',
+    'Kask, çanta, rüzgâr siperi',
+    Icons.sports_motorsports_outlined,
+  ),
+
+  // --- Emlakçılar (D-079) ----------------------------------------------
+  emlakciOrta(
+    'Emlakçı',
+    'Küçük ve standart daireler',
+    Icons.apartment_outlined,
+  ),
+  emlakciLuks(
+    'Lüks emlak ofisi',
+    'Müstakil ev ve villa',
+    Icons.villa_outlined,
+  );
 
   const ShopCategory(this.label, this.description, this.icon);
 
   final String label;
   final String description;
   final IconData icon;
+
+  /// Bu kategori konut satıyor mu? (D-066: şehir filtresi ve ilan listesi.)
+  bool get isHousing =>
+      this == ShopCategory.emlakciOrta || this == ShopCategory.emlakciLuks;
+
+  /// Bu kategori araç satıyor mu? Aksesuarcılar araç satmaz.
+  bool get isVehicle =>
+      this == ShopCategory.galeriUcuz ||
+      this == ShopCategory.galeriOrta ||
+      this == ShopCategory.galeriLuks ||
+      this == ShopCategory.motorUcuz ||
+      this == ShopCategory.motorLuks;
+
+  /// Şehir bazlı ilan listesiyle mi gösterilir? (D-066)
+  bool get isListed => isHousing || isVehicle;
+
+  /// Bu galeriden alınan araç masraf çıkarabilir mi? (D-079)
+  ///
+  /// Yalnızca uygun fiyatlı galeri: ucuz araç gerçekten başa iş açar.
+  bool get cheapVehicles => this == ShopCategory.galeriUcuz;
 }
 
 /// Mağazada satılan bir ürün.
@@ -229,103 +300,166 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     minAge: 7,
   ),
 
-  // --- Araç galerisi ----------------------------------------------------
+  // --- Uygun fiyatlı galeri (D-079) -------------------------------------
+  //
+  // Ucuz araç gerçekten ucuzdur ve gerçekten başa iş açar: bu galeriden
+  // alınan otomobiller yıl içinde masraf olayı üretebilir.
   ShopProduct(
-    typeId: 'motosiklet_ekonomik',
-    description: 'Küçük motorlu, ekonomik bir motosiklet.',
-    category: ShopCategory.aracGalerisi,
-    minAge: 18,
-  ),
-  ShopProduct(
-    typeId: 'motosiklet_guclu',
-    description: 'Daha güçlü bir motosiklet; dikkat ister.',
-    category: ShopCategory.aracGalerisi,
+    typeId: 'otomobil_hurdaya_yakin',
+    description:
+        'Çok yıpranmış; ucuz ama tamirciyle tanışacaksın.',
+    category: ShopCategory.galeriUcuz,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'otomobil_ikinci_el',
     description: 'Yaşını almış ama yolda kalmayan bir otomobil.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.galeriUcuz,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'otomobil_ekonomik',
     description: 'Yeni, ekonomik bir otomobil.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.galeriUcuz,
+    minAge: 18,
+  ),
+
+  // --- Orta sınıf galeri ------------------------------------------------
+  ShopProduct(
+    typeId: 'otomobil_aile',
+    description: 'Geniş bagaj, rahat arka koltuk.',
+    category: ShopCategory.galeriOrta,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'otomobil_orta',
     description: 'Orta sınıf; donanımı biraz daha iyi.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.galeriOrta,
     minAge: 18,
   ),
+  ShopProduct(
+    typeId: 'otomobil_arazi',
+    description: 'Yüksek gövde; kötü yolda rahat.',
+    category: ShopCategory.galeriOrta,
+    minAge: 18,
+  ),
+
+  // --- Lüks galeri ------------------------------------------------------
   ShopProduct(
     typeId: 'otomobil_luks',
     description: 'Lüks bir otomobil. Pahalı ve göz alıcı.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.galeriLuks,
     minAge: 18,
   ),
   ShopProduct(
-    typeId: 'kask',
-    description: 'Motosiklete binerken takılır.',
-    category: ShopCategory.aracGalerisi,
-    minAge: 16,
+    typeId: 'otomobil_spor',
+    description: 'Hızlı, alçak ve herkesin dönüp baktığı.',
+    category: ShopCategory.galeriLuks,
+    minAge: 18,
   ),
   ShopProduct(
-    typeId: 'motosiklet_cantasi',
-    description: 'Motosiklete takılan yük çantası.',
-    category: ShopCategory.aracGalerisi,
-    minAge: 16,
+    typeId: 'otomobil_prestij',
+    description: 'Bu otomobil bir şey söylüyor; sen söylemesen de.',
+    category: ShopCategory.galeriLuks,
+    minAge: 18,
+  ),
+
+  // --- Motosiklet galerisi ----------------------------------------------
+  ShopProduct(
+    typeId: 'motosiklet_scooter',
+    description: 'Şehir içi için küçük ve pratik.',
+    category: ShopCategory.motorUcuz,
+    minAge: 18,
   ),
   ShopProduct(
-    typeId: 'motosiklet_cami',
-    description: 'Motosiklete takılan rüzgâr siperi.',
-    category: ShopCategory.aracGalerisi,
-    minAge: 16,
+    typeId: 'motosiklet_ekonomik',
+    description: 'Küçük motorlu, ekonomik bir motosiklet.',
+    category: ShopCategory.motorUcuz,
+    minAge: 18,
   ),
+
+  // --- Büyük motosiklet galerisi ----------------------------------------
+  ShopProduct(
+    typeId: 'motosiklet_guclu',
+    description: 'Daha güçlü bir motosiklet; dikkat ister.',
+    category: ShopCategory.motorLuks,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'motosiklet_tur',
+    description: 'Uzun yol için; koltuğu ve deposu geniş.',
+    category: ShopCategory.motorLuks,
+    minAge: 18,
+  ),
+
+  // --- Oto aksesuarcısı -------------------------------------------------
   ShopProduct(
     typeId: 'arac_kamerasi',
     description: 'Otomobile takılır; yol kaydı tutar.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.otoAksesuar,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'bebek_koltugu',
     description: 'Otomobile takılır; çocuk için güvenli koltuk.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.otoAksesuar,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'tavan_bagaji',
     description: 'Otomobile takılır; uzun yolda yer açar.',
-    category: ShopCategory.aracGalerisi,
+    category: ShopCategory.otoAksesuar,
     minAge: 18,
+  ),
+
+  // --- Motosiklet aksesuarcısı ------------------------------------------
+  //
+  // Kask ve motosiklete özgü parçalar 16 yaşından itibaren alınabilir
+  // (D-042); aksesuar almak sürme hakkı vermez.
+  ShopProduct(
+    typeId: 'kask',
+    description: 'Motosiklete binerken takılır.',
+    category: ShopCategory.motorAksesuar,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'motosiklet_cantasi',
+    description: 'Motosiklete takılan yük çantası.',
+    category: ShopCategory.motorAksesuar,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'motosiklet_cami',
+    description: 'Motosiklete takılan rüzgâr siperi.',
+    category: ShopCategory.motorAksesuar,
+    minAge: 16,
   ),
 
   // --- Emlakçı ----------------------------------------------------------
   ShopProduct(
     typeId: 'kucuk_daire',
     description: 'Tek odalı, küçük bir daire.',
-    category: ShopCategory.emlakci,
+    category: ShopCategory.emlakciOrta,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'standart_daire',
     description: 'İki yatak odalı standart bir daire.',
-    category: ShopCategory.emlakci,
+    category: ShopCategory.emlakciOrta,
     minAge: 18,
   ),
+
+  // --- Lüks emlak ofisi -------------------------------------------------
   ShopProduct(
     typeId: 'mustakil_ev',
     description: 'Bahçeli, müstakil bir ev.',
-    category: ShopCategory.emlakci,
+    category: ShopCategory.emlakciLuks,
     minAge: 18,
   ),
   ShopProduct(
     typeId: 'villa',
     description: 'Büyük bir ev; bakımı da büyük.',
-    category: ShopCategory.emlakci,
+    category: ShopCategory.emlakciLuks,
     minAge: 18,
   ),
 ];

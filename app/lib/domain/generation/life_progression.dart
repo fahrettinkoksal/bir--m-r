@@ -37,6 +37,9 @@ import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../life/aging.dart';
 import '../models/stats.dart';
+import '../economy/banking.dart';
+import '../economy/vehicle_trouble.dart';
+import '../effects/effect_diff.dart';
 import '../life/hair_loss.dart';
 import '../life/sick_leave.dart';
 import '../life/upkeep_tracker.dart';
@@ -364,6 +367,18 @@ class LifeProgression {
     // kademelidir ve kişiden kişiye değişir. Yalnızca gerçek değer
     // değişir; mutluluk ve zekâ bundan etkilenmez.
     afterDeaths = _applyAging(afterDeaths, newAge);
+
+    // Araç masrafı (D-079): yılda en fazla bir arıza.
+    afterDeaths = _applyVehicleTrouble(afterDeaths, newAge);
+
+    // Kredi taksitleri (D-080): ödenebilen düşer, ödenemeyen kaçar ve
+    // borç faiziyle büyür. Cüzdan eksiye inmez.
+    final ({GameState state, List<String> messages}) kredi =
+        Banking.advanceYear(afterDeaths);
+    afterDeaths = kredi.state;
+    for (final String satir in kredi.messages) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
 
     // Eş vefat ettiyse evlilik kaydı **dul** durumuna geçer; kayıt
     // silinmez, miras hâlâ gerçek bir evliliğe dayanır (D-037).
@@ -821,6 +836,59 @@ class LifeProgression {
         ),
       ]),
     );
+  }
+
+  /// Araç masrafı (D-079).
+  ///
+  /// Faho'nun isteği: "ucuz araçlar sorun çıkartsın, 'araban masraf
+  /// çıkarttı' gibi bildirimler olsun". Yılda **en fazla bir** araç
+  /// arızalanır; her aracı ayrı ayrı bozmak yılı masraf yağmuruna
+  /// çevirirdi. Masraf gerçekten cüzdandan düşer, ödenemezse araç tamir
+  /// edilmeden kalır.
+  GameState _applyVehicleTrouble(GameState state, int newAge) {
+    final List<OwnedItem> araclar = state.items
+        .where(VehicleTroubles.applies)
+        .toList(growable: false);
+    if (araclar.isEmpty) return state;
+
+    for (final OwnedItem arac in araclar) {
+      final VehicleTrouble? sorun = VehicleTroubles.roll(
+        item: arac,
+        wallet: state.player.wallet,
+        rng: _rng,
+      );
+      if (sorun == null) continue;
+
+      final int odenen = sorun.paid ? sorun.cost : 0;
+      GameState next = state.copyWith(
+        player: state.player.copyWith(
+          wallet: state.player.wallet - odenen,
+        ),
+        items: List<OwnedItem>.unmodifiable(
+          state.items.map((OwnedItem i) => i.id == sorun.itemId
+              ? i.copyWith(
+                  condition: (i.condition + sorun.conditionDelta).clamp(0, 100),
+                )
+              : i),
+        ),
+      );
+
+      next = _logLine(next, newAge, sorun.text);
+      next = Notices.enqueue(next, <PendingNotice>[
+        PendingNotice(
+          id: 'arac-${sorun.itemId}-$newAge',
+          kind: NoticeKind.arac,
+          age: newAge,
+          title: 'Araç masrafı',
+          text: sorun.text,
+          money: odenen,
+          effects: diffAppliedEffects(state, next),
+        ),
+      ]);
+      // Yılda tek arıza: ilk bozulanla yetinilir.
+      return next;
+    }
+    return state;
   }
 
   /// Hastalık ve işe gidememe (D-078).

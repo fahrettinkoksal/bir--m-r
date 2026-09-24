@@ -362,6 +362,22 @@ const List<ItemType> kItemTypes = <ItemType>[
     kind: ItemKind.motosiklet,
     baseValue: 420000,
   ),
+  // D-079: galeriler ayrıldığı için her kademede birden fazla seçenek
+  // gerekiyor; tek modelli bir galeri raf değil, vitrin olurdu.
+  ItemType(
+    id: 'motosiklet_scooter',
+    name: 'Scooter',
+    icon: Icons.electric_scooter_outlined,
+    kind: ItemKind.motosiklet,
+    baseValue: 96000,
+  ),
+  ItemType(
+    id: 'motosiklet_tur',
+    name: 'Tur motosikleti',
+    icon: Icons.motorcycle_outlined,
+    kind: ItemKind.motosiklet,
+    baseValue: 780000,
+  ),
 
   // --- Motosiklet aksesuarları -----------------------------------------
   ItemType(
@@ -417,6 +433,43 @@ const List<ItemType> kItemTypes = <ItemType>[
     icon: Icons.car_rental_outlined,
     kind: ItemKind.otomobil,
     baseValue: 6800000,
+  ),
+  // D-079: üç galeri için üç kademe. Marka adı yoktur; katalog
+  // kurgusaldır ve lisans sorunu doğurmaz (D-066).
+  ItemType(
+    id: 'otomobil_hurdaya_yakin',
+    name: 'Çok yıpranmış otomobil',
+    icon: Icons.no_crash_outlined,
+    kind: ItemKind.otomobil,
+    baseValue: 320000,
+  ),
+  ItemType(
+    id: 'otomobil_aile',
+    name: 'Aile otomobili',
+    icon: Icons.airport_shuttle_outlined,
+    kind: ItemKind.otomobil,
+    baseValue: 2050000,
+  ),
+  ItemType(
+    id: 'otomobil_arazi',
+    name: 'Arazi aracı',
+    icon: Icons.terrain_outlined,
+    kind: ItemKind.otomobil,
+    baseValue: 3400000,
+  ),
+  ItemType(
+    id: 'otomobil_spor',
+    name: 'Spor otomobil',
+    icon: Icons.sports_score_outlined,
+    kind: ItemKind.otomobil,
+    baseValue: 9500000,
+  ),
+  ItemType(
+    id: 'otomobil_prestij',
+    name: 'Prestij otomobili',
+    icon: Icons.workspace_premium_outlined,
+    kind: ItemKind.otomobil,
+    baseValue: 14500000,
   ),
 
   // --- Otomobil aksesuarları -------------------------------------------

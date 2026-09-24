@@ -42,6 +42,12 @@ enum NoticeKind {
 
   /// Sağlık işleminin sonucu: muayene, aşı, tahlil, kontrol (D-076).
   saglik,
+
+  /// Araç arızası ve tamir masrafı (D-079).
+  arac,
+
+  /// Banka kredisi: onay, ret ve taksit (D-080).
+  banka,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

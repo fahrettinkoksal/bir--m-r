@@ -54,8 +54,12 @@ void main() {
 
     test('küçük çocuğa araç ve emlak gösterilmez', () {
       final List<ShopCategory> cocuk = shopCategoriesFor(8);
-      expect(cocuk, isNot(contains(ShopCategory.aracGalerisi)));
-      expect(cocuk, isNot(contains(ShopCategory.emlakci)));
+      // D-079: galeriler ve emlakçılar ayrıldı; hiçbiri çocuğa açılmaz.
+      for (final ShopCategory c in ShopCategory.values) {
+        if (c.isVehicle || c.isHousing) {
+          expect(cocuk, isNot(contains(c)), reason: c.label);
+        }
+      }
       expect(cocuk, contains(ShopCategory.genel));
     });
 

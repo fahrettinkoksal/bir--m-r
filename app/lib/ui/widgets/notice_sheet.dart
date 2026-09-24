@@ -269,6 +269,10 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.heart_broken_outlined;
       case NoticeKind.saglik:
         return Icons.monitor_heart_outlined;
+      case NoticeKind.arac:
+        return Icons.car_repair_outlined;
+      case NoticeKind.banka:
+        return Icons.account_balance_outlined;
     }
   }
 }

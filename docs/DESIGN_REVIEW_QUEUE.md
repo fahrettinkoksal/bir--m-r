@@ -2710,5 +2710,30 @@ Faho istedi: "göz muayenesine tıkladım, küçük bir oyun oynatmalıyız", "a
 
 ---
 
+### Q-120 — Galeri kademeleri, araç masrafı ve kredi dengesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-079, D-080 · `app/lib/data/shop_catalog.dart`, `app/lib/domain/economy/vehicle_trouble.dart`, `app/lib/domain/economy/banking.dart` · Test: `app/test/shops_and_bank_test.dart`
+
+Faho istedi: "araç galerisi kısmını ayır, 3 adet galeri ekle... ucuz araçlar sorun çıkartsın... 2 adet motor galerisi... aksesuarları da ayır... emlak bölümünü de lüks ve orta sınıf olarak ayır" ve "banka sistemi ekleyelim, kredi çekebilelim, faizi ile ödenebilir şekilde; Fakbank ve Bankavrupa".
+
+**Yeni araç türleri (2026 ₺, `prototypeOnly`):** çok yıpranmış otomobil 320.000 · scooter 96.000 · aile otomobili 2.050.000 · arazi aracı 3.400.000 · tur motosikleti 780.000 · spor otomobil 9.500.000 · prestij otomobili 14.500.000.
+
+**Araç arızası:** kondisyon 70'in altındaysa ihtimal artar; 500.000 ₺ altındaki araçlarda ek %15 pay. Tamir, aracın temel değerinin **%5'i**. Ödenirse kondisyon +12, ödenemezse −8. Yılda **en fazla bir** arıza.
+
+**Kredi:** Fakbank aylık %2,95 (yıllık ~%42), Bankavrupa aylık %4,60 (yıllık ~%72). Vade 1-3 yıl. Taksit, gelirin en fazla **%45'i** (Bankavrupa) / **%25'i** (Fakbank, kolaylık çarpanıyla) kadar olabilir. Kaçan her taksit tavanı **%25** düşürür.
+
+**Karar soruları:**
+1. Yeni araç fiyatları doğru mu? Prestij otomobili 14,5 milyon ₺ — oyunda ulaşılabilir bir hedef mi, yoksa fazla mı uzak?
+2. Araç arızası yılda en fazla bir. İki araç sahibi olan oyuncu için bu az mı?
+3. Tamir masrafı aracın **%5'i**. Lüks otomobilde bu 340.000 ₺ ediyor; pahalı araç sahibi olmanın bedeli olarak doğru mu?
+4. Ucuz galeriden alınan araç ile miras kalan yaşlı araç **aynı kuralla** bozuluyor. Ucuz galeri ayrıca cezalandırılsın mı?
+5. **Kredi faizleri gerçek ama acı:** 3 yıllık 300.000 ₺'lik Fakbank kredisi toplam ~510.000 ₺ ödetiyor. Oyun dengesi için düşürülsün mü, yoksa gerçeklik korunsun mu?
+6. Vade **3 yıl** ile sınırlı. Konut kredisi (çok daha uzun vade) ayrı bir ürün olarak eklensin mi?
+7. Aynı anda **iki** kredi sınırı doğru mu?
+8. **Kredi notu** yok; ödeme geçmişi yalnızca kaçan taksit sayısıyla izleniyor. Gerçek bir kredi notu sistemi gerekli mi?
+9. Kredi taksiti ödenemediğinde şu an yalnızca borç büyüyor. İcra, haciz ya da varlık satışı gibi bir sonuç olmalı mı?
+10. Banka ekranı **Varlıklar** altında. Doğru yer mi, yoksa ayrı bir bölüm mü olmalı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

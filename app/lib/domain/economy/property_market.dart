@@ -100,7 +100,7 @@ abstract final class PropertyMarket {
     );
     if (urunler.isEmpty) return const <PropertyListing>[];
 
-    final bool konut = category == ShopCategory.emlakci;
+    final bool konut = category.isHousing;
     final List<String> notlar = konut ? _konutNotlari : _aracNotlari;
 
     // Şehir adından belirlenimli bir başlangıç noktası: aynı şehirde

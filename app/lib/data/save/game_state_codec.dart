@@ -8,6 +8,7 @@
 /// ileride enum sırası değişse bile eski kayıtlar bozulmaz.
 library;
 
+import '../../domain/models/loan.dart';
 import '../../domain/models/applied_effect.dart';
 import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
@@ -118,6 +119,21 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
       'wagerThisAge': state.wagerThisAge,
+      // Krediler (D-080). Alan eklemeli; eski kayıtta boş liste okunur.
+      'loans': <Map<String, Object?>>[
+        for (final Loan l in state.loans)
+          <String, Object?>{
+            'id': l.id,
+            'bank': l.bank.name,
+            'principal': l.principal,
+            'annualPayment': l.annualPayment,
+            'termYears': l.termYears,
+            'remainingPayments': l.remainingPayments,
+            'outstanding': l.outstanding,
+            'takenAtAge': l.takenAtAge,
+            'missedPayments': l.missedPayments,
+          },
+      ],
       // Bakım geçmişi (D-072). Eski kayıtlarda yoktur; `null` kalır ve
       // ihmal sayılmaz.
       'lastSportAge': state.lastSportAge,
@@ -799,6 +815,11 @@ GameState decodeGameState(Map<String, Object?> json) {
         ? null
         : _decodeBlackjack(_asMap(json['blackjack'], 'blackjack')),
     wagerThisAge: json['wagerThisAge'] == null ? 0 : _int(json, 'wagerThisAge'),
+    loans: List<Loan>.unmodifiable(
+      _optionalRawList(json, 'loans')
+          .map((Object? e) => _decodeLoan(_asMap(e, 'loan')))
+          .toList(growable: false),
+    ),
     lastSportAge: _intOrNull(json, 'lastSportAge'),
     lastGroomingAge: _intOrNull(json, 'lastGroomingAge'),
     lastLearningAge: _intOrNull(json, 'lastLearningAge'),
@@ -1194,6 +1215,18 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
             .map((Object? e) => _decodeAppliedEffect(_asMap(e, 'effect')))
             .toList(growable: false),
       ),
+    );
+
+Loan _decodeLoan(Map<String, Object?> json) => Loan(
+      id: _string(json, 'id'),
+      bank: _enumByName(Bank.values, _string(json, 'bank'), 'loan.bank'),
+      principal: _int(json, 'principal'),
+      annualPayment: _int(json, 'annualPayment'),
+      termYears: _int(json, 'termYears'),
+      remainingPayments: _int(json, 'remainingPayments'),
+      outstanding: _int(json, 'outstanding'),
+      takenAtAge: _int(json, 'takenAtAge'),
+      missedPayments: _intOr(json, 'missedPayments', 0),
     );
 
 AppliedEffect _decodeAppliedEffect(Map<String, Object?> json) => AppliedEffect(

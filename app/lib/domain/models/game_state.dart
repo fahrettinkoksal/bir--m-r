@@ -15,6 +15,7 @@ import 'game_settings.dart';
 import 'gift_record.dart';
 import 'owned_item.dart';
 import 'life_log.dart';
+import 'loan.dart';
 import 'life_summary.dart';
 import 'marriage.dart';
 import 'parental_status.dart';
@@ -81,6 +82,7 @@ class GameState {
     this.pendingInterview,
     this.blackjack,
     this.wagerThisAge = 0,
+    this.loans = const <Loan>[],
     this.lastSportAge,
     this.lastGroomingAge,
     this.lastLearningAge,
@@ -576,6 +578,12 @@ class GameState {
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
   final int wagerThisAge;
 
+  /// Çekilmiş krediler (D-080).
+  ///
+  /// Kapanmış krediler de listede kalır: borç geçmişi silinmez, yeni
+  /// başvuruda ödeme geçmişine bakılır.
+  final List<Loan> loans;
+
   /// Oyuncunun en son spor yaptığı yaş; hiç yapmadıysa `null` (D-072).
   ///
   /// Tekrar sayaçları her yaşta sıfırlandığı için bakım geçmişi ayrıca
@@ -765,6 +773,7 @@ class GameState {
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
+    List<Loan>? loans,
     int? lastSportAge,
     int? lastGroomingAge,
     int? lastLearningAge,
@@ -847,6 +856,7 @@ class GameState {
           ? this.blackjack
           : blackjack as BlackjackGame?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
+      loans: loans ?? this.loans,
       lastSportAge: lastSportAge ?? this.lastSportAge,
       lastGroomingAge: lastGroomingAge ?? this.lastGroomingAge,
       lastLearningAge: lastLearningAge ?? this.lastLearningAge,

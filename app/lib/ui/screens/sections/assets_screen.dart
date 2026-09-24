@@ -12,6 +12,8 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
+import '../../../domain/economy/banking.dart';
+import 'bank_page.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
@@ -23,7 +25,7 @@ import '../../../data/pet_catalog.dart';
 /// burada toplanır. Ailenin ekonomik durumu buraya karıştırılmaz: aile
 /// varlığı oyuncunun harcanabilir parası değildir.
 /// Varlıklar alt sayfaları.
-enum _AssetsPage { kok, magazalar, kategori }
+enum _AssetsPage { kok, magazalar, kategori, banka }
 
 class AssetsScreen extends StatefulWidget {
   const AssetsScreen({super.key, required this.onBack});
@@ -70,6 +72,10 @@ class _AssetsScreenState extends State<AssetsScreen> {
           _sonMagazaSonucu = null;
         }),
       );
+    }
+
+    if (_page == _AssetsPage.banka) {
+      return BankPage(onBack: () => setState(() => _page = _AssetsPage.kok));
     }
 
     if (_page == _AssetsPage.magazalar) {
@@ -126,6 +132,21 @@ class _AssetsScreenState extends State<AssetsScreen> {
             accent: BirOmurAccents.turuncu,
             trailingText: '${magazalar.length}',
             onTap: () => setState(() => _page = _AssetsPage.magazalar),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Banka (D-080): kredi çekmek ve taksit takibi.
+        if (state.player.age >= Banking.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('assets_banka'),
+            title: 'Banka',
+            subtitle: GameScope.of(context).totalDebt > 0
+                ? 'Kalan borcun '
+                    '${trMoney(GameScope.of(context).totalDebt)}'
+                : 'Fakbank ve Bankavrupa — kredi başvurusu',
+            icon: Icons.account_balance_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => setState(() => _page = _AssetsPage.banka),
           ),
           const SizedBox(height: 12),
         ],
@@ -271,8 +292,7 @@ class _ShopView extends StatelessWidget {
         shopProductsIn(category, state.player.age);
     // Emlakçı ve araç galerisi ilan panosuyla çalışır; diğer mağazalar
     // katalog fiyatıyla.
-    final bool ilanli = category == ShopCategory.emlakci ||
-        category == ShopCategory.aracGalerisi;
+    final bool ilanli = category.isListed;
     final List<PropertyListing> ilanlar = listings;
 
     return SectionScaffold(
@@ -410,15 +430,19 @@ class _ShopView extends StatelessWidget {
         const SizedBox(height: 10),
         InfoPanel(
           icon: Icons.info_outline,
-          text: category == ShopCategory.aracGalerisi
-              ? 'Araç satın almak için ehliyet gerekmez; aracı kullanmak '
-                  'için gerekir. Aksesuarı takmak için Varlıklar\'tan '
-                  'araca gir.'
-              : category == ShopCategory.emlakci
-                  ? 'Ev satın almak o eve taşındığın anlamına gelmez. '
-                      'Kira, taşınma ve kredi henüz yazılmadı.'
-                  : 'Aldığın aksesuarı takmak için Varlıklar\'tan ilgili '
-                      'eşyaya gir.',
+          text: category.cheapVehicles
+              ? 'Buradaki araçlar ucuz, çünkü yaşlılar: yıl içinde '
+                  'masraf çıkarabilirler. Araç satın almak için ehliyet '
+                  'gerekmez; aracı kullanmak için gerekir.'
+              : category.isVehicle
+                  ? 'Araç satın almak için ehliyet gerekmez; aracı '
+                      'kullanmak için gerekir. Aksesuarı takmak için '
+                      'Varlıklar\'tan araca gir.'
+                  : category.isHousing
+                      ? 'Ev satın almak o eve taşındığın anlamına gelmez. '
+                          'Taşınmak için Varlıklar\'taki eve gir.'
+                      : 'Aldığın aksesuarı takmak için Varlıklar\'tan '
+                          'ilgili eşyaya gir.',
         ),
       ],
     );
