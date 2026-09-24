@@ -6,6 +6,7 @@ import 'package:bir_omur/data/save/save_format.dart';
 import 'package:bir_omur/data/save/save_service.dart';
 import 'package:bir_omur/data/save/save_store.dart';
 import 'package:bir_omur/data/social_catalog.dart';
+import 'package:bir_omur/data/sponsor_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/applied_effect.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
@@ -222,7 +223,18 @@ void main() {
         SocialPlatform.video: 'eglence_videosu',
         SocialPlatform.foto: 'fotograf',
         SocialPlatform.mikroblog: 'mizah',
+        SocialPlatform.kisaVideo: 'dans_akimi',
       };
+
+      // Yeni platform eklenip buraya örnek içerik yazılmazsa test
+      // anlaşılmaz bir null hatasıyla çöküyordu. Eksiği adıyla söyle.
+      for (final SocialPlatform p in SocialPlatform.values) {
+        expect(
+          ornekIcerik[p],
+          isNotNull,
+          reason: '${p.label} için örnek içerik yazılmamış',
+        );
+      }
 
       for (final SocialPlatform dolan in SocialPlatform.values) {
         for (final SocialPlatform digeri in SocialPlatform.values) {
@@ -770,6 +782,127 @@ void main() {
               .fame ??
           0;
       expect(erimeUn, greaterThanOrEqualTo(buyuk.player.fame ?? 0));
+    });
+  });
+
+  // -------------------------------------------------------------------
+  // TikTok (Faho'nun isteği)
+  //
+  // Yeni bir platform eklemek, onu yalnızca listeye yazmak değil: hesabı
+  // açılabilmeli, içeriği olmalı, sponsorluk alabilmeli ve eski kayıtları
+  // bozmamalı.
+  // -------------------------------------------------------------------
+  group('TikTok platformu', () {
+    test('katalogda var ve adı doğru', () {
+      expect(SocialPlatform.values, contains(SocialPlatform.kisaVideo));
+      expect(SocialPlatform.kisaVideo.label, 'TikTok');
+      expect(SocialPlatform.kisaVideo.audienceWord, 'takipçi');
+    });
+
+    test('her platformun en az bir içeriği var', () {
+      // Sessiz hata sınıfı: içeriği olmayan platform ekranda açılır ama
+      // hiçbir şey paylaşılamaz.
+      for (final SocialPlatform p in SocialPlatform.values) {
+        expect(
+          contentsFor(p),
+          isNotEmpty,
+          reason: '${p.label} için içerik yazılmamış',
+        );
+      }
+    });
+
+    test('içerik kimlikleri havuzun tamamında benzersiz', () {
+      final Set<String> gorulen = <String>{};
+      for (final SocialContent c in kSocialContents) {
+        expect(gorulen.add(c.id), isTrue, reason: 'Tekrar eden: ${c.id}');
+      }
+    });
+
+    test('hesap açılabiliyor ve paylaşım yapılabiliyor', () {
+      GameState s = withAccount(
+        life(5, age: 20, charisma: 80),
+        SocialPlatform.kisaVideo,
+      );
+      expect(s.accountFor(SocialPlatform.kisaVideo), isNotNull);
+
+      final SocialResult r = social.post(s, content('dans_akimi'), Random(2));
+      expect(r.outcome.applied, isTrue);
+      s = r.state;
+      expect(s.accountFor(SocialPlatform.kisaVideo)!.posts.length, 1);
+    });
+
+    test('kısa video erişimi yüksek ama riski de yüksek', () {
+      // Platformun karakteri: tavan yüksek, oynak. Taban erişimi
+      // mikroblogdan yüksek, kayıp riski de öyle.
+      final SocialContent dans = content('dans_akimi');
+      final SocialContent dusunce = content('gunluk_dusunce');
+      expect(dans.baseReach, greaterThan(dusunce.baseReach));
+      expect(dans.riskOfLoss, greaterThan(dusunce.riskOfLoss));
+    });
+
+    test('sponsorluk alabiliyor', () {
+      final List<SponsorCategory> uygun = kSponsorCategories
+          .where(
+            (SponsorCategory c) =>
+                c.platforms.isEmpty ||
+                c.platforms.contains(SocialPlatform.kisaVideo),
+          )
+          .toList(growable: false);
+      expect(uygun, isNotEmpty, reason: 'TikTok hiçbir sponsorluk alamıyor');
+    });
+
+    test('her platform en az bir sponsorluğa uygun', () {
+      for (final SocialPlatform p in SocialPlatform.values) {
+        final bool varMi = kSponsorCategories.any(
+          (SponsorCategory c) => c.platforms.isEmpty || c.platforms.contains(p),
+        );
+        expect(varMi, isTrue, reason: '${p.label} sponsorsuz kalıyor');
+      }
+    });
+
+    test('çapraz yansıma TikTok hesabına da geliyor', () {
+      GameState s = life(4, charisma: 90);
+      s = withAccount(s, SocialPlatform.mikroblog, followers: 5000);
+      s = withAccount(s, SocialPlatform.kisaVideo, followers: 200);
+      final int once = s.accountFor(SocialPlatform.kisaVideo)!.followers;
+
+      for (int seed = 0; seed < 40; seed++) {
+        final SocialResult r = social.post(s, content('mizah'), Random(seed));
+        if (r.outcome.followerDelta < SocialEngine.prototypeOnlyCrossMinGain) {
+          continue;
+        }
+        expect(
+          r.state.accountFor(SocialPlatform.kisaVideo)!.followers,
+          greaterThan(once),
+        );
+        return;
+      }
+      fail('Hiç kazançlı paylaşım çıkmadı');
+    });
+
+    test('eski kayıt bozulmuyor, yeni platform kaydedilip okunuyor', () {
+      // Platform adıyla saklanıyor; eski kayıtlarda "kisaVideo" hiç
+      // geçmediği için yeni değer onları etkilemiyor. Kayıt sürümü
+      // değişmedi.
+      GameState s = withAccount(life(5, age: 20), SocialPlatform.kisaVideo);
+      s = social.post(s, content('sokak_roportaji'), Random(1)).state;
+
+      final GameState geri = decodeGameState(encodeGameState(s));
+      final SocialAccount? hesap = geri.accountFor(SocialPlatform.kisaVideo);
+      expect(hesap, isNotNull);
+      expect(hesap!.posts.length, 1);
+      expect(hesap.posts.first.contentId, 'sokak_roportaji');
+      expect(jsonEncode(encodeGameState(geri)), jsonEncode(encodeGameState(s)));
+    });
+
+    test('TikTok hesabı olmayan TikTok içeriği paylaşamaz', () {
+      final GameState s = withAccount(life(5, age: 20), SocialPlatform.foto);
+      final InteractionAvailability durum = social.postAvailability(
+        s,
+        content('dans_akimi'),
+      );
+      expect(durum.isAllowed, isFalse);
+      expect(durum.reason, contains('TikTok'));
     });
   });
 }

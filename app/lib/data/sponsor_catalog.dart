@@ -69,7 +69,11 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
         'istiyorlar.',
     minFollowers: 3000,
     baseFee: 70000,
-    platforms: <SocialPlatform>{SocialPlatform.video, SocialPlatform.foto},
+    platforms: <SocialPlatform>{
+      SocialPlatform.video,
+      SocialPlatform.foto,
+      SocialPlatform.kisaVideo,
+    },
   ),
   SponsorCategory(
     id: 'mobil_oyun',
@@ -77,7 +81,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     pitch: 'Yeni oyunlarını bir videoda denemeni istiyorlar.',
     minFollowers: 5000,
     baseFee: 110000,
-    platforms: <SocialPlatform>{SocialPlatform.video},
+    platforms: <SocialPlatform>{SocialPlatform.video, SocialPlatform.kisaVideo},
   ),
   SponsorCategory(
     id: 'kitap_kulubu',
@@ -86,6 +90,14 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     minFollowers: 2500,
     baseFee: 50000,
     platforms: <SocialPlatform>{SocialPlatform.mikroblog, SocialPlatform.video},
+  ),
+  SponsorCategory(
+    id: 'yerel_lezzet',
+    label: 'yerel lezzet markası',
+    pitch: 'Ürünlerini kısa bir videoda denemeni istiyorlar.',
+    minFollowers: 4000,
+    baseFee: 85000,
+    platforms: <SocialPlatform>{SocialPlatform.kisaVideo, SocialPlatform.foto},
   ),
   SponsorCategory(
     id: 'elektronik',
