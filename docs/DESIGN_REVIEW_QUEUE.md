@@ -2554,5 +2554,35 @@ Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığar
 
 ---
 
+### Q-114 — Çok adımlı olay zincirleri
+
+**Durum:** Faho "olay zincirlerini derinleştir" dedi. Dört zincir yazıldı; **sayısal etkiler prototypeOnly ve onay bekliyor.** Kod: `lib/data/event_pool_chains.dart`. İlgili: `docs/NEXT_DEVELOPMENT_OPTIONS.md` madde 10, Q-110.
+
+**Önceki durum:** Altyapı (`requiredFlags`, `forbiddenFlags`, `rememberPersonAs`, `personRole`) Paket 4'ten beri duruyordu ama zincirlerin çoğu **iki adımdı**: bir seçim, yıllar sonra tek bir yankı.
+
+**Yazılanlar — 17 olay, 4 zincir, 8 dal:**
+
+| Zincir | Adım | Yaş aralığı | Kişi | Sonuç |
+|---|---|---|---|---|
+| Öğretmenin defteri | 4 (geçiştiren dal 3) | 10 → 70 | Öğretmen | Anlatan tarafa geçmek |
+| Emanet para | 3 | 17 → 55 | Arkadaş | Para geri gelir; hangi dalda ne kadar ve ilişkinin ne olduğu değişir |
+| Mahallenin boş arsası | 3 | 11 → 80 | Kişisiz | Arsa park olur ya da bina olur |
+| İş yerindeki haksızlık | 3 | 22 → 70 | İş arkadaşı | İş teklifi açılır ya da aynı şey başa gelir |
+
+Dallar birbirini dışlıyor ve hiçbir dal "doğru" diye işaretlenmiyor: emanet parada **beklemek** daha geç ama daha çok getiriyor, **istemek** daha erken ama arkadaşlığı soğutuyor.
+
+**Ölçüm — havuza eklemenin yan etkisi.** 17 yeni olay rastgeleliği kaydırıyor. Okulda arkadaş edinme oranını 30 tohumda ölçtüm: zincirler **kapalıyken 20/30**, **açıkken 20/30**. Oran değişmedi, yalnızca hangi tohumun tuttuğu değişti. (Bu yüzden tek tohuma bağlı bir okul testi kırıldı; test silinmedi, tohumdan bağımsız hâle getirildi.)
+
+**Karar soruları:**
+1. Zincir uzunluğu **üç-dört adım** doğru mu? Daha uzun zincir (5-6 adım) ister misin, yoksa bu bir hayatta takip edilebilirliğin sınırı mı?
+2. Oyuncu bir zincirin içinde olduğunu **fark edebilmeli mi**? Şu an hiçbir ekranda "bu bir devam olayı" işareti yok; yalnızca metin hatırlatıyor.
+3. Emanet parada tutarlar: verilen 4.000 ₺, isteyen dalda geri gelen 4.000 ₺, bekleyen dalda gelen 9.000 ₺. Beklemenin karşılığı iki katından fazla — bu fark doğru mu?
+4. İş zincirinde teklifi kabul etmek 25.000 ₺ veriyor ama **işi değiştirmiyor**; yalnızca para ve iz. Gerçekten iş değiştirmeli mi? (Bu, kariyer sistemine dokunmak demek, kendi başıma yapmadım.)
+5. Zincirin ortasında **kişi vefat ederse** adım hiç çıkmıyor ve zincir sessizce kesiliyor. Bunun yerine kişisiz bir kapanış adımı yazılsın mı?
+6. Öğretmen zinciri 10 yaşta başlayıp 70 yaşa kadar sürebiliyor. Bu kadar uzun bir yay iyi mi, yoksa zincirler bir hayat evresine mi sığmalı?
+7. Dört zincir yeterli mi, yoksa her hayat evresi için (çocukluk, gençlik, orta yaş, yaşlılık) ayrı zincirler mi yazılsın?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
