@@ -1040,6 +1040,15 @@ büyük. Basit kredi karnesi (İyi/Orta/Riskli/Çok riskli) banka ekranının
 üstünde gerekçesiyle duruyor; icra ve haciz için zemin bırakıldı.
 Harçlık isteyince alınan tutar sonucun içinde yazıyor.
 
+**Paket N — hayvanlar ve aile tepkisi (D-109, D-110).** Evcil hayvan
+sahiplendirilebiliyor: vefat değil, kaydı duruyor ve "Yeni yuvasına
+gidenler" başlığında görünüyor. Hayvan ekranı üçe ayrıldı. Kayıp hayvan
+sonsuza kadar kayıp kalmıyor; üç yılın sonunda durum kapanıyor ve hayvan
+ölmüş sayılmıyor. Özel izin gerektiren tür (timsah) gerçekten zorlaştı:
+25 yaş, kendi evi ve bedelin yarısı kadar izin masrafı. 18-20 yaşında
+çocuk sahibi olan oyuncuya ailenin tepkisi eklendi; evliyse destek,
+değilse endişe — ikisi de gerçekten uygulanıyor.
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1108,12 +1117,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-127 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-128 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1946 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1963 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

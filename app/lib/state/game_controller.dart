@@ -1153,6 +1153,32 @@ class GameController extends ChangeNotifier {
     return PetCare.adoptionAvailability(current, species);
   }
 
+  /// Kaydı duran ama artık bakılmayan hayvanlar (D-109).
+  List<Pet> get pastPets =>
+      _state == null ? const <Pet>[] : PetCare.pastPets(_state!);
+
+  /// Bu hayvan başka bir yuvaya verilebilir mi? (D-109)
+  InteractionAvailability petRehomeAvailability(Pet pet) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return PetCare.rehomeAvailability(current, pet);
+  }
+
+  /// Hayvanı başka bir yuvaya verir; sonuç metnini döner (D-109).
+  String? rehomePet(Pet pet) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) sonuc =
+        PetCare.rehome(state: current, petId: pet.id);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
+
   /// Hayvan sahiplenir; sonuç metnini döner.
   String? adoptPet(PetSpecies species, String name) {
     final GameState? current = _state;

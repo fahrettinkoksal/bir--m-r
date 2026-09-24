@@ -606,6 +606,8 @@ Map<String, Object?> _encodePet(Pet pet) => <String, Object?>{
       // Hayvan sağlığı ve kayıp durumu (D-082). Alan eklemeli.
       'health': pet.health,
       'missingSinceAge': pet.missingSinceAge,
+      // Sahiplendirme alan eklemeli (D-109); eski kayıtta yoktur.
+      'rehomedAtPlayerAge': pet.rehomedAtPlayerAge,
     };
 
 Map<String, Object?> _encodeLogEntry(LifeLogEntry e) => <String, Object?>{
@@ -1625,6 +1627,7 @@ Pet _decodePet(Map<String, Object?> json) => Pet(
       // Eski kayıtta hayvan sağlığı yoktur; nötr okunur (D-082).
       health: _intOr(json, 'health', Pet.prototypeOnlyDefaultPetHealth),
       missingSinceAge: _intOrNull(json, 'missingSinceAge'),
+      rehomedAtPlayerAge: _intOrNull(json, 'rehomedAtPlayerAge'),
     );
 
 LifeLogEntry _decodeLogEntry(Map<String, Object?> json) => LifeLogEntry(

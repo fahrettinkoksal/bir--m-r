@@ -275,6 +275,7 @@ class Pet {
     this.bond = 50,
     this.health = prototypeOnlyDefaultPetHealth,
     this.missingSinceAge,
+    this.rehomedAtPlayerAge,
   });
 
   /// prototypeOnly: yeni ve eski kayıttan okunan hayvanın sağlığı.
@@ -314,7 +315,23 @@ class Pet {
   final int? missingSinceAge;
 
   /// Hayvan şu an kayıp mı?
-  bool get isMissing => missingSinceAge != null && diedAtAge == null;
+  bool get isMissing =>
+      missingSinceAge != null && diedAtAge == null && !isRehomed;
+
+  /// Başka bir yuvaya verildiyse **oyuncunun** o zamanki yaşı (D-109).
+  ///
+  /// Sahiplendirmek vefat değildir: hayvan yaşamaya devam eder, kaydı
+  /// silinmez, ama artık oyuncunun bakımında değildir.
+  final int? rehomedAtPlayerAge;
+
+  /// Başka bir yuvaya verildi mi?
+  bool get isRehomed => rehomedAtPlayerAge != null;
+
+  /// Şu an oyuncunun bakımında mı? (D-109)
+  ///
+  /// Vefat etmemiş, sahiplendirilmemiş hayvan. Kayıp hayvan hâlâ
+  /// oyuncunundur: dönmesi beklenir.
+  bool get isActive => isAlive && !isRehomed;
 
   /// Vefat ettiyse hayvanın kendi yaşı.
   final int? diedAtAge;
@@ -343,6 +360,7 @@ class Pet {
     int? bond,
     int? health,
     Object? missingSinceAge = _unset,
+    Object? rehomedAtPlayerAge = _unset,
   }) =>
       Pet(
         id: id,
@@ -365,5 +383,8 @@ class Pet {
         missingSinceAge: missingSinceAge == _unset
             ? this.missingSinceAge
             : missingSinceAge as int?,
+        rehomedAtPlayerAge: rehomedAtPlayerAge == _unset
+            ? this.rehomedAtPlayerAge
+            : rehomedAtPlayerAge as int?,
       );
 }

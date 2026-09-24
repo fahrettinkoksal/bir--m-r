@@ -192,25 +192,24 @@ void main() {
   test('harçlık sonucunda alınan tutar yazılır (D-108)', () {
     GameState s = calisan(age: 12);
     // Para verebilecek bir yakın bulunur.
-    final Person? veren = s.people.firstWhere(
+    final Person veren = s.people.firstWhere(
       (Person p) =>
           p.isAlive && p.wealth != null && p.relation == RelationType.anne,
       orElse: () => s.people.firstWhere(
         (Person p) => p.isAlive && p.wealth != null,
       ),
     );
-    expect(veren, isNotNull);
     s = s.copyWith(
       people: s.people
           .map((Person p) =>
-              p.id == veren!.id ? p.copyWith(wealth: WealthTier.varlikli) : p)
+              p.id == veren.id ? p.copyWith(wealth: WealthTier.varlikli) : p)
           .toList(growable: false),
     );
 
     for (int seed = 0; seed < 40; seed++) {
       final InteractionResult r = const FamilyInteractions().perform(
         state: s,
-        personId: veren!.id,
+        personId: veren.id,
         kind: InteractionKind.paraIste,
         rng: Random(seed),
       );

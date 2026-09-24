@@ -1271,7 +1271,7 @@ class LifeProgression {
     }
 
     final Person bebek = dogum.state.children.last;
-    return dogum.state.copyWith(
+    GameState sonuc = dogum.state.copyWith(
       notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
         ...dogum.state.notices,
         Notices.birth(
@@ -1283,6 +1283,83 @@ class LifeProgression {
         ),
       ]),
     );
+
+    // Çok genç yaşta çocuk sahibi olmak ailede karşılıksız kalmaz
+    // (D-110). Tepki **evlilik durumuna** bakar ve gerçekten uygulanır.
+    sonuc = _youngParentReaction(sonuc, newAge);
+    return sonuc;
+  }
+
+  /// prototypeOnly: ailenin tepki verdiği en küçük ve en büyük yaş.
+  static const int prototypeOnlyYoungParentMinAge = 18;
+  static const int prototypeOnlyYoungParentMaxAge = 20;
+
+  /// prototypeOnly: evli değilken ailenin yakınlık tepkisi.
+  static const int prototypeOnlyWorriedBond = -5;
+  static const int prototypeOnlyWorriedHappiness = -3;
+
+  /// prototypeOnly: evliyken ailenin yakınlık tepkisi.
+  static const int prototypeOnlySupportiveBond = 3;
+  static const int prototypeOnlySupportiveHappiness = 2;
+
+  /// 18-20 yaşında çocuk sahibi olan oyuncuya ailenin tepkisi (D-110).
+  ///
+  /// Faho'nun isteği: "18-20 yaşında çocuk olunca ailenin bir tepkisi
+  /// olsun". Tepki **yargı değil, durum**: evliyse aile destekler,
+  /// değilse endişelenir. Etki yalnızca **hayatta olan** anne ve babaya
+  /// uygulanır; olmayan ebeveyn için satır yazılmaz.
+  GameState _youngParentReaction(GameState state, int newAge) {
+    if (newAge < prototypeOnlyYoungParentMinAge ||
+        newAge > prototypeOnlyYoungParentMaxAge) {
+      return state;
+    }
+    final List<Person> ebeveynler = state.people
+        .where((Person p) =>
+            p.isAlive &&
+            (p.relation == RelationType.anne ||
+                p.relation == RelationType.baba))
+        .toList(growable: false);
+    if (ebeveynler.isEmpty) return state;
+
+    final bool evli = state.marriage != null;
+    final int bagFarki =
+        evli ? prototypeOnlySupportiveBond : prototypeOnlyWorriedBond;
+    final int mutluluk = evli
+        ? prototypeOnlySupportiveHappiness
+        : prototypeOnlyWorriedHappiness;
+
+    final Set<String> kimlikler =
+        ebeveynler.map((Person p) => p.id).toSet();
+    final GameState oncesi = state;
+    GameState next = state.copyWith(
+      people: List<Person>.unmodifiable(
+        state.people.map((Person p) => kimlikler.contains(p.id)
+            ? p.copyWith(bond: (p.bond + bagFarki).clamp(0, 100))
+            : p),
+      ),
+      player: state.player.copyWith(
+        stats: state.player.stats.gain(happiness: mutluluk),
+      ),
+    );
+
+    final String adlar = ebeveynler.map((Person p) => p.firstName).join(' ve ');
+    final String metin = evli
+        ? '$adlar haberi duyunca sevindi. "Genç yaşta zor ama yanındayız" '
+            'dediler.'
+        : '$adlar haberi duyunca uzun bir sessizlik oldu. '
+            'Kızgın değiller; endişeliler.';
+
+    next = _logLine(next, newAge, metin);
+    return Notices.enqueue(next, <PendingNotice>[
+      PendingNotice(
+        id: 'aile-genc-ebeveyn-$newAge',
+        kind: NoticeKind.dogum,
+        age: newAge,
+        title: 'Ailenin tepkisi',
+        text: metin,
+        effects: diffAppliedEffects(oncesi, next),
+      ),
+    ]);
   }
 
   /// Bir yıllık ilgisizliği uygular (Paket 24).

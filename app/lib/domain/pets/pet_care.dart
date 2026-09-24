@@ -64,8 +64,93 @@ abstract final class PetCare {
   // Okuma yardımcıları
   // -------------------------------------------------------------------
 
+  /// Oyuncunun **şu an baktığı** hayvanlar (D-109).
+  ///
+  /// Vefat edenler ve başka yuvaya verilenler burada yoktur; kayıp olan
+  /// hâlâ oyuncunundur, çünkü dönmesi beklenir.
   static List<Pet> livingPets(GameState state) =>
-      state.pets.where((Pet p) => p.isAlive).toList(growable: false);
+      state.pets.where((Pet p) => p.isActive).toList(growable: false);
+
+  /// Kaydı duran ama artık bakılmayan hayvanlar (D-109).
+  static List<Pet> pastPets(GameState state) =>
+      state.pets.where((Pet p) => !p.isActive).toList(growable: false);
+
+  /// prototypeOnly: sahiplendirmenin mutluluk bedeli.
+  ///
+  /// İyi bir yuva bulmak doğru karar olabilir ama yine de bir ayrılıktır.
+  static const int prototypeOnlyRehomeHappiness = -5;
+
+  /// prototypeOnly: bir hayvan en çok kaç yıl kayıp kalabilir (D-109).
+  ///
+  /// Faho bildirdi: "kaçan hayvan mutlaka sonuçlansın". Eskiden dönme
+  /// ihtimali her yıl yeniden atılıyordu ve şanssız bir hayvan ömür boyu
+  /// kayıp kalabiliyordu. Artık bu sürenin sonunda durum kapanır:
+  /// hayvan ya döner ya da başka bir yuva bulmuş sayılır.
+  static const int prototypeOnlyMaxMissingYears = 3;
+
+  /// Hayvan başka bir yuvaya verilebilir mi? (D-109)
+  static InteractionAvailability rehomeAvailability(
+    GameState state,
+    Pet pet,
+  ) {
+    if (!pet.isAlive) {
+      return const InteractionAvailability.blocked('Bu hayvan artık yok.');
+    }
+    if (pet.isRehomed) {
+      return const InteractionAvailability.blocked(
+        'Bu hayvanı zaten başka bir yuvaya verdin.',
+      );
+    }
+    if (pet.isMissing) {
+      return const InteractionAvailability.blocked(
+        'Önce kayıp hayvanın dönmesini beklemen gerekiyor.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Hayvanı başka bir yuvaya verir (D-109).
+  ///
+  /// **Vefat değildir**: hayvan yaşamaya devam eder, kaydı silinmez ve
+  /// "Geçmişte bakıp verdiklerin" bölümünde görünür. Bakım gideri
+  /// bundan sonra işlemez.
+  static ({GameState state, bool applied, String text}) rehome({
+    required GameState state,
+    required String petId,
+  }) {
+    final Pet? pet = petById(state, petId);
+    if (pet == null) {
+      return (state: state, applied: false, text: 'Böyle bir hayvan yok.');
+    }
+    final InteractionAvailability check = rehomeAvailability(state, pet);
+    if (!check.isAllowed) {
+      return (state: state, applied: false, text: check.reason!);
+    }
+
+    final String metin = '${pet.name} için yeni bir yuva buldun. '
+        'Vedalaşmak kolay olmadı.';
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyRehomeHappiness,
+        ),
+      ),
+      pets: List<Pet>.unmodifiable(
+        state.pets.map((Pet p) => p.id == petId
+            ? p.copyWith(rehomedAtPlayerAge: state.player.age)
+            : p),
+      ),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: state.player.age,
+          text: metin,
+          category: LogCategory.aile,
+        ),
+      ]),
+    );
+    return (state: next, applied: true, text: metin);
+  }
 
   static Pet? petById(GameState state, String id) {
     for (final Pet p in state.pets) {
@@ -101,6 +186,32 @@ abstract final class PetCare {
         'Evde bakabileceğin kadar hayvan var.',
       );
     }
+    // Özel izin gerektiren tür (D-082) artık gerçekten zor (D-109):
+    // yaş şartı ağırdır ve iznin ayrıca bir bedeli vardır. Kapı
+    // kapanmaz, ama bu bir "tıkla ve al" tercihi değildir.
+    if (species.requiresPermit) {
+      if (state.player.age < prototypeOnlyPermitMinAge) {
+        return InteractionAvailability.blocked(
+          '${species.label} için özel izin gerekiyor; izin '
+          '$prototypeOnlyPermitMinAge yaşından önce verilmiyor.',
+        );
+      }
+      if (!state.movedOut) {
+        return InteractionAvailability.blocked(
+          '${species.label} için kendi evinde yaşıyor olman gerekiyor; '
+          'izin ailenin evine verilmiyor.',
+        );
+      }
+      final int toplam = species.adoptionCost + permitFeeFor(species);
+      if (state.player.wallet < toplam) {
+        return InteractionAvailability.blocked(
+          '${species.label} için hayvanın bedeli ve izin masrafı '
+          'birlikte ${trMoney(toplam)} tutuyor; cüzdanında yeterli para '
+          'yok.',
+        );
+      }
+      return const InteractionAvailability.allowed();
+    }
     if (state.player.wallet < species.adoptionCost) {
       return InteractionAvailability.blocked(
         '${trMoney(species.adoptionCost)} gerekiyor; cüzdanında yeterli '
@@ -109,6 +220,16 @@ abstract final class PetCare {
     }
     return const InteractionAvailability.allowed();
   }
+
+  /// prototypeOnly: özel izin gerektiren hayvan için en küçük yaş.
+  static const int prototypeOnlyPermitMinAge = 25;
+
+  /// prototypeOnly: özel iznin masrafı — hayvanın bedelinin yarısı.
+  ///
+  /// İzin, muayene, kayıt ve uygun barınak: bedelin yanında ayrıca
+  /// ödenir. İzin gerektirmeyen türde sıfırdır.
+  static int permitFeeFor(PetSpecies species) =>
+      species.requiresPermit ? species.adoptionCost ~/ 2 : 0;
 
   /// Bir hayvan sahiplenir.
   ///
@@ -146,7 +267,9 @@ abstract final class PetCare {
 
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet - species.adoptionCost,
+        wallet: state.player.wallet -
+            species.adoptionCost -
+            permitFeeFor(species),
         stats: state.player.stats.gain(
           happiness: 5,
         ),
@@ -286,7 +409,9 @@ abstract final class PetCare {
     int toplamGider = 0;
 
     for (final Pet pet in state.pets) {
-      if (!pet.isAlive || !pet.inPlayerHousehold) {
+      // Vefat eden, hanede olmayan ve **başka yuvaya verilen** hayvan
+      // için yıl işlemez: bakım gideri de alınmaz (D-109).
+      if (!pet.isActive || !pet.inPlayerHousehold) {
         sonuc.add(pet);
         continue;
       }
@@ -321,6 +446,8 @@ abstract final class PetCare {
       // ihtimalle döner. Kayıpken bakım gideri işlemez, yaşlanmaya
       // devam eder.
       if (guncel.isMissing) {
+        final int kayipYil = newAge - (guncel.missingSinceAge ?? newAge);
+        final bool sonYil = kayipYil >= prototypeOnlyMaxMissingYears;
         if (rng.chance(prototypeOnlyReturnChance)) {
           guncel = guncel.copyWith(missingSinceAge: null);
           gunluk.add(
@@ -338,6 +465,30 @@ abstract final class PetCare {
               title: '${guncel.name} döndü',
               text: '${guncel.name} kapının önünde bekliyordu. '
                   'Sağ salim geri geldi.',
+            ),
+          );
+        } else if (sonYil) {
+          // Kayıp sonsuza kadar sürmez (D-109): süre dolunca durum
+          // kapanır. Hayvan **ölmez**; başka bir yuva bulmuş sayılır ve
+          // kaydı "geçmişte bakıp verdiklerin" arasına geçer.
+          guncel = guncel.copyWith(rehomedAtPlayerAge: newAge);
+          gunluk.add(
+            LifeLogEntry(
+              age: newAge,
+              text: '${guncel.name} bir daha dönmedi. Komşular başka bir '
+                  'mahallede görüldüğünü söyledi.',
+              category: LogCategory.aile,
+            ),
+          );
+          bildirimler.add(
+            PendingNotice(
+              id: 'hayvan-kapandi-${guncel.id}-$newAge',
+              kind: NoticeKind.hayvan,
+              age: newAge,
+              title: '${guncel.name} dönmedi',
+              text: '${guncel.name} $prototypeOnlyMaxMissingYears yıldır '
+                  'kayıptı. Aramayı bıraktın; başka bir kapıda '
+                  'yaşadığını duydun.',
             ),
           );
         }

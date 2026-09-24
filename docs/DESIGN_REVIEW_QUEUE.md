@@ -2939,5 +2939,34 @@ Faho bildirdi: "banka Aktiviteler altına geçsin", "kredi tutarını elle gireb
 
 ---
 
+### Q-128 — Sahiplendirme, kaybın sonu, özel izin ve genç ebeveyn tepkisi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-109, D-110 · `app/lib/domain/pets/pet_care.dart`, `app/lib/domain/generation/life_progression.dart` · Test: `app/test/package_n_test.dart`
+
+Faho bildirdi: "evcil hayvanı sahiplendirebilelim, aktif ve geçmiş ayrılsın", "kaçan hayvan mutlaka sonuçlansın", "timsah nadir/özel olsun", "18-20 yaşında çocuk olunca ailenin tepkisi olsun". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Sayılar.**
+
+| Kural | Değer |
+|---|---|
+| Sahiplendirmenin mutluluk bedeli | −5 |
+| Kayıp hayvanın en çok kayıp kalabileceği süre | 3 yıl |
+| Özel izin için en küçük yaş | 25 |
+| Özel izin masrafı | Hayvanın bedelinin yarısı (timsahta 90.000 ₺) |
+| Genç ebeveyn — evliyse | Yakınlık +3, mutluluk +2 |
+| Genç ebeveyn — evli değilse | Yakınlık −5, mutluluk −3 |
+| Genç ebeveyn yaş bandı | 18-20 |
+
+**Karar soruları:**
+1. Sahiplendirme **geri alınamaz**. Hayvanın sonradan geri alınabilmesi (aynı yuvadan) bir seçenek olmalı mı?
+2. Kayıp süresi **3 yıl** doğru mu? Süre dolunca hayvan "başka bir yuva buldu" sayılıyor; bunun yerine "bir daha hiç haber alınamadı" gibi belirsiz bir kapanış mı olmalı?
+3. Özel izin için **kendi evinde yaşamak** şartı doğru mu? Şu an ailesinin yanında yaşayan bir yetişkin timsah sahiplenemiyor.
+4. İzin masrafı **bedelin yarısı**. Sabit bir tutar mı olmalı?
+5. Timsah dışında hangi türler izin gerektirmeli? (Şu an yalnızca timsah.)
+6. Genç ebeveyn tepkisi **evlilik durumuna** bakıyor. Başka ne bakmalı — oyuncunun işi var mı, kendi evi var mı, ailenin ekonomik durumu?
+7. Tepki **tek seferlik**. Sonraki yıllarda "nasıl gidiyor" diye devam eden bir olay zinciri olmalı mı?
+8. Yaş bandı **18-20**. 21-23 için daha hafif bir tepki de olmalı mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
