@@ -2621,5 +2621,51 @@ Dallar birbirini dışlıyor ve hiçbir dal "doğru" diye işaretlenmiyor: emane
 
 ---
 
+### Q-116 — Statların yaşla düşme hızı ve bakımın gücü
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-072 · `app/lib/domain/life/aging.dart` (`StatAging`), `app/lib/domain/life/upkeep_tracker.dart` · Test: `app/test/stat_aging_test.dart`
+
+Faho bildirdi: "karizma zeka mutluluk sağlık görünüş bunlar yaşa bağlı olarak düşmeli", "zekâ 100 olarak başladım 100 olarak bitirdim", "bakım yapmayınca kendime görünüşüm ve karizmam düşsün", "sürekli spor yapan birisinin karizması daha az düşsün". Kural D-072 olarak kodlandı; **sayılar geçicidir.**
+
+**Şu an kodda olan (hepsi `prototypeOnly`):**
+
+| Değer | Başlangıç yaşı | Yıllık ihtimal | Taban | Koruyan bakım |
+|---|---|---|---|---|
+| Görünüş | 30 | %25 → %70 (yaşa göre) | 15 | Berber/kuaför |
+| Karizma | 35 | %18 → %38 | 15 | Spor (ağırlıklı) + berber |
+| Sağlık | 45 | %22 → %46 | 30 | Spor |
+| Zekâ | 60 | %14 → %22 | 30 | Kitap ve kurs |
+| Mutluluk | 65 | %8 → %38 (sağlığa göre) | 25 | — (sağlık dolaylı korur) |
+
+Bakım "son 2 yıl içinde" yapılmışsa ihtimal **×0,45**; 5 yıldır ya da hiç yapılmamışsa **×1,4**. Bakımsızlık 18 yaşından itibaren sayılır.
+
+**Ölçüm (120 hayat):** ortalama ölüm yaşı **77,6**; 70 yaşında ortalama zekâ 53, karizma 40, sağlık 56, görünüş 32, mutluluk 57.
+
+**Karar soruları:**
+1. Sağlık düşüşü **ölüm eğrisini besliyor** (`Mortality` sağlığa bakar). Ortalama ömür 77,6'da kalıyor ama sağlığını hiç kollamayan oyuncu daha erken ölüyor. Bu isteniyor mu, yoksa sağlık düşüşü ölümden ayrılmalı mı?
+2. 70 yaşında ortalama **görünüş 32** fazla mı düşük? Taban 15.
+3. Mutluluğun yaşla düşmesi D-051'in "yaşlanma mutluluğu düşürmez" hükmünü değiştiriyor. Bu değişiklik onaylanıyor mu, yoksa mutluluk yaşlanmadan muaf mı kalsın?
+4. Bakımın koruma gücü (×0,45) yeterli mi? Şu an bakım yapmak kaybı yarıdan biraz fazla azaltıyor.
+5. Bakım sayılan mekânlar doğru mu? Şu an **spor = spor salonu**, **bakım = berber/kuaför**, **zihin = kurslar + kitap okumak**. Dövüş sanatları sporu sayılmıyor — sayılmalı mı?
+6. Düşüşler günlüğe yazılıyor ama ayrı bir **ekran bildirimi** yok. Yıl sonunda "bu yıl şunlar düştü" özeti gerekli mi?
+
+---
+
+### Q-117 — Saç dökülmesinin kapsamı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-073 · `app/lib/domain/life/hair_loss.dart` · Test: `app/test/stat_aging_test.dart`
+
+Faho istedi: "erkek kullanıcılarının ihtimal dahilinde 30 yaşından sonra saçları dökülmeye başlayabilir bu da karizmayı etkilyebilir".
+
+**Şu an kodda olan:** 30 yaşından itibaren yıllık **%3,4** başlama ihtimali (50 yaşında birikimli ~%50, epidemiyolojik çıpayla uyumlu), başladıktan sonra yılda %12 ihtimalle bir sonraki basamak, en fazla 3 basamak. Basamak ilerlediği yıl bir kez görünüş −2/−2/−3 ve karizma −1/−2/−2; **düzenli bakım yapan oyuncuda yarıya iner**. Ömür boyu ölçüm: erkeklerin **%82'sinde** bir noktada başlıyor (80 yaş üstü gerçek yaygınlıkla uyumlu).
+
+**Karar soruları:**
+1. Gerçekte dökülme çoğu zaman **20'li yaşlarda** başlıyor. Oyunda başlangıç 30; erkene çekilsin mi, yoksa 30 kalsın mı?
+2. **Kadınlarda** yaşa bağlı seyrelme gerçektir ama şu an işletilmiyor. Eklensin mi, eklenirse nasıl anlatılsın?
+3. **Karizma cezası** doğru mu? Saçın dökülmesi karakteri daha az çekici yapmaz; şu anki gerekçe "kendi alışma dönemi". Ceza tamamen kaldırılsın mı, yoksa yalnızca ilk basamakta mı olsun?
+4. **Saç ektirme** (Paket C'deki estetik işlemler içinde) basamağı düşürebilmeli mi? Düşürebiliyorsa kaç basamak ve hangi bedelle?
+5. Ömür boyu %82 fazla mı? Gerçeğe yakın ama oyunda neredeyse her erkek karakteri kapsıyor.
+6. Peruk, şapka, "kabullenmek" gibi **oyuncunun seçebileceği tepkiler** olmalı mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

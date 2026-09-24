@@ -117,6 +117,11 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
       'wagerThisAge': state.wagerThisAge,
+      // Bakım geçmişi (D-072). Eski kayıtlarda yoktur; `null` kalır ve
+      // ihmal sayılmaz.
+      'lastSportAge': state.lastSportAge,
+      'lastGroomingAge': state.lastGroomingAge,
+      'lastLearningAge': state.lastLearningAge,
       'licenses': state.licenses.toList(growable: false),
       'pendingLicenseExam': state.pendingLicenseExam == null
           ? null
@@ -259,6 +264,7 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'fame': p.fame,
       'wallet': p.wallet,
       'hairStyle': p.hairStyle,
+      'hairLossStage': p.hairLossStage,
       'infertile': p.infertile,
       // Doğum ayı ve günü (Paket 27). **Yıl yoktur** (D-003).
       'birthMonth': p.birthDate?.month,
@@ -781,6 +787,9 @@ GameState decodeGameState(Map<String, Object?> json) {
         ? null
         : _decodeBlackjack(_asMap(json['blackjack'], 'blackjack')),
     wagerThisAge: json['wagerThisAge'] == null ? 0 : _int(json, 'wagerThisAge'),
+    lastSportAge: _intOrNull(json, 'lastSportAge'),
+    lastGroomingAge: _intOrNull(json, 'lastGroomingAge'),
+    lastLearningAge: _intOrNull(json, 'lastLearningAge'),
     // Eski kayıtlarda ehliyet yoktur; boş kümeyle açılır.
     licenses: Set<String>.unmodifiable(
       json['licenses'] == null
@@ -958,6 +967,8 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     fame: _intOrNull(json, 'fame'),
     wallet: _int(json, 'wallet'),
     hairStyle: _stringOrNull(json, 'hairStyle'),
+    // Eski kayıtlarda saç dökülmesi yoktur; dökülmemiş sayılır.
+    hairLossStage: _intOr(json, 'hairLossStage', 0),
     // Eski kayıtlarda doğurganlık bilgisi yoktur; kısır sayılmaz.
     infertile: _boolOr(json, 'infertile'),
     // Eski kayıtlarda doğum ayı/günü yoktur; boş kalır. Burç o zaman

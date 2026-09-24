@@ -36,6 +36,9 @@ import '../models/pregnancy.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../life/aging.dart';
+import '../models/stats.dart';
+import '../life/hair_loss.dart';
+import '../life/upkeep_tracker.dart';
 import '../life/notices.dart';
 import '../models/pending_notice.dart';
 import 'child_progression.dart';
@@ -814,40 +817,66 @@ class LifeProgression {
     );
   }
 
-  /// Yaşlanmanın dış görünüşe etkisini uygular (D-051).
+  /// Yaşlanmanın bütün değerlere etkisini uygular (D-051, D-072, D-073).
   ///
   /// Etki yılda **bir kez**, yaş ilerletmenin içinde uygulanır; oyunu
   /// kapatıp açmak aynı yılın etkisini ikinci kez uygulamaz.
+  ///
+  /// Üç iş birlikte yapılır ki aynı yılın kayıpları tek bir yerde
+  /// toplansın: yaşa bağlı sürüklenme, bakımın koruyucu etkisi ve
+  /// erkeklerde saç dökülmesi.
   GameState _applyAging(GameState state, int newAge) {
-    final int delta = Aging.yearlyDelta(
+    final StatDrift drift = StatAging.yearlyDrift(
       age: newAge,
-      appearance: state.player.stats.appearance,
-      health: state.player.stats.health,
+      stats: state.player.stats,
+      upkeep: UpkeepTracker.statusOf(state),
       rng: _rng,
     );
-    if (delta == 0) return state;
 
-    final GameState next = state.copyWith(
+    final HairLossStep sac = HairLoss.step(
+      gender: state.player.gender,
+      age: newAge,
+      stage: state.player.hairLossStage,
+      groomedRecently: UpkeepTracker.groomedRecently(state),
+      rng: _rng,
+    );
+
+    if (drift.isEmpty && !sac.changed) return state;
+
+    final Stats stats = state.player.stats;
+    GameState next = state.copyWith(
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          appearance: state.player.stats.appearance + delta,
+        hairLossStage: sac.stage,
+        stats: stats.copyWith(
+          appearance: stats.appearance + drift.appearance + sac.appearance,
+          charisma: stats.charisma + drift.charisma + sac.charisma,
+          health: stats.health + drift.health,
+          intelligence: stats.intelligence + drift.intelligence,
+          happiness: stats.happiness + drift.happiness,
         ),
       ),
     );
-    if (!Aging.worthLogging(delta)) return next;
 
-    return next.copyWith(
-      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-        ...next.log,
-        LifeLogEntry(
-          age: newAge,
-          text:
-              'Aynada bu yıl birkaç yeni çizgi gördün; dış görünüşün '
-              '${next.player.stats.appearance}.',
-          category: LogCategory.kisisel,
-        ),
-      ]),
-    );
+    // Günlük her yıl dolmaz: yalnızca anlatmaya değer olanlar yazılır.
+    final List<String> satirlar = <String>[
+      ...drift.notes,
+      if (sac.note != null) sac.note!,
+    ];
+    if (satirlar.isEmpty) return next;
+
+    for (final String satir in satirlar) {
+      next = next.copyWith(
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...next.log,
+          LifeLogEntry(
+            age: newAge,
+            text: satir,
+            category: LogCategory.kisisel,
+          ),
+        ]),
+      );
+    }
+    return next;
   }
 
   /// Yası hafifletir (D-036).

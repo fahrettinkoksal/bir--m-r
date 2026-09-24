@@ -81,6 +81,9 @@ class GameState {
     this.pendingInterview,
     this.blackjack,
     this.wagerThisAge = 0,
+    this.lastSportAge,
+    this.lastGroomingAge,
+    this.lastLearningAge,
     this.licenses = const <String>{},
     this.pendingLicenseExam,
     this.settledEstates = const <String>{},
@@ -573,6 +576,33 @@ class GameState {
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
   final int wagerThisAge;
 
+  /// Oyuncunun en son spor yaptığı yaş; hiç yapmadıysa `null` (D-072).
+  ///
+  /// Tekrar sayaçları her yaşta sıfırlandığı için bakım geçmişi ayrıca
+  /// tutulur: "kaç yıldır spor yapmıyor" sorusunun cevabı buradadır.
+  final int? lastSportAge;
+
+  /// Oyuncunun en son berber/kuaför bakımı yaptırdığı yaş.
+  final int? lastGroomingAge;
+
+  /// Oyuncunun en son zihnini çalıştırdığı (kitap, kurs) yaş.
+  final int? lastLearningAge;
+
+  /// Şu an kaç yıldır spor yapılmadığı; hiç yapılmadıysa `null`.
+  int? get yearsSinceSport => _yearsSince(lastSportAge);
+
+  /// Şu an kaç yıldır bakım yaptırılmadığı; hiç yaptırılmadıysa `null`.
+  int? get yearsSinceGrooming => _yearsSince(lastGroomingAge);
+
+  /// Şu an kaç yıldır zihin çalıştırılmadığı; hiç yapılmadıysa `null`.
+  int? get yearsSinceLearning => _yearsSince(lastLearningAge);
+
+  int? _yearsSince(int? age) {
+    if (age == null) return null;
+    final int fark = player.age - age;
+    return fark < 0 ? 0 : fark;
+  }
+
   /// Bir platformdaki hesap; açılmamışsa `null`.
   SocialAccount? accountFor(SocialPlatform platform) {
     for (final SocialAccount a in socialAccounts) {
@@ -735,6 +765,9 @@ class GameState {
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
     int? wagerThisAge,
+    int? lastSportAge,
+    int? lastGroomingAge,
+    int? lastLearningAge,
     Set<String>? licenses,
     Object? pendingLicenseExam = _unsetEvent,
     Set<String>? settledEstates,
@@ -814,6 +847,9 @@ class GameState {
           ? this.blackjack
           : blackjack as BlackjackGame?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
+      lastSportAge: lastSportAge ?? this.lastSportAge,
+      lastGroomingAge: lastGroomingAge ?? this.lastGroomingAge,
+      lastLearningAge: lastLearningAge ?? this.lastLearningAge,
       licenses: licenses ?? this.licenses,
       pendingLicenseExam: pendingLicenseExam == _unsetEvent
           ? this.pendingLicenseExam

@@ -10,6 +10,7 @@ import '../life/astrology.dart';
 import '../../data/fortune_catalog.dart';
 import '../../data/hobby_catalog.dart';
 import '../hobby/hobby_tracker.dart';
+import '../life/upkeep_tracker.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/player_character.dart';
@@ -162,6 +163,10 @@ class ActivityEngine {
     // Kalıcı hobi geçmişi (Paket 39). Eylemin kendisi değişmez; yalnızca
     // beslediği bir hobi varsa geçmişe iz düşer.
     next = HobbyTracker.creditActivity(next, action.id);
+
+    // Bakım geçmişi (D-072): spor salonu, berber ve kurs yıllık
+    // yıpranmayı yavaşlatır. Kayıt tek noktadan yazılır.
+    next = UpkeepTracker.credit(next, action);
 
     // Birlikte gidildiyse sahne, bağ ve ortak geçmiş burada işlenir
     // (Paket 41). Tek çıkış noktası: çifte kayıt oluşamaz.
@@ -419,6 +424,10 @@ class ActivityEngine {
     books = List<BookProgress>.unmodifiable(books);
 
     GameState next = state.copyWith(books: books);
+    // Sayfa çevirmek de zihni çalıştırır (D-072): okuyan oyuncunun
+    // zekâsı ileri yaşta daha yavaş aşınır. Kitabı bitirmek şart
+    // değildir; düzenli okumak yeterlidir.
+    next = UpkeepTracker.recordLearning(next);
     if (bitti) {
       next = next.copyWith(
         player: next.player.copyWith(
