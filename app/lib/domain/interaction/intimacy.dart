@@ -63,11 +63,28 @@ abstract final class Intimacy {
   static const int prototypeOnlyWorryAfter = 4;
 
   /// Kadının yaşına göre ihtimal çarpanı (`prototypeOnly`).
+  /// prototypeOnly: taşıyacak tarafın yaşına göre gebelik çarpanı.
+  ///
+  /// **Faho'nun isteği:** "55'e kadar hamile kalınabilir olsun, yaş
+  /// ilerledikçe ihtimal düşsün." Eskiden 45 yaşında çarpan sıfırlanıyor
+  /// ve kapı tamamen kapanıyordu.
+  ///
+  /// Sayılar gerçeğe yaslandı, isteğin rakamına değil: doğal gebelik
+  /// 40'tan sonra hızla seyrekleşir, 45-49 arasında nadirdir ve 50
+  /// sonrasında son derece ender görülür (menopoz ortalaması Türkiye'de
+  /// 47-51 aralığındadır). Bu yüzden kapı 55'e kadar **açık** ama üst
+  /// yaşlarda ihtimal sıfıra çok yakın: oyuncu deneyebilir, ama bu bir
+  /// plan olmaz.
   static double prototypeOnlyAgeFactor(int womanAge) {
     if (womanAge <= 29) return 1.0;
     if (womanAge <= 34) return 0.8;
     if (womanAge <= 39) return 0.5;
-    if (womanAge <= 44) return 0.25;
+    if (womanAge <= 42) return 0.25;
+    if (womanAge <= 44) return 0.12;
+    if (womanAge <= 46) return 0.05;
+    if (womanAge <= 48) return 0.02;
+    if (womanAge <= 50) return 0.008;
+    if (womanAge <= 55) return 0.002;
     return 0;
   }
 

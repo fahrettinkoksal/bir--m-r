@@ -12,8 +12,13 @@
 /// * **Yalnızca erişilebilir kişiler** zayıflar. Yıllar önceki ilkokul
 ///   öğretmeni ya da başka şehirdeki eski bir sınıf arkadaşı zaten
 ///   aranamıyor; oyuncuyu elinden gelmeyen bir şey için cezalandırmayız.
-/// * **Aynı evde yaşayanlar zayıflamaz.** Her gün görülen biriyle
-///   "görüşmemek" diye bir şey yok.
+/// * **Aynı evde yaşayan yakınlar zayıflamaz** — bir istisnayla.
+///   Her gün görülen anneyle "görüşmemek" diye bir şey yok. Ama
+///   **eş ve sevgili** için bu doğru değildi: Faho yıllarca hiç
+///   ilgilenmediği eşle yakınlığının hâlâ tam olduğunu bildirdi.
+///   Aynı evde yaşamak ilgi göstermek değildir; evlilik ilgisizlikten
+///   soğur. Bu yüzden eş ve sevgili, hanede olsa bile **daha yavaş ve
+///   daha yüksek bir tabanla** zayıflar.
 /// * **Kan bağı daha yavaş zayıflar.** Anne annedir; uzaklaşır ama
 ///   yabancıya dönmez. Bu yüzden kan bağında bir **taban** vardır ve
 ///   yakınlık onun altına ilgisizlikten düşmez.
@@ -23,6 +28,7 @@ library;
 
 import '../models/game_state.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
 
 /// Bir yılın ihmal etkisi.
 class BondDecayResult {
@@ -67,10 +73,35 @@ abstract final class BondDecay {
   /// Kan bağı dışında ilgisizliğin indirebileceği en düşük yakınlık.
   static const int prototypeOnlyFloor = 0;
 
+  /// Hanedeki eş/sevgilinin ihmal sayılması için geçmesi gereken yıl.
+  ///
+  /// Aynı evde yaşandığı için hoşgörü daha uzun; ama sonsuz değil.
+  static const int prototypeOnlyPartnerGraceYears = 4;
+
+  /// Hanedeki eş/sevgilide yıllık kayıp.
+  ///
+  /// Kan bağından da yavaş: birlikte yaşamak bir şeydir. Ama on yıl hiç
+  /// ilgilenmemek yakınlığı tam bırakmaz.
+  static const int prototypeOnlyPartnerLoss = 2;
+
+  /// Hanedeki eş/sevgilide ilgisizliğin indirebileceği en düşük yakınlık.
+  ///
+  /// Evlilik soğur ama yabancılaşmaz; bu taban onu korur.
+  static const int prototypeOnlyPartnerFloor = 35;
+
+  /// Bu kişi hanede yaşayan eş ya da sevgili mi?
+  static bool isHouseholdPartner(Person person) =>
+      person.inPlayerHousehold &&
+      (person.relation == RelationType.es ||
+          person.relation == RelationType.sevgili);
+
   /// Bu kişi ilgisizlikten zayıflayabilir mi?
   static bool decays(GameState state, Person person) {
     if (!person.isAlive) return false;
-    // Her gün görülen biriyle "görüşmemek" diye bir şey yok.
+    // Hanedeki eş ve sevgili istisnadır: aynı evde yaşamak ilgi
+    // göstermek değildir (Faho'nun bildirdiği durum).
+    if (isHouseholdPartner(person)) return true;
+    // Her gün görülen diğer yakınlarla "görüşmemek" diye bir şey yok.
     if (person.inPlayerHousehold) return false;
     // Aranamayan kişi için oyuncu suçlanmaz.
     if (!state.isReachable(person)) return false;
@@ -78,12 +109,25 @@ abstract final class BondDecay {
   }
 
   /// Bu kişinin ilgisizlik tabanı.
-  static int floorFor(Person person) =>
-      person.relation.kanBagi ? prototypeOnlyBloodFloor : prototypeOnlyFloor;
+  static int floorFor(Person person) {
+    if (isHouseholdPartner(person)) return prototypeOnlyPartnerFloor;
+    return person.relation.kanBagi
+        ? prototypeOnlyBloodFloor
+        : prototypeOnlyFloor;
+  }
 
   /// Bu kişinin yıllık kaybı.
-  static int lossFor(Person person) =>
-      person.relation.kanBagi ? prototypeOnlyBloodLoss : prototypeOnlyYearlyLoss;
+  static int lossFor(Person person) {
+    if (isHouseholdPartner(person)) return prototypeOnlyPartnerLoss;
+    return person.relation.kanBagi
+        ? prototypeOnlyBloodLoss
+        : prototypeOnlyYearlyLoss;
+  }
+
+  /// Bu kişide ihmal sayılmadan önce geçmesi gereken yıl.
+  static int graceFor(Person person) => isHouseholdPartner(person)
+      ? prototypeOnlyPartnerGraceYears
+      : prototypeOnlyGraceYears;
 
   /// Kaç yıldır görüşülmediğini döndürür.
   ///
@@ -121,7 +165,7 @@ abstract final class BondDecay {
         return p;
       }
       final int gecen = (state.player.age - temas[p.id]!).clamp(0, 200);
-      if (gecen <= prototypeOnlyGraceYears) return p;
+      if (gecen <= graceFor(p)) return p;
 
       final int taban = floorFor(p);
       if (p.bond <= taban) return p;

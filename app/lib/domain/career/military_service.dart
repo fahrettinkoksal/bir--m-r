@@ -455,8 +455,13 @@ abstract final class MilitaryService {
   static String blockReason(GameState state, MilitaryTrack track) {
     final MilitaryState askerlik = state.military;
     if (askerlik.isServing) return 'Zaten görevdesin.';
-    if (askerlik.status.kapandi) {
-      return 'Askerlik meselen kapandı: ${askerlik.status.label}.';
+    // Faho'nun bildirdiği durum: bedelli ödedikten sonra subaylık ve
+    // astsubaylık da kapanıyordu. Oysa bedelli **yükümlülüğü** kapatır;
+    // meslek olarak askerlik ayrı bir yoldur ve gönüllüdür. Yalnızca
+    // "er olarak yap" kapanır, çünkü kapatılan yükümlülük odur.
+    if (askerlik.status.kapandi && track == MilitaryTrack.er) {
+      return 'Askerlik yükümlülüğün kapandı: ${askerlik.status.label}. '
+          'İstersen subay ya da astsubay olarak başvurabilirsin.';
     }
     // Bakaya kalan da gidip yükümlülüğünü kapatabilir; cezası ayrıca
     // hesaplanır (Paket 31).

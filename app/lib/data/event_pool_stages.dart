@@ -566,7 +566,13 @@ const List<GameEvent> kLifeStageEvents = <GameEvent>[
     text:
         'Ay sonu geldi; kira, fatura ve market aynı haftaya denk '
         'düştü. Hesap tam çıkmıyor.',
-    requirement: EventRequirement(minAge: 20, maxAge: 45),
+    // Kira geçen olay yalnızca kiracıya çıkar (Faho'nun bildirdiği
+    // hatanın aynısı).
+    requirement: EventRequirement(
+      minAge: 20,
+      maxAge: 45,
+      requiresTenant: true,
+    ),
     repeatable: true,
     minAgeGap: 7,
     weight: 4,
@@ -704,10 +710,13 @@ const List<GameEvent> kLifeStageEvents = <GameEvent>[
     text:
         'Toplantıda yanlış bildiğini düşündüğün bir karar alınıyor. '
         'Söz almak için el kaldırmak yeterli.',
+    // Faho'nun bildirdiği hata: bu olay çalışmayan oyuncuya da
+    // çıkıyordu. calismaHayati bir **geçmiş izidir** ve işten ayrılınca
+    // silinmez; iş yeri olayı anlık iş durumuna bakmalı.
     requirement: EventRequirement(
       minAge: 30,
       maxAge: 60,
-      requiredFlags: <String>{StoryFlags.calismaHayati},
+      requiresEmployed: true,
     ),
     repeatable: true,
     minAgeGap: 7,
@@ -840,6 +849,7 @@ const List<GameEvent> kLifeStageEvents = <GameEvent>[
         'Emeklilik konuşulmaya başlandı. Kalmak da gitmek de '
         'mümkün; ikisi de bir şey bitiriyor.',
     requirement: EventRequirement(
+      requiresEmployed: true,
       minAge: 58,
       maxAge: 68,
       requiredFlags: <String>{StoryFlags.calismaHayati},

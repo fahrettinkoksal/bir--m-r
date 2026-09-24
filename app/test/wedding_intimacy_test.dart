@@ -312,7 +312,23 @@ void main() {
         Intimacy.prototypeOnlyAgeFactor(40),
         lessThan(Intimacy.prototypeOnlyAgeFactor(25)),
       );
-      expect(Intimacy.prototypeOnlyAgeFactor(50), 0);
+      // Eskiden 45'te sıfırlanıyordu; Faho'nun isteğiyle kapı 55'e
+      // kadar açık ama oran gerçeğe yaslandı.
+      expect(
+        Intimacy.prototypeOnlyAgeFactor(50),
+        greaterThan(0),
+        reason: '55e kadar gebe kalınabilmeli',
+      );
+      expect(
+        Intimacy.prototypeOnlyAgeFactor(50),
+        lessThan(0.02),
+        reason: '50 yaşında doğal gebelik son derece ender',
+      );
+      expect(
+        Intimacy.prototypeOnlyAgeFactor(50),
+        lessThan(Intimacy.prototypeOnlyAgeFactor(44)),
+      );
+      expect(Intimacy.prototypeOnlyAgeFactor(56), 0);
     });
 
     test('yakınlaşma bir temastır; ilgisizlik sayacını sıfırlar', () {

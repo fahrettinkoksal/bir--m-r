@@ -43,6 +43,7 @@ class EventRequirement {
     this.requiresSocialAccount = false,
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
+    this.requiresTenant = false,
     this.requiresMinYearsInJob = 0,
     this.minFame = 0,
     this.requiresTripMemory = false,
@@ -168,6 +169,13 @@ class EventRequirement {
   ///
   /// İşsiz oyuncuya iş yerinde geçen olay çıkmaz (Paket 9).
   final bool requiresEmployed;
+
+  /// Oyuncunun **kirada** yaşıyor olmasını gerektirir.
+  ///
+  /// Ev sahibi, kira zammı ve depozito gibi olaylar içindir. Kendi
+  /// evinde oturan ya da ailesinin yanında yaşayan oyuncuya "ev sahibi
+  /// aradı" denmez.
+  final bool requiresTenant;
 
   /// Şu anki işte geçmiş olması gereken en az yıl.
   ///

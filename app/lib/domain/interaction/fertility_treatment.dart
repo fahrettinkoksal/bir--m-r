@@ -71,6 +71,13 @@ abstract final class FertilityTreatment {
 
   /// prototypeOnly: taşıyacak tarafın yaşına göre bir denemenin
   /// canlı doğumla sonuçlanma ihtimali.
+  /// prototypeOnly: taşıyacak tarafın yaşına göre bir denemenin
+  /// canlı doğumla sonuçlanma ihtimali.
+  ///
+  /// Kendi yumurtasıyla tüp bebekte canlı doğum oranı 43-44'ten sonra
+  /// %1-2 bandına iner ve 46'dan sonra neredeyse görülmez. Faho'nun
+  /// "55'e kadar" isteğine uyarak kapı açık bırakıldı ama üst yaşlarda
+  /// oran gerçeğe yakın tutuldu: denemek mümkün, ummak gerçekçi değil.
   static double prototypeOnlySuccessByAge(int womanAge) {
     if (womanAge < 35) return 0.45;
     if (womanAge <= 37) return 0.38;
@@ -78,6 +85,8 @@ abstract final class FertilityTreatment {
     if (womanAge <= 42) return 0.18;
     if (womanAge <= 44) return 0.06;
     if (womanAge <= 46) return 0.02;
+    if (womanAge <= 50) return 0.008;
+    if (womanAge <= 55) return 0.003;
     return 0;
   }
 

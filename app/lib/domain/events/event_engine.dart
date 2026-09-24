@@ -10,6 +10,7 @@ import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
 import '../models/game_event.dart';
 import '../activities/travel.dart';
+import '../economy/living_costs.dart';
 import '../models/game_state.dart';
 import '../models/hobby_progress.dart';
 import '../hobby/hobby_tracker.dart';
@@ -253,6 +254,11 @@ class EventEngine {
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
+    // Kirada oturmayan oyuncuya ev sahibi olayı çıkmaz.
+    if (req.requiresTenant &&
+        LivingCosts.situationOf(state) != LivingSituation.kirada) {
+      return false;
+    }
     if (req.requiresMinYearsInJob > 0 &&
         state.career.yearsInJob(state.player.age) <
             req.requiresMinYearsInJob) {

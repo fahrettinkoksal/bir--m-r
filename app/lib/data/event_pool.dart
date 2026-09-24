@@ -891,10 +891,12 @@ const List<GameEvent> kEventPool = <GameEvent>[
     id: 'ilk_maas',
     category: EventCategory.yetiskinlik,
     text: 'İlk maaşını elden aldın. Zarf ince ama senin.',
+    // calismaHayati bir geçmiş izidir ve işten ayrılınca silinmez;
+    // maaş olayı anlık iş durumuna bakmalı.
     requirement: EventRequirement(
+      requiresEmployed: true,
       minAge: 18,
       maxAge: 24,
-      requiredFlags: <String>{StoryFlags.calismaHayati},
     ),
     weight: 3,
     choices: <EventChoice>[

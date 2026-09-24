@@ -31,7 +31,13 @@ const List<GameEvent> kMidlifeEvents = <GameEvent>[
         'Ev sahibi aradı. "Bu sene biraz ayarlama yapmamız lazım" '
         'dedi ve bir rakam söyledi. Telefonu kapattıktan sonra bir süre '
         'ekrana baktın.',
-    requirement: EventRequirement(minAge: 26, maxAge: 58),
+    // Faho'nun bildirdiği hata: bu olay kendi evinde oturan oyuncuya da
+    // çıkıyordu. Ev sahibi olayı yalnızca kiracıya çıkar.
+    requirement: EventRequirement(
+      minAge: 26,
+      maxAge: 58,
+      requiresTenant: true,
+    ),
     repeatable: true,
     minAgeGap: 6,
     weight: 8,

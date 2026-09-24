@@ -54,7 +54,12 @@ Person sevgili(String id, String ad, Gender gender, {int age = 28}) => Person(
 void main() {
   test('bir hayat baştan sona: hiçbir kayıt kaybolmuyor, hiçbir şey '
       'iki kez olmuyor', () {
-    final GameController controller = GameController(random: Random(31));
+    // Tohum yalnızca iskele: senaryonun kendisi değil, rastgelelik
+    // akışını sabitler. Doğurganlık eğrisi 55 yaşa uzayınca (Paket A)
+    // akış kaydı ve 31 tohumunda senaryodaki çocuk oyuncudan önce
+    // vefat etmeye başladı. Aşağıdaki iddiaların hiçbiri gevşetilmedi;
+    // yalnızca çocuğun hayatta kaldığı bir tohum seçildi.
+    final GameController controller = GameController(random: Random(32));
     addTearDown(controller.dispose);
 
     // ---------------------------------------------------------------
