@@ -93,7 +93,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Bisiklet',
     icon: Icons.pedal_bike_outlined,
     kind: ItemKind.bisiklet,
-    baseValue: 9000,
+    baseValue: 28000,
   ),
 
   // --- Bisiklet aksesuarları --------------------------------------------
@@ -102,7 +102,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Bisiklet zili',
     icon: Icons.notifications_active_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 120,
+    baseValue: 350,
     fitsOn: <ItemKind>{ItemKind.bisiklet},
   ),
   ItemType(
@@ -110,7 +110,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Bisiklet kornası',
     icon: Icons.campaign_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 180,
+    baseValue: 500,
     fitsOn: <ItemKind>{ItemKind.bisiklet},
   ),
   ItemType(
@@ -118,7 +118,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Reflektör',
     icon: Icons.brightness_low_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 100,
+    baseValue: 300,
     fitsOn: <ItemKind>{ItemKind.bisiklet},
   ),
   ItemType(
@@ -126,7 +126,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Gidon süsü',
     icon: Icons.auto_awesome_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 80,
+    baseValue: 220,
     fitsOn: <ItemKind>{ItemKind.bisiklet},
   ),
 
@@ -136,7 +136,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Bisiklet bakım seti',
     icon: Icons.build_outlined,
     kind: ItemKind.evEsyasi,
-    baseValue: 450,
+    baseValue: 1400,
   ),
 
   // --- Saatler ------------------------------------------------------------
@@ -145,14 +145,14 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Kol saati',
     icon: Icons.watch_outlined,
     kind: ItemKind.saat,
-    baseValue: 2200,
+    baseValue: 6500,
   ),
   ItemType(
     id: 'antika_saat',
     name: 'Antika cep saati',
     icon: Icons.history_toggle_off_outlined,
     kind: ItemKind.saat,
-    baseValue: 9000,
+    baseValue: 28000,
     special: true,
   ),
 
@@ -162,49 +162,49 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Yo-yo',
     icon: Icons.sports_baseball_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 60,
+    baseValue: 180,
   ),
   ItemType(
     id: 'oyuncak_araba',
     name: 'Oyuncak araba',
     icon: Icons.toys_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 160,
+    baseValue: 450,
   ),
   ItemType(
     id: 'oyuncak_bebek',
     name: 'Oyuncak bebek',
     icon: Icons.child_friendly_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 160,
+    baseValue: 450,
   ),
   ItemType(
     id: 'bilye',
     name: 'Bilye torbası',
     icon: Icons.circle_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 20,
+    baseValue: 90,
   ),
   ItemType(
     id: 'ucurtma',
     name: 'Uçurtma',
     icon: Icons.air_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 90,
+    baseValue: 250,
   ),
   ItemType(
     id: 'pelus_oyuncak',
     name: 'Pelüş oyuncak',
     icon: Icons.pets_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 220,
+    baseValue: 650,
   ),
   ItemType(
     id: 'kutu_oyunu',
     name: 'Kutu oyunu',
     icon: Icons.casino_outlined,
     kind: ItemKind.oyuncak,
-    baseValue: 500,
+    baseValue: 1500,
   ),
 
   // --- Spor ---------------------------------------------------------------
@@ -213,14 +213,14 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Futbol topu',
     icon: Icons.sports_soccer_outlined,
     kind: ItemKind.spor,
-    baseValue: 450,
+    baseValue: 1400,
   ),
   ItemType(
     id: 'spor_ayakkabi',
     name: 'Spor ayakkabı',
     icon: Icons.directions_run_outlined,
     kind: ItemKind.spor,
-    baseValue: 1500,
+    baseValue: 4200,
   ),
 
   // --- Kitap ve kırtasiye --------------------------------------------------
@@ -229,35 +229,35 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Boyama kitabı',
     icon: Icons.palette_outlined,
     kind: ItemKind.kirtasiye,
-    baseValue: 60,
+    baseValue: 180,
   ),
   ItemType(
     id: 'cizim_seti',
     name: 'Çizim seti',
     icon: Icons.draw_outlined,
     kind: ItemKind.kirtasiye,
-    baseValue: 380,
+    baseValue: 1100,
   ),
   ItemType(
     id: 'defter',
     name: 'Hatıra defteri',
     icon: Icons.book_outlined,
     kind: ItemKind.kirtasiye,
-    baseValue: 120,
+    baseValue: 350,
   ),
   ItemType(
     id: 'hikaye_kitabi',
     name: 'Hikâye kitabı',
     icon: Icons.menu_book_outlined,
     kind: ItemKind.kitap,
-    baseValue: 150,
+    baseValue: 420,
   ),
   ItemType(
     id: 'roman',
     name: 'Roman',
     icon: Icons.auto_stories_outlined,
     kind: ItemKind.kitap,
-    baseValue: 250,
+    baseValue: 700,
   ),
 
   // --- Kıyafet -------------------------------------------------------------
@@ -266,7 +266,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Yeni kıyafet',
     icon: Icons.checkroom_outlined,
     kind: ItemKind.kiyafet,
-    baseValue: 900,
+    baseValue: 2600,
   ),
 
   // --- Elektronik ----------------------------------------------------------
@@ -275,14 +275,14 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Kulaklık',
     icon: Icons.headphones_outlined,
     kind: ItemKind.elektronik,
-    baseValue: 1200,
+    baseValue: 3400,
   ),
   ItemType(
     id: 'radyo',
     name: 'Küçük radyo',
     icon: Icons.radio_outlined,
     kind: ItemKind.elektronik,
-    baseValue: 900,
+    baseValue: 2600,
   ),
 
   // --- Ev eşyası ------------------------------------------------------------
@@ -291,7 +291,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Çay takımı',
     icon: Icons.emoji_food_beverage_outlined,
     kind: ItemKind.evEsyasi,
-    baseValue: 800,
+    baseValue: 2400,
   ),
 
   // --- Elektronik -------------------------------------------------------
@@ -300,28 +300,28 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Akıllı telefon',
     icon: Icons.smartphone_outlined,
     kind: ItemKind.elektronik,
-    baseValue: 18000,
+    baseValue: 45000,
   ),
   ItemType(
     id: 'bilgisayar',
     name: 'Dizüstü bilgisayar',
     icon: Icons.laptop_mac_outlined,
     kind: ItemKind.elektronik,
-    baseValue: 32000,
+    baseValue: 65000,
   ),
   ItemType(
     id: 'oyun_konsolu',
     name: 'Oyun konsolu',
     icon: Icons.sports_esports_outlined,
     kind: ItemKind.elektronik,
-    baseValue: 22000,
+    baseValue: 38000,
   ),
   ItemType(
     id: 'akilli_saat',
     name: 'Akıllı saat',
     icon: Icons.watch_outlined,
     kind: ItemKind.saat,
-    baseValue: 6000,
+    baseValue: 17000,
   ),
 
   // --- Spor ve hobi -----------------------------------------------------
@@ -330,21 +330,21 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Gitar',
     icon: Icons.music_note_outlined,
     kind: ItemKind.spor,
-    baseValue: 4500,
+    baseValue: 13000,
   ),
   ItemType(
     id: 'kamp_cadiri',
     name: 'Kamp çadırı',
     icon: Icons.cabin_outlined,
     kind: ItemKind.spor,
-    baseValue: 3200,
+    baseValue: 9000,
   ),
   ItemType(
     id: 'agirlik_seti',
     name: 'Ağırlık seti',
     icon: Icons.fitness_center_outlined,
     kind: ItemKind.spor,
-    baseValue: 2800,
+    baseValue: 8000,
   ),
 
   // --- Motosikletler ----------------------------------------------------
@@ -353,14 +353,14 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Ekonomik motosiklet',
     icon: Icons.two_wheeler_outlined,
     kind: ItemKind.motosiklet,
-    baseValue: 75000,
+    baseValue: 190000,
   ),
   ItemType(
     id: 'motosiklet_guclu',
     name: 'Güçlü motosiklet',
     icon: Icons.two_wheeler,
     kind: ItemKind.motosiklet,
-    baseValue: 190000,
+    baseValue: 420000,
   ),
 
   // --- Motosiklet aksesuarları -----------------------------------------
@@ -369,7 +369,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Motosiklet kaskı',
     icon: Icons.sports_motorsports_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 3500,
+    baseValue: 9500,
     fitsOn: <ItemKind>{ItemKind.motosiklet},
   ),
   ItemType(
@@ -377,7 +377,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Motosiklet çantası',
     icon: Icons.work_outline,
     kind: ItemKind.aksesuar,
-    baseValue: 2200,
+    baseValue: 6500,
     fitsOn: <ItemKind>{ItemKind.motosiklet},
   ),
   ItemType(
@@ -385,7 +385,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Rüzgâr siperi',
     icon: Icons.shield_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 1800,
+    baseValue: 5200,
     fitsOn: <ItemKind>{ItemKind.motosiklet},
   ),
 
@@ -395,28 +395,28 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'İkinci el otomobil',
     icon: Icons.directions_car_filled_outlined,
     kind: ItemKind.otomobil,
-    baseValue: 320000,
+    baseValue: 850000,
   ),
   ItemType(
     id: 'otomobil_ekonomik',
     name: 'Ekonomik otomobil',
     icon: Icons.directions_car_outlined,
     kind: ItemKind.otomobil,
-    baseValue: 750000,
+    baseValue: 1650000,
   ),
   ItemType(
     id: 'otomobil_orta',
     name: 'Orta sınıf otomobil',
     icon: Icons.directions_car,
     kind: ItemKind.otomobil,
-    baseValue: 1250000,
+    baseValue: 2600000,
   ),
   ItemType(
     id: 'otomobil_luks',
     name: 'Lüks otomobil',
     icon: Icons.car_rental_outlined,
     kind: ItemKind.otomobil,
-    baseValue: 3400000,
+    baseValue: 6800000,
   ),
 
   // --- Otomobil aksesuarları -------------------------------------------
@@ -425,7 +425,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Araç kamerası',
     icon: Icons.videocam_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 2400,
+    baseValue: 7000,
     fitsOn: <ItemKind>{ItemKind.otomobil},
   ),
   ItemType(
@@ -433,7 +433,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Bebek koltuğu',
     icon: Icons.child_friendly_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 3800,
+    baseValue: 11000,
     fitsOn: <ItemKind>{ItemKind.otomobil},
   ),
   ItemType(
@@ -441,7 +441,7 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Tavan bagajı',
     icon: Icons.luggage_outlined,
     kind: ItemKind.aksesuar,
-    baseValue: 5200,
+    baseValue: 15000,
     fitsOn: <ItemKind>{ItemKind.otomobil},
   ),
 
@@ -451,28 +451,28 @@ const List<ItemType> kItemTypes = <ItemType>[
     name: 'Küçük daire',
     icon: Icons.apartment_outlined,
     kind: ItemKind.konut,
-    baseValue: 1800000,
+    baseValue: 3200000,
   ),
   ItemType(
     id: 'standart_daire',
     name: 'Standart daire',
     icon: Icons.apartment,
     kind: ItemKind.konut,
-    baseValue: 3200000,
+    baseValue: 5400000,
   ),
   ItemType(
     id: 'mustakil_ev',
     name: 'Müstakil ev',
     icon: Icons.house_outlined,
     kind: ItemKind.konut,
-    baseValue: 5400000,
+    baseValue: 8800000,
   ),
   ItemType(
     id: 'villa',
     name: 'Büyük ev / villa',
     icon: Icons.villa_outlined,
     kind: ItemKind.konut,
-    baseValue: 9500000,
+    baseValue: 16000000,
   ),
 ];
 

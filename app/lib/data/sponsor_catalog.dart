@@ -52,22 +52,23 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'mahalle kafe zinciri',
     pitch: 'Yeni şubelerini duyurmak istiyorlar; bir paylaşım yeterli.',
     minFollowers: 1000,
-    baseFee: 9000,
+    baseFee: 28000,
   ),
   SponsorCategory(
     id: 'kirtasiye',
     label: 'kırtasiye markası',
     pitch: 'Okul sezonu için bir paylaşım istiyorlar.',
     minFollowers: 1500,
-    baseFee: 12000,
+    baseFee: 38000,
   ),
   SponsorCategory(
     id: 'spor_icecegi',
     label: 'sporcu içeceği üreticisi',
-    pitch: 'Antrenman içeriğinin yanına küçük bir tanıtım koymanı '
+    pitch:
+        'Antrenman içeriğinin yanına küçük bir tanıtım koymanı '
         'istiyorlar.',
     minFollowers: 3000,
-    baseFee: 22000,
+    baseFee: 70000,
     platforms: <SocialPlatform>{SocialPlatform.video, SocialPlatform.foto},
   ),
   SponsorCategory(
@@ -75,7 +76,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'bağımsız mobil oyun stüdyosu',
     pitch: 'Yeni oyunlarını bir videoda denemeni istiyorlar.',
     minFollowers: 5000,
-    baseFee: 35000,
+    baseFee: 110000,
     platforms: <SocialPlatform>{SocialPlatform.video},
   ),
   SponsorCategory(
@@ -83,18 +84,15 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'çevrim içi kitap kulübü',
     pitch: 'Okuduğun bir kitaptan söz etmeni istiyorlar.',
     minFollowers: 2500,
-    baseFee: 16000,
-    platforms: <SocialPlatform>{
-      SocialPlatform.mikroblog,
-      SocialPlatform.video,
-    },
+    baseFee: 50000,
+    platforms: <SocialPlatform>{SocialPlatform.mikroblog, SocialPlatform.video},
   ),
   SponsorCategory(
     id: 'elektronik',
     label: 'elektronik mağazası',
     pitch: 'Bir ürünlerini tanıtmanı istiyorlar.',
     minFollowers: 8000,
-    baseFee: 60000,
+    baseFee: 190000,
   ),
 ];
 

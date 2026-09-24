@@ -364,7 +364,7 @@ void main() {
 
     test('değerli eşya eşiği ortak tablodan gelir', () {
       expect(ItemActions.prototypeOnlyValuableThreshold,
-          Economy.prototypeOnlyValuableThreshold);
+          Economy.valuableThreshold);
       expect(itemTypeById('telefon')!.baseValue,
           greaterThan(ItemActions.prototypeOnlyValuableThreshold));
       expect(itemTypeById('bilye')!.baseValue,

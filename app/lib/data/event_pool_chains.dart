@@ -307,7 +307,7 @@ const List<GameEvent> kChainEvents = <GameEvent>[
             'Saydın, verdin, senet falan olmadı. Kapıdan '
             'çıkarken "unutmam" dedi. Unutup unutmadığını zaman '
             'gösterecek.',
-        money: -4000, // prototypeOnly
+        money: -12000, // 2026: bir aylık asgari ücretin yarısı
         happiness: 2,
         bond: 10,
         addFlags: <String>{ChainFlags.borcVerdi},
@@ -351,7 +351,7 @@ const List<GameEvent> kChainEvents = <GameEvent>[
             'Lafı dolandırmadan sordun. Bozuldu, "isteseydin '
             'verirdim zaten" dedi. Bir hafta sonra parayı getirdi ve '
             'çayı içmeden gitti.',
-        money: 4000, // prototypeOnly
+        money: 12000, // prototypeOnly
         happiness: -2,
         bond: -12,
         addFlags: <String>{ChainFlags.borcuIstedi},
@@ -390,7 +390,7 @@ const List<GameEvent> kChainEvents = <GameEvent>[
             'Açtığında sesi titriyordu. "Utandığım için '
             'kaybolmuştum" dedi. O akşam iki saat konuştunuz; arada '
             'geçen yıllar birden kısaldı.',
-        money: 9000, // prototypeOnly
+        money: 20000, // Q-114: verilenin ~1,7 katı
         happiness: 12,
         bond: 18,
       ),
@@ -400,7 +400,7 @@ const List<GameEvent> kChainEvents = <GameEvent>[
         resultText:
             'Zarfı çekmeceye koydun. Borç kapandı; konuşulmayan '
             'şey kapanmadı.',
-        money: 9000, // prototypeOnly
+        money: 20000, // Q-114: verilenin ~1,7 katı
         happiness: 3,
         bond: 2,
       ),

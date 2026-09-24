@@ -83,7 +83,8 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
   HealthCrisis(
     id: 'ates_hastalik',
     kind: CrisisKind.hastalik,
-    text: 'Günlerdir geçmeyen yüksek ateşin var; halsizlik seni yatağa '
+    text:
+        'Günlerdir geçmeyen yüksek ateşin var; halsizlik seni yatağa '
         'bağladı.',
     minAge: 3,
     maxAge: 40,
@@ -92,9 +93,10 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
       CrisisChoice(
         id: 'doktor',
         label: 'Doktora git',
-        resultText: 'Doktor tedaviye başladı; birkaç hafta içinde '
+        resultText:
+            'Doktor tedaviye başladı; birkaç hafta içinde '
             'toparlandın.',
-        cost: 6000,
+        cost: 22000,
         survivalBonus: 0.07,
         healthChange: -4,
         needsMoney: true,
@@ -112,7 +114,8 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
   HealthCrisis(
     id: 'trafik_kazasi',
     kind: CrisisKind.kaza,
-    text: 'Yolda bir trafik kazası geçirdin; ilk kontrolde durumun ciddi '
+    text:
+        'Yolda bir trafik kazası geçirdin; ilk kontrolde durumun ciddi '
         'görünüyor.',
     minAge: 16,
     maxAge: 75,
@@ -122,7 +125,7 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
         id: 'hastane',
         label: 'Hastanede tedavi ol',
         resultText: 'Tedavi işe yaradı; bir süre dinlenerek iyileştin.',
-        cost: 25000,
+        cost: 85000,
         survivalBonus: 0.1,
         healthChange: -10,
         needsMoney: true,
@@ -142,7 +145,8 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
   HealthCrisis(
     id: 'kalp_uyarisi',
     kind: CrisisKind.hastalik,
-    text: 'Göğsünde sıkışma hissiyle uyandın; doktorlar kalbini yakından '
+    text:
+        'Göğsünde sıkışma hissiyle uyandın; doktorlar kalbini yakından '
         'izlemek istiyor.',
     minAge: 40,
     maxAge: 95,
@@ -152,7 +156,7 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
         id: 'tedavi',
         label: 'Tedaviyi kabul et',
         resultText: 'Tedavi ve düzenli kontrollerle durumun toparlandı.',
-        cost: 40000,
+        cost: 140000,
         survivalBonus: 0.12,
         healthChange: -8,
         needsMoney: true,
@@ -179,7 +183,7 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
         id: 'mudahale',
         label: 'Acil müdahaleyi kabul et',
         resultText: 'Müdahale zamanında yapıldı; yaraların iyileşti.',
-        cost: 18000,
+        cost: 60000,
         survivalBonus: 0.09,
         healthChange: -9,
         needsMoney: true,
@@ -208,7 +212,7 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
         id: 'hastane',
         label: 'Hastanede tedavi ol',
         resultText: 'Tedavi sonrası nefesin rahatladı.',
-        cost: 22000,
+        cost: 75000,
         survivalBonus: 0.13,
         healthChange: -10,
         needsMoney: true,
@@ -241,7 +245,7 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
         id: 'ameliyat',
         label: 'Hastaneye git',
         resultText: 'Tedaviden sonra yeniden yürümeye başladın.',
-        cost: 30000,
+        cost: 110000,
         survivalBonus: 0.12,
         healthChange: -12,
         needsMoney: true,

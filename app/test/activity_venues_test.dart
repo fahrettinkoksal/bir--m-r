@@ -239,7 +239,9 @@ void main() {
     });
 
     test('yeni yaşta sayaç sıfırlanır, eylem yeniden açılır', () {
-      GameState s = hayat(age: 20, wallet: 20000);
+      // 2026 kalibrasyonu: bilgisayar kursu 3.200 ₺'den 16.000 ₺'ye
+      // çıktı. Cüzdan fixture'ı ölçeğe çekildi; iddia aynen duruyor.
+      GameState s = hayat(age: 20, wallet: 120000);
       final ActivityAction a = eylem('bilgisayar_kursu');
 
       for (int i = 0; i < a.maxPerAge; i++) {

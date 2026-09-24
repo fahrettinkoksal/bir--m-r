@@ -108,7 +108,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Kahve falına baktır',
     description: 'Fincan ters çevrilir, beklenir, sonra biri bakar.',
     icon: Icons.coffee_rounded,
-    cost: 150, // prototypeOnly
+    cost: 450, // prototypeOnly
     minAge: 14,
     maxPerAge: 2,
   ),
@@ -118,7 +118,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Tarot açtır',
     description: 'Deste karılır, tek kart çekilir. Gerisi yoruma kalmış.',
     icon: Icons.style_rounded,
-    cost: 400, // prototypeOnly
+    cost: 1200, // prototypeOnly
     minAge: 16,
     maxPerAge: 2,
   ),
@@ -139,7 +139,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Saç kestir',
     description: 'Klasik tıraş. Ense temiz, ayna iki taraflı.',
     icon: Icons.content_cut_outlined,
-    cost: 120, // prototypeOnly
+    cost: 350, // prototypeOnly
     minAge: 4,
     appearance: 3,
     happiness: 1,
@@ -153,7 +153,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Yeni bir model dene. Bazen iyi gider, bazen saç uzamasını '
         'beklersin.',
     icon: Icons.auto_fix_high_outlined,
-    cost: 260, // prototypeOnly
+    cost: 800, // prototypeOnly
     minAge: 10,
     appearance: 4,
     charisma: 2,
@@ -224,7 +224,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Tansiyon, tahlil, kısa bir muayene. Çoğu yıl bir şey '
         'çıkmaz; çıkarsa erken çıkar.',
     icon: Icons.monitor_heart_outlined,
-    cost: 900, // prototypeOnly
+    cost: 2800, // prototypeOnly
     minAge: 3,
     health: 5,
     maxPerAge: 1,
@@ -235,7 +235,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Diş kontrolü',
     description: 'Koltuk arkaya yatar, ışık gözüne gelir, on dakikada biter.',
     icon: Icons.sentiment_satisfied_outlined,
-    cost: 650, // prototypeOnly
+    cost: 2000, // prototypeOnly
     minAge: 5,
     appearance: 3,
     health: 2,
@@ -249,7 +249,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Duvardaki harfler gittikçe küçülüyor. En alt satır herkese '
         'aynı şeyi sormuyor.',
     icon: Icons.remove_red_eye_outlined,
-    cost: 450, // prototypeOnly
+    cost: 1400, // prototypeOnly
     minAge: 6,
     health: 2,
     maxPerAge: 1,
@@ -262,7 +262,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Kısa bir iğne, bir gün kolun ağrır, kış biraz daha kolay '
         'geçer.',
     icon: Icons.vaccines_outlined,
-    cost: 300, // prototypeOnly
+    cost: 900, // prototypeOnly
     minAge: 1,
     health: 3,
     maxPerAge: 1,
@@ -275,7 +275,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Kırk beş dakika boyunca yalnızca sen konuşuyorsun ve '
         'kimse sözünü kesmiyor.',
     icon: Icons.psychology_outlined,
-    cost: 1400, // prototypeOnly
+    cost: 4500, // prototypeOnly
     minAge: 12,
     happiness: 9,
     health: 1,
@@ -308,7 +308,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Işıklar sönüyor, koltuk arkaya yaslanıyor, iki saat '
         'boyunca başka bir hayat.',
     icon: Icons.movie_outlined,
-    cost: 250, // prototypeOnly
+    cost: 750, // prototypeOnly
     minAge: 5,
     happiness: 5,
     maxPerAge: 3,
@@ -319,7 +319,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Kafede otur',
     description: 'Bir çay, uzun bir sohbet ve camdan dışarıyı seyretmek.',
     icon: Icons.local_cafe_outlined,
-    cost: 200, // prototypeOnly
+    cost: 600, // prototypeOnly
     minAge: 11,
     happiness: 3,
     charisma: 1,
@@ -333,7 +333,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Tribün ayakta, ses kulağında, sonuç ne olursa olsun akşam '
         'konuşulacak bir şey var.',
     icon: Icons.sports_soccer_outlined,
-    cost: 550, // prototypeOnly
+    cost: 1700, // prototypeOnly
     minAge: 8,
     happiness: 7,
     maxPerAge: 2,
@@ -344,7 +344,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Konsere git',
     description: 'Kalabalık, ışık ve herkesin aynı sözü bildiği o an.',
     icon: Icons.music_note_outlined,
-    cost: 950, // prototypeOnly
+    cost: 2900, // prototypeOnly
     minAge: 13,
     happiness: 9,
     charisma: 1,
@@ -361,7 +361,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     label: 'Resim atölyesi',
     description: 'Önlük, fırça ve kuruması beklenen bir tuval.',
     icon: Icons.brush_outlined,
-    cost: 1600, // prototypeOnly
+    cost: 5000, // prototypeOnly
     minAge: 6,
     happiness: 4,
     charisma: 1,
@@ -375,7 +375,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'İlk hafta parmaklar acıyor, üçüncü hafta bir şeye '
         'benziyor.',
     icon: Icons.piano_outlined,
-    cost: 2200, // prototypeOnly
+    cost: 12000, // prototypeOnly
     minAge: 7,
     charisma: 3,
     happiness: 3,
@@ -389,7 +389,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Yeni bir dilde ilk cümleni kurmak, ilk cümleni kurduğun '
         'günkü kadar tuhaf.',
     icon: Icons.translate_outlined,
-    cost: 2800, // prototypeOnly
+    cost: 14000, // prototypeOnly
     minAge: 10,
     intelligence: 4,
     charisma: 1,
@@ -403,7 +403,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
         'Ekranda çalışmayan bir şey var ve sebebini bulmak '
         'sandığından uzun sürüyor.',
     icon: Icons.terminal_outlined,
-    cost: 3200, // prototypeOnly
+    cost: 16000, // prototypeOnly
     minAge: 13,
     intelligence: 5,
     maxPerAge: 2,
@@ -569,6 +569,173 @@ const List<BookInfo> kBookCatalog = <BookInfo>[
     minAge: 16,
     maxAge: 120,
     intelligenceGain: 7,
+  ),
+  // --- Q-110: kütüphane 8'den 23 kitaba çıkarıldı ------------------------
+  //
+  // Okuma hobisini yalnızca bitirilen kitaplar besliyor. Sekiz kitapla
+  // merdivenin üst basamakları hiçbir hayatta ulaşılamıyordu; yazarlık
+  // mesleği de bu yüzden açılamıyordu. Bütün adlar ve yazarlar özgündür.
+  BookInfo(
+    id: 'gokyuzu_defteri',
+    title: 'Gökyüzü Defteri',
+    author: 'Ela Sarıgül',
+    kind: BookKind.cocuk,
+    pages: 6,
+    minAge: 6,
+    maxAge: 11,
+    intelligenceGain: 2,
+    happinessGain: 2,
+  ),
+  BookInfo(
+    id: 'tahta_kilic',
+    title: 'Tahta Kılıç',
+    author: 'Mert Özbay',
+    kind: BookKind.macera,
+    pages: 7,
+    minAge: 7,
+    maxAge: 12,
+    intelligenceGain: 2,
+    happinessGain: 3,
+  ),
+  BookInfo(
+    id: 'komsunun_bahcesi',
+    title: 'Komşunun Bahçesi',
+    author: 'Sevil Tuna',
+    kind: BookKind.cocuk,
+    pages: 5,
+    minAge: 6,
+    maxAge: 10,
+    intelligenceGain: 2,
+    happinessGain: 2,
+  ),
+  BookInfo(
+    id: 'gece_treni',
+    title: 'Gece Treni',
+    author: 'Kerem Alpaslan',
+    kind: BookKind.macera,
+    pages: 9,
+    minAge: 10,
+    maxAge: 16,
+    intelligenceGain: 3,
+    happinessGain: 2,
+  ),
+  BookInfo(
+    id: 'sessiz_sinif',
+    title: 'Sessiz Sınıf',
+    author: 'Bahar Keskin',
+    kind: BookKind.roman,
+    pages: 12,
+    minAge: 12,
+    maxAge: 120,
+    intelligenceGain: 3,
+    charismaGain: 1,
+  ),
+  BookInfo(
+    id: 'demir_kopru',
+    title: 'Demir Köprü',
+    author: 'Ozan Yılmazer',
+    kind: BookKind.roman,
+    pages: 15,
+    minAge: 14,
+    maxAge: 120,
+    intelligenceGain: 4,
+    charismaGain: 1,
+  ),
+  BookInfo(
+    id: 'tuz_ve_deniz',
+    title: 'Tuz ve Deniz',
+    author: 'Nergis Akbulut',
+    kind: BookKind.roman,
+    pages: 16,
+    minAge: 15,
+    maxAge: 120,
+    intelligenceGain: 4,
+    happinessGain: 2,
+  ),
+  BookInfo(
+    id: 'sayilarin_dili',
+    title: 'Sayıların Dili',
+    author: 'Cem Doğanay',
+    kind: BookKind.bilim,
+    pages: 18,
+    minAge: 14,
+    maxAge: 120,
+    intelligenceGain: 6,
+  ),
+  BookInfo(
+    id: 'gorunmeyen_sehir',
+    title: 'Görünmeyen Şehir',
+    author: 'İpek Yalçınkaya',
+    kind: BookKind.roman,
+    pages: 17,
+    minAge: 16,
+    maxAge: 120,
+    intelligenceGain: 4,
+    charismaGain: 2,
+  ),
+  BookInfo(
+    id: 'atolye_notlari',
+    title: 'Atölye Notları',
+    author: 'Hakan Erdoğmuş',
+    kind: BookKind.bilim,
+    pages: 20,
+    minAge: 17,
+    maxAge: 120,
+    intelligenceGain: 6,
+  ),
+  BookInfo(
+    id: 'uzun_kis',
+    title: 'Uzun Kış',
+    author: 'Ayşen Bozdağ',
+    kind: BookKind.roman,
+    pages: 19,
+    minAge: 18,
+    maxAge: 120,
+    intelligenceGain: 5,
+    happinessGain: 2,
+  ),
+  BookInfo(
+    id: 'bir_ustanin_anlattiklari',
+    title: 'Bir Ustanın Anlattıkları',
+    author: 'Rıza Çamlıca',
+    kind: BookKind.bilim,
+    pages: 16,
+    minAge: 16,
+    maxAge: 120,
+    intelligenceGain: 5,
+    charismaGain: 1,
+  ),
+  BookInfo(
+    id: 'kapali_carsi_hikayeleri',
+    title: 'Kapalı Çarşı Hikâyeleri',
+    author: 'Suat Nalbantoğlu',
+    kind: BookKind.roman,
+    pages: 14,
+    minAge: 15,
+    maxAge: 120,
+    intelligenceGain: 4,
+    charismaGain: 2,
+  ),
+  BookInfo(
+    id: 'yildizlara_bakmak',
+    title: 'Yıldızlara Bakmak',
+    author: 'Defne Korkmazer',
+    kind: BookKind.bilim,
+    pages: 22,
+    minAge: 18,
+    maxAge: 120,
+    intelligenceGain: 7,
+  ),
+  BookInfo(
+    id: 'son_mektup',
+    title: 'Son Mektup',
+    author: 'Orhan Tezcan',
+    kind: BookKind.roman,
+    pages: 21,
+    minAge: 20,
+    maxAge: 120,
+    intelligenceGain: 5,
+    happinessGain: 3,
   ),
 ];
 

@@ -77,7 +77,7 @@ class MarriageEngine {
   /// Yerine cüzdana göre seçilen düğün geldi (`kWeddingStyles`). Sabit
   /// alan, eski kayıtlarla ve testlerle uyum için duruyor.
   @Deprecated('Paket 25: yerine kWeddingStyles geldi.')
-  static const int prototypeOnlyWeddingCost = 60000;
+  static const int prototypeOnlyWeddingCost = 240000;
 
   /// prototypeOnly: boşanmada eşe kalan nakit payı.
   ///

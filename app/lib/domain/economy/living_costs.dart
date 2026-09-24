@@ -79,20 +79,29 @@ abstract final class LivingCosts {
   static const Map<LivingSituation, List<CostItem>> prototypeOnlyItems =
       <LivingSituation, List<CostItem>>{
     LivingSituation.cocuk: <CostItem>[],
+    // 2026 kalibrasyonu: taban tutarlar yıllıktır.
+    //
+    // Kira bilerek gerçek piyasanın **altında** tutuldu. Türkiye'de
+    // asgari ücretle tek başına kirada yaşamak pratikte birikim
+    // bırakmıyor; oysa D-039 "düşük gelirli bağımsız karakter de birikim
+    // yapabilmeli" diyor ve bu onaylanmış bir karar. Gerçekçilik ile
+    // onaylı kural çatıştığında onaylı kural kazandı: en düşük maaşlı iş
+    // bile gelirinin en az üçte birini elinde tutuyor.
+    // Gerekçe: docs/ECONOMY_2026.md.
     LivingSituation.aileYaninda: <CostItem>[
-      CostItem(label: 'Eve katkı', base: 6000, incomeShare: 0.02),
-      CostItem(label: 'Beslenme', base: 10000, incomeShare: 0.04),
-      CostItem(label: 'Diğer giderler', base: 4000, incomeShare: 0.02),
+      CostItem(label: 'Eve katkı', base: 24000, incomeShare: 0.02),
+      CostItem(label: 'Beslenme', base: 36000, incomeShare: 0.04),
+      CostItem(label: 'Diğer giderler', base: 18000, incomeShare: 0.02),
     ],
     LivingSituation.kirada: <CostItem>[
-      CostItem(label: 'Kira', base: 45000, incomeShare: 0.07),
-      CostItem(label: 'Beslenme', base: 22000, incomeShare: 0.05),
-      CostItem(label: 'Fatura ve diğer', base: 8000, incomeShare: 0.03),
+      CostItem(label: 'Kira', base: 88000, incomeShare: 0.07),
+      CostItem(label: 'Beslenme', base: 48000, incomeShare: 0.05),
+      CostItem(label: 'Fatura ve diğer', base: 26000, incomeShare: 0.03),
     ],
     LivingSituation.kendiEvinde: <CostItem>[
-      CostItem(label: 'Aidat ve bakım', base: 15000, incomeShare: 0.03),
-      CostItem(label: 'Beslenme', base: 22000, incomeShare: 0.05),
-      CostItem(label: 'Fatura ve diğer', base: 8000, incomeShare: 0.04),
+      CostItem(label: 'Aidat ve bakım', base: 40000, incomeShare: 0.03),
+      CostItem(label: 'Beslenme', base: 48000, incomeShare: 0.05),
+      CostItem(label: 'Fatura ve diğer', base: 26000, incomeShare: 0.04),
     ],
   };
 
@@ -102,7 +111,7 @@ abstract final class LivingCosts {
   /// çarpılır. Eşin kendi geliri kendi giderini karşılar sayılır; eşin
   /// hane ekonomisine katkısı ve ortak bütçe henüz tasarlanmadı (Q-063).
   static const CostItem prototypeOnlyChildCost =
-      CostItem(label: 'Çocuk gideri', base: 24000, incomeShare: 0.03);
+      CostItem(label: 'Çocuk gideri', base: 72000, incomeShare: 0.03);
 
   /// Oyuncu **ailesinin** yanında mı yaşıyor?
   ///

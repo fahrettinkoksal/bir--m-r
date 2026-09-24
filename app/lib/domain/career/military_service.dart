@@ -58,7 +58,7 @@ abstract final class MilitaryService {
   static const int prototypeOnlyExemptAge = 41;
 
   /// prototypeOnly: bedelli askerlik ücreti (₺).
-  static const int prototypeOnlyBedelliCost = 280000;
+  static const int prototypeOnlyBedelliCost = 550000;
 
   /// prototypeOnly: kaç kez tecil hakkı var (Paket 31).
   static const int prototypeOnlyMaxDeferrals = 2;
@@ -78,12 +78,12 @@ abstract final class MilitaryService {
   /// iki katı** uygulanır; kendiliğinden başvuran daha azını öder.
   /// Buradaki tutarlar oyunun ekonomisine göre seçildi, gerçek mevzuat
   /// tutarı değildir (Q-099).
-  static const int prototypeOnlyDailyFineSelf = 50;
-  static const int prototypeOnlyDailyFineCaught = 100;
+  static const int prototypeOnlyDailyFineSelf = 180;
+  static const int prototypeOnlyDailyFineCaught = 360;
 
   /// prototypeOnly: bakaya kalanın bedelliye eklenen **ek bedeli**
   /// (kaçtığı her yıl için).
-  static const int prototypeOnlyLateBedelliPerYear = 60000;
+  static const int prototypeOnlyLateBedelliPerYear = 120000;
 
   /// prototypeOnly: aileden bedelli istemek için gereken en az yakınlık.
   static const int prototypeOnlyFamilyMinBond = 55;

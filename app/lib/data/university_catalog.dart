@@ -82,6 +82,59 @@ const List<UniversityProgram> kUniversityPrograms = <UniversityProgram>[
     description: 'Her alandan öğrenci alır; gerisi sana kalmış.',
     minScore: 40,
   ),
+  // --- Sağlık bölümleri -------------------------------------------------
+  //
+  // Sağlık meslekleri (hemşire, doktor, eczacı, psikolog) bu bölümler
+  // olmadan hiçbir hayatta açılamazdı. Meslek kataloğu bu diplomaları
+  // aradığı için bölümler de gerçekten seçilebilir olmalı.
+  UniversityProgram(
+    id: 'tip',
+    name: 'Tıp',
+    description: 'Altı yıl, sonra uzmanlık. En uzun ve en dar yol.',
+    minScore: 88,
+    durationYears: 6,
+    preferredTracks: <EducationTrack>{EducationTrack.fenBilim},
+  ),
+  UniversityProgram(
+    id: 'hemsirelik',
+    name: 'Hemşirelik',
+    description: 'Klinik uygulama, nöbet ve ayakta geçen uzun vardiyalar.',
+    minScore: 58,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.fenBilim,
+      EducationTrack.genelAkademik,
+    },
+  ),
+  UniversityProgram(
+    id: 'eczacilik',
+    name: 'Eczacılık',
+    description: 'Beş yıl kimya, farmakoloji ve dikkat.',
+    minScore: 78,
+    durationYears: 5,
+    preferredTracks: <EducationTrack>{EducationTrack.fenBilim},
+  ),
+  UniversityProgram(
+    id: 'psikoloji',
+    name: 'Psikoloji',
+    description: 'İnsanın kendi hâlini inceler; sabır ister.',
+    minScore: 62,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.sosyalBilimler,
+      EducationTrack.fenBilim,
+      EducationTrack.genelAkademik,
+    },
+  ),
+  UniversityProgram(
+    id: 'iletisim',
+    name: 'İletişim',
+    description: 'Haber, metin ve görüntü.',
+    minScore: 48,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.sosyalBilimler,
+      EducationTrack.genelAkademik,
+      EducationTrack.tasarim,
+    },
+  ),
   UniversityProgram(
     id: 'sosyoloji',
     name: 'Sosyoloji',

@@ -32,7 +32,7 @@ import 'parenthood.dart';
 /// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-103).
 abstract final class FertilityTreatment {
   /// prototypeOnly: bir denemenin ücreti (₺).
-  static const int prototypeOnlyCost = 120000;
+  static const int prototypeOnlyCost = 250000;
 
   /// prototypeOnly: tedaviye başvurmadan önce gereken başarısız deneme.
   ///

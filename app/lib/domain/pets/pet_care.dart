@@ -450,7 +450,7 @@ enum PetAction {
     id: 'bakim',
     label: 'Bakımını yap',
     description: 'Tarak, tırnak, kulak. Sevmiyor ama gerekiyor.',
-    cost: 250, // prototypeOnly
+    cost: 900, // prototypeOnly
     happiness: 2,
     bond: 4,
     maxPerAge: 2,

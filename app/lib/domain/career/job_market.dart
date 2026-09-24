@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/interview_catalog.dart';
 import '../../data/job_catalog.dart';
 import '../../data/hobby_catalog.dart';
+import '../../data/license_catalog.dart';
 import '../../data/martial_arts_catalog.dart';
 import '../activities/martial_arts_engine.dart';
 import '../hobby/hobby_tracker.dart';
@@ -143,6 +144,13 @@ class JobMarket {
         return '${hobi.label} uğraşında en az '
             '"${hobi.stages[job.minHobbyStage].label}" basamağına '
             'gelmen gerekiyor.';
+      }
+    }
+    // Ehliyet isteyen meslekler (kuryelik): aracı kullanmak işin kendisi.
+    for (final String ehliyet in job.requiredLicenses) {
+      if (!state.hasLicense(ehliyet)) {
+        final LicenseType? tur = licenseTypeById(ehliyet);
+        return '${tur?.label ?? 'Ehliyet'} gerekiyor.';
       }
     }
     // Dövüş sanatı eğitmenliği (Paket 32): kuşağı/boyu olmayan öğretemez.

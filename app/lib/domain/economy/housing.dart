@@ -43,7 +43,7 @@ class Housing {
   static const int prototypeOnlyMinAge = 18;
 
   /// prototypeOnly: taşınmanın tek seferlik masrafı (nakliye, depozito).
-  static const int prototypeOnlyMoveCost = 12000;
+  static const int prototypeOnlyMoveCost = 45000;
 
   /// prototypeOnly: konutun değerinin yıllık kira geliri oranı.
   static const double prototypeOnlyYearlyRentYield = 0.045;

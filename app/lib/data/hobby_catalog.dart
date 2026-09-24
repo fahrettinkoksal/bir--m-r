@@ -44,28 +44,28 @@ enum HobbyKind {
     activityIds: <String>{'muzik_kursu'},
     stages: <HobbyStage>[
       HobbyStage(
-        label: 'Heveslendin',
+        label: 'Hevesli',
         experience: 0,
         memory: '{yas} yaşında müzikle uğraşmaya başladın.',
       ),
       HobbyStage(
         label: 'Meraklı',
-        experience: 6,
+        experience: 4,
         memory: 'Artık kendi başına çalışıyordun.',
       ),
       HobbyStage(
-        label: 'Düzenli çalan',
-        experience: 18,
+        label: 'Düzenli',
+        experience: 10,
         memory: 'Çalmak günlük bir alışkanlık oldu.',
       ),
       HobbyStage(
         label: 'Tutkulu',
-        experience: 40,
+        experience: 18,
         memory: 'Eve girer girmez önce enstrümana gidiyordun.',
       ),
       HobbyStage(
-        label: 'Ustalaşmış',
-        experience: 80,
+        label: 'Usta',
+        experience: 28,
         memory: 'Çevrende "o müzikle uğraşır" diye biliniyordun.',
       ),
     ],
@@ -78,28 +78,28 @@ enum HobbyKind {
     activityIds: <String>{'resim_atolyesi'},
     stages: <HobbyStage>[
       HobbyStage(
-        label: 'Heveslendin',
+        label: 'Hevesli',
         experience: 0,
         memory: '{yas} yaşında resim yapmaya başladın.',
       ),
       HobbyStage(
         label: 'Meraklı',
-        experience: 6,
+        experience: 4,
         memory: 'Defterin kenarları çizimle doldu.',
       ),
       HobbyStage(
-        label: 'Düzenli çizen',
-        experience: 18,
+        label: 'Düzenli',
+        experience: 10,
         memory: 'Çizmek için ayrı bir köşe ayırdın.',
       ),
       HobbyStage(
         label: 'Tutkulu',
-        experience: 40,
+        experience: 18,
         memory: 'Gördüğün her şeyi çizmek istiyordun.',
       ),
       HobbyStage(
-        label: 'Ustalaşmış',
-        experience: 80,
+        label: 'Usta',
+        experience: 28,
         memory: 'İnsanlar senden resim istemeye başladı.',
       ),
     ],
@@ -113,7 +113,7 @@ enum HobbyKind {
     activityIds: <String>{},
     stages: <HobbyStage>[
       HobbyStage(
-        label: 'Heveslendin',
+        label: 'Hevesli',
         experience: 0,
         memory: '{yas} yaşında ilk kitabını bitirdin.',
       ),
@@ -123,18 +123,18 @@ enum HobbyKind {
         memory: 'Kitaplar birikmeye başladı.',
       ),
       HobbyStage(
-        label: 'Düzenli okuyan',
-        experience: 8,
+        label: 'Düzenli',
+        experience: 7,
         memory: 'Yanında hep bir kitap taşıyordun.',
       ),
       HobbyStage(
         label: 'Tutkulu',
-        experience: 18,
+        experience: 12,
         memory: 'Okumak günün en iyi saatiydi.',
       ),
       HobbyStage(
-        label: 'Ustalaşmış',
-        experience: 35,
+        label: 'Usta',
+        experience: 20,
         memory: 'Sana ne okuyacağını soranlar oldu.',
       ),
     ],
@@ -148,28 +148,28 @@ enum HobbyKind {
     activityIds: <String>{'kosu', 'agirlik', 'esneme'},
     stages: <HobbyStage>[
       HobbyStage(
-        label: 'Heveslendin',
+        label: 'Hevesli',
         experience: 0,
         memory: '{yas} yaşında düzenli spora başladın.',
       ),
       HobbyStage(
         label: 'Meraklı',
-        experience: 8,
+        experience: 6,
         memory: 'Haftada birkaç gün salona gidiyordun.',
       ),
       HobbyStage(
-        label: 'Düzenli çalışan',
-        experience: 25,
+        label: 'Düzenli',
+        experience: 16,
         memory: 'Antrenman günlük düzenin parçası oldu.',
       ),
       HobbyStage(
         label: 'Tutkulu',
-        experience: 55,
+        experience: 30,
         memory: 'Spor yapmadığın gün eksik hissediyordun.',
       ),
       HobbyStage(
-        label: 'Ustalaşmış',
-        experience: 110,
+        label: 'Usta',
+        experience: 48,
         memory: 'Çevrende "o sporcu" diye biliniyordun.',
       ),
     ],

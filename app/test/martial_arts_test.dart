@@ -1,5 +1,6 @@
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/interview_catalog.dart';
+import 'package:bir_omur/data/economy.dart';
 import 'package:bir_omur/data/martial_arts_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
@@ -87,11 +88,17 @@ void main() {
     });
 
     test('ders ücretleri düşük tutulur', () {
+      // Eşik eskiden 250 ₺ ile sabitti; 2026 kalibrasyonundan sonra o
+      // sayı anlamını yitirdi. Kural aynı kaldı ama ölçeğe bağlandı:
+      // Faho'nun Q-111 kararı "ustalık paradan çok zaman ve süreklilik
+      // gerektirsin". Bir ders, aylık asgari ücretin %3'ünü aşmamalı.
+      final int enFazla = (Economy.netMonthlyMinimumWage * 0.03).round();
       for (final MartialArt art in MartialArt.values) {
         expect(
           art.lessonCost,
-          lessThanOrEqualTo(250),
-          reason: '${art.label} ders başı ücreti ucuz olmalı',
+          lessThanOrEqualTo(enFazla),
+          reason: '${art.label} ders başı ücreti ucuz olmalı '
+              '(${art.lessonCost} > $enFazla)',
         );
       }
     });

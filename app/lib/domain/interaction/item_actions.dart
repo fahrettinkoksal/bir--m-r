@@ -74,7 +74,7 @@ class ItemActions {
   /// prototypeOnly: bakım ücreti, temel değerin bu oranı kadar eksik
   /// kondisyonla çarpılarak bulunur.
   static const double prototypeOnlyRepairCostRatio = 0.15;
-  static const int prototypeOnlyMinRepairCost = 20;
+  static const int prototypeOnlyMinRepairCost = 120;
 
   /// prototypeOnly: bakım seti varsa ücret bu oranda azalır.
   static const double prototypeOnlyRepairKitDiscount = 0.5;
@@ -96,7 +96,7 @@ class ItemActions {
   ///
   /// Ortak ekonomi ölçeğinden gelir (`lib/data/economy.dart`).
   static const int prototypeOnlyValuableThreshold =
-      Economy.prototypeOnlyValuableThreshold;
+      Economy.valuableThreshold;
 
   /// prototypeOnly: değerli eşya satabilmek için gereken yaş.
   ///

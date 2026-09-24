@@ -51,7 +51,7 @@ abstract final class SocialIncome {
   static const int prototypeOnlyDealDeadline = 2;
 
   /// prototypeOnly: sponsorluk ücretinin kitleye göre büyüme katsayısı.
-  static const double prototypeOnlyFeePerFollower = 1.2;
+  static const double prototypeOnlyFeePerFollower = 3.2;
 
   // -------------------------------------------------------------------
   // Paylaşım geliri

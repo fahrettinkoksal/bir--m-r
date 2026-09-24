@@ -320,8 +320,11 @@ void main() {
     });
 
     test('temizlik ve bakım farklı sonuç üretir', () {
+      // Cüzdan 2026 ölçeğine çekildi: bisikletin değeri 9.000 ₺'den
+      // 28.000 ₺'ye çıktı, bakım ücreti de değere oranlı. Eski 2.000 ₺
+      // artık bakımı karşılamıyordu; iddia aynen duruyor.
       final ({GameState state, OwnedItem item}) kur = withItem(
-        life(14, age: 14, wallet: 2000),
+        life(14, age: 14, wallet: 8000),
         'bisiklet',
         condition: 30,
       );
@@ -334,7 +337,7 @@ void main() {
       );
       final int temizSonrasi = temiz.state.itemById(kur.item.id)!.condition;
       expect(temizSonrasi, 30 + ItemActions.prototypeOnlyCleanGain);
-      expect(temiz.state.player.wallet, 2000,
+      expect(temiz.state.player.wallet, 8000,
           reason: 'Temizlik ücretsizdir');
 
       final ItemActionResult bakim = actions.perform(
@@ -346,7 +349,7 @@ void main() {
       final int bakimSonrasi = bakim.state.itemById(kur.item.id)!.condition;
       expect(bakimSonrasi, greaterThan(temizSonrasi),
           reason: 'Bakım temizlikten daha çok iyileştirir');
-      expect(bakim.state.player.wallet, lessThan(2000),
+      expect(bakim.state.player.wallet, lessThan(8000),
           reason: 'Bakım ücretlidir');
       // Hiçbiri sihirli şekilde sıfırlamaz.
       expect(bakimSonrasi, lessThanOrEqualTo(ItemActions.prototypeOnlyRepairCeiling));

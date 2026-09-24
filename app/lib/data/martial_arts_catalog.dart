@@ -41,7 +41,7 @@ enum MartialArt {
     label: 'Karate',
     icon: Icons.sports_martial_arts_rounded,
     description: 'Duruş, vuruş ve kata. İlerleme kuşakla ölçülür.',
-    lessonCost: 180, // prototypeOnly
+    lessonCost: 700, // prototypeOnly
     minAge: 7,
     instructorFromLevel: 9, // Siyah kuşak (1. Dan)
     instructorJobId: 'karate_egitmeni',
@@ -114,7 +114,7 @@ enum MartialArt {
     label: 'Kung fu',
     icon: Icons.self_improvement_rounded,
     description: 'Formlar, nefes ve sabır. Kuşaktan duanwei derecesine.',
-    lessonCost: 200, // prototypeOnly
+    lessonCost: 750, // prototypeOnly
     minAge: 8,
     instructorFromLevel: 5, // Siyah kuşak
     instructorJobId: 'kungfu_egitmeni',
@@ -154,11 +154,7 @@ enum MartialArt {
         lessonsNeeded: 82,
         note: 'Duanwei düzeninin ilk resmî derecesi.',
       ),
-      MartialRank(
-        name: '2. Duan',
-        lessonsNeeded: 110,
-        note: 'Yarışma düzeyi.',
-      ),
+      MartialRank(name: '2. Duan', lessonsNeeded: 110, note: 'Yarışma düzeyi.'),
       MartialRank(
         name: '3. Duan',
         lessonsNeeded: 145,
@@ -172,7 +168,7 @@ enum MartialArt {
     label: 'Yağlı güreş',
     icon: Icons.sports_kabaddi_rounded,
     description: 'Kıspet, zeytinyağı ve çayır. Boyun yükseldikçe rakip büyür.',
-    lessonCost: 150, // prototypeOnly
+    lessonCost: 600, // prototypeOnly
     minAge: 9,
     instructorFromLevel: 7, // Başaltı
     instructorJobId: 'gures_antrenoru',

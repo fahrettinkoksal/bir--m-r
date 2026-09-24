@@ -57,7 +57,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'agac_dikimi',
     category: EventCategory.mahalle,
-    text: 'Okulun bahçesine fidan dağıtıldı. Herkese bir tane, adını '
+    text:
+        'Okulun bahçesine fidan dağıtıldı. Herkese bir tane, adını '
         'yazacağın küçük bir etiketle birlikte.',
     requirement: EventRequirement(minAge: 7, maxAge: 13),
     weight: 4,
@@ -65,7 +66,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'dik',
         label: 'Fidanı dik ve adını yaz',
-        resultText: 'Toprağı elinle bastırdın. Etikete adını yazarken harfler '
+        resultText:
+            'Toprağı elinle bastırdın. Etikete adını yazarken harfler '
             'biraz büyük kaçtı ama okunuyordu.',
         happiness: 4,
         addFlags: <String>{ExtraFlags.agacDikildi},
@@ -73,7 +75,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'ver',
         label: 'Fidanı başkasına ver',
-        resultText: 'Elindeki fidanı sıranın arkasındakine uzattın. O çok '
+        resultText:
+            'Elindeki fidanı sıranın arkasındakine uzattın. O çok '
             'sevindi, sen de bahçenin gölgesinde oturdun.',
         happiness: 2,
         charisma: 2,
@@ -83,7 +86,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'diktigin_agac',
     category: EventCategory.mahalle,
-    text: 'Yolun kenarındaki okulun bahçesinden geçiyorsun. İçeride, '
+    text:
+        'Yolun kenarındaki okulun bahçesinden geçiyorsun. İçeride, '
         'senin boyunu çoktan geçmiş bir ağaç var.',
     requirement: EventRequirement(
       minAge: 35,
@@ -96,7 +100,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'gir',
         label: 'Bahçeye gir, gövdesine bak',
-        resultText: 'Etiket yok artık, olması da beklenmezdi. Gövdeye elini '
+        resultText:
+            'Etiket yok artık, olması da beklenmezdi. Gövdeye elini '
             'koydun; ağaç senden daha uzun yaşayacak gibi duruyor.',
         happiness: 6,
       ),
@@ -118,7 +123,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'besle',
         label: 'Evden bir şeyler getir',
-        resultText: 'Mutfaktan aşırdığın tabakla döndün. Kedi önce bakmadı '
+        resultText:
+            'Mutfaktan aşırdığın tabakla döndün. Kedi önce bakmadı '
             'bile, sonra tabak boşaldı.',
         happiness: 5,
         addFlags: <String>{ExtraFlags.sokakHayvaniBeslendi},
@@ -126,7 +132,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'haber',
         label: 'Kapıcıya haber ver',
-        resultText: 'Kapıcı kutu bulup girişe koydu. Kedi o kutuya taşındı, '
+        resultText:
+            'Kapıcı kutu bulup girişe koydu. Kedi o kutuya taşındı, '
             'sen de her gün girerken selam verdin.',
         happiness: 3,
         charisma: 2,
@@ -134,7 +141,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'gec',
         label: 'Üzülerek geç',
-        resultText: 'Merdivenleri çıkarken arkana baktın. Bu, uzun süre '
+        resultText:
+            'Merdivenleri çıkarken arkana baktın. Bu, uzun süre '
             'aklında kaldı.',
         happiness: -2,
       ),
@@ -143,7 +151,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'hayvanin_donusu',
     category: EventCategory.mahalle,
-    text: 'Girişte tanıdık bir duruş: aynı köşe, daha iri bir kedi. '
+    text:
+        'Girişte tanıdık bir duruş: aynı köşe, daha iri bir kedi. '
         'Seni görünce kaçmıyor.',
     requirement: EventRequirement(
       minAge: 14,
@@ -170,7 +179,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'harclik_pazarligi',
     category: EventCategory.aile,
-    text: '{sahip} {kisi} ile haftalık harçlık konusunu yeniden açtın. '
+    text:
+        '{sahip} {kisi} ile haftalık harçlık konusunu yeniden açtın. '
         'Sofrada herkes susup seni dinliyor.',
     requirement: EventRequirement(
       minAge: 9,
@@ -185,9 +195,10 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'gerekce',
         label: 'Gerekçelerini sırala',
-        resultText: 'Otobüs parası, defter, arada bir tost. Sayınca kimse '
+        resultText:
+            'Otobüs parası, defter, arada bir tost. Sayınca kimse '
             'itiraz edemedi; harçlık biraz arttı.',
-        money: 250,
+        money: 800,
         intelligence: 2,
         bond: 2,
       ),
@@ -201,7 +212,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'vazgec',
         label: 'Vazgeç, konuyu kapat',
-        resultText: 'Evin durumunu biliyordun. Konuyu kendin kapattın; '
+        resultText:
+            'Evin durumunu biliyordun. Konuyu kendin kapattın; '
             "kimse bir şey demedi ama {sahipk} {kisi} sana uzun baktı.",
         bond: 4,
         happiness: -1,
@@ -211,7 +223,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'okul_gosterisi',
     category: EventCategory.okul,
-    text: 'Yıl sonu gösterisi için sahneye çıkacak birileri aranıyor. '
+    text:
+        'Yıl sonu gösterisi için sahneye çıkacak birileri aranıyor. '
         'Öğretmen sınıfa bakıyor, bakışlar seninkiyle kesişiyor.',
     requirement: EventRequirement(
       minAge: 7,
@@ -225,7 +238,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'cik',
         label: 'Parmak kaldır',
-        resultText: 'Sahnede ses titredi ama cümle tamamlandı. Alkış bitince '
+        resultText:
+            'Sahnede ses titredi ama cümle tamamlandı. Alkış bitince '
             'kulağında bir uğultu kaldı, iyi cinsten.',
         charisma: 4,
         happiness: 4,
@@ -233,7 +247,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'perde',
         label: 'Perde arkasında çalış',
-        resultText: 'Işıkları ve sıraları sen ayarladın. Gösteri aksamadı; '
+        resultText:
+            'Işıkları ve sıraları sen ayarladın. Gösteri aksamadı; '
             'bunu bilen üç kişiydi.',
         intelligence: 3,
         happiness: 2,
@@ -247,7 +262,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'defter_siiri',
     category: EventCategory.kisisel,
-    text: 'Arka sayfalarına kimseye göstermediğin şeyler yazdığın bir '
+    text:
+        'Arka sayfalarına kimseye göstermediğin şeyler yazdığın bir '
         'defter var. Bugün biri onu masanın üstünde açık bıraktığını fark '
         'etti.',
     requirement: EventRequirement(minAge: 14, maxAge: 19),
@@ -256,7 +272,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'sakla',
         label: 'Defteri kap ve sakla',
-        resultText: 'Çantaya attın. O gün defteri bir daha açmadın ama '
+        resultText:
+            'Çantaya attın. O gün defteri bir daha açmadın ama '
             'atmadın da.',
         happiness: 2,
         addFlags: <String>{ExtraFlags.siirDefteri},
@@ -264,7 +281,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'oku',
         label: 'Bir sayfa oku',
-        resultText: 'Sesin ortasında kısıldı. Kimse gülmedi; bu, beklediğin '
+        resultText:
+            'Sesin ortasında kısıldı. Kimse gülmedi; bu, beklediğin '
             'şey değildi.',
         charisma: 4,
         happiness: 3,
@@ -273,7 +291,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'yirt',
         label: 'Sayfayı yırt',
-        resultText: 'Yırtılan kâğıdın sesi sınıfta duyuldu. Akşam, yazdığını '
+        resultText:
+            'Yırtılan kâğıdın sesi sınıfta duyuldu. Akşam, yazdığını '
             'hatırlamaya çalıştın; olmadı.',
         happiness: -3,
       ),
@@ -282,7 +301,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'eski_defter',
     category: EventCategory.kisisel,
-    text: 'Dolabın üst rafında, kenarları sararmış bir defter çıktı. '
+    text:
+        'Dolabın üst rafında, kenarları sararmış bir defter çıktı. '
         'El yazısı seninki ama kelimeler bir başkasının gibi.',
     requirement: EventRequirement(
       minAge: 50,
@@ -295,7 +315,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'oku',
         label: 'Baştan sona oku',
-        resultText: 'Bazı satırlarda güldün, birinde durdun. O satırı yazan '
+        resultText:
+            'Bazı satırlarda güldün, birinde durdun. O satırı yazan '
             'çocuk hâlâ bir yerlerde.',
         happiness: 5,
       ),
@@ -310,7 +331,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'yaz_isi',
     category: EventCategory.yetiskinlik,
-    text: 'Yaz tatili başladı. Mahallenin köşesindeki dükkân iki aylığına '
+    text:
+        'Yaz tatili başladı. Mahallenin köşesindeki dükkân iki aylığına '
         'birini arıyor; ücret az, saatler uzun.',
     requirement: EventRequirement(minAge: 16, maxAge: 20),
     weight: 5,
@@ -318,9 +340,10 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'basla',
         label: 'İşe başla',
-        resultText: 'İlk gün ayakların şişti, ikinci hafta alıştın. Ay sonunda '
+        resultText:
+            'İlk gün ayakların şişti, ikinci hafta alıştın. Ay sonunda '
             'kendi kazandığın parayı elinde tuttun.',
-        money: 3500,
+        money: 11000,
         health: -2,
         intelligence: 2,
         charisma: 2,
@@ -329,7 +352,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'reddet',
         label: 'Yazı kendine ayır',
-        resultText: 'Sabahları geç kalktın, akşamları uzundu. Eylülde anlatacak '
+        resultText:
+            'Sabahları geç kalktın, akşamları uzundu. Eylülde anlatacak '
             'çok şeyin yoktu ama dinlenmiştin.',
         happiness: 4,
         health: 2,
@@ -339,7 +363,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'grup_baskisi',
     category: EventCategory.mahalle,
-    text: 'Herkesin gittiği bir yer var, sen gitmeyince konu kapanmıyor. '
+    text:
+        'Herkesin gittiği bir yer var, sen gitmeyince konu kapanmıyor. '
         'Bugün yine soruldu.',
     requirement: EventRequirement(minAge: 14, maxAge: 18),
     repeatable: true,
@@ -349,7 +374,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'git',
         label: 'Bu sefer git',
-        resultText: 'Gittin. Ortam sandığın kadar iyi değildi ama artık '
+        resultText:
+            'Gittin. Ortam sandığın kadar iyi değildi ama artık '
             'konuşulan şeyin ne olduğunu biliyorsun.',
         charisma: 3,
         happiness: 1,
@@ -357,7 +383,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'hayir',
         label: 'Gitmeyeceğini net söyle',
-        resultText: '"Gelmiyorum" demek ilk seferde zor. İkinci seferde kimse '
+        resultText:
+            '"Gelmiyorum" demek ilk seferde zor. İkinci seferde kimse '
             'ısrar etmedi.',
         charisma: 2,
         happiness: 2,
@@ -367,7 +394,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'gece_muzigi',
     category: EventCategory.kisisel,
-    text: 'Kulaklık takılı, ses biraz fazla. Duvarın öbür tarafından iki '
+    text:
+        'Kulaklık takılı, ses biraz fazla. Duvarın öbür tarafından iki '
         'kez vuruldu.',
     requirement: EventRequirement(
       minAge: 13,
@@ -383,14 +411,16 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kis',
         label: 'Sesi kıs',
-        resultText: 'Kıstın. Şarkı aynı şarkıydı ama artık tek başına '
+        resultText:
+            'Kıstın. Şarkı aynı şarkıydı ama artık tek başına '
             'dinleniyordu.',
         happiness: 2,
       ),
       EventChoice(
         id: 'devam',
         label: 'Aynı sesle devam et',
-        resultText: 'Sabah merdivende karşılaştığınızda kimse konuyu açmadı; '
+        resultText:
+            'Sabah merdivende karşılaştığınızda kimse konuyu açmadı; '
             'selam da verilmedi.',
         happiness: 1,
         charisma: -2,
@@ -404,7 +434,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'emanet_para',
     category: EventCategory.yetiskinlik,
-    text: 'Bir tanıdık, birkaç haftalığına sende dursun diye zarfla para '
+    text:
+        'Bir tanıdık, birkaç haftalığına sende dursun diye zarfla para '
         'bıraktı. Zarf çekmecede duruyor ve ay sonuna daha var.',
     requirement: EventRequirement(minAge: 20),
     weight: 4,
@@ -412,7 +443,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'dokunma',
         label: 'Zarfa hiç dokunma',
-        resultText: 'Ay sonunu zor getirdin ama zarf olduğu gibi el değiştirdi. '
+        resultText:
+            'Ay sonunu zor getirdin ama zarf olduğu gibi el değiştirdi. '
             'Bunu kimseye anlatmadın.',
         happiness: 3,
         addFlags: <String>{ExtraFlags.emanetTutuldu},
@@ -420,9 +452,10 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kullan',
         label: 'Bir kısmını kullan, sonra yerine koy',
-        resultText: 'Yerine koymak düşündüğünden uzun sürdü. Zarf tamamlandı '
+        resultText:
+            'Yerine koymak düşündüğünden uzun sürdü. Zarf tamamlandı '
             'ama sen o çekmeceye bir daha aynı gözle bakmadın.',
-        money: 2500,
+        money: 8000,
         happiness: -4,
         addFlags: <String>{ExtraFlags.emanetYendi},
       ),
@@ -431,7 +464,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'emanetin_hatirlatilmasi',
     category: EventCategory.yetiskinlik,
-    text: 'Yıllar sonra aynı tanıdıkla karşılaştın. "Sana güvenilir" dedi, '
+    text:
+        'Yıllar sonra aynı tanıdıkla karşılaştın. "Sana güvenilir" dedi, '
         'başka da bir şey demedi.',
     requirement: EventRequirement(
       minAge: 26,
@@ -459,7 +493,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'emanetin_golgesi',
     category: EventCategory.yetiskinlik,
-    text: 'Aynı tanıdık bir iş için isim aranıyor dedi ve sana bakmadan '
+    text:
+        'Aynı tanıdık bir iş için isim aranıyor dedi ve sana bakmadan '
         'başkasının adını yazdı.',
     requirement: EventRequirement(
       minAge: 26,
@@ -479,7 +514,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'sus',
         label: 'Sesini çıkarma',
-        resultText: 'Çekmecedeki zarfı hatırladın. O gün başka bir şey '
+        resultText:
+            'Çekmecedeki zarfı hatırladın. O gün başka bir şey '
             'konuşulmadı.',
         happiness: -2,
       ),
@@ -488,7 +524,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'komsu_gerginligi',
     category: EventCategory.mahalle,
-    text: 'Üst kattan akşam boyu ses geliyor. Bu üçüncü gece ve yarın erken '
+    text:
+        'Üst kattan akşam boyu ses geliyor. Bu üçüncü gece ve yarın erken '
         'kalkacaksın.',
     requirement: EventRequirement(minAge: 22),
     weight: 5,
@@ -496,7 +533,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kapi_cal',
         label: 'Kapıyı çal, sakin konuş',
-        resultText: 'Kapıda kısa bir şaşkınlık, sonra özür. Ertesi hafta '
+        resultText:
+            'Kapıda kısa bir şaşkınlık, sonra özür. Ertesi hafta '
             'kapına bir tabak geldi.',
         charisma: 4,
         happiness: 3,
@@ -521,7 +559,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'komsunun_yardimi',
     category: EventCategory.mahalle,
-    text: 'Anahtarın içeride kaldı ve kapı kapandı. Merdivende tanıdık bir '
+    text:
+        'Anahtarın içeride kaldı ve kapı kapandı. Merdivende tanıdık bir '
         'yüz duruyor: üst kattaki komşu.',
     requirement: EventRequirement(
       minAge: 25,
@@ -534,7 +573,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kabul',
         label: 'Yardımı kabul et',
-        resultText: 'Çilingir gelene kadar onların mutfağında çay içtin. '
+        resultText:
+            'Çilingir gelene kadar onların mutfağında çay içtin. '
             'O gece iyi ki bir zamanlar kapıyı çalmıştın diye düşündün.',
         happiness: 5,
         charisma: 2,
@@ -542,7 +582,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kendim',
         label: 'Kendin hallet',
-        resultText: 'Kendi başına çözdün ama teklif edilmiş olması bile '
+        resultText:
+            'Kendi başına çözdün ama teklif edilmiş olması bile '
             'yetti.',
         happiness: 3,
       ),
@@ -551,7 +592,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'komsunun_soguklugu',
     category: EventCategory.mahalle,
-    text: 'Asansörde üst kattaki komşuyla yalnız kaldın. Beş kat, tek '
+    text:
+        'Asansörde üst kattaki komşuyla yalnız kaldın. Beş kat, tek '
         'kelime yok.',
     requirement: EventRequirement(
       minAge: 25,
@@ -581,7 +623,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'is_yerinde_yeni_gelen',
     category: EventCategory.yetiskinlik,
-    text: 'İşe yeni biri başladı. Kimse anlatmaya gönüllü değil, ilk günün '
+    text:
+        'İşe yeni biri başladı. Kimse anlatmaya gönüllü değil, ilk günün '
         'nasıl geçtiğini hatırlıyorsun.',
     requirement: EventRequirement(
       minAge: 22,
@@ -594,7 +637,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'anlat',
         label: 'İşi baştan anlat',
-        resultText: 'Yarım saatin gitti, karşılığında ekip içinde adın '
+        resultText:
+            'Yarım saatin gitti, karşılığında ekip içinde adın '
             '"sorulacak kişi" oldu.',
         charisma: 4,
         happiness: 2,
@@ -602,7 +646,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kendi',
         label: 'Kendi işine bak',
-        resultText: 'Akşama kadar kimse sana bir şey sormadı. Bu da bir tür '
+        resultText:
+            'Akşama kadar kimse sana bir şey sormadı. Bu da bir tür '
             'sessizlik.',
         happiness: -1,
       ),
@@ -623,16 +668,18 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'iste',
         label: 'Rakam söyle',
-        resultText: 'Söylediğin rakam masada bir sessizlik yarattı. Sonuç '
+        resultText:
+            'Söylediğin rakam masada bir sessizlik yarattı. Sonuç '
             'istediğin kadar değildi ama sıfır da değildi.',
-        money: 6000,
+        money: 18000,
         charisma: 3,
         addFlags: <String>{ExtraFlags.zamIstendi},
       ),
       EventChoice(
         id: 'bekle',
         label: 'Gelecek seneyi bekle',
-        resultText: 'Kapıdan çıkarken söylemediğin cümleyi düşündün. Bir yıl '
+        resultText:
+            'Kapıdan çıkarken söylemediğin cümleyi düşündün. Bir yıl '
             'daha aynı rakamla geçecek.',
         happiness: -3,
       ),
@@ -641,7 +688,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'is_cikisinda_yagmur',
     category: EventCategory.yetiskinlik,
-    text: 'Çıkışta bardaktan boşanırcasına yağıyor, şemsiye yok. Durakta '
+    text:
+        'Çıkışta bardaktan boşanırcasına yağıyor, şemsiye yok. Durakta '
         'kalabalık var.',
     requirement: EventRequirement(
       minAge: 18,
@@ -654,7 +702,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kos',
         label: 'Islanmayı göze al, yürü',
-        resultText: 'Eve vardığında ayakkabıların içi su doluydu. Yine de '
+        resultText:
+            'Eve vardığında ayakkabıların içi su doluydu. Yine de '
             'yolda kimse konuşmadığı için kafan dinlendi.',
         health: -2,
         happiness: 3,
@@ -662,7 +711,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'bekle',
         label: 'Saçak altında bekle',
-        resultText: 'Yarım saat sonra yağmur dindi. Aynı saçağın altındaki '
+        resultText:
+            'Yarım saat sonra yağmur dindi. Aynı saçağın altındaki '
             'kişiyle hava üzerine iki cümle kurdunuz.',
         charisma: 2,
         happiness: 1,
@@ -672,7 +722,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'araba_yolda_kaldi',
     category: EventCategory.yetiskinlik,
-    text: 'Araba şehirden çıkışta öksürüp durdu. Kapılar açık, dörtlüler '
+    text:
+        'Araba şehirden çıkışta öksürüp durdu. Kapılar açık, dörtlüler '
         'yanıyor.',
     requirement: EventRequirement(
       minAge: 18,
@@ -686,15 +737,17 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'cekici',
         label: 'Çekici çağır',
-        resultText: 'Beklemek uzun sürdü, fatura da kısa değildi. En azından '
+        resultText:
+            'Beklemek uzun sürdü, fatura da kısa değildi. En azından '
             'araba servise ulaştı.',
-        money: -2500,
+        money: -8000,
         happiness: -2,
       ),
       EventChoice(
         id: 'bak',
         label: 'Kaputu aç, kendin bak',
-        resultText: 'Üç kablo oynattın, dördüncüde çalıştı. Bunu yıllarca '
+        resultText:
+            'Üç kablo oynattın, dördüncüde çalıştı. Bunu yıllarca '
             'anlattın.',
         happiness: 4,
         intelligence: 2,
@@ -708,7 +761,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'sabah_yuruyusu',
     category: EventCategory.kisisel,
-    text: 'Sabah altıda uyandın ve bir daha uyuyamadın. Dışarısı daha yeni '
+    text:
+        'Sabah altıda uyandın ve bir daha uyuyamadın. Dışarısı daha yeni '
         'aydınlanıyor.',
     requirement: EventRequirement(minAge: 58),
     repeatable: true,
@@ -718,7 +772,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'yuru',
         label: 'Yürüyüşe çık',
-        resultText: 'Park boştu, sadece iki kişi vardı ve ikisi de senin gibi '
+        resultText:
+            'Park boştu, sadece iki kişi vardı ve ikisi de senin gibi '
             'erken kalkmıştı. Dönüşte nefesin düzelmişti.',
         health: 4,
         happiness: 3,
@@ -726,7 +781,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'cay',
         label: 'Çay koy, pencereye otur',
-        resultText: 'Sokağın uyanmasını izledin. Acelesi olan herkesi '
+        resultText:
+            'Sokağın uyanmasını izledin. Acelesi olan herkesi '
             'tanıyordun.',
         happiness: 4,
       ),
@@ -735,7 +791,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'telefonla_dolandirici',
     category: EventCategory.kisisel,
-    text: 'Telefon çaldı. Karşıdaki kendini resmî bir kurumdan tanıttı ve '
+    text:
+        'Telefon çaldı. Karşıdaki kendini resmî bir kurumdan tanıttı ve '
         'acele etmeni istiyor.',
     requirement: EventRequirement(minAge: 55),
     repeatable: true,
@@ -745,7 +802,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kapat',
         label: 'Telefonu kapat',
-        resultText: 'Kapattın. Bir süre elinde tuttun, sonra kendi kendine '
+        resultText:
+            'Kapattın. Bir süre elinde tuttun, sonra kendi kendine '
             'güldün.',
         intelligence: 3,
         happiness: 2,
@@ -762,9 +820,10 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'dinle',
         label: 'Söylediklerini yap',
-        resultText: 'İşlem tamamlandığında hattaki ses gitmişti. Parayı geri '
+        resultText:
+            'İşlem tamamlandığında hattaki ses gitmişti. Parayı geri '
             'alamadın; anlatması da kolay olmadı.',
-        money: -8000,
+        money: -24000,
         happiness: -8,
       ),
     ],
@@ -772,7 +831,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'hastane_kuyrugu',
     category: EventCategory.kisisel,
-    text: 'Randevu saatin geçti, sıra ilerlemiyor. Koridordaki sandalyeler '
+    text:
+        'Randevu saatin geçti, sıra ilerlemiyor. Koridordaki sandalyeler '
         'dolu.',
     requirement: EventRequirement(minAge: 62),
     repeatable: true,
@@ -782,7 +842,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'bekle',
         label: 'Sabırla bekle',
-        resultText: 'Üç saat sonra sıra geldi. Muayene beş dakika sürdü ama '
+        resultText:
+            'Üç saat sonra sıra geldi. Muayene beş dakika sürdü ama '
             'tahliller istendi ve sen onları yaptırdın.',
         health: 3,
         happiness: -1,
@@ -790,7 +851,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'cik',
         label: 'Vazgeç, eve dön',
-        resultText: 'Evde çayını içerken "geçer" dedin. Geçti de; ne olduğunu '
+        resultText:
+            'Evde çayını içerken "geçer" dedin. Geçti de; ne olduğunu '
             'öğrenemedin.',
         health: -3,
         happiness: 1,
@@ -800,7 +862,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'kis_hazirligi',
     category: EventCategory.aile,
-    text: 'Havalar döndü. Balkondaki kutular, kışlıklar, soba borusu... '
+    text:
+        'Havalar döndü. Balkondaki kutular, kışlıklar, soba borusu... '
         'hepsi seni bekliyor.',
     requirement: EventRequirement(minAge: 50),
     repeatable: true,
@@ -810,7 +873,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'hazirlan',
         label: 'Bir günde hallet',
-        resultText: 'Akşam beliniz ağrıyordu ama ev kışa hazırdı. İlk soğukta '
+        resultText:
+            'Akşam beliniz ağrıyordu ama ev kışa hazırdı. İlk soğukta '
             'bunun kıymetini bildin.',
         health: -2,
         happiness: 4,
@@ -820,14 +884,15 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         label: 'Hafta sonuna bırak',
         resultText: 'Hafta sonu yağmur yağdı. Kutular balkonda ıslandı.',
         happiness: -2,
-        money: -600,
+        money: -1800,
       ),
     ],
   ),
   GameEvent(
     id: 'gozluk_numarasi',
     category: EventCategory.kisisel,
-    text: 'Gazetenin yazıları bugün nedense daha küçük. Kolunu biraz daha '
+    text:
+        'Gazetenin yazıları bugün nedense daha küçük. Kolunu biraz daha '
         'uzatınca okunuyor.',
     requirement: EventRequirement(minAge: 45),
     repeatable: true,
@@ -837,9 +902,10 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'gozlukcu',
         label: 'Gözlükçüye git',
-        resultText: 'Numara çıktı. Camın arkasından dünya biraz daha net, '
+        resultText:
+            'Numara çıktı. Camın arkasından dünya biraz daha net, '
             'aynada yüzün biraz daha farklı.',
-        money: -1800,
+        money: -5500,
         health: 2,
         happiness: 2,
       ),
@@ -855,7 +921,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'fotograf_kutusu',
     category: EventCategory.aile,
-    text: 'Dolabın altından bir ayakkabı kutusu çıktı. İçi, tarihleri '
+    text:
+        'Dolabın altından bir ayakkabı kutusu çıktı. İçi, tarihleri '
         'arkasına yazılmış fotoğraflarla dolu.',
     requirement: EventRequirement(minAge: 60),
     repeatable: true,
@@ -865,16 +932,18 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'ayir',
         label: 'Tek tek ayır',
-        resultText: 'Bazılarının arkasındaki yazıyı sen yazmışsın, bazılarını '
+        resultText:
+            'Bazılarının arkasındaki yazıyı sen yazmışsın, bazılarını '
             'tanımadın bile. Kutu yeniden kapandığında akşam olmuştu.',
         happiness: 6,
       ),
       EventChoice(
         id: 'cerceve',
         label: 'Birini çerçeveletip as',
-        resultText: 'Duvarda artık bir fotoğraf var. Her geçişte bir saniye '
+        resultText:
+            'Duvarda artık bir fotoğraf var. Her geçişte bir saniye '
             'duruyorsun.',
-        money: -400,
+        money: -1200,
         happiness: 7,
       ),
     ],
@@ -882,7 +951,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'bahcedeki_saksi',
     category: EventCategory.kisisel,
-    text: 'Balkondaki saksı kurumak üzere. Toprağı sertleşmiş, yaprakları '
+    text:
+        'Balkondaki saksı kurumak üzere. Toprağı sertleşmiş, yaprakları '
         'sararmış.',
     requirement: EventRequirement(minAge: 52),
     repeatable: true,
@@ -892,7 +962,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'ilgilen',
         label: 'Toprağını değiştir',
-        resultText: 'Üç hafta sonra yeni bir sürgün verdi. Sabah ilk oraya '
+        resultText:
+            'Üç hafta sonra yeni bir sürgün verdi. Sabah ilk oraya '
             'bakıyorsun.',
         happiness: 4,
         health: 1,
@@ -900,7 +971,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'birak',
         label: 'Kendi hâline bırak',
-        resultText: 'Saksı bir süre daha dayandı. Sonra balkonun köşesine '
+        resultText:
+            'Saksı bir süre daha dayandı. Sonra balkonun köşesine '
             'kaldırıldı.',
         happiness: -1,
       ),
@@ -909,7 +981,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'eski_dostun_haberi',
     category: EventCategory.kisisel,
-    text: 'Uzun zamandır görüşmediğin birinin adı, hiç beklemediğin bir '
+    text:
+        'Uzun zamandır görüşmediğin birinin adı, hiç beklemediğin bir '
         'konuşmada geçti. İyi olduğunu söylediler.',
     requirement: EventRequirement(minAge: 65),
     repeatable: true,
@@ -919,7 +992,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'ara',
         label: 'Numarasını bul, ara',
-        resultText: 'İlk beş saniye yabancıydı, sonra yıllar kapandı. '
+        resultText:
+            'İlk beş saniye yabancıydı, sonra yıllar kapandı. '
             'Konuşma bittiğinde kulağın sıcaktı.',
         happiness: 7,
         charisma: 2,
@@ -935,7 +1009,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'komsu_kapisi_calmadi',
     category: EventCategory.mahalle,
-    text: 'Karşı daireden iki gündür ses yok. Kapının önündeki gazeteler '
+    text:
+        'Karşı daireden iki gündür ses yok. Kapının önündeki gazeteler '
         'birikmiş.',
     requirement: EventRequirement(minAge: 60),
     repeatable: true,
@@ -945,7 +1020,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'cal',
         label: 'Kapıyı çal',
-        resultText: 'Kapı açıldı: grip olmuş, çorbayı sen götürdün. '
+        resultText:
+            'Kapı açıldı: grip olmuş, çorbayı sen götürdün. '
             'Ertesi gün gazeteler de alınmıştı.',
         happiness: 5,
         charisma: 3,
@@ -953,7 +1029,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'yonetim',
         label: 'Yöneticiye haber ver',
-        resultText: 'Yönetici baktı, her şey yolundaydı. Yine de birinin fark '
+        resultText:
+            'Yönetici baktı, her şey yolundaydı. Yine de birinin fark '
             'etmiş olması konuşuldu.',
         happiness: 3,
       ),
@@ -962,7 +1039,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'unutulan_isim',
     category: EventCategory.kisisel,
-    text: 'Karşındaki yüzü tanıyorsun ama adı bir türlü gelmiyor. '
+    text:
+        'Karşındaki yüzü tanıyorsun ama adı bir türlü gelmiyor. '
         'Konuşma sürüyor ve o adını biliyor.',
     requirement: EventRequirement(minAge: 70),
     repeatable: true,
@@ -972,7 +1050,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'soyle',
         label: 'Açıkça söyle',
-        resultText: '"Adını bir türlü çıkaramadım" dedin. Güldü, söyledi, '
+        resultText:
+            '"Adını bir türlü çıkaramadım" dedin. Güldü, söyledi, '
             'konuşma kaldığı yerden devam etti.',
         happiness: 3,
         charisma: 2,
@@ -980,7 +1059,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'idare',
         label: 'İdare etmeye çalış',
-        resultText: 'Beş dakika boyunca hiç isim kullanmadın. Zor bir '
+        resultText:
+            'Beş dakika boyunca hiç isim kullanmadın. Zor bir '
             'beş dakikaydı.',
         happiness: -2,
         intelligence: 1,
@@ -1002,7 +1082,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'dinle',
         label: 'Sonuna kadar dinle',
-        resultText: 'Şarkı bitti, sen bir süre daha oturdun. Sessizlik artık '
+        resultText:
+            'Şarkı bitti, sen bir süre daha oturdun. Sessizlik artık '
             'daha katlanılır.',
         happiness: 5,
       ),
@@ -1017,7 +1098,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'yillarin_hesabi',
     category: EventCategory.kisisel,
-    text: 'Bugün kimse aramadı, kimse gelmedi. Akşam erken çöktü ve sen '
+    text:
+        'Bugün kimse aramadı, kimse gelmedi. Akşam erken çöktü ve sen '
         'geçen yılları saymaya başladın.',
     requirement: EventRequirement(minAge: 78),
     repeatable: true,
@@ -1027,7 +1109,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'yaz',
         label: 'Bir deftere yaz',
-        resultText: 'Yazdıkça sıraya girdi: kimler, nereler, hangi yıl. '
+        resultText:
+            'Yazdıkça sıraya girdi: kimler, nereler, hangi yıl. '
             'Defteri kapattığında içinde bir ağırlık azalmıştı.',
         happiness: 4,
         intelligence: 2,
@@ -1035,7 +1118,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'ara',
         label: 'Birini ara',
-        resultText: 'Telefonda uzun uzun konuştunuz. Kapatırken yarın yine '
+        resultText:
+            'Telefonda uzun uzun konuştunuz. Kapatırken yarın yine '
             'arayacağını söyledin ve arayacaktın.',
         happiness: 6,
         bond: 4,
@@ -1052,7 +1136,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'kapidaki_yardim',
     category: EventCategory.mahalle,
-    text: 'Market poşetleri ağır, merdiven uzun. Alt kattan biri "ben '
+    text:
+        'Market poşetleri ağır, merdiven uzun. Alt kattan biri "ben '
         'çıkarayım" diye seslendi.',
     requirement: EventRequirement(minAge: 74),
     repeatable: true,
@@ -1062,7 +1147,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kabul',
         label: 'Teşekkür ederek kabul et',
-        resultText: 'Poşetler kapının önüne kadar geldi. Kapıyı kapatırken '
+        resultText:
+            'Poşetler kapının önüne kadar geldi. Kapıyı kapatırken '
             'içinde iyi bir şey kaldı.',
         happiness: 5,
         health: 2,
@@ -1070,7 +1156,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'kendim',
         label: 'Kendin çıkar',
-        resultText: 'Üç molada çıktın. Kapıda soluklanırken "hâlâ '
+        resultText:
+            'Üç molada çıktın. Kapıda soluklanırken "hâlâ '
             'yapabiliyorum" dedin.',
         health: -2,
         happiness: 3,
@@ -1080,14 +1167,12 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'evin_anahtari',
     category: EventCategory.aile,
-    text: 'Evin yedek anahtarı kimde dursun sorusu bugün açıldı. '
+    text:
+        'Evin yedek anahtarı kimde dursun sorusu bugün açıldı. '
         'Konuşmayı sen başlatmadın.',
     requirement: EventRequirement(
       minAge: 75,
-      livingRelations: <RelationType>{
-        RelationType.cocuk,
-        RelationType.kardes,
-      },
+      livingRelations: <RelationType>{RelationType.cocuk, RelationType.kardes},
       personMinAge: 18,
     ),
     repeatable: true,
@@ -1097,7 +1182,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'ver',
         label: 'Anahtarı {kisi} alsın',
-        resultText: 'Anahtar el değiştirdi. Bunun bir kolaylık mı yoksa bir '
+        resultText:
+            'Anahtar el değiştirdi. Bunun bir kolaylık mı yoksa bir '
             'işaret mi olduğunu ikiniz de söylemediniz.',
         bond: 6,
         happiness: 2,
@@ -1105,7 +1191,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'bende',
         label: 'Anahtar bende kalsın',
-        resultText: '"Daha vakit var" dedin. Konu kapandı ama tamamen '
+        resultText:
+            '"Daha vakit var" dedin. Konu kapandı ama tamamen '
             'kapanmadı.',
         happiness: 2,
         bond: -2,
@@ -1119,7 +1206,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'market_kuyrugu',
     category: EventCategory.mahalle,
-    text: 'Kasada uzun bir kuyruk var. Arkandaki kişinin elinde iki parça, '
+    text:
+        'Kasada uzun bir kuyruk var. Arkandaki kişinin elinde iki parça, '
         'senin sepetin dolu.',
     requirement: EventRequirement(minAge: 16),
     repeatable: true,
@@ -1129,7 +1217,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'gecir',
         label: 'Öne al',
-        resultText: 'Teşekkür etti, kasiyer de gülümsedi. Sıra sana '
+        resultText:
+            'Teşekkür etti, kasiyer de gülümsedi. Sıra sana '
             'geldiğinde bir dakika kaybetmiştin, o kadar.',
         charisma: 3,
         happiness: 2,
@@ -1145,7 +1234,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'asansor_arizasi',
     category: EventCategory.mahalle,
-    text: 'Asansör iki kat arasında durdu. Işık yanıyor, telefon çekiyor, '
+    text:
+        'Asansör iki kat arasında durdu. Işık yanıyor, telefon çekiyor, '
         'ama kapı açılmıyor.',
     requirement: EventRequirement(minAge: 14),
     repeatable: true,
@@ -1155,7 +1245,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'sakin',
         label: 'Sakin ol, yardım çağır',
-        resultText: 'Yirmi dakika sonra kapı açıldı. Çıkarken kendi '
+        resultText:
+            'Yirmi dakika sonra kapı açıldı. Çıkarken kendi '
             'sakinliğine şaşırdın.',
         happiness: 2,
         intelligence: 2,
@@ -1163,7 +1254,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'panik',
         label: 'Kapıya vur, bağır',
-        resultText: 'Sesini duydular ama bekleme süresi değişmedi. Çıktığında '
+        resultText:
+            'Sesini duydular ama bekleme süresi değişmedi. Çıktığında '
             'ellerin titriyordu.',
         happiness: -3,
         health: -1,
@@ -1173,7 +1265,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'mahalle_dugunu',
     category: EventCategory.mahalle,
-    text: 'Sokağın başına düğün kurulmuş. Ses, ışık ve herkesin bildiği '
+    text:
+        'Sokağın başına düğün kurulmuş. Ses, ışık ve herkesin bildiği '
         'şarkılar.',
     requirement: EventRequirement(minAge: 10),
     repeatable: true,
@@ -1183,7 +1276,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'katil',
         label: 'Halkaya gir',
-        resultText: 'Adımları bilmiyordun, yanındaki öğretti. Gece geç '
+        resultText:
+            'Adımları bilmiyordun, yanındaki öğretti. Gece geç '
             'bitti, ayakların ağrıdı.',
         happiness: 6,
         charisma: 3,
@@ -1192,7 +1286,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'izle',
         label: 'Balkondan izle',
-        resultText: 'Yukarıdan bakmak da bir tür katılmaktı. Müzik bitince '
+        resultText:
+            'Yukarıdan bakmak da bir tür katılmaktı. Müzik bitince '
             'sokak sessizleşti.',
         happiness: 3,
       ),
@@ -1201,7 +1296,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
   GameEvent(
     id: 'kaybolan_esya',
     category: EventCategory.kisisel,
-    text: 'Evde bir şey kayboldu ve tam olarak nereye koyduğunu '
+    text:
+        'Evde bir şey kayboldu ve tam olarak nereye koyduğunu '
         'hatırlamıyorsun. Aramak bütün günü aldı.',
     requirement: EventRequirement(minAge: 20),
     repeatable: true,
@@ -1211,7 +1307,8 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
       EventChoice(
         id: 'topla',
         label: 'Aramışken her yeri topla',
-        resultText: 'Aradığını bulamadın ama ev yıllardır olmadığı kadar '
+        resultText:
+            'Aradığını bulamadın ama ev yıllardır olmadığı kadar '
             'düzenli. İki gün sonra kayıp şey ceketin cebinden çıktı.',
         happiness: 3,
         intelligence: 1,

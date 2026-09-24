@@ -49,7 +49,7 @@ abstract final class ChildProgression {
   ///
   /// Birikim maaştan bu gider düşülerek oluşur; böylece her çalışan çocuk
   /// otomatik olarak zengin olmaz.
-  static const int prototypeOnlyYearlyCost = 140000;
+  static const int prototypeOnlyYearlyCost = 320000;
 
   /// prototypeOnly: iş arayan bir yılda iş bulma olasılığı.
   static const double prototypeOnlyJobChance = 0.45;

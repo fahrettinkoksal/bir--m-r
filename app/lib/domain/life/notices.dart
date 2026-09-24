@@ -46,7 +46,7 @@ enum FuneralChoice {
 /// Tutarlar `prototypeOnly`'dir (Q-074).
 abstract final class Notices {
   /// prototypeOnly: cenaze masrafına önerilen katkı (₺).
-  static const int prototypeOnlyFuneralCost = 25000;
+  static const int prototypeOnlyFuneralCost = 120000;
 
   /// prototypeOnly: katkıda bulunmanın mutluluk etkisi.
   static const int prototypeOnlyContributionHappiness = 3;

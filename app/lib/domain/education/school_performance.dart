@@ -59,7 +59,7 @@ abstract final class SchoolPerformance {
   static const int prototypeOnlyScholarshipMinGrade = 9;
 
   /// prototypeOnly: yıllık burs tutarı (₺).
-  static const int prototypeOnlyScholarshipAmount = 45000;
+  static const int prototypeOnlyScholarshipAmount = 150000;
 
   /// prototypeOnly: sınıfta kalma eşiği.
   static const int prototypeOnlyFailAverage = 35;

@@ -196,8 +196,10 @@ void main() {
     });
 
     test('seçilen düğünün masrafı bir kez düşer', () {
+      // 2026 kalibrasyonu: salon düğünü 90.000 ₺'den 380.000 ₺'ye çıktı.
+      // Cüzdan fixture'ı ölçeğe çekildi; iddia aynen duruyor.
       final ({GameState state, Person partner}) v =
-          sevgiliyle(wallet: 200000);
+          sevgiliyle(wallet: 600000);
       final GameState kabul = kabulEttir(v.state, v.partner.id);
       final WeddingStyle salon = weddingStyleById('salon')!;
       final GameState evli = evlilik.holdWedding(kabul, 'salon').state;

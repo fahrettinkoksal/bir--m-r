@@ -57,7 +57,7 @@ class Adoption {
   static const int prototypeOnlyMinAge = 21;
 
   /// prototypeOnly: başvuru ve hazırlık masrafı (₺).
-  static const int prototypeOnlyCost = 80000;
+  static const int prototypeOnlyCost = 160000;
 
   /// prototypeOnly: masraftan sonra çocuğun bakımı için gereken birikim.
   ///

@@ -49,7 +49,7 @@ class Parenthood {
   static const int prototypeOnlyUnmarriedMinBond = 60;
 
   /// prototypeOnly: doğum ve hazırlık masrafı (₺).
-  static const int prototypeOnlyBirthCost = 20000;
+  static const int prototypeOnlyBirthCost = 65000;
 
   /// prototypeOnly: yeni doğan çocuğun yakınlığı.
   static const int prototypeOnlyNewbornBond = 70;

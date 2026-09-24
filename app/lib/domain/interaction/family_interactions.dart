@@ -67,7 +67,7 @@ class FamilyInteractions {
   ///
   /// Hediyenin gerçek bedeli katalogdan gelir; bu yalnızca "hiç para yokken
   /// hediye düğmesi açılmasın" eşiğidir.
-  static const int prototypeOnlyMinGiftBudget = 20;
+  static const int prototypeOnlyMinGiftBudget = 120;
 
   /// prototypeOnly: karşı tarafın verebileceği harçlık, kendi ekonomik
   /// durumuna göre. Bu, kişinin servetinin oyuncuya geçmesi **değildir**;
@@ -77,8 +77,8 @@ class FamilyInteractions {
     WealthTier.cokYoksul: 10,
     WealthTier.yoksul: 25,
     WealthTier.ortaHalli: 60,
-    WealthTier.varlikli: 150,
-    WealthTier.cokVarlikli: 400,
+    WealthTier.varlikli: 500,
+    WealthTier.cokVarlikli: 1400,
   };
 
   /// prototypeOnly: hediye/para istenebilmesi için gereken asgari yakınlık.
