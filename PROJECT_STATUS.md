@@ -952,8 +952,38 @@ sürümden çıkan altı madde işlendi:
 Bu pakette **hiçbir sayısal denge değeri kendi başına değiştirilmedi**;
 hepsi `prototypeOnly` kaldı ve kararlar Q-111…Q-114 olarak kuyrukta.
 
+**Paket 50 — Q-103…Q-114 kararları, 2026 ekonomisi ve şehir filtresi.**
+Faho on iki tasarım sorusunun tamamını karara bağladı; kararlar
+`DECISIONS.md` içine **D-054…D-065** olarak, ekonomi kararı **D-053**,
+şehir filtresi **D-066** olarak işlendi. Kuyruktaki Q-103…Q-114
+"KARARLAŞTIRILDI" durumuna geçti.
+
+- **2026 Türkiye ekonomisi.** Bütün tutarlar 2026 TL satın alma gücü;
+  nominal enflasyon simüle edilmiyor. Çıpa: net yıllık asgari ücret
+  336.900 ₺. Maaşlar yedi gelir bandına ayrıldı ve her bant test
+  edilerek korunuyor. Gerekçeli eski/yeni tablosu:
+  `docs/ECONOMY_2026.md`.
+- **Meslek kataloğu 9 → 44.** Hizmet, teknik, ofis, sağlık,
+  mühendislik, kamu ve yaratıcı sektörler temsil ediliyor. Sağlık ve
+  iletişim meslekleri için üniversite kataloğuna beş bölüm eklendi;
+  ulaşılamayan iş üretilmedi.
+- **Ev/araç ilanları yaşanan ille sınırlandı.** "Türkiye geneli"
+  liste kalktı, şehir bazlı fiyat katsayısı eklendi.
+- **Kütüphane 8 → 23 kitap**, okuma eşikleri 0/3/7/12/20; hobi
+  basamak adları ve süreleri karara uyduruldu.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
+gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
+"Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
+değeri ve Hayvan Detayı ekranı (D-058), "Hobilerim" bölümü (D-057),
+bitirilmiş kitabın yeniden okunması, 0-5 ve 80+ yaş havuzlarının
+genişletilmesi, olay örtüşmesinin %40-45 bandına indirilmesi ve
+kariyer olaylarının payı (D-061), zincir sonundaki gerçek kariyer
+teklifi ve kişisiz kapanış olayları (D-065), çoklu kişiyle aktivite
+(D-059).
+
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1599 geçti, 15 atlandı, 0 başarısız**. Atlananların
+`flutter test` **1660 geçti, 15 atlandı, 0 başarısız**. Atlananların
 tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleridir.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
