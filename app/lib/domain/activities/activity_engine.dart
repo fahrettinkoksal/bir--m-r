@@ -12,6 +12,8 @@ import '../../data/hobby_catalog.dart';
 import '../hobby/hobby_tracker.dart';
 import '../life/upkeep_tracker.dart';
 import '../models/interaction.dart';
+import '../life/hair_loss.dart';
+import '../life/health_report.dart';
 import '../life/notices.dart';
 import '../models/life_log.dart';
 import '../models/pending_notice.dart';
@@ -72,7 +74,21 @@ class ActivityEngine {
   InteractionAvailability availability(GameState state, ActivityAction action) {
     if (state.player.age < action.minAge) {
       return InteractionAvailability.blocked(
-        '${action.minAge} yaşından itibaren yapabilirsin.',
+        '${action.minAge} yaşından itibaren yapabilirsin.'
+        '${action.minAgeNote == null ? '' : ' ${action.minAgeNote}'}',
+      );
+    }
+    // Hekim yönlendirmediyse tahlil düğmesi çalışmaz (D-076).
+    if (action.requiresFlag != null &&
+        !state.storyFlags.contains(action.requiresFlag)) {
+      return const InteractionAvailability.blocked(
+        'Şu an bunun için bir yönlendirme yok.',
+      );
+    }
+    // Dökülmemiş saç ektirilmez (D-077).
+    if (action.reducesHairLoss && state.player.hairLossStage <= 0) {
+      return const InteractionAvailability.blocked(
+        'Saçında ektirmeyi gerektiren bir dökülme yok.',
       );
     }
     if (timesDone(state, action) >= action.maxPerAge) {
@@ -134,14 +150,27 @@ class ActivityEngine {
     final double factor =
         prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
 
-    final Stats stats = state.player.stats.copyWith(
-      appearance: state.player.stats.appearance + _scaled(action.appearance, factor),
-      charisma: state.player.stats.charisma + _scaled(action.charisma, factor),
-      happiness: state.player.stats.happiness + _scaled(action.happiness, factor),
-      health: state.player.stats.health + _scaled(action.health, factor),
-      intelligence:
-          state.player.stats.intelligence + _scaled(action.intelligence, factor),
-    );
+    // Estetik işlemler risksiz değildir (D-077). Kötü sonuçta ücret yine
+    // ödenir, kazanç uygulanmaz ve mutluluk düşer.
+    final bool kotuSonuc =
+        action.riskChance > 0 && rng.nextDouble() < action.riskChance;
+
+    final Stats stats = kotuSonuc
+        ? state.player.stats.copyWith(
+            happiness: state.player.stats.happiness +
+                prototypeOnlyBadOutcomeHappiness,
+          )
+        : state.player.stats.copyWith(
+            appearance:
+                state.player.stats.appearance + _scaled(action.appearance, factor),
+            charisma:
+                state.player.stats.charisma + _scaled(action.charisma, factor),
+            happiness:
+                state.player.stats.happiness + _scaled(action.happiness, factor),
+            health: state.player.stats.health + _scaled(action.health, factor),
+            intelligence: state.player.stats.intelligence +
+                _scaled(action.intelligence, factor),
+          );
 
     // Saç stili değişiyorsa mevcut stilden farklı biri seçilir.
     String? yeniStil = state.player.hairStyle;
@@ -152,10 +181,16 @@ class ActivityEngine {
       yeniStil = secenekler[rng.nextInt(secenekler.length)];
     }
 
+    // Saç ekimi basamağı bir kademe düşürür; başarısız işlem düşürmez.
+    final int yeniBasamak = action.reducesHairLoss && !kotuSonuc
+        ? (state.player.hairLossStage - 1).clamp(0, HairLoss.maxStage)
+        : state.player.hairLossStage;
+
     final PlayerCharacter player = state.player.copyWith(
       stats: stats,
       wallet: state.player.wallet - odenecek,
       hairStyle: yeniStil,
+      hairLossStage: yeniBasamak,
     );
 
     GameState next = state.copyWith(
@@ -164,6 +199,9 @@ class ActivityEngine {
         ...state.interactionCounts,
         GameState.interactionKey('aktivite', action.id): done + 1,
       }),
+      // Yönlendirme izleri: tahlil yapılınca kapanır, check-up yeni bir
+      // yönlendirme açabilir (D-076).
+      storyFlags: _flags(state, action, kotuSonuc),
     );
 
     // Kalıcı hobi geçmişi (Paket 39). Eylemin kendisi değişmez; yalnızca
@@ -192,15 +230,25 @@ class ActivityEngine {
       );
     }
 
-    final String metin = action.changesHairStyle
-        ? '${action.label}: artık saçın "$yeniStil". '
-            '${trMoney(odenecek)} ödedin.'
-        : '${action.label} tamamlandı.'
-            '${odenecek > 0 ? ' ${trMoney(odenecek)} ödedin.' : ''}';
+    final String ucret =
+        odenecek > 0 ? ' ${trMoney(odenecek)} ödedin.' : '';
+    final String metin;
+    if (kotuSonuc) {
+      metin = '${action.label}: sonuç umduğun gibi olmadı. Hekim '
+          'zamanla oturacağını söylüyor ama şu an memnun değilsin.'
+          '$ucret';
+    } else if (action.changesHairStyle) {
+      metin = '${action.label}: artık saçın "$yeniStil".$ucret';
+    } else {
+      // Sağlık işlemleri artık ne olduğunu anlatır (D-076).
+      final String? rapor = _healthText(state, action);
+      metin = rapor ?? '${action.label} tamamlandı.$ucret';
+    }
 
     GameState sonDurum = _log(next, metin);
     final List<AppliedEffect> etkiler = diffAppliedEffects(state, sonDurum);
     sonDurum = _announce(state, sonDurum, action, metin, etkiler, null);
+    sonDurum = _announceHealth(state, sonDurum, action, metin, etkiler);
 
     return ActivityResult(
       state: sonDurum,
@@ -211,6 +259,82 @@ class ActivityEngine {
         noNewBenefit: factor == 0,
       ),
     );
+  }
+
+  /// prototypeOnly: işlem kötü sonuçlandığında mutluluk etkisi.
+  static const int prototypeOnlyBadOutcomeHappiness = -6;
+
+  /// Eylemin hikâye izlerini günceller (D-076).
+  ///
+  /// Tahlile gidince yönlendirme kapanır; check-up yeni bir yönlendirme
+  /// açabilir. Kötü sonuçlanan bir işlem iz bırakmaz.
+  Set<String> _flags(GameState state, ActivityAction action, bool kotuSonuc) {
+    final Set<String> izler = <String>{...state.storyFlags};
+    if (action.clearsFlag != null) izler.remove(action.clearsFlag);
+    if (!kotuSonuc && action.setsFlag != null) izler.add(action.setsFlag!);
+    // Check-up sonucu tahlil gerektiriyorsa yönlendirme açılır.
+    if (action.id == 'genel_kontrol' &&
+        HealthChecks.checkup(state).needsLabTest) {
+      izler.add(HealthChecks.labTestFlag);
+    }
+    return izler;
+  }
+
+  /// Sağlık işleminin anlatılacak sonucu; sağlık işlemi değilse `null`.
+  ///
+  /// Sonuç uydurulmaz: oyuncunun gerçek sağlık değerine, yaşına ve bakım
+  /// geçmişine bakılarak üretilir.
+  String? _healthText(GameState state, ActivityAction action) {
+    switch (action.id) {
+      case 'genel_kontrol':
+        return HealthChecks.checkup(state).noticeText;
+      case 'ruh_sagligi':
+        return HealthChecks.therapyOutcome(state);
+      case 'mevsim_asisi':
+        return HealthChecks.vaccineOutcome(state);
+      case 'dis_kontrol':
+        return HealthChecks.dentalOutcome(state);
+      case 'tahlil':
+        // Yönlendirilen değerlerin büyük çoğunluğu temiz çıkar; kontrolün
+        // amacı da budur. "Temiz mi" kararı yıl içinde sabittir.
+        final bool temiz = !HealthChecks.checkup(state).lines.any(
+              (HealthLine l) => l.status == OrganStatus.sorunlu,
+            );
+        return HealthChecks.labResult(state, clean: temiz);
+      default:
+        return null;
+    }
+  }
+
+  /// Sağlık ve estetik işlemlerinin sonucunu ekran bildirimi yapar.
+  ///
+  /// Faho'nun isteği: "aşı olduğumuzda falan da bildirim olarak ekrana
+  /// vermeliyiz; kullanıcı ne olduğunu gelen bildirim ile anlamalı".
+  /// Göz muayenesi buraya girmez: onun kendi mini oyunu ve kendi
+  /// bildirimi var (D-076).
+  GameState _announceHealth(
+    GameState before,
+    GameState after,
+    ActivityAction action,
+    String metin,
+    List<AppliedEffect> effects,
+  ) {
+    final bool saglik = action.venue == ActivityVenue.saglikMerkezi &&
+        action.id != 'goz_muayenesi';
+    final bool estetik = action.venue == ActivityVenue.estetik;
+    if (!saglik && !estetik) return after;
+
+    final int sira = timesDone(after, action);
+    return Notices.enqueue(after, <PendingNotice>[
+      PendingNotice(
+        id: 'saglik-${action.id}-${after.player.age}-$sira',
+        kind: NoticeKind.saglik,
+        age: after.player.age,
+        title: action.label,
+        text: metin,
+        effects: List<AppliedEffect>.unmodifiable(effects),
+      ),
+    ]);
   }
 
   /// Eğlence programlarının sonucunu **ekran bildirimi** olarak kuyruğa

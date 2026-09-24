@@ -38,6 +38,7 @@ import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
 import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
+import '../domain/life/eye_exam.dart';
 import '../domain/life/notices.dart';
 import '../domain/life/life_verdict.dart';
 import '../domain/life/will.dart';
@@ -762,6 +763,59 @@ class GameController extends ChangeNotifier {
             companion: companion,
           ),
   );
+
+  /// Göz muayenesi mini oyununu bitirir (D-076).
+  ///
+  /// Mini oyunun sonucu **sağlığı değiştirmez**: muayene olmanın kendisi
+  /// küçük bir katkıdır, oyuncunun dikkati karakterin gözünü
+  /// iyileştirmez. Bildirimde iki bilgi **ayrı ayrı** yazar: oyuncunun
+  /// tabloda kaç satır okuduğu ve hekimin karakterin gözü hakkında
+  /// söyledikleri.
+  ///
+  /// [correct] tabloda doğru bulunan satır sayısı, [total] satır sayısı.
+  ActivityOutcome? finishEyeExam(
+    ActivityAction action, {
+    required int correct,
+    required int total,
+  }) => _runActivity((GameState current) {
+        final ActivityResult sonuc = _activities.perform(
+          state: current,
+          action: action,
+          rng: _random,
+        );
+        if (!sonuc.outcome.applied) return sonuc;
+
+        final String metin = <String>[
+          EyeExam.scoreText(correct, total),
+          EyeExam.sightNote(
+            age: current.player.age,
+            health: current.player.stats.health,
+          ),
+        ].join('\n\n');
+
+        final GameState bildirimli = Notices.enqueue(
+          sonuc.state,
+          <PendingNotice>[
+            PendingNotice(
+              id: 'goz-${current.player.age}',
+              kind: NoticeKind.saglik,
+              age: current.player.age,
+              title: action.label,
+              text: metin,
+              effects: sonuc.outcome.effects,
+            ),
+          ],
+        );
+
+        return ActivityResult(
+          state: bildirimli,
+          outcome: ActivityOutcome(
+            applied: true,
+            text: metin,
+            effects: sonuc.outcome.effects,
+          ),
+        );
+      });
 
   /// Bu eyleme şu an gerçekten katılabilecek kişiler (Paket 41).
   List<Person> outingCompanions(ActivityAction action) {

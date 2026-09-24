@@ -7,6 +7,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../domain/life/health_report.dart';
+
 /// Aktivitenin hangi alanda olduğu.
 enum ActivityVenue {
   berber('Berber / Kuaför', Icons.content_cut_rounded),
@@ -24,7 +26,13 @@ enum ActivityVenue {
   kurs('Kurslar', Icons.palette_rounded),
 
   /// Paket 27: kahve falı, tarot ve burç yorumu.
-  falTarot('Fal ve Tarot', Icons.auto_awesome_rounded);
+  falTarot('Fal ve Tarot', Icons.auto_awesome_rounded),
+
+  /// D-077: estetik işlemler. Görünüş yaşla düştüğü için (D-072)
+  /// oyuncunun buna karşı yapabileceği bir şey olmalı.
+  ///
+  /// Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  estetik('Estetik', Icons.face_retouching_natural_rounded);
 
   const ActivityVenue(this.label, this.icon);
 
@@ -66,6 +74,12 @@ class ActivityAction {
     this.intelligence = 0,
     this.maxPerAge = 2,
     this.changesHairStyle = false,
+    this.requiresFlag,
+    this.clearsFlag,
+    this.setsFlag,
+    this.reducesHairLoss = false,
+    this.riskChance = 0,
+    this.minAgeNote,
   });
 
   final String id;
@@ -96,6 +110,29 @@ class ActivityAction {
 
   /// Saç stilini değiştiren eylem mi?
   final bool changesHairStyle;
+
+  /// Bu eylemin açılması için gereken hikâye izi.
+  ///
+  /// Tahlile yönlendirilmeden "Tahlile git" düğmesi görünmez (D-076).
+  final String? requiresFlag;
+
+  /// Eylem başarıyla yapıldığında **silinen** hikâye izi.
+  final String? clearsFlag;
+
+  /// Eylem başarıyla yapıldığında **eklenen** hikâye izi.
+  final String? setsFlag;
+
+  /// Saç dökülmesi basamağını bir kademe düşürür mü? (D-077)
+  final bool reducesHairLoss;
+
+  /// prototypeOnly: işlemin istenen sonucu vermeme ihtimali.
+  ///
+  /// Estetik işlemler risksiz değildir. Kötü sonuçta kazanç uygulanmaz,
+  /// ücret yine ödenir ve mutluluk düşer — gerçek hayatta da böyle.
+  final double riskChance;
+
+  /// Yaş sınırının **gerekçesi**; kapalı düğmede gösterilir.
+  final String? minAgeNote;
 }
 
 const List<ActivityAction> kActivityActions = <ActivityAction>[
@@ -280,6 +317,115 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     happiness: 9,
     health: 1,
     maxPerAge: 2,
+  ),
+
+  // Tahlil yalnızca check-up sonrası açılır (D-076): hekim
+  // yönlendirmediyse bu düğme menüde durmaz.
+  ActivityAction(
+    id: 'tahlil',
+    venue: ActivityVenue.saglikMerkezi,
+    label: 'Tahlile git',
+    description:
+        'Hekimin işaretlediği değerler için kan verilecek. Sonuç aynı '
+        'gün çıkıyor.',
+    icon: Icons.science_outlined,
+    cost: 3600, // prototypeOnly
+    minAge: 3,
+    health: 3,
+    maxPerAge: 1,
+    requiresFlag: HealthChecks.labTestFlag,
+    clearsFlag: HealthChecks.labTestFlag,
+  ),
+
+  // --- Estetik (D-077) ---------------------------------------------------
+  //
+  // Görünüş yaşla düşüyor (D-072) ve erkeklerde saç dökülebiliyor
+  // (D-073). Oyuncunun buna karşı yapabileceği bir şey olmalıydı.
+  //
+  // Fiyatlar 2026 ölçeğindedir (D-053) ve Türkiye piyasasının gerçek
+  // aralıklarına dayanır; tek tek tutarlar `prototypeOnly` (Q-119).
+  // Hiçbiri tıbbi tavsiye değildir.
+  //
+  // Her işlemin bir **riski** vardır: kötü sonuçta ücret yine ödenir,
+  // kazanç uygulanmaz ve mutluluk düşer.
+  ActivityAction(
+    id: 'kas_dolgusu',
+    venue: ActivityVenue.estetik,
+    label: 'Kaş ve yüz dolgusu',
+    description:
+        'Küçük bir iğne, yarım saat. Şişlik birkaç günde iner.',
+    icon: Icons.brush_outlined,
+    cost: 22000, // prototypeOnly
+    minAge: 20,
+    minAgeNote: 'Estetik işlemler için erişkin olman gerekiyor.',
+    appearance: 4,
+    maxPerAge: 1,
+    riskChance: 0.12,
+  ),
+  ActivityAction(
+    id: 'dis_estetigi',
+    venue: ActivityVenue.estetik,
+    label: 'Gülüş tasarımı',
+    description:
+        'Ölçü alındı, kaplamalar hazırlandı. Aynada ilk gülüşün '
+        'tuhaf geliyor, sonra alışıyorsun.',
+    icon: Icons.sentiment_very_satisfied_outlined,
+    cost: 185000, // prototypeOnly
+    minAge: 18,
+    minAgeNote: 'Estetik işlemler için erişkin olman gerekiyor.',
+    appearance: 7,
+    charisma: 2,
+    maxPerAge: 1,
+    riskChance: 0.1,
+  ),
+  ActivityAction(
+    id: 'goz_kapagi',
+    venue: ActivityVenue.estetik,
+    label: 'Göz kapağı estetiği',
+    description:
+        'Üst kapaktaki fazlalık alınıyor. Bir hafta morluk, sonra '
+        'bakışın açılıyor.',
+    icon: Icons.visibility_outlined,
+    cost: 90000, // prototypeOnly
+    minAge: 30,
+    minAgeNote: 'Bu işlem genellikle otuzundan sonra gündeme geliyor.',
+    appearance: 6,
+    maxPerAge: 1,
+    riskChance: 0.14,
+  ),
+  ActivityAction(
+    id: 'burun_ameliyati',
+    venue: ActivityVenue.estetik,
+    label: 'Burun estetiği',
+    description:
+        'Ameliyathane, genel anestezi ve iki hafta şişlik. Sonucu '
+        'altı ay sonra tam görüyorsun.',
+    icon: Icons.face_outlined,
+    cost: 145000, // prototypeOnly
+    minAge: 18,
+    minAgeNote: 'Burun gelişimi tamamlanmadan bu ameliyat yapılmıyor.',
+    appearance: 9,
+    charisma: 2,
+    health: -2,
+    maxPerAge: 1,
+    riskChance: 0.18,
+  ),
+  ActivityAction(
+    id: 'sac_ekimi',
+    venue: ActivityVenue.estetik,
+    label: 'Saç ektir',
+    description:
+        'Uzun bir gün, ensenden alınan kökler öne taşınıyor. Sonuç '
+        'bir yılda oturuyor.',
+    icon: Icons.content_cut_rounded,
+    cost: 95000, // prototypeOnly
+    minAge: 25,
+    minAgeNote: 'Dökülme oturmadan saç ekimi önerilmiyor.',
+    appearance: 5,
+    charisma: 3,
+    maxPerAge: 1,
+    reducesHairLoss: true,
+    riskChance: 0.15,
   ),
 
   // --- Eğlence (Paket 18) ------------------------------------------------

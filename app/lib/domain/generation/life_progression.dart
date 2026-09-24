@@ -38,6 +38,7 @@ import '../models/person.dart';
 import '../life/aging.dart';
 import '../models/stats.dart';
 import '../life/hair_loss.dart';
+import '../life/sick_leave.dart';
 import '../life/upkeep_tracker.dart';
 import '../life/notices.dart';
 import '../models/pending_notice.dart';
@@ -256,6 +257,11 @@ class LifeProgression {
       );
       maas = (state: aylik.state, logText: maas.logText);
     }
+
+    // Hastalık maaştan **sonra**, işten çıkarılmadan **önce** işler
+    // (D-078): çalışılan yılın ücreti ödenir, raporun ödenmeyen günleri
+    // o ücretten düşer, uyarı birikmişse çıkarılma ihtimaline katılır.
+    maas = _applySickLeave(maas, newAge, log);
 
     // Maaş ödendikten **sonra** işten çıkarılma denenir: çalışılan yılın
     // ücreti ödenir, yeni yıla işsiz girilir (Paket 9).
@@ -815,6 +821,65 @@ class LifeProgression {
         ),
       ]),
     );
+  }
+
+  /// Hastalık ve işe gidememe (D-078).
+  ///
+  /// Faho'nun isteği: "hasta olayım, 3-5 gün işe gidemeyeyim, işverenim
+  /// sorun etsin". Kayıp **gerçekten uygulanır**: ödenmeyen günler
+  /// cüzdandan düşer ve uyarı kariyer kaydına yazılır. İşveren her
+  /// hastalığı sorun etmez; kısa rapor geçer.
+  ({GameState state, String? logText}) _applySickLeave(
+    ({GameState state, String? logText}) girdi,
+    int newAge,
+    List<LifeLogEntry> log,
+  ) {
+    final GameState state = girdi.state;
+    final SickLeave hastalik = SickLeaves.roll(
+      age: newAge,
+      health: state.player.stats.health,
+      yearsSinceSport: state.yearsSinceSport,
+      yearlySalary: state.career.isEmployed ? state.career.salary : null,
+      previousWarnings: state.career.employerWarnings,
+      rng: _rng,
+      isStudent: state.education.isSchoolStudent,
+    );
+    if (!hastalik.happened) return girdi;
+
+    final int kayip = hastalik.wageLoss.clamp(0, state.player.wallet);
+    GameState next = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet - kayip,
+        stats: state.player.stats.copyWith(
+          happiness: state.player.stats.happiness + hastalik.happinessDelta,
+        ),
+      ),
+    );
+    if (hastalik.employerUpset) {
+      next = next.copyWith(
+        career: next.career.copyWith(
+          employerWarnings: next.career.employerWarnings + 1,
+        ),
+      );
+    }
+
+    // Günlük her kırgınlıkla dolmaz (D-063'ün spam kuralı): yalnızca
+    // hayatta bir karşılığı olan hastalık yazılır — işten kalınan,
+    // gelirden götüren ya da uzun süren. Üç gün nezle olan bir çocuğun
+    // her yılı günlüğe girmez; etkisi yine uygulanır.
+    final bool anlatmayaDeger = hastalik.wageLoss > 0 ||
+        hastalik.employerUpset ||
+        hastalik.days >= SickLeaves.prototypeOnlyUpsetDays;
+    if (anlatmayaDeger) {
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: hastalik.text,
+          category: LogCategory.kisisel,
+        ),
+      );
+    }
+    return (state: next, logText: girdi.logText);
   }
 
   /// Yaşlanmanın bütün değerlere etkisini uygular (D-051, D-072, D-073).

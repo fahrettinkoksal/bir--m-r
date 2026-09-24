@@ -2685,5 +2685,30 @@ Faho istedi: "boşandığımda ... mal varlığından şu kadar ona gitti, ev on
 
 ---
 
+### Q-119 — Sağlık raporu, estetik fiyatları ve hastalık dengesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-076, D-077, D-078 · `app/lib/domain/life/health_report.dart`, `app/lib/domain/life/eye_exam.dart`, `app/lib/domain/life/sick_leave.dart`, `app/lib/data/activity_catalog.dart` · Test: `app/test/health_package_test.dart`
+
+Faho istedi: "göz muayenesine tıkladım, küçük bir oyun oynatmalıyız", "aşı olduğumuzda bildirim olarak ekrana vermeliyiz", "checkup'a girmişim gibi bildirim gelsin, ciğerlerin iyi kalp iyi vb", "estetikleri de ekleyelim", "hasta olayım 3-5 gün işe gidemeyeyim işverenim sorun etsin".
+
+**Estetik fiyatları (2026 ₺, hepsi `prototypeOnly`):** kaş/yüz dolgusu 22.000 · göz kapağı 90.000 · saç ekimi 95.000 · burun estetiği 145.000 · gülüş tasarımı 185.000. Burun estetiği için 2025 piyasa aralığı yaygın olarak 60.000-120.000 ₺ diye veriliyor; buradaki 145.000 bunun 2026 ölçeğine taşınmış hâlidir ve net yıllık asgari ücretin (336.900 ₺) kabaca **beş aylığına** denk gelir.
+
+**Risk oranları:** dolgu %12 · gülüş tasarımı %10 · göz kapağı %14 · saç ekimi %15 · burun %18. Kötü sonuçta ücret ödenir, kazanç gelmez, mutluluk −6.
+
+**Hastalık ihtimali (yıllık):** sağlık ≥80 → %12, 60-79 → %20, 40-59 → %30, <40 → %42. Spor ×0,75 / hareketsizlik ×1,2 · 65+ ×1,25 · 12 yaş altı ×1,2.
+
+**Karar soruları:**
+1. Estetik fiyatları doğru mu? Şu an burun estetiği bir yılın maaşının yaklaşık yarısı; oyunda erişilebilir ama ucuz değil.
+2. **Risk** kalsın mı? Kötü sonuçta oyuncu hem parayı hem kazancı kaybediyor. Oranlar fazla mı?
+3. Estetik işlemler **yılda bir** yapılabiliyor. Ömür boyu bir sınır olmalı mı?
+4. Saç ekimi basamağı **bir kademe** düşürüyor. Tamamen sıfırlamalı mı?
+5. Hastalıkta **gelir kaybı yalnızca iki gün**. Gerçeğe uygun ama oyunda hissedilmiyor olabilir; artırılsın mı?
+6. İşveren uyarısı işten çıkarılma ihtimaline en fazla **%16** ekliyor. Yeterli mi, yoksa yeterince uyarı birikince doğrudan işten çıkarma mı olsun?
+7. Hastalık şu an **sağlığı kalıcı olarak düşürmüyor**. Düşürmeli mi?
+8. Check-up raporundaki altı sistem yeterli mi? Başka sistem eklensin mi?
+9. Göz muayenesi mini oyunu **beş satır**. Zorluk doğru mu? Yanlış seçimde satır kaybediliyor, tablo baştan kurulmuyor.
+10. Mini oyun başka yerlerde de kullanılsın mı (diş kontrolü, işitme testi, ehliyet sınavı)?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

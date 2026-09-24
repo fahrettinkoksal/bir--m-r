@@ -26,6 +26,7 @@ import 'casino_pages.dart';
 import 'martial_arts_page.dart';
 import 'lottery_page.dart';
 import 'finger_page.dart';
+import 'eye_exam_page.dart';
 import 'fertility_page.dart';
 import 'license_pages.dart';
 import 'pets_page.dart';
@@ -59,6 +60,8 @@ enum _ActivityPage {
   falTarot,
   dovus,
   tupBebek,
+  gozMuayenesi,
+  estetik,
   sosyalMedya,
   kumarhane,
   piyango,
@@ -144,6 +147,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return VenuePage(
           venue: ActivityVenue.saglikMerkezi,
           onBack: () => _go(_ActivityPage.kok),
+          // Göz muayenesinin kendi mini oyunu var (D-076); düğme eylemi
+          // doğrudan uygulamak yerine o ekranı açar.
+          customActions: <String, VoidCallback>{
+            'goz_muayenesi': () => _go(_ActivityPage.gozMuayenesi),
+          },
           extraRows: <Widget>[
             // Tüp bebek yalnızca bir eş/sevgili varken görünür; çalışmayan
             // düğme konmaz (Paket 35).
@@ -161,6 +169,17 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         );
       case _ActivityPage.tupBebek:
         return FertilityPage(onBack: () => _go(_ActivityPage.saglik));
+      case _ActivityPage.gozMuayenesi:
+        return EyeExamPage(
+          action: kActivityActions
+              .firstWhere((ActivityAction a) => a.id == 'goz_muayenesi'),
+          onBack: () => _go(_ActivityPage.saglik),
+        );
+      case _ActivityPage.estetik:
+        return VenuePage(
+          venue: ActivityVenue.estetik,
+          onBack: () => _go(_ActivityPage.kok),
+        );
       case _ActivityPage.eglence:
         return VenuePage(
           venue: ActivityVenue.eglence,
@@ -274,6 +293,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.medical_services_outlined,
             accent: BirOmurAccents.nar,
             onTap: () => _go(_ActivityPage.saglik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Estetik (D-077): görünüş yaşla düştüğü için oyuncunun buna
+        // karşı yapabileceği bir şey olmalı. Yaşı tutmayana çalışmayan
+        // düğme gösterilmez (D-038).
+        if (state.player.age >= ActivityVenue.estetik.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_estetik'),
+            title: ActivityVenue.estetik.label,
+            subtitle: 'Dolgu, gülüş tasarımı, burun ve saç ekimi',
+            icon: Icons.face_retouching_natural_outlined,
+            accent: BirOmurAccents.gul,
+            onTap: () => _go(_ActivityPage.estetik),
           ),
           const SizedBox(height: 10),
         ],

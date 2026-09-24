@@ -100,7 +100,14 @@ void main() {
       expect(r.outcome.applied, isTrue);
       expect(r.state.player.wallet, 5000 - a.cost);
       expect(r.state.player.stats.health, greaterThan(50));
-      expect(r.state.log.last.text, contains(a.label));
+      // D-076: check-up artık "tamamlandı" demiyor, ne bulunduğunu
+      // anlatıyor. Günlükte eylemin adı değil, raporun kendisi durur.
+      expect(r.state.log.last.text, contains('Check-up bitti'));
+      expect(r.state.log.last.text, contains('Kalp ve tansiyon'));
+      expect(r.state.log.last.text, contains('Akciğerler'));
+      // Sonuç ayrıca ekran bildirimi olarak kuyruğa girer.
+      expect(r.state.nextNotice, isNotNull);
+      expect(r.state.nextNotice!.title, a.label);
       checkInvariants(r.state);
     });
 

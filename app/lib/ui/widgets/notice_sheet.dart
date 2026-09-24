@@ -29,6 +29,14 @@ class NoticeSheet extends StatefulWidget {
       enableDrag: false,
       useRootNavigator: true,
       showDragHandle: false,
+      // Varsayılan pencere ekranın 9/16'sını geçemez ve uzun bildirim
+      // taşardı: check-up raporu gibi çok satırlı metinler sığmıyordu
+      // (D-076'da ölçüldü: 48 px taşma). Artık pencere gerektiği kadar
+      // uzayabiliyor, metin de kendi içinde kayıyor.
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
       builder: (BuildContext context) => NoticeSheet(notice: notice),
     );
   }
@@ -104,40 +112,55 @@ class _NoticeSheetState extends State<NoticeSheet> {
             const SizedBox(height: 10),
             const KilimDivider(),
             const SizedBox(height: 14),
-            Text(
-              _sonuc ?? notice.text,
-              key: const Key('notice_text'),
-              style: theme.textTheme.bodyLarge,
+            // Metin ve etkiler kendi içinde kayar; başlık ve düğmeler
+            // sabit kalır. Böylece uzun bir rapor da okunabilir ve
+            // "Tamam" düğmesi ekrandan taşmaz.
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      _sonuc ?? notice.text,
+                      key: const Key('notice_text'),
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    // Etki yalnızca gerçekten uygulandıysa yazılır.
+                    if (_sonuc == null && notice.happinessDelta < 0) ...<Widget>[
+                      const SizedBox(height: 12),
+                      Text(
+                        'Mutluluk ${notice.happinessDelta}',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ],
+                    // Gerçekten uygulanmış değişimler (D-074): "bana 5,
+                    // kızıma 5" gibi bir sonucun iki satırı da burada.
+                    if (_sonuc == null && notice.effects.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 12),
+                      EffectChips(
+                        key: const Key('notice_effects'),
+                        effects: notice.effects,
+                      ),
+                    ],
+                    if (_sonuc == null &&
+                        notice.kind == NoticeKind.miras) ...<Widget>[
+                      const SizedBox(height: 12),
+                      if (notice.money > 0)
+                        Text(
+                          'Cüzdanına ${trMoney(notice.money)} geçti.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      for (final String ad in notice.itemNames)
+                        Text('$ad sana kaldı.',
+                            style: theme.textTheme.bodyMedium),
+                    ],
+                  ],
+                ),
+              ),
             ),
-            // Etki yalnızca gerçekten uygulandıysa yazılır.
-            if (_sonuc == null && notice.happinessDelta < 0) ...<Widget>[
-              const SizedBox(height: 12),
-              Text(
-                'Mutluluk ${notice.happinessDelta}',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
-            ],
-            // Gerçekten uygulanmış değişimler (D-074): "bana 5, kızıma 5"
-            // gibi bir sonucun iki satırı da burada görünür.
-            if (_sonuc == null && notice.effects.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 12),
-              EffectChips(
-                key: const Key('notice_effects'),
-                effects: notice.effects,
-              ),
-            ],
-            if (_sonuc == null && notice.kind == NoticeKind.miras) ...<Widget>[
-              const SizedBox(height: 12),
-              if (notice.money > 0)
-                Text(
-                  'Cüzdanına ${trMoney(notice.money)} geçti.',
-                  style: theme.textTheme.bodyMedium,
-                ),
-              for (final String ad in notice.itemNames)
-                Text('$ad sana kaldı.', style: theme.textTheme.bodyMedium),
-            ],
             const SizedBox(height: 18),
             if (katilimSorulacak) ...<Widget>[
               SizedBox(

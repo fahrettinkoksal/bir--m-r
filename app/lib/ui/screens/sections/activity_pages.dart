@@ -30,10 +30,17 @@ class VenuePage extends StatefulWidget {
     required this.venue,
     required this.onBack,
     this.extraRows = const <Widget>[],
+    this.customActions = const <String, VoidCallback>{},
   });
 
   final ActivityVenue venue;
   final VoidCallback onBack;
+
+  /// Kendi ekranı olan eylemler: kimlik → o ekrana götüren geri çağrı.
+  ///
+  /// Göz muayenesi böyle çalışır (D-076): düğme eylemi doğrudan
+  /// uygulamak yerine mini oyunu açar. Mekân sayfası genel kalır.
+  final Map<String, VoidCallback> customActions;
 
   /// Mekânın kendi eylemlerinin **üstünde** gösterilen ek satırlar.
   ///
@@ -96,6 +103,12 @@ class _VenuePageState extends State<VenuePage> {
                   }
                 }),
                 onTap: () {
+                  final VoidCallback? ozel =
+                      widget.customActions[eylem.id];
+                  if (ozel != null) {
+                    ozel();
+                    return;
+                  }
                   final ActivityOutcome? outcome =
                       controller.performActivity(eylem, companion: yoldas);
                   setState(() => _sonuc = outcome);
@@ -130,6 +143,8 @@ BirOmurAccent accentForVenue(ActivityVenue venue) {
     case ActivityVenue.kurs:
       return BirOmurAccents.mor;
     case ActivityVenue.falTarot:
+      return BirOmurAccents.gul;
+    case ActivityVenue.estetik:
       return BirOmurAccents.gul;
   }
 }
