@@ -36,7 +36,8 @@ class _MartialArtsPageState extends State<MartialArtsPage> {
       icon: Icons.sports_martial_arts_rounded,
       accent: BirOmurAccents.nar,
       title: 'Dövüş sanatları',
-      subtitle: 'Ders ucuz, ustalık pahalı: kuşak yılla gelir. '
+      subtitle:
+          'Ders ucuz, ustalık pahalı: kuşak yılla gelir. '
           'Cüzdanında ${controller.state!.player.walletLabel} var.',
       backLabel: 'Spor salonu',
       onBack: widget.onBack,
@@ -49,9 +50,17 @@ class _MartialArtsPageState extends State<MartialArtsPage> {
             lessonsThisAge: controller.martialLessonsThisAge(art),
             expanded: _acik == art,
             onToggle: () => setState(() => _acik = _acik == art ? null : art),
+            seasonLessons: controller.martialSeasonLessons(art),
             onLesson: () {
-              final ActivityOutcome? outcome =
-                  controller.takeMartialLesson(art);
+              final ActivityOutcome? outcome = controller.takeMartialLesson(
+                art,
+              );
+              setState(() => _sonuc = outcome);
+            },
+            onSeason: () {
+              final ActivityOutcome? outcome = controller.takeMartialSeason(
+                art,
+              );
               setState(() => _sonuc = outcome);
             },
           ),
@@ -75,6 +84,8 @@ class _ArtCard extends StatelessWidget {
     required this.expanded,
     required this.onToggle,
     required this.onLesson,
+    required this.seasonLessons,
+    required this.onSeason,
   });
 
   final MartialArt art;
@@ -84,6 +95,10 @@ class _ArtCard extends StatelessWidget {
   final bool expanded;
   final VoidCallback onToggle;
   final VoidCallback onLesson;
+
+  /// Bu yıl tek seferde alınabilecek ders sayısı (0 ise düğme çıkmaz).
+  final int seasonLessons;
+  final VoidCallback onSeason;
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +139,9 @@ class _ArtCard extends StatelessWidget {
                 ),
                 Text(
                   trMoney(art.lessonCost),
-                  style: theme.textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w800),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -150,7 +166,7 @@ class _ArtCard extends StatelessWidget {
               progress.isTopRank
                   ? 'En üst basamak: ${progress.rankName}'
                   : 'Sonraki basamak: ${art.ranks[progress.level + 1].name}'
-                      '${kalan == null ? '' : ' — $kalan ders kaldı'}',
+                        '${kalan == null ? '' : ' — $kalan ders kaldı'}',
               style: theme.textTheme.bodySmall,
             ),
             Text(
@@ -195,6 +211,15 @@ class _ArtCard extends StatelessWidget {
                   onPressed: acik ? onLesson : null,
                   child: Text(acik ? 'Ders al' : 'Şu an kapalı'),
                 ),
+                // Basamaklar yüzlerce ders istiyor; tek tek tıklamak
+                // yerine yılın kalanı bir hamlede çalışılabilir. Kural
+                // aynı: yıllık sınır, ücret ve eşikler değişmiyor.
+                if (acik && seasonLessons > 1)
+                  FilledButton(
+                    key: Key('dovus_yil_${art.id}'),
+                    onPressed: onSeason,
+                    child: Text('Yılı çalış ($seasonLessons ders)'),
+                  ),
               ],
             ),
             if (expanded) ...<Widget>[

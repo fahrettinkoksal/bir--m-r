@@ -127,7 +127,7 @@ void main() {
           expect(
             art.ranks[i].lessonsNeeded,
             greaterThan(art.ranks[i - 1].lessonsNeeded),
-            reason: '${art.id} ${i}. basamak geriye gidiyor',
+            reason: '${art.id} $i. basamak geriye gidiyor',
           );
         }
       }

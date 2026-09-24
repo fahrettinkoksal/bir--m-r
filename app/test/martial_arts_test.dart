@@ -14,8 +14,9 @@ import 'package:flutter_test/flutter_test.dart';
 const MartialArtsEngine motor = MartialArtsEngine();
 
 GameState hayat({int age = 20, int wallet = 1000000}) {
-  final GameState taban =
-      LifeGenerator.seeded(7).generate(mode: StartMode.tamamenRastgele);
+  final GameState taban = LifeGenerator.seeded(
+    7,
+  ).generate(mode: StartMode.tamamenRastgele);
   return taban.copyWith(
     pendingEvent: null,
     education: const EducationState(finished: true, startedAtAge: 6),
@@ -49,8 +50,11 @@ void main() {
   group('Katalog', () {
     test('her dalın basamakları artan ders sayısıyla sıralı', () {
       for (final MartialArt art in MartialArt.values) {
-        expect(art.ranks.first.lessonsNeeded, 0,
-            reason: '${art.label} ilk basamağı ücretsiz başlamalı');
+        expect(
+          art.ranks.first.lessonsNeeded,
+          0,
+          reason: '${art.label} ilk basamağı ücretsiz başlamalı',
+        );
         for (int i = 1; i < art.ranks.length; i++) {
           expect(
             art.ranks[i].lessonsNeeded,
@@ -74,15 +78,21 @@ void main() {
         final JobType? is_ = jobById(art.instructorJobId);
         expect(is_, isNotNull, reason: art.instructorJobId);
         expect(is_!.martialArtId, art.id);
-        expect(questionsForJob(is_.id), isNotEmpty,
-            reason: '${is_.name} için mülakat sorusu yok, iş açılmaz');
+        expect(
+          questionsForJob(is_.id),
+          isNotEmpty,
+          reason: '${is_.name} için mülakat sorusu yok, iş açılmaz',
+        );
       }
     });
 
     test('ders ücretleri düşük tutulur', () {
       for (final MartialArt art in MartialArt.values) {
-        expect(art.lessonCost, lessThanOrEqualTo(250),
-            reason: '${art.label} ders başı ücreti ucuz olmalı');
+        expect(
+          art.lessonCost,
+          lessThanOrEqualTo(250),
+          reason: '${art.label} ders başı ücreti ucuz olmalı',
+        );
       }
     });
 
@@ -110,23 +120,26 @@ void main() {
   group('Ders almak', () {
     test('ücret düşer, sağlık artar, ders sayılır', () {
       final GameState s = hayat(wallet: 10000);
-      final ActivityResult r =
-          motor.takeLesson(state: s, art: MartialArt.karate);
+      final ActivityResult r = motor.takeLesson(
+        state: s,
+        art: MartialArt.karate,
+      );
 
       expect(r.outcome.applied, isTrue);
       expect(
         r.state.player.wallet,
         s.player.wallet - MartialArt.karate.lessonCost,
       );
-      expect(r.state.player.stats.health,
-          greaterThan(s.player.stats.health));
+      expect(r.state.player.stats.health, greaterThan(s.player.stats.health));
       expect(motor.progressOf(r.state, MartialArt.karate).lessons, 1);
     });
 
     test('parası yetmeyen ders alamaz ve durum değişmez', () {
       final GameState s = hayat(wallet: 10);
-      final ActivityResult r =
-          motor.takeLesson(state: s, art: MartialArt.karate);
+      final ActivityResult r = motor.takeLesson(
+        state: s,
+        art: MartialArt.karate,
+      );
       expect(r.outcome.applied, isFalse);
       expect(r.state.player.wallet, 10);
       expect(r.state.martialArts, isEmpty);
@@ -134,10 +147,7 @@ void main() {
 
     test('yaşı tutmayan ders alamaz', () {
       final GameState s = hayat(age: 5);
-      expect(
-        motor.availability(s, MartialArt.karate).isAllowed,
-        isFalse,
-      );
+      expect(motor.availability(s, MartialArt.karate).isAllowed, isFalse);
     });
 
     test('bir yaşta ders sayısı sınırlı', () {
@@ -146,8 +156,10 @@ void main() {
         s = motor.takeLesson(state: s, art: MartialArt.karate).state;
       }
       expect(motor.availability(s, MartialArt.karate).isAllowed, isFalse);
-      final ActivityResult r =
-          motor.takeLesson(state: s, art: MartialArt.karate);
+      final ActivityResult r = motor.takeLesson(
+        state: s,
+        art: MartialArt.karate,
+      );
       expect(r.outcome.applied, isFalse);
       expect(r.outcome.text, contains('seneye'));
     });
@@ -209,8 +221,9 @@ void main() {
       for (final MartialArt art in MartialArt.values) {
         GameState s = hayat(age: 10, wallet: 100000000);
         s = seviyeyeCik(s, art, art.instructorFromLevel);
-        final GameState yetiskin =
-            s.copyWith(player: s.player.copyWith(age: 25));
+        final GameState yetiskin = s.copyWith(
+          player: s.player.copyWith(age: 25),
+        );
         final JobType is_ = jobById(art.instructorJobId)!;
         expect(
           pazar.meetsRequirements(yetiskin, is_),
@@ -224,8 +237,7 @@ void main() {
       final MartialArt art = MartialArt.karate;
       GameState s = hayat(age: 10, wallet: 100000000);
       s = seviyeyeCik(s, art, art.instructorFromLevel - 1);
-      final GameState yetiskin =
-          s.copyWith(player: s.player.copyWith(age: 25));
+      final GameState yetiskin = s.copyWith(player: s.player.copyWith(age: 25));
       expect(
         pazar.meetsRequirements(yetiskin, jobById(art.instructorJobId)!),
         isFalse,
@@ -235,8 +247,7 @@ void main() {
     test('bir daldaki kuşak başka dalın eğitmenliğini açmaz', () {
       GameState s = hayat(age: 10, wallet: 100000000);
       s = seviyeyeCik(s, MartialArt.karate, MartialArt.karate.topLevel);
-      final GameState yetiskin =
-          s.copyWith(player: s.player.copyWith(age: 30));
+      final GameState yetiskin = s.copyWith(player: s.player.copyWith(age: 30));
       expect(
         pazar.meetsRequirements(
           yetiskin,
@@ -263,10 +274,128 @@ void main() {
 
   test('eski kayıtta dövüş sanatı alanı yoksa boş okunur', () {
     final GameState s = hayat();
-    final Map<String, Object?> json =
-        Map<String, Object?>.from(encodeGameState(s));
+    final Map<String, Object?> json = Map<String, Object?>.from(
+      encodeGameState(s),
+    );
     json.remove('martialArts');
     final GameState geri = decodeGameState(json);
     expect(geri.martialArts, isEmpty);
+  });
+
+  // -------------------------------------------------------------------
+  // Toplu çalışma
+  //
+  // Siyah kuşak 110, başpehlivanlık 120 ders istiyor ve bir yaşta en
+  // fazla kMaxMartialLessonsPerAge ders alınabiliyor. Oyuncu aynı
+  // düğmeye yüzden fazla kez basmak zorunda kalıyordu. Toplu çalışma
+  // yalnızca dokunma sayısını azaltır; kuralların hiçbirini değiştirmez.
+  // -------------------------------------------------------------------
+  group('Toplu çalışma', () {
+    test('tek tek ders almakla birebir aynı sonucu verir', () {
+      const MartialArt art = MartialArt.karate;
+      final GameState basla = hayat(age: 20);
+
+      // Yol A: tek tek.
+      GameState tekTek = basla;
+      while (motor.availability(tekTek, art).isAllowed) {
+        tekTek = motor.takeLesson(state: tekTek, art: art).state;
+      }
+
+      // Yol B: toplu.
+      final GameState toplu = motor.takeSeason(state: basla, art: art).state;
+
+      expect(
+        motor.progressOf(toplu, art).lessons,
+        motor.progressOf(tekTek, art).lessons,
+      );
+      expect(
+        motor.progressOf(toplu, art).level,
+        motor.progressOf(tekTek, art).level,
+      );
+      expect(toplu.player.wallet, tekTek.player.wallet);
+      expect(toplu.player.stats.health, tekTek.player.stats.health);
+      expect(toplu.player.stats.happiness, tekTek.player.stats.happiness);
+      expect(toplu.player.stats.charisma, tekTek.player.stats.charisma);
+      expect(
+        motor.lessonsThisAge(toplu, art),
+        motor.lessonsThisAge(tekTek, art),
+      );
+    });
+
+    test('yıllık sınırı aşmaz', () {
+      const MartialArt art = MartialArt.karate;
+      final GameState s = motor
+          .takeSeason(state: hayat(age: 20), art: art)
+          .state;
+      expect(motor.lessonsThisAge(s, art), kMaxMartialLessonsPerAge);
+      expect(motor.availability(s, art).isAllowed, isFalse);
+    });
+
+    test('aynı yıl ikinci kez çalışılamaz', () {
+      const MartialArt art = MartialArt.karate;
+      final GameState s = motor
+          .takeSeason(state: hayat(age: 20), art: art)
+          .state;
+      final ActivityResult ikinci = motor.takeSeason(state: s, art: art);
+      expect(ikinci.outcome.applied, isFalse);
+      expect(
+        motor.progressOf(ikinci.state, art).lessons,
+        motor.progressOf(s, art).lessons,
+      );
+    });
+
+    test('para yetmezse yalnızca ödenebilen kadar ders alınır', () {
+      const MartialArt art = MartialArt.karate;
+      // Tam üç dersin parası var.
+      final GameState s = hayat(age: 20, wallet: art.lessonCost * 3);
+      final ActivityResult r = motor.takeSeason(state: s, art: art);
+      expect(r.outcome.applied, isTrue);
+      expect(motor.progressOf(r.state, art).lessons, 3);
+      expect(r.state.player.wallet, lessThan(art.lessonCost));
+      // Sessizce kesilmez: neden durduğu yazılır.
+      expect(r.outcome.text, contains('Paran bittiği'));
+    });
+
+    test('planlanan ders sayısı gerçekleşenle uyuşur', () {
+      for (final MartialArt art in MartialArt.values) {
+        final GameState s = hayat(age: 25);
+        final int plan = motor.plannedSeasonLessons(s, art);
+        final GameState sonra = motor.takeSeason(state: s, art: art).state;
+        final int gercek =
+            motor.progressOf(sonra, art).lessons -
+            motor.progressOf(s, art).lessons;
+        expect(gercek, plan, reason: art.id);
+      }
+    });
+
+    test('parası olmayana plan sıfırdır ve toplu çalışma uygulanmaz', () {
+      const MartialArt art = MartialArt.karate;
+      final GameState s = hayat(age: 20, wallet: 0);
+      expect(motor.plannedSeasonLessons(s, art), 0);
+      expect(motor.takeSeason(state: s, art: art).outcome.applied, isFalse);
+    });
+
+    test('yaşı gelmemişe toplu çalışma açılmaz', () {
+      const MartialArt art = MartialArt.karate;
+      final GameState s = hayat(age: art.minAge - 1);
+      expect(motor.plannedSeasonLessons(s, art), 0);
+      expect(motor.takeSeason(state: s, art: art).outcome.applied, isFalse);
+    });
+
+    test('toplu çalışma spor hobisini besler', () {
+      const MartialArt art = MartialArt.karate;
+      final GameState s = hayat(age: 20);
+      final GameState sonra = motor.takeSeason(state: s, art: art).state;
+      expect(sonra.hobbies, isNotEmpty);
+    });
+
+    test('en üst basamağa gelince toplu çalışma kapanır', () {
+      const MartialArt art = MartialArt.gures;
+      GameState s = seviyeyeCik(hayat(age: 12), art, art.topLevel);
+      expect(motor.progressOf(s, art).isTopRank, isTrue);
+      s = s.copyWith(interactionCounts: const <String, int>{});
+      expect(motor.plannedSeasonLessons(s, art), 0);
+      expect(motor.takeSeason(state: s, art: art).outcome.applied, isFalse);
+    });
   });
 }

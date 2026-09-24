@@ -84,8 +84,8 @@ import '../domain/activities/outing.dart';
 /// sistemler eklendiğinde bu sınıfın üzerine modül eklenebilir.
 class GameController extends ChangeNotifier {
   GameController({Random? random, SaveService? saveService})
-      : _random = random ?? Random(),
-        _saveService = saveService;
+    : _random = random ?? Random(),
+      _saveService = saveService;
 
   final Random _random;
   final FamilyInteractions _interactions = const FamilyInteractions();
@@ -194,12 +194,12 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (service == null || current == null || _autoSaveBlocked) return;
     _hasSavedLife = true;
-    _saveChain = _saveChain.then((_) => service.save(current)).catchError(
-      (Object error) {
-        // Kayıt yazılamadıysa oyun durmaz; sorun kullanıcıya bildirilir.
-        _saveProblem = 'Oyun kaydedilemedi: $error';
-      },
-    );
+    _saveChain = _saveChain.then((_) => service.save(current)).catchError((
+      Object error,
+    ) {
+      // Kayıt yazılamadıysa oyun durmaz; sorun kullanıcıya bildirilir.
+      _saveProblem = 'Oyun kaydedilemedi: $error';
+    });
   }
 
   /// Bekleyen kayıt yazmalarının bitmesini bekler.
@@ -267,9 +267,7 @@ class GameController extends ChangeNotifier {
     final GameState? yeni = sonuc.state;
     if (yeni == null) return sonuc.blockReason;
 
-    _state = yeni.copyWith(
-      pastLives: List<LifeSummary>.unmodifiable(arsiv),
-    );
+    _state = yeni.copyWith(pastLives: List<LifeSummary>.unmodifiable(arsiv));
     // Yeni kuşak bilinçli bir seçimdir; kayıt yazmak güvenli.
     _autoSaveBlocked = false;
     _saveProblem = null;
@@ -429,8 +427,8 @@ class GameController extends ChangeNotifier {
 
   /// Eşyayı satar. Onay arayüzde alınır; burada tek bir satış uygulanır.
   ItemOutcome? sellItem(String itemId) => _runItemAction(
-        (GameState current) => _items.sell(state: current, itemId: itemId),
-      );
+    (GameState current) => _items.sell(state: current, itemId: itemId),
+  );
 
   /// Mağazadan ürün alır.
   /// Mağazadan ürün alır.
@@ -439,11 +437,8 @@ class GameController extends ChangeNotifier {
   /// mülk kaydına yazılır (D-043).
   ItemOutcome? buyProduct(ShopProduct product, {String? location}) =>
       _runItemAction(
-        (GameState current) => _items.buy(
-          state: current,
-          product: product,
-          location: location,
-        ),
+        (GameState current) =>
+            _items.buy(state: current, product: product, location: location),
       );
 
   /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum
@@ -477,8 +472,8 @@ class GameController extends ChangeNotifier {
 
   /// Lise alanını seçer.
   EducationOutcome? chooseTrack(EducationTrack track) => _runEducation(
-        (GameState current) => _education.chooseTrack(current, track),
-      );
+    (GameState current) => _education.chooseTrack(current, track),
+  );
 
   /// Başvurulabilecek üniversite bölümleri.
   List<UniversityProgram> availablePrograms() {
@@ -495,9 +490,8 @@ class GameController extends ChangeNotifier {
       );
 
   /// Üniversiteye gitmeyip iş hayatına yönelir.
-  EducationOutcome? skipUniversity() => _runEducation(
-        (GameState current) => _education.skipUniversity(current),
-      );
+  EducationOutcome? skipUniversity() =>
+      _runEducation((GameState current) => _education.skipUniversity(current));
 
   EducationOutcome? _runEducation(EducationResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -552,7 +546,10 @@ class GameController extends ChangeNotifier {
   void ensureUniversityExamScore() {
     final GameState? current = _state;
     if (current == null) return;
-    final GameState next = _education.ensureUniversityExamScore(current, _random);
+    final GameState next = _education.ensureUniversityExamScore(
+      current,
+      _random,
+    );
     if (identical(next, current)) return;
     _state = next;
     _autoSave();
@@ -564,14 +561,12 @@ class GameController extends ChangeNotifier {
 
   /// Mülakat sorusunu cevaplar.
   JobOutcome? answerInterview(int optionIndex) => _runJob(
-        (GameState current) =>
-            _jobs.answerInterview(current, optionIndex, _random),
-      );
+    (GameState current) => _jobs.answerInterview(current, optionIndex, _random),
+  );
 
   /// Mülakatı yarıda bırakır.
-  JobOutcome? cancelInterview() => _runJob(
-        (GameState current) => _jobs.cancelInterview(current),
-      );
+  JobOutcome? cancelInterview() =>
+      _runJob((GameState current) => _jobs.cancelInterview(current));
 
   /// Başvurunun şu an mümkün olup olmadığı.
   InteractionAvailability jobApplicationAvailability(JobType job) {
@@ -583,9 +578,8 @@ class GameController extends ChangeNotifier {
   }
 
   /// İşe başvurur.
-  JobOutcome? applyForJob(JobType job) => _runJob(
-        (GameState current) => _jobs.apply(current, job, _random),
-      );
+  JobOutcome? applyForJob(JobType job) =>
+      _runJob((GameState current) => _jobs.apply(current, job, _random));
 
   /// İşten ayrılır.
   JobOutcome? quitJob() => _runJob((GameState current) => _jobs.quit(current));
@@ -667,14 +661,13 @@ class GameController extends ChangeNotifier {
 
   /// Zam ister; sonucu metin olarak döner.
   String? askForRaise() => _runCareerRequest(
-        (GameState current) => CareerProgress.askForRaise(current, _random),
-      );
+    (GameState current) => CareerProgress.askForRaise(current, _random),
+  );
 
   /// Terfi ister; sonucu metin olarak döner.
   String? askForPromotion() => _runCareerRequest(
-        (GameState current) =>
-            CareerProgress.askForPromotion(current, _random),
-      );
+    (GameState current) => CareerProgress.askForPromotion(current, _random),
+  );
 
   String? _runCareerRequest(CareerRequestResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -730,21 +723,16 @@ class GameController extends ChangeNotifier {
   ActivityOutcome? performActivity(
     ActivityAction action, {
     Person? companion,
-  }) =>
-      _runActivity(
-        (GameState current) => ActivityEngine.isFortune(action)
-            ? _activities.tellFortune(
-                state: current,
-                action: action,
-                rng: _random,
-              )
-            : _activities.perform(
-                state: current,
-                action: action,
-                rng: _random,
-                companion: companion,
-              ),
-      );
+  }) => _runActivity(
+    (GameState current) => ActivityEngine.isFortune(action)
+        ? _activities.tellFortune(state: current, action: action, rng: _random)
+        : _activities.perform(
+            state: current,
+            action: action,
+            rng: _random,
+            companion: companion,
+          ),
+  );
 
   /// Bu eyleme şu an gerçekten katılabilecek kişiler (Paket 41).
   List<Person> outingCompanions(ActivityAction action) {
@@ -871,11 +859,11 @@ class GameController extends ChangeNotifier {
     if (current == null) return null;
     final ({GameState state, bool applied, String text}) sonuc =
         PetCare.interact(
-      state: current,
-      pet: pet,
-      action: action,
-      rng: _random,
-    );
+          state: current,
+          pet: pet,
+          action: action,
+          rng: _random,
+        );
     if (sonuc.applied) {
       _state = sonuc.state;
       _autoSave();
@@ -913,8 +901,12 @@ class GameController extends ChangeNotifier {
   String? buyLotteryTicket(LotteryDraw draw, TicketShare share) {
     final GameState? current = _state;
     if (current == null) return null;
-    final ({GameState state, bool applied, String text}) sonuc =
-        Lottery.buy(state: current, draw: draw, share: share, rng: _random);
+    final ({GameState state, bool applied, String text}) sonuc = Lottery.buy(
+      state: current,
+      draw: draw,
+      share: share,
+      rng: _random,
+    );
     if (sonuc.applied) {
       _state = sonuc.state;
       _autoSave();
@@ -946,8 +938,7 @@ class GameController extends ChangeNotifier {
   FamilyOutcome? tryFertilityTreatment() {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
-    final FamilyResult result =
-        FertilityTreatment.attempt(current, _random);
+    final FamilyResult result = FertilityTreatment.attempt(current, _random);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
@@ -984,9 +975,20 @@ class GameController extends ChangeNotifier {
 
   /// Bir ders alır.
   ActivityOutcome? takeMartialLesson(MartialArt art) => _runActivity(
-        (GameState current) =>
-            _martial.takeLesson(state: current, art: art),
-      );
+    (GameState current) => _martial.takeLesson(state: current, art: art),
+  );
+
+  /// Bu yıl kaç ders daha alınabilir?
+  int martialSeasonLessons(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _martial.plannedSeasonLessons(current, art);
+  }
+
+  /// Bu yılın derslerini tek seferde alır.
+  ActivityOutcome? takeMartialSeason(MartialArt art) => _runActivity(
+    (GameState current) => _martial.takeSeason(state: current, art: art),
+  );
 
   /// Yaşa uygun kitaplar.
   List<BookInfo> availableBooks() {
@@ -996,14 +998,12 @@ class GameController extends ChangeNotifier {
   }
 
   /// Kitabı açar.
-  ActivityOutcome? openBook(BookInfo book) => _runActivity(
-        (GameState current) => _activities.openBook(current, book),
-      );
+  ActivityOutcome? openBook(BookInfo book) =>
+      _runActivity((GameState current) => _activities.openBook(current, book));
 
   /// Bir sayfa çevirir.
-  ActivityOutcome? turnBookPage(BookInfo book) => _runActivity(
-        (GameState current) => _activities.turnPage(current, book),
-      );
+  ActivityOutcome? turnBookPage(BookInfo book) =>
+      _runActivity((GameState current) => _activities.turnPage(current, book));
 
   ActivityOutcome? _runActivity(ActivityResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1049,9 +1049,8 @@ class GameController extends ChangeNotifier {
   }
 
   /// Sosyal medya hesabı açar.
-  SocialOutcome? openSocialAccount(SocialPlatform platform) => _runSocial(
-        (GameState current) => _social.openAccount(current, platform),
-      );
+  SocialOutcome? openSocialAccount(SocialPlatform platform) =>
+      _runSocial((GameState current) => _social.openAccount(current, platform));
 
   // -------------------------------------------------------------------
   // Sponsorluk (Paket 10)
@@ -1130,8 +1129,8 @@ class GameController extends ChangeNotifier {
 
   /// Paylaşım yapar.
   SocialOutcome? postContent(SocialContent content) => _runSocial(
-        (GameState current) => _social.post(current, content, _random),
-      );
+    (GameState current) => _social.post(current, content, _random),
+  );
 
   SocialOutcome? _runSocial(SocialResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1162,8 +1161,7 @@ class GameController extends ChangeNotifier {
   CrisisOutcome? respondToCrisis(String choiceId) {
     final GameState? current = _state;
     if (current == null || current.pendingCrisis == null) return null;
-    final CrisisResult result =
-        _crises.respond(current, choiceId, _random);
+    final CrisisResult result = _crises.respond(current, choiceId, _random);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
@@ -1184,16 +1182,16 @@ class GameController extends ChangeNotifier {
       _state == null ? ResidenceKind.aileYaninda : Housing.residenceOf(_state!);
 
   /// Oyuncunun yaşadığı şehir.
-  String get currentCity =>
-      _state == null ? '' : Housing.cityOf(_state!);
+  String get currentCity => _state == null ? '' : Housing.cityOf(_state!);
 
   /// Kiraya verilen konutların yıllık toplam geliri.
   int get yearlyRentIncome =>
       _state == null ? 0 : Housing.yearlyRentIncome(_state!);
 
   /// Bu eve taşınmanın engeli; yoksa boş metin.
-  String moveBlockReason(OwnedItem home) =>
-      _state == null ? 'Etkin bir hayat yok.' : _housing.moveBlockReason(_state!, home);
+  String moveBlockReason(OwnedItem home) => _state == null
+      ? 'Etkin bir hayat yok.'
+      : _housing.moveBlockReason(_state!, home);
 
   /// Bu evi kiraya vermenin engeli; yoksa boş metin.
   String rentOutBlockReason(OwnedItem home) => _state == null
@@ -1226,15 +1224,16 @@ class GameController extends ChangeNotifier {
 
     // Şehir değiştiyse okul ve iş bağları da güncellenir (Paket 3).
     if (next.player.currentCity != current.player.currentCity) {
-      final ({GameState state, String? logText}) nakil =
-          const SchoolTransfer().transferIfNeeded(next, _random);
+      final ({GameState state, String? logText}) nakil = const SchoolTransfer()
+          .transferIfNeeded(next, _random);
       next = nakil.state;
       if (nakil.logText != null) metin = '$metin\n${nakil.logText}';
 
       // Çalışan karakterin işine kendiliğinden son verilmez; yalnızca
       // durum açıkça yazılır (Q-065).
       if (next.career.isInAnotherCity(next.player.currentCity)) {
-        final String isMetni = '${next.career.job?.name ?? 'İşin'} hâlâ '
+        final String isMetni =
+            '${next.career.job?.name ?? 'İşin'} hâlâ '
             '${next.career.jobCity} şehrinde; işine devam ediyorsun.';
         next = next.copyWith(
           log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
@@ -1279,13 +1278,13 @@ class GameController extends ChangeNotifier {
 
   /// Ehliyet başvurusu yapar; ücret bir kez alınır ve sınav açılır.
   LicenseOutcome? applyForLicense(LicenseType type) => _runLicense(
-        (GameState current) => _licenses.apply(current, type, _random),
-      );
+    (GameState current) => _licenses.apply(current, type, _random),
+  );
 
   /// Sınav sorusunu cevaplar.
   LicenseOutcome? answerLicenseExam(int optionIndex) => _runLicense(
-        (GameState current) => _licenses.answer(current, optionIndex),
-      );
+    (GameState current) => _licenses.answer(current, optionIndex),
+  );
 
   /// Sınavdan vazgeçer.
   LicenseOutcome? cancelLicenseExam() =>
@@ -1347,9 +1346,8 @@ class GameController extends ChangeNotifier {
   }
 
   /// Blackjack eli açar.
-  CasinoOutcome? dealBlackjack(int bet) => _runCasino(
-        (GameState current) => _blackjack.deal(current, bet, _random),
-      );
+  CasinoOutcome? dealBlackjack(int bet) =>
+      _runCasino((GameState current) => _blackjack.deal(current, bet, _random));
 
   /// Kart çeker.
   CasinoOutcome? hitBlackjack() =>
@@ -1511,8 +1509,10 @@ class GameController extends ChangeNotifier {
   String? chooseHeir(String childId) {
     final GameState? current = _state;
     if (current == null || current.deceased) return null;
-    final ({GameState state, String text, bool applied}) sonuc =
-        Will.choose(current, childId);
+    final ({GameState state, String text, bool applied}) sonuc = Will.choose(
+      current,
+      childId,
+    );
     if (!sonuc.applied) return sonuc.text;
     _state = sonuc.state;
     _autoSave();
@@ -1524,8 +1524,9 @@ class GameController extends ChangeNotifier {
   String? clearHeir() {
     final GameState? current = _state;
     if (current == null || current.deceased) return null;
-    final ({GameState state, String text, bool applied}) sonuc =
-        Will.clear(current);
+    final ({GameState state, String text, bool applied}) sonuc = Will.clear(
+      current,
+    );
     if (!sonuc.applied) return sonuc.text;
     _state = sonuc.state;
     _autoSave();
@@ -1577,8 +1578,11 @@ class GameController extends ChangeNotifier {
   }) {
     final GameState? current = _state;
     if (current == null || !current.hasNotice) return null;
-    final ({GameState state, String text}) sonuc =
-        Notices.respondToFuneral(current, choice, attendance: attendance);
+    final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+      current,
+      choice,
+      attendance: attendance,
+    );
     _state = sonuc.state;
     _autoSave();
     notifyListeners();
@@ -1607,12 +1611,8 @@ class GameController extends ChangeNotifier {
   /// kayda girer.
   FamilyOutcome? propose(String personId, {String styleId = 'sade'}) =>
       _runFamily(
-        (GameState current) => _marriages.propose(
-          current,
-          personId,
-          _random,
-          styleId: styleId,
-        ),
+        (GameState current) =>
+            _marriages.propose(current, personId, _random, styleId: styleId),
       );
 
   /// Bekleyen düğünü yapar (Paket 25).
@@ -1620,8 +1620,8 @@ class GameController extends ChangeNotifier {
   /// Teklif kabul edildikten sonra oyuncu cüzdanına göre bir düğün seçer;
   /// evlilik ancak burada kurulur. Bedelsiz seçenek her zaman vardır.
   FamilyOutcome? holdWedding(String styleId) => _runFamily(
-        (GameState current) => _marriages.holdWedding(current, styleId),
-      );
+    (GameState current) => _marriages.holdWedding(current, styleId),
+  );
 
   // =====================================================================
   // Askerlik (Paket 29)
@@ -1657,12 +1657,10 @@ class GameController extends ChangeNotifier {
 
   /// Askerliğe katılır ya da rütbeli yola başvurur.
   MilitaryResult? enlistMilitary(MilitaryTrack track) =>
-      _runMilitary((GameState c) =>
-          MilitaryService.enlist(c, track, _random));
+      _runMilitary((GameState c) => MilitaryService.enlist(c, track, _random));
 
   /// Bedelliyi kendi cebinden öder.
-  MilitaryResult? payBedelli() =>
-      _runMilitary(MilitaryService.payBedelli);
+  MilitaryResult? payBedelli() => _runMilitary(MilitaryService.payBedelli);
 
   /// Askerliği tecil ettirir (Paket 31).
   MilitaryResult? deferMilitary() => _runMilitary(MilitaryService.defer);
@@ -1675,9 +1673,9 @@ class GameController extends ChangeNotifier {
       _runMilitary(MilitaryService.surrender);
 
   /// Bedelli ücretini bir yakından ister.
-  MilitaryResult? askFamilyForBedelli(String personId) =>
-      _runMilitary((GameState c) =>
-          MilitaryService.askFamilyForBedelli(c, personId, _random));
+  MilitaryResult? askFamilyForBedelli(String personId) => _runMilitary(
+    (GameState c) => MilitaryService.askFamilyForBedelli(c, personId, _random),
+  );
 
   MilitaryResult? _runMilitary(MilitaryResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1783,8 +1781,8 @@ class GameController extends ChangeNotifier {
 
   /// Çocuk sahibi olur: kalıcı kimlikli yeni bir kişi kaydı açılır.
   FamilyOutcome? haveChild() => _runFamily(
-        (GameState current) => _parenthood.haveChild(current, _random),
-      );
+    (GameState current) => _parenthood.haveChild(current, _random),
+  );
 
   FamilyOutcome? _runFamily(FamilyResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1849,12 +1847,12 @@ class GameController extends ChangeNotifier {
         educationLabel: current.education.program == null
             ? current.education.label
             : '${current.education.label} · '
-                '${current.education.program!.name}',
+                  '${current.education.program!.name}',
         careerLabel: current.career.isEmployed
             ? current.career.label
             : current.career.pastJobIds.isEmpty
-                ? 'Çalışmadı'
-                : 'Son iş: ${current.career.label}',
+            ? 'Çalışmadı'
+            : 'Son iş: ${current.career.label}',
         wallet: current.player.wallet,
         itemCount: current.items.length,
         licenseCount: current.licenses.length,
@@ -1885,8 +1883,10 @@ class GameController extends ChangeNotifier {
         case MarriageStatus.evli:
           parcalar.add('Eşi: $ad (${evlilik.marriedAtAge} yaşında evlendi)');
         case MarriageStatus.bosandi:
-          parcalar.add('Eski eşi: $ad '
-              '(${evlilik.marriedAtAge}-${evlilik.endedAtAge} yaş)');
+          parcalar.add(
+            'Eski eşi: $ad '
+            '(${evlilik.marriedAtAge}-${evlilik.endedAtAge} yaş)',
+          );
         case MarriageStatus.dul:
           parcalar.add('Eşi: $ad (${evlilik.endedAtAge} yaşında kaybetti)');
       }

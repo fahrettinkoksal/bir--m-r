@@ -2463,5 +2463,30 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-111 — Dövüş sanatlarında ustalık süresi
+
+**Durum:** Faho "spor salonunda aldığımız karate vb. mesleklerin eğitimleri çok uzun" dedi. **Tıklama yükü düzeltildi, sayısal denge dokunulmadan duruyor** ve karar Faho'nun. Kod: `lib/data/martial_arts_catalog.dart`, `lib/domain/activities/martial_arts_engine.dart`. İlgili: Q-100.
+
+**Ölçülen durum:**
+
+| Sanat | En üst basamak | Toplam ders | Yılda en fazla | En az kaç yıl | Eğitmenlik eşiği |
+|---|---|---|---|---|---|
+| Karate | Siyah kuşak (3. Dan) | 200 | 20 | 10 | 110 ders (6 yıl) |
+| Kung fu | 3. Duan | 145 | 20 | 8 | 58 ders (3 yıl) |
+| Yağlı güreş | Başpehlivan | 120 | 20 | 6 | 92 ders (5 yıl) |
+
+Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığarak bir yılda usta olunmasın diye. Ama her ders ayrı bir dokunuş olduğu için karate siyah kuşağı **110 kez "Ders al" düğmesine basmak** demekti.
+
+**Yapılan teknik düzeltme (denge değişmedi):** "Yılı çalış" eylemi eklendi; yılın kalan derslerini tek seferde alıyor. Ücret, yıllık sınır, basamak eşikleri ve spor hobisi katkısı **birebir aynı**. Bunu kanıtlayan test var: tek tek ders almakla toplu çalışmanın ders sayısı, basamak, cüzdan ve bütün özellikleri aynı çıkıyor.
+
+**Karar soruları:**
+1. Süre **gerçekten** uzun mu, yoksa sorun yalnızca tekrar tıklamak mıydı? Toplu çalışma yeterli geldi mi?
+2. Yeterli gelmediyse hangisi değişsin — yıllık ders sınırı (20) mu, basamakların istediği ders sayıları mı, yoksa ikisi de mi?
+3. Karatede en üst basamak 10 yıl sürüyor, kung fuda 8, güreşte 6. Bu fark bilerek mi kalsın?
+4. Eğitmenlik eşiği karatede 110 ders (6 yıl), kung fuda 58 ders (3 yıl). Meslek olarak açılma hızı sanatlar arasında bu kadar farklı olmalı mı?
+5. Ders ücretleri (karate 180 ₺, kung fu 200 ₺, güreş 150 ₺) bilerek düşük tutuldu: "ustalık parayla değil yılla gelir". Bu kural kalsın mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
