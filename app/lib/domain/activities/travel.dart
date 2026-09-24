@@ -238,9 +238,9 @@ abstract final class Travel {
       player: state.player.copyWith(
         // Cüzdan eksiye düşmez; ücret bir kez düşer.
         wallet: state.player.wallet - ucret,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + mutluluk,
-          health: state.player.stats.health + prototypeOnlyHealthCost,
+        stats: state.player.stats.gain(
+          happiness: mutluluk,
+          health: prototypeOnlyHealthCost,
         ),
       ),
       trips: List<TripRecord>.unmodifiable(<TripRecord>[
@@ -416,9 +416,9 @@ abstract final class Travel {
     GameState next = state.copyWith(
       player: state.player.copyWith(
         wallet: state.player.wallet - ucret,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + mutluluk,
-          health: state.player.stats.health + prototypeOnlyHealthCost,
+        stats: state.player.stats.gain(
+          happiness: mutluluk,
+          health: prototypeOnlyHealthCost,
         ),
       ),
       trips: List<TripRecord>.unmodifiable(<TripRecord>[

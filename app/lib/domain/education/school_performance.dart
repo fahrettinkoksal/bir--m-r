@@ -148,11 +148,9 @@ abstract final class SchoolPerformance {
         .copyWith(
           education: egitim.copyWith(gradeAverage: yeni),
           player: state.player.copyWith(
-            stats: state.player.stats.copyWith(
-              intelligence: state.player.stats.intelligence +
-                  prototypeOnlyStudyIntelligence,
-              happiness:
-                  state.player.stats.happiness + prototypeOnlyStudyHappiness,
+            stats: state.player.stats.gain(
+              intelligence: prototypeOnlyStudyIntelligence,
+              happiness: prototypeOnlyStudyHappiness,
             ),
           ),
           interactionCounts: Map<String, int>.unmodifiable(<String, int>{

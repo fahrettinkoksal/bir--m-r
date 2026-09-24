@@ -2786,16 +2786,58 @@ Faho bildirdi: "olayların sonucu ekranda görünsün", "yıl sonunda statların
 
 | Ölçüm | Önce | Sonra |
 |---|---|---|
-| Tek yılda aynı anda açılan en çok pencere | 7 | 6 |
+| Tek yılda aynı anda açılan en çok pencere | 7 (iki vefat, iki cenaze, **iki** miras, bir burç) | 7 (üç vefat, üç cenaze, **tek** toplu miras) |
 | Yıl başına ortalama pencere | 0,41 | 0,39 |
+
+En kötü yılın sayısı aynı kaldı ama sebebi değişti: artık yedi pencere görmek için **üç** yakınını aynı yıl kaybetmek gerekiyor. Ölüm ve cenaze kişiye özel olduğu için birleştirilmedi.
 
 **Karar soruları:**
 1. Yıl özeti **kart** olarak doğru mu, yoksa yaş alır almaz bir **pencere** olarak mı açılsın? Kart oyuncuyu durdurmuyor; pencere kaçırılmıyor ama her yıl bir tık daha istiyor.
 2. Özette yalnızca oyuncunun kendi değerleri var. **Yakınlık değişimleri** de girsin mi? (Örn. "Kızın Elif ile yakınlık −6".) Girerse kart uzar; girmezse ilgisizliğin bedeli yalnızca günlükte kalır.
 3. Cüzdan satırı her yıl çıkıyor (geçim gideri ve maaş yüzünden). Küçük tutarlar için bir alt sınır konsun mu?
-4. En kötü yıl hâlâ **altı pencere** (iki vefat, iki cenaze, toplu miras, bir haber). Ölüm ve cenaze de birleştirilsin mi, yoksa her kayıp kendi anını hak ediyor mu?
+4. En kötü yıl **yedi pencere**: aynı yıl üç yakınını kaybetmek. Ölüm ve cenaze de birleştirilsin mi (ör. "bu yıl üç kaybın oldu" diye tek pencere ve tek katkı kararı), yoksa her kayıp kendi anını hak ediyor mu? Birleştirme, cenaze başına ayrı katkı kararını ortadan kaldırır.
 5. Acılı yılda **burç bildirimi** gösterilmiyor (etki yine uygulanıyor, günlüğe yazılıyor). Doğru mu?
 6. Kritik sayılan haberler şimdilik üç tane: işten çıkarılma, işveren uyarısı, kaçan kredi taksiti. Başka ne eklenmeli? (Örn. büyük para kaybı, ciddi sağlık düşüşü, evden çıkarılma.)
+
+---
+
+### Q-124 — Azalan getiri, çaba tavanı ve sağlık dengesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-099, D-100, D-101, D-102 (Q-116 ve Q-117'nin kararları) · `app/lib/domain/models/stats.dart`, `app/lib/domain/activities/activity_engine.dart`, `app/lib/domain/life/sick_leave.dart`, `app/lib/domain/life/aging.dart`, `app/lib/domain/life/hair_loss.dart` · Test: `app/test/stat_gain_test.dart`, `app/test/package_j_test.dart`
+
+Faho bildirdi: "statlar gerçekten hissedilsin", "kalıcı 100 olmasın", "check-up ile stat kasılıyor", "hastalanınca sağlık düşmeli", "dövüş sanatı da spor sayılsın", "görünüş düşüşü biraz yumuşasın", "saç karizmayı değil görünüşü etkilesin", "saç ekimi 1-2 kademe düşürsün". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Azalan getiri (ölçülen).**
+
+| Değer | +5 kazancın gerçek karşılığı |
+|---|---|
+| 40 | +5 |
+| 70 | +4 |
+| 88 | +1 |
+| 94 | +1 |
+
+| Yol | Gereken ham puan |
+|---|---|
+| 50 → 75 | 31 |
+| 75 → 93 | 46 |
+
+Çaba tavanı **95**. Yılda +4 kazandıran bir alışkanlık 40 yıl sürse bile 95'te durur (ölçüldü); eskiden 100'e ulaşıyordu.
+
+**Sağlık Merkezi.** Yıllık toplam sağlık kazancı **6** ile sınırlandı; eskiden üst üste yapılan işlemlerle yılda **17** puan kazanılabiliyordu.
+
+**Hastalık.** Kısa rapor −1, uzun rapor −2 sağlık; sağlığı 40'ın altındaysa bir puan daha.
+
+**Görünüş.** Yıllık düşüş olasılığı 0,25/0,45/0,60/0,70 → **0,18/0,34/0,46/0,55**; çift puan ihtimali 0,20/0,35 → **0,15/0,25**.
+
+**Saç.** Karizma etkisi kaldırıldı; basamak görünüş maliyeti 2/2/3 → **3/4/5**. Saç ekimi 2. ve 3. basamaktan **iki**, 1. basamaktan **bir** kademe düşürür.
+
+**Karar soruları:**
+1. Çaba tavanı **95** doğru mu? 100'ü tamamen kapatmak yerine çok nadir bir olayla (ömürde bir kez) açılabilir bir kapı bırakılsın mı?
+2. Azalan getiri basamakları (60 / 75 / 85 / 93) ve çarpanları (1,0 / 0,7 / 0,5 / 0,3 / 0,15) doğru mu? Şu an 75'ten 93'e çıkmak 46 ham puan istiyor; bu, yılda +4 kazanan bir oyuncu için ~12 yıl.
+3. Sağlık Merkezi'nin yıllık **6** puanlık sınırı doğru mu? Alternatif: her işlemin kendi kazancını sıfıra indirip Sağlık Merkezi'ni tamamen "erken teşhis" yeri yapmak.
+4. Genel kontrol hâlâ **+5** sağlık veriyor (sınıra kadar). Muayene olmak insanı sağlıklı yapmadığına göre bu kazanç sıfırlanmalı mı? Sıfırlanırsa işlemin karşılığı yalnızca rapor ve tahlil yönlendirmesi olur.
+5. Hastalığın sağlığa bedeli (1-3 puan) doğru mu? Ömür boyu birikimi ölüm eğrisini besliyor.
+6. Görünüş düşüşündeki yumuşatma yeterli mi, fazla mı?
+7. Saç ekiminin iki kademe düşürmesi fiyatıyla orantılı mı? İşlem tek seferlik ve pahalı; şu an ileri basamaktan gelen oyuncuya belirgin avantaj veriyor.
 
 ---
 

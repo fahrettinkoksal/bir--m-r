@@ -147,8 +147,8 @@ abstract final class PetCare {
     final GameState next = state.copyWith(
       player: state.player.copyWith(
         wallet: state.player.wallet - species.adoptionCost,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + 5,
+        stats: state.player.stats.gain(
+          happiness: 5,
         ),
       ),
       pets: List<Pet>.unmodifiable(<Pet>[...state.pets, yeni]),
@@ -247,9 +247,9 @@ abstract final class PetCare {
     final GameState next = state.copyWith(
       player: state.player.copyWith(
         wallet: state.player.wallet - ucret,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + mutluluk,
-          health: state.player.stats.health + saglik,
+        stats: state.player.stats.gain(
+          happiness: mutluluk,
+          health: saglik,
         ),
       ),
       pets: _replace(state.pets, guncel),
@@ -439,8 +439,8 @@ abstract final class PetCare {
       );
     }
 
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness + mutluluk,
+    final Stats stats = state.player.stats.gain(
+      happiness: mutluluk,
     );
 
     return state.copyWith(

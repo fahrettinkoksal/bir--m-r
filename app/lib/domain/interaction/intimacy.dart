@@ -233,10 +233,8 @@ class IntimacyEngine {
     GameState next = state.copyWith(
       people: List<Person>.unmodifiable(people),
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  Intimacy.prototypeOnlyHappiness)
-              .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: Intimacy.prototypeOnlyHappiness,
         ),
       ),
       // Yakınlaşmak da bir temastır; ilgisizlik sayacı sıfırlanır.

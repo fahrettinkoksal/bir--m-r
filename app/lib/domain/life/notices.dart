@@ -523,8 +523,8 @@ abstract final class Notices {
     next = next.copyWith(
       player: next.player.copyWith(
         wallet: next.player.wallet - tutar,
-        stats: next.player.stats.copyWith(
-          happiness: next.player.stats.happiness + mutlulukEtkisi,
+        stats: next.player.stats.gain(
+          happiness: mutlulukEtkisi,
         ),
       ),
     );

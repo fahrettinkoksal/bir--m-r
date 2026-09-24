@@ -30,19 +30,24 @@ abstract final class Aging {
   static const int prototypeOnlyFloor = 15;
 
   /// prototypeOnly: yaş aralığına göre **yıllık düşüş olasılığı**.
+  ///
+  /// Faho'nun Q-116 kararı: görünüş düşüşü **yumuşatıldı**. Eski eğri
+  /// (0,25 / 0,45 / 0,60 / 0,70) yaşlanmayı hissettiriyordu ama orta
+  /// yaşta görünüşü fazla hızlı eritiyordu. Yaklaşık dörtte bir
+  /// azaltıldı; yön aynı, tempo daha yavaş.
   static double prototypeOnlyChance(int age) {
     if (age < prototypeOnlyStartAge) return 0;
-    if (age < 45) return 0.25;
-    if (age < 60) return 0.45;
-    if (age < 75) return 0.6;
-    return 0.7;
+    if (age < 45) return 0.18;
+    if (age < 60) return 0.34;
+    if (age < 75) return 0.46;
+    return 0.55;
   }
 
   /// prototypeOnly: düşüşün iki puan olma olasılığı (ileri yaşta).
   static double prototypeOnlyDoubleChance(int age) {
     if (age < 60) return 0;
-    if (age < 75) return 0.2;
-    return 0.35;
+    if (age < 75) return 0.15;
+    return 0.25;
   }
 
   /// Bu yılın görünüş değişimi (0 veya negatif).

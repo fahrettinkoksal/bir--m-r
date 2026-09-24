@@ -732,11 +732,10 @@ abstract final class MilitaryService {
     // Hizmet etkileri her yıl uygulanır.
     GameState next = state.copyWith(
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          health: state.player.stats.health + prototypeOnlyServiceHealth,
-          charisma: state.player.stats.charisma + prototypeOnlyServiceCharisma,
-          happiness:
-              state.player.stats.happiness + prototypeOnlyServiceHappiness,
+        stats: state.player.stats.gain(
+          health: prototypeOnlyServiceHealth,
+          charisma: prototypeOnlyServiceCharisma,
+          happiness: prototypeOnlyServiceHappiness,
         ),
         // Meslek olarak askerlikte maaş yıllık yatar.
         wallet: state.player.wallet + yol.prototypeOnlySalary,
@@ -767,9 +766,8 @@ abstract final class MilitaryService {
           finishedAtAge: newAge,
         ),
         player: next.player.copyWith(
-          stats: next.player.stats.copyWith(
-            happiness:
-                next.player.stats.happiness + prototypeOnlyDischargeHappiness,
+          stats: next.player.stats.gain(
+            happiness: prototypeOnlyDischargeHappiness,
           ),
         ),
         notices: List<PendingNotice>.unmodifiable(<PendingNotice>[

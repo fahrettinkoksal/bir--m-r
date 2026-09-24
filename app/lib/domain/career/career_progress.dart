@@ -380,8 +380,8 @@ abstract final class CareerProgress {
   /// Mutluluğu **gerçekten uygulanabilecek kadar** değiştirir.
   static GameState _happiness(GameState state, int delta) => state.copyWith(
         player: state.player.copyWith(
-          stats: state.player.stats.copyWith(
-            happiness: state.player.stats.happiness + delta,
+          stats: state.player.stats.gain(
+            happiness: delta,
           ),
         ),
       );

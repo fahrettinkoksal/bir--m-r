@@ -10,6 +10,7 @@ import '../models/martial_progress.dart';
 import '../models/player_character.dart';
 import '../models/stats.dart';
 import 'activity_engine.dart';
+import '../life/upkeep_tracker.dart';
 
 /// Karate, kung fu ve yağlı güreş dersleri (Paket 32).
 ///
@@ -219,18 +220,10 @@ class MartialArtsEngine {
       kayit,
     ];
 
-    final Stats stats = state.player.stats.copyWith(
-      health:
-          state.player.stats.health +
-          prototypeOnlyHealthPerLesson +
-          (atladi ? prototypeOnlyRankHealth : 0),
-      happiness:
-          state.player.stats.happiness +
-          prototypeOnlyHappinessPerLesson +
-          (atladi ? prototypeOnlyRankHappiness : 0),
-      charisma:
-          state.player.stats.charisma +
-          (atladi ? prototypeOnlyRankCharisma : 0),
+    final Stats stats = state.player.stats.gain(
+      health: prototypeOnlyHealthPerLesson + (atladi ? prototypeOnlyRankHealth : 0),
+      happiness: prototypeOnlyHappinessPerLesson + (atladi ? prototypeOnlyRankHappiness : 0),
+      charisma: (atladi ? prototypeOnlyRankCharisma : 0),
     );
 
     final PlayerCharacter player = state.player.copyWith(
@@ -251,6 +244,11 @@ class MartialArtsEngine {
     // Dövüş dersi de spor hobisini besler (Paket 39): salona gitmek
     // hangi kapıdan olursa olsun spordur.
     next = HobbyTracker.credit(next, HobbyKind.spor);
+
+    // Faho'nun Q-116 kararı: dövüş sanatı **spor sayılır**. Bakım
+    // geçmişine de yazılır; yoksa her hafta çalışan biri yıllık
+    // yıpranmada "hiç spor yapmamış" sayılıyordu (D-072).
+    next = UpkeepTracker.recordSport(next);
 
     final String metin = _metin(art, kayit, atladi: atladi, zirve: zirve);
     if (atladi) next = _log(next, metin);

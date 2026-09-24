@@ -529,12 +529,12 @@ class EventEngine {
       }
     }
 
-    final Stats stats = working.player.stats.copyWith(
-      happiness: working.player.stats.happiness + choice.happiness,
-      health: working.player.stats.health + choice.health,
-      intelligence: working.player.stats.intelligence + choice.intelligence,
-      charisma: working.player.stats.charisma + choice.charisma,
-      appearance: working.player.stats.appearance + choice.appearance,
+    final Stats stats = working.player.stats.gain(
+      happiness: choice.happiness,
+      health: choice.health,
+      intelligence: choice.intelligence,
+      charisma: choice.charisma,
+      appearance: choice.appearance,
     );
     final PlayerCharacter player = working.player.copyWith(
       stats: stats,

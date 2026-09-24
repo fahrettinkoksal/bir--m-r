@@ -243,7 +243,7 @@ void main() {
       expect(a.reason, contains('dökülme'));
     });
 
-    test('saç ekimi basamağı bir kademe düşürür', () {
+    test('saç ekimi ileri basamaktan iki kademe düşürür (Q-117 kararı)', () {
       GameState s = hayat(12, age: 40);
       s = s.copyWith(player: s.player.copyWith(hairLossStage: 2));
 
@@ -253,11 +253,25 @@ void main() {
       for (int seed = 0; seed < 40 && !dustu; seed++) {
         final ActivityResult r = const ActivityEngine()
             .perform(state: s, action: eylem('sac_ekimi'), rng: Random(seed));
-        if (r.outcome.applied && r.state.player.hairLossStage == 1) {
+        if (r.outcome.applied && r.state.player.hairLossStage == 0) {
           dustu = true;
         }
       }
-      expect(dustu, isTrue, reason: 'Başarılı ekim basamağı düşürmeli');
+      expect(dustu, isTrue, reason: 'Başarılı ekim iki kademe düşürmeli');
+    });
+
+    test('saç ekimi ilk basamaktan bir kademe düşürür', () {
+      GameState s = hayat(12, age: 40);
+      s = s.copyWith(player: s.player.copyWith(hairLossStage: 1));
+      bool dustu = false;
+      for (int seed = 0; seed < 40 && !dustu; seed++) {
+        final ActivityResult r = const ActivityEngine()
+            .perform(state: s, action: eylem('sac_ekimi'), rng: Random(seed));
+        if (r.outcome.applied && r.state.player.hairLossStage == 0) {
+          dustu = true;
+        }
+      }
+      expect(dustu, isTrue);
     });
 
     test('estetik işlem kötü sonuçlanabilir: ücret gider, kazanç gelmez', () {

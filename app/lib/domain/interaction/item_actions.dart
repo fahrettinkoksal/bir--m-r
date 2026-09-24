@@ -280,12 +280,11 @@ class ItemActions {
         prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
 
     final _UseReward reward = _useRewards[item.type.kind] ?? const _UseReward();
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness + _scaled(reward.happiness, factor),
-      health: state.player.stats.health + _scaled(reward.health, factor),
-      charisma: state.player.stats.charisma + _scaled(reward.charisma, factor),
-      appearance:
-          state.player.stats.appearance + _scaled(reward.appearance, factor),
+    final Stats stats = state.player.stats.gain(
+      happiness: _scaled(reward.happiness, factor),
+      health: _scaled(reward.health, factor),
+      charisma: _scaled(reward.charisma, factor),
+      appearance: _scaled(reward.appearance, factor),
     );
 
     // Kullanım her hâlükârda yıpratır; fayda bitse de eşya eskir.

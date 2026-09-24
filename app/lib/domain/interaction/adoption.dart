@@ -168,8 +168,8 @@ class Adoption {
       people: List<Person>.unmodifiable(<Person>[...state.people, cocuk]),
       player: state.player.copyWith(
         wallet: state.player.wallet - prototypeOnlyCost,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + prototypeOnlyHappiness,
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyHappiness,
         ),
       ),
     );

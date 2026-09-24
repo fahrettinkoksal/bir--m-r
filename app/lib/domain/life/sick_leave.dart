@@ -31,6 +31,7 @@ class SickLeave {
     required this.days,
     required this.wageLoss,
     required this.happinessDelta,
+    required this.healthDelta,
     required this.employerUpset,
     required this.text,
   });
@@ -44,6 +45,13 @@ class SickLeave {
   /// Mutluluğa uygulanacak değişim (negatif ya da 0).
   final int happinessDelta;
 
+  /// Sağlığa uygulanacak değişim (negatif ya da 0) — D-101.
+  ///
+  /// Hastalık yalnızca keyif kaçırıp maaştan götüren bir şey değildir:
+  /// bedende gerçek bir karşılığı vardır. Uzun rapor daha ağır gelir;
+  /// sağlığı zaten düşük olan daha çok yıpranır.
+  final int healthDelta;
+
   /// İşveren bu sefer sorun etti mi?
   final bool employerUpset;
 
@@ -55,6 +63,7 @@ class SickLeave {
     days: 0,
     wageLoss: 0,
     happinessDelta: 0,
+    healthDelta: 0,
     employerUpset: false,
     text: '',
   );
@@ -73,6 +82,16 @@ abstract final class SickLeaves {
   /// Gerçekte geçici iş göremezlik ödeneği raporun ilk iki günü için
   /// ödenmez; oyun bunu böyle basitleştirir.
   static const int prototypeOnlyUnpaidDays = 2;
+
+  /// prototypeOnly: kısa hastalığın sağlığa bedeli.
+  static const int prototypeOnlyShortHealthCost = 1;
+
+  /// prototypeOnly: uzun hastalığın (uyarı eşiğindeki) sağlığa bedeli.
+  static const int prototypeOnlyLongHealthCost = 2;
+
+  /// prototypeOnly: sağlığı bu değerin altındaysa hastalık bir puan
+  /// daha yıpratır; zayıf beden daha zor toparlar.
+  static const int prototypeOnlyFragileHealth = 40;
 
   /// prototypeOnly: uyarının işten çıkarılma ihtimaline kattığı pay.
   static const double prototypeOnlyWarningLayoffBonus = 0.04;
@@ -166,10 +185,17 @@ abstract final class SickLeaves {
         'İş yerinde sorun çıkmadı.',
     ].join(' ');
 
+    // Hastalığın bedende karşılığı vardır (D-101).
+    final int saglikKaybi = (gun >= prototypeOnlyUpsetDays
+            ? prototypeOnlyLongHealthCost
+            : prototypeOnlyShortHealthCost) +
+        (health < prototypeOnlyFragileHealth ? 1 : 0);
+
     return SickLeave(
       days: gun,
       wageLoss: kayip,
       happinessDelta: gun >= prototypeOnlyUpsetDays ? -4 : -2,
+      healthDelta: -saglikKaybi,
       employerUpset: kizdi,
       text: metin,
     );

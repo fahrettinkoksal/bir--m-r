@@ -327,10 +327,8 @@ class LifeProgression {
     if (yeniTorunlar.isNotEmpty) {
       afterDeaths = afterDeaths.copyWith(
         player: afterDeaths.player.copyWith(
-          stats: afterDeaths.player.stats.copyWith(
-            happiness:
-                afterDeaths.player.stats.happiness +
-                Grandchildren.prototypeOnlyHappiness * yeniTorunlar.length,
+          stats: afterDeaths.player.stats.gain(
+            happiness: Grandchildren.prototypeOnlyHappiness * yeniTorunlar.length,
           ),
         ),
       );
@@ -338,10 +336,8 @@ class LifeProgression {
     if (olumSonucu.happinessLoss > 0) {
       afterDeaths = advanced.copyWith(
         player: advanced.player.copyWith(
-          stats: advanced.player.stats.copyWith(
-            happiness:
-                (advanced.player.stats.happiness - olumSonucu.happinessLoss)
-                    .clamp(0, 100),
+          stats: advanced.player.stats.gain(
+            happiness: -olumSonucu.happinessLoss,
           ),
         ),
         grief: advanced.grief + olumSonucu.happinessLoss,
@@ -975,8 +971,9 @@ class LifeProgression {
     GameState next = state.copyWith(
       player: state.player.copyWith(
         wallet: state.player.wallet - kayip,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + hastalik.happinessDelta,
+        stats: state.player.stats.gain(
+          happiness: hastalik.happinessDelta,
+          health: hastalik.healthDelta,
         ),
       ),
     );
@@ -1050,12 +1047,12 @@ class LifeProgression {
     GameState next = state.copyWith(
       player: state.player.copyWith(
         hairLossStage: sac.stage,
-        stats: stats.copyWith(
-          appearance: stats.appearance + drift.appearance + sac.appearance,
-          charisma: stats.charisma + drift.charisma + sac.charisma,
-          health: stats.health + drift.health,
-          intelligence: stats.intelligence + drift.intelligence,
-          happiness: stats.happiness + drift.happiness,
+        stats: stats.gain(
+          appearance: drift.appearance + sac.appearance,
+          charisma: drift.charisma + sac.charisma,
+          health: drift.health,
+          intelligence: drift.intelligence,
+          happiness: drift.happiness,
         ),
       ),
     );
@@ -1100,8 +1097,8 @@ class LifeProgression {
     return state.copyWith(
       grief: state.grief - geriVerilen,
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness + geriVerilen).clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: geriVerilen,
         ),
       ),
     );
@@ -1196,13 +1193,14 @@ class LifeProgression {
     if (state.notices.any((PendingNotice n) => n.id == id)) return state;
 
     final int once = state.player.stats.happiness;
-    final int sonra = (once + donem.prototypeOnlyHappiness).clamp(0, 100);
-    final int gercek = sonra - once;
+    // Kazanç azalan getiriyle işlenir (D-099); bildirimde yazan değer de
+    // **gerçekten uygulanan** değerdir.
+    final Stats yeniStats =
+        state.player.stats.gain(happiness: donem.prototypeOnlyHappiness);
+    final int gercek = yeniStats.happiness - once;
 
     final GameState etkili = state.copyWith(
-      player: state.player.copyWith(
-        stats: state.player.stats.copyWith(happiness: sonra),
-      ),
+      player: state.player.copyWith(stats: yeniStats),
     );
 
     // Bir yakınını kaybettiği yılda oyuncuya burç penceresi açılmaz
@@ -1308,11 +1306,10 @@ class LifeProgression {
     if (alan == null || !state.education.isSchoolStudent) return state;
     return state.copyWith(
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          intelligence:
-              state.player.stats.intelligence + alan.intelligenceBonus,
-          charisma: state.player.stats.charisma + alan.charismaBonus,
-          appearance: state.player.stats.appearance + alan.appearanceBonus,
+        stats: state.player.stats.gain(
+          intelligence: alan.intelligenceBonus,
+          charisma: alan.charismaBonus,
+          appearance: alan.appearanceBonus,
         ),
       ),
     );

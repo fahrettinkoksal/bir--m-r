@@ -461,9 +461,9 @@ class FamilyInteractions {
         )
         .toList(growable: false);
 
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness + outcome.happinessDelta,
-      charisma: state.player.stats.charisma + outcome.charismaDelta,
+    final Stats stats = state.player.stats.gain(
+      happiness: outcome.happinessDelta,
+      charisma: outcome.charismaDelta,
     );
     // Cüzdan eksiye düşmez; borç kuralları kararlaştırılmadı. Hediye
     // verebilmek için yeterli para zaten `availability` ile denetlenir.

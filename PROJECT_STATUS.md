@@ -1002,6 +1002,17 @@ toplanarak ve acılı yılda burç penceresi kapatılarak altıya indi
 etkisiz seçim yok, yalnızca görünmez işaret bırakan seçim yok; kural
 testle sabitlendi.
 
+**Paket J — statlar gerçekten hissedilsin (D-099…D-102).** Kazançlar
+artık azalan getiriyle işleniyor: +5'lik bir kazanç 40'tan +5, 70'ten +4,
+88'den +1 getiriyor. Çabayla ulaşılabilecek tavan 95; yılda +4 kazandıran
+bir alışkanlık 40 yıl sürse bile 100'e ulaşmıyor (eskiden ulaşıyordu).
+Kural tek noktadan geçiyor ve bunu atlayan yeni bir yol açılamasın diye
+kaynak taramalı bir testle sabitlendi. Sağlık Merkezi'nin yıllık toplam
+sağlık kazancı 17'den 6'ya indirildi (check-up ile stat kasma açığı).
+Hastalık artık sağlığı da düşürüyor. Dövüş sanatı spor bakımına sayılıyor.
+Görünüş düşüşü yaklaşık dörtte bir yumuşatıldı. Saç dökülmesi karizmayı
+değil görünüşü etkiliyor; saç ekimi ileri basamaktan iki kademe düşürüyor.
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1070,12 +1081,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-123 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-124 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1888 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1908 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

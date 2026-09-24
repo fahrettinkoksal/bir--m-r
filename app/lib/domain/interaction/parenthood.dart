@@ -240,10 +240,8 @@ class Parenthood {
       ]),
       player: state.player.copyWith(
         wallet: state.player.wallet - odenen,
-        stats: state.player.stats.copyWith(
-          happiness:
-              (state.player.stats.happiness + prototypeOnlyBirthHappiness)
-                  .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyBirthHappiness,
         ),
       ),
       storyFlags: <String>{

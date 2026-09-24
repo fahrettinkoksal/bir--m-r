@@ -75,10 +75,11 @@ void main() {
     expect(toplamYil, greaterThan(1000), reason: 'Ölçüm yeterince geniş');
     expect(
       enCok,
-      lessThanOrEqualTo(6),
-      reason: 'Ölçülen en kötü yıl altı penceredir (iki vefat, iki '
-          'cenaze, toplu miras ve bir haber). Daha fazlası bildirim '
-          'yağmuru sayılır.',
+      lessThanOrEqualTo(7),
+      reason: 'Ölçülen en kötü yıl yedi penceredir: aynı yıl **üç** '
+          'yakınını kaybeden oyuncuda üç vefat, üç cenaze ve bir toplu '
+          'miras. Vefat ve cenaze kişiye özeldir, birleştirilmez; '
+          'daha fazlası bildirim yağmuru sayılır.',
     );
     expect(
       toplamBildirim / toplamYil,

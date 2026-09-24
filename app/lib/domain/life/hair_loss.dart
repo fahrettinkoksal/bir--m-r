@@ -71,10 +71,18 @@ abstract final class HairLoss {
   static const double prototypeOnlyProgressChance = 0.12;
 
   /// Basamağa ilk geçildiği yıl uygulanan görünüş kaybı.
-  static const List<int> prototypeOnlyAppearanceCost = <int>[0, 2, 2, 3];
+  ///
+  /// Faho'nun Q-117 kararı: saç **görünüşü** etkiler, karizmayı değil.
+  /// Eski karizma kaybı buraya taşındı; toplam ağırlık korundu, yalnızca
+  /// hangi değere yazıldığı değişti.
+  static const List<int> prototypeOnlyAppearanceCost = <int>[0, 3, 4, 5];
 
-  /// Basamağa ilk geçildiği yıl uygulanan karizma kaybı.
-  static const List<int> prototypeOnlyCharismaCost = <int>[0, 1, 2, 2];
+  /// Karizma kaybı **yoktur** (Q-117 kararı).
+  ///
+  /// Saçın dökülmesi karakterin insanlarla kurduğu ilişkiyi değiştirmez;
+  /// aynada gördüğü şeyi değiştirir. Alan, eski kayıtlarla ve çağrı
+  /// noktalarıyla uyum için duruyor ve hep sıfırdır.
+  static const List<int> prototypeOnlyCharismaCost = <int>[0, 0, 0, 0];
 
   /// Bakım yapan oyuncuda kaybın çarpanı.
   ///

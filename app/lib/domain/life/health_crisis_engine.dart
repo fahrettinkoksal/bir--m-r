@@ -173,9 +173,8 @@ class HealthCrisisEngine {
 
     next = next.copyWith(
       player: next.player.copyWith(
-        stats: next.player.stats.copyWith(
-          health:
-              (next.player.stats.health + secim.healthChange).clamp(0, 100),
+        stats: next.player.stats.gain(
+          health: secim.healthChange,
         ),
       ),
     );

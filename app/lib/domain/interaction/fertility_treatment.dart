@@ -180,11 +180,8 @@ abstract final class FertilityTreatment {
     final Person partner = Intimacy.partnerOf(state)!;
     final bool basarili = rng.nextDouble() < successChance(state);
 
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness +
-          (basarili
-              ? prototypeOnlySuccessHappiness
-              : prototypeOnlyFailHappiness),
+    final Stats stats = state.player.stats.gain(
+      happiness: (basarili ? prototypeOnlySuccessHappiness : prototypeOnlyFailHappiness),
     );
 
     final List<Person> people = basarili

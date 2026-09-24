@@ -190,13 +190,9 @@ class MarriageEngine {
       people: List<Person>.unmodifiable(people),
       player: state.player.copyWith(
         wallet: state.player.wallet - stil.prototypeOnlyCost,
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  stil.prototypeOnlyHappiness)
-              .clamp(0, 100),
-          charisma: (state.player.stats.charisma +
-                  stil.prototypeOnlyCharisma)
-              .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: stil.prototypeOnlyHappiness,
+          charisma: stil.prototypeOnlyCharisma,
         ),
         // Ün kapalıysa **açılmaz** (D-027): düğün Ün doğurmaz.
         fame: state.player.fameUnlocked && stil.prototypeOnlyFame > 0
@@ -376,10 +372,8 @@ class MarriageEngine {
         people: List<Person>.unmodifiable(people),
         proposalAges: Map<String, int>.unmodifiable(teklifler),
         player: odenmis.player.copyWith(
-          stats: odenmis.player.stats.copyWith(
-            happiness: (odenmis.player.stats.happiness +
-                    stil.prototypeOnlyHappiness)
-                .clamp(0, 100),
+          stats: odenmis.player.stats.gain(
+            happiness: stil.prototypeOnlyHappiness,
           ),
         ),
         pendingWedding: PendingWedding(
@@ -408,9 +402,8 @@ class MarriageEngine {
       people: List<Person>.unmodifiable(people),
       proposalAges: Map<String, int>.unmodifiable(teklifler),
       player: odenmis.player.copyWith(
-        stats: odenmis.player.stats.copyWith(
-          happiness:
-              odenmis.player.stats.happiness + prototypeOnlyRejectHappiness,
+        stats: odenmis.player.stats.gain(
+          happiness: prototypeOnlyRejectHappiness,
         ),
       ),
     );
@@ -482,10 +475,8 @@ class MarriageEngine {
       ),
       player: state.player.copyWith(
         wallet: state.player.wallet - pay,
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  prototypeOnlyDivorceHappiness)
-              .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyDivorceHappiness,
         ),
       ),
       marriage: state.marriage!.copyWith(

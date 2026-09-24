@@ -66,6 +66,20 @@ class ActivityEngine {
   /// prototypeOnly: aynı yaşta tekrar edildikçe azalan kazanç eğrisi.
   static const List<double> prototypeOnlyRewardCurve = <double>[1.0, 0.6, 0.3];
 
+  /// prototypeOnly: Sağlık Merkezi'nden bir yılda kazanılabilecek en çok
+  /// sağlık puanı (D-100).
+  ///
+  /// Her işlem ayrı ayrı `maxPerAge: 1` ile sınırlıydı ama **toplamı**
+  /// sınırlı değildi: kontrol, diş, göz, aşı, tahlil ve terapi üst üste
+  /// yapıldığında yılda 17 puan sağlık kazanılabiliyordu — yaşlanmanın
+  /// aldığının kat kat üstü. Muayene olmak insanı sağlıklı yapmaz;
+  /// erken fark ettirir. Kapı kapanmıyor, yalnızca yıllık toplam
+  /// sınırlanıyor.
+  static const int prototypeOnlyHealthCentreYearlyCap = 6;
+
+  /// Yıllık sağlık kazancı sayacının anahtarı.
+  static const String healthCentreCounterId = 'saglik_merkezi_kazanc';
+
   /// Bir eylemin bu yaşta kaç kez yapıldığı.
   int timesDone(GameState state, ActivityAction action) =>
       state.interactionCount('aktivite', action.id);
@@ -155,21 +169,25 @@ class ActivityEngine {
     final bool kotuSonuc =
         action.riskChance > 0 && rng.nextDouble() < action.riskChance;
 
+    // Sağlık Merkezi'nin yıllık toplam sağlık kazancı sınırlıdır (D-100).
+    final int saglikHakki = action.venue == ActivityVenue.saglikMerkezi
+        ? (prototypeOnlyHealthCentreYearlyCap -
+                state.interactionCount(healthCentreCounterId, 'aktivite'))
+            .clamp(0, prototypeOnlyHealthCentreYearlyCap)
+        : 1 << 30;
+    final int saglikKazanci =
+        min(_scaled(action.health, factor), saglikHakki);
+
     final Stats stats = kotuSonuc
-        ? state.player.stats.copyWith(
-            happiness: state.player.stats.happiness +
-                prototypeOnlyBadOutcomeHappiness,
+        ? state.player.stats.gain(
+            happiness: prototypeOnlyBadOutcomeHappiness,
           )
-        : state.player.stats.copyWith(
-            appearance:
-                state.player.stats.appearance + _scaled(action.appearance, factor),
-            charisma:
-                state.player.stats.charisma + _scaled(action.charisma, factor),
-            happiness:
-                state.player.stats.happiness + _scaled(action.happiness, factor),
-            health: state.player.stats.health + _scaled(action.health, factor),
-            intelligence: state.player.stats.intelligence +
-                _scaled(action.intelligence, factor),
+        : state.player.stats.gain(
+            appearance: _scaled(action.appearance, factor),
+            charisma: _scaled(action.charisma, factor),
+            happiness: _scaled(action.happiness, factor),
+            health: saglikKazanci,
+            intelligence: _scaled(action.intelligence, factor),
           );
 
     // Saç stili değişiyorsa mevcut stilden farklı biri seçilir.
@@ -181,9 +199,13 @@ class ActivityEngine {
       yeniStil = secenekler[rng.nextInt(secenekler.length)];
     }
 
-    // Saç ekimi basamağı bir kademe düşürür; başarısız işlem düşürmez.
+    // Saç ekimi basamağı **bir ya da iki** kademe düşürür (Q-117
+    // kararı); başarısız işlem hiç düşürmez. İleri basamaktan gelen
+    // oyuncu tek seansta daha çok yol alır, çünkü ekilecek alan da
+    // büyüktür; ilk basamaktaki zaten bir adım uzaktadır.
+    final int kademe = state.player.hairLossStage >= 2 ? 2 : 1;
     final int yeniBasamak = action.reducesHairLoss && !kotuSonuc
-        ? (state.player.hairLossStage - 1).clamp(0, HairLoss.maxStage)
+        ? (state.player.hairLossStage - kademe).clamp(0, HairLoss.maxStage)
         : state.player.hairLossStage;
 
     final PlayerCharacter player = state.player.copyWith(
@@ -198,6 +220,14 @@ class ActivityEngine {
       interactionCounts: Map<String, int>.unmodifiable(<String, int>{
         ...state.interactionCounts,
         GameState.interactionKey('aktivite', action.id): done + 1,
+        // Yıllık sağlık kazancı yalnızca **gerçekten uygulanan** kadar
+        // sayılır; sayaç yaşa aittir ve yeni yaşta sıfırlanır (D-100).
+        if (action.venue == ActivityVenue.saglikMerkezi &&
+            !kotuSonuc &&
+            saglikKazanci > 0)
+          GameState.interactionKey(healthCentreCounterId, 'aktivite'):
+              state.interactionCount(healthCentreCounterId, 'aktivite') +
+                  saglikKazanci,
       }),
       // Yönlendirme izleri: tahlil yapılınca kapanır, check-up yeni bir
       // yönlendirme açabilir (D-076).
@@ -403,8 +433,8 @@ class ActivityEngine {
 
     GameState next = after.copyWith(
       player: after.player.copyWith(
-        stats: after.player.stats.copyWith(
-          happiness: after.player.stats.happiness + mutlulukArtisi,
+        stats: after.player.stats.gain(
+          happiness: mutlulukArtisi,
         ),
       ),
       people: after.people
@@ -483,8 +513,8 @@ class ActivityEngine {
     final GameState next = state.copyWith(
       player: state.player.copyWith(
         wallet: state.player.wallet - action.cost,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + delta,
+        stats: state.player.stats.gain(
+          happiness: delta,
         ),
       ),
       interactionCounts: Map<String, int>.unmodifiable(<String, int>{
@@ -615,11 +645,10 @@ class ActivityEngine {
     if (bitti) {
       next = next.copyWith(
         player: next.player.copyWith(
-          stats: next.player.stats.copyWith(
-            intelligence:
-                next.player.stats.intelligence + book.intelligenceGain,
-            happiness: next.player.stats.happiness + book.happinessGain,
-            charisma: next.player.stats.charisma + book.charismaGain,
+          stats: next.player.stats.gain(
+            intelligence: book.intelligenceGain,
+            happiness: book.happinessGain,
+            charisma: book.charismaGain,
           ),
         ),
       );
