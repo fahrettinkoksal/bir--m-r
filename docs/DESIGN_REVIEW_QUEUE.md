@@ -2912,5 +2912,32 @@ Faho bildirdi: "eşleşince ne istediğim sorulsun", "tanışmak sevgili olmak d
 
 ---
 
+### Q-127 — Konut kredisi, kredi karnesi ve borcun sonu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-108 (Q-120'nin kararları) · `app/lib/domain/economy/banking.dart`, `app/lib/domain/models/loan.dart`, `app/lib/ui/screens/sections/bank_page.dart` · Test: `app/test/package_m_test.dart`
+
+Faho bildirdi: "banka Aktiviteler altına geçsin", "kredi tutarını elle girebileyim", "konut kredisi olsun", "basit bir kredi durumu olsun (İyi/Orta/Riskli/Çok riskli)", "icra-haciz için zemin bırak", "harçlık istediğimde ne aldığımı göreyim". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Kredi örnekleri (ölçüldü).**
+
+| Tür | Banka | Tutar / vade | Yıllık taksit | Toplam geri ödeme |
+|---|---|---|---|---|
+| İhtiyaç | Fakbank | 300.000 ₺ / 3 yıl | 193.014 ₺ | 579.042 ₺ |
+| İhtiyaç | Bankavrupa | 300.000 ₺ / 3 yıl | 267.658 ₺ | 802.974 ₺ |
+| Konut | Fakbank | 3.000.000 ₺ / 10 yıl | 1.069.703 ₺ | 10.697.030 ₺ |
+| Konut | Bankavrupa | 3.000.000 ₺ / 10 yıl | 1.508.216 ₺ | 15.082.160 ₺ |
+
+**Kredi karnesi.** Kaçan taksit 1 → Riskli, 2+ → Çok riskli. Kaçan yoksa taksit yükü/gelir: ≤%25 İyi, ≤%45 Orta, üstü Riskli.
+
+**Karar soruları:**
+1. Konut kredisi aylık faizi **%2,45 / %3,40** doğru mu? Bu oranla 10 yıllık kredide toplam geri ödeme anaparanın **3,5-5 katı** oluyor. Matematik doğru ama oyunda konut kredisi neredeyse alınamaz hâle geliyor; oyun gerçeğe mi yoksa oynanabilirliğe mi uysun?
+2. Konut kredisinde vade **10 yıl**. Daha uzun (15-20 yıl) bir seçenek, yıllık taksiti düşürüp krediyi gerçekten kullanılabilir yapar mı?
+3. Konut kredisi şu an **eve bağlı değil**: para cüzdana giriyor, oyuncu isterse başka şeye harcıyor. Gerçek konut kredisi gibi **yalnızca ev alımında** kullanılabilir olmalı mı?
+4. Kredi karnesinin eşikleri (%25 / %45, 1 ve 2 kaçan taksit) doğru mu?
+5. Karne şu an yalnızca **gösteriliyor**; kredi kararında ayrıca kullanılmıyor (kaçan taksit zaten tavanı düşürüyor). Karne doğrudan bir çarpan olmalı mı?
+6. **İcra ve haciz**: borç ödenmediğinde ne olmalı? Şu an borç faiziyle büyüyor ve yeni kredi zorlaşıyor, o kadar. Seçenekler: (a) belli bir eşikten sonra eşyaya haciz, (b) maaştan kesinti, (c) hiçbiri — oyun bu kadarıyla kalsın.
+7. Harçlık metnine tutar eklendi. Diğer para taşıyan etkileşimlerde (hediye ver/al) de tutar yazılmalı mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

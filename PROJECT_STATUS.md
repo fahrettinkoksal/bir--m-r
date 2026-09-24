@@ -1032,6 +1032,14 @@ bakıyor. Flört kendiliğinden sevgiliye dönmüyor; oyuncu teklif ediyor ve
 yakınlık yeterliyse resmîleşiyor. Adaylar ekonomik duruma göre
 süzülebiliyor. Beğeni kotası yılda 5'ten 12'ye çıktı, premium 30 kaldı.
 
+**Paket M — banka, konut kredisi ve harçlık (D-108).** Banka
+Varlıklar'dan Aktiviteler'e taşındı; Varlıklar'da yalnızca açık borç
+hatırlatması kaldı. Kredi tutarı artık elle yazılıyor. Konut kredisi
+eklendi: daha ucuz (aylık %2,45 / %3,40), 10 yıla kadar vadeli ve daha
+büyük. Basit kredi karnesi (İyi/Orta/Riskli/Çok riskli) banka ekranının
+üstünde gerekçesiyle duruyor; icra ve haciz için zemin bırakıldı.
+Harçlık isteyince alınan tutar sonucun içinde yazıyor.
+
 **Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
 gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
 "Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
@@ -1100,12 +1108,12 @@ dair karar oraya eklendi.
 aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
 eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 
-**Açık kalan sayılar:** Q-116 … Q-126 (`docs/DESIGN_REVIEW_QUEUE.md`).
+**Açık kalan sayılar:** Q-116 … Q-127 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1935 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **1946 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

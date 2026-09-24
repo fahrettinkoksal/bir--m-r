@@ -185,6 +185,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'remainingPayments': l.remainingPayments,
             'outstanding': l.outstanding,
             'takenAtAge': l.takenAtAge,
+            // Kredi amacı alan eklemeli (D-108); eski kayıtta yoktur ve
+            // ihtiyaç kredisi olarak okunur.
+            'purpose': l.purpose.name,
             'missedPayments': l.missedPayments,
           },
       ],
@@ -1376,6 +1379,13 @@ PendingRace _decodePendingRace(Map<String, Object?> json) => PendingRace(
 Loan _decodeLoan(Map<String, Object?> json) => Loan(
       id: _string(json, 'id'),
       bank: _enumByName(Bank.values, _string(json, 'bank'), 'loan.bank'),
+      purpose: json['purpose'] == null
+          ? LoanPurpose.ihtiyac
+          : _enumByName(
+              LoanPurpose.values,
+              _string(json, 'purpose'),
+              'loan.purpose',
+            ),
       principal: _int(json, 'principal'),
       annualPayment: _int(json, 'annualPayment'),
       termYears: _int(json, 'termYears'),

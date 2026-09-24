@@ -34,6 +34,8 @@ import 'social_pages.dart';
 import '../../../text/turkish_text.dart';
 import '../../../domain/social/media_opportunities.dart';
 import 'media_page.dart';
+import '../../../domain/economy/banking.dart';
+import 'bank_page.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
 ///
@@ -67,6 +69,7 @@ enum _ActivityPage {
   estetik,
   sosyalMedya,
   medya,
+  banka,
   kumarhane,
   piyango,
   finger,
@@ -204,6 +207,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.medya:
         return MediaPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.banka:
+        return BankPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.piyango:
@@ -469,6 +474,22 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.stars_outlined,
             accent: BirOmurAccents.pirinc,
             onTap: () => _go(_ActivityPage.medya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Banka (D-108): Varlıklar'dan buraya taşındı. Bankaya gitmek
+        // bir eylemdir; Varlıklar sahip olunan şeylerin listesidir.
+        if (state.player.age >= Banking.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activities_banka'),
+            title: 'Banka',
+            subtitle: GameScope.of(context).totalDebt > 0
+                ? 'Kalan borcun '
+                    '${trMoney(GameScope.of(context).totalDebt)}'
+                : 'Fakbank ve Bankavrupa — ihtiyaç ve konut kredisi',
+            icon: Icons.account_balance_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => _go(_ActivityPage.banka),
           ),
           const SizedBox(height: 10),
         ],

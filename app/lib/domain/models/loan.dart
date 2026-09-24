@@ -14,12 +14,14 @@ enum Bank {
     'Fakbank',
     'Faizi düşük tutar, ama herkese kredi vermez.',
     monthlyRate: 0.0295,
+    housingMonthlyRate: 0.0245,
     approvalEase: 0.55,
   ),
   bankavrupa(
     'Bankavrupa',
     'Faizi yüksek, buna karşılık kapısı daha açık.',
     monthlyRate: 0.046,
+    housingMonthlyRate: 0.0340,
     approvalEase: 1.0,
   );
 
@@ -27,14 +29,36 @@ enum Bank {
     this.label,
     this.description, {
     required this.monthlyRate,
+    required this.housingMonthlyRate,
     required this.approvalEase,
   });
 
   final String label;
   final String description;
 
-  /// prototypeOnly: aylık faiz oranı.
+  /// prototypeOnly: ihtiyaç kredisinin aylık faiz oranı.
   final double monthlyRate;
+
+  /// prototypeOnly: konut kredisinin aylık faiz oranı (D-108).
+  ///
+  /// Konut kredisi ihtiyaç kredisinden **ucuzdur**, çünkü ev teminattır.
+  /// 2026 Türkiye'sinde konut kredisi aylık faizi kabaca **%2,2 – %3,5**
+  /// bandında seyrediyor; iki banka bu bandın iki ucunda durur.
+  final double housingMonthlyRate;
+
+  /// Verilen amaca göre aylık faiz.
+  double monthlyRateFor(LoanPurpose purpose) =>
+      purpose == LoanPurpose.konut ? housingMonthlyRate : monthlyRate;
+
+  /// Verilen amaca göre yıllık bileşik faiz.
+  double yearlyRateFor(LoanPurpose purpose) {
+    double carpan = 1.0;
+    final double aylik = monthlyRateFor(purpose);
+    for (int i = 0; i < 12; i++) {
+      carpan *= 1 + aylik;
+    }
+    return carpan - 1;
+  }
 
   /// prototypeOnly: onay kolaylığı çarpanı (1.0 = en kolay).
   final double approvalEase;
@@ -52,6 +76,21 @@ enum Bank {
   }
 }
 
+/// Kredinin amacı (D-108).
+///
+/// Faho'nun isteği: "konut kredisi de olsun". Konut kredisi ihtiyaç
+/// kredisinden **daha ucuz, daha uzun vadeli ve daha büyük**tür; çünkü
+/// ev teminattır. Yeni değerler listenin **sonuna** eklenir.
+enum LoanPurpose {
+  ihtiyac('İhtiyaç kredisi', 'Serbest kullanım; kısa vadeli ve pahalı.'),
+  konut('Konut kredisi', 'Ev almak için; uzun vadeli ve daha ucuz.');
+
+  const LoanPurpose(this.label, this.description);
+
+  final String label;
+  final String description;
+}
+
 /// Çekilmiş bir kredi (D-080).
 @immutable
 class Loan {
@@ -64,6 +103,7 @@ class Loan {
     required this.remainingPayments,
     required this.outstanding,
     required this.takenAtAge,
+    this.purpose = LoanPurpose.ihtiyac,
     this.missedPayments = 0,
   });
 
@@ -86,6 +126,9 @@ class Loan {
   final int outstanding;
 
   final int takenAtAge;
+
+  /// Kredinin amacı (D-108). Eski kayıtlarda ihtiyaç kredisi sayılır.
+  final LoanPurpose purpose;
 
   /// Ödenemeyen taksit sayısı.
   final int missedPayments;
@@ -110,6 +153,7 @@ class Loan {
         remainingPayments: remainingPayments ?? this.remainingPayments,
         outstanding: outstanding ?? this.outstanding,
         takenAtAge: takenAtAge,
+        purpose: purpose,
         missedPayments: missedPayments ?? this.missedPayments,
       );
 }

@@ -50,10 +50,83 @@ class LoanDecision {
   final int annualPayment;
 }
 
+/// Oyuncunun kredi karnesi (D-108).
+///
+/// Faho'nun isteği: "basit bir kredi durumu olsun". Karmaşık bir skor
+/// değil, **dört kademeli** ve gerekçesi okunabilir bir durum. İcra ve
+/// haciz bu sürümde **yoktur**; zemin bırakıldı (Q-127).
+enum CreditStanding {
+  iyi('İyi', 'Ödemelerin düzenli, yükün hafif.'),
+  orta('Orta', 'Ödemelerin düzenli ama yükün ağırlaşıyor.'),
+  riskli('Riskli', 'Taksit kaçırdın ya da yükün gelirini zorluyor.'),
+  cokRiskli('Çok riskli', 'Birden fazla taksit kaçtı; kapılar kapanıyor.');
+
+  const CreditStanding(this.label, this.description);
+
+  final String label;
+  final String description;
+}
+
 abstract final class Banking {
-  /// prototypeOnly: en kısa ve en uzun vade (yıl).
+  /// prototypeOnly: ihtiyaç kredisinde en kısa ve en uzun vade (yıl).
   static const int minTermYears = 1;
   static const int maxTermYears = 3;
+
+  /// prototypeOnly: konut kredisinde en uzun vade (yıl) — D-108.
+  ///
+  /// Türkiye'de konut kredisi vadeleri 120 aya kadar çıkabiliyor; oyun
+  /// on yılda tutar.
+  static const int maxHousingTermYears = 10;
+
+  /// Verilen amaca göre en uzun vade.
+  static int maxTermFor(LoanPurpose purpose) =>
+      purpose == LoanPurpose.konut ? maxHousingTermYears : maxTermYears;
+
+  /// prototypeOnly: konut kredisinin en küçük tutarı.
+  ///
+  /// Konut kredisi ihtiyaç kredisi gibi küçük tutarlar için açılmaz.
+  static int get minHousingAmount => Economy.netYearlyMinimumWage * 2;
+
+  /// Verilen amaca göre en küçük tutar.
+  static int minAmountFor(LoanPurpose purpose) =>
+      purpose == LoanPurpose.konut ? minHousingAmount : minAmount;
+
+  /// prototypeOnly: konut kredisinde taksite ayrılabilen gelir payı.
+  ///
+  /// Ev teminat olduğu için banka daha cömert davranır.
+  static const double prototypeOnlyHousingPaymentShare = 0.60;
+
+  /// Amaca göre taksit payı tavanı.
+  static double paymentShareFor(LoanPurpose purpose) =>
+      purpose == LoanPurpose.konut
+          ? prototypeOnlyHousingPaymentShare
+          : prototypeOnlyMaxPaymentShare;
+
+  /// prototypeOnly: "orta" kademeye geçilen taksit yükü oranı.
+  static const double prototypeOnlyModerateBurden = 0.25;
+
+  /// prototypeOnly: "riskli" kademeye geçilen taksit yükü oranı.
+  static const double prototypeOnlyRiskyBurden = 0.45;
+
+  /// Oyuncunun kredi durumu (D-108).
+  ///
+  /// Uydurma bir puan değil: **kaçan taksit sayısı** ile **taksit
+  /// yükünün gelire oranı** okunur. Hiç kredisi olmayan oyuncu iyidir.
+  static CreditStanding standingOf(GameState state) {
+    final int kacan = missedPayments(state);
+    if (kacan >= 2) return CreditStanding.cokRiskli;
+    if (kacan == 1) return CreditStanding.riskli;
+
+    final int gelir = assessedIncome(state);
+    final int yuk = annualBurden(state);
+    if (yuk <= 0) return CreditStanding.iyi;
+    if (gelir <= 0) return CreditStanding.riskli;
+
+    final double oran = yuk / gelir;
+    if (oran >= prototypeOnlyRiskyBurden) return CreditStanding.riskli;
+    if (oran >= prototypeOnlyModerateBurden) return CreditStanding.orta;
+    return CreditStanding.iyi;
+  }
 
   /// prototypeOnly: kredi çekilebilecek en küçük yaş.
   static const int prototypeOnlyMinAge = 18;
@@ -116,8 +189,9 @@ abstract final class Banking {
     required int amount,
     required int termYears,
     required Bank bank,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
   }) {
-    final double r = bank.yearlyRate;
+    final double r = bank.yearlyRateFor(purpose);
     if (termYears <= 0) return amount;
     if (r <= 0) return (amount / termYears).ceil();
     double carpan = 1.0;
@@ -130,7 +204,11 @@ abstract final class Banking {
   }
 
   /// Bu başvuru neden hiç değerlendirilemez? Engel yoksa `null`.
-  static String? blockReason(GameState state, {required int amount}) {
+  static String? blockReason(
+    GameState state, {
+    required int amount,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
+  }) {
     if (state.player.age < prototypeOnlyMinAge) {
       return 'Kredi başvurusu için $prototypeOnlyMinAge yaşını doldurman '
           'gerekiyor.';
@@ -139,8 +217,11 @@ abstract final class Banking {
       return 'Aynı anda en fazla $prototypeOnlyMaxActiveLoans kredin '
           'olabilir. Önce birini kapatman gerekiyor.';
     }
-    if (amount < minAmount) {
-      return 'Banka bu kadar küçük bir tutar için dosya açmıyor.';
+    if (amount < minAmountFor(purpose)) {
+      return purpose == LoanPurpose.konut
+          ? 'Konut kredisi en az ${minHousingAmount ~/ 1000} bin ₺ için '
+              'açılıyor; daha küçük tutarda ihtiyaç kredisi kullanılır.'
+          : 'Banka bu kadar küçük bir tutar için dosya açmıyor.';
     }
     return null;
   }
@@ -155,8 +236,10 @@ abstract final class Banking {
     required Bank bank,
     required int amount,
     required int termYears,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
   }) {
-    final String? engel = blockReason(state, amount: amount);
+    final String? engel =
+        blockReason(state, amount: amount, purpose: purpose);
     if (engel != null) {
       return LoanDecision(approved: false, reason: engel);
     }
@@ -164,8 +247,9 @@ abstract final class Banking {
     final int gelir = assessedIncome(state);
     final int mevcutYuk = annualBurden(state);
 
-    // Bankanın taksite ayırmaya razı olduğu yıllık pay.
-    final double pay = prototypeOnlyMaxPaymentShare * bank.approvalEase;
+    // Bankanın taksite ayırmaya razı olduğu yıllık pay. Konut kredisinde
+    // ev teminat olduğu için pay daha yüksektir (D-108).
+    final double pay = paymentShareFor(purpose) * bank.approvalEase;
     final int taksitTavani = gelir > 0
         ? (gelir * pay).round() - mevcutYuk
         : (prototypeOnlyNoIncomeCeiling * bank.approvalEase).round() -
@@ -194,6 +278,7 @@ abstract final class Banking {
       amount: amount,
       termYears: termYears,
       bank: bank,
+      purpose: purpose,
     );
 
     if (istenenTaksit <= gercekTavan) {
@@ -210,8 +295,9 @@ abstract final class Banking {
       payment: gercekTavan,
       termYears: termYears,
       bank: bank,
+      purpose: purpose,
     );
-    if (teklif < minAmount) {
+    if (teklif < minAmountFor(purpose)) {
       return LoanDecision(
         approved: false,
         reason: '${bank.label} bu tutarı geri ödeyemeyeceğini düşündü ve '
@@ -228,6 +314,7 @@ abstract final class Banking {
         amount: teklif,
         termYears: termYears,
         bank: bank,
+        purpose: purpose,
       ),
     );
   }
@@ -241,19 +328,22 @@ abstract final class Banking {
     required Bank bank,
     required int amount,
     required int termYears,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
   }) {
-    final int vade = termYears.clamp(minTermYears, maxTermYears);
+    final int vade = termYears.clamp(minTermYears, maxTermFor(purpose));
     final LoanDecision karar = evaluate(
       state,
       bank: bank,
       amount: amount,
       termYears: vade,
+      purpose: purpose,
     );
     if (!karar.approved) return (state: state, decision: karar);
 
     final Loan kredi = Loan(
       id: 'kredi-${bank.name}-${state.player.age}-${state.loans.length}',
       bank: bank,
+      purpose: purpose,
       principal: karar.offeredAmount,
       annualPayment: karar.annualPayment,
       termYears: vade,
@@ -375,8 +465,9 @@ abstract final class Banking {
     required int payment,
     required int termYears,
     required Bank bank,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
   }) {
-    final double r = bank.yearlyRate;
+    final double r = bank.yearlyRateFor(purpose);
     if (r <= 0) return payment * termYears;
     double carpan = 1.0;
     for (int i = 0; i < termYears; i++) {

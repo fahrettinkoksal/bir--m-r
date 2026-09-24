@@ -15,6 +15,7 @@ import '../models/relation.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
 import 'interaction_policy.dart';
+import '../../text/turkish_text.dart';
 
 /// Etkileşimin hem yeni durumu hem de oyuncuya gösterilecek sonucu.
 class InteractionResult {
@@ -386,19 +387,26 @@ class FamilyInteractions {
         alinanHediye == null &&
         verilenHediye == null;
 
+    // Harçlık isteyen oyuncu **ne kadar aldığını** okumak için cüzdanına
+    // bakmak zorunda kalmaz (D-108): tutar sonucun içinde yazar.
+    final String sahne = interactionText(
+      rng: rng,
+      person: person,
+      kind: kind,
+      accepted: true,
+      noNewBenefit: noNewBenefit,
+      playerAge: state.player.age,
+      giftName: (alinanHediye ?? verilenHediye)?.name,
+    );
+    final String metin = kind == InteractionKind.paraIste && moneyDelta > 0
+        ? '$sahne Cüzdanına ${trMoney(moneyDelta)} girdi.'
+        : sahne;
+
     final InteractionOutcome outcome = InteractionOutcome(
       kind: kind,
       personId: person.id,
       accepted: true,
-      text: interactionText(
-        rng: rng,
-        person: person,
-        kind: kind,
-        accepted: true,
-        noNewBenefit: noNewBenefit,
-        playerAge: state.player.age,
-        giftName: (alinanHediye ?? verilenHediye)?.name,
-      ),
+      text: metin,
       bondDelta: bondDelta,
       happinessDelta: happinessDelta,
       charismaDelta: charismaDelta,

@@ -29,10 +29,45 @@ class BankPage extends StatefulWidget {
 
 class _BankPageState extends State<BankPage> {
   Bank _banka = Bank.fakbank;
+  LoanPurpose _amac = LoanPurpose.ihtiyac;
   int _vade = 2;
   late int _tutar = Banking.minAmount * 20;
   String? _sonuc;
   bool _olumlu = false;
+
+  /// Tutar **elle** yazılabilir (D-108): kaydırıcı kaba kalıyordu.
+  late final TextEditingController _tutarAlani =
+      TextEditingController(text: '$_tutar');
+
+  @override
+  void dispose() {
+    _tutarAlani.dispose();
+    super.dispose();
+  }
+
+  /// Yazılan metni tutara çevirir; geçersizse tutar değişmez.
+  void _tutarYazildi(String metin) {
+    final String temiz = metin.replaceAll(RegExp(r'[^0-9]'), '');
+    if (temiz.isEmpty) return;
+    final int? deger = int.tryParse(temiz);
+    if (deger == null) return;
+    setState(() => _tutar = deger);
+  }
+
+  /// Amaç değişince vade ve tutar yeni sınırlara çekilir.
+  void _amacSec(LoanPurpose amac) {
+    setState(() {
+      _amac = amac;
+      _vade = _vade.clamp(
+        Banking.minTermYears,
+        Banking.maxTermFor(amac),
+      );
+      if (_tutar < Banking.minAmountFor(amac)) {
+        _tutar = Banking.minAmountFor(amac);
+        _tutarAlani.text = '$_tutar';
+      }
+    });
+  }
 
   void _basvur() {
     final GameController controller = GameScope.of(context);
@@ -40,6 +75,7 @@ class _BankPageState extends State<BankPage> {
       bank: _banka,
       amount: _tutar,
       termYears: _vade,
+      purpose: _amac,
     );
     if (karar == null) return;
     setState(() {
@@ -68,17 +104,48 @@ class _BankPageState extends State<BankPage> {
       bank: _banka,
       amount: _tutar,
       termYears: _vade,
+      purpose: _amac,
     );
-    final String? engel = Banking.blockReason(state, amount: _tutar);
+    final String? engel =
+        Banking.blockReason(state, amount: _tutar, purpose: _amac);
+    final CreditStanding karne = controller.creditStanding;
 
     return SectionScaffold(
       icon: Icons.account_balance_rounded,
       accent: BirOmurAccents.mavi,
       title: 'Banka',
       subtitle: 'Cüzdanında ${state.player.walletLabel} var.',
-      backLabel: 'Varlıklar',
+      backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
+        // Kredi karnesi (D-108): dört kademe, gerekçesiyle.
+        Container(
+          key: const Key('credit_standing'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Kredi durumun: ${karne.label}',
+                style: theme.textTheme.titleSmall,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                karne.description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         if (acik.isNotEmpty) ...<Widget>[
           Text('Açık kredilerin', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -97,7 +164,25 @@ class _BankPageState extends State<BankPage> {
           const SizedBox(height: 18),
         ],
         Text('Yeni kredi', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
+        // Kredinin amacı (D-108): konut kredisi daha ucuz, daha uzun
+        // vadeli ve daha büyüktür.
+        for (final LoanPurpose p in LoanPurpose.values) ...<Widget>[
+          ListTile(
+            key: Key('loan_purpose_${p.name}'),
+            onTap: () => _amacSec(p),
+            leading: Icon(
+              p == _amac
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: theme.colorScheme.primary,
+            ),
+            title: Text(p.label),
+            subtitle: Text(p.description),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ],
+        const SizedBox(height: 4),
         for (final Bank b in Bank.values) ...<Widget>[
           ListTile(
             key: Key('bank_${b.name}'),
@@ -111,32 +196,42 @@ class _BankPageState extends State<BankPage> {
             title: Text(b.label),
             subtitle: Text(
               '${b.description}\n'
-              'Aylık faiz %${(b.monthlyRate * 100).toStringAsFixed(2)} · '
-              'yıllık %${(b.yearlyRate * 100).round()}',
+              'Aylık faiz '
+              '%${(b.monthlyRateFor(_amac) * 100).toStringAsFixed(2)} · '
+              'yıllık %${(b.yearlyRateFor(_amac) * 100).round()}',
             ),
             isThreeLine: true,
             contentPadding: EdgeInsets.zero,
           ),
         ],
         const SizedBox(height: 8),
-        Text('Tutar: ${trMoney(_tutar)}', style: theme.textTheme.bodyMedium),
-        Slider(
-          key: const Key('loan_amount'),
-          value: _tutar.toDouble(),
-          min: Banking.minAmount.toDouble(),
-          max: (Banking.minAmount * 400).toDouble(),
-          divisions: 40,
-          onChanged: (double v) =>
-              setState(() => _tutar = (v ~/ 1000) * 1000),
+        // Tutar elle yazılır (D-108): kaydırıcı kaba kalıyordu, oyuncu
+        // istediği rakamı giremiyordu.
+        TextField(
+          key: const Key('loan_amount_field'),
+          controller: _tutarAlani,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: 'Tutar (₺)',
+            helperText: 'En az ${trMoney(Banking.minAmountFor(_amac))}',
+            suffixText: trMoney(_tutar),
+          ),
+          onChanged: _tutarYazildi,
         ),
-        const SizedBox(height: 4),
-        Text('Vade: $_vade yıl', style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 12),
+        Text(
+          'Vade: $_vade yıl (en fazla ${Banking.maxTermFor(_amac)})',
+          style: theme.textTheme.bodyMedium,
+        ),
         Slider(
           key: const Key('loan_term'),
-          value: _vade.toDouble(),
+          value: _vade.toDouble().clamp(
+                Banking.minTermYears.toDouble(),
+                Banking.maxTermFor(_amac).toDouble(),
+              ),
           min: Banking.minTermYears.toDouble(),
-          max: Banking.maxTermYears.toDouble(),
-          divisions: Banking.maxTermYears - Banking.minTermYears,
+          max: Banking.maxTermFor(_amac).toDouble(),
+          divisions: Banking.maxTermFor(_amac) - Banking.minTermYears,
           onChanged: (double v) => setState(() => _vade = v.round()),
         ),
         const SizedBox(height: 10),

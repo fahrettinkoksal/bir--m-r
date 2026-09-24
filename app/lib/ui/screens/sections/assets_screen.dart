@@ -12,8 +12,6 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
-import '../../../domain/economy/banking.dart';
-import 'bank_page.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
@@ -25,7 +23,7 @@ import '../../../data/pet_catalog.dart';
 /// burada toplanır. Ailenin ekonomik durumu buraya karıştırılmaz: aile
 /// varlığı oyuncunun harcanabilir parası değildir.
 /// Varlıklar alt sayfaları.
-enum _AssetsPage { kok, magazalar, kategori, banka }
+enum _AssetsPage { kok, magazalar, kategori }
 
 class AssetsScreen extends StatefulWidget {
   const AssetsScreen({super.key, required this.onBack});
@@ -72,10 +70,6 @@ class _AssetsScreenState extends State<AssetsScreen> {
           _sonMagazaSonucu = null;
         }),
       );
-    }
-
-    if (_page == _AssetsPage.banka) {
-      return BankPage(onBack: () => setState(() => _page = _AssetsPage.kok));
     }
 
     if (_page == _AssetsPage.magazalar) {
@@ -135,18 +129,15 @@ class _AssetsScreenState extends State<AssetsScreen> {
           ),
           const SizedBox(height: 12),
         ],
-        // Banka (D-080): kredi çekmek ve taksit takibi.
-        if (state.player.age >= Banking.prototypeOnlyMinAge) ...<Widget>[
-          MenuRow(
-            key: const Key('assets_banka'),
-            title: 'Banka',
-            subtitle: GameScope.of(context).totalDebt > 0
-                ? 'Kalan borcun '
-                    '${trMoney(GameScope.of(context).totalDebt)}'
-                : 'Fakbank ve Bankavrupa — kredi başvurusu',
+        // Banka **Aktiviteler** altına taşındı (D-108): burası sahip
+        // olunan şeylerin listesi; bankaya gitmek bir eylemdir. Açık
+        // borç varsa oyuncu buradan da görsün diye tek satır kalır.
+        if (GameScope.of(context).totalDebt > 0) ...<Widget>[
+          InfoPanel(
             icon: Icons.account_balance_outlined,
-            accent: BirOmurAccents.mavi,
-            onTap: () => setState(() => _page = _AssetsPage.banka),
+            text: 'Bankaya olan borcun '
+                '${trMoney(GameScope.of(context).totalDebt)}. '
+                'Kredi işlemleri Aktiviteler > Banka altında.',
           ),
           const SizedBox(height: 12),
         ],

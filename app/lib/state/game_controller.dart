@@ -912,6 +912,7 @@ class GameController extends ChangeNotifier {
     required Bank bank,
     required int amount,
     required int termYears,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
   }) {
     final GameState? current = _state;
     if (current == null) {
@@ -922,8 +923,13 @@ class GameController extends ChangeNotifier {
       bank: bank,
       amount: amount,
       termYears: termYears,
+      purpose: purpose,
     );
   }
+
+  /// Oyuncunun kredi karnesi (D-108).
+  CreditStanding get creditStanding =>
+      _state == null ? CreditStanding.iyi : Banking.standingOf(_state!);
 
   /// Kredi başvurusu yapar.
   ///
@@ -932,6 +938,7 @@ class GameController extends ChangeNotifier {
     required Bank bank,
     required int amount,
     required int termYears,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
   }) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
@@ -940,6 +947,7 @@ class GameController extends ChangeNotifier {
       bank: bank,
       amount: amount,
       termYears: termYears,
+      purpose: purpose,
     );
     if (!sonuc.decision.approved) return sonuc.decision;
 
