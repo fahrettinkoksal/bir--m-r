@@ -2264,7 +2264,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-103 — Tüp bebek tedavisi
 
-**Durum:** `BACKLOG.md` içinde "Faho'nun işaret ettiği, henüz yapılmayanlar" başlığı altında duruyordu; kodlandı, sayıların onayı bekleniyor. Kod: Paket 35 (`lib/domain/interaction/fertility_treatment.dart`, `lib/ui/screens/sections/fertility_page.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-054** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Faho'nun isteği:** "İleride aktiviteler menüsünün içerisine sağlık menüsü olacak, tüp bebek tedavisi eklenebilir."
 
@@ -2297,7 +2297,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-104 — İkinci evlilik
 
-**Durum:** `BACKLOG.md` içinde duruyordu, Q-063'ün konusuydu; kodlandı, onay bekliyor. Kod: Paket 36 (`lib/domain/interaction/marriage_engine.dart`, `lib/domain/models/game_state.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-055** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Önceki hâli:** Boşanan ya da eşini kaybeden oyuncu yeni sevgili edinebiliyor ama **evlenemiyordu**. Ekranda "Bu prototipte ikinci evlilik yok; ilk evliliğin kaydı korunuyor" yazıyordu. Sebep teknikti: yeni bir kayıt açmak eskisinin üzerine yazmak olurdu ve bu projede kayıt asla silinmez.
 
@@ -2321,7 +2321,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-105 — Hayat sonu değerlendirmesi yeni sistemleri görüyor
 
-**Durum:** Kendi tespitim, Faho'nun doğrudan isteği değil — onay bekliyor. Kod: Paket 37 (`lib/domain/life/life_verdict.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-056** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Bulunan boşluk:** Paket 29-36 arasında askerlik, dövüş sanatları ve ikinci evlilik eklendi. Hayat sonu değerlendirmesi (Q-090) bunlardan **hiçbirini görmüyordu**. Ölçüde şu çıkıyordu: başpehlivanlığa çıkmış ya da binbaşı olarak terhis olmuş bir hayat, hiç salona gitmemiş ve hiç askere gitmemiş bir hayatla **aynı** puanı alıyordu. Eklenen sistemler menüde duruyor ama hayatın anlatısına girmiyordu.
 
@@ -2344,7 +2344,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-106 — Kalıcı hobiler
 
-**Durum:** Issue #67'nin birinci kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 39 (`lib/data/hobby_catalog.dart`, `lib/domain/hobby/hobby_tracker.dart`, `lib/data/event_pool_hobby.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-057** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Mevcut kesin kural:** İkinci bir aktivite sistemi kurulmayacak; mevcut Kurslar, Kütüphane, Spor salonu, Resim ve Müzik altyapısı kullanılacak. Yeni meslek ağacı ya da profesyonel sanatçı yolu açılmayacak (Issue #67 sınırı). Kayıt asla silinmez.
 
@@ -2371,7 +2371,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-107 — Evcil hayvanlar
 
-**Durum:** Issue #67'nin ikinci kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 40 (`lib/data/pet_catalog.dart`, `lib/domain/pets/pet_care.dart`, `lib/data/event_pool_pet.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-058** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Mevcut kesin kural:** İkinci bir evcil hayvan sistemi kurulmayacak; `GameState.pets` kullanılacak. v1'de yalnızca kedi ve köpek sahiplenilebilir. Evcil hayvan miras kalemi değildir. Kayıt asla silinmez. Bu paket, `Q-067`'deki "hayvanın yaşı tutulmuyor, kuşaklar arası taşımak ölümsüz hayvan üretirdi" gerekçesini de kapatıyor: artık gerçek yaş var.
 
@@ -2398,7 +2398,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-108 — Eğlence aktivitelerinin gerçek kişilerle yapılması
 
-**Durum:** Issue #67'nin üçüncü kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 41 (`lib/domain/activities/outing.dart`, `lib/domain/activities/activity_engine.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-059** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Mevcut kesin kural:** İkinci bir aktivite sistemi kurulmayacak. Kimse uydurulmayacak: yanına gelen kişi kayıtta gerçekten duran, yaşayan, erişilebilen biri olacak (D-024, Paket 3 erişilebilirlik kuralı). Kayıt ikilenmeyecek.
 
@@ -2425,7 +2425,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-109 — Vefat etmiş eşin bağ etiketi
 
-**Durum:** Paket 43'te bulunan bir hatanın yan sorusu; teknik düzeltme yapıldı, **söz seçimi onay bekliyor.** Kod: `lib/domain/interaction/marriage_engine.dart`.
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-060** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Bulunan hata:** Boşanan oyuncunun eski eşi aynı kimlikle `eskiEs` oluyordu; **eşini kaybedip yeniden evlenen** oyuncuda bu yapılmıyordu. Kayıtta iki kişi birden "Eş" kalıyor, bütün metinler ikisine birden "Eşin" diyordu ve İlişkiler ekranında iki eş yan yana görünüyordu.
 
@@ -2441,7 +2441,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-110 — Olay havuzu dengesi ve okuma merdiveni
 
-**Durum:** Paket 47'nin ölçüm sonuçlarından çıkan öneriler. **Hiçbiri uygulanmadı**; sayısal denge kararı Faho'nun. Ölçüm: `docs/EVENT_CONTENT_REPORT.md` (500 hayat, gerçek oyun akışıyla).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-061** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Ölçülen durum:**
 - 200 olaydan **194'ü** en az bir hayatta çıkıyor; bir hayat ortalama **116 farklı** olay görüyor.
@@ -2465,7 +2465,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-111 — Dövüş sanatlarında ustalık süresi
 
-**Durum:** Faho "spor salonunda aldığımız karate vb. mesleklerin eğitimleri çok uzun" dedi. **Tıklama yükü düzeltildi, sayısal denge dokunulmadan duruyor** ve karar Faho'nun. Kod: `lib/data/martial_arts_catalog.dart`, `lib/domain/activities/martial_arts_engine.dart`. İlgili: Q-100.
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-062** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Ölçülen durum:**
 
@@ -2490,7 +2490,7 @@ Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığar
 
 ### Q-112 — Sosyal medyada platformlar arası yayılma ve yıllık büyüme
 
-**Durum:** Faho'nun iki somut isteği kodlandı; **sayılar prototypeOnly ve onay bekliyor.** Kod: `lib/domain/social/social_engine.dart`, `lib/domain/generation/life_progression.dart`. İlgili: Q-050.
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-063** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **İstek (Faho'nun sözleriyle):** "sosyal medyada takipçim artarsa örneğin X'de takipçi sayım arttı diğer platformlarda da artsın, eğer takipçim fazlaysa her yıl geçtiğinde takipçi sayım artsın".
 
@@ -2522,7 +2522,7 @@ Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığar
 
 ### Q-113 — Yeni meslekler: görünüş ve hobiyle açılan işler
 
-**Durum:** Faho "meslek tarafında mankenlik, yazarlık vb. şeyler de eklensin" dedi. Altı meslek kodlandı; **maaşlar ve eşikler prototypeOnly, onay bekliyor.** Kod: `lib/data/job_catalog.dart`, `lib/domain/career/job_market.dart`. İlgili: Q-048, Q-078, Q-110.
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-064** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Önceki durum:** Katalogda **dokuz** iş vardı ve altısı genel, üçü dövüş eğitmenliğiydi. Bir ömür boyunca seçilebilecek meslek sayısı azdı.
 
@@ -2556,7 +2556,7 @@ Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığar
 
 ### Q-114 — Çok adımlı olay zincirleri
 
-**Durum:** Faho "olay zincirlerini derinleştir" dedi. Dört zincir yazıldı; **sayısal etkiler prototypeOnly ve onay bekliyor.** Kod: `lib/data/event_pool_chains.dart`. İlgili: `docs/NEXT_DEVELOPMENT_OPTIONS.md` madde 10, Q-110.
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-065** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Önceki durum:** Altyapı (`requiredFlags`, `forbiddenFlags`, `rememberPersonAs`, `personRole`) Paket 4'ten beri duruyordu ama zincirlerin çoğu **iki adımdı**: bir seçim, yıllar sonra tek bir yankı.
 
