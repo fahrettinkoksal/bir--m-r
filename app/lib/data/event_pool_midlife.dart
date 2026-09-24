@@ -12,6 +12,7 @@
 library;
 
 import '../domain/models/game_event.dart';
+import '../domain/models/relation.dart';
 
 /// Orta yaş izleri.
 abstract final class MidlifeFlags {
@@ -21,6 +22,12 @@ abstract final class MidlifeFlags {
   static const String saglikErteledi = 'orta_saglik_erteledi';
   static const String yeniUgras = 'orta_yeni_ugras';
   static const String gonulluOldu = 'orta_gonullu';
+
+  /// Eşe ev sözü verildi (D-085).
+  static const String eveSozVerdi = 'orta_eve_soz_verdi';
+
+  /// Eşe araba sözü verildi (D-085).
+  static const String arabayaSozVerdi = 'orta_arabaya_soz_verdi';
 }
 
 const List<GameEvent> kMidlifeEvents = <GameEvent>[
@@ -891,6 +898,151 @@ const List<GameEvent> kMidlifeEvents = <GameEvent>[
         label: 'Akşamlarım bana lazım',
         resultText: '"Kusura bakma" dedin. Akşamların senin kaldı.',
         happiness: 4,
+      ),
+    ],
+  ),
+  // --- Eşin/sevgilinin beklentileri (D-085) -----------------------------
+  //
+  // Faho'nun isteği: "eğer ev alamazsam eşim veya sevgilim ev araba gibi
+  // şeyler istemeli". Beklenti **gerçek duruma** bakar: evi olan
+  // oyuncuya ev istenmez, arabası olana araba istenmez.
+  GameEvent(
+    id: 'esten_ev_beklentisi',
+    category: EventCategory.yetiskinlik,
+    text:
+        'Akşam yemeğinden sonra konu yine oraya geldi. "Ne zamana kadar '
+        'kirada oturacağız?" dedi. Sesinde kızgınlık yoktu; yorgunluk '
+        'vardı.',
+    requirement: EventRequirement(
+      minAge: 24,
+      maxAge: 60,
+      livingRelations: <RelationType>{RelationType.es, RelationType.sevgili},
+      requireSameHousehold: true,
+      forbidsProperty: true,
+    ),
+    repeatable: true,
+    minAgeGap: 5,
+    weight: 7,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'soz_ver',
+        label: 'Söz ver: bir yolunu bulacağız',
+        resultText:
+            'Söz verdin. O gece ikiniz de uzun süre uyuyamadınız ama '
+            'aranızdaki gerginlik dağıldı.',
+        happiness: 1,
+        bond: 4,
+        addFlags: <String>{MidlifeFlags.eveSozVerdi},
+      ),
+      EventChoice(
+        id: 'durumu_anlat',
+        label: 'Bütçeyi açıkça anlat',
+        resultText:
+            'Rakamları tek tek konuştunuz. Kimse memnun olmadı ama '
+            'ikiniz de nerede durduğunuzu biliyorsunuz.',
+        happiness: -1,
+        bond: 1,
+        charisma: 1,
+      ),
+      EventChoice(
+        id: 'konuyu_kapat',
+        label: 'Konuyu kapat',
+        resultText:
+            '"Şimdi sırası değil" dedin. Konu kapandı; mesele kapanmadı.',
+        happiness: -2,
+        bond: -5,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'esten_araba_beklentisi',
+    category: EventCategory.yetiskinlik,
+    text:
+        'Otobüs durağında yağmur altında beklerken yanındaki, "bir araba '
+        'olsa" dedi. Şaka gibi söyledi ama ikiniz de ciddi olduğunu '
+        'biliyordunuz.',
+    requirement: EventRequirement(
+      minAge: 22,
+      maxAge: 60,
+      livingRelations: <RelationType>{RelationType.es, RelationType.sevgili},
+      requireSameHousehold: true,
+      forbidsVehicle: true,
+    ),
+    repeatable: true,
+    minAgeGap: 5,
+    weight: 6,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'arastiracagim',
+        label: 'Bakacağıma söz ver',
+        resultText:
+            'O hafta ilanlara bakmaya başladın. Henüz bir şey almadın '
+            'ama konuşulan bir şey artık gerçek.',
+        bond: 3,
+        addFlags: <String>{MidlifeFlags.arabayaSozVerdi},
+      ),
+      EventChoice(
+        id: 'simdilik_olmaz',
+        label: 'Şimdilik mümkün değil de',
+        resultText:
+            'Anlayışla karşıladı. Yine de dönüş yolunda pek konuşmadınız.',
+        happiness: -1,
+        bond: -2,
+      ),
+      EventChoice(
+        id: 'birlikte_biriktir',
+        label: 'Birlikte biriktirmeyi öner',
+        resultText:
+            'Bir plan yaptınız: her ay bir miktar kenara. Bu akşam '
+            'ikinizin de moralini düzeltti.',
+        happiness: 2,
+        bond: 5,
+      ),
+    ],
+  ),
+  GameEvent(
+    id: 'esten_ev_sozu_hatirlatma',
+    category: EventCategory.yetiskinlik,
+    text:
+        'Yıllar önce verdiğin sözü hatırlattı. Kırıcı olmadan, ama '
+        'hatırlattı.',
+    requirement: EventRequirement(
+      minAge: 28,
+      maxAge: 65,
+      livingRelations: <RelationType>{RelationType.es, RelationType.sevgili},
+      requireSameHousehold: true,
+      forbidsProperty: true,
+      requiredFlags: <String>{MidlifeFlags.eveSozVerdi},
+    ),
+    repeatable: true,
+    minAgeGap: 7,
+    weight: 5,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'ozur_dile',
+        label: 'Özür dile, yeniden söz verme',
+        resultText:
+            'Söz vermedin bu sefer. Sadece özür diledin. Bunu daha çok '
+            'sevdi.',
+        bond: 3,
+        happiness: -1,
+      ),
+      EventChoice(
+        id: 'krediyi_dusun',
+        label: 'Kredi çekmeyi konuşun',
+        resultText:
+            'Bankadaki rakamları birlikte hesapladınız. Taksitler büyük '
+            'ama artık ortada bir yol var.',
+        bond: 4,
+        happiness: 1,
+      ),
+      EventChoice(
+        id: 'sessiz_kal',
+        label: 'Bir şey söyleme',
+        resultText:
+            'Sustun. O da sustu. Sessizlik uzun sürdü.',
+        bond: -6,
+        happiness: -3,
       ),
     ],
   ),

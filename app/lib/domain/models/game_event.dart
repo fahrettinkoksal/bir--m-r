@@ -44,6 +44,8 @@ class EventRequirement {
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
     this.requiresTenant = false,
+    this.forbidsProperty = false,
+    this.forbidsVehicle = false,
     this.requiresMinYearsInJob = 0,
     this.minFame = 0,
     this.requiresTripMemory = false,
@@ -60,6 +62,14 @@ class EventRequirement {
   /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
   ///
   /// Hobi geçmişi **gerçek kayıttan** okunur; uydurulmaz.
+  /// Oyuncunun **hiç konutu olmaması** gerekiyor mu? (D-085)
+  ///
+  /// Eşin ev istediği olay, zaten evi olan oyuncuya çıkmaz.
+  final bool forbidsProperty;
+
+  /// Oyuncunun **hiç aracı olmaması** gerekiyor mu? (D-085)
+  final bool forbidsVehicle;
+
   final String? requiredHobbyId;
 
   /// prototypeOnly: hobinin kaç yıl sürmüş olması gerektiği.

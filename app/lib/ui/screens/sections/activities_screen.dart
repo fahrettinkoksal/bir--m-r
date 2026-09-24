@@ -71,6 +71,7 @@ enum _ActivityPage {
   evcilHayvan,
   vasiyet,
   seyahat,
+  tasin,
 }
 
 /// Evcil hayvan menüsünün alt metni: gerçek kayda bakar.
@@ -213,6 +214,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return WillPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.seyahat:
         return TravelPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.tasin:
+        return RelocationPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -367,14 +370,26 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         // Seyahat, tek başına yola çıkılabilecek yaştan itibaren görünür
         // (Paket 11). Kalıcı taşınmadan ayrıdır.
         if (state.player.age >= Travel.prototypeOnlyMinAge) ...<Widget>[
+          // Seyahat ikiye ayrıldı (D-083): tatil ve taşınma ayrı işler.
           MenuRow(
-            title: 'Seyahat',
+            key: const Key('activity_tatil'),
+            title: 'Tatil yap',
             subtitle: state.trips.isEmpty
-                ? 'Başka bir şehre kısa bir gezi'
+                ? 'Hazır tur paketleri ya da kendi seçtiğin bir şehir'
                 : '${state.trips.length} gezi yaptın',
             icon: Icons.luggage_outlined,
             accent: BirOmurAccents.mavi,
             onTap: () => _go(_ActivityPage.seyahat),
+          ),
+          const SizedBox(height: 10),
+          MenuRow(
+            key: const Key('activity_tasin'),
+            title: 'Taşın',
+            subtitle: '${state.player.currentCity} çevresindeki illere '
+                'yerleş',
+            icon: Icons.local_shipping_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => _go(_ActivityPage.tasin),
           ),
           const SizedBox(height: 10),
         ],
@@ -482,13 +497,17 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
-        // Vasiyet yalnızca hayatta çocuğu olan oyuncuda görünür (D-052);
-        // çocuğu olmayana çalışmayan düğme gösterilmez.
-        if (state.livingChildren.isNotEmpty) ...<Widget>[
+        // "Son Kararlar" (D-052, D-084): mirasçı seçimi ve hayatın sonu.
+        // Çocuğu olmayan oyuncuya da açıktır, çünkü hayatın sonuna dair
+        // karar çocuğa bağlı değildir; mirasçı bölümü o zaman gerekçesini
+        // yazar (D-038).
+        if (state.livingChildren.isNotEmpty ||
+            GameScope.of(context).lifeEndBlockReason == null) ...<Widget>[
           MenuRow(
-            title: 'Vasiyet',
+            key: const Key('activity_son_kararlar'),
+            title: 'Son Kararlar',
             subtitle: GameScope.of(context).heirChild == null
-                ? 'Mirasçı seçilmedi'
+                ? 'Mirasçı ve hayatının sonu'
                 : 'Mirasçın: ${GameScope.of(context).heirChild!.firstName}',
             icon: Icons.history_edu_outlined,
             accent: BirOmurAccents.pirinc,

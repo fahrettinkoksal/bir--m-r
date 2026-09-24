@@ -262,14 +262,29 @@ void main() {
     temiz();
   });
 
-  testWidgets('seyahat sayfası 320 px / yazı ×1.5 taşmaz',
+  testWidgets('tatil sayfası 320 px / yazı ×1.5 taşmaz',
       (WidgetTester tester) async {
     yakala();
     addTearDown(birak);
     await hazirla(tester, genislik: 320, yaziOlcegi: 1.5);
     await tester.tap(find.byKey(const Key('tab_aktiviteler')));
     await tester.pumpAndSettle();
-    await tapMenuRow(tester, 'Seyahat');
+    await tapMenuRow(tester, 'Tatil yap');
+    // D-083 ile sayfaya tur paketleri eklendi; liste uzadığı için daha
+    // çok kaydırma gerekiyor.
+    await sonunaKaydir(tester, adim: 34);
+    temiz();
+  });
+
+  // D-083: taşınma ayrı bir sayfa oldu; o da dar ekranda sınanır.
+  testWidgets('taşınma sayfası 320 px / yazı ×1.5 taşmaz',
+      (WidgetTester tester) async {
+    yakala();
+    addTearDown(birak);
+    await hazirla(tester, genislik: 320, yaziOlcegi: 1.5);
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Taşın');
     await sonunaKaydir(tester, adim: 20);
     temiz();
   });

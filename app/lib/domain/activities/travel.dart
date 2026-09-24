@@ -11,6 +11,7 @@ import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
+import '../../data/tour_catalog.dart';
 import '../models/trip.dart';
 
 /// Bir gezi denemesinin sonucu.
@@ -286,6 +287,162 @@ abstract final class Travel {
         : '${yoldas.firstName} ile gittin';
     final String satir = '$city gezisi: $kimle (${mode.label}), '
         '${trMoney(ucret)} harcadın. $ani';
+
+    next = next.copyWith(
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...next.log,
+        LifeLogEntry(age: age, text: satir, category: LogCategory.kisisel),
+      ]),
+    );
+
+    return TripResult(
+      state: next,
+      outcome: TripOutcome(applied: true, text: satir, trip: kayit),
+    );
+  }
+
+  // =====================================================================
+  // Tatil turları (D-083)
+  // =====================================================================
+
+  /// prototypeOnly: yoldaşla gidilen turda ücretin çarpanı.
+  ///
+  /// Tur paketinde ikinci kişi tam ücret öder; otobüs biletinden farklı
+  /// olarak burada gerçekten iki kişilik konaklama satın alınır.
+  static const double prototypeOnlyTourCompanionFactor = 2.0;
+
+  /// prototypeOnly: turun mutluluğa kattığı taban.
+  ///
+  /// Gece sayısına göre artar: bir haftalık tur, üç gecelik turdan daha
+  /// çok şey bırakır.
+  static const int prototypeOnlyTourHappinessPerNight = 1;
+
+  /// Turun ücreti.
+  static int tourCostOf(TourPackage tour, {required bool withCompanion}) =>
+      withCompanion
+          ? (tour.prototypeOnlyCost * prototypeOnlyTourCompanionFactor).round()
+          : tour.prototypeOnlyCost;
+
+  /// Bu tura çıkılabilir mi?
+  ///
+  /// Yaş, yıllık gezi kotası, para ve yoldaş koşulları **tek tek**
+  /// bakılır; kapalı düğmenin sebebi görünür olur (D-038).
+  static InteractionAvailability tourAvailability(
+    GameState state, {
+    required TourPackage tour,
+    String? companionId,
+  }) {
+    if (state.player.age < prototypeOnlyMinAge) {
+      return InteractionAvailability.blocked(
+        '$prototypeOnlyMinAge yaşından itibaren tura çıkabilirsin.',
+      );
+    }
+    if (tripsThisAge(state) >= prototypeOnlyMaxTripsPerAge) {
+      return const InteractionAvailability.blocked(
+        'Bu yıl yeterince gezdin; seneye yeniden.',
+      );
+    }
+    if (companionId != null) {
+      final Person? yoldas = state.personById(companionId);
+      if (yoldas == null || !yoldas.isAlive) {
+        return const InteractionAvailability.blocked('Böyle biri yok.');
+      }
+      if (!state.isReachable(yoldas)) {
+        return const InteractionAvailability.blocked(
+          'Şu an gündelik hayatında görüştüğün biri değil.',
+        );
+      }
+      if (yoldas.age < prototypeOnlyMinCompanionAge) {
+        return InteractionAvailability.blocked(
+          '${yoldas.firstName} bunun için çok küçük.',
+        );
+      }
+    }
+    final int ucret = tourCostOf(tour, withCompanion: companionId != null);
+    if (state.player.wallet < ucret) {
+      return InteractionAvailability.blocked(
+        '${trMoney(ucret)} gerekiyor; cüzdanında yeterli para yok.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Tur paketini satın alır ve tatili yapar.
+  ///
+  /// Tur **bir gezidir**: yıllık gezi kotasını kullanır, gezi kaydına
+  /// girer ve hayat günlüğüne yazılır. Taşınmadan ayrıdır; oyuncunun
+  /// yaşadığı şehir değişmez.
+  static TripResult takeTour(
+    GameState state, {
+    required TourPackage tour,
+    String? companionId,
+    required Random rng,
+  }) {
+    final InteractionAvailability uygunluk = tourAvailability(
+      state,
+      tour: tour,
+      companionId: companionId,
+    );
+    if (!uygunluk.isAllowed) {
+      return TripResult(
+        state: state,
+        outcome: TripOutcome(applied: false, text: uygunluk.reason!),
+      );
+    }
+
+    final int ucret = tourCostOf(tour, withCompanion: companionId != null);
+    final Person? yoldas =
+        companionId == null ? null : state.personById(companionId);
+    final int age = state.player.age;
+
+    final TripRecord kayit = TripRecord(
+      id: 'tur-$age-${tour.id}-${state.trips.length + 1}',
+      city: tour.mainCity,
+      age: age,
+      // Paket turlar otobüsle yapılır; uydurma bir ulaşım türü eklenmez.
+      mode: TravelMode.otobus,
+      cost: ucret,
+      companionId: companionId,
+      note: '${tour.label}: ${tour.cities.join(', ')}.',
+    );
+
+    final int mutluluk = (rng.between(
+              prototypeOnlyMinHappiness,
+              prototypeOnlyMaxHappiness,
+            ) +
+            tour.nights * prototypeOnlyTourHappinessPerNight)
+        .clamp(0, 20);
+
+    GameState next = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet - ucret,
+        stats: state.player.stats.copyWith(
+          happiness: state.player.stats.happiness + mutluluk,
+          health: state.player.stats.health + prototypeOnlyHealthCost,
+        ),
+      ),
+      trips: List<TripRecord>.unmodifiable(<TripRecord>[
+        ...state.trips,
+        kayit,
+      ]),
+    );
+
+    if (yoldas != null) {
+      final int yeni = (yoldas.bond + prototypeOnlyBondGain).clamp(0, 100);
+      if (yeni != yoldas.bond) {
+        next = next.copyWith(
+          people: next.people
+              .map((Person p) => p.id == yoldas.id ? p.copyWith(bond: yeni) : p)
+              .toList(growable: false),
+        );
+      }
+    }
+
+    final String kimle = yoldas == null
+        ? 'Yalnız gittin'
+        : '${yoldas.firstName} ile gittin';
+    final String satir = '${tour.label} (${tour.nights} gece): $kimle, '
+        '${trMoney(ucret)} harcadın. ${tour.cities.join(', ')} gezildi.';
 
     next = next.copyWith(
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[

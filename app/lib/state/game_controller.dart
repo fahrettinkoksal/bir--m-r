@@ -40,6 +40,7 @@ import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
 import '../domain/economy/banking.dart';
 import '../domain/life/eye_exam.dart';
+import '../domain/life/life_end_choice.dart';
 import '../domain/models/loan.dart';
 import '../text/turkish_text.dart';
 import '../domain/life/notices.dart';
@@ -50,6 +51,7 @@ import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
 import '../data/health_crisis_catalog.dart';
+import '../data/tour_catalog.dart';
 import '../domain/economy/housing.dart';
 import '../domain/economy/property_market.dart';
 import '../domain/education/school_transfer.dart';
@@ -245,6 +247,52 @@ class GameController extends ChangeNotifier {
     _saveProblem = null;
     _autoSave();
     notifyListeners();
+  }
+
+  /// Hayata kendi kararıyla son verme seçeneği açık mı? (D-084)
+  ///
+  /// Engel yoksa `null`; varsa gerekçe.
+  String? get lifeEndBlockReason {
+    final GameState? state = _state;
+    if (state == null) return 'Etkin bir hayat yok.';
+    return LifeEndChoice.blockReason(
+      age: state.player.age,
+      deceased: state.deceased,
+    );
+  }
+
+  /// Oyuncunun hayatını kendi kararıyla sonlandırır (D-084).
+  ///
+  /// Hayat **olağan ölüm yolundan** tamamlanır: kayıt silinmez, hayat
+  /// özeti ve Geçmiş Hayatlar arşivi çalışır, miras olağan kurallarıyla
+  /// işler. Hiçbir ödül ya da avantaj verilmez.
+  ///
+  /// Engel varsa durum **değişmez** ve gerekçe döner; boş metin başarı
+  /// demektir.
+  String endLifeByChoice() {
+    final GameState? state = _state;
+    if (state == null) return 'Etkin bir hayat yok.';
+    final String? engel = lifeEndBlockReason;
+    if (engel != null) return engel;
+
+    final int yas = state.player.age;
+    _state = state.copyWith(
+      deceased: true,
+      deathAge: yas,
+      deathCause: kLifeEndCause,
+      pendingEvent: null,
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: yas,
+          text: LifeEndChoice.logLine(yas),
+          category: LogCategory.yasDegisimi,
+        ),
+      ]),
+    );
+    _autoSave();
+    notifyListeners();
+    return '';
   }
 
   /// Kuşak devamında seçilebilecek çocuklar (Paket E3).
@@ -1349,6 +1397,66 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return sonuc.outcome;
+  }
+
+  /// Tur paketine çıkılabilir mi? (D-083)
+  InteractionAvailability tourAvailability({
+    required TourPackage tour,
+    String? companionId,
+  }) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return Travel.tourAvailability(
+      current,
+      tour: tour,
+      companionId: companionId,
+    );
+  }
+
+  /// Tur paketini satın alır ve tatili yapar (D-083).
+  TripOutcome? takeTour({
+    required TourPackage tour,
+    String? companionId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final TripResult sonuc = Travel.takeTour(
+      current,
+      tour: tour,
+      companionId: companionId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Şu an taşınılabilecek yakın iller (D-083).
+  List<String> relocationTargets() {
+    final GameState? current = _state;
+    return current == null
+        ? const <String>[]
+        : const Housing().relocationTargets(current);
+  }
+
+  /// Başka bir ile (ya da aynı ilde kiralık eve) taşınır (D-083).
+  ///
+  /// Sonucu anlatan metni döner; taşınma gerçekleşmediyse gerekçeyi.
+  String relocate({String? city}) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    if (current.hasPendingEvent) return 'Önce ekrandaki olayı çöz.';
+    final HousingResult sonuc =
+        const Housing().moveToRental(current, city: city);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
   }
 
   /// Paylaşım yapar.

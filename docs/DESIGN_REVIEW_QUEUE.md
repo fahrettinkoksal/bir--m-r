@@ -2735,5 +2735,28 @@ Faho istedi: "araç galerisi kısmını ayır, 3 adet galeri ekle... ucuz araçl
 
 ---
 
+### Q-121 — Finger kotası, hayvan türleri, tur fiyatları ve hayatın sonu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-081, D-082, D-083, D-084, D-085 · `app/lib/domain/interaction/finger.dart`, `app/lib/data/pet_catalog.dart`, `app/lib/data/tour_catalog.dart`, `app/lib/data/city_neighbours.dart`, `app/lib/domain/life/life_end_choice.dart` · Test: `app/test/package_f_test.dart`
+
+**Finger.** Aday yaş bandı: alt sınır `max(yaş−10, yaş/2+7)`, üst sınır `yaş+10`, hiçbir koşulda 18'in altına inmez. Beğeni kotası yılda **5**, premiumda **30**; premium ücreti **4.800 ₺**, bir yıl geçerli. Profil doldurmak eşleşme ihtimaline **+%12**, premium **+%8**, her ortak ilgi alanı **+%5** katıyor. "Seni beğenenler" listesinde en fazla **3** kişi oluyor.
+
+**Evcil hayvanlar.** Yeni türler ve yıllık kaçma riski: muhabbet kuşu %10, kanarya %10, papağan %7, hamster %14, tavşan %9, kaplumbağa %4, balık %0, timsah %12, kedi/köpek %3. Kaçan hayvanın dönme ihtimali yılda **%60**. Hastalanma ihtimali yılda **%12**, sağlığa zararı **−18**, veteriner **+22**.
+
+**Turlar (2026 ₺).** Kapadokya 3 gece 29.000 · Ege 4 gece 38.000 · Akdeniz 5 gece 42.000 · GAP 5 gece 44.000 · Karadeniz 6 gece 48.000 · Doğu 7 gece 62.000. Başka ile taşınmanın ek masrafı **65.000 ₺**.
+
+**Karar soruları:**
+1. Beğeni kotası **yılda 5** doğru mu? Oyun yıl yıl ilerlediği için "günde 5" böyle taşındı; oyuncuya az gelebilir.
+2. Premium **bir yıl** geçerli ve her yıl yeniden alınıyor. Ömür boyu bir seçenek de olsun mu?
+3. **Timsah** oyunda kalsın mı? Gerçek hayatta özel izin gerektiriyor ve bireysel beslenmesi çoğu yerde yasak; oyun bunu uyarıyla anlatıyor ama yine de bir tercih.
+4. Kaçan hayvanın dönme ihtimali **%60**. Dönmeyen hayvan yıllarca kayıp kalabiliyor; bir üst sınır konmalı mı?
+5. Hayvan hastalandığında oyuncu **bildirim** alıyor ama tedavi zorunlu değil. Bakılmayan hayvanın durumu yıllar içinde kötüleşiyor — bu yeterince görünür mü?
+6. Tur fiyatları doğru mu? Doğu turu 62.000 ₺, net yıllık asgari ücretin kabaca **beşte biri**.
+7. **Yakın il tablosu** doğru mu? Oyunda 22 şehir var ve aralarında büyük boşluklar bulunuyor; örneğin Amasya'dan yalnızca Samsun, Sivas ve Trabzon'a taşınılabiliyor.
+8. Başka ile taşınma **65.000 ₺** ek masraf. Şehir değiştirmenin işe ve okula etkisi henüz yok; eklenmeli mi?
+9. **Hayatın sonu seçeneği**: şu an yalnızca yetişkinde görünüyor, ayrı onay istiyor, yöntem geçmiyor, ödül vermiyor ve gerçek yardım hatlarını gösteriyor. Bu çerçeve yeterli mi? Ayarlardan tamamen kapatılabilen bir seçenek olmalı mı?
+10. Eşin ev/araba beklentisi olayları yılda bir çıkabiliyor ve en az beş yıl ara var. Sıklık doğru mu?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.

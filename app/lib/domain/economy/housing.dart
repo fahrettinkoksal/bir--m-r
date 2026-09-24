@@ -1,3 +1,4 @@
+import '../../data/city_neighbours.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
@@ -154,35 +155,67 @@ class Housing {
     );
   }
 
+  /// prototypeOnly: başka şehre taşınmanın ek masrafı (D-083).
+  ///
+  /// Şehir değiştirmek, aynı şehirde ev değiştirmekten pahalıdır:
+  /// nakliye uzar, iş ve okul düzeni değişir.
+  static const int prototypeOnlyIntercityExtraCost = 65000;
+
+  /// Oyuncunun şu an taşınabileceği şehirler (D-083).
+  ///
+  /// Faho'nun isteği: "taşınmada yaşadığım ilin yakınındaki iller olsun;
+  /// her taşındığımda yakınındaki iller çıksın". Ülkenin tamamı yerine
+  /// **yaşanan ilin komşuları** listelenir; taşındıkça liste yenilenir.
+  List<String> relocationTargets(GameState state) =>
+      neighboursOf(state.player.currentCity);
+
   /// Kiraya çıkar (kendi evinden veya aile evinden ayrılır).
-  HousingResult moveToRental(GameState state) {
+  ///
+  /// [city] verilirse **başka bir şehre** taşınılır; şehir yaşanan ilin
+  /// komşusu olmak zorundadır ve ek masraf alınır.
+  HousingResult moveToRental(GameState state, {String? city}) {
     if (state.player.age < prototypeOnlyMinAge) {
       return _blocked(
         state,
         '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.',
       );
     }
-    if (residenceOf(state) == ResidenceKind.kirada) {
+    final bool sehirDegisiyor =
+        city != null && city != state.player.currentCity;
+    if (!sehirDegisiyor && residenceOf(state) == ResidenceKind.kirada) {
       return _blocked(state, 'Zaten kirada yaşıyorsun.');
     }
-    if (state.player.wallet < prototypeOnlyMoveCost) {
+    if (sehirDegisiyor && !areNeighbours(state.player.currentCity, city)) {
       return _blocked(
         state,
-        'Taşınma masrafı ${trMoney(prototypeOnlyMoveCost)}; cüzdanında yeterli para yok.',
+        '$city buradan taşınılacak kadar yakın değil. Önce aradaki bir '
+        'ile taşınman gerekiyor.',
       );
     }
 
-    const String metin = 'Kiralık bir eve taşındın.';
+    final int masraf = prototypeOnlyMoveCost +
+        (sehirDegisiyor ? prototypeOnlyIntercityExtraCost : 0);
+    if (state.player.wallet < masraf) {
+      return _blocked(
+        state,
+        'Taşınma masrafı ${trMoney(masraf)}; cüzdanında yeterli para yok.',
+      );
+    }
+
+    final String metin = sehirDegisiyor
+        ? '$city\'e taşındın; kiralık bir eve yerleştin.'
+        : 'Kiralık bir eve taşındın.';
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet - prototypeOnlyMoveCost,
+        wallet: state.player.wallet - masraf,
+        currentCity: sehirDegisiyor ? city : null,
       ),
       residenceItemId: null,
       movedOut: true,
     );
     return HousingResult(
       state: _log(next, metin),
-      outcome: const HousingOutcome(applied: true, text: metin),
+      outcome: HousingOutcome(applied: true, text: metin),
     );
   }
 

@@ -254,6 +254,15 @@ class EventEngine {
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
+    // Evi olan oyuncuya "eşin ev istiyor" olayı çıkmaz (D-085).
+    if (req.forbidsProperty &&
+        state.items.any((OwnedItem i) => i.isProperty)) {
+      return false;
+    }
+    if (req.forbidsVehicle &&
+        state.items.any((OwnedItem i) => i.isVehicle)) {
+      return false;
+    }
     // Kirada oturmayan oyuncuya ev sahibi olayı çıkmaz.
     if (req.requiresTenant &&
         LivingCosts.situationOf(state) != LivingSituation.kirada) {

@@ -207,8 +207,17 @@ void main() {
             !r.requiresSocialAccount;
       }).length;
       // Bu paketin amacı, nasıl bir hayat yaşanırsa yaşansın orta yaşın
-      // dolu geçmesi.
-      expect(kosulsuz, greaterThanOrEqualTo(kMidlifeEvents.length - 2));
+      // dolu geçmesi. D-085 ile eşin ev/araba beklentisi eklendi; bunlar
+      // doğaları gereği koşulludur. Kural artık mutlak sayı değil
+      // **oran**: havuzun büyük çoğunluğu koşulsuz kalmalı ki bekâr,
+      // işsiz ve mülksüz bir hayat da dolu geçsin.
+      expect(
+        kosulsuz / kMidlifeEvents.length,
+        greaterThanOrEqualTo(0.75),
+        reason: '$kosulsuz / ${kMidlifeEvents.length} koşulsuz',
+      );
+      // Koşulsuz olayların mutlak sayısı da bir tabanın altına inemez.
+      expect(kosulsuz, greaterThanOrEqualTo(20));
     });
 
     test('iki olay önceki kararı hatırlar', () {
