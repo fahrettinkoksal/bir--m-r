@@ -218,7 +218,17 @@ void main() {
       final int un = s.player.fame!;
       final int kitle = s.totalFollowers;
 
-      final MediaResult r = MediaOpportunities.accept(s, is1);
+      // Başvuru artık reddedilebilir (D-120); ödül yolunu kesin
+      // sınamak için davetli hâl kullanılıyor — davet edilen iş
+      // reddedilmez.
+      final MediaResult r = MediaOpportunities.accept(
+        s.copyWith(
+          mediaInvitationId: is1.id,
+          mediaInvitationAge: s.player.age,
+        ),
+        is1,
+        Random(3),
+      );
       expect(r.applied, isTrue);
       expect(r.state.player.wallet, cuzdan + is1.fee);
       expect(r.state.player.fame, un + is1.fameGain);
@@ -246,8 +256,14 @@ void main() {
         player: hayat().player.copyWith(fame: 60),
       );
       expect(s.socialAccounts, isEmpty);
-      final MediaResult r =
-          MediaOpportunities.accept(s, kMediaOpportunities.first);
+      final MediaResult r = MediaOpportunities.accept(
+        s.copyWith(
+          mediaInvitationId: kMediaOpportunities.first.id,
+          mediaInvitationAge: s.player.age,
+        ),
+        kMediaOpportunities.first,
+        Random(3),
+      );
       expect(r.applied, isTrue);
       expect(r.state.totalFollowers, 0);
       expect(r.text, isNot(contains('takipçi')));

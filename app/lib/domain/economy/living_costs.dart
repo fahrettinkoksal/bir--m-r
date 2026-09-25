@@ -105,6 +105,22 @@ abstract final class LivingCosts {
     ],
   };
 
+  /// prototypeOnly: **geliri olmayan** ve ailesinin yanında yaşayan
+  /// yetişkinin gideri (D-123).
+  ///
+  /// Faho sordu: "yıllık yaşam gideri çalışmıyorsam neden var ve bu
+  /// giderler neye göre belirleniyor?" Cevabın bir kısmı gerçek: işsiz
+  /// insan da yiyip içiyor, fatura ödüyor. Ama ailesinin yanında yaşayan
+  /// ve hiç geliri olmayan biri için bu yükü tam ödetmek gerçekçi
+  /// değildi — Türkiye'de o gideri **aile karşılar**. Geriye yalnızca
+  /// kişisel harcama kalır.
+  ///
+  /// Bu yalnızca **geliri sıfır** olan oyuncu içindir; maaşı ya da kira
+  /// geliri olan eve katkısını yapar.
+  static const List<CostItem> prototypeOnlySupportedItems = <CostItem>[
+    CostItem(label: 'Kişisel harcama', base: 12000, incomeShare: 0.0),
+  ];
+
   /// prototypeOnly: hanede bakılan her çocuğun yıllık gideri.
   ///
   /// Çocuk gideri yaşam düzeninden bağımsızdır ve **çocuk sayısıyla**
@@ -161,11 +177,17 @@ abstract final class LivingCosts {
     final LivingSituation durum = situationOf(state);
     final int gelir = yearlyIncome(state);
     final int cocukSayisi = Parenthood.dependentChildren(state).length;
+    // Geliri olmayan ve ailesinin yanında yaşayanın yükünü aile taşır
+    // (D-123).
+    final List<CostItem> kalemler =
+        durum == LivingSituation.aileYaninda && gelir <= 0
+            ? prototypeOnlySupportedItems
+            : prototypeOnlyItems[durum]!;
     return CostBreakdown(
       situation: durum,
       income: gelir,
       items: <({String label, int amount})>[
-        for (final CostItem kalem in prototypeOnlyItems[durum]!)
+        for (final CostItem kalem in kalemler)
           (label: kalem.label, amount: kalem.amountFor(gelir)),
         if (cocukSayisi > 0)
           (

@@ -6,6 +6,9 @@ import '../career/retirement.dart';
 import '../life/year_review.dart';
 import 'grandchildren.dart';
 import '../social/social_engine.dart';
+import '../../data/media_catalog.dart';
+import 'child_marriage.dart';
+import '../social/media_opportunities.dart';
 import '../social/social_income.dart';
 import '../models/sponsorship.dart';
 import '../career/job_market.dart';
@@ -26,6 +29,7 @@ import '../life/mortality.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
 import '../interaction/bond_decay.dart';
+import '../interaction/finger.dart';
 import '../models/life_log.dart';
 import '../models/zodiac.dart';
 import '../career/military_service.dart';
@@ -124,15 +128,38 @@ class LifeProgression {
         })
         .toList(growable: false);
 
+    // Yetişkin çocuklar kendi hayatlarında evlenir (D-121). Haberin
+    // biçimi yakınlığa bağlıdır: yakınsan davet edilirsin, uzaksan
+    // sonradan duyarsın.
+    final List<PendingNotice> aileBildirimleri = <PendingNotice>[];
+    final List<String> aileHaberleri = <String>[];
+    final List<Person> evlilikSonrasi = <Person>[];
+    for (final Person kisi in peopleWithChildren) {
+      final ChildMarriageResult? evlilik = ChildMarriage.maybeMarry(
+        child: kisi,
+        playerAge: newAge,
+        rng: _rng,
+      );
+      if (evlilik == null) {
+        evlilikSonrasi.add(kisi);
+        continue;
+      }
+      evlilikSonrasi.add(evlilik.person);
+      aileBildirimleri.add(evlilik.notice);
+      aileHaberleri.add(evlilik.logText);
+    }
+    final List<Person> evlilikliKisiler =
+        List<Person>.unmodifiable(evlilikSonrasi);
+
     // Yetişkin çocukların kendi çocukları olabilir (Paket 12). Torun
     // gerçek bir kişi kaydıdır ve doğduğu yıl oluşturulur.
     final List<Person> yeniTorunlar = <Person>[];
     final List<String> torunHaberleri = <String>[];
-    for (final Person cocuk in peopleWithChildren) {
+    for (final Person cocuk in evlilikliKisiler) {
       final Person? torun = Grandchildren.maybeBorn(
         state: state.copyWith(
           people: List<Person>.unmodifiable(<Person>[
-            ...peopleWithChildren,
+            ...evlilikliKisiler,
             ...yeniTorunlar,
           ]),
         ),
@@ -141,9 +168,20 @@ class LifeProgression {
       );
       if (torun == null) continue;
       yeniTorunlar.add(torun);
-      torunHaberleri.add(
-        '${cocuk.firstName} bir çocuk sahibi oldu: ${torun.firstName}. '
-        'Artık dede/nine oldun.',
+      final String haber =
+          '${cocuk.firstName} bir çocuk sahibi oldu: ${torun.firstName}. '
+          'Artık dede/nine oldun.';
+      torunHaberleri.add(haber);
+      // Torunun doğumu kaçırılmaması gereken bir haberdir (D-121).
+      aileBildirimleri.add(
+        PendingNotice(
+          id: 'torun-${torun.id}-$newAge',
+          kind: NoticeKind.aileDonum,
+          age: newAge,
+          title: 'Torunun oldu',
+          text: haber,
+          personId: torun.id,
+        ),
       );
     }
 
@@ -155,6 +193,8 @@ class LifeProgression {
         category: LogCategory.yasDegisimi,
       ),
       for (final String haber in torunHaberleri)
+        LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
+      for (final String haber in aileHaberleri)
         LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
     ];
 
@@ -607,13 +647,49 @@ class LifeProgression {
       sonraki = _logLine(sonraki, newAge, satir);
     }
 
+    // Fırsat her zaman oyuncunun menüye girip aramasıyla gelmez; bazen
+    // kapıyı onlar çalar (D-120).
+    final MediaOpportunity? davet =
+        MediaOpportunities.maybeInvitation(sonraki, _rng);
+    if (davet != null) {
+      sonraki = sonraki.copyWith(
+        mediaInvitationId: davet.id,
+        mediaInvitationAge: newAge,
+      );
+      final String metin = '${davet.label} seni çağırdı. Bu iş için Ün '
+          'şartı aranmıyor ve başvurun geri çevrilmeyecek; bu yıl '
+          'Aktiviteler → Ün ve Medya Fırsatları bölümünden kabul '
+          'edebilirsin.';
+      sonraki = _logLine(sonraki, newAge, metin);
+      sonraki = Notices.enqueue(sonraki, <PendingNotice>[
+        PendingNotice(
+          id: 'medya-davet-$newAge-${davet.id}',
+          kind: NoticeKind.aktivite,
+          age: newAge,
+          title: 'Medya daveti',
+          text: metin,
+        ),
+      ]);
+    }
+
     final SponsorOffer? teklif = SocialIncome.maybeOffer(sonraki, _rng);
     if (teklif == null) return sonraki;
+    final String sponsorMetni =
+        'Sosyal medyada bir ${teklif.label} sponsorluk teklif etti. '
+        'Aktiviteler → Sosyal medya bölümünden yanıtlayabilirsin.';
+    sonraki = Notices.enqueue(sonraki, <PendingNotice>[
+      PendingNotice(
+        id: 'sponsor-teklif-$newAge-${teklif.id}',
+        kind: NoticeKind.aktivite,
+        age: newAge,
+        title: 'Sponsorluk teklifi',
+        text: sponsorMetni,
+      ),
+    ]);
     return _logLine(
       sonraki.copyWith(sponsorOffer: teklif),
       newAge,
-      'Sosyal medyada bir ${teklif.label} sponsorluk teklif etti. '
-      'Aktiviteler → Sosyal medya bölümünden yanıtlayabilirsin.',
+      sponsorMetni,
     );
   }
 
@@ -1414,10 +1490,22 @@ class LifeProgression {
       people: sonuc.people,
       lastInteractionAge: sonuc.lastInteractionAge,
     );
-    if (!sonuc.changed) return next;
+    // İlgilenilmeyen flört biter (D-122); kayıt silinmez, bağ
+    // arkadaşlığa döner ve oyuncuya bildirim gider.
+    final ({GameState state, List<PendingNotice> notices}) flort =
+        Finger.endNeglectedFlirts(next, newAge);
+    GameState sonrasi = flort.state;
+    if (flort.notices.isNotEmpty) {
+      sonrasi = Notices.enqueue(sonrasi, flort.notices);
+      for (final PendingNotice n in flort.notices) {
+        sonrasi = _logLine(sonrasi, newAge, n.text);
+      }
+    }
+
+    if (!sonuc.changed) return sonrasi;
     final String? satir = BondDecay.logLineFor(state, sonuc);
-    if (satir == null) return next;
-    return _logLine(next, newAge, satir);
+    if (satir == null) return sonrasi;
+    return _logLine(sonrasi, newAge, satir);
   }
 
   GameState _applyTrackBonus(GameState state) {

@@ -171,4 +171,38 @@ void main() {
       expect(engel, isNot(contains('artık başvuramazsın')));
     });
   });
+
+  group('Karizma gerçekten yıpranır (D-124)', () {
+    test('düşüş ihtimali her yaş bandında artırıldı', () {
+      // Faho bildirdi: "sağlık ve karizma asla düşmüyor neredeyse".
+      // Ölçüm: 100 hayatta karizma 20 yaşta 52,6 · 70 yaşta 38,4 idi.
+      expect(StatAging.prototypeOnlyCharismaChance(40), greaterThanOrEqualTo(0.30));
+      expect(StatAging.prototypeOnlyCharismaChance(55), greaterThanOrEqualTo(0.45));
+      expect(StatAging.prototypeOnlyCharismaChance(70), greaterThanOrEqualTo(0.60));
+    });
+
+    test('düşüş yaşla birlikte hızlanır', () {
+      expect(
+        StatAging.prototypeOnlyCharismaChance(70),
+        greaterThan(StatAging.prototypeOnlyCharismaChance(40)),
+      );
+      expect(
+        StatAging.prototypeOnlyCharismaStepFor(65),
+        greaterThan(StatAging.prototypeOnlyCharismaStepFor(40)),
+      );
+    });
+
+    test('gençlikte karizma yıpranmaz', () {
+      expect(
+        StatAging.prototypeOnlyCharismaChance(
+          StatAging.prototypeOnlyCharismaFromAge - 1,
+        ),
+        0,
+      );
+    });
+
+    test('karizma tabanın altına inmez', () {
+      expect(StatAging.prototypeOnlyCharismaFloor, greaterThan(0));
+    });
+  });
 }

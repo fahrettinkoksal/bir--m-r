@@ -64,14 +64,14 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'mahalle kafe zinciri',
     pitch: 'Yeni şubelerini duyurmak istiyorlar; bir paylaşım yeterli.',
     minFollowers: 5000,
-    baseFee: 28000,
+    baseFee: 3000,
   ),
   SponsorCategory(
     id: 'kirtasiye',
     label: 'kırtasiye markası',
     pitch: 'Okul sezonu için bir paylaşım istiyorlar.',
     minFollowers: 6000,
-    baseFee: 38000,
+    baseFee: 4000,
   ),
   SponsorCategory(
     id: 'spor_icecegi',
@@ -80,7 +80,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
         'Antrenman içeriğinin yanına küçük bir tanıtım koymanı '
         'istiyorlar.',
     minFollowers: 9000,
-    baseFee: 70000,
+    baseFee: 7000,
     platforms: <SocialPlatform>{
       SocialPlatform.video,
       SocialPlatform.foto,
@@ -92,7 +92,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'bağımsız mobil oyun stüdyosu',
     pitch: 'Yeni oyunlarını bir videoda denemeni istiyorlar.',
     minFollowers: 5000,
-    baseFee: 110000,
+    baseFee: 11000,
     platforms: <SocialPlatform>{SocialPlatform.video, SocialPlatform.kisaVideo},
   ),
   SponsorCategory(
@@ -100,7 +100,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'çevrim içi kitap kulübü',
     pitch: 'Okuduğun bir kitaptan söz etmeni istiyorlar.',
     minFollowers: 7500,
-    baseFee: 50000,
+    baseFee: 5000,
     platforms: <SocialPlatform>{SocialPlatform.mikroblog, SocialPlatform.video},
   ),
   SponsorCategory(
@@ -108,7 +108,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'yerel lezzet markası',
     pitch: 'Ürünlerini kısa bir videoda denemeni istiyorlar.',
     minFollowers: 12000,
-    baseFee: 85000,
+    baseFee: 8500,
     platforms: <SocialPlatform>{SocialPlatform.kisaVideo, SocialPlatform.foto},
   ),
   SponsorCategory(
@@ -116,7 +116,7 @@ const List<SponsorCategory> kSponsorCategories = <SponsorCategory>[
     label: 'elektronik mağazası',
     pitch: 'Bir ürünlerini tanıtmanı istiyorlar.',
     minFollowers: 20000,
-    baseFee: 190000,
+    baseFee: 18000,
   ),
 ];
 

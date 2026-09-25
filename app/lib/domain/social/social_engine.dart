@@ -254,24 +254,36 @@ class SocialEngine {
 
     final int yeniTakipci = (account.followers + delta).clamp(0, 1 << 30);
     final int gercekDelta = yeniTakipci - account.followers;
+    // NOT: yorgunluk kaybı aşağıda, sponsorluk belli olduktan sonra
+    // hesaplanır ve takipçi sayısına orada uygulanır (D-119).
 
-    // İçerik geliri: kitlesi olan hesapta, gerçekten ilgi gören
-    // paylaşımda ve garanti olmadan (Paket 10).
-    final int kazanc = SocialIncome.earningsFor(
-      state: state,
-      account: account,
-      content: content,
-      followerDelta: gercekDelta,
-      rng: rng,
-    );
+    // Sıradan paylaşım para kazandırmaz (D-117). Faho bildirdi:
+    // "dümdüz yaptığım paylaşımlardan ücret kazanıyorum, bu olmamalı".
+    // Para sponsorluktan ve büyük hesabın yıllık gelir payından gelir.
+    const int kazanc = 0;
 
     // Açık bir sponsorluk varsa ve paylaşım o platformdaysa yükümlülük
     // **bu paylaşımla** yerine gelir; ücret bir kez ödenir.
     final SponsorDeal? sponsor = _openDealFor(state, content.platform);
     final int sponsorUcreti = sponsor?.fee ?? 0;
 
+    // Hesabı reklam panosuna çeviren kitlesini yorar (D-119). Ara sıra
+    // reklam yapmak bedelsizdir; art arda sponsorluk takipçi kaybettirir.
+    final double yorgunluk = sponsor == null
+        ? 0
+        : SocialIncome.audienceFatigue(
+            state: state,
+            platform: content.platform,
+            age: state.player.age,
+          );
+    final int yorgunlukKaybi =
+        yorgunluk <= 0 ? 0 : (account.followers * yorgunluk).round();
+
+    final int yorgunlukSonrasi =
+        (yeniTakipci - yorgunlukKaybi).clamp(0, 1 << 30);
+
     final SocialAccount guncel = account.copyWith(
-      followers: yeniTakipci,
+      followers: yorgunlukSonrasi,
       posts: List<SocialPost>.unmodifiable(<SocialPost>[
         ...account.posts,
         SocialPost(
@@ -345,6 +357,14 @@ class SocialEngine {
       kayitli = _log(
         kayitli,
         '${SocialIncome.earningText(content: content, platform: account.platform, followerDelta: gercekDelta, amount: kazanc)} ${trMoney(kazanc)} cüzdanına girdi.',
+      );
+    }
+    if (yorgunlukKaybi > 0) {
+      kayitli = _log(
+        kayitli,
+        'Arka arkaya reklam paylaşımı kitleni yordu: '
+        '${trNumber(yorgunlukKaybi)} ${account.platform.audienceWord} '
+        'gitti.',
       );
     }
     if (sponsor != null) {
@@ -456,8 +476,7 @@ class SocialEngine {
       final SocialAccount? hesap = sonraki.accountFor(d.platform);
       final int kayip = hesap == null
           ? 0
-          : (hesap.followers * SocialIncome.prototypeOnlyBrokenDealFollowerLoss)
-              .round();
+          : (hesap.followers * SocialIncome.brokenDealLoss(sonraki)).round();
       if (kayip > 0) {
         sonraki = _applyFollowerDeltas(sonraki, <SocialPlatform, int>{
           d.platform: -kayip,
@@ -651,7 +670,98 @@ class SocialEngine {
       socialAccounts: List<SocialAccount>.unmodifiable(guncel),
     );
     sonraki = _refreshFame(sonraki);
+    sonraki = _decayFame(sonraki, newAge, satirlar);
+    sonraki = _payRevenueShare(sonraki, newAge, satirlar);
     return (state: sonraki, logTexts: satirlar);
+  }
+
+  /// prototypeOnly: Ünün düşmeye başladığı sessizlik süresi (yıl).
+  ///
+  /// Faho "1 yıl paylaşım yapmayı unutursam düşmeli" dedi; ölçü **tam
+  /// bir yılın kaçırılmasıdır**. 20 yaşında paylaşım yapıp 21'e giren
+  /// oyuncu sessiz sayılmaz — o yıl paylaşım yapmıştır. Düşüş, hiç
+  /// paylaşım yapılmayan ilk yılın sonunda başlar.
+  static const int prototypeOnlyFameSilenceYears = 2;
+
+  /// prototypeOnly: sessiz geçen her yılın Ünden götürdüğü pay.
+  ///
+  /// Sabit puan değil **oran**: çok tanınmış biri bir yılda unutulmaz,
+  /// ama yıllar geçtikçe kayıp hızlanır.
+  static const double prototypeOnlyFameDecayRate = 0.12;
+
+  /// prototypeOnly: sessizlik uzadıkça kaybın hızlandığı yıl.
+  static const int prototypeOnlyFameFastDecayYears = 4;
+
+  /// Paylaşım yapılmayan yıllarda Ün düşer (D-118).
+  ///
+  /// Faho bildirdi: "ün neredeyse hiç ama hiç düşmüyor, bu da 1 yıl
+  /// paylaşım yapmayı unutursam düşmeli, 1 yıl uzun bir süre". Bu,
+  /// D-027'nin "Ün yalnızca yukarı taşınır" kuralını **Faho'nun kararıyla**
+  /// değiştirir: tanınmışlık bakım ister.
+  ///
+  /// Geçmişte yaşanmış tanınmışlık tamamen silinmez: Ün bir tabana kadar
+  /// düşer, sıfıra inmez.
+  GameState _decayFame(GameState state, int newAge, List<String> satirlar) {
+    final int? mevcut = state.player.fame;
+    if (mevcut == null || mevcut <= prototypeOnlyFameFloor) return state;
+
+    final int sonPaylasim = _lastPostAge(state);
+    final int sessizYil = newAge - sonPaylasim;
+    if (sessizYil < prototypeOnlyFameSilenceYears) return state;
+
+    final double hiz = sessizYil >= prototypeOnlyFameFastDecayYears
+        ? prototypeOnlyFameDecayRate * 2
+        : prototypeOnlyFameDecayRate;
+    final int kayip = (mevcut * hiz).round().clamp(1, mevcut);
+    final int yeni = (mevcut - kayip).clamp(prototypeOnlyFameFloor, mevcut);
+    if (yeni == mevcut) return state;
+
+    satirlar.add(
+      'Bir süredir paylaşım yapmıyorsun; adın daha az anılır oldu '
+      '(Ün $mevcut → $yeni).',
+    );
+    return state.copyWith(player: state.player.copyWith(fame: yeni));
+  }
+
+  /// prototypeOnly: Ünün düşebileceği taban.
+  ///
+  /// Bir kez gerçekten tanınmış olmak tamamen silinmez.
+  static const int prototypeOnlyFameFloor = 5;
+
+  /// En son paylaşım yapılan yaş; hiç paylaşım yoksa hesabın açıldığı yaş.
+  int _lastPostAge(GameState state) {
+    int enSon = 0;
+    for (final SocialAccount a in state.socialAccounts) {
+      if (a.createdAtAge > enSon) enSon = a.createdAtAge;
+      for (final SocialPost p in a.posts) {
+        if (p.age > enSon) enSon = p.age;
+      }
+    }
+    return enSon;
+  }
+
+  /// Büyük hesaplara platformun ödediği **yıllık** gelir payı (D-117).
+  ///
+  /// Sıradan paylaşım para kazandırmaz; ciddi bir kitlenin kendisi gelir
+  /// üretir ve bu gelir yıllıktır.
+  GameState _payRevenueShare(
+    GameState state,
+    int newAge,
+    List<String> satirlar,
+  ) {
+    int toplam = 0;
+    for (final SocialAccount a in state.socialAccounts) {
+      toplam += SocialIncome.yearlyRevenueShare(a);
+    }
+    if (toplam <= 0) return state;
+    satirlar.add(
+      'Platform gelir paylaşımından ${trMoney(toplam)} kazandın.',
+    );
+    return state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet + toplam,
+      ),
+    );
   }
 
   /// Bu yıl aşılan takipçi eşiği; aşılmadıysa `null`.

@@ -161,7 +161,12 @@ void main() {
     int guard = 0;
 
     while (!controller.state!.deceased) {
-      if (guard++ > 400) {
+      // Sınır, sonsuz döngüyü yakalamak içindir; yıl sayısı değildir.
+      // D-114'ten sonra **her aktivite** bir bildirim üretiyor ve döngü
+      // bildirimi kapatmak için bir tur daha dönüyor; bir yıl artık tek
+      // tur değil birkaç tur sürüyor. Seksen beş yıllık bir hayat eski
+      // 400'lük sınıra sığmıyordu.
+      if (guard++ > 2000) {
         fail('Hayat ilerlemiyor (tohum $seed, yaş '
             '${controller.state!.player.age})');
       }

@@ -375,6 +375,8 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.account_balance_outlined;
       case NoticeKind.kariyer:
         return Icons.work_outline;
+      case NoticeKind.aileDonum:
+        return Icons.celebration_outlined;
     }
   }
 }

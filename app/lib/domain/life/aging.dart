@@ -172,7 +172,7 @@ abstract final class StatAging {
 
   // --- Başlangıç yaşları ------------------------------------------------
   static const int prototypeOnlyAppearanceFromAge = Aging.prototypeOnlyStartAge;
-  static const int prototypeOnlyCharismaFromAge = 35;
+  static const int prototypeOnlyCharismaFromAge = 32;
   static const int prototypeOnlyHealthFromAge = 45;
   static const int prototypeOnlyIntelligenceFromAge = 60;
   static const int prototypeOnlyHappinessFromAge = 65;
@@ -211,12 +211,24 @@ abstract final class StatAging {
   }
 
   /// Karizmanın yıllık düşüş ihtimali (bakım öncesi ham değer).
+  ///
+  /// **D-124 ile artırıldı.** Faho bildirdi: "statlar hâlâ çok çok fazla,
+  /// sağlık ve karizma asla düşmüyor neredeyse". Ölçüldü ve haklıydı:
+  /// 100 hayatta karizma 20 yaşta 52,6 iken 70 yaşta ancak **38,4**
+  /// oluyordu — elli yılda on dört puan. Eski oranlar (0,18 / 0,28 /
+  /// 0,38) yılda en çok bir puanla birleşince yıpranma hissedilmiyordu.
   static double prototypeOnlyCharismaChance(int age) {
     if (age < prototypeOnlyCharismaFromAge) return 0;
-    if (age < 50) return 0.18;
-    if (age < 65) return 0.28;
-    return 0.38;
+    if (age < 50) return 0.30;
+    if (age < 65) return 0.45;
+    return 0.60;
   }
+
+  /// prototypeOnly: karizmanın bir yılda kaybedebileceği en çok puan
+  /// (D-124).
+  ///
+  /// İleri yaşta kayıp hızlanır; gençlikte tek puandır.
+  static int prototypeOnlyCharismaStepFor(int age) => age >= 60 ? 2 : 1;
 
   /// Sağlığın yıllık düşüş ihtimali (bakım öncesi ham değer).
   static double prototypeOnlyHealthChance(int age) {
@@ -284,7 +296,11 @@ abstract final class StatAging {
       final double sans =
           (prototypeOnlyCharismaChance(age) * carpan).clamp(0.0, 0.85);
       if (rng.chance(sans)) {
-        karizma = -_kalan(stats.charisma, 1, prototypeOnlyCharismaFloor);
+        karizma = -_kalan(
+          stats.charisma,
+          prototypeOnlyCharismaStepFor(age),
+          prototypeOnlyCharismaFloor,
+        );
       }
     }
 

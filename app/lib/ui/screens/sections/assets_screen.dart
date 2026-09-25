@@ -107,7 +107,9 @@ class _AssetsScreenState extends State<AssetsScreen> {
         const SizedBox(height: 2),
         _ResidenceCard(state: state),
         const SizedBox(height: 10),
-        // Yıllık geçim gideri gerçek hesaptan okunur (D-033).
+        // Yıllık geçim gideri gerçek hesaptan okunur (D-033) ve
+        // **kalem kalem** gösterilir (D-123). Faho sordu: "bu giderler
+        // neye göre belirleniyor?" — hesap artık ekranda duruyor.
         InfoPanel(
           icon: Icons.receipt_long_outlined,
           text: LivingCosts.yearlyCost(state) == 0
@@ -117,6 +119,10 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   '${state.hardshipYears > 0 ? ' Bu yıl geçim sıkıntısı '
                       'çekiyorsun.' : ''}',
         ),
+        if (LivingCosts.yearlyCost(state) > 0) ...<Widget>[
+          const SizedBox(height: 8),
+          _CostBreakdownCard(breakdown: LivingCosts.breakdownFor(state)),
+        ],
         const SizedBox(height: 12),
         if (magazalar.isNotEmpty) ...<Widget>[
           MenuRow(
@@ -725,6 +731,83 @@ class _ResidenceCardState extends State<_ResidenceCard> {
               const SizedBox(height: 8),
               Text(_sonuc!, style: theme.textTheme.bodySmall),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Yıllık geçim giderinin kalem kalem dökümü (D-123).
+///
+/// Gider **uydurulmaz**: her satır hesaplanan kalemin kendisidir ve
+/// toplam bu satırların toplamıdır.
+class _CostBreakdownCard extends StatelessWidget {
+  const _CostBreakdownCard({required this.breakdown});
+
+  final CostBreakdown breakdown;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Gider dökümü',
+              key: const Key('cost_breakdown_title'),
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            for (final ({String label, int amount}) kalem in breakdown.items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        kalem.label,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    Text(
+                      trMoney(kalem.amount),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            const Divider(height: 16),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    'Toplam',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+                Text(
+                  trMoney(breakdown.total),
+                  key: const Key('cost_breakdown_total'),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              breakdown.income > 0
+                  ? 'Kalemler taban tutar ile yıllık gelirinin '
+                      '(${trMoney(breakdown.income)}) payından oluşur.'
+                  : 'Gelirin olmadığı için yalnızca taban tutarlar '
+                      'işliyor.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),

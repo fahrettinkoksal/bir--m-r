@@ -53,6 +53,12 @@ enum NoticeKind {
   ///
   /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
   kariyer,
+
+  /// Ailedeki dönüm noktası: çocuğun evlenmesi, torunun doğması (D-121).
+  ///
+  /// `dogum`dan ayrıdır: doğum bildiriminde bebeğe isim verilir, burada
+  /// verilmez. Yeni değerler **listenin sonuna** eklenir.
+  aileDonum,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

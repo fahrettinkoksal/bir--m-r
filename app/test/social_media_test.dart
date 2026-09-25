@@ -760,28 +760,37 @@ void main() {
       expect(r.state, same(s));
     });
 
-    test('büyüme Ünü tazeler ama geçmiş Ünü düşürmez', () {
+    test('büyüme Ünü tazeler, sessizlik ise düşürür (D-118)', () {
+      // D-027 "Ün yalnızca yukarı taşınır" diyordu. Faho bu kararı
+      // değiştirdi: "ün neredeyse hiç ama hiç düşmüyor, 1 yıl paylaşım
+      // yapmayı unutursam düşmeli". Test yeni kurala göre yazıldı ve
+      // **iki yönü birden** sınıyor.
       GameState s = life(4, age: 20);
       s = withAccount(s, SocialPlatform.video, followers: 200000);
       s = social.post(s, content('vlog'), Random(2)).state;
       final int oncekiUn = s.player.fame ?? 0;
-      final GameState buyuk = social.advanceYear(s, s.player.age + 1).state;
+
+      // Paylaşımın yapıldığı yıl: Ün düşmez.
+      final GameState buyuk =
+          social.advanceYear(s, s.player.age + 1).state;
       expect(buyuk.player.fame, greaterThanOrEqualTo(oncekiUn));
 
-      // Erimede Ün geri gitmez: yaşanmış tanınmışlık silinmez (D-027).
-      final int erimeUn =
-          social
-              .advanceYear(
-                buyuk,
-                buyuk.player.age +
-                    SocialEngine.prototypeOnlyDormantAfterYears +
-                    2,
-              )
-              .state
-              .player
-              .fame ??
-          0;
-      expect(erimeUn, greaterThanOrEqualTo(buyuk.player.fame ?? 0));
+      // Yıllarca sessizlik: Ün gerçekten düşer.
+      final GameState sessiz = social
+          .advanceYear(
+            buyuk,
+            buyuk.player.age +
+                SocialEngine.prototypeOnlyDormantAfterYears +
+                2,
+          )
+          .state;
+      expect(sessiz.player.fame, lessThan(buyuk.player.fame ?? 0));
+
+      // Ama sıfırlanmaz: yaşanmış tanınmışlık tamamen silinmez.
+      expect(
+        sessiz.player.fame,
+        greaterThanOrEqualTo(SocialEngine.prototypeOnlyFameFloor),
+      );
     });
   });
 

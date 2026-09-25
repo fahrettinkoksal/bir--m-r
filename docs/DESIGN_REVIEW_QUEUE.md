@@ -3060,3 +3060,116 @@ Faho bildirdi: "TÜM AMA TÜM BİLDİRİMLER POP UP OLMALI ... KULLANICI ANLAMAL
 1. Bu iki istisna kabul mü, yoksa onlar da mı pencere açsın?
 2. Finger kaydırmaları gerçekten pencere açmamalı mı? (Yılda 12 beğeni hakkı var; her biri pencere açsaydı uygulama kullanılamaz olurdu.)
 3. Aynı anda birden çok pencere açıldığında üst üste mi gösterilsin, yoksa tek pencerede mi toplansın? Şu an sırayla açılıyor.
+
+---
+
+### Q-133 — Çocuğun evlenmesi, torun haberi ve flörtün sonu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-121, D-122 · `app/lib/domain/generation/child_marriage.dart`, `app/lib/domain/interaction/finger.dart` · Test: `app/test/package_r_test.dart`
+
+Faho bildirdi: "torunum olduğunda, kızım/çocuğum evlendiğinde pop-up olarak bildirilsin; düğünlerine çağırılabileyim; aram kötü ise sadece düğününün olduğunu, iyi ise direkt davetiye gibi gelsin" ve "ilgilenilmeyen flört bitsin". Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Değer |
+|---|---|
+| Çocuğun evlenebileceği en küçük yaş | 22 |
+| Yıllık evlenme ihtimali | 22 yaşta %10, her yıl +%1, en çok %28 |
+| Düğüne davet edilmek için yakınlık | 45 |
+| Flörtün bittiği yakınlık | 35 |
+| Flörtün bitmesi için sessiz yıl | 2 |
+
+**Karar soruları:**
+1. Evlenme ihtimali doğru mu? Şu an 30 yaşındaki bir çocuk her yıl ~%18 ihtimalle evleniyor; ömür boyunca çoğu çocuk evleniyor.
+2. Davet eşiği 45 doğru mu? Altında haberi "sonradan duyuyorsun".
+3. **Düğüne gitmek bir seçim olmalı mı?** Şu an davetiye yalnızca bir haber; katılma/katılmama seçeneği yok (cenazede var). Katılım yakınlığı etkilesin mi, masrafı olsun mu?
+4. Çocuğun eşi **ayrı bir kişi kaydı** olmalı mı? Şu an yalnızca adı tutuluyor; dünür ailesi, torunun diğer ebeveyni gibi bağlar kurulmuyor.
+5. Çocuk boşanabilmeli mi? Şu an evlilik tek yönlü.
+6. Flört 2 yıl sessizlikte bitiyor; bu çok hızlı mı? Yakınlık eşiği 35 doğru mu?
+7. Flört bitince kişi **arkadaş** olarak kalıyor. "Eski flört" diye ayrı bir bağ olsun mu?
+
+---
+
+### Q-134 — Sosyal medyanın yeni ekonomisi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-117, D-118, D-119, D-120 · `app/lib/domain/social/` · Test: `app/test/package_q_test.dart`
+
+Faho bildirdi: "sponsorluk ücretleri hâlâ çok fazla", "dümdüz yaptığım paylaşımlardan ücret kazanıyorum bu olmamalı", "ün neredeyse hiç düşmüyor", "başvurularda kabul edilmeme durumu olsun", "bazen firmalar kendiliğinden teklif yollasın", "sürekli sponsor alırsa kayıp yaşansın", "her sosyal medya hesabı ayrı". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Sponsorluk ücreti — araştırmaya dayanıyor.** 2026'da Türkiye'de 10K-100K takipçili bir hesap gönderi başına kabaca **3.000-15.000 ₺** alıyor. Oyun 100.000 takipçiye 118.000 ₺ ödüyordu.
+
+| Takipçi (o hesapta) | Eski ücret | Yeni ücret |
+|---|---|---|
+| 5.000 | 32.500 ₺ | **3.600 ₺** |
+| 20.000 | 46.000 ₺ | **5.400 ₺** |
+| 100.000 | 118.000 ₺ | **15.000 ₺** |
+| 500.000 | 478.000 ₺ | **63.000 ₺** |
+
+**Para nereden geliyor artık:** sponsorluk + 100.000 takipçiden sonra başlayan **yıllık gelir payı** (takipçi başına yılda 0,9 ₺). Paylaşım başına ödeme **tamamen kaldırıldı**.
+
+**Ün düşüşü (D-027 değişti):** hiç paylaşım yapılmayan bir yılın sonunda Ün yılda **%12** düşer; dördüncü sessiz yıldan sonra **%24**. Taban **5**; sıfıra inmez.
+
+**Kitle yorgunluğu:** beş yıllık pencerede ilk iki sponsorluk bedelsiz; sonraki her biri o platformun kitlesinden **%2,5** (en çok %12).
+
+**Başvuru ve davet:** kabul şansı %45 + eşik üstü her Ün puanı için %2 (en çok %92). Yılda **%22** ihtimalle kendiliğinden davet gelir; davetli işte Ün şartı aranmaz ve ret olmaz.
+
+**Karar soruları:**
+1. 0,12 ₺/takipçi doğru mu? Araştırma bandını tutuyor ama oyunda sosyal medyayı bir "meslek" olmaktan çıkarır mı?
+2. **Yıllık gelir payı yeni bir mekanizma.** Kabul mü? Eşik 100.000 doğru mu?
+3. Ün düşüş hızı %12 doğru mu? Taban 5 mi olmalı, yoksa 0'a kadar inmeli mi?
+4. Kitle yorgunluğunda "iki bedelsiz sponsorluk" doğru mu?
+5. Davet ihtimali %22 çok mu sık? Davetin Ün şartını tamamen kaldırması doğru mu?
+6. Reddedilen başvurunun yıllık hakkı tüketmesi doğru mu, yoksa aynı yıl tekrar denenebilmeli mi?
+
+---
+
+### Q-135 — Geçim giderinin gerekçesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-123 · `app/lib/domain/economy/living_costs.dart`, `app/lib/ui/screens/sections/assets_screen.dart` · Test: `app/test/package_s_test.dart`
+
+Faho sordu: "yıllık yaşam gideri çalışmıyorsam neden var ve bu giderler neye göre belirleniyor? eğer evim arabam vb tarzı vergilendirilecek şeyler yoksa bir giderim olmamalı, bence olsa bile az olmalı".
+
+**Cevap iki parçalı.** Gider bir **vergi değil**, geçim masrafıdır: kira, yemek, fatura. Bu yüzden mal varlığı olmayan da öder. Ama iki eksik vardı ve ikisi de düzeltildi: (1) hesap ekranda görünmüyordu, artık **kalem kalem** duruyor; (2) ailesinin yanında yaşayan ve **hiç geliri olmayan** oyuncuya tam yük biniyordu, artık yalnızca kişisel harcama (yılda 12.000 ₺) işliyor.
+
+| Durum | Yıllık taban |
+|---|---|
+| Çocuk (18 altı) | 0 |
+| Ailesinin yanında, **geliri yok** | 12.000 ₺ |
+| Ailesinin yanında, geliri var | 78.000 ₺ + gelirin %8'i |
+| Kirada | 162.000 ₺ + gelirin %15'i |
+| Kendi evinde | 114.000 ₺ + gelirin %12'si |
+
+**Karar soruları:**
+1. Gelirsiz genç için 12.000 ₺ doğru mu, yoksa sıfır mı olmalı?
+2. Bu indirim yalnızca **ailesinin yanında** yaşayana açık. Kirada oturup işsiz kalan tam yükü ödüyor ve cüzdanı erirken borç birikiyor. Doğru mu, yoksa işsizlik için ayrı bir kural mı gerekli?
+3. Faho'nun asıl sorusu "vergilendirilecek şey yoksa gider olmamalı" idi. Oyunda **vergi diye ayrı bir kalem yok**; ev/araba masrafı (aidat, bakım) gider kalemlerinin içinde. Ayrı bir "vergi" kalemi olsun mu?
+4. Döküm Varlıklar ekranında duruyor. Yıl sonu özetinde de görünsün mü?
+
+---
+
+### Q-136 — Karizmanın yıpranma hızı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-124 · `app/lib/domain/life/aging.dart` · Test: `app/test/package_p_test.dart`
+
+Faho bildirdi: "statlar hâlâ çok çok fazla, sağlık ve karizma asla düşmüyor neredeyse". Ölçüldü ve haklıydı. Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Eski | Yeni |
+|---|---|---|
+| Yıpranmanın başladığı yaş | 35 | **32** |
+| Düşüş ihtimali (32-49) | %18 | **%30** |
+| Düşüş ihtimali (50-64) | %28 | **%45** |
+| Düşüş ihtimali (65+) | %38 | **%60** |
+| Yılda en çok kayıp | 1 puan | **60 yaşa kadar 1, sonra 2** |
+| Taban | 15 | 15 (değişmedi) |
+
+**Ölçüm (100 hayat, ortalama karizma):**
+
+| Yaş | Önce | Sonra |
+|---|---|---|
+| 20 | 52,6 | 52,6 |
+| 40 | 51,0 | **48,9** |
+| 50 | 48,7 | **45,2** |
+| 60 | 44,5 | **38,9** |
+| 70 | 38,4 | **28,7** |
+
+Aynı ölçümde sağlık (D-116 ile birlikte): 20 yaş 69,9 → 70 yaş **13,8**.
+
+**Karar soruları:**
+1. Bu hız doğru mu, yoksa daha da sert mi olmalı?
+2. Yıpranmanın 32'de başlaması doğru mu? Görünüş 30'da, sağlık 45'te başlıyor.
+3. Taban 15 doğru mu? Karizma bir insanda hiç sıfırlanmamalı mı?
+4. Bakımın (spor, berber) koruyucu etkisi yeterli mi? Şu an düzenli spor yapan belirgin biçimde daha az kaybediyor ama oran onaylanmadı.

@@ -2157,7 +2157,7 @@ class GameController extends ChangeNotifier {
   MediaResult? acceptMediaJob(MediaOpportunity job) {
     final GameState? current = _state;
     if (current == null) return null;
-    final MediaResult sonuc = MediaOpportunities.accept(current, job);
+    final MediaResult sonuc = MediaOpportunities.accept(current, job, _random);
     if (!sonuc.applied) return sonuc;
     _state = sonuc.state;
     _autoSave();

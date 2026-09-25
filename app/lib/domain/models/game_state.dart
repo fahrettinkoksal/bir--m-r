@@ -82,6 +82,8 @@ class GameState {
     this.socialAccounts = const <SocialAccount>[],
     this.celebrityContacts = const <CelebrityContact>[],
     this.sponsorOffer,
+    this.mediaInvitationId,
+    this.mediaInvitationAge,
     this.sponsorDeals = const <SponsorDeal>[],
     this.trips = const <TripRecord>[],
     this.pendingInterview,
@@ -379,6 +381,21 @@ class GameState {
   /// Aynı anda yalnızca bir teklif bekler; kabul veya ret verilene kadar
   /// yenisi gelmez.
   final SponsorOffer? sponsorOffer;
+
+  /// Kendiliğinden gelen medya daveti: işin kimliği (D-120).
+  ///
+  /// Faho bildirdi: "oyuncunun menüye girip fırsat seçmesi yerine bazen
+  /// firmalar/TV programları kendiliğinden teklif yollasın". Davet gelen
+  /// iş için Ün şartı aranmaz ve başvuru reddedilmez — zaten **onlar**
+  /// çağırmıştır. Davet o yıl içinde kullanılmazsa düşer.
+  final String? mediaInvitationId;
+
+  /// Davetin geldiği yaş; davet yalnızca o yıl geçerlidir.
+  final int? mediaInvitationAge;
+
+  /// Bu iş için şu an geçerli bir davet var mı?
+  bool hasMediaInvitation(String jobId) =>
+      mediaInvitationId == jobId && mediaInvitationAge == player.age;
 
   /// Kabul edilmiş sponsorluk yükümlülükleri ve geçmişi.
   final List<SponsorDeal> sponsorDeals;
@@ -850,6 +867,8 @@ class GameState {
     List<SocialAccount>? socialAccounts,
     List<CelebrityContact>? celebrityContacts,
     Object? sponsorOffer = _unsetEvent,
+    Object? mediaInvitationId = _unsetEvent,
+    Object? mediaInvitationAge = _unsetEvent,
     List<SponsorDeal>? sponsorDeals,
     List<TripRecord>? trips,
     Object? pendingInterview = _unsetEvent,
@@ -939,6 +958,12 @@ class GameState {
       sponsorOffer: sponsorOffer == _unsetEvent
           ? this.sponsorOffer
           : sponsorOffer as SponsorOffer?,
+      mediaInvitationId: mediaInvitationId == _unsetEvent
+          ? this.mediaInvitationId
+          : mediaInvitationId as String?,
+      mediaInvitationAge: mediaInvitationAge == _unsetEvent
+          ? this.mediaInvitationAge
+          : mediaInvitationAge as int?,
       sponsorDeals: sponsorDeals ?? this.sponsorDeals,
       trips: trips ?? this.trips,
       pendingInterview: pendingInterview == _unsetEvent

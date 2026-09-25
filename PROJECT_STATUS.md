@@ -1133,12 +1133,32 @@ eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
 | Görüşülmeyen çocukla yakınlık | 1 yıl 100 · 5 yıl 94 · 10 yıl 74 · 15 yıl 44 · 20 yıl 20 (taban) |
 | Tek yılda en çok bildirim | 7 (üç vefat, üç cenaze, tek toplu miras); ortalama 0,39 |
 
-**Açık kalan sayılar:** Q-116 … Q-128 (`docs/DESIGN_REVIEW_QUEUE.md`).
+### Paket O-S sonrası ölçümler (D-111 … D-124)
+
+Faho'nun 24 Eylül tarihli ikinci geri bildirim listesinden sonra
+yeniden ölçüldü (100 hayat):
+
+| Ölçüm | Önce | Sonra |
+|---|---|---|
+| Sağlık: 20 → 70 yaş | 69,9 → 38,4 gibi yavaş | **69,9 → 13,8** |
+| Sağlık 40 yaşta | 66,2 | **55,6** |
+| Karizma: 20 → 70 yaş | 52,6 → 38,4 | **52,6 → 28,7** |
+| Ortalama ömür | 72,4 | **74,2** |
+| Yıl başına bildirim penceresi | 0,39 | **0,71** (en kötü yıl 7 → 6) |
+| Sponsorluk ücreti (100.000 takipçi) | 118.000 ₺ | **15.000 ₺** |
+| Sıradan paylaşımın geliri | değişken | **0** |
+
+Hastalığın bedeli −1/−2/−3'ten ciddiyete bağlı **−10 / −14 / −18**'e
+çıkarıldı; tek başına uygulandığında 40 yaşta ortalama sağlık **0,8**'e
+düştüğü ölçüldüğü için **toparlanma** eklendi (hastalanılmayan yılda +7,
+yaşa göre düşen bir tavana kadar).
+
+**Açık kalan sayılar:** Q-116 … Q-136 (`docs/DESIGN_REVIEW_QUEUE.md`).
 Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
 kadar kesin denge değeri sayılmaz.
 
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1963 geçti, 15 atlandı, 0 başarısız**.
+`flutter test` **2024 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri

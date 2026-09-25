@@ -240,7 +240,13 @@ void main() {
         s.player.age + 1,
       );
       // 6.000'in %6'sı 360: anlamlı sayılmaz, günlüğe girmez.
-      expect(r.logTexts, isEmpty);
+      // D-063 takipçi **spam'ini** yasaklar: "her yıl 183 takipçi
+      // büyüdü" satırı yazılmaz. Ün düşüşü (D-118) ayrı bir haberdir ve
+      // oyuncunun görmesi gerekir; bu yüzden takipçi satırları aranıyor.
+      expect(
+        r.logTexts.where((String t) => t.contains('takipçi')),
+        isEmpty,
+      );
       expect(
         r.state.accountFor(SocialPlatform.video)!.followers,
         greaterThan(6000),

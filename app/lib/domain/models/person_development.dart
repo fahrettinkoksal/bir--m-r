@@ -60,6 +60,8 @@ class PersonDevelopment {
     this.otherParentId,
     this.track,
     this.adopted = false,
+    this.marriedAtAge,
+    this.spouseName,
   });
 
   /// Kişinin kendi karakter değerleri (D-046 ile doğumda oluşturulur).
@@ -134,6 +136,20 @@ class PersonDevelopment {
   /// doğru anlatılması içindir; uydurma bir biyolojik ebeveyn yazılmaz.
   final bool adopted;
 
+  /// Bu kişinin **kendi** evlendiği yaş (D-121).
+  ///
+  /// Faho'nun isteği: "çocuğum evlendiğinde pop-up olarak bildirilsin".
+  /// Çocuklar artık kendi hayatlarında evleniyor; kayıt burada durur ve
+  /// kuşak devamında olduğu gibi taşınır.
+  final int? marriedAtAge;
+
+  /// Evlendiği kişinin adı. Bu kişi ayrı bir kayıt olarak tutulmaz;
+  /// oyuncunun hayatına giren yalnızca adıdır.
+  final String? spouseName;
+
+  /// Evli mi?
+  bool get isMarried => marriedAtAge != null;
+
   bool get isStudent => grade != null;
   bool get isUniversityStudent => university == UniversityStatus.okuyor;
   bool get isEmployed => jobId != null;
@@ -190,6 +206,8 @@ class PersonDevelopment {
     Object? otherParentId = _unsetDev,
     Object? track = _unsetDev,
     bool? adopted,
+    Object? marriedAtAge = _unsetDev,
+    Object? spouseName = _unsetDev,
   }) {
     return PersonDevelopment(
       stats: stats ?? this.stats,
@@ -221,6 +239,11 @@ class PersonDevelopment {
           : otherParentId as String?,
       track: track == _unsetDev ? this.track : track as EducationTrack?,
       adopted: adopted ?? this.adopted,
+      marriedAtAge: marriedAtAge == _unsetDev
+          ? this.marriedAtAge
+          : marriedAtAge as int?,
+      spouseName:
+          spouseName == _unsetDev ? this.spouseName : spouseName as String?,
     );
   }
 

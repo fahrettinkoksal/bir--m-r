@@ -48,6 +48,18 @@ class _MediaPageState extends State<MediaPage> {
               'programlar ve markalar seni arar. Markalar kurgusaldır; '
               'bütün tutarlar oyun parasıdır.',
         ),
+        // Kendiliğinden gelen davet ekranda açıkça durur (D-120).
+        if (state.mediaInvitationId != null &&
+            state.mediaInvitationAge == state.player.age) ...<Widget>[
+          const SizedBox(height: 12),
+          InfoPanel(
+            icon: Icons.mark_email_unread_outlined,
+            text: 'Bu yıl sana bir davet geldi: '
+                '${_davetAdi(state.mediaInvitationId!)}. Ün şartı '
+                'aranmıyor ve başvurun geri çevrilmeyecek. Davet bu yıl '
+                'geçerli.',
+          ),
+        ],
         const SizedBox(height: 12),
         for (final MediaOpportunity is1 in kMediaOpportunities) ...<Widget>[
           _JobCard(
@@ -155,4 +167,12 @@ class _JobCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Davet edilen işin adı; katalogda yoksa kimliği yazılır.
+String _davetAdi(String id) {
+  for (final MediaOpportunity j in kMediaOpportunities) {
+    if (j.id == id) return j.label;
+  }
+  return id;
 }

@@ -9,6 +9,7 @@ import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
+import '../models/pending_notice.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
@@ -588,6 +589,64 @@ abstract final class Finger {
 
   /// prototypeOnly: flörtün sevgiliye dönmesi için gereken yakınlık.
   static const int prototypeOnlyOfficialBond = 60;
+
+  /// prototypeOnly: ilgilenilmeyen flörtün bittiği yakınlık (D-122).
+  ///
+  /// Faho bildirdi: "ilgilenilmeyen flört bitsin ve pop-up olarak
+  /// bildirilsin". Flört bir söz değildir; ilgilenilmezse karşı taraf
+  /// bekleyip durmaz. **Kayıt silinmez**: kişi arkadaş olarak kalır,
+  /// geçmişi durur.
+  static const int prototypeOnlyFlirtEndBond = 35;
+
+  /// prototypeOnly: flörtün bitmesi için geçmesi gereken en az sessiz yıl.
+  static const int prototypeOnlyFlirtEndYears = 2;
+
+  /// İlgilenilmeyen flörtler biter (D-122).
+  ///
+  /// Bitmesi için **iki koşul birden** gerekir: yakınlığın eşiğin altına
+  /// düşmesi ve üstünden en az iki yıl geçmiş olması. Böylece bir yıl
+  /// yoğun geçen oyuncunun flörtü aniden kopmaz.
+  static ({GameState state, List<PendingNotice> notices}) endNeglectedFlirts(
+    GameState state,
+    int newAge,
+  ) {
+    final List<PendingNotice> bildirimler = <PendingNotice>[];
+    final List<Person> guncel = <Person>[];
+    for (final Person p in state.people) {
+      if (p.relation != RelationType.flort || !p.isAlive) {
+        guncel.add(p);
+        continue;
+      }
+      final int? sonTemas = state.lastInteractionAge[p.id];
+      final int sessizYil = sonTemas == null ? 0 : newAge - sonTemas;
+      if (p.bond >= prototypeOnlyFlirtEndBond ||
+          sessizYil < prototypeOnlyFlirtEndYears) {
+        guncel.add(p);
+        continue;
+      }
+      // Kayıt silinmez; bağ arkadaşlığa döner.
+      final Person biten = p.copyWith(relation: RelationType.arkadas);
+      guncel.add(biten);
+      final String metin = '${p.firstName} ile aranız açıldı. Uzun '
+          'süredir görüşmüyordunuz; flörtünüz bitti. Arkadaş olarak '
+          'kaldınız.';
+      bildirimler.add(
+        PendingNotice(
+          id: 'flort-bitti-${p.id}-$newAge',
+          kind: NoticeKind.aileDonum,
+          age: newAge,
+          title: 'Flörtün bitti',
+          text: metin,
+          personId: p.id,
+        ),
+      );
+    }
+    if (bildirimler.isEmpty) return (state: state, notices: bildirimler);
+    return (
+      state: state.copyWith(people: List<Person>.unmodifiable(guncel)),
+      notices: bildirimler,
+    );
+  }
 
   /// Arkadaşa çıkma teklif etmek için gereken en az yakınlık (D-112).
   ///

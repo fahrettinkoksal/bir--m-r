@@ -121,6 +121,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           .map(_encodeCelebrityContact)
           .toList(growable: false),
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
+      'mediaInvitationId': state.mediaInvitationId,
+      'mediaInvitationAge': state.mediaInvitationAge,
       'sponsorOffer': state.sponsorOffer == null
           ? null
           : _encodeSponsorOffer(state.sponsorOffer!),
@@ -475,6 +477,8 @@ Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
       'otherParentId': d.otherParentId,
       'track': d.track?.name,
       'adopted': d.adopted,
+      'marriedAtAge': d.marriedAtAge,
+      'spouseName': d.spouseName,
       'milestones': <Map<String, Object?>>[
         for (final LifeMilestone m in d.milestones)
           <String, Object?>{'age': m.age, 'text': m.text},
@@ -522,6 +526,8 @@ PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
       'development.track',
     ),
     adopted: json['adopted'] == true,
+    marriedAtAge: _intOrNull(json, 'marriedAtAge'),
+    spouseName: _stringOrNull(json, 'spouseName'),
     milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
       for (final Object? e in _optionalRawList(json, 'milestones'))
         LifeMilestone(
@@ -893,6 +899,8 @@ GameState decodeGameState(Map<String, Object?> json) {
           .toList(growable: false),
     ),
     // Eski kayıtlarda sponsorluk yoktur; boş açılır.
+    mediaInvitationId: _stringOrNull(json, 'mediaInvitationId'),
+    mediaInvitationAge: _intOrNull(json, 'mediaInvitationAge'),
     sponsorOffer: json['sponsorOffer'] == null
         ? null
         : _decodeSponsorOffer(_map(json, 'sponsorOffer')),

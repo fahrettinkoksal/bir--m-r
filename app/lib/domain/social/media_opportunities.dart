@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import '../../data/media_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../models/applied_effect.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
+import '../generation/random_util.dart';
 import '../models/social_account.dart';
 import '../effects/effect_diff.dart';
 
@@ -43,15 +46,19 @@ abstract final class MediaOpportunities {
     MediaOpportunity job,
   ) {
     final int un = state.player.fame ?? 0;
-    if (un < kMediaSectionMinFame) {
-      return InteractionAvailability.blocked(
-        'Medya fırsatları Ün $kMediaSectionMinFame olunca açılır.',
-      );
-    }
-    if (un < job.minFame) {
-      return InteractionAvailability.blocked(
-        'Bu iş için Ün ${job.minFame} gerekiyor; senin Ünün $un.',
-      );
+    // Davet gelen işte Ün şartı aranmaz: zaten onlar çağırmıştır (D-120).
+    final bool davetli = state.hasMediaInvitation(job.id);
+    if (!davetli) {
+      if (un < kMediaSectionMinFame) {
+        return InteractionAvailability.blocked(
+          'Medya fırsatları Ün $kMediaSectionMinFame olunca açılır.',
+        );
+      }
+      if (un < job.minFame) {
+        return InteractionAvailability.blocked(
+          'Bu iş için Ün ${job.minFame} gerekiyor; senin Ünün $un.',
+        );
+      }
     }
     if (timesDone(state, job) >= job.maxPerAge) {
       return InteractionAvailability.blocked(
@@ -65,11 +72,68 @@ abstract final class MediaOpportunities {
   static int timesDone(GameState state, MediaOpportunity job) =>
       state.interactionCount(job.id, 'medya');
 
-  /// İşi kabul eder ve sonucu uygular.
-  static MediaResult accept(GameState state, MediaOpportunity job) {
+  /// prototypeOnly: başvurunun kabul edilme ihtimalinin tabanı (D-120).
+  ///
+  /// Faho bildirdi: "medya kazançlar gibi tekliflere başvursam bile kabul
+  /// edilmeme durumu olsun". Başvurmak almak değildir: eşiği yeni geçen
+  /// bir ad için yapım da markası da başka adayları değerlendirir.
+  static const double prototypeOnlyBaseAcceptChance = 0.45;
+
+  /// prototypeOnly: eşiğin üstündeki her Ün puanının kattığı şans.
+  static const double prototypeOnlyAcceptPerFamePoint = 0.02;
+
+  /// prototypeOnly: kabul şansının üst sınırı.
+  ///
+  /// Hiçbir zaman garanti değildir; çok tanınan biri bile reddedilebilir.
+  static const double prototypeOnlyMaxAcceptChance = 0.92;
+
+  /// Başvurunun kabul edilme ihtimali (D-120).
+  static double acceptChance(GameState state, MediaOpportunity job) {
+    final int un = state.player.fame ?? 0;
+    final int fazla = (un - job.minFame).clamp(0, 100);
+    return (prototypeOnlyBaseAcceptChance +
+            fazla * prototypeOnlyAcceptPerFamePoint)
+        .clamp(0.0, prototypeOnlyMaxAcceptChance);
+  }
+
+  /// İşe başvurur; kabul edilirse sonucu uygular (D-120).
+  ///
+  /// Başvuru **reddedilebilir**. Reddedilen başvuru da yıllık hakkı
+  /// tüketir: aynı yıl aynı kapıyı tekrar tekrar çalmak mümkün değildir.
+  static MediaResult accept(
+    GameState state,
+    MediaOpportunity job,
+    Random rng,
+  ) {
     final InteractionAvailability check = availability(state, job);
     if (!check.isAllowed) {
       return MediaResult(state: state, applied: false, text: check.reason!);
+    }
+
+    // Davet edilen iş reddedilmez; çağıran taraf zaten karar vermiştir.
+    if (!state.hasMediaInvitation(job.id) &&
+        !rng.chance(acceptChance(state, job))) {
+      final String ret = '${job.label}: başvurun bu kez kabul edilmedi. '
+          'Ün arttıkça kabul edilme şansın da artar '
+          '(şu an Ün ${state.player.fame ?? 0}).';
+      final GameState red = state.copyWith(
+        player: state.player.copyWith(
+          stats: state.player.stats.gain(happiness: -2),
+        ),
+        interactionCounts: Map<String, int>.unmodifiable(<String, int>{
+          ...state.interactionCounts,
+          GameState.interactionKey(job.id, 'medya'): timesDone(state, job) + 1,
+        }),
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(
+            age: state.player.age,
+            text: ret,
+            category: LogCategory.kisisel,
+          ),
+        ]),
+      );
+      return MediaResult(state: red, applied: true, text: ret);
     }
 
     // Takipçi kazancı **mevcut** kitleden hesaplanır; hesabı olmayana
@@ -96,6 +160,9 @@ abstract final class MediaOpportunities {
         ...state.interactionCounts,
         GameState.interactionKey(job.id, 'medya'): timesDone(state, job) + 1,
       }),
+      // Davet kullanıldı; bir kez geçerlidir.
+      mediaInvitationId: null,
+      mediaInvitationAge: null,
     );
 
     final StringBuffer metin = StringBuffer(
@@ -157,5 +224,28 @@ abstract final class MediaOpportunities {
       sonuc.add(a.copyWith(followers: a.followers + pay));
     }
     return sonuc;
+  }
+
+  /// prototypeOnly: bir yılda kendiliğinden davet gelme ihtimali (D-120).
+  static const double prototypeOnlyInvitationChance = 0.22;
+
+  /// Kendiliğinden gelen medya daveti üretir; koşul yoksa `null` (D-120).
+  ///
+  /// Davet, oyuncunun Ününe **yakın** işlerden seçilir: Ünün çok
+  /// üstündeki bir program kimseyi durup dururken çağırmaz. Davet edilen
+  /// iş için Ün şartı aranmaz ve başvuru reddedilmez.
+  static MediaOpportunity? maybeInvitation(GameState state, Random rng) {
+    final int un = state.player.fame ?? 0;
+    if (un < kMediaSectionMinFame) return null;
+    if (state.mediaInvitationId != null) return null;
+    if (!rng.chance(prototypeOnlyInvitationChance)) return null;
+
+    // Ünün en çok 15 puan üstündeki işler davet edebilir.
+    final List<MediaOpportunity> adaylar = <MediaOpportunity>[
+      for (final MediaOpportunity j in kMediaOpportunities)
+        if (j.minFame <= un + 15 && timesDone(state, j) < j.maxPerAge) j,
+    ];
+    if (adaylar.isEmpty) return null;
+    return adaylar[rng.nextInt(adaylar.length)];
   }
 }
