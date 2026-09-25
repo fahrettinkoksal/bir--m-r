@@ -25,6 +25,7 @@ import '../life/health_crisis_engine.dart';
 import '../interaction/marriage_engine.dart';
 import '../interaction/parenthood.dart';
 import '../life/inheritance.dart';
+import '../law/legal_engine.dart';
 import '../life/mortality.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
@@ -523,6 +524,11 @@ class LifeProgression {
     afterDeaths = MilitaryService.advanceFugitive(afterDeaths, newAge, _rng);
     afterDeaths = MilitaryService.applyDeferralEnd(afterDeaths, newAge);
     afterDeaths = MilitaryService.applyCallUp(afterDeaths, newAge);
+
+    // Adli süreç (D-128): açık soruşturma ilerler, dosya mahkemeye
+    // gidebilir, hapisteki yıl işler ve süresi dolan tahliye olur.
+    // Suç işlemeyen oyuncuda bu satırların hiçbir etkisi yoktur.
+    afterDeaths = LegalEngine.advanceYear(afterDeaths, newAge, _rng);
 
     // Evcil hayvanlar (Paket 40): yaşlanır, yıllık bakım gideri **bir
     // kez** alınır ve yaşı gelen hayvan doğal yoldan kaybedilir. Parasızlık

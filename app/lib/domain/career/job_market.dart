@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import '../../data/interview_catalog.dart';
+import '../../data/crime_catalog.dart';
 import '../../data/job_catalog.dart';
+import '../models/criminal_record.dart';
 import '../../data/hobby_catalog.dart';
 import '../../data/license_catalog.dart';
 import '../../data/martial_arts_catalog.dart';
@@ -118,6 +120,14 @@ class JobMarket {
     if (egitim.isSchoolStudent) {
       return 'Okula devam ederken tam zamanlı işe başvurulmaz.';
     }
+    // Cezaevindeyken iş aranmaz (D-128).
+    if (state.isImprisoned) {
+      return 'Cezaevindeyken işe başvurulmaz.';
+    }
+    // Sabıka kaydı (D-128). Her suç bütün işleri kapatmaz: kural işin
+    // kendi gerçeğine bakar ve gerekçe açıkça yazılır (D-063).
+    final String adliEngel = recordReason(state, job);
+    if (adliEngel.isNotEmpty) return adliEngel;
     switch (job.education) {
       case JobEducation.yok:
         break;
@@ -181,6 +191,32 @@ class JobMarket {
       }
     }
     return '';
+  }
+
+  /// Sabıka kaydının bu işe engel olup olmadığı (D-128).
+  ///
+  /// Engel yoksa boş metin döner. Gerekçe **açık yazılır**: hangi kayıt,
+  /// hangi yaşta, neden engel.
+  String recordReason(GameState state, JobType job) {
+    if (job.recordRule == RecordRule.serbest) return '';
+    final List<CriminalCase> sabika = state.legal.record;
+    if (sabika.isEmpty) return '';
+
+    final List<CriminalCase> engelleyen = job.recordRule ==
+            RecordRule.temizGerekir
+        ? sabika
+        : sabika
+            .where(
+              (CriminalCase c) =>
+                  c.crime != null && c.crime!.severity != CrimeSeverity.hafif,
+            )
+            .toList(growable: false);
+    if (engelleyen.isEmpty) return '';
+
+    final CriminalCase ilk = engelleyen.first;
+    final String ad = ilk.crime?.recordLabel ?? 'adli kayıt';
+    return '${job.recordRule.label}: ${ilk.ageAtIncident} yaşındaki '
+        '"$ad" kaydı sicilinde duruyor.';
   }
 
   InteractionAvailability applicationAvailability(

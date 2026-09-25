@@ -1214,6 +1214,56 @@ değerleri), **Q-140** (üslup belgesi ve robotik kalıp tavanı).
 `flutter test` **2037 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
+## Paket T: Suç ve Hukuk V1 + sokak kültürü dili (25 Eylül 2026, D-128, D-129)
+
+Faho iki iş istedi: (1) suç/hukuk sistemini ilk kez ekle ama **ilk sürümü
+kontrollü tut**, (2) yeni içeriklerde günümüz Türkiye'sinin doğal konuşma
+biçimi kullanılsın.
+
+**Kapsam bilinçli olarak dar.** Amaç suç işlemeyi öğretmek değil,
+seçimlerin hukuki ve toplumsal sonucunu canlandırmak. Hiçbir metinde suç
+işleme yöntemi, kaçış, saklanma, delil ya da denetimden kurtulma
+anlatılmıyor; olaylar yüksek seviyede **seçimler** olarak kalıyor ve
+sonucu motor yürütüyor. **Ağır/organize suç bu sürümde yok.**
+
+**Eklenenler:**
+- 11 suç türü (trafikten yaralamaya, hafif/orta/ağır ağırlıkta)
+- Hukuki durumlar: idari ceza · soruşturma · dava · takipsizlik · karar
+  (beraat / uyarı / para cezası / erteleme / hapis) · sabıka · hapis ·
+  denetim dönemi
+- **31 olay, 5 çok adımlı zincir** (`lib/data/event_pool_crime.dart`)
+- Ayrı **duruşma ekranı**: avukat + savunma tutumu aynı pencerede
+- 4 kademeli avukat kataloğu (2026 ücretleriyle); **sonucu garanti etmez**
+- Sabıkanın işe etkisi: `RecordRule.serbest / temizGerekir / agirEngeller`
+- Basit hapis: iş biter, gelir kesilir, bağlar zayıflar, dışarının
+  aktiviteleri kapanır, içeride 4 güvenli aktivite açılır
+- **Adli Geçmiş** bölümü (Okul/Meslek altında)
+- Hayat sonu değerlendirmesinde suç geçmişi **anılır ama puanlanmaz**
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):**
+
+| Oynayış | Dosyası olan | Sabıkalı | Mahkemeye çıkan | Hapis yatan |
+|---|---|---|---|---|
+| Riskli seçim yapan | 97 | 56 | 75 | 22 |
+| **Temiz oynayan** | **0** | **0** | **0** | **0** |
+
+**Suç zorunlu içerik değil:** her olayda suça girmeyen bir kapı var ve
+riskli seçim yapmayan 100 hayatta tek bir dosya bile açılmıyor. Bu bir
+testle sabit.
+
+**Dil (D-129):** `docs/WRITING_STYLE_TR.md` §14 yazıldı. Polis kısa ve
+ciddi, hâkim resmî, avukat yarı resmî; sokak ağzı yalnızca sokakta.
+Polisin karikatürleşmemesi ve hâkimin sokak ağzı kullanmaması testle
+sabit.
+
+**Açık kalan sayılar:** Q-141 (kapsam ve sıklık), Q-142 (avukat
+ücretleri), Q-143 (sabıkanın işlere etkisi ve hapsin bedeli). Bütün
+sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2072 geçti, 15 atlandı, 0 başarısız** (bunların **35'i** bu pakette yeni).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

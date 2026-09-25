@@ -3,6 +3,8 @@ library;
 
 import '../models/book_progress.dart';
 import '../models/career.dart';
+import '../../data/crime_catalog.dart';
+import '../models/criminal_record.dart';
 import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../../data/martial_arts_catalog.dart';
@@ -389,6 +391,38 @@ abstract final class LifeVerdictBuilder {
         age: ilkIs.startedAtAge,
         text: 'İlk işine girdin: ${ilkIs.title}.',
       ));
+    }
+
+    // Adli geçmiş anılır ama **puanlanmaz** (D-128). "Suç işledi = kötü
+    // insan" gibi bir ahlaki yargı yok; yalnızca somut geçmiş yazılır.
+    for (final CriminalCase dosya in state.legal.cases) {
+      if (dosya.stage != CaseStage.karar) continue;
+      final int? yas = dosya.decidedAtAge;
+      final CrimeType? suc = dosya.crime;
+      if (yas == null || suc == null) continue;
+      switch (dosya.verdict) {
+        case Verdict.hapis:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: '${suc.label} nedeniyle '
+                '${dosya.prisonYears} yıl cezaevinde kaldın.',
+          ));
+        case Verdict.beraat:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: '${suc.label} dosyasından beraat ettin.',
+          ));
+        case Verdict.paraCezasi:
+        case Verdict.erteleme:
+        case Verdict.uyari:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: 'Bir ${suc.category.label.toLowerCase()} dosyası '
+                'nedeniyle mahkemeye çıktın.',
+          ));
+        case Verdict.yok:
+          break;
+      }
     }
 
     final TripRecord? ilkGezi = state.trips.isEmpty

@@ -3261,3 +3261,64 @@ Faho'nun talimatı belgeye çevrildi ve bir testle ölçülüyor. Test bir **kel
 3. Espri yasağının kapsamı doğru mu? Şu an: ölüm, cenaze, ağır hastalık, gebelik kaybı, ağır boşanma, ciddi borç, şiddet, hayatın sonu, çocukla ilgili ciddi sorunlar.
 4. Tavan 40 çok gevşek mi? Ölçüm 0 olduğuna göre tavan **0'a** çekilip yeni kalıp tamamen yasaklanabilir; bu CI'yı sertleştirir.
 5. Mevcut 272 olayın metinleri tek tek gözden geçirilsin mi? Bu turda yalnızca **mekanik duran** metinler değiştirildi; iyi okunanlara dokunulmadı.
+
+---
+
+### Q-141 — Suç/Hukuk V1: kapsam, sıklık ve denge
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-128 · `app/lib/data/crime_catalog.dart`, `app/lib/domain/law/legal_engine.dart`, `app/lib/data/event_pool_crime.dart` · Test: `app/test/crime_law_test.dart`
+
+Faho istedi: "suç/hukuk sistemini ilk kez ekle ama ilk sürümü kontrollü tut". 11 suç türü, 31 olay ve 5 zincir yazıldı. Sistemin **kapsamı ve sıklığı** onay bekliyor.
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):**
+
+| Oynayış | Dosyası olan | Sabıkalı | Mahkemeye çıkan | Hapis yatan |
+|---|---|---|---|---|
+| **Riskli seçimler yapan** (rastgele seçim) | 97 | **56** | 75 | **22** |
+| **Temiz oynayan** (riskli seçim hiç seçilmiyor) | **0** | **0** | **0** | **0** |
+
+"Dosyası olan 97" sayısı yanıltıcı görünebilir: içine **trafik cezası gibi idari işlemler** de giriyor ve bunlar sabıka sayılmıyor. Anlamlı sayı **sabıkalı 56**'dır ve bu, riskli seçimi üçte bir oranında seçen bir oyuncunun sonucudur.
+
+**Karar soruları:**
+1. **Sıklık doğru mu?** Riskli seçim yapan oyuncunun %56'sının sabıkalı olması çok mu? Suç olaylarının havuzdaki ağırlığı düşürülsün mü? (Şu an 31 olay / 303 havuz.)
+2. **%22 hapis** oranı doğru mu? Hapis cezası çok mu kolay çıkıyor?
+3. **Ağır/organize suç** ne zaman gelsin? Bu sürümde bilinçli olarak yok.
+4. **Hapis süresi** oyun yılı ölçeğinde (1-3 yıl). Daha uzun cezalar olmalı mı?
+5. Tahliye sonrası **iki yıl denetim dönemi** doğru mu? Şu an denetim döneminin somut bir yaptırımı yok; olmalı mı?
+6. Suç olayları şu an **yaşa ve mali duruma** bağlı çıkıyor (kötü arkadaş çevresi, düşük para, öfke). Başka bir tetikleyici eklenmeli mi?
+
+---
+
+### Q-142 — Avukat kademeleri ve ücretleri
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-128 · `app/lib/data/lawyer_catalog.dart` · Test: `app/test/crime_law_test.dart`
+
+Üç kademe var; gerçek bir avukatın ya da büronun adı kullanılmıyor. Ücretler 2026 net asgari ücret (28.075 ₺) çıpasından türetildi; Türkiye Barolar Birliği asgari ücret tarifesi ceza davalarında beş haneli tutarlardan başlıyor.
+
+| Kademe | Ücret | Yumuşama payı |
+|---|---|---|
+| Avukat tutma (kendini savun) | 0 ₺ | 0 |
+| Uygun ücretli avukat | 33.690 ₺ | +%10 |
+| Deneyimli avukat | 98.263 ₺ | +%20 |
+| Adı duyulmuş avukat | 252.675 ₺ | +%32 |
+
+**Karar soruları:**
+1. Ücretler doğru bantta mı? Pahalı avukat çok mu ucuz?
+2. **Yumuşama payları** doğru mu? En iyi avukat %32 katkı yapıyor ve sonucu **garanti etmiyor** — ölçümde aynı dosyada farklı kararlar çıkıyor. Bu belirsizlik doğru mu?
+3. Avukat **peşin** ödeniyor. Taksit ya da "kaybedersen alma" gibi bir yol olmalı mı?
+4. Kademe sayısı üç yeterli mi?
+
+---
+
+### Q-143 — Sabıkanın işlere etkisi ve hapsin bedeli
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-128 · `app/lib/data/job_catalog.dart` (`RecordRule`), `app/lib/domain/career/job_market.dart` · Test: `app/test/crime_law_test.dart`
+
+**Kodlanan kural:** `serbest` (çoğu iş) · `temizGerekir` (polis, itfaiyeci, memur, güvenlik) · `agirEngeller` (öğretmen, doktor, hemşire, banka personeli). Dayanak gerçek: 657 sayılı kanun ve 5188 sayılı özel güvenlik kanunu belirli suçlardan hüküm giyenleri bu görevlerin dışında tutuyor.
+
+**Hapsin bedeli:** iş biter (kayıt geçmişe geçer, silinmez) · gelir kesilir · yaşayan herkesle bağ düşer (giriş −6, her yıl −3) · mutluluk −12, sağlık −4 · dışarının bütün aktiviteleri kapanır.
+
+**Karar soruları:**
+1. **Hangi işler hangi kuralda olmalı?** Şu an 4 iş temiz kayıt istiyor, 4 iş ağır kayıtta kapanıyor, kalan 36 iş serbest. Liste genişletilsin mi?
+2. Sabıka **zamanla silinmeli mi?** Şu an hayat boyu duruyor. Gerçekte adli sicil kaydı belirli koşullarda siliniyor; oyuna girsin mi?
+3. **Erteleme** (hükmün ertelenmesi) şu an sabıka sayılıyor ve işi kapatıyor. Doğru mu?
+4. Hapsin bağ üzerindeki etkisi (giriş −6, yıllık −3) doğru mu? Çok mu sert, az mı?
+5. Cezaevindeki dört aktivite yeterli mi? (Görüş, kitap, spor, sakin kalmak.)
+6. Hapisten sonra iş bulmak şu an yalnızca `recordRule` üzerinden zorlaşıyor; ayrıca bir "işe alım isteksizliği" olmalı mı?

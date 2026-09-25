@@ -14,7 +14,9 @@ import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/interview_sheet.dart';
 import '../../../domain/career/military_service.dart';
+import '../../../domain/models/criminal_record.dart';
 import '../../../domain/models/military.dart';
+import 'legal_record_page.dart';
 import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../widgets/track_choice_sheet.dart';
@@ -300,7 +302,29 @@ class _PeoplePage extends StatelessWidget {
 }
 
 /// Meslek ekranının alt sayfaları.
-enum _CareerPage { kok, mezuniyetSonrasi, isArama, kariyerGecmisi, askerlik }
+/// Adli Geçmiş menüsünün alt metni: gerçek kayda bakar, uydurmaz.
+String _adliAltMetni(GameState state) {
+  final LegalState hukuk = state.legal;
+  if (hukuk.isImprisoned) {
+    return 'Cezaevindesin · tahliye ${hukuk.releaseAtAge} yaş';
+  }
+  final CriminalCase? acik = hukuk.openCase;
+  if (acik != null) {
+    return '${acik.stage.label} · ${acik.crime?.label ?? 'dosya'}';
+  }
+  final int kayit = hukuk.record.length;
+  if (kayit == 0) return 'Adli kaydın temiz';
+  return kayit == 1 ? 'Sicilinde bir kayıt var' : 'Sicilinde $kayit kayıt var';
+}
+
+enum _CareerPage {
+  kok,
+  mezuniyetSonrasi,
+  isArama,
+  kariyerGecmisi,
+  askerlik,
+  adliGecmis,
+}
 
 class _CareerView extends StatefulWidget {
   const _CareerView({required this.state, required this.onBack});
@@ -330,6 +354,8 @@ class _CareerViewState extends State<_CareerView> {
     switch (_page) {
       case _CareerPage.askerlik:
         return MilitaryPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.adliGecmis:
+        return LegalRecordPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.mezuniyetSonrasi:
         return AfterSchoolPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.isArama:
@@ -477,6 +503,18 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 10),
         ],
+        // Adli Geçmiş (D-128). Sabıkanın oyundaki en somut etkisi iş
+        // başvurusu olduğu için burada durur. Kayıt yoksa da görünür:
+        // "temiz" bilgisi de bilgidir.
+        MenuRow(
+          key: const Key('career_legal_row'),
+          title: 'Adli Geçmiş',
+          subtitle: _adliAltMetni(state),
+          icon: Icons.gavel_outlined,
+          accent: BirOmurAccents.nar,
+          onTap: () => _go(_CareerPage.adliGecmis),
+        ),
+        const SizedBox(height: 10),
         if (isAranabilir && !state.career.isRetired) ...<Widget>[
           MenuRow(
             title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',

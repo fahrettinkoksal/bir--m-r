@@ -18,6 +18,29 @@ import 'package:flutter/foundation.dart';
 import 'economy.dart';
 import 'education_tracks.dart';
 
+/// İşin sabıka kaydına bakışı (D-128).
+///
+/// **Her suç bütün işleri kapatmaz.** Kural işin kendi gerçeğine bakar:
+/// güvenlik ve kamu görevlerinde temiz kayıt aranır, çoğu işte aranmaz.
+enum RecordRule {
+  /// Sabıkaya bakılmaz. Katalogdaki işlerin çoğu böyledir.
+  serbest('Adli kayda bakılmaz'),
+
+  /// **Hiç** sabıka kaydı olmamalı. Polis, memur, güvenlik gibi
+  /// görevler için: 657 sayılı kanun ve 5188 sayılı özel güvenlik
+  /// kanunu belirli suçlardan hüküm giyenlerin bu görevlere
+  /// alınmayacağını söyler.
+  temizGerekir('Adli kaydın temiz olması gerekiyor'),
+
+  /// Yalnızca **orta ve ağır** kayıtlar engeller; hafif bir dosya
+  /// kapıyı kapatmaz.
+  agirEngeller('Ağır bir adli kayıt bu işe engel');
+
+  const RecordRule(this.label);
+
+  final String label;
+}
+
 /// İşin gerektirdiği asgari eğitim.
 enum JobEducation {
   yok('Eğitim şartı yok'),
@@ -51,6 +74,7 @@ class JobType {
     this.hobbyId,
     this.minHobbyStage = 0,
     this.requiredLicenses = const <String>{},
+    this.recordRule = RecordRule.serbest,
   });
 
   final String id;
@@ -128,6 +152,12 @@ class JobType {
   /// Kuryelik gibi, aracı kullanmanın işin kendisi olduğu mesleklerde
   /// aranır. Ehliyetsiz oyuncuya iş açılmaz; gerekçesi yazılır.
   final Set<String> requiredLicenses;
+
+  /// İşin sabıka kaydına bakışı (D-128).
+  ///
+  /// Varsayılan **serbest**'tir: oyun uydurma bir engel koymaz, yalnızca
+  /// gerçekte kayıt aranan işlerde doldurulur.
+  final RecordRule recordRule;
 
   /// Bu meslekte çıkılabilecek en üst basamak.
   int get maxLevel => levels.isEmpty ? 0 : levels.length - 1;
@@ -207,6 +237,7 @@ const List<JobType> kJobCatalog = <JobType>[
     band: SalaryBand.giris,
     education: JobEducation.lise,
     levels: <String>['Güvenlik görevlisi', 'Vardiya amiri', 'Güvenlik şefi'],
+    recordRule: RecordRule.temizGerekir,
   ),
   JobType(
     id: 'cagri_merkezi',
@@ -381,6 +412,7 @@ const List<JobType> kJobCatalog = <JobType>[
       'Müşteri ilişkileri yetkilisi',
       'Şube müdür yardımcısı',
     ],
+    recordRule: RecordRule.agirEngeller,
   ),
   JobType(
     id: 'ik_uzmani',
@@ -421,6 +453,7 @@ const List<JobType> kJobCatalog = <JobType>[
     programs: <String>{'hemsirelik'},
     minIntelligence: 55,
     levels: <String>['Hemşire', 'Kıdemli hemşire', 'Sorumlu hemşire'],
+    recordRule: RecordRule.agirEngeller,
   ),
   JobType(
     id: 'doktor',
@@ -433,6 +466,7 @@ const List<JobType> kJobCatalog = <JobType>[
     programs: <String>{'tip'},
     minIntelligence: 75,
     levels: <String>['Pratisyen hekim', 'Uzman hekim', 'Başhekim yardımcısı'],
+    recordRule: RecordRule.agirEngeller,
   ),
   JobType(
     id: 'psikolog',
@@ -548,6 +582,7 @@ const List<JobType> kJobCatalog = <JobType>[
     minIntelligence: 50,
     minCharisma: 40,
     levels: <String>['Öğretmen', 'Kıdemli öğretmen', 'Zümre başkanı'],
+    recordRule: RecordRule.agirEngeller,
   ),
   JobType(
     id: 'polis',
@@ -564,6 +599,7 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     minIntelligence: 45,
     levels: <String>['Polis memuru', 'Kıdemli memur', 'Komiser yardımcısı'],
+    recordRule: RecordRule.temizGerekir,
   ),
   JobType(
     id: 'itfaiyeci',
@@ -578,6 +614,7 @@ const List<JobType> kJobCatalog = <JobType>[
     band: SalaryBand.ofisUzmanlik,
     education: JobEducation.lise,
     levels: <String>['İtfaiye eri', 'Kıdemli er', 'Grup amiri'],
+    recordRule: RecordRule.temizGerekir,
   ),
   JobType(
     id: 'memur',
@@ -589,6 +626,7 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     minIntelligence: 45,
     levels: <String>['Memur', 'Kıdemli memur', 'Şef'],
+    recordRule: RecordRule.temizGerekir,
   ),
 
   // ===================================================================

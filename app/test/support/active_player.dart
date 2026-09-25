@@ -3,9 +3,12 @@ import 'dart:math';
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
+import 'package:bir_omur/data/lawyer_catalog.dart';
 import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/data/university_catalog.dart';
+import 'package:bir_omur/domain/models/criminal_record.dart';
 import 'package:bir_omur/domain/models/pending_crisis.dart';
+import 'package:bir_omur/domain/models/pending_trial.dart';
 import 'package:bir_omur/domain/models/pending_wedding.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
@@ -32,6 +35,7 @@ class ActiveLifeResult {
     required this.married,
     required this.hadChild,
     this.eventAges = const <String, int>{},
+    this.finalLegal = const LegalState(),
   });
 
   /// Bu hayatta sunulan olayların kimlikleri.
@@ -54,6 +58,9 @@ class ActiveLifeResult {
 
   /// Olay kimliği -> ilk görüldüğü yaş (ölçüm için).
   final Map<String, int> eventAges;
+
+  /// Hayatın sonundaki adli durum (D-128 ölçümleri için).
+  final LegalState finalLegal;
 }
 
 /// **Aktif oyuncu** simülasyonu.
@@ -67,7 +74,11 @@ class ActiveLifeResult {
 /// bölüm seçer, iş arar, mülakata girer, hobi edinir, geziye çıkar,
 /// sosyal medya hesabı açar ve yaşı gelince emekli olur. Böylece koşullu
 /// içeriğin **gerçek** erişilebilirliği ölçülebilir.
-ActiveLifeResult playActiveLife(int seed, {bool recordAges = false}) {
+ActiveLifeResult playActiveLife(
+  int seed, {
+  bool recordAges = false,
+  bool avoidCrime = false,
+}) {
   final GameController c = GameController(random: Random(seed));
   c.startNewLife(mode: StartMode.tamamenRastgele);
   final Random secim = Random(seed * 31 + 5);
@@ -94,7 +105,15 @@ ActiveLifeResult playActiveLife(int seed, {bool recordAges = false}) {
       gorulen.add(olay.eventId);
       tekrar[olay.eventId] = (tekrar[olay.eventId] ?? 0) + 1;
       if (recordAges) olayYasi.putIfAbsent(olay.eventId, () => s.player.age);
-      final List<EventChoice> sec = olay.choices;
+      List<EventChoice> sec = olay.choices;
+      // "Temiz oynayan" ölçümü (D-128): riskli seçim hiç seçilmez.
+      // Böylece suçun **zorunlu içerik olmadığı** ölçülebilir.
+      if (avoidCrime) {
+        final List<EventChoice> temiz = sec
+            .where((EventChoice ch) => ch.crimeId == null)
+            .toList(growable: false);
+        if (temiz.isNotEmpty) sec = temiz;
+      }
       c.chooseEventOption(sec[secim.nextInt(sec.length)].id);
       continue;
     }
@@ -110,6 +129,21 @@ ActiveLifeResult playActiveLife(int seed, {bool recordAges = false}) {
               .toList(growable: false);
       if (acik.isEmpty) break;
       c.respondToCrisis(acik[secim.nextInt(acik.length)].id);
+      continue;
+    }
+
+    // 2b) Duruşma varsa savunmayı yap (D-128). Gerçek oyuncu gibi:
+    // parası yetiyorsa avukat tutar, yetmiyorsa kendi anlatır.
+    if (s.hasPendingTrial) {
+      final List<LawyerTier> uygun = kLawyerCatalog
+          .where((LawyerTier t) => t.fee == 0 || s.player.wallet >= t.fee)
+          .toList(growable: false);
+      final LawyerTier avukat = uygun[secim.nextInt(uygun.length)];
+      final List<DefenceStance> tutumlar = DefenceStance.values;
+      c.respondToTrial(
+        stance: tutumlar[secim.nextInt(tutumlar.length)],
+        lawyerId: avukat.id,
+      );
       continue;
     }
 
@@ -274,6 +308,7 @@ ActiveLifeResult playActiveLife(int seed, {bool recordAges = false}) {
 
   izler.addAll(c.state!.storyFlags);
   final int yas = c.state!.player.age;
+  final LegalState adli = c.state!.legal;
   c.dispose();
 
   return ActiveLifeResult(
@@ -289,6 +324,7 @@ ActiveLifeResult playActiveLife(int seed, {bool recordAges = false}) {
     married: evlendi,
     hadChild: cocukOldu,
     eventAges: olayYasi,
+    finalLegal: adli,
   );
 }
 

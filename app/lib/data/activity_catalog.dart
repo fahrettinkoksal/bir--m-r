@@ -32,7 +32,13 @@ enum ActivityVenue {
   /// oyuncunun buna karşı yapabileceği bir şey olmalı.
   ///
   /// Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
-  estetik('Estetik', Icons.face_retouching_natural_rounded);
+  estetik('Estetik', Icons.face_retouching_natural_rounded),
+
+  /// D-128: yalnızca cezaevindeyken açılan, güvenli ve genel
+  /// aktiviteler. Burada suç mekaniği **yoktur**.
+  ///
+  /// Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  cezaevi('Cezaevi', Icons.gavel_rounded);
 
   const ActivityVenue(this.label, this.icon);
 
@@ -80,7 +86,13 @@ class ActivityAction {
     this.reducesHairLoss = false,
     this.riskChance = 0,
     this.minAgeNote,
+    this.onlyInPrison = false,
   });
+
+  /// Yalnızca cezaevindeyken yapılabilir mi? (D-128)
+  ///
+  /// Cezaevi eylemleri dışarıda, dışarının eylemleri içeride açılmaz.
+  final bool onlyInPrison;
 
   final String id;
   final ActivityVenue venue;
@@ -553,6 +565,56 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     minAge: 13,
     intelligence: 5,
     maxPerAge: 2,
+  ),
+
+  // =====================================================================
+  // Cezaevi (D-128)
+  //
+  // İçerideyken yapılabilecek **güvenli ve genel** şeyler. Burada suç
+  // mekaniği yoktur; amaç oyuncunun o yılları boş geçirmemesi.
+  // =====================================================================
+  ActivityAction(
+    id: 'cezaevi_gorus',
+    venue: ActivityVenue.cezaevi,
+    label: 'Görüşe çık',
+    description: 'Camın öbür tarafında tanıdık bir yüz.',
+    icon: Icons.record_voice_over_outlined,
+    happiness: 5,
+    maxPerAge: 3,
+    onlyInPrison: true,
+  ),
+  ActivityAction(
+    id: 'cezaevi_kitap',
+    venue: ActivityVenue.cezaevi,
+    label: 'Kitap oku',
+    description: 'Kütüphanede üç raf var; üçünü de bitireceksin.',
+    icon: Icons.menu_book_outlined,
+    intelligence: 4,
+    happiness: 1,
+    maxPerAge: 3,
+    onlyInPrison: true,
+  ),
+  ActivityAction(
+    id: 'cezaevi_spor',
+    venue: ActivityVenue.cezaevi,
+    label: 'Spor yap',
+    description: 'Avluda tur. Sayıyorsun, sonra saymayı bırakıyorsun.',
+    icon: Icons.fitness_center_rounded,
+    health: 4,
+    happiness: 1,
+    maxPerAge: 3,
+    onlyInPrison: true,
+  ),
+  ActivityAction(
+    id: 'cezaevi_sakin',
+    venue: ActivityVenue.cezaevi,
+    label: 'Sakin kal',
+    description: 'Tartışmanın kenarından dolaş. En zor olanı bu.',
+    icon: Icons.self_improvement_rounded,
+    happiness: 2,
+    charisma: 1,
+    maxPerAge: 3,
+    onlyInPrison: true,
   ),
 ];
 

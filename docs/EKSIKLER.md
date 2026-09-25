@@ -36,14 +36,14 @@ ayırmak için her madde aşağıda işaretlendi.
 
 | Sistem | Sayı |
 |---|---|
-| Olay havuzu | **272 olay** (221 + 51 çocukluk, D-126) |
+| Olay havuzu | **303 olay** (221 + 51 çocukluk + 31 suç/hukuk) |
 | Olay kategorileri | kişisel 79 · yetişkinlik 44 · aile 40 · mahalle 34 · okul 24 |
 | Meslek | 44 |
 | Aktivite eylemi | 51 (7 mekân) |
 | Üniversite bölümü | 11 |
 | Evcil hayvan türü | 10 · dövüş sanatı 3 · hobi 4 |
 | Sosyal medya | 14 içerik · 7 medya işi · 7 sponsor kategorisi |
-| Kesin karar | D-001 … D-127 |
+| Kesin karar | D-001 … D-129 |
 | Test | 2024 geçiyor, 15 atlanıyor |
 
 **Ölçülen oynanış:** ortalama ömür ~71-74 yıl · bir hayatta görülen
@@ -56,15 +56,25 @@ bir olayın tek hayatta en çok tekrarı **3**.
 
 Bunlar oyunda **yok**. Kodda tek satırı geçmiyor (arama ile doğrulandı).
 
-### 2.1 Suç, hukuk ve hapis — **yok**
-Arama: `suç|hapis` → kodda **0 sonuç**.
+### 2.1 Suç, hukuk ve hapis — **eklendi (D-128, V1)**
 
-Oyunda hiçbir risk yok; her hayat "iyi vatandaş" olarak geçiyor. Hırsızlık,
-kavga, trafik cezası, dava, tutukluluk, sabıka kaydının işe başvuruyu
-etkilemesi — hiçbiri yok. Faho daha önce "ileride gelecek" demişti.
+> **Güncelleme (aynı gün):** Bu bölümdeki "yok" tespiti artık geçerli
+> değil. Faho onayıyla **Suç ve Hukuk V1** eklendi.
 
-**Bu en büyük tek eksik.** Hayatın kaybedilebilir olmadığı bir hayat
-simülasyonu, seçimlerin ağırlığını taşıyamıyor.
+Gelen: 11 suç türü (hız ihlali, yanlış park, maddi hasarlı kaza, alkollü
+araç kullanma, kavga, kamu düzenini bozma, mala zarar verme, hırsızlık
+girişimi, yaralama, iş yerinde usulsüzlük, borç davası) · idari ceza,
+soruşturma, dava, takipsizlik, karar, sabıka, hapis ve denetim dönemi ·
+31 olay ve 5 zincir · ayrı duruşma ekranı · 4 kademeli avukat · sabıkanın
+iş başvurusuna etkisi · basit hapis ve cezaevi aktiviteleri · Adli
+Geçmiş bölümü.
+
+**Hâlâ yok:** ağır/organize suç, suç çevresi/çete, denetim döneminin
+somut yaptırımı, adli sicilin zamanla silinmesi. Bunlar V2'ye bırakıldı
+ve Q-141 … Q-143'te soruldu.
+
+**Suç zorunlu içerik değil:** riskli seçim yapmayan 100 hayatta tek bir
+dosya bile açılmıyor (ölçüldü, testle sabit).
 
 ### 2.2 Girişimcilik — **yok**
 Arama: `girişim` → **0 sonuç**.
@@ -286,8 +296,8 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    Ucuz, ve gerçek bir hata çıkarsa değerli.
 2. **Çocukluk ve ergenlik olayları** (0-17 için 40-50 olay). Oyunun en
    fakir ve en duygusal dönemi.
-3. **Suç ve hukuk sistemi.** Oyuna kaybedilebilirlik katan tek büyük
-   eksik.
+3. ~~**Suç ve hukuk sistemi.**~~ **Yapıldı (D-128, V1).** V2 için açık
+   kalanlar Q-141 … Q-143'te.
 4. **Arkadaşlığı derinleştir** — küslük, barışma, arkadaşın kendi hayatı.
 5. **Görsel kimlik kararı (Q-001/Q-077).** Oyun bir yıl daha kodlanabilir
    ama nasıl göründüğü seçilmeden "bitti" denemez.
@@ -298,5 +308,9 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 tekrar oynanabilir değil**. İkinci hayatı ilkinden farklı kılan şey
 henüz yeterli değil. Bunun sebebi havuzun küçüklüğü değil — bir hayatta
 ortalama 48 farklı olay görülüyor ve tekrar en fazla 3 — asıl sebep
-**hayatların birbirine benzemesi**: risk yok (suç/hukuk yok), meslek
-yolları birbirinin aynı (hepsi maaşlı), arkadaşlık sığ, çocukluk fakir.
+**hayatların birbirine benzemesi**: meslek yolları birbirinin aynı
+(hepsi maaşlı), arkadaşlık sığ.
+
+**Güncelleme:** bu görüşün iki dayanağı kapandı — çocukluk artık fakir
+değil (D-126) ve risk geldi (D-128). Kalan iki dayanak duruyor:
+girişimcilik yok, arkadaşlık hâlâ sığ.

@@ -10,6 +10,7 @@ import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 import 'event_pool_chains.dart';
 import 'event_pool_childhood.dart';
+import 'event_pool_crime.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_extra.dart';
 import 'event_pool_exam.dart';
@@ -1712,4 +1713,5 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // Çocukluk ve ergenlik (D-126): hayatın ilk on sekiz yılı en fakir
   // dönemdi; `docs/EKSIKLER.md` ölçtü.
   ...kChildhoodEvents,
+  ...kCrimeEvents,
 ];

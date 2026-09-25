@@ -195,3 +195,62 @@ Koşulu `EventRequirement` ile kur; metinde varsayma.
 Metinde kişiye atıf `{kisi}`, iyelikli bağ `{sahip}` ile yapılır;
 oyun bunları gerçek isim ve bağla doldurur. Elle "annen" yazmak yerine
 yer tutucu kullanmak, olayın farklı kişilerle çalışmasını sağlar.
+
+---
+
+## 14. Sokak kültürü ve hukuk dili (D-129 eki)
+
+**Kaynak:** Faho'nun 25 Eylül 2026 tarihli ek talimatı. Bu bölüm §5 ve
+§6'yı **genişletir**, iptal etmez.
+
+### 14.1 Genel ton
+
+Oyunun tonu "günümüz Türkiye'sinde yaşayan insanların doğal konuşma
+biçimi"dir. Şu alanlarda hafif sokak kültürü hissi **kullanılabilir**:
+
+arkadaş · kardeş · mahalle · gençlik · flört · iş arkadaşı · sanayi ·
+okul · kahvehane/kafe · sokak olayları
+
+Örnek doğal ifadeler:
+
+- "Abi bu iş pek iyi kokmuyor."
+- "Oğlum sen ne yaptın?"
+- "İyi bari, ucuz atlattın."
+- "Mahallede laf hızlı yayılmış."
+- "Usta bir baktı, yüzü düştü."
+- "Sen daha ne olduğunu anlamadan ortalık karıştı."
+- "Bu işin şakası kalmadı."
+- "Başına iş aldın."
+- "Millet çoktan konuşmaya başlamış."
+- "Bir anlık gazla yaptığın şey pahalıya patladı."
+
+**Yapılmayacak:** her cümlede "abi", her cümlede "oğlum", sürekli "lan",
+internet meme'leri, aşırı argo, küfür.
+
+**Anlatıcı** hafif esprili ve doğaldır. **Karakter diyaloğu** karakterin
+yaşına, çevresine ve rolüne göre daha sokak ağzı olabilir.
+
+### 14.2 Hukuk alanında kim nasıl konuşur
+
+| Kim | Ton |
+|---|---|
+| Polis | Kısa ve ciddi. "Şöyle kenara geçelim." |
+| Hâkim / savcı | Resmî. Sokak ağzı **yok**. |
+| Avukat | Yarı resmî. Garanti vermez. |
+| Anne / baba | Doğal aile dili. |
+| Arkadaş | Rahat. |
+
+**Polis karikatürleşmez** ("Gel lan buraya" yazılmaz). Hâkim sokak ağzı
+kullanmaz. Bu iki kural bir testle sabittir (`test/crime_law_test.dart`).
+
+### 14.3 Suç ve hukukta espri sınırı
+
+Suç ve hukuk olaylarında komedi yapılabilir, **ama ciddi sonuç şakaya
+çevrilmez**. Hapis kararı, yaralama ve mahkûmiyet anları §7'nin kapsamına
+girer: dil sade ve saygılı olur.
+
+### 14.4 Yazılmayacak içerik
+
+Suç olaylarında **yöntem anlatılmaz**: suç işleme yolu, kaçış, saklanma,
+delil ya da denetimden kurtulma hiçbir metinde yer almaz. Olaylar
+yüksek seviyede **seçimler** olarak kalır; sonucu motor yürütür.

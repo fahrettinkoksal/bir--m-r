@@ -87,6 +87,18 @@ class ActivityEngine {
 
   /// Eylem şu an yapılabilir mi?
   InteractionAvailability availability(GameState state, ActivityAction action) {
+    // Cezaevi ile dışarısı birbirine karışmaz (D-128). İçerideyken
+    // berbere gidilmez; dışarıdayken cezaevi avlusunda tur atılmaz.
+    if (action.onlyInPrison && !state.isImprisoned) {
+      return const InteractionAvailability.blocked(
+        'Bu yalnızca cezaevindeyken yapılabilir.',
+      );
+    }
+    if (!action.onlyInPrison && state.isImprisoned) {
+      return const InteractionAvailability.blocked(
+        'Cezaevindesin; buraya şu an gidemezsin.',
+      );
+    }
     if (state.player.age < action.minAge) {
       return InteractionAvailability.blocked(
         '${action.minAge} yaşından itibaren yapabilirsin.'

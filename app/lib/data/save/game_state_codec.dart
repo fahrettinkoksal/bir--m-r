@@ -35,7 +35,9 @@ import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
+import '../../domain/models/criminal_record.dart';
 import '../../domain/models/military.dart';
+import '../../domain/models/pending_trial.dart';
 import '../../domain/models/pregnancy.dart';
 import '../../domain/models/zodiac.dart';
 import '../../domain/models/pending_interview.dart';
@@ -285,6 +287,38 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'expecting': state.pregnancy!.expecting.name,
             },
       // Askerlik kaydı (Paket 29); yarım kalan hizmet kaybolmaz.
+      // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
+      // **uydurulmaz**.
+      'legal': <String, Object?>{
+        'imprisonedSinceAge': state.legal.imprisonedSinceAge,
+        'releaseAtAge': state.legal.releaseAtAge,
+        'probationUntilAge': state.legal.probationUntilAge,
+        'caseCounter': state.legal.caseCounter,
+        'cases': <Object?>[
+          for (final CriminalCase c in state.legal.cases)
+            <String, Object?>{
+              'id': c.id,
+              'crimeId': c.crimeId,
+              'ageAtIncident': c.ageAtIncident,
+              'stage': c.stage.name,
+              'verdict': c.verdict.name,
+              'fine': c.fine,
+              'finePaid': c.finePaid,
+              'prisonYears': c.prisonYears,
+              'lawyerId': c.lawyerId,
+              'decidedAtAge': c.decidedAtAge,
+              'closedAtAge': c.closedAtAge,
+              'note': c.note,
+            },
+        ],
+      },
+      'pendingTrial': state.pendingTrial == null
+          ? null
+          : <String, Object?>{
+              'caseId': state.pendingTrial!.caseId,
+              'age': state.pendingTrial!.age,
+              'text': state.pendingTrial!.text,
+            },
       'military': <String, Object?>{
         'status': state.military.status.name,
         'trackName': state.military.trackName,
@@ -1015,6 +1049,13 @@ GameState decodeGameState(Map<String, Object?> json) {
     military: json['military'] == null
         ? const MilitaryState()
         : _decodeMilitary(_asMap(json['military'], 'military')),
+    // Eski kayıtlarda adli kayıt yoktur; **temiz** açılır (D-128).
+    legal: json['legal'] == null
+        ? const LegalState()
+        : _decodeLegal(_asMap(json['legal'], 'legal')),
+    pendingTrial: json['pendingTrial'] == null
+        ? null
+        : _decodeTrial(_asMap(json['pendingTrial'], 'pendingTrial')),
     // Eski kayıtlarda deneme sayacı yoktur; sıfırdan başlar.
     unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
     ivfAttempts: _intOrNull(json, 'ivfAttempts') ?? 0,
@@ -1886,3 +1927,43 @@ T? _enumByNameOrNull<T extends Enum>(
   String key,
 ) =>
     name == null ? null : _enumByName(values, name, key);
+
+/// Adli durumu okur.
+///
+/// Bilinmeyen bir aşama ya da karar gelirse kayıt **atılmaz**: en güvenli
+/// karşılık okunur, çünkü bu projede kayıt silinmez.
+LegalState _decodeLegal(Map<String, Object?> json) => LegalState(
+      imprisonedSinceAge: _intOrNull(json, 'imprisonedSinceAge'),
+      releaseAtAge: _intOrNull(json, 'releaseAtAge'),
+      probationUntilAge: _intOrNull(json, 'probationUntilAge'),
+      caseCounter: _intOr(json, 'caseCounter', 0),
+      cases: List<CriminalCase>.unmodifiable(<CriminalCase>[
+        for (final Object? e in _optionalRawList(json, 'cases'))
+          _decodeCase(_asMap(e, 'legal.case')),
+      ]),
+    );
+
+CriminalCase _decodeCase(Map<String, Object?> json) => CriminalCase(
+      id: _string(json, 'id'),
+      crimeId: _string(json, 'crimeId'),
+      ageAtIncident: _intOr(json, 'ageAtIncident', 0),
+      stage: _enumByName(CaseStage.values, _string(json, 'stage'), 'case.stage'),
+      verdict: _enumByName(
+        Verdict.values,
+        _stringOrNull(json, 'verdict') ?? Verdict.yok.name,
+        'case.verdict',
+      ),
+      fine: _intOr(json, 'fine', 0),
+      finePaid: _boolOr(json, 'finePaid'),
+      prisonYears: _intOr(json, 'prisonYears', 0),
+      lawyerId: _stringOrNull(json, 'lawyerId'),
+      decidedAtAge: _intOrNull(json, 'decidedAtAge'),
+      closedAtAge: _intOrNull(json, 'closedAtAge'),
+      note: _stringOrNull(json, 'note'),
+    );
+
+PendingTrial _decodeTrial(Map<String, Object?> json) => PendingTrial(
+      caseId: _string(json, 'caseId'),
+      age: _intOr(json, 'age', 0),
+      text: _string(json, 'text'),
+    );

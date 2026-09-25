@@ -59,6 +59,11 @@ enum NoticeKind {
   /// `dogum`dan ayrıdır: doğum bildiriminde bebeğe isim verilir, burada
   /// verilmez. Yeni değerler **listenin sonuna** eklenir.
   aileDonum,
+
+  /// Adli süreç: soruşturma, mahkeme kararı, tahliye (D-128).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  adli,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

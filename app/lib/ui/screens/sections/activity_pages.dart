@@ -151,6 +151,8 @@ BirOmurAccent accentForVenue(ActivityVenue venue) {
       return BirOmurAccents.gul;
     case ActivityVenue.estetik:
       return BirOmurAccents.gul;
+    case ActivityVenue.cezaevi:
+      return BirOmurAccents.nar;
   }
 }
 

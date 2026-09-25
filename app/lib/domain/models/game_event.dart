@@ -60,6 +60,9 @@ class EventRequirement {
     this.minPetAge = 0,
     this.minPetYearsTogether = 0,
     this.requiresActiveHobby = false,
+    this.requiresOpenCase = false,
+    this.requiresRecord = false,
+    this.requiresReleased = false,
   });
 
   /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
@@ -105,6 +108,23 @@ class EventRequirement {
 
   /// Hobi **hâlâ sürüyor** sayılmalı mı? (Uzun süredir bırakılmışsa çıkmaz.)
   final bool requiresActiveHobby;
+
+  /// Süren bir adli dosya (soruşturma ya da dava) gerekir mi? (D-128)
+  ///
+  /// İfade ve bekleyiş olayları bunu kullanır; dosyası olmayana
+  /// "mahkemeyi bekliyorsun" denmez.
+  final bool requiresOpenCase;
+
+  /// Sabıka kaydı gerekir mi? (D-128)
+  ///
+  /// Sabıkası olmayan oyuncuya "kayıt var" olayı çıkmaz.
+  final bool requiresRecord;
+
+  /// Hapisten **çıkmış** olmak gerekir mi? (D-128)
+  ///
+  /// Tahliye sonrası olayları içindir; hiç içeri girmemiş oyuncuya
+  /// çıkmaz. İçerideyken de çıkmaz.
+  final bool requiresReleased;
 
   final int minAge;
   final int maxAge;
@@ -235,6 +255,7 @@ class EventChoice {
     this.startsSchoolFriendship = false,
     this.startsFriendship = false,
     this.rememberPersonAs,
+    this.crimeId,
   });
 
   final String id;
@@ -242,6 +263,14 @@ class EventChoice {
 
   /// Seçimden sonra gösterilen ve hayat günlüğüne yazılan özgün metin.
   final String resultText;
+
+  /// Bu seçim hukuki bir sürecin önünü açıyorsa o olayın kimliği
+  /// ([CrimeType.id], D-128).
+  ///
+  /// Seçim yapılınca motor dosyayı açar: idari ceza kesilir ya da
+  /// soruşturma başlar. **Sonucu seçim değil, süreç belirler**; oyuncuya
+  /// "şunu seçersen yakalanmazsın" diyen hiçbir bilgi verilmez.
+  final String? crimeId;
 
   final int happiness;
   final int health;

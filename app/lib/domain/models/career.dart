@@ -7,7 +7,12 @@ enum JobEndReason {
   istifa('Kendi isteğiyle ayrıldı'),
   cikarildi('İşten çıkarıldı'),
   emeklilik('Emekli oldu'),
-  kusakDevami('Kuşak devamında bırakıldı');
+  kusakDevami('Kuşak devamında bırakıldı'),
+
+  /// Hapis cezası nedeniyle iş bitti (D-128).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  hapis('Hapis nedeniyle ayrıldı');
 
   const JobEndReason(this.label);
 

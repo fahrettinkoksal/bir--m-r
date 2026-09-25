@@ -11,6 +11,7 @@ import '../widgets/character_header.dart';
 import '../widgets/comic.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
+import '../widgets/trial_sheet.dart';
 import '../widgets/notice_sheet.dart';
 import '../widgets/after_school_choice_sheet.dart';
 import '../widgets/track_choice_sheet.dart';
@@ -76,6 +77,27 @@ class _HomeShellState extends State<HomeShell> {
       await NoticeSheet.show(context, notice);
       if (!mounted) return;
       setState(() => _noticeVisible = false);
+    });
+  }
+
+  /// Aynı anda yalnızca tek duruşma penceresi açılır (D-128).
+  bool _trialVisible = false;
+
+  /// Bekleyen duruşmayı gösterir.
+  ///
+  /// Sağlık krizinden sonra, bildirimlerden **önce** gelir: mahkeme
+  /// kararı bildirimi duruşma kapanmadan üretilmiş olamaz.
+  void _showTrial() {
+    if (_trialVisible) return;
+    _trialVisible = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final NavigatorState navigator =
+          Navigator.of(context, rootNavigator: true);
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
+      await TrialSheet.show(context);
+      if (!mounted) return;
+      setState(() => _trialVisible = false);
     });
   }
 
@@ -290,12 +312,20 @@ class _HomeShellState extends State<HomeShell> {
     // Sağlık krizi, olaylardan önce ekrana gelir (D-044).
     if (state.hasPendingCrisis) _showCrisis();
 
+    // Duruşma krizden sonra, bildirimlerden önce gelir (D-128).
+    if (state.hasPendingTrial && !state.hasPendingCrisis) _showTrial();
+
     // Önemli haberler (ölüm, miras, cenaze) krizden sonra, olaydan önce.
     final PendingNotice? notice = state.nextNotice;
-    if (notice != null && !state.hasPendingCrisis) _showNotice(notice);
+    if (notice != null && !state.hasPendingCrisis && !state.hasPendingTrial) {
+      _showNotice(notice);
+    }
 
     final ActiveEvent? pending = state.pendingEvent;
-    if (pending != null && !state.hasPendingCrisis && !state.hasNotice) {
+    if (pending != null &&
+        !state.hasPendingCrisis &&
+        !state.hasPendingTrial &&
+        !state.hasNotice) {
       _showPendingEvent(pending);
     }
 

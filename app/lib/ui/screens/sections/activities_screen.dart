@@ -79,6 +79,7 @@ enum _ActivityPage {
   vasiyet,
   seyahat,
   tasin,
+  cezaevi,
 }
 
 /// Evcil hayvan menüsünün alt metni: gerçek kayda bakar.
@@ -126,6 +127,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     final List<Person> kisiler = _uygunKisiler(context, state);
 
     switch (_page) {
+      case _ActivityPage.cezaevi:
+        return VenuePage(
+          venue: ActivityVenue.cezaevi,
+          onBack: () => _go(_ActivityPage.kok),
+        );
       case _ActivityPage.berber:
         return VenuePage(
           venue: ActivityVenue.berber,
@@ -251,6 +257,32 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             ),
             const SizedBox(height: 10),
           ],
+        ],
+      );
+    }
+
+    // Cezaevindeyken dışarının menüsü açılmaz (D-128). Oyuncu boş bir
+    // liste görmesin diye içeride yapılabilecekler ayrı gösterilir.
+    if (state.isImprisoned) {
+      final int? tahliye = state.legal.releaseAtAge;
+      return SectionScaffold(
+        icon: Icons.gavel_rounded,
+        title: 'Cezaevi',
+        accent: BirOmurAccents.nar,
+        subtitle: tahliye == null
+            ? 'İçeridesin.'
+            : 'Tahliye yaşın: $tahliye. Dışarısı seni beklemiyor ama '
+                'bu yıllar da geçiyor.',
+        onBack: widget.onBack,
+        children: <Widget>[
+          MenuRow(
+            key: const Key('aktivite_cezaevi'),
+            title: 'İçeride yapılabilecekler',
+            subtitle: 'Görüş, kitap, spor, sakin kalmak',
+            icon: Icons.self_improvement_rounded,
+            accent: BirOmurAccents.nar,
+            onTap: () => _go(_ActivityPage.cezaevi),
+          ),
         ],
       );
     }

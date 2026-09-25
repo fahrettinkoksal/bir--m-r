@@ -1,5 +1,8 @@
 import 'dart:math';
 
+import '../law/legal_engine.dart';
+import '../models/criminal_record.dart';
+
 import 'package:flutter/foundation.dart';
 
 import '../../data/event_pool.dart';
@@ -250,6 +253,19 @@ class EventEngine {
     // Evcil hayvan olayları yalnızca gerçekten bir hayvanı olan oyuncuya
     // çıkar (Paket 40). Vefat etmiş ya da hanede olmayan hayvan sayılmaz.
     if (req.requiresLivingPet && _eventPet(state, req) == null) return false;
+
+    // Adli kapılar (D-128). Dosyası olmayana "mahkemeyi bekliyorsun",
+    // sabıkası olmayana "bir de şu kayıt var" denmez. Cezaevindeyken
+    // dışarıdaki hiçbir olay çıkmaz: içerideki hayat ayrıdır.
+    if (state.isImprisoned) return false;
+    if (req.requiresOpenCase && state.legal.openCase == null) return false;
+    if (req.requiresRecord && !state.legal.hasRecord) return false;
+    if (req.requiresReleased) {
+      final bool hicGirmedi = state.legal.cases.every(
+        (CriminalCase c) => c.verdict != Verdict.hapis,
+      );
+      if (hicGirmedi || state.legal.isImprisoned) return false;
+    }
 
     // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
     if (req.requiresRetired && !state.career.isRetired) return false;
@@ -623,6 +639,13 @@ class EventEngine {
     // İlişkiyi bitiren seçim: kişi silinmez, aynı kimlikle eski sevgili olur.
     if (choice.endsRomance && active.personId != null) {
       working = romance.end(working, active.personId!, logText: null);
+    }
+
+    // Riskli seçimin hukuki tarafı (D-128). Motor kararı kendi verir;
+    // seçim yalnızca süreci başlatır.
+    final String? sucId = choice.crimeId;
+    if (sucId != null) {
+      working = LegalEngine.openCase(working, sucId, rng ?? Random());
     }
 
     return working;

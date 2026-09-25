@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../data/social_catalog.dart';
 
 import 'blackjack_game.dart';
+import 'criminal_record.dart';
 import 'education.dart';
 import 'book_progress.dart';
 import 'martial_progress.dart';
@@ -26,6 +27,7 @@ import 'parental_status.dart';
 import 'pending_notice.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
+import 'pending_trial.dart';
 import 'military.dart';
 import 'pending_wedding.dart';
 import 'pregnancy.dart';
@@ -57,6 +59,8 @@ class GameState {
     this.pendingWedding,
     this.pregnancy,
     this.military = const MilitaryState(),
+    this.legal = const LegalState(),
+    this.pendingTrial,
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
     this.lastConceptionTryAge,
@@ -170,6 +174,20 @@ class GameState {
 
   /// Askerlik durumu (Paket 29).
   final MilitaryState military;
+
+  /// Adli durum: dosyalar, sabıka, hapis ve denetim dönemi (D-128).
+  ///
+  /// Kayıt **silinmez**: kapanan dosya listede kalır. Eski kayıtlarda bu
+  /// alan yoktur ve boş açılır — geriye dönük sabıka **uydurulmaz**.
+  final LegalState legal;
+
+  /// Ekranda cevap bekleyen duruşma (D-128).
+  final PendingTrial? pendingTrial;
+
+  bool get hasPendingTrial => pendingTrial != null;
+
+  /// Oyuncu şu an cezaevinde mi?
+  bool get isImprisoned => legal.isImprisoned;
 
   /// Korunmadan geçen, çocukla sonuçlanmamış deneme sayısı (Paket 25).
   ///
@@ -542,6 +560,20 @@ class GameState {
   /// kaybolmaz. Aynı bildirim iki kez kuyruğa girmez.
   final List<PendingNotice> notices;
 
+  /// Bildirimi kuyruğa ekler.
+  ///
+  /// **Aynı kimlikli bildirim ikinci kez girmez**: motor bir yılda iki
+  /// kez çağrılsa da oyuncu aynı pencereyi iki kez görmez.
+  GameState queueNotice(PendingNotice notice) {
+    if (notices.any((PendingNotice n) => n.id == notice.id)) return this;
+    return copyWith(
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...notices,
+        notice,
+      ]),
+    );
+  }
+
   bool get hasNotice => notices.isNotEmpty;
 
   /// Sıradaki bildirim; yoksa `null`.
@@ -901,6 +933,8 @@ class GameState {
     Object? residenceItemId = _unsetEvent,
     bool? movedOut,
     Object? pendingCrisis = _unsetEvent,
+    LegalState? legal,
+    Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
     Object? marriage = _unsetEvent,
@@ -1014,6 +1048,10 @@ class GameState {
       pendingCrisis: pendingCrisis == _unsetEvent
           ? this.pendingCrisis
           : pendingCrisis as PendingCrisis?,
+      legal: legal ?? this.legal,
+      pendingTrial: pendingTrial == _unsetEvent
+          ? this.pendingTrial
+          : pendingTrial as PendingTrial?,
       lastCrisisAge: lastCrisisAge ?? this.lastCrisisAge,
       healthWarned: healthWarned ?? this.healthWarned,
       marriage:

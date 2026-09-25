@@ -63,6 +63,10 @@ import '../domain/economy/property_market.dart';
 import '../domain/education/school_transfer.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
+import '../domain/models/pending_trial.dart';
+import '../domain/models/criminal_record.dart';
+import '../data/lawyer_catalog.dart';
+import '../domain/law/legal_engine.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
@@ -1773,6 +1777,48 @@ class GameController extends ChangeNotifier {
     notifyListeners();
     return result.outcome;
   }
+
+  // =====================================================================
+  // Adli süreç (D-128)
+  // =====================================================================
+
+  /// Cevap bekleyen duruşma.
+  PendingTrial? get pendingTrial => _state?.pendingTrial;
+
+  /// Duruşmadaki dosya.
+  CriminalCase? get trialCase {
+    final GameState? current = _state;
+    final PendingTrial? durusma = current?.pendingTrial;
+    if (current == null || durusma == null) return null;
+    return current.legal.caseById(durusma.caseId);
+  }
+
+  /// Bu avukat şu an tutulabilir mi? Gerekçe boşsa tutulabilir (D-063).
+  String lawyerBlockReason(LawyerTier tier) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return LegalEngine.lawyerBlockReason(current, tier);
+  }
+
+  /// Duruşmayı karara bağlar. **Aynı dosya iki kez karara bağlanmaz.**
+  void respondToTrial({
+    required DefenceStance stance,
+    required String lawyerId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.pendingTrial == null) return;
+    _state = LegalEngine.resolveTrial(
+      state: current,
+      stance: stance,
+      lawyerId: lawyerId,
+      rng: _random,
+    );
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Oyuncunun adli geçmişi (Adli Geçmiş bölümü için).
+  LegalState get legal => _state?.legal ?? const LegalState();
 
   // =====================================================================
   // Konut: taşınma ve kiraya verme (D-043)
