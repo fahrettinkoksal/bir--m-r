@@ -688,10 +688,29 @@ void main() {
       final String bisikletId = oyun.state!.items.single.id;
       expect(oyun.state!.possessions, contains('bisiklet'));
 
+      // D-125'ten sonra eşya eylemleri de ilerleme sayılıyor; motor
+      // aynı yaşta ek olay sunabiliyor. Gerçek oyuncu o pencereyi
+      // kapatıp devam eder — test de öyle yapar, yoksa bir sonraki
+      // eylem "olay bekliyor" diye reddedilir.
+      void devamEt() {
+        int guard = 0;
+        while (oyun.state!.hasNotice || oyun.state!.hasPendingEvent) {
+          if (guard++ > 20) fail('Pencereler kapanmıyor.');
+          if (oyun.state!.hasNotice) {
+            oyun.dismissNotice();
+            continue;
+          }
+          oyun.chooseEventOption(oyun.state!.pendingEvent!.choices.first.id);
+        }
+      }
+
+      devamEt();
+
       // 2) Bisiklete bindim.
       final ItemOutcome? bindi =
           oyun.performItemAction(bisikletId, ItemActionKind.kullan);
       expect(bindi!.applied, isTrue);
+      devamEt();
       final int kullanimSonrasi = oyun.state!.itemById(bisikletId)!.condition;
       expect(kullanimSonrasi, lessThan(OwnedItem.defaultCondition));
 
@@ -704,6 +723,8 @@ void main() {
       expect(oyun.state!.itemById(bisikletId)!.condition,
           greaterThan(kullanimSonrasi));
 
+      devamEt();
+
       // 4) Zil aldım ve taktım.
       final ShopProduct zil = shopProductByTypeId('bisiklet_zili')!;
       final int cuzdanAlimOnce = oyun.state!.player.wallet;
@@ -712,6 +733,7 @@ void main() {
       final String zilId = oyun.state!.items
           .firstWhere((OwnedItem i) => i.typeId == 'bisiklet_zili')
           .id;
+      devamEt();
       expect(oyun.attachAccessory(bisikletId, zilId)!.applied, isTrue);
       expect(oyun.state!.itemById(bisikletId)!.attachments,
           contains('bisiklet_zili'));

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/activity_catalog.dart';
+import '../../data/activity_result_texts.dart';
 import '../effects/effect_diff.dart';
 import '../models/applied_effect.dart';
 import '../models/book_progress.dart';
@@ -268,11 +269,20 @@ class ActivityEngine {
           'zamanla oturacağını söylüyor ama şu an memnun değilsin.'
           '$ucret';
     } else if (action.changesHairStyle) {
-      metin = '${action.label}: artık saçın "$yeniStil".$ucret';
+      metin = yeniStil == null
+          ? '${action.label} tamamlandı.$ucret'
+          : '${hairResultText(state.player.gender, yeniStil)}$ucret';
     } else {
       // Sağlık işlemleri artık ne olduğunu anlatır (D-076).
       final String? rapor = _healthText(state, action);
-      metin = rapor ?? '${action.label} tamamlandı.$ucret';
+      // "X tamamlandı." en sık görülen ve en mekanik cümleydi (D-127).
+      // Yerine mekâna göre yazılmış, kendini tekrar etmeyen cümleler
+      // geldi; yoksa eski davranışa düşülür.
+      final String? dogal = activityResultText(
+        action.venue.name,
+        state.player.age + stableTextSeed(action.id),
+      );
+      metin = rapor ?? '${dogal ?? '${action.label} tamamlandı.'}$ucret';
     }
 
     GameState sonDurum = _log(next, metin);

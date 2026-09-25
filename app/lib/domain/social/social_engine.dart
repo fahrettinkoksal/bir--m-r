@@ -807,16 +807,33 @@ class SocialEngine {
     return state.copyWith(player: state.player.copyWith(fame: hesaplanan));
   }
 
+  /// Paylaşım sonucunu anlatır (D-127).
+  ///
+  /// Paylaşım oyunun **en çok tekrarlanan** eylemi; tek cümleyle
+  /// anlatmak metni ezberletiyordu (`docs/WRITING_STYLE_TR.md` §9).
+  /// Sayı yine verilir, cümle değişir.
   String _postText(SocialContent content, int delta, SocialPlatform platform) {
+    final String kitle = platform.audienceWord;
     if (delta > 0) {
-      return '${content.label}: paylaşım ilgi gördü, '
-          '${trNumber(delta)} ${platform.audienceWord} kazandın.';
+      const List<String> iyi = <String>[
+        'tuttu',
+        'beklediğinden çok döndü',
+        'sabaha kadar bildirim yağdı',
+        'paylaşımı görenler paylaştı',
+      ];
+      final String kalip = iyi[delta.abs() % iyi.length];
+      return '${content.label}: $kalip. ${trNumber(delta)} $kitle geldi.';
     }
     if (delta < 0) {
-      return '${content.label}: beklediğin olmadı, '
-          '${trNumber(-delta)} ${platform.audienceWord} kaybettin.';
+      const List<String> kotu = <String>[
+        'pek tutmadı',
+        'yanlış zamanda düşmüş olabilir',
+        'kimsenin havasında olmadığı bir gündü',
+      ];
+      final String kalip = kotu[delta.abs() % kotu.length];
+      return '${content.label}: $kalip. ${trNumber(-delta)} $kitle gitti.';
     }
-    return '${content.label}: kimse fark etmedi.';
+    return '${content.label}: paylaştın, ortalık sessiz kaldı.';
   }
 
   SocialResult _blocked(GameState state, String reason) => SocialResult(

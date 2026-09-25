@@ -569,6 +569,36 @@ class GameController extends ChangeNotifier {
   /// Etkiler **uydurulmaz**: eylemin öncesi ve sonrası karşılaştırılarak
   /// hesaplanır, bu yüzden tavana dayanmış bir değer için sahte artış
   /// yazılamaz (D-074, D-096 ile aynı kural).
+  /// Oyuncunun **anlamlı bir eylemi** ilerleme sayılır (D-125).
+  ///
+  /// Gerçek hata: `progressSinceLastEvent` yalnızca **aile
+  /// etkileşimlerinde** artıyordu. Aktiviteler, iş, sosyal medya, gezi,
+  /// hayvan — hiçbiri saymıyordu. Oysa motor "aynı yaşta ek olay" için
+  /// bu sayaca bakıyor (D-023, D-024). Sonuç: oyuncu bütün yıl aktivite
+  /// yapsa bile ek olay eşiğini hiç geçemiyordu ve **aynı okul yılına
+  /// sığması gereken zincirler** (sınav zinciri) hiçbir zaman
+  /// tamamlanamıyordu.
+  ///
+  /// Sayaç yalnızca durum gerçekten değiştiyse artar; boş tekrar
+  /// ilerleme sayılmaz (aile etkileşimindeki kuralın aynısı).
+  GameState _countProgress(GameState before, GameState after) {
+    if (identical(before, after)) return after;
+    GameState next = after.copyWith(
+      progressSinceLastEvent: after.progressSinceLastEvent + 1,
+    );
+    // İlerleme biriktiyse ek olay **burada** sorulur. Eskiden bu soru
+    // yalnızca aile etkileşiminden sonra soruluyordu; aktivite yapan
+    // oyuncuya hiç sorulmuyordu (D-125).
+    final ActiveEvent? ek = _events.progressEvent(next, _random);
+    if (ek != null) {
+      next = next.copyWith(
+        pendingEvent: ek,
+        extraEventsThisAge: next.extraEventsThisAge + 1,
+      );
+    }
+    return next;
+  }
+
   GameState _announce(
     GameState before,
     GameState after,
@@ -603,8 +633,13 @@ class GameController extends ChangeNotifier {
       return result.outcome;
     }
 
-    _state = _announce(current, result.state, result.outcome.text,
-        title: 'Eşya', tag: 'esya');
+    _state = _announce(
+      current,
+      _countProgress(current, result.state),
+      result.outcome.text,
+      title: 'Eşya',
+      tag: 'esya',
+    );
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -1226,9 +1261,10 @@ class GameController extends ChangeNotifier {
     // düzenlemek kendi ekranında zaten görünür. Bildirim yalnızca
     // **bir kişiyle ilgili gerçek bir değişim** olduğunda çıkar:
     // tanışma, flört, sevgili olma (D-114).
+    final GameState fingerSonrasi = _countProgress(current, result.state);
     _state = result.outcome.person == null
-        ? result.state
-        : _announce(current, result.state, result.outcome.text,
+        ? fingerSonrasi
+        : _announce(current, fingerSonrasi, result.outcome.text,
             title: 'Finger', tag: 'finger');
     _autoSave();
     notifyListeners();
@@ -1463,8 +1499,13 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return null;
     final ActivityResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = _announce(current, result.state, result.outcome.text,
-        title: 'Aktivite', tag: 'aktivite');
+    _state = _announce(
+      current,
+      _countProgress(current, result.state),
+      result.outcome.text,
+      title: 'Aktivite',
+      tag: 'aktivite',
+    );
     _autoSave();
     notifyListeners();
     return result.outcome;

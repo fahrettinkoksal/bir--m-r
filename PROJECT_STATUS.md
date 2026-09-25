@@ -1161,6 +1161,59 @@ kadar kesin denge değeri sayılmaz.
 `flutter test` **2024 geçti, 15 atlandı, 0 başarısız**.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
+## Paket O + P: ölü hikâye izleri, çocukluk ve metin üslubu (25 Eylül 2026, D-125 … D-127)
+
+Faho iki iş istedi: (1) "hiç konmayan 10 hikâye izini araştır, **tahminle
+flag ekleme, gerçek sebebi bul**", (2) 0-17 yaş için yeni olaylar ve
+metinlerin "yapay zekâ yazmış gibi" durmaması.
+
+**Gerçek sebep bulundu (D-125).** On izin hiçbiri ölü içerik değildi.
+Motor aynı yaşta ikinci olay sunmak için `progressSinceLastEvent`
+sayacına bakıyor, ama bu sayaç kodda **tek bir yerde** artıyordu: aile
+etkileşimleri. Spor, kurs, berber, eşya kullanımı, Finger — hiçbiri
+ilerleme saymıyordu. Yani aktif oynayan oyuncu hiçbir şey yapmayanla
+aynı sayıda olay görüyordu. Düzeltildi; on izin **onu da** konuyor ve
+bir gerileme testiyle sabitlendi.
+
+**Çocukluk havuzu (D-126).** 0-17 yaş için **51 yeni olay** yazıldı
+(`lib/data/event_pool_childhood.dart`). Çocukluk arkadaşı ve ilk
+hoşlanılan kişi **gerçek `Person` kaydı** olarak kuruluyor.
+
+**Metin üslubu (D-127).** `docs/WRITING_STYLE_TR.md` yazıldı ve iki
+somut mekanik metin değiştirildi: aktivite sonucu ("X tamamlandı" →
+mekâna göre yazılmış, kendini tekrar etmeyen cümleler) ve sosyal medya
+paylaşım sonucu. **İş mantığına ve etki değerlerine dokunulmadı.**
+
+| Ölçü (120 hayat, oyuncu gibi oynanarak) | Önce | Sonra |
+|---|---|---|
+| Bir hayatta görülen farklı olay | 48 | **110** |
+| Havuz | 221 | **272** |
+| 120 hayatta hiç çıkmayan olay | 61 | **18** |
+| 0-5 yaşta farklı olay | 11 | **24** |
+| 6-12 yaşta farklı olay | 25 | **53** |
+| 13-17 yaşta farklı olay | 30 | **62** |
+| Ortalama ömür | 74 | 80,4 |
+
+**Dürüstçe yazılması gereken yan etki:** havuz büyüyünce **dar pencereli
+zincir halkaları seyreldi** — D-125'ten hemen sonra hiç çıkmayan olay 9
+idi, 51 çocukluk olayından sonra 18 oldu. Yeni içerik kötü değil; dar
+pencereli zincirler yarışmayı kaybediyor. Motorun zincirlere öncelik
+verip vermemesi tasarım kararıdır, **Q-138**'de soruldu.
+
+**Kuyruk temizliği:** sonradan alınan kararlarla örtüşen dört soru
+kapatıldı — Q-115 → D-106, Q-116 → D-102, Q-117 → D-102, Q-121 → D-107
+(kısmen). Tarihsel kayıt **silinmedi**. Yeni sorular: **Q-138** (olay
+yoğunluğu ve zincir önceliği), **Q-139** (çocukluk temaları ve etki
+değerleri), **Q-140** (üslup belgesi ve robotik kalıp tavanı).
+
+**Açık kalan sayılar:** tamamen açık **66** soru, sayıları onay bekleyen
+39 soru (`docs/DESIGN_REVIEW_QUEUE.md`). Bütün yeni sayılar
+`prototypeOnly`'dir.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2037 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

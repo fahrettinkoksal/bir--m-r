@@ -2586,7 +2586,9 @@ Dallar birbirini dışlıyor ve hiçbir dal "doğru" diye işaretlenmiyor: emane
 
 ### Q-115 — Ünlülerle temas ve TikTok
 
-**Durum:** Faho iki şey istedi: sosyal medyaya TikTok eklenmesi ve "ünlü ile diyaloğa gir gibi bir şey". İkisi de **kodlandı**; sayısal değerler `prototypeOnly` ve **onay bekliyor.** Kod: `lib/data/celebrity_catalog.dart`, `lib/domain/social/celebrity_engine.dart`, `lib/data/social_catalog.dart`. İlgili: Q-112, D-063.
+**Durum: KARARLAŞTIRILDI — D-106.** Faho bu maddenin karar sorularını cevapladı; kesin kural `DECISIONS.md` içinde **D-106** olarak kayıtlıdır (ünlüye yılda iki temas, ayrı "Ünlüler ve tanıdıklar" bölümü, Türkçe binlik ayracı). Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Özgün kayıt —** Faho iki şey istedi: sosyal medyaya TikTok eklenmesi ve "ünlü ile diyaloğa gir gibi bir şey". İkisi de **kodlandı**; sayısal değerler `prototypeOnly` ve **onay bekliyor.** Kod: `lib/data/celebrity_catalog.dart`, `lib/domain/social/celebrity_engine.dart`, `lib/data/social_catalog.dart`. İlgili: Q-112, D-063.
 
 **Yapılanlar.** Dördüncü platform olarak TikTok eklendi (dört özgün içerik). Ünlüler kurgusaldır; gerçek kişilerin adı, hesabı ya da sözü kullanılmaz. Oyuncu bir ünlüye **yorum yapabilir, mesaj atabilir ya da iş birliği teklif edebilir**. Karşılık garanti değildir.
 
@@ -2622,7 +2624,9 @@ Dallar birbirini dışlıyor ve hiçbir dal "doğru" diye işaretlenmiyor: emane
 ---
 
 ### Q-116 — Statların yaşla düşme hızı ve bakımın gücü
-**Durum:** Öneri, karar bekliyor · **Bağlam:** D-072 · `app/lib/domain/life/aging.dart` (`StatAging`), `app/lib/domain/life/upkeep_tracker.dart` · Test: `app/test/stat_aging_test.dart`
+**Durum: KARARLAŞTIRILDI — D-102.** Kesin kural `DECISIONS.md` içinde **D-102** olarak kayıtlıdır (dövüş sanatı spor sayılır, görünüş düşüşü yumuşatıldı). Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor. Karizmanın hızı sonradan **D-124** ile ayrıca değiştirildi (Q-136).
+
+**Özgün kayıt —** Öneri, karar bekliyor · **Bağlam:** D-072 · `app/lib/domain/life/aging.dart` (`StatAging`), `app/lib/domain/life/upkeep_tracker.dart` · Test: `app/test/stat_aging_test.dart`
 
 Faho bildirdi: "karizma zeka mutluluk sağlık görünüş bunlar yaşa bağlı olarak düşmeli", "zekâ 100 olarak başladım 100 olarak bitirdim", "bakım yapmayınca kendime görünüşüm ve karizmam düşsün", "sürekli spor yapan birisinin karizması daha az düşsün". Kural D-072 olarak kodlandı; **sayılar geçicidir.**
 
@@ -2651,7 +2655,9 @@ Bakım "son 2 yıl içinde" yapılmışsa ihtimal **×0,45**; 5 yıldır ya da h
 ---
 
 ### Q-117 — Saç dökülmesinin kapsamı
-**Durum:** Öneri, karar bekliyor · **Bağlam:** D-073 · `app/lib/domain/life/hair_loss.dart` · Test: `app/test/stat_aging_test.dart`
+**Durum: KARARLAŞTIRILDI — D-102.** Kesin kural `DECISIONS.md` içinde **D-102** olarak kayıtlıdır (saç görünüşü etkiler). Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Özgün kayıt —** Öneri, karar bekliyor · **Bağlam:** D-073 · `app/lib/domain/life/hair_loss.dart` · Test: `app/test/stat_aging_test.dart`
 
 Faho istedi: "erkek kullanıcılarının ihtimal dahilinde 30 yaşından sonra saçları dökülmeye başlayabilir bu da karizmayı etkilyebilir".
 
@@ -2736,7 +2742,9 @@ Faho istedi: "araç galerisi kısmını ayır, 3 adet galeri ekle... ucuz araçl
 ---
 
 ### Q-121 — Finger kotası, hayvan türleri, tur fiyatları ve hayatın sonu
-**Durum:** Öneri, karar bekliyor · **Bağlam:** D-081, D-082, D-083, D-084, D-085 · `app/lib/domain/interaction/finger.dart`, `app/lib/data/pet_catalog.dart`, `app/lib/data/tour_catalog.dart`, `app/lib/data/city_neighbours.dart`, `app/lib/domain/life/life_end_choice.dart` · Test: `app/test/package_f_test.dart`
+**Durum: KISMEN KARARLAŞTIRILDI — D-107.** Finger ile ilgili sorular (beğeni kotası, niyet, flörtten sevgiliye geçiş, ekonomik süzgeç) **D-107** ile kapandı; beğeni kotası 5'ten 12'ye çıktı. Hayvan türleri, tur fiyatları ve hayatın sonu **hâlâ karar bekliyor**.
+
+**Özgün kayıt —** Öneri, karar bekliyor · **Bağlam:** D-081, D-082, D-083, D-084, D-085 · `app/lib/domain/interaction/finger.dart`, `app/lib/data/pet_catalog.dart`, `app/lib/data/tour_catalog.dart`, `app/lib/data/city_neighbours.dart`, `app/lib/domain/life/life_end_choice.dart` · Test: `app/test/package_f_test.dart`
 
 **Finger.** Aday yaş bandı: alt sınır `max(yaş−10, yaş/2+7)`, üst sınır `yaş+10`, hiçbir koşulda 18'in altına inmez. Beğeni kotası yılda **5**, premiumda **30**; premium ücreti **4.800 ₺**, bir yıl geçerli. Profil doldurmak eşleşme ihtimaline **+%12**, premium **+%8**, her ortak ilgi alanı **+%5** katıyor. "Seni beğenenler" listesinde en fazla **3** kişi oluyor.
 
@@ -3204,3 +3212,52 @@ Faho istedi: "oyunda eksik ve tamamlanması gerektiğini düşündüklerini yaz"
 3. **Görsel kimlik (Q-001 / Q-077) ne zaman karara bağlanacak?** Oyun bir yıl daha kodlanabilir ama palet seçilmeden "bitti" denemez; 15 golden testi de bu yüzden atlanıyor.
 4. **136 sorunun 68'i hâlâ karar bekliyor ve hiçbiri "kararlaştırıldı" diye kapatılmamış.** Kuyruk bu hâliyle işe yarıyor mu, yoksa toplu bir karar turu mu gerekiyor?
 5. Çocukluk için 40-50 yeni olay yazılması onaylanıyor mu? Onaylanırsa hangi temalar öncelikli?
+
+---
+
+### Q-138 — İlerleme sayacı düzeldi: bir hayat kaç olay görmeli?
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-125, D-023, D-024 · `app/lib/state/game_controller.dart` (`_countProgress`) · Test: `app/test/paket_op_test.dart`
+
+D-125 gerçek bir hatayı kapattı: oyuncunun eylemleri ilerleme sayılmıyordu, bu yüzden aktif oynayan da hiçbir şey yapmayan da aynı sayıda olay görüyordu. Düzeltmeden sonra ölçüm (120 hayat, oyuncu gibi oynanarak):
+
+| Ölçü | Önce | Sonra |
+|---|---|---|
+| Bir hayatta görülen farklı olay | 48 | **105** |
+| Hiç çıkmayan olay | 40 | **9** |
+| Havuzun görülen kısmı | 205/221 | **212/221** |
+
+**Karar soruları:**
+1. Bir hayatta **105 farklı olay** doğru yoğunluk mu? Az mı, çok mu? Şu an yılda ortalama 1,4 olay demek.
+2. Her eylem eşit mi saymalı? Şu an spor yapmak da eşya kullanmak da **1** ilerleme. Kimi eylem daha ağır saymalı mı?
+3. Aynı yaşta en fazla **bir** ek olay kuralı (D-024) duruyor. Çok aktif oynayana daha fazla verilmeli mi?
+4. Bu yoğunluk mobilde yorucu mu? Oyuncu "yaş al"dan sonra art arda pencere görmekten sıkılır mı?
+
+---
+
+### Q-139 — Çocukluk ve ergenlik olaylarının temaları ve dozu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-126 · `app/lib/data/event_pool_childhood.dart` · Test: `app/test/paket_op_test.dart`
+
+Faho istedi: "0-17 için yaklaşık 45 yeni olay; kalite nicelikten önemli". 51 olay yazıldı. **Etki değerleri ve bazı temalar onay bekliyor.**
+
+Yazılan temalar: 0-5 — ilk kelime, kreş, ilk düşme, misafirlik, oyuncak kavgası. 6-12 — mahalle maçı, komşunun camı, harçlık biriktirme, karne, sınıf başkanlığı, servis, kantin, okul gösterisi, çocukluk arkadaşı. 13-17 — ilk hoşlanma, cesaret edememe/reddedilme, gruba girme ya da dışlanma, ilk yalan, yaz işi istemek, sigara teklifi, öğretmenle ters düşmek.
+
+**Karar soruları:**
+1. **Sigara teklifi, dışlanma ve ilk yalan** gibi temalar bu yaş bandında doğru mu? Dozu ağır mı?
+2. Çocukluk arkadaşı ve ilk hoşlanılan kişi **gerçek kişi kaydı** olarak kuruluyor; bu kişiler ileride (20'li, 30'lu yaşlarda) geri dönmeli mi? Şu an dönmüyorlar.
+3. Çocuklukta alınan izler yetişkinlikte ne kadar ağır basmalı? Şu an yalnızca birkaç yerde okunuyor.
+4. Etki değerleri (`prototypeOnly`) onaylanıyor mu? Örnek: camı itiraf etmek karizma **+4** ve **−300 ₺**, kaçmak mutluluk **−2**.
+5. 0-5 bandı hâlâ en zayıfı (24 farklı olay). Bebeklik için daha fazla yazılsın mı, yoksa o yaş **hızlı geçmeli** mi?
+
+---
+
+### Q-140 — Metin üslubu belgesi ve robotik kalıp tavanı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-127 · `docs/WRITING_STYLE_TR.md` · Test: `app/test/language_quality_test.dart`
+
+Faho'nun talimatı belgeye çevrildi ve bir testle ölçülüyor. Test bir **kelime polisi değil**: yasak kalıpların sayısını raporlar ve tavanla sınırlar, böylece yeni metin eski rapor diline geri dönemez. **Bugünkü ölçüm: 0 robotik kalıp** (tavan 40).
+
+**Karar soruları:**
+1. Yasak listesi eksik mi? Faho'nun rahatsız olduğu başka kalıplar var mı?
+2. Sokak ağzı listesi (abi, ya, oğlum, neyse, cebin yandı…) doğru mu? Eklenecek/çıkarılacak var mı?
+3. Espri yasağının kapsamı doğru mu? Şu an: ölüm, cenaze, ağır hastalık, gebelik kaybı, ağır boşanma, ciddi borç, şiddet, hayatın sonu, çocukla ilgili ciddi sorunlar.
+4. Tavan 40 çok gevşek mi? Ölçüm 0 olduğuna göre tavan **0'a** çekilip yeni kalıp tamamen yasaklanabilir; bu CI'yı sertleştirir.
+5. Mevcut 272 olayın metinleri tek tek gözden geçirilsin mi? Bu turda yalnızca **mekanik duran** metinler değiştirildi; iyi okunanlara dokunulmadı.
