@@ -35,6 +35,7 @@ import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
+import '../../domain/models/business.dart';
 import '../../domain/models/criminal_record.dart';
 import '../../domain/models/military.dart';
 import '../../domain/models/pending_trial.dart';
@@ -287,6 +288,22 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'expecting': state.pregnancy!.expecting.name,
             },
       // Askerlik kaydı (Paket 29); yarım kalan hizmet kaybolmaz.
+      // Kurulmuş işler (D-132). Eski kayıtlarda yoktur; boş açılır.
+      'businesses': <Object?>[
+        for (final Business b in state.businesses)
+          <String, Object?>{
+            'id': b.id,
+            'typeId': b.typeId,
+            'startedAtAge': b.startedAtAge,
+            'condition': b.condition,
+            'totalInvested': b.totalInvested,
+            'totalProfit': b.totalProfit,
+            'lastTendedAge': b.lastTendedAge,
+            'lastSettledAge': b.lastSettledAge,
+            'closedAtAge': b.closedAtAge,
+            'endReason': b.endReason?.name,
+          },
+      ],
       // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
       // **uydurulmaz**.
       'legal': <String, Object?>{
@@ -1053,6 +1070,11 @@ GameState decodeGameState(Map<String, Object?> json) {
     military: json['military'] == null
         ? const MilitaryState()
         : _decodeMilitary(_asMap(json['military'], 'military')),
+    // Eski kayıtlarda iş kaydı yoktur; boş açılır (D-132).
+    businesses: List<Business>.unmodifiable(<Business>[
+      for (final Object? e in _optionalRawList(json, 'businesses'))
+        _decodeBusiness(_asMap(e, 'business')),
+    ]),
     // Eski kayıtlarda adli kayıt yoktur; **temiz** açılır (D-128).
     legal: json['legal'] == null
         ? const LegalState()
@@ -1972,4 +1994,21 @@ PendingTrial _decodeTrial(Map<String, Object?> json) => PendingTrial(
       caseId: _string(json, 'caseId'),
       age: _intOr(json, 'age', 0),
       text: _string(json, 'text'),
+    );
+
+Business _decodeBusiness(Map<String, Object?> json) => Business(
+      id: _string(json, 'id'),
+      typeId: _string(json, 'typeId'),
+      startedAtAge: _intOr(json, 'startedAtAge', 0),
+      condition: _intOr(json, 'condition', Business.prototypeOnlyStartCondition),
+      totalInvested: _intOr(json, 'totalInvested', 0),
+      totalProfit: _intOr(json, 'totalProfit', 0),
+      lastTendedAge: _intOrNull(json, 'lastTendedAge'),
+      lastSettledAge: _intOrNull(json, 'lastSettledAge'),
+      closedAtAge: _intOrNull(json, 'closedAtAge'),
+      endReason: _enumByNameOrNull(
+        BusinessEndReason.values,
+        _stringOrNull(json, 'endReason'),
+        'business.endReason',
+      ),
     );

@@ -4,6 +4,7 @@ library;
 import '../models/book_progress.dart';
 import '../models/career.dart';
 import '../../data/crime_catalog.dart';
+import '../models/business.dart';
 import '../models/criminal_record.dart';
 import '../models/game_state.dart';
 import '../models/gender.dart';
@@ -390,6 +391,23 @@ abstract final class LifeVerdictBuilder {
       ilkler.add(VerdictFirst(
         age: ilkIs.startedAtAge,
         text: 'İlk işine girdin: ${ilkIs.title}.',
+      ));
+    }
+
+    // Kendi işi (D-132): kurmak da batmak da hayatın somut anı.
+    for (final Business b in state.businesses) {
+      final String ad = b.type?.name ?? 'kendi işini';
+      ilkler.add(VerdictFirst(
+        age: b.startedAtAge,
+        text: '$ad açtın.',
+      ));
+      final int? kapanis = b.closedAtAge;
+      if (kapanis == null) continue;
+      ilkler.add(VerdictFirst(
+        age: kapanis,
+        text: b.endReason == BusinessEndReason.batti
+            ? '$ad battı.'
+            : '$ad devrettin.',
       ));
     }
 

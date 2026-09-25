@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../data/social_catalog.dart';
 
 import 'blackjack_game.dart';
+import 'business.dart';
 import 'criminal_record.dart';
 import 'education.dart';
 import 'book_progress.dart';
@@ -60,6 +61,7 @@ class GameState {
     this.pregnancy,
     this.military = const MilitaryState(),
     this.legal = const LegalState(),
+    this.businesses = const <Business>[],
     this.pendingTrial,
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
@@ -174,6 +176,13 @@ class GameState {
 
   /// Askerlik durumu (Paket 29).
   final MilitaryState military;
+
+  /// Kurulmuş işler (D-132).
+  ///
+  /// **Kayıt silinmez:** batan ya da devredilen iş listede kalır. Eski
+  /// kayıtlarda bu alan yoktur ve boş açılır — geriye dönük iş
+  /// **uydurulmaz**.
+  final List<Business> businesses;
 
   /// Adli durum: dosyalar, sabıka, hapis ve denetim dönemi (D-128).
   ///
@@ -934,6 +943,7 @@ class GameState {
     bool? movedOut,
     Object? pendingCrisis = _unsetEvent,
     LegalState? legal,
+    List<Business>? businesses,
     Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
@@ -1049,6 +1059,9 @@ class GameState {
           ? this.pendingCrisis
           : pendingCrisis as PendingCrisis?,
       legal: legal ?? this.legal,
+      businesses: businesses == null
+          ? this.businesses
+          : List<Business>.unmodifiable(businesses),
       pendingTrial: pendingTrial == _unsetEvent
           ? this.pendingTrial
           : pendingTrial as PendingTrial?,

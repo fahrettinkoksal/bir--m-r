@@ -66,8 +66,12 @@ enum NoticeKind {
   /// Arkadaşlık: yakın arkadaş olma, küslük, barışma, arkadaştan haber
   /// (D-130).
   ///
-  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
   arkadaslik,
+
+  /// Kendi işi: açılış, yıl sonu, zarar, batma, devir (D-132).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  kendiIsi,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

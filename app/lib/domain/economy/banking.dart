@@ -27,6 +27,7 @@ library;
 
 import '../../data/economy.dart';
 import '../models/game_state.dart';
+import 'business_engine.dart';
 import '../models/loan.dart';
 
 /// Bir başvurunun sonucu.
@@ -163,6 +164,10 @@ abstract final class Banking {
     int gelir = 0;
     if (state.career.isEmployed) gelir += state.career.salary ?? 0;
     gelir += state.career.pension ?? 0;
+    // Kendi işinin kârı da gelirdir (D-132). Banka **zarar eden işi**
+    // gelir saymaz: eksi kâr gelire eklenmez, sıfır sayılır.
+    final int isKari = BusinessEngine.yearlyBusinessIncome(state);
+    if (isKari > 0) gelir += isKari;
     return gelir;
   }
 

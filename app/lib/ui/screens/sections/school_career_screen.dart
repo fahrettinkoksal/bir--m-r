@@ -14,8 +14,11 @@ import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/interview_sheet.dart';
 import '../../../domain/career/military_service.dart';
+import '../../../domain/economy/business_engine.dart';
+import '../../../domain/models/business.dart';
 import '../../../domain/models/criminal_record.dart';
 import '../../../domain/models/military.dart';
+import 'business_page.dart';
 import 'legal_record_page.dart';
 import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
@@ -317,6 +320,20 @@ String _adliAltMetni(GameState state) {
   return kayit == 1 ? 'Sicilinde bir kayıt var' : 'Sicilinde $kayit kayıt var';
 }
 
+/// Kendi İşim menüsünün alt metni: gerçek kayda bakar.
+String _isAltMetni(GameState state) {
+  final Business? acik = BusinessEngine.openBusiness(state);
+  if (acik != null) {
+    return '${acik.type?.name ?? 'İşin'} · ${acik.conditionLabel}';
+  }
+  if (state.businesses.isNotEmpty) {
+    final Business son = state.businesses.last;
+    return 'Kapandı: ${son.type?.name ?? ''} '
+        '(${son.endReason?.label ?? ''})';
+  }
+  return 'Sermaye koy, kendi işini kur';
+}
+
 /// prototypeOnly: yarım zamanlı iş için en küçük yaş (D-131).
 ///
 /// Katalogdaki en küçük `minAge` ile aynı; ekranda gerekçe yazarken
@@ -330,6 +347,7 @@ enum _CareerPage {
   kariyerGecmisi,
   askerlik,
   adliGecmis,
+  kendiIsi,
 }
 
 class _CareerView extends StatefulWidget {
@@ -362,6 +380,8 @@ class _CareerViewState extends State<_CareerView> {
         return MilitaryPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.adliGecmis:
         return LegalRecordPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.kendiIsi:
+        return BusinessPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.mezuniyetSonrasi:
         return AfterSchoolPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.isArama:
@@ -513,6 +533,20 @@ class _CareerViewState extends State<_CareerView> {
             icon: Icons.military_tech_outlined,
             accent: BirOmurAccents.yesil,
             onTap: () => _go(_CareerPage.askerlik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Kendi İşim (D-132). Maaşlı işin yanında ikinci bir geçim
+        // yolu; 18 yaşından itibaren görünür.
+        if (state.player.age >= 18 ||
+            state.businesses.isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('career_business_row'),
+            title: 'Kendi İşim',
+            subtitle: _isAltMetni(state),
+            icon: Icons.storefront_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => _go(_CareerPage.kendiIsi),
           ),
           const SizedBox(height: 10),
         ],

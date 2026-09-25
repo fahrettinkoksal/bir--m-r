@@ -66,7 +66,10 @@ import '../domain/models/pending_crisis.dart';
 import '../domain/models/pending_trial.dart';
 import '../domain/models/criminal_record.dart';
 import '../data/lawyer_catalog.dart';
+import '../data/business_catalog.dart';
+import '../domain/economy/business_engine.dart';
 import '../domain/interaction/friendship_depth.dart';
+import '../domain/models/business.dart';
 import '../domain/law/legal_engine.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
@@ -1777,6 +1780,94 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  // =====================================================================
+  // Kendi işi (D-132)
+  // =====================================================================
+
+  /// Şu an açık olan iş; yoksa `null`.
+  Business? get openBusiness =>
+      _state == null ? null : BusinessEngine.openBusiness(_state!);
+
+  /// Bütün iş kayıtları (kapananlar dahil; kayıt silinmez).
+  List<Business> get businesses => _state?.businesses ?? const <Business>[];
+
+  /// Bu iş şu an kurulabilir mi?
+  InteractionAvailability businessOpenAvailability(BusinessType tur) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.openAvailability(current, tur);
+  }
+
+  /// İşi kurar. Sermaye peşin gider.
+  BusinessOutcome? openBusinessOf(BusinessType tur) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.open(state: current, tur: tur);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Bu yıl işle ilgilenilebilir mi?
+  InteractionAvailability businessTendAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.tendAvailability(current);
+  }
+
+  /// İşle ilgilenir.
+  BusinessOutcome? tendBusiness() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r = BusinessEngine.tend(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// İşe para yatırmanın şu an mümkün olup olmadığı.
+  InteractionAvailability businessInvestAvailability(int tutar) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.investAvailability(current, tutar);
+  }
+
+  /// İşe para yatırır.
+  BusinessOutcome? investInBusiness(int tutar) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.invest(state: current, tutar: tutar);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// İşi devreder/kapatır. Onay arayüzde alınır.
+  BusinessOutcome? closeBusiness() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r = BusinessEngine.close(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = r.state;
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
   }
 
   // =====================================================================

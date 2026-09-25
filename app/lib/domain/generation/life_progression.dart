@@ -26,6 +26,7 @@ import '../interaction/marriage_engine.dart';
 import '../interaction/parenthood.dart';
 import '../life/inheritance.dart';
 import '../../data/job_catalog.dart';
+import '../economy/business_engine.dart';
 import '../interaction/friendship_depth.dart';
 import '../law/legal_engine.dart';
 import '../life/mortality.dart';
@@ -526,6 +527,10 @@ class LifeProgression {
     afterDeaths = MilitaryService.advanceFugitive(afterDeaths, newAge, _rng);
     afterDeaths = MilitaryService.applyDeferralEnd(afterDeaths, newAge);
     afterDeaths = MilitaryService.applyCallUp(afterDeaths, newAge);
+
+    // Kendi işi (D-132): kâr/zarar cüzdana yazılır, durum kayar,
+    // ilgilenilmeyen iş batar. İşi olmayan oyuncuda etkisi yoktur.
+    afterDeaths = BusinessEngine.advanceYear(afterDeaths, newAge, _rng);
 
     // Arkadaşlıklar (D-130): ilgilenilmeyen arkadaşlık kopabilir ve
     // arkadaşın kendi hayatında bir şey olur. İkisi de seyrektir.

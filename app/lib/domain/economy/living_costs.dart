@@ -2,6 +2,7 @@ import '../interaction/parenthood.dart';
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import 'business_engine.dart';
 import 'housing.dart';
 import '../../text/turkish_text.dart';
 
@@ -167,7 +168,11 @@ abstract final class LivingCosts {
   /// Maaş ve **kira geliri** birlikte sayılır (D-033: bütün para akışları
   /// aynı ekonomiye bağlıdır).
   static int yearlyIncome(GameState state) =>
-      (state.career.job?.yearlySalary ?? 0) + Housing.yearlyRentIncome(state);
+      (state.career.job?.yearlySalary ?? 0) +
+      Housing.yearlyRentIncome(state) +
+      // Kendi işinin kârı da aynı ekonomiye girer (D-033, D-132). Zarar
+      // eden iş geliri **düşürür**; gider hesabı bunu görür.
+      BusinessEngine.yearlyBusinessIncome(state);
 
   /// Bu yılın gider dökümü.
   ///
