@@ -22,6 +22,7 @@ import 'kilim_divider.dart';
 import '../../domain/models/person_development.dart';
 import '../../text/turkish_text.dart';
 import '../../domain/interaction/finger.dart';
+import '../../domain/interaction/friendship_depth.dart';
 
 /// Kişi ayrıntısı ve aile etkileşimleri.
 ///
@@ -616,6 +617,89 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                           _Note(
                             text: uygun.reason ?? 'Şu an mümkün değil.',
                           ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Yakın arkadaş olma teklifi (D-130). Ölçüm: hayatların
+              // 34/60'ında hiç arkadaş yoktu, çünkü oyuncunun bir
+              // tanıdığı arkadaş yapmak için düğmesi yoktu.
+              if (person.isAlive && !person.isEstranged) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun = GameScope.of(context)
+                        .closeFriendAvailability(person.id);
+                    // Bu ilişki hiç arkadaşlığa dönüşmüyorsa satır
+                    // kilitli olarak da durmaz.
+                    if (uygun.reason == 'Bu ilişki arkadaşlığa dönüşmez.' ||
+                        uygun.reason == 'Zaten yakın arkadaşsınız.') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('propose_close_friend'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FriendshipOutcome? o =
+                                        GameScope.of(context)
+                                            .proposeCloseFriend(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Yakın arkadaş ol'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(text: uygun.reason ?? 'Şu an mümkün değil.'),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Küslük kalıcı değil (D-130). Kayıt silinmedi; barış
+              // kapısı açık duruyor.
+              if (person.isAlive && person.isEstranged) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).makeUpAvailability(person.id);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('make_up'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FriendshipOutcome? o =
+                                        GameScope.of(context)
+                                            .makeUp(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Barışmayı dene'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(text: uygun.reason ?? 'Şu an mümkün değil.'),
                         ],
                       ],
                     );

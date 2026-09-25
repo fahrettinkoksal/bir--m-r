@@ -11,6 +11,7 @@ import '../domain/models/relation.dart';
 import 'event_pool_chains.dart';
 import 'event_pool_childhood.dart';
 import 'event_pool_crime.dart';
+import 'event_pool_friendship.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_extra.dart';
 import 'event_pool_exam.dart';
@@ -1714,4 +1715,5 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // dönemdi; `docs/EKSIKLER.md` ölçtü.
   ...kChildhoodEvents,
   ...kCrimeEvents,
+  ...kFriendshipEvents,
 ];

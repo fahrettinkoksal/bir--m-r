@@ -66,6 +66,7 @@ import '../domain/models/pending_crisis.dart';
 import '../domain/models/pending_trial.dart';
 import '../domain/models/criminal_record.dart';
 import '../data/lawyer_catalog.dart';
+import '../domain/interaction/friendship_depth.dart';
 import '../domain/law/legal_engine.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
@@ -1776,6 +1777,60 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  // =====================================================================
+  // Arkadaşlık derinliği (D-130)
+  // =====================================================================
+
+  /// Bu kişiye yakın arkadaşlık teklif edilebilir mi?
+  InteractionAvailability closeFriendAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return FriendshipDepth.closeFriendAvailability(current, personId);
+  }
+
+  /// Yakın arkadaşlık teklif eder. **Kabul garanti değildir.**
+  FriendshipOutcome? proposeCloseFriend(String personId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FriendshipResult sonuc = FriendshipDepth.proposeCloseFriend(
+      state: current,
+      personId: personId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = _countProgress(current, sonuc.state);
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Küs olan biriyle barışılabilir mi?
+  InteractionAvailability makeUpAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return FriendshipDepth.makeUpAvailability(current, personId);
+  }
+
+  /// Barışma denemesi. **Kabul garanti değildir.**
+  FriendshipOutcome? makeUp(String personId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FriendshipResult sonuc = FriendshipDepth.makeUp(
+      state: current,
+      personId: personId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = _countProgress(current, sonuc.state);
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
   }
 
   // =====================================================================

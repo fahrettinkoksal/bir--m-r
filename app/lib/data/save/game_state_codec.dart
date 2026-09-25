@@ -481,6 +481,10 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'classId': p.classId,
       'estate': p.estate,
       'infertile': p.infertile,
+      // Küslük ve arkadaşlık tarihi (D-130). Eski kayıtlarda yoktur;
+      // kimse küs açılmaz ve geriye dönük tarih uydurulmaz.
+      'estrangedSinceAge': p.estrangedSinceAge,
+      'becameFriendAtAge': p.becameFriendAtAge,
       // Kişinin kendi hayatı (D-045); yalnızca kaydı olanlarda doludur.
       'development': p.development == null
           ? null
@@ -1560,6 +1564,8 @@ Person _decodePerson(Map<String, Object?> json) {
     development: json['development'] == null
         ? null
         : _decodeDevelopment(_asMap(json['development'], 'person.development')),
+    estrangedSinceAge: _intOrNull(json, 'estrangedSinceAge'),
+    becameFriendAtAge: _intOrNull(json, 'becameFriendAtAge'),
   );
 }
 

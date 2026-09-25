@@ -36,6 +36,8 @@ class Person {
     this.city,
     this.estate = const <String>[],
     this.development,
+    this.estrangedSinceAge,
+    this.becameFriendAtAge,
     this.infertile = false,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
@@ -149,6 +151,23 @@ class Person {
   /// `null`'dır ve hiçbir yerde uydurma bilgi gösterilmez.
   final PersonDevelopment? development;
 
+  /// Küslük başladığı **oyuncu yaşı**; kavga yoksa `null` (D-130).
+  ///
+  /// **Kayıt silinmez:** küs olan kişi listeden düşmez, ilişkisi değişmez;
+  /// yalnızca gündelik etkileşim kapanır ve "barış" kapısı açılır. Eski
+  /// kayıtlarda bu alan yoktur ve kimse küs açılmaz.
+  final int? estrangedSinceAge;
+
+  /// Yakın arkadaşlığın başladığı **oyuncu yaşı** (D-130).
+  ///
+  /// Tanışıklıktan arkadaşlığa geçiş burada tarihlenir; hayat sonu
+  /// değerlendirmesi ve "yıllar sonra" olayları bunu okur. Eski
+  /// kayıtlarda `null`'dır ve geriye dönük bir tarih **uydurulmaz**.
+  final int? becameFriendAtAge;
+
+  /// Şu an küs mü?
+  bool get isEstranged => estrangedSinceAge != null;
+
   /// Oyuncuyla ilişki puanı (0-100).
   ///
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
@@ -219,6 +238,8 @@ class Person {
     List<String>? estate,
     Object? development = _unset,
     bool? infertile,
+    Object? estrangedSinceAge = _unset,
+    Object? becameFriendAtAge = _unset,
   }) {
     return Person(
       id: id,
@@ -249,6 +270,12 @@ class Person {
           ? this.development
           : development as PersonDevelopment?,
       infertile: infertile ?? this.infertile,
+      estrangedSinceAge: estrangedSinceAge == _unset
+          ? this.estrangedSinceAge
+          : estrangedSinceAge as int?,
+      becameFriendAtAge: becameFriendAtAge == _unset
+          ? this.becameFriendAtAge
+          : becameFriendAtAge as int?,
     );
   }
 }

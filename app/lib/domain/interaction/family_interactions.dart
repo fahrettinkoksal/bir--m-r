@@ -116,6 +116,13 @@ class FamilyInteractions {
         'Bu kişi hayatta değil; etkileşim kurulamaz.',
       );
     }
+    // Küs olan kişiyle gündelik etkileşim kurulmaz (D-130). Kayıt
+    // silinmez; yalnızca kapı kapanır, barış yolu açık kalır.
+    if (person.isEstranged) {
+      return const InteractionAvailability.blocked(
+        'Aranız bozuk. Barışmadan görüşmüyorsunuz.',
+      );
+    }
     if (person.relation == RelationType.eskiEs) {
       // Boşanma sonrası hangi etkileşimlerin açık kalacağı henüz
       // kararlaştırılmadı (Q-063); uydurma bir kural uygulanmaz.

@@ -7,6 +7,7 @@ import 'package:bir_omur/data/lawyer_catalog.dart';
 import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/data/university_catalog.dart';
 import 'package:bir_omur/domain/models/criminal_record.dart';
+import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/domain/models/pending_trial.dart';
 import 'package:bir_omur/domain/models/pending_wedding.dart';
@@ -36,6 +37,10 @@ class ActiveLifeResult {
     required this.hadChild,
     this.eventAges = const <String, int>{},
     this.finalLegal = const LegalState(),
+    this.friendCount = 0,
+    this.closeFriendCount = 0,
+    this.estrangedCount = 0,
+    this.everHadFriend = false,
   });
 
   /// Bu hayatta sunulan olayların kimlikleri.
@@ -61,6 +66,18 @@ class ActiveLifeResult {
 
   /// Hayatın sonundaki adli durum (D-128 ölçümleri için).
   final LegalState finalLegal;
+
+  /// Hayat sonunda yaşayan arkadaş sayısı (D-130 ölçümleri için).
+  final int friendCount;
+
+  /// Yakınlığı 60 ve üstü olan arkadaş sayısı.
+  final int closeFriendCount;
+
+  /// Küs olan kişi sayısı.
+  final int estrangedCount;
+
+  /// Hayatta bir kez bile arkadaşı oldu mu?
+  final bool everHadFriend;
 }
 
 /// **Aktif oyuncu** simülasyonu.
@@ -94,6 +111,7 @@ ActiveLifeResult playActiveLife(
   bool geziYapti = false;
   bool sosyalActi = false;
   bool emekliOldu = false;
+  int etkilesimBuYil = 0;
 
   int guard = 0;
   while (!c.state!.deceased && guard++ < 4000) {
@@ -301,14 +319,69 @@ ActiveLifeResult playActiveLife(
       }
     }
 
+    // 8b) Yakınlarıyla ve tanıdıklarıyla vakit geçir (D-130 ölçümü).
+    // Eski simülasyon **hiç kimseyle** vakit geçirmiyordu; bu yüzden
+    // yakınlık hiç artmıyor ve "arkadaşlık kurulamıyor" gibi
+    // görünüyordu. Gerçek oyuncu bunu yapar.
+    if (etkilesimBuYil < 4) {
+      final List<Person> gorusulebilir = s.people
+          .where(
+            (Person p) =>
+                p.isAlive && c.availableKindsFor(p).isNotEmpty,
+          )
+          .toList(growable: false);
+      if (gorusulebilir.isNotEmpty) {
+        final Person hedef =
+            gorusulebilir[secim.nextInt(gorusulebilir.length)];
+        final List<InteractionKind> turler = c.availableKindsFor(hedef);
+        c.interact(hedef.id, turler[secim.nextInt(turler.length)]);
+        etkilesimBuYil++;
+        continue;
+      }
+    }
+
+    // 9) Yakınlığı yeten bir tanıdığa arkadaşlık teklif et (D-130).
+    // Gerçek oyuncu bunu yapar; eski simülasyon hiç yapmıyordu ve bu
+    // yüzden "hiç arkadaşı olmayan hayat" ölçülüyordu.
+    final List<Person> adaylar = s.people
+        .where(
+          (Person p) =>
+              p.isAlive &&
+              c.closeFriendAvailability(p.id).isAllowed,
+        )
+        .toList(growable: false);
+    if (adaylar.isNotEmpty) {
+      c.proposeCloseFriend(adaylar[secim.nextInt(adaylar.length)].id);
+      continue;
+    }
+    // 10) Küs biriyle barışmayı dene.
+    final List<Person> kusler = s.people
+        .where(
+          (Person p) =>
+              p.isAlive && p.isEstranged && c.makeUpAvailability(p.id).isAllowed,
+        )
+        .toList(growable: false);
+    if (kusler.isNotEmpty) {
+      c.makeUp(kusler[secim.nextInt(kusler.length)].id);
+      continue;
+    }
+
     izler.addAll(c.state!.storyFlags);
     resolveEducationChoices(c);
+    etkilesimBuYil = 0;
     c.ageUp();
   }
 
   izler.addAll(c.state!.storyFlags);
   final int yas = c.state!.player.age;
   final LegalState adli = c.state!.legal;
+  final List<Person> arkadaslar = c.state!.people
+      .where((Person p) => p.isAlive && p.relation == RelationType.arkadas)
+      .toList(growable: false);
+  final int kus = c.state!.people.where((Person p) => p.isEstranged).length;
+  final bool hicArkadas = c.state!.people.any(
+    (Person p) => p.relation == RelationType.arkadas,
+  );
   c.dispose();
 
   return ActiveLifeResult(
@@ -325,6 +398,10 @@ ActiveLifeResult playActiveLife(
     hadChild: cocukOldu,
     eventAges: olayYasi,
     finalLegal: adli,
+    friendCount: arkadaslar.length,
+    closeFriendCount: arkadaslar.where((Person p) => p.bond >= 60).length,
+    estrangedCount: kus,
+    everHadFriend: hicArkadas,
   );
 }
 

@@ -61,9 +61,13 @@ enum NoticeKind {
   aileDonum,
 
   /// Adli süreç: soruşturma, mahkeme kararı, tahliye (D-128).
+  adli,
+
+  /// Arkadaşlık: yakın arkadaş olma, küslük, barışma, arkadaştan haber
+  /// (D-130).
   ///
   /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
-  adli,
+  arkadaslik,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).
