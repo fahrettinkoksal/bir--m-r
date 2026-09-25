@@ -3173,3 +3173,34 @@ Aynı ölçümde sağlık (D-116 ile birlikte): 20 yaş 69,9 → 70 yaş **13,8*
 2. Yıpranmanın 32'de başlaması doğru mu? Görünüş 30'da, sağlık 45'te başlıyor.
 3. Taban 15 doğru mu? Karizma bir insanda hiç sıfırlanmamalı mı?
 4. Bakımın (spor, berber) koruyucu etkisi yeterli mi? Şu an düzenli spor yapan belirgin biçimde daha az kaybediyor ama oran onaylanmadı.
+
+---
+
+### Q-137 — Eksikler envanteri ve sıradaki büyük iş
+**Durum:** Öneri, karar bekliyor · **Bağlam:** `docs/EKSIKLER.md` (tam envanter) · Ölçüm: 120 hayat oynanarak
+
+Faho istedi: "oyunda eksik ve tamamlanması gerektiğini düşündüklerini yaz". Tam envanter `docs/EKSIKLER.md` dosyasına çıkarıldı. Burada yalnızca **karar sorusu** duruyor: bundan sonra ne yapılacak?
+
+**Hiç kodlanmamış sistemler** (kodda tek satırı yok, arama ile doğrulandı):
+
+| Sistem | Durum |
+|---|---|
+| Suç, hukuk, hapis | **Yok** — oyunda hiçbir risk yok |
+| Girişimcilik | **Yok** — 44 mesleğin hepsi maaşlı |
+| Üvey ebeveyn / ikinci ailenin bağları | **Yok** |
+| Nafaka, velayet | Bilerek ertelendi (Q-118) |
+| Hane bütçesi, eşin ekonomisi | **Yok** (Q-063) |
+| İkiz gebelik | **Yok** |
+
+**Yarım kalmış sistemler:** arkadaşlık (yalnızca sohbet/vakit/hediye; küslük, barışma, arkadaşın kendi hayatı yok) · çocuğun hayatı tek yönlü (boşanamaz, işsiz kalamaz) · Hobilerim bölümü yok · Evlilik Geçmişi ekranı yok · hayvan detay ekranı yok · dul kalmak ile boşanmak aynı bağa düşüyor · çoklu kişiyle aktivite yok.
+
+**Ölçülen içerik boşluğu:** hayatın ilk 18 yılı en fakir dönem — 0-5 yaşta **11**, 6-12'de **25** farklı olay görülüyor; oysa 40-59'da **52**, 60-79'da **60**.
+
+**Bir uyarı:** 120 hayatta 61 olay hiç çıkmadı, ama bunların çoğu **bozuk değil** — simülasyon işe girmediği ve hobi edinmediği için tetiklenemedi (`ilk_maas` yalnızca "18-24 yaşta çalışıyor ol" istiyor). **Ancak 10 hikâye izi hiç konmuyor** ve bir kısmı zincirin ilk halkası hiç çıkmadığı için ölü olabilir; bu gerçek bir hata olabilir.
+
+**Karar soruları:**
+1. **Sıradaki büyük iş hangisi olsun?** Claude'un önerisi: (a) ölü hikâye izlerini araştır, (b) çocukluk/ergenlik olayları, (c) suç ve hukuk sistemi, (d) arkadaşlığı derinleştir, (e) görsel kimlik kararı. Bu bir öneridir; sıra sizindir.
+2. **Suç ve hukuk sistemi bu sürüme girsin mi?** Daha önce "ileride gelecek" denmişti. Oyuna kaybedilebilirlik katan tek büyük eksik bu.
+3. **Görsel kimlik (Q-001 / Q-077) ne zaman karara bağlanacak?** Oyun bir yıl daha kodlanabilir ama palet seçilmeden "bitti" denemez; 15 golden testi de bu yüzden atlanıyor.
+4. **136 sorunun 68'i hâlâ karar bekliyor ve hiçbiri "kararlaştırıldı" diye kapatılmamış.** Kuyruk bu hâliyle işe yarıyor mu, yoksa toplu bir karar turu mu gerekiyor?
+5. Çocukluk için 40-50 yeni olay yazılması onaylanıyor mu? Onaylanırsa hangi temalar öncelikli?

@@ -75,6 +75,14 @@ Faho'nun onayı bekleniyor.
 ## Faho'nun işaret ettiği, henüz yapılmayanlar
 - Şu an bu başlıkta bekleyen madde yok. Yeni istekler geldikçe buraya yazılır.
 
+## Eksikler envanteri (25 Eylül 2026)
+Oyunun bütün eksikleri ölçülerek `docs/EKSIKLER.md` dosyasına çıkarıldı:
+hiç kodlanmamış sistemler (suç ve hukuk, girişimcilik, üvey ebeveyn,
+hane bütçesi, ikiz gebelik), yarım kalmış sistemler (arkadaşlığın
+sığlığı, çocuğun tek yönlü hayatı, eksik ekranlar), ölçülmüş içerik
+boşlukları (çocukluk en fakir dönem) ve karar bekleyen 68 soru.
+Sıralama kararı `docs/DESIGN_REVIEW_QUEUE.md` **Q-137**'de bekliyor.
+
 ## Boşanmanın hukuki tarafı — bilerek ertelendi (Q-118 kararı)
 Faho'nun kararı: boşanmada **mal paylaşımı kalsın** (D-075), ama
 **nafaka ve velayet şimdilik yazılmasın**. Bunlar oyunun bugünkü
