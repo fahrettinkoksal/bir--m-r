@@ -1434,7 +1434,8 @@ const List<GameEvent> kChildhoodEvents = <GameEvent>[
         id: 'calis',
         label: 'Sen de bir şey ara',
         resultText: 'Bir yerde iki ay çalıştın. Para azdı, ama kendi '
-            'paran olması başka şeymiş.',
+            'paran olması başka şeymiş.\n\nMeslek bölümünde artık '
+            'yarım zamanlı işler de açık.',
         happiness: 2,
         money: 8000,
         charisma: 3,

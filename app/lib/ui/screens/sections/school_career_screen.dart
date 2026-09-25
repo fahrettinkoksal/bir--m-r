@@ -317,6 +317,12 @@ String _adliAltMetni(GameState state) {
   return kayit == 1 ? 'Sicilinde bir kayıt var' : 'Sicilinde $kayit kayıt var';
 }
 
+/// prototypeOnly: yarım zamanlı iş için en küçük yaş (D-131).
+///
+/// Katalogdaki en küçük `minAge` ile aynı; ekranda gerekçe yazarken
+/// kullanılır.
+const int _enKucukYarimZamanliYas = 16;
+
 enum _CareerPage {
   kok,
   mezuniyetSonrasi,
@@ -366,7 +372,14 @@ class _CareerViewState extends State<_CareerView> {
         break;
     }
 
-    final bool isAranabilir = egitim.finished || egitim.universityFinished;
+    // Öğrenci de iş arayabilir: yarım zamanlı işler ona açık (D-131).
+    // Tam zamanlı iş kapısı yine liseyi bitirmeye bağlı; bunu
+    // `JobMarket.requirementReason` denetliyor.
+    final bool yarimZamanliCagi =
+        state.player.age >= _enKucukYarimZamanliYas;
+    final bool isAranabilir = egitim.finished ||
+        egitim.universityFinished ||
+        (egitim.isSchoolStudent && yarimZamanliCagi);
 
     return SectionScaffold(
       icon: Icons.work_rounded,
@@ -520,7 +533,9 @@ class _CareerViewState extends State<_CareerView> {
             title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
             subtitle: state.career.isEmployed
                 ? 'Önce mevcut işinden ayrılman gerekir'
-                : 'Koşullarını sağladığın işler',
+                : egitim.isSchoolStudent
+                    ? 'Okurken yapılabilecek yarım zamanlı işler'
+                    : 'Koşullarını sağladığın işler',
             icon: Icons.work_outline,
             accent: BirOmurAccents.mor,
             onTap: () => _go(_CareerPage.isArama),
@@ -655,7 +670,8 @@ class _CareerViewState extends State<_CareerView> {
             icon: Icons.work_outline,
             text: okulOncesi
                 ? 'Okul çağına gelince bu bölüm okul bilgilerini gösterecek.'
-                : 'İş arama liseyi bitirdikten sonra açılır.',
+                : 'Yarım zamanlı iş $_enKucukYarimZamanliYas yaşında, '
+                    'tam zamanlı iş liseyi bitirdikten sonra açılır.',
           ),
       ],
     );

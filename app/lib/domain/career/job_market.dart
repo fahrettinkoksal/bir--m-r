@@ -117,8 +117,12 @@ class JobMarket {
       return '$dayanak Şu an ${state.player.age} yaşındasın; '
           'bu işe artık başvuramazsın.';
     }
-    if (egitim.isSchoolStudent) {
-      return 'Okula devam ederken tam zamanlı işe başvurulmaz.';
+    // Okula devam ederken **tam zamanlı** iş yapılmaz; yarım zamanlı
+    // yapılır (D-131). Faho'nun isteği ve D-126'daki "yaz işi istemek"
+    // olayının gerçek karşılığı.
+    if (egitim.isSchoolStudent && !job.partTime) {
+      return 'Okula devam ederken tam zamanlı işe başvurulmaz. '
+          'Yarım zamanlı işlere başvurabilirsin.';
     }
     // Cezaevindeyken iş aranmaz (D-128).
     if (state.isImprisoned) {

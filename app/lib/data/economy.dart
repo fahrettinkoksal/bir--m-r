@@ -63,7 +63,17 @@ enum SalaryBand {
   /// Bu bandın altı [giris] bandının altına inebilir: serbest çalışan
   /// bir yazarın kötü yılı asgari ücretin altında olabilir. Sabit maaş
   /// kuralı bu banda uygulanmaz.
-  yaraticiDegisken('Yaratıcı / değişken gelir', 380000, 2000000);
+  yaraticiDegisken('Yaratıcı / değişken gelir', 380000, 2000000),
+
+  /// Yarım zamanlı iş (D-131): okula devam ederken ya da tam gün
+  /// çalışmadan yapılan iş.
+  ///
+  /// **Asgari ücret tabanı bu banda uygulanmaz**, çünkü yarım zamanlı
+  /// çalışan tam ay çalışmıyor: 2026'da net asgari ücret aylık
+  /// 28.075 ₺, yarım gün çalışan bunun kabaca yarısını alır.
+  ///
+  /// Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  yarimZamanli('Yarım zamanlı', 90000, 260000);
 
   const SalaryBand(this.label, this.minYearly, this.maxYearly);
 
@@ -76,7 +86,12 @@ enum SalaryBand {
   final int maxYearly;
 
   /// Sabit maaş kuralının (asgari ücret tabanı) uygulandığı bant mı?
-  bool get sabitMaasli => this != SalaryBand.yaraticiDegisken;
+  ///
+  /// Yaratıcı/değişken gelirde taban yoktur; yarım zamanlıda da yoktur
+  /// çünkü tam ay çalışılmıyor (D-131).
+  bool get sabitMaasli =>
+      this != SalaryBand.yaraticiDegisken &&
+      this != SalaryBand.yarimZamanli;
 
   bool icerir(int yillik) => yillik >= minYearly && yillik <= maxYearly;
 }

@@ -75,6 +75,7 @@ class JobType {
     this.minHobbyStage = 0,
     this.requiredLicenses = const <String>{},
     this.recordRule = RecordRule.serbest,
+    this.partTime = false,
   });
 
   final String id;
@@ -152,6 +153,13 @@ class JobType {
   /// Kuryelik gibi, aracı kullanmanın işin kendisi olduğu mesleklerde
   /// aranır. Ehliyetsiz oyuncuya iş açılmaz; gerekçesi yazılır.
   final Set<String> requiredLicenses;
+
+  /// Bu iş **yarım zamanlı** mı? (D-131)
+  ///
+  /// Yarım zamanlı iş okula devam ederken de yapılabilir; tam zamanlı iş
+  /// yapılamaz. Maaşı düşüktür ve öğrenciyken çalışmanın **bedeli**
+  /// vardır: yıllık zekâ kazancı azalır, sağlık biraz düşer.
+  final bool partTime;
 
   /// İşin sabıka kaydına bakışı (D-128).
   ///
@@ -776,6 +784,99 @@ const List<JobType> kJobCatalog = <JobType>[
       'Güreş antrenörü',
       'Kulüp baş antrenörü',
     ],
+  ),
+
+  // ===================================================================
+  // Yarım zamanlı işler (D-131)
+  //
+  // Okula devam ederken de yapılabilir. Maaş düşüktür ve öğrenciyken
+  // çalışmanın bedeli vardır: zekâ kazancı azalır, sağlık biraz düşer.
+  // "Yaz işi istemek" olayı (D-126) artık gerçek bir kapıya çıkıyor.
+  // ===================================================================
+  JobType(
+    id: 'yz_market_reyon',
+    name: 'Market reyon görevlisi (yarım zamanlı)',
+    description: 'Raf dizmek, fiyat okutmak, akşamüstü kalabalığı.',
+    minAge: 16,
+    yearlySalary: 132000, // prototypeOnly
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Reyon görevlisi', 'Reyon sorumlusu'],
+  ),
+  JobType(
+    id: 'yz_kafe',
+    name: 'Kafe garsonu (yarım zamanlı)',
+    description: 'Hafta sonu vardiyası, ayakta geçen altı saat.',
+    minAge: 16,
+    yearlySalary: 145000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    minCharisma: 20,
+    levels: <String>['Komi', 'Garson'],
+  ),
+  JobType(
+    id: 'yz_kurye',
+    name: 'Motorlu kurye (yarım zamanlı)',
+    description: 'Adres bul, zile bas, yağmurda ıslan.',
+    minAge: 18,
+    yearlySalary: 186000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    requiredLicenses: <String>{'motosiklet_ehliyeti'},
+    levels: <String>['Kurye'],
+  ),
+  JobType(
+    id: 'yz_cagri_merkezi',
+    name: 'Çağrı merkezi (yarım zamanlı)',
+    description: 'Kulaklık, senaryo ve bitmeyen bir sıra.',
+    minAge: 18,
+    yearlySalary: 168000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    minCharisma: 25,
+    levels: <String>['Müşteri temsilcisi', 'Kıdemli temsilci'],
+  ),
+  JobType(
+    id: 'yz_dersane_asistani',
+    name: 'Etüt asistanı (yarım zamanlı)',
+    description: 'Küçüklerin ödevine bakıyorsun; bir kısmını sen de '
+        'yeni öğrendin.',
+    minAge: 17,
+    yearlySalary: 156000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    minIntelligence: 45,
+    levels: <String>['Etüt asistanı', 'Grup sorumlusu'],
+  ),
+  JobType(
+    id: 'yz_kitapci',
+    name: 'Kitapçı tezgâhı (yarım zamanlı)',
+    description: 'Sessiz dükkân, tozlu raflar, arada bir müşteri.',
+    minAge: 16,
+    yearlySalary: 118000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Tezgâhtar'],
+  ),
+  JobType(
+    id: 'yz_hali_saha',
+    name: 'Halı saha görevlisi (yarım zamanlı)',
+    description: 'Saat tut, ışığı aç, forma yıka.',
+    minAge: 16,
+    yearlySalary: 124000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Saha görevlisi'],
+  ),
+  JobType(
+    id: 'yz_sanayi_cirak',
+    name: 'Sanayide çırak (yarım zamanlı)',
+    description: 'Elin yağ kokuyor, usta hâlâ "tut şunu" diyor.',
+    minAge: 16,
+    yearlySalary: 138000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Çırak', 'Kalfa'],
   ),
 ];
 JobType? jobById(String id) {

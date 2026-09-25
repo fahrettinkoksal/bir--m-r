@@ -25,6 +25,7 @@ import '../life/health_crisis_engine.dart';
 import '../interaction/marriage_engine.dart';
 import '../interaction/parenthood.dart';
 import '../life/inheritance.dart';
+import '../../data/job_catalog.dart';
 import '../interaction/friendship_depth.dart';
 import '../law/legal_engine.dart';
 import '../life/mortality.dart';
@@ -551,6 +552,9 @@ class LifeProgression {
     // İlgisizlikten zayıflayan bağlar (Paket 24). Bağ yalnızca
     // yükselmemeli: uzun süre görüşülmeyen kişiyle araya mesafe girer.
     afterDeaths = _applyBondDecay(afterDeaths, newAge);
+
+    // Okurken yarım zamanlı çalışmanın bedeli (D-131).
+    afterDeaths = _applyPartTimeStrain(afterDeaths, newAge);
 
     // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
     GameState withTrack = _applyTrackBonus(afterDeaths);
@@ -1522,14 +1526,46 @@ class LifeProgression {
   GameState _applyTrackBonus(GameState state) {
     final EducationTrackInfo? alan = state.education.trackInfo;
     if (alan == null || !state.education.isSchoolStudent) return state;
+    // Okurken yarım zamanlı çalışmanın bedeli var (D-131): derse ayrılan
+    // zaman azalıyor. Alan katkısının **yarısı** gider; kapı kapanmaz,
+    // kazanç yavaşlar.
+    final bool okurkenCalisiyor = state.career.job?.partTime ?? false;
+    final int zekaKatkisi = okurkenCalisiyor
+        ? alan.intelligenceBonus ~/ 2
+        : alan.intelligenceBonus;
     return state.copyWith(
       player: state.player.copyWith(
         stats: state.player.stats.gain(
-          intelligence: alan.intelligenceBonus,
+          intelligence: zekaKatkisi,
           charisma: alan.charismaBonus,
           appearance: alan.appearanceBonus,
         ),
       ),
+    );
+  }
+
+  /// Okurken yarım zamanlı çalışmanın yıllık bedeli (D-131).
+  ///
+  /// Ayakta geçen vardiyalar bedava değil: sağlık düşer, mutluluk biraz
+  /// azalır. Çalışan öğrenci karşılığında **gerçek para** kazanıyor;
+  /// bedel para kazancının karşılığıdır.
+  GameState _applyPartTimeStrain(GameState state, int newAge) {
+    if (!state.education.isSchoolStudent) return state;
+    final JobType? is_ = state.career.job;
+    if (is_ == null || !is_.partTime) return state;
+    return state.copyWith(
+      player: state.player.copyWith(
+        stats: state.player.stats.gain(health: -2, happiness: -1),
+      ),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: newAge,
+          text: 'Okul ve iş bir arada yürüdü. Yoruldun ama '
+              'kendi paran oldu.',
+          category: LogCategory.kisisel,
+        ),
+      ]),
     );
   }
 

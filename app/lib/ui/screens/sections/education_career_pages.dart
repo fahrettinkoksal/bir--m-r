@@ -321,7 +321,43 @@ class _JobSearchPageState extends State<JobSearchPage> {
             text: 'Şu an koşullarını sağladığın bir iş yok. Eğitimini '
                 'ilerletmek veya yaşının büyümesi seçenekleri açabilir.',
           ),
-        for (final JobType job in acik) ...<Widget>[
+        // Yarım zamanlı işler ayrı grupta durur (D-131): okuyan oyuncu
+        // hangilerinin ona açık olduğunu tek bakışta görsün.
+        if (acik.any((JobType j) => j.partTime)) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Yarım zamanlı',
+            accent: BirOmurAccents.pirinc,
+          ),
+          const SizedBox(height: 8),
+          for (final JobType job in acik.where((JobType j) => j.partTime))
+            ...<Widget>[
+            _JobCard(
+              job: job,
+              availability: controller.jobApplicationAvailability(job),
+              onApply: () async {
+                final JobOutcome? outcome = controller.applyForJob(job);
+                if (outcome == null) return;
+                if (outcome.interviewStarted && context.mounted) {
+                  await InterviewSheet.show(context);
+                  if (!context.mounted) return;
+                  setState(() => _sonuc = null);
+                  return;
+                }
+                setState(() => _sonuc = outcome.text);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (acik.any((JobType j) => !j.partTime)) ...<Widget>[
+            const MenuGroupTitle(
+              text: 'Tam zamanlı',
+              accent: BirOmurAccents.mor,
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+        for (final JobType job in acik.where((JobType j) => !j.partTime))
+            ...<Widget>[
           _JobCard(
             job: job,
             availability: controller.jobApplicationAvailability(job),
