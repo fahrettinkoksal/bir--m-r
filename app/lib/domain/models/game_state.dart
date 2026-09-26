@@ -90,6 +90,7 @@ class GameState {
     this.sponsorOffer,
     this.mediaInvitationId,
     this.mediaInvitationAge,
+    this.mediaJobLastAge = const <String, int>{},
     this.sponsorDeals = const <SponsorDeal>[],
     this.trips = const <TripRecord>[],
     this.pendingInterview,
@@ -423,6 +424,20 @@ class GameState {
   /// Bu iş için şu an geçerli bir davet var mı?
   bool hasMediaInvitation(String jobId) =>
       mediaInvitationId == jobId && mediaInvitationAge == player.age;
+
+  /// Her medya işinin **en son hangi yaşta** yapıldığı (D-147).
+  ///
+  /// Faho bildirdi: "medya fırsatları sürekli açık olması, oradan da çok
+  /// kolay para spamlanabiliyor... bir fenomen her sene radyo programına
+  /// vb işlere çağırılıyor mu gibi düşün". Aynı kapı her yıl çalınmaz;
+  /// bu harita bekleme süresinin ölçüldüğü yerdir.
+  ///
+  /// Eski kayıtlarda yoktur; boş açılır ve geriye dönük geçmiş
+  /// **uydurulmaz**.
+  final Map<String, int> mediaJobLastAge;
+
+  /// Bu iş en son hangi yaşta yapıldı? Hiç yapılmadıysa `null`.
+  int? mediaJobDoneAt(String jobId) => mediaJobLastAge[jobId];
 
   /// Kabul edilmiş sponsorluk yükümlülükleri ve geçmişi.
   final List<SponsorDeal> sponsorDeals;
@@ -910,6 +925,7 @@ class GameState {
     Object? sponsorOffer = _unsetEvent,
     Object? mediaInvitationId = _unsetEvent,
     Object? mediaInvitationAge = _unsetEvent,
+    Map<String, int>? mediaJobLastAge,
     List<SponsorDeal>? sponsorDeals,
     List<TripRecord>? trips,
     Object? pendingInterview = _unsetEvent,
@@ -1005,6 +1021,9 @@ class GameState {
       mediaInvitationId: mediaInvitationId == _unsetEvent
           ? this.mediaInvitationId
           : mediaInvitationId as String?,
+      mediaJobLastAge: mediaJobLastAge == null
+          ? this.mediaJobLastAge
+          : Map<String, int>.unmodifiable(mediaJobLastAge),
       mediaInvitationAge: mediaInvitationAge == _unsetEvent
           ? this.mediaInvitationAge
           : mediaInvitationAge as int?,

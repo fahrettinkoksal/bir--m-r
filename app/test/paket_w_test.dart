@@ -6,11 +6,18 @@ library;
 import 'dart:math';
 
 import 'package:bir_omur/data/activity_catalog.dart';
+import 'package:bir_omur/data/item_catalog.dart';
+import 'package:bir_omur/data/media_catalog.dart';
+import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/data/finger_catalog.dart';
 import 'package:bir_omur/data/pet_catalog.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/interaction/finger.dart';
+import 'package:bir_omur/domain/models/interaction.dart';
+import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/domain/social/media_opportunities.dart';
 import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
@@ -31,6 +38,7 @@ GameState hayat(int seed, {int age = 10, int wallet = 5000}) {
 }
 
 void main() {
+  _paketW2();
   // ===================================================================
   // Sahiplenmediğin hayvanın bakımı senden çıkmaz (D-144)
   // ===================================================================
@@ -232,6 +240,188 @@ void main() {
       final GameState sonra =
           Finger.meet(s, profil.id, Random(2)).state;
       expect(sonra.people.last.wealth, isNull);
+    });
+  });
+}
+
+// =====================================================================
+// D-147: medya fırsatları spam olmaktan çıktı
+// D-148: araç sigorta/kasko/vergi gideri
+// =====================================================================
+void _paketW2() {
+  group('Medya fırsatları (D-147)', () {
+    GameState unlu({int fame = 60, int age = 30}) {
+      final GameState s = hayat(20, age: age, wallet: 100000);
+      return s.copyWith(
+        player: s.player.copyWith(fame: fame),
+      );
+    }
+
+    test('yılda en çok iki medya işine girişilebilir', () {
+      // Faho: "medya fırsatları sürekli açık olması, oradan da çok kolay
+      // para spamlanabiliyor." Sekiz işin sekizi de aynı yıl
+      // yapılabiliyordu.
+      GameState s = unlu();
+      int girisim = 0;
+      for (final MediaOpportunity is_ in kMediaOpportunities) {
+        if (!MediaOpportunities.availability(s, is_).isAllowed) continue;
+        s = MediaOpportunities.accept(s, is_, Random(girisim)).state;
+        girisim++;
+      }
+      expect(girisim, MediaOpportunities.prototypeOnlyMaxJobsPerAge);
+      expect(MediaOpportunities.jobsThisAge(s),
+          MediaOpportunities.prototypeOnlyMaxJobsPerAge);
+      for (final MediaOpportunity is_ in kMediaOpportunities) {
+        expect(
+          MediaOpportunities.availability(s, is_).isAllowed,
+          isFalse,
+          reason: is_.label,
+        );
+      }
+    });
+
+    test('reddedilen başvuru da yıllık hakkı tüketir', () {
+      GameState s = unlu(fame: kMediaSectionMinFame);
+      final MediaOpportunity is_ = kMediaOpportunities.reduce(
+        (MediaOpportunity a, MediaOpportunity b) =>
+            a.minFame <= b.minFame ? a : b,
+      );
+      // Kabul edilse de edilmese de sayaç artar.
+      s = MediaOpportunities.accept(s, is_, Random(0)).state;
+      expect(MediaOpportunities.jobsThisAge(s), 1);
+    });
+
+    test('aynı iş üç yıl boyunca tekrar yapılamaz', () {
+      // Faho: "bir fenomen her sene radyo programına vb işlere
+      // çağırılıyor mu gibi düşün."
+      GameState s = unlu(fame: 90);
+      final MediaOpportunity is_ = kMediaOpportunities
+          .firstWhere((MediaOpportunity j) => j.minFame <= 90);
+      // Kabul edilene kadar dene (tohum değiştirerek).
+      for (int t = 0; t < 30; t++) {
+        final GameState deneme =
+            MediaOpportunities.accept(unlu(fame: 90), is_, Random(t)).state;
+        if (deneme.mediaJobDoneAt(is_.id) != null) {
+          s = deneme;
+          break;
+        }
+      }
+      expect(s.mediaJobDoneAt(is_.id), isNotNull, reason: 'Hiç kabul çıkmadı');
+
+      final int yapilanYas = s.mediaJobDoneAt(is_.id)!;
+      for (int fark = 1;
+          fark < MediaOpportunities.prototypeOnlyJobCooldownYears;
+          fark++) {
+        final GameState ileri = s.copyWith(
+          player: s.player.copyWith(age: yapilanYas + fark),
+          interactionCounts: const <String, int>{},
+        );
+        final InteractionAvailability u =
+            MediaOpportunities.availability(ileri, is_);
+        expect(u.isAllowed, isFalse, reason: '$fark yıl sonra hâlâ kapalı');
+        expect(u.reason, contains('Aynı kapı her yıl çalınmaz'));
+      }
+      // Süre dolunca yeniden açılır.
+      final GameState sonra = s.copyWith(
+        player: s.player.copyWith(
+          age: yapilanYas + MediaOpportunities.prototypeOnlyJobCooldownYears,
+        ),
+        interactionCounts: const <String, int>{},
+      );
+      expect(MediaOpportunities.availability(sonra, is_).isAllowed, isTrue);
+    });
+
+    test('kabul şansı hiçbir zaman garanti değil', () {
+      final GameState s = unlu(fame: 100);
+      for (final MediaOpportunity is_ in kMediaOpportunities) {
+        expect(
+          MediaOpportunities.acceptChance(s, is_),
+          lessThanOrEqualTo(MediaOpportunities.prototypeOnlyMaxAcceptChance),
+          reason: is_.label,
+        );
+      }
+    });
+
+    test('yeni alanlar kayda girer; eski kayıtta boş açılır', () {
+      GameState s = unlu();
+      s = s.copyWith(
+        mediaJobLastAge: <String, int>{'radyo_programi': 29},
+      );
+      final GameState geri = decodeGameState(encodeGameState(s));
+      expect(geri.mediaJobDoneAt('radyo_programi'), 29);
+
+      final Map<String, Object?> json = encodeGameState(unlu())
+        ..remove('mediaJobLastAge');
+      expect(decodeGameState(json).mediaJobLastAge, isEmpty);
+    });
+  });
+
+  group('Araç gideri: sigorta, kasko, vergi (D-148)', () {
+    GameState aracli(String typeId, {int yas = 30, int alindigiYas = 30}) {
+      final GameState s = hayat(21, age: alindigiYas, wallet: 50000000);
+      final GameState sahip = s.grantItems(
+        <String>[typeId],
+        source: ItemSource.satinAlma,
+        purchasePrice: itemTypeOrFallback(typeId).baseValue,
+      );
+      return sahip.copyWith(player: sahip.player.copyWith(age: yas));
+    }
+
+    test('aracı olmayanda araç gideri yok', () {
+      final GameState s = hayat(22, age: 30);
+      expect(LivingCosts.vehicleItems(s), isEmpty);
+    });
+
+    test('araç alınca her yıl sigorta, kasko ve vergi çıkar', () {
+      // Faho: "araç satın aldığımda kasko ve sigorta masrafı da çıksın,
+      // her yıl vergisi de çıksın."
+      final GameState s = aracli('otomobil_ekonomik');
+      final List<({String label, int amount})> kalemler =
+          LivingCosts.vehicleItems(s);
+      expect(kalemler, hasLength(1));
+      expect(kalemler.single.amount, greaterThan(0));
+      expect(kalemler.single.label, contains('sigorta, kasko ve vergi'));
+      // Gider yıllık dökümde de görünür (D-123).
+      expect(
+        LivingCosts.breakdownFor(s)
+            .items
+            .any((({String label, int amount}) k) =>
+                k.label.contains('sigorta, kasko ve vergi')),
+        isTrue,
+      );
+    });
+
+    test('pahalı araç daha çok gider çıkarır', () {
+      final int ucuz = LivingCosts.vehicleItems(aracli('otomobil_ekonomik'))
+          .single
+          .amount;
+      final int pahali =
+          LivingCosts.vehicleItems(aracli('otomobil_prestij')).single.amount;
+      expect(pahali, greaterThan(ucuz));
+    });
+
+    test('araç yaşlandıkça vergi payı düşer ama gider sıfırlanmaz', () {
+      final int yeni = LivingCosts.vehicleItems(
+        aracli('otomobil_orta', yas: 30, alindigiYas: 30),
+      ).single.amount;
+      final int eski = LivingCosts.vehicleItems(
+        aracli('otomobil_orta', yas: 45, alindigiYas: 30),
+      ).single.amount;
+      expect(eski, lessThan(yeni));
+      expect(eski, greaterThan(0));
+    });
+
+    test('bisiklet gider çıkarmaz', () {
+      expect(LivingCosts.vehicleItems(aracli('bisiklet')), isEmpty);
+    });
+
+    test('iki araç iki ayrı satır olur', () {
+      GameState s = aracli('otomobil_ekonomik');
+      s = s.grantItems(
+        <String>['motosiklet_ekonomik'],
+        source: ItemSource.satinAlma,
+      );
+      expect(LivingCosts.vehicleItems(s), hasLength(2));
     });
   });
 }

@@ -126,6 +126,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
       'mediaInvitationId': state.mediaInvitationId,
       'mediaInvitationAge': state.mediaInvitationAge,
+      // D-147: her medya işinin en son yapıldığı yaş. Eski kayıtlarda
+      // yoktur; boş açılır ve geriye dönük geçmiş uydurulmaz.
+      'mediaJobLastAge': state.mediaJobLastAge,
       'sponsorOffer': state.sponsorOffer == null
           ? null
           : _encodeSponsorOffer(state.sponsorOffer!),
@@ -966,6 +969,12 @@ GameState decodeGameState(Map<String, Object?> json) {
     // Eski kayıtlarda sponsorluk yoktur; boş açılır.
     mediaInvitationId: _stringOrNull(json, 'mediaInvitationId'),
     mediaInvitationAge: _intOrNull(json, 'mediaInvitationAge'),
+    // Eski kayıtta bu alan yoktur; **eksik olması hata değildir**.
+    mediaJobLastAge: Map<String, int>.unmodifiable(
+      json['mediaJobLastAge'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'mediaJobLastAge'),
+    ),
     sponsorOffer: json['sponsorOffer'] == null
         ? null
         : _decodeSponsorOffer(_map(json, 'sponsorOffer')),

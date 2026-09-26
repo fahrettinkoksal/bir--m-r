@@ -62,11 +62,55 @@ abstract final class MediaOpportunities {
     }
     if (timesDone(state, job) >= job.maxPerAge) {
       return InteractionAvailability.blocked(
-        'Bu işi bu yıl yaptın; gelecek yıl yeniden teklif gelir.',
+        'Bu işi bu yıl denedin; gelecek yıl yeniden bakarsın.',
+      );
+    }
+    // D-147: aynı kapı her yıl çalınmaz. Faho'nun sorusu: "bir fenomen
+    // her sene radyo programına vb işlere çağırılıyor mu?"
+    final int? sonYapilan = state.mediaJobDoneAt(job.id);
+    if (sonYapilan != null &&
+        state.player.age - sonYapilan < prototypeOnlyJobCooldownYears) {
+      final int kalan =
+          prototypeOnlyJobCooldownYears - (state.player.age - sonYapilan);
+      return InteractionAvailability.blocked(
+        'Bu işi $sonYapilan yaşında yaptın. Aynı kapı her yıl çalınmaz; '
+        '$kalan yıl daha beklemen gerekiyor.',
+      );
+    }
+    // D-147: yılda en çok birkaç medya işi. Sekiz iş birden yapılınca
+    // hem para hem Ün anlamsız biçimde birikiyordu.
+    if (jobsThisAge(state) >= prototypeOnlyMaxJobsPerAge) {
+      return InteractionAvailability.blocked(
+        'Bu yıl yeterince medya işi yaptın; seneye yeniden açılır.',
       );
     }
     return const InteractionAvailability.allowed();
   }
+
+  /// prototypeOnly: aynı işin tekrarı için beklenmesi gereken yıl (D-147).
+  static const int prototypeOnlyJobCooldownYears = 3;
+
+  /// prototypeOnly: bir yılda yapılabilecek **toplam** medya işi (D-147).
+  ///
+  /// Katalogda sekiz iş var ve her biri yılda bir kez yapılabiliyordu;
+  /// yani bir yılda sekiz işin tamamı yapılabiliyor, bu da hem kolay
+  /// para hem durmadan yükselen Ün demekti.
+  static const int prototypeOnlyMaxJobsPerAge = 2;
+
+  /// Bu yıl toplam kaç medya işine girişildi (kabul + ret)?
+  static int jobsThisAge(GameState state) =>
+      state.interactionCount(_yearScope, _yearKind);
+
+  static const String _yearScope = 'medya';
+  static const String _yearKind = 'yil';
+
+  /// Yıllık sayaca bir giriş ekler.
+  static Map<String, int> _countYear(GameState state) =>
+      <String, int>{
+        ...state.interactionCounts,
+        GameState.interactionKey(_yearScope, _yearKind):
+            jobsThisAge(state) + 1,
+      };
 
   /// Bu iş bu yaşta kaç kez yapıldı?
   static int timesDone(GameState state, MediaOpportunity job) =>
@@ -77,7 +121,11 @@ abstract final class MediaOpportunities {
   /// Faho bildirdi: "medya kazançlar gibi tekliflere başvursam bile kabul
   /// edilmeme durumu olsun". Başvurmak almak değildir: eşiği yeni geçen
   /// bir ad için yapım da markası da başka adayları değerlendirir.
-  static const double prototypeOnlyBaseAcceptChance = 0.45;
+  /// **D-147 ile düşürüldü.** Faho bildirdi: "medya fırsatları sürekli
+  /// açık olması oradan da çok kolay para spamlanabiliyor... her
+  /// seferinde kabul edilmesin". Taban 0,45'ten 0,30'a indi; Ün payı
+  /// aynen duruyor, yani tanınmış biri yine de daha kolay kabul edilir.
+  static const double prototypeOnlyBaseAcceptChance = 0.30;
 
   /// prototypeOnly: eşiğin üstündeki her Ün puanının kattığı şans.
   static const double prototypeOnlyAcceptPerFamePoint = 0.02;
@@ -121,7 +169,7 @@ abstract final class MediaOpportunities {
           stats: state.player.stats.gain(happiness: -2),
         ),
         interactionCounts: Map<String, int>.unmodifiable(<String, int>{
-          ...state.interactionCounts,
+          ..._countYear(state),
           GameState.interactionKey(job.id, 'medya'): timesDone(state, job) + 1,
         }),
         log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
@@ -157,9 +205,14 @@ abstract final class MediaOpportunities {
       ),
       socialAccounts: List<SocialAccount>.unmodifiable(hesaplar),
       interactionCounts: Map<String, int>.unmodifiable(<String, int>{
-        ...state.interactionCounts,
+        ..._countYear(state),
         GameState.interactionKey(job.id, 'medya'): timesDone(state, job) + 1,
       }),
+      // D-147: aynı işin tekrarı için bekleme süresi buradan ölçülür.
+      mediaJobLastAge: <String, int>{
+        ...state.mediaJobLastAge,
+        job.id: state.player.age,
+      },
       // Davet kullanıldı; bir kez geçerlidir.
       mediaInvitationId: null,
       mediaInvitationAge: null,

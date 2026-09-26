@@ -1,3 +1,4 @@
+import '../../data/item_catalog.dart';
 import '../interaction/parenthood.dart';
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
@@ -201,8 +202,93 @@ abstract final class LivingCosts {
                 : '${prototypeOnlyChildCost.label} ($cocukSayisi çocuk)',
             amount: prototypeOnlyChildCost.amountFor(gelir) * cocukSayisi,
           ),
+        // Araç giderleri (D-148): sahip olunan her motorlu araç için
+        // zorunlu trafik sigortası, kasko ve motorlu taşıtlar vergisi.
+        ...vehicleItems(state),
       ],
     );
+  }
+
+  // =====================================================================
+  // Araç giderleri (D-148)
+  //
+  // Faho'nun isteği: "araç satın aldığımda kasko ve sigorta masrafı da
+  // çıksın, her yıl vergisi de çıksın."
+  //
+  // Üç kalem var ve üçü de Türkiye'deki karşılıklarına dayanıyor:
+  //   * **Zorunlu trafik sigortası** — kanunen zorunlu.
+  //   * **Kasko** — isteğe bağlıdır; bu sürümde herkes yaptırıyor sayılır
+  //     (Q-153'te soruldu).
+  //   * **MTV (motorlu taşıtlar vergisi)** — yılda iki taksit; oyun tek
+  //     kalem olarak yazar. Gerçekte motor hacmi ve araç yaşına göre
+  //     değişir; oyunda **araç değeri ve yaşı** ölçü alınır.
+  //
+  // Bütün oranlar `prototypeOnly` (Q-153).
+  // =====================================================================
+
+  /// prototypeOnly: zorunlu trafik sigortasının araç değerine oranı.
+  static const double prototypeOnlyTrafficInsuranceRate = 0.010;
+
+  /// prototypeOnly: kaskonun araç değerine oranı.
+  static const double prototypeOnlyKaskoRate = 0.025;
+
+  /// prototypeOnly: MTV'nin araç değerine oranı (sıfır araç için).
+  static const double prototypeOnlyVehicleTaxRate = 0.012;
+
+  /// prototypeOnly: MTV'nin her araç yaşı için indiği pay.
+  ///
+  /// Gerçekte MTV yaş bandına göre kademeli düşer; oyun bunu düz bir
+  /// azalışla taklit eder ve bir tabanın altına inmez.
+  static const double prototypeOnlyVehicleTaxAgeDrop = 0.05;
+
+  /// prototypeOnly: MTV oranının inebileceği taban.
+  static const double prototypeOnlyVehicleTaxFloor = 0.35;
+
+  /// prototypeOnly: bisiklet gider çıkarmaz; yalnızca motorlu araç.
+  static bool isMotorVehicle(OwnedItem item) =>
+      item.type.kind == ItemKind.otomobil ||
+      item.type.kind == ItemKind.motosiklet;
+
+  /// Oyuncunun sahip olduğu motorlu araçlar.
+  static List<OwnedItem> motorVehicles(GameState state) =>
+      state.items.where(isMotorVehicle).toList(growable: false);
+
+  /// Bir aracın yıllık sigorta + kasko + vergi gideri (₺).
+  ///
+  /// Değerleme **ödenen fiyata** değil, türün katalog değerine dayanır:
+  /// ikinci el alınan lüks araç da lüks araç vergisi öder.
+  static int yearlyVehicleCost(GameState state, OwnedItem item) {
+    final int deger = item.type.baseValue;
+    if (deger <= 0) return 0;
+    final int yas = (state.player.age - item.acquiredAtAge).clamp(0, 60);
+    final double vergiOrani = (prototypeOnlyVehicleTaxRate *
+            (1 - prototypeOnlyVehicleTaxAgeDrop * yas))
+        .clamp(
+      prototypeOnlyVehicleTaxRate * prototypeOnlyVehicleTaxFloor,
+      prototypeOnlyVehicleTaxRate,
+    );
+    final double toplam = prototypeOnlyTrafficInsuranceRate +
+        prototypeOnlyKaskoRate +
+        vergiOrani;
+    return (deger * toplam).round();
+  }
+
+  /// Araç gider kalemleri; aracı olmayanda boştur.
+  ///
+  /// Her araç **ayrı satır** olur ki oyuncu hangi aracın ne kadar
+  /// tuttuğunu görebilsin (D-123'ün "hesap ekranda dursun" kuralı).
+  static List<({String label, int amount})> vehicleItems(GameState state) {
+    final List<({String label, int amount})> sonuc =
+        <({String label, int amount})>[];
+    for (final OwnedItem arac in motorVehicles(state)) {
+      final int tutar = yearlyVehicleCost(state, arac);
+      if (tutar <= 0) continue;
+      sonuc.add((
+        label: '${arac.name}: sigorta, kasko ve vergi',
+        amount: tutar,
+      ));
+    }
+    return sonuc;
   }
 
   /// Bu yaş için yıllık toplam gider.
