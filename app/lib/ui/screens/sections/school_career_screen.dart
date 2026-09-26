@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/event_pool_exam.dart';
+import '../../../domain/career/craft_mastery.dart';
 import '../../../domain/career/retirement.dart';
 import '../../../domain/education/education_path.dart';
 import '../../../domain/models/education.dart';
@@ -466,6 +467,12 @@ class _CareerViewState extends State<_CareerView> {
                 label: 'Toplam çalışma',
                 value: '${state.career.totalWorkYears(state.player.age)} yıl',
               ),
+              // İtibar emeklilikte de durur: bir ömrün emeği tek bir
+              // işverene bağlı değildir (D-155).
+              (
+                label: 'İtibar',
+                value: CraftMastery.reputationLabel(state),
+              ),
               (label: 'Cüzdan', value: state.player.walletLabel),
             ],
           )
@@ -490,6 +497,21 @@ class _CareerViewState extends State<_CareerView> {
                   label: 'Bu işteki süren',
                   value: '${state.career.yearsInJob(state.player.age)} yıl',
                 ),
+              // Ustalık ve itibar (D-155): aynı işte otuz yıl çalışanla
+              // üç yıl çalışan arasındaki fark artık ekranda görünüyor.
+              if (CraftMastery.stageOf(state) != null)
+                (
+                  label: 'Ustalık',
+                  value: CraftMastery.yearsToNextStage(state) == null
+                      ? CraftMastery.stageOf(state)!.label
+                      : '${CraftMastery.stageOf(state)!.label} · '
+                          'sonraki basamağa '
+                          '${CraftMastery.yearsToNextStage(state)} yıl',
+                ),
+              (
+                label: 'İtibar',
+                value: CraftMastery.reputationLabel(state),
+              ),
               // İşin şehri yalnızca gerçekten biliniyorsa yazılır; şehir
               // değişince işe kendiliğinden son verilmez (Q-065).
               if (state.career.jobCity != null)

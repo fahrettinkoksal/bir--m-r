@@ -6,7 +6,9 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
+import 'package:bir_omur/domain/career/craft_mastery.dart';
 import 'package:bir_omur/domain/generation/spouse_life.dart';
+import 'package:bir_omur/domain/models/career.dart';
 import 'package:bir_omur/domain/life/chronic_engine.dart';
 import 'package:bir_omur/domain/life/health_crisis_engine.dart';
 import 'package:bir_omur/domain/life/health_report.dart';
@@ -641,6 +643,189 @@ void main() {
         bildirimGelen,
         greaterThan(0),
         reason: 'Düğün bildirimi ekrana hiç ulaşmıyorsa bağlantı kopuk',
+      );
+    });
+  });
+
+  group('Meslekte ustalık ve itibar (D-155)', () {
+    GameState calisan({
+      int age = 40,
+      int startedAtAge = 30,
+      int level = 0,
+      List<JobHistoryEntry> gecmis = const <JobHistoryEntry>[],
+    }) {
+      final JobType is_ = kJobCatalog.first;
+      final GameState base = hayat(age: age);
+      return base.copyWith(
+        career: CareerState(
+          jobId: is_.id,
+          startedAtAge: startedAtAge,
+          level: level,
+          history: gecmis,
+        ),
+      );
+    }
+
+    test('basamaklar artan yılla sıralı ve ilki sıfır', () {
+      expect(MasteryStage.values.first.yearsNeeded, 0);
+      for (int i = 1; i < MasteryStage.values.length; i++) {
+        expect(
+          MasteryStage.values[i].yearsNeeded,
+          greaterThan(MasteryStage.values[i - 1].yearsNeeded),
+        );
+      }
+    });
+
+    test('ustalık aynı işte geçen yıldan türetilir', () {
+      expect(CraftMastery.stageForYears(0), MasteryStage.cirak);
+      expect(CraftMastery.stageForYears(3), MasteryStage.kalfa);
+      expect(CraftMastery.stageForYears(8), MasteryStage.usta);
+      expect(CraftMastery.stageForYears(16), MasteryStage.basusta);
+      expect(CraftMastery.stageForYears(28), MasteryStage.duayen);
+      expect(CraftMastery.stageForYears(99), MasteryStage.duayen);
+    });
+
+    test('işsizde ustalık yok, gerekçesiz sayı üretilmez', () {
+      final GameState s = hayat().copyWith(career: const CareerState.none());
+      expect(CraftMastery.stageOf(s), isNull);
+      expect(CraftMastery.yearsToNextStage(s), isNull);
+      expect(CraftMastery.requestBonus(s), 0);
+      expect(CraftMastery.layoffFactor(s), 1);
+      expect(CraftMastery.reputationLabel(s), 'Henüz iş hayatı yok');
+    });
+
+    test('sonraki basamağa kalan yıl doğru, en üstte null', () {
+      expect(CraftMastery.yearsToNextStage(calisan(age: 30, startedAtAge: 30)),
+          MasteryStage.kalfa.yearsNeeded);
+      expect(
+        CraftMastery.yearsToNextStage(calisan(age: 70, startedAtAge: 30)),
+        isNull,
+      );
+    });
+
+    test('ustalık zam şansına, işten çıkarılma ihtimaline etki eder', () {
+      final GameState yeni = calisan(age: 30, startedAtAge: 30);
+      final GameState kidemli = calisan(age: 60, startedAtAge: 30);
+      expect(
+        CraftMastery.requestBonus(kidemli),
+        greaterThan(CraftMastery.requestBonus(yeni)),
+      );
+      expect(
+        CraftMastery.layoffFactor(kidemli),
+        lessThan(CraftMastery.layoffFactor(yeni)),
+      );
+      // Usta olmak dokunulmazlık değildir: çarpan bir tabanın altına
+      // inmez.
+      expect(
+        CraftMastery.layoffFactor(kidemli),
+        greaterThanOrEqualTo(CraftMastery.prototypeOnlyMinLayoffFactor),
+      );
+    });
+
+    test('itibar çalışma yılıyla artar, işten çıkarılmayla düşer', () {
+      final GameState az = calisan(age: 32, startedAtAge: 30);
+      final GameState cok = calisan(age: 60, startedAtAge: 30);
+      expect(
+        CraftMastery.reputationOf(cok),
+        greaterThan(CraftMastery.reputationOf(az)),
+      );
+
+      final GameState cikarilmis = calisan(
+        age: 60,
+        startedAtAge: 55,
+        gecmis: <JobHistoryEntry>[
+          JobHistoryEntry(
+            jobId: kJobCatalog.first.id,
+            startedAtAge: 30,
+            endedAtAge: 50,
+            endReason: JobEndReason.cikarildi,
+          ),
+          JobHistoryEntry(
+            jobId: kJobCatalog.first.id,
+            startedAtAge: 50,
+            endedAtAge: 55,
+            endReason: JobEndReason.cikarildi,
+          ),
+        ],
+      );
+      final GameState temiz = calisan(
+        age: 60,
+        startedAtAge: 55,
+        gecmis: <JobHistoryEntry>[
+          JobHistoryEntry(
+            jobId: kJobCatalog.first.id,
+            startedAtAge: 30,
+            endedAtAge: 50,
+            endReason: JobEndReason.istifa,
+          ),
+          JobHistoryEntry(
+            jobId: kJobCatalog.first.id,
+            startedAtAge: 50,
+            endedAtAge: 55,
+            endReason: JobEndReason.istifa,
+          ),
+        ],
+      );
+      expect(
+        CraftMastery.reputationOf(cikarilmis),
+        lessThan(CraftMastery.reputationOf(temiz)),
+      );
+    });
+
+    test('itibar iş değişince sıfırlanmaz', () {
+      final GameState s = calisan(
+        age: 60,
+        startedAtAge: 58,
+        gecmis: <JobHistoryEntry>[
+          JobHistoryEntry(
+            jobId: kJobCatalog.first.id,
+            startedAtAge: 25,
+            endedAtAge: 58,
+            endReason: JobEndReason.istifa,
+            level: 2,
+          ),
+        ],
+      );
+      expect(CraftMastery.reputationOf(s), greaterThan(40));
+    });
+
+    test('itibar 0-100 arasında kalır', () {
+      for (final GameState s in <GameState>[
+        calisan(age: 18, startedAtAge: 18),
+        calisan(age: 95, startedAtAge: 18, level: 5),
+      ]) {
+        expect(CraftMastery.reputationOf(s), inInclusiveRange(0, 100));
+      }
+    });
+
+    test('basamak atlanan yıl kaydedilir ve bildirim gelir', () {
+      // Kalfa eşiği 3 yıl: 30'da başlayan 33'te kalfa olur.
+      GameState s = calisan(age: 32, startedAtAge: 30).copyWith(
+        pendingEvent: null,
+        notices: const <PendingNotice>[],
+      );
+      s = LifeProgression(Random(5)).advanceOneYear(s);
+      expect(
+        s.notices.any((PendingNotice n) => n.id.startsWith('ustalik-kalfa-')),
+        isTrue,
+        reason: 'Kalfa olunan yıl bildirime çıkmalı',
+      );
+      expect(
+        s.log.any((LifeLogEntry l) => l.text.contains('kalfa')),
+        isTrue,
+      );
+    });
+
+    test('aynı basamak iki kez kutlanmaz', () {
+      GameState s = calisan(age: 33, startedAtAge: 30).copyWith(
+        pendingEvent: null,
+        notices: const <PendingNotice>[],
+      );
+      s = LifeProgression(Random(5)).advanceOneYear(s);
+      expect(
+        s.notices.any((PendingNotice n) => n.id.startsWith('ustalik-kalfa-')),
+        isFalse,
+        reason: '34 yaşında 4. yıl: eşik yılı değil',
       );
     });
   });

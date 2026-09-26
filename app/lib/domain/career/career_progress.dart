@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/job_catalog.dart';
 import '../life/sick_leave.dart';
 import '../../text/turkish_text.dart';
+import 'craft_mastery.dart';
 import '../models/career.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
@@ -197,6 +198,11 @@ abstract final class CareerProgress {
       sans -= prototypeOnlyBadRecordPenalty;
     }
 
+    // Ustalık ve itibar (D-155): aynı işte yıllarca duran ve iyi iz
+    // bırakan kişinin talebi daha kolay kabul edilir. Yeni bir kayıt
+    // alanı yok; ikisi de mevcut kayıttan türetilir.
+    sans += CraftMastery.requestBonus(state);
+
     // Üst basamaklarda terfi zorlaşır.
     sans -= career.level * 0.08;
 
@@ -343,8 +349,11 @@ abstract final class CareerProgress {
     }
     // İşveren uyarıları ihtimali artırır ama tek başına kimseyi atmaz
     // (D-078).
-    final double sans =
-        prototypeOnlyLayoffChance + SickLeaves.layoffBonus(career.employerWarnings);
+    // Ustayı kolay göndermezler (D-155); ama küçülme herkese uğrar, o
+    // yüzden çarpanın bir tabanı var.
+    final double sans = (prototypeOnlyLayoffChance +
+            SickLeaves.layoffBonus(career.employerWarnings)) *
+        CraftMastery.layoffFactor(state);
     if (!(rng.nextDouble() < sans)) {
       return (state: state, logText: null);
     }

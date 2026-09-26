@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/name_pool.dart';
+import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
@@ -370,6 +371,43 @@ class LifeProgression {
     // bildirim olarak da gösterilir (D-097).
     final List<PendingNotice> kariyerBildirimleri = <PendingNotice>[];
     maas = _applySickLeave(maas, newAge, log, kariyerBildirimleri);
+
+    // Ustalık basamağı (D-155): aynı işte geçen yıl sayısı bir eşiği
+    // geçtiyse o yıl kaydedilir. İşten çıkarılmadan **önce** bakılır;
+    // çalışılan yılın kazanımı kaybolmaz.
+    final MasteryStage? yeniBasamak = maas.state.career.isEmployed
+        ? CraftMastery.stageReachedAt(
+            maas.state.career.yearsInJob(newAge),
+          )
+        : null;
+    if (yeniBasamak != null) {
+      final String unvan = maas.state.career.title;
+      final String metin =
+          '$unvan olarak ${yeniBasamak.yearsNeeded} yılı doldurdun: '
+          'artık ${trLower(yeniBasamak.label)} sayılıyorsun.';
+      maas = (
+        state: maas.state.copyWith(
+          career: maas.state.career.withMilestone(newAge, metin),
+        ),
+        logText: maas.logText,
+      );
+      log.add(
+        LifeLogEntry(
+          age: newAge,
+          text: metin,
+          category: LogCategory.kisisel,
+        ),
+      );
+      kariyerBildirimleri.add(
+        PendingNotice(
+          id: 'ustalik-${yeniBasamak.name}-$newAge',
+          kind: NoticeKind.kariyer,
+          age: newAge,
+          title: 'Meslekte ${yeniBasamak.label}',
+          text: metin,
+        ),
+      );
+    }
 
     // Maaş ödendikten **sonra** işten çıkarılma denenir: çalışılan yılın
     // ücreti ödenir, yeni yıla işsiz girilir (Paket 9).

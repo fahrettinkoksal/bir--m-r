@@ -3614,3 +3614,31 @@ Altı durum var: kalp rahatsızlığı, solunum rahatsızlığı, süregelen bel
 6. **Eşin kaydı açılırken birikimi ekonomik durum etiketinden türetiliyor** (`prototypeOnlyMoneyFloorFor`). Bu olmasa "çok varlıklı" eş bir yılda "çok yoksul" görünürdü — Finger'daki hatanın aynısı. Eşik tablosu doğru mu?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; sevgili ilerletilmez, eşin geliri hane bütçesine katılmaz.
+
+---
+
+### Q-158 — Meslekte ustalık ve itibar: basamaklar, etkiler ve sayılar
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-155 · Test: `app/test/paket_y_test.dart`
+
+Kariyer, iş kimliği artı yıl sayısıydı: aynı işte otuz yıl çalışan biriyle üç yıl çalışan biri arasında, maaş dışında hiçbir fark yoktu — ne ekranda, ne zam masasında, ne hayat sonu değerlendirmesinde.
+
+**Yeni kayıt alanı eklenmedi.** İkisi de var olan kayıttan türetiliyor:
+- **Ustalık** işe aittir (`yearsInJob`): Çırak (0), Kalfa (3), Usta (8), Başusta (16), Duayen (28 yıl). İş değişince sıfırdan başlar.
+- **İtibar** kariyere aittir: toplam çalışma yılı + ulaşılan en yüksek görev basamağı − işten çıkarılma sayısı. İş değişince **kaybolmaz**.
+
+Basamak adları Türkçe zanaat düzeninden (çırak → kalfa → usta), üstündeki ikisi günlük dilden.
+
+**Nereye etki ediyor:** zam/terfi kabul şansı (ustalık + itibar), işten çıkarılma ihtimali (usta daha az; ama taban var, küçülme herkese uğrar), kariyer ekranı, hayat sonu Emek ekseni ve basamak atlandığı yılın bildirimi.
+
+**Karar soruları:**
+1. **Eşikler** 0/3/8/16/28 yıl. Duayen için 28 yıl çok mu? Bir ömürde en fazla bir işte duayen olunabiliyor.
+2. **Ustalık ne açmalı?** Şu an yalnızca zam şansı, iş güvencesi ve anlatı açıyor. **Maaşa doğrudan bir taban artışı** da vermeli mi? (Şu an vermiyor, çünkü maaş kayıtta duruyor ve her yıl çarpmak bileşik artış yapardı.)
+3. **Ustalık yeni iş seçenekleri açmalı mı?** Örneğin "Usta" olan birine eğitmenlik/ustabaşılık yolu. Şu an açmıyor; dövüş sanatlarındaki eğitmenlik eşiğinin (Q-100) karşılığı meslekte yok.
+4. **İş değişince ustalık sıfırlanıyor.** Doğru mu, yoksa **aynı meslekte** iş değiştirmek ustalığı korumalı mı? (Katalogda "aynı meslek" kavramı yok; eklenmesi gerekir.)
+5. **İtibar formülü:** yıl başına 1,6 puan, basamak başına 6 puan, işten çıkarılma başına −9 puan. Doğru ağırlıklar mı?
+6. **İtibar etiketleri:** "Henüz iz bırakmadı / Yeni tanınıyor / Bilinen bir isim / Güvenilir / Adı iyi bilinir". Hiç çalışmamış oyuncuya "Henüz iş hayatı yok" yazılıyor, ceza yazılmıyor. Doğru mu?
+7. **İtibar ile Ün (D-027) ayrı iki şey.** Birbirine bağlanmalı mı? (Şu an tamamen ayrı: itibar iş hayatı, Ün sosyal medya.)
+8. **Emek eksenine katkı** basamak başına 4, en fazla 16 puan. Doğru mu?
+9. **Kendi işi (D-132) ustalığa girmiyor.** Kendi işini yıllarca yürütmek de ustalık sayılmalı mı?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; maaşa doğrudan artış eklenmez, ustalık yeni iş açmaz, kendi işi ustalığa girmez.

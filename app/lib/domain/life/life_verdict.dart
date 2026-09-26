@@ -1,6 +1,8 @@
 /// Hayat sonu değerlendirmesi: "nasıl bir hayattı?"
 library;
 
+import '../../text/turkish_text.dart';
+import '../career/craft_mastery.dart';
 import '../models/book_progress.dart';
 import '../models/career.dart';
 import '../../data/crime_catalog.dart';
@@ -213,6 +215,13 @@ abstract final class LifeVerdictBuilder {
     // bir binbaşı ile hiç askere gitmemiş biri aynı sayılıyordu.
     puan += _askerlikPuani(state);
 
+    // Meslekte ustalık (D-155): aynı işte otuz yıl çalışmış biri ile üç
+    // yıl çalışmış biri değerlendirmede de aynı sayılmamalı. Basamak
+    // **ulaşıldığı için** sayılır; iş değişmişse en yüksek basamak
+    // geçmişten okunur.
+    puan += (_enYuksekUstalik(state, olumYasi) * prototypeOnlyMasteryPoint)
+        .clamp(0, prototypeOnlyMasteryMax);
+
     final String not;
     if (gecmis.isEmpty && state.military.status == MilitaryStatus.tamamlandi) {
       not = 'Hiçbir işte çalışmadın ama askerliğini tamamladın.';
@@ -223,12 +232,44 @@ abstract final class LifeVerdictBuilder {
     } else {
       not = '${gecmis.length} işte toplam $calisilanYil yıl çalıştın.';
     }
+    final int ustalik = _enYuksekUstalik(state, olumYasi);
+    final String notTam = ustalik >= MasteryStage.usta.index
+        ? '$not Mesleğinde '
+            '${trLower(MasteryStage.values[ustalik].label)} oldun.'
+        : not;
     return VerdictAxis(
       id: 'emek',
       label: 'Emek',
       value: puan.clamp(0, 100),
-      note: not,
+      note: notTam,
     );
+  }
+
+  /// prototypeOnly: her ustalık basamağının Emek eksenine katkısı.
+  static const int prototypeOnlyMasteryPoint = 4;
+
+  /// prototypeOnly: ustalığın Emek eksenine en fazla katkısı.
+  static const int prototypeOnlyMasteryMax = 16;
+
+  /// Hayat boyunca ulaşılan **en yüksek** ustalık basamağının sırası.
+  ///
+  /// Süren iş ve biten kayıtlar birlikte bakılır; iş değiştirmek kazanılan
+  /// ustalığı silmez, çünkü o yıllar gerçekten yaşandı.
+  static int _enYuksekUstalik(GameState state, int olumYasi) {
+    int enYuksek = 0;
+    for (final JobHistoryEntry e in state.career.history) {
+      final int bitis = e.endedAtAge ?? olumYasi;
+      final int yil = (bitis - e.startedAtAge).clamp(0, 80);
+      final int basamak = CraftMastery.stageForYears(yil).index;
+      if (basamak > enYuksek) enYuksek = basamak;
+    }
+    final int? basla = state.career.startedAtAge;
+    if (basla != null) {
+      final int basamak =
+          CraftMastery.stageForYears((olumYasi - basla).clamp(0, 80)).index;
+      if (basamak > enYuksek) enYuksek = basamak;
+    }
+    return enYuksek;
   }
 
   /// Deneyim: gezdiğin yerler, okuduğun kitaplar, edindiğin şeyler.
