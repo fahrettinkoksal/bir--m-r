@@ -99,6 +99,68 @@ abstract final class LegalEngine {
   /// Daha ağır olaylarda soruşturma açılabilir; açılıp açılmayacağı
   /// olayın ağırlığına ve geçmişe bakar, oyuncunun bilmediği bir zar
   /// atılır.
+  // =====================================================================
+  // Denetim dönemi, sicilin zamanla silinmesi ve çevre (D-161)
+  // =====================================================================
+
+  /// prototypeOnly: denetim döneminde şehir dışına çıkmak yasak mı?
+  ///
+  /// Türkiye'de denetimli serbestlikte yükümlülükler kararla belirlenir;
+  /// oyun tek bir somut yaptırım uyguluyor: **yurt içi seyahat izne
+  /// bağlı**, oyunda bu "kapalı" demek. Denetim döneminin bir karşılığı
+  /// olmadan kâğıt üstünde kalıyordu.
+  static const bool prototypeOnlyProbationBlocksTravel = true;
+
+  /// Denetim dönemi sürüyor mu?
+  static bool onProbation(GameState state) {
+    final int? bitis = state.legal.probationUntilAge;
+    return bitis != null && state.player.age < bitis;
+  }
+
+  /// Denetim döneminin engeli; engel yoksa **boş metin**.
+  static String probationBlockReason(GameState state) {
+    if (!prototypeOnlyProbationBlocksTravel) return '';
+    if (!onProbation(state)) return '';
+    return 'Denetim dönemindesin; şehir dışına çıkmak '
+        '${state.legal.probationUntilAge} yaşına kadar kapalı.';
+  }
+
+  /// prototypeOnly: sicilin iş başvurusunda sayılmaz hâle gelmesi için
+  /// dosyanın kapanmasından sonra geçmesi gereken yıl, ağırlığa göre.
+  ///
+  /// Kayıt **silinmez** — dosya Adli Geçmiş'te hayat boyu durur. Değişen
+  /// tek şey, işe başvuruda sayılıp sayılmadığı. Gerçekte adli sicil
+  /// arşiv kaydına geçer ve çoğu başvuruda görünmez; oyun bu ana fikri
+  /// uyguluyor.
+  static int prototypeOnlyRecordFadeYears(CrimeSeverity severity) {
+    switch (severity) {
+      case CrimeSeverity.hafif:
+        return 5;
+      case CrimeSeverity.orta:
+        return 12;
+      case CrimeSeverity.agir:
+        return 25;
+    }
+  }
+
+  /// Bu dosya [age] yaşında **hâlâ** iş başvurusunda sayılıyor mu?
+  ///
+  /// Kapanmamış dosya her zaman sayılır. Yeni bir dosya açılırsa eskilerin
+  /// süresi yeniden işlemez; her dosya kendi kapanışından sayar.
+  static bool recordCountsAt(CriminalCase c, int age) {
+    if (!c.leavesRecord) return false;
+    final int? kapanis = c.closedAtAge;
+    if (kapanis == null) return true;
+    final CrimeSeverity? agirlik = c.crime?.severity;
+    if (agirlik == null) return true;
+    return age - kapanis < prototypeOnlyRecordFadeYears(agirlik);
+  }
+
+  /// İş başvurusunda **sayılan** sabıka kayıtları (D-161).
+  static List<CriminalCase> activeRecord(GameState state) => state.legal.record
+      .where((CriminalCase c) => recordCountsAt(c, state.player.age))
+      .toList(growable: false);
+
   static GameState openCase(
     GameState state,
     String crimeId,

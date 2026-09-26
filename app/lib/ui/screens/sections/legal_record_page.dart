@@ -87,7 +87,8 @@ class LegalRecordPage extends StatelessWidget {
             key: const Key('adli_denetim'),
             icon: Icons.schedule_rounded,
             text: 'Denetim dönemindesin; '
-                '${hukuk.probationUntilAge} yaşına kadar sürüyor.',
+                '${hukuk.probationUntilAge} yaşına kadar sürüyor. '
+                'Şehir dışına çıkmak kapalı.',
           )
         else if (!hukuk.hasRecord)
           const InfoPanel(
@@ -95,6 +96,21 @@ class LegalRecordPage extends StatelessWidget {
             icon: Icons.verified_outlined,
             text: 'Adli kaydın temiz.',
           ),
+
+        // Çevre (D-161): yalnızca **gerçekten teklif gelebiliyorsa**
+        // görünür. Çalışmayan düğme konmaz; içerik hiçbir yöntem
+        // anlatmaz, yalnızca karışıp karışmama seçimi sunar.
+        if (GameScope.of(context).crewOfferAvailability().isAllowed)
+          ...<Widget>[
+          const SizedBox(height: 12),
+          const MenuGroupTitle(
+            text: 'Çevre',
+            accent: BirOmurAccents.nar,
+          ),
+          const SizedBox(height: 8),
+          _CevreKarti(crewJobs: hukuk.crewJobs),
+          const SizedBox(height: 4),
+        ],
 
         // Kefalet kartı yalnızca tutukluyken görünür (D-139).
         if (hukuk.isDetained) ...<Widget>[
@@ -377,4 +393,82 @@ class _CaseCard extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Çevreden gelen teklif kartı (D-161).
+///
+/// Metin bilerek belirsizdir: oyun hiçbir suçun **nasıl** işlendiğini
+/// anlatmaz. Oyuncunun gördüğü tek şey karışıp karışmama seçimi.
+class _CevreKarti extends StatefulWidget {
+  const _CevreKarti({required this.crewJobs});
+
+  final int crewJobs;
+
+  @override
+  State<_CevreKarti> createState() => _CevreKartiState();
+}
+
+class _CevreKartiState extends State<_CevreKarti> {
+  String? _sonuc;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    return Container(
+      key: const Key('cevre_karti'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('Çevreden bir teklif', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 6),
+          Text(
+            'İçeride tanıştığın çevre seni arıyor. Bir işe girmeyi teklif '
+            'ediyorlar; ayrıntısını söylemiyorlar.',
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (widget.crewJobs > 0) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              'Daha önce ${widget.crewJobs} kez karıştın.',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 12),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: FilledButton.tonal(
+                  key: const Key('cevre_karis'),
+                  onPressed: () => setState(
+                    () => _sonuc = controller.acceptCrewOffer(),
+                  ),
+                  child: const Text('Karış'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  key: const Key('cevre_karisma'),
+                  onPressed: () => setState(
+                    () => _sonuc = controller.declineCrewOffer(),
+                  ),
+                  child: const Text('Karışma'),
+                ),
+              ),
+            ],
+          ),
+          if (_sonuc != null) ...<Widget>[
+            const SizedBox(height: 10),
+            Text(_sonuc!, style: theme.textTheme.bodyMedium),
+          ],
+        ],
+      ),
+    );
+  }
 }

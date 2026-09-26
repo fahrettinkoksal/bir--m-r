@@ -5,6 +5,7 @@ import '../../data/license_catalog.dart';
 import '../../data/name_pool.dart';
 import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
+import '../law/legal_engine.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
@@ -151,6 +152,12 @@ abstract final class Travel {
       return const InteractionAvailability.blocked(
         'Zaten bu şehirde yaşıyorsun.',
       );
+    }
+    // Denetim döneminin somut yaptırımı (D-161): şehir dışına çıkmak
+    // kapalı. Gerekçe açıkça yazılır.
+    final String denetim = LegalEngine.probationBlockReason(state);
+    if (denetim.isNotEmpty) {
+      return InteractionAvailability.blocked(denetim);
     }
     if (tripsThisAge(state) >= prototypeOnlyMaxTripsPerAge) {
       return const InteractionAvailability.blocked(

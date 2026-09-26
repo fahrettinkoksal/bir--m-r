@@ -168,6 +168,8 @@ class LegalState {
     this.goodBehaviour = 0,
     this.crewStanding = 0,
     this.yearsServed = 0,
+    this.crewOfferAtAge,
+    this.crewJobs = 0,
   });
 
   /// Kefaleti oyuncunun kendisi ödediğinde [bailPaidBy] bu değeri alır.
@@ -224,6 +226,22 @@ class LegalState {
 
   /// Cezaevinde fiilen geçirilen yıl.
   final int yearsServed;
+
+  // =====================================================================
+  // Çevre: çeteleşmenin dışarıya taşması (D-161)
+  // =====================================================================
+
+  /// Çevreden en son hangi yaşta teklif geldiği; hiç gelmediyse `null`.
+  ///
+  /// Aynı yıl ikinci teklif gelmez ve iki teklif arasında bir bekleme
+  /// vardır.
+  final int? crewOfferAtAge;
+
+  /// Çevreden gelen kaç teklife **karışıldığı**.
+  ///
+  /// Sayı yalnızca sayılır: oyun hiçbir yerde nasıl yapıldığını anlatmaz,
+  /// yalnızca karışıp karışılmadığını kaydeder.
+  final int crewJobs;
 
   /// Hüküm gereği içeride mi?
   bool get isSentenced => releaseAtAge != null;
@@ -290,6 +308,8 @@ class LegalState {
     Object? bailAskedAtAge = _unset,
     int? goodBehaviour,
     int? crewStanding,
+    int? crewOfferAtAge,
+    int? crewJobs,
     int? yearsServed,
   }) {
     return LegalState(
@@ -316,6 +336,8 @@ class LegalState {
           : bailAskedAtAge as int?,
       goodBehaviour: (goodBehaviour ?? this.goodBehaviour).clamp(0, 100),
       crewStanding: (crewStanding ?? this.crewStanding).clamp(0, 100),
+      crewOfferAtAge: crewOfferAtAge ?? this.crewOfferAtAge,
+      crewJobs: crewJobs ?? this.crewJobs,
       yearsServed: yearsServed ?? this.yearsServed,
     );
   }

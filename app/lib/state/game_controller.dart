@@ -62,6 +62,7 @@ import '../domain/economy/housing.dart';
 import '../domain/economy/property_market.dart';
 import '../domain/economy/used_vehicle_market.dart';
 import '../domain/education/school_transfer.dart';
+import '../domain/law/crew_life.dart';
 import '../domain/life/chronic_engine.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
@@ -1377,6 +1378,39 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return sonuc.text;
+  }
+
+  /// Çevreden gelen teklife karışır (D-161); sonuç metnini döner.
+  String? acceptCrewOffer() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final CrewResult sonuc = CrewLife.accept(current, _random);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
+  }
+
+  /// Çevreden gelen teklifi reddeder (D-161); sonuç metnini döner.
+  String? declineCrewOffer() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final CrewResult sonuc = CrewLife.decline(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
+  }
+
+  /// Çevreden teklif gelebilir mi? (D-161)
+  InteractionAvailability crewOfferAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return CrewLife.offerAvailability(current);
   }
 
   /// Bir kronik durumun o yılki takibini yapar (D-153).

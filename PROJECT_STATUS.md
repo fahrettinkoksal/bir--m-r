@@ -1486,6 +1486,113 @@ Sayılar `prototypeOnly` — **Q-155**.
 `paket_x_test` (14).
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
+## Paket Y ve Z — B ve C grupları (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. A grubu ve kataloglar **Paket X**'te bitti;
+B grubu **Paket Y**'de, C grubu **Paket Z**'de.
+
+### B grubu — D-153 … D-156
+
+| Paket | Karar | Ne geldi |
+|---|---|---|
+| Y/1 | **D-153** | Kronik durumlar ve Sağlık Geçmişi |
+| Y/2 | **D-154** | Eşin kendi hayatı + düşen aile bildirimleri düzeltildi |
+| Y/3 | **D-155** | Meslekte ustalık ve itibar |
+| Y/4 | **D-156** | Hayat hedefleri |
+
+**D-153.** Sağlık tek bir sayıydı, krizler birbirinden bağımsızdı, atlatılan
+kriz hiçbir iz bırakmıyordu. Altı kronik durum geldi (dördü kriz sonrası,
+ikisi yaşla). Takip edilmeyen durum her yıl sağlıktan düşürüyor, kriz
+riskini yükseltiyor ve check-up raporunda ilgili satırı aşağı çekiyor.
+Takip **yönetir**, ortadan kaldırmaz. Yeni Sağlık Geçmişi bölümü. Sayılar
+**Q-156**.
+
+**D-154.** Eşin kariyeri, emekliliği ve birikimi artık mevcut
+`ChildProgression` ile ilerliyor; paralel sistem kurulmadı. Eş
+hastalanabiliyor ve bu oyuncunun mutluluğuna gerçekten uygulanıyor. Sayılar
+**Q-157**.
+
+**D-155.** Ustalık (Çırak → Kalfa → Usta → Başusta → Duayen) işe, itibar
+kariyere ait. İkisi de **mevcut kayıttan türetiliyor**, yeni alan
+eklenmedi. Zam/terfi şansı, iş güvencesi, kariyer ekranı ve hayat sonu
+Emek ekseni bunları görüyor. Sayılar **Q-158**.
+
+**D-156.** 19 hedef, beş alanda. Ulaşıldığı **yaş** kaydediliyor ve bir daha
+değişmiyor. Hedefler başta seçilmiyor, yol boyunca açılıyor ve **hiçbir
+ödül vermiyor** — ikisi de prototipin tercihi, **Q-159**'da soruldu.
+
+### C grubu — D-157 … D-161
+
+| Paket | Karar | Ne geldi |
+|---|---|---|
+| Z/1 | **D-157** | Araç muayenesi + kazada araç hasarı |
+| Z/2 | **D-158** | Kardeşin kendi hayatı ve yeğenler |
+| Z/3 | **D-159** | Şehrin iş piyasası |
+| Z/4 | **D-160** | Hane bütçesi, velayet ve nafaka |
+| Z/5 | **D-161** | Denetim yaptırımı, sicilin solması, çevre |
+
+**D-157.** Önce neyin zaten var olduğu ayrıldı: arıza/tamir (D-079), yıllık
+sigorta-kasko-vergi (D-148) ve aracı satmak zaten vardı. Gerçekten eksik
+olan ikisi eklendi: **muayene** (iki yılda bir, kondisyonu düşük araç
+geçmez, geciken idari bedel öder) ve **kazada araç hasarı** — kaza iki
+yerde yaşanıyordu ama ikisi de araç kaydına hiç dokunmuyordu. Sayılar
+**Q-160**.
+
+**D-158.** Kardeş artık okuyor, iş buluyor, emekli oluyor, evleniyor ve
+çocuğu oluyor; kardeşin çocuğu **yeğen** olarak doğuyor. `RelationType.yegen`
+D-087'den beri tanımlıydı ama doğal yoldan hiç oluşmuyordu. Üç mevcut parça
+genelleştirildi, yeni sistem kurulmadı. Sayılar **Q-161**.
+
+**D-159.** Şehrin yeni kaldıracı **iş piyasasının genişliği**: yalnızca en
+üst bant dar piyasada bulunmuyor ve gerekçe açıkça yazılıyor. Geçim gideri
+ve maaş çarpanı **denendi ve bilerek geri alındı** — gerekçesi ölçümle
+birlikte **Q-162**'de.
+
+**D-160.** ⚠️ **Bu paket Q-118'deki "nafaka ve velayet şimdilik yazılmasın"
+kararını değiştiriyor.** Çalışan eş maaşının %35'ini haneye koyuyor;
+boşanmada velayet çocukların yakınlığından, nafaka ödeyen tarafın gerçek
+gelirinden hesaplanıyor. Geri alması kolay: tek kayıt alanı, tek motor.
+**Q-163**.
+
+**D-161.** Denetim dönemi artık şehir dışına çıkmayı kapatıyor; sicil
+zamanla **başvuruda sayılmaz** oluyor (kayıt silinmiyor); koğuşta kurulan
+itibar tahliyeden sonra bir **teklif kartına** dönüşüyor ("karış" /
+"karışma"). Karışmak kolay para değil: %45 ihtimalle dosya açılıyor.
+**İçerik sınırı korundu ve kalıcı testle sabitlendi:** hiçbir metin yöntem,
+plan, kaçma, saklanma, iz gizleme ya da yakalanmaktan kurtulma anlatmıyor.
+Ağır/organize suç bilerek eklenmedi. **Q-164**.
+
+### Bu iki pakette bulunan ve düzeltilen gerçek hatalar
+
+Hepsi **ölçülerek** bulundu, tahminle dokunulmadı; hiçbir test
+gevşetilmedi:
+
+1. **Çocuk evliliği kalıcı değildi.** `ChildMarriage`'in güncellediği kişi
+   kaydı boru hattına hiç girmiyordu; **aynı çocuk her yıl yeniden
+   evleniyordu** (ölçüm: 12 yılda 4 düğün → 1).
+2. **Aile dönüm noktası bildirimleri ekrana hiç ulaşmıyordu** (çocuğun
+   düğünü, torunun doğumu): üretiliyor ama hiçbir yere yazılmıyordu.
+3. **Kardeş mirası yanlış kişiye gidiyordu.** Kardeş evlenip çocuk sahibi
+   olabildiği için mirası önce kendi hanesine gitmeli. Ölçüm: düzeltmeden
+   önce 300 hayatta oyuncu yaşlılıkta 43 milyon ₺'ye kadar beklenmedik
+   miras alıyor, toplam oynanan yıl 22.445'ten 1.427'ye düşüyordu.
+4. **`Person.schoolLevel` iki anlamı birden taşıyor** (soyda "şu anki
+   kademe", okul tanışıklığında "tanışılan kademe"); okul çağındaki kardeş
+   sınıf listesine karışıyordu.
+5. **`ChildProgression.ensureRecord` serveti sıfırlıyordu:** "çok varlıklı"
+   eş bir yılda "çok yoksul" görünürdü — Finger'daki hatanın aynısı.
+6. **Test yardımcısı**, oyuncu kriz yanıtlanırken vefat ettiğinde
+   çöküyordu.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2392 geçti, 15 atlandı, 0 başarısız**. Bu iki pakette yeni:
+`paket_y_test` (51), `paket_y_widget_test` (6), `paket_z_test` (60).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+### DECISIONS.md'ye dokunulmadı
+D-134 … D-161 yalnızca kodda ve bu dosyada duruyor. `CLAUDE.md` kuralı
+gereği kullanıcı onayı olmadan `DECISIONS.md`'ye karar yazılmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

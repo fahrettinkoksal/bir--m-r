@@ -3782,3 +3782,31 @@ Kardeş kaydı doğuştan vardı ama hayatı hiç ilerlemiyordu: okumuyor, iş b
 8. **Ekran:** velayet ve nafaka Evlilik Geçmişi sayfasında bir kartta duruyor. Doğru yer mi?
 
 **Varsayılan işlem:** Onay gelene dek bütün oranlar `prototypeOnly` kalır; yoksulluk nafakası eklenmez, velayet oyuncuya sorulmaz, ödenmeyen nafakanın yaptırımı olmaz.
+
+---
+
+### Q-164 — Suç V2: denetim döneminin yaptırımı, sicilin solması ve çevre
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-161 · Test: `app/test/paket_z_test.dart`
+
+`docs/EKSIKLER.md` §2.1'de Suç ve Hukuk V1'den sonra açık kalanlar sayılmıştı: *"ağır/organize suç, suç çevresi/çete, denetim döneminin somut yaptırımı, adli sicilin zamanla silinmesi."* Üçü geldi; **ağır/organize suç bilerek gelmedi.**
+
+**1. Denetim döneminin somut yaptırımı.** `probationUntilAge` kayıtta duruyordu ama hiçbir şeyi engellemiyordu — kâğıt üstünde kalıyordu. Artık denetim dönemi boyunca **şehir dışına çıkmak kapalı** ve gerekçe açıkça yazılıyor.
+
+**2. Sicil zamanla başvuruda sayılmaz oluyor.** Kayıt **silinmiyor** — dosya Adli Geçmiş'te hayat boyu duruyor. Değişen tek şey işe başvuruda sayılıp sayılmadığı: hafif kayıt 5, orta 12, ağır 25 yıl sonra kapıyı kapatmayı bırakıyor. Kapanmamış dosya her zaman sayılıyor. Gerçekte adli sicil arşiv kaydına geçer ve çoğu başvuruda görünmez; oyun bu ana fikri uyguluyor.
+
+**3. Çevre: çeteleşmenin dışarıya taşması (Q-148'in konusu).** Koğuşta kurulan itibar (`crewStanding`, D-140) yalnızca içeride sayılıyordu. Artık itibarı yeterliyse tahliyeden sonra Adli Geçmiş bölümünde bir **teklif kartı** çıkıyor: "karış" ya da "karışma". Karışmak para getiriyor ama **%45 ihtimalle dosya açıyor** ve mevcut adli süreç olduğu gibi işliyor — kolay para değil. Karışmamak itibarı düşürüyor, başka bir şey olmuyor. İki teklif arasında 3 yıl var.
+
+**İçerik sınırı korundu ve kalıcı testle sabitlendi.** Oyun hiçbir suçun **nasıl** işlendiğini anlatmıyor: ne yöntem, ne plan, ne kaçma, ne saklanma, ne iz gizleme, ne yakalanmaktan kurtulma. Teklifin içeriği bilerek belirsiz ve oyuncu da ayrıntısını sormuyor. Bir test bu kelimelerin metinlerde geçmediğini denetliyor.
+
+**Ağır/organize suç eklenmedi, bilerek:** kataloğa yeni bir ağır suç türü yazmak anlatacak bir yöntem gerektirirdi ve içerik sınırını zorlardı. Çevre kartı mevcut suçlardan birini kullanıyor.
+
+**Karar soruları:**
+1. **Denetim döneminin tek yaptırımı şehir dışı yasağı.** Yeterli mi? Başka somut yaptırımlar: iş değiştirme izne bağlı, kumarhane kapalı, yılda bir imza (kaçırılırsa geri içeri).
+2. **Sicilin solma süreleri** (5 / 12 / 25 yıl) doğru mu?
+3. **Sicil solması yalnızca iş başvurusunu etkiliyor.** Yeni bir dosyada "önceki kayıt" ağırlığı (`prototypeOnlyPriorRecordWeight`) hâlâ **bütün** kayıtlara bakıyor. O da solmalı mı?
+4. **Çevre itibarı eşiği 40**, bekleme 3 yıl, dosya ihtimali %45, kazanç 45.000-260.000 ₺. Doğru bantta mı?
+5. **Karışmak yalnızca para getiriyor.** Başka bir sonucu olmalı mı (aile yakınlığının düşmesi, iş kaybı, ün)?
+6. **Çevre itibarı hiç sıfırlanmıyor:** yıllarca karışmayan birinin çevresi unutmuyor. Zamanla sönmeli mi?
+7. **Ağır/organize suç eklenmeli mi?** Eklenecekse içerik sınırı nasıl korunacak — yalnızca sonuç anlatan, yöntem anlatmayan bir çerçeve mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; ağır/organize suç eklenmez, çevre itibarı sönmez, denetim döneminin başka yaptırımı olmaz.

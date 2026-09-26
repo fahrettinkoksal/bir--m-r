@@ -69,9 +69,13 @@ soruşturma, dava, takipsizlik, karar, sabıka, hapis ve denetim dönemi ·
 iş başvurusuna etkisi · basit hapis ve cezaevi aktiviteleri · Adli
 Geçmiş bölümü.
 
-**Hâlâ yok:** ağır/organize suç, suç çevresi/çete, denetim döneminin
-somut yaptırımı, adli sicilin zamanla silinmesi. Bunlar V2'ye bırakıldı
-ve Q-141 … Q-143'te soruldu.
+**V2 geldi (D-161):** denetim dönemi artık şehir dışına çıkmayı
+kapatıyor; adli sicil zamanla **başvuruda sayılmaz** oluyor (kayıt
+silinmiyor, hafif 5 / orta 12 / ağır 25 yıl); koğuşta kurulan itibar
+tahliyeden sonra bir teklif kartına dönüşüyor. Sorular Q-164'te.
+
+**Hâlâ yok:** ağır/organize suç. **Bilerek:** yeni bir ağır suç türü
+anlatacak bir yöntem gerektirir ve oyunun içerik sınırını zorlar.
 
 **Suç zorunlu içerik değil:** riskli seçim yapmayan 100 hayatta tek bir
 dosya bile açılmıyor (ölçüldü, testle sabit).
@@ -100,16 +104,23 @@ bağı sayılmıyor. Vefat eden ebeveyn kayıttan silinmiyor.
 yalnızca bir **ad** olarak tutuluyor (D-121), kişi kaydı değil. Açık
 sorular Q-149'da.
 
-### 2.4 Nafaka, velayet, mal rejimi — **bilerek ertelendi**
+### 2.4 Nafaka, velayet, mal rejimi — **nafaka ve velayet eklendi (D-160)**
+> **Güncelleme (26 Eylül 2026):** Faho'nun açık isteğiyle nafaka ve
+> velayet eklendi; bu **Q-118 kararını değiştiriyor** ve Q-163'te tekrar
+> soruldu. Mal rejimi sözleşmesi, katkı payı ve değer artış payı hâlâ
+> yok. Aşağıdaki eski gerekçe tarihsel kayıt olarak duruyor.
 Arama: `nafaka` → 1 sonuç, o da `BACKLOG.md`'deki erteleme notu.
 
 Q-118'de "şimdilik yok" kararı verildi ve gerekçesiyle yazıldı. Boşanmanın
 mal paylaşımı var (D-075) ama nafaka ve velayet yok. İkinci evlilik
 açıldıkça bu boşluk daha görünür oluyor.
 
-### 2.5 Hane bütçesi ve eşin ekonomisi — **yok**
-Eşin kendi geliri "kendi giderini karşılar" varsayılıyor; ortak bütçe,
-eşin işi, eşin işsiz kalması yok (Q-063).
+### 2.5 Hane bütçesi ve eşin ekonomisi — **eklendi (D-154, D-160)**
+> **Güncelleme (26 Eylül 2026):** Bu tespit artık geçerli değil.
+
+Eşin kendi işi, iş değiştirmesi, emekli olması ve hastalanması geldi
+(D-154). Çalışan eş maaşının %35'ini haneye koyuyor (D-160); ikinci bir
+bakiye açılmadı, para doğrudan cüzdana giriyor. Sorular Q-157 ve Q-163.
 
 ### 2.6 İkiz gebelik — **eklendi (D-151)**
 > **Güncelleme (26 Eylül 2026):** Bu tespit artık geçerli değil.
@@ -126,6 +137,11 @@ aşılmaz. Üçüz yok. Sayılar Q-154'te.
 ## 3. Yarım kalmış sistemler
 
 Kodlandı ama yüzeysel; derinleştirilmesi gerekiyor.
+
+### 3.2b Kardeşin hayatı — **eklendi (D-158)**
+Kardeş kaydı doğuştan vardı ama hayatı hiç ilerlemiyordu. Artık okuyor,
+iş buluyor, emekli oluyor, evleniyor ve çocuğu oluyor; kardeşin çocuğu
+**yeğen** olarak doğuyor. Sorular Q-161.
 
 ### 3.1 Arkadaşlık — en zayıf ilişki
 Arkadaşlar pratikte birer **isim**. Yapılabilenler: sohbet, vakit geçir,

@@ -342,6 +342,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
         // Cezaevi hayatı (D-140).
         'goodBehaviour': state.legal.goodBehaviour,
         'crewStanding': state.legal.crewStanding,
+        // Çevre (D-161). Alan eklemeli; eski kayıtta yoktur.
+        'crewOfferAtAge': state.legal.crewOfferAtAge,
+        'crewJobs': state.legal.crewJobs,
         'yearsServed': state.legal.yearsServed,
         'cases': <Object?>[
           for (final CriminalCase c in state.legal.cases)
@@ -2098,6 +2101,8 @@ LegalState _decodeLegal(Map<String, Object?> json) => LegalState(
       bailAskedAtAge: _intOrNull(json, 'bailAskedAtAge'),
       goodBehaviour: _intOr(json, 'goodBehaviour', 0),
       crewStanding: _intOr(json, 'crewStanding', 0),
+      crewOfferAtAge: _intOrNull(json, 'crewOfferAtAge'),
+      crewJobs: _intOr(json, 'crewJobs', 0),
       yearsServed: _intOr(json, 'yearsServed', 0),
       cases: List<CriminalCase>.unmodifiable(<CriminalCase>[
         for (final Object? e in _optionalRawList(json, 'cases'))

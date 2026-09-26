@@ -4,6 +4,7 @@ import '../../data/city_catalog.dart';
 import '../../data/interview_catalog.dart';
 import '../../data/crime_catalog.dart';
 import '../../data/job_catalog.dart';
+import '../law/legal_engine.dart';
 import '../models/criminal_record.dart';
 import '../../data/hobby_catalog.dart';
 import '../../data/license_catalog.dart';
@@ -211,7 +212,10 @@ class JobMarket {
   /// hangi yaşta, neden engel.
   String recordReason(GameState state, JobType job) {
     if (job.recordRule == RecordRule.serbest) return '';
-    final List<CriminalCase> sabika = state.legal.record;
+    // Sicil zamanla **başvuruda sayılmaz** hâle gelir (D-161). Kayıt
+    // silinmez; Adli Geçmiş'te hayat boyu durur. Değişen tek şey, yıllar
+    // sonra bir hatanın kapıyı kapatmaya devam etmemesi.
+    final List<CriminalCase> sabika = LegalEngine.activeRecord(state);
     if (sabika.isEmpty) return '';
 
     final List<CriminalCase> engelleyen = job.recordRule ==

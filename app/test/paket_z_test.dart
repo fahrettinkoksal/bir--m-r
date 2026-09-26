@@ -5,7 +5,14 @@ import 'package:bir_omur/data/economy.dart';
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/data/crime_catalog.dart';
+import 'package:bir_omur/domain/activities/travel.dart';
 import 'package:bir_omur/domain/career/job_market.dart';
+import 'package:bir_omur/domain/law/crew_life.dart';
+import 'package:bir_omur/domain/law/legal_engine.dart';
+import 'package:bir_omur/domain/models/criminal_record.dart';
+import 'package:bir_omur/domain/models/interaction.dart';
+import 'package:bir_omur/domain/models/trip.dart';
 import 'package:bir_omur/domain/economy/household_budget.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/domain/models/career.dart';
@@ -901,6 +908,222 @@ void main() {
       final Map<String, Object?> json = encodeGameState(s);
       json.remove('alimony');
       expect(decodeGameState(json).alimony, isNull);
+    });
+  });
+
+  group('Çete ve suç V2 (D-161)', () {
+    GameState sabikali({
+      int age = 40,
+      int crewStanding = 0,
+      int? probationUntilAge,
+      int? crewOfferAtAge,
+      int wallet = 100000,
+      List<CriminalCase> dosyalar = const <CriminalCase>[],
+    }) {
+      final GameState base = hayat(age: age, wallet: wallet);
+      return base.copyWith(
+        legal: LegalState(
+          cases: dosyalar,
+          crewStanding: crewStanding,
+          probationUntilAge: probationUntilAge,
+          crewOfferAtAge: crewOfferAtAge,
+        ),
+      );
+    }
+
+    CriminalCase dosya({
+      required String crimeId,
+      required int ageAtIncident,
+      required int closedAtAge,
+    }) =>
+        CriminalCase(
+          id: 'dosya-1',
+          crimeId: crimeId,
+          ageAtIncident: ageAtIncident,
+          stage: CaseStage.karar,
+          verdict: Verdict.hapis,
+          closedAtAge: closedAtAge,
+        );
+
+    test('denetim dönemi şehir dışına çıkmayı kapatıyor', () {
+      final GameState s = sabikali(age: 40, probationUntilAge: 43);
+      expect(LegalEngine.onProbation(s), isTrue);
+      expect(LegalEngine.probationBlockReason(s), isNotEmpty);
+      expect(LegalEngine.probationBlockReason(s), contains('43'));
+
+      final InteractionAvailability u = Travel.availability(
+        s,
+        mode: TravelMode.otobus,
+        city: 'Ankara',
+      );
+      expect(u.isAllowed, isFalse);
+      expect(u.reason, contains('Denetim'));
+    });
+
+    test('denetim dönemi bitince engel kalkıyor', () {
+      final GameState s = sabikali(age: 43, probationUntilAge: 43);
+      expect(LegalEngine.onProbation(s), isFalse);
+      expect(LegalEngine.probationBlockReason(s), isEmpty);
+    });
+
+    test('sicil zamanla başvuruda sayılmaz olur ama silinmez', () {
+      // Hafif kayıt: 5 yıl sonra sayılmaz.
+      final GameState taze = sabikali(
+        age: 30,
+        dosyalar: <CriminalCase>[
+          dosya(crimeId: 'trafik_hiz', ageAtIncident: 28, closedAtAge: 28),
+        ],
+      );
+      final GameState eski = sabikali(
+        age: 40,
+        dosyalar: <CriminalCase>[
+          dosya(crimeId: 'trafik_hiz', ageAtIncident: 28, closedAtAge: 28),
+        ],
+      );
+      // Kayıt her iki durumda da yerinde duruyor.
+      expect(taze.legal.record, hasLength(1));
+      expect(eski.legal.record, hasLength(1));
+      // Ama başvuruda sayılan yalnızca tazesi.
+      expect(LegalEngine.activeRecord(taze), hasLength(1));
+      expect(LegalEngine.activeRecord(eski), isEmpty);
+    });
+
+    test('ağır kayıt çok daha uzun süre sayılır', () {
+      expect(
+        LegalEngine.prototypeOnlyRecordFadeYears(CrimeSeverity.agir),
+        greaterThan(
+          LegalEngine.prototypeOnlyRecordFadeYears(CrimeSeverity.hafif),
+        ),
+      );
+      final GameState s = sabikali(
+        age: 45,
+        dosyalar: <CriminalCase>[
+          dosya(crimeId: 'yaralama', ageAtIncident: 28, closedAtAge: 28),
+        ],
+      );
+      expect(LegalEngine.activeRecord(s), hasLength(1));
+    });
+
+    test('kapanmamış dosya her zaman sayılır', () {
+      final CriminalCase acik = CriminalCase(
+        id: 'dosya-1',
+        crimeId: 'yaralama',
+        ageAtIncident: 20,
+        stage: CaseStage.karar,
+        verdict: Verdict.hapis,
+      );
+      expect(LegalEngine.recordCountsAt(acik, 90), isTrue);
+    });
+
+    test('çevresi olmayana teklif gelmiyor', () {
+      final InteractionAvailability u =
+          CrewLife.offerAvailability(sabikali(crewStanding: 10));
+      expect(u.isAllowed, isFalse);
+      expect(u.reason, contains('çevre'));
+    });
+
+    test('içerideyken teklif gelmiyor', () {
+      GameState s = sabikali(crewStanding: 80);
+      s = s.copyWith(
+        legal: s.legal.copyWith(imprisonedSinceAge: 39, releaseAtAge: 42),
+      );
+      expect(CrewLife.offerAvailability(s).isAllowed, isFalse);
+    });
+
+    test('bekleme süresi dolmadan ikinci teklif gelmiyor', () {
+      final GameState s = sabikali(
+        age: 41,
+        crewStanding: 80,
+        crewOfferAtAge: 40,
+      );
+      final InteractionAvailability u = CrewLife.offerAvailability(s);
+      expect(u.isAllowed, isFalse);
+      expect(u.reason, contains('yıl'));
+    });
+
+    test('karışmak para getirir ve itibarı yükseltir', () {
+      final GameState s = sabikali(age: 40, crewStanding: 60, wallet: 1000);
+      final CrewResult r = CrewLife.accept(s, Random(1));
+      expect(r.outcome.applied, isTrue);
+      expect(r.outcome.money, greaterThanOrEqualTo(CrewLife.prototypeOnlyMinPay));
+      expect(r.state.player.wallet, 1000 + r.outcome.money);
+      expect(r.state.legal.crewStanding, greaterThan(60));
+      expect(r.state.legal.crewJobs, 1);
+      expect(r.state.legal.crewOfferAtAge, 40);
+    });
+
+    test('karışmak bazen dosya açıyor: kolay para değil', () {
+      int dosyaAcilan = 0;
+      int temizGecen = 0;
+      for (int seed = 0; seed < 200; seed++) {
+        final GameState s = sabikali(age: 40, crewStanding: 60);
+        final CrewResult r = CrewLife.accept(s, Random(seed));
+        if (r.outcome.caseOpened) {
+          dosyaAcilan++;
+          expect(r.state.legal.cases, isNotEmpty);
+        } else {
+          temizGecen++;
+        }
+      }
+      expect(dosyaAcilan, greaterThan(0));
+      expect(temizGecen, greaterThan(0));
+      // Risk gerçek olmalı: en az beşte bir.
+      expect(dosyaAcilan / 200, greaterThan(0.2));
+    });
+
+    test('karışmamak itibarı düşürür, başka bir şey olmaz', () {
+      final GameState s = sabikali(age: 40, crewStanding: 60, wallet: 5000);
+      final CrewResult r = CrewLife.decline(s);
+      expect(r.outcome.applied, isTrue);
+      expect(r.state.player.wallet, 5000);
+      expect(r.state.legal.crewStanding, lessThan(60));
+      expect(r.state.legal.cases, isEmpty);
+    });
+
+    test('metinler yöntem anlatmıyor', () {
+      // İçerik sınırı kalıcı testle korunur: hiçbir metin nasıl
+      // yapıldığını, nasıl kaçıldığını ya da nasıl iz gizlendiğini
+      // anlatmaz.
+      const List<String> yasakli = <String>[
+        'nasıl',
+        'kaç',
+        'sakla',
+        'iz bırakma',
+        'delil',
+        'yakalanma',
+        'plan',
+      ];
+      final GameState s = sabikali(age: 40, crewStanding: 60);
+      final List<String> metinler = <String>[
+        CrewLife.accept(s, Random(1)).outcome.text,
+        CrewLife.decline(s).outcome.text,
+      ];
+      for (final String m in metinler) {
+        for (final String k in yasakli) {
+          expect(
+            m.toLowerCase().contains(k),
+            isFalse,
+            reason: 'Metinde "$k" geçiyor: $m',
+          );
+        }
+      }
+    });
+
+    test('çevre kaydı kaydedilip geri okunur; eski kayıt bozulmaz', () {
+      final GameState s = sabikali(crewStanding: 55, crewOfferAtAge: 40)
+          .copyWith();
+      final GameState geri = decodeGameState(encodeGameState(s));
+      expect(geri.legal.crewStanding, 55);
+      expect(geri.legal.crewOfferAtAge, 40);
+
+      final Map<String, Object?> json = encodeGameState(s);
+      final Map<String, Object?> legal =
+          json['legal']! as Map<String, Object?>;
+      legal.remove('crewOfferAtAge');
+      legal.remove('crewJobs');
+      final GameState eski = decodeGameState(json);
+      expect(eski.legal.crewOfferAtAge, isNull);
+      expect(eski.legal.crewJobs, 0);
     });
   });
 }
