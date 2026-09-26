@@ -465,7 +465,13 @@ abstract final class Finger {
           ? EmploymentStatus.ogrenci
           : EmploymentStatus.calisiyor,
       occupation: profil.occupation,
-      wealth: profil.age >= 18 ? WealthTier.ortaHalli : null,
+      // **Gerçek hata (Faho bildirdi):** "Finger'de çok varlıklı olarak
+      // tanıştığım kişi arkadaşım olduğu an orta halli görünüyor."
+      // Burada profilin kendi `wealth` değeri atılıp yerine sabit
+      // `ortaHalli` yazılıyordu; ilanda okunan hâl kişi kaydına hiç
+      // geçmiyordu. Artık tanışılan kişi ilanındaki hâliyle kaydediliyor.
+      // 18 yaşından küçükte kendi serveti yoktur; orada boş kalır.
+      wealth: profil.age >= 18 ? profil.wealth : null,
       city: profil.city,
       bond: rng.between(45, 62), // prototypeOnly
       infertile: iliski == RelationType.flort

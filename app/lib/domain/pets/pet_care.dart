@@ -420,7 +420,22 @@ abstract final class PetCare {
       Pet guncel = pet.copyWith(age: pet.age + 1);
 
       // --- Bakım gideri: yılda **bir kez** ------------------------------
-      if (guncel.lastCareChargedPlayerAge != newAge) {
+      //
+      // **Sahiplenmediğin hayvanın bakımı senden çıkmaz (D-144).**
+      //
+      // Faho bildirdi: "4-5-6 yaşlarında aileden harçlık alıyorum, sene
+      // geçtiğinde harçlığım evde zaten ben doğduğumda var olan hayvanın
+      // bakımına gidiyor! Eğer hayvanı ben sahiplenmediysem bakımına
+      // benden ücret çıkmasın."
+      //
+      // `adoptedAtPlayerAge == null` demek "oyuncu doğduğunda hayvan
+      // evdeydi" demektir; o hayvan ailenin hayvanıdır. Yaşlanması,
+      // kaçması, hastalanması ve vefatı aynen işler — yalnızca para
+      // oyuncunun cüzdanından çıkmaz.
+      final bool bakimiSenOdemezsin = guncel.adoptedAtPlayerAge == null;
+      if (bakimiSenOdemezsin) {
+        guncel = guncel.copyWith(lastCareChargedPlayerAge: newAge);
+      } else if (guncel.lastCareChargedPlayerAge != newAge) {
         final int gider = tur.yearlyCareCost;
         if (cuzdan >= gider) {
           cuzdan -= gider;

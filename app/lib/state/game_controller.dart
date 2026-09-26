@@ -1554,8 +1554,39 @@ class GameController extends ChangeNotifier {
       _runActivity((GameState current) => _activities.openBook(current, book));
 
   /// Bir sayfa çevirir.
-  ActivityOutcome? turnBookPage(BookInfo book) =>
-      _runActivity((GameState current) => _activities.turnPage(current, book));
+  ///
+  /// **Sayfa başına pop-up çıkmaz (D-145).** Faho bildirdi: "her kitap
+  /// okumada neden bildirim atıyor! her sayfada bildirim var saçmalık!!!
+  /// kitabı okumam bittiğinde gelmeli sadece pop-up, zekâ ve mutluluk
+  /// arttı gibi." Sayfa sayacı zaten okuma ekranının üstünde duruyor ve
+  /// kazanç yalnızca kitap bitince veriliyor; ara sayfaların bildirimi
+  /// hiçbir şey anlatmıyordu. Bildirim artık **yalnızca kitap
+  /// bittiğinde** kuyruğa giriyor.
+  ActivityOutcome? turnBookPage(BookInfo book) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+
+    final bool onceBitmisti = current.bookProgress(book.id)?.finished ?? false;
+    final ActivityResult result = _activities.turnPage(current, book);
+    if (!result.outcome.applied) return result.outcome;
+
+    final bool simdiBitti =
+        result.state.bookProgress(book.id)?.finished ?? false;
+    final GameState ilerleyen = _countProgress(current, result.state);
+
+    _state = simdiBitti && !onceBitmisti
+        ? _announce(
+            current,
+            ilerleyen,
+            result.outcome.text,
+            title: 'Kitap bitti',
+            tag: 'kitap',
+          )
+        : ilerleyen;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
 
   ActivityOutcome? _runActivity(ActivityResult Function(GameState) islem) {
     final GameState? current = _state;
