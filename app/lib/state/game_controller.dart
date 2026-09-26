@@ -67,6 +67,7 @@ import '../domain/models/pending_trial.dart';
 import '../domain/models/criminal_record.dart';
 import '../data/lawyer_catalog.dart';
 import '../data/business_catalog.dart';
+import '../data/gift_catalog.dart';
 import '../domain/economy/business_engine.dart';
 import '../domain/interaction/friendship_depth.dart';
 import '../domain/models/business.dart';
@@ -408,7 +409,12 @@ class GameController extends ChangeNotifier {
   ///
   /// Genel bir etkileşim kotası yoktur; sınır yalnızca aynı kişiyle aynı
   /// etkinliğin aynı yaştaki **getirisinde** işler (D-026).
-  InteractionOutcome? interact(String personId, InteractionKind kind) {
+  /// [giftId] verilirse hediye **oyuncunun seçtiği** olur (D-134).
+  InteractionOutcome? interact(
+    String personId,
+    InteractionKind kind, {
+    String? giftId,
+  }) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final InteractionResult result = _interactions.perform(
@@ -416,6 +422,7 @@ class GameController extends ChangeNotifier {
       personId: personId,
       kind: kind,
       rng: _random,
+      giftId: giftId,
     );
     // Oyun içi ilerlemeye bağlı olarak aralıklı bir ek olay çıkabilir
     // (D-023, D-024). Gerçek dünya dakikası beklenmez ve bir yaşta en fazla
@@ -433,6 +440,31 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  /// Bu kişiye şu an **gerçekten alınabilecek** hediyeler (D-134).
+  ///
+  /// Liste cüzdana, kişinin yaşına ve zaten sahip olduğu eşyalara bakar;
+  /// alınamayacak hediye listede görünmez.
+  List<GiftItem> giftOptionsFor(String personId) {
+    final GameState? current = _state;
+    if (current == null) return const <GiftItem>[];
+    final Person? kisi = current.personById(personId);
+    if (kisi == null) return const <GiftItem>[];
+    return _interactions.giftOptions(current, kisi);
+  }
+
+  /// Bu hediye o kişiye nasıl gider? Arayüz **söylemez**; sürpriz kalır.
+  /// Yalnızca testler ve hayat günlüğü için okunabilir.
+  GiftReaction giftReactionPreview(String personId, GiftItem gift) {
+    final GameState? current = _state;
+    final Person? kisi = current?.personById(personId);
+    if (kisi == null) return GiftReaction.idare;
+    return giftReactionFor(
+      gift: gift,
+      relation: kisi.relation,
+      receiverAge: kisi.age,
+    );
   }
 
   /// Etkileşimin şu an mümkün olup olmadığı; arayüz bunu kullanarak

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/gift_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../../data/wedding_catalog.dart';
 import '../../domain/activities/outing.dart';
@@ -16,6 +17,7 @@ import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/interaction/shared_history.dart';
 import '../theme/bir_omur_theme.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import 'effect_chips.dart';
 import 'kilim_divider.dart';
@@ -52,8 +54,42 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
   String? _notice;
 
   void _run(InteractionKind kind) {
+    // Hediye artık rastgele değil: oyuncu seçer (D-134).
+    if (kind == InteractionKind.hediyeVer) {
+      _chooseGift();
+      return;
+    }
     final InteractionOutcome? outcome =
         GameScope.of(context).interact(widget.personId, kind);
+    if (outcome == null) return;
+    setState(() {
+      _lastOutcome = outcome;
+      _notice = null;
+    });
+  }
+
+  /// Hediye seçimi penceresi (D-134).
+  ///
+  /// Listede yalnızca **gerçekten alınabilecek** hediyeler durur; fiyatı
+  /// yanında yazar. Kişinin beğenip beğenmeyeceği **söylenmez** — o
+  /// sürprizdir ve oyuncunun kimi tanıdığını öğrenmesi gerekir.
+  Future<void> _chooseGift() async {
+    final GameController controller = GameScope.of(context);
+    final List<GiftItem> secenekler =
+        controller.giftOptionsFor(widget.personId);
+    if (secenekler.isEmpty) return;
+    final GiftItem? secilen = await showModalBottomSheet<GiftItem>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (BuildContext context) => _GiftSheet(gifts: secenekler),
+    );
+    if (secilen == null || !mounted) return;
+    final InteractionOutcome? outcome = GameScope.of(context).interact(
+      widget.personId,
+      InteractionKind.hediyeVer,
+      giftId: secilen.id,
+    );
     if (outcome == null) return;
     setState(() {
       _lastOutcome = outcome;
@@ -1215,6 +1251,72 @@ class _ProtectionSheet extends StatelessWidget {
               const SizedBox(height: 10),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hediye seçimi listesi (D-134).
+///
+/// Sınıflara göre gruplanır: oyuncu ne aldığını bilsin. Beğeni bilgisi
+/// **gösterilmez**; kimin neyi sevdiğini oyuncu deneyerek öğrenir.
+class _GiftSheet extends StatelessWidget {
+  const _GiftSheet({required this.gifts});
+
+  final List<GiftItem> gifts;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Map<GiftCategory, List<GiftItem>> gruplar =
+        <GiftCategory, List<GiftItem>>{};
+    for (final GiftItem g in gifts) {
+      gruplar.putIfAbsent(g.category, () => <GiftItem>[]).add(g);
+    }
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('Ne alacaksın?', style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 4),
+              Text(
+                'Bedeli cüzdanından çıkar. Beğenip beğenmeyeceğini '
+                'göreceksin.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const KilimDivider(),
+              const SizedBox(height: 10),
+              for (final GiftCategory k in GiftCategory.values)
+                if (gruplar[k] != null) ...<Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 4),
+                    child: Text(
+                      k.label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  for (final GiftItem g in gruplar[k]!)
+                    ListTile(
+                      key: Key('gift_option_${g.id}'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(g.icon),
+                      title: Text(g.name),
+                      trailing: Text(trMoney(g.value)),
+                      onTap: () => Navigator.of(context).pop(g),
+                    ),
+                ],
+            ],
+          ),
         ),
       ),
     );

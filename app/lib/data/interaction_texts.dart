@@ -7,6 +7,7 @@ library;
 import 'dart:math';
 
 import '../domain/models/interaction.dart';
+import 'gift_catalog.dart';
 import '../domain/models/person.dart';
 import '../domain/models/relation.dart';
 import '../text/turkish_text.dart';
@@ -266,3 +267,43 @@ const Set<RelationType> _buyukler = <RelationType>{
   RelationType.anneTarafiDede,
   RelationType.babaTarafiDede,
 };
+
+// =====================================================================
+// Hediye tepkileri (D-134)
+//
+// Doğru hediye sevindirir, yanlış hediye nazikçe geri çevrilir. Metin
+// kimseyi utandırmaz ama belli eder (docs/WRITING_STYLE_TR.md §1, §5).
+// =====================================================================
+
+/// Hediyeye verilen tepkinin metni.
+String giftReactionText({
+  required GiftReaction reaction,
+  required Person person,
+  required GiftItem gift,
+}) {
+  final String ad = person.firstName;
+  switch (reaction) {
+    case GiftReaction.sevindi:
+      final List<String> secenekler = <String>[
+        '$ad paketi açtı, bir an durdu. "Bunu nereden bildin?"',
+        '$ad hediyeyi elinde çevirdi çevirdi. Yüzü güldü.',
+        '$ad "şey almayacaktın" dedi ama bırakmadı elinden.',
+      ];
+      return secenekler[gift.name.length % secenekler.length];
+    case GiftReaction.idare:
+      final List<String> secenekler = <String>[
+        '$ad teşekkür etti, kenara koydu.',
+        '$ad "eline sağlık" dedi. Fena değildi.',
+        '$ad gülümsedi. Uzun bir şey söylemedi.',
+      ];
+      return secenekler[gift.name.length % secenekler.length];
+    case GiftReaction.begenmedi:
+      final List<String> secenekler = <String>[
+        '$ad "aa, sağ ol" dedi. Sesindeki o küçük boşluğu ikiniz de '
+            'duydunuz.',
+        '$ad paketi kapattı, masaya bıraktı. Konu değişti.',
+        '$ad bir an ne diyeceğini bilemedi. "Güzelmiş" dedi sonunda.',
+      ];
+      return secenekler[gift.name.length % secenekler.length];
+  }
+}

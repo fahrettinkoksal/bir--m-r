@@ -30,6 +30,18 @@ enum ItemKind {
 
   /// Başka bir eşyaya takılan parça.
   aksesuar,
+
+  /// Takı ve kıymetli maden (D-134). Hediye sisteminde ayrı bir sınıf:
+  /// çeyrek altın ile tavla aynı şey değildir.
+  ///
+  /// Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  taki,
+
+  /// Çiçek, kutu çikolata gibi **tüketilen** hediyeler.
+  hediyelik,
+
+  /// Masa oyunu: tavla, dama, satranç.
+  masaOyunu,
 }
 
 /// Eşya üzerinde yapılabilecek eylem türleri.
@@ -527,6 +539,104 @@ const List<ItemType> kItemTypes = <ItemType>[
     kind: ItemKind.konut,
     baseValue: 16000000,
   ),
+  // --- Takı ve hediyelik (D-134) -----------------------------------------
+  //
+  // Faho'nun istediği hediyeler: tavla, buket çiçek, çeyrek altın, bilezik.
+  // Fiyatlar 2026 Türkiye'sine göre `prototypeOnly`'dir (Q-148).
+  ItemType(
+    id: 'ceyrek_altin',
+    name: 'Çeyrek altın',
+    icon: Icons.stars_rounded,
+    kind: ItemKind.taki,
+    // 2026'da çeyrek altın beş haneli tutarlara yaklaştı; sayı onay
+    // bekliyor.
+    baseValue: 11500,
+  ),
+  ItemType(
+    id: 'gram_altin',
+    name: 'Gram altın',
+    icon: Icons.circle_outlined,
+    kind: ItemKind.taki,
+    baseValue: 6800,
+  ),
+  ItemType(
+    id: 'bilezik',
+    name: 'Altın bilezik',
+    icon: Icons.brightness_1_outlined,
+    kind: ItemKind.taki,
+    baseValue: 42000,
+  ),
+  ItemType(
+    id: 'kolye',
+    name: 'Kolye',
+    icon: Icons.diamond_outlined,
+    kind: ItemKind.taki,
+    baseValue: 9500,
+  ),
+  ItemType(
+    id: 'kupe',
+    name: 'Küpe',
+    icon: Icons.blur_circular_outlined,
+    kind: ItemKind.taki,
+    baseValue: 5200,
+  ),
+  ItemType(
+    id: 'cicek_buketi',
+    name: 'Buket çiçek',
+    icon: Icons.local_florist_outlined,
+    kind: ItemKind.hediyelik,
+    baseValue: 900,
+  ),
+  ItemType(
+    id: 'kutu_cikolata',
+    name: 'Kutu çikolata',
+    icon: Icons.cake_outlined,
+    kind: ItemKind.hediyelik,
+    baseValue: 650,
+  ),
+  ItemType(
+    id: 'parfum',
+    name: 'Parfüm',
+    icon: Icons.air_outlined,
+    kind: ItemKind.hediyelik,
+    baseValue: 3800,
+  ),
+  ItemType(
+    id: 'tavla',
+    name: 'Tavla',
+    icon: Icons.grid_view_rounded,
+    kind: ItemKind.masaOyunu,
+    baseValue: 1400,
+  ),
+  ItemType(
+    id: 'satranc',
+    name: 'Satranç takımı',
+    icon: Icons.castle_outlined,
+    kind: ItemKind.masaOyunu,
+    baseValue: 1100,
+  ),
+  ItemType(
+    id: 'kasmir_atki',
+    name: 'Kaşmir atkı',
+    icon: Icons.dry_cleaning_outlined,
+    kind: ItemKind.kiyafet,
+    baseValue: 2400,
+  ),
+  ItemType(
+    id: 'seccade',
+    name: 'Seccade',
+    icon: Icons.texture_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 1800,
+  ),
+  ItemType(
+    id: 'kahve_makinesi',
+    name: 'Kahve makinesi',
+    icon: Icons.coffee_maker_outlined,
+    kind: ItemKind.elektronik,
+    baseValue: 7200,
+  ),
+
 ];
 
 ItemType? itemTypeById(String id) {
@@ -578,11 +688,23 @@ Set<ItemActionKind> actionsFor(ItemKind kind) {
     case ItemKind.oyuncak:
     case ItemKind.spor:
     case ItemKind.kiyafet:
+    // Masa oyunu oynanır, temizlenir, satılır (D-134).
+    case ItemKind.masaOyunu:
       return <ItemActionKind>{
         ItemActionKind.kullan,
         ItemActionKind.temizle,
         ItemActionKind.sat,
       };
+    // Takı takılır, temizlenir, satılır; bakımı yoktur (D-134).
+    case ItemKind.taki:
+      return <ItemActionKind>{
+        ItemActionKind.kullan,
+        ItemActionKind.temizle,
+        ItemActionKind.sat,
+      };
+    // Çiçek ve çikolata tüketilir: satılmaz, bakımı yapılmaz.
+    case ItemKind.hediyelik:
+      return <ItemActionKind>{ItemActionKind.kullan};
     case ItemKind.evEsyasi:
     case ItemKind.kirtasiye:
       return <ItemActionKind>{ItemActionKind.temizle, ItemActionKind.sat};

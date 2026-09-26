@@ -220,6 +220,12 @@ class FamilyInteractions {
       );
 
   /// Oyuncunun kendi cüzdanıyla o kişiye alabileceği hediyeler.
+  /// Oyuncunun bu kişiye alabileceği hediyeler (D-134).
+  ///
+  /// Arayüz bu listeyi gösterir; listede olmayan hediye seçilemez.
+  List<GiftItem> giftOptions(GameState state, Person person) =>
+      _giftsPlayerCanBuy(state, person);
+
   List<GiftItem> _giftsPlayerCanBuy(GameState state, Person person) => giftsFor(
         receiverAge: person.age,
         maxValue: state.player.wallet,
@@ -240,11 +246,16 @@ class FamilyInteractions {
   /// Etkileşimi uygular ve yeni durumu döndürür.
   ///
   /// Uygun olmayan bir kişi için çağrılırsa durum değişmez.
+  /// [giftId] verilirse hediye **oyuncunun seçtiği** olur (D-134).
+  ///
+  /// Verilmezse eskisi gibi uygun hediyelerden biri rastgele seçilir;
+  /// eski çağrı yolları bozulmaz.
   InteractionResult perform({
     required GameState state,
     required String personId,
     required InteractionKind kind,
     required Random rng,
+    String? giftId,
   }) {
     final Person? person = state.personById(personId);
     if (person == null) {
@@ -297,7 +308,14 @@ class FamilyInteractions {
     if (kind != InteractionKind.hediyeVer && rng.chance(refusalChance)) {
       return _refuse(state: state, person: person, kind: kind, rng: rng);
     }
-    return _accept(state: state, person: person, kind: kind, rng: rng, done: done);
+    return _accept(
+      state: state,
+      person: person,
+      kind: kind,
+      rng: rng,
+      done: done,
+      giftId: giftId,
+    );
   }
 
   InteractionResult _refuse({
@@ -344,6 +362,7 @@ class FamilyInteractions {
     required InteractionKind kind,
     required Random rng,
     required int done,
+    String? giftId,
   }) {
     final double factor =
         prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
@@ -366,7 +385,15 @@ class FamilyInteractions {
           // gösterilmez.
           return _noGiftAvailable(state: state, person: person, rng: rng);
         }
-        verilenHediye = uygun[rng.nextInt(uygun.length)];
+        // Oyuncu bir hediye seçtiyse o alınır (D-134). Seçim listede
+        // yoksa (parası yetmiyor, yaşa uygun değil) sahte bir hediye
+        // uydurulmaz: uygunlardan biri seçilir.
+        verilenHediye = giftId == null
+            ? uygun[rng.nextInt(uygun.length)]
+            : uygun.firstWhere(
+                (GiftItem g) => g.id == giftId,
+                orElse: () => uygun[rng.nextInt(uygun.length)],
+              );
         moneyDelta = -verilenHediye.value;
       case InteractionKind.paraIste:
         final int base = prototypeOnlyAllowanceByWealth[person.wealth] ?? 0;
@@ -387,8 +414,35 @@ class FamilyInteractions {
         break;
     }
 
-    final bool noNewBenefit = bondDelta == 0 &&
-        happinessDelta == 0 &&
+    // Hediye beğenisi (D-134). Faho'nun isteği: "tavla hediye edersem
+    // beğenmesin". Yanlış hediye para götürür, yakınlık getirmez.
+    GiftReaction? tepki;
+    int hediyeBonu = 0;
+    if (verilenHediye != null) {
+      tepki = giftReactionFor(
+        gift: verilenHediye,
+        relation: person.relation,
+        receiverAge: person.age,
+      );
+      switch (tepki) {
+        case GiftReaction.sevindi:
+          // prototypeOnly: doğru hediye yakınlığı belirgin biçimde artırır.
+          hediyeBonu = 6;
+        case GiftReaction.idare:
+          hediyeBonu = 0;
+        case GiftReaction.begenmedi:
+          // Yakınlık kazancı silinir ve bir miktar da geri gider; para
+          // yine harcanmıştır.
+          hediyeBonu = -(bondDelta + 2);
+      }
+    }
+    final int hediyeliBond = bondDelta + hediyeBonu;
+    final int hediyeliHappiness = tepki == GiftReaction.begenmedi
+        ? happinessDelta - 2
+        : happinessDelta;
+
+    final bool noNewBenefit = hediyeliBond == 0 &&
+        hediyeliHappiness == 0 &&
         charismaDelta == 0 &&
         moneyDelta == 0 &&
         alinanHediye == null &&
@@ -405,17 +459,26 @@ class FamilyInteractions {
       playerAge: state.player.age,
       giftName: (alinanHediye ?? verilenHediye)?.name,
     );
-    final String metin = kind == InteractionKind.paraIste && moneyDelta > 0
+    String metin = kind == InteractionKind.paraIste && moneyDelta > 0
         ? '$sahne Cüzdanına ${trMoney(moneyDelta)} girdi.'
         : sahne;
+    // Tepki anlatının içine değil, **arkasına** yazılır: oyuncu ne
+    // olduğunu görsün (D-127 §3, anlatı ile sonuç ayrı).
+    if (tepki != null && verilenHediye != null) {
+      metin = '$metin\n\n${giftReactionText(
+        reaction: tepki,
+        person: person,
+        gift: verilenHediye,
+      )}';
+    }
 
     final InteractionOutcome outcome = InteractionOutcome(
       kind: kind,
       personId: person.id,
       accepted: true,
       text: metin,
-      bondDelta: bondDelta,
-      happinessDelta: happinessDelta,
+      bondDelta: hediyeliBond,
+      happinessDelta: hediyeliHappiness,
       charismaDelta: charismaDelta,
       moneyDelta: moneyDelta,
       gainedPossession: alinanHediye?.id,
