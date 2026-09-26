@@ -4,7 +4,6 @@ import '../../../data/crime_catalog.dart';
 import '../../../domain/models/criminal_record.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
-import '../../../domain/models/wealth.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../../text/turkish_text.dart';
