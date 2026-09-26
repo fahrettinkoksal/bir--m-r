@@ -56,6 +56,7 @@ import '../life/upkeep_tracker.dart';
 import '../life/notices.dart';
 import '../models/pending_notice.dart';
 import 'child_progression.dart';
+import 'spouse_life.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
@@ -191,6 +192,46 @@ class LifeProgression {
       );
     }
 
+    // Eş de kendi hayatını yaşar (D-154): iş değiştirir, emekli olur,
+    // hastalanır. Kariyer mevcut `ChildProgression` ile ilerler; paralel
+    // bir sistem kurulmaz. Yalnızca **yürüyen** evliliğin eşi ilerletilir.
+    final List<String> esHaberleri = <String>[];
+    int esMutlulukEtkisi = 0;
+    final List<Person> esSonrasi = <Person>[];
+    final String? yurumekteOlanEsId = state.marriage != null &&
+            state.marriage!.isActive
+        ? state.marriage!.spouseId
+        : null;
+    for (final Person kisi in evlilikliKisiler) {
+      if (kisi.id != yurumekteOlanEsId ||
+          !kisi.isAlive ||
+          kisi.relation != RelationType.es) {
+        esSonrasi.add(kisi);
+        continue;
+      }
+      final SpouseYear yil = SpouseLife.advance(
+        spouse: kisi,
+        playerAge: newAge,
+        rng: _rng,
+      );
+      esSonrasi.add(yil.person);
+      esHaberleri.addAll(yil.news);
+      esMutlulukEtkisi += yil.playerHappiness;
+      for (final String metin in yil.noticeTexts) {
+        aileBildirimleri.add(
+          PendingNotice(
+            id: 'es-haber-${kisi.id}-$newAge-${aileBildirimleri.length}',
+            kind: NoticeKind.aileDonum,
+            age: newAge,
+            title: 'Eşinden haber',
+            text: metin,
+            personId: kisi.id,
+          ),
+        );
+      }
+    }
+    final List<Person> esliKisiler = List<Person>.unmodifiable(esSonrasi);
+
     final List<LifeLogEntry> log = <LifeLogEntry>[
       ...state.log,
       LifeLogEntry(
@@ -198,6 +239,8 @@ class LifeProgression {
         text: '$newAge yaşına girdin.',
         category: LogCategory.yasDegisimi,
       ),
+      for (final String haber in esHaberleri)
+        LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
       for (final String haber in torunHaberleri)
         LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
       for (final String haber in aileHaberleri)
@@ -247,7 +290,12 @@ class LifeProgression {
     final ({List<Person> people, EducationState education}) okulSonucu =
         _setUpClassIfNeeded(
           state: state,
-          people: peopleWithChildren,
+          // **Düzeltme (D-154):** burada `peopleWithChildren` kullanılıyordu.
+          // Çocuk evliliğinin (D-121) ve eşin kendi hayatının (D-154)
+          // güncellediği kayıtlar bu yüzden boru hattına hiç girmiyordu:
+          // `dev.marriedAtAge` kalıcı olmadığı için **aynı çocuk her yıl
+          // yeniden evleniyordu** (ölçüldü: 12 yılda 4 düğün).
+          people: esliKisiler,
           education: education,
           newAge: newAge,
           log: log,
@@ -363,12 +411,28 @@ class LifeProgression {
       progressSinceLastEvent: 0,
       education: okulSonucu.education,
       career: maas.state.career,
+      // **Düzeltme (D-154):** aile dönüm noktası bildirimleri
+      // (çocuğun düğünü, torunun doğumu, eşten haber) toplanıyor ama
+      // hiçbir yere yazılmıyordu; ekrana hiç ulaşmıyorlardı.
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...state.notices,
+        ...aileBildirimleri,
+      ]),
     );
 
     // Kaybın etkisi: mutluluk düşer, ama bu **kalıcı bir ceza değildir**.
     // Düşen miktar yas olarak saklanır ve sonraki yıllarda geri verilir
     // (D-036).
     GameState afterDeaths = advanced;
+    // Eşin hastalığı oyuncuyu da etkiler (D-154); etki **gerçekten**
+    // uygulanır, yalnızca metinde kalmaz.
+    if (esMutlulukEtkisi != 0) {
+      afterDeaths = afterDeaths.copyWith(
+        player: afterDeaths.player.copyWith(
+          stats: afterDeaths.player.stats.gain(happiness: esMutlulukEtkisi),
+        ),
+      );
+    }
     // Torun sevinci: gerçekten doğduğu yıl uygulanır.
     if (yeniTorunlar.isNotEmpty) {
       afterDeaths = afterDeaths.copyWith(

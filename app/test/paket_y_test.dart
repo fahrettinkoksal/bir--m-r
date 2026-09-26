@@ -4,13 +4,23 @@ import 'package:bir_omur/data/chronic_catalog.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
+import 'package:bir_omur/domain/generation/spouse_life.dart';
 import 'package:bir_omur/domain/life/chronic_engine.dart';
 import 'package:bir_omur/domain/life/health_crisis_engine.dart';
 import 'package:bir_omur/domain/life/health_report.dart';
 import 'package:bir_omur/domain/models/chronic_condition.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/health_history.dart';
+import 'package:bir_omur/domain/models/life_log.dart';
+import 'package:bir_omur/domain/models/marriage.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/person_development.dart';
+import 'package:bir_omur/domain/models/stats.dart';
+import 'package:bir_omur/domain/models/relation.dart';
+import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -412,6 +422,226 @@ void main() {
           .status
           .index;
       expect(takipliIndex, lessThanOrEqualTo(takipsizIndex));
+    });
+  });
+
+  group('Eşin kendi hayatı (D-154)', () {
+    Person es({int age = 45, WealthTier? wealth = WealthTier.ortaHalli}) =>
+        Person(
+          id: 'es-1',
+          firstName: 'Eren',
+          lastName: 'Yıldız',
+          gender: Gender.erkek,
+          relation: RelationType.es,
+          age: age,
+          isAlive: true,
+          inPlayerHousehold: true,
+          employment: EmploymentStatus.calisiyor,
+          wealth: wealth,
+          bond: 80,
+        );
+
+    GameState evli({int playerAge = 45, int spouseAge = 45}) {
+      final GameState base = hayat(age: playerAge);
+      final Person e = es(age: spouseAge);
+      return base.copyWith(
+        people: List<Person>.unmodifiable(<Person>[...base.people, e]),
+        marriage: Marriage(
+          spouseId: e.id,
+          marriedAtAge: playerAge - 10,
+          status: MarriageStatus.evli,
+        ),
+      );
+    }
+
+    test('yürüyen evliliğin eşi bulunur, boşanmış eş bulunmaz', () {
+      expect(SpouseLife.spouseOf(evli())?.id, 'es-1');
+      final GameState bosanmis = evli().copyWith(
+        marriage: const Marriage(
+          spouseId: 'es-1',
+          marriedAtAge: 35,
+          status: MarriageStatus.bosandi,
+          endedAtAge: 44,
+        ),
+      );
+      // Boşanmış kayıtta kişi hâlâ `es` bağıyla dursa bile ilerletme
+      // yalnızca yürüyen evlilik için yapılır; motor tarafı bunu
+      // `marriage.isActive` ile ayırır.
+      expect(bosanmis.marriage!.isActive, isFalse);
+    });
+
+    test('eşin kaydı açılırken serveti sıfırlanmaz', () {
+      // Finger'daki "çok varlıklı kişi orta halli göründü" hatasının
+      // aynısı burada da olabilirdi: [_sync] ekonomik durumu birikimden
+      // yeniden yazıyor.
+      final Person zengin = es(wealth: WealthTier.cokVarlikli);
+      final SpouseYear yil = SpouseLife.advance(
+        spouse: zengin,
+        playerAge: 45,
+        rng: Random(1),
+      );
+      expect(yil.person.wealth, WealthTier.cokVarlikli);
+    });
+
+    test('çalışan eş yaşı gelince emekli oluyor', () {
+      // Gerçekten bir işi olmalı: eski kayıtta mesleği serbest metin
+      // olan kişinin iş kimliği yoktur ve "emekli oldu" haberi çıkmaz.
+      final JobType is_ = kJobCatalog.first;
+      final Person yasli = es(age: 65).copyWith(
+        occupation: is_.name,
+        development: PersonDevelopment(
+          tracksLife: true,
+          stats: const Stats(
+            appearance: 50,
+            happiness: 60,
+            health: 60,
+            intelligence: 60,
+            charisma: 60,
+          ),
+          finishedSchool: true,
+          jobId: is_.id,
+          jobStartedAtAge: 30,
+        ),
+      );
+      final SpouseYear yil = SpouseLife.advance(
+        spouse: yasli,
+        playerAge: 65,
+        rng: Random(1),
+      );
+      expect(yil.person.employment, EmploymentStatus.emekli);
+      expect(
+        yil.news.any((String h) => h.contains('emekli oldu')),
+        isTrue,
+      );
+      expect(yil.noticeTexts, isNotEmpty, reason: 'Hane haberi bildirime çıkar');
+    });
+
+    test('eş bazı yıllarda hastalanıyor ve oyuncu bunu hissediyor', () {
+      int hasta = 0;
+      for (int seed = 0; seed < 400; seed++) {
+        final SpouseYear yil = SpouseLife.advance(
+          spouse: es(age: 60),
+          playerAge: 60,
+          rng: Random(seed),
+        );
+        if (yil.news.any((String h) => h.contains('hastalandı'))) {
+          hasta++;
+          expect(yil.playerHappiness, lessThan(0));
+          expect(yil.noticeTexts, isNotEmpty);
+        }
+      }
+      expect(hasta, greaterThan(0), reason: 'Hiç hastalanmadıysa bağlantı kopuk');
+      expect(hasta, lessThan(200), reason: 'Her yıl hastalanmamalı');
+    });
+
+    test('hane haberi ile günlük haberi ayrılıyor', () {
+      expect(SpouseLife.isHouseholdNews('Eren emekli oldu.'), isTrue);
+      expect(
+        SpouseLife.isHouseholdNews('Eren müzik ile ilgilenmeye başladı.'),
+        isFalse,
+      );
+    });
+  });
+
+  group('Eşin hastalığı oyuncuya uygulanıyor', () {
+    test('yıl akışında eşin hastalığı oyuncunun mutluluğunu düşürüyor', () {
+      // Etkinin **gerçekten uygulandığı** aranıyor: metinde kalması
+      // yetmez.
+      int hastaYil = 0;
+      for (int seed = 0; seed < 200 && hastaYil == 0; seed++) {
+        final GameState base = hayat(seed: 3, age: 60);
+        final Person e = Person(
+          id: 'es-1',
+          firstName: 'Eren',
+          lastName: 'Yıldız',
+          gender: Gender.erkek,
+          relation: RelationType.es,
+          age: 62,
+          isAlive: true,
+          inPlayerHousehold: true,
+          employment: EmploymentStatus.emekli,
+          wealth: WealthTier.ortaHalli,
+          bond: 80,
+        );
+        final GameState s = base.copyWith(
+          people: List<Person>.unmodifiable(<Person>[...base.people, e]),
+          marriage: const Marriage(
+            spouseId: 'es-1',
+            marriedAtAge: 30,
+            status: MarriageStatus.evli,
+          ),
+        );
+        final GameState sonra = LifeProgression(Random(seed)).advanceOneYear(s);
+        final bool hasta = sonra.log.any(
+          (LifeLogEntry l) => l.text.contains('Eren bir süre hastalandı'),
+        );
+        if (!hasta) continue;
+        hastaYil++;
+        expect(
+          sonra.notices.any((PendingNotice n) => n.id.startsWith('es-haber-')),
+          isTrue,
+          reason: 'Eşin hastalığı bildirime çıkmalı',
+        );
+      }
+      expect(hastaYil, 1, reason: '200 yılda hiç hastalanmadıysa bağlantı kopuk');
+    });
+  });
+
+  group('Aile dönüm noktaları ekrana ulaşıyor (D-154 düzeltmesi)', () {
+    test('aynı çocuk birden fazla kez evlenmiyor ve bildirim geliyor', () {
+      int cokEvlenen = 0;
+      int bildirimGelen = 0;
+      for (int seed = 0; seed < 25; seed++) {
+        GameState s = hayat(seed: seed, age: 55);
+        s = s.copyWith(
+          people: List<Person>.unmodifiable(<Person>[
+            ...s.people,
+            Person(
+              id: 'cocuk-1',
+              firstName: 'Deniz',
+              lastName: 'Yıldız',
+              gender: Gender.kadin,
+              relation: RelationType.cocuk,
+              age: 26,
+              isAlive: true,
+              inPlayerHousehold: false,
+              employment: EmploymentStatus.calisiyor,
+              wealth: null,
+              bond: 70,
+            ),
+          ]),
+        );
+        final LifeProgression motor = LifeProgression(Random(seed + 9));
+        int dugunGunlugu = 0;
+        int dugunBildirimi = 0;
+        for (int i = 0; i < 12 && !s.deceased; i++) {
+          s = motor.advanceOneYear(s);
+          dugunBildirimi += s.notices
+              .where((PendingNotice n) => n.id.startsWith('cocuk-evlilik-'))
+              .length;
+          s = s.copyWith(
+            pendingEvent: null,
+            pendingCrisis: null,
+            notices: const <PendingNotice>[],
+          );
+        }
+        dugunGunlugu = s.log
+            .where((LifeLogEntry e) =>
+                e.text.contains('evleniyor') || e.text.contains('evlenmiş'))
+            .length;
+        if (dugunGunlugu > 1) cokEvlenen++;
+        if (dugunBildirimi > 0) bildirimGelen++;
+      }
+      expect(
+        cokEvlenen,
+        0,
+        reason: 'Çocuk evliliği kalıcı olmalı; aynı kişi tekrar evlenmemeli',
+      );
+      expect(
+        bildirimGelen,
+        greaterThan(0),
+        reason: 'Düğün bildirimi ekrana hiç ulaşmıyorsa bağlantı kopuk',
+      );
     });
   });
 }

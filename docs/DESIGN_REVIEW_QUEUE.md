@@ -3591,3 +3591,26 @@ Altı durum var: kalp rahatsızlığı, solunum rahatsızlığı, süregelen bel
 9. **Durum listesi altı taneyle sınırlı.** Yeterli mi? Görme/işitme kaybı, uyku sorunu eklensin mi?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; hiçbir durum iyileşmez ve ölüm ihtimaline doğrudan etki eklenmez.
+
+---
+
+### Q-157 — Eşin kendi hayatı ve düşen aile bildirimleri
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-154 · Test: `app/test/paket_y_test.dart`
+
+Çocuklar arka planda gerçekten büyüyordu (D-045) ama eş donmuş bir kayıttı: iş değiştirmiyor, emekli olmuyor, hastalanmıyordu. Otuz yıllık evlilikte eşin hayatında hiçbir şey olmuyordu.
+
+**Paralel sistem kurulmadı:** eşin kariyeri, emekliliği ve birikimi mevcut `ChildProgression` ile ilerliyor — aynı katalog, aynı kurallar. Eşe özgü olan iki şey: hane gelirini değiştiren haberler **bildirime** çıkıyor, ve eş bir yıl hastalanabiliyor (kendi sağlığı düşer, oyuncunun mutluluğu da).
+
+**Bu paket sırasında iki gerçek hata bulundu ve düzeltildi** (aşağıda soru yok, bildirim):
+1. **Çocuk evliliği kalıcı değildi.** `ChildMarriage`'in güncellediği kişi kaydı boru hattına hiç girmiyordu; `dev.marriedAtAge` kaybolduğu için **aynı çocuk her yıl yeniden evleniyordu** (ölçüldü: 12 yılda 4 düğün). Kalıcı gerileme testi eklendi.
+2. **Aile dönüm noktası bildirimleri ekrana hiç ulaşmıyordu.** Çocuğun düğünü ve torunun doğumu için bildirim üretiliyor ama hiçbir yere yazılmıyordu; oyuncu yalnızca günlükte görebiliyordu.
+
+**Karar soruları:**
+1. **Eşin hastalanma oranı** yaşa göre %1,2 – %5,5; iki hastalık arasında en az 3 yıl. Doğru mu?
+2. **Oyuncunun mutluluğu eşin hastalığında 4 puan düşüyor.** Doğru mu? Yanında olmak (etkileşim) bunu telafi edebilmeli mi? Şu an öyle bir kapı yok.
+3. **Eşin geliri hâlâ hane bütçesine girmiyor** — kendi birikimini yapıyor. Bu Q-158'in (hane bütçesi) konusu.
+4. **Hangi haberler bildirime çıkmalı?** Şu an yalnızca emeklilik, işten ayrılma ve işe başlama. Eşin üniversiteye başlaması ya da yeni ilgi alanı günlükte kalıyor. Doğru ayrım mı?
+5. **Eş yalnızca yürüyen evlilikte ilerliyor.** Sevgili ve flört ilerlemiyor. Sevgilinin de kendi hayatı olmalı mı?
+6. **Eşin kaydı açılırken birikimi ekonomik durum etiketinden türetiliyor** (`prototypeOnlyMoneyFloorFor`). Bu olmasa "çok varlıklı" eş bir yılda "çok yoksul" görünürdü — Finger'daki hatanın aynısı. Eşik tablosu doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; sevgili ilerletilmez, eşin geliri hane bütçesine katılmaz.

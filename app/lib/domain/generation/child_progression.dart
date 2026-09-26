@@ -120,7 +120,35 @@ abstract final class ChildProgression {
       finishedSchool: liseBitti,
       jobId: isKimligi,
       jobStartedAtAge: isKimligi == null ? null : age,
+      // **Birikim sıfırdan başlamaz.** [_sync] ekonomik durumu birikimden
+      // yeniden yazdığı için, kaydı yeni açılan bir yetişkinin birikimi
+      // sıfır kalırsa "çok varlıklı" biri bir yılda "çok yoksul"
+      // görünürdü. Elinde zaten bir etiket varsa birikim o etiketin
+      // tabanından başlar; uydurma bir zenginlik eklenmez, var olan
+      // bilgi korunur (D-154).
+      money: person.wealth == null
+          ? 0
+          : prototypeOnlyMoneyFloorFor(person.wealth!),
     );
+  }
+
+  /// prototypeOnly: [prototypeOnlyWealthFor]'un tersi — etiketin tabanı.
+  ///
+  /// Aynı eşikleri kullanır; ikisi birbirinden ayrılırsa kalıcı bir test
+  /// bunu yakalar.
+  static int prototypeOnlyMoneyFloorFor(WealthTier tier) {
+    switch (tier) {
+      case WealthTier.cokVarlikli:
+        return 3000000;
+      case WealthTier.varlikli:
+        return 900000;
+      case WealthTier.ortaHalli:
+        return 200000;
+      case WealthTier.yoksul:
+        return 30000;
+      case WealthTier.cokYoksul:
+        return 0;
+    }
   }
 
   /// prototypeOnly: özellik bilgisi olmayan kişi için nötr değerler.
