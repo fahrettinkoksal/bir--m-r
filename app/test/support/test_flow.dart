@@ -225,6 +225,17 @@ Future<void> ageTo(
     // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111).
     await resolveEducationSheets(tester, controller);
     await tester.pumpAndSettle();
+    // Oyuncu **bu tur içinde** vefat etmiş olabilir: sağlık krizi
+    // yanıtlanırken hayat tamamlanabiliyor (D-044). O durumda "Yaş Al"
+    // düğmesi ekranda yoktur; döngü başındaki denetim bu ölümü
+    // göremiyordu ve yardımcı çöküyordu.
+    if (controller.state!.deceased) return;
+    // Hayatta olan oyuncuda düğmenin olmaması gerçek bir sorundur;
+    // sessizce dönmek testi yanıltır.
+    if (find.byKey(const Key('age_up_button')).evaluate().isEmpty) {
+      fail('Oyuncu hayatta ama "Yaş Al" düğmesi ekranda yok '
+          '(yaş ${controller.state!.player.age}).');
+    }
     await tester.tap(find.byKey(const Key('age_up_button')));
     await tester.pumpAndSettle();
     // Bu yıl bir eğitim kararı doğduysa pencere hemen açılır; bir sonraki

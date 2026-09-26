@@ -96,8 +96,22 @@ abstract final class Inheritance {
           playerIsHeir: true,
         );
 
-      // Kardeşin mirası: önce anne-baba, yoksa diğer kardeşler (ve oyuncu).
+      // Kardeşin mirası: **önce kendi ailesi** (D-158).
+      //
+      // Kardeş D-158'den önce hiç evlenmiyor ve çocuğu olmuyordu; bu
+      // yüzden mirası doğrudan anne-babaya ya da oyuncuya kalıyordu.
+      // Artık kardeşin kendi eşi ve çocukları olabiliyor: bir insanın
+      // mirası önce kendi hanesine gider. Oyuncu ancak kardeşin
+      // **eşi de çocuğu da yoksa** mirasçı olur.
       case RelationType.kardes:
+        final bool kendiAilesiVar =
+            (deceased.development?.isMarried ?? false) ||
+                state.people.any((Person p) =>
+                    p.relation == RelationType.yegen &&
+                    p.development?.otherParentId == deceased.id);
+        if (kendiAilesiVar) {
+          return (others: const <Person>[], playerIsHeir: false);
+        }
         final List<Person> ebeveynler =
             ara(<RelationType>{RelationType.anne, RelationType.baba});
         if (ebeveynler.isNotEmpty) {

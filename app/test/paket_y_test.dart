@@ -616,12 +616,16 @@ void main() {
           ]),
         );
         final LifeProgression motor = LifeProgression(Random(seed + 9));
-        int dugunGunlugu = 0;
+        // **Yalnızca bu çocuğun** düğünleri sayılır. D-158'den sonra
+        // kardeşler de evlendiği için "evleniyor" geçen bütün satırları
+        // saymak yanlış ölçüm olurdu; aranan şey aynı kişinin ikinci kez
+        // evlenmemesi.
         int dugunBildirimi = 0;
         for (int i = 0; i < 12 && !s.deceased; i++) {
           s = motor.advanceOneYear(s);
           dugunBildirimi += s.notices
-              .where((PendingNotice n) => n.id.startsWith('cocuk-evlilik-'))
+              .where((PendingNotice n) =>
+                  n.id.startsWith('cocuk-evlilik-cocuk-1-'))
               .length;
           s = s.copyWith(
             pendingEvent: null,
@@ -629,11 +633,7 @@ void main() {
             notices: const <PendingNotice>[],
           );
         }
-        dugunGunlugu = s.log
-            .where((LifeLogEntry e) =>
-                e.text.contains('evleniyor') || e.text.contains('evlenmiş'))
-            .length;
-        if (dugunGunlugu > 1) cokEvlenen++;
+        if (dugunBildirimi > 1) cokEvlenen++;
         if (dugunBildirimi > 0) bildirimGelen++;
       }
       expect(

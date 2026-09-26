@@ -5,9 +5,17 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/economy/vehicle_inspection.dart';
 import 'package:bir_omur/domain/economy/vehicle_trouble.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/generation/grandchildren.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/life/health_crisis_engine.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/gender.dart';
+import 'package:bir_omur/domain/models/life_log.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/person_development.dart';
+import 'package:bir_omur/domain/models/relation.dart';
+import 'package:bir_omur/domain/models/stats.dart';
+import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/domain/models/pending_notice.dart';
@@ -257,6 +265,213 @@ void main() {
         40,
         reason: 'Yıl akışında muayene hiç çalışmıyorsa bağlantı kopuk',
       );
+    });
+  });
+
+  group('Kardeşin kendi hayatı ve yeğenler (D-158)', () {
+    Person kardes({int age = 30, String id = 'kardes-1'}) => Person(
+          id: id,
+          firstName: 'Melis',
+          lastName: 'Yıldız',
+          gender: Gender.kadin,
+          relation: RelationType.kardes,
+          age: age,
+          isAlive: true,
+          inPlayerHousehold: false,
+          employment: EmploymentStatus.issiz,
+          wealth: WealthTier.ortaHalli,
+          bond: 65,
+        );
+
+    GameState kardesli({int playerAge = 32, int kardesYasi = 30}) {
+      final GameState base = hayat(age: playerAge);
+      return base.copyWith(
+        people: List<Person>.unmodifiable(<Person>[
+          ...base.people.where((Person p) => p.relation != RelationType.kardes),
+          kardes(age: kardesYasi),
+        ]),
+      );
+    }
+
+    test('kardeşin hayatı ilerliyor: gelişim kaydı açılıyor', () {
+      GameState s = kardesli();
+      expect(s.personById('kardes-1')!.development, isNull);
+      s = LifeProgression(Random(3)).advanceOneYear(s);
+      final Person k = s.personById('kardes-1')!;
+      expect(k.development, isNotNull);
+      expect(k.development!.tracksLife, isTrue);
+      expect(k.age, 31, reason: 'Kardeş de yaşlanıyor');
+    });
+
+    test('kardeşin serveti kayıt açılırken sıfırlanmıyor', () {
+      GameState s = kardesli();
+      s = s.copyWith(
+        people: s.people
+            .map((Person p) => p.relation == RelationType.kardes
+                ? p.copyWith(wealth: WealthTier.cokVarlikli)
+                : p)
+            .toList(growable: false),
+      );
+      s = LifeProgression(Random(3)).advanceOneYear(s);
+      expect(
+        s.personById('kardes-1')!.wealth,
+        WealthTier.cokVarlikli,
+        reason: 'Finger hatasının aynısı burada da olmamalı',
+      );
+    });
+
+    test('kardeş evlenebiliyor ve kaydı kalıcı', () {
+      int evlenen = 0;
+      for (int seed = 0; seed < 40 && evlenen == 0; seed++) {
+        GameState s = kardesli(playerAge: 32, kardesYasi: 28);
+        final LifeProgression motor = LifeProgression(Random(seed));
+        for (int i = 0; i < 10 && !s.deceased; i++) {
+          s = motor.advanceOneYear(s);
+          s = s.copyWith(
+            pendingEvent: null,
+            pendingCrisis: null,
+            notices: const <PendingNotice>[],
+          );
+        }
+        final Person? k = s.personById('kardes-1');
+        if (k?.development?.isMarried ?? false) {
+          evlenen++;
+          // Aynı kardeş iki kez evlenmez.
+          final int dugun = s.log
+              .where((LifeLogEntry l) =>
+                  l.text.contains('Melis evleniyor') ||
+                  l.text.contains('Melis evlenmiş'))
+              .length;
+          expect(dugun, 1);
+        }
+      }
+      expect(evlenen, 1, reason: '40 denemede hiç evlenmediyse bağlantı kopuk');
+    });
+
+    test('kardeşin çocuğu yeğen olarak doğuyor', () {
+      int yegenli = 0;
+      for (int seed = 0; seed < 60 && yegenli == 0; seed++) {
+        GameState s = kardesli(playerAge: 32, kardesYasi: 28);
+        final LifeProgression motor = LifeProgression(Random(seed));
+        for (int i = 0; i < 12 && !s.deceased; i++) {
+          s = motor.advanceOneYear(s);
+          s = s.copyWith(
+            pendingEvent: null,
+            pendingCrisis: null,
+            notices: const <PendingNotice>[],
+          );
+        }
+        final List<Person> yegenler = s.people
+            .where((Person p) => p.relation == RelationType.yegen)
+            .toList(growable: false);
+        if (yegenler.isEmpty) continue;
+        yegenli++;
+        final Person y = yegenler.first;
+        expect(y.development?.otherParentId, 'kardes-1');
+        expect(y.id, startsWith('yegen-'));
+        expect(y.inPlayerHousehold, isFalse);
+        expect(
+          s.log.any((LifeLogEntry l) => l.text.contains('Yeğenin oldu')),
+          isTrue,
+        );
+      }
+      expect(yegenli, 1, reason: '60 denemede hiç yeğen olmadıysa bağlantı kopuk');
+    });
+
+    test('yeğen torunla karışmıyor; ayrı kimlik öneki taşıyor', () {
+      final Person k = kardes(age: 30).copyWith(
+        development: const PersonDevelopment(
+          tracksLife: true,
+          stats: Stats(
+            appearance: 50,
+            happiness: 60,
+            health: 60,
+            intelligence: 60,
+            charisma: 60,
+          ),
+        ),
+      );
+      final GameState s = hayat().copyWith(
+        people: List<Person>.unmodifiable(<Person>[k]),
+      );
+      // Torun kuralı kardeşe uygulanmaz: parentRelation uyuşmuyor.
+      expect(
+        Grandchildren.maybeBorn(state: s, child: k, rng: Random(1)),
+        isNull,
+      );
+      // Yeğen kuralı ise çalışır (şansa bağlı; birçok tohumda denenir).
+      Person? yegen;
+      for (int seed = 0; seed < 200 && yegen == null; seed++) {
+        yegen = Grandchildren.maybeBornTo(
+          state: s,
+          parent: k,
+          rng: Random(seed),
+          parentRelation: RelationType.kardes,
+          childRelation: RelationType.yegen,
+          idPrefix: 'yegen',
+        );
+      }
+      expect(yegen, isNotNull);
+      expect(yegen!.relation, RelationType.yegen);
+      expect(yegen.id, startsWith('yegen-'));
+    });
+
+    test('bir kardeşin yeğen sayısı üst sınırı aşmıyor', () {
+      final Person k = kardes(age: 30).copyWith(
+        development: const PersonDevelopment(
+          tracksLife: true,
+          stats: Stats(
+            appearance: 50,
+            happiness: 60,
+            health: 60,
+            intelligence: 60,
+            charisma: 60,
+          ),
+        ),
+      );
+      final List<Person> yegenler = <Person>[
+        for (int i = 1; i <= Grandchildren.prototypeOnlyMaxPerChild; i++)
+          Person(
+            id: 'yegen-$i',
+            firstName: 'Yegen$i',
+            lastName: 'Yıldız',
+            gender: Gender.erkek,
+            relation: RelationType.yegen,
+            age: i,
+            isAlive: true,
+            inPlayerHousehold: false,
+            employment: EmploymentStatus.cocuk,
+            wealth: null,
+            bond: 50,
+            development: const PersonDevelopment(
+              tracksLife: true,
+              stats: Stats(
+                appearance: 50,
+                happiness: 60,
+                health: 60,
+                intelligence: 60,
+                charisma: 60,
+              ),
+              otherParentId: 'kardes-1',
+            ),
+          ),
+      ];
+      final GameState s = hayat().copyWith(
+        people: List<Person>.unmodifiable(<Person>[k, ...yegenler]),
+      );
+      for (int seed = 0; seed < 100; seed++) {
+        expect(
+          Grandchildren.maybeBornTo(
+            state: s,
+            parent: k,
+            rng: Random(seed),
+            parentRelation: RelationType.kardes,
+            childRelation: RelationType.yegen,
+            idPrefix: 'yegen',
+          ),
+          isNull,
+        );
+      }
     });
   });
 }

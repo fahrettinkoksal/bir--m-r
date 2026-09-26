@@ -6,6 +6,7 @@ import '../../data/university_catalog.dart';
 import '../life/aging.dart';
 import '../models/education.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
 import '../models/person_development.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
@@ -462,11 +463,25 @@ abstract final class ChildProgression {
       durum = EmploymentStatus.issiz;
     }
 
+    // `Person.schoolLevel` iki ayrı anlam taşıyor: **soy** için "şu anki
+    // kademe", okul tanışıklıkları için "hangi kademede tanışıldığı"
+    // (`_agePerson` bu kuralı açıkça yazıyor). Bu yüzden yalnızca soydan
+    // gelen kişilerde yazılır. Kardeş D-158'den sonra burada ilerliyor;
+    // onun kademesini yazmak okul listelerini kirletiyordu — okul çağında
+    // bir kardeş "sınıf arkadaşı" sayılıyordu. Kardeşin kendi kademesi
+    // `development.schoolLevel` içinde durmaya devam eder.
+    const Set<RelationType> kademeYazilanlar = <RelationType>{
+      RelationType.cocuk,
+      RelationType.torun,
+      RelationType.yegen,
+    };
     return person.copyWith(
       development: dev,
       employment: durum,
       occupation: durum == EmploymentStatus.calisiyor ? dev.job?.name : null,
-      schoolLevel: dev.schoolLevel,
+      schoolLevel: kademeYazilanlar.contains(person.relation)
+          ? dev.schoolLevel
+          : person.schoolLevel,
       wealth: person.age < 18 ? null : prototypeOnlyWealthFor(dev.money),
     );
   }

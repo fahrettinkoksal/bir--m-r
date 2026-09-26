@@ -60,9 +60,12 @@ abstract final class ChildMarriage {
   }
 
   /// Bu kişi bu yıl evlenebilir mi?
-  static bool eligible(Person person) =>
+  static bool eligible(
+    Person person, {
+    RelationType relation = RelationType.cocuk,
+  }) =>
       person.isAlive &&
-      person.relation == RelationType.cocuk &&
+      person.relation == relation &&
       person.age >= prototypeOnlyMinAge &&
       person.development != null &&
       !person.development!.isMarried;
@@ -72,8 +75,9 @@ abstract final class ChildMarriage {
     required Person child,
     required int playerAge,
     required Random rng,
+    RelationType relation = RelationType.cocuk,
   }) {
-    if (!eligible(child)) return null;
+    if (!eligible(child, relation: relation)) return null;
     if (!rng.chance(chanceFor(child.age))) return null;
 
     // Eşin cinsiyeti çocuğun cinsiyetinin karşıtı seçilir; bu bir
@@ -99,13 +103,18 @@ abstract final class ChildMarriage {
         : '${child.firstName} evlenmiş: $esAdi ile. Haberi sonradan '
             'duydun; uzun zamandır görüşmüyordunuz.';
 
+    // Bağ değiştiğinde yalnızca bildirimin başlığı ve kimlik öneki
+    // değişir; kural tek yerde durur (D-158).
+    final bool cocuk = relation == RelationType.cocuk;
     return ChildMarriageResult(
       person: guncel,
       notice: PendingNotice(
-        id: 'cocuk-evlilik-${child.id}-$playerAge',
+        id: '${cocuk ? 'cocuk' : 'kardes'}-evlilik-${child.id}-$playerAge',
         kind: NoticeKind.aileDonum,
         age: playerAge,
-        title: davetli ? 'Düğün davetiyesi' : 'Çocuğun evlendi',
+        title: davetli
+            ? 'Düğün davetiyesi'
+            : (cocuk ? 'Çocuğun evlendi' : 'Kardeşin evlendi'),
         text: metin,
         personId: child.id,
       ),

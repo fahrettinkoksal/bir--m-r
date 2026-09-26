@@ -3699,3 +3699,31 @@ Araç sahipliğinin devamı eksikti. Neyin **zaten var** olduğunu ayırdım, ik
 7. **Takas yok.** Satıp yenisini almak var; doğrudan takas ayrı bir ekran ister. Gerekli mi?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; kasko kazada devreye girmez, takas eklenmez, gecikmiş araç trafikten çekilmez.
+
+---
+
+### Q-161 — Kardeşin kendi hayatı, yeğenler ve kardeş mirası
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-158 · Test: `app/test/paket_z_test.dart`
+
+Kardeş kaydı doğuştan vardı ama hayatı hiç ilerlemiyordu: okumuyor, iş bulmuyor, evlenmiyor, çocuğu olmuyordu. `RelationType.yegen` D-087'den beri tanımlı ama **doğal yoldan hiç oluşmuyordu**; yalnızca kuşak devrinde ortaya çıkıyordu. Aile ağacı tek kuşakta kalıyordu.
+
+**Paralel sistem kurulmadı.** Üç mevcut parça genelleştirildi:
+- `ChildProgression` kardeşe de uygulanıyor (okul, iş, emeklilik, birikim).
+- `ChildMarriage` bağ parametresi aldı: kardeş de evleniyor.
+- `Grandchildren` bağ parametresi aldı: kardeşin çocuğu **yeğen** olarak doğuyor.
+
+**Bu paket sırasında dört gerçek sorun çıktı; hepsi ölçülerek bulundu ve düzeltildi:**
+1. **Kardeş mirası yanlış kişiye gidiyordu.** Kardeş artık evlenip çocuk sahibi olabildiği için, mirasının önce **kendi hanesine** gitmesi gerekiyor. Düzeltilmeden önce 300 hayatlık ölçümde oyuncu yaşlılıkta 43 milyon ₺'ye kadar beklenmedik miras alıyordu; toplam oynanan yıl 22.445'ten 1.427'ye düşmüştü (değişmez denetimi kırılıyordu).
+2. **`Person.schoolLevel` iki anlamı birden taşıyor:** soy için "şu anki kademe", okul tanışıklıkları için "hangi kademede tanışıldığı". Kardeş okul çağındayken sınıf listesine karışıyordu. Kademe artık yalnızca soydan gelen kişilerde yazılıyor; kardeşin kademesi kendi gelişim kaydında duruyor.
+3. **Test yardımcısı** oyuncu kriz yanıtlanırken vefat ettiğinde çöküyordu.
+4. İki test belirli kişilere çivilenmişti (belirli bir çocuğun düğünü, babanın etkileşimi); ikisi de ölçümü **kişiye özel** hâle getirilerek sağlamlaştırıldı, gevşetilmedi.
+
+**Karar soruları:**
+1. **Kardeş mirası kuralı:** oyuncu, kardeşin eşi ya da çocuğu varsa mirasçı **değil**. Türk hukukunda da alt soy ve eş önce gelir. Doğru mu, yoksa oyuncuya küçük bir pay mı kalmalı?
+2. **Yeğen sayısı** kardeş başına en çok 3 (torunla aynı sınır). Kişi listesi şişer mi? Üç kardeş × 3 yeğen = 9 kişi.
+3. **Yeğenler İlişkiler ekranında geniş ailede listeleniyor** (D-087'den beri). Ayrı bir başlık mı olmalı?
+4. **Yeğenin kendi hayatı da izleniyor** (okur, iş bulur). Kaç kuşak izlenmeli? Yeğenin çocuğu **yok** — orada duruyor.
+5. **Kardeşle etkileşim derinleşmedi:** kardeş evlendiğinde ya da yeğen doğduğunda oyuncuya düşen özel bir etkileşim yok. Eklenmeli mi?
+6. **Kardeşin eşi kişi kaydı değil**, yalnızca bir ad (D-121 ile aynı sınırlama). Dünür ailesi hâlâ yok.
+
+**Varsayılan işlem:** Onay gelene dek kardeşin eşine pay verilmez (oyuncu mirasçı değilse miras kaydı hiç açılmaz), yeğenin çocuğu olmaz, dünür ailesi eklenmez.

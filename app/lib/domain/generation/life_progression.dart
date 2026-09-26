@@ -130,9 +130,14 @@ class LifeProgression {
         .map((Person person) {
           // Torunlar da kendi hayatlarını yaşar (Paket 12): okula başlar,
           // büyür. Vefat edenlere dokunulmaz.
+          // Kardeş de kendi hayatını yaşar (D-158): okur, iş bulur,
+          // emekli olur. Kayıt kardeşi doğuştan taşıyordu ama hayatı
+          // hiç ilerlemiyordu. Yeğen kaydı da bu yüzden hiç oluşmuyordu.
           final bool kendiHayati =
               person.relation == RelationType.cocuk ||
-              person.relation == RelationType.torun;
+              person.relation == RelationType.torun ||
+              person.relation == RelationType.yegen ||
+              person.relation == RelationType.kardes;
           if (!person.isAlive || !kendiHayati) {
             return person;
           }
@@ -150,10 +155,14 @@ class LifeProgression {
     final List<String> aileHaberleri = <String>[];
     final List<Person> evlilikSonrasi = <Person>[];
     for (final Person kisi in peopleWithChildren) {
+      // Aynı kural iki bağa da işler: kardeş de evlenir (D-158).
       final ChildMarriageResult? evlilik = ChildMarriage.maybeMarry(
         child: kisi,
         playerAge: newAge,
         rng: _rng,
+        relation: kisi.relation == RelationType.kardes
+            ? RelationType.kardes
+            : RelationType.cocuk,
       );
       if (evlilik == null) {
         evlilikSonrasi.add(kisi);
@@ -240,8 +249,50 @@ class LifeProgression {
     }
     final List<Person> esliKisiler = List<Person>.unmodifiable(esSonrasi);
 
+    // Kardeşin çocuğu **yeğen** olarak doğar (D-158). Kural torunla aynı
+    // yerde durur; yalnızca bağ ve kimlik öneki değişir. Yeğen kaydı
+    // `RelationType.yegen` D-087'den beri vardı ama doğal yoldan hiç
+    // oluşmuyordu: yalnızca kuşak devrinde ortaya çıkıyordu.
+    final List<Person> yeniYegenler = <Person>[];
+    final List<String> yegenHaberleri = <String>[];
+    for (final Person kardes in esliKisiler) {
+      if (kardes.relation != RelationType.kardes) continue;
+      final Person? yegen = Grandchildren.maybeBornTo(
+        state: state.copyWith(
+          people: List<Person>.unmodifiable(<Person>[
+            ...esliKisiler,
+            ...yeniTorunlar,
+            ...yeniYegenler,
+          ]),
+        ),
+        parent: kardes,
+        rng: _rng,
+        parentRelation: RelationType.kardes,
+        childRelation: RelationType.yegen,
+        idPrefix: 'yegen',
+      );
+      if (yegen == null) continue;
+      yeniYegenler.add(yegen);
+      final String haber =
+          '${kardes.firstName} bir çocuk sahibi oldu: ${yegen.firstName}. '
+          'Yeğenin oldu.';
+      yegenHaberleri.add(haber);
+      aileBildirimleri.add(
+        PendingNotice(
+          id: 'yegen-${yegen.id}-$newAge',
+          kind: NoticeKind.aileDonum,
+          age: newAge,
+          title: 'Yeğenin oldu',
+          text: haber,
+          personId: yegen.id,
+        ),
+      );
+    }
+
     final List<LifeLogEntry> log = <LifeLogEntry>[
       ...state.log,
+      for (final String haber in yegenHaberleri)
+        LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
       LifeLogEntry(
         age: newAge,
         text: '$newAge yaşına girdin.',
@@ -310,8 +361,9 @@ class LifeProgression {
         );
     final List<Person> peopleWithSchool = okulSonucu.people;
 
-    // Çocukların bu yıl yaşadığı önemli gelişmeler aile haberi olarak
-    // günlüğe girer; kişinin kendi geçmişinde zaten kayıtlıdır.
+    // Çocuk, torun, yeğen ve kardeşin bu yıl yaşadığı önemli gelişmeler
+    // aile haberi olarak günlüğe girer; kişinin kendi geçmişinde zaten
+    // kayıtlıdır (D-158'den sonra liste kardeşi de içeriyor).
     for (final String haber in cocukHaberleri) {
       log.add(
         LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
@@ -323,6 +375,7 @@ class LifeProgression {
     final List<Person> peopleWithEstates = <Person>[
       ..._driftEstates(peopleWithSchool),
       ...yeniTorunlar,
+      ...yeniYegenler,
     ];
 
     // Ölümler: hayatın sonlu olduğunu hissettiren, yaşa bağlı bir eğilim.
