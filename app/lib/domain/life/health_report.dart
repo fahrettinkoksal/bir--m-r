@@ -17,6 +17,8 @@
 /// kurgudur; gerçek bir tetkik listesi ya da teşhis değildir.
 library;
 
+import '../../data/chronic_catalog.dart';
+import '../models/chronic_condition.dart';
 import '../models/game_state.dart';
 import 'aging.dart';
 
@@ -151,6 +153,16 @@ abstract final class HealthChecks {
       ),
     ];
 
+    // Taşınan kronik durum kontrolde **görünür** (D-153): ilgili satır
+    // aşağı çekilir. Takip edilen durumun etkisi daha azdır. Bu bir
+    // teşhis değildir; kayıtta duran durumu rapora yansıtmaktır.
+    final List<HealthLine> kronikliSatirlar = satirlar
+        .map((HealthLine l) => _kronikEtkisi(state, l))
+        .toList(growable: false);
+    satirlar
+      ..clear()
+      ..addAll(kronikliSatirlar);
+
     final bool tahlil =
         satirlar.any((HealthLine l) => l.status.needsFollowUp);
     final int iyiSayisi =
@@ -170,6 +182,46 @@ abstract final class HealthChecks {
       summary: ozet,
       needsLabTest: tahlil,
     );
+  }
+
+  /// prototypeOnly: takip edilmeyen kronik durumun rapor satırına etkisi.
+  static const int prototypeOnlyChronicPenalty = 22;
+
+  /// prototypeOnly: takip edilen kronik durumun rapor satırına etkisi.
+  static const int prototypeOnlyManagedChronicPenalty = 9;
+
+  /// Kronik durumların bu rapor satırına etkisi.
+  static HealthLine _kronikEtkisi(GameState state, HealthLine line) {
+    int ceza = 0;
+    for (final ChronicCondition c in state.activeChronic) {
+      final ChronicConditionType? tur = c.type;
+      if (tur == null || tur.reportSystem != line.system) continue;
+      final bool takipli = c.lastCaredAtAge != null &&
+          state.player.age - c.lastCaredAtAge! <= 1;
+      ceza += takipli
+          ? prototypeOnlyManagedChronicPenalty
+          : prototypeOnlyChronicPenalty;
+    }
+    if (ceza == 0) return line;
+    return HealthLine(
+      system: line.system,
+      status: statusOf(_sinirla(_puanOf(line.status) - ceza)),
+    );
+  }
+
+  /// Bir durumun kaba puan karşılığı; yalnızca kronik cezasını uygulamak
+  /// için gerekir.
+  static int _puanOf(OrganStatus status) {
+    switch (status) {
+      case OrganStatus.iyi:
+        return 85;
+      case OrganStatus.normal:
+        return 68;
+      case OrganStatus.takip:
+        return 48;
+      case OrganStatus.sorunlu:
+        return 25;
+    }
   }
 
   /// Ruh sağlığı görüşmesinin sonucu.

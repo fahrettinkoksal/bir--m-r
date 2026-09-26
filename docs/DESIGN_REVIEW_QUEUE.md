@@ -3567,3 +3567,27 @@ Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek düzen
 6. **Boksta kuşak olmadığı için** basamaklar "Yıldızlar / Gençler / Büyükler / Bölge şampiyonu / Türkiye şampiyonu / Profesyonel…" diye gidiyor. Bu doğru bir çözüm mü, yoksa boks hiç girmemeli mi?
 
 **Varsayılan işlem:** Onay gelene dek bütün ücretler, puanlar ve basamak sayıları `prototypeOnly` kalır; bölüm–meslek bağı kurulmaz.
+
+---
+
+### Q-156 — Kronik durumlar: sayılar, ceza dengesi ve iyileşme
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-153 · Test: `app/test/paket_y_test.dart`, `app/test/paket_y_widget_test.dart`
+
+Sağlık tek bir sayıydı ve krizler birbirinden bağımsızdı: aynı krizi üçüncü kez yaşayan oyuncuda hiçbir iz kalmıyordu. Artık atlatılan kriz **kalıcı bir kayıt** bırakabiliyor, o kayıt her yıl sağlıktan düşürüyor, kriz riskini yükseltiyor ve check-up raporunda görünüyor. Ayrı bir Sağlık Geçmişi bölümü geldi.
+
+Altı durum var: kalp rahatsızlığı, solunum rahatsızlığı, süregelen bel ağrısı, eklem rahatsızlığı, yüksek tansiyon, kan şekeri düzensizliği. Dördü **kriz sonrası**, ikisi **yaşla** geliyor.
+
+**Metinler tıbbi bilgi içermiyor:** hiçbir yerde ilaç, doz ya da tedavi tarifi yok. Oyunun söylediği tek şey "bu rahatsızlık var, takip edilmezse sağlık düşer".
+
+**Karar soruları:**
+1. **Kriz sonrası iz bırakma şansı %42.** Çok mu yüksek? İki krizden neredeyse biri kalıcı bir şey bırakıyor.
+2. **Yıllık sağlık düşüşü 2-3 puan**, takip edilirse 0-1 puan. Yaşlanmanın kendi düşüşünün üstüne biniyor; birlikte fazla mı oluyor?
+3. **Takip bedelleri** 9.000 – 24.000 ₺/yıl. Doğru bantta mı? Emekli oyuncu için ağır mı?
+4. **Takip "yönetir", iyileştirmez:** hiçbir durum geçmiyor. Bazıları (bel ağrısı, tansiyon) uzun takipten sonra **kapanabilmeli mi**? Kayıtta `endedAtAge` alanı hazır duruyor ama şu an hiçbir yol onu doldurmuyor.
+5. **En fazla 3 süren durum.** Doğru sınır mı?
+6. **Kriz riski çarpanı** durum başına 1,1–1,6; tavan 2,5. Doğru mu?
+7. **Check-up cezası:** takip edilmeyen durum ilgili satırı 22 puan, takip edilen 9 puan aşağı çekiyor. Doğru mu?
+8. **Ölüm ihtimaline doğrudan etkisi yok** — yalnızca sağlık düştüğü için dolaylı etkisi var. Doğrudan bir etki olmalı mı?
+9. **Durum listesi altı taneyle sınırlı.** Yeterli mi? Görme/işitme kaybı, uyku sorunu eklensin mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; hiçbir durum iyileşmez ve ölüm ihtimaline doğrudan etki eklenmez.

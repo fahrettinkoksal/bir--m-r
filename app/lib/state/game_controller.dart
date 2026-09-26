@@ -62,6 +62,7 @@ import '../domain/economy/housing.dart';
 import '../domain/economy/property_market.dart';
 import '../domain/economy/used_vehicle_market.dart';
 import '../domain/education/school_transfer.dart';
+import '../domain/life/chronic_engine.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
 import '../domain/models/pending_trial.dart';
@@ -1376,6 +1377,22 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return sonuc.text;
+  }
+
+  /// Bir kronik durumun o yılki takibini yapar (D-153).
+  ///
+  /// Bedel gerçekten düşer; engel varsa gerekçesi döner ve hiçbir şey
+  /// değişmez.
+  String? careForChronic(String typeId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ChronicCareResult sonuc =
+        ChronicEngine.care(state: current, typeId: typeId);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
   }
 
   /// Hayvan sahiplenir; sonuç metnini döner.

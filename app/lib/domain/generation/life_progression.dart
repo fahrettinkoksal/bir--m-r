@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/name_pool.dart';
 import '../career/career_progress.dart';
 import '../career/retirement.dart';
+import '../life/chronic_engine.dart';
 import '../life/year_review.dart';
 import 'grandchildren.dart';
 import '../social/social_engine.dart';
@@ -474,6 +475,15 @@ class LifeProgression {
     // üvey anne ya da üvey baba gelir (D-141). Kimse silinmez; vefat
     // eden ebeveyn kayıtta kalır.
     afterDeaths = StepParents.maybeRemarry(afterDeaths, newAge, _rng);
+
+    // Kronik durumlar: takip edilmeyen rahatsızlık her yıl sağlıktan
+    // düşürür; ileri yaşta yenisi ortaya çıkabilir (D-153). Kriz gibi
+    // ekranı kesmez, çünkü oyuncunun vereceği bir karar yoktur.
+    afterDeaths = ChronicEngine.advanceYear(
+      state: afterDeaths,
+      newAge: newAge,
+      rng: _rng,
+    );
 
     // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).
     afterDeaths = _applyRentIncome(afterDeaths, newAge);

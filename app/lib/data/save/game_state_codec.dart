@@ -26,7 +26,9 @@ import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_settings.dart';
+import '../../domain/models/chronic_condition.dart';
 import '../../domain/models/game_state.dart';
+import '../../domain/models/health_history.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
@@ -99,6 +101,13 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           state.martialArts.map(_encodeMartial).toList(growable: false),
       // Hobi geçmişi (Paket 39). Alan eklemeli.
       'hobbies': state.hobbies.map(_encodeHobby).toList(growable: false),
+      // Kronik durumlar ve sağlık geçmişi (D-153). Alan eklemeli:
+      // eski kayıtta yoklar, okuma tarafı isteğe bağlı okur.
+      'chronicConditions':
+          state.chronicConditions.map(_encodeChronic).toList(growable: false),
+      'healthHistory': state.healthHistory
+          .map(_encodeHealthHistory)
+          .toList(growable: false),
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -477,6 +486,38 @@ Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
       'matchedAtAge': p.matchedAtAge,
       'metPersonId': p.metPersonId,
     };
+
+Map<String, Object?> _encodeChronic(ChronicCondition c) => <String, Object?>{
+      'typeId': c.typeId,
+      'startedAtAge': c.startedAtAge,
+      'lastCaredAtAge': c.lastCaredAtAge,
+      'endedAtAge': c.endedAtAge,
+      'careYears': c.careYears,
+    };
+
+ChronicCondition _decodeChronic(Map<String, Object?> json) => ChronicCondition(
+      typeId: _string(json, 'typeId'),
+      startedAtAge: _int(json, 'startedAtAge'),
+      lastCaredAtAge: _intOrNull(json, 'lastCaredAtAge'),
+      endedAtAge: _intOrNull(json, 'endedAtAge'),
+      careYears: _intOr(json, 'careYears', 0),
+    );
+
+Map<String, Object?> _encodeHealthHistory(HealthHistoryEntry h) =>
+    <String, Object?>{
+      'crisisId': h.crisisId,
+      'age': h.age,
+      'choiceId': h.choiceId,
+      'chronicTypeId': h.chronicTypeId,
+    };
+
+HealthHistoryEntry _decodeHealthHistory(Map<String, Object?> json) =>
+    HealthHistoryEntry(
+      crisisId: _string(json, 'crisisId'),
+      age: _int(json, 'age'),
+      choiceId: _string(json, 'choiceId'),
+      chronicTypeId: _stringOrNull(json, 'chronicTypeId'),
+    );
 
 Map<String, Object?> _encodeHobby(HobbyProgress h) => <String, Object?>{
       'hobbyId': h.hobbyId,
@@ -909,6 +950,20 @@ GameState decodeGameState(Map<String, Object?> json) {
     hobbies: List<HobbyProgress>.unmodifiable(
       _optionalRawList(json, 'hobbies')
           .map((Object? e) => _decodeHobby(_asMap(e, 'hobbies[]')))
+          .toList(growable: false),
+    ),
+    // D-153. `_optionalRawList` eksik anahtarı boş liste okur; eski
+    // kayıtlar bu yüzden bozulmaz.
+    chronicConditions: List<ChronicCondition>.unmodifiable(
+      _optionalRawList(json, 'chronicConditions')
+          .map((Object? e) =>
+              _decodeChronic(_asMap(e, 'chronicConditions[]')))
+          .toList(growable: false),
+    ),
+    healthHistory: List<HealthHistoryEntry>.unmodifiable(
+      _optionalRawList(json, 'healthHistory')
+          .map((Object? e) =>
+              _decodeHealthHistory(_asMap(e, 'healthHistory[]')))
           .toList(growable: false),
     ),
     martialArts: List<MartialProgress>.unmodifiable(

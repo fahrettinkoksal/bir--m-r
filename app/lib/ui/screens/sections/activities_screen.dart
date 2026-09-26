@@ -29,6 +29,7 @@ import 'finger_page.dart';
 import 'eye_exam_page.dart';
 import 'fertility_page.dart';
 import 'license_pages.dart';
+import 'health_history_page.dart';
 import 'hobbies_page.dart';
 import 'social_pages.dart';
 import '../../../text/turkish_text.dart';
@@ -66,6 +67,7 @@ enum _ActivityPage {
   dovus,
   tupBebek,
   gozMuayenesi,
+  saglikGecmisi,
   estetik,
   sosyalMedya,
   medya,
@@ -149,7 +151,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
               MenuRow(
                 key: const Key('spor_dovus'),
                 title: 'Dövüş sanatları',
-                subtitle: 'Karate, kung fu ve yağlı güreş dersleri',
+                subtitle: 'Karate, kung fu, güreş, boks, judo, taekwondo',
                 icon: Icons.sports_martial_arts_outlined,
                 accent: BirOmurAccents.nar,
                 onTap: () => _go(_ActivityPage.dovus),
@@ -182,8 +184,24 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 accent: BirOmurAccents.nar,
                 onTap: () => _go(_ActivityPage.tupBebek),
               ),
+            // Sağlık geçmişi (D-153): yalnızca gösterecek bir şey varken
+            // görünür. Boş bir "geçmişin yok" sayfası açan düğme konmaz.
+            if (state.chronicConditions.isNotEmpty ||
+                state.healthHistory.isNotEmpty)
+              MenuRow(
+                key: const Key('saglik_gecmis'),
+                title: 'Sağlık Geçmişi',
+                subtitle: state.activeChronic.isEmpty
+                    ? 'Atlattığın krizler'
+                    : '${state.activeChronic.length} süren durum · takip',
+                icon: Icons.monitor_heart_outlined,
+                accent: BirOmurAccents.mor,
+                onTap: () => _go(_ActivityPage.saglikGecmisi),
+              ),
           ],
         );
+      case _ActivityPage.saglikGecmisi:
+        return HealthHistoryPage(onBack: () => _go(_ActivityPage.saglik));
       case _ActivityPage.tupBebek:
         return FertilityPage(onBack: () => _go(_ActivityPage.saglik));
       case _ActivityPage.gozMuayenesi:

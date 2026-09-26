@@ -14,6 +14,8 @@ import '../../data/finger_catalog.dart';
 import 'finger_profile.dart';
 import 'wealth.dart';
 import 'career.dart';
+import 'chronic_condition.dart';
+import 'health_history.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
 import 'gift_record.dart';
@@ -82,6 +84,8 @@ class GameState {
     this.books = const <BookProgress>[],
     this.martialArts = const <MartialProgress>[],
     this.hobbies = const <HobbyProgress>[],
+    this.chronicConditions = const <ChronicCondition>[],
+    this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
     this.fingerMatches = const <FingerProfile>[],
@@ -377,6 +381,25 @@ class GameState {
   ///
   /// Mevcut aktivitelerden beslenir; ayrı bir aktivite sistemi değildir.
   final List<HobbyProgress> hobbies;
+
+  /// D-153: oyuncunun taşıdığı kronik sağlık durumları.
+  ///
+  /// Kayıt silinmez; geçen durum da listede kalır ve `endedAtAge` dolar.
+  final List<ChronicCondition> chronicConditions;
+
+  /// D-153: atlatılmış sağlık krizlerinin kalıcı geçmişi.
+  ///
+  /// Önceden yalnızca son krizin yaşı tutuluyordu (`lastCrisisAge`).
+  final List<HealthHistoryEntry> healthHistory;
+
+  /// Şu an süren kronik durumlar.
+  List<ChronicCondition> get activeChronic => chronicConditions
+      .where((ChronicCondition c) => c.isActive)
+      .toList(growable: false);
+
+  /// Bu kronik durum şu an sürüyor mu?
+  bool hasChronic(String typeId) => chronicConditions.any(
+      (ChronicCondition c) => c.typeId == typeId && c.isActive);
 
   /// Paket 33: çekilişi bekleyen Milli Piyango biletleri.
   final List<LotteryTicket> lotteryTickets;
@@ -937,6 +960,8 @@ class GameState {
     List<BookProgress>? books,
     List<MartialProgress>? martialArts,
     List<HobbyProgress>? hobbies,
+    List<ChronicCondition>? chronicConditions,
+    List<HealthHistoryEntry>? healthHistory,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
     List<FingerProfile>? fingerMatches,
@@ -1031,6 +1056,8 @@ class GameState {
       books: books ?? this.books,
       martialArts: martialArts ?? this.martialArts,
       hobbies: hobbies ?? this.hobbies,
+      chronicConditions: chronicConditions ?? this.chronicConditions,
+      healthHistory: healthHistory ?? this.healthHistory,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,
       fingerMatches: fingerMatches ?? this.fingerMatches,

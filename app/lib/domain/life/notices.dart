@@ -250,6 +250,24 @@ abstract final class Notices {
         personId: childId,
       );
 
+  /// Kronik durum kaydına girdi (D-153).
+  ///
+  /// Bilgilendirmedir: karar sormaz, hiçbir değeri değiştirmez. Metin
+  /// tıbbi tavsiye vermez, yalnızca durumu söyler.
+  static PendingNotice chronicStarted({
+    required int playerAge,
+    required String typeId,
+    required String label,
+    required String description,
+  }) =>
+      PendingNotice(
+        id: 'kronik-$typeId-$playerAge',
+        kind: NoticeKind.saglik,
+        age: playerAge,
+        title: label,
+        text: '$description Sağlık Geçmişi bölümünden takip edebilirsin.',
+      );
+
   /// İkiz doğdu (D-151).
   ///
   /// İki ayrı "çocuğunuz oldu" penceresi üst üste açılmaz; ikiz **tek**
