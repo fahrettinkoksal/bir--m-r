@@ -3642,3 +3642,30 @@ Basamak adları Türkçe zanaat düzeninden (çırak → kalfa → usta), üstü
 9. **Kendi işi (D-132) ustalığa girmiyor.** Kendi işini yıllarca yürütmek de ustalık sayılmalı mı?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; maaşa doğrudan artış eklenmez, ustalık yeni iş açmaz, kendi işi ustalığa girmez.
+
+---
+
+### Q-159 — Hayat hedefleri: seçim, ödül ve liste
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-156 · Test: `app/test/paket_y_test.dart`, `app/test/paket_y_widget_test.dart`
+
+Hayat sonu değerlendirmesi (Q-090) hayatın **sonunda** tek seferlik bir özet veriyordu. Oyun içinde oyuncuyu yönlendiren hiçbir hedef yoktu; ikinci hayatın birincisinden farklı olmasını sağlayan bir sebep de yoktu.
+
+**19 hedef geldi**, beş alanda: Eğitim (2), Kariyer (4), Ekonomi (4), Aile (3), Kendin (6). Her hedefin koşulu oyunun **gerçek kaydına** bakar; uydurma koşul yok.
+
+**Prototipin verdiği iki karar — ikisi de onay bekliyor:**
+- **Hedefler hayat başında seçilmez, yol boyunca açılır.** Başta seçilen hedef oyuncuyu tek bir yola kilitler ve "yanlış hedef seçtim" hissi doğurur.
+- **Hiçbir hedef ödül vermez.** Ne para, ne puan. Ulaşılan hedef kaydedilir ve ekranda durur.
+
+Ulaşıldığı **yaş** kaydedilir ve bir daha değişmez: ev satılsa bile "otuz beşinde ev sahibi oldun" gerçekten yaşanmış bir andır.
+
+**Karar soruları:**
+1. **Hedefler başta mı seçilsin?** Prototip "yol boyunca açılır" diyor. Alternatif: hayat başında 3 hedef seçilir, tutulursa değerlendirmede fazladan ağırlık alır.
+2. **Ödül olmalı mı?** Şu an yok. Olacaksa ne: mutluluk, stat, para, yoksa yalnızca kayıt?
+3. **Kuşaklar arası taşınır mı?** Şu an her hayat kendi hedef listesiyle başlar; `pastLives` arşivinde birikmiyor.
+4. **19 hedef yeterli mi?** Eklenebilecekler: "bir dili öğren", "yurt dışına taşın" (şu an şehir içi taşınma var), "hiç suç işlemeden yaşlan", "üç kuşağı gör".
+5. **Eşikler:** ilk milyon 1.000.000 ₺, takipçi 100.000, Ün 60. Doğru mu?
+6. **Bir yılda en fazla 2 hedef bildirimi** açılıyor; kalanı kaydedilir ama bildirilmez. Doğru mu, yoksa hepsi tek pencerede mi toplanmalı?
+7. **Hedef ekranı Aktiviteler altında.** Doğru yer mi, yoksa Hayat ekranında mı durmalı?
+8. **Ulaşılmayan hedefin koşulu açıkça yazılıyor** ("Aynı işte 8 yılı doldur"). Bu bir yol gösterme mi, yoksa sürprizi bozuyor mu?
+
+**Varsayılan işlem:** Onay gelene dek hedefler yol boyunca açılır, ödül verilmez, kuşaklar arası taşınmaz.

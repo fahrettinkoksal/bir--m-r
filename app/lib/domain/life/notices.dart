@@ -250,6 +250,23 @@ abstract final class Notices {
         personId: childId,
       );
 
+  /// Bir hayat hedefine ulaşıldı (D-156).
+  ///
+  /// Bilgilendirmedir: ödül vermez, karar sormaz, hiçbir değeri
+  /// değiştirmez.
+  static PendingNotice goalReached({
+    required int playerAge,
+    required String goalId,
+    required String label,
+  }) =>
+      PendingNotice(
+        id: 'hedef-$goalId',
+        kind: NoticeKind.aileDonum,
+        age: playerAge,
+        title: 'Bir hedefe ulaştın',
+        text: '$label. Hayat Hedefleri bölümünde duruyor.',
+      );
+
   /// Kronik durum kaydına girdi (D-153).
   ///
   /// Bilgilendirmedir: karar sormaz, hiçbir değeri değiştirmez. Metin

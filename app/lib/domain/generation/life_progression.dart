@@ -5,6 +5,7 @@ import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
+import '../life/life_goals.dart';
 import '../life/year_review.dart';
 import 'grandchildren.dart';
 import '../social/social_engine.dart';
@@ -109,6 +110,11 @@ class LifeProgression {
     // Hiçbir şey değişmediyse özet üretilmez; eski yılın özeti ekranda
     // bırakılmaz.
     final YearSummary? yilOzeti = YearReview.summarize(state.yearMark, state);
+
+    // Hayat hedefleri (D-156): yıl içinde yapılanlar **o yılın yaşıyla**
+    // kaydedilsin diye yaş artmadan **önce** bakılır. Kırk dörtte alınan
+    // ev "kırk beşinde aldın" diye yazılmaz.
+    state = LifeGoals.advanceYear(state: state, newAge: state.player.age);
 
     final int newAge = state.player.age + 1;
 
@@ -678,6 +684,10 @@ class LifeProgression {
 
     // Okurken yarım zamanlı çalışmanın bedeli (D-131).
     afterDeaths = _applyPartTimeStrain(afterDeaths, newAge);
+
+    // Yılın ilerlemesiyle ulaşılan hedefler (emeklilik, torun, ustalık…)
+    // yeni yaşla kaydedilir. Zaten kayıtlı hedefe tekrar bakılmaz.
+    afterDeaths = LifeGoals.advanceYear(state: afterDeaths, newAge: newAge);
 
     // Lise alanının yıllık küçük kazancı; alan seçimi kozmetik değildir.
     GameState withTrack = _applyTrackBonus(afterDeaths);

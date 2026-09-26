@@ -85,6 +85,7 @@ class GameState {
     this.martialArts = const <MartialProgress>[],
     this.hobbies = const <HobbyProgress>[],
     this.chronicConditions = const <ChronicCondition>[],
+    this.goalsReachedAt = const <String, int>{},
     this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
@@ -386,6 +387,16 @@ class GameState {
   ///
   /// Kayıt silinmez; geçen durum da listede kalır ve `endedAtAge` dolar.
   final List<ChronicCondition> chronicConditions;
+
+  /// D-156: hedef kimliği -> ulaşıldığı yaş.
+  ///
+  /// Sonradan hesaplanmaz: ulaşıldığı **yıl** yazılır ve bir daha
+  /// değişmez. Böylece "kırk beşinde ilk milyonunu gördün" cümlesi
+  /// gerçek bir andır, bugünün durumundan türetilmiş bir tahmin değil.
+  final Map<String, int> goalsReachedAt;
+
+  /// Bu hedefe ulaşıldı mı?
+  bool goalReached(String id) => goalsReachedAt.containsKey(id);
 
   /// D-153: atlatılmış sağlık krizlerinin kalıcı geçmişi.
   ///
@@ -961,6 +972,7 @@ class GameState {
     List<MartialProgress>? martialArts,
     List<HobbyProgress>? hobbies,
     List<ChronicCondition>? chronicConditions,
+    Map<String, int>? goalsReachedAt,
     List<HealthHistoryEntry>? healthHistory,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
@@ -1057,6 +1069,7 @@ class GameState {
       martialArts: martialArts ?? this.martialArts,
       hobbies: hobbies ?? this.hobbies,
       chronicConditions: chronicConditions ?? this.chronicConditions,
+      goalsReachedAt: goalsReachedAt ?? this.goalsReachedAt,
       healthHistory: healthHistory ?? this.healthHistory,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,

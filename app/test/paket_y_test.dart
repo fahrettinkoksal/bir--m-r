@@ -6,7 +6,9 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
+import 'package:bir_omur/data/life_goal_catalog.dart';
 import 'package:bir_omur/domain/career/craft_mastery.dart';
+import 'package:bir_omur/domain/life/life_goals.dart';
 import 'package:bir_omur/domain/generation/spouse_life.dart';
 import 'package:bir_omur/domain/models/career.dart';
 import 'package:bir_omur/domain/life/chronic_engine.dart';
@@ -826,6 +828,121 @@ void main() {
         s.notices.any((PendingNotice n) => n.id.startsWith('ustalik-kalfa-')),
         isFalse,
         reason: '34 yaşında 4. yıl: eşik yılı değil',
+      );
+    });
+  });
+
+  group('Hayat hedefleri (D-156)', () {
+    test('hedef kimlikleri benzersiz, metinleri dolu', () {
+      final List<String> kimlikler =
+          kLifeGoals.map((LifeGoal g) => g.id).toList();
+      expect(kimlikler.toSet(), hasLength(kimlikler.length));
+      for (final LifeGoal g in kLifeGoals) {
+        expect(g.label, isNotEmpty, reason: g.id);
+        expect(g.description, isNotEmpty, reason: g.id);
+      }
+    });
+
+    test('her alanda en az bir hedef var', () {
+      for (final GoalArea a in GoalArea.values) {
+        expect(lifeGoalsIn(a), isNotEmpty, reason: a.label);
+      }
+    });
+
+    test('yeni hayatta hiçbir hedefe ulaşılmamış olabilir', () {
+      // "Bir hedefe doğuştan ulaşılmış" gibi bir durum olmamalı; yeni
+      // hayatın hedef kaydı boş başlar.
+      final GameState s = hayat(age: 0);
+      expect(s.goalsReachedAt, isEmpty);
+      expect(LifeGoals.reachedCount(s), 0);
+    });
+
+    test('ulaşılan hedef o yılın yaşıyla kaydedilir', () {
+      // Cüzdanı bir milyonu geçen oyuncu "ilk milyon" hedefine ulaşır.
+      final GameState s = hayat(age: 44, wallet: kGoalMillion + 5);
+      final GameState sonra =
+          LifeGoals.advanceYear(state: s, newAge: s.player.age);
+      expect(sonra.goalsReachedAt['ilk_milyon'], 44);
+      expect(sonra.goalReached('ilk_milyon'), isTrue);
+    });
+
+    test('ulaşılan hedefin yaşı sonradan değişmez', () {
+      GameState s = hayat(age: 44, wallet: kGoalMillion + 5);
+      s = LifeGoals.advanceYear(state: s, newAge: 44);
+      // Sonraki yıllarda tekrar bakılsa bile yaş 44 kalır.
+      s = LifeGoals.advanceYear(state: s, newAge: 50);
+      expect(s.goalsReachedAt['ilk_milyon'], 44);
+    });
+
+    test('para harcanınca kayıt silinmez', () {
+      GameState s = hayat(age: 44, wallet: kGoalMillion + 5);
+      s = LifeGoals.advanceYear(state: s, newAge: 44);
+      s = s.copyWith(player: s.player.copyWith(wallet: 10));
+      s = LifeGoals.advanceYear(state: s, newAge: 45);
+      expect(
+        s.goalsReachedAt['ilk_milyon'],
+        44,
+        reason: 'Yaşanmış an silinmez',
+      );
+    });
+
+    test('bir yılda en fazla iki hedef bildirimi açılır', () {
+      // Aynı anda birçok hedefi sağlayan bir durum kur.
+      GameState s = hayat(age: 40, wallet: kGoalMillion + 5);
+      s = s.copyWith(
+        career: CareerState(
+          jobId: kJobCatalog.first.id,
+          startedAtAge: 20,
+        ),
+        education: s.education,
+      );
+      final GameState sonra =
+          LifeGoals.advanceYear(state: s, newAge: 40);
+      expect(sonra.goalsReachedAt.length, greaterThan(2));
+      expect(
+        sonra.notices.where((PendingNotice n) => n.id.startsWith('hedef-')),
+        hasLength(LifeGoals.prototypeOnlyMaxNoticesPerYear),
+        reason: 'Beş pencere üst üste açılmaz; kayıt yine tutulur',
+      );
+    });
+
+    test('ulaşılanlar yaşa göre sıralı döner', () {
+      GameState s = hayat(age: 30);
+      s = s.copyWith(
+        goalsReachedAt: const <String, int>{
+          'emekli_ol': 65,
+          'ilk_is': 22,
+          'evlen': 30,
+        },
+      );
+      final List<({LifeGoal goal, int age})> sirali =
+          LifeGoals.reachedInOrder(s);
+      expect(sirali.map((({LifeGoal goal, int age}) e) => e.age).toList(),
+          <int>[22, 30, 65]);
+    });
+
+    test('hedef kaydı kaydedilip geri okunur, eski kayıt bozulmaz', () {
+      final GameState s = hayat().copyWith(
+        goalsReachedAt: const <String, int>{'ilk_is': 22},
+      );
+      final GameState geri = decodeGameState(encodeGameState(s));
+      expect(geri.goalsReachedAt['ilk_is'], 22);
+
+      final Map<String, Object?> json = encodeGameState(s);
+      json.remove('goalsReachedAt');
+      expect(decodeGameState(json).goalsReachedAt, isEmpty);
+    });
+
+    test('yıl akışında hedef gerçekten kaydediliyor', () {
+      GameState s = hayat(age: 40, wallet: kGoalMillion + 5).copyWith(
+        pendingEvent: null,
+        notices: const <PendingNotice>[],
+      );
+      s = LifeProgression(Random(4)).advanceOneYear(s);
+      expect(
+        s.goalsReachedAt['ilk_milyon'],
+        40,
+        reason: 'Yaş artmadan önce bakıldığı için 40 yazılmalı',
       );
     });
   });

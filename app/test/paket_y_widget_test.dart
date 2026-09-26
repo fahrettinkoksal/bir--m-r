@@ -163,4 +163,38 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('Hayat Hedefleri satırı görünür ve sayfa açılır',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 6200);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      BirOmurApp(controller: controller, sound: SoundService.silent()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+    controller.debugSetState(
+      hayat().copyWith(goalsReachedAt: const <String, int>{'ilk_is': 22}),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+
+    await scrollToFinder(tester, find.byKey(const Key('aktivite_hedefler')));
+    await tester.tap(find.byKey(const Key('aktivite_hedefler')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hayat Hedefleri'), findsWidgets);
+    // Ulaşılan hedefin yaşı yazılır, ulaşılmayanın ne istendiği yazılır.
+    await scrollToFinder(tester, find.byKey(const Key('hedef_ilk_is')));
+    expect(find.textContaining('22 yaşında'), findsOneWidget);
+    await scrollToFinder(tester, find.byKey(const Key('hedef_emekli_ol')));
+    expect(
+      find.textContaining('Çalışma hayatını emeklilikle kapat'),
+      findsOneWidget,
+    );
+  });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/life_goal_catalog.dart';
 import '../../../data/activity_catalog.dart';
 import '../../../data/social_catalog.dart';
 import '../../../data/license_catalog.dart';
@@ -8,6 +9,7 @@ import '../../../data/lottery_catalog.dart';
 import '../../../data/finger_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
+import '../../../domain/life/life_goals.dart';
 import '../../../domain/life/astrology.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/interaction/intimacy.dart';
@@ -30,6 +32,7 @@ import 'eye_exam_page.dart';
 import 'fertility_page.dart';
 import 'license_pages.dart';
 import 'health_history_page.dart';
+import 'life_goals_page.dart';
 import 'hobbies_page.dart';
 import 'social_pages.dart';
 import '../../../text/turkish_text.dart';
@@ -82,6 +85,7 @@ enum _ActivityPage {
   tasin,
   cezaevi,
   hobiler,
+  hedefler,
 }
 
 /// Hobilerim menüsünün alt metni: gerçek kayda bakar.
@@ -137,6 +141,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         );
       case _ActivityPage.hobiler:
         return HobbiesPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.hedefler:
+        return LifeGoalsPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.berber:
         return VenuePage(
           venue: ActivityVenue.berber,
@@ -344,6 +350,22 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
+        // Hayat Hedefleri (D-156): oyun içinde oyuncuyu yönlendiren
+        // hiçbir hedef yoktu. Bölüm her zaman görünür; boş hâli de
+        // bilgidir ("neler yapılabilir").
+        MenuRow(
+          key: const Key('aktivite_hedefler'),
+          title: 'Hayat Hedefleri',
+          subtitle: LifeGoals.reachedCount(state) == 0
+              ? 'Henüz hiçbirine ulaşmadın'
+              : '${LifeGoals.reachedCount(state)} hedefe ulaştın',
+          icon: Icons.flag_outlined,
+          accent: BirOmurAccents.pirinc,
+          trailingText:
+              '${LifeGoals.reachedCount(state)}/${kLifeGoals.length}',
+          onTap: () => _go(_ActivityPage.hedefler),
+        ),
+        const SizedBox(height: 10),
         const MenuGroupTitle(
           text: 'Kendine bak',
           accent: BirOmurAccents.yesil,

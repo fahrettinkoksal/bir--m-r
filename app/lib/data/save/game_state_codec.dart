@@ -108,6 +108,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'healthHistory': state.healthHistory
           .map(_encodeHealthHistory)
           .toList(growable: false),
+      // Hayat hedefleri (D-156). Alan eklemeli.
+      'goalsReachedAt': state.goalsReachedAt,
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -966,6 +968,11 @@ GameState decodeGameState(Map<String, Object?> json) {
               _decodeHealthHistory(_asMap(e, 'healthHistory[]')))
           .toList(growable: false),
     ),
+    // D-156. `_intMap` eksik anahtarda hata verir; bu yüzden null
+    // koruması şart (eski kayıtlar bozulmasın).
+    goalsReachedAt: json['goalsReachedAt'] == null
+        ? const <String, int>{}
+        : _intMap(json, 'goalsReachedAt'),
     martialArts: List<MartialProgress>.unmodifiable(
       _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
