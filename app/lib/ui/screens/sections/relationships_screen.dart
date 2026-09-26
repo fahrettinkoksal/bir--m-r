@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
+import '../../../data/pet_catalog.dart';
+import '../../../domain/pets/pet_care.dart';
 import '../../../domain/models/relation.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
@@ -9,6 +11,7 @@ import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'marriage_history_page.dart';
+import 'pets_page.dart';
 
 /// İlişkiler ana menüsü (NAV-001).
 ///
@@ -16,6 +19,20 @@ import 'marriage_history_page.dart';
 /// romantik bağlar alt menülere ayrılır. Uzun tek liste yerine iç içe menü
 /// tercih edilmiştir. Veri yapısı değişmez: kişiler aynı kalıcı kimlikle,
 /// aynı bağ türleriyle okunur.
+/// Evcil hayvan satırının alt metni: gerçek kayda bakar, uydurmaz.
+///
+/// D-146 ile Aktiviteler ekranından buraya taşındı.
+String _hayvanAltMetni(GameState state) {
+  final List<Pet> yasayan = PetCare.livingPets(state);
+  if (yasayan.isEmpty) {
+    return adoptablePetSpecies.map((PetSpecies s) => s.label).join(' ya da ');
+  }
+  if (yasayan.length == 1) {
+    return '${yasayan.first.name} seninle yaşıyor';
+  }
+  return '${yasayan.length} hayvana bakıyorsun';
+}
+
 enum RelationshipSubPage {
   akrabalar,
   arkadaslar,
@@ -29,6 +46,12 @@ enum RelationshipSubPage {
   /// D-133: ikinci evlilik D-036'da geldi ama geçmiş evlilikler
   /// hiçbir ekranda görünmüyordu.
   evlilikGecmisi,
+
+  /// D-146: evcil hayvan Varlıklar'dan İlişkiler'e taşındı.
+  ///
+  /// Faho'nun isteği: "evdeki evcil hayvanımı ilişkiler kısmına taşı,
+  /// varlıklarda değil." Hayvan bir mülk değil, bir ilişkidir.
+  evcilHayvanlar,
 }
 
 class RelationshipsScreen extends StatefulWidget {
@@ -108,6 +131,14 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
       return MarriageHistoryPage(onBack: () => setState(() => _subPage = null));
     }
 
+    // Evcil hayvanlar da kişi listesi değil: kendi sayfası var (D-146).
+    if (_subPage == RelationshipSubPage.evcilHayvanlar) {
+      return PetsPage(
+        backLabel: 'İlişkiler',
+        onBack: () => setState(() => _subPage = null),
+      );
+    }
+
     if (_subPage != null) {
       final List<Person> kisiler = switch (_subPage!) {
         RelationshipSubPage.akrabalar => _akrabalar(state),
@@ -119,6 +150,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         // Buraya ulaşılmaz: evlilik geçmişi yukarıda ayrı ekran olarak
         // açılıyor. Derleyicinin tam kapsama isteği için duruyor.
         RelationshipSubPage.evlilikGecmisi => const <Person>[],
+        RelationshipSubPage.evcilHayvanlar => const <Person>[],
       };
       final String baslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar => 'Akrabalar',
@@ -128,6 +160,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.torunlar => 'Torunlar',
         RelationshipSubPage.tanidiklar => 'Ünlüler ve tanıdıklar',
         RelationshipSubPage.evlilikGecmisi => 'Evlilik Geçmişi',
+        RelationshipSubPage.evcilHayvanlar => 'Evcil hayvanlar',
       };
       final String altBaslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar =>
@@ -143,7 +176,8 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.tanidiklar =>
           'Sana geri dönen ünlüler. Arkadaş değiller; tanışıklık.',
         RelationshipSubPage.evlilikGecmisi => '',
-};
+        RelationshipSubPage.evcilHayvanlar => '',
+      };
 
       return SectionScaffold(
         icon: Icons.groups_rounded,
@@ -172,6 +206,9 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
     final int arkadasSayisi = _arkadaslar(state).length;
     final int tanidikSayisi = _tanidiklar(state).length;
     final int romantikSayisi = _romantikler(state).length;
+    final int hayvanSayisi = PetCare.livingPets(state)
+        .where((Pet p) => p.inPlayerHousehold)
+        .length;
 
     return SectionScaffold(
       icon: Icons.favorite_rounded,
@@ -309,13 +346,27 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           ),
           const SizedBox(height: 10),
         ],
-        if (state.pets.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 2),
-          const InfoPanel(
+        // Evcil hayvanlar (D-146). Satır, evde hayvan varsa **her yaşta**
+        // görünür; sahiplenme yaşı geldiğinde de görünür.
+        //
+        // Faho bildirdi: "oynadığım bir hayatta evde evcil hayvan vardı
+        // fakat iletişim yoktu." Sebebi buydu: menü yalnızca sahiplenme
+        // yaşından (7) itibaren açılıyordu, oysa oyuncu doğduğunda evde
+        // olan hayvanla beş yaşındaki çocuk da oynayabilmeli.
+        if (state.pets.isNotEmpty ||
+            playerAge >= PetCare.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('relationships_pets_row'),
+            title: 'Evcil hayvanlar',
+            subtitle: _hayvanAltMetni(state),
             icon: Icons.pets_outlined,
-            text: 'Evcil hayvanların Varlıklar bölümünde listeleniyor; '
-                'onlarla Aktiviteler menüsünden vakit geçirebilirsin.',
+            accent: BirOmurAccents.turuncu,
+            trailingText: hayvanSayisi == 0 ? null : '$hayvanSayisi',
+            onTap: () => setState(
+              () => _subPage = RelationshipSubPage.evcilHayvanlar,
+            ),
           ),
+          const SizedBox(height: 10),
         ],
       ],
     );

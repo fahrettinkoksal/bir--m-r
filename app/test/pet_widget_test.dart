@@ -16,6 +16,7 @@ import 'support/test_flow.dart';
 
 /// Evcil hayvan ekranı (Paket 40 — Issue #67, 2. kısım).
 void main() {
+  _d146();
   late GameController controller;
 
   setUp(() => controller = GameController(random: Random(8)));
@@ -53,10 +54,11 @@ void main() {
     await tester.pumpAndSettle();
     controller.debugSetState(state);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    // D-146: evcil hayvanlar Aktiviteler'den İlişkiler'e taşındı.
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
     await tester.pumpAndSettle();
-    await scrollToFinder(tester, find.byKey(const Key('activity_hayvan')));
-    await tester.tap(find.byKey(const Key('activity_hayvan')));
+    await scrollToFinder(tester, find.byKey(const Key('relationships_pets_row')));
+    await tester.tap(find.byKey(const Key('relationships_pets_row')));
     await tester.pumpAndSettle();
   }
 
@@ -228,4 +230,93 @@ void main() {
       expect(hatalar, isEmpty, reason: hatalar.join('\n'));
     });
   }
+}
+
+// =====================================================================
+// D-146: hayvan İlişkiler'de, her yaşta etkileşilebilir
+//
+// Faho bildirdi: "evdeki evcil hayvanımı ilişkiler kısmına taşı,
+// varlıklarda değil ve evcil hayvan ile etkileşime geçebileyim;
+// oynadığım bir hayatta evde evcil hayvan vardı fakat iletişim yoktu."
+//
+// Sebebi: menü satırı yalnızca **sahiplenme yaşından** (7) itibaren
+// açılıyordu; oyuncu doğduğunda evde olan hayvanla beş yaşındaki çocuk
+// hiçbir şey yapamıyordu.
+// =====================================================================
+void _d146() {
+  late GameController controller;
+  setUp(() => controller = GameController(random: Random(3)));
+  tearDown(() => controller.dispose());
+
+  Pet aileKedisi() => const Pet(
+        id: 'pet-aile',
+        name: 'Tekir',
+        species: 'kedi',
+        age: 4,
+        adoptedAtPlayerAge: null,
+        inPlayerHousehold: true,
+        bond: 55,
+      );
+
+  GameState cocuk({int age = 5}) {
+    final GameState base =
+        LifeGenerator.seeded(97).generate(mode: StartMode.tamamenRastgele);
+    return base.copyWith(
+      pendingEvent: null,
+      notices: const <PendingNotice>[],
+      pets: List<Pet>.unmodifiable(<Pet>[aileKedisi()]),
+      player: base.player.copyWith(age: age, wallet: 200),
+    );
+  }
+
+  Future<void> ac(WidgetTester tester, GameState state) async {
+    tester.view.physicalSize = const Size(1080, 5600);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      BirOmurApp(controller: controller, sound: SoundService.silent()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+    controller.debugSetState(state);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('beş yaşındaki çocuk evdeki hayvanla etkileşebilir',
+      (WidgetTester tester) async {
+    await ac(tester, cocuk());
+    // Sahiplenme yaşının altında bile satır görünür, çünkü evde hayvan var.
+    expect(controller.state!.player.age,
+        lessThan(PetCare.prototypeOnlyMinAge));
+
+    await tester.tap(find.byKey(const Key('tab_iliskiler')));
+    await tester.pumpAndSettle();
+    final Finder satir = find.byKey(const Key('relationships_pets_row'));
+    await scrollToFinder(tester, satir);
+    expect(satir, findsOneWidget);
+    await tester.tap(satir);
+    await tester.pumpAndSettle();
+
+    // Etkileşim düğmesi gerçekten çalışır.
+    final Finder oyun =
+        find.byKey(const Key('hayvan_pet-aile_vakit'));
+    await scrollToFinder(tester, oyun);
+    final int onceBag = controller.state!.pets.single.bond;
+    await tester.tap(oyun);
+    await tester.pumpAndSettle();
+    expect(controller.state!.pets.single.bond, greaterThan(onceBag));
+  });
+
+  testWidgets('Varlıklar ekranında hayvan listesi yok',
+      (WidgetTester tester) async {
+    await ac(tester, cocuk());
+    await tester.tap(find.byKey(const Key('tab_varliklar')));
+    await tester.pumpAndSettle();
+
+    // Hayvanın adı Varlıklar'da geçmez; yerine yönlendirme satırı var.
+    expect(find.text('Tekir'), findsNothing);
+    expect(find.textContaining('İlişkiler menüsünde'), findsWidgets);
+  });
 }

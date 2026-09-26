@@ -13,12 +13,21 @@ import '../../widgets/section_scaffold.dart';
 
 /// Evcil hayvanlar sayfası (Paket 40 — Issue #67, 2. kısım).
 ///
-/// Yeni bir ana menü açılmaz; Aktiviteler menüsünün altında bir sayfadır.
-/// Vefat etmiş hayvanlar **listede kalır**, yalnızca etkileşime kapanır.
+/// D-146 ile **İlişkiler** menüsünün altına taşındı: hayvan bir mülk
+/// değil, bir ilişkidir (Faho'nun isteği). Vefat etmiş hayvanlar
+/// **listede kalır**, yalnızca etkileşime kapanır.
 class PetsPage extends StatefulWidget {
-  const PetsPage({super.key, required this.onBack});
+  const PetsPage({
+    super.key,
+    required this.onBack,
+    this.backLabel = 'İlişkiler',
+  });
 
   final VoidCallback onBack;
+
+  /// Geri düğmesinde yazan menü adı. Sayfa D-146 ile İlişkiler altına
+  /// taşındı; parametre, ileride başka bir yerden açılırsa diye duruyor.
+  final String backLabel;
 
   @override
   State<PetsPage> createState() => _PetsPageState();
@@ -46,7 +55,7 @@ class _PetsPageState extends State<PetsPage> {
       title: 'Evcil hayvanlar',
       subtitle: 'Cüzdanında ${controller.state!.player.walletLabel} var. '
           'Bakım gideri her yıl bir kez alınır.',
-      backLabel: 'Aktiviteler',
+      backLabel: widget.backLabel,
       onBack: widget.onBack,
       children: <Widget>[
         if (yasayan.isEmpty)

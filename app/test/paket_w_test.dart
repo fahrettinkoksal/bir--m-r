@@ -11,7 +11,6 @@ import 'package:bir_omur/data/pet_catalog.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/finger.dart';
-import 'package:bir_omur/domain/models/book_progress.dart';
 import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';

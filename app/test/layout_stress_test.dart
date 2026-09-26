@@ -212,8 +212,30 @@ void main() {
     (anahtar: 'activity_fal', ad: 'Fal ve Tarot'),
     (anahtar: 'activity_piyango', ad: 'Piyango'),
     (anahtar: 'activity_finger', ad: 'Finger'),
-    (anahtar: 'activity_hayvan', ad: 'Evcil hayvanlar'),
   ];
+
+  // D-146: evcil hayvanlar sayfası Aktiviteler'den İlişkiler'e taşındı.
+  // Taşma denetimi silinmedi, yalnızca yeni yolundan açılıyor.
+  for (final double genislik in <double>[320, 390]) {
+    testWidgets(
+        'Evcil hayvanlar sayfası ${genislik.toInt()} px / yazı ×1.5 taşmaz',
+        (WidgetTester tester) async {
+      yakala();
+      addTearDown(birak);
+      await hazirla(tester, genislik: genislik, yaziOlcegi: 1.5);
+
+      await tester.tap(find.byKey(const Key('tab_iliskiler')));
+      await tester.pumpAndSettle();
+      await scrollToFinder(
+        tester,
+        find.byKey(const Key('relationships_pets_row')),
+      );
+      await tester.tap(find.byKey(const Key('relationships_pets_row')));
+      await tester.pumpAndSettle();
+      await sonunaKaydir(tester, adim: 18);
+      temiz();
+    });
+  }
 
   for (final double genislik in <double>[320, 390]) {
     for (final ({String anahtar, String ad}) sayfa in altSayfalar) {

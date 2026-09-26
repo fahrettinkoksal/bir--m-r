@@ -8,7 +8,6 @@ import '../../../domain/economy/housing.dart';
 import '../../../domain/economy/living_costs.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/owned_item.dart';
-import '../../../domain/models/person.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
@@ -16,7 +15,6 @@ import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
-import '../../../data/pet_catalog.dart';
 
 /// Varlıklar ana menüsü (NAV-001, ECO-001).
 ///
@@ -197,25 +195,18 @@ class _AssetsScreenState extends State<AssetsScreen> {
           ],
           const SizedBox(height: 4),
         ],
+        // D-146: evcil hayvanlar buradan kaldırıldı ve İlişkiler menüsüne
+        // taşındı. Faho'nun isteği: "evdeki evcil hayvanımı ilişkiler
+        // kısmına taşı, varlıklarda değil." Hayvan bir mülk değildir.
         if (state.pets.isNotEmpty) ...<Widget>[
-          const _GroupTitle('Evcil hayvanlar'),
-          const SizedBox(height: 8),
-          // Vefat eden hayvanın kaydı silinmez (Paket 40); listede kalır
-          // ve öyle işaretlenir.
-          for (final Pet pet in state.pets) ...<Widget>[
-            _AssetTile(
-              title: pet.name,
-              subtitle: pet.isAlive
-                  ? '${petSpeciesLabel(pet.species)} · ${pet.age} yaşında'
-                  : '${petSpeciesLabel(pet.species)} · '
-                      '${pet.diedAtAge} yaşında vefat etti',
-              icon: pet.isAlive ? Icons.pets_outlined : Icons.spa_outlined,
-            ),
-            const SizedBox(height: 10),
-          ],
-          const SizedBox(height: 4),
+          const InfoPanel(
+            icon: Icons.pets_outlined,
+            text: 'Evcil hayvanların İlişkiler menüsünde; onlarla orada '
+                'vakit geçirebilirsin.',
+          ),
+          const SizedBox(height: 10),
         ],
-        if (esyalar.isEmpty && state.pets.isEmpty)
+        if (esyalar.isEmpty)
           const InfoPanel(
             icon: Icons.inventory_2_outlined,
             text: 'Henüz kendine ait bir eşyan yok. Hediyeler, olaylar ve '
@@ -846,48 +837,6 @@ class _GroupTitle extends StatelessWidget {
   }
 }
 
-class _AssetTile extends StatelessWidget {
-  const _AssetTile({required this.title, required this.icon, this.subtitle});
-
-  final String title;
-  final String? subtitle;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: <Widget>[
-            Icon(icon, color: theme.colorScheme.secondary),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(title, style: theme.textTheme.titleMedium),
-                  if (subtitle != null) ...<Widget>[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Nerede yaşandığını gösteren kart ve taşınma eylemleri (D-043).
 class _ResidenceCard extends StatefulWidget {
   const _ResidenceCard({required this.state});
 
