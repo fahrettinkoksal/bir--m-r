@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/generation_fixtures.dart';
 import 'support/invariants.dart';
+import 'package:bir_omur/domain/models/stats.dart';
 
 /// Yaşayan bir oyuncu ve verilen kişilerle durum kurar.
 GameState hayat({
@@ -412,9 +413,18 @@ void main() {
       expect(sonuc.state.player.wallet, state.player.wallet);
       expect(sonuc.text, contains('cenazedeydin'));
       expect(sonuc.text, contains('katkıda bulunmadın'));
+      // Kazanç azalan getiriye tabidir (D-099); beklenen değer de
+      // **gerçekten uygulanan** değerdir, ham toplam değil.
       expect(
         sonuc.state.player.stats.happiness,
-        state.player.stats.happiness + Notices.prototypeOnlyAttendanceHappiness,
+        StatGain.apply(
+          state.player.stats.happiness,
+          Notices.prototypeOnlyAttendanceHappiness,
+        ),
+      );
+      expect(
+        sonuc.state.player.stats.happiness,
+        greaterThan(state.player.stats.happiness),
       );
       expect(checkInvariants(sonuc.state), isEmpty);
     });

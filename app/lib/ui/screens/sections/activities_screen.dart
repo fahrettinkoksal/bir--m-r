@@ -6,30 +6,37 @@ import '../../../data/license_catalog.dart';
 import '../../../data/martial_arts_catalog.dart';
 import '../../../data/lottery_catalog.dart';
 import '../../../data/finger_catalog.dart';
-import '../../../data/pet_catalog.dart';
 import '../../../domain/activities/travel.dart';
 import '../../../domain/casino/casino_rules.dart';
 import '../../../domain/life/astrology.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/interaction/intimacy.dart';
 import '../../../domain/interaction/parenthood.dart';
-import '../../../domain/pets/pet_care.dart';
 import '../../../domain/models/game_state.dart';
+import '../../../domain/models/hobby_progress.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
+import '../../widgets/prison_life_panel.dart';
 import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
 import 'casino_pages.dart';
 import 'martial_arts_page.dart';
 import 'lottery_page.dart';
 import 'finger_page.dart';
+import 'eye_exam_page.dart';
 import 'fertility_page.dart';
 import 'license_pages.dart';
-import 'pets_page.dart';
+import 'health_history_page.dart';
+import 'hobbies_page.dart';
 import 'social_pages.dart';
+import '../../../text/turkish_text.dart';
+import '../../../domain/social/media_opportunities.dart';
+import 'media_page.dart';
+import '../../../domain/economy/banking.dart';
+import 'bank_page.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
 ///
@@ -59,27 +66,32 @@ enum _ActivityPage {
   falTarot,
   dovus,
   tupBebek,
+  gozMuayenesi,
+  saglikGecmisi,
+  estetik,
   sosyalMedya,
+  medya,
+  banka,
   kumarhane,
   piyango,
   finger,
   ehliyet,
   evlatEdinme,
-  evcilHayvan,
   vasiyet,
   seyahat,
+  tasin,
+  cezaevi,
+  hobiler,
 }
 
-/// Evcil hayvan menüsünün alt metni: gerçek kayda bakar.
-String _hayvanAltMetni(GameState state) {
-  final List<Pet> yasayan = PetCare.livingPets(state);
-  if (yasayan.isEmpty) {
-    return adoptablePetSpecies.map((PetSpecies s) => s.label).join(' ya da ');
-  }
-  if (yasayan.length == 1) {
-    return '${yasayan.first.name} seninle yaşıyor';
-  }
-  return '${yasayan.length} hayvana bakıyorsun';
+/// Hobilerim menüsünün alt metni: gerçek kayda bakar.
+String _hobiAltMetni(GameState state) {
+  final int yas = state.player.age;
+  final int suren =
+      state.hobbies.where((HobbyProgress h) => h.isActiveAt(yas)).length;
+  if (suren == 0) return 'Hepsi bir süredir askıda';
+  if (suren == state.hobbies.length) return 'Hepsi sürüyor';
+  return '$suren tanesi sürüyor';
 }
 
 /// Dövüş sanatlarına en erken hangi yaşta başlanabilir?
@@ -115,6 +127,16 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     final List<Person> kisiler = _uygunKisiler(context, state);
 
     switch (_page) {
+      case _ActivityPage.cezaevi:
+        return VenuePage(
+          venue: ActivityVenue.cezaevi,
+          onBack: () => _go(_ActivityPage.kok),
+          // Koğuş hayatı (D-140): arkadaşlık, iyi hâl ve gruba yakın
+          // durma. Mekân sayfası genel kalsın diye ek satır olarak girer.
+          extraRows: const <Widget>[PrisonLifePanel()],
+        );
+      case _ActivityPage.hobiler:
+        return HobbiesPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.berber:
         return VenuePage(
           venue: ActivityVenue.berber,
@@ -129,7 +151,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
               MenuRow(
                 key: const Key('spor_dovus'),
                 title: 'Dövüş sanatları',
-                subtitle: 'Karate, kung fu ve yağlı güreş dersleri',
+                subtitle: 'Karate, kung fu, güreş, boks, judo, taekwondo',
                 icon: Icons.sports_martial_arts_outlined,
                 accent: BirOmurAccents.nar,
                 onTap: () => _go(_ActivityPage.dovus),
@@ -144,6 +166,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return VenuePage(
           venue: ActivityVenue.saglikMerkezi,
           onBack: () => _go(_ActivityPage.kok),
+          // Göz muayenesinin kendi mini oyunu var (D-076); düğme eylemi
+          // doğrudan uygulamak yerine o ekranı açar.
+          customActions: <String, VoidCallback>{
+            'goz_muayenesi': () => _go(_ActivityPage.gozMuayenesi),
+          },
           extraRows: <Widget>[
             // Tüp bebek yalnızca bir eş/sevgili varken görünür; çalışmayan
             // düğme konmaz (Paket 35).
@@ -157,10 +184,37 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                 accent: BirOmurAccents.nar,
                 onTap: () => _go(_ActivityPage.tupBebek),
               ),
+            // Sağlık geçmişi (D-153): yalnızca gösterecek bir şey varken
+            // görünür. Boş bir "geçmişin yok" sayfası açan düğme konmaz.
+            if (state.chronicConditions.isNotEmpty ||
+                state.healthHistory.isNotEmpty)
+              MenuRow(
+                key: const Key('saglik_gecmis'),
+                title: 'Sağlık Geçmişi',
+                subtitle: state.activeChronic.isEmpty
+                    ? 'Atlattığın krizler'
+                    : '${state.activeChronic.length} süren durum · takip',
+                icon: Icons.monitor_heart_outlined,
+                accent: BirOmurAccents.mor,
+                onTap: () => _go(_ActivityPage.saglikGecmisi),
+              ),
           ],
         );
+      case _ActivityPage.saglikGecmisi:
+        return HealthHistoryPage(onBack: () => _go(_ActivityPage.saglik));
       case _ActivityPage.tupBebek:
         return FertilityPage(onBack: () => _go(_ActivityPage.saglik));
+      case _ActivityPage.gozMuayenesi:
+        return EyeExamPage(
+          action: kActivityActions
+              .firstWhere((ActivityAction a) => a.id == 'goz_muayenesi'),
+          onBack: () => _go(_ActivityPage.saglik),
+        );
+      case _ActivityPage.estetik:
+        return VenuePage(
+          venue: ActivityVenue.estetik,
+          onBack: () => _go(_ActivityPage.kok),
+        );
       case _ActivityPage.eglence:
         return VenuePage(
           venue: ActivityVenue.eglence,
@@ -178,6 +232,10 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         );
       case _ActivityPage.sosyalMedya:
         return SocialMediaPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.medya:
+        return MediaPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.banka:
+        return BankPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.piyango:
@@ -188,12 +246,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return LicenseOfficePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.evlatEdinme:
         return AdoptionPage(onBack: () => _go(_ActivityPage.kok));
-      case _ActivityPage.evcilHayvan:
-        return PetsPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.vasiyet:
         return WillPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.seyahat:
         return TravelPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.tasin:
+        return RelocationPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.sosyal:
       case _ActivityPage.kok:
         break;
@@ -222,6 +280,32 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       );
     }
 
+    // Cezaevindeyken dışarının menüsü açılmaz (D-128). Oyuncu boş bir
+    // liste görmesin diye içeride yapılabilecekler ayrı gösterilir.
+    if (state.isImprisoned) {
+      final int? tahliye = state.legal.releaseAtAge;
+      return SectionScaffold(
+        icon: Icons.gavel_rounded,
+        title: 'Cezaevi',
+        accent: BirOmurAccents.nar,
+        subtitle: tahliye == null
+            ? 'İçeridesin.'
+            : 'Tahliye yaşın: $tahliye. Dışarısı seni beklemiyor ama '
+                'bu yıllar da geçiyor.',
+        onBack: widget.onBack,
+        children: <Widget>[
+          MenuRow(
+            key: const Key('aktivite_cezaevi'),
+            title: 'İçeride yapılabilecekler',
+            subtitle: 'Görüş, kitap, spor, sakin kalmak',
+            icon: Icons.self_improvement_rounded,
+            accent: BirOmurAccents.nar,
+            onTap: () => _go(_ActivityPage.cezaevi),
+          ),
+        ],
+      );
+    }
+
     return SectionScaffold(
       icon: Icons.local_activity_rounded,
       title: 'Aktiviteler',
@@ -246,6 +330,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         const SizedBox(height: 12),
         // Paket 28: uzun liste gruplara ayrıldı. Aradığını bulmak için
         // bütün ekranı kaydırmak gerekmiyor.
+        // Hobilerim (D-133): hobi sistemi vardı ama neyle uğraşıldığını
+        // tek yerde gösteren ekran yoktu.
+        if (state.hobbies.isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('aktivite_hobiler'),
+            title: 'Hobilerim',
+            subtitle: _hobiAltMetni(state),
+            icon: Icons.palette_outlined,
+            accent: BirOmurAccents.mor,
+            trailingText: '${state.hobbies.length}',
+            onTap: () => _go(_ActivityPage.hobiler),
+          ),
+          const SizedBox(height: 10),
+        ],
         const MenuGroupTitle(
           text: 'Kendine bak',
           accent: BirOmurAccents.yesil,
@@ -274,6 +372,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.medical_services_outlined,
             accent: BirOmurAccents.nar,
             onTap: () => _go(_ActivityPage.saglik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Estetik (D-077): görünüş yaşla düştüğü için oyuncunun buna
+        // karşı yapabileceği bir şey olmalı. Yaşı tutmayana çalışmayan
+        // düğme gösterilmez (D-038).
+        if (state.player.age >= ActivityVenue.estetik.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_estetik'),
+            title: ActivityVenue.estetik.label,
+            subtitle: 'Dolgu, gülüş tasarımı, burun ve saç ekimi',
+            icon: Icons.face_retouching_natural_outlined,
+            accent: BirOmurAccents.gul,
+            onTap: () => _go(_ActivityPage.estetik),
           ),
           const SizedBox(height: 10),
         ],
@@ -334,14 +446,26 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         // Seyahat, tek başına yola çıkılabilecek yaştan itibaren görünür
         // (Paket 11). Kalıcı taşınmadan ayrıdır.
         if (state.player.age >= Travel.prototypeOnlyMinAge) ...<Widget>[
+          // Seyahat ikiye ayrıldı (D-083): tatil ve taşınma ayrı işler.
           MenuRow(
-            title: 'Seyahat',
+            key: const Key('activity_tatil'),
+            title: 'Tatil yap',
             subtitle: state.trips.isEmpty
-                ? 'Başka bir şehre kısa bir gezi'
+                ? 'Hazır tur paketleri ya da kendi seçtiğin bir şehir'
                 : '${state.trips.length} gezi yaptın',
             icon: Icons.luggage_outlined,
             accent: BirOmurAccents.mavi,
             onTap: () => _go(_ActivityPage.seyahat),
+          ),
+          const SizedBox(height: 10),
+          MenuRow(
+            key: const Key('activity_tasin'),
+            title: 'Taşın',
+            subtitle: '${state.player.currentCity} çevresindeki illere '
+                'yerleş',
+            icon: Icons.local_shipping_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => _go(_ActivityPage.tasin),
           ),
           const SizedBox(height: 10),
         ],
@@ -399,10 +523,38 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             title: 'Sosyal medya',
             subtitle: state.socialAccounts.isEmpty
                 ? 'Hesap açmak isteğe bağlı'
-                : '${state.totalFollowers} takipçi',
+                : '${trNumber(state.totalFollowers)} takipçi',
             icon: Icons.public_outlined,
             accent: BirOmurAccents.cini,
             onTap: () => _go(_ActivityPage.sosyalMedya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Ün ve Medya Fırsatları yalnızca Ün eşiği geçilince görünür
+        // (D-103); altındaki oyuncuya çalışmayan kapı gösterilmez.
+        if (MediaOpportunities.sectionVisible(state)) ...<Widget>[
+          MenuRow(
+            title: 'Ün ve Medya Fırsatları',
+            subtitle: 'Ünün ${state.player.fame}; seni arayanlar var',
+            icon: Icons.stars_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => _go(_ActivityPage.medya),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Banka (D-108): Varlıklar'dan buraya taşındı. Bankaya gitmek
+        // bir eylemdir; Varlıklar sahip olunan şeylerin listesidir.
+        if (state.player.age >= Banking.prototypeOnlyMinAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activities_banka'),
+            title: 'Banka',
+            subtitle: GameScope.of(context).totalDebt > 0
+                ? 'Kalan borcun '
+                    '${trMoney(GameScope.of(context).totalDebt)}'
+                : 'Fakbank ve Bankavrupa — ihtiyaç ve konut kredisi',
+            icon: Icons.account_balance_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => _go(_ActivityPage.banka),
           ),
           const SizedBox(height: 10),
         ],
@@ -436,26 +588,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
-        // Evcil hayvanlar (Paket 40). Yeni ana menü açılmadı; mevcut
-        // Aktiviteler menüsünün altında bir sayfadır.
-        if (state.player.age >= PetCare.prototypeOnlyMinAge) ...<Widget>[
+        // Evcil hayvanlar D-146 ile **İlişkiler** menüsüne taşındı:
+        // hayvan bir aktivite değil, bir ilişkidir (Faho'nun isteği).
+        // Buradan kaldırıldı ki aynı sayfa iki menüde durmasın.
+        // "Son Kararlar" (D-052, D-084): mirasçı seçimi ve hayatın sonu.
+        // Çocuğu olmayan oyuncuya da açıktır, çünkü hayatın sonuna dair
+        // karar çocuğa bağlı değildir; mirasçı bölümü o zaman gerekçesini
+        // yazar (D-038).
+        if (state.livingChildren.isNotEmpty ||
+            GameScope.of(context).lifeEndBlockReason == null) ...<Widget>[
           MenuRow(
-            key: const Key('activity_hayvan'),
-            title: 'Evcil hayvanlar',
-            subtitle: _hayvanAltMetni(state),
-            icon: Icons.pets_outlined,
-            accent: BirOmurAccents.turuncu,
-            onTap: () => _go(_ActivityPage.evcilHayvan),
-          ),
-          const SizedBox(height: 10),
-        ],
-        // Vasiyet yalnızca hayatta çocuğu olan oyuncuda görünür (D-052);
-        // çocuğu olmayana çalışmayan düğme gösterilmez.
-        if (state.livingChildren.isNotEmpty) ...<Widget>[
-          MenuRow(
-            title: 'Vasiyet',
+            key: const Key('activity_son_kararlar'),
+            title: 'Son Kararlar',
             subtitle: GameScope.of(context).heirChild == null
-                ? 'Mirasçı seçilmedi'
+                ? 'Mirasçı ve hayatının sonu'
                 : 'Mirasçın: ${GameScope.of(context).heirChild!.firstName}',
             icon: Icons.history_edu_outlined,
             accent: BirOmurAccents.pirinc,

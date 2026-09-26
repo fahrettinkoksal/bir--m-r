@@ -7,6 +7,8 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Oyuncu vefat ettiğinde hayat özetinin gerçekten göründüğünü sınar.
 void main() {
   late GameController controller;
@@ -60,6 +62,8 @@ void main() {
 
   testWidgets('ölümden sonra yaş ilerlemez', (WidgetTester tester) async {
     await pumpApp(tester, tamamlanmisHayat());
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveEducationChoices(controller);
     controller.ageUp();
     await tester.pumpAndSettle();
     expect(controller.state!.player.age, 81);

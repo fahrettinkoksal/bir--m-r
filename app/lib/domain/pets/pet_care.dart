@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../generation/random_util.dart';
+
 import '../../data/pet_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../models/game_state.dart';
@@ -41,12 +43,114 @@ abstract final class PetCare {
   static const int prototypeOnlyDeathHappinessBase = -8;
   static const int prototypeOnlyDeathHappinessExtra = -10;
 
+  /// prototypeOnly: kayıp hayvanın bir yılda geri dönme ihtimali (D-082).
+  ///
+  /// Yüksek tutuldu: kaçan hayvan kalıcı olarak yok olmaz (D-058).
+  static const double prototypeOnlyReturnChance = 0.6;
+
+  /// prototypeOnly: bir yılda hastalanma ihtimali.
+  static const double prototypeOnlyIllnessChance = 0.12;
+
+  /// prototypeOnly: hastalığın sağlığa verdiği zarar.
+  static const int prototypeOnlyIllnessDamage = 18;
+
+  /// prototypeOnly: veteriner ziyaretinin sağlığa katkısı.
+  static const int prototypeOnlyVetHealthGain = 22;
+
+  /// prototypeOnly: sağlığın vefat ihtimaline etkisinin üst sınırı.
+  static const double prototypeOnlyHealthDeathFactor = 1.6;
+
   // -------------------------------------------------------------------
   // Okuma yardımcıları
   // -------------------------------------------------------------------
 
+  /// Oyuncunun **şu an baktığı** hayvanlar (D-109).
+  ///
+  /// Vefat edenler ve başka yuvaya verilenler burada yoktur; kayıp olan
+  /// hâlâ oyuncunundur, çünkü dönmesi beklenir.
   static List<Pet> livingPets(GameState state) =>
-      state.pets.where((Pet p) => p.isAlive).toList(growable: false);
+      state.pets.where((Pet p) => p.isActive).toList(growable: false);
+
+  /// Kaydı duran ama artık bakılmayan hayvanlar (D-109).
+  static List<Pet> pastPets(GameState state) =>
+      state.pets.where((Pet p) => !p.isActive).toList(growable: false);
+
+  /// prototypeOnly: sahiplendirmenin mutluluk bedeli.
+  ///
+  /// İyi bir yuva bulmak doğru karar olabilir ama yine de bir ayrılıktır.
+  static const int prototypeOnlyRehomeHappiness = -5;
+
+  /// prototypeOnly: bir hayvan en çok kaç yıl kayıp kalabilir (D-109).
+  ///
+  /// Faho bildirdi: "kaçan hayvan mutlaka sonuçlansın". Eskiden dönme
+  /// ihtimali her yıl yeniden atılıyordu ve şanssız bir hayvan ömür boyu
+  /// kayıp kalabiliyordu. Artık bu sürenin sonunda durum kapanır:
+  /// hayvan ya döner ya da başka bir yuva bulmuş sayılır.
+  static const int prototypeOnlyMaxMissingYears = 3;
+
+  /// Hayvan başka bir yuvaya verilebilir mi? (D-109)
+  static InteractionAvailability rehomeAvailability(
+    GameState state,
+    Pet pet,
+  ) {
+    if (!pet.isAlive) {
+      return const InteractionAvailability.blocked('Bu hayvan artık yok.');
+    }
+    if (pet.isRehomed) {
+      return const InteractionAvailability.blocked(
+        'Bu hayvanı zaten başka bir yuvaya verdin.',
+      );
+    }
+    if (pet.isMissing) {
+      return const InteractionAvailability.blocked(
+        'Önce kayıp hayvanın dönmesini beklemen gerekiyor.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Hayvanı başka bir yuvaya verir (D-109).
+  ///
+  /// **Vefat değildir**: hayvan yaşamaya devam eder, kaydı silinmez ve
+  /// "Geçmişte bakıp verdiklerin" bölümünde görünür. Bakım gideri
+  /// bundan sonra işlemez.
+  static ({GameState state, bool applied, String text}) rehome({
+    required GameState state,
+    required String petId,
+  }) {
+    final Pet? pet = petById(state, petId);
+    if (pet == null) {
+      return (state: state, applied: false, text: 'Böyle bir hayvan yok.');
+    }
+    final InteractionAvailability check = rehomeAvailability(state, pet);
+    if (!check.isAllowed) {
+      return (state: state, applied: false, text: check.reason!);
+    }
+
+    final String metin = '${pet.name} için yeni bir yuva buldun. '
+        'Vedalaşmak kolay olmadı.';
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyRehomeHappiness,
+        ),
+      ),
+      pets: List<Pet>.unmodifiable(
+        state.pets.map((Pet p) => p.id == petId
+            ? p.copyWith(rehomedAtPlayerAge: state.player.age)
+            : p),
+      ),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: state.player.age,
+          text: metin,
+          category: LogCategory.aile,
+        ),
+      ]),
+    );
+    return (state: next, applied: true, text: metin);
+  }
 
   static Pet? petById(GameState state, String id) {
     for (final Pet p in state.pets) {
@@ -82,6 +186,32 @@ abstract final class PetCare {
         'Evde bakabileceğin kadar hayvan var.',
       );
     }
+    // Özel izin gerektiren tür (D-082) artık gerçekten zor (D-109):
+    // yaş şartı ağırdır ve iznin ayrıca bir bedeli vardır. Kapı
+    // kapanmaz, ama bu bir "tıkla ve al" tercihi değildir.
+    if (species.requiresPermit) {
+      if (state.player.age < prototypeOnlyPermitMinAge) {
+        return InteractionAvailability.blocked(
+          '${species.label} için özel izin gerekiyor; izin '
+          '$prototypeOnlyPermitMinAge yaşından önce verilmiyor.',
+        );
+      }
+      if (!state.movedOut) {
+        return InteractionAvailability.blocked(
+          '${species.label} için kendi evinde yaşıyor olman gerekiyor; '
+          'izin ailenin evine verilmiyor.',
+        );
+      }
+      final int toplam = species.adoptionCost + permitFeeFor(species);
+      if (state.player.wallet < toplam) {
+        return InteractionAvailability.blocked(
+          '${species.label} için hayvanın bedeli ve izin masrafı '
+          'birlikte ${trMoney(toplam)} tutuyor; cüzdanında yeterli para '
+          'yok.',
+        );
+      }
+      return const InteractionAvailability.allowed();
+    }
     if (state.player.wallet < species.adoptionCost) {
       return InteractionAvailability.blocked(
         '${trMoney(species.adoptionCost)} gerekiyor; cüzdanında yeterli '
@@ -90,6 +220,16 @@ abstract final class PetCare {
     }
     return const InteractionAvailability.allowed();
   }
+
+  /// prototypeOnly: özel izin gerektiren hayvan için en küçük yaş.
+  static const int prototypeOnlyPermitMinAge = 25;
+
+  /// prototypeOnly: özel iznin masrafı — hayvanın bedelinin yarısı.
+  ///
+  /// İzin, muayene, kayıt ve uygun barınak: bedelin yanında ayrıca
+  /// ödenir. İzin gerektirmeyen türde sıfırdır.
+  static int permitFeeFor(PetSpecies species) =>
+      species.requiresPermit ? species.adoptionCost ~/ 2 : 0;
 
   /// Bir hayvan sahiplenir.
   ///
@@ -127,9 +267,11 @@ abstract final class PetCare {
 
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet - species.adoptionCost,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + 5,
+        wallet: state.player.wallet -
+            species.adoptionCost -
+            permitFeeFor(species),
+        stats: state.player.stats.gain(
+          happiness: 5,
         ),
       ),
       pets: List<Pet>.unmodifiable(<Pet>[...state.pets, yeni]),
@@ -216,16 +358,21 @@ abstract final class PetCare {
       );
     }
 
+    // Veteriner ziyareti hayvanın **kendi sağlığını** yükseltir
+    // (D-058): gerçek bir anlamı olsun diye.
     final Pet guncel = pet.copyWith(
       bond: (pet.bond + bag).clamp(0, 100),
+      health: action == PetAction.veteriner
+          ? pet.health + prototypeOnlyVetHealthGain
+          : pet.health,
     );
 
     final GameState next = state.copyWith(
       player: state.player.copyWith(
         wallet: state.player.wallet - ucret,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + mutluluk,
-          health: state.player.stats.health + saglik,
+        stats: state.player.stats.gain(
+          happiness: mutluluk,
+          health: saglik,
         ),
       ),
       pets: _replace(state.pets, guncel),
@@ -262,7 +409,9 @@ abstract final class PetCare {
     int toplamGider = 0;
 
     for (final Pet pet in state.pets) {
-      if (!pet.isAlive || !pet.inPlayerHousehold) {
+      // Vefat eden, hanede olmayan ve **başka yuvaya verilen** hayvan
+      // için yıl işlemez: bakım gideri de alınmaz (D-109).
+      if (!pet.isActive || !pet.inPlayerHousehold) {
         sonuc.add(pet);
         continue;
       }
@@ -271,7 +420,22 @@ abstract final class PetCare {
       Pet guncel = pet.copyWith(age: pet.age + 1);
 
       // --- Bakım gideri: yılda **bir kez** ------------------------------
-      if (guncel.lastCareChargedPlayerAge != newAge) {
+      //
+      // **Sahiplenmediğin hayvanın bakımı senden çıkmaz (D-144).**
+      //
+      // Faho bildirdi: "4-5-6 yaşlarında aileden harçlık alıyorum, sene
+      // geçtiğinde harçlığım evde zaten ben doğduğumda var olan hayvanın
+      // bakımına gidiyor! Eğer hayvanı ben sahiplenmediysem bakımına
+      // benden ücret çıkmasın."
+      //
+      // `adoptedAtPlayerAge == null` demek "oyuncu doğduğunda hayvan
+      // evdeydi" demektir; o hayvan ailenin hayvanıdır. Yaşlanması,
+      // kaçması, hastalanması ve vefatı aynen işler — yalnızca para
+      // oyuncunun cüzdanından çıkmaz.
+      final bool bakimiSenOdemezsin = guncel.adoptedAtPlayerAge == null;
+      if (bakimiSenOdemezsin) {
+        guncel = guncel.copyWith(lastCareChargedPlayerAge: newAge);
+      } else if (guncel.lastCareChargedPlayerAge != newAge) {
         final int gider = tur.yearlyCareCost;
         if (cuzdan >= gider) {
           cuzdan -= gider;
@@ -288,6 +452,117 @@ abstract final class PetCare {
           );
         }
         guncel = guncel.copyWith(lastCareChargedPlayerAge: newAge);
+      }
+
+      // --- Kaçma ve dönüş (D-082) ---------------------------------------
+      //
+      // Faho'nun isteği: "bazen evden kaçabilir, hastalanabilir".
+      // Kaçan hayvan **yok olmaz** (D-058): kayıtta kalır ve büyük
+      // ihtimalle döner. Kayıpken bakım gideri işlemez, yaşlanmaya
+      // devam eder.
+      if (guncel.isMissing) {
+        final int kayipYil = newAge - (guncel.missingSinceAge ?? newAge);
+        final bool sonYil = kayipYil >= prototypeOnlyMaxMissingYears;
+        if (rng.chance(prototypeOnlyReturnChance)) {
+          guncel = guncel.copyWith(missingSinceAge: null);
+          gunluk.add(
+            LifeLogEntry(
+              age: newAge,
+              text: '${guncel.name} eve döndü.',
+              category: LogCategory.aile,
+            ),
+          );
+          bildirimler.add(
+            PendingNotice(
+              id: 'hayvan-dondu-${guncel.id}-$newAge',
+              kind: NoticeKind.hayvan,
+              age: newAge,
+              title: '${guncel.name} döndü',
+              text: '${guncel.name} kapının önünde bekliyordu. '
+                  'Sağ salim geri geldi.',
+            ),
+          );
+        } else if (sonYil) {
+          // Kayıp sonsuza kadar sürmez (D-109): süre dolunca durum
+          // kapanır. Hayvan **ölmez**; başka bir yuva bulmuş sayılır ve
+          // kaydı "geçmişte bakıp verdiklerin" arasına geçer.
+          guncel = guncel.copyWith(rehomedAtPlayerAge: newAge);
+          gunluk.add(
+            LifeLogEntry(
+              age: newAge,
+              text: '${guncel.name} bir daha dönmedi. Komşular başka bir '
+                  'mahallede görüldüğünü söyledi.',
+              category: LogCategory.aile,
+            ),
+          );
+          bildirimler.add(
+            PendingNotice(
+              id: 'hayvan-kapandi-${guncel.id}-$newAge',
+              kind: NoticeKind.hayvan,
+              age: newAge,
+              title: '${guncel.name} dönmedi',
+              text: '${guncel.name} $prototypeOnlyMaxMissingYears yıldır '
+                  'kayıptı. Aramayı bıraktın; başka bir kapıda '
+                  'yaşadığını duydun.',
+            ),
+          );
+        }
+      } else if (rng.chance(tur.escapeRisk)) {
+        guncel = guncel.copyWith(missingSinceAge: newAge);
+        gunluk.add(
+          LifeLogEntry(
+            age: newAge,
+            text: '${guncel.name} evden kaçtı.',
+            category: LogCategory.aile,
+          ),
+        );
+        bildirimler.add(
+          PendingNotice(
+            id: 'hayvan-kacti-${guncel.id}-$newAge',
+            kind: NoticeKind.hayvan,
+            age: newAge,
+            title: '${guncel.name} kayıp',
+            text: '${guncel.name} evden kaçtı. Mahalleye ilan astın; '
+                'dönmesini bekliyorsun.',
+          ),
+        );
+      }
+
+      // --- Hastalık (D-082) ----------------------------------------------
+      //
+      // Hasta hayvanın sağlığı düşer. Veteriner ziyareti gerçekten işe
+      // yarar; bakılmayan hayvanın sağlığı yıllar içinde erir ve doğal
+      // vefat ihtimali artar. Parası yetmeyen oyuncu cezalandırılmaz,
+      // ama hayvanın durumu iyileşmez.
+      if (!guncel.isMissing && rng.chance(prototypeOnlyIllnessChance)) {
+        guncel = guncel.copyWith(
+          health: guncel.health - prototypeOnlyIllnessDamage,
+        );
+        gunluk.add(
+          LifeLogEntry(
+            age: newAge,
+            text: '${guncel.name} hastalandı; veterinere görünmesi '
+                'gerekiyor.',
+            category: LogCategory.aile,
+          ),
+        );
+        bildirimler.add(
+          PendingNotice(
+            id: 'hayvan-hasta-${guncel.id}-$newAge',
+            kind: NoticeKind.hayvan,
+            age: newAge,
+            title: '${guncel.name} hasta',
+            // Sayı cümle sonunda kalınca "Sağlığı 57. Aktiviteler"
+            // sıra sayısı gibi okunuyordu (Faho bildirdi). Sayı artık
+            // parantez içinde; ardından nokta gelmiyor. Türkçe ek de
+            // kullanılmıyor, çünkü ek son hanenin ünlüsüne göre değişir
+            // (57'ye ama 60'a) ve sayı değişkendir.
+            text: '${guncel.name} bu yıl hastalandı (sağlığı '
+                '${guncel.health}). Aktiviteler → Evcil Hayvanlar\'dan '
+                'veterinere götürebilirsin '
+                '(${trMoney(tur.vetCost)}).',
+          ),
+        );
       }
 
       // --- Doğal vefat ---------------------------------------------------
@@ -335,8 +610,8 @@ abstract final class PetCare {
       );
     }
 
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness + mutluluk,
+    final Stats stats = state.player.stats.gain(
+      happiness: mutluluk,
     );
 
     return state.copyWith(
@@ -399,8 +674,13 @@ abstract final class PetCare {
     if (pet.age < tur.typicalLifespan ~/ 2) return false;
     final double oran =
         (pet.age - tur.typicalLifespan / 2) / (tur.maxLifespan - tur.typicalLifespan / 2);
+    // Sağlık ölüm eğrisini besler (D-058): bakılan hayvan daha uzun
+    // yaşar, bakılmayan daha erken gider. Sağlık 75 nötrdür.
+    final double saglikCarpani =
+        (1 + (Pet.prototypeOnlyDefaultPetHealth - pet.health) / 100)
+            .clamp(0.5, prototypeOnlyHealthDeathFactor);
     // prototypeOnly: olağan ömrün yarısında ~%0, üst sınırda %100.
-    return rng.nextDouble() < oran * oran;
+    return rng.nextDouble() < oran * oran * saglikCarpani;
   }
 
   static String _birlikteMetni(Pet pet, int playerAge) {
@@ -450,7 +730,7 @@ enum PetAction {
     id: 'bakim',
     label: 'Bakımını yap',
     description: 'Tarak, tırnak, kulak. Sevmiyor ama gerekiyor.',
-    cost: 250, // prototypeOnly
+    cost: 900, // prototypeOnly
     happiness: 2,
     bond: 4,
     maxPerAge: 2,

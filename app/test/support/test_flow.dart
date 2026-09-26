@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bir_omur/data/health_crisis_catalog.dart';
+import 'package:bir_omur/data/education_tracks.dart';
 import 'package:bir_omur/domain/generation/school_people.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
@@ -128,6 +129,86 @@ Future<void> answerPendingNotices(
   }
 }
 
+/// Lise alanı seçimi bekliyorsa oyuncunun yerine bir alan seçer (D-094).
+///
+/// Gerçek oyunda bu kararı oyuncu verir ve seçim yapılmadan yaş atlanmaz;
+/// otomatik ilerleyen testlerde aynı adımı burası atar. Puanın yettiği ilk
+/// alan seçilir — puan ne olursa olsun en az bir alan açıktır.
+void resolveTrackChoice(GameController controller) {
+  if (!controller.needsTrackChoice) return;
+  final List<EducationTrackInfo> acik = controller.availableTracks();
+  if (acik.isEmpty) return;
+  controller.chooseTrack(acik.first.track);
+}
+
+/// Lise sonrası yol seçimi bekliyorsa oyuncunun yerine karar verir (D-111).
+///
+/// Gerçek oyunda bu kararı oyuncu verir ve karar verilmeden yaş atlanmaz.
+/// Testlerde varsayılan karar **üniversiteye gitmemek**tir: her durumda
+/// açık olan tek kapı budur, dolayısıyla test hiçbir zaman kilitlenmez.
+/// Üniversiteye giden yolu sınayan testler kendi seçimini kendisi yapar.
+void resolveAfterSchoolChoice(GameController controller) {
+  if (!controller.needsAfterSchoolChoice) return;
+  controller.skipUniversity();
+}
+
+/// Bekleyen **her** eğitim kararını kapatır (D-094, D-111).
+void resolveEducationChoices(GameController controller) {
+  resolveTrackChoice(controller);
+  resolveAfterSchoolChoice(controller);
+}
+
+/// Ekranda açık bir eğitim seçimi penceresi varsa **oyuncunun yapacağını**
+/// yaparak kapatır (D-094, D-111).
+///
+/// Pencere dışarı dokunarak kapanmaz; bu yüzden durumu koddan değiştirmek
+/// yetmez, pencerenin kendi düğmelerine basılır. Böylece test gerçek
+/// oyundaki akışı izler ve yeni pencereler de sınanmış olur.
+Future<void> resolveEducationSheets(
+  WidgetTester tester,
+  GameController controller,
+) async {
+  for (int tur = 0; tur < 8; tur++) {
+    // Lise alanı penceresi: puanı yeten ilk alan seçilir.
+    final Finder alanKapat = find.byKey(const Key('track_choice_close'));
+    if (alanKapat.evaluate().isNotEmpty) {
+      await tester.tap(alanKapat);
+      await tester.pumpAndSettle();
+      continue;
+    }
+    if (controller.needsTrackChoice &&
+        find.byKey(const Key('track_choice_title')).evaluate().isNotEmpty) {
+      final List<EducationTrackInfo> acik = controller.availableTracks();
+      if (acik.isEmpty) return;
+      await tester.tap(find.byKey(Key('track_choice_${acik.first.track.name}')));
+      await tester.pumpAndSettle();
+      continue;
+    }
+
+    // Mezuniyet sonrası penceresi: varsayılan karar üniversiteye gitmemek.
+    final Finder sonraKapat = find.byKey(const Key('after_school_close'));
+    if (sonraKapat.evaluate().isNotEmpty) {
+      await tester.tap(sonraKapat);
+      await tester.pumpAndSettle();
+      continue;
+    }
+    final Finder atla = find.byKey(const Key('after_school_skip'));
+    if (atla.evaluate().isNotEmpty) {
+      await tester.tap(atla);
+      await tester.pumpAndSettle();
+      continue;
+    }
+
+    // Pencere yoksa kararı doğrudan kapatmak yeterli.
+    if (controller.needsEducationChoice) {
+      resolveEducationChoices(controller);
+      await tester.pumpAndSettle();
+      continue;
+    }
+    return;
+  }
+}
+
 /// Hedef yaşa, yol boyunca çıkan olayları yanıtlayarak ilerler.
 Future<void> ageTo(
   WidgetTester tester,
@@ -141,8 +222,14 @@ Future<void> ageTo(
     if (controller.state!.deceased) return;
     if (guard++ > 200) fail('Yaş ilerlemiyor.');
     await answerPendingEvents(tester, controller, preferChoiceId: preferChoiceId);
+    // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111).
+    await resolveEducationSheets(tester, controller);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('age_up_button')));
     await tester.pumpAndSettle();
+    // Bu yıl bir eğitim kararı doğduysa pencere hemen açılır; bir sonraki
+    // "Yaş Al"ı engellemesin diye burada kapatılır.
+    await resolveEducationSheets(tester, controller);
   }
   await answerPendingEvents(tester, controller, preferChoiceId: preferChoiceId);
 }
@@ -195,6 +282,8 @@ void advanceToAge(
     if (controller.state!.deceased) return;
     if (guard++ > 500) throw StateError('Yaş ilerlemiyor.');
     resolvePendingEvents(controller, preferChoiceId: preferChoiceId);
+    // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111).
+    resolveEducationChoices(controller);
     controller.ageUp();
   }
   resolvePendingEvents(controller, preferChoiceId: preferChoiceId);

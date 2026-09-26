@@ -30,6 +30,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/invariants.dart';
 
+import 'support/test_flow.dart';
+
 /// Ekrandaki olayı ve krizi kapatarak bir yaş ilerletir.
 void yasAl(GameController controller) {
   int guard = 0;
@@ -49,6 +51,8 @@ void yasAl(GameController controller) {
       controller.state!.pendingEvent!.choices.first.id,
     );
   }
+  // Lise alanı seçilmeden yaş atlanmaz (D-094).
+  resolveEducationChoices(controller);
   controller.ageUp();
   while (controller.state!.hasPendingCrisis) {
     if (guard++ > 60) fail('Kriz kapanmıyor.');
@@ -376,6 +380,8 @@ void main() {
         controller.debugSetState(
           controller.state!.copyWith(pendingEvent: null),
         );
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
 

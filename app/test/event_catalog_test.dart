@@ -1,3 +1,4 @@
+import 'package:bir_omur/domain/models/relation.dart';
 import 'dart:math';
 
 import 'package:bir_omur/data/event_pool.dart';
@@ -204,6 +205,12 @@ void main() {
         player: state.player.copyWith(currentCity: 'Yakınşehir'),
       );
 
+      // Not: "başka şehirde" demek "erişilemez" demek değildir. Kural
+      // gereği eş, çocuk ve torunla başka şehirde de görüşülür
+      // (`GameState.isReachable`). Bu yüzden test varsayım yapmak
+      // yerine **gerçekten** erişilebilirliği kontrol eder; böylece
+      // ileride çocukla kurulabilen bir olay eklenince yanlış yere
+      // patlamaz, gerçek bir ihlali yakalar.
       for (int i = 0; i < 300; i++) {
         final ActiveEvent? olay =
             motor.openingEvent(uzak.copyWith(pendingEvent: null), Random(i));
@@ -211,7 +218,32 @@ void main() {
         final GameEvent tanim =
             kEventPool.firstWhere((GameEvent e) => e.id == olay.eventId);
         if (!tanim.requirement.requireReachable) continue;
-        fail('${olay.eventId} erişilemeyen kişiyle kuruldu');
+        final Person? kisi = uzak.personById(olay.personId!);
+        expect(kisi, isNotNull, reason: '${olay.eventId}: kişi kayıtta yok');
+        expect(
+          uzak.isReachable(kisi!),
+          isTrue,
+          reason: '${olay.eventId} erişilemeyen '
+              '${kisi.relation.name} ile kuruldu',
+        );
+      }
+
+      // Kuralın gerçekten kapattığı bağ **arkadaşlık**: başka şehirdeki
+      // arkadaş gündelik olayda kullanılmaz. (Anne, baba, kardeş ve
+      // çocuk başka şehirde de görüşülür; bu bilinçli bir kuraldır.)
+      for (int i = 0; i < 300; i++) {
+        final ActiveEvent? olay =
+            motor.openingEvent(uzak.copyWith(pendingEvent: null), Random(i));
+        if (olay == null || olay.personId == null) continue;
+        final GameEvent tanim =
+            kEventPool.firstWhere((GameEvent e) => e.id == olay.eventId);
+        if (!tanim.requirement.requireReachable) continue;
+        final Person kisi = uzak.personById(olay.personId!)!;
+        expect(
+          kisi.relation,
+          isNot(RelationType.arkadas),
+          reason: '${olay.eventId} başka şehirdeki arkadaşla kurulmamalı',
+        );
       }
     });
   });

@@ -70,11 +70,85 @@ class SocialEngine {
   /// prototypeOnly: Ünün açılması için gereken toplam takipçi.
   static const int prototypeOnlyFameThreshold = 500;
 
+  /// prototypeOnly: tanınan biri yeni hesap açarken mevcut kitlesinin
+  /// bu oranı kadarıyla başlar (D-105).
+  ///
+  /// Faho bildirdi: "500 bin takipçim varken yeni hesap açınca sıfırdan
+  /// başlıyorum." Gerçekte tanınan biri yeni bir platforma açıldığında
+  /// kitlesinin bir kısmı peşinden gelir. Tamamı gelmez: her platformun
+  /// kendi kitlesi vardır.
+  static const double prototypeOnlyCarryOverRatio = 0.08;
+
+  /// prototypeOnly: taşınan kitlenin üst sınırı.
+  ///
+  /// Çok büyük hesapların yeni platformu tek hamlede doldurması
+  /// engellenir; büyüme yine emek ister.
+  static const int prototypeOnlyCarryOverCap = 40000;
+
+  /// prototypeOnly: taşınmanın işlemesi için gereken en az toplam kitle.
+  static const int prototypeOnlyCarryOverThreshold = 2000;
+
   /// prototypeOnly: Ün hesabında kaç takipçi bir Ün puanına denk gelir.
   static const int prototypeOnlyFollowersPerFame = 900;
 
   /// prototypeOnly: Ünün üst sınırı.
   static const int prototypeOnlyMaxFame = 100;
+
+  // -------------------------------------------------------------------
+  // Platformlar arası yayılma ve yıllık büyüme (Faho'nun isteği)
+  //
+  // Bunlar Faho'nun iki somut isteği: bir platformda takipçi artınca
+  // diğerlerinde de artması, ve takipçisi çok olan hesabın yıl geçtikçe
+  // kendiliğinden büyümesi. Sayılar prototypeOnly (Q-112).
+  // -------------------------------------------------------------------
+
+  /// prototypeOnly: bir platformdaki takipçi kazancının **diğer açık
+  /// hesaplara** yansıyan payı.
+  ///
+  /// Yalnızca kazanç yayılır, kayıp yayılmaz: bir platformda tökezlemek
+  /// diğerlerindeki kitleyi silmemeli.
+  static const double prototypeOnlyCrossShare = 0.15;
+
+  /// prototypeOnly: yayılmanın oluşması için kaynak hesapta gereken
+  /// en az kazanç.
+  static const int prototypeOnlyCrossMinGain = 4;
+
+  /// prototypeOnly: kendiliğinden yıllık büyümenin başladığı takipçi
+  /// sayısı. Bunun altındaki hesap kendi kendine büyümez.
+  static const int prototypeOnlyOrganicThreshold = 5000;
+
+  /// prototypeOnly: kendiliğinden yıllık büyüme oranı.
+  static const double prototypeOnlyOrganicRate = 0.06;
+
+  /// prototypeOnly: kaç yıl paylaşım yapılmazsa hesap durgun sayılır.
+  ///
+  /// Bu kural Faho'nun isteğinde yoktu ama teknik olarak gerekli:
+  /// yıllarca dokunulmayan hesap ömür boyu büyümeye devam ederse
+  /// oyuncu hiçbir şey yapmadan ünlü oluyor. Q-112'de soruldu.
+  static const int prototypeOnlyDormantAfterYears = 4;
+
+  /// prototypeOnly: durgun hesabın yıllık takipçi kaybı oranı.
+  static const double prototypeOnlyDormantDecay = 0.05;
+
+  /// Yıllık değişimin günlüğe yazılması için gereken en az takipçi.
+  ///
+  /// Faho'nun Q-112 kararı: "Instagram'ın 183 takipçi büyüdü" gibi her
+  /// yıl tekrarlanan satırlar günlüğü boğuyordu. Yalnızca **anlamlı**
+  /// büyüme, önemli eşiğin aşılması ya da Ün seviyesinin değişmesi
+  /// yazılır.
+  static const int prototypeOnlyLogWorthyDelta = 2000;
+
+  /// Günlüğe yazılmayı hak eden takipçi eşikleri.
+  ///
+  /// Bu sayıların aşıldığı yıl, değişim küçük olsa da yazılır: "on bini
+  /// geçtin" cümlesi oyuncu için gerçekten bir olaydır.
+  static const List<int> prototypeOnlyMilestones = <int>[
+    10000,
+    50000,
+    100000,
+    500000,
+    1000000,
+  ];
 
   // ===================================================================
   // Hesap
@@ -100,12 +174,24 @@ class SocialEngine {
     final InteractionAvailability check = accountAvailability(state, platform);
     if (!check.isAllowed) return _blocked(state, check.reason!);
 
-    final String metin = '${platform.label} hesabı açtın. '
-        'İlk ${platform.audienceWord}lerin tanıdıkların olacak.';
+    // Tanınan biri sıfırdan başlamaz (D-105): mevcut kitlesinin bir
+    // kısmı yeni platforma taşınır. Tanınmayan oyuncu sıfırdan başlar.
+    final int tasinan = _carryOverFollowers(state);
+
+    final String metin = tasinan > 0
+        ? '${platform.label} hesabı açtın. Seni tanıyanların bir kısmı '
+            'hemen buldu: ${trNumber(tasinan)} ${platform.audienceWord} '
+            'ile başlıyorsun.'
+        : '${platform.label} hesabı açtın. '
+            'İlk ${platform.audienceWord}lerin tanıdıkların olacak.';
     final GameState next = state.copyWith(
       socialAccounts: List<SocialAccount>.unmodifiable(<SocialAccount>[
         ...state.socialAccounts,
-        SocialAccount(platform: platform, createdAtAge: state.player.age),
+        SocialAccount(
+          platform: platform,
+          createdAtAge: state.player.age,
+          followers: tasinan,
+        ),
       ]),
     );
     return SocialResult(
@@ -149,8 +235,10 @@ class SocialEngine {
   int remainingPosts(GameState state, SocialPlatform platform) {
     final SocialAccount? account = state.accountFor(platform);
     if (account == null) return 0;
-    return (prototypeOnlyMaxPostsPerAge - _postsThisAge(state, account))
-        .clamp(0, prototypeOnlyMaxPostsPerAge);
+    return (prototypeOnlyMaxPostsPerAge - _postsThisAge(state, account)).clamp(
+      0,
+      prototypeOnlyMaxPostsPerAge,
+    );
   }
 
   /// Paylaşım yapar.
@@ -166,24 +254,36 @@ class SocialEngine {
 
     final int yeniTakipci = (account.followers + delta).clamp(0, 1 << 30);
     final int gercekDelta = yeniTakipci - account.followers;
+    // NOT: yorgunluk kaybı aşağıda, sponsorluk belli olduktan sonra
+    // hesaplanır ve takipçi sayısına orada uygulanır (D-119).
 
-    // İçerik geliri: kitlesi olan hesapta, gerçekten ilgi gören
-    // paylaşımda ve garanti olmadan (Paket 10).
-    final int kazanc = SocialIncome.earningsFor(
-      state: state,
-      account: account,
-      content: content,
-      followerDelta: gercekDelta,
-      rng: rng,
-    );
+    // Sıradan paylaşım para kazandırmaz (D-117). Faho bildirdi:
+    // "dümdüz yaptığım paylaşımlardan ücret kazanıyorum, bu olmamalı".
+    // Para sponsorluktan ve büyük hesabın yıllık gelir payından gelir.
+    const int kazanc = 0;
 
     // Açık bir sponsorluk varsa ve paylaşım o platformdaysa yükümlülük
     // **bu paylaşımla** yerine gelir; ücret bir kez ödenir.
     final SponsorDeal? sponsor = _openDealFor(state, content.platform);
     final int sponsorUcreti = sponsor?.fee ?? 0;
 
+    // Hesabı reklam panosuna çeviren kitlesini yorar (D-119). Ara sıra
+    // reklam yapmak bedelsizdir; art arda sponsorluk takipçi kaybettirir.
+    final double yorgunluk = sponsor == null
+        ? 0
+        : SocialIncome.audienceFatigue(
+            state: state,
+            platform: content.platform,
+            age: state.player.age,
+          );
+    final int yorgunlukKaybi =
+        yorgunluk <= 0 ? 0 : (account.followers * yorgunluk).round();
+
+    final int yorgunlukSonrasi =
+        (yeniTakipci - yorgunlukKaybi).clamp(0, 1 << 30);
+
     final SocialAccount guncel = account.copyWith(
-      followers: yeniTakipci,
+      followers: yorgunlukSonrasi,
       posts: List<SocialPost>.unmodifiable(<SocialPost>[
         ...account.posts,
         SocialPost(
@@ -199,10 +299,25 @@ class SocialEngine {
     GameState next = state.copyWith(
       socialAccounts: List<SocialAccount>.unmodifiable(
         state.socialAccounts
-            .map((SocialAccount a) => a.platform == content.platform ? guncel : a)
+            .map(
+              (SocialAccount a) => a.platform == content.platform ? guncel : a,
+            )
             .toList(growable: false),
       ),
     );
+
+    // Bir platformda tutan içerik oyuncuyu diğerlerinde de aratır:
+    // kazancın bir payı açık olan öbür hesaplara yansır (Faho'nun
+    // isteği). Kayıp yayılmaz.
+    final Map<SocialPlatform, int> yansiyan = _crossPlatformGains(
+      next,
+      content.platform,
+      gercekDelta,
+    );
+    if (yansiyan.isNotEmpty) {
+      next = _applyFollowerDeltas(next, yansiyan);
+    }
+
     next = _updateFame(next, content);
 
     // Para cüzdana gerçekten işlenir.
@@ -217,9 +332,11 @@ class SocialEngine {
       next = next.copyWith(
         sponsorDeals: List<SponsorDeal>.unmodifiable(
           next.sponsorDeals
-              .map((SponsorDeal d) => d.id == sponsor.id
-                  ? d.copyWith(completedAtAge: next.player.age)
-                  : d)
+              .map(
+                (SponsorDeal d) => d.id == sponsor.id
+                    ? d.copyWith(completedAtAge: next.player.age)
+                    : d,
+              )
               .toList(growable: false),
         ),
       );
@@ -229,15 +346,25 @@ class SocialEngine {
 
     // Günlükte paranın **nereden** geldiği ayrı ayrı yazılır.
     GameState kayitli = gercekDelta.abs() >= 1 ? _log(next, metin) : next;
+    for (final MapEntry<SocialPlatform, int> e in yansiyan.entries) {
+      kayitli = _log(
+        kayitli,
+        '${e.key.label} tarafında da fark edildin: '
+        '${trNumber(e.value)} ${e.key.audienceWord} kazandın.',
+      );
+    }
     if (kazanc > 0) {
       kayitli = _log(
         kayitli,
-        '${SocialIncome.earningText(
-          content: content,
-          platform: account.platform,
-          followerDelta: gercekDelta,
-          amount: kazanc,
-        )} ${trMoney(kazanc)} cüzdanına girdi.',
+        '${SocialIncome.earningText(content: content, platform: account.platform, followerDelta: gercekDelta, amount: kazanc)} ${trMoney(kazanc)} cüzdanına girdi.',
+      );
+    }
+    if (yorgunlukKaybi > 0) {
+      kayitli = _log(
+        kayitli,
+        'Arka arkaya reklam paylaşımı kitleni yordu: '
+        '${trNumber(yorgunlukKaybi)} ${account.platform.audienceWord} '
+        'gitti.',
       );
     }
     if (sponsor != null) {
@@ -278,7 +405,8 @@ class SocialEngine {
     if (teklif == null) {
       return _blocked(state, 'Bekleyen bir sponsorluk teklifi yok.');
     }
-    final String metin = '${teklif.label} ile anlaştın. '
+    final String metin =
+        '${teklif.label} ile anlaştın. '
         'Ücret, ${teklif.platform.label} üzerinde paylaşımı yapınca '
         'ödenecek.';
     final GameState next = state.copyWith(
@@ -322,25 +450,56 @@ class SocialEngine {
     int newAge,
   ) {
     final List<String> satirlar = <String>[];
-    final List<SponsorDeal> guncel = state.sponsorDeals.map((SponsorDeal d) {
-      if (!d.isOpen) return d;
-      if (newAge - d.acceptedAtAge < SocialIncome.prototypeOnlyDealDeadline) {
-        return d;
-      }
-      satirlar.add(
-        '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma düştü '
-        've ödeme olmadı.',
-      );
-      return d.copyWith(expired: true);
-    }).toList(growable: false);
+    final List<SponsorDeal> dusen = <SponsorDeal>[];
+    final List<SponsorDeal> guncel = state.sponsorDeals
+        .map((SponsorDeal d) {
+          if (!d.isOpen) return d;
+          if (newAge - d.acceptedAtAge <
+              SocialIncome.prototypeOnlyDealDeadline) {
+            return d;
+          }
+          dusen.add(d);
+          return d.copyWith(expired: true);
+        })
+        .toList(growable: false);
 
-    if (satirlar.isEmpty) return (state: state, logTexts: satirlar);
-    return (
-      state: state.copyWith(
-        sponsorDeals: List<SponsorDeal>.unmodifiable(guncel),
-      ),
-      logTexts: satirlar,
+    if (dusen.isEmpty) return (state: state, logTexts: satirlar);
+
+    GameState sonraki = state.copyWith(
+      sponsorDeals: List<SponsorDeal>.unmodifiable(guncel),
     );
+
+    // Sözünü tutmamanın bir bedeli vardır (D-104). Marka küser, konu
+    // kitleye yansır: takipçi kaybı **gerçekten** uygulanır ve yalnızca
+    // uygulanan kadar yazılır.
+    for (final SponsorDeal d in dusen) {
+      final SocialAccount? hesap = sonraki.accountFor(d.platform);
+      final int kayip = hesap == null
+          ? 0
+          : (hesap.followers * SocialIncome.brokenDealLoss(sonraki)).round();
+      if (kayip > 0) {
+        sonraki = _applyFollowerDeltas(sonraki, <SocialPlatform, int>{
+          d.platform: -kayip,
+        });
+      }
+      sonraki = sonraki.copyWith(
+        player: sonraki.player.copyWith(
+          stats: sonraki.player.stats.gain(
+            happiness: SocialIncome.prototypeOnlyBrokenDealHappiness,
+          ),
+        ),
+      );
+      satirlar.add(
+        kayip > 0
+            ? '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
+                'düştü, ödeme olmadı ve konu kitlene yansıdı: '
+                '${trNumber(kayip)} ${d.platform.audienceWord} kaybettin.'
+            : '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
+                'düştü ve ödeme olmadı.',
+      );
+    }
+
+    return (state: sonraki, logTexts: satirlar);
   }
 
   /// Takipçi değişimi.
@@ -352,20 +511,23 @@ class SocialEngine {
   ) {
     // Aynı içeriği üst üste paylaşmak kazancı düşürür.
     final int tekrar = account.recentCountOf(content.id);
-    final double tekrarCarpani =
-        (1 - tekrar * prototypeOnlyRepeatPenalty).clamp(0.1, 1.0);
+    final double tekrarCarpani = (1 - tekrar * prototypeOnlyRepeatPenalty)
+        .clamp(0.1, 1.0);
 
     // Takipçi kaybı riski: içerik türüne ve tekrara bağlı.
-    final double kayipRiski =
-        (content.riskOfLoss + tekrar * 0.05).clamp(0.0, 0.6);
+    final double kayipRiski = (content.riskOfLoss + tekrar * 0.05).clamp(
+      0.0,
+      0.6,
+    );
     if (rng.nextDouble() < kayipRiski) {
-      final int enFazlaKayip =
-          (account.followers * prototypeOnlyMaxLossRatio).round();
+      final int enFazlaKayip = (account.followers * prototypeOnlyMaxLossRatio)
+          .round();
       if (enFazlaKayip <= 0) return 0;
       return -(rng.nextInt(enFazlaKayip) + 1);
     }
 
-    final double karakter = content.charismaWeight * state.player.stats.charisma +
+    final double karakter =
+        content.charismaWeight * state.player.stats.charisma +
         content.intelligenceWeight * state.player.stats.intelligence +
         content.appearanceWeight * state.player.stats.appearance;
 
@@ -375,6 +537,257 @@ class SocialEngine {
     final double ham =
         (content.baseReach + karakter * 0.5 + kitle) * tekrarCarpani * sans;
     return ham.round();
+  }
+
+  // ===================================================================
+  // Platformlar arası yayılma
+  // ===================================================================
+
+  /// Kaynak platformdaki kazancın diğer **açık** hesaplara yansıması.
+  ///
+  /// Hesabı olmayan platforma takipçi yazılmaz: olmayan hesap büyümez.
+  /// Kayıp yayılmaz; yalnızca kazanç.
+  Map<SocialPlatform, int> _crossPlatformGains(
+    GameState state,
+    SocialPlatform kaynak,
+    int kazanc,
+  ) {
+    if (kazanc < prototypeOnlyCrossMinGain) {
+      return const <SocialPlatform, int>{};
+    }
+    final Map<SocialPlatform, int> sonuc = <SocialPlatform, int>{};
+    for (final SocialAccount hesap in state.socialAccounts) {
+      if (hesap.platform == kaynak) continue;
+      final int pay = (kazanc * prototypeOnlyCrossShare).floor();
+      if (pay <= 0) continue;
+      sonuc[hesap.platform] = pay;
+    }
+    return sonuc;
+  }
+
+  /// Yeni açılan hesaba taşınan kitle (D-105).
+  ///
+  /// Uydurma değildir: **mevcut** toplam kitleden hesaplanır. Kitlesi
+  /// olmayan oyuncuda sıfırdır.
+  int _carryOverFollowers(GameState state) {
+    final int toplam = state.totalFollowers;
+    if (toplam < prototypeOnlyCarryOverThreshold) return 0;
+    return (toplam * prototypeOnlyCarryOverRatio)
+        .round()
+        .clamp(0, prototypeOnlyCarryOverCap);
+  }
+
+  /// Verilen platformlara takipçi ekler/çıkarır.
+  GameState _applyFollowerDeltas(
+    GameState state,
+    Map<SocialPlatform, int> degisim,
+  ) {
+    if (degisim.isEmpty) return state;
+    return state.copyWith(
+      socialAccounts: List<SocialAccount>.unmodifiable(
+        state.socialAccounts
+            .map((SocialAccount a) {
+              final int? d = degisim[a.platform];
+              if (d == null || d == 0) return a;
+              return a.copyWith(followers: (a.followers + d).clamp(0, 1 << 30));
+            })
+            .toList(growable: false),
+      ),
+    );
+  }
+
+  // ===================================================================
+  // Yıllık kendiliğinden değişim
+  // ===================================================================
+
+  /// Bir hesabın bu yılki kendiliğinden takipçi değişimi.
+  ///
+  /// - Kitlesi [prototypeOnlyOrganicThreshold] üstünde olan **ve hâlâ
+  ///   paylaşım yapılan** hesap yıl geçtikçe kendiliğinden büyür:
+  ///   büyük hesap kendi kendini duyurur.
+  /// - [prototypeOnlyDormantAfterYears] yıldır dokunulmayan hesap
+  ///   yavaşça erir. Bu kural olmasa oyuncu hiçbir şey yapmadan ömür
+  ///   boyu büyürdü.
+  /// - Eşiğin altındaki, hareketsiz ama yeni hesap olduğu yerde kalır.
+  int prototypeOnlyOrganicDelta(SocialAccount account, int newAge) {
+    final int sonPaylasim = account.lastPostAge ?? account.createdAtAge;
+    final int gecenYil = newAge - sonPaylasim;
+
+    if (gecenYil >= prototypeOnlyDormantAfterYears) {
+      final int kayip = (account.followers * prototypeOnlyDormantDecay).round();
+      return -kayip;
+    }
+    if (account.followers < prototypeOnlyOrganicThreshold) return 0;
+    return (account.followers * prototypeOnlyOrganicRate).round();
+  }
+
+  /// Yıl geçerken bütün hesapların kendiliğinden değişimini işler.
+  ///
+  /// Ün, büyümeden sonra yeniden hesaplanır: kitlesi yıllar içinde
+  /// büyüyen oyuncunun Ünü paylaşım yapmadığı için donup kalmasın.
+  ({GameState state, List<String> logTexts}) advanceYear(
+    GameState state,
+    int newAge,
+  ) {
+    if (state.socialAccounts.isEmpty) {
+      return (state: state, logTexts: const <String>[]);
+    }
+
+    final List<String> satirlar = <String>[];
+    final List<SocialAccount> guncel = state.socialAccounts
+        .map((SocialAccount a) {
+          final int delta = prototypeOnlyOrganicDelta(a, newAge);
+          if (delta == 0) return a;
+          final int yeni = (a.followers + delta).clamp(0, 1 << 30);
+          final int gercek = yeni - a.followers;
+          if (gercek == 0) return a;
+          // Her yıl satır yazmak günlüğü boğuyordu (Q-112). Yalnızca
+          // anlamlı büyüme ya da aşılan bir eşik yazılır; küçük
+          // dalgalanma sessizce işlenir.
+          final int? esik = _gecilenEsik(a.followers, yeni);
+          if (esik != null) {
+            satirlar.add(
+              '${a.platform.label} hesabın ${trNumber(esik)} '
+              '${a.platform.audienceWord} sınırını geçti.',
+            );
+          } else if (gercek >= prototypeOnlyLogWorthyDelta) {
+            satirlar.add(
+              '${a.platform.label} hesabın kendiliğinden büyüdü: '
+              '$gercek ${a.platform.audienceWord} eklendi.',
+            );
+          } else if (-gercek >= prototypeOnlyLogWorthyDelta) {
+            satirlar.add(
+              '${a.platform.label} hesabına uzun süredir bir şey '
+              'koymadın; ${-gercek} ${a.platform.audienceWord} '
+              'kaybettin.',
+            );
+          }
+          return a.copyWith(followers: yeni);
+        })
+        .toList(growable: false);
+
+    GameState sonraki = state.copyWith(
+      socialAccounts: List<SocialAccount>.unmodifiable(guncel),
+    );
+    sonraki = _refreshFame(sonraki);
+    sonraki = _decayFame(sonraki, newAge, satirlar);
+    sonraki = _payRevenueShare(sonraki, newAge, satirlar);
+    return (state: sonraki, logTexts: satirlar);
+  }
+
+  /// prototypeOnly: Ünün düşmeye başladığı sessizlik süresi (yıl).
+  ///
+  /// Faho "1 yıl paylaşım yapmayı unutursam düşmeli" dedi; ölçü **tam
+  /// bir yılın kaçırılmasıdır**. 20 yaşında paylaşım yapıp 21'e giren
+  /// oyuncu sessiz sayılmaz — o yıl paylaşım yapmıştır. Düşüş, hiç
+  /// paylaşım yapılmayan ilk yılın sonunda başlar.
+  static const int prototypeOnlyFameSilenceYears = 2;
+
+  /// prototypeOnly: sessiz geçen her yılın Ünden götürdüğü pay.
+  ///
+  /// Sabit puan değil **oran**: çok tanınmış biri bir yılda unutulmaz,
+  /// ama yıllar geçtikçe kayıp hızlanır.
+  static const double prototypeOnlyFameDecayRate = 0.12;
+
+  /// prototypeOnly: sessizlik uzadıkça kaybın hızlandığı yıl.
+  static const int prototypeOnlyFameFastDecayYears = 4;
+
+  /// Paylaşım yapılmayan yıllarda Ün düşer (D-118).
+  ///
+  /// Faho bildirdi: "ün neredeyse hiç ama hiç düşmüyor, bu da 1 yıl
+  /// paylaşım yapmayı unutursam düşmeli, 1 yıl uzun bir süre". Bu,
+  /// D-027'nin "Ün yalnızca yukarı taşınır" kuralını **Faho'nun kararıyla**
+  /// değiştirir: tanınmışlık bakım ister.
+  ///
+  /// Geçmişte yaşanmış tanınmışlık tamamen silinmez: Ün bir tabana kadar
+  /// düşer, sıfıra inmez.
+  GameState _decayFame(GameState state, int newAge, List<String> satirlar) {
+    final int? mevcut = state.player.fame;
+    if (mevcut == null || mevcut <= prototypeOnlyFameFloor) return state;
+
+    final int sonPaylasim = _lastPostAge(state);
+    final int sessizYil = newAge - sonPaylasim;
+    if (sessizYil < prototypeOnlyFameSilenceYears) return state;
+
+    final double hiz = sessizYil >= prototypeOnlyFameFastDecayYears
+        ? prototypeOnlyFameDecayRate * 2
+        : prototypeOnlyFameDecayRate;
+    final int kayip = (mevcut * hiz).round().clamp(1, mevcut);
+    final int yeni = (mevcut - kayip).clamp(prototypeOnlyFameFloor, mevcut);
+    if (yeni == mevcut) return state;
+
+    satirlar.add(
+      'Bir süredir paylaşım yapmıyorsun; adın daha az anılır oldu '
+      '(Ün $mevcut → $yeni).',
+    );
+    return state.copyWith(player: state.player.copyWith(fame: yeni));
+  }
+
+  /// prototypeOnly: Ünün düşebileceği taban.
+  ///
+  /// Bir kez gerçekten tanınmış olmak tamamen silinmez.
+  static const int prototypeOnlyFameFloor = 5;
+
+  /// En son paylaşım yapılan yaş; hiç paylaşım yoksa hesabın açıldığı yaş.
+  int _lastPostAge(GameState state) {
+    int enSon = 0;
+    for (final SocialAccount a in state.socialAccounts) {
+      if (a.createdAtAge > enSon) enSon = a.createdAtAge;
+      for (final SocialPost p in a.posts) {
+        if (p.age > enSon) enSon = p.age;
+      }
+    }
+    return enSon;
+  }
+
+  /// Büyük hesaplara platformun ödediği **yıllık** gelir payı (D-117).
+  ///
+  /// Sıradan paylaşım para kazandırmaz; ciddi bir kitlenin kendisi gelir
+  /// üretir ve bu gelir yıllıktır.
+  GameState _payRevenueShare(
+    GameState state,
+    int newAge,
+    List<String> satirlar,
+  ) {
+    int toplam = 0;
+    for (final SocialAccount a in state.socialAccounts) {
+      toplam += SocialIncome.yearlyRevenueShare(a);
+    }
+    if (toplam <= 0) return state;
+    satirlar.add(
+      'Platform gelir paylaşımından ${trMoney(toplam)} kazandın.',
+    );
+    return state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet + toplam,
+      ),
+    );
+  }
+
+  /// Bu yıl aşılan takipçi eşiği; aşılmadıysa `null`.
+  int? _gecilenEsik(int onceki, int simdiki) {
+    if (simdiki <= onceki) return null;
+    for (final int esik in prototypeOnlyMilestones) {
+      if (onceki < esik && simdiki >= esik) return esik;
+    }
+    return null;
+  }
+
+  /// Kitle değiştikten sonra Ünü tazeler.
+  ///
+  /// Ün yalnızca **yukarı** taşınır: bir yıl takipçi kaybetmek geçmişte
+  /// gerçekten yaşanmış tanınmışlığı silmez (D-027).
+  GameState _refreshFame(GameState state) {
+    final int toplam = state.totalFollowers;
+    if (toplam < prototypeOnlyFameThreshold && !state.player.fameUnlocked) {
+      return state;
+    }
+    final int hesaplanan = (toplam / prototypeOnlyFollowersPerFame)
+        .round()
+        .clamp(1, prototypeOnlyMaxFame);
+    final int mevcut = state.player.fame ?? 0;
+    if (hesaplanan <= mevcut) return state;
+    return state.copyWith(player: state.player.copyWith(fame: hesaplanan));
   }
 
   /// Ün, gerçekten bir kitle oluştuğunda açılır (D-027).
@@ -391,36 +804,51 @@ class SocialEngine {
     final int mevcut = state.player.fame ?? 0;
     if (hesaplanan <= mevcut) return state;
 
-    return state.copyWith(
-      player: state.player.copyWith(fame: hesaplanan),
-    );
+    return state.copyWith(player: state.player.copyWith(fame: hesaplanan));
   }
 
+  /// Paylaşım sonucunu anlatır (D-127).
+  ///
+  /// Paylaşım oyunun **en çok tekrarlanan** eylemi; tek cümleyle
+  /// anlatmak metni ezberletiyordu (`docs/WRITING_STYLE_TR.md` §9).
+  /// Sayı yine verilir, cümle değişir.
   String _postText(SocialContent content, int delta, SocialPlatform platform) {
+    final String kitle = platform.audienceWord;
     if (delta > 0) {
-      return '${content.label}: paylaşım ilgi gördü, '
-          '$delta ${platform.audienceWord} kazandın.';
+      const List<String> iyi = <String>[
+        'tuttu',
+        'beklediğinden çok döndü',
+        'sabaha kadar bildirim yağdı',
+        'paylaşımı görenler paylaştı',
+      ];
+      final String kalip = iyi[delta.abs() % iyi.length];
+      return '${content.label}: $kalip. ${trNumber(delta)} $kitle geldi.';
     }
     if (delta < 0) {
-      return '${content.label}: beklediğin olmadı, '
-          '${-delta} ${platform.audienceWord} kaybettin.';
+      const List<String> kotu = <String>[
+        'pek tutmadı',
+        'yanlış zamanda düşmüş olabilir',
+        'kimsenin havasında olmadığı bir gündü',
+      ];
+      final String kalip = kotu[delta.abs() % kotu.length];
+      return '${content.label}: $kalip. ${trNumber(-delta)} $kitle gitti.';
     }
-    return '${content.label}: kimse fark etmedi.';
+    return '${content.label}: paylaştın, ortalık sessiz kaldı.';
   }
 
   SocialResult _blocked(GameState state, String reason) => SocialResult(
-        state: state,
-        outcome: SocialOutcome(applied: false, text: reason),
-      );
+    state: state,
+    outcome: SocialOutcome(applied: false, text: reason),
+  );
 
   GameState _log(GameState state, String text) => state.copyWith(
-        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-          ...state.log,
-          LifeLogEntry(
-            age: state.player.age,
-            text: text,
-            category: LogCategory.kisisel,
-          ),
-        ]),
-      );
+    log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+      ...state.log,
+      LifeLogEntry(
+        age: state.player.age,
+        text: text,
+        category: LogCategory.kisisel,
+      ),
+    ]),
+  );
 }

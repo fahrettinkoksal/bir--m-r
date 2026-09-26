@@ -93,18 +93,25 @@ BirOmurAccent _accentFor(Person person) {
   switch (person.relation) {
     case RelationType.es:
     case RelationType.sevgili:
+    case RelationType.flort:
     case RelationType.eskiSevgili:
     case RelationType.eskiEs:
       return BirOmurAccents.gul;
     case RelationType.cocuk:
+    case RelationType.unlu:
+      return BirOmurAccents.pirinc;
     case RelationType.torun:
+    case RelationType.yegen:
       return BirOmurAccents.mavi;
     case RelationType.anne:
     case RelationType.baba:
     case RelationType.kardes:
+    case RelationType.uveyAnne:
+    case RelationType.uveyBaba:
       return BirOmurAccents.nar;
     case RelationType.arkadas:
     case RelationType.sinifArkadasi:
+    case RelationType.kogusArkadasi:
       return BirOmurAccents.turuncu;
     case RelationType.isArkadasi:
       return BirOmurAccents.mor;

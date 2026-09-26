@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../data/gift_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../../data/wedding_catalog.dart';
+import '../../domain/activities/outing.dart';
 import '../../domain/interaction/intimacy.dart';
 
 import '../../domain/interaction/bond_decay.dart';
@@ -15,11 +17,14 @@ import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/interaction/shared_history.dart';
 import '../theme/bir_omur_theme.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import 'effect_chips.dart';
 import 'kilim_divider.dart';
 import '../../domain/models/person_development.dart';
 import '../../text/turkish_text.dart';
+import '../../domain/interaction/finger.dart';
+import '../../domain/interaction/friendship_depth.dart';
 
 /// Kişi ayrıntısı ve aile etkileşimleri.
 ///
@@ -49,8 +54,42 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
   String? _notice;
 
   void _run(InteractionKind kind) {
+    // Hediye artık rastgele değil: oyuncu seçer (D-134).
+    if (kind == InteractionKind.hediyeVer) {
+      _chooseGift();
+      return;
+    }
     final InteractionOutcome? outcome =
         GameScope.of(context).interact(widget.personId, kind);
+    if (outcome == null) return;
+    setState(() {
+      _lastOutcome = outcome;
+      _notice = null;
+    });
+  }
+
+  /// Hediye seçimi penceresi (D-134).
+  ///
+  /// Listede yalnızca **gerçekten alınabilecek** hediyeler durur; fiyatı
+  /// yanında yazar. Kişinin beğenip beğenmeyeceği **söylenmez** — o
+  /// sürprizdir ve oyuncunun kimi tanıdığını öğrenmesi gerekir.
+  Future<void> _chooseGift() async {
+    final GameController controller = GameScope.of(context);
+    final List<GiftItem> secenekler =
+        controller.giftOptionsFor(widget.personId);
+    if (secenekler.isEmpty) return;
+    final GiftItem? secilen = await showModalBottomSheet<GiftItem>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (BuildContext context) => _GiftSheet(gifts: secenekler),
+    );
+    if (secilen == null || !mounted) return;
+    final InteractionOutcome? outcome = GameScope.of(context).interact(
+      widget.personId,
+      InteractionKind.hediyeVer,
+      giftId: secilen.id,
+    );
     if (outcome == null) return;
     setState(() {
       _lastOutcome = outcome;
@@ -401,6 +440,37 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               ),
               if (person.isAlive) ...<Widget>[
                 const SizedBox(height: 16),
+                // Keyif, yakınlıktan ayrı bir şeydir (D-074): yakınlık
+                // ilişkinin gücü, keyif kişinin şu anki hâlidir. Keyfi
+                // düşük kişi davetleri reddedebilir, bu yüzden oyuncu
+                // bunu görebilmeli.
+                Text('Keyfi', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    key: const Key('person_happiness'),
+                    value: person.happiness / 100,
+                    minHeight: 8,
+                    backgroundColor:
+                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+                if (person.happiness < Outing.prototypeOnlyLowHappiness)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '${person.firstName} bu aralar keyifsiz; '
+                      'davetlerini geri çevirebilir.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
                 Text('Yakınlık', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 6),
                 ClipRRect(
@@ -543,6 +613,181 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     ),
                     child: const Text('Boşan'),
                   ),
+                ),
+              ],
+              // Flörtü sevgiliye çevirmek (D-107): kendiliğinden olmaz,
+              // oyuncu ister ve yakınlık yeterli olmalıdır. Koşul
+              // **basmadan önce** yazar (D-112): Faho "ilerisi yok" dedi,
+              // çünkü gereken yakınlık ancak düğmeye basınca görünüyordu.
+              if (person.isAlive &&
+                  person.relation == RelationType.flort) ...<Widget>[
+                const SizedBox(height: 12),
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).officialAvailability(person.id);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('make_official'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FingerOutcome? o =
+                                        GameScope.of(context)
+                                            .makeRelationshipOfficial(
+                                                person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Sevgili olmayı teklif et'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(
+                            text: uygun.reason ?? 'Şu an mümkün değil.',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Yakın arkadaş olma teklifi (D-130). Ölçüm: hayatların
+              // 34/60'ında hiç arkadaş yoktu, çünkü oyuncunun bir
+              // tanıdığı arkadaş yapmak için düğmesi yoktu.
+              if (person.isAlive && !person.isEstranged) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun = GameScope.of(context)
+                        .closeFriendAvailability(person.id);
+                    // Bu ilişki hiç arkadaşlığa dönüşmüyorsa satır
+                    // kilitli olarak da durmaz.
+                    if (uygun.reason == 'Bu ilişki arkadaşlığa dönüşmez.' ||
+                        uygun.reason == 'Zaten yakın arkadaşsınız.') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('propose_close_friend'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FriendshipOutcome? o =
+                                        GameScope.of(context)
+                                            .proposeCloseFriend(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Yakın arkadaş ol'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(text: uygun.reason ?? 'Şu an mümkün değil.'),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Küslük kalıcı değil (D-130). Kayıt silinmedi; barış
+              // kapısı açık duruyor.
+              if (person.isAlive && person.isEstranged) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).makeUpAvailability(person.id);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('make_up'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FriendshipOutcome? o =
+                                        GameScope.of(context)
+                                            .makeUp(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Barışmayı dene'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(text: uygun.reason ?? 'Şu an mümkün değil.'),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Arkadaşlık bir son değil (D-112). Finger'da tanışılan
+              // herkes flört olmuyor; arkadaş kalan biriyle de zamanla
+              // yol açılabilir.
+              if (person.isAlive &&
+                  person.relation == RelationType.arkadas) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).askOutAvailability(person.id);
+                    // Hayatında biri varken bu kapı hiç gösterilmez;
+                    // kilitli bir satır olarak da durmaz.
+                    if (uygun.reason == 'Hayatında zaten biri var.' ||
+                        uygun.reason == 'Bu kişiye çıkma teklif edilemez.') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('ask_out'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FingerOutcome? o =
+                                        GameScope.of(context)
+                                            .askOut(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Çıkma teklif et'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(
+                            text: uygun.reason ?? 'Şu an mümkün değil.',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ],
               // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;
@@ -1006,6 +1251,72 @@ class _ProtectionSheet extends StatelessWidget {
               const SizedBox(height: 10),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hediye seçimi listesi (D-134).
+///
+/// Sınıflara göre gruplanır: oyuncu ne aldığını bilsin. Beğeni bilgisi
+/// **gösterilmez**; kimin neyi sevdiğini oyuncu deneyerek öğrenir.
+class _GiftSheet extends StatelessWidget {
+  const _GiftSheet({required this.gifts});
+
+  final List<GiftItem> gifts;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Map<GiftCategory, List<GiftItem>> gruplar =
+        <GiftCategory, List<GiftItem>>{};
+    for (final GiftItem g in gifts) {
+      gruplar.putIfAbsent(g.category, () => <GiftItem>[]).add(g);
+    }
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('Ne alacaksın?', style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 4),
+              Text(
+                'Bedeli cüzdanından çıkar. Beğenip beğenmeyeceğini '
+                'göreceksin.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const KilimDivider(),
+              const SizedBox(height: 10),
+              for (final GiftCategory k in GiftCategory.values)
+                if (gruplar[k] != null) ...<Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 4),
+                    child: Text(
+                      k.label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  for (final GiftItem g in gruplar[k]!)
+                    ListTile(
+                      key: Key('gift_option_${g.id}'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(g.icon),
+                      title: Text(g.name),
+                      trailing: Text(trMoney(g.value)),
+                      onTap: () => Navigator.of(context).pop(g),
+                    ),
+                ],
+            ],
+          ),
         ),
       ),
     );

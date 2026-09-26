@@ -243,13 +243,18 @@ void main() {
       expect(shopProductByTypeId('kask')!.minAge, 16);
       expect(shopProductByTypeId('motosiklet_cantasi')!.minAge, 16);
 
-      final List<ShopProduct> onYedi =
-          shopProductsIn(ShopCategory.aracGalerisi, 17);
+      // D-079: aksesuarcılar ayrıldı. Kural aynı kalıyor: 17 yaşındaki
+      // oyuncu otomobil aksesuarını göremez, motosiklet kaskını görür.
       expect(
-        onYedi.any((ShopProduct p) => p.typeId == 'tavan_bagaji'),
+        shopProductsIn(ShopCategory.otoAksesuar, 17)
+            .any((ShopProduct p) => p.typeId == 'tavan_bagaji'),
         isFalse,
       );
-      expect(onYedi.any((ShopProduct p) => p.typeId == 'kask'), isTrue);
+      expect(
+        shopProductsIn(ShopCategory.motorAksesuar, 17)
+            .any((ShopProduct p) => p.typeId == 'kask'),
+        isTrue,
+      );
     });
 
     test('aksesuar veya araç sahipliği sürme hakkı vermez', () {

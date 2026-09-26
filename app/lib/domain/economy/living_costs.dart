@@ -1,7 +1,9 @@
+import '../../data/item_catalog.dart';
 import '../interaction/parenthood.dart';
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import 'business_engine.dart';
 import 'housing.dart';
 import '../../text/turkish_text.dart';
 
@@ -79,22 +81,47 @@ abstract final class LivingCosts {
   static const Map<LivingSituation, List<CostItem>> prototypeOnlyItems =
       <LivingSituation, List<CostItem>>{
     LivingSituation.cocuk: <CostItem>[],
+    // 2026 kalibrasyonu: taban tutarlar yıllıktır.
+    //
+    // Kira bilerek gerçek piyasanın **altında** tutuldu. Türkiye'de
+    // asgari ücretle tek başına kirada yaşamak pratikte birikim
+    // bırakmıyor; oysa D-039 "düşük gelirli bağımsız karakter de birikim
+    // yapabilmeli" diyor ve bu onaylanmış bir karar. Gerçekçilik ile
+    // onaylı kural çatıştığında onaylı kural kazandı: en düşük maaşlı iş
+    // bile gelirinin en az üçte birini elinde tutuyor.
+    // Gerekçe: docs/ECONOMY_2026.md.
     LivingSituation.aileYaninda: <CostItem>[
-      CostItem(label: 'Eve katkı', base: 6000, incomeShare: 0.02),
-      CostItem(label: 'Beslenme', base: 10000, incomeShare: 0.04),
-      CostItem(label: 'Diğer giderler', base: 4000, incomeShare: 0.02),
+      CostItem(label: 'Eve katkı', base: 24000, incomeShare: 0.02),
+      CostItem(label: 'Beslenme', base: 36000, incomeShare: 0.04),
+      CostItem(label: 'Diğer giderler', base: 18000, incomeShare: 0.02),
     ],
     LivingSituation.kirada: <CostItem>[
-      CostItem(label: 'Kira', base: 45000, incomeShare: 0.07),
-      CostItem(label: 'Beslenme', base: 22000, incomeShare: 0.05),
-      CostItem(label: 'Fatura ve diğer', base: 8000, incomeShare: 0.03),
+      CostItem(label: 'Kira', base: 88000, incomeShare: 0.07),
+      CostItem(label: 'Beslenme', base: 48000, incomeShare: 0.05),
+      CostItem(label: 'Fatura ve diğer', base: 26000, incomeShare: 0.03),
     ],
     LivingSituation.kendiEvinde: <CostItem>[
-      CostItem(label: 'Aidat ve bakım', base: 15000, incomeShare: 0.03),
-      CostItem(label: 'Beslenme', base: 22000, incomeShare: 0.05),
-      CostItem(label: 'Fatura ve diğer', base: 8000, incomeShare: 0.04),
+      CostItem(label: 'Aidat ve bakım', base: 40000, incomeShare: 0.03),
+      CostItem(label: 'Beslenme', base: 48000, incomeShare: 0.05),
+      CostItem(label: 'Fatura ve diğer', base: 26000, incomeShare: 0.04),
     ],
   };
+
+  /// prototypeOnly: **geliri olmayan** ve ailesinin yanında yaşayan
+  /// yetişkinin gideri (D-123).
+  ///
+  /// Faho sordu: "yıllık yaşam gideri çalışmıyorsam neden var ve bu
+  /// giderler neye göre belirleniyor?" Cevabın bir kısmı gerçek: işsiz
+  /// insan da yiyip içiyor, fatura ödüyor. Ama ailesinin yanında yaşayan
+  /// ve hiç geliri olmayan biri için bu yükü tam ödetmek gerçekçi
+  /// değildi — Türkiye'de o gideri **aile karşılar**. Geriye yalnızca
+  /// kişisel harcama kalır.
+  ///
+  /// Bu yalnızca **geliri sıfır** olan oyuncu içindir; maaşı ya da kira
+  /// geliri olan eve katkısını yapar.
+  static const List<CostItem> prototypeOnlySupportedItems = <CostItem>[
+    CostItem(label: 'Kişisel harcama', base: 12000, incomeShare: 0.0),
+  ];
 
   /// prototypeOnly: hanede bakılan her çocuğun yıllık gideri.
   ///
@@ -102,7 +129,7 @@ abstract final class LivingCosts {
   /// çarpılır. Eşin kendi geliri kendi giderini karşılar sayılır; eşin
   /// hane ekonomisine katkısı ve ortak bütçe henüz tasarlanmadı (Q-063).
   static const CostItem prototypeOnlyChildCost =
-      CostItem(label: 'Çocuk gideri', base: 24000, incomeShare: 0.03);
+      CostItem(label: 'Çocuk gideri', base: 72000, incomeShare: 0.03);
 
   /// Oyuncu **ailesinin** yanında mı yaşıyor?
   ///
@@ -142,7 +169,11 @@ abstract final class LivingCosts {
   /// Maaş ve **kira geliri** birlikte sayılır (D-033: bütün para akışları
   /// aynı ekonomiye bağlıdır).
   static int yearlyIncome(GameState state) =>
-      (state.career.job?.yearlySalary ?? 0) + Housing.yearlyRentIncome(state);
+      (state.career.job?.yearlySalary ?? 0) +
+      Housing.yearlyRentIncome(state) +
+      // Kendi işinin kârı da aynı ekonomiye girer (D-033, D-132). Zarar
+      // eden iş geliri **düşürür**; gider hesabı bunu görür.
+      BusinessEngine.yearlyBusinessIncome(state);
 
   /// Bu yılın gider dökümü.
   ///
@@ -152,11 +183,17 @@ abstract final class LivingCosts {
     final LivingSituation durum = situationOf(state);
     final int gelir = yearlyIncome(state);
     final int cocukSayisi = Parenthood.dependentChildren(state).length;
+    // Geliri olmayan ve ailesinin yanında yaşayanın yükünü aile taşır
+    // (D-123).
+    final List<CostItem> kalemler =
+        durum == LivingSituation.aileYaninda && gelir <= 0
+            ? prototypeOnlySupportedItems
+            : prototypeOnlyItems[durum]!;
     return CostBreakdown(
       situation: durum,
       income: gelir,
       items: <({String label, int amount})>[
-        for (final CostItem kalem in prototypeOnlyItems[durum]!)
+        for (final CostItem kalem in kalemler)
           (label: kalem.label, amount: kalem.amountFor(gelir)),
         if (cocukSayisi > 0)
           (
@@ -165,8 +202,93 @@ abstract final class LivingCosts {
                 : '${prototypeOnlyChildCost.label} ($cocukSayisi çocuk)',
             amount: prototypeOnlyChildCost.amountFor(gelir) * cocukSayisi,
           ),
+        // Araç giderleri (D-148): sahip olunan her motorlu araç için
+        // zorunlu trafik sigortası, kasko ve motorlu taşıtlar vergisi.
+        ...vehicleItems(state),
       ],
     );
+  }
+
+  // =====================================================================
+  // Araç giderleri (D-148)
+  //
+  // Faho'nun isteği: "araç satın aldığımda kasko ve sigorta masrafı da
+  // çıksın, her yıl vergisi de çıksın."
+  //
+  // Üç kalem var ve üçü de Türkiye'deki karşılıklarına dayanıyor:
+  //   * **Zorunlu trafik sigortası** — kanunen zorunlu.
+  //   * **Kasko** — isteğe bağlıdır; bu sürümde herkes yaptırıyor sayılır
+  //     (Q-153'te soruldu).
+  //   * **MTV (motorlu taşıtlar vergisi)** — yılda iki taksit; oyun tek
+  //     kalem olarak yazar. Gerçekte motor hacmi ve araç yaşına göre
+  //     değişir; oyunda **araç değeri ve yaşı** ölçü alınır.
+  //
+  // Bütün oranlar `prototypeOnly` (Q-153).
+  // =====================================================================
+
+  /// prototypeOnly: zorunlu trafik sigortasının araç değerine oranı.
+  static const double prototypeOnlyTrafficInsuranceRate = 0.010;
+
+  /// prototypeOnly: kaskonun araç değerine oranı.
+  static const double prototypeOnlyKaskoRate = 0.025;
+
+  /// prototypeOnly: MTV'nin araç değerine oranı (sıfır araç için).
+  static const double prototypeOnlyVehicleTaxRate = 0.012;
+
+  /// prototypeOnly: MTV'nin her araç yaşı için indiği pay.
+  ///
+  /// Gerçekte MTV yaş bandına göre kademeli düşer; oyun bunu düz bir
+  /// azalışla taklit eder ve bir tabanın altına inmez.
+  static const double prototypeOnlyVehicleTaxAgeDrop = 0.05;
+
+  /// prototypeOnly: MTV oranının inebileceği taban.
+  static const double prototypeOnlyVehicleTaxFloor = 0.35;
+
+  /// prototypeOnly: bisiklet gider çıkarmaz; yalnızca motorlu araç.
+  static bool isMotorVehicle(OwnedItem item) =>
+      item.type.kind == ItemKind.otomobil ||
+      item.type.kind == ItemKind.motosiklet;
+
+  /// Oyuncunun sahip olduğu motorlu araçlar.
+  static List<OwnedItem> motorVehicles(GameState state) =>
+      state.items.where(isMotorVehicle).toList(growable: false);
+
+  /// Bir aracın yıllık sigorta + kasko + vergi gideri (₺).
+  ///
+  /// Değerleme **ödenen fiyata** değil, türün katalog değerine dayanır:
+  /// ikinci el alınan lüks araç da lüks araç vergisi öder.
+  static int yearlyVehicleCost(GameState state, OwnedItem item) {
+    final int deger = item.type.baseValue;
+    if (deger <= 0) return 0;
+    final int yas = (state.player.age - item.acquiredAtAge).clamp(0, 60);
+    final double vergiOrani = (prototypeOnlyVehicleTaxRate *
+            (1 - prototypeOnlyVehicleTaxAgeDrop * yas))
+        .clamp(
+      prototypeOnlyVehicleTaxRate * prototypeOnlyVehicleTaxFloor,
+      prototypeOnlyVehicleTaxRate,
+    );
+    final double toplam = prototypeOnlyTrafficInsuranceRate +
+        prototypeOnlyKaskoRate +
+        vergiOrani;
+    return (deger * toplam).round();
+  }
+
+  /// Araç gider kalemleri; aracı olmayanda boştur.
+  ///
+  /// Her araç **ayrı satır** olur ki oyuncu hangi aracın ne kadar
+  /// tuttuğunu görebilsin (D-123'ün "hesap ekranda dursun" kuralı).
+  static List<({String label, int amount})> vehicleItems(GameState state) {
+    final List<({String label, int amount})> sonuc =
+        <({String label, int amount})>[];
+    for (final OwnedItem arac in motorVehicles(state)) {
+      final int tutar = yearlyVehicleCost(state, arac);
+      if (tutar <= 0) continue;
+      sonuc.add((
+        label: '${arac.name}: sigorta, kasko ve vergi',
+        amount: tutar,
+      ));
+    }
+    return sonuc;
   }
 
   /// Bu yaş için yıllık toplam gider.

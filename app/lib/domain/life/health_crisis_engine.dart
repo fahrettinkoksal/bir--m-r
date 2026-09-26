@@ -3,7 +3,9 @@ import 'dart:math';
 import '../../data/health_crisis_catalog.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
+import '../models/health_history.dart';
 import '../models/pending_crisis.dart';
+import 'chronic_engine.dart';
 
 /// Bir krize verilen yanıtın sonucu.
 class CrisisOutcome {
@@ -78,8 +80,12 @@ class HealthCrisisEngine {
     final int? son = state.lastCrisisAge;
     if (son != null && age - son < prototypeOnlyMinAgeGap) return null;
 
+    // Taşınan kronik durumlar riski yükseltir (D-153). Çarpan tavanlıdır;
+    // üç durum taşıyan oyuncunun her yıl krize girmesi oyunu cezaya
+    // çevirirdi.
     final double sans =
-        prototypeOnlyCrisisChance(age, state.player.stats.health);
+        prototypeOnlyCrisisChance(age, state.player.stats.health) *
+            ChronicEngine.crisisRiskFactor(state);
     if (rng.nextDouble() >= sans) return null;
 
     final List<HealthCrisis> uygun = crisesForAge(age);
@@ -173,17 +179,45 @@ class HealthCrisisEngine {
 
     next = next.copyWith(
       player: next.player.copyWith(
-        stats: next.player.stats.copyWith(
-          health:
-              (next.player.stats.health + secim.healthChange).clamp(0, 100),
+        stats: next.player.stats.gain(
+          health: secim.healthChange,
         ),
       ),
     );
+
+    // Atlatılan kriz **iz bırakır** (D-153): kalıcı bir rahatsızlık
+    // kalabilir ve kriz her hâlde sağlık geçmişine yazılır. Önceden
+    // yalnızca son krizin yaşı tutuluyordu.
+    final ({GameState state, String? typeId}) kronik =
+        ChronicEngine.afterCrisis(
+      state: next,
+      crisisId: kriz.id,
+      age: state.player.age,
+      rng: rng,
+    );
+    next = kronik.state.copyWith(
+      healthHistory: List<HealthHistoryEntry>.unmodifiable(
+        <HealthHistoryEntry>[
+          ...kronik.state.healthHistory,
+          HealthHistoryEntry(
+            crisisId: kriz.id,
+            age: state.player.age,
+            choiceId: secim.id,
+            chronicTypeId: kronik.typeId,
+          ),
+        ],
+      ),
+    );
+
+    final String metin = kronik.typeId == null
+        ? secim.resultText
+        : '${secim.resultText} Ama bu bir iz bıraktı.';
+
     return CrisisResult(
       state: _log(next, secim.resultText),
       outcome: CrisisOutcome(
         applied: true,
-        text: secim.resultText,
+        text: metin,
         cost: bedel,
       ),
     );

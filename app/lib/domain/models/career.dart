@@ -7,7 +7,12 @@ enum JobEndReason {
   istifa('Kendi isteğiyle ayrıldı'),
   cikarildi('İşten çıkarıldı'),
   emeklilik('Emekli oldu'),
-  kusakDevami('Kuşak devamında bırakıldı');
+  kusakDevami('Kuşak devamında bırakıldı'),
+
+  /// Hapis cezası nedeniyle iş bitti (D-128).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  hapis('Hapis nedeniyle ayrıldı');
 
   const JobEndReason(this.label);
 
@@ -92,6 +97,7 @@ class CareerState {
     this.lastJobLossAge,
     this.retiredAtAge,
     this.pension,
+    this.employerWarnings = 0,
   });
 
   const CareerState.none() : this();
@@ -147,6 +153,13 @@ class CareerState {
 
   /// prototypeOnly: yıllık emekli aylığı (₺).
   final int? pension;
+
+  /// İşverenin uzun ya da üst üste gelen raporlar için verdiği uyarı
+  /// sayısı (D-078).
+  ///
+  /// Uyarı **tek başına** kimseyi işten atmaz; yalnızca işten çıkarılma
+  /// ihtimalini bir miktar artırır. İş değiştiğinde sıfırlanır.
+  final int employerWarnings;
 
   /// Oyuncu emekli mi?
   bool get isRetired => retiredAtAge != null;
@@ -215,6 +228,8 @@ class CareerState {
       level: 0,
       salary: null,
       milestones: const <CareerMilestone>[],
+      // Uyarılar işe aittir: yeni iş temiz sayfayla başlar (D-078).
+      employerWarnings: 0,
       lastRaiseAge: null,
       lastPromotionAge: null,
       pastJobIds: List<String>.unmodifiable(<String>[...pastJobIds, id]),
@@ -260,6 +275,7 @@ class CareerState {
     Object? lastJobLossAge = _unsetCareer,
     Object? retiredAtAge = _unsetCareer,
     Object? pension = _unsetCareer,
+    int? employerWarnings,
   }) {
     return CareerState(
       jobId: jobId == _unsetCareer ? this.jobId : jobId as String?,
@@ -287,6 +303,7 @@ class CareerState {
           ? this.retiredAtAge
           : retiredAtAge as int?,
       pension: pension == _unsetCareer ? this.pension : pension as int?,
+      employerWarnings: employerWarnings ?? this.employerWarnings,
     );
   }
 }

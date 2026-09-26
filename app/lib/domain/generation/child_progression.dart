@@ -49,7 +49,7 @@ abstract final class ChildProgression {
   ///
   /// Birikim maaştan bu gider düşülerek oluşur; böylece her çalışan çocuk
   /// otomatik olarak zengin olmaz.
-  static const int prototypeOnlyYearlyCost = 140000;
+  static const int prototypeOnlyYearlyCost = 320000;
 
   /// prototypeOnly: iş arayan bir yılda iş bulma olasılığı.
   static const double prototypeOnlyJobChance = 0.45;
@@ -366,10 +366,12 @@ abstract final class ChildProgression {
   static Stats _driftStats(PersonDevelopment dev, int age, Random rng) {
     Stats stats = dev.stats;
     if ((dev.isStudent || dev.isUniversityStudent) && rng.chance(0.35)) {
-      stats = stats.copyWith(intelligence: stats.intelligence + 1);
+      stats = stats.gain(
+        intelligence: 1,
+      );
     }
     if (age > 50 && rng.chance(0.4)) {
-      stats = stats.copyWith(health: stats.health - 1);
+      stats = stats.gain(health: -1);
     }
     final int gorunus = Aging.yearlyDelta(
       age: age,
@@ -378,7 +380,9 @@ abstract final class ChildProgression {
       rng: rng,
     );
     if (gorunus != 0) {
-      stats = stats.copyWith(appearance: stats.appearance + gorunus);
+      stats = stats.gain(
+        appearance: gorunus,
+      );
     }
     return stats;
   }

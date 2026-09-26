@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../data/job_catalog.dart';
+import '../life/sick_leave.dart';
 import '../../text/turkish_text.dart';
 import '../models/career.dart';
 import '../models/game_state.dart';
@@ -340,7 +341,11 @@ abstract final class CareerProgress {
         newAge - sonKayip < prototypeOnlyLayoffCooldown) {
       return (state: state, logText: null);
     }
-    if (!(rng.nextDouble() < prototypeOnlyLayoffChance)) {
+    // İşveren uyarıları ihtimali artırır ama tek başına kimseyi atmaz
+    // (D-078).
+    final double sans =
+        prototypeOnlyLayoffChance + SickLeaves.layoffBonus(career.employerWarnings);
+    if (!(rng.nextDouble() < sans)) {
       return (state: state, logText: null);
     }
 
@@ -375,8 +380,8 @@ abstract final class CareerProgress {
   /// Mutluluğu **gerçekten uygulanabilecek kadar** değiştirir.
   static GameState _happiness(GameState state, int delta) => state.copyWith(
         player: state.player.copyWith(
-          stats: state.player.stats.copyWith(
-            happiness: state.player.stats.happiness + delta,
+          stats: state.player.stats.gain(
+            happiness: delta,
           ),
         ),
       );

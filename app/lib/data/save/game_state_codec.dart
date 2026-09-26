@@ -8,6 +8,10 @@
 /// ileride enum sırası değişse bile eski kayıtlar bozulmaz.
 library;
 
+import '../../domain/models/loan.dart';
+import '../../domain/models/pending_race.dart';
+import '../../domain/life/year_review.dart';
+import '../../domain/models/applied_effect.dart';
 import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
 import '../../domain/models/blackjack_game.dart';
@@ -15,13 +19,16 @@ import '../../domain/models/book_progress.dart';
 import '../../domain/models/martial_progress.dart';
 import '../../domain/models/hobby_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
+import '../finger_catalog.dart';
 import '../../domain/models/finger_profile.dart';
 import '../lottery_catalog.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_settings.dart';
+import '../../domain/models/chronic_condition.dart';
 import '../../domain/models/game_state.dart';
+import '../../domain/models/health_history.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
@@ -30,7 +37,10 @@ import '../../domain/models/owned_item.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
+import '../../domain/models/business.dart';
+import '../../domain/models/criminal_record.dart';
 import '../../domain/models/military.dart';
+import '../../domain/models/pending_trial.dart';
 import '../../domain/models/pregnancy.dart';
 import '../../domain/models/zodiac.dart';
 import '../../domain/models/pending_interview.dart';
@@ -39,6 +49,7 @@ import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/person_development.dart';
 import '../../domain/models/playing_card.dart';
+import '../../domain/models/celebrity_contact.dart';
 import '../../domain/models/social_account.dart';
 import '../../domain/models/sponsorship.dart';
 import '../../domain/models/trip.dart';
@@ -90,6 +101,13 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           state.martialArts.map(_encodeMartial).toList(growable: false),
       // Hobi geçmişi (Paket 39). Alan eklemeli.
       'hobbies': state.hobbies.map(_encodeHobby).toList(growable: false),
+      // Kronik durumlar ve sağlık geçmişi (D-153). Alan eklemeli:
+      // eski kayıtta yoklar, okuma tarafı isteğe bağlı okur.
+      'chronicConditions':
+          state.chronicConditions.map(_encodeChronic).toList(growable: false),
+      'healthHistory': state.healthHistory
+          .map(_encodeHealthHistory)
+          .toList(growable: false),
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -98,9 +116,30 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           state.fingerDeck.map(_encodeFinger).toList(growable: false),
       'fingerMatches':
           state.fingerMatches.map(_encodeFinger).toList(growable: false),
+      // Karşılıklı beğeni, profil ve premium (D-081). Alan eklemeli.
+      'fingerIncoming':
+          state.fingerIncoming.map(_encodeFinger).toList(growable: false),
+      'fingerBio': state.fingerBio,
+      'fingerInterests': state.fingerInterests,
+      'fingerPremiumUntilAge': state.fingerPremiumUntilAge,
+      // Oyuncunun niyeti ve süzgeci (D-107); alan eklemeli.
+      'fingerIntent': state.fingerIntent.name,
+      'fingerWealthFilter': state.fingerWealthFilter?.name,
       'socialAccounts':
           state.socialAccounts.map(_encodeAccount).toList(growable: false),
+      // Ünlülerle kurulan temaslar. Eski kayıtlarda bu alan yoktur;
+      // okuma tarafı isteğe bağlı okuduğu için kayıt sürümü değişmedi.
+      'celebrityContacts': state.celebrityContacts
+          .map(_encodeCelebrityContact)
+          .toList(growable: false),
       // Sponsorluk teklifi ve anlaşmaları (Paket 10).
+      'mediaInvitationId': state.mediaInvitationId,
+      'mediaInvitationAge': state.mediaInvitationAge,
+      // D-147: her medya işinin en son yapıldığı yaş. Eski kayıtlarda
+      // yoktur; boş açılır ve geriye dönük geçmiş uydurulmaz.
+      'mediaJobLastAge': state.mediaJobLastAge,
+      // D-149: arkadaş haberlerinin tekrar sayacı. Eski kayıtta yoktur.
+      'friendNewsLastAge': state.friendNewsLastAge,
       'sponsorOffer': state.sponsorOffer == null
           ? null
           : _encodeSponsorOffer(state.sponsorOffer!),
@@ -110,7 +149,72 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'trips': state.trips.map(_encodeTrip).toList(growable: false),
       'blackjack':
           state.blackjack == null ? null : _encodeBlackjack(state.blackjack!),
+      // Sonuçlanmamış at yarışı bahsi (D-089). Alan eklemeli; eski
+      // kayıtta yoktur.
+      'pendingRace': state.pendingRace == null
+          ? null
+          : <String, Object?>{
+              'id': state.pendingRace!.id,
+              'lane': state.pendingRace!.lane,
+              'bet': state.pendingRace!.bet,
+              'winnerLane': state.pendingRace!.winnerLane,
+              'payout': state.pendingRace!.payout,
+              'horseName': state.pendingRace!.horseName,
+              'winnerName': state.pendingRace!.winnerName,
+              'oddsLabel': state.pendingRace!.oddsLabel,
+              'atAge': state.pendingRace!.atAge,
+            },
+      // Yıl özeti ve yılın başındaki fotoğraf (D-096). Alan eklemeli;
+      // eski kayıtta yoktur ve özetsiz açılır.
+      'yearMark': state.yearMark == null
+          ? null
+          : <String, Object?>{
+              'age': state.yearMark!.age,
+              'appearance': state.yearMark!.stats.appearance,
+              'happiness': state.yearMark!.stats.happiness,
+              'health': state.yearMark!.stats.health,
+              'intelligence': state.yearMark!.stats.intelligence,
+              'charisma': state.yearMark!.stats.charisma,
+              'wallet': state.yearMark!.wallet,
+              'fame': state.yearMark!.fame,
+            },
+      'lastYearSummary': state.lastYearSummary == null
+          ? null
+          : <String, Object?>{
+              'age': state.lastYearSummary!.age,
+              'effects': <Map<String, Object?>>[
+                for (final AppliedEffect e in state.lastYearSummary!.effects)
+                  <String, Object?>{
+                    'label': e.label,
+                    'delta': e.delta,
+                    'unit': e.unit,
+                  },
+              ],
+            },
       'wagerThisAge': state.wagerThisAge,
+      // Krediler (D-080). Alan eklemeli; eski kayıtta boş liste okunur.
+      'loans': <Map<String, Object?>>[
+        for (final Loan l in state.loans)
+          <String, Object?>{
+            'id': l.id,
+            'bank': l.bank.name,
+            'principal': l.principal,
+            'annualPayment': l.annualPayment,
+            'termYears': l.termYears,
+            'remainingPayments': l.remainingPayments,
+            'outstanding': l.outstanding,
+            'takenAtAge': l.takenAtAge,
+            // Kredi amacı alan eklemeli (D-108); eski kayıtta yoktur ve
+            // ihtiyaç kredisi olarak okunur.
+            'purpose': l.purpose.name,
+            'missedPayments': l.missedPayments,
+          },
+      ],
+      // Bakım geçmişi (D-072). Eski kayıtlarda yoktur; `null` kalır ve
+      // ihmal sayılmaz.
+      'lastSportAge': state.lastSportAge,
+      'lastGroomingAge': state.lastGroomingAge,
+      'lastLearningAge': state.lastLearningAge,
       'licenses': state.licenses.toList(growable: false),
       'pendingLicenseExam': state.pendingLicenseExam == null
           ? null
@@ -153,6 +257,14 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'itemNames': n.itemNames,
             'happinessDelta': n.happinessDelta,
             'funeralCost': n.funeralCost,
+            'effects': <Map<String, Object?>>[
+              for (final AppliedEffect e in n.effects)
+                <String, Object?>{
+                  'label': e.label,
+                  'delta': e.delta,
+                  'unit': e.unit,
+                },
+            ],
           },
       ],
       'marriage': state.marriage == null
@@ -190,6 +302,64 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'expecting': state.pregnancy!.expecting.name,
             },
       // Askerlik kaydı (Paket 29); yarım kalan hizmet kaybolmaz.
+      // Kurulmuş işler (D-132). Eski kayıtlarda yoktur; boş açılır.
+      'businesses': <Object?>[
+        for (final Business b in state.businesses)
+          <String, Object?>{
+            'id': b.id,
+            'typeId': b.typeId,
+            'startedAtAge': b.startedAtAge,
+            'condition': b.condition,
+            'totalInvested': b.totalInvested,
+            'totalProfit': b.totalProfit,
+            'lastTendedAge': b.lastTendedAge,
+            'lastSettledAge': b.lastSettledAge,
+            'closedAtAge': b.closedAtAge,
+            'endReason': b.endReason?.name,
+          },
+      ],
+      // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
+      // **uydurulmaz**.
+      'legal': <String, Object?>{
+        'imprisonedSinceAge': state.legal.imprisonedSinceAge,
+        'releaseAtAge': state.legal.releaseAtAge,
+        'probationUntilAge': state.legal.probationUntilAge,
+        'caseCounter': state.legal.caseCounter,
+        // Tutukluluk ve kefalet (D-139). Eski kayıtlarda yoktur; boş
+        // gelirse tutuksuz sayılır, geriye dönük tutukluluk uydurulmaz.
+        'detainedSinceAge': state.legal.detainedSinceAge,
+        'bailAmount': state.legal.bailAmount,
+        'bailPaidBy': state.legal.bailPaidBy,
+        'bailAskedAtAge': state.legal.bailAskedAtAge,
+        // Cezaevi hayatı (D-140).
+        'goodBehaviour': state.legal.goodBehaviour,
+        'crewStanding': state.legal.crewStanding,
+        'yearsServed': state.legal.yearsServed,
+        'cases': <Object?>[
+          for (final CriminalCase c in state.legal.cases)
+            <String, Object?>{
+              'id': c.id,
+              'crimeId': c.crimeId,
+              'ageAtIncident': c.ageAtIncident,
+              'stage': c.stage.name,
+              'verdict': c.verdict.name,
+              'fine': c.fine,
+              'finePaid': c.finePaid,
+              'prisonYears': c.prisonYears,
+              'lawyerId': c.lawyerId,
+              'decidedAtAge': c.decidedAtAge,
+              'closedAtAge': c.closedAtAge,
+              'note': c.note,
+            },
+        ],
+      },
+      'pendingTrial': state.pendingTrial == null
+          ? null
+          : <String, Object?>{
+              'caseId': state.pendingTrial!.caseId,
+              'age': state.pendingTrial!.age,
+              'text': state.pendingTrial!.text,
+            },
       'military': <String, Object?>{
         'status': state.military.status.name,
         'trackName': state.military.trackName,
@@ -209,6 +379,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // Tüp bebek denemeleri (Paket 35). Alan eklemeli.
       'ivfAttempts': state.ivfAttempts,
       'lastConceptionTryAge': state.lastConceptionTryAge,
+      // Yıl içindeki deneme sayısı (D-086). Alan eklemeli.
+      'conceptionTriesAtAge': state.conceptionTriesAtAge,
       'settings': <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
@@ -253,6 +425,7 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'fame': p.fame,
       'wallet': p.wallet,
       'hairStyle': p.hairStyle,
+      'hairLossStage': p.hairLossStage,
       'infertile': p.infertile,
       // Doğum ayı ve günü (Paket 27). **Yıl yoktur** (D-003).
       'birthMonth': p.birthDate?.month,
@@ -306,9 +479,45 @@ Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
       'bio': p.bio,
       'interests': p.interests,
       'occupation': p.occupation,
+      // Niyet ve ekonomik durum alan eklemeli (D-107); eski kayıtta
+      // yoktur ve varsayılanla okunur.
+      'intent': p.intent.name,
+      'wealth': p.wealth.name,
       'matchedAtAge': p.matchedAtAge,
       'metPersonId': p.metPersonId,
     };
+
+Map<String, Object?> _encodeChronic(ChronicCondition c) => <String, Object?>{
+      'typeId': c.typeId,
+      'startedAtAge': c.startedAtAge,
+      'lastCaredAtAge': c.lastCaredAtAge,
+      'endedAtAge': c.endedAtAge,
+      'careYears': c.careYears,
+    };
+
+ChronicCondition _decodeChronic(Map<String, Object?> json) => ChronicCondition(
+      typeId: _string(json, 'typeId'),
+      startedAtAge: _int(json, 'startedAtAge'),
+      lastCaredAtAge: _intOrNull(json, 'lastCaredAtAge'),
+      endedAtAge: _intOrNull(json, 'endedAtAge'),
+      careYears: _intOr(json, 'careYears', 0),
+    );
+
+Map<String, Object?> _encodeHealthHistory(HealthHistoryEntry h) =>
+    <String, Object?>{
+      'crisisId': h.crisisId,
+      'age': h.age,
+      'choiceId': h.choiceId,
+      'chronicTypeId': h.chronicTypeId,
+    };
+
+HealthHistoryEntry _decodeHealthHistory(Map<String, Object?> json) =>
+    HealthHistoryEntry(
+      crisisId: _string(json, 'crisisId'),
+      age: _int(json, 'age'),
+      choiceId: _string(json, 'choiceId'),
+      chronicTypeId: _stringOrNull(json, 'chronicTypeId'),
+    );
 
 Map<String, Object?> _encodeHobby(HobbyProgress h) => <String, Object?>{
       'hobbyId': h.hobbyId,
@@ -338,12 +547,17 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       'occupation': p.occupation,
       'wealth': p.wealth?.name,
       'bond': p.bond,
+      'happiness': p.happiness,
       'schoolLevel': p.schoolLevel?.name,
       'schoolTie': p.schoolTie?.name,
       'schoolId': p.schoolId,
       'classId': p.classId,
       'estate': p.estate,
       'infertile': p.infertile,
+      // Küslük ve arkadaşlık tarihi (D-130). Eski kayıtlarda yoktur;
+      // kimse küs açılmaz ve geriye dönük tarih uydurulmaz.
+      'estrangedSinceAge': p.estrangedSinceAge,
+      'becameFriendAtAge': p.becameFriendAtAge,
       // Kişinin kendi hayatı (D-045); yalnızca kaydı olanlarda doludur.
       'development': p.development == null
           ? null
@@ -374,6 +588,8 @@ Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
       'otherParentId': d.otherParentId,
       'track': d.track?.name,
       'adopted': d.adopted,
+      'marriedAtAge': d.marriedAtAge,
+      'spouseName': d.spouseName,
       'milestones': <Map<String, Object?>>[
         for (final LifeMilestone m in d.milestones)
           <String, Object?>{'age': m.age, 'text': m.text},
@@ -421,6 +637,8 @@ PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
       'development.track',
     ),
     adopted: json['adopted'] == true,
+    marriedAtAge: _intOrNull(json, 'marriedAtAge'),
+    spouseName: _stringOrNull(json, 'spouseName'),
     milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
       for (final Object? e in _optionalRawList(json, 'milestones'))
         LifeMilestone(
@@ -502,6 +720,11 @@ Map<String, Object?> _encodePet(Pet pet) => <String, Object?>{
       'diedAtPlayerAge': pet.diedAtPlayerAge,
       'lastCareChargedPlayerAge': pet.lastCareChargedPlayerAge,
       'bond': pet.bond,
+      // Hayvan sağlığı ve kayıp durumu (D-082). Alan eklemeli.
+      'health': pet.health,
+      'missingSinceAge': pet.missingSinceAge,
+      // Sahiplendirme alan eklemeli (D-109); eski kayıtta yoktur.
+      'rehomedAtPlayerAge': pet.rehomedAtPlayerAge,
     };
 
 Map<String, Object?> _encodeLogEntry(LifeLogEntry e) => <String, Object?>{
@@ -551,6 +774,8 @@ Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
       // Emeklilik (Paket 12).
       'retiredAtAge': c.retiredAtAge,
       'pension': c.pension,
+      // İşveren uyarıları (D-078). Alan eklemeli; eski kayıtta sıfır.
+      'employerWarnings': c.employerWarnings,
     };
 
 Map<String, Object?> _encodeCareerMilestone(CareerMilestone m) =>
@@ -727,6 +952,20 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeHobby(_asMap(e, 'hobbies[]')))
           .toList(growable: false),
     ),
+    // D-153. `_optionalRawList` eksik anahtarı boş liste okur; eski
+    // kayıtlar bu yüzden bozulmaz.
+    chronicConditions: List<ChronicCondition>.unmodifiable(
+      _optionalRawList(json, 'chronicConditions')
+          .map((Object? e) =>
+              _decodeChronic(_asMap(e, 'chronicConditions[]')))
+          .toList(growable: false),
+    ),
+    healthHistory: List<HealthHistoryEntry>.unmodifiable(
+      _optionalRawList(json, 'healthHistory')
+          .map((Object? e) =>
+              _decodeHealthHistory(_asMap(e, 'healthHistory[]')))
+          .toList(growable: false),
+    ),
     martialArts: List<MartialProgress>.unmodifiable(
       _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
@@ -735,6 +974,12 @@ GameState decodeGameState(Map<String, Object?> json) {
     lotteryTickets: List<LotteryTicket>.unmodifiable(
       _optionalRawList(json, 'lotteryTickets')
           .map((Object? e) => _decodeTicket(_asMap(e, 'lotteryTickets[]')))
+          .toList(growable: false),
+    ),
+    celebrityContacts: List<CelebrityContact>.unmodifiable(
+      _optionalRawList(json, 'celebrityContacts')
+          .map((Object? e) =>
+              _decodeCelebrityContact(_asMap(e, 'celebrityContacts[]')))
           .toList(growable: false),
     ),
     fingerDeck: List<FingerProfile>.unmodifiable(
@@ -747,12 +992,51 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeFinger(_asMap(e, 'fingerMatches[]')))
           .toList(growable: false),
     ),
+    fingerIncoming: List<FingerProfile>.unmodifiable(
+      _optionalRawList(json, 'fingerIncoming')
+          .map((Object? e) => _decodeFinger(_asMap(e, 'fingerIncoming[]')))
+          .toList(growable: false),
+    ),
+    fingerBio: _stringOrNull(json, 'fingerBio'),
+    fingerInterests: List<String>.unmodifiable(
+      json['fingerInterests'] == null
+          ? const <String>[]
+          : _stringList(json, 'fingerInterests'),
+    ),
+    fingerPremiumUntilAge: _intOrNull(json, 'fingerPremiumUntilAge'),
+    fingerIntent: json['fingerIntent'] == null
+        ? FingerIntent.belirsiz
+        : _enumByName(
+            FingerIntent.values,
+            _string(json, 'fingerIntent'),
+            'fingerIntent',
+          ),
+    fingerWealthFilter: json['fingerWealthFilter'] == null
+        ? null
+        : _enumByName(
+            WealthTier.values,
+            _string(json, 'fingerWealthFilter'),
+            'fingerWealthFilter',
+          ),
     socialAccounts: List<SocialAccount>.unmodifiable(
       _list(json, 'socialAccounts')
           .map((Object? e) => _decodeAccount(_asMap(e, 'socialAccounts[]')))
           .toList(growable: false),
     ),
     // Eski kayıtlarda sponsorluk yoktur; boş açılır.
+    mediaInvitationId: _stringOrNull(json, 'mediaInvitationId'),
+    mediaInvitationAge: _intOrNull(json, 'mediaInvitationAge'),
+    // Eski kayıtta bu alan yoktur; **eksik olması hata değildir**.
+    mediaJobLastAge: Map<String, int>.unmodifiable(
+      json['mediaJobLastAge'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'mediaJobLastAge'),
+    ),
+    friendNewsLastAge: Map<String, int>.unmodifiable(
+      json['friendNewsLastAge'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'friendNewsLastAge'),
+    ),
     sponsorOffer: json['sponsorOffer'] == null
         ? null
         : _decodeSponsorOffer(_map(json, 'sponsorOffer')),
@@ -769,6 +1053,26 @@ GameState decodeGameState(Map<String, Object?> json) {
         ? null
         : _decodeBlackjack(_asMap(json['blackjack'], 'blackjack')),
     wagerThisAge: json['wagerThisAge'] == null ? 0 : _int(json, 'wagerThisAge'),
+    loans: List<Loan>.unmodifiable(
+      _optionalRawList(json, 'loans')
+          .map((Object? e) => _decodeLoan(_asMap(e, 'loan')))
+          .toList(growable: false),
+    ),
+    pendingRace: json['pendingRace'] == null
+        ? null
+        : _decodePendingRace(_asMap(json['pendingRace'], 'pendingRace')),
+    // Yıl özeti alanları eklemeli; eski kayıtta yoktur (D-096).
+    yearMark: json['yearMark'] == null
+        ? null
+        : _decodeYearMark(_asMap(json['yearMark'], 'yearMark')),
+    lastYearSummary: json['lastYearSummary'] == null
+        ? null
+        : _decodeYearSummary(
+            _asMap(json['lastYearSummary'], 'lastYearSummary'),
+          ),
+    lastSportAge: _intOrNull(json, 'lastSportAge'),
+    lastGroomingAge: _intOrNull(json, 'lastGroomingAge'),
+    lastLearningAge: _intOrNull(json, 'lastLearningAge'),
     // Eski kayıtlarda ehliyet yoktur; boş kümeyle açılır.
     licenses: Set<String>.unmodifiable(
       json['licenses'] == null
@@ -847,10 +1151,23 @@ GameState decodeGameState(Map<String, Object?> json) {
     military: json['military'] == null
         ? const MilitaryState()
         : _decodeMilitary(_asMap(json['military'], 'military')),
+    // Eski kayıtlarda iş kaydı yoktur; boş açılır (D-132).
+    businesses: List<Business>.unmodifiable(<Business>[
+      for (final Object? e in _optionalRawList(json, 'businesses'))
+        _decodeBusiness(_asMap(e, 'business')),
+    ]),
+    // Eski kayıtlarda adli kayıt yoktur; **temiz** açılır (D-128).
+    legal: json['legal'] == null
+        ? const LegalState()
+        : _decodeLegal(_asMap(json['legal'], 'legal')),
+    pendingTrial: json['pendingTrial'] == null
+        ? null
+        : _decodeTrial(_asMap(json['pendingTrial'], 'pendingTrial')),
     // Eski kayıtlarda deneme sayacı yoktur; sıfırdan başlar.
     unprotectedTries: _intOrNull(json, 'unprotectedTries') ?? 0,
     ivfAttempts: _intOrNull(json, 'ivfAttempts') ?? 0,
     lastConceptionTryAge: _intOrNull(json, 'lastConceptionTryAge'),
+    conceptionTriesAtAge: _intOr(json, 'conceptionTriesAtAge', 0),
     // Eski kayıtlarda kuşak bilgisi yoktur: o hayatlar ilk kuşaktır.
     generation: _intOrNull(json, 'generation') ?? 1,
     // Eski kayıtlarda teklif geçmişi yoktur; boş açılır.
@@ -946,6 +1263,8 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     fame: _intOrNull(json, 'fame'),
     wallet: _int(json, 'wallet'),
     hairStyle: _stringOrNull(json, 'hairStyle'),
+    // Eski kayıtlarda saç dökülmesi yoktur; dökülmemiş sayılır.
+    hairLossStage: _intOr(json, 'hairLossStage', 0),
     // Eski kayıtlarda doğurganlık bilgisi yoktur; kısır sayılmaz.
     infertile: _boolOr(json, 'infertile'),
     // Eski kayıtlarda doğum ayı/günü yoktur; boş kalır. Burç o zaman
@@ -959,6 +1278,28 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
           ),
   );
 }
+
+Map<String, Object?> _encodeCelebrityContact(CelebrityContact c) =>
+    <String, Object?>{
+      'celebrityId': c.celebrityId,
+      'attempts': c.attempts,
+      'replied': c.replied,
+      'followsBack': c.followsBack,
+      'collaborated': c.collaborated,
+      'firstContactAge': c.firstContactAge,
+      'lastContactAge': c.lastContactAge,
+    };
+
+CelebrityContact _decodeCelebrityContact(Map<String, Object?> json) =>
+    CelebrityContact(
+      celebrityId: _string(json, 'celebrityId'),
+      attempts: _intOr(json, 'attempts', 0),
+      replied: _boolOr(json, 'replied', varsayilan: false),
+      followsBack: _boolOr(json, 'followsBack', varsayilan: false),
+      collaborated: _boolOr(json, 'collaborated', varsayilan: false),
+      firstContactAge: _intOrNull(json, 'firstContactAge'),
+      lastContactAge: _intOrNull(json, 'lastContactAge'),
+    );
 
 SocialAccount _decodeAccount(Map<String, Object?> json) => SocialAccount(
       platform: _enumByName(
@@ -1084,6 +1425,20 @@ FingerProfile _decodeFinger(Map<String, Object?> json) => FingerProfile(
             .toList(growable: false),
       ),
       occupation: _stringOrNull(json, 'occupation'),
+      intent: json['intent'] == null
+          ? FingerIntent.belirsiz
+          : _enumByName(
+              FingerIntent.values,
+              _string(json, 'intent'),
+              'finger.intent',
+            ),
+      wealth: json['wealth'] == null
+          ? WealthTier.ortaHalli
+          : _enumByName(
+              WealthTier.values,
+              _string(json, 'wealth'),
+              'finger.wealth',
+            ),
       matchedAtAge: _intOrNull(json, 'matchedAtAge'),
       metPersonId: _stringOrNull(json, 'metPersonId'),
     );
@@ -1131,6 +1486,77 @@ PendingNotice _decodeNotice(Map<String, Object?> json) => PendingNotice(
       happinessDelta:
           json['happinessDelta'] == null ? 0 : _int(json, 'happinessDelta'),
       funeralCost: json['funeralCost'] == null ? 0 : _int(json, 'funeralCost'),
+      // Eski kayıtlarda etki satırı yoktur; boş liste okunur.
+      effects: List<AppliedEffect>.unmodifiable(
+        _optionalRawList(json, 'effects')
+            .map((Object? e) => _decodeAppliedEffect(_asMap(e, 'effect')))
+            .toList(growable: false),
+      ),
+    );
+
+YearMark _decodeYearMark(Map<String, Object?> json) => YearMark(
+      age: _int(json, 'age'),
+      stats: Stats(
+        appearance: _int(json, 'appearance'),
+        happiness: _int(json, 'happiness'),
+        health: _int(json, 'health'),
+        intelligence: _int(json, 'intelligence'),
+        charisma: _int(json, 'charisma'),
+      ),
+      wallet: _int(json, 'wallet'),
+      fame: _intOrNull(json, 'fame'),
+    );
+
+YearSummary _decodeYearSummary(Map<String, Object?> json) => YearSummary(
+      age: _int(json, 'age'),
+      effects: List<AppliedEffect>.unmodifiable(<AppliedEffect>[
+        for (final Map<String, Object?> e
+            in _optionalRawList(json, 'effects').map(
+          (Object? raw) => _asMap(raw, 'lastYearSummary.effects'),
+        ))
+          AppliedEffect(
+            label: _string(e, 'label'),
+            delta: _intOrNull(e, 'delta'),
+            unit: e['unit'] is String ? e['unit']! as String : '',
+          ),
+      ]),
+    );
+
+PendingRace _decodePendingRace(Map<String, Object?> json) => PendingRace(
+      id: _string(json, 'id'),
+      lane: _int(json, 'lane'),
+      bet: _int(json, 'bet'),
+      winnerLane: _int(json, 'winnerLane'),
+      payout: _int(json, 'payout'),
+      horseName: _string(json, 'horseName'),
+      winnerName: _string(json, 'winnerName'),
+      oddsLabel: _string(json, 'oddsLabel'),
+      atAge: _int(json, 'atAge'),
+    );
+
+Loan _decodeLoan(Map<String, Object?> json) => Loan(
+      id: _string(json, 'id'),
+      bank: _enumByName(Bank.values, _string(json, 'bank'), 'loan.bank'),
+      purpose: json['purpose'] == null
+          ? LoanPurpose.ihtiyac
+          : _enumByName(
+              LoanPurpose.values,
+              _string(json, 'purpose'),
+              'loan.purpose',
+            ),
+      principal: _int(json, 'principal'),
+      annualPayment: _int(json, 'annualPayment'),
+      termYears: _int(json, 'termYears'),
+      remainingPayments: _int(json, 'remainingPayments'),
+      outstanding: _int(json, 'outstanding'),
+      takenAtAge: _int(json, 'takenAtAge'),
+      missedPayments: _intOr(json, 'missedPayments', 0),
+    );
+
+AppliedEffect _decodeAppliedEffect(Map<String, Object?> json) => AppliedEffect(
+      label: _string(json, 'label'),
+      delta: _intOrNull(json, 'delta'),
+      unit: json['unit'] == null ? '' : _string(json, 'unit'),
     );
 
 MilitaryState _decodeMilitary(Map<String, Object?> json) => MilitaryState(
@@ -1208,6 +1634,12 @@ Person _decodePerson(Map<String, Object?> json) {
       'person.wealth',
     ),
     bond: _int(json, 'bond'),
+    // Eski kayıtlarda kişinin kendi keyfi yoktur; nötr okunur (D-074).
+    happiness: _intOr(
+      json,
+      'happiness',
+      Person.prototypeOnlyDefaultHappiness,
+    ),
     // Eski kayıtlarda doğurganlık bilgisi yoktur; **kısır sayılmaz**.
     // Geriye dönük gizli bir engel yazılmaz.
     infertile: _boolOr(json, 'infertile'),
@@ -1235,6 +1667,8 @@ Person _decodePerson(Map<String, Object?> json) {
     development: json['development'] == null
         ? null
         : _decodeDevelopment(_asMap(json['development'], 'person.development')),
+    estrangedSinceAge: _intOrNull(json, 'estrangedSinceAge'),
+    becameFriendAtAge: _intOrNull(json, 'becameFriendAtAge'),
   );
 }
 
@@ -1282,6 +1716,8 @@ CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
       // Eski kayıtlarda emeklilik yoktur; oyuncu emekli sayılmaz.
       retiredAtAge: _intOrNull(json, 'retiredAtAge'),
       pension: _intOrNull(json, 'pension'),
+      // Eski kayıtta işveren uyarısı yoktur; sıfırdan başlar (D-078).
+      employerWarnings: _intOr(json, 'employerWarnings', 0),
     );
 
 CareerMilestone _decodeCareerMilestone(Map<String, Object?> json) =>
@@ -1346,6 +1782,10 @@ Pet _decodePet(Map<String, Object?> json) => Pet(
       diedAtPlayerAge: _intOrNull(json, 'diedAtPlayerAge'),
       lastCareChargedPlayerAge: _intOrNull(json, 'lastCareChargedPlayerAge'),
       bond: _intOr(json, 'bond', 50),
+      // Eski kayıtta hayvan sağlığı yoktur; nötr okunur (D-082).
+      health: _intOr(json, 'health', Pet.prototypeOnlyDefaultPetHealth),
+      missingSinceAge: _intOrNull(json, 'missingSinceAge'),
+      rehomedAtPlayerAge: _intOrNull(json, 'rehomedAtPlayerAge'),
     );
 
 LifeLogEntry _decodeLogEntry(Map<String, Object?> json) => LifeLogEntry(
@@ -1596,3 +2036,67 @@ T? _enumByNameOrNull<T extends Enum>(
   String key,
 ) =>
     name == null ? null : _enumByName(values, name, key);
+
+/// Adli durumu okur.
+///
+/// Bilinmeyen bir aşama ya da karar gelirse kayıt **atılmaz**: en güvenli
+/// karşılık okunur, çünkü bu projede kayıt silinmez.
+LegalState _decodeLegal(Map<String, Object?> json) => LegalState(
+      imprisonedSinceAge: _intOrNull(json, 'imprisonedSinceAge'),
+      releaseAtAge: _intOrNull(json, 'releaseAtAge'),
+      probationUntilAge: _intOrNull(json, 'probationUntilAge'),
+      caseCounter: _intOr(json, 'caseCounter', 0),
+      detainedSinceAge: _intOrNull(json, 'detainedSinceAge'),
+      bailAmount: _intOrNull(json, 'bailAmount'),
+      bailPaidBy: _stringOrNull(json, 'bailPaidBy'),
+      bailAskedAtAge: _intOrNull(json, 'bailAskedAtAge'),
+      goodBehaviour: _intOr(json, 'goodBehaviour', 0),
+      crewStanding: _intOr(json, 'crewStanding', 0),
+      yearsServed: _intOr(json, 'yearsServed', 0),
+      cases: List<CriminalCase>.unmodifiable(<CriminalCase>[
+        for (final Object? e in _optionalRawList(json, 'cases'))
+          _decodeCase(_asMap(e, 'legal.case')),
+      ]),
+    );
+
+CriminalCase _decodeCase(Map<String, Object?> json) => CriminalCase(
+      id: _string(json, 'id'),
+      crimeId: _string(json, 'crimeId'),
+      ageAtIncident: _intOr(json, 'ageAtIncident', 0),
+      stage: _enumByName(CaseStage.values, _string(json, 'stage'), 'case.stage'),
+      verdict: _enumByName(
+        Verdict.values,
+        _stringOrNull(json, 'verdict') ?? Verdict.yok.name,
+        'case.verdict',
+      ),
+      fine: _intOr(json, 'fine', 0),
+      finePaid: _boolOr(json, 'finePaid'),
+      prisonYears: _intOr(json, 'prisonYears', 0),
+      lawyerId: _stringOrNull(json, 'lawyerId'),
+      decidedAtAge: _intOrNull(json, 'decidedAtAge'),
+      closedAtAge: _intOrNull(json, 'closedAtAge'),
+      note: _stringOrNull(json, 'note'),
+    );
+
+PendingTrial _decodeTrial(Map<String, Object?> json) => PendingTrial(
+      caseId: _string(json, 'caseId'),
+      age: _intOr(json, 'age', 0),
+      text: _string(json, 'text'),
+    );
+
+Business _decodeBusiness(Map<String, Object?> json) => Business(
+      id: _string(json, 'id'),
+      typeId: _string(json, 'typeId'),
+      startedAtAge: _intOr(json, 'startedAtAge', 0),
+      condition: _intOr(json, 'condition', Business.prototypeOnlyStartCondition),
+      totalInvested: _intOr(json, 'totalInvested', 0),
+      totalProfit: _intOr(json, 'totalProfit', 0),
+      lastTendedAge: _intOrNull(json, 'lastTendedAge'),
+      lastSettledAge: _intOrNull(json, 'lastSettledAge'),
+      closedAtAge: _intOrNull(json, 'closedAtAge'),
+      endReason: _enumByNameOrNull(
+        BusinessEndReason.values,
+        _stringOrNull(json, 'endReason'),
+        'business.endReason',
+      ),
+    );

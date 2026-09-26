@@ -4,9 +4,12 @@ import '../sound/sound_scope.dart';
 import '../sound/sound_service.dart';
 
 import '../../domain/life/notices.dart';
+import '../../domain/interaction/child_naming.dart';
 import '../../domain/models/pending_notice.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import '../../text/turkish_text.dart';
+import 'effect_chips.dart';
 import 'kilim_divider.dart';
 
 /// Önemli haber penceresi (D-050).
@@ -28,6 +31,14 @@ class NoticeSheet extends StatefulWidget {
       enableDrag: false,
       useRootNavigator: true,
       showDragHandle: false,
+      // Varsayılan pencere ekranın 9/16'sını geçemez ve uzun bildirim
+      // taşardı: check-up raporu gibi çok satırlı metinler sığmıyordu
+      // (D-076'da ölçüldü: 48 px taşma). Artık pencere gerektiği kadar
+      // uzayabiliyor, metin de kendi içinde kayıyor.
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
       builder: (BuildContext context) => NoticeSheet(notice: notice),
     );
   }
@@ -43,9 +54,58 @@ class _NoticeSheetState extends State<NoticeSheet> {
   /// katkıda bulunmak aynı şey değildir.
   FuneralAttendance? _katilim;
 
+  /// Doğum bildiriminde bebeğin adı (D-095).
+  final TextEditingController _isimAlani = TextEditingController();
+
+  /// İsim alanı bir kez doldurulur; her çizimde yazılan silinmesin.
+  bool _isimHazir = false;
+
+  /// İsim denemesinin sonucu: onay ya da sebebiyle birlikte ret.
+  String? _isimNotu;
+
+  @override
+  void dispose() {
+    _isimAlani.dispose();
+    super.dispose();
+  }
+
+  /// Bebeğe girilen adı verir; sonuç ekranda yazılı kalır (D-095).
+  void _isimVer(String childId) {
+    final ({bool applied, String message}) sonuc =
+        GameScope.of(context).nameChild(childId, _isimAlani.text);
+    setState(() => _isimNotu = sonuc.message);
+  }
+
+  /// Bildirimi kapatır.
+  ///
+  /// Doğum bildirimindeyse **önce yazılan ad uygulanır**. Faho bildirdi:
+  /// adı yazıp "Tamam"a basınca ad kayboluyordu, çünkü ad yalnızca ayrı
+  /// "İsmi kaydet" düğmesiyle işleniyordu. Yazılan ad sessizce atılmaz:
+  /// geçerliyse uygulanır, geçersizse pencere **kapanmaz** ve sebebi
+  /// ekranda yazar.
   void _kapat() {
+    if (!_adiUygula()) return;
     GameScope.of(context).dismissNotice();
     Navigator.of(context).pop();
+  }
+
+  /// Yazılan adı uygular. Kapatmaya devam edilebilirse `true` döner.
+  bool _adiUygula() {
+    final String bebekId = widget.notice.personId ?? '';
+    if (widget.notice.kind != NoticeKind.dogum || bebekId.isEmpty) return true;
+    final GameController controller = GameScope.of(context);
+    if (!controller.canNameChild(bebekId)) return true;
+    final String yazilan = _isimAlani.text.trim();
+    if (yazilan.isEmpty) return true;
+    // Ad zaten buysa boşuna günlüğe satır düşürmeyelim.
+    final String mevcut =
+        controller.state?.personById(bebekId)?.firstName ?? '';
+    if (ChildNaming.normalize(yazilan) == mevcut) return true;
+    final ({bool applied, String message}) sonuc =
+        controller.nameChild(bebekId, yazilan);
+    if (sonuc.applied) return true;
+    setState(() => _isimNotu = sonuc.message);
+    return false;
   }
 
   void _katilimSec(FuneralAttendance secim) {
@@ -66,6 +126,18 @@ class _NoticeSheetState extends State<NoticeSheet> {
     final PendingNotice notice = widget.notice;
     final bool cenaze = notice.kind == NoticeKind.cenaze && _sonuc == null;
     final bool katilimSorulacak = cenaze && _katilim == null;
+
+    // Doğum bildiriminde bebeğe isim verilebilir (D-095). Ad zaten
+    // önerilmiştir; oyuncu isterse değiştirir, istemezse "Tamam" der.
+    final String? bebekId = notice.personId;
+    final bool isimVerilebilir = notice.kind == NoticeKind.dogum &&
+        bebekId != null &&
+        GameScope.of(context).canNameChild(bebekId);
+    if (isimVerilebilir && !_isimHazir) {
+      _isimHazir = true;
+      _isimAlani.text =
+          GameScope.of(context).state?.personById(bebekId)?.firstName ?? '';
+    }
 
     return SafeArea(
       child: Padding(
@@ -103,31 +175,92 @@ class _NoticeSheetState extends State<NoticeSheet> {
             const SizedBox(height: 10),
             const KilimDivider(),
             const SizedBox(height: 14),
-            Text(
-              _sonuc ?? notice.text,
-              key: const Key('notice_text'),
-              style: theme.textTheme.bodyLarge,
-            ),
-            // Etki yalnızca gerçekten uygulandıysa yazılır.
-            if (_sonuc == null && notice.happinessDelta < 0) ...<Widget>[
-              const SizedBox(height: 12),
-              Text(
-                'Mutluluk ${notice.happinessDelta}',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.error,
+            // Metin ve etkiler kendi içinde kayar; başlık ve düğmeler
+            // sabit kalır. Böylece uzun bir rapor da okunabilir ve
+            // "Tamam" düğmesi ekrandan taşmaz.
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      _sonuc ?? notice.text,
+                      key: const Key('notice_text'),
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    // Etki yalnızca gerçekten uygulandıysa yazılır.
+                    if (_sonuc == null && notice.happinessDelta < 0) ...<Widget>[
+                      const SizedBox(height: 12),
+                      Text(
+                        'Mutluluk ${notice.happinessDelta}',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ],
+                    // Gerçekten uygulanmış değişimler (D-074): "bana 5,
+                    // kızıma 5" gibi bir sonucun iki satırı da burada.
+                    if (_sonuc == null && notice.effects.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 12),
+                      EffectChips(
+                        key: const Key('notice_effects'),
+                        effects: notice.effects,
+                      ),
+                    ],
+                    if (isimVerilebilir) ...<Widget>[
+                      const SizedBox(height: 16),
+                      Text(
+                        'Bebeğin adını sen koyabilirsin.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        key: const Key('birth_name_field'),
+                        controller: _isimAlani,
+                        maxLength: ChildNaming.maxLength,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          labelText: 'Bebeğin adı',
+                          counterText: '',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonal(
+                          key: const Key('birth_name_save'),
+                          onPressed: () => _isimVer(bebekId),
+                          child: const Text('İsmi kaydet'),
+                        ),
+                      ),
+                      if (_isimNotu != null) ...<Widget>[
+                        const SizedBox(height: 8),
+                        Text(
+                          _isimNotu!,
+                          key: const Key('birth_name_note'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                    if (_sonuc == null &&
+                        notice.kind == NoticeKind.miras) ...<Widget>[
+                      const SizedBox(height: 12),
+                      if (notice.money > 0)
+                        Text(
+                          'Cüzdanına ${trMoney(notice.money)} geçti.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      for (final String ad in notice.itemNames)
+                        Text('$ad sana kaldı.',
+                            style: theme.textTheme.bodyMedium),
+                    ],
+                  ],
                 ),
               ),
-            ],
-            if (_sonuc == null && notice.kind == NoticeKind.miras) ...<Widget>[
-              const SizedBox(height: 12),
-              if (notice.money > 0)
-                Text(
-                  'Cüzdanına ${trMoney(notice.money)} geçti.',
-                  style: theme.textTheme.bodyMedium,
-                ),
-              for (final String ad in notice.itemNames)
-                Text('$ad sana kaldı.', style: theme.textTheme.bodyMedium),
-            ],
+            ),
             const SizedBox(height: 18),
             if (katilimSorulacak) ...<Widget>[
               SizedBox(
@@ -230,6 +363,26 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.confirmation_number_rounded;
       case NoticeKind.hayvan:
         return Icons.pets_rounded;
+      case NoticeKind.aktivite:
+        return Icons.celebration_rounded;
+      case NoticeKind.bosanma:
+        return Icons.heart_broken_outlined;
+      case NoticeKind.saglik:
+        return Icons.monitor_heart_outlined;
+      case NoticeKind.arac:
+        return Icons.car_repair_outlined;
+      case NoticeKind.banka:
+        return Icons.account_balance_outlined;
+      case NoticeKind.adli:
+        return Icons.gavel_rounded;
+      case NoticeKind.arkadaslik:
+        return Icons.people_alt_rounded;
+      case NoticeKind.kendiIsi:
+        return Icons.storefront_rounded;
+      case NoticeKind.kariyer:
+        return Icons.work_outline;
+      case NoticeKind.aileDonum:
+        return Icons.celebration_outlined;
     }
   }
 }

@@ -230,6 +230,8 @@ void main() {
         greaterThan(0),
       );
 
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveEducationChoices(controller);
       controller.ageUp();
       resolvePendingEvents(controller);
       expect(controller.state!.interactionCounts, isEmpty,
@@ -258,6 +260,8 @@ void main() {
           controller.interact(anne.id, InteractionKind.sohbet);
         }
         resolvePendingEvents(controller);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
       resolvePendingEvents(controller);

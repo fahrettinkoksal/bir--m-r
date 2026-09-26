@@ -100,6 +100,8 @@ void main() {
           // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
           if (controller.state!.deceased) break;
           final int onceki = controller.state!.player.age;
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(controller);
           controller.ageUp();
           expect(controller.state!.player.age, onceki + 1);
           // Yaş alındıktan sonra ekranda **en fazla bir** olay olur.
@@ -154,6 +156,8 @@ void main() {
             findRelation(controller.state!, RelationType.anne);
 
         for (int i = 0; i < 26; i++) {
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(controller);
           controller.ageUp();
           while (controller.state!.hasPendingEvent) {
             final ActiveEvent active = controller.state!.pendingEvent!;
@@ -255,6 +259,8 @@ void main() {
         final List<String> gorulen = <String>[];
 
         for (int i = 0; i < 26; i++) {
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(controller);
           controller.ageUp();
           while (controller.state!.hasPendingEvent) {
             final ActiveEvent active = controller.state!.pendingEvent!;
@@ -426,6 +432,8 @@ void main() {
 
         for (int i = 0; i < 20; i++) {
           int buYastakiOlay = 0;
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(controller);
           controller.ageUp();
           if (controller.state!.hasPendingEvent) {
             buYastakiOlay++;
@@ -482,6 +490,8 @@ void main() {
         final GameController controller = GameController(random: Random(seed));
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int age = 1; age <= 4; age++) {
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(controller);
           controller.ageUp();
           expect(controller.state!.player.age, age);
           final ActiveEvent? olay = controller.state!.pendingEvent;
@@ -508,6 +518,8 @@ void main() {
           // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
           if (controller.state!.deceased) break;
           final int logOnce = controller.state!.log.length;
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(controller);
           controller.ageUp();
           toplamYas++;
           expect(controller.state!.log.length, greaterThan(logOnce),

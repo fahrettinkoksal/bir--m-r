@@ -52,8 +52,16 @@ void main() {
     await dovuseGit(tester, hayat());
 
     expect(find.text('Dövüş sanatları'), findsWidgets);
+    // Ekran bir `ListView`; altta kalan dal henüz inşa edilmemiş olur.
+    // Bu yüzden her dala **kaydırarak ulaşılabildiği** doğrulanır:
+    // "ilk ekranda görünüyor" değil, "ulaşılabiliyor" aranan şeydir.
     for (final MartialArt art in MartialArt.values) {
-      expect(find.text(art.label), findsOneWidget);
+      await scrollToFinder(tester, find.text(art.label));
+      expect(
+        find.text(art.label),
+        findsOneWidget,
+        reason: '${art.label} dalına ulaşılamıyor',
+      );
     }
   });
 

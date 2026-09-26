@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/game_event.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/person.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import '../theme/bir_omur_theme.dart';
 import '../widgets/bottom_action_bar.dart';
@@ -10,7 +11,9 @@ import '../widgets/character_header.dart';
 import '../widgets/comic.dart';
 import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
+import '../widgets/trial_sheet.dart';
 import '../widgets/notice_sheet.dart';
+import '../widgets/track_choice_sheet.dart';
 import '../../domain/life/will.dart';
 import '../../domain/models/pending_notice.dart';
 import 'life_screen.dart';
@@ -76,6 +79,27 @@ class _HomeShellState extends State<HomeShell> {
     });
   }
 
+  /// Aynı anda yalnızca tek duruşma penceresi açılır (D-128).
+  bool _trialVisible = false;
+
+  /// Bekleyen duruşmayı gösterir.
+  ///
+  /// Sağlık krizinden sonra, bildirimlerden **önce** gelir: mahkeme
+  /// kararı bildirimi duruşma kapanmadan üretilmiş olamaz.
+  void _showTrial() {
+    if (_trialVisible) return;
+    _trialVisible = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final NavigatorState navigator =
+          Navigator.of(context, rootNavigator: true);
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
+      await TrialSheet.show(context);
+      if (!mounted) return;
+      setState(() => _trialVisible = false);
+    });
+  }
+
   void _showCrisis() {
     if (_crisisVisible) return;
     _crisisVisible = true;
@@ -110,10 +134,60 @@ class _HomeShellState extends State<HomeShell> {
 
   void _goHome() => setState(() => _selectedTab = null);
 
+  /// Aynı anda yalnızca tek eğitim seçimi penceresi açılır (D-094, D-111).
+  bool _educationChoiceVisible = false;
+
+  /// Bekleyen eğitim kararını **hemen** sorar (D-094, D-111).
+  ///
+  /// Faho bildirdi: karar bir sonraki "Yaş Al"a kalıyordu, yani oyuncu
+  /// lise alanını seçmeden o yılın bütün aktivitelerini yapabiliyordu.
+  /// Karar artık ortaya çıktığı anda sorulur.
+  Future<void> _showEducationChoice() async {
+    if (_educationChoiceVisible) return;
+    final GameController controller = GameScope.of(context);
+    if (!controller.needsEducationChoice) return;
+    // Lise **sonrası** karar artık pencereyle sorulmuyor (D-142).
+    //
+    // Faho'nun isteği: "bu kendi kendine gelen pop up menü yerine direkt
+    // okul içerisine atabiliriz". Oyuncu Okul/Meslek ekranının başvuru
+    // sayfasına düşüyor; kural aynı kalıyor, karar verilmeden yaş
+    // alınamıyor (D-111). Lise **alanı** seçimi penceresi duruyor: o
+    // karar okul yılının içinde veriliyor ve gidilecek bir sayfası yok.
+    if (!controller.needsTrackChoice) {
+      setState(() {
+        _selectedTab = TabIds.okulMeslek;
+        _afterSchoolPending = true;
+      });
+      return;
+    }
+    _educationChoiceVisible = true;
+    await TrackChoiceSheet.show(context);
+    if (!mounted) return;
+    setState(() => _educationChoiceVisible = false);
+  }
+
+  /// Okul/Meslek ekranı açılırken doğrudan başvuru sayfasına gidilsin mi?
+  bool _afterSchoolPending = false;
+
   void _ageUp() {
-    GameScope.of(context).ageUp();
+    final GameController controller = GameScope.of(context);
+    // Eğitim kararı verilmeden yaş atlanamaz; düğme sessiz kalmaz, seçim
+    // ekranı açılır (D-094, D-111).
+    if (controller.needsEducationChoice) {
+      _goHome();
+      _showEducationChoice();
+      return;
+    }
+    controller.ageUp();
     // Yaş alınca yeni günlük satırı ve olay görünsün diye ana ekrana dönülür.
     _goHome();
+    // Bu yıl liseye ya da mezuniyete gelindiyse karar **hemen** sorulur;
+    // bir sonraki yıla ertelenmez.
+    if (controller.needsEducationChoice) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showEducationChoice();
+      });
+    }
   }
 
   Future<void> _confirmNewLife() async {
@@ -210,7 +284,12 @@ class _HomeShellState extends State<HomeShell> {
   Widget _body() {
     switch (_selectedTab) {
       case TabIds.okulMeslek:
-        return SchoolCareerScreen(onBack: _goHome);
+        final bool acilsin = _afterSchoolPending;
+        _afterSchoolPending = false;
+        return SchoolCareerScreen(
+          onBack: _goHome,
+          openAfterSchool: acilsin,
+        );
       case TabIds.varliklar:
         return AssetsScreen(onBack: _goHome);
       case TabIds.iliskiler:
@@ -250,12 +329,20 @@ class _HomeShellState extends State<HomeShell> {
     // Sağlık krizi, olaylardan önce ekrana gelir (D-044).
     if (state.hasPendingCrisis) _showCrisis();
 
+    // Duruşma krizden sonra, bildirimlerden önce gelir (D-128).
+    if (state.hasPendingTrial && !state.hasPendingCrisis) _showTrial();
+
     // Önemli haberler (ölüm, miras, cenaze) krizden sonra, olaydan önce.
     final PendingNotice? notice = state.nextNotice;
-    if (notice != null && !state.hasPendingCrisis) _showNotice(notice);
+    if (notice != null && !state.hasPendingCrisis && !state.hasPendingTrial) {
+      _showNotice(notice);
+    }
 
     final ActiveEvent? pending = state.pendingEvent;
-    if (pending != null && !state.hasPendingCrisis && !state.hasNotice) {
+    if (pending != null &&
+        !state.hasPendingCrisis &&
+        !state.hasPendingTrial &&
+        !state.hasNotice) {
       _showPendingEvent(pending);
     }
 

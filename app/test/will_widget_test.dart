@@ -43,15 +43,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('menüde Vasiyet var ve mirasçı seçilebilir',
+  testWidgets('menüde Son Kararlar var ve mirasçı seçilebilir',
       (WidgetTester tester) async {
     await pumpApp(tester, yasayan());
 
     // Aktiviteler menüsü uzadı; satır önce görünür hale getirilir.
-    await scrollToMenuRow(tester, 'Vasiyet');
-    expect(find.text('Vasiyet'), findsOneWidget);
-    expect(find.text('Mirasçı seçilmedi'), findsOneWidget);
-    await tapMenuRow(tester, 'Vasiyet');
+    await scrollToMenuRow(tester, 'Son Kararlar');
+    expect(find.text('Son Kararlar'), findsOneWidget);
+    expect(find.text('Mirasçı ve hayatının sonu'), findsOneWidget);
+    await tapMenuRow(tester, 'Son Kararlar');
 
     await tester.tap(find.byKey(const Key('will_choose_cocuk-1')));
     await tester.pumpAndSettle();
@@ -71,8 +71,13 @@ void main() {
     expect(controller.state!.heirChildId, isNull);
   });
 
-  testWidgets('çocuğu olmayan oyuncuda Vasiyet menüde görünmez',
+  testWidgets(
+      'çocuğu olmayan oyuncuda mirasçı seçimi kapalıdır ama menü açıktır',
       (WidgetTester tester) async {
+    // D-084 ile bu menü "Son Kararlar" oldu ve mirasçı seçiminin yanında
+    // hayatın sonuna dair kararı da taşıyor. O karar çocuğa bağlı
+    // olmadığı için menü yetişkin oyuncuya açık; mirasçı bölümü ise
+    // gerekçesini yazıyor (D-038).
     final GameState cocuksuz = yasayan().copyWith(
       people: yasayan()
           .people
@@ -80,7 +85,51 @@ void main() {
           .toList(growable: false),
     );
     await pumpApp(tester, cocuksuz);
-    expect(find.text('Vasiyet'), findsNothing);
+    await scrollToMenuRow(tester, 'Son Kararlar');
+    await tapMenuRow(tester, 'Son Kararlar');
+
+    // Mirasçı yapılabilecek kimse gösterilmez.
+    expect(find.textContaining('Mirasçı yap'), findsNothing);
+    // Hayatın sonu bölümü ve gerçek destek bilgisi görünür.
+    expect(find.byKey(const Key('life_end_open')), findsOneWidget);
+    expect(find.textContaining('ALO 183'), findsWidgets);
+  });
+
+  testWidgets('hayata son verme onay ister ve vazgeçilebilir',
+      (WidgetTester tester) async {
+    await pumpApp(tester, yasayan());
+    await scrollToMenuRow(tester, 'Son Kararlar');
+    await tapMenuRow(tester, 'Son Kararlar');
+
+    await scrollToFinder(tester, find.byKey(const Key('life_end_open')));
+    await tester.tap(find.byKey(const Key('life_end_open')));
+    await tester.pumpAndSettle();
+
+    // Onay ekranında gerçek yardım bilgisi yazar.
+    expect(find.textContaining('ALO 183'), findsWidgets);
+
+    await tester.tap(find.byKey(const Key('life_end_cancel')));
+    await tester.pumpAndSettle();
+    expect(controller.state!.deceased, isFalse,
+        reason: 'Vazgeçince hayat devam etmeli');
+  });
+
+  testWidgets('onaylanınca hayat biter ve çocuktan devam açılır',
+      (WidgetTester tester) async {
+    await pumpApp(tester, yasayan());
+    await scrollToMenuRow(tester, 'Son Kararlar');
+    await tapMenuRow(tester, 'Son Kararlar');
+
+    await scrollToFinder(tester, find.byKey(const Key('life_end_open')));
+    await tester.tap(find.byKey(const Key('life_end_open')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('life_end_confirm')));
+    await tester.pumpAndSettle();
+
+    expect(controller.state!.deceased, isTrue);
+    expect(controller.state!.deathAge, isNotNull);
+    // Kayıt silinmez ve çocuktan devam etme yolu açık kalır.
+    expect(controller.canContinueGeneration, isTrue);
   });
 
   testWidgets('hayat özetinde ve devam listesinde mirasçı işaretlenir',

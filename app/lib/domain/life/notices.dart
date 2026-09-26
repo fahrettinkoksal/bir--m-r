@@ -46,7 +46,7 @@ enum FuneralChoice {
 /// Tutarlar `prototypeOnly`'dir (Q-074).
 abstract final class Notices {
   /// prototypeOnly: cenaze masrafına önerilen katkı (₺).
-  static const int prototypeOnlyFuneralCost = 25000;
+  static const int prototypeOnlyFuneralCost = 120000;
 
   /// prototypeOnly: katkıda bulunmanın mutluluk etkisi.
   static const int prototypeOnlyContributionHappiness = 3;
@@ -182,6 +182,38 @@ abstract final class Notices {
     );
   }
 
+  /// Aynı yıl birden fazla mirasın **tek** bildirimi (D-097).
+  ///
+  /// İki yakınını aynı yıl kaybeden oyuncuya art arda altı pencere
+  /// açılıyordu. Ölüm ve cenaze kişiye özeldir, ayrı kalır; miras ise
+  /// tek bir haberde toplanır. Hiçbir pay kaybolmaz: her satır kendi
+  /// kişisiyle yazılır, tutarlar ve eşyalar toplanır.
+  static PendingNotice? combinedInheritance({
+    required int playerAge,
+    required List<PendingNotice> shares,
+  }) {
+    if (shares.isEmpty) return null;
+    if (shares.length == 1) return shares.single;
+
+    final int toplam = shares.fold<int>(
+      0,
+      (int acc, PendingNotice n) => acc + n.money,
+    );
+    final List<String> esyalar = <String>[
+      for (final PendingNotice n in shares) ...n.itemNames,
+    ];
+    return PendingNotice(
+      id: 'miras-toplu-$playerAge',
+      kind: NoticeKind.miras,
+      age: playerAge,
+      title: 'Miras',
+      text: 'Bu yıl birden fazla mirastan pay aldın. '
+          '${shares.map((PendingNotice n) => n.text).join(' ')}',
+      money: toplam,
+      itemNames: List<String>.unmodifiable(esyalar),
+    );
+  }
+
   // -----------------------------------------------------------------
   // Okul dönüm noktaları (Paket 17)
   // -----------------------------------------------------------------
@@ -217,6 +249,55 @@ abstract final class Notices {
                 'bunu bekliyordunuz.',
         personId: childId,
       );
+
+  /// Kronik durum kaydına girdi (D-153).
+  ///
+  /// Bilgilendirmedir: karar sormaz, hiçbir değeri değiştirmez. Metin
+  /// tıbbi tavsiye vermez, yalnızca durumu söyler.
+  static PendingNotice chronicStarted({
+    required int playerAge,
+    required String typeId,
+    required String label,
+    required String description,
+  }) =>
+      PendingNotice(
+        id: 'kronik-$typeId-$playerAge',
+        kind: NoticeKind.saglik,
+        age: playerAge,
+        title: label,
+        text: '$description Sağlık Geçmişi bölümünden takip edebilirsin.',
+      );
+
+  /// İkiz doğdu (D-151).
+  ///
+  /// İki ayrı "çocuğunuz oldu" penceresi üst üste açılmaz; ikiz **tek**
+  /// bildirimle duyurulur. Bildirim yalnızca gerçekten olanı yazar: iki
+  /// çocuğun adı ve cinsiyeti.
+  static PendingNotice twinBirth({
+    required int playerAge,
+    required String firstChildId,
+    required String firstName,
+    required bool firstIsGirl,
+    required String secondName,
+    required bool secondIsGirl,
+    String? otherParentName,
+  }) {
+    final String baslik = firstIsGirl == secondIsGirl
+        ? (firstIsGirl ? 'İkiz kızınız oldu' : 'İkiz oğlunuz oldu')
+        : 'İkizleriniz oldu';
+    final String beklenti = otherParentName == null
+        ? 'Bir bebek bekliyordunuz, iki bebek geldi.'
+        : 'Sen ve $otherParentName bir bebek bekliyordunuz, iki bebek '
+            'geldi.';
+    return PendingNotice(
+      id: 'ikiz-$firstChildId',
+      kind: NoticeKind.dogum,
+      age: playerAge,
+      title: baslik,
+      text: '$firstName ve $secondName aynı gün doğdu. $beklenti',
+      personId: firstChildId,
+    );
+  }
 
   /// Burçsal dönem bildirimi (Paket 27): aynı dönem aynı yaşta bir kez.
   static String zodiacNoticeId(String periodId, int age) =>
@@ -491,8 +572,8 @@ abstract final class Notices {
     next = next.copyWith(
       player: next.player.copyWith(
         wallet: next.player.wallet - tutar,
-        stats: next.player.stats.copyWith(
-          happiness: next.player.stats.happiness + mutlulukEtkisi,
+        stats: next.player.stats.gain(
+          happiness: mutlulukEtkisi,
         ),
       ),
     );

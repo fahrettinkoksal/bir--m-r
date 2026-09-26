@@ -14,6 +14,7 @@ import '../models/stats.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 import '../../data/pet_catalog.dart';
+import '../life/year_review.dart';
 
 /// Başlangıç modları (D-005).
 enum StartMode {
@@ -347,7 +348,10 @@ class LifeGenerator {
       log: const <LifeLogEntry>[],
     );
 
-    return state.copyWith(log: _birthLog(state));
+    // Yılın başındaki fotoğraf ilk yıldan itibaren durur (D-096); ilk
+    // yaş özeti de gerçek değerlerle üretilsin.
+    final GameState hazir = state.copyWith(log: _birthLog(state));
+    return hazir.copyWith(yearMark: YearMark.of(hazir));
   }
 
   // --------------------------------------------------------------------

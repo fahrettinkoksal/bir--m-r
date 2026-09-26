@@ -316,6 +316,29 @@ class EducationPath {
   /// Üniversiteye gitmeme kararının hikâye izi.
   static const String universiteyeGitmediFlag = 'universiteye_gitmedi';
 
+  /// prototypeOnly: mezuniyet sonrası kararının sorulduğu en büyük yaş
+  /// (D-111).
+  ///
+  /// Kilidin bir sonu olmalı. Ölçümde çıktı: lise bitirip hiçbir karar
+  /// vermemiş eski bir kayıtta kilit **ömür boyu** sürüyordu ve oyuncu
+  /// 85 yaşında hâlâ "üniversite bölümünü seç" penceresiyle
+  /// karşılaşıyordu. Bu yaştan sonra hayat zaten kararını vermiştir;
+  /// soru sorulmaz ve yıl normal akar.
+  static const int prototypeOnlyAfterSchoolMaxAge = 30;
+
+  /// Lise bittikten sonraki yol **hâlâ seçilmeyi bekliyor mu?** (D-111)
+  ///
+  /// `EducationState.awaitingAfterSchoolChoice` yalnızca eğitim kaydına
+  /// bakabildiği için "üniversiteye gitmemeye karar verdim" durumunu
+  /// göremez; o karar bir hikâye izidir. Karar verilmiş bir oyuncuyu
+  /// sonsuza dek bekletmemek için kilit bu yardımcıdan okunur.
+  ///
+  /// Kilit yaşla da sınırlıdır: bkz. [prototypeOnlyAfterSchoolMaxAge].
+  static bool needsAfterSchoolChoice(GameState state) =>
+      state.education.awaitingAfterSchoolChoice &&
+      state.player.age <= prototypeOnlyAfterSchoolMaxAge &&
+      !state.storyFlags.contains(universiteyeGitmediFlag);
+
   EducationResult _blocked(GameState state, String reason) => EducationResult(
         state: state,
         outcome: EducationOutcome(applied: false, text: reason),

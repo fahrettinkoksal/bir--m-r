@@ -26,6 +26,7 @@ class Person {
     required this.employment,
     required this.wealth,
     required this.bond,
+    this.happiness = prototypeOnlyDefaultHappiness,
     this.occupation,
     this.schoolLevel,
     this.schoolTie,
@@ -35,6 +36,8 @@ class Person {
     this.city,
     this.estate = const <String>[],
     this.development,
+    this.estrangedSinceAge,
+    this.becameFriendAtAge,
     this.infertile = false,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
@@ -148,10 +151,40 @@ class Person {
   /// `null`'dır ve hiçbir yerde uydurma bilgi gösterilmez.
   final PersonDevelopment? development;
 
+  /// Küslük başladığı **oyuncu yaşı**; kavga yoksa `null` (D-130).
+  ///
+  /// **Kayıt silinmez:** küs olan kişi listeden düşmez, ilişkisi değişmez;
+  /// yalnızca gündelik etkileşim kapanır ve "barış" kapısı açılır. Eski
+  /// kayıtlarda bu alan yoktur ve kimse küs açılmaz.
+  final int? estrangedSinceAge;
+
+  /// Yakın arkadaşlığın başladığı **oyuncu yaşı** (D-130).
+  ///
+  /// Tanışıklıktan arkadaşlığa geçiş burada tarihlenir; hayat sonu
+  /// değerlendirmesi ve "yıllar sonra" olayları bunu okur. Eski
+  /// kayıtlarda `null`'dır ve geriye dönük bir tarih **uydurulmaz**.
+  final int? becameFriendAtAge;
+
+  /// Şu an küs mü?
+  bool get isEstranged => estrangedSinceAge != null;
+
   /// Oyuncuyla ilişki puanı (0-100).
   ///
   /// Prototip aralığıdır; onaylanmış bir denge değeri değildir.
   final int bond;
+
+  /// Kişinin **kendi** keyfi (D-074).
+  ///
+  /// Bağdan ayrıdır: yakınlık ilişkinin gücüdür, keyif o kişinin şu anki
+  /// hâlidir. Birlikte geçirilen iyi bir gün ikisini de yükseltir; uzun
+  /// ilgisizlik ikisini de düşürür. Oyuncu bunu kişi kartında görür ve
+  /// keyfi düşük kişi daveti **gerçekten reddedebilir** (D-059).
+  ///
+  /// Eski kayıtlarda yoktur; nötr başlangıçla okunur.
+  final int happiness;
+
+  /// prototypeOnly: yeni kişinin ve eski kayıttan okunan kişinin keyfi.
+  static const int prototypeOnlyDefaultHappiness = 60;
 
   String get fullName => '$firstName $lastName';
 
@@ -195,6 +228,7 @@ class Person {
     Object? occupation = _unset,
     Object? wealth = _unset,
     int? bond,
+    int? happiness,
     Object? schoolLevel = _unset,
     Object? schoolTie = _unset,
     Object? schoolId = _unset,
@@ -204,6 +238,8 @@ class Person {
     List<String>? estate,
     Object? development = _unset,
     bool? infertile,
+    Object? estrangedSinceAge = _unset,
+    Object? becameFriendAtAge = _unset,
   }) {
     return Person(
       id: id,
@@ -218,6 +254,7 @@ class Person {
       occupation: occupation == _unset ? this.occupation : occupation as String?,
       wealth: wealth == _unset ? this.wealth : wealth as WealthTier?,
       bond: bond ?? this.bond,
+      happiness: (happiness ?? this.happiness).clamp(0, 100),
       schoolLevel: schoolLevel == _unset
           ? this.schoolLevel
           : schoolLevel as SchoolLevel?,
@@ -233,6 +270,12 @@ class Person {
           ? this.development
           : development as PersonDevelopment?,
       infertile: infertile ?? this.infertile,
+      estrangedSinceAge: estrangedSinceAge == _unset
+          ? this.estrangedSinceAge
+          : estrangedSinceAge as int?,
+      becameFriendAtAge: becameFriendAtAge == _unset
+          ? this.becameFriendAtAge
+          : becameFriendAtAge as int?,
     );
   }
 }
@@ -257,7 +300,13 @@ class Pet {
     this.diedAtPlayerAge,
     this.lastCareChargedPlayerAge,
     this.bond = 50,
+    this.health = prototypeOnlyDefaultPetHealth,
+    this.missingSinceAge,
+    this.rehomedAtPlayerAge,
   });
+
+  /// prototypeOnly: yeni ve eski kayıttan okunan hayvanın sağlığı.
+  static const int prototypeOnlyDefaultPetHealth = 75;
 
   final String id;
   final String name;
@@ -279,6 +328,37 @@ class Pet {
   /// Kuşak değişiminde yalnızca **aynı hanede** olan hayvan devam eder;
   /// sahte yeni hayvan üretilmez.
   final bool inPlayerHousehold;
+
+  /// Hayvanın sağlığı (D-058, D-082).
+  ///
+  /// Veteriner ziyareti gerçek anlam taşır: hastalanan hayvanın sağlığı
+  /// düşer, tedavi yükseltir. Uzun süre düşük kalan sağlık ömrü kısaltır.
+  final int health;
+
+  /// Evden kaçtıysa **oyuncunun** o zamanki yaşı (D-082).
+  ///
+  /// Kaçan hayvan kayıttan silinmez ve yok olmaz (D-058): geri
+  /// dönebilir. `null` ise hayvan evdedir.
+  final int? missingSinceAge;
+
+  /// Hayvan şu an kayıp mı?
+  bool get isMissing =>
+      missingSinceAge != null && diedAtAge == null && !isRehomed;
+
+  /// Başka bir yuvaya verildiyse **oyuncunun** o zamanki yaşı (D-109).
+  ///
+  /// Sahiplendirmek vefat değildir: hayvan yaşamaya devam eder, kaydı
+  /// silinmez, ama artık oyuncunun bakımında değildir.
+  final int? rehomedAtPlayerAge;
+
+  /// Başka bir yuvaya verildi mi?
+  bool get isRehomed => rehomedAtPlayerAge != null;
+
+  /// Şu an oyuncunun bakımında mı? (D-109)
+  ///
+  /// Vefat etmemiş, sahiplendirilmemiş hayvan. Kayıp hayvan hâlâ
+  /// oyuncunundur: dönmesi beklenir.
+  bool get isActive => isAlive && !isRehomed;
 
   /// Vefat ettiyse hayvanın kendi yaşı.
   final int? diedAtAge;
@@ -305,6 +385,9 @@ class Pet {
     Object? diedAtPlayerAge = _unset,
     Object? lastCareChargedPlayerAge = _unset,
     int? bond,
+    int? health,
+    Object? missingSinceAge = _unset,
+    Object? rehomedAtPlayerAge = _unset,
   }) =>
       Pet(
         id: id,
@@ -323,5 +406,12 @@ class Pet {
             ? this.lastCareChargedPlayerAge
             : lastCareChargedPlayerAge as int?,
         bond: bond ?? this.bond,
+        health: (health ?? this.health).clamp(0, 100),
+        missingSinceAge: missingSinceAge == _unset
+            ? this.missingSinceAge
+            : missingSinceAge as int?,
+        rehomedAtPlayerAge: rehomedAtPlayerAge == _unset
+            ? this.rehomedAtPlayerAge
+            : rehomedAtPlayerAge as int?,
       );
 }

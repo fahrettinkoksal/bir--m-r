@@ -924,14 +924,567 @@ ifadeler düzeltildi; sonraki büyük sistem önerileri
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` dosyasında **yalnızca öneri** olarak
 toplandı.
 
+**Paket 49 — Faho'nun oyun içi geri bildirimleri.** PC'de oynanan
+sürümden çıkan altı madde işlendi:
+
+1. **Askerlik hatası düzeltildi.** Kadın oyuncu 18 yaşından sonra
+   "Askerlik · Yapılmadı" satırını görüyordu; zorunlu askerliği yokken
+   yerine getirilmemiş bir yükümlülük varmış gibi okunuyordu. Kayıt
+   değişmedi (değişseydi gönüllü subaylık yolu da kapanırdı), görüntü
+   düzeltildi.
+2. **Kalıcı pasif seçenek denetimi.** Açık düğmelerin hepsi gerekçesini
+   zaten yazıyordu; asıl risk ekranda durup hiç açılamayan içerikti.
+   `test/content_reachability_test.dart` bunu kalıcı hâle getirdi.
+3. **Dövüş sanatı eğitimi.** Karate siyah kuşağı 110 ders ve yılda en
+   fazla 20 ders demek: 110 ayrı tıklama. "Yılı çalış" eylemi eklendi;
+   ücret, yıllık sınır ve basamak eşikleri **birebir aynı**. Süre kararı
+   Q-111'de.
+4. **Sosyal medya.** Bir platformdaki kazanç artık diğer açık hesaplara
+   yansıyor ve kitlesi büyük hesap yıl geçtikçe kendiliğinden büyüyor.
+   Durgun hesabın erimesi **Claude'un eklediği varsayımdır**, Q-112'de
+   onaya sunuldu.
+5. **Meslek kataloğu 9'dan 15'e.** Aşçı, kuaför, muhasebeci, manken,
+   yazar, müzisyen. Mankenlik görünüşle, yazarlık okuma hobisiyle,
+   müzisyenlik müzik hobisiyle açılıyor. Sayılar Q-113'te.
+6. **Olay zincirleri.** Yıllara yayılan 4 zincir, 17 olay, 8 dal.
+   Sayılar Q-114'te.
+
+Bu pakette **hiçbir sayısal denge değeri kendi başına değiştirilmedi**;
+hepsi `prototypeOnly` kaldı ve kararlar Q-111…Q-114 olarak kuyrukta.
+
+**Paket 50 — Q-103…Q-114 kararları, 2026 ekonomisi ve şehir filtresi.**
+Faho on iki tasarım sorusunun tamamını karara bağladı; kararlar
+`DECISIONS.md` içine **D-054…D-065** olarak, ekonomi kararı **D-053**,
+şehir filtresi **D-066** olarak işlendi. Kuyruktaki Q-103…Q-114
+"KARARLAŞTIRILDI" durumuna geçti.
+
+- **2026 Türkiye ekonomisi.** Bütün tutarlar 2026 TL satın alma gücü;
+  nominal enflasyon simüle edilmiyor. Çıpa: net yıllık asgari ücret
+  336.900 ₺. Maaşlar yedi gelir bandına ayrıldı ve her bant test
+  edilerek korunuyor. Gerekçeli eski/yeni tablosu:
+  `docs/ECONOMY_2026.md`.
+- **Meslek kataloğu 9 → 44.** Hizmet, teknik, ofis, sağlık,
+  mühendislik, kamu ve yaratıcı sektörler temsil ediliyor. Sağlık ve
+  iletişim meslekleri için üniversite kataloğuna beş bölüm eklendi;
+  ulaşılamayan iş üretilmedi.
+- **Ev/araç ilanları yaşanan ille sınırlandı.** "Türkiye geneli"
+  liste kalktı, şehir bazlı fiyat katsayısı eklendi.
+- **Kütüphane 8 → 23 kitap**, okuma eşikleri 0/3/7/12/20; hobi
+  basamak adları ve süreleri karara uyduruldu.
+
+**Paket G — bildirilen gerçek hatalar (D-087…D-093).** Kuşak devamında
+torunlar kayboluyordu; `RelationType.yegen` eklenerek düzeltildi. Finger
+ekranındaki donmanın gerçek sebebi bulundu (menü bileşeni uzun metni
+sınırsız genişlikte yerleştiriyordu) ve dar ekran testi eklendi. At
+yarışı bahsi emanete alınıp sonuç atomik kesinleşiyor; blackjack'te el
+sonunda tekrar oynanabiliyor. Aynı işe aynı yıl ikinci başvuru kapandı.
+Finans olayları gerçek mali duruma bakıyor. İlgisizlik artık hızlanarak
+yakınlık düşürüyor ve uzaklaşan yakın için sitem olayı eklendi.
+
+**Paket H — lise alan seçimi ve doğumda isim (D-094, D-095).** Liseye
+geçen oyuncu alan seçmeden yaş atlayamıyor: **Yaş Al** düğmesi sessiz
+kalmıyor, seçim penceresi açılıyor ve seçim yapılmadan kapanmıyor.
+Seçilen alan günlüğe yazılıyor, sonuç aynı pencerede gösteriliyor ve
+üniversite koşullarında gerçek kaynak oluyor. Bebek doğduğunda adı
+doğum bildiriminin içinden değiştirilebiliyor; ad yalnızca doğum
+yılında, 2-16 harf ve yalnızca harf olarak kabul ediliyor, soyadı
+değişmiyor.
+
+**Paket I — geri bildirim ve sonuç görünürlüğü (D-096…D-098).** Yaş
+alındığında biten yılın özeti ana ekranın üstünde kart olarak duruyor:
+"23 yaşın böyle geçti". Satırlar yılın başındaki fotoğrafla bugünün
+farkından üretiliyor, uydurma kazanç yazamıyor. Kritik iş ve kredi
+haberleri (işten çıkarılma, işveren uyarısı, kaçan taksit) artık
+bildirim oluyor. Bildirim yoğunluğu 100 hayat üzerinde ölçüldü: en kötü
+yıl yedi pencereydi, aynı yıl gelen miras payları tek bildirimde
+toplanarak ve acılı yılda burç penceresi kapatılarak altıya indi
+(ortalama 0,39/yıl). Olay havuzundaki 467 seçimin tamamı denetlendi:
+etkisiz seçim yok, yalnızca görünmez işaret bırakan seçim yok; kural
+testle sabitlendi.
+
+**Paket J — statlar gerçekten hissedilsin (D-099…D-102).** Kazançlar
+artık azalan getiriyle işleniyor: +5'lik bir kazanç 40'tan +5, 70'ten +4,
+88'den +1 getiriyor. Çabayla ulaşılabilecek tavan 95; yılda +4 kazandıran
+bir alışkanlık 40 yıl sürse bile 100'e ulaşmıyor (eskiden ulaşıyordu).
+Kural tek noktadan geçiyor ve bunu atlayan yeni bir yol açılamasın diye
+kaynak taramalı bir testle sabitlendi. Sağlık Merkezi'nin yıllık toplam
+sağlık kazancı 17'den 6'ya indirildi (check-up ile stat kasma açığı).
+Hastalık artık sağlığı da düşürüyor. Dövüş sanatı spor bakımına sayılıyor.
+Görünüş düşüşü yaklaşık dörtte bir yumuşatıldı. Saç dökülmesi karizmayı
+değil görünüşü etkiliyor; saç ekimi ileri basamaktan iki kademe düşürüyor.
+
+**Paket K — sosyal medya, sponsorluk ve Ün (D-103…D-106).** Aktiviteler
+altında **Ün ve Medya Fırsatları** bölümü açıldı; Ün 40 olmadan menüde
+hiç görünmüyor. Yedi kurgusal medya işi var (dergi röportajından reklam
+yüzü olmaya). Sponsorluk için platform başına en az 5.000 takipçi
+gerekiyor ve ücret kitlenin tamamıyla ölçekleniyor: 5.000 → 32.500 ₺,
+500.000 → 478.000 ₺. Kabul edilip paylaşılmayan sponsorlukta ödeme yok,
+mutluluk düşüyor ve o platformdaki kitlenin %4'ü gidiyor. Tanınan biri
+yeni hesabı sıfırdan açmıyor: mevcut kitlesinin %8'i (en çok 40.000)
+taşınıyor. Ünlüye yılda iki kez yazılabiliyor ve geri takip edenler
+İlişkiler ekranında "Ünlüler ve tanıdıklar" başlığında duruyor. Takipçi
+sayıları Türkçe binlik ayracıyla yazılıyor (2.232).
+
+**Paket L — Finger: niyet, flört ve süzgeç (D-107).** Tanışmak artık
+sevgili olmak değil: araya **flört** basamağı girdi. Hem oyuncunun hem
+adayın "ne aradığı" profilde yazıyor ve buluşmanın sonucu ikisine birden
+bakıyor. Flört kendiliğinden sevgiliye dönmüyor; oyuncu teklif ediyor ve
+yakınlık yeterliyse resmîleşiyor. Adaylar ekonomik duruma göre
+süzülebiliyor. Beğeni kotası yılda 5'ten 12'ye çıktı, premium 30 kaldı.
+
+**Paket M — banka, konut kredisi ve harçlık (D-108).** Banka
+Varlıklar'dan Aktiviteler'e taşındı; Varlıklar'da yalnızca açık borç
+hatırlatması kaldı. Kredi tutarı artık elle yazılıyor. Konut kredisi
+eklendi: daha ucuz (aylık %2,45 / %3,40), 10 yıla kadar vadeli ve daha
+büyük. Basit kredi karnesi (İyi/Orta/Riskli/Çok riskli) banka ekranının
+üstünde gerekçesiyle duruyor; icra ve haciz için zemin bırakıldı.
+Harçlık isteyince alınan tutar sonucun içinde yazıyor.
+
+**Paket N — hayvanlar ve aile tepkisi (D-109, D-110).** Evcil hayvan
+sahiplendirilebiliyor: vefat değil, kaydı duruyor ve "Yeni yuvasına
+gidenler" başlığında görünüyor. Hayvan ekranı üçe ayrıldı. Kayıp hayvan
+sonsuza kadar kayıp kalmıyor; üç yılın sonunda durum kapanıyor ve hayvan
+ölmüş sayılmıyor. Özel izin gerektiren tür (timsah) gerçekten zorlaştı:
+25 yaş, kendi evi ve bedelin yarısı kadar izin masrafı. 18-20 yaşında
+çocuk sahibi olan oyuncuya ailenin tepkisi eklendi; evliyse destek,
+değilse endişe — ikisi de gerçekten uygulanıyor.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
+gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
+"Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
+değeri ve Hayvan Detayı ekranı (D-058), "Hobilerim" bölümü (D-057),
+bitirilmiş kitabın yeniden okunması, 0-5 ve 80+ yaş havuzlarının
+genişletilmesi, olay örtüşmesinin %40-45 bandına indirilmesi ve
+kariyer olaylarının payı (D-061), zincir sonundaki gerçek kariyer
+teklifi ve kişisiz kapanış olayları (D-065), çoklu kişiyle aktivite
+(D-059).
+
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1539 geçti, 15 atlandı, 0 başarısız**. Atlananların
+`flutter test` **1660 geçti, 15 atlandı, 0 başarısız**. Atlananların
 tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleridir.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
-**CI:** GitHub Actions hesabın ödeme/harcama limiti nedeniyle hiçbir işi
-başlatmıyor; bu turda da yeni Windows sürümü veya Android APK
-üretilemedi. Engelin sebebi kod ya da iş akışı yapılandırması değildir.
+**CI:** Depo public yapıldıktan sonra GitHub Actions normal çalışıyor.
+Windows test sürümü `claude/paket54-belge-denetimi` dalının
+`6f3a852` commitinden üretildi ve artifact olarak yüklendi. Android APK
+bu ortamda hâlâ üretilemiyor (Android SDK indirilemiyor).
+**Hiçbir sürüm gerçek Windows ya da Android cihazda oynanmadı.**
+
+## Paket A-F: Faho'nun 24 Eylül listesi (D-067 … D-085)
+
+Faho'nun uzun revizyon listesi altı pakette kodlandı. Her paket ayrı
+commit; hepsi `claude/stoic-maxwell-6rkrit` dalında.
+
+**Paket A — bildirilen beş hata (D-067…D-071).** Ev sahibi olan
+oyuncuya kira zammı olayı çıkması, çalışmayana iş yeri olayı çıkması,
+gebeliğin 46 yaşta tamamen kapanması, yıllarca ilgilenilmeyen eşle
+yakınlığın tam kalması, bedelli sonrası subay/astsubay yolunun da
+kapanması.
+
+**Paket B — statlar yaşla düşer, bakım karşılık verir (D-072, D-073).**
+Beş değerin her birinin kendi başlangıç yaşı ve tabanı var. Spor,
+berber ve okumak kaybı belirgin biçimde yavaşlatıyor. Erkeklerde saç
+dökülmesi eklendi; oran androjenetik alopesinin yaygın epidemiyolojik
+özetine göre seçildi ve test bunu ölçüyor.
+
+**Paket C — sağlık bildirimleri, göz mini oyunu, estetik, hastalık
+(D-076…D-078).** Check-up altı vücut sistemi için gerçek duruma dayalı
+rapor üretiyor ve gerekirse tahlile yönlendiriyor. Göz muayenesi mini
+oyun oldu. Estetik bölümü eklendi; fiyatlar Türkiye piyasasından
+2026 ölçeğine taşındı. Hastalanınca işe gidilemiyor, raporun ilk iki
+günü ödenmiyor ve işveren uzun raporu sorun ediyor.
+
+**Paket D — aktivite bildirimleri, kişi keyfi, boşanmada mal paylaşımı
+(D-074, D-075).** Eğlence programının sonucu ekran bildirimi olarak,
+kime ne kattığı satır satır yazılıyor. Kişilerin yakınlıktan ayrı bir
+keyfi var ve D-059'un "davet edilen reddedebilir" kuralı artık gerçekten
+çalışıyor. Boşanmada evlilik içinde edinilen mallar paylaşılıyor.
+
+**Paket E — mağaza ayrımı, araç masrafı, banka (D-079, D-080).** Üç
+otomobil galerisi, iki motosiklet galerisi, ayrı aksesuarcılar, orta ve
+lüks emlakçı. Motorlu araçlar masraf çıkarıyor. Fakbank ve Bankavrupa;
+faiz oranları 2026 ihtiyaç kredisi bandından alındı.
+
+**Paket F — Finger, hayvanlar, seyahat, Son Kararlar (D-081…D-085).**
+Finger'da yaş bandı hatası düzeltildi (deste yaşla yenilenmiyordu),
+beğeni kotası, premium ve kendi profilin eklendi. Hayvan türleri
+genişledi; kaçma ve hastalık eklendi. Seyahat "Tatil yap" ve "Taşın"
+diye ikiye ayrıldı. Vasiyet menüsü "Son Kararlar" oldu ve hayatın sonuna
+dair karar oraya eklendi.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** suç ve hapis sistemi
+(Faho "ileride gelecek" dedi), hayvan detayı ekranı, çoklu kişiyle
+aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
+eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
+
+**Ölçümler (gerçekten çalıştırıldı — `app/test/measurements_test.dart`).**
+
+| Ölçüm | Sonuç |
+|---|---|
+| 100 hayat, ortalama ömür | 72,4 |
+| Hayat sonunda ortalama görünüş | 31,1 (en düşük 3, en yüksek 71) |
+| Hayat sonunda ortalama mutluluk | 66,4 (1 – 89) |
+| Hayat sonunda ortalama sağlık | 20,6 (0 – 73) |
+| Hayat sonunda ortalama zekâ | 78,0 (40 – 93) |
+| Hayat sonunda ortalama karizma | 72,0 (27 – 92) |
+| 100'e dayanan değer sayısı | **0** |
+| Görünüş: 20 yaş → 80 yaş | 51,9 → 19,5 |
+| Sağlık: 20 yaş → 80 yaş | 56,4 → 16,0 |
+| Görüşülmeyen çocukla yakınlık | 1 yıl 100 · 5 yıl 94 · 10 yıl 74 · 15 yıl 44 · 20 yıl 20 (taban) |
+| Tek yılda en çok bildirim | 7 (üç vefat, üç cenaze, tek toplu miras); ortalama 0,39 |
+
+### Paket O-S sonrası ölçümler (D-111 … D-124)
+
+Faho'nun 24 Eylül tarihli ikinci geri bildirim listesinden sonra
+yeniden ölçüldü (100 hayat):
+
+| Ölçüm | Önce | Sonra |
+|---|---|---|
+| Sağlık: 20 → 70 yaş | 69,9 → 38,4 gibi yavaş | **69,9 → 13,8** |
+| Sağlık 40 yaşta | 66,2 | **55,6** |
+| Karizma: 20 → 70 yaş | 52,6 → 38,4 | **52,6 → 28,7** |
+| Ortalama ömür | 72,4 | **74,2** |
+| Yıl başına bildirim penceresi | 0,39 | **0,71** (en kötü yıl 7 → 6) |
+| Sponsorluk ücreti (100.000 takipçi) | 118.000 ₺ | **15.000 ₺** |
+| Sıradan paylaşımın geliri | değişken | **0** |
+
+Hastalığın bedeli −1/−2/−3'ten ciddiyete bağlı **−10 / −14 / −18**'e
+çıkarıldı; tek başına uygulandığında 40 yaşta ortalama sağlık **0,8**'e
+düştüğü ölçüldüğü için **toparlanma** eklendi (hastalanılmayan yılda +7,
+yaşa göre düşen bir tavana kadar).
+
+**Açık kalan sayılar:** Q-116 … Q-136 (`docs/DESIGN_REVIEW_QUEUE.md`).
+Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
+kadar kesin denge değeri sayılmaz.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2024 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket O + P: ölü hikâye izleri, çocukluk ve metin üslubu (25 Eylül 2026, D-125 … D-127)
+
+Faho iki iş istedi: (1) "hiç konmayan 10 hikâye izini araştır, **tahminle
+flag ekleme, gerçek sebebi bul**", (2) 0-17 yaş için yeni olaylar ve
+metinlerin "yapay zekâ yazmış gibi" durmaması.
+
+**Gerçek sebep bulundu (D-125).** On izin hiçbiri ölü içerik değildi.
+Motor aynı yaşta ikinci olay sunmak için `progressSinceLastEvent`
+sayacına bakıyor, ama bu sayaç kodda **tek bir yerde** artıyordu: aile
+etkileşimleri. Spor, kurs, berber, eşya kullanımı, Finger — hiçbiri
+ilerleme saymıyordu. Yani aktif oynayan oyuncu hiçbir şey yapmayanla
+aynı sayıda olay görüyordu. Düzeltildi; on izin **onu da** konuyor ve
+bir gerileme testiyle sabitlendi.
+
+**Çocukluk havuzu (D-126).** 0-17 yaş için **51 yeni olay** yazıldı
+(`lib/data/event_pool_childhood.dart`). Çocukluk arkadaşı ve ilk
+hoşlanılan kişi **gerçek `Person` kaydı** olarak kuruluyor.
+
+**Metin üslubu (D-127).** `docs/WRITING_STYLE_TR.md` yazıldı ve iki
+somut mekanik metin değiştirildi: aktivite sonucu ("X tamamlandı" →
+mekâna göre yazılmış, kendini tekrar etmeyen cümleler) ve sosyal medya
+paylaşım sonucu. **İş mantığına ve etki değerlerine dokunulmadı.**
+
+| Ölçü (120 hayat, oyuncu gibi oynanarak) | Önce | Sonra |
+|---|---|---|
+| Bir hayatta görülen farklı olay | 48 | **110** |
+| Havuz | 221 | **272** |
+| 120 hayatta hiç çıkmayan olay | 61 | **18** |
+| 0-5 yaşta farklı olay | 11 | **24** |
+| 6-12 yaşta farklı olay | 25 | **53** |
+| 13-17 yaşta farklı olay | 30 | **62** |
+| Ortalama ömür | 74 | 80,4 |
+
+**Dürüstçe yazılması gereken yan etki:** havuz büyüyünce **dar pencereli
+zincir halkaları seyreldi** — D-125'ten hemen sonra hiç çıkmayan olay 9
+idi, 51 çocukluk olayından sonra 18 oldu. Yeni içerik kötü değil; dar
+pencereli zincirler yarışmayı kaybediyor. Motorun zincirlere öncelik
+verip vermemesi tasarım kararıdır, **Q-138**'de soruldu.
+
+**Kuyruk temizliği:** sonradan alınan kararlarla örtüşen dört soru
+kapatıldı — Q-115 → D-106, Q-116 → D-102, Q-117 → D-102, Q-121 → D-107
+(kısmen). Tarihsel kayıt **silinmedi**. Yeni sorular: **Q-138** (olay
+yoğunluğu ve zincir önceliği), **Q-139** (çocukluk temaları ve etki
+değerleri), **Q-140** (üslup belgesi ve robotik kalıp tavanı).
+
+**Açık kalan sayılar:** tamamen açık **66** soru, sayıları onay bekleyen
+39 soru (`docs/DESIGN_REVIEW_QUEUE.md`). Bütün yeni sayılar
+`prototypeOnly`'dir.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2037 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket T: Suç ve Hukuk V1 + sokak kültürü dili (25 Eylül 2026, D-128, D-129)
+
+Faho iki iş istedi: (1) suç/hukuk sistemini ilk kez ekle ama **ilk sürümü
+kontrollü tut**, (2) yeni içeriklerde günümüz Türkiye'sinin doğal konuşma
+biçimi kullanılsın.
+
+**Kapsam bilinçli olarak dar.** Amaç suç işlemeyi öğretmek değil,
+seçimlerin hukuki ve toplumsal sonucunu canlandırmak. Hiçbir metinde suç
+işleme yöntemi, kaçış, saklanma, delil ya da denetimden kurtulma
+anlatılmıyor; olaylar yüksek seviyede **seçimler** olarak kalıyor ve
+sonucu motor yürütüyor. **Ağır/organize suç bu sürümde yok.**
+
+**Eklenenler:**
+- 11 suç türü (trafikten yaralamaya, hafif/orta/ağır ağırlıkta)
+- Hukuki durumlar: idari ceza · soruşturma · dava · takipsizlik · karar
+  (beraat / uyarı / para cezası / erteleme / hapis) · sabıka · hapis ·
+  denetim dönemi
+- **31 olay, 5 çok adımlı zincir** (`lib/data/event_pool_crime.dart`)
+- Ayrı **duruşma ekranı**: avukat + savunma tutumu aynı pencerede
+- 4 kademeli avukat kataloğu (2026 ücretleriyle); **sonucu garanti etmez**
+- Sabıkanın işe etkisi: `RecordRule.serbest / temizGerekir / agirEngeller`
+- Basit hapis: iş biter, gelir kesilir, bağlar zayıflar, dışarının
+  aktiviteleri kapanır, içeride 4 güvenli aktivite açılır
+- **Adli Geçmiş** bölümü (Okul/Meslek altında)
+- Hayat sonu değerlendirmesinde suç geçmişi **anılır ama puanlanmaz**
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):**
+
+| Oynayış | Dosyası olan | Sabıkalı | Mahkemeye çıkan | Hapis yatan |
+|---|---|---|---|---|
+| Riskli seçim yapan | 97 | 56 | 75 | 22 |
+| **Temiz oynayan** | **0** | **0** | **0** | **0** |
+
+**Suç zorunlu içerik değil:** her olayda suça girmeyen bir kapı var ve
+riskli seçim yapmayan 100 hayatta tek bir dosya bile açılmıyor. Bu bir
+testle sabit.
+
+**Dil (D-129):** `docs/WRITING_STYLE_TR.md` §14 yazıldı. Polis kısa ve
+ciddi, hâkim resmî, avukat yarı resmî; sokak ağzı yalnızca sokakta.
+Polisin karikatürleşmemesi ve hâkimin sokak ağzı kullanmaması testle
+sabit.
+
+**Açık kalan sayılar:** Q-141 (kapsam ve sıklık), Q-142 (avukat
+ücretleri), Q-143 (sabıkanın işlere etkisi ve hapsin bedeli). Bütün
+sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2072 geçti, 15 atlandı, 0 başarısız** (bunların **35'i** bu pakette yeni).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket U: arkadaşlık, yarım zamanlı iş, girişimcilik ve eksik ekranlar (26 Eylül 2026, D-130 … D-133)
+
+Faho'nun seçimi: arkadaşlığı derinleştir · girişimcilik ve kendi işini kur ·
+yarım zamanlı işler · ucuz kazançlar (eksik ekranlar). **Hayat hedefleri
+bilinçli olarak eklenmedi.**
+
+### Arkadaşlık (D-130)
+Kodla doğrulanan eksik: 60 hayatta **1.141 sınıf arkadaşı** üretiliyordu,
+yalnızca **30'u** arkadaş oluyordu — çünkü oyuncunun bir tanıdığı arkadaş
+yapmak için **hiçbir düğmesi yoktu.** Artık dört şey var: yakın arkadaş
+olma teklifi (garanti değil), küslük, barışma ve arkadaşın kendi hayatı
+(taşınır, evlenir, iş değiştirir, zor gün geçirir). 13 yeni olay, üç
+zincir — biri D-126'da kaydedilip hiç dönmeyen **çocukluk arkadaşının
+yıllar sonra dönüşü**.
+
+**Ölçüm düzeltmesi:** "34/60 hayatta hiç arkadaş yok" sayısı hatalıydı;
+simülasyon hiç kimseyle vakit geçirmiyordu. Simülasyona etkileşim eklendi.
+
+| Ölçü (100 hayat) | Önce | Sonra |
+|---|---|---|
+| Hiç arkadaşı olmayan hayat | 34/60 (hatalı ölçüm) | **0** |
+| Yakın arkadaşla ölen | 0 | **88** |
+| Ortalama arkadaş | 0,5 | **6,8** |
+| Ortalama yakın arkadaş | 0,0 | **3,3** |
+| Küslük yaşayan | — | 89 |
+
+### Yarım zamanlı iş (D-131)
+D-126'daki "yaz işi istemek" olayı hiçbir kapıya çıkmıyordu ve öğrencinin
+çalışması mümkün değildi. 8 yarım zamanlı iş, yeni bir maaş bandı
+(90.000-260.000 ₺/yıl, asgari ücret tabanı uygulanmaz), 16 mülakat sorusu.
+Okurken çalışmanın bedeli var: zekâ katkısı yarıya iner, yılda −2 sağlık.
+
+### Girişimcilik (D-132)
+44 mesleğin hepsi maaşlıydı. 13 iş türü geldi (sermaye 84.000-2.900.000 ₺).
+Maaş garantidir, kendi işi değildir: işin durumu 0-100 arası, 25'in altında
+para yer, 0'da batar. Üç hamle: işine bak, para yatır, işi devret.
+Ekonomiye bağlı; banka zarar eden işi gelir saymıyor. Yeni ekran: Kendi İşim.
+
+### Eksik ekranlar (D-133)
+Hobilerim · Evlilik Geçmişi · evcil hayvan detayı · çoklu kişiyle aktivite.
+Dördü de kodda vardı ama oyuncu göremiyordu.
+
+**Açık kalan sayılar:** Q-144 (arkadaşlık eşikleri), Q-145 (arkadaşlık
+olayları), Q-146 (yarım zamanlı iş ve kendi işi sayıları), Q-147 (ekranlar
+ve kalabalık aktivite). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2145 geçti, 15 atlandı, 0 başarısız** (bunların **73'ü** bu pakette yeni:
+friendship_depth 23, part_time_work 12, business 28, missing_screens 10).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket V: hediye seçimi, menüler, 2. el araç pazarı, kefalet ve üvey ebeveyn (26 Eylül 2026, D-134 … D-141)
+
+Faho'nun sekiz maddelik listesi. **D-134 … D-141 numaraları bu pakette
+kullanıldı ama `DECISIONS.md`'ye yazılmadı:** `CLAUDE.md` "kullanıcı onayı
+olmadan `DECISIONS.md` içine karar ekleme" diyor. Numaralar kodda ve bu
+dosyada geçiyor; kesin kural hâline gelmeleri Faho'nun onayına bağlı.
+
+### Hediye seçimi (D-134)
+"Anneme tıkladım, hediye vere tıkladım; tavla, buket çiçek, çeyrek altın,
+bilezik gibi şeyler olsun; tavla hediye edersem beğenmesin." Hediye artık
+rastgele değil: açılır listeden seçiliyor, karşı taraf **beğenmeyebiliyor**.
+13 yeni hediye, 10 hediye kategorisi, bağ türüne ve yaşa göre zevk tablosu.
+Beğenilmeyen hediye bağı düşürüyor ama parayı geri getirmiyor.
+
+### Evcil hayvan menüsü (D-135)
+Edinme listesi tek yığından altı gruba ayrıldı: Kediler, Köpekler, Kuşlar,
+Kemirgenler ve tavşan, Su ve sürüngen, Egzotik.
+
+### Kurgusal araç adları (D-136)
+13 araç kurgusal marka+model adı aldı (Foros, Tunca, Veran, Doruk, Alvera,
+Sarp, Rüzgâr). Gerçek marka yok, telif sorunu yok. Sınıf bilgisi
+`ItemType.segment` alanında ayrı duruyor ve ad altında yazıyor.
+
+### 2. el araç pazarı (D-137)
+Yeni mağaza. İlanda model adı, satıcı (sahibinden/galeriden), fiyat, sıfır
+fiyatı, yaş, km, durum ve beş satır "Araç detayları" var: "şasi ve podyede
+oynama yoktur", "bel altı temizlik", "boyalı ama değişeni yok", "tramer
+kaydı", "muayenesi yeni". Alınan araç **ilanın kondisyonuyla** giriyor.
+Havuz şehir + yaşa göre belirlenimli; yıl geçince tazeleniyor. Model yılı
+yazılmıyor: oyunda takvim yılı yok.
+
+### Menü düzeni (D-138)
+Mağazalar: on bir satırlık düz liste üç öbeğe ayrıldı (Gündelik alışveriş /
+Araç ve aksesuar / Konut), sıra sabit; raf içi ürünler ucuzdan pahalıya
+sıralı. **Meslek:** "Bu yıl yapabileceklerin" ve "Kayıtlar ve durum" diye
+iki başlık; askerlik, kendi işi ve adli geçmiş artık "iş ara" ile aynı
+kolonda karışmıyor. **İlişkiler:** alt listeler "Listeler" başlığı altında.
+Aktiviteler ekranı zaten başlıklıydı, dokunulmadı.
+
+### Kefalet ve tutukluluk (D-139)
+Ağır bir dosyada tutuklama kararı çıkabiliyor (%45, 18 yaş altına
+uygulanmıyor). Kefalet **tutukluluğu** kaldırıyor, cezayı satın almıyor.
+İki kapı: kendi cüzdanından yatırmak ya da aileden istemek (red
+edilebilir, aynı yıl ikinci kez istenmez). Kefalet teminat: duruşmaya
+çıkılınca geri veriliyor — ödeyen aileden biriyse para ona dönüyor.
+Tutuklulukta geçen süre cezadan düşülüyor. Tutukluluk en çok 2 yıl;
+süre dolarsa tutuksuz yargılama sürüyor.
+
+### Cezaevi hayatı ve çeteleşmenin ilk adımı (D-140)
+Koğuşta sohbet (en çok 3 koğuş arkadaşı, tahliyeden sonra listede kalıyor),
+kurallara uymak (iyi hâl), **sözü geçen gruba yakın durmak** ve gruptan
+uzaklaşmak. İyi hâl ≥ 60 + cezanın yarısı + koğuş itibarı < 50 ise
+koşullu salıverilme geliyor; gruba yakın durmak o kapıyı kapatıyor.
+Çete tarafı bilinçli olarak **sayaçta**: dışarıda örgüt, gelir ya da emir
+zinciri yok (Q-148).
+
+### Üvey anne / baba (D-141)
+Ebeveynlerden biri vefat ettiyse, hayatta kalan ebeveyn yas süresinden
+sonra yeniden evlenebiliyor. Gelen kişi çekirdek ailede listeleniyor,
+bağ 18'den başlıyor, **kan bağı sayılmıyor**. Vefat eden ebeveyn kayıttan
+silinmiyor. Üvey kardeş ve miras bu sürümde yok (Q-149).
+
+**Açık kalan sayılar:** Q-148 (kefalet, tutukluluk, çete sınırı),
+Q-149 (üvey ebeveyn), Q-150 (2. el pazar fiyatları), Q-151 (araç adları),
+Q-152 (mağaza menü düzeni). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2219 geçti, 15 atlandı, 0 başarısız** (bunların **74'ü**
+bu pakette yeni: gift_choice 15, used_vehicle_market 19,
+used_vehicle_widget 3, bail_prison 32, bail_prison_widget 5).
+**Gerçek Windows veya Android cihazda oynanmadı; APK derlenmedi.**
+
+## Paket W: Faho'nun 13 maddelik hata listesi (26 Eylül 2026, D-142 … D-150)
+
+Çoğu **gerçek hataydı**; her biri önce reproduce edildi, sonra düzeltildi
+ve bildirilen cümleyle bir teste bağlandı. D-142 … D-150 numaraları
+`DECISIONS.md`'ye **yazılmadı** (bkz. Paket V notu): onay Faho'da.
+
+| Bildirilen | Sebep | Durum |
+|---|---|---|
+| "lise bittikten sonra hiçbir üniversiteye başvuramıyorum" | Pencerenin kartı engeli `String?` tutup `== null` ile ölçüyordu; motor boş dize döndürdüğü için düğme hep kapalıydı | Düzeltildi (D-142); pencere kaldırılıp Okul ekranına taşındı |
+| "kendi işime para yatır düğmesi aktif olmuyor" | Metin kutusu yazılınca yeniden çizim tetiklenmiyordu | Düzeltildi |
+| "işine bak'a sonsuz tıklayabiliyorum" | Yıllık sayaç `lastTendedAge`e bakıp en çok 1 döndürüyordu, sınır 2 idi | Düzeltildi |
+| "Finger'de çok varlıklı tanıştığım kişi orta halli görünüyor" | Kişi kaydı kurulurken profilin serveti atılıp sabit `ortaHalli` yazılıyordu | Düzeltildi |
+| "her sayfada bildirim var" | Sayfa çevirme genel aktivite yolundan geçiyordu | Düzeltildi (D-145): bildirim yalnızca kitap bitince |
+| "doğduğumda evde olan hayvanın bakımı harçlığımdan çıkıyor" | Bakım gideri sahiplenme durumuna bakmıyordu | Düzeltildi (D-144) |
+| "evde hayvan vardı ama iletişim yoktu" | Menü yalnızca sahiplenme yaşından (7) itibaren açılıyordu | Düzeltildi (D-146); sayfa İlişkiler'e taşındı |
+| "aynı arkadaş bildirimleri çok fazla" | Bekleme süresi yoktu, her haber türünün tek metni vardı | Düzeltildi (D-149) |
+| "medya fırsatları kolay para, ünüm hiç düşmüyor" | 8 iş × yılda bir = bir yılda sekizi birden | Düzeltildi (D-147) |
+| "cümleler saçma kurulmuş" | Metin neyin verildiğini yazmıyordu | Düzeltildi (D-150), kural belgeye yazıldı |
+| "araç vergisi/sigortası çıksın" | Yoktu | Eklendi (D-148) |
+| "kendi işim varken işveren laf etsin" | Yoktu | Eklendi (D-143) |
+| "sponsorluk paylaşmadan para gelmesin" | Zaten böyleydi (D-104) | Doğrulandı, dokunulmadı |
+
+**Açık kalan sayılar:** Q-153 (araç gideri oranları, kaskonun isteğe bağlı
+olup olmayacağı, medya ve arkadaş haberi bekleme süreleri, aile hayvanının
+bakımının yetişkinlikte kime ait olduğu).
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2261 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+after_school_widget (5), business_widget (4), business_test +6,
+paket_w_test (25), pet_widget_test +2.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket X — A grubu ve kataloglar (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. **Önce denetim yapıldı ve önerilerimin bir
+kısmının zaten kodlanmış olduğu görüldü** — öneri listesini 25 Eylül tarihli
+`docs/EKSIKLER.md`'ye dayandırmıştım, o belge güncel değildi. Yanlış
+söylediklerim:
+
+| Önerdiğim | Gerçek durum |
+|---|---|
+| Hayvan detay sayfası yok | **Var** — `pet_detail_sheet.dart` (D-133) |
+| Evlilik geçmişi ekranı yok | **Var** — `marriage_history_page.dart` (D-133) |
+| "Hobilerim" görünümü yok | **Var** — `hobbies_page.dart` (D-133) |
+| Dul ile boşanmış aynı statüde | **Ayrı** — `MarriageStatus.dul`, dul eş `eskiEs`'e düşmüyor |
+| Çoklu kişiyle aktivite yok | **Var** — `perform(others:)` + `costForParty` (D-133) |
+| Küslük/barışma yok | **Var** — `friendship_depth.dart` (D-130) |
+
+`docs/EKSIKLER.md` bu altı madde için düzeltildi. A grubunda **gerçekten
+eksik olan tek şey ikiz gebelikti**.
+
+### D-151 — İkiz gebelik
+Doğum anında %2,8 ihtimalle ikinci bebek de geliyor. Gebelik kaydı **tek**
+kalıyor; ikinci bebek aynı doğumun parçası olduğu için "aynı yıl ikinci
+bebek olmaz" kuralı yalnızca açık `twin` bayrağıyla atlanıyor — oyuncunun
+düğmesi bu bayrağı hiç geçmiyor. İkiz aynı diğer ebeveynden olur, adı ve
+kimliği ayrıdır, **en fazla çocuk sınırını aşmaz** (üç çocuklu oyuncuda
+doğum tek bebekle kapanır) ve iki pencere yerine **tek** ikiz bildirimi
+açılır. Üçüz yok. Sayı `prototypeOnly` — **Q-154**.
+
+### D-152 — Kataloglar genişletildi
+`docs/EKSIKLER.md` §4.3'teki darlık ölçümüne karşılık:
+
+| Katalog | Önce | Sonra |
+|---|---|---|
+| Hobi | 4 | **12** |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Dövüş sanatı | 3 | **6** |
+
+Yeni hobiler: mutfak, fotoğraf, dans, satranç, yazmak, bahçe, yabancı dil,
+bilgisayar. İlk altısı için **altı yeni kurs** eklendi; son ikisi zaten var
+olan dil ve bilgisayar kurslarını besliyor, yeni düğme gerekmedi.
+Kataloğun kendi kuralı korundu: **her hobiyi gerçekten var olan bir eylem
+besler**, sahte hobi yok (kalıcı test).
+
+Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek
+düzenlerden derlendi: boksta kuşak yoktur, o yüzden amatör yaş
+kategorileri ve profesyonel sıralama kullanıldı; judo kyu/dan, taekwondo
+gup/dan.
+
+**Mevcut koruma testleri üç gerçek boşluk yakaladı ve hiçbirini
+gevşetmedim:**
+1. `economy_calibration_test` — `boks_antrenoru` maaşı `kuafor` ile
+   çakışıyordu (440.000 ₺); 438.000 ₺ yapıldı.
+2. `score_interview_test` / `martial_arts_test` / `content_reachability_test`
+   — üç yeni eğitmenlik işinin **mülakat sorusu yoktu**, yani iş listede
+   görünüp başvurulamayacaktı. Dokuz soru yazıldı (her işe üç).
+3. `martial_arts_widget_test` — ekran bir `ListView` olduğu için altta
+   kalan yeni dallar hiç inşa edilmiyordu. Test **gevşetilmedi**,
+   güçlendirildi: artık her dala kaydırarak ulaşılabildiği doğrulanıyor.
+
+Sayılar `prototypeOnly` — **Q-155**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2275 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_x_test` (14).
+**Gerçek Windows veya Android cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

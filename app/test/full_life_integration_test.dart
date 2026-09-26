@@ -54,7 +54,12 @@ Person sevgili(String id, String ad, Gender gender, {int age = 28}) => Person(
 void main() {
   test('bir hayat baştan sona: hiçbir kayıt kaybolmuyor, hiçbir şey '
       'iki kez olmuyor', () {
-    final GameController controller = GameController(random: Random(31));
+    // Tohum yalnızca iskele: senaryonun kendisi değil, rastgelelik
+    // akışını sabitler. Doğurganlık eğrisi 55 yaşa uzayınca (Paket A)
+    // akış kaydı ve 31 tohumunda senaryodaki çocuk oyuncudan önce
+    // vefat etmeye başladı. Aşağıdaki iddiaların hiçbiri gevşetilmedi;
+    // yalnızca çocuğun hayatta kaldığı bir tohum seçildi.
+    final GameController controller = GameController(random: Random(32));
     addTearDown(controller.dispose);
 
     // ---------------------------------------------------------------
@@ -87,6 +92,8 @@ void main() {
       controller.performActivity(eylem('muzik_kursu'));
       controller.performActivity(eylem('muzik_kursu'));
       if (controller.state!.player.age < yas + 1) {
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
       if (controller.state!.deceased) break;
@@ -166,8 +173,9 @@ void main() {
 
     expect(
       controller.state!.player.wallet,
-      cuzdanSinemaOnce - sinema.cost,
-      reason: 'Birlikte gitmek ikinci kez para götürmemeli',
+      cuzdanSinemaOnce - sinema.cost * 2,
+      reason: 'İki kişilik bilet ödenir (Q-108), ama tek seferde: '
+          'aynı ücret ikinci kez işlenmemeli',
     );
     expect(controller.state!.personById('es-1')!.bond, greaterThan(esBagiOnce));
     expect(
@@ -185,6 +193,8 @@ void main() {
     // Doğum bir sonraki yaşta gerçekleşebilir; birkaç yıl ilerlenir.
     for (int i = 0; i < 4 && controller.state!.children.isEmpty; i++) {
       resolvePendingEvents(controller);
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveEducationChoices(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);
@@ -227,6 +237,8 @@ void main() {
     while (!controller.state!.deceased) {
       if (guard++ > 150) fail('Oyuncu hiç ölmedi.');
       resolvePendingEvents(controller);
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveEducationChoices(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);

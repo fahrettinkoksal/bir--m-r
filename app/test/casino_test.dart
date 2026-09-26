@@ -133,7 +133,16 @@ void main() {
     });
 
     test('yıllık bahis bütçesi aşılamaz ve yaş dönünce yenilenir', () {
-      GameState state = oyuncu(6, wallet: 5000000);
+      // Bütçe her çağrıda **güncel cüzdandan** hesaplanıyor; oyuncu
+      // kazandıkça bütçe de büyüyor. Eski tavan (150.000 ₺) bunu
+      // maskeliyordu: 5.000.000 ₺ cüzdanın %5'i tavanı aştığı için bütçe
+      // sabit kalıyordu. 2026 kalibrasyonunda tavan 450.000 ₺ olunca
+      // bütçe yüzmeye başladı ve test kırıldı.
+      //
+      // Testin iddiası aynı kaldı; fixture bütçeyi yine tavana
+      // sabitleyecek kadar büyütüldü. Bütçenin yıl içinde kaymasının
+      // kendisi ayrı bir tasarım sorusudur (Q-115).
+      GameState state = oyuncu(6, wallet: 12000000);
       final int butce = CasinoAccess.yearlyBudget(state);
       final int enFazla = CasinoAccess.maxBet(state);
       expect(butce, greaterThan(0));

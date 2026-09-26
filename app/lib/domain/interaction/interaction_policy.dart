@@ -70,11 +70,18 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.sinifArkadasi:
       return _temel.union(<InteractionKind>{InteractionKind.hediyeVer});
 
+    // Ünlüyle gündelik hayatta vakit geçirilmez; temas sosyal medya
+    // üzerinden kurulur. Burada yalnızca sohbet anlamlıdır.
+    case RelationType.unlu:
+      return const <InteractionKind>{InteractionKind.sohbet};
+
     case RelationType.ogretmen:
       return _ogretmen;
 
     case RelationType.arkadas:
     case RelationType.sevgili:
+    // Flörtle de vakit geçirilir, sohbet edilir, hediye alınır (D-107).
+    case RelationType.flort:
       return _arkadas;
 
     // İş arkadaşıyla vakit geçirilir ve sohbet edilir; para istemek iş
@@ -101,14 +108,32 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.cocuk:
       return _arkadas;
 
-    // Torunla vakit geçirilir, sohbet edilir ve hediye verilir; torundan
-    // para veya hediye istemek anlamlı değildir (Paket 12).
+    // Torun ve yeğenle vakit geçirilir, sohbet edilir ve hediye verilir;
+    // onlardan para veya hediye istemek anlamlı değildir (Paket 12,
+    // D-087).
     case RelationType.torun:
+    case RelationType.yegen:
       return const <InteractionKind>{
         InteractionKind.vakitGecir,
         InteractionKind.sohbet,
         InteractionKind.hediyeVer,
       };
+
+    // Koğuş arkadaşıyla vakit geçirilir ve sohbet edilir (D-140).
+    // İçeride hediye alışverişi yoktur; dışarıda da bu bağ arkadaşlık
+    // gibi işler ama para/hediye kapıları açılmaz.
+    case RelationType.kogusArkadasi:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+      };
+
+    // Üvey ebeveynle aynı evde yaşanır: vakit geçirilir, sohbet edilir,
+    // hediyeleşilir. Para istemek bağa göre açılır ama başta kapalıdır;
+    // bu sürümde aile kapılarının hepsi açık (D-141).
+    case RelationType.uveyAnne:
+    case RelationType.uveyBaba:
+      return _aile;
 
     case RelationType.eskiSevgili:
     case RelationType.eskiEs:

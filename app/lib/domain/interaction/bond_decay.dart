@@ -12,8 +12,13 @@
 /// * **Yalnızca erişilebilir kişiler** zayıflar. Yıllar önceki ilkokul
 ///   öğretmeni ya da başka şehirdeki eski bir sınıf arkadaşı zaten
 ///   aranamıyor; oyuncuyu elinden gelmeyen bir şey için cezalandırmayız.
-/// * **Aynı evde yaşayanlar zayıflamaz.** Her gün görülen biriyle
-///   "görüşmemek" diye bir şey yok.
+/// * **Aynı evde yaşayan yakınlar zayıflamaz** — bir istisnayla.
+///   Her gün görülen anneyle "görüşmemek" diye bir şey yok. Ama
+///   **eş ve sevgili** için bu doğru değildi: Faho yıllarca hiç
+///   ilgilenmediği eşle yakınlığının hâlâ tam olduğunu bildirdi.
+///   Aynı evde yaşamak ilgi göstermek değildir; evlilik ilgisizlikten
+///   soğur. Bu yüzden eş ve sevgili, hanede olsa bile **daha yavaş ve
+///   daha yüksek bir tabanla** zayıflar.
 /// * **Kan bağı daha yavaş zayıflar.** Anne annedir; uzaklaşır ama
 ///   yabancıya dönmez. Bu yüzden kan bağında bir **taban** vardır ve
 ///   yakınlık onun altına ilgisizlikten düşmez.
@@ -23,6 +28,7 @@ library;
 
 import '../models/game_state.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
 
 /// Bir yılın ihmal etkisi.
 class BondDecayResult {
@@ -47,16 +53,45 @@ class BondDecayResult {
 }
 
 abstract final class BondDecay {
-  /// İhmal sayılmadan önce geçmesi gereken yıl.
+  /// İhmal sayılmadan önce geçmesi gereken yıl (D-093).
   ///
-  /// Bir yıl görüşmemek ihmal değildir; hayat böyle.
-  static const int prototypeOnlyGraceYears = 3;
+  /// Bir-iki yıl görüşmemek ihmal değildir; hayat böyle. Faho'nun
+  /// isteğiyle üç yıldan ikiye indi.
+  static const int prototypeOnlyGraceYears = 2;
 
   /// Erişilebilir ama görüşülmeyen kişide yıllık kayıp.
   static const int prototypeOnlyYearlyLoss = 3;
 
   /// Kan bağında yıllık kayıp (daha yavaş).
   static const int prototypeOnlyBloodLoss = 2;
+
+  /// Uzayan ilgisizlikte kaybın hızlanma çarpanları (D-093).
+  ///
+  /// **Faho'nun bildirdiği hata:** "16 yıldır görüşmediğim kızımla
+  /// yakınlığım neredeyse 100." Sebebi düşüşün sabit ve yavaş olmasıydı:
+  /// yılda iki puan, on altı yılda ancak yirmi altı puan eder.
+  ///
+  /// Artık kayıp zamanla **hızlanır**. Kan bağı yine tamamen kopmaz —
+  /// taban korunur (anne annedir) — ama on yıl görüşülmemiş bir çocukla
+  /// doksan yakınlıkta kalmak mümkün değildir.
+  ///
+  /// Sıralı eşikler: ihmalin kaçıncı yılından itibaren hangi çarpan.
+  static const List<({int fromYear, double factor})>
+      prototypeOnlyAccelerationSteps = <({int fromYear, double factor})>[
+    (fromYear: 0, factor: 1.0),
+    (fromYear: 4, factor: 2.0),
+    (fromYear: 9, factor: 3.0),
+  ];
+
+  /// İhmalin kaçıncı yılında olunduğuna göre kayıp çarpanı.
+  static double accelerationFor(int yearsNeglected) {
+    double carpan = 1.0;
+    for (final ({int fromYear, double factor}) adim
+        in prototypeOnlyAccelerationSteps) {
+      if (yearsNeglected >= adim.fromYear) carpan = adim.factor;
+    }
+    return carpan;
+  }
 
   /// Kan bağında ilgisizliğin indirebileceği **en düşük** yakınlık.
   ///
@@ -67,10 +102,35 @@ abstract final class BondDecay {
   /// Kan bağı dışında ilgisizliğin indirebileceği en düşük yakınlık.
   static const int prototypeOnlyFloor = 0;
 
+  /// Hanedeki eş/sevgilinin ihmal sayılması için geçmesi gereken yıl.
+  ///
+  /// Aynı evde yaşandığı için hoşgörü daha uzun; ama sonsuz değil.
+  static const int prototypeOnlyPartnerGraceYears = 4;
+
+  /// Hanedeki eş/sevgilide yıllık kayıp.
+  ///
+  /// Kan bağından da yavaş: birlikte yaşamak bir şeydir. Ama on yıl hiç
+  /// ilgilenmemek yakınlığı tam bırakmaz.
+  static const int prototypeOnlyPartnerLoss = 2;
+
+  /// Hanedeki eş/sevgilide ilgisizliğin indirebileceği en düşük yakınlık.
+  ///
+  /// Evlilik soğur ama yabancılaşmaz; bu taban onu korur.
+  static const int prototypeOnlyPartnerFloor = 35;
+
+  /// Bu kişi hanede yaşayan eş ya da sevgili mi?
+  static bool isHouseholdPartner(Person person) =>
+      person.inPlayerHousehold &&
+      (person.relation == RelationType.es ||
+          person.relation == RelationType.sevgili);
+
   /// Bu kişi ilgisizlikten zayıflayabilir mi?
   static bool decays(GameState state, Person person) {
     if (!person.isAlive) return false;
-    // Her gün görülen biriyle "görüşmemek" diye bir şey yok.
+    // Hanedeki eş ve sevgili istisnadır: aynı evde yaşamak ilgi
+    // göstermek değildir (Faho'nun bildirdiği durum).
+    if (isHouseholdPartner(person)) return true;
+    // Her gün görülen diğer yakınlarla "görüşmemek" diye bir şey yok.
     if (person.inPlayerHousehold) return false;
     // Aranamayan kişi için oyuncu suçlanmaz.
     if (!state.isReachable(person)) return false;
@@ -78,12 +138,36 @@ abstract final class BondDecay {
   }
 
   /// Bu kişinin ilgisizlik tabanı.
-  static int floorFor(Person person) =>
-      person.relation.kanBagi ? prototypeOnlyBloodFloor : prototypeOnlyFloor;
+  static int floorFor(Person person) {
+    if (isHouseholdPartner(person)) return prototypeOnlyPartnerFloor;
+    return person.relation.kanBagi
+        ? prototypeOnlyBloodFloor
+        : prototypeOnlyFloor;
+  }
 
-  /// Bu kişinin yıllık kaybı.
-  static int lossFor(Person person) =>
-      person.relation.kanBagi ? prototypeOnlyBloodLoss : prototypeOnlyYearlyLoss;
+  /// Bu kişinin taban yıllık kaybı (hızlanma uygulanmadan).
+  static int baseLossFor(Person person) {
+    if (isHouseholdPartner(person)) return prototypeOnlyPartnerLoss;
+    return person.relation.kanBagi
+        ? prototypeOnlyBloodLoss
+        : prototypeOnlyYearlyLoss;
+  }
+
+  /// Bu kişinin bu yılki kaybı (D-093).
+  ///
+  /// [yearsNeglected] ihmalin kaçıncı yılında olunduğudur. Uzadıkça
+  /// kayıp hızlanır.
+  static int lossFor(Person person, {int yearsNeglected = 0}) {
+    final int taban = baseLossFor(person);
+    final double carpan = accelerationFor(yearsNeglected);
+    final int kayip = (taban * carpan).round();
+    return kayip < 1 ? 1 : kayip;
+  }
+
+  /// Bu kişide ihmal sayılmadan önce geçmesi gereken yıl.
+  static int graceFor(Person person) => isHouseholdPartner(person)
+      ? prototypeOnlyPartnerGraceYears
+      : prototypeOnlyGraceYears;
 
   /// Kaç yıldır görüşülmediğini döndürür.
   ///
@@ -114,6 +198,10 @@ abstract final class BondDecay {
         Map<String, int>.from(state.lastInteractionAge);
 
     final List<Person> guncel = state.people.map((Person p) {
+      // Keyif her yıl kendi nötrüne doğru bir adım kayar (D-074). Böylece
+      // keyif **birikimli bir puan değil, o anki hâl** olur: güzel bir
+      // yılın etkisi zamanla söner, kötü bir yıl kalıcı ceza olmaz.
+      p = _keyifKay(p);
       if (!decays(state, p)) return p;
       if (!temas.containsKey(p.id)) {
         // Sayaç bu yıl başlıyor; bu yıl kayıp yok.
@@ -121,11 +209,14 @@ abstract final class BondDecay {
         return p;
       }
       final int gecen = (state.player.age - temas[p.id]!).clamp(0, 200);
-      if (gecen <= prototypeOnlyGraceYears) return p;
+      if (gecen <= graceFor(p)) return p;
 
       final int taban = floorFor(p);
       if (p.bond <= taban) return p;
-      final int yeni = (p.bond - lossFor(p)).clamp(taban, 100);
+      // İhmalin kaçıncı yılı? Hoşgörü bittikten sonra sayılır (D-093).
+      final int ihmalYili = gecen - graceFor(p);
+      final int yeni =
+          (p.bond - lossFor(p, yearsNeglected: ihmalYili)).clamp(taban, 100);
       if (yeni == p.bond) return p;
       zayiflayan.add(p.id);
       return p.copyWith(bond: yeni);
@@ -135,6 +226,20 @@ abstract final class BondDecay {
       people: List<Person>.unmodifiable(guncel),
       weakened: List<String>.unmodifiable(zayiflayan),
       lastInteractionAge: Map<String, int>.unmodifiable(temas),
+    );
+  }
+
+  /// prototypeOnly: keyfin her yıl nötre doğru kaydığı adım.
+  static const int prototypeOnlyHappinessDrift = 1;
+
+  /// Kişinin keyfini bir adım nötre yaklaştırır.
+  static Person _keyifKay(Person p) {
+    if (!p.isAlive) return p;
+    const int notr = Person.prototypeOnlyDefaultHappiness;
+    if (p.happiness == notr) return p;
+    final int yon = p.happiness > notr ? -1 : 1;
+    return p.copyWith(
+      happiness: p.happiness + yon * prototypeOnlyHappinessDrift,
     );
   }
 

@@ -12,6 +12,8 @@ import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/test_flow.dart';
+
 /// Olay çeşitliliği (Paket 20).
 ///
 /// Ölçüm, 30-49 yaş arasında bir yılda ortalama yalnızca 1-2 uygun olay
@@ -46,6 +48,8 @@ Map<String, int> hayatOyna(int seed, {int maxAge = 95}) {
       final PendingCrisis k = c.state!.pendingCrisis!;
       c.respondToCrisis(k.crisis!.choices.first.id);
     }
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveEducationChoices(c);
     c.ageUp();
   }
   c.dispose();
@@ -133,6 +137,8 @@ void main() {
       c.startNewLife(mode: StartMode.tamamenRastgele);
       int guard = 0;
       while (!c.state!.hasPendingEvent && guard++ < 20) {
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       expect(c.state!.hasPendingEvent, isTrue);
@@ -207,8 +213,17 @@ void main() {
             !r.requiresSocialAccount;
       }).length;
       // Bu paketin amacı, nasıl bir hayat yaşanırsa yaşansın orta yaşın
-      // dolu geçmesi.
-      expect(kosulsuz, greaterThanOrEqualTo(kMidlifeEvents.length - 2));
+      // dolu geçmesi. D-085 ile eşin ev/araba beklentisi eklendi; bunlar
+      // doğaları gereği koşulludur. Kural artık mutlak sayı değil
+      // **oran**: havuzun büyük çoğunluğu koşulsuz kalmalı ki bekâr,
+      // işsiz ve mülksüz bir hayat da dolu geçsin.
+      expect(
+        kosulsuz / kMidlifeEvents.length,
+        greaterThanOrEqualTo(0.75),
+        reason: '$kosulsuz / ${kMidlifeEvents.length} koşulsuz',
+      );
+      // Koşulsuz olayların mutlak sayısı da bir tabanın altına inemez.
+      expect(kosulsuz, greaterThanOrEqualTo(20));
     });
 
     test('iki olay önceki kararı hatırlar', () {

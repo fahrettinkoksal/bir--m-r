@@ -178,6 +178,8 @@ void main() {
       resolvePendingEvents(c);
       for (int i = 0; i < 4 && c.state!.children.isEmpty; i++) {
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -200,7 +202,12 @@ void main() {
     });
 
     test('4. boşanma + ikinci evlilik', () async {
-      final GameController c = GameController(random: Random(6));
+      // Tohum 6, D-125/D-126 sonrası rastgele akış kaydığı için 27
+      // yaşında ölümcül bir trafik kazasına düşüyor (parası tedaviye
+      // yetmiyor). Ölüm gerçek bir oyun sonucu, hata değil; bu senaryo
+      // ise **yaşayan** bir oyuncu istiyor. Tohum 7'de hayat 30'a
+      // ulaşıyor; senaryonun iddiaları aynen duruyor.
+      final GameController c = GameController(random: Random(7));
       addTearDown(c.dispose);
       c.startNewLife(mode: StartMode.tamamenRastgele);
       advanceToAge(c, 30);
@@ -259,6 +266,8 @@ void main() {
       c.haveChild();
       for (int i = 0; i < 5 && c.state!.children.isEmpty; i++) {
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -268,6 +277,8 @@ void main() {
       while (!c.state!.deceased) {
         if (guard++ > 150) fail('Oyuncu hiç ölmedi.');
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -322,6 +333,8 @@ void main() {
       while (!c.state!.hasPendingEvent) {
         if (guard++ > 40) fail('Hiç olay çıkmadı.');
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       final GameState once = c.state!;
@@ -351,6 +364,8 @@ void main() {
           c.dismissNotice();
           continue;
         }
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       if (!c.state!.hasPendingCrisis) return; // kriz çıkmadıysa sınanacak şey yok
@@ -406,6 +421,8 @@ void main() {
       while (c.state!.settledEstates.isEmpty && !c.state!.deceased) {
         if (guard++ > 200) break;
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       if (c.state!.settledEstates.isEmpty) return;

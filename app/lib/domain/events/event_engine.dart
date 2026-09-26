@@ -1,5 +1,8 @@
 import 'dart:math';
 
+import '../law/legal_engine.dart';
+import '../models/criminal_record.dart';
+
 import 'package:flutter/foundation.dart';
 
 import '../../data/event_pool.dart';
@@ -10,6 +13,7 @@ import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
 import '../models/game_event.dart';
 import '../activities/travel.dart';
+import '../economy/living_costs.dart';
 import '../models/game_state.dart';
 import '../models/hobby_progress.dart';
 import '../hobby/hobby_tracker.dart';
@@ -17,6 +21,7 @@ import '../../data/hobby_catalog.dart';
 import '../../data/pet_catalog.dart';
 import '../models/trip.dart';
 import '../models/life_log.dart';
+import '../economy/financial_strain.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
@@ -249,10 +254,50 @@ class EventEngine {
     // çıkar (Paket 40). Vefat etmiş ya da hanede olmayan hayvan sayılmaz.
     if (req.requiresLivingPet && _eventPet(state, req) == null) return false;
 
+    // Adli kapılar (D-128). Dosyası olmayana "mahkemeyi bekliyorsun",
+    // sabıkası olmayana "bir de şu kayıt var" denmez. Cezaevindeyken
+    // dışarıdaki hiçbir olay çıkmaz: içerideki hayat ayrıdır.
+    if (state.isImprisoned) return false;
+    if (req.requiresOpenCase && state.legal.openCase == null) return false;
+    if (req.requiresRecord && !state.legal.hasRecord) return false;
+    if (req.requiresReleased) {
+      final bool hicGirmedi = state.legal.cases.every(
+        (CriminalCase c) => c.verdict != Verdict.hapis,
+      );
+      if (hicGirmedi || state.legal.isImprisoned) return false;
+    }
+
     // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
+    // Mali durum kapıları (D-092): varlıklı oyuncuya yoksulluk metni,
+    // parasız oyuncuya varlık metni çıkmaz. Durum mutlak bir işaretten
+    // değil, **gerçek hesaptan** okunur.
+    if (req.maxComfort != null || req.minComfort != null) {
+      final FinancialComfort durum = FinancialStrain.comfortOf(state);
+      if (req.maxComfort != null && durum.index > req.maxComfort!.index) {
+        return false;
+      }
+      if (req.minComfort != null && durum.index < req.minComfort!.index) {
+        return false;
+      }
+    }
+
+    // Evi olan oyuncuya "eşin ev istiyor" olayı çıkmaz (D-085).
+    if (req.forbidsProperty &&
+        state.items.any((OwnedItem i) => i.isProperty)) {
+      return false;
+    }
+    if (req.forbidsVehicle &&
+        state.items.any((OwnedItem i) => i.isVehicle)) {
+      return false;
+    }
+    // Kirada oturmayan oyuncuya ev sahibi olayı çıkmaz.
+    if (req.requiresTenant &&
+        LivingCosts.situationOf(state) != LivingSituation.kirada) {
+      return false;
+    }
     if (req.requiresMinYearsInJob > 0 &&
         state.career.yearsInJob(state.player.age) <
             req.requiresMinYearsInJob) {
@@ -315,6 +360,18 @@ class EventEngine {
       final List<Person> neglected = state.people.where((Person p) {
         if (!p.isAlive) return false;
         if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+        // **Gerçek hata (D-093):** bu seçici yalnızca hane koşuluna
+        // bakıyordu; `requireOutsideHousehold` ve `requireReachable`
+        // koşullarını yok sayıyordu. Yani "uzaktaki yakınla" kurulan bir
+        // olay, aynı evde yaşayan ya da hiç erişilemeyen biriyle
+        // kurulabiliyordu. Aşağıdaki iki satır o boşluğu kapatır.
+        if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+        if (req.requireReachable && !state.isReachable(p)) return false;
+        // Bağ türü belirtilmişse ona da uyulur.
+        if (req.livingRelations.isNotEmpty &&
+            !req.livingRelations.contains(p.relation)) {
+          return false;
+        }
         final int? last = state.lastInteractionAge[p.id];
         if (last == null) {
           // Hiç temas kurulmamışsa, oyuncunun etkileşim kurabildiği yaştan
@@ -366,6 +423,9 @@ class EventEngine {
             c,
       ]),
       personId: candidate.person?.id,
+      // Geçmiş bir seçimin ya da kişinin devamıysa işaretlenir.
+      isContinuation: candidate.event.requirement.requiredFlags.isNotEmpty ||
+          candidate.event.requirement.personRole != null,
     );
   }
 
@@ -485,12 +545,12 @@ class EventEngine {
       }
     }
 
-    final Stats stats = working.player.stats.copyWith(
-      happiness: working.player.stats.happiness + choice.happiness,
-      health: working.player.stats.health + choice.health,
-      intelligence: working.player.stats.intelligence + choice.intelligence,
-      charisma: working.player.stats.charisma + choice.charisma,
-      appearance: working.player.stats.appearance + choice.appearance,
+    final Stats stats = working.player.stats.gain(
+      happiness: choice.happiness,
+      health: choice.health,
+      intelligence: choice.intelligence,
+      charisma: choice.charisma,
+      appearance: choice.appearance,
     );
     final PlayerCharacter player = working.player.copyWith(
       stats: stats,
@@ -579,6 +639,13 @@ class EventEngine {
     // İlişkiyi bitiren seçim: kişi silinmez, aynı kimlikle eski sevgili olur.
     if (choice.endsRomance && active.personId != null) {
       working = romance.end(working, active.personId!, logText: null);
+    }
+
+    // Riskli seçimin hukuki tarafı (D-128). Motor kararı kendi verir;
+    // seçim yalnızca süreci başlatır.
+    final String? sucId = choice.crimeId;
+    if (sucId != null) {
+      working = LegalEngine.openCase(working, sucId, rng ?? Random());
     }
 
     return working;

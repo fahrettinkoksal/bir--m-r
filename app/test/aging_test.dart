@@ -155,8 +155,11 @@ void main() {
       expect(state.player.stats.appearance, inInclusiveRange(0, 100));
     });
 
-    test('yaşlanma tek başına mutluluğu veya zekâyı düşürmez', () {
-      // Kural düzeyinde: yaşlanma yalnızca görünüş döndürür.
+    test('Aging.yearlyDelta yalnızca görünüş döndürür', () {
+      // D-072 ile mutluluk ve zekâ da yaşla düşer, ama bu kural
+      // StatAging'dedir (stat_aging_test.dart). Buradaki eski yol
+      // NPC'ler için duruyor ve yalnızca görünüşü değiştirir; ikisinin
+      // karışmadığını burada sabitliyoruz.
       final Random rng = Random(4);
       for (int i = 0; i < 100; i++) {
         final int delta = Aging.yearlyDelta(

@@ -3,29 +3,40 @@ import 'package:flutter/foundation.dart';
 import '../../data/social_catalog.dart';
 
 import 'blackjack_game.dart';
+import 'business.dart';
+import 'criminal_record.dart';
 import 'education.dart';
 import 'book_progress.dart';
 import 'martial_progress.dart';
 import 'hobby_progress.dart';
 import 'lottery_ticket.dart';
+import '../../data/finger_catalog.dart';
 import 'finger_profile.dart';
+import 'wealth.dart';
 import 'career.dart';
+import 'chronic_condition.dart';
+import 'health_history.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
 import 'gift_record.dart';
 import 'owned_item.dart';
 import 'life_log.dart';
+import 'loan.dart';
+import 'pending_race.dart';
+import '../life/year_review.dart';
 import 'life_summary.dart';
 import 'marriage.dart';
 import 'parental_status.dart';
 import 'pending_notice.dart';
 import 'pending_interview.dart';
 import 'pending_crisis.dart';
+import 'pending_trial.dart';
 import 'military.dart';
 import 'pending_wedding.dart';
 import 'pregnancy.dart';
 import 'pending_license_exam.dart';
 import 'person.dart';
+import 'celebrity_contact.dart';
 import 'social_account.dart';
 import 'sponsorship.dart';
 import 'trip.dart';
@@ -51,9 +62,13 @@ class GameState {
     this.pendingWedding,
     this.pregnancy,
     this.military = const MilitaryState(),
+    this.legal = const LegalState(),
+    this.businesses = const <Business>[],
+    this.pendingTrial,
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
     this.lastConceptionTryAge,
+    this.conceptionTriesAtAge = 0,
     this.storyFlags = const <String>{},
     this.items = const <OwnedItem>[],
     this.seenEventIds = const <String>{},
@@ -69,16 +84,36 @@ class GameState {
     this.books = const <BookProgress>[],
     this.martialArts = const <MartialProgress>[],
     this.hobbies = const <HobbyProgress>[],
+    this.chronicConditions = const <ChronicCondition>[],
+    this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
     this.fingerMatches = const <FingerProfile>[],
     this.socialAccounts = const <SocialAccount>[],
+    this.celebrityContacts = const <CelebrityContact>[],
     this.sponsorOffer,
+    this.mediaInvitationId,
+    this.mediaInvitationAge,
+    this.mediaJobLastAge = const <String, int>{},
+    this.friendNewsLastAge = const <String, int>{},
     this.sponsorDeals = const <SponsorDeal>[],
     this.trips = const <TripRecord>[],
     this.pendingInterview,
     this.blackjack,
+    this.pendingRace,
+    this.yearMark,
+    this.lastYearSummary,
     this.wagerThisAge = 0,
+    this.loans = const <Loan>[],
+    this.fingerIncoming = const <FingerProfile>[],
+    this.fingerBio,
+    this.fingerInterests = const <String>[],
+    this.fingerPremiumUntilAge,
+    this.fingerIntent = FingerIntent.belirsiz,
+    this.fingerWealthFilter,
+    this.lastSportAge,
+    this.lastGroomingAge,
+    this.lastLearningAge,
     this.licenses = const <String>{},
     this.pendingLicenseExam,
     this.settledEstates = const <String>{},
@@ -148,6 +183,27 @@ class GameState {
   /// Askerlik durumu (Paket 29).
   final MilitaryState military;
 
+  /// Kurulmuş işler (D-132).
+  ///
+  /// **Kayıt silinmez:** batan ya da devredilen iş listede kalır. Eski
+  /// kayıtlarda bu alan yoktur ve boş açılır — geriye dönük iş
+  /// **uydurulmaz**.
+  final List<Business> businesses;
+
+  /// Adli durum: dosyalar, sabıka, hapis ve denetim dönemi (D-128).
+  ///
+  /// Kayıt **silinmez**: kapanan dosya listede kalır. Eski kayıtlarda bu
+  /// alan yoktur ve boş açılır — geriye dönük sabıka **uydurulmaz**.
+  final LegalState legal;
+
+  /// Ekranda cevap bekleyen duruşma (D-128).
+  final PendingTrial? pendingTrial;
+
+  bool get hasPendingTrial => pendingTrial != null;
+
+  /// Oyuncu şu an cezaevinde mi?
+  bool get isImprisoned => legal.isImprisoned;
+
   /// Korunmadan geçen, çocukla sonuçlanmamış deneme sayısı (Paket 25).
   ///
   /// Doğumla sıfırlanır. Belli bir sayıdan sonra oyuncuya "olmuyor"
@@ -165,6 +221,14 @@ class GameState {
   /// Aynı yıl üst üste denemekle ihtimal katlanmaz; yıl başına bir kez
   /// hesaplanır.
   final int? lastConceptionTryAge;
+
+  /// [lastConceptionTryAge] yaşında yapılan gebelik denemesi sayısı
+  /// (D-086).
+  ///
+  /// Sayaç **yaşa bağlıdır**: oyuncunun yaşı değiştiği anda kendiliğinden
+  /// geçersiz olur, çünkü okurken `lastConceptionTryAge` ile bugünkü yaş
+  /// karşılaştırılır. Böylece ayrı bir sıfırlama adımına gerek kalmaz.
+  final int conceptionTriesAtAge;
 
   /// Geçmiş seçimlerin bıraktığı izler (D-008).
   final Set<String> storyFlags;
@@ -318,6 +382,25 @@ class GameState {
   /// Mevcut aktivitelerden beslenir; ayrı bir aktivite sistemi değildir.
   final List<HobbyProgress> hobbies;
 
+  /// D-153: oyuncunun taşıdığı kronik sağlık durumları.
+  ///
+  /// Kayıt silinmez; geçen durum da listede kalır ve `endedAtAge` dolar.
+  final List<ChronicCondition> chronicConditions;
+
+  /// D-153: atlatılmış sağlık krizlerinin kalıcı geçmişi.
+  ///
+  /// Önceden yalnızca son krizin yaşı tutuluyordu (`lastCrisisAge`).
+  final List<HealthHistoryEntry> healthHistory;
+
+  /// Şu an süren kronik durumlar.
+  List<ChronicCondition> get activeChronic => chronicConditions
+      .where((ChronicCondition c) => c.isActive)
+      .toList(growable: false);
+
+  /// Bu kronik durum şu an sürüyor mu?
+  bool hasChronic(String typeId) => chronicConditions.any(
+      (ChronicCondition c) => c.typeId == typeId && c.isActive);
+
   /// Paket 33: çekilişi bekleyen Milli Piyango biletleri.
   final List<LotteryTicket> lotteryTickets;
 
@@ -331,11 +414,73 @@ class GameState {
   /// hesabı olmayan platformdan paylaşım veya olay gelmez.
   final List<SocialAccount> socialAccounts;
 
+  /// Ünlülerle kurulan temasların kalıcı kaydı (Faho'nun isteği).
+  ///
+  /// Yalnızca **gerçekten denenmiş** ünlüler burada durur; katalogdaki
+  /// her ünlü kayda girmez.
+  final List<CelebrityContact> celebrityContacts;
+
+  /// Bu ünlüyle daha önce temas kuruldu mu?
+  CelebrityContact? contactWith(String celebrityId) {
+    for (final CelebrityContact c in celebrityContacts) {
+      if (c.celebrityId == celebrityId) return c;
+    }
+    return null;
+  }
+
   /// Yanıt bekleyen sponsorluk teklifi (Paket 10).
   ///
   /// Aynı anda yalnızca bir teklif bekler; kabul veya ret verilene kadar
   /// yenisi gelmez.
   final SponsorOffer? sponsorOffer;
+
+  /// Kendiliğinden gelen medya daveti: işin kimliği (D-120).
+  ///
+  /// Faho bildirdi: "oyuncunun menüye girip fırsat seçmesi yerine bazen
+  /// firmalar/TV programları kendiliğinden teklif yollasın". Davet gelen
+  /// iş için Ün şartı aranmaz ve başvuru reddedilmez — zaten **onlar**
+  /// çağırmıştır. Davet o yıl içinde kullanılmazsa düşer.
+  final String? mediaInvitationId;
+
+  /// Davetin geldiği yaş; davet yalnızca o yıl geçerlidir.
+  final int? mediaInvitationAge;
+
+  /// Bu iş için şu an geçerli bir davet var mı?
+  bool hasMediaInvitation(String jobId) =>
+      mediaInvitationId == jobId && mediaInvitationAge == player.age;
+
+  /// Her medya işinin **en son hangi yaşta** yapıldığı (D-147).
+  ///
+  /// Faho bildirdi: "medya fırsatları sürekli açık olması, oradan da çok
+  /// kolay para spamlanabiliyor... bir fenomen her sene radyo programına
+  /// vb işlere çağırılıyor mu gibi düşün". Aynı kapı her yıl çalınmaz;
+  /// bu harita bekleme süresinin ölçüldüğü yerdir.
+  ///
+  /// Eski kayıtlarda yoktur; boş açılır ve geriye dönük geçmiş
+  /// **uydurulmaz**.
+  final Map<String, int> mediaJobLastAge;
+
+  /// Bu iş en son hangi yaşta yapıldı? Hiç yapılmadıysa `null`.
+  int? mediaJobDoneAt(String jobId) => mediaJobLastAge[jobId];
+
+  /// Arkadaş haberlerinin en son hangi yaşta geldiği (D-149).
+  ///
+  /// Faho bildirdi: "yakın arkadaş ile alakalı aynı bildirimler çok fazla
+  /// geliyor! Ahmet her sene iş değiştiriyor ve sesi çok iyi geliyor
+  /// mesela." Anahtarlar `kişiKimliği` ve `kişiKimliği|haberTürü`
+  /// biçimindedir; ilki "bu kişiden ne zaman haber geldi", ikincisi "aynı
+  /// haber ne zaman geldi" sorusunu yanıtlar.
+  ///
+  /// Eski kayıtlarda yoktur; boş açılır ve geriye dönük geçmiş
+  /// **uydurulmaz**.
+  final Map<String, int> friendNewsLastAge;
+
+  /// Bu kişiden en son hangi yaşta haber geldi?
+  int? friendNewsAt(String personId) => friendNewsLastAge[personId];
+
+  /// Bu kişiden bu tür haber en son hangi yaşta geldi?
+  int? friendNewsAtKind(String personId, String kind) =>
+      friendNewsLastAge['$personId|$kind'];
 
   /// Kabul edilmiş sponsorluk yükümlülükleri ve geçmişi.
   final List<SponsorDeal> sponsorDeals;
@@ -482,6 +627,20 @@ class GameState {
   /// kaybolmaz. Aynı bildirim iki kez kuyruğa girmez.
   final List<PendingNotice> notices;
 
+  /// Bildirimi kuyruğa ekler.
+  ///
+  /// **Aynı kimlikli bildirim ikinci kez girmez**: motor bir yılda iki
+  /// kez çağrılsa da oyuncu aynı pencereyi iki kez görmez.
+  GameState queueNotice(PendingNotice notice) {
+    if (notices.any((PendingNotice n) => n.id == notice.id)) return this;
+    return copyWith(
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...notices,
+        notice,
+      ]),
+    );
+  }
+
   bool get hasNotice => notices.isNotEmpty;
 
   /// Sıradaki bildirim; yoksa `null`.
@@ -552,10 +711,102 @@ class GameState {
   List<Person> get deceasedPeople =>
       people.where((Person p) => !p.isAlive).toList(growable: false);
 
+  /// Sonuçlanmayı bekleyen at yarışı bahsi (D-089).
+  ///
+  /// Bahis tutarı cüzdandan çıkmış, ödeme **henüz yapılmamıştır**.
+  /// Animasyon bitince tek ve atomik bir işlemle kesinleşir.
+  final PendingRace? pendingRace;
+
+  /// Sonuçlanmamış bir bahis var mı?
+  bool get hasPendingRace => pendingRace != null;
+
+  /// İçinde bulunulan yılın başındaki değerlerin fotoğrafı (D-096).
+  ///
+  /// Yıl sonunda "ne değişti" sorusu bununla yanıtlanır; uydurma bir
+  /// başlangıç değeri kullanılmaz.
+  final YearMark? yearMark;
+
+  /// Biten yılın özeti (D-096).
+  ///
+  /// Oyuncu hayat günlüğünü taramadan yılın nasıl geçtiğini görebilsin
+  /// diye ana ekranda gösterilir.
+  final YearSummary? lastYearSummary;
+
   /// **Bu yaşta** kumarhanede oynanan toplam bahis.
   ///
   /// Yıllık bahis sınırı için tutulur; yaş değişince sıfırlanır.
   final int wagerThisAge;
+
+  /// Oyuncuyu **kendiliğinden beğenmiş** profiller (D-081).
+  ///
+  /// Karşılıklı beğeni için: oyuncu bu profillerden birini beğenirse
+  /// eşleşme **kesindir**, çünkü karşı taraf zaten beğenmiştir.
+  final List<FingerProfile> fingerIncoming;
+
+  /// Oyuncunun kendi Finger profilindeki tanıtım yazısı (D-081).
+  ///
+  /// Boşsa profil doldurulmamıştır ve eşleşme ihtimali düşüktür.
+  final String? fingerBio;
+
+  /// Oyuncunun kendi profilinde yazan ilgi alanları (D-081).
+  final List<String> fingerInterests;
+
+  /// Premium üyeliğin geçerli olduğu son yaş; üyelik yoksa `null`.
+  final int? fingerPremiumUntilAge;
+
+  /// Oyuncunun Finger'da **ne aradığı** (D-107).
+  ///
+  /// Buluşmanın sonucu hem buna hem karşı tarafın niyetine bakar:
+  /// tanışmak kendiliğinden sevgili olmak değildir.
+  final FingerIntent fingerIntent;
+
+  /// Adayları ekonomik duruma göre süzme tercihi (D-107).
+  ///
+  /// `null` ise süzgeç kapalıdır ve bütün adaylar gösterilir. Süzgeç
+  /// gerçek bir kısıttır: dar tutmak deste üretimini zorlaştırır.
+  final WealthTier? fingerWealthFilter;
+
+  /// Premium üyelik şu an geçerli mi?
+  bool get hasFingerPremium =>
+      fingerPremiumUntilAge != null && player.age <= fingerPremiumUntilAge!;
+
+  /// Oyuncunun profili doldurulmuş mu?
+  bool get hasFingerProfile =>
+      (fingerBio != null && fingerBio!.isNotEmpty) ||
+      fingerInterests.isNotEmpty;
+
+  /// Çekilmiş krediler (D-080).
+  ///
+  /// Kapanmış krediler de listede kalır: borç geçmişi silinmez, yeni
+  /// başvuruda ödeme geçmişine bakılır.
+  final List<Loan> loans;
+
+  /// Oyuncunun en son spor yaptığı yaş; hiç yapmadıysa `null` (D-072).
+  ///
+  /// Tekrar sayaçları her yaşta sıfırlandığı için bakım geçmişi ayrıca
+  /// tutulur: "kaç yıldır spor yapmıyor" sorusunun cevabı buradadır.
+  final int? lastSportAge;
+
+  /// Oyuncunun en son berber/kuaför bakımı yaptırdığı yaş.
+  final int? lastGroomingAge;
+
+  /// Oyuncunun en son zihnini çalıştırdığı (kitap, kurs) yaş.
+  final int? lastLearningAge;
+
+  /// Şu an kaç yıldır spor yapılmadığı; hiç yapılmadıysa `null`.
+  int? get yearsSinceSport => _yearsSince(lastSportAge);
+
+  /// Şu an kaç yıldır bakım yaptırılmadığı; hiç yaptırılmadıysa `null`.
+  int? get yearsSinceGrooming => _yearsSince(lastGroomingAge);
+
+  /// Şu an kaç yıldır zihin çalıştırılmadığı; hiç yapılmadıysa `null`.
+  int? get yearsSinceLearning => _yearsSince(lastLearningAge);
+
+  int? _yearsSince(int? age) {
+    if (age == null) return null;
+    final int fark = player.age - age;
+    return fark < 0 ? 0 : fark;
+  }
 
   /// Bir platformdaki hesap; açılmamışsa `null`.
   SocialAccount? accountFor(SocialPlatform platform) {
@@ -693,6 +944,7 @@ class GameState {
     int? unprotectedTries,
     int? ivfAttempts,
     Object? lastConceptionTryAge = _unsetEvent,
+    int? conceptionTriesAtAge,
     Set<String>? storyFlags,
     List<OwnedItem>? items,
     Set<String>? seenEventIds,
@@ -708,16 +960,36 @@ class GameState {
     List<BookProgress>? books,
     List<MartialProgress>? martialArts,
     List<HobbyProgress>? hobbies,
+    List<ChronicCondition>? chronicConditions,
+    List<HealthHistoryEntry>? healthHistory,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
     List<FingerProfile>? fingerMatches,
     List<SocialAccount>? socialAccounts,
+    List<CelebrityContact>? celebrityContacts,
     Object? sponsorOffer = _unsetEvent,
+    Object? mediaInvitationId = _unsetEvent,
+    Object? mediaInvitationAge = _unsetEvent,
+    Map<String, int>? mediaJobLastAge,
+    Map<String, int>? friendNewsLastAge,
     List<SponsorDeal>? sponsorDeals,
     List<TripRecord>? trips,
     Object? pendingInterview = _unsetEvent,
     Object? blackjack = _unsetEvent,
+    Object? pendingRace = _unsetEvent,
+    Object? yearMark = _unsetEvent,
+    Object? lastYearSummary = _unsetEvent,
     int? wagerThisAge,
+    List<Loan>? loans,
+    List<FingerProfile>? fingerIncoming,
+    String? fingerBio,
+    List<String>? fingerInterests,
+    int? fingerPremiumUntilAge,
+    FingerIntent? fingerIntent,
+    Object? fingerWealthFilter = _unsetEvent,
+    int? lastSportAge,
+    int? lastGroomingAge,
+    int? lastLearningAge,
     Set<String>? licenses,
     Object? pendingLicenseExam = _unsetEvent,
     Set<String>? settledEstates,
@@ -732,6 +1004,9 @@ class GameState {
     Object? residenceItemId = _unsetEvent,
     bool? movedOut,
     Object? pendingCrisis = _unsetEvent,
+    LegalState? legal,
+    List<Business>? businesses,
+    Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
     Object? marriage = _unsetEvent,
@@ -762,6 +1037,7 @@ class GameState {
       lastConceptionTryAge: lastConceptionTryAge == _unsetEvent
           ? this.lastConceptionTryAge
           : lastConceptionTryAge as int?,
+      conceptionTriesAtAge: conceptionTriesAtAge ?? this.conceptionTriesAtAge,
       storyFlags: storyFlags ?? this.storyFlags,
       items: items ?? this.items,
       seenEventIds: seenEventIds ?? this.seenEventIds,
@@ -780,13 +1056,28 @@ class GameState {
       books: books ?? this.books,
       martialArts: martialArts ?? this.martialArts,
       hobbies: hobbies ?? this.hobbies,
+      chronicConditions: chronicConditions ?? this.chronicConditions,
+      healthHistory: healthHistory ?? this.healthHistory,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,
       fingerMatches: fingerMatches ?? this.fingerMatches,
       socialAccounts: socialAccounts ?? this.socialAccounts,
+      celebrityContacts: celebrityContacts ?? this.celebrityContacts,
       sponsorOffer: sponsorOffer == _unsetEvent
           ? this.sponsorOffer
           : sponsorOffer as SponsorOffer?,
+      mediaInvitationId: mediaInvitationId == _unsetEvent
+          ? this.mediaInvitationId
+          : mediaInvitationId as String?,
+      mediaJobLastAge: mediaJobLastAge == null
+          ? this.mediaJobLastAge
+          : Map<String, int>.unmodifiable(mediaJobLastAge),
+      friendNewsLastAge: friendNewsLastAge == null
+          ? this.friendNewsLastAge
+          : Map<String, int>.unmodifiable(friendNewsLastAge),
+      mediaInvitationAge: mediaInvitationAge == _unsetEvent
+          ? this.mediaInvitationAge
+          : mediaInvitationAge as int?,
       sponsorDeals: sponsorDeals ?? this.sponsorDeals,
       trips: trips ?? this.trips,
       pendingInterview: pendingInterview == _unsetEvent
@@ -795,7 +1086,28 @@ class GameState {
       blackjack: blackjack == _unsetEvent
           ? this.blackjack
           : blackjack as BlackjackGame?,
+      pendingRace: pendingRace == _unsetEvent
+          ? this.pendingRace
+          : pendingRace as PendingRace?,
+      yearMark:
+          yearMark == _unsetEvent ? this.yearMark : yearMark as YearMark?,
+      lastYearSummary: lastYearSummary == _unsetEvent
+          ? this.lastYearSummary
+          : lastYearSummary as YearSummary?,
       wagerThisAge: wagerThisAge ?? this.wagerThisAge,
+      loans: loans ?? this.loans,
+      fingerIncoming: fingerIncoming ?? this.fingerIncoming,
+      fingerBio: fingerBio ?? this.fingerBio,
+      fingerInterests: fingerInterests ?? this.fingerInterests,
+      fingerPremiumUntilAge:
+          fingerPremiumUntilAge ?? this.fingerPremiumUntilAge,
+      fingerIntent: fingerIntent ?? this.fingerIntent,
+      fingerWealthFilter: fingerWealthFilter == _unsetEvent
+          ? this.fingerWealthFilter
+          : fingerWealthFilter as WealthTier?,
+      lastSportAge: lastSportAge ?? this.lastSportAge,
+      lastGroomingAge: lastGroomingAge ?? this.lastGroomingAge,
+      lastLearningAge: lastLearningAge ?? this.lastLearningAge,
       licenses: licenses ?? this.licenses,
       pendingLicenseExam: pendingLicenseExam == _unsetEvent
           ? this.pendingLicenseExam
@@ -816,6 +1128,13 @@ class GameState {
       pendingCrisis: pendingCrisis == _unsetEvent
           ? this.pendingCrisis
           : pendingCrisis as PendingCrisis?,
+      legal: legal ?? this.legal,
+      businesses: businesses == null
+          ? this.businesses
+          : List<Business>.unmodifiable(businesses),
+      pendingTrial: pendingTrial == _unsetEvent
+          ? this.pendingTrial
+          : pendingTrial as PendingTrial?,
       lastCrisisAge: lastCrisisAge ?? this.lastCrisisAge,
       healthWarned: healthWarned ?? this.healthWarned,
       marriage:

@@ -58,8 +58,46 @@ Faho'nun onayı bekleniyor.
 - ~~**İkinci evlilik.**~~ **Yapıldı (Paket 36).** Boşanan ya da dul kalan yeniden evlenebiliyor; eski kayıt engellenerek değil, geçmişe taşınarak korunuyor. Sorular — **Q-104**.
 - ~~**Hamilelik süreci.**~~ **Yapıldı (Paket 26).** Korunmadan yakınlaşma artık hamilelik başlatıyor, bebek bir sonraki yaşta doğuyor. Sorular — Q-094.
 
+## Faho'nun PC'de oynarken işaret ettikleri — yapılanlar (Paket 49)
+- ~~**Kadına zorunlu askerlik görünüyor.**~~ **Düzeltildi.** Kayıt değil,
+  görüntü hatasıydı; gönüllü subaylık yolu korundu.
+- ~~**Bazı seçimler pasif kalıyor.**~~ **Denetlendi.** Kapalı düğmelerin
+  hepsi gerekçesini yazıyor; kalıcı ulaşılmaz içeriğe karşı test eklendi.
+- ~~**Karate vb. eğitimler çok uzun.**~~ **Tıklama yükü düzeltildi**
+  ("Yılı çalış"). Süre kararı — **Q-111**.
+- ~~**Sosyal medyada çapraz ve yıllık takipçi artışı.**~~ **Kodlandı.**
+  Sayılar ve durgunluk kuralı — **Q-112**.
+- ~~**Mankenlik, yazarlık vb. meslekler.**~~ **Kodlandı** (katalog 9 → 15).
+  Maaşlar ve eşikler — **Q-113**.
+- ~~**Olay zincirlerini derinleştir.**~~ **Kodlandı** (4 zincir, 17 olay).
+  Sayılar — **Q-114**.
+
 ## Faho'nun işaret ettiği, henüz yapılmayanlar
 - Şu an bu başlıkta bekleyen madde yok. Yeni istekler geldikçe buraya yazılır.
+
+## Eksikler envanteri (25 Eylül 2026)
+Oyunun bütün eksikleri ölçülerek `docs/EKSIKLER.md` dosyasına çıkarıldı:
+hiç kodlanmamış sistemler (suç ve hukuk, girişimcilik, üvey ebeveyn,
+hane bütçesi, ikiz gebelik), yarım kalmış sistemler (arkadaşlığın
+sığlığı, çocuğun tek yönlü hayatı, eksik ekranlar), ölçülmüş içerik
+boşlukları (çocukluk en fakir dönem) ve karar bekleyen 68 soru.
+Sıralama kararı `docs/DESIGN_REVIEW_QUEUE.md` **Q-137**'de bekliyor.
+
+## Boşanmanın hukuki tarafı — bilerek ertelendi (Q-118 kararı)
+Faho'nun kararı: boşanmada **mal paylaşımı kalsın** (D-075), ama
+**nafaka ve velayet şimdilik yazılmasın**. Bunlar oyunun bugünkü
+kapsamının dışında ve doğru yapılması ayrı bir tasarım turu ister:
+- **Nafaka:** yoksulluk nafakası ile iştirak nafakası ayrı şeylerdir;
+  süre, tutar ve kesilme koşulları gelir ve velayete bağlıdır. Yıllık
+  bir cüzdan kesintisi olarak eklemek kolay ama yanlış olur.
+- **Velayet:** çocuğun hangi ebeveynde kalacağı, görüşme düzeni ve bunun
+  hane/yakınlık sistemine etkisi. Oyunda hane ve yakınlık zaten var, bu
+  yüzden yarım bir velayet sistemi mevcut kuralları bozar.
+- **Mal rejimi sözleşmesi, katkı payı, değer artış payı:** D-075 bunları
+  bilerek dışarıda bırakıyor.
+Bunlar yazılana kadar oyun bir hukuk simülasyonu olduğunu **iddia
+etmiyor**; boşanma bildirimi hangi kalemin kime gittiğini yazıyor ve
+orada duruyor.
 
 ## İleride değerlendirilir
 Premium şehir seçimi; tarihsel takvim/doğum yılı temelli içerik; diğer para kazanma yöntemleri. Şimdilik uygulama kapsamına dahil değiller.

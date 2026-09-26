@@ -23,6 +23,7 @@ import 'life_progression.dart';
 import 'random_util.dart';
 import '../../text/turkish_text.dart';
 import '../pets/pet_care.dart';
+import '../life/year_review.dart';
 
 /// Kuşak devamı: **"Çocuğum olarak devam et"** (Paket E3,
 /// `docs/GENERATION_PROPOSAL.md` §5).
@@ -152,13 +153,24 @@ abstract final class GenerationContinuation {
         marriage: state.marriage,
         motherLine: anneTarafi,
         otherParentId: cocuk.development?.otherParentId,
+        childId: childId,
       );
       if (yeniBag == null) continue; // yeni kuşakta bağı yok
+      // Eski oyuncunun torunu yeni oyuncunun **çocuğu** oldu: küçükse
+      // artık onun hanesinde yaşar. Torun kaydında hane `false`'tu,
+      // çünkü oyuncunun değil kendi ailesinin yanındaydı — o aile de
+      // şimdi bu hane (D-087).
+      final bool torundanCocuk =
+          kisi.relation == RelationType.torun && yeniBag == RelationType.cocuk;
+      final bool hanede = torundanCocuk
+          ? kisi.isAlive && kisi.age < prototypeOnlyAdultAge
+          : kisi.isAlive && kisi.inPlayerHousehold;
+
       yeniKisiler.add(
         kisi.copyWith(
           relation: yeniBag,
           bond: _carriedBond(kisi.bond),
-          inPlayerHousehold: kisi.isAlive && kisi.inPlayerHousehold,
+          inPlayerHousehold: hanede,
           estate: <String>[...kisi.estate, ...?baskasinaKalan[kisi.id]],
           // Okul bağları eski oyuncuya aitti; yeni kuşağa taşınmaz.
           schoolTie: null,
@@ -318,6 +330,10 @@ abstract final class GenerationContinuation {
     // Küçük yaşta devam eden çocuk açıklamasız bir hanede bırakılmaz.
     yeni = LifeProgression.ensureCaregiver(yeni, cocuk.age);
 
+    // Yeni kuşak kendi yılının başından sayar; eski oyuncunun fotoğrafı
+    // taşınmaz ve eski yılın özeti ekranda kalmaz (D-096).
+    yeni = yeni.copyWith(yearMark: YearMark.of(yeni), lastYearSummary: null);
+
     return (state: yeni, blockReason: '');
   }
 
@@ -370,7 +386,26 @@ abstract final class GenerationContinuation {
     required Marriage? marriage,
     required bool motherLine,
     String? otherParentId,
+    required String childId,
   }) {
+    // Torunlar (D-087).
+    //
+    // **Faho'nun bildirdiği hata:** "ölüp çocuğumun hayatı ile devam
+    // ettiğimde torunlarım vardı, fakat çocuğumun hayatına geçtiğimde
+    // çocuklarım görünmedi." Sebebi buydu: `torun` hiçbir dalda
+    // karşılanmıyor, aşağıdaki `default` ile **tamamen düşüyordu**.
+    //
+    // Torunun kaydında kendi ebeveyninin kimliği yazılıdır
+    // (`development.otherParentId`, bkz. `grandchildren.dart`). Devam
+    // edilen çocuğun torunları yeni oyuncunun **çocuğu**, diğer
+    // çocukların torunları **yeğeni** olur. Hiçbiri silinmez.
+    if (person.relation == RelationType.torun) {
+      final String? torununEbeveyni = person.development?.otherParentId;
+      if (torununEbeveyni == childId) return RelationType.cocuk;
+      // Ebeveyni bilinmeyen torun uydurulmaz; yine de kaydı korunur.
+      return RelationType.yegen;
+    }
+
     // Çocuğun kaydında yazan diğer biyolojik ebeveyn her durumda
     // ebeveyndir: evlilik olmadan doğan çocuğun da iki ebeveyni vardır
     // (D-047).

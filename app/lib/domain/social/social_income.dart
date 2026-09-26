@@ -6,6 +6,7 @@ import '../generation/random_util.dart';
 import '../models/game_state.dart';
 import '../models/social_account.dart';
 import '../models/sponsorship.dart';
+import '../../text/turkish_text.dart';
 
 /// Sosyal medya geliri ve sponsorluk teklifleri (Paket 10).
 ///
@@ -27,31 +28,93 @@ abstract final class SocialIncome {
   /// Dün açılmış hesap, takipçisi olsa bile hemen ödeme almaz.
   static const int prototypeOnlyMinAccountAge = 1;
 
-  /// prototypeOnly: gelir çıkma ihtimalinin tabanı.
-  static const double prototypeOnlyEarningChance = 0.45;
-
-  /// prototypeOnly: kitle büyüdükçe ihtimalin artış payı (üst sınırlı).
-  static const double prototypeOnlyChanceBonus = 0.3;
-
-  /// prototypeOnly: her yeni takipçinin getirdiği tutar (₺).
-  static const double prototypeOnlyPerNewFollower = 45;
-
-  /// prototypeOnly: mevcut kitlenin taban katkısı (₺ / takipçi).
-  static const double prototypeOnlyPerFollower = 0.9;
-
-  /// prototypeOnly: tek paylaşımın üst sınırı (₺).
-  ///
-  /// Sosyal medya tek başına ekonomiyi bozmasın diye konmuştur.
-  static const int prototypeOnlyMaxPerPost = 150000;
-
   /// prototypeOnly: sponsorluk teklifinin yıllık çıkma ihtimali.
   static const double prototypeOnlyOfferChance = 0.35;
 
   /// prototypeOnly: kabul edilen sponsorluğun tamamlanması için süre (yıl).
   static const int prototypeOnlyDealDeadline = 2;
 
-  /// prototypeOnly: sponsorluk ücretinin kitleye göre büyüme katsayısı.
-  static const double prototypeOnlyFeePerFollower = 1.2;
+  /// prototypeOnly: sponsorluk ücretinin takipçi başına payı (₺).
+  ///
+  /// Eskiden ücret, kategorinin eşiğini **aşan** takipçi başına 3,2 ₺
+  /// üzerinden hesaplanıyordu; eşiği yeni geçen hesapla eşiğin çok
+  /// üstündeki hesap arasındaki fark anlamsız biçimde büyüyordu.
+  /// Faho'nun kararı: ücret **kitlenin tamamıyla** ölçeklensin.
+  /// Türkiye'de 2026'da bir gönderi için kabaca takipçi başına 1 ₺
+  /// civarı konuşuluyor; oyunda 0,9 ₺ kullanılıyor (D-104).
+  ///
+  /// **D-117 ile yeniden ölçüldü.** Faho bildirdi: "sponsorluk ücretleri
+  /// hâlâ çok fazla". Araştırıldı: 2026'da Türkiye'de 10K-100K takipçili
+  /// bir hesap gönderi başına kabaca **3.000-15.000 ₺** alıyor. Oyun
+  /// 100.000 takipçiye **118.000 ₺** ödüyordu — gerçeğin sekiz katı.
+  /// Yeni oran ve düşürülen taban ücretlerle 100.000 takipçi **15.000 ₺**
+  /// veriyor; bant tutuyor.
+  static const double prototypeOnlyFeePerFollower = 0.12;
+
+  /// prototypeOnly: süresi dolan sponsorluğun kitleye maliyeti.
+  ///
+  /// Kabul edip paylaşmamanın bir bedeli vardır: marka küser, takipçi
+  /// güveni sarsılır (D-104).
+  static const double prototypeOnlyBrokenDealFollowerLoss = 0.04;
+
+  /// prototypeOnly: süresi dolan sponsorluğun mutluluğa etkisi.
+  static const int prototypeOnlyBrokenDealHappiness = -4;
+
+  // -------------------------------------------------------------------
+  // Kitle yorgunluğu (D-119)
+  // -------------------------------------------------------------------
+
+  /// prototypeOnly: art arda sponsorluğun sayıldığı pencere (yıl).
+  static const int prototypeOnlyFatigueWindowYears = 5;
+
+  /// prototypeOnly: bu pencerede bedelsiz sayılan sponsorluk adedi.
+  ///
+  /// Faho bildirdi: "her sponsorlukta kayıba gerek yok fakat sürekli
+  /// sponsor alırsa kayıp yaşansın". Ara sıra reklam yapmak kimseyi
+  /// kaçırmaz; hesabı reklam panosuna çeviren takipçi kaybeder.
+  static const int prototypeOnlyFatigueFreeDeals = 2;
+
+  /// prototypeOnly: eşiği aşan her sponsorluğun kitleye maliyeti.
+  static const double prototypeOnlyFatigueLossPerDeal = 0.025;
+
+  /// prototypeOnly: yorgunluk kaybının üst sınırı.
+  static const double prototypeOnlyMaxFatigueLoss = 0.12;
+
+  /// Bu platformda son yıllarda yapılan sponsorlu paylaşımın kitleye
+  /// maliyeti (oran). Eşiğin altında 0 döner (D-119).
+  static double audienceFatigue({
+    required GameState state,
+    required SocialPlatform platform,
+    required int age,
+  }) {
+    int yakin = 0;
+    for (final SponsorDeal d in state.sponsorDeals) {
+      final int? bitis = d.completedAtAge;
+      if (bitis == null) continue;
+      if (d.platform != platform) continue;
+      if (age - bitis >= prototypeOnlyFatigueWindowYears) continue;
+      yakin++;
+    }
+    final int fazla = yakin - prototypeOnlyFatigueFreeDeals;
+    if (fazla <= 0) return 0;
+    return (fazla * prototypeOnlyFatigueLossPerDeal)
+        .clamp(0.0, prototypeOnlyMaxFatigueLoss);
+  }
+
+  /// Sözünü tutmamanın kitleye maliyeti; **tekrarladıkça artar** (D-119).
+  ///
+  /// İlk kez olduğunda taban oran uygulanır; aynı oyuncu sözünü tutmamayı
+  /// alışkanlık hâline getirirse marka çevresi ve kitle daha sert tepki
+  /// verir.
+  static double brokenDealLoss(GameState state) {
+    int kirilan = 0;
+    for (final SponsorDeal d in state.sponsorDeals) {
+      if (d.expired) kirilan++;
+    }
+    final double oran =
+        prototypeOnlyBrokenDealFollowerLoss * (1 + kirilan.clamp(0, 4) * 0.5);
+    return oran.clamp(0.0, 0.15);
+  }
 
   // -------------------------------------------------------------------
   // Paylaşım geliri
@@ -62,34 +125,27 @@ abstract final class SocialIncome {
       account.followers >= prototypeOnlyEarningThreshold &&
       state.player.age - account.createdAtAge >= prototypeOnlyMinAccountAge;
 
-  /// Bir paylaşımın kazandırdığı tutar; kazanmadıysa 0.
+  /// prototypeOnly: platformun gelir paylaşımına giren en az takipçi
+  /// (D-117).
   ///
-  /// [followerDelta] paylaşımın **gerçek** sonucudur: takipçi kaybettiren
-  /// ya da hiç ilgi görmeyen paylaşım para kazandırmaz.
-  static int earningsFor({
-    required GameState state,
-    required SocialAccount account,
-    required SocialContent content,
-    required int followerDelta,
-    required Random rng,
-  }) {
-    if (!canEarn(state, account)) return 0;
-    if (followerDelta <= 0) return 0;
+  /// Faho bildirdi: "sosyal medyada dümdüz yaptığım paylaşımlardan ücret
+  /// kazanıyorum, bu olmamalı". Haklı: kimse sıradan bir gönderi için
+  /// para almaz. Para iki yerden gelir — **sponsorluk** ve platformun
+  /// büyük hesaplara ödediği **gelir payı**. İkincisi gönderi başına
+  /// değil, yıllıktır ve ancak ciddi bir kitleden sonra başlar.
+  static const int prototypeOnlyRevenueShareThreshold = 100000;
 
-    // Kitle büyüdükçe gelir ihtimali artar ama hiçbir zaman garanti olmaz.
-    final double oran = (account.followers / 50000).clamp(0.0, 1.0);
-    final double ihtimal =
-        prototypeOnlyEarningChance + oran * prototypeOnlyChanceBonus;
-    if (!rng.chance(ihtimal)) return 0;
+  /// prototypeOnly: gelir payının takipçi başına yıllık tutarı (₺).
+  static const double prototypeOnlyYearlyRevenuePerFollower = 0.9;
 
-    final double etkilesim = followerDelta * prototypeOnlyPerNewFollower;
-    final double kitle = account.followers * prototypeOnlyPerFollower;
-    // İçerik türünün ağırlığı: hazırlık isteyen içerik daha iyi ödenir.
-    final double tur = 0.6 + content.fameWeight * 0.4;
-    final double dalgalanma = 0.7 + rng.nextDouble() * 0.6;
-
-    final int tutar = ((etkilesim + kitle) * tur * dalgalanma).round();
-    return tutar.clamp(0, prototypeOnlyMaxPerPost);
+  /// Platformun bu hesaba ödediği **yıllık** gelir payı (D-117).
+  ///
+  /// Gönderi başına değil yıllıktır; sıradan paylaşım para kazandırmaz
+  /// ama ciddi bir kitlenin kendisi gelir üretir. Eşiğin altındaki hesap
+  /// hiçbir şey almaz.
+  static int yearlyRevenueShare(SocialAccount account) {
+    if (account.followers < prototypeOnlyRevenueShareThreshold) return 0;
+    return (account.followers * prototypeOnlyYearlyRevenuePerFollower).round();
   }
 
   /// Gelirin hayat günlüğüne yazılacak açıklaması.
@@ -100,7 +156,7 @@ abstract final class SocialIncome {
     required int amount,
   }) =>
       '${platform.label}: "${content.label}" paylaşımın '
-      '$followerDelta ${platform.audienceWord} getirdi; '
+      '${trNumber(followerDelta)} ${platform.audienceWord} getirdi; '
       'içerik gelirinden kazandın.';
 
   // -------------------------------------------------------------------
@@ -145,11 +201,19 @@ abstract final class SocialIncome {
     );
   }
 
-  /// prototypeOnly: teklif ücreti — taban + kitleye bağlı pay.
+  /// prototypeOnly: teklif ücreti — taban + **o hesabın** kitlesine bağlı
+  /// pay (D-104, D-117).
+  ///
+  /// Kitle **hesap bazındadır**, toplam takipçi değil: Instagram'da 5.000
+  /// takipçi varsa teklif Instagram için gelir; başka hesaplarla toplanıp
+  /// eşik geçilmiş sayılmaz (Faho'nun isteği).
+  ///
+  /// Ölçek (en küçük kategori, taban 3.000 ₺):
+  /// 5.000 → 3.600 ₺ · 20.000 → 5.400 ₺ · 100.000 → 15.000 ₺ ·
+  /// 500.000 → 63.000 ₺.
   static int feeFor(SponsorCategory category, SocialAccount account) {
-    final int fazla =
-        (account.followers - category.minFollowers).clamp(0, 1 << 30);
-    return category.baseFee + (fazla * prototypeOnlyFeePerFollower).round();
+    final int kitle = account.followers.clamp(0, 1 << 30);
+    return category.baseFee + (kitle * prototypeOnlyFeePerFollower).round();
   }
 
   /// Teklifin ekranda gösterilecek metni.

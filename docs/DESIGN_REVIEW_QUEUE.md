@@ -2264,7 +2264,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-103 — Tüp bebek tedavisi
 
-**Durum:** `BACKLOG.md` içinde "Faho'nun işaret ettiği, henüz yapılmayanlar" başlığı altında duruyordu; kodlandı, sayıların onayı bekleniyor. Kod: Paket 35 (`lib/domain/interaction/fertility_treatment.dart`, `lib/ui/screens/sections/fertility_page.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-054** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Faho'nun isteği:** "İleride aktiviteler menüsünün içerisine sağlık menüsü olacak, tüp bebek tedavisi eklenebilir."
 
@@ -2297,7 +2297,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-104 — İkinci evlilik
 
-**Durum:** `BACKLOG.md` içinde duruyordu, Q-063'ün konusuydu; kodlandı, onay bekliyor. Kod: Paket 36 (`lib/domain/interaction/marriage_engine.dart`, `lib/domain/models/game_state.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-055** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Önceki hâli:** Boşanan ya da eşini kaybeden oyuncu yeni sevgili edinebiliyor ama **evlenemiyordu**. Ekranda "Bu prototipte ikinci evlilik yok; ilk evliliğin kaydı korunuyor" yazıyordu. Sebep teknikti: yeni bir kayıt açmak eskisinin üzerine yazmak olurdu ve bu projede kayıt asla silinmez.
 
@@ -2321,7 +2321,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-105 — Hayat sonu değerlendirmesi yeni sistemleri görüyor
 
-**Durum:** Kendi tespitim, Faho'nun doğrudan isteği değil — onay bekliyor. Kod: Paket 37 (`lib/domain/life/life_verdict.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-056** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Bulunan boşluk:** Paket 29-36 arasında askerlik, dövüş sanatları ve ikinci evlilik eklendi. Hayat sonu değerlendirmesi (Q-090) bunlardan **hiçbirini görmüyordu**. Ölçüde şu çıkıyordu: başpehlivanlığa çıkmış ya da binbaşı olarak terhis olmuş bir hayat, hiç salona gitmemiş ve hiç askere gitmemiş bir hayatla **aynı** puanı alıyordu. Eklenen sistemler menüde duruyor ama hayatın anlatısına girmiyordu.
 
@@ -2344,7 +2344,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-106 — Kalıcı hobiler
 
-**Durum:** Issue #67'nin birinci kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 39 (`lib/data/hobby_catalog.dart`, `lib/domain/hobby/hobby_tracker.dart`, `lib/data/event_pool_hobby.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-057** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Mevcut kesin kural:** İkinci bir aktivite sistemi kurulmayacak; mevcut Kurslar, Kütüphane, Spor salonu, Resim ve Müzik altyapısı kullanılacak. Yeni meslek ağacı ya da profesyonel sanatçı yolu açılmayacak (Issue #67 sınırı). Kayıt asla silinmez.
 
@@ -2371,7 +2371,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-107 — Evcil hayvanlar
 
-**Durum:** Issue #67'nin ikinci kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 40 (`lib/data/pet_catalog.dart`, `lib/domain/pets/pet_care.dart`, `lib/data/event_pool_pet.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-058** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Mevcut kesin kural:** İkinci bir evcil hayvan sistemi kurulmayacak; `GameState.pets` kullanılacak. v1'de yalnızca kedi ve köpek sahiplenilebilir. Evcil hayvan miras kalemi değildir. Kayıt asla silinmez. Bu paket, `Q-067`'deki "hayvanın yaşı tutulmuyor, kuşaklar arası taşımak ölümsüz hayvan üretirdi" gerekçesini de kapatıyor: artık gerçek yaş var.
 
@@ -2398,7 +2398,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-108 — Eğlence aktivitelerinin gerçek kişilerle yapılması
 
-**Durum:** Issue #67'nin üçüncü kısmı, Faho'nun isteği; kodlandı, sayısal değerler onay bekliyor. Kod: Paket 41 (`lib/domain/activities/outing.dart`, `lib/domain/activities/activity_engine.dart`).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-059** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Mevcut kesin kural:** İkinci bir aktivite sistemi kurulmayacak. Kimse uydurulmayacak: yanına gelen kişi kayıtta gerçekten duran, yaşayan, erişilebilen biri olacak (D-024, Paket 3 erişilebilirlik kuralı). Kayıt ikilenmeyecek.
 
@@ -2425,7 +2425,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-109 — Vefat etmiş eşin bağ etiketi
 
-**Durum:** Paket 43'te bulunan bir hatanın yan sorusu; teknik düzeltme yapıldı, **söz seçimi onay bekliyor.** Kod: `lib/domain/interaction/marriage_engine.dart`.
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-060** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Bulunan hata:** Boşanan oyuncunun eski eşi aynı kimlikle `eskiEs` oluyordu; **eşini kaybedip yeniden evlenen** oyuncuda bu yapılmıyordu. Kayıtta iki kişi birden "Eş" kalıyor, bütün metinler ikisine birden "Eşin" diyordu ve İlişkiler ekranında iki eş yan yana görünüyordu.
 
@@ -2441,7 +2441,7 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ### Q-110 — Olay havuzu dengesi ve okuma merdiveni
 
-**Durum:** Paket 47'nin ölçüm sonuçlarından çıkan öneriler. **Hiçbiri uygulanmadı**; sayısal denge kararı Faho'nun. Ölçüm: `docs/EVENT_CONTENT_REPORT.md` (500 hayat, gerçek oyun akışıyla).
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-061** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
 
 **Ölçülen durum:**
 - 200 olaydan **194'ü** en az bir hayatta çıkıyor; bir hayat ortalama **116 farklı** olay görüyor.
@@ -2463,5 +2463,1131 @@ Rütbeli yollara **başvurulur ve reddedilebilir**; kabul ihtimali zekâ ve sağ
 
 ---
 
+### Q-111 — Dövüş sanatlarında ustalık süresi
+
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-062** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Ölçülen durum:**
+
+| Sanat | En üst basamak | Toplam ders | Yılda en fazla | En az kaç yıl | Eğitmenlik eşiği |
+|---|---|---|---|---|---|
+| Karate | Siyah kuşak (3. Dan) | 200 | 20 | 10 | 110 ders (6 yıl) |
+| Kung fu | 3. Duan | 145 | 20 | 8 | 58 ders (3 yıl) |
+| Yağlı güreş | Başpehlivan | 120 | 20 | 6 | 92 ders (5 yıl) |
+
+Yıl sınırı (`kMaxMartialLessonsPerAge = 20`) bilerek konmuştu: para yığarak bir yılda usta olunmasın diye. Ama her ders ayrı bir dokunuş olduğu için karate siyah kuşağı **110 kez "Ders al" düğmesine basmak** demekti.
+
+**Yapılan teknik düzeltme (denge değişmedi):** "Yılı çalış" eylemi eklendi; yılın kalan derslerini tek seferde alıyor. Ücret, yıllık sınır, basamak eşikleri ve spor hobisi katkısı **birebir aynı**. Bunu kanıtlayan test var: tek tek ders almakla toplu çalışmanın ders sayısı, basamak, cüzdan ve bütün özellikleri aynı çıkıyor.
+
+**Karar soruları:**
+1. Süre **gerçekten** uzun mu, yoksa sorun yalnızca tekrar tıklamak mıydı? Toplu çalışma yeterli geldi mi?
+2. Yeterli gelmediyse hangisi değişsin — yıllık ders sınırı (20) mu, basamakların istediği ders sayıları mı, yoksa ikisi de mi?
+3. Karatede en üst basamak 10 yıl sürüyor, kung fuda 8, güreşte 6. Bu fark bilerek mi kalsın?
+4. Eğitmenlik eşiği karatede 110 ders (6 yıl), kung fuda 58 ders (3 yıl). Meslek olarak açılma hızı sanatlar arasında bu kadar farklı olmalı mı?
+5. Ders ücretleri (karate 180 ₺, kung fu 200 ₺, güreş 150 ₺) bilerek düşük tutuldu: "ustalık parayla değil yılla gelir". Bu kural kalsın mı?
+
+---
+
+### Q-112 — Sosyal medyada platformlar arası yayılma ve yıllık büyüme
+
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-063** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**İstek (Faho'nun sözleriyle):** "sosyal medyada takipçim artarsa örneğin X'de takipçi sayım arttı diğer platformlarda da artsın, eğer takipçim fazlaysa her yıl geçtiğinde takipçi sayım artsın".
+
+**Önceki durum:** Takipçi sayısı **yalnızca** paylaşım yapıldığı an değişiyordu. Yıllık ilerleme sosyal medyaya hiç dokunmuyordu; platformlar birbirinden tamamen bağımsızdı.
+
+**Yapılanlar ve sayıları:**
+
+| Kural | Değer | Not |
+|---|---|---|
+| Çapraz yansıma payı | `prototypeOnlyCrossShare = 0,25` | Kazancın dörtte biri diğer **açık** hesaplara |
+| Yansıma için en az kazanç | `prototypeOnlyCrossMinGain = 4` | Küçük dalgalanma yayılmaz |
+| Yıllık büyüme eşiği | `prototypeOnlyOrganicThreshold = 1000` | Altındaki hesap kendi kendine büyümez |
+| Yıllık büyüme oranı | `prototypeOnlyOrganicRate = %6` | Kitleyle orantılı |
+| Durgunluk süresi | `prototypeOnlyDormantAfterYears = 4` yıl | Bu kadar süre paylaşım yoksa |
+| Durgun hesabın yıllık erimesi | `prototypeOnlyDormantDecay = %5` | |
+
+**Kendi başıma eklediğim kural — onayını istiyorum.** İstekte durgunluk yoktu. Ama yalnızca "takipçisi çoksa her yıl büyüsün" kuralı konursa, hesabı bir kez büyüten oyuncu **hiçbir şey yapmadan** ömür boyu büyümeye devam ediyor: 50.000 takipçi 40 yılda yarım milyonu geçiyor ve Ün kendiliğinden tavana çıkıyor. Bunu engellemek için 4 yıldır dokunulmayan hesabın yavaşça erimesini ekledim. Bu bir **teknik gereklilik varsayımı**, onaylanmış oyun kuralı değil.
+
+**Karar soruları:**
+1. Çapraz yansıma payı %25 doğru mu? Daha az mı (%10), daha çok mu (%50)?
+2. Yansıma **her platforma eşit** mi olsun, yoksa platform çiftine göre değişsin mi (ör. Instagram → X yakın, YouTube → X uzak)?
+3. **Kayıp yayılmıyor**, yalnızca kazanç. Simetrik mi olmalı? Bir platformda tökezlemek diğerlerindeki kitleyi de azaltsın mı?
+4. Yıllık büyüme eşiği 1.000 takipçi doğru mu? Bu eşik "artık kendi kendine yürüyor" sayılan nokta.
+5. **Durgunluk kuralı kalsın mı?** Kalacaksa 4 yıl ve %5 doğru mu? Kalmayacaksa kontrolsüz büyümeyi ne durduracak?
+6. Ün şu an yalnızca **yukarı** taşınıyor: takipçi kaybedince Ün düşmüyor (D-027'nin "yaşanmış tanınmışlık silinmez" okuması). Erime varken bu doğru mu?
+7. Yıllık büyüme günlüğe satır yazıyor ("YouTube hesabın kendiliğinden büyüdü: 3.000 abone eklendi"). Her yıl bu satırı görmek fazla gürültü mü?
+
+---
+
+### Q-113 — Yeni meslekler: görünüş ve hobiyle açılan işler
+
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-064** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Önceki durum:** Katalogda **dokuz** iş vardı ve altısı genel, üçü dövüş eğitmenliğiydi. Bir ömür boyunca seçilebilecek meslek sayısı azdı.
+
+**Eklenenler (hepsi üç mülakat sorusuyla birlikte):**
+
+| İş | Kapı | Yıllık maaş | Not |
+|---|---|---|---|
+| Aşçı | yok | 230.000 ₺ | Giriş seviyesi |
+| Kuaför | karizma 40 | 210.000 ₺ | Giriş seviyesi |
+| Muhasebeci | üniversite · işletme · zekâ 55 | 460.000 ₺ | |
+| Manken | görünüş 70 · karizma 45 | 340.000 ₺ | Yeni kapı türü |
+| Yazar | okuma hobisi 1. basamak · zekâ 55 | 280.000 ₺ | Yeni kapı türü |
+| Müzisyen | müzik hobisi 2. basamak · karizma 40 | 260.000 ₺ | Yeni kapı türü |
+
+**İki yeni kapı türü açıldı** (ikisi de dövüş eğitmenliğinin — Paket 32 — aynı deseni):
+- `minAppearance`: işe görünüşle giriliyor.
+- `hobbyId` + `minHobbyStage`: işe yıllarca sürdürülmüş bir uğraşla giriliyor.
+
+**Neden bu basamaklar seçildi.** Yazarlık için **1.** basamak (3 bitirilmiş kitap) alındı çünkü Q-110'da ölçüldüğü gibi "okumak" hobisini yalnızca bitirilen kitaplar besliyor ve kütüphanede 8 kitap var: 3. basamak (18 deneyim) **hiçbir hayatta** ulaşılamıyor. Müzisyenlik için 2. basamak (18 deneyim) alındı; müzik kursu yılda iki kez alınabildiği için bu 9 yıl demek. Bu eşiklerin ulaşılabilirliğini kalıcı bir test denetliyor.
+
+**Karar soruları:**
+1. Maaşlar mevcut ekonomiye oturuyor mu? (Kıyas: yazılım geliştirici 720.000 ₺, öğretmen 420.000 ₺, mağaza çalışanı 180.000 ₺.)
+2. Mankenlik eşiği **görünüş 70** doğru mu? Yaşlanma görünüşü düşürdüğü için bu iş kendiliğinden ileri yaşta kapanıyor — bu istenen davranış mı, yoksa mankenliğe ayrı bir yaş üst sınırı mı konsun?
+3. Mankenlik **Ün**'e de bağlanmalı mı? Şu an sosyal medyayla hiç ilişkisi yok; oysa ikisi doğal olarak birbirini besler.
+4. Yazarlık 3 bitirilmiş kitapla açılıyor. Az mı? Açılması için kütüphaneye kitap eklenip eşik yükseltilsin mi (Q-110/1 ile aynı konu)?
+5. Yazar ve müzisyen **iş kurar gibi** mi çalışsın (gelir dalgalı), yoksa şimdiki gibi sabit yıllık maaş mı alsın? Şu an ikisi de maaşlı.
+6. Aşçı/kuaför gibi giriş seviyesi işlerden kaç tane daha olsun? Şu an katalog 15 işte.
+7. Hobiyle açılan iş, hobi **bırakılırsa** kapanmalı mı? Şu an bir kez ulaşılan basamak kalıcı; işe girdikten sonra okumayı bırakmak işi etkilemiyor.
+
+---
+
+### Q-114 — Çok adımlı olay zincirleri
+
+**Durum: KARARLAŞTIRILDI.** Faho bu maddenin tamamını onayladı; kesin kural `DECISIONS.md` içinde **D-065** olarak kayıtlıdır. Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Önceki durum:** Altyapı (`requiredFlags`, `forbiddenFlags`, `rememberPersonAs`, `personRole`) Paket 4'ten beri duruyordu ama zincirlerin çoğu **iki adımdı**: bir seçim, yıllar sonra tek bir yankı.
+
+**Yazılanlar — 17 olay, 4 zincir, 8 dal:**
+
+| Zincir | Adım | Yaş aralığı | Kişi | Sonuç |
+|---|---|---|---|---|
+| Öğretmenin defteri | 4 (geçiştiren dal 3) | 10 → 70 | Öğretmen | Anlatan tarafa geçmek |
+| Emanet para | 3 | 17 → 55 | Arkadaş | Para geri gelir; hangi dalda ne kadar ve ilişkinin ne olduğu değişir |
+| Mahallenin boş arsası | 3 | 11 → 80 | Kişisiz | Arsa park olur ya da bina olur |
+| İş yerindeki haksızlık | 3 | 22 → 70 | İş arkadaşı | İş teklifi açılır ya da aynı şey başa gelir |
+
+Dallar birbirini dışlıyor ve hiçbir dal "doğru" diye işaretlenmiyor: emanet parada **beklemek** daha geç ama daha çok getiriyor, **istemek** daha erken ama arkadaşlığı soğutuyor.
+
+**Ölçüm — havuza eklemenin yan etkisi.** 17 yeni olay rastgeleliği kaydırıyor. Okulda arkadaş edinme oranını 30 tohumda ölçtüm: zincirler **kapalıyken 20/30**, **açıkken 20/30**. Oran değişmedi, yalnızca hangi tohumun tuttuğu değişti. (Bu yüzden tek tohuma bağlı bir okul testi kırıldı; test silinmedi, tohumdan bağımsız hâle getirildi.)
+
+**Karar soruları:**
+1. Zincir uzunluğu **üç-dört adım** doğru mu? Daha uzun zincir (5-6 adım) ister misin, yoksa bu bir hayatta takip edilebilirliğin sınırı mı?
+2. Oyuncu bir zincirin içinde olduğunu **fark edebilmeli mi**? Şu an hiçbir ekranda "bu bir devam olayı" işareti yok; yalnızca metin hatırlatıyor.
+3. Emanet parada tutarlar: verilen 4.000 ₺, isteyen dalda geri gelen 4.000 ₺, bekleyen dalda gelen 9.000 ₺. Beklemenin karşılığı iki katından fazla — bu fark doğru mu?
+4. İş zincirinde teklifi kabul etmek 25.000 ₺ veriyor ama **işi değiştirmiyor**; yalnızca para ve iz. Gerçekten iş değiştirmeli mi? (Bu, kariyer sistemine dokunmak demek, kendi başıma yapmadım.)
+5. Zincirin ortasında **kişi vefat ederse** adım hiç çıkmıyor ve zincir sessizce kesiliyor. Bunun yerine kişisiz bir kapanış adımı yazılsın mı?
+6. Öğretmen zinciri 10 yaşta başlayıp 70 yaşa kadar sürebiliyor. Bu kadar uzun bir yay iyi mi, yoksa zincirler bir hayat evresine mi sığmalı?
+7. Dört zincir yeterli mi, yoksa her hayat evresi için (çocukluk, gençlik, orta yaş, yaşlılık) ayrı zincirler mi yazılsın?
+
+---
+
+### Q-115 — Ünlülerle temas ve TikTok
+
+**Durum: KARARLAŞTIRILDI — D-106.** Faho bu maddenin karar sorularını cevapladı; kesin kural `DECISIONS.md` içinde **D-106** olarak kayıtlıdır (ünlüye yılda iki temas, ayrı "Ünlüler ve tanıdıklar" bölümü, Türkçe binlik ayracı). Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Özgün kayıt —** Faho iki şey istedi: sosyal medyaya TikTok eklenmesi ve "ünlü ile diyaloğa gir gibi bir şey". İkisi de **kodlandı**; sayısal değerler `prototypeOnly` ve **onay bekliyor.** Kod: `lib/data/celebrity_catalog.dart`, `lib/domain/social/celebrity_engine.dart`, `lib/data/social_catalog.dart`. İlgili: Q-112, D-063.
+
+**Yapılanlar.** Dördüncü platform olarak TikTok eklendi (dört özgün içerik). Ünlüler kurgusaldır; gerçek kişilerin adı, hesabı ya da sözü kullanılmaz. Oyuncu bir ünlüye **yorum yapabilir, mesaj atabilir ya da iş birliği teklif edebilir**. Karşılık garanti değildir.
+
+| Kural | Değer |
+|---|---|
+| Bir ünlüye yılda kaç kez yazılabilir | 1 |
+| Eylem çarpanı (yorum / mesaj / iş birliği) | 0,55 / 1,0 / 0,45 |
+| Karizmanın katkısı | %25 |
+| Ünün katkısı | %30 |
+| Her ısrarlı denemenin cezası | −%12 (en fazla dörtte bire iner) |
+| En yüksek karşılık ihtimali | %85 (asla %100 değil) |
+| İş birliği için gereken en az Ün | 25 |
+| Ünlünün kitlesinden geçen pay | %0,16 |
+| Sonuç çarpanı (beğendi / cevap / geri takip / iş birliği) | 0,25 / 0,60 / 1,30 / 2,40 |
+| Ters cevabın kitleye kaybı | %5 |
+
+**Tasarım kararları (kodlanmış hâliyle):**
+- Ünlü **kendiliğinden İlişkiler ekranına girmez**. Yalnızca **geri takip ettiğinde** kalıcı bir kişi kaydı açılır; o an gerçekten bir bağ kurulmuştur. Yeni bir bağ türü eklendi: `RelationType.unlu`.
+- Karşılıksız denemeler **günlüğe yazılmaz**; günlük dolmasın diye.
+- Israrcı olup hâlâ karşılık alamayan oyuncu, nadiren **alenen ters cevap** alabilir ve takipçi kaybeder.
+- Ünlüyle gündelik hayatta vakit geçirilmez; etkileşim listesinde yalnızca sohbet açıktır.
+
+**Karar soruları:**
+1. Ulaşılabilirlik sayıları doğru mu? Şu an en küçük isim %45, en büyük isim %9 tabanla başlıyor.
+2. Yılda **bir** temas az mı? Oyuncu bir ünlüye ancak yılda bir yazabiliyor.
+3. **Ters cevap** kalsın mı? Israr edip karşılık alamayan oyuncunun alenen paylaşılması sert bir sonuç; oyunun tonuna uyuyor mu?
+4. Geri takip eden ünlünün İlişkiler ekranında **Arkadaşlar** bölümünde listelenmesi doğru mu, yoksa ayrı bir "Tanıdıklar / Ünlüler" başlığı mı olmalı?
+5. İş birliği ücreti ünlünün takipçi sayısının %6'sı (2026 ₺). En büyük isimle iş birliği ~450.000 ₺ getiriyor — bu, bir yıllık ortalama maaşın yarısı. Fazla mı?
+6. Ünlü sayısı **on bir**. Yeterli mi, yoksa her platformda daha fazla isim mi olsun?
+7. Ünlülerle ilgili **olay** yazılmalı mı? Şu an yalnızca oyuncunun başlattığı temas var; ünlünün kendiliğinden yazması ya da bir olayda görünmesi yok.
+8. TikTok içeriklerinin karakteri (yüksek erişim, yüksek kayıp riski) doğru mu?
+
+---
+
+### Q-116 — Statların yaşla düşme hızı ve bakımın gücü
+**Durum: KARARLAŞTIRILDI — D-102.** Kesin kural `DECISIONS.md` içinde **D-102** olarak kayıtlıdır (dövüş sanatı spor sayılır, görünüş düşüşü yumuşatıldı). Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor. Karizmanın hızı sonradan **D-124** ile ayrıca değiştirildi (Q-136).
+
+**Özgün kayıt —** Öneri, karar bekliyor · **Bağlam:** D-072 · `app/lib/domain/life/aging.dart` (`StatAging`), `app/lib/domain/life/upkeep_tracker.dart` · Test: `app/test/stat_aging_test.dart`
+
+Faho bildirdi: "karizma zeka mutluluk sağlık görünüş bunlar yaşa bağlı olarak düşmeli", "zekâ 100 olarak başladım 100 olarak bitirdim", "bakım yapmayınca kendime görünüşüm ve karizmam düşsün", "sürekli spor yapan birisinin karizması daha az düşsün". Kural D-072 olarak kodlandı; **sayılar geçicidir.**
+
+**Şu an kodda olan (hepsi `prototypeOnly`):**
+
+| Değer | Başlangıç yaşı | Yıllık ihtimal | Taban | Koruyan bakım |
+|---|---|---|---|---|
+| Görünüş | 30 | %25 → %70 (yaşa göre) | 15 | Berber/kuaför |
+| Karizma | 35 | %18 → %38 | 15 | Spor (ağırlıklı) + berber |
+| Sağlık | 45 | %22 → %46 | 30 | Spor |
+| Zekâ | 60 | %14 → %22 | 30 | Kitap ve kurs |
+| Mutluluk | 65 | %8 → %38 (sağlığa göre) | 25 | — (sağlık dolaylı korur) |
+
+Bakım "son 2 yıl içinde" yapılmışsa ihtimal **×0,45**; 5 yıldır ya da hiç yapılmamışsa **×1,4**. Bakımsızlık 18 yaşından itibaren sayılır.
+
+**Ölçüm (120 hayat):** ortalama ölüm yaşı **77,6**; 70 yaşında ortalama zekâ 53, karizma 40, sağlık 56, görünüş 32, mutluluk 57.
+
+**Karar soruları:**
+1. Sağlık düşüşü **ölüm eğrisini besliyor** (`Mortality` sağlığa bakar). Ortalama ömür 77,6'da kalıyor ama sağlığını hiç kollamayan oyuncu daha erken ölüyor. Bu isteniyor mu, yoksa sağlık düşüşü ölümden ayrılmalı mı?
+2. 70 yaşında ortalama **görünüş 32** fazla mı düşük? Taban 15.
+3. Mutluluğun yaşla düşmesi D-051'in "yaşlanma mutluluğu düşürmez" hükmünü değiştiriyor. Bu değişiklik onaylanıyor mu, yoksa mutluluk yaşlanmadan muaf mı kalsın?
+4. Bakımın koruma gücü (×0,45) yeterli mi? Şu an bakım yapmak kaybı yarıdan biraz fazla azaltıyor.
+5. Bakım sayılan mekânlar doğru mu? Şu an **spor = spor salonu**, **bakım = berber/kuaför**, **zihin = kurslar + kitap okumak**. Dövüş sanatları sporu sayılmıyor — sayılmalı mı?
+6. Düşüşler günlüğe yazılıyor ama ayrı bir **ekran bildirimi** yok. Yıl sonunda "bu yıl şunlar düştü" özeti gerekli mi?
+
+---
+
+### Q-117 — Saç dökülmesinin kapsamı
+**Durum: KARARLAŞTIRILDI — D-102.** Kesin kural `DECISIONS.md` içinde **D-102** olarak kayıtlıdır (saç görünüşü etkiler). Aşağıdaki sorular **kapanmıştır**, tarihsel kayıt olarak duruyor.
+
+**Özgün kayıt —** Öneri, karar bekliyor · **Bağlam:** D-073 · `app/lib/domain/life/hair_loss.dart` · Test: `app/test/stat_aging_test.dart`
+
+Faho istedi: "erkek kullanıcılarının ihtimal dahilinde 30 yaşından sonra saçları dökülmeye başlayabilir bu da karizmayı etkilyebilir".
+
+**Şu an kodda olan:** 30 yaşından itibaren yıllık **%3,4** başlama ihtimali (50 yaşında birikimli ~%50, epidemiyolojik çıpayla uyumlu), başladıktan sonra yılda %12 ihtimalle bir sonraki basamak, en fazla 3 basamak. Basamak ilerlediği yıl bir kez görünüş −2/−2/−3 ve karizma −1/−2/−2; **düzenli bakım yapan oyuncuda yarıya iner**. Ömür boyu ölçüm: erkeklerin **%82'sinde** bir noktada başlıyor (80 yaş üstü gerçek yaygınlıkla uyumlu).
+
+**Karar soruları:**
+1. Gerçekte dökülme çoğu zaman **20'li yaşlarda** başlıyor. Oyunda başlangıç 30; erkene çekilsin mi, yoksa 30 kalsın mı?
+2. **Kadınlarda** yaşa bağlı seyrelme gerçektir ama şu an işletilmiyor. Eklensin mi, eklenirse nasıl anlatılsın?
+3. **Karizma cezası** doğru mu? Saçın dökülmesi karakteri daha az çekici yapmaz; şu anki gerekçe "kendi alışma dönemi". Ceza tamamen kaldırılsın mı, yoksa yalnızca ilk basamakta mı olsun?
+4. **Saç ektirme** (Paket C'deki estetik işlemler içinde) basamağı düşürebilmeli mi? Düşürebiliyorsa kaç basamak ve hangi bedelle?
+5. Ömür boyu %82 fazla mı? Gerçeğe yakın ama oyunda neredeyse her erkek karakteri kapsıyor.
+6. Peruk, şapka, "kabullenmek" gibi **oyuncunun seçebileceği tepkiler** olmalı mı?
+
+---
+
+### Q-118 — Boşanmada mal paylaşımı, nafaka ve davet reddi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-074, D-075 · Q-063'ün yerini alır · `app/lib/domain/interaction/divorce_settlement.dart`, `app/lib/domain/activities/outing.dart` · Test: `app/test/activity_notice_test.dart`
+
+Faho istedi: "boşandığımda ... mal varlığından şu kadar ona gitti, ev ona gitti vb gibi yazmalı" ve "parka git dediğimde bildirim olarak karşıma çıksın ... bana 5, kızıma 5 mutluluk".
+
+**Şu an kodda olan:** Evlilik içinde **satın alınarak** edinilen eşyalar paylaşılıyor; evlilikten önceki, miras ve hediye eşya kişisel mal sayılıp paylaşıma girmiyor. Bölünemeyen eşyalar değere göre dengeli dağıtılıyor, eşitlikte oyuncu alıyor. Nakit payı **%25**'te kaldı. Sonuç ekranda bildirim olarak gösteriliyor.
+
+**Karar soruları:**
+1. **Nafaka yok.** Eklenecek mi? Eklenirse yıllık bir gider mi olsun, tek seferlik mi?
+2. Nakit payı **%25**; edinilmiş mal rejiminin mantığına göre evlilik içinde biriken nakdin yarısı olmalıydı. Nakdin ne kadarının evlilik içinde biriktiğini izlemiyoruz. İzlensin mi, yoksa %25 sabit mi kalsın?
+3. **Oturulan ev** paylaşımda ayrıcalıklı olmalı mı? Şu an tek ev evlilik içinde alındıysa bir tarafa gidiyor ve oyuncu evsiz kalabiliyor.
+4. **Velayet** yok: çocuklar oyuncunun hanesinde kalıyor. Ayrı bir kural gerekli mi?
+5. Aracın, evin ve diğer eşyanın **satın alma fiyatı** üzerinden bölünüyor; yıpranma hesaba katılmıyor. Yeterli mi?
+6. **Davet reddi:** keyfi düşük kişi daveti geri çevirebiliyor, ret ihtimalinin tavanı **%75**. Bu tavan doğru mu? Ret gerekçesinin metinleri yeterince yumuşak mı?
+7. Kişilerin **keyfi** şu an yalnızca birlikte yapılan programlardan yükseliyor ve her yıl nötre kayıyor. Başka neler keyfi etkilemeli — hediye, kavga, oyuncunun başarısı, kendi hayatındaki olaylar?
+
+---
+
+### Q-119 — Sağlık raporu, estetik fiyatları ve hastalık dengesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-076, D-077, D-078 · `app/lib/domain/life/health_report.dart`, `app/lib/domain/life/eye_exam.dart`, `app/lib/domain/life/sick_leave.dart`, `app/lib/data/activity_catalog.dart` · Test: `app/test/health_package_test.dart`
+
+Faho istedi: "göz muayenesine tıkladım, küçük bir oyun oynatmalıyız", "aşı olduğumuzda bildirim olarak ekrana vermeliyiz", "checkup'a girmişim gibi bildirim gelsin, ciğerlerin iyi kalp iyi vb", "estetikleri de ekleyelim", "hasta olayım 3-5 gün işe gidemeyeyim işverenim sorun etsin".
+
+**Estetik fiyatları (2026 ₺, hepsi `prototypeOnly`):** kaş/yüz dolgusu 22.000 · göz kapağı 90.000 · saç ekimi 95.000 · burun estetiği 145.000 · gülüş tasarımı 185.000. Burun estetiği için 2025 piyasa aralığı yaygın olarak 60.000-120.000 ₺ diye veriliyor; buradaki 145.000 bunun 2026 ölçeğine taşınmış hâlidir ve net yıllık asgari ücretin (336.900 ₺) kabaca **beş aylığına** denk gelir.
+
+**Risk oranları:** dolgu %12 · gülüş tasarımı %10 · göz kapağı %14 · saç ekimi %15 · burun %18. Kötü sonuçta ücret ödenir, kazanç gelmez, mutluluk −6.
+
+**Hastalık ihtimali (yıllık):** sağlık ≥80 → %12, 60-79 → %20, 40-59 → %30, <40 → %42. Spor ×0,75 / hareketsizlik ×1,2 · 65+ ×1,25 · 12 yaş altı ×1,2.
+
+**Karar soruları:**
+1. Estetik fiyatları doğru mu? Şu an burun estetiği bir yılın maaşının yaklaşık yarısı; oyunda erişilebilir ama ucuz değil.
+2. **Risk** kalsın mı? Kötü sonuçta oyuncu hem parayı hem kazancı kaybediyor. Oranlar fazla mı?
+3. Estetik işlemler **yılda bir** yapılabiliyor. Ömür boyu bir sınır olmalı mı?
+4. Saç ekimi basamağı **bir kademe** düşürüyor. Tamamen sıfırlamalı mı?
+5. Hastalıkta **gelir kaybı yalnızca iki gün**. Gerçeğe uygun ama oyunda hissedilmiyor olabilir; artırılsın mı?
+6. İşveren uyarısı işten çıkarılma ihtimaline en fazla **%16** ekliyor. Yeterli mi, yoksa yeterince uyarı birikince doğrudan işten çıkarma mı olsun?
+7. Hastalık şu an **sağlığı kalıcı olarak düşürmüyor**. Düşürmeli mi?
+8. Check-up raporundaki altı sistem yeterli mi? Başka sistem eklensin mi?
+9. Göz muayenesi mini oyunu **beş satır**. Zorluk doğru mu? Yanlış seçimde satır kaybediliyor, tablo baştan kurulmuyor.
+10. Mini oyun başka yerlerde de kullanılsın mı (diş kontrolü, işitme testi, ehliyet sınavı)?
+
+---
+
+### Q-120 — Galeri kademeleri, araç masrafı ve kredi dengesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-079, D-080 · `app/lib/data/shop_catalog.dart`, `app/lib/domain/economy/vehicle_trouble.dart`, `app/lib/domain/economy/banking.dart` · Test: `app/test/shops_and_bank_test.dart`
+
+Faho istedi: "araç galerisi kısmını ayır, 3 adet galeri ekle... ucuz araçlar sorun çıkartsın... 2 adet motor galerisi... aksesuarları da ayır... emlak bölümünü de lüks ve orta sınıf olarak ayır" ve "banka sistemi ekleyelim, kredi çekebilelim, faizi ile ödenebilir şekilde; Fakbank ve Bankavrupa".
+
+**Yeni araç türleri (2026 ₺, `prototypeOnly`):** çok yıpranmış otomobil 320.000 · scooter 96.000 · aile otomobili 2.050.000 · arazi aracı 3.400.000 · tur motosikleti 780.000 · spor otomobil 9.500.000 · prestij otomobili 14.500.000.
+
+**Araç arızası:** kondisyon 70'in altındaysa ihtimal artar; 500.000 ₺ altındaki araçlarda ek %15 pay. Tamir, aracın temel değerinin **%5'i**. Ödenirse kondisyon +12, ödenemezse −8. Yılda **en fazla bir** arıza.
+
+**Kredi:** Fakbank aylık %2,95 (yıllık ~%42), Bankavrupa aylık %4,60 (yıllık ~%72). Vade 1-3 yıl. Taksit, gelirin en fazla **%45'i** (Bankavrupa) / **%25'i** (Fakbank, kolaylık çarpanıyla) kadar olabilir. Kaçan her taksit tavanı **%25** düşürür.
+
+**Karar soruları:**
+1. Yeni araç fiyatları doğru mu? Prestij otomobili 14,5 milyon ₺ — oyunda ulaşılabilir bir hedef mi, yoksa fazla mı uzak?
+2. Araç arızası yılda en fazla bir. İki araç sahibi olan oyuncu için bu az mı?
+3. Tamir masrafı aracın **%5'i**. Lüks otomobilde bu 340.000 ₺ ediyor; pahalı araç sahibi olmanın bedeli olarak doğru mu?
+4. Ucuz galeriden alınan araç ile miras kalan yaşlı araç **aynı kuralla** bozuluyor. Ucuz galeri ayrıca cezalandırılsın mı?
+5. **Kredi faizleri gerçek ama acı:** 3 yıllık 300.000 ₺'lik Fakbank kredisi toplam ~510.000 ₺ ödetiyor. Oyun dengesi için düşürülsün mü, yoksa gerçeklik korunsun mu?
+6. Vade **3 yıl** ile sınırlı. Konut kredisi (çok daha uzun vade) ayrı bir ürün olarak eklensin mi?
+7. Aynı anda **iki** kredi sınırı doğru mu?
+8. **Kredi notu** yok; ödeme geçmişi yalnızca kaçan taksit sayısıyla izleniyor. Gerçek bir kredi notu sistemi gerekli mi?
+9. Kredi taksiti ödenemediğinde şu an yalnızca borç büyüyor. İcra, haciz ya da varlık satışı gibi bir sonuç olmalı mı?
+10. Banka ekranı **Varlıklar** altında. Doğru yer mi, yoksa ayrı bir bölüm mü olmalı?
+
+---
+
+### Q-121 — Finger kotası, hayvan türleri, tur fiyatları ve hayatın sonu
+**Durum: KISMEN KARARLAŞTIRILDI — D-107.** Finger ile ilgili sorular (beğeni kotası, niyet, flörtten sevgiliye geçiş, ekonomik süzgeç) **D-107** ile kapandı; beğeni kotası 5'ten 12'ye çıktı. Hayvan türleri, tur fiyatları ve hayatın sonu **hâlâ karar bekliyor**.
+
+**Özgün kayıt —** Öneri, karar bekliyor · **Bağlam:** D-081, D-082, D-083, D-084, D-085 · `app/lib/domain/interaction/finger.dart`, `app/lib/data/pet_catalog.dart`, `app/lib/data/tour_catalog.dart`, `app/lib/data/city_neighbours.dart`, `app/lib/domain/life/life_end_choice.dart` · Test: `app/test/package_f_test.dart`
+
+**Finger.** Aday yaş bandı: alt sınır `max(yaş−10, yaş/2+7)`, üst sınır `yaş+10`, hiçbir koşulda 18'in altına inmez. Beğeni kotası yılda **5**, premiumda **30**; premium ücreti **4.800 ₺**, bir yıl geçerli. Profil doldurmak eşleşme ihtimaline **+%12**, premium **+%8**, her ortak ilgi alanı **+%5** katıyor. "Seni beğenenler" listesinde en fazla **3** kişi oluyor.
+
+**Evcil hayvanlar.** Yeni türler ve yıllık kaçma riski: muhabbet kuşu %10, kanarya %10, papağan %7, hamster %14, tavşan %9, kaplumbağa %4, balık %0, timsah %12, kedi/köpek %3. Kaçan hayvanın dönme ihtimali yılda **%60**. Hastalanma ihtimali yılda **%12**, sağlığa zararı **−18**, veteriner **+22**.
+
+**Turlar (2026 ₺).** Kapadokya 3 gece 29.000 · Ege 4 gece 38.000 · Akdeniz 5 gece 42.000 · GAP 5 gece 44.000 · Karadeniz 6 gece 48.000 · Doğu 7 gece 62.000. Başka ile taşınmanın ek masrafı **65.000 ₺**.
+
+**Karar soruları:**
+1. Beğeni kotası **yılda 5** doğru mu? Oyun yıl yıl ilerlediği için "günde 5" böyle taşındı; oyuncuya az gelebilir.
+2. Premium **bir yıl** geçerli ve her yıl yeniden alınıyor. Ömür boyu bir seçenek de olsun mu?
+3. **Timsah** oyunda kalsın mı? Gerçek hayatta özel izin gerektiriyor ve bireysel beslenmesi çoğu yerde yasak; oyun bunu uyarıyla anlatıyor ama yine de bir tercih.
+4. Kaçan hayvanın dönme ihtimali **%60**. Dönmeyen hayvan yıllarca kayıp kalabiliyor; bir üst sınır konmalı mı?
+5. Hayvan hastalandığında oyuncu **bildirim** alıyor ama tedavi zorunlu değil. Bakılmayan hayvanın durumu yıllar içinde kötüleşiyor — bu yeterince görünür mü?
+6. Tur fiyatları doğru mu? Doğu turu 62.000 ₺, net yıllık asgari ücretin kabaca **beşte biri**.
+7. **Yakın il tablosu** doğru mu? Oyunda 22 şehir var ve aralarında büyük boşluklar bulunuyor; örneğin Amasya'dan yalnızca Samsun, Sivas ve Trabzon'a taşınılabiliyor.
+8. Başka ile taşınma **65.000 ₺** ek masraf. Şehir değiştirmenin işe ve okula etkisi henüz yok; eklenmeli mi?
+9. **Hayatın sonu seçeneği**: şu an yalnızca yetişkinde görünüyor, ayrı onay istiyor, yöntem geçmiyor, ödül vermiyor ve gerçek yardım hatlarını gösteriyor. Bu çerçeve yeterli mi? Ayarlardan tamamen kapatılabilen bir seçenek olmalı mı?
+10. Eşin ev/araba beklentisi olayları yılda bir çıkabiliyor ve en az beş yıl ara var. Sıklık doğru mu?
+
+---
+
+### Q-122 — Lise alan seçimi ve doğumda isim verme
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-094, D-095 · `app/lib/ui/widgets/track_choice_sheet.dart`, `app/lib/domain/interaction/child_naming.dart`, `app/lib/domain/education/education_path.dart` · Test: `app/test/track_choice_test.dart`, `app/test/child_naming_test.dart`
+
+Faho iki şey istedi: "Oyuncu liseye geçtiğinde alan seçimi yapılmadan yaş atlanamasın" ve "çocuk doğduğunda isim verilebilsin". İkisi de **kodlandı**; aşağıdaki sayılar ve ayrıntılar `prototypeOnly` ve **onay bekliyor.**
+
+**Kodlanan hâli.** Alan seçimi 9. sınıfta zorunlu hâle geldi: seçim yapılmadan **Yaş Al** çalışmaz, düğmeye basınca seçim penceresi açılır ve pencere seçim yapılmadan kapanmaz. Puanı yetmeyen alanlar gizlenmez, gerekçesiyle soluk durur. Bebeğin adı doğum bildiriminin içinden değiştirilebilir; yalnızca doğum yılında, 2-16 harf, yalnızca harf.
+
+**Karar soruları:**
+1. Alan seçimi penceresi **hiç kapanmasın mı**, yoksa "sonra karar ver" diye bir kapı bırakılsın mı? Şu an kapı yok: karar verilmeden yıl geçmiyor.
+2. Mevcut kayıtlarda 9. sınıfı geçmiş ama alanı boş bir karakter varsa ilk **Yaş Al**'da pencere açılıyor. Bu doğru mu, yoksa eski kayıtlarda alan boş kalabilmeli mi?
+3. İsim uzunluğu **2-16 harf** doğru mu? Uzun Türkçe adlar (ör. "Abdurrahman") sığıyor, iki adlı kullanım ("Ayşe Nur") 16 harfe kadar mümkün.
+4. İsim yalnızca **doğum yılında** değiştirilebiliyor. Oyuncunun sonradan fikir değiştirmesi (ör. ilk yaşta) için bir pencere açılsın mı?
+5. Evlat edinilen çocuğa da isim verilebilmeli mi? Şu an yalnızca **doğan** bebek için açık.
+6. Oyuncunun kendi adı hâlâ hayat başlangıcında üretiliyor; oradan da değiştirilebilsin mi?
+
+---
+
+### Q-123 — Yıl sonu özeti ve bildirim yoğunluğu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-096, D-097, D-098 · `app/lib/domain/life/year_review.dart`, `app/lib/domain/generation/life_progression.dart`, `app/lib/domain/life/notices.dart` · Test: `app/test/year_summary_test.dart`, `app/test/critical_notice_test.dart`, `app/test/event_choice_effect_test.dart`
+
+Faho bildirdi: "olayların sonucu ekranda görünsün", "yıl sonunda statların özeti çıksın", "kritik şeyler anında bildirilsin", "oyuncu ne olduğunu anlamak için hayat günlüğünü kurcalamak zorunda kalmasın".
+
+**Kodlanan hâli.** Yaş alındığında biten yılın özeti ana ekranın üstünde bir kart olur (kart, pencere değil: yılda bir modal daha açmak istemedik). Özette yalnızca oyuncunun kendi değerleri var. Kritik iş ve kredi haberleri bildirim oldu. Bildirim yoğunluğu ölçüldü ve iki noktada azaltıldı.
+
+**Ölçüm (100 hayat, ~9.000 yıl):**
+
+| Ölçüm | Önce | Sonra |
+|---|---|---|
+| Tek yılda aynı anda açılan en çok pencere | 7 (iki vefat, iki cenaze, **iki** miras, bir burç) | 7 (üç vefat, üç cenaze, **tek** toplu miras) |
+| Yıl başına ortalama pencere | 0,41 | 0,39 |
+
+En kötü yılın sayısı aynı kaldı ama sebebi değişti: artık yedi pencere görmek için **üç** yakınını aynı yıl kaybetmek gerekiyor. Ölüm ve cenaze kişiye özel olduğu için birleştirilmedi.
+
+**Karar soruları:**
+1. Yıl özeti **kart** olarak doğru mu, yoksa yaş alır almaz bir **pencere** olarak mı açılsın? Kart oyuncuyu durdurmuyor; pencere kaçırılmıyor ama her yıl bir tık daha istiyor.
+2. Özette yalnızca oyuncunun kendi değerleri var. **Yakınlık değişimleri** de girsin mi? (Örn. "Kızın Elif ile yakınlık −6".) Girerse kart uzar; girmezse ilgisizliğin bedeli yalnızca günlükte kalır.
+3. Cüzdan satırı her yıl çıkıyor (geçim gideri ve maaş yüzünden). Küçük tutarlar için bir alt sınır konsun mu?
+4. En kötü yıl **yedi pencere**: aynı yıl üç yakınını kaybetmek. Ölüm ve cenaze de birleştirilsin mi (ör. "bu yıl üç kaybın oldu" diye tek pencere ve tek katkı kararı), yoksa her kayıp kendi anını hak ediyor mu? Birleştirme, cenaze başına ayrı katkı kararını ortadan kaldırır.
+5. Acılı yılda **burç bildirimi** gösterilmiyor (etki yine uygulanıyor, günlüğe yazılıyor). Doğru mu?
+6. Kritik sayılan haberler şimdilik üç tane: işten çıkarılma, işveren uyarısı, kaçan kredi taksiti. Başka ne eklenmeli? (Örn. büyük para kaybı, ciddi sağlık düşüşü, evden çıkarılma.)
+
+---
+
+### Q-124 — Azalan getiri, çaba tavanı ve sağlık dengesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-099, D-100, D-101, D-102 (Q-116 ve Q-117'nin kararları) · `app/lib/domain/models/stats.dart`, `app/lib/domain/activities/activity_engine.dart`, `app/lib/domain/life/sick_leave.dart`, `app/lib/domain/life/aging.dart`, `app/lib/domain/life/hair_loss.dart` · Test: `app/test/stat_gain_test.dart`, `app/test/package_j_test.dart`
+
+Faho bildirdi: "statlar gerçekten hissedilsin", "kalıcı 100 olmasın", "check-up ile stat kasılıyor", "hastalanınca sağlık düşmeli", "dövüş sanatı da spor sayılsın", "görünüş düşüşü biraz yumuşasın", "saç karizmayı değil görünüşü etkilesin", "saç ekimi 1-2 kademe düşürsün". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Azalan getiri (ölçülen).**
+
+| Değer | +5 kazancın gerçek karşılığı |
+|---|---|
+| 40 | +5 |
+| 70 | +4 |
+| 88 | +1 |
+| 94 | +1 |
+
+| Yol | Gereken ham puan |
+|---|---|
+| 50 → 75 | 31 |
+| 75 → 93 | 46 |
+
+Çaba tavanı **95**. Yılda +4 kazandıran bir alışkanlık 40 yıl sürse bile 95'te durur (ölçüldü); eskiden 100'e ulaşıyordu.
+
+**Sağlık Merkezi.** Yıllık toplam sağlık kazancı **6** ile sınırlandı; eskiden üst üste yapılan işlemlerle yılda **17** puan kazanılabiliyordu.
+
+**Hastalık.** Kısa rapor −1, uzun rapor −2 sağlık; sağlığı 40'ın altındaysa bir puan daha.
+
+**Görünüş.** Yıllık düşüş olasılığı 0,25/0,45/0,60/0,70 → **0,18/0,34/0,46/0,55**; çift puan ihtimali 0,20/0,35 → **0,15/0,25**.
+
+**Saç.** Karizma etkisi kaldırıldı; basamak görünüş maliyeti 2/2/3 → **3/4/5**. Saç ekimi 2. ve 3. basamaktan **iki**, 1. basamaktan **bir** kademe düşürür.
+
+**Karar soruları:**
+1. Çaba tavanı **95** doğru mu? 100'ü tamamen kapatmak yerine çok nadir bir olayla (ömürde bir kez) açılabilir bir kapı bırakılsın mı?
+2. Azalan getiri basamakları (60 / 75 / 85 / 93) ve çarpanları (1,0 / 0,7 / 0,5 / 0,3 / 0,15) doğru mu? Şu an 75'ten 93'e çıkmak 46 ham puan istiyor; bu, yılda +4 kazanan bir oyuncu için ~12 yıl.
+3. Sağlık Merkezi'nin yıllık **6** puanlık sınırı doğru mu? Alternatif: her işlemin kendi kazancını sıfıra indirip Sağlık Merkezi'ni tamamen "erken teşhis" yeri yapmak.
+4. Genel kontrol hâlâ **+5** sağlık veriyor (sınıra kadar). Muayene olmak insanı sağlıklı yapmadığına göre bu kazanç sıfırlanmalı mı? Sıfırlanırsa işlemin karşılığı yalnızca rapor ve tahlil yönlendirmesi olur.
+5. Hastalığın sağlığa bedeli (1-3 puan) doğru mu? Ömür boyu birikimi ölüm eğrisini besliyor.
+6. Görünüş düşüşündeki yumuşatma yeterli mi, fazla mı?
+7. Saç ekiminin iki kademe düşürmesi fiyatıyla orantılı mı? İşlem tek seferlik ve pahalı; şu an ileri basamaktan gelen oyuncuya belirgin avantaj veriyor.
+
+---
+
+### Q-125 — Medya fırsatları, sponsorluk ölçeği ve yeni hesabın kitlesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-103, D-104, D-105, D-106 (Q-115'in kararları) · `app/lib/data/media_catalog.dart`, `app/lib/domain/social/media_opportunities.dart`, `app/lib/data/sponsor_catalog.dart`, `app/lib/domain/social/social_income.dart` · Test: `app/test/package_k_test.dart`
+
+Faho bildirdi: "sponsorluk için platform başına en az 5.000 takipçi olsun ve ücret ölçeklensin", "sponsorluk paylaşılmadan para ödenmesin, yapmazsan tepki olsun", "takipçi sayıları 2.232 gibi yazılsın", "Ün 40'ı geçince Ün/Medya Fırsatları bölümü açılsın", "ünlüyken yeni hesap sıfır takipçiyle başlamasın", "ünlüye yılda 2 kez yazılabilsin ve ünlüler ayrı bölümde dursun". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Medya işleri (2026 ₺, net asgari ücret çıpasıyla).**
+
+| İş | Gereken Ün | Ücret | Ün | Kitle payı |
+|---|---|---|---|---|
+| Dergi röportajı | 40 | 4 aylık asgari ücret (112.300 ₺) | +2 | %3 |
+| Radyo programı | 45 | 6 aylık (168.450 ₺) | +3 | %4 |
+| Podcast konukluğu | 50 | 8 aylık (224.600 ₺) | +3 | %6 |
+| Televizyon programı | 55 | 16 aylık (449.200 ₺) | +5 | %8 |
+| Belgesel seslendirme | 60 | 20 aylık (561.500 ₺) | +3 | %3 |
+| Reklam yüzü olmak | 65 | 45 aylık (1.263.375 ₺) | +6 | %10 |
+| Kitap teklifi | 70 | 30 aylık (842.250 ₺) | +4 | %5 |
+
+**Sponsorluk ücreti (en küçük kategori, taban 28.000 ₺ + takipçi başına 0,9 ₺).**
+
+| Takipçi | Ücret |
+|---|---|
+| 5.000 | 32.500 ₺ |
+| 20.000 | 46.000 ₺ |
+| 100.000 | 118.000 ₺ |
+| 500.000 | 478.000 ₺ |
+
+**Yeni hesaba taşınan kitle:** mevcut toplamın **%8'i**, en çok **40.000**, en az 2.000 toplam kitle şartıyla. Ölçüm: 120.000 takipçili oyuncu yeni hesabı **9.600** takipçiyle açıyor.
+
+**Sözünü tutmamanın bedeli:** süresi dolan sponsorlukta ödeme yok, mutluluk **−4**, o platformdaki kitlenin **%4'ü** gidiyor.
+
+**Karar soruları:**
+1. Medya işlerinin ücretleri doğru mu? Reklam yüzü olmak 45 aylık asgari ücret; bu, oyunun en büyük tek seferlik gelirlerinden biri.
+2. Ün eşikleri (40-70) doğru mu? Ün en fazla kaç olabiliyorsa (şu an 100) buna göre yedi iş yeterli mi, yoksa daha çok ara basamak mı gerekir?
+3. Medya işleri **yılda bir kez** yapılabiliyor ve teklif kendiliğinden gelmiyor; oyuncu bölüme girip seçiyor. Teklif olarak da gelmeli mi (sponsorluk gibi)?
+4. Sponsorluk eşiği **5.000** ve ücret takipçi başına **0,9 ₺**. Türkiye'deki gerçek aralık geniş; oyun ortayı mı tutmalı, yoksa kategoriye göre çok mu değişmeli?
+5. Sözünü tutmamanın bedeli kitlenin **%4'ü**. Az mı, çok mu? Tekrarlanırsa birikmeli mi?
+6. Yeni hesaba taşınan **%8** ve tavan **40.000** doğru mu?
+7. Ünlüye **yılda iki** temas doğru mu, yoksa üç mü olmalı?
+8. "Ünlüler ve tanıdıklar" bölümüne ileride başka kimler girmeli? (Örn. iş dünyasından tanışıklıklar, eski öğretmenler.)
+
+---
+
+### Q-126 — Flört basamağı, niyet ve Finger süzgeci
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-107 (Q-121'in kararları) · `app/lib/domain/interaction/finger.dart`, `app/lib/data/finger_catalog.dart`, `app/lib/domain/models/relation.dart` · Test: `app/test/package_l_test.dart`
+
+Faho bildirdi: "eşleşince ne istediğim sorulsun", "tanışmak sevgili olmak demek değil, flört durumu olsun", "zenginlik filtresi olsun", "beğeni 12/yıl normal, 30 premium olsun". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Niyetin sonucu.**
+
+| Oyuncu | Karşı taraf | Sonuç |
+|---|---|---|
+| Ciddi | Ciddi | Flört |
+| Ciddi | Belirsiz | Flört |
+| Belirsiz | Belirsiz | Flört |
+| Herhangi | Arkadaşlık | Arkadaş |
+| Arkadaşlık | Herhangi | Arkadaş |
+| Hayatında biri var | — | Arkadaş |
+
+**Sayılar.** Flörtün sevgiliye dönmesi için gereken yakınlık **60**. Beğeni kotası **12**, premiumda **30**. Aday varlık dağılımı: çok yoksul %6, dar gelirli %16, orta halli %50, varlıklı %22, çok varlıklı %6.
+
+**Karar soruları:**
+1. Flörtün sevgiliye dönmesi için **60 yakınlık** doğru mu? Buluşma 45-62 arası bir yakınlıkla başlıyor, yani bazı flörtler ilk yıl resmîleşebiliyor.
+2. Flört **kendiliğinden bitmeli mi**? Şu an yalnızca oyuncu ilerletebiliyor; ilgilenilmeyen flört yıllarca flört kalıyor (ilgisizlik yakınlığı düşürüyor ama bağ kopmuyor).
+3. Flört sırasında yakınlaşma (D-054 kapsamı) açık olmalı mı? Şu an yalnızca sevgiliyle açık.
+4. Süzgeç **ücretsiz** mi kalmalı, yoksa premium özelliği mi olmalı?
+5. Süzgeç açıkken üretilen adayların **hepsi** o kademeden oluyor. Bu, "çok varlıklı" süzgecini gerçekçi olmayan biçimde kolaylaştırıyor mu? Alternatif: süzgeci bir eğilim yapmak (o kademeden daha çok, ama yalnızca o değil).
+6. Beğeni kotası **12** doğru mu?
+7. Niyet seçenekleri üç tane. "Evlilik düşünüyorum" gibi dördüncü bir basamak gerekir mi?
+
+---
+
+### Q-127 — Konut kredisi, kredi karnesi ve borcun sonu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-108 (Q-120'nin kararları) · `app/lib/domain/economy/banking.dart`, `app/lib/domain/models/loan.dart`, `app/lib/ui/screens/sections/bank_page.dart` · Test: `app/test/package_m_test.dart`
+
+Faho bildirdi: "banka Aktiviteler altına geçsin", "kredi tutarını elle girebileyim", "konut kredisi olsun", "basit bir kredi durumu olsun (İyi/Orta/Riskli/Çok riskli)", "icra-haciz için zemin bırak", "harçlık istediğimde ne aldığımı göreyim". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Kredi örnekleri (ölçüldü).**
+
+| Tür | Banka | Tutar / vade | Yıllık taksit | Toplam geri ödeme |
+|---|---|---|---|---|
+| İhtiyaç | Fakbank | 300.000 ₺ / 3 yıl | 193.014 ₺ | 579.042 ₺ |
+| İhtiyaç | Bankavrupa | 300.000 ₺ / 3 yıl | 267.658 ₺ | 802.974 ₺ |
+| Konut | Fakbank | 3.000.000 ₺ / 10 yıl | 1.069.703 ₺ | 10.697.030 ₺ |
+| Konut | Bankavrupa | 3.000.000 ₺ / 10 yıl | 1.508.216 ₺ | 15.082.160 ₺ |
+
+**Kredi karnesi.** Kaçan taksit 1 → Riskli, 2+ → Çok riskli. Kaçan yoksa taksit yükü/gelir: ≤%25 İyi, ≤%45 Orta, üstü Riskli.
+
+**Karar soruları:**
+1. Konut kredisi aylık faizi **%2,45 / %3,40** doğru mu? Bu oranla 10 yıllık kredide toplam geri ödeme anaparanın **3,5-5 katı** oluyor. Matematik doğru ama oyunda konut kredisi neredeyse alınamaz hâle geliyor; oyun gerçeğe mi yoksa oynanabilirliğe mi uysun?
+2. Konut kredisinde vade **10 yıl**. Daha uzun (15-20 yıl) bir seçenek, yıllık taksiti düşürüp krediyi gerçekten kullanılabilir yapar mı?
+3. Konut kredisi şu an **eve bağlı değil**: para cüzdana giriyor, oyuncu isterse başka şeye harcıyor. Gerçek konut kredisi gibi **yalnızca ev alımında** kullanılabilir olmalı mı?
+4. Kredi karnesinin eşikleri (%25 / %45, 1 ve 2 kaçan taksit) doğru mu?
+5. Karne şu an yalnızca **gösteriliyor**; kredi kararında ayrıca kullanılmıyor (kaçan taksit zaten tavanı düşürüyor). Karne doğrudan bir çarpan olmalı mı?
+6. **İcra ve haciz**: borç ödenmediğinde ne olmalı? Şu an borç faiziyle büyüyor ve yeni kredi zorlaşıyor, o kadar. Seçenekler: (a) belli bir eşikten sonra eşyaya haciz, (b) maaştan kesinti, (c) hiçbiri — oyun bu kadarıyla kalsın.
+7. Harçlık metnine tutar eklendi. Diğer para taşıyan etkileşimlerde (hediye ver/al) de tutar yazılmalı mı?
+
+---
+
+### Q-128 — Sahiplendirme, kaybın sonu, özel izin ve genç ebeveyn tepkisi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-109, D-110 · `app/lib/domain/pets/pet_care.dart`, `app/lib/domain/generation/life_progression.dart` · Test: `app/test/package_n_test.dart`
+
+Faho bildirdi: "evcil hayvanı sahiplendirebilelim, aktif ve geçmiş ayrılsın", "kaçan hayvan mutlaka sonuçlansın", "timsah nadir/özel olsun", "18-20 yaşında çocuk olunca ailenin tepkisi olsun". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Sayılar.**
+
+| Kural | Değer |
+|---|---|
+| Sahiplendirmenin mutluluk bedeli | −5 |
+| Kayıp hayvanın en çok kayıp kalabileceği süre | 3 yıl |
+| Özel izin için en küçük yaş | 25 |
+| Özel izin masrafı | Hayvanın bedelinin yarısı (timsahta 90.000 ₺) |
+| Genç ebeveyn — evliyse | Yakınlık +3, mutluluk +2 |
+| Genç ebeveyn — evli değilse | Yakınlık −5, mutluluk −3 |
+| Genç ebeveyn yaş bandı | 18-20 |
+
+**Karar soruları:**
+1. Sahiplendirme **geri alınamaz**. Hayvanın sonradan geri alınabilmesi (aynı yuvadan) bir seçenek olmalı mı?
+2. Kayıp süresi **3 yıl** doğru mu? Süre dolunca hayvan "başka bir yuva buldu" sayılıyor; bunun yerine "bir daha hiç haber alınamadı" gibi belirsiz bir kapanış mı olmalı?
+3. Özel izin için **kendi evinde yaşamak** şartı doğru mu? Şu an ailesinin yanında yaşayan bir yetişkin timsah sahiplenemiyor.
+4. İzin masrafı **bedelin yarısı**. Sabit bir tutar mı olmalı?
+5. Timsah dışında hangi türler izin gerektirmeli? (Şu an yalnızca timsah.)
+6. Genç ebeveyn tepkisi **evlilik durumuna** bakıyor. Başka ne bakmalı — oyuncunun işi var mı, kendi evi var mı, ailenin ekonomik durumu?
+7. Tepki **tek seferlik**. Sonraki yıllarda "nasıl gidiyor" diye devam eden bir olay zinciri olmalı mı?
+8. Yaş bandı **18-20**. 21-23 için daha hafif bir tepki de olmalı mı?
+
+---
+
 ## Kontrol notu
 Bu sıra, inceleme ve karar koordinasyonu içindir. `DECISIONS.md` ile eşdeğer değildir; Claude'un geçici teknik parametreleri Faho'nun ürün kararı sayılmaz.
+
+---
+
+### Q-129 — Dövüş dersinin yıllık stat tavanı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-115 · `app/lib/domain/activities/martial_arts_engine.dart` · Test: `app/test/package_p_test.dart`
+
+Faho bildirdi: "20 dersi birden aldığımda mutluluğum ve sağlığım çok fazla artıyor". Sebep **ölçüldü**: yıllık ders sayısı sınırlıydı (20) ama kazancın toplamı değildi — bir yılda ham **40 sağlık** ve **20 mutluluk**. Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Değer |
+|---|---|
+| Derslerden bir yılda kazanılabilecek sağlık | 4 |
+| Derslerden bir yılda kazanılabilecek mutluluk | 3 |
+| Basamak atlama ödülü | Tavanın **dışında** (sağlık +3, mutluluk +6, karizma +2) |
+| Yıllık ders hakkı | 20 (değişmedi) |
+
+**Karar soruları:**
+1. 4 sağlık / 3 mutluluk doğru mu? Spor salonu ve Sağlık Merkezi'nin yıllık tavanı 6; dövüş bundan düşük tutuldu çünkü ayrıca hobi ve bakım da besliyor.
+2. Basamak atlama ödülü tavanın dışında kalmalı mı, yoksa o da mı sayılmalı?
+3. Ders hakkı 20 kalsın mı? Stat kazancı kesildikten sonra 20 dersin tek anlamı basamak ilerlemesi oluyor; tekrar tıklama yükü sürüyor. "Bu yıl kalan dersleri toplu al" gibi tek dokunuşluk bir yol açılsın mı?
+
+---
+
+### Q-130 — Finger: arkadaşlıktan flörte, flörtten sevgiliye
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-112 · `app/lib/domain/interaction/finger.dart` · Test: `app/test/package_o_test.dart`
+
+Faho bildirdi: "Finger'da tanıştığım birisi ile nasıl sevgili olacağım... ilerisi yok". İki sebep ölçüldü: tanışmaların **%35'i** arkadaşlıkla bitiyor ve arkadaşta romantik yol hiç yoktu; flörtlerin **%74'ü** ise sevgili olma eşiğinin (60) altında başlıyor. Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Değer |
+|---|---|
+| Çıkma teklifi için en az yakınlık | 50 |
+| Kabul şansı | Yakınlık 50'de %40, 100'de %90 |
+| Reddedilince yakınlık kaybı | −6 |
+| Sevgili olmak için en az yakınlık | 60 (değişmedi) |
+| Teklif için en küçük yaş | 16 (iki taraf da) |
+
+**Karar soruları:**
+1. Çıkma teklifi eşiği 50 doğru mu? Flört başlangıç yakınlığı zaten 45-62; yani bazı arkadaşlara ilk yıl teklif edilebiliyor.
+2. Reddedilince −6 yakınlık doğru mu, yoksa teklif bedelsiz mi olmalı?
+3. Yılda kaç kez teklif edilebilsin? Şu an sınır yok; yakınlık düştükçe şans da düşüyor ama üst üste denenebiliyor.
+4. Arkadaşa teklif **yalnızca Finger'da tanışılan** kişiye mi açık olmalı, yoksa okul/iş arkadaşına da mı? Şu an her uygun arkadaşa açık.
+5. Flört ilgilenilmezse kendiliğinden bitmeli mi? (Bu ayrıca Faho'nun istediği bir şey; henüz kodlanmadı.)
+
+---
+
+### Q-131 — Hastalığın bedeli ve toparlanma
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-116 · `app/lib/domain/life/sick_leave.dart`, `app/lib/domain/life/aging.dart` · Test: `app/test/package_p_test.dart`
+
+Faho bildirdi: "hastalıkta -1-2-3 değil de en az -10 sağlık düşmeli ve hastalığının ciddiyetine göre bu artmalı". Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Ciddiyet | Rapor | Sağlık bedeli |
+|---|---|---|
+| Hafif | 3-4 gün | −10 |
+| Orta | 5-6 gün | −14 |
+| Ağır | 7 gün | −18 |
+| Sağlığı 40'ın altındaysa | — | 3 puan daha |
+
+**Toparlanma neden eklendi.** İstenen bedel tek başına uygulandığında **ölçüldü ve oyunu bozdu**: toparlanma olmadığı için kayıplar birikiyor ve 100 hayatta **40 yaşta ortalama sağlık 0,8'e** düşüyordu. Bu yüzden hastalanılmayan yılda yılda **7 puan** toparlanma eklendi, bir **tavana** kadar:
+
+| Yaş | Toparlanma tavanı |
+|---|---|
+| 30'a kadar | 90 |
+| 45'e kadar | 80 |
+| 60'a kadar | 68 |
+| 70'e kadar | 55 |
+| 70 üstü | Toparlanma yok |
+
+**Ölçüm (100 hayat):** 40 yaşta ortalama sağlık **54,7** · 60 yaşta **31,1** · ortalama ömür **74,2** (önce 72,4).
+
+**Karar soruları:**
+1. −10/−14/−18 doğru mu, yoksa daha da ağır mı olmalı?
+2. Toparlanma bu projede **yeni bir mekanizma**. Kabul ediliyor mu? Alternatif: toparlanma olmasın ama hastalık daha seyrek gelsin.
+3. Toparlanma tavanları doğru mu? Şu an 30 yaşındaki biri hastalıktan sonra 90'a kadar toparlanıyor.
+4. Toparlanma spor/bakım yapana daha hızlı olsun mu? Şu an herkese aynı.
+5. 70 yaşından sonra hiç toparlanmama doğru mu?
+
+---
+
+### Q-132 — Her şey pop-up: nerede durmalı?
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-114 · `app/lib/state/game_controller.dart` · Test: `app/test/package_q_test.dart`
+
+Faho bildirdi: "TÜM AMA TÜM BİLDİRİMLER POP UP OLMALI ... KULLANICI ANLAMALI". Kodlandı: uygulanmış her eylem artık ekranda pencere açıyor.
+
+**Ölçüm:** yıl başına ortalama pencere **0,39 → 0,71**, en kötü yıl **7 → 6**. (Aktivite pencereleri oyuncunun kendi dokunuşuyla açıldığı için bu sayıya girmiyor; sayı yıl geçerken kendiliğinden açılanları ölçüyor.)
+
+**İki istisna bırakıldı**, ikisi de aynı gerekçeyle — sonucu zaten kendi penceresi anlatıyor: **mülakat cevabı** ve **eğitim seçimleri**. Ayrıca Finger'da her kaydırma pencere açmıyor; yalnızca tanışma/flört/sevgili olma açıyor.
+
+**Karar soruları:**
+1. Bu iki istisna kabul mü, yoksa onlar da mı pencere açsın?
+2. Finger kaydırmaları gerçekten pencere açmamalı mı? (Yılda 12 beğeni hakkı var; her biri pencere açsaydı uygulama kullanılamaz olurdu.)
+3. Aynı anda birden çok pencere açıldığında üst üste mi gösterilsin, yoksa tek pencerede mi toplansın? Şu an sırayla açılıyor.
+
+---
+
+### Q-133 — Çocuğun evlenmesi, torun haberi ve flörtün sonu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-121, D-122 · `app/lib/domain/generation/child_marriage.dart`, `app/lib/domain/interaction/finger.dart` · Test: `app/test/package_r_test.dart`
+
+Faho bildirdi: "torunum olduğunda, kızım/çocuğum evlendiğinde pop-up olarak bildirilsin; düğünlerine çağırılabileyim; aram kötü ise sadece düğününün olduğunu, iyi ise direkt davetiye gibi gelsin" ve "ilgilenilmeyen flört bitsin". Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Değer |
+|---|---|
+| Çocuğun evlenebileceği en küçük yaş | 22 |
+| Yıllık evlenme ihtimali | 22 yaşta %10, her yıl +%1, en çok %28 |
+| Düğüne davet edilmek için yakınlık | 45 |
+| Flörtün bittiği yakınlık | 35 |
+| Flörtün bitmesi için sessiz yıl | 2 |
+
+**Karar soruları:**
+1. Evlenme ihtimali doğru mu? Şu an 30 yaşındaki bir çocuk her yıl ~%18 ihtimalle evleniyor; ömür boyunca çoğu çocuk evleniyor.
+2. Davet eşiği 45 doğru mu? Altında haberi "sonradan duyuyorsun".
+3. **Düğüne gitmek bir seçim olmalı mı?** Şu an davetiye yalnızca bir haber; katılma/katılmama seçeneği yok (cenazede var). Katılım yakınlığı etkilesin mi, masrafı olsun mu?
+4. Çocuğun eşi **ayrı bir kişi kaydı** olmalı mı? Şu an yalnızca adı tutuluyor; dünür ailesi, torunun diğer ebeveyni gibi bağlar kurulmuyor.
+5. Çocuk boşanabilmeli mi? Şu an evlilik tek yönlü.
+6. Flört 2 yıl sessizlikte bitiyor; bu çok hızlı mı? Yakınlık eşiği 35 doğru mu?
+7. Flört bitince kişi **arkadaş** olarak kalıyor. "Eski flört" diye ayrı bir bağ olsun mu?
+
+---
+
+### Q-134 — Sosyal medyanın yeni ekonomisi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-117, D-118, D-119, D-120 · `app/lib/domain/social/` · Test: `app/test/package_q_test.dart`
+
+Faho bildirdi: "sponsorluk ücretleri hâlâ çok fazla", "dümdüz yaptığım paylaşımlardan ücret kazanıyorum bu olmamalı", "ün neredeyse hiç düşmüyor", "başvurularda kabul edilmeme durumu olsun", "bazen firmalar kendiliğinden teklif yollasın", "sürekli sponsor alırsa kayıp yaşansın", "her sosyal medya hesabı ayrı". Hepsi **kodlandı**; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+**Sponsorluk ücreti — araştırmaya dayanıyor.** 2026'da Türkiye'de 10K-100K takipçili bir hesap gönderi başına kabaca **3.000-15.000 ₺** alıyor. Oyun 100.000 takipçiye 118.000 ₺ ödüyordu.
+
+| Takipçi (o hesapta) | Eski ücret | Yeni ücret |
+|---|---|---|
+| 5.000 | 32.500 ₺ | **3.600 ₺** |
+| 20.000 | 46.000 ₺ | **5.400 ₺** |
+| 100.000 | 118.000 ₺ | **15.000 ₺** |
+| 500.000 | 478.000 ₺ | **63.000 ₺** |
+
+**Para nereden geliyor artık:** sponsorluk + 100.000 takipçiden sonra başlayan **yıllık gelir payı** (takipçi başına yılda 0,9 ₺). Paylaşım başına ödeme **tamamen kaldırıldı**.
+
+**Ün düşüşü (D-027 değişti):** hiç paylaşım yapılmayan bir yılın sonunda Ün yılda **%12** düşer; dördüncü sessiz yıldan sonra **%24**. Taban **5**; sıfıra inmez.
+
+**Kitle yorgunluğu:** beş yıllık pencerede ilk iki sponsorluk bedelsiz; sonraki her biri o platformun kitlesinden **%2,5** (en çok %12).
+
+**Başvuru ve davet:** kabul şansı %45 + eşik üstü her Ün puanı için %2 (en çok %92). Yılda **%22** ihtimalle kendiliğinden davet gelir; davetli işte Ün şartı aranmaz ve ret olmaz.
+
+**Karar soruları:**
+1. 0,12 ₺/takipçi doğru mu? Araştırma bandını tutuyor ama oyunda sosyal medyayı bir "meslek" olmaktan çıkarır mı?
+2. **Yıllık gelir payı yeni bir mekanizma.** Kabul mü? Eşik 100.000 doğru mu?
+3. Ün düşüş hızı %12 doğru mu? Taban 5 mi olmalı, yoksa 0'a kadar inmeli mi?
+4. Kitle yorgunluğunda "iki bedelsiz sponsorluk" doğru mu?
+5. Davet ihtimali %22 çok mu sık? Davetin Ün şartını tamamen kaldırması doğru mu?
+6. Reddedilen başvurunun yıllık hakkı tüketmesi doğru mu, yoksa aynı yıl tekrar denenebilmeli mi?
+
+---
+
+### Q-135 — Geçim giderinin gerekçesi
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-123 · `app/lib/domain/economy/living_costs.dart`, `app/lib/ui/screens/sections/assets_screen.dart` · Test: `app/test/package_s_test.dart`
+
+Faho sordu: "yıllık yaşam gideri çalışmıyorsam neden var ve bu giderler neye göre belirleniyor? eğer evim arabam vb tarzı vergilendirilecek şeyler yoksa bir giderim olmamalı, bence olsa bile az olmalı".
+
+**Cevap iki parçalı.** Gider bir **vergi değil**, geçim masrafıdır: kira, yemek, fatura. Bu yüzden mal varlığı olmayan da öder. Ama iki eksik vardı ve ikisi de düzeltildi: (1) hesap ekranda görünmüyordu, artık **kalem kalem** duruyor; (2) ailesinin yanında yaşayan ve **hiç geliri olmayan** oyuncuya tam yük biniyordu, artık yalnızca kişisel harcama (yılda 12.000 ₺) işliyor.
+
+| Durum | Yıllık taban |
+|---|---|
+| Çocuk (18 altı) | 0 |
+| Ailesinin yanında, **geliri yok** | 12.000 ₺ |
+| Ailesinin yanında, geliri var | 78.000 ₺ + gelirin %8'i |
+| Kirada | 162.000 ₺ + gelirin %15'i |
+| Kendi evinde | 114.000 ₺ + gelirin %12'si |
+
+**Karar soruları:**
+1. Gelirsiz genç için 12.000 ₺ doğru mu, yoksa sıfır mı olmalı?
+2. Bu indirim yalnızca **ailesinin yanında** yaşayana açık. Kirada oturup işsiz kalan tam yükü ödüyor ve cüzdanı erirken borç birikiyor. Doğru mu, yoksa işsizlik için ayrı bir kural mı gerekli?
+3. Faho'nun asıl sorusu "vergilendirilecek şey yoksa gider olmamalı" idi. Oyunda **vergi diye ayrı bir kalem yok**; ev/araba masrafı (aidat, bakım) gider kalemlerinin içinde. Ayrı bir "vergi" kalemi olsun mu?
+4. Döküm Varlıklar ekranında duruyor. Yıl sonu özetinde de görünsün mü?
+
+---
+
+### Q-136 — Karizmanın yıpranma hızı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-124 · `app/lib/domain/life/aging.dart` · Test: `app/test/package_p_test.dart`
+
+Faho bildirdi: "statlar hâlâ çok çok fazla, sağlık ve karizma asla düşmüyor neredeyse". Ölçüldü ve haklıydı. Kodlandı; sayılar `prototypeOnly` ve **onay bekliyor.**
+
+| Kural | Eski | Yeni |
+|---|---|---|
+| Yıpranmanın başladığı yaş | 35 | **32** |
+| Düşüş ihtimali (32-49) | %18 | **%30** |
+| Düşüş ihtimali (50-64) | %28 | **%45** |
+| Düşüş ihtimali (65+) | %38 | **%60** |
+| Yılda en çok kayıp | 1 puan | **60 yaşa kadar 1, sonra 2** |
+| Taban | 15 | 15 (değişmedi) |
+
+**Ölçüm (100 hayat, ortalama karizma):**
+
+| Yaş | Önce | Sonra |
+|---|---|---|
+| 20 | 52,6 | 52,6 |
+| 40 | 51,0 | **48,9** |
+| 50 | 48,7 | **45,2** |
+| 60 | 44,5 | **38,9** |
+| 70 | 38,4 | **28,7** |
+
+Aynı ölçümde sağlık (D-116 ile birlikte): 20 yaş 69,9 → 70 yaş **13,8**.
+
+**Karar soruları:**
+1. Bu hız doğru mu, yoksa daha da sert mi olmalı?
+2. Yıpranmanın 32'de başlaması doğru mu? Görünüş 30'da, sağlık 45'te başlıyor.
+3. Taban 15 doğru mu? Karizma bir insanda hiç sıfırlanmamalı mı?
+4. Bakımın (spor, berber) koruyucu etkisi yeterli mi? Şu an düzenli spor yapan belirgin biçimde daha az kaybediyor ama oran onaylanmadı.
+
+---
+
+### Q-137 — Eksikler envanteri ve sıradaki büyük iş
+**Durum:** Öneri, karar bekliyor · **Bağlam:** `docs/EKSIKLER.md` (tam envanter) · Ölçüm: 120 hayat oynanarak
+
+Faho istedi: "oyunda eksik ve tamamlanması gerektiğini düşündüklerini yaz". Tam envanter `docs/EKSIKLER.md` dosyasına çıkarıldı. Burada yalnızca **karar sorusu** duruyor: bundan sonra ne yapılacak?
+
+**Hiç kodlanmamış sistemler** (kodda tek satırı yok, arama ile doğrulandı):
+
+| Sistem | Durum |
+|---|---|
+| Suç, hukuk, hapis | **Yok** — oyunda hiçbir risk yok |
+| Girişimcilik | **Yok** — 44 mesleğin hepsi maaşlı |
+| Üvey ebeveyn / ikinci ailenin bağları | **Yok** |
+| Nafaka, velayet | Bilerek ertelendi (Q-118) |
+| Hane bütçesi, eşin ekonomisi | **Yok** (Q-063) |
+| İkiz gebelik | **Yok** |
+
+**Yarım kalmış sistemler:** arkadaşlık (yalnızca sohbet/vakit/hediye; küslük, barışma, arkadaşın kendi hayatı yok) · çocuğun hayatı tek yönlü (boşanamaz, işsiz kalamaz) · Hobilerim bölümü yok · Evlilik Geçmişi ekranı yok · hayvan detay ekranı yok · dul kalmak ile boşanmak aynı bağa düşüyor · çoklu kişiyle aktivite yok.
+
+**Ölçülen içerik boşluğu:** hayatın ilk 18 yılı en fakir dönem — 0-5 yaşta **11**, 6-12'de **25** farklı olay görülüyor; oysa 40-59'da **52**, 60-79'da **60**.
+
+**Bir uyarı:** 120 hayatta 61 olay hiç çıkmadı, ama bunların çoğu **bozuk değil** — simülasyon işe girmediği ve hobi edinmediği için tetiklenemedi (`ilk_maas` yalnızca "18-24 yaşta çalışıyor ol" istiyor). **Ancak 10 hikâye izi hiç konmuyor** ve bir kısmı zincirin ilk halkası hiç çıkmadığı için ölü olabilir; bu gerçek bir hata olabilir.
+
+**Karar soruları:**
+1. **Sıradaki büyük iş hangisi olsun?** Claude'un önerisi: (a) ölü hikâye izlerini araştır, (b) çocukluk/ergenlik olayları, (c) suç ve hukuk sistemi, (d) arkadaşlığı derinleştir, (e) görsel kimlik kararı. Bu bir öneridir; sıra sizindir.
+2. **Suç ve hukuk sistemi bu sürüme girsin mi?** Daha önce "ileride gelecek" denmişti. Oyuna kaybedilebilirlik katan tek büyük eksik bu.
+3. **Görsel kimlik (Q-001 / Q-077) ne zaman karara bağlanacak?** Oyun bir yıl daha kodlanabilir ama palet seçilmeden "bitti" denemez; 15 golden testi de bu yüzden atlanıyor.
+4. **136 sorunun 68'i hâlâ karar bekliyor ve hiçbiri "kararlaştırıldı" diye kapatılmamış.** Kuyruk bu hâliyle işe yarıyor mu, yoksa toplu bir karar turu mu gerekiyor?
+5. Çocukluk için 40-50 yeni olay yazılması onaylanıyor mu? Onaylanırsa hangi temalar öncelikli?
+
+---
+
+### Q-138 — İlerleme sayacı düzeldi: bir hayat kaç olay görmeli?
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-125, D-023, D-024 · `app/lib/state/game_controller.dart` (`_countProgress`) · Test: `app/test/paket_op_test.dart`
+
+D-125 gerçek bir hatayı kapattı: oyuncunun eylemleri ilerleme sayılmıyordu, bu yüzden aktif oynayan da hiçbir şey yapmayan da aynı sayıda olay görüyordu. Düzeltmeden sonra ölçüm (120 hayat, oyuncu gibi oynanarak):
+
+| Ölçü | Önce | Sonra |
+|---|---|---|
+| Bir hayatta görülen farklı olay | 48 | **105** |
+| Hiç çıkmayan olay | 40 | **9** |
+| Havuzun görülen kısmı | 205/221 | **212/221** |
+
+**Karar soruları:**
+1. Bir hayatta **105 farklı olay** doğru yoğunluk mu? Az mı, çok mu? Şu an yılda ortalama 1,4 olay demek.
+2. Her eylem eşit mi saymalı? Şu an spor yapmak da eşya kullanmak da **1** ilerleme. Kimi eylem daha ağır saymalı mı?
+3. Aynı yaşta en fazla **bir** ek olay kuralı (D-024) duruyor. Çok aktif oynayana daha fazla verilmeli mi?
+4. Bu yoğunluk mobilde yorucu mu? Oyuncu "yaş al"dan sonra art arda pencere görmekten sıkılır mı?
+
+---
+
+### Q-139 — Çocukluk ve ergenlik olaylarının temaları ve dozu
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-126 · `app/lib/data/event_pool_childhood.dart` · Test: `app/test/paket_op_test.dart`
+
+Faho istedi: "0-17 için yaklaşık 45 yeni olay; kalite nicelikten önemli". 51 olay yazıldı. **Etki değerleri ve bazı temalar onay bekliyor.**
+
+Yazılan temalar: 0-5 — ilk kelime, kreş, ilk düşme, misafirlik, oyuncak kavgası. 6-12 — mahalle maçı, komşunun camı, harçlık biriktirme, karne, sınıf başkanlığı, servis, kantin, okul gösterisi, çocukluk arkadaşı. 13-17 — ilk hoşlanma, cesaret edememe/reddedilme, gruba girme ya da dışlanma, ilk yalan, yaz işi istemek, sigara teklifi, öğretmenle ters düşmek.
+
+**Karar soruları:**
+1. **Sigara teklifi, dışlanma ve ilk yalan** gibi temalar bu yaş bandında doğru mu? Dozu ağır mı?
+2. Çocukluk arkadaşı ve ilk hoşlanılan kişi **gerçek kişi kaydı** olarak kuruluyor; bu kişiler ileride (20'li, 30'lu yaşlarda) geri dönmeli mi? Şu an dönmüyorlar.
+3. Çocuklukta alınan izler yetişkinlikte ne kadar ağır basmalı? Şu an yalnızca birkaç yerde okunuyor.
+4. Etki değerleri (`prototypeOnly`) onaylanıyor mu? Örnek: camı itiraf etmek karizma **+4** ve **−300 ₺**, kaçmak mutluluk **−2**.
+5. 0-5 bandı hâlâ en zayıfı (24 farklı olay). Bebeklik için daha fazla yazılsın mı, yoksa o yaş **hızlı geçmeli** mi?
+
+---
+
+### Q-140 — Metin üslubu belgesi ve robotik kalıp tavanı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-127 · `docs/WRITING_STYLE_TR.md` · Test: `app/test/language_quality_test.dart`
+
+Faho'nun talimatı belgeye çevrildi ve bir testle ölçülüyor. Test bir **kelime polisi değil**: yasak kalıpların sayısını raporlar ve tavanla sınırlar, böylece yeni metin eski rapor diline geri dönemez. **Bugünkü ölçüm: 0 robotik kalıp** (tavan 40).
+
+**Karar soruları:**
+1. Yasak listesi eksik mi? Faho'nun rahatsız olduğu başka kalıplar var mı?
+2. Sokak ağzı listesi (abi, ya, oğlum, neyse, cebin yandı…) doğru mu? Eklenecek/çıkarılacak var mı?
+3. Espri yasağının kapsamı doğru mu? Şu an: ölüm, cenaze, ağır hastalık, gebelik kaybı, ağır boşanma, ciddi borç, şiddet, hayatın sonu, çocukla ilgili ciddi sorunlar.
+4. Tavan 40 çok gevşek mi? Ölçüm 0 olduğuna göre tavan **0'a** çekilip yeni kalıp tamamen yasaklanabilir; bu CI'yı sertleştirir.
+5. Mevcut 272 olayın metinleri tek tek gözden geçirilsin mi? Bu turda yalnızca **mekanik duran** metinler değiştirildi; iyi okunanlara dokunulmadı.
+
+---
+
+### Q-141 — Suç/Hukuk V1: kapsam, sıklık ve denge
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-128 · `app/lib/data/crime_catalog.dart`, `app/lib/domain/law/legal_engine.dart`, `app/lib/data/event_pool_crime.dart` · Test: `app/test/crime_law_test.dart`
+
+Faho istedi: "suç/hukuk sistemini ilk kez ekle ama ilk sürümü kontrollü tut". 11 suç türü, 31 olay ve 5 zincir yazıldı. Sistemin **kapsamı ve sıklığı** onay bekliyor.
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):**
+
+| Oynayış | Dosyası olan | Sabıkalı | Mahkemeye çıkan | Hapis yatan |
+|---|---|---|---|---|
+| **Riskli seçimler yapan** (rastgele seçim) | 97 | **56** | 75 | **22** |
+| **Temiz oynayan** (riskli seçim hiç seçilmiyor) | **0** | **0** | **0** | **0** |
+
+"Dosyası olan 97" sayısı yanıltıcı görünebilir: içine **trafik cezası gibi idari işlemler** de giriyor ve bunlar sabıka sayılmıyor. Anlamlı sayı **sabıkalı 56**'dır ve bu, riskli seçimi üçte bir oranında seçen bir oyuncunun sonucudur.
+
+**Karar soruları:**
+1. **Sıklık doğru mu?** Riskli seçim yapan oyuncunun %56'sının sabıkalı olması çok mu? Suç olaylarının havuzdaki ağırlığı düşürülsün mü? (Şu an 31 olay / 303 havuz.)
+2. **%22 hapis** oranı doğru mu? Hapis cezası çok mu kolay çıkıyor?
+3. **Ağır/organize suç** ne zaman gelsin? Bu sürümde bilinçli olarak yok.
+4. **Hapis süresi** oyun yılı ölçeğinde (1-3 yıl). Daha uzun cezalar olmalı mı?
+5. Tahliye sonrası **iki yıl denetim dönemi** doğru mu? Şu an denetim döneminin somut bir yaptırımı yok; olmalı mı?
+6. Suç olayları şu an **yaşa ve mali duruma** bağlı çıkıyor (kötü arkadaş çevresi, düşük para, öfke). Başka bir tetikleyici eklenmeli mi?
+
+---
+
+### Q-142 — Avukat kademeleri ve ücretleri
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-128 · `app/lib/data/lawyer_catalog.dart` · Test: `app/test/crime_law_test.dart`
+
+Üç kademe var; gerçek bir avukatın ya da büronun adı kullanılmıyor. Ücretler 2026 net asgari ücret (28.075 ₺) çıpasından türetildi; Türkiye Barolar Birliği asgari ücret tarifesi ceza davalarında beş haneli tutarlardan başlıyor.
+
+| Kademe | Ücret | Yumuşama payı |
+|---|---|---|
+| Avukat tutma (kendini savun) | 0 ₺ | 0 |
+| Uygun ücretli avukat | 33.690 ₺ | +%10 |
+| Deneyimli avukat | 98.263 ₺ | +%20 |
+| Adı duyulmuş avukat | 252.675 ₺ | +%32 |
+
+**Karar soruları:**
+1. Ücretler doğru bantta mı? Pahalı avukat çok mu ucuz?
+2. **Yumuşama payları** doğru mu? En iyi avukat %32 katkı yapıyor ve sonucu **garanti etmiyor** — ölçümde aynı dosyada farklı kararlar çıkıyor. Bu belirsizlik doğru mu?
+3. Avukat **peşin** ödeniyor. Taksit ya da "kaybedersen alma" gibi bir yol olmalı mı?
+4. Kademe sayısı üç yeterli mi?
+
+---
+
+### Q-143 — Sabıkanın işlere etkisi ve hapsin bedeli
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-128 · `app/lib/data/job_catalog.dart` (`RecordRule`), `app/lib/domain/career/job_market.dart` · Test: `app/test/crime_law_test.dart`
+
+**Kodlanan kural:** `serbest` (çoğu iş) · `temizGerekir` (polis, itfaiyeci, memur, güvenlik) · `agirEngeller` (öğretmen, doktor, hemşire, banka personeli). Dayanak gerçek: 657 sayılı kanun ve 5188 sayılı özel güvenlik kanunu belirli suçlardan hüküm giyenleri bu görevlerin dışında tutuyor.
+
+**Hapsin bedeli:** iş biter (kayıt geçmişe geçer, silinmez) · gelir kesilir · yaşayan herkesle bağ düşer (giriş −6, her yıl −3) · mutluluk −12, sağlık −4 · dışarının bütün aktiviteleri kapanır.
+
+**Karar soruları:**
+1. **Hangi işler hangi kuralda olmalı?** Şu an 4 iş temiz kayıt istiyor, 4 iş ağır kayıtta kapanıyor, kalan 36 iş serbest. Liste genişletilsin mi?
+2. Sabıka **zamanla silinmeli mi?** Şu an hayat boyu duruyor. Gerçekte adli sicil kaydı belirli koşullarda siliniyor; oyuna girsin mi?
+3. **Erteleme** (hükmün ertelenmesi) şu an sabıka sayılıyor ve işi kapatıyor. Doğru mu?
+4. Hapsin bağ üzerindeki etkisi (giriş −6, yıllık −3) doğru mu? Çok mu sert, az mı?
+5. Cezaevindeki dört aktivite yeterli mi? (Görüş, kitap, spor, sakin kalmak.)
+6. Hapisten sonra iş bulmak şu an yalnızca `recordRule` üzerinden zorlaşıyor; ayrıca bir "işe alım isteksizliği" olmalı mı?
+
+---
+
+### Q-144 — Arkadaşlığın eşikleri ve küslüğün sertliği
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-130 · `app/lib/domain/interaction/friendship_depth.dart` · Test: `app/test/friendship_depth_test.dart`
+
+Arkadaşlık artık kurulabiliyor, kopabiliyor ve düzelebiliyor. **Eşikler onay bekliyor.**
+
+| Kural | Şu anki değer |
+|---|---|
+| Yakın arkadaş olmak için gereken yakınlık | **55** |
+| Kabul şansı | 55'te %45 · 100'de %90 |
+| Reddedilmenin bedeli | yakınlık **−8** |
+| Küsme eşiği | yakınlık **18'in altı** + **3 yıl** ilgisizlik |
+| Yılda kopabilecek arkadaşlık | en fazla **1** |
+| Barışma için gereken kalan yakınlık | **12** |
+| Barışmanın kazandırdığı | yakınlık **+14** |
+| Arkadaştan haber gelme ihtimali | yılda **%28** |
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):** hiç arkadaşı olmayan **0**, yakın arkadaşla ölen **88**, ortalama arkadaş **6,8**, ortalama yakın arkadaş **3,3**, hayatında küslük yaşayan **89**.
+
+**Karar soruları:**
+1. **Küslük çok mu sık?** 100 hayatın 89'unda en az bir arkadaşlık kopuyor. Gerçekçi mi, yoksa fazla mı?
+2. Ortalama **6,8 arkadaş** doğru mu? Bir insanın hayatında bu kadar "yakın arkadaş" olur mu, yoksa sayı düşürülmeli mi?
+3. Yakınlık eşiği **55** doğru mu? Sınıf arkadaşları 35-55 arası başlıyor; yani çoğunda birkaç kez vakit geçirmek gerekiyor.
+4. Reddedilmenin **−8** bedeli doğru mu? Israrla tekrar teklif edilebiliyor; bir üst sınır olmalı mı?
+5. Barışma şu an **ısrarla** denenebiliyor (her yıl bir deneme). Sınırlanmalı mı?
+6. Arkadaşın "zor gün" haberi şu an yalnızca haber; oyuncunun **gidip yardım etmesi** için ayrı bir eylem olmalı mı? (Şu an yalnızca olay havuzundan geliyor.)
+
+---
+
+### Q-145 — Arkadaşlık olaylarının temaları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-130 · `app/lib/data/event_pool_friendship.dart`
+
+13 olay yazıldı, üç zincir: çocukluk arkadaşının dönüşü, zor gün ve karşılığı, kırgınlık → kavga → barışma. Tekil olaylar: sır tutmak, sağdıçlık, arkadaşın grubuna girmek, uzaktan arkadaşlık, arkadaşın para istemesi.
+
+**Karar soruları:**
+1. Temalar doğru mu? Eksik olan var mı (ör. arkadaşın ihaneti, ortak iş kurmak, arkadaşın vefatı)?
+2. Etki değerleri onaylanıyor mu? Örnek: zor günde gitmek yakınlık **+18**, gitmemek **−20**; sırrı anlatmak **−25** ve küslük.
+3. Çocukluk arkadaşı zinciri şu an 22 yaşından sonra açılıyor. Doğru yaş mı?
+4. "Arkadaşın para istemesi" olayı borç sistemine (D-128'deki borç davası) bağlanmalı mı? Şu an bağlı değil.
+
+---
+
+### Q-146 — Yarım zamanlı iş ve kendi işi: sayılar
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-131, D-132 · `app/lib/data/job_catalog.dart`, `app/lib/data/business_catalog.dart`, `app/lib/domain/economy/business_engine.dart` · Test: `app/test/part_time_work_test.dart`, `app/test/business_test.dart`
+
+**Yarım zamanlı iş (D-131):** 8 iş, yıllık 118.000-186.000 ₺. Okurken çalışmanın bedeli: alan zekâ katkısı yarıya iner, yılda −2 sağlık ve −1 mutluluk.
+
+**Kendi işi (D-132):** 13 tür, sermaye 84.000-2.900.000 ₺. Durum 0-100; 50 üstünde kâr, 25 altında zarar, 0'da batar. İlgilenmek +12 (maaşlı işte +6), ilgilenmemek −9/yıl, para yatırmak asgari ücretin her yıllık katı için +10 (en çok +35).
+
+**Karar soruları:**
+1. **Yarım zamanlı maaşlar doğru mu?** En yükseği (kurye, 186.000 ₺/yıl ≈ 15.500 ₺/ay) 2026 için makul mü?
+2. Okurken çalışmanın bedeli doğru mu? Zekâ katkısının **yarıya inmesi** çok mu sert?
+3. **Sermayeler doğru bantta mı?** Halı saha 2.360.000 ₺, lokanta 2.021.000 ₺, büfe 236.000 ₺.
+4. **Batma hızı doğru mu?** İlgilenilmeyen iş kaç yılda batmalı? Şu an durum 48'den başlıyor ve yılda 9 puan düşüyor — yani hiç bakılmazsa kabaca 5-6 yılda batıyor.
+5. Aynı anda **tek iş** kuralı doğru mu? İkinci iş ileride açılsın mı?
+6. **Kendi işi emeklilik hakkı vermiyor.** Maaşlı çalışan emekli olabiliyor, esnaf olamıyor. Bu bir eksik mi, yoksa bilinçli mi olmalı?
+7. Kendi işi için **banka kredisi** kullanılabiliyor (gerekçede yazıyor) ama ayrı bir "işletme kredisi" yok. Gerekli mi?
+8. İş **kuşak devamında** ne olmalı? Şu an `BusinessEndReason.kusakDevami` alanı var ama kuşak geçişinde işlenmiyor.
+
+---
+
+### Q-147 — Ekrana gelen kayıtlar ve kalabalık aktivite
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-133 · Test: `app/test/missing_screens_test.dart`
+
+Dört görünmeyen kayıt ekrana geldi: Hobilerim, Evlilik Geçmişi, evcil hayvan detayı, çoklu kişiyle aktivite.
+
+**Karar soruları:**
+1. **Hobilerim** Aktiviteler altında; doğru yer mi? Yoksa kendi sekmesi mi olmalı?
+2. **Evlilik Geçmişi** İlişkiler altında; doğru mu?
+3. Kalabalık aktivitede ücret **kişi başına** artıyor (3 kişi = 3 bilet). Doğru mu, yoksa grup indirimi mi olmalı?
+4. Kalabalık gitmek şu an herkese **aynı** bağ puanını veriyor. Kalabalıkta kişi başına daha az mı olmalı? ("Beş kişiyle sinemaya gitmek, bir kişiyle gitmek kadar yakınlaştırmaz.")
+5. Kalabalık aktivitede en fazla kaç kişi olmalı? Şu an teknik sınır 8, pratikte listedeki herkes.
+
+---
+
+### Q-148 — Kefalet, tutukluluk ve çeteleşmenin sınırı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-139, D-140 · `app/lib/domain/law/prison_life.dart`, `app/lib/domain/law/legal_engine.dart` · Test: `app/test/bail_prison_test.dart`, `app/test/bail_prison_widget_test.dart`
+
+Faho'nun isteği: "hapishane sistemine şey ekle, para ile çıkabilelim, kefalet ücretiymiydi neydi; aileden ödemesini isteyebilelim veya paramız var ise biz ödeyelim; avukat tutabilelim; içeride hapishanede arkadaşlar edinebilelim; ileride çete eklicez, onun ilk adımları gibi düşün, hapishanede çeteleşebilelim."
+
+**Claude'un uyguladığı okuma (teknik varsayım, ürün kuralı değil):** Türkiye'de kefalet **tutukluluğu** kaldırır, verilmiş bir hapis cezasını satın almaz. Bu yüzden kod şöyle kuruldu: ağır bir dosyada (%45) tutuklama kararı çıkabiliyor, kefalet belirleniyor, oyuncu kendi yatırıyor ya da aileden istiyor; duruşmaya çıkınca kefalet **geri veriliyor**; tutuklulukta geçen süre cezadan **düşülüyor**. Hükümlülükten para ile çıkış yoktur; onun yerine **iyi hâl → koşullu salıverilme** var.
+
+**Karar soruları:**
+1. **Doğru okuma bu mu?** Faho "para ile çıkabilelim" derken hükümlülükten de para ile çıkmayı mı kastetti? Öyleyse bu gerçeklikten ayrılır; isteniyorsa ayrı ve bilinçli bir oyun kuralı olarak yazılır.
+2. **Kefalet tutarı:** şu an olayın para cezası tavanının **2 katı** (yaralamada ≈ 6 asgari ücret). Doğru bantta mı?
+3. **Tutuklama sıklığı %45** ve yalnızca ağır olayda (orta olayda sabıkalıysa). Çok mu sık, az mı?
+4. **Tutukluluk tavanı 2 yıl.** Süre dolunca "tutuksuz yargılanma" ile çıkılıyor. Doğru mu?
+5. **Kefalet geri veriliyor.** Aileden biri yatırdıysa para ona dönüyor, oyuncunun cüzdanına girmiyor ve bağ +3 oluyor. Doğru mu?
+6. **Çeteleşme nerede durmalı?** Şu an yalnızca bir sayaç: `crewStanding` 0-100, içerideki metinleri değiştiriyor ve **koşullu salıverilmeyi kapatıyor** (eşik 50). Dışarıda örgüt, gelir, emir zinciri **yok**. Sonraki adımda ne gelmeli — tahliyeden sonra süren bir bağ mı, mahalle düzeyinde bir grup mu, hiçbiri mi?
+7. **Koşullu salıverilme eşiği:** iyi hâl ≥ 60, cezanın yarısı yatılmış ve koğuş itibarı < 50. Doğru mu?
+8. Cezaevi eylemleri yılda **2 kez**; bir hükümlülükte en fazla **3** koğuş arkadaşı. Doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek sayılar `prototypeOnly` kalır; çete tarafı sayaçtan öteye geçmez.
+
+---
+
+### Q-149 — Üvey anne/baba: tetik, sıklık ve üvey kardeş
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-141 · `app/lib/domain/generation/step_parents.dart` · Test: `app/test/bail_prison_test.dart`
+
+Faho'nun isteği: "üvey anne baba olabilsin."
+
+**Uygulanan:** Ebeveynlerden biri **vefat ettiyse**, hayatta kalan ebeveyn (en çok 72 yaşına kadar) yas süresi geçtikten sonra yılda %12 ihtimalle yeniden evleniyor; gelen kişi `uveyAnne`/`uveyBaba` olarak çekirdek ailede listeleniyor, bağ 18'den başlıyor, kan bağı sayılmıyor.
+
+**Karar soruları:**
+1. **Tetik yalnızca vefat.** Ebeveynlerin **boşanması** oyunda hiç modellenmiyor. Eklenmeli mi? Eklenirse aynı kapı kullanılacak.
+2. **Yas süresi 2 yıl** ve **yıllık %12**. Doğru mu?
+3. **Üvey kardeş gelmiyor.** Üvey ebeveynin kendi çocukları olmalı mı? Olursa hangi bağ türü (`uveyKardes`) ve aynı hanede mi?
+4. Oyuncu bu evliliğe **karşı çıkabilmeli mi**? Şu an çocuğun karar hakkı yok; haber olarak geliyor.
+5. **Üvey ebeveynden miras** olmalı mı? Şu an kan bağı olmadığı için miras akışına girmiyor.
+6. Üvey ebeveynle **etkileşimler** anne/babayla aynı (vakit geçir, sohbet, hediye, para iste). Para isteme baştan açık olmalı mı, yoksa bağ belirli bir eşiği geçince mi?
+7. Üvey ebeveyn geldiğinde oyuncunun mutluluğu **düşüyor** (18 altında −3, üstünde −1). Doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek üvey kardeş, miras ve boşanma tetiği eklenmez.
+
+---
+
+### Q-150 — 2. el araç pazarı: fiyat, yaş ve ilan dili
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-137 · `app/lib/domain/economy/used_vehicle_market.dart` · Test: `app/test/used_vehicle_market_test.dart`
+
+Faho'nun isteği: "2. el araç pazarı ekleyelim, içerisinde araç ilanları olsun, araç detayları yazsın — şasi podyede oynama yoktur, bel altı temizlik, boyalı vb."
+
+**Uygulanan:** Yaşanan ilde 9 ilan. Fiyat = şehir katsayısı × yaş kaybı (yılda %7, tabanı %35) × durum (hatasız 1,08 / bakımlı 1,00 / ortalama 0,88 / yorgun 0,72) × satıcı (sahibinden 0,97 / galeriden 1,04). Alınan araç ilanın kondisyonuyla giriyor (92/78/60/38). Havuz şehir + oyuncu yaşına göre **belirlenimli**: yıl geçince tazeleniyor.
+
+**Karar soruları:**
+1. **Yaş kaybı yılda %7, taban %35.** Doğru mu? 15 yaşındaki bir araç sıfırının ~%35'ine iniyor.
+2. **İlan sayısı 9.** Az mı, çok mu?
+3. **Pazar yılda bir tazeleniyor.** Aynı yıl içinde yeni ilan çıkmıyor. Doğru mu?
+4. **Model yılı yazılmıyor** ("8 yaşında" deniyor), çünkü oyunda takvim yılı yok. Bu kabul edilebilir mi, yoksa gizli bir başlangıç yılı mı eklenmeli?
+5. **En yorgun ilanın kondisyonu 38.** Seyahat için alt sınır 25; yani yorgun araç yola çıkabiliyor ama bakım istiyor. Doğru mu?
+6. Pazardan alınan aracın **masraf olayı** çıkarması gerekir mi? Şu an yalnızca "uygun fiyatlı galeri" için böyle bir not var.
+7. İlan detayları **satıcı beyanıdır**; ekranda öyle yazıyor. İlerideki bir sürümde **yalan ilan** (yazandan kötü çıkan araç) olmalı mı?
+8. **Takas** ve **pazarlık** ilan notlarında yazıyor ama mekanik değil. Eklenmeli mi?
+
+---
+
+### Q-151 — Kurgusal araç marka ve model adları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-136 · `app/lib/data/item_catalog.dart`
+
+Faho'nun isteği: "araçların adlarını biraz günümüz araçları ile vurgula, mesela düşük bütçeli araca foros vb gibi, en azından telif yemeyiz."
+
+**Uygulanan adlar:** Foros 1.0, Foros Kent 1.4, Tunca Ege 1.2, Tunca Ferah 1.6, Veran Sedan 1.6, Doruk Yayla 4x4, Alvera Salon 2.0, Sarp Coupe 3.0, Alvera Prestij 4.0; motosikletler: Rüzgâr Scoot 125, Rüzgâr 250, Sarp 750, Sarp 1100 Tur. Sınıf bilgisi ayrı alanda (`ItemType.segment`) duruyor ve ad altında yazıyor.
+
+**Karar soruları:**
+1. **Adlar beğenildi mi?** Faho'nun örneği "Foros" korundu; diğerleri Claude'un önerisi.
+2. **Altı marka** çok mu (Foros, Tunca, Veran, Doruk, Alvera, Sarp)? Daha az marka ve daha çok model mi olmalı?
+3. Bisiklet hâlâ sadece "Bisiklet". Ona da kurgusal ad verilmeli mi?
+4. Konutlara da kurgusal **site/proje adı** verilmeli mi? ("Alvera Konakları" gibi.)
+5. Marka adı oyuncunun **statüsünü** anlatmalı mı? ("Alvera sürüyor" demek bir şey ifade etmeli mi, yoksa sadece etiket mi kalmalı?)
+
+---
+
+### Q-152 — Mağaza menülerinin düzeni
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-138 · `app/lib/data/shop_catalog.dart`, `app/lib/ui/screens/sections/assets_screen.dart`
+
+Faho'nun isteği: "menüleri düzenli hale getir", "market menülerini daha stabil ve güzel hale getir."
+
+**Uygulanan:** Mağazalar üç öbekte (Gündelik alışveriş / Araç ve aksesuar / Konut), öbek ve satır sırası sabit; raf içi ürünler ucuzdan pahalıya sıralı. Evcil hayvan edinme listesi tür gruplarına ayrıldı (D-135).
+
+**Karar soruları:**
+1. **Üç öbek doğru kırılım mı?** Aksesuarcılar araç öbeğinde duruyor; ayrı bir "Aksesuar" öbeği mi olmalı?
+2. Ürünler **ucuzdan pahalıya** sıralı. Alternatif: kademe kademe (giriş/orta/üst) başlıklar. Hangisi?
+3. Mağaza satırında şu an **ürün sayısı** yazıyor. Yerine **fiyat aralığı** mı yazsın ("350 ₺ – 14,5 M ₺")?
+4. Parası yetmeyen ürün şu an listede **kapalı düğmeyle** duruyor. Gizlenmeli mi, yoksa görünmeye devam mı etmeli?
+5. Evcil hayvan grupları açılır-kapanır (`ExpansionTile`). Mağaza öbekleri de açılır-kapanır mı olmalı, yoksa başlık olarak kalmalı mı?
+
+---
+
+### Q-153 — Paket W: Faho'nun 13 maddelik hata listesinden çıkan sayılar
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-142 … D-150 · Test: `app/test/paket_w_test.dart`, `app/test/after_school_widget_test.dart`, `app/test/business_widget_test.dart`
+
+Listedeki maddelerin çoğu **gerçek hataydı** ve düzeltildi (aşağıda ayrıca soru yok). Karar bekleyen yalnızca yeni gelen sayılar ve iki tasarım tercihi:
+
+**1. Araç gideri (D-148).** Sahip olunan her motorlu araç için yıllık gider geldi: zorunlu trafik sigortası (araç değerinin **%1,0**'i), kasko (**%2,5**), MTV (**%1,2**, araç yaşlandıkça %35'ine kadar iner).
+   - Oranlar doğru bantta mı? Ekonomik otomobil (1.650.000 ₺) için yılda ≈ 77.000 ₺ çıkıyor.
+   - **Kasko isteğe bağlı olmalı mı?** Türkiye'de trafik sigortası zorunlu, kasko değil. Şu an herkes kasko yaptırıyor sayılıyor. Seçilebilir olsun mu (yaptırmayan ucuz kurtulur ama kaza masrafını kendi öder)?
+   - Araç kullanılmasa (ehliyet yokken miras kalan araba) da gider çıkıyor. Doğru mu, yoksa "trafiğe kapalı" seçeneği mi olmalı?
+
+**2. Medya fırsatları (D-147).** Yılda toplam **2** iş, aynı iş için **3 yıl** bekleme, kabul şansı tabanı **%30**.
+   - Yılda 2 doğru mu? Çok tanınan biri için 3-4 olmalı mı (Ün'e bağlı bir tavan)?
+   - Aynı işin 3 yıl bekleme süresi doğru mu?
+   - Kabul şansı Ün ile %92'ye kadar çıkıyor; tavan doğru mu?
+
+**3. Arkadaş haberleri (D-149).** Aynı kişiden **3 yıl**, aynı türden **8 yıl** bekleme; her türde 3 metin.
+   - Bekleme süreleri doğru mu?
+   - Dört haber türü (taşındı, evlendi, iş değiştirdi, zor gün) yeterli mi? "Çocuğu oldu", "hastalandı", "memleketine döndü" eklensin mi?
+
+**4. Hayvan bakım gideri (D-144).** Sahiplenmediğin hayvanın bakımı senden çıkmıyor.
+   - Oyuncu **yetişkin olduktan sonra** da ailenin hayvanının bakımı bedava kalmalı mı? Yoksa 18'den sonra (ya da evden çıkınca) sorumluluk oyuncuya mı geçmeli?
+
+**5. Kendi işi (D-143).** İkinci iş uyarısı yılda en çok bir kez, **%28** ihtimalle geliyor.
+   - Oran doğru mu? Uyarı birikince işten çıkarılma ihtimali artıyor (D-078 sayacı); bu yeterli bir bedel mi?
+
+**6. Lise sonrası karar (D-142).** Pencere kaldırıldı, oyuncu Okul/Meslek ekranının "Mezuniyet sonrası" sayfasına düşüyor.
+   - Doğru yer mi? Lise **alan** seçimi hâlâ pencereyle soruluyor (gidilecek ayrı sayfası yok); o da bir sayfaya mı taşınmalı?
+
+**7. Evcil hayvan (D-146).** Sayfa İlişkiler altına taşındı, Varlıklar'dan ve Aktiviteler'den kaldırıldı.
+   - Doğru yer mi? Sahiplenme de aynı sayfada duruyor; sahiplenme Aktiviteler'de mi kalmalıydı?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; kasko isteğe bağlı hâle getirilmez, ek haber türü eklenmez.
+
+---
+
+### Q-154 — İkiz gebelik: oran ve sonuçları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-151 · Test: `app/test/paket_x_test.dart`
+
+Faho'nun A grubu isteğiyle ikiz gebelik geldi. Gebelik kaydı **tek** kalıyor; ikinci bebek aynı doğumda dünyaya geliyor, aynı diğer ebeveynden. İki ayrı "çocuğunuz oldu" penceresi açılmıyor; tek bir ikiz bildirimi var.
+
+**Karar soruları:**
+1. **Oran %2,8** (`Parenthood.prototypeOnlyTwinChance`). Türkiye'de ikiz doğum oranı yaklaşık %2-3; oyunun ölçeği buradan seçildi. Doğru mu?
+2. **Tüp bebek tedavisi (D-... / Paket 35) ikiz oranını yükseltmeli mi?** Gerçekte belirgin biçimde yükseltir. Şu an tedaviden gelen gebelik ile kendiliğinden gelen gebelik **aynı** orana bakıyor, çünkü gebelik kaydında "tedaviyle mi oldu" bilgisi tutulmuyor. Tutulsun mu?
+3. **Doğum masrafı iki kez alınıyor** (her bebek için `prototypeOnlyBirthCost`). İki bebek iki masraf mı, yoksa tek doğumun tek masrafı mı olmalı?
+4. **En fazla çocuk sayısı 4.** Üç çocuğu olan oyuncuda ikiz çıkarsa ikinci bebek gelmiyor (sınır aşılmıyor, doğum tek bebekle kapanıyor). Doğru mu, yoksa ikiz sınırı bir kez aşabilmeli mi?
+5. **Üçüz yok.** Eklenmeli mi, yoksa ikiz yeterli mi?
+
+**Varsayılan işlem:** Onay gelene dek oran `prototypeOnly` kalır; üçüz eklenmez, tedavi ile kendiliğinden gebelik ayrılmaz.
+
+---
+
+### Q-155 — Genişletilen kataloglar: yeni hobiler, bölümler, medya işleri ve dövüş dalları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-152 · Test: `app/test/paket_x_test.dart`
+
+`docs/EKSIKLER.md` §4.3'te kataloğun dar olduğu ölçülmüştü. Genişletilenler:
+
+| Katalog | Önce | Sonra |
+|---|---|---|
+| Hobi | 4 | **12** |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Dövüş sanatı | 3 | **6** |
+
+Yeni hobilerin sekizi: mutfak, fotoğraf, dans, satranç, yazmak, bahçe, yabancı dil, bilgisayar. İlk altısı için **altı yeni kurs** eklendi (Kurslar mekânı); son ikisi zaten var olan dil ve bilgisayar kurslarını besliyor, yeni düğme gerekmedi. Kuralı bozmadım: her hobiyi gerçekten var olan bir eylem besliyor, sahte hobi yok (kalıcı test).
+
+Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek düzenlerden: boksta kuşak yoktur, amatör yaş kategorileri ve profesyonel sıralama kullanıldı; judo kyu/dan, taekwondo gup/dan. Üçü için eğitmenlik işi ve üçer mülakat sorusu da eklendi — eksik olsa basamak boşa giderdi (mevcut testler bunu yakaladı).
+
+**Karar soruları:**
+1. **Hobi 12 yeterli mi, fazla mı?** Hobi ekranı uzadı; öbeklenmeli mi (sanat / spor / zihin / el işi)?
+2. **Yeni kursların ücretleri** 3.200 – 11.000 ₺ arası. Doğru bantta mı? Satranç kulübü en ucuz (3.200 ₺), yazarlık atölyesi en pahalı (11.000 ₺).
+3. **Yeni bölümlerin taban puanları** doğru mu? Diş hekimliği 84, hukuk 76, veterinerlik 74, turizm 38.
+4. **Bölüm–meslek eşleşmesi:** yeni bölümlerin çoğu şu an hiçbir mesleğin **şartı** değil (meslekler yalnızca "üniversite mezunu" istiyor). Hukuk okuyup avukat olmak gibi bir bağ kurulsun mu? Bu ayrı ve büyük bir iş.
+5. **Yeni medya işleri** (ödül töreni sunuculuğu 60 asgari ücret, dijital platform programı 55) ün eşiği 78 ve 68. Tutarlar çok mu yüksek?
+6. **Boksta kuşak olmadığı için** basamaklar "Yıldızlar / Gençler / Büyükler / Bölge şampiyonu / Türkiye şampiyonu / Profesyonel…" diye gidiyor. Bu doğru bir çözüm mü, yoksa boks hiç girmemeli mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün ücretler, puanlar ve basamak sayıları `prototypeOnly` kalır; bölüm–meslek bağı kurulmaz.
+
+---
+
+### Q-156 — Kronik durumlar: sayılar, ceza dengesi ve iyileşme
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-153 · Test: `app/test/paket_y_test.dart`, `app/test/paket_y_widget_test.dart`
+
+Sağlık tek bir sayıydı ve krizler birbirinden bağımsızdı: aynı krizi üçüncü kez yaşayan oyuncuda hiçbir iz kalmıyordu. Artık atlatılan kriz **kalıcı bir kayıt** bırakabiliyor, o kayıt her yıl sağlıktan düşürüyor, kriz riskini yükseltiyor ve check-up raporunda görünüyor. Ayrı bir Sağlık Geçmişi bölümü geldi.
+
+Altı durum var: kalp rahatsızlığı, solunum rahatsızlığı, süregelen bel ağrısı, eklem rahatsızlığı, yüksek tansiyon, kan şekeri düzensizliği. Dördü **kriz sonrası**, ikisi **yaşla** geliyor.
+
+**Metinler tıbbi bilgi içermiyor:** hiçbir yerde ilaç, doz ya da tedavi tarifi yok. Oyunun söylediği tek şey "bu rahatsızlık var, takip edilmezse sağlık düşer".
+
+**Karar soruları:**
+1. **Kriz sonrası iz bırakma şansı %42.** Çok mu yüksek? İki krizden neredeyse biri kalıcı bir şey bırakıyor.
+2. **Yıllık sağlık düşüşü 2-3 puan**, takip edilirse 0-1 puan. Yaşlanmanın kendi düşüşünün üstüne biniyor; birlikte fazla mı oluyor?
+3. **Takip bedelleri** 9.000 – 24.000 ₺/yıl. Doğru bantta mı? Emekli oyuncu için ağır mı?
+4. **Takip "yönetir", iyileştirmez:** hiçbir durum geçmiyor. Bazıları (bel ağrısı, tansiyon) uzun takipten sonra **kapanabilmeli mi**? Kayıtta `endedAtAge` alanı hazır duruyor ama şu an hiçbir yol onu doldurmuyor.
+5. **En fazla 3 süren durum.** Doğru sınır mı?
+6. **Kriz riski çarpanı** durum başına 1,1–1,6; tavan 2,5. Doğru mu?
+7. **Check-up cezası:** takip edilmeyen durum ilgili satırı 22 puan, takip edilen 9 puan aşağı çekiyor. Doğru mu?
+8. **Ölüm ihtimaline doğrudan etkisi yok** — yalnızca sağlık düştüğü için dolaylı etkisi var. Doğrudan bir etki olmalı mı?
+9. **Durum listesi altı taneyle sınırlı.** Yeterli mi? Görme/işitme kaybı, uyku sorunu eklensin mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; hiçbir durum iyileşmez ve ölüm ihtimaline doğrudan etki eklenmez.

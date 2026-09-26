@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/shop_catalog.dart';
+import '../../../domain/economy/property_market.dart';
+import '../../../domain/economy/used_vehicle_market.dart';
 import '../../../domain/interaction/item_actions.dart';
-import '../../../data/name_pool.dart';
 import '../../../domain/economy/housing.dart';
 import '../../../domain/economy/living_costs.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/owned_item.dart';
-import '../../../domain/models/person.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
@@ -15,7 +15,6 @@ import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
-import '../../../data/pet_catalog.dart';
 
 /// Varlıklar ana menüsü (NAV-001, ECO-001).
 ///
@@ -39,12 +38,24 @@ class _AssetsScreenState extends State<AssetsScreen> {
   ShopCategory? _kategori;
   ItemOutcome? _sonMagazaSonucu;
 
-  /// Emlakçıda seçilen şehir; diğer mağazalarda kullanılmaz.
-  String? _secilenSehir;
-
   void _buy(ShopProduct product) {
-    final ItemOutcome? outcome = GameScope.of(context)
-        .buyProduct(product, location: _secilenSehir);
+    final ItemOutcome? outcome = GameScope.of(context).buyProduct(product);
+    if (outcome == null) return;
+    setState(() => _sonMagazaSonucu = outcome);
+  }
+
+  /// İlan panosundan satın alır: fiyat ve şehir ilandan gelir.
+  void _buyListing(PropertyListing listing) {
+    final ItemOutcome? outcome = GameScope.of(context).buyListing(listing);
+    if (outcome == null) return;
+    setState(() => _sonMagazaSonucu = outcome);
+  }
+
+  /// 2. el araç ilanından satın alır (D-137): araç ilanın kondisyonuyla
+  /// envantere girer.
+  void _buyUsedVehicle(UsedVehicleListing listing) {
+    final ItemOutcome? outcome =
+        GameScope.of(context).buyUsedVehicle(listing);
     if (outcome == null) return;
     setState(() => _sonMagazaSonucu = outcome);
   }
@@ -58,9 +69,12 @@ class _AssetsScreenState extends State<AssetsScreen> {
         state: state,
         category: _kategori!,
         lastOutcome: _sonMagazaSonucu,
-        selectedCity: _secilenSehir ?? Housing.cityOf(state),
-        onCityChanged: (String sehir) =>
-            setState(() => _secilenSehir = sehir),
+        listings: GameScope.of(context).listings(_kategori!),
+        usedListings: _kategori!.isUsedMarket
+            ? GameScope.of(context).usedVehicleListings()
+            : const <UsedVehicleListing>[],
+        onBuyListing: _buyListing,
+        onBuyUsedVehicle: _buyUsedVehicle,
         onBuy: _buy,
         onBack: () => setState(() {
           _page = _AssetsPage.magazalar;
@@ -105,7 +119,9 @@ class _AssetsScreenState extends State<AssetsScreen> {
         const SizedBox(height: 2),
         _ResidenceCard(state: state),
         const SizedBox(height: 10),
-        // Yıllık geçim gideri gerçek hesaptan okunur (D-033).
+        // Yıllık geçim gideri gerçek hesaptan okunur (D-033) ve
+        // **kalem kalem** gösterilir (D-123). Faho sordu: "bu giderler
+        // neye göre belirleniyor?" — hesap artık ekranda duruyor.
         InfoPanel(
           icon: Icons.receipt_long_outlined,
           text: LivingCosts.yearlyCost(state) == 0
@@ -115,6 +131,10 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   '${state.hardshipYears > 0 ? ' Bu yıl geçim sıkıntısı '
                       'çekiyorsun.' : ''}',
         ),
+        if (LivingCosts.yearlyCost(state) > 0) ...<Widget>[
+          const SizedBox(height: 8),
+          _CostBreakdownCard(breakdown: LivingCosts.breakdownFor(state)),
+        ],
         const SizedBox(height: 12),
         if (magazalar.isNotEmpty) ...<Widget>[
           MenuRow(
@@ -124,6 +144,18 @@ class _AssetsScreenState extends State<AssetsScreen> {
             accent: BirOmurAccents.turuncu,
             trailingText: '${magazalar.length}',
             onTap: () => setState(() => _page = _AssetsPage.magazalar),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Banka **Aktiviteler** altına taşındı (D-108): burası sahip
+        // olunan şeylerin listesi; bankaya gitmek bir eylemdir. Açık
+        // borç varsa oyuncu buradan da görsün diye tek satır kalır.
+        if (GameScope.of(context).totalDebt > 0) ...<Widget>[
+          InfoPanel(
+            icon: Icons.account_balance_outlined,
+            text: 'Bankaya olan borcun '
+                '${trMoney(GameScope.of(context).totalDebt)}. '
+                'Kredi işlemleri Aktiviteler > Banka altında.',
           ),
           const SizedBox(height: 12),
         ],
@@ -163,25 +195,18 @@ class _AssetsScreenState extends State<AssetsScreen> {
           ],
           const SizedBox(height: 4),
         ],
+        // D-146: evcil hayvanlar buradan kaldırıldı ve İlişkiler menüsüne
+        // taşındı. Faho'nun isteği: "evdeki evcil hayvanımı ilişkiler
+        // kısmına taşı, varlıklarda değil." Hayvan bir mülk değildir.
         if (state.pets.isNotEmpty) ...<Widget>[
-          const _GroupTitle('Evcil hayvanlar'),
-          const SizedBox(height: 8),
-          // Vefat eden hayvanın kaydı silinmez (Paket 40); listede kalır
-          // ve öyle işaretlenir.
-          for (final Pet pet in state.pets) ...<Widget>[
-            _AssetTile(
-              title: pet.name,
-              subtitle: pet.isAlive
-                  ? '${petSpeciesLabel(pet.species)} · ${pet.age} yaşında'
-                  : '${petSpeciesLabel(pet.species)} · '
-                      '${pet.diedAtAge} yaşında vefat etti',
-              icon: pet.isAlive ? Icons.pets_outlined : Icons.spa_outlined,
-            ),
-            const SizedBox(height: 10),
-          ],
-          const SizedBox(height: 4),
+          const InfoPanel(
+            icon: Icons.pets_outlined,
+            text: 'Evcil hayvanların İlişkiler menüsünde; onlarla orada '
+                'vakit geçirebilirsin.',
+          ),
+          const SizedBox(height: 10),
         ],
-        if (esyalar.isEmpty && state.pets.isEmpty)
+        if (esyalar.isEmpty)
           const InfoPanel(
             icon: Icons.inventory_2_outlined,
             text: 'Henüz kendine ait bir eşyan yok. Hediyeler, olaylar ve '
@@ -208,7 +233,11 @@ class _ShopCategoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
+    // Mağazalar üç öbekte durur (D-138): gündelik alışveriş, araç ve
+    // aksesuar, konut. Öbek ve satır sırası sabittir; liste her açılışta
+    // aynı görünür.
+    final Map<ShopGroup, List<ShopCategory>> obekler =
+        shopGroupsFor(state.player.age);
     return SectionScaffold(
       icon: Icons.storefront_rounded,
       accent: BirOmurAccents.turuncu,
@@ -217,16 +246,25 @@ class _ShopCategoryList extends StatelessWidget {
       backLabel: 'Varlıklar',
       onBack: onBack,
       children: <Widget>[
-        for (final ShopCategory kategori in magazalar) ...<Widget>[
-          MenuRow(
-            title: kategori.label,
-            subtitle: kategori.description,
-            icon: kategori.icon,
-            trailingText:
-                '${shopProductsIn(kategori, state.player.age).length}',
-            onTap: () => onOpen(kategori),
-          ),
-          const SizedBox(height: 10),
+        for (final ShopGroup obek in obekler.keys) ...<Widget>[
+          _GroupTitle(obek.label),
+          const SizedBox(height: 8),
+          for (final ShopCategory kategori in obekler[obek]!) ...<Widget>[
+            MenuRow(
+              key: Key('magaza_${kategori.name}'),
+              title: kategori.label,
+              subtitle: kategori.description,
+              icon: kategori.icon,
+              // 2. el pazarın ürünleri katalogda durmadığı için sayısı
+              // ilan havuzundan okunur (D-137).
+              trailingText: kategori.isUsedMarket
+                  ? '${UsedVehicleMarket.prototypeOnlyListingCount}'
+                  : '${shopProductsIn(kategori, state.player.age).length}',
+              onTap: () => onOpen(kategori),
+            ),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 4),
         ],
         const SizedBox(height: 4),
         const InfoPanel(
@@ -246,8 +284,10 @@ class _ShopView extends StatelessWidget {
     required this.state,
     required this.category,
     required this.lastOutcome,
-    required this.selectedCity,
-    required this.onCityChanged,
+    required this.listings,
+    required this.usedListings,
+    required this.onBuyListing,
+    required this.onBuyUsedVehicle,
     required this.onBuy,
     required this.onBack,
   });
@@ -256,9 +296,13 @@ class _ShopView extends StatelessWidget {
   final ShopCategory category;
   final ItemOutcome? lastOutcome;
 
-  /// Emlakçıda seçili şehir.
-  final String selectedCity;
-  final ValueChanged<String> onCityChanged;
+  /// Yaşanan ildeki ev/araç ilanları; diğer mağazalarda boştur.
+  final List<PropertyListing> listings;
+
+  /// Yaşanan ildeki 2. el araç ilanları; yalnızca pazarda doludur (D-137).
+  final List<UsedVehicleListing> usedListings;
+  final void Function(PropertyListing listing) onBuyListing;
+  final void Function(UsedVehicleListing listing) onBuyUsedVehicle;
   final void Function(ShopProduct product) onBuy;
   final VoidCallback onBack;
 
@@ -267,6 +311,10 @@ class _ShopView extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final List<ShopProduct> urunler =
         shopProductsIn(category, state.player.age);
+    // Emlakçı ve araç galerisi ilan panosuyla çalışır; diğer mağazalar
+    // katalog fiyatıyla.
+    final bool ilanli = category.isListed;
+    final List<PropertyListing> ilanlar = listings;
 
     return SectionScaffold(
       icon: Icons.shopping_bag_rounded,
@@ -275,34 +323,117 @@ class _ShopView extends StatelessWidget {
       backLabel: 'Mağazalar',
       onBack: onBack,
       children: <Widget>[
-        // Emlakçıda konutun hangi şehirde alındığı seçilir (D-043).
-        if (category == ShopCategory.emlakci) ...<Widget>[
-          Text('Şehir', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(
-            'Seçtiğin şehirdeki ev mülk kaydına o şehirle yazılır. '
-            'Ev almak taşınmak değildir; taşınmak için evin detayına gir.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+        // Ev ve araç ilanları **yalnızca oyuncunun yaşadığı ilde**
+        // gösterilir (Faho'nun kesin kararı). Eskiden emlakçıda 20
+        // şehirlik bir seçici vardı ve oyuncu Amasya'da yaşarken
+        // İstanbul'dan ev alabiliyordu; "Türkiye geneli" liste kalktı.
+        // 2. el araç pazarı kendi ilan biçimini kullanır (D-137): yaş, km
+        // ve "araç detayları" satırları emlak ilanına sığmıyordu.
+        if (category.isUsedMarket) ...<Widget>[
+          InfoPanel(
+            icon: Icons.place_outlined,
+            text: '${state.player.currentCity} pazarındaki ilanlar. '
+                'İlanlar yılda bir tazelenir; taşınırsan yeni şehrin '
+                'pazarını görürsün. İlan detaylarını satıcı yazar, '
+                'ekspertiz raporu değildir.',
+          ),
+          const SizedBox(height: 12),
+          if (usedListings.isEmpty)
+            const InfoPanel(
+              icon: Icons.info_outline,
+              text: 'Şu an pazarda ilan yok.',
             ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: <Widget>[
-              for (final String sehir in sehirler)
-                ChoiceChip(
-                  key: Key('city_$sehir'),
-                  label: Text(sehir),
-                  selected: selectedCity == sehir,
-                  onSelected: (_) => onCityChanged(sehir),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
+          for (final UsedVehicleListing ilan in usedListings) ...<Widget>[
+            _UsedVehicleCard(
+              listing: ilan,
+              affordable: state.player.wallet >= ilan.price,
+              onBuy: () => onBuyUsedVehicle(ilan),
+            ),
+            const SizedBox(height: 10),
+          ],
         ],
-        for (final ShopProduct urun in urunler) ...<Widget>[
+        if (ilanli) ...<Widget>[
+          InfoPanel(
+            icon: Icons.place_outlined,
+            text: '${state.player.currentCity} ilanları gösteriliyor. '
+                'Başka ildeki ilanlar burada listelenmez; taşınırsan '
+                'ilanlar yeni şehrine göre yenilenir.',
+          ),
+          const SizedBox(height: 12),
+          for (final PropertyListing ilan in ilanlar) ...<Widget>[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Icon(
+                          ilan.product.type.icon,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                ilan.name,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              // Ad kurgusal bir model adı olduğunda sınıfı
+                              // altına yazılır (D-136).
+                              if (ilan.product.type.segment != null)
+                                Text(
+                                  ilan.product.type.segment!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color:
+                                        theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          trMoney(ilan.price),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${ilan.city} · ${ilan.note}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton.tonal(
+                        key: Key('ilan_${ilan.id}'),
+                        onPressed: state.player.wallet >= ilan.price
+                            ? () => onBuyListing(ilan)
+                            : null,
+                        child: Text(
+                          state.player.wallet >= ilan.price
+                              ? 'Satın al'
+                              : 'Paran yetmiyor',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ],
+        if (!ilanli)
+          for (final ShopProduct urun in urunler) ...<Widget>[
           Card(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -314,8 +445,20 @@ class _ShopView extends StatelessWidget {
                       Icon(urun.type.icon, color: theme.colorScheme.secondary),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(urun.name,
-                            style: theme.textTheme.titleMedium),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(urun.name,
+                                style: theme.textTheme.titleMedium),
+                            if (urun.type.segment != null)
+                              Text(
+                                urun.type.segment!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                       Text(
                         trMoney(urun.price),
@@ -360,17 +503,180 @@ class _ShopView extends StatelessWidget {
         const SizedBox(height: 10),
         InfoPanel(
           icon: Icons.info_outline,
-          text: category == ShopCategory.aracGalerisi
-              ? 'Araç satın almak için ehliyet gerekmez; aracı kullanmak '
-                  'için gerekir. Aksesuarı takmak için Varlıklar\'tan '
-                  'araca gir.'
-              : category == ShopCategory.emlakci
-                  ? 'Ev satın almak o eve taşındığın anlamına gelmez. '
-                      'Kira, taşınma ve kredi henüz yazılmadı.'
-                  : 'Aldığın aksesuarı takmak için Varlıklar\'tan ilgili '
-                      'eşyaya gir.',
+          text: category.isUsedMarket
+              ? 'Pazardan alınan araç ikinci eldir: envantere ilanda '
+                  'yazan durumla girer, sıfır gibi değil. Yorgun bir araç '
+                  'bakım ister. Araç satın almak için ehliyet gerekmez; '
+                  'kullanmak için gerekir.'
+              : category.cheapVehicles
+              ? 'Buradaki araçlar ucuz, çünkü yaşlılar: yıl içinde '
+                  'masraf çıkarabilirler. Araç satın almak için ehliyet '
+                  'gerekmez; aracı kullanmak için gerekir.'
+              : category.isVehicle
+                  ? 'Araç satın almak için ehliyet gerekmez; aracı '
+                      'kullanmak için gerekir. Aksesuarı takmak için '
+                      'Varlıklar\'tan araca gir.'
+                  : category.isHousing
+                      ? 'Ev satın almak o eve taşındığın anlamına gelmez. '
+                          'Taşınmak için Varlıklar\'taki eve gir.'
+                      : 'Aldığın aksesuarı takmak için Varlıklar\'tan '
+                          'ilgili eşyaya gir.',
         ),
       ],
+    );
+  }
+}
+
+/// 2. el araç pazarındaki tek bir ilan kartı (D-137).
+///
+/// Gerçek ilan düzeni: üstte model adı ve satıcı, yanında fiyat, altında
+/// yaş/km/durum etiketleri, sonra "Araç detayları" satırları ve satıcının
+/// tek satırlık notu.
+class _UsedVehicleCard extends StatelessWidget {
+  const _UsedVehicleCard({
+    required this.listing,
+    required this.affordable,
+    required this.onBuy,
+  });
+
+  final UsedVehicleListing listing;
+  final bool affordable;
+  final VoidCallback onBuy;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Color soluk = theme.colorScheme.onSurfaceVariant;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(listing.type.icon, color: theme.colorScheme.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(listing.name, style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 2),
+                      Text(
+                        <String>[
+                          if (listing.type.segment != null)
+                            listing.type.segment!,
+                          listing.seller.label,
+                        ].join(' · '),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: soluk,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      trMoney(listing.price),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'sıfırı ${trMoneyShort(listing.newPrice)}',
+                      style: theme.textTheme.bodySmall?.copyWith(color: soluk),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: <Widget>[
+                _AdChip(text: '${listing.ageYears} yaşında'),
+                _AdChip(text: '${trNumber(listing.km)} km'),
+                _AdChip(text: listing.grade.label),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Araç detayları',
+              style: theme.textTheme.labelLarge?.copyWith(color: soluk),
+            ),
+            const SizedBox(height: 6),
+            for (final String satir in listing.details) ...<Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: soluk,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    child: Text(satir, style: theme.textTheme.bodySmall),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              '“${listing.sellerNote}”',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: soluk,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                key: Key('ikinci_el_${listing.id}'),
+                onPressed: affordable ? onBuy : null,
+                child: Text(affordable ? 'Satın al' : 'Paran yetmiyor'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// İlan etiketi: yaş, km, durum.
+class _AdChip extends StatelessWidget {
+  const _AdChip({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
     );
   }
 }
@@ -435,10 +741,14 @@ class _ItemTile extends StatelessWidget {
                     Text(item.name, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(
-                      item.attachments.isEmpty
-                          ? item.conditionLabel
-                          : '${item.conditionLabel} · '
-                              '${item.attachments.length} aksesuar',
+                      <String>[
+                        // Ad kurgusal model adı olduğunda sınıfı görünsün
+                        // (D-136): "Foros Kent 1.4" neyin nesi belli olsun.
+                        if (item.type.segment != null) item.type.segment!,
+                        item.conditionLabel,
+                        if (item.attachments.isNotEmpty)
+                          '${item.attachments.length} aksesuar',
+                      ].join(' · '),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -527,48 +837,6 @@ class _GroupTitle extends StatelessWidget {
   }
 }
 
-class _AssetTile extends StatelessWidget {
-  const _AssetTile({required this.title, required this.icon, this.subtitle});
-
-  final String title;
-  final String? subtitle;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: <Widget>[
-            Icon(icon, color: theme.colorScheme.secondary),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(title, style: theme.textTheme.titleMedium),
-                  if (subtitle != null) ...<Widget>[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Nerede yaşandığını gösteren kart ve taşınma eylemleri (D-043).
 class _ResidenceCard extends StatefulWidget {
   const _ResidenceCard({required this.state});
 
@@ -660,6 +928,83 @@ class _ResidenceCardState extends State<_ResidenceCard> {
               const SizedBox(height: 8),
               Text(_sonuc!, style: theme.textTheme.bodySmall),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Yıllık geçim giderinin kalem kalem dökümü (D-123).
+///
+/// Gider **uydurulmaz**: her satır hesaplanan kalemin kendisidir ve
+/// toplam bu satırların toplamıdır.
+class _CostBreakdownCard extends StatelessWidget {
+  const _CostBreakdownCard({required this.breakdown});
+
+  final CostBreakdown breakdown;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Gider dökümü',
+              key: const Key('cost_breakdown_title'),
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            for (final ({String label, int amount}) kalem in breakdown.items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        kalem.label,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    Text(
+                      trMoney(kalem.amount),
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            const Divider(height: 16),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    'Toplam',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+                Text(
+                  trMoney(breakdown.total),
+                  key: const Key('cost_breakdown_total'),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              breakdown.income > 0
+                  ? 'Kalemler taban tutar ile yıllık gelirinin '
+                      '(${trMoney(breakdown.income)}) payından oluşur.'
+                  : 'Gelirin olmadığı için yalnızca taban tutarlar '
+                      'işliyor.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),

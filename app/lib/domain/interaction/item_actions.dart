@@ -74,7 +74,7 @@ class ItemActions {
   /// prototypeOnly: bakım ücreti, temel değerin bu oranı kadar eksik
   /// kondisyonla çarpılarak bulunur.
   static const double prototypeOnlyRepairCostRatio = 0.15;
-  static const int prototypeOnlyMinRepairCost = 20;
+  static const int prototypeOnlyMinRepairCost = 120;
 
   /// prototypeOnly: bakım seti varsa ücret bu oranda azalır.
   static const double prototypeOnlyRepairKitDiscount = 0.5;
@@ -96,7 +96,7 @@ class ItemActions {
   ///
   /// Ortak ekonomi ölçeğinden gelir (`lib/data/economy.dart`).
   static const int prototypeOnlyValuableThreshold =
-      Economy.prototypeOnlyValuableThreshold;
+      Economy.valuableThreshold;
 
   /// prototypeOnly: değerli eşya satabilmek için gereken yaş.
   ///
@@ -280,12 +280,11 @@ class ItemActions {
         prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
 
     final _UseReward reward = _useRewards[item.type.kind] ?? const _UseReward();
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness + _scaled(reward.happiness, factor),
-      health: state.player.stats.health + _scaled(reward.health, factor),
-      charisma: state.player.stats.charisma + _scaled(reward.charisma, factor),
-      appearance:
-          state.player.stats.appearance + _scaled(reward.appearance, factor),
+    final Stats stats = state.player.stats.gain(
+      happiness: _scaled(reward.happiness, factor),
+      health: _scaled(reward.health, factor),
+      charisma: _scaled(reward.charisma, factor),
+      appearance: _scaled(reward.appearance, factor),
     );
 
     // Kullanım her hâlükârda yıpratır; fayda bitse de eşya eskir.
@@ -435,28 +434,36 @@ class ItemActions {
     required GameState state,
     required ShopProduct product,
     String? location,
+    int? price,
+    int? condition,
   }) {
+    // İlan panosundan gelen fiyat şehir katsayısını taşır; katalog
+    // fiyatı yalnızca ilan dışı satın almalarda kullanılır.
+    final int fiyat = price ?? product.price;
     if (state.player.age < product.minAge) {
       return _blocked(
         state,
         'Bu ürünü ${product.minAge} yaşından itibaren alabilirsin.',
       );
     }
-    if (state.player.wallet < product.price) {
+    if (state.player.wallet < fiyat) {
       return _blocked(
         state,
-        '${product.name} için ${trMoney(product.price)} gerekiyor; '
+        '${product.name} için ${trMoney(fiyat)} gerekiyor; '
         'cüzdanında yeterli para yok.',
       );
     }
 
     final PlayerCharacter player =
-        state.player.copyWith(wallet: state.player.wallet - product.price);
+        state.player.copyWith(wallet: state.player.wallet - fiyat);
     // Konutta satın alınan şehir kaydedilir; **taşınma anlamına gelmez**.
     final GameState next = state.copyWith(player: player).grantItems(
       <String>[product.typeId],
       source: ItemSource.satinAlma,
-      purchasePrice: product.price,
+      purchasePrice: fiyat,
+      // 2. el araç pazarından alınan araç **yorgun** girer (D-137);
+      // sıfır ürün varsayılan kondisyonla girer.
+      condition: condition ?? OwnedItem.defaultCondition,
       // Konutta satın alınan şehir kaydedilir (D-043); belirtilmezse
       // oyuncunun yaşadığı şehir kullanılır.
       location: product.type.kind == ItemKind.konut
@@ -465,7 +472,7 @@ class ItemActions {
     );
 
     final String metin =
-        '${product.name} satın alındı. ${trMoney(product.price)} ödedin.';
+        '${product.name} satın alındı. ${trMoney(fiyat)} ödedin.';
     return ItemActionResult(
       state: _withLog(next, metin),
       outcome: ItemOutcome(

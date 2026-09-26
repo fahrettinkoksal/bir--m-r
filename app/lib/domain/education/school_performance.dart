@@ -59,7 +59,7 @@ abstract final class SchoolPerformance {
   static const int prototypeOnlyScholarshipMinGrade = 9;
 
   /// prototypeOnly: yıllık burs tutarı (₺).
-  static const int prototypeOnlyScholarshipAmount = 45000;
+  static const int prototypeOnlyScholarshipAmount = 150000;
 
   /// prototypeOnly: sınıfta kalma eşiği.
   static const int prototypeOnlyFailAverage = 35;
@@ -148,11 +148,9 @@ abstract final class SchoolPerformance {
         .copyWith(
           education: egitim.copyWith(gradeAverage: yeni),
           player: state.player.copyWith(
-            stats: state.player.stats.copyWith(
-              intelligence: state.player.stats.intelligence +
-                  prototypeOnlyStudyIntelligence,
-              happiness:
-                  state.player.stats.happiness + prototypeOnlyStudyHappiness,
+            stats: state.player.stats.gain(
+              intelligence: prototypeOnlyStudyIntelligence,
+              happiness: prototypeOnlyStudyHappiness,
             ),
           ),
           interactionCounts: Map<String, int>.unmodifiable(<String, int>{

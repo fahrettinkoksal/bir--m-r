@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../domain/life/aging.dart';
+import '../../domain/life/hair_loss.dart';
 
 import '../../domain/life/astrology.dart';
 import '../../domain/models/game_settings.dart';
@@ -175,8 +177,20 @@ class CharacterHeader extends StatelessWidget {
       if (state.careStatus != CareStatus.aileYaninda)
         trLower(state.careStatus.label),
       if (state.hardshipYears > 0) 'geçim sıkıntısı',
+      // Saç dökülmesi ve bakımsızlık burada görünür (D-072, D-073):
+      // oyuncu değerlerin neden düştüğünü bir yerden okuyabilmeli.
+      if (state.player.hasHairLoss)
+        trLower(HairLoss.label(state.player.hairLossStage)),
+      if (_bakimsiz(state)) 'uzun süredir bakım yok',
     ];
     return ekler.isEmpty ? haneMetni : '$haneMetni · ${ekler.join(' · ')}';
+  }
+
+  /// Yetişkin oyuncu uzun süredir berbere/kuaföre gitmedi mi?
+  static bool _bakimsiz(GameState state) {
+    if (state.player.age < StatAging.prototypeOnlyUpkeepFromAge) return false;
+    final int? yil = state.yearsSinceGrooming;
+    return yil == null || yil >= StatAging.prototypeOnlyNeglectYears;
   }
 }
 

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/tour_catalog.dart';
+import '../../../domain/life/life_end_choice.dart';
+import '../../widgets/kilim_divider.dart';
+import '../../../domain/economy/housing.dart';
+
 import '../../../data/activity_catalog.dart';
 import '../../../domain/activities/activity_engine.dart';
 import '../../../domain/models/book_progress.dart';
+import '../../../domain/activities/outing.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
@@ -30,10 +36,17 @@ class VenuePage extends StatefulWidget {
     required this.venue,
     required this.onBack,
     this.extraRows = const <Widget>[],
+    this.customActions = const <String, VoidCallback>{},
   });
 
   final ActivityVenue venue;
   final VoidCallback onBack;
+
+  /// Kendi ekranı olan eylemler: kimlik → o ekrana götüren geri çağrı.
+  ///
+  /// Göz muayenesi böyle çalışır (D-076): düğme eylemi doğrudan
+  /// uygulamak yerine mini oyunu açar. Mekân sayfası genel kalır.
+  final Map<String, VoidCallback> customActions;
 
   /// Mekânın kendi eylemlerinin **üstünde** gösterilen ek satırlar.
   ///
@@ -48,10 +61,12 @@ class VenuePage extends StatefulWidget {
 class _VenuePageState extends State<VenuePage> {
   ActivityOutcome? _sonuc;
 
-  /// Eylem kimliği → birlikte gidilecek kişinin kimliği.
+  /// Eylem kimliği → birlikte gidilecek kişilerin kimlikleri (D-133).
   ///
-  /// Boşsa yalnız gidilir. Seçim yalnızca ekranda tutulur; kayda girmez.
-  final Map<String, String> _kiminle = <String, String>{};
+  /// Boşsa yalnız gidilir. **Birden fazla kişi** seçilebilir: "ailecek"
+  /// bir şey yapmak artık mümkün. Seçim yalnızca ekranda tutulur; kayda
+  /// girmez.
+  final Map<String, Set<String>> _kiminle = <String, Set<String>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -78,26 +93,47 @@ class _VenuePageState extends State<VenuePage> {
               // kimse uydurulmaz (Paket 41).
               final List<Person> kisiler =
                   controller.outingCompanions(eylem);
-              final String? secili = _kiminle[eylem.id];
-              final Person? yoldas = kisiler
-                  .where((Person p) => p.id == secili)
-                  .firstOrNull;
+              final Set<String> secililer =
+                  _kiminle[eylem.id] ?? const <String>{};
+              final List<Person> yoldaslar = kisiler
+                  .where((Person p) => secililer.contains(p.id))
+                  .toList(growable: false);
               return _ActionCard(
                 action: eylem,
                 availability: controller.activityAvailability(eylem),
                 companions: kisiler,
-                selected: yoldas,
+                selectedIds: secililer,
                 playerAge: state.player.age,
-                onSelect: (Person? p) => setState(() {
+                partyCost: Outing.costForParty(eylem, yoldaslar.length),
+                onToggle: (Person? p) => setState(() {
                   if (p == null) {
                     _kiminle.remove(eylem.id);
+                    return;
+                  }
+                  final Set<String> mevcut = <String>{
+                    ..._kiminle[eylem.id] ?? const <String>{},
+                  };
+                  if (!mevcut.remove(p.id)) mevcut.add(p.id);
+                  if (mevcut.isEmpty) {
+                    _kiminle.remove(eylem.id);
                   } else {
-                    _kiminle[eylem.id] = p.id;
+                    _kiminle[eylem.id] = mevcut;
                   }
                 }),
                 onTap: () {
-                  final ActivityOutcome? outcome =
-                      controller.performActivity(eylem, companion: yoldas);
+                  final VoidCallback? ozel =
+                      widget.customActions[eylem.id];
+                  if (ozel != null) {
+                    ozel();
+                    return;
+                  }
+                  final ActivityOutcome? outcome = controller.performActivity(
+                    eylem,
+                    companion: yoldaslar.isEmpty ? null : yoldaslar.first,
+                    others: yoldaslar.length <= 1
+                        ? const <Person>[]
+                        : yoldaslar.sublist(1),
+                  );
                   setState(() => _sonuc = outcome);
                 },
               );
@@ -131,6 +167,10 @@ BirOmurAccent accentForVenue(ActivityVenue venue) {
       return BirOmurAccents.mor;
     case ActivityVenue.falTarot:
       return BirOmurAccents.gul;
+    case ActivityVenue.estetik:
+      return BirOmurAccents.gul;
+    case ActivityVenue.cezaevi:
+      return BirOmurAccents.nar;
   }
 }
 
@@ -140,9 +180,10 @@ class _ActionCard extends StatelessWidget {
     required this.availability,
     required this.onTap,
     this.companions = const <Person>[],
-    this.selected,
+    this.selectedIds = const <String>{},
     this.playerAge = 0,
-    this.onSelect,
+    this.onToggle,
+    this.partyCost,
   });
 
   final ActivityAction action;
@@ -151,9 +192,15 @@ class _ActionCard extends StatelessWidget {
 
   /// Birlikte gidilebilecek gerçek kişiler; boşsa seçim hiç gösterilmez.
   final List<Person> companions;
-  final Person? selected;
+
+  /// Seçili yoldaşların kimlikleri (D-133): birden fazla olabilir.
+  final Set<String> selectedIds;
+
+  /// Kalabalık gidilirse ödenecek toplam ücret; hesaplanmadıysa `null`.
+  final int? partyCost;
   final int playerAge;
-  final void Function(Person?)? onSelect;
+  /// `null` verilirse bütün seçim temizlenir (yalnız gidilir).
+  final void Function(Person?)? onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +239,7 @@ class _ActionCard extends StatelessWidget {
             // Kiminle gidileceği (Paket 41). Yalnızca gerçekten
             // katılabilecek kişiler listelenir; kimse yoksa bölüm hiç
             // görünmez, sahte düğme olmaz.
-            if (companions.isNotEmpty && onSelect != null) ...<Widget>[
+            if (companions.isNotEmpty && onToggle != null) ...<Widget>[
               const SizedBox(height: 10),
               Text(
                 'Kiminle?',
@@ -208,8 +255,8 @@ class _ActionCard extends StatelessWidget {
                   ChoiceChip(
                     key: Key('birlikte_${action.id}_yalniz'),
                     label: const Text('Yalnız'),
-                    selected: selected == null,
-                    onSelected: (_) => onSelect!(null),
+                    selected: selectedIds.isEmpty,
+                    onSelected: (_) => onToggle!(null),
                   ),
                   for (final Person kisi in companions)
                     ChoiceChip(
@@ -218,11 +265,23 @@ class _ActionCard extends StatelessWidget {
                         '${kisi.firstName} · '
                         '${trLower(kisi.labelFor(playerAge))}',
                       ),
-                      selected: selected?.id == kisi.id,
-                      onSelected: (_) => onSelect!(kisi),
+                      selected: selectedIds.contains(kisi.id),
+                      onSelected: (_) => onToggle!(kisi),
                     ),
                 ],
               ),
+              if (selectedIds.length > 1 &&
+                  partyCost != null &&
+                  partyCost! > action.cost) ...<Widget>[
+                const SizedBox(height: 6),
+                Text(
+                  '${selectedIds.length + 1} kişi · '
+                  'toplam ${trMoney(partyCost!)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
             const SizedBox(height: 10),
             // Dar ekranda gerekçe ile düğme yan yana sıkışmasın diye
@@ -731,6 +790,47 @@ class _WillPageState extends State<WillPage> {
     setState(() => _notice = metin);
   }
 
+  /// Hayata son verme onayı (D-084).
+  ///
+  /// Kaza eseri seçilemesin diye ayrı bir onay istenir ve onay ekranında
+  /// **gerçek yardım hatları** yazar. Hiçbir yerde yöntem geçmez.
+  Future<void> _hayataSonVer() async {
+    final bool? onay = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Emin misin?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text(kLifeEndConfirmText),
+            const SizedBox(height: 12),
+            Text(
+              kLifeEndSupportText,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          TextButton(
+            key: const Key('life_end_cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          TextButton(
+            key: const Key('life_end_confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Devam et'),
+          ),
+        ],
+      ),
+    );
+    if (onay != true || !mounted) return;
+    final String engel = GameScope.of(context).endLifeByChoice();
+    if (!mounted) return;
+    setState(() => _notice = engel.isEmpty ? null : engel);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -743,8 +843,8 @@ class _WillPageState extends State<WillPage> {
     return SectionScaffold(
       icon: Icons.history_edu_rounded,
       accent: BirOmurAccents.pirinc,
-      title: 'Vasiyet',
-      subtitle: 'Mirasçı olarak bir çocuğunu seçebilirsin',
+      title: 'Son Kararlar',
+      subtitle: 'Mirasçı seçimi ve hayatının sonuna dair kararlar',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
@@ -855,12 +955,51 @@ class _WillPageState extends State<WillPage> {
           const SizedBox(height: 12),
           InfoPanel(icon: Icons.history_edu_outlined, text: _notice!),
         ],
+        // --- Hayatın sonu (D-084) ------------------------------------
+        //
+        // Ayrı ve en altta durur; yanlışlıkla basılmasın diye kendi
+        // onayı vardır ve onay ekranında gerçek yardım hatları yazar.
+        // Hiçbir yerde yöntem geçmez, hiçbir ödül verilmez.
+        if (GameScope.of(context).lifeEndBlockReason == null) ...<Widget>[
+          const SizedBox(height: 26),
+          const KilimDivider(),
+          const SizedBox(height: 14),
+          Text('Hayatının sonu', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 6),
+          Text(
+            'Karakterinin hayatına kendi kararıyla son verebilirsin. '
+            'Bu geri alınamaz ve hiçbir avantaj sağlamaz. Hayatta bir '
+            'çocuğun varsa onun hayatından devam edebilirsin.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const Key('life_end_open'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.error,
+              ),
+              onPressed: _hayataSonVer,
+              child: const Text('Hayatına son ver'),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            kLifeEndSupportText,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ],
     );
   }
 }
 
-/// Aktiviteler → Seyahat (Paket 11).
+/// Aktiviteler → Tatil yap (Paket 11, D-083).
 ///
 /// Kısa gezi planlanır: şehir, yolculuk türü ve istenirse bir yakın
 /// seçilir. Ücret **önceden görünür**, cüzdan yetmiyorsa düğme yerine
@@ -902,12 +1041,30 @@ class _TravelPageState extends State<TravelPage> {
     return SectionScaffold(
       icon: Icons.luggage_rounded,
       accent: BirOmurAccents.mavi,
-      title: 'Seyahat',
-      subtitle: 'Kısa bir gezi. Taşınma değil: yaşadığın şehir değişmez. '
+      title: 'Tatil yap',
+      subtitle: 'Tatil, taşınma değildir: yaşadığın şehir değişmez. '
           'Cüzdanında ${state.player.walletLabel} var.',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
+        // Hazır paketler (D-083): tek şehre gidip gelmek yerine program.
+        const _TravelSectionTitle('Hazır tur paketleri'),
+        const SizedBox(height: 8),
+        for (final TourPackage tur in kTourPackages) ...<Widget>[
+          _TourCard(
+            tour: tur,
+            companionId: _yoldasId,
+            onTake: () => setState(
+              () => _sonuc = controller
+                  .takeTour(tour: tur, companionId: _yoldasId)
+                  ?.text,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        const SizedBox(height: 14),
+        const _TravelSectionTitle('Ya da kendin bir şehir seç'),
+        const SizedBox(height: 8),
         const _TravelSectionTitle('Nereye?'),
         const SizedBox(height: 8),
         Wrap(
@@ -1125,6 +1282,166 @@ class _TravelModeCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Hazır tur paketi kartı (D-083).
+class _TourCard extends StatelessWidget {
+  const _TourCard({
+    required this.tour,
+    required this.companionId,
+    required this.onTake,
+  });
+
+  final TourPackage tour;
+  final String? companionId;
+  final VoidCallback onTake;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final InteractionAvailability izin = controller.tourAvailability(
+      tour: tour,
+      companionId: companionId,
+    );
+    final int ucret =
+        Travel.tourCostOf(tour, withCompanion: companionId != null);
+
+    return Container(
+      decoration: panelDecoration(context, radius: 16),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(tour.icon, color: theme.colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(tour.label, style: theme.textTheme.titleSmall),
+              ),
+              Text(trMoney(ucret), style: theme.textTheme.labelLarge),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(tour.description, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text(
+            '${tour.nights} gece · ${tour.cities.join(', ')}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          if (!izin.isAllowed)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                izin.reason!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonal(
+              key: Key('tour_${tour.id}'),
+              onPressed: izin.isAllowed ? onTake : null,
+              child: const Text('Bu tura çık'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Taşın" sayfası (D-083).
+///
+/// Faho'nun isteği: "taşınmada yaşadığım ilin yakınındaki iller olsun;
+/// her taşındığımda yakınındaki iller çıksın". Ülkenin tamamı yerine
+/// yaşanan ilin komşuları listelenir.
+class RelocationPage extends StatefulWidget {
+  const RelocationPage({super.key, required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  State<RelocationPage> createState() => _RelocationPageState();
+}
+
+class _RelocationPageState extends State<RelocationPage> {
+  String? _sonuc;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final GameState state = controller.state!;
+    final List<String> hedefler = controller.relocationTargets();
+
+    return SectionScaffold(
+      icon: Icons.local_shipping_rounded,
+      accent: BirOmurAccents.mavi,
+      title: 'Taşın',
+      subtitle: '${state.player.currentCity} şehrinde yaşıyorsun. '
+          'Cüzdanında ${state.player.walletLabel} var.',
+      backLabel: 'Aktiviteler',
+      onBack: widget.onBack,
+      children: <Widget>[
+        InfoPanel(
+          icon: Icons.map_outlined,
+          text: 'Yalnızca yaşadığın ilin yakınındaki illere taşınabilirsin. '
+              'Uzak bir şehre gitmek için aradaki illerden geçmen gerekir. '
+              'Taşınma masrafı '
+              '${trMoney(Housing.prototypeOnlyMoveCost + Housing.prototypeOnlyIntercityExtraCost)}; '
+              'aynı ilde kiralık eve geçmek daha ucuzdur.',
+        ),
+        const SizedBox(height: 14),
+        if (hedefler.isEmpty)
+          const InfoPanel(
+            icon: Icons.info_outline,
+            text: 'Bu şehir için yakın il kaydı yok.',
+          )
+        else
+          for (final String sehir in hedefler) ...<Widget>[
+            MenuRow(
+              key: Key('relocate_$sehir'),
+              title: sehir,
+              subtitle: 'Kiralık bir eve taşın',
+              icon: Icons.location_city_outlined,
+              accent: BirOmurAccents.mavi,
+              onTap: () => setState(
+                () => _sonuc = controller.relocate(city: sehir),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        const SizedBox(height: 14),
+        MenuRow(
+          key: const Key('relocate_same_city'),
+          title: 'Aynı ilde kiralık eve taşın',
+          subtitle: trMoney(Housing.prototypeOnlyMoveCost),
+          icon: Icons.home_work_outlined,
+          accent: BirOmurAccents.yesil,
+          onTap: () => setState(() => _sonuc = controller.relocate()),
+        ),
+        if (_sonuc != null) ...<Widget>[
+          const SizedBox(height: 14),
+          InfoPanel(icon: Icons.info_outline, text: _sonuc!),
+        ],
+        const SizedBox(height: 10),
+        Text(
+          'Ev sahibi olduğun bir eve taşınmak için Varlıklar bölümünden '
+          'o eve gir.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
