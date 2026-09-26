@@ -265,7 +265,7 @@ abstract final class BusinessEngine {
         stats: state.player.stats.gain(health: -1, happiness: -1),
       ),
     );
-    next = _log(next, metin);
+    next = _countTend(_log(next, metin), is_);
     return BusinessResult(
       state: next,
       outcome: BusinessOutcome(applied: true, text: metin),
@@ -467,7 +467,7 @@ abstract final class BusinessEngine {
     next = _replace(next, guncel);
     final String metin = _yilMetni(tur, guncel, kar);
     next = _log(next, metin, age: newAge);
-    return next.queueNotice(
+    next = next.queueNotice(
       PendingNotice(
         id: 'is-yil-${is_.id}-$newAge',
         kind: NoticeKind.kendiIsi,
@@ -475,6 +475,59 @@ abstract final class BusinessEngine {
         title: kar >= 0 ? 'İşin yılı kapandı' : 'İşin zarar etti',
         text: metin,
         money: kar,
+      ),
+    );
+    return _maybeEmployerComplaint(next, tur, newAge, rng);
+  }
+
+  /// prototypeOnly: maaşlı işte çalışırken kendi işi de olan oyuncuya
+  /// işverenin laf etme ihtimali (D-143).
+  ///
+  /// Faho'nun isteği: "hem kendi işimi kurup hem de bir işte çalıştığımda
+  /// iş verenim beni fazla ilgilenmemekle falan suçlasın, kendi işimi
+  /// kurduğumda rastgele gelebilsin bu durum."
+  static const double prototypeOnlyEmployerComplaintChance = 0.28;
+
+  /// İşveren, ikinci işi olan çalışanına laf eder.
+  ///
+  /// Uyarı **tek başına kimseyi işten atmaz** (D-078 ile aynı kural);
+  /// yalnızca işten çıkarılma ihtimalini bir miktar yükseltir. Yılda en
+  /// çok bir kez gelir ve yalnızca gerçekten iki işi olan oyuncuya gelir.
+  static GameState _maybeEmployerComplaint(
+    GameState state,
+    BusinessType tur,
+    int newAge,
+    Random rng,
+  ) {
+    if (!state.career.isEmployed) return state;
+    if (state.career.isRetired) return state;
+    if (state.isImprisoned) return state;
+    if (rng.nextDouble() >= prototypeOnlyEmployerComplaintChance) {
+      return state;
+    }
+
+    final String isAdi = state.career.job?.name ?? 'işin';
+    GameState next = state.copyWith(
+      career: state.career.copyWith(
+        employerWarnings: state.career.employerWarnings + 1,
+      ),
+      player: state.player.copyWith(
+        stats: state.player.stats.gain(happiness: -3),
+      ),
+    );
+    final String metin = 'Yöneticin ${tur.name} için laf etti: '
+        '"Kafan burada değil, dükkânda."\n\n'
+        'Uyarı tek başına işten çıkarmaz ama birikirse iş masaya '
+        'yatırılır.';
+    next = _log(next, '$isAdi işinde ikinci iş için uyarı aldın.',
+        age: newAge);
+    return next.queueNotice(
+      PendingNotice(
+        id: 'is-uyari-$newAge',
+        kind: NoticeKind.kariyer,
+        age: newAge,
+        title: 'İş yerinden uyarı',
+        text: metin,
       ),
     );
   }
@@ -496,8 +549,32 @@ abstract final class BusinessEngine {
   // Yardımcılar
   // ===================================================================
 
+  /// Bu yıl işe kaç kez bakıldı.
+  ///
+  /// **Gerçek hata (Faho bildirdi):** burası `lastTendedAge` alanına
+  /// bakıyordu ve en çok **1** döndürebiliyordu. Sınır ise 2 idi; yani
+  /// `1 >= 2` hiçbir zaman doğru olmuyor, kapı hiç kapanmıyordu. Faho'nun
+  /// gözlemi: "kendi işimde işine bak seçeneğine sonsuz tıklayabiliyorum
+  /// ve kara geçene kadar tıkladım". Sayaç artık gerçekten sayılıyor.
+  ///
+  /// Sayaç `interactionCounts` içinde tutulur; bu harita her yaşta
+  /// sıfırlandığı için ayrı bir kayıt alanı açmaya gerek yok.
   static int _tendedThisAge(GameState state, Business is_) =>
-      is_.lastTendedAge == state.player.age ? 1 : 0;
+      state.interactionCount(tendCounterScope, is_.id);
+
+  /// Cezaevi/aktivite sayaçlarıyla çakışmayan kapsam adı.
+  static const String tendCounterScope = 'kendiIsi';
+
+  /// Sayaca bir vuruş ekler.
+  static GameState _countTend(GameState state, Business is_) {
+    final String anahtar = GameState.interactionKey(tendCounterScope, is_.id);
+    return state.copyWith(
+      interactionCounts: Map<String, int>.unmodifiable(<String, int>{
+        ...state.interactionCounts,
+        anahtar: (state.interactionCounts[anahtar] ?? 0) + 1,
+      }),
+    );
+  }
 
   static GameState _replace(GameState state, Business is_) => state.copyWith(
         businesses: state.businesses

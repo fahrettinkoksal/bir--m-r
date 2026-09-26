@@ -30,7 +30,24 @@ class _BusinessPageState extends State<BusinessPage> {
   final TextEditingController _tutar = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // **Gerçek hata (Faho bildirdi):** "kendi işime para yatırmak
+    // istediğimde tutar yazmama rağmen yatır seçeneği aktif olmuyor."
+    //
+    // Düğmenin açıklığı `_tutar.text`ten hesaplanıyordu ama yazı yazmak
+    // yeniden çizim tetiklemiyordu; düğme sayfa açıldığındaki değerle
+    // (0) kalıyor, yani hiç açılmıyordu. Denetleyici dinleniyor.
+    _tutar.addListener(_tutarDegisti);
+  }
+
+  void _tutarDegisti() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _tutar.removeListener(_tutarDegisti);
     _tutar.dispose();
     super.dispose();
   }

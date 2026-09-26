@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bir_omur/data/business_catalog.dart';
+import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/economy.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/economy/banking.dart';
@@ -8,6 +9,7 @@ import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/business.dart';
+import 'package:bir_omur/domain/models/career.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +27,7 @@ GameState hayat(int seed, {int age = 25, int wallet = 5000000}) {
 BusinessType get bufe => businessTypeById('is_buyfe')!;
 
 void main() {
+  _paketW();
   // ===================================================================
   // 1) Katalog
   // ===================================================================
@@ -418,5 +421,127 @@ void main() {
         .reduce(max);
     expect(enUcuz, lessThan(Economy.netYearlyMinimumWage));
     expect(enPahali, greaterThan(Economy.netYearlyMinimumWage * 5));
+  });
+}
+
+// =====================================================================
+// Paket W: Faho'nun bildirdiği iki gerçek hata + ikinci iş uyarısı
+// (D-143). Bu blok dosyanın sonuna eklendi; üstteki testlere
+// dokunulmadı.
+// =====================================================================
+void _paketW() {
+  group('Paket W — işine bakma sınırı (gerçek hata)', () {
+    test('yıllık sınır gerçekten uygulanır', () {
+      // Faho: "kendi işimde işine bak seçeneğine sonsuz tıklayabiliyorum
+      // ve kara geçene kadar tıkladım". Sayaç `lastTendedAge`e bakıyordu
+      // ve en çok 1 döndürüyordu; sınır 2 olduğu için kapı hiç
+      // kapanmıyordu.
+      GameState s = BusinessEngine.open(state: hayat(40), tur: bufe).state;
+      int uygulanan = 0;
+      for (int i = 0; i < 20; i++) {
+        final BusinessResult r = BusinessEngine.tend(state: s);
+        if (!r.outcome.applied) break;
+        uygulanan++;
+        s = r.state;
+      }
+      expect(uygulanan, BusinessEngine.prototypeOnlyTendPerAge);
+      expect(BusinessEngine.tendAvailability(s).isAllowed, isFalse);
+      expect(
+        BusinessEngine.tendAvailability(s).reason,
+        contains('Bu yıl'),
+      );
+    });
+
+    test('yeni yaşta sınır sıfırlanır', () {
+      GameState s = BusinessEngine.open(state: hayat(41), tur: bufe).state;
+      for (int i = 0; i < BusinessEngine.prototypeOnlyTendPerAge; i++) {
+        s = BusinessEngine.tend(state: s).state;
+      }
+      expect(BusinessEngine.tendAvailability(s).isAllowed, isFalse);
+
+      // Yıl geçince sayaç sıfırlanır (interactionCounts her yaşta boşalır).
+      s = s.copyWith(
+        player: s.player.copyWith(age: s.player.age + 1),
+        interactionCounts: const <String, int>{},
+      );
+      expect(BusinessEngine.tendAvailability(s).isAllowed, isTrue);
+    });
+
+    test('sonsuz tıklamayla durum tavana çıkmıyor', () {
+      GameState s = BusinessEngine.open(state: hayat(42), tur: bufe).state;
+      final int basta = BusinessEngine.openBusiness(s)!.condition;
+      for (int i = 0; i < 30; i++) {
+        final BusinessResult r = BusinessEngine.tend(state: s);
+        if (!r.outcome.applied) break;
+        s = r.state;
+      }
+      final int sonra = BusinessEngine.openBusiness(s)!.condition;
+      expect(
+        sonra - basta,
+        lessThanOrEqualTo(
+          BusinessEngine.prototypeOnlyTendGain *
+              BusinessEngine.prototypeOnlyTendPerAge,
+        ),
+      );
+      expect(sonra, lessThan(100));
+    });
+  });
+
+  group('Paket W — ikinci iş uyarısı (D-143)', () {
+    test('maaşlı işi olmayan oyuncuya uyarı gelmez', () {
+      GameState s = BusinessEngine.open(state: hayat(43), tur: bufe).state;
+      expect(s.career.isEmployed, isFalse);
+      for (int yas = s.player.age + 1; yas < s.player.age + 12; yas++) {
+        s = s.copyWith(player: s.player.copyWith(age: yas));
+        s = BusinessEngine.advanceYear(s, yas, Random(yas));
+        if (BusinessEngine.openBusiness(s) == null) break;
+      }
+      expect(s.career.employerWarnings, 0);
+    });
+
+    test('hem maaşlı hem kendi işi olan uyarı alabilir', () {
+      final JobType is_ = jobById('magaza_calisani')!;
+      GameState temel = BusinessEngine.open(state: hayat(44), tur: bufe).state;
+      temel = temel.copyWith(
+        career: CareerState(
+          jobId: is_.id,
+          startedAtAge: temel.player.age - 2,
+          lastPaidAge: temel.player.age,
+          salary: is_.yearlySalary,
+        ),
+      );
+
+      int uyariAlan = 0;
+      for (int tohum = 0; tohum < 40; tohum++) {
+        final int yas = temel.player.age + 1;
+        final GameState s = BusinessEngine.advanceYear(
+          temel.copyWith(player: temel.player.copyWith(age: yas)),
+          yas,
+          Random(tohum),
+        );
+        if (s.career.employerWarnings > 0) uyariAlan++;
+      }
+      expect(uyariAlan, greaterThan(0), reason: 'Uyarı hiç gelmiyor');
+      expect(uyariAlan, lessThan(40), reason: 'Her yıl gelmemeli');
+    });
+
+    test('uyarı yılda en çok bir kez artar', () {
+      final JobType is_ = jobById('magaza_calisani')!;
+      GameState s = BusinessEngine.open(state: hayat(45), tur: bufe).state;
+      s = s.copyWith(
+        career: CareerState(
+          jobId: is_.id,
+          startedAtAge: s.player.age - 2,
+          lastPaidAge: s.player.age,
+          salary: is_.yearlySalary,
+        ),
+      );
+      final int yas = s.player.age + 1;
+      s = s.copyWith(player: s.player.copyWith(age: yas));
+      final GameState bir = BusinessEngine.advanceYear(s, yas, Random(1));
+      // Aynı yıl ikinci kez çalıştırmak hesabı tekrar açmaz.
+      final GameState iki = BusinessEngine.advanceYear(bir, yas, Random(1));
+      expect(iki.career.employerWarnings, bir.career.employerWarnings);
+    });
   });
 }
