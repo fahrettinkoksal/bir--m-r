@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/investment_catalog.dart';
 import '../../../data/shop_catalog.dart';
 import '../../../domain/economy/property_market.dart';
 import '../../../domain/economy/used_vehicle_market.dart';
@@ -14,6 +15,7 @@ import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import 'investments_page.dart';
 import '../../../text/turkish_text.dart';
 
 /// Varlıklar ana menüsü (NAV-001, ECO-001).
@@ -22,7 +24,7 @@ import '../../../text/turkish_text.dart';
 /// burada toplanır. Ailenin ekonomik durumu buraya karıştırılmaz: aile
 /// varlığı oyuncunun harcanabilir parası değildir.
 /// Varlıklar alt sayfaları.
-enum _AssetsPage { kok, magazalar, kategori }
+enum _AssetsPage { kok, magazalar, kategori, yatirimlar }
 
 class AssetsScreen extends StatefulWidget {
   const AssetsScreen({super.key, required this.onBack});
@@ -81,6 +83,12 @@ class _AssetsScreenState extends State<AssetsScreen> {
           _kategori = null;
           _sonMagazaSonucu = null;
         }),
+      );
+    }
+
+    if (_page == _AssetsPage.yatirimlar) {
+      return InvestmentsPage(
+        onBack: () => setState(() => _page = _AssetsPage.kok),
       );
     }
 
@@ -144,6 +152,24 @@ class _AssetsScreenState extends State<AssetsScreen> {
             accent: BirOmurAccents.turuncu,
             trailingText: '${magazalar.length}',
             onTap: () => setState(() => _page = _AssetsPage.magazalar),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Yatırımlar **Varlıklar** altında (D-162): portföy sahip olunan
+        // bir şeydir. Banka Aktiviteler'de kalıyor; bankaya gitmek bir
+        // eylemdir, portföye bakmak değildir.
+        if (state.player.age >= kInvestmentMinAge) ...<Widget>[
+          MenuRow(
+            title: 'Yatırımlar',
+            subtitle: state.portfolioValue == 0
+                ? 'Vadeli hesap, altın, döviz, fon ve hisse sepeti'
+                : 'Portföyün ${trMoney(state.portfolioValue)}',
+            icon: Icons.trending_up_outlined,
+            accent: BirOmurAccents.yesil,
+            trailingText: state.portfolioValue == 0
+                ? null
+                : _yuzde(state.portfolioUnrealized, state.portfolioInvested),
+            onTap: () => setState(() => _page = _AssetsPage.yatirimlar),
           ),
           const SizedBox(height: 12),
         ],
@@ -1010,4 +1036,11 @@ class _CostBreakdownCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Portföyün yüzde kaç kâr/zararda olduğu. Yatırılan sıfırsa boş döner.
+String? _yuzde(int unrealized, int invested) {
+  if (invested <= 0) return null;
+  final int oran = (unrealized * 100 / invested).round();
+  return oran >= 0 ? '+%$oran' : '%$oran';
 }

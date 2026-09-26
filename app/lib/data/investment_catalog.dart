@@ -29,13 +29,16 @@ enum InvestmentRisk {
 
 /// Yatırımlar ekranındaki öbek.
 enum InvestmentGroup {
-  guvenli('Güvenli'),
-  koruyucu('Koruyucu'),
-  piyasa('Piyasa');
+  guvenli('Güvenli', 'anaparayı korumaya oynar'),
+  koruyucu('Koruyucu', 'sıkışık yıllarda aranır'),
+  piyasa('Piyasa', 'iniş çıkışı en sert olan taraf');
 
-  const InvestmentGroup(this.label);
+  const InvestmentGroup(this.label, this.blurb);
 
   final String label;
+
+  /// Öbeğin ne olduğunu anlatan kısa not. Tavsiye vermez.
+  final String blurb;
 }
 
 /// Bir yatırımın piyasa rejimine verdiği tepkinin ağırlıkları.

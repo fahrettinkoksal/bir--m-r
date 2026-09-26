@@ -656,7 +656,6 @@ class LifeProgression {
     afterDeaths = InvestmentEngine.advanceYear(
       state: afterDeaths,
       newAge: newAge,
-      rng: _rng,
     );
 
     // Hane bütçesi (D-160): çalışan eş yılda bir kez haneye katkı koyar.

@@ -63,6 +63,8 @@ class EventRequirement {
     this.requiresOpenCase = false,
     this.requiresRecord = false,
     this.requiresReleased = false,
+    this.requiresPortfolio = false,
+    this.forbidsPortfolio = false,
   });
 
   /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
@@ -98,6 +100,14 @@ class EventRequirement {
   /// Olay yalnızca **yaşayan ve hanede olan** bir evcil hayvanı olan
   /// oyuncuya çıkar (Paket 40). Metindeki `{hayvan}` o hayvanın gerçek
   /// adıyla doldurulur.
+  /// Olay yalnızca **gerçekten yatırımı olan** oyuncuya çıksın (D-162).
+  ///
+  /// Portföyü olmayana "hisseler düştü, ne yapacaksın" sorulmaz.
+  final bool requiresPortfolio;
+
+  /// Olay yalnızca **hiç yatırımı olmayan** oyuncuya çıksın.
+  final bool forbidsPortfolio;
+
   final bool requiresLivingPet;
 
   /// Hayvanın kendi yaşı en az kaç olmalı?

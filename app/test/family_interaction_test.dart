@@ -218,7 +218,12 @@ void main() {
     });
 
     test('yaş alınca aynı etkinlik yeniden fayda verir', () {
-      final GameController controller = livingController(seed: 5, age: 8);
+      // Tohum 6 kullanılıyor: D-162'de yatırım olayları havuza girince
+      // rastgele akış kaydı ve tohum 5'te oyuncu 8 yaşında vefat ediyor
+      // (gerçek bir oyun sonucu, hata değil). Senaryo **yaşayan** bir
+      // öğrenci istiyor; iddialar gevşetilmedi, yalnızca tohum yeniden
+      // çıpalandı.
+      final GameController controller = livingController(seed: 6, age: 8);
       final Person anne = motherOf(controller);
       for (int i = 0; i < 6; i++) {
         resolvePendingEvents(controller);

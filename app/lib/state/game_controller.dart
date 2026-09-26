@@ -43,7 +43,9 @@ import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
 import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
+import '../data/investment_catalog.dart';
 import '../domain/economy/banking.dart';
+import '../domain/economy/investment_engine.dart';
 import '../domain/life/eye_exam.dart';
 import '../domain/life/life_end_choice.dart';
 import '../domain/models/loan.dart';
@@ -1139,6 +1141,82 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return sonuc.decision;
+  }
+
+  // -------------------------------------------------------------------
+  // Yatırımlar (D-162)
+  // -------------------------------------------------------------------
+
+  /// Yatırım ekranı şu an açılabilir mi?
+  InteractionAvailability get investmentAvailability => _state == null
+      ? const InteractionAvailability.blocked('Etkin bir hayat yok.')
+      : InvestmentEngine.availability(_state!);
+
+  /// Alıma engel; engel yoksa boş metin.
+  String investmentBuyBlockReason(InvestmentType type, int amount) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : InvestmentEngine.buyBlockReason(
+              state: _state!,
+              type: type,
+              amount: amount,
+            );
+
+  /// Satışa engel; engel yoksa boş metin.
+  String investmentSellBlockReason(InvestmentType type, int amount) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : InvestmentEngine.sellBlockReason(
+              state: _state!,
+              type: type,
+              amount: amount,
+            );
+
+  /// Yatırım alır. Engel varsa durum değişmez, gerekçe döner.
+  InvestmentOutcome? buyInvestment(String typeId, int amount) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final InvestmentResult sonuc = InvestmentEngine.buy(
+      state: current,
+      typeId: typeId,
+      amount: amount,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Yatırım satar.
+  InvestmentOutcome? sellInvestment(String typeId, int amount) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final InvestmentResult sonuc = InvestmentEngine.sell(
+      state: current,
+      typeId: typeId,
+      amount: amount,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Vadeli hesabı vadesinden önce bozar.
+  InvestmentOutcome? breakTermDeposit(String depositId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final InvestmentResult sonuc = InvestmentEngine.breakTermDeposit(
+      state: current,
+      depositId: depositId,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
   }
 
   /// Krediyi erken kapatır; sonucu anlatan metni döner.

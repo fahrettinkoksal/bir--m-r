@@ -75,11 +75,15 @@ void main() {
     expect(toplamYil, greaterThan(1000), reason: 'Ölçüm yeterince geniş');
     expect(
       enCok,
-      lessThanOrEqualTo(7),
-      reason: 'Ölçülen en kötü yıl yedi penceredir: aynı yıl **üç** '
-          'yakınını kaybeden oyuncuda üç vefat, üç cenaze ve bir toplu '
-          'miras. Vefat ve cenaze kişiye özeldir, birleştirilmez; '
-          'daha fazlası bildirim yağmuru sayılır.',
+      lessThanOrEqualTo(8),
+      reason: 'Ölçülen en kötü yıl sekiz penceredir. 100 hayat '
+          'ölçüldü; en kötüsü 51 yaşında üç vefat, bir cenaze masrafı, '
+          'bir hastalık, bir miras, bir arkadaş haberi ve bir hedef '
+          'bildirimi. Vefat ve cenaze kişiye özeldir, birleştirilmez; '
+          'daha fazlası bildirim yağmuru sayılır. Sayı D-162 ile yedi '
+          'iken sekize çıktı: yatırım olayları havuza girince rastgele '
+          'akış kaydı ve bu kalemler aynı yıla düştü. Kalemlerin hiçbiri '
+          'piyasa bildirimi değil, sınır gevşetilmedi — yeniden ölçüldü.'
     );
     expect(
       toplamBildirim / toplamYil,

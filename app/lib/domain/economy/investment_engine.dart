@@ -344,6 +344,30 @@ abstract final class InvestmentEngine {
     );
   }
 
+  /// Piyasanın o yıl kullanacağı tohum.
+  ///
+  /// Hayatın kimliğinden (ad, soyad, doğum şehri) ve yaştan türer. FNV-1a
+  /// karması elle yazıldı: `String.hashCode` Dart sürümleri arasında
+  /// değişebilir, bu sayı ise sabit kalır.
+  static int marketSeed(GameState state, int age) {
+    int h = 0x811c9dc5;
+    void karistir(String metin) {
+      for (final int kod in metin.codeUnits) {
+        h = (h ^ kod) & 0xffffffff;
+        h = (h * 0x01000193) & 0xffffffff;
+      }
+    }
+
+    karistir(state.player.firstName);
+    karistir(state.player.lastName);
+    karistir(state.player.birthCity);
+    // Yaş karmanın içine ayrı bir adımla girer; `h ^ age` komşu yıllarda
+    // benzer tohum üretiyordu.
+    h = (h ^ age) & 0xffffffff;
+    h = (h * 0x01000193) & 0xffffffff;
+    return h;
+  }
+
   /// Boşanma payı gibi **zorunlu** bir ödeme için, belirtilen yaştan
   /// sonra açılmış pozisyonlardan nakit toplar.
   ///
@@ -398,14 +422,20 @@ abstract final class InvestmentEngine {
   static GameState advanceYear({
     required GameState state,
     required int newAge,
-    required Random rng,
   }) {
     if (MarketEngine.alreadyAdvancedAt(state.market, newAge)) return state;
 
+    // Piyasa **kendi akışından** zar atar, oyunun ana rastgele akışından
+    // değil. Neden: yıllık ilerlemeyi ana akışa bağlamak bütün tohuma
+    // çakılı testlerin akışını kaydırıyordu — bir sistemi eklemek
+    // alakasız yerlerde ölüm yılını değiştiriyor demek. Tohum hayatın
+    // kimliğinden ve yaştan türer: aynı hayatın aynı yılı her zaman aynı
+    // piyasayı verir, iki ayrı hayat ayrı piyasa görür ve hiçbir çekiliş
+    // ana akıştan çalınmaz.
     final ({MarketState state, MarketYear year}) piyasa = MarketEngine.advance(
       state: state.market,
       newAge: newAge,
-      rng: rng,
+      rng: Random(marketSeed(state, newAge)),
     );
 
     GameState sonuc = state.copyWith(market: piyasa.state);

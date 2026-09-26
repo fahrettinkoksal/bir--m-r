@@ -268,12 +268,10 @@ void main() {
       final GameState bir = InvestmentEngine.advanceYear(
         state: s,
         newAge: 31,
-        rng: Random(2),
       );
       final GameState iki = InvestmentEngine.advanceYear(
         state: bir,
         newAge: 31,
-        rng: Random(9),
       );
       expect(iki.holdingOf('hisse')!.value, bir.holdingOf('hisse')!.value);
       expect(iki.market.priceIndex, bir.market.priceIndex);
@@ -294,7 +292,7 @@ void main() {
       );
 
       // Yıl ilerleyince vade doluyor ve hesap kapanıyor; bu beklenen.
-      s = InvestmentEngine.advanceYear(state: s, newAge: 31, rng: Random(4));
+      s = InvestmentEngine.advanceYear(state: s, newAge: 31);
       expect(s.termDeposits, isEmpty);
 
       final GameState geri = decodeGameState(encodeGameState(s));
@@ -309,7 +307,6 @@ void main() {
       final GameState tekrar = InvestmentEngine.advanceYear(
         state: geri,
         newAge: 31,
-        rng: Random(99),
       );
       expect(tekrar.market.priceIndex, s.market.priceIndex);
     });
@@ -507,7 +504,6 @@ void main() {
       final GameState ilerledi = InvestmentEngine.advanceYear(
         state: yeni,
         newAge: yeni.player.age + 1,
-        rng: Random(6),
       );
       expect(ilerledi.market.advancedAtAge, yeni.player.age + 1);
     });

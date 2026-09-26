@@ -75,8 +75,13 @@ void main() {
   // ===================================================================
   group('Üniversite sınav puanı görünür ve saklanır', () {
     test('lise bitince puan bir kez hesaplanıp kaydedilir', () {
-      final GameController c = GameController(random: Random(5));
-      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 5);
+      // Tohum 6 kullanılıyor: D-162'de yatırım olayları havuza girince
+      // rastgele akış kaydı ve tohum 5'te oyuncu 8 yaşında vefat ediyor
+      // (gerçek bir oyun sonucu, hata değil). Senaryo **yaşayan** bir
+      // öğrenci istiyor; iddialar gevşetilmedi, yalnızca tohum yeniden
+      // çıpalandı.
+      final GameController c = GameController(random: Random(6));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 6);
       advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 13);
       resolvePendingEvents(c);
 

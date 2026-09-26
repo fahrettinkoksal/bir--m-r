@@ -19,6 +19,17 @@ enum MarketRegime {
 
   /// Oyuncuya gösterilebilecek kadar belirgin bir yıl mı?
   bool get isNotable => this == MarketRegime.kriz || this == MarketRegime.guclu;
+
+  /// Ekranda yazılan gözlem cümlesi.
+  ///
+  /// Bilerek **sayı vermiyor ve tavsiye etmiyor**: yılın havasını anlatır,
+  /// "şunu al" demez. Dil sokak Türkçesi (`docs/WRITING_STYLE_TR.md`).
+  String get mood => switch (this) {
+        MarketRegime.durgun => 'Piyasa bu aralar uyuşuk, kimse acele etmiyor.',
+        MarketRegime.normal => 'Piyasa olağan hâlinde, iniş çıkış normal.',
+        MarketRegime.guclu => 'Piyasada hareket var, herkes iyimser.',
+        MarketRegime.kriz => 'Piyasa karışık, ortalık gergin.',
+      };
 }
 
 /// Piyasanın kalıcı durumu.

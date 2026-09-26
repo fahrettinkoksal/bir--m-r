@@ -109,8 +109,13 @@ void main() {
   // ===================================================================
   group('Lise tercihi', () {
     test('8. sınıftan 9. sınıfa geçince yerleştirme puanı oluşur', () {
-      final GameController c = GameController(random: Random(5));
-      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 5);
+      // Tohum 6 kullanılıyor: D-162'de yatırım olayları havuza girince
+      // rastgele akış kaydı ve tohum 5'te oyuncu 8 yaşında vefat ediyor
+      // (gerçek bir oyun sonucu, hata değil). Senaryo **yaşayan** bir
+      // öğrenci istiyor; iddialar gevşetilmedi, yalnızca tohum yeniden
+      // çıpalandı.
+      final GameController c = GameController(random: Random(6));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 6);
       advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 7);
       resolvePendingEvents(c);
       expect(c.state!.education.grade, 8);

@@ -254,6 +254,11 @@ class EventEngine {
     // çıkar (Paket 40). Vefat etmiş ya da hanede olmayan hayvan sayılmaz.
     if (req.requiresLivingPet && _eventPet(state, req) == null) return false;
 
+    // Yatırım kapıları (D-162): portföyü olmayana "hisselerin düştü"
+    // denmez, portföyü olana "hiç yatırım yapmadın" denmez.
+    if (req.requiresPortfolio && state.portfolioValue <= 0) return false;
+    if (req.forbidsPortfolio && state.portfolioValue > 0) return false;
+
     // Adli kapılar (D-128). Dosyası olmayana "mahkemeyi bekliyorsun",
     // sabıkası olmayana "bir de şu kayıt var" denmez. Cezaevindeyken
     // dışarıdaki hiçbir olay çıkmaz: içerideki hayat ayrıdır.
