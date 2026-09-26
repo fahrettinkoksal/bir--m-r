@@ -3322,3 +3322,77 @@ Faho istedi: "suç/hukuk sistemini ilk kez ekle ama ilk sürümü kontrollü tut
 4. Hapsin bağ üzerindeki etkisi (giriş −6, yıllık −3) doğru mu? Çok mu sert, az mı?
 5. Cezaevindeki dört aktivite yeterli mi? (Görüş, kitap, spor, sakin kalmak.)
 6. Hapisten sonra iş bulmak şu an yalnızca `recordRule` üzerinden zorlaşıyor; ayrıca bir "işe alım isteksizliği" olmalı mı?
+
+---
+
+### Q-144 — Arkadaşlığın eşikleri ve küslüğün sertliği
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-130 · `app/lib/domain/interaction/friendship_depth.dart` · Test: `app/test/friendship_depth_test.dart`
+
+Arkadaşlık artık kurulabiliyor, kopabiliyor ve düzelebiliyor. **Eşikler onay bekliyor.**
+
+| Kural | Şu anki değer |
+|---|---|
+| Yakın arkadaş olmak için gereken yakınlık | **55** |
+| Kabul şansı | 55'te %45 · 100'de %90 |
+| Reddedilmenin bedeli | yakınlık **−8** |
+| Küsme eşiği | yakınlık **18'in altı** + **3 yıl** ilgisizlik |
+| Yılda kopabilecek arkadaşlık | en fazla **1** |
+| Barışma için gereken kalan yakınlık | **12** |
+| Barışmanın kazandırdığı | yakınlık **+14** |
+| Arkadaştan haber gelme ihtimali | yılda **%28** |
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):** hiç arkadaşı olmayan **0**, yakın arkadaşla ölen **88**, ortalama arkadaş **6,8**, ortalama yakın arkadaş **3,3**, hayatında küslük yaşayan **89**.
+
+**Karar soruları:**
+1. **Küslük çok mu sık?** 100 hayatın 89'unda en az bir arkadaşlık kopuyor. Gerçekçi mi, yoksa fazla mı?
+2. Ortalama **6,8 arkadaş** doğru mu? Bir insanın hayatında bu kadar "yakın arkadaş" olur mu, yoksa sayı düşürülmeli mi?
+3. Yakınlık eşiği **55** doğru mu? Sınıf arkadaşları 35-55 arası başlıyor; yani çoğunda birkaç kez vakit geçirmek gerekiyor.
+4. Reddedilmenin **−8** bedeli doğru mu? Israrla tekrar teklif edilebiliyor; bir üst sınır olmalı mı?
+5. Barışma şu an **ısrarla** denenebiliyor (her yıl bir deneme). Sınırlanmalı mı?
+6. Arkadaşın "zor gün" haberi şu an yalnızca haber; oyuncunun **gidip yardım etmesi** için ayrı bir eylem olmalı mı? (Şu an yalnızca olay havuzundan geliyor.)
+
+---
+
+### Q-145 — Arkadaşlık olaylarının temaları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-130 · `app/lib/data/event_pool_friendship.dart`
+
+13 olay yazıldı, üç zincir: çocukluk arkadaşının dönüşü, zor gün ve karşılığı, kırgınlık → kavga → barışma. Tekil olaylar: sır tutmak, sağdıçlık, arkadaşın grubuna girmek, uzaktan arkadaşlık, arkadaşın para istemesi.
+
+**Karar soruları:**
+1. Temalar doğru mu? Eksik olan var mı (ör. arkadaşın ihaneti, ortak iş kurmak, arkadaşın vefatı)?
+2. Etki değerleri onaylanıyor mu? Örnek: zor günde gitmek yakınlık **+18**, gitmemek **−20**; sırrı anlatmak **−25** ve küslük.
+3. Çocukluk arkadaşı zinciri şu an 22 yaşından sonra açılıyor. Doğru yaş mı?
+4. "Arkadaşın para istemesi" olayı borç sistemine (D-128'deki borç davası) bağlanmalı mı? Şu an bağlı değil.
+
+---
+
+### Q-146 — Yarım zamanlı iş ve kendi işi: sayılar
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-131, D-132 · `app/lib/data/job_catalog.dart`, `app/lib/data/business_catalog.dart`, `app/lib/domain/economy/business_engine.dart` · Test: `app/test/part_time_work_test.dart`, `app/test/business_test.dart`
+
+**Yarım zamanlı iş (D-131):** 8 iş, yıllık 118.000-186.000 ₺. Okurken çalışmanın bedeli: alan zekâ katkısı yarıya iner, yılda −2 sağlık ve −1 mutluluk.
+
+**Kendi işi (D-132):** 13 tür, sermaye 84.000-2.900.000 ₺. Durum 0-100; 50 üstünde kâr, 25 altında zarar, 0'da batar. İlgilenmek +12 (maaşlı işte +6), ilgilenmemek −9/yıl, para yatırmak asgari ücretin her yıllık katı için +10 (en çok +35).
+
+**Karar soruları:**
+1. **Yarım zamanlı maaşlar doğru mu?** En yükseği (kurye, 186.000 ₺/yıl ≈ 15.500 ₺/ay) 2026 için makul mü?
+2. Okurken çalışmanın bedeli doğru mu? Zekâ katkısının **yarıya inmesi** çok mu sert?
+3. **Sermayeler doğru bantta mı?** Halı saha 2.360.000 ₺, lokanta 2.021.000 ₺, büfe 236.000 ₺.
+4. **Batma hızı doğru mu?** İlgilenilmeyen iş kaç yılda batmalı? Şu an durum 48'den başlıyor ve yılda 9 puan düşüyor — yani hiç bakılmazsa kabaca 5-6 yılda batıyor.
+5. Aynı anda **tek iş** kuralı doğru mu? İkinci iş ileride açılsın mı?
+6. **Kendi işi emeklilik hakkı vermiyor.** Maaşlı çalışan emekli olabiliyor, esnaf olamıyor. Bu bir eksik mi, yoksa bilinçli mi olmalı?
+7. Kendi işi için **banka kredisi** kullanılabiliyor (gerekçede yazıyor) ama ayrı bir "işletme kredisi" yok. Gerekli mi?
+8. İş **kuşak devamında** ne olmalı? Şu an `BusinessEndReason.kusakDevami` alanı var ama kuşak geçişinde işlenmiyor.
+
+---
+
+### Q-147 — Ekrana gelen kayıtlar ve kalabalık aktivite
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-133 · Test: `app/test/missing_screens_test.dart`
+
+Dört görünmeyen kayıt ekrana geldi: Hobilerim, Evlilik Geçmişi, evcil hayvan detayı, çoklu kişiyle aktivite.
+
+**Karar soruları:**
+1. **Hobilerim** Aktiviteler altında; doğru yer mi? Yoksa kendi sekmesi mi olmalı?
+2. **Evlilik Geçmişi** İlişkiler altında; doğru mu?
+3. Kalabalık aktivitede ücret **kişi başına** artıyor (3 kişi = 3 bilet). Doğru mu, yoksa grup indirimi mi olmalı?
+4. Kalabalık gitmek şu an herkese **aynı** bağ puanını veriyor. Kalabalıkta kişi başına daha az mı olmalı? ("Beş kişiyle sinemaya gitmek, bir kişiyle gitmek kadar yakınlaştırmaz.")
+5. Kalabalık aktivitede en fazla kaç kişi olmalı? Şu an teknik sınır 8, pratikte listedeki herkes.

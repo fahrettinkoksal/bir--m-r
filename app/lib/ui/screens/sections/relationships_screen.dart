@@ -8,6 +8,7 @@ import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import 'marriage_history_page.dart';
 
 /// İlişkiler ana menüsü (NAV-001).
 ///
@@ -24,6 +25,10 @@ enum RelationshipSubPage {
   // Faho'nun Q-115 kararı: geri takip eden ünlüler arkadaş listesine
   // karışmaz, kendi başlığında durur (D-106).
   tanidiklar,
+
+  /// D-133: ikinci evlilik D-036'da geldi ama geçmiş evlilikler
+  /// hiçbir ekranda görünmüyordu.
+  evlilikGecmisi,
 }
 
 class RelationshipsScreen extends StatefulWidget {
@@ -84,6 +89,11 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
     final GameState state = GameScope.of(context).state!;
     final int playerAge = state.player.age;
 
+    // Evlilik Geçmişi kişi listesi değil, kayıt ekranıdır (D-133).
+    if (_subPage == RelationshipSubPage.evlilikGecmisi) {
+      return MarriageHistoryPage(onBack: () => setState(() => _subPage = null));
+    }
+
     if (_subPage != null) {
       final List<Person> kisiler = switch (_subPage!) {
         RelationshipSubPage.akrabalar => _akrabalar(state),
@@ -92,6 +102,9 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.cocuklar => _cocuklar(state),
         RelationshipSubPage.torunlar => _torunlar(state),
         RelationshipSubPage.tanidiklar => _tanidiklar(state),
+        // Buraya ulaşılmaz: evlilik geçmişi yukarıda ayrı ekran olarak
+        // açılıyor. Derleyicinin tam kapsama isteği için duruyor.
+        RelationshipSubPage.evlilikGecmisi => const <Person>[],
       };
       final String baslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar => 'Akrabalar',
@@ -100,6 +113,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.cocuklar => 'Çocuklar',
         RelationshipSubPage.torunlar => 'Torunlar',
         RelationshipSubPage.tanidiklar => 'Ünlüler ve tanıdıklar',
+        RelationshipSubPage.evlilikGecmisi => 'Evlilik Geçmişi',
       };
       final String altBaslik = switch (_subPage!) {
         RelationshipSubPage.akrabalar =>
@@ -114,6 +128,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           'Çocuklarının çocukları. Kendi hayatlarını yaşarlar.',
         RelationshipSubPage.tanidiklar =>
           'Sana geri dönen ünlüler. Arkadaş değiller; tanışıklık.',
+        RelationshipSubPage.evlilikGecmisi => '',
 };
 
       return SectionScaffold(
@@ -241,6 +256,24 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             trailingText: '$romantikSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.romantik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Evlilik Geçmişi (D-133): ikinci evlilik geldi ama eski kayıt
+        // hiçbir ekranda görünmüyordu.
+        if (state.marriageCount > 0) ...<Widget>[
+          MenuRow(
+            key: const Key('iliskiler_evlilik_gecmisi'),
+            title: 'Evlilik Geçmişi',
+            subtitle: state.marriageCount == 1
+                ? 'Bir evlilik kaydı'
+                : '${state.marriageCount} evlilik kaydı',
+            icon: Icons.favorite_rounded,
+            accent: BirOmurAccents.gul,
+            trailingText: '${state.marriageCount}',
+            onTap: () => setState(
+              () => _subPage = RelationshipSubPage.evlilikGecmisi,
+            ),
           ),
           const SizedBox(height: 10),
         ],

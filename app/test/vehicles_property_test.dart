@@ -345,10 +345,16 @@ void main() {
     });
 
     test('maaşlar eşya fiyatlarıyla aynı ölçekte', () {
-      final int enDusukMaas = kJobCatalog
+      // Yarım zamanlı işler bu ölçüye girmez (D-131): tam gün
+      // çalışılmadığı için "bir yıllık maaş" karşılaştırması onlarda
+      // anlamsız olur. Ölçü tam zamanlı işlere bakar.
+      final List<JobType> tamZamanli = kJobCatalog
+          .where((JobType j) => !j.partTime)
+          .toList(growable: false);
+      final int enDusukMaas = tamZamanli
           .map((JobType j) => j.yearlySalary)
           .reduce((int a, int b) => a < b ? a : b);
-      final int enYuksekMaas = kJobCatalog
+      final int enYuksekMaas = tamZamanli
           .map((JobType j) => j.yearlySalary)
           .reduce((int a, int b) => a > b ? a : b);
 

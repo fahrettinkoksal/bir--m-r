@@ -15,6 +15,7 @@ import '../../../domain/interaction/intimacy.dart';
 import '../../../domain/interaction/parenthood.dart';
 import '../../../domain/pets/pet_care.dart';
 import '../../../domain/models/game_state.dart';
+import '../../../domain/models/hobby_progress.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
@@ -29,6 +30,7 @@ import 'finger_page.dart';
 import 'eye_exam_page.dart';
 import 'fertility_page.dart';
 import 'license_pages.dart';
+import 'hobbies_page.dart';
 import 'pets_page.dart';
 import 'social_pages.dart';
 import '../../../text/turkish_text.dart';
@@ -80,6 +82,17 @@ enum _ActivityPage {
   seyahat,
   tasin,
   cezaevi,
+  hobiler,
+}
+
+/// Hobilerim menüsünün alt metni: gerçek kayda bakar.
+String _hobiAltMetni(GameState state) {
+  final int yas = state.player.age;
+  final int suren =
+      state.hobbies.where((HobbyProgress h) => h.isActiveAt(yas)).length;
+  if (suren == 0) return 'Hepsi bir süredir askıda';
+  if (suren == state.hobbies.length) return 'Hepsi sürüyor';
+  return '$suren tanesi sürüyor';
 }
 
 /// Evcil hayvan menüsünün alt metni: gerçek kayda bakar.
@@ -132,6 +145,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           venue: ActivityVenue.cezaevi,
           onBack: () => _go(_ActivityPage.kok),
         );
+      case _ActivityPage.hobiler:
+        return HobbiesPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.berber:
         return VenuePage(
           venue: ActivityVenue.berber,
@@ -311,6 +326,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         const SizedBox(height: 12),
         // Paket 28: uzun liste gruplara ayrıldı. Aradığını bulmak için
         // bütün ekranı kaydırmak gerekmiyor.
+        // Hobilerim (D-133): hobi sistemi vardı ama neyle uğraşıldığını
+        // tek yerde gösteren ekran yoktu.
+        if (state.hobbies.isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('aktivite_hobiler'),
+            title: 'Hobilerim',
+            subtitle: _hobiAltMetni(state),
+            icon: Icons.palette_outlined,
+            accent: BirOmurAccents.mor,
+            trailingText: '${state.hobbies.length}',
+            onTap: () => _go(_ActivityPage.hobiler),
+          ),
+          const SizedBox(height: 10),
+        ],
         const MenuGroupTitle(
           text: 'Kendine bak',
           accent: BirOmurAccents.yesil,

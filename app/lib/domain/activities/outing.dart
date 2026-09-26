@@ -50,9 +50,18 @@ abstract final class Outing {
   /// Yoldaşın da bileti ödenir: iki kişilik maliyet.
   ///
   /// Faho'nun Q-108 kararı. Ücretsiz aktivite (park) ücretsiz kalır.
-  static int costFor(ActivityAction action, {required bool withCompanion}) {
+  static int costFor(ActivityAction action, {required bool withCompanion}) =>
+      costForParty(action, withCompanion ? 1 : 0);
+
+  /// Kalabalık programın ücreti (D-133).
+  ///
+  /// Faho'nun Q-108 kararı: iki kişi gidiyorsa iki kişilik gerçek maliyet
+  /// hesaba katılır. Aynı kural üç kişiye de işler: oyuncu **artı**
+  /// yoldaş sayısı kadar bilet alınır. Ücretsiz aktivite ücretsiz kalır,
+  /// çünkü sıfırın katı da sıfırdır.
+  static int costForParty(ActivityAction action, int companionCount) {
     if (action.cost <= 0) return 0;
-    return withCompanion ? action.cost * 2 : action.cost;
+    return action.cost * (1 + companionCount.clamp(0, 8));
   }
 
   static const int prototypeOnlyCompanionHappiness = 3;

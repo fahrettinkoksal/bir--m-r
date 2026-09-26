@@ -330,7 +330,17 @@ void main() {
 
     test('öğrenciyken tam zamanlı işe başvurulmaz', () {
       final GameState ogrenci = highSchooler(22, grade: 11, age: 17);
-      expect(market.openJobs(ogrenci), isEmpty);
+      // D-131'den sonra öğrenciye **yarım zamanlı** işler açık; testin
+      // iddiası aynı kaldı ve daraltıldı: tam zamanlı hiçbir iş açık
+      // olmamalı.
+      final List<JobType> acik = market.openJobs(ogrenci);
+      expect(
+        acik.where((JobType j) => !j.partTime),
+        isEmpty,
+        reason: 'Öğrenciye tam zamanlı iş açılmamalı.',
+      );
+      // Karşı iddia: yarım zamanlı kapı gerçekten açık.
+      expect(acik.where((JobType j) => j.partTime), isNotEmpty);
     });
 
     test('başvuru doğrudan kabulle sonuçlanmaz, mülakat açılır', () {

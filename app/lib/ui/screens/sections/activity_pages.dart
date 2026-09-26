@@ -8,6 +8,7 @@ import '../../../domain/economy/housing.dart';
 import '../../../data/activity_catalog.dart';
 import '../../../domain/activities/activity_engine.dart';
 import '../../../domain/models/book_progress.dart';
+import '../../../domain/activities/outing.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
@@ -60,10 +61,12 @@ class VenuePage extends StatefulWidget {
 class _VenuePageState extends State<VenuePage> {
   ActivityOutcome? _sonuc;
 
-  /// Eylem kimliği → birlikte gidilecek kişinin kimliği.
+  /// Eylem kimliği → birlikte gidilecek kişilerin kimlikleri (D-133).
   ///
-  /// Boşsa yalnız gidilir. Seçim yalnızca ekranda tutulur; kayda girmez.
-  final Map<String, String> _kiminle = <String, String>{};
+  /// Boşsa yalnız gidilir. **Birden fazla kişi** seçilebilir: "ailecek"
+  /// bir şey yapmak artık mümkün. Seçim yalnızca ekranda tutulur; kayda
+  /// girmez.
+  final Map<String, Set<String>> _kiminle = <String, Set<String>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -90,21 +93,31 @@ class _VenuePageState extends State<VenuePage> {
               // kimse uydurulmaz (Paket 41).
               final List<Person> kisiler =
                   controller.outingCompanions(eylem);
-              final String? secili = _kiminle[eylem.id];
-              final Person? yoldas = kisiler
-                  .where((Person p) => p.id == secili)
-                  .firstOrNull;
+              final Set<String> secililer =
+                  _kiminle[eylem.id] ?? const <String>{};
+              final List<Person> yoldaslar = kisiler
+                  .where((Person p) => secililer.contains(p.id))
+                  .toList(growable: false);
               return _ActionCard(
                 action: eylem,
                 availability: controller.activityAvailability(eylem),
                 companions: kisiler,
-                selected: yoldas,
+                selectedIds: secililer,
                 playerAge: state.player.age,
-                onSelect: (Person? p) => setState(() {
+                partyCost: Outing.costForParty(eylem, yoldaslar.length),
+                onToggle: (Person? p) => setState(() {
                   if (p == null) {
                     _kiminle.remove(eylem.id);
+                    return;
+                  }
+                  final Set<String> mevcut = <String>{
+                    ..._kiminle[eylem.id] ?? const <String>{},
+                  };
+                  if (!mevcut.remove(p.id)) mevcut.add(p.id);
+                  if (mevcut.isEmpty) {
+                    _kiminle.remove(eylem.id);
                   } else {
-                    _kiminle[eylem.id] = p.id;
+                    _kiminle[eylem.id] = mevcut;
                   }
                 }),
                 onTap: () {
@@ -114,8 +127,13 @@ class _VenuePageState extends State<VenuePage> {
                     ozel();
                     return;
                   }
-                  final ActivityOutcome? outcome =
-                      controller.performActivity(eylem, companion: yoldas);
+                  final ActivityOutcome? outcome = controller.performActivity(
+                    eylem,
+                    companion: yoldaslar.isEmpty ? null : yoldaslar.first,
+                    others: yoldaslar.length <= 1
+                        ? const <Person>[]
+                        : yoldaslar.sublist(1),
+                  );
                   setState(() => _sonuc = outcome);
                 },
               );
@@ -162,9 +180,10 @@ class _ActionCard extends StatelessWidget {
     required this.availability,
     required this.onTap,
     this.companions = const <Person>[],
-    this.selected,
+    this.selectedIds = const <String>{},
     this.playerAge = 0,
-    this.onSelect,
+    this.onToggle,
+    this.partyCost,
   });
 
   final ActivityAction action;
@@ -173,9 +192,15 @@ class _ActionCard extends StatelessWidget {
 
   /// Birlikte gidilebilecek gerçek kişiler; boşsa seçim hiç gösterilmez.
   final List<Person> companions;
-  final Person? selected;
+
+  /// Seçili yoldaşların kimlikleri (D-133): birden fazla olabilir.
+  final Set<String> selectedIds;
+
+  /// Kalabalık gidilirse ödenecek toplam ücret; hesaplanmadıysa `null`.
+  final int? partyCost;
   final int playerAge;
-  final void Function(Person?)? onSelect;
+  /// `null` verilirse bütün seçim temizlenir (yalnız gidilir).
+  final void Function(Person?)? onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +239,7 @@ class _ActionCard extends StatelessWidget {
             // Kiminle gidileceği (Paket 41). Yalnızca gerçekten
             // katılabilecek kişiler listelenir; kimse yoksa bölüm hiç
             // görünmez, sahte düğme olmaz.
-            if (companions.isNotEmpty && onSelect != null) ...<Widget>[
+            if (companions.isNotEmpty && onToggle != null) ...<Widget>[
               const SizedBox(height: 10),
               Text(
                 'Kiminle?',
@@ -230,8 +255,8 @@ class _ActionCard extends StatelessWidget {
                   ChoiceChip(
                     key: Key('birlikte_${action.id}_yalniz'),
                     label: const Text('Yalnız'),
-                    selected: selected == null,
-                    onSelected: (_) => onSelect!(null),
+                    selected: selectedIds.isEmpty,
+                    onSelected: (_) => onToggle!(null),
                   ),
                   for (final Person kisi in companions)
                     ChoiceChip(
@@ -240,11 +265,23 @@ class _ActionCard extends StatelessWidget {
                         '${kisi.firstName} · '
                         '${trLower(kisi.labelFor(playerAge))}',
                       ),
-                      selected: selected?.id == kisi.id,
-                      onSelected: (_) => onSelect!(kisi),
+                      selected: selectedIds.contains(kisi.id),
+                      onSelected: (_) => onToggle!(kisi),
                     ),
                 ],
               ),
+              if (selectedIds.length > 1 &&
+                  partyCost != null &&
+                  partyCost! > action.cost) ...<Widget>[
+                const SizedBox(height: 6),
+                Text(
+                  '${selectedIds.length + 1} kişi · '
+                  'toplam ${trMoney(partyCost!)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
             const SizedBox(height: 10),
             // Dar ekranda gerekçe ile düğme yan yana sıkışmasın diye

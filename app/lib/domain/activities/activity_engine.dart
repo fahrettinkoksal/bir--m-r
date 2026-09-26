@@ -141,35 +141,46 @@ class ActivityEngine {
   ///
   /// [companion] verilirse eylem **birlikte** yapılır (Paket 41). Ücret,
   /// yaş sınırı ve yıllık kota aynı yerde kaldığı için birlikte gitmek
-  /// ikinci kez para götürmez ve ikinci bir kayıt açmaz; yalnızca sonuç
-  /// metni, bağ ve ortak geçmiş değişir.
+  /// ikinci bir kayıt açmaz; yalnızca sonuç metni, bağ ve ortak geçmiş
+  /// değişir.
+  ///
+  /// [others] ile **birden fazla** kişi götürülebilir (D-133): "ailecek"
+  /// bir şey yapmak artık mümkün. Ücret kişi sayısına göre artar ve
+  /// herkesin bağı ayrı ayrı işlenir.
   ActivityResult perform({
     required GameState state,
     required ActivityAction action,
     required Random rng,
     Person? companion,
+    List<Person> others = const <Person>[],
   }) {
     final InteractionAvailability check = availability(state, action);
     if (!check.isAllowed) return _blocked(state, check.reason!);
-    if (companion != null) {
+    // Bütün yoldaşlar aynı denetimden geçer; biri uygun değilse program
+    // kurulmaz ve para gitmez.
+    final List<Person> yoldaslar = <Person>[
+      if (companion != null) companion,
+      ...others,
+    ];
+    for (final Person kisi in yoldaslar) {
       final InteractionAvailability birlikte =
-          Outing.companionAvailability(state, action, companion);
+          Outing.companionAvailability(state, action, kisi);
       if (!birlikte.isAllowed) return _blocked(state, birlikte.reason!);
       // Davet edilen kişi reddedebilir (D-059). Ret **para götürmez** ve
       // yıllık kotayı harcamaz: gerçekleşmeyen program ücretlendirilmez.
-      final String? ret = Outing.refusalReason(state, action, companion);
+      final String? ret = Outing.refusalReason(state, action, kisi);
       if (ret != null) return _blocked(state, ret);
     }
 
     // Faho'nun Q-108 kararı: iki kişi gidiyorsa iki kişilik gerçek
     // maliyet hesaba katılır. Park gibi ücretsiz aktivite ücretsiz
     // kalır, çünkü sıfırın iki katı da sıfırdır.
-    final int odenecek = Outing.costFor(action, withCompanion: companion != null);
+    final int odenecek = Outing.costForParty(action, yoldaslar.length);
     if (state.player.wallet < odenecek) {
       return _blocked(
         state,
         '${trMoney(odenecek)} gerekiyor; cüzdanında yeterli para yok. '
-        'İki kişilik bilet tek kişilikten pahalı.',
+        '${yoldaslar.length == 1 ? 'İki kişilik bilet tek kişilikten pahalı.' : 'Kalabalık gitmek pahalı.'}',
       );
     }
 
@@ -257,8 +268,10 @@ class ActivityEngine {
 
     // Birlikte gidildiyse sahne, bağ ve ortak geçmiş burada işlenir
     // (Paket 41). Tek çıkış noktası: çifte kayıt oluşamaz.
-    if (companion != null) {
-      next = _applyCompanion(state, next, action, companion, rng);
+    if (yoldaslar.isNotEmpty) {
+      for (final Person kisi in yoldaslar) {
+        next = _applyCompanion(state, next, action, kisi, rng);
+      }
       final String sahne = next.log.last.text;
       final List<AppliedEffect> etkiler = diffAppliedEffects(state, next);
       next = _announce(state, next, action, sahne, etkiler, companion);

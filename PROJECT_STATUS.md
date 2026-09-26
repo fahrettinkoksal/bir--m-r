@@ -1264,6 +1264,57 @@ sayılar `prototypeOnly`.
 `flutter test` **2072 geçti, 15 atlandı, 0 başarısız** (bunların **35'i** bu pakette yeni).
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
+## Paket U: arkadaşlık, yarım zamanlı iş, girişimcilik ve eksik ekranlar (26 Eylül 2026, D-130 … D-133)
+
+Faho'nun seçimi: arkadaşlığı derinleştir · girişimcilik ve kendi işini kur ·
+yarım zamanlı işler · ucuz kazançlar (eksik ekranlar). **Hayat hedefleri
+bilinçli olarak eklenmedi.**
+
+### Arkadaşlık (D-130)
+Kodla doğrulanan eksik: 60 hayatta **1.141 sınıf arkadaşı** üretiliyordu,
+yalnızca **30'u** arkadaş oluyordu — çünkü oyuncunun bir tanıdığı arkadaş
+yapmak için **hiçbir düğmesi yoktu.** Artık dört şey var: yakın arkadaş
+olma teklifi (garanti değil), küslük, barışma ve arkadaşın kendi hayatı
+(taşınır, evlenir, iş değiştirir, zor gün geçirir). 13 yeni olay, üç
+zincir — biri D-126'da kaydedilip hiç dönmeyen **çocukluk arkadaşının
+yıllar sonra dönüşü**.
+
+**Ölçüm düzeltmesi:** "34/60 hayatta hiç arkadaş yok" sayısı hatalıydı;
+simülasyon hiç kimseyle vakit geçirmiyordu. Simülasyona etkileşim eklendi.
+
+| Ölçü (100 hayat) | Önce | Sonra |
+|---|---|---|
+| Hiç arkadaşı olmayan hayat | 34/60 (hatalı ölçüm) | **0** |
+| Yakın arkadaşla ölen | 0 | **88** |
+| Ortalama arkadaş | 0,5 | **6,8** |
+| Ortalama yakın arkadaş | 0,0 | **3,3** |
+| Küslük yaşayan | — | 89 |
+
+### Yarım zamanlı iş (D-131)
+D-126'daki "yaz işi istemek" olayı hiçbir kapıya çıkmıyordu ve öğrencinin
+çalışması mümkün değildi. 8 yarım zamanlı iş, yeni bir maaş bandı
+(90.000-260.000 ₺/yıl, asgari ücret tabanı uygulanmaz), 16 mülakat sorusu.
+Okurken çalışmanın bedeli var: zekâ katkısı yarıya iner, yılda −2 sağlık.
+
+### Girişimcilik (D-132)
+44 mesleğin hepsi maaşlıydı. 13 iş türü geldi (sermaye 84.000-2.900.000 ₺).
+Maaş garantidir, kendi işi değildir: işin durumu 0-100 arası, 25'in altında
+para yer, 0'da batar. Üç hamle: işine bak, para yatır, işi devret.
+Ekonomiye bağlı; banka zarar eden işi gelir saymıyor. Yeni ekran: Kendi İşim.
+
+### Eksik ekranlar (D-133)
+Hobilerim · Evlilik Geçmişi · evcil hayvan detayı · çoklu kişiyle aktivite.
+Dördü de kodda vardı ama oyuncu göremiyordu.
+
+**Açık kalan sayılar:** Q-144 (arkadaşlık eşikleri), Q-145 (arkadaşlık
+olayları), Q-146 (yarım zamanlı iş ve kendi işi sayıları), Q-147 (ekranlar
+ve kalabalık aktivite). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2145 geçti, 15 atlandı, 0 başarısız** (bunların **73'ü** bu pakette yeni:
+friendship_depth 23, part_time_work 12, business 28, missing_screens 10).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

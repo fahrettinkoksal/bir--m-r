@@ -8,6 +8,7 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../../text/turkish_text.dart';
 import '../../theme/bir_omur_theme.dart';
+import '../../widgets/pet_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 
 /// Evcil hayvanlar sayfası (Paket 40 — Issue #67, 2. kısım).
@@ -208,6 +209,15 @@ class _PetCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+                // Kaydın tamamı ayrı pencerede (D-133): sağlık, yakınlık,
+                // kaç yıldır birlikte, kayıp ve vefat geçmişi.
+                IconButton(
+                  key: Key('pet_detail_${pet.id}'),
+                  tooltip: 'Kayıt',
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () =>
+                      PetDetailSheet.show(context, petId: pet.id),
                 ),
               ],
             ),

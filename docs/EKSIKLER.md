@@ -36,14 +36,14 @@ ayırmak için her madde aşağıda işaretlendi.
 
 | Sistem | Sayı |
 |---|---|
-| Olay havuzu | **303 olay** (221 + 51 çocukluk + 31 suç/hukuk) |
+| Olay havuzu | **316 olay** (221 + 51 çocukluk + 31 suç + 13 arkadaşlık) |
 | Olay kategorileri | kişisel 79 · yetişkinlik 44 · aile 40 · mahalle 34 · okul 24 |
-| Meslek | 44 |
+| Meslek | **52** (44 tam zamanlı + 8 yarım zamanlı) · kendi işi **13 tür** |
 | Aktivite eylemi | 51 (7 mekân) |
 | Üniversite bölümü | 11 |
 | Evcil hayvan türü | 10 · dövüş sanatı 3 · hobi 4 |
 | Sosyal medya | 14 içerik · 7 medya işi · 7 sponsor kategorisi |
-| Kesin karar | D-001 … D-129 |
+| Kesin karar | D-001 … D-133 |
 | Test | 2024 geçiyor, 15 atlanıyor |
 
 **Ölçülen oynanış:** ortalama ömür ~71-74 yıl · bir hayatta görülen
@@ -76,12 +76,16 @@ ve Q-141 … Q-143'te soruldu.
 **Suç zorunlu içerik değil:** riskli seçim yapmayan 100 hayatta tek bir
 dosya bile açılmıyor (ölçüldü, testle sabit).
 
-### 2.2 Girişimcilik — **yok**
-Arama: `girişim` → **0 sonuç**.
+### 2.2 Girişimcilik — **eklendi (D-132)**
 
-44 meslek var, **hepsi maaşlı**. Kendi işini kurmak, dükkân açmak, ortak
-almak, batmak yok. Ekonomi sistemi (banka, kredi, mülk, kira geliri)
-zaten var; girişimcilik bu altyapının üstüne oturabilir.
+> **Güncelleme:** bu bölümdeki "yok" tespiti artık geçerli değil.
+
+Gelen: 13 iş türü üç ölçekte (sermaye 84.000-2.900.000 ₺) · işin durumu
+(0-100) · kâr/zarar · batma · devretme · işine bakmak · para yatırmak ·
+ekonomiye bağlı gelir · Kendi İşim ekranı.
+
+**Hâlâ yok:** ortak almak, ikinci iş, işletme kredisi, esnaf emekliliği,
+işin kuşak devamında geçmesi. Q-146'da soruldu.
 
 ### 2.3 Üvey ebeveyn ve ikinci ailenin bağları — **yok**
 Arama: `üvey` → **0 sonuç**.
@@ -298,19 +302,19 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    fakir ve en duygusal dönemi.
 3. ~~**Suç ve hukuk sistemi.**~~ **Yapıldı (D-128, V1).** V2 için açık
    kalanlar Q-141 … Q-143'te.
-4. **Arkadaşlığı derinleştir** — küslük, barışma, arkadaşın kendi hayatı.
+4. ~~**Arkadaşlığı derinleştir**~~ **Yapıldı (D-130).**
 5. **Görsel kimlik kararı (Q-001/Q-077).** Oyun bir yıl daha kodlanabilir
-   ama nasıl göründüğü seçilmeden "bitti" denemez.
-6. Girişimcilik, hobi kataloğunun genişletilmesi, eksik ekranlar
-   (Hobilerim, Evlilik Geçmişi, hayvan detayı).
+   ama nasıl göründüğü seçilmeden "bitti" denemez. **Sıradaki en büyük
+   engel bu.**
+6. ~~Girişimcilik, eksik ekranlar~~ **Yapıldı (D-132, D-133).** Hobi
+   kataloğunun genişletilmesi (4 hobi) duruyor.
 
-**Claude'un kişisel görüşü:** oyun şu an **oynanabilir ama yeterince
-tekrar oynanabilir değil**. İkinci hayatı ilkinden farklı kılan şey
-henüz yeterli değil. Bunun sebebi havuzun küçüklüğü değil — bir hayatta
-ortalama 48 farklı olay görülüyor ve tekrar en fazla 3 — asıl sebep
-**hayatların birbirine benzemesi**: meslek yolları birbirinin aynı
-(hepsi maaşlı), arkadaşlık sığ.
+**Claude'un kişisel görüşü (26 Eylül 2026'da güncellendi):** "hayatlar
+birbirine benziyor" görüşünün **dört dayanağının dördü de kapandı**:
+çocukluk artık fakir değil (D-126), risk geldi (D-128), arkadaşlık
+yaşanıyor (D-130) ve kariyerin ikinci bir şekli var (D-131, D-132).
 
-**Güncelleme:** bu görüşün iki dayanağı kapandı — çocukluk artık fakir
-değil (D-126) ve risk geldi (D-128). Kalan iki dayanak duruyor:
-girişimcilik yok, arkadaşlık hâlâ sığ.
+Kalan en büyük engel **kod değil, karar**: görsel kimlik ve palet hiç
+seçilmedi (Q-001, Q-077) ve 15 golden testi bu yüzden atlanıyor. Bunun
+yanında oyun hâlâ **hiçbir gerçek cihazda oynanmadı** — bütün doğrulama
+otomatik test. Bu iki madde kapanmadan "bitti" denemez.

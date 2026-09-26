@@ -926,12 +926,13 @@ class GameController extends ChangeNotifier {
   /// mutluluğu düşürebilir de; bu yüzden ayrı yoldan geçer (Paket 27).
   /// Yönlendirme tek yerde yapılır ki arayüz hangi eylemin fal olduğunu
   /// bilmek zorunda kalmasın.
-  /// [companion] verilirse eylem **birlikte** yapılır (Paket 41). Ücret ve
-  /// yıllık kota tek yerde kaldığı için birlikte gitmek ikinci kez para
-  /// götürmez.
+  /// [companion] verilirse eylem **birlikte** yapılır (Paket 41).
+  /// [others] ile birden fazla kişi götürülebilir (D-133); ücret kişi
+  /// sayısına göre artar ama yıllık kota tek kalır.
   ActivityOutcome? performActivity(
     ActivityAction action, {
     Person? companion,
+    List<Person> others = const <Person>[],
   }) => _runActivity(
     (GameState current) => ActivityEngine.isFortune(action)
         ? _activities.tellFortune(state: current, action: action, rng: _random)
@@ -940,6 +941,7 @@ class GameController extends ChangeNotifier {
             action: action,
             rng: _random,
             companion: companion,
+            others: others,
           ),
   );
 
