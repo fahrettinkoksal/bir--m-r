@@ -1593,6 +1593,77 @@ gevşetilmedi:
 D-134 … D-161 yalnızca kodda ve bu dosyada duruyor. `CLAUDE.md` kuralı
 gereği kullanıcı onayı olmadan `DECISIONS.md`'ye karar yazılmadı.
 
+## Paket AA — Yatırım, portföy ve servet (26 Eylül 2026, D-162)
+
+Varlıklar altına **Yatırımlar** geldi. Beş tür: Vadeli Hesap, Altın,
+Döviz Sepeti, Dengeli Fon, Karma Hisse Sepeti. **Gerçek şirket, fon,
+hisse ya da banka adı hiçbir yerde geçmiyor**; canlı fiyat çekilmiyor;
+hiçbir metin yatırım tavsiyesi vermiyor. Banka Aktiviteler'de kaldı
+(D-108).
+
+**Piyasa rejimi.** Yılın bir rejimi var (durgun / normal / güçlü / kriz)
+ve iki gizli parametresi (enflasyon baskısı, piyasa güveni). Rejim iki
+ortak etken üretiyor — risk iştahı (hisse, fon) ve korunma talebi
+(altın, döviz) — varlıklar bu etkenlere kendi ağırlıklarıyla tepki
+veriyor. Böylece kriz yılında hisse düşerken altın portföyü tutabiliyor.
+Ölçüm: 10.000 yılda kriz yıllarının %83'ünde hisse düşüyor, %95'inde
+altın hisseden iyi durumda.
+
+**Piyasa yaş başına bir kez ilerliyor.** Ekranı kapatıp açmak, al-sat
+yapmak ya da kaydı geri yüklemek fiyatı yeniden çevirmiyor. Piyasa
+kendi rastgele akışını kullanıyor (tohum hayatın kimliğinden ve yaştan
+türeyen sabit bir karma), oyunun ana akışından çekiliş çalmıyor.
+
+**Portföy.** Maliyet esası, ortalama maliyet, kısmi satış, gerçekleşen
+ve gerçekleşmeyen kâr/zarar, tür bazlı geçmiş. Vadeli hesap 1 yıl
+kilitli ve vadesinde zarar yazmıyor; erken bozmak faizi yakıyor,
+anapara tam geri geliyor. 18 yaş sınırı var, çocuk adına hesap yok.
+Cüzdan hiçbir yolda eksiye düşmüyor.
+
+**Servet, miras, boşanma.** Tek bir net varlık hesabı (`NetWorth`)
+kuruldu; eşya değeri boşanma paylaşımıyla aynı fonksiyondan geliyor.
+Hayat sonu değerlendirmesi artık cüzdan değil "eldeki nakit + portföy"
+okuyor. Kuşak devrinde portföy bir kez nakde çevrilip miras havuzuna
+giriyor — kaybolmuyor, iki kez de sayılmıyor. Evlilik içinde açılan
+pozisyonlar edinilmiş mal sayılıp paylaşıma giriyor; cüzdan yetmezse
+eksik kısım normal satış muhasebesinden geçen zorunlu satışla
+toplanıyor.
+
+**Ölçümler (`app/test/paket_aa_measure_test.dart`, gerçekten
+çalıştırıldı):** 10.000 piyasa yılı, her tür için 1.000 ayrı yirmi
+yıllık yol, 100 hayatın ölüm anındaki serveti — hem yatırım yapan hem
+yapmayan hâliyle. Yıllık ortalamalar: vadeli %6,0 · altın %7,0 · döviz
+%6,5 · fon %8,0 · hisse %10,0. 100.000 ₺ ile 20 yıl: medyan 314-410 bin
+₺, en riskli türde en iyi %10 1,87 milyon ₺ ve yolların %10'u
+anaparanın altında bitiyor. 100 hayatın en zengini 110 milyon ₺;
+**hiçbir hayat milyarder bitmiyor.**
+
+**Getiriler gerçek Türkiye enflasyonuna göre kalibre edilmedi, bilerek.**
+Görevin 3. maddesindeki %32'lik örnek ile 24. maddesindeki "%40-60
+büyütme, oyunun ekonomisini parçalar" yasağı çelişiyordu; 24. madde esas
+alındı ve çelişki kodda da, Q-165/1'de de yazılı duruyor.
+
+**Açık kalan gerçek bulgu:** geçim gideri portföyden tahsil edilmiyor,
+yalnızca cüzdandan. Bu yüzden yatırım yapan hayat, hiç yatırım yapmayan
+aynı hayattan ölçümde 24 kat zengin bitiyor — farkın büyük kısmı
+getiriden değil, paranın geçim giderinden korunmasından geliyor. Bu bir
+ürün kararı; Q-165/5'te duruyor ve **uydurulmadı.**
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2428 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_aa_test` (26), `paket_aa_widget_test` (7), `paket_aa_measure_test`
+(3 ölçüm). **Gerçek Windows veya Android cihazda oynanmadı.**
+
+Yeni olaylar havuza girince rastgele akış kaydığı için dört mevcut test
+kırıldı. Hiçbiri gevşetilmedi ya da silinmedi: üçünde tohum yeniden
+çıpalandı (tohum 5'te oyuncu 8 yaşında vefat ediyor), birinde bildirim
+sınırı yeniden ölçüldü ve o yılın sekiz kaleminin hiçbirinin piyasa
+bildirimi olmadığı gerekçeye yazıldı. Kökteki kırılganlık
+`docs/EKSIKLER.md` §6'da duruyor ve motor değişikliği onay bekliyor.
+
+### DECISIONS.md'ye dokunulmadı
+D-162 de yalnızca kodda ve bu dosyada duruyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

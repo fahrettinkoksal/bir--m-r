@@ -134,6 +134,23 @@ aşılmaz. Üçüz yok. Sayılar Q-154'te.
 
 ---
 
+### 2.7 Yatırım, portföy ve servet — **eklendi (D-162, V1)**
+
+Oyunda para yalnızca cüzdanda duruyordu: biriktirmenin tek yolu
+harcamamaktı ve harcamayan oyuncunun parası geçim giderine gidiyordu.
+Varlıklar altına **Yatırımlar** geldi: beş tür (vadeli hesap, altın,
+döviz sepeti, dengeli fon, karma hisse sepeti), yılın rejimi olan bir
+piyasa (durgun / normal / güçlü / kriz) ve iki gizli parametre. Piyasa
+yaş başına bir kez ilerliyor; ekranı açıp kapatmak fiyatı çevirmiyor.
+
+Portföy net varlığa, boşanma paylaşımına ve mirasa giriyor; hayat sonu
+değerlendirmesi artık cüzdan değil "eldeki nakit + portföy" okuyor.
+
+**V1'de bilerek yok:** gerçek hisse/şirket adı, canlı fiyat, kripto,
+opsiyon, kaldıraç, vadeli işlem, açığa satış, yatırım kredisi, ayrıntılı
+vergi, gün içi alım-satım, grafik. Ayrıca **geçim gideri portföyden
+tahsil edilmiyor** — bu bir karar sorusu olarak Q-165/5'te duruyor.
+
 ## 3. Yarım kalmış sistemler
 
 Kodlandı ama yüzeysel; derinleştirilmesi gerekiyor.
@@ -331,6 +348,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   pencere. Oynanırken fazla gelebilir (Q-132).
 - **Kayıt göçü** her yeni alanda elle yazılıyor; alan sayısı arttıkça
   bu kırılgan bir nokta.
+- **Olay havuzuna içerik eklemek tohuma çakılı testleri kaydırıyor.**
+  `EventEngine._pick`, havuzdaki **her** olay için kişiyi çözüyor
+  (`_resolvePerson`, çekiliş tüketiyor) ve yaş kapısına ancak ondan
+  sonra bakıyor. Sonuç: 20 yaş üstü bir olay eklemek çocukluk yıllarının
+  rastgele akışını da kaydırıyor. D-162'de bu dört testi kırdı; hiçbiri
+  gevşetilmedi, tohumları yeniden çıpalandı ve gerekçesi yazıldı. Kalıcı
+  çözüm yaş kapısını kişi çözmeden önce bakmak; **bu bir motor
+  değişikliği olduğu için onay bekliyor**, yatırım paketinin yan etkisi
+  olarak yapılmadı.
 
 ---
 

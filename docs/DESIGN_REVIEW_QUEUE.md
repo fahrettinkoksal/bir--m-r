@@ -3810,3 +3810,45 @@ Kardeş kaydı doğuştan vardı ama hayatı hiç ilerlemiyordu: okumuyor, iş b
 7. **Ağır/organize suç eklenmeli mi?** Eklenecekse içerik sınırı nasıl korunacak — yalnızca sonuç anlatan, yöntem anlatmayan bir çerçeve mi?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; ağır/organize suç eklenmez, çevre itibarı sönmez, denetim döneminin başka yaptırımı olmaz.
+
+---
+
+### Q-165 — Yatırım, portföy ve servet sistemi V1
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-162 · Test: `app/test/paket_aa_test.dart`, `app/test/paket_aa_widget_test.dart`, `app/test/paket_aa_measure_test.dart`
+
+Varlıklar altına **Yatırımlar** geldi. Beş tür: Vadeli Hesap, Altın, Döviz Sepeti, Dengeli Fon, Karma Hisse Sepeti. Gerçek şirket, fon, hisse ya da banka adı hiçbir yerde geçmiyor; canlı fiyat çekilmiyor. Piyasa yaş başına **bir kez** ilerliyor; ekranı açıp kapatmak, al-sat yapmak ya da kaydı geri yüklemek fiyatı yeniden çevirmiyor. Bütün sayılar `prototypeOnly`.
+
+**Görevin kendi içinde bir çelişkisi vardı, uydurarak kapatmadım.** 3. maddede "100.000 ₺ → tahmini 132.000 ₺" örneği var (yıllık %32). 24. maddede ise "yatırımları gerçek Türkiye enflasyonuna göre her yıl %40-60 büyütme, bu oyunun ekonomisini parçalar" yazıyor. 3. madde kendi içinde "mevcut oyun ekonomisini bozmayacak oran kullan" diye devam ettiği için **24. madde esas alındı**: oranlar oyun ölçeğine göre seçildi, gerçek mevduat faizi taklit edilmedi. Sayı onayını bekliyor (aşağıda 1. soru).
+
+**Ölçüldü (tahmin değil):**
+
+| Tür | 10.000 yılda ortalama | Oynaklık | Zarar yılı | En kötü yıl | 20 yıl / 100.000 ₺ medyan | En iyi %10 | Anaparanın altında biten |
+|---|---|---|---|---|---|---|---|
+| Vadeli Hesap | %6,0 | — | %0 | — | 321.000 ₺ | 321.000 ₺ | %0 |
+| Altın | %7,0 | %10,8 | %26,2 | −%25 | 342.000 ₺ | 662.000 ₺ | ~%1 |
+| Döviz Sepeti | %6,5 | %9,8 | %25,4 | −%24 | 314.000 ₺ | 561.000 ₺ | <%1 |
+| Dengeli Fon | %8,0 | %12,1 | %24,9 | −%39 | 410.000 ₺ | 824.000 ₺ | ~%1 |
+| Karma Hisse Sepeti | %10,0 | %23,9 | %33,1 | −%55 | 406.000 ₺ | 1.865.000 ₺ | %10 |
+
+Rejim dağılımı (10.000 yıl): durgun %26,2 · normal %46,1 · güçlü %19,6 · kriz %8,0. Kriz yıllarında hisse %83 ihtimalle düşüyor ve %95 ihtimalle altın hisseden iyi durumda — varlıklar bağımsız zar atmıyor.
+
+**Gerçek bulgu: yatırım, parayı geçim giderinden koruyor.** 100 hayat iki kez ölçüldü. Hiç yatırım yapmayan hayatın ölüm anındaki net varlığı medyan **85.000 ₺**; 18'inden sonra her yıl cüzdanının beşte birini fon ve hisseye koyan aynı 100 hayatta medyan **2.057.000 ₺**. Fark 24 kat ama bunun büyük kısmı getiri değil: yatırılan anapara medyan 106.000 ₺, son portföy 1.358.000 ₺ (bir ömür boyunca bileşik etki, 13 kat). Geri kalanı **paranın nerede durduğu**: cüzdanda duran para her yıl geçim giderine gidiyor, portföyde duran para gitmiyor. En yüksek net varlık 110 milyon ₺ (yatırımsızda 14,9 milyon); hiçbir hayat milyarder bitmiyor ve kimse birkaç yılda zengin olmuyor.
+
+**Boşanmada portföy paylaşıma giriyor.** Evlilik içinde açılan pozisyonlar edinilmiş mal sayılıyor (D-075'teki eşya kuralının aynısı), evlilik öncesi pozisyon kişisel mal. Nakit payı cüzdan + evlilik içi portföy üzerinden hesaplanıyor; cüzdan yetmezse eksik kısım **normal satış muhasebesinden geçen** zorunlu satışla, gerekirse vadeli bozularak toplanıyor. Cüzdan eksiye düşmüyor. **Bilinen sınır:** evlilikten önce açılmış bir pozisyona evlilik içinde para eklenmişse o ekleme de kişisel sayılıyor, çünkü pozisyon tek kayıt tutuyor ve her alımın yaşı ayrı saklanmıyor.
+
+**Mirasta portföy kaybolmuyor, iki kez de sayılmıyor.** Kuşak devrinde portföy bir kez nakde çevrilip miras havuzuna giriyor; pozisyonlar yeni hayata taşınmıyor. Piyasa rejimi ve gizli parametreler devrediliyor, "ilerletildi" işareti devredilmiyor.
+
+**Karar soruları:**
+1. **Getiri oranları** (vadeli %6, altın %7, döviz %6,5, fon %8, hisse %10 yıllık eğilim) doğru bantta mı? Görevdeki %32'lik örnek mi esas alınsın, oyun ekonomisi mi? (Şu an oyun ekonomisi esas.)
+2. **Vadeli hesap 1 yıl, en az 5.000 ₺, erken bozmada faiz tamamen yanıyor.** Vade seçenekleri (2 yıl, 5 yıl) eklenmeli mi? Erken bozmada faizin bir kısmı kalsın mı?
+3. **Rejim dağılımı** (kriz %8, güçlü %20) doğru mu? Kriz daha seyrek/sık mı olmalı?
+4. **Hisse en kötü yılı −%55.** Bir oyun için fazla acı mı, yoksa "yüksek risk" etiketinin karşılığı bu mu?
+5. **Geçim gideri portföyden tahsil edilmiyor.** Cüzdan boşalınca geçim sıkıntısı yaşanıyor ama portföy el sürülmeden duruyor. İki seçenek: (a) şimdiki hâl — yatırım bir biriktirme yeri, (b) cüzdan yetmezse portföyden zorunlu satış. Yukarıdaki 24 katlık farkın asıl sebebi bu; karar senin.
+6. **Boşanmada pozisyon başına yaş tutulmuyor** (yukarıdaki bilinen sınır). Her alımı ayrı kayıt yapmak gerekir mi, yoksa V1 için bu yaklaşım yeterli mi?
+7. **Yatırım 18 yaşında açılıyor**, çocuk adına hesap yok. Doğru mu?
+8. **Ekran yeri:** Yatırımlar Varlıklar altında, Banka Aktiviteler altında (D-108). İkisi aynı yere mi toplanmalı?
+9. **15 yatırım olayı var** ve hiçbiri portföyü kendi kendine değiştirmiyor (al/sat yalnızca ekrandan). Olaylar portföyü doğrudan etkileyebilmeli mi (mesela "bir kısmını satmak zorunda kaldın")?
+10. **Hayat sonu değerlendirmesinde** emek ekseni artık cüzdan değil "eldeki nakit + portföy" okuyor. Eşya ve ev de sayılmalı mı (şu an net varlık hesabında var ama değerlendirmede yok)?
+11. **Vadeli hesap dışında vergi, komisyon ve alım-satım masrafı yok.** V1'de böyle kalsın mı?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; geçim gideri portföyden tahsil edilmez, vade seçenekleri açılmaz, olaylar portföye dokunmaz ve `DECISIONS.md`'ye kesin karar yazılmaz.
