@@ -401,6 +401,14 @@ class _CareerViewState extends State<_CareerView> {
         egitim.universityFinished ||
         (egitim.isSchoolStudent && yarimZamanliCagi);
 
+    // Başlık boş kalmasın: bu yıl tıklanabilir bir eylem var mı?
+    final bool eylemVar = egitim.awaitingAfterSchoolChoice ||
+        state.hasPendingInterview ||
+        (isAranabilir && !state.career.isRetired) ||
+        (state.career.isEmployed && !state.career.isRetired) ||
+        (!state.career.isRetired &&
+            state.player.age >= Retirement.prototypeOnlyEarlyAge);
+
     return SectionScaffold(
       icon: Icons.work_rounded,
       accent: BirOmurAccents.mor,
@@ -501,6 +509,14 @@ class _CareerViewState extends State<_CareerView> {
             ],
           ),
         const SizedBox(height: 12),
+        // Bu yıl gerçekten yapılabilecek şeyler tek başlık altında (D-138).
+        if (eylemVar) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Bu yıl yapabileceklerin',
+            accent: BirOmurAccents.mor,
+          ),
+          const SizedBox(height: 8),
+        ],
         if (egitim.awaitingAfterSchoolChoice) ...<Widget>[
           MenuRow(
             title: 'Mezuniyet sonrası',
@@ -522,46 +538,6 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 10),
         ],
-        // Askerlik ayrı bir menüdür (Paket 29). Yükümlülük kapanmışsa
-        // da görünür: ne olduğu okunabilmeli.
-        if (state.player.age >= MilitaryService.prototypeOnlyMinAge ||
-            state.military.status != MilitaryStatus.yok) ...<Widget>[
-          MenuRow(
-            key: const Key('career_military_row'),
-            title: 'Askerlik',
-            subtitle: MilitaryService.menuSubtitle(state),
-            icon: Icons.military_tech_outlined,
-            accent: BirOmurAccents.yesil,
-            onTap: () => _go(_CareerPage.askerlik),
-          ),
-          const SizedBox(height: 10),
-        ],
-        // Kendi İşim (D-132). Maaşlı işin yanında ikinci bir geçim
-        // yolu; 18 yaşından itibaren görünür.
-        if (state.player.age >= 18 ||
-            state.businesses.isNotEmpty) ...<Widget>[
-          MenuRow(
-            key: const Key('career_business_row'),
-            title: 'Kendi İşim',
-            subtitle: _isAltMetni(state),
-            icon: Icons.storefront_outlined,
-            accent: BirOmurAccents.pirinc,
-            onTap: () => _go(_CareerPage.kendiIsi),
-          ),
-          const SizedBox(height: 10),
-        ],
-        // Adli Geçmiş (D-128). Sabıkanın oyundaki en somut etkisi iş
-        // başvurusu olduğu için burada durur. Kayıt yoksa da görünür:
-        // "temiz" bilgisi de bilgidir.
-        MenuRow(
-          key: const Key('career_legal_row'),
-          title: 'Adli Geçmiş',
-          subtitle: _adliAltMetni(state),
-          icon: Icons.gavel_outlined,
-          accent: BirOmurAccents.nar,
-          onTap: () => _go(_CareerPage.adliGecmis),
-        ),
-        const SizedBox(height: 10),
         if (isAranabilir && !state.career.isRetired) ...<Widget>[
           MenuRow(
             title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
@@ -670,6 +646,55 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 10),
         ],
+        // Kayıtlar ve durum (D-138): geçmişe bakılan satırlar, bu yıl
+        // yapılacak işlerin altında kendi başlığında durur. Eskiden
+        // askerlik, kendi işi ve adli geçmiş "iş ara" ile aynı
+        // kolonda karışıyordu.
+        const MenuGroupTitle(
+          text: 'Kayıtlar ve durum',
+          accent: BirOmurAccents.cini,
+        ),
+        const SizedBox(height: 8),
+        // Askerlik ayrı bir menüdür (Paket 29). Yükümlülük kapanmışsa
+        // da görünür: ne olduğu okunabilmeli.
+        if (state.player.age >= MilitaryService.prototypeOnlyMinAge ||
+            state.military.status != MilitaryStatus.yok) ...<Widget>[
+          MenuRow(
+            key: const Key('career_military_row'),
+            title: 'Askerlik',
+            subtitle: MilitaryService.menuSubtitle(state),
+            icon: Icons.military_tech_outlined,
+            accent: BirOmurAccents.yesil,
+            onTap: () => _go(_CareerPage.askerlik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Kendi İşim (D-132). Maaşlı işin yanında ikinci bir geçim
+        // yolu; 18 yaşından itibaren görünür.
+        if (state.player.age >= 18 ||
+            state.businesses.isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('career_business_row'),
+            title: 'Kendi İşim',
+            subtitle: _isAltMetni(state),
+            icon: Icons.storefront_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => _go(_CareerPage.kendiIsi),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Adli Geçmiş (D-128). Sabıkanın oyundaki en somut etkisi iş
+        // başvurusu olduğu için burada durur. Kayıt yoksa da görünür:
+        // "temiz" bilgisi de bilgidir.
+        MenuRow(
+          key: const Key('career_legal_row'),
+          title: 'Adli Geçmiş',
+          subtitle: _adliAltMetni(state),
+          icon: Icons.gavel_outlined,
+          accent: BirOmurAccents.nar,
+          onTap: () => _go(_CareerPage.adliGecmis),
+        ),
+        const SizedBox(height: 10),
         // Kariyer geçmişi: eski işler silinmez.
         if (state.career.allEntries().isNotEmpty) ...<Widget>[
           MenuRow(

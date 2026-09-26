@@ -209,6 +209,13 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           const SizedBox(height: 10),
         ],
         const SizedBox(height: 8),
+        // Alt listeler tek başlık altında toplanır (D-138): yukarıda
+        // yakınların kartları, aşağıda "kimler var" listeleri.
+        const MenuGroupTitle(
+          text: 'Listeler',
+          accent: BirOmurAccents.gul,
+        ),
+        const SizedBox(height: 8),
         if (cocukSayisi > 0) ...<Widget>[
           MenuRow(
             key: const Key('relationships_children_row'),

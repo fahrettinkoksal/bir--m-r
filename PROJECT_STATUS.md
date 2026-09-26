@@ -1346,9 +1346,13 @@ kaydı", "muayenesi yeni". Alınan araç **ilanın kondisyonuyla** giriyor.
 Havuz şehir + yaşa göre belirlenimli; yıl geçince tazeleniyor. Model yılı
 yazılmıyor: oyunda takvim yılı yok.
 
-### Mağaza menüleri (D-138)
-On bir satırlık düz liste üç öbeğe ayrıldı (Gündelik alışveriş / Araç ve
-aksesuar / Konut), sıra sabit; raf içi ürünler ucuzdan pahalıya sıralı.
+### Menü düzeni (D-138)
+Mağazalar: on bir satırlık düz liste üç öbeğe ayrıldı (Gündelik alışveriş /
+Araç ve aksesuar / Konut), sıra sabit; raf içi ürünler ucuzdan pahalıya
+sıralı. **Meslek:** "Bu yıl yapabileceklerin" ve "Kayıtlar ve durum" diye
+iki başlık; askerlik, kendi işi ve adli geçmiş artık "iş ara" ile aynı
+kolonda karışmıyor. **İlişkiler:** alt listeler "Listeler" başlığı altında.
+Aktiviteler ekranı zaten başlıklıydı, dokunulmadı.
 
 ### Kefalet ve tutukluluk (D-139)
 Ağır bir dosyada tutuklama kararı çıkabiliyor (%45, 18 yaş altına
