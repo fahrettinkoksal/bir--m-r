@@ -148,6 +148,95 @@ const List<MediaOpportunity> kMediaOpportunities = <MediaOpportunity>[
     followerRatio: 0.05,
     happiness: 4,
   ),
+
+  // --- İkinci tur (D-152) ------------------------------------------------
+  //
+  // Ün 40'ı geçen oyuncuya yedi iş düşüyordu ve kırklı yaşlardan sonra
+  // aynı yedi teklif dönüp duruyordu. Markalar yine kurgusaldır.
+  // Sayılar `prototypeOnly` (Q-155).
+  MediaOpportunity(
+    id: 'yerel_gazete',
+    label: 'Yerel gazete söyleşisi',
+    description:
+        'Şehrin gazetesi yarım sayfa ayırmış. Ücret küçük, ama kapı '
+        'bir yerden açılıyor.',
+    minFame: kMediaSectionMinFame,
+    fee: Economy.netMonthlyMinimumWage * 2,
+    fameGain: 1,
+    followerRatio: 0.02,
+    happiness: 2,
+  ),
+  MediaOpportunity(
+    id: 'acilis_konugu',
+    label: 'Açılış konuğu',
+    description:
+        'Kurdele kesiliyor, fotoğraf çekiliyor, bir saat sonra '
+        'bitiyor.',
+    minFame: 48,
+    fee: Economy.netMonthlyMinimumWage * 5,
+    fameGain: 2,
+    followerRatio: 0.03,
+    charisma: 1,
+  ),
+  MediaOpportunity(
+    id: 'yarisma_juri',
+    label: 'Yarışma jürisi',
+    description:
+        'Bir yetenek yarışmasında jüri koltuğu. Söylediğin her şey '
+        'kesilip yayılıyor.',
+    minFame: 58,
+    fee: Economy.netMonthlyMinimumWage * 18,
+    fameGain: 4,
+    followerRatio: 0.07,
+    charisma: 2,
+    happiness: 1,
+  ),
+  MediaOpportunity(
+    id: 'dizi_konuk_rol',
+    label: 'Dizide konuk rol',
+    description:
+        'İki bölümlük bir rol. Metni ezberlemek sandığından zor.',
+    minFame: 62,
+    fee: Economy.netMonthlyMinimumWage * 24,
+    fameGain: 5,
+    followerRatio: 0.09,
+    happiness: 3,
+  ),
+  MediaOpportunity(
+    id: 'dijital_kanal',
+    label: 'Dijital platform programı',
+    description:
+        'Kendi adınla bir program. Sezon bağlayıcı; bitene kadar '
+        'takvimin sana ait değil.',
+    minFame: 68,
+    fee: Economy.netMonthlyMinimumWage * 55,
+    fameGain: 7,
+    followerRatio: 0.12,
+    happiness: 2,
+  ),
+  MediaOpportunity(
+    id: 'moda_kampanya',
+    label: 'Moda kampanyası',
+    description:
+        'Sezonluk çekim. Bir gün sürüyor, bir yıl afişlerde kalıyor.',
+    minFame: 72,
+    fee: Economy.netMonthlyMinimumWage * 40,
+    fameGain: 5,
+    followerRatio: 0.11,
+    charisma: 2,
+  ),
+  MediaOpportunity(
+    id: 'odul_toreni',
+    label: 'Ödül töreni sunuculuğu',
+    description:
+        'Canlı yayın, teleprompter ve geri alınamayan bir akşam.',
+    minFame: 78,
+    fee: Economy.netMonthlyMinimumWage * 60,
+    fameGain: 8,
+    followerRatio: 0.14,
+    charisma: 3,
+    happiness: 2,
+  ),
 ];
 
 MediaOpportunity? mediaOpportunityById(String id) {

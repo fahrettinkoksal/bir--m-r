@@ -57,6 +57,12 @@ class Parenthood {
   /// prototypeOnly: çocuk sahibi olmanın mutluluk etkisi.
   static const int prototypeOnlyBirthHappiness = 10;
 
+  /// prototypeOnly: ikiz doğum ihtimali.
+  ///
+  /// Türkiye'de ikiz doğum oranı yaklaşık yüzde iki ile üç arasındadır;
+  /// oyunun ölçeği buradan seçildi. Sayı onay bekliyor (Q-154).
+  static const double prototypeOnlyTwinChance = 0.028;
+
   /// prototypeOnly: çocuğun hanenin dışına çıktığı yaş.
   static const int prototypeOnlyLeaveHomeAge = 25;
 
@@ -85,7 +91,11 @@ class Parenthood {
   }
 
   /// Çocuk sahibi olmaya engel; engel yoksa boş metin.
-  String blockReason(GameState state, {String? coParentId}) {
+  String blockReason(
+    GameState state, {
+    String? coParentId,
+    bool twin = false,
+  }) {
     final Person? partner = coParent(state, preferredId: coParentId);
     if (partner == null) {
       return 'Çocuk sahibi olmak için eşin ya da sevgilin olmalı.';
@@ -126,7 +136,11 @@ class Parenthood {
           'olabiliyor.';
     }
     // Aynı yıl ikinci bir bebek olmaz: bu yıl doğan çocuk henüz 0 yaşında.
-    if (cocuklar.any((Person p) => p.age == 0)) {
+    //
+    // **İkiz bunun istisnasıdır** (D-151): ikinci bebek aynı doğumun
+    // parçasıdır, ayrı bir gebelik değildir. Kural ancak `twin` açıkça
+    // verildiğinde atlanır; oyuncunun düğmesi bu bayrağı hiç geçmez.
+    if (!twin && cocuklar.any((Person p) => p.age == 0)) {
       return 'Bu yıl bir bebeğiniz oldu; bir sonraki yaşta yeniden '
           'deneyebilirsin.';
     }
@@ -151,8 +165,10 @@ class Parenthood {
     GameState state,
     Random rng, {
     String? coParentId,
+    bool twin = false,
   }) {
-    final String engel = blockReason(state, coParentId: coParentId);
+    final String engel =
+        blockReason(state, coParentId: coParentId, twin: twin);
     if (engel.isNotEmpty) {
       return FamilyResult(
         state: state,
@@ -223,9 +239,13 @@ class Parenthood {
       ),
     );
 
-    final String metin = gender == Gender.kadin
-        ? '$isim adında bir kızınız oldu.'
-        : '$isim adında bir oğlunuz oldu.';
+    final String metin = twin
+        ? (gender == Gender.kadin
+            ? 'İkizin diğeri kız oldu: $isim.'
+            : 'İkizin diğeri oğlan oldu: $isim.')
+        : (gender == Gender.kadin
+            ? '$isim adında bir kızınız oldu.'
+            : '$isim adında bir oğlunuz oldu.');
 
     // Masraf **cüzdanda ne varsa o kadar** düşer; borç yazılmaz ve
     // bakiye eksiye inmez (Paket 25).

@@ -567,6 +567,94 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     maxPerAge: 2,
   ),
 
+  // --- Kurslar: ikinci tur (D-152) ---------------------------------------
+  //
+  // Hobi kataloğu dört hobiyle dardı ve "ne yapsam" diye bakan oyuncuya
+  // verecek şeyi azdı. Buradaki her kurs **gerçek bir hobiyi** besler
+  // (`hobby_catalog.dart`); beslemeyen süs eylemi eklenmedi.
+  ActivityAction(
+    id: 'yemek_kursu',
+    venue: ActivityVenue.kurs,
+    label: 'Yemek kursu',
+    description:
+        'Soğan doğramanın bir yolu varmış, yıllardır yanlış '
+        'yapıyormuşsun.',
+    icon: Icons.restaurant_menu_outlined,
+    cost: 7500, // prototypeOnly
+    minAge: 12,
+    happiness: 4,
+    charisma: 1,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'fotograf_kursu',
+    venue: ActivityVenue.kurs,
+    label: 'Fotoğraf kursu',
+    description:
+        'Işığı beklemeyi öğreniyorsun; kareyi acele eden kaçırıyor.',
+    icon: Icons.photo_camera_outlined,
+    cost: 9500, // prototypeOnly
+    minAge: 11,
+    happiness: 4,
+    intelligence: 1,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'dans_kursu',
+    venue: ActivityVenue.kurs,
+    label: 'Dans kursu',
+    description:
+        'Ayaklar sayıyor, beden saymamayı öğrenene kadar sayıyor.',
+    icon: Icons.music_video_outlined,
+    cost: 8500, // prototypeOnly
+    minAge: 8,
+    happiness: 5,
+    charisma: 3,
+    health: 1,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'satranc_kulubu',
+    venue: ActivityVenue.kurs,
+    label: 'Satranç kulübü',
+    description:
+        'Tahtanın karşısında oturan kişi bazen kendinden başkası '
+        'değil.',
+    icon: Icons.grid_on_outlined,
+    cost: 3200, // prototypeOnly
+    minAge: 7,
+    intelligence: 4,
+    happiness: 2,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'yazarlik_atolyesi',
+    venue: ActivityVenue.kurs,
+    label: 'Yazarlık atölyesi',
+    description:
+        'Bir cümleyi on kere kurup dokuzunu çiziyorsun; kalan biri '
+        'de durmuyor.',
+    icon: Icons.edit_note_outlined,
+    cost: 11000, // prototypeOnly
+    minAge: 14,
+    intelligence: 3,
+    charisma: 2,
+    maxPerAge: 2,
+  ),
+  ActivityAction(
+    id: 'bahce_atolyesi',
+    venue: ActivityVenue.kurs,
+    label: 'Bahçe atölyesi',
+    description:
+        'Toprak sabırla konuşuyor; sen acele ettikçe o susuyor.',
+    icon: Icons.local_florist_outlined,
+    cost: 4800, // prototypeOnly
+    minAge: 9,
+    happiness: 5,
+    health: 1,
+    maxPerAge: 2,
+  ),
+
   // =====================================================================
   // Cezaevi (D-128)
   //

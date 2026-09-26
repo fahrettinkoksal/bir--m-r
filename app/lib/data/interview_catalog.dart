@@ -672,6 +672,129 @@ const List<InterviewQuestion> kInterviewQuestions = <InterviewQuestion>[
         'Boylar yaş ve gelişime göre ayrılır; atlamak sakatlık '
         'getirir.',
   ),
+
+  // --- Yeni dövüş dalları (D-152) ---------------------------------------
+  InterviewQuestion(
+    id: 'boks_antrenoru_1',
+    jobId: 'boks_antrenoru',
+    text: 'Amatör boksta kategoriler neye göre ayrılır?',
+    options: <String>[
+      'Kuşak rengine göre',
+      'Yaş ve sıklet grubuna göre',
+      'Ders sayısına göre',
+      'Salonun büyüklüğüne göre',
+    ],
+    correctIndex: 1,
+    explanation: 'Amatör boksta ayrım yaş kategorisi ve sıklettir.',
+  ),
+  InterviewQuestion(
+    id: 'boks_antrenoru_2',
+    jobId: 'boks_antrenoru',
+    text: 'Yeni başlayan bir sporcunun ilk haftaları neyle geçer?',
+    options: <String>[
+      'Doğrudan ringde maç yapar',
+      'Duruş, ayak çalışması ve nefes',
+      'Ağır torba çalışması',
+      'Hiçbir şey, sadece seyreder',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Duruş ve ayak oturmadan yapılan her şey hem boşa gider hem '
+        'sakatlar.',
+  ),
+  InterviewQuestion(
+    id: 'boks_antrenoru_3',
+    jobId: 'boks_antrenoru',
+    text:
+        'Çalışma sırasında sporcu kafasına sert bir darbe aldı ve '
+        'sersemledi. Ne yaparsın?',
+    options: <String>[
+      'Çalışmayı bitirmesini beklerim',
+      'Çalışmayı hemen keser, dinlendirir ve hekime yönlendiririm',
+      'Bir bardak su verip devam ettiririm',
+      'Daha sert çalışmasını söylerim',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Kafa darbesinde çalışma durur; karar antrenörün değil hekimin.',
+  ),
+
+  InterviewQuestion(
+    id: 'judo_egitmeni_1',
+    jobId: 'judo_egitmeni',
+    text: 'Judoda öğrenci dereceleri hangi adla sayılır?',
+    options: <String>['Dan', 'Kyu', 'Gup', 'Boy'],
+    correctIndex: 1,
+    explanation: 'Öğrenci dereceleri kyu, siyah kuşak sonrası dandır.',
+  ),
+  InterviewQuestion(
+    id: 'judo_egitmeni_2',
+    jobId: 'judo_egitmeni',
+    text: 'İlk derslerde neden düşme çalışması (ukemi) öğretilir?',
+    options: <String>[
+      'Sıralama böyle olduğu için',
+      'Sporcu güvenle düşmeyi öğrenmeden atılamaz',
+      'Isınma sayıldığı için',
+      'Gerekmez, doğrudan atışa geçilir',
+    ],
+    correctIndex: 1,
+    explanation: 'Güvenli düşüş judonun ilk ve vazgeçilmez basamağıdır.',
+  ),
+  InterviewQuestion(
+    id: 'judo_egitmeni_3',
+    jobId: 'judo_egitmeni',
+    text: 'Eşleşmede iki sporcunun kilo farkı çok fazlaysa ne yaparsın?',
+    options: <String>[
+      'Yine eşleştiririm, fark etmez',
+      'Yakın kilodaki sporcularla eşleştiririm',
+      'Küçük olanı çalıştırmam',
+      'İkisini de gönderirim',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Kilo farkı büyük eşleşme hem öğretmez hem sakatlık riski '
+        'taşır.',
+  ),
+
+  InterviewQuestion(
+    id: 'taekwondo_egitmeni_1',
+    jobId: 'taekwondo_egitmeni',
+    text: 'Taekwondoda öğrenci dereceleri hangi adla sayılır?',
+    options: <String>['Kyu', 'Gup', 'Duan', 'Boy'],
+    correctIndex: 1,
+    explanation: 'Öğrenci dereceleri gup, siyah kuşak sonrası dandır.',
+  ),
+  InterviewQuestion(
+    id: 'taekwondo_egitmeni_2',
+    jobId: 'taekwondo_egitmeni',
+    text: 'Poomsae nedir?',
+    options: <String>[
+      'Bir sıklet grubu',
+      'Belirli sırayla yapılan hareket dizisi',
+      'Kuşak sınavı ücreti',
+      'Bir tekme çeşidi',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Poomsae, belirli sırayla yapılan ve derecelerde sınanan '
+        'hareket dizisidir.',
+  ),
+  InterviewQuestion(
+    id: 'taekwondo_egitmeni_3',
+    jobId: 'taekwondo_egitmeni',
+    text:
+        'Yüksek tekme çalışmasında esnekliği yetmeyen bir öğrenci var. '
+        'Nasıl ilerlersin?',
+    options: <String>[
+      'Zorlayarak bacağını kaldırtırım',
+      'Esnekliği kademeli çalıştırıp tekme yüksekliğini sonra artırırım',
+      'O hareketi hiç öğretmem',
+      'Başka salona gönderirim',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Esneklik kademeli kazanılır; zorlamak sakatlıkla sonuçlanır.',
+  ),
   InterviewQuestion(
     id: 'kasiyer_1',
     jobId: 'kasiyer',

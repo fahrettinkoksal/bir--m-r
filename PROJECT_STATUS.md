@@ -1419,6 +1419,73 @@ after_school_widget (5), business_widget (4), business_test +6,
 paket_w_test (25), pet_widget_test +2.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
+## Paket X — A grubu ve kataloglar (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. **Önce denetim yapıldı ve önerilerimin bir
+kısmının zaten kodlanmış olduğu görüldü** — öneri listesini 25 Eylül tarihli
+`docs/EKSIKLER.md`'ye dayandırmıştım, o belge güncel değildi. Yanlış
+söylediklerim:
+
+| Önerdiğim | Gerçek durum |
+|---|---|
+| Hayvan detay sayfası yok | **Var** — `pet_detail_sheet.dart` (D-133) |
+| Evlilik geçmişi ekranı yok | **Var** — `marriage_history_page.dart` (D-133) |
+| "Hobilerim" görünümü yok | **Var** — `hobbies_page.dart` (D-133) |
+| Dul ile boşanmış aynı statüde | **Ayrı** — `MarriageStatus.dul`, dul eş `eskiEs`'e düşmüyor |
+| Çoklu kişiyle aktivite yok | **Var** — `perform(others:)` + `costForParty` (D-133) |
+| Küslük/barışma yok | **Var** — `friendship_depth.dart` (D-130) |
+
+`docs/EKSIKLER.md` bu altı madde için düzeltildi. A grubunda **gerçekten
+eksik olan tek şey ikiz gebelikti**.
+
+### D-151 — İkiz gebelik
+Doğum anında %2,8 ihtimalle ikinci bebek de geliyor. Gebelik kaydı **tek**
+kalıyor; ikinci bebek aynı doğumun parçası olduğu için "aynı yıl ikinci
+bebek olmaz" kuralı yalnızca açık `twin` bayrağıyla atlanıyor — oyuncunun
+düğmesi bu bayrağı hiç geçmiyor. İkiz aynı diğer ebeveynden olur, adı ve
+kimliği ayrıdır, **en fazla çocuk sınırını aşmaz** (üç çocuklu oyuncuda
+doğum tek bebekle kapanır) ve iki pencere yerine **tek** ikiz bildirimi
+açılır. Üçüz yok. Sayı `prototypeOnly` — **Q-154**.
+
+### D-152 — Kataloglar genişletildi
+`docs/EKSIKLER.md` §4.3'teki darlık ölçümüne karşılık:
+
+| Katalog | Önce | Sonra |
+|---|---|---|
+| Hobi | 4 | **12** |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Dövüş sanatı | 3 | **6** |
+
+Yeni hobiler: mutfak, fotoğraf, dans, satranç, yazmak, bahçe, yabancı dil,
+bilgisayar. İlk altısı için **altı yeni kurs** eklendi; son ikisi zaten var
+olan dil ve bilgisayar kurslarını besliyor, yeni düğme gerekmedi.
+Kataloğun kendi kuralı korundu: **her hobiyi gerçekten var olan bir eylem
+besler**, sahte hobi yok (kalıcı test).
+
+Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek
+düzenlerden derlendi: boksta kuşak yoktur, o yüzden amatör yaş
+kategorileri ve profesyonel sıralama kullanıldı; judo kyu/dan, taekwondo
+gup/dan.
+
+**Mevcut koruma testleri üç gerçek boşluk yakaladı ve hiçbirini
+gevşetmedim:**
+1. `economy_calibration_test` — `boks_antrenoru` maaşı `kuafor` ile
+   çakışıyordu (440.000 ₺); 438.000 ₺ yapıldı.
+2. `score_interview_test` / `martial_arts_test` / `content_reachability_test`
+   — üç yeni eğitmenlik işinin **mülakat sorusu yoktu**, yani iş listede
+   görünüp başvurulamayacaktı. Dokuz soru yazıldı (her işe üç).
+3. `martial_arts_widget_test` — ekran bir `ListView` olduğu için altta
+   kalan yeni dallar hiç inşa edilmiyordu. Test **gevşetilmedi**,
+   güçlendirildi: artık her dala kaydırarak ulaşılabildiği doğrulanıyor.
+
+Sayılar `prototypeOnly` — **Q-155**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2275 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_x_test` (14).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

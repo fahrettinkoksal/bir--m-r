@@ -786,6 +786,37 @@ const List<JobType> kJobCatalog = <JobType>[
     ],
   ),
 
+  JobType(
+    id: 'boks_antrenoru',
+    name: 'Boks antrenörü',
+    description: 'Ringi bıraktın; şimdi köşede sen duruyorsun.',
+    minAge: 18,
+    yearlySalary: 438000,
+    band: SalaryBand.nitelikliHizmet,
+    martialArtId: 'boks',
+    levels: <String>['Yardımcı antrenör', 'Boks antrenörü', 'Kulüp hocası'],
+  ),
+  JobType(
+    id: 'judo_egitmeni',
+    name: 'Judo eğitmeni',
+    description: 'Tatamide önce düşmeyi öğretiyorsun, sonra kalkmayı.',
+    minAge: 18,
+    yearlySalary: 435000,
+    band: SalaryBand.nitelikliHizmet,
+    martialArtId: 'judo',
+    levels: <String>['Yardımcı antrenör', 'Judo eğitmeni', 'Baş eğitmen'],
+  ),
+  JobType(
+    id: 'taekwondo_egitmeni',
+    name: 'Taekwondo eğitmeni',
+    description: 'Poomsae saydırmak, tekme yüksekliğini düzeltmek.',
+    minAge: 18,
+    yearlySalary: 432000,
+    band: SalaryBand.nitelikliHizmet,
+    martialArtId: 'taekwondo',
+    levels: <String>['Yardımcı antrenör', 'Taekwondo eğitmeni', 'Salon hocası'],
+  ),
+
   // ===================================================================
   // Yarım zamanlı işler (D-131)
   //

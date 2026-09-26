@@ -145,6 +145,99 @@ const List<UniversityProgram> kUniversityPrograms = <UniversityProgram>[
       EducationTrack.genelAkademik,
     },
   ),
+
+  // --- İkinci tur bölümler (D-152) ---------------------------------------
+  //
+  // 44 mesleğe karşı 11 bölüm vardı: lise sonrası tercih ekranı oyunun
+  // en dar yeriydi ve aynı hayat tekrar tekrar aynı bölümü okuyordu.
+  // Puanlar `prototypeOnly` (Q-155).
+  UniversityProgram(
+    id: 'hukuk',
+    name: 'Hukuk',
+    description: 'Okumak, ezberlemek ve tartışmak. Sonrasında staj var.',
+    minScore: 76,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.sosyalBilimler,
+      EducationTrack.genelAkademik,
+    },
+  ),
+  UniversityProgram(
+    id: 'mimarlik',
+    name: 'Mimarlık',
+    description: 'Maket, çizim ve teslim gecesi.',
+    minScore: 70,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.tasarim,
+      EducationTrack.fenBilim,
+      EducationTrack.guzelSanatlar,
+    },
+  ),
+  UniversityProgram(
+    id: 'iktisat',
+    name: 'İktisat',
+    description: 'Sayı ile insan davranışının kesiştiği yer.',
+    minScore: 58,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.genelAkademik,
+      EducationTrack.sosyalBilimler,
+    },
+  ),
+  UniversityProgram(
+    id: 'veterinerlik',
+    name: 'Veterinerlik',
+    description: 'Beş yıl; hastan derdini anlatamıyor.',
+    minScore: 74,
+    durationYears: 5,
+    preferredTracks: <EducationTrack>{EducationTrack.fenBilim},
+  ),
+  UniversityProgram(
+    id: 'dis_hekimligi',
+    name: 'Diş hekimliği',
+    description: 'Beş yıl; el becerisi ile sabrın birlikte sınandığı bölüm.',
+    minScore: 84,
+    durationYears: 5,
+    preferredTracks: <EducationTrack>{EducationTrack.fenBilim},
+  ),
+  UniversityProgram(
+    id: 'ziraat',
+    name: 'Ziraat',
+    description: 'Toprak, tohum ve hasat; derslerin yarısı tarlada.',
+    minScore: 42,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.fenBilim,
+      EducationTrack.teknikMeslek,
+    },
+  ),
+  UniversityProgram(
+    id: 'turizm',
+    name: 'Turizm ve otelcilik',
+    description: 'Sezon, dil ve insanla uğraşmak.',
+    minScore: 38,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.genelAkademik,
+      EducationTrack.sosyalBilimler,
+    },
+  ),
+  UniversityProgram(
+    id: 'muzik_bolumu',
+    name: 'Müzik',
+    description: 'Yetenek sınavı, sonra yıllarca aynı odada çalışmak.',
+    minScore: 44,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.muzik,
+      EducationTrack.guzelSanatlar,
+    },
+  ),
+  UniversityProgram(
+    id: 'spor_bilimleri',
+    name: 'Spor bilimleri',
+    description: 'Antrenman, anatomi ve sahada geçen dersler.',
+    minScore: 40,
+    preferredTracks: <EducationTrack>{
+      EducationTrack.genelAkademik,
+      EducationTrack.fenBilim,
+    },
+  ),
 ];
 
 UniversityProgram? universityProgramById(String id) {

@@ -1415,16 +1415,49 @@ class LifeProgression {
     }
 
     final Person bebek = dogum.state.children.last;
-    GameState sonuc = dogum.state.copyWith(
+
+    // İkiz (D-151): aynı doğumun ikinci bebeği. Gebelik kaydı tektir;
+    // ikinci bebek burada, **aynı diğer ebeveynle** dünyaya gelir.
+    // İkinci doğum engellenirse (ör. en fazla çocuk sayısı dolduysa)
+    // doğum tek bebekle kapanır; sessiz bir hata oluşmaz.
+    final bool ikizDenendi =
+        _rng.nextDouble() < Parenthood.prototypeOnlyTwinChance;
+    FamilyResult? ikiz;
+    if (ikizDenendi) {
+      final FamilyResult deneme = const Parenthood().haveChild(
+        dogum.state,
+        _rng,
+        coParentId: bekleyen.partnerId,
+        twin: true,
+      );
+      if (deneme.outcome.applied) ikiz = deneme;
+    }
+
+    final GameState dogumSonrasi = ikiz?.state ?? dogum.state;
+    final Person? ikizBebek =
+        ikiz == null ? null : dogumSonrasi.children.last;
+
+    GameState sonuc = dogumSonrasi.copyWith(
       notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
-        ...dogum.state.notices,
-        Notices.birth(
-          playerAge: newAge,
-          childId: bebek.id,
-          childName: bebek.firstName,
-          isGirl: bebek.gender == Gender.kadin,
-          otherParentName: diger.firstName,
-        ),
+        ...dogumSonrasi.notices,
+        if (ikizBebek == null)
+          Notices.birth(
+            playerAge: newAge,
+            childId: bebek.id,
+            childName: bebek.firstName,
+            isGirl: bebek.gender == Gender.kadin,
+            otherParentName: diger.firstName,
+          )
+        else
+          Notices.twinBirth(
+            playerAge: newAge,
+            firstChildId: bebek.id,
+            firstName: bebek.firstName,
+            firstIsGirl: bebek.gender == Gender.kadin,
+            secondName: ikizBebek.firstName,
+            secondIsGirl: ikizBebek.gender == Gender.kadin,
+            otherParentName: diger.firstName,
+          ),
       ]),
     );
 

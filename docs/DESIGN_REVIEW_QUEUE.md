@@ -3523,3 +3523,47 @@ Listedeki maddelerin çoğu **gerçek hataydı** ve düzeltildi (aşağıda ayr�
    - Doğru yer mi? Sahiplenme de aynı sayfada duruyor; sahiplenme Aktiviteler'de mi kalmalıydı?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; kasko isteğe bağlı hâle getirilmez, ek haber türü eklenmez.
+
+---
+
+### Q-154 — İkiz gebelik: oran ve sonuçları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-151 · Test: `app/test/paket_x_test.dart`
+
+Faho'nun A grubu isteğiyle ikiz gebelik geldi. Gebelik kaydı **tek** kalıyor; ikinci bebek aynı doğumda dünyaya geliyor, aynı diğer ebeveynden. İki ayrı "çocuğunuz oldu" penceresi açılmıyor; tek bir ikiz bildirimi var.
+
+**Karar soruları:**
+1. **Oran %2,8** (`Parenthood.prototypeOnlyTwinChance`). Türkiye'de ikiz doğum oranı yaklaşık %2-3; oyunun ölçeği buradan seçildi. Doğru mu?
+2. **Tüp bebek tedavisi (D-... / Paket 35) ikiz oranını yükseltmeli mi?** Gerçekte belirgin biçimde yükseltir. Şu an tedaviden gelen gebelik ile kendiliğinden gelen gebelik **aynı** orana bakıyor, çünkü gebelik kaydında "tedaviyle mi oldu" bilgisi tutulmuyor. Tutulsun mu?
+3. **Doğum masrafı iki kez alınıyor** (her bebek için `prototypeOnlyBirthCost`). İki bebek iki masraf mı, yoksa tek doğumun tek masrafı mı olmalı?
+4. **En fazla çocuk sayısı 4.** Üç çocuğu olan oyuncuda ikiz çıkarsa ikinci bebek gelmiyor (sınır aşılmıyor, doğum tek bebekle kapanıyor). Doğru mu, yoksa ikiz sınırı bir kez aşabilmeli mi?
+5. **Üçüz yok.** Eklenmeli mi, yoksa ikiz yeterli mi?
+
+**Varsayılan işlem:** Onay gelene dek oran `prototypeOnly` kalır; üçüz eklenmez, tedavi ile kendiliğinden gebelik ayrılmaz.
+
+---
+
+### Q-155 — Genişletilen kataloglar: yeni hobiler, bölümler, medya işleri ve dövüş dalları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-152 · Test: `app/test/paket_x_test.dart`
+
+`docs/EKSIKLER.md` §4.3'te kataloğun dar olduğu ölçülmüştü. Genişletilenler:
+
+| Katalog | Önce | Sonra |
+|---|---|---|
+| Hobi | 4 | **12** |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Dövüş sanatı | 3 | **6** |
+
+Yeni hobilerin sekizi: mutfak, fotoğraf, dans, satranç, yazmak, bahçe, yabancı dil, bilgisayar. İlk altısı için **altı yeni kurs** eklendi (Kurslar mekânı); son ikisi zaten var olan dil ve bilgisayar kurslarını besliyor, yeni düğme gerekmedi. Kuralı bozmadım: her hobiyi gerçekten var olan bir eylem besliyor, sahte hobi yok (kalıcı test).
+
+Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek düzenlerden: boksta kuşak yoktur, amatör yaş kategorileri ve profesyonel sıralama kullanıldı; judo kyu/dan, taekwondo gup/dan. Üçü için eğitmenlik işi ve üçer mülakat sorusu da eklendi — eksik olsa basamak boşa giderdi (mevcut testler bunu yakaladı).
+
+**Karar soruları:**
+1. **Hobi 12 yeterli mi, fazla mı?** Hobi ekranı uzadı; öbeklenmeli mi (sanat / spor / zihin / el işi)?
+2. **Yeni kursların ücretleri** 3.200 – 11.000 ₺ arası. Doğru bantta mı? Satranç kulübü en ucuz (3.200 ₺), yazarlık atölyesi en pahalı (11.000 ₺).
+3. **Yeni bölümlerin taban puanları** doğru mu? Diş hekimliği 84, hukuk 76, veterinerlik 74, turizm 38.
+4. **Bölüm–meslek eşleşmesi:** yeni bölümlerin çoğu şu an hiçbir mesleğin **şartı** değil (meslekler yalnızca "üniversite mezunu" istiyor). Hukuk okuyup avukat olmak gibi bir bağ kurulsun mu? Bu ayrı ve büyük bir iş.
+5. **Yeni medya işleri** (ödül töreni sunuculuğu 60 asgari ücret, dijital platform programı 55) ün eşiği 78 ve 68. Tutarlar çok mu yüksek?
+6. **Boksta kuşak olmadığı için** basamaklar "Yıldızlar / Gençler / Büyükler / Bölge şampiyonu / Türkiye şampiyonu / Profesyonel…" diye gidiyor. Bu doğru bir çözüm mü, yoksa boks hiç girmemeli mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün ücretler, puanlar ve basamak sayıları `prototypeOnly` kalır; bölüm–meslek bağı kurulmaz.

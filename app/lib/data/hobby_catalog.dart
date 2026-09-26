@@ -173,6 +173,278 @@ enum HobbyKind {
         memory: 'Çevrende "o sporcu" diye biliniyordun.',
       ),
     ],
+  ),
+
+  mutfak(
+    id: 'mutfak',
+    label: 'Mutfak',
+    icon: Icons.restaurant_menu_rounded,
+    activityIds: <String>{'yemek_kursu'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında mutfağa kendi isteğinle girdin.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'Bir iki yemeği ezbere yapar oldun.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Evde yemek senden sorulmaya başladı.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Tarifi kendin değiştirip daha iyisini buluyordun.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Misafir, senin sofran için geliyordu.',
+      ),
+    ],
+  ),
+
+  fotograf(
+    id: 'fotograf',
+    label: 'Fotoğraf',
+    icon: Icons.photo_camera_rounded,
+    activityIds: <String>{'fotograf_kursu'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında objektifin arkasına geçtin.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'Çektiklerini ayıklamayı öğrendin.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Işığı beklemeyi huy edindin.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Gördüğün her şeyde bir kare arıyordun.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'İnsanlar önemli günlerini sana çektiriyordu.',
+      ),
+    ],
+  ),
+
+  dans(
+    id: 'dans',
+    label: 'Dans',
+    icon: Icons.music_video_rounded,
+    activityIds: <String>{'dans_kursu'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında dans etmeyi öğrenmeye başladın.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'Adımları saymadan atar oldun.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Müzik başlayınca beden kendiliğinden gidiyordu.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Düğünde önce seni sahaya çağırıyorlardı.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Yeni başlayanlara sen gösteriyordun.',
+      ),
+    ],
+  ),
+
+  satranc(
+    id: 'satranc',
+    label: 'Satranç',
+    icon: Icons.grid_on_rounded,
+    activityIds: <String>{'satranc_kulubu'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında tahtanın karşısına oturdun.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'Açılışları ezberlemeye başladın.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'İki hamle ötesini görmeyi öğrendin.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Kaybettiğin oyunları gece tekrar oynuyordun.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Kulüpte yenmesi zor biri olmuştun.',
+      ),
+    ],
+  ),
+
+  yazmak(
+    id: 'yazmak',
+    label: 'Yazmak',
+    icon: Icons.edit_note_rounded,
+    activityIds: <String>{'yazarlik_atolyesi'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında yazmaya başladın.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'Bir defteri sadece buna ayırdın.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Düzenli yazmak günlük bir işe dönüştü.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Bitmemiş bir metin hep aklının bir köşesindeydi.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Yazdıkların okunmaya başladı.',
+      ),
+    ],
+  ),
+
+  bahce(
+    id: 'bahce',
+    label: 'Bahçe',
+    icon: Icons.local_florist_rounded,
+    activityIds: <String>{'bahce_atolyesi'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında toprakla uğraşmaya başladın.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'İlk saksın tuttu.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Mevsimi takip etmeyi öğrendin.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Sabahları önce onlara bakıyordun.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Komşular fidelerini senden alıyordu.',
+      ),
+    ],
+  ),
+
+  dil(
+    id: 'dil',
+    label: 'Yabancı dil',
+    icon: Icons.translate_rounded,
+    activityIds: <String>{'dil_kursu'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında yeni bir dile başladın.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'İlk cümleni kurdun.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Altyazısız bir şeyler anlar oldun.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'O dilde düşündüğünü fark ettin.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Rahatça konuşuyordun.',
+      ),
+    ],
+  ),
+
+  yazilim(
+    id: 'yazilim',
+    label: 'Bilgisayar',
+    icon: Icons.terminal_rounded,
+    activityIds: <String>{'bilgisayar_kursu'},
+    stages: <HobbyStage>[
+      HobbyStage(
+        label: 'Hevesli',
+        experience: 0,
+        memory: '{yas} yaşında bilgisayarla ciddi ciddi uğraşmaya başladın.',
+      ),
+      HobbyStage(
+        label: 'Meraklı',
+        experience: 4,
+        memory: 'Çalışmayan şeyin sebebini bulmayı öğrendin.',
+      ),
+      HobbyStage(
+        label: 'Düzenli',
+        experience: 10,
+        memory: 'Kendi küçük şeylerini yapar oldun.',
+      ),
+      HobbyStage(
+        label: 'Tutkulu',
+        experience: 18,
+        memory: 'Bir sorunu çözene kadar kalkmıyordun.',
+      ),
+      HobbyStage(
+        label: 'Usta',
+        experience: 28,
+        memory: 'Çevrende "ona sor" denen kişi sendin.',
+      ),
+    ],
   );
 
   const HobbyKind({

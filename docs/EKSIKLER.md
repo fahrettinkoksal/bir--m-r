@@ -111,9 +111,15 @@ açıldıkça bu boşluk daha görünür oluyor.
 Eşin kendi geliri "kendi giderini karşılar" varsayılıyor; ortak bütçe,
 eşin işi, eşin işsiz kalması yok (Q-063).
 
-### 2.6 İkiz gebelik — **yok**
-Arama: `ikiz` → 3 sonuç, hepsi **kardeş etiketi** (`İkiz kız kardeş`).
-Oyuncunun ikiz çocuğu olması mümkün değil.
+### 2.6 İkiz gebelik — **eklendi (D-151)**
+> **Güncelleme (26 Eylül 2026):** Bu tespit artık geçerli değil.
+
+Eski ölçüm: `ikiz` → 3 sonuç, hepsi **kardeş etiketi**.
+
+**Eklendi (D-151):** Gebelik doğumla sonuçlanırken %2,8 ihtimalle ikinci
+bebek de aynı doğumda geliyor. Gebelik kaydı tek kalır, ikinci bebek aynı
+diğer ebeveynden olur, tek bildirim açılır ve en fazla çocuk sınırı
+aşılmaz. Üçüz yok. Sayılar Q-154'te.
 
 ---
 
@@ -136,25 +142,38 @@ evleniyor (D-121). Ama: boşanamıyor, işsiz kalamıyor, hastalanamıyor,
 oyuncudan para isteyemiyor, oyuncuya bakamıyor. Torun doğuyor ama
 torunun kendi hayatı yok.
 
-### 3.3 "Hobilerim" görünümü yok
-Arama: `Hobilerim` → 2 sonuç, ikisi de **eksik listesinde**.
-Hobi sistemi çalışıyor (4 hobi, basamaklar) ama oyuncunun neyle
-uğraştığını tek yerde gösteren bir bölüm yok.
+### 3.3 "Hobilerim" görünümü — **eklendi (D-133)**
+> **Düzeltme (26 Eylül 2026):** Bu madde bu belge yazıldıktan sonra
+> kapandı; envanter güncellenmemişti. `lib/ui/screens/sections/hobbies_page.dart`
+> süren ve bırakılan hobileri ayrı ayrı gösteriyor.
 
-### 3.4 Evlilik geçmişi ekranı yok
-Arama: `Evlilik Geçmişi` → **0 sonuç**.
-`pastMarriages` kaydı tutuluyor (D-036) ama oyuncu onu göremiyor.
+Hobi **sayısı** dardı: 4 hobi. **Genişletildi (D-152): 12 hobi.**
 
-### 3.5 Hayvan detay ekranı yok
-10 tür, bakım, hastalık, kayıp, sahiplendirme var; ama tek bir hayvanın
-kendi sayfası (geçmişi, anıları, birlikte geçen yıllar) yok.
+### 3.4 Evlilik geçmişi ekranı — **eklendi (D-133)**
+> **Düzeltme (26 Eylül 2026):** Kapandı.
+> `lib/ui/screens/sections/marriage_history_page.dart` kiminle, kaç
+> yaşında evlenildiğini ve nasıl bittiğini gösteriyor.
 
-### 3.6 "Vefat eden eş" ayrı statü değil
-Dul kalmak ile boşanmak aynı `eskiEs` bağına düşüyor. İkisi çok farklı
-şeyler.
+### 3.5 Hayvan detay ekranı — **eklendi (D-133)**
+> **Düzeltme (26 Eylül 2026):** Kapandı.
+> `lib/ui/widgets/pet_detail_sheet.dart` sağlık, yakınlık, birlikte geçen
+> yıllar ve kayıp geçmişini gösteriyor.
 
-### 3.7 Çoklu kişiyle aktivite yok
-Programa tek kişi davet edilebiliyor. "Ailecek" bir şey yapmak yok.
+### 3.6 "Vefat eden eş" — **bu tespit yanlıştı**
+> **Düzeltme (26 Eylül 2026):** Kodu okuyunca görüldü ki dul kalmak ile
+> boşanmak **ayrı** durumlar: `MarriageStatus.dul` ile
+> `MarriageStatus.bosandi` ayrı değerler, ekran metinleri ayrı
+> (`_marriageLabel`), ve `settleWidowhood` bağı `eskiEs`'e **düşürmüyor**
+> — vefat eden eş `es` olarak kalıyor. Yalnızca boşanma `eskiEs` yazıyor.
+
+**Hâlâ yok:** dulluğun kendine ait olay havuzu (anma, yıldönümü, eşin
+ailesiyle bağın sürmesi).
+
+### 3.7 Çoklu kişiyle aktivite — **eklendi (D-133)**
+> **Düzeltme (26 Eylül 2026):** Kapandı.
+> `ActivityEngine.perform(others: ...)` birden fazla kişi alıyor,
+> `Outing.costForParty` kişi başı bilet hesaplıyor ve Eğlence ekranında
+> çoklu seçim var.
 
 ---
 
@@ -242,14 +261,16 @@ bir gerileme testiyle sabitlendi (`test/paket_op_test.dart`).
 
 ### 4.3 Kataloglar dar
 
-| Katalog | Bugün | Gözlem |
+| Katalog | Ölçüldüğünde | **Bugün (D-152)** |
 |---|---|---|
-| Hobi | **4** | Hobi sistemi güçlü ama seçenek çok az |
-| Dövüş sanatı | 3 | |
-| Üniversite bölümü | 11 | 44 mesleğe karşı 11 bölüm |
-| Medya işi | 7 | Ün 40+ oyuncu için tek içerik |
-| Sponsor kategorisi | 7 | |
-| Evcil hayvan | 10 | Yeterli görünüyor |
+| Hobi | 4 | **12** |
+| Dövüş sanatı | 3 | **6** (boks, judo, taekwondo geldi) |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Sponsor kategorisi | 7 | 7 (değişmedi) |
+| Evcil hayvan | 10 | 10 (yeterli görünüyor) |
+
+Yeni sayılar onay bekliyor: **Q-155**.
 
 ---
 

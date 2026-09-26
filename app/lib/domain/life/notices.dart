@@ -250,6 +250,37 @@ abstract final class Notices {
         personId: childId,
       );
 
+  /// İkiz doğdu (D-151).
+  ///
+  /// İki ayrı "çocuğunuz oldu" penceresi üst üste açılmaz; ikiz **tek**
+  /// bildirimle duyurulur. Bildirim yalnızca gerçekten olanı yazar: iki
+  /// çocuğun adı ve cinsiyeti.
+  static PendingNotice twinBirth({
+    required int playerAge,
+    required String firstChildId,
+    required String firstName,
+    required bool firstIsGirl,
+    required String secondName,
+    required bool secondIsGirl,
+    String? otherParentName,
+  }) {
+    final String baslik = firstIsGirl == secondIsGirl
+        ? (firstIsGirl ? 'İkiz kızınız oldu' : 'İkiz oğlunuz oldu')
+        : 'İkizleriniz oldu';
+    final String beklenti = otherParentName == null
+        ? 'Bir bebek bekliyordunuz, iki bebek geldi.'
+        : 'Sen ve $otherParentName bir bebek bekliyordunuz, iki bebek '
+            'geldi.';
+    return PendingNotice(
+      id: 'ikiz-$firstChildId',
+      kind: NoticeKind.dogum,
+      age: playerAge,
+      title: baslik,
+      text: '$firstName ve $secondName aynı gün doğdu. $beklenti',
+      personId: firstChildId,
+    );
+  }
+
   /// Burçsal dönem bildirimi (Paket 27): aynı dönem aynı yaşta bir kez.
   static String zodiacNoticeId(String periodId, int age) =>
       'burc-$periodId-$age';

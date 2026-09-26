@@ -219,6 +219,186 @@ enum MartialArt {
         note: 'Altın kemer. Adın Kırkpınar\'a yazılır.',
       ),
     ],
+  ),
+
+  boks(
+    id: 'boks',
+    label: 'Boks',
+    icon: Icons.sports_mma_rounded,
+    description:
+        'Kuşak yok; basamak ringde belli oluyor. Önce ip, sonra kum '
+        'torbası, sonra karşındaki.',
+    lessonCost: 650, // prototypeOnly
+    minAge: 10,
+    instructorFromLevel: 6,
+    instructorJobId: 'boks_antrenoru',
+    ranks: <MartialRank>[
+      MartialRank(
+        name: 'Acemi',
+        lessonsNeeded: 0,
+        note: 'Duruş ve nefes. Henüz eldiven bile ağır geliyor.',
+      ),
+      MartialRank(
+        name: 'Yıldızlar',
+        lessonsNeeded: 6,
+        note: 'Kulübün en küçük yaş kategorisi.',
+      ),
+      MartialRank(
+        name: 'Gençler',
+        lessonsNeeded: 18,
+        note: 'Kategori büyüdü, rakip de büyüdü.',
+      ),
+      MartialRank(
+        name: 'Büyükler (amatör)',
+        lessonsNeeded: 34,
+        note: 'Amatör kategorinin en üst yaş grubu.',
+      ),
+      MartialRank(
+        name: 'Bölge şampiyonu',
+        lessonsNeeded: 52,
+        note: 'Bölge elemelerini geçtin.',
+      ),
+      MartialRank(
+        name: 'Türkiye şampiyonu (amatör)',
+        lessonsNeeded: 76,
+        note: 'Amatör kariyerin zirvesi.',
+      ),
+      MartialRank(
+        name: 'Profesyonel',
+        lessonsNeeded: 104,
+        note: 'Lisans değişti; artık işin adı bu.',
+      ),
+      MartialRank(
+        name: 'Ulusal sıralama',
+        lessonsNeeded: 136,
+        note: 'Adın sıralama listesine girdi.',
+      ),
+      MartialRank(
+        name: 'Ulusal şampiyon',
+        lessonsNeeded: 172,
+        note: 'Kemer senin.',
+      ),
+    ],
+  ),
+
+  judo(
+    id: 'judo',
+    label: 'Judo',
+    icon: Icons.sports_kabaddi_rounded,
+    description:
+        'Dengeyi bozmak, tutuşu bulmak, yere temiz indirmek. Kuşak '
+        'kyu ve dan ile sayılır.',
+    lessonCost: 620, // prototypeOnly
+    minAge: 7,
+    instructorFromLevel: 7,
+    instructorJobId: 'judo_egitmeni',
+    ranks: <MartialRank>[
+      MartialRank(
+        name: 'Beyaz kuşak (6. kyu)',
+        lessonsNeeded: 0,
+        note: 'Başlangıç. Önce düşmeyi öğreniyorsun.',
+      ),
+      MartialRank(
+        name: 'Sarı kuşak (5. kyu)',
+        lessonsNeeded: 6,
+        note: 'Temel düşüş ve tutuş oturdu.',
+      ),
+      MartialRank(
+        name: 'Turuncu kuşak (4. kyu)',
+        lessonsNeeded: 16,
+        note: 'İlk atışlar geliyor.',
+      ),
+      MartialRank(
+        name: 'Yeşil kuşak (3. kyu)',
+        lessonsNeeded: 30,
+        note: 'Yer tekniklerine giriş.',
+      ),
+      MartialRank(
+        name: 'Mavi kuşak (2. kyu)',
+        lessonsNeeded: 48,
+        note: 'Rakibin dengesini okumaya başladın.',
+      ),
+      MartialRank(
+        name: 'Kahverengi kuşak (1. kyu)',
+        lessonsNeeded: 70,
+        note: 'Siyahın hemen öncesi.',
+      ),
+      MartialRank(
+        name: 'Siyah kuşak (1. dan)',
+        lessonsNeeded: 100,
+        note: 'Shodan. Asıl öğrenme şimdi başlıyor.',
+      ),
+      MartialRank(
+        name: 'Siyah kuşak (2. dan)',
+        lessonsNeeded: 138,
+        note: 'Nidan.',
+      ),
+      MartialRank(
+        name: 'Siyah kuşak (3. dan)',
+        lessonsNeeded: 180,
+        note: 'Sandan.',
+      ),
+    ],
+  ),
+
+  taekwondo(
+    id: 'taekwondo',
+    label: 'Taekwondo',
+    icon: Icons.sports_martial_arts_outlined,
+    description:
+        'Tekme yüksekliği, hız ve poomsae. Basamaklar gup ve dan ile '
+        'sayılır.',
+    lessonCost: 640, // prototypeOnly
+    minAge: 7,
+    instructorFromLevel: 7,
+    instructorJobId: 'taekwondo_egitmeni',
+    ranks: <MartialRank>[
+      MartialRank(
+        name: 'Beyaz kuşak (10. gup)',
+        lessonsNeeded: 0,
+        note: 'Masumiyet. Hiçbir şey bilmemek de bir yer.',
+      ),
+      MartialRank(
+        name: 'Sarı kuşak (8. gup)',
+        lessonsNeeded: 6,
+        note: 'Toprak: kök salıyorsun.',
+      ),
+      MartialRank(
+        name: 'Yeşil kuşak (6. gup)',
+        lessonsNeeded: 16,
+        note: 'Bitki: büyüme başladı.',
+      ),
+      MartialRank(
+        name: 'Mavi kuşak (4. gup)',
+        lessonsNeeded: 30,
+        note: 'Gökyüzü: yukarı bakıyorsun.',
+      ),
+      MartialRank(
+        name: 'Kırmızı kuşak (2. gup)',
+        lessonsNeeded: 50,
+        note: 'Tehlike: gücünü denetlemeyi öğreniyorsun.',
+      ),
+      MartialRank(
+        name: 'Kırmızı-siyah (1. gup)',
+        lessonsNeeded: 72,
+        note: 'Siyaha son adım.',
+      ),
+      MartialRank(
+        name: 'Siyah kuşak (1. dan)',
+        lessonsNeeded: 102,
+        note: 'İl dan. Olgunluk.',
+      ),
+      MartialRank(
+        name: 'Siyah kuşak (2. dan)',
+        lessonsNeeded: 140,
+        note: 'İ dan.',
+      ),
+      MartialRank(
+        name: 'Siyah kuşak (3. dan)',
+        lessonsNeeded: 182,
+        note: 'Sam dan.',
+      ),
+    ],
   );
 
   const MartialArt({
