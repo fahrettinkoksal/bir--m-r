@@ -22,6 +22,7 @@ import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
 import '../economy/household_budget.dart';
+import '../economy/investment_engine.dart';
 import '../economy/vehicle_inspection.dart';
 import '../economy/housing.dart';
 import '../economy/living_costs.dart';
@@ -643,6 +644,16 @@ class LifeProgression {
     // düşürür; ileri yaşta yenisi ortaya çıkabilir (D-153). Kriz gibi
     // ekranı kesmez, çünkü oyuncunun vereceği bir karar yoktur.
     afterDeaths = ChronicEngine.advanceYear(
+      state: afterDeaths,
+      newAge: newAge,
+      rng: _rng,
+    );
+
+    // Piyasa ve portföy (D-162): piyasa **yaş başına bir kez** ilerler,
+    // pozisyonlar yeniden değerlenir, vadesi dolan hesap cüzdana geçer.
+    // Portföyü olmayan oyuncuda da piyasa ilerler — fiyat endeksi kimsenin
+    // alım yapmasını beklemez.
+    afterDeaths = InvestmentEngine.advanceYear(
       state: afterDeaths,
       newAge: newAge,
       rng: _rng,

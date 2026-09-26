@@ -4,6 +4,7 @@ import '../../data/item_catalog.dart';
 import '../life/inheritance.dart';
 import '../life/will.dart';
 import '../life/mortality.dart';
+import '../models/market_state.dart';
 import '../models/education.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
@@ -108,7 +109,16 @@ abstract final class GenerationContinuation {
     final List<Person> mirascilar = _heirOrder(state);
     final Person? sagKalanEs = _survivingSpouse(state);
     // Borç miras kalmaz: eksi bakiye yeni kuşağa geçmez (prototypeOnly).
-    final int nakit = eskiOyuncu.wallet > 0 ? eskiOyuncu.wallet : 0;
+    //
+    // **Portföy burada nakde çevrilir (D-162).** Yatırımlar yeni kuşağa
+    // canlı pozisyon olarak geçmez: geçseydi maliyet esasını da taşımak
+    // gerekirdi ve "dedenin aldığı altının maliyeti" gibi anlamı olmayan
+    // bir kayıt doğardı. Bunun yerine ölüm anındaki **güncel değeri** tek
+    // seferlik mirasa girer. Yeni durumda `investments` ve `termDeposits`
+    // boş başladığı için çifte sayım oluşmaz.
+    final int portfoy = state.portfolioValue;
+    final int nakit =
+        (eskiOyuncu.wallet > 0 ? eskiOyuncu.wallet : 0) + portfoy;
     final int esPayi = sagKalanEs == null
         ? 0
         : (nakit * Inheritance.prototypeOnlySpouseShare).round();
@@ -300,6 +310,15 @@ abstract final class GenerationContinuation {
       // korunur, sahte yeni hayvan üretilmez. Vefat etmiş ya da hanede
       // olmayan hayvan taşınmaz: evcil hayvan miras kalemi değildir.
       pets: PetCare.carryOver(state.pets),
+      // Piyasa dünyanın bir parçası: oyuncu ölünce endeks sıfırlanmaz.
+      // Ama "şu yaşta ilerletildi" işareti **taşınmaz**; taşınsa yeni
+      // oyuncunun piyasası bir daha hiç ilerlemezdi.
+      market: MarketState(
+        regime: state.market.regime,
+        inflationPressure: state.market.inflationPressure,
+        confidence: state.market.confidence,
+        priceIndex: state.market.priceIndex,
+      ),
       // Ebeveynlerin durumu gerçeğe dayanır: evlilik kaydı yoksa evli
       // yazılmaz (D-047).
       parentalStatus: _parentalStatusFor(state, cocuk),

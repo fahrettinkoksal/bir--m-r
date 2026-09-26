@@ -3,6 +3,7 @@ library;
 
 import '../../text/turkish_text.dart';
 import '../career/craft_mastery.dart';
+import '../economy/net_worth.dart';
 import '../models/book_progress.dart';
 import '../models/career.dart';
 import '../../data/crime_catalog.dart';
@@ -201,11 +202,14 @@ abstract final class LifeVerdictBuilder {
     puan += (calisilanYil ~/ 2).clamp(0, 34);
     puan += (state.career.level * 5).clamp(0, 18);
     if (state.career.isRetired) puan += 10;
-    if (state.player.wallet >= 250000) {
+    // **Yatırım da paradır** (D-162). Bütün parasını portföye koymuş
+    // oyuncu "cüzdanı boş" diye yoksul sayılmaz.
+    final int eldeki = NetWorth.liquid(state);
+    if (eldeki >= 250000) {
       puan += 16;
-    } else if (state.player.wallet >= 50000) {
+    } else if (eldeki >= 50000) {
       puan += 8;
-    } else if (state.player.wallet > 0) {
+    } else if (eldeki > 0) {
       puan += 3;
     }
     if (state.career.milestones.isNotEmpty) puan += 6;

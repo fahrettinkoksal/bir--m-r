@@ -30,6 +30,8 @@ import '../../domain/models/chronic_condition.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/health_history.dart';
 import '../../domain/models/household.dart';
+import '../../domain/models/investment.dart';
+import '../../domain/models/market_state.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
@@ -116,6 +118,15 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // Nafaka kaydı (D-160). Alan eklemeli; eski kayıtta yoktur.
       'alimony':
           state.alimony == null ? null : _encodeAlimony(state.alimony!),
+      // Yatırımlar ve piyasa (D-162). Alan eklemeli; eski kayıtta yoktur.
+      'investments':
+          state.investments.map(_encodeHolding).toList(growable: false),
+      'termDeposits':
+          state.termDeposits.map(_encodeTermDeposit).toList(growable: false),
+      'investmentHistory': state.investmentHistory
+          .map(_encodeInvestmentRecord)
+          .toList(growable: false),
+      'market': _encodeMarket(state.market),
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -497,6 +508,88 @@ Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
       'matchedAtAge': p.matchedAtAge,
       'metPersonId': p.metPersonId,
     };
+
+Map<String, Object?> _encodeHolding(Holding h) => <String, Object?>{
+      'typeId': h.typeId,
+      'value': h.value,
+      'costBasis': h.costBasis,
+      'totalInvested': h.totalInvested,
+      'realizedProfit': h.realizedProfit,
+      'firstBoughtAtAge': h.firstBoughtAtAge,
+    };
+
+Holding _decodeHolding(Map<String, Object?> json) => Holding(
+      typeId: _string(json, 'typeId'),
+      value: _int(json, 'value'),
+      costBasis: _int(json, 'costBasis'),
+      totalInvested: _int(json, 'totalInvested'),
+      realizedProfit: _intOr(json, 'realizedProfit', 0),
+      firstBoughtAtAge: _intOr(json, 'firstBoughtAtAge', 0),
+    );
+
+Map<String, Object?> _encodeTermDeposit(TermDeposit d) => <String, Object?>{
+      'id': d.id,
+      'amount': d.amount,
+      'openedAtAge': d.openedAtAge,
+      'maturesAtAge': d.maturesAtAge,
+      'rateBasis': d.rateBasis,
+    };
+
+TermDeposit _decodeTermDeposit(Map<String, Object?> json) => TermDeposit(
+      id: _string(json, 'id'),
+      amount: _int(json, 'amount'),
+      openedAtAge: _int(json, 'openedAtAge'),
+      maturesAtAge: _int(json, 'maturesAtAge'),
+      rateBasis: _int(json, 'rateBasis'),
+    );
+
+Map<String, Object?> _encodeInvestmentRecord(InvestmentRecord r) =>
+    <String, Object?>{
+      'typeId': r.typeId,
+      'age': r.age,
+      'kind': r.kind.name,
+      'amount': r.amount,
+      'realized': r.realized,
+    };
+
+InvestmentRecord _decodeInvestmentRecord(Map<String, Object?> json) =>
+    InvestmentRecord(
+      typeId: _string(json, 'typeId'),
+      age: _int(json, 'age'),
+      kind: _enumByNameOrNull(
+            InvestmentRecordKind.values,
+            _stringOrNull(json, 'kind'),
+            'investmentRecord.kind',
+          ) ??
+          InvestmentRecordKind.aldi,
+      amount: _int(json, 'amount'),
+      realized: _intOr(json, 'realized', 0),
+    );
+
+Map<String, Object?> _encodeMarket(MarketState m) => <String, Object?>{
+      'regime': m.regime.name,
+      'inflationPressure': m.inflationPressure,
+      'confidence': m.confidence,
+      'priceIndex': m.priceIndex,
+      'advancedAtAge': m.advancedAtAge,
+      'lastNoticeAge': m.lastNoticeAge,
+    };
+
+MarketState _decodeMarket(Map<String, Object?> json) => MarketState(
+      regime: _enumByNameOrNull(
+            MarketRegime.values,
+            _stringOrNull(json, 'regime'),
+            'market.regime',
+          ) ??
+          MarketRegime.normal,
+      inflationPressure: _intOr(json, 'inflationPressure', 50),
+      confidence: _intOr(json, 'confidence', 50),
+      priceIndex: json['priceIndex'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'priceIndex'),
+      advancedAtAge: _intOrNull(json, 'advancedAtAge'),
+      lastNoticeAge: _intOrNull(json, 'lastNoticeAge'),
+    );
 
 Map<String, Object?> _encodeAlimony(Alimony a) => <String, Object?>{
       'otherPersonId': a.otherPersonId,
@@ -1015,6 +1108,27 @@ GameState decodeGameState(Map<String, Object?> json) {
     alimony: json['alimony'] == null
         ? null
         : _decodeAlimony(_asMap(json['alimony'], 'alimony')),
+    // D-162. Eksik anahtar boş portföy ve taze piyasa demektir; eski
+    // kayıtlar bu yüzden bozulmaz.
+    investments: List<Holding>.unmodifiable(
+      _optionalRawList(json, 'investments')
+          .map((Object? e) => _decodeHolding(_asMap(e, 'investments[]')))
+          .toList(growable: false),
+    ),
+    termDeposits: List<TermDeposit>.unmodifiable(
+      _optionalRawList(json, 'termDeposits')
+          .map((Object? e) => _decodeTermDeposit(_asMap(e, 'termDeposits[]')))
+          .toList(growable: false),
+    ),
+    investmentHistory: List<InvestmentRecord>.unmodifiable(
+      _optionalRawList(json, 'investmentHistory')
+          .map((Object? e) =>
+              _decodeInvestmentRecord(_asMap(e, 'investmentHistory[]')))
+          .toList(growable: false),
+    ),
+    market: json['market'] == null
+        ? const MarketState()
+        : _decodeMarket(_asMap(json['market'], 'market')),
     martialArts: List<MartialProgress>.unmodifiable(
       _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))

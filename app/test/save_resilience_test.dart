@@ -202,12 +202,13 @@ void main() {
     });
 
     test('4. boşanma + ikinci evlilik', () async {
-      // Tohum 6, D-125/D-126 sonrası rastgele akış kaydığı için 27
-      // yaşında ölümcül bir trafik kazasına düşüyor (parası tedaviye
-      // yetmiyor). Ölüm gerçek bir oyun sonucu, hata değil; bu senaryo
-      // ise **yaşayan** bir oyuncu istiyor. Tohum 7'de hayat 30'a
-      // ulaşıyor; senaryonun iddiaları aynen duruyor.
-      final GameController c = GameController(random: Random(7));
+      // Bu senaryo **yaşayan** bir oyuncu istiyor; tohum ise rastgele
+      // akışa bağlı. D-125/D-126'da akış kayınca tohum 6 → 7 yapılmıştı.
+      // D-162'de yıllık piyasa ilerlemesi eklenince akış yine kaydı ve
+      // tohum 7'de oyuncu 16 yaşında vefat ediyor (gerçek bir oyun
+      // sonucu, hata değil). Tohum 6 yeniden 30 yaşına ulaşıyor;
+      // senaryonun iddiaları aynen duruyor, gevşetilmedi.
+      final GameController c = GameController(random: Random(6));
       addTearDown(c.dispose);
       c.startNewLife(mode: StartMode.tamamenRastgele);
       advanceToAge(c, 30);

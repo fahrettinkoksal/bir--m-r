@@ -3,6 +3,7 @@ import 'dart:math';
 import '../effects/effect_diff.dart';
 import 'divorce_settlement.dart';
 import '../life/notices.dart';
+import '../economy/investment_engine.dart';
 import '../economy/household_budget.dart';
 import '../models/household.dart';
 import '../models/game_state.dart';
@@ -437,18 +438,42 @@ class MarriageEngine {
     // Mal paylaşımı (D-075): evlilik içinde **satın alınarak** edinilen
     // eşyalar bölünür; evlilikten önceki, miras ve hediye eşya kişisel
     // maldır ve paylaşıma girmez.
+    final int evlilikYasi = state.marriage!.marriedAtAge;
+
+    // Yatırım portföyü de paylaşıma girer (D-162): evlilik içinde açılan
+    // pozisyonlar edinilmiş mal sayılır, evlilik öncesi pozisyonlar
+    // kişisel maldır. Parayı yatırıma koymak paylaşımdan kaçmanın yolu
+    // olmamalı.
+    final int evlilikPortfoyu = DivorceSettlement.maritalPortfolio(
+      investments: state.investments,
+      termDeposits: state.termDeposits,
+      marriedAtAge: evlilikYasi,
+    );
+
     final DivorceSettlement paylasim = DivorceSettlement.compute(
       items: state.items,
-      marriedAtAge: state.marriage!.marriedAtAge,
+      marriedAtAge: evlilikYasi,
       wallet: state.player.wallet,
       cashShare: prototypeOnlyDivorceShare,
+      maritalPortfolioValue: evlilikPortfoyu,
     );
     final int pay = paylasim.cashToSpouse;
+
+    // Cüzdan payı karşılamıyorsa eksik kısım evlilik içinde açılmış
+    // pozisyonlardan **normal satış muhasebesiyle** toplanır; gerçekleşen
+    // kâr/zarar ve geçmiş kaydı oradan yazılır. Cüzdan yine de eksiye
+    // düşmesin diye ödeme sonda eldeki nakitle sınırlanır.
+    final GameState nakde = InvestmentEngine.raiseCashFromPositions(
+      state: state,
+      needed: pay - state.player.wallet,
+      sinceAge: evlilikYasi,
+    );
+    final int odenen = pay < nakde.player.wallet ? pay : nakde.player.wallet;
     final Set<String> gidenler = <String>{
       for (final OwnedItem i in paylasim.toSpouse) i.id,
     };
 
-    final List<Person> people = state.people
+    final List<Person> people = nakde.people
         .map((Person p) => p.id == spouse.id
             ? p.copyWith(
                 relation: RelationType.eskiEs,
@@ -488,7 +513,7 @@ class MarriageEngine {
     final List<String> satirlar = paylasim.summaryLines(spouse.firstName);
     final String metin = <String>[
       '${spouse.fullName} ile boşandın.',
-      if (pay > 0) 'Anlaşma gereği ${trMoney(pay)} cüzdanından çıktı.',
+      if (odenen > 0) 'Anlaşma gereği ${trMoney(odenen)} cüzdanından çıktı.',
       ...satirlar,
       if (kucukler.isNotEmpty) 'Velayet: ${velayet.label.toLowerCase()}.',
       if (nafaka != null)
@@ -498,13 +523,13 @@ class MarriageEngine {
       'Kaydı İlişkiler bölümünde eski eş olarak kalıyor.',
     ].join(' ');
 
-    final GameState next = state.copyWith(
+    final GameState next = nakde.copyWith(
       people: List<Person>.unmodifiable(velayetliKisiler),
       items: List<OwnedItem>.unmodifiable(
-        state.items.where((OwnedItem i) => !gidenler.contains(i.id)),
+        nakde.items.where((OwnedItem i) => !gidenler.contains(i.id)),
       ),
-      player: state.player.copyWith(
-        wallet: state.player.wallet - pay,
+      player: nakde.player.copyWith(
+        wallet: nakde.player.wallet - odenen,
         stats: state.player.stats.gain(
           happiness: prototypeOnlyDivorceHappiness,
         ),

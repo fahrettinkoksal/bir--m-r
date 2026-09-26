@@ -17,6 +17,8 @@ import 'career.dart';
 import 'chronic_condition.dart';
 import 'health_history.dart';
 import 'household.dart';
+import 'investment.dart';
+import 'market_state.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
 import 'gift_record.dart';
@@ -89,6 +91,10 @@ class GameState {
     this.goalsReachedAt = const <String, int>{},
     this.vehicleInspectionAt = const <String, int>{},
     this.alimony,
+    this.investments = const <Holding>[],
+    this.termDeposits = const <TermDeposit>[],
+    this.investmentHistory = const <InvestmentRecord>[],
+    this.market = const MarketState(),
     this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
@@ -400,6 +406,50 @@ class GameState {
 
   /// Bu hedefe ulaşıldı mı?
   bool goalReached(String id) => goalsReachedAt.containsKey(id);
+
+  /// D-162: portföydeki pozisyonlar. Boşsa hiç yatırım yapılmamıştır.
+  final List<Holding> investments;
+
+  /// D-162: açık ve kapanmamış vadeli hesaplar.
+  final List<TermDeposit> termDeposits;
+
+  /// D-162: portföy geçmişi (alım, satım, vade kapanışı, sıra dışı yıl).
+  ///
+  /// Yıllık fiyat hareketi buraya yazılmaz; yoksa geçmiş okunamaz hâle
+  /// gelirdi.
+  final List<InvestmentRecord> investmentHistory;
+
+  /// D-162: piyasanın kalıcı durumu (rejim, gizli parametreler, endeks).
+  final MarketState market;
+
+  /// Portföyün bugünkü toplam değeri (vadeli anaparalar dahil).
+  ///
+  /// Vadeli hesapta **anapara** sayılır, vade sonu değeri değil: henüz
+  /// kazanılmamış faizi servet gibi göstermek yanlış olurdu.
+  int get portfolioValue =>
+      investments.fold<int>(0, (int t, Holding h) => t + h.value) +
+      termDeposits.fold<int>(0, (int t, TermDeposit d) => t + d.amount);
+
+  /// Portföye hayat boyu yatırılan toplam (₺).
+  int get portfolioInvested =>
+      investments.fold<int>(0, (int t, Holding h) => t + h.totalInvested) +
+      termDeposits.fold<int>(0, (int t, TermDeposit d) => t + d.amount);
+
+  /// Elde duran pozisyonların gerçekleşmemiş kâr/zararı (₺).
+  int get portfolioUnrealized =>
+      investments.fold<int>(0, (int t, Holding h) => t + h.unrealizedProfit);
+
+  /// Hayat boyu gerçekleşen kâr/zarar (₺).
+  int get portfolioRealized =>
+      investments.fold<int>(0, (int t, Holding h) => t + h.realizedProfit);
+
+  /// Bu türdeki pozisyon; yoksa `null`.
+  Holding? holdingOf(String typeId) {
+    for (final Holding h in investments) {
+      if (h.typeId == typeId) return h;
+    }
+    return null;
+  }
 
   /// D-160: süren ya da kapanmış nafaka kaydı; hiç olmadıysa `null`.
   ///
@@ -990,6 +1040,10 @@ class GameState {
     Map<String, int>? goalsReachedAt,
     Map<String, int>? vehicleInspectionAt,
     Object? alimony = _unsetEvent,
+    List<Holding>? investments,
+    List<TermDeposit>? termDeposits,
+    List<InvestmentRecord>? investmentHistory,
+    MarketState? market,
     List<HealthHistoryEntry>? healthHistory,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
@@ -1090,6 +1144,10 @@ class GameState {
       vehicleInspectionAt:
           vehicleInspectionAt ?? this.vehicleInspectionAt,
       alimony: alimony == _unsetEvent ? this.alimony : alimony as Alimony?,
+      investments: investments ?? this.investments,
+      termDeposits: termDeposits ?? this.termDeposits,
+      investmentHistory: investmentHistory ?? this.investmentHistory,
+      market: market ?? this.market,
       healthHistory: healthHistory ?? this.healthHistory,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,

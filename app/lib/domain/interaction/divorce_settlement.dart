@@ -17,6 +17,7 @@
 /// uygular. Ayrıntılar karar kuyruğunda (Q-118).
 library;
 
+import '../models/investment.dart';
 import '../models/owned_item.dart';
 
 /// Boşanmada varlıkların nasıl bölündüğü.
@@ -68,11 +69,35 @@ class DivorceSettlement {
   /// her biri **o an daha az pay almış tarafa** verilir; sonuç iki tarafı
   /// da yaklaşık eşitler. Tek bir ev varsa ve evlilik içinde alınmışsa,
   /// o ev bir tarafa gider — yarısı kimseye verilemez.
+  /// Evlilik içinde **açılmış** yatırım pozisyonlarının toplam değeri (₺).
+  ///
+  /// Eşyadaki kuralın aynısı (D-075): evlilikten önce açılmış pozisyon
+  /// kişisel maldır. **Bilinen sınır:** evlilikten önce açılmış bir
+  /// pozisyona evlilik içinde para eklenmişse o ekleme de kişisel
+  /// sayılıyor, çünkü pozisyon tek kayıt olarak tutuluyor ve her alımın
+  /// yaşı ayrı saklanmıyor. Bu bilerek böyle; ayrıştırmak için her alımı
+  /// ayrı kayıt yapmak gerekir (Q-165/6).
+  static int maritalPortfolio({
+    required List<Holding> investments,
+    required List<TermDeposit> termDeposits,
+    required int marriedAtAge,
+  }) {
+    int toplam = 0;
+    for (final Holding h in investments) {
+      if (h.firstBoughtAtAge >= marriedAtAge) toplam += h.value;
+    }
+    for (final TermDeposit d in termDeposits) {
+      if (d.openedAtAge >= marriedAtAge) toplam += d.amount;
+    }
+    return toplam;
+  }
+
   static DivorceSettlement compute({
     required List<OwnedItem> items,
     required int marriedAtAge,
     required int wallet,
     required double cashShare,
+    int maritalPortfolioValue = 0,
   }) {
     final List<OwnedItem> kisisel = <OwnedItem>[];
     final List<OwnedItem> ortak = <OwnedItem>[];
@@ -107,7 +132,13 @@ class DivorceSettlement {
       }
     }
 
-    final int nakit = (wallet * cashShare).round().clamp(0, wallet);
+    // Nakit payı **cüzdan artı evlilik içinde açılan portföy** üzerinden
+    // hesaplanır (D-162): parasını yatırıma koymak paylaşımdan kaçmanın
+    // yolu olmamalı. Ödeme yine cüzdandan yapılır; cüzdan yetmezse
+    // portföyden zorunlu satışla tamamlanır (`MarriageEngine.divorce`).
+    final int paylasilanNakit = wallet + maritalPortfolioValue;
+    final int nakit =
+        (paylasilanNakit * cashShare).round().clamp(0, paylasilanNakit);
 
     return DivorceSettlement(
       cashToSpouse: nakit,

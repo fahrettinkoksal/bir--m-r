@@ -1,0 +1,608 @@
+/// Portföy motoru: al, sat, vadeli ve yıllık ilerleme (D-162).
+///
+/// **İkinci bir ekonomi motoru değildir.** Para tek cüzdandan çıkar ve tek
+/// cüzdana girer (`GameState.player.wallet`); banka, kredi ve yaşam gideri
+/// olduğu gibi durur. Buranın yaptığı tek şey cüzdandaki paranın bir kısmını
+/// **pozisyona** çevirmek ve piyasa endeksi hareket ettikçe o pozisyonun
+/// değerini güncellemek.
+///
+/// Kurallar:
+/// - Cüzdan **asla eksiye inmez**.
+/// - Piyasa yaş başına **bir kez** ilerler; al-sat yapmak ya da ekranı
+///   kapatıp açmak fiyatı yeniden çevirmez.
+/// - Kayıt silinmez: pozisyon sıfırlansa bile geçmiş satırları kalır.
+/// - Hiçbir metin yatırım tavsiyesi vermez, "kesin kazanç" demez.
+///
+/// Bütün sayılar `prototypeOnly`'dir (Q-165).
+library;
+
+import 'dart:math';
+
+import '../../data/investment_catalog.dart';
+import '../../text/turkish_text.dart';
+import '../models/game_state.dart';
+import '../models/interaction.dart';
+import '../models/investment.dart';
+import '../models/life_log.dart';
+import '../models/market_state.dart';
+import '../models/pending_notice.dart';
+import 'market_engine.dart';
+
+/// Bir portföy işleminin sonucu.
+class InvestmentOutcome {
+  const InvestmentOutcome({
+    required this.applied,
+    required this.text,
+    this.amount = 0,
+    this.realized = 0,
+  });
+
+  final bool applied;
+  final String text;
+
+  /// İşleme konu tutar (₺).
+  final int amount;
+
+  /// Satışta gerçekleşen kâr/zarar (₺).
+  final int realized;
+}
+
+class InvestmentResult {
+  const InvestmentResult({required this.state, required this.outcome});
+
+  final GameState state;
+  final InvestmentOutcome outcome;
+}
+
+abstract final class InvestmentEngine {
+  /// prototypeOnly: "büyük hareket" sayılan yıllık oran.
+  ///
+  /// Bildirim ve geçmiş satırı bu eşiğin üstünde açılır; sıradan yıl
+  /// yalnızca portföy ekranında görünür.
+  static const double prototypeOnlyBigMove = 0.22;
+
+  /// prototypeOnly: piyasa bildirimleri arasında en az kaç yıl geçmeli.
+  static const int prototypeOnlyNoticeGap = 2;
+
+  // -------------------------------------------------------------------
+  // Uygunluk
+  // -------------------------------------------------------------------
+
+  /// Yatırım bölümü bu oyuncuya açık mı?
+  static InteractionAvailability availability(GameState state) {
+    if (state.player.age < kInvestmentMinAge) {
+      return InteractionAvailability.blocked(
+        'Kendi adına yatırım yapmak için $kInvestmentMinAge yaşında olman '
+        'gerekiyor.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Bu tutarda alım yapılabilir mi? Yapılamıyorsa gerekçe (boş = uygun).
+  static String buyBlockReason({
+    required GameState state,
+    required InvestmentType type,
+    required int amount,
+  }) {
+    final InteractionAvailability u = availability(state);
+    if (!u.isAllowed) return u.reason!;
+    final int enAz = type.isTermDeposit ? kTermDepositMinAmount : kInvestmentMinBuy;
+    if (amount < enAz) return 'En az ${trMoney(enAz)} ile başlanabiliyor.';
+    if (state.player.wallet < amount) {
+      return 'Cüzdanında ${trMoney(amount)} yok.';
+    }
+    return '';
+  }
+
+  /// Bu tutarda satış yapılabilir mi? (boş = uygun)
+  static String sellBlockReason({
+    required GameState state,
+    required InvestmentType type,
+    required int amount,
+  }) {
+    if (type.isTermDeposit) {
+      return 'Vadeli hesap bu ekrandan satılmaz; vadesini bozabilirsin.';
+    }
+    final Holding? h = state.holdingOf(type.id);
+    if (h == null || h.isEmpty) return 'Bu türde yatırımın yok.';
+    if (amount <= 0) return 'Bir tutar yaz.';
+    if (amount > h.value) {
+      return 'Elindeki ${trMoney(h.value)} kadarını satabilirsin.';
+    }
+    return '';
+  }
+
+  // -------------------------------------------------------------------
+  // Alım
+  // -------------------------------------------------------------------
+
+  /// Yatırım alır. Vadeli hesapta ayrı bir kayıt açar.
+  static InvestmentResult buy({
+    required GameState state,
+    required String typeId,
+    required int amount,
+  }) {
+    final InvestmentType? tur = investmentTypeById(typeId);
+    if (tur == null) return _blocked(state, 'Böyle bir yatırım türü yok.');
+    final String engel =
+        buyBlockReason(state: state, type: tur, amount: amount);
+    if (engel.isNotEmpty) return _blocked(state, engel);
+
+    final int yas = state.player.age;
+    if (tur.isTermDeposit) return _openTermDeposit(state, amount, yas);
+
+    final Holding? mevcut = state.holdingOf(typeId);
+    final Holding yeni = mevcut == null
+        ? Holding.opened(typeId: typeId, amount: amount, atAge: yas)
+        : mevcut.copyWith(
+            value: mevcut.value + amount,
+            costBasis: mevcut.costBasis + amount,
+            totalInvested: mevcut.totalInvested + amount,
+          );
+
+    final String metin = '${tur.name}: ${trMoney(amount)} aldın.';
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet - amount,
+      ),
+      investments: List<Holding>.unmodifiable(<Holding>[
+        for (final Holding h in state.investments)
+          if (h.typeId != typeId) h,
+        yeni,
+      ]),
+      investmentHistory: List<InvestmentRecord>.unmodifiable(
+        <InvestmentRecord>[
+          ...state.investmentHistory,
+          InvestmentRecord(
+            typeId: typeId,
+            age: yas,
+            kind: InvestmentRecordKind.aldi,
+            amount: amount,
+          ),
+        ],
+      ),
+    );
+
+    return InvestmentResult(
+      state: _log(next, metin, yas),
+      outcome: InvestmentOutcome(applied: true, text: metin, amount: amount),
+    );
+  }
+
+  static InvestmentResult _openTermDeposit(
+    GameState state,
+    int amount,
+    int yas,
+  ) {
+    final int sayac = state.termDeposits.length +
+        state.investmentHistory
+            .where((InvestmentRecord r) =>
+                r.kind == InvestmentRecordKind.vadeAcildi)
+            .length +
+        1;
+    final TermDeposit kayit = TermDeposit(
+      id: 'vadeli-$sayac',
+      amount: amount,
+      openedAtAge: yas,
+      maturesAtAge: yas + kTermDepositYears,
+      rateBasis: (kTermDepositRate * MarketState.basis).round(),
+    );
+
+    final String metin =
+        'Vadeli hesaba ${trMoney(amount)} bağladın. Vade dolduğunda '
+        '${trMoney(kayit.maturityValue)} olarak dönecek; o güne kadar '
+        'para kilitli.';
+
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(wallet: state.player.wallet - amount),
+      termDeposits: List<TermDeposit>.unmodifiable(<TermDeposit>[
+        ...state.termDeposits,
+        kayit,
+      ]),
+      investmentHistory: List<InvestmentRecord>.unmodifiable(
+        <InvestmentRecord>[
+          ...state.investmentHistory,
+          InvestmentRecord(
+            typeId: 'vadeli',
+            age: yas,
+            kind: InvestmentRecordKind.vadeAcildi,
+            amount: amount,
+          ),
+        ],
+      ),
+    );
+
+    return InvestmentResult(
+      state: _log(next, metin, yas),
+      outcome: InvestmentOutcome(applied: true, text: metin, amount: amount),
+    );
+  }
+
+  // -------------------------------------------------------------------
+  // Satış
+  // -------------------------------------------------------------------
+
+  /// Pozisyonun bir kısmını (ya da tamamını) satar.
+  ///
+  /// Kısmi satışta **maliyet de oranla düşer**: gerçekleşen kâr, satılan
+  /// kısmın maliyeti ile eline geçen para arasındaki farktır.
+  static InvestmentResult sell({
+    required GameState state,
+    required String typeId,
+    required int amount,
+  }) {
+    final InvestmentType? tur = investmentTypeById(typeId);
+    if (tur == null) return _blocked(state, 'Böyle bir yatırım türü yok.');
+    final String engel =
+        sellBlockReason(state: state, type: tur, amount: amount);
+    if (engel.isNotEmpty) return _blocked(state, engel);
+
+    final Holding h = state.holdingOf(typeId)!;
+    final int yas = state.player.age;
+    final bool tamami = amount >= h.value;
+
+    // Satılan oran kadar maliyet düşer. Tamamı satıldıysa maliyetin
+    // tamamı gider; yoksa kuruş artıkları pozisyonda kalır.
+    final int dusenMaliyet =
+        tamami ? h.costBasis : (h.costBasis * amount / h.value).round();
+    final int gerceklesen = amount - dusenMaliyet;
+
+    final Holding yeni = h.copyWith(
+      value: h.value - amount,
+      costBasis: h.costBasis - dusenMaliyet,
+      realizedProfit: h.realizedProfit + gerceklesen,
+    );
+
+    final String metin = gerceklesen >= 0
+        ? '${tur.name}: ${trMoney(amount)} sattın. '
+            'Kâr ${trMoney(gerceklesen)}.'
+        : '${tur.name}: ${trMoney(amount)} sattın. '
+            'Zarar ${trMoney(-gerceklesen)}.';
+
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet + amount,
+      ),
+      investments: List<Holding>.unmodifiable(<Holding>[
+        for (final Holding x in state.investments)
+          if (x.typeId != typeId) x else yeni,
+      ]),
+      investmentHistory: List<InvestmentRecord>.unmodifiable(
+        <InvestmentRecord>[
+          ...state.investmentHistory,
+          InvestmentRecord(
+            typeId: typeId,
+            age: yas,
+            kind: InvestmentRecordKind.satti,
+            amount: amount,
+            realized: gerceklesen,
+          ),
+        ],
+      ),
+    );
+
+    return InvestmentResult(
+      state: _log(next, metin, yas),
+      outcome: InvestmentOutcome(
+        applied: true,
+        text: metin,
+        amount: amount,
+        realized: gerceklesen,
+      ),
+    );
+  }
+
+  /// Vadeyi **erken** bozar: anapara geri gelir, faiz yanar.
+  ///
+  /// Oyun yıllık ilerlediği için vade içinde geçen "kısmi süre" yoktur;
+  /// bu yüzden erken bozmada faizin tamamı kaybedilir. Ekranda bu açıkça
+  /// yazılır.
+  static InvestmentResult breakTermDeposit({
+    required GameState state,
+    required String depositId,
+  }) {
+    TermDeposit? kayit;
+    for (final TermDeposit d in state.termDeposits) {
+      if (d.id == depositId) kayit = d;
+    }
+    if (kayit == null) return _blocked(state, 'Böyle bir vadeli hesap yok.');
+
+    final int yas = state.player.age;
+    final String metin =
+        'Vadeli hesabı vadesinden önce bozdun. ${trMoney(kayit.amount)} '
+        'anapara geri geldi, faiz yandı.';
+
+    final GameState next = state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet + kayit.amount,
+      ),
+      termDeposits: List<TermDeposit>.unmodifiable(<TermDeposit>[
+        for (final TermDeposit d in state.termDeposits)
+          if (d.id != depositId) d,
+      ]),
+      investmentHistory: List<InvestmentRecord>.unmodifiable(
+        <InvestmentRecord>[
+          ...state.investmentHistory,
+          InvestmentRecord(
+            typeId: 'vadeli',
+            age: yas,
+            kind: InvestmentRecordKind.vadeBozuldu,
+            amount: kayit.amount,
+          ),
+        ],
+      ),
+    );
+
+    return InvestmentResult(
+      state: _log(next, metin, yas),
+      outcome: InvestmentOutcome(
+        applied: true,
+        text: metin,
+        amount: kayit.amount,
+      ),
+    );
+  }
+
+  /// Boşanma payı gibi **zorunlu** bir ödeme için, belirtilen yaştan
+  /// sonra açılmış pozisyonlardan nakit toplar.
+  ///
+  /// Kasıtlı olarak yeni bir muhasebe kurmuyor: her satış normal [sell],
+  /// her vade bozma normal [breakTermDeposit] üzerinden geçer. Böylece
+  /// gerçekleşen kâr/zarar, geçmiş kaydı ve günlük satırı tek yerden
+  /// yazılır. Sıra önce serbest pozisyonlar, sonra vadeli hesaplar:
+  /// vadeliyi bozmak faizi yakar, son çare olmalı.
+  static GameState raiseCashFromPositions({
+    required GameState state,
+    required int needed,
+    required int sinceAge,
+  }) {
+    if (needed <= 0) return state;
+    GameState s = state;
+    int kalan = needed;
+
+    for (final Holding h in state.investments) {
+      if (kalan <= 0) break;
+      if (h.firstBoughtAtAge < sinceAge) continue;
+      final Holding? guncel = s.holdingOf(h.typeId);
+      if (guncel == null || guncel.value <= 0) continue;
+      final int miktar = kalan < guncel.value ? kalan : guncel.value;
+      final InvestmentResult r =
+          sell(state: s, typeId: h.typeId, amount: miktar);
+      if (!r.outcome.applied) continue;
+      s = r.state;
+      kalan -= miktar;
+    }
+
+    for (final TermDeposit d in state.termDeposits) {
+      if (kalan <= 0) break;
+      if (d.openedAtAge < sinceAge) continue;
+      final InvestmentResult r = breakTermDeposit(state: s, depositId: d.id);
+      if (!r.outcome.applied) continue;
+      s = r.state;
+      kalan -= d.amount;
+    }
+
+    return s;
+  }
+
+  // -------------------------------------------------------------------
+  // Yıllık ilerleme
+  // -------------------------------------------------------------------
+
+  /// Piyasayı ve portföyü **bir yıl** ilerletir.
+  ///
+  /// Yaş başına bir kez çalışır: aynı yıl ikinci kez çağrılsa durum
+  /// değişmez. Portföyü olmayan oyuncuda da piyasa ilerler, çünkü fiyat
+  /// endeksi oyuncunun alım yapmasını beklemez.
+  static GameState advanceYear({
+    required GameState state,
+    required int newAge,
+    required Random rng,
+  }) {
+    if (MarketEngine.alreadyAdvancedAt(state.market, newAge)) return state;
+
+    final ({MarketState state, MarketYear year}) piyasa = MarketEngine.advance(
+      state: state.market,
+      newAge: newAge,
+      rng: rng,
+    );
+
+    GameState sonuc = state.copyWith(market: piyasa.state);
+    sonuc = _revaluePortfolio(sonuc, piyasa.year, newAge);
+    sonuc = _settleTermDeposits(sonuc, newAge);
+    sonuc = _maybeMarketNotice(sonuc, piyasa.year, newAge);
+    return sonuc;
+  }
+
+  /// Pozisyonların değerini yılın getirisiyle günceller.
+  static GameState _revaluePortfolio(
+    GameState state,
+    MarketYear year,
+    int newAge,
+  ) {
+    if (state.investments.isEmpty) return state;
+
+    final List<Holding> yeni = <Holding>[];
+    final List<InvestmentRecord> kayitlar = <InvestmentRecord>[];
+    for (final Holding h in state.investments) {
+      final double? getiri = year.returns[h.typeId];
+      if (getiri == null || h.isEmpty) {
+        yeni.add(h);
+        continue;
+      }
+      final int yeniDeger = (h.value * (1 + getiri)).round();
+      final int guvenli = yeniDeger < 0 ? 0 : yeniDeger;
+      yeni.add(h.copyWith(value: guvenli));
+
+      // Yalnızca **sıra dışı** yıl geçmişe yazılır; her yılın hareketi
+      // yazılsa geçmiş okunamaz hâle gelirdi.
+      if (getiri.abs() >= prototypeOnlyBigMove) {
+        kayitlar.add(
+          InvestmentRecord(
+            typeId: h.typeId,
+            age: newAge,
+            kind: getiri > 0
+                ? InvestmentRecordKind.buyukKazanc
+                : InvestmentRecordKind.buyukKayip,
+            amount: (guvenli - h.value).abs(),
+          ),
+        );
+      }
+    }
+
+    return state.copyWith(
+      investments: List<Holding>.unmodifiable(yeni),
+      investmentHistory: kayitlar.isEmpty
+          ? state.investmentHistory
+          : List<InvestmentRecord>.unmodifiable(<InvestmentRecord>[
+              ...state.investmentHistory,
+              ...kayitlar,
+            ]),
+    );
+  }
+
+  /// Vadesi dolan hesapları kapatır ve parayı cüzdana yazar.
+  static GameState _settleTermDeposits(GameState state, int newAge) {
+    if (state.termDeposits.isEmpty) return state;
+
+    final List<TermDeposit> kalan = <TermDeposit>[];
+    final List<TermDeposit> dolan = <TermDeposit>[];
+    for (final TermDeposit d in state.termDeposits) {
+      if (d.maturedAt(newAge)) {
+        dolan.add(d);
+      } else {
+        kalan.add(d);
+      }
+    }
+    if (dolan.isEmpty) return state;
+
+    int giren = 0;
+    final List<InvestmentRecord> kayitlar = <InvestmentRecord>[];
+    final List<LifeLogEntry> satirlar = <LifeLogEntry>[];
+    for (final TermDeposit d in dolan) {
+      giren += d.maturityValue;
+      kayitlar.add(
+        InvestmentRecord(
+          typeId: 'vadeli',
+          age: newAge,
+          kind: InvestmentRecordKind.vadeKapandi,
+          amount: d.maturityValue,
+          realized: d.interest,
+        ),
+      );
+      satirlar.add(
+        LifeLogEntry(
+          age: newAge,
+          text: 'Vadeli hesabın doldu: ${trMoney(d.maturityValue)} '
+              'hesabına geçti (${trMoney(d.interest)} faiz).',
+          category: LogCategory.kisisel,
+        ),
+      );
+    }
+
+    return state.copyWith(
+      player: state.player.copyWith(
+        wallet: state.player.wallet + giren,
+      ),
+      termDeposits: List<TermDeposit>.unmodifiable(kalan),
+      investmentHistory: List<InvestmentRecord>.unmodifiable(
+        <InvestmentRecord>[...state.investmentHistory, ...kayitlar],
+      ),
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        ...satirlar,
+      ]),
+    );
+  }
+
+  /// Piyasa belirgin hareket ettiyse bildirim açar.
+  ///
+  /// **Her yıl pencere açılmaz:** yalnızca portföyü olan oyuncuda, büyük
+  /// hareket ya da kriz/güçlü yılda ve iki bildirim arasında en az
+  /// [prototypeOnlyNoticeGap] yıl geçmişse.
+  static GameState _maybeMarketNotice(
+    GameState state,
+    MarketYear year,
+    int newAge,
+  ) {
+    if (state.investments.isEmpty) return state;
+
+    final int? son = state.market.lastNoticeAge;
+    if (son != null && newAge - son < prototypeOnlyNoticeGap) return state;
+
+    // Oyuncunun **gerçekten tuttuğu** varlıklardaki en büyük hareket.
+    double enBuyuk = 0;
+    for (final Holding h in state.investments) {
+      if (h.isEmpty) continue;
+      final double? g = year.returns[h.typeId];
+      if (g == null) continue;
+      if (g.abs() > enBuyuk.abs()) enBuyuk = g;
+    }
+    final bool belirgin = enBuyuk.abs() >= prototypeOnlyBigMove ||
+        (year.regime.isNotable && enBuyuk.abs() >= prototypeOnlyBigMove / 2);
+    if (!belirgin) return state;
+
+    return state.copyWith(
+      market: state.market.copyWith(lastNoticeAge: newAge),
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...state.notices,
+        PendingNotice(
+          id: 'piyasa-$newAge',
+          kind: NoticeKind.banka,
+          age: newAge,
+          title: enBuyuk >= 0 ? 'Piyasa iyi gitti' : 'Piyasa tatsızdı',
+          text: marketNoticeText(year: year, biggestMove: enBuyuk),
+        ),
+      ]),
+    );
+  }
+
+  /// Piyasa bildiriminin metni.
+  ///
+  /// Doğal Türkçe; "finansal piyasalarda olumlu gelişmeler yaşandı" gibi
+  /// robotik kalıp yok. Hiçbir cümle tavsiye vermez.
+  static String marketNoticeText({
+    required MarketYear year,
+    required double biggestMove,
+  }) {
+    final double hisse = year.returns['hisse'] ?? 0;
+    final double altin = year.returns['altin'] ?? 0;
+
+    if (year.regime == MarketRegime.kriz) {
+      if (altin > 0 && hisse < 0) {
+        return 'Piyasalar bu yıl tatsızdı. Hisse tarafı sert düştü, '
+            'altın ise portföyü biraz tuttu.';
+      }
+      return 'Zor bir yıl oldu. Ekranı açınca rakam can sıkıyor; '
+          'böyle yıllar da oluyor.';
+    }
+    if (year.regime == MarketRegime.guclu && biggestMove > 0) {
+      return 'Bu yıl yatırımcıların yüzü güldü. Portföyün de bundan '
+          'payını aldı.';
+    }
+    if (biggestMove > 0) {
+      return 'Piyasa bu yıl iyi yürüdü. Portföyün bir köşesi yüzünü '
+          'güldürdü.';
+    }
+    return 'Bu yıl piyasa pek yüz güldürmedi. Rakam biraz geri gitti.';
+  }
+
+  // -------------------------------------------------------------------
+  // Yardımcılar
+  // -------------------------------------------------------------------
+
+  static InvestmentResult _blocked(GameState state, String reason) =>
+      InvestmentResult(
+        state: state,
+        outcome: InvestmentOutcome(applied: false, text: reason),
+      );
+
+  static GameState _log(GameState state, String text, int age) =>
+      state.copyWith(
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(age: age, text: text, category: LogCategory.kisisel),
+        ]),
+      );
+}
