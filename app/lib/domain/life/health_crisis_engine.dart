@@ -3,7 +3,9 @@ import 'dart:math';
 import '../../data/health_crisis_catalog.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
+import '../../domain/economy/vehicle_trouble.dart';
 import '../models/health_history.dart';
+import '../models/owned_item.dart';
 import '../models/pending_crisis.dart';
 import 'chronic_engine.dart';
 
@@ -184,6 +186,21 @@ class HealthCrisisEngine {
         ),
       ),
     );
+
+    // Trafik kazasında araç da hasar görür (D-157). Kaza zaten iki yerde
+    // yaşanıyordu ama araç kaydına hiç dokunulmuyordu.
+    if (kriz.id == 'trafik_kazasi') {
+      final ({List<OwnedItem> items, String? text}) hasar =
+          VehicleTroubles.damageInAccident(next.items);
+      if (hasar.text != null) {
+        next = _log(
+          next.copyWith(
+            items: List<OwnedItem>.unmodifiable(hasar.items),
+          ),
+          hasar.text!,
+        );
+      }
+    }
 
     // Atlatılan kriz **iz bırakır** (D-153): kalıcı bir rahatsızlık
     // kalabilir ve kriz her hâlde sağlık geçmişine yazılır. Önceden

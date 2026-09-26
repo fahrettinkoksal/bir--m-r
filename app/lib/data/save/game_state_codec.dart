@@ -110,6 +110,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           .toList(growable: false),
       // Hayat hedefleri (D-156). Alan eklemeli.
       'goalsReachedAt': state.goalsReachedAt,
+      // Araç muayenesi (D-157). Alan eklemeli.
+      'vehicleInspectionAt': state.vehicleInspectionAt,
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -973,6 +975,9 @@ GameState decodeGameState(Map<String, Object?> json) {
     goalsReachedAt: json['goalsReachedAt'] == null
         ? const <String, int>{}
         : _intMap(json, 'goalsReachedAt'),
+    vehicleInspectionAt: json['vehicleInspectionAt'] == null
+        ? const <String, int>{}
+        : _intMap(json, 'vehicleInspectionAt'),
     martialArts: List<MartialProgress>.unmodifiable(
       _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))

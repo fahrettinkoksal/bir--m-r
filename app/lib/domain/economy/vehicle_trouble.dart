@@ -131,6 +131,41 @@ abstract final class VehicleTroubles {
     );
   }
 
+  /// prototypeOnly: trafik kazasında araca gelen kondisyon kaybı.
+  static const int prototypeOnlyAccidentDamage = 22;
+
+  /// Trafik kazasında **oyuncunun kullandığı aracın** hasar görmesi
+  /// (D-157).
+  ///
+  /// Kaza zaten iki yerde yaşanıyordu — sağlık krizi (`trafik_kazasi`) ve
+  /// adli kayıt (`trafik_kaza`) — ama **araç kaydına hiç dokunmuyordu**:
+  /// kaza geçiren oyuncunun arabası tazeliğini koruyordu.
+  ///
+  /// Yalnızca **bir** araç etkilenir: en yüksek kondisyonlu motorlu araç,
+  /// yani kazada büyük olasılıkla kullanılan. Aracı olmayan oyuncuda
+  /// hiçbir şey olmaz.
+  static ({List<OwnedItem> items, String? text}) damageInAccident(
+    List<OwnedItem> items,
+  ) {
+    OwnedItem? hedef;
+    for (final OwnedItem i in items) {
+      if (!applies(i)) continue;
+      if (hedef == null || i.condition > hedef.condition) hedef = i;
+    }
+    if (hedef == null) return (items: items, text: null);
+
+    final int yeni =
+        (hedef.condition - prototypeOnlyAccidentDamage).clamp(0, 100);
+    final OwnedItem guncel = hedef.copyWith(condition: yeni);
+    return (
+      items: items
+          .map((OwnedItem i) => i.id == guncel.id ? guncel : i)
+          .toList(growable: false),
+      text: '${hedef.name} kazada hasar gördü; durumu '
+          '"${guncel.conditionLabel.toLowerCase()}" oldu.',
+    );
+  }
+
   static String _arizaAdi(OwnedItem item, Random rng) {
     final List<String> liste = item.type.kind == ItemKind.motosiklet
         ? _motosiklet

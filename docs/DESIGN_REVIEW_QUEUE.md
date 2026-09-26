@@ -3669,3 +3669,33 @@ Ulaşıldığı **yaş** kaydedilir ve bir daha değişmez: ev satılsa bile "ot
 8. **Ulaşılmayan hedefin koşulu açıkça yazılıyor** ("Aynı işte 8 yılı doldur"). Bu bir yol gösterme mi, yoksa sürprizi bozuyor mu?
 
 **Varsayılan işlem:** Onay gelene dek hedefler yol boyunca açılır, ödül verilmez, kuşaklar arası taşınmaz.
+
+---
+
+### Q-160 — Araç muayenesi ve kazada araç hasarı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-157 · Test: `app/test/paket_z_test.dart`
+
+Araç sahipliğinin devamı eksikti. Neyin **zaten var** olduğunu ayırdım, ikinci bir sistem kurmadım:
+
+| Parça | Durum |
+|---|---|
+| Arıza ve tamir masrafı | **Vardı** (D-079, `VehicleTroubles`) |
+| Yıllık sigorta, kasko, vergi | **Vardı** (D-148, `LivingCosts`) |
+| Aracı satmak | **Vardı** (`ItemActions.sell`; fiyat kondisyona bakıyor) |
+| **Muayene** | **Yoktu — eklendi** |
+| **Kazanın aracı hasara uğratması** | **Yoktu — eklendi** |
+
+**Muayene:** iki yılda bir, her araç için ayrı takip. Kondisyonu 40'ın altındaki araç geçmez (ücret yine ödenir, geçmek için bakım gerekir). Parası yetmeyenin cüzdanı eksiye düşmez, muayene yapılmamış sayılır. Muayenesi geciken araç yıllık idari bedel çıkarır.
+
+**Kaza:** trafik kazası oyunda **iki yerde** yaşanıyordu — sağlık krizi (`trafik_kazasi`) ve adli kayıt (`trafik_kaza`) — ama ikisi de **araç kaydına hiç dokunmuyordu**: kaza geçiren oyuncunun arabası tazeliğini koruyordu. Artık ikisi de aracın kondisyonunu düşürüyor.
+
+**Karar soruları:**
+1. **Muayene ücretleri** otomobil 3.200 ₺, motosiklet 1.900 ₺. Doğru bantta mı?
+2. **Geçme eşiği kondisyon 40.** Doğru mu? Daha yükseği oyuncuyu sürekli bakıma zorlar.
+3. **Gecikme bedeli 2.400 ₺/yıl** ve gecikmenin ilk yılında başlıyor. Doğru mu? Alternatif: gecikmiş araç trafiğe çıkamaz (araç olayları kapanır) — daha sert ama daha gerçekçi.
+4. **Aralık iki yıl** (Türkiye'deki gerçek düzen). Araç yaşına göre değişmeli mi? (Gerçekte yeni araçlarda ilk muayene daha geç gelir.)
+5. **Kaza hasarı 22 kondisyon** ve **yalnızca bir araca** (en yüksek kondisyonlu, yani kazada büyük olasılıkla kullanılan) uygulanıyor. Doğru varsayım mı? Alternatif: hangi aracı kullandığı sorulsun.
+6. **Kasko kazada devreye girmiyor.** Kasko yıllık gider olarak çıkıyor (D-148) ama kaza masrafını karşılamıyor. Girmeli mi? Q-153/1'deki "kasko isteğe bağlı olsun mu" sorusuyla birlikte karara bağlanmalı.
+7. **Takas yok.** Satıp yenisini almak var; doğrudan takas ayrı bir ekran ister. Gerekli mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; kasko kazada devreye girmez, takas eklenmez, gecikmiş araç trafikten çekilmez.

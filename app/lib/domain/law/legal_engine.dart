@@ -17,6 +17,8 @@ import '../../data/crime_catalog.dart';
 import '../../data/economy.dart';
 import '../../data/lawyer_catalog.dart';
 import '../../text/turkish_text.dart';
+import '../economy/vehicle_trouble.dart';
+import '../models/owned_item.dart';
 import '../models/career.dart';
 import '../models/criminal_record.dart';
 import '../models/game_state.dart';
@@ -109,6 +111,19 @@ abstract final class LegalEngine {
     final LegalState hukuk = state.legal;
     final int sayac = hukuk.caseCounter + 1;
     final String dosyaId = 'dosya-$sayac';
+
+    // Maddi hasarlı trafik kazasında araç da hasar görür (D-157).
+    // Adli kayıt açılıyordu ama araç kaydına hiç dokunulmuyordu.
+    if (crimeId == 'trafik_kaza') {
+      final ({List<OwnedItem> items, String? text}) hasar =
+          VehicleTroubles.damageInAccident(state.items);
+      if (hasar.text != null) {
+        state = _log(
+          state.copyWith(items: List<OwnedItem>.unmodifiable(hasar.items)),
+          hasar.text!,
+        );
+      }
+    }
 
     // Olayın soruşturmaya dönüşme ihtimali: ağırlık + geçmiş. Oyuncuya
     // bu hesap gösterilmez ve etkileyecek bir "yöntem" sunulmaz.

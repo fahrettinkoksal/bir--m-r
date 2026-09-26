@@ -86,6 +86,7 @@ class GameState {
     this.hobbies = const <HobbyProgress>[],
     this.chronicConditions = const <ChronicCondition>[],
     this.goalsReachedAt = const <String, int>{},
+    this.vehicleInspectionAt = const <String, int>{},
     this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
@@ -397,6 +398,12 @@ class GameState {
 
   /// Bu hedefe ulaşıldı mı?
   bool goalReached(String id) => goalsReachedAt.containsKey(id);
+
+  /// D-157: araç kimliği -> muayeneden **geçtiği** son yaş.
+  ///
+  /// Eksik anahtar "hiç muayene edilmemiş" demektir; o zaman aracın
+  /// edinildiği yaş başlangıç sayılır.
+  final Map<String, int> vehicleInspectionAt;
 
   /// D-153: atlatılmış sağlık krizlerinin kalıcı geçmişi.
   ///
@@ -973,6 +980,7 @@ class GameState {
     List<HobbyProgress>? hobbies,
     List<ChronicCondition>? chronicConditions,
     Map<String, int>? goalsReachedAt,
+    Map<String, int>? vehicleInspectionAt,
     List<HealthHistoryEntry>? healthHistory,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
@@ -1070,6 +1078,8 @@ class GameState {
       hobbies: hobbies ?? this.hobbies,
       chronicConditions: chronicConditions ?? this.chronicConditions,
       goalsReachedAt: goalsReachedAt ?? this.goalsReachedAt,
+      vehicleInspectionAt:
+          vehicleInspectionAt ?? this.vehicleInspectionAt,
       healthHistory: healthHistory ?? this.healthHistory,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,

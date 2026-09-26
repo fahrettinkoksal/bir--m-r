@@ -21,6 +21,7 @@ import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
+import '../economy/vehicle_inspection.dart';
 import '../economy/housing.dart';
 import '../economy/living_costs.dart';
 import '../../data/health_crisis_catalog.dart';
@@ -664,6 +665,14 @@ class LifeProgression {
     // gidebilir, hapisteki yıl işler ve süresi dolan tahliye olur.
     // Suç işlemeyen oyuncuda bu satırların hiçbir etkisi yoktur.
     afterDeaths = LegalEngine.advanceYear(afterDeaths, newAge, _rng);
+
+    // Araç muayenesi (D-157): iki yılda bir gelir, kondisyonu düşük araç
+    // geçemez, muayenesi geciken araç yıllık bir idari bedel çıkarır.
+    // Aracı olmayan oyuncuda etkisi yoktur.
+    afterDeaths = VehicleInspection.advanceYear(
+      state: afterDeaths,
+      newAge: newAge,
+    );
 
     // Evcil hayvanlar (Paket 40): yaşlanır, yıllık bakım gideri **bir
     // kez** alınır ve yaşı gelen hayvan doğal yoldan kaybedilir. Parasızlık

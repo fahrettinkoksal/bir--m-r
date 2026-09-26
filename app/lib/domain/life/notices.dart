@@ -250,6 +250,25 @@ abstract final class Notices {
         personId: childId,
       );
 
+  /// Araç muayenesi (D-157).
+  ///
+  /// Bilgilendirmedir: karar sormaz. Metin gerçekten ödenen tutarı ve
+  /// gerçek sonucu yazar.
+  static PendingNotice vehicleInspection({
+    required int playerAge,
+    required String itemId,
+    required String vehicleName,
+    required bool passed,
+    required String text,
+  }) =>
+      PendingNotice(
+        id: 'muayene-$itemId-$playerAge',
+        kind: NoticeKind.arac,
+        age: playerAge,
+        title: passed ? 'Muayene tamam' : 'Muayeneden geçemedi',
+        text: text,
+      );
+
   /// Bir hayat hedefine ulaşıldı (D-156).
   ///
   /// Bilgilendirmedir: ödül vermez, karar sormaz, hiçbir değeri
