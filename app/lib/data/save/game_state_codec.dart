@@ -311,6 +311,16 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
         'releaseAtAge': state.legal.releaseAtAge,
         'probationUntilAge': state.legal.probationUntilAge,
         'caseCounter': state.legal.caseCounter,
+        // Tutukluluk ve kefalet (D-139). Eski kayıtlarda yoktur; boş
+        // gelirse tutuksuz sayılır, geriye dönük tutukluluk uydurulmaz.
+        'detainedSinceAge': state.legal.detainedSinceAge,
+        'bailAmount': state.legal.bailAmount,
+        'bailPaidBy': state.legal.bailPaidBy,
+        'bailAskedAtAge': state.legal.bailAskedAtAge,
+        // Cezaevi hayatı (D-140).
+        'goodBehaviour': state.legal.goodBehaviour,
+        'crewStanding': state.legal.crewStanding,
+        'yearsServed': state.legal.yearsServed,
         'cases': <Object?>[
           for (final CriminalCase c in state.legal.cases)
             <String, Object?>{
@@ -1965,6 +1975,13 @@ LegalState _decodeLegal(Map<String, Object?> json) => LegalState(
       releaseAtAge: _intOrNull(json, 'releaseAtAge'),
       probationUntilAge: _intOrNull(json, 'probationUntilAge'),
       caseCounter: _intOr(json, 'caseCounter', 0),
+      detainedSinceAge: _intOrNull(json, 'detainedSinceAge'),
+      bailAmount: _intOrNull(json, 'bailAmount'),
+      bailPaidBy: _stringOrNull(json, 'bailPaidBy'),
+      bailAskedAtAge: _intOrNull(json, 'bailAskedAtAge'),
+      goodBehaviour: _intOr(json, 'goodBehaviour', 0),
+      crewStanding: _intOr(json, 'crewStanding', 0),
+      yearsServed: _intOr(json, 'yearsServed', 0),
       cases: List<CriminalCase>.unmodifiable(<CriminalCase>[
         for (final Object? e in _optionalRawList(json, 'cases'))
           _decodeCase(_asMap(e, 'legal.case')),

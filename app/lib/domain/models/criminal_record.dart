@@ -161,7 +161,17 @@ class LegalState {
     this.releaseAtAge,
     this.probationUntilAge,
     this.caseCounter = 0,
+    this.detainedSinceAge,
+    this.bailAmount,
+    this.bailPaidBy,
+    this.bailAskedAtAge,
+    this.goodBehaviour = 0,
+    this.crewStanding = 0,
+    this.yearsServed = 0,
   });
+
+  /// Kefaleti oyuncunun kendisi ödediğinde [bailPaidBy] bu değeri alır.
+  static const String selfPaidBail = 'ben';
 
   /// Bütün dosyalar, açılış sırasıyla. **Silinmez.**
   final List<CriminalCase> cases;
@@ -178,7 +188,54 @@ class LegalState {
   /// Dosya kimlikleri için sayaç; kimlikler çakışmaz.
   final int caseCounter;
 
-  bool get isImprisoned => releaseAtAge != null;
+  // =====================================================================
+  // Tutukluluk ve kefalet (D-139)
+  // =====================================================================
+
+  /// **Tutuklandığı** yaş; dosya sürerken içeride tutuluyorsa dolu.
+  ///
+  /// Tutukluluk ile hükümlülük ayrı şeylerdir: kefalet **tutukluluğu**
+  /// kaldırır, verilmiş bir hapis cezasını satın almaz.
+  final int? detainedSinceAge;
+
+  /// Tutukluluk için belirlenen kefalet bedeli (₺); tutuklu değilse boş.
+  final int? bailAmount;
+
+  /// Kefaleti kim yatırdı: [selfPaidBail] ya da ödeyen kişinin kimliği.
+  /// Ödenmediyse boş.
+  final String? bailPaidBy;
+
+  /// Aileden kefalet **istendiği** yaş; aynı yıl ikinci kez istenmez.
+  final int? bailAskedAtAge;
+
+  // =====================================================================
+  // Cezaevi hayatı (D-140)
+  // =====================================================================
+
+  /// İyi hâl (0-100). Koşullu salıverilmeyi yaklaştırır.
+  final int goodBehaviour;
+
+  /// Koğuşta sözü geçen grubun yanındaki itibar (0-100).
+  ///
+  /// **Çete sisteminin ilk adımı.** Şu sürümde yalnızca sayılır ve
+  /// cezaevi içindeki metinleri/iyi hâli etkiler; dışarıda bir örgüt
+  /// kurmaz. Faho'nun notu: "ileride çete eklicez, onun ilk adımları."
+  final int crewStanding;
+
+  /// Cezaevinde fiilen geçirilen yıl.
+  final int yearsServed;
+
+  /// Hüküm gereği içeride mi?
+  bool get isSentenced => releaseAtAge != null;
+
+  /// Dosya sürerken tutuklu mu?
+  bool get isDetained => detainedSinceAge != null;
+
+  /// Kefalet yatırıldı mı?
+  bool get bailPaid => bailPaidBy != null;
+
+  /// Oyuncu şu an içeride mi? Tutukluluk da içeridedir.
+  bool get isImprisoned => isSentenced || isDetained;
 
   /// Sabıka kaydı bırakmış dosyalar.
   List<CriminalCase> get record =>
@@ -227,6 +284,13 @@ class LegalState {
     Object? releaseAtAge = _unset,
     Object? probationUntilAge = _unset,
     int? caseCounter,
+    Object? detainedSinceAge = _unset,
+    Object? bailAmount = _unset,
+    Object? bailPaidBy = _unset,
+    Object? bailAskedAtAge = _unset,
+    int? goodBehaviour,
+    int? crewStanding,
+    int? yearsServed,
   }) {
     return LegalState(
       cases: cases == null
@@ -241,6 +305,18 @@ class LegalState {
           ? this.probationUntilAge
           : probationUntilAge as int?,
       caseCounter: caseCounter ?? this.caseCounter,
+      detainedSinceAge: detainedSinceAge == _unset
+          ? this.detainedSinceAge
+          : detainedSinceAge as int?,
+      bailAmount: bailAmount == _unset ? this.bailAmount : bailAmount as int?,
+      bailPaidBy:
+          bailPaidBy == _unset ? this.bailPaidBy : bailPaidBy as String?,
+      bailAskedAtAge: bailAskedAtAge == _unset
+          ? this.bailAskedAtAge
+          : bailAskedAtAge as int?,
+      goodBehaviour: (goodBehaviour ?? this.goodBehaviour).clamp(0, 100),
+      crewStanding: (crewStanding ?? this.crewStanding).clamp(0, 100),
+      yearsServed: yearsServed ?? this.yearsServed,
     );
   }
 }

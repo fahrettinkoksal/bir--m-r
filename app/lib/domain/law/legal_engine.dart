@@ -14,6 +14,7 @@ library;
 import 'dart:math';
 
 import '../../data/crime_catalog.dart';
+import '../../data/economy.dart';
 import '../../data/lawyer_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../models/career.dart';
@@ -44,6 +45,47 @@ abstract final class LegalEngine {
 
   /// prototypeOnly: tahliye sonrası denetim dönemi (yıl).
   static const int prototypeOnlyProbationYears = 2;
+
+  /// prototypeOnly: koşullu salıverilme için gereken iyi hâl.
+  static const int prototypeOnlyParoleBehaviour = 60;
+
+  /// prototypeOnly: koşullu salıverilme, içeride gruba bu kadar yakın
+  /// duranlara açılmaz (D-140).
+  static const int prototypeOnlyParoleCrewLimit = 50;
+
+  // ===================================================================
+  // Tutukluluk ve kefalet (D-139)
+  //
+  // **Önemli ayrım:** kefalet tutukluluğu kaldırır, verilmiş bir hapis
+  // cezasını satın almaz. Oyuncu dosya sürerken tutuklanabilir; kefaleti
+  // kendi yatırır ya da aileden ister, sonra yargılama dışarıda sürer.
+  // Kefalet **teminattır**: duruşmaya çıkılınca geri verilir.
+  // ===================================================================
+
+  /// prototypeOnly: ağır bir dosyada tutuklama kararı çıkma ihtimali.
+  static const double prototypeOnlyDetentionChance = 0.45;
+
+  /// prototypeOnly: tutukluluk en fazla kaç yıl sürer.
+  ///
+  /// Süre dolarsa oyuncu **tutuksuz yargılanmak üzere** bırakılır; dosya
+  /// kapanmaz, içeride süresiz beklenmez.
+  static const int prototypeOnlyMaxDetentionYears = 2;
+
+  /// prototypeOnly: kefalet, olayın para cezası tavanının bu katı.
+  static const double prototypeOnlyBailMultiplier = 2.0;
+
+  /// prototypeOnly: aileden kefalet isteği için gereken asgari yakınlık.
+  static const int prototypeOnlyBailMinBond = 30;
+
+  /// Bu olay için belirlenen kefalet bedeli (₺).
+  ///
+  /// Bin ₺'nin katlarına yuvarlanır ki ekranda okunaklı dursun.
+  static int bailFor(CrimeType suc) {
+    final int taban =
+        suc.fineMax > 0 ? suc.fineMax : Economy.netMonthlyMinimumWage * 3;
+    final int tutar = (taban * prototypeOnlyBailMultiplier).round();
+    return (tutar / 1000).round() * 1000;
+  }
 
   // ===================================================================
   // 1) Dosya açılışı
@@ -122,7 +164,51 @@ abstract final class LegalEngine {
           'Konu: ${suc.label}.',
     );
     next = _familyReaction(next, suc);
+    next = _maybeDetain(next, suc, rng);
     return next;
+  }
+
+  /// Ağır bir dosyada tutuklama kararı çıkabilir (D-139).
+  ///
+  /// Çocuk tutuklanmaz: bu prototipte tutukluluk yalnızca 18 yaşından
+  /// itibaren uygulanır. Karar oyuncunun görmediği bir zara bağlıdır ve
+  /// etkileyecek bir "yöntem" sunulmaz.
+  static GameState _maybeDetain(GameState state, CrimeType suc, Random rng) {
+    if (state.player.age < 18) return state;
+    if (state.legal.isImprisoned) return state;
+    final bool tutuklanabilir = suc.severity == CrimeSeverity.agir ||
+        (suc.severity == CrimeSeverity.orta && state.legal.hasRecord);
+    if (!tutuklanabilir) return state;
+    if (rng.nextDouble() >= prototypeOnlyDetentionChance) return state;
+
+    final int yas = state.player.age;
+    final int kefalet = bailFor(suc);
+    GameState next = state.copyWith(
+      legal: state.legal.copyWith(
+        detainedSinceAge: yas,
+        bailAmount: kefalet,
+        bailPaidBy: null,
+        bailAskedAtAge: null,
+      ),
+      player: state.player.copyWith(
+        stats: state.player.stats.gain(happiness: -8, health: -2),
+      ),
+    );
+    next = _log(
+      next,
+      '${suc.label} dosyasında tutuklandın. Kefalet '
+      '${trMoney(kefalet)} olarak belirlendi.',
+    );
+    next = _notice(
+      next,
+      id: 'tutuklama-$yas-${suc.id}',
+      title: 'Tutuklandın',
+      text: 'Dosya sürerken tutuklama kararı çıktı.\n\n'
+          'Kefalet ${trMoney(kefalet)}. Yatırırsan dışarıda '
+          'beklersin; yatırmazsan duruşmaya kadar içerideyim demektir.\n\n'
+          'Kefalet teminattır: duruşmaya çıkınca geri verilir.',
+    );
+    return _loosenBonds(next, perYear: false);
   }
 
   // ===================================================================
@@ -132,8 +218,49 @@ abstract final class LegalEngine {
   /// Açık dosyaları ve hapis durumunu bir yıl ilerletir.
   static GameState advanceYear(GameState state, int newAge, Random rng) {
     GameState next = _advancePrison(state, newAge);
+    next = _advanceDetention(next, newAge);
     next = _advanceInvestigations(next, newAge, rng);
     return next;
+  }
+
+  /// Tutuklulukta geçen yılı işler (D-139).
+  ///
+  /// Süre dolduysa oyuncu **tutuksuz yargılanmak üzere** bırakılır; dosya
+  /// açık kalır, içeride süresiz beklenmez.
+  static GameState _advanceDetention(GameState state, int newAge) {
+    final LegalState hukuk = state.legal;
+    final int? giris = hukuk.detainedSinceAge;
+    if (giris == null || hukuk.isSentenced) return state;
+
+    if (newAge - giris < prototypeOnlyMaxDetentionYears) {
+      GameState next = _log(
+        state,
+        'Bir yıl daha tutuklu geçti. Dosya hâlâ açık.',
+      );
+      next = next.copyWith(
+        player: next.player.copyWith(
+          stats: next.player.stats.gain(happiness: -5, health: -2),
+        ),
+        legal: next.legal.copyWith(yearsServed: next.legal.yearsServed + 1),
+      );
+      return _loosenBonds(next, perYear: true);
+    }
+
+    GameState next = state.copyWith(
+      legal: hukuk.copyWith(detainedSinceAge: null),
+    );
+    next = _log(
+      next,
+      'Tutukluluğun kaldırıldı; yargılama tutuksuz sürecek.',
+    );
+    return _notice(
+      next,
+      id: 'tutuksuz-$newAge',
+      title: 'Tutukluluk kaldırıldı',
+      text: 'Tutukluluğun kaldırıldı. Dosya kapanmadı: yargılama '
+          'dışarıda sürecek.\n\n'
+          'Duruşmaya gitmen gerekiyor.',
+    );
   }
 
   /// Hapisteki yılı işler; süresi dolduysa tahliye eder.
@@ -142,7 +269,18 @@ abstract final class LegalEngine {
     final int? tahliye = hukuk.releaseAtAge;
     if (tahliye == null) return state;
 
-    if (newAge < tahliye) {
+    // Koşullu salıverilme (D-140): iyi hâl toplandıysa ve cezanın yarısı
+    // yatıldıysa tahliye öne çekilir. İçeride gruba yakın durmak bu
+    // kapıyı kapatır — ikisi birlikte yürümez.
+    final int giris = hukuk.imprisonedSinceAge ?? newAge;
+    final int toplamCeza = (tahliye - giris).clamp(1, 60);
+    final bool yariniYatti = newAge - giris >= (toplamCeza / 2).ceil();
+    final bool kosulluHak = newAge < tahliye &&
+        yariniYatti &&
+        hukuk.goodBehaviour >= prototypeOnlyParoleBehaviour &&
+        hukuk.crewStanding < prototypeOnlyParoleCrewLimit;
+
+    if (newAge < tahliye && !kosulluHak) {
       // İçeride geçen yıl: dışarıdaki hayat yerinde saymaz.
       GameState next = _log(
         state,
@@ -152,11 +290,12 @@ abstract final class LegalEngine {
         player: next.player.copyWith(
           stats: next.player.stats.gain(happiness: -6, health: -2),
         ),
+        legal: next.legal.copyWith(yearsServed: next.legal.yearsServed + 1),
       );
       return _loosenBonds(next, perYear: true);
     }
 
-    // Tahliye.
+    // Tahliye (süre doldu ya da koşullu salıverildi).
     final List<CriminalCase> guncel = hukuk.cases
         .map(
           (CriminalCase c) => c.verdict == Verdict.hapis && c.closedAtAge == null
@@ -173,13 +312,26 @@ abstract final class LegalEngine {
         probationUntilAge: newAge + prototypeOnlyProbationYears,
       ),
     );
-    next = _log(next, 'Tahliye oldun. Kapıdan çıkarken hava soğuktu.');
+    next = _log(
+      next,
+      kosulluHak
+          ? 'İyi hâlden koşullu salıverildin. Kapıdan çıkarken hava '
+              'soğuktu.'
+          : 'Tahliye oldun. Kapıdan çıkarken hava soğuktu.',
+    );
     next = _notice(
       next,
       id: 'tahliye-$newAge',
-      title: 'Tahliye oldun',
-      text: 'Kapı arkandan kapandı. Cebinde bir poşet, elinde bir kâğıt.\n\n'
-          'Denetim dönemin $prototypeOnlyProbationYears yıl sürecek.',
+      title: kosulluHak ? 'Koşullu salıverildin' : 'Tahliye oldun',
+      text: kosulluHak
+          ? 'İyi hâl dosyan tuttu; cezanın kalanını dışarıda '
+              'çekeceksin.\n\n'
+              'Kapı arkandan kapandı. Cebinde bir poşet, elinde bir '
+              'kâğıt.\n\n'
+              'Denetim dönemin $prototypeOnlyProbationYears yıl sürecek.'
+          : 'Kapı arkandan kapandı. Cebinde bir poşet, elinde bir '
+              'kâğıt.\n\n'
+              'Denetim dönemin $prototypeOnlyProbationYears yıl sürecek.',
     );
     return next;
   }
@@ -191,7 +343,9 @@ abstract final class LegalEngine {
     Random rng,
   ) {
     final LegalState hukuk = state.legal;
-    if (hukuk.isImprisoned) return state;
+    // Hükümlüyken yeni dosya ilerlemez; **tutukluyken ilerler**, yoksa
+    // tutuklu oyuncu içeride sonsuza kadar beklerdi (D-139).
+    if (hukuk.isSentenced) return state;
     final CriminalCase? acik = hukuk.openCase;
     if (acik == null) return state;
 
@@ -217,7 +371,7 @@ abstract final class LegalEngine {
         .clamp(0.02, 0.6);
 
     if (rng.nextDouble() < takipsizlik) {
-      final GameState next = _replaceCase(
+      GameState next = _replaceCase(
         state,
         acik.copyWith(
           stage: CaseStage.takipsizlik,
@@ -225,6 +379,8 @@ abstract final class LegalEngine {
           note: 'Takipsizlik kararı verildi.',
         ),
       );
+      // Dosya kapandıysa tutukluluk da biter, kefalet geri verilir.
+      next = _releaseDetention(next, attended: true);
       return _notice(
         _log(next, '${suc.label} dosyasında takipsizlik kararı çıktı.'),
         id: 'takipsizlik-${acik.id}',
@@ -367,9 +523,28 @@ abstract final class LegalEngine {
 
     next = _replaceCase(next, kapanan).copyWith(pendingTrial: null);
 
+    // Tutuklulukta geçen süre cezadan düşülür (D-139): oyuncu aynı yılı
+    // iki kez yatmaz. Kefalet yatırılmışsa duruşmaya çıkıldığı için geri
+    // verilir.
+    final int tutuklulukYili = next.legal.detainedSinceAge == null
+        ? 0
+        : (yas - next.legal.detainedSinceAge!).clamp(0, 50);
+    next = _releaseDetention(next, attended: true);
+
     // Hapis: iş biter, gelir kesilir, bağlar zayıflar.
     if (karar == Verdict.hapis) {
-      next = _enterPrison(next, yas, hapisYili);
+      final int kalan = hapisYili - tutuklulukYili;
+      if (kalan <= 0) {
+        // Tutuklulukta yatılan süre cezayı karşıladı: dosya kapanır.
+        next = _replaceCase(next, kapanan.copyWith(closedAtAge: yas));
+        next = _log(
+          next,
+          'Ceza, tutuklulukta geçen süreden sayıldı; içeride '
+          'kalmayacaksın.',
+        );
+      } else {
+        next = _enterPrison(next, yas, kalan);
+      }
     }
 
     next = _log(next, _kararGunlugu(suc, karar, ceza, hapisYili));
@@ -437,6 +612,78 @@ abstract final class LegalEngine {
       );
     }
     return _loosenBonds(next, perYear: false);
+  }
+
+  /// Tutukluluğu kaldırır ve kefaleti geri verir (D-139).
+  ///
+  /// Kefalet **teminattır**: duruşmaya çıkıldığında ya da dosya
+  /// kapandığında geri verilir. Oyuncu kendi yatırdıysa para cüzdana
+  /// döner; aileden biri yatırdıysa para **ona** geri gider, oyuncunun
+  /// cüzdanına girmez, ama aradaki bağ güçlenir.
+  static GameState _releaseDetention(
+    GameState state, {
+    required bool attended,
+  }) {
+    final LegalState hukuk = state.legal;
+    if (!hukuk.isDetained && !hukuk.bailPaid) return state;
+
+    final int? kefalet = hukuk.bailAmount;
+    final String? odeyen = hukuk.bailPaidBy;
+    GameState next = state.copyWith(
+      legal: hukuk.copyWith(
+        detainedSinceAge: null,
+        bailAmount: null,
+        bailPaidBy: null,
+        bailAskedAtAge: null,
+      ),
+    );
+    if (!attended || kefalet == null || kefalet <= 0 || odeyen == null) {
+      return next;
+    }
+
+    if (odeyen == LegalState.selfPaidBail) {
+      next = next.copyWith(
+        player: next.player.copyWith(
+          wallet: next.player.wallet + kefalet,
+        ),
+      );
+      next = _log(next, 'Kefalet ${trMoney(kefalet)} geri ödendi.');
+      return _notice(
+        next,
+        id: 'kefalet-geri-${next.player.age}',
+        title: 'Kefalet geri verildi',
+        text: 'Duruşmaya çıktın; yatırdığın kefalet geri ödendi.\n\n'
+            '${trMoney(kefalet)} cüzdanına döndü.',
+        money: kefalet,
+      );
+    }
+
+    final Person? kisi = next.personById(odeyen);
+    if (kisi == null) return next;
+    next = next.copyWith(
+      people: List<Person>.unmodifiable(
+        next.people
+            .map(
+              (Person p) => p.id == odeyen
+                  ? p.copyWith(bond: (p.bond + 3).clamp(0, 100))
+                  : p,
+            )
+            .toList(growable: false),
+      ),
+    );
+    next = _log(
+      next,
+      'Kefalet geri ödendi; parayı ${kisi.firstName}\'a geri verdin.',
+    );
+    return _notice(
+      next,
+      id: 'kefalet-geri-${next.player.age}',
+      title: 'Kefalet geri verildi',
+      text: 'Duruşmaya çıktın, kefalet geri ödendi. Parayı '
+          '${kisi.firstName}\'a geri verdin.\n\n'
+          'Kimse bir şey demedi ama not edildi.',
+      personId: kisi.id,
+    );
   }
 
   /// Uzaklaşan bağlar. **Kimse listeden silinmez** (D-058 ile aynı ilke).

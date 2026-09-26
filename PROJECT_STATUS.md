@@ -1315,6 +1315,74 @@ ve kalabalık aktivite). Bütün yeni sayılar `prototypeOnly`.
 friendship_depth 23, part_time_work 12, business 28, missing_screens 10).
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
+## Paket V: hediye seçimi, menüler, 2. el araç pazarı, kefalet ve üvey ebeveyn (26 Eylül 2026, D-134 … D-141)
+
+Faho'nun sekiz maddelik listesi. **D-134 … D-141 numaraları bu pakette
+kullanıldı ama `DECISIONS.md`'ye yazılmadı:** `CLAUDE.md` "kullanıcı onayı
+olmadan `DECISIONS.md` içine karar ekleme" diyor. Numaralar kodda ve bu
+dosyada geçiyor; kesin kural hâline gelmeleri Faho'nun onayına bağlı.
+
+### Hediye seçimi (D-134)
+"Anneme tıkladım, hediye vere tıkladım; tavla, buket çiçek, çeyrek altın,
+bilezik gibi şeyler olsun; tavla hediye edersem beğenmesin." Hediye artık
+rastgele değil: açılır listeden seçiliyor, karşı taraf **beğenmeyebiliyor**.
+13 yeni hediye, 10 hediye kategorisi, bağ türüne ve yaşa göre zevk tablosu.
+Beğenilmeyen hediye bağı düşürüyor ama parayı geri getirmiyor.
+
+### Evcil hayvan menüsü (D-135)
+Edinme listesi tek yığından altı gruba ayrıldı: Kediler, Köpekler, Kuşlar,
+Kemirgenler ve tavşan, Su ve sürüngen, Egzotik.
+
+### Kurgusal araç adları (D-136)
+13 araç kurgusal marka+model adı aldı (Foros, Tunca, Veran, Doruk, Alvera,
+Sarp, Rüzgâr). Gerçek marka yok, telif sorunu yok. Sınıf bilgisi
+`ItemType.segment` alanında ayrı duruyor ve ad altında yazıyor.
+
+### 2. el araç pazarı (D-137)
+Yeni mağaza. İlanda model adı, satıcı (sahibinden/galeriden), fiyat, sıfır
+fiyatı, yaş, km, durum ve beş satır "Araç detayları" var: "şasi ve podyede
+oynama yoktur", "bel altı temizlik", "boyalı ama değişeni yok", "tramer
+kaydı", "muayenesi yeni". Alınan araç **ilanın kondisyonuyla** giriyor.
+Havuz şehir + yaşa göre belirlenimli; yıl geçince tazeleniyor. Model yılı
+yazılmıyor: oyunda takvim yılı yok.
+
+### Mağaza menüleri (D-138)
+On bir satırlık düz liste üç öbeğe ayrıldı (Gündelik alışveriş / Araç ve
+aksesuar / Konut), sıra sabit; raf içi ürünler ucuzdan pahalıya sıralı.
+
+### Kefalet ve tutukluluk (D-139)
+Ağır bir dosyada tutuklama kararı çıkabiliyor (%45, 18 yaş altına
+uygulanmıyor). Kefalet **tutukluluğu** kaldırıyor, cezayı satın almıyor.
+İki kapı: kendi cüzdanından yatırmak ya da aileden istemek (red
+edilebilir, aynı yıl ikinci kez istenmez). Kefalet teminat: duruşmaya
+çıkılınca geri veriliyor — ödeyen aileden biriyse para ona dönüyor.
+Tutuklulukta geçen süre cezadan düşülüyor. Tutukluluk en çok 2 yıl;
+süre dolarsa tutuksuz yargılama sürüyor.
+
+### Cezaevi hayatı ve çeteleşmenin ilk adımı (D-140)
+Koğuşta sohbet (en çok 3 koğuş arkadaşı, tahliyeden sonra listede kalıyor),
+kurallara uymak (iyi hâl), **sözü geçen gruba yakın durmak** ve gruptan
+uzaklaşmak. İyi hâl ≥ 60 + cezanın yarısı + koğuş itibarı < 50 ise
+koşullu salıverilme geliyor; gruba yakın durmak o kapıyı kapatıyor.
+Çete tarafı bilinçli olarak **sayaçta**: dışarıda örgüt, gelir ya da emir
+zinciri yok (Q-148).
+
+### Üvey anne / baba (D-141)
+Ebeveynlerden biri vefat ettiyse, hayatta kalan ebeveyn yas süresinden
+sonra yeniden evlenebiliyor. Gelen kişi çekirdek ailede listeleniyor,
+bağ 18'den başlıyor, **kan bağı sayılmıyor**. Vefat eden ebeveyn kayıttan
+silinmiyor. Üvey kardeş ve miras bu sürümde yok (Q-149).
+
+**Açık kalan sayılar:** Q-148 (kefalet, tutukluluk, çete sınırı),
+Q-149 (üvey ebeveyn), Q-150 (2. el pazar fiyatları), Q-151 (araç adları),
+Q-152 (mağaza menü düzeni). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2219 geçti, 15 atlandı, 0 başarısız** (bunların **74'ü**
+bu pakette yeni: gift_choice 15, used_vehicle_market 19,
+used_vehicle_widget 3, bail_prison 32, bail_prison_widget 5).
+**Gerçek Windows veya Android cihazda oynanmadı; APK derlenmedi.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

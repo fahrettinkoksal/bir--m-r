@@ -3396,3 +3396,95 @@ Dört görünmeyen kayıt ekrana geldi: Hobilerim, Evlilik Geçmişi, evcil hayv
 3. Kalabalık aktivitede ücret **kişi başına** artıyor (3 kişi = 3 bilet). Doğru mu, yoksa grup indirimi mi olmalı?
 4. Kalabalık gitmek şu an herkese **aynı** bağ puanını veriyor. Kalabalıkta kişi başına daha az mı olmalı? ("Beş kişiyle sinemaya gitmek, bir kişiyle gitmek kadar yakınlaştırmaz.")
 5. Kalabalık aktivitede en fazla kaç kişi olmalı? Şu an teknik sınır 8, pratikte listedeki herkes.
+
+---
+
+### Q-148 — Kefalet, tutukluluk ve çeteleşmenin sınırı
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-139, D-140 · `app/lib/domain/law/prison_life.dart`, `app/lib/domain/law/legal_engine.dart` · Test: `app/test/bail_prison_test.dart`, `app/test/bail_prison_widget_test.dart`
+
+Faho'nun isteği: "hapishane sistemine şey ekle, para ile çıkabilelim, kefalet ücretiymiydi neydi; aileden ödemesini isteyebilelim veya paramız var ise biz ödeyelim; avukat tutabilelim; içeride hapishanede arkadaşlar edinebilelim; ileride çete eklicez, onun ilk adımları gibi düşün, hapishanede çeteleşebilelim."
+
+**Claude'un uyguladığı okuma (teknik varsayım, ürün kuralı değil):** Türkiye'de kefalet **tutukluluğu** kaldırır, verilmiş bir hapis cezasını satın almaz. Bu yüzden kod şöyle kuruldu: ağır bir dosyada (%45) tutuklama kararı çıkabiliyor, kefalet belirleniyor, oyuncu kendi yatırıyor ya da aileden istiyor; duruşmaya çıkınca kefalet **geri veriliyor**; tutuklulukta geçen süre cezadan **düşülüyor**. Hükümlülükten para ile çıkış yoktur; onun yerine **iyi hâl → koşullu salıverilme** var.
+
+**Karar soruları:**
+1. **Doğru okuma bu mu?** Faho "para ile çıkabilelim" derken hükümlülükten de para ile çıkmayı mı kastetti? Öyleyse bu gerçeklikten ayrılır; isteniyorsa ayrı ve bilinçli bir oyun kuralı olarak yazılır.
+2. **Kefalet tutarı:** şu an olayın para cezası tavanının **2 katı** (yaralamada ≈ 6 asgari ücret). Doğru bantta mı?
+3. **Tutuklama sıklığı %45** ve yalnızca ağır olayda (orta olayda sabıkalıysa). Çok mu sık, az mı?
+4. **Tutukluluk tavanı 2 yıl.** Süre dolunca "tutuksuz yargılanma" ile çıkılıyor. Doğru mu?
+5. **Kefalet geri veriliyor.** Aileden biri yatırdıysa para ona dönüyor, oyuncunun cüzdanına girmiyor ve bağ +3 oluyor. Doğru mu?
+6. **Çeteleşme nerede durmalı?** Şu an yalnızca bir sayaç: `crewStanding` 0-100, içerideki metinleri değiştiriyor ve **koşullu salıverilmeyi kapatıyor** (eşik 50). Dışarıda örgüt, gelir, emir zinciri **yok**. Sonraki adımda ne gelmeli — tahliyeden sonra süren bir bağ mı, mahalle düzeyinde bir grup mu, hiçbiri mi?
+7. **Koşullu salıverilme eşiği:** iyi hâl ≥ 60, cezanın yarısı yatılmış ve koğuş itibarı < 50. Doğru mu?
+8. Cezaevi eylemleri yılda **2 kez**; bir hükümlülükte en fazla **3** koğuş arkadaşı. Doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek sayılar `prototypeOnly` kalır; çete tarafı sayaçtan öteye geçmez.
+
+---
+
+### Q-149 — Üvey anne/baba: tetik, sıklık ve üvey kardeş
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-141 · `app/lib/domain/generation/step_parents.dart` · Test: `app/test/bail_prison_test.dart`
+
+Faho'nun isteği: "üvey anne baba olabilsin."
+
+**Uygulanan:** Ebeveynlerden biri **vefat ettiyse**, hayatta kalan ebeveyn (en çok 72 yaşına kadar) yas süresi geçtikten sonra yılda %12 ihtimalle yeniden evleniyor; gelen kişi `uveyAnne`/`uveyBaba` olarak çekirdek ailede listeleniyor, bağ 18'den başlıyor, kan bağı sayılmıyor.
+
+**Karar soruları:**
+1. **Tetik yalnızca vefat.** Ebeveynlerin **boşanması** oyunda hiç modellenmiyor. Eklenmeli mi? Eklenirse aynı kapı kullanılacak.
+2. **Yas süresi 2 yıl** ve **yıllık %12**. Doğru mu?
+3. **Üvey kardeş gelmiyor.** Üvey ebeveynin kendi çocukları olmalı mı? Olursa hangi bağ türü (`uveyKardes`) ve aynı hanede mi?
+4. Oyuncu bu evliliğe **karşı çıkabilmeli mi**? Şu an çocuğun karar hakkı yok; haber olarak geliyor.
+5. **Üvey ebeveynden miras** olmalı mı? Şu an kan bağı olmadığı için miras akışına girmiyor.
+6. Üvey ebeveynle **etkileşimler** anne/babayla aynı (vakit geçir, sohbet, hediye, para iste). Para isteme baştan açık olmalı mı, yoksa bağ belirli bir eşiği geçince mi?
+7. Üvey ebeveyn geldiğinde oyuncunun mutluluğu **düşüyor** (18 altında −3, üstünde −1). Doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek üvey kardeş, miras ve boşanma tetiği eklenmez.
+
+---
+
+### Q-150 — 2. el araç pazarı: fiyat, yaş ve ilan dili
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-137 · `app/lib/domain/economy/used_vehicle_market.dart` · Test: `app/test/used_vehicle_market_test.dart`
+
+Faho'nun isteği: "2. el araç pazarı ekleyelim, içerisinde araç ilanları olsun, araç detayları yazsın — şasi podyede oynama yoktur, bel altı temizlik, boyalı vb."
+
+**Uygulanan:** Yaşanan ilde 9 ilan. Fiyat = şehir katsayısı × yaş kaybı (yılda %7, tabanı %35) × durum (hatasız 1,08 / bakımlı 1,00 / ortalama 0,88 / yorgun 0,72) × satıcı (sahibinden 0,97 / galeriden 1,04). Alınan araç ilanın kondisyonuyla giriyor (92/78/60/38). Havuz şehir + oyuncu yaşına göre **belirlenimli**: yıl geçince tazeleniyor.
+
+**Karar soruları:**
+1. **Yaş kaybı yılda %7, taban %35.** Doğru mu? 15 yaşındaki bir araç sıfırının ~%35'ine iniyor.
+2. **İlan sayısı 9.** Az mı, çok mu?
+3. **Pazar yılda bir tazeleniyor.** Aynı yıl içinde yeni ilan çıkmıyor. Doğru mu?
+4. **Model yılı yazılmıyor** ("8 yaşında" deniyor), çünkü oyunda takvim yılı yok. Bu kabul edilebilir mi, yoksa gizli bir başlangıç yılı mı eklenmeli?
+5. **En yorgun ilanın kondisyonu 38.** Seyahat için alt sınır 25; yani yorgun araç yola çıkabiliyor ama bakım istiyor. Doğru mu?
+6. Pazardan alınan aracın **masraf olayı** çıkarması gerekir mi? Şu an yalnızca "uygun fiyatlı galeri" için böyle bir not var.
+7. İlan detayları **satıcı beyanıdır**; ekranda öyle yazıyor. İlerideki bir sürümde **yalan ilan** (yazandan kötü çıkan araç) olmalı mı?
+8. **Takas** ve **pazarlık** ilan notlarında yazıyor ama mekanik değil. Eklenmeli mi?
+
+---
+
+### Q-151 — Kurgusal araç marka ve model adları
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-136 · `app/lib/data/item_catalog.dart`
+
+Faho'nun isteği: "araçların adlarını biraz günümüz araçları ile vurgula, mesela düşük bütçeli araca foros vb gibi, en azından telif yemeyiz."
+
+**Uygulanan adlar:** Foros 1.0, Foros Kent 1.4, Tunca Ege 1.2, Tunca Ferah 1.6, Veran Sedan 1.6, Doruk Yayla 4x4, Alvera Salon 2.0, Sarp Coupe 3.0, Alvera Prestij 4.0; motosikletler: Rüzgâr Scoot 125, Rüzgâr 250, Sarp 750, Sarp 1100 Tur. Sınıf bilgisi ayrı alanda (`ItemType.segment`) duruyor ve ad altında yazıyor.
+
+**Karar soruları:**
+1. **Adlar beğenildi mi?** Faho'nun örneği "Foros" korundu; diğerleri Claude'un önerisi.
+2. **Altı marka** çok mu (Foros, Tunca, Veran, Doruk, Alvera, Sarp)? Daha az marka ve daha çok model mi olmalı?
+3. Bisiklet hâlâ sadece "Bisiklet". Ona da kurgusal ad verilmeli mi?
+4. Konutlara da kurgusal **site/proje adı** verilmeli mi? ("Alvera Konakları" gibi.)
+5. Marka adı oyuncunun **statüsünü** anlatmalı mı? ("Alvera sürüyor" demek bir şey ifade etmeli mi, yoksa sadece etiket mi kalmalı?)
+
+---
+
+### Q-152 — Mağaza menülerinin düzeni
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-138 · `app/lib/data/shop_catalog.dart`, `app/lib/ui/screens/sections/assets_screen.dart`
+
+Faho'nun isteği: "menüleri düzenli hale getir", "market menülerini daha stabil ve güzel hale getir."
+
+**Uygulanan:** Mağazalar üç öbekte (Gündelik alışveriş / Araç ve aksesuar / Konut), öbek ve satır sırası sabit; raf içi ürünler ucuzdan pahalıya sıralı. Evcil hayvan edinme listesi tür gruplarına ayrıldı (D-135).
+
+**Karar soruları:**
+1. **Üç öbek doğru kırılım mı?** Aksesuarcılar araç öbeğinde duruyor; ayrı bir "Aksesuar" öbeği mi olmalı?
+2. Ürünler **ucuzdan pahalıya** sıralı. Alternatif: kademe kademe (giriş/orta/üst) başlıklar. Hangisi?
+3. Mağaza satırında şu an **ürün sayısı** yazıyor. Yerine **fiyat aralığı** mı yazsın ("350 ₺ – 14,5 M ₺")?
+4. Parası yetmeyen ürün şu an listede **kapalı düğmeyle** duruyor. Gizlenmeli mi, yoksa görünmeye devam mı etmeli?
+5. Evcil hayvan grupları açılır-kapanır (`ExpansionTile`). Mağaza öbekleri de açılır-kapanır mı olmalı, yoksa başlık olarak kalmalı mı?

@@ -54,7 +54,21 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
     ..sort((Person a, Person b) => b.age.compareTo(a.age));
 
   List<Person> _arkadaslar(GameState state) => state.people
-      .where((Person p) => p.relation == RelationType.arkadas)
+      .where((Person p) =>
+          p.relation == RelationType.arkadas ||
+          // Cezaevinde tanışılan kişi de burada listelenir (D-140);
+          // yoksa kayıt oluşuyor ama oyuncu hiç göremiyordu.
+          p.relation == RelationType.kogusArkadasi)
+      .toList(growable: false);
+
+  /// Üvey anne ve üvey baba (D-141).
+  ///
+  /// Anne/baba kartlarının hemen altında dururlar: aynı hanede yaşarlar
+  /// ama kan bağı değildirler.
+  List<Person> _uveyEbeveynler(GameState state) => state.people
+      .where((Person p) =>
+          p.relation == RelationType.uveyAnne ||
+          p.relation == RelationType.uveyBaba)
       .toList(growable: false);
 
   List<Person> _romantikler(GameState state) =>
@@ -184,6 +198,16 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             ),
             const SizedBox(height: 10),
           ],
+        // Üvey anne / üvey baba hemen altta (D-141).
+        for (final Person uvey in _uveyEbeveynler(state)) ...<Widget>[
+          PersonCard(
+            key: Key('uvey_ebeveyn_${uvey.id}'),
+            person: uvey,
+            playerAge: playerAge,
+            onTap: () => _openPerson(uvey.id),
+          ),
+          const SizedBox(height: 10),
+        ],
         const SizedBox(height: 8),
         if (cocukSayisi > 0) ...<Widget>[
           MenuRow(
@@ -227,6 +251,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           MenuRow(
             title: 'Arkadaşlar',
             subtitle: 'Okul ve hayat arkadaşların',
+            key: const Key('relationships_friends_row'),
             icon: Icons.handshake_outlined,
             accent: BirOmurAccents.turuncu,
             trailingText: '$arkadasSayisi',

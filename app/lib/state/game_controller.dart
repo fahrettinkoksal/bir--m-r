@@ -73,6 +73,7 @@ import '../domain/economy/business_engine.dart';
 import '../domain/interaction/friendship_depth.dart';
 import '../domain/models/business.dart';
 import '../domain/law/legal_engine.dart';
+import '../domain/law/prison_life.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
@@ -2019,6 +2020,94 @@ class GameController extends ChangeNotifier {
 
   /// Oyuncunun adli geçmişi (Adli Geçmiş bölümü için).
   LegalState get legal => _state?.legal ?? const LegalState();
+
+  // =====================================================================
+  // Kefalet ve cezaevi hayatı (D-139, D-140)
+  // =====================================================================
+
+  /// Kefaleti kendin yatırabilir misin? Gerekçe boşsa yatırabilirsin.
+  String selfBailBlockReason() {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return PrisonLife.selfBailBlockReason(current);
+  }
+
+  /// Kefaleti kendi cüzdanından yatırır.
+  PrisonOutcome? payBailSelf() => _runPrison(
+        (GameState current) => PrisonLife.payBailSelf(current),
+        title: 'Kefalet',
+        tag: 'kefalet',
+      );
+
+  /// Kefaleti isteyebileceğin kişiler.
+  List<Person> bailHelpers() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return PrisonLife.bailHelpers(current);
+  }
+
+  /// Aileden kefaleti ödemesini ister. Sonuç garanti değildir.
+  PrisonOutcome? askFamilyForBail(String personId) => _runPrison(
+        (GameState current) => PrisonLife.askFamilyForBail(
+          state: current,
+          personId: personId,
+          rng: _random,
+        ),
+        title: 'Kefalet',
+        tag: 'kefalet',
+      );
+
+  /// Bu cezaevi eylemi şu an yapılabilir mi? Gerekçe boşsa yapılabilir.
+  String prisonActionBlockReason(PrisonAction action) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return PrisonLife.blockReason(current, action);
+  }
+
+  /// Bir cezaevi eylemini uygular.
+  PrisonOutcome? doPrisonAction(PrisonAction action) => _runPrison(
+        (GameState current) => PrisonLife.perform(
+          state: current,
+          action: action,
+          rng: _random,
+        ),
+        title: 'Cezaevi',
+        tag: 'cezaevi',
+      );
+
+  /// İçeride tanışılmış kişiler.
+  List<Person> cellmates() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return PrisonLife.cellmates(current);
+  }
+
+  /// Kefalet ve cezaevi eylemlerinin ortak akışı.
+  ///
+  /// Eşya eylemleriyle aynı kural: olay beklerken çalışmaz, yalnızca
+  /// gerçekten uygulanan işlem kaydedilir ve her sonuç bildirime döner.
+  PrisonOutcome? _runPrison(
+    ({GameState state, PrisonOutcome outcome}) Function(GameState) islem, {
+    required String title,
+    required String tag,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+
+    final ({GameState state, PrisonOutcome outcome}) sonuc = islem(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+
+    _state = _announce(
+      current,
+      _countProgress(current, sonuc.state),
+      sonuc.outcome.text,
+      title: title,
+      tag: tag,
+    );
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
 
   // =====================================================================
   // Konut: taşınma ve kiraya verme (D-043)

@@ -58,6 +58,7 @@ import 'child_progression.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
+import 'step_parents.dart';
 import 'school_people.dart';
 import '../../text/turkish_text.dart';
 import '../../data/item_catalog.dart';
@@ -468,6 +469,11 @@ class LifeProgression {
     // Büyüyen çocuklar kendi hayatlarını kurar: haneden çıkarlar ama
     // kayıtları silinmez, görüşülmeye devam edilir.
     afterDeaths = _childrenLeaveHome(afterDeaths, newAge);
+
+    // Vefat eden eşin ardından ebeveyn yeniden evlenebilir: oyuncuya
+    // üvey anne ya da üvey baba gelir (D-141). Kimse silinmez; vefat
+    // eden ebeveyn kayıtta kalır.
+    afterDeaths = StepParents.maybeRemarry(afterDeaths, newAge, _rng);
 
     // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).
     afterDeaths = _applyRentIncome(afterDeaths, newAge);

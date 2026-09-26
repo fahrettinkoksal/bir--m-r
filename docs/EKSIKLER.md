@@ -87,12 +87,18 @@ ekonomiye bağlı gelir · Kendi İşim ekranı.
 **Hâlâ yok:** ortak almak, ikinci iş, işletme kredisi, esnaf emekliliği,
 işin kuşak devamında geçmesi. Q-146'da soruldu.
 
-### 2.3 Üvey ebeveyn ve ikinci ailenin bağları — **yok**
-Arama: `üvey` → **0 sonuç**.
+### 2.3 Üvey ebeveyn ve ikinci ailenin bağları — **kısmen eklendi (D-141)**
+Eski ölçüm: `üvey` → **0 sonuç**.
 
-İkinci evlilik var (D-036), ama eşin önceki çocuğu, üvey kardeş, dünür
-ailesi diye bir bağ yok. Çocuğun eşi bile yalnızca bir **ad** olarak
-tutuluyor (D-121), kişi kaydı değil.
+**Eklendi (D-141):** Oyuncunun ebeveynlerinden biri vefat ettiyse hayatta
+kalan ebeveyn yeniden evlenebiliyor; gelen kişi `RelationType.uveyAnne` /
+`uveyBaba` olarak çekirdek ailede listeleniyor, bağ düşük başlıyor ve kan
+bağı sayılmıyor. Vefat eden ebeveyn kayıttan silinmiyor.
+
+**Hâlâ yok:** üvey kardeş, üvey ebeveynden miras, ebeveynlerin boşanması
+(tek tetik vefat), eşin önceki çocuğu, dünür ailesi. Çocuğun eşi hâlâ
+yalnızca bir **ad** olarak tutuluyor (D-121), kişi kaydı değil. Açık
+sorular Q-149'da.
 
 ### 2.4 Nafaka, velayet, mal rejimi — **bilerek ertelendi**
 Arama: `nafaka` → 1 sonuç, o da `BACKLOG.md`'deki erteleme notu.
@@ -308,6 +314,9 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    engel bu.**
 6. ~~Girişimcilik, eksik ekranlar~~ **Yapıldı (D-132, D-133).** Hobi
    kataloğunun genişletilmesi (4 hobi) duruyor.
+7. ~~Hediye seçimi, menü düzeni, 2. el araç pazarı, kefalet ve cezaevi
+   hayatı, üvey ebeveyn~~ **Yapıldı (D-134 … D-141).** Çetenin dışarı
+   taşması (Q-148), üvey kardeş ve miras (Q-149) duruyor.
 
 **Claude'un kişisel görüşü (26 Eylül 2026'da güncellendi):** "hayatlar
 birbirine benziyor" görüşünün **dört dayanağının dördü de kapandı**:

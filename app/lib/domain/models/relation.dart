@@ -54,7 +54,25 @@ enum RelationType {
   // Flört ilerleyebilir (sevgili olur) ya da biter.
   //
   // Yeni değer listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
-  flort;
+  flort,
+
+  // Koğuş arkadaşı: cezaevinde tanışılan kişi (D-140).
+  //
+  // Tahliyeden sonra kaydı silinmez: içeride tanıştığın adam dışarıda da
+  // tanıdığındır. Arkadaşlar öbeğinde listelenir.
+  //
+  // Yeni değer listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  kogusArkadasi,
+
+  // Üvey anne / üvey baba (D-141).
+  //
+  // Faho'nun isteği: "üvey anne baba olabilsin." Ebeveyn boşandıktan ya
+  // da öldükten sonra yeniden evlenirse gelen kişi burada durur. Çekirdek
+  // ailede listelenir ama **kan bağı değildir**.
+  //
+  // Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  uveyAnne,
+  uveyBaba;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -67,6 +85,10 @@ enum RelationType {
       // Eş ve çocuklar çekirdek ailedir; eski eş ilişki geçmişine düşer.
       case RelationType.es:
       case RelationType.cocuk:
+      // Üvey ebeveyn aynı hanede yaşar; çekirdek ailede listelenir
+      // (kan bağı sayılmaz, [kanBagi] ayrıca dışlar).
+      case RelationType.uveyAnne:
+      case RelationType.uveyBaba:
         return RelationGroup.cekirdek;
       case RelationType.torun:
       case RelationType.yegen:
@@ -85,6 +107,8 @@ enum RelationType {
         return RelationGroup.okul;
       case RelationType.arkadas:
       case RelationType.isArkadasi:
+      // İçeride tanışılan kişi de arkadaş öbeğinde durur (D-140).
+      case RelationType.kogusArkadasi:
         return RelationGroup.arkadaslar;
       // Faho'nun Q-115 kararı: geri takip eden ünlü arkadaş listesine
       // karışmaz, **kendi başlığında** durur (D-106).
@@ -106,6 +130,10 @@ enum RelationType {
   /// **Eş çekirdek ailedendir ama kan bağı değildir**; çocuk ise kan bağıdır.
   bool get kanBagi =>
       this != RelationType.es &&
+      // Üvey ebeveyn çekirdek ailede listelenir ama kan bağı değildir
+      // (D-141); kalıtım ve akrabalık kuralları ona uygulanmaz.
+      this != RelationType.uveyAnne &&
+      this != RelationType.uveyBaba &&
       (group == RelationGroup.cekirdek || group == RelationGroup.genis);
 
   /// Birlikte hane kurulan bağ mı? (Eş ve çocuklar.)
@@ -191,6 +219,12 @@ String relationLabel({
       return gender == Gender.kadin ? 'Yeğen (kız)' : 'Yeğen (erkek)';
     case RelationType.unlu:
       return 'Ünlü';
+    case RelationType.kogusArkadasi:
+      return 'Koğuş arkadaşı';
+    case RelationType.uveyAnne:
+      return 'Üvey anne';
+    case RelationType.uveyBaba:
+      return 'Üvey baba';
   }
 }
 
@@ -260,5 +294,11 @@ String relationPossessive({
       return 'Yeğenin';
     case RelationType.unlu:
       return 'Tanıdığın ünlü';
+    case RelationType.kogusArkadasi:
+      return 'Koğuş arkadaşın';
+    case RelationType.uveyAnne:
+      return 'Üvey annen';
+    case RelationType.uveyBaba:
+      return 'Üvey baban';
   }
 }

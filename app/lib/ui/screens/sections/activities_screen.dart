@@ -21,6 +21,7 @@ import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
+import '../../widgets/prison_life_panel.dart';
 import '../../widgets/section_scaffold.dart';
 import 'activity_pages.dart';
 import 'casino_pages.dart';
@@ -144,6 +145,9 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return VenuePage(
           venue: ActivityVenue.cezaevi,
           onBack: () => _go(_ActivityPage.kok),
+          // Koğuş hayatı (D-140): arkadaşlık, iyi hâl ve gruba yakın
+          // durma. Mekân sayfası genel kalsın diye ek satır olarak girer.
+          extraRows: const <Widget>[PrisonLifePanel()],
         );
       case _ActivityPage.hobiler:
         return HobbiesPage(onBack: () => _go(_ActivityPage.kok));

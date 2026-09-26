@@ -119,6 +119,22 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
         InteractionKind.hediyeVer,
       };
 
+    // Koğuş arkadaşıyla vakit geçirilir ve sohbet edilir (D-140).
+    // İçeride hediye alışverişi yoktur; dışarıda da bu bağ arkadaşlık
+    // gibi işler ama para/hediye kapıları açılmaz.
+    case RelationType.kogusArkadasi:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+      };
+
+    // Üvey ebeveynle aynı evde yaşanır: vakit geçirilir, sohbet edilir,
+    // hediyeleşilir. Para istemek bağa göre açılır ama başta kapalıdır;
+    // bu sürümde aile kapılarının hepsi açık (D-141).
+    case RelationType.uveyAnne:
+    case RelationType.uveyBaba:
+      return _aile;
+
     case RelationType.eskiSevgili:
     case RelationType.eskiEs:
       return _yok;

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../data/crime_catalog.dart';
 import '../../../domain/models/criminal_record.dart';
 import '../../../domain/models/game_state.dart';
+import '../../../domain/models/person.dart';
+import '../../../domain/models/wealth.dart';
+import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../../text/turkish_text.dart';
 import '../../theme/bir_omur_theme.dart';
@@ -46,12 +49,30 @@ class LegalRecordPage extends StatelessWidget {
       onBack: onBack,
       children: <Widget>[
         // Durum satırı.
-        if (hukuk.isImprisoned)
+        if (hukuk.isSentenced)
           InfoPanel(
             key: const Key('adli_hapis'),
             icon: Icons.lock_outline,
             text: 'Şu an cezaevindesin. Tahliye yaşın: '
-                '${hukuk.releaseAtAge}.',
+                '${hukuk.releaseAtAge}.'
+                '${hukuk.goodBehaviour > 0 ? ' İyi hâl: '
+                    '${hukuk.goodBehaviour}/100.' : ''}',
+          )
+        // Tutukluluk hükümlülükten ayrıdır (D-139): dosya sürüyor, ceza
+        // verilmedi. Kefalet bu durumu kaldırır.
+        else if (hukuk.isDetained)
+          InfoPanel(
+            key: const Key('adli_tutuklu'),
+            icon: Icons.lock_clock_outlined,
+            text: 'Tutuklusun; dosyan hâlâ sürüyor, ceza verilmedi. '
+                'Kefalet yatırılırsa yargılama dışarıda devam eder.',
+          )
+        else if (hukuk.bailPaid)
+          InfoPanel(
+            key: const Key('adli_kefaletli'),
+            icon: Icons.how_to_reg_outlined,
+            text: 'Kefaletle dışarıdasın. Duruşmaya çıkınca kefalet '
+                'geri verilir.',
           )
         else if (hukuk.openCase != null)
           InfoPanel(
@@ -75,6 +96,12 @@ class LegalRecordPage extends StatelessWidget {
             icon: Icons.verified_outlined,
             text: 'Adli kaydın temiz.',
           ),
+
+        // Kefalet kartı yalnızca tutukluyken görünür (D-139).
+        if (hukuk.isDetained) ...<Widget>[
+          const SizedBox(height: 12),
+          _BailCard(bail: hukuk.bailAmount ?? 0),
+        ],
 
         if (sabika.isNotEmpty) ...<Widget>[
           const SizedBox(height: 16),
@@ -110,6 +137,147 @@ class LegalRecordPage extends StatelessWidget {
           ],
         ],
       ],
+    );
+  }
+}
+
+/// Tutukluyken görünen kefalet kartı (D-139).
+///
+/// İki kapı var: kefaleti kendin yatırmak ya da aileden istemek. İkisi de
+/// **garantili değildir**: paran yetmiyorsa düğme kapanır ve gerekçesi
+/// yazar (D-063); aileden istemek reddedilebilir.
+class _BailCard extends StatelessWidget {
+  const _BailCard({required this.bail});
+
+  final int bail;
+
+  Future<void> _askFamily(BuildContext context) async {
+    final GameController controller = GameScope.of(context);
+    final List<Person> yakinlar = controller.bailHelpers();
+    if (yakinlar.isEmpty) return;
+
+    final int oyuncuYasi = controller.state?.player.age ?? 0;
+    final Person? secim = await showModalBottomSheet<Person>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                'Kefaleti kimden isteyeceksin?',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            for (final Person kisi in yakinlar)
+              ListTile(
+                key: Key('kefalet_iste_${kisi.id}'),
+                leading: const Icon(Icons.person_outline),
+                title: Text(kisi.firstName),
+                subtitle: Text(
+                  <String>[
+                    kisi.labelFor(oyuncuYasi),
+                    if (kisi.wealth != null) kisi.wealth!.label,
+                  ].join(' · '),
+                ),
+                onTap: () => Navigator.of(context).pop(kisi),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (secim == null || !context.mounted) return;
+    controller.askFamilyForBail(secim.id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final String engel = controller.selfBailBlockReason();
+    final bool kendiOdeyebilir = engel.isEmpty;
+    final List<Person> yakinlar = controller.bailHelpers();
+
+    return Container(
+      decoration: panelDecoration(context, radius: 20),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const AccentIconTile(
+                icon: Icons.account_balance_wallet_outlined,
+                accent: BirOmurAccents.nar,
+                size: 38,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('Kefalet', style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(
+                      trMoney(bail),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Kefalet teminattır: tutukluluğu kaldırır, cezayı satın '
+            'almaz. Duruşmaya çıkınca geri verilir.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonal(
+              key: const Key('kefalet_kendim'),
+              onPressed:
+                  kendiOdeyebilir ? () => controller.payBailSelf() : null,
+              child: Text(
+                kendiOdeyebilir
+                    ? 'Kefaleti kendim yatırayım'
+                    : 'Kendi paranla yatıramıyorsun',
+              ),
+            ),
+          ),
+          if (!kendiOdeyebilir) ...<Widget>[
+            const SizedBox(height: 6),
+            Text(
+              engel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const Key('kefalet_aileden'),
+              onPressed:
+                  yakinlar.isEmpty ? null : () => _askFamily(context),
+              child: Text(
+                yakinlar.isEmpty
+                    ? 'İsteyebileceğin kimse yok'
+                    : 'Aileden kefaleti ödemesini isteyeyim',
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
