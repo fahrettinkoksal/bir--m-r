@@ -29,6 +29,7 @@ import '../../domain/models/game_settings.dart';
 import '../../domain/models/chronic_condition.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/health_history.dart';
+import '../../domain/models/household.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
@@ -112,6 +113,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'goalsReachedAt': state.goalsReachedAt,
       // Araç muayenesi (D-157). Alan eklemeli.
       'vehicleInspectionAt': state.vehicleInspectionAt,
+      // Nafaka kaydı (D-160). Alan eklemeli; eski kayıtta yoktur.
+      'alimony':
+          state.alimony == null ? null : _encodeAlimony(state.alimony!),
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -490,6 +494,33 @@ Map<String, Object?> _encodeFinger(FingerProfile p) => <String, Object?>{
       'matchedAtAge': p.matchedAtAge,
       'metPersonId': p.metPersonId,
     };
+
+Map<String, Object?> _encodeAlimony(Alimony a) => <String, Object?>{
+      'otherPersonId': a.otherPersonId,
+      'yearlyAmount': a.yearlyAmount,
+      'startedAtAge': a.startedAtAge,
+      'untilAge': a.untilAge,
+      'playerPays': a.playerPays,
+      'custody': a.custody.name,
+      'endedAtAge': a.endedAtAge,
+      'paidYears': a.paidYears,
+    };
+
+Alimony _decodeAlimony(Map<String, Object?> json) => Alimony(
+      otherPersonId: _string(json, 'otherPersonId'),
+      yearlyAmount: _int(json, 'yearlyAmount'),
+      startedAtAge: _int(json, 'startedAtAge'),
+      untilAge: _int(json, 'untilAge'),
+      playerPays: _boolOr(json, 'playerPays', varsayilan: true),
+      custody: _enumByNameOrNull(
+            Custody.values,
+            _stringOrNull(json, 'custody'),
+            'alimony.custody',
+          ) ??
+          Custody.oyuncuda,
+      endedAtAge: _intOrNull(json, 'endedAtAge'),
+      paidYears: _intOr(json, 'paidYears', 0),
+    );
 
 Map<String, Object?> _encodeChronic(ChronicCondition c) => <String, Object?>{
       'typeId': c.typeId,
@@ -978,6 +1009,9 @@ GameState decodeGameState(Map<String, Object?> json) {
     vehicleInspectionAt: json['vehicleInspectionAt'] == null
         ? const <String, int>{}
         : _intMap(json, 'vehicleInspectionAt'),
+    alimony: json['alimony'] == null
+        ? null
+        : _decodeAlimony(_asMap(json['alimony'], 'alimony')),
     martialArts: List<MartialProgress>.unmodifiable(
       _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))

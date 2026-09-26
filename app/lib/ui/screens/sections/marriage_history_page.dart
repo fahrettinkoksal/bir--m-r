@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/game_state.dart';
+import '../../../domain/models/household.dart';
 import '../../../domain/models/marriage.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
+import '../../../text/turkish_text.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/kilim_divider.dart';
 import '../../widgets/section_scaffold.dart';
@@ -40,6 +42,22 @@ class MarriageHistoryPage extends StatelessWidget {
             icon: Icons.favorite_outline,
             text: 'Henüz evlenmedin.',
           ),
+        // Velayet ve nafaka (D-160): boşanmanın parasal ve çocuğa dair
+        // sonucu bir yerde görünmeli. Panel yalnızca **gerçekten bir
+        // kayıt varsa** çıkar.
+        if (state.alimony != null) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Velayet ve nafaka',
+            accent: BirOmurAccents.nar,
+          ),
+          const SizedBox(height: 8),
+          _NafakaKarti(
+            alimony: state.alimony!,
+            other: state.personById(state.alimony!.otherPersonId),
+            playerAge: state.player.age,
+          ),
+          const SizedBox(height: 16),
+        ],
         if (suren != null) ...<Widget>[
           const MenuGroupTitle(
             text: 'Süren evlilik',
@@ -155,4 +173,69 @@ class _EvlilikKarti extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// Velayet ve nafaka kartı (D-160).
+///
+/// Yalnızca kayıttaki gerçek değerleri yazar; tahmin üretmez.
+class _NafakaKarti extends StatelessWidget {
+  const _NafakaKarti({
+    required this.alimony,
+    required this.other,
+    required this.playerAge,
+  });
+
+  final Alimony alimony;
+  final Person? other;
+  final int playerAge;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool suruyor = alimony.runsAt(playerAge);
+    return Container(
+      key: const Key('nafaka_karti'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Velayet: ${alimony.custody.label}',
+            style: theme.textTheme.titleSmall,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            suruyor
+                ? (alimony.playerPays
+                    ? 'Yılda ${trMoney(alimony.yearlyAmount)} nafaka '
+                        'ödüyorsun.'
+                    : 'Yılda ${trMoney(alimony.yearlyAmount)} nafaka '
+                        'alıyorsun.')
+                : 'Nafaka yükümlülüğü sona erdi.',
+            style: theme.textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            suruyor
+                ? '${alimony.untilAge} yaşına kadar sürüyor · '
+                    '${alimony.paidYears} yıl işledi'
+                : '${alimony.startedAtAge}-${alimony.endedAtAge ?? alimony.untilAge} yaş · '
+                    '${alimony.paidYears} yıl',
+            style: theme.textTheme.bodySmall,
+          ),
+          if (other != null) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              'Karşı taraf: ${other!.fullName}',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }

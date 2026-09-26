@@ -3,6 +3,8 @@ import 'dart:math';
 import '../effects/effect_diff.dart';
 import 'divorce_settlement.dart';
 import '../life/notices.dart';
+import '../economy/household_budget.dart';
+import '../models/household.dart';
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/pending_notice.dart';
@@ -460,16 +462,44 @@ class MarriageEngine {
             : p)
         .toList(growable: false);
 
+    // Velayet ve nafaka (D-160). Q-118'de "şimdilik yazılmasın" denmişti;
+    // Faho'nun açık isteğiyle eklendi. Karar **uydurulmaz**: velayet
+    // çocukların yakınlığından, nafaka ödeyen tarafın gerçek gelirinden
+    // hesaplanır. Çocuk yoksa ikisi de yoktur.
+    final Custody velayet = HouseholdBudget.decideCustody(state);
+    final Alimony? nafaka = HouseholdBudget.computeAlimony(
+      state: state,
+      custody: velayet,
+      exSpouseId: spouse.id,
+    );
+    final List<Person> kucukler = HouseholdBudget.minorChildren(state);
+
+    // Çocuklar eski eşin hanesine geçiyorsa hane bilgisi güncellenir;
+    // **kayıt silinmez**, çocuk İlişkiler'de durmaya devam eder ve
+    // görüşülebilir.
+    final List<Person> velayetliKisiler = velayet == Custody.eskiEste
+        ? people
+            .map((Person p) => kucukler.any((Person c) => c.id == p.id)
+                ? p.copyWith(inPlayerHousehold: false)
+                : p)
+            .toList(growable: false)
+        : people;
+
     final List<String> satirlar = paylasim.summaryLines(spouse.firstName);
     final String metin = <String>[
       '${spouse.fullName} ile boşandın.',
       if (pay > 0) 'Anlaşma gereği ${trMoney(pay)} cüzdanından çıktı.',
       ...satirlar,
+      if (kucukler.isNotEmpty) 'Velayet: ${velayet.label.toLowerCase()}.',
+      if (nafaka != null)
+        nafaka.playerPays
+            ? 'Yılda ${trMoney(nafaka.yearlyAmount)} nafaka ödeyeceksin.'
+            : 'Yılda ${trMoney(nafaka.yearlyAmount)} nafaka alacaksın.',
       'Kaydı İlişkiler bölümünde eski eş olarak kalıyor.',
     ].join(' ');
 
     final GameState next = state.copyWith(
-      people: List<Person>.unmodifiable(people),
+      people: List<Person>.unmodifiable(velayetliKisiler),
       items: List<OwnedItem>.unmodifiable(
         state.items.where((OwnedItem i) => !gidenler.contains(i.id)),
       ),
@@ -479,6 +509,7 @@ class MarriageEngine {
           happiness: prototypeOnlyDivorceHappiness,
         ),
       ),
+      alimony: nafaka,
       marriage: state.marriage!.copyWith(
         status: MarriageStatus.bosandi,
         endedAtAge: state.player.age,

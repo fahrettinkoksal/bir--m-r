@@ -3750,3 +3750,35 @@ Kardeş kaydı doğuştan vardı ama hayatı hiç ilerlemiyordu: okumuyor, iş b
 6. **Şehir değiştirmenin sosyal bedeli yok:** taşınınca mahalle arkadaşlarından uzaklaşma modellenmiyor (erişilebilirlik şehre bakıyor ama bağ sönümü hızlanmıyor).
 
 **Varsayılan işlem:** Onay gelene dek geçim gideri ve maaş şehirden etkilenmez; yalnızca en üst bant dar piyasada kapalı kalır; şehre özgü olay eklenmez.
+
+---
+
+### Q-163 — Hane bütçesi, nafaka ve velayet: **Q-118 kararı değişti**
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-160 · Test: `app/test/paket_z_test.dart`
+
+> **DİKKAT — bu paket daha önce verilmiş bir kararı değiştiriyor.**
+> **Q-118'de** senin kararın şuydu: *"boşanmada mal paylaşımı kalsın (D-075), ama **nafaka ve velayet şimdilik yazılmasın**."* Gerekçe de yazılıydı: yoksulluk nafakası ile iştirak nafakası ayrı şeylerdir, yarım bir velayet sistemi mevcut hane ve yakınlık kurallarını bozar.
+>
+> Bu paket "a+b+c grubunu kodla" isteğinle geldi ve C grubunun 14. maddesi bunu içeriyordu. **Kodladım.** Eski kararı geri almak istersen söyle; geri alması kolay, çünkü tek bir kayıt alanı (`GameState.alimony`) ve tek bir motor (`HouseholdBudget`) üzerinde duruyor.
+
+**Ne geldi:**
+
+**1. Ortak bütçe.** Çalışan eş her yıl maaşının **%35'ini** haneye koyuyor; para doğrudan cüzdana giriyor ve günlüğe yazılıyor. **İkinci bir bakiye açılmadı** — oyunda tek cüzdan var, ikincisi bütün ekranları ikiye bölerdi. Eşin kalanı kendi kaydında birikmeye devam ediyor (D-154). İşsiz eş katkı koymuyor; uydurma gelir yazılmıyor.
+
+**2. Velayet.** Boşanmada 18 yaş altı çocukların hangi hanede kalacağı belirleniyor. Karar **uydurulmuyor**: çocukların oyuncuya olan ortalama yakınlığına bakılıyor — 60 üstü sende, 40 altı eski eşte, arası ortak düzen. Çocuğun kaydı **silinmiyor**, yalnızca hane bilgisi değişiyor; İlişkiler'de durmaya ve görüşülmeye devam ediyor.
+
+**3. Nafaka.** Çocuk kendisinde kalmayan taraf ödüyor; ortak düzende kimse ödemiyor; çocuk yoksa nafaka yok. Tutar ödeyen tarafın **gerçek gelirinin** %18'i artı çocuk başına %6, tavan %40. En küçük çocuk 18'ini doldurunca bitiyor. Parası yetmeyen oyuncunun cüzdanı eksiye inmiyor, borç yazılmıyor (D-039 ilkesi).
+
+**Hâlâ yok (bilerek):** yoksulluk nafakası (çocuksuz boşanmada nafaka), nafakanın artırım/indirim davası, mal rejimi sözleşmesi, katkı payı, değer artış payı. Oyun bir hukuk simülasyonu olduğunu iddia etmiyor.
+
+**Karar soruları:**
+1. **Q-118 kararı gerçekten değişsin mi?** Bu sorunun cevabı diğerlerinin önünde.
+2. **Eşin katkısı %35** doğru mu? Alternatif: eşin geliri hiç görünmesin ama **geçim gideri düşsün** (aynı etki, farklı anlatım).
+3. **Velayet yakınlığa bağlı.** Doğru ölçü mü? Alternatifler: çocuğun yaşı (küçükse anneye), oyuncunun geliri, ya da **oyuncuya sorulması** (şu an sorulmuyor, kendiliğinden karar veriliyor).
+4. **Nafaka oranları** (%18 + çocuk başına %6, tavan %40) doğru bantta mı?
+5. **Çocuksuz boşanmada nafaka yok.** Yoksulluk nafakası eklenmeli mi? (Gerçekte gelir farkı varsa mümkündür.)
+6. **Nafaka ödenmezse yaptırım yok:** parası yetmeyen oyuncu borçlanmıyor ve bir sonuç yaşamıyor. Adli sürece (D-128) bağlanmalı mı?
+7. **Velayet sonrası çocukla ilişki değişmiyor:** hanede olmayan çocuğun yakınlığı daha hızlı sönmüyor, görüşme düzeni yok. Eklenmeli mi?
+8. **Ekran:** velayet ve nafaka Evlilik Geçmişi sayfasında bir kartta duruyor. Doğru yer mi?
+
+**Varsayılan işlem:** Onay gelene dek bütün oranlar `prototypeOnly` kalır; yoksulluk nafakası eklenmez, velayet oyuncuya sorulmaz, ödenmeyen nafakanın yaptırımı olmaz.

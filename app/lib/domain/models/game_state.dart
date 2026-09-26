@@ -16,6 +16,7 @@ import 'wealth.dart';
 import 'career.dart';
 import 'chronic_condition.dart';
 import 'health_history.dart';
+import 'household.dart';
 import 'game_event.dart';
 import 'game_settings.dart';
 import 'gift_record.dart';
@@ -87,6 +88,7 @@ class GameState {
     this.chronicConditions = const <ChronicCondition>[],
     this.goalsReachedAt = const <String, int>{},
     this.vehicleInspectionAt = const <String, int>{},
+    this.alimony,
     this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
@@ -398,6 +400,12 @@ class GameState {
 
   /// Bu hedefe ulaşıldı mı?
   bool goalReached(String id) => goalsReachedAt.containsKey(id);
+
+  /// D-160: süren ya da kapanmış nafaka kaydı; hiç olmadıysa `null`.
+  ///
+  /// Kayıt silinmez: süresi dolan nafaka listede kalır ve `endedAtAge`
+  /// dolar. Q-118'in "nafaka yazılmasın" kararını değiştirir (Q-163).
+  final Alimony? alimony;
 
   /// D-157: araç kimliği -> muayeneden **geçtiği** son yaş.
   ///
@@ -981,6 +989,7 @@ class GameState {
     List<ChronicCondition>? chronicConditions,
     Map<String, int>? goalsReachedAt,
     Map<String, int>? vehicleInspectionAt,
+    Object? alimony = _unsetEvent,
     List<HealthHistoryEntry>? healthHistory,
     List<LotteryTicket>? lotteryTickets,
     List<FingerProfile>? fingerDeck,
@@ -1080,6 +1089,7 @@ class GameState {
       goalsReachedAt: goalsReachedAt ?? this.goalsReachedAt,
       vehicleInspectionAt:
           vehicleInspectionAt ?? this.vehicleInspectionAt,
+      alimony: alimony == _unsetEvent ? this.alimony : alimony as Alimony?,
       healthHistory: healthHistory ?? this.healthHistory,
       lotteryTickets: lotteryTickets ?? this.lotteryTickets,
       fingerDeck: fingerDeck ?? this.fingerDeck,

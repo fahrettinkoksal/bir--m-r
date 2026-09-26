@@ -21,6 +21,7 @@ import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
+import '../economy/household_budget.dart';
 import '../economy/vehicle_inspection.dart';
 import '../economy/housing.dart';
 import '../economy/living_costs.dart';
@@ -645,6 +646,18 @@ class LifeProgression {
       state: afterDeaths,
       newAge: newAge,
       rng: _rng,
+    );
+
+    // Hane bütçesi (D-160): çalışan eş yılda bir kez haneye katkı koyar.
+    afterDeaths = HouseholdBudget.applySpouseContribution(
+      state: afterDeaths,
+      newAge: newAge,
+    );
+
+    // Nafaka (D-160): süren kayıt bir yıl işler, süresi dolan kapanır.
+    afterDeaths = HouseholdBudget.advanceYear(
+      state: afterDeaths,
+      newAge: newAge,
     );
 
     // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).

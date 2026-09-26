@@ -6,6 +6,11 @@ import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/career/job_market.dart';
+import 'package:bir_omur/domain/economy/household_budget.dart';
+import 'package:bir_omur/domain/interaction/marriage_engine.dart';
+import 'package:bir_omur/domain/models/career.dart';
+import 'package:bir_omur/domain/models/household.dart';
+import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/economy/vehicle_inspection.dart';
 import 'package:bir_omur/domain/economy/vehicle_trouble.dart';
@@ -570,6 +575,332 @@ void main() {
         vehiclePriceIn('İstanbul', 1000000),
         greaterThanOrEqualTo(vehiclePriceIn('Sivas', 1000000)),
       );
+    });
+  });
+
+  group('Hane bütçesi, velayet ve nafaka (D-160)', () {
+    Person es({
+      int age = 40,
+      String? jobId,
+      bool alive = true,
+    }) =>
+        Person(
+          id: 'es-1',
+          firstName: 'Eren',
+          lastName: 'Yıldız',
+          gender: Gender.erkek,
+          relation: RelationType.es,
+          age: age,
+          isAlive: alive,
+          inPlayerHousehold: true,
+          employment: jobId == null
+              ? EmploymentStatus.issiz
+              : EmploymentStatus.calisiyor,
+          occupation: jobId == null ? null : jobById(jobId)!.name,
+          wealth: WealthTier.ortaHalli,
+          bond: 80,
+          development: PersonDevelopment(
+            tracksLife: true,
+            stats: const Stats(
+              appearance: 50,
+              happiness: 60,
+              health: 60,
+              intelligence: 60,
+              charisma: 60,
+            ),
+            finishedSchool: true,
+            jobId: jobId,
+            jobStartedAtAge: jobId == null ? null : 25,
+          ),
+        );
+
+    Person cocuk(String id, int age, {int bond = 70}) => Person(
+          id: id,
+          firstName: 'Cocuk$id',
+          lastName: 'Yıldız',
+          gender: Gender.kadin,
+          relation: RelationType.cocuk,
+          age: age,
+          isAlive: true,
+          inPlayerHousehold: true,
+          employment: EmploymentStatus.cocuk,
+          wealth: null,
+          bond: bond,
+        );
+
+    GameState evli({
+      int playerAge = 40,
+      String? esIsi,
+      List<Person> cocuklar = const <Person>[],
+      int wallet = 900000,
+      String? oyuncuIsi,
+    }) {
+      final GameState base = hayat(age: playerAge, wallet: wallet);
+      return base.copyWith(
+        people: List<Person>.unmodifiable(<Person>[
+          ...base.people,
+          es(jobId: esIsi),
+          ...cocuklar,
+        ]),
+        marriage: Marriage(
+          spouseId: 'es-1',
+          marriedAtAge: playerAge - 10,
+          status: MarriageStatus.evli,
+        ),
+        career: oyuncuIsi == null
+            ? const CareerState.none()
+            : CareerState(jobId: oyuncuIsi, startedAtAge: playerAge - 5),
+      );
+    }
+
+    test('çalışan eş haneye katkı koyuyor', () {
+      final JobType is_ = kJobCatalog.first;
+      final GameState s = evli(esIsi: is_.id);
+      final int katki = HouseholdBudget.spouseContribution(s);
+      expect(katki, greaterThan(0));
+      expect(
+        katki,
+        (is_.yearlySalary * HouseholdBudget.prototypeOnlySpouseShare).round(),
+      );
+
+      final int once = s.player.wallet;
+      final GameState sonra = HouseholdBudget.applySpouseContribution(
+        state: s,
+        newAge: 41,
+      );
+      expect(sonra.player.wallet, once + katki);
+      expect(sonra.log.last.text, contains('haneye'));
+    });
+
+    test('işsiz eş katkı koymaz, uydurma gelir yazılmaz', () {
+      expect(HouseholdBudget.spouseContribution(evli()), 0);
+    });
+
+    test('boşanmış kayıtta eşin katkısı kesilir', () {
+      GameState s = evli(esIsi: kJobCatalog.first.id);
+      s = s.copyWith(
+        marriage: s.marriage!.copyWith(
+          status: MarriageStatus.bosandi,
+          endedAtAge: 40,
+        ),
+      );
+      expect(HouseholdBudget.spouseContribution(s), 0);
+    });
+
+    test('velayet çocukların yakınlığından belirlenir', () {
+      expect(
+        HouseholdBudget.decideCustody(
+          evli(cocuklar: <Person>[cocuk('cocuk-1', 8, bond: 85)]),
+        ),
+        Custody.oyuncuda,
+      );
+      expect(
+        HouseholdBudget.decideCustody(
+          evli(cocuklar: <Person>[cocuk('cocuk-1', 8, bond: 20)]),
+        ),
+        Custody.eskiEste,
+      );
+      expect(
+        HouseholdBudget.decideCustody(
+          evli(cocuklar: <Person>[cocuk('cocuk-1', 8, bond: 50)]),
+        ),
+        Custody.ortak,
+      );
+    });
+
+    test('çocuk yoksa nafaka da yoktur', () {
+      expect(
+        HouseholdBudget.computeAlimony(
+          state: evli(),
+          custody: Custody.oyuncuda,
+          exSpouseId: 'es-1',
+        ),
+        isNull,
+      );
+    });
+
+    test('ortak velayette kimse nafaka ödemez', () {
+      expect(
+        HouseholdBudget.computeAlimony(
+          state: evli(
+            cocuklar: <Person>[cocuk('cocuk-1', 8)],
+            oyuncuIsi: kJobCatalog.first.id,
+          ),
+          custody: Custody.ortak,
+          exSpouseId: 'es-1',
+        ),
+        isNull,
+      );
+    });
+
+    test('çocuk kendisinde kalmayan taraf öder', () {
+      // Çocuk eski eşte kaldıysa oyuncu öder.
+      final Alimony? oyuncuOder = HouseholdBudget.computeAlimony(
+        state: evli(
+          cocuklar: <Person>[cocuk('cocuk-1', 8)],
+          oyuncuIsi: kJobCatalog.first.id,
+        ),
+        custody: Custody.eskiEste,
+        exSpouseId: 'es-1',
+      );
+      expect(oyuncuOder, isNotNull);
+      expect(oyuncuOder!.playerPays, isTrue);
+
+      // Çocuk oyuncuda kaldıysa eski eş öder.
+      final Alimony? esOder = HouseholdBudget.computeAlimony(
+        state: evli(
+          cocuklar: <Person>[cocuk('cocuk-1', 8)],
+          esIsi: kJobCatalog.first.id,
+        ),
+        custody: Custody.oyuncuda,
+        exSpouseId: 'es-1',
+      );
+      expect(esOder, isNotNull);
+      expect(esOder!.playerPays, isFalse);
+    });
+
+    test('geliri olmayan taraftan nafaka çıkmaz', () {
+      expect(
+        HouseholdBudget.computeAlimony(
+          state: evli(cocuklar: <Person>[cocuk('cocuk-1', 8)]),
+          custody: Custody.eskiEste,
+          exSpouseId: 'es-1',
+        ),
+        isNull,
+        reason: 'İşsiz oyuncudan uydurma nafaka hesaplanmamalı',
+      );
+    });
+
+    test('nafaka en küçük çocuk 18 olunca biter', () {
+      final Alimony a = HouseholdBudget.computeAlimony(
+        state: evli(
+          playerAge: 40,
+          cocuklar: <Person>[
+            cocuk('cocuk-1', 15),
+            cocuk('cocuk-2', 8),
+          ],
+          oyuncuIsi: kJobCatalog.first.id,
+        ),
+        custody: Custody.eskiEste,
+        exSpouseId: 'es-1',
+      )!;
+      // En küçük 8; 10 yıl kalmış.
+      expect(a.untilAge, 50);
+      expect(a.runsAt(49), isTrue);
+      expect(a.runsAt(50), isFalse);
+    });
+
+    test('nafaka oranı tavanı aşmaz', () {
+      final Alimony a = HouseholdBudget.computeAlimony(
+        state: evli(
+          cocuklar: <Person>[
+            cocuk('cocuk-1', 2),
+            cocuk('cocuk-2', 4),
+            cocuk('cocuk-3', 6),
+            cocuk('cocuk-4', 8),
+          ],
+          oyuncuIsi: kJobCatalog.first.id,
+        ),
+        custody: Custody.eskiEste,
+        exSpouseId: 'es-1',
+      )!;
+      final int maas = jobById(kJobCatalog.first.id)!.yearlySalary;
+      expect(
+        a.yearlyAmount / maas,
+        lessThanOrEqualTo(HouseholdBudget.prototypeOnlyAlimonyMaxRate),
+      );
+    });
+
+    test('nafaka yılda bir işler; parası yetmeyende cüzdan eksiye inmez', () {
+      GameState s = evli(wallet: 100).copyWith(
+        alimony: const Alimony(
+          otherPersonId: 'es-1',
+          yearlyAmount: 200000,
+          startedAtAge: 40,
+          untilAge: 50,
+          playerPays: true,
+        ),
+      );
+      s = HouseholdBudget.advanceYear(state: s, newAge: 41);
+      expect(s.player.wallet, greaterThanOrEqualTo(0));
+      expect(s.alimony!.paidYears, 1);
+    });
+
+    test('alan taraf için nafaka cüzdana girer', () {
+      GameState s = evli(wallet: 1000).copyWith(
+        alimony: const Alimony(
+          otherPersonId: 'es-1',
+          yearlyAmount: 50000,
+          startedAtAge: 40,
+          untilAge: 50,
+          playerPays: false,
+        ),
+      );
+      s = HouseholdBudget.advanceYear(state: s, newAge: 41);
+      expect(s.player.wallet, 51000);
+    });
+
+    test('süresi dolan nafaka kapanır ama silinmez', () {
+      GameState s = evli().copyWith(
+        alimony: const Alimony(
+          otherPersonId: 'es-1',
+          yearlyAmount: 50000,
+          startedAtAge: 40,
+          untilAge: 50,
+          playerPays: true,
+        ),
+      );
+      s = HouseholdBudget.advanceYear(state: s, newAge: 50);
+      expect(s.alimony, isNotNull, reason: 'Kayıt silinmez');
+      expect(s.alimony!.isActive, isFalse);
+      expect(s.alimony!.endedAtAge, 50);
+      expect(s.log.last.text, contains('sona erdi'));
+    });
+
+    test('boşanma velayeti ve nafakayı gerçekten kuruyor', () {
+      final GameState s = evli(
+        cocuklar: <Person>[cocuk('cocuk-1', 8, bond: 20)],
+        oyuncuIsi: kJobCatalog.first.id,
+      );
+      final FamilyResult r = const MarriageEngine().divorce(s);
+      expect(r.outcome.applied, isTrue);
+      expect(r.state.alimony, isNotNull);
+      expect(r.state.alimony!.playerPays, isTrue);
+      expect(r.outcome.text, contains('Velayet'));
+      expect(r.outcome.text, contains('nafaka'));
+      // Çocuk eski eşin hanesine geçer ama kaydı silinmez.
+      final Person c = r.state.personById('cocuk-1')!;
+      expect(c.inPlayerHousehold, isFalse);
+      expect(c.relation, RelationType.cocuk);
+    });
+
+    test('çocuğu olmayan boşanmada nafaka kaydı açılmaz', () {
+      final GameState s = evli(oyuncuIsi: kJobCatalog.first.id);
+      final FamilyResult r = const MarriageEngine().divorce(s);
+      expect(r.outcome.applied, isTrue);
+      expect(r.state.alimony, isNull);
+    });
+
+    test('nafaka kaydı kaydedilip geri okunur; eski kayıt bozulmaz', () {
+      final GameState s = evli().copyWith(
+        alimony: const Alimony(
+          otherPersonId: 'es-1',
+          yearlyAmount: 50000,
+          startedAtAge: 40,
+          untilAge: 50,
+          playerPays: true,
+          custody: Custody.eskiEste,
+          paidYears: 3,
+        ),
+      );
+      final GameState geri = decodeGameState(encodeGameState(s));
+      expect(geri.alimony!.yearlyAmount, 50000);
+      expect(geri.alimony!.custody, Custody.eskiEste);
+      expect(geri.alimony!.paidYears, 3);
+
+      final Map<String, Object?> json = encodeGameState(s);
+      json.remove('alimony');
+      expect(decodeGameState(json).alimony, isNull);
     });
   });
 }
