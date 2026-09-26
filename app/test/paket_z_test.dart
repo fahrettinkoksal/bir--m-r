@@ -1,7 +1,12 @@
 import 'dart:math';
 
+import 'package:bir_omur/data/city_catalog.dart';
+import 'package:bir_omur/data/economy.dart';
 import 'package:bir_omur/data/item_catalog.dart';
+import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/domain/career/job_market.dart';
+import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/economy/vehicle_inspection.dart';
 import 'package:bir_omur/domain/economy/vehicle_trouble.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
@@ -472,6 +477,99 @@ void main() {
           isNull,
         );
       }
+    });
+  });
+
+  group('Şehrin kendi karakteri (D-159)', () {
+    test('her şehrin fırsat düzeyi makul ve konutla tutarlı', () {
+      for (final CityProfile c in kCityProfiles) {
+        expect(c.opportunity, inInclusiveRange(0.0, 1.0), reason: c.name);
+      }
+      // Konutu pahalı şehir aynı zamanda geniş piyasa olur; sıralama
+      // bozulmamalı.
+      expect(
+        cityProfile('İstanbul').opportunity,
+        greaterThan(cityProfile('Sivas').opportunity),
+      );
+    });
+
+    test('tanınmayan şehir uydurma katsayı almaz', () {
+      final CityProfile bilinmeyen = cityProfile('Olmayanşehir');
+      expect(bilinmeyen.housingFactor, 1.0);
+      expect(bilinmeyen.vehicleFactor, 1.0);
+    });
+
+    test('geçim gideri şehirden etkilenmiyor (D-159 kararı)', () {
+      // Bilerek böyle: gideri şehre bağlamak mevcut denge kuralını
+      // kırıyordu, ikisini birlikte oynatmak ise maaşlı çalışan için
+      // etkiyi sıfırlıyordu. Karar Q-162'de.
+      GameState kur(String sehir) {
+        final GameState base = hayat(age: 30);
+        return base.copyWith(
+          player: base.player.copyWith(currentCity: sehir),
+          movedOut: true,
+        );
+      }
+
+      expect(
+        LivingCosts.yearlyCost(kur('İstanbul')),
+        LivingCosts.yearlyCost(kur('Sivas')),
+      );
+    });
+
+    test('en üst bant dışındaki her iş her şehirde bulunur', () {
+      for (final CityProfile c in kCityProfiles) {
+        for (final SalaryBand b in SalaryBand.values) {
+          if (b == SalaryBand.yuksekUzmanlik) continue;
+          expect(
+            bandAvailableIn(c.name, b),
+            isTrue,
+            reason: '${c.name} / ${b.name}',
+          );
+        }
+      }
+    });
+
+    test('hobiyle açılan yaratıcı meslekler şehre bağlı değil', () {
+      // Yıllarca hobisine emek veren oyuncu, doğduğu şehir yüzünden
+      // karşılığını alamamamalı.
+      for (final CityProfile c in kCityProfiles) {
+        expect(
+          bandAvailableIn(c.name, SalaryBand.yaraticiDegisken),
+          isTrue,
+          reason: c.name,
+        );
+      }
+    });
+
+    test('yüksek uzmanlık dar piyasada bulunmaz, geniş piyasada bulunur', () {
+      expect(bandAvailableIn('Sivas', SalaryBand.yuksekUzmanlik), isFalse);
+      expect(bandAvailableIn('İstanbul', SalaryBand.yuksekUzmanlik), isTrue);
+    });
+
+    test('dar piyasada iş gerekçesi açıkça yazılıyor', () {
+      final JobType ust = kJobCatalog.firstWhere(
+        (JobType j) => j.band == SalaryBand.yuksekUzmanlik,
+      );
+      GameState s = hayat(age: 40);
+      s = s.copyWith(
+        player: s.player.copyWith(currentCity: 'Sivas'),
+      );
+      final String gerekce = const JobMarket().requirementReason(s, ust);
+      expect(gerekce, isNotEmpty);
+      expect(gerekce, contains('Sivas'));
+      expect(gerekce, contains('Büyük şehirlerde'));
+    });
+
+    test('konut ve araç fiyatı şehre göre değişmeye devam ediyor', () {
+      expect(
+        housingPriceIn('İstanbul', 1000000),
+        greaterThan(housingPriceIn('Sivas', 1000000)),
+      );
+      expect(
+        vehiclePriceIn('İstanbul', 1000000),
+        greaterThanOrEqualTo(vehiclePriceIn('Sivas', 1000000)),
+      );
     });
   });
 }

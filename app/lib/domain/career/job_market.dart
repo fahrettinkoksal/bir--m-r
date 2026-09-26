@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../../data/city_catalog.dart';
 import '../../data/interview_catalog.dart';
 import '../../data/crime_catalog.dart';
 import '../../data/job_catalog.dart';
@@ -107,6 +108,13 @@ class JobMarket {
     final EducationState egitim = state.education;
     if (state.player.age < job.minAge) {
       return '${job.minAge} yaşından itibaren başvurulabilir.';
+    }
+    // Şehrin iş piyasası (D-159): üst bantlardaki meslekler dar
+    // piyasada **hiç bulunmaz**. Gerekçe açıkça yazılır; oyuncu neden
+    // göremediğini anlar ve taşınmanın bir anlamı olur.
+    if (!bandAvailableIn(state.player.currentCity, job.band)) {
+      return '${state.player.currentCity} bu iş için dar bir piyasa; '
+          'böyle bir ilan çıkmıyor. Büyük şehirlerde bulunur.';
     }
     // İşe **girişte** üst yaş sınırı (D-113). Yalnızca gerçekten sınırı
     // olan mesleklerde doludur; uydurma sınır konmaz. Sınır yalnızca ilk

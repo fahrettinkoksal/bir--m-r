@@ -3727,3 +3727,26 @@ Kardeş kaydı doğuştan vardı ama hayatı hiç ilerlemiyordu: okumuyor, iş b
 6. **Kardeşin eşi kişi kaydı değil**, yalnızca bir ad (D-121 ile aynı sınırlama). Dünür ailesi hâlâ yok.
 
 **Varsayılan işlem:** Onay gelene dek kardeşin eşine pay verilmez (oyuncu mirasçı değilse miras kaydı hiç açılmaz), yeğenin çocuğu olmaz, dünür ailesi eklenmez.
+
+---
+
+### Q-162 — Şehrin karakteri: ne değişsin, ne değişmesin
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-159 · Test: `app/test/paket_z_test.dart`
+
+Şehir bir etikettti: erişilebilirlik ve **konut/araç fiyatı** dışında hiçbir şeyi değiştirmiyordu. Bu pakette şehre **bir** yeni kaldıraç geldi ve **iki** tanesi denendikten sonra bilerek geri alındı.
+
+**Gelen: iş piyasasının genişliği.** Her şehrin bir `opportunity` değeri var (0-1), şehrin nüfusu ve iş merkezi olma rolüne göre **elle** yazıldı — konut fiyatından türetmek kötü bir vekil olurdu. Yalnızca **en üst bant** (`yuksekUzmanlik`) dar piyasada bulunmuyor; ilan çıkmadığında gerekçe açıkça yazılıyor ("… bu iş için dar bir piyasa; büyük şehirlerde bulunur"), böylece taşınmanın bir anlamı oluyor.
+
+**Bilerek kapsam dışında bırakılan iki şey ve sebepleri (ölçüldü):**
+1. **Geçim gideri şehre bağlanmadı.** Denendi: yalnızca gideri şehre bağlamak mevcut denge kuralını kırdı — "düşük gelirli de maaşının en az üçte birini biriktirebilmeli" kuralında garsonun elinde kalan pay %34'ten **%21,5'e** indi. Gideri ve maaşı **birlikte** aynı çarpanla oynatmak ise maaşlı çalışan için etkiyi tamamen sıfırlıyor; geriye yalnızca onlarca testi sayı peşinde koşturan bir değişiklik kalıyordu. Bu yüzden ikisi de geri alındı.
+2. **Yaratıcı meslekler şehre bağlanmadı.** Müzisyenlik ve yazarlık hobiyle açılıyor (Paket 39); şehre bağlamak, yıllarca hobisine emek veren oyuncuyu doğduğu şehir yüzünden cezalandırırdı. Bu sektör oyunda zaten çevrimiçi kitleye dayanıyor (D-027).
+
+**Karar soruları:**
+1. **Geçim gideri şehre bağlanmalı mı?** Bağlanacaksa maaş da bağlanmalı (yoksa denge kuralı kırılıyor) — o zaman maaşlı için etki sıfır olur ve fark yalnızca **kira geliri, kendi işi ve birikim** gibi maaş dışı gelirlerde hissedilir. Bu istenen şey mi?
+2. **`opportunity` değerleri** doğru mu? İstanbul 1,0 · Ankara 0,95 · İzmir 0,9 · Bursa 0,78 · Antalya 0,76 · Kocaeli 0,72 · Adana 0,7 · Konya 0,66 · Gaziantep 0,64 · Kayseri 0,62 · Eskişehir 0,6 · Diyarbakır 0,56 · Samsun 0,55 · Denizli 0,54 · Van 0,5 · Trabzon 0,5 · Aydın 0,48 · Malatya 0,45 · Erzurum 0,44 · Sivas 0,4 · Zonguldak 0,4 · Amasya 0,3.
+3. **Eşik 0,7** — yalnızca yedi şehirde en üst bant var. Çok mu dar? Alternatif: eşik 0,55 (on üç şehir).
+4. **Yalnızca en üst bant mı kapanmalı?** Alternatif: `profesyonel` bant da orta ölçekli şehirlerde seyrelsin (kapanmasın, ilan **daha az** çıksın). Bunun için iş piyasasına "ilan sayısı" kavramı eklemek gerekir; şu an yok.
+5. **Şehre özgü olay havuzu yok.** Sahil şehrinde deniz, Doğu'da kış, büyük şehirde trafik olayları eklenmeli mi? Bu içerik işi, sistem işi değil.
+6. **Şehir değiştirmenin sosyal bedeli yok:** taşınınca mahalle arkadaşlarından uzaklaşma modellenmiyor (erişilebilirlik şehre bakıyor ama bağ sönümü hızlanmıyor).
+
+**Varsayılan işlem:** Onay gelene dek geçim gideri ve maaş şehirden etkilenmez; yalnızca en üst bant dar piyasada kapalı kalır; şehre özgü olay eklenmez.
