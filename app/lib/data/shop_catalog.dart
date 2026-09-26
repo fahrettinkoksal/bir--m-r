@@ -21,6 +21,23 @@ import 'package:flutter/material.dart';
 
 import 'item_catalog.dart';
 
+/// Mağazaların üst kırılımı (D-138).
+///
+/// Faho'nun isteği: "market menülerini daha stabil ve güzel hale getir."
+/// Mağazalar listesi on bir satırlık düz bir yığındı; oyuncu ayakkabıyla
+/// villayı aynı kolonda arıyordu. Kategoriler artık üç öbekte duruyor ve
+/// öbeklerin sırası sabittir: liste her açılışta aynı görünür.
+enum ShopGroup {
+  gundelik('Gündelik alışveriş', Icons.shopping_basket_outlined),
+  arac('Araç ve aksesuar', Icons.directions_car_outlined),
+  konut('Konut', Icons.apartment_outlined);
+
+  const ShopGroup(this.label, this.icon);
+
+  final String label;
+  final IconData icon;
+}
+
 /// Mağaza kategorisi. Her kategori ayrı bir alt sayfadır.
 enum ShopCategory {
   genel('Genel mağaza', 'Gündelik eşya, kitap, kıyafet', Icons.storefront_outlined),
@@ -78,6 +95,17 @@ enum ShopCategory {
     'Lüks emlak ofisi',
     'Müstakil ev ve villa',
     Icons.villa_outlined,
+  ),
+
+  /// 2. el araç pazarı (D-137). Galerilerin yerine geçmez, yanına gelir:
+  /// ilan sahibi vardır, araç yaşlıdır ve ilan detayları yazılıdır.
+  ///
+  /// Ürünleri katalogda durmaz; ilanları
+  /// `lib/domain/economy/used_vehicle_market.dart` üretir.
+  ikinciElPazar(
+    '2. el araç pazarı',
+    'Sahibinden ve galeriden ilanlar',
+    Icons.handshake_outlined,
   );
 
   const ShopCategory(this.label, this.description, this.icon);
@@ -96,10 +124,28 @@ enum ShopCategory {
       this == ShopCategory.galeriOrta ||
       this == ShopCategory.galeriLuks ||
       this == ShopCategory.motorUcuz ||
-      this == ShopCategory.motorLuks;
+      this == ShopCategory.motorLuks ||
+      this == ShopCategory.ikinciElPazar;
+
+  /// 2. el araç pazarı mı? (D-137)
+  ///
+  /// Pazarın ilanları emlak/galeri panosundan **ayrı** üretilir: yaş, km
+  /// ve ilan detayları vardır. Bu yüzden [isListed] pazarı kapsamaz.
+  bool get isUsedMarket => this == ShopCategory.ikinciElPazar;
 
   /// Şehir bazlı ilan listesiyle mi gösterilir? (D-066)
-  bool get isListed => isHousing || isVehicle;
+  bool get isListed => isHousing || (isVehicle && !isUsedMarket);
+
+  /// Mağazalar listesinde hangi öbekte durduğu (D-138).
+  ShopGroup get group {
+    if (isHousing) return ShopGroup.konut;
+    if (isVehicle ||
+        this == ShopCategory.otoAksesuar ||
+        this == ShopCategory.motorAksesuar) {
+      return ShopGroup.arac;
+    }
+    return ShopGroup.gundelik;
+  }
 
   /// Bu galeriden alınan araç masraf çıkarabilir mi? (D-079)
   ///
@@ -468,17 +514,54 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
 List<ShopProduct> shopProductsFor(int age) =>
     kShopCatalog.where((ShopProduct p) => age >= p.minAge).toList(growable: false);
 
-/// Bir kategorideki, yaşa uygun ürünler.
-List<ShopProduct> shopProductsIn(ShopCategory category, int age) => kShopCatalog
-    .where((ShopProduct p) => p.category == category && age >= p.minAge)
-    .toList(growable: false);
+/// Bir kategorideki, yaşa uygun ürünler — **ucuzdan pahalıya** (D-138).
+///
+/// Sıralama katalogdaki yazım sırasına bırakılmıştı; aynı rafta 350 ₺'lik
+/// zil ile 14 milyonluk otomobil karışık duruyordu. Fiyat sırası liste
+/// için sabit ve öngörülebilir bir düzen verir: oyuncu bütçesine uyan
+/// ürünü hep üstte bulur. Eşit fiyatta ad sırası kullanılır ki sıralama
+/// çalıştırmalar arasında oynamasın.
+List<ShopProduct> shopProductsIn(ShopCategory category, int age) {
+  final List<ShopProduct> urunler = kShopCatalog
+      .where((ShopProduct p) => p.category == category && age >= p.minAge)
+      .toList(growable: true)
+    ..sort((ShopProduct a, ShopProduct b) {
+      final int fiyat = a.price.compareTo(b.price);
+      return fiyat != 0 ? fiyat : a.name.compareTo(b.name);
+    });
+  return List<ShopProduct>.unmodifiable(urunler);
+}
 
 /// Bu yaşta gerçekten ürün gösteren kategoriler.
 ///
 /// Boş kategori menüde gösterilmez; sahte düğme olmaz.
 List<ShopCategory> shopCategoriesFor(int age) => ShopCategory.values
-    .where((ShopCategory c) => shopProductsIn(c, age).isNotEmpty)
+    .where(
+      (ShopCategory c) => c.isUsedMarket
+          // 2. el pazarın ürünleri katalogda durmaz; ilanları pazar
+          // üretir (D-137). Yaş kuralı galerilerle aynıdır.
+          ? age >= 18
+          : shopProductsIn(c, age).isNotEmpty,
+    )
     .toList(growable: false);
+
+/// Bu yaşta açık olan mağazaları **öbek öbek** verir (D-138).
+///
+/// Öbek sırası [ShopGroup.values] sırasıdır, öbek içindeki sıra
+/// [ShopCategory.values] sırasıdır: liste her açılışta aynı görünür.
+/// Hiç mağazası olmayan öbek anahtar olarak da dönmez.
+Map<ShopGroup, List<ShopCategory>> shopGroupsFor(int age) {
+  final List<ShopCategory> acik = shopCategoriesFor(age);
+  final Map<ShopGroup, List<ShopCategory>> sonuc =
+      <ShopGroup, List<ShopCategory>>{};
+  for (final ShopGroup obek in ShopGroup.values) {
+    final List<ShopCategory> uyeler = acik
+        .where((ShopCategory c) => c.group == obek)
+        .toList(growable: false);
+    if (uyeler.isNotEmpty) sonuc[obek] = uyeler;
+  }
+  return sonuc;
+}
 
 ShopProduct? shopProductByTypeId(String typeId) {
   for (final ShopProduct p in kShopCatalog) {

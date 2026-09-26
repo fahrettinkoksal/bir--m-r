@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/shop_catalog.dart';
 import '../../../domain/economy/property_market.dart';
+import '../../../domain/economy/used_vehicle_market.dart';
 import '../../../domain/interaction/item_actions.dart';
 import '../../../domain/economy/housing.dart';
 import '../../../domain/economy/living_costs.dart';
@@ -52,6 +53,15 @@ class _AssetsScreenState extends State<AssetsScreen> {
     setState(() => _sonMagazaSonucu = outcome);
   }
 
+  /// 2. el araç ilanından satın alır (D-137): araç ilanın kondisyonuyla
+  /// envantere girer.
+  void _buyUsedVehicle(UsedVehicleListing listing) {
+    final ItemOutcome? outcome =
+        GameScope.of(context).buyUsedVehicle(listing);
+    if (outcome == null) return;
+    setState(() => _sonMagazaSonucu = outcome);
+  }
+
   @override
   Widget build(BuildContext context) {
     final GameState state = GameScope.of(context).state!;
@@ -62,7 +72,11 @@ class _AssetsScreenState extends State<AssetsScreen> {
         category: _kategori!,
         lastOutcome: _sonMagazaSonucu,
         listings: GameScope.of(context).listings(_kategori!),
+        usedListings: _kategori!.isUsedMarket
+            ? GameScope.of(context).usedVehicleListings()
+            : const <UsedVehicleListing>[],
         onBuyListing: _buyListing,
+        onBuyUsedVehicle: _buyUsedVehicle,
         onBuy: _buy,
         onBack: () => setState(() {
           _page = _AssetsPage.magazalar;
@@ -228,7 +242,11 @@ class _ShopCategoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
+    // Mağazalar üç öbekte durur (D-138): gündelik alışveriş, araç ve
+    // aksesuar, konut. Öbek ve satır sırası sabittir; liste her açılışta
+    // aynı görünür.
+    final Map<ShopGroup, List<ShopCategory>> obekler =
+        shopGroupsFor(state.player.age);
     return SectionScaffold(
       icon: Icons.storefront_rounded,
       accent: BirOmurAccents.turuncu,
@@ -237,16 +255,25 @@ class _ShopCategoryList extends StatelessWidget {
       backLabel: 'Varlıklar',
       onBack: onBack,
       children: <Widget>[
-        for (final ShopCategory kategori in magazalar) ...<Widget>[
-          MenuRow(
-            title: kategori.label,
-            subtitle: kategori.description,
-            icon: kategori.icon,
-            trailingText:
-                '${shopProductsIn(kategori, state.player.age).length}',
-            onTap: () => onOpen(kategori),
-          ),
-          const SizedBox(height: 10),
+        for (final ShopGroup obek in obekler.keys) ...<Widget>[
+          _GroupTitle(obek.label),
+          const SizedBox(height: 8),
+          for (final ShopCategory kategori in obekler[obek]!) ...<Widget>[
+            MenuRow(
+              key: Key('magaza_${kategori.name}'),
+              title: kategori.label,
+              subtitle: kategori.description,
+              icon: kategori.icon,
+              // 2. el pazarın ürünleri katalogda durmadığı için sayısı
+              // ilan havuzundan okunur (D-137).
+              trailingText: kategori.isUsedMarket
+                  ? '${UsedVehicleMarket.prototypeOnlyListingCount}'
+                  : '${shopProductsIn(kategori, state.player.age).length}',
+              onTap: () => onOpen(kategori),
+            ),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 4),
         ],
         const SizedBox(height: 4),
         const InfoPanel(
@@ -267,7 +294,9 @@ class _ShopView extends StatelessWidget {
     required this.category,
     required this.lastOutcome,
     required this.listings,
+    required this.usedListings,
     required this.onBuyListing,
+    required this.onBuyUsedVehicle,
     required this.onBuy,
     required this.onBack,
   });
@@ -278,7 +307,11 @@ class _ShopView extends StatelessWidget {
 
   /// Yaşanan ildeki ev/araç ilanları; diğer mağazalarda boştur.
   final List<PropertyListing> listings;
+
+  /// Yaşanan ildeki 2. el araç ilanları; yalnızca pazarda doludur (D-137).
+  final List<UsedVehicleListing> usedListings;
   final void Function(PropertyListing listing) onBuyListing;
+  final void Function(UsedVehicleListing listing) onBuyUsedVehicle;
   final void Function(ShopProduct product) onBuy;
   final VoidCallback onBack;
 
@@ -303,6 +336,31 @@ class _ShopView extends StatelessWidget {
         // gösterilir (Faho'nun kesin kararı). Eskiden emlakçıda 20
         // şehirlik bir seçici vardı ve oyuncu Amasya'da yaşarken
         // İstanbul'dan ev alabiliyordu; "Türkiye geneli" liste kalktı.
+        // 2. el araç pazarı kendi ilan biçimini kullanır (D-137): yaş, km
+        // ve "araç detayları" satırları emlak ilanına sığmıyordu.
+        if (category.isUsedMarket) ...<Widget>[
+          InfoPanel(
+            icon: Icons.place_outlined,
+            text: '${state.player.currentCity} pazarındaki ilanlar. '
+                'İlanlar yılda bir tazelenir; taşınırsan yeni şehrin '
+                'pazarını görürsün. İlan detaylarını satıcı yazar, '
+                'ekspertiz raporu değildir.',
+          ),
+          const SizedBox(height: 12),
+          if (usedListings.isEmpty)
+            const InfoPanel(
+              icon: Icons.info_outline,
+              text: 'Şu an pazarda ilan yok.',
+            ),
+          for (final UsedVehicleListing ilan in usedListings) ...<Widget>[
+            _UsedVehicleCard(
+              listing: ilan,
+              affordable: state.player.wallet >= ilan.price,
+              onBuy: () => onBuyUsedVehicle(ilan),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ],
         if (ilanli) ...<Widget>[
           InfoPanel(
             icon: Icons.place_outlined,
@@ -326,9 +384,24 @@ class _ShopView extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            ilan.name,
-                            style: theme.textTheme.titleMedium,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                ilan.name,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              // Ad kurgusal bir model adı olduğunda sınıfı
+                              // altına yazılır (D-136).
+                              if (ilan.product.type.segment != null)
+                                Text(
+                                  ilan.product.type.segment!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color:
+                                        theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                         Text(
@@ -381,8 +454,20 @@ class _ShopView extends StatelessWidget {
                       Icon(urun.type.icon, color: theme.colorScheme.secondary),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(urun.name,
-                            style: theme.textTheme.titleMedium),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(urun.name,
+                                style: theme.textTheme.titleMedium),
+                            if (urun.type.segment != null)
+                              Text(
+                                urun.type.segment!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                       Text(
                         trMoney(urun.price),
@@ -427,7 +512,12 @@ class _ShopView extends StatelessWidget {
         const SizedBox(height: 10),
         InfoPanel(
           icon: Icons.info_outline,
-          text: category.cheapVehicles
+          text: category.isUsedMarket
+              ? 'Pazardan alınan araç ikinci eldir: envantere ilanda '
+                  'yazan durumla girer, sıfır gibi değil. Yorgun bir araç '
+                  'bakım ister. Araç satın almak için ehliyet gerekmez; '
+                  'kullanmak için gerekir.'
+              : category.cheapVehicles
               ? 'Buradaki araçlar ucuz, çünkü yaşlılar: yıl içinde '
                   'masraf çıkarabilirler. Araç satın almak için ehliyet '
                   'gerekmez; aracı kullanmak için gerekir.'
@@ -442,6 +532,160 @@ class _ShopView extends StatelessWidget {
                           'ilgili eşyaya gir.',
         ),
       ],
+    );
+  }
+}
+
+/// 2. el araç pazarındaki tek bir ilan kartı (D-137).
+///
+/// Gerçek ilan düzeni: üstte model adı ve satıcı, yanında fiyat, altında
+/// yaş/km/durum etiketleri, sonra "Araç detayları" satırları ve satıcının
+/// tek satırlık notu.
+class _UsedVehicleCard extends StatelessWidget {
+  const _UsedVehicleCard({
+    required this.listing,
+    required this.affordable,
+    required this.onBuy,
+  });
+
+  final UsedVehicleListing listing;
+  final bool affordable;
+  final VoidCallback onBuy;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Color soluk = theme.colorScheme.onSurfaceVariant;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(listing.type.icon, color: theme.colorScheme.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(listing.name, style: theme.textTheme.titleMedium),
+                      const SizedBox(height: 2),
+                      Text(
+                        <String>[
+                          if (listing.type.segment != null)
+                            listing.type.segment!,
+                          listing.seller.label,
+                        ].join(' · '),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: soluk,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      trMoney(listing.price),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'sıfırı ${trMoneyShort(listing.newPrice)}',
+                      style: theme.textTheme.bodySmall?.copyWith(color: soluk),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: <Widget>[
+                _AdChip(text: '${listing.ageYears} yaşında'),
+                _AdChip(text: '${trNumber(listing.km)} km'),
+                _AdChip(text: listing.grade.label),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Araç detayları',
+              style: theme.textTheme.labelLarge?.copyWith(color: soluk),
+            ),
+            const SizedBox(height: 6),
+            for (final String satir in listing.details) ...<Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: soluk,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    child: Text(satir, style: theme.textTheme.bodySmall),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              '“${listing.sellerNote}”',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: soluk,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                key: Key('ikinci_el_${listing.id}'),
+                onPressed: affordable ? onBuy : null,
+                child: Text(affordable ? 'Satın al' : 'Paran yetmiyor'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// İlan etiketi: yaş, km, durum.
+class _AdChip extends StatelessWidget {
+  const _AdChip({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
     );
   }
 }
@@ -506,10 +750,14 @@ class _ItemTile extends StatelessWidget {
                     Text(item.name, style: theme.textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(
-                      item.attachments.isEmpty
-                          ? item.conditionLabel
-                          : '${item.conditionLabel} · '
-                              '${item.attachments.length} aksesuar',
+                      <String>[
+                        // Ad kurgusal model adı olduğunda sınıfı görünsün
+                        // (D-136): "Foros Kent 1.4" neyin nesi belli olsun.
+                        if (item.type.segment != null) item.type.segment!,
+                        item.conditionLabel,
+                        if (item.attachments.isNotEmpty)
+                          '${item.attachments.length} aksesuar',
+                      ].join(' · '),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

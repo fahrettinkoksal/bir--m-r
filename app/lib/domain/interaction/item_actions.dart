@@ -435,6 +435,7 @@ class ItemActions {
     required ShopProduct product,
     String? location,
     int? price,
+    int? condition,
   }) {
     // İlan panosundan gelen fiyat şehir katsayısını taşır; katalog
     // fiyatı yalnızca ilan dışı satın almalarda kullanılır.
@@ -460,6 +461,9 @@ class ItemActions {
       <String>[product.typeId],
       source: ItemSource.satinAlma,
       purchasePrice: fiyat,
+      // 2. el araç pazarından alınan araç **yorgun** girer (D-137);
+      // sıfır ürün varsayılan kondisyonla girer.
+      condition: condition ?? OwnedItem.defaultCondition,
       // Konutta satın alınan şehir kaydedilir (D-043); belirtilmezse
       // oyuncunun yaşadığı şehir kullanılır.
       location: product.type.kind == ItemKind.konut

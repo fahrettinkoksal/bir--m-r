@@ -73,6 +73,7 @@ class ItemType {
     required this.baseValue,
     this.fitsOn = const <ItemKind>{},
     this.special = false,
+    this.segment,
   });
 
   /// Kalıcı tür kimliği (envanterde ve kayıtta kullanılır).
@@ -90,6 +91,14 @@ class ItemType {
   /// Özel/antika nitelik. Değerlemede çarpan uygulanır; geniş bir antika
   /// kataloğu henüz yok, altyapı hazır.
   final bool special;
+
+  /// Adı kurgusal bir model adı olan eşyalarda **sınıf/segment** satırı
+  /// (D-136): "Foros Kent 1.4" adının altında "İkinci el otomobil" yazar.
+  ///
+  /// Faho'nun isteği: araç adları günümüz araçlarını çağrıştırsın ama
+  /// gerçek marka olmasın. Ad kurgusal, segment bilgisi ayrı alanda
+  /// duruyor; oyuncu neyi aldığını hâlâ görüyor.
+  final String? segment;
 
   bool get isAccessory => kind == ItemKind.aksesuar;
 
@@ -362,14 +371,16 @@ const List<ItemType> kItemTypes = <ItemType>[
   // --- Motosikletler ----------------------------------------------------
   ItemType(
     id: 'motosiklet_ekonomik',
-    name: 'Ekonomik motosiklet',
+    name: 'Rüzgâr 250',
+    segment: 'Ekonomik motosiklet',
     icon: Icons.two_wheeler_outlined,
     kind: ItemKind.motosiklet,
     baseValue: 190000,
   ),
   ItemType(
     id: 'motosiklet_guclu',
-    name: 'Güçlü motosiklet',
+    name: 'Sarp 750',
+    segment: 'Güçlü motosiklet',
     icon: Icons.two_wheeler,
     kind: ItemKind.motosiklet,
     baseValue: 420000,
@@ -378,14 +389,16 @@ const List<ItemType> kItemTypes = <ItemType>[
   // gerekiyor; tek modelli bir galeri raf değil, vitrin olurdu.
   ItemType(
     id: 'motosiklet_scooter',
-    name: 'Scooter',
+    name: 'Rüzgâr Scoot 125',
+    segment: 'Scooter',
     icon: Icons.electric_scooter_outlined,
     kind: ItemKind.motosiklet,
     baseValue: 96000,
   ),
   ItemType(
     id: 'motosiklet_tur',
-    name: 'Tur motosikleti',
+    name: 'Sarp 1100 Tur',
+    segment: 'Tur motosikleti',
     icon: Icons.motorcycle_outlined,
     kind: ItemKind.motosiklet,
     baseValue: 780000,
@@ -420,65 +433,79 @@ const List<ItemType> kItemTypes = <ItemType>[
   // --- Otomobiller ------------------------------------------------------
   ItemType(
     id: 'otomobil_ikinci_el',
-    name: 'İkinci el otomobil',
+    name: 'Foros Kent 1.4',
+    segment: 'İkinci el otomobil',
     icon: Icons.directions_car_filled_outlined,
     kind: ItemKind.otomobil,
     baseValue: 850000,
   ),
   ItemType(
     id: 'otomobil_ekonomik',
-    name: 'Ekonomik otomobil',
+    name: 'Tunca Ege 1.2',
+    segment: 'Ekonomik otomobil',
     icon: Icons.directions_car_outlined,
     kind: ItemKind.otomobil,
     baseValue: 1650000,
   ),
   ItemType(
     id: 'otomobil_orta',
-    name: 'Orta sınıf otomobil',
+    name: 'Veran Sedan 1.6',
+    segment: 'Orta sınıf otomobil',
     icon: Icons.directions_car,
     kind: ItemKind.otomobil,
     baseValue: 2600000,
   ),
   ItemType(
     id: 'otomobil_luks',
-    name: 'Lüks otomobil',
+    name: 'Alvera Salon 2.0',
+    segment: 'Lüks otomobil',
     icon: Icons.car_rental_outlined,
     kind: ItemKind.otomobil,
     baseValue: 6800000,
   ),
-  // D-079: üç galeri için üç kademe. Marka adı yoktur; katalog
-  // kurgusaldır ve lisans sorunu doğurmaz (D-066).
+  // D-079: üç galeri için üç kademe.
+  //
+  // D-136: adlar artık kurgusal marka+model adları (Foros, Tunca, Veran,
+  // Doruk, Alvera, Sarp, Rüzgâr). Hiçbiri gerçek bir marka veya model
+  // değildir; lisans sorunu doğurmaz. Sınıf bilgisi [ItemType.segment]
+  // alanında ayrı durur, böylece oyuncu "Foros Kent 1.4"ün ikinci el bir
+  // otomobil olduğunu ekranda görür.
   ItemType(
     id: 'otomobil_hurdaya_yakin',
-    name: 'Çok yıpranmış otomobil',
+    name: 'Foros 1.0',
+    segment: 'Çok yıpranmış otomobil',
     icon: Icons.no_crash_outlined,
     kind: ItemKind.otomobil,
     baseValue: 320000,
   ),
   ItemType(
     id: 'otomobil_aile',
-    name: 'Aile otomobili',
+    name: 'Tunca Ferah 1.6',
+    segment: 'Aile otomobili',
     icon: Icons.airport_shuttle_outlined,
     kind: ItemKind.otomobil,
     baseValue: 2050000,
   ),
   ItemType(
     id: 'otomobil_arazi',
-    name: 'Arazi aracı',
+    name: 'Doruk Yayla 4x4',
+    segment: 'Arazi aracı',
     icon: Icons.terrain_outlined,
     kind: ItemKind.otomobil,
     baseValue: 3400000,
   ),
   ItemType(
     id: 'otomobil_spor',
-    name: 'Spor otomobil',
+    name: 'Sarp Coupe 3.0',
+    segment: 'Spor otomobil',
     icon: Icons.sports_score_outlined,
     kind: ItemKind.otomobil,
     baseValue: 9500000,
   ),
   ItemType(
     id: 'otomobil_prestij',
-    name: 'Prestij otomobili',
+    name: 'Alvera Prestij 4.0',
+    segment: 'Prestij otomobili',
     icon: Icons.workspace_premium_outlined,
     kind: ItemKind.otomobil,
     baseValue: 14500000,

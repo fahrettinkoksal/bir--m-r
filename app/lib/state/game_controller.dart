@@ -60,6 +60,7 @@ import '../data/health_crisis_catalog.dart';
 import '../data/tour_catalog.dart';
 import '../domain/economy/housing.dart';
 import '../domain/economy/property_market.dart';
+import '../domain/economy/used_vehicle_market.dart';
 import '../domain/education/school_transfer.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
@@ -565,6 +566,7 @@ class GameController extends ChangeNotifier {
     ShopProduct product, {
     String? location,
     int? price,
+    int? condition,
   }) =>
       _runItemAction(
         (GameState current) => _items.buy(
@@ -572,6 +574,7 @@ class GameController extends ChangeNotifier {
           product: product,
           location: location,
           price: price,
+          condition: condition,
         ),
       );
 
@@ -590,6 +593,23 @@ class GameController extends ChangeNotifier {
         listing.product,
         location: listing.city,
         price: listing.price,
+      );
+
+  /// Oyuncunun **yaşadığı ildeki** 2. el araç ilanları (D-137).
+  List<UsedVehicleListing> usedVehicleListings() {
+    final GameState? current = _state;
+    if (current == null) return const <UsedVehicleListing>[];
+    return UsedVehicleMarket.listingsFor(current);
+  }
+
+  /// 2. el araç ilanından satın alır.
+  ///
+  /// Fiyat ilandan gelir ve araç **ilanın kondisyonuyla** envantere girer:
+  /// yorgun bir ilan yorgun bir araç demektir.
+  ItemOutcome? buyUsedVehicle(UsedVehicleListing listing) => buyProduct(
+        listing.product,
+        price: listing.price,
+        condition: listing.condition,
       );
 
   /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum

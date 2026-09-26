@@ -71,6 +71,10 @@ void main() {
 
     test('her galeri boş değil ve en az iki seçenek sunuyor', () {
       for (final ShopCategory c in ShopCategory.values) {
+        // D-137: 2. el pazarın rafı katalogda değil, ilan havuzunda.
+        // Havuzun boş kalmadığı `used_vehicle_market_test.dart` içinde
+        // doğrulanıyor; burada katalog rafları denetleniyor.
+        if (c.isUsedMarket) continue;
         final List<ShopProduct> urunler = shopProductsIn(c, 30);
         expect(urunler, isNotEmpty, reason: '${c.label} boş');
         if (c.isVehicle) {

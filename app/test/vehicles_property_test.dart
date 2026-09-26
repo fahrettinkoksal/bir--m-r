@@ -11,6 +11,7 @@ import 'package:bir_omur/data/save/save_service.dart';
 import 'package:bir_omur/data/save/save_store.dart';
 import 'package:bir_omur/data/shop_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/economy/used_vehicle_market.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
@@ -43,10 +44,20 @@ void main() {
   // Mağaza kategorileri
   // ===================================================================
   group('Mağazalar', () {
-    test('beş kategori de yaşına uygun ürün sunar', () {
+    test('her kategori yaşına uygun bir şeyler sunar', () {
       final List<ShopCategory> yetiskin = shopCategoriesFor(25);
       expect(yetiskin.length, ShopCategory.values.length);
       for (final ShopCategory kategori in ShopCategory.values) {
+        if (kategori.isUsedMarket) {
+          // D-137: 2. el pazarın ürünleri katalogda durmaz; havuzu
+          // `UsedVehicleMarket` üretir. Boş kalmadığı orada doğrulanır.
+          expect(
+            UsedVehicleMarket.listingsFor(oyuncu(25)),
+            isNotEmpty,
+            reason: '${kategori.label} boş olmamalı',
+          );
+          continue;
+        }
         expect(shopProductsIn(kategori, 25), isNotEmpty,
             reason: '${kategori.label} boş olmamalı');
       }
@@ -88,7 +99,9 @@ void main() {
 
       expect(araba.id, isNotEmpty, reason: 'Kalıcı kimlik');
       expect(araba.typeId, 'otomobil_ekonomik');
-      expect(araba.type.name, 'Ekonomik otomobil');
+      // D-136: ad kurgusal bir model adıdır, sınıf bilgisi segmentte.
+      expect(araba.type.name, 'Tunca Ege 1.2');
+      expect(araba.type.segment, 'Ekonomik otomobil');
       expect(araba.purchasePrice, urun('otomobil_ekonomik').price);
       expect(araba.condition, OwnedItem.defaultCondition);
       expect(araba.attachments, isEmpty);
