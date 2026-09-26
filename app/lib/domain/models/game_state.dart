@@ -91,6 +91,7 @@ class GameState {
     this.mediaInvitationId,
     this.mediaInvitationAge,
     this.mediaJobLastAge = const <String, int>{},
+    this.friendNewsLastAge = const <String, int>{},
     this.sponsorDeals = const <SponsorDeal>[],
     this.trips = const <TripRecord>[],
     this.pendingInterview,
@@ -438,6 +439,25 @@ class GameState {
 
   /// Bu iş en son hangi yaşta yapıldı? Hiç yapılmadıysa `null`.
   int? mediaJobDoneAt(String jobId) => mediaJobLastAge[jobId];
+
+  /// Arkadaş haberlerinin en son hangi yaşta geldiği (D-149).
+  ///
+  /// Faho bildirdi: "yakın arkadaş ile alakalı aynı bildirimler çok fazla
+  /// geliyor! Ahmet her sene iş değiştiriyor ve sesi çok iyi geliyor
+  /// mesela." Anahtarlar `kişiKimliği` ve `kişiKimliği|haberTürü`
+  /// biçimindedir; ilki "bu kişiden ne zaman haber geldi", ikincisi "aynı
+  /// haber ne zaman geldi" sorusunu yanıtlar.
+  ///
+  /// Eski kayıtlarda yoktur; boş açılır ve geriye dönük geçmiş
+  /// **uydurulmaz**.
+  final Map<String, int> friendNewsLastAge;
+
+  /// Bu kişiden en son hangi yaşta haber geldi?
+  int? friendNewsAt(String personId) => friendNewsLastAge[personId];
+
+  /// Bu kişiden bu tür haber en son hangi yaşta geldi?
+  int? friendNewsAtKind(String personId, String kind) =>
+      friendNewsLastAge['$personId|$kind'];
 
   /// Kabul edilmiş sponsorluk yükümlülükleri ve geçmişi.
   final List<SponsorDeal> sponsorDeals;
@@ -926,6 +946,7 @@ class GameState {
     Object? mediaInvitationId = _unsetEvent,
     Object? mediaInvitationAge = _unsetEvent,
     Map<String, int>? mediaJobLastAge,
+    Map<String, int>? friendNewsLastAge,
     List<SponsorDeal>? sponsorDeals,
     List<TripRecord>? trips,
     Object? pendingInterview = _unsetEvent,
@@ -1024,6 +1045,9 @@ class GameState {
       mediaJobLastAge: mediaJobLastAge == null
           ? this.mediaJobLastAge
           : Map<String, int>.unmodifiable(mediaJobLastAge),
+      friendNewsLastAge: friendNewsLastAge == null
+          ? this.friendNewsLastAge
+          : Map<String, int>.unmodifiable(friendNewsLastAge),
       mediaInvitationAge: mediaInvitationAge == _unsetEvent
           ? this.mediaInvitationAge
           : mediaInvitationAge as int?,

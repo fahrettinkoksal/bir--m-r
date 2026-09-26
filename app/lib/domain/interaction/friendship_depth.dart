@@ -359,13 +359,34 @@ abstract final class FriendshipDepth {
   ///
   /// Haber **gerçekten kayda geçer**: taşınan arkadaşın şehri değişir,
   /// evlenen arkadaşın kaydına yazılır. Uydurma haber üretilmez.
+  /// prototypeOnly: aynı kişiden yeniden haber gelmesi için gereken yıl.
+  ///
+  /// **Faho bildirdi:** "yakın arkadaş ile alakalı aynı bildirimler çok
+  /// fazla geliyor! Ahmet her sene iş değiştiriyor ve sesi çok iyi
+  /// geliyor mesela." Sebep ikiydi: (1) hiçbir bekleme süresi yoktu,
+  /// aynı kişi arka arkaya seçilebiliyordu; (2) her haber türünün tek
+  /// bir metni vardı, yani aynı cümle birebir tekrar ediyordu.
+  static const int prototypeOnlyAnyNewsCooldown = 3;
+
+  /// prototypeOnly: **aynı türden** haberin tekrarı için gereken yıl.
+  ///
+  /// Bir arkadaş sekiz yılda bir iş değiştirebilir; her yıl değiştirmez.
+  static const int prototypeOnlySameNewsCooldown = 8;
+
   static GameState _maybeFriendNews(GameState state, int newAge, Random rng) {
     final List<Person> arkadaslar = state.people
         .where(
           (Person p) =>
               p.isAlive &&
               p.relation == RelationType.arkadas &&
-              !p.isEstranged,
+              !p.isEstranged &&
+              // Bu kişiden yakın zamanda haber geldiyse sırası değil.
+              _haberAralikta(
+                state,
+                newAge,
+                state.friendNewsAt(p.id),
+                prototypeOnlyAnyNewsCooldown,
+              ),
         )
         .toList(growable: false);
     if (arkadaslar.isEmpty) return state;
@@ -378,7 +399,18 @@ abstract final class FriendshipDepth {
       if (kisi.age >= 22 && kisi.age <= 45) _FriendNewsKind.evlendi,
       if (kisi.age >= 20 && kisi.age < 65) _FriendNewsKind.isDegisti,
       _FriendNewsKind.zorGun,
-    ];
+    ]
+        // Aynı haber aynı kişiden kısa aralıkla gelmez.
+        .where(
+          (_FriendNewsKind k) => _haberAralikta(
+            state,
+            newAge,
+            state.friendNewsAtKind(kisi.id, k.name),
+            prototypeOnlySameNewsCooldown,
+          ),
+        )
+        .toList(growable: false);
+    if (mumkun.isEmpty) return state;
     final _FriendNewsKind tur = mumkun[rng.nextInt(mumkun.length)];
 
     switch (tur) {
@@ -394,22 +426,39 @@ abstract final class FriendshipDepth {
           // Uzaklık yakınlığı bir miktar zorlar; koparmaz.
           bond: (kisi.bond - 4).clamp(0, 100),
         );
-        final String metin = '${kisi.firstName} $yeni\'ye taşındı. '
-            '"Gel bir ara" dedi, ikiniz de bunun kolay olmadığını '
-            'biliyorsunuz.';
-        return _haber(state, tasinan, metin, newAge, 'tasindi');
+        final String metin = _sec(rng, <String>[
+          '${kisi.firstName} $yeni\'ye taşındı. "Gel bir ara" dedi, '
+              'ikiniz de bunun kolay olmadığını biliyorsunuz.',
+          '${kisi.firstName} işi gereği $yeni\'ye gitti. Eşyaları '
+              'kamyonete sığmış, veda telefonda kalmış.',
+          '${kisi.firstName} artık $yeni\'de. Haritada bakıp "yakınmış '
+              'aslında" dedin, değil.',
+        ]);
+        return _haber(state, tasinan, metin, newAge, tur.name);
 
       case _FriendNewsKind.evlendi:
         final Person evlenen = kisi.copyWith(bond: (kisi.bond + 2).clamp(0, 100));
-        final String metin = '${kisi.firstName} evlendi. Düğünde '
-            'fotoğrafa girerken seni de çektiler.';
-        return _haber(state, evlenen, metin, newAge, 'evlendi');
+        final String metin = _sec(rng, <String>[
+          '${kisi.firstName} evlendi. Düğünde fotoğrafa girerken seni '
+              'de çektiler.',
+          '${kisi.firstName} evlendi. Salonun kapısında seni görünce '
+              'gelinliğin eteğini toplayıp koştu.',
+          '${kisi.firstName} evlendi. Davetiye elden geldi, altında '
+              '"gelmezsen küserim" yazıyordu.',
+        ]);
+        return _haber(state, evlenen, metin, newAge, tur.name);
 
       case _FriendNewsKind.isDegisti:
         final Person calisan = kisi.copyWith(bond: (kisi.bond + 1).clamp(0, 100));
-        final String metin = '${kisi.firstName} iş değiştirdi. '
-            'Sesi telefonda uzun zamandır bu kadar iyi değildi.';
-        return _haber(state, calisan, metin, newAge, 'isdegisti');
+        final String metin = _sec(rng, <String>[
+          '${kisi.firstName} iş değiştirdi. Sesi telefonda uzun '
+              'zamandır bu kadar iyi değildi.',
+          '${kisi.firstName} yeni bir işe girdi. "Bu sefer tutar" '
+              'diyor, sen de inanmak istiyorsun.',
+          '${kisi.firstName} işten ayrılmış, yenisini bulmuş. '
+              'Ayrıntıyı anlatmadı, sen de sormadın.',
+        ]);
+        return _haber(state, calisan, metin, newAge, tur.name);
 
       case _FriendNewsKind.zorGun:
         // Zor gün: arkadaş yardım ister. Yardım etmek bir olay değil,
@@ -417,11 +466,29 @@ abstract final class FriendshipDepth {
         final Person zorda = kisi.copyWith(
           happiness: (kisi.happiness - 10).clamp(0, 100),
         );
-        final String metin = '${kisi.firstName} aradı. Sesinden belli, '
-            'işler iyi gitmiyor. "Bir ara görüşelim mi" dedi.';
-        return _haber(state, zorda, metin, newAge, 'zorgun');
+        final String metin = _sec(rng, <String>[
+          '${kisi.firstName} aradı. Sesinden belli, işler iyi gitmiyor. '
+              '"Bir ara görüşelim mi" dedi.',
+          '${kisi.firstName} uzun bir mesaj attı, sonra sildi. Kalanı '
+              '"boş ver, geçer" idi.',
+          '${kisi.firstName} ile karşılaştınız. Hâl hatır sorarken '
+              'gözü başka yerdeydi.',
+        ]);
+        return _haber(state, zorda, metin, newAge, tur.name);
     }
   }
+
+  /// Bu haber için bekleme süresi doldu mu? Hiç gelmediyse doludur.
+  static bool _haberAralikta(
+    GameState state,
+    int newAge,
+    int? sonYas,
+    int aralik,
+  ) =>
+      sonYas == null || newAge - sonYas >= aralik;
+
+  static String _sec(Random rng, List<String> secenekler) =>
+      secenekler[rng.nextInt(secenekler.length)];
 
   static GameState _haber(
     GameState state,
@@ -430,7 +497,14 @@ abstract final class FriendshipDepth {
     int newAge,
     String etiket,
   ) {
-    GameState next = _replace(state, guncel);
+    GameState next = _replace(state, guncel).copyWith(
+      // D-149: hem "bu kişiden", hem "bu haber" sayacı işlenir.
+      friendNewsLastAge: <String, int>{
+        ...state.friendNewsLastAge,
+        guncel.id: newAge,
+        '${guncel.id}|$etiket': newAge,
+      },
+    );
     next = _log(next, metin, personId: guncel.id, age: newAge);
     return next.queueNotice(
       PendingNotice(

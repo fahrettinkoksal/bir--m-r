@@ -3488,3 +3488,38 @@ Faho'nun isteği: "menüleri düzenli hale getir", "market menülerini daha stab
 3. Mağaza satırında şu an **ürün sayısı** yazıyor. Yerine **fiyat aralığı** mı yazsın ("350 ₺ – 14,5 M ₺")?
 4. Parası yetmeyen ürün şu an listede **kapalı düğmeyle** duruyor. Gizlenmeli mi, yoksa görünmeye devam mı etmeli?
 5. Evcil hayvan grupları açılır-kapanır (`ExpansionTile`). Mağaza öbekleri de açılır-kapanır mı olmalı, yoksa başlık olarak kalmalı mı?
+
+---
+
+### Q-153 — Paket W: Faho'nun 13 maddelik hata listesinden çıkan sayılar
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-142 … D-150 · Test: `app/test/paket_w_test.dart`, `app/test/after_school_widget_test.dart`, `app/test/business_widget_test.dart`
+
+Listedeki maddelerin çoğu **gerçek hataydı** ve düzeltildi (aşağıda ayrıca soru yok). Karar bekleyen yalnızca yeni gelen sayılar ve iki tasarım tercihi:
+
+**1. Araç gideri (D-148).** Sahip olunan her motorlu araç için yıllık gider geldi: zorunlu trafik sigortası (araç değerinin **%1,0**'i), kasko (**%2,5**), MTV (**%1,2**, araç yaşlandıkça %35'ine kadar iner).
+   - Oranlar doğru bantta mı? Ekonomik otomobil (1.650.000 ₺) için yılda ≈ 77.000 ₺ çıkıyor.
+   - **Kasko isteğe bağlı olmalı mı?** Türkiye'de trafik sigortası zorunlu, kasko değil. Şu an herkes kasko yaptırıyor sayılıyor. Seçilebilir olsun mu (yaptırmayan ucuz kurtulur ama kaza masrafını kendi öder)?
+   - Araç kullanılmasa (ehliyet yokken miras kalan araba) da gider çıkıyor. Doğru mu, yoksa "trafiğe kapalı" seçeneği mi olmalı?
+
+**2. Medya fırsatları (D-147).** Yılda toplam **2** iş, aynı iş için **3 yıl** bekleme, kabul şansı tabanı **%30**.
+   - Yılda 2 doğru mu? Çok tanınan biri için 3-4 olmalı mı (Ün'e bağlı bir tavan)?
+   - Aynı işin 3 yıl bekleme süresi doğru mu?
+   - Kabul şansı Ün ile %92'ye kadar çıkıyor; tavan doğru mu?
+
+**3. Arkadaş haberleri (D-149).** Aynı kişiden **3 yıl**, aynı türden **8 yıl** bekleme; her türde 3 metin.
+   - Bekleme süreleri doğru mu?
+   - Dört haber türü (taşındı, evlendi, iş değiştirdi, zor gün) yeterli mi? "Çocuğu oldu", "hastalandı", "memleketine döndü" eklensin mi?
+
+**4. Hayvan bakım gideri (D-144).** Sahiplenmediğin hayvanın bakımı senden çıkmıyor.
+   - Oyuncu **yetişkin olduktan sonra** da ailenin hayvanının bakımı bedava kalmalı mı? Yoksa 18'den sonra (ya da evden çıkınca) sorumluluk oyuncuya mı geçmeli?
+
+**5. Kendi işi (D-143).** İkinci iş uyarısı yılda en çok bir kez, **%28** ihtimalle geliyor.
+   - Oran doğru mu? Uyarı birikince işten çıkarılma ihtimali artıyor (D-078 sayacı); bu yeterli bir bedel mi?
+
+**6. Lise sonrası karar (D-142).** Pencere kaldırıldı, oyuncu Okul/Meslek ekranının "Mezuniyet sonrası" sayfasına düşüyor.
+   - Doğru yer mi? Lise **alan** seçimi hâlâ pencereyle soruluyor (gidilecek ayrı sayfası yok); o da bir sayfaya mı taşınmalı?
+
+**7. Evcil hayvan (D-146).** Sayfa İlişkiler altına taşındı, Varlıklar'dan ve Aktiviteler'den kaldırıldı.
+   - Doğru yer mi? Sahiplenme de aynı sayfada duruyor; sahiplenme Aktiviteler'de mi kalmalıydı?
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; kasko isteğe bağlı hâle getirilmez, ek haber türü eklenmez.

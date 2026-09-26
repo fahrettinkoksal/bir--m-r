@@ -254,3 +254,36 @@ girer: dil sade ve saygılı olur.
 Suç olaylarında **yöntem anlatılmaz**: suç işleme yolu, kaçış, saklanma,
 delil ya da denetimden kurtulma hiçbir metinde yer almaz. Olaylar
 yüksek seviyede **seçimler** olarak kalır; sonucu motor yürütür.
+
+## 15. Cümle bütünlüğü (D-150)
+
+Faho bildirdi: *"sohbetlerdeki saçmalıklar düzeltilmeli. Örnek: 'anne
+tarafından deden seni mutfağa çekti, parmağını dudağına götürdü: annene
+yok' — cümle saçma kurulmuş. 'Sana fıstık ezmesi sürüyor' gibi bir cümle
+olsun, saçma olmasın."*
+
+İki kural:
+
+### 15.1 Eylemin nesnesi yazılır
+
+Bir metinde birinin bir şey **verdiği, uzattığı, sakladığı** anlatılıyorsa
+o şeyin ne olduğu yazılır. Okuyan kişi neyin konuşulduğunu tahmin etmek
+zorunda kalmaz.
+
+| Yanlış | Doğru |
+|---|---|
+| "Parmağını dudağına götürdü: *Annene yok.*" | "Kaşığın ucuna fıstık ezmesi aldı ve parmağını dudağına götürdü: *Annene yok.*" |
+
+Seçenek etiketi ("Al, ye") metindeki eksiği kapatmaz: seçenek, metni
+okuyan biri için anlamlı olmalıdır.
+
+### 15.2 Metin kendi sonucunu yalanlamaz
+
+Olumlu bir sonucun metni olumsuz bitmez, olumsuz bir sonucunki olumlu.
+
+| Yanlış | Doğru |
+|---|---|
+| (Vakit geçirmenin **olumlu** sonucu) "…bulaşık sonraya kaldı, sohbet **kalmadı**." | "…bulaşık sonraya kaldı, sohbet **uzadı**." |
+
+Bu iki kural `test/language_quality_test.dart` içinde örnekleriyle
+sabitlenmiştir.

@@ -288,8 +288,13 @@ const List<GameEvent> kChildhoodEvents = <GameEvent>[
   GameEvent(
     id: 'cocukluk_dededen_seker',
     category: EventCategory.aile,
-    text: '{sahip} {kisi} seni mutfağa çekti, parmağını dudağına '
-        'götürdü: "Annene yok."',
+    // Faho bildirdi: eski metin "parmağını dudağına götürdü: Annene
+    // yok" diyordu ve **neyin** verildiği hiç yazmıyordu; cümle havada
+    // kalıyordu. Ne uzatıldığı artık yazıyor (bkz. docs/WRITING_STYLE_TR.md,
+    // "eylemin nesnesi yazılır" kuralı).
+    text: '{sahip} {kisi} seni mutfağa çekti. Dolabın arkasından bir '
+        'kavanoz çıkardı, kaşığın ucuna fıstık ezmesi aldı ve parmağını '
+        'dudağına götürdü: "Annene yok."',
     requirement: EventRequirement(
       minAge: 3,
       maxAge: 8,

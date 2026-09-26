@@ -9,19 +9,24 @@ import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/media_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/data/event_pool_childhood.dart';
 import 'package:bir_omur/data/finger_catalog.dart';
+import 'package:bir_omur/data/interaction_texts.dart';
 import 'package:bir_omur/data/pet_catalog.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/interaction/finger.dart';
+import 'package:bir_omur/domain/interaction/friendship_depth.dart';
+import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/models/pending_notice.dart';
+import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/social/media_opportunities.dart';
 import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
-import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/domain/pets/pet_care.dart';
@@ -38,6 +43,7 @@ GameState hayat(int seed, {int age = 10, int wallet = 5000}) {
 }
 
 void main() {
+  _paketW3();
   _paketW2();
   // ===================================================================
   // Sahiplenmediğin hayvanın bakımı senden çıkmaz (D-144)
@@ -422,6 +428,184 @@ void _paketW2() {
         source: ItemSource.satinAlma,
       );
       expect(LivingCosts.vehicleItems(s), hasLength(2));
+    });
+  });
+}
+
+// =====================================================================
+// D-149: arkadaş haberleri tekrar etmez
+// D-150: cümle bütünlüğü
+// =====================================================================
+void _paketW3() {
+  group('Arkadaş haberleri (D-149)', () {
+    Person arkadas(String id, String ad) => Person(
+          id: id,
+          firstName: ad,
+          lastName: 'Demir',
+          gender: Gender.erkek,
+          relation: RelationType.arkadas,
+          age: 30,
+          isAlive: true,
+          inPlayerHousehold: false,
+          employment: EmploymentStatus.calisiyor,
+          occupation: 'tekniker',
+          wealth: WealthTier.ortaHalli,
+          bond: 70,
+          city: 'İstanbul',
+        );
+
+    GameState tekArkadas({int age = 30}) {
+      final GameState s = hayat(30, age: age, wallet: 50000);
+      return s.copyWith(
+        people: List<Person>.unmodifiable(<Person>[arkadas('ark-1', 'Ahmet')]),
+      );
+    }
+
+    test('aynı arkadaştan art arda yıllarda haber gelmez', () {
+      // Faho: "Ahmet her sene iş değiştiriyor ve sesi çok iyi geliyor."
+      GameState s = tekArkadas();
+      int haberliYil = 0;
+      int sonHaberYili = -99;
+      for (int yas = 31; yas <= 70; yas++) {
+        s = s.copyWith(
+          player: s.player.copyWith(age: yas),
+          notices: const <PendingNotice>[],
+        );
+        final GameState sonra =
+            FriendshipDepth.advanceYear(s, yas, Random(yas));
+        if (sonra.notices.any((PendingNotice n) =>
+            n.title == 'Arkadaşından haber')) {
+          expect(
+            yas - sonHaberYili,
+            greaterThanOrEqualTo(
+              FriendshipDepth.prototypeOnlyAnyNewsCooldown,
+            ),
+            reason: '$yas yaşında üst üste haber geldi',
+          );
+          sonHaberYili = yas;
+          haberliYil++;
+        }
+        s = sonra;
+      }
+      expect(haberliYil, greaterThan(0), reason: 'Hiç haber gelmedi');
+    });
+
+    test('aynı tür haber aynı kişiden sık tekrar etmez', () {
+      GameState s = tekArkadas();
+      final Map<String, List<int>> turYillari = <String, List<int>>{};
+      for (int yas = 31; yas <= 90; yas++) {
+        s = s.copyWith(
+          player: s.player.copyWith(age: yas),
+          notices: const <PendingNotice>[],
+        );
+        s = FriendshipDepth.advanceYear(s, yas, Random(yas * 7));
+      }
+      // Kayıttaki tür sayaçlarından hiçbiri bekleme süresinden kısa
+      // aralıkla iki kez yazılmış olamaz; son yazılan yaş korunur.
+      for (final MapEntry<String, int> e in s.friendNewsLastAge.entries) {
+        if (!e.key.contains('|')) continue;
+        turYillari.putIfAbsent(e.key, () => <int>[]).add(e.value);
+      }
+      expect(s.friendNewsLastAge, isNotEmpty);
+    });
+
+    test('her haber türünün birden çok metni var', () {
+      // Tek metinli haber, ikinci kez geldiğinde birebir tekrar ediyordu.
+      final Set<String> metinler = <String>{};
+      for (int tohum = 0; tohum < 300; tohum++) {
+        GameState s = tekArkadas();
+        s = s.copyWith(player: s.player.copyWith(age: 31));
+        final GameState sonra =
+            FriendshipDepth.advanceYear(s, 31, Random(tohum));
+        for (final PendingNotice n in sonra.notices) {
+          if (n.title == 'Arkadaşından haber') metinler.add(n.text);
+        }
+      }
+      expect(
+        metinler.length,
+        greaterThanOrEqualTo(6),
+        reason: 'Haber metinleri yeterince çeşitli değil',
+      );
+    });
+
+    test('yeni sayaç kayda girer; eski kayıtta boş açılır', () {
+      GameState s = tekArkadas().copyWith(
+        friendNewsLastAge: <String, int>{'ark-1': 30, 'ark-1|isDegisti': 30},
+      );
+      final GameState geri = decodeGameState(encodeGameState(s));
+      expect(geri.friendNewsAt('ark-1'), 30);
+      expect(geri.friendNewsAtKind('ark-1', 'isDegisti'), 30);
+
+      final Map<String, Object?> json = encodeGameState(tekArkadas())
+        ..remove('friendNewsLastAge');
+      expect(decodeGameState(json).friendNewsLastAge, isEmpty);
+    });
+  });
+
+  group('Cümle bütünlüğü (D-150)', () {
+    test('dededen şeker olayında ne verildiği yazılı', () {
+      // Faho: "'annene yok' cümlesi saçma kurulmuş; sana fıstık ezmesi
+      // sürüyor gibi bir cümle olsun."
+      final GameEvent olay = kChildhoodEvents
+          .firstWhere((GameEvent e) => e.id == 'cocukluk_dededen_seker');
+      expect(olay.text, contains('fıstık ezmesi'));
+      expect(olay.text, contains('Annene yok'));
+      // Seçenek metnin devamı olarak anlamlı kalmalı.
+      expect(
+        olay.choices.any((EventChoice c) => c.label.contains('Al')),
+        isTrue,
+      );
+    });
+
+    test('vakit geçirme metni kendi sonucunu yalanlamıyor', () {
+      // "sohbet kalmadı" olumlu bir sonucun metniydi.
+      final String metin = interactionText(
+        kind: InteractionKind.vakitGecir,
+        person: Person(
+          id: 'es-1',
+          firstName: 'Elif',
+          lastName: 'Yılmaz',
+          gender: Gender.kadin,
+          relation: RelationType.es,
+          age: 32,
+          isAlive: true,
+          inPlayerHousehold: true,
+          employment: EmploymentStatus.calisiyor,
+          occupation: 'öğretmen',
+          wealth: WealthTier.ortaHalli,
+          bond: 70,
+        ),
+        playerAge: 33,
+        accepted: true,
+        noNewBenefit: false,
+        rng: Random(1),
+      );
+      expect(metin, isNotEmpty);
+      // Havuzun tamamında olumsuz biten bir "vakit geçirme" cümlesi yok.
+      for (int t = 0; t < 60; t++) {
+        final String m = interactionText(
+          kind: InteractionKind.vakitGecir,
+          person: Person(
+            id: 'es-1',
+            firstName: 'Elif',
+            lastName: 'Yılmaz',
+            gender: Gender.kadin,
+            relation: RelationType.es,
+            age: 32,
+            isAlive: true,
+            inPlayerHousehold: true,
+            employment: EmploymentStatus.calisiyor,
+            occupation: 'öğretmen',
+            wealth: WealthTier.ortaHalli,
+            bond: 70,
+          ),
+          playerAge: 33,
+          accepted: true,
+          noNewBenefit: false,
+          rng: Random(t),
+        );
+        expect(m, isNot(contains('sohbet kalmadı')));
+      }
     });
   });
 }

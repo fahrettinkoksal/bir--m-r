@@ -69,8 +69,10 @@ const List<String> _vakitGecirErgen = <String>[
 
 /// Eş: aynı hanede kurulan gündelik yakınlık.
 const List<String> _vakitGecirEs = <String>[
+  // Eski metin "sohbet kalmadı" diyordu; vakit geçirmenin **olumlu**
+  // sonucu olarak yazılan bir cümlede bu kendini yalanlıyordu.
   '{ad} ile akşam mutfakta kaldınız; bulaşık sonraya kaldı, sohbet '
-      'kalmadı.',
+      'uzadı.',
   '{ad} ile balkonda oturup sokağı seyrettiniz. Kimse telefona bakmadı.',
   '{ad} ile yıllar önce gittiğiniz yere bir kez daha gittiniz; orası '
       'değişmiş, siz de.',

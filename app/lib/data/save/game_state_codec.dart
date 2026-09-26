@@ -129,6 +129,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // D-147: her medya işinin en son yapıldığı yaş. Eski kayıtlarda
       // yoktur; boş açılır ve geriye dönük geçmiş uydurulmaz.
       'mediaJobLastAge': state.mediaJobLastAge,
+      // D-149: arkadaş haberlerinin tekrar sayacı. Eski kayıtta yoktur.
+      'friendNewsLastAge': state.friendNewsLastAge,
       'sponsorOffer': state.sponsorOffer == null
           ? null
           : _encodeSponsorOffer(state.sponsorOffer!),
@@ -974,6 +976,11 @@ GameState decodeGameState(Map<String, Object?> json) {
       json['mediaJobLastAge'] == null
           ? const <String, int>{}
           : _intMap(json, 'mediaJobLastAge'),
+    ),
+    friendNewsLastAge: Map<String, int>.unmodifiable(
+      json['friendNewsLastAge'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'friendNewsLastAge'),
     ),
     sponsorOffer: json['sponsorOffer'] == null
         ? null

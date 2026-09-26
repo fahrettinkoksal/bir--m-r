@@ -1387,6 +1387,38 @@ bu pakette yeni: gift_choice 15, used_vehicle_market 19,
 used_vehicle_widget 3, bail_prison 32, bail_prison_widget 5).
 **Gerçek Windows veya Android cihazda oynanmadı; APK derlenmedi.**
 
+## Paket W: Faho'nun 13 maddelik hata listesi (26 Eylül 2026, D-142 … D-150)
+
+Çoğu **gerçek hataydı**; her biri önce reproduce edildi, sonra düzeltildi
+ve bildirilen cümleyle bir teste bağlandı. D-142 … D-150 numaraları
+`DECISIONS.md`'ye **yazılmadı** (bkz. Paket V notu): onay Faho'da.
+
+| Bildirilen | Sebep | Durum |
+|---|---|---|
+| "lise bittikten sonra hiçbir üniversiteye başvuramıyorum" | Pencerenin kartı engeli `String?` tutup `== null` ile ölçüyordu; motor boş dize döndürdüğü için düğme hep kapalıydı | Düzeltildi (D-142); pencere kaldırılıp Okul ekranına taşındı |
+| "kendi işime para yatır düğmesi aktif olmuyor" | Metin kutusu yazılınca yeniden çizim tetiklenmiyordu | Düzeltildi |
+| "işine bak'a sonsuz tıklayabiliyorum" | Yıllık sayaç `lastTendedAge`e bakıp en çok 1 döndürüyordu, sınır 2 idi | Düzeltildi |
+| "Finger'de çok varlıklı tanıştığım kişi orta halli görünüyor" | Kişi kaydı kurulurken profilin serveti atılıp sabit `ortaHalli` yazılıyordu | Düzeltildi |
+| "her sayfada bildirim var" | Sayfa çevirme genel aktivite yolundan geçiyordu | Düzeltildi (D-145): bildirim yalnızca kitap bitince |
+| "doğduğumda evde olan hayvanın bakımı harçlığımdan çıkıyor" | Bakım gideri sahiplenme durumuna bakmıyordu | Düzeltildi (D-144) |
+| "evde hayvan vardı ama iletişim yoktu" | Menü yalnızca sahiplenme yaşından (7) itibaren açılıyordu | Düzeltildi (D-146); sayfa İlişkiler'e taşındı |
+| "aynı arkadaş bildirimleri çok fazla" | Bekleme süresi yoktu, her haber türünün tek metni vardı | Düzeltildi (D-149) |
+| "medya fırsatları kolay para, ünüm hiç düşmüyor" | 8 iş × yılda bir = bir yılda sekizi birden | Düzeltildi (D-147) |
+| "cümleler saçma kurulmuş" | Metin neyin verildiğini yazmıyordu | Düzeltildi (D-150), kural belgeye yazıldı |
+| "araç vergisi/sigortası çıksın" | Yoktu | Eklendi (D-148) |
+| "kendi işim varken işveren laf etsin" | Yoktu | Eklendi (D-143) |
+| "sponsorluk paylaşmadan para gelmesin" | Zaten böyleydi (D-104) | Doğrulandı, dokunulmadı |
+
+**Açık kalan sayılar:** Q-153 (araç gideri oranları, kaskonun isteğe bağlı
+olup olmayacağı, medya ve arkadaş haberi bekleme süreleri, aile hayvanının
+bakımının yetişkinlikte kime ait olduğu).
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2261 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+after_school_widget (5), business_widget (4), business_test +6,
+paket_w_test (25), pet_widget_test +2.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
