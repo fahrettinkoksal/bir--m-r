@@ -60,11 +60,28 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('menüde görünür ve sayfa açılır', (WidgetTester tester) async {
+  /// Sahiplenme menüsü D-135 ile gruplara ayrıldı; tür kartları grup
+  /// açılınca görünür. Bu yardımcı istenen grubu açar.
+  Future<void> grubuAc(WidgetTester tester, String grup) async {
+    final Finder baslik = find.byKey(Key('pet_group_$grup'));
+    await scrollToFinder(tester, baslik);
+    await tester.tap(baslik);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('menüde görünür ve gruplar listelenir',
+      (WidgetTester tester) async {
     await hayvanlariAc(tester, hayat());
     expect(find.text('Evcil hayvanlar'), findsWidgets);
-    expect(find.text('Kedi'), findsOneWidget);
-    expect(find.text('Köpek'), findsOneWidget);
+    // Gruplar görünür (D-135).
+    expect(find.text('Kediler'), findsOneWidget);
+    expect(find.text('Köpekler'), findsOneWidget);
+    expect(find.text('Kuşlar'), findsOneWidget);
+    expect(find.text('Egzotik'), findsOneWidget);
+    // Tür kartı grup açılana kadar görünmez.
+    expect(find.byKey(const Key('hayvan_sahiplen_kedi')), findsNothing);
+    await grubuAc(tester, 'kedi');
+    expect(find.byKey(const Key('hayvan_sahiplen_kedi')), findsOneWidget);
   });
 
   testWidgets('sahiplenince kayıt oluşur ve ücret bir kez alınır',
@@ -72,6 +89,7 @@ void main() {
     await hayvanlariAc(tester, hayat());
     final int once = controller.state!.player.wallet;
 
+    await grubuAc(tester, 'kedi');
     await scrollToFinder(
       tester,
       find.byKey(const Key('hayvan_ad_kedi')),

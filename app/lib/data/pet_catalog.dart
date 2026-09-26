@@ -23,8 +23,24 @@ library;
 import 'package:flutter/material.dart';
 
 /// Bir evcil hayvan türü.
+/// Sahiplenme menüsündeki hayvan grubu (D-135).
+enum PetGroup {
+  kedi('Kediler', 'Bağımsız, sessiz, kendi kuralları var'),
+  kopek('Köpekler', 'Bakım ister, karşılığını da verir'),
+  kus('Kuşlar', 'Ses, tüy ve açık pencereye dikkat'),
+  kemirgen('Kemirgenler ve tavşan', 'Küçük kafes, kısa ömür'),
+  suVeSurungen('Su ve sürüngen', 'Sessiz; bakımı düzen ister'),
+  egzotik('Egzotik', 'Özel izin ve ciddi sorumluluk');
+
+  const PetGroup(this.label, this.description);
+
+  final String label;
+  final String description;
+}
+
 enum PetSpecies {
   kedi(
+    group: PetGroup.kedi,
     id: 'kedi',
     label: 'Kedi',
     icon: Icons.pets_rounded,
@@ -37,6 +53,7 @@ enum PetSpecies {
     maxLifespan: 21,
   ),
   kopek(
+    group: PetGroup.kopek,
     id: 'köpek',
     label: 'Köpek',
     icon: Icons.pets_outlined,
@@ -49,6 +66,7 @@ enum PetSpecies {
     maxLifespan: 18,
   ),
   muhabbetKusu(
+    group: PetGroup.kus,
     id: 'muhabbet kuşu',
     label: 'Muhabbet kuşu',
     icon: Icons.flutter_dash_rounded,
@@ -61,6 +79,7 @@ enum PetSpecies {
     maxLifespan: 14,
   ),
   kaplumbaga(
+    group: PetGroup.suVeSurungen,
     id: 'kaplumbağa',
     label: 'Kaplumbağa',
     icon: Icons.eco_rounded,
@@ -73,6 +92,7 @@ enum PetSpecies {
     maxLifespan: 55,
   ),
   balik(
+    group: PetGroup.suVeSurungen,
     id: 'balık',
     label: 'Balık',
     icon: Icons.set_meal_rounded,
@@ -87,6 +107,7 @@ enum PetSpecies {
 
   // --- D-082 ile eklenen türler ----------------------------------------
   kanarya(
+    group: PetGroup.kus,
     id: 'kanarya',
     label: 'Kanarya',
     icon: Icons.music_note_rounded,
@@ -100,6 +121,7 @@ enum PetSpecies {
     escapeRisk: 0.10,
   ),
   papagan(
+    group: PetGroup.kus,
     id: 'papağan',
     label: 'Papağan',
     icon: Icons.record_voice_over_rounded,
@@ -114,6 +136,7 @@ enum PetSpecies {
     escapeRisk: 0.07,
   ),
   hamster(
+    group: PetGroup.kemirgen,
     id: 'hamster',
     label: 'Hamster',
     icon: Icons.cruelty_free_rounded,
@@ -127,6 +150,7 @@ enum PetSpecies {
     escapeRisk: 0.14,
   ),
   tavsan(
+    group: PetGroup.kemirgen,
     id: 'tavşan',
     label: 'Tavşan',
     icon: Icons.grass_rounded,
@@ -140,6 +164,7 @@ enum PetSpecies {
     escapeRisk: 0.09,
   ),
   timsah(
+    group: PetGroup.egzotik,
     id: 'timsah',
     label: 'Timsah',
     icon: Icons.warning_amber_rounded,
@@ -158,6 +183,7 @@ enum PetSpecies {
   );
 
   const PetSpecies({
+    required this.group,
     required this.id,
     required this.label,
     required this.icon,
@@ -171,6 +197,12 @@ enum PetSpecies {
     this.requiresPermit = false,
     this.warning,
   });
+
+  /// Sahiplenme menüsündeki grubu (D-135).
+  ///
+  /// Faho'nun isteği: menü kedi/köpek/kuş/egzotik diye ayrılsın. Tek
+  /// uzun liste yerine gruplanmış menü.
+  final PetGroup group;
 
   /// `Pet.species` alanında saklanan kimlik.
   ///
@@ -221,6 +253,16 @@ PetSpecies? petSpeciesById(String id) {
 }
 
 /// Sahiplenilebilen türler (v1: kedi ve köpek).
+/// Bu gruptaki sahiplenilebilir türler (D-135).
+List<PetSpecies> adoptableIn(PetGroup group) => adoptablePetSpecies
+    .where((PetSpecies s) => s.group == group)
+    .toList(growable: false);
+
+/// Sahiplenilebilir tür barındıran gruplar, menü sırasıyla.
+List<PetGroup> get adoptablePetGroups => PetGroup.values
+    .where((PetGroup g) => adoptableIn(g).isNotEmpty)
+    .toList(growable: false);
+
 List<PetSpecies> get adoptablePetSpecies => PetSpecies.values
     .where((PetSpecies s) => s.adoptable)
     .toList(growable: false);

@@ -88,11 +88,16 @@ class _PetsPageState extends State<PetsPage> {
           text: 'Sahiplen',
           accent: BirOmurAccents.yesil,
         ),
-        for (final PetSpecies tur in adoptablePetSpecies) ...<Widget>[
-          _AdoptCard(
-            species: tur,
-            availability: controller.petAdoptionAvailability(tur),
-            onAdopt: (String ad) {
+        const SizedBox(height: 4),
+        // Sahiplenme menüsü gruplara ayrıldı (D-135). Faho'nun isteği:
+        // tek uzun liste yerine kedi/köpek/kuş/egzotik ayrımı. Grup
+        // kapalı başlar; oyuncu ilgilendiği grubu açar.
+        for (final PetGroup grup in adoptablePetGroups) ...<Widget>[
+          _PetGroupTile(
+            group: grup,
+            species: adoptableIn(grup),
+            availabilityFor: controller.petAdoptionAvailability,
+            onAdopt: (PetSpecies tur, String ad) {
               final String? metin = controller.adoptPet(tur, ad);
               setState(() => _sonuc = metin);
             },
@@ -486,6 +491,74 @@ class _MemorialRow extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hayvan grubu satırı (D-135).
+///
+/// Katlanır bir başlık: grup açılınca içindeki türler gösterilir. Kapalı
+/// hâlde kaç tür olduğunu ve grubun kısa tanımını yazar.
+class _PetGroupTile extends StatelessWidget {
+  const _PetGroupTile({
+    required this.group,
+    required this.species,
+    required this.availabilityFor,
+    required this.onAdopt,
+  });
+
+  final PetGroup group;
+  final List<PetSpecies> species;
+  final InteractionAvailability Function(PetSpecies) availabilityFor;
+  final void Function(PetSpecies, String) onAdopt;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    // Grupta şu an gerçekten açık olan tür var mı? Varsa rozet gösterilir.
+    final int acik = species
+        .where((PetSpecies s) => availabilityFor(s).isAllowed)
+        .length;
+    return Container(
+      decoration: panelDecoration(context, radius: 18),
+      child: Theme(
+        // ExpansionTile'ın kendi çizgilerini kaldırıp panelin içine
+        // oturtuyoruz; menü sade kalsın.
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          key: Key('pet_group_${group.name}'),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+          leading: AccentIconTile(
+            icon: species.first.icon,
+            accent: BirOmurAccents.turuncu,
+            size: 36,
+          ),
+          title: Text(group.label, style: theme.textTheme.titleMedium),
+          subtitle: Text(
+            group.description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: Text(
+            acik == 0 ? '${species.length}' : '$acik/${species.length}',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          children: <Widget>[
+            for (final PetSpecies tur in species) ...<Widget>[
+              _AdoptCard(
+                species: tur,
+                availability: availabilityFor(tur),
+                onAdopt: (String ad) => onAdopt(tur, ad),
+              ),
+              const SizedBox(height: 10),
+            ],
           ],
         ),
       ),
