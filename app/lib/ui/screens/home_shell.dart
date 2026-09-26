@@ -13,7 +13,6 @@ import '../widgets/event_dialog.dart';
 import '../widgets/health_crisis_sheet.dart';
 import '../widgets/trial_sheet.dart';
 import '../widgets/notice_sheet.dart';
-import '../widgets/after_school_choice_sheet.dart';
 import '../widgets/track_choice_sheet.dart';
 import '../../domain/life/will.dart';
 import '../../domain/models/pending_notice.dart';
@@ -147,15 +146,28 @@ class _HomeShellState extends State<HomeShell> {
     if (_educationChoiceVisible) return;
     final GameController controller = GameScope.of(context);
     if (!controller.needsEducationChoice) return;
-    _educationChoiceVisible = true;
-    if (controller.needsTrackChoice) {
-      await TrackChoiceSheet.show(context);
-    } else {
-      await AfterSchoolChoiceSheet.show(context);
+    // Lise **sonrası** karar artık pencereyle sorulmuyor (D-142).
+    //
+    // Faho'nun isteği: "bu kendi kendine gelen pop up menü yerine direkt
+    // okul içerisine atabiliriz". Oyuncu Okul/Meslek ekranının başvuru
+    // sayfasına düşüyor; kural aynı kalıyor, karar verilmeden yaş
+    // alınamıyor (D-111). Lise **alanı** seçimi penceresi duruyor: o
+    // karar okul yılının içinde veriliyor ve gidilecek bir sayfası yok.
+    if (!controller.needsTrackChoice) {
+      setState(() {
+        _selectedTab = TabIds.okulMeslek;
+        _afterSchoolPending = true;
+      });
+      return;
     }
+    _educationChoiceVisible = true;
+    await TrackChoiceSheet.show(context);
     if (!mounted) return;
     setState(() => _educationChoiceVisible = false);
   }
+
+  /// Okul/Meslek ekranı açılırken doğrudan başvuru sayfasına gidilsin mi?
+  bool _afterSchoolPending = false;
 
   void _ageUp() {
     final GameController controller = GameScope.of(context);
@@ -272,7 +284,12 @@ class _HomeShellState extends State<HomeShell> {
   Widget _body() {
     switch (_selectedTab) {
       case TabIds.okulMeslek:
-        return SchoolCareerScreen(onBack: _goHome);
+        final bool acilsin = _afterSchoolPending;
+        _afterSchoolPending = false;
+        return SchoolCareerScreen(
+          onBack: _goHome,
+          openAfterSchool: acilsin,
+        );
       case TabIds.varliklar:
         return AssetsScreen(onBack: _goHome);
       case TabIds.iliskiler:

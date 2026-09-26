@@ -90,6 +90,7 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
           ],
           const SizedBox(height: 4),
           OutlinedButton(
+            key: const Key('after_school_skip'),
             onPressed: () {
               final String? metin = controller.skipUniversity()?.text;
               setState(() => _sonuc = metin);
@@ -106,6 +107,7 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
           // Uygun bölüm yokken de bu kapı açık kalmalı: karar verilmeden
           // yaş alınamadığı için (D-111) kapalı olsaydı oyuncu kilitlenirdi.
           OutlinedButton(
+            key: const Key('after_school_skip'),
             onPressed: () {
               final String? metin = controller.skipUniversity()?.text;
               setState(() => _sonuc = metin);
@@ -274,6 +276,7 @@ class _ProgramCard extends StatelessWidget {
                   ),
                 ),
                 FilledButton.tonal(
+                  key: Key('after_school_apply_${program.id}'),
                   onPressed: blockReason.isEmpty ? onApply : null,
                   child: Text(blockReason.isEmpty ? 'Başvur' : 'Uygun değil'),
                 ),

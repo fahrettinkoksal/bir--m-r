@@ -32,9 +32,20 @@ import '../../../text/turkish_text.dart';
 /// okulda değilken **Meslek**. İçerik küçük panellerle verilir; olmayan
 /// sistem için sahte düğme konmaz.
 class SchoolCareerScreen extends StatelessWidget {
-  const SchoolCareerScreen({super.key, required this.onBack});
+  const SchoolCareerScreen({
+    super.key,
+    required this.onBack,
+    this.openAfterSchool = false,
+  });
 
   final VoidCallback onBack;
+
+  /// Açılır açılmaz **Mezuniyet sonrası** sayfasına git (D-142).
+  ///
+  /// Faho'nun isteği: "bu kendi kendine gelen pop up menü yerine direkt
+  /// okul içerisine atabiliriz". Lise bitince artık pencere açılmıyor;
+  /// oyuncu Okul/Meslek ekranının başvuru sayfasına düşüyor.
+  final bool openAfterSchool;
 
   /// Menünün o anki başlığı; alt gezinme de bu adı kullanır.
   static String labelFor(GameState state) =>
@@ -48,7 +59,11 @@ class SchoolCareerScreen extends StatelessWidget {
     if (egitim.isStudent) {
       return _SchoolView(state: state, onBack: onBack);
     }
-    return _CareerView(state: state, onBack: onBack);
+    return _CareerView(
+      state: state,
+      onBack: onBack,
+      openAfterSchool: openAfterSchool,
+    );
   }
 }
 
@@ -351,10 +366,15 @@ enum _CareerPage {
 }
 
 class _CareerView extends StatefulWidget {
-  const _CareerView({required this.state, required this.onBack});
+  const _CareerView({
+    required this.state,
+    required this.onBack,
+    this.openAfterSchool = false,
+  });
 
   final GameState state;
   final VoidCallback onBack;
+  final bool openAfterSchool;
 
   @override
   State<_CareerView> createState() => _CareerViewState();
@@ -363,6 +383,17 @@ class _CareerView extends StatefulWidget {
 class _CareerViewState extends State<_CareerView> {
   _CareerPage _page = _CareerPage.kok;
   String? _sonuc;
+
+  @override
+  void initState() {
+    super.initState();
+    // Lise bitti ve karar bekleniyorsa doğrudan başvuru sayfası açılır
+    // (D-142); oyuncu menüde aramak zorunda kalmaz.
+    if (widget.openAfterSchool &&
+        widget.state.education.awaitingAfterSchoolChoice) {
+      _page = _CareerPage.mezuniyetSonrasi;
+    }
+  }
 
   void _go(_CareerPage page) => setState(() {
     _page = page;
