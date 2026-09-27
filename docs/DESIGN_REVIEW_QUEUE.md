@@ -3832,6 +3832,13 @@ Varlıklar altına **Yatırımlar** geldi. Beş tür: Vadeli Hesap, Altın, Döv
 
 Rejim dağılımı (10.000 yıl): durgun %26,2 · normal %46,1 · güçlü %19,6 · kriz %8,0. Kriz yıllarında hisse %83 ihtimalle düşüyor ve %95 ihtimalle altın hisseden iyi durumda — varlıklar bağımsız zar atmıyor.
 
+> ⚠️ **BASİT SİMÜLASYON ÖLÇÜMÜ — gerçek oyuncu davranışını temsil etmiyor.**
+> Bu sayılar sürekli "Yaş Al"a basan, olaylarda rastgele seçim yapan,
+> kariyer geliştirmeyen ve parasını yönetmeyen bir botla alındı. Tarihsel
+> kayıt olarak duruyor; **ürün kararı için kullanılmaz.** Gerçek oyuncu
+> davranışıyla ölçülen güncel sayılar `app/test/product_simulation_test.dart`
+> içinde ve PROJECT_STATUS'ın "Test stratejisi revizyonu" bölümünde.
+
 **Gerçek bulgu: yatırım, parayı geçim giderinden koruyor.** 100 hayat iki kez ölçüldü. Hiç yatırım yapmayan hayatın ölüm anındaki net varlığı medyan **85.000 ₺**; 18'inden sonra her yıl cüzdanının beşte birini fon ve hisseye koyan aynı 100 hayatta medyan **2.057.000 ₺**. Fark 24 kat ama bunun büyük kısmı getiri değil: yatırılan anapara medyan 106.000 ₺, son portföy 1.358.000 ₺ (bir ömür boyunca bileşik etki, 13 kat). Geri kalanı **paranın nerede durduğu**: cüzdanda duran para her yıl geçim giderine gidiyor, portföyde duran para gitmiyor. En yüksek net varlık 110 milyon ₺ (yatırımsızda 14,9 milyon); hiçbir hayat milyarder bitmiyor ve kimse birkaç yılda zengin olmuyor.
 
 **Boşanmada portföy paylaşıma giriyor.** Evlilik içinde açılan pozisyonlar edinilmiş mal sayılıyor (D-075'teki eşya kuralının aynısı), evlilik öncesi pozisyon kişisel mal. Nakit payı cüzdan + evlilik içi portföy üzerinden hesaplanıyor; cüzdan yetmezse eksik kısım **normal satış muhasebesinden geçen** zorunlu satışla, gerekirse vadeli bozularak toplanıyor. Cüzdan eksiye düşmüyor. **Bilinen sınır:** evlilikten önce açılmış bir pozisyona evlilik içinde para eklenmişse o ekleme de kişisel sayılıyor, çünkü pozisyon tek kayıt tutuyor ve her alımın yaşı ayrı saklanmıyor.
@@ -3888,6 +3895,13 @@ Ev artık "3 milyonluk bir mülk" değil: kiracısı, kirası, defteri ve bakım
 | **Net kira getirisi** | **%3,70** |
 
 Mortgage'lı ev: 3.200.000 ₺ değerinde daire, yıllık kira 144.000 ₺, yıllık taksit 1.016.000 ₺, bakım 10.000 ₺ → **net nakit akışı −881.000 ₺**. Krediyle ev alıp kiraya vermek teknik olarak mümkün ama kira taksidi karşılamıyor; "bedava ev" exploit'i yok.
+
+> ⚠️ **BASİT SİMÜLASYON ÖLÇÜMÜ — gerçek oyuncu davranışını temsil etmiyor.**
+> Bu sayılar sürekli "Yaş Al"a basan, olaylarda rastgele seçim yapan,
+> kariyer geliştirmeyen ve parasını yönetmeyen bir botla alındı. Tarihsel
+> kayıt olarak duruyor; **ürün kararı için kullanılmaz.** Gerçek oyuncu
+> davranışıyla ölçülen güncel sayılar `app/test/product_simulation_test.dart`
+> içinde ve PROJECT_STATUS'ın "Test stratejisi revizyonu" bölümünde.
 
 100 hayat, üç senaryo (hiç yatırım evi almayan / bir ev alan / olabildiğince ev alan):
 

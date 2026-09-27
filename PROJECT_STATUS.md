@@ -1696,7 +1696,9 @@ kalma süresi 4,6 yıl · kiranın hiç gelmediği yıl %4,1 · belirgin hasar
 %5,3 · brüt getiri %4,06 · **net getiri %3,70**. Mortgage'lı ev:
 3,2 milyonluk daire, yıllık kira 144 bin, taksit 1.016 bin → **net nakit
 akışı −881 bin ₺**; "bedava ev" exploit'i yok. 100 hayat × 3 senaryo:
-94 hayat hiç konut sahibi olmadan ölüyor, medyan üç senaryoda da aynı;
+94 hayat hiç konut sahibi olmadan ölüyor, medyan üç senaryoda da aynı
+(⚠️ **basit simülasyon** ölçümü; gerçek oyuncu davranışıyla ev sahipliği
+%40,3 çıkıyor — aşağıdaki "Test stratejisi revizyonu" bölümü);
 ev sahibi olabilen 6 hayatta çok ev almak medyan serveti 10,0M → 11,9M
 yapıyor. **4+ ev ile ölen karakter hiç çıkmadı** — gayrimenkul maaşlı
 çalışmayı anlamsızlaştırmıyor, çoğu oyuncunun eli yetişmiyor.
@@ -1740,6 +1742,115 @@ bu paket onu sessizce kapatmak için kullanılmadı.
 
 ### DECISIONS.md'ye dokunulmadı
 D-163 de yalnızca kodda ve bu dosyada duruyor.
+
+## Test stratejisi revizyonu — gerçek oyuncu davranışı (27 Eylül 2026)
+
+**Sorun:** ürün metrikleri basit bir botla ölçülüyordu. O bot sürekli
+"Yaş Al"a basıyor, olaylarda rastgele/ilk seçeneği seçiyor, üniversiteyi
+varsayılan olarak atlıyor, kariyer geliştirmiyor, parasını yönetmiyor ve
+yatırım/girişim/konut/sosyal sistemlerini oyuncu gibi kullanmıyordu.
+Regresyon avlamak için yeterli, **"kaç kişi ev alabiliyor"** sorusu için
+değil.
+
+**Gelen:** `app/test/support/player_bot.dart` — 10 oyuncu arketipi
+(kariyer, yatırımcı, girişimci, aile, sosyal, eğitim, rahat, riskli,
+spor, rastgele-geçerli). Her arketip hedef ve hafızayla oynuyor:
+üniversite kararını hayat başında bir kez veriyor ve lise sonrası
+vazgeçmiyor, yaşam rezervi ayırıp üstünü arketipe göre yatırıma/ev
+peşinatına/iş sermayesine dağıtıyor, zam ve terfi istiyor, maaşı düşükse
+iş değiştiriyor, partnerine özel zaman ayırıp evleniyor, çocuk yapıyor,
+boşanabiliyor, hobi ve dövüş sanatını hayat boyu aynısını sürdürüyor.
+
+**Kurallar:** `debugSetState` ile para/stat/ilişki/ev/iş **verilmiyor**;
+her şey `GameController`'ın gerçek public aksiyonlarından geçiyor.
+Olaylarda `choices.first` **yasak** — seçim para, sağlık, ilişki,
+kariyer, risk ve arketip üzerinden puanlanıyor, üstüne %15-30 insani
+kayma payı var. Hafıza test tarafında; `GameState`'e alan eklenmedi.
+
+**İki test türü ayrıldı:** unit/regresyon testleri bir sistemi doğrular
+ve ilk açık seçeneği kullanabilir; **ürün simülasyonu**
+(`product_simulation_test.dart`) gerçek oyuncuya benzer ve yalnızca ürün
+dengesi tartışması için kullanılır. Raporları karıştırılmaz.
+
+### Ölçüm: 1.500 tam hayat (10 arketip × 100 + 500 rastgele-geçerli)
+
+Hepsi doğumdan ölüme; **1500/1500 hayat ölümle bitti, takılan sıfır**.
+
+| Alan | Sonuç |
+|---|---|
+| Ortalama ölüm yaşı | 74,1 (medyan 77) |
+| Üniversiteye giden / mezun | %48,5 / %48,4 |
+| Bölüm çeşitliliği | 20/20 |
+| Çalışan / emekli | %98,9 / %85,6 |
+| Görülen meslek | 50/55 |
+| Ortalama farklı iş / iş değişimi | 2,52 / 1,56 |
+| Ölüm anı net servet (medyan) | 134,4M ₺ |
+| Yatırım yapan | %92,1 |
+| **Ev sahibi** | **%40,3** |
+| Yatırım evi / kiraya veren | %28,3 / %28,3 |
+| İş sahibi | %23,5 |
+| Evlenen / boşanan / tekrar evlenen | %22,0 / %6,4 / **%0,0** |
+| Çocuklu / ortalama çocuk / torun gören | %33,4 / 1,27 / %30,1 |
+| Arkadaşı olan / küslük yaşayan | %51,4 / %43,8 |
+| Sosyal medya açan | %43,3 |
+| Kronik / check-up / spor | %74,2 / %97,4 / %99,4 |
+| Sabıkalı / hapis yatan | %18,2 / %6,9 |
+| **Olay havuzundan görülen** | **349/361 (%96,7)** |
+| Hobi / dövüş sanatı / işletme türü | 11/12 · 6/6 · 9/13 |
+
+**Arketip bazlı (medyan servet):** yatırımcı 231M · girişimci 178M ·
+rastgele 163M · riskli 152M · kariyer 143M · eğitim 123M · spor 113M ·
+rahat 111M · aile 102M · sosyal 25M.
+
+### Simülasyon sırasında bulunan gerçek hatalar (hepsi bot tarafında)
+
+1. **Yıl hiç bitmiyordu.** Eylemler bildirim üretiyor, ana döngü
+   bildirimi kapatıp başa dönüyor ve aynı yıl eylemleri yeniden
+   yapıyordu. Hayatların %25,6'sı 6000 turluk güvenlik sınırına çarpıyor
+   ve ölçüme "ölmedi" diye giriyordu. Eylemler artık yaş başına bir kez.
+2. **Bebeğe kendi adını verme sonsuz döngüsü.** `ChildNaming.rename`
+   aynı adı değişiklik saymıyor, isim penceresi kapanmıyor ve bot her
+   turda başa dönüyordu.
+3. **Bekleyen düğün kapanmıyordu.** Doğru akış `holdWedding`; bot
+   `marry` çağırıyordu ve iki hayat sonsuz döngüye girdi.
+4. **Tek yılda üst üste konut kredisi.** Ev listesi boyunca her ev için
+   ayrı kredi çekiliyordu; serveti şişiriyordu.
+5. **Bot oyundan daha katıydı:** çocuk için evlilik şartı koyuyordu, oysa
+   oyun sevgiliyle de izin veriyor (D-047). Düzeltilince "çocuklu" oranı
+   %5,4 → %33,4 çıktı.
+6. **Yanlış aktivite kimliği** (`check_up` yerine `genel_kontrol`):
+   check-up oranı %0,0 ölçülüyordu, gerçekte %97,4.
+7. **Bot hiç boşanmıyordu** → "boşanan %0,0" metriği anlamsızdı.
+8. **Metrik tanımı hatası:** "mahkemeye çıkan" açılmış her dosyayı
+   sayıyordu (%51); karara bağlanmış dosya ölçülünce %26,1.
+
+### Dikkat çeken sonuçlar (karar Faho + ChatGPT'de)
+
+* **Servet medyanı 134M ₺.** Sebebi bulundu ve bot hatası değil: yatırım
+  getirisi bir ömür boyunca bileşik büyüyor ve oyunda anlamlı bir servet
+  gideri yok. Bot portföyünü hiç harcamıyor; gerçek oyuncu harcar ama
+  oyun bunu zorunlu kılmıyor.
+* **Tekrar evlenen %0,0.** Boşanma sonrası yeni partner + yakınlık 45
+  eşiği pratikte ulaşılamıyor.
+* **Evlenen %22** ama partneri olan %94,9: evlilik dar bir kapı.
+* **Sosyal arketip en yoksul** (25M) — yatırım yapmayan profil.
+* **Hiç girilmeyen 5 meslek:** kurye, doktor, eczacı, yazar, yz_kurye.
+* **Hiç görülmeyen 12 olay**, çoğu suç zinciri devamı ve araç olayları.
+* **İşletme türü 9/13**: dört tür hiç kurulmuyor.
+
+**Hiçbir denge değiştirilmedi.** Bu turda yalnızca test altyapısı
+düzeltildi; oyunun sayılarına dokunulmadı.
+
+### UI smoke life
+
+10 uzun hayat **arayüzden** oynanıyor (`ui_smoke_life_test.dart`):
+menüler açılıyor, sayfa kaydırılıyor, düğmeye basılıyor, pencere
+seçiliyor, sekmeler geziliyor. Amaç "motor çalışıyor ama buton
+ulaşılamıyor" hatasını yakalamak. 1.000 hayatın tamamını arayüzden
+oynamak çok yavaş olurdu.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.

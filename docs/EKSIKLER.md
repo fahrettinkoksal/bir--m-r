@@ -167,8 +167,13 @@ sınırlı değer değişimi ve mülk başına kârlılık defteri.
 
 **Ölçülen:** doluluk %97,5, kiracının ortalama kalma süresi 4,6 yıl, net
 kira getirisi %3,70. Mortgage'lı evde net nakit akışı **eksi** ("bedava
-ev" yok). 100 hayatın 94'ü hiç konut sahibi olmadan ölüyor: **normal
-maaşlı hayat yatırım evine ulaşamıyor.**
+ev" yok).
+
+> ⚠️ "100 hayatın 94'ü hiç konut sahibi olmadan ölüyor" sonucu **basit
+> simülasyonla** alınmıştı (sürekli Yaş Al'a basan bot). Gerçek oyuncu
+> davranışıyla ölçüldüğünde (`product_simulation_test.dart`, 1.500 hayat)
+> **ev sahipliği %40,3**, yatırım evi %28,3 çıkıyor. Eski sayı tarihsel
+> kayıt olarak duruyor, ürün kararı için kullanılmaz.
 
 **V1'de bilerek yok:** günlük kiralama, otel, ticari plaza, arsa/imar,
 inşaat şirketi, onlarca kiracılı apartman yönetimi, kira hukuku
@@ -375,6 +380,17 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   bilgisinin tek kaynağı sözleşme oldu; bayrak yalnızca eski kayıtları
   açmak için duruyor ve yüklemede sözleşmeye çevriliyor. Kaydı bozmamak
   için silinmedi, ama yeni kod okumamalı. Bir sürüm sonra kaldırılabilir.
+- **Ürün metrikleri artık yalnızca `PlayerBot` ile ölçülür.** Basit
+  "sürekli Yaş Al" botuyla alınmış eski sayılar (ev sahipliği, servet,
+  yatırım, kariyer erişimi) belgelerde **etiketli** duruyor ve ürün
+  kararı için kullanılmaz. Unit/regresyon testleri ilk açık seçeneği
+  kullanmaya devam edebilir; ikisinin raporu karıştırılmaz.
+- **Hiç girilmeyen 5 meslek** (kurye, doktor, eczacı, yazar, yz_kurye) ve
+  **hiç kurulmayan 4 işletme türü** var. 1.500 hayatta bir kez bile
+  görünmüyorlar; sebebi araştırılmadı (ölçüm turu denge değiştirmedi).
+- **Hiç görülmeyen 12 olay** var; çoğu suç zincirinin devam halkaları ve
+  araç olayları. Zincir başları görülüyor, devamı görülmüyor.
+- **Tekrar evlenme pratikte ulaşılamıyor** (1.500 hayatta %0,0).
 - **Olay havuzuna içerik eklemek tohuma çakılı testleri kaydırıyor.**
   `EventEngine._pick`, havuzdaki **her** olay için kişiyi çözüyor
   (`_resolvePerson`, çekiliş tüketiyor) ve yaş kapısına ancak ondan
