@@ -61,6 +61,7 @@ import '../domain/casino/blackjack.dart';
 import '../data/health_crisis_catalog.dart';
 import '../data/tour_catalog.dart';
 import '../domain/economy/housing.dart';
+import '../domain/economy/rental_engine.dart';
 import '../domain/economy/property_market.dart';
 import '../domain/economy/used_vehicle_market.dart';
 import '../domain/education/school_transfer.dart';
@@ -103,6 +104,7 @@ import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
 import '../domain/models/interaction.dart';
 import '../domain/models/owned_item.dart';
+import '../domain/models/rental.dart';
 import '../domain/models/pending_interview.dart';
 import '../domain/models/person.dart';
 import '../data/pet_catalog.dart';
@@ -2307,11 +2309,121 @@ class GameController extends ChangeNotifier {
   HousingOutcome? moveBackToFamily() =>
       _runHousing((GameState current) => _housing.moveBackToFamily(current));
 
-  HousingOutcome? rentOutHome(OwnedItem home) =>
-      _runHousing((GameState current) => _housing.rentOut(current, home));
+  // -------------------------------------------------------------------
+  // Kiralama (D-163)
+  // -------------------------------------------------------------------
 
-  HousingOutcome? endLease(OwnedItem home) =>
-      _runHousing((GameState current) => _housing.endLease(current, home));
+  /// Bu konutun kullanım durumu.
+  PropertyUse propertyUse(OwnedItem home) => _state == null
+      ? PropertyUse.bos
+      : RentalEngine.useOf(_state!, home);
+
+  /// Bu konutun bugünkü tahmini değeri (₺).
+  int propertyValue(OwnedItem home) =>
+      _state == null ? 0 : RentalEngine.valueOf(_state!, home);
+
+  /// Tahmini piyasa kirası bandı (yıllık ₺).
+  ({int low, int high}) rentBand(OwnedItem home) => _state == null
+      ? (low: 0, high: 0)
+      : RentalEngine.rentBand(_state!, home);
+
+  /// Bu konutun piyasa yıllık kirası (₺).
+  int marketRent(OwnedItem home) =>
+      _state == null ? 0 : RentalEngine.marketRent(_state!, home);
+
+  /// Bu evin yürüyen sözleşmesi (yoksa null).
+  Lease? leaseOf(OwnedItem home) => _state?.leaseOf(home.id);
+
+  /// Bu evin defteri.
+  PropertyLedger ledgerOf(OwnedItem home) =>
+      _state?.ledgerOf(home.id) ?? PropertyLedger(propertyItemId: home.id);
+
+  /// Bu kirayla başvuran adaylar. **Deterministik**: ekranı kapatıp açmak
+  /// yeni aday üretmez.
+  List<TenantRecord> tenantCandidatesFor(OwnedItem home, int askingRent) =>
+      _state == null
+          ? const <TenantRecord>[]
+          : RentalEngine.candidates(
+              state: _state!,
+              home: home,
+              askingRent: askingRent,
+            );
+
+  /// Bu kirayla kiraya vermeye engel; yoksa boş metin.
+  String rentOutAskBlockReason(OwnedItem home, int askingRent) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : RentalEngine.rentOutBlockReason(
+              state: _state!,
+              home: home,
+              askingRent: askingRent,
+            );
+
+  /// Seçilen adayla sözleşme imzalar.
+  RentalOutcome? signLease({
+    required OwnedItem home,
+    required TenantRecord tenant,
+    required int yearlyRent,
+  }) =>
+      _runRental(
+        (GameState current) => RentalEngine.signLease(
+          state: current,
+          home: home,
+          tenant: tenant,
+          yearlyRent: yearlyRent,
+        ),
+      );
+
+  /// Sözleşmeyi sonlandırır.
+  RentalOutcome? endLease(OwnedItem home) => _runRental(
+        (GameState current) =>
+            RentalEngine.endLease(state: current, propertyItemId: home.id),
+      );
+
+  /// Sözleşmeyi yeni kirayla yeniler.
+  RentalOutcome? renewLease(OwnedItem home, int newYearlyRent) => _runRental(
+        (GameState current) => RentalEngine.renewLease(
+          state: current,
+          propertyItemId: home.id,
+          newYearlyRent: newYearlyRent,
+        ),
+      );
+
+  /// Bakım ya da tadilatın maliyeti (₺).
+  int upkeepCost(OwnedItem home, {required bool major}) => _state == null
+      ? 0
+      : RentalEngine.upkeepCost(_state!, home, major: major);
+
+  /// Bakım/tadilat engeli; yoksa boş metin.
+  String upkeepBlockReason(OwnedItem home, {required bool major}) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : RentalEngine.upkeepBlockReason(
+              state: _state!,
+              home: home,
+              major: major,
+            );
+
+  /// Bakım (ucuz) ya da tadilat (pahalı) yapar.
+  RentalOutcome? upkeepProperty(OwnedItem home, {required bool major}) =>
+      _runRental(
+        (GameState current) => RentalEngine.upkeep(
+          state: current,
+          home: home,
+          major: major,
+        ),
+      );
+
+  RentalOutcome? _runRental(RentalResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final RentalResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
 
   HousingOutcome? _runHousing(HousingResult Function(GameState) islem) {
     final GameState? current = _state;

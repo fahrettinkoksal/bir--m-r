@@ -377,6 +377,8 @@ class _NoticeSheetState extends State<NoticeSheet> {
         return Icons.gavel_rounded;
       case NoticeKind.arkadaslik:
         return Icons.people_alt_rounded;
+      case NoticeKind.konut:
+        return Icons.home_work_outlined;
       case NoticeKind.kendiIsi:
         return Icons.storefront_rounded;
       case NoticeKind.kariyer:

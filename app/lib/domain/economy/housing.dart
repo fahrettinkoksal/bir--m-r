@@ -2,6 +2,7 @@ import '../../data/city_neighbours.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
+import '../models/rental.dart';
 import '../models/person.dart';
 import '../../text/turkish_text.dart';
 
@@ -91,20 +92,25 @@ class Housing {
     return ev?.location ?? state.player.currentCity;
   }
 
-  /// Kiraya verilebilecek konutlar: sahip olunan, oturulmayan evler.
+  /// Kiraya verilebilecek konutlar: sahip olunan, oturulmayan, kiracısı
+  /// olmayan evler.
+  ///
+  /// "Kirada mı" sorusunun cevabı **sözleşmeden** gelir (D-163), eşyanın
+  /// üstündeki eski `rentedOut` bayrağından değil.
   static List<OwnedItem> rentableHomes(GameState state) => state.items
       .where((OwnedItem i) =>
-          i.isProperty && !i.rentedOut && i.id != state.residenceItemId)
+          i.isProperty &&
+          state.leaseOf(i.id) == null &&
+          i.id != state.residenceItemId)
       .toList(growable: false);
 
-  /// Bir konutun yıllık kira geliri.
-  static int yearlyRentOf(OwnedItem home) =>
-      (home.type.baseValue * prototypeOnlyYearlyRentYield).round();
-
-  /// Kiraya verilmiş konutların toplam yıllık kira geliri.
-  static int yearlyRentIncome(GameState state) => state.items
-      .where((OwnedItem i) => i.isProperty && i.rentedOut)
-      .fold(0, (int toplam, OwnedItem i) => toplam + yearlyRentOf(i));
+  /// Kiraya verilmiş konutların toplam yıllık kira geliri (₺).
+  ///
+  /// Sözleşmede **gerçekten yazılı** kira toplanır. Eskiden bu sayı
+  /// katalog değerinden türetiliyordu ve oyuncunun belirlediği kirayı ya da
+  /// şehri hiç görmüyordu.
+  static int yearlyRentIncome(GameState state) => state.leases
+      .fold<int>(0, (int toplam, Lease l) => toplam + l.yearlyRent);
 
   // =====================================================================
   // Taşınma
@@ -118,7 +124,7 @@ class Housing {
       return '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.';
     }
     if (state.residenceItemId == home.id) return 'Zaten burada yaşıyorsun.';
-    if (home.rentedOut) {
+    if (state.leaseOf(home.id) != null) {
       return 'Bu ev kirada; önce kiracıyı çıkarman gerekiyor.';
     }
     if (state.player.wallet < prototypeOnlyMoveCost) {
@@ -246,42 +252,19 @@ class Housing {
   // Kiraya verme
   // =====================================================================
 
+  /// Kiraya vermeye engel; engel yoksa boş metin.
+  ///
+  /// Kiraya verme akışının kendisi D-163 ile `RentalEngine`'e taşındı:
+  /// kira bedeli belirlenir, adaylar gelir, oyuncu kiracıyı seçer. Burada
+  /// yalnızca **kapı** duruyor, çünkü taşınma ekranı da aynı kapıya bakar.
   String rentOutBlockReason(GameState state, OwnedItem home) {
     if (!home.isProperty) return 'Burası bir konut değil.';
     if (state.itemById(home.id) == null) return 'Bu mülk artık sende değil.';
-    if (home.rentedOut) return 'Bu ev zaten kirada.';
+    if (state.leaseOf(home.id) != null) return 'Bu evde kiracı var.';
     if (state.residenceItemId == home.id) {
       return 'Oturduğun evi kiraya veremezsin; önce taşınman gerekir.';
     }
     return '';
-  }
-
-  /// Konutu kiraya verir.
-  HousingResult rentOut(GameState state, OwnedItem home) {
-    final String engel = rentOutBlockReason(state, home);
-    if (engel.isNotEmpty) return _blocked(state, engel);
-
-    final int kira = yearlyRentOf(home);
-    final String metin = '${home.name} kiraya verildi; yılda ${trMoney(kira)} kira '
-        'geliri bekleniyor.';
-    final GameState next =
-        state.updateItem(home.copyWith(rentedOut: true));
-    return HousingResult(
-      state: _log(next, metin),
-      outcome: HousingOutcome(applied: true, text: metin),
-    );
-  }
-
-  /// Kiracıyı çıkarır.
-  HousingResult endLease(GameState state, OwnedItem home) {
-    if (!home.rentedOut) return _blocked(state, 'Bu ev kirada değil.');
-    final String metin = '${home.name} için kira sözleşmesi sona erdi.';
-    final GameState next =
-        state.updateItem(home.copyWith(rentedOut: false));
-    return HousingResult(
-      state: _log(next, metin),
-      outcome: HousingOutcome(applied: true, text: metin),
-    );
   }
 
   HousingResult _blocked(GameState state, String reason) => HousingResult(

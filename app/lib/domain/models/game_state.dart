@@ -23,6 +23,7 @@ import 'game_event.dart';
 import 'game_settings.dart';
 import 'gift_record.dart';
 import 'owned_item.dart';
+import 'rental.dart';
 import 'life_log.dart';
 import 'loan.dart';
 import 'pending_race.dart';
@@ -95,6 +96,9 @@ class GameState {
     this.termDeposits = const <TermDeposit>[],
     this.investmentHistory = const <InvestmentRecord>[],
     this.market = const MarketState(),
+    this.leases = const <Lease>[],
+    this.propertyLedgers = const <PropertyLedger>[],
+    this.landlord,
     this.healthHistory = const <HealthHistoryEntry>[],
     this.lotteryTickets = const <LotteryTicket>[],
     this.fingerDeck = const <FingerProfile>[],
@@ -314,9 +318,26 @@ class GameState {
   }
 
   /// Bir eşya örneğini envanterden çıkarır (satış, tüketim).
+  /// Bir eşya örneğini envanterden çıkarır.
+  ///
+  /// **Kiralama kayıtları da temizlenir (D-163).** Gerçek bir exploit
+  /// buradaydı: kiradaki ev satılınca sözleşme listede kalıyor ve kira
+  /// gelmeye devam ediyordu — elinde olmayan evden gelir. Tek çıkış
+  /// noktası burası olduğu için temizlik burada yapılıyor; satış, boşanma
+  /// ve başka bütün yollar aynı yerden geçiyor.
   GameState removeItem(String itemId) => copyWith(
         items: List<OwnedItem>.unmodifiable(
           items.where((OwnedItem i) => i.id != itemId).toList(growable: false),
+        ),
+        leases: List<Lease>.unmodifiable(
+          leases
+              .where((Lease l) => l.propertyItemId != itemId)
+              .toList(growable: false),
+        ),
+        propertyLedgers: List<PropertyLedger>.unmodifiable(
+          propertyLedgers
+              .where((PropertyLedger l) => l.propertyItemId != itemId)
+              .toList(growable: false),
         ),
       );
 
@@ -421,6 +442,39 @@ class GameState {
 
   /// D-162: piyasanın kalıcı durumu (rejim, gizli parametreler, endeks).
   final MarketState market;
+
+  /// Yürüyen kira sözleşmeleri (D-163).
+  ///
+  /// Bir mülkte en fazla bir sözleşme olur. **"Bu ev kirada" bilgisinin
+  /// tek kaynağı budur**; `OwnedItem.rentedOut` yalnızca eski kayıtları
+  /// açmak için duruyor ve yükleme sırasında sözleşmeye çevriliyor.
+  final List<Lease> leases;
+
+  /// Mülk başına ömür boyu defter: kira, bakım, boş yıl, değer.
+  final List<PropertyLedger> propertyLedgers;
+
+  /// Oyuncu kiradaysa ev sahibi kaydı. Person değil, hafif kayıt.
+  final LandlordRecord? landlord;
+
+  /// Bu mülkün yürüyen sözleşmesi (yoksa null).
+  Lease? leaseOf(String itemId) {
+    for (final Lease l in leases) {
+      if (l.propertyItemId == itemId) return l;
+    }
+    return null;
+  }
+
+  /// Bu mülkün defteri (yoksa boş bir defter).
+  PropertyLedger ledgerOf(String itemId) {
+    for (final PropertyLedger l in propertyLedgers) {
+      if (l.propertyItemId == itemId) return l;
+    }
+    return PropertyLedger(propertyItemId: itemId);
+  }
+
+  /// Sahip olunan konutlar.
+  List<OwnedItem> get properties =>
+      items.where((OwnedItem i) => i.isProperty).toList(growable: false);
 
   /// Portföyün bugünkü toplam değeri (vadeli anaparalar dahil).
   ///
@@ -1084,6 +1138,9 @@ class GameState {
     int? grief,
     int? hardshipYears,
     GameSettings? settings,
+    List<Lease>? leases,
+    List<PropertyLedger>? propertyLedgers,
+    Object? landlord = _unsetEvent,
     Object? residenceItemId = _unsetEvent,
     bool? movedOut,
     Object? pendingCrisis = _unsetEvent,
@@ -1212,6 +1269,11 @@ class GameState {
       grief: grief ?? this.grief,
       hardshipYears: hardshipYears ?? this.hardshipYears,
       settings: settings ?? this.settings,
+      leases: leases ?? this.leases,
+      propertyLedgers: propertyLedgers ?? this.propertyLedgers,
+      landlord: landlord == _unsetEvent
+          ? this.landlord
+          : landlord as LandlordRecord?,
       residenceItemId: residenceItemId == _unsetEvent
           ? this.residenceItemId
           : residenceItemId as String?,

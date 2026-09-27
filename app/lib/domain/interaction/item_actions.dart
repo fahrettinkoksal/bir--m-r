@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../economy/rental_engine.dart';
 
 import '../../data/economy.dart';
 import '../../data/item_catalog.dart';
@@ -412,11 +413,24 @@ class ItemActions {
         availability(state, item, ItemActionKind.sat);
     if (!check.isAllowed) return _blocked(state, check.reason!);
 
+    // Kiradaki ev satılıyorsa **önce sözleşme kapanır** (D-163): kiracı
+    // çıkar, depozito iade edilir, günlüğe yazılır. Yoksa oyuncu evi
+    // satıp depozitoyu cebinde tutardı.
+    GameState onceki = state;
+    if (state.leaseOf(item.id) != null) {
+      final RentalResult kapanis = RentalEngine.endLease(
+        state: state,
+        propertyItemId: item.id,
+        reasonText: '${item.name} satılıyor; kiracıyla sözleşme kapandı.',
+      );
+      if (kapanis.outcome.applied) onceki = kapanis.state;
+    }
+
     final int bedel = estimatedPrice(item);
     final PlayerCharacter player =
-        state.player.copyWith(wallet: state.player.wallet + bedel);
+        onceki.player.copyWith(wallet: onceki.player.wallet + bedel);
     final GameState next =
-        state.copyWith(player: player).removeItem(item.id);
+        onceki.copyWith(player: player).removeItem(item.id);
 
     final String metin = '${item.name} ${trMoney(bedel)} karşılığında satıldı.';
     return ItemActionResult(

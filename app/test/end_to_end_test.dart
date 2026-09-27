@@ -23,6 +23,7 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/life_summary.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/domain/models/rental.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -211,23 +212,63 @@ void main() {
     final OwnedItem kiralik = controller.state!.items.last;
 
     expect(controller.moveInto(oturulan)?.applied, isTrue);
-    expect(controller.rentOutHome(kiralik)?.applied, isTrue);
-    // Oturulan ev kiraya verilemez.
-    expect(controller.rentOutHome(controller.state!.items.first)?.applied,
-        isFalse);
 
-    final int kira = Housing.yearlyRentIncome(controller.state!);
-    expect(kira, greaterThan(0));
+    // D-163: kiraya verme artık kiracı seçmeyi gerektiriyor.
+    final int kira = controller.marketRent(kiralik);
+    final List<TenantRecord> adaylar =
+        controller.tenantCandidatesFor(kiralik, kira);
+    expect(adaylar, isNotEmpty);
+    expect(
+      controller
+          .signLease(
+            home: kiralik,
+            tenant: adaylar.first,
+            yearlyRent: kira,
+          )
+          ?.applied,
+      isTrue,
+    );
+    // Oturulan ev kiraya verilemez.
+    expect(
+      controller.rentOutAskBlockReason(
+        controller.state!.items.first,
+        controller.marketRent(controller.state!.items.first),
+      ),
+      isNotEmpty,
+    );
+
+    final int kiraGeliri = Housing.yearlyRentIncome(controller.state!);
+    expect(kiraGeliri, greaterThan(0));
+    expect(kiraGeliri, kira, reason: 'Sözleşmede yazan kira tahsil edilir');
 
     final int cuzdanOnce = controller.state!.player.wallet;
     final int gider = LivingCosts.yearlyCost(controller.state!);
     yasAl(controller);
     if (controller.state!.deceased) return;
 
-    // Kira bir kez gelir, gider bir kez çıkar (kiracı bulunduysa).
+    // Kira bir kez gelir, gider bir kez çıkar. D-163'ten sonra kalemler
+    // mülk defterinde yazılı olduğu için iddia **daha sıkı**: cüzdan
+    // farkı, defterdeki tahsilat ve mülk gideriyle geçim giderinin
+    // toplamına **tam olarak** eşit olmalı. Böylece iki kez tahsil, iki
+    // kez kesinti ve kayıp kuruş aynı iddiayla yakalanıyor.
+    final int defterKira = controller.state!.propertyLedgers
+        .fold<int>(0, (int t, PropertyLedger l) => t + l.rentCollected);
+    final int defterGider = controller.state!.propertyLedgers
+        .fold<int>(0, (int t, PropertyLedger l) => t + l.maintenanceSpent);
     final int fark = controller.state!.player.wallet - cuzdanOnce;
-    expect(fark, anyOf(<Matcher>[equals(kira - gider), equals(-gider)]),
-        reason: 'Kira veya gider iki kez uygulanmamalı');
+    expect(
+      fark,
+      defterKira - defterGider - gider,
+      reason: 'Kira veya gider iki kez uygulanmamalı',
+    );
+    expect(
+      controller.state!.log
+          .where((dynamic e) =>
+              (e.text as String).contains('Kira gelirin bu yıl'))
+          .length,
+      lessThanOrEqualTo(1),
+      reason: 'Kira yılda bir kez tahsil edilir',
+    );
 
     final SaveService service = SaveService(MemorySaveStore());
     await service.save(controller.state!);
@@ -235,7 +276,8 @@ void main() {
     expect(geri.player.wallet, controller.state!.player.wallet);
     expect(geri.items.length, controller.state!.items.length);
     expect(geri.residenceItemId, controller.state!.residenceItemId);
-    expect(Housing.yearlyRentIncome(geri), kira);
+    expect(Housing.yearlyRentIncome(geri),
+        Housing.yearlyRentIncome(controller.state!));
   });
 
   // ===================================================================

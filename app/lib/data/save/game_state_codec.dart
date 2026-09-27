@@ -37,6 +37,8 @@ import '../../domain/models/gift_record.dart';
 import '../../domain/models/life_log.dart';
 import '../../domain/models/life_summary.dart';
 import '../../domain/models/owned_item.dart';
+import '../../domain/models/rental.dart';
+import '../tenant_catalog.dart';
 import '../../domain/models/parental_status.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../domain/models/pending_wedding.dart';
@@ -127,6 +129,13 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           .map(_encodeInvestmentRecord)
           .toList(growable: false),
       'market': _encodeMarket(state.market),
+      // Kiralama (D-163). Üçü de alan eklemeli: eski kayıt boş listeyle
+      // açılır, `rentedOut` taşıyan eski konutlar yüklemede sözleşmeye
+      // çevrilir.
+      'leases': state.leases.map(_encodeLease).toList(growable: false),
+      'propertyLedgers':
+          state.propertyLedgers.map(_encodeLedger).toList(growable: false),
+      if (state.landlord != null) 'landlord': _encodeLandlord(state.landlord!),
       // Piyango biletleri (Paket 33). Alan eklemeli.
       'lotteryTickets':
           state.lotteryTickets.map(_encodeTicket).toList(growable: false),
@@ -1019,6 +1028,40 @@ GameState decodeGameState(Map<String, Object?> json) {
 
   final Object? pending = json['pendingEvent'];
 
+  // **Eski kayıt göçü (D-163).** Kiralama sözleşmeleri gelmeden önce
+  // "bu ev kirada" bilgisi `OwnedItem.rentedOut` bayrağında duruyordu.
+  // Kiracı, kira bedeli ve depozito bilgisi yoktu. Eski kayıt silinmez:
+  // bayrak taşıyan her konut için, o konutun kendi bilgilerinden türeyen
+  // bir sözleşme **üretilir** ve oyuncunun kirası kesilmeden devam eder.
+  // Üretim belirlenimlidir: aynı kayıt her açılışta aynı kiracıyı verir.
+  final List<Lease> yazilanSozlesmeler = _optionalRawList(json, 'leases')
+      .map((Object? e) => _decodeLease(_asMap(e, 'leases[]')))
+      .toList();
+  final Set<String> sozlesmeliMulkler = <String>{
+    for (final Lease l in yazilanSozlesmeler) l.propertyItemId,
+  };
+  for (final Object? ham in _optionalRawList(json, 'items')) {
+    final Map<String, Object?> esya = _asMap(ham, 'items[]');
+    if (esya['rentedOut'] != true) continue;
+    final String esyaId = _string(esya, 'id');
+    if (sozlesmeliMulkler.contains(esyaId)) continue;
+    final OwnedItem konut = _decodeItem(esya);
+    if (!konut.isProperty) continue;
+    yazilanSozlesmeler.add(
+      Lease(
+        propertyItemId: esyaId,
+        tenant: migratedTenantFor(esyaId),
+        yearlyRent: legacyYearlyRent(konut),
+        // Eski kayıtta depozito diye bir şey yoktu; uydurup oyuncuya borç
+        // yazmıyoruz. Sıfır depozito, çıkışta iade edilecek bir şey de yok.
+        deposit: 0,
+        startedAtAge: konut.acquiredAtAge,
+      ),
+    );
+  }
+  final List<Lease> okunanSozlesmeler =
+      List<Lease>.unmodifiable(yazilanSozlesmeler);
+
   return GameState(
     seed: _int(json, 'seed'),
     player: player,
@@ -1129,6 +1172,15 @@ GameState decodeGameState(Map<String, Object?> json) {
     market: json['market'] == null
         ? const MarketState()
         : _decodeMarket(_asMap(json['market'], 'market')),
+    leases: okunanSozlesmeler,
+    propertyLedgers: List<PropertyLedger>.unmodifiable(
+      _optionalRawList(json, 'propertyLedgers')
+          .map((Object? e) => _decodeLedger(_asMap(e, 'propertyLedgers[]')))
+          .toList(growable: false),
+    ),
+    landlord: json['landlord'] == null
+        ? null
+        : _decodeLandlord(_asMap(json['landlord'], 'landlord')),
     martialArts: List<MartialProgress>.unmodifiable(
       _optionalRawList(json, 'martialArts')
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
@@ -2264,4 +2316,117 @@ Business _decodeBusiness(Map<String, Object?> json) => Business(
         _stringOrNull(json, 'endReason'),
         'business.endReason',
       ),
+    );
+
+// =====================================================================
+// Kiralama (D-163)
+// =====================================================================
+
+Map<String, Object?> _encodeTenant(TenantRecord t) => <String, Object?>{
+      'id': t.id,
+      'firstName': t.firstName,
+      'lastName': t.lastName,
+      'age': t.age,
+      'occupation': t.occupation,
+      'household': t.household.name,
+      'income': t.income.name,
+      'track': t.track.name,
+      'reliability': t.reliability,
+      'care': t.care,
+    };
+
+TenantRecord _decodeTenant(Map<String, Object?> json) => TenantRecord(
+      id: _string(json, 'id'),
+      firstName: _string(json, 'firstName'),
+      lastName: _string(json, 'lastName'),
+      age: _int(json, 'age'),
+      occupation: _string(json, 'occupation'),
+      household: _enumByNameOrNull(
+              TenantHousehold.values,
+              _stringOrNull(json, 'household'),
+              'household',
+            ) ??
+            TenantHousehold.tekBasina,
+      income: _enumByNameOrNull(
+              TenantIncome.values,
+              _stringOrNull(json, 'income'),
+              'income',
+            ) ??
+            TenantIncome.orta,
+      track: _enumByNameOrNull(
+              TenantTrack.values,
+              _stringOrNull(json, 'track'),
+              'track',
+            ) ??
+            TenantTrack.belirsiz,
+      reliability: _int(json, 'reliability'),
+      care: _int(json, 'care'),
+    );
+
+Map<String, Object?> _encodeLease(Lease l) => <String, Object?>{
+      'propertyItemId': l.propertyItemId,
+      'tenant': _encodeTenant(l.tenant),
+      'yearlyRent': l.yearlyRent,
+      'deposit': l.deposit,
+      'startedAtAge': l.startedAtAge,
+      'onTimeYears': l.onTimeYears,
+      'lateYears': l.lateYears,
+      'unpaidYears': l.unpaidYears,
+      if (l.lastRenewedAtAge != null) 'lastRenewedAtAge': l.lastRenewedAtAge,
+      if (l.graceGivenAtAge != null) 'graceGivenAtAge': l.graceGivenAtAge,
+    };
+
+Lease _decodeLease(Map<String, Object?> json) => Lease(
+      propertyItemId: _string(json, 'propertyItemId'),
+      tenant: _decodeTenant(_asMap(json['tenant'], 'lease.tenant')),
+      yearlyRent: _int(json, 'yearlyRent'),
+      deposit: _int(json, 'deposit'),
+      startedAtAge: _int(json, 'startedAtAge'),
+      onTimeYears: _intOr(json, 'onTimeYears', 0),
+      lateYears: _intOr(json, 'lateYears', 0),
+      unpaidYears: _intOr(json, 'unpaidYears', 0),
+      lastRenewedAtAge: _intOrNull(json, 'lastRenewedAtAge'),
+      graceGivenAtAge: _intOrNull(json, 'graceGivenAtAge'),
+    );
+
+Map<String, Object?> _encodeLedger(PropertyLedger l) => <String, Object?>{
+      'propertyItemId': l.propertyItemId,
+      'rentCollected': l.rentCollected,
+      'maintenanceSpent': l.maintenanceSpent,
+      'depositHeld': l.depositHeld,
+      'vacantYears': l.vacantYears,
+      'tenantCount': l.tenantCount,
+      if (l.lastMaintenanceAge != null)
+        'lastMaintenanceAge': l.lastMaintenanceAge,
+      if (l.valueBasis != null) 'valueBasis': l.valueBasis,
+    };
+
+PropertyLedger _decodeLedger(Map<String, Object?> json) => PropertyLedger(
+      propertyItemId: _string(json, 'propertyItemId'),
+      rentCollected: _intOr(json, 'rentCollected', 0),
+      maintenanceSpent: _intOr(json, 'maintenanceSpent', 0),
+      depositHeld: _intOr(json, 'depositHeld', 0),
+      vacantYears: _intOr(json, 'vacantYears', 0),
+      tenantCount: _intOr(json, 'tenantCount', 0),
+      lastMaintenanceAge: _intOrNull(json, 'lastMaintenanceAge'),
+      valueBasis: _intOrNull(json, 'valueBasis'),
+    );
+
+Map<String, Object?> _encodeLandlord(LandlordRecord l) => <String, Object?>{
+      'firstName': l.firstName,
+      'lastName': l.lastName,
+      'sinceAge': l.sinceAge,
+      'temperament': l.temperament.name,
+    };
+
+LandlordRecord _decodeLandlord(Map<String, Object?> json) => LandlordRecord(
+      firstName: _string(json, 'firstName'),
+      lastName: _string(json, 'lastName'),
+      sinceAge: _int(json, 'sinceAge'),
+      temperament: _enumByNameOrNull(
+              LandlordTemperament.values,
+              _stringOrNull(json, 'temperament'),
+              'temperament',
+            ) ??
+            LandlordTemperament.olculu,
     );

@@ -72,6 +72,11 @@ enum NoticeKind {
   ///
   /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
   kendiIsi,
+
+  /// Kiraya verilen evle ilgili gerçekten anlatılacak bir şey (D-163):
+  /// kira ödenmedi, kiracı çıktı, büyük hasar, yeni kiracı. Normal
+  /// tahsilat bildirim açmaz, yıl özetinde görünür.
+  konut,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).

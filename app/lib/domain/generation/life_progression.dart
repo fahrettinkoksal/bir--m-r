@@ -22,9 +22,9 @@ import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
 import '../economy/household_budget.dart';
+import '../economy/rental_engine.dart';
 import '../economy/investment_engine.dart';
 import '../economy/vehicle_inspection.dart';
-import '../economy/housing.dart';
 import '../economy/living_costs.dart';
 import '../../data/health_crisis_catalog.dart';
 import '../life/health_crisis_engine.dart';
@@ -670,8 +670,27 @@ class LifeProgression {
       newAge: newAge,
     );
 
-    // Kira geliri: kiraya verilen konutlardan yılda **bir kez** (D-043).
-    afterDeaths = _applyRentIncome(afterDeaths, newAge);
+    // Kiralama (D-163): tahsilat, yıpranma, hasar, boş ev gideri, kiracının
+    // çıkması ve evin değer değişimi yılda **bir kez**. Normal tahsilat
+    // bildirim açmaz; yalnızca anlatılacak bir şey varsa pencere gelir.
+    final ({GameState state, RentalYear year}) kiralama =
+        RentalEngine.advanceYear(
+      state: afterDeaths,
+      newAge: newAge,
+      rng: _rng,
+    );
+    afterDeaths = kiralama.state;
+    if (kiralama.year.notable) {
+      afterDeaths = Notices.enqueue(afterDeaths, <PendingNotice>[
+        PendingNotice(
+          id: 'konut-$newAge',
+          kind: NoticeKind.konut,
+          age: newAge,
+          title: 'Evlerinden haber',
+          text: kiralama.year.notes.join(' '),
+        ),
+      ]);
+    }
 
     // Sosyal medya: süresi dolan sponsorluklar kapanır, koşullar
     // uygunsa yeni bir teklif gelir (Paket 10).
@@ -932,45 +951,6 @@ class LifeProgression {
       LifeLogEntry(age: age, text: text, category: LogCategory.kisisel),
     ]),
   );
-
-  GameState _applyRentIncome(GameState state, int newAge) {
-    final List<OwnedItem> kiradakiler = state.items
-        .where((OwnedItem i) => i.isProperty && i.rentedOut)
-        .toList(growable: false);
-    if (kiradakiler.isEmpty) return state;
-
-    int toplam = 0;
-    final List<LifeLogEntry> satirlar = <LifeLogEntry>[];
-    for (final OwnedItem ev in kiradakiler) {
-      if (_rng.nextDouble() < Housing.prototypeOnlyVacancyChance) {
-        satirlar.add(
-          LifeLogEntry(
-            age: newAge,
-            text: '${ev.name} bu yıl boş kaldı; kira geliri gelmedi.',
-            category: LogCategory.kisisel,
-          ),
-        );
-        continue;
-      }
-      final int kira = Housing.yearlyRentOf(ev);
-      toplam += kira;
-      satirlar.add(
-        LifeLogEntry(
-          age: newAge,
-          text: '${ev.name} için yıllık ${trMoney(kira)} kira geliri aldın.',
-          category: LogCategory.kisisel,
-        ),
-      );
-    }
-
-    return state.copyWith(
-      player: state.player.copyWith(wallet: state.player.wallet + toplam),
-      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-        ...state.log,
-        ...satirlar,
-      ]),
-    );
-  }
 
   /// Yetişkin olan çocukları haneden çıkarır.
   ///
