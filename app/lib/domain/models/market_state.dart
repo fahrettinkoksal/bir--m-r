@@ -3,6 +3,9 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../../data/company_catalog.dart';
+import 'market_incident.dart';
+
 /// Yıllık piyasa rejimi.
 ///
 /// Her varlık kendi başına zar atmaz; yılın rejimi ortak etkenleri belirler
@@ -11,14 +14,28 @@ enum MarketRegime {
   durgun('Durgun'),
   normal('Normal'),
   guclu('Güçlü'),
-  kriz('Kriz');
+  kriz('Kriz'),
+
+  /// Krizin ardından gelen **toparlanma** (Paket AC, §11).
+  ///
+  /// V1'de kriz tek yıllıktı ve ertesi yıl doğrudan "güçlü" olabiliyordu;
+  /// bu "krizde al, ertesi yıl kesin toparlar" exploitini üretiyordu.
+  /// Artık kriz 1-3 yıl sürüyor ve çıkışı bu rejimden geçiyor:
+  /// toparlanma yukarı eğilimli ama **hâlâ oynak**, garanti değil.
+  toparlanma('Toparlanma');
 
   const MarketRegime(this.label);
 
   final String label;
 
   /// Oyuncuya gösterilebilecek kadar belirgin bir yıl mı?
-  bool get isNotable => this == MarketRegime.kriz || this == MarketRegime.guclu;
+  bool get isNotable =>
+      this == MarketRegime.kriz ||
+      this == MarketRegime.guclu ||
+      this == MarketRegime.toparlanma;
+
+  /// Kriz baskısı sürüyor mu?
+  bool get isStressed => this == MarketRegime.kriz;
 
   /// Ekranda yazılan gözlem cümlesi.
   ///
@@ -29,6 +46,8 @@ enum MarketRegime {
         MarketRegime.normal => 'Piyasa olağan hâlinde, iniş çıkış normal.',
         MarketRegime.guclu => 'Piyasada hareket var, herkes iyimser.',
         MarketRegime.kriz => 'Piyasa karışık, ortalık gergin.',
+        MarketRegime.toparlanma =>
+          'Piyasa toparlanmaya çalışıyor; kimse emin değil.',
       };
 }
 
@@ -49,6 +68,10 @@ class MarketState {
     this.priceIndex = const <String, int>{},
     this.advancedAtAge,
     this.lastNoticeAge,
+    this.regimeYearsLeft = 0,
+    this.companyStatus = const <String, String>{},
+    this.halts = const <TradingHalt>[],
+    this.incidents = const <MarketIncident>[],
   });
 
   /// Baz puan ölçeği: 10.000 = 1,00.
@@ -77,6 +100,49 @@ class MarketState {
   /// En son piyasa bildirimi verilen yaş; her yıl pencere açılmaz.
   final int? lastNoticeAge;
 
+  /// Yürüyen rejimin **kalan zorunlu yılı** (Paket AC, §11).
+  ///
+  /// Kriz başlarken 1-3 arası çekilir ve her yıl bir azalır; sıfıra
+  /// gelmeden rejim değişmez. Böylece kriz tek yıllık olmaktan çıkar ve
+  /// "krizde al, ertesi yıl toparlar" garantisi kalkar.
+  final int regimeYearsLeft;
+
+  /// Kurgusal şirket kimliği -> [CompanyStatus.name].
+  ///
+  /// Enum değil **metin** tutuluyor: kayıt ileri sürümlerde tanımadığı
+  /// bir durumla karşılaşırsa çökmek yerine `normal` okur.
+  final Map<String, String> companyStatus;
+
+  /// Yürüyen işlem durmaları.
+  final List<TradingHalt> halts;
+
+  /// Yaşanmış olayların kaydı. Aynı olay iki kez uygulanmaz.
+  final List<MarketIncident> incidents;
+
+  /// Bu şirketin durumu; kayıtta yoksa ya da tanınmıyorsa `normal`.
+  CompanyStatus statusOf(String companyId) {
+    final String? ad = companyStatus[companyId];
+    if (ad == null) return CompanyStatus.normal;
+    for (final CompanyStatus d in CompanyStatus.values) {
+      if (d.name == ad) return d;
+    }
+    return CompanyStatus.normal;
+  }
+
+  /// Bu türde [age] yaşında işlem durmuş mu?
+  TradingHalt? haltFor(String typeId, int age) {
+    for (final TradingHalt h in halts) {
+      if (h.typeId == typeId && h.activeAt(age)) return h;
+    }
+    return null;
+  }
+
+  /// Faaliyeti duran şirketler.
+  Set<String> get closedCompanies => <String>{
+        for (final String id in companyStatus.keys)
+          if (statusOf(id) == CompanyStatus.kapandi) id,
+      };
+
   /// Bu varlığın endeksi (baz puan). Hiç işlem görmemişse 1,00.
   int indexOf(String typeId) => priceIndex[typeId] ?? basis;
 
@@ -87,6 +153,10 @@ class MarketState {
     Map<String, int>? priceIndex,
     int? advancedAtAge,
     int? lastNoticeAge,
+    int? regimeYearsLeft,
+    Map<String, String>? companyStatus,
+    List<TradingHalt>? halts,
+    List<MarketIncident>? incidents,
   }) =>
       MarketState(
         regime: regime ?? this.regime,
@@ -96,6 +166,11 @@ class MarketState {
         priceIndex: priceIndex ?? this.priceIndex,
         advancedAtAge: advancedAtAge ?? this.advancedAtAge,
         lastNoticeAge: lastNoticeAge ?? this.lastNoticeAge,
+        regimeYearsLeft:
+            (regimeYearsLeft ?? this.regimeYearsLeft) < 0 ? 0 : (regimeYearsLeft ?? this.regimeYearsLeft),
+        companyStatus: companyStatus ?? this.companyStatus,
+        halts: halts ?? this.halts,
+        incidents: incidents ?? this.incidents,
       );
 }
 
@@ -105,9 +180,13 @@ class MarketYear {
   const MarketYear({
     required this.regime,
     required this.returns,
+    this.incidents = const <MarketIncident>[],
   });
 
   final MarketRegime regime;
+
+  /// Bu yıl gerçekleşen olaylar (Paket AC).
+  final List<MarketIncident> incidents;
 
   /// Varlık kimliği -> o yılın getirisi.
   final Map<String, double> returns;

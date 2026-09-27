@@ -1591,8 +1591,14 @@ void _handleRelationships(
           if (c.state!.hasPendingEvent) return;
         }
       }
+      // **`!isMarried`, `marriage == null` değil.** Botta da üretim
+      // kodundaki aynı hata vardı (Q-167/3): boşanmadan sonra evlilik
+      // kaydı silinmediği için bot bir daha hiç teklif etmiyordu.
+      // `finger.dart` düzeltildikten sonra ayrılık sonrası huni
+      // flört %47,5 / sevgili %8,5'e çıktı ama "teklif etti" %0'da
+      // kaldı — kalan sıfır botun kendi kapısıydı.
       if (intent.wantsMarriage &&
-          c.state!.marriage == null &&
+          !c.state!.isMarried &&
           c.state!.player.age >= 20 &&
           c.proposalAvailability(p.id).isAllowed &&
           rng.nextDouble() < 0.7) {
@@ -1950,11 +1956,16 @@ void _collectFinalMetrics(GameController c, BotLifeResult sonuc) {
   if (s.termDeposits.isNotEmpty) sonuc.investmentTypes.add('vadeli');
   sonuc.usedLoan = sonuc.usedLoan || s.loans.isNotEmpty;
 
+  // Bir kez evlenmiş olmak: kayıt varsa evlenmiştir (boşanmış olsa da).
+  // Burada `marriage != null` **doğru** soru: "hiç evlendi mi?"
   sonuc.married = sonuc.married || s.marriage != null;
   sonuc.divorced = s.pastMarriages
           .any((Marriage m) => m.status == MarriageStatus.bosandi) ||
       s.marriage?.status == MarriageStatus.bosandi;
-  sonuc.remarried = s.pastMarriages.isNotEmpty && s.marriage != null;
+  // Tekrar evlenmiş olmak: geçmişte evlilik var **ve** şu an yürüyen
+  // bir evlilik var. Boşanmış kayıt "yürüyen" sayılmamalı, o yüzden
+  // `isMarried`.
+  sonuc.remarried = s.pastMarriages.isNotEmpty && s.isMarried;
   sonuc.childCount = s.children.length;
   sonuc.sawGrandchild =
       s.people.any((Person p) => p.relation == RelationType.torun);

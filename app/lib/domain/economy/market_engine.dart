@@ -38,31 +38,64 @@ abstract final class MarketEngine {
   /// da normal yıldan geçer.
   static const Map<MarketRegime, Map<MarketRegime, double>>
       prototypeOnlyTransitions = <MarketRegime, Map<MarketRegime, double>>{
+    // **Krize giriş ihtimali yarıya indirildi (Paket AC).** Bu ölçümden
+    // çıktı: krizi çok yıllı yapmak (§11) giriş ihtimalini
+    // değiştirmeden kriz yıllarının payını %8'den **%17,8'e** çıkardı.
+    // Sonuç risk merdivenini tersine çevirdi — hissenin gerçekleşen
+    // ortalaması yazdığı %10 yerine %6,4'e düştü ve altının %7,9'unun
+    // **altında** kaldı. Yüksek riskli varlığın beklenen getirisi düşük
+    // riskliden az olamaz. Amaç daha çok kriz değil, **daha uzun** kriz:
+    // giriş seyreldi, süre uzadı, toplam pay korundu.
     MarketRegime.durgun: <MarketRegime, double>{
-      MarketRegime.durgun: 0.34,
-      MarketRegime.normal: 0.46,
+      MarketRegime.durgun: 0.35,
+      MarketRegime.normal: 0.48,
       MarketRegime.guclu: 0.13,
-      MarketRegime.kriz: 0.07,
+      MarketRegime.kriz: 0.04,
     },
     MarketRegime.normal: <MarketRegime, double>{
-      MarketRegime.durgun: 0.22,
-      MarketRegime.normal: 0.50,
-      MarketRegime.guclu: 0.22,
-      MarketRegime.kriz: 0.06,
+      MarketRegime.durgun: 0.23,
+      MarketRegime.normal: 0.51,
+      MarketRegime.guclu: 0.23,
+      MarketRegime.kriz: 0.03,
     },
     MarketRegime.guclu: <MarketRegime, double>{
-      MarketRegime.durgun: 0.20,
-      MarketRegime.normal: 0.42,
-      MarketRegime.guclu: 0.28,
-      MarketRegime.kriz: 0.10,
+      MarketRegime.durgun: 0.21,
+      MarketRegime.normal: 0.43,
+      MarketRegime.guclu: 0.31,
+      MarketRegime.kriz: 0.05,
     },
+    // **Krizin çıkışı toparlanmadan geçer (Paket AC, §11).** V1'de kriz
+    // yılından doğrudan "güçlü" yıla %6 ihtimalle atlanıyordu ve kriz
+    // tek yıllıktı; bu "krizde al, ertesi yıl kesin toparlar" exploitini
+    // besliyordu. Artık krizin zorunlu süresi var
+    // (`prototypeOnlyCrisisYears`) ve bittiğinde ezici ihtimalle
+    // toparlanmaya geçilir: yukarı eğilimli ama **hâlâ oynak** bir yıl.
     MarketRegime.kriz: <MarketRegime, double>{
-      MarketRegime.durgun: 0.42,
-      MarketRegime.normal: 0.34,
-      MarketRegime.guclu: 0.06,
-      MarketRegime.kriz: 0.18,
+      MarketRegime.toparlanma: 0.64,
+      MarketRegime.durgun: 0.28,
+      MarketRegime.normal: 0.05,
+      MarketRegime.kriz: 0.03,
+    },
+    // Toparlanmadan sonra hayat normale döner; yeniden krize düşmek de
+    // mümkün (çift dipli kriz).
+    MarketRegime.toparlanma: <MarketRegime, double>{
+      MarketRegime.normal: 0.50,
+      MarketRegime.durgun: 0.23,
+      MarketRegime.guclu: 0.21,
+      MarketRegime.kriz: 0.06,
     },
   };
+
+  /// prototypeOnly: kriz başladığında kaç yıl **zorunlu** sürer.
+  ///
+  /// Alt sınır dahil, üst sınır dahil. 1-3 yıl: bazı krizler tek yılda
+  /// biter, bazıları üç yıl sürer. Oyuncu krize girdiğinde ne zaman
+  /// çıkacağını bilemez — bilse "dibi al" garanti bir strateji olurdu.
+  static const int prototypeOnlyCrisisMinYears = 1;
+  static const int prototypeOnlyCrisisMaxYears = 3;
+
+  /// prototypeOnly: toparlanmanın zorunlu süresi (yıl).
+  static const int prototypeOnlyRecoveryYears = 1;
 
   /// prototypeOnly: rejimin **risk iştahı** etkeni bandı (taban, genlik).
   /// Tabanlar **ortalaması sıfıra çekilmiş** biçimde yazıldı, bilerek:
@@ -75,6 +108,9 @@ abstract final class MarketEngine {
     MarketRegime.normal: (base: 0.017, spread: 0.14),
     MarketRegime.guclu: (base: 0.137, spread: 0.16),
     MarketRegime.kriz: (base: -0.273, spread: 0.18),
+    // Toparlanma: tabanı artı ama genliği geniş. Yukarı eğilimli, garanti
+    // değil — bazı toparlanma yılları eksi kapanır.
+    MarketRegime.toparlanma: (base: 0.092, spread: 0.19),
   };
 
   /// prototypeOnly: rejimin **korunma talebi** etkeni bandı.
@@ -86,6 +122,13 @@ abstract final class MarketEngine {
     // altına sığınmaz.
     MarketRegime.guclu: (base: -0.012, spread: 0.11),
     MarketRegime.kriz: (base: 0.108, spread: 0.14),
+    // **Toparlanmada panik primi geri verilir.** Krizin ilk yılında
+    // korunma tarafı +0,108 taban alıyor; ortalık düzelmeye başlayınca
+    // para riskli tarafa döner ve altın/döviz o primin bir kısmını geri
+    // verir. V1'de böyle bir geri verme yoktu ve ölçümde sonuç şuydu:
+    // **Döviz Sepeti'nde 1.000 yirmi yıllık yolun hiçbiri anaparanın
+    // altında bitmiyordu.** "Risk etiketi yazıp risksiz davranmak olmaz."
+    MarketRegime.toparlanma: (base: -0.105, spread: 0.13),
   };
 
   /// prototypeOnly: enflasyon baskısının ve güvenin yıllık kayma adımı.
@@ -93,6 +136,34 @@ abstract final class MarketEngine {
 
   /// prototypeOnly: gizli parametrelerin her yıl 50'ye çekilme payı.
   static const double prototypeOnlyMeanReversion = 0.25;
+
+  /// prototypeOnly: **uzayan** kriz yılında korunma priminin kalan payı.
+  ///
+  /// Bu sabit bir ölçüm bulgusundan doğdu. Krizi çok yıllı yapınca
+  /// (§11) korunma tarafı sistematik olarak zenginleşti: kriz artık
+  /// ortalama iki yıl sürüyor ve her yıl `+0,108` korunma tabanı
+  /// uygulanıyordu, yani bir krizin toplam korunma primi ikiye katlandı.
+  /// Sonuç ölçümde görüldü — **Döviz Sepeti'nde 1.000 yirmi yıllık yolun
+  /// hiçbiri anaparanın altında bitmiyordu.** "Risk etiketi yazıp risksiz
+  /// davranmak olmaz" diyen bekçi haklı olarak kırıldı.
+  ///
+  /// Düzeltme uydurma değil, mekanizmaya uygun: **güvenli limana kaçış
+  /// krizin başında olur.** İlk yıl panik primi tamdır; kriz uzadıkça o
+  /// prim erir, çünkü herkes çoktan pozisyon almıştır. Uzayan kriz
+  /// yılında korunma tabanı bu katsayıyla çarpılır.
+  static const double prototypeOnlyProlongedCrisisHedgeShare = 0.30;
+
+  /// prototypeOnly: faiz şokunun yıllık ihtimali ve büyüklüğü (§16).
+  static const double prototypeOnlyRateShockChance = 0.05;
+  static const double prototypeOnlyRateShockRiskHit = 0.11;
+  static const double prototypeOnlyRateShockHedgeLift = 0.05;
+
+  /// prototypeOnly: kur şokunun yıllık ihtimali ve büyüklüğü (§17).
+  ///
+  /// İki yönlü uygulanır: %58 yukarı, %42 aşağı. Böylece döviz/altın
+  /// tarafı "her zaman kazanan" olmaz.
+  static const double prototypeOnlyFxShockChance = 0.07;
+  static const double prototypeOnlyFxShockSize = 0.14;
 
   /// prototypeOnly: tek yılda bir varlığın düşebileceği en dip oran.
   ///
@@ -104,7 +175,7 @@ abstract final class MarketEngine {
   // Yılı ilerletmek
   // -------------------------------------------------------------------
 
-  /// Bir sonraki rejimi seçer.
+  /// Bir sonraki rejimi seçer (**süreye bakmaz**; bkz. [nextPhase]).
   static MarketRegime nextRegime(MarketRegime current, Random rng) {
     final Map<MarketRegime, double> agirliklar =
         prototypeOnlyTransitions[current]!;
@@ -115,6 +186,42 @@ abstract final class MarketEngine {
       if (zar < toplam) return e.key;
     }
     return MarketRegime.normal;
+  }
+
+  /// Bu rejim başladığında kaç yıl zorunlu sürer?
+  ///
+  /// Kriz ve toparlanma dışındaki rejimler süresizdir (her yıl yeniden
+  /// zar atılır); onlarda 0 döner.
+  /// Dönen sayı **bu yıldan sonraki** kilitli yıl sayısıdır: toplam süre
+  /// 1 + dönen değerdir.
+  ///
+  /// İlk yazımda toplam süreyi döndürüyordum ve `nextPhase` üstüne bir yıl
+  /// daha ekliyordu; ölçümde kriz ortalaması 3,13 yıl, en uzunu 11 yıl
+  /// çıktı — hedeflenen 1-3 yılın çok üstünde. Bire bir kaydırma hatasıydı.
+  static int lockYearsFor(MarketRegime regime, Random rng) => switch (regime) {
+        MarketRegime.kriz => prototypeOnlyCrisisMinYears -
+            1 +
+            rng.nextInt(
+              prototypeOnlyCrisisMaxYears - prototypeOnlyCrisisMinYears + 1,
+            ),
+        MarketRegime.toparlanma => prototypeOnlyRecoveryYears - 1,
+        _ => 0,
+      };
+
+  /// Rejimin bir sonraki adımı: süre kilidi varsa rejim **değişmez**.
+  ///
+  /// Dönen `yearsLeft` yeni yılın **kalan** zorunlu yılıdır.
+  static ({MarketRegime regime, int yearsLeft}) nextPhase({
+    required MarketRegime current,
+    required int yearsLeft,
+    required Random rng,
+  }) {
+    if (yearsLeft > 0) {
+      // Kilit sürüyor: aynı rejim bir yıl daha.
+      return (regime: current, yearsLeft: yearsLeft - 1);
+    }
+    final MarketRegime yeni = nextRegime(current, rng);
+    return (regime: yeni, yearsLeft: lockYearsFor(yeni, rng));
   }
 
   /// -1 ile +1 arasında üçgene yakın bir gürültü.
@@ -133,7 +240,12 @@ abstract final class MarketEngine {
     required int newAge,
     required Random rng,
   }) {
-    final MarketRegime yeniRejim = nextRegime(state.regime, rng);
+    final ({MarketRegime regime, int yearsLeft}) faz = nextPhase(
+      current: state.regime,
+      yearsLeft: state.regimeYearsLeft,
+      rng: rng,
+    );
+    final MarketRegime yeniRejim = faz.regime;
 
     // Gizli parametreler yavaş kayar; kriz enflasyonu ve güvensizliği
     // besler, güçlü yıl güveni toparlar.
@@ -152,6 +264,11 @@ abstract final class MarketEngine {
       case MarketRegime.normal:
         enflasyon += rng.nextInt(7) - 3;
         guven += rng.nextInt(7) - 3;
+      case MarketRegime.toparlanma:
+        // Toparlanmada güven yavaş yavaş geri gelir, enflasyon baskısı
+        // gevşer ama bir yılda normale dönmez.
+        enflasyon -= rng.nextInt(prototypeOnlyDriftStep ~/ 2 + 1);
+        guven += rng.nextInt(prototypeOnlyDriftStep ~/ 2 + 1);
     }
     // **Ortalamaya dönüş.** Bu olmadan iki parametre rastgele yürüyüşle
     // sınıra dayanıyordu: ölçümde enflasyon baskısı 0'a çakılıyor ve
@@ -174,11 +291,42 @@ abstract final class MarketEngine {
     final double guvenKaymasi = (guven - 50) / 100 * 0.08;
     final double enflasyonKaymasi = (enflasyon - 50) / 100 * 0.08;
 
-    final double riskEtkeni =
+    double riskEtkeni =
         riskBandi.base + guvenKaymasi + riskBandi.spread * _noise(rng) * 2;
-    final double hedgeEtkeni =
-        hedgeBandi.base + enflasyonKaymasi + hedgeBandi.spread * _noise(rng) * 2;
+    // **Korunma primi krizin başında tamdır, uzayınca erir.** Bkz.
+    // `prototypeOnlyProlongedCrisisHedgeShare`.
+    final bool uzayanKriz =
+        yeniRejim == MarketRegime.kriz && state.regime == MarketRegime.kriz;
+    final double hedgeTabani = uzayanKriz
+        ? hedgeBandi.base * prototypeOnlyProlongedCrisisHedgeShare
+        : hedgeBandi.base;
+    double hedgeEtkeni =
+        hedgeTabani + enflasyonKaymasi + hedgeBandi.spread * _noise(rng) * 2;
     final double enflasyonEtkeni = (enflasyon - 50) / 100;
+
+    // ---- Faiz şoku (§16) ----------------------------------------------
+    // Nadir. Faiz sert yükseldiğinde riskli taraf baskılanır; vadeli
+    // hesabın cazibesi bu pakette **kur/faiz oranı olarak değil**,
+    // yalnızca hisse/fon üzerindeki baskı olarak modellendi — vadeli
+    // oranını yıl içinde oynatmak bütün mevcut vadeli kayıtlarını
+    // yeniden hesaplamayı gerektirirdi ve o mimari değişiklik onay
+    // bekliyor (Q-168).
+    final bool faizSoku = rng.nextDouble() < prototypeOnlyRateShockChance;
+    if (faizSoku) {
+      riskEtkeni -= prototypeOnlyRateShockRiskHit;
+      hedgeEtkeni += prototypeOnlyRateShockHedgeLift;
+    }
+
+    // ---- Kur şoku (§17) -----------------------------------------------
+    // İki yönlü: bazı yıllarda korunma tarafı sert yukarı, bazı yıllarda
+    // sert geri çekilir. **"Döviz her zaman kazanır" kuralı yok.**
+    final bool kurSoku = rng.nextDouble() < prototypeOnlyFxShockChance;
+    if (kurSoku) {
+      final bool yukari = rng.nextDouble() < 0.58;
+      hedgeEtkeni += yukari
+          ? prototypeOnlyFxShockSize
+          : -prototypeOnlyFxShockSize * 0.85;
+    }
 
     final Map<String, double> getiriler = <String, double>{};
     final Map<String, int> yeniEndeks = <String, int>{...state.priceIndex};
@@ -204,6 +352,7 @@ abstract final class MarketEngine {
     return (
       state: state.copyWith(
         regime: yeniRejim,
+        regimeYearsLeft: faz.yearsLeft,
         inflationPressure: enflasyon,
         confidence: guven,
         priceIndex: Map<String, int>.unmodifiable(yeniEndeks),

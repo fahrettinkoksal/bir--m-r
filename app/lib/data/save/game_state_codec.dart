@@ -31,6 +31,7 @@ import '../../domain/models/game_state.dart';
 import '../../domain/models/health_history.dart';
 import '../../domain/models/household.dart';
 import '../../domain/models/investment.dart';
+import '../../domain/models/market_incident.dart';
 import '../../domain/models/market_state.dart';
 import '../../domain/models/gender.dart';
 import '../../domain/models/gift_record.dart';
@@ -582,7 +583,50 @@ Map<String, Object?> _encodeMarket(MarketState m) => <String, Object?>{
       'priceIndex': m.priceIndex,
       'advancedAtAge': m.advancedAtAge,
       'lastNoticeAge': m.lastNoticeAge,
+      // Paket AC: dördü de **alan eklemeli**. Eski kayıt sıfır/boş
+      // okunur, çökmez.
+      'regimeYearsLeft': m.regimeYearsLeft,
+      'companyStatus': m.companyStatus,
+      'halts': m.halts.map(_encodeHalt).toList(growable: false),
+      'incidents': m.incidents.map(_encodeIncident).toList(growable: false),
     };
+
+Map<String, Object?> _encodeHalt(TradingHalt h) => <String, Object?>{
+      'typeId': h.typeId,
+      'untilAge': h.untilAge,
+      'reason': h.reason,
+    };
+
+TradingHalt _decodeHalt(Map<String, Object?> json) => TradingHalt(
+      typeId: _stringOrNull(json, 'typeId') ?? '',
+      untilAge: _intOr(json, 'untilAge', 0),
+      reason: _stringOrNull(json, 'reason') ?? '',
+    );
+
+Map<String, Object?> _encodeIncident(MarketIncident i) => <String, Object?>{
+      'kind': i.kind.name,
+      'age': i.age,
+      'companyId': i.companyId,
+      'typeId': i.typeId,
+      // Oran kesirli; kayıtta baz puan olarak tutuluyor ki yuvarlama
+      // kayması olmasın.
+      'impactBasis': (i.impact * MarketState.basis).round(),
+      'cashDelta': i.cashDelta,
+    };
+
+MarketIncident _decodeIncident(Map<String, Object?> json) => MarketIncident(
+      kind: _enumByNameOrNull(
+            IncidentKind.values,
+            _stringOrNull(json, 'kind'),
+            'market.incidents[].kind',
+          ) ??
+          IncidentKind.piyasaPanigi,
+      age: _intOr(json, 'age', 0),
+      companyId: _stringOrNull(json, 'companyId'),
+      typeId: _stringOrNull(json, 'typeId'),
+      impact: _intOr(json, 'impactBasis', 0) / MarketState.basis,
+      cashDelta: _intOr(json, 'cashDelta', 0),
+    );
 
 MarketState _decodeMarket(Map<String, Object?> json) => MarketState(
       regime: _enumByNameOrNull(
@@ -598,6 +642,21 @@ MarketState _decodeMarket(Map<String, Object?> json) => MarketState(
           : _intMap(json, 'priceIndex'),
       advancedAtAge: _intOrNull(json, 'advancedAtAge'),
       lastNoticeAge: _intOrNull(json, 'lastNoticeAge'),
+      regimeYearsLeft: _intOr(json, 'regimeYearsLeft', 0),
+      companyStatus: json['companyStatus'] == null
+          ? const <String, String>{}
+          : _stringMap(json, 'companyStatus'),
+      halts: List<TradingHalt>.unmodifiable(
+        _optionalRawList(json, 'halts')
+            .map((Object? e) => _decodeHalt(_asMap(e, 'market.halts[]')))
+            .toList(growable: false),
+      ),
+      incidents: List<MarketIncident>.unmodifiable(
+        _optionalRawList(json, 'incidents')
+            .map((Object? e) =>
+                _decodeIncident(_asMap(e, 'market.incidents[]')))
+            .toList(growable: false),
+      ),
     );
 
 Map<String, Object?> _encodeAlimony(Alimony a) => <String, Object?>{

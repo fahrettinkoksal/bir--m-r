@@ -8,6 +8,7 @@ import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
+import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/test_flow.dart';
@@ -96,7 +97,11 @@ void main() {
     await tester.tap(find.byKey(const Key('buy_fon')));
     await tester.pumpAndSettle();
 
-    expect(controller.state!.player.wallet, 260000);
+    // Paket AC (§22): alımda komisyon da çıkar. Test gevşetilmedi;
+    // komisyonun tam tutarı iddia ediliyor.
+    final int komisyon = InvestmentEngine.commissionFor(40000);
+    expect(komisyon, 80);
+    expect(controller.state!.player.wallet, 300000 - 40000 - komisyon);
     expect(controller.state!.holdingOf('fon')!.value, 40000);
     expect(find.byKey(const Key('investment_result')), findsOneWidget);
   });
@@ -139,9 +144,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.state!.holdingOf('hisse')!.value, 40000);
-    expect(controller.state!.player.wallet, 50000);
-    // Gerçekleşen kâr: 40.000 satıldı, düşen maliyet 30.000.
+    // Gerçekleşen kâr: 40.000 satıldı, düşen maliyet 30.000. **Brüt**
+    // kalır; kesinti kârı değil cüzdana gireni azaltır.
     expect(controller.state!.holdingOf('hisse')!.realizedProfit, 10000);
+    // Paket AC (§22-23): komisyon + kâr kesintisi.
+    final int komisyon = InvestmentEngine.commissionFor(40000);
+    final int kesinti =
+        (10000 * InvestmentEngine.prototypeOnlyGainWithholding).round();
+    expect(komisyon, 80);
+    expect(kesinti, 1000);
+    expect(
+      controller.state!.player.wallet,
+      10000 + 40000 - komisyon - kesinti,
+    );
+    expect(controller.state!.player.wallet, 48920);
   });
 
   testWidgets('vadeli hesabın kilidi ekranda yazıyor',

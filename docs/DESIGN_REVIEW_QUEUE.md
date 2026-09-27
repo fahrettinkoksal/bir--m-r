@@ -4127,3 +4127,142 @@ Yani **tek bir bot eksiği (ehliyet almamak) 5 olayı, 2 mesleği ve 1 işletme 
 14. Her arketip çalışıyor; işsiz kalmayı seçen profil yok.
 
 **Varsayılan işlem:** Onay gelene dek hiçbir denge değeri değişmez, `finger.dart` düzeltmesi yapılmaz ve `DECISIONS.md`'ye karar yazılmaz. Bot tarafındaki 7 madde (8–14) ürün kararı değil; yine de Faho'ya bildirilmeden ölçüm sayıları yeniden üretilmeyecek, çünkü düzeltilince bütün ürün metrikleri değişir.
+
+---
+
+### Q-168 — Paket AC: yatırım riskleri, piyasa şokları ve servet dengesi V2
+
+**Durum:** öneri / karar bekliyor.
+**İlgili kod:** `lib/data/company_catalog.dart`, `lib/domain/models/market_incident.dart`, `lib/domain/economy/incident_engine.dart`, `lib/domain/economy/market_engine.dart`, `lib/domain/economy/investment_engine.dart`, `lib/domain/economy/living_costs.dart`, `lib/data/event_pool_market.dart`. Testler: `paket_ac_test.dart` (33), `paket_ac_measure_test.dart` (2 ölçüm), `paket_ac_adversarial_test.dart` (12).
+**İlgili PR:** #80 (`claude/stoic-maxwell-6rkrit`).
+
+Temel prensip uygulandı: **bot zayıflatılarak problem gizlenmedi, oyun dengelendi.** Yatırım hâlâ faydalı; ama artık risksiz servet makinesi değil.
+
+#### Ne geldi
+
+| Mekanik | Durum |
+|---|---|
+| 12 kurgusal şirket, 10 sektör, sepet payları | geldi |
+| Şirket durumu kademeli: normal → inceleme → sıkıntı → konkordato/kayyum → kapandı | geldi |
+| Konkordato, iflas, kayyum, yönetim skandalı, bilanço şoku, sermaye artırımı, temettü, satın alma, sektör krizi/atağı | geldi |
+| İşlem sırasının kapanması (alım **ve** satım durur, 1-2 yıl) | geldi |
+| Fon riski: yönetici değişimi, yanlış yatırım, strateji değişimi, birleşme, **tasfiye** | geldi |
+| Çok yıllı kriz (1-3 yıl) + **toparlanma** rejimi | geldi |
+| Faiz şoku (%5/yıl), kur şoku (%7/yıl, **iki yönlü**) | geldi |
+| Alım-satım komisyonu %0,2, fon yönetim gideri %1,1/yıl, kazanç kesintisi %10 | geldi |
+| Zorunlu portföy satışı: geçim gideri portföyden karşılanıyor | geldi |
+| Yoğunlaşma riski: tek varlıkta toplanan portföy daha oynak | geldi |
+| 24 yeni piyasa/şirket olayı | geldi |
+| Tekil hisse (§10) | **gelmedi** — ayrı paket olarak bırakıldı (aşağıda) |
+| Nominal enflasyon motoru (§18) | **gelmedi** — mimari raporu aşağıda |
+| Oyuncuya seçenek sunan geçim-gideri akışı (§19'un üç seçeneği) | **gelmedi** — aşağıda |
+
+#### Ölçüm (40.000 piyasa yılı)
+
+| Ölçü | Sonuç |
+|---|---|
+| Rejim dağılımı | normal %45,0 · durgun %24,8 · güçlü %20,3 · **kriz %7,5** · toparlanma %2,4 |
+| Kriz bölümü | 1.441 bölüm · **ortalama 2,09 yıl** · en uzun 6 |
+| Olay görülen yıl | %31,1 (çoğu yıl sessiz) |
+| İşlem kapalı yıl | %4,5 |
+| **Şirket batışı** | yıllık **%0,64** (40.000 yılda 257 kez) |
+| Fon tasfiyesi | yıllık %0,92 |
+| Piyasa paniği | yıllık %4,72 |
+
+Yıllık getiri (40.000 yıl): hisse %9,2 (std %24,8) > fon %7,5 > altın %6,9 > döviz %6,4 > vadeli %6,0. **Risk merdiveni doğru.** 20 yıllık yolda anaparanın altında bitme: hisse %19,3 · fon %3,4 · altın %0,4 · döviz %0,1 — **hiçbir tür risksiz değil.**
+
+#### Min-max oyuncu (8 strateji × 20/40/60 yıl, 3.000 strateji hayatı)
+
+60 yıl, yatırımın **kendi** getirisi (maaş karışmaz, portföy+gerçekleşen / anapara):
+
+| Strateji | medyan | kötü%10 | iyi%10 | yatırım zarar ettiren |
+|---|---|---|---|---|
+| %100 hisse | 7,41x | **0,69x** | 150,43x | **%13,6** |
+| sadece altın | 18,23x | 2,93x | 113,86x | %3,2 |
+| her yıl maksimum | 5,41x | 2,50x | 20,18x | %0,0 |
+| dengeli (4 varlık) | 6,49x | 1,98x | 15,39x | %0,0 |
+| ev + yatırım | 8,50x | 1,34x | 47,71x | %4,0 |
+| girişim + yatırım | 5,64x | 1,33x | 49,61x | %6,4 |
+
+60 yıl, aşırı servet: yatırım yapmayan **%0** 50M'yi geçiyor; yatırım yapan stratejilerde 50M+ %57-76, **1B+ %0-19,2**.
+
+Kuyruk riski (60 yıl, %100 hisse): şirket batışı gören **%100**, fon tasfiyesi %62, işlem kapalı yıl yaşayan %88, panik gören %100, ortalama en derin düşüş **%81**.
+
+#### Paket AC öncesi / sonrası (aynı tohumlar)
+
+| Ölçü | Önce (786c333) | Sonra | Fark |
+|---|---|---|---|
+| Ürün simülasyonu, ölüm anı medyan net servet | 134.365k ₺ | **97.250k ₺** | **−%27,6** |
+| kötü %10 | 19.289k | 15.569k | −%19 |
+| iyi %10 | 569.644k | 402.789k | −%29 |
+| Teşhis korpusu medyan servet | 122.254k | 88.541k | −%27,6 |
+| Portföyün net servetteki payı | %97,8 | %95,8 | −2,0 puan |
+| Ortalama ölüm yaşı | 74,1 | 74,2 | — |
+| Yatırım yapan | %92,1 | %92,5 | — |
+| Ev sahibi | %40,3 | %42,5 | +2,2 puan |
+| **Tekrar evlenen** | **%0,0** | **%0,5** | bug fix |
+
+#### Bulunan yeni defekt: **kontrolsüz borç büyümesi**
+
+`banking.dart advanceYear`: ödenmeyen taksitte borç her yıl faiziyle büyüyor, ama **`remainingPayments` azalmıyor** ve hiçbir tahsil / haciz / yapılandırma / silme mekanizması yok. Kredi hiç kapanmıyor. Uzun hayatlarda borç kontrolsüz büyüyor: ölçümde bir hayatta **1.788.495k ₺ borç** ve **−1.601.336k ₺ net servet** çıktı (ev + yatırım stratejisinin %0,8'i, 125 hayatta 1). Bu bir **oyun defekti**, oyuncu exploiti değil; net servet istatistiklerini de bozuyor.
+
+**Düzeltilmedi**, çünkü doğru çözüm bir ürün kararı: haciz mi, yapılandırma mı, iflas/borç silme mi, yoksa sadece bir üst sınır mı? Karar sizde.
+
+#### Saldırgan oyuncu taraması (§27) — exploit bulunamadı
+
+| Deneme | Sonuç |
+|---|---|
+| Kaydı geri yükleyip piyasayı yeniden çevirmek (25 deneme) | **engelli** — aynı sonuç |
+| Aynı yıl piyasayı 40 kez ilerletmek | **engelli** |
+| Al-sat döngüsü (20 tur) | **para kaybettiriyor** (1.000k → 923k) |
+| Kredi arbitrajı | **yok** — kredi faizi yıllık %42 (Fakbank) / %72 (Bankavrupa), en yüksek yatırım eğilimi %10 |
+| Parayı portföye saklayıp boşanma payından kaçmak | **engelli** — portföy paylaşıma giriyor |
+| İkinci boşanma çağrısıyla ikinci pay almak | **engelli** |
+| Aynı mirası iki kez almak | **engelli** |
+| İşlem kapalıyken zorunlu satışla çıkmak | **engelli** |
+| Vadeli aç-boz döngüsüyle faiz üretmek | **engelli** |
+
+#### §18 — ENFLASYON MİMARİSİ RAPORU (motor kurulmadı)
+
+Soru şu: oyuncunun 80 yaşında 97 milyon ₺ görmesi ne anlama geliyor?
+
+**Mevcut mimari:** oyunun tamamı **sabit 2026 TL** ölçeğinde (D-053). Net yıllık asgari ücret 336.900 ₺ olarak çıpalı; maaşlar, ev/araç fiyatları, geçim gideri, dükkân fiyatları hiç enflasyona uğramıyor. Yatırım eğilimleri (hisse %10, fon %8, altın %7, döviz %6,5, vadeli %6) bu ölçekte yazıldığı için **reel getiri** anlamına geliyor.
+
+**Asıl mesele budur:** yılda %9,2 **reel** getiri, 60 yıl boyunca kesintisiz. 1,092⁶⁰ ≈ **200 kat**. Paket AC'nin risk katmanı medyanı %27,6 düşürdü ve gerçek bir kayıp kuyruğu yarattı, ama üst kuyruğun büyüklüğü **eğilim × ufuk** çarpımından geliyor; olay katmanı onu tek başına çözemez. Ölçümde 1.500 hayatın en yükseği 112 milyar ₺ çıktı.
+
+İki seçenek, mevcut mimariye uygunluklarıyla:
+
+**A) Sabit 2026 reel TL'de kalmak → yatırım eğilimlerini reel ölçeğe indirmek**
+* Mimariye **tam uyumlu**: hiçbir sistem değişmez, tek değişen `investment_catalog.dart` içindeki 5 sayı.
+* Gerçek dünyada uzun vadeli reel hisse getirisi ~%5, tahvil ~%1-2 bandındadır. Oyunun %10'u reel olarak çok yüksek.
+* Örnek: hisse %10 → %5, fon %8 → %4, altın %7 → %2,5, döviz %6,5 → %2, vadeli %6 → %1,5 yapılırsa 60 yılda 1,05⁶⁰ ≈ 18 kat olur (200 kat değil).
+* **Maliyeti:** yatırım "para katlayan" bir sistemden "parayı koruyan + yavaş büyüten" bir sisteme döner. Bu bir **oyun hissi** kararıdır; oyuncuya heyecan veren şeyin bir kısmı gider.
+* Bu turda **yapılmadı**: beş denge sayısını onay almadan değiştirmek yasak.
+
+**B) Nominal enflasyon motoru kurmak**
+* Maaş, geçim gideri, ev/araç fiyatı, dükkân fiyatı, kira, kredi, yatırım **birlikte** büyür. Yatırım nominal olarak yüksek getiri verir ama satın alma gücü ölçülü artar.
+* **Mimari maliyeti ağır:** `economy.dart` çıpası, `job_catalog` maaşları, `shop_catalog` fiyatları, `LivingCosts`, `rental_engine` kira bandı, `Banking` taksitleri, `Inheritance` miras kademeleri, `DivorceSettlement`, bütün `prototypeOnly` tutarlar ve **her para içeren olay metni** bir enflasyon endeksinden geçmek zorunda. Kayıt göçü de gerekir.
+* Ayrıca bütün mevcut ölçüm bekçileri (ev fiyatı, servet bandı, 100 hayat ölçümleri) yeniden kalibre edilmeli.
+* Tahmini iş: bu paketin en az iki katı.
+
+**Açıkça söylüyorum: sadece yatırım fiyatını nominal büyütmek yasak** (§18) ve yapılmadı.
+
+**Önerim (öneri, karar değil):** A. Tek dosyada beş sayı, ölçümle doğrulanabilir, geri alması kolay. B'yi ayrı bir paket olarak, kendi ölçüm turuyla ele almak daha güvenli.
+
+#### Karar soruları
+
+1. **Yatırım eğilimleri** (hisse %10 / fon %8 / altın %7 / döviz %6,5 / vadeli %6) reel ölçekte çok yüksek mi? A seçeneği uygulanmalı mı?
+2. **Şirket batış oranı yıllık %0,64** doğru bantta mı? Nadir ama erişilebilir olsun diye seçildi.
+3. **İşlem kapanması 1-2 yıl** ve yılların %4,5'i. Uzun mu, kısa mı? Oyuncu o süre boyunca satamıyor.
+4. **Kriz 1-3 yıl, yılların %7,5'i.** Doğru mu?
+5. **Komisyon %0,2 / fon gideri %1,1 / kazanç kesintisi %10.** Gerçek mevzuat birebir taklit edilmedi; bantlar doğru mu?
+6. **Zorunlu satış otomatik.** §19 oyuncuya üç seçenek sunulmasını öneriyor (portföyden sat / kredi dene / ödeme güçlüğüne düş). Bu yeni bir bekleyen pencere demek ve teşhis turunda bekleyen pencerelerin gerçek kilitlenme riski olduğu ölçüldü. Seçenekli akış istenir mi?
+7. **Q-165/5 kapanmadı.** Portföy artık görünmez kasa değil (gider oradan karşılanıyor) ama "oyuncuya sorulsun mu" sorusu duruyor.
+8. **Sadece altın stratejisi medyanda hisseyi geçiyor** (18,23x vs 7,41x). Matematiksel olarak doğru (oynaklık sürüklemesi) ama "yüksek risk yüksek getiri" beklentisine ters görünüyor. Böyle mi kalsın?
+9. **Tekil hisse (§10) gelmedi.** Karma sepet ile tek şirket riski karıştırılmadı; ayrı paket (AD) olarak mı açılsın?
+10. **Kontrolsüz borç defekti**: haciz, yapılandırma, borç silme yoksa en azından bir üst sınır konmalı mı?
+11. **1B+ ile ölen oyuncu oranı** min-max stratejilerde %0-19,2. Hard cap konmayacak (§29) ama dağılım kabul edilebilir mi?
+
+**V1/V2'de bilerek yok:** gerçek şirket/banka/fon/kurum/kişi adı, gerçek tarihsel fiyat, canlı veri, gerçek vergi mevzuatı, tekil hisse alım-satımı, türev ürün, kaldıraç, kripto, sermaye artırımına katılma kararı, temettü takvimi.
+
+**Varsayılan işlem:** Onay gelene dek yatırım eğilimleri değişmez, enflasyon motoru kurulmaz, borç defekti düzeltilmez, tekil hisse eklenmez ve `DECISIONS.md`'ye kesin sayı yazılmaz.

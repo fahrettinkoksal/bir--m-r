@@ -1693,7 +1693,9 @@ class LifeProgression {
         .toList(growable: false);
     if (ebeveynler.isEmpty) return state;
 
-    final bool evli = state.marriage != null;
+    // `isMarried`, `marriage != null` değil (Q-167/3): boşanmış oyuncunun
+    // ebeveynleri onu hâlâ evli sayıp "destekleyici" tepki veriyordu.
+    final bool evli = state.isMarried;
     final int bagFarki =
         evli ? prototypeOnlySupportiveBond : prototypeOnlyWorriedBond;
     final int mutluluk = evli

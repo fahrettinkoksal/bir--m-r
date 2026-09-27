@@ -75,13 +75,21 @@ void main() {
   // ===================================================================
   group('Üniversite sınav puanı görünür ve saklanır', () {
     test('lise bitince puan bir kez hesaplanıp kaydedilir', () {
-      // Tohum 6 kullanılıyor: D-162'de yatırım olayları havuza girince
-      // rastgele akış kaydı ve tohum 5'te oyuncu 8 yaşında vefat ediyor
-      // (gerçek bir oyun sonucu, hata değil). Senaryo **yaşayan** bir
-      // öğrenci istiyor; iddialar gevşetilmedi, yalnızca tohum yeniden
-      // çıpalandı.
-      final GameController c = GameController(random: Random(6));
-      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 6);
+      // Tohum 7 kullanılıyor. Bu ikinci yeniden çıpalama:
+      //
+      // * D-162'de yatırım olayları havuza girince akış kaydı, tohum 5'te
+      //   oyuncu 8 yaşında vefat etti; tohum 6'ya geçildi.
+      // * Paket AC'de 24 piyasa olayı havuza girdi ve akış yeniden kaydı;
+      //   tohum 6'daki oyuncu artık liseyi bitiremiyor.
+      //
+      // Sebebi bilinen bir motor kırılganlığı (EKSIKLER §6):
+      // `EventEngine._pick` yaş kapısından **önce** kişiyi çözüyor, bu
+      // yüzden havuza olay eklemek bütün yaşlarda çekilişi kaydırıyor.
+      // **İddialar gevşetilmedi**, yalnızca tohum değişti. Kalıcı çözüm
+      // yaş kapısını kişi çözmeden önce bakmak; o bir motor değişikliği
+      // olduğu için onay bekliyor.
+      final GameController c = GameController(random: Random(7));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 7);
       advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 13);
       resolvePendingEvents(c);
 

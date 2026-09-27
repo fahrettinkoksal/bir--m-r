@@ -402,7 +402,23 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   `zincir_ogretmen_3`). Geri kalanlar ehliyet, hobi `okuma` ya da suç
   zincirinin önceki halkasından gelen flag + hatırlanan kişi rolünün
   birlikte gerekmesi yüzünden oluşmuyor.
-- **Tekrar evlenme %0'ın kök nedeni bulundu: gerçek hata (Q-167/3).**
+- **KONTROLSUZ BORÇ BÜYÜMESİ (Paket AC ölçümünde bulundu).**
+  `banking.dart advanceYear`: ödenmeyen taksitte borç her yıl faiziyle
+  büyüyor ama `remainingPayments` **azalmıyor** ve hiçbir haciz,
+  yapılandırma, iflas ya da borç silme mekanizması yok. Kredi hiç
+  kapanmıyor. Ölçümde bir hayatta **1.788.495k ₺ borç** ve
+  **−1.601.336k ₺ net servet** çıktı (ev+yatırım stratejisinin %0,8'i).
+  Net servet istatistiklerini de bozuyor. Düzeltilmedi çünkü doğru çözüm
+  bir ürün kararı (Q-168/10).
+- **Yatırım eğilimleri reel ölçekte yüksek.** Oyun sabit 2026 TL
+  ölçeğinde (D-053), yani hisse %10 / fon %8 / altın %7 **reel** getiri
+  demek. %9,2 gerçekleşen reel getiri 60 yılda ~200 kat eder. Paket AC'nin
+  risk katmanı medyanı %27,6 düşürdü ve gerçek bir kayıp kuyruğu yarattı
+  (%100 hisse stratejisinde hayatların %13,6'sında yatırım para
+  kaybettiriyor), ama üst kuyruğun büyüklüğü **eğilim × ufuk**
+  çarpımından geliyor. Mimari seçenekler Q-168'de raporlandı; enflasyon
+  motoru **kurulmadı**, eğilimler **değiştirilmedi**.
+- **Tekrar evlenme %0'ın kök nedeni bulundu ve DÜZELTİLDİ (Q-167/3).**
   `Finger` "evli mi" sorusunu `state.marriage != null` ile soruyor;
   boşanmada ve dullukta kayıt bilerek silinmediği için (Paket 36) bu
   koşul bir kez evlenen herkes için hayatının sonuna kadar doğru.
@@ -410,9 +426,16 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   resmîleşmiyor, çıkma teklif edilemiyor. `marryBlockReason` ikinci
   evliliği açıyor ama **evlenecek sevgiliyi edinmenin yolu kapalı**.
   Aynı kalıp `life_progression.dart:1696`'da da var (küçük etki).
-  Doğrusu `state.isMarried`; **düzeltme onay bekliyor** çünkü bütün
-  ilişki metriklerini değiştirecek. Kanıt:
-  `app/test/diagnosis_remarriage_lock_test.dart` (9 test).
+  Paket AC'de düzeltildi: beş yerde `state.isMarried` kullanılıyor
+  (`finger.dart` dördü + `life_progression.dart:1696`). `PlayerBot`'ta da
+  aynı hata vardı (teklif kapısı), o da düzeltildi. Sonuç: ayrılık sonrası
+  yeni flört %0,0 → **%47,5**, yeni sevgili → %8,5, tekrar evlenme →
+  **%5,7**. Kanıt ve tam oyuncu yolu regresyonu:
+  `app/test/diagnosis_remarriage_lock_test.dart` (11 test) — iki eşin
+  ikisi de Finger'dan geliyor, elle sevgili enjekte edilmiyor.
+  **Kalan darlık:** 67 flörtün ancak 12'si sevgiliye dönüyor; bu bot
+  eksiği (flörtle vakit geçirmiyor) ve 45-62 / 60 eşik örtüşmesi
+  (Q-167/2) — ikisi de açık.
   `second_marriage_test.dart` geçiyordu çünkü orada sevgili elle
   kuruluyordu; oyuncunun gerçek yolu test edilmiyordu.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**

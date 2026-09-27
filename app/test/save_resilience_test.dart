@@ -246,7 +246,12 @@ void main() {
     });
 
     test('5. kuşak değişimi', () async {
-      final GameController c = GameController(random: Random(31));
+      // Tohum 32: Paket AC'de 24 piyasa olayı havuza girince akış kaydı
+      // ve tohum 31'deki oyuncu 28 yaşına ulaşamıyor (gerçek bir oyun
+      // sonucu, hata değil). Senaryo çocuk sahibi olabilecek **yaşayan**
+      // bir oyuncu istiyor. İddialar gevşetilmedi, tohum çıpalandı.
+      // Kırılganlığın kaynağı EKSIKLER §6'da yazılı.
+      final GameController c = GameController(random: Random(32));
       addTearDown(c.dispose);
       c.startNewLife(mode: StartMode.tamamenRastgele);
       advanceToAge(c, 28);

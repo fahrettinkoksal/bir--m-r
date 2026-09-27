@@ -1925,6 +1925,139 @@ metrikleri değişeceği için** Faho'ya bildirilmeden dokunulmadı.
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
 `flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
 
+## Paket AC — yatırım riskleri, piyasa şokları ve servet dengesi V2 (27 Eylül 2026)
+
+**Temel prensip:** botu zayıflatarak problem gizlenmedi, **oyun dengelendi**.
+Gerçek oyuncu her yıl yatırım yapabilir; oyun ekonomisi o stratejiye
+dayanmalı. Karar soruları `docs/DESIGN_REVIEW_QUEUE.md` **Q-168**'de.
+
+**Gelen sistemler**
+
+* **12 kurgusal şirket, 10 sektör** (`data/company_catalog.dart`). Hiçbiri
+  gerçek değil; gerçek şirket/banka/fon/kurum/kişi adı geçmiyor.
+* **Olay katmanı** (`domain/economy/incident_engine.dart`): konkordato,
+  iflas, kayyum, yönetim skandalı, bilanço şoku, sermaye artırımı,
+  temettü, satın alma haberi, sektör krizi/atağı, regülatör incelemesi.
+  Şirket durumu **kademeli** ilerliyor — sağlıklı şirket tek yılda iflas
+  etmiyor, oyuncu yolda haberleri görüyor.
+* **İşlem sırasının kapanması**: kayyum/konkordato ve panikte alım **ve**
+  satım 1-2 yıl duruyor. "Satayım kurtulayım" her zaman mümkün değil.
+* **Fon riski**: yönetici değişimi, yanlış yatırım, strateji değişimi,
+  birleşme, **tasfiye** (pozisyon piyasa değerinden nakde döner). Fon tek
+  hisse gibi davranmıyor.
+* **Çok yıllı kriz** (1-3 yıl) ve yeni **toparlanma** rejimi. "Krizde al,
+  ertesi yıl kesin toparlar" garantisi kalktı: krizden doğrudan güçlü yıla
+  atlanamıyor.
+* **Faiz şoku** (%5/yıl) ve **kur şoku** (%7/yıl, **iki yönlü** — döviz
+  her zaman kazanan değil).
+* **Maliyetler**: alım-satım komisyonu %0,2, fon yönetim gideri %1,1/yıl,
+  gerçekleşen kârdan %10 kesinti. Zararda kesinti yok, zarar mahsubu yok.
+  Komisyon **maliyet esasına girmiyor**.
+* **Zorunlu portföy satışı**: cüzdan geçim giderini karşılamazsa açık
+  portföyden kapanıyor. Portföy artık görünmez kasa değil.
+* **Yoğunlaşma riski**: tek riskli varlıkta toplanan portföy daha oynak.
+  Çeşitlendirme kazanç garantisi vermiyor, yalnızca oynaklığı düşürüyor.
+  **Yapay yatırım limiti yok** — isteyen parasının tamamını yatırıyor.
+* **24 yeni piyasa/şirket olayı** (`data/event_pool_market.dart`).
+  Hiçbirinde "şunu al kesin yükselir" yok; hiçbir seçenek doğru cevap
+  değil.
+
+**Ölçüm (40.000 piyasa yılı)**
+
+Rejim: normal %45,0 · durgun %24,8 · güçlü %20,3 · kriz %7,5 ·
+toparlanma %2,4. Kriz bölümü ortalama **2,09 yıl**, en uzun 6.
+Şirket batışı yıllık **%0,64**. İşlem kapalı yıl %4,5. Olay görülen yıl
+%31,1 — çoğu yıl sessiz.
+
+Yıllık getiri: hisse %9,2 (std %24,8) > fon %7,5 > altın %6,9 >
+döviz %6,4 > vadeli %6,0. **Risk merdiveni doğru.** 20 yıllık yolda
+anaparanın altında bitme: hisse %19,3 · fon %3,4 · altın %0,4 ·
+döviz %0,1 — hiçbir tür risksiz değil.
+
+**Min-max oyuncu (8 strateji × 20/40/60 yıl, 3.000 strateji hayatı)**
+
+60 yılda yatırımın kendi getirisi (maaş karışmaz): %100 hisse medyan
+7,41x, kötü%10 **0,69x**, yatırım zarar ettiren **%13,6**. Sadece altın
+18,23x. Yatırım yapmayan hiçbir hayatta 50M'ye ulaşmıyor; yatırım yapan
+stratejilerde 50M+ %57-76.
+
+**Paket AC öncesi / sonrası (aynı tohumlar)**
+
+| Ölçü | Önce | Sonra |
+|---|---|---|
+| Ürün simülasyonu medyan net servet | 134.365k ₺ | **97.250k ₺** (−%27,6) |
+| Teşhis korpusu medyan servet | 122.254k ₺ | 88.541k ₺ (−%27,6) |
+| Portföyün servetteki payı | %97,8 | %95,8 |
+| Tekrar evlenen | %0,0 | **%0,5** |
+
+**Tekrar evlenme bug fix (Q-167/3 kapandı)**
+
+`finger.dart`'ta dört yerde ve `life_progression.dart:1696`'da
+`state.marriage != null` yerine **`state.isMarried`** kullanılıyor artık.
+Boşanmada/dullukta evlilik kaydı bilerek silinmediği için eski koşul bir
+kez evlenen herkes için hayat boyu doğruydu ve bütün romantik yollar
+kalıcı kapanıyordu. `PlayerBot`'ta da aynı hata vardı (teklif kapısı).
+Ayrılık sonrası huni: yeni flört %0,0 → **%47,5**, yeni sevgili → %8,5,
+tekrar evlenme → **%5,7** (teşhis korpusu). Yeni regresyon testi tam
+oyuncu yolunu yürüyor: **iki eşin ikisi de Finger'dan geliyor**, elle
+sevgili enjekte edilmiyor.
+
+**Bulunan yeni defekt: kontrolsüz borç büyümesi**
+
+`banking.dart advanceYear`: ödenmeyen taksitte borç her yıl faiziyle
+büyüyor ama `remainingPayments` azalmıyor ve hiçbir haciz/yapılandırma/
+silme mekanizması yok. Kredi hiç kapanmıyor. Ölçümde bir hayatta
+**1.788.495k ₺ borç** ve **−1.601.336k ₺ net servet** çıktı (125 hayatta
+1). **Düzeltilmedi**: doğru çözüm ürün kararı (Q-168/10).
+
+**Saldırgan oyuncu taraması: exploit bulunamadı.** Kayıt geri yükleyip
+piyasayı yeniden çevirmek, aynı yılı tekrar ilerletmek, al-sat döngüsü,
+kredi arbitrajı, parayı portföye saklayıp boşanma payından kaçmak, ikinci
+boşanma, aynı mirası iki kez almak, kapalı sırada zorunlu satışla çıkmak,
+vadeli aç-boz döngüsü — hepsi engelli. Al-sat döngüsü 20 turda 1.000k →
+923k **kaybettiriyor**.
+
+**Düzeltilen kendi hatalarım (ölçümle bulundu, raporda yazılı)**
+
+* Krizi çok yıllı yapmak kriz yıllarını %8'den **%17,8'e** çıkardı ve
+  risk merdivenini tersine çevirdi (hisse %6,4 < altın %7,9). Krize giriş
+  ihtimali yarıya indirildi: kriz **daha uzun ama daha seyrek**, payı
+  korundu, merdiven düzeldi.
+* Korunma primi her kriz yılında tekrar uygulanıyordu; **Döviz Sepeti'nde
+  1.000 yirmi yıllık yolun hiçbiri anaparanın altında bitmiyordu**.
+  Güvenli limana kaçış krizin **başında** olur: uzayan kriz yılında prim
+  eriyor, toparlanmada geri veriliyor.
+* Kriz kilidinde bire bir kaydırma hatası: ortalama 3,13 yıl, en uzun 11
+  çıkıyordu. Düzeltilince 2,09 / 6 oldu.
+* Yoğunlaşma zammı **bütün getiriyi** çarpıyordu, yani eğilimi de: yoğun
+  portföyün beklenen getirisi yükseliyordu. Ölçümde bir hayat **10,2
+  milyar ₺** ile öldü ve AA'nın bekçisi kırıldı. Doğrusu yalnızca
+  eğilimden sapmayı büyütmek.
+* "Başlangıç parasının altında bitti" ölçüsünü strateji riski sanmıştım;
+  bu hayatlar 60 yıl maaş da alıyor, o yüzden neredeyse hiç gerçekleşmiyor
+  ve "%100 hisse hiç kaybetmiyor" diye okunacaktı. Doğru ölçü yatırımın
+  kendi getirisi: (portföy + gerçekleşen kâr) / anapara.
+
+**Bilerek yapılmayanlar**
+
+* **Nominal enflasyon motoru (§18):** kurulmadı, yalnızca mimari
+  raporlandı (Q-168). Sadece yatırım fiyatını nominal büyütmek yasaktı ve
+  yapılmadı. Asıl mesele şu: **%9,2 reel getiri 60 yılda ~200 kat eder.**
+  Risk katmanı medyanı %27,6 düşürdü ama üst kuyruk **eğilim × ufuk**
+  çarpımından geliyor; olay katmanı onu tek başına çözemez.
+* **Tekil hisse (§10):** karma sepetle tek şirket riski karıştırılmadı;
+  ayrı paket önerisi olarak bırakıldı.
+* **Geçim gideri seçenekli akışı (§19):** zorunlu satış otomatik yapıldı.
+  Üç seçenekli akış yeni bir bekleyen pencere demek ve teşhis turunda
+  bekleyen pencerelerin gerçek kilitlenme riski ölçülmüştü.
+
+**Denge sayıları değişmedi:** yatırım eğilimleri (hisse %10, fon %8,
+altın %7, döviz %6,5, vadeli %6) **aynı**. Değişen şey riskin kendisi.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2549 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

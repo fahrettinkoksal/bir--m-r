@@ -19,6 +19,7 @@ import 'event_pool_infancy.dart';
 import 'event_pool_midlife.dart';
 import 'event_pool_hobby.dart';
 import 'event_pool_investment.dart';
+import 'event_pool_market.dart';
 import 'event_pool_property.dart';
 import 'event_pool_pet.dart';
 import 'event_pool_romance.dart';
@@ -1708,6 +1709,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // Hobi olayları (Paket 39): yalnızca gerçek hobi geçmişi olana çıkar.
   ...kHobbyEvents,
   ...kInvestmentEvents,
+  // Şirket ve piyasa olayları (Paket AC).
+  ...kMarketEvents,
   ...kPropertyEvents,
   ...kPetEvents,
 

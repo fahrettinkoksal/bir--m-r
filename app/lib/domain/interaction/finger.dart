@@ -440,7 +440,15 @@ abstract final class Finger {
     }
 
     const Romance romance = Romance();
-    final bool bosta = !romance.hasPartner(state) && state.marriage == null;
+    // **`isMarried`, `marriage != null` değil (Q-167/3).** Boşanmada ve
+    // dullukta evlilik kaydı bilerek silinmiyor (Paket 36: "kiminle, kaç
+    // yaşında evlenildi" hayat boyu dursun), yalnızca durumu değişiyor.
+    // Bu yüzden `marriage != null` bir kez evlenen herkes için hayatının
+    // sonuna kadar doğruydu ve boşanan/dul kalan oyuncunun bütün
+    // romantik yolları kalıcı olarak kapanıyordu: ölçümde 1000 hayatın
+    // 141'i ayrıldı, 78'i yeni aday gördü, **hiçbiri flört bile
+    // edemedi** ve tekrar evlenme %0,0 çıktı.
+    final bool bosta = !romance.hasPartner(state) && !state.isMarried;
 
     // Tanışmak sevgili olmak değildir (D-107). Buluşmanın sonucu iki
     // tarafın da **ne aradığına** bakar; oyun kimseyi kimsenin sevgilisi
@@ -549,7 +557,9 @@ abstract final class Finger {
       );
     }
     const Romance romance = Romance();
-    if (romance.hasPartner(state) || state.marriage != null) {
+    // `isMarried`: boşanmış/dul oyuncu yeniden flört resmîleştirebilir
+    // (Q-167/3).
+    if (romance.hasPartner(state) || state.isMarried) {
       return FingerResult(
         state: state,
         outcome: const FingerOutcome(
@@ -677,7 +687,8 @@ abstract final class Finger {
       return const InteractionAvailability.blocked('Artık mümkün değil.');
     }
     const Romance romance = Romance();
-    if (romance.hasPartner(state) || state.marriage != null) {
+    // `isMarried`: boşanmış/dul oyuncunun yolu kapanmasın (Q-167/3).
+    if (romance.hasPartner(state) || state.isMarried) {
       return const InteractionAvailability.blocked('Hayatında zaten biri var.');
     }
     if (kisi.bond < prototypeOnlyOfficialBond) {
@@ -708,7 +719,8 @@ abstract final class Finger {
       return const InteractionAvailability.blocked('Artık mümkün değil.');
     }
     const Romance romance = Romance();
-    if (romance.hasPartner(state) || state.marriage != null) {
+    // `isMarried`: boşanmış/dul oyuncunun yolu kapanmasın (Q-167/3).
+    if (romance.hasPartner(state) || state.isMarried) {
       return const InteractionAvailability.blocked('Hayatında zaten biri var.');
     }
     if (state.player.age < 16 || kisi.age < 16) {

@@ -4,6 +4,7 @@ import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import 'business_engine.dart';
+import 'investment_engine.dart';
 import 'housing.dart';
 import '../../text/turkish_text.dart';
 
@@ -334,15 +335,55 @@ abstract final class LivingCosts {
       );
     }
 
-    // Para yetmiyor: cüzdan sıfırlanır, borç oluşmaz, durum açıkça yazılır.
-    final int eksik = gider - cuzdan;
+    // ---- Portföyden zorunlu satış (Paket AC, §19) ---------------------
+    //
+    // V1'de burası doğrudan "cüzdan sıfır + geçim sıkıntısı" yazıyordu ve
+    // portföye **hiç dokunmuyordu**. Teşhiste ölçüldü: hayatların
+    // %46,7'si en az bir yıl bunu yaşıyor ve o yıllarda ortalama
+    // 13,4M ₺ portföy korunarak bileşik büyümeye devam ediyordu.
+    // Cüzdanında 5.000 ₺, portföyünde 40.000.000 ₺ olan birinin "geçim
+    // giderini ödeyemediğini" söylemek mantıksızdı. Artık açık önce
+    // portföyden kapatılır.
+    //
+    // **Q-165/5 bu pakette kapandı mı?** Hayır — soru "oyuncuya seçenek
+    // sunulsun mu" (sat / kredi dene / ödeme güçlüğüne düş) biçiminde
+    // duruyor ve o bir arayüz kararı. Burada yapılan şey daha dar:
+    // portföy artık görünmez kasa değil. Seçenekli akış Q-168'de.
+    int eksik = gider - cuzdan;
+    GameState s = state;
+    if (s.portfolioValue > 0) {
+      final ({GameState state, int raised}) toplanan =
+          InvestmentEngine.raiseCashForExpense(state: s, needed: eksik);
+      s = toplanan.state;
+      if (toplanan.raised > 0) {
+        final int yeniCuzdan = s.player.wallet;
+        if (yeniCuzdan >= gider) {
+          return (
+            state: s.copyWith(
+              player: s.player.copyWith(wallet: yeniCuzdan - gider),
+              hardshipYears: 0,
+            ),
+            logText:
+                'Yıllık geçim giderin ${trMoney(gider)} tuttu; cüzdan '
+                'yetmedi, yatırımdan ${trMoney(toplanan.raised)} bozmak '
+                'zorunda kaldın.',
+          );
+        }
+        eksik = gider - yeniCuzdan;
+      }
+    }
+
+    // Portföy de yetmedi: cüzdan sıfırlanır, borç oluşmaz, durum açıkça
+    // yazılır.
+    final int kalanCuzdan = s.player.wallet;
     return (
-      state: state.copyWith(
-        player: state.player.copyWith(wallet: 0),
-        hardshipYears: state.hardshipYears + 1,
+      state: s.copyWith(
+        player: s.player.copyWith(wallet: 0),
+        hardshipYears: s.hardshipYears + 1,
       ),
-      logText: 'Geçim giderin ${trMoney(gider)} tuttu, cüzdanında ${trMoney(cuzdan)} vardı. '
-          '${trMoney(eksik)} açık kaldı; bu yıl geçim sıkıntısı çektin.',
+      logText: 'Geçim giderin ${trMoney(gider)} tuttu, elinde '
+          '${trMoney(kalanCuzdan)} vardı. ${trMoney(eksik)} açık kaldı; '
+          'bu yıl geçim sıkıntısı çektin.',
     );
   }
 }

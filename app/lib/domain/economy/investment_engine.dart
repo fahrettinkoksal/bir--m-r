@@ -18,13 +18,17 @@ library;
 
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import '../../data/investment_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/investment.dart';
 import '../models/life_log.dart';
+import '../models/market_incident.dart';
 import '../models/market_state.dart';
+import 'incident_engine.dart';
 import '../models/pending_notice.dart';
 import 'market_engine.dart';
 
@@ -65,6 +69,36 @@ abstract final class InvestmentEngine {
   static const int prototypeOnlyNoticeGap = 2;
 
   // -------------------------------------------------------------------
+  // Portföy maliyetleri (Paket AC, §22-23) — hepsi prototypeOnly
+  // -------------------------------------------------------------------
+
+  /// prototypeOnly: alım-satım komisyonu (işlem tutarının oranı).
+  ///
+  /// Küçük ama uzun vadede hissedilir: her yıl alım yapan oyuncu bunu
+  /// altmış kez öder. Gerçek bir aracı kurum tarifesi taklit edilmedi.
+  static const double prototypeOnlyTradeCommission = 0.002;
+
+  /// prototypeOnly: fonun yıllık yönetim gideri (pozisyon değerinin oranı).
+  ///
+  /// Yalnızca fona uygulanır — "içinde biraz her şey var" diyen bir ürünün
+  /// bir yöneticisi vardır ve o yönetici ücret alır.
+  static const double prototypeOnlyFundAnnualFee = 0.011;
+
+  /// prototypeOnly: satışta **gerçekleşen kârdan** yapılan kesinti.
+  ///
+  /// Gerçek Türkiye vergi mevzuatı **birebir kodlanmadı** (§23): tek
+  /// oranlı, oyunlaştırılmış bir kesinti. Yalnızca kârdan alınır; zararda
+  /// kesinti yoktur ve zarar mahsubu yoktur.
+  static const double prototypeOnlyGainWithholding = 0.10;
+
+  /// prototypeOnly: tek bir riskli varlıkta yoğunlaşmanın oynaklık zammı.
+  ///
+  /// Portföyün tamamı tek riskli varlıktaysa o varlığın kendi gürültüsü
+  /// bu kat kadar büyür; dağıtıldığında etkisi kaybolur. Çeşitlendirme
+  /// **kazanç garantisi vermez**, yalnızca oynaklığı düşürür (§24).
+  static const double prototypeOnlyConcentrationVolBoost = 0.55;
+
+  // -------------------------------------------------------------------
   // Uygunluk
   // -------------------------------------------------------------------
 
@@ -89,8 +123,15 @@ abstract final class InvestmentEngine {
     if (!u.isAllowed) return u.reason!;
     final int enAz = type.isTermDeposit ? kTermDepositMinAmount : kInvestmentMinBuy;
     if (amount < enAz) return 'En az ${trMoney(enAz)} ile başlanabiliyor.';
-    if (state.player.wallet < amount) {
-      return 'Cüzdanında ${trMoney(amount)} yok.';
+    // **İşlem sırası kapalıysa alım da yapılmaz (Paket AC, §5).**
+    final TradingHalt? durma =
+        state.market.haltFor(type.id, state.player.age);
+    if (durma != null) return durma.reason;
+    // Komisyon cüzdandan ayrıca çıkar; parası tam tutarsa alım olmaz.
+    final int komisyon = commissionFor(amount);
+    if (state.player.wallet < amount + komisyon) {
+      return 'Cüzdanında ${trMoney(amount + komisyon)} yok '
+          '(${trMoney(komisyon)} işlem masrafı dahil).';
     }
     return '';
   }
@@ -110,7 +151,20 @@ abstract final class InvestmentEngine {
     if (amount > h.value) {
       return 'Elindeki ${trMoney(h.value)} kadarını satabilirsin.';
     }
+    // **İşlem sırası kapalıysa satış yapılamaz (Paket AC, §5).**
+    // "Satayım kurtulayım" her zaman mümkün değil; gerçek yatırım
+    // risklerinden biri bu. Süre sonsuz değil, `untilAge` ile biter.
+    final TradingHalt? durma =
+        state.market.haltFor(type.id, state.player.age);
+    if (durma != null) return durma.reason;
     return '';
+  }
+
+  /// Bir işlemin komisyonu (₺). En az 1 ₺, tutar sıfırsa 0.
+  static int commissionFor(int amount) {
+    if (amount <= 0) return 0;
+    final int k = (amount * prototypeOnlyTradeCommission).round();
+    return k < 1 ? 1 : k;
   }
 
   // -------------------------------------------------------------------
@@ -141,10 +195,16 @@ abstract final class InvestmentEngine {
             totalInvested: mevcut.totalInvested + amount,
           );
 
-    final String metin = '${tur.name}: ${trMoney(amount)} aldın.';
+    // **Komisyon (§22).** Yatırılan tutar pozisyona girer, masraf
+    // cüzdandan ayrıca çıkar: maliyet esasını şişirmemek için.
+    final int komisyon = commissionFor(amount);
+    final String metin = komisyon > 0
+        ? '${tur.name}: ${trMoney(amount)} aldın. '
+            'İşlem masrafı ${trMoney(komisyon)}.'
+        : '${tur.name}: ${trMoney(amount)} aldın.';
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet - amount,
+        wallet: state.player.wallet - amount - komisyon,
       ),
       investments: List<Holding>.unmodifiable(<Holding>[
         for (final Holding h in state.investments)
@@ -254,15 +314,27 @@ abstract final class InvestmentEngine {
       realizedProfit: h.realizedProfit + gerceklesen,
     );
 
+    // **Komisyon ve kazanç kesintisi (§22-23).** Kesinti yalnızca
+    // gerçekleşen **kârdan** alınır; zararda kesinti yoktur ve zarar
+    // mahsubu yoktur (gerçek mevzuat birebir kodlanmadı).
+    final int komisyon = commissionFor(amount);
+    final int kesinti = gerceklesen > 0
+        ? (gerceklesen * prototypeOnlyGainWithholding).round()
+        : 0;
+    final int eleGecen = amount - komisyon - kesinti;
+
     final String metin = gerceklesen >= 0
         ? '${tur.name}: ${trMoney(amount)} sattın. '
-            'Kâr ${trMoney(gerceklesen)}.'
+            'Kâr ${trMoney(gerceklesen)}, kesintiler '
+            '${trMoney(komisyon + kesinti)}. '
+            'Eline ${trMoney(eleGecen)} geçti.'
         : '${tur.name}: ${trMoney(amount)} sattın. '
-            'Zarar ${trMoney(-gerceklesen)}.';
+            'Zarar ${trMoney(-gerceklesen)}, işlem masrafı '
+            '${trMoney(komisyon)}.';
 
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet + amount,
+        wallet: state.player.wallet + eleGecen,
       ),
       investments: List<Holding>.unmodifiable(<Holding>[
         for (final Holding x in state.investments)
@@ -368,6 +440,75 @@ abstract final class InvestmentEngine {
     return h;
   }
 
+  /// **Zorunlu satış (Paket AC, §19).** Geçim gideri gibi kaçınılmaz bir
+  /// ödeme için portföyden nakit toplar.
+  ///
+  /// V1'de portföy geçim giderinden **tamamen korunuyordu**:
+  /// `LivingCosts.apply` yalnızca cüzdana bakıyor, para yetmezse cüzdanı
+  /// sıfırlıyor ve borç yazmadan "geçim sıkıntısı" kaydediyordu. Teşhiste
+  /// ölçüldü — hayatların %46,7'si en az bir yıl bu durumu yaşıyordu ve o
+  /// yıllarda ortalama 13,4M ₺ portföy **dokunulmadan** bileşik büyümeye
+  /// devam ediyordu. Cüzdanında 5.000 ₺, portföyünde 40.000.000 ₺ olan
+  /// biri "geçim giderini ödeyemedi" sayılıyordu. Artık portföy görünmez
+  /// kasa değil.
+  ///
+  /// Sıra: **serbest pozisyonlar önce, vadeli hesap en son.** Vadeliyi
+  /// bozmak faizi yakar, o yüzden son çare. İşlem sırası kapalı olan tür
+  /// atlanır — zorunlu satış bile kapalı sırayı açmaz (§5).
+  ///
+  /// Satışlar normal [sell] ve [breakTermDeposit] üzerinden geçer:
+  /// gerçekleşen kâr/zarar, komisyon, kazanç kesintisi, geçmiş kaydı ve
+  /// günlük satırı tek yerden yazılır. İkinci bir muhasebe kurulmaz.
+  ///
+  /// [needed] **eline geçmesi gereken** net tutardır; komisyon ve kesinti
+  /// düşüldükten sonra bu kadar nakit kalmalıdır.
+  static ({GameState state, int raised}) raiseCashForExpense({
+    required GameState state,
+    required int needed,
+  }) {
+    if (needed <= 0) return (state: state, raised: 0);
+    GameState s = state;
+    final int baslangic = state.player.wallet;
+
+    // Riskli pozisyonlar: en büyük olandan başla. Sebebi şu — küçük
+    // pozisyonu tamamen tüketip portföyü parçalamak yerine büyük
+    // pozisyondan bir dilim almak oyuncunun dağılımını daha az bozar.
+    final List<Holding> sirali = state.investments
+        .where((Holding h) => h.value > 0)
+        .toList(growable: true)
+      ..sort((Holding a, Holding b) => b.value.compareTo(a.value));
+
+    for (final Holding h in sirali) {
+      final int kalan = needed - (s.player.wallet - baslangic);
+      if (kalan <= 0) break;
+      if (s.market.haltFor(h.typeId, s.player.age) != null) continue;
+      final Holding? guncel = s.holdingOf(h.typeId);
+      if (guncel == null || guncel.value <= 0) continue;
+      // Komisyon ve kesinti yüzünden satılan tutarın tamamı ele
+      // geçmiyor; bir miktar fazla satmak gerekiyor. Oran küçük olduğu
+      // için kaba bir pay yeterli, kalanı sonraki turda toplanır.
+      final int hedef =
+          (kalan / (1 - prototypeOnlyTradeCommission - prototypeOnlyGainWithholding))
+              .ceil();
+      final int miktar = hedef < guncel.value ? hedef : guncel.value;
+      final InvestmentResult r =
+          sell(state: s, typeId: h.typeId, amount: miktar);
+      if (!r.outcome.applied) continue;
+      s = r.state;
+    }
+
+    // Vadeli hesap: en son. Faizi yanar.
+    for (final TermDeposit d in state.termDeposits) {
+      final int kalan = needed - (s.player.wallet - baslangic);
+      if (kalan <= 0) break;
+      final InvestmentResult r = breakTermDeposit(state: s, depositId: d.id);
+      if (!r.outcome.applied) continue;
+      s = r.state;
+    }
+
+    return (state: s, raised: s.player.wallet - baslangic);
+  }
+
   /// Boşanma payı gibi **zorunlu** bir ödeme için, belirtilen yaştan
   /// sonra açılmış pozisyonlardan nakit toplar.
   ///
@@ -438,8 +579,33 @@ abstract final class InvestmentEngine {
       rng: Random(marketSeed(state, newAge)),
     );
 
-    GameState sonuc = state.copyWith(market: piyasa.state);
-    sonuc = _revaluePortfolio(sonuc, piyasa.year, newAge);
+    // ---- Olay katmanı (Paket AC) --------------------------------------
+    // Olaylar **kendi zarını** kullanır (piyasa tohumundan türer) ve
+    // etkileri portföye uygulanır, endekse değil: endeks bütün oyuncular
+    // için ortaktır, olay etkisi ise pozisyona özeldir. Endeksi olayla
+    // oynatmak portföyü olmayan oyuncunun fiyatını da kaydırır ve
+    // etkiyi iki kez sayardı.
+    final IncidentOutcome olaylar = IncidentEngine.advance(
+      state: state.market,
+      regime: piyasa.state.regime,
+      newAge: newAge,
+      basketValue: state.holdingOf('hisse')?.value ?? 0,
+      fundValue: state.holdingOf('fon')?.value ?? 0,
+      rng: Random(marketSeed(state, newAge) ^ 0x5bf03635),
+    );
+
+    GameState sonuc = state.copyWith(
+      market: piyasa.state.copyWith(
+        companyStatus: Map<String, String>.unmodifiable(olaylar.companyStatus),
+        halts: List<TradingHalt>.unmodifiable(olaylar.halts),
+        incidents: List<MarketIncident>.unmodifiable(<MarketIncident>[
+          ...state.market.incidents,
+          ...olaylar.incidents,
+        ]),
+      ),
+    );
+    sonuc = _revaluePortfolio(sonuc, piyasa.year, newAge, olaylar);
+    sonuc = _applyIncidentCash(sonuc, olaylar, newAge);
     sonuc = _settleTermDeposits(sonuc, newAge);
     sonuc = _maybeMarketNotice(sonuc, piyasa.year, newAge);
     return sonuc;
@@ -450,8 +616,23 @@ abstract final class InvestmentEngine {
     GameState state,
     MarketYear year,
     int newAge,
+    IncidentOutcome olaylar,
   ) {
     if (state.investments.isEmpty) return state;
+
+    // **Yoğunlaşma (§24).** Portföyün ne kadarı tek bir riskli varlıkta?
+    // Tamamı tek varlıktaysa o varlığın kendi gürültüsü büyür; dağıtılmışsa
+    // etkisi kaybolur. Çeşitlendirme **kazanç garantisi vermez**, yalnızca
+    // oynaklığı düşürür. Vadeli hesap riskli sayılmaz.
+    final int riskliToplam = state.investments
+        .fold<int>(0, (int t, Holding h) => t + (h.value > 0 ? h.value : 0));
+    final int enBuyuk = state.investments.fold<int>(
+        0, (int t, Holding h) => h.value > t ? h.value : t);
+    final double yogunlasma =
+        riskliToplam <= 0 ? 0 : (enBuyuk / riskliToplam).clamp(0.0, 1.0);
+    // 0,5'te (iki eşit varlık) etki yok; 1,0'da tam zam.
+    final double yogunlasmaZammi = ((yogunlasma - 0.5) / 0.5).clamp(0.0, 1.0) *
+        prototypeOnlyConcentrationVolBoost;
 
     final List<Holding> yeni = <Holding>[];
     final List<InvestmentRecord> kayitlar = <InvestmentRecord>[];
@@ -461,18 +642,43 @@ abstract final class InvestmentEngine {
         yeni.add(h);
         continue;
       }
-      final int yeniDeger = (h.value * (1 + getiri)).round();
+      // Yoğunlaşma zammı getiriyi **eğilimden uzaklaştırır**: iyi yıl daha
+      // iyi, kötü yıl daha kötü, ama **beklenen değer kaymaz**.
+      //
+      // İlk yazımda bütün getiriyi çarpıyordum (`getiri * (1 + zam)`).
+      // O, eğilimi de çarpıyordu: yoğunlaşan portföyün beklenen getirisi
+      // yükseliyordu — oysa yoğunlaşma risk ekler, getiri eklemez.
+      // Sonuç ölçümde görüldü: 100 hayatta bir oyuncu **10,2 milyar ₺**
+      // ile öldü ve AA'nın "yatırım ekonomiyi kırıyor" bekçisi kırıldı.
+      // Doğrusu yalnızca **eğilimden sapmayı** büyütmek.
+      double etkinGetiri = getiri;
+      if (yogunlasmaZammi > 0 && h.value == enBuyuk) {
+        final double egilim = investmentTypeById(h.typeId)?.drift ?? 0;
+        etkinGetiri = egilim + (getiri - egilim) * (1 + yogunlasmaZammi);
+      }
+      // Olay çarpanı (şirket batışı, panik, sektör…).
+      final double olayCarpani = olaylar.multipliers[h.typeId] ?? 1.0;
+      // Fonun yıllık yönetim gideri (§22).
+      final double yonetimGideri =
+          h.typeId == 'fon' ? prototypeOnlyFundAnnualFee : 0;
+
+      final int yeniDeger =
+          (h.value * (1 + etkinGetiri) * olayCarpani * (1 - yonetimGideri))
+              .round();
       final int guvenli = yeniDeger < 0 ? 0 : yeniDeger;
       yeni.add(h.copyWith(value: guvenli));
 
       // Yalnızca **sıra dışı** yıl geçmişe yazılır; her yılın hareketi
-      // yazılsa geçmiş okunamaz hâle gelirdi.
-      if (getiri.abs() >= prototypeOnlyBigMove) {
+      // yazılsa geçmiş okunamaz hâle gelirdi. Ölçü gerçekleşen değişimdir,
+      // ham getiri değil: olay etkisi de sayılsın.
+      final double gercekOran =
+          h.value <= 0 ? 0 : (guvenli - h.value) / h.value;
+      if (gercekOran.abs() >= prototypeOnlyBigMove) {
         kayitlar.add(
           InvestmentRecord(
             typeId: h.typeId,
             age: newAge,
-            kind: getiri > 0
+            kind: gercekOran > 0
                 ? InvestmentRecordKind.buyukKazanc
                 : InvestmentRecordKind.buyukKayip,
             amount: (guvenli - h.value).abs(),
@@ -491,6 +697,90 @@ abstract final class InvestmentEngine {
             ]),
     );
   }
+
+  /// Olayların nakit tarafını uygular: temettü girişi ve fon tasfiyesi.
+  ///
+  /// **Tasfiye bir kez olur.** Fon pozisyonu piyasa değerinden nakde
+  /// döner: gerçekleşen kâr/zarar normal satış muhasebesinden geçer,
+  /// böylece iki yerde iki ayrı hesap olmaz. Tasfiyede komisyon ve
+  /// kazanç kesintisi **alınmaz** — bu oyuncunun kararı değil, fonun
+  /// kapanması.
+  static GameState _applyIncidentCash(
+    GameState state,
+    IncidentOutcome olaylar,
+    int newAge,
+  ) {
+    if (olaylar.isEmpty) return state;
+    GameState s = state;
+
+    for (final MarketIncident olay in olaylar.incidents) {
+      switch (olay.kind) {
+        case IncidentKind.temettu:
+          if (olay.cashDelta <= 0) break;
+          s = s.copyWith(
+            player: s.player.copyWith(
+              wallet: s.player.wallet + olay.cashDelta,
+            ),
+          );
+          s = _log(
+            s,
+            'Beklemediğin bir temettü geldi: ${trMoney(olay.cashDelta)}.',
+            newAge,
+          );
+
+        case IncidentKind.fonTasfiye:
+          final Holding? fon = s.holdingOf('fon');
+          if (fon == null || fon.isEmpty) break;
+          final int deger = fon.value;
+          final int gerceklesen = deger - fon.costBasis;
+          s = s.copyWith(
+            player: s.player.copyWith(wallet: s.player.wallet + deger),
+            investments: List<Holding>.unmodifiable(<Holding>[
+              for (final Holding h in s.investments)
+                if (h.typeId != 'fon')
+                  h
+                else
+                  h.copyWith(
+                    value: 0,
+                    costBasis: 0,
+                    realizedProfit: h.realizedProfit + gerceklesen,
+                  ),
+            ]),
+            investmentHistory: List<InvestmentRecord>.unmodifiable(
+              <InvestmentRecord>[
+                ...s.investmentHistory,
+                InvestmentRecord(
+                  typeId: 'fon',
+                  age: newAge,
+                  kind: InvestmentRecordKind.satti,
+                  amount: deger,
+                  realized: gerceklesen,
+                ),
+              ],
+            ),
+          );
+          s = _log(
+            s,
+            'Fon tasfiye edildi. Payın ${trMoney(deger)} olarak hesabına '
+            'geçti; senin kararın değildi.',
+            newAge,
+          );
+
+        default:
+          break;
+      }
+    }
+    return s;
+  }
+
+  /// Yalnızca ölçüm/test içindir: olayların nakit tarafını uygular.
+  @visibleForTesting
+  static GameState debugApplyIncidentCash(
+    GameState state,
+    IncidentOutcome olaylar,
+    int newAge,
+  ) =>
+      _applyIncidentCash(state, olaylar, newAge);
 
   /// Vadesi dolan hesapları kapatır ve parayı cüzdana yazar.
   static GameState _settleTermDeposits(GameState state, int newAge) {

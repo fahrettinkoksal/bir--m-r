@@ -184,15 +184,25 @@ void main() {
       expect(r.state.player.wallet, 5000);
     });
 
-    test('alım maliyeti ve ortalama maliyet birikiyor', () {
+    test('alım maliyeti birikiyor, komisyon maliyet esasına GİRMİYOR', () {
+      // Paket AC: alım-satım komisyonu geldi (§22). Bu test eskiden
+      // "cüzdan tam 50.000" diyordu; komisyon eklendiğinde kırıldı ve
+      // **gevşetilmek yerine güçlendirildi**: artık komisyonun tam
+      // tutarını ve maliyet esasına girmediğini birlikte iddia ediyor.
+      // Maliyet esasının şişmemesi önemli — şişerse satışta gerçekleşen
+      // kâr eksik hesaplanır ve kesinti kaçar.
       GameState s = hayat(wallet: 100000);
       s = InvestmentEngine.buy(state: s, typeId: 'fon', amount: 30000).state;
       s = InvestmentEngine.buy(state: s, typeId: 'fon', amount: 20000).state;
       final Holding h = s.holdingOf('fon')!;
       expect(h.value, 50000);
-      expect(h.costBasis, 50000);
+      expect(h.costBasis, 50000, reason: 'komisyon maliyet esasına girmemeli');
       expect(h.totalInvested, 50000);
-      expect(s.player.wallet, 50000);
+      final int komisyon = InvestmentEngine.commissionFor(30000) +
+          InvestmentEngine.commissionFor(20000);
+      expect(komisyon, 100, reason: '%0,2 komisyon: 60 + 40');
+      expect(s.player.wallet, 100000 - 50000 - komisyon);
+      expect(s.player.wallet, 49900);
     });
 
     test('kısmi satış maliyeti oranlı düşürür', () {
@@ -202,13 +212,47 @@ void main() {
       s = s.copyWith(investments: <Holding>[
         s.holdingOf('hisse')!.copyWith(value: 60000),
       ]);
+      final int alimKomisyonu = InvestmentEngine.commissionFor(40000);
+      final int cuzdanAlimSonrasi = 100000 - 40000 - alimKomisyonu;
       s = InvestmentEngine.sell(state: s, typeId: 'hisse', amount: 30000).state;
       final Holding h = s.holdingOf('hisse')!;
       expect(h.value, 30000);
       expect(h.costBasis, 20000); // 40.000'in yarısı
+      // Gerçekleşen kâr **brüt** kalır: kesinti kârı azaltmaz, cüzdana
+      // giren tutarı azaltır. Karıştırılırsa geçmiş kaydı yanlış olur.
       expect(h.realizedProfit, 10000);
-      expect(s.player.wallet, 90000); // 60.000 kalan + 30.000 satış
       expect(h.unrealizedProfit, 10000);
+      // Paket AC (§22-23): satışta komisyon ve **kâr üzerinden** kesinti.
+      // Zararda kesinti olmaz; burada kâr var.
+      final int satisKomisyonu = InvestmentEngine.commissionFor(30000);
+      final int kesinti =
+          (10000 * InvestmentEngine.prototypeOnlyGainWithholding).round();
+      expect(satisKomisyonu, 60);
+      expect(kesinti, 1000, reason: '10.000 kârın %10\'u');
+      expect(
+        s.player.wallet,
+        cuzdanAlimSonrasi + 30000 - satisKomisyonu - kesinti,
+      );
+      expect(s.player.wallet, 88860);
+    });
+
+    test('zararına satışta kâr kesintisi ALINMIYOR', () {
+      // Kesinti yalnızca kârdan alınır; zarar mahsubu da yok.
+      GameState s = hayat(wallet: 100000);
+      s = InvestmentEngine.buy(state: s, typeId: 'hisse', amount: 40000).state;
+      final int cuzdan = s.player.wallet;
+      // Pozisyon yarıya indi.
+      s = s.copyWith(investments: <Holding>[
+        s.holdingOf('hisse')!.copyWith(value: 20000),
+      ]);
+      s = InvestmentEngine.sell(state: s, typeId: 'hisse', amount: 20000).state;
+      final Holding h = s.holdingOf('hisse')!;
+      expect(h.realizedProfit, -20000);
+      // Yalnızca komisyon düşer, kesinti yok.
+      expect(
+        s.player.wallet,
+        cuzdan + 20000 - InvestmentEngine.commissionFor(20000),
+      );
     });
 
     test('tamamı satılınca maliyet artığı kalmıyor', () {
@@ -327,15 +371,21 @@ void main() {
   });
 
   group('Servet, miras ve boşanma (AA/3)', () {
-    test('yatırım net varlığa giriyor', () {
+    test('yatırım net varlığa giriyor; tek fark komisyon', () {
+      // Paket AC öncesi bu test "net varlık hiç değişmedi" diyordu.
+      // Komisyon geldi (§22), yani alım artık **bedava değil**. Test
+      // gevşetilmedi: farkın tam olarak komisyon kadar olduğunu iddia
+      // ediyor. Fark başka bir şeyden gelirse (örneğin portföy eksik
+      // sayılırsa) bu iddia kırılır.
       GameState s = hayat(wallet: 100000);
       final int once = NetWorth.of(s);
       s = InvestmentEngine.buy(state: s, typeId: 'fon', amount: 40000).state;
-      // Para yatırıma geçti; net varlık değişmedi, yer değiştirdi.
-      expect(NetWorth.of(s), once);
-      expect(s.player.wallet, 60000);
+      final int komisyon = InvestmentEngine.commissionFor(40000);
+      expect(komisyon, 80);
+      expect(NetWorth.of(s), once - komisyon);
+      expect(s.player.wallet, 100000 - 40000 - komisyon);
       expect(s.portfolioValue, 40000);
-      expect(NetWorth.liquid(s), 100000);
+      expect(NetWorth.liquid(s), 100000 - komisyon);
     });
 
     test('vadeli hesap da net varlıkta sayılıyor', () {

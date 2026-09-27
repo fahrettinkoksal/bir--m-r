@@ -1,65 +1,53 @@
-/// **Teşhis kanıtı: tekrar evlenme %0'ın kök nedeni.**
+/// **Tekrar evlenme kilidi — bulundu, kanıtlandı, düzeltildi (Q-167/3).**
 ///
-/// Ürün simülasyonunda 1000 hayatta tekrar evlenen **%0,0** çıktı.
-/// `diagnosis_root_cause_test.dart` hunisi kırılmanın yerini gösterdi:
+/// Ürün simülasyonunda 1000 hayatta tekrar evlenen **%0,0** çıkıyordu.
+/// Teşhis hunisi kırılmanın yerini gösterdi:
 ///
 /// ```
 /// ayrilan                      141  %100.0
 /// yeniden bekar sayiliyor      141  %100.0   <- marryBlockReason acik
 /// yeni partner adayi gordu      78   %55.3   <- Finger destesi doluyor
-/// yeni flort                     0    %0.0   <- BURADA KIRILIYOR
-/// yeni sevgili                   0    %0.0
+/// yeni flort                     0    %0.0   <- BURADA KIRILIYORDU
 /// YENIDEN EVLENDI                0    %0.0
 /// ```
 ///
-/// Bu dosya istatistik değil **kanıt** üretir: tek bir kurulmuş durumla,
-/// rastgelelik olmadan, kilidin yerini gösterir.
+/// **Kök neden.** `GameState.isMarried` doğru çalışıyor: boşanmış
+/// (`bosandi`) ya da dul (`dul`) kayıt "evli" saymıyor, ve
+/// `MarriageEngine.marryBlockReason` ikinci evliliği **açıyor**. Ama
+/// `Finger` aynı soruyu başka bir alandan soruyordu:
+/// **`state.marriage != null`**. Boşanmada ve dullukta kayıt bilerek
+/// silinmiyor (Paket 36: "kiminle, kaç yaşında evlenildi" hayat boyu
+/// dursun), dolayısıyla o koşul **bir kez evlenen herkes için hayatının
+/// sonuna kadar doğruydu**.
 ///
-/// **Bulgu.** `MarriageEngine.marryBlockReason` ikinci evliliği doğru
-/// biçimde açıyor — `GameState.isMarried` boşanmış ya da dul kaydı
-/// "evli" saymıyor:
+/// Kapanan yollar (hepsi düzeltildi, `state.isMarried` oldu):
 ///
-/// ```dart
-/// bool get isMarried {
-///   final Marriage? kayit = marriage;
-///   if (kayit == null || !kayit.isActive) return false;   // bosandi -> false
-///   final Person? es = spouse;
-///   return es != null && es.isAlive;                      // vefat -> false
-/// }
-/// ```
+/// | Yer | Etkisi |
+/// |---|---|
+/// | `finger.dart:451` `meetFingerMatch` | eşleşme arkadaş kalıyordu, flört olmuyordu |
+/// | `finger.dart:562` `makeRelationshipOfficial` | "Hayatında zaten biri var." |
+/// | `finger.dart:691` `officialAvailability` | aynı engel |
+/// | `finger.dart:723` `askOutAvailability` | aynı engel |
+/// | `life_progression.dart:1696` | boşanmış oyuncunun ebeveynleri onu evli sayıyordu |
 ///
-/// Ama `Finger` aynı soruyu **başka bir alandan** soruyor:
-/// `state.marriage != null`. Boşanmada kayıt silinmiyor, yalnızca
-/// `status: bosandi` oluyor (bilerek: "kiminle, kaç yaşında evlenildi"
-/// bilgisi hayat boyu duruyor, Paket 36). Dul kalmada da kayıt duruyor.
-/// Yani `marriage != null` **bir kez evlenen herkes için hayatının geri
-/// kalanında doğru**.
+/// Oyun "yeniden evlenebilirsin" diyordu ama evlenecek sevgiliyi
+/// edinmenin yolu kapalıydı. `second_marriage_test.dart` geçiyordu çünkü
+/// orada sevgili **elle** kuruluyor; oyuncunun gerçek yolu test
+/// edilmiyordu. Bu dosya o boşluğu kapatıyor.
 ///
-/// Sonuç: bir kez evlenmiş oyuncu boşansa da dul kalsa da romantik
-/// ilişkiye giren bütün Finger yollarını **kalıcı olarak** kapatıyor:
-///
-/// * `finger.dart:443` `meetFingerMatch` — `bosta` yanlış olur, eşleşme
-///   yalnızca arkadaş kalır, flört olmaz.
-/// * `finger.dart:552` `makeRelationshipOfficial` — "Hayatında zaten
-///   biri var."
-/// * `finger.dart:680` `officialAvailability` — aynı engel.
-/// * `finger.dart:711` `askOutAvailability` — aynı engel.
-///
-/// Oyun "yeniden evlenebilirsin" diyor ama evlenecek sevgiliyi edinmenin
-/// yolu kapalı. `second_marriage_test.dart` geçiyor çünkü orada sevgili
-/// **elle** kuruluyor; oyuncunun gerçek yolu test edilmiyordu.
-///
-/// **Bu dosya hiçbir şeyi düzeltmiyor.** Teşhis turunda denge ve kod
-/// değiştirmek yasak; bulgu `docs/DESIGN_REVIEW_QUEUE.md` ve
-/// `docs/EKSIKLER.md` üzerinden Faho'ya gidiyor. Testler mevcut
-/// **yanlış** davranışı sabitliyor ve düzeltildiğinde kırılacak biçimde
-/// yazıldı: her birinin adında "BUG" var ve içinde doğru davranışın ne
-/// olduğu yazılı.
+/// **Bu bir denge değişikliği değil, hata düzeltmesidir.** Hiçbir eşik,
+/// ihtimal, fiyat ya da getiri değişmedi.
 library;
 
+import 'dart:math';
+
+import 'package:bir_omur/data/finger_catalog.dart';
+import 'package:bir_omur/data/health_crisis_catalog.dart';
+import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/finger.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
+import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
@@ -68,6 +56,7 @@ import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
+import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const MarriageEngine _evlilik = MarriageEngine();
@@ -78,7 +67,6 @@ Person _kisi(
   required RelationType relation,
   int age = 34,
   int bond = 90,
-  bool isAlive = true,
 }) =>
     Person(
       id: id,
@@ -87,7 +75,7 @@ Person _kisi(
       gender: Gender.kadin,
       relation: relation,
       age: age,
-      isAlive: isAlive,
+      isAlive: true,
       inPlayerHousehold: false,
       employment: EmploymentStatus.calisiyor,
       occupation: 'öğretmen',
@@ -95,15 +83,13 @@ Person _kisi(
       bond: bond,
     );
 
-/// Erkek oyuncu; yanında romantik ilişkiye açık bir arkadaş ve bir
-/// flört. Hiçbir şey `debugSetState` ile verilmiyor: durum doğrudan
-/// kuruluyor ve bütün geçişler üretim motorlarından geçiyor.
+/// Erkek oyuncu; yanında romantik ilişkiye açık bir arkadaş ve bir flört.
 ///
 /// [sevgiliyle] yalnızca evlenip boşanma kurulumunda açılıyor.
-/// `Romance.hasPartner` yalnızca **yaşayan sevgiliye** bakıyor, bu
-/// yüzden karşılaştırmanın temiz olması için temel durumda sevgili
-/// bulunmuyor: yoksa "hayatında zaten biri var" engeli hiç evlenmemiş
-/// oyuncuda da çıkar ve kilit ölçülemez.
+/// `Romance.hasPartner` yalnızca **yaşayan sevgiliye** bakıyor, bu yüzden
+/// karşılaştırmanın temiz olması için temel durumda sevgili bulunmuyor:
+/// yoksa "hayatında zaten biri var" engeli hiç evlenmemiş oyuncuda da
+/// çıkar ve kilit ölçülemez.
 GameState _hayat({int age = 40, bool sevgiliyle = false}) {
   for (int seed = 0; seed < 300; seed++) {
     final GameState taban =
@@ -130,7 +116,6 @@ GameState _hayat({int age = 40, bool sevgiliyle = false}) {
   throw StateError('Uygun hayat bulunamadi');
 }
 
-/// Evlendirir, sonra boşar. İkisi de üretim motorundan geçer.
 GameState _evlenVeBosan(GameState s) {
   final GameState evli = _evlilik.marry(s, 'sevgili-1').state;
   expect(evli.isMarried, isTrue, reason: 'kurulum: evlilik olusmadi');
@@ -139,8 +124,6 @@ GameState _evlenVeBosan(GameState s) {
   return bosanmis;
 }
 
-/// Evlendirir, sonra eşi vefat eder. Vefatı kaydın kendi durumuyla
-/// ifade ediyoruz; oyuncuya hiçbir avantaj verilmiyor.
 GameState _evlenVeDulKal(GameState s) {
   final GameState evli = _evlilik.marry(s, 'sevgili-1').state;
   expect(evli.isMarried, isTrue);
@@ -157,24 +140,34 @@ GameState _evlenVeDulKal(GameState s) {
 }
 
 void main() {
-  group('Teshis kaniti — tekrar evlenme kilidi', () {
-    test('kurulum: bosanmadan sonra evlilik kaydi SILINMIYOR', () {
+  group('Tekrar evlenme — kaydın korunması', () {
+    test('boşanmadan sonra evlilik kaydı SİLİNMİYOR', () {
       final GameState s = _evlenVeBosan(_hayat(sevgiliyle: true));
       // Kaydın durması bilinçli bir karar (Paket 36): geçmiş kaybolmasın.
       expect(s.marriage, isNotNull);
       expect(s.marriage!.status, MarriageStatus.bosandi);
-      // Ama "evli mi" sorusunun doğru cevabi hayir.
+      // Ama "evli mi" sorusunun doğru cevabı hayır.
       expect(s.isMarried, isFalse);
     });
 
-    test('kurulum: dul kaldiktan sonra da kayit duruyor', () {
+    test('dul kaldıktan sonra da kayıt duruyor', () {
       final GameState s = _evlenVeDulKal(_hayat(sevgiliyle: true));
       expect(s.marriage, isNotNull);
       expect(s.marriage!.status, MarriageStatus.dul);
       expect(s.isMarried, isFalse);
     });
 
-    test('motor tekrar evlenmeye IZIN VERIYOR (kilit burada degil)', () {
+    test('`marriage != null` ile `isMarried` boşanmada ÇELİŞİR', () {
+      // Kilidin kaynağı buydu: iki alanı aynı şey sanan her kontrol
+      // hatalıdır. Bu test kalıbı kalıcı olarak sabitliyor ki aynı hata
+      // başka bir yerde tekrar yazılmasın.
+      final GameState bosanmis = _evlenVeBosan(_hayat(sevgiliyle: true));
+      expect(bosanmis.marriage != null, isTrue);
+      expect(bosanmis.isMarried, isFalse);
+      expect((bosanmis.marriage != null) == bosanmis.isMarried, isFalse);
+    });
+
+    test('motor tekrar evlenmeye izin veriyor', () {
       final GameState s = _evlenVeBosan(_hayat(sevgiliyle: true));
       final GameState yeni = s.copyWith(
         people: List<Person>.unmodifiable(<Person>[
@@ -185,119 +178,314 @@ void main() {
       expect(
         _evlilik.marryBlockReason(yeni, yeni.personById('sevgili-2')!),
         '',
-        reason: 'marryBlockReason ikinci evliligi engellemiyor; '
-            'huninin %0 olmasinin sebebi bu degil.',
       );
     });
+  });
 
-    // ----------------------------------------------------------------
-    // Kilidin kendisi. Aşağıdaki dört test bugünkü **yanlış** davranışı
-    // sabitliyor. Düzeltilirse kırılacaklar; kırılmaları iyi haberdir.
-    // ----------------------------------------------------------------
-
-    test('BUG: bosanan oyuncuya cikma teklif edilemiyor (finger.dart:711)',
-        () {
-      // Hiç evlenmemiş oyuncuda yol açık:
+  group('Tekrar evlenme — Finger yolları AÇIK (düzeltme)', () {
+    test('boşanan oyuncu yeniden çıkma teklif edebiliyor', () {
       expect(
         Finger.askOutAvailability(_hayat(), 'arkadas-1').isAllowed,
         isTrue,
-        reason: 'hic evlenmemis oyuncuda cikma teklifi acik olmali',
+        reason: 'hic evlenmemis oyuncuda zaten acikti',
       );
-      // Boşandıktan sonra kapanıyor. Boşanmadan sonra eski sevgili
-      // `eskiEs` oluyor, yani `hasPartner` yanlış: kalan tek fark
-      // silinmeyen evlilik kaydı.
       final GameState bosanmis = _evlenVeBosan(_hayat(sevgiliyle: true));
-      final InteractionAvailability sonra =
-          Finger.askOutAvailability(bosanmis, 'arkadas-1');
       expect(
-        sonra.isAllowed,
-        isFalse,
-        reason: 'BUGUNKU DAVRANIS. Dogrusu: bosanan oyuncu yeniden '
-            'cikma teklif edebilmeli (isMarried false).',
+        Finger.askOutAvailability(bosanmis, 'arkadas-1').isAllowed,
+        isTrue,
+        reason: 'DUZELTME: bosanan oyuncunun yolu artik kapali degil',
       );
-      expect(sonra.reason, 'Hayatında zaten biri var.');
     });
 
-    test('BUG: dul kalan oyuncuya da cikma teklif edilemiyor', () {
+    test('dul kalan oyuncu yeniden çıkma teklif edebiliyor', () {
       final GameState dul = _evlenVeDulKal(_hayat(sevgiliyle: true));
-      final InteractionAvailability sonra =
-          Finger.askOutAvailability(dul, 'arkadas-1');
-      expect(
-        sonra.isAllowed,
-        isFalse,
-        reason: 'BUGUNKU DAVRANIS. Dogrusu: esini kaybeden oyuncu '
-            'yeniden cikma teklif edebilmeli.',
-      );
-      expect(sonra.reason, 'Hayatında zaten biri var.');
+      expect(Finger.askOutAvailability(dul, 'arkadas-1').isAllowed, isTrue);
     });
 
-    test('BUG: bosanan oyuncu flortunu resmilestiremiyor '
-        '(finger.dart:552/680)', () {
+    test('boşanan oyuncu flörtünü resmîleştirebiliyor', () {
       expect(
         Finger.officialAvailability(_hayat(), 'flort-1').isAllowed,
         isTrue,
-        reason: 'hic evlenmemis oyuncuda resmilestirme acik olmali',
       );
       final GameState bosanmis = _evlenVeBosan(_hayat(sevgiliyle: true));
       final InteractionAvailability sonra =
           Finger.officialAvailability(bosanmis, 'flort-1');
       expect(
         sonra.isAllowed,
-        isFalse,
-        reason: 'BUGUNKU DAVRANIS. Dogrusu: bosanan oyuncu yeni bir '
-            'flortu sevgiliye cevirebilmeli — yoksa evlenecek sevgili '
-            'hic olusmaz ve tekrar evlenme %0 kalir.',
-      );
-      expect(sonra.reason, 'Hayatında zaten biri var.');
-    });
-
-    test('BUG: kilit kaliCi — bosanmadan 30 yil sonra da kapali', () {
-      GameState s = _evlenVeBosan(_hayat(age: 35, sevgiliyle: true));
-      // Yaşı ilerletmek kilidi açmıyor: engel yaşa değil, silinmeyen
-      // evlilik kaydına bağlı.
-      s = s.copyWith(player: s.player.copyWith(age: 65));
-      expect(Finger.askOutAvailability(s, 'arkadas-1').isAllowed, isFalse);
-      expect(Finger.officialAvailability(s, 'flort-1').isAllowed, isFalse);
-    });
-
-    test('kanit: kilit TEK alandan geliyor — kayit bosaltilinca acilir', () {
-      final GameState bosanmis = _evlenVeBosan(_hayat(sevgiliyle: true));
-      // `marriage` alanını boşaltmak **çözüm değil** (geçmiş kaybolur);
-      // burada yalnızca engelin kaynağını kanıtlıyor: aynı durumda
-      // yalnızca bu alan değişince yol açılıyor. Yani sorun yaşta,
-      // yakınlıkta, para veya kişi kaydında değil.
-      final GameState kayitsiz = bosanmis.copyWith(marriage: null);
-      expect(kayitsiz.isMarried, isFalse);
-      expect(bosanmis.isMarried, isFalse);
-      expect(
-        Finger.askOutAvailability(kayitsiz, 'arkadas-1').isAllowed,
         isTrue,
-        reason: 'Iki durum yalnizca `marriage` alaninda farkli ve ikisinde '
-            'de isMarried false. Yol yalnizca alan bosalinca aciliyor: '
-            'engel `marriage != null` kontrolu.',
-      );
-      expect(
-        Finger.officialAvailability(kayitsiz, 'flort-1').isAllowed,
-        isTrue,
+        reason: 'DUZELTME: evlenecek sevgili artik edinilebiliyor',
       );
     });
 
-    test('ikinci kirilma: bosanmis oyuncu ebeveyn tepkisinde "evli" '
-        'sayiliyor (life_progression.dart:1696)', () {
-      // Aynı kalıbın ikinci örneği. `final bool evli = state.marriage
-      // != null;` — boşanmış oyuncunun ebeveynleri onu hâlâ evli
-      // sayıyor ve "destekleyici" tepki veriyor; oysa `isMarried` false.
-      // Etkisi küçük (yakınlık/mutluluk farkı), ama kalıp aynı.
-      final GameState bosanmis = _evlenVeBosan(_hayat(sevgiliyle: true));
-      expect(bosanmis.marriage != null, isTrue);
-      expect(bosanmis.isMarried, isFalse);
-      // Bu test bir davranışı değil, iki alanın **çeliştiğini** sabitliyor.
+    test('dul kalan oyuncu flörtünü resmîleştirebiliyor', () {
+      final GameState dul = _evlenVeDulKal(_hayat(sevgiliyle: true));
+      expect(Finger.officialAvailability(dul, 'flort-1').isAllowed, isTrue);
+    });
+
+    test('yürüyen evlilikte yollar HÂLÂ kapalı', () {
+      // Düzeltme fazla açmamalı: evliyken Finger yine kapalı olmalı.
+      final GameState evli =
+          _evlilik.marry(_hayat(sevgiliyle: true), 'sevgili-1').state;
+      expect(evli.isMarried, isTrue);
+      expect(Finger.askOutAvailability(evli, 'arkadas-1').isAllowed, isFalse);
       expect(
-        (bosanmis.marriage != null) == bosanmis.isMarried,
+        Finger.officialAvailability(evli, 'flort-1').isAllowed,
         isFalse,
-        reason: '`marriage != null` ile `isMarried` bosanmada celisiyor; '
-            'ikisini ayni sey sanan her kontrol hatali.',
       );
+    });
+
+    test('yaşayan sevgilisi olan oyuncuda yollar kapalı kalıyor', () {
+      // `hasPartner` kapısı korunuyor: iki sevgili aynı anda olmaz.
+      final GameState sevgilili = _hayat(sevgiliyle: true);
+      expect(
+        Finger.askOutAvailability(sevgilili, 'arkadas-1').isAllowed,
+        isFalse,
+      );
+    });
+  });
+
+  group('Tekrar evlenme — TAM OYUNCU YOLU (elle sevgili enjekte edilmiyor)', () {
+    // §35: evlen → boşan → Finger kullan → flört et → sevgili ol →
+    // tekrar evlen.
+    //
+    // **İki eşin ikisi de Finger'dan geliyor.** Hiçbir yerde hazır
+    // sevgili/flört kaydı enjekte edilmiyor; bütün ilişki geçişleri
+    // `GameController`'ın gerçek public aksiyonlarından geçiyor.
+    // `debugSetState` yalnızca **yaş ve cüzdan** için kullanılıyor
+    // (0 yaşından 30'a doğal olarak yaşlanmak bu testin konusu değil);
+    // ilişki, stat, kişi ya da yakınlık verilmiyor.
+
+    /// Bekleyen pencereleri kapatır ve bir yıl ilerletir.
+    ///
+    /// Yakınlık **yıllar içinde** artıyor ("birlikte vakit geçirdikçe
+    /// artar"); aynı yıl içinde üst üste etkileşim çağırmak yetmiyor.
+    /// İlk yazımda yıl ilerletmeden 14 kez etkileşim çağırmıştım ve
+    /// yakınlık 58'den ancak 62'ye çıkıyordu — çoğu çağrı yılın
+    /// sınırına takılıp boşa gidiyordu.
+    void yilGec(GameController c, Random rng) {
+      for (int guard = 0; guard < 40; guard++) {
+        final GameState s = c.state!;
+        if (s.deceased) return;
+        if (s.hasNotice) {
+          c.dismissNotice();
+          continue;
+        }
+        if (s.pendingEvent != null) {
+          final List<EventChoice> secenekler = s.pendingEvent!.choices;
+          c.chooseEventOption(secenekler[rng.nextInt(secenekler.length)].id);
+          continue;
+        }
+        if (s.pendingCrisis != null) {
+          final HealthCrisis? katalog =
+              healthCrisisById(s.pendingCrisis!.crisisId);
+          final List<CrisisChoice> acik = katalog == null
+              ? const <CrisisChoice>[]
+              : katalog.choices
+                  .where((CrisisChoice ch) => ch.cost <= s.player.wallet)
+                  .toList(growable: false);
+          if (acik.isEmpty) return;
+          c.respondToCrisis(acik[rng.nextInt(acik.length)].id);
+          continue;
+        }
+        if (s.hasPendingTrial || s.pendingInterview != null) return;
+        if (c.needsEducationChoice) return;
+        final int onceki = s.player.age;
+        c.ageUp();
+        if (c.state!.player.age != onceki) return;
+      }
+    }
+
+    /// Finger üzerinden bir sevgili edinir ve kimliğini döner; olmazsa
+    /// `null`.
+    ///
+    /// **Israrcı bir oyuncu gibi davranıyor:** her yıl desteyi
+    /// tazeliyor, daha önce tanışılmamış ve arkadaşlık aramayan
+    /// profilleri beğeniyor, eşleşme olursa flörtle yıllarca vakit
+    /// geçirip yakınlığı resmîleştirme eşiğine (60) çıkarıyor. Tek bir
+    /// profille tek denemede olmuyor: beğenilerin bir kısmı karşılık
+    /// bulmuyor ve yakınlık yıllar içinde artıyor.
+    ///
+    /// Hiçbir yerde kişi, yakınlık ya da ilişki **enjekte edilmiyor**.
+    String? finderdanSevgiliEdin(GameController c, Random rng, {int yil = 25}) {
+      c.setFingerIntent(FingerIntent.ciddi);
+      for (int i = 0; i < yil; i++) {
+        if (c.state!.deceased) return null;
+
+        // Sevgili oluştuysa bitti.
+        final Person? sevgili = c.state!.people
+            .where((Person p) =>
+                p.isAlive && p.relation == RelationType.sevgili)
+            .firstOrNull;
+        if (sevgili != null) return sevgili.id;
+
+        // Elde flört varsa onunla ilgilen; yoksa yeni aday ara.
+        final Person? flort = c.state!.people
+            .where((Person p) => p.isAlive && p.relation == RelationType.flort)
+            .firstOrNull;
+        if (flort != null) {
+          if (c.officialAvailability(flort.id).isAllowed) {
+            c.makeRelationshipOfficial(flort.id);
+            while (c.state!.hasNotice) {
+              c.dismissNotice();
+            }
+            continue;
+          }
+          final List<InteractionKind> acik = c.availableKindsFor(flort);
+          if (acik.isNotEmpty) {
+            c.interact(flort.id, acik[rng.nextInt(acik.length)]);
+            while (c.state!.hasNotice) {
+              c.dismissNotice();
+            }
+          }
+        } else {
+          c.fillFingerDeck();
+          // Tanışılmamış ve arkadaşlık aramayan profiller. Arkadaşlık
+          // niyetli profille tanışmak flört üretmiyor (D-107); bu testin
+          // konusu o kural değil.
+          final List<FingerProfile> adaylar = c.state!.fingerDeck
+              .where((FingerProfile p) =>
+                  !p.isMet && p.intent != FingerIntent.arkadaslik)
+              .toList(growable: false);
+          // Yılda birkaç beğeni: kota dolabilir, hepsi karşılık bulmaz.
+          for (final FingerProfile profil in adaylar.take(4)) {
+            c.likeFingerProfile(profil.id);
+            c.meetFingerMatch(profil.id);
+            while (c.state!.hasNotice) {
+              c.dismissNotice();
+            }
+            if (c.state!.people.any((Person p) =>
+                p.relation == RelationType.flort ||
+                p.relation == RelationType.sevgili)) {
+              break;
+            }
+          }
+        }
+        yilGec(c, rng);
+      }
+      final Person? son = c.state!.people
+          .where((Person p) => p.isAlive && p.relation == RelationType.sevgili)
+          .firstOrNull;
+      return son?.id;
+    }
+
+    /// Teklif eder ve düğünü yapar; olmazsa `false`.
+    bool evlen(GameController c, String partnerId, Random rng) {
+      for (int deneme = 0; deneme < 8; deneme++) {
+        if (c.state!.pendingWedding != null) break;
+        if (!c.proposalAvailability(partnerId).isAllowed) {
+          // Teklif bekleme süresi ya da yakınlık: biraz daha vakit geçir.
+          final Person? guncel = c.state!.personById(partnerId);
+          if (guncel == null) return false;
+          final List<InteractionKind> acik = c.availableKindsFor(guncel);
+          if (acik.isNotEmpty) {
+            c.interact(partnerId, acik[rng.nextInt(acik.length)]);
+            while (c.state!.hasNotice) {
+              c.dismissNotice();
+            }
+          }
+          yilGec(c, rng);
+          if (c.state!.deceased) return false;
+          continue;
+        }
+        c.propose(partnerId);
+        while (c.state!.hasNotice) {
+          c.dismissNotice();
+        }
+      }
+      if (c.state!.pendingWedding == null) return false;
+      c.holdWedding('nikah');
+      while (c.state!.hasNotice) {
+        c.dismissNotice();
+      }
+      return c.state!.isMarried;
+    }
+
+    test('boşandıktan sonra Finger üzerinden yeniden evlenilebiliyor', () {
+      GameController? kazanan;
+      int denenen = 0;
+      String? ilkEsId;
+
+      // Finger destesi ve teklif kabulü rastgele; bu yüzden birkaç tohum
+      // deneniyor. İddia "her tohumda olur" değil, **yolun baştan sona
+      // yürüyebildiği**. Düzeltmeden önce bu yol 1000 hayatta %0 idi.
+      for (int seed = 1; seed <= 60 && kazanan == null; seed++) {
+        denenen++;
+        final GameController c = GameController(random: Random(seed));
+        c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
+        final Random rng = Random(seed * 31 + 7);
+
+        // Yalnızca yaş ve cüzdan; ilişki/stat/kişi verilmiyor.
+        c.debugSetState(
+          c.state!.copyWith(
+            pendingEvent: null,
+            notices: const <PendingNotice>[],
+            player: c.state!.player.copyWith(age: 30, wallet: 3000000),
+          ),
+        );
+
+        // --- 1) İlk sevgili: Finger'dan. ---
+        final String? birinci = finderdanSevgiliEdin(c, rng);
+        if (birinci == null) {
+          c.dispose();
+          continue;
+        }
+        // --- 2) İlk evlilik. ---
+        if (!evlen(c, birinci, rng)) {
+          c.dispose();
+          continue;
+        }
+
+        // --- 3) Boşanma. ---
+        if (!c.divorceAvailability().isAllowed) {
+          c.dispose();
+          continue;
+        }
+        c.divorce();
+        while (c.state!.hasNotice) {
+          c.dismissNotice();
+        }
+        if (c.state!.isMarried) {
+          c.dispose();
+          continue;
+        }
+
+        // --- 4) İkinci sevgili: yine Finger'dan. Düzeltmeden önce
+        //        BURASI hiç yürümüyordu. ---
+        final String? ikinci = finderdanSevgiliEdin(c, rng);
+        if (ikinci == null) {
+          c.dispose();
+          continue;
+        }
+        // --- 5) Tekrar evlilik. ---
+        if (evlen(c, ikinci, rng)) {
+          ilkEsId = birinci;
+          kazanan = c;
+        } else {
+          c.dispose();
+        }
+      }
+
+      expect(
+        kazanan,
+        isNotNull,
+        reason: 'TAM OYUNCU YOLU: $denenen tohumda bir kez bile '
+            'Finger->flort->sevgili->evlen->bosan->Finger->flort->'
+            'sevgili->tekrar evlen yurumedi.',
+      );
+      final GameState son = kazanan!.state!;
+      expect(son.isMarried, isTrue);
+      expect(son.marriageCount, 2, reason: 'ikinci evlilik sayilmali');
+      expect(son.pastMarriages, hasLength(1),
+          reason: 'ilk evlilik gecmise tasinmali, uzerine yazilmamali');
+      expect(son.pastMarriages.first.status, MarriageStatus.bosandi);
+      expect(son.pastMarriages.first.spouseId, ilkEsId);
+      expect(son.marriage!.spouseId, isNot(ilkEsId),
+          reason: 'ikinci es farkli bir kisi olmali');
+      // Eski eşin kaydı hâlâ okunabilir.
+      expect(son.personById(ilkEsId!), isNotNull);
+      expect(son.marriageWith(ilkEsId)!.status, MarriageStatus.bosandi);
+      expect(son.personById(ilkEsId)!.relation, RelationType.eskiEs);
+      kazanan.dispose();
     });
   });
 }
