@@ -673,6 +673,14 @@ class LifeProgression {
     // Kiralama (D-163): tahsilat, yıpranma, hasar, boş ev gideri, kiracının
     // çıkması ve evin değer değişimi yılda **bir kez**. Normal tahsilat
     // bildirim açmaz; yalnızca anlatılacak bir şey varsa pencere gelir.
+    // Oyuncu kiradaysa ev sahibi kaydı kurulur/korunur (D-163): aynı evde
+    // yıllarca oturan oyuncunun ev sahibi her olayda değişmesin.
+    afterDeaths = RentalEngine.syncLandlord(
+      state: afterDeaths,
+      newAge: newAge,
+      rng: _rng,
+    );
+
     final ({GameState state, RentalYear year}) kiralama =
         RentalEngine.advanceYear(
       state: afterDeaths,

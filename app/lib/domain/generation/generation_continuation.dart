@@ -13,6 +13,7 @@ import '../models/life_log.dart';
 import '../models/marriage.dart';
 import '../models/career.dart';
 import '../models/owned_item.dart';
+import '../models/rental.dart';
 import '../models/person_development.dart';
 import '../models/parental_status.dart';
 import '../models/person.dart';
@@ -255,7 +256,7 @@ abstract final class GenerationContinuation {
     if (!haneYetiskini && cocuk.age >= prototypeOnlyAdultAge) {
       for (final OwnedItem esya in cocugaKalan) {
         if (itemTypeOrFallback(esya.typeId).kind == ItemKind.konut &&
-            !esya.rentedOut) {
+            state.leaseOf(esya.id) == null) {
           oturulanKonut = esya;
           break;
         }
@@ -313,6 +314,28 @@ abstract final class GenerationContinuation {
       // Piyasa dünyanın bir parçası: oyuncu ölünce endeks sıfırlanmaz.
       // Ama "şu yaşta ilerletildi" işareti **taşınmaz**; taşınsa yeni
       // oyuncunun piyasası bir daha hiç ilerlemezdi.
+      // **Kiracı konutla birlikte devrediliyor (D-163).** Mirasçı evi
+      // devralıyorsa kiracı ortadan kaybolmaz: "babandan kalan Ankara'daki
+      // daire hâlâ kirada." Sözleşmenin başlangıç yaşı mirasçının yaş
+      // ölçeğine **yeniden çıpalanıyor**, yoksa "35 yaşında başlamış"
+      // sözleşme 22 yaşındaki mirasçıda eksi yıl gösterirdi.
+      leases: List<Lease>.unmodifiable(<Lease>[
+        for (final OwnedItem esya in cocugaKalan)
+          if (state.leaseOf(esya.id) != null)
+            _rebaseLease(state.leaseOf(esya.id)!, state.player.age, cocuk.age),
+      ]),
+      // Defterin **para sayaçları taşınmıyor**, bilerek: "bu ev bana ne
+      // kazandırdı" sorusu her kuşak için yeniden başlar. Taşınan tek şey
+      // evin güncel değeri; taşınmasa ev alış fiyatına geri dönerdi.
+      propertyLedgers: List<PropertyLedger>.unmodifiable(<PropertyLedger>[
+        for (final OwnedItem esya in cocugaKalan)
+          if (state.ledgerOf(esya.id).valueBasis != null)
+            PropertyLedger(
+              propertyItemId: esya.id,
+              valueBasis: state.ledgerOf(esya.id).valueBasis,
+              depositHeld: state.leaseOf(esya.id)?.deposit ?? 0,
+            ),
+      ]),
       market: MarketState(
         regime: state.market.regime,
         inflationPressure: state.market.inflationPressure,
@@ -583,4 +606,22 @@ abstract final class GenerationContinuation {
       startedAtAge: 6,
     );
   }
+}
+
+/// Devredilen sözleşmeyi mirasçının yaş ölçeğine yeniden çıpalar.
+///
+/// Geçen yıl sayısı korunur: eski oyuncuda 6 yıldır oturan kiracı,
+/// mirasçının kaydında da 6 yıldır oturuyor görünür.
+Lease _rebaseLease(Lease lease, int oldAge, int heirAge) {
+  final int gecenYil = (oldAge - lease.startedAtAge).clamp(0, 120);
+  return Lease(
+    propertyItemId: lease.propertyItemId,
+    tenant: lease.tenant,
+    yearlyRent: lease.yearlyRent,
+    deposit: lease.deposit,
+    startedAtAge: (heirAge - gecenYil).clamp(0, heirAge),
+    onTimeYears: lease.onTimeYears,
+    lateYears: lease.lateYears,
+    unpaidYears: lease.unpaidYears,
+  );
 }

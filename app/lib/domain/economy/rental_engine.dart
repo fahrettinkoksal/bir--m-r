@@ -25,6 +25,7 @@ library;
 import 'dart:math';
 
 import '../../data/city_catalog.dart';
+import '../../data/name_pool.dart';
 import '../../data/tenant_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../interaction/divorce_settlement.dart';
@@ -178,7 +179,26 @@ abstract final class RentalEngine {
     return (low: (orta * 0.90).round(), high: (orta * 1.10).round());
   }
 
-  /// prototypeOnly: şehrin kira talebi çarpanı (D-159 ile bağlı).
+  /// prototypeOnly: şehrin **kiracı akışı** çarpanı (D-159 ile bağlı).
+  ///
+  /// Bu, kira **fiyatını** değil "kaç kişi arar"ı belirler. Ayrı tutuluyor,
+  /// çünkü ikisi farklı şeyler: büyük şehirde kira da yüksek, talep de
+  /// yüksek; küçük şehirde ev ucuz ama **kiracı bulmak uzun sürüyor**
+  /// (görevin 19. maddesi). İlk ölçümde bu ayrım yoktu — fiyat çarpanı
+  /// talebe de bindirilmişti ve bant 1,03-1,06 kadar dardı; doluluk her
+  /// şehirde %99 çıkıyor, küçük il ile büyük il arasında hiçbir fark
+  /// hissedilmiyordu.
+  ///
+  /// Ölçek: Amasya 0,55 (piyasa kirasında ortalama 1,7 başvuru, yılların
+  /// ~%19'unda hiç kimse aramıyor), İstanbul 1,40 (ortalama 4,2 başvuru,
+  /// ~%1,5 boş yıl).
+  static double applicantFlowFactor(String? city) {
+    if (city == null) return 1.0;
+    final double f = cityProfile(city).housingFactor;
+    return 0.55 + ((f - 1.0) / 1.2) * 0.85;
+  }
+
+  /// prototypeOnly: şehrin kira **fiyatı** çarpanı (D-159 ile bağlı).
   ///
   /// Konut fiyatı şehirle birlikte zaten değişiyor; bu çarpan **fiyatın
   /// üstüne** binen kira talebi farkı. Büyük şehirde kira getirisi biraz
@@ -203,8 +223,8 @@ abstract final class RentalEngine {
     final int piyasa = marketRent(state, home);
     if (piyasa <= 0) return const <TenantRecord>[];
     final double oran = askingRent / piyasa;
-    final double talep = prototypeOnlyDemandFactor(oran) *
-        (0.85 + rentDemandFactor(home.location) * 0.20);
+    final double talep =
+        prototypeOnlyDemandFactor(oran) * applicantFlowFactor(home.location);
     return tenantCandidates(
       propertyId: home.id,
       age: state.player.age,
@@ -472,6 +492,41 @@ abstract final class RentalEngine {
     return RentalResult(
       state: _log(next, metin, yas),
       outcome: RentalOutcome(applied: true, text: metin, amount: tutar),
+    );
+  }
+
+  // -------------------------------------------------------------------
+  // Ev sahibi (oyuncu kiradayken)
+  // -------------------------------------------------------------------
+
+  /// Oyuncu kiradaysa ev sahibi kaydını kurar ya da olduğu gibi bırakır.
+  ///
+  /// **Neden kayda yazılıyor:** ev sahibinin adı her olayda yeniden
+  /// üretilse aynı evde yıllarca oturan oyuncunun ev sahibi her yıl başka
+  /// biri olurdu. Kayıt Person değil; İlişkiler ekranını doldurmaması için
+  /// hafif tutuldu. Oyuncu kendi evine geçince kayıt kapanır.
+  static GameState syncLandlord({
+    required GameState state,
+    required int newAge,
+    required Random rng,
+  }) {
+    final bool kirada = Housing.residenceOf(state) == ResidenceKind.kirada;
+    if (!kirada) {
+      return state.landlord == null ? state : state.copyWith(landlord: null);
+    }
+    if (state.landlord != null) return state;
+
+    final bool erkek = rng.nextBool();
+    return state.copyWith(
+      landlord: LandlordRecord(
+        firstName: erkek
+            ? erkekIsimleri[rng.nextInt(erkekIsimleri.length)]
+            : kadinIsimleri[rng.nextInt(kadinIsimleri.length)],
+        lastName: soyisimler[rng.nextInt(soyisimler.length)],
+        sinceAge: newAge,
+        temperament: LandlordTemperament
+            .values[rng.nextInt(LandlordTemperament.values.length)],
+      ),
     );
   }
 

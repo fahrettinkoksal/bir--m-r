@@ -4,6 +4,8 @@ import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/data/tenant_catalog.dart';
+import 'package:bir_omur/domain/models/rental.dart';
 import 'package:bir_omur/domain/models/parental_status.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/player_character.dart';
@@ -174,3 +176,16 @@ OwnedItem esya(String id, String typeId, {bool rentedOut = false}) => OwnedItem(
       rentedOut: rentedOut,
     );
 
+/// Kiradaki bir konut için sözleşme üretir (D-163).
+///
+/// "Bu ev kirada" bilgisinin tek kaynağı sözleşme. Eşyanın üstündeki eski
+/// `rentedOut` bayrağı yalnızca eski kayıtları açmak için duruyor, o da
+/// yükleme sırasında sözleşmeye çevriliyor.
+Lease kiraSozlesmesi(String itemId, {int startedAtAge = 60}) => Lease(
+      propertyItemId: itemId,
+      tenant: migratedTenantFor(itemId),
+      yearlyRent: 120000,
+      deposit: 10000,
+      startedAtAge: startedAtAge,
+      onTimeYears: 4,
+    );

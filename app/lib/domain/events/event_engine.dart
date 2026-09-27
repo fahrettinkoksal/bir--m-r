@@ -259,6 +259,17 @@ class EventEngine {
     if (req.requiresPortfolio && state.portfolioValue <= 0) return false;
     if (req.forbidsPortfolio && state.portfolioValue > 0) return false;
 
+    // Kiralama kapıları (D-163). Kiracısı olmayana "kiracın aradı"
+    // denmez; boş evi olmayana "ev boş duruyor" denmez.
+    if (req.requiresLetProperty && state.leases.isEmpty) return false;
+    if (req.requiresVacantProperty &&
+        !state.items.any((OwnedItem i) =>
+            i.isProperty &&
+            i.id != state.residenceItemId &&
+            state.leaseOf(i.id) == null)) {
+      return false;
+    }
+
     // Adli kapılar (D-128). Dosyası olmayana "mahkemeyi bekliyorsun",
     // sabıkası olmayana "bir de şu kayıt var" denmez. Cezaevindeyken
     // dışarıdaki hiçbir olay çıkmaz: içerideki hayat ayrıdır.

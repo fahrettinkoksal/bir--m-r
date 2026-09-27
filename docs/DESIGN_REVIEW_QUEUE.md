@@ -3852,3 +3852,76 @@ Rejim dağılımı (10.000 yıl): durgun %26,2 · normal %46,1 · güçlü %19,6
 11. **Vadeli hesap dışında vergi, komisyon ve alım-satım masrafı yok.** V1'de böyle kalsın mı?
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; geçim gideri portföyden tahsil edilmez, vade seçenekleri açılmaz, olaylar portföye dokunmaz ve `DECISIONS.md`'ye kesin karar yazılmaz.
+
+---
+
+### Q-166 — Ev sahibi / kiracı / kiralık gayrimenkul V1
+**Durum:** Öneri, karar bekliyor · **Bağlam:** D-163 · Test: `app/test/paket_ab_test.dart`, `app/test/paket_ab_widget_test.dart`, `app/test/paket_ab_measure_test.dart`
+
+Ev artık "3 milyonluk bir mülk" değil: kiracısı, kirası, defteri ve bakımı olan bir varlık. **Varlıklar > Evlerim** ekranı geldi; her konut kullanım durumuyla (oturuluyor / kirada / boş) listeleniyor, detayında kiraya verme, bakım ve kârlılık özeti var.
+
+**Mevcut sistemde bulunan gerçek eksikler (kod okunarak):**
+
+1. Kira **katalog değerinden** hesaplanıyordu (`type.baseValue * 0,045`). İstanbul'da 6,6 milyona alınan daire ile Amasya'da 3 milyona alınan daire **aynı** kirayı getiriyordu; şehir katsayısı (D-159) kirada hiç görünmüyordu. Oyuncu kirayı da belirleyemiyordu.
+2. Kiracı yoktu. `rentedOut` tek bir bayraktı; kira ya tam geliyordu ya hiç gelmiyordu, boşluk her yıl bağımsız bir %12 zarıydı ve hafızası yoktu.
+3. Depozito, sözleşme, ödeme geçmişi, kiracının kendi isteğiyle çıkması yoktu.
+4. Konutun kondisyonu **hiç değişmiyordu** ve bakım/tadilat diye bir şey yoktu (araçta `vehicle_trouble.dart` vardı, konutta karşılığı yoktu).
+5. Boş evin hiçbir maliyeti yoktu.
+6. Evin değeri ömür boyu sabitti.
+
+**Çoklu ev sahipliği için kayıt göçü gerekmedi:** `items` zaten `List<OwnedItem>`, `residenceItemId` zaten tek alan. Yeni üç alan (`leases`, `propertyLedgers`, `landlord`) tamamen ek. Eski kayıtta `rentedOut` bayrağı taşıyan konut için, o konutun kendi bilgilerinden **deterministik** bir sözleşme üretiliyor ve **eski kira tutarı korunuyor** — yükleme sırasında oyuncunun kirasını zamlamak ya da indirmek olmaz.
+
+**Kiracı Person değil, bilerek:** her yıl birkaç aday gelse İlişkiler ekranı oyuncunun hiç tanışmadığı yüzlerce kişiyle dolardı. `TenantRecord` hafif ama **kalıcı**: adı, yaşı, mesleği, hane durumu sözleşme boyunca aynı. Adaylar (mülk kimliği, yaş, istenen kira) üçlüsünden FNV-1a karmasıyla türüyor: ekranı kapatıp açmak yeni aday üretmiyor. Kiracıyı **oyuncu** seçiyor; görünen "ödeme geçmişi" gizli güvenilirliğin bulanık yansıması, "İyi" görünen aday da sıkışabiliyor.
+
+**Ölçüldü (tahmin değil):**
+
+10.000 konut-yılı (400 konut × 25 yıl, altı ayrı şehir, piyasa kirasıyla yeniden ilan veren ideal ev sahibi):
+
+| Ölçüm | Sonuç |
+|---|---|
+| Doluluk | %97,5 |
+| Kiracının ortalama kalma süresi | 4,6 yıl |
+| Kiranın hiç gelmediği yıl (dolu yıllar içinde) | %4,1 |
+| Belirgin hasar yılı | %5,3 |
+| Ortalama yıllık mülk gideri | 11.700 ₺ |
+| Brüt kira getirisi | %4,06 |
+| **Net kira getirisi** | **%3,70** |
+
+Mortgage'lı ev: 3.200.000 ₺ değerinde daire, yıllık kira 144.000 ₺, yıllık taksit 1.016.000 ₺, bakım 10.000 ₺ → **net nakit akışı −881.000 ₺**. Krediyle ev alıp kiraya vermek teknik olarak mümkün ama kira taksidi karşılamıyor; "bedava ev" exploit'i yok.
+
+100 hayat, üç senaryo (hiç yatırım evi almayan / bir ev alan / olabildiğince ev alan):
+
+| Senaryo | Medyan servet | En yüksek | Ev dağılımı (0 / 1 / 2-3 / 4+) |
+|---|---|---|---|
+| Hiç ev almayan | 85.000 ₺ | 12,4M ₺ | 94 / 6 / 0 / 0 |
+| Bir yatırım evi | 85.000 ₺ | 12,4M ₺ | 94 / 6 / 0 / 0 |
+| Olabildiğince ev | 85.000 ₺ | 14,6M ₺ | 94 / 3 / 3 / 0 |
+
+**Ölçümün açık söylediği şey: normal maaşlı hayat yatırım evine ulaşamıyor.** 100 hayatın 94'ü hiç konut sahibi olmadan ölüyor; medyan üç senaryoda da aynı. Ev sahibi olabilen 6 hayatta "olabildiğince ev al" davranışı medyan serveti 10,0M'den 11,9M'ye çıkarıyor (+%18). Yani gayrimenkul sahipliği maaşlı çalışmayı anlamsızlaştırmıyor — tersine, çoğu oyuncunun eli yetişmiyor. **4+ ev ile ölen karakter hiç çıkmadı.**
+
+**Kalibrasyon ölçümle düzeltildi, tahminle değil.** Aday modeli iki kez elendi: (1) ilk model piyasa kirasında **her zaman** aday üretiyordu, doluluk %100 çıktı ve ev bir yıl bile boş kalmadı; (2) ikinci model ayrı bir "kimse aramadı" zarı koydu ama piyasanın 2,2 katı kira isteyen eve bile %55 ihtimalle aday geliyordu. Üçüncü model tek formülle çözdü: aday sayısı Poisson çekiliyor. Ayrıca şehrin **kiracı akışı** ile **kira fiyatı** çarpanları ayrıldı; öncesinde ikisi aynı dar banttaydı ve küçük il ile büyük il arasında hiçbir fark hissedilmiyordu (görevin 19. maddesi karşılanmıyordu).
+
+**Bulunan gerçek exploit'ler (ikisi de düzeltildi):**
+1. Kiradaki ev **satılınca** sözleşme listede kalıyordu; elde olmayan evden kira gelmeye devam ediyordu. `GameState.removeItem` artık sözleşmeyi ve defteri de siliyor (tek çıkış noktası), satışta önce sözleşme kapanıp depozito iade ediliyor.
+2. Boşanmada eşe geçen kiralık ev de aynı hayalet sözleşmeyi bırakıyordu; eşya listesi elle filtrelenmek yerine `removeItem`'dan geçiyor.
+
+**Mirasta kiracı konutla birlikte devrediliyor:** "babandan kalan Ankara'daki daire hâlâ kirada." Sözleşmenin başlangıç yaşı mirasçının yaş ölçeğine yeniden çıpalanıyor, oturma süresi korunuyor. Defterin **para sayaçları taşınmıyor** (her kuşak için "bu ev bana ne kazandırdı" yeniden başlıyor), taşınan tek şey evin güncel değeri.
+
+**Karar soruları:**
+1. **Brüt kira getirisi %4,2** (net %3,70) doğru bantta mı? Türkiye'de amortisman süresi uzundur; oyun bunu birebir taklit etmiyor.
+2. **Bakım %0,8 / tadilat %3,5** (ev değerinin oranı), kazandırdıkları +12 / +34 kondisyon. Tadilatın değere katkısı %1,2. Doğru mu?
+3. **Depozito bir aylık kira.** İki ay mı olmalı? Çıkışta kesinti yalnızca kondisyon 55'in altındaysa yapılıyor.
+4. **Kiranın hiç gelmediği yıl %4,1**, gecikmeli/kısmi ödeme ayrıca var. Fazla mı, az mı?
+5. **Mülk sayısı sınırı yok.** Ölçümde 4+ ev hiç çıkmadı; yine de sert bir üst sınır konmalı mı?
+6. **Mortgage ile kiralama serbest** ve net nakit akışı eksi. Böyle mi kalsın, yoksa konut kredisi yatırım amaçlı ev için kapatılsın mı?
+7. **Boş evin yıllık gideri değerin %0,6'sı**, kiradakinin %0,3'ü (aidatı kiracı ödüyor varsayımı). Doğru mu?
+8. **Kira artışı** üç seçenek: aynı / makul (%10) / yüksek (%30). Yüksek artış çıkma ihtimalini artırıyor. Gerçek mevzuat oranları **bilerek** kullanılmadı; oyun kendi bandını kuruyor.
+9. **Mirasta aktif kiracı devam ediyor.** Doğru mu, yoksa kuşak devrinde sözleşmeler kapanmalı mı?
+10. **Evin değer eğilimi yıllık %2,5** (şehir ve kondisyonla kayıyor). Yatırım portföyündeki gibi sert bir piyasa motoru bilerek kurulmadı.
+11. **Boş ev kirası olmayan evin kondisyonu da düşüyor** (yılda ~1,4 puan). Boş ev daha az mı yıpranmalı?
+
+**V1'de bilerek yok:** günlük kiralama, otel, ticari plaza, arsa/imar, inşaat şirketi, bina yapıp satma, onlarca kiracılı apartman yönetimi, kira hukuku simülasyonu, mahkeme/tahliye prosedürü, ayrıntılı emlak vergisi mevzuatı, gerçek şehir kira verisi, gerçek emlak sitesi adları.
+
+**Q-165/5'e dokunulmadı:** "geçim gideri portföyden otomatik tahsil edilsin mi?" sorusu açık duruyor ve bu paket onu sessizce kapatmak için kullanılmadı.
+
+**Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; mülk sayısı sınırı konmaz, mortgage ile kiralama kapatılmaz, kira hukuku eklenmez ve `DECISIONS.md`'ye kesin karar yazılmaz.

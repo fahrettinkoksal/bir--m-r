@@ -137,26 +137,33 @@ void main() {
   // Kiraya verme ve kira geliri
   // ===================================================================
 
-  /// Evi piyasa kirasıyla, gelen **ilk adaya** kiraya verir.
+  /// Evi kiraya verir: gelen ilk adayla anlaşır.
   ///
-  /// D-163 ile kiraya verme artık tek dokunuş değil: kira belirlenir,
-  /// adaylar gelir, kiracı seçilir. Testler bu akışın tamamından geçer.
+  /// Aday sayısı Poisson çekildiği için piyasa kirasında bile bazı yıl
+  /// kimse aramaz. Gerçek ev sahibi gibi davranır: rakamı bandın içinde
+  /// biraz oynatarak kiracı bulunana kadar dener. Bulunamazsa test
+  /// **sessizce geçmez**, yüksek sesle düşer.
   GameState kiralaVer(GameState state, OwnedItem ev) {
-    final int kira = RentalEngine.marketRent(state, ev);
-    final List<TenantRecord> adaylar = RentalEngine.candidates(
-      state: state,
-      home: ev,
-      askingRent: kira,
-    );
-    expect(adaylar, isNotEmpty, reason: 'Piyasa kirasında aday gelmeli');
-    final RentalResult sonuc = RentalEngine.signLease(
-      state: state,
-      home: ev,
-      tenant: adaylar.first,
-      yearlyRent: kira,
-    );
-    expect(sonuc.outcome.applied, isTrue, reason: sonuc.outcome.text);
-    return sonuc.state;
+    final int piyasa = RentalEngine.marketRent(state, ev);
+    for (final double oran in <double>[1.0, 0.98, 1.02, 0.95, 1.05, 0.9]) {
+      final int istenen = (piyasa * oran).round();
+      final List<TenantRecord> adaylar = RentalEngine.candidates(
+        state: state,
+        home: ev,
+        askingRent: istenen,
+      );
+      if (adaylar.isEmpty) continue;
+      final RentalResult sonuc = RentalEngine.signLease(
+        state: state,
+        home: ev,
+        tenant: adaylar.first,
+        yearlyRent: istenen,
+      );
+      expect(sonuc.outcome.applied, isTrue, reason: sonuc.outcome.text);
+      return sonuc.state;
+    }
+    fail('Bandın içinde hiçbir rakamda kiracı bulunamadı; talep modeli '
+        'fazla sıkı olabilir.');
   }
 
   group('Kira geliri ve kiracı (D-043, D-163)', () {

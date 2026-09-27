@@ -4,6 +4,7 @@ import '../effects/effect_diff.dart';
 import 'divorce_settlement.dart';
 import '../life/notices.dart';
 import '../economy/investment_engine.dart';
+import '../economy/rental_engine.dart';
 import '../economy/household_budget.dart';
 import '../models/household.dart';
 import '../models/game_state.dart';
@@ -469,10 +470,6 @@ class MarriageEngine {
       sinceAge: evlilikYasi,
     );
     final int odenen = pay < nakde.player.wallet ? pay : nakde.player.wallet;
-    final Set<String> gidenler = <String>{
-      for (final OwnedItem i in paylasim.toSpouse) i.id,
-    };
-
     final List<Person> people = nakde.people
         .map((Person p) => p.id == spouse.id
             ? p.copyWith(
@@ -523,13 +520,30 @@ class MarriageEngine {
       'Kaydı İlişkiler bölümünde eski eş olarak kalıyor.',
     ].join(' ');
 
-    final GameState next = nakde.copyWith(
+    // Eşe geçen mülkler **removeItem üzerinden** çıkarılır (D-163): eşya
+    // listesini elle filtrelemek kiradaki evin sözleşmesini geride
+    // bırakıyordu ve oyuncu artık kendisine ait olmayan evden kira
+    // almaya devam ederdi. Kiracısı olan ev el değiştiriyorsa önce
+    // sözleşme kapanır ve depozito iade edilir.
+    GameState devredilmis = nakde;
+    for (final OwnedItem giden in paylasim.toSpouse) {
+      if (devredilmis.leaseOf(giden.id) != null) {
+        final RentalResult kapanis = RentalEngine.endLease(
+          state: devredilmis,
+          propertyItemId: giden.id,
+          reasonText: '${giden.name} eşine geçti; kiracıyla sözleşme '
+              'kapandı.',
+        );
+        if (kapanis.outcome.applied) devredilmis = kapanis.state;
+      }
+      devredilmis = devredilmis.removeItem(giden.id);
+    }
+
+    final GameState next = devredilmis.copyWith(
       people: List<Person>.unmodifiable(velayetliKisiler),
-      items: List<OwnedItem>.unmodifiable(
-        nakde.items.where((OwnedItem i) => !gidenler.contains(i.id)),
-      ),
-      player: nakde.player.copyWith(
-        wallet: nakde.player.wallet - odenen,
+      player: devredilmis.player.copyWith(
+        wallet: (devredilmis.player.wallet - odenen)
+            .clamp(0, devredilmis.player.wallet),
         stats: state.player.stats.gain(
           happiness: prototypeOnlyDivorceHappiness,
         ),

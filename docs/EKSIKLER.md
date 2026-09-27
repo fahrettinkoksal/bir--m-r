@@ -151,6 +151,29 @@ opsiyon, kaldıraç, vadeli işlem, açığa satış, yatırım kredisi, ayrınt
 vergi, gün içi alım-satım, grafik. Ayrıca **geçim gideri portföyden
 tahsil edilmiyor** — bu bir karar sorusu olarak Q-165/5'te duruyor.
 
+### 2.8 Ev sahibi / kiracı / kiralık gayrimenkul — **eklendi (D-163, V1)**
+
+Konut bir sayıydı: "3.000.000 ₺ değerinde bir mülk". Kiraya vermek tek bir
+`rentedOut` bayrağıydı; kiracı yoktu, kira katalog değerinden
+hesaplanıyordu (şehir farkı kirada hiç görünmüyordu), depozito ve sözleşme
+yoktu, konutun kondisyonu hiç değişmiyordu, boş evin maliyeti yoktu ve
+evin değeri ömür boyu sabitti.
+
+Gelen: **Varlıklar > Evlerim** ekranı, kullanım durumu (oturuluyor /
+kirada / boş), kira bandı, kiracı adayları ve kiracı seçimi, depozito,
+ödeme davranışı (tam / gecikmeli-kısmi / hiç), kiracının kendi isteğiyle
+çıkması, kondisyon yıpranması, bakım ve tadilat, boş ev gideri, evin
+sınırlı değer değişimi ve mülk başına kârlılık defteri.
+
+**Ölçülen:** doluluk %97,5, kiracının ortalama kalma süresi 4,6 yıl, net
+kira getirisi %3,70. Mortgage'lı evde net nakit akışı **eksi** ("bedava
+ev" yok). 100 hayatın 94'ü hiç konut sahibi olmadan ölüyor: **normal
+maaşlı hayat yatırım evine ulaşamıyor.**
+
+**V1'de bilerek yok:** günlük kiralama, otel, ticari plaza, arsa/imar,
+inşaat şirketi, onlarca kiracılı apartman yönetimi, kira hukuku
+simülasyonu, mahkeme/tahliye prosedürü, ayrıntılı emlak vergisi.
+
 ## 3. Yarım kalmış sistemler
 
 Kodlandı ama yüzeysel; derinleştirilmesi gerekiyor.
@@ -348,6 +371,10 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   pencere. Oynanırken fazla gelebilir (Q-132).
 - **Kayıt göçü** her yeni alanda elle yazılıyor; alan sayısı arttıkça
   bu kırılgan bir nokta.
+- **`OwnedItem.rentedOut` artık ölü bir alan.** D-163 ile "bu ev kirada"
+  bilgisinin tek kaynağı sözleşme oldu; bayrak yalnızca eski kayıtları
+  açmak için duruyor ve yüklemede sözleşmeye çevriliyor. Kaydı bozmamak
+  için silinmedi, ama yeni kod okumamalı. Bir sürüm sonra kaldırılabilir.
 - **Olay havuzuna içerik eklemek tohuma çakılı testleri kaydırıyor.**
   `EventEngine._pick`, havuzdaki **her** olay için kişiyi çözüyor
   (`_resolvePerson`, çekiliş tüketiyor) ve yaş kapısına ancak ondan

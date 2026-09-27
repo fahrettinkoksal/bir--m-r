@@ -1664,6 +1664,83 @@ bildirimi olmadığı gerekçeye yazıldı. Kökteki kırılganlık
 ### DECISIONS.md'ye dokunulmadı
 D-162 de yalnızca kodda ve bu dosyada duruyor.
 
+## Paket AB — Ev sahibi, kiracı ve kiralık gayrimenkul (27 Eylül 2026, D-163)
+
+Konut bir sayıydı. Artık kiracısı, kirası, defteri ve bakımı olan bir
+varlık. **Varlıklar > Evlerim** ekranı geldi; her ev kullanım durumuyla
+(oturuluyor / kirada / boş) listeleniyor.
+
+**Denetimde bulunan gerçek eksikler.** Kira katalog değerinden
+hesaplanıyordu: İstanbul'da 6,6 milyona alınan daire ile Amasya'da 3
+milyona alınan daire aynı kirayı getiriyordu ve şehir katsayısı (D-159)
+kirada hiç görünmüyordu. Kiracı yoktu — `rentedOut` tek bir bayraktı,
+boşluk her yıl hafızası olmayan bir %12 zarıydı. Depozito, sözleşme,
+ödeme geçmişi ve kiracının kendi isteğiyle çıkması yoktu. Konutun
+kondisyonu hiç değişmiyordu ve bakım diye bir şey yoktu. Boş evin
+maliyeti yoktu, evin değeri ömür boyu sabitti.
+
+**Kiracı Person değil**, bilerek: her yıl birkaç aday gelse İlişkiler
+ekranı oyuncunun hiç tanışmadığı yüzlerce kişiyle dolardı. Kayıt hafif
+ama kalıcı; aynı kiracı ertesi yıl başka isimle görünmüyor. Adaylar
+deterministik: ekranı kapatıp açmak yeni aday üretmiyor. Kiracıyı oyuncu
+seçiyor ve görünen ödeme geçmişi gizli güvenilirliğin bulanık yansıması.
+
+**Çoklu ev sahipliği için kayıt göçü gerekmedi:** `items` zaten liste,
+`residenceItemId` zaten tek alan. Üç yeni alan tamamen ek; eski kayıtta
+bayrak taşıyan konut için deterministik bir sözleşme üretiliyor ve eski
+kira tutarı korunuyor.
+
+**Ölçümler (`app/test/paket_ab_measure_test.dart`, gerçekten
+çalıştırıldı).** 10.000 konut-yılı: doluluk %97,5 · kiracının ortalama
+kalma süresi 4,6 yıl · kiranın hiç gelmediği yıl %4,1 · belirgin hasar
+%5,3 · brüt getiri %4,06 · **net getiri %3,70**. Mortgage'lı ev:
+3,2 milyonluk daire, yıllık kira 144 bin, taksit 1.016 bin → **net nakit
+akışı −881 bin ₺**; "bedava ev" exploit'i yok. 100 hayat × 3 senaryo:
+94 hayat hiç konut sahibi olmadan ölüyor, medyan üç senaryoda da aynı;
+ev sahibi olabilen 6 hayatta çok ev almak medyan serveti 10,0M → 11,9M
+yapıyor. **4+ ev ile ölen karakter hiç çıkmadı** — gayrimenkul maaşlı
+çalışmayı anlamsızlaştırmıyor, çoğu oyuncunun eli yetişmiyor.
+
+**Kalibrasyon ölçümle düzeltildi.** Aday modeli iki kez elendi: ilki
+piyasa kirasında her zaman aday üretiyordu (doluluk %100, ev bir yıl bile
+boş kalmıyordu); ikincisi fahiş kira isteyen eve bile %55 ihtimalle aday
+gönderiyordu. Üçüncüsü tek formülle çözdü: Poisson. Ayrıca şehrin
+**kiracı akışı** ile **kira fiyatı** çarpanları ayrıldı; öncesinde ikisi
+aynı dar banttaydı ve küçük il ile büyük il arasında fark
+hissedilmiyordu.
+
+**Bulunan iki gerçek exploit, ikisi de düzeltildi:** (1) kiradaki ev
+satılınca sözleşme listede kalıyor ve elde olmayan evden kira gelmeye
+devam ediyordu; (2) boşanmada eşe geçen kiralık ev aynı hayalet
+sözleşmeyi bırakıyordu. `GameState.removeItem` artık sözleşmeyi ve
+defteri de siliyor (tek çıkış noktası).
+
+**Mirasta kiracı konutla devrediliyor:** "babandan kalan daire hâlâ
+kirada." Sözleşme mirasçının yaş ölçeğine yeniden çıpalanıyor, oturma
+süresi korunuyor. Defterin para sayaçları taşınmıyor; taşınan tek şey
+evin güncel değeri.
+
+30 yeni konut/kiracı/ev sahibi olayı eklendi. İki taraf ayrı kapıdan
+geçiyor: ev sahibi tarafı (`requiresLetProperty`, `requiresVacantProperty`)
+ve kiracı tarafı (`requiresTenant`). Hiçbir metin hukuki yol göstermiyor;
+tahliye ve icra anlatılmıyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2463 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_ab_test` (23), `paket_ab_widget_test` (9), `paket_ab_measure_test`
+(3 ölçüm). **Gerçek Windows veya Android cihazda oynanmadı.**
+
+Mevcut testler gevşetilmedi, yeni akışa göre güçlendirildi: kiraya verme
+aday seçmeden geçiyor, kayıt testi kiracının kimliğini/kirasını/
+depozitosunu karşılaştırıyor, e2e cüzdan iddiası mülk defterine
+çivilendi ve miras testi kiracının oturma süresinin korunduğunu ölçüyor.
+
+Q-165/5 ("geçim gideri portföyden tahsil edilsin mi?") **açık bırakıldı**;
+bu paket onu sessizce kapatmak için kullanılmadı.
+
+### DECISIONS.md'ye dokunulmadı
+D-163 de yalnızca kodda ve bu dosyada duruyor.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -16,6 +16,7 @@ import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 import 'investments_page.dart';
+import 'properties_page.dart';
 import '../../../text/turkish_text.dart';
 
 /// Varlıklar ana menüsü (NAV-001, ECO-001).
@@ -24,7 +25,7 @@ import '../../../text/turkish_text.dart';
 /// burada toplanır. Ailenin ekonomik durumu buraya karıştırılmaz: aile
 /// varlığı oyuncunun harcanabilir parası değildir.
 /// Varlıklar alt sayfaları.
-enum _AssetsPage { kok, magazalar, kategori, yatirimlar }
+enum _AssetsPage { kok, magazalar, kategori, yatirimlar, evler }
 
 class AssetsScreen extends StatefulWidget {
   const AssetsScreen({super.key, required this.onBack});
@@ -83,6 +84,12 @@ class _AssetsScreenState extends State<AssetsScreen> {
           _kategori = null;
           _sonMagazaSonucu = null;
         }),
+      );
+    }
+
+    if (_page == _AssetsPage.evler) {
+      return PropertiesPage(
+        onBack: () => setState(() => _page = _AssetsPage.kok),
       );
     }
 
@@ -152,6 +159,26 @@ class _AssetsScreenState extends State<AssetsScreen> {
             accent: BirOmurAccents.turuncu,
             trailingText: '${magazalar.length}',
             onTap: () => setState(() => _page = _AssetsPage.magazalar),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Evlerim (D-163): konutlar tek listede, kullanım durumuyla.
+        // Eşya listesindeki "Mülkler" öbeği kaldı ama kiralama, bakım ve
+        // kârlılık burada; eşya kartı bunları taşıyamıyordu.
+        if (mulkler.isNotEmpty) ...<Widget>[
+          MenuRow(
+            title: 'Evlerim',
+            subtitle: state.leases.isEmpty
+                ? '${mulkler.length} konut'
+                : '${mulkler.length} konut · ${state.leases.length} kirada',
+            icon: Icons.home_work_outlined,
+            accent: BirOmurAccents.yesil,
+            trailingText: Housing.yearlyRentIncome(state) == 0
+                ? null
+                : trMoney(
+                    (Housing.yearlyRentIncome(state) / 12).round(),
+                  ),
+            onTap: () => setState(() => _page = _AssetsPage.evler),
           ),
           const SizedBox(height: 12),
         ],

@@ -65,6 +65,8 @@ class EventRequirement {
     this.requiresReleased = false,
     this.requiresPortfolio = false,
     this.forbidsPortfolio = false,
+    this.requiresLetProperty = false,
+    this.requiresVacantProperty = false,
   });
 
   /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
@@ -107,6 +109,14 @@ class EventRequirement {
 
   /// Olay yalnızca **hiç yatırımı olmayan** oyuncuya çıksın.
   final bool forbidsPortfolio;
+
+  /// Olay yalnızca **kiracısı olan** ev sahibine çıksın (D-163).
+  ///
+  /// Kiracısı olmayana "kiracın aradı" denmez.
+  final bool requiresLetProperty;
+
+  /// Olay yalnızca **boş, kiraya verilmeyi bekleyen** evi olana çıksın.
+  final bool requiresVacantProperty;
 
   final bool requiresLivingPet;
 
