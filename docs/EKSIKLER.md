@@ -385,12 +385,45 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   yatırım, kariyer erişimi) belgelerde **etiketli** duruyor ve ürün
   kararı için kullanılmaz. Unit/regresyon testleri ilk açık seçeneği
   kullanmaya devam edebilir; ikisinin raporu karıştırılmaz.
-- **Hiç girilmeyen 5 meslek** (kurye, doktor, eczacı, yazar, yz_kurye) ve
-  **hiç kurulmayan 4 işletme türü** var. 1.500 hayatta bir kez bile
-  görünmüyorlar; sebebi araştırılmadı (ölçüm turu denge değiştirmedi).
-- **Hiç görülmeyen 12 olay** var; çoğu suç zincirinin devam halkaları ve
-  araç olayları. Zincir başları görülüyor, devamı görülmüyor.
-- **Tekrar evlenme pratikte ulaşılamıyor** (1.500 hayatta %0,0).
+- **Hiç girilmeyen meslekler, kurulmayan işletmeler ve görülmeyen
+  olayların sebebi ölçüldü (Q-167).** Tek bir ölçüm eksiği üç yerde
+  birden karşımıza çıkıyor: **PlayerBot hiç ehliyet almıyor**
+  (`applyForLicense` çağrılmıyor). Bu yüzden `kurye` ve `yz_kurye` ilanı
+  hiç açılmıyor, `is_nakliye` hiç kurulamıyor ve **5 olay** hiç
+  çıkmıyor (`direksiyon_basinda`, `araba_yolda_kaldi`, `suc_radar`,
+  `suc_dugun_donusu` ve zincir halkaları). Oyunun kapısı değil, botun
+  eksiği. Diğer sebepler: `muzisyen` 34 kez ilanda açıldı ama bot
+  maaşa göre üst üçte birden seçtiği için **hiç başvurmadı**; `doktor`
+  tıp + zekâ 75 + büyük şehir birleşimiyle 1.000 hayatta yalnızca 3 yıl
+  ilanda göründü; 2M+ sermayeli işletmeler botun bütün artan parayı
+  portföye koyması yüzünden hiç karşılanamadı.
+- **Görülmeyen olayların 3'ü erişilebilir**, yalnızca havuz çekilişinde
+  kaybediyor (`yardimin_karsiligi`, `sinav8_son_hafta`,
+  `zincir_ogretmen_3`). Geri kalanlar ehliyet, hobi `okuma` ya da suç
+  zincirinin önceki halkasından gelen flag + hatırlanan kişi rolünün
+  birlikte gerekmesi yüzünden oluşmuyor.
+- **Tekrar evlenme %0'ın kök nedeni bulundu: gerçek hata (Q-167/3).**
+  `Finger` "evli mi" sorusunu `state.marriage != null` ile soruyor;
+  boşanmada ve dullukta kayıt bilerek silinmediği için (Paket 36) bu
+  koşul bir kez evlenen herkes için hayatının sonuna kadar doğru.
+  Sonuç: `finger.dart:443/552/680/711` — eşleşme flört olmuyor, flört
+  resmîleşmiyor, çıkma teklif edilemiyor. `marryBlockReason` ikinci
+  evliliği açıyor ama **evlenecek sevgiliyi edinmenin yolu kapalı**.
+  Aynı kalıp `life_progression.dart:1696`'da da var (küçük etki).
+  Doğrusu `state.isMarried`; **düzeltme onay bekliyor** çünkü bütün
+  ilişki metriklerini değiştirecek. Kanıt:
+  `app/test/diagnosis_remarriage_lock_test.dart` (9 test).
+  `second_marriage_test.dart` geçiyordu çünkü orada sevgili elle
+  kuruluyordu; oyuncunun gerçek yolu test edilmiyordu.
+- **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
+  Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
+  resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger
+  profilini niyete bakmadan seçiyor (adayların %25'i yalnızca arkadaşlık
+  istiyor); yatırım yapabildiği **her** yıl yatırım yapıyor
+  (yatırım/fırsat 1,00); artan parayı hep portföye koyduğu için yüksek
+  sermayeli işletmeye ulaşamıyor; her arketip çalışıyor (%98-100),
+  işsiz kalmayı seçen profil yok. Bunlar düzeltilirse **bütün ürün
+  metrikleri değişir**, bu yüzden Faho'ya bildirilmeden yapılmadı.
 - **Olay havuzuna içerik eklemek tohuma çakılı testleri kaydırıyor.**
   `EventEngine._pick`, havuzdaki **her** olay için kişiyi çözüyor
   (`_resolvePerson`, çekiliş tüketiyor) ve yaş kapısına ancak ondan

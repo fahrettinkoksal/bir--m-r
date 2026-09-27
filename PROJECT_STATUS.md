@@ -1852,6 +1852,79 @@ oynamak çok yavaş olurdu.
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
 `flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
 
+## Ürün simülasyonu kök neden analizi (27 Eylül 2026)
+
+**Amaç:** son PlayerBot ölçümündeki altı aşırı sayıyı denge değiştirerek
+"düzeltmek" değil, **nedenini ölçmek**. Bu turda oyun dengesinde bir tek
+sabit, eşik, fiyat, getiri ya da şart **değişmedi**; kod da düzeltilmedi.
+Ayrıntılı karar soruları `docs/DESIGN_REVIEW_QUEUE.md` **Q-167**'de.
+
+**Gelen dosyalar:**
+* `app/test/support/bot_diagnostics.dart` — `BotDiag` (servet bileşenleri,
+  para akışları, evlilik hunisinin her basamağı, ayrılık sonrası huni,
+  meslek/işletme uygunluğu, bot eylem sıklıkları) ve `BotOverrides`
+  (teşhis için **botun tercihini** kapatır; oyunun sayılarına dokunmaz).
+* `app/test/diagnosis_root_cause_test.dart` — 16 bölümlük rapor.
+  1000 hayat (10 arketip × 100, hepsi ölümle bitti, takılan 0) + 5
+  senaryo × 200 karşılaştırma + 500 hedefli ayrılık hayatı.
+* `app/test/diagnosis_remarriage_lock_test.dart` — 9 test, tekrar evlenme
+  %0'ın kök nedeninin **deterministik kanıtı**.
+
+**Ölçüm bütünlüğü:** teşhis botun rastgele akışına dokunmuyor —
+`product_simulation_test.dart` çıktısı teşhis eklendikten sonra **satır
+satır aynı** kaldı (yalnızca geçen süre satırı değişti). `debugSetState`
+ile para/stat/ilişki/ev/iş verilmedi.
+
+**Bulunan sebepler (özet):**
+
+| Soru | Sebep |
+|---|---|
+| Servet medyan ~134M | Net servetin **%97,8'i portföy**. Eğri hiçbir yaşta patlamıyor; her 5 yılda 1,34-1,94x büyüyor. Yatırımsız senaryo **0,150x**; yatırım yapmayan tek arketip (`social`) 20,7M ile ölüyor. |
+| Gayrimenkul | Serveti **azaltıyor**: gayrimenkulsüz senaryo **1,202x**. "Ev al, bedava gelir" exploit'i yok, tersi var. |
+| Miras / işletme | Etkisiz. 50M üstü hayatlarda mirasın payı **medyan %0,15**; işletmesiz senaryo 0,977x. |
+| Q-165/5 (gider portföyden tahsil edilmiyor) | Ölçüldü ama **ana sebep değil**: korunan yıl medyan 2, ödenmeyen gider %8,2. Portföy/maliyet katı 6,6x. Sürükleyici gerçek getiri. |
+| Partner %94,9 / evli %22 | İki kapı. (1) Bot yalnızca %47,1 evlenmek istiyor (**bot parametresi**). (2) İsteyenlerin **%49'u hiç sevgili edinemiyor** — bütün kayıp orada. Yakınlık 45 eşiği kayıp üretmiyor (%50,1 → %49,7); görülen en yüksek yakınlık medyan 100. |
+| Tekrar evlenme %0 | **GERÇEK HATA.** `Finger` "evli mi" sorusunu `state.marriage != null` ile soruyor; boşanmada/dullukta kayıt bilerek silinmediği için bu koşul bir kez evlenen herkes için hayat boyu doğru. `finger.dart:443/552/680/711` romantik yolların hepsini kalıcı kapatıyor. `marryBlockReason` izin veriyor ama evlenecek sevgili edinilemiyor. |
+| 5 girilmeyen meslek + 4 kurulmayan işletme + 12 görülmeyen olay | Büyük kısmı **tek bir bot eksiği**: PlayerBot hiç ehliyet almıyor (`applyForLicense` çağrılmıyor) → 2 meslek + 1 işletme + 5 olay kapanıyor. |
+
+**Sevgili kapısının mekaniği:** Finger adaylarının %25'i baştan yalnızca
+arkadaşlık istiyor (flört değil arkadaş üretir, D-107). Flört oluşursa
+yakınlığı `rng.between(45, 62)`, resmîleştirme eşiği **60** → doğrudan
+geçme ihtimali %16,7. Kalanı için flörtle vakit geçirmek gerekiyor ama
+**bot flörtle hiç vakit geçirmiyor** (`_spendTimeWithFamily` listesinde
+flört yok) ve ilgilenilmeyen flört Paket R ile bitiyor. Ölçüm: flört
+edinen 412 hayatın **228'i (%55,3) hiç sevgiliye çevirmiyor** — huninin
+228 kayıplık basamağıyla birebir aynı.
+
+**Kendi ölçüm hatalarım (düzeltildi, raporda açıkça yazıyor):**
+* Spor ve check-up'ı "bir kez yaptı mı" diye ölçmüştüm; on arketipte de
+  %95-100 çıktı ve "bot fazla mekanik" diye yorumlamaya hazırdım. Yanlış
+  metrikti: bot yılda bir profile bağlı zar atıyor, 57 yılda düşük
+  olasılık bile doygunlaşıyor. Yıllık sıklıkla ölçünce arketipler
+  ayrışıyor (spor/yıl 0,21-0,97).
+* Eski eş kaydını "bağı artık `es` değil" diye ölçtüm, %37,7 çıktı ve
+  kayıt bozuluyor sandım. Dullukta eş vefat eder ve bağı `es` kalabilir.
+  Doğru ölçümle: kayıt korunma **%100**, boşanmada bağ güncellenme
+  **%100**, yeniden bekâr sayılma **%100**. Kayıt yönetimi doğru.
+* İlk yazımda `diag.wantedMarriage`'ı hayatın başında okumuştum;
+  `_Intent`'in `late final` alanları erişim sırasına göre zar attığı için
+  bu bütün niyet zarlarını kaydırdı (ölüm yaşı 74,1 → 74,2, üniversite
+  %48,5 → %47,4). Teşhis akışa dokunmamalı; botun kendi okuduğu yere
+  taşındı ve çıktı yeniden birebir aynı oldu.
+* Evlilik hunisine monoton olmayan basamaklar koymuştum (bot niyeti,
+  flört) ve tablo eksi kayıp yüzdesi basıyordu; ikisi huninin yanına
+  ayrı bilgi olarak taşındı. "Uygun ama teklif etmeyen" oranını bütün
+  korpusta ölçmüştüm (%48,6); neredeyse tamamı hiç evlenmek istememiş
+  hayatlardı. Evlenmek isteyenlerde gerçek değer **%0,6**.
+
+**Denge değişmedi.** Bot tarafındaki 7 eksik (ehliyet, flört kuru, Finger
+niyeti, her fırsatta yatırım, sermaye birikmemesi, maaş süzgeci, herkesin
+çalışması) ürün kararı değil; yine de düzeltilirse **bütün ürün
+metrikleri değişeceği için** Faho'ya bildirilmeden dokunulmadı.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

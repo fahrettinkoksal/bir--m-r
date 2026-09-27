@@ -3939,3 +3939,191 @@ Mortgage'lı ev: 3.200.000 ₺ değerinde daire, yıllık kira 144.000 ₺, yıl
 **Q-165/5'e dokunulmadı:** "geçim gideri portföyden otomatik tahsil edilsin mi?" sorusu açık duruyor ve bu paket onu sessizce kapatmak için kullanılmadı.
 
 **Varsayılan işlem:** Onay gelene dek bütün sayılar `prototypeOnly` kalır; mülk sayısı sınırı konmaz, mortgage ile kiralama kapatılmaz, kira hukuku eklenmez ve `DECISIONS.md`'ye kesin karar yazılmaz.
+
+---
+
+### Q-167 — Ürün simülasyonu kök neden analizi: altı aşırı sayının sebebi
+
+**Durum:** öneri / karar bekliyor.
+**İlgili kod:** `app/test/diagnosis_root_cause_test.dart` (16 bölümlük teşhis raporu), `app/test/diagnosis_remarriage_lock_test.dart` (9 test, kilidin kanıtı), `app/test/support/bot_diagnostics.dart`.
+**İlgili PR:** #80 (`claude/stoic-maxwell-6rkrit`).
+
+Son PlayerBot ölçümündeki altı aşırı sayının **nedeni ölçüldü**. Bu turda oyun dengesi, bir tek sabit, eşik, fiyat, getiri ya da şart **değiştirilmedi**; kod da düzeltilmedi. Aşağıdaki her bulgunun altında "oyun sorunu mu, bot sorunu mu" ayrımı var.
+
+Ölçüm: 10 arketip × 100 = **1000 hayat** (hepsi ölümle bitti, takılan 0), ayrıca D bölümünde 5 senaryo × 200 = 1000 hayat ve L bölümünde 500 hedefli hayat. Teşhis botun rastgele akışına dokunmuyor: `product_simulation_test.dart` çıktısı teşhis eklendikten sonra **satır satır aynı** kaldı.
+
+#### 1. Servet 134M: bileşik portföy büyümesi, sistem kırılması değil
+
+Ölüm anı net servetin **%97,8'i portföy**. Gayrimenkul %1,0, cüzdan %1,6, araç %0,2.
+
+Servet eğrisi hiçbir yaşta patlamıyor; her 5 yılda benzer katsayıyla büyüyor:
+
+| Yaş | Medyan net servet | Önceki yaşın katı |
+|---|---|---|
+| 25 | 873k ₺ | — |
+| 35 | 4.043k ₺ | 1,94x |
+| 45 | 12.786k ₺ | 1,72x |
+| 55 | 30.725k ₺ | 1,53x |
+| 65 | 59.727k ₺ | 1,34x |
+| 75 | 115.647k ₺ | 1,40x |
+| 80 | 170.880k ₺ | 1,48x |
+
+Yani 134M, **60 yıl boyunca hiç kesilmeyen bileşik büyümenin** doğal sonucu.
+
+Karşılaştırmalı senaryo (aynı tohumlar, oyunun sayıları değişmeden, yalnızca botun tercihi kapatılarak):
+
+| Senaryo | Medyan servet | Normale göre |
+|---|---|---|
+| normal | 118.575k ₺ | 1,000x |
+| yatırımsız | 17.760k ₺ | **0,150x** |
+| gayrimenkulsüz | 142.571k ₺ | **1,202x** |
+| işletmesiz | 115.832k ₺ | 0,977x |
+| yatırım + evsiz | 15.938k ₺ | 0,134x |
+
+Aynı sonucu arketip tablosu da veriyor: yatırım yapmayan tek arketip (`social`, `investStyle: none`) **20.690k ₺** ile ölüyor; yatırım yapanlar 96M–205M arasında.
+
+**Okunması gereken üç şey:**
+* Serveti büyüten tek sistem **yatırım**. İşletme etkisiz (%2,3), miras önemsiz (serveti 50M üstü hayatlarda mirasın payı **medyan %0,15**; en zengin miras kademesinde bile nakit 3,5M ile sınırlı).
+* **Gayrimenkul serveti AZALTIYOR.** Eve konan para portföyde bileşiklenmediği için ev almayan bot %20 daha zengin ölüyor. Yani "ev al, sonsuza kadar bedava gelir" exploit'i yok — tersi var.
+* Q-165/5 ölçüldü: `LivingCosts.apply` yalnızca cüzdana dokunuyor, portföyü satmıyor ve borç yazmıyor. Ama bu **ana sebep değil**: cüzdanı yetmeyip portföyü dolu olan hayat %46,7, o hayatlarda korunan yıl **medyan 2**, korunan yıllarda ortalama portföy 13,4M. Ödenmeyen gider toplamda %8,2. Portföy/maliyet katı ise medyan **6,6x**. Yani 134M'nin ezici kısmı **gerçek yatırım getirisi**; giderden korunma ikincil.
+
+**Karar soruları:** (a) 60 yıllık kesintisiz bileşiklenme kalsın mı, yoksa portföyü aşağı çeken bir kalem (geçim, sağlık, emeklilik harcaması, vergi) girsin mi? (b) Gayrimenkulün servet açısından yatırımdan kötü olması istenen sonuç mu? (c) Q-165/5 hâlâ açık ve bu turda kapatılmadı.
+
+#### 2. Partneri olan %94,9 / evlenen %22: iki ayrı kapı
+
+Evlenmek **isteyen** 471 hayatta huni:
+
+| Basamak | Oran | Bu basamakta kayıp |
+|---|---|---|
+| evlenmek isteyen | %100,0 | — |
+| partner adayı gördü | %99,4 | %0,6 |
+| **sevgilisi oldu** | **%51,0** | **%48,7** |
+| yakınlık 45+ | %50,1 | %0,8 |
+| teklif edilebilir | %50,1 | 0 |
+| teklif etti | %49,7 | %0,8 |
+| kabul edildi | %46,7 | %6,0 |
+| düğün yapıldı | %46,7 | 0 |
+
+* **"Partneri olan %94,9" yanıltıcı bir metrik:** flört *ya da* sevgili görmüş olmayı sayıyor. Gerçek sevgili oranı %72,3.
+* %22 = botun evlenmek istediği %47,1 × dönüşüm %46,7. Yarısı **bot parametresi** (`familyDesire`), yarısı tek bir kapı.
+* **Yakınlık 45 eşiği kayıp üretmiyor** (%50,1 → %49,7). Görülen en yüksek sevgili yakınlığı medyan **100**. Eşiği düşürmek bu sayıyı değiştirmez.
+* Teklif reddi %3,0, "kabul alıp düğünsüz kalan" %0,0 (gerçek hata yok).
+* Aile odaklı botta bile aynı yer daralıyor: `family` arketipinde isteyen %98, sevgili %62, düğün %56.
+
+**Kapının mekaniği (G-EK bölümü):** Finger adaylarının **%25'i baştan yalnızca arkadaşlık istiyor** (`kFingerIntentWeights`), onlarla tanışmak flört değil arkadaş üretiyor (D-107). Flört oluşursa yakınlığı `rng.between(45, 62)`, resmîleştirme eşiği ise **60**: doğrudan geçme ihtimali 3/18 ≈ **%16,7**. Kalanı için flörtle vakit geçirip yakınlığı yükseltmek gerekiyor — **ama bot flörtle hiç vakit geçirmiyor**; `_spendTimeWithFamily` eş/çocuk/anne/baba/sevgili ile ilgileniyor, flört listede yok. Üstüne Paket R kuralı var: ilgilenilmeyen flört biter.
+
+**Ayrım:** oyun tarafı 45–62 başlangıç yakınlığı ile 60 eşiğinin dar örtüşmesi ve %25 arkadaşlık niyeti; **bot tarafı** flörtü hiç kur etmemesi ve desteden niyete bakmadan profil seçmesi. **Asıl kaynak bot tarafı** — flörtle vakit geçirmek oyunda mümkün.
+
+**Karar sorusu:** resmîleştirme eşiği 60 ile flörtün başlangıç yakınlık bandı 45–62 bilinçli bir tasarım mı? (Bot eksiği ürün kararı değil; test tarafında düzeltilir.)
+
+#### 3. Tekrar evlenen %0: **gerçek hata bulundu**
+
+Kök neden kanıtlandı (`diagnosis_remarriage_lock_test.dart`, 9 test geçiyor).
+
+`GameState.isMarried` doğru çalışıyor: boşanmış (`bosandi`) ya da dul (`dul`) kayıt "evli" saymıyor, ve `MarriageEngine.marryBlockReason` ikinci evliliği **açıyor**. Ama `Finger` aynı soruyu başka bir alandan soruyor: **`state.marriage != null`**. Boşanmada ve dullukta kayıt bilerek silinmiyor (Paket 36: "kiminle, kaç yaşında evlenildi" kaybolmasın), dolayısıyla bu koşul **bir kez evlenen herkes için hayatının sonuna kadar doğru**.
+
+Kapanan yollar:
+
+| Yer | Etki |
+|---|---|
+| `finger.dart:443` `meetFingerMatch` | eşleşme yalnızca arkadaş kalır, flört olmaz |
+| `finger.dart:552` `makeRelationshipOfficial` | "Hayatında zaten biri var." |
+| `finger.dart:680` `officialAvailability` | aynı engel |
+| `finger.dart:711` `askOutAvailability` | aynı engel |
+
+Yani oyun "yeniden evlenebilirsin" diyor ama **evlenecek sevgiliyi edinmenin yolu kalıcı olarak kapalı**. Ölçüm bunu birebir doğruluyor:
+
+| Basamak | 1000 hayat korpusu | 500 hedefli hayat |
+|---|---|---|
+| ayrılan | 141 | 114 |
+| yeniden bekâr sayılıyor | %100,0 | %100,0 |
+| yeni partner adayı gördü | %55,3 | %50,0 |
+| **yeni flört** | **%0,0** | **%0,0** |
+| yeniden evlendi | %0,0 | %0,0 |
+
+`second_marriage_test.dart` geçiyordu çünkü orada sevgili **elle** kuruluyor; oyuncunun gerçek yolu test edilmiyordu.
+
+**Aynı kalıbın ikinci örneği:** `life_progression.dart:1696` `final bool evli = state.marriage != null;` — boşanmış oyuncunun ebeveynleri onu hâlâ evli sayıp "destekleyici" tepki veriyor. Etkisi küçük (yakınlık/mutluluk farkı) ama kalıp aynı.
+
+**İkincil bulgu:** ayrılık **medyan 70-71 yaşında** oluyor (141 ayrılığın 80'i dulluk). Kilit açılsa bile tekrar evlenme için kalan süre medyan 9-11 yıl. Yani kilidi açmak tek başına oranı yükseltmeye yetmeyebilir.
+
+**Öneri (uygulanmadı, onay bekliyor):** `finger.dart`'taki dört `state.marriage != null` kontrolü `state.isMarried` olmalı; `life_progression.dart:1696` de öyle. Bu bir **hata düzeltmesi**, denge değişikliği değil — ama tekrar evlenme oranını sıfırdan yukarı taşıyacağı için Faho'nun haberi olmadan yapılmadı.
+
+#### 4. Hiç girilmeyen 5 meslek: üçü tek bir bot eksiği
+
+| Meslek | Açık ilanda görülen yıl | Başvuru | Sebep | Sınıf |
+|---|---|---|---|---|
+| `kurye` | 0 | 0 | "Motosiklet ehliyeti gerekiyor." | bot eksiği |
+| `yz_kurye` | 0 | 0 | aynı | bot eksiği |
+| `yazar` | 0 | 0 | hobi `okuma` basamak 2 + zekâ 55 | dar kapı + bot |
+| `doktor` | 3 | 1 | tıp + zekâ 75 + **büyük şehir** (D-159) | dar kapı (B) |
+| `muzisyen` | 34 | **0** | maaş 440k, botun "üst üçte bir" süzgecine girmiyor | **bot davranışı (A)** |
+
+**PlayerBot hiç ehliyet almıyor** — `applyForLicense` hiçbir yerde çağrılmıyor. Ehliyet oyunda alınabilir bir şey, yani bu bir oyun kapısı değil ölçüm eksiği.
+
+Botun iş seçme kuralı ikinci taraf: işsizken açık işleri **maaşa göre** sıralıyor ve %70 ihtimalle üst üçte birden seçiyor. Bu yüzden düşük maaşlı meslekler ilan açılsa bile neredeyse hiç seçilmiyor (`muzisyen` 34 ilan / 0 başvuru; `yz_cagri_merkezi` 2078 ilan / 4 başvuru = %0,2).
+
+**Not:** bu korpus farklı tohumlarla koştuğu için 0-hit listesi bir önceki ölçümden biraz farklı (`eczaci` girildi, `muzisyen` girilmedi). Liste tohuma duyarlı; tek tek meslek adı değil **sınıf** önemli.
+
+#### 5. Hiç kurulmayan 4 işletme: ikisi ayrı sebep
+
+| Tür | Sermaye | Şart açık geçen yıl | Sebep |
+|---|---|---|---|
+| `is_nakliye` | 1.145k ₺ | 0 | "Otomobil ehliyeti gerekiyor." → **aynı ehliyet eksiği** |
+| `is_lokanta` | 2.021k ₺ | 0 | sermaye hiç birikmiyor |
+| `is_hali_saha` | 2.358k ₺ | 0 | sermaye hiç birikmiyor |
+| `is_spor_salonu` | 2.864k ₺ | 0 | sermaye hiç birikmiyor |
+| `is_kahve` | 808k ₺ | 27 (13'ünde sermaye de yetti) | bot rastgele başka tür seçti |
+
+Sermaye sebebi **oyunun şartı değil botun para politikası**: bot artan parayı **her fırsatta** portföye koyuyor (aşağıda, yatırım/fırsat 1,00), bu yüzden cüzdanda hiç 2M birikmiyor. Botun "işletme kurmak için yatırım sat" ya da "işletme kredisi çek" yolu yok. Girişimci arketipinin 100 hayatında bile 13 türün yalnızca 6'sı kuruluyor.
+
+#### 6. Hiç görülmeyen 12 olay: beşi yine ehliyet
+
+361 olayın 346'sı görüldü (%95,8). Görülmeyen 15 olay:
+
+* **3 olay uygun hale geldi ama havuz çekilişinde seçilmedi** (`yardimin_karsiligi`, `sinav8_son_hafta`, `zincir_ogretmen_3`) — erişilebilir, yalnızca rekabet.
+* **5 olay otomobil ehliyeti istiyor** (`direksiyon_basinda`, `araba_yolda_kaldi`, `suc_radar`, `suc_dugun_donusu`, kısmen `un_is_daveti` hariç) — **aynı bot eksiği**.
+* **2 olay hobi `okuma`** istiyor (`hobi_sevgili_kitapci`, `hobi_okuma_gecesi`) — `yazar` mesleğiyle aynı kapı. Bot hayat boyu tek bir rastgele hobi seçiyor, `okuma` ~1/12.
+* **5 olay suç zincirinin devamı** (`suc_kavga_karsisindaki`, `suc_teklif_ikinci_kez`, `suc_teklif_eden_sonu`, `suc_borc_odenmedi`, `suc_borc_sonrasi`) — önceki olaydan gelen flag **ve** hatırlanan kişi rolü birlikte gerekiyor.
+* **1 olay ün 8 + sosyal medya** istiyor (`un_is_daveti`).
+
+Yani **tek bir bot eksiği (ehliyet almamak) 5 olayı, 2 mesleği ve 1 işletme türünü birden kapatıyor.**
+
+#### 7. PlayerBot'un fazla mekanik davrandığı yerler
+
+| Ölçü | Sonuç | Yorum |
+|---|---|---|
+| yatırım / fırsat | 10 arketipin 9'unda **1,00** | Bot yatırım yapabildiği **her** yıl yatırım yapıyor. Gerçek oyuncu böyle değil. 134M'nin arkasındaki asıl bot davranışı bu. |
+| çalışan | %98–100 (fark **2 puan**) | İş bulma kuralı arketipe hiç bakmıyor; işsiz kalmayı seçen oyuncu profili yok. |
+| üniversite | fark 69 puan | ayrışıyor |
+| yatırım (ever) | fark 100 puan | ayrışıyor |
+| işletme | fark 91 puan | ayrışıyor |
+| sabıka | fark 68 puan | ayrışıyor |
+| evli | fark 44 puan | ayrışıyor |
+| ev sahibi | fark 33 puan | ayrışıyor |
+
+**Kendi ölçüm hatam:** ilk yazımda spor ve check-up'ı "bir kez yaptı mı" diye ölçtüm, on arketipte de %95–100 çıktı ve "bot fazla mekanik" diye yorumlamaya hazırdım. Yanlış metrikti: bot sporu yılda bir, profile bağlı zarla deniyor (`rng < sportDesire`); girişimcide bile 0,20 ve 57 yetişkin yılda 1−0,80⁵⁷ ≈ %100 eder. Doğru ölçü yıllık sıklık ve orada arketipler ayrışıyor (spor/yıl 0,20 ile 0,95 arası). Doygunluk botun değil metriğin sorunuydu.
+
+#### Ayrım özeti
+
+**Oyun sorunu (ürün kararı gerekiyor):**
+1. 60 yıllık kesintisiz bileşik portföy büyümesi (servet 134M'nin sebebi).
+2. Gayrimenkulün net servete katkısının **negatif** olması.
+3. Flörtün 45–62 başlangıç yakınlığı ile 60 resmîleştirme eşiğinin dar örtüşmesi.
+4. Ayrılığın medyan 70-71 yaşta olması (dulluk baskın).
+5. Q-165/5 açık: geçim gideri portföyden tahsil edilsin mi?
+
+**Gerçek hata (düzeltme gerekiyor, denge değil):**
+6. `finger.dart`'ta dört yerde `state.marriage != null` yerine `state.isMarried` olmalı → tekrar evlenme %0'ın kök nedeni.
+7. `life_progression.dart:1696` aynı kalıp (küçük etki).
+
+**Bot sorunu (ölçüm altyapısında düzeltilir, ürün kararı değil):**
+8. Bot hiç ehliyet almıyor → 5 olay + 2 meslek + 1 işletme türü kapanıyor.
+9. Bot flörtle hiç vakit geçirmiyor → sevgili kapısı.
+10. Bot Finger profilini niyete bakmadan seçiyor.
+11. Bot yatırım yapabildiği her yıl yatırım yapıyor (1,00).
+12. Bot artan parayı hep portföye koyduğu için yüksek sermayeli işletmeye hiç ulaşamıyor.
+13. Bot işsizken maaşa göre üst üçte birden seçtiği için düşük maaşlı meslekler hiç görülmüyor.
+14. Her arketip çalışıyor; işsiz kalmayı seçen profil yok.
+
+**Varsayılan işlem:** Onay gelene dek hiçbir denge değeri değişmez, `finger.dart` düzeltmesi yapılmaz ve `DECISIONS.md`'ye karar yazılmaz. Bot tarafındaki 7 madde (8–14) ürün kararı değil; yine de Faho'ya bildirilmeden ölçüm sayıları yeniden üretilmeyecek, çünkü düzeltilince bütün ürün metrikleri değişir.

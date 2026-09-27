@@ -40,6 +40,7 @@ import 'package:bir_omur/domain/career/craft_mastery.dart';
 import 'package:bir_omur/domain/career/job_market.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
+import 'package:bir_omur/domain/interaction/divorce_settlement.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/data/job_catalog.dart';
@@ -75,7 +76,13 @@ import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/investment.dart';
 import 'package:bir_omur/domain/models/rental.dart';
+import 'package:bir_omur/domain/events/event_engine.dart';
+import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/state/game_controller.dart';
+
+import 'bot_diagnostics.dart';
+
+export 'bot_diagnostics.dart';
 
 /// Oyuncu tipleri. Her biri farklı hedeflerle oynar.
 enum PlayerArchetype {
@@ -430,28 +437,40 @@ class BotLifeResult {
   bool usedFinger = false;
   bool gambled = false;
 
+  /// Teşhis kayıtları (bkz. `bot_diagnostics.dart`). Her hayatta
+  /// doldurulur; oyunun akışına dokunmaz, yalnızca okur.
+  final BotDiag diag = BotDiag();
+
   bool get wentToUni => wentToUniversity;
 }
 
 /// Botun hafızası. **Test tarafı**; `GameState`'e alan eklenmedi.
 class _Intent {
-  _Intent(this.profile, this.rng);
+  _Intent(this.profile, this.rng, this.overrides);
 
   final BotProfile profile;
   final Random rng;
+
+  /// Teşhis turunda kapatılan politikalar. Varsayılan hiçbir şeyi
+  /// kapatmaz; kapatırken bile niyet zarı **atılır** (aşağıda), böylece
+  /// aynı tohum bütün senaryolarda aynı rastgele akışla başlar.
+  final BotOverrides overrides;
 
   /// Bu hayatta üniversiteye gitmeye karar verdi mi? Lise sonrası rastgele
   /// vazgeçmemesi için bir kez karar verilir ve hatırlanır.
   late final bool wantsUniversity = rng.nextDouble() < profile.university;
 
   /// Ev için para biriktiriyor mu?
-  late final bool savingForHome = rng.nextDouble() < profile.wantsProperty;
+  late final bool savingForHome =
+      rng.nextDouble() < profile.wantsProperty && !overrides.noProperty;
 
   /// Kiralık ev hedefi var mı?
-  late final bool wantsRental = rng.nextDouble() < profile.wantsRental;
+  late final bool wantsRental =
+      rng.nextDouble() < profile.wantsRental && !overrides.noProperty;
 
   /// İş kurma hedefi var mı?
-  late final bool wantsBusiness = rng.nextDouble() < profile.wantsBusiness;
+  late final bool wantsBusiness =
+      rng.nextDouble() < profile.wantsBusiness && !overrides.noBusiness;
 
   /// Evlenmek istiyor mu? (Bekar kalmak da geçerli bir hayat.)
   late final bool wantsMarriage = rng.nextDouble() < profile.familyDesire;
@@ -473,12 +492,14 @@ class _Intent {
       : null;
 
   /// Yatırım türü tercihi: profile göre sabit bir sepet.
-  late final List<String> investmentBasket = switch (profile.investStyle) {
-    InvestStyle.none => const <String>[],
-    InvestStyle.cautious => const <String>['vadeli', 'altin'],
-    InvestStyle.balanced => const <String>['fon', 'altin', 'doviz'],
-    InvestStyle.aggressive => const <String>['hisse', 'fon'],
-  };
+  late final List<String> investmentBasket = overrides.noInvesting
+      ? const <String>[]
+      : switch (profile.investStyle) {
+          InvestStyle.none => const <String>[],
+          InvestStyle.cautious => const <String>['vadeli', 'altin'],
+          InvestStyle.balanced => const <String>['fon', 'altin', 'doviz'],
+          InvestStyle.aggressive => const <String>['hisse', 'fon'],
+        };
 
   /// Kaç yıldır aynı işte? İş değiştirme kararında kullanılır.
   int yearsInCurrentJob = 0;
@@ -499,6 +520,13 @@ BotLifeResult playBotLife({
   required int seed,
   /// Yalnızca teşhis için: her yılın sonunda çağrılır.
   void Function(GameState state)? onYear,
+  /// Teşhis turunda botun politikasını kısıtlar. Oyunun sayıları
+  /// **değişmez**; yalnızca botun tercihleri kapanır.
+  BotOverrides overrides = BotOverrides.none,
+  /// Olay uygunluğunu her yıl tarar (O bölümü). Pahalı olduğu için
+  /// varsayılan kapalı; açıkken **kendi ayrı zarını** kullanır, oyunun
+  /// rastgele akışına dokunmaz.
+  bool scanEventEligibility = false,
 }) {
   final BotProfile profile = kBotProfiles[archetype]!;
   final GameController c = GameController(random: Random(seed));
@@ -507,8 +535,12 @@ BotLifeResult playBotLife({
   // Botun kendi zarı oyunun zarından **ayrı**: bot kararları oyunun
   // rastgele akışını kaydırmasın.
   final Random rng = Random(seed * 7919 + archetype.index * 104729 + 13);
-  final _Intent intent = _Intent(profile, rng);
+  final _Intent intent = _Intent(profile, rng, overrides);
   final BotLifeResult sonuc = BotLifeResult(archetype: archetype, seed: seed);
+  final BotDiag diag = sonuc.diag;
+  // Teşhis taramasının **ayrı** zarı: oyunun akışını kaydırmasın.
+  final Random tarayiciRng = Random(seed * 31 + 17);
+  const EventEngine tarayici = EventEngine();
 
   /// Eylemlerin çalıştığı son yaş: yıl içinde tekrar çalışmasınlar.
   int islenenYas = -1;
@@ -520,6 +552,15 @@ BotLifeResult playBotLife({
 
     // ---- 1) Bekleyen şeyler ------------------------------------------
     if (s.hasNotice) {
+      // Teşhis: mirası bildirimin kendi tutarından okuyoruz. Cüzdan
+      // farkından çıkarmak yanlış olurdu — aynı yıl maaş, gider ve kira
+      // da cüzdanı oynatıyor.
+      final PendingNotice bildirim = s.notices.first;
+      if (bildirim.kind == NoticeKind.miras) {
+        diag.inheritanceCount++;
+        diag.inheritanceMoney += bildirim.money;
+        diag.inheritanceItems += bildirim.itemNames.length;
+      }
       c.dismissNotice();
       continue;
     }
@@ -534,6 +575,7 @@ BotLifeResult playBotLife({
         rng: rng,
       );
       if (secim.crimeId != null) sonuc.crimeIds.add(secim.crimeId!);
+      diag.eventsAnswered++;
       c.chooseEventOption(secim.id);
       continue;
     }
@@ -564,6 +606,11 @@ BotLifeResult playBotLife({
       continue;
     }
     if (s.pendingWedding != null) {
+      diag.pendingWeddingSeen = true;
+      diag.proposalAccepted = true;
+      if (diag.separationAge != null) {
+        diag.postSepAccepted = true;
+      }
       // **Doğru akış `holdWedding`.** `marry` teklifsiz doğrudan yol;
       // bekleyen düğünde çağrılınca kabul edilmeyebiliyor ve pencere
       // kapanmadan kalıyordu (2 hayat sonsuz döngüye girdi). Bedelsiz
@@ -571,6 +618,7 @@ BotLifeResult playBotLife({
       final FamilyOutcome? dugun = c.holdWedding('nikah');
       if (dugun?.applied ?? false) {
         sonuc.married = true;
+        _markWeddingHeld(c, diag);
         continue;
       }
       // Yine olmadıysa doğrudan evlenmeyi dene; o da olmazsa bu düğünü
@@ -578,6 +626,7 @@ BotLifeResult playBotLife({
       final FamilyOutcome? dogrudan = c.marry(s.pendingWedding!.spouseId);
       if (dogrudan?.applied ?? false) {
         sonuc.married = true;
+        _markWeddingHeld(c, diag);
         continue;
       }
       sonuc.stuckReason = 'dugun kapanmiyor';
@@ -604,6 +653,13 @@ BotLifeResult playBotLife({
     // giriyordu. Artık her yaş için eylemler bir kez çalışıyor.
     if (islenenYas != s.player.age) {
       islenenYas = s.player.age;
+      if (s.player.age >= 18) diag.adultYears++;
+      if (scanEventEligibility) {
+        // Ayrı zar: oyunun akışı kaymaz. "Bir kez bile uygun hale geldi
+        // mi" sorusunu yanıtlar; görülenle arasındaki fark havuz
+        // rekabetinde kaybedilen olaylardır.
+        diag.eligibleEvents.addAll(tarayici.debugEligibleIds(s, tarayiciRng));
+      }
       // Doğan bebeğe isim: **sonsuz döngü kaynağıydı.** Bot ilk yazımda
       // bebeğe kendi adını veriyordu; `ChildNaming.rename` aynı adı
       // değişiklik saymıyor, pencere açık kalıyor ve bot "isim
@@ -626,6 +682,11 @@ BotLifeResult playBotLife({
 
     // ---- 7) Yaş al ---------------------------------------------------
     final int oncekiYas = c.state!.player.age;
+    // Teşhis: yaş almadan **önce** gideri ve cüzdanı okuyoruz.
+    // `LivingCosts.apply` cüzdanı sıfırlayıp borç yazmıyor, portföye
+    // hiç dokunmuyor (Q-165/5'in kaynağı); ödenen kısmı ancak burada
+    // doğru hesaplayabiliriz.
+    _snapshotBeforeAge(c.state!, diag);
     c.ageUp();
     if (c.state!.player.age == oncekiYas) {
       // İlerlemeyi engelleyen bir şey kaldıysa döngüyü kırmak yerine
@@ -642,6 +703,7 @@ BotLifeResult playBotLife({
       break;
     }
     intent.yearsInCurrentJob++;
+    _snapshotAfterAge(c.state!, diag);
     if (onYear != null) onYear(c.state!);
   }
 
@@ -658,8 +720,170 @@ BotLifeResult playBotLife({
         'yas=${son.player.age})';
   }
   _collectFinalMetrics(c, sonuc);
+  _collectDiagAtDeath(c, diag);
   c.dispose();
   return sonuc;
+}
+
+// =====================================================================
+// Teşhis yardımcıları — hiçbiri oyunun akışını değiştirmez, `rng`
+// tüketmez, yalnızca okur.
+// =====================================================================
+
+/// Düğün gerçekten yapıldı: huninin son basamağı.
+void _markWeddingHeld(GameController c, BotDiag diag) {
+  diag.weddingHeld = true;
+  if (diag.separationAge != null) {
+    diag.postSepMarried = true;
+    diag.remarriageAge ??= c.state!.player.age;
+  }
+}
+
+/// Yaş almadan **önce** okunanlar: yaşam gideri ve portföy koruması.
+void _snapshotBeforeAge(GameState s, BotDiag diag) {
+  final int gider = LivingCosts.yearlyCost(s);
+  if (gider <= 0) return;
+  final int cuzdan = s.player.wallet;
+  diag.lifetimeLivingCostAccrued += gider;
+  diag.lifetimeLivingCostPaid += cuzdan >= gider ? gider : cuzdan;
+  if (cuzdan < gider) {
+    // **Q-165/5'in ölçüsü.** `LivingCosts.apply` yalnızca cüzdana
+    // dokunuyor: portföy satılmıyor, borç yazılmıyor. Yani bu yıl
+    // portföy giderden korunuyor ve bileşik büyümeye devam ediyor.
+    final int portfoy = s.portfolioValue;
+    if (portfoy > 0) {
+      diag.protectedYears++;
+      diag.protectedYearsPortfolioSum += portfoy;
+    }
+  }
+  // Maaş: çalışıyorsa o yılın yıllık maaşı. Yaklaşık brüt kariyer
+  // geliri; vergi/kesinti modeli değil.
+  diag.lifetimeSalary += s.career.job?.yearlySalary ?? 0;
+}
+
+/// Yaş aldıktan **sonra** okunanlar: servet eğrisi ve sıkıntı sayacı.
+void _snapshotAfterAge(GameState s, BotDiag diag) {
+  final int yas = s.player.age;
+  if (kWealthCurveAges.contains(yas)) {
+    diag.netWorthAtAge[yas] = NetWorth.of(s);
+    diag.portfolioAtAge[yas] = s.portfolioValue;
+  }
+  // `hardshipYears` üst üste sıkıntı sayacı; en yükseğini tutuyoruz.
+  if (s.hardshipYears > diag.hardshipYears) {
+    diag.hardshipYears = s.hardshipYears;
+  }
+  _trackSeparation(s, diag);
+}
+
+/// Boşanma ya da dulluk oldu mu, oldu ise kayıt doğru kapandı mı?
+void _trackSeparation(GameState s, BotDiag diag) {
+  if (diag.separationAge != null) {
+    diag.yearsAfterSeparation = s.player.age - diag.separationAge!;
+    return;
+  }
+  final Marriage? bitmis = <Marriage>[
+    ...s.pastMarriages,
+    if (s.marriage != null) s.marriage!,
+  ].firstWhereOrNullBot((Marriage m) =>
+      m.status == MarriageStatus.bosandi ||
+      m.status == MarriageStatus.dul);
+  if (bitmis == null) return;
+  diag.separationAge = s.player.age;
+  diag.separationKind =
+      bitmis.status == MarriageStatus.bosandi ? 'bosanma' : 'dulluk';
+  // Kayıt korundu mu: eski eş aynı kimlikle listede duruyor mu?
+  // (İlk yazımda bunu "bağı artık `es` değil" diye ölçmüştüm ve %37,7
+  // çıkmıştı; ama dullukta eş vefat eder ve bağı `es` kalabilir. O ölçü
+  // dulluğu haksız yere "kayıt bozuldu" sayıyordu. İki soru ayrıldı.)
+  diag.exSpouseRecordKept = !s.isMarried &&
+      s.people.any((Person p) => p.id == bitmis.spouseId);
+  if (bitmis.status == MarriageStatus.bosandi) {
+    diag.exSpouseRelationUpdated = s.people.any((Person p) =>
+        p.id == bitmis.spouseId && p.relation != RelationType.es);
+  }
+  // Oyun yeniden bekar kabul ediyor mu? `marryBlockReason`'ın ilk
+  // kapısı "Zaten evlisin." — o kapı açıldı mı diye bakıyoruz.
+  diag.treatedAsSingleAfter = !s.isMarried;
+}
+
+/// Teklif hunisinin bir basamağını işaretler.
+void _trackProposalFunnel({
+  required GameController c,
+  required Person partner,
+  required BotDiag diag,
+}) {
+  final bool ayrilikSonrasi = diag.separationAge != null;
+  diag.hadPartner = true;
+  if (ayrilikSonrasi) diag.postSepPartner = true;
+  if (partner.bond > diag.bestPartnerBond) {
+    diag.bestPartnerBond = partner.bond;
+  }
+  if (partner.bond >= 30) diag.bond30 = true;
+  if (partner.bond >= MarriageEngine.prototypeOnlyMinBond) {
+    diag.bond45 = true;
+    if (ayrilikSonrasi) diag.postSepBond45 = true;
+  }
+  final InteractionAvailability uygunluk = c.proposalAvailability(partner.id);
+  if (uygunluk.isAllowed) {
+    diag.proposalEligible = true;
+    if (ayrilikSonrasi) diag.postSepEligible = true;
+  } else if (diag.wantedMarriage && c.state!.player.age >= 20) {
+    // Bot teklif etmek istiyor ama oyun izin vermiyor: gerekçeyi
+    // **oyunun kendi metninden** alıyoruz, tahmin etmiyoruz.
+    final String sebep = _normalizeBlocker(uygunluk.reason ?? '');
+    diag.marriageBlockers.add(sebep);
+    if (ayrilikSonrasi) diag.postSepBlockers.add(sebep);
+  }
+}
+
+/// Engel metnini sayılabilir bir etikete indirir: metinde yakınlık
+/// değeri, kalan yıl gibi değişkenler var, ham metin sayılamaz.
+String _normalizeBlocker(String reason) {
+  if (reason.contains('Zaten evlisin')) return 'zaten evli';
+  if (reason.contains('yeterince yakın değil')) return 'yakinlik yetersiz';
+  if (reason.contains('yeterli zaman geçmedi')) return 'teklif bekleme suresi';
+  if (reason.contains('Yalnızca sevgilinle')) return 'sevgili degil';
+  if (reason.contains('çok genç')) return 'partner yasi kucuk';
+  if (reason.contains('yaşından itibaren')) return 'oyuncu yasi kucuk';
+  if (reason.contains('hayatta değil')) return 'partner hayatta degil';
+  if (reason.contains('kayıtlarda yok')) return 'partner kayitta yok';
+  if (reason.isEmpty) return 'engel yok';
+  return 'diger: $reason';
+}
+
+/// Ölüm anı servet bileşenleri ve akış toplamları.
+void _collectDiagAtDeath(GameController c, BotDiag diag) {
+  final GameState s = c.state!;
+  diag.wallet = s.player.wallet;
+  diag.portfolio = s.portfolioValue;
+  diag.debt = NetWorth.debt(s);
+  diag.netWorth = NetWorth.of(s);
+  diag.portfolioInvestedAtDeath = s.portfolioInvested;
+  diag.portfolioUnrealizedAtDeath = s.portfolioUnrealized;
+  diag.portfolioRealizedAtDeath = s.portfolioRealized;
+
+  // Eşya değerini **boşanma paylaşımıyla aynı yerden** okuyoruz
+  // (`NetWorth.itemsValue` de öyle yapıyor): iki ayrı değer ölçüsü
+  // olmasın, toplam tutsun.
+  for (final OwnedItem i in s.items) {
+    final int deger = DivorceSettlement.valueOf(i);
+    if (itemTypeOrFallback(i.typeId).kind == ItemKind.konut) {
+      diag.realEstate += deger;
+    } else if (i.isVehicle) {
+      diag.vehicles += deger;
+    } else {
+      diag.otherAssets += deger;
+    }
+  }
+
+  for (final PropertyLedger defter in s.propertyLedgers) {
+    diag.lifetimeRent += defter.rentCollected;
+    diag.lifetimeMaintenance += defter.maintenanceSpent;
+  }
+  for (final Business b in s.businesses) {
+    diag.businessInvested += b.totalInvested;
+    diag.businessProfit += b.totalProfit;
+  }
 }
 
 /// Küçük yardımcı: listedeki ilk uyan öğe ya da null.
@@ -918,6 +1142,16 @@ void _handleCareer(
     // zamanlı iş görüyordu — gerçek oyuncu 40 yaşında kafe garsonluğuna
     // razı olmaz, bu bir bot davranışı hatasıydı.
     final bool yarimZamanliUygun = s.player.age < 25;
+    // Teşhis: işsizken açık ilanda görülen her iş sayılır. `openJobs`
+    // yalnızca **şartları sağlanan** işleri veriyor, yani buradaki sayaç
+    // "bot bu işe girebilir durumdaydı" demektir. Kapalı işlerin
+    // gerekçesi de kaydediliyor (M bölümü).
+    for (final JobType j in c.openJobs()) {
+      sonuc.diag.jobOpenYears[j.id] = (sonuc.diag.jobOpenYears[j.id] ?? 0) + 1;
+    }
+    c.lockedJobs().forEach((JobType j, String sebep) {
+      sonuc.diag.jobLockReason[j.id] = sebep;
+    });
     final List<JobType> acik = c
         .openJobs()
         .where((JobType j) =>
@@ -932,10 +1166,17 @@ void _handleCareer(
     final JobType secim = rng.nextDouble() < 0.7
         ? acik[rng.nextInt(ustSinir)]
         : acik[rng.nextInt(acik.length)];
+    sonuc.diag.jobApplications++;
+    sonuc.diag.jobApplied[secim.id] =
+        (sonuc.diag.jobApplied[secim.id] ?? 0) + 1;
     final JobOutcome? sonucu = c.applyForJob(secim);
     if (sonucu != null) {
       intent.yearsInCurrentJob = 0;
       if (secim.partTime) sonuc.partTime = true;
+    }
+    if (!c.state!.career.isEmployed) {
+      sonuc.diag.jobFailed[secim.id] =
+          (sonuc.diag.jobFailed[secim.id] ?? 0) + 1;
     }
     return;
   }
@@ -981,7 +1222,11 @@ void _handleCareer(
             c.jobApplicationAvailability(j).isAllowed)
         .toList(growable: false);
     if (daha.isNotEmpty) {
-      c.applyForJob(daha[rng.nextInt(daha.length)]);
+      final JobType hedef = daha[rng.nextInt(daha.length)];
+      sonuc.diag.jobApplications++;
+      sonuc.diag.jobApplied[hedef.id] =
+          (sonuc.diag.jobApplied[hedef.id] ?? 0) + 1;
+      c.applyForJob(hedef);
     }
   }
 }
@@ -1018,6 +1263,22 @@ void _handleMoney(
       s.player.age >= 22 &&
       s.player.age - intent.businessAttemptAge >= 3) {
     intent.businessAttemptAge = s.player.age;
+    // Teşhis: her tür için "şart açık mı" ve "sermaye yetiyor mu" ayrı
+    // sayılır (N bölümü). Böylece hiç kurulmayan işletmenin sebebi
+    // şartta mı sermayede mi belli olur.
+    for (final BusinessType t in kBusinessCatalog) {
+      final InteractionAvailability u = c.businessOpenAvailability(t);
+      if (!u.isAllowed) {
+        sonuc.diag.bizLockReason[t.id] = u.reason ?? '';
+        continue;
+      }
+      sonuc.diag.bizAllowedYears[t.id] =
+          (sonuc.diag.bizAllowedYears[t.id] ?? 0) + 1;
+      if (t.setupCost <= serbest()) {
+        sonuc.diag.bizAffordableYears[t.id] =
+            (sonuc.diag.bizAffordableYears[t.id] ?? 0) + 1;
+      }
+    }
     final List<BusinessType> uygun = kBusinessCatalog
         .where((BusinessType t) =>
             c.businessOpenAvailability(t).isAllowed &&
@@ -1025,6 +1286,8 @@ void _handleMoney(
         .toList(growable: false);
     if (uygun.isNotEmpty) {
       final BusinessType secim = uygun[rng.nextInt(uygun.length)];
+      sonuc.diag.bizAttempted[secim.id] =
+          (sonuc.diag.bizAttempted[secim.id] ?? 0) + 1;
       final BusinessOutcome? sonucu = c.openBusinessOf(secim);
       if (sonucu?.applied ?? false) {
         sonuc.ownedBusiness = true;
@@ -1080,6 +1343,12 @@ void _handleMoney(
   _rentOutVacant(c, rng, sonuc);
 
   // ---- Yatırım -----------------------------------------------------
+  if (s.player.age >= kInvestmentMinAge &&
+      serbest() >= kInvestmentMinBuy) {
+    // Yatırım **yapabilecek** durumda geçen yıl: "bot her yıl mı
+    // yatırıyor" sorusunun paydası (Q bölümü).
+    sonuc.diag.investOpportunityYears++;
+  }
   if (intent.investmentBasket.isNotEmpty) {
     final int pay = (serbest() * (0.25 + profile.savingRate * 0.5)).round();
     if (pay >= kInvestmentMinBuy) {
@@ -1091,6 +1360,8 @@ void _handleMoney(
         if (sonucu?.applied ?? false) {
           sonuc.investedEver = true;
           sonuc.investmentTypes.add(tur);
+          sonuc.diag.investBuys++;
+          sonuc.diag.investedPrincipalEver += pay;
         }
       }
     }
@@ -1250,7 +1521,17 @@ void _handleRelationships(
     _spendTimeWithFamily(c, profile, rng, sonuc);
     return;
   }
+  if (s.player.age >= MarriageEngine.prototypeOnlyMinAge) {
+    sonuc.diag.reachedRomanceAge = true;
+  }
 
+  // Teşhis: "bu hayatta evlenmek istedi mi" **botun kendi okuduğu
+  // yerde** kaydedilir. İlk yazımda bunu hayatın başında okumuştum;
+  // `_Intent`'in `late final` alanları erişim sırasına göre zar attığı
+  // için bu, bütün niyet zarlarının sırasını kaydırdı ve ölçüm eskiyle
+  // karşılaştırılamaz hale geldi (ölüm yaşı 74,1 → 74,2, üniversite
+  // %48,5 → %47,4). Teşhis akışa dokunmamalı.
+  sonuc.diag.wantedMarriage = intent.wantsMarriage;
   // Finger: partner arayan oyuncu uygulamayı kullanır.
   if (intent.wantsMarriage &&
       s.player.age >= 18 &&
@@ -1263,6 +1544,10 @@ void _handleRelationships(
     final List<FingerProfile> deste = c.state!.fingerDeck;
     if (deste.isNotEmpty) {
       sonuc.usedFinger = true;
+      sonuc.diag.sawCandidate = true;
+      if (sonuc.diag.separationAge != null) {
+        sonuc.diag.postSepCandidate = true;
+      }
       final FingerProfile profil = deste[rng.nextInt(deste.length)];
       c.likeFingerProfile(profil.id);
       c.meetFingerMatch(profil.id);
@@ -1275,6 +1560,12 @@ void _handleRelationships(
     if (!p.isAlive) continue;
     if (p.relation == RelationType.flort) {
       sonuc.everPartner = true;
+      sonuc.diag.sawCandidate = true;
+      sonuc.diag.flirted = true;
+      if (sonuc.diag.separationAge != null) {
+        sonuc.diag.postSepCandidate = true;
+        sonuc.diag.postSepFlirt = true;
+      }
       if (c.officialAvailability(p.id).isAllowed && rng.nextDouble() < 0.7) {
         c.makeRelationshipOfficial(p.id);
       }
@@ -1282,6 +1573,8 @@ void _handleRelationships(
     }
     if (p.relation == RelationType.sevgili) {
       sonuc.everPartner = true;
+      sonuc.diag.sawCandidate = true;
+      _trackProposalFunnel(c: c, partner: p, diag: sonuc.diag);
       // **Evlenmek isteyen oyuncu ilişkisine yatırım yapar.** İlk
       // ölçümde bot sevgilisine özel zaman ayırmıyordu: rastgele bir
       // yakınla vakit geçiriyordu, sevgilinin yakınlığı evlilik eşiğine
@@ -1290,6 +1583,7 @@ void _handleRelationships(
       if (intent.wantsMarriage && p.bond < 60) {
         final List<InteractionKind> acik = c.availableKindsFor(p);
         if (acik.isNotEmpty) {
+          sonuc.diag.interactions++;
           c.interact(p.id, acik[rng.nextInt(acik.length)]);
           while (c.state!.hasNotice) {
             c.dismissNotice();
@@ -1302,6 +1596,11 @@ void _handleRelationships(
           c.state!.player.age >= 20 &&
           c.proposalAvailability(p.id).isAllowed &&
           rng.nextDouble() < 0.7) {
+        sonuc.diag.proposed = true;
+        sonuc.diag.proposalAttempts++;
+        if (sonuc.diag.separationAge != null) {
+          sonuc.diag.postSepProposed = true;
+        }
         c.propose(p.id);
       }
       break;
@@ -1394,6 +1693,7 @@ void _spendTimeWithFamily(
     final Person kisi = yakinlar[rng.nextInt(yakinlar.length)];
     final List<InteractionKind> acik = c.availableKindsFor(kisi);
     if (acik.isEmpty) continue;
+    sonuc.diag.interactions++;
     c.interact(kisi.id, acik[rng.nextInt(acik.length)]);
     while (c.state!.hasNotice) {
       c.dismissNotice();
@@ -1435,6 +1735,7 @@ void _handleActivities(
       final ActivityAction? eylem = _actionByIdBot(id);
       if (eylem == null) continue;
       if (c.activityAvailability(eylem).isAllowed) {
+        sonuc.diag.activityActions++;
         c.performActivity(eylem);
         sonuc.hobbies.add(hobi.id);
         if (kesildiMi()) return;
@@ -1447,6 +1748,8 @@ void _handleActivities(
   if (rng.nextDouble() < profile.sportDesire) {
     final ActivityAction? kosu = _actionByIdBot('kosu');
     if (kosu != null && c.activityAvailability(kosu).isAllowed) {
+      sonuc.diag.activityActions++;
+      sonuc.diag.sportActions++;
       c.performActivity(kosu);
       sonuc.didSport = true;
       if (kesildiMi()) return;
@@ -1455,6 +1758,8 @@ void _handleActivities(
   final MartialArt? sanat = intent.favouriteArt;
   if (sanat != null && rng.nextDouble() < 0.5) {
     if (c.martialAvailability(sanat).isAllowed) {
+      sonuc.diag.activityActions++;
+      sonuc.diag.sportActions++;
       c.takeMartialSeason(sanat);
       sonuc.martialArts.add(sanat.id);
       sonuc.didSport = true;
@@ -1467,6 +1772,8 @@ void _handleActivities(
   if (rng.nextDouble() < profile.healthCare * 0.5) {
     final ActivityAction? checkup = _actionByIdBot('genel_kontrol');
     if (checkup != null && c.activityAvailability(checkup).isAllowed) {
+      sonuc.diag.activityActions++;
+      sonuc.diag.checkupActions++;
       c.performActivity(checkup);
       sonuc.checkup = true;
       if (kesildiMi()) return;
@@ -1519,6 +1826,7 @@ void _handleActivities(
   if (s.player.stats.happiness < 55 && rng.nextDouble() < 0.5) {
     final ActivityAction? eglence = _actionByIdBot('sinema');
     if (eglence != null && c.activityAvailability(eglence).isAllowed) {
+      sonuc.diag.activityActions++;
       c.performActivity(eglence);
       if (kesildiMi()) return;
     }
@@ -1528,6 +1836,7 @@ void _handleActivities(
       rng.nextDouble() < profile.socialDesire * 0.6) {
     final ActivityAction? berber = _actionByIdBot('berber_sac');
     if (berber != null && c.activityAvailability(berber).isAllowed) {
+      sonuc.diag.activityActions++;
       c.performActivity(berber);
       if (kesildiMi()) return;
     }
