@@ -589,6 +589,11 @@ Map<String, Object?> _encodeMarket(MarketState m) => <String, Object?>{
       'companyStatus': m.companyStatus,
       'halts': m.halts.map(_encodeHalt).toList(growable: false),
       'incidents': m.incidents.map(_encodeIncident).toList(growable: false),
+      // Paket AD: alan eklemeli. Eski kayıtta yoksa bütün varlıklar
+      // normal (50) ısıda açılır.
+      'valuationHeat': m.valuationHeat,
+      'riskTide': m.riskTide,
+      'hedgeTide': m.hedgeTide,
     };
 
 Map<String, Object?> _encodeHalt(TradingHalt h) => <String, Object?>{
@@ -657,6 +662,12 @@ MarketState _decodeMarket(Map<String, Object?> json) => MarketState(
                 _decodeIncident(_asMap(e, 'market.incidents[]')))
             .toList(growable: false),
       ),
+      valuationHeat: json['valuationHeat'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'valuationHeat'),
+      // Eski kayıtta gelgit yoksa nötr (50) açılır.
+      riskTide: _intOr(json, 'riskTide', 50),
+      hedgeTide: _intOr(json, 'hedgeTide', 50),
     );
 
 Map<String, Object?> _encodeAlimony(Alimony a) => <String, Object?>{

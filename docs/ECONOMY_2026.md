@@ -1,5 +1,20 @@
 # 2026 Türkiye ekonomi kalibrasyonu
 
+> **TARİHSEL ARAŞTIRMA NOTU (Paket AD, §22-§23).** Bu belge bir *kural*
+> değil, sayıların ilk nereden çıktığının **kaydı**dır. Bir Ömür gerçek
+> Türkiye ekonomisine bağlı çalışan bir finans simülatörü değildir ve
+> oyunun kendi takvimi yoktur: kodda gerçek tarihe (`DateTime.now()`)
+> bağlı **hiçbir ekonomi hesabı yok** ve oyuncuya gösterilen hiçbir
+> metinde yıl yazmaz. Aşağıdaki gerçek tarihler ve oranlar yalnızca
+> "ilk ölçek nereden geldi" sorusunun cevabıdır.
+>
+> Ölçeğin **kendisi** artık oyunun kendi ekonomisidir: yatırım
+> getirileri bu belgedeki gerçek dünya oranlarına değil, oyunun piyasa
+> motoruna göre dengelenir (bkz. `docs/DESIGN_REVIEW_QUEUE.md` Q-169 ve
+> `app/test/paket_ad_measure_test.dart`). Buradaki bir sayıyı
+> güncellemek için gerçek dünyada bir şeyin değişmiş olması **yeterli
+> gerekçe değildir**; ölçüt oyunun dengesidir.
+
 Bu belge, oyunun para değerlerinin **neden** bu sayılar olduğunu açıklar.
 Kesin kural `DECISIONS.md` içinde **D-053**'tür; buradaki tek tek tutarlar
 hâlâ ayarlanabilir, kalibrasyonun **kuralları** ayarlanamaz.

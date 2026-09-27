@@ -418,6 +418,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   kaybettiriyor), ama üst kuyruğun büyüklüğü **eğilim × ufuk**
   çarpımından geliyor. Mimari seçenekler Q-168'de raporlandı; enflasyon
   motoru **kurulmadı**, eğilimler **değiştirilmedi**.
+  > **Güncelleme (Paket AD, 27 Eylül 2026): bu madde artık geçerli değil.**
+  > Faho §2'de açık yetki verdi ve **`drift` alanı tamamen kaldırıldı.**
+  > Getiri artık rejimden, gizli değerleme ısısından, çağ gelgitinden ve
+  > varlığın kendi ürettiği akıştan doğuyor. Yeni ölçüm: hisse geometrik
+  > **%6,5** (önce ~%9,2 gerçekleşen), altın **%3,4**, vadeli %6 → **%3**.
+  > 60 yıllık "sadece altın" stratejisi medyan **18 kat** yerine **7,4
+  > kat**. %100 hisse stratejisinde para kaybeden hayat payı %13,6 →
+  > **%16,8**. Ayrıntı: `PROJECT_STATUS.md` "Paket AD (1/6)" ve Q-169.
+  > **§18'in dağılım hedefi hâlâ doğrulanmadı** (AD/6).
 - **Tekrar evlenme %0'ın kök nedeni bulundu ve DÜZELTİLDİ (Q-167/3).**
   `Finger` "evli mi" sorusunu `state.marriage != null` ile soruyor;
   boşanmada ve dullukta kayıt bilerek silinmediği için (Paket 36) bu

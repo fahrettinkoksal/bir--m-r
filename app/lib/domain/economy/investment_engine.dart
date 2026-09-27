@@ -653,7 +653,7 @@ abstract final class InvestmentEngine {
       // Doğrusu yalnızca **eğilimden sapmayı** büyütmek.
       double etkinGetiri = getiri;
       if (yogunlasmaZammi > 0 && h.value == enBuyuk) {
-        final double egilim = investmentTypeById(h.typeId)?.drift ?? 0;
+        final double egilim = investmentTypeById(h.typeId)?.carry ?? 0;
         etkinGetiri = egilim + (getiri - egilim) * (1 + yogunlasmaZammi);
       }
       // Olay çarpanı (şirket batışı, panik, sektör…).

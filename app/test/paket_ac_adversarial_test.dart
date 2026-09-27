@@ -16,6 +16,7 @@ import 'dart:math';
 
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
+import 'package:bir_omur/domain/economy/market_engine.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:bir_omur/domain/economy/net_worth.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
@@ -132,18 +133,27 @@ void main() {
       // Kredi faizi yatırım getirisinden düşükse "borç al, yatır" bedava
       // para olurdu. Ölçüyoruz.
       final GameState s = _hayat(wallet: 100000, age: 30);
+      // Paket AD: `drift` alanı kalktı. Karşılaştırma artık varlığın
+      // **yapısal beklentisiyle** yapılıyor (carry + risk primi + korunma
+      // tabanı + değer saklama payı). Bu, motorun sabitlerinden çıkan en
+      // iyimser uzun vade eğilimidir; tek tek yıllar bunun çok üstüne de
+      // çıkar, ama borçla yatırım kararını belirleyen şey beklentidir.
+      double enIyiYapisal = 0;
+      for (final InvestmentType tur in kInvestmentTypes) {
+        final double y = MarketEngine.structuralReturn(tur);
+        if (y > enIyiYapisal) enIyiYapisal = y;
+      }
       for (final Bank banka in Bank.values) {
         final int yillikFaiz = (banka.yearlyRate * 100).round();
-        // En iyimser yatırım eğilimi (hisse) ile karşılaştır.
-        final int enIyiEgilim =
-            (investmentTypeById('hisse')!.drift * 100).round();
         print('${banka.label}: yillik kredi faizi ~%$yillikFaiz · '
-            'en yuksek yatirim egilimi %$enIyiEgilim');
+            'en yuksek yapisal yatirim beklentisi '
+            '~%${(enIyiYapisal * 100).round()}');
         expect(
           banka.yearlyRate,
-          greaterThan(investmentTypeById('hisse')!.drift),
-          reason: 'ARBITRAJ: ${banka.label} kredi faizi en yuksek yatirim '
-              'egiliminden dusuk; borc alip yatirmak bedava para olur',
+          greaterThan(enIyiYapisal),
+          reason: 'ARBITRAJ: ${banka.label} kredi faizi en yuksek yapisal '
+              'yatirim beklentisinden dusuk; borc alip yatirmak bedava '
+              'para olur',
         );
       }
       expect(s.loans, isEmpty);

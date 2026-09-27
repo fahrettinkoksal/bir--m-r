@@ -72,6 +72,9 @@ class MarketState {
     this.companyStatus = const <String, String>{},
     this.halts = const <TradingHalt>[],
     this.incidents = const <MarketIncident>[],
+    this.valuationHeat = const <String, int>{},
+    this.riskTide = 50,
+    this.hedgeTide = 50,
   });
 
   /// Baz puan ölçeği: 10.000 = 1,00.
@@ -119,6 +122,46 @@ class MarketState {
   /// Yaşanmış olayların kaydı. Aynı olay iki kez uygulanmaz.
   final List<MarketIncident> incidents;
 
+  /// **Değerleme ısısı** (Paket AD): varlık kimliği -> 0-100, 50 = normal.
+  ///
+  /// Bir varlık yıllarca yükselirse ısınır: beklenen getirisi düşer ve
+  /// sert düzeltme riski artar. Ucuzlarsa soğur ve tersi olur. Oyuncuya
+  /// **sayı olarak gösterilmez** — zirveyi önceden bilmek mümkün olmamalı.
+  ///
+  /// Bu alan sabit pozitif eğilimin (`drift`) yerini alan mekanizmanın
+  /// yarısıdır: eğilim kaldırıldı, yerine döngü geldi. Döngü ortalamada
+  /// sıfırlanır, yani uzun vade artık garanti zenginlik değil.
+  final Map<String, int> valuationHeat;
+
+  /// **Çağ gelgiti** (Paket AD, §4-§5): gizli, çok yavaş risk eğilimi.
+  ///
+  /// 0-100, 50 = nötr. Yılda küçük bir adım atar ve 50'ye çok zayıf
+  /// çekilir — yarı ömrü on yılın üstünde. Yani bir hayat **yapısal
+  /// olarak şanssız** olabilir: hisse tarafı yirmi yıl boyunca kendi
+  /// normalinin altında kalabilir.
+  ///
+  /// Bu alan §4'ün ("uzun vade = garanti zenginlik olmasın") tek gerçek
+  /// çözümü. Yıllık getiriler birbirinden bağımsız olduğu sürece 40 yılın
+  /// ortalaması matematik gereği daralır: ölçümde hisse 40 yılda yalnızca
+  /// **%2,9** olasılıkla anaparanın altında kalıyordu ve en kötü %10'luk
+  /// dilim bile 2,47 kat yapıyordu. Yani "hiç satmadan bekle" garanti
+  /// stratejiydi (§15). Gelgit bu daralmayı kırıyor: kötü bir çağa denk
+  /// gelen hayat, iyi oynasa da kazanmayabilir.
+  ///
+  /// Oyuncuya **hiçbir biçimde gösterilmez**; rejim gibi bir etiketi de
+  /// yoktur. Fark edilmesi gereken şey, sayı değil hikâyedir: "bizim
+  /// zamanımızda borsa hiç yürümedi".
+  final int riskTide;
+
+  /// Korunma tarafının (altın/döviz) çağ gelgiti. Bkz. [riskTide].
+  ///
+  /// Ayrı tutuluyor, çünkü altının kötü çağı hissenin kötü çağıyla aynı
+  /// yıllara denk gelmek zorunda değil; yoksa çeşitlendirme anlamsızlaşır.
+  final int hedgeTide;
+
+  /// Bu varlığın ısısı; kayıtta yoksa normal (50).
+  int heatOf(String typeId) => valuationHeat[typeId] ?? 50;
+
   /// Bu şirketin durumu; kayıtta yoksa ya da tanınmıyorsa `normal`.
   CompanyStatus statusOf(String companyId) {
     final String? ad = companyStatus[companyId];
@@ -157,6 +200,9 @@ class MarketState {
     Map<String, String>? companyStatus,
     List<TradingHalt>? halts,
     List<MarketIncident>? incidents,
+    Map<String, int>? valuationHeat,
+    int? riskTide,
+    int? hedgeTide,
   }) =>
       MarketState(
         regime: regime ?? this.regime,
@@ -171,6 +217,9 @@ class MarketState {
         companyStatus: companyStatus ?? this.companyStatus,
         halts: halts ?? this.halts,
         incidents: incidents ?? this.incidents,
+        valuationHeat: valuationHeat ?? this.valuationHeat,
+        riskTide: (riskTide ?? this.riskTide).clamp(0, 100),
+        hedgeTide: (hedgeTide ?? this.hedgeTide).clamp(0, 100),
       );
 }
 

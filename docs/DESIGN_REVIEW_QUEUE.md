@@ -4266,3 +4266,92 @@ Soru şu: oyuncunun 80 yaşında 97 milyon ₺ görmesi ne anlama geliyor?
 **V1/V2'de bilerek yok:** gerçek şirket/banka/fon/kurum/kişi adı, gerçek tarihsel fiyat, canlı veri, gerçek vergi mevzuatı, tekil hisse alım-satımı, türev ürün, kaldıraç, kripto, sermaye artırımına katılma kararı, temettü takvimi.
 
 **Varsayılan işlem:** Onay gelene dek yatırım eğilimleri değişmez, enflasyon motoru kurulmaz, borç defekti düzeltilmez, tekil hisse eklenmez ve `DECISIONS.md`'ye kesin sayı yazılmaz.
+
+---
+
+### Q-169 — Paket AD: oyunun kendi ekonomisi, tarihten bağımsız borsa
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "EKONOMİ TASARIM PRENSİBİ REVİZYONU" briefi (§1-§24) · **Etkilenen kod:** `app/lib/data/investment_catalog.dart`, `app/lib/domain/economy/market_engine.dart`, `app/lib/domain/models/market_state.dart`, `app/lib/data/save/game_state_codec.dart`, `app/lib/ui/screens/sections/bank_page.dart`, `app/test/paket_ad_measure_test.dart`
+
+#### Neyin kesin olduğu
+
+Faho §2'de **açıkça yetki verdi**: "Yatırım türlerinin SABİT POZİTİF DRIFT garantisi olmasın." Bu, Q-168/1'de karar bekleyen soruyu kapatıyor ve bu turda uygulandı. §22-§23 de kesin: oyunun takvimi yok, production ekonomi kodu gerçek tarihe bağlanmaz.
+
+Bunlar **uygulandı**, aşağıdaki sorular uygulananın *seviyesi* hakkındadır.
+
+#### Ne yapıldı (§2-§6, §22-§23)
+
+`drift` alanı kaldırıldı. Yerine gelen yapı:
+
+| Kaynak | Ne yapar | Oyuncuya görünür mü |
+|---|---|---|
+| `carry` | Varlığın ürettiği akış. Hisse %2,8 · fon %2,2 · **altın 0** · **döviz 0** · vadeli %3 | Dolaylı |
+| `annualFee` | Fonun yıllık yönetim ücreti %1,4 | Hayır (yeni) |
+| Risk primi | Rejim sıklığından doğan pay; yalnızca riske duyarlı varlıklara geçer | Hayır |
+| Korunma tabanı | Korunma etkeninin ortalamasını sıfıra getirir | Hayır |
+| Değer saklama payı | Altın/dövizin artı beklentisi | Hayır |
+| **Değerleme ısısı** | 0-100 gizli; pahalı varlığın beklentisi düşer, balon kırılma zarı atılır | **Hayır (§6)** |
+| **Çağ gelgiti** | Hayat ölçeğinde yavaş gizli eğilim; ortalaması sıfır, dağılımı genişletir | **Hayır** |
+
+Ayrıca: banka ekranındaki oyuncuya görünen "2026 Türkiye ihtiyaç kredisi piyasası" cümlesinden yıl kaldırıldı ve `docs/ECONOMY_2026.md` tarihsel araştırma notu olarak işaretlendi. Kodda gerçek tarihe bağlı **hiçbir ekonomi hesabı bulunmadı** (`DateTime.now()` yalnızca ses soğuma süresinde ve kayıt zaman damgasında).
+
+#### Ölçülen sonuç
+
+Yıllık (60.000 yıl, tek varlık):
+
+| Tür | carry | ortalama | geometrik | stdev | eksi kapanan yıl |
+|---|---|---|---|---|---|
+| altın | 0 | %4,0 | %3,4 | %11,8 | %37 |
+| döviz | 0 | %3,7 | %3,2 | %10,6 | %37 |
+| fon | %2,2 | %5,3 | %4,5 | %12,6 | %34 |
+| hisse | %2,8 | %9,2 | %6,5 | %23,1 | %34 |
+| vadeli | %3 | %3 | %3 | 0 | %0 |
+
+Tek varlığa yatırıp **hiç dokunmamak** (1000 yol, zorunlu satış/komisyon hariç):
+
+| Yıl | Tür | Medyan | Kötü %10 | İyi %10 | Anapara altı |
+|---|---|---|---|---|---|
+| 20 | altın | 1,89x | 0,98x | 3,90x | %10,9 |
+| 20 | hisse | 4,05x | 0,94x | 14,11x | %10,4 |
+| 40 | altın | 3,66x | 1,37x | 10,33x | %3,6 |
+| 40 | hisse | 15,25x | 1,61x | 118,49x | %5,0 |
+| 60 | altın | 7,42x | 2,26x | 25,86x | %1,2 |
+| 60 | hisse | 56,17x | 3,37x | 862,09x | %3,8 |
+
+60 yıllık bot stratejileri (yatırımın kendi getirisi, oyunun bütün sürtünmesiyle):
+
+| Strateji | Medyan kat | Kötü %10 | İyi %10 | Zarar eden |
+|---|---|---|---|---|
+| %100 hisse | 4,85x | 0,49x | 39,99x | **%16,8** |
+| sadece altın | 3,97x | 1,04x | 21,83x | %7,2 |
+| her yıl maksimum | 3,46x | 1,56x | 17,27x | %1,6 |
+| dengeli (4 varlık) | 2,50x | 1,23x | 9,51x | %3,2 |
+
+#### Kalibrasyon sırasında bulunan iki gerçek sorun
+
+Ikisi de ölçümle bulundu, tahminle değil; ikisi de kodda düzeltildi ve gerekçesi yorumda duruyor.
+
+1. **Tek yönlü balon = sistematik vergi.** Yalnızca "balon kırılması" varken ısı mekanizması her varlığı yavaşça kurutuyordu: altın yıllık ortalama **%-0,3**, hisse geometrik **%-0,2**. Yani "uzun vadede kesin zengin" sorununu "uzun vadede kesin batık" sorununa çevirmişim. Aynası eklendi: dipte sert toparlanma zarı. Simetri hem beklentiyi düzeltti hem oyunu zenginleştirdi — çöküşün dibi gerçek bir fırsat oldu ama **garanti değil**.
+2. **§6 ile §4 birbirine çalışıyor.** Balon mekaniği yıllık getirilere eksi otokorelasyon veriyor (pahalı yılı ucuz yıl izliyor) ve bu, uzun vadeli ortalamanın dağılımını *sıkıştırıyor*: 40 yıllık log ortalamanın standart sapması bağımsız yıllar varsayımıyla %3,87 olmalıyken **%2,39** ölçüldü. Sonuç: 40 yıl hisse tutanın en kötü %10'u bile 2,47 kat yapıyordu, yalnızca %2,9'u anaparanın altında bitiyordu. Yani §6'yı doğru kurmak §4'ü imkânsız hale getiriyor. Çözüm **çağ gelgiti**: hayat ölçeğinde yavaş (yarı ömür ~11 yıl), gizli, ortalaması sıfır bir eğilim. Artık bir hayat **yapısal olarak şanssız** olabilir; oyuncunun hatası olmadan.
+
+#### Karar soruları
+
+1. **Hisse 60 yılda medyan 56 kat, iyi %10'u 862 kat** (tek varlık, dokunmadan). Bot ölçümünde bu 4,85x'e iniyor çünkü oyunun sürtünmesi var. Üst kuyruk kabul edilebilir mi, yoksa risk primi %5,6'dan düşürülsün mü? **§18 dağılımı AD/6'da ölçülecek; bu soru ona bağlı.**
+2. **40 yıl hisse tutup para kaybetme oranı %5.** §4 "uzun vade garanti zenginlik olmasın" diyor. %5 yeterli mi, %10'a çıkarılsın mı? (Çıkarmanın yolu gelgit genliğini büyütmek.)
+3. **Altın 60 yılda medyan 7,4 kat** (önce 18 kat). §10 karşılandı mı?
+4. **Vadeli %6'dan %3'e indirildi.** §11 "ana işlevi nakdi koruma, düşük getiri" diyor. %3 doğru mu? 60 yılda risksiz 5,9 kat ediyor.
+5. **Dengeli strateji en düşük medyanı veriyor** (2,50x) ama en iyi tabanı (1,23x, %3,2 zarar). Çeşitlendirmenin medyanı düşürmesi doğru mu, yoksa çeşitlendirme ödüllendirilmeli mi (§9)?
+6. **Fon yönetim ücreti %1,4 eklendi** — yeni bir mekanik. Oyuncuya ekranda gösterilsin mi? Şu an yalnızca getiriye yansıyor.
+7. **Çağ gelgiti oyuncuya hiç gösterilmiyor.** "Bizim zamanımızda borsa hiç yürümedi" hissi hikâye olarak anlatılsın mı (ölüm ekranında bir satır gibi), yoksa tamamen sessiz mi kalsın?
+8. **Hisse sepetinin kendine özgü gürültüsü %17'den %13'e indirildi.** Sebep: hissenin *medyanı* altının medyanının altına düşüyordu (3,82x < 3,97x), yani riskten kaçan oyuncunun hisseye dokunmak için sebebi kalmıyordu. Tek isim riski ayrı modellenmiş durumda. Doğru müdahale mi?
+9. **`ECONOMY_2026.md` tarihsel not oldu.** Belge adı da değişsin mi (ör. `ECONOMY_SCALE.md`)? Ad değişikliği `DECISIONS.md` D-053 ve altı dosyadaki bağlantıyı etkiler.
+
+#### Bu turda bilerek yapılmayanlar
+
+- **§7-§9 şirket sağlık modeli** (gizli sağlık, kaldıraç, büyüme, yönetim kalitesi) — AD/2.
+- **§16 kontrolsüz borç düzeltmesi** — AD/4. Faho yetki verdi ("gerçek bug"), ayrı turda yapılacak.
+- **§13 servetin kullanımı / para harcama kanalları** — AD/5.
+- **§18-§21 on strateji × 20/40/60 kalibrasyonu** — AD/6. §18'in dağılım hedefi (normal oyuncu milyonlar · milyarderlik çok nadir) **henüz doğrulanmadı**.
+- **Enflasyon motoru** — Q-168'de duruyor, açılmadı.
+
+**Varsayılan işlem:** Onay gelene dek bu turda ölçülen beş kalibrasyon sayısı (risk primi, gelgit genliği, değer saklama payı, vadeli oranı, fon ücreti) olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.

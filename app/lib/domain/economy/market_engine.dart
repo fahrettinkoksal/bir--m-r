@@ -131,6 +131,90 @@ abstract final class MarketEngine {
     MarketRegime.toparlanma: (base: -0.105, spread: 0.13),
   };
 
+  /// prototypeOnly: rejim tabanlarının üstüne eklenen **risk primi**.
+  ///
+  /// Yukarıdaki rejim tabanları rejimler arası *farkı* yazar ve ağırlıklı
+  /// ortalaması sıfıra yakındır (o biçim `drift` çağından kalma: taban
+  /// ortalaması drift'in üstüne binmesin diye böyle yazılmıştı). Drift
+  /// kalkınca (§2) bu, riskli tarafı **beklentisi sıfır** bıraktı;
+  /// ölçümde hisse geometrik %-0,2 çıktı ve "sadece vadeli" her şeyi
+  /// yendi. Yani her kararın yanlış cevabı olan bir oyun oldu.
+  ///
+  /// Bu pay o eksiği kapatıyor ve **sabit bir varlık drift'i değil**:
+  /// risk iştahına ekleniyor, yani yalnızca riske duyarlı varlıklara
+  /// (`sensitivity.risk`) ve **rejimin izin verdiği ölçüde** geçiyor.
+  /// Kaynağı da uydurma değil, ölçülmüş bir oyun gerçeği: rejim
+  /// paylarında iyi yıllar kriz yıllarından çok (durgun %24,5 · normal
+  /// %45,3 · güçlü %20,8 · kriz %7,1 · toparlanma %2,3). Krizi çok gören
+  /// bir hayatta bu prim **hiç gerçekleşmez** — kriz tabanı primi fazlasıyla
+  /// yiyor.
+  static const double prototypeOnlyRiskPremium = 0.056;
+
+  /// prototypeOnly: rejim tabanlarının üstüne eklenen korunma tabanı.
+  ///
+  /// AC'de korunma tarafındaki "her zaman kazanan" sorununu düzeltirken
+  /// (toparlanmada prim geri verme + uzayan krizde prim erimesi) korunma
+  /// etkeninin uzun vadeli ortalaması **eksiye** kaydı: ölçümde -0,006.
+  /// Bu da altını/dövizi sistematik kaybettiren bir varlığa çevirdi
+  /// (altın 20 yılda medyan 0,81x). Bu pay ortalamayı sıfıra getiriyor:
+  /// **korunma tarafı bir döngü boyunca kazandığını geri verir** —
+  /// ne kazandırır ne kaybettirir. Altının/dövizin artı beklentisi
+  /// korunma talebinden değil, aşağıdaki değer saklama payından gelir.
+  static const double prototypeOnlyHedgeBaseline = 0.006;
+
+  /// prototypeOnly: sert varlıkların yıllık **değer saklama** payı.
+  ///
+  /// Altın ve döviz hiçbir şey üretmez (`carry` sıfır), ama oyunun kendi
+  /// parası yıllar içinde alım gücü kaybeder ve sert varlıkların nominal
+  /// fiyatı bunu yansıtır. `sensitivity.inflation` ağırlığıyla geçer,
+  /// yani en çok altına/dövize, en az hisseye (hissede eksi ağırlık:
+  /// yüksek enflasyon hisseyi baskılar).
+  ///
+  /// **Bu tam bir enflasyon motoru değildir** ve öyle sunulmuyor: maaşlar,
+  /// fiyatlar ve giderler bu paketle birlikte oynamıyor. Kapsamlı
+  /// enflasyon mimarisi Q-168'de karar bekliyor. Buradaki tek iş, sert
+  /// varlıkların beklentisini eksi olmaktan kurtarmak.
+  static const double prototypeOnlyStoreOfValueDrift = 0.115;
+
+  // -------------------------------------------------------------------
+  // Çağ gelgiti (§4-§5) — hepsi prototypeOnly
+  // -------------------------------------------------------------------
+
+  /// prototypeOnly: gelgitin yıllık en büyük adımı (puan).
+  static const int prototypeOnlyTideStep = 8;
+
+  /// prototypeOnly: gelgitin 50'ye çekilme payı — **bilerek çok küçük**.
+  ///
+  /// 0,06 yarı ömrü on bir yıl demek. Rejimin `prototypeOnlyMeanReversion`
+  /// payı 0,25 (yarı ömrü ~2,5 yıl): rejim yılların havası, gelgit çağın
+  /// havası. İkisi ayrı hızda çalışmalı, yoksa uzun vade yine daralır.
+  static const double prototypeOnlyTideReversion = 0.06;
+
+  /// prototypeOnly: gelgitin risk iştahına/korunma talebine geçiş genliği.
+  ///
+  /// Gelgit uçtayken (0 ya da 100) ortak etkene eklenen/çıkarılan en büyük
+  /// pay. Rejim tabanlarıyla kıyaslanabilir büyüklükte: güçlü rejimin
+  /// tabanı 0,137, kriz -0,273. Yani kötü bir çağ, iyi rejimlerin bir
+  /// kısmını yiyebilir — ama hiçbir yılı tek başına belirlemez.
+  ///
+  /// **Genlik ölçümle büyütüldü (0,13 → 0,20).** İlk değerde 40 yıllık
+  /// hisse yolunun en kötü %10'u hâlâ 1,86 kat yapıyordu. Nedeni ölçümde
+  /// çıktı: ısı mekanizması (§6) yıllık getirilere **eksi otokorelasyon**
+  /// veriyor — pahalı yılı ucuz yıl izliyor — ve bu, uzun vadeli
+  /// ortalamanın dağılımını bağımsız yılların altına *sıkıştırıyor*
+  /// (40 yıllık log ortalamanın standart sapması bağımsız varsayımla
+  /// %3,87 olmalıyken %2,39 ölçüldü). Yani §6 ile §4 birbirine çalışıyor:
+  /// balon mekaniği uzun vadeyi istikrarlı yapıyor. Gelgit bu sıkışmayı
+  /// dengeleyecek kadar geniş olmak zorunda.
+  static const double prototypeOnlyRiskTideAmplitude = 0.20;
+
+  /// prototypeOnly: korunma tarafının gelgit genliği.
+  ///
+  /// Risk tarafından küçük: altının çağı da kötü geçebilir (§10), ama
+  /// altın oynaklığı zaten hissenin yarısı; aynı genlik altını hisseden
+  /// riskli yapardı.
+  static const double prototypeOnlyHedgeTideAmplitude = 0.08;
+
   /// prototypeOnly: enflasyon baskısının ve güvenin yıllık kayma adımı.
   static const int prototypeOnlyDriftStep = 12;
 
@@ -164,6 +248,53 @@ abstract final class MarketEngine {
   /// tarafı "her zaman kazanan" olmaz.
   static const double prototypeOnlyFxShockChance = 0.07;
   static const double prototypeOnlyFxShockSize = 0.14;
+
+  // -------------------------------------------------------------------
+  // Değerleme ısısı ve balon (Paket AD, §5-§6) — hepsi prototypeOnly
+  // -------------------------------------------------------------------
+
+  /// prototypeOnly: değerleme çekişinin gücü.
+  ///
+  /// Isı en uçtayken (0 ya da 100) getiriye eklenen/çıkarılan en büyük
+  /// pay. Sabit eğilimin yerini bu alıyor: uzun yükseliş kendi frenini
+  /// üretiyor, uzun düşüş kendi zeminini.
+  static const double prototypeOnlyValuationPull = 0.075;
+
+  /// prototypeOnly: getirinin ısıya dönüşme katsayısı.
+  ///
+  /// `fazlaGetiri` (carry üstü getiri) bu katsayıyla ısıya eklenir.
+  /// %20 fazla getiri ısıyı ~9 puan yükseltir.
+  static const double prototypeOnlyHeatGain = 45.0;
+
+  /// prototypeOnly: ısının her yıl 50'ye doğru sönümlenme payı.
+  ///
+  /// Küçük tutuldu: balon birkaç yıl sürebilsin. Büyük olsa ısı hemen
+  /// normale döner ve döngü hissedilmez.
+  static const double prototypeOnlyHeatDecay = 0.18;
+
+  /// prototypeOnly: en sıcak noktada balonun kırılma ihtimali.
+  ///
+  /// Isı sapmasının **karesiyle** ölçeklenir: hafif pahalıda neredeyse
+  /// hiç, tepede belirgin. Oyuncu zirveyi önceden bilemez.
+  static const double prototypeOnlyBubbleBurstChance = 0.30;
+
+  /// prototypeOnly: kırılmanın büyüklüğü (en sıcak noktada).
+  static const double prototypeOnlyBubbleBurstSize = 0.30;
+
+  /// prototypeOnly: en soğuk noktada sert toparlanmanın ihtimali/büyüklüğü.
+  ///
+  /// **Bu, balon kırılmasının aynadaki eşi ve ölçümden doğdu.** İlk
+  /// kurulumda yalnızca kırılma vardı, yani ısı mekanizması tek yönlü bir
+  /// vergiydi: her varlık zaman zaman sert düşüyor ama hiç sert
+  /// toparlanmıyordu. 60.000 yıllık ölçümde sonuç şu çıktı — altın yıllık
+  /// ortalama **%-0,3**, hisse geometrik **%-0,2**; yani "uzun vadede
+  /// kesin zengin olma" sorununu "uzun vadede kesin batma" sorununa
+  /// çevirmiştim. Simetri hem beklentiyi düzeltiyor hem de oyunu
+  /// zenginleştiriyor: çöküşün dibi gerçek bir fırsat olur, ama **garanti
+  /// olmaz** — dipte de zar atılır, oyuncu dibi de zirve gibi önceden
+  /// bilemez.
+  static const double prototypeOnlyPanicRallyChance = 0.30;
+  static const double prototypeOnlyPanicRallySize = 0.30;
 
   /// prototypeOnly: tek yılda bir varlığın düşebileceği en dip oran.
   ///
@@ -223,6 +354,25 @@ abstract final class MarketEngine {
     final MarketRegime yeni = nextRegime(current, rng);
     return (regime: yeni, yearsLeft: lockYearsFor(yeni, rng));
   }
+
+  /// Bir varlığın **yapısal** yıllık eğilimi: ısının sıfır noktası.
+  ///
+  /// Isı "bu varlık kendi normalinin ne kadar üstünde/altında" demektir.
+  /// Referans olarak yalnızca `carry` kullanınca ölçümde ısının uzun vadeli
+  /// ortalaması 50 değil **55-58** çıktı: beklenen getiri artı olduğu için
+  /// her varlık sistematik olarak "pahalı" işaretleniyor ve değerleme çekişi
+  /// primin bir kısmını kalıcı olarak yiyordu. Referans varlığın sabitlerden
+  /// gelen koşulsuz beklentisi olunca ısı yeniden 50'de merkezleniyor ve
+  /// çekiş yalnızca **döngüsel** sapmayı cezalandırıyor.
+  ///
+  /// Bu bir getiri bileşeni **değildir**; getiri formülüne girmez, yalnızca
+  /// ısının nereye göre ölçüldüğünü söyler.
+  static double structuralReturn(InvestmentType t) =>
+      t.carry -
+      t.annualFee +
+      t.sensitivity.risk * prototypeOnlyRiskPremium +
+      t.sensitivity.hedge * prototypeOnlyHedgeBaseline +
+      t.sensitivity.inflation * prototypeOnlyStoreOfValueDrift;
 
   /// -1 ile +1 arasında üçgene yakın bir gürültü.
   ///
@@ -291,17 +441,44 @@ abstract final class MarketEngine {
     final double guvenKaymasi = (guven - 50) / 100 * 0.08;
     final double enflasyonKaymasi = (enflasyon - 50) / 100 * 0.08;
 
-    double riskEtkeni =
-        riskBandi.base + guvenKaymasi + riskBandi.spread * _noise(rng) * 2;
+    // ---- Çağ gelgiti (§4-§5) ------------------------------------------
+    //
+    // Yılda küçük bir adım, 50'ye çok zayıf çekiliş. Ortalaması sıfır
+    // olduğu için beklenen getiriyi değiştirmez; yaptığı tek şey uzun
+    // vadeli sonucun **dağılımını genişletmek**. Bir hayat kötü bir çağa
+    // denk gelebilir ve bu oyuncunun hatası olmaz.
+    int riskGelgiti = state.riskTide +
+        (rng.nextInt(2 * prototypeOnlyTideStep + 1) - prototypeOnlyTideStep);
+    int korunmaGelgiti = state.hedgeTide +
+        (rng.nextInt(2 * prototypeOnlyTideStep + 1) - prototypeOnlyTideStep);
+    riskGelgiti +=
+        ((50 - riskGelgiti) * prototypeOnlyTideReversion).round();
+    korunmaGelgiti +=
+        ((50 - korunmaGelgiti) * prototypeOnlyTideReversion).round();
+    riskGelgiti = riskGelgiti.clamp(0, 100);
+    korunmaGelgiti = korunmaGelgiti.clamp(0, 100);
+    final double riskGelgitPayi =
+        (riskGelgiti - 50) / 50.0 * prototypeOnlyRiskTideAmplitude;
+    final double korunmaGelgitPayi =
+        (korunmaGelgiti - 50) / 50.0 * prototypeOnlyHedgeTideAmplitude;
+
+    double riskEtkeni = riskBandi.base +
+        prototypeOnlyRiskPremium +
+        riskGelgitPayi +
+        guvenKaymasi +
+        riskBandi.spread * _noise(rng) * 2;
     // **Korunma primi krizin başında tamdır, uzayınca erir.** Bkz.
     // `prototypeOnlyProlongedCrisisHedgeShare`.
     final bool uzayanKriz =
         yeniRejim == MarketRegime.kriz && state.regime == MarketRegime.kriz;
-    final double hedgeTabani = uzayanKriz
-        ? hedgeBandi.base * prototypeOnlyProlongedCrisisHedgeShare
-        : hedgeBandi.base;
-    double hedgeEtkeni =
-        hedgeTabani + enflasyonKaymasi + hedgeBandi.spread * _noise(rng) * 2;
+    final double hedgeTabani = prototypeOnlyHedgeBaseline +
+        (uzayanKriz
+            ? hedgeBandi.base * prototypeOnlyProlongedCrisisHedgeShare
+            : hedgeBandi.base);
+    double hedgeEtkeni = hedgeTabani +
+        korunmaGelgitPayi +
+        enflasyonKaymasi +
+        hedgeBandi.spread * _noise(rng) * 2;
     final double enflasyonEtkeni = (enflasyon - 50) / 100;
 
     // ---- Faiz şoku (§16) ----------------------------------------------
@@ -330,13 +507,71 @@ abstract final class MarketEngine {
 
     final Map<String, double> getiriler = <String, double>{};
     final Map<String, int> yeniEndeks = <String, int>{...state.priceIndex};
+    final Map<String, int> yeniIsi = <String, int>{...state.valuationHeat};
 
     for (final InvestmentType tur in kMarketInvestmentTypes) {
       final MarketSensitivity h = tur.sensitivity;
-      final double ham = tur.drift +
+      final int isi = state.heatOf(tur.id);
+
+      // ---- Değerleme çekişi (Paket AD, §5-§6) ------------------------
+      //
+      // Sabit pozitif eğilimin (`drift`) yerini alan mekanizma. Isı
+      // 50'nin üstündeyse varlık pahalı sayılır ve beklenen getirisi
+      // **aşağı** çekilir; altındaysa yukarı. Uzun yükseliş kendi
+      // frenini üretir, uzun düşüş kendi toparlanma zeminini hazırlar —
+      // ama hiçbir geçiş garanti değil, çünkü çekiş gürültünün yanında
+      // yalnızca bir bileşen.
+      final double isiSapmasi = (isi - 50) / 50.0; // -1 .. +1
+      final double degerlemeCekisi =
+          -isiSapmasi * prototypeOnlyValuationPull * tur.heatSensitivity;
+
+      // ---- Balon kırılması (§6) --------------------------------------
+      //
+      // Isı yükseldikçe sert düzeltme ihtimali artar. Oyuncu zirveyi
+      // önceden bilemez: kırılma bir zar, ısı yalnızca ihtimali büyütür.
+      // Aynısı aşağı uçta da geçerlidir (`prototypeOnlyPanicRallyChance`):
+      // uzun süre dipte kalan varlık bir yıl sert toparlanabilir. Tek yönlü
+      // bırakılırsa ısı mekanizması sistematik bir vergiye dönüşüyor.
+      double balonKirilmasi = 0;
+      if (isiSapmasi > 0) {
+        final double kirilmaSansi = isiSapmasi *
+            isiSapmasi *
+            prototypeOnlyBubbleBurstChance *
+            tur.heatSensitivity;
+        if (rng.nextDouble() < kirilmaSansi) {
+          balonKirilmasi = -prototypeOnlyBubbleBurstSize *
+              isiSapmasi *
+              tur.heatSensitivity;
+        }
+      } else if (isiSapmasi < 0) {
+        final double raliSansi = isiSapmasi *
+            isiSapmasi *
+            prototypeOnlyPanicRallyChance *
+            tur.heatSensitivity;
+        if (rng.nextDouble() < raliSansi) {
+          balonKirilmasi = -prototypeOnlyPanicRallySize *
+              isiSapmasi *
+              tur.heatSensitivity;
+        }
+      }
+
+      // **`carry` bir garanti değil, varlığın ürettiği akıştır.** Altın
+      // ve dövizde sıfır: onlar hiçbir şey üretmez. Onların artı beklentisi
+      // `prototypeOnlyStoreOfValueDrift` payından gelir; döngüsel kazancı
+      // (korunma talebi) ise ortalamada geri verilir.
+      //
+      // `annualFee` fonun yıllık yönetim ücretidir: her yıl, kâr olsun
+      // olmasın kesilir. Fonun brüt carry'sinin büyük kısmını yiyor —
+      // "profesyonel yönetim bedava değil" (§12: hiçbir seçenek doğru
+      // cevap olmasın).
+      final double ham = tur.carry -
+          tur.annualFee +
+          degerlemeCekisi +
+          balonKirilmasi +
           h.risk * riskEtkeni +
           h.hedge * hedgeEtkeni +
-          h.inflation * enflasyonEtkeni * 0.10 +
+          h.inflation *
+              (prototypeOnlyStoreOfValueDrift + enflasyonEtkeni * 0.10) +
           h.idiosyncratic * _noise(rng) * 2;
       final double getiri = ham < prototypeOnlyFloorReturn
           ? prototypeOnlyFloorReturn
@@ -347,6 +582,18 @@ abstract final class MarketEngine {
       final int yeni = (eski * (1 + getiri)).round();
       // Endeks sıfırın altına inmez ve tamamen sıfırlanmaz.
       yeniEndeks[tur.id] = yeni < 1 ? 1 : yeni;
+
+      // ---- Isıyı güncelle --------------------------------------------
+      //
+      // Fiyat carry'nin üstünde arttıysa varlık ısınır, altında kaldıysa
+      // soğur. Üstüne her yıl 50'ye doğru bir sönümleme var: ısı sonsuza
+      // gitmez, ama hızlı da düşmez — balon birkaç yıl sürebilir.
+      final double fazlaGetiri = getiri - structuralReturn(tur);
+      final int isiDegisimi =
+          (fazlaGetiri * prototypeOnlyHeatGain * tur.heatSensitivity).round();
+      final int sonumleme =
+          ((50 - isi) * prototypeOnlyHeatDecay).round();
+      yeniIsi[tur.id] = (isi + isiDegisimi + sonumleme).clamp(0, 100);
     }
 
     return (
@@ -356,6 +603,9 @@ abstract final class MarketEngine {
         inflationPressure: enflasyon,
         confidence: guven,
         priceIndex: Map<String, int>.unmodifiable(yeniEndeks),
+        valuationHeat: Map<String, int>.unmodifiable(yeniIsi),
+        riskTide: riskGelgiti,
+        hedgeTide: korunmaGelgiti,
         advancedAtAge: newAge,
       ),
       year: MarketYear(

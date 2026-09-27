@@ -300,8 +300,13 @@ class _BankPageState extends State<BankPage> {
         ],
         const SizedBox(height: 14),
         Text(
-          'Faiz oranları 2026 Türkiye ihtiyaç kredisi piyasasına '
-          'dayanır; vade en fazla ${Banking.maxTermYears} yıldır. '
+          // Paket AD, §22-§23: oyuncuya gösterilen metinde **yıl yazmaz.**
+          // Oyunun kendi takvimi yok; aynı derleme yıllar sonra
+          // oynandığında "2026 piyasası" cümlesi oyunu eski gösterir.
+          // Sayıların hangi gerçek dünya araştırmasından çıktığı
+          // `docs/ECONOMY_2026.md` içinde tarihsel not olarak duruyor.
+          'Faiz oranları bankadan bankaya değişir; vade en fazla '
+          '${Banking.maxTermYears} yıldır. '
           'Taksit her yıl cüzdanından düşer. Ödenemeyen taksit kaçar ve '
           'borç faiziyle büyür.',
           style: theme.textTheme.bodySmall?.copyWith(

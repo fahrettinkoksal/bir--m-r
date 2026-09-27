@@ -2058,6 +2058,93 @@ altın %7, döviz %6,5, vadeli %6) **aynı**. Değişen şey riskin kendisi.
 `flutter test` **2549 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
 oynanmadı.**
 
+## Paket AD (1/6) — oyunun kendi ekonomisi: sabit getiri eğilimi kaldırıldı (27 Eylül 2026)
+
+Faho'nun "EKONOMİ TASARIM PRENSİBİ REVİZYONU" briefinin **§1-§6 ve
+§22-§23** kısmı. Kalan altı başlık (§7-§21) ayrı turlarda; aşağıda
+"yapılmayanlar" olarak açıkça yazılı. Sorular `docs/DESIGN_REVIEW_QUEUE.md`
+**Q-169**'da; `DECISIONS.md`'ye kesin kural **yazılmadı**.
+
+**Kesin olan (§2, Faho'nun açık yetkisi):** "Yatırım türlerinin SABİT
+POZİTİF DRIFT garantisi olmasın." Bu, Q-168/1'de bekleyen soruyu kapattı.
+
+### Ne yapıldı
+
+- **`drift` alanı kaldırıldı.** Yerine `carry` (varlığın *ürettiği* akış:
+  hisse %2,8 · fon %2,2 · **altın 0** · **döviz 0** · vadeli %3) ve
+  `annualFee` (fonda %1,4 yönetim ücreti) geldi.
+- **Vadeli %6 → %3.** §11: ana işlevi nakdi korumak, servet büyütmek değil.
+- **Değerleme ısısı** (`MarketState.valuationHeat`, 0-100, gizli): pahalı
+  varlığın beklentisi düşer, balon kırılma zarı atılır; ucuzlayanda tersi.
+- **Çağ gelgiti** (`MarketState.riskTide` / `hedgeTide`, gizli): hayat
+  ölçeğinde yavaş (yarı ömür ~11 yıl), ortalaması sıfır eğilim. §4'ün tek
+  gerçek çözümü — aşağıya bak.
+- **Risk primi rejim sıklığından doğuyor**, tür başına yazılı sayı değil.
+- Banka ekranındaki oyuncuya görünen **"2026" ifadesi kaldırıldı**;
+  `docs/ECONOMY_2026.md` tarihsel araştırma notu olarak işaretlendi.
+  Denetimde production ekonomi kodunda gerçek tarihe bağlı **hiçbir hesap
+  bulunmadı** (`DateTime.now()` yalnızca ses soğuması ve kayıt zaman
+  damgası).
+
+### Kalibrasyon sırasında bulunan iki gerçek sorun
+
+Ikisi de ölçümle bulundu, tahminle değil.
+
+1. **Tek yönlü balon sistematik vergiye dönüşüyordu.** Yalnızca "balon
+   kırılması" varken altın yıllık ortalama **%-0,3**, hisse geometrik
+   **%-0,2** ölçüldü: "uzun vadede kesin zengin" sorunu "uzun vadede kesin
+   batık" sorununa dönmüştü. Aynası eklendi (dipte sert toparlanma zarı).
+2. **§6 ile §4 birbirine çalışıyor.** Balon mekaniği yıllık getirilere eksi
+   otokorelasyon veriyor ve uzun vadeli ortalamanın dağılımını
+   *sıkıştırıyor*: 40 yıllık log ortalamanın standart sapması bağımsız
+   yıllar varsayımıyla %3,87 olmalıyken **%2,39** ölçüldü. Bu yüzden 40 yıl
+   hisse tutanın en kötü %10'u bile 2,47 kat yapıyordu. Çağ gelgiti bu
+   sıkışmayı dengelemek için eklendi ve genliği ölçümle büyütüldü.
+
+### Ölçüm (`app/test/paket_ad_measure_test.dart`, gerçekten çalıştırıldı)
+
+Yıllık, 60.000 yıl, tek varlık:
+
+| Tür | ortalama | geometrik | stdev | eksi kapanan yıl |
+|---|---|---|---|---|
+| altın | %4,0 | %3,4 | %11,8 | %37 |
+| döviz | %3,7 | %3,2 | %10,6 | %37 |
+| fon | %5,3 | %4,5 | %12,6 | %34 |
+| hisse | %9,2 | %6,5 | %23,1 | %34 |
+
+Tek varlığa yatırıp hiç dokunmamak (1000 yol, oyunun sürtünmesi **hariç**):
+
+| Yıl | Tür | Medyan | Kötü %10 | Anapara altı |
+|---|---|---|---|---|
+| 40 | hisse | 15,25x | 1,61x | **%5,0** (önce %2,9) |
+| 60 | altın | 7,42x | 2,26x | %1,2 (**önce medyan 18x**) |
+
+60 yıllık bot stratejileri (yatırımın kendi getirisi, sürtünme **dahil**):
+
+| Strateji | Medyan kat | Kötü %10 | Zarar eden |
+|---|---|---|---|
+| %100 hisse | 4,85x | 0,49x | **%16,8** |
+| sadece altın | 3,97x | 1,04x | %7,2 |
+| dengeli (4 varlık) | 2,50x | 1,23x | %3,2 |
+
+Artık hisse **en yüksek medyanı ve en kötü tabanı** birlikte veriyor; altın
+arada; dengeli en güvenli. Hiçbir strateji baskın değil (§12).
+
+### Bu turda bilerek yapılmayanlar
+
+- **§7-§9 şirket sağlık modeli** (gizli sağlık, kaldıraç, büyüme, yönetim
+  kalitesi) — AD/2.
+- **§16 kontrolsüz borç düzeltmesi** — AD/4. Faho yetki verdi, ayrı tur.
+- **§13 servetin kullanımı / harcama kanalları** — AD/5.
+- **§18-§21 on strateji × 20/40/60 kalibrasyonu** — AD/6. **§18'in dağılım
+  hedefi (normal oyuncu milyonlar · milyarderlik çok nadir) henüz
+  doğrulanmadı.**
+- Enflasyon motoru — Q-168'de duruyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2552 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
