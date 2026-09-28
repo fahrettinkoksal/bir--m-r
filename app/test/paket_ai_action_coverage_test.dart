@@ -138,6 +138,20 @@ void main() {
       engeller.addAll(r.blockedActivities);
     }
     print('hobi ilerleyen: ${gorulenHobi.join(', ')}');
+    final List<CoverageResult> okuyucular = hayatlar
+        .where((CoverageResult r) => r.plan == CoveragePlan.okuyucu)
+        .toList(growable: false);
+    final Set<String> okuyucuHobi = <String>{
+      for (final CoverageResult r in okuyucular) ...r.hobbies,
+    };
+    final Set<String> okuyucuAktivite = <String>{
+      for (final CoverageResult r in okuyucular) ...r.performedActivities,
+    };
+    print('kontrol grubu (hic yatirim yapmayan okuyucu, '
+        '${okuyucular.length} hayat): hobi ${okuyucuHobi.length} '
+        '(${okuyucuHobi.join(', ')}) · aktivite ${okuyucuAktivite.length}');
+    final Set<String> yapilan = topla((CoverageResult r) => r.performedActivities);
+    print('yapilan aktivite (${yapilan.length}): ${(yapilan.toList()..sort()).join(', ')}');
     print('acilamayan aktivite (${engeller.length}):');
     for (final MapEntry<String, String> e in engeller.entries) {
       print('  ${e.key.padRight(22)} ${e.value}');

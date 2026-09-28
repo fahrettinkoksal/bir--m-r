@@ -141,6 +141,9 @@ class CoverageResult {
   /// Aktivite kimliği → oyunun verdiği engel gerekçesi (son görülen).
   final Map<String, String> blockedActivities = <String, String>{};
 
+  /// Gerçekten yapılan aktiviteler.
+  final Set<String> performedActivities = <String>{};
+
   int maxIntelligence = 0;
   int maxCharisma = 0;
   int maxFame = 0;
@@ -158,9 +161,21 @@ typedef _CoverageStep = void Function(
 
 /// Yılın bölümleri, sırayla. Her biri ayrı bir adım: biri bildirim
 /// üretirse ötekiler o yıl atlanmaz.
+///
+/// **Sıra önemli.** Yatırım ve alışveriş önce gelirse cüzdan boşalıyor
+/// ve ₺3.200-16.000 arası kurslar "yeterli paran yok" diye kapanıyor;
+/// ölçümde 12 hobinin 10'u hiç ilerlemiyordu. Gerçek oyuncu da önce
+/// gününü yaşar, artanı yatırır.
 const List<_CoverageStep> _adimlar = <_CoverageStep>[
   _education,
   _career,
+  _books,
+  _dailyActivities,
+  _martial,
+  _health,
+  _relationships,
+  _social,
+  _extras,
   _bank,
   _invest,
   _shopping,
@@ -168,13 +183,6 @@ const List<_CoverageStep> _adimlar = <_CoverageStep>[
   _housing,
   _business,
   _gambling,
-  _relationships,
-  _books,
-  _dailyActivities,
-  _martial,
-  _health,
-  _social,
-  _extras,
 ];
 
 /// Listedeki ilk uyan öğe ya da null.
@@ -274,6 +282,14 @@ CoverageResult runCoverageLife({
 
 bool _kesildi(GameController c) =>
     c.state!.hasNotice || c.state!.hasPendingEvent;
+
+/// Yalnızca **olay** akışı kesiyor mu?
+///
+/// Bildirim biriktirmek eylemleri engellemiyor (denetleyici çoğu yerde
+/// `hasPendingEvent`e bakıyor). İlk yazımda aktivite döngüsü bildirimde
+/// de duruyordu; her aktivite bir bildirim ürettiği için bot **yılda
+/// tek aktivite** yapabiliyordu ve 12 hobinin yalnızca 2'si ilerliyordu.
+bool _olayVar(GameController c) => c.state!.hasPendingEvent;
 
 /// Bekleyen olay/kriz/duruşma/mülakat/sınav/bildirim. `true` dönerse ana
 /// döngü baştan başlar.
@@ -521,6 +537,14 @@ void _bank(
 
 }
 
+/// Kapsam botunun cüzdanında bıraktığı pay.
+///
+/// Yatırım ve alışveriş cüzdanı sonuna kadar boşaltınca ertesi yılın
+/// ₺3.200-16.000'lik kursları "yeterli paran yok" diye kapanıyor ve 12
+/// hobinin 10'u hiç ilerlemiyordu. Gerçek oyuncu da gündelik hayatına
+/// bir pay ayırır.
+const int kCoverageReserve = 250000;
+
 void _invest(
   GameController c,
   CoveragePlan plan,
@@ -529,6 +553,12 @@ void _invest(
   ActionLog log,
 ) {
   if (c.state!.player.age < 18) return;
+  // **Okuyucu planı parasını yatırmaz.** Ücretli kurslara neden hiç
+  // gidilemediğini ayırt etmek için bir kontrol grubu gerekiyordu:
+  // bot mu parayı bitiriyor, yoksa kurslar normal bir hayatın
+  // erişemeyeceği kadar mı pahalı?
+  if (plan == CoveragePlan.okuyucu) return;
+  if (c.state!.player.wallet <= kCoverageReserve) return;
   // **Her yatırım türüne dokun.** İlk yazımda ilk uygun türde `break`
   // vardı ve 60 hayatta yalnızca 1 tür deneniyordu.
   for (final InvestmentType t in kInvestmentTypes) {
@@ -560,9 +590,12 @@ void _shopping(
   ActionLog log,
 ) {
   final GameState s = c.state!;
+  if (plan == CoveragePlan.okuyucu) return;
+  final int harcanabilir = s.player.wallet - kCoverageReserve;
+  if (harcanabilir <= 0) return;
   if (plan == CoveragePlan.tuketici || rng.nextDouble() < 0.25) {
     final List<ShopProduct> urunler = shopProductsFor(s.player.age)
-        .where((ShopProduct p) => p.price <= s.player.wallet)
+        .where((ShopProduct p) => p.price <= harcanabilir)
         .toList(growable: false);
     if (urunler.isNotEmpty) {
       final ShopProduct u = urunler[rng.nextInt(urunler.length)];
@@ -953,39 +986,34 @@ void _dailyActivities(
   ActionLog log,
 ) {
   // ---- Aktiviteler: kataloğun tamamı --------------------------------
-  final List<ActivityAction> acik = <ActivityAction>[
-    for (final ActivityVenue mekan in ActivityVenue.values)
-      ...c.availableActivities(mekan),
-  ];
+  //
+  // **Kataloğun kendisi taranıyor, `availableActivities` değil.** O
+  // yardımcı zaten uygunluk süzgecinden geçmiş listeyi veriyor;
+  // onunla ölçünce "hiçbir aktivite engellenmedi" gibi yanlış bir
+  // sonuç çıkıyordu. Engellenenleri görmek için ham katalog gerekli.
   final List<ActivityAction> denenecek = <ActivityAction>[];
-  for (final ActivityAction a in acik) {
+  for (final ActivityAction a in kActivityActions) {
     final InteractionAvailability uygun = c.activityAvailability(a);
     if (uygun.isAllowed) {
       denenecek.add(a);
     } else {
-      // Hangi aktivite neden açılmadı: hobi kapsamının açıklaması.
       r.blockedActivities[a.id] = uygun.reason ?? '';
     }
   }
   // Kapsam için hepsine dokunmaya çalış; yıl içinde tükenirse bırakır.
   for (final ActivityAction a in denenecek) {
-    log.outcome('performActivity', () => c.performActivity(a));
+    if (!c.activityAvailability(a).isAllowed) continue;
+    final ActivityOutcome? cikti =
+        log.outcome('performActivity', () => c.performActivity(a));
+    if (cikti?.applied ?? false) r.performedActivities.add(a.id);
     // Hobi ilerlemesi **durumdan** okunuyor: aktivite kimliğini
     // eşleştirmek eksik kalıyordu (kitapla beslenen okuma hobisi hiç
     // sayılmıyordu).
     for (final HobbyProgress h in c.state!.hobbies) {
       r.hobbies.add(h.hobbyId);
     }
-    if (_kesildi(c)) return;
+    if (_olayVar(c)) return;
   }
-  // Göz muayenesi mini oyunu ayrı bir aksiyon.
-  final ActivityAction? goz =
-      acik.firstOrNullCov((ActivityAction a) => a.id == 'goz_muayenesi');
-  if (goz != null && c.activityAvailability(goz).isAllowed) {
-    log('finishEyeExam',
-        () => c.finishEyeExam(goz, correct: 6 + rng.nextInt(4), total: 10));
-  }
-
 }
 
 void _martial(
@@ -1004,7 +1032,7 @@ void _martial(
     final ActivityOutcome? sezon =
         log.outcome('takeMartialSeason', () => c.takeMartialSeason(art));
     if (sezon?.applied ?? false) r.martialArts.add(art.id);
-    if (_kesildi(c)) return;
+    if (_olayVar(c)) return;
   }
 
 }
