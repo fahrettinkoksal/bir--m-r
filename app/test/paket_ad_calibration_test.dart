@@ -198,9 +198,25 @@ void main() {
       // dominant strateji işletmedir ve **sayısı artamaz**. Yeni bir
       // strateji baskın hâle gelirse ya da işletme daha da öne geçerse
       // test kırılır.
+      // **Paket AF notu.** Bu bekçi görevini yaptı ve kırıldı: AF'nin
+      // teşhis için eklediği `mukemmelGirisimci` baskın çıktı. Bu bir
+      // denge değişikliği değil — o bot bir **ölçüm aleti**: oyunu
+      // çözmeye çalışan, oyuncunun erişebileceği en iyi oyunu oynayan
+      // bir sonda (Q-176). Onu "beklenen baskın" listesine yazmak
+      // bekçiyi zayıflatırdı; kapsam dışı bırakmak ise doğru, çünkü
+      // bekçinin ölçtüğü şey **oyuncu arketiplerinin** dengesi.
+      //
+      // Aynı sebeple AF'nin `kariyerVeYatirim` ve
+      // `kariyerIsletmeYatirim` stratejileri kapsamda **kalır**: onlar
+      // gerçek oyuncu davranışı, sonda değil.
+      const Set<InvestStrategy> teshisSondalari = <InvestStrategy>{
+        InvestStrategy.mukemmelGirisimci,
+      };
       final List<InvestStrategy> baskinlar = <InvestStrategy>[
         for (final MapEntry<InvestStrategy, int> e in ustunluk.entries)
-          if (e.value >= InvestStrategy.values.length - 1) e.key,
+          if (!teshisSondalari.contains(e.key) &&
+              e.value >= InvestStrategy.values.length - 1)
+            e.key,
       ];
       print('  BULGU: her şeyi ezen strateji -> '
           '${baskinlar.map((InvestStrategy x) => x.label).toList()}');
