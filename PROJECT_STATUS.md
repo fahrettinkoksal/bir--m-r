@@ -2638,6 +2638,81 @@ kazandın artık düş" mekaniği eklenmedi.
 
 **Karar bekleyen:** Q-177. **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AH — TAM YAŞAM DENETİMİ TAMAMLANDI (teşhis; denge değiştirilmedi)
+
+**Konu:** AD + AE + AF + AG paketlerinden sonra oyunun doğumdan ölüme
+bütün döngüsünü yeniden ölçmek.
+
+**Bu tur teşhistir.** Hiçbir denge sayısı değiştirilmedi, `lib/` içinde
+yalnızca okuma yapıldı; bütün değişiklikler test tarafında.
+
+**Ölçüm:** 10 arketip × 200 + 1000 rastgele-geçerli = **3000 tam hayat**,
+doğumdan ölüme. **Takılan hayat: 0.** Ölüm yaşı medyan 76.
+
+### §2 — botun kapsamı denetlendi, üç bot hatası çıktı
+
+`GameController`'ın 225 genel eyleminin botta kullanılmayan 100'ü
+listelendi. Üçü gerçek eksikti:
+
+1. **İşletme yönetimi hiç kullanılmıyordu.** Bot AE'nin getirdiği
+   `setBusinessPrice`, `setBusinessAd`, `maintainBusiness` ve
+   `businessStaff` ekranlarının hiçbirini açmıyordu. Yani AE'den beri
+   "gerçek oyuncu" ölçümlerinde işletme yönetimi hiç ölçülmemiş.
+2. **Yatırım hiç satılmıyordu.** Portföy yalnızca oyunun zorunlu
+   bozdurmasıyla küçülüyordu.
+3. **Yakın arkadaşlık hiçbir zaman çalışamıyordu.** Teklif koşulu
+   `relation == arkadas` idi; oysa `arkadas` zaten yakın arkadaşlığın
+   kendisi. Üstelik bot sınıf/iş arkadaşıyla hiç vakit geçirmediği için
+   yakınlıkları olay dışında hiç artmıyordu.
+
+Üçü de düzeltildi (bot tarafı; oyunun sayıları sabit). Yakın arkadaşlık
+hunisi düzelmenin öncesi/sonrası: tanışıklık yakınlığı medyan **35 → 47**,
+şartı sağlayan **%1,9 → %16,9**, kabul alan **%1,6 → %15,8**.
+
+### Ölçülen son durum (3000 hayat)
+
+* **Ekonomi.** Ölüm serveti medyan ₺48,2M, kötü %10 ₺11,9M, iyi %10
+  ₺160,0M. 50M+ %48,5 · 100M+ %21,5 · 250M+ %4,6 · 500M+ %1,6 · 1B+
+  %0,50. Negatif net servetle ölen %0,1, borçlu ölen %1,5. Servetin
+  %75,6'sı portföyden, %6,3'ü gayrimenkulden, %3,9'u mirastan.
+* **İşletme.** Açan %23,3; 26.272 işletme-yılı. Kapanan %14,3, zarar yılı
+  %1,9, reklamlı yıl %36,1, viral 629 yıl. İşletme kârı medyan ₺5,3M,
+  iyi %10 ₺17,2M; işten servet yapan %19,7.
+* **Yatırım.** Yapan %93,7. Tek varlıkta tek yılda ≥%20 düşüş gören
+  %95,8, ≥%30 %67,6, ≥%40 %51,1. Skandal/regülatör %99,0,
+  konkordato/kayyum/kapanma %16,3, zorunlu satış %49,3, yatırımı
+  zararla biten %18,8. 19 piyasa olay türünün hepsi görüldü.
+* **Kariyer.** Çalışan %99,4, emekli %86,1, ortalama 39,6 yıl çalışma,
+  1,0 yıl işsiz yetişkin yıl. Meslek kapsamı 53/55.
+* **İlişki.** Partneri olan %93,1, evlenen %48,0, boşanan %17,8, dul
+  kalan %15,7, tekrar evlenen %12,4, çocuklu %37,7, torun gören %34,2.
+* **Sağlık.** Kronik yaşayan %76,4, check-up %96,5, sağlık krizi %69,0.
+* **Suç.** Dosyası olan %57,8, sabıkalı %20,1, davaya giden %27,5,
+  mahkûm %20,1, hapis %7,5, denetimli %6,8.
+* **İçerik.** Olay 381/391 (%97,4), bölüm 20/20, hobi 11/12, dövüş 6/6,
+  meslek 53/55, **işletme 9/14**.
+
+### §11 — baskın hayat yolu var mı?
+
+Yok. En zengin %10 ile bütün hayatlar arasındaki fark küçük: üniversite
+%47 / %48, işletme %15 / %23, yatırım %100 / %94, ev %55 / %46, kiraya
+veren %41 / %28, evli %50 / %48. Zenginliğin tek ayırt edici işareti
+**yatırım ve kira geliri**; işletme zenginlerde daha az bile.
+
+### §12 — açık kalan, sınıflandırılmış bulgular
+
+* **Beş işletme hiç açılmadı** (pastane, nakliye, halı saha, spor
+  salonu, lokanta) ve terzi tek başına seçimlerin %69,5'i. Bot hatası
+  ağır basıyor (nakit biriktirmiyor), ama ardında ürün sorusu var.
+* **Yazar mesleği erişilemiyor:** okuma hobisi aşama 2 istiyor, o hobi
+  yalnızca kütüphanede kitap bitirerek ilerliyor ve bot kitap açmıyor.
+* **Yakın arkadaşlık eşiği 55** düzeltmeden sonra bile hayatların
+  %16,9'unda sağlanıyor.
+* **Erişilmeyen 10 olayın 5'i suç zinciri devamı**, 3'ü ün, 2'si okuma
+  hobisi.
+
+**Karar bekleyen:** Q-178. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

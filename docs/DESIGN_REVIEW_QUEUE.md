@@ -4850,3 +4850,51 @@ Katsayı = toplam kâr / konan sermaye. §13'ün katı tanımıyla hiçbir strat
 **Claude'un önerisi (yalnızca öneri).** 1 için (B): oran değiştirmek yerine oyuncuya açmadan önce riski gösteren bir etiket; bu, geniş dağılımı bozmadan bilgiyi verir. 3 için ilk iş seçiminin çeşitliliğini artırmak — ama bu botun davranışı olduğu için önce gerçek oyuncuda sorun mu, ölçmek gerekir. Diğerleri için mevcut değerlerin bir tur oynanarak hissedilmesi.
 
 **Varsayılan işlem:** Onay gelene dek bu sorulardan hiçbiri için sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-178 — Paket AH: 3000 hayatlık tam yaşam denetiminin açtığı sorular
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/test/paket_ah_life_audit_test.dart`, `app/test/support/player_bot.dart`, `app/test/support/bot_diagnostics.dart`.
+
+**Bağlam.** AD + AE + AF + AG'den sonra oyunun tamamı yeniden ölçüldü: 10 arketip × 200 + 1000 rastgele = **3000 tam hayat**, doğumdan ölüme, **takılan hayat sıfır**. Denge değiştirilmedi; aşağıdakiler ölçümün açtığı **ürün** sorularıdır. Her biri OYUN / BOT / NORMAL diye sınıflandırıldı; yalnızca ürün kararı gerektirenler buraya yazıldı.
+
+#### 1 — Beş işletme hiç açılmıyor (sınıflandırma: ağırlıkla BOT, ardında ürün sorusu)
+
+3000 hayatta açılan 699 işletmenin dağılımı: terzi 486, serbest yazılım 86, büfe 65, kuruyemiş 48, oto yıkama 6, bakkal 3, kuaför 3, kahve 1, oto tamir 1. **Pastane, nakliyecilik, halı saha, spor salonu ve lokanta hiç açılmadı.**
+
+Botun payı belli: nakit biriktirmiyor, serbest parasının çoğunu her yıl yatırıma koyuyor, dolayısıyla ₺1,7M-4,0M sermayeli işi kurabilecek kadar cüzdanı hiç dolmuyor. Bu tur botun hedef seçimi düzeltildi (terzi payı %77,7'den %69,5'e indi) ama pahalı işler yine açılamadı.
+
+Ardındaki ürün sorusu şu: **oyunda büyük bir iş kurmanın nakit biriktirmekten başka yolu yok.** Konut kredisi var, işletme kredisi yok; yatırımı satıp iş kurmak mümkün ama oyun bunu hiçbir yerde önermiyor. Seçenekler: (A) olduğu gibi kalsın — büyük iş zaten geç hayatın işi; (B) işletme kredisi eklensin; (C) işletme ekranı "şu kadar daha biriktirmen gerekiyor" diye hedef gösterip yönlendirsin.
+
+#### 2 — Yakın arkadaşlık eşiği (sınıflandırma: BOT hatası düzeltildi, eşik sorusu ürün)
+
+Yakın arkadaşlık teklifi hiçbir hayatta çalışmıyordu; sebebi bot hatasıydı (bot sınıf/iş arkadaşıyla hiç vakit geçirmiyordu) ve düzeltildi. Düzeltmeden sonra:
+
+| Basamak | Önce | Sonra |
+|---|---|---|
+| Tanışıklığı olan | %99,6 | %99,8 |
+| En yüksek tanışıklık yakınlığı (medyan) | 35 | 47 |
+| Eşiği (55) sağlayan | %1,9 | %16,9 |
+| Teklif eden | %1,6 | %15,9 |
+| Kabul alan | %1,6 | %15,8 |
+
+Yani sistem artık çalışıyor ama **hayatların %83'ünde hâlâ bir kez bile yakın arkadaş edinilemiyor**; engel her seferinde "yakınlık yetmedi". Soru: yakın arkadaşlık bilinçli olarak nadir ve emek isteyen bir şey mi olsun (eşik 55 kalsın), yoksa sıradan bir hayatta da olması beklenen bir şey mi (eşik düşsün ya da tanışıklıkla vakit geçirmenin getirisi artsın)?
+
+#### 3 — Yazar mesleği erişilemiyor (sınıflandırma: BOT, ama tek yollu tasarım)
+
+Yazar olmak `okuma` hobisinde aşama 2 istiyor. `okuma` hobisi kataloğun **tek** `activityIds` boş hobisi: yalnızca kütüphanede kitap bitirerek ilerliyor. Bot kitap okuma ekranını hiç açmıyor, dolayısıyla meslek 3000 hayatta hiç görülmedi. Bot eksikliği gerçek, ama tasarım da tek yollu: bir mesleğin tek anahtarı tek bir ekranda. Soru: okuma hobisi başka bir yoldan da (etkinlik, olay) ilerlesin mi?
+
+#### 4 — Kimse borçlu ölmüyor (sınıflandırma: karar sorusu)
+
+3000 hayatta negatif net servetle ölen **%0,1**, borçlu ölen %1,5, borç medyanı ₺2,3M. Ölüm serveti medyanı ₺48,2M ve en kötü %10 bile ₺11,9M. Yani oyunda "eli boş ölmek" pratikte yok. Bu bilinçli bir seçim mi (oyun ceza vermez, hayat toparlar), yoksa yoksulluk yolu eksik mi?
+
+#### 5 — Suç dosyası oranı (sınıflandırma: ölçüm bilgisi, karar sorusu)
+
+Hayatların **%57,8'inde en az bir adli dosya** var; %20,1 sabıkalı, %27,5 davaya çıkıyor, %7,5 hapis yatıyor. Dosyası olanların %46,7'sinin birden fazla dosyası var. Trafik cezası gibi idari kayıtlar da dosya sayıldığı için oran yüksek görünüyor. Soru: bu his doğru mu, yoksa idari ceza ile adli dosya oyuncuya daha net ayrılmalı mı?
+
+#### 6 — Erişilmeyen 10 olay
+
+`un_etkinlik_daveti`, `un_is_daveti`, `un_yorumlar` (ün eşiği), `hobi_sevgili_kitapci`, `hobi_okuma_gecesi` (okuma hobisi), `suc_kavga_karsisindaki`, `suc_teklif_ikinci_kez`, `suc_teklif_eden_sonu`, `suc_borc_odenmedi`, `suc_borc_sonrasi` (suç zincirlerinin devamı). Beşi zincir devamı olduğu için ilk halkanın çıkmasına bağlı; bu normal olabilir. Soru: bu zincirlerin ilk halkaları yeterince sık çıkıyor mu, yoksa devamlar pratikte ölü içerik mi?
+
+**Claude'un önerisi (yalnızca öneri).** 1 için (C): kredi eklemeden önce oyuncuya hedefi göstermek daha ucuz ve daha az yan etkili. 2 için eşiği düşürmek yerine "tanışıklıkla vakit geçirmenin" görünürlüğünü artırmak — sistem çalışıyor, oyuncu yolu bilmiyor olabilir. 4 ve 5 için önce bir tur oynanıp hissedilmesi.
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
