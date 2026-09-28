@@ -12,7 +12,9 @@ import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
+import '../economy/investment_engine.dart';
 import '../models/game_event.dart';
+import '../models/market_state.dart';
 import '../activities/travel.dart';
 import '../economy/living_costs.dart';
 import '../models/game_state.dart';
@@ -273,6 +275,18 @@ class EventEngine {
       final bool varMi = state.market.activeBasketCompanies
           .any((Company c) => state.market.vitalsOf(c.id).isStrained);
       if (!varMi) return false;
+    }
+    // **Piyasa hâli kapıları (Paket AD, §6-§7).** Panik olayı sakin bir
+    // yılda çıkmasın; FOMO olayı gerçekten ısınmış piyasada çıksın.
+    if (req.requiresCrisis &&
+        !(state.market.regime == MarketRegime.kriz ||
+            state.market.halts.isNotEmpty)) {
+      return false;
+    }
+    final String? sicakTur = req.requiresHotAsset;
+    if (sicakTur != null &&
+        state.market.heatOf(sicakTur) < req.requiresHotAssetHeat) {
+      return false;
     }
     if (req.requiresThrivingCompany) {
       final bool varMi = state.market.activeBasketCompanies
@@ -683,6 +697,19 @@ class EventEngine {
     final String? sucId = choice.crimeId;
     if (sucId != null) {
       working = LegalEngine.openCase(working, sucId, rng ?? Random());
+    }
+
+    // Portföy hamlesi (Paket AD, §AD/3). Suç seçiminde olduğu gibi: karar
+    // burada verilmez, ilgili motora devredilir. Hamle başarısız olabilir
+    // (işlem durmuş, para yetmiyor, pozisyon yok) ve bu normaldir.
+    final PortfolioAction? hamle = choice.portfolioAction;
+    if (hamle != null) {
+      working = InvestmentEngine.applyEventAction(
+        working,
+        action: hamle,
+        typeId: choice.portfolioTypeId,
+        share: choice.portfolioShare,
+      );
     }
 
     return working;

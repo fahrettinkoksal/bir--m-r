@@ -66,6 +66,9 @@ class EventRequirement {
     this.requiresReleased = false,
     this.requiresPortfolio = false,
     this.requiresCompanyStatus,
+    this.requiresCrisis = false,
+    this.requiresHotAsset,
+    this.requiresHotAssetHeat = 68,
     this.requiresStrainedCompany = false,
     this.requiresThrivingCompany = false,
     this.forbidsPortfolio = false,
@@ -119,6 +122,21 @@ class EventRequirement {
   /// tamamen sağlıklı bir şirket için "konkordato başvurdu" haberi
   /// okuyabiliyordu. §4 bunu istedi: "olaylar state'ten doğsun."
   final CompanyStatus? requiresCompanyStatus;
+
+  /// Piyasa gerçekten kriz/panik hâlinde mi olsun (Paket AD, §6)?
+  ///
+  /// Panik olayını sakin bir yılda göstermek oyuncuya yalan söylemek olur.
+  final bool requiresCrisis;
+
+  /// Bu varlığın değerleme ısısı yüksek olsun (Paket AD, §7).
+  ///
+  /// FOMO olayı **gerçekten** ısınmış piyasada çıksın. Isı oyuncuya
+  /// gösterilmiyor; oyuncu yalnızca "herkes bundan bahsediyor" cümlesini
+  /// görüyor ve zirveyi önceden bilemiyor.
+  final String? requiresHotAsset;
+
+  /// [requiresHotAsset] için gereken en düşük ısı.
+  final int requiresHotAssetHeat;
 
   /// Sepette **zorda** bir şirket olmasını ister (gizli göstergelerden).
   final bool requiresStrainedCompany;
@@ -272,6 +290,30 @@ class EventRequirement {
   final String? personRole;
 }
 
+/// Bir olay seçiminin portföye **gerçek** etkisi (Paket AD, §AD/3).
+///
+/// **Neden var.** Paket AC'de panik ve balon olayları vardı ama
+/// seçeneklerinin tek etkisi mutluluktu: "sat", "bekle", "al" seçmek
+/// portföyde hiçbir şey değiştirmiyordu. Yani karar değil, süslü metindi.
+/// §6 ve §7 bunu istedi — oyuncu panikte ve balonda gerçekten karar
+/// verebilsin.
+///
+/// **İkinci bir ekonomi motoru kurulmuyor:** hamle `InvestmentEngine`'in
+/// kendi al/sat yollarından geçiyor, yani komisyon, kazanç kesintisi,
+/// işlem durması ve maliyet esası aynen işliyor. Aynı kalıp suç
+/// seçimlerinde de var (`crimeId` -> `LegalEngine`).
+enum PortfolioAction {
+  /// Pozisyonun bir kısmını sat. Zararı gerçekleştirir; daha fazla
+  /// düşmekten korur ama toparlanmayı da kaçırır.
+  satKismi,
+
+  /// Cüzdandaki nakdin bir kısmıyla al. Dip olabilir, olmayabilir.
+  alKismi,
+
+  /// **Kâr al:** yalnızca pozisyon kârdaysa bir kısmını sat.
+  karAl,
+}
+
 /// Bir olay seçeneği ve sonuçları.
 @immutable
 class EventChoice {
@@ -295,6 +337,9 @@ class EventChoice {
     this.startsFriendship = false,
     this.rememberPersonAs,
     this.crimeId,
+    this.portfolioAction,
+    this.portfolioTypeId = 'hisse',
+    this.portfolioShare = 0.25,
   });
 
   final String id;
@@ -310,6 +355,15 @@ class EventChoice {
   /// soruşturma başlar. **Sonucu seçim değil, süreç belirler**; oyuncuya
   /// "şunu seçersen yakalanmazsın" diyen hiçbir bilgi verilmez.
   final String? crimeId;
+
+  /// Bu seçim portföyde gerçekten bir şey yapıyorsa hamlesi.
+  final PortfolioAction? portfolioAction;
+
+  /// Hamlenin uygulanacağı yatırım türü.
+  final String portfolioTypeId;
+
+  /// Hamlenin büyüklüğü: pozisyonun (ya da nakdin) payı.
+  final double portfolioShare;
 
   final int happiness;
   final int health;

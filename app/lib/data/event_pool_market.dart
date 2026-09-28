@@ -67,6 +67,27 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
             'değeri değiştirmiyor ama uykun daha iyi.',
         happiness: 1,
       ),
+      // **Gerçek karar (Paket AD, §AD/3).** Şirket ciddi sorunluyken
+      // oyuncu ya çıkar ya azaltır ya bekler. Hiçbiri doğru cevap değil:
+      // konkordatodan çıkan şirket de var, kapanan da.
+      EventChoice(
+        id: 'azalt',
+        label: 'Bir miktar azalt',
+        resultText: 'Hepsini değil, bir kısmını çıkardın. Tamamen çıkmak da '
+            'hiç dokunmamak da içine sinmedi.',
+        happiness: -1,
+        portfolioAction: PortfolioAction.satKismi,
+        portfolioShare: 0.25,
+      ),
+      EventChoice(
+        id: 'cik',
+        label: 'Çık, bu iş bitti',
+        resultText: 'Sattın. Zarar kesinleşti. Şirket toparlanırsa canın '
+            'sıkılacak, batarsa iyi ki dedirtecek.',
+        happiness: -3,
+        portfolioAction: PortfolioAction.satKismi,
+        portfolioShare: 0.60,
+      ),
     ],
   ),
   GameEvent(
@@ -161,6 +182,15 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
         resultText: 'Akşam boyunca söylendin. Kimse duymadı, hisse de '
             'duymadı.',
         happiness: -4,
+      ),
+      EventChoice(
+        id: 'azalt',
+        label: 'Küçük bir miktar azalt',
+        resultText: 'Riski biraz düşürdün. Tamamen çıkmadın; belki de '
+            'doğrusu buydu, belki değil.',
+        happiness: -1,
+        portfolioAction: PortfolioAction.satKismi,
+        portfolioShare: 0.15,
       ),
     ],
   ),
@@ -473,17 +503,22 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     category: EventCategory.kisisel,
     text: 'Sabah telefonu açtın.\n\nEkran kıpkırmızı. Daha kahveyi '
         'içmeden para erimeye başladı.',
+    // **Panik olayı sakin bir yılda çıkmaz (Paket AD, §6).** Piyasa
+    // gerçekten kriz rejiminde olacak ya da işlem durması yaşanacak.
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresCrisis: true,
     ),
     repeatable: true,
     minAgeGap: 7,
     weight: 6,
     choices: <EventChoice>[
-      // Hiçbiri "doğru cevap" değil. Sonucun ne olacağı burada yazmıyor;
-      // portföyün değerini piyasa belirliyor, bu seçim yalnızca oyuncunun
-      // o anki hâlini kaydediyor.
+      // **Seçimler portföyde gerçekten bir şey yapıyor (Paket AD, §6).**
+      // Paket AC'de bunların tek etkisi mutluluktu, yani karar değil süslü
+      // metindi. Hiçbiri "doğru cevap" değil: satmak zararı kesinleştirir
+      // ama toparlanmayı kaçırır, almak dip olabilir de olmayabilir de.
+      // Sonucu sonraki yılların piyasası söyler; burası bilmiyor.
       EventChoice(
         id: 'sat',
         label: 'Bir kısmını sat, rahatla',
@@ -491,6 +526,8 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
             'bazen kişinin uykusu paradan değerli oluyor. Doğru muydu, '
             'zamanla anlayacaksın.',
         happiness: -2,
+        portfolioAction: PortfolioAction.satKismi,
+        portfolioShare: 0.35,
       ),
       EventChoice(
         id: 'bekle',
@@ -506,6 +543,8 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
             'söyleyecek.',
         happiness: -1,
         intelligence: 1,
+        portfolioAction: PortfolioAction.alKismi,
+        portfolioShare: 0.30,
       ),
     ],
   ),
@@ -517,6 +556,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresCrisis: true,
     ),
     repeatable: true,
     minAgeGap: 11,
@@ -545,9 +585,14 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     text: 'İş yerinde herkes aynı hisseden konuşuyor.\n\n"Kaçırma, daha '
         'yeni başlıyor."\n\nTelefonu açınca grafik zaten epey başlamış '
         'gibi duruyor.',
+    // **FOMO olayı gerçekten ısınmış piyasada çıkar (Paket AD, §7).**
+    // Değerleme ısısı oyuncuya **gösterilmiyor**: o yalnızca "herkes
+    // bundan bahsediyor" cümlesini görüyor. Zirveyi önceden bilmenin yolu
+    // yok — ısı yüksekken de piyasa bir süre daha yükselebilir.
     requirement: EventRequirement(
       minAge: 20,
       requiresEmployed: true,
+      requiresHotAsset: 'hisse',
     ),
     repeatable: true,
     minAgeGap: 6,
@@ -559,16 +604,28 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
         resultText: 'Koydun. Şimdi her sabah ilk baktığın şey o. Bazı '
             'balonlar sürüyor, bazıları çöküyor; hangisi olduğunu '
             'önceden söyleyen kimse yok.',
-        money: -18000,
         happiness: 2,
+        portfolioAction: PortfolioAction.alKismi,
+        portfolioShare: 0.45,
       ),
       EventChoice(
         id: 'kucuk',
         label: 'Küçük bir miktarla dene',
         resultText: 'Kaybetsen üzülmeyeceğin kadar koydun. Merakını da '
             'giderdin.',
-        money: -3500,
         happiness: 1,
+        portfolioAction: PortfolioAction.alKismi,
+        portfolioShare: 0.10,
+      ),
+      EventChoice(
+        id: 'karal',
+        label: 'Tam tersi: elindekinin bir kısmını sat',
+        resultText: 'Herkes alırken sen bir miktar çıktın. Erken mi davrandın, '
+            'akıllılık mı ettin — bunu ancak yıllar söyler.',
+        happiness: -1,
+        intelligence: 1,
+        portfolioAction: PortfolioAction.karAl,
+        portfolioShare: 0.30,
       ),
       EventChoice(
         id: 'uzak',

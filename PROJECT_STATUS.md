@@ -2256,6 +2256,41 @@ koşuda **normalden doğrudan kapanan şirket 0**.
 `flutter test` **2571 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
 oynanmadı; Android APK bu makinede derlenmedi.**
 
+## Paket AD (4/6) — yatırım kararları gerçek oldu (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/3 (§6, §7)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-172**'de.
+
+### Bulduğum sorun
+
+Paket AC panik, balon ve şirket olaylarını getirmişti ama **seçeneklerinin
+tek etkisi mutluluktu**: "sat", "bekle", "al" seçmek portföyde hiçbir şey
+değiştirmiyordu. Karar değil, süslü metindi. Ayrıca panik olayı sapasağlam
+bir yılda, FOMO olayı soğuk bir piyasada çıkabiliyordu.
+
+### Ne yapıldı
+
+`EventChoice` artık portföy hamlesi taşıyabiliyor (kısmi sat, kısmi al, kâr
+al) ve hamle `InvestmentEngine`'in kendi al/sat yollarından geçiyor —
+komisyon, kesinti, işlem durması ve maliyet esası aynen işliyor. İkinci bir
+ekonomi motoru kurulmadı. Hamle başarısız olabilir (işlem durmuş, para yok,
+zararda kâr alınamaz).
+
+Panik ve devre kesici olayları **gerçek kriz**, FOMO olayı **gerçek ısı**
+ister. Konkordato ve bilanço şoku olaylarına "azalt" / "çık" seçenekleri
+eklendi.
+
+### Ölçüm (gerçekten çalıştırıldı)
+
+500 panik yolunda, panikte %35 satan ile hiç dokunmayan on yıl sonra
+karşılaştırıldı: **satan 154, bekleyen 346**. Panikte satmak çoğu zaman
+yanlış ama %31 oranında doğru — tek doğru cevap yok. 29 finansal olayın
+hepsinde en az beş yıl tekrar aralığı var: bildirim yağmuru yok.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2578 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

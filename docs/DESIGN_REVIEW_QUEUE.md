@@ -4481,3 +4481,45 @@ Geçişler (1200 yıl): kötüleşen 79 · toparlanan 18 · kapanan 3 · yerine 
 6. **Göstergeler oyuncuya hiç gösterilmiyor.** §3 bunu istedi. Yatırımlar ekranında şirketin *hâlini* ima eden bir cümle (sayı değil) olsun mu?
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-172 — Paket AD/3: yatırım kararlarının derinliği
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AD DEVAM" briefi (AD/3, §6, §7) · **Etkilenen kod:** `app/lib/domain/models/game_event.dart`, `app/lib/domain/events/event_engine.dart`, `app/lib/domain/economy/investment_engine.dart`, `app/lib/data/event_pool_market.dart`, `app/test/paket_ad_decision_test.dart`
+
+#### Bulduğum sorun
+
+Paket AC panik, balon ve şirket olaylarını getirmişti ama **seçeneklerinin tek etkisi mutluluktu**. "Bir kısmını sat", "hiçbir şey yapma", "biraz daha al" — üçü de portföyde hiçbir şey değiştirmiyordu. Yani karar değil, süslü metindi.
+
+İkinci sorun: olaylar piyasanın gerçek hâline bakmıyordu. Panik olayı sapasağlam bir yılda, FOMO olayı ("herkes bundan bahsediyor") soğuk bir piyasada çıkabiliyordu.
+
+#### Ne yapıldı
+
+- `EventChoice` artık **portföy hamlesi** taşıyabiliyor: kısmi sat, kısmi al, kâr al. Hamle `InvestmentEngine`'in kendi al/sat yollarından geçiyor — komisyon, kazanç kesintisi, işlem durması ve maliyet esası aynen işliyor. **İkinci bir ekonomi motoru kurulmadı**; aynı kalıp suç seçimlerinde de var (`crimeId` → `LegalEngine`).
+- Hamle **başarısız olabilir**: işlem durmuşsa, para yetmiyorsa, pozisyon yoksa ya da zararda kâr almaya çalışılıyorsa durum değişmez.
+- Panik ve devre kesici olayları **gerçek kriz** ister; FOMO olayı hissenin **değerleme ısısının 68 üstünde** olmasını ister. Isı oyuncuya hâlâ gösterilmiyor (§7).
+- Konkordato olayına "bir miktar azalt" ve "çık, bu iş bitti"; bilanço şokuna "küçük bir miktar azalt" seçenekleri eklendi (§AD/3'ün istediği dört yol).
+- FOMO'ya "tam tersi: elindekinin bir kısmını sat" eklendi — balonda kâr alma da bir seçenek.
+
+#### Ölçüm: hiçbir seçim her hayatta doğru değil
+
+500 ayrı panik yolunda, panikte %35 satan ile hiç dokunmayanı on yıl sonra karşılaştırdım:
+
+| | Kazandı |
+|---|---|
+| Panikte satan | **154 / 500** |
+| Bekleyen | **346 / 500** |
+
+Yani panikte satmak çoğu zaman yanlış ama **%31 oranında doğru**. Tek doğru cevap yok (§6). Bildirim yağmuru da yok: 29 finansal olayın hepsinde en az beş yıl tekrar aralığı var.
+
+#### Karar soruları
+
+1. **Hamle oranları** (panikte sat %35, panikte al %30, FOMO'da büyük alım nakdin %45'i, konkordatoda çıkış %60) doğru mu?
+2. **FOMO ısı eşiği 68.** Ölçümde hissenin ısısı p90'da 73 çıkıyor, yani olay gerçekten seyrek. Daha sık mı olsun?
+3. **Panik olayı artık yalnızca kriz rejiminde çıkıyor.** Kriz yılların %7'si; olay bu yüzden nadirleşti. Doğru mu, yoksa "sert düşüş" de sayılsın mı?
+4. **"Hiçbir şey yapma" hiçbir şey yapmıyor** — bilerek. Beklemenin de bir bedeli (mutluluk dışında) olmalı mı?
+5. **Altın/döviz/fon için panik-FOMO olayı yok**, yalnızca hisse. Eklensin mi?
+6. Hamle **başarısız olduğunda** oyuncuya ayrı bir cümle gösterilmiyor; seçimin metni yine de yazılıyor. Bu kafa karıştırır mı?
+
+**Varsayılan işlem:** Onay gelene dek bu oranlar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.

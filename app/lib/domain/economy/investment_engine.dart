@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../data/investment_catalog.dart';
 import '../../text/turkish_text.dart';
+import '../models/game_event.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/investment.dart';
@@ -739,6 +740,48 @@ abstract final class InvestmentEngine {
   /// böylece iki yerde iki ayrı hesap olmaz. Tasfiyede komisyon ve
   /// kazanç kesintisi **alınmaz** — bu oyuncunun kararı değil, fonun
   /// kapanması.
+  /// Bir olay seçiminin portföy hamlesini uygular (Paket AD, §AD/3).
+  ///
+  /// **İkinci bir ekonomi motoru değil:** hamle bu sınıfın kendi
+  /// [buy]/[sell] yollarından geçiyor, yani komisyon, kazanç kesintisi,
+  /// işlem durması ve maliyet esası aynen işliyor. Hamle **başarısız
+  /// olabilir** (işlem durmuşsa, para yetmiyorsa, pozisyon yoksa); o zaman
+  /// durum değişmez ve oyuncu yalnızca metni okur.
+  ///
+  /// Sonucun iyi mi kötü mü olduğunu burası **bilmiyor**: panikte satmak
+  /// da almak da sonraki yılların piyasasına bağlı (§6).
+  static GameState applyEventAction(
+    GameState state, {
+    required PortfolioAction action,
+    required String typeId,
+    required double share,
+  }) {
+    final double pay = share.clamp(0.05, 1.0);
+    switch (action) {
+      case PortfolioAction.satKismi:
+      case PortfolioAction.karAl:
+        final Holding? h = state.holdingOf(typeId);
+        if (h == null || h.value <= 0) return state;
+        // Kâr alma yalnızca kârdayken anlamlı.
+        if (action == PortfolioAction.karAl && h.value <= h.costBasis) {
+          return state;
+        }
+        final int miktar = (h.value * pay).round();
+        if (miktar < kInvestmentMinBuy) return state;
+        final InvestmentResult r =
+            sell(state: state, typeId: typeId, amount: miktar);
+        return r.outcome.applied ? r.state : state;
+
+      case PortfolioAction.alKismi:
+        final int nakit = state.player.wallet;
+        final int miktar = (nakit * pay).round();
+        if (miktar < kInvestmentMinBuy) return state;
+        final InvestmentResult r =
+            buy(state: state, typeId: typeId, amount: miktar);
+        return r.outcome.applied ? r.state : state;
+    }
+  }
+
   static GameState _applyIncidentCash(
     GameState state,
     IncidentOutcome olaylar,
