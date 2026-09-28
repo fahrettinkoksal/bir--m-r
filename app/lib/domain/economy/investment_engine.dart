@@ -26,8 +26,10 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/investment.dart';
 import '../models/life_log.dart';
+import '../models/company_vitals.dart';
 import '../models/market_incident.dart';
 import '../models/market_state.dart';
+import 'company_engine.dart';
 import 'incident_engine.dart';
 import '../models/pending_notice.dart';
 import 'market_engine.dart';
@@ -579,6 +581,34 @@ abstract final class InvestmentEngine {
       rng: Random(marketSeed(state, newAge)),
     );
 
+    // ---- Şirket sağlığı (Paket AD/2) ---------------------------------
+    // Şirketlerin gizli göstergeleri ve sektör gücü her yıl yürür. Olay
+    // katmanı **bundan sonra** çalışıyor, çünkü olayların ihtimali bu
+    // duruma bakıyor: borcu yıllardır artan şirketin haberi kötü olur.
+    // Kendi zar akışını kullanıyor, ana akıştan çekiliş çalmıyor.
+    final ({
+      Map<String, CompanyVitals> vitals,
+      Map<String, int> sectorStrength,
+      Map<String, String> statusChanges,
+    }) sirketler = CompanyEngine.advance(
+      state: state.market,
+      regime: piyasa.state.regime,
+      rng: Random(marketSeed(state, newAge) ^ 0x1f3a7c11),
+    );
+    final MarketState sirketliPiyasa = piyasa.state.copyWith(
+      companyVitals: sirketler.vitals,
+      sectorStrength: sirketler.sectorStrength,
+      // Sessiz toparlanmalar olay katmanından **önce** işleniyor: aynı yıl
+      // hem düzelip hem kötü haber alan şirket olabilir, ama kötü haber
+      // son sözü söyler.
+      companyStatus: sirketler.statusChanges.isEmpty
+          ? piyasa.state.companyStatus
+          : Map<String, String>.unmodifiable(<String, String>{
+              ...piyasa.state.companyStatus,
+              ...sirketler.statusChanges,
+            }),
+    );
+
     // ---- Olay katmanı (Paket AC) --------------------------------------
     // Olaylar **kendi zarını** kullanır (piyasa tohumundan türer) ve
     // etkileri portföye uygulanır, endekse değil: endeks bütün oyuncular
@@ -586,7 +616,7 @@ abstract final class InvestmentEngine {
     // oynatmak portföyü olmayan oyuncunun fiyatını da kaydırır ve
     // etkiyi iki kez sayardı.
     final IncidentOutcome olaylar = IncidentEngine.advance(
-      state: state.market,
+      state: sirketliPiyasa,
       regime: piyasa.state.regime,
       newAge: newAge,
       basketValue: state.holdingOf('hisse')?.value ?? 0,
@@ -595,8 +625,12 @@ abstract final class InvestmentEngine {
     );
 
     GameState sonuc = state.copyWith(
-      market: piyasa.state.copyWith(
+      market: sirketliPiyasa.copyWith(
         companyStatus: Map<String, String>.unmodifiable(olaylar.companyStatus),
+        companyClosedAtAge:
+            Map<String, int>.unmodifiable(olaylar.companyClosedAtAge),
+        companySuccessors:
+            Map<String, String>.unmodifiable(olaylar.companySuccessors),
         halts: List<TradingHalt>.unmodifiable(olaylar.halts),
         incidents: List<MarketIncident>.unmodifiable(<MarketIncident>[
           ...state.market.incidents,

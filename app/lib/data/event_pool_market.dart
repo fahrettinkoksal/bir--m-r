@@ -21,6 +21,7 @@
 /// Ağırlıklar ve tutarlar `prototypeOnly`'dir (Q-168).
 library;
 
+import 'company_catalog.dart';
 import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 
@@ -37,6 +38,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresCompanyStatus: CompanyStatus.konkordato,
     ),
     repeatable: true,
     minAgeGap: 9,
@@ -77,6 +79,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresCompanyStatus: CompanyStatus.kayyum,
     ),
     repeatable: true,
     minAgeGap: 11,
@@ -107,6 +110,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 22,
       requiresPortfolio: true,
+      requiresStrainedCompany: true,
     ),
     repeatable: true,
     minAgeGap: 14,
@@ -138,6 +142,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresStrainedCompany: true,
     ),
     repeatable: true,
     minAgeGap: 8,
@@ -168,6 +173,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresCompanyStatus: CompanyStatus.inceleme,
     ),
     repeatable: true,
     minAgeGap: 6,
@@ -227,6 +233,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresThrivingCompany: true,
     ),
     repeatable: true,
     minAgeGap: 8,
@@ -257,6 +264,7 @@ const List<GameEvent> kMarketEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 20,
       requiresPortfolio: true,
+      requiresThrivingCompany: true,
     ),
     repeatable: true,
     minAgeGap: 5,

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../../data/company_catalog.dart';
 import '../law/legal_engine.dart';
 import '../models/criminal_record.dart';
 
@@ -258,6 +259,26 @@ class EventEngine {
     // denmez, portföyü olana "hiç yatırım yapmadın" denmez.
     if (req.requiresPortfolio && state.portfolioValue <= 0) return false;
     if (req.forbidsPortfolio && state.portfolioValue > 0) return false;
+
+    // **Şirket durumu kapıları (Paket AD, §4).** Olay metni şirketi adıyla
+    // anlatıyorsa, o şirket gerçekten o durumda olmalı. Yoksa oyuncu
+    // sapasağlam bir şirket için konkordato haberi okuyor.
+    final CompanyStatus? gerekenDurum = req.requiresCompanyStatus;
+    if (gerekenDurum != null) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.statusOf(c.id) == gerekenDurum);
+      if (!varMi) return false;
+    }
+    if (req.requiresStrainedCompany) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.vitalsOf(c.id).isStrained);
+      if (!varMi) return false;
+    }
+    if (req.requiresThrivingCompany) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.vitalsOf(c.id).isThriving);
+      if (!varMi) return false;
+    }
 
     // Kiralama kapıları (D-163). Kiracısı olmayana "kiracın aradı"
     // denmez; boş evi olmayana "ev boş duruyor" denmez.

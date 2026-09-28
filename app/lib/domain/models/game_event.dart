@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/company_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../economy/financial_strain.dart';
 import 'relation.dart';
@@ -64,6 +65,9 @@ class EventRequirement {
     this.requiresRecord = false,
     this.requiresReleased = false,
     this.requiresPortfolio = false,
+    this.requiresCompanyStatus,
+    this.requiresStrainedCompany = false,
+    this.requiresThrivingCompany = false,
     this.forbidsPortfolio = false,
     this.requiresLetProperty = false,
     this.requiresVacantProperty = false,
@@ -106,6 +110,21 @@ class EventRequirement {
   ///
   /// Portföyü olmayana "hisseler düştü, ne yapacaksın" sorulmaz.
   final bool requiresPortfolio;
+
+  /// **Şirket durumu kapısı** (Paket AD, §4).
+  ///
+  /// Doluysa, olay yalnızca sepette bu durumda **en az bir şirket varsa**
+  /// sunulur. Sebebi: Paket AC'de bu olayların metni şirketi adıyla
+  /// anlatıyordu ama olay şirketin gerçek hâline bakmıyordu — oyuncu
+  /// tamamen sağlıklı bir şirket için "konkordato başvurdu" haberi
+  /// okuyabiliyordu. §4 bunu istedi: "olaylar state'ten doğsun."
+  final CompanyStatus? requiresCompanyStatus;
+
+  /// Sepette **zorda** bir şirket olmasını ister (gizli göstergelerden).
+  final bool requiresStrainedCompany;
+
+  /// Sepette **iyi giden** bir şirket olmasını ister.
+  final bool requiresThrivingCompany;
 
   /// Olay yalnızca **hiç yatırımı olmayan** oyuncuya çıksın.
   final bool forbidsPortfolio;

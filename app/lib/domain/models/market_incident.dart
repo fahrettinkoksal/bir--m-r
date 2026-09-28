@@ -78,7 +78,13 @@ enum IncidentKind {
   kurSoku('Kur şoku'),
 
   /// Ani yükseliş dalgası.
-  aniYukselis('Ani yükseliş');
+  aniYukselis('Ani yükseliş'),
+
+  /// Kapanan şirketin yerine sepete **yeni** bir şirket girdi (§5).
+  ///
+  /// Değer listenin **sonuna** eklendi: eski kayıtlarda enum sırası
+  /// bozulmamalı. Kapanan şirketin dirilmesi değil — yeni bir ad.
+  yeniSirket('Sepete yeni şirket girdi');
 
   const IncidentKind(this.label);
 
@@ -94,7 +100,8 @@ enum IncidentKind {
         IncidentKind.iflas ||
         IncidentKind.sermayeArtirimi ||
         IncidentKind.temettu ||
-        IncidentKind.satinAlma =>
+        IncidentKind.satinAlma ||
+        IncidentKind.yeniSirket =>
           true,
         _ => false,
       };

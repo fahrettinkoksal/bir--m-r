@@ -200,11 +200,79 @@ const List<Company> kCompanyCatalog = <Company>[
   ),
 ];
 
+/// prototypeOnly: kapanan şirketin yerine sepete girebilecek **yeni**
+/// kurgusal şirketler (Paket AD, §5).
+///
+/// Ekonomi durmaz: bir şirket kapanınca yıllar sonra o boşluğu başka bir
+/// şirket doldurur. **Kapanan şirket geri dönmez** — §5 bunu açıkça
+/// yasakladı ("aynı şirket dirildi gibi saçma bir şey gösterme"). Yedekler
+/// ayrı adlarla, ayrı sektörlerle ve kendi kırılganlıklarıyla duruyor.
+///
+/// `basketWeight` burada **sıfır**: sepetteki payı, yerine geçtiği kapanan
+/// şirketin payından gelir (`CompanyBasket.weightOf`).
+const List<Company> kCompanyReserve = <Company>[
+  Company(
+    id: 'yildiz_biyoteknoloji',
+    name: 'Yıldız Biyoteknoloji',
+    sector: CompanySector.sanayi,
+    basketWeight: 0,
+    fragility: 0.50,
+  ),
+  Company(
+    id: 'karasu_denizcilik',
+    name: 'Karasu Denizcilik',
+    sector: CompanySector.lojistik,
+    basketWeight: 0,
+    fragility: 0.55,
+  ),
+  Company(
+    id: 'safir_perakende',
+    name: 'Safir Perakende',
+    sector: CompanySector.perakende,
+    basketWeight: 0,
+    fragility: 0.40,
+  ),
+  Company(
+    id: 'tan_enerji',
+    name: 'Tan Enerji',
+    sector: CompanySector.enerji,
+    basketWeight: 0,
+    fragility: 0.45,
+  ),
+  Company(
+    id: 'meridyen_yazilim',
+    name: 'Meridyen Yazılım',
+    sector: CompanySector.teknoloji,
+    basketWeight: 0,
+    fragility: 0.60,
+  ),
+  Company(
+    id: 'bereket_gida',
+    name: 'Bereket Gıda',
+    sector: CompanySector.gida,
+    basketWeight: 0,
+    fragility: 0.30,
+  ),
+];
+
+/// Katalog + yedekler. Kimlikten şirkete çevirmek için.
+List<Company> get kAllCompanies =>
+    <Company>[...kCompanyCatalog, ...kCompanyReserve];
+
+/// prototypeOnly: kapanan şirketin yerine yenisinin gelmesi için geçen yıl.
+///
+/// Hemen olmaz: sepetteki boşluk bir süre açık kalır, sonra yeni bir ad
+/// belirir. Oyuncu "battı, yerine yenisi geldi" hikâyesini yaşar.
+const int kCompanySuccessorYears = 4;
+
+
 /// Payların toplamı. Testle 1,00'de sabitlenir.
 const double kCompanyBasketWeightSum = 1.0;
 
+/// Kimliği verilen şirket. **Yedekler de aranıyor** (Paket AD, §5):
+/// kapanan şirketin yerine geçen yeni şirket de kimlikle bulunabilmeli.
 Company? companyById(String id) {
-  for (final Company c in kCompanyCatalog) {
+  for (final Company c in kAllCompanies) {
     if (c.id == id) return c;
   }
   return null;

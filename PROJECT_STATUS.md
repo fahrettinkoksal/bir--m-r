@@ -2202,6 +2202,60 @@ küçükten başlıyor.
 `flutter test` **2562 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
 oynanmadı; Android APK bu makinede derlenmedi.**
 
+## Paket AD (3/6) — şirket sağlık modeli (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/2 (§1-§5) ve §23** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-171**'de; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Ne geldi
+
+Her kurgusal şirketin beş **gizli, kalıcı, yıldan yıla değişen** göstergesi
+var (mali sağlık, borç baskısı, büyüme, yönetim kalitesi, güven) ve on
+sektörün kendi gücü. Hepsi kayda giriyor, hiçbiri oyuncuya sayı olarak
+gösterilmiyor.
+
+Olaylar artık bunlardan doğuyor: hangi şirketin habere konu olacağı,
+haberin iyi mi kötü mü olacağı, krizden çıkma ihtimali (yönetim kalitesi)
+ve hangi sektörün kriz/atak yaşayacağı. 24 olayın yedisi şirketin **gerçek
+durumuna** kapılı — oyuncu sapasağlam bir şirket için konkordato haberi
+okuyamıyor.
+
+Kapanan şirketin sepetteki payını dört yıl sonra **yeni bir ad** devralıyor
+(altı yedek kurgusal şirket). Kapanan şirket geri dönmüyor.
+
+### Bulduğum yapısal kusur (Paket AC'den kalma)
+
+1200 yıllık ilk ölçümde şirketlerin yalnızca **%31'i normal**, %68'i kalıcı
+sıkıntılı çıktı. Sebep: şirketin durumu yalnızca **olaya konu olduğunda**
+değişiyordu ve bir şirket ortalama yetmiş yılda bir seçiliyor; kötüleşme
+tam iyileşmeden olası olduğu için durumlar yutucu hâle geliyordu. Oyun
+kuşaklar arası devam ettiği için bu, ilerleyen kayıtlarda "bütün şirketler
+hasta" demek. Çözüm: göstergeleri düzelen şirket **sessizce** bir kademe
+iyileşebiliyor. Kötü haber her zaman duyurulur, iyi haber sessiz olabilir.
+
+İlk denemede fazla cömert davrandım (eşik 0,50) ve kapanma 1200 yılda 1'e
+düştü — Paket AC'nin eklediği riski kendi elimle söndürüyordum. Eşiği
+ölçümle 0,44'e çektim.
+
+### Ölçüm (14.396 şirket-yılı — gerçekten çalıştırıldı)
+
+| Durum | Pay |
+|---|---|
+| normal | %65,8 |
+| inceleme | %22,1 |
+| sıkıntı | %10,1 |
+| kayyum | %0,6 |
+| konkordato | %0,2 |
+
+Geçişler (1200 yıl): kötüleşen 79 · toparlanan 18 · kapanan 3 · yerine gelen
+yeni şirket 3. Durum değişimi şirket-yıllarının **%0,8'i**. 200 tek yıllık
+koşuda **normalden doğrudan kapanan şirket 0**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2571 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

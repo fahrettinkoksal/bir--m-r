@@ -8,6 +8,7 @@
 /// ileride enum sırası değişse bile eski kayıtlar bozulmaz.
 library;
 
+import '../../domain/models/company_vitals.dart';
 import '../../domain/models/loan.dart';
 import '../../domain/models/pending_race.dart';
 import '../../domain/life/year_review.dart';
@@ -601,6 +602,21 @@ Map<String, Object?> _encodeMarket(MarketState m) => <String, Object?>{
       'valuationHeat': m.valuationHeat,
       'riskTide': m.riskTide,
       'hedgeTide': m.hedgeTide,
+      // Paket AD/2: şirket sağlık göstergeleri ve sektör gücü. Alan
+      // eklemeli; eski kayıtta yoklar ve katalog tabanından okunurlar.
+      'companyVitals': <String, Object?>{
+        for (final MapEntry<String, CompanyVitals> e in m.companyVitals.entries)
+          e.key: <String, Object?>{
+            'financialHealth': e.value.financialHealth,
+            'debtPressure': e.value.debtPressure,
+            'growth': e.value.growth,
+            'management': e.value.management,
+            'confidence': e.value.confidence,
+          },
+      },
+      'sectorStrength': m.sectorStrength,
+      'companyClosedAtAge': m.companyClosedAtAge,
+      'companySuccessors': m.companySuccessors,
     };
 
 Map<String, Object?> _encodeHalt(TradingHalt h) => <String, Object?>{
@@ -675,6 +691,23 @@ MarketState _decodeMarket(Map<String, Object?> json) => MarketState(
       // Eski kayıtta gelgit yoksa nötr (50) açılır.
       riskTide: _intOr(json, 'riskTide', 50),
       hedgeTide: _intOr(json, 'hedgeTide', 50),
+      companyVitals: json['companyVitals'] == null
+          ? const <String, CompanyVitals>{}
+          : <String, CompanyVitals>{
+              for (final MapEntry<String, Object?> e
+                  in _asMap(json['companyVitals'], 'market.companyVitals')
+                      .entries)
+                e.key: _decodeVitals(_asMap(e.value, 'market.companyVitals[]')),
+            },
+      sectorStrength: json['sectorStrength'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'sectorStrength'),
+      companyClosedAtAge: json['companyClosedAtAge'] == null
+          ? const <String, int>{}
+          : _intMap(json, 'companyClosedAtAge'),
+      companySuccessors: json['companySuccessors'] == null
+          ? const <String, String>{}
+          : _stringMap(json, 'companySuccessors'),
     );
 
 Map<String, Object?> _encodeAlimony(Alimony a) => <String, Object?>{
@@ -1850,6 +1883,14 @@ Loan _decodeLoan(Map<String, Object?> json) => Loan(
       restructures: _intOr(json, 'restructures', 0),
       writtenOff: json['writtenOff'] == true,
       closedAtAge: _intOrNull(json, 'closedAtAge'),
+    );
+
+CompanyVitals _decodeVitals(Map<String, Object?> json) => CompanyVitals(
+      financialHealth: _intOr(json, 'financialHealth', 50),
+      debtPressure: _intOr(json, 'debtPressure', 50),
+      growth: _intOr(json, 'growth', 50),
+      management: _intOr(json, 'management', 50),
+      confidence: _intOr(json, 'confidence', 50),
     );
 
 AppliedEffect _decodeAppliedEffect(Map<String, Object?> json) => AppliedEffect(

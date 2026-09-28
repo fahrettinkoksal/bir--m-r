@@ -4,6 +4,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 import '../../data/company_catalog.dart';
+import 'company_vitals.dart';
 import 'market_incident.dart';
 
 /// Yıllık piyasa rejimi.
@@ -75,6 +76,10 @@ class MarketState {
     this.valuationHeat = const <String, int>{},
     this.riskTide = 50,
     this.hedgeTide = 50,
+    this.companyVitals = const <String, CompanyVitals>{},
+    this.sectorStrength = const <String, int>{},
+    this.companyClosedAtAge = const <String, int>{},
+    this.companySuccessors = const <String, String>{},
   });
 
   /// Baz puan ölçeği: 10.000 = 1,00.
@@ -159,6 +164,81 @@ class MarketState {
   /// yıllara denk gelmek zorunda değil; yoksa çeşitlendirme anlamsızlaşır.
   final int hedgeTide;
 
+  /// Şirket kimliği -> **gizli sağlık göstergeleri** (Paket AD, §AD/2).
+  ///
+  /// Kayda girer: şirketin yıllardır zorlandığı bilgisi oyuncu kaydı
+  /// kapatıp açınca silinmemeli, yoksa kayıt/yükleme şirketin kaderini
+  /// yeniden çevirmenin bir yolu olurdu (§26-§27).
+  final Map<String, CompanyVitals> companyVitals;
+
+  /// [CompanySector.name] -> sektör gücü (0-100, 50 nötr).
+  final Map<String, int> sectorStrength;
+
+  /// Bu şirketin göstergeleri; kayıtta yoksa katalog tabanı okunur.
+  CompanyVitals vitalsOf(String companyId) =>
+      companyVitals[companyId] ??
+      CompanyVitals(
+        financialHealth: _tabanFor(companyId, 44, artan: true),
+        debtPressure: _tabanFor(companyId, 44, artan: false),
+        growth: _tabanFor(companyId, 18, artan: true),
+        management: _tabanFor(companyId, 34, artan: true),
+        confidence: _tabanFor(companyId, 26, artan: true),
+      );
+
+  /// Katalogdaki `fragility`'den taban gösterge üretir.
+  ///
+  /// `CompanyEngine.baselineFor` ile aynı hesabı yapıyor; burada tekrar
+  /// duruyor çünkü model katmanı motora bağımlı olmamalı. İkisi
+  /// `paket_ad_company_test.dart` içinde karşılaştırılıyor, yani ikisi
+  /// ayrışırsa test kırılır.
+  static int _tabanFor(String companyId, double genlik, {required bool artan}) {
+    for (final Company c in kCompanyCatalog) {
+      if (c.id != companyId) continue;
+      final double fark = artan ? (0.5 - c.fragility) : (c.fragility - 0.5);
+      return (50 + fark * genlik).round().clamp(0, 100);
+    }
+    return 50;
+  }
+
+  /// Kapanan şirket kimliği -> kapandığı yaş (Paket AD, §5).
+  final Map<String, int> companyClosedAtAge;
+
+  /// Kapanan şirket kimliği -> **yerine gelen** yeni şirketin kimliği.
+  ///
+  /// §5: kapanan şirket geri dönmez, yerine **başka bir ad** gelir ve
+  /// sepetteki payını devralır. "Aynı şirket dirildi" diye bir şey yok.
+  final Map<String, String> companySuccessors;
+
+  /// Bir şirketin sepetteki payı.
+  ///
+  /// Katalog şirketinde kendi payı; yedek şirkette **yerine geçtiği**
+  /// şirketin payı. Yedeklerin kataloğa yazılı payı sıfırdır.
+  double basketWeightOf(String companyId) {
+    final Company? c = companyById(companyId);
+    if (c == null) return 0;
+    if (c.basketWeight > 0) return c.basketWeight;
+    for (final MapEntry<String, String> e in companySuccessors.entries) {
+      if (e.value == companyId) {
+        return companyById(e.key)?.basketWeight ?? 0;
+      }
+    }
+    return 0;
+  }
+
+  /// Sepette **şu an** yer alan şirketler: kapanmamış katalog şirketleri +
+  /// devreye girmiş yedekler.
+  List<Company> get activeBasketCompanies => <Company>[
+        for (final Company c in kCompanyCatalog)
+          if (statusOf(c.id).isActive) c,
+        for (final String id in companySuccessors.values)
+          if (statusOf(id).isActive)
+            if (companyById(id) != null) companyById(id)!,
+      ];
+
+  /// Bu sektörün gücü; kayıtta yoksa nötr (50).
+  int sectorStrengthOf(CompanySector sector) =>
+      sectorStrength[sector.name] ?? 50;
+
   /// Bu varlığın ısısı; kayıtta yoksa normal (50).
   int heatOf(String typeId) => valuationHeat[typeId] ?? 50;
 
@@ -203,6 +283,10 @@ class MarketState {
     Map<String, int>? valuationHeat,
     int? riskTide,
     int? hedgeTide,
+    Map<String, CompanyVitals>? companyVitals,
+    Map<String, int>? sectorStrength,
+    Map<String, int>? companyClosedAtAge,
+    Map<String, String>? companySuccessors,
   }) =>
       MarketState(
         regime: regime ?? this.regime,
@@ -220,6 +304,10 @@ class MarketState {
         valuationHeat: valuationHeat ?? this.valuationHeat,
         riskTide: (riskTide ?? this.riskTide).clamp(0, 100),
         hedgeTide: (hedgeTide ?? this.hedgeTide).clamp(0, 100),
+        companyVitals: companyVitals ?? this.companyVitals,
+        sectorStrength: sectorStrength ?? this.sectorStrength,
+        companyClosedAtAge: companyClosedAtAge ?? this.companyClosedAtAge,
+        companySuccessors: companySuccessors ?? this.companySuccessors,
       );
 }
 

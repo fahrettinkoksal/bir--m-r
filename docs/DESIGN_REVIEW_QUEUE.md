@@ -4430,3 +4430,54 @@ Ayrıca gecikme faizi tavanını ilk turda **anaparaya** bağlamıştım ve mevc
 7. **Kapanma süresi medyan 6 yıl.** Daha uzun bir çile mi olmalı?
 
 **Varsayılan işlem:** Onay gelene dek bu yedi sayı olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-171 — Paket AD/2: şirket sağlık modeli kalibrasyonu
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AD DEVAM" briefi (AD/2, §1-§5, §23) · **Etkilenen kod:** `app/lib/domain/models/company_vitals.dart`, `app/lib/domain/economy/company_engine.dart`, `app/lib/domain/economy/incident_engine.dart`, `app/lib/data/company_catalog.dart`, `app/lib/data/event_pool_market.dart`, `app/test/paket_ad_company_test.dart`
+
+#### Ne yapıldı
+
+Her kurgusal şirketin **beş gizli, kalıcı, yıldan yıla değişen** göstergesi var: mali sağlık, borç baskısı, büyüme potansiyeli, yönetim kalitesi, piyasa güveni. Üstüne on sektörün kendi **sektör gücü**. Hepsi 0-100, hepsi kayda giriyor, **hiçbiri oyuncuya sayı olarak gösterilmiyor** (§3).
+
+Olaylar artık bunlardan doğuyor:
+
+- Hangi şirketin habere konu olacağı, katalogdaki sabit `fragility` yerine şirketin **o yılki gerçek baskısına** bakıyor.
+- Haberin iyi mi kötü mü olacağı da öyle: iyi giden şirkette satın alma/temettü, zorlanan şirkette inceleme/skandal, borç baskısı 70'in üstündeyse doğrudan mali sıkıntı.
+- Krizden çıkma ihtimalini **yönetim kalitesi** belirliyor (§3).
+- Sektör rastgele seçilmiyor: gücü düşük sektörün kriz haberi, yüksek sektörün atak haberi daha olası. Ama aynı sektördeki iki şirket aynı hareket etmiyor (§2) — ölçümde Doruk Yapı stres 78, Ege İnşaat 71.
+- 24 olayın yedisi artık **şirketin gerçek durumuna** kapılı: oyuncu sapasağlam bir şirket için konkordato haberi okuyamıyor (§4).
+
+**§5 (kapanan şirketin yeri):** altı yedek kurgusal şirket eklendi. Kapanan şirketin sepetteki payını, dört yıl sonra **yeni bir ad** devralıyor. Kapanan şirket geri dönmüyor — ölçümde Ege İnşaat'ın yerine Meridyen Yazılım geldi.
+
+#### Bulduğum yapısal kusur (Paket AC'den kalma)
+
+1200 yıllık ilk ölçümde şirketlerin yalnızca **%31'i normal**, %68'i kalıcı olarak sıkıntılı çıktı. Sebep: Paket AC'de şirketin durumu **yalnızca olaya konu olduğunda** değişiyordu. Olay ihtimali yılda %16 ve on iki şirkete dağılıyor, yani bir şirket ortalama yetmiş yılda bir seçiliyor; kötüleşme ihtimali tam iyileşmeden yüksek olduğu için durumlar neredeyse **yutucu** hâle geliyordu. Oyun kuşaklar arası devam ettiği için bu, ilerleyen kayıtlarda "bütün şirketler hasta" demek.
+
+Çözüm §1'in kendi kuralı: göstergeleri düzelen şirket **sessizce** bir kademe iyileşebiliyor. **Asimetri bilerek:** kötü haber her zaman duyurulur, iyi haber sessiz olabilir.
+
+İlk denemede fazla cömert davrandım (eşik 0,50) ve bu sefer kapanma neredeyse yok oldu (1200 yılda 1) — yani Paket AC'nin eklediği risk katmanını kendi elimle söndürüyordum. Eşiği ölçümle 0,44'e çektim.
+
+#### Ölçülen dağılım (14.396 şirket-yılı)
+
+| Durum | Pay |
+|---|---|
+| normal | %65,8 |
+| inceleme | %22,1 |
+| sıkıntı | %10,1 |
+| kayyum | %0,6 |
+| konkordato | %0,2 |
+
+Geçişler (1200 yıl): kötüleşen 79 · toparlanan 18 · kapanan 3 · yerine gelen yeni şirket 3. Stres: medyan 55, p10 43, p90 71. Durum değişimi şirket-yıllarının **%0,8'i** — yani şirketler her yıl durum değiştirmiyor, iyi şirket iyi kalabiliyor (§1). 200 tek yıllık koşuda **normalden doğrudan kapanan şirket 0**.
+
+#### Karar soruları
+
+1. **Kapanma 1200 yılda 3** (≈%0,25/yıl). Paket AC'de %0,64 ölçülmüştü. Altmış yıllık bir hayatta oyuncunun şirket batışı görme ihtimali kabaca %14. Yeterince "nadir + anlamlı" mı (§8), yoksa artırılsın mı?
+2. **Normal payı %65,8.** Ekonomi çok mu sağlıklı, yoksa doğru mu?
+3. **Sessiz toparlanma** oyuncuya hiç haber vermiyor. Bir şirketin düzeldiği de duyurulsun mu, yoksa bildirim yağmuru mu olur (AD/3 §"bildirim yağmuru istemiyorum")?
+4. **Altı yedek şirket** yeterli mi? Hepsi kullanılırsa sepet kalıcı olarak küçülür.
+5. **Yedek dört yıl sonra** geliyor. Doğru süre mi?
+6. **Göstergeler oyuncuya hiç gösterilmiyor.** §3 bunu istedi. Yatırımlar ekranında şirketin *hâlini* ima eden bir cümle (sayı değil) olsun mu?
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
