@@ -2100,6 +2100,30 @@ void _spendTimeWithFamily(
               p.relation == RelationType.baba ||
               p.relation == RelationType.sevgili))
       .toList(growable: false);
+
+  // **Paket AH, §12 — üçüncü bot hatası.** Bot yalnızca eş, çocuk,
+  // ebeveyn ve sevgiliyle vakit geçiriyordu. Sınıf ve iş arkadaşına
+  // hiç zaman ayırmadığı için onlarla yakınlık **yalnızca olaylardan**
+  // geliyordu ve 3000 hayatta medyan 35'te kalıyordu; yakın arkadaşlık
+  // eşiği 55. Sonuç: hayatların %98'inde tanışıklık hiçbir zaman
+  // arkadaşlığa dönüşemiyordu. Sosyal oyuncu arkadaşına da vakit ayırır.
+  final List<Person> tanisiklar = s.people
+      .where((Person p) =>
+          p.isAlive &&
+          !p.isEstranged &&
+          (p.relation == RelationType.sinifArkadasi ||
+              p.relation == RelationType.isArkadasi ||
+              p.relation == RelationType.arkadas))
+      .toList(growable: false);
+  if (tanisiklar.isNotEmpty && rng.nextDouble() < profile.socialDesire) {
+    final Person kisi = tanisiklar[rng.nextInt(tanisiklar.length)];
+    final List<InteractionKind> acik = c.availableKindsFor(kisi);
+    if (acik.isNotEmpty) {
+      sonuc.diag.interactions++;
+      c.interact(kisi.id, acik[rng.nextInt(acik.length)]);
+    }
+  }
+
   if (yakinlar.isEmpty) return;
   // Yılda bir-iki kişiyle: her yıl herkesle uğraşmak gerçekçi değil.
   final int adet = rng.nextDouble() < profile.familyDesire ? 2 : 1;
