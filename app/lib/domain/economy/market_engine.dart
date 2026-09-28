@@ -148,7 +148,15 @@ abstract final class MarketEngine {
   /// %45,3 · güçlü %20,8 · kriz %7,1 · toparlanma %2,3). Krizi çok gören
   /// bir hayatta bu prim **hiç gerçekleşmez** — kriz tabanı primi fazlasıyla
   /// yiyor.
-  static const double prototypeOnlyRiskPremium = 0.056;
+  ///
+  /// **AD/6 ölçümünde 0,056'dan 0,048'e indirildi.** Yoğunlaşma cezası
+  /// üst kuyruğu ciddi biçimde kesti (%100 hisse stratejisinde milyarder
+  /// payı %12,7'den %6,7'ye, görülen en yüksek servet ₺211.732 milyondan
+  /// ₺62.594 milyona) ama §19'un "milyarderlik çok nadir" hedefi için
+  /// hâlâ yüksekti. Prim riske duyarlı varlıklara geçtiği için bu indirim
+  /// hisse/fon tarafını kısar, altın/dövize neredeyse dokunmaz — yani
+  /// risk merdiveni korunur.
+  static const double prototypeOnlyRiskPremium = 0.048;
 
   /// prototypeOnly: rejim tabanlarının üstüne eklenen korunma tabanı.
   ///

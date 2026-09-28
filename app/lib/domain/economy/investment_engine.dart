@@ -99,7 +99,29 @@ abstract final class InvestmentEngine {
   /// Portföyün tamamı tek riskli varlıktaysa o varlığın kendi gürültüsü
   /// bu kat kadar büyür; dağıtıldığında etkisi kaybolur. Çeşitlendirme
   /// **kazanç garantisi vermez**, yalnızca oynaklığı düşürür (§24).
-  static const double prototypeOnlyConcentrationVolBoost = 0.55;
+  /// prototypeOnly: tek varlığa yığılmanın **oynaklık** zammı.
+  ///
+  /// **Paket AD'de 0,55'ten 0,25'e indirildi ve yanına bir de
+  /// beklenen-getiri cezası kondu.** Sebebi AD/6 ölçümü: 60 yıllık
+  /// "%100 hisse" stratejisinde en iyi %10 **₺1,56 milyar**, görülen en
+  /// yüksek servet **₺211.732 milyon** ve hayatların **%12,7'si**
+  /// milyarder çıktı. §19 "milyarderlik çok nadir" diyor.
+  ///
+  /// Sebep mekanizmanın kendisiydi. Zam sapmayı çarpıyor ve yorumunda
+  /// "beklenen değer kaymaz" yazıyordu — **tek yıl için doğru, bileşik
+  /// servet için değil.** Sapmayı 1,55 ile çarpmak yıllık oynaklığı
+  /// %23'ten ~%36'ya çıkarıyor; altmış yıl bileşiklenince bu, medyanı
+  /// düşürürken üst kuyruğu patlatıyor. Yani "ceza" diye yazılan şey
+  /// pratikte bir **piyango bileti** olmuş.
+  static const double prototypeOnlyConcentrationVolBoost = 0.25;
+
+  /// prototypeOnly: tek varlığa yığılmanın **beklenen getiri** cezası.
+  ///
+  /// Yoğunlaşma risk ekler ama karşılığında getiri **eklemez** — çeşitlenen
+  /// oyuncu aynı riski daha ucuza alır. Oyun kuralı olarak: tam yoğunlaşmış
+  /// portföy her yıl bu kadar geri kalır. §9'un "çeşitlendirme korur"
+  /// kuralının sayısal karşılığı budur; çeşitlenen portföyde sıfırdır.
+  static const double prototypeOnlyConcentrationDrag = 0.012;
 
   // -------------------------------------------------------------------
   // Uygunluk
@@ -677,19 +699,31 @@ abstract final class InvestmentEngine {
         yeni.add(h);
         continue;
       }
-      // Yoğunlaşma zammı getiriyi **eğilimden uzaklaştırır**: iyi yıl daha
-      // iyi, kötü yıl daha kötü, ama **beklenen değer kaymaz**.
+      // Yoğunlaşma iki şey yapar: sapmayı büyütür **ve** beklenen getiriyi
+      // düşürür.
       //
       // İlk yazımda bütün getiriyi çarpıyordum (`getiri * (1 + zam)`).
       // O, eğilimi de çarpıyordu: yoğunlaşan portföyün beklenen getirisi
-      // yükseliyordu — oysa yoğunlaşma risk ekler, getiri eklemez.
-      // Sonuç ölçümde görüldü: 100 hayatta bir oyuncu **10,2 milyar ₺**
-      // ile öldü ve AA'nın "yatırım ekonomiyi kırıyor" bekçisi kırıldı.
-      // Doğrusu yalnızca **eğilimden sapmayı** büyütmek.
+      // yükseliyordu. Sonuç ölçümde görüldü: 100 hayatta bir oyuncu
+      // **10,2 milyar ₺** ile öldü. Düzeltip yalnızca sapmayı büyüttüm ve
+      // yorumuna "beklenen değer kaymaz" yazdım.
+      //
+      // **O yorum tek yıl için doğruydu, bileşik servet için değil.**
+      // AD/6 ölçümünde 60 yıllık "%100 hisse" stratejisinin en iyi %10'u
+      // ₺1,56 milyar, en yükseği ₺211.732 milyon ve milyarder payı %12,7
+      // çıktı: sapmayı büyütmek medyanı düşürürken üst kuyruğu
+      // patlatıyor, yani ceza diye yazılan şey piyango bileti oluyor.
+      //
+      // Doğrusu, yoğunlaşmanın **bedeli** olması: aynı riski çeşitlenerek
+      // daha ucuza alabilecekken almamanın karşılığı, her yıl eğilimin bir
+      // miktar altında kalmak (§9).
       double etkinGetiri = getiri;
       if (yogunlasmaZammi > 0 && h.value == enBuyuk) {
         final double egilim = investmentTypeById(h.typeId)?.carry ?? 0;
-        etkinGetiri = egilim + (getiri - egilim) * (1 + yogunlasmaZammi);
+        final double ceza = prototypeOnlyConcentrationDrag *
+            (yogunlasmaZammi / prototypeOnlyConcentrationVolBoost);
+        etkinGetiri =
+            egilim - ceza + (getiri - egilim) * (1 + yogunlasmaZammi);
       }
       // Olay çarpanı (şirket batışı, panik, sektör…).
       final double olayCarpani = olaylar.multipliers[h.typeId] ?? 1.0;

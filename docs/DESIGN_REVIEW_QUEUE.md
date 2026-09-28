@@ -4570,3 +4570,68 @@ Hepsi **normal eşya**: net servete giriyor, boşanmada paylaşılıyor, mirasa 
 8. **Bunun yatırım dominansını gerçekten kırdığı ölçülmedi.** AD/6'da bot lüks almayı hiç denemiyor; harcama kanalları "var" ama botun kullanıp kullanmadığı ayrı bir soru.
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-174 — Paket AD/6: strateji kalibrasyonu ve bulunan dominant strateji
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AD DEVAM" briefi (AD/6, §18-§22) · **Etkilenen kod:** `app/lib/domain/economy/investment_engine.dart`, `app/lib/domain/economy/market_engine.dart`, `app/test/paket_ad_calibration_test.dart`, `app/test/support/strategy_player.dart`, `app/test/support/player_bot.dart`
+
+#### Bulduğum asıl hata: "ceza" diye yazdığım şey piyango biletiymiş
+
+30.000 yolluk ilk tam ölçümde 60 yıllık **%100 hisse** stratejisi şunu verdi: en iyi %10 **₺1.558M**, görülen en yüksek servet **₺211.732M**, milyarder payı **%12,7**. 2000 tam hayatta en yüksek servet **₺396.089M**.
+
+Sebep Paket AC'den kalma yoğunlaşma mekanizmasıydı. Tek varlığa yığılan portföyde getirinin **sapmasını** 1,55 ile çarpıyordu ve yorumunda "beklenen değer kaymaz" yazıyordu — **bunu ben yazmıştım ve tek yıl için doğru, bileşik servet için değil.** Sapmayı büyütmek yıllık oynaklığı %23'ten ~%36'ya çıkarıyor; altmış yıl bileşiklenince medyanı düşürürken üst kuyruğu patlatıyor. Yani risk cezası diye kurduğum şey pratikte bir piyango biletiydi.
+
+**Düzeltme:** yoğunlaşma artık beklenen getiriyi de düşürüyor (aynı riski çeşitlenerek daha ucuza alabilecekken almamanın bedeli, §9); oynaklık zammı 0,55 → 0,25. Üstüne risk primi 0,056 → 0,048.
+
+| %100 hisse, 60 yıl | Başlangıç | Yoğunlaşma düzeltmesi | + risk primi |
+|---|---|---|---|
+| medyan | ₺42,0M | ₺42,0M | ₺27,5M |
+| iyi %10 | ₺1.558M | ₺598M | **₺371M** |
+| görülen en yüksek | ₺211.732M | ₺62.594M | **₺7.460M** |
+| milyarder payı | %12,7 | %6,7 | **%3,8** |
+
+2000 tam hayat: medyan ₺62,0M → **₺50,9M**, milyarder %2,5 → **%1,3**, en yüksek ₺396.089M → **₺38.103M**.
+
+#### §20 — 60 yıl, 1000 yol/strateji
+
+| Strateji | Medyan | Kötü %10 | İyi %10 | En yüksek | 1B+ | Yat. zarar | maxDD | Zor. satış |
+|---|---|---|---|---|---|---|---|---|
+| girişim + yatırım | **₺52,2M** | **₺10,4M** | ₺328,7M | ₺8.579M | %2,8 | %16,5 | %48 | %92,5 |
+| her yıl maksimum | ₺31,6M | ₺7,0M | ₺127,6M | ₺4.237M | %0,5 | %2,3 | %27 | %88,9 |
+| ev + yatırım | ₺28,0M | ₺5,5M | ₺215,0M | ₺13.819M | %2,0 | %17,7 | %49 | %87,4 |
+| %100 hisse | ₺27,5M | ₺3,3M | ₺371,2M | ₺7.460M | %3,8 | %20,4 | %68 | %88,2 |
+| karma normal oyuncu | ₺27,1M | ₺7,3M | ₺110,4M | ₺3.557M | %0,4 | %2,7 | %29 | %16,0 |
+| dengeli | ₺22,5M | ₺6,2M | ₺71,0M | ₺317M | %0,0 | %5,8 | %22 | %30,2 |
+| sadece vadeli | ₺21,3M | ₺7,0M | ₺48,6M | ₺309M | %0,0 | %28,6 | %12 | %0,0 |
+| sadece altın | ₺19,3M | ₺5,4M | ₺82,5M | ₺523M | %0,0 | %15,4 | %35 | %87,6 |
+| sadece fon | ₺15,2M | ₺3,3M | ₺69,4M | ₺474M | %0,0 | %36,2 | %43 | %87,9 |
+| yatırım yok | ₺10,1M | ₺4,0M | ₺20,0M | ₺160M | %0,0 | — | %15 | %0,1 |
+
+**En riskli:** %100 hisse (en düşük taban ₺3,3M, en yüksek drawdown %68, zarar eden %20,4). **En güvenli:** sadece vadeli (drawdown %12, zorunlu satış %0) ama yatırımın kendisi %28,6 oranında para kaybettiriyor — enflasyonsuz bir oyunda bile vadeli "kaybetmeyen" değil.
+
+#### §22 — BULUNAN DOMİNANT STRATEJİ (karar gerekiyor)
+
+**`girişim + yatırım` diğer dokuzunun hepsini, her ufukta, hem medyanda hem en kötü %10'da geçiyor.** Yani işletme, yatırımın üstüne bedava bir kat ekliyor: aynı yatırımı yapıp üstüne işletme açan oyuncu her boyutta daha iyi durumda.
+
+Bu pakette **işletme dengesine dokunmadım**: işletme ekonomisi Paket U'da kalibre edildi, değiştirmek ayrı bir ürün kararı. Bekçi bulguyu dondurdu — bilinen tek dominant strateji işletmedir ve sayısı artamaz; yeni bir baskın strateji çıkarsa test kırılır. Piyasa stratejileri (işletme/ev hariç) arasında baskın yok.
+
+#### §21 — 60 yıl servet bileşenleri (medyan)
+
+Bütün stratejilerde servetin neredeyse tamamı **portföy**. Gayrimenkul, araç ve **lüks kalemi hepsinde ₺0** — min-max oyuncu AD/5'in açtığı harcama kanallarına hiç uğramıyor. İşletme stratejisinde işletme sermayesi medyanda yalnızca ₺202k.
+
+#### §18 — 2000 tam hayat
+
+medyan ₺50,9M · kötü %10 ₺11,1M · iyi %10 ₺209,0M · en yüksek ₺38.103M · 50M+ %50,9 · 100M+ %25,4 · 250M+ %7,5 · 500M+ %2,9 · **1B+ %1,3**. Ehliyet alan %59,0 · evlenen %46,8 · partneri olan %91,7 · yatırım yapan %90,8 · ev sahibi %44,3 · işletme kuran %19,7 · **ölümle biten %100 (takılan hayat yok)**.
+
+#### Karar soruları
+
+1. **`girişim + yatırım` dominansı.** İşletme getirisi düşürülsün mü, sermaye/bakım yükü artırılsın mı, yoksa "girişimcilik zaten en zor ve en kârlı yol olsun" mu? **Bu paketin en önemli açık sorusu.**
+2. **§19 hedef dağılımı tam tutmuyor.** 2000 tam hayatta medyan ₺50,9M — §19'un "normal oyuncu milyonlar" bandının bir kademe üstü ("on milyonlar"). Milyarderlik %1,3'e indi. Medyan daha da düşsün mü? Düşerse hangi koldan: getiri mi, maaş mı, gider mi?
+3. **Risk primi 0,048 ve yoğunlaşma cezası 0,012/yıl** doğru mu?
+4. **Lüks kalemi bütün stratejilerde ₺0.** AD/5'in kanalları var ama min-max oyuncu kullanmıyor. Bot lüks almayı denesin mi (o zaman "normal oyuncu" ölçümü değişir), yoksa min-max oyuncunun harcamaması doğal mı sayılsın?
+5. **"Sadece fon" yatırımın %36,2'sinde para kaybettiriyor** — fon yönetim ücreti (%1,4) fazla mı?
+6. **Ağır ölçüm `BIR_OMUR_FULL_MEASURE=1` ile açılıyor**, her turda çalışmıyor (30.000 yol + 2000 hayat ~25 dakika). Golden testlerle aynı kalıp. Doğru mu, yoksa CI'da da çalışsın mı?
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır, işletme dengesine dokunulmaz ve `DECISIONS.md`'ye kesin kural yazılmaz.

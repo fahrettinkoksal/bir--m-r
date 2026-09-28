@@ -2338,6 +2338,92 @@ tohumun hepsi çalışıyor**. Hiçbir iddia gevşetilmedi.
 `flutter test` **2584 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
 oynanmadı; Android APK bu makinede derlenmedi.**
 
+## Paket AD (6/6) — strateji kalibrasyonu · **AD TAMAMLANDI** (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/6 (§18-§22)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-174**'te; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Bulduğum asıl hata: "ceza" diye yazdığım şey piyango biletiymiş
+
+30.000 yolluk ilk tam ölçümde 60 yıllık %100 hisse stratejisi: en iyi %10
+**₺1.558M**, görülen en yüksek **₺211.732M**, milyarder payı **%12,7**.
+
+Sebep Paket AC'den kalma yoğunlaşma mekanizmasıydı: tek varlığa yığılan
+portföyde getirinin **sapmasını** 1,55 ile çarpıyor ve yorumunda "beklenen
+değer kaymaz" yazıyordu. **Bunu ben yazmıştım ve tek yıl için doğru,
+bileşik servet için değil.** Sapmayı büyütmek yıllık oynaklığı %23'ten
+~%36'ya çıkarıyor; altmış yıl bileşiklenince medyanı düşürürken üst kuyruğu
+patlatıyor.
+
+Düzeltme: yoğunlaşma artık **beklenen getiriyi de düşürüyor** (§9),
+oynaklık zammı 0,55 → 0,25, risk primi 0,056 → 0,048.
+
+| %100 hisse, 60 yıl | Başlangıç | Sonra |
+|---|---|---|
+| iyi %10 | ₺1.558M | **₺371M** |
+| görülen en yüksek | ₺211.732M | **₺7.460M** |
+| milyarder payı | %12,7 | **%3,8** |
+
+2000 tam hayat: medyan ₺62,0M → **₺50,9M**, milyarder %2,5 → **%1,3**,
+en yüksek ₺396.089M → **₺38.103M**.
+
+### §22 — BULUNAN DOMİNANT STRATEJİ (Faho'nun kararı gerekiyor)
+
+**`girişim + yatırım` diğer dokuzunun hepsini, her ufukta, hem medyanda hem
+en kötü %10'da geçiyor** (60 yıl: medyan ₺52,2M, kötü%10 ₺10,4M — ikisi de
+listenin tepesi). İşletme, yatırımın üstüne bedava bir kat ekliyor.
+
+Bu pakette işletme dengesine **dokunulmadı**: işletme ekonomisi Paket U'da
+kalibre edildi, değiştirmek ayrı bir ürün kararı (Q-174/1). Bekçi bulguyu
+dondurdu; yeni bir baskın strateji çıkarsa test kırılır. Piyasa
+stratejileri arasında baskın yok.
+
+### Botu güçlendirdim, zayıflatmadım (§18)
+
+Ehliyet (en büyük tek eksik: 2 meslek + 1 işletme + 5 olay), Finger niyeti,
+flörtle vakit geçirme. Ehliyette gerçek bir hata buldum: ilk kurulumumda
+yılda bir soru cevaplıyordum ve 60 hayatın 34'ü sınava girip **hiçbiri**
+geçemiyordu (rastgele tahminin beklediği %26'nın çok altında) — sınav üç
+soruluk, yıllara yayılınca cevaplar düşüyordu. Tek oturuşta bitirilince 34
+denemenin 30'u ehliyet alıyor.
+
+Stratejiler 8 → 10 (`sadece fon`, `karma normal oyuncu`). Min-max
+stratejiler olduğu gibi duruyor.
+
+### Ölçümün iki kademesi
+
+Ağır ölçüm (30.000 yol + 2000 tam hayat, ~25 dakika) `BIR_OMUR_FULL_MEASURE=1`
+ile açılıyor — depodaki golden testlerle aynı kalıp. Her turda çalışan
+sürüm aynı kodu daha az yolla koşup bekçi görevi yapıyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2586 geçti, 15 atlandı, 0 başarısız**. Ağır ölçüm elle
+çalıştırıldı. **Gerçek cihazda oynanmadı; Android APK bu makinede
+derlenmedi.**
+
+---
+
+## PAKET AD TAMAMLANDI (1/6 … 6/6)
+
+| Paket | Konu | Commit |
+|---|---|---|
+| AD/1 | Sabit getiri eğilimi kaldırıldı, getiri piyasadan doğuyor | `1c75f41` |
+| AD/2 | Borç yaşam döngüsü (kontrolsüz borç bug'ı) | `7f965a5` |
+| AD/3 | Şirket sağlık modeli | `2065baa` |
+| AD/4 | Yatırım kararları gerçek oldu (panik, FOMO) | `7324ce1` |
+| AD/5 | Servetin kullanımı (lüks katman, harcama kanalları) | `766c90a` |
+| AD/6 | Strateji kalibrasyonu | `d3db879` + bu commit |
+
+**Bulunan gerçek buglar:** kontrolsüz borç (int taşması, ₺9,2×10¹⁸),
+ödenmeyen konut kredisinin ihtiyaç kredisi faiziyle büyümesi, all-or-nothing
+taksit, şirket durumlarının yutucu olması, olay seçimlerinin portföyde hiçbir
+şey yapmaması, yoğunlaşma cezasının piyango bileti olması, botun ehliyet
+sınavını hiç geçememesi.
+
+**Karar bekleyen sorular:** Q-169 … Q-174. `DECISIONS.md`'ye hiçbir kesin
+kural yazılmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
