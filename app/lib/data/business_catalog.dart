@@ -278,8 +278,18 @@ final List<BusinessType> kBusinessCatalog = List<BusinessType>.unmodifiable(
       name: 'Terzi atölyesi',
       description: 'Bir makine, bir ütü, sabır.',
       scale: BusinessScale.kucuk,
-      setupCost: _wage(1.50),
-      baseYearlyProfit: _wage(0.55),
+      // Kataloğun **en küçük** işi: bir yıllık asgari ücretin altına
+      // kurulabilmeli ki genç oyuncunun erişebileceği bir yol kalsın
+      // (`business_test.dart` — "sermaye 2026 ölçeğinde").
+      //
+      // Sermayeyi ve kârı **aynı oranda** indirmek işe yaramadı: ucuz
+      // giriş tek başına avantaj, çünkü iş çok daha erken kuruluyor ve
+      // yıllarca daha uzun çalışıyor. 0,88 / 0,32 denendiğinde
+      // `girisim + yatirim` AE §32 bekçisini 10/14'e çıkardı (sınır 8).
+      // Bu yüzden ucuz giriş **düşük tavanla** dengelendi: nominal dönüş
+      // ~3,7 yıl, ölçülen §32 değeri 5/14.
+      setupCost: _wage(0.88),
+      baseYearlyProfit: _wage(0.24),
       volatility: 0.30,
       minAge: 20,
       priceLabel: 'Ortalama işlem ücreti',

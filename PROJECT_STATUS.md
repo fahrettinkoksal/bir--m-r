@@ -2566,6 +2566,78 @@ sermaye/kâr oranını düzeltmek; ayrıntı ve önce/sonra ölçüm önerisi
 
 **Doğrulanmayan:** Gerçek cihazda oynanmadı.
 
+## PAKET AG TAMAMLANDI (1/7 … 7/7)
+
+**Konu:** işletme ekonomisi kalibrasyonu — ortalama denge, ama **hayatın
+sürprizleri korunarak**.
+
+**Tasarım kuralı:** bu bir hayat simülasyonu. İşletmeler "her seferinde
+3-6 yılda amorti olur" gibi deterministik çalışmayacak. Aynı işletme her
+hayatta aynı sonucu vermemeli.
+
+**Katalog (§6, §14).** 14 işletmenin sermaye/kâr oranı yeniden kuruldu:
+nominal geri ödeme **0,16-2,24 yıldan 1,52-5,58 yıla** çıktı. Oynaklık da
+yükseldi (lokanta 0,60 → 0,66, serbest 0,55 → 0,95), çünkü §14
+işletmelerin birbirinden farklı olmasını istiyor. Kataloğun en küçük işi
+(terzi) bilerek bir yıllık asgari ücretin altında tutuldu — genç oyuncuya
+erişilebilir bir yol kalsın diye; ucuz giriş **düşük tavanla** dengelendi.
+
+**Serbest yazılımcılık (§4, §5, §20).** AF'de kötü %10'u bile 159 kat
+kazandırıyordu. Ortalaması ezilmedi, **dağılımı genişletildi**: sermaye
+0,25 → 1,60 asgari ücret, sabit gider payı 0,06 → 0,18, tedarik
+0,05 → 0,08 ve altı yeni olay (abonelik, tahsil edilemeyen iş, iş
+gelmeyen dönem, büyük müşteri kaybı + iki pozitif). Kötü %10 geri ödeme
+katsayısı **159 → −0,4**; iyi %10 **64,1** olarak kaldı. Yılların %1,4'ü
+zarar (önceden %0).
+
+**Lokanta ve bakkal (§15).** Sadece kâr artırılmadı, gider yapısı
+düzeltildi (lokanta personel 0,28 → 0,24 ve tedarik 0,32 → 0,29; bakkal
+tedarik 0,58 → 0,52). Kapanma: lokanta %79 → %46, bakkal %60 → %38.
+40 hayatta çok iyi giden: bakkal 23, lokanta 4.
+
+**Pozitif kuyruk (§2, §3, §7, §9).** 16 yeni olay — mahalle seni
+benimsedi, video patladı, turnuva tuttu, yemeğin adı çıktı, kurumsal
+anlaşma, karşıdaki kapandı, bölge hareketlendi, referans zinciri, bayram
+siparişleri, düğün sezonu. Hepsi mevcut `demandPressure` altyapısını
+kullanıyor: 1-3 yıl süren güçlü avantaj, **sonsuz buff değil**. Popup
+yazıp geçmiyorlar; talebi ve itibarı gerçekten değiştiriyorlar.
+
+**Viral reklam (§10, §11).** Kampanya her zaman aynı ROI'yi vermiyor:
+tutma ihtimali mahalle %4, sosyal medya %9, büyük %14 (ölçülen 4,0 / 9,1
+/ 14,0). Tutan kampanya o yılki katkıyı 3,6 katına çıkarıyor ve bir iki
+yıl süren talep bırakıyor. Kampanya bedelleri bu kuyruğu fiyatlıyor
+(büyük 0,170 → 0,232); aksi hâlde en pahalı kampanya **her işte**
+kazandıran garanti hamle oluyordu ve AE §35 exploit'i geri geliyordu.
+
+**Hikâye bildirimleri (§12, §13).** Kozmetik değil: ölçü geçen yıla göre
+**gerçekleşen ciro**, üstelik yıl tutulan bütün geçmişe göre de uç
+olmalı — düşüşten sonraki toparlanma haber değil. 2949 işletme-yılında
+199 başarı, 173 başarısızlık; yıl başına pencere 0,65.
+
+**Ölçüm boşluğu kapatıldı (Q-176/6).** Nakliyecilik ehliyet istiyor ve
+ölçüm botu ehliyet almıyordu; tablo onu boş gösteriyordu. Bot artık
+gerçek oyuncu yolundan sınava girip cevaplıyor (`debugSetState` ile
+ehliyet **verilmiyor**). Nakliyecilik artık ölçülüyor: medyan 2,8 yıl,
+%37 hiç amorti etmiyor.
+
+**Sonuç (§17-§19).** Dağılım genişledi, dominans kalmadı:
+
+| strateji | AF medyan → AG | AF kötü %10 → AG | AG iyi %10 |
+|---|---|---|---|
+| mükemmel girişimci | 93,1M → **51,6M** | 24,7M → **13,9M** | 228,3M |
+| kariyer + işletme + yatırım | 52,5M → 38,8M | 9,3M → 4,7M | 232,7M |
+| girişim + yatırım | 41,0M → 18,1M | 11,9M → 4,4M | 181,8M |
+
+§13'ün katı tanımıyla **bütün diğerlerini ezen strateji yok**; çözücü
+9/14. Fırsat maliyeti oranı 0,79 → 0,68. Hiçbir işletmede "otomatik
+zenginlik" kalmadı: her 14 işletmede sermayesini çıkaramayan hayatlar
+var, kötü %10 katsayısı 13'ünde sıfırın altında.
+
+**Yapay hard cap yok (§21):** kâr tavanı, servet tavanı ya da "çok
+kazandın artık düş" mekaniği eklenmedi.
+
+**Karar bekleyen:** Q-177. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

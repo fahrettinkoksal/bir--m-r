@@ -28,9 +28,14 @@ enum BusinessEndReason {
 /// Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
 enum BusinessAd {
   yok('Reklam yok', 0.0, 0.00, 0.0),
-  mahalle('Mahalle reklamı', 0.030, 0.10, 0.25),
-  sosyalMedya('Sosyal medya kampanyası', 0.075, 0.20, 0.85),
-  buyuk('Büyük kampanya', 0.170, 0.38, 1.30);
+  // **Bedeller viral kuyruğu da fiyatlar (Paket AG, §10-§11).** Tutma
+  // ihtimali kampanyanın beklenen katkısını yükseltiyor; bedel aynı
+  // kalsaydı en pahalı kampanya ortalamada her işte kazandıran garanti
+  // bir hamle olurdu ve AE §35 exploit'i geri gelirdi. Bedeller ölçümle
+  // ayarlandı, kafadan konmadı.
+  mahalle('Mahalle reklamı', 0.033, 0.10, 0.25),
+  sosyalMedya('Sosyal medya kampanyası', 0.092, 0.20, 0.85),
+  buyuk('Büyük kampanya', 0.232, 0.38, 1.30);
 
   const BusinessAd(this.label, this.costShare, this.lift, this.variance);
 

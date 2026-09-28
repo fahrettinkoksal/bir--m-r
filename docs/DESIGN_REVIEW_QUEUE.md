@@ -4801,3 +4801,52 @@ Bu paketin bıraktığı testler **önce/sonra karşılaştırmasını hazır** 
 7. **Çözücünün medyanı ikincinin 1,77 katı.** §13'ün katı tanımıyla dominant değil. Bu fark kabul edilebilir mi, yoksa kapatılmalı mı?
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-177 — Paket AG: işletme ekonomisi kalibrasyonundan sonra kalan denge soruları
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/data/business_catalog.dart`, `app/lib/data/business_incident_catalog.dart`, `app/lib/domain/economy/business_engine.dart`, `app/test/paket_ag_payback_test.dart`, `app/test/paket_ag_tail_test.dart`.
+
+**Bağlam.** AF teşhisi iki şey söylemişti: alt mekanikler temiz, abuse katalog sayılarında (geri ödeme 0,16-2,24 yıl; serbest yazılımcılığın kötü %10'u bile 159 kat). AG bunu düzeltti — ama Faho'nun kesin tasarım kuralına uyarak: **"Bu bir hayat simülasyonu. Aynı işletme her hayatta aynı sonucu vermesin."** Yani hedef dar bir bant değil, makul medyan + **geniş dağılım**.
+
+**Mevcut kesin kurallar.** Girişimcilik kötü olacak diye değil, hiçbir strateji her koşulda ezmeyecek diye ayarlanır (AE §32). Yapay kâr/servet tavanı yok (AG §21). Pasif işletme sahibinin batması normaldir (Faho, AF). Bildirim spam'i istenmiyor (AE §25/§28).
+
+**Ölçülen son durum (hafif bekçi; ağır sürüm `BIR_OMUR_FULL_MEASURE=1`).**
+
+| İşletme | Nominal | Gerçekleşen medyan | Katsayı kötü %10 | Katsayı iyi %10 | Kapanma |
+|---|---|---|---|---|---|
+| Serbest yazılımcılık | 1,52 | 0,9 | −0,4 | 64,1 | %14 |
+| Büfe | 2,58 | 2,1 | −0,5 | 31,5 | %31 |
+| Kuruyemişçi | 2,79 | 1,9 | −0,4 | 33,2 | %27 |
+| Kuaför salonu | 3,48 | 1,7 | −0,1 | 31,3 | %14 |
+| Terzi atölyesi | 3,67 | 2,2 | 6,4 | 32,4 | %4 |
+| Kahve dükkânı | 3,68 | 2,0 | −0,7 | 28,0 | %41 |
+| Oto tamir dükkânı | 3,71 | 2,2 | −0,4 | 24,6 | %18 |
+| Bakkal | 3,81 | 2,7 | −0,4 | 17,5 | %38 |
+| Oto yıkama | 3,82 | 2,7 | −0,5 | 20,1 | %34 |
+| Pastane | 3,85 | 2,2 | −0,4 | 23,8 | %29 |
+| Nakliyecilik | 4,00 | 2,8 | −0,4 | 22,7 | %37 |
+| Halı saha işletmesi | 5,13 | 4,0 | −0,2 | 10,9 | %17 |
+| Lokanta | 5,41 | 3,2 | −0,5 | 13,0 | %46 |
+| Spor salonu | 5,58 | 3,4 | −0,4 | 16,4 | %48 |
+
+Katsayı = toplam kâr / konan sermaye. §13'ün katı tanımıyla hiçbir strateji diğerlerinin hepsini ezmiyor.
+
+#### Karar soruları
+
+1. **Kapanma oranları istenen his mi?** Spor salonu %48, lokanta %46, kahve dükkânı %41. "Lokanta açanların neredeyse yarısı batıyor" gerçekçi ve dramatik; ama oyuncunun bunu **açmadan önce** sezebileceği bir işaret yok. Seçenekler: (A) olduğu gibi kalsın, (B) işletme kartında "riskli / oturmuş" gibi bir tür etiketi görünsün, (C) oranlar bir miktar düşürülsün.
+
+2. **Serbest yazılımcılık hâlâ en güçlü iş.** Medyan katsayı 50,1 ve iyi %10'u 64,1 ile listenin tepesinde; buna karşılık kötü %10'u artık −0,4 ve yılların %1,4'ü zarar. AG'nin istediği ("tek müşteriyle zenginleşen yazılımcı mümkün olsun") sağlandı. Soru: bu **tavanın** yüksek kalması onaylanıyor mu, yoksa medyan da mı inmeli?
+
+3. **Terzi atölyesi tek "güvenli" iş oldu** (kapanma %4, kötü %10 katsayısı 6,4). Sebebi teknik: kataloğun en küçük işi bir yıllık asgari ücretin altında kalmalı (mevcut test kuralı), o yüzden ucuz giriş düşük tavanla dengelendi. Ölçüm botu 40 hayatın 35'inde **ilk** iş olarak terziyi açıp sonra büyüğüne geçiyor. Bu "küçükten başla, büyüğe geç" ilerleyişi istenen meta mı, yoksa ilk iş seçimi daha çeşitli mi olmalı?
+
+4. **Viral kampanyanın şekli.** Tutma ihtimali mahalle %4 / sosyal medya %9 / büyük %14, tutunca o yılki katkı 3,6 kat ve bir iki yıl süren talep. Sayılar simülasyonla seçildi, kafadan konmadı; ama **şekil** bir tasarım tercihi: nadir ve çok büyük mü olsun, yoksa sık ve küçük mü?
+
+5. **Sadece işletme işleten oyuncu belirgin biçimde geride.** `isletme aktif` medyanı 14,3M; `kariyer + yatırım` 36,5M. Yani "dükkânını iyi yönet ama yatırım yapma" hayatı, "maaşını yatır" hayatının yarısından az. Bu bilinçli bir mesaj mı (kazandığını değerlendirmelisin), yoksa işletme tek başına da geçerli bir yol mu olmalı?
+
+6. **Hikâye bildirimi sıklığı.** İşletme yılı başına 0,65 pencere; bunun ~%10'u başarı/başarısızlık hikâyesi. Az mı, çok mu?
+
+7. **Hedef bandın ölçüsü.** AG §6 nominal geri ödemeyi 2,5-6 yıl istedi; gerçekleşen medyanlar 0,9-4,0 yıl (iyi yönetilen işletme nominalden hızlı dönüyor). Hedef band **nominal** üzerinden mi, **gerçekleşen medyan** üzerinden mi tanımlanmalı?
+
+**Claude'un önerisi (yalnızca öneri).** 1 için (B): oran değiştirmek yerine oyuncuya açmadan önce riski gösteren bir etiket; bu, geniş dağılımı bozmadan bilgiyi verir. 3 için ilk iş seçiminin çeşitliliğini artırmak — ama bu botun davranışı olduğu için önce gerçek oyuncuda sorun mu, ölçmek gerekir. Diğerleri için mevcut değerlerin bir tur oynanarak hissedilmesi.
+
+**Varsayılan işlem:** Onay gelene dek bu sorulardan hiçbiri için sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.

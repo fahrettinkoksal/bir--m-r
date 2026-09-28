@@ -1092,12 +1092,23 @@ abstract final class BusinessEngine {
     final BusinessYear onceki = b.history[b.history.length - 2];
     if (onceki.revenue <= 0) return null;
     final double oran = yil.revenue / onceki.revenue;
-    if (oran >= prototypeOnlySuccessStoryRatio) {
+    // **Hikâye, yılın sıra dışı olduğu anlamına gelir.** Yalnızca geçen
+    // yıla bakmak yetmiyor: oynak bir işte ciro her yıl ileri geri
+    // gidiyor ve "bu sene işler başka" her yıl yazılıyordu (§25, §28
+    // bildirim yağmuru kuralı). Bu yüzden yıl, tutulan **bütün** geçmişe
+    // göre de uç olmalı; düşüşten sonraki toparlanma haber değildir.
+    final List<BusinessYear> gecmis =
+        b.history.sublist(0, b.history.length - 1);
+    final bool enIyiYil =
+        gecmis.every((BusinessYear y) => yil.revenue > y.revenue);
+    final bool enKotuYil =
+        gecmis.every((BusinessYear y) => yil.revenue < y.revenue);
+    if (oran >= prototypeOnlySuccessStoryRatio && enIyiYil) {
       return 'Bu sene işler başka.\n\n'
           'Akşam kapıyı kapatırken kasaya bir daha baktın.\n\n'
           'Geçen yılın neredeyse iki katı.';
     }
-    if (oran <= prototypeOnlyFailureStoryRatio) {
+    if (oran <= prototypeOnlyFailureStoryRatio && enKotuYil) {
       return 'Bu yıl dükkân eskisi gibi değil.\n\n'
           'Kapı açılıyor ama alışveriş yapan yok.\n\n'
           'Akşam kasayı sayarken iki kere saydın.';

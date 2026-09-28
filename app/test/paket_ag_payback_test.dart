@@ -123,6 +123,11 @@ void main() {
             '${_yuzde(o.amortiEden(5), o.acanlar.length).padLeft(4)}|'
             '${_yuzde(o.hicAmortiEtmeyen, o.acanlar.length).padLeft(4)}|'
             '${_yuzde(o.kapanan, o.acanlar.length).padLeft(5)}');
+        final List<double> k = o.geriOdeme;
+        print('${' ' * 24} | katsayi: kotu%10 '
+            '${_p(k, 0.10).toStringAsFixed(1)}  medyan '
+            '${_p(k, 0.50).toStringAsFixed(1)}  iyi%10 '
+            '${_p(k, 0.90).toStringAsFixed(1)}');
       }
 
       expect(hepsi.length, greaterThanOrEqualTo(10));
@@ -130,18 +135,31 @@ void main() {
       // --- §16 bekçisi: dağılım GENİŞ olmalı -------------------------
       //
       // "Herkes 3-6 yıl" çıkarsa sistem fazla mekanik. Her işletmede
-      // kötü %10 ile iyi %10 arasında gerçek bir açıklık aranıyor.
+      // kötü %10 ile iyi %10 arasında gerçek bir açıklık aranmalı.
+      //
+      // **Ölçü yıl değil, gerçekleşen geri dönüş katsayısıdır.** Yıl
+      // ölçüsü sermayesini hiç çıkaramayan hayatları dışarıda bırakıyor
+      // (katsayı sıfır ya da eksi olunca "kaç yılda amorti etti" sorusu
+      // anlamsız) — yani dağılımın **kötü kuyruğunu görmüyordu**. Hızlı
+      // dönen bir işte bu, batan hayatları saymayıp "hepsi aynı" gibi
+      // görünmesine yol açıyor. Katsayı ölçüsü bütün açılan hayatları
+      // sayar, batanlar dahil.
+      //
+      // Ölçüt tek sayıya bağlanmadı: **onluklar arası açıklık medyanın
+      // kendisinden büyük olmalı.** Sonuçlar dar olsaydı bu açıklık
+      // merkezin yanında küçük kalırdı.
       for (final PaybackOzeti o in hepsi) {
-        final List<double> y = o.paybackYili;
-        if (y.length < 10) continue;
-        final double iyi = _p(y, 0.10);
-        final double kotu = _p(y, 0.90);
+        final List<double> k = o.geriOdeme;
+        if (k.length < 10) continue;
+        final double kotu = _p(k, 0.10);
+        final double orta = _p(k, 0.50);
+        final double iyi = _p(k, 0.90);
         expect(
-          kotu,
-          greaterThan(iyi * 1.5),
-          reason: '${o.tur.name}: iyi %10 ($iyi) ile kötü %10 ($kotu) '
-              'arası çok dar — aynı işletme her hayatta aynı sonucu '
-              'veriyor demektir (§16).',
+          iyi - kotu,
+          greaterThan(orta),
+          reason: '${o.tur.name}: kötü %10 ($kotu), medyan ($orta), iyi '
+              '%10 ($iyi) — dağılım çok dar; aynı işletme her hayatta '
+              'aynı sonucu veriyor demektir (§16).',
         );
       }
 
@@ -178,10 +196,20 @@ void main() {
         lessThan(30),
         reason: 'Serbest yazılımcılığın kötü %10\'u hâlâ aşırı kazanıyor.',
       );
+      // Kötü %10 artık sermayesini bile çıkaramamalı (AF'de 159 katti).
+      expect(
+        _p(kat, 0.10),
+        lessThan(1),
+        reason: 'Serbest yazılımcılığın kötü onda biri hâlâ sermayesini '
+            'rahat çıkarıyor; risk kazanmadı.',
+      );
+      // Ama §20 ortalamayı ezmeyi değil dağılımı genişletmeyi istiyor:
+      // iyi kuyruk güçlü kalmalı. "Tek müşteriyle zenginleşen yazılımcı"
+      // hâlâ mümkün olsun.
       expect(
         _p(kat, 0.90),
-        greaterThan(_p(kat, 0.10) * 3),
-        reason: 'Dağılım genişlemedi.',
+        greaterThan(20),
+        reason: 'İyi kuyruk da ezilmiş; §20 bunu istemiyor.',
       );
     });
   });
