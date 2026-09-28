@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import '../economy/net_worth.dart';
 import '../../data/company_catalog.dart';
 import '../law/legal_engine.dart';
 import '../models/criminal_record.dart';
@@ -276,6 +277,13 @@ class EventEngine {
           .any((Company c) => state.market.vitalsOf(c.id).isStrained);
       if (!varMi) return false;
     }
+    // **Servet kapısı (Paket AD, §13, §17).** Zenginin hayatı farklı
+    // hissettirmeli: bazı olaylar ancak belirli servet seviyesinde çıkar.
+    final int? gerekenServet = req.minNetWorth;
+    if (gerekenServet != null && NetWorth.of(state) < gerekenServet) {
+      return false;
+    }
+
     // **Piyasa hâli kapıları (Paket AD, §6-§7).** Panik olayı sakin bir
     // yılda çıkmasın; FOMO olayı gerçekten ısınmış piyasada çıksın.
     if (req.requiresCrisis &&

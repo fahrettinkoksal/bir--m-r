@@ -2291,6 +2291,53 @@ hepsinde en az beş yıl tekrar aralığı var: bildirim yağmuru yok.
 `flutter test` **2578 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
 oynanmadı; Android APK bu makinede derlenmedi.**
 
+## Paket AD (5/6) — servetin kullanımı (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/5 (§12-§17)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-173**'te.
+
+### Denetimin bulduğu sorun
+
+Oyundaki en pahalı şey **₺16.000.000'luk villaydı**; diğer kategorilerin
+tepesi önemsiz (saat ₺28.000, takı ₺42.000). Oysa altmış yıl yatırım yapanın
+portföyü ₺30.000.000'u aşıyor. Paranın harcanacak yeri olmayınca "her şeyi
+yatır" doğal olarak tek akıllı strateji oluyor.
+
+### Ne geldi
+
+- **Lüks katman:** yazlık (₺6,2M-₺145M), tekne (₺4,8M-₺38M), koleksiyon
+  (₺3,1M-₺22M). Tavan ₺16M'dan **₺145M'a** çıktı. Hepsi normal eşya: net
+  servete giriyor, boşanmada paylaşılıyor, mirasa kalıyor, borç tahsilinde
+  satılabiliyor.
+- **Servet kapısı:** üç yeni mağaza ve "Lüks ve koleksiyon" öbeği. Eşiğin
+  altındaki oyuncu kategoriyi görmüyor (koleksiyon ₺8M · yazlık ₺12M ·
+  marina ₺25M).
+- **Bakım masrafı:** yazlık %1,2 · tekne %5,5 · koleksiyon %0,8; araç
+  giderleriyle aynı mantıkta, gider dökümünde ayrı satır. Motoryat sahibinin
+  yıllık gideri ₺12.000 → ₺2.102.000.
+- **Yapay zengin vergisi yok:** cüzdanında ₺400.000.000 olan ama malı
+  olmayan oyuncunun gideri değişmiyor. Testle sabitlendi.
+- **Servet seviyesine açılan beş olay:** aile para istiyor (≥₺2M), çocuğun
+  eğitimi (≥₺3M), uzun tatil (≥₺5M), bağış (≥₺10M), özel etkinlik (≥₺20M).
+  Sağlık masrafı 55 yaş üstü, ağırlık 3, tekrar aralığı 12 yıl — nadir.
+
+### Kırılan üç test de gerçek bir şeyi yakaladı
+
+1. Bağış olayının bir seçeneğini **etkisiz** yazmışım; mevcut kural haklıydı.
+2. "Her mağaza kategorisi açık" iddiası servet kapısıyla çelişiyordu; test
+   yeni kuralı öğrenecek biçimde güncellendi ve üstüne "eşiğin altında
+   kapalı" iddiası **eklendi**.
+3. Mağaza öbeği testi "Konut" başlığının ekranda kalmasına bel bağlıyordu;
+   liste uzayınca kırıldı, her başlığa ayrı kaydırılacak biçimde düzeltildi.
+
+İki tohuma çakılı test de kaydı (EKSIKLER §6): tekrar evlenme tam yolu
+60→240 tohum, kuşak senaryosu 32→33. 30-80 aralığında **32 dışındaki 48
+tohumun hepsi çalışıyor**. Hiçbir iddia gevşetilmedi.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2584 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/economy/net_worth.dart';
 import '../../../data/investment_catalog.dart';
 import '../../../data/shop_catalog.dart';
 import '../../../domain/economy/property_market.dart';
@@ -114,7 +115,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
     // Eşyalar okunaklı olsun diye türe göre sıralanır.
     final List<OwnedItem> esyalar = state.items.toList(growable: true)
       ..sort((OwnedItem a, OwnedItem b) => a.name.compareTo(b.name));
-    final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age);
+    final List<ShopCategory> magazalar = shopCategoriesFor(state.player.age, netWorth: NetWorth.of(state));
     final List<OwnedItem> araclar =
         esyalar.where((OwnedItem i) => i.isVehicle).toList(growable: false);
     final List<OwnedItem> mulkler =
@@ -290,7 +291,7 @@ class _ShopCategoryList extends StatelessWidget {
     // aksesuar, konut. Öbek ve satır sırası sabittir; liste her açılışta
     // aynı görünür.
     final Map<ShopGroup, List<ShopCategory>> obekler =
-        shopGroupsFor(state.player.age);
+        shopGroupsFor(state.player.age, netWorth: NetWorth.of(state));
     return SectionScaffold(
       icon: Icons.storefront_rounded,
       accent: BirOmurAccents.turuncu,

@@ -20,6 +20,7 @@ import 'event_pool_midlife.dart';
 import 'event_pool_hobby.dart';
 import 'event_pool_investment.dart';
 import 'event_pool_market.dart';
+import 'event_pool_wealth.dart';
 import 'event_pool_property.dart';
 import 'event_pool_pet.dart';
 import 'event_pool_romance.dart';
@@ -1711,6 +1712,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   ...kInvestmentEvents,
   // Şirket ve piyasa olayları (Paket AC).
   ...kMarketEvents,
+  // Servetin hayata dokunduğu olaylar (Paket AD, §12-§17).
+  ...kWealthEvents,
   ...kPropertyEvents,
   ...kPetEvents,
 

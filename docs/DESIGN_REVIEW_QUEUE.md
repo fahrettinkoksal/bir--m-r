@@ -4523,3 +4523,50 @@ Yani panikte satmak çoğu zaman yanlış ama **%31 oranında doğru**. Tek doğ
 6. Hamle **başarısız olduğunda** oyuncuya ayrı bir cümle gösterilmiyor; seçimin metni yine de yazılıyor. Bu kafa karıştırır mı?
 
 **Varsayılan işlem:** Onay gelene dek bu oranlar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-173 — Paket AD/5: servetin kullanımı
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AD DEVAM" briefi (AD/5, §12-§17) · **Etkilenen kod:** `app/lib/data/item_catalog.dart`, `app/lib/data/shop_catalog.dart`, `app/lib/data/event_pool_wealth.dart`, `app/lib/domain/economy/living_costs.dart`, `app/lib/domain/models/game_event.dart`, `app/test/paket_ad_wealth_test.dart`
+
+#### Denetimin bulduğu sorun
+
+Oyundaki **en pahalı şey ₺16.000.000'luk villaydı.** Diğer bütün kategorilerin tepesi önemsiz: saat ₺28.000, takı ₺42.000, elektronik ₺65.000. Oysa altmış yıl yatırım yapan oyuncunun portföyü **₺30.000.000'u aşıyor.**
+
+Yani paranın harcanacak yeri yoktu ve "her şeyi yatır" **doğal olarak** tek akıllı strateji oluyordu. §13 bunu açıkça söyledi: sorunu getiriyi düşürerek değil, paraya anlam vererek çöz.
+
+#### Ne yapıldı
+
+**Lüks katman (§12).** Sekiz yeni eşya, üç yeni sınıf: yazlık (sahil ₺9,5M · dağ evi ₺6,2M · yalı ₺145M), tekne (yelkenli ₺4,8M · motoryat ₺38M), koleksiyon (klasik otomobil ₺7,4M · tablo ₺22M · saat ₺3,1M). Tavan ₺16M'dan **₺145M'a** çıktı.
+
+Hepsi **normal eşya**: net servete giriyor, boşanmada paylaşılıyor, mirasa kalıyor, borç tahsilinde satılabiliyor. İkinci bir "lüks varlık" sistemi kurulmadı.
+
+**Servet kapısı (§13).** Üç yeni mağaza kategorisi ve yeni bir "Lüks ve koleksiyon" öbeği. Eşiğin altındaki oyuncu kategoriyi **görmüyor** — olmayan parayla vitrin gezdirmek oyuncuyu oyalamaktan başka bir şey yapmaz. Koleksiyon ₺8M, yazlık ₺12M, marina ₺25M.
+
+**Bakım masrafı (§14).** Yazlık %1,2, tekne %5,5, koleksiyon %0,8 (varlık değerinin yıllık oranı), araç giderleriyle **aynı mantıkta** ve gider dökümünde ayrı satır olarak. Ölçümde: motoryat sahibinin yıllık gideri ₺12.000 → ₺2.102.000.
+
+**Yapay zengin vergisi yok (§14).** Cüzdanında ₺400.000.000 olan ama malı olmayan oyuncunun gideri **değişmiyor** (₺12.000). Masraf servete değil, sahip olunan şeye bağlı. Bu testle sabitlendi.
+
+**Servet seviyesine açılan olaylar (§15-§17).** Beş yeni olay: aile para istiyor (≥₺2M), çocuğun eğitimi (≥₺3M), uzun tatil (≥₺5M), bağış (≥₺10M), özel etkinlik (≥₺20M). Aileye para vermenin/vermemenin ilişkiye bedeli var. Sağlık masrafı (§16) 55 yaş üstü, ağırlık 3, tekrar aralığı 12 yıl — **nadir ve anlamlı**, "her yaşlı sürekli servet eritmesin".
+
+#### Kırılan üç testin hepsi gerçek bir şeyi yakaladı
+
+1. **`event_choice_effect_test`** — bağış olayının "şimdi değil" seçeneğini etkisiz yazmışım. Mevcut kural haklıydı; seçeneğe gerçek bir etki verdim.
+2. **`vehicles_property_test`** — "her kategori açık" iddiası servet kapısıyla çelişiyordu. Test yeni kuralı **öğrenecek** biçimde güncellendi ve üstüne "eşiğin altında kapalı" iddiası **eklendi**.
+3. **`used_vehicle_widget_test`** — "Konut" başlığının ekranda kalması, konut öbeğinin listenin sonuncusu olmasına bel bağlıyordu. Liste uzayınca kırıldı; her başlığa ayrı kaydırılacak biçimde düzeltildi ve lüks öbeği için yeni bir iddia eklendi.
+
+İki tohuma çakılı test de kaydı (`EKSIKLER` §6): tekrar evlenme tam yolu için tohum bandı 60→240 genişletildi, kuşak senaryosu 32→33'e çıpalandı. **30-80 aralığında 32 dışındaki 48 tohumun hepsi çalışıyor**, yani oyunda bozulma yok. Hiçbir iddia gevşetilmedi.
+
+#### Karar soruları
+
+1. **Fiyatlar** doğru bantta mı? Yalı ₺145M, motoryat ₺38M, tablo ₺22M.
+2. **Servet eşikleri** (koleksiyon ₺8M · yazlık ₺12M · marina ₺25M) doğru mu?
+3. **Bakım oranları** (yazlık %1,2 · tekne %5,5 · koleksiyon %0,8) doğru mu? Tekne yılda değerinin %5,5'i — çok mu?
+4. **Koleksiyon değer kazanmıyor.** `special: true` altyapısı var ama koleksiyon parçasının değeri yıllar içinde artmıyor. Artsın mı (o zaman ikinci bir yatırım aracı olur, §12'nin sınırını aşar) yoksa böyle mi kalsın?
+5. **Yazlık kiraya verilebilir mi?** Şu an `ItemKind.konut` kiralanabiliyor, `yazlik` ayrı sınıf olduğu için kiralanamıyor. Kiraya verilebilmeli mi?
+6. **Aileye para tutarları** (₺120.000 / ₺40.000, çocuk eğitimi ₺450.000) doğru mu?
+7. **§12'nin listesindeki bazı kanallar gelmedi:** hobiler, evcil hayvan lüksü, özel okul, sağlık sigortası, birden fazla yazlık indirimi. Ayrı bir turda mı?
+8. **Bunun yatırım dominansını gerçekten kırdığı ölçülmedi.** AD/6'da bot lüks almayı hiç denemiyor; harcama kanalları "var" ama botun kullanıp kullanmadığı ayrı bir soru.
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.

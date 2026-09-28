@@ -206,6 +206,8 @@ abstract final class LivingCosts {
         // Araç giderleri (D-148): sahip olunan her motorlu araç için
         // zorunlu trafik sigortası, kasko ve motorlu taşıtlar vergisi.
         ...vehicleItems(state),
+        // Lüks varlık bakımı (Paket AD, §14).
+        ...luxuryItems(state),
       ],
     );
   }
@@ -244,6 +246,59 @@ abstract final class LivingCosts {
 
   /// prototypeOnly: MTV oranının inebileceği taban.
   static const double prototypeOnlyVehicleTaxFloor = 0.35;
+
+  // =====================================================================
+  // Lüks varlık bakımı (Paket AD, §14)
+  //
+  // Faho'nun kuralı net: "çok varlık sıfır masraf olmamalı" ama
+  // **"zenginsin diye otomatik %20 para sil" gibi yapay vergi YOK.**
+  // Bu yüzden masraf servete değil, **sahip olunan şeye** bağlı ve
+  // araç giderleriyle aynı mantıkta çalışıyor: değerin küçük bir oranı.
+  //
+  // Oranlar gerçek dünyadaki karşılıklarından değil, oyunun kendi
+  // ölçeğinden seçildi (§22-§23). Teknenin oranı en yüksek: bağlama,
+  // kışlama, bakım. Koleksiyonunki en düşük: sigorta ve saklama.
+  // Hepsi `prototypeOnly` (Q-173).
+  // =====================================================================
+
+  /// prototypeOnly: yazlığın yıllık bakım/aidat/vergi oranı.
+  static const double prototypeOnlySummerHouseRate = 0.012;
+
+  /// prototypeOnly: teknenin yıllık bağlama/bakım oranı.
+  static const double prototypeOnlyBoatRate = 0.055;
+
+  /// prototypeOnly: koleksiyonun yıllık sigorta/saklama oranı.
+  static const double prototypeOnlyCollectionRate = 0.008;
+
+  /// Lüks varlıkların yıllık bakım kalemleri.
+  ///
+  /// Her varlık **ayrı satır**: oyuncu hangi varlığın ne tuttuğunu görsün
+  /// (D-123). Satırı görmek kararın bir parçası — yazlık almak bedava
+  /// değil ve bunu ekranda okuyor.
+  static List<({String label, int amount})> luxuryItems(GameState state) {
+    final List<({String label, int amount})> sonuc =
+        <({String label, int amount})>[];
+    for (final OwnedItem esya in state.items) {
+      final double oran = switch (esya.type.kind) {
+        ItemKind.yazlik => prototypeOnlySummerHouseRate,
+        ItemKind.tekne => prototypeOnlyBoatRate,
+        ItemKind.koleksiyon => prototypeOnlyCollectionRate,
+        _ => 0.0,
+      };
+      if (oran <= 0) continue;
+      final int tutar = (esya.type.baseValue * oran).round();
+      if (tutar <= 0) continue;
+      sonuc.add((
+        label: switch (esya.type.kind) {
+          ItemKind.tekne => '${esya.name}: bağlama ve bakım',
+          ItemKind.koleksiyon => '${esya.name}: sigorta ve saklama',
+          _ => '${esya.name}: bakım, aidat ve vergi',
+        },
+        amount: tutar,
+      ));
+    }
+    return sonuc;
+  }
 
   /// prototypeOnly: bisiklet gider çıkarmaz; yalnızca motorlu araç.
   static bool isMotorVehicle(OwnedItem item) =>

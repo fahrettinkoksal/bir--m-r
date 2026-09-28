@@ -45,8 +45,21 @@ void main() {
   // ===================================================================
   group('Mağazalar', () {
     test('her kategori yaşına uygun bir şeyler sunar', () {
-      final List<ShopCategory> yetiskin = shopCategoriesFor(25);
+      // **Servet verilerek çağrılıyor (Paket AD, §13).** Lüks
+      // kategoriler artık servet eşiğiyle açılıyor; eşiği geçen oyuncuda
+      // bütün kategoriler açık olmalı. Eşiğin altında kapalı kaldıkları
+      // hemen aşağıda ayrıca doğrulanıyor.
+      final List<ShopCategory> yetiskin =
+          shopCategoriesFor(25, netWorth: 500000000);
       expect(yetiskin.length, ShopCategory.values.length);
+
+      // Serveti olmayan oyuncuya lüks vitrin gösterilmez.
+      final List<ShopCategory> fakir = shopCategoriesFor(25);
+      expect(fakir.any((ShopCategory c) => c.isLuxury), isFalse);
+      expect(
+        fakir.length,
+        ShopCategory.values.where((ShopCategory c) => !c.isLuxury).length,
+      );
       for (final ShopCategory kategori in ShopCategory.values) {
         if (kategori.isUsedMarket) {
           // D-137: 2. el pazarın ürünleri katalogda durmaz; havuzu

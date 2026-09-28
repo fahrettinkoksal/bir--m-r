@@ -30,7 +30,15 @@ import 'item_catalog.dart';
 enum ShopGroup {
   gundelik('Gündelik alışveriş', Icons.shopping_basket_outlined),
   arac('Araç ve aksesuar', Icons.directions_car_outlined),
-  konut('Konut', Icons.apartment_outlined);
+  konut('Konut', Icons.apartment_outlined),
+
+  /// **Lüks ve koleksiyon** (Paket AD, §12-§13).
+  ///
+  /// Ayrı öbek, çünkü ayrı bir hayat: yazlık, tekne ve koleksiyon
+  /// oyuncunun barınma ya da ulaşım ihtiyacı değil, servetinin hayat
+  /// kalitesine dönüştüğü yer. Servet eşiğini geçmeyene **hiç
+  /// gösterilmez** — vitrin gezmek de bir şey değiştirmez.
+  luks('Lüks ve koleksiyon', Icons.diamond_outlined);
 
   const ShopGroup(this.label, this.icon);
 
@@ -106,6 +114,28 @@ enum ShopCategory {
     '2. el araç pazarı',
     'Sahibinden ve galeriden ilanlar',
     Icons.handshake_outlined,
+  ),
+
+  // --- Lüks ve koleksiyon (Paket AD, §12-§13) --------------------------
+  //
+  // Denetimde ortaya çıkan sorun: oyundaki en pahalı şey ₺16.000.000'luk
+  // villaydı, oysa altmış yıl yatırım yapanın portföyü ₺30.000.000'u
+  // aşıyor. Paranın harcanacak yeri yoktu, dolayısıyla "her şeyi yatır"
+  // tek akıllı strateji oluyordu. Bu üç kategori paraya gidecek yer açıyor.
+  yazlikci(
+    'Yazlık ve ikinci konut',
+    'Sahil, dağ evi, su kenarı',
+    Icons.beach_access_outlined,
+  ),
+  marina(
+    'Marina',
+    'Yelkenli ve motoryat',
+    Icons.sailing_outlined,
+  ),
+  koleksiyoncu(
+    'Koleksiyon',
+    'Klasik otomobil, tablo, saat',
+    Icons.diamond_outlined,
   );
 
   const ShopCategory(this.label, this.description, this.icon);
@@ -113,6 +143,25 @@ enum ShopCategory {
   final String label;
   final String description;
   final IconData icon;
+
+  /// Lüks öbeğinden mi? (Paket AD, §13)
+  bool get isLuxury =>
+      this == ShopCategory.yazlikci ||
+      this == ShopCategory.marina ||
+      this == ShopCategory.koleksiyoncu;
+
+  /// prototypeOnly: bu kategorinin açılması için gereken net servet (₺).
+  ///
+  /// §13'ün istediği "belirli servet seviyelerinde yeni şeyler açılsın".
+  /// Eşiğin altındaki oyuncu kategoriyi **görmez**: olmayan parayla
+  /// vitrin gezdirmek oyuncuyu oyalamaktan başka bir şey yapmaz.
+  /// Hepsi `prototypeOnly` (Q-173).
+  int get wealthGate => switch (this) {
+        ShopCategory.yazlikci => 12000000,
+        ShopCategory.marina => 25000000,
+        ShopCategory.koleksiyoncu => 8000000,
+        _ => 0,
+      };
 
   /// Bu kategori konut satıyor mu? (D-066: şehir filtresi ve ilan listesi.)
   bool get isHousing =>
@@ -138,6 +187,7 @@ enum ShopCategory {
 
   /// Mağazalar listesinde hangi öbekte durduğu (D-138).
   ShopGroup get group {
+    if (isLuxury) return ShopGroup.luks;
     if (isHousing) return ShopGroup.konut;
     if (isVehicle ||
         this == ShopCategory.otoAksesuar ||
@@ -508,6 +558,56 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     category: ShopCategory.emlakciLuks,
     minAge: 18,
   ),
+
+  // --- Lüks ve koleksiyon (Paket AD, §12) -------------------------------
+  ShopProduct(
+    typeId: 'yazlik_sahil',
+    description: 'Yazın iki ay, kışın kapalı. Denize yürüme mesafesi.',
+    category: ShopCategory.yazlikci,
+    minAge: 25,
+  ),
+  ShopProduct(
+    typeId: 'yazlik_dag',
+    description: 'Sessizlik pahalı bir şey; burada var.',
+    category: ShopCategory.yazlikci,
+    minAge: 25,
+  ),
+  ShopProduct(
+    typeId: 'yali_bogaz',
+    description: 'Su kenarında, tarihi. Bakımı da kendisi kadar ciddi.',
+    category: ShopCategory.yazlikci,
+    minAge: 30,
+  ),
+  ShopProduct(
+    typeId: 'tekne_yelkenli',
+    description: 'Rüzgârla gidiyor ama bağlaması parayla.',
+    category: ShopCategory.marina,
+    minAge: 25,
+  ),
+  ShopProduct(
+    typeId: 'tekne_motoryat',
+    description: 'Alması bir kere, bakması her yıl.',
+    category: ShopCategory.marina,
+    minAge: 30,
+  ),
+  ShopProduct(
+    typeId: 'koleksiyon_klasik_otomobil',
+    description: 'Yürüyor ama sürmek için almıyorsun.',
+    category: ShopCategory.koleksiyoncu,
+    minAge: 25,
+  ),
+  ShopProduct(
+    typeId: 'koleksiyon_tablo',
+    description: 'Duvarda durur, konuşulur, sigortası ayrı yazılır.',
+    category: ShopCategory.koleksiyoncu,
+    minAge: 30,
+  ),
+  ShopProduct(
+    typeId: 'koleksiyon_saat',
+    description: 'Saati göstermek en son işi.',
+    category: ShopCategory.koleksiyoncu,
+    minAge: 25,
+  ),
 ];
 
 /// Oyuncunun yaşına uygun ürünler.
@@ -535,7 +635,14 @@ List<ShopProduct> shopProductsIn(ShopCategory category, int age) {
 /// Bu yaşta gerçekten ürün gösteren kategoriler.
 ///
 /// Boş kategori menüde gösterilmez; sahte düğme olmaz.
-List<ShopCategory> shopCategoriesFor(int age) => ShopCategory.values
+///
+/// [netWorth] lüks kategorilerin servet kapısı içindir (Paket AD, §13).
+/// Varsayılanı sıfır: **kapı kapalı**. Servet bilgisi olmayan bir çağrı
+/// lüks mağazaları açmasın; eşiği bilmeden vitrin göstermek oyuncuyu
+/// olmayan parayla oyalamaktır.
+List<ShopCategory> shopCategoriesFor(int age, {int netWorth = 0}) =>
+    ShopCategory.values
+    .where((ShopCategory c) => !c.isLuxury || netWorth >= c.wealthGate)
     .where(
       (ShopCategory c) => c.isUsedMarket
           // 2. el pazarın ürünleri katalogda durmaz; ilanları pazar
@@ -550,8 +657,8 @@ List<ShopCategory> shopCategoriesFor(int age) => ShopCategory.values
 /// Öbek sırası [ShopGroup.values] sırasıdır, öbek içindeki sıra
 /// [ShopCategory.values] sırasıdır: liste her açılışta aynı görünür.
 /// Hiç mağazası olmayan öbek anahtar olarak da dönmez.
-Map<ShopGroup, List<ShopCategory>> shopGroupsFor(int age) {
-  final List<ShopCategory> acik = shopCategoriesFor(age);
+Map<ShopGroup, List<ShopCategory>> shopGroupsFor(int age, {int netWorth = 0}) {
+  final List<ShopCategory> acik = shopCategoriesFor(age, netWorth: netWorth);
   final Map<ShopGroup, List<ShopCategory>> sonuc =
       <ShopGroup, List<ShopCategory>>{};
   for (final ShopGroup obek in ShopGroup.values) {

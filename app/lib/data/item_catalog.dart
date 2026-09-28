@@ -42,6 +42,19 @@ enum ItemKind {
 
   /// Masa oyunu: tavla, dama, satranç.
   masaOyunu,
+
+  /// **Yazlık / ikinci konut** (Paket AD, §12).
+  ///
+  /// Oturulan evden ayrı bir sınıf: yazlığın işi barınmak değil, servetin
+  /// hayat kalitesine dönüşmesi. Bakım masrafı çıkarır.
+  yazlik,
+
+  /// **Tekne** (Paket AD, §12). Oyundaki en pahalı bakım kalemi.
+  tekne,
+
+  /// **Koleksiyon parçası** (Paket AD, §12): klasik otomobil, tablo,
+  /// eski saat. Hem servet saklar hem masraf çıkarır.
+  koleksiyon,
 }
 
 /// Eşya üzerinde yapılabilecek eylem türleri.
@@ -664,6 +677,89 @@ const List<ItemType> kItemTypes = <ItemType>[
     baseValue: 7200,
   ),
 
+
+  // --- Lüks ve koleksiyon (Paket AD, §12-§14) ---------------------------
+  //
+  // **Neden eklendi.** Denetimde ortaya çıktı: oyundaki en pahalı şey
+  // ₺16.000.000'luk villaydı, oysa altmış yıl yatırım yapan oyuncunun
+  // portföyü ₺30.000.000'u aşıyor. Yani paranın harcanacak yeri yoktu ve
+  // "her şeyi yatır" doğal olarak tek akıllı strateji oluyordu. §13 bunu
+  // açıkça söyledi: sorunu getiriyi düşürerek değil, **paraya anlam
+  // vererek** çöz.
+  //
+  // Hepsi normal eşya olarak duruyor — yani net servete giriyor, boşanmada
+  // paylaşılıyor, mirasa kalıyor ve borç tahsilinde satılabiliyor. İkinci
+  // bir "lüks varlık" sistemi kurulmadı.
+  //
+  // Bakım masrafları `LivingCosts` içinde; "zenginsin diye para sil" gibi
+  // yapay bir vergi **yok** (§14).
+  ItemType(
+    id: 'yazlik_sahil',
+    name: 'Sahilde yazlık',
+    icon: Icons.beach_access_rounded,
+    kind: ItemKind.yazlik,
+    baseValue: 9500000,
+    segment: 'İkinci konut',
+  ),
+  ItemType(
+    id: 'yazlik_dag',
+    name: 'Dağ evi',
+    icon: Icons.cabin_rounded,
+    kind: ItemKind.yazlik,
+    baseValue: 6200000,
+    segment: 'İkinci konut',
+  ),
+  ItemType(
+    id: 'yali_bogaz',
+    name: 'Su kenarında yalı',
+    icon: Icons.villa_rounded,
+    kind: ItemKind.yazlik,
+    baseValue: 145000000,
+    segment: 'İkinci konut',
+  ),
+  ItemType(
+    id: 'tekne_yelkenli',
+    name: 'Yelkenli',
+    icon: Icons.sailing_rounded,
+    kind: ItemKind.tekne,
+    baseValue: 4800000,
+    segment: 'Deniz aracı',
+  ),
+  ItemType(
+    id: 'tekne_motoryat',
+    name: 'Motoryat',
+    icon: Icons.directions_boat_rounded,
+    kind: ItemKind.tekne,
+    baseValue: 38000000,
+    segment: 'Deniz aracı',
+  ),
+  ItemType(
+    id: 'koleksiyon_klasik_otomobil',
+    name: 'Klasik otomobil',
+    icon: Icons.time_to_leave_rounded,
+    kind: ItemKind.koleksiyon,
+    baseValue: 7400000,
+    special: true,
+    segment: 'Koleksiyon',
+  ),
+  ItemType(
+    id: 'koleksiyon_tablo',
+    name: 'İmzalı tablo',
+    icon: Icons.image_rounded,
+    kind: ItemKind.koleksiyon,
+    baseValue: 22000000,
+    special: true,
+    segment: 'Koleksiyon',
+  ),
+  ItemType(
+    id: 'koleksiyon_saat',
+    name: 'Koleksiyon saati',
+    icon: Icons.watch_rounded,
+    kind: ItemKind.koleksiyon,
+    baseValue: 3100000,
+    special: true,
+    segment: 'Koleksiyon',
+  ),
 ];
 
 ItemType? itemTypeById(String id) {
@@ -702,8 +798,21 @@ Set<ItemActionKind> actionsFor(ItemKind kind) {
         ItemActionKind.sat,
       };
     case ItemKind.konut:
+    // Yazlık da konut gibi: sahiplik ve satış (Paket AD, §12).
+    case ItemKind.yazlik:
       // Konutta sürme/aksesuar yok; ilk sürümde sahiplik ve satış çalışır.
       return <ItemActionKind>{ItemActionKind.sat};
+    // Tekne ve koleksiyon: kullanılır, bakımı yapılır, satılır. Bakım
+    // burada oyuncunun **isteğe bağlı** eylemi; zorunlu yıllık masraf
+    // `LivingCosts` tarafında (§14).
+    case ItemKind.tekne:
+    case ItemKind.koleksiyon:
+      return <ItemActionKind>{
+        ItemActionKind.kullan,
+        ItemActionKind.temizle,
+        ItemActionKind.bakim,
+        ItemActionKind.sat,
+      };
     case ItemKind.saat:
     case ItemKind.elektronik:
       return <ItemActionKind>{

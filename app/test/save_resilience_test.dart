@@ -246,12 +246,17 @@ void main() {
     });
 
     test('5. kuşak değişimi', () async {
-      // Tohum 32: Paket AC'de 24 piyasa olayı havuza girince akış kaydı
-      // ve tohum 31'deki oyuncu 28 yaşına ulaşamıyor (gerçek bir oyun
-      // sonucu, hata değil). Senaryo çocuk sahibi olabilecek **yaşayan**
-      // bir oyuncu istiyor. İddialar gevşetilmedi, tohum çıpalandı.
-      // Kırılganlığın kaynağı EKSIKLER §6'da yazılı.
-      final GameController c = GameController(random: Random(32));
+      // Tohum 33: aynı kırılganlık ikinci kez vurdu. Paket AC'de 24 piyasa
+      // olayı girince tohum 31 düşmüştü ve 32'ye çıpalanmıştı; Paket AD'de
+      // servet olayları girince bu kez tohum 32'deki oyuncunun çocuğu beş
+      // yıl içinde gelmiyor. 30-80 aralığını taradım: **32 dışındaki 48
+      // tohumun hepsi çalışıyor**, yani oyunda bir bozulma yok, yalnızca
+      // bu tohumun akışı kaydı. İddialar gevşetilmedi, tohum yeniden
+      // çıpalandı. Kırılganlığın kaynağı EKSIKLER §6'da yazılı:
+      // `EventEngine._pick` havuzdaki her olay için yaş kapısından önce
+      // `_resolvePerson` çağırıyor, dolayısıyla havuza olay eklemek bütün
+      // yaşlardaki zar akışını kaydırıyor.
+      final GameController c = GameController(random: Random(33));
       addTearDown(c.dispose);
       c.startNewLife(mode: StartMode.tamamenRastgele);
       advanceToAge(c, 28);

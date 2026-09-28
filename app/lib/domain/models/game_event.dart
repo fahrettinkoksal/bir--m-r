@@ -66,6 +66,7 @@ class EventRequirement {
     this.requiresReleased = false,
     this.requiresPortfolio = false,
     this.requiresCompanyStatus,
+    this.minNetWorth,
     this.requiresCrisis = false,
     this.requiresHotAsset,
     this.requiresHotAssetHeat = 68,
@@ -122,6 +123,15 @@ class EventRequirement {
   /// tamamen sağlıklı bir şirket için "konkordato başvurdu" haberi
   /// okuyabiliyordu. §4 bunu istedi: "olaylar state'ten doğsun."
   final CompanyStatus? requiresCompanyStatus;
+
+  /// **En düşük net servet** (₺) — servet seviyesine açılan hayat
+  /// (Paket AD, §13, §17).
+  ///
+  /// Zengin oyuncunun hayatı asgari ücretliyle aynı hissettirmemeli:
+  /// belirli servet seviyelerinde farklı fırsatlar, farklı aile talepleri
+  /// ve farklı yaşam tarzı olayları çıkar. Net servet **portföy ve mal
+  /// dahil, borç düşülmüş** okunur (`NetWorth.of`).
+  final int? minNetWorth;
 
   /// Piyasa gerçekten kriz/panik hâlinde mi olsun (Paket AD, §6)?
   ///

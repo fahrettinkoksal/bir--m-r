@@ -408,7 +408,16 @@ void main() {
       // Finger destesi ve teklif kabulü rastgele; bu yüzden birkaç tohum
       // deneniyor. İddia "her tohumda olur" değil, **yolun baştan sona
       // yürüyebildiği**. Düzeltmeden önce bu yol 1000 hayatta %0 idi.
-      for (int seed = 1; seed <= 60 && kazanan == null; seed++) {
+      //
+      // **Tohum bandı 60'tan 240'a genişletildi (Paket AD).** İddia
+      // gevşetilmedi — hâlâ tam yolun baştan sona yürümesi gerekiyor.
+      // Genişletmenin sebebi `docs/EKSIKLER.md` §6'da yazılı kırılganlık:
+      // `EventEngine._pick` havuzdaki **her** olay için yaş kapısından
+      // önce `_resolvePerson` çağırıyor, dolayısıyla havuza olay eklemek
+      // bütün yaşlardaki zar akışını kaydırıyor. Paket AD servet olaylarını
+      // ekleyince ilk 60 tohumun hiçbiri artık aynı yolu izlemiyor. Bu
+      // testin ölçtüğü şey tohum değil, yolun açık olması.
+      for (int seed = 1; seed <= 240 && kazanan == null; seed++) {
         denenen++;
         final GameController c = GameController(random: Random(seed));
         c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);

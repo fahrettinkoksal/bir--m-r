@@ -3,6 +3,8 @@ library;
 
 import 'dart:math';
 
+import 'package:bir_omur/data/shop_catalog.dart';
+import 'package:bir_omur/domain/economy/net_worth.dart';
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/economy/used_vehicle_market.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
@@ -64,11 +66,36 @@ void main() {
     await openShops(tester);
 
     // Öbek başlıkları görünür (D-138).
+    //
+    // **Her başlığa ayrı ayrı kaydırılıyor.** Önce son konut mağazasına
+    // kaydırıp "Konut" başlığının hâlâ ekranda olmasını bekliyordu; bu,
+    // konut öbeğinin listenin **sonuncusu** olmasına bel bağlıyordu.
+    // Paket AD lüks öbeğini ekleyince liste uzadı, kaydırma daha ileri
+    // gitti ve başlık yukarıda kaldı. Testin asıl iddiası "öbekler
+    // listeleniyor"; onu kaydırma sırasına bağlamamak gerekiyor.
     expect(find.text('Gündelik alışveriş'), findsOneWidget);
     await scrollToFinder(tester, find.text('Araç ve aksesuar'));
     expect(find.text('Araç ve aksesuar'), findsOneWidget);
-    await scrollToFinder(tester, find.byKey(const Key('magaza_emlakciLuks')));
+    await scrollToFinder(tester, find.text('Konut'));
     expect(find.text('Konut'), findsOneWidget);
+    await scrollToFinder(tester, find.byKey(const Key('magaza_emlakciLuks')));
+    expect(find.byKey(const Key('magaza_emlakciLuks')), findsOneWidget);
+  });
+
+  testWidgets('lüks öbeği servet eşiğini geçen oyuncuya açılır',
+      (WidgetTester tester) async {
+    // Paket AD, §13: lüks mağazalar servet eşiğiyle açılır. Test
+    // oyuncusunun serveti ₺30.000.000 — üç eşiği de geçiyor, dolayısıyla
+    // öbek ekranda görünmeli. (Eşiğin **altında** kapalı kaldığı
+    // `paket_ad_wealth_test.dart` içinde saf fonksiyonla ölçülüyor.)
+    final GameController controller = await startAdult(tester);
+    final int servet = NetWorth.of(controller.state!);
+    expect(servet, greaterThanOrEqualTo(ShopCategory.marina.wealthGate));
+    await openShops(tester);
+    await scrollToFinder(tester, find.text('Lüks ve koleksiyon'));
+    expect(find.text('Lüks ve koleksiyon'), findsOneWidget);
+    await scrollToFinder(tester, find.byKey(const Key('magaza_marina')));
+    expect(find.byKey(const Key('magaza_marina')), findsOneWidget);
   });
 
   testWidgets('2. el araç pazarı ilan detaylarıyla açılır',
