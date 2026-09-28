@@ -313,6 +313,10 @@ class BotDiag {
   int investBuys = 0;
   int jobApplications = 0;
   int interactions = 0;
+
+  /// Ehliyet başvurusu denemesi ve kazanılan ehliyet (Paket AD, §18).
+  int licenseAttempts = 0;
+  int licensesEarned = 0;
   int eventsAnswered = 0;
   int checkupActions = 0;
   int sportActions = 0;

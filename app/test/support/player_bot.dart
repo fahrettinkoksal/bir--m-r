@@ -33,6 +33,9 @@ import 'package:bir_omur/domain/education/education_path.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/data/hobby_catalog.dart';
 import 'package:bir_omur/data/interview_catalog.dart';
+import 'package:bir_omur/data/finger_catalog.dart';
+import 'package:bir_omur/data/license_catalog.dart';
+import 'package:bir_omur/domain/models/pending_license_exam.dart';
 import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
@@ -482,6 +485,18 @@ class _Intent {
   /// Sosyal medya kullanacak mı?
   late final bool wantsSocial = rng.nextDouble() < profile.socialDesire;
 
+  /// **Ehliyet almak istiyor mu (Paket AD, §18)?**
+  ///
+  /// Teşhis turunda ölçülen en büyük tek bot eksiği buydu: bot hiç
+  /// `applyForLicense` çağırmıyordu ve bu tek başına **2 mesleği, 1
+  /// işletmeyi ve 5 olayı** erişilemez yapıyordu. Herkes ehliyet almıyor;
+  /// oran risk iştahı ve sosyalliğe bağlı.
+  late final bool wantsLicense =
+      rng.nextDouble() < 0.55 + profile.riskAppetite * 0.3;
+
+  /// Son ehliyet denemesinin yaşı; her yıl tekrar denemesin.
+  int licenseAttemptAge = -99;
+
   /// Seçtiği hobi ve dövüş sanatı: hayat boyunca **aynısına** devam eder,
   /// her yıl başka bir hobiye atlamaz.
   late final HobbyKind? favouriteHobby = rng.nextDouble() < profile.hobbyDesire
@@ -671,6 +686,7 @@ BotLifeResult playBotLife({
         c.nameChild(bebek.id, _botChildName(bebek, rng));
         break;
       }
+      _handleLicense(c, profile, intent, rng, sonuc);
       _handleCareer(c, profile, intent, rng, sonuc);
       _handleMoney(c, profile, intent, rng, sonuc);
       _handleRelationships(c, profile, intent, rng, sonuc);
@@ -1110,6 +1126,65 @@ void _decideUniversity(
 ///
 /// **Bot ilk işe girip 50 yıl aynı yerde kalmıyor.** Maaşı piyasanın
 /// altındaysa ve profil iş değiştirmeye yatkınsa daha iyisine başvuruyor.
+/// Açık ehliyet sınavının bütün sorularını cevaplar.
+///
+/// Bot cevapları **bilmiyor**: her soruda rastgele bir seçenek işaretler.
+/// Üç sorudan ikisi doğru olmalı, yani geçme ihtimali kabaca %26 — ehliyet
+/// bir kerede gelmiyor, tekrar denemek gerekiyor. Bu bilerek: `debugSetState`
+/// ile ehliyet verilmiyor, bot gerçek yolu yürüyor.
+void _finishExam(GameController c, Random rng) {
+  for (int guard = 0; guard < 8; guard++) {
+    final PendingLicenseExam? sinav = c.pendingLicenseExam;
+    if (sinav == null) return;
+    final int secenek = sinav.currentQuestion?.options.length ?? 3;
+    c.answerLicenseExam(rng.nextInt(secenek));
+    while (c.state!.hasNotice) {
+      c.dismissNotice();
+    }
+    // Bekleyen olay cevabı düşürüyorsa döngüyü kırmak gerekiyor.
+    if (c.state!.hasPendingEvent) return;
+  }
+}
+
+/// Ehliyet başvurusu ve sınavı (Paket AD, §18).
+///
+/// Gerçek oyuncu yolundan geçiyor: ücret ödeniyor, sınav açılıyor ve
+/// soru cevaplanıyor. `debugSetState` ile ehliyet **verilmiyor**.
+void _handleLicense(
+  GameController c,
+  BotProfile profile,
+  _Intent intent,
+  Random rng,
+  BotLifeResult sonuc,
+) {
+  // **Sınav tek oturuşta bitirilir.** İlk kurulumda yılda bir soru
+  // cevaplıyordum ve ölçümde 60 hayatın 34'ü sınava girip **hiçbiri**
+  // ehliyet alamıyordu — rastgele tahminin beklediği ~%26'nın çok
+  // altında. Sebebi: sınav üç soruluk ve bot her yıl bir soru
+  // cevapladığı için sınav yıllara yayılıyor, arada bekleyen olay
+  // çıkınca cevap düşüyordu. Gerçek oyuncu da sınavı tek oturuşta verir.
+  if (c.pendingLicenseExam != null) {
+    _finishExam(c, rng);
+    return;
+  }
+  if (!intent.wantsLicense) return;
+  final GameState s = c.state!;
+  if (s.player.age - intent.licenseAttemptAge < 3) return;
+  for (final LicenseType t in LicenseType.values) {
+    if (c.hasLicense(t)) continue;
+    if (!c.licenseAvailability(t).isAllowed) continue;
+    intent.licenseAttemptAge = s.player.age;
+    c.applyForLicense(t);
+    while (c.state!.hasNotice) {
+      c.dismissNotice();
+    }
+    if (c.pendingLicenseExam != null) _finishExam(c, rng);
+    sonuc.diag.licenseAttempts++;
+    if (c.hasLicense(t)) sonuc.diag.licensesEarned++;
+    return;
+  }
+}
+
 void _handleCareer(
   GameController c,
   BotProfile profile,
@@ -1548,7 +1623,18 @@ void _handleRelationships(
       if (sonuc.diag.separationAge != null) {
         sonuc.diag.postSepCandidate = true;
       }
-      final FingerProfile profil = deste[rng.nextInt(deste.length)];
+      // **Finger niyeti hesaba katılıyor (Paket AD, §18).** Adayların bir
+      // kısmı baştan yalnızca arkadaşlık istiyor; teşhis turunda flört
+      // edinen 412 hayatın 228'inin (%55,3) hiç sevgiliye çevirmemesinin
+      // sebeplerinden biri buydu. Bot artık romantik niyeti olanı tercih
+      // ediyor — yalnızca arkadaşlık isteyen kalırsa yine deniyor, çünkü
+      // gerçek oyuncu da bazen deniyor.
+      final List<FingerProfile> romantik = deste
+          .where((FingerProfile x) => x.intent != FingerIntent.arkadaslik)
+          .toList(growable: false);
+      final List<FingerProfile> havuz =
+          romantik.isNotEmpty ? romantik : deste;
+      final FingerProfile profil = havuz[rng.nextInt(havuz.length)];
       c.likeFingerProfile(profil.id);
       c.meetFingerMatch(profil.id);
     }
@@ -1565,6 +1651,22 @@ void _handleRelationships(
       if (sonuc.diag.separationAge != null) {
         sonuc.diag.postSepCandidate = true;
         sonuc.diag.postSepFlirt = true;
+      }
+      // **Flörtle vakit geçiriyor (Paket AD, §18).** Teşhiste ölçüldü:
+      // flörtün yakınlığı `rng.between(45,62)` ile başlıyor ve
+      // resmîleştirme eşiği 60; bot hiç vakit geçirmediği için flört
+      // edinen 412 hayatın 228'i (%55,3) hiç sevgiliye çevirmiyordu.
+      // Eşiğin altındaysa önce yakınlık artırılıyor.
+      if (p.bond < 60) {
+        final List<InteractionKind> acik = c.availableKindsFor(p);
+        if (acik.isNotEmpty) {
+          sonuc.diag.interactions++;
+          c.interact(p.id, acik[rng.nextInt(acik.length)]);
+          while (c.state!.hasNotice) {
+            c.dismissNotice();
+          }
+          if (c.state!.hasPendingEvent) return;
+        }
       }
       if (c.officialAvailability(p.id).isAllowed && rng.nextDouble() < 0.7) {
         c.makeRelationshipOfficial(p.id);

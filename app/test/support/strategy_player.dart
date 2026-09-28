@@ -27,6 +27,8 @@ import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/shop_catalog.dart';
 import 'package:bir_omur/domain/economy/banking.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
+import 'package:bir_omur/domain/economy/living_costs.dart';
+import 'package:bir_omur/domain/models/business.dart';
 import 'package:bir_omur/domain/economy/net_worth.dart';
 import 'package:bir_omur/domain/interaction/divorce_settlement.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
@@ -63,7 +65,17 @@ enum InvestStrategy {
   evVeYatirim('ev + yatirim'),
 
   /// Girişim + yatırım.
-  girisimVeYatirim('girisim + yatirim');
+  girisimVeYatirim('girisim + yatirim'),
+
+  /// Yalnızca fon (Paket AD, §AD/6'nın istediği 10 stratejiden biri).
+  sadeceFon('sadece fon'),
+
+  /// **Karma normal oyuncu.** Diğer dokuzu tek bir şeyi en iyi yapmaya
+  /// çalışır; bu strateji "makul davranan insan"ı temsil eder: parasının
+  /// bir kısmını yatırır, bir kısmını nakit tutar, dengesiz ama akıllıca
+  /// olmayan bir dağılım yapar ve arada harcar. §AD/6 bunu ayrıca istedi
+  /// çünkü hedef dağılım (§19) "normal oyuncu"ya göre yazıldı.
+  karmaNormal('karma normal oyuncu');
 
   const InvestStrategy(this.label);
 
@@ -82,6 +94,16 @@ class StrategyResult {
   int portfolio = 0;
   int wallet = 0;
   int realEstate = 0;
+
+  /// Araçların toplam değeri (₺) — §21.
+  int vehicles = 0;
+
+  /// İşletmelerin toplam değeri (₺) — §21.
+  int business = 0;
+
+  /// Lüks varlıkların (yazlık/tekne/koleksiyon) toplam değeri (₺) — §21.
+  int luxury = 0;
+
   int debt = 0;
 
   /// Hayat boyu portföye konan anapara.
@@ -236,6 +258,21 @@ StrategyResult playStrategy({
       .where((OwnedItem i) =>
           itemTypeOrFallback(i.typeId).kind == ItemKind.konut)
       .fold<int>(0, (int t, OwnedItem i) => t + DivorceSettlement.valueOf(i));
+  sonuc.vehicles = son.items
+      .where((OwnedItem i) => LivingCosts.isMotorVehicle(i))
+      .fold<int>(0, (int t, OwnedItem i) => t + DivorceSettlement.valueOf(i));
+  sonuc.luxury = son.items
+      .where((OwnedItem i) => <ItemKind>{
+            ItemKind.yazlik,
+            ItemKind.tekne,
+            ItemKind.koleksiyon,
+          }.contains(itemTypeOrFallback(i.typeId).kind))
+      .fold<int>(0, (int t, OwnedItem i) => t + DivorceSettlement.valueOf(i));
+  // İşletmenin "değeri" olarak yatırılan sermaye okunuyor: oyunda bir
+  // işletme satış fiyatı yok, `NetWorth` de işletmeyi ayrıca saymıyor.
+  // Bu satır §21'in bileşen dökümü için bilgi amaçlıdır.
+  sonuc.business = son.businesses
+      .fold<int>(0, (int t, Business b) => t + b.totalInvested);
   sonuc.principal = son.portfolioInvested;
   sonuc.realizedProfit = son.portfolioRealized;
   // `companyFailures` yıl yıl toplandığı için birikmiş sayıyı düzelt:
@@ -348,7 +385,48 @@ void _act(
     case InvestStrategy.girisimVeYatirim:
       _tryOpenBusiness(c, rng);
       _buyAll(c, <String>['hisse', 'fon'], rng, sonuc);
+
+    case InvestStrategy.sadeceFon:
+      _buyAll(c, <String>['fon'], rng, sonuc);
+
+    case InvestStrategy.karmaNormal:
+      _actNormalPlayer(c, rng, sonuc);
   }
+}
+
+/// **Karma normal oyuncu** (Paket AD, §AD/6).
+///
+/// Min-max değil: parasının **bir kısmını** yatırır, gerisini cüzdanda
+/// tutar; dağılımı kabaca güvenli tarafa yatkın; ev almayı dener; arada
+/// nakit harcar. Bot zayıflatılmıyor — bu **ayrı bir strateji**, diğer
+/// dokuzu olduğu gibi duruyor (§19'un "min-max bot ayrı kalsın" kuralı).
+void _actNormalPlayer(GameController c, Random rng, StrategyResult sonuc) {
+  // Her yıl yatırmıyor: normal insan bazı yıllar atlar.
+  if (rng.nextDouble() < 0.35) return;
+  final int cuzdan = c.state!.player.wallet;
+  if (cuzdan < kInvestmentMinBuy * 3) return;
+  // Parasının yarısını nakit tutuyor.
+  final int yatirilacak = cuzdan ~/ 2;
+  if (yatirilacak < kInvestmentMinBuy) return;
+  // Güvenliye yatkın dağılım: vadeli/altın daha olası.
+  final List<String> havuz = <String>[
+    'vadeli',
+    'vadeli',
+    'altin',
+    'altin',
+    'fon',
+    'hisse',
+  ];
+  final String tur = havuz[rng.nextInt(havuz.length)];
+  final InvestmentType? tip = investmentTypeById(tur);
+  if (tip == null) return;
+  final int enAz = tip.isTermDeposit ? kTermDepositMinAmount : kInvestmentMinBuy;
+  if (yatirilacak < enAz) return;
+  if (c.investmentBuyBlockReason(tip, yatirilacak).isNotEmpty) return;
+  final InvestmentOutcome? r = c.buyInvestment(tur, yatirilacak);
+  if (r?.applied ?? false) sonuc.principal += yatirilacak;
+  // Otuz beşinden sonra ev almayı dener.
+  if (c.state!.player.age >= 35) _tryBuyHome(c, rng);
 }
 
 /// Cüzdanda ne varsa (bir yıllık gideri bırakarak) yatırır.
