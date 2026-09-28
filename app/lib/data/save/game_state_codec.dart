@@ -353,6 +353,38 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'lastSettledAge': b.lastSettledAge,
             'closedAtAge': b.closedAtAge,
             'endReason': b.endReason?.name,
+            // Paket AE: fiyat, itibar, personel, bakım, reklam ve son
+            // yılların dökümü. Eski kayıtlarda yoktur; varsayılanla açılır.
+            'price': b.price,
+            'reputation': b.reputation,
+            'upkeep': b.upkeep,
+            'staffQuality': b.staffQuality,
+            'staffMorale': b.staffMorale,
+            'staffCount': b.staffCount,
+            'wageLevel': b.wageLevel,
+            'ad': b.ad.name,
+            'adStreak': b.adStreak,
+            'yearMaintenanceSpend': b.yearMaintenanceSpend,
+            'lastMaintenanceAge': b.lastMaintenanceAge,
+            'lastStaffCareAge': b.lastStaffCareAge,
+            'recentIncidents': b.recentIncidents,
+            'history': <Object?>[
+              for (final BusinessYear y in b.history)
+                <String, Object?>{
+                  'age': y.age,
+                  'revenue': y.revenue,
+                  'staffCost': y.staffCost,
+                  'supplyCost': y.supplyCost,
+                  'fixedCost': y.fixedCost,
+                  'maintenanceCost': y.maintenanceCost,
+                  'adCost': y.adCost,
+                  'incidentCost': y.incidentCost,
+                  'net': y.net,
+                  'price': y.price,
+                  'marketPrice': y.marketPrice,
+                  'demandIndex': y.demandIndex,
+                },
+            ],
           },
       ],
       // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
@@ -2441,6 +2473,57 @@ Business _decodeBusiness(Map<String, Object?> json) => Business(
         _stringOrNull(json, 'endReason'),
         'business.endReason',
       ),
+      // Paket AE alanları: eski kayıtta yoklar, varsayılan değerleriyle
+      // açılırlar. Fiyat 0 ise iş bölge ortalamasından çalışır.
+      price: _intOr(json, 'price', 0),
+      reputation:
+          _intOr(json, 'reputation', Business.prototypeOnlyStartReputation),
+      upkeep: _intOr(json, 'upkeep', Business.prototypeOnlyStartUpkeep),
+      staffQuality: _intOr(
+        json,
+        'staffQuality',
+        Business.prototypeOnlyStartStaffQuality,
+      ),
+      staffMorale: _intOr(
+        json,
+        'staffMorale',
+        Business.prototypeOnlyStartStaffMorale,
+      ),
+      staffCount: _intOr(json, 'staffCount', -1),
+      wageLevel: _intOr(json, 'wageLevel', 100),
+      ad: _enumByNameOrNull(
+            BusinessAd.values,
+            _stringOrNull(json, 'ad'),
+            'business.ad',
+          ) ??
+          BusinessAd.yok,
+      adStreak: _intOr(json, 'adStreak', 0),
+      yearMaintenanceSpend: _intOr(json, 'yearMaintenanceSpend', 0),
+      lastMaintenanceAge: _intOrNull(json, 'lastMaintenanceAge'),
+      lastStaffCareAge: _intOrNull(json, 'lastStaffCareAge'),
+      recentIncidents: List<String>.unmodifiable(<String>[
+        for (final Object? e in _optionalRawList(json, 'recentIncidents'))
+          if (e is String) e,
+      ]),
+      history: List<BusinessYear>.unmodifiable(<BusinessYear>[
+        for (final Object? e in _optionalRawList(json, 'history'))
+          _decodeBusinessYear(_asMap(e, 'businessYear')),
+      ]),
+    );
+
+BusinessYear _decodeBusinessYear(Map<String, Object?> json) => BusinessYear(
+      age: _intOr(json, 'age', 0),
+      revenue: _intOr(json, 'revenue', 0),
+      staffCost: _intOr(json, 'staffCost', 0),
+      supplyCost: _intOr(json, 'supplyCost', 0),
+      fixedCost: _intOr(json, 'fixedCost', 0),
+      maintenanceCost: _intOr(json, 'maintenanceCost', 0),
+      adCost: _intOr(json, 'adCost', 0),
+      incidentCost: _intOr(json, 'incidentCost', 0),
+      net: _intOr(json, 'net', 0),
+      price: _intOr(json, 'price', 0),
+      marketPrice: _intOr(json, 'marketPrice', 0),
+      demandIndex: _intOr(json, 'demandIndex', 100),
     );
 
 // =====================================================================

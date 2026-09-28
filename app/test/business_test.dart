@@ -391,23 +391,56 @@ void main() {
   // ===================================================================
   // 8) Maaş garanti, kendi işi değil
   // ===================================================================
-  test('aynı iş farklı yıllarda farklı sonuç verir', () {
-    // Oynaklık gerçek: aynı durumdan aynı sonuç çıkmıyor.
-    GameState s =
-        BusinessEngine.open(state: hayat(60, age: 30), tur: bufe).state;
-    s = s.copyWith(
-      businesses: <Business>[s.businesses.single.copyWith(condition: 60)],
-    );
-    final Set<int> kazanclar = <int>{};
-    for (int i = 0; i < 30; i++) {
-      final GameState sonra = BusinessEngine.advanceYear(s, 31, Random(i));
-      kazanclar.add(sonra.player.wallet - s.player.wallet);
+  group('maaş garanti, kendi işi değil', () {
+    // **Paket AE'de düzeltildi.** Bu test eskiden **aynı yılı** 30 kez
+    // çevirip sonuçların farklı çıkmasını bekliyordu; yani kendi adıyla
+    // ("farklı yıllarda") çelişiyordu. AE'den sonra işletme zarı kendi
+    // akışından geliyor ve aynı yıl her zaman aynı sonucu veriyor —
+    // kayıt geri yüklenerek kötü yıl yeniden çevrilemesin diye. Test
+    // ikiye ayrıldı ve **iki güvence birden** denetleniyor.
+    GameState kur(int seed) {
+      final GameState s =
+          BusinessEngine.open(state: hayat(seed, age: 30), tur: bufe).state;
+      return s.copyWith(
+        businesses: <Business>[s.businesses.single.copyWith(condition: 60)],
+      );
     }
-    expect(
-      kazanclar.length,
-      greaterThan(1),
-      reason: 'Kendi işi maaş gibi sabit olmamalı.',
-    );
+
+    test('aynı yıl yeniden çevrilemez', () {
+      final GameState s = kur(60);
+      final Set<int> kazanclar = <int>{};
+      for (int i = 0; i < 30; i++) {
+        final GameState sonra = BusinessEngine.advanceYear(s, 31, Random(i));
+        kazanclar.add(sonra.player.wallet - s.player.wallet);
+      }
+      expect(
+        kazanclar.length,
+        1,
+        reason: 'Aynı yıl her zaman aynı sonucu vermeli; '
+            'kayıt geri yüklenerek kötü yıl tazelenemez.',
+      );
+    });
+
+    test('farklı yıllar farklı sonuç verir', () {
+      final GameState s = kur(60);
+      final Set<int> kazanclar = <int>{};
+      for (int yas = 31; yas < 61; yas++) {
+        final GameState once = s.copyWith(
+          player: s.player.copyWith(age: yas),
+          businesses: <Business>[
+            s.businesses.single.copyWith(lastTendedAge: yas),
+          ],
+        );
+        final GameState sonra =
+            BusinessEngine.advanceYear(once, yas, Random(1));
+        kazanclar.add(sonra.player.wallet - once.player.wallet);
+      }
+      expect(
+        kazanclar.length,
+        greaterThan(10),
+        reason: 'Kendi işi maaş gibi sabit olmamalı.',
+      );
+    });
   });
 
   test('sermaye 2026 ölçeğinde', () {

@@ -75,6 +75,7 @@ import '../data/lawyer_catalog.dart';
 import '../data/business_catalog.dart';
 import '../data/gift_catalog.dart';
 import '../domain/economy/business_engine.dart';
+import '../domain/economy/business_market.dart';
 import '../domain/interaction/friendship_depth.dart';
 import '../domain/models/business.dart';
 import '../domain/law/legal_engine.dart';
@@ -2046,6 +2047,127 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final BusinessResult r = BusinessEngine.tend(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  // ---------------------------------------------------------------------
+  // Paket AE: fiyat, reklam, bakım, personel
+  // ---------------------------------------------------------------------
+
+  /// İşletmenin bölgesindeki ortalama birim fiyat (§3).
+  int businessMarketPrice() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    final BusinessType? tur = is_?.type;
+    if (current == null || tur == null) return 0;
+    return BusinessMarket.averagePrice(current, tur, current.player.age);
+  }
+
+  /// İşletmenin uyguladığı birim fiyat; belirlenmemişse bölge ortalaması.
+  int businessPrice() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    final BusinessType? tur = is_?.type;
+    if (current == null || is_ == null || tur == null) return 0;
+    return BusinessMarket.effectivePrice(current, is_, tur, current.player.age);
+  }
+
+  /// Yazılabilecek fiyat aralığı.
+  ({int min, int max}) businessPriceRange() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    if (current == null || is_ == null) return (min: 1, max: 1);
+    return BusinessEngine.priceRange(current, is_);
+  }
+
+  /// Bu yılın müşteri yoğunluğu tahmini (§30).
+  BusinessDemand? businessDemand() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    final BusinessType? tur = is_?.type;
+    if (current == null || is_ == null || tur == null) return null;
+    return BusinessMarket.demand(
+      state: current,
+      business: is_,
+      tur: tur,
+      age: current.player.age,
+      rng: Random(BusinessMarket.seed(current, is_.id, current.player.age)),
+    );
+  }
+
+  /// Fiyatı belirler (§4).
+  BusinessOutcome? setBusinessPrice(int fiyat) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.setPrice(state: current, fiyat: fiyat);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Reklam kampanyasını kurar ya da keser (§8).
+  BusinessOutcome? setBusinessAd(BusinessAd reklam) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.setAd(state: current, reklam: reklam);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Bakım şu an yapılabilir mi?
+  InteractionAvailability businessMaintenanceAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.maintenanceAvailability(current);
+  }
+
+  /// Bakımın bu yılki bedeli (₺).
+  int businessMaintenanceCost() {
+    final Business? is_ = openBusiness;
+    if (is_ == null) return 0;
+    return BusinessEngine.maintenanceCost(is_);
+  }
+
+  /// Bakım yaptırır (§10).
+  BusinessOutcome? maintainBusiness() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r = BusinessEngine.doMaintenance(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Personel hamlesi şu an mümkün mü?
+  InteractionAvailability businessStaffAvailability(StaffAction hamle) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.staffAvailability(current, hamle);
+  }
+
+  /// Personelle ilgilenir (§7).
+  BusinessOutcome? businessStaff(StaffAction hamle) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.staff(state: current, hamle: hamle);
     if (!r.outcome.applied) return r.outcome;
     _state = _countProgress(current, r.state);
     _autoSave();

@@ -20,6 +20,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../data/company_catalog.dart';
 import '../../data/investment_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../models/game_event.dart';
@@ -664,8 +665,15 @@ abstract final class InvestmentEngine {
     sonuc = _revaluePortfolio(sonuc, piyasa.year, newAge, olaylar);
     sonuc = _applyIncidentCash(sonuc, olaylar, newAge);
     sonuc = _settleTermDeposits(sonuc, newAge);
-    sonuc = _maybeMarketNotice(sonuc, piyasa.year, newAge);
-    return sonuc;
+    // **Paket AE, §26-29.** Portföyü ciddi etkileyen olayda bildirim
+    // çıkar ve sepetteki şirketin **adı** geçer: oyuncu portföyünün neden
+    // düştüğünü anlasın. Rutin yıl bildirimi piyasa bildiriminin kendi
+    // eşiğine bırakılır (§28).
+    final GameState olayli = _maybeIncidentNotice(sonuc, olaylar, newAge);
+    // İki pencere aynı yıl açılmaz: olay bildirimi çıktıysa piyasa
+    // bildirimi o yıl susar (§28, bildirim spam'i yok).
+    if (olayli.market.lastNoticeAge == newAge) return olayli;
+    return _maybeMarketNotice(olayli, piyasa.year, newAge);
   }
 
   /// Pozisyonların değerini yılın getirisiyle günceller.
@@ -945,6 +953,150 @@ abstract final class InvestmentEngine {
         ...satirlar,
       ]),
     );
+  }
+
+  /// prototypeOnly: olay bildiriminin açılması için portföye etkisinin
+  /// eşiği (§28).
+  ///
+  /// Her olumsuz yıl pencere açmaz; **bildirim yağmuru istemiyoruz**.
+  /// Olay ya bu eşiği aşacak kadar portföyü vuracak ya da kendi başına
+  /// ciddi olacak (konkordato, kayyum, kapanma, işlem durması, panik).
+  static const double prototypeOnlyIncidentNoticeImpact = 0.12;
+
+  /// Portföyü ciddi etkileyen bir olay olduysa bildirim açar (§26-29).
+  ///
+  /// **Neden var.** AC'den beri şirket olayları vardı ve
+  /// [IncidentKind.opensNotice] tanımlıydı — ama hiçbir yerde
+  /// **okunmuyordu**: oyuncu konkordatoyu, kayyumu, şirket kapanmasını
+  /// yalnızca portföy rakamının düşmesinden anlıyordu. Bu, oyuncunun
+  /// "neden düştü?" sorusunu cevapsız bırakıyordu (§29).
+  ///
+  /// Metinlerde **kurgusal** şirket adı geçer; gerçek şirket, banka ya da
+  /// kurum adı asla geçmez ve hiçbir cümle yatırım tavsiyesi vermez.
+  static GameState _maybeIncidentNotice(
+    GameState state,
+    IncidentOutcome olaylar,
+    int newAge,
+  ) {
+    if (olaylar.isEmpty) return state;
+    if (state.investments.isEmpty) return state;
+
+    MarketIncident? secilen;
+    double enBuyukEtki = 0;
+    for (final MarketIncident o in olaylar.incidents) {
+      // Oyuncu bu varlığı gerçekten tutuyor mu? Tutmuyorsa haberin
+      // portföyle ilgisi yok.
+      final Holding? poz =
+          o.typeId == null ? null : state.holdingOf(o.typeId!);
+      if (poz == null || poz.isEmpty) continue;
+      final double etki = o.impact.abs();
+      final bool ciddi = o.kind.opensNotice ||
+          etki >= prototypeOnlyIncidentNoticeImpact;
+      if (!ciddi) continue;
+      // En sert olan anlatılır: bir yılda üç pencere açmak oyunu yorar.
+      if (secilen == null || etki > enBuyukEtki) {
+        secilen = o;
+        enBuyukEtki = etki;
+      }
+    }
+    if (secilen == null) return state;
+
+    return state.copyWith(
+      market: state.market.copyWith(lastNoticeAge: newAge),
+      notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
+        ...state.notices,
+        PendingNotice(
+          id: 'piyasa-olay-${secilen.kind.name}-$newAge',
+          kind: NoticeKind.banka,
+          age: newAge,
+          title: secilen.kind.label,
+          text: incidentNoticeText(secilen),
+        ),
+      ]),
+    );
+  }
+
+  /// Portföy olayının bildirim metni (§26, §29, §37).
+  ///
+  /// Sepetteki **kurgusal** şirketin adı geçer ki oyuncu portföyünün
+  /// neden düştüğünü anlasın. Hiçbir cümle tavsiye vermez.
+  static String incidentNoticeText(MarketIncident olay) {
+    final Company? sirket =
+        olay.companyId == null ? null : companyById(olay.companyId!);
+    final String ad = sirket?.name ?? 'sepetindeki şirketlerden biri';
+    final bool sepet = olay.typeId == 'hisse';
+    final String nerede =
+        sepet ? "Karma Hisse Sepeti'nin içindeki $ad" : ad;
+
+    switch (olay.kind) {
+      case IncidentKind.yonetimSkandali:
+        return 'Sabah telefonu açtın.\n\n'
+            'Portföyündeki $ad hakkında yolsuzluk soruşturması haberi '
+            'yayılmış.\n\n'
+            'Hisse daha gün bitmeden sert satış yedi.';
+      case IncidentKind.regulatorIncelemesi:
+        return 'Telefonuna piyasa bildirimi düştü.\n\n'
+            '$ad hakkında inceleme başlatılmış.\n\n'
+            'Ekran pek iç açıcı görünmüyor.';
+      case IncidentKind.maliSikinti:
+        return '$nerede zor günler geçiriyor.\n\n'
+            'Borcunu çevirmekte zorlandığı konuşuluyor.';
+      case IncidentKind.konkordato:
+        return '$ad konkordato ilan etti.\n\n'
+            'Süreç ne kadar sürer, sonunda ne kalır belli değil.';
+      case IncidentKind.kayyum:
+        return '$ad yönetimine geçici olarak el konuldu.\n\n'
+            'İşlemler bir süre durdu. Satmak istesen de satamazsın.';
+      case IncidentKind.iflas:
+        return '$ad faaliyetini durdurdu.\n\n'
+            'Sepetteki payı silindi. Geriye kalan sepet yoluna devam '
+            'ediyor.';
+      case IncidentKind.sermayeArtirimi:
+        return '$ad sermaye artırımına gitti.\n\n'
+            'Eldeki pay aynı kaldı ama ağırlığı azaldı.';
+      case IncidentKind.sektorKrizi:
+        return 'Bütün bir sektör aynı anda daraldı.\n\n'
+            'Sepetindeki birkaç şirket birden aşağı gitti.';
+      case IncidentKind.piyasaPanigi:
+        return 'Gün içinde satış satışı kovaladı.\n\n'
+            'Ekranı açmak istemedin. Açtığında da pişman oldun.';
+      case IncidentKind.fonTasfiye:
+        return 'Fon tasfiye ediliyor.\n\n'
+            'Pozisyonun piyasa değerinden nakde döndü; sana sorulmadı.';
+      case IncidentKind.fonYanlisYatirim:
+        return 'Fonun büyük yatırımı ters gitti.\n\n'
+            'Ay sonu raporunu okurken durdun.';
+      case IncidentKind.faizSoku:
+        return 'Faiz bir gecede sert yükseldi.\n\n'
+            'Portföyün bir kısmı bunu hemen hissetti.';
+      case IncidentKind.kurSoku:
+        return 'Kur sert hareket etti.\n\n'
+            'Portföyün bazı köşeleri bundan payını aldı.';
+      case IncidentKind.yeniSirket:
+        return 'Sepete yeni bir şirket girdi: $ad.\n\n'
+            'Kapananın yerini aldı.';
+      case IncidentKind.satinAlma:
+        return '$ad için satın alma haberi çıktı.\n\n'
+            'Fiyat aynı gün yukarı zıpladı.';
+      case IncidentKind.temettu:
+        return '$ad temettü dağıttı.\n\n'
+            'Hesabına küçük bir tutar düştü.';
+      case IncidentKind.sektorPatlamasi:
+        return 'Bir sektör aniden açıldı.\n\n'
+            'Sepetindeki birkaç şirket birden yukarı gitti.';
+      case IncidentKind.aniYukselis:
+        return 'Piyasa gün içinde hızlandı.\n\n'
+            'Portföyün bugün yüzünü güldürdü.';
+      case IncidentKind.fonYoneticiDegisti:
+        return 'Fonun yöneticisi değişti.\n\n'
+            'Bir süre ne olacağı belli olmayacak.';
+      case IncidentKind.fonStratejiDegisti:
+        return 'Fon stratejisini değiştirdi.\n\n'
+            'Artık aldığın şey tam olarak aldığın şey değil.';
+      case IncidentKind.fonBirlesti:
+        return 'Fon başka bir fonla birleşti.\n\n'
+            'Pozisyonun yeni fona aktarıldı.';
+    }
   }
 
   /// Piyasa belirgin hareket ettiyse bildirim açar.
