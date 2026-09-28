@@ -4696,3 +4696,108 @@ Medyanda hâlâ birinci. §32 bunu yasaklamıyor ("Başarılı işletmeci çok p
 7. **İşletme değeri servete sayılmıyor.** Oyunda bir işletme satış fiyatı yok; `NetWorth` işletmeyi ayrıca saymıyor, yalnızca devir bedeli kapanışta cüzdana giriyor. İşletmenin bir "piyasa değeri" olmalı mı?
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-176 — Paket AF: girişim + yatırım abuse teşhisi
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AE SONRASI / META / ABUSE DENETİMİ" briefi · **Etkilenen kod:** `app/test/support/strategy_player.dart`, `app/test/paket_af_meta_test.dart`, `app/test/paket_af_business_roi_test.dart` · **Hiçbir denge değeri değiştirilmedi.**
+
+#### Sorulan soru
+
+"Oyunu çözen akıllı oyuncu girişim + yatırım ile ekonomiyi kırıyor mu?"
+
+#### Cevap: alt mekanikler temiz, abuse katalog sayılarında
+
+AE'nin getirdiği mekaniklerin hiçbirinde exploit yok:
+
+| Mekanik | Ölçüm | Sonuç |
+|---|---|---|
+| Fiyat (§5) | optimize etmek piyasaya göre ×1,04 | abuse değil |
+| Reklam (§6) | kazanan kademe: mahalle 7 / sosyal medya 5 / büyük 1 / hiç 1 | aşırı güçlü değil |
+| Reklam, hayat düzeyi | reklamsız ₺104,4M, mahalle ₺69,7M, büyük ₺85,6M | **optimal oyuncu hiç reklam vermiyor** |
+| Bakım (§7) | eşik 95 → ₺316,2M, 66 → ₺282,0M, 0 → ₺171,6M | geciktirme exploiti **yok**, tersine kaybettiriyor |
+| Personel (§8) | kendin ilgilen ₺319,2M, sürekli zam ₺244,6M, hiçbir şey ₺242,0M | gerçek trade-off var |
+| Maaş + işletme (§9) | fırsat maliyeti oranı **0,79** | bedava kombinasyon **değil** |
+| Rezerv (§10) | rezervli zorunlu satış %70, rezervsiz %87,5 | rezerv işe yarıyor |
+| Borsa (§16) | çözücü üst kuyruk ₺1,0B / %2,5; %100 hisse ₺7,4B / %5,0 | işletme kârının borsaya akması kuyruğu **patlatmıyor** |
+
+İlginç bir yan bulgu: bakımın **işletme-içi** optimumu (her yıl, eşik 95) ile **hayat düzeyi** optimumu (eşik 66) farklı. Sebep gerçek bir ekonomik ödünleşme: bakıma giden para borsada kazanacağı getiriden vazgeçmek demek. Bu bir hata değil, sistemin kendi tutarlılığı.
+
+#### Asıl bulgu — §3 ROI tablosu
+
+| İşletme | Sermaye | Görünür ROI | Geri ödeme | Medyan ROI | Kötü %10 ROI | Kapanma |
+|---|---|---|---|---|---|---|
+| **Serbest yazılımcılık** | **₺84k** | **6,40** | **0,16 yıl** | **340,5** | **159,2** | **%5** |
+| Kuaför salonu | ₺438k | 1,31 | 0,8 | 100,4 | −0,8 | %11 |
+| Terzi atölyesi | ₺202k | 1,33 | 0,8 | 59,3 | 2,1 | %10 |
+| Oto tamir dükkânı | ₺606k | 1,17 | 0,9 | 53,2 | −1,4 | %20 |
+| Kuruyemişçi | ₺303k | 1,11 | 0,9 | 48,2 | 16,9 | %13 |
+| Oto yıkama | ₺539k | 1,00 | 1,0 | 45,0 | −1,2 | %23 |
+| Büfe | ₺236k | 1,29 | 0,8 | 31,2 | −0,9 | %37 |
+| Kahve dükkânı | ₺809k | 0,79 | 1,3 | 29,2 | −1,2 | %36 |
+| Halı saha | ₺2,4M | 0,49 | 2,1 | 16,6 | 0,3 | %10 |
+| Spor salonu | ₺2,9M | 0,45 | 2,2 | 15,3 | −0,8 | %30 |
+| Pastane | ₺876k | 0,77 | 1,3 | 14,6 | −1,3 | %41 |
+| Bakkal | ₺674k | 0,75 | 1,3 | −0,6 | −1,5 | %60 |
+| Lokanta | ₺2,0M | 0,53 | 1,9 | −1,0 | −1,6 | %79 |
+| Nakliyecilik | — | 1,13 | 0,9 | (ölçülemedi) | — | — |
+
+> Nakliyecilik ehliyet istiyor; ölçüm botu ehliyet almadığı için hiç açılmadı. Bu bir oyun hatası değil, **ölçümün sınırı**; ayrıca not edildi.
+
+**İki şey görünüyor:**
+
+1. **Bütün işletmelerin sermayesi yıllık kârına göre çok küçük.** Geri ödeme süresi 0,16 ile 2,24 yıl arasında. İki yıldan sonra işletme fiilen bedava bir para akışı; oyuncunun portföyüyle yarışan bir yatırım değil, yanına eklenen bir gelir.
+
+2. **Serbest yazılımcılık kırık bir aykırı değer.** Sermaye ₺84k, geri ödeme **0,16 yıl** (iki ay), medyan ROI 340×, kapanma %5 — ve **kötü %10'u bile 159×**. Diğer bütün işletmelerde kötü %10 sıfır civarı ya da negatif. Yani tek başına risksiz bir para makinesi. Sebebi yapısal: kadrosu yok (personel olayı gelmiyor), mekânı yok (afet ve denetim dar), gider payı 0,11 — yani kötü bir yılda ödeyeceği kira yok. Çözücü bot 40 hayatın 28'inde bunu seçti ve 36'sında bununla bitirdi.
+
+#### §11-§13 — 15 strateji, 60 yıl (hafif bekçi: 40 hayat/strateji)
+
+| Strateji | Medyan | Kötü %10 | İyi %10 | 1B+ | Drawdown |
+|---|---|---|---|---|---|
+| mükemmel girişimci | **₺93,1M** | **₺24,7M** | ₺314,1M | %0,0 | %35 |
+| kariyer + işletme + yatırım | ₺52,5M | ₺9,3M | ₺369,3M | %5,0 | %48 |
+| girişim + yatırım | ₺41,0M | ₺11,9M | ₺135,6M | %2,5 | %52 |
+| kariyer + yatırım | ₺36,5M | ₺7,2M | ₺310,0M | %2,5 | %48 |
+| her yıl maksimum | ₺35,8M | ₺7,4M | ₺137,7M | %0,0 | %22 |
+| sadece altın | ₺31,8M | ₺6,6M | ₺105,4M | %0,0 | %28 |
+| karma normal oyuncu | ₺27,1M | ₺8,8M | ₺79,5M | %0,0 | %25 |
+| işletme aktif | ₺24,0M | ₺12,7M | ₺48,1M | %0,0 | %24 |
+| ev + yatırım | ₺22,1M | ₺4,7M | ₺555,5M | %2,5 | %49 |
+| sadece fon | ₺21,4M | ₺4,0M | ₺106,4M | %0,0 | %38 |
+| sadece vadeli | ₺20,7M | ₺5,2M | ₺55,0M | %0,0 | %3 |
+| dengeli | ₺14,3M | ₺4,7M | ₺33,8M | %0,0 | %16 |
+| %100 hisse | ₺12,6M | ₺2,9M | ₺165,2M | %5,0 | %71 |
+| yatırım yok | ₺10,9M | ₺3,4M | ₺24,2M | %0,0 | %6 |
+| işletme pasif | ₺8,3M | ₺2,3M | ₺22,2M | %0,0 | %24 |
+
+**§13'ün katı tanımıyla hiçbir strateji diğerlerinin hepsini ezmiyor** (çözücü 6/14). Ama çözücü hem medyanda (ikincinin **1,77 katı**) hem kötü %10'da (ikincinin **2,7 katı**) birinci ve riski ortalamanın altında. Yalnızca düşük riskli stratejilerde (vadeli %3, dengeli %16) drawdown farkı dominansı kırıyor.
+
+#### §14 — hangi doğal maliyet gerekiyor
+
+Ölçüm, §14'ün listesinden **hangisinin gerekmediğini** de söylüyor:
+
+* **(A) Yönetim zamanı** — zaten var ve çalışıyor (fırsat maliyeti 0,79). Artırmak gerekmez.
+* **(D) Yeniden yatırım / (E) Sahip ilgisi / (F) Rekabet** — bunlar da var (kalıcı rekabet baskısı, tek işletme sınırı); ölçümde bir boşluk göstermiyorlar.
+* **(B) İşletme sermayesi ve (C) ölçek gideri** — teşhisin işaret ettiği yer burası.
+
+**Önerim (öneri, karar değil):** yapay kâr kesme yerine **sermaye/kâr oranını** düzelt. Gerçek bir işletme kendini iki ayda değil, birkaç yılda amorti eder. İki ayrı ayar:
+
+1. **Serbest yazılımcılık ayrıca ele alınmalı.** Sermayesi (₺84k) kârına (₺539k) göre absürt; ayrıca risksiz. En az iki şey gerek: kurulum sermayesi ciddi biçimde yükselsin **ve** risk kaynağı kazansın — projeler kesilebilir (bu olay var ama kalıcı baskısı zayıf), ödeme gecikebilir, müşteri kaybı sürekli olabilir. Kadrosu ve kirası olmadığı için kötü yılı gerçekten kötü yapan tek şey talep düşüşü.
+2. **Bütün katalogda geri ödeme süresi uzasın.** Şu an 0,16-2,24 yıl; makul bant 3-6 yıl olurdu. Bu, `setupCost`'u yükselterek ya da `baseYearlyProfit`'i düşürerek yapılabilir — **hangisi olacağı senin kararın**, çünkü ikisi farklı şeyleri değiştirir: sermayeyi yükseltmek işletmeyi "geç erişilen" bir yol yapar, kârı düşürmek "erişilir ama az kazandıran" yapar.
+
+#### §17 — değiştirmeden önce/sonra ölçüm önerisi
+
+Bu paketin bıraktığı testler **önce/sonra karşılaştırmasını hazır** veriyor: `paket_af_business_roi_test.dart` ROI tablosunu, `paket_af_meta_test.dart` 15 strateji tablosunu basıyor. Bir ayar denenince ikisi yeniden çalıştırılıp bu belgedeki sayılarla karşılaştırılabilir. Ağır sürüm (`BIR_OMUR_FULL_MEASURE=1`) işletme başına 500, strateji başına 1000 hayat koşuyor.
+
+#### Karar soruları
+
+1. **Serbest yazılımcılığın sermayesi ne olmalı?** Şu an 0,25 asgari ücret. 1,5-2,0 bandı geri ödemeyi ~1 yıla çıkarır; 3,0+ onu "birikim isteyen" bir yol yapar.
+2. **Serbest yazılımcılık risk kazanmalı mı?** Kadrosu ve kirası olmadığı için kötü yılı yok. Ekipman/abonelik gideri, uzun ödeme gecikmesi ya da kalıcı müşteri kaybı eklenebilir.
+3. **Katalog genelinde hedef geri ödeme süresi kaç yıl olmalı?** (Şu an 0,16-2,24.)
+4. **Sermayeyi mi yükseltelim, kârı mı düşürelim?** İkisi oyunun hissini farklı değiştirir.
+5. **Lokanta ve bakkal negatif medyan ROI veriyor** (−1,0 ve −0,6), kapanma %79 ve %60. Bunlar "zor ama ödüllü" mü olmalı, yoksa şu an fazla mı cezalı?
+6. **Nakliyecilik ölçülemedi** çünkü bot ehliyet almıyor. Ölçüm botuna ehliyet yolu eklensin mi, yoksa ehliyetli botla ayrı mı ölçülsün?
+7. **Çözücünün medyanı ikincinin 1,77 katı.** §13'ün katı tanımıyla dominant değil. Bu fark kabul edilebilir mi, yoksa kapatılmalı mı?
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.

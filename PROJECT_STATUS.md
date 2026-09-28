@@ -2519,6 +2519,53 @@ kural yazılmadı.
 **Doğrulanmayan:** Gerçek cihazda oynanmadı; Android APK bu makinede
 derlenmedi.
 
+---
+
+## PAKET AF — TEŞHİS TAMAMLANDI (denge değiştirilmedi)
+
+**Konu:** "Oyunu çözen akıllı oyuncu girişim + yatırım ile ekonomiyi
+kırıyor mu?"
+
+**Bu tur ölçümdür.** Hiçbir denge değeri değiştirilmedi; Faho'nun kararı
+uyarınca pasif işletme sahibinin %98 batış oranı yumuşatılmadı.
+
+**Gelen test altyapısı:** `PerfectEntrepreneurBot` — işletmeleri görünür
+ROI'ye göre karşılaştıran, fiyatı **geçmiş sonuçlarından öğrenerek**
+optimize eden (gelecek bilgisi yok, hafıza her hayatta sıfırlanıyor),
+reklamı ancak karşılığını görürse veren, kötü işletmeyi kapatıp daha
+iyisine geçen ve artan parayı yatıran bot. Debug para/stat yok. Ayrıca
+§11'in 12 stratejisini tamamlamak için `kariyer + yatırım` ve
+`kariyer + işletme + yatırım`.
+
+**Sonuç: alt mekanikler temiz, abuse katalog sayılarında.**
+
+Fiyat optimizasyonu piyasaya göre yalnızca ×1,04; reklam aşırı güçlü
+değil (optimal oyuncu **hiç reklam vermiyor** — aynı para borsada daha
+çok getiriyor); bakımı geciktirme exploiti yok, tersine kaybettiriyor;
+personelde gerçek trade-off var; maaş + işletme **bedava kombinasyon
+değil** (fırsat maliyeti oranı 0,79); işletme kârının borsaya akması üst
+kuyruğu %100 hisseden daha az patlatıyor.
+
+**Asıl bulgu:** bütün işletmelerin sermayesi yıllık kârına göre çok
+küçük — geri ödeme süresi **0,16 ile 2,24 yıl**. İki yıldan sonra işletme
+fiilen bedava bir gelir akışı.
+
+**Serbest yazılımcılık kırık bir aykırı değer:** sermaye ₺84k, geri ödeme
+**0,16 yıl**, medyan ROI 340×, kapanma %5 ve **kötü %10'u bile 159×**.
+Diğer bütün işletmelerde kötü %10 sıfır civarı ya da negatif. Kadrosu,
+mekânı ve kirası olmadığı için kötü yılı yok. Çözücü bot 40 hayatın
+28'inde bunu seçiyor.
+
+**§13 dominans:** katı tanımla (medyan VE kötü %10 VE risk ≤) hiçbir
+strateji diğerlerinin hepsini ezmiyor; çözücü 6/14'ünü eziyor. Ama hem
+medyanda (ikincinin 1,77 katı) hem kötü %10'da (2,7 katı) birinci.
+
+**Karar bekleyen:** Q-176 (yedi soru). Öneri — yapay kâr kesme yerine
+sermaye/kâr oranını düzeltmek; ayrıntı ve önce/sonra ölçüm önerisi
+`docs/DESIGN_REVIEW_QUEUE.md` içinde.
+
+**Doğrulanmayan:** Gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
