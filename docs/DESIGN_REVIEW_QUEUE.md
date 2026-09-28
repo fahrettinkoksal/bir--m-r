@@ -4635,3 +4635,64 @@ medyan ₺50,9M · kötü %10 ₺11,1M · iyi %10 ₺209,0M · en yüksek ₺38.
 6. **Ağır ölçüm `BIR_OMUR_FULL_MEASURE=1` ile açılıyor**, her turda çalışmıyor (30.000 yol + 2000 hayat ~25 dakika). Golden testlerle aynı kalıp. Doğru mu, yoksa CI'da da çalışsın mı?
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır, işletme dengesine dokunulmaz ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-175 — Paket AE: işletme yönetim sistemi ve kalan denge soruları
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AE" briefi (§1-§38) · **Etkilenen kod:** `app/lib/domain/economy/business_market.dart`, `business_engine.dart`, `business_incidents.dart`, `app/lib/data/business_catalog.dart`, `business_incident_catalog.dart`, `app/test/paket_ae_calibration_test.dart`
+
+#### Ne yapıldı
+
+İşletme artık "her yıl otomatik kâr alan kayıt" değil: kendi fiyatı, talebi, gider kalemleri, personeli, bakımı, reklamı, itibarı ve olayları olan bir sistem. Katalog 14 işletmeye çıktı (Oto yıkama eklendi), 70+ işletme olayı yazıldı.
+
+#### Bulunan altı gerçek hata (hepsi ölçümle yakalandı, tahminle değil)
+
+1. **`condition` talebe neredeyse hiç etki etmiyordu.** Durumu 10/100 olan bir büfe hâlâ kâr ediyordu — oyunun kendi sözü "ilgilenilmeyen iş batar" iken. Durum artık talebe doğrudan biniyor.
+2. **Fiyat exploit'i.** Sabit esneklikli talep eğrisinde esneklik 1'in altında kalan her işte "fiyatı sonuna kadar yükselt" **mutlak baskın** stratejiydi; ölçüm 14 işletmenin **10'unda** en pahalı seçeneğin kazandığını gösterdi. Esneklik artık gider yapısına çıpalanıyor (`1/(1-tedarik payı)`), üstüne itibar ve rekabet biniyor. Yeni dağılım: piyasa 10 / ucuz 3 / pahalı 1.
+3. **`IncidentKind.opensNotice` hiç okunmuyordu.** AC'den beri tanımlıydı ama hiçbir yerde kullanılmıyordu: konkordato, kayyum, şirket kapanması oyuncuya sessizce geçiyordu (§26, §29).
+4. **Reklam tuzaktı.** Kampanya sonsuza kadar sürüyordu ve azalan marjinal etki yüzünden birkaç yıl sonra bedeli katkısını **her** işletmede aşıyordu. Kampanya artık üç yılda kendiliğinden bitiyor.
+5. **Katalogdaki `volatility` kâra hiç yansımıyordu.** Yalnızca `condition` salınımına giriyordu, o da işine bakan sahipte tavanda kalıyordu: lokanta (0,60) ile terzi (0,25) aynı oynaklıkta davranıyordu.
+6. **İyi yönetilen işletme risksizdi.** 45 hayat × ~35 yıl ölçümünde aktif sahibin kapanma oranı **%0** çıktı ve `isletme aktif` oyunun **en güvenli** stratejisi oldu (kötü %10'u bütün yatırım stratejilerinin üstünde). §32'nin tam yasakladığı şey.
+
+#### §32 — dominans: AD/6'dan bu yana ne değişti
+
+AD/6'da `girişim + yatırım` diğer dokuzunu **her ölçüde** eziyordu (Q-174/1). AE üç bedel ekledi: (a) üst üste üç zarar yılında iş kapanıyor, (b) rakip açılması gibi olaylar **kalıcı** talep baskısı bırakıyor, (c) maaşlı işte de çalışan sahip dükkâna tam ilgi veremiyor (§32'nin saydığı "yönetim zamanı").
+
+| Ölçü | AE öncesi | AE sonrası |
+|---|---|---|
+| her ölçüde ezdiği strateji | 10 / 11 | **6 / 11** |
+| `girişim + yatırım` kötü %10 | ₺13,2M | **₺8,0M** |
+| `girişim + yatırım` medyan | ₺71,5M | ₺65,1M |
+| aktif sahibin işletme kapanma oranı | %0 | **%9** |
+
+Medyanda hâlâ birinci. §32 bunu yasaklamıyor ("Başarılı işletmeci çok para kazanabilir"); yasak olan **her koşulda** ezmesi.
+
+#### §33 — üç bot (hafif bekçi: 45 tam hayat/bot, 60 yıl)
+
+| Bot | Medyan | Kötü %10 | İyi %10 | İşletme kârı | Kapandı | Battı |
+|---|---|---|---|---|---|---|
+| işletme pasif | ₺8,6M | ₺2,2M | ₺20,2M | ₺44k | %98 | %98 |
+| işletme aktif | ₺22,7M | ₺12,3M | ₺47,1M | ₺16,1M | %9 | %9 |
+| girişim + yatırım | ₺47,2M | ₺9,5M | ₺281,2M | ₺11,1M | %7 | %7 |
+
+#### §34, §35 — exploit ölçümleri
+
+* **Fiyat:** optimum 14 işletmede piyasa 10 / ucuz 3 / pahalı 1. Ne en pahalı ne en ucuz her zaman kazanıyor. Optimum işletmenin itibarına göre de kayıyor (adı iyi olan pahalıyı taşıyor).
+* **Reklam:** büyük kampanya ortalamada 14 işletmenin 9'unda kazandırıyor ama **tek tek hayatların %26,2'sinde para kaybettiriyor**. Garanti değil.
+
+#### §27 — sert düşüş
+
+%100 hisse portföyünde 6600 yılın **%16,3'ü ≥%20**, %9,6'sı ≥%30, %5,1'i ≥%40 düşüyor. Dağıtılmış portföyde (hisse+altın+fon) ≥%20 oranı **%1,89**.
+
+#### Karar soruları
+
+1. **Pasif işletme sahibi %98 batıyor.** Bu AE'den önce de böyleydi (ilgilenilmeyen iş yılda 9 puan durum kaybediyor, altı yılda kepenk iniyor) ama sayı fiilen kesinlik demek. "İş açıp hiç bakmamak = kesin batış" doğru mu, yoksa bazı işler kendi hâline bırakılınca idare etmeli mi?
+2. **Sert düşüş sıklığı.** %100 hisse portföyünde her altı yılda bir ≥%20 düşüş oluyor. Bu AD/1'in onaylı kalibrasyonundan doğuyor ve AE'de değiştirilmedi — AD/6 aynı kalibrasyonun 60 yıllık servet dağılımını zaten ölçüp kabul etmişti. Olduğu gibi kalsın mı?
+3. **İyi yönetilen işletmenin başarısızlık oranı %9.** Doğru bant bu mu? Yükselsin mi (işletme daha riskli olsun), yoksa "iyi yöneten batmaz" mı?
+4. **`girişim + yatırım` hâlâ medyanda birinci** (₺65,1M, ikincinin iki katı). Bu kabul edilebilir mi, yoksa işletme geliri daha da mı inmeli? İnecekse hangi koldan: taban kâr mı, gider payları mı, yönetim zamanı bedeli mi (şu an %12)?
+5. **Reklam kademelerinin bedelleri** (mahalle %3, sosyal medya %7,5, büyük %17 — taban ciroya oranla) ve kampanya süresi (3 yıl) doğru mu?
+6. **Fiyat kademeleri** ucuz %78 / pahalı %132 olarak sunuluyor; oyuncu ayrıca özel tutar yazabiliyor (aralık: bölge ortalamasının %35-%260'ı). Bantlar doğru mu?
+7. **İşletme değeri servete sayılmıyor.** Oyunda bir işletme satış fiyatı yok; `NetWorth` işletmeyi ayrıca saymıyor, yalnızca devir bedeli kapanışta cüzdana giriyor. İşletmenin bir "piyasa değeri" olmalı mı?
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.

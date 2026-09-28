@@ -21,6 +21,7 @@ library;
 import 'dart:math';
 
 import 'package:bir_omur/data/business_catalog.dart';
+import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
@@ -70,6 +71,20 @@ enum InvestStrategy {
   /// Yalnızca fon (Paket AD, §AD/6'nın istediği 10 stratejiden biri).
   sadeceFon('sadece fon'),
 
+  /// **Pasif işletme sahibi** (Paket AE, §33/A).
+  ///
+  /// İşi açar ve bir daha dönüp bakmaz: fiyat koymaz, bakım yapmaz,
+  /// personelle ilgilenmez, reklam vermez. "Otomatik kâr alan kişi"nin
+  /// ne olduğunu ölçer.
+  isletmePasif('isletme pasif'),
+
+  /// **Aktif işletme sahibi** (Paket AE, §33/B).
+  ///
+  /// Fiyatı işletmenin hâline göre ayarlar, bakım yaptırır, kadroyu
+  /// tamamlar, kampanya kurar ve işine bakar. Yatırım yapmaz: ölçülen
+  /// şey işletme yönetiminin kendisi.
+  isletmeAktif('isletme aktif'),
+
   /// **Karma normal oyuncu.** Diğer dokuzu tek bir şeyi en iyi yapmaya
   /// çalışır; bu strateji "makul davranan insan"ı temsil eder: parasının
   /// bir kısmını yatırır, bir kısmını nakit tutar, dengesiz ama akıllıca
@@ -100,6 +115,21 @@ class StrategyResult {
 
   /// İşletmelerin toplam değeri (₺) — §21.
   int business = 0;
+
+  /// İşletmenin hayat boyu net sonucu (₺) — Paket AE, §33.
+  int businessProfit = 0;
+
+  /// İşletmenin açık kaldığı toplam yıl — Paket AE, §23 ölçümü.
+  int businessYears = 0;
+
+  /// Hiç işletme kuruldu mu?
+  bool businessOpened = false;
+
+  /// Bir işletme kapandı mı (devir ya da batış)?
+  bool businessClosed = false;
+
+  /// Bir işletme **battı** mı?
+  bool businessBankrupt = false;
 
   /// Lüks varlıkların (yazlık/tekne/koleksiyon) toplam değeri (₺) — §21.
   int luxury = 0;
@@ -273,6 +303,18 @@ StrategyResult playStrategy({
   // Bu satır §21'in bileşen dökümü için bilgi amaçlıdır.
   sonuc.business = son.businesses
       .fold<int>(0, (int t, Business b) => t + b.totalInvested);
+  // Paket AE, §33: işletmenin **kendi** sonucu ayrı ölçülür.
+  sonuc.businessProfit = son.businesses
+      .fold<int>(0, (int t, Business b) => t + b.totalProfit);
+  sonuc.businessYears = son.businesses.fold<int>(
+    0,
+    (int t, Business b) => t + b.yearsOpen(son.player.age),
+  );
+  sonuc.businessOpened = son.businesses.isNotEmpty;
+  sonuc.businessClosed =
+      son.businesses.any((Business b) => !b.isOpen);
+  sonuc.businessBankrupt = son.businesses
+      .any((Business b) => b.endReason == BusinessEndReason.batti);
   sonuc.principal = son.portfolioInvested;
   sonuc.realizedProfit = son.portfolioRealized;
   // `companyFailures` yıl yıl toplandığı için birikmiş sayıyı düzelt:
@@ -384,7 +426,15 @@ void _act(
 
     case InvestStrategy.girisimVeYatirim:
       _tryOpenBusiness(c, rng);
+      _manageBusiness(c);
       _buyAll(c, <String>['hisse', 'fon'], rng, sonuc);
+
+    case InvestStrategy.isletmePasif:
+      _tryOpenBusiness(c, rng, tend: false);
+
+    case InvestStrategy.isletmeAktif:
+      _tryOpenBusiness(c, rng);
+      _manageBusiness(c);
 
     case InvestStrategy.sadeceFon:
       _buyAll(c, <String>['fon'], rng, sonuc);
@@ -510,9 +560,10 @@ void _tryBuyHome(GameController c, Random rng) {
   }
 }
 
-void _tryOpenBusiness(GameController c, Random rng) {
+void _tryOpenBusiness(GameController c, Random rng, {bool tend = true}) {
   if (c.state!.businesses.isNotEmpty) {
-    if (c.businessTendAvailability().isAllowed) c.tendBusiness();
+    // Pasif sahip işine **hiç** bakmaz: §33/A'nın ölçtüğü şey bu.
+    if (tend && c.businessTendAvailability().isAllowed) c.tendBusiness();
     return;
   }
   if (c.state!.player.age < 24) return;
@@ -521,4 +572,58 @@ void _tryOpenBusiness(GameController c, Random rng) {
       .toList(growable: false);
   if (uygun.isEmpty) return;
   c.openBusinessOf(uygun[rng.nextInt(uygun.length)]);
+}
+
+/// **Aktif işletme yönetimi** (Paket AE, §33/B, §33/C).
+///
+/// Bot burada **zayıflatılmıyor, akıllandırılıyor**: sistemi anlayan bir
+/// oyuncunun yapacağını yapar — fiyatı işletmenin hâline göre koyar,
+/// bakımı geciktirmez, kadroyu tamamlar, kampanya kurar. §33'ün sorusu
+/// "iyi yöneten ne kazanır?" olduğuna göre ölçüm iyi yönetimle yapılmalı.
+///
+/// Min-max ilkesi (kullanıcının "EN ÖNEMLİ KURAL"ı): ekonomi, botu
+/// aptallaştırarak değil, akıllı oyuncuya dayanarak düzeltilir.
+void _manageBusiness(GameController c) {
+  final Business? is_ = c.openBusiness;
+  if (is_ == null) return;
+  final BusinessType? tur = is_.type;
+  if (tur == null) return;
+
+  // 1) Fiyat: adı iyi olan dükkân pahalıyı taşır, adı kötü olan taşımaz.
+  //    Esneklik zaten itibara göre kayıyor; bot bunu okuyup karşılık
+  //    veriyor.
+  final int ortalama = c.businessMarketPrice();
+  if (ortalama > 0) {
+    final double oran = is_.reputation >= 65
+        ? 1.15
+        : is_.reputation <= 35
+            ? 0.88
+            : 1.0;
+    final int hedef = (ortalama * oran).round();
+    if ((hedef - c.businessPrice()).abs() > ortalama * 0.05) {
+      c.setBusinessPrice(hedef);
+    }
+  }
+
+  // 2) Bakım: yıpranmayı biriktirmek pahalıya patlıyor (bedel eksikle
+  //    birlikte artıyor), o yüzden erken davran.
+  if (is_.upkeep < 72 && c.businessMaintenanceAvailability().isAllowed) {
+    c.maintainBusiness();
+  }
+
+  // 3) Personel: önce eksik kadro, sonra huzursuzluk, sonra ilgi.
+  if (c.businessStaffAvailability(StaffAction.iseAl).isAllowed) {
+    c.businessStaff(StaffAction.iseAl);
+  } else if (is_.staffMorale < 45 &&
+      c.businessStaffAvailability(StaffAction.zam).isAllowed) {
+    c.businessStaff(StaffAction.zam);
+  } else if (c.businessStaffAvailability(StaffAction.ilgilen).isAllowed) {
+    c.businessStaff(StaffAction.ilgilen);
+  }
+
+  // 4) Reklam: kampanya bittiğinde yenisini kur. Min-max oyuncu en
+  //    pahalısını seçer; §35 bunun garanti para olmadığını denetliyor.
+  if (is_.ad == BusinessAd.yok) {
+    c.setBusinessAd(BusinessAd.buyuk);
+  }
 }

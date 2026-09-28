@@ -475,6 +475,25 @@ void main() {
       expect(gorulen, isNotEmpty);
     });
 
+    test('mekânı olmayan işe dükkân olayı gelmez (§21)', () {
+      // Etiket kilidinin yanında ikinci kilit: `hasShopfront`.
+      for (final BusinessType t in kBusinessCatalog) {
+        if (t.hasShopfront) continue;
+        for (final String etiket in t.incidentTags) {
+          expect(
+            BusinessIncidents.prototypeOnlyShopOnlyTags.contains(etiket),
+            isFalse,
+            reason: '${t.id} mekânsız ama dükkân etiketi taşıyor: $etiket',
+          );
+        }
+      }
+      // En az bir mekânsız iş olmalı, yoksa test hiçbir şey ölçmez.
+      expect(
+        kBusinessCatalog.any((BusinessType t) => !t.hasShopfront),
+        isTrue,
+      );
+    });
+
     test('aynı olay aynı yıl iki kez uygulanmaz (§36)', () {
       // Yıl hesabı bir kez kapanır; ikinci çağrı hiçbir şey yapmaz.
       GameState s = isle(18, 'is_hali_saha', age: 30);
@@ -515,6 +534,52 @@ void main() {
       }
     });
 
+    test('reklam spam exploit yok (§36)', () {
+      // Aynı yıl kampanyayı defalarca değiştirmek ne para üretir ne de
+      // bedeli katlar: bedel yıl sonunda **bir kez** yazılır.
+      GameState s = isle(28, 'is_kahve', age: 30);
+      final int once = s.player.wallet;
+      for (int i = 0; i < 25; i++) {
+        s = BusinessEngine.setAd(
+          state: s,
+          reklam: i.isEven ? BusinessAd.buyuk : BusinessAd.mahalle,
+        ).state;
+      }
+      expect(s.player.wallet, once, reason: 'Reklam seçmek para vermez.');
+      // Yorgunluk sayacı da şişmez: kampanya değişince sıfırlanır.
+      expect(s.businesses.single.adStreak, 0);
+
+      s = s.copyWith(player: s.player.copyWith(age: 31));
+      s = BusinessEngine.advanceYear(s, 31, Random(1));
+      final BusinessYear y = s.businesses.single.lastYear!;
+      final BusinessType t = tur('is_kahve');
+      // Bedel tek bir kampanyanın bedeli kadar; 25 katı değil.
+      expect(
+        y.adCost,
+        lessThanOrEqualTo((t.baseRevenue * BusinessAd.buyuk.costShare)
+                .round() +
+            1),
+      );
+    });
+
+    test('devredilen işletme olay üretmiyor (§36)', () {
+      GameState s = isle(29, 'is_lokanta', age: 30);
+      s = BusinessEngine.close(state: s).state;
+      final Business kapali = s.businesses.single;
+      for (int yas = 31; yas <= 60; yas++) {
+        s = s.copyWith(player: s.player.copyWith(age: yas));
+        final int onceBildirim = s.notices.length;
+        s = BusinessEngine.advanceYear(s, yas, Random(1));
+        expect(s.notices.length, onceBildirim,
+            reason: 'Kapanmış iş $yas yaşında bildirim üretti.');
+      }
+      final Business sonra = s.businesses.single;
+      expect(sonra.recentIncidents, kapali.recentIncidents);
+      expect(sonra.history.length, kapali.history.length);
+      expect(sonra.upkeep, kapali.upkeep);
+      expect(sonra.staffCount, kapali.staffCount);
+    });
+
     test('kapanan işletme gelir üretmez (§36)', () {
       GameState s = isle(20, 'is_kahve', age: 30);
       s = BusinessEngine.close(state: s).state;
@@ -544,6 +609,36 @@ void main() {
       expect(rapor, contains('Net'));
       expect(y.revenue, greaterThan(0));
       expect(y.totalCost, greaterThan(0));
+      // Rapor aritmetiği tutmalı: oyuncu "Ciro − giderler ≠ Net" görmesin.
+      expect(y.revenue - y.totalCost, y.net);
+    });
+
+    test('bakım yaptıran yılda da rapor tutarlı ve para iki kez çıkmaz', () {
+      // §6/§31: bakım gider satırında görünür ve net'e girer, ama cüzdan
+      // bir kez ödenir.
+      GameState s = isle(30, 'is_kahve', age: 30, upkeep: 40);
+      final int cuzdanBasta = s.player.wallet;
+      final int bakimBedeli =
+          BusinessEngine.maintenanceCost(s.businesses.single);
+      s = BusinessEngine.doMaintenance(state: s).state;
+      expect(s.player.wallet, cuzdanBasta - bakimBedeli);
+
+      final int cuzdanBakimSonrasi = s.player.wallet;
+      s = s.copyWith(player: s.player.copyWith(age: 31));
+      s = BusinessEngine.advanceYear(s, 31, Random(1));
+      final BusinessYear y = s.businesses.single.lastYear!;
+
+      expect(y.maintenanceCost, greaterThanOrEqualTo(bakimBedeli));
+      expect(y.revenue - y.totalCost, y.net);
+      // Yılın **ekonomik** sonucu bakımı içeriyor; cüzdana ise bakım
+      // hariç kısım yazılıyor, çünkü o para zaten çıkmıştı.
+      expect(
+        s.player.wallet - cuzdanBakimSonrasi,
+        y.net + bakimBedeli,
+        reason: 'Bakım ya iki kez tahsil edildi ya da hiç sayılmadı.',
+      );
+      // Sayaç sıfırlanır: gelecek yıl aynı bakım tekrar yazılmaz.
+      expect(s.businesses.single.yearMaintenanceSpend, 0);
     });
 
     test('geçmiş en fazla beş yıl tutulur', () {
@@ -617,6 +712,10 @@ void main() {
       expect(sonra.staffQuality, once.staffQuality);
       expect(sonra.wageLevel, once.wageLevel);
       expect(sonra.recentIncidents, once.recentIncidents);
+      expect(sonra.lossStreak, once.lossStreak);
+      expect(sonra.demandPressure, closeTo(once.demandPressure, 1e-9));
+      expect(sonra.lastMaintenanceAge, once.lastMaintenanceAge);
+      expect(sonra.lastStaffCareAge, once.lastStaffCareAge);
       expect(sonra.history.length, once.history.length);
       expect(sonra.lastYear!.net, once.lastYear!.net);
       expect(sonra.lastYear!.revenue, once.lastYear!.revenue);
@@ -656,6 +755,8 @@ void main() {
         'adStreak',
         'history',
         'recentIncidents',
+        'lossStreak',
+        'demandPressure',
       ]) {
         is0.remove(alan);
       }
@@ -667,6 +768,8 @@ void main() {
       expect(b.ad, BusinessAd.yok);
       expect(b.history, isEmpty);
       expect(b.recentIncidents, isEmpty);
+      expect(b.lossStreak, 0);
+      expect(b.demandPressure, 1.0);
     });
   });
 }

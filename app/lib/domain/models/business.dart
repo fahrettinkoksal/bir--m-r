@@ -135,6 +135,8 @@ class Business {
     this.lastStaffCareAge,
     this.history = const <BusinessYear>[],
     this.recentIncidents = const <String>[],
+    this.lossStreak = 0,
+    this.demandPressure = 1.0,
   });
 
   /// prototypeOnly: yeni kurulan işin başlangıç durumu.
@@ -253,6 +255,22 @@ class Business {
   /// Kayda girer, yani kayıt geri yüklenerek olay tazelenemez.
   final List<String> recentIncidents;
 
+  /// Üst üste kaç yıl zarar edildi (Paket AE, §32).
+  ///
+  /// Kâr eden yıl sayacı sıfırlar; işe para koymak bir yıl geri alır.
+  /// Belirli bir sayıya ulaşınca iş kapanır: işini iyi yöneten birinin
+  /// bile üst üste kötü yılları sonsuza kadar finanse etmesi beklenemez.
+  final int lossStreak;
+
+  /// **Kalıcı talep baskısı** (Paket AE, §11-24, §32).
+  ///
+  /// 1,0 nötrdür. Karşı sokağa açılan kahveci, mahalleye gelen zincir
+  /// market ya da iptal edilen büyük sözleşme bunu aşağı çeker; filo
+  /// anlaşması ya da canlanan mahalle yukarı iter. Her yıl bir miktar
+  /// 1,0'a doğru toparlanır ama **o yıl içinde geçmez**: rakip açılması
+  /// bir yıllık dalgalanma değil, işin şartlarının değişmesidir.
+  final double demandPressure;
+
   BusinessType? get type => businessTypeById(typeId);
 
   /// Bu işin fiilî kadrosu.
@@ -335,6 +353,8 @@ class Business {
     Object? lastStaffCareAge = _unset,
     List<BusinessYear>? history,
     List<String>? recentIncidents,
+    int? lossStreak,
+    double? demandPressure,
   }) {
     return Business(
       id: id,
@@ -376,6 +396,8 @@ class Business {
       recentIncidents: recentIncidents == null
           ? this.recentIncidents
           : List<String>.unmodifiable(recentIncidents),
+      lossStreak: lossStreak ?? this.lossStreak,
+      demandPressure: demandPressure ?? this.demandPressure,
     );
   }
 }

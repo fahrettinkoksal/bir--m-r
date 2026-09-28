@@ -117,6 +117,39 @@ abstract final class BusinessMarket {
   /// prototypeOnly: rekabetin esnekliği kaydırma payı.
   static const double prototypeOnlyCompetitionElasticityShift = 0.45;
 
+  /// prototypeOnly: kalıcı talep baskısının yılda ne kadar toparlandığı.
+  ///
+  /// Karşı sokağa açılan rakip birkaç yıl sonra sönümlenir ama o yıl
+  /// içinde geçmez. 0,18 ile %12'lik bir darbe sekiz yılda üçte birine
+  /// iner; oyuncu bu arada fiyat, reklam ve itibarla karşılık verebilir.
+  static const double prototypeOnlyPressureRecovery = 0.10;
+
+  /// prototypeOnly: kalıcı baskının inebileceği ve çıkabileceği sınır.
+  ///
+  /// Üst üste gelen rakipler işi sıfıra indirmesin, art arda gelen iyi
+  /// haberler de işi sonsuz büyütmesin.
+  static const double prototypeOnlyPressureFloor = 0.55;
+  static const double prototypeOnlyPressureCeiling = 1.35;
+
+  /// prototypeOnly: maaşlı işte de çalışan sahibin işletmeye
+  /// verebildiği ilgi (§32).
+  ///
+  /// **Neden var.** §32 işletmenin bedelleri arasında "yönetim zamanı"nı
+  /// sayıyor ama AE'nin ilk hâlinde bu hiç uygulanmıyordu: oyuncu tam
+  /// zamanlı bir işte çalışırken dükkânı da eksiksiz yönetebiliyor,
+  /// ikisinin gelirini birden alıyordu. İşletmeyi yönetmek bir iştir;
+  /// iki işi birden yapan ikisini de tam yapamaz.
+  ///
+  /// Bu, işvereni de rahatsız eden aynı durumun dükkân tarafındaki
+  /// karşılığıdır (D-143: işveren ikinci iş için laf eder).
+  static const double prototypeOnlyEmployedAttention = 0.88;
+
+  /// prototypeOnly: mevsimin talebe salınım payı.
+  static const double prototypeOnlySeasonSwing = 0.22;
+
+  /// prototypeOnly: işin kendi oynaklığının talebe salınım payı.
+  static const double prototypeOnlyTypeVolatilitySwing = 0.34;
+
   /// prototypeOnly: fiyat oranının alt/üst sınırı.
   ///
   /// Oyuncu 1 ₺ fiyat yazıp sonsuz müşteri üretemez, 10 katı yazıp
@@ -278,6 +311,11 @@ abstract final class BusinessMarket {
     // --- İşin durumu -------------------------------------------------
     final double durum = conditionFactor(business.condition);
 
+    // --- Sahibin zamanı (§32) ----------------------------------------
+    final double ilgi = state.career.isEmployed && !state.career.isRetired
+        ? prototypeOnlyEmployedAttention
+        : 1.0;
+
     // --- Reklam (§8) -------------------------------------------------
     final double reklam = 1 + adLift;
 
@@ -287,19 +325,34 @@ abstract final class BusinessMarket {
     final double ekonomi = regimeDemandFactor(state.market.regime);
     final double rekabet = competition(state, tur, age);
 
-    // --- Mevsim ve şans ----------------------------------------------
-    // Mevsim oynaklığı türe bağlı: spor salonunun yılı halı sahanınkine
-    // benzemez, bakkalınki hemen hemen aynıdır.
-    final double salinim =
-        (rng.nextDouble() * 2 - 1) * (tur.seasonality * 0.35 + 0.08);
+    // --- Mevsim, işin kendi oynaklığı ve şans ------------------------
+    //
+    // **Gerçek hata (ölçümde yakalandı).** AE'nin ilk hâlinde buraya
+    // yalnızca [BusinessType.seasonality] giriyordu;
+    // [BusinessType.volatility] ise eski motordan kalma biçimde sadece
+    // `condition` salınımına bakıyordu. İşine bakan bir sahipte durum
+    // tavanda kaldığı için katalogda yazan oynaklık (lokanta 0,60,
+    // terzi 0,25) kâra **hiç** yansımıyordu: 14 işletmede 1400'er yıl
+    // ölçüldü, zarar yılı %0 ile %3,7 arasında ve en uzun zarar serisi
+    // 3 çıktı. Yani iyi yönetilen işletme tahvil gibi davranıyordu ve
+    // `isletme aktif` oyunun en güvenli stratejisi oluyordu — §32'nin
+    // yasakladığı şey.
+    //
+    // Oynaklık artık doğrudan talebe biniyor: lokantanın yılı terzininkine
+    // benzemez.
+    final double salinim = (rng.nextDouble() * 2 - 1) *
+        (tur.seasonality * prototypeOnlySeasonSwing +
+            tur.volatility * prototypeOnlyTypeVolatilitySwing);
 
     final double toplam = fiyatEtkisi *
         itibar *
         hizmet *
         durum *
+        ilgi *
         reklam *
         sehir *
-        ekonomi /
+        ekonomi *
+        business.demandPressure /
         rekabet *
         (1 + salinim);
 

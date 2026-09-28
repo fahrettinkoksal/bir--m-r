@@ -41,6 +41,7 @@ class BusinessIncident {
     this.conditionDelta = 0,
     this.staffLoss = 0,
     this.demandShift = 1.0,
+    this.lastingShift = 1.0,
     this.major = false,
     this.minYearsOpen = 1,
     this.requiresStaff = false,
@@ -78,6 +79,13 @@ class BusinessIncident {
 
   /// O yılın talebine çarpan (1,0 etkisiz).
   final double demandShift;
+
+  /// **Kalıcı** talep baskısına çarpan (1,0 etkisiz).
+  ///
+  /// Karşı sokağa açılan rakip bir yıllık bir dalgalanma değildir: ertesi
+  /// yıl da oradadır. Bu alan [Business.demandPressure] değerini çarpar
+  /// ve etkisi yıllar içinde yavaşça azalır.
+  final double lastingShift;
 
   /// Oyuncuya pencere açılır mı (§25)?
   final bool major;
@@ -278,6 +286,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'saha'},
     weight: 1.3,
     demandShift: 0.82,
+    lastingShift: 0.88,
     minYearsOpen: 3,
     major: true,
   ),
@@ -309,6 +318,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'turnuva'},
     weight: 1.2,
     demandShift: 1.18,
+    lastingShift: 1.06,
     conditionDelta: 4,
     minYearsOpen: 2,
   ),
@@ -369,6 +379,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'kahve'},
     weight: 1.4,
     demandShift: 0.84,
+    lastingShift: 0.90,
     minYearsOpen: 2,
     major: true,
   ),
@@ -402,6 +413,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'kahve'},
     weight: 1.2,
     demandShift: 1.15,
+    lastingShift: 1.06,
     conditionDelta: 3,
     minYearsOpen: 2,
   ),
@@ -543,6 +555,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'salon', 'yikama'},
     weight: 1.3,
     demandShift: 0.85,
+    lastingShift: 0.90,
     minYearsOpen: 3,
     major: true,
   ),
@@ -616,6 +629,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'atolye'},
     weight: 1.2,
     demandShift: 0.87,
+    lastingShift: 0.92,
     minYearsOpen: 3,
   ),
   BusinessIncident(
@@ -626,6 +640,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'filo'},
     weight: 1.3,
     demandShift: 1.25,
+    lastingShift: 1.10,
     conditionDelta: 5,
     minReputation: 48,
     minYearsOpen: 2,
@@ -743,6 +758,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'nakliye'},
     weight: 1.4,
     demandShift: 1.26,
+    lastingShift: 1.10,
     conditionDelta: 4,
     minReputation: 45,
   ),
@@ -754,6 +770,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'nakliye'},
     weight: 1.5,
     demandShift: 0.82,
+    lastingShift: 0.88,
     major: true,
   ),
   BusinessIncident(
@@ -799,6 +816,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'perakende'},
     weight: 1.3,
     demandShift: 0.80,
+    lastingShift: 0.86,
     minYearsOpen: 3,
     major: true,
   ),
@@ -819,6 +837,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'perakende'},
     weight: 1.4,
     demandShift: 1.20,
+    lastingShift: 1.08,
     conditionDelta: 3,
   ),
   BusinessIncident(
@@ -875,6 +894,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'kuafor'},
     weight: 1.3,
     demandShift: 0.86,
+    lastingShift: 0.92,
     minYearsOpen: 3,
   ),
 
@@ -934,6 +954,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'serbest'},
     weight: 2.0,
     demandShift: 0.80,
+    lastingShift: 0.91,
     major: true,
   ),
   BusinessIncident(
@@ -1052,6 +1073,7 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     tags: <String>{'yikama'},
     weight: 1.3,
     demandShift: 0.85,
+    lastingShift: 0.90,
     minYearsOpen: 2,
   ),
 

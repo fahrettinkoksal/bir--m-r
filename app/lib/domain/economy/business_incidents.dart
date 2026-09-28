@@ -25,6 +25,7 @@ import '../../data/business_incident_catalog.dart';
 import '../models/business.dart';
 import '../models/game_state.dart';
 import '../models/pending_notice.dart';
+import 'business_market.dart';
 
 /// Bir yılın işletme olaylarının sonucu.
 class BusinessIncidentOutcome {
@@ -81,6 +82,27 @@ abstract final class BusinessIncidents {
 
   /// prototypeOnly: iyi haberin kötü işletmedeki ağırlık payı.
   static const double prototypeOnlyGoodNewsPenalty = 0.35;
+
+  /// Yalnızca fiziksel mekânı olan işletmelere ait olay etiketleri (§21).
+  ///
+  /// Ayıklama burada **yapılmaz**, çünkü bir olay birden çok etiket
+  /// taşıyabiliyor: mali denetim hem `dukkan` hem `serbest` hem `nakliye`
+  /// etiketli ve §23 onu üçüne de istiyor. Motorda "bu etiketlerden biri
+  /// varsa eleme" kuralı yazmayı denedim ve denetimi serbest yazılımcıdan
+  /// koparıyordu.
+  ///
+  /// Doğru güvence katalog tarafında: mekânı olmayan bir işletme bu
+  /// etiketleri **taşımaz**. `paket_ae_business_test.dart` bunu
+  /// denetliyor; buradaki küme o testin okuduğu tanımdır.
+  static const Set<String> prototypeOnlyShopOnlyTags = <String>{
+    'dukkan',
+    'tesis',
+    'saha',
+    'salon',
+    'mutfak',
+    'firin',
+    'yikama',
+  };
 
   /// Bir yılın olaylarını işler.
   static BusinessIncidentOutcome advance({
@@ -231,6 +253,10 @@ abstract final class BusinessIncidents {
       kadro = (kadro - olay.staffLoss).clamp(0, tur.staffSlots);
     }
     return business.copyWith(
+      demandPressure: (business.demandPressure * olay.lastingShift).clamp(
+        BusinessMarket.prototypeOnlyPressureFloor,
+        BusinessMarket.prototypeOnlyPressureCeiling,
+      ),
       upkeep: (business.upkeep + olay.upkeepDelta).clamp(0, 100),
       staffMorale: (business.staffMorale + olay.moraleDelta).clamp(0, 100),
       staffQuality: (business.staffQuality + olay.qualityDelta).clamp(0, 100),

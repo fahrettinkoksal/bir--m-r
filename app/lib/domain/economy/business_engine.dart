@@ -351,6 +351,9 @@ abstract final class BusinessEngine {
     final Business guncel = is_.copyWith(
       condition: (is_.condition + pay).clamp(0, 100),
       totalInvested: is_.totalInvested + tutar,
+      // İşe konan para zarar sayacını bir yıl geri alır (§32): kötü
+      // giden işi ayakta tutmanın yolu var ama bedava değil.
+      lossStreak: (is_.lossStreak - 1).clamp(0, 1 << 30),
     );
     final String metin = 'İşe ${trMoney(tutar)} koydun. '
         '${is_.type?.name ?? 'Dükkân'} biraz toparlandı.';
@@ -781,6 +784,25 @@ abstract final class BusinessEngine {
   /// yıpratıyor: kötü yönetilen iş gerçekten batıyor.
   static const int prototypeOnlyLossConditionHit = 16;
 
+  /// prototypeOnly: üst üste kaç zarar yılından sonra iş kapanır (§32).
+  ///
+  /// **Neden var (ölçümde yakalandı).** AE'nin ilk hâlinde işine bakan
+  /// bir sahibin işi **hiç** kapanmıyordu: 45 hayat × ~35 yıl ölçümünde
+  /// aktif sahibin kapanma oranı %0 çıktı ve `isletme aktif` oyunun en
+  /// güvenli stratejisi oldu (kötü %10'u bütün yatırım stratejilerinin
+  /// üstünde). §32 tam bunu yasaklıyor: "İşletmenin kendi risk, masraf,
+  /// yönetim zamanı, **başarısızlık**, beklenmedik gider bedeli olsun."
+  ///
+  /// Eksik olan şey şuydu: durum (`condition`) ilgilenmekle yükseliyordu,
+  /// yani kötü giden bir işi ayakta tutmanın bedeli yoktu. Artık **zarar
+  /// yılları sayılıyor**. İşini iyi yöneten biri bile üst üste kötü
+  /// yılları sonsuza kadar finanse edemez; kepenk iner.
+  ///
+  /// Sayaç kâr eden yılda sıfırlanır ve işe para koymak bir yıl geri
+  /// alır ([invest]): "işe para koy" böylece gerçek bir kurtarma hamlesi
+  /// olur.
+  static const int prototypeOnlyLossStreakLimit = 3;
+
   /// İşin yılını işler: talep doğar, ciro ve giderler hesaplanır, sonuç
   /// cüzdana yazılır, durum kayar ve iş batabilir.
   ///
@@ -877,23 +899,36 @@ abstract final class BusinessEngine {
         ? 0
         : (tur.baseRevenue * b.ad.costShare).round();
 
+    // Oyuncunun kendi yaptırdığı bakım cüzdandan **o an** çıkmıştı;
+    // burada yalnızca yılın gerçek sonucuna yazılır.
+    //
+    // **Gerçek hata (kendi diff'imi okurken yakalandı).** İlk yazımda bu
+    // tutar `BusinessYear.maintenanceCost` satırına giriyor ama `net`ten
+    // düşülmüyordu: oyuncu raporda "Ciro − giderler ≠ Net" görüyordu.
+    // Artık yılın **ekonomik** sonucu bakımı da içeriyor; cüzdana ise
+    // yalnızca yıl sonunda kapanan kısım yazılıyor, yani para iki kez
+    // çıkmıyor.
     final int gider = personel +
         tedarik +
         sabit +
         rutinBakim +
+        b.yearMaintenanceSpend +
         reklamBedeli +
         olay.cost;
     final int net = ciro - gider;
+    // Cüzdana giren/çıkan: bakım zaten ödendiği için geri eklenir.
+    final int cuzdanEtkisi = net + b.yearMaintenanceSpend;
 
     // -----------------------------------------------------------------
     // 5) Kayıt: cüzdan, durum, geçmiş.
     // -----------------------------------------------------------------
     GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: (state.player.wallet + net).clamp(0, 1 << 31),
+        wallet: (state.player.wallet + cuzdanEtkisi).clamp(0, 1 << 31),
       ),
     );
 
+    int zararSerisi = net < 0 ? b.lossStreak + 1 : 0;
     int durum = b.condition;
     if (net < 0) {
       // Zararın büyüklüğüne göre durum düşer: küçük zarar yıpratır,
@@ -926,8 +961,12 @@ abstract final class BusinessEngine {
       gecmis.removeAt(0);
     }
 
+    if (zararSerisi > prototypeOnlyLossStreakLimit) {
+      zararSerisi = prototypeOnlyLossStreakLimit;
+    }
     b = b.copyWith(
       condition: durum,
+      lossStreak: zararSerisi,
       totalProfit: b.totalProfit + net,
       lastSettledAge: newAge,
       history: gecmis,
@@ -943,15 +982,21 @@ abstract final class BusinessEngine {
     // -----------------------------------------------------------------
     // 6) Battı mı?
     // -----------------------------------------------------------------
-    if (durum <= 0) {
+    final bool zararlaBatti = zararSerisi >= prototypeOnlyLossStreakLimit;
+    if (durum <= 0 || zararlaBatti) {
       final Business batan = b.copyWith(
         closedAtAge: newAge,
         endReason: BusinessEndReason.batti,
       );
       next = _replace(next, batan);
-      final String metin = '${tur.name} battı. Kepenk indi, '
-          'borçlar kaldı.\n\nOraya koyduğun '
-          '${trMoney(batan.totalInvested)} gitti.';
+      final String metin = zararlaBatti
+          ? '${tur.name} kapandı.\n\n'
+              'Üç yıl üst üste açığı sen kapattın. '
+              'Bu yıl kapatmayacağını anladın.\n\n'
+              'Oraya koyduğun ${trMoney(batan.totalInvested)} gitti.'
+          : '${tur.name} battı. Kepenk indi, '
+              'borçlar kaldı.\n\nOraya koyduğun '
+              '${trMoney(batan.totalInvested)} gitti.';
       next = _log(next, '${tur.name} battı.', age: newAge);
       next = next.copyWith(
         player: next.player.copyWith(
@@ -963,9 +1008,9 @@ abstract final class BusinessEngine {
           id: 'is-batti-${is_.id}-$newAge',
           kind: NoticeKind.kendiIsi,
           age: newAge,
-          title: 'İşin battı',
+          title: zararlaBatti ? 'İşini kapattın' : 'İşin battı',
           text: metin,
-          money: net,
+          money: cuzdanEtkisi,
         ),
       );
     }
@@ -988,7 +1033,7 @@ abstract final class BusinessEngine {
           age: newAge,
           title: net >= 0 ? 'İşin yılı kapandı' : 'İşin zarar etti',
           text: yearReport(tur, yil),
-          money: net,
+          money: cuzdanEtkisi,
         ),
       );
     }
@@ -1108,6 +1153,12 @@ abstract final class BusinessEngine {
       nitelik = (nitelik + (moral >= 45 ? 2 : -3)).clamp(0, 100);
     }
 
+    // --- Kalıcı talep baskısı (§11-24) -------------------------------
+    // Rakibin açılması, sözleşmenin iptali ya da mahallenin canlanması
+    // yıllar boyu sürer; her yıl bir miktar 1,0'a doğru toparlanır.
+    final double baski = is_.demandPressure +
+        (1 - is_.demandPressure) * BusinessMarket.prototypeOnlyPressureRecovery;
+
     // --- İtibar (§9) -------------------------------------------------
     final int ortalama = BusinessMarket.averagePrice(state, tur, newAge);
     final int fiyat =
@@ -1135,6 +1186,7 @@ abstract final class BusinessEngine {
       staffMorale: moral,
       staffQuality: nitelik,
       reputation: itibar,
+      demandPressure: baski,
     );
   }
 

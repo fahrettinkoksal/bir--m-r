@@ -179,6 +179,33 @@ ev" yok).
 inşaat şirketi, onlarca kiracılı apartman yönetimi, kira hukuku
 simülasyonu, mahkeme/tahliye prosedürü, ayrıntılı emlak vergisi.
 
+### 2.9 Kendi işi / işletme yönetimi — **eklendi (Paket AE)**
+
+İşletme tek bir sayıydı: `condition`. Kâr ondan çıkıyordu, oyuncunun tek
+hamlesi "işine bak" idi ve iyi yönetilen işletme her yıl aynı parayı
+veren bir tahvil gibi davranıyordu. Fiyat yoktu, müşteri yoktu, personel
+yoktu, bakım yoktu, reklam yoktu, itibar yoktu ve 13 işletmenin hepsinin
+başına aynı hiçbir şey geliyordu.
+
+Gelen: her işletmenin **kendi sattığı şeyi** ve fiyat başlığı (halı sahada
+"Maç / saat ücreti", kuaförde "Saç kesim ortalaması"), oyun içi **bölge
+ortalaması** (şehir + ekonomi rejimi + kurgusal rekabet; gerçek yıla bağlı
+değil), fiyat/talep elastikiyeti, müşteri yoğunluğu, ciro-gider-net
+dökümü, hafif personel sistemi (kadro, nitelik, memnuniyet, ücret düzeyi),
+üç kademeli reklam, itibar, yıpranma ve bakım, 70+ işletmeye özel olay,
+kalıcı rekabet baskısı, nadir afetler, işletme ekranı ve son beş yılın
+raporu. Katalog 14 işletmeye çıktı (Oto yıkama).
+
+**Ölçülen:** pasif sahip 20 yılda zarar ediyor ve %98 batıyor; aktif sahip
+taban kârın 1,2-1,75 katını alıyor ve %7 kapanma yaşıyor. Fiyat optimumu
+14 işletmede piyasa 10 / ucuz 3 / pahalı 1 — ne en pahalı ne en ucuz her
+zaman kazanıyor. Büyük reklam kampanyası tek tek hayatların %20,2'sinde
+para kaybettiriyor.
+
+**V1'de bilerek yok:** tek tek çalışan kaydı (kadro sayı+nitelik+memnuniyet
+soyutlaması), şube açma, franchise, tedarikçi pazarlığı, stok yönetimi,
+gerçek muhasebe/mevzuat simülasyonu, vergi optimizasyonu.
+
 ## 3. Yarım kalmış sistemler
 
 Kodlandı ama yüzeysel; derinleştirilmesi gerekiyor.

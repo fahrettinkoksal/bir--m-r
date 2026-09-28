@@ -146,4 +146,83 @@ void main() {
     );
     expect(find.textContaining('Bu yıl işine yeterince baktın'), findsWidgets);
   });
+
+  // ===================================================================
+  // Paket AE — işletme ekranı (§30)
+  // ===================================================================
+
+  testWidgets('ekran bölge ortalamasını ve fiyatı gösterir (§3, §30)',
+      (WidgetTester tester) async {
+    await openBusinessPage(tester, isSahibi());
+    expect(find.textContaining('Bölgendeki ortalama'), findsWidgets);
+    expect(find.textContaining(bufe.priceLabel), findsWidgets);
+    expect(find.textContaining('Senin fiyatın'), findsWidgets);
+  });
+
+  testWidgets('hazır fiyat seçeneği fiyatı gerçekten değiştirir (§4)',
+      (WidgetTester tester) async {
+    await openBusinessPage(tester, isSahibi());
+    final int ortalama = controller.businessMarketPrice();
+    expect(controller.openBusiness!.price, 0, reason: 'Başta fiyat yok.');
+
+    final Finder ucuz = find.byKey(const Key('business_price_ucuz'));
+    await scrollToFinder(tester, ucuz);
+    await tester.tap(ucuz);
+    await tester.pumpAndSettle();
+    await answerPendingNotices(tester, controller);
+
+    expect(controller.openBusiness!.price, lessThan(ortalama));
+    expect(controller.openBusiness!.price, greaterThan(0));
+  });
+
+  testWidgets('reklam kampanyası kurulabiliyor (§8)',
+      (WidgetTester tester) async {
+    await openBusinessPage(tester, isSahibi());
+    expect(controller.openBusiness!.ad, BusinessAd.yok);
+
+    final Finder buyuk = find.byKey(const Key('business_ad_buyuk'));
+    await scrollToFinder(tester, buyuk);
+    await tester.tap(buyuk);
+    await tester.pumpAndSettle();
+    await answerPendingNotices(tester, controller);
+
+    expect(controller.openBusiness!.ad, BusinessAd.buyuk);
+    // Yürüyen kampanyanın kendi düğmesi listeden kalkar.
+    expect(find.byKey(const Key('business_ad_buyuk')), findsNothing);
+  });
+
+  testWidgets('bakım düğmesi parayı alır ve ekipmanı toparlar (§10)',
+      (WidgetTester tester) async {
+    final GameState s = isSahibi(wallet: 3000000);
+    await openBusinessPage(
+      tester,
+      s.copyWith(
+        businesses: <Business>[s.businesses.single.copyWith(upkeep: 40)],
+      ),
+    );
+    final int cuzdan = controller.state!.player.wallet;
+
+    final Finder bakim = find.byKey(const Key('business_maintain'));
+    await scrollToFinder(tester, bakim);
+    expect(tester.widget<OutlinedButton>(bakim).onPressed, isNotNull);
+    await tester.tap(bakim);
+    await tester.pumpAndSettle();
+    await answerPendingNotices(tester, controller);
+
+    expect(controller.openBusiness!.upkeep, greaterThan(40));
+    expect(controller.state!.player.wallet, lessThan(cuzdan));
+
+    // Aynı yıl ikinci bakım yok.
+    await scrollToFinder(tester, bakim);
+    expect(tester.widget<OutlinedButton>(bakim).onPressed, isNull);
+  });
+
+  testWidgets('tek kişilik işte personel bölümü çıkmaz (§7)',
+      (WidgetTester tester) async {
+    // Büfenin kadrosu yok; personel düğmeleri hiç çizilmemeli.
+    expect(bufe.staffSlots, 0);
+    await openBusinessPage(tester, isSahibi());
+    expect(find.byKey(const Key('business_staff_zam')), findsNothing);
+    expect(find.byKey(const Key('business_staff_iseAl')), findsNothing);
+  });
 }

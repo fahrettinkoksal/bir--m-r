@@ -368,6 +368,8 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'lastMaintenanceAge': b.lastMaintenanceAge,
             'lastStaffCareAge': b.lastStaffCareAge,
             'recentIncidents': b.recentIncidents,
+            'lossStreak': b.lossStreak,
+            'demandPressure': b.demandPressure,
             'history': <Object?>[
               for (final BusinessYear y in b.history)
                 <String, Object?>{
@@ -2295,6 +2297,18 @@ int _intOr(Map<String, Object?> json, String key, int fallback) {
   _eksik(key, 'tam sayı');
 }
 
+/// Ondalıklı alan; yoksa [fallback] döner.
+///
+/// JSON'da tam sayı olarak yazılmış bir ondalık (`1` yerine `1.0`) da
+/// kabul edilir: kayıt dosyası elle düzenlenmiş olabilir.
+double _doubleOr(Map<String, Object?> json, String key, double fallback) {
+  final Object? value = json[key];
+  if (value == null) return fallback;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  _eksik(key, 'ondalıklı sayı');
+}
+
 /// Eski kayıtlarda bulunmayan listeler için: yoksa boş liste döner.
 List<Map<String, Object?>> _optionalList(
   Map<String, Object?> json,
@@ -2501,6 +2515,8 @@ Business _decodeBusiness(Map<String, Object?> json) => Business(
       yearMaintenanceSpend: _intOr(json, 'yearMaintenanceSpend', 0),
       lastMaintenanceAge: _intOrNull(json, 'lastMaintenanceAge'),
       lastStaffCareAge: _intOrNull(json, 'lastStaffCareAge'),
+      lossStreak: _intOr(json, 'lossStreak', 0),
+      demandPressure: _doubleOr(json, 'demandPressure', 1.0),
       recentIncidents: List<String>.unmodifiable(<String>[
         for (final Object? e in _optionalRawList(json, 'recentIncidents'))
           if (e is String) e,

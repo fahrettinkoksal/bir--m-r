@@ -2440,6 +2440,85 @@ temizlemek (iz duruyor), şirket durumunu kayıtla yeniden çevirmek (aynen
 **Karar bekleyen sorular:** Q-169 … Q-174. `DECISIONS.md`'ye hiçbir kesin
 kural yazılmadı.
 
+---
+
+## PAKET AE TAMAMLANDI (1/6 … 6/6)
+
+**Konu:** Girişimcilik V2 — işletme yönetimi, fiyat, müşteri, personel ve
+krizler.
+
+**Neden:** AD/6 ölçümünde `girişim + yatırım` diğer dokuz stratejiyi
+birden eziyordu (Q-174/1). Çözüm işletme kârını yapay olarak kesmek
+değil, işletmeyi gerçek bir **oyun sistemi** hâline getirmekti: oyuncu iş
+kurunca "her yıl otomatik kâr alan kişi" değil, işini yöneten bir işletme
+sahibi olsun.
+
+| Paket | Konu |
+|---|---|
+| AE/1 | İşletme veri modeli: fiyat, itibar, personel, bakım, reklam, 5 yıllık döküm |
+| AE/2 | Talep ve kâr motoru: bölge ortalaması, elastikiyet, gider kalemleri |
+| AE/3 | 70+ işletme olayı, kalıcı rekabet baskısı, afet ve denetim |
+| AE/4 | Yatırım önemli olay bildirimleri ve sert düşüş ölçümü |
+| AE/5 | İşletme ekranı ve yıllık rapor |
+| AE/6 | Pasif/aktif/girişim+yatırım ölçümü, fiyat ve reklam exploit taraması |
+
+**Katalog 14 işletmeye çıktı:** Oto yıkama eklendi. Her işletmenin kendi
+sattığı şey ve fiyat başlığı var (halı sahada "Maç / saat ücreti",
+kuaförde "Saç kesim ortalaması"). Bölge ortalaması şehirden, ekonomi
+rejiminden ve kurgusal rekabetten üretiliyor — **gerçek yıla ya da gerçek
+fiyata bağlı değil** (§3, §25).
+
+**Bulunan altı gerçek bug (hepsi ölçümle yakalandı):**
+
+1. `condition` talebe neredeyse hiç etki etmiyordu — durumu 10/100 olan
+   büfe hâlâ kâr ediyordu.
+2. Fiyat exploit'i: sabit esneklikli talep eğrisinde esneklik 1'in altında
+   kalan her işte "fiyatı sonuna kadar yükselt" mutlak baskındı; 14
+   işletmenin 10'unda en pahalı seçenek kazanıyordu.
+3. `IncidentKind.opensNotice` AC'den beri tanımlıydı ama hiçbir yerde
+   okunmuyordu: konkordato, kayyum, şirket kapanması sessizce geçiyordu.
+4. Reklam tuzaktı: kampanya sonsuza kadar sürüyor, azalan marjinal etki
+   yüzünden bedeli her işletmede katkısını aşıyordu.
+5. Katalogdaki `volatility` kâra hiç yansımıyordu — lokanta (0,60) ile
+   terzi (0,25) aynı oynaklıkta davranıyordu.
+6. İyi yönetilen işletme risksizdi: aktif sahibin kapanma oranı **%0** ve
+   `isletme aktif` oyunun en güvenli stratejisiydi.
+
+**§32 — dominans, AD/6'dan bu yana:**
+
+| Ölçü | AE öncesi | AE sonrası |
+|---|---|---|
+| `girişim + yatırım`ın her ölçüde ezdiği strateji | 10 / 11 | **6 / 11** |
+| kötü %10 | ₺13,2M | **₺8,0M** |
+| medyan | ₺71,5M | ₺65,1M |
+| aktif sahibin işletme kapanma oranı | %0 | **%9** |
+
+Medyanda hâlâ birinci; §32 bunu yasaklamıyor ("Başarılı işletmeci çok para
+kazanabilir"), yasak olan her koşulda ezmesi. Magnitude sorusu Faho'ya
+Q-175/4 olarak soruldu.
+
+**§34 fiyat exploit taraması:** optimum 14 işletmede piyasa 10 / ucuz 3 /
+pahalı 1. Ne en pahalı ne en ucuz her zaman kazanmıyor; optimum
+işletmenin itibarına göre de kayıyor.
+
+**§35 reklam exploit taraması:** büyük kampanya ortalamada 14 işletmenin
+9'unda kazandırıyor ama **tek tek hayatların %26,2'sinde para
+kaybettiriyor** — garanti değil.
+
+**§27 sert düşüş:** %100 hisse portföyünde 6600 yılın %16,3'ü ≥%20, %9,6'sı
+≥%30, %5,1'i ≥%40 düşüyor. Dağıtılmış portföyde ≥%20 oranı %1,89. Bu
+dağılım AD/1'in onaylı kalibrasyonundan doğuyor; AE'de değiştirilmedi ve
+Q-175/2 olarak soruldu.
+
+**§23/§36:** 8.784 işletme-yılı işlendi (ağır ölçümde daha fazla), 283
+erken kapanma. Kayıt tamamen additive; eski kayıt varsayılanla açılıyor.
+
+**Karar bekleyen sorular:** Q-169 … Q-175. `DECISIONS.md`'ye hiçbir kesin
+kural yazılmadı.
+
+**Doğrulanmayan:** Gerçek cihazda oynanmadı; Android APK bu makinede
+derlenmedi.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
