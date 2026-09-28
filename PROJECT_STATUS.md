@@ -2421,6 +2421,22 @@ taksit, şirket durumlarının yutucu olması, olay seçimlerinin portföyde hi�
 şey yapmaması, yoğunlaşma cezasının piyango bileti olması, botun ehliyet
 sınavını hiç geçememesi.
 
+**§25 tarih bağımsızlığı doğrulandı:** production ekonomi kodunda
+`DateTime.now()` kullanımı **yok** (yalnızca ses soğuması ve kayıt zaman
+damgası); oyuncuya gösterilen hiçbir metinde gerçek dünya yılı **yok**;
+`lib/` altındaki bütün "2026" geçişleri yorum satırı.
+
+**§27 saldırgan oyuncu taraması: EXPLOIT BULUNAMADI.** Paket AD'nin dört
+yeni sistemine sekiz saldırı denendi ve hepsi engellendi — sınırsız
+yapılandırma (2'de duruyor, kredi kapanıyor), malı satıp borcu iki kez
+kapatmak (net servet 300k → 150k, zorunlu satış zarar ettiriyor),
+kayıt/yükleme ile borç durumunu sıfırlamak (aynen korunuyor), olay
+hamlesiyle işlem durmasını delmek (portföy değişmiyor), olay hamlesiyle
+komisyonsuz al-sat döngüsü (20 turda ₺20.899 kaybettiriyor), lüks varlığı
+zorla satarak para üretmek (₺37,7M → ₺28,2M), kredi notu izini kayıtla
+temizlemek (iz duruyor), şirket durumunu kayıtla yeniden çevirmek (aynen
+çıkıyor).
+
 **Karar bekleyen sorular:** Q-169 … Q-174. `DECISIONS.md`'ye hiçbir kesin
 kural yazılmadı.
 
