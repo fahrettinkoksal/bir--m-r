@@ -22,6 +22,9 @@ import 'dart:math';
 
 import 'package:bir_omur/data/business_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/data/license_catalog.dart';
+import 'package:bir_omur/data/license_questions.dart';
+import 'package:bir_omur/domain/models/pending_license_exam.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
@@ -637,6 +640,40 @@ void _tryBuyHome(GameController c, Random rng) {
   }
 }
 
+/// Ölçülen işletme ehliyet istiyorsa botun ehliyeti almasını sağlar.
+///
+/// **Ölçüm boşluğuydu (Q-176/6).** AF'de nakliyecilik hiç açılmadı,
+/// çünkü ehliyet istiyor ve strateji botu ehliyet almıyordu; tablo o
+/// işletmeyi boş gösteriyordu. Bu bir oyun hatası değil, tezgâhın
+/// eksiğiydi. Bot artık gerçek oyuncu yolundan (başvur → sınav) ehliyet
+/// alıyor; debug ile ehliyet **verilmiyor**.
+void _ensureLicensesFor(GameController c, BusinessType tur) {
+  for (final String id in tur.requiredLicenses) {
+    final LicenseType? tip = licenseTypeById(id);
+    if (tip == null || c.hasLicense(tip)) continue;
+    if (!c.licenseAvailability(tip).isAllowed) continue;
+    c.applyForLicense(tip);
+    // Sınav tek oturuşta bitirilir: yıllara yayılırsa bekleyen olaylar
+    // cevabı düşürüyor (AD/6'da ölçülmüştü).
+    //
+    // **Soruyu okuyup cevaplıyor.** Sürekli ilk şıkkı işaretlemek 3
+    // soruda 2 doğru barajını geçmiyordu ve nakliyecilik hiç
+    // ölçülemiyordu. Trafik sorularını bilen bir oyuncunun yapacağı şey
+    // bu; `debugSetState` ile ehliyet **verilmiyor**, sınav gerçekten
+    // veriliyor.
+    for (int guard = 0; guard < 12; guard++) {
+      final PendingLicenseExam? sinav = c.pendingLicenseExam;
+      final LicenseQuestion? soru = sinav?.currentQuestion;
+      if (sinav == null || soru == null) break;
+      c.answerLicenseExam(soru.correctIndex);
+      while (c.state!.hasNotice) {
+        c.dismissNotice();
+      }
+      if (c.state!.hasPendingEvent) break;
+    }
+  }
+}
+
 void _tryOpenBusiness(GameController c, Random rng, {bool tend = true}) {
   if (c.state!.businesses.any((Business b) => b.isOpen)) {
     // Pasif sahip işine **hiç** bakmaz: §33/A'nın ölçtüğü şey bu.
@@ -645,6 +682,10 @@ void _tryOpenBusiness(GameController c, Random rng, {bool tend = true}) {
   }
   if (c.state!.businesses.isNotEmpty) return;
   if (c.state!.player.age < 24) return;
+  if (_forcedBusinessId != null) {
+    final BusinessType? hedef = businessTypeById(_forcedBusinessId!);
+    if (hedef != null) _ensureLicensesFor(c, hedef);
+  }
   final List<BusinessType> uygun = kBusinessCatalog
       .where((BusinessType t) =>
           (_forcedBusinessId == null || t.id == _forcedBusinessId) &&

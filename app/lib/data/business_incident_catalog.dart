@@ -1122,4 +1122,251 @@ const List<BusinessIncident> kBusinessIncidents = <BusinessIncident>[
     minYearsOpen: 2,
     major: true,
   ),
+  // ===================================================================
+  // Paket AG, §2, §7 — POZİTİF KUYRUK: "iş bir anda tuttu"
+  // ===================================================================
+  //
+  // **Neden var.** AF ölçümünde işletmelerin dağılımı dardı: kötü kuyruk
+  // vardı (rakip, arıza, afet) ama iyi kuyruk yoktu. Oysa bu bir hayat
+  // simülasyonu — bir bakkal reklamla uçabilmeli, bir yazılımcı tek
+  // müşteriyle zenginleşebilmeli. Bu olaylar **nadir** (ağırlıkları
+  // düşük), **güçlü** (talebi belirgin yükseltir) ve **kalıcı değil**:
+  // `lastingShift` yıllar içinde sönümleniyor, sonsuz buff yok.
+  BusinessIncident(
+    id: 'ae_ag_mahalle_benimsedi',
+    title: 'Mahalle seni benimsedi',
+    text: 'Geçen ay verdiğin mahalle reklamı beklediğinden fazla tuttu.\n\n'
+        'Yakındaki okulun velileri dükkâna alıştı.\n\n'
+        'Sabah servis saatinde kapı bir açılıp bir kapanıyor.',
+    tags: <String>{'perakende'},
+    weight: 0.75,
+    demandShift: 1.45,
+    lastingShift: 1.22,
+    reputationDelta: 10,
+    conditionDelta: 5,
+    minYearsOpen: 2,
+    minReputation: 38,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_video_patladi',
+    title: 'Video patladı',
+    text: 'Biri dükkânda çektiği videoyu paylaşmış.\n\n'
+        'Sabah uyandığında telefonun elinde titriyordu.\n\n'
+        'Öğleden sonra kapıda sıra vardı ve sıra bir hafta bitmedi.',
+    tags: <String>{'sosyal', 'kahve', 'kuafor'},
+    weight: 0.6,
+    demandShift: 1.60,
+    lastingShift: 1.26,
+    reputationDelta: 14,
+    minYearsOpen: 2,
+    minReputation: 42,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_turnuva_tuttu',
+    title: 'Turnuva tuttu',
+    text: 'Düzenlediğin turnuvayı mahalle sahiplendi.\n\n'
+        'Finali izlemeye gelenler sahanın etrafını doldurdu.\n\n'
+        'Ertesi sezon takımlar yer bulmak için sıraya girdi.',
+    tags: <String>{'turnuva', 'saha'},
+    weight: 0.7,
+    demandShift: 1.50,
+    lastingShift: 1.24,
+    reputationDelta: 12,
+    conditionDelta: 5,
+    minYearsOpen: 2,
+    minReputation: 40,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_yemegin_adi_cikti',
+    title: 'Yemeğin adı çıktı',
+    text: 'Bir akşam gelen masa, ertesi hafta üç masa getirdi.\n\n'
+        'Sonra şehirden insanlar sırf o yemek için gelmeye başladı.\n\n'
+        'Cumartesi akşamları rezervasyonsuz yer yok.',
+    tags: <String>{'mutfak', 'gida'},
+    weight: 0.65,
+    demandShift: 1.55,
+    lastingShift: 1.28,
+    reputationDelta: 15,
+    conditionDelta: 6,
+    minYearsOpen: 3,
+    minReputation: 42,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_kurumsal_anlasma',
+    title: 'Kurumsal anlaşma',
+    text: 'Bir şirket bütün işini sana bağladı.\n\n'
+        'Sözleşmeyi imzalarken elin biraz titredi.\n\n'
+        'Artık ay başında ne kadar gireceğini biliyorsun.',
+    tags: <String>{'filo', 'nakliye', 'salon', 'yikama', 'atolye'},
+    weight: 0.7,
+    demandShift: 1.48,
+    lastingShift: 1.25,
+    reputationDelta: 9,
+    conditionDelta: 6,
+    minYearsOpen: 3,
+    minReputation: 45,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_rakip_kapandi',
+    title: 'Karşıdaki kapandı',
+    text: 'Bir sabah karşı dükkânın kepengi inikti.\n\n'
+        'Öğlene kadar da açılmadı.\n\n'
+        'Onların müşterisi yavaş yavaş sana alıştı.',
+    tags: <String>{'dukkan', 'perakende', 'atolye', 'saha', 'salon', 'yikama'},
+    weight: 0.8,
+    demandShift: 1.35,
+    lastingShift: 1.20,
+    minYearsOpen: 3,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_bolge_hareketlendi',
+    title: 'Bölge hareketlendi',
+    text: 'Sokağın başına büyük bir site yapıldı.\n\n'
+        'İlk aylar toz topraktı, sonra insanlar taşınmaya başladı.\n\n'
+        'Artık akşamüstü kaldırım kalabalık.',
+    tags: <String>{'dukkan', 'perakende', 'kahve', 'firin', 'yikama'},
+    weight: 0.7,
+    demandShift: 1.40,
+    lastingShift: 1.24,
+    minYearsOpen: 4,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_referans_zinciri',
+    title: 'Referans zinciri',
+    text: 'Bir müşteri seni arkadaşına anlatmış.\n\n'
+        'O da başkasına.\n\n'
+        'Artık gelenlerin çoğu kapıdan girer girmez bir isim söylüyor.',
+    tags: <String>{'atolye', 'kuafor', 'serbest', 'oto'},
+    weight: 0.75,
+    demandShift: 1.42,
+    lastingShift: 1.23,
+    reputationDelta: 11,
+    minYearsOpen: 2,
+    minReputation: 45,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_bayram_zinciri',
+    title: 'Bayram siparişleri katlandı',
+    text: 'Geçen bayram bir kurumun siparişini yetiştirmiştin.\n\n'
+        'Bu bayram üç kurum birden aradı.\n\n'
+        'Fırın on gün boyunca hiç sönmedi.',
+    tags: <String>{'firin', 'bayram'},
+    weight: 0.7,
+    demandShift: 1.46,
+    lastingShift: 1.22,
+    reputationDelta: 10,
+    moraleDelta: -6,
+    minYearsOpen: 3,
+    minReputation: 42,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_dugun_sezonu_patladi',
+    title: 'Düğün sezonu patladı',
+    text: 'Bir gelinin fotoğrafları dolaştı.\n\n'
+        'Ertesi sezon randevu defteri şubattan doldu.',
+    tags: <String>{'dugun', 'kuafor'},
+    weight: 0.65,
+    demandShift: 1.44,
+    lastingShift: 1.22,
+    reputationDelta: 12,
+    minYearsOpen: 2,
+    minReputation: 45,
+    major: true,
+  ),
+
+  // ===================================================================
+  // Paket AG, §4, §5 — SERBEST YAZILIMCILIK: gerçek gider ve kötü dönem
+  // ===================================================================
+  //
+  // AF ölçümünde serbest yazılımcılığın **kötü %10'u bile 159 kat**
+  // kazandırıyordu: kadrosu ve kirası olmadığı için kötü yılı yoktu.
+  // Kira/personel zorlaması yapmadan (§5) kendi doğasına uygun gider ve
+  // boşluk riskleri eklendi.
+  BusinessIncident(
+    id: 'ae_ag_serbest_abonelik',
+    title: 'Abonelikler yenilendi',
+    text: 'Yıllık lisanslar aynı hafta üst üste yenilendi.\n\n'
+        'Hepsi ayrı ayrı küçüktü. Toplamı öyle değildi.',
+    tags: <String>{'serbest'},
+    weight: 2.0,
+    costShare: 0.055,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_serbest_tahsil_edilemedi',
+    title: 'Para tahsil edilemedi',
+    text: 'İşi teslim ettin, fatura kesildi, aylar geçti.\n\n'
+        'Sonra şirketin kapandığını duydun.\n\n'
+        'O işin parasını hiç almadın.',
+    tags: <String>{'serbest'},
+    weight: 1.6,
+    costShare: 0.140,
+    demandShift: 0.88,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_serbest_is_gelmedi',
+    title: 'Uzun süre iş gelmedi',
+    text: 'Ocakta bir iş bitti.\n\n'
+        'Şubat boş geçti. Mart da.\n\n'
+        'Nisanda teklif göndermeye başladın ama dönen olmadı.',
+    tags: <String>{'serbest'},
+    weight: 1.8,
+    demandShift: 0.62,
+    lastingShift: 0.86,
+    conditionDelta: -8,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_serbest_musteri_kaybi',
+    title: 'Büyük müşteri gitti',
+    text: 'İki yıldır işinin yarısını veren müşteri ekibini büyüttü.\n\n'
+        'Artık içeride yapıyorlarmış.\n\n'
+        'Kibar bir mesajdı. Yine de uzun süre baktın.',
+    tags: <String>{'serbest'},
+    weight: 1.5,
+    demandShift: 0.72,
+    lastingShift: 0.82,
+    minYearsOpen: 3,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_serbest_urun_tuttu',
+    title: 'Yaptığın şey tuttu',
+    text: 'Bir müşteri için yazdığın şeyi başkaları da istedi.\n\n'
+        'Aynı işi üç kez sattın.\n\n'
+        'Dördüncüsü yurt dışından geldi.',
+    tags: <String>{'serbest'},
+    weight: 0.7,
+    demandShift: 1.75,
+    lastingShift: 1.30,
+    reputationDelta: 12,
+    conditionDelta: 6,
+    minYearsOpen: 2,
+    minReputation: 45,
+    major: true,
+  ),
+  BusinessIncident(
+    id: 'ae_ag_serbest_uzun_sozlesme',
+    title: 'Uzun sözleşme',
+    text: 'Bir firma seni yıllık bağladı.\n\n'
+        'Rakamı ilk duyduğunda tekrar sordun.\n\n'
+        'Artık ayın sonunu merak etmiyorsun.',
+    tags: <String>{'serbest'},
+    weight: 0.75,
+    demandShift: 1.55,
+    lastingShift: 1.28,
+    conditionDelta: 8,
+    minYearsOpen: 2,
+    minReputation: 42,
+    major: true,
+  ),
 ];

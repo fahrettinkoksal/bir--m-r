@@ -849,7 +849,17 @@ abstract final class BusinessEngine {
     // -----------------------------------------------------------------
     // 3) Reklam: etkisi ve bedeli (§8).
     // -----------------------------------------------------------------
-    final double reklamEtkisi = _adLift(b, zar);
+    final ({double lift, bool viral}) reklam = _adLift(b, zar);
+    final double reklamEtkisi = reklam.lift;
+    if (reklam.viral) {
+      // Tutan kampanya bir iki yıl süren kalıcı baskı bırakır (§11).
+      b = b.copyWith(
+        demandPressure: (b.demandPressure * prototypeOnlyViralLasting).clamp(
+          BusinessMarket.prototypeOnlyPressureFloor,
+          BusinessMarket.prototypeOnlyPressureCeiling,
+        ),
+      );
+    }
 
     // -----------------------------------------------------------------
     // 4) Talep ve hesap (§5, §6).
@@ -1025,7 +1035,28 @@ abstract final class BusinessEngine {
     next = _log(next, _yilMetni(tur, b, net), age: newAge);
     // Rutin yıl penceresi açmaz (§25, §31): yalnızca gerçekten
     // anlatılacak bir şey olduğunda bildirim çıkar.
-    if (_yilBildirimiGerekli(tur, yil, olay)) {
+    // **Hikâye bildirimi (§12, §13).** Kozmetik değil: ölçü, geçen yıla
+    // göre **gerçekleşen ciro**. Hikâye varsa yılın penceresi odur;
+    // ikisi birden açılmaz (§25 bildirim yağmuru kuralı).
+    final String? hikaye = _yilHikayesi(b, yil, reklam.viral);
+    if (hikaye != null) {
+      next = next.queueNotice(
+        PendingNotice(
+          id: 'is-hikaye-${is_.id}-$newAge',
+          kind: NoticeKind.kendiIsi,
+          age: newAge,
+          title: reklam.viral
+              ? 'Reklam tuttu'
+              : yil.revenue >= (b.history.length > 1
+                      ? b.history[b.history.length - 2].revenue
+                      : 0)
+                  ? 'Bu sene işler başka'
+                  : 'Dükkân eskisi gibi değil',
+          text: '$hikaye\n\n${yearReport(tur, yil)}',
+          money: cuzdanEtkisi,
+        ),
+      );
+    } else if (_yilBildirimiGerekli(tur, yil, olay)) {
       next = next.queueNotice(
         PendingNotice(
           id: 'is-yil-${is_.id}-$newAge',
@@ -1038,6 +1069,40 @@ abstract final class BusinessEngine {
       );
     }
     return _maybeEmployerComplaint(next, tur, newAge, rng);
+  }
+
+  /// prototypeOnly: başarı hikâyesi için gereken ciro sıçraması (§12).
+  static const double prototypeOnlySuccessStoryRatio = 1.55;
+
+  /// prototypeOnly: başarısızlık hikâyesi için gereken ciro düşüşü (§13).
+  static const double prototypeOnlyFailureStoryRatio = 0.66;
+
+  /// Bu yılın hikâyesi; sıradan yılda `null`.
+  ///
+  /// **Ölçü gerçekleşen cirodur** (§12: "sadece kozmetik değil, gerçek
+  /// ciro artışıyla uyumlu olsun"). Geçen yılın cirosu yoksa hikâye
+  /// anlatılmaz: ilk yılın karşılaştırması olmaz.
+  static String? _yilHikayesi(Business b, BusinessYear yil, bool viral) {
+    if (viral) {
+      return 'Kampanya beklediğinden başka tuttu.\n\n'
+          'Bir hafta boyunca gelen herkes aynı şeyi söyledi: '
+          '"Gördüm de geldim."';
+    }
+    if (b.history.length < 2) return null;
+    final BusinessYear onceki = b.history[b.history.length - 2];
+    if (onceki.revenue <= 0) return null;
+    final double oran = yil.revenue / onceki.revenue;
+    if (oran >= prototypeOnlySuccessStoryRatio) {
+      return 'Bu sene işler başka.\n\n'
+          'Akşam kapıyı kapatırken kasaya bir daha baktın.\n\n'
+          'Geçen yılın neredeyse iki katı.';
+    }
+    if (oran <= prototypeOnlyFailureStoryRatio) {
+      return 'Bu yıl dükkân eskisi gibi değil.\n\n'
+          'Kapı açılıyor ama alışveriş yapan yok.\n\n'
+          'Akşam kasayı sayarken iki kere saydın.';
+    }
+    return null;
   }
 
   /// prototypeOnly: yıl penceresinin açılması için zararın taban kâra
@@ -1094,21 +1159,53 @@ abstract final class BusinessEngine {
     return b.toString();
   }
 
+  /// prototypeOnly: kampanyanın **tutma** ihtimali (Paket AG, §10, §11).
+  ///
+  /// Reklam her zaman aynı getiriyi vermez. Nadiren beklenmedik biçimde
+  /// tutar ve bir iki yıl süren talep sıçraması bırakır. Büyük kampanya
+  /// hem daha pahalı hem daha oynak: tutma ihtimali de yüksek.
+  ///
+  /// Oranlar **ölçümle doğrulandı**, kafadan sabitlenmedi: AG ölçümü
+  /// gerçekleşen viral sıklığını ve kampanyaların dağılımını raporluyor.
+  static double viralChanceFor(BusinessAd ad) => switch (ad) {
+        BusinessAd.yok => 0.0,
+        BusinessAd.mahalle => 0.040,
+        BusinessAd.sosyalMedya => 0.090,
+        BusinessAd.buyuk => 0.140,
+      };
+
+  /// prototypeOnly: tutan kampanyanın o yılki katkı çarpanı.
+  static const double prototypeOnlyViralMultiplier = 3.6;
+
+  /// prototypeOnly: tutan kampanyanın bıraktığı kalıcı talep baskısı.
+  ///
+  /// Sonsuz buff değil: [BusinessMarket.prototypeOnlyPressureRecovery]
+  /// her yıl 1,0'a doğru çekiyor, yani etkisi bir iki yılda sönüyor.
+  static const double prototypeOnlyViralLasting = 1.24;
+
   /// Reklamın bu yılki talep katkısı; ölçüm testleri için açık kapı.
   static double adLiftForTest(Business business, Random rng) =>
-      _adLift(business, rng);
+      _adLift(business, rng).lift;
 
-  /// Reklamın bu yılki talep katkısı (§8, §35).
-  static double _adLift(Business business, Random rng) {
-    if (business.ad == BusinessAd.yok) return 0.0;
+  /// Reklamın bu yılki talep katkısı (§8, §35) ve tutup tutmadığı (§11).
+  static ({double lift, bool viral}) _adLift(
+    Business business,
+    Random rng,
+  ) {
+    if (business.ad == BusinessAd.yok) return (lift: 0.0, viral: false);
     final BusinessAd r = business.ad;
     // Azalan marjinal etki: aynı kampanyanın ikinci, üçüncü yılı daha az
     // iş yapar.
     final double yorgunluk = 1 / (1 + prototypeOnlyAdFatigue * business.adStreak);
     final double sans = 1 + (rng.nextDouble() * 2 - 1) * r.variance;
-    return (r.lift * yorgunluk * sans)
-        .clamp(prototypeOnlyAdWorstCase, 1.0)
-        .toDouble();
+    // **Tutma** zarı ayrı atılır ki kampanya kademesine göre değişsin.
+    final bool tuttu = rng.nextDouble() < viralChanceFor(r);
+    final double ham =
+        r.lift * yorgunluk * sans * (tuttu ? prototypeOnlyViralMultiplier : 1);
+    return (
+      lift: ham.clamp(prototypeOnlyAdWorstCase, 3.0).toDouble(),
+      viral: tuttu,
+    );
   }
 
   /// Yılın yıpranması: ekipman, personel, itibar ve işin durumu.
