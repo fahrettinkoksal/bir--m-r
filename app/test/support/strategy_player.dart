@@ -21,6 +21,7 @@ library;
 import 'dart:math';
 
 import 'package:bir_omur/data/business_catalog.dart';
+import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
@@ -30,6 +31,7 @@ import 'package:bir_omur/domain/economy/banking.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/models/business.dart';
+import 'package:bir_omur/domain/models/investment.dart';
 import 'package:bir_omur/domain/economy/net_worth.dart';
 import 'package:bir_omur/domain/interaction/divorce_settlement.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
@@ -85,6 +87,29 @@ enum InvestStrategy {
   /// şey işletme yönetiminin kendisi.
   isletmeAktif('isletme aktif'),
 
+  /// **Mükemmel girişimci** (Paket AF, §1, §2).
+  ///
+  /// Oyunu ekonomik olarak **çözmeye çalışan** bot. İşletmeleri
+  /// karşılaştırır, fiyatı geçmiş sonuçlardan öğrenerek optimize eder,
+  /// reklamı ancak karşılığını gördüğünde verir, bakımı ekonomik
+  /// optimumda yaptırır, kötü işletmeyi kapatıp daha iyisine geçer ve
+  /// artan parayı yatırır. **Geleceği bilmez**; yalnızca oyuncunun
+  /// ekranda görebileceği bilgiyi kullanır.
+  mukemmelGirisimci('mukemmel girisimci'),
+
+  /// **Maaşlı kariyer + yatırım** (Paket AF, §11/11).
+  ///
+  /// Diğer stratejilerde bot açık ilanlardan **rastgele** birine
+  /// başvuruyor; bu strateji en yüksek maaşlıyı seçiyor ve her fırsatta
+  /// zam istiyor. İşletme açmıyor.
+  kariyerVeYatirim('kariyer + yatirim'),
+
+  /// **Maaşlı kariyer + işletme + yatırım** (Paket AF, §11/12).
+  ///
+  /// Üçünü birden yapan oyuncu. §9'un sorusu bu: maaş da almak, dükkânı
+  /// da kusursuz yönetmek bedava bir kombinasyon mu?
+  kariyerIsletmeYatirim('kariyer + isletme + yatirim'),
+
   /// **Karma normal oyuncu.** Diğer dokuzu tek bir şeyi en iyi yapmaya
   /// çalışır; bu strateji "makul davranan insan"ı temsil eder: parasının
   /// bir kısmını yatırır, bir kısmını nakit tutar, dengesiz ama akıllıca
@@ -130,6 +155,22 @@ class StrategyResult {
 
   /// Bir işletme **battı** mı?
   bool businessBankrupt = false;
+
+  /// Hayat boyu işletmeye konan sermaye (₺) — Paket AF, §12.
+  int businessCapital = 0;
+
+  /// Hayat boyu maaş geliri (₺) — Paket AF, §12.
+  int salaryIncome = 0;
+
+  /// Kaç ayrı işletme açıldı (geçiş zinciri uzunluğu) — §4.
+  int businessCount = 0;
+
+  /// Açılan işletmelerin kimlikleri, sırayla — §4 geçiş zinciri.
+  final List<String> businessChain = <String>[];
+
+  /// İşletmenin sermaye getirisi: toplam kâr / konan sermaye.
+  double get businessRoi =>
+      businessCapital <= 0 ? 0 : businessProfit / businessCapital;
 
   /// Lüks varlıkların (yazlık/tekne/koleksiyon) toplam değeri (₺) — §21.
   int luxury = 0;
@@ -209,11 +250,19 @@ const int kStrategyStartCash = 100000;
 ///
 /// Oyuncu ölürse ölçüm o yaşta durur ve [StrategyResult.endedByDeath]
 /// işaretlenir; ölüm anındaki servet raporlanır.
+/// Ölçüm sırasında belirli bir işletme türünü zorlamak için (Paket AF, §3).
+///
+/// `null` ise bot kendi seçimini yapar. Ayarlandığında `_tryOpenBusiness`
+/// ve çözücü yalnızca bu türü açar; 14 işletmeyi ayrı ayrı ölçmek için.
+String? _forcedBusinessId;
+
 StrategyResult playStrategy({
   required InvestStrategy strategy,
   required int seed,
   required int years,
+  String? businessTypeId,
 }) {
+  _forcedBusinessId = businessTypeId;
   final GameController c = GameController(random: Random(seed));
   c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
   final Random rng = Random(seed * 7907 + strategy.index * 6151 + 29);
@@ -230,6 +279,11 @@ StrategyResult playStrategy({
       ),
     ),
   );
+
+  // **Çözücü hafızası her hayatta sıfırlanır (Paket AF, §5).**
+  // Taşınsaydı bot önceki hayatlarda öğrendiği en iyi fiyatı bilirdi;
+  // bu, oyuncunun sahip olamayacağı bir bilgi — yani gelecek bilgisi.
+  _solverMemory.clear();
 
   int zirve = NetWorth.of(c.state!);
   int oncekiHardship = 0;
@@ -254,6 +308,8 @@ StrategyResult playStrategy({
 
     // ---- Ölçüm --------------------------------------------------------
     final GameState s = c.state!;
+    // Maaş geliri yıl yıl birikir (Paket AF, §12).
+    sonuc.salaryIncome += s.career.job?.yearlySalary ?? 0;
     final int servet = NetWorth.of(s);
     sonuc.netWorthByYear.add(servet);
     if (servet > zirve) zirve = servet;
@@ -306,6 +362,14 @@ StrategyResult playStrategy({
   // Paket AE, §33: işletmenin **kendi** sonucu ayrı ölçülür.
   sonuc.businessProfit = son.businesses
       .fold<int>(0, (int t, Business b) => t + b.totalProfit);
+  // Paket AF, §12: sermaye ve geçiş zinciri bütün stratejilerde **aynı
+  // yerden** okunur; strateji içinde elle sayılmaz.
+  sonuc.businessCapital = son.businesses
+      .fold<int>(0, (int t, Business b) => t + b.totalInvested);
+  sonuc.businessCount = son.businesses.length;
+  sonuc.businessChain
+    ..clear()
+    ..addAll(son.businesses.map((Business b) => b.typeId));
   sonuc.businessYears = son.businesses.fold<int>(
     0,
     (int t, Business b) => t + b.yearsOpen(son.player.age),
@@ -439,6 +503,19 @@ void _act(
     case InvestStrategy.sadeceFon:
       _buyAll(c, <String>['fon'], rng, sonuc);
 
+    case InvestStrategy.mukemmelGirisimci:
+      _actSolver(c, rng, sonuc);
+
+    case InvestStrategy.kariyerVeYatirim:
+      _applyBestJob(c);
+      _buyAll(c, <String>['hisse', 'fon'], rng, sonuc);
+
+    case InvestStrategy.kariyerIsletmeYatirim:
+      _applyBestJob(c);
+      _tryOpenBusiness(c, rng);
+      _manageBusiness(c);
+      _buyAll(c, <String>['hisse', 'fon'], rng, sonuc);
+
     case InvestStrategy.karmaNormal:
       _actNormalPlayer(c, rng, sonuc);
   }
@@ -561,14 +638,17 @@ void _tryBuyHome(GameController c, Random rng) {
 }
 
 void _tryOpenBusiness(GameController c, Random rng, {bool tend = true}) {
-  if (c.state!.businesses.isNotEmpty) {
+  if (c.state!.businesses.any((Business b) => b.isOpen)) {
     // Pasif sahip işine **hiç** bakmaz: §33/A'nın ölçtüğü şey bu.
     if (tend && c.businessTendAvailability().isAllowed) c.tendBusiness();
     return;
   }
+  if (c.state!.businesses.isNotEmpty) return;
   if (c.state!.player.age < 24) return;
   final List<BusinessType> uygun = kBusinessCatalog
-      .where((BusinessType t) => c.businessOpenAvailability(t).isAllowed)
+      .where((BusinessType t) =>
+          (_forcedBusinessId == null || t.id == _forcedBusinessId) &&
+          c.businessOpenAvailability(t).isAllowed)
       .toList(growable: false);
   if (uygun.isEmpty) return;
   c.openBusinessOf(uygun[rng.nextInt(uygun.length)]);
@@ -626,4 +706,318 @@ void _manageBusiness(GameController c) {
   if (is_.ad == BusinessAd.yok) {
     c.setBusinessAd(BusinessAd.buyuk);
   }
+}
+
+// =====================================================================
+// Paket AF — mükemmel girişimci (§1, §2, §5-§8)
+// =====================================================================
+
+/// prototypeOnly: botun denediği fiyat oranları (bölge ortalamasına göre).
+///
+/// Oyuncunun ekranda seçebileceği bantla aynı aralıkta; bot bunların
+/// arasından **deneyerek** en iyisini bulmaya çalışır.
+const List<double> kSolverPriceRatios = <double>[0.80, 0.92, 1.0, 1.10, 1.25];
+
+/// Bir işletme türü için botun **kendi** hafızası.
+///
+/// Oyuncunun görebileceğinden fazlasını tutmaz: hangi fiyat oranını
+/// denediğinde o yılın neti ne çıktı. Gelecek bilgisi yok.
+class _SolverMemory {
+  final Map<int, List<int>> fiyatSonuclari = <int, List<int>>{};
+  final List<int> reklamliYillar = <int>[];
+  final List<int> reklamsizYillar = <int>[];
+  int denenenFiyatIndeksi = 2;
+  bool reklamDeniyor = false;
+
+  /// O ana kadarki en iyi fiyat indeksi; hiç veri yoksa piyasa (2).
+  int get enIyiFiyat {
+    int enIyi = 2;
+    double enIyiOrt = -double.infinity;
+    for (final MapEntry<int, List<int>> e in fiyatSonuclari.entries) {
+      if (e.value.isEmpty) continue;
+      final double ort =
+          e.value.reduce((int a, int b) => a + b) / e.value.length;
+      if (ort > enIyiOrt) {
+        enIyiOrt = ort;
+        enIyi = e.key;
+      }
+    }
+    return enIyi;
+  }
+
+  /// Reklam karşılığını veriyor mu? Yeterli veri yoksa "bilmiyorum".
+  bool? get reklamKarliMi {
+    if (reklamliYillar.length < 2 || reklamsizYillar.length < 2) return null;
+    final double a = reklamliYillar.reduce((int x, int y) => x + y) /
+        reklamliYillar.length;
+    final double b = reklamsizYillar.reduce((int x, int y) => x + y) /
+        reklamsizYillar.length;
+    return a > b;
+  }
+}
+
+/// Her hayatta sıfırlanan çözücü hafızası.
+final Map<String, _SolverMemory> _solverMemory = <String, _SolverMemory>{};
+
+/// prototypeOnly: botun bakım eşiği (§7).
+///
+/// **Ölçümle seçildi ve ilk tahminimi çürüttü.** Bakım bedeli yıpranmayla
+/// birlikte büyüdüğü ama kazanç 34 puanda tavanlandığı için "puan başına
+/// en ucuz nokta" kabaca 66 çıkıyor; eşiği oraya koymuştum. Süpürme
+/// (`paket_af_business_roi_test.dart` §7) bunun yanlış olduğunu gösterdi:
+/// 95 → ₺316,2M, 66 → ₺282,0M, 0 → ₺171,6M. Sebep şu: ekipman durumu
+/// talebi **her yıl** besliyor, yani yüksek tutmanın getirisi puan başına
+/// maliyet farkını aşıyor.
+///
+/// 95 pratikte "yapılabildiği her yıl bakım yaptır" demek
+/// ([BusinessEngine.maintenanceAvailability] 96'nın üstünde kapanıyor).
+/// Geciktirme exploiti **yok**; tersine, geciktirmek kaybettiriyor.
+/// **Hayat düzeyinde ölçüldü (§5-§8).** İşletme tezgâhında en iyi eşik 95
+/// çıkıyordu (her yıl bakım), ama tam hayatta bakıma giden para borsada
+/// kazanacağı getiriden vazgeçmek demek. 18 politikanın süpürmesinde
+/// 66/reklamsız/zamsız medyan ₺104,4M ile birinci; 95 → ₺74,1M.
+int kSolverMaintenanceThreshold = 66;
+
+/// Çözücünün reklam kademesi (§6).
+///
+/// **Ölçüm sonucu: optimal oyuncu reklam vermiyor.** Hayat düzeyinde
+/// süpürmede reklamsız her bakım eşiğinde reklamlıyı geçti
+/// (66: reklamsız ₺104,4M, mahalle ₺69,7M, büyük ₺85,6M). Sebep işletme
+/// tezgâhında da görülüyordu: kampanyanın kazancı x1,04-x1,28 bandında,
+/// aynı para borsada daha çok getiriyor.
+BusinessAd kSolverAdTier = BusinessAd.yok;
+
+/// prototypeOnly: çözücü zam yapsın mı (§8). Ölçümde değiştirilir.
+bool kSolverUsesRaise = false;
+
+/// En yüksek maaşlı açık işe başvurur (§11/11, §11/12).
+void _applyBestJob(GameController c) {
+  final GameState s = c.state!;
+  if (s.career.isEmployed) {
+    if (c.raiseAvailability().isAllowed) c.askForRaise();
+    return;
+  }
+  final List<JobType> uygun = c
+      .openJobs()
+      .where((JobType j) => c.jobApplicationAvailability(j).isAllowed)
+      .toList(growable: false);
+  if (uygun.isEmpty) return;
+  JobType enIyi = uygun.first;
+  for (final JobType j in uygun) {
+    if (j.yearlySalary > enIyi.yearlySalary) enIyi = j;
+  }
+  c.applyForJob(enIyi);
+}
+
+/// İşletmenin **beklenen** yıllık kârının sermayesine oranı.
+///
+/// Oyuncunun kurulum ekranında görebildiği iki sayıdan (sermaye ve "iyi
+/// giderse yılda") hesaplanıyor; gizli alan kullanılmıyor.
+double _visibleRoi(BusinessType t) =>
+    t.setupCost <= 0 ? 0 : t.baseYearlyProfit / t.setupCost;
+
+/// Bot bu yıl hangi işletmeyi açardı?
+///
+/// Karşılayabildikleri arasından görünür ROI'si en yüksek olanı seçer.
+BusinessType? _pickBestBusiness(GameController c) {
+  final List<BusinessType> uygun = kBusinessCatalog
+      .where((BusinessType t) =>
+          (_forcedBusinessId == null || t.id == _forcedBusinessId) &&
+          c.businessOpenAvailability(t).isAllowed)
+      .toList(growable: false);
+  if (uygun.isEmpty) return null;
+  BusinessType enIyi = uygun.first;
+  for (final BusinessType t in uygun) {
+    if (_visibleRoi(t) > _visibleRoi(enIyi)) enIyi = t;
+  }
+  return enIyi;
+}
+
+/// **Mükemmel girişimci** bir yılını oynar (§1, §2).
+void _actSolver(GameController c, Random rng, StrategyResult sonuc) {
+  _applyBestJob(c);
+
+  final Business? acik = c.openBusiness;
+  if (acik == null) {
+    // İş yok: karşılayabildiği en iyi ROI'li işi aç.
+    final BusinessType? hedef = _pickBestBusiness(c);
+    if (hedef != null) {
+      c.openBusinessOf(hedef);
+    } else {
+      // Sermaye yetmiyorsa yatırımdan çekip sermaye toplar (§1).
+      _fundBusinessFromPortfolio(c);
+    }
+  } else {
+    _manageSolverBusiness(c, acik, sonuc);
+    _maybeSwitchBusiness(c, acik, sonuc);
+  }
+
+  // Artan parayı yatırır; işletme için rezerv bırakır (§10).
+  _investSurplus(c, sonuc);
+}
+
+/// İşletme rezervi: bir yıllık sabit gideri kadar nakit tutulur.
+///
+/// §10 "bütün kârı anında yatırıma çekmek optimal mi?" diye soruyor.
+/// Bot **rezerv bırakan** tarafı oynuyor; rezervsiz oynayan sürüm
+/// `paket_af_meta_test.dart` içinde ayrıca ölçülüyor.
+int _businessReserve(GameController c) {
+  final Business? b = c.openBusiness;
+  final BusinessType? t = b?.type;
+  if (t == null) return 0;
+  return (t.baseRevenue * (t.fixedShare + t.staffShare * 0.7)).round();
+}
+
+void _investSurplus(GameController c, StrategyResult sonuc) {
+  final int rezerv = _businessReserve(c);
+  final int serbest = c.state!.player.wallet - rezerv;
+  if (serbest < kInvestmentMinBuy) return;
+  // Risk/getiri dengesi: yarısı hisse, yarısı fon + altın.
+  const List<String> sepet = <String>['hisse', 'fon', 'altin'];
+  final int pay = serbest ~/ sepet.length;
+  if (pay < kInvestmentMinBuy) return;
+  for (final String tur in sepet) {
+    final InvestmentType? tip = investmentTypeById(tur);
+    if (tip == null) continue;
+    if (c.investmentBuyBlockReason(tip, pay).isNotEmpty) continue;
+    final InvestmentOutcome? r = c.buyInvestment(tur, pay);
+    if (r?.applied ?? false) sonuc.principal += pay;
+  }
+}
+
+/// Sermaye için portföyden nakit çeker (§1: "gerekirse yatırım satarak").
+void _fundBusinessFromPortfolio(GameController c) {
+  final List<BusinessType> hepsi = kBusinessCatalog
+      .where((BusinessType t) =>
+          c.businessOpenAvailability(t).reason?.contains('Sermaye') ?? false)
+      .toList(growable: false);
+  if (hepsi.isEmpty) return;
+  // En ucuz kurulabilir işi hedefle.
+  BusinessType hedef = hepsi.first;
+  for (final BusinessType t in hepsi) {
+    if (t.setupCost < hedef.setupCost) hedef = t;
+  }
+  final int eksik = hedef.setupCost - c.state!.player.wallet;
+  if (eksik <= 0) return;
+  for (final Holding h in c.state!.investments) {
+    if (h.isEmpty) continue;
+    final int satilacak = h.value < eksik ? h.value : eksik;
+    if (satilacak < kInvestmentMinBuy) continue;
+    c.sellInvestment(h.typeId, satilacak);
+    if (c.state!.player.wallet >= hedef.setupCost) return;
+  }
+}
+
+/// İşletmeyi çözücü mantığıyla yönetir (§5-§8).
+void _manageSolverBusiness(
+  GameController c,
+  Business b,
+  StrategyResult sonuc,
+) {
+  final BusinessType? tur = b.type;
+  if (tur == null) return;
+  final _SolverMemory hafiza =
+      _solverMemory.putIfAbsent(tur.id, () => _SolverMemory());
+
+  // --- Geçen yılın sonucunu hafızaya yaz (§5, §6) --------------------
+  final BusinessYear? sonYil = b.lastYear;
+  if (sonYil != null) {
+    hafiza.fiyatSonuclari
+        .putIfAbsent(hafiza.denenenFiyatIndeksi, () => <int>[])
+        .add(sonYil.net);
+    if (hafiza.reklamDeniyor) {
+      hafiza.reklamliYillar.add(sonYil.net);
+    } else {
+      hafiza.reklamsizYillar.add(sonYil.net);
+    }
+  }
+
+  // --- Fiyat: keşfet, sonra en iyisinde kal (§5) ---------------------
+  // İlk yıllarda bütün oranları sırayla dener; sonra ölçtüğü en iyisine
+  // yerleşir. Geleceği bilmiyor, yalnızca kendi geçmişine bakıyor.
+  final int denenmemis = kSolverPriceRatios
+      .asMap()
+      .keys
+      .firstWhere(
+        (int i) => (hafiza.fiyatSonuclari[i]?.length ?? 0) < 2,
+        orElse: () => -1,
+      );
+  hafiza.denenenFiyatIndeksi =
+      denenmemis >= 0 ? denenmemis : hafiza.enIyiFiyat;
+  final int ortalama = c.businessMarketPrice();
+  if (ortalama > 0) {
+    final int hedef =
+        (ortalama * kSolverPriceRatios[hafiza.denenenFiyatIndeksi]).round();
+    if (hedef != c.businessPrice()) c.setBusinessPrice(hedef);
+  }
+
+  // --- Reklam: ancak karşılığını gördüyse (§6) -----------------------
+  final bool? karli = hafiza.reklamKarliMi;
+  if (karli == null) {
+    // Henüz bilmiyor: dönüşümlü dener ki karşılaştırabilsin.
+    hafiza.reklamDeniyor = !hafiza.reklamDeniyor;
+  } else {
+    hafiza.reklamDeniyor = karli;
+  }
+  if (hafiza.reklamDeniyor && b.ad == BusinessAd.yok) {
+    // **Ölçümle seçildi (§6).** Süpürmede kademe bazında kazanan sayısı
+    // mahalle 7, sosyal medya 5, büyük 1, hiç 1 çıktı: en pahalı kampanya
+    // 14 işletmenin yalnızca birinde en iyisi. Çözücü ölçülen en yaygın
+    // kazananı oynuyor.
+    c.setBusinessAd(kSolverAdTier);
+  } else if (!hafiza.reklamDeniyor && b.ad != BusinessAd.yok) {
+    c.setBusinessAd(BusinessAd.yok);
+  }
+
+  // --- Bakım: ekonomik optimumda (§7) --------------------------------
+  if (b.upkeep <= kSolverMaintenanceThreshold &&
+      c.businessMaintenanceAvailability().isAllowed) {
+    c.maintainBusiness();
+  }
+
+  // --- Personel (§8) -------------------------------------------------
+  // **Ölçümle seçildi (§8).** Politika süpürmesi: sürekli ilgi ₺319,2M,
+  // sürekli zam ₺244,6M, hiçbir şey ₺242,0M. Zam kalıcı gider getirdiği
+  // için memnuniyet kazancını yiyor; verimli hamle "kendin ilgilen".
+  // Kadro eksiği yine de önce kapatılıyor: eksik kadro talebi düşürüyor.
+  if (c.businessStaffAvailability(StaffAction.iseAl).isAllowed) {
+    c.businessStaff(StaffAction.iseAl);
+  } else if (kSolverUsesRaise &&
+      b.staffMorale < 45 &&
+      c.businessStaffAvailability(StaffAction.zam).isAllowed) {
+    c.businessStaff(StaffAction.zam);
+  } else if (c.businessStaffAvailability(StaffAction.ilgilen).isAllowed) {
+    c.businessStaff(StaffAction.ilgilen);
+  }
+
+  if (c.businessTendAvailability().isAllowed) c.tendBusiness();
+}
+
+/// Daha iyi bir işletme açılabiliyorsa geçer (§4).
+void _maybeSwitchBusiness(
+  GameController c,
+  Business b,
+  StrategyResult sonuc,
+) {
+  final BusinessType? mevcut = b.type;
+  if (mevcut == null) return;
+  // Belirli bir tür ölçülüyorsa geçiş yapılmaz (§3 tek tür ölçüyor).
+  if (_forcedBusinessId != null) return;
+  // En az beş yıl çalıştırmadan karar vermez: bir iki kötü yıl kanıt değil.
+  if (c.state!.player.age - b.startedAtAge < 5) return;
+
+  // Devir bedelinden sonra eline geçecek parayla hangi işi açabilir?
+  final int tahminiNakit =
+      c.state!.player.wallet + (mevcut.salvageValue * 0.7).round();
+  BusinessType? hedef;
+  for (final BusinessType t in kBusinessCatalog) {
+    if (t.id == mevcut.id) continue;
+    if (t.setupCost > tahminiNakit) continue;
+    if (c.state!.player.age < t.minAge) continue;
+    if (_visibleRoi(t) <= _visibleRoi(mevcut) * 1.15) continue;
+    if (hedef == null || _visibleRoi(t) > _visibleRoi(hedef)) hedef = t;
+  }
+  if (hedef == null) return;
+  c.closeBusiness();
+  c.openBusinessOf(hedef);
 }
