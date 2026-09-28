@@ -45,6 +45,7 @@ import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:bir_omur/domain/interaction/divorce_settlement.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
+import 'package:bir_omur/domain/interaction/friendship_depth.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/lawyer_catalog.dart';
@@ -72,6 +73,7 @@ import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/loan.dart';
+import 'package:bir_omur/domain/models/market_incident.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/domain/models/pending_trial.dart';
@@ -524,6 +526,47 @@ class _Intent {
   int homeAttemptAge = -99;
   int rentalAttemptAge = -99;
   int businessAttemptAge = -99;
+
+  // ------------------------------------------------------------------
+  // Paket AH, §2 — işletme yönetimi tarzı
+  // ------------------------------------------------------------------
+  //
+  // Her işletme sahibi aynı oyuncu değil. Kimi her yıl dükkânın başında,
+  // kimi yılda bir uğrar. Bu dört değer hayat başına **bir kez**
+  // çekilir ve ömür boyu aynı kalır: aynı hayat içinde bot tutarlı bir
+  // karakter olsun, yıldan yıla başka biri gibi davranmasın.
+
+  /// Dükkânla ne kadar ilgileniyor (0-1). Girişimcinin daha yüksek.
+  late final double bizAttention =
+      (0.25 + profile.wantsBusiness * 0.5 + rng.nextDouble() * 0.3)
+          .clamp(0.15, 0.95);
+
+  /// Bölge ortalamasına göre kendi fiyat oranı.
+  late final double bizPriceRatio = 0.85 + rng.nextDouble() * 0.35;
+
+  /// Reklam alışkanlığı: çoğu esnaf hiç vermez.
+  late final BusinessAd bizAdTier = switch (rng.nextDouble()) {
+        < 0.45 => BusinessAd.yok,
+        < 0.75 => BusinessAd.mahalle,
+        < 0.93 => BusinessAd.sosyalMedya,
+        _ => BusinessAd.buyuk,
+      };
+
+  /// Bakımı hangi yıpranmada hatırlıyor (düşük eşik = ihmalkâr).
+  late final int bizUpkeepThreshold = 45 + rng.nextInt(45);
+
+  /// Hayat boyunca **kurmak istediği** işletme türü. Rastgele değil bir
+  /// hedef: oyuncunun aklındaki dükkân. Sermayesi yetene kadar bekler.
+  late final String? targetBusinessId = kBusinessCatalog.isEmpty
+      ? null
+      : kBusinessCatalog[rng.nextInt(kBusinessCatalog.length)].id;
+
+  /// Hedefinden vazgeçip eline geçeni kuracağı yaş.
+  late final int businessPatienceAge = 34 + rng.nextInt(14);
+
+  /// Yatırım satma eğilimi (0-1). Temkinli oyuncu daha sık bozdurur.
+  late final double sellTendency =
+      (0.15 + (1 - profile.riskAppetite) * 0.25).clamp(0.05, 0.6);
 }
 
 /// Bir hayatı **doğumdan ölüme** oynar ve ölçümünü döner.
@@ -575,6 +618,12 @@ BotLifeResult playBotLife({
         diag.inheritanceCount++;
         diag.inheritanceMoney += bildirim.money;
         diag.inheritanceItems += bildirim.itemNames.length;
+      }
+      // Paket AH, §4: reklamın tuttuğu yıl. Motor bunu ayrı bir
+      // başlıkla bildiriyor; sayacı oradan okuyoruz.
+      if (bildirim.id.startsWith('is-hikaye-') &&
+          bildirim.title == 'Reklam tuttu') {
+        diag.bizViralYears++;
       }
       c.dismissNotice();
       continue;
@@ -703,6 +752,7 @@ BotLifeResult playBotLife({
     // hiç dokunmuyor (Q-165/5'in kaynağı); ödenen kısmı ancak burada
     // doğru hesaplayabiliriz.
     _snapshotBeforeAge(c.state!, diag);
+    _snapshotAhBefore(c.state!, diag);
     c.ageUp();
     if (c.state!.player.age == oncekiYas) {
       // İlerlemeyi engelleyen bir şey kaldıysa döngüyü kırmak yerine
@@ -720,6 +770,7 @@ BotLifeResult playBotLife({
     }
     intent.yearsInCurrentJob++;
     _snapshotAfterAge(c.state!, diag);
+    _snapshotAhAfter(c.state!, diag);
     if (onYear != null) onYear(c.state!);
   }
 
@@ -775,6 +826,84 @@ void _snapshotBeforeAge(GameState s, BotDiag diag) {
   // Maaş: çalışıyorsa o yılın yıllık maaşı. Yaklaşık brüt kariyer
   // geliri; vergi/kesinti modeli değil.
   diag.lifetimeSalary += s.career.job?.yearlySalary ?? 0;
+}
+
+/// Paket AH — yıl **başındaki** okumalar (§4, §5, §6).
+///
+/// Yalnızca okur. `_snapshotBeforeAge` yaşam gideri ölçümüne bağlı ve
+/// gider sıfırsa erken dönüyor; AH ölçüleri her yıl gerekli olduğu için
+/// ayrı bir fonksiyona alındı.
+void _snapshotAhBefore(GameState s, BotDiag diag) {
+  diag.prevHoldingValue
+    ..clear()
+    ..addEntries(s.investments
+        .map((Holding h) => MapEntry<String, int>(h.typeId, h.value)));
+  final int portfoy = s.portfolioValue;
+  if (portfoy > diag.peakPortfolio) diag.peakPortfolio = portfoy;
+
+  // Kariyer: 18+ yaşta işi olan / olmayan yıl. Emeklilik işsizlik
+  // sayılmaz — çalışmayı bırakmak bir sonuç, engel değil.
+  if (s.player.age >= 18) {
+    if (s.career.job != null) {
+      diag.employedYears++;
+    } else if (s.career.retiredAtAge == null) {
+      diag.unemployedAdultYears++;
+    }
+  }
+}
+
+/// Paket AH — yıl **sonundaki** okumalar (§4, §5).
+void _snapshotAhAfter(GameState s, BotDiag diag) {
+  // --- Yatırım: tek yılda tek varlıkta görülen düşüş ----------------
+  for (final Holding h in s.investments) {
+    final int onceki = diag.prevHoldingValue[h.typeId] ?? 0;
+    if (onceki <= 0) continue;
+    final double oran = (onceki - h.value) / onceki;
+    if (oran >= 0.40) {
+      diag.drop40++;
+      diag.drop30++;
+      diag.drop20++;
+    } else if (oran >= 0.30) {
+      diag.drop30++;
+      diag.drop20++;
+    } else if (oran >= 0.20) {
+      diag.drop20++;
+    }
+  }
+  final int portfoy = s.portfolioValue;
+  if (diag.peakPortfolio > 0 && portfoy < diag.peakPortfolio) {
+    final double dusus = (diag.peakPortfolio - portfoy) / diag.peakPortfolio;
+    if (dusus > diag.worstDrawdown) diag.worstDrawdown = dusus;
+  }
+
+  // --- Piyasa olayları ----------------------------------------------
+  for (final MarketIncident olay in s.market.incidents) {
+    diag.marketIncidentKinds.add(olay.kind.name);
+    if (olay.kind == IncidentKind.yonetimSkandali ||
+        olay.kind == IncidentKind.regulatorIncelemesi) {
+      diag.sawScandal = true;
+    }
+    if (olay.kind == IncidentKind.konkordato ||
+        olay.kind == IncidentKind.kayyum ||
+        olay.kind == IncidentKind.iflas) {
+      diag.sawCompanyFailure = true;
+    }
+  }
+
+  // --- İşletme: kapanan yılın sonucu --------------------------------
+  for (final Business b in s.businesses) {
+    if (b.history.isEmpty) continue;
+    final BusinessYear son = b.history.last;
+    // Sayaç **işletme başına**: aynı hayatta ikinci bir iş açılırsa
+    // onun yılları da sayılsın. (İlk yazımda tek sayaç vardı ve ikinci
+    // işletmenin yılları düşüyordu.)
+    if (son.age <= (diag.lastCountedBizYearOf[b.id] ?? -1)) continue;
+    diag.lastCountedBizYearOf[b.id] = son.age;
+    diag.bizYears++;
+    if (son.net < 0) diag.bizLossYears++;
+    if (son.adCost > 0) diag.bizAdYears++;
+    if (son.net > diag.bizBestYear) diag.bizBestYear = son.net;
+  }
 }
 
 /// Yaş aldıktan **sonra** okunanlar: servet eğrisi ve sıkıntı sayacı.
@@ -900,6 +1029,57 @@ void _collectDiagAtDeath(GameController c, BotDiag diag) {
     diag.businessInvested += b.totalInvested;
     diag.businessProfit += b.totalProfit;
   }
+
+  // ------------------------------------------------------------------
+  // Paket AH — ölümde okunanlar (§4, §5, §8, §9)
+  // ------------------------------------------------------------------
+
+  // İşletme: kurulan, kapanan, konan sermaye, çıkan kâr.
+  diag.bizOpened = s.businesses.length;
+  diag.bizClosed = s.businesses.where((Business b) => !b.isOpen).length;
+  for (final Business b in s.businesses) {
+    diag.bizCapital += b.totalInvested;
+    diag.bizProfit += b.totalProfit;
+  }
+
+  // Yatırım: zorunlu satış = toplam satış kaydı − botun kendi satışı.
+  // Oyun ayrı bir "zorunlu" kaydı tutmuyor; fark bunu veriyor.
+  final int satisKaydi = s.investmentHistory
+      .where((InvestmentRecord r) => r.kind == InvestmentRecordKind.satti)
+      .length;
+  diag.forcedSales =
+      satisKaydi - diag.investSells < 0 ? 0 : satisKaydi - diag.investSells;
+  diag.investEndedInLoss = diag.portfolioInvestedAtDeath > 0 &&
+      s.portfolioValue + diag.portfolioRealizedAtDeath <
+          diag.portfolioInvestedAtDeath;
+
+  // Sağlık.
+  diag.healthCrises = s.healthHistory.length;
+  diag.chronicCount = s.chronicConditions.length;
+
+  // Suç / hukuk.
+  diag.caseCount = s.legal.cases.length;
+  for (final CriminalCase dosya in s.legal.cases) {
+    switch (dosya.stage) {
+      case CaseStage.sorusturma:
+        diag.investigations++;
+      case CaseStage.dava:
+        diag.investigations++;
+        diag.trials++;
+      case CaseStage.karar:
+        diag.investigations++;
+        diag.trials++;
+        if (dosya.verdict.leavesRecord) diag.convictions++;
+        if (dosya.verdict == Verdict.hapis) {
+          diag.prisonYears += dosya.prisonYears;
+        }
+      case CaseStage.takipsizlik:
+        diag.investigations++;
+      case CaseStage.idariCeza:
+        break;
+    }
+  }
+  if (s.legal.probationUntilAge != null) diag.probationYears++;
 }
 
 /// Küçük yardımcı: listedeki ilk uyan öğe ya da null.
@@ -1354,12 +1534,43 @@ void _handleMoney(
             (sonuc.diag.bizAffordableYears[t.id] ?? 0) + 1;
       }
     }
-    final List<BusinessType> uygun = kBusinessCatalog
-        .where((BusinessType t) =>
-            c.businessOpenAvailability(t).isAllowed &&
-            t.setupCost <= serbest())
+    // **Paket AH, §11/§12 — bot hatası.** Burada "şartı açık ve parası
+    // yeten türlerden rastgele biri" seçiliyordu. Sonucu ölçüldü: 375
+    // hayatta açılan 94 işletmenin 73'ü terzi atölyesiydi (%77,7) ve 14
+    // türün 9'u **hiç açılmadı**. Sebep dengede değil, botun sabırsız
+    // olmasında: 22 yaşında elinde ne varsa onu kuruyor, en ucuz iş de
+    // hep aynı. Gerçek oyuncu aklındaki dükkânı kurmak için birikir.
+    //
+    // Artık her hayat **bir hedef tür** seçiyor (ömür boyu aynı) ve
+    // sermayesi yetene kadar bekliyor. Sabrı tükenirse eline geçeni
+    // kurar; o da bir oyuncu davranışı.
+    final List<BusinessType> hedefUygun = kBusinessCatalog
+        .where((BusinessType t) => c.businessOpenAvailability(t).isAllowed)
         .toList(growable: false);
-    if (uygun.isNotEmpty) {
+    final BusinessType? hedef = intent.targetBusinessId == null
+        ? null
+        : hedefUygun.firstWhereOrNullBot(
+            (BusinessType t) => t.id == intent.targetBusinessId);
+    if (hedef != null && hedef.setupCost <= serbest()) {
+      sonuc.diag.bizAttempted[hedef.id] =
+          (sonuc.diag.bizAttempted[hedef.id] ?? 0) + 1;
+      final BusinessOutcome? hedefSonuc = c.openBusinessOf(hedef);
+      if (hedefSonuc?.applied ?? false) {
+        sonuc.ownedBusiness = true;
+        sonuc.businessTypes.add(hedef.id);
+      }
+    }
+    final List<BusinessType> uygun = c.state!.businesses.isNotEmpty
+        ? const <BusinessType>[]
+        : kBusinessCatalog
+            .where((BusinessType t) =>
+                c.businessOpenAvailability(t).isAllowed &&
+                t.setupCost <= serbest())
+            .toList(growable: false);
+    // Sabır: hedefi hâlâ kuramadıysa, ancak belli bir yaştan sonra
+    // eline geçeni kurar.
+    if (uygun.isNotEmpty &&
+        (hedef == null || s.player.age >= intent.businessPatienceAge)) {
       final BusinessType secim = uygun[rng.nextInt(uygun.length)];
       sonuc.diag.bizAttempted[secim.id] =
           (sonuc.diag.bizAttempted[secim.id] ?? 0) + 1;
@@ -1370,14 +1581,68 @@ void _handleMoney(
       }
     }
   }
-  // İşi varsa ilgilenir, kötü gidiyorsa kapatır.
+  // İşi varsa yönetir, kötü gidiyorsa kapatır.
+  //
+  // **Paket AH, §2.** Burası AE'ye kadar yalnızca `tendBusiness`,
+  // `investInBusiness` ve `closeBusiness` çağırıyordu: AE'nin getirdiği
+  // fiyat, reklam, bakım ve personel ekranlarını bot hiç açmıyordu, yani
+  // "gerçek oyuncu davranışı" ölçümünde işletme yönetimi eksikti.
+  // Aşağısı o dört sistemi de kullanır — ama **min-max oynamaz**:
+  // her oyuncu her yıl her şeyi yapmaz, kimi ilgisizdir. Min-max
+  // ölçümü ayrı kalıyor (`strategy_player.dart`).
   final Business? isletme =
       c.state!.businesses.isEmpty ? null : c.state!.businesses.first;
-  if (isletme != null) {
+  if (isletme != null && isletme.isOpen) {
     sonuc.ownedBusiness = true;
     sonuc.businessTypes.add(isletme.typeId);
-    if (c.businessTendAvailability().isAllowed && rng.nextDouble() < 0.7) {
+    if (c.businessTendAvailability().isAllowed &&
+        rng.nextDouble() < intent.bizAttention) {
       c.tendBusiness();
+      sonuc.diag.bizTend++;
+    }
+    // --- Fiyat: kendi oranına göre, ara sıra gözden geçirir ----------
+    if (rng.nextDouble() < intent.bizAttention * 0.5) {
+      final int piyasa = c.businessMarketPrice();
+      if (piyasa > 0) {
+        final ({int min, int max}) bant = c.businessPriceRange();
+        final int hedef =
+            (piyasa * intent.bizPriceRatio).round().clamp(bant.min, bant.max);
+        if ((hedef - c.businessPrice()).abs() > piyasa * 0.05) {
+          if (c.setBusinessPrice(hedef)?.applied ?? false) {
+            sonuc.diag.bizPriceChanges++;
+          }
+        }
+      }
+    }
+    // --- Reklam: kampanya bitince yenisini düşünür -------------------
+    if (intent.bizAdTier != BusinessAd.yok &&
+        c.state!.businesses.first.ad == BusinessAd.yok &&
+        rng.nextDouble() < 0.5) {
+      if (c.setBusinessAd(intent.bizAdTier)?.applied ?? false) {
+        sonuc.diag.bizAdSet++;
+      }
+    }
+    // --- Bakım: yıpranma görünür hale gelince -----------------------
+    if (c.state!.businesses.first.upkeep < intent.bizUpkeepThreshold &&
+        c.businessMaintenanceAvailability().isAllowed &&
+        rng.nextDouble() < intent.bizAttention) {
+      if (c.maintainBusiness()?.applied ?? false) sonuc.diag.bizMaintain++;
+    }
+    // --- Personel: önce eksik kadro, sonra huzursuzluk, sonra ilgi ---
+    if (rng.nextDouble() < intent.bizAttention) {
+      final Business b = c.state!.businesses.first;
+      StaffAction? hamle;
+      if (c.businessStaffAvailability(StaffAction.iseAl).isAllowed) {
+        hamle = StaffAction.iseAl;
+      } else if (b.staffMorale < 45 &&
+          c.businessStaffAvailability(StaffAction.zam).isAllowed) {
+        hamle = StaffAction.zam;
+      } else if (c.businessStaffAvailability(StaffAction.ilgilen).isAllowed) {
+        hamle = StaffAction.ilgilen;
+      }
+      if (hamle != null && (c.businessStaff(hamle)?.applied ?? false)) {
+        sonuc.diag.bizStaff++;
+      }
     }
     // Sermaye koyma: parası varsa ve iş ayaktaysa.
     final int yatirim = (serbest() * 0.3).round();
@@ -1389,7 +1654,7 @@ void _handleMoney(
     // Zarar ediyorsa devret: üst üste kötü giden işi tutmaz.
     // Toplam kârı eksiye düşen işi bir noktada bırakır: zarar eden işi
     // ömür boyu taşımaz.
-    if (isletme.totalProfit < 0 && rng.nextDouble() < 0.25) {
+    if (c.state!.businesses.first.totalProfit < 0 && rng.nextDouble() < 0.25) {
       c.closeBusiness();
     }
   }
@@ -1438,6 +1703,24 @@ void _handleMoney(
           sonuc.diag.investBuys++;
           sonuc.diag.investedPrincipalEver += pay;
         }
+      }
+    }
+  }
+  // **Paket AH, §2.** Bot AH'ye kadar hiç satmıyordu: portföy yalnızca
+  // oyunun zorunlu bozdurmasıyla küçülüyordu. Gerçek oyuncu bazen satar
+  // — büyük bir harcamadan önce ya da düşüşte paniğe kapılıp. İkisi de
+  // burada; hangisinin ne sıklıkta olduğu ölçülüyor.
+  s = c.state!;
+  if (s.investments.isNotEmpty && rng.nextDouble() < intent.sellTendency) {
+    final Holding h = s.investments[rng.nextInt(s.investments.length)];
+    final bool zararda = h.value < h.costBasis * 0.85;
+    // Panik satışı düşüşte daha olası; normal satış nadir.
+    final double sans = zararda ? 0.45 : 0.15;
+    if (h.value > 0 && rng.nextDouble() < sans) {
+      final int miktar = (h.value * (0.3 + rng.nextDouble() * 0.5)).round();
+      if (miktar > 0 &&
+          (c.sellInvestment(h.typeId, miktar)?.applied ?? false)) {
+        sonuc.diag.investSells++;
       }
     }
   }
@@ -1758,13 +2041,36 @@ void _handleRelationships(
   }
 
   // Yakın arkadaşlık: sosyal oyuncu teklif eder.
+  //
+  // **Paket AH, §12 — bot hatası.** Burada koşul `relation == arkadas`
+  // idi; oysa `arkadas` zaten *yakın arkadaş* durumunun kendisi ve
+  // `closeFriendAvailability` o durumda "Zaten yakın arkadaşsınız."
+  // diyerek kapanıyor. Yani bot teklifi **hiçbir zaman** yapamıyordu:
+  // 375 hayatın hiçbirinde tanışıklık arkadaşlığa dönüşmedi. Dönüşüm
+  // sınıf/iş arkadaşından olur; koşul oraya çevrildi.
   for (final Person p in c.state!.people) {
     if (!p.isAlive) continue;
-    if (p.relation == RelationType.arkadas &&
-        c.closeFriendAvailability(p.id).isAllowed &&
-        rng.nextDouble() < profile.socialDesire) {
-      c.proposeCloseFriend(p.id);
-      break;
+    final bool tanisiklik = p.relation == RelationType.sinifArkadasi ||
+        p.relation == RelationType.isArkadasi;
+    if (tanisiklik) {
+      sonuc.diag.sawAcquaintance = true;
+      if (p.bond > sonuc.diag.bestAcquaintanceBond) {
+        sonuc.diag.bestAcquaintanceBond = p.bond;
+      }
+    }
+    if (tanisiklik) {
+      final InteractionAvailability uygun = c.closeFriendAvailability(p.id);
+      if (uygun.isAllowed) {
+        sonuc.diag.closeFriendEligibleYears++;
+      } else {
+        sonuc.diag.closeFriendBlockReason = uygun.reason ?? '';
+      }
+      if (uygun.isAllowed && rng.nextDouble() < profile.socialDesire) {
+        sonuc.diag.closeFriendAttempts++;
+        final FriendshipOutcome? sonucu = c.proposeCloseFriend(p.id);
+        if (sonucu?.applied ?? false) sonuc.diag.closeFriendAccepted++;
+        break;
+      }
     }
     // Küslük varsa barışmayı dener.
     if (c.makeUpAvailability(p.id).isAllowed && rng.nextDouble() < 0.4) {

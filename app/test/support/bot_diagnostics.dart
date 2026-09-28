@@ -326,6 +326,119 @@ class BotDiag {
   int investOpportunityYears = 0;
 
   // ------------------------------------------------------------------
+  // AH — tam yaşam denetimi
+  // ------------------------------------------------------------------
+  //
+  // Paket AE işletmeye fiyat/reklam/bakım/personel getirdi, ama
+  // `PlayerBot` o gün güncellenmedi: yalnızca `tendBusiness`,
+  // `investInBusiness` ve `closeBusiness` çağırıyordu. AH'nin §2'si
+  // botun bu sistemleri **gerçekten** kullanmasını istiyor; aşağıdaki
+  // sayaçlar kullandığını kanıtlıyor. Hiçbiri oyunun sayısını
+  // değiştirmez, yalnızca okur.
+
+  /// İşletmenin açık geçirdiği yıl (bütün işletmeler toplamı).
+  int bizYears = 0;
+
+  /// O yılın neti eksi olan işletme yılı.
+  int bizLossYears = 0;
+
+  /// Kurulan ve kapanan işletme sayısı.
+  int bizOpened = 0;
+  int bizClosed = 0;
+
+  /// Bot eylem sayaçları: fiyat, reklam, bakım, personel.
+  int bizPriceChanges = 0;
+  int bizAdSet = 0;
+  int bizAdYears = 0;
+  int bizMaintain = 0;
+  int bizStaff = 0;
+  int bizTend = 0;
+
+  /// Reklamın tuttuğu (viral) yıl: motorun bıraktığı bildirimden okunur.
+  int bizViralYears = 0;
+
+  /// Hayat boyunca işletmeye konan sermaye ve işletmeden çıkan kâr.
+  int bizCapital = 0;
+  int bizProfit = 0;
+
+  /// En iyi tek işletme yılı (₺ net).
+  int bizBestYear = 0;
+
+  // --- Yatırım ------------------------------------------------------
+
+  /// Botun **kendi isteğiyle** sattığı kez.
+  int investSells = 0;
+
+  /// Tek yılda tek varlıkta görülen düşüşler (§5).
+  int drop20 = 0;
+  int drop30 = 0;
+  int drop40 = 0;
+
+  /// Portföyün zirveden en kötü düşüşü (0-1).
+  double worstDrawdown = 0;
+
+  /// Yıl boyunca görülen piyasa olayları.
+  bool sawScandal = false;
+  bool sawCompanyFailure = false;
+  final Set<String> marketIncidentKinds = <String>{};
+
+  /// Zorunlu satış yılı: oyunun bozdurduğu, botun istemediği satış.
+  /// (Toplam satış kaydı − botun kendi satışı.)
+  int forcedSales = 0;
+
+  /// Portföyü anaparasının altında biten hayat mı?
+  bool investEndedInLoss = false;
+
+  // --- Kariyer ------------------------------------------------------
+
+  /// 18+ yaşta işi olan / olmayan yıl.
+  int employedYears = 0;
+  int unemployedAdultYears = 0;
+
+  // --- Sağlık -------------------------------------------------------
+
+  /// Sağlık krizi sayısı ve kronik tanı sayısı.
+  int healthCrises = 0;
+  int chronicCount = 0;
+
+  /// Kontrol (check-up) ve tahlil eylemi sayısı.
+  int healthActions = 0;
+
+  // --- Suç / hukuk --------------------------------------------------
+
+  int investigations = 0;
+  int trials = 0;
+  int convictions = 0;
+  int prisonYears = 0;
+  int probationYears = 0;
+
+  /// Birden fazla dosyası olan hayat: yeniden suç.
+  int caseCount = 0;
+
+  // --- Yakın arkadaşlık hunisi (AH, §7/§10) -------------------------
+  //
+  // Tanışıklık (sınıf/iş arkadaşı) → yakınlık 55 → teklif → kabul.
+  // Hangi basamakta tıkandığını görmek için her basamak ayrı sayılıyor.
+  bool sawAcquaintance = false;
+  int bestAcquaintanceBond = 0;
+  int closeFriendEligibleYears = 0;
+  int closeFriendAttempts = 0;
+  int closeFriendAccepted = 0;
+  String closeFriendBlockReason = '';
+
+  // --- İç kullanım: yıl başı değerleri ------------------------------
+  //
+  // Rapor alanı değil; yıl sınırındaki karşılaştırmayı kurmak için
+  // tutuluyor. Bot **yıl içinde alım/satım yapmıyor** (eylemler yaş
+  // almadan önce biter), dolayısıyla iki okuma arasındaki fark saf
+  // piyasa hareketidir.
+  final Map<String, int> prevHoldingValue = <String, int>{};
+  int peakPortfolio = 0;
+
+  /// İşletme kimliği → sayılan son yıl (aynı yıl iki kez sayılmasın).
+  final Map<String, int> lastCountedBizYearOf = <String, int>{};
+
+  // ------------------------------------------------------------------
   // Türetilmiş ölçüler
   // ------------------------------------------------------------------
 
