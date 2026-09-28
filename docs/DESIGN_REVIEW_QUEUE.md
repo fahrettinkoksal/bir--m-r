@@ -4898,3 +4898,52 @@ Hayatların **%57,8'inde en az bir adli dosya** var; %20,1 sabıkalı, %27,5 dav
 **Claude'un önerisi (yalnızca öneri).** 1 için (C): kredi eklemeden önce oyuncuya hedefi göstermek daha ucuz ve daha az yan etkili. 2 için eşiği düşürmek yerine "tanışıklıkla vakit geçirmenin" görünürlüğünü artırmak — sistem çalışıyor, oyuncu yolu bilmiyor olabilir. 4 ve 5 için önce bir tur oynanıp hissedilmesi.
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-179 — Paket AI: aksiyon kapsamı denetiminin açtığı sorular
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/test/support/action_inventory.dart`, `app/test/support/coverage_bot.dart`, `app/test/paket_ai_action_coverage_test.dart`, `app/test/paket_ai_abuse_test.dart`.
+
+**Bağlam.** Oyuncunun yapabildiği 109 aksiyonun 103'ü artık bir testten geçiyor (%94,5) ve 400 hedefli hayatta takılan yok. Aynı yıl tekrarı, arbitraj ve stat farming saldırılarının hiçbiri para basmıyor. Aşağıdakiler ölçümün açtığı **ürün** sorularıdır; hiçbir sayı değiştirilmedi.
+
+#### 1 — Kaydet/yükle ile kumar sonucu yeniden atılabiliyor (doğrulandı)
+
+Oyunun zarı `GameController._random` kurucuda bir kez üretiliyor ve `GameState` içinde taşınmıyor; dolayısıyla **kayda yazılmıyor**. Kaydı geri yükleyen oyuncu aynı bahsi yeniden oynayabiliyor ve farklı bir sonuç alabiliyor. Ölçüm: 30 yükleme denemesinin en iyisi blackjack'te **+₺135k**, rulette **+₺90k**.
+
+Bu bir denge sorusu değil, kayıt tasarımının doğrudan sonucu. Seçenekler: (A) olduğu gibi kalsın — tek kayıt yuvası var, oyuncu kendi oyununu bozuyorsa bozsun; (B) zar durumu kayda yazılsın, böylece aynı kayıttan aynı sonuç çıksın; (C) bahis sonucu gösterilmeden önce kesinleştirilsin (oyuncu sonucu görmeden kaydı geri alamaz). **Öneri (yalnızca öneri): (A)**, çünkü (B) bütün rastgele sistemleri belirlenimli yapar ve (C) kayıt akışını ağırlaştırır; ama bu senin kararın.
+
+#### 2 — Ücretli aktiviteler sıradan bir hayatta erişilemiyor
+
+60 tam hayatta yapılan aktivite yalnızca 16 tane ve **hiçbiri ücretli kurs değil**: burç, kahve falı, tarot, diş/genel kontrol, göz muayenesi, mevsim aşısı, koşu, esneme, parkta yürüyüş, saç/sakal, cezaevi aktiviteleri. Oyunun verdiği gerekçe hep aynı: *"N ₺ gerekiyor; cüzdanında yeterli para yok."*
+
+Bunun bot davranışı olmadığını ayırt etmek için kontrol grubu kuruldu: hiç yatırım ve alışveriş yapmayan `okuyucu` planı da 6 tam hayatta tek bir kursa giremedi.
+
+| Kurs | Ücret |
+|---|---|
+| Satranç kulübü | ₺3.200 |
+| Bahçe atölyesi | ₺4.800 |
+| Resim atölyesi | ₺5.000 |
+| Yemek kursu | ₺7.500 |
+| Dans kursu | ₺8.500 |
+| Fotoğraf kursu | ₺9.500 |
+| Yazarlık atölyesi | ₺11.000 |
+| Müzik kursu | ₺12.000 |
+| Dil kursu | ₺14.000 |
+| Bilgisayar kursu | ₺16.000 |
+
+Sonuç: **12 hobinin 10'u** ve onlara bağlı olay/meslek içeriği bu kapının arkasında. İlerleyen tek iki hobi `spor` ve `okuma` — ikisi de bedava yollarla besleniyor (koşu/esneme ve kütüphanede kitap bitirme). AH'de "Yazar mesleği 3000 hayatta hiç görülmedi" bulgusunun asıl sebebi de bu: yazarlık okuma hobisinin 2. aşamasını istiyor.
+
+Soru: ücretler mi yüksek, yoksa oyuncunun cüzdanı yıl içinde mi boş kalıyor (maaş yaş alırken geliyor, yaşam gideri hemen alıyor)? Seçenekler: (A) kurs ücretleri düşsün; (B) cüzdan akışı değişsin — maaşın bir kısmı yıl içinde erişilebilir olsun; (C) hobiler ücretsiz bir ilerleme yolu da kazansın; (D) olduğu gibi kalsın, kurslar bilinçli olarak "parası olanın" işi olsun.
+
+#### 3 — Menü, aksiyonun kabul etmediği seçeneği gösteriyor
+
+Lise sonrası `availableTracks()` hâlâ 7 lise alanı döndürüyor, ama `chooseTrack` her birini *"Şu an lise alanı seçemezsin."* diye reddediyor. O anki doğru aksiyon `applyToUniversity` ya da `skipUniversity`. Arayüz bu listeyi o ekranda kullanmıyor olabilir; yine de sorgu ile aksiyon aynı şeyi söylemiyor. Soru: `availableTracks()` o durumda boş dönmeli mi (sözleşme düzeltmesi), yoksa arayüzün doğru listeyi seçmesi yeterli mi sayılsın?
+
+#### 4 — Hiç tetiklenemeyen dört aksiyon
+
+`acceptCrewOffer` / `declineCrewOffer` (çete teklifi 400 hedefli hayatta bir kez bile açılmadı) ve `payBailSelf` / `askFamilyForBail` (kefalet penceresi yakalanamadı). Bunlar "bot beceremedi" mi, yoksa ön koşulları pratikte oluşmayan ölü içerik mi? Bir sonraki turda hedefli bir suç/hapis planıyla ayrıca denenebilir.
+
+#### 5 — Sosyal medya paylaşım limiti
+
+Aynı yıl 100 paylaşım denemesinin 24'ü uygulandı (dört platform açıkken). Platform değiştirerek limit aşılıyor mu, yoksa 24 bilinçli bir toplam mı? Servet değişmedi, yani para tarafında istismar yok; soru yalnızca tempo.
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.

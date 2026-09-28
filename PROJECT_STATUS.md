@@ -2713,6 +2713,68 @@ veren %41 / %28, evli %50 / %48. Zenginliğin tek ayırt edici işareti
 
 **Karar bekleyen:** Q-178. **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AI — AKSİYON KAPSAMI VE ABUSE DENETİMİ (teşhis; denge değiştirilmedi)
+
+**Soru:** oyuncunun yapabildiği her şey gerçekten test ediliyor mu ve bu
+sistemlerden biri abuse edilerek oyun kırılabiliyor mu?
+
+Üç bot ayrı tutuldu: **PlayerBot** hayatı temsil eder, **CoverageBot**
+her şeye dokunur, **AbuseBot** kırmaya çalışır.
+
+### §1 — envanter artık elle tutulmuyor
+
+`test/support/action_inventory.dart`, `game_controller.dart`'ı test
+çalışırken okuyup üyeleri koddan çıkarıyor. Sınıflandırma isme değil
+davranışa bakıyor: gövdesi `_state = …` atan, `notifyListeners()` ya da
+`_autoSave()` çağıran — veya bunu yapan başka bir üyeyi çağıran — üye
+**aksiyon**; geri kalanı sorgu.
+
+| | sayı |
+|---|---|
+| toplam public üye | 225 |
+| **oyuncu aksiyonu** | **109** |
+| sorgu | 106 |
+| oyun dışı (debug, kayıt, ayar) | 10 |
+
+### §2 — ACTION COVERAGE %94,5
+
+400 hedefli hayatta (10 plan × 40) **103/109** aksiyon gerçekten çalıştı,
+**takılan hayat 0**. İçerik: 14/14 işletme, 6/6 dövüş sanatı, 20/20
+bölüm, 52 meslek, 5/5 yatırım türü, 4/4 sosyal platform, 806 olay-seçenek
+kolu.
+
+Kalan 6: `acceptCrewOffer`, `declineCrewOffer` (çete teklifi hiç
+açılmadı), `payBailSelf`, `askFamilyForBail` (kefalet anı yakalanamadı),
+`endLifeByChoice` (95+ ve bilinçli), `askFamilyForBedelli` (1295 deneme,
+oyunun gerekçesi hep "Askerlik meselen kapandı").
+
+### Bulunan gerçek sorunlar
+
+1. **Save-scum vektörü (doğrulandı).** Oyunun zarı
+   `GameController._random` kurucuda bir kez üretiliyor ve `GameState`
+   içinde taşınmıyor — yani **kayda girmiyor**. Kaydı geri yüklemek
+   kumar sonucunu yeniden attırıyor: 30 tekrarın en iyisi blackjack'te
+   +135k, rulette +90k. Düzeltilmedi; çözüm seçimi ürün kararı.
+2. **Ücretli aktiviteler pratikte erişilemiyor.** 60 hayatta yapılan 16
+   aktivitenin hiçbiri ücretli kurs değil; oyunun gerekçesi hep
+   "cüzdanında yeterli para yok". Hiç yatırım/alışveriş yapmayan kontrol
+   grubu da tek bir kursa giremedi. 12 hobinin 10'u ve onlara bağlı
+   içerik bu kapının arkasında — AH'deki "Yazar mesleği erişilemiyor"
+   bulgusunun asıl sebebi de bu.
+3. **Sorgu/aksiyon uyuşmazlığı.** Lise sonrası `availableTracks()` 7
+   lise alanı döndürüyor ama `chooseTrack` "Şu an lise alanı
+   seçemezsin." diyor. Menü, aksiyonun kabul etmediği seçenekleri
+   gösteriyor.
+
+### Abuse sonuçları — para basan tekrar yok
+
+Aynı yıl 100-400 tekrarın hiçbiri net serveti artırmıyor: aktivite
+−780k, kitap −120k, hediye −2k, eşya al-sat −9k (komisyon), blackjack
+−14k (kasa avantajı), yatırım al-sat 0, sosyal medya 0. Stat farming'de
+tek yılda hiçbir stat 100'e çıkmıyor (mutluluk 93'e kadar).
+
+**Karar bekleyen:** Q-179. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
