@@ -26,8 +26,13 @@
 library;
 
 import '../../data/economy.dart';
+import '../../text/turkish_text.dart';
+import '../interaction/divorce_settlement.dart';
 import '../models/game_state.dart';
+import '../models/owned_item.dart';
 import 'business_engine.dart';
+import 'investment_engine.dart';
+import 'rental_engine.dart';
 import '../models/loan.dart';
 
 /// Bir başvurunun sonucu.
@@ -135,6 +140,69 @@ abstract final class Banking {
   /// prototypeOnly: aynı anda açık olabilecek kredi sayısı.
   static const int prototypeOnlyMaxActiveLoans = 2;
 
+  // -------------------------------------------------------------------
+  // Borç yaşam döngüsü (Paket AD, §8-§11) — hepsi prototypeOnly
+  // -------------------------------------------------------------------
+  //
+  // **Bu bölüm bir bug düzeltmesi.** Öncesinde ödenmeyen taksit şunu
+  // yapıyordu: borç her yıl faiziyle büyüyor, `remainingPayments` hiç
+  // azalmıyor ve hiçbir tahsil/yapılandırma/kapanış yolu yok. Yani kredi
+  // ölümsüzdü. Ölçtüm: ₺200.000 ihtiyaç kredisi, cüzdan sıfır, 60 yıl —
+  // borç 20. yılda 9,7 milyar, 40. yılda 474 trilyon, 60. yılda
+  // **9.223.372.036.854.775.807**, yani `int`in tepesine oturuyor. Bu bir
+  // taşma; net servet istatistiklerini de anlamsız yapıyordu.
+  //
+  // Gerçek hukuk süreci taklit edilmiyor (§8 bunu açıkça yasakladı).
+  // Oyunlaştırılmış beş durak: normal -> gecikme -> ciddi gecikme ->
+  // yapılandırma / tahsil -> kapanış.
+
+  /// prototypeOnly: kaçıncı üst üste kaçak taksitten sonra banka tahsile
+  /// geçer (oyuncunun portföyüne ve oturmadığı malına uzanır).
+  static const int prototypeOnlyCollectionAfterMissed = 2;
+
+  /// prototypeOnly: kaçıncı üst üste kaçak taksitten sonra yapılandırma.
+  static const int prototypeOnlyRestructureAfterMissed = 3;
+
+  /// prototypeOnly: en fazla kaç kez yapılandırılabilir.
+  ///
+  /// Sınırlı olmak zorunda: sonsuz yapılandırma "hiç ödemem, her
+  /// seferinde vade uzasın" exploitine dönerdi.
+  static const int prototypeOnlyMaxRestructures = 2;
+
+  /// prototypeOnly: yapılandırmada vadeye eklenen yıl.
+  static const int prototypeOnlyRestructureExtraYears = 5;
+
+  /// prototypeOnly: kaçıncı üst üste kaçaktan sonra borç zarar yazılıp
+  /// kapatılır.
+  ///
+  /// Bu sayı **sonsuz kuyruğu kesen** şeydir (§10). Üst sınır böylece
+  /// belirli: en kötü durumda
+  /// `maxRestructures × restructureAfterMissed + writeOffAfterMissed`
+  /// yıllık faiz büyümesi olabilir, daha fazlası olamaz.
+  static const int prototypeOnlyWriteOffAfterMissed = 6;
+
+  /// prototypeOnly: gecikme faizinin borcu şişirebileceği en büyük kat.
+  ///
+  /// Ölçümle geldi. Yalnızca "yapılandır, sonra kapat" zinciri kurduğumda
+  /// borç artık sonsuza gitmiyordu ama **hâlâ saçmaydı**: 1000 borçlu
+  /// hayatta görülen en büyük borç **₺180.502.538** çıktı. Sebebi basit —
+  /// kapanışa kadar en fena yolda on iki yıl geçiyor ve yıllık %72 bileşik
+  /// faiz on iki yılda ~1.200 kat ediyor.
+  ///
+  /// Bu yüzden gecikme faizi **anaparanın katı olarak** sınırlı: borç bu
+  /// katı geçtikten sonra büyümeyi keser, süreç (yapılandırma, tahsil,
+  /// kapanış) işlemeye devam eder. Çıpa `Loan.debtBase`: anapara değil,
+  /// **baştan borçlanılan toplam tutar** — sebebi orada yazılı. Yapay bir "zenginden para sil" tavanı
+  /// değil, gecikme faizine konan bir üst sınır — bu oyunun kendi kuralı.
+  static const double prototypeOnlyMaxDebtMultiple = 2.0;
+
+  /// prototypeOnly: zorla satılan malın değerinden kaybedilen pay.
+  ///
+  /// Aceleyle satmak pahalıdır; borç yüzünden mal satmak oyuncuya
+  /// **maliyetli** olmalı, yoksa "malı sat, borcu kapat" bedava bir çıkış
+  /// yolu olurdu.
+  static const double prototypeOnlyForcedSaleDiscount = 0.25;
+
   /// prototypeOnly: en küçük kredi tutarı.
   ///
   /// Net aylık asgari ücretin yarısı: bunun altındaki tutar için banka
@@ -184,8 +252,35 @@ abstract final class Banking {
       activeLoans(state).fold(0, (int t, Loan l) => t + l.outstanding);
 
   /// Kaçırılmış taksit sayısı.
-  static int missedPayments(GameState state) =>
-      state.loans.fold(0, (int t, Loan l) => t + l.missedPayments);
+  /// prototypeOnly: kapanmış kredinin kredi notundaki izinin ömrü (yıl).
+  ///
+  /// §11 açık: "ömür boyu kredi yasağı yapma." Kapanan kredinin kaçan
+  /// taksitleri kayıtta kalır (geçmiş silinmez) ama bu süre geçtikten
+  /// sonra **yeni başvuruda sayılmaz**. Açık kredinin izi her zaman sayılır.
+  static const int prototypeOnlyRecordYears = 10;
+
+  /// Kredi notunda **şu an sayılan** kaçan taksit sayısı.
+  ///
+  /// Açık kredilerin hepsi, kapanmış kredilerin yalnızca son
+  /// [prototypeOnlyRecordYears] yıl içinde kapananları sayılır.
+  static int missedPayments(GameState state) {
+    int toplam = 0;
+    for (final Loan l in state.loans) {
+      if (!l.isClosed) {
+        toplam += l.missedPayments;
+        continue;
+      }
+      final int? kapanis = l.closedAtAge;
+      // Kapanış yaşı bilinmeyen eski kayıt: izini sayıyoruz, çünkü
+      // bilmediğimiz için affetmek oyuncuyu kayıt sürümüne göre
+      // ödüllendirirdi.
+      if (kapanis == null ||
+          state.player.age - kapanis < prototypeOnlyRecordYears) {
+        toplam += l.missedPayments;
+      }
+    }
+    return toplam;
+  }
 
   /// Verilen tutar ve vade için yıllık taksit.
   ///
@@ -354,6 +449,8 @@ abstract final class Banking {
       termYears: vade,
       remainingPayments: vade,
       outstanding: karar.annualPayment * vade,
+      // Gecikme faizi tavanının çıpası (§10).
+      originalDebt: karar.annualPayment * vade,
       takenAtAge: state.player.age,
     );
 
@@ -402,11 +499,22 @@ abstract final class Banking {
     );
   }
 
-  /// Bir yılın taksitlerini uygular.
+  /// Bir yılın taksitlerini uygular ve borcun yaşam döngüsünü yürütür.
   ///
-  /// Ödenebilen taksit cüzdandan düşer. Ödenemeyen taksit **kaçar**:
-  /// kalan borç bir yıllık faiziyle büyür ve kaçan taksit sayacı artar.
-  /// Cüzdan **eksiye düşmez**.
+  /// Sıra (Paket AD, §8-§11):
+  ///
+  /// 1. Taksit cüzdandan çıkıyorsa öder, kaçak serisi sıfırlanır.
+  /// 2. Çıkmıyorsa ve ödemeler bir süredir aksıyorsa banka **tahsile**
+  ///    geçer: önce portföyden, sonra oturulmayan maldan (§9). Tek yılın
+  ///    taksiti kadar tahsil eder, hepsini birden silmez.
+  /// 3. Yine yetmiyorsa cüzdanda ne varsa borca sayılır (**kısmi ödeme**)
+  ///    ve kalan borç kendi faiziyle büyür.
+  /// 4. Aksama sürerse kredi **yapılandırılır**: vade uzar, taksit düşer.
+  ///    Sınırlı sayıda.
+  /// 5. Yapılandırma hakkı bittiyse borç **zarar yazılıp kapatılır** —
+  ///    sonsuz kuyruk burada kesiliyor (§10).
+  ///
+  /// Cüzdan **eksiye düşmez**. Oturulan ev asla satılmaz.
   static ({GameState state, List<String> messages, List<String> missed})
       advanceYear(GameState state) {
     if (state.loans.isEmpty) {
@@ -421,7 +529,9 @@ abstract final class Banking {
     // Kaçan taksitler ayrı tutulur: oyuncunun kaçırmaması gereken kritik
     // haberdir, yalnızca günlüğe yazılıp geçilmez (D-097).
     final List<String> kacanlar = <String>[];
-    int cuzdan = state.player.wallet;
+    // Durum boyunca taşınıyor: tahsil portföye ve mala dokunduğu için
+    // artık yalnızca bir `int cuzdan` yetmiyor.
+    GameState s = state;
     final List<Loan> guncel = <Loan>[];
 
     for (final Loan l in state.loans) {
@@ -429,39 +539,222 @@ abstract final class Banking {
         guncel.add(l);
         continue;
       }
-      if (cuzdan >= l.annualPayment) {
-        cuzdan -= l.annualPayment;
-        final int kalanBorc = (l.outstanding - l.annualPayment).clamp(0, 1 << 62);
-        final int kalanTaksit = l.remainingPayments - 1;
-        guncel.add(l.copyWith(
-          outstanding: kalanBorc,
-          remainingPayments: kalanTaksit,
-        ));
-        if (kalanTaksit <= 0 || kalanBorc <= 0) {
-          satirlar.add('${l.bank.label} kredisinin son taksitini ödedin.');
+
+      // ---- 1. Cüzdandan ödeme --------------------------------------
+      if (s.player.wallet >= l.annualPayment) {
+        s = s.copyWith(
+          player: s.player.copyWith(wallet: s.player.wallet - l.annualPayment),
+        );
+        guncel.add(_paid(l, satirlar));
+        continue;
+      }
+
+      // ---- 2. Tahsil (§9) ------------------------------------------
+      //
+      // Bankanın malvarlığına uzanması için ödemelerin **bir süredir**
+      // aksaması gerekiyor: ilk gecikmede kimse eve gelmez.
+      if (l.missedStreak + 1 >= prototypeOnlyCollectionAfterMissed) {
+        final int eksik = l.annualPayment - s.player.wallet;
+        final ({GameState state, int raised, List<String> notes}) tahsil =
+            _collect(state: s, loan: l, needed: eksik);
+        s = tahsil.state;
+        for (final String n in tahsil.notes) {
+          satirlar.add(n);
+          kacanlar.add(n);
         }
-      } else {
-        // Ödenmeyen taksit: borç bir yıllık faiziyle büyür.
-        final int buyumus =
-            (l.outstanding * (1 + l.bank.yearlyRate)).round();
-        guncel.add(l.copyWith(
-          outstanding: buyumus,
-          missedPayments: l.missedPayments + 1,
-        ));
-        final String metin =
-            '${l.bank.label} taksitini ödeyemedin; borç faiziyle büyüdü.';
+      }
+
+      // Tahsil taksiti kurtardıysa ödeme yapılır.
+      if (s.player.wallet >= l.annualPayment) {
+        s = s.copyWith(
+          player: s.player.copyWith(wallet: s.player.wallet - l.annualPayment),
+        );
+        guncel.add(_paid(l, satirlar));
+        continue;
+      }
+
+      // ---- 3. Kısmi ödeme + gecikme --------------------------------
+      //
+      // **Eski davranış buradaki gerçek hatanın bir parçasıydı:** taksitin
+      // %90'ı cüzdanda olsa bile hiç ödeme yapılmıyor, bütün borç
+      // büyüyordu. Artık elde ne varsa borca sayılıyor.
+      final int kismi = s.player.wallet > 0 ? s.player.wallet : 0;
+      if (kismi > 0) {
+        s = s.copyWith(player: s.player.copyWith(wallet: 0));
+      }
+      // Faiz **kredinin kendi oranıyla** işliyor. Eski kod `bank.yearlyRate`
+      // kullanıyordu ve bu `purpose`'u yok sayıyordu: ödenmeyen bir konut
+      // kredisi ihtiyaç kredisi oranıyla (%72 yerine %49 olması gerekirken)
+      // büyüyordu. Ayrı bir hataydı, aynı satırda duruyordu.
+      final double oran = l.bank.yearlyRateFor(l.purpose);
+      final int kalanAnapara = (l.outstanding - kismi).clamp(0, 1 << 52);
+      // Gecikme faizi anaparanın katıyla sınırlı (§10). Sınıra gelen borç
+      // büyümeyi keser; süreç yapılandırma/tahsil/kapanış olarak devam eder.
+      final int tavan = (l.debtBase * prototypeOnlyMaxDebtMultiple).round();
+      final int faizli = (kalanAnapara * (1 + oran)).round();
+      final int buyumus = faizli > tavan
+          ? (kalanAnapara > tavan ? kalanAnapara : tavan)
+          : faizli;
+      Loan sonraki = l.copyWith(
+        outstanding: buyumus,
+        missedPayments: l.missedPayments + 1,
+        missedStreak: l.missedStreak + 1,
+      );
+      final String gecikmeMetni = kismi > 0
+          ? '${l.bank.label} taksitini tamamlayamadın; '
+              '${trMoney(kismi)} yatırdın, kalan borç faiziyle büyüdü.'
+          : '${l.bank.label} taksitini ödeyemedin; borç faiziyle büyüdü.';
+      satirlar.add(gecikmeMetni);
+      kacanlar.add(gecikmeMetni);
+
+      // ---- 4. Yapılandırma (§8) ------------------------------------
+      if (sonraki.missedStreak >= prototypeOnlyRestructureAfterMissed &&
+          sonraki.restructures < prototypeOnlyMaxRestructures) {
+        sonraki = _restructure(sonraki);
+        final String metin = '${l.bank.label} borcu yapılandırdı: vade '
+            'uzadı, yıllık taksit ${trMoney(sonraki.annualPayment)} oldu.';
         satirlar.add(metin);
         kacanlar.add(metin);
+      } else if (sonraki.missedStreak >= prototypeOnlyWriteOffAfterMissed) {
+        // ---- 5. Zarar yazarak kapatma (§10) ------------------------
+        //
+        // Sonsuz kuyruk burada kesiliyor. Bedavaya kurtulmak değil:
+        // tahsil zaten portföyü ve malı almış olur, kredi notundaki iz de
+        // on yıl kalır.
+        sonraki = sonraki.copyWith(
+          outstanding: 0,
+          remainingPayments: 0,
+          writtenOff: true,
+          closedAtAge: s.player.age,
+        );
+        final String metin = '${l.bank.label} borcu takibe düştü ve '
+            'kapatıldı. Ödeme geçmişinde izi kalıyor.';
+        satirlar.add(metin);
+        kacanlar.add(metin);
+      }
+      guncel.add(sonraki);
+    }
+
+    return (
+      state: s.copyWith(loans: List<Loan>.unmodifiable(guncel)),
+      messages: List<String>.unmodifiable(satirlar),
+      missed: List<String>.unmodifiable(kacanlar),
+    );
+  }
+
+  /// Taksiti ödenmiş krediyi ilerletir. Kaçak serisi sıfırlanır.
+  static Loan _paid(Loan l, List<String> satirlar) {
+    final int kalanBorc = (l.outstanding - l.annualPayment).clamp(0, 1 << 52);
+    final int kalanTaksit = l.remainingPayments - 1;
+    final bool kapandi = kalanTaksit <= 0 || kalanBorc <= 0;
+    if (kapandi) {
+      satirlar.add('${l.bank.label} kredisinin son taksitini ödedin.');
+    }
+    return l.copyWith(
+      outstanding: kalanBorc,
+      remainingPayments: kalanTaksit,
+      missedStreak: 0,
+    );
+  }
+
+  /// Krediyi yapılandırır: vade uzar, **taksit düşer**.
+  ///
+  /// Taksit `annualPaymentFor` ile hesaplanmıyor; bilerek. İlk kurulumda
+  /// öyle yapmıştım ve ölçümde yapılandırma **rahatlatmak yerine
+  /// hızlandırıyordu**: şişmiş borca yeniden yıllık %72 bileşik faiz
+  /// bindiği için taksit ₺90.000'den önce ₺725.651'e, sonra ₺3.647.779'a
+  /// çıkıyordu. Oyuncuya "yapılandırıldı" yazıp taksiti kırk katına
+  /// çıkarmak yapılandırma değil.
+  ///
+  /// Doğrusu, oyuncunun bu kelimeden anladığı şey: **borç donar ve taksite
+  /// bölünür.** Yapılandırılan tutara yeni faiz eklenmiyor; kalan borç yeni
+  /// vadeye eşit bölünüyor. Ödenmezse borç yine büyümeye başlar, ama o
+  /// zamana kadar yapılandırma hakkı tükenmiş olur ve kapanış gelir.
+  static Loan _restructure(Loan l) {
+    final int yeniVade = (l.remainingPayments > 0 ? l.remainingPayments : 1) +
+        prototypeOnlyRestructureExtraYears;
+    final int yeniTaksit = (l.outstanding / yeniVade).ceil();
+    return l.copyWith(
+      termYears: l.termYears + prototypeOnlyRestructureExtraYears,
+      remainingPayments: yeniVade,
+      annualPayment: yeniTaksit,
+      restructures: l.restructures + 1,
+      // Seri sıfırlanır: yapılandırma yeni bir başlangıçtır. Kredi
+      // notundaki iz (`missedPayments`) silinmez.
+      missedStreak: 0,
+    );
+  }
+
+  /// Bankanın zorunlu tahsili (§9).
+  ///
+  /// Sıra: **likit yatırım -> oturulmayan mal.** Tek yılın taksiti kadar
+  /// toplar; "tek seferde her şeyi yok etme" kuralı bu yüzden var.
+  /// **Oturulan ev hiçbir koşulda satılmaz** — oyuncuyu evsiz bırakmak
+  /// bu paketin işi değil ve §9 ayrıca dikkat edilmesini istedi.
+  static ({GameState state, int raised, List<String> notes}) _collect({
+    required GameState state,
+    required Loan loan,
+    required int needed,
+  }) {
+    if (needed <= 0) {
+      return (state: state, raised: 0, notes: const <String>[]);
+    }
+    GameState s = state;
+    final List<String> notlar = <String>[];
+    final int basla = s.player.wallet;
+
+    // a) Likit yatırım. AC'de gelen yardımcı aynen kullanılıyor: işlem
+    //    durması, komisyon ve kazanç kesintisi orada zaten işliyor.
+    final ({GameState state, int raised}) portfoy =
+        InvestmentEngine.raiseCashForExpense(state: s, needed: needed);
+    s = portfoy.state;
+    if (portfoy.raised > 0) {
+      notlar.add('${loan.bank.label} borcu için yatırımlarından '
+          '${trMoney(portfoy.raised)} çözüldü.');
+    }
+
+    // b) Hâlâ eksikse mal satılır. Oturulan ev listeye hiç girmiyor.
+    int kalan = needed - (s.player.wallet - basla);
+    if (kalan > 0) {
+      final List<OwnedItem> satilabilir = s.items
+          .where((OwnedItem i) => i.id != s.residenceItemId)
+          .where((OwnedItem i) => DivorceSettlement.valueOf(i) > 0)
+          .toList(growable: true)
+        // En küçüğünden başla: borcu kapatmak için villayı satmak yerine
+        // yetiyorsa saati satmak oyuncunun hayatını daha az bozar.
+        ..sort((OwnedItem a, OwnedItem b) => DivorceSettlement.valueOf(a)
+            .compareTo(DivorceSettlement.valueOf(b)));
+
+      for (final OwnedItem item in satilabilir) {
+        if (kalan <= 0) break;
+        final int deger = DivorceSettlement.valueOf(item);
+        final int eleGecen =
+            (deger * (1 - prototypeOnlyForcedSaleDiscount)).round();
+        if (eleGecen <= 0) continue;
+        // Kiracısı varsa sözleşme önce kapanır (D-163): yoksa elinde
+        // olmayan evden kira gelmeye devam ederdi.
+        if (s.leaseOf(item.id) != null) {
+          final RentalResult kapanis = RentalEngine.endLease(
+            state: s,
+            propertyItemId: item.id,
+            reasonText: '${item.name} borç yüzünden satıldı; kiracıyla '
+                'sözleşme kapandı.',
+          );
+          if (kapanis.outcome.applied) s = kapanis.state;
+        }
+        s = s.removeItem(item.id).copyWith(
+              player: s.player.copyWith(wallet: s.player.wallet + eleGecen),
+            );
+        notlar.add('${loan.bank.label} borcu yüzünden ${item.name} '
+            'elden çıktı; ${trMoney(eleGecen)} borca gitti.');
+        kalan = needed - (s.player.wallet - basla);
       }
     }
 
     return (
-      state: state.copyWith(
-        player: state.player.copyWith(wallet: cuzdan),
-        loans: List<Loan>.unmodifiable(guncel),
-      ),
-      messages: List<String>.unmodifiable(satirlar),
-      missed: List<String>.unmodifiable(kacanlar),
+      state: s,
+      raised: s.player.wallet - basla,
+      notes: List<String>.unmodifiable(notlar),
     );
   }
 

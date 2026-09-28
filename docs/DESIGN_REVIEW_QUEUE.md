@@ -4355,3 +4355,78 @@ Ikisi de ölçümle bulundu, tahminle değil; ikisi de kodda düzeltildi ve gere
 - **Enflasyon motoru** — Q-168'de duruyor, açılmadı.
 
 **Varsayılan işlem:** Onay gelene dek bu turda ölçülen beş kalibrasyon sayısı (risk primi, gelgit genliği, değer saklama payı, vadeli oranı, fon ücreti) olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-170 — Paket AD/4: borç yaşam döngüsü kalibrasyonu
+
+**Durum:** karar bekliyor · **Kaynak:** Faho'nun "PAKET AD DEVAM" briefi (§8-§11, §24) · **Etkilenen kod:** `app/lib/domain/models/loan.dart`, `app/lib/domain/economy/banking.dart`, `app/lib/data/save/game_state_codec.dart`, `app/test/paket_ad_debt_test.dart`
+
+#### Kesin olan
+
+Faho §16'da (AD briefi) ve §8-§10'da (devam briefi) açık yetki verdi: kontrolsüz borç büyümesi **gerçek bug**, düzeltilecek, ama gerçek hukuk simülatörü kurulmayacak. Düzeltme yapıldı; aşağıdaki sorular kalibrasyon sayıları hakkında.
+
+#### Hatanın ölçülen hâli (düzeltme öncesi)
+
+₺200.000 ihtiyaç kredisi, cüzdan sıfır, 60 yıl:
+
+| Yıl | Kalan borç | Kalan taksit |
+|---|---|---|
+| 1 | 343.092 | 5 |
+| 20 | 9.741.693.444 | 5 |
+| 40 | 474.502.763.809.644 | 5 |
+| 60 | **9.223.372.036.854.775.807** | 5 |
+
+Son satır `int`in tepesi: bu bir **tamsayı taşması**. `remainingPayments` hiç azalmıyor, hiçbir tahsil/yapılandırma/kapanış yolu yok — kredi ölümsüz.
+
+Aynı satırda **ikinci bir hata** vardı: büyüme `l.bank.yearlyRate` ile hesaplanıyor ve `l.purpose`'u yok sayıyordu, yani ödenmeyen bir **konut** kredisi ihtiyaç kredisi oranıyla büyüyordu (%49 yerine %72). Üçüncüsü: taksitin %90'ı cüzdanda olsa bile hiç ödeme yapılmıyordu (all-or-nothing).
+
+#### Gelen yaşam döngüsü
+
+`normal → gecikme → ciddi gecikme → tahsil → yapılandırma → kapanış`
+
+| Aşama | Ne oluyor | Sabit |
+|---|---|---|
+| Kısmi ödeme | Cüzdanda ne varsa borca gider | — |
+| Tahsil | 2. üst üste kaçakta banka portföye, sonra oturulmayan mala uzanır | `prototypeOnlyCollectionAfterMissed = 2` |
+| Yapılandırma | 3. kaçakta vade uzar, **taksit düşer**, borç donar | `prototypeOnlyMaxRestructures = 2`, `+5 yıl` |
+| Gecikme faizi tavanı | Borç baştan borçlanılan tutarın katını geçmez | `prototypeOnlyMaxDebtMultiple = 2,0` |
+| Kapanış | Hak bittiyse zarar yazılıp kapatılır | `prototypeOnlyWriteOffAfterMissed = 6` |
+| Kredi notu | İz kapanıştan sonra on yıl sayılır, sonra silinir | `prototypeOnlyRecordYears = 10` |
+| Zorla satış | Malın değerinden kayıp | `prototypeOnlyForcedSaleDiscount = 0,25` |
+
+Oturulan ev **hiçbir koşulda** satılmıyor. Mal satışı **en küçükten** başlıyor: borcu kapatmak için villa yerine yetiyorsa saat gidiyor.
+
+#### Ölçülen sonuç (1000 borçlu hayat, 60 yıl)
+
+| Ölçüm | Değer |
+|---|---|
+| Gecikme gören | %99,7 |
+| Zorunlu tahsil gören | %66,3 |
+| Yapılandırma gören | %33,2 |
+| Zarar yazılarak kapanan | %33,2 |
+| **Hiç kapanmayan** | **0** |
+| Eksi net servetle biten | %0,1 |
+| Kapanma süresi | medyan 6 yıl · en uzun 16 |
+| Görülen en büyük borç | medyan 388.540 · **en büyük 997.780** |
+
+En büyük borç 9,2×10¹⁸ yerine ₺997.780. Sonsuz kuyruk kesildi.
+
+#### Kalibrasyonda düzelttiğim iki kendi hatam
+
+1. **Yapılandırma rahatlatmak yerine hızlandırıyordu.** İlk kurulumda yeni taksiti `annualPaymentFor` ile hesaplattım; şişmiş borca yeniden yıllık %72 bileşik faiz bindiği için taksit ₺90.000'den ₺725.651'e, sonra ₺3.647.779'a çıkıyordu. Oyuncuya "yapılandırıldı" yazıp taksiti kırk katına çıkarmak yapılandırma değil. Doğrusu: borç **donar** ve yeni vadeye bölünür (₺90.000 → ₺40.000 → ₺26.667).
+2. **Tahsil testim boştu.** Taze üretilen hayatın hiç eşyası olmadığını fark etmemişim; "oturulan ev satılmadı" testi hiçbir şeyi kanıtlamıyordu ve 1000 hayatlık ölçümde "zorunlu tahsil %0,0" çıkıyordu. Borçlulara gerçek mal veren bir yardımcı yazdım; şimdi %66,3.
+
+Ayrıca gecikme faizi tavanını ilk turda **anaparaya** bağlamıştım ve mevcut bir test haklı olarak kırıldı: `outstanding` baştan anapara değil, vade boyunca ödenecek toplamdır (₺300.000 anapara → ₺802.974 borç), yani tavan borcu kendi başlangıç bakiyesinin altına kırpıyordu. Çıpa `Loan.originalDebt` oldu. **Test gevşetilmedi.**
+
+#### Karar soruları
+
+1. **Gecikme faizi tavanı 2,0 kat** doğru mu? Düşürmek borcu daha az korkutucu, yükseltmek kuyruğu uzatır.
+2. **Zarar yazma bir kaçış yolu mu?** Tahsil önce portföyü ve malı alıyor, kredi notu on yıl bozuk kalıyor. Yine de "borç al, harca, batır" bir strateji olarak cazip görünürse ek bir bedel (mutluluk, itibar, aile tepkisi) eklenmeli mi?
+3. **Oturulan ev asla satılmıyor.** §9 "ayrıca dikkatli davran" dedi; ben tamamen dokunulmaz yaptım. Doğru mu, yoksa konut kredisi teminatlıysa ev elden çıkabilmeli mi (o zaman yeni bir "evsiz kaldın" anlatısı gerekir)?
+4. **Yapılandırma oyuncuya sorulmuyor**, otomatik uygulanıyor. §8 seçenekli bir pencere öneriyor (yapılandırmayı kabul et / mal sat / portföyden karşıla / güçlükte devam et). Teşhis turunda bekleyen pencerelerin gerçek kilitlenme riski ölçülmüştü; seçenekli akış istenir mi?
+5. **Kredi notu izi on yıl.** §11 "ömür boyu yasak yapma" dedi. On yıl doğru mu?
+6. **Zorla satışta %25 kayıp** doğru mu?
+7. **Kapanma süresi medyan 6 yıl.** Daha uzun bir çile mi olmalı?
+
+**Varsayılan işlem:** Onay gelene dek bu yedi sayı olduğu gibi kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.

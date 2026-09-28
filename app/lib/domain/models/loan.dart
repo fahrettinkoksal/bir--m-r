@@ -105,6 +105,11 @@ class Loan {
     required this.takenAtAge,
     this.purpose = LoanPurpose.ihtiyac,
     this.missedPayments = 0,
+    this.originalDebt,
+    this.missedStreak = 0,
+    this.restructures = 0,
+    this.writtenOff = false,
+    this.closedAtAge,
   });
 
   final String id;
@@ -130,30 +135,110 @@ class Loan {
   /// Kredinin amacı (D-108). Eski kayıtlarda ihtiyaç kredisi sayılır.
   final LoanPurpose purpose;
 
-  /// Ödenemeyen taksit sayısı.
+  /// Ödenemeyen taksit sayısı — **ömür boyu** kayıt.
+  ///
+  /// Kredi notu bu sayıdan okunur. Kapanan kredide de durmaya devam eder,
+  /// ama etkisi zamanla siliniyor: bkz. `Banking.missedPayments`.
   final int missedPayments;
 
+  /// Kredi çekildiğinde borçlanılan toplam tutar (₺).
+  ///
+  /// Gecikme faizinin tavanı buna göre hesaplanıyor (§10). `principal`
+  /// **yetmez**: `outstanding` daha başlangıçta anapara değil, vade
+  /// boyunca ödenecek toplamdır (₺300.000 anapara, üç yıl vade, kolay
+  /// onaylayan banka -> ₺802.974). Tavanı anaparaya bağlamak, borcu
+  /// **kendi başlangıç bakiyesinin altına** kırpıyordu ve mevcut bir test
+  /// haklı olarak kırıldı. Eski kayıtta yok; o zaman `outstanding` okunur.
+  final int? originalDebt;
+
+  /// Gecikme faizinin şişirebileceği tavanın dayandığı tutar.
+  int get debtBase => originalDebt ?? outstanding;
+
+  /// **Üst üste** kaçan taksit sayısı (Paket AD, §8).
+  ///
+  /// `missedPayments`'tan ayrı tutuluyor, çünkü ikisi iki farklı soruya
+  /// cevap veriyor: `missedPayments` "bu borçlu geçmişte ne yaptı"
+  /// (kredi notu), `missedStreak` "şu an ne kadar kötü durumda"
+  /// (yapılandırma ve tahsil eşiği). Ödeme yapılınca ya da
+  /// yapılandırmadan sonra sıfırlanır; kredi notu izi ise silinmez.
+  final int missedStreak;
+
+  /// Kaç kez yapılandırıldı (Paket AD, §8).
+  ///
+  /// Sınırlı: sonsuz yapılandırma "hiç ödemem, her seferinde vade uzasın"
+  /// exploitine dönerdi.
+  final int restructures;
+
+  /// Zarar yazılarak mı kapandı (Paket AD, §10)?
+  ///
+  /// Normal kapanıştan ayırt etmek için var: borç silinmiş olsa bile
+  /// kredi notunda iz bırakır ve ekranda öyle yazılır.
+  final bool writtenOff;
+
+  /// Kapandığı yaş. Açık kredide `null`.
+  ///
+  /// Kredi notu izinin **eskimesi** buna bakıyor (§11: ömür boyu kredi
+  /// yasağı olmasın).
+  final int? closedAtAge;
+
   bool get isClosed => remainingPayments <= 0 || outstanding <= 0;
+
+  /// Borcun yaşam döngüsündeki yeri (Paket AD, §8). Yalnızca metin/eşik
+  /// için; hesaba girmez.
+  LoanStage get stage {
+    if (isClosed) {
+      return writtenOff ? LoanStage.zararYazildi : LoanStage.kapandi;
+    }
+    if (missedStreak <= 0) return LoanStage.normal;
+    if (missedStreak == 1) return LoanStage.gecikme;
+    return LoanStage.ciddiGecikme;
+  }
 
   /// Vade boyunca ödenecek toplam tutar.
   int get totalRepayment => annualPayment * termYears;
 
   Loan copyWith({
     int? annualPayment,
+    int? termYears,
     int? remainingPayments,
     int? outstanding,
     int? missedPayments,
+    int? originalDebt,
+    int? missedStreak,
+    int? restructures,
+    bool? writtenOff,
+    int? closedAtAge,
   }) =>
       Loan(
         id: id,
         bank: bank,
         principal: principal,
         annualPayment: annualPayment ?? this.annualPayment,
-        termYears: termYears,
+        termYears: termYears ?? this.termYears,
         remainingPayments: remainingPayments ?? this.remainingPayments,
         outstanding: outstanding ?? this.outstanding,
         takenAtAge: takenAtAge,
         purpose: purpose,
         missedPayments: missedPayments ?? this.missedPayments,
+        originalDebt: originalDebt ?? this.originalDebt,
+        missedStreak: missedStreak ?? this.missedStreak,
+        restructures: restructures ?? this.restructures,
+        writtenOff: writtenOff ?? this.writtenOff,
+        closedAtAge: closedAtAge ?? this.closedAtAge,
       );
+}
+
+/// Borcun yaşam döngüsündeki durağı (Paket AD, §8).
+///
+/// Gerçek bir hukuk süreci taklit edilmiyor; oyunlaştırılmış dört durak.
+enum LoanStage {
+  normal('Ödemeler düzenli'),
+  gecikme('Ödeme aksadı'),
+  ciddiGecikme('Ödemeler bir süredir aksıyor'),
+  kapandi('Kapandı'),
+  zararYazildi('Takibe düştü ve kapatıldı');
+
+  const LoanStage(this.label);
+
+  final String label;
 }

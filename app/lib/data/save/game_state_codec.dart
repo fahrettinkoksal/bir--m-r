@@ -237,6 +237,13 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             // ihtiyaç kredisi olarak okunur.
             'purpose': l.purpose.name,
             'missedPayments': l.missedPayments,
+            // Paket AD borç yaşam döngüsü (§8-§11). Hepsi alan eklemeli;
+            // eski kayıtta yoklar ve nötr okunurlar.
+            'originalDebt': l.originalDebt,
+            'missedStreak': l.missedStreak,
+            'restructures': l.restructures,
+            'writtenOff': l.writtenOff,
+            'closedAtAge': l.closedAtAge,
           },
       ],
       // Bakım geçmişi (D-072). Eski kayıtlarda yoktur; `null` kalır ve
@@ -1836,6 +1843,13 @@ Loan _decodeLoan(Map<String, Object?> json) => Loan(
       outstanding: _int(json, 'outstanding'),
       takenAtAge: _int(json, 'takenAtAge'),
       missedPayments: _intOr(json, 'missedPayments', 0),
+      // Eski kayıtta yoksa: hiç aksamamış, hiç yapılandırılmamış sayılır.
+      // Eski kayıtta yoksa `debtBase` mevcut bakiyeyi okur.
+      originalDebt: _intOrNull(json, 'originalDebt'),
+      missedStreak: _intOr(json, 'missedStreak', 0),
+      restructures: _intOr(json, 'restructures', 0),
+      writtenOff: json['writtenOff'] == true,
+      closedAtAge: _intOrNull(json, 'closedAtAge'),
     );
 
 AppliedEffect _decodeAppliedEffect(Map<String, Object?> json) => AppliedEffect(

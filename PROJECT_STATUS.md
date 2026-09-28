@@ -2145,6 +2145,63 @@ arada; dengeli en güvenli. Hiçbir strateji baskın değil (§12).
 `flutter test` **2552 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
 oynanmadı; Android APK bu makinede derlenmedi.**
 
+## Paket AD (2/6) — borç yaşam döngüsü: kontrolsüz borç bug'ı düzeltildi (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **§8-§11 ve §24** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-170**'te; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Hatanın ölçülen hâli
+
+₺200.000 kredi, cüzdan sıfır, 60 yıl: borç 20. yılda 9,7 milyar, 40. yılda
+474 trilyon, 60. yılda **9.223.372.036.854.775.807** — yani `int`in tepesi.
+Bu bir **tamsayı taşması**, sadece çirkin bir kuyruk değil.
+`remainingPayments` hiç azalmıyor; kredi ölümsüz.
+
+Aynı satırda iki hata daha: büyüme `l.bank.yearlyRate` ile hesaplanıyor ve
+`purpose`'u yok sayıyordu (ödenmeyen **konut** kredisi ihtiyaç kredisi
+oranıyla büyüyordu), ve taksitin %90'ı cüzdanda olsa bile hiç ödeme
+yapılmıyordu.
+
+### Gelen yaşam döngüsü
+
+`normal → gecikme → ciddi gecikme → tahsil → yapılandırma → kapanış`.
+Kısmi ödeme var; 2. kaçakta banka portföye ve **oturulmayan** mala uzanır;
+3. kaçakta borç donup taksite bölünür (en fazla iki kez); gecikme faizi
+baştan borçlanılan tutarın **iki katını** geçmez; hak bittiyse borç zarar
+yazılıp kapanır; kredi notu izi on yıl sayılıp siliniyor (§11: ömür boyu
+yasak yok). **Oturulan ev hiçbir koşulda satılmıyor**, mal satışı en
+küçükten başlıyor.
+
+### Ölçüm (1000 borçlu hayat, 60 yıl — gerçekten çalıştırıldı)
+
+| Ölçüm | Değer |
+|---|---|
+| Gecikme gören | %99,7 |
+| Zorunlu tahsil gören | %66,3 |
+| Yapılandırma gören | %33,2 |
+| Zarar yazılarak kapanan | %33,2 |
+| **Hiç kapanmayan** | **0** |
+| Kapanma süresi | medyan 6 yıl · en uzun 16 |
+| Görülen en büyük borç | medyan 388.540 · **en büyük 997.780** |
+
+### Kalibrasyonda düzelttiğim kendi hatalarım
+
+1. **Yapılandırma rahatlatmak yerine hızlandırıyordu**: şişmiş borca yeniden
+   bileşik faiz bindiği için taksit ₺90.000 → ₺725.651 → ₺3.647.779 oluyordu.
+   Doğrusu borcun donup vadeye bölünmesi (₺90.000 → ₺40.000 → ₺26.667).
+2. **Tahsil testim boştu**: taze üretilen hayatın hiç eşyası olmadığını fark
+   etmemişim, "oturulan ev satılmadı" testi hiçbir şeyi kanıtlamıyordu ve
+   ölçümde tahsil %0,0 çıkıyordu. Gerçek mal veren yardımcı yazıldı → %66,3.
+3. Gecikme faizi tavanını **anaparaya** bağlamıştım; `outstanding` baştan
+   anapara değil vade boyunca ödenecek toplam olduğu için tavan borcu kendi
+   başlangıç bakiyesinin altına kırpıyordu ve mevcut bir test haklı olarak
+   kırıldı. Çıpa `Loan.originalDebt` oldu. **Test gevşetilmedi.**
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2562 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
