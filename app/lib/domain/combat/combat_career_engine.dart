@@ -28,6 +28,9 @@ import '../models/combat_career.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/martial_progress.dart';
+import 'sport_family_support.dart';
+import 'sport_rivalry.dart';
+import 'sport_workload.dart';
 
 /// Bir müsabakanın sonucu.
 class BoutResult {
@@ -298,9 +301,15 @@ abstract final class CombatCareerEngine {
     Random rng,
   ) {
     // Daha önce karşılaşılmış ve gücü bu kademeye yakın rakipler.
+    //
+    // Rakip de yaşlanıyor ve bir yaştan sonra havuzdan düşüyor
+    // (Paket AL/2, §19); önemli rakipler ise oyuncuyla birlikte
+    // güçlendiği için üst kademede de eşleşme bandına giriyor.
     final List<CombatOpponent> tanidik = career.opponents
         .where((CombatOpponent o) =>
-            (o.rating - tier.opponentRating).abs() <= 18 && o.metCount > 0)
+            (o.rating - tier.opponentRating).abs() <= 18 &&
+            o.metCount > 0 &&
+            SportRivalry.isSelectable(o))
         .toList(growable: false);
     if (tanidik.isNotEmpty && rng.nextDouble() < 0.35) {
       return tanidik[rng.nextInt(tanidik.length)];
@@ -343,8 +352,14 @@ abstract final class CombatCareerEngine {
     }
 
     // Fırsat her yıl çıkmaz: itibar ve form yükseldikçe daha sık çıkar.
+    //
+    // Tam zamanlı çalışan sporcu antrenmana ve müsabaka takvimine daha
+    // az yetişir; fırsat ihtimali düşer ama **sıfırlanmaz**
+    // (Paket AL/2, §21, §24). Kazanma ihtimaline doğrudan dokunulmadı
+    // (§25): işin bedeli fırsattan ve formdan geliyor.
     final double sans =
-        (0.45 + kariyer.reputation / 300 + kariyer.form / 400).clamp(0.3, 0.9);
+        (0.45 + kariyer.reputation / 300 + kariyer.form / 400).clamp(0.3, 0.9) *
+            SportWorkload.opportunityFactor(state);
     if (rng.nextDouble() > sans) {
       return (state: state, bout: null, text: null);
     }
@@ -381,7 +396,10 @@ abstract final class CombatCareerEngine {
 
     final PendingBout bout = PendingBout(
       tier: kademe,
-      opponent: rakip,
+      // Unvan maçında rakip kaydına kademe yazılır: rekabetin gücü
+      // hesabında "bir kez kemer için karşılaştık" bileşeni buradan
+      // okunuyor (Paket AL/2, §16).
+      opponent: unvan ? rakip.copyWith(tier: kTitleTier) : rakip,
       purse: unvan ? yol.titlePurse : tier.purse,
       seed: rng.nextInt(1 << 31),
       offeredAtAge: state.player.age,
@@ -442,10 +460,15 @@ abstract final class CombatCareerEngine {
         : (1 - yasFarki * prototypeOnlyDeclinePerYear * yipranma)
             .clamp(0.30, 1.0);
 
-    // Hazırlık: kamp tercihi ve antrenör.
+    // Hazırlık: kamp tercihi, antrenör ve (18 yaş altında) ekipman.
+    //
+    // Ekipman/turnuva yolu parası yetmeyen genç sporcu müsabakadan
+    // men edilmiyor (Paket AL/2, §4): eskimiş ekipmanla ve uzun
+    // yolculuktan sonra çıkıyor, hazırlığı bir miktar eksik kalıyor.
     final double hazirlik = 1 +
         (prototypeOnlyCampPrep[camp] ?? 0) +
-        prototypeOnlyCoachPrep[career.coachLevel.clamp(0, 2)];
+        prototypeOnlyCoachPrep[career.coachLevel.clamp(0, 2)] -
+        SportFamilySupport.gearPenalty(state, campCost(camp));
 
     // Sakatlık gölgesi: iyileşmiş ama izi kalmış olabilir.
     final double sakatlik = 1 - career.seriousInjuryCount * 0.05;
@@ -511,13 +534,32 @@ abstract final class CombatCareerEngine {
       );
     }
     final int ucret = campCost(camp);
-    if (state.player.wallet < ucret) {
+
+    // 18 yaş altında aile kampın bir kısmını üstlenmiş olabilir
+    // (Paket AL/2, §1). Kredi varsa cepten çıkacak tutar azalır; yoksa
+    // hiçbir şey değişmez. Yetişkinde kredi hiç oluşmadığı için bu
+    // satırlar sessizce geçilir.
+    final int cepten = SportFamilySupport.outOfPocketCamp(state, ucret);
+    if (state.player.wallet < cepten) {
       return BoutResult(
         state: state,
         applied: false,
-        text: '${camp.label} için $ucret ₺ gerekiyor; cüzdanın yetmiyor.',
+        text: '${camp.label} için $cepten ₺ gerekiyor; cüzdanın yetmiyor.',
       );
     }
+
+    // Ekipman ve turnuva yolu: önce aile kredisi, sonra cüzdan.
+    // Karşılanamıyorsa hiçbir şey alınmaz ve müsabaka yine yapılır;
+    // bedel `playerStrength` içindeki hazırlık kesintisine yansımıştır.
+    final ({GameState state, int paid}) ekipman =
+        SportFamilySupport.chargeGear(state, ucret);
+    final ({GameState state, int remaining}) kampOdeme =
+        SportFamilySupport.spendCredit(
+      ekipman.state,
+      SportExpense.kamp,
+      ucret,
+    );
+    final GameState taban = kampOdeme.state;
 
     // Sonuç tohumu fırsat üretilirken yazıldı: kaydet/yükle aynı
     // sonucu verir (§44). Hazırlık tercihi ihtimali değiştirir, zarı
@@ -595,7 +637,7 @@ abstract final class CombatCareerEngine {
     // --- para (§13) -------------------------------------------------
     // Kaybeden de eli boş dönmez ama payı küçüktür.
     final int odul = kazandi ? bout.purse : (bout.purse * 0.25).round();
-    int cuzdan = state.player.wallet - ucret + odul;
+    int cuzdan = taban.player.wallet - kampOdeme.remaining + odul;
     // Sakatlık masrafı: ciddi olan cepten de yakar.
     final int tedavi = sakatlik == InjurySeverity.yok
         ? 0
@@ -622,6 +664,8 @@ abstract final class CombatCareerEngine {
           .copyWith(
             championships: yeni.championships + 1,
             isChampion: true,
+            // Başarının tazeliği buradan okunuyor (Paket AL/2, §12).
+            lastTitleAge: state.player.age,
           )
           .remember(
             state.player.age,
@@ -667,6 +711,29 @@ abstract final class CombatCareerEngine {
     // --- rakip kaydı (§9) -------------------------------------------
     yeni = _rememberOpponent(yeni, bout.opponent, kazandi);
 
+    // --- rekabetin üne katkısı (Paket AL/2, §17) --------------------
+    //
+    // Yalnızca **kazanılan** ve gerçekten **önemli** rekabet maçları
+    // sayılır. Aynı rakibe tekrar çıkmak her seferinde daha az ün
+    // getirir (azalan getiri) ve yıllık bir tavan var; böylece tek bir
+    // rakiple ün çiftliği kurulamıyor.
+    int rekabetUnu = 0;
+    final CombatOpponent? guncelRakip = _opponentById(yeni, bout.opponent.id);
+    if (guncelRakip != null) {
+      rekabetUnu = SportRivalry.fameBonus(
+        state: state,
+        career: yeni,
+        opponent: guncelRakip,
+        won: kazandi,
+      );
+      if (rekabetUnu > 0) {
+        yeni = _markFameAward(yeni, guncelRakip.id).remember(
+          state.player.age,
+          '${guncelRakip.name} ile rekabetiniz konuşulur oldu.',
+        );
+      }
+    }
+
     // İlk galibiyet/mağlubiyet kariyer geçmişine yazılır (§27).
     if (kazandi && yeni.totalWins == 1) {
       yeni = yeni.remember(state.player.age, 'İlk galibiyetini aldın.');
@@ -678,21 +745,27 @@ abstract final class CombatCareerEngine {
     }
 
     // --- durum -------------------------------------------------------
-    GameState next = _replace(state, yeni).copyWith(
-      player: state.player.copyWith(
+    GameState next = _replace(taban, yeni).copyWith(
+      player: taban.player.copyWith(
         wallet: cuzdan,
-        stats: state.player.stats.gain(
+        stats: taban.player.stats.gain(
           happiness: kazandi ? 5 : -4,
           health: -sakatlik.weight * 3,
         ),
       ),
       interactionCounts: <String, int>{
-        ...state.interactionCounts,
+        ...taban.interactionCounts,
         GameState.interactionKey(kariyer.artId, boutCounterKind):
-            state.interactionCount(kariyer.artId, boutCounterKind) + 1,
+            taban.interactionCount(kariyer.artId, boutCounterKind) + 1,
       },
     );
-    next = _applySportFame(next, kazandi ? tier.fameGain : 0, bout.isTitle);
+    next = _applySportFame(
+      next,
+      (kazandi ? tier.fameGain : 0) + rekabetUnu,
+      bout.isTitle,
+    );
+    // Yıllık rekabet ünü tavanının sayacı.
+    next = SportRivalry.markFame(next, rekabetUnu);
 
     return BoutResult(
       state: next,
@@ -806,6 +879,25 @@ abstract final class CombatCareerEngine {
       opponents: List<CombatOpponent>.unmodifiable(liste.take(10)),
     );
   }
+
+  static CombatOpponent? _opponentById(CombatCareer career, String id) {
+    for (final CombatOpponent o in career.opponents) {
+      if (o.id == id) return o;
+    }
+    return null;
+  }
+
+  /// Bu rekabetten ün alındığını rakibin kaydına yazar.
+  ///
+  /// Sayaç oyuncunun değil **rakibin** kaydında durur; azalan getiri
+  /// böylece rekabete özgü olur ve kaydet/yükle ile sıfırlanamaz.
+  static CombatCareer _markFameAward(CombatCareer career, String id) =>
+      career.copyWith(
+        opponents: List<CombatOpponent>.unmodifiable(<CombatOpponent>[
+          for (final CombatOpponent o in career.opponents)
+            if (o.id == id) o.copyWith(fameAwards: o.fameAwards + 1) else o,
+        ]),
+      );
 
   static GameState _replace(GameState state, CombatCareer career) =>
       state.copyWith(
@@ -1019,19 +1111,56 @@ abstract final class CombatCareerEngine {
     // Gerçekte teknik öğrenmeyi bitiren sporcu çalışmayı bırakmaz.
     // Artık iki şey daha telafi ediyor: o yıl çıkılan müsabakalar ve
     // zirvedeki sporcunun sürdürdüğü kondisyon.
+    // BİLİNEN PROD BUG — Paket AL/2'de bulundu, BİLEREK düzeltilmedi.
+    //
+    // Anahtar sırası ters. `MartialArtsEngine` ders sayacını
+    // `interactionKey('dovus', artId)` olarak **yazıyor**; burası
+    // `interactionCount(artId, 'dovus')` diye **okuyor**.
+    // `interactionKey` iki parçayı sırayla birleştirdiği için bu iki
+    // anahtar farklı ('dovus|karate' ≠ 'karate|dovus'), yani `dersler`
+    // her yıl 0 dönüyor ve "çalışmak formu telafi eder" kuralı Paket
+    // AL'den beri hiç işlemiyor.
+    //
+    // **Neden düzeltilmedi.** Düzeltme denendi ve dengeyi kaydırdı:
+    // `paket_al_600_athletes_test.dart` kohortunun medyan kariyer geliri
+    // 4,04 M₺'den 6,51 M₺'ye çıktı ve o testin kendi denge koruması
+    // ("Spor otomatik zenginlik makinesine dönmüş") kırıldı. Paket AL/2
+    // bir entegrasyon paketiydi; brief §0 ödül çarpanlarına ve
+    // şampiyonluk oranlarına dokunmayı yasaklıyor, mevcut testi
+    // gevşetmek de yasak. Karar Q-184 #1'de Faho'ya bırakıldı.
+    //
+    // Telafi bu arada ölmüyor: o yıl çıkılan müsabakalar ve zirvedeki
+    // sporcunun kondisyonu (aşağıda) çalışmaya devam ediyor.
     final int dersler = state.interactionCount(k.artId, 'dovus');
     final int macSayisi = state.interactionCount(k.artId, boutCounterKind);
     final MartialProgress teknik = _progress(state, k.artId);
     final int zirveBakimi = teknik.isTopRank ? prototypeOnlyTopRankUpkeep : 0;
+    //
+    // Çalışan sporcunun telafisi daha az: işten artan zamanla
+    // kondisyonu korumak zorlaşıyor (Paket AL/2, §21). Telafi 0'ın
+    // altına inmiyor; yani iş formu doğrudan eritmiyor, korumayı
+    // zorlaştırıyor. Kazanma ihtimaline doğrudan bir kesinti yok (§25).
+    final int isYuku = SportWorkload.formUpkeepCost(state);
     final int telafi =
-        ((dersler * 1.2).round() + macSayisi * 4 + zirveBakimi).clamp(0, 18);
+        ((dersler * 1.2).round() + macSayisi * 4 + zirveBakimi - isYuku)
+            .clamp(0, 18);
     int yeniForm = k.form - prototypeOnlyFormDecayPerYear + telafi;
     if (state.player.stats.health < 50) yeniForm -= 5;
     k = k.copyWith(form: yeniForm.clamp(0, 100));
 
     // Koç ücreti: seçilen kalite her yıl para ister (§28).
+    //
+    // 18 yaş altında aile bu kalemi üstlenmiş olabilir; kredi varsa
+    // önce o harcanır (Paket AL/2, §1, §3).
     if (k.coachLevel > 0) {
-      final int ucret = coachCost(k.coachLevel);
+      final ({GameState state, int remaining}) kocOdeme =
+          SportFamilySupport.spendCredit(
+        next,
+        SportExpense.koc,
+        coachCost(k.coachLevel),
+      );
+      next = kocOdeme.state;
+      final int ucret = kocOdeme.remaining;
       if (next.player.wallet >= ucret) {
         next = next.copyWith(
           player: next.player.copyWith(wallet: next.player.wallet - ucret),
@@ -1053,6 +1182,10 @@ abstract final class CombatCareerEngine {
             'boşa düştü.');
       }
     }
+
+    // Rakipler de yaşlanır; önemli rakipler oyuncuyla birlikte
+    // güçlenir (Paket AL/2, §19).
+    k = SportRivalry.advanceRivals(k, rng);
 
     return (state: _replace(next, k), lines: satirlar);
   }

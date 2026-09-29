@@ -4,6 +4,7 @@ import '../../data/name_pool.dart';
 import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
 import '../combat/combat_career_engine.dart';
+import '../combat/sport_school_conflict.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
 import '../life/life_goals.dart';
@@ -626,6 +627,20 @@ class LifeProgression {
     afterDeaths = firsat.state;
     if (firsat.text != null) {
       afterDeaths = _logLine(afterDeaths, newAge, firsat.text!);
+    }
+    // Okul + spor çatışması (Paket AL/2, §6): yalnızca okula kayıtlı
+    // genç sporcuda, ciddi kademedeki bekleyen bir müsabaka varken ve
+    // yılda en fazla bir kez çıkar. Kararı oyuncu spor ekranında
+    // verir; verilene kadar müsabaka bekler.
+    final CombatCareer? sporKariyeri =
+        CombatCareerEngine.activeCareer(afterDeaths);
+    if (sporKariyeri != null) {
+      final ({GameState state, String? text}) catisma =
+          SportSchoolConflict.maybeRaise(afterDeaths, sporKariyeri, _rng);
+      afterDeaths = catisma.state;
+      if (catisma.text != null) {
+        afterDeaths = _logLine(afterDeaths, newAge, catisma.text!);
+      }
     }
 
     // Kredi taksitleri (D-080): ödenebilen düşer, ödenemeyen kaçar ve

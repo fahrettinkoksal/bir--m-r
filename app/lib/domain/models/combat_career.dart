@@ -83,6 +83,8 @@ class CombatOpponent {
     this.metCount = 0,
     this.playerWins = 0,
     this.playerLosses = 0,
+    this.fameAwards = 0,
+    this.tier = 0,
   });
 
   final String id;
@@ -101,6 +103,20 @@ class CombatOpponent {
   /// Bu karşılaşmalarda oyuncunun galibiyet/mağlubiyet sayısı.
   final int playerWins;
   final int playerLosses;
+
+  /// Bu rekabetten şimdiye kadar kaç kez ün katkısı alındı (Paket AL/2,
+  /// §17).
+  ///
+  /// Aynı rakiple defalarca dövüşerek ün biriktirmeyi engelleyen
+  /// azalan getirinin sayacı. Rakibin kendi kaydında durur ki
+  /// kaydet/yükle ile sıfırlanamasın.
+  final int fameAwards;
+
+  /// Rakibin kendi kariyerinde bulunduğu kademe (§19).
+  ///
+  /// Önemli rakip oyuncuyla birlikte yükselebilsin diye tutulur;
+  /// sıradan rakipte hep 0 kalır.
+  final int tier;
 
   /// Aralarında gerçek bir rekabet oluştu mu?
   bool get isRival => metCount >= 2;
@@ -126,6 +142,8 @@ class CombatOpponent {
     int? playerLosses,
     int? age,
     int? rating,
+    int? fameAwards,
+    int? tier,
   }) =>
       CombatOpponent(
         id: id,
@@ -137,6 +155,8 @@ class CombatOpponent {
         metCount: metCount ?? this.metCount,
         playerWins: playerWins ?? this.playerWins,
         playerLosses: playerLosses ?? this.playerLosses,
+        fameAwards: fameAwards ?? this.fameAwards,
+        tier: tier ?? this.tier,
       );
 }
 
@@ -214,6 +234,8 @@ class CombatCareer {
     this.opponents = const <CombatOpponent>[],
     this.pendingBout,
     this.memories = const <CombatMemory>[],
+    this.lastTitleAge,
+    this.schoolConflictAge,
   });
 
   final String artId;
@@ -274,6 +296,19 @@ class CombatCareer {
 
   final List<CombatMemory> memories;
 
+  /// Son unvan kazanılan yaş (Paket AL/2, §12).
+  ///
+  /// Başarının **tazeliği** buradan okunur: on yıl önceki şampiyonluk
+  /// ile geçen yılki şampiyonluk sosyal medyada aynı etkiyi yapmamalı.
+  /// Şampiyonluk sayısından ayrı tutulur; sayı kalıcı, tazelik geçici.
+  final int? lastTitleAge;
+
+  /// Bu yaşta çözülmeyi bekleyen okul/spor çatışması (§6).
+  ///
+  /// `null` ise bekleyen çatışma yok. Çözülünce yeniden `null` olur;
+  /// aynı çatışmanın iki kez uygulanmasını bu alan engeller (§31).
+  final int? schoolConflictAge;
+
   MartialArt? get art => martialArtById(artId);
 
   bool get isRetired => retiredAtAge != null;
@@ -315,6 +350,8 @@ class CombatCareer {
     List<CombatOpponent>? opponents,
     Object? pendingBout = _unset,
     List<CombatMemory>? memories,
+    int? lastTitleAge,
+    Object? schoolConflictAge = _unset,
   }) =>
       CombatCareer(
         artId: artId,
@@ -344,6 +381,10 @@ class CombatCareer {
         pendingBout:
             pendingBout == _unset ? this.pendingBout : pendingBout as PendingBout?,
         memories: memories ?? this.memories,
+        lastTitleAge: lastTitleAge ?? this.lastTitleAge,
+        schoolConflictAge: schoolConflictAge == _unset
+            ? this.schoolConflictAge
+            : schoolConflictAge as int?,
       );
 
   /// Kariyer geçmişine bir an ekler; sıradan antrenman yazılmaz (§27).

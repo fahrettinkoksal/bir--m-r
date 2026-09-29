@@ -4,6 +4,7 @@ import '../hobby/hobby_tracker.dart';
 import '../../text/turkish_text.dart';
 import '../effects/effect_diff.dart';
 import '../models/game_state.dart';
+import '../combat/sport_family_support.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/martial_progress.dart';
@@ -94,9 +95,14 @@ class MartialArtsEngine {
         'Bu yıl için yeterince çalıştın; seneye devam edersin.',
       );
     }
-    if (state.player.wallet < art.lessonCost) {
+    // 18 yaş altında aile ders ücretini üstlenmiş olabilir; kredi
+    // varsa cepten çıkacak tutar azalır (Paket AL/2, §1).
+    final int cepten = (art.lessonCost -
+            SportFamilySupport.creditFor(state, SportExpense.ders))
+        .clamp(0, art.lessonCost);
+    if (state.player.wallet < cepten) {
       return InteractionAvailability.blocked(
-        '${trMoney(art.lessonCost)} gerekiyor; cüzdanında yeterli para yok.',
+        '${trMoney(cepten)} gerekiyor; cüzdanında yeterli para yok.',
       );
     }
     return const InteractionAvailability.allowed();
@@ -267,16 +273,29 @@ class MartialArtsEngine {
       charisma: (atladi ? prototypeOnlyRankCharisma : 0),
     );
 
-    final PlayerCharacter player = state.player.copyWith(
+    // Ders ücreti: önce aile kredisi, sonra cüzdan (Paket AL/2, §3).
+    // Kredi bir kez harcanır; aynı ders için ikinci kez para verilmez.
+    final ({GameState state, int remaining}) dersOdeme =
+        SportFamilySupport.spendCredit(
+      state,
+      SportExpense.ders,
+      art.lessonCost,
+    );
+    final GameState odenmis = dersOdeme.state;
+
+    final PlayerCharacter player = odenmis.player.copyWith(
       stats: stats,
-      wallet: state.player.wallet - art.lessonCost,
+      wallet: odenmis.player.wallet - dersOdeme.remaining,
     );
 
-    GameState next = state.copyWith(
+    GameState next = odenmis.copyWith(
       player: player,
       martialArts: List<MartialProgress>.unmodifiable(liste),
       interactionCounts: Map<String, int>.unmodifiable(<String, int>{
-        ...state.interactionCounts,
+        // DİKKAT: taban `odenmis`, `state` değil. `state` yazılırsa
+        // harcanan aile kredisi geri gelir ve aynı destek ikinci kez
+        // kullanılabilir (Paket AL/2, §31 — double payment).
+        ...odenmis.interactionCounts,
         GameState.interactionKey('dovus', art.id):
             lessonsThisAge(state, art) + 1,
         GameState.interactionKey('aktivite', lessonHealthCounterId):

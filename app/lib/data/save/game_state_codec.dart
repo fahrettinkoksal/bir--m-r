@@ -550,6 +550,10 @@ Map<String, Object?> _encodeOpponent(CombatOpponent o) => <String, Object?>{
       'metCount': o.metCount,
       'playerWins': o.playerWins,
       'playerLosses': o.playerLosses,
+      // Paket AL/2 (§17, §19): rekabetin azalan getiri sayacı ve
+      // rakibin kendi kademesi. Eski kayıtta yok; 0 olarak yüklenir.
+      'fameAwards': o.fameAwards,
+      'opponentTier': o.tier,
     };
 
 Map<String, Object?> _encodeCombat(CombatCareer c) => <String, Object?>{
@@ -595,6 +599,10 @@ Map<String, Object?> _encodeCombat(CombatCareer c) => <String, Object?>{
                 'text': m.text,
               })
           .toList(growable: false),
+      // Paket AL/2 (§12, §30): başarının tazeliği ve bekleyen
+      // okul/spor çatışması. İkisi de toplamsal; eski kayıt bozulmaz.
+      'lastTitleAge': c.lastTitleAge,
+      'schoolConflictAge': c.schoolConflictAge,
     };
 
 Map<String, Object?> _encodeTicket(LotteryTicket t) => <String, Object?>{
@@ -1841,6 +1849,8 @@ CombatOpponent _decodeOpponent(Map<String, Object?> json) => CombatOpponent(
       metCount: _intOr(json, 'metCount', 0),
       playerWins: _intOr(json, 'playerWins', 0),
       playerLosses: _intOr(json, 'playerLosses', 0),
+      fameAwards: _intOr(json, 'fameAwards', 0),
+      tier: _intOr(json, 'opponentTier', 0),
     );
 
 CombatCareer _decodeCombat(Map<String, Object?> json) {
@@ -1905,6 +1915,8 @@ CombatCareer _decodeCombat(Map<String, Object?> json) {
         return CombatMemory(age: _int(m, 'age'), text: _string(m, 'text'));
       }).toList(growable: false),
     ),
+    lastTitleAge: _intOrNull(json, 'lastTitleAge'),
+    schoolConflictAge: _intOrNull(json, 'schoolConflictAge'),
   );
 }
 

@@ -5073,25 +5073,37 @@ Futbol/basketbol/voleybol bilerek dışarıda (kulüp, transfer, kontrat, lig ay
 
 **Bağlam.** Paket AL/VERIFY bağımsız doğrulama turuydu: yeni özellik eklenmedi, denge değiştirilmedi. 27 doğrulama testi ürünün gerçek kapılarından geçti ve **prod bug bulunmadı**; iki **test** hatası bulunup düzeltildi. Aşağıdakiler ölçümün ortaya çıkardığı, karar gerektiren noktalar.
 
+> **Paket AL/2 güncellemesi (§36).** Aşağıdaki **#1-#5 uygulandı**: kod + hedefli test + (gereken yerde) UI + save/load hazır. #6 (boks-taekwondo hassasiyeti) **hâlâ karar bekliyor** ve o katsayılara dokunulmadı. Paket AL/2'nin kendi kalibrasyon ve ölçüm soruları **Q-184**'te.
+
 #### 1 — 18 yaş altı sporcuya aile desteği yok (brief §4)
+
+**TAMAMLANDI — Paket AL/2 §1-§5.** `app/lib/domain/combat/sport_family_support.dart`. Paket AJ'nin `CourseSupport` mantığı yeniden kullanıldı ve **aynı ebeveyn yıllık bütçesi** (`CourseSupport.budgetKind`) paylaşıldı; kurs desteği ile spor desteği tek keseden çıkıyor. Dört masraf başlığı: kulüp/ders ücreti, ekipman ve turnuva yolu, kamp, koç. Ders/kamp/koç ödemeleri önce aile kredisini harcıyor. 18 yaşından sonra ekran hiç açılmıyor. UI: spor ekranında yaşayan ebeveyn başına buton (`spor_destek_*`). Testler: `app/test/paket_al2_entegrasyon_test.dart`, `AL/2 aile desteği` grubu (10 test).
 
 Brief'te "ekipman, yol, kulüp, turnuva masrafında Paket AJ'nin aile destek mantığından yararlan" yazıyordu. Kodda **hiç bağlanmadı**: `CourseSupport` combat tarafında çağrılmıyor, genç sporcunun kamp ve koç masrafı yalnızca kendi cüzdanından çıkıyor. Soru: bu bağ kurulsun mu (ayrı küçük paket), yoksa spor masrafı bilinçli olarak sporcunun kendi işi mi kalsın?
 
 #### 2 — Okul + spor çatışması yok (brief §35)
 
+**TAMAMLANDI — Paket AL/2 §6-§9.** `app/lib/domain/combat/sport_school_conflict.dart`. Yılda en fazla bir kez, okula kayıtlı (lise ya da üniversite) ve ciddi bir müsabakası olan sporcuda çıkıyor; kararı oyuncu spor ekranında veriyor (`spor_okul_turnuvaya_git` / `spor_okul_oncelik`). Turnuva: müsabaka korunur, not ortalaması düşer (kritik yılda daha fazla). Okul: ortalama korunur, bekleyen müsabaka iptal olur, formdan gider. Bekleyen çatışma `CombatCareer.schoolConflictAge` alanında ve kayda giriyor.
+
 "Turnuva sınav haftasına denk geldi — Turnuvaya git / Okula öncelik ver" gibi bir karar noktası kodda yok. Soru: bu olay zinciri eklensin mi, yoksa genç sporcunun okulu ayrı bir sistem olarak mı kalsın?
 
 #### 3 — Spor başarısı sosyal medya paylaşım performansını etkilemiyor (brief §16)
 
+**TAMAMLANDI — Paket AL/2 §10-§14.** `app/lib/domain/social/sport_social_boost.dart`. Yeni paylaşım motoru kurulmadı: başarı, mevcut `SocialEngine._followerDelta` hesabına bir çarpan olarak giriyor. Hangi içeriğin spora yakın olduğu kataloğa eklenen `SocialContent.sportRelevance` alanından okunuyor (vlog 1.0, kısa video 0.8, fotoğraf 0.7, hikâye 0.5; diğerleri 0). Tazelik/legacy ayrımı var. Doğrudan para üretmiyor. Ölçüm: spor içeriğinde şampiyon **+%41**, spor dışı içerikte fark **tam olarak 0**.
+
 Ölçüldü: şampiyon olmuş sporcu ile **aynı takipçili** sıradan oyuncu, paylaşım başına aynı sonucu alıyor. Sporun etkisi yalnızca Ün üzerinden dolaylı: Ün medya işlerini (`kMediaSectionMinFame`, `job.minFame`) ve ünlü iş birliklerini (`minFame 25`) açıyor. Soru: "önemli spor başarısı içerik performansını artırsın" kuralı ayrıca eklensin mi, yoksa dolaylı etki yeterli mi?
 
 #### 4 — Rivalry'nin ün/ilgi etkisi yok (brief §9)
+
+**TAMAMLANDI — Paket AL/2 §15-§19.** `app/lib/domain/combat/sport_rivalry.dart`. Rekabet gücü dört bileşenden türüyor (tekrar, skor yakınlığı, iki tarafın ağırlığı, unvan karşılaşması); her ikinci karşılaşma "büyük rekabet" değil. Kazanılan önemli rövanş küçük bir ün katkısı veriyor — **azalan getiri** (rakibin kaydındaki `fameAwards`) ve **yıllık tavan** (6) ile. Sosyal medyada ek ilgi yaratıyor ve üç yılda sönüyor. **Belgelenen sınır da kapatıldı:** önemli rakip artık oyuncuyla birlikte yükseliyor (yaş ve tavan sınırıyla), 42 yaşından sonra havuzdan düşüyor.
 
 Rakip kaydı, tekrar karşılaşma ve karşılıklı skor **gerçek state**: ölçüldü, tanıdık rakip kendi kademesinde 200 fırsatta **49 kez** geri geldi ve skor kayda/kaydet-yükle'ye giriyor. Ama brief'in "ün, sosyal medya, müsabaka ilgisi üzerinde küçük etki" fikri uygulanmadı.
 
 **Ayrıca belgelenen sınır:** tanıdık rakip yalnızca gücü oyuncunun bugünkü kademesine yakınken geri gelebiliyor. Oyuncu üst kademeye çıkınca eski rakipler bandın dışında kalıyor (200 fırsatta **0**). Kayıt kaybolmuyor. Soru: rakip oyuncuyla birlikte yükselsin mi (rövanş/final anlatısı için), yoksa kademede kalması gerçekçi mi?
 
 #### 5 — İş + spor çatışması yalnızca para ve sağlık (brief §36)
+
+**TAMAMLANDI — Paket AL/2 §20-§25.** `app/lib/domain/combat/sport_workload.dart`. Yeni stamina motoru kurulmadı; bedel **fırsat** ve **form telafisi** üzerinden geliyor, kazanma ihtimaline doğrudan kesinti yok. İşsiz/part-time/full-time üç sınıf (`JobType.partTime`); mesleğe göre ayrı tablo yok. Ölçüm (200 çalışan sporcu, 10 yıl): kişi başı müsabaka **13,3 / 10,7 / 9,1**, full-time fırsat kaybı **%32**, kariyer sonu form **48 / 29 / 20** — kariyer kapanmıyor.
 
 Ölçüldü: tam zamanlı çalışan sporcu ile çalışmayanın kazanma ihtimali (%40 vs %40), maç sonucu ve 200 denemedeki fırsat sayısı (133 vs 133) **birebir aynı**. İş durumu spor motoruna hiç girmiyor. Brief "yeni devasa stamina motoru kurma" dediği için bu bilinçliydi, ama bedelsizliği de ölçülmüş oldu. Soru: çalışan sporcunun müsabaka fırsatı azalsın mı (tek satırlık bir çarpan), yoksa mevcut hâli yeterli mi?
 
@@ -5104,3 +5116,57 @@ Ayrıca boks dört ölçütün üçünde **son sırada** (elit 63, şampiyon 5, 
 Soru: (A) olduğu gibi kalsın — boksun zorluğu kemerin değerini artırır; (B) boksun ödülleri yükseltilsin (risk primi); (C) boksun rakip/sakatlık katsayıları ötekilere yaklaştırılsın. **Hiçbir sayıya dokunulmadı.**
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+---
+
+### Q-184 — Paket AL/2: spor kariyeri entegrasyonlarının kalibrasyonu
+
+**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/combat/sport_family_support.dart`, `sport_school_conflict.dart`, `sport_rivalry.dart`, `sport_workload.dart`, `app/lib/domain/social/sport_social_boost.dart`, `app/test/paket_al2_entegrasyon_test.dart`.
+
+**Bağlam.** Paket AL/2, Q-183'teki beş maddeyi uyguladı (bkz. Q-183 güncellemesi). Brief §0 "dengeye gereksiz dokunma" dediği için mevcut kazanma bandı, sakatlık oranları, şampiyonluk oranları, yaş eğrisi ve ödül çarpanlarına **dokunulmadı**. Aşağıdakiler yeni mekaniklerin kendi sayıları ve ölçümde çıkan gözlemler; hepsi `prototypeOnly` ve karar bekliyor.
+
+#### 1 — Bulunan PROD bug: ders telafisi sayacı hiç okunmuyormuş
+
+`MartialArtsEngine` ders sayacını `interactionKey('dovus', artId)` olarak **yazıyor**, `CombatCareerEngine.advanceYear` ise `interactionCount(artId, 'dovus')` diye **okuyordu**. `interactionKey` iki parçayı sırayla birleştirdiği için bu iki anahtar farklı (`dovus|karate` ≠ `karate|dovus`). Sonuç: Paket AL'den beri "çalışmak formu telafi eder" kuralı **hiç işlememiş**.
+
+Ölçüm (150 kariyer, yılda 4 ders alan sporcu): kariyer sonu form **2,0 → 30,2**, kariyer boyu müsabaka **20,7 → 30,5**.
+
+**DÜZELTİLMEDİ — bilerek.** Düzeltme denendi ve **dengeyi ciddi biçimde kaydırdı.** Paket AL'in 600 sporcu ölçümü (`app/test/paket_al_600_athletes_test.dart`) dersleri `MartialArtsEngine` üzerinden gerçekten alıyor; anahtar düzeltilince o kohortun **medyan kariyer geliri 4,04 M₺'den 6,51 M₺'ye** çıktı ve testin kendi denge koruması ("Spor otomatik zenginlik makinesine dönmüş") kırıldı.
+
+Brief §0 bu paket için "mevcut ödül çarpanları ve şampiyonluk oranları değiştirme; bu bir entegrasyon paketi, yeni denge turu değil" diyor; mevcut testleri gevşetmek de yasak. Bu yüzden düzeltme **geri alındı** ve hata burada, ölçülmüş hâliyle Faho'ya bırakıldı. Hatanın varlığını kilitleyen bir belge testi eklendi (`app/test/paket_al2_entegrasyon_test.dart`, "ders telafisi sayacı iki tarafta ters yazılmış").
+
+Soru: (A) hata düzeltilsin ve spor gelir/şampiyonluk bandı yeniden kalibre edilsin (ayrı bir denge paketi); (B) düzeltilsin ve mevcut band olduğu gibi kabul edilsin (spor daha kazançlı olur); (C) `advanceYear`'ın ders telafisi tamamen kaldırılsın — zaten hiç çalışmamış, form telafisi müsabaka ve zirve bakımından gelmeye devam etsin.
+
+#### 2 — Dar gelirli ailede destek yapısal olarak sıfır
+
+Ölçüm (200 genç sporcu, dengeli kamp isteği): kabul oranı çok yoksul **%0**, yoksul **%0**, orta hâlli **%23**, varlıklı **%58**, çok varlıklı **%69**.
+
+%0'lar bir kilit değil, bütçe gerçeği: dengeli kampın ücreti (asgari ücretin %5'i) bu ailelerin **yıllık toplam destek kapasitesinin** (%1 ve %3) üstünde. Daha ucuz hazırlık sorulduğunda kapı açılıyor (yoksul aile, en ucuz hazırlık: 40 denemede 4 kabul).
+
+Soru: (A) olduğu gibi kalsın — dar gelirli ailenin çocuğu için spor gerçekten pahalı; (B) dar gelirli ailenin yıllık kapasitesi yükseltilsin; (C) genç sporcuya burs/kulüp desteği gibi ayrı bir yol açılsın.
+
+#### 3 — Okul çatışmasının kapısı kademeden **bağlılığa** çevrildi
+
+İlk yazımda çatışma yalnızca kademe ≥ 1 müsabakalarda çıkıyordu. Ölçüm: 200 okul çağı sporcusunda çatışma **1 kez** çıktı — okul çağındakilerin yalnızca 16/200'ü kademe 1'e ulaşabiliyor (kademe atlamak galibiyet + itibar + teknik basamak istiyor ve bunlar 15-18 aralığına sığmıyor). Yani özellik yazılmış ama fiilen ölüydü.
+
+Kapı, kariyerinde **4+ müsabaka** yapmış sporcuyu da kapsayacak şekilde genişletildi (gerekçe: çatışmayı yaratan şey kademe değil takvim yoğunluğu). Yeni ölçüm: 200 kariyer × 8 okul yılında **44 çatışma** (~%3 sporcu-yılı). Soru: bu sıklık doğru mu, yoksa daha nadir mi olsun?
+
+#### 4 — İş yükü katsayıları ölçümle yumuşatıldı
+
+İlk yazımda tam zamanlı iş fırsat çarpanı 0,72 ve form telafi kesintisi 4'tü. Tek yıl bazında makul görünüyordu ama kariyer boyunca sarmala giriyordu (az maç → az form telafisi → düşük form → daha az fırsat): kariyer sonu form **3,8**, fırsat kaybı **%55**. §21 "anlamlı ama kariyeri öldürmeyen" diyor.
+
+Yumuşatıldı: çarpan 0,84, telafi kesintisi 2. Yeni ölçüm: kişi başı müsabaka **13,3 / 10,7 / 9,1**, fırsat kaybı **%32**, kariyer sonu form **48 / 29 / 20**. Soru: bu bant doğru mu?
+
+**Not (bilinçli davranış):** hiç ders almayan sporcuda telafi zaten 0 olduğu için iş kaynaklı form kaybı da 0 olur. "Yapmadığın antrenmanı iş senden alamaz." Bu bir hata değil, kurulum tercihi.
+
+#### 5 — Spor içeriği etiketleri
+
+`SocialContent.sportRelevance`: vlog 1.0, kısa video 0.8, fotoğraf 0.7, hikâye 0.5, diğer tüm içerikler 0. Ölçüm: aynı yaş/takipçi/platform/içerikte şampiyon sporcu spor içeriğinde **+%41**, spor dışı içerikte fark **tam olarak 0**.
+
+Soru: bu liste doğru mu; ayrıca gerçek bir "spor içeriği" türü (antrenman videosu, maç kamera arkası) kataloğa eklensin mi?
+
+#### 6 — Rekabet ün katkısının tavanı
+
+Kazanılan önemli rövanş en fazla 6 ün puanı veriyor, azalan getiriyle (ikinci ödül yarısı, üçüncüsü üçte biri) ve yıllık 6 puan tavanıyla. Ölçümde tavan hiç aşılmadı ve 25 paylaşımlık spam sonrası Ün 100'ü geçmedi. Soru: tavan doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır, `DECISIONS.md`'ye kesin kural yazılmaz ve boks/taekwondo katsayılarına (Q-183 #6) dokunulmaz.

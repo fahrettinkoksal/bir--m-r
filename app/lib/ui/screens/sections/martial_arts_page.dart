@@ -4,9 +4,12 @@ import '../../../data/combat_circuit_catalog.dart';
 import '../../../data/martial_arts_catalog.dart';
 import '../../../domain/activities/activity_engine.dart';
 import '../../../domain/combat/combat_career_engine.dart';
+import '../../../domain/combat/sport_family_support.dart';
+import '../../../domain/combat/sport_rivalry.dart';
 import '../../../domain/models/combat_career.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/martial_progress.dart';
+import '../../../domain/models/person.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../../text/turkish_text.dart';
@@ -396,6 +399,11 @@ class _CombatPanelState extends State<_CombatPanel> {
 
     final CombatTier kademe = yol.tiers[k.tier.clamp(0, yol.tiers.length - 1)];
     final PendingBout? bekleyen = k.pendingBout;
+    final bool catisma = controller.hasSchoolSportConflict();
+    // §29: yüzde göstermeden, işin hazırlığa etkisini anlatan satır.
+    final String? isNotu = controller.sportWorkloadNote();
+    // §26: yalnızca 18 yaş altında ve yaşayan ebeveyn varsa dolu döner.
+    final List<Person> destekciler = controller.sportSupportSponsors();
 
     return Container(
       key: const Key('spor_kariyeri_paneli'),
@@ -459,6 +467,17 @@ class _CombatPanelState extends State<_CombatPanel> {
               sol: 'Antrenör',
               sag: CombatCareerEngine.coachLabels[k.coachLevel.clamp(0, 2)],
             ),
+
+            // --- rekabet (§28) ---------------------------------------
+            // Her rakip yığılmaz: yalnızca gerçekten anlamlı olanlar.
+            for (final RivalStanding r in controller.sportRivals(k))
+              _SatirCift(
+                sol: r.label!,
+                sag: '${r.opponent.name} · '
+                    '${r.opponent.metCount} karşılaşma · '
+                    'Sen ${r.opponent.playerWins} — '
+                    'O ${r.opponent.playerLosses}',
+              ),
             if (k.isInjured)
               _SatirCift(
                 sol: 'Sakatlık',
@@ -487,6 +506,45 @@ class _CombatPanelState extends State<_CombatPanel> {
                   ),
                 ),
               const SizedBox(height: 8),
+
+              // --- okul + spor çatışması (Paket AL/2, §27) -----------
+              // Karar verilmeden müsabakaya çıkılmaz: seçim gerçek.
+              if (catisma) ...<Widget>[
+                Text(
+                  'Turnuva okulunla çakıştı. Önce buna karar ver.',
+                  key: const Key('spor_okul_catismasi'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: <Widget>[
+                    OutlinedButton(
+                      key: const Key('spor_okul_turnuvaya_git'),
+                      onPressed: () {
+                        final ActivityOutcome? o = controller
+                            .resolveSchoolSportConflict(chooseSport: true);
+                        if (o != null) widget.onResult(o.text);
+                      },
+                      child: const Text('Turnuvaya git'),
+                    ),
+                    OutlinedButton(
+                      key: const Key('spor_okul_oncelik'),
+                      onPressed: () {
+                        final ActivityOutcome? o = controller
+                            .resolveSchoolSportConflict(chooseSport: false);
+                        if (o != null) widget.onResult(o.text);
+                      },
+                      child: const Text('Okula öncelik ver'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
+
               // §10: birkaç anlamlı seçenek, yirmi mikro düğme değil.
               Wrap(
                 spacing: 6,
@@ -495,7 +553,7 @@ class _CombatPanelState extends State<_CombatPanel> {
                   for (final CampChoice c in CampChoice.values)
                     OutlinedButton(
                       key: Key('spor_kamp_${c.name}'),
-                      onPressed: k.isInjured
+                      onPressed: k.isInjured || catisma
                           ? null
                           : () {
                               final ({bool applied, String text, bool won})? r =
@@ -520,6 +578,76 @@ class _CombatPanelState extends State<_CombatPanel> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+            ],
+
+            // --- iş + spor (Paket AL/2, §29) --------------------------
+            // Yüzde yok: oyuncuya matematik değil durum anlatılıyor.
+            if (!k.isRetired && isNotu != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                isNotu,
+                key: const Key('spor_is_yuku_notu'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+
+            // --- aile desteği (Paket AL/2, §26) -----------------------
+            // Yalnızca 18 yaş altında ve **yaşayan** ebeveyn varken
+            // görünür; ebeveyn yoksa sahte seçenek gösterilmez.
+            if (!k.isRetired && destekciler.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 10),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Text(
+                'Bu masrafları tek başına karşılaman gerekmiyor.',
+                key: const Key('spor_aile_destegi'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              for (final SportExpense gider in SportExpense.values)
+                if (controller.sportExpenseCost(gider) > 0 &&
+                    controller.sportSupportCredit(gider) <
+                        controller.sportExpenseCost(gider)) ...<Widget>[
+                  const SizedBox(height: 6),
+                  Text(
+                    '${gider.label} · '
+                    '${trMoney(controller.sportExpenseCost(gider))}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: <Widget>[
+                      for (final Person ebeveyn in destekciler)
+                        Builder(
+                          builder: (BuildContext context) {
+                            final String engel = controller
+                                .sportSupportBlockReason(gider, ebeveyn);
+                            return OutlinedButton(
+                              key: Key(
+                                'spor_destek_${gider.name}_${ebeveyn.id}',
+                              ),
+                              onPressed: engel.isNotEmpty
+                                  ? null
+                                  : () {
+                                      final ActivityOutcome? o = controller
+                                          .askSportSupport(gider, ebeveyn);
+                                      if (o != null) widget.onResult(o.text);
+                                    },
+                              child: Text(
+                                '${ebeveyn.firstName} ile konuş',
+                              ),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ],
             ],
 
             // --- kararlar --------------------------------------------

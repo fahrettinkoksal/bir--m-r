@@ -51,6 +51,7 @@ class SocialContent {
     this.appearanceWeight = 0.0,
     this.riskOfLoss = 0.15,
     this.fameWeight = 1.0,
+    this.sportRelevance = 0.0,
   });
 
   final String id;
@@ -71,6 +72,15 @@ class SocialContent {
 
   /// prototypeOnly: üne katkı ağırlığı.
   final double fameWeight;
+
+  /// prototypeOnly: içeriğin spor başarısına yakınlığı (0-1).
+  ///
+  /// Paket AL/2, §11. Sporcunun ringde kazandığı ad yalnızca **bu**
+  /// içeriklerde işe yarar: kendini ve gününü gösteren biçimler.
+  /// Yemek tarifi ya da bilgi içeriğinde 0'dır; şampiyon olmak tarifi
+  /// daha çok izletmez. Yeni bir içerik türü eklenmedi, mevcut
+  /// kataloğa yalnızca bu etiket yazıldı.
+  final double sportRelevance;
 }
 
 const List<SocialContent> kSocialContents = <SocialContent>[
@@ -93,6 +103,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     charismaWeight: 0.5,
     appearanceWeight: 0.2,
     riskOfLoss: 0.18,
+    sportRelevance: 1.0,
   ),
   SocialContent(
     id: 'oyun_videosu',
@@ -125,6 +136,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     charismaWeight: 0.35,
     appearanceWeight: 0.45,
     riskOfLoss: 0.12,
+    sportRelevance: 0.7,
   ),
   SocialContent(
     id: 'hikaye',
@@ -136,6 +148,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     appearanceWeight: 0.3,
     riskOfLoss: 0.08,
     fameWeight: 0.6,
+    sportRelevance: 0.5,
   ),
   SocialContent(
     id: 'kisa_video',
@@ -146,6 +159,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     charismaWeight: 0.5,
     appearanceWeight: 0.25,
     riskOfLoss: 0.16,
+    sportRelevance: 0.8,
   ),
 
   // --- Mikroblog ----------------------------------------------------------

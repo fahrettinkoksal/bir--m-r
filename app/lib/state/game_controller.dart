@@ -11,6 +11,10 @@ import '../data/job_catalog.dart';
 import '../domain/career/career_synergy.dart';
 import '../domain/models/combat_career.dart';
 import '../domain/combat/combat_career_engine.dart';
+import '../domain/combat/sport_family_support.dart';
+import '../domain/combat/sport_rivalry.dart';
+import '../domain/combat/sport_school_conflict.dart';
+import '../domain/combat/sport_workload.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
@@ -1873,6 +1877,104 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return null;
     return CombatCareerEngine.retirementPressure(current);
+  }
+
+  // =====================================================================
+  // Spor kariyeri entegrasyonları (Paket AL/2)
+  // =====================================================================
+
+  /// 18 yaş altı sporcunun spor masrafı için destek istenebilecek
+  /// ebeveynler (§26).
+  ///
+  /// Yaşayan ve kendi parası olan ebeveyn yoksa liste boş döner;
+  /// ekranda sahte seçenek gösterilmez.
+  List<Person> sportSupportSponsors() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    if (current.player.age >= SportFamilySupport.adultAge) {
+      // §5: yetişkin oyuncuda bu ekran hiç görünmez.
+      return const <Person>[];
+    }
+    return SportFamilySupport.sponsorsFor(current);
+  }
+
+  /// Bu masrafın güncel tutarı (₺).
+  int sportExpenseCost(SportExpense expense) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return SportFamilySupport.defaultCost(current, expense);
+  }
+
+  /// Bu masraf için aileden gelmiş, henüz harcanmamış destek (₺).
+  int sportSupportCredit(SportExpense expense) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return SportFamilySupport.creditFor(current, expense);
+  }
+
+  /// Bu ebeveynden bu masraf için destek istemenin engeli; yoksa boş.
+  String sportSupportBlockReason(SportExpense expense, Person person) {
+    final GameState? current = _state;
+    if (current == null) return 'Hayat başlamadı.';
+    return SportFamilySupport.blockReason(
+      state: current,
+      expense: expense,
+      person: person,
+      amount: SportFamilySupport.defaultCost(current, expense),
+    );
+  }
+
+  /// Aileden spor masrafı için destek ister.
+  ActivityOutcome? askSportSupport(SportExpense expense, Person person) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final SportSupportResult r = SportFamilySupport.ask(
+      state: current,
+      expense: expense,
+      person: person,
+      amount: SportFamilySupport.defaultCost(current, expense),
+      rng: _random,
+    );
+    if (r.outcome.applied) _commitCombat(r.state);
+    return ActivityOutcome(
+      applied: r.outcome.applied,
+      text: r.outcome.text,
+    );
+  }
+
+  /// Çözülmeyi bekleyen okul/spor çatışması var mı (§27)?
+  bool hasSchoolSportConflict() {
+    final GameState? current = _state;
+    if (current == null) return false;
+    final CombatCareer? k = CombatCareerEngine.activeCareer(current);
+    if (k == null) return false;
+    return SportSchoolConflict.isPending(current, k);
+  }
+
+  /// Okul/spor çatışmasını çözer.
+  ActivityOutcome? resolveSchoolSportConflict({required bool chooseSport}) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final SchoolConflictResult r = chooseSport
+        ? SportSchoolConflict.chooseSport(current)
+        : SportSchoolConflict.chooseSchool(current);
+    if (r.outcome.applied) _commitCombat(r.state);
+    return ActivityOutcome(
+      applied: r.outcome.applied,
+      text: r.outcome.text,
+    );
+  }
+
+  /// Ekranda gösterilmeye değer rekabetler (§28).
+  List<RivalStanding> sportRivals(CombatCareer career) =>
+      SportRivalry.visibleRivals(career);
+
+  /// Tam/yarım zamanlı işin spor hazırlığına etkisi; yoksa `null` (§29).
+  String? sportWorkloadNote() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (CombatCareerEngine.activeCareer(current) == null) return null;
+    return SportWorkload.note(current);
   }
 
   /// Yaşa uygun kitaplar.

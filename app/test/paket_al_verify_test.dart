@@ -1241,14 +1241,26 @@ void main() {
           '%${(s2 * 100).round()}');
       print('  müsabaka sonucu    ${r1.won} vs ${r2.won}');
       print('  200 denemede fırsat $firsat1 vs $firsat2');
-      print('  -> iş durumu spor motoruna HİÇ girmiyor; tek bedel para '
-          've sağlık (Q-182 #4).');
+      print('  -> Paket AL/2 sonrası: kazanma ihtimali hâlâ aynı (§25), '
+          'bedel FIRSAT ve form üzerinden geliyor (§21).');
 
-      // Ölçümün söylediğini teste de yazıyoruz: bu bir iddia değil,
-      // mevcut davranışın kaydı. Değişirse test haber verir.
-      expect(s1, s2);
-      expect(r1.won, r2.won);
-      expect(firsat1, firsat2);
+      // GÜNCELLEME — Paket AL/2.
+      //
+      // Bu test Paket AL/VERIFY'de "iş durumu spor motoruna hiç
+      // girmiyor" gözlemini kaydediyordu ve üç değerin de eşit olmasını
+      // bekliyordu. Paket AL/2 bunu bilerek değiştirdi: §21 çalışan
+      // sporcunun müsabaka fırsatını azalttı. Test gevşetilmedi,
+      // **yeni beklentiye çevrildi** — ve kazanma ihtimalinin eşit
+      // kalması şartı aynen duruyor, çünkü §25 işin kazanma ihtimaline
+      // doğrudan ceza yazmasını yasaklıyor.
+      expect(s1, s2,
+          reason: '§25: iş kazanma ihtimaline doğrudan kesinti yazmamalı.');
+      expect(r1.won, r2.won,
+          reason: 'Aynı tohum, aynı ihtimal: sonuç da aynı olmalı.');
+      expect(firsat1, greaterThan(firsat2),
+          reason: '§21: tam zamanlı çalışan sporcunun fırsatı azalmalı.');
+      expect(firsat2, greaterThan(0),
+          reason: '§24: full-time sporcunun fırsatı sıfırlanmamalı.');
     });
   });
   // =================================================================

@@ -3269,6 +3269,59 @@ Denge sorusu olarak Q-183 #6'da duruyor.
 
 **Karar bekleyen:** Q-183. **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AL/2 — SPOR KARİYERİ ENTEGRASYONLARI
+
+Paket AL/VERIFY beş brief maddesinin **yazıldığı ama uygulanmadığını**
+tespit etmişti. Bu paket o beşini gerçekten kodladı: her biri için
+production kod, gerçek state etkisi, hedefli test ve gereken yerde UI
+var. **Yeni denge turu değil**; mevcut kazanma bandı, sakatlık oranları,
+şampiyonluk oranları, yaş eğrisi ve ödül çarpanlarına dokunulmadı.
+
+### Önce / sonra
+
+| Konu | Paket AL/VERIFY sonunda | Paket AL/2 sonunda |
+| --- | --- | --- |
+| 18 yaş altı aile desteği | Yok. Genç sporcunun kamp/koç masrafı yalnızca kendi cüzdanından. | Dört masraf başlığında aileden destek istenebiliyor; **Paket AJ ile aynı ebeveyn yıllık bütçesi** paylaşılıyor. Kabul oranı varlığa göre %0 / %0 / %23 / %58 / %69. |
+| Okul + spor | Karar noktası yok. | Yılda en fazla bir kez çıkan gerçek çatışma; iki seçim de farklı state üretiyor. 200 kariyer × 8 okul yılında 44 çatışma. |
+| Spor başarısı → sosyal medya | Şampiyon ile sıradan oyuncu **birebir aynı** paylaşım performansı. | Spor içeriğinde şampiyon **+%41**; spor dışı içerikte fark **tam olarak 0**. |
+| Rivalry | Kayıt tutuluyordu, hiçbir sonucu yoktu. Üst kademeye çıkınca eski rakip 0 kez geliyordu. | Rekabet gücü ölçülüyor; kazanılan önemli rövanş ün ve sosyal ilgi getiriyor (azalan getiri + yıllık tavan). Önemli rakip oyuncuyla birlikte yükseliyor, yaşlanınca düşüyor. |
+| İş + spor | Çalışan ve çalışmayan sporcu **birebir aynı**: aynı fırsat, aynı kazanma ihtimali. | Kişi başı müsabaka 13,3 / 10,7 / 9,1; full-time fırsat kaybı %32; kariyer sonu form 48 / 29 / 20. Kazanma ihtimaline **doğrudan** kesinti yok. |
+
+### Yeni dosyalar
+
+- `app/lib/domain/combat/sport_family_support.dart` (§1-§5)
+- `app/lib/domain/combat/sport_school_conflict.dart` (§6-§9)
+- `app/lib/domain/combat/sport_rivalry.dart` (§15-§19)
+- `app/lib/domain/combat/sport_workload.dart` (§20-§25)
+- `app/lib/domain/social/sport_social_boost.dart` (§10-§14)
+- `app/test/paket_al2_entegrasyon_test.dart` (38 test + §34 ölçümü)
+
+### Bulunan PROD bug — raporlandı, DÜZELTİLMEDİ
+
+`CombatCareerEngine.advanceYear` ders sayacını ters anahtar sırasıyla
+okuyor (`karate|dovus`), oysa `MartialArtsEngine` `dovus|karate`
+yazıyor. Paket AL'den beri "çalışmak formu telafi eder" kuralı hiç
+işlememiş.
+
+Düzeltme **denendi ve geri alındı**: 600 sporcu ölçümünde medyan kariyer
+geliri 4,04 M₺ → 6,51 M₺ çıkıp testin kendi denge koruması kırıldı.
+Brief §0 bu pakette ödül çarpanlarına ve şampiyonluk oranlarına
+dokunmayı yasaklıyor, mevcut testi gevşetmek de yasak. Karar Q-184
+#1'de Faho'ya bırakıldı; hatanın varlığı bir belge testiyle kilitlendi.
+
+### Ölçümle düzeltilen iki kalibrasyon (ikisi de bu paketin kendi
+### mekanikleri)
+
+1. Okul çatışması ilk yazımda yalnızca kademe ≥ 1'de çıkıyordu ve 200
+   sporcuda **1 kez** çıktı — fiilen ölü özellik. Kapı, 4+ müsabaka
+   yapmış sporcuyu da kapsayacak şekilde genişletildi.
+2. Tam zamanlı iş cezası ilk yazımda kariyeri öldürüyordu (kariyer sonu
+   form 3,8, fırsat kaybı %55). Katsayılar yumuşatıldı.
+
+**Karar bekleyen:** Q-184 (ve Q-183 #6 boks/taekwondo hassasiyeti hâlâ
+açık). **Doğrulanmayan:** gerçek cihazda oynanmadı; Android APK bu
+oturumda cihazda test edilmedi.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

@@ -9,6 +9,7 @@ import '../models/life_log.dart';
 import '../models/social_account.dart';
 import '../models/sponsorship.dart';
 import 'social_income.dart';
+import 'sport_social_boost.dart';
 import '../../text/turkish_text.dart';
 
 /// Bir sosyal medya işleminin sonucu.
@@ -534,8 +535,17 @@ class SocialEngine {
     final double kitle = account.followers * prototypeOnlyAudienceFactor;
     final double sans = 0.5 + rng.nextDouble(); // prototypeOnly: 0.5 - 1.5
 
-    final double ham =
-        (content.baseReach + karakter * 0.5 + kitle) * tekrarCarpani * sans;
+    // Spor başarısı ve açık rekabet, **spor ile ilgili** içeriklerde
+    // erişimi büyütür (Paket AL/2, §10-§14, §18). İlgisiz içerikte
+    // çarpan tam olarak 1.0'dır; yani şampiyon olmak yemek tarifini
+    // daha çok izletmez. Doğrudan para üretmez (§13): kazanç yolu
+    // değişmedi, yalnızca erişim değişti.
+    final double sporCarpani = SportSocialBoost.multiplierFor(state, content);
+
+    final double ham = (content.baseReach + karakter * 0.5 + kitle) *
+        tekrarCarpani *
+        sans *
+        sporCarpani;
     return ham.round();
   }
 
