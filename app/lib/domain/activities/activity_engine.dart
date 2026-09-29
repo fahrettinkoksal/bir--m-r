@@ -10,6 +10,8 @@ import '../models/zodiac.dart';
 import '../life/astrology.dart';
 import '../../data/fortune_catalog.dart';
 import '../../data/hobby_catalog.dart';
+import '../hobby/course_progress.dart';
+import '../hobby/course_support.dart';
 import '../hobby/hobby_tracker.dart';
 import '../life/upkeep_tracker.dart';
 import '../models/interaction.dart';
@@ -86,6 +88,15 @@ class ActivityEngine {
       state.interactionCount('aktivite', action.id);
 
   /// Eylem şu an yapılabilir mi?
+  /// prototypeOnly: kurs dersinin kendi stat katsayısı.
+  ///
+  /// Sıfır değil, çünkü derse gitmek hiçbir şey hissettirmemeli demek
+  /// değil; ama düğmeye basmak stat toplamaya dönüşmesin diye küçük.
+  static const double prototypeOnlyCourseLessonFactor = 0.2;
+
+  /// prototypeOnly: kilometre taşı dersinin stat katsayısı.
+  static const double prototypeOnlyCourseMilestoneFactor = 2.5;
+
   InteractionAvailability availability(GameState state, ActivityAction action) {
     // Cezaevi ile dışarısı birbirine karışmaz (D-128). İçerideyken
     // berbere gidilmez; dışarıdayken cezaevi avlusunda tur atılmaz.
@@ -123,9 +134,24 @@ class ActivityEngine {
         'Bu yıl için yeterince yaptın; seneye yeniden açılır.',
       );
     }
-    if (state.player.wallet < action.cost) {
+    // **Kurs ücreti kademeli** (Paket AJ). İlk beş ders ücretsiz; sonrası
+    // katalog fiyatının kademesine göre. Ailenin karşıladığı kredi varsa
+    // cüzdandan düşülecek tutar o kadar azalır.
+    final CourseStanding? kurs = CourseProgress.standingFor(state, action);
+    final int gereken = kurs == null ? action.cost : kurs.fee;
+    final int kredi =
+        kurs == null ? 0 : CourseSupport.creditFor(state, kurs.hobby.id);
+    final int cuzdandan = (gereken - kredi).clamp(0, gereken);
+    if (state.player.wallet < cuzdandan) {
+      if (kurs != null && state.player.age < CourseSupport.kAdultAge) {
+        return InteractionAvailability.blocked(
+          'Kursun ücretsiz tanışma dersleri bitti. Devam etmek için '
+          '${trMoney(gereken)} kayıt ücreti gerekiyor; ailenden destek '
+          'isteyebilirsin.',
+        );
+      }
       return InteractionAvailability.blocked(
-        '${trMoney(action.cost)} gerekiyor; cüzdanında yeterli para yok.',
+        '${trMoney(cuzdandan)} gerekiyor; cüzdanında yeterli para yok.',
       );
     }
     return const InteractionAvailability.allowed();
@@ -175,8 +201,19 @@ class ActivityEngine {
     // Faho'nun Q-108 kararı: iki kişi gidiyorsa iki kişilik gerçek
     // maliyet hesaba katılır. Park gibi ücretsiz aktivite ücretsiz
     // kalır, çünkü sıfırın iki katı da sıfırdır.
-    final int odenecek = Outing.costForParty(action, yoldaslar.length);
-    if (state.player.wallet < odenecek) {
+    final CourseStanding? kurs = CourseProgress.standingFor(state, action);
+    // Kursta ücret kademeden gelir; öteki eylemlerde katalog fiyatı ve
+    // kalabalık çarpanı geçerli kalır.
+    final int odenecek = kurs == null
+        ? Outing.costForParty(action, yoldaslar.length)
+        : kurs.fee;
+    // Ailenin karşıladığı kısım önce harcanır; kalan cüzdandan çıkar.
+    final ({GameState state, int remaining}) kredi = kurs == null
+        ? (state: state, remaining: odenecek)
+        : CourseSupport.spendCredit(state, kurs.hobby.id, odenecek);
+    state = kredi.state;
+    final int cuzdandan = kredi.remaining;
+    if (state.player.wallet < cuzdandan) {
       return _blocked(
         state,
         '${trMoney(odenecek)} gerekiyor; cüzdanında yeterli para yok. '
@@ -185,8 +222,17 @@ class ActivityEngine {
     }
 
     final int done = timesDone(state, action);
-    final double factor =
-        prototypeOnlyRewardCurve[min(done, prototypeOnlyRewardCurve.length - 1)];
+    // **Kursta stat ödülü derse değil kilometre taşına bağlı** (Paket
+    // AJ, §2). Ücretsiz tanışma dersleri hobiyi ilerletir; statlar 5.,
+    // 10., 20. ve 35. derste gelir. Böylece "her basışta stat" düğmesi
+    // olmaktan çıkar ve aynı yıl bütün kursları dolaşmak stat toplamaya
+    // dönüşmez.
+    final double factor = kurs == null
+        ? prototypeOnlyRewardCurve[
+            min(done, prototypeOnlyRewardCurve.length - 1)]
+        : kurs.milestone > 0
+            ? prototypeOnlyCourseMilestoneFactor
+            : prototypeOnlyCourseLessonFactor;
 
     // Estetik işlemler risksiz değildir (D-077). Kötü sonuçta ücret yine
     // ödenir, kazanç uygulanmaz ve mutluluk düşer.
@@ -234,7 +280,7 @@ class ActivityEngine {
 
     final PlayerCharacter player = state.player.copyWith(
       stats: stats,
-      wallet: state.player.wallet - odenecek,
+      wallet: state.player.wallet - cuzdandan,
       hairStyle: yeniStil,
       hairLossStage: yeniBasamak,
     );
@@ -261,6 +307,12 @@ class ActivityEngine {
     // Kalıcı hobi geçmişi (Paket 39). Eylemin kendisi değişmez; yalnızca
     // beslediği bir hobi varsa geçmişe iz düşer.
     next = HobbyTracker.creditActivity(next, action.id);
+
+    // Yıllık ücretsiz ders tavanı (Paket AJ, §2): tanışma dersi bedava
+    // verildiyse sayaca işlenir.
+    if (kurs != null && kurs.fee == 0) {
+      next = CourseProgress.countFreeLesson(next);
+    }
 
     // Bakım geçmişi (D-072): spor salonu, berber ve kurs yıllık
     // yıpranmayı yavaşlatır. Kayıt tek noktadan yazılır.

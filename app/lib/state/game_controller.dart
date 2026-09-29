@@ -28,6 +28,8 @@ import '../domain/social/media_opportunities.dart';
 import '../domain/interaction/child_naming.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
+import '../domain/hobby/course_progress.dart';
+import '../domain/hobby/course_support.dart';
 import '../domain/models/martial_progress.dart';
 import '../domain/activities/martial_arts_engine.dart';
 import '../data/martial_arts_catalog.dart';
@@ -1004,6 +1006,64 @@ class GameController extends ChangeNotifier {
             others: others,
           ),
   );
+
+  // =====================================================================
+  // Kurs ücreti ve aileden destek (Paket AJ)
+  // =====================================================================
+
+  /// Bu kursun bugünkü durumu: kaçıncı ders, hangi kademe, ne kadar
+  /// ücret, kaç ücretsiz ders kaldı. Kurs değilse `null`.
+  CourseStanding? courseStanding(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CourseProgress.standingFor(current, action);
+  }
+
+  /// Bu kursun ücreti için destek istenebilecek kişiler.
+  ///
+  /// Ebeveyn yoksa liste boş döner: ekranda olmayan bir seçenek
+  /// gösterilmez (§4).
+  List<Person> courseSponsors(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return CourseSupport.sponsorsFor(current)
+        .where((Person p) =>
+            CourseSupport.blockReason(current, action, p).isEmpty)
+        .toList(growable: false);
+  }
+
+  /// Destek istemenin engeli; yoksa boş metin.
+  String courseSupportBlockReason(ActivityAction action, Person person) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return CourseSupport.blockReason(current, action, person);
+  }
+
+  /// Aileden kurs ücreti için destek ister.
+  ///
+  /// Kabul edilirse ücret **ailenin yıllık bütçesinden** düşer ve o
+  /// hobiye kredi olarak yazılır; ders yapılırken harcanır. Para yoktan
+  /// yaratılmaz (§8).
+  CourseSupportOutcome? askFamilyForCourse(
+    ActivityAction action,
+    String personId,
+  ) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final Person? kisi = current.personById(personId);
+    if (kisi == null) return null;
+    final CourseSupportResult sonuc = CourseSupport.ask(
+      state: current,
+      action: action,
+      person: kisi,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = _countProgress(current, sonuc.state);
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
 
   /// Göz muayenesi mini oyununu bitirir (D-076).
   ///
