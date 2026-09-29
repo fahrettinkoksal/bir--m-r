@@ -5034,3 +5034,35 @@ Bu bir ürün sorusu: (A) olduğu gibi kalsın — Yazar gerçekten yıllarca ok
 Sinerji mevcut karara katkı yapıyor (§17 uyarınca yeni motor kurulmadı), ama altta yatan mülakat hâlâ **tek soruluk ve ikili**. Sinerji bu yüzden yalnızca "yanlış cevaba rağmen işe alınma" kanalından işleyebiliyor. Soru: mülakat ileride puanlı hale gelsin mi (o zaman sinerji doğal olarak puana eklenir), yoksa tek soru oyunun sadeliği için doğru mu?
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-182 — Paket AL: spor kariyerinin dağılımı ve V1'de bilerek dışarıda bırakılanlar
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/combat/combat_career_engine.dart`, `app/lib/data/combat_circuit_catalog.dart`, `app/test/paket_al_600_athletes_test.dart`.
+
+**Bağlam.** Faho'nun PAKET AL brief'i altı dövüş sanatını gerçek bir kariyer yoluna çevirdi. Aşağıdakiler brief'in **sayıya bağlamadığı** ya da açıkça "V1'i şişirme / Q olarak bırak" dediği noktalar. Hepsi `prototypeOnly`; `DECISIONS.md`'ye hiçbir kural yazılmadı.
+
+#### 1 — Şampiyonluk oranı: adanmış sporcuda %18,2
+
+600 sporcu ölçümünde kendini tamamen adamış sporcuların **%18,2'si** en az bir şampiyonluk kazandı (boks 5, güreş 25, judo 10, karate 18, taekwondo 27, kung fu 24 — her biri 100 hayatta).
+
+**Kohort önemli:** bot her yıl çalışıyor, her fırsatı değerlendiriyor ve yalnızca oyun zorlayınca bırakıyor. Sıradan bir oyuncunun oranı bunun çok altında olur. §41 "hepsi şampiyon olmasın ama imkânsız da olmasın" diyordu; ölçüm o bandın içinde ama **nerede durması gerektiği ürün kararı**.
+
+Kalibrasyon sırasında iki gerçek hata bulunup düzeltildi (sıralama merdiveni şampiyonluğu pratikte kapatıyordu; zirvedeki sporcunun formu çöküyordu). Ondan sonrası ince ayar olurdu ve durduruldu. Soru: %18 doğru his mi, yoksa daha nadir mi olmalı? Seçenekler: (A) olduğu gibi kalsın; (B) unvan maçı çağrısı seyrekleşsin (şu an sıralama ≤2 + itibar ≥70 + %40 zar); (C) unvan maçı rakibi daha güçlü olsun; (D) bir kez şampiyon olan için sonraki unvan maçları zorlaşsın.
+
+#### 2 — Sanatlar arası fark: boks %5, taekwondo %27
+
+Boks en zor yol (daha güçlü rakipler, daha yüksek sakatlık, daha hızlı yaş aşınması), kung fu/taekwondo en kolay. Bu bilinçli bir anlatı farkı ama **beş kat** açık. Soru: bu fark oyuncuya "boks seçme" dedirtir mi, yoksa bokssun zorluğu kemerin değerini mi artırır? Tek sanat baskınlığı testi geçiyor (hiçbiri kapalı değil).
+
+#### 3 — Menajer sistemi eklenmedi (§29)
+
+Brief "V1'i şişirme, mimariyi çok büyütecekse Q olarak bırak" diyordu. Bırakıldı: şu an yalnızca antrenör kalitesi var (kulüp hocası / deneyimli koç / elit koç). Soru: bokta basit bir menajer (maç bulma, pay alma, kötü sözleşme riski) ayrı bir paket olarak gelsin mi?
+
+#### 4 — İş + spor çatışması yalnızca para ve sağlık üzerinden
+
+§36 "yeni devasa stamina motoru kurma" dediği için zaman maliyeti kampın parasında, sağlığında ve sakatlık riskinde duruyor. Yani tam zamanlı çalışan bir doktor teoride profesyonel boksör de olabilir; bedeli para ve sağlık. Soru: bu yeterli mi, yoksa çalışanın müsabaka fırsatı azalsın mı?
+
+#### 5 — Takım sporları ve dans yok (§45, §46)
+
+Futbol/basketbol/voleybol bilerek dışarıda (kulüp, transfer, kontrat, lig ayrı büyük mekanik ister). Dans da bu pakete zorla sokulmadı; Paket AK'de açık bırakılan mimari duruyor. Soru: sıradaki paket profesyonel dans mı, takım sporu mu, yoksa başka bir alan mı?
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.

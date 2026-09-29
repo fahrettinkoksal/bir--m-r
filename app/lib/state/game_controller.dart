@@ -9,6 +9,8 @@ import '../data/item_catalog.dart';
 import '../data/hobby_catalog.dart';
 import '../data/job_catalog.dart';
 import '../domain/career/career_synergy.dart';
+import '../domain/models/combat_career.dart';
+import '../domain/combat/combat_career_engine.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
@@ -1781,6 +1783,97 @@ class GameController extends ChangeNotifier {
   ActivityOutcome? takeMartialSeason(MartialArt art) => _runActivity(
     (GameState current) => _martial.takeSeason(state: current, art: art),
   );
+
+  // =====================================================================
+  // Profesyonel dövüş/spor kariyeri (Paket AL)
+  // =====================================================================
+
+  /// Spor kariyeri eylemlerinin ortak kaydı: durumu yazar, otomatik
+  /// kaydeder ve ekranı uyandırır.
+  void _commitCombat(GameState next) {
+    _state = _countProgress(_state!, next);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Bu sanattaki rekabet kariyeri; yoksa `null`.
+  CombatCareer? combatCareer(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CombatCareerEngine.careerFor(current, art.id);
+  }
+
+  /// Şu an müsabakalara çıkılan kariyer; yoksa `null`.
+  CombatCareer? activeCombatCareer() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CombatCareerEngine.activeCareer(current);
+  }
+
+  /// Bu sanatta rekabete başlanabilir mi?
+  InteractionAvailability combatStartAvailability(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return CombatCareerEngine.startAvailability(current, art);
+  }
+
+  /// Rekabete başlar.
+  ActivityOutcome? startCompeting(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.startCompeting(current, art);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Bekleyen müsabakayı oynar.
+  ({bool applied, String text, bool won})? fightBout(CampChoice camp) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final BoutResult r = CombatCareerEngine.fight(current, camp);
+    if (r.applied) _commitCombat(r.state);
+    return (applied: r.applied, text: r.text, won: r.won);
+  }
+
+  /// Antrenör kalitesini değiştirir.
+  ActivityOutcome? setCombatCoach(int level) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.setCoach(current, level);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Sakatken riski göze alır.
+  ActivityOutcome? pushThroughCombatInjury() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.pushThroughInjury(current, _random);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Spordan çekilir.
+  ActivityOutcome? retireFromCombat() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.retire(current, RetirementReason.kendiKarari);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Emeklilik baskısı var mı (yaş, sakatlık, düşen performans)?
+  RetirementReason? combatRetirementPressure() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CombatCareerEngine.retirementPressure(current);
+  }
 
   /// Yaşa uygun kitaplar.
   List<BookInfo> availableBooks() {

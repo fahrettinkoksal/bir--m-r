@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/combat_circuit_catalog.dart';
 import '../../../data/martial_arts_catalog.dart';
 import '../../../domain/activities/activity_engine.dart';
+import '../../../domain/combat/combat_career_engine.dart';
+import '../../../domain/models/combat_career.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/martial_progress.dart';
 import '../../../state/game_controller.dart';
@@ -42,11 +45,28 @@ class _MartialArtsPageState extends State<MartialArtsPage> {
       backLabel: 'Spor salonu',
       onBack: widget.onBack,
       children: <Widget>[
+        // Rekabet kariyeri en üstte durur: sporcu önce kendi durumunu
+        // görsün, sonra ders listesini (Paket AL, §26).
+        if (controller.activeCombatCareer() != null) ...<Widget>[
+          _CombatPanel(
+            career: controller.activeCombatCareer()!,
+            onResult: (String metin) => setState(
+              () => _sonuc = ActivityOutcome(applied: true, text: metin),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         for (final MartialArt art in MartialArt.values) ...<Widget>[
           _ArtCard(
             art: art,
             progress: controller.martialProgress(art),
             availability: controller.martialAvailability(art),
+            competeAvailability: controller.combatStartAvailability(art),
+            competing: controller.combatCareer(art) != null,
+            onCompete: () {
+              final ActivityOutcome? outcome = controller.startCompeting(art);
+              setState(() => _sonuc = outcome);
+            },
             lessonsThisAge: controller.martialLessonsThisAge(art),
             expanded: _acik == art,
             onToggle: () => setState(() => _acik = _acik == art ? null : art),
@@ -80,6 +100,9 @@ class _ArtCard extends StatelessWidget {
     required this.art,
     required this.progress,
     required this.availability,
+    required this.competeAvailability,
+    required this.onCompete,
+    required this.competing,
     required this.lessonsThisAge,
     required this.expanded,
     required this.onToggle,
@@ -91,6 +114,11 @@ class _ArtCard extends StatelessWidget {
   final MartialArt art;
   final MartialProgress progress;
   final InteractionAvailability availability;
+
+  /// Rekabete başlama durumu (Paket AL, §3).
+  final InteractionAvailability competeAvailability;
+  final VoidCallback onCompete;
+  final bool competing;
   final int lessonsThisAge;
   final bool expanded;
   final VoidCallback onToggle;
@@ -185,6 +213,19 @@ class _ArtCard extends StatelessWidget {
                 ),
               ),
             ],
+            if (!competing &&
+                !competeAvailability.isAllowed &&
+                progress.lessons > 0 &&
+                (competeAvailability.reason ?? '').isNotEmpty) ...<Widget>[
+              const SizedBox(height: 6),
+              Text(
+                'Müsabaka: ${competeAvailability.reason!}',
+                key: Key('dovus_rekabet_gerekce_${art.id}'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             if (!acik && (availability.reason ?? '').isNotEmpty) ...<Widget>[
               const SizedBox(height: 6),
               Text(
@@ -219,6 +260,14 @@ class _ArtCard extends StatelessWidget {
                     key: Key('dovus_yil_${art.id}'),
                     onPressed: onSeason,
                     child: Text('Yılı çalış ($seasonLessons ders)'),
+                  ),
+                // Rekabete geçiş: teknik basamak tuttuğunda açılır.
+                // Kapalıyken gerekçesi yukarıda yazar; sahte düğme yok.
+                if (!competing && competeAvailability.isAllowed)
+                  FilledButton(
+                    key: Key('dovus_rekabet_${art.id}'),
+                    onPressed: onCompete,
+                    child: const Text('Müsabakalara başla'),
                   ),
               ],
             ),
@@ -302,6 +351,276 @@ class _RankLine extends StatelessWidget {
             '${rank.lessonsNeeded} ders',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Rekabet kariyeri paneli (Paket AL, §26).
+///
+/// Mevcut dövüş sanatı ekranı çöpe atılmadı, derinleştirildi: teknik
+/// basamak yukarıda kartlarda duruyor, burada sporcunun **kariyeri**
+/// var — form, rekor, sıradaki fırsat ve kararlar.
+class _CombatPanel extends StatefulWidget {
+  const _CombatPanel({required this.career, required this.onResult});
+
+  final CombatCareer career;
+  final void Function(String) onResult;
+
+  @override
+  State<_CombatPanel> createState() => _CombatPanelState();
+}
+
+class _CombatPanelState extends State<_CombatPanel> {
+  bool _gecmisAcik = false;
+
+  String _formLabel(int form) {
+    if (form >= 80) return 'Çok iyi';
+    if (form >= 62) return 'İyi';
+    if (form >= 42) return 'Orta';
+    if (form >= 25) return 'Düşük';
+    return 'Çok düşük';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final CombatCareer k = widget.career;
+    final MartialArt? art = k.art;
+    final CombatCircuit? yol = combatCircuitFor(k.artId);
+    if (art == null || yol == null) return const SizedBox.shrink();
+
+    final CombatTier kademe = yol.tiers[k.tier.clamp(0, yol.tiers.length - 1)];
+    final PendingBout? bekleyen = k.pendingBout;
+
+    return Container(
+      key: const Key('spor_kariyeri_paneli'),
+      decoration: panelDecoration(context, radius: 20),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                AccentIconTile(
+                  icon: art.icon,
+                  accent: BirOmurAccents.nar,
+                  size: 38,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(art.label, style: theme.textTheme.titleMedium),
+                      Text(
+                        k.isRetired
+                            ? 'Emekli — ${k.retirementReason?.label ?? ''}'
+                            : k.status == CompetitiveStatus.profesyonel
+                                ? yol.proLabel
+                                : k.status.label,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (k.isChampion)
+                  Icon(
+                    Icons.emoji_events_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _SatirCift(sol: 'Kademe', sag: kademe.label),
+            _SatirCift(sol: 'Form', sag: _formLabel(k.form)),
+            _SatirCift(
+              sol: 'Rekor',
+              sag: k.record +
+                  (k.championships > 0
+                      ? ' · ${k.championships} şampiyonluk'
+                      : ''),
+            ),
+            if (k.ranking > 0)
+              _SatirCift(sol: 'Sıralama', sag: '${k.ranking}.'),
+            if (k.careerEarnings > 0)
+              _SatirCift(
+                sol: 'Kariyer geliri',
+                sag: trMoney(k.careerEarnings),
+              ),
+            _SatirCift(
+              sol: 'Antrenör',
+              sag: CombatCareerEngine.coachLabels[k.coachLevel.clamp(0, 2)],
+            ),
+            if (k.isInjured)
+              _SatirCift(
+                sol: 'Sakatlık',
+                sag: '${k.injury.label} · ${k.injuryYearsLeft} yıl',
+              ),
+
+            // --- sıradaki fırsat -------------------------------------
+            if (!k.isRetired && bekleyen != null) ...<Widget>[
+              const SizedBox(height: 10),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Text(
+                bekleyen.isTitle
+                    ? '${yol.titleLabel}: ${bekleyen.opponent.name}'
+                    : 'Sıradaki müsabaka: ${bekleyen.opponent.name}',
+                key: const Key('spor_bekleyen_musabaka'),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (bekleyen.opponent.headToHead != null)
+                Text(
+                  bekleyen.opponent.headToHead!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              const SizedBox(height: 8),
+              // §10: birkaç anlamlı seçenek, yirmi mikro düğme değil.
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: <Widget>[
+                  for (final CampChoice c in CampChoice.values)
+                    OutlinedButton(
+                      key: Key('spor_kamp_${c.name}'),
+                      onPressed: k.isInjured
+                          ? null
+                          : () {
+                              final ({bool applied, String text, bool won})? r =
+                                  controller.fightBout(c);
+                              if (r != null) widget.onResult(r.text);
+                            },
+                      child: Text(
+                        '${c.label} '
+                        '(${trMoney(CombatCareerEngine.campCost(c))})',
+                      ),
+                    ),
+                ],
+              ),
+            ] else if (!k.isRetired) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                k.isInjured
+                    ? 'Sakatlığın geçmeden fırsat çıkmıyor.'
+                    : 'Şu an önünde bir müsabaka yok. Fırsat her yıl '
+                        'çıkmaz; çalışmaya devam et.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+
+            // --- kararlar --------------------------------------------
+            if (!k.isRetired) ...<Widget>[
+              const SizedBox(height: 10),
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 6,
+                runSpacing: 6,
+                children: <Widget>[
+                  if (k.memories.isNotEmpty)
+                    TextButton(
+                      onPressed: () =>
+                          setState(() => _gecmisAcik = !_gecmisAcik),
+                      child: Text(_gecmisAcik ? 'Gizle' : 'Kariyeri gör'),
+                    ),
+                  if (k.isInjured)
+                    OutlinedButton(
+                      key: const Key('spor_riski_goze_al'),
+                      onPressed: () {
+                        final ActivityOutcome? o =
+                            controller.pushThroughCombatInjury();
+                        if (o != null) widget.onResult(o.text);
+                      },
+                      child: const Text('Riski göze al'),
+                    ),
+                  if (k.coachLevel < 2)
+                    OutlinedButton(
+                      key: const Key('spor_koc_yukselt'),
+                      onPressed: () {
+                        final ActivityOutcome? o =
+                            controller.setCombatCoach(k.coachLevel + 1);
+                        if (o != null) widget.onResult(o.text);
+                      },
+                      child: Text(
+                        '${CombatCareerEngine.coachLabels[k.coachLevel + 1]}'
+                        ' tut',
+                      ),
+                    ),
+                  OutlinedButton(
+                    key: const Key('spor_emekli_ol'),
+                    onPressed: () {
+                      final ActivityOutcome? o = controller.retireFromCombat();
+                      if (o != null) widget.onResult(o.text);
+                    },
+                    child: const Text('Spordan çekil'),
+                  ),
+                ],
+              ),
+            ],
+
+            // --- kariyer geçmişi (§27) --------------------------------
+            if (_gecmisAcik && k.memories.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 10),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              for (final CombatMemory m in k.memories.reversed.take(10))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${m.age} yaşında — ${m.text}',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SatirCift extends StatelessWidget {
+  const _SatirCift({required this.sol, required this.sag});
+
+  final String sol;
+  final String sag;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            width: 116,
+            child: Text(
+              sol,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              sag,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

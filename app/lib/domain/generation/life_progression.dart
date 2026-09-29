@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/name_pool.dart';
 import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
+import '../combat/combat_career_engine.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
 import '../life/life_goals.dart';
@@ -37,6 +38,7 @@ import '../interaction/friendship_depth.dart';
 import '../law/legal_engine.dart';
 import '../life/mortality.dart';
 import '../models/game_settings.dart';
+import '../models/combat_career.dart';
 import '../models/game_state.dart';
 import '../interaction/bond_decay.dart';
 import '../interaction/finger.dart';
@@ -601,6 +603,30 @@ class LifeProgression {
 
     // Araç masrafı (D-079): yılda en fazla bir arıza.
     afterDeaths = _applyVehicleTrouble(afterDeaths, newAge);
+
+    // Spor kariyeri (Paket AL): form aşınır, sakatlık iyileşir, koç
+    // ücreti ödenir, uzun ara sıralamayı düşürür.
+    final ({GameState state, List<String> lines}) spor =
+        CombatCareerEngine.advanceYear(afterDeaths, newAge, _rng);
+    afterDeaths = spor.state;
+    for (final String satir in spor.lines) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
+    // Spor sponsorluğu: başarı, kademe, itibar ve kitle birlikte
+    // arandığı için her yıl çıkmaz (§15).
+    final ({GameState state, int fee, String? text}) sporSponsor =
+        CombatCareerEngine.offerSportSponsor(afterDeaths, _rng);
+    afterDeaths = sporSponsor.state;
+    if (sporSponsor.text != null) {
+      afterDeaths = _logLine(afterDeaths, newAge, sporSponsor.text!);
+    }
+    // Müsabaka fırsatı: her yıl çıkmaz (§43).
+    final ({GameState state, PendingBout? bout, String? text}) firsat =
+        CombatCareerEngine.offerBout(afterDeaths, _rng);
+    afterDeaths = firsat.state;
+    if (firsat.text != null) {
+      afterDeaths = _logLine(afterDeaths, newAge, firsat.text!);
+    }
 
     // Kredi taksitleri (D-080): ödenebilen düşer, ödenemeyen kaçar ve
     // borç faiziyle büyür. Cüzdan eksiye inmez.

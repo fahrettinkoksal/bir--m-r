@@ -7,6 +7,7 @@ import 'business.dart';
 import 'criminal_record.dart';
 import 'education.dart';
 import 'book_progress.dart';
+import 'combat_career.dart';
 import 'martial_progress.dart';
 import 'hobby_progress.dart';
 import 'lottery_ticket.dart';
@@ -87,6 +88,7 @@ class GameState {
     this.career = const CareerState.none(),
     this.books = const <BookProgress>[],
     this.martialArts = const <MartialProgress>[],
+    this.combatCareers = const <CombatCareer>[],
     this.hobbies = const <HobbyProgress>[],
     this.chronicConditions = const <ChronicCondition>[],
     this.goalsReachedAt = const <String, int>{},
@@ -407,6 +409,13 @@ class GameState {
 
   /// Paket 32: dövüş sanatlarındaki ilerleme (karate, kung fu, güreş).
   final List<MartialProgress> martialArts;
+
+  /// Dövüş sanatlarındaki **rekabet** kariyerleri (Paket AL).
+  ///
+  /// `martialArts` teknik ilerlemeyi tutar (kaç ders, hangi kuşak);
+  /// bu liste müsabakayı tutar (rakip, sıralama, sakatlık, ödül,
+  /// emeklilik). Eski kayıtlarda yoktur ve boş olarak yüklenir.
+  final List<CombatCareer> combatCareers;
 
   /// Paket 39: kalıcı hobi geçmişi (müzik, resim, okuma, spor).
   ///
@@ -1089,6 +1098,7 @@ class GameState {
     CareerState? career,
     List<BookProgress>? books,
     List<MartialProgress>? martialArts,
+    List<CombatCareer>? combatCareers,
     List<HobbyProgress>? hobbies,
     List<ChronicCondition>? chronicConditions,
     Map<String, int>? goalsReachedAt,
@@ -1195,6 +1205,7 @@ class GameState {
       career: career ?? this.career,
       books: books ?? this.books,
       martialArts: martialArts ?? this.martialArts,
+      combatCareers: combatCareers ?? this.combatCareers,
       hobbies: hobbies ?? this.hobbies,
       chronicConditions: chronicConditions ?? this.chronicConditions,
       goalsReachedAt: goalsReachedAt ?? this.goalsReachedAt,

@@ -17,6 +17,7 @@ import '../../data/education_tracks.dart';
 import '../../data/social_catalog.dart';
 import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
+import '../../domain/models/combat_career.dart';
 import '../../domain/models/martial_progress.dart';
 import '../../domain/models/hobby_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
@@ -106,6 +107,10 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // liste okunur, sürüm yükseltmesi gerekmez.
       'martialArts':
           state.martialArts.map(_encodeMartial).toList(growable: false),
+      // Rekabet kariyeri (Paket AL). Alan eklemeli: eski kayıtta yok,
+      // okuma tarafı boş liste ile yükler.
+      'combatCareers':
+          state.combatCareers.map(_encodeCombat).toList(growable: false),
       // Hobi geçmişi (Paket 39). Alan eklemeli.
       'hobbies': state.hobbies.map(_encodeHobby).toList(growable: false),
       // Kronik durumlar ve sağlık geçmişi (D-153). Alan eklemeli:
@@ -533,6 +538,63 @@ Map<String, Object?> _encodeMartial(MartialProgress m) => <String, Object?>{
       'lessons': m.lessons,
       'startedAtAge': m.startedAtAge,
       'topRankAtAge': m.topRankAtAge,
+    };
+
+Map<String, Object?> _encodeOpponent(CombatOpponent o) => <String, Object?>{
+      'id': o.id,
+      'name': o.name,
+      'age': o.age,
+      'rating': o.rating,
+      'wins': o.wins,
+      'losses': o.losses,
+      'metCount': o.metCount,
+      'playerWins': o.playerWins,
+      'playerLosses': o.playerLosses,
+    };
+
+Map<String, Object?> _encodeCombat(CombatCareer c) => <String, Object?>{
+      'artId': c.artId,
+      'startedCompetitiveAtAge': c.startedCompetitiveAtAge,
+      'status': c.status.name,
+      'tier': c.tier,
+      'amateurWins': c.amateurWins,
+      'amateurLosses': c.amateurLosses,
+      'proWins': c.proWins,
+      'proLosses': c.proLosses,
+      'championships': c.championships,
+      'isChampion': c.isChampion,
+      'ranking': c.ranking,
+      'lastBoutAge': c.lastBoutAge,
+      'form': c.form,
+      'reputation': c.reputation,
+      'careerEarnings': c.careerEarnings,
+      'sponsorEarnings': c.sponsorEarnings,
+      'injuryCount': c.injuryCount,
+      'seriousInjuryCount': c.seriousInjuryCount,
+      'injury': c.injury.name,
+      'injuryYearsLeft': c.injuryYearsLeft,
+      'retiredAtAge': c.retiredAtAge,
+      'retirementReason': c.retirementReason?.name,
+      'coachLevel': c.coachLevel,
+      'opponents': c.opponents.map(_encodeOpponent).toList(growable: false),
+      // Bekleyen müsabakanın TOHUMU da kayda girer (Paket AL, §44):
+      // aynı müsabakayı yükleyip tekrar oynamak aynı sonucu verir.
+      'pendingBout': c.pendingBout == null
+          ? null
+          : <String, Object?>{
+              'tier': c.pendingBout!.tier,
+              'opponent': _encodeOpponent(c.pendingBout!.opponent),
+              'purse': c.pendingBout!.purse,
+              'seed': c.pendingBout!.seed,
+              'offeredAtAge': c.pendingBout!.offeredAtAge,
+              'isTitle': c.pendingBout!.isTitle,
+            },
+      'memories': c.memories
+          .map((CombatMemory m) => <String, Object?>{
+                'age': m.age,
+                'text': m.text,
+              })
+          .toList(growable: false),
     };
 
 Map<String, Object?> _encodeTicket(LotteryTicket t) => <String, Object?>{
@@ -1331,6 +1393,12 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
           .toList(growable: false),
     ),
+    // Paket AL: eski kayıtta yok; boş liste ile yüklenir.
+    combatCareers: List<CombatCareer>.unmodifiable(
+      _optionalRawList(json, 'combatCareers')
+          .map((Object? e) => _decodeCombat(_asMap(e, 'combatCareers[]')))
+          .toList(growable: false),
+    ),
     lotteryTickets: List<LotteryTicket>.unmodifiable(
       _optionalRawList(json, 'lotteryTickets')
           .map((Object? e) => _decodeTicket(_asMap(e, 'lotteryTickets[]')))
@@ -1762,6 +1830,83 @@ MartialProgress _decodeMartial(Map<String, Object?> json) => MartialProgress(
       startedAtAge: _intOrNull(json, 'startedAtAge'),
       topRankAtAge: _intOrNull(json, 'topRankAtAge'),
     );
+
+CombatOpponent _decodeOpponent(Map<String, Object?> json) => CombatOpponent(
+      id: _string(json, 'id'),
+      name: _string(json, 'name'),
+      age: _int(json, 'age'),
+      rating: _int(json, 'rating'),
+      wins: _intOr(json, 'wins', 0),
+      losses: _intOr(json, 'losses', 0),
+      metCount: _intOr(json, 'metCount', 0),
+      playerWins: _intOr(json, 'playerWins', 0),
+      playerLosses: _intOr(json, 'playerLosses', 0),
+    );
+
+CombatCareer _decodeCombat(Map<String, Object?> json) {
+  final Object? bekleyen = json['pendingBout'];
+  return CombatCareer(
+    artId: _string(json, 'artId'),
+    startedCompetitiveAtAge: _int(json, 'startedCompetitiveAtAge'),
+    status: CompetitiveStatus.values.firstWhere(
+      (CompetitiveStatus s) => s.name == json['status'],
+      orElse: () => CompetitiveStatus.amator,
+    ),
+    tier: _intOr(json, 'tier', 0),
+    amateurWins: _intOr(json, 'amateurWins', 0),
+    amateurLosses: _intOr(json, 'amateurLosses', 0),
+    proWins: _intOr(json, 'proWins', 0),
+    proLosses: _intOr(json, 'proLosses', 0),
+    championships: _intOr(json, 'championships', 0),
+    isChampion: json['isChampion'] == true,
+    ranking: _intOr(json, 'ranking', 0),
+    lastBoutAge: _intOrNull(json, 'lastBoutAge'),
+    form: _intOr(json, 'form', 50),
+    reputation: _intOr(json, 'reputation', 0),
+    careerEarnings: _intOr(json, 'careerEarnings', 0),
+    sponsorEarnings: _intOr(json, 'sponsorEarnings', 0),
+    injuryCount: _intOr(json, 'injuryCount', 0),
+    seriousInjuryCount: _intOr(json, 'seriousInjuryCount', 0),
+    injury: InjurySeverity.values.firstWhere(
+      (InjurySeverity s) => s.name == json['injury'],
+      orElse: () => InjurySeverity.yok,
+    ),
+    injuryYearsLeft: _intOr(json, 'injuryYearsLeft', 0),
+    retiredAtAge: _intOrNull(json, 'retiredAtAge'),
+    retirementReason: json['retirementReason'] == null
+        ? null
+        : RetirementReason.values.firstWhere(
+            (RetirementReason r) => r.name == json['retirementReason'],
+            orElse: () => RetirementReason.kendiKarari,
+          ),
+    coachLevel: _intOr(json, 'coachLevel', 0),
+    opponents: List<CombatOpponent>.unmodifiable(
+      _optionalRawList(json, 'opponents')
+          .map((Object? e) => _decodeOpponent(_asMap(e, 'opponents[]')))
+          .toList(growable: false),
+    ),
+    pendingBout: bekleyen == null
+        ? null
+        : () {
+            final Map<String, Object?> b = _asMap(bekleyen, 'pendingBout');
+            return PendingBout(
+              tier: _intOr(b, 'tier', 0),
+              opponent:
+                  _decodeOpponent(_asMap(b['opponent'], 'pendingBout.opponent')),
+              purse: _intOr(b, 'purse', 0),
+              seed: _intOr(b, 'seed', 0),
+              offeredAtAge: _intOr(b, 'offeredAtAge', 0),
+              isTitle: b['isTitle'] == true,
+            );
+          }(),
+    memories: List<CombatMemory>.unmodifiable(
+      _optionalRawList(json, 'memories').map((Object? e) {
+        final Map<String, Object?> m = _asMap(e, 'memories[]');
+        return CombatMemory(age: _int(m, 'age'), text: _string(m, 'text'));
+      }).toList(growable: false),
+    ),
+  );
+}
 
 LotteryTicket _decodeTicket(Map<String, Object?> json) => LotteryTicket(
       drawId: _string(json, 'drawId'),

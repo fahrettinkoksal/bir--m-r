@@ -3021,6 +3021,141 @@ Tek yeni alan: `CareerState.synergyHeadStart` (int). Eski kayıtlar
 
 **Karar bekleyen:** Q-181. **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AL — PROFESYONEL DÖVÜŞ / SPOR KARİYERİ V1
+
+Altı dövüş sanatı "ders al → basamak yüksel → eğitmenlik" olmaktan
+çıkıp gerçek bir yaşam yoluna dönüştü: çocuk yaşta kulüp, amatör
+müsabaka, bölge, ulusal, profesyonel/elit, sponsor, sakatlık, düşüş,
+şampiyonluk, emeklilik, eğitmenlik.
+
+**Ana tasarım kuralı.** "En iyi antrenmanı yaptım, o zaman kesin
+kazanmalıyım" değil: *"Doğru kararlarla şansımı yükselttim, ama
+karşımda başka bir insan var."*
+
+### Ne eklendi, ne bozulmadı
+
+`MartialProgress` **dokunulmadı**: teknik ilerleme (ders, kuşak) aynı
+motorda duruyor. Rekabet ayrı bir modelde: `CombatCareer`. İkinci bir
+ders sistemi kurulmadı (§5), yeni bir stamina motoru yok (§36).
+Eğitmenlik mesleklerinin `instructorFromLevel` şartı **aynen** duruyor
+(§30, testle korunuyor).
+
+### Altı sanatın kendi yolu (§1, §23)
+
+| Sanat | Kademeler | Şampiyonluk |
+|---|---|---|
+| Boks | Amatör maçlar → Bölgesel → Ulusal amatör → Profesyonel ring | Kemer maçı |
+| Yağlı güreş | Yerel güreş → Boy müsabakaları → Bölgesel organizasyon → Büyük organizasyon | Başpehlivanlık |
+| Judo | Kulüp → Bölge → Ulusal → Elit turnuva | Uluslararası şampiyonluk |
+| Karate | Kulüp → Bölge → Ulusal → Elit kumite turnuvası | Ulusal şampiyonluk |
+| Taekwondo | Kulüp → Bölge → Ulusal → Elit turnuva | Ulusal şampiyonluk |
+| Kung fu | Okul içi → Açık turnuva → Bölgesel → Ulusal yarışma | Ulusal şampiyonluk |
+
+Organizasyonlar **kurgusal**; hiçbir federasyon, lig ya da şirket
+verisine bağlı değil. Ödüller net yıllık asgari ücretin katı olarak
+yazıldı (§14): çıpa kayarsa ödüller birlikte kayar, gerçek güncel fiyat
+hardcode edilmedi. Amatör kademe **para kazandırmıyor**.
+
+### Maç motoru (§7, §37)
+
+Sonuç ne yalnızca zar ne yalnızca stat karşılaştırması. Güç hesabı:
+teknik %42, form %24, sağlık %16, deneyim %10, itibar %8 — hepsi yaş
+eğrisi, hazırlık ve sakatlık geçmişiyle ölçekleniyor. Kazanma ihtimali
+**hiçbir zaman 0 ya da 1 değil**: band %10-%85.
+
+Ölçüldü: 300 maçta favori **87** kez kaybetti, underdog **30** kez
+kazandı. Judoda aynı sporcu için hazırlık farkı: dinlenerek %39,
+dengeli %44, yoğun kamp %53.
+
+### Form, kamp, antrenör
+
+Form 0-100; her yıl aşınır, çalışmak ve müsabaka telafi eder. Kamp üç
+seçenek (§10): dengeli / yoğun / dinlen — yoğun kamp hazırlığı artırır
+ama parayı, sağlığı ve sakatlık riskini de artırır. Antrenör üç kalite
+(kulüp hocası / deneyimli koç / elit koç); elit koç ancak üst kademede
+kabul ediyor ve **garanti galibiyet yok**.
+
+### Sakatlık (§18-§20)
+
+Ölçüldü: 400 maçta yoğun kampla **59**, dinlenerek **9** sakatlık.
+Sakatlık kariyer kademesini ya da şampiyonlukları **silmiyor**; formu
+düşürüyor, müsabakayı geçici kapatıyor, cepten masraf çıkarıyor.
+"Riski göze al" gerçekten riskli: 200 kararda **98** kez durum
+ağırlaştı.
+
+### Yaş (§21)
+
+Zirve 27; sonrası yavaş düşüş, sanatın yıpratıcılığına göre biraz
+farklı. Sert kesim yok. Ölçülen boks gücü: 20y **60,4** · 27y **65,0** ·
+33y **57,2** · 38y **50,7** · 45y **41,6**.
+
+### Save/load (§44)
+
+Müsabaka fırsatı üretildiği anda **sonucun tohumu kayda yazılıyor**.
+Ölçüldü: aynı müsabakayı kaydedip yükleyip tekrar oynamak aynı sonucu,
+aynı ödülü ve aynı sakatlığı veriyor. Bu çözüm yalnızca spor
+kariyerine uygulandı; oyunun genel rastgelelik mimarisine
+dokunulmadı.
+
+### 600 sporcu ölçümü (§49)
+
+6 sanat × 100 hedefli sporcu. **Kohort sıradan bir hayat değil**: bot
+her yıl çalışıyor, her fırsatı değerlendiriyor, yalnızca oyun zorlayınca
+bırakıyor.
+
+| Sanat | Elit/pro | Şampiyon | Erken bırakan | Ciddi sakatlanan | Medyan gelir |
+|---|---|---|---|---|---|
+| Boks | 63 | 5 | 3 | 33 | 1.573.324 ₺ |
+| Yağlı güreş | 88 | 25 | 1 | 32 | 5.441.778 ₺ |
+| Judo | 75 | 10 | 6 | 29 | 2.491.377 ₺ |
+| Karate | 80 | 18 | 0 | 29 | 3.682.320 ₺ |
+| Taekwondo | 78 | 27 | 0 | 32 | 2.971.461 ₺ |
+| Kung fu | 81 | 24 | 2 | 40 | 3.392.585 ₺ |
+
+Toplam: rekabete başlayan **%100**, elit/pro **%77,5**, şampiyon
+**%18,2**. Gelir: en kötü %10 **134.760 ₺**, medyan **3.048.104 ₺**, en
+iyi %10 **9.099.675 ₺**, en iyi **17.435.417 ₺** (asgari ücret çıpası
+336.900 ₺). Absürt sonuç, negatif rekor ya da uçuk gelir yok.
+
+### Ölçümün bulduğu iki gerçek sorun (düzeltildi)
+
+1. **Şampiyonluk pratikte kapalıydı.** İlk yazımda sıralamaya 12.
+   sıradan girilip her galibiyette bir basamak çıkılıyordu; 600
+   sporcuda **tek** şampiyon çıktı. Merdiven düzeltildi: 10. sıradan
+   giriş, alt sıralarda iki basamak.
+2. **Zirvedeki sporcunun formu çöküyordu.** En üst teknik basamağa
+   çıkan sporcuya ders motoru artık ders vermiyor ("öğrenecek ders
+   kalmadı"), dolayısıyla form telafisi sıfırlanıyor ve sporcu otuzlu
+   yaşların başında emekliliğe itiliyordu. Artık müsabakalar ve
+   zirvedeki kondisyon da forma katkı veriyor.
+
+### Abuse (§42)
+
+Aynı yıl 40 denemede yapılabilen müsabaka **3** (tavan 4). Aynı
+müsabakanın ödülü iki kez alınamıyor. Sakatken müsabaka yapılamıyor.
+Emekli olup aynı dalda yeniden başlanamıyor. Sıralaması olmayan
+şampiyonluk maçına çağrılmıyor (200 denemede 0). İki dalda birden
+rekabet edilemiyor.
+
+### Kayıt
+
+Tek yeni alan: `GameState.combatCareers`. Eski kayıtlarda yok, boş
+liste ile yükleniyor; test bunu doğruluyor.
+
+### Arayüz (§26, §27)
+
+Mevcut dövüş sanatı ekranı çöpe atılmadı, derinleştirildi: üstte
+kariyer paneli (kademe, form, rekor, sıralama, kariyer geliri,
+antrenör, sakatlık, sıradaki müsabaka ve rakip), altında eski ders
+kartları. Kararlar: üç kamp seçeneği, koç tut, riski göze al, spordan
+çekil, kariyeri gör (son 10 önemli an). Sıradan antrenman geçmişe
+yazılmıyor.
+
+25 test: `app/test/paket_al_combat_career_test.dart` (24) +
+`app/test/paket_al_600_athletes_test.dart` (1, 600 kariyer).
+
+**Karar bekleyen:** Q-182. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
