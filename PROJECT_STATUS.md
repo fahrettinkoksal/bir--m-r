@@ -2759,8 +2759,17 @@ oyunun gerekçesi hep "Askerlik meselen kapandı").
    aktivitenin hiçbiri ücretli kurs değil; oyunun gerekçesi hep
    "cüzdanında yeterli para yok". Hiç yatırım/alışveriş yapmayan kontrol
    grubu da tek bir kursa giremedi. 12 hobinin 10'u ve onlara bağlı
-   içerik bu kapının arkasında — AH'deki "Yazar mesleği erişilemiyor"
-   bulgusunun asıl sebebi de bu.
+   içerik bu kapının arkasında.
+
+   > **DÜZELTME (Paket AJ ölçümü).** Burada ayrıca "AH'deki *Yazar
+   > mesleği erişilemiyor* bulgusunun asıl sebebi de bu" yazmıştım.
+   > **Yanlış.** `okuma` hobisinin `activityIds` listesi boş: onu
+   > besleyen hiçbir kurs yok, yalnızca kütüphanede **bitirilen** kitap
+   > ilerletiyor ve kitap okumak ücretsiz. Yazar'ın koşulu 7 bitirilmiş
+   > kitap + 20 yaş + 55 zekâ; kurs ücreti hiç girmiyor. Paket AJ'nin
+   > kurs düzeltmesi Yazar'ı açmıyor. Test:
+   > `paket_aj_course_test.dart` → "Yazar mesleği kursla değil, bedava
+   > okumayla açılıyor".
 3. **Sorgu/aksiyon uyuşmazlığı.** Lise sonrası `availableTracks()` 7
    lise alanı döndürüyor ama `chooseTrack` "Şu an lise alanı
    seçemezsin." diyor. Menü, aksiyonun kabul etmediği seçenekleri
@@ -2855,9 +2864,18 @@ zaten işe giriş koşulu; burada aynı koşul oyuncunun görebileceği hale
 çevriliyor. İkinci bir eşleme tablosu tutulmadı, **yeni kilit
 eklenmedi**. Meslek bağı olmayan hobide satır hiç görünmüyor.
 
-Ölçüldü: okuma → **Yazar** (Düzenli basamağı, 7 ders), müzik →
-**Müzisyen** (10 ders). Test dersleri gerçekten kursa girerek topluyor
-ve iş kataloğunun `minHobbyStage` koşulunun da sağlandığını doğruluyor.
+Ölçüldü: okuma → **Yazar** (Düzenli basamağı, 7 birim), müzik →
+**Müzisyen** (10 ders). Müzik testi dersleri gerçekten kursa girerek
+topluyor ve iş kataloğunun `minHobbyStage` koşulunun da sağlandığını
+doğruluyor.
+
+**Yazar mesleği kursla açılmıyor.** `okuma` hobisinin `activityIds`
+listesi boş; onu besleyen kurs yok, yalnızca kütüphanede bitirilen
+kitap ilerletiyor ve o ücretsiz. Yazar'ın koşulu **7 bitirilmiş kitap +
+20 yaş + 55 zekâ**. Kitaplar 5-24 sayfa ve her sayfa bir eylem, yani 7
+kitap kabaca 50-100 okuma eylemi demek — AH'de Yazar'ın 3000 hayatta
+hiç görülmemesinin sebebi kurs ücreti değil, bu. Paket AJ bunu
+değiştirmedi; denge sorusu olarak Q-180 #5'te duruyor.
 12 hobinin yalnızca 2'si bir mesleğe çıkıyor; kalan 10'u için bağ
 kurmak tasarım kararı — Q-180 #4.
 

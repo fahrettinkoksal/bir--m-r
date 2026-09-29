@@ -19,6 +19,7 @@ import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/data/event_pool_course.dart';
 import 'package:bir_omur/data/hobby_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/domain/career/job_market.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/hobby/course_progress.dart';
@@ -701,6 +702,50 @@ void main() {
       print('');
       print('-- müzisyen yolu ${ilk.lessonsNeeded} derste açıldı '
           '(basamak ${HobbyKind.muzik.stageFor(ilerleme.experience)}) --');
+    });
+
+    // Paket AI'da "Yazar mesleginin erisilememesinin asil sebebi
+    // ucretli kurslar" diye yazmistim. YANLIS. Bu test onu kodla
+    // dogruluyor: okuma hobisi HICBIR kursla beslenmiyor
+    // (activityIds bos), yalnizca kutuphanede BITIRILEN kitapla
+    // ilerliyor ve kitap okumak ucretsiz. Yani Paket AJ'nin kurs
+    // duzeltmesi Yazar'i acmiyor; onu kapatan sey baska.
+    test('Yazar mesleği kursla değil, bedava okumayla açılıyor', () {
+      expect(HobbyKind.okuma.activityIds, isEmpty,
+          reason: 'Okuma hobisini besleyen bir kurs yok.');
+
+      final JobType yazar =
+          kJobCatalog.firstWhere((JobType m) => m.id == 'yazar');
+      final int gereken =
+          HobbyKind.okuma.stages[yazar.minHobbyStage].experience;
+
+      const JobMarket pazar = JobMarket();
+      GameState s = _hayat(age: yazar.minAge, wallet: 0);
+      s = s.copyWith(
+        player: s.player.copyWith(
+          stats: s.player.stats.copyWith(
+            intelligence: yazar.minIntelligence,
+          ),
+        ),
+      );
+
+      // Once kapali ve gerekce hobi basamagi.
+      expect(pazar.meetsRequirements(s, yazar), isFalse);
+      expect(pazar.requirementReason(s, yazar), contains('basamağına'));
+
+      // Kitap bitirerek ac: para harcanmiyor.
+      GameState okumus = s;
+      for (int i = 0; i < gereken; i++) {
+        okumus = HobbyTracker.credit(okumus, HobbyKind.okuma);
+      }
+      expect(okumus.player.wallet, s.player.wallet,
+          reason: 'Okuma yolu ücretsiz olmalı.');
+      expect(pazar.meetsRequirements(okumus, yazar), isTrue,
+          reason: '$gereken bitirilmiş kitap Yazar mesleğini açmalıydı.');
+
+      print('');
+      print('-- Yazar: $gereken bitirilmiş kitap + ${yazar.minAge} yaş '
+          '+ ${yazar.minIntelligence} zekâ · kurs ücreti YOK --');
     });
 
     test('yolu olmayan hobide uydurma vaat yok', () {

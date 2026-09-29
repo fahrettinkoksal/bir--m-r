@@ -4932,7 +4932,9 @@ Bunun bot davranışı olmadığını ayırt etmek için kontrol grubu kuruldu: 
 | Dil kursu | ₺14.000 |
 | Bilgisayar kursu | ₺16.000 |
 
-Sonuç: **12 hobinin 10'u** ve onlara bağlı olay/meslek içeriği bu kapının arkasında. İlerleyen tek iki hobi `spor` ve `okuma` — ikisi de bedava yollarla besleniyor (koşu/esneme ve kütüphanede kitap bitirme). AH'de "Yazar mesleği 3000 hayatta hiç görülmedi" bulgusunun asıl sebebi de bu: yazarlık okuma hobisinin 2. aşamasını istiyor.
+Sonuç: **12 hobinin 10'u** ve onlara bağlı olay/meslek içeriği bu kapının arkasında. İlerleyen tek iki hobi `spor` ve `okuma` — ikisi de bedava yollarla besleniyor (koşu/esneme ve kütüphanede kitap bitirme).
+
+> **DÜZELTME (Paket AJ ölçümü).** Burada ayrıca "AH'deki *Yazar mesleği hiç görülmedi* bulgusunun asıl sebebi de bu" yazmıştım. **Yanlış.** `okuma` hobisini besleyen hiçbir kurs yok (`activityIds` boş); yalnızca bitirilen kitap ilerletiyor ve o ücretsiz. Yazar kurs ücretine hiç takılmıyor. Gerçek sebep Q-180 #5'te.
 
 Soru: ücretler mi yüksek, yoksa oyuncunun cüzdanı yıl içinde mi boş kalıyor (maaş yaş alırken geliyor, yaşam gideri hemen alıyor)? Seçenekler: (A) kurs ücretleri düşsün; (B) cüzdan akışı değişsin — maaşın bir kısmı yıl içinde erişilebilir olsun; (C) hobiler ücretsiz bir ilerleme yolu da kazansın; (D) olduğu gibi kalsın, kurslar bilinçli olarak "parası olanın" işi olsun.
 
@@ -4984,5 +4986,13 @@ Aynı yıl 100 paylaşım denemesinin 24'ü uygulandı (dört platform açıkken
 §13 uyarınca kart artık kursun nereye götürdüğünü gösteriyor, ama meslek kataloğunda `hobbyId` taşıyan yalnızca iki iş var: **Yazar** (okuma, Düzenli basamağı, 7 ders) ve **Müzisyen** (müzik, 10 ders). Kalan on hobinin (resim, dil, yazılım, mutfak, fotoğraf, dans, satranç, yazmak, bahçe, spor) bir meslek karşılığı yok; kartta da hiçbir şey yazılmıyor — uydurma vaat verilmedi.
 
 Bu bir eksiklik mi, yoksa hobinin mesleğe çıkmaması normal mi? Seçenekler: (A) olduğu gibi kalsın, hobi kendi başına değerli olsun; (B) mevcut mesleklere hobi koşulu eklensin (aşçı ↔ mutfak, fotoğrafçı ↔ fotoğraf, yazılımcı ↔ yazılım gibi) — **dikkat: bu mesleklere yeni kilit koymak demektir, mevcut dengeyi değiştirir**; (C) hobi koşulu kilit değil avantaj olsun (aynı işe girerken daha yüksek başlangıç basamağı). Öneri (yalnızca öneri): **(C)**, çünkü (B) bugün erişilebilen meslekleri kapatır ve AH/AI ölçümlerini geçersiz kılar. Hangi hobinin hangi mesleğe bağlanacağı tasarım kararıdır; Claude kendiliğinden bağlamadı.
+
+#### 5 — Yazar mesleği: kurs değil, 7 bitirilmiş kitap
+
+Paket AI'da bu bulgunun sebebini kurs ücretlerine bağlamıştım; ölçüm bunu çürüttü ve düzeltme ilgili yerlere işlendi. `okuma` hobisini besleyen **hiçbir kurs yok** (`activityIds` boş); yalnızca kütüphanede **bitirilen** kitap ilerletiyor ve kitap okumak ücretsiz.
+
+Yazar'ın gerçek koşulu: **7 bitirilmiş kitap + 20 yaş + 55 zekâ**. Kitaplar 5-24 sayfa ve her sayfa ayrı bir okuma eylemi, yani 7 kitap kabaca **50-100 okuma eylemi** demek. AH'de Yazar'ın 3000 hayatta hiç görülmemesinin sebebi bu tempo.
+
+Bu bir ürün sorusu: (A) olduğu gibi kalsın — Yazar gerçekten yıllarca okumuş birinin işi olsun; (B) kitap sayfaları azalsın ya da "oturup okudum" tek eylemde bir kitap bitirsin; (C) Yazar'ın istediği basamak düşsün (Düzenli yerine Meraklı = 3 kitap); (D) `yazarlik_atolyesi` kursu da okuma hobisini beslesin (şu an `yazmak` hobisini besliyor). Öneri (yalnızca öneri): **(B)**, çünkü sorun eşiğin yüksekliği değil, bir kitabı bitirmenin kaç tıklama sürdüğü; (C) mesleği ucuzlatır, (D) iki hobiyi birbirine karıştırır. Karar senin. Hiçbir sayı değiştirilmedi.
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
