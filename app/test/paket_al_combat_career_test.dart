@@ -396,17 +396,48 @@ void main() {
       expect(ikinci.purse, 0);
     });
 
-    test('sakatken müsabaka yapılamıyor', () {
-      GameState s = _sporcu(artId: 'boks', level: 6, age: 27);
-      s = _rekabete(s, 'boks');
-      s = s.copyWith(combatCareers: <CombatCareer>[
-        for (final CombatCareer c in s.combatCareers)
+    // TEST HATASI DÜZELTİLDİ (Paket AL/VERIFY §0).
+    //
+    // Önceki hâlinde yorum "fırsat da çıkmıyor" diyor ama iddia
+    // `isNotNull` idi — ve o iddia **her zaman** geçiyordu: testin
+    // kendisi bir satır önce `_musabakaKur` ile bekleyen müsabaka
+    // kuruyor, `offerBout` da bekleyen müsabaka varsa onu geri
+    // veriyor. Yani sakatlık kapısı hiç sınanmamıştı.
+    //
+    // Ürünün gerçek kuralı iki kapılı ve ikisi de motorda var:
+    //   1. Sakat sporcuya YENİ fırsat üretilmiyor.
+    //   2. Elinde bekleyen müsabaka olsa bile dövüşemiyor.
+    // İkisi birlikte "sakatken fight spam" yolunu kapatıyor.
+    test('sakatken ne yeni fırsat çıkıyor ne de dövüşülebiliyor', () {
+      GameState temel = _sporcu(artId: 'boks', level: 6, age: 27);
+      temel = _rekabete(temel, 'boks');
+      final GameState sakat = temel.copyWith(combatCareers: <CombatCareer>[
+        for (final CombatCareer c in temel.combatCareers)
           c.copyWith(injury: InjurySeverity.ciddi, injuryYearsLeft: 3),
       ]);
-      s = _musabakaKur(s);
-      expect(CombatCareerEngine.fight(s, CampChoice.dengeli).applied, isFalse);
-      // Fırsat da çıkmıyor.
-      expect(CombatCareerEngine.offerBout(s, Random(3)).bout, isNotNull);
+
+      // 1) Bekleyen müsabaka YOKKEN yeni fırsat üretilmiyor.
+      expect(CombatCareerEngine.activeCareer(sakat)!.pendingBout, isNull);
+      for (int i = 0; i < 50; i++) {
+        expect(CombatCareerEngine.offerBout(sakat, Random(i)).bout, isNull,
+            reason: 'Sakat sporcuya yeni müsabaka fırsatı çıkmamalı.');
+      }
+      // Sağlam sporcuya ise çıkabiliyor: kapı sakatlıktan kapanıyor,
+      // her koşulda kapalı değil.
+      bool saglamaCikti = false;
+      for (int i = 0; i < 50; i++) {
+        if (CombatCareerEngine.offerBout(temel, Random(i)).bout != null) {
+          saglamaCikti = true;
+          break;
+        }
+      }
+      expect(saglamaCikti, isTrue,
+          reason: 'Sağlam sporcuya hiç fırsat çıkmıyorsa test anlamsız.');
+
+      // 2) Elde bekleyen müsabaka olsa bile dövüşülemiyor.
+      final GameState bekleyenli = _musabakaKur(sakat);
+      expect(CombatCareerEngine.fight(bekleyenli, CampChoice.dengeli).applied,
+          isFalse);
     });
 
     test('emekli olup dönerek ödül sıfırlanamıyor', () {
@@ -521,16 +552,31 @@ void main() {
   // §30 — eğitmenliğe geçiş
   // =================================================================
   group('Paket AL — eğitmenliğe geçiş (§30)', () {
+    // TEST HATASI DÜZELTİLDİ (Paket AL/VERIFY §25).
+    //
+    // Önceki hâlinde iki kusur vardı:
+    //   1. `dusuk` iki kez atanıyordu; ilk atama (level 2) ölü koddu ve
+    //      yorumla çelişiyordu.
+    //   2. `requirementReason(...).contains('basamak')` iddiası **asla
+    //      doğru olamazdı**: motorun ürettiği metin "basamağına gelmen
+    //      gerekiyor" — Türkçe yumuşamayla 'basamağına', 'basamak'
+    //      alt dizesini içermiyor (ğ ≠ k). Yani iddia her zaman
+    //      geçiyordu ve hiçbir şeyi sınamıyordu.
+    //
+    // Şimdi iki yönlü ve gerçek dizeyle sınanıyor: basamağı tutmayanda
+    // engel gerekçesi eğitmenlik basamağını SÖYLÜYOR, tutanda o gerekçe
+    // KALKIYOR.
     test('instructorFromLevel şartı bozulmadı', () {
       const JobMarket pazar = JobMarket();
       for (final MartialArt a in MartialArt.values) {
+        final int altBasamak = combatCircuitFor(a.id)!.minLevelFor(0);
+        expect(altBasamak, lessThan(a.instructorFromLevel),
+            reason: '${a.label}: test kurgusu anlamsız — rekabete giriş '
+                'basamağı zaten eğitmenlik basamağına eşit.');
+
         // Emekli ama teknik basamağı düşük: eğitmenlik yine kapalı.
-        GameState dusuk = _sporcu(artId: a.id, level: 2, age: 40);
-        dusuk = _rekabete(
-          _sporcu(artId: a.id, level: combatCircuitFor(a.id)!.minLevelFor(0),
-              age: 40),
-          a.id,
-        );
+        GameState dusuk = _sporcu(artId: a.id, level: altBasamak, age: 40);
+        dusuk = _rekabete(dusuk, a.id);
         dusuk = CombatCareerEngine.retire(dusuk, RetirementReason.yas).state;
         expect(CombatCareerEngine.instructorHint(dusuk), isNull,
             reason: '${a.label}: basamak tutmadan eğitmenlik önerilmemeli.');
@@ -543,12 +589,17 @@ void main() {
         expect(CombatCareerEngine.instructorHint(yuksek), isNotNull,
             reason: '${a.label}: emekli usta eğitmenliğe geçebilmeli.');
 
-        // Ve iş kataloğu koşulu da gerçekten sağlanıyor.
-        final job = jobById(a.instructorJobId);
-        if (job != null) {
-          expect(pazar.requirementReason(yuksek, job).contains('basamak'),
-              isFalse);
-        }
+        // İş kataloğu koşulu da gerçekten değişiyor: gerekçe basamağı
+        // düşük olanda o basamağı söylüyor, yüksek olanda söylemiyor.
+        final JobType? job = jobById(a.instructorJobId);
+        expect(job, isNotNull, reason: '${a.instructorJobId} kataloğda yok.');
+        final String gerekceDusuk = pazar.requirementReason(dusuk, job!);
+        final String gerekceYuksek = pazar.requirementReason(yuksek, job);
+        expect(gerekceDusuk, contains(a.instructorRankName),
+            reason: '${a.label}: düşük basamakta eğitmenlik engeli '
+                'gerekçesi görünmüyor.');
+        expect(gerekceYuksek, isNot(contains(a.instructorRankName)),
+            reason: '${a.label}: basamak tuttuğu hâlde engel duruyor.');
       }
     });
   });

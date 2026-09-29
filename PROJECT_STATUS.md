@@ -3156,6 +3156,119 @@ yazılmıyor.
 
 **Karar bekleyen:** Q-182. **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AL/VERIFY — BAĞIMSIZ DOĞRULAMA
+
+Yeni özellik eklenmedi, denge değiştirilmedi, 3000 hayat testi
+yapılmadı. Tek soru: **Paket AL brief'te söylediğimiz gibi mi
+çalışıyor, testlerinde hata var mı, eksik uygulanmış madde var mı?**
+
+### Bulunan iki TEST hatası (düzeltildi)
+
+1. **"sakatken müsabaka yapılamıyor" testi hiçbir şeyi sınamıyordu.**
+   Yorum "fırsat da çıkmıyor" diyordu ama iddia `isNotNull` idi — ve o
+   iddia **her zaman** geçiyordu, çünkü testin kendisi bir satır önce
+   bekleyen müsabakayı kuruyor, `offerBout` da bekleyen müsabaka varsa
+   onu geri veriyor. Sakatlık kapısı hiç sınanmamış.
+   Ürünün gerçek kuralı iki kapılı ve ikisi de motorda **var**: sakat
+   sporcuya yeni fırsat üretilmiyor, elinde bekleyen müsabaka olsa bile
+   dövüşemiyor. Test artık ikisini de ayrı ayrı sınıyor (50 tohumda 0
+   fırsat; sağlam sporcuda fırsat çıkıyor — yani kapı sakatlıktan
+   kapanıyor, her koşulda kapalı değil).
+
+2. **`requirementReason(...).contains('basamak')` iddiası asla doğru
+   olamazdı.** Motorun ürettiği metin "basamağına gelmen gerekiyor";
+   Türkçe yumuşamayla `'basamağına'`, `'basamak'` alt dizesini
+   içermiyor (ğ ≠ k). Yani eğitmenlik testinin son iddiası her zaman
+   geçiyordu. Ayrıca `dusuk` değişkeni iki kez atanıyordu; ilk atama
+   ölü koddu ve yorumla çelişiyordu. İkisi de düzeltildi; iddia artık
+   iki yönlü ve gerçek dizeyle: basamağı tutmayanda engel gerekçesi
+   eğitmenlik basamağını **söylüyor**, tutanda **kalkıyor**.
+
+### PROD BUG bulunmadı
+
+27 yeni doğrulama testi ürünün gerçek kapılarından geçti; çökme, state
+bozulması, çift ödeme ya da save/load hatası çıkmadı.
+
+### Doğrulanan davranışlar
+
+| Konu | Ölçüm |
+|---|---|
+| 6/6 sanat tam yol | başla → kazan → kaybet → kademe 3 → pro → emekli, hepsi ürün API'siyle |
+| Maç motoru bileşenleri | teknik, form, sağlık, deneyim, hazırlık, yaş, sakatlık geçmişi — **yedisi de** ihtimali değiştiriyor |
+| Bant uç durumda | en zayıf %10 · en güçlü %85 (0 ve 1 yok) |
+| Save/load | 6/6 sanatta sonuç, ödül, sakatlık, sıralama ve şampiyonluk birebir aynı |
+| Hazırlık kararı canlı | 200 müsabakanın **18'inde** kamp tercihi sonucu değiştirdi |
+| Çift ödeme | unvan maçı tek ödeme; ikinci çağrı ve kaydet/yükle sonrası 0 ₺ |
+| Şampiyonluk | 6/6 sanatta ürün kapılarından ulaşılabilir, geçmişe yazılıyor |
+| Şampiyon sonrası | unvan kaybı → tekrar şampiyonluk zinciri çalışıyor; kariyer bitmiyor |
+| Sıralama | galibiyet 10 → mağlubiyet 12 → 5 yıl ara 20; band 0-20, negatif yok |
+| Sakatlık | 600 maçta yok 471 · hafif 85 · orta 36 · ciddi 8 — üç seviye de çıkıyor |
+| "Riski göze al" | 200 kararda ağırlaşan 98 · kurtulan 102 (cosmetic değil) |
+| Antrenör | elit koç 94.332 ₺/yıl, yılda **bir kez** kesiliyor; kazanma %37 → %44; garanti değil |
+| Ün kademeleri | yerel 0 · ulusal 3 · elit 6 · şampiyonluk 18; spor tavanı 70 |
+| Sponsor | kademe 1'de 0 · itibar 20'de 0 · kademe 2 itibar 50'de 57 · +ün 172 · +şampiyonluk 174 (300 denemede) |
+| Yaş | 20y 60,4 · 27y 65,0 · 33y 57,8 · 35y 55,4 · 45y 43,5 · 55y 31,5 — duvar yok, 50+ dominans yok |
+| Emeklilik | üç sebep de çalışıyor, emekli geri dönemiyor, bekleyen müsabaka temizleniyor |
+| Boş durum | kariyeri olmayan ve bozuk `artId` taşıyan oyuncuda hiçbir okuma çökmüyor |
+
+### Brief'te yazılı olup UYGULANMAMIŞ maddeler
+
+Bunlar bu turda **eklenmedi** (verify turu); raporlandı ve Q-183'e
+yazıldı.
+
+| Madde | Durum |
+|---|---|
+| **§4 / §16** 18 yaş altı sporcuya aile desteği (ekipman, yol, kulüp, turnuva) | **YOK.** Paket AJ'nin `CourseSupport` sistemi combat tarafında hiç çağrılmıyor. Genç sporcunun kamp/koç masrafı yalnızca kendi cüzdanından çıkıyor. |
+| **§35 / §17** Okul + spor çatışması ("Turnuva sınav haftasına denk geldi") | **YOK.** Böyle bir olay ya da karar noktası kodda yok. |
+| **§16 / §14** Spor başarısının sosyal medya içerik performansına etkisi | **DOLAYLI.** Şampiyon ile aynı takipçili sıradan oyuncu, paylaşım başına **aynı** sonucu alıyor. Spor yalnızca Ün'ü yükseltiyor; Ün de medya işlerini (`kMediaSectionMinFame`, `job.minFame`) ve ünlü iş birliklerini (`minFame 25`) açıyor. Yani etkisi var ama paylaşım performansında değil. |
+| **§9** Rivalry'nin ün/ilgi üzerindeki "küçük etkisi" | **YOK.** Rakip kaydı, tekrar karşılaşma ve karşılıklı skor **gerçek state** (ölçüldü: kendi kademesinde 200 fırsatta 49 kez geri geldi), ama rivalry ne üne ne ödüle ne de fırsat sıklığına dokunuyor. |
+| **§36 / §18** İş + spor çatışması | **YALNIZCA PARA/SAĞLIK.** Ölçüldü: çalışan ve çalışmayan sporcunun kazanma ihtimali (%40 vs %40), maç sonucu ve 200 denemedeki fırsat sayısı (133 vs 133) **birebir aynı**. İş durumu spor motoruna hiç girmiyor. |
+
+### Belgelenen sınır (hata değil)
+
+Tanıdık rakip yalnızca gücü oyuncunun **bugünkü** kademesine yakınken
+geri gelebiliyor. Oyuncu üst kademeye çıkınca alt kademedeki eski
+rakipler bandın dışında kalıyor: ölçüldü, kendi kademesinde 200
+fırsatta **49**, üst kademeye çıkınca **0**. Kayıt kaybolmuyor, çökme
+yok; ama brief'in "aynı rakiple rövanş, final, kemer maçı" fikri
+kademeler arası taşınmıyor.
+
+### §22 — boks (%5) ve taekwondo (%27) farkı BUG mu?
+
+**Hayır, katsayıların bileşik sonucu.** Maç başına fark küçük:
+
+| Sanat | Kademe-3 rakip | Unvan rakibi | Sakatlık | Yıpranma | Denk şans | Unvan şansı |
+|---|---|---|---|---|---|---|
+| Boks | 76 | 92 | 0,22 | 1,15 | %62 | %40 |
+| Yağlı güreş | 74 | 90 | 0,18 | 1,10 | %65 | %43 |
+| Judo | 75 | 91 | 0,16 | 1,00 | %64 | %42 |
+| Karate | 74 | 90 | 0,14 | 0,95 | %65 | %43 |
+| Taekwondo | 74 | 90 | 0,14 | 0,95 | %65 | %43 |
+| Kung fu | 72 | 88 | 0,12 | 0,85 | %68 | %46 |
+
+**Dikkat çeken nokta:** unvan maçı başına fark yalnızca **3 puan**
+(%40 vs %43), ama 600 hayatlık sonuç **5'e 27** — beş kattan fazla.
+Fark tek bir büyük katsayıdan değil, üç küçük katsayının kariyer
+boyunca **birbirini çarpmasından** doğuyor: daha güçlü rakip → daha az
+terfi; daha yüksek sakatlık → kaybedilen yıllar → sıralama aşınması;
+daha hızlı yaş aşınması → daha kısa elit pencere. Bu hassasiyetin
+kendisi Faho'ya bildirildi (Q-183 #6); **hiçbir sayı değiştirilmedi.**
+
+### §23 — dominance
+
+Hiçbir sanat dört ölçütün (elit oranı, şampiyonluk, sakatlık, gelir)
+dördünde birden önde değil: en çok elit yağlı güreş (88), en çok
+şampiyon taekwondo (27), en az sakatlık judo/karate (29), en yüksek
+gelir yağlı güreş (5,44 M₺).
+
+**Ters yönde bir uyarı var:** boks dört ölçütün üçünde **son sırada**
+(elit 63, şampiyon 5, gelir 1,57 M₺) ve sakatlıkta da üst sıralarda.
+Denge sorusu olarak Q-183 #6'da duruyor.
+
+27 doğrulama testi: `app/test/paket_al_verify_test.dart`.
+
+**Karar bekleyen:** Q-183. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

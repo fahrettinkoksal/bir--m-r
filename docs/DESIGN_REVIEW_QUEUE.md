@@ -5066,3 +5066,41 @@ Brief "V1'i şişirme, mimariyi çok büyütecekse Q olarak bırak" diyordu. Bı
 Futbol/basketbol/voleybol bilerek dışarıda (kulüp, transfer, kontrat, lig ayrı büyük mekanik ister). Dans da bu pakete zorla sokulmadı; Paket AK'de açık bırakılan mimari duruyor. Soru: sıradaki paket profesyonel dans mı, takım sporu mu, yoksa başka bir alan mı?
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-183 — Paket AL/VERIFY: uygulanmamış brief maddeleri ve sanatlar arası hassasiyet
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/test/paket_al_verify_test.dart`, `app/lib/domain/combat/combat_career_engine.dart`.
+
+**Bağlam.** Paket AL/VERIFY bağımsız doğrulama turuydu: yeni özellik eklenmedi, denge değiştirilmedi. 27 doğrulama testi ürünün gerçek kapılarından geçti ve **prod bug bulunmadı**; iki **test** hatası bulunup düzeltildi. Aşağıdakiler ölçümün ortaya çıkardığı, karar gerektiren noktalar.
+
+#### 1 — 18 yaş altı sporcuya aile desteği yok (brief §4)
+
+Brief'te "ekipman, yol, kulüp, turnuva masrafında Paket AJ'nin aile destek mantığından yararlan" yazıyordu. Kodda **hiç bağlanmadı**: `CourseSupport` combat tarafında çağrılmıyor, genç sporcunun kamp ve koç masrafı yalnızca kendi cüzdanından çıkıyor. Soru: bu bağ kurulsun mu (ayrı küçük paket), yoksa spor masrafı bilinçli olarak sporcunun kendi işi mi kalsın?
+
+#### 2 — Okul + spor çatışması yok (brief §35)
+
+"Turnuva sınav haftasına denk geldi — Turnuvaya git / Okula öncelik ver" gibi bir karar noktası kodda yok. Soru: bu olay zinciri eklensin mi, yoksa genç sporcunun okulu ayrı bir sistem olarak mı kalsın?
+
+#### 3 — Spor başarısı sosyal medya paylaşım performansını etkilemiyor (brief §16)
+
+Ölçüldü: şampiyon olmuş sporcu ile **aynı takipçili** sıradan oyuncu, paylaşım başına aynı sonucu alıyor. Sporun etkisi yalnızca Ün üzerinden dolaylı: Ün medya işlerini (`kMediaSectionMinFame`, `job.minFame`) ve ünlü iş birliklerini (`minFame 25`) açıyor. Soru: "önemli spor başarısı içerik performansını artırsın" kuralı ayrıca eklensin mi, yoksa dolaylı etki yeterli mi?
+
+#### 4 — Rivalry'nin ün/ilgi etkisi yok (brief §9)
+
+Rakip kaydı, tekrar karşılaşma ve karşılıklı skor **gerçek state**: ölçüldü, tanıdık rakip kendi kademesinde 200 fırsatta **49 kez** geri geldi ve skor kayda/kaydet-yükle'ye giriyor. Ama brief'in "ün, sosyal medya, müsabaka ilgisi üzerinde küçük etki" fikri uygulanmadı.
+
+**Ayrıca belgelenen sınır:** tanıdık rakip yalnızca gücü oyuncunun bugünkü kademesine yakınken geri gelebiliyor. Oyuncu üst kademeye çıkınca eski rakipler bandın dışında kalıyor (200 fırsatta **0**). Kayıt kaybolmuyor. Soru: rakip oyuncuyla birlikte yükselsin mi (rövanş/final anlatısı için), yoksa kademede kalması gerçekçi mi?
+
+#### 5 — İş + spor çatışması yalnızca para ve sağlık (brief §36)
+
+Ölçüldü: tam zamanlı çalışan sporcu ile çalışmayanın kazanma ihtimali (%40 vs %40), maç sonucu ve 200 denemedeki fırsat sayısı (133 vs 133) **birebir aynı**. İş durumu spor motoruna hiç girmiyor. Brief "yeni devasa stamina motoru kurma" dediği için bu bilinçliydi, ama bedelsizliği de ölçülmüş oldu. Soru: çalışan sporcunun müsabaka fırsatı azalsın mı (tek satırlık bir çarpan), yoksa mevcut hâli yeterli mi?
+
+#### 6 — Sanatlar arası hassasiyet: 3 puanlık fark, 5 katlık sonuç
+
+600 hayatta şampiyonluk: boks **5**, taekwondo **27**. Sebep bir hata değil; ama **maç başına fark yalnızca 3 puan** (unvan maçı şansı %40 vs %43). Fark, üç küçük katsayının kariyer boyunca birbirini çarpmasından doğuyor: daha güçlü rakip → daha az terfi; daha yüksek sakatlık → kaybedilen yıllar → sıralama aşınması; daha hızlı yaş aşınması → daha kısa elit pencere.
+
+Ayrıca boks dört ölçütün üçünde **son sırada** (elit 63, şampiyon 5, gelir 1,57 M₺). Hiçbir sanat her yönden üstün değil, ama boks her yönden zayıf olabilir.
+
+Soru: (A) olduğu gibi kalsın — boksun zorluğu kemerin değerini artırır; (B) boksun ödülleri yükseltilsin (risk primi); (C) boksun rakip/sakatlık katsayıları ötekilere yaklaştırılsın. **Hiçbir sayıya dokunulmadı.**
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
