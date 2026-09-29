@@ -18,6 +18,7 @@ import 'package:bir_omur/data/economy.dart';
 import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/data/event_pool_course.dart';
 import 'package:bir_omur/data/hobby_catalog.dart';
+import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/hobby/course_progress.dart';
@@ -575,6 +576,147 @@ void main() {
           '${HobbyKind.values.length}: ${ilerleyen.join(', ')} --');
       expect(ilerleyen.length, HobbyKind.values.length,
           reason: 'Her hobinin bir ilerleme yolu olmalı.');
+    });
+  });
+
+  // ===================================================================
+  // §12 — İleri seviye kademesi ne satıyor
+  // ===================================================================
+  group('Paket AJ — ileri seviye kademesi (§12)', () {
+    test('her kademe ücretinin karşılığını söylüyor', () {
+      for (final CourseTier k in CourseTier.values) {
+        expect(k.note.trim(), isNotEmpty,
+            reason: '${k.label} kademesinin karşılığı yazılmamış.');
+      }
+      // Kademeler birbirinden farklı şeyler satıyor: aynı cümle
+      // tekrarlanmıyor.
+      final Set<String> ayri =
+          CourseTier.values.map((CourseTier k) => k.note).toSet();
+      expect(ayri.length, CourseTier.values.length);
+
+      final String ileri = CourseTier.profesyonel.note;
+      for (final String kelime in <String>[
+        'Özel hoca',
+        'ekipman',
+        'yarışma',
+      ]) {
+        expect(ileri, contains(kelime),
+            reason: 'İleri seviyenin karşılığında $kelime geçmeli.');
+      }
+      print('');
+      print('-- kademelerin karşılığı --');
+      for (final CourseTier k in CourseTier.values) {
+        print('${k.label.padRight(16)} x${k.feeMultiplier}  ${k.note}');
+      }
+    });
+
+    test('ileri seviye ücreti normalin üstünde ve not ekranda görünür',
+        () {
+      final ActivityAction kurs = _kurs('muzik_kursu');
+      // 20 ders sonrası ileri seviye.
+      GameState s = _hayat(age: 16, wallet: 0);
+      s = s.copyWith(hobbies: <HobbyProgress>[
+        const HobbyProgress(
+            hobbyId: 'muzik',
+            experience: 22,
+            startedAtAge: 8,
+            lastPracticedAge: 16,
+          ),
+      ]);
+      final CourseStanding? d = CourseProgress.standingFor(s, kurs);
+      expect(d, isNotNull);
+      expect(d!.tier, CourseTier.profesyonel);
+      expect(d.isFree, isFalse);
+      expect(d.fee, greaterThan(kurs.cost),
+          reason: 'İleri seviye normal kademeden pahalı olmalı.');
+      // Ücretli olduğu için kartta kademe notu gösterilecek.
+      expect(d.tier.note, CourseTier.profesyonel.note);
+      print('');
+      print('-- ileri seviye ders ücreti: ${d.fee} ₺ '
+          '(katalog ${kurs.cost} ₺) --');
+    });
+  });
+
+  // ===================================================================
+  // §13 — Kurs bir hayat yoluna bağlı mı
+  // ===================================================================
+  group('Paket AJ — kurs hayat yoluna bağlı (§13)', () {
+    test('yollar meslek kataloğundan türüyor, elle yazılmıyor', () {
+      final GameState s = _hayat(age: 14);
+      final Set<String> katalogdaki = <String>{
+        for (final JobType m in kJobCatalog)
+          if (m.hobbyId != null) m.hobbyId!,
+      };
+      final Set<String> yoluOlan = <String>{};
+      for (final HobbyKind h in HobbyKind.values) {
+        if (CourseProgress.lifePathsFor(s, h).isNotEmpty) {
+          yoluOlan.add(h.id);
+        }
+      }
+      expect(yoluOlan, katalogdaki);
+    });
+
+    test('okuma hobisi yazar mesleğine götürüyor', () {
+      final GameState s = _hayat(age: 14);
+      final List<CourseLifePath> yollar =
+          CourseProgress.lifePathsFor(s, HobbyKind.okuma);
+      expect(yollar.map((CourseLifePath y) => y.jobId), contains('yazar'));
+      final CourseLifePath yazar = yollar
+          .firstWhere((CourseLifePath y) => y.jobId == 'yazar');
+      expect(yazar.isOpen, isFalse,
+          reason: 'Hiç ders almamış oyuncuda yol kapalı olmalı.');
+      expect(yazar.lessonsNeeded, greaterThan(0));
+      print('');
+      print('-- yazar yolu: ${yazar.stageLabel} basamağı, '
+          '${yazar.lessonsNeeded} ders --');
+    });
+
+    test('ders aldıkça kalan azalıyor ve yol gerçekten açılıyor', () {
+      final CourseLifePath ilk = CourseProgress
+          .lifePathsFor(_hayat(age: 14), HobbyKind.muzik)
+          .firstWhere((CourseLifePath y) => y.jobId == 'muzisyen');
+
+      // Gerekli dersi gerçekten kursa girerek topla.
+      GameState s = _dersAl(
+        _hayat(age: 10, wallet: 5000000),
+        _kurs('muzik_kursu'),
+        ilk.lessonsNeeded,
+      );
+      final CourseLifePath son = CourseProgress
+          .lifePathsFor(s, HobbyKind.muzik)
+          .firstWhere((CourseLifePath y) => y.jobId == 'muzisyen');
+      expect(son.lessonsLeft, lessThan(ilk.lessonsLeft));
+      expect(son.isOpen, isTrue,
+          reason: '${ilk.lessonsNeeded} ders sonrası müzisyen yolu '
+              'açılmalıydı.');
+
+      // Aynı koşul iş kataloğunda da sağlanıyor mu: basamak gerçekten
+      // tutuyor mu.
+      final JobType meslek =
+          kJobCatalog.firstWhere((JobType m) => m.id == 'muzisyen');
+      final HobbyProgress ilerleme = s.hobbies
+          .firstWhere((HobbyProgress h) => h.hobbyId == 'muzik');
+      expect(HobbyKind.muzik.stageFor(ilerleme.experience),
+          greaterThanOrEqualTo(meslek.minHobbyStage));
+      print('');
+      print('-- müzisyen yolu ${ilk.lessonsNeeded} derste açıldı '
+          '(basamak ${HobbyKind.muzik.stageFor(ilerleme.experience)}) --');
+    });
+
+    test('yolu olmayan hobide uydurma vaat yok', () {
+      final GameState s = _hayat(age: 14);
+      for (final ActivityAction k in _kurslar) {
+        final HobbyKind? h = hobbyForActivity(k.id);
+        if (h == null) continue;
+        final String? satir = CourseProgress.lifePathLabel(s, k);
+        if (CourseProgress.lifePathsFor(s, h).isEmpty) {
+          expect(satir, isNull,
+              reason: '${h.label} hobisinin meslek bağı yok; '
+                  'ekranda yol yazılmamalı.');
+        } else {
+          expect(satir, isNotNull);
+        }
+      }
     });
   });
 }

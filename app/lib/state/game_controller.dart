@@ -1019,6 +1019,13 @@ class GameController extends ChangeNotifier {
     return CourseProgress.standingFor(current, action);
   }
 
+  /// Bu kursun götürdüğü meslek yolu satırı; yol yoksa `null` (§13).
+  String? courseLifePath(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CourseProgress.lifePathLabel(current, action);
+  }
+
   /// Bu kursun ücreti için destek istenebilecek kişiler.
   ///
   /// Ebeveyn yoksa liste boş döner: ekranda olmayan bir seçenek

@@ -20,6 +20,7 @@ library;
 
 import '../../data/activity_catalog.dart';
 import '../../data/hobby_catalog.dart';
+import '../../data/job_catalog.dart';
 import '../models/game_state.dart';
 import '../models/hobby_progress.dart';
 import 'hobby_tracker.dart';
@@ -27,20 +28,29 @@ import 'hobby_tracker.dart';
 /// Kursun hangi kademesinde olunduğu.
 enum CourseTier {
   /// İlk beş ders: ücretsiz tanışma dönemi.
-  tanisma('Tanışma dersleri', 0.0),
+  tanisma('Tanışma dersleri', 0.0, 'Deneme dersi. Kayıt ücreti yok.'),
 
   /// 6-10: düşük ücret.
-  baslangic('Başlangıç', 0.40),
+  baslangic('Başlangıç', 0.40, 'Kalabalık grup dersi, malzeme kurstan.'),
 
   /// 11-20: normal ücret. Katalogdaki fiyat bu kademeyi anlatır.
-  normal('Normal', 1.0),
+  normal('Normal', 1.0, 'Küçük grup, kendi malzemenle çalışıyorsun.'),
 
-  /// 20+: özel hoca, ileri ekipman, yarışma hazırlığı.
-  profesyonel('İleri seviye', 2.2);
+  /// 20+: özel hoca, ileri ekipman, yarışma hazırlığı (§12).
+  profesyonel(
+    'İleri seviye',
+    2.2,
+    'Özel hoca, ileri ekipman ve yarışma hazırlığı bu ücrete dahil.',
+  );
 
-  const CourseTier(this.label, this.feeMultiplier);
+  const CourseTier(this.label, this.feeMultiplier, this.note);
 
   final String label;
+
+  /// Ücretin karşılığında ne alındığı. İleri seviyenin pahalı olmasının
+  /// gerekçesi ekranda görünsün diye var (§12): oyuncu zammı sebepsiz
+  /// bir sayı olarak görmesin.
+  final String note;
 
   /// Katalog ücretinin kaç katı.
   ///
@@ -83,6 +93,35 @@ class CourseStanding {
   final int milestone;
 
   bool get isFree => fee == 0;
+}
+
+/// Bir hobinin götürdüğü hayat yolu (Paket AJ, §13).
+///
+/// Uydurma bir bağ değil: meslek kataloğunda `hobbyId` ile o hobiye
+/// bağlanmış işlerden türetiliyor. Katalog değişince bu liste de
+/// kendiliğinden değişir; ikinci bir eşleme tablosu tutulmuyor.
+class CourseLifePath {
+  const CourseLifePath({
+    required this.jobId,
+    required this.jobName,
+    required this.stageLabel,
+    required this.lessonsNeeded,
+    required this.lessonsLeft,
+  });
+
+  final String jobId;
+  final String jobName;
+
+  /// Mesleğin istediği hobi basamağının adı ("Düzenli" gibi).
+  final String stageLabel;
+
+  /// O basamağa çıkmak için gereken toplam ders.
+  final int lessonsNeeded;
+
+  /// Bugünden itibaren kaç ders kaldı; 0 ise yol açık.
+  final int lessonsLeft;
+
+  bool get isOpen => lessonsLeft == 0;
 }
 
 /// Kurs ilerlemesinin kuralları.
@@ -219,5 +258,55 @@ abstract final class CourseProgress {
         GameState.interactionKey(yearlyFreeCounterId, counterKind):
             yearlyFreeUsed(state) + 1,
     });
+  }
+
+  /// Bu hobinin açtığı meslek yolları (§13).
+  ///
+  /// Kurs bir stat kuyusu değil, bir hayat yolunun başlangıcı olmalı.
+  /// Bağlantı meslek kataloğundan okunuyor: `hobbyId` ve
+  /// `minHobbyStage` alanları zaten işe giriş koşulu. Burada yalnızca
+  /// aynı koşul oyuncunun göreceği hâle çevriliyor; yeni bir kilit
+  /// eklenmiyor.
+  static List<CourseLifePath> lifePathsFor(
+    GameState state,
+    HobbyKind hobby,
+  ) {
+    final HobbyProgress? ilerleme = HobbyTracker.progressOf(state, hobby);
+    final int alinan = ilerleme?.experience ?? 0;
+    final List<CourseLifePath> yollar = <CourseLifePath>[];
+
+    for (final JobType meslek in kJobCatalog) {
+      if (meslek.hobbyId != hobby.id) continue;
+      final int basamak = meslek.minHobbyStage.clamp(0, hobby.topStage);
+      final int gereken = hobby.stages[basamak].experience;
+      yollar.add(CourseLifePath(
+        jobId: meslek.id,
+        jobName: meslek.name,
+        stageLabel: hobby.stages[basamak].label,
+        lessonsNeeded: gereken,
+        lessonsLeft: (gereken - alinan).clamp(0, gereken),
+      ));
+    }
+    return yollar;
+  }
+
+  /// Kartta gösterilecek yol satırı; yol yoksa `null`.
+  ///
+  /// Meslek bağı olmayan hobi için uydurma bir vaat yazılmıyor: o
+  /// durumda satır hiç görünmez.
+  static String? lifePathLabel(GameState state, ActivityAction action) {
+    final HobbyKind? hobi = hobbyForActivity(action.id);
+    if (hobi == null) return null;
+    final List<CourseLifePath> yollar = lifePathsFor(state, hobi);
+    if (yollar.isEmpty) return null;
+
+    final List<String> parcalar = <String>[];
+    for (final CourseLifePath yol in yollar) {
+      parcalar.add(yol.isOpen
+          ? '${yol.jobName} yolu açık'
+          : '${yol.jobName} için ${yol.lessonsLeft} ders daha '
+              '(${yol.stageLabel} basamağı)');
+    }
+    return parcalar.join(' · ');
   }
 }

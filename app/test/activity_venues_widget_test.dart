@@ -2,7 +2,10 @@ import 'dart:math';
 
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/data/activity_catalog.dart';
+import 'package:bir_omur/data/hobby_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/hobby/course_progress.dart';
+import 'package:bir_omur/domain/models/hobby_progress.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:bir_omur/ui/sound/sound_service.dart';
@@ -94,12 +97,40 @@ void main() {
     expect(controller.state!.player.stats.health, greaterThan(40));
   });
 
-  testWidgets('parası yetmeyen eylemin düğmesi kapalıdır',
+  // Paket AJ'den önce bu test "kurslarda ücretsiz eylem yok, hepsi
+  // kapalı" diyordu. Faho'nun KURS / HOBİ ERİŞİLEBİLİRLİK V2 brief'i
+  // (§1) o kuralı değiştirdi: ilk beş ders tanışma dersi ve ücretsiz.
+  // Kural değiştiği için iddia da değişti; parasızın kapıda kalması
+  // iddiası atılmadı, tanışma sonrasına taşındı.
+  testWidgets('parası olmayan çocuk tanışma dersine girebiliyor',
       (WidgetTester tester) async {
-    await aktiviteleriAc(tester, hayat(wallet: 0));
+    await aktiviteleriAc(tester, hayat(age: 12, wallet: 0));
     await tapMenuRow(tester, ActivityVenue.kurs.label);
 
-    // Kurslarda ücretsiz eylem yok; hepsi kapalı olmalı.
+    expect(find.widgetWithText(FilledButton, 'Yap'), findsWidgets);
+    expect(find.textContaining('Tanışma dersleri'), findsWidgets);
+  });
+
+  testWidgets('tanışma dersleri bitince parası yetmeyen kurs kapanıyor',
+      (WidgetTester tester) async {
+    // Dil kursunun tanışma dönemi bitmiş: ücret başlıyor ve cüzdan boş.
+    final GameState temel = hayat(age: 30, wallet: 0);
+    await aktiviteleriAc(
+      tester,
+      temel.copyWith(hobbies: <HobbyProgress>[
+        for (final HobbyKind h in HobbyKind.values)
+          HobbyProgress(
+            hobbyId: h.id,
+            experience: CourseProgress.prototypeOnlyFreeLessons + 2,
+            startedAtAge: 10,
+            lastPracticedAge: 29,
+          ),
+      ]),
+    );
+    await tapMenuRow(tester, ActivityVenue.kurs.label);
+
+    // Yetişkin olduğu için aileden destek yolu da kapalı (§9):
+    // kursa girmenin tek yolu parayı kendisinin ödemesi.
     expect(find.widgetWithText(FilledButton, 'Yap'), findsNothing);
     expect(find.textContaining('Şu an kapalı'), findsWidgets);
   });

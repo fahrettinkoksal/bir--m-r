@@ -103,6 +103,7 @@ class _VenuePageState extends State<VenuePage> {
                   .where((Person p) => secililer.contains(p.id))
                   .toList(growable: false);
               final CourseStanding? kurs = controller.courseStanding(eylem);
+              final String? hayatYolu = controller.courseLifePath(eylem);
               // Aileden destek yalnızca ücret gerçekten gerekiyorsa ve
               // oyuncunun cüzdanı yetmiyorsa sorulur; ebeveyn yoksa
               // liste boş döner ve bölüm hiç görünmez.
@@ -115,6 +116,7 @@ class _VenuePageState extends State<VenuePage> {
                 action: eylem,
                 availability: controller.activityAvailability(eylem),
                 course: kurs,
+                lifePath: hayatYolu,
                 sponsors: destekciler,
                 onAskFamily: destekciler.isEmpty
                     ? null
@@ -214,6 +216,7 @@ class _ActionCard extends StatelessWidget {
     this.onToggle,
     this.partyCost,
     this.course,
+    this.lifePath,
     this.sponsors = const <Person>[],
     this.onAskFamily,
   });
@@ -236,6 +239,9 @@ class _ActionCard extends StatelessWidget {
 
   /// Bu bir kursa aitse bugünkü ders/ücret durumu (Paket AJ).
   final CourseStanding? course;
+
+  /// Bu kursun açtığı meslek yolu (§13); yol yoksa `null`.
+  final String? lifePath;
 
   /// Ücret için destek istenebilecek kişiler; ebeveyn yoksa boş.
   final List<Person> sponsors;
@@ -292,6 +298,32 @@ class _ActionCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              // Ücretin karşılığı (§12). İleri seviyenin pahalı olması
+              // sebepsiz bir zam gibi görünmesin: özel hoca, ileri
+              // ekipman ve yarışma hazırlığı o ücrete dahil.
+              if (!course!.isFree) ...<Widget>[
+                const SizedBox(height: 4),
+                Text(
+                  course!.tier.note,
+                  key: Key('kurs_kademe_notu_${action.id}'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              // Kursun götürdüğü hayat yolu (§13). Meslek kataloğundan
+              // türetiliyor; bağı olmayan hobide satır hiç görünmez.
+              if (lifePath != null) ...<Widget>[
+                const SizedBox(height: 4),
+                Text(
+                  lifePath!,
+                  key: Key('kurs_yolu_${action.id}'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ],
             // Ücret gerekiyor ve oyuncu çocuksa aileye sorabilir (§4).
             // Ebeveyn yoksa bu bölüm hiç görünmez: sahte düğme olmaz.
