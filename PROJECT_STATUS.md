@@ -2775,6 +2775,118 @@ tek yılda hiçbir stat 100'e çıkmıyor (mutluluk 93'e kadar).
 
 **Karar bekleyen:** Q-179. **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AJ — KURS / HOBİ ERİŞİLEBİLİRLİĞİ (Faho'nun brief'i uyarınca)
+
+Paket AI'nın ikinci bulgusunun (ücretli kurslara girilemiyor) ürün
+cevabı. Faho'nun **KURS / HOBİ ERİŞİLEBİLİRLİK V2** brief'i kodlandı:
+kurslar erişilebilir oldu ama bedava stat çeşmesine dönüşmedi.
+
+### Kurs ilerleme sistemi
+
+`app/lib/domain/hobby/course_progress.dart` — ders sayacı hobinin kendi
+deneyimi (`HobbyProgress.experience`); ayrı bir sayaç kurulmadı.
+
+| Ders | Kademe | Ücret (müzik kursu) |
+|---|---|---|
+| 1-5 | Tanışma | 0 ₺ |
+| 6-10 | Başlangıç | 4.800 ₺ (katalogun 0,40 katı) |
+| 11-20 | Normal | 12.000 ₺ (katalog fiyatı) |
+| 20+ | İleri seviye | 26.400 ₺ (katalogun 2,2 katı) |
+
+Kademeler **oyunun kendi ekonomik ölçeğinden** türüyor: katalog fiyatı
+"normal" kademeyi anlatıyor, ötekiler onun katı. Asgari ücret çıpası
+kayarsa kademeler de birlikte kayıyor. Gerçek bir ülkenin güncel
+fiyatlarına bağlanmadı.
+
+### Bedava stat farming'e karşı üç kapı
+
+1. **Ders başına stat katsayısı düşük** (0,2), asıl ödül kilometre
+   taşlarında (5/10/20/35, katsayı 2,5). Ölçüldü: tek tanışma dersi
+   **+2 stat**, 5. ders **+15**.
+2. **Yıllık ücretsiz ders tavanı 6** — bütün kurslar toplamında. Aynı
+   yıl on kursu dolaşıp yirmi bedava ders toplanamıyor. Ölçüldü: 6.
+3. **Tanışma dönemi hobi ömrü boyunca bir kez.** Bitince ücret başlıyor.
+
+### 18 yaş altı: aileden destek (§4-§9)
+
+Ücret gerekiyor ve çocuğun cüzdanı yetmiyorsa kartta yaşayan ebeveynler
+düğme olarak çıkıyor. **Ebeveyn yoksa bölüm hiç görünmüyor** — sahte
+düğme yok. 18'den sonra kapı kapanıyor.
+
+Karar tek zar değil. 200 istekte kabul sayısı:
+
+| Etken | Ölçüm |
+|---|---|
+| Varlık | yoksul 46 · orta hallı 90 · varlıklı 134 |
+| Yakınlık | uzak (20) 77 · yakın (95) 118 |
+| Devamlılık | yeni 100 · 5 yıldır aynı kurs 145 |
+
+Ayrıca yarıda bırakılan her kurs kabul şansını düşürüyor.
+
+**Para yoktan yaratılmıyor.** Ebeveynin yıllık kurs bütçesi varlık
+düzeyinden ve asgari ücret çıpasından türüyor (orta hallı anne:
+33.690 ₺/yıl). Ölçüldü: 400 istekte toplam **33.600 ₺** verildi, bütçe
+33.690. Kabul edilen ücret o hobiye kredi yazılıyor ve ders yapılırken
+**bir kez** harcanıyor; kaydet/yükle ile ikinci kredi alınamıyor.
+
+### Ret kalıcı değil: ücretsiz yollar (§7)
+
+`app/lib/data/event_pool_course.dart` — dört olay: belediye atölyesi
+(8-17), okul kulübü (10-18, öğrenciyken), öğretmenin desteği (11-18),
+akrabanın desteği (9-17). Hepsi `kurs_destegi` izi bırakıyor; iz varken
+dersler yıl içinde dört derse kadar ücretsiz. Sonsuz bedava ders değil,
+bir yıl açık kalan kapı. Burslu yıl tanışma hakkını yemiyor.
+
+Ret ayrıca o yıla özgü: sayaçlar yıl başında sıfırlandığı için oyuncu
+seneye yeniden sorabiliyor.
+
+### İleri seviye ne satıyor (§12)
+
+Her kademe ücretinin karşılığını da söylüyor; ileri seviyede kart
+"Özel hoca, ileri ekipman ve yarışma hazırlığı bu ücrete dahil" diyor.
+Ücretsiz tanışma dersinde bu satır görünmüyor.
+
+### Kurs bir hayat yolunun başlangıcı (§13)
+
+Kart kursun nereye götürdüğünü gösteriyor: *"Müzisyen için 10 ders daha
+(Düzenli basamağı)"*, yol açıldıysa *"Müzisyen yolu açık"*. Bağ
+uydurulmuyor — meslek kataloğunun `hobbyId` / `minHobbyStage` alanları
+zaten işe giriş koşulu; burada aynı koşul oyuncunun görebileceği hale
+çevriliyor. İkinci bir eşleme tablosu tutulmadı, **yeni kilit
+eklenmedi**. Meslek bağı olmayan hobide satır hiç görünmüyor.
+
+Ölçüldü: okuma → **Yazar** (Düzenli basamağı, 7 ders), müzik →
+**Müzisyen** (10 ders). Test dersleri gerçekten kursa girerek topluyor
+ve iş kataloğunun `minHobbyStage` koşulunun da sağlandığını doğruluyor.
+12 hobinin yalnızca 2'si bir mesleğe çıkıyor; kalan 10'u için bağ
+kurmak tasarım kararı — Q-180 #4.
+
+### Ölçülen erişilebilirlik
+
+| Ölçüm | Paket AI (önce) | Paket AJ (sonra) |
+|---|---|---|
+| Girilebilen ücretli kurs | 0 / 10 | **10 / 10** |
+| İlerletilebilen hobi | 2 / 12 | **12 / 12** |
+
+### Değiştirilen testler (silinmedi, yeniden yazıldı)
+
+İki test Paket AJ'nin değiştirdiği eski kuralı doğruluyordu:
+
+* `activity_venues_test` "dil kursu zekâyı gerçekten artırır" — her ders
+  katalog fiyatını alır ve stati bir kerede verir diyordu. Yerine **üç**
+  test: ilk ders bedava ve hobiyi ilerletiyor, 5. ders kilometre taşı
+  ödülünü veriyor, tanışma bitince ücret cüzdandan çıkıyor.
+* `activity_venues_widget_test` "parası yetmeyen eylemin düğmesi
+  kapalıdır" — "kurslarda ücretsiz eylem yok, hepsi kapalı" diyordu.
+  Yerine **iki** test: parasız çocuk tanışma dersine girebiliyor, ve
+  tanışma bitince parası yetmeyen yetişkinin kursu gerçekten kapanıyor.
+
+28 test: `app/test/paket_aj_course_test.dart`.
+
+**Karar bekleyen:** Q-180 (prototip sayıları, tanışma hakkının ömürlük
+olması, yetişkinin ücretsiz yolu, hobi-meslek bağı).
+**Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

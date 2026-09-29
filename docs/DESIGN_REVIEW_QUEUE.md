@@ -4913,6 +4913,8 @@ Bu bir denge sorusu değil, kayıt tasarımının doğrudan sonucu. Seçenekler:
 
 #### 2 — Ücretli aktiviteler sıradan bir hayatta erişilemiyor
 
+> **KAPANDI.** Faho'nun KURS / HOBİ ERİŞİLEBİLİRLİK V2 brief'i bu soruyu yanıtladı: (C) + kademeli ücret + aileden destek. Paket AJ kodladı; ölçülen sonuç 10/10 kursa girilebiliyor ve 12/12 hobi ilerletilebiliyor. Brief'in karara bağlamadığı sayılar **Q-180**'de.
+
 60 tam hayatta yapılan aktivite yalnızca 16 tane ve **hiçbiri ücretli kurs değil**: burç, kahve falı, tarot, diş/genel kontrol, göz muayenesi, mevsim aşısı, koşu, esneme, parkta yürüyüş, saç/sakal, cezaevi aktiviteleri. Oyunun verdiği gerekçe hep aynı: *"N ₺ gerekiyor; cüzdanında yeterli para yok."*
 
 Bunun bot davranışı olmadığını ayırt etmek için kontrol grubu kuruldu: hiç yatırım ve alışveriş yapmayan `okuyucu` planı da 6 tam hayatta tek bir kursa giremedi.
@@ -4945,5 +4947,42 @@ Lise sonrası `availableTracks()` hâlâ 7 lise alanı döndürüyor, ama `choos
 #### 5 — Sosyal medya paylaşım limiti
 
 Aynı yıl 100 paylaşım denemesinin 24'ü uygulandı (dört platform açıkken). Platform değiştirerek limit aşılıyor mu, yoksa 24 bilinçli bir toplam mı? Servet değişmedi, yani para tarafında istismar yok; soru yalnızca tempo.
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-180 — Paket AJ: kurs erişilebilirliğinin bıraktığı sayılar ve hobi-meslek bağı
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/hobby/course_progress.dart`, `app/lib/domain/hobby/course_support.dart`, `app/lib/data/event_pool_course.dart`, `app/test/paket_aj_course_test.dart`.
+
+**Bağlam.** Q-179 #2'de "ücretli aktiviteler sıradan bir hayatta erişilemiyor" diye sorulmuştu. Faho'nun KURS / HOBİ ERİŞİLEBİLİRLİK V2 brief'i o soruyu **kapattı**: ilk beş ders ücretsiz, sonra kademeli ücret, 18 yaş altında aileden destek, burslu/ücretsiz alternatif yollar. Paket AJ bunu kodladı. Aşağıdakiler o brief'in **açıkça karara bağlamadığı** ve şu an `prototypeOnly` etiketiyle duran noktalar. Hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+#### 1 — Prototip sayıları kalıcı kural mı
+
+| Sayı | Şu anki değer | Nerede |
+|---|---|---|
+| Ücretsiz tanışma dersi | 5 (hobi ömrü boyunca) | `prototypeOnlyFreeLessons` |
+| Yıllık ücretsiz ders tavanı (bütün kurslar toplamı) | 6 | `prototypeOnlyYearlyFreeLessons` |
+| Kademe çarpanları | başlangıç 0,40 · normal 1,0 · ileri 2,2 | `CourseTier` |
+| Kilometre taşları | 5 / 10 / 20 / 35 | `prototypeOnlyMilestones` |
+| Ders başına stat katsayısı | 0,2 (taşta 2,5) | `ActivityEngine` |
+| Burs izi varken yıllık ücretsiz ders | 4 | `prototypeOnlyScholarshipLessons` |
+| Ailenin yıllık kurs bütçesi (net asgari ücret payı) | çok yoksul 0,01 · yoksul 0,03 · orta 0,10 · varlıklı 0,35 · çok varlıklı 1,00 | `prototypeOnlyYearlyBudgetShare` |
+| Kabul olasılığı tabanı | 0,42 | `CourseSupport` |
+
+Ölçülen sonuç (müzik kursu): başlangıç ₺4.800 · normal ₺12.000 · ileri ₺26.400. Ailede 200 istekte kabul: yoksul 46 · orta hallı 90 · varlıklı 134. Soru: bu tablo kalıcı kural olsun mu, yoksa bir tur oynanıp hissedildikten sonra mı sabitlensin?
+
+#### 2 — Tanışma dersi hobi ömrü boyunca bir kez mi
+
+Şu an beş ücretsiz ders o hobi için **ömürlük**: bitince bir daha bedava ders yok (burs izi hariç). Alternatif, tanışma hakkının uzun aradan sonra yenilenmesi olurdu ("yıllar sonra yeniden başlıyorsun"). Öneri (yalnızca öneri): **ömürlük kalsın**, çünkü yenilenen hak yıl atlayarak bedava ders toplamanın kapısını aralar. Karar senin.
+
+#### 3 — 18 yaşından sonra kursun tek yolu kendi parası
+
+§9 uyarınca yetişkinde aileden destek düğmesi kapanıyor ("Artık kendi kursunu kendin karşılıyorsun"). Yetişkin için burs/kurum desteği yolu yok; dört ücretsiz yol olayı da 8-18 yaş aralığında. Soru: yetişkinin de bir ücretsiz yolu olmalı mı (işyeri eğitimi, meslek kursu, belediye kursu), yoksa yetişkinlikte kursun paralı olması bilinçli bir seçim mi?
+
+#### 4 — 12 hobinin yalnızca 2'si bir mesleğe çıkıyor
+
+§13 uyarınca kart artık kursun nereye götürdüğünü gösteriyor, ama meslek kataloğunda `hobbyId` taşıyan yalnızca iki iş var: **Yazar** (okuma, Düzenli basamağı, 7 ders) ve **Müzisyen** (müzik, 10 ders). Kalan on hobinin (resim, dil, yazılım, mutfak, fotoğraf, dans, satranç, yazmak, bahçe, spor) bir meslek karşılığı yok; kartta da hiçbir şey yazılmıyor — uydurma vaat verilmedi.
+
+Bu bir eksiklik mi, yoksa hobinin mesleğe çıkmaması normal mi? Seçenekler: (A) olduğu gibi kalsın, hobi kendi başına değerli olsun; (B) mevcut mesleklere hobi koşulu eklensin (aşçı ↔ mutfak, fotoğrafçı ↔ fotoğraf, yazılımcı ↔ yazılım gibi) — **dikkat: bu mesleklere yeni kilit koymak demektir, mevcut dengeyi değiştirir**; (C) hobi koşulu kilit değil avantaj olsun (aynı işe girerken daha yüksek başlangıç basamağı). Öneri (yalnızca öneri): **(C)**, çünkü (B) bugün erişilebilen meslekleri kapatır ve AH/AI ölçümlerini geçersiz kılar. Hangi hobinin hangi mesleğe bağlanacağı tasarım kararıdır; Claude kendiliğinden bağlamadı.
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
