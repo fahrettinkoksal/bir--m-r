@@ -19,6 +19,7 @@
 library;
 
 import '../models/career.dart';
+import 'career_synergy.dart';
 import '../models/game_state.dart';
 
 /// Bir işteki ustalık basamağı.
@@ -63,6 +64,18 @@ abstract final class CraftMastery {
   /// prototypeOnly: itibarın zam/terfi şansına kattığı en fazla pay.
   static const double prototypeOnlyReputationRaiseBonus = 0.14;
 
+  /// Ustalık merdiveninde sayılan yıl: işte geçen yıl **artı** hobi
+  /// sinerjisinin işe başlarken verdiği pay (Paket AK, §18).
+  ///
+  /// Yalnızca bu merdiven için: maaş, zam zamanlaması, kıdem ve toplam
+  /// çalışma yılı `CareerState.yearsInJob` / `totalWorkYears` ile
+  /// hesaplanmaya devam ediyor ve bu paydan etkilenmiyor.
+  static int effectiveYears(GameState state) {
+    final CareerState k = state.career;
+    if (!k.isEmployed) return 0;
+    return k.yearsInJob(state.player.age) + k.synergyHeadStart;
+  }
+
   /// Bu işte kaç yıl geçtiyse hangi basamaktasın?
   static MasteryStage stageForYears(int years) {
     MasteryStage sonuc = MasteryStage.cirak;
@@ -76,14 +89,14 @@ abstract final class CraftMastery {
   static MasteryStage? stageOf(GameState state) {
     final CareerState k = state.career;
     if (!k.isEmployed) return null;
-    return stageForYears(k.yearsInJob(state.player.age));
+    return stageForYears(effectiveYears(state));
   }
 
   /// Bir sonraki basamağa kaç yıl kaldı? En üstteyse `null`.
   static int? yearsToNextStage(GameState state) {
     final CareerState k = state.career;
     if (!k.isEmployed) return null;
-    final int yil = k.yearsInJob(state.player.age);
+    final int yil = effectiveYears(state);
     for (final MasteryStage s in MasteryStage.values) {
       if (s.yearsNeeded > yil) return s.yearsNeeded - yil;
     }
@@ -135,7 +148,10 @@ abstract final class CraftMastery {
     final double ustalik = basamak.index * prototypeOnlyStagePerRaiseBonus;
     final double itibar =
         reputationOf(state) / 100 * prototypeOnlyReputationRaiseBonus;
-    return ustalik + itibar;
+    // Hobi işe girdikten sonra da sürüyorsa çok küçük bir devam payı
+    // (Paket AK, §19). Pay hobinin **basamağından** gelir, o yıl kaç
+    // ders alındığından değil: hobiyi spamlamak terfi üretmez.
+    return ustalik + itibar + CareerSynergyRules.promotionBonus(state);
   }
 
   /// İşten çıkarılma ihtimaline uygulanan çarpan.

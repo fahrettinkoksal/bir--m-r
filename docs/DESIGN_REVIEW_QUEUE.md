@@ -4996,3 +4996,41 @@ Yazar'ın gerçek koşulu: **7 bitirilmiş kitap + 20 yaş + 55 zekâ**. Kitapla
 Bu bir ürün sorusu: (A) olduğu gibi kalsın — Yazar gerçekten yıllarca okumuş birinin işi olsun; (B) kitap sayfaları azalsın ya da "oturup okudum" tek eylemde bir kitap bitirsin; (C) Yazar'ın istediği basamak düşsün (Düzenli yerine Meraklı = 3 kitap); (D) `yazarlik_atolyesi` kursu da okuma hobisini beslesin (şu an `yazmak` hobisini besliyor). Öneri (yalnızca öneri): **(B)**, çünkü sorun eşiğin yüksekliği değil, bir kitabı bitirmenin kaç tıklama sürdüğü; (C) mesleği ucuzlatır, (D) iki hobiyi birbirine karıştırır. Karar senin. Hiçbir sayı değiştirilmedi.
 
 **Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-181 — Paket AK: kariyer sinerjisinin bıraktığı sayılar ve boş bağlar
+
+**Durum:** Karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/career/career_synergy.dart`, `app/lib/data/job_catalog.dart`, `app/test/paket_ak_synergy_test.dart`.
+
+**Bağlam.** Faho'nun PAKET AK brief'i hobi → kariyer bağlarını ve her bağın gücünü (güçlü/orta/küçük) karara bağladı; §23'teki tablo koda birebir girdi. Aşağıdakiler brief'in **sayıya bağlamadığı**, şu an `prototypeOnly` etiketiyle duran noktalar. Hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+#### 1 — Avantaj tavanları kalıcı kural mı
+
+| Sayı | Şu anki değer | Ne yapıyor |
+|---|---|---|
+| Basamak payları | Hevesli 0,00 · Meraklı 0,25 · Düzenli 0,55 · Tutkulu 0,80 · Usta 1,00 | Avantajın büyüklüğü |
+| Bağ ağırlıkları | küçük 0,35 · orta 0,65 · güçlü 1,00 | §23'teki güç sözcüklerinin karşılığı |
+| Mülakat ikinci şansı tavanı | 0,45 | Usta + güçlü bağ %45'te kalıyor |
+| Başlangıç ustalığı tavanı | 5 yıl | Kalfa'ya yetiyor, Usta'ya (8 yıl) yetmiyor |
+| Terfi payı tavanı | 0,05 | Hobi sürüyorsa çok küçük devam payı |
+| Bırakılmış hobi payı | 0,55 | Geçmiş yok olmuyor ama aktif kadar değil |
+| İkinci hobinin payı | 0,25 | Toplama değil, küçük ek |
+
+Ölçülen sonuç (aşçılık, bilerek yanlış cevapla 200 başvuru): hobisiz **0**, Düzenli **44**, Usta **94**. Soru: bu his doğru mu? Usta'nın yanlış cevaba rağmen ~%47 işe girmesi fazla mı, az mı?
+
+#### 2 — Bahçe hobisinin kariyer karşılığı yok
+
+§13 uyarınca zorlama bağ kurulmadı; bahçe şu an hiçbir mesleğe bağlı değil ve kurs kartında kariyer bölümü hiç görünmüyor. Mimari hazır: Bahçıvan / Peyzaj / Üretim gibi bir meslek eklenirse tek satırla bağlanır. Soru: bu meslek eklensin mi, yoksa bahçe bilinçli olarak "kendisi için yapılan" hobi mi kalsın?
+
+#### 3 — Dans yalnızca Manken'e bağlı
+
+§11 uyarınca zorlama yapılmadı ve müzisyene bağlanmadı; dansın tek karşılığı Manken'de küçük bir avantaj. Profesyonel dans yolu ileride eklenebilsin diye mimari açık bırakıldı. Soru: bir sonraki PROFESYONEL SPOR / DÖVÜŞ KARİYERİ paketinde dans da ele alınsın mı?
+
+#### 4 — Müzik ve okuma: sert şart + sinerji birlikte
+
+§14 "aynı hobi mevcut hard requirement mesleğinde ayrıca başlangıç itibarı avantajı sağlayabilir, fakat double-count exploit yaratma" diyordu. Uygulama: Yazar'ın okuma şartı ve Müzisyen'in müzik şartı **aynen duruyor**; aynı hobi ek olarak **orta** güçte sinerji veriyor (güçlü değil — sert şartla kapıyı açan hobi tek başına başlangıç payını da tavana çıkarmasın diye). Etki tek: başlangıç ustalığı, bir kez. Soru: bu yeterince temiz mi, yoksa sert şartlı mesleklerde sinerji hiç olmasın mı?
+
+#### 5 — Mülakat hâlâ tek soru, doğru/yanlış
+
+Sinerji mevcut karara katkı yapıyor (§17 uyarınca yeni motor kurulmadı), ama altta yatan mülakat hâlâ **tek soruluk ve ikili**. Sinerji bu yüzden yalnızca "yanlış cevaba rağmen işe alınma" kanalından işleyebiliyor. Soru: mülakat ileride puanlı hale gelsin mi (o zaman sinerji doğal olarak puana eklenir), yoksa tek soru oyunun sadeliği için doğru mu?
+
+**Varsayılan işlem:** Onay gelene dek hiçbir sayı değiştirilmez ve `DECISIONS.md`'ye kesin kural yazılmaz.

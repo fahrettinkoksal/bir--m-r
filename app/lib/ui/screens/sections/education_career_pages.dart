@@ -337,6 +337,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
             _JobCard(
               job: job,
               availability: controller.jobApplicationAvailability(job),
+              synergyNote: controller.jobSynergyNote(job),
               onApply: () async {
                 final JobOutcome? outcome = controller.applyForJob(job);
                 if (outcome == null) return;
@@ -364,6 +365,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
           _JobCard(
             job: job,
             availability: controller.jobApplicationAvailability(job),
+            synergyNote: controller.jobSynergyNote(job),
             onApply: () async {
               final JobOutcome? outcome = controller.applyForJob(job);
               if (outcome == null) return;
@@ -430,11 +432,18 @@ class _JobCard extends StatelessWidget {
     required this.job,
     required this.availability,
     required this.onApply,
+    this.synergyNote,
   });
 
   final JobType job;
   final dynamic availability;
   final VoidCallback onApply;
+
+  /// Hobi geçmişinin bu başvuruya kattığı avantaj (Paket AK, §16).
+  ///
+  /// Doğal dille yazılır; yüzde gösterilmez. Avantaj yoksa `null` gelir
+  /// ve satır hiç görünmez: boş vaat olmaz.
+  final String? synergyNote;
 
   @override
   Widget build(BuildContext context) {
@@ -466,6 +475,30 @@ class _JobCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            if (synergyNote != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      synergyNote!,
+                      key: Key('is_sinerji_${job.id}'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 10),
             Row(
               children: <Widget>[

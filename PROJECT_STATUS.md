@@ -2905,6 +2905,122 @@ kurmak tasarım kararı — Q-180 #4.
 olması, yetişkinin ücretsiz yolu, hobi-meslek bağı).
 **Doğrulanmayan:** gerçek cihazda oynanmadı.
 
+## PAKET AK — HOBİ / KURS → KARİYER SİNERJİSİ
+
+Paket AJ 12 hobiyi erişilebilir yaptı ama katalogda hobiye bağlı
+yalnızca iki meslek vardı ve ikisi de **sert şart**: Yazar (okuma) ve
+Müzisyen (müzik). Çocukken başlanan fotoğraf kursu hayatın geri
+kalanında hiçbir kapı açmıyordu. Bu paket o boşluğu **kilit koymadan**
+dolduruyor.
+
+### Temel kural: hiçbir kapı kapanmadı
+
+Faho'nun kararı: kurs/hobi yapmamış oyuncunun bugün girebildiği
+mesleklerin **hiçbiri kapanmayacak**. Bu yüzden sinerji
+`JobType.hobbyId` / `minHobbyStage` sert şartından **ayrı** bir alanda
+(`JobType.synergies`) duruyor ve `JobMarket.requirementReason` içine
+hiç girmiyor.
+
+Ölçüldü: hiç hobisi olmayan oyuncu ile bütün hobileri Usta olan
+oyuncunun 19 sinerjili meslekteki **engel gerekçeleri birebir aynı**.
+Yanlış cevap veren hobisiz aday 200 başvurunun 200'ünde de eskisi gibi
+reddediliyor; doğru cevap veren hobisiz aday eskisi gibi işe giriyor.
+
+### Avantaj nereden geliyor
+
+Üç yerden, üçü de sınırlı. Maaşa ve gelir bandına **hiç dokunmuyor**.
+
+| Kanal | Ne yapıyor | Tavan |
+|---|---|---|
+| Mülakat | Cevap tutmazsa geçmiş ikinci bir şans veriyor | %45 |
+| Başlangıç ustalığı | İşe sıfır çırak olarak başlanmıyor | 5 yıl (= Kalfa) |
+| Terfi | Hobi sürüyorsa çok küçük devam payı | +0,05 |
+
+Pay hobinin **basamağından** geliyor, o yıl kaç ders alındığından değil.
+
+| Basamak | Pay | Fotoğrafçıda mülakat ikinci şansı |
+|---|---|---|
+| Hevesli | 0,00 | %0 |
+| Meraklı | 0,25 | %11 |
+| Düzenli | 0,55 | %25 |
+| Tutkulu | 0,80 | %36 |
+| Usta | 1,00 | %45 |
+
+**Usta bile garanti değil.** Aşçılıkta bilerek yanlış cevap verilen 200
+başvuruda: hobisiz **0**, Düzenli **44**, Usta **94**. Artıyor, ama
+hiçbir zaman 200 olmuyor.
+
+### Hobi → meslek tablosu (§23)
+
+| Hobi | Meslekler |
+|---|---|
+| Resim | Ressam/tasarımcı (güçlü) · Grafik tasarımcı (güçlü) |
+| Mutfak | Aşçı (güçlü) |
+| Fotoğraf | Fotoğrafçı (güçlü) · Gazeteci (küçük) |
+| Bilgisayar | Yazılım geliştirici (güçlü) · Veri analisti (orta) · Teknik servis (küçük) |
+| Yazmak | Yazar (güçlü) · Gazeteci (orta) |
+| Yabancı dil | Resepsiyonist (güçlü) · Satış danışmanı (orta) · Gazeteci (orta) · Banka personeli, Çağrı merkezi, İK uzmanı (küçük) |
+| Spor | Güvenlik (orta) · İtfaiyeci (orta) · Polis (küçük) |
+| Dans | Manken (küçük) |
+| Satranç | Veri analisti (küçük) |
+| Müzik | Müzisyen (orta) — sert şart ayrıca duruyor |
+| Okumak | Yazar (orta) — sert şart ayrıca duruyor |
+| **Bahçe** | **Bağ yok** |
+
+Bahçe bilerek boş: §13 uyarınca her hobinin mevcut bir mesleğe
+bağlanması gerekmiyor, zorlama bağ kurulmadı. İleride Bahçıvan/Peyzaj
+eklenirse tek satırla bağlanır. Test bunu koruyor: bahçe hiçbir
+meslekte görünmüyorsa test geçer.
+
+Spor bağları yasal eğitim, yaş ve sabıka şartlarını **bypass etmiyor**;
+yazmak hobisi Yazar'ın okuma şartını bypass etmiyor (ölçüldü).
+
+### Aktif / bırakılmış hobi (§20)
+
+Geçmiş silinmiyor ama aktif olanla aynı da değil. Usta resim:
+aktif **1,00**, 12 yıldır ara verilmiş **0,55**. Bırakılmış hobi terfi
+payı **hiç** vermiyor: geçmiş ustalık işe başlarken sayıldı, terfi
+masasında ikinci kez sayılmıyor.
+
+### Başlangıç ustalığı (§18)
+
+Usta fotoğrafçı işe **Kalfa** olarak başlıyor (5 yıl pay), hobisiz
+oyuncu **Çırak**. Usta olarak başlamak mümkün değil: Usta 8 yıl ister,
+tavan 5.
+
+Pay yalnızca ustalık merdivenine işliyor. Ölçüldü: 28 yaşında işe
+girmiş 30 yaşındaki oyuncunun `yearsInJob` ve `totalWorkYears`
+değerleri **2**, ustalık merdivenindeki etkin yıl **2 + pay**. Maaş
+katalog maaşı olarak kalıyor. İşten ayrılınca pay sıfırlanıyor.
+
+### Abuse (§22)
+
+* 12 hobiden **birer ders** alan oyuncunun en yüksek kariyer payı
+  **0,00** — Hevesli basamağının payı sıfır.
+* Gazetecinin üç bağını birden Usta yapmak avantajı çarpmıyor: tek hobi
+  **0,65**, üç hobi **0,81** (toplasa 1,95 olurdu). En güçlü bağ esas,
+  ikincisi yalnızca küçük pay ekliyor.
+* Hobi deneyimini 500 artırmak terfi payını **değiştirmiyor**.
+* 19 sinerjili mesleğin hepsinde maaş katalog maaşı olarak kalıyor.
+
+### Kayıt
+
+Tek yeni alan: `CareerState.synergyHeadStart` (int). Eski kayıtlar
+0 ile yükleniyor, kayıt bozulmuyor.
+
+### Arayüz
+
+* **Kurs kartı** (§15): "Kariyer avantajları — • Yazılım geliştirici —
+  güçlü avantaj · • Veri analisti — anlamlı avantaj · • Teknik servis —
+  orta avantaj". Bırakılmış hobide "(uzun zamandır ara verdin)".
+* **İş ilanı** (§16): "Bilgisayar hobin bu başvuruda sana güçlü avantaj
+  sağlıyor." Yüzde gösterilmiyor; test bunu kontrol ediyor.
+* Avantajı olmayan işte satır **hiç** görünmüyor.
+
+23 test: `app/test/paket_ak_synergy_test.dart`.
+
+**Karar bekleyen:** Q-181. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

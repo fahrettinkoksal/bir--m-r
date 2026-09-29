@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import '../data/activity_catalog.dart';
 import '../data/education_tracks.dart';
 import '../data/item_catalog.dart';
+import '../data/hobby_catalog.dart';
 import '../data/job_catalog.dart';
+import '../domain/career/career_synergy.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
@@ -1017,6 +1019,45 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return null;
     return CourseProgress.standingFor(current, action);
+  }
+
+  /// Bu kursun beslediği hobinin kariyer avantajları (Paket AK, §15).
+  ///
+  /// Liste meslek kataloğundan türer; hobisi ilerlememişse boş döner.
+  /// Her satır: meslek adı + avantaj sözcüğü. Yüzde gösterilmez (§16).
+  List<({String jobName, String advice, bool isActive})> courseCareerEdges(
+    ActivityAction action,
+  ) {
+    final GameState? current = _state;
+    if (current == null) return const <({String jobName, String advice, bool isActive})>[];
+    final HobbyKind? hobi = hobbyForActivity(action.id);
+    if (hobi == null) return const <({String jobName, String advice, bool isActive})>[];
+
+    final List<({String jobName, String advice, bool isActive})> sonuc =
+        <({String jobName, String advice, bool isActive})>[];
+    for (final JobType meslek in kJobCatalog) {
+      final double pay = CareerSynergyRules.scoreFor(current, meslek);
+      if (pay <= 0) continue;
+      final List<SynergyStanding> baglar =
+          CareerSynergyRules.standingsFor(current, meslek);
+      // Yalnızca BU hobinin beslediği meslekler listelenir.
+      if (!baglar.any((SynergyStanding b) => b.hobby.id == hobi.id)) continue;
+      final SynergyStanding bu =
+          baglar.firstWhere((SynergyStanding b) => b.hobby.id == hobi.id);
+      sonuc.add((
+        jobName: meslek.name,
+        advice: CareerSynergyRules.label(bu.score),
+        isActive: bu.isActive,
+      ));
+    }
+    return sonuc;
+  }
+
+  /// İş ilanında gösterilecek avantaj satırı; avantaj yoksa `null` (§16).
+  String? jobSynergyNote(JobType job) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CareerSynergyRules.applicationNote(current, job);
   }
 
   /// Bu kursun götürdüğü meslek yolu satırı; yol yoksa `null` (§13).

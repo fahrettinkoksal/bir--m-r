@@ -15,6 +15,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../domain/career/career_synergy.dart';
 import 'economy.dart';
 import 'education_tracks.dart';
 
@@ -73,6 +74,7 @@ class JobType {
     this.martialArtId,
     this.hobbyId,
     this.minHobbyStage = 0,
+    this.synergies = const <CareerSynergy>[],
     this.requiredLicenses = const <String>{},
     this.recordRule = RecordRule.serbest,
     this.partTime = false,
@@ -147,6 +149,16 @@ class JobType {
 
   /// prototypeOnly: [hobbyId] hobisinde ulaşılmış olması gereken basamak.
   final int minHobbyStage;
+
+  /// Bu mesleğe **avantaj** sağlayan hobiler (Paket AK).
+  ///
+  /// [hobbyId] sert şarttır; bu liste değildir. Buradaki hobilerin
+  /// hiçbiri işe girmenin önkoşulu olmaz: hobisi olmayan oyuncu aynı
+  /// işe aynı koşullarla başvurur. Sinerji yalnızca mülakatta ikinci
+  /// bir şans, işe başlarken ustalık payı ve süren işte küçük bir
+  /// terfi payı olarak görünür — kurallar
+  /// `domain/career/career_synergy.dart` içinde.
+  final List<CareerSynergy> synergies;
 
   /// İşe girmek için gereken ehliyetler ([LicenseType.id]).
   ///
@@ -246,6 +258,9 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     levels: <String>['Güvenlik görevlisi', 'Vardiya amiri', 'Güvenlik şefi'],
     recordRule: RecordRule.temizGerekir,
+    synergies: <CareerSynergy>[
+      CareerSynergy('spor', SynergyStrength.orta),
+    ],
   ),
   JobType(
     id: 'cagri_merkezi',
@@ -257,6 +272,9 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     minCharisma: 40,
     levels: <String>['Müşteri temsilcisi', 'Kıdemli temsilci', 'Takım lideri'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.kucuk),
+    ],
   ),
   JobType(
     id: 'satis_danismani',
@@ -268,6 +286,9 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     minCharisma: 50,
     levels: <String>['Satış danışmanı', 'Kıdemli danışman', 'Satış müdürü'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.orta),
+    ],
   ),
   JobType(
     id: 'resepsiyonist',
@@ -279,6 +300,9 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     minCharisma: 45,
     levels: <String>['Resepsiyonist', 'Ön büro görevlisi', 'Ön büro şefi'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.guclu),
+    ],
   ),
   JobType(
     id: 'asci',
@@ -288,6 +312,9 @@ const List<JobType> kJobCatalog = <JobType>[
     yearlySalary: 470000,
     band: SalaryBand.nitelikliHizmet,
     levels: <String>['Aşçı yardımcısı', 'Aşçı', 'Mutfak şefi'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('mutfak', SynergyStrength.guclu),
+    ],
   ),
   JobType(
     id: 'kuafor',
@@ -321,6 +348,9 @@ const List<JobType> kJobCatalog = <JobType>[
       'Teknik servis çalışanı',
       'Kıdemli teknisyen',
       'Servis sorumlusu',
+    ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazilim', SynergyStrength.kucuk),
     ],
   ),
   JobType(
@@ -421,6 +451,9 @@ const List<JobType> kJobCatalog = <JobType>[
       'Şube müdür yardımcısı',
     ],
     recordRule: RecordRule.agirEngeller,
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.kucuk),
+    ],
   ),
   JobType(
     id: 'ik_uzmani',
@@ -433,6 +466,9 @@ const List<JobType> kJobCatalog = <JobType>[
     programs: <String>{'isletme', 'sosyoloji', 'psikoloji'},
     minCharisma: 55,
     levels: <String>['İK uzmanı', 'Kıdemli İK uzmanı', 'İK müdürü'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.kucuk),
+    ],
   ),
   JobType(
     id: 'muhasebeci',
@@ -521,6 +557,9 @@ const List<JobType> kJobCatalog = <JobType>[
       'Kıdemli geliştirici',
       'Takım lideri',
     ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazilim', SynergyStrength.guclu),
+    ],
   ),
   JobType(
     id: 'veri_analisti',
@@ -536,6 +575,10 @@ const List<JobType> kJobCatalog = <JobType>[
       'Veri analisti',
       'Kıdemli analist',
       'Analitik takım lideri',
+    ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazilim', SynergyStrength.orta),
+      CareerSynergy('satranc', SynergyStrength.kucuk),
     ],
   ),
   JobType(
@@ -608,6 +651,9 @@ const List<JobType> kJobCatalog = <JobType>[
     minIntelligence: 45,
     levels: <String>['Polis memuru', 'Kıdemli memur', 'Komiser yardımcısı'],
     recordRule: RecordRule.temizGerekir,
+    synergies: <CareerSynergy>[
+      CareerSynergy('spor', SynergyStrength.kucuk),
+    ],
   ),
   JobType(
     id: 'itfaiyeci',
@@ -623,6 +669,9 @@ const List<JobType> kJobCatalog = <JobType>[
     education: JobEducation.lise,
     levels: <String>['İtfaiye eri', 'Kıdemli er', 'Grup amiri'],
     recordRule: RecordRule.temizGerekir,
+    synergies: <CareerSynergy>[
+      CareerSynergy('spor', SynergyStrength.orta),
+    ],
   ),
   JobType(
     id: 'memur',
@@ -660,6 +709,9 @@ const List<JobType> kJobCatalog = <JobType>[
       'Deneyimli tasarımcı',
       'Sanat yönetmeni',
     ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('resim', SynergyStrength.guclu),
+    ],
   ),
   JobType(
     id: 'grafik_tasarimci',
@@ -680,6 +732,9 @@ const List<JobType> kJobCatalog = <JobType>[
       'Kıdemli tasarımcı',
       'Kreatif direktör',
     ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('resim', SynergyStrength.guclu),
+    ],
   ),
   JobType(
     id: 'gazeteci',
@@ -693,6 +748,11 @@ const List<JobType> kJobCatalog = <JobType>[
     minIntelligence: 55,
     minCharisma: 45,
     levels: <String>['Muhabir', 'Kıdemli muhabir', 'Editör'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazmak', SynergyStrength.orta),
+      CareerSynergy('fotograf', SynergyStrength.kucuk),
+      CareerSynergy('dil', SynergyStrength.orta),
+    ],
   ),
   JobType(
     id: 'fotografci',
@@ -706,6 +766,9 @@ const List<JobType> kJobCatalog = <JobType>[
       EducationTrack.tasarim,
     },
     levels: <String>['Fotoğrafçı', 'Deneyimli fotoğrafçı', 'Stüdyo sahibi'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('fotograf', SynergyStrength.guclu),
+    ],
   ),
   JobType(
     id: 'manken',
@@ -717,6 +780,9 @@ const List<JobType> kJobCatalog = <JobType>[
     minCharisma: 45,
     minAppearance: 70,
     levels: <String>['Manken', 'Podyum mankeni', 'Yüzü afişe basılan manken'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dans', SynergyStrength.kucuk),
+    ],
   ),
   JobType(
     id: 'yazar',
@@ -729,6 +795,10 @@ const List<JobType> kJobCatalog = <JobType>[
     hobbyId: 'okuma',
     minHobbyStage: 2,
     levels: <String>['Yazar', 'Kitabı basılan yazar', 'Adı bilinen yazar'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazmak', SynergyStrength.guclu),
+      CareerSynergy('okuma', SynergyStrength.orta),
+    ],
   ),
   JobType(
     id: 'muzisyen',
@@ -741,6 +811,9 @@ const List<JobType> kJobCatalog = <JobType>[
     hobbyId: 'muzik',
     minHobbyStage: 2,
     levels: <String>['Müzisyen', 'Sahne müzisyeni', 'Kendi grubunun müzisyeni'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('muzik', SynergyStrength.orta),
+    ],
   ),
 
   // ===================================================================

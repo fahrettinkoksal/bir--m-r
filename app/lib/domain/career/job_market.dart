@@ -21,6 +21,7 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/pending_interview.dart';
+import 'career_synergy.dart';
 import '../../text/turkish_text.dart';
 
 class JobOutcome {
@@ -364,7 +365,19 @@ class JobMarket {
       );
     }
 
-    if (!dogru) {
+    // Hobi sinerjisi (Paket AK, §17). Ayrı bir işe giriş motoru
+    // kurulmadı: mevcut kararın içine kontrollü bir katkı kondu.
+    // Cevabı tutmayan adayın işi bitmiyorsa, sebebi geçmişi — yıllardır
+    // fotoğraf çeken birinin dosyasına bakıyorlar. Garanti değil:
+    // en yüksek sinerjide bile zar atılıyor (tavan
+    // `prototypeOnlyMaxInterviewRescue`).
+    final double ikinciSans =
+        CareerSynergyRules.interviewRescueChance(state, job);
+    final bool gecmisKurtardi = !dogru &&
+        ikinciSans > 0 &&
+        (rng ?? Random()).nextDouble() < ikinciSans;
+
+    if (!dogru && !gecmisKurtardi) {
       final String metin =
           '${job.name} mülakatı olumsuz sonuçlandı. '
           '"Teşekkür ederiz, sizi arayacağız" dediler.';
@@ -379,9 +392,14 @@ class JobMarket {
       );
     }
 
-    final String metin =
-        '${job.name} olarak işe alındın. '
-        'İlk maaşın bir yıl sonra cebinde olacak.';
+    final List<SynergyStanding> baglar =
+        CareerSynergyRules.standingsFor(state, job);
+    final String metin = gecmisKurtardi
+        ? '${job.name} mülakatında sorunun cevabı tutmadı. Ama '
+            '${baglar.first.hobby.label.toLowerCase()} geçmişini görünce '
+            '"bu işi zaten yapıyormuşsun" dediler ve seni işe aldılar.'
+        : '${job.name} olarak işe alındın. '
+            'İlk maaşın bir yıl sonra cebinde olacak.';
     final GameState iseAlinmis = kapali.copyWith(
       career: kapali.career.copyWith(
         jobId: job.id,
@@ -396,6 +414,10 @@ class JobMarket {
         milestones: const <CareerMilestone>[],
         lastRaiseAge: null,
         lastPromotionAge: null,
+        // Başlangıç ustalığı (§18): hobide ciddi geçmişi olan işe sıfır
+        // çırak gibi başlamaz. Maaş katalog maaşı olarak kalır; pay
+        // yalnızca ustalık merdivenine işler.
+        synergyHeadStart: CareerSynergyRules.headStartYears(state, job),
       ),
     );
     // İşe girince birkaç iş arkadaşıyla tanışılır; kalıcı kimlikleri olur.

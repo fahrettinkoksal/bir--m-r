@@ -104,6 +104,8 @@ class _VenuePageState extends State<VenuePage> {
                   .toList(growable: false);
               final CourseStanding? kurs = controller.courseStanding(eylem);
               final String? hayatYolu = controller.courseLifePath(eylem);
+              final List<({String jobName, String advice, bool isActive})>
+                  kariyer = controller.courseCareerEdges(eylem);
               // Aileden destek yalnızca ücret gerçekten gerekiyorsa ve
               // oyuncunun cüzdanı yetmiyorsa sorulur; ebeveyn yoksa
               // liste boş döner ve bölüm hiç görünmez.
@@ -117,6 +119,7 @@ class _VenuePageState extends State<VenuePage> {
                 availability: controller.activityAvailability(eylem),
                 course: kurs,
                 lifePath: hayatYolu,
+                careerEdges: kariyer,
                 sponsors: destekciler,
                 onAskFamily: destekciler.isEmpty
                     ? null
@@ -217,6 +220,8 @@ class _ActionCard extends StatelessWidget {
     this.partyCost,
     this.course,
     this.lifePath,
+    this.careerEdges =
+        const <({String jobName, String advice, bool isActive})>[],
     this.sponsors = const <Person>[],
     this.onAskFamily,
   });
@@ -242,6 +247,12 @@ class _ActionCard extends StatelessWidget {
 
   /// Bu kursun açtığı meslek yolu (§13); yol yoksa `null`.
   final String? lifePath;
+
+  /// Bu hobinin kariyerde sağladığı avantajlar (Paket AK, §15).
+  ///
+  /// "Bu kurs ne işe yarıyor?" sorusunun cevabı. Boşsa bölüm hiç
+  /// görünmez; yüzde yazılmaz (§16).
+  final List<({String jobName, String advice, bool isActive})> careerEdges;
 
   /// Ücret için destek istenebilecek kişiler; ebeveyn yoksa boş.
   final List<Person> sponsors;
@@ -323,6 +334,32 @@ class _ActionCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+              ],
+              // Kariyer avantajları (Paket AK, §15). Bunlar KİLİT
+              // değil: bu hobisi olmayan da aynı işe başvurabiliyor.
+              if (careerEdges.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 8),
+                Text(
+                  'Kariyer avantajları',
+                  key: Key('kurs_kariyer_${action.id}'),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                for (final ({String jobName, String advice, bool isActive}) e
+                    in careerEdges)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      '• ${e.jobName} — ${e.advice}'
+                      '${e.isActive ? '' : ' (uzun zamandır ara verdin)'}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
               ],
             ],
             // Ücret gerekiyor ve oyuncu çocuksa aileye sorabilir (§4).
