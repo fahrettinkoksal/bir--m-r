@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/hobby/course_progress.dart';
+import '../../../domain/hobby/course_support.dart';
+import '../../../domain/models/applied_effect.dart';
+
 import '../../../data/tour_catalog.dart';
 import '../../../domain/life/life_end_choice.dart';
 import '../../widgets/kilim_divider.dart';
@@ -98,9 +102,34 @@ class _VenuePageState extends State<VenuePage> {
               final List<Person> yoldaslar = kisiler
                   .where((Person p) => secililer.contains(p.id))
                   .toList(growable: false);
+              final CourseStanding? kurs = controller.courseStanding(eylem);
+              // Aileden destek yalnızca ücret gerçekten gerekiyorsa ve
+              // oyuncunun cüzdanı yetmiyorsa sorulur; ebeveyn yoksa
+              // liste boş döner ve bölüm hiç görünmez.
+              final List<Person> destekciler = kurs == null ||
+                      kurs.fee == 0 ||
+                      state.player.wallet >= kurs.fee
+                  ? const <Person>[]
+                  : controller.courseSponsors(eylem);
               return _ActionCard(
                 action: eylem,
                 availability: controller.activityAvailability(eylem),
+                course: kurs,
+                sponsors: destekciler,
+                onAskFamily: destekciler.isEmpty
+                    ? null
+                    : (Person kisi) {
+                        final CourseSupportOutcome? cikti =
+                            controller.askFamilyForCourse(eylem, kisi.id);
+                        if (cikti == null) return;
+                        setState(() {
+                          _sonuc = ActivityOutcome(
+                            applied: cikti.applied,
+                            text: cikti.text,
+                            effects: const <AppliedEffect>[],
+                          );
+                        });
+                      },
                 companions: kisiler,
                 selectedIds: secililer,
                 playerAge: state.player.age,
@@ -184,6 +213,9 @@ class _ActionCard extends StatelessWidget {
     this.playerAge = 0,
     this.onToggle,
     this.partyCost,
+    this.course,
+    this.sponsors = const <Person>[],
+    this.onAskFamily,
   });
 
   final ActivityAction action;
@@ -201,6 +233,15 @@ class _ActionCard extends StatelessWidget {
   final int playerAge;
   /// `null` verilirse bütün seçim temizlenir (yalnız gidilir).
   final void Function(Person?)? onToggle;
+
+  /// Bu bir kursa aitse bugünkü ders/ücret durumu (Paket AJ).
+  final CourseStanding? course;
+
+  /// Ücret için destek istenebilecek kişiler; ebeveyn yoksa boş.
+  final List<Person> sponsors;
+
+  /// Aileden destek isteme.
+  final void Function(Person)? onAskFamily;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +263,9 @@ class _ActionCard extends StatelessWidget {
                   child: Text(action.label, style: theme.textTheme.titleMedium),
                 ),
                 Text(
-                  action.cost == 0 ? 'Ücretsiz' : trMoney(action.cost),
+                  (course?.fee ?? action.cost) == 0
+                      ? 'Ücretsiz'
+                      : trMoney(course?.fee ?? action.cost),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -236,6 +279,44 @@ class _ActionCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            // Kursun hangi aşamada olduğu (Paket AJ, §1). "Tanışma
+            // dersleri 3 / 5 · Ücretsiz" gibi: oyuncu ne zaman ücret
+            // başlayacağını önceden görsün.
+            if (course != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                CourseProgress.label(course!),
+                key: Key('kurs_durum_${action.id}'),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+            // Ücret gerekiyor ve oyuncu çocuksa aileye sorabilir (§4).
+            // Ebeveyn yoksa bu bölüm hiç görünmez: sahte düğme olmaz.
+            if (sponsors.isNotEmpty && onAskFamily != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                'Kayıt ücreti için kime soracaksın?',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: <Widget>[
+                  for (final Person kisi in sponsors)
+                    OutlinedButton(
+                      key: Key('kurs_destek_${action.id}_${kisi.id}'),
+                      onPressed: () => onAskFamily!(kisi),
+                      child: Text('${kisi.firstName}\'a sor'),
+                    ),
+                ],
+              ),
+            ],
             // Kiminle gidileceği (Paket 41). Yalnızca gerçekten
             // katılabilecek kişiler listelenir; kimse yoksa bölüm hiç
             // görünmez, sahte düğme olmaz.

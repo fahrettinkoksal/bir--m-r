@@ -10,6 +10,7 @@ import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
 import 'event_pool_chains.dart';
 import 'event_pool_childhood.dart';
+import 'event_pool_course.dart';
 import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
 import 'event_pool_elder.dart';
@@ -1709,6 +1710,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
   ...kRomanceEvents,
   // Hobi olayları (Paket 39): yalnızca gerçek hobi geçmişi olana çıkar.
   ...kHobbyEvents,
+  ...kCourseSupportEvents,
   ...kInvestmentEvents,
   // Şirket ve piyasa olayları (Paket AC).
   ...kMarketEvents,

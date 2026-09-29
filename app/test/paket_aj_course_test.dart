@@ -15,12 +15,15 @@ import 'dart:math';
 
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/economy.dart';
+import 'package:bir_omur/data/event_pool.dart';
+import 'package:bir_omur/data/event_pool_course.dart';
 import 'package:bir_omur/data/hobby_catalog.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/hobby/course_progress.dart';
 import 'package:bir_omur/domain/hobby/course_support.dart';
 import 'package:bir_omur/domain/hobby/hobby_tracker.dart';
+import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/hobby_progress.dart';
 import 'package:bir_omur/domain/models/person.dart';
@@ -226,7 +229,7 @@ void main() {
   group('Paket AJ — aileden destek', () {
     ActivityAction get6 () => _kurs('muzik_kursu');
 
-    GameState _ucretliNokta({
+    GameState ucretliNokta({
       WealthTier? anne = WealthTier.ortaHalli,
       WealthTier? baba = WealthTier.ortaHalli,
       int bond = 70,
@@ -255,29 +258,29 @@ void main() {
       ]);
     }
 
-    Person _anne(GameState s) =>
+    Person anneKisi(GameState s) =>
         s.people.firstWhere((Person p) => p.relation == RelationType.anne);
-    Person _baba(GameState s) =>
+    Person babaKisi(GameState s) =>
         s.people.firstWhere((Person p) => p.relation == RelationType.baba);
 
     test('18 yaş altı anneye ve babaya sorabiliyor', () {
-      final GameState s = _ucretliNokta();
+      final GameState s = ucretliNokta();
       final List<Person> destekciler = CourseSupport.sponsorsFor(s);
       expect(destekciler.map((Person p) => p.relation),
           containsAll(<RelationType>[RelationType.anne, RelationType.baba]));
-      expect(CourseSupport.blockReason(s, get6(), _anne(s)), isEmpty);
-      expect(CourseSupport.blockReason(s, get6(), _baba(s)), isEmpty);
+      expect(CourseSupport.blockReason(s, get6(), anneKisi(s)), isEmpty);
+      expect(CourseSupport.blockReason(s, get6(), babaKisi(s)), isEmpty);
     });
 
     test('ebeveyn yoksa seçenek görünmüyor', () {
       final GameState s =
-          _ucretliNokta(anneVar: false, babaVar: false);
+          ucretliNokta(anneVar: false, babaVar: false);
       expect(CourseSupport.sponsorsFor(s), isEmpty);
     });
 
     test('18 yaş sonrası aileden kurs ödemesi kapanıyor', () {
-      final GameState s = _ucretliNokta(age: 22);
-      final String engel = CourseSupport.blockReason(s, get6(), _anne(s));
+      final GameState s = ucretliNokta(age: 22);
+      final String engel = CourseSupport.blockReason(s, get6(), anneKisi(s));
       expect(engel, contains('kendi kursunu kendin'));
     });
 
@@ -285,11 +288,11 @@ void main() {
       int say(WealthTier tier) {
         int kabul = 0;
         for (int i = 0; i < 200; i++) {
-          final GameState s = _ucretliNokta(anne: tier, baba: tier);
+          final GameState s = ucretliNokta(anne: tier, baba: tier);
           final CourseSupportResult r = CourseSupport.ask(
             state: s,
             action: get6(),
-            person: _anne(s),
+            person: anneKisi(s),
             rng: Random(1000 + i),
           );
           if (r.outcome.accepted) kabul++;
@@ -314,11 +317,11 @@ void main() {
       int say(int bond) {
         int kabul = 0;
         for (int i = 0; i < 200; i++) {
-          final GameState s = _ucretliNokta(bond: bond);
+          final GameState s = ucretliNokta(bond: bond);
           final CourseSupportResult r = CourseSupport.ask(
             state: s,
             action: get6(),
-            person: _anne(s),
+            person: anneKisi(s),
             rng: Random(2000 + i),
           );
           if (r.outcome.accepted) kabul++;
@@ -336,11 +339,11 @@ void main() {
       int say(int yil) {
         int kabul = 0;
         for (int i = 0; i < 200; i++) {
-          final GameState s = _ucretliNokta(gecmisYil: yil);
+          final GameState s = ucretliNokta(gecmisYil: yil);
           final CourseSupportResult r = CourseSupport.ask(
             state: s,
             action: get6(),
-            person: _anne(s),
+            person: anneKisi(s),
             rng: Random(3000 + i),
           );
           if (r.outcome.accepted) kabul++;
@@ -355,39 +358,39 @@ void main() {
     });
 
     test('ret kalıcı değil: seneye yeniden sorulabiliyor', () {
-      GameState s = _ucretliNokta(anne: WealthTier.cokYoksul);
+      GameState s = ucretliNokta(anne: WealthTier.cokYoksul);
       // Reddettiren bir istek bul.
       CourseSupportResult r = CourseSupport.ask(
         state: s,
         action: get6(),
-        person: _anne(s),
+        person: anneKisi(s),
         rng: Random(11),
       );
       while (r.outcome.accepted) {
-        s = _ucretliNokta(anne: WealthTier.cokYoksul);
+        s = ucretliNokta(anne: WealthTier.cokYoksul);
         r = CourseSupport.ask(
           state: s,
           action: get6(),
-          person: _anne(s),
+          person: anneKisi(s),
           rng: Random(11),
         );
         break;
       }
       if (!r.outcome.accepted) {
         s = r.state;
-        expect(CourseSupport.blockReason(s, get6(), _anne(s)),
+        expect(CourseSupport.blockReason(s, get6(), anneKisi(s)),
             contains('seneye'));
         // Yıl dönünce sayaçlar sıfırlanır (LifeProgression) ve kapı açılır.
         final GameState seneye =
             s.copyWith(interactionCounts: const <String, int>{});
-        expect(CourseSupport.blockReason(seneye, get6(), _anne(seneye)),
+        expect(CourseSupport.blockReason(seneye, get6(), anneKisi(seneye)),
             isEmpty);
       }
     });
 
     test('aile parası yoktan oluşmuyor: yıllık bütçe var', () {
-      GameState s = _ucretliNokta(anne: WealthTier.ortaHalli);
-      final Person anne = _anne(s);
+      GameState s = ucretliNokta(anne: WealthTier.ortaHalli);
+      final Person anne = anneKisi(s);
       final int butce = CourseSupport.yearlyBudget(anne);
       expect(butce, greaterThan(0));
       int verilen = 0;
@@ -421,11 +424,11 @@ void main() {
     });
 
     test('ödeme iki kez uygulanmıyor: kredi bir kez harcanıyor', () {
-      GameState s = _ucretliNokta();
+      GameState s = ucretliNokta();
       final CourseSupportResult r = CourseSupport.ask(
         state: s,
         action: get6(),
-        person: _anne(s),
+        person: anneKisi(s),
         rng: Random(4),
       );
       if (!r.outcome.accepted) return;
@@ -447,11 +450,11 @@ void main() {
       // Kabul edilen desteği "kaydet, yükle, tekrar sor" ile çoğaltmaya
       // çalışmak: aynı yıl aynı kişiden ikinci kez kredi alınamaz çünkü
       // bütçe ve kredi aynı durumun içinde tutuluyor.
-      GameState s = _ucretliNokta();
+      GameState s = ucretliNokta();
       final CourseSupportResult ilk = CourseSupport.ask(
         state: s,
         action: get6(),
-        person: _anne(s),
+        person: anneKisi(s),
         rng: Random(4),
       );
       if (!ilk.outcome.accepted) return;
@@ -459,11 +462,73 @@ void main() {
       final CourseSupportResult ikinci = CourseSupport.ask(
         state: s,
         action: get6(),
-        person: _anne(s),
+        person: anneKisi(s),
         rng: Random(4),
       );
       expect(ikinci.outcome.applied, isFalse,
           reason: 'Ücret zaten karşılanmışken ikinci kredi verilmemeli.');
+    });
+  });
+
+  group('Paket AJ — burs ve ücretsiz yollar (§7)', () {
+    test('dört ücretsiz yol olayı havuzda ve izi bırakıyor', () {
+      expect(kCourseSupportEvents.length, greaterThanOrEqualTo(4));
+      for (final GameEvent e in kCourseSupportEvents) {
+        expect(kEventPool.any((GameEvent p) => p.id == e.id), isTrue,
+            reason: '${e.id} ana havuza kayıtlı değil.');
+        expect(
+          e.choices.any((EventChoice c) =>
+              c.addFlags.contains(CourseProgress.scholarshipFlag)),
+          isTrue,
+          reason: '${e.id} hiçbir seçenekte burs izi bırakmıyor.',
+        );
+      }
+    });
+
+    test('burs izi varken ücretli ders bedava', () {
+      final ActivityAction kurs = _kurs('muzik_kursu');
+      GameState s = _hayat(age: 14, wallet: 0);
+      // Tanışma dönemini bitir.
+      s = s.copyWith(hobbies: <HobbyProgress>[
+        HobbyProgress(
+          hobbyId: HobbyKind.muzik.id,
+          startedAtAge: 10,
+          experience: 8,
+          lastPracticedAge: 14,
+        ),
+      ]);
+      expect(CourseProgress.standingFor(s, kurs)!.fee, greaterThan(0));
+      final GameState burslu = s.copyWith(
+        storyFlags: <String>{...s.storyFlags, CourseProgress.scholarshipFlag},
+      );
+      expect(CourseProgress.standingFor(burslu, kurs)!.fee, 0,
+          reason: 'Burs izi ücreti kaldırmalı.');
+      expect(_motor.availability(burslu, kurs).isAllowed, isTrue);
+    });
+
+    test('burs sınırsız değil: yıllık hak bitince ücret geri geliyor', () {
+      final ActivityAction kurs = _kurs('muzik_kursu');
+      GameState s = _hayat(age: 14, wallet: 0).copyWith(
+        hobbies: <HobbyProgress>[
+          HobbyProgress(
+            hobbyId: HobbyKind.muzik.id,
+            startedAtAge: 10,
+            experience: 8,
+            lastPracticedAge: 14,
+          ),
+        ],
+      );
+      s = s.copyWith(
+        storyFlags: <String>{...s.storyFlags, CourseProgress.scholarshipFlag},
+        interactionCounts: <String, int>{
+          GameState.interactionKey(
+            CourseProgress.scholarshipCounterId,
+            CourseProgress.counterKind,
+          ): CourseProgress.prototypeOnlyScholarshipLessons,
+        },
+      );
+      expect(CourseProgress.standingFor(s, kurs)!.fee, greaterThan(0),
+          reason: 'Burs hakkı bitince ücret geri gelmeli.');
     });
   });
 

@@ -98,6 +98,18 @@ abstract final class CourseProgress {
   /// deneme hakkı olarak bırakıyor ama bedava stat turuna çevirmiyor.
   static const int prototypeOnlyYearlyFreeLessons = 6;
 
+  /// prototypeOnly: burs/ücretsiz kontenjan izi (Paket AJ, §7).
+  ///
+  /// Belediye atölyesi, okul kulübü, öğretmen ya da akraba desteği bu
+  /// izi bırakır. İz varken dersler yıl içinde belli bir sayıya kadar
+  /// ücretsizdir: sonsuz bedava ders değil, bir yıl açık kalan kapı.
+  static const String scholarshipFlag = 'kurs_destegi';
+
+  /// prototypeOnly: burs izi varken yıllık ücretsiz ders hakkı.
+  static const int prototypeOnlyScholarshipLessons = 4;
+
+  static const String scholarshipCounterId = 'kursBursu';
+
   /// prototypeOnly: kilometre taşları.
   static const List<int> prototypeOnlyMilestones = <int>[5, 10, 20, 35];
 
@@ -137,10 +149,18 @@ abstract final class CourseProgress {
                 ? CourseTier.normal
                 : CourseTier.profesyonel;
 
+    // Burs izi: aile ödeyemediğinde kursu sonsuza kapatmayan yol.
+    final int bursKalan = state.storyFlags.contains(scholarshipFlag)
+        ? (prototypeOnlyScholarshipLessons -
+                state.interactionCount(scholarshipCounterId, counterKind))
+            .clamp(0, prototypeOnlyScholarshipLessons)
+        : 0;
+
     // Tanışma dersi ancak yıllık hak varken ücretsiz. Hak bittiyse aynı
     // ders başlangıç kademesinden ücretlenir: kapı kapanmaz, bedava
     // olmaktan çıkar.
-    final bool bedava = kademe == CourseTier.tanisma && yillikKalan > 0;
+    final bool bedava =
+        (kademe == CourseTier.tanisma && yillikKalan > 0) || bursKalan > 0;
     final int ucret = bedava
         ? 0
         : (action.cost *
@@ -182,10 +202,22 @@ abstract final class CourseProgress {
   }
 
   /// Ücretsiz ders sayacını bir artırır.
-  static GameState countFreeLesson(GameState state) =>
-      state.copyWith(interactionCounts: <String, int>{
-        ...state.interactionCounts,
+  ///
+  /// Burs izi varken önce burs hakkı harcanır; tanışma hakkı
+  /// tüketilmez. Böylece burslu bir yıl, tanışma dersi hakkını
+  /// yemez.
+  static GameState countFreeLesson(GameState state) {
+    final bool burslu = state.storyFlags.contains(scholarshipFlag) &&
+        state.interactionCount(scholarshipCounterId, counterKind) <
+            prototypeOnlyScholarshipLessons;
+    return state.copyWith(interactionCounts: <String, int>{
+      ...state.interactionCounts,
+      if (burslu)
+        GameState.interactionKey(scholarshipCounterId, counterKind):
+            state.interactionCount(scholarshipCounterId, counterKind) + 1
+      else
         GameState.interactionKey(yearlyFreeCounterId, counterKind):
             yearlyFreeUsed(state) + 1,
-      });
+    });
+  }
 }
