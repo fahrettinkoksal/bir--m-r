@@ -3673,6 +3673,48 @@ koşulda doğruydu. İki yönlü yazıldı — yarım kardeşten yeğen **geliyo
 kırıldı, ama sebep ürün değil harness'tı: `advanceOneYear` ekranda
 çözülmemiş olay varken hiçbir şey yapmadan dönüyor.
 
+### Tam süitin kırdığı üç bekçi — üçü de ölçümle çözüldü
+
+Paket AO tamamlandıktan sonra tam süitte üç test kırıldı. Üçü de tahminle
+değil ölçümle incelendi ve üçünde de aynı sonuç çıktı: kırılan şey ürün
+değil, **bekçinin kendisiydi**. Hiçbir eşik düşürülmedi.
+
+**1. `paket_ai_abuse` §24 — "para isteme net serveti artırıyor (+108)".**
+Para istemek tasarım gereği para verir (harçlık, D-019); net servet
+farkının işareti bu saldırıda kuralı değil, o turda açılan rastgele
+olayın cebe ne yaptığını ölçüyordu. Paket AO **öncesi** HEAD'de aynı
+saldırı 20 tohumda koşuldu: **14 tohumda net servet zaten artıyordu**,
+birebir +108 dahil. Bekçi tek tohumla tesadüfen geçiyormuş.
+
+Gevşetmek yerine saldırının asıl koruması iddiaya çevrildi: **mekanik
+doyuyor.** 100 denemede de 1000 denemede de kabul sayısı aynı (20 tohumda
+da 3). Yeni iddia: kabul ≤ 4 **ve** on kat deneme bir kabul daha
+getirmiyor. Diğer altı saldırıda "servet artmasın" bekçisi aynen duruyor.
+
+**2-3. `paket_ag_payback` §16 ve §20 — dağılım kuyrukları.** Hızlı turda
+işletme başına 45 hayat koşuluyordu ve işletmeyi gerçekten **açan** hayat
+~25'e düşüyordu; yani "kötü %10" sıralı listenin 3. elemanıydı.
+
+| örneklem | serbest yazılım kötü%10 (AO öncesi → sonrası) |
+| --- | --- |
+| 45 | −0,37 → **+7,79** |
+| 150 | −0,33 → +0,30 |
+| 300 | −0,29 → +0,30 |
+
+Örneklem 45'ten **600**'e çıkarıldı; eşikler ve istatistik aynen kaldı.
+
+Paket AO'nun bu sayılara dokunmadığı ayrıca **kanıtlandı**: Faz 3'ün tek
+simülasyon etkisi yeni bağlara `ChildProgression` çalıştırmaktı ve o
+kayıtlar oyuncunun ekonomisine hiç değmiyor. Deney olarak sonuçlar atılıp
+yalnızca zar akışı ilerletildiğinde ölçüm birebir aynı çıktı:
+**9,416017364203027**, on beş hanesine kadar. Fark tamamen zarın
+konumundan geliyordu.
+
+Yan bulgu (gerçek, denge kararı verilmedi): **terzi atölyesi** katalogdaki
+en dar dağılım ve §16 sınırına iki ağaçta da en yakın işletme — Paket
+AH'nin "işletme seçimlerinin %60'ı terzi" bulgusuyla aynı yöne işaret
+ediyor.
+
 ### Bilerek yapılmayanlar (§51)
 
 Dev aile ağacı görseli, DNA testi, evlat edinme akışı, velayet mahkemesi
