@@ -68,7 +68,9 @@ import 'spouse_life.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
+import 'parent_divorce.dart';
 import 'step_parents.dart';
+import 'step_siblings.dart';
 import 'school_people.dart';
 import '../../text/turkish_text.dart';
 import '../../data/item_catalog.dart';
@@ -676,10 +678,20 @@ class LifeProgression {
     // kayıtları silinmez, görüşülmeye devam edilir.
     afterDeaths = _childrenLeaveHome(afterDeaths, newAge);
 
-    // Vefat eden eşin ardından ebeveyn yeniden evlenebilir: oyuncuya
-    // üvey anne ya da üvey baba gelir (D-141). Kimse silinmez; vefat
-    // eden ebeveyn kayıtta kalır.
+    // Anne ve baba ayrılabilir (Paket AO §1-§6). Boşanma **önce** işlenir:
+    // ayrılan ebeveynin yeniden evlenmesi ancak boşanma durumu yazıldıktan
+    // sonra mümkün olur, yani aynı yıl hem ayrılıp hem evlenmez.
+    afterDeaths = ParentDivorce.maybeDivorce(afterDeaths, newAge, _rng);
+
+    // Eşi vefat eden **ya da boşanan** ebeveyn yeniden evlenebilir:
+    // oyuncuya üvey anne ya da üvey baba gelir (D-141, Paket AO §7-§8).
+    // Kimse silinmez; vefat eden ya da ayrılan ebeveyn kayıtta kalır.
     afterDeaths = StepParents.maybeRemarry(afterDeaths, newAge, _rng);
+
+    // Üvey ebeveynden yarım kardeş doğabilir (Paket AO §12, §13).
+    // "Bebeği oldu" yalnızca metin değil: yaşı 0 olan gerçek bir kayıt
+    // açılır ve ortak biyolojik ebeveyn yazılır.
+    afterDeaths = StepSiblings.maybeHalfSibling(afterDeaths, newAge, _rng);
 
     // Kronik durumlar: takip edilmeyen rahatsızlık her yıl sağlıktan
     // düşürür; ileri yaşta yenisi ortaya çıkabilir (D-153). Kriz gibi

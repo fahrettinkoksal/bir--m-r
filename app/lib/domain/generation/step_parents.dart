@@ -13,8 +13,11 @@
 /// ebeveyni geçmişten kaldırmaz. Üvey kardeş bu sürümde gelmiyor
 /// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-149).
 ///
-/// Ebeveynlerin **boşanması** henüz modellenmiyor; bu yüzden tek tetik
-/// vefattır. Boşanma eklendiğinde aynı kapı kullanılacak.
+/// **Paket AO (§7, §8):** tetik artık yalnızca vefat değil. Ebeveynler
+/// ayrıldıysa ([ParentalStatus.bosanmis] / [ParentalStatus.ayri]) uygun
+/// yıllar geçince **iki taraf da** yeniden evlenebilir — yani oyuncunun
+/// aynı hayatta hem üvey annesi hem üvey babası olabilir, farklı
+/// hanelerde. Vefat yolu aynen korundu; iki tetik de aynı kapıdan geçer.
 ///
 /// Bütün sayılar `prototypeOnly`'dir.
 library;
@@ -30,10 +33,16 @@ import '../models/person.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
+import 'step_siblings.dart';
 
 abstract final class StepParents {
   /// prototypeOnly: vefattan sonra en az kaç yıl geçmeli.
   static const int prototypeOnlyMourningYears = 2;
+
+  /// prototypeOnly: ayrılıktan sonra en az kaç yıl geçmeli (§7).
+  ///
+  /// Yastan kısa: ayrılık bir kayıp değil, bir sonlanmadır.
+  static const int prototypeOnlySeparationYears = 1;
 
   /// prototypeOnly: uygun bir yılda yeniden evlenme ihtimali.
   static const double prototypeOnlyRemarryChance = 0.12;
@@ -57,23 +66,30 @@ abstract final class StepParents {
     final Person? anne = _parent(state, RelationType.anne);
     final Person? baba = _parent(state, RelationType.baba);
 
-    // Yeniden evlenebilecek ebeveyn: kendisi hayatta, eşi yok (vefat etti
-    // ya da hiç kayıtlı değil) ve o taraftan üvey ebeveyn henüz gelmemiş.
-    final Person? evlenecek = _remarryCandidate(
-      state: state,
-      parent: anne,
-      counterpart: baba,
-      stepType: RelationType.uveyBaba,
-      newAge: newAge,
-    ) ??
-        _remarryCandidate(
-          state: state,
-          parent: baba,
-          counterpart: anne,
-          stepType: RelationType.uveyAnne,
-          newAge: newAge,
-        );
-    if (evlenecek == null) return state;
+    // Yeniden evlenebilecek ebeveyn: kendisi hayatta, eşi yok ya da
+    // ayrılmışlar, ve o taraftan üvey ebeveyn henüz gelmemiş.
+    //
+    // §8: iki taraf da aday. Aday listesi sırayla denenmiyor —
+    // **karıştırılıyor**; yoksa boşanmada hep anne önce evlenirdi ve
+    // baba tarafı ancak anne evlenemezse sıra alırdı.
+    final List<Person> adaylar = <Person>[
+      ?_remarryCandidate(
+        state: state,
+        parent: anne,
+        counterpart: baba,
+        stepType: RelationType.uveyBaba,
+        newAge: newAge,
+      ),
+      ?_remarryCandidate(
+        state: state,
+        parent: baba,
+        counterpart: anne,
+        stepType: RelationType.uveyAnne,
+        newAge: newAge,
+      ),
+    ];
+    if (adaylar.isEmpty) return state;
+    final Person evlenecek = adaylar[rng.nextInt(adaylar.length)];
     if (rng.nextDouble() >= prototypeOnlyRemarryChance) return state;
 
     final RelationType tur = evlenecek.relation == RelationType.anne
@@ -91,8 +107,19 @@ abstract final class StepParents {
         '${trUpperFirstLocal(evlenecek.possessiveFor(newAge))} yeniden '
         'evlendi. ${uvey.firstName} artık üvey $etiket.';
 
+    // §9-§11: üvey ebeveyn yanında kendi çocuklarını getirmiş olabilir.
+    // **Çoğu zaman getirmez** — 0 çocuk en olası sonuçtur.
+    final List<Person> uveyKardesler = StepSiblings.childrenOf(
+      state: state,
+      stepParent: uvey,
+      playerAge: newAge,
+      rng: rng,
+    );
+
     GameState next = state.copyWith(
-      people: List<Person>.unmodifiable(<Person>[...state.people, uvey]),
+      people: List<Person>.unmodifiable(
+        <Person>[...state.people, uvey, ...uveyKardesler],
+      ),
       player: state.player.copyWith(
         // Alışmak zaman alır; küçük yaşta daha zor.
         stats: state.player.stats.gain(happiness: newAge < 18 ? -3 : -1),
@@ -105,6 +132,13 @@ abstract final class StepParents {
           category: LogCategory.aile,
           personId: uvey.id,
         ),
+        for (final Person k in uveyKardesler)
+          LifeLogEntry(
+            age: newAge,
+            text: '${k.firstName} artık üvey kardeşin.',
+            category: LogCategory.aile,
+            personId: k.id,
+          ),
       ]),
     );
     next = next.queueNotice(
@@ -114,6 +148,7 @@ abstract final class StepParents {
         age: newAge,
         title: 'Evde yeni biri var',
         text: '$metin\n\n'
+            '${_stepChildrenLine(uveyKardesler)}'
             '${uvey.firstName} ile aranız kendiliğinden kurulmayacak: '
             'yakınlık düşük başlıyor, vakit geçirdikçe değişir.',
         personId: uvey.id,
@@ -139,13 +174,27 @@ abstract final class StepParents {
   }) {
     if (parent == null || !parent.isAlive) return null;
     if (parent.age > prototypeOnlyMaxParentAge) return null;
-    // Eşi hâlâ hayattaysa yeniden evlenmez.
-    if (counterpart != null && counterpart.isAlive) return null;
     // O taraftan üvey ebeveyn zaten geldiyse ikincisi gelmez.
     if (state.people.any((Person p) => p.relation == stepType)) return null;
-    // Yas süresi: vefat yılı kayıttan okunur, uydurulmaz. Kayıt yoksa
-    // (hayat başlarken vefat etmiş biri) süre geçmiş sayılır.
-    if (counterpart != null) {
+
+    final bool ayrilmislar = !state.parentalStatus.birlikteMi;
+
+    // Eşi hâlâ hayattaysa ve **ayrılmamışlarsa** yeniden evlenmez.
+    // Paket AO §7: ayrılmışlarsa eşin hayatta olması engel değildir.
+    if (counterpart != null && counterpart.isAlive && !ayrilmislar) {
+      return null;
+    }
+
+    if (ayrilmislar) {
+      // Ayrılık yılı günlükten okunur, uydurulmaz.
+      final int? ayrilikYasi = _separationAge(state);
+      if (ayrilikYasi != null &&
+          newAge - ayrilikYasi < prototypeOnlySeparationYears) {
+        return null;
+      }
+    } else if (counterpart != null) {
+      // Yas süresi: vefat yılı kayıttan okunur, uydurulmaz. Kayıt yoksa
+      // (hayat başlarken vefat etmiş biri) süre geçmiş sayılır.
       final int? vefatYasi = _deathAge(state, counterpart.id);
       if (vefatYasi != null &&
           newAge - vefatYasi < prototypeOnlyMourningYears) {
@@ -153,6 +202,17 @@ abstract final class StepParents {
       }
     }
     return parent;
+  }
+
+  /// Anne ve babanın ayrıldığı oyuncu yaşı; kayıt yoksa `null`.
+  static int? _separationAge(GameState state) {
+    for (final LifeLogEntry e in state.log.reversed) {
+      if (e.category == LogCategory.aile &&
+          e.text.contains('Annenle baban ayrıldı')) {
+        return e.age;
+      }
+    }
+    return null;
   }
 
   /// Bu kişinin vefatının yazıldığı oyuncu yaşı; kayıt yoksa `null`.
@@ -203,6 +263,8 @@ abstract final class StepParents {
       age: (parent.age + rng.nextInt(9) - 4).clamp(25, 85),
       isAlive: true,
       // Ebeveyn oyuncunun hanesindeyse üvey ebeveyn de aynı hanede olur.
+      // Boşanmadan sonra oyuncu tek bir ebeveynle yaşadığı için, diğer
+      // taraftan gelen üvey ebeveyn **başka hanededir** (§8).
       inPlayerHousehold: parent.inPlayerHousehold,
       employment: calisiyor
           ? EmploymentStatus.calisiyor
@@ -213,6 +275,17 @@ abstract final class StepParents {
       bond: prototypeOnlyStartBond,
       city: parent.city ?? state.player.currentCity,
     );
+  }
+
+  /// Üvey kardeş varsa bildirimde geçen cümle; yoksa boş.
+  static String _stepChildrenLine(List<Person> cocuklar) {
+    if (cocuklar.isEmpty) return '';
+    if (cocuklar.length == 1) {
+      return 'Yanında ${cocuklar.first.firstName} da geldi '
+          '(${cocuklar.first.age} yaşında); artık üvey kardeşin.\n\n';
+    }
+    final String adlar = cocuklar.map((Person p) => p.firstName).join(' ve ');
+    return 'Yanında $adlar da geldi; artık üvey kardeşlerin.\n\n';
   }
 
   /// İlk harfi büyüten yerel yardımcı: metin katmanına bağımlılık

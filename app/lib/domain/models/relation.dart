@@ -72,7 +72,31 @@ enum RelationType {
   //
   // Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
   uveyAnne,
-  uveyBaba;
+  uveyBaba,
+
+  // --- Paket AO: Aile V2 ---------------------------------------------
+  //
+  // Hepsi listenin **sonuna** eklendi; enum sırası bozulmadı, eski
+  // kayıtlar bozulmasın.
+
+  // Üvey kardeş (§9): anne ya da babanın yeni eşinin **önceki**
+  // çocuğu. Oyuncuyla **kan bağı yoktur** — ortak biyolojik ebeveyni
+  // bulunmaz. Aynı evde büyüyebilir; çekirdek ailede listelenir.
+  uveyKardes,
+
+  // Yarım kardeş (§12): anne ya da babanın yeni eşinden doğan çocuk.
+  // Üvey kardeşten farkı **kan bağıdır**: oyuncuyla bir biyolojik
+  // ebeveyni ortaktır. Miras ve akrabalık kuralları buna göre işler.
+  yariKardes,
+
+  // Üvey çocuk (§18): eşin önceki ilişkisinden olan çocuğu. Oyuncunun
+  // biyolojik çocuğu **değildir**. Boşanınca kaydı silinmez.
+  uveyCocuk,
+
+  // Kayın aile (§21): eşin yaşayan ebeveynleri. Boşanınca kayıt kalır,
+  // yalnızca gündelik erişim kapanır.
+  kayinvalide,
+  kayinpeder;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -89,7 +113,17 @@ enum RelationType {
       // (kan bağı sayılmaz, [kanBagi] ayrıca dışlar).
       case RelationType.uveyAnne:
       case RelationType.uveyBaba:
+      // Paket AO: üvey/yarım kardeş ve üvey çocuk da çekirdek ailede
+      // yaşar. Kan bağı ayrımı [kanBagi] içinde yapılır.
+      case RelationType.uveyKardes:
+      case RelationType.yariKardes:
+      case RelationType.uveyCocuk:
         return RelationGroup.cekirdek;
+      // Eşin ailesi kendi başlığında durur (§38): çekirdek aileye
+      // karışmaz, geniş aile de değildir.
+      case RelationType.kayinvalide:
+      case RelationType.kayinpeder:
+        return RelationGroup.esinAilesi;
       case RelationType.torun:
       case RelationType.yegen:
         return RelationGroup.genis;
@@ -134,6 +168,12 @@ enum RelationType {
       // (D-141); kalıtım ve akrabalık kuralları ona uygulanmaz.
       this != RelationType.uveyAnne &&
       this != RelationType.uveyBaba &&
+      // Paket AO §9, §18: üvey kardeş ve üvey çocuk da çekirdek ailede
+      // listelenir ama **kan bağı değildir**. Yarım kardeş (§12) ise
+      // kan bağıdır: bir biyolojik ebeveyn ortaktır, o yüzden burada
+      // dışlanmaz.
+      this != RelationType.uveyKardes &&
+      this != RelationType.uveyCocuk &&
       (group == RelationGroup.cekirdek || group == RelationGroup.genis);
 
   /// Birlikte hane kurulan bağ mı? (Eş ve çocuklar.)
@@ -147,7 +187,9 @@ enum RelationGroup {
   arkadaslar('Arkadaşlar'),
   romantik('İlişkiler'),
   // Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
-  tanidiklar('Ünlüler ve tanıdıklar');
+  tanidiklar('Ünlüler ve tanıdıklar'),
+  // Paket AO §38: kayınvalide ve kayınpeder kendi başlığında durur.
+  esinAilesi('Eşinin ailesi');
 
   const RelationGroup(this.title);
 
@@ -225,6 +267,22 @@ String relationLabel({
       return 'Üvey anne';
     case RelationType.uveyBaba:
       return 'Üvey baba';
+    case RelationType.uveyKardes:
+      return gender == Gender.kadin ? 'Üvey kız kardeş' : 'Üvey erkek kardeş';
+    case RelationType.yariKardes:
+      // Yaş sırası kardeşte olduğu gibi etikete girer.
+      if (personAge > playerAge) {
+        return gender == Gender.kadin ? 'Yarım abla' : 'Yarım abi';
+      }
+      return gender == Gender.kadin
+          ? 'Yarım kız kardeş'
+          : 'Yarım erkek kardeş';
+    case RelationType.uveyCocuk:
+      return gender == Gender.kadin ? 'Üvey kız' : 'Üvey oğul';
+    case RelationType.kayinvalide:
+      return 'Kayınvalide';
+    case RelationType.kayinpeder:
+      return 'Kayınpeder';
   }
 }
 
@@ -300,5 +358,22 @@ String relationPossessive({
       return 'Üvey annen';
     case RelationType.uveyBaba:
       return 'Üvey baban';
+    case RelationType.uveyKardes:
+      return gender == Gender.kadin
+          ? 'Üvey kız kardeşin'
+          : 'Üvey erkek kardeşin';
+    case RelationType.yariKardes:
+      if (personAge > playerAge) {
+        return gender == Gender.kadin ? 'Yarım ablan' : 'Yarım abin';
+      }
+      return gender == Gender.kadin
+          ? 'Yarım kız kardeşin'
+          : 'Yarım erkek kardeşin';
+    case RelationType.uveyCocuk:
+      return gender == Gender.kadin ? 'Üvey kızın' : 'Üvey oğlun';
+    case RelationType.kayinvalide:
+      return 'Kayınvaliden';
+    case RelationType.kayinpeder:
+      return 'Kayınpederin';
   }
 }

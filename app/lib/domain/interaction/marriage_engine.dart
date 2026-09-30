@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import '../generation/in_laws.dart';
+
 import '../effects/effect_diff.dart';
 import 'divorce_settlement.dart';
 import '../life/notices.dart';
@@ -216,8 +218,22 @@ class MarriageEngine {
       storyFlags: <String>{...state.storyFlags, StoryFlags.evlendi},
     );
 
+    // Paket AO §19-§22: eşin ailesi ve varsa önceki çocuğu **evlilik
+    // kurulurken** hayata girer. "Beş yıl sonra eşinin 12 yaşında çocuğu
+    // olduğunu öğrenmek" saçmalığı böyle engelleniyor.
+    //
+    // Rastgelelik eşin kalıcı kimliğinden türetiliyor: `holdWedding`
+    // dışarıdan `Random` almıyor ve imzası değiştirilmedi. Aynı evlilik
+    // aynı aileyi verir, kayıt/yükleme sonrası değişmez.
+    final GameState aileyle = InLaws.onMarriage(
+      state: next,
+      spouse: partner,
+      age: state.player.age,
+      rng: Random(partner.id.hashCode ^ state.player.age),
+    );
+
     return FamilyResult(
-      state: _log(next, metin, LogCategory.aile),
+      state: _log(aileyle, metin, LogCategory.aile),
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }

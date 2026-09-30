@@ -91,8 +91,21 @@ abstract final class Inheritance {
               : RelationType.anne,
         });
         final List<Person> kardesler = ara(<RelationType>{RelationType.kardes});
+        // Paket AO §17: yarım kardeş **biyolojik** akrabadır ve ortak
+        // ebeveynin mirasına girer. Ama yalnızca **o ebeveyni** paylaşan
+        // yarım kardeş girer: annenin mirasına babanın önceki
+        // evliliğinden olan yarım kardeş giremez.
+        //
+        // Ayrım ad üzerinden değil **kayıtlı soy** üzerinden yapılıyor;
+        // eski kayıtlarda soy alanı boş olduğu için bu liste boş döner ve
+        // eski davranış birebir korunur.
+        final List<Person> yarimKardesler = yasayanlar
+            .where((Person p) =>
+                p.relation == RelationType.yariKardes &&
+                (p.motherId == deceased.id || p.fatherId == deceased.id))
+            .toList(growable: false);
         return (
-          others: <Person>[...digerEbeveyn, ...kardesler],
+          others: <Person>[...digerEbeveyn, ...kardesler, ...yarimKardesler],
           playerIsHeir: true,
         );
 
@@ -103,6 +116,9 @@ abstract final class Inheritance {
       // Artık kardeşin kendi eşi ve çocukları olabiliyor: bir insanın
       // mirası önce kendi hanesine gider. Oyuncu ancak kardeşin
       // **eşi de çocuğu da yoksa** mirasçı olur.
+      // Yarım kardeş de kardeş gibi ele alınır (Paket AO §17): kan bağı
+      // vardır, dolayısıyla kendi ailesi yoksa miras yukarı çıkar.
+      case RelationType.yariKardes:
       case RelationType.kardes:
         final bool kendiAilesiVar =
             (deceased.development?.isMarried ?? false) ||
@@ -112,8 +128,19 @@ abstract final class Inheritance {
         if (kendiAilesiVar) {
           return (others: const <Person>[], playerIsHeir: false);
         }
-        final List<Person> ebeveynler =
-            ara(<RelationType>{RelationType.anne, RelationType.baba});
+        // Yarım kardeşte yalnızca **ortak olmayan** tarafın ebeveyni de
+        // mirasçıdır; kayıt varsa oradan okunur, yoksa eski davranış
+        // (iki ebeveyn birden) korunur.
+        final List<Person> ebeveynler = deceased.relation ==
+                    RelationType.yariKardes &&
+                deceased.biologicalParentIds.isNotEmpty
+            ? yasayanlar
+                .where((Person p) =>
+                    (p.relation == RelationType.anne ||
+                        p.relation == RelationType.baba) &&
+                    deceased.biologicalParentIds.contains(p.id))
+                .toList(growable: false)
+            : ara(<RelationType>{RelationType.anne, RelationType.baba});
         if (ebeveynler.isNotEmpty) {
           return (others: ebeveynler, playerIsHeir: false);
         }
@@ -157,6 +184,13 @@ abstract final class Inheritance {
 
       // Diğer bağlarda (arkadaş, öğretmen, uzak akraba, **eski eş**)
       // miras yoktur: boşanmış eş mirasçı değildir (D-037).
+      //
+      // Paket AO §17 — buraya bilerek düşenler: **üvey kardeş**, **üvey
+      // çocuk**, **üvey ebeveyn** ve **kayın aile**. Hiçbirinin oyuncuyla
+      // kan bağı yoktur, dolayısıyla yasal mirasçı da değildirler. Bu
+      // onlara hiçbir şey bırakılamaz demek değil: vasiyet sistemi
+      // bilinçli bırakmaya izin veriyorsa o yol açık kalır, burası
+      // yalnızca **kendiliğinden** kalan mirası dağıtır.
       default:
         return (others: const <Person>[], playerIsHeir: false);
     }

@@ -103,6 +103,22 @@ class FamilyInteractions {
         .toList(growable: false);
   }
 
+  /// [exSpouse] ile oyuncunun **ortak** çocukları (§25).
+  ///
+  /// Ad üzerinden değil kayıt üzerinden: çocuğun diğer biyolojik ebeveyni
+  /// olarak bu kişinin kimliği yazılmışsa ortaktır. Eski kayıtlarda bu
+  /// alan boş olduğu için liste boş döner ve eski davranış (kapalı kapı)
+  /// aynen korunur.
+  List<Person> _sharedChildrenWith(GameState state, Person exSpouse) =>
+      state.people
+          .where((Person p) =>
+              (p.relation == RelationType.cocuk ||
+                  p.relation == RelationType.uveyCocuk) &&
+              (p.motherId == exSpouse.id ||
+                  p.fatherId == exSpouse.id ||
+                  p.development?.otherParentId == exSpouse.id))
+          .toList(growable: false);
+
   /// Etkileşimin şu an mümkün olup olmadığı.
   ///
   /// Olmayan veya vefat etmiş kişiyle etkileşim hiçbir zaman açılmaz.
@@ -124,12 +140,26 @@ class FamilyInteractions {
       );
     }
     if (person.relation == RelationType.eskiEs) {
-      // Boşanma sonrası hangi etkileşimlerin açık kalacağı henüz
-      // kararlaştırılmadı (Q-063); uydurma bir kural uygulanmaz.
-      return const InteractionAvailability.blocked(
-        'Boşandınız. Eski eşle hangi etkileşimlerin açık kalacağı henüz '
-        'tasarlanmadı.',
-      );
+      // Paket AO §25 — burası eskiden **her şeyi** kapatıyordu ve
+      // gerekçesi "henüz tasarlanmadı"ydı. Artık tasarlandı:
+      //
+      // * Ortak çocuk **yoksa** gündelik iletişim kapalı kalır. Boşandınız;
+      //   sizi bağlayan bir şey kalmadı.
+      // * Ortak çocuk **varsa** iletişim tamamen bitmez. İki insan aynı
+      //   çocuğun annesi ve babası olmaya devam eder.
+      //
+      // Açılan tek kapı `cocukKonus`: dev bir velayet/mahkeme sistemi
+      // kurulmadı (§25, V1 sınırı).
+      if (_sharedChildrenWith(state, person).isEmpty) {
+        return const InteractionAvailability.blocked(
+          'Boşandınız. Sizi bağlayan bir şey kalmadı.',
+        );
+      }
+      if (kind != null && kind != InteractionKind.cocukKonus) {
+        return const InteractionAvailability.blocked(
+          'Boşandınız. Konuşacağınız tek şey çocuğunuz.',
+        );
+      }
     }
     if (person.relation == RelationType.eskiSevgili) {
       // Ayrılık sonrası sevgiliye özel eylemler koşulsuz açılmaz
@@ -168,6 +198,21 @@ class FamilyInteractions {
     switch (kind) {
       case InteractionKind.vakitGecir:
       case InteractionKind.sohbet:
+        return const InteractionAvailability.allowed();
+
+      // §25: yalnızca ortak çocuğu olan eski eşle konuşulur. Kapı
+      // yukarıda da denetlendi; burası türün kendi koşulu.
+      case InteractionKind.cocukKonus:
+        if (person.relation != RelationType.eskiEs) {
+          return const InteractionAvailability.blocked(
+            'Bu etkileşim yalnızca eski eşle yapılır.',
+          );
+        }
+        if (_sharedChildrenWith(state, person).isEmpty) {
+          return const InteractionAvailability.blocked(
+            'Ortak çocuğunuz yok.',
+          );
+        }
         return const InteractionAvailability.allowed();
 
       case InteractionKind.hediyeVer:
@@ -411,6 +456,9 @@ class FamilyInteractions {
         alinanHediye = uygun[rng.nextInt(uygun.length)];
       case InteractionKind.vakitGecir:
       case InteractionKind.sohbet:
+      // Çocuğu konuşmak para ya da eşya devretmez (§25): co-parenting
+      // bir gelir kapısı değil.
+      case InteractionKind.cocukKonus:
         break;
     }
 

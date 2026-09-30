@@ -477,6 +477,10 @@ abstract final class GenerationContinuation {
             ? RelationType.anneTarafiDede
             : RelationType.babaTarafiDede;
       case RelationType.kardes:
+      // Paket AO §41: yarım kardeş de eski oyuncunun kardeşidir, yani
+      // yeni oyuncunun teyzesi/dayısı/halası/amcasıdır. Kan bağı
+      // olduğu için biyolojik kardeşle aynı yoldan geçer.
+      case RelationType.yariKardes:
         if (motherLine) {
           return person.gender == Gender.kadin
               ? RelationType.teyze
@@ -485,6 +489,44 @@ abstract final class GenerationContinuation {
         return person.gender == Gender.kadin
             ? RelationType.hala
             : RelationType.amca;
+
+      // --- Paket AO §41: yeni bağların çevrimi ---------------------------
+      //
+      // Bu dallar olmasaydı hepsi aşağıdaki `default` ile **düşerdi**;
+      // bu projede kayıt silinmez. Torunda yaşanan hatanın (D-087) aynısı
+      // tekrarlanmasın diye her yeni bağ açıkça karşılanıyor.
+
+      // Üvey kardeş: eski oyuncuyla kan bağı yoktu, yeni oyuncuyla hiç
+      // yok. Ama hayatında var olmuş bir insan; **tanıdık** olarak kalır.
+      // Yanlışlıkla teyze/dayı yapılmaz — biyolojik bağ uydurulmuş olur.
+      case RelationType.uveyKardes:
+        return RelationType.arkadas;
+
+      // Üvey ebeveyn: eski oyuncunun üvey annesi/babası, yeni oyuncunun
+      // kanından değildir. Büyükanne/büyükbaba yapılmaz.
+      case RelationType.uveyAnne:
+      case RelationType.uveyBaba:
+        return RelationType.arkadas;
+
+      // Üvey çocuk: eski oyuncunun eşinin çocuğu. Devam edilen çocukla
+      // **kan bağı yoktur**, dolayısıyla kardeş yapılamaz (§41'in açık
+      // uyarısı). Hayatta kalan bir tanıdıktır.
+      case RelationType.uveyCocuk:
+        return RelationType.arkadas;
+
+      // Kayın aile: eski oyuncunun eşinin ebeveynleri. Devam edilen
+      // çocuğun **büyükanne/büyükbabasıdır** — bu gerçek bir kan bağı,
+      // çünkü çocuk o eşten olma. Anne tarafı mı baba tarafı mı,
+      // [motherLine] söylüyor.
+      case RelationType.kayinvalide:
+        return motherLine
+            ? RelationType.babaanne
+            : RelationType.anneanne;
+      case RelationType.kayinpeder:
+        return motherLine
+            ? RelationType.babaTarafiDede
+            : RelationType.anneTarafiDede;
+
       default:
         return null;
     }

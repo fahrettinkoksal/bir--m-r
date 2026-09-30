@@ -11,6 +11,7 @@ import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/pending_notice.dart';
 import '../models/person.dart';
+import '../models/kinship.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
 import 'intimacy.dart';
@@ -718,6 +719,24 @@ abstract final class Finger {
     if (!kisi.isAlive) {
       return const InteractionAvailability.blocked('Artık mümkün değil.');
     }
+    // Aile romantik havuza giremez (Paket AO §16).
+    //
+    // Bugün buraya yalnızca `arkadas` bağıyla gelinebiliyor ve aile
+    // üyeleri o bağı almıyor — yani bu kapı **şu an** kapalı. Kontrol
+    // yine de konuldu: §16'nın istediği, korumanın havuzun bugünkü
+    // kurulma biçimine **rastlantısal** olarak bağlı kalmaması. Kontrol
+    // `kanBagi`'ya değil [Kinship]'e soruyor, çünkü üvey kardeşin kan
+    // bağı yoktur ama romantik havuza girmesi kabul edilemez.
+    if (Kinship.isRomanceForbiddenFor(
+      kisi,
+      playerId: state.player.id,
+      playerMotherId: _playerParentId(state, RelationType.anne),
+      playerFatherId: _playerParentId(state, RelationType.baba),
+    )) {
+      return const InteractionAvailability.blocked(
+        'Bu kişi ailenden; böyle bir teklif olmaz.',
+      );
+    }
     const Romance romance = Romance();
     // `isMarried`: boşanmış/dul oyuncunun yolu kapanmasın (Q-167/3).
     if (romance.hasPartner(state) || state.isMarried) {
@@ -774,6 +793,16 @@ abstract final class Finger {
       state: _replace(state, yeni, metin),
       outcome: FingerOutcome(applied: true, text: metin, person: yeni),
     );
+  }
+
+  /// Oyuncunun anne ya da babasının kimliği; kayıt yoksa `null`.
+  ///
+  /// Soy karşılaştırması ad üzerinden değil **kimlik** üzerinden yapılır.
+  static String? _playerParentId(GameState state, RelationType tur) {
+    for (final Person p in state.people) {
+      if (p.relation == tur) return p.id;
+    }
+    return null;
   }
 
   /// Kişiyi yerine koyar ve hayat günlüğüne satır düşer.

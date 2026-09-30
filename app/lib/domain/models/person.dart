@@ -39,6 +39,8 @@ class Person {
     this.estrangedSinceAge,
     this.becameFriendAtAge,
     this.infertile = false,
+    this.motherId,
+    this.fatherId,
   }) : assert(
           occupation == null || employment == EmploymentStatus.calisiyor,
           'Çalışmayan kişiye meslek atanmaz.',
@@ -50,6 +52,45 @@ class Person {
   /// ancak denedikçe anlaşılır. Romantik olmayan kişilerde anlamsızdır
   /// ve hep `false` kalır.
   final bool infertile;
+
+  /// Bu kişinin **biyolojik annesinin** kimliği; bilinmiyorsa `null`.
+  ///
+  /// Paket AO §14. `RelationType` yalnızca "bu kişi oyuncunun nesi?"
+  /// sorusunu cevaplıyor; Aile V2 ile "bu iki kişi kardeş mi?", "bu kimin
+  /// çocuğu?", "üvey mi yarım mı?" soruları da gerekti. Bu iki alan o
+  /// soruları **tahminle değil kayıtla** cevaplar.
+  ///
+  /// Değer bir [Person.id] ya da oyuncunun kendi kimliği
+  /// (`state.player.id`) olabilir — §15 gereği "player" gibi sahte bir
+  /// sabit kullanılmaz.
+  ///
+  /// İkinci bir kişi sistemi değildir: gerçek kişi kaydı hâlâ [Person].
+  /// Burada yalnızca bağ tutulur ve bağ **kimlik üzerinden** kurulur, ad
+  /// üzerinden değil.
+  ///
+  /// Eski kayıtlarda yoktur ve `null` kalır; geriye dönük soy ağacı
+  /// **uydurulmaz** (§47).
+  final String? motherId;
+
+  /// Bu kişinin **biyolojik babasının** kimliği; bilinmiyorsa `null`.
+  final String? fatherId;
+
+  /// Bilinen biyolojik ebeveyn kimlikleri.
+  List<String> get biologicalParentIds => <String>[
+        if (motherId != null) motherId!,
+        if (fatherId != null) fatherId!,
+      ];
+
+  /// Bu kişiyle [other] en az bir biyolojik ebeveyni paylaşıyor mu?
+  ///
+  /// Kardeşlik testinin **tek doğru yolu** budur: `RelationType` adına
+  /// bakmak üvey ile yarım kardeşi ayırt edemez.
+  bool sharesParentWith(Person other) {
+    for (final String id in biologicalParentIds) {
+      if (other.biologicalParentIds.contains(id)) return true;
+    }
+    return false;
+  }
 
   /// Hayat boyu değişmeyen kişi kimliği.
   final String id;
@@ -240,6 +281,8 @@ class Person {
     bool? infertile,
     Object? estrangedSinceAge = _unset,
     Object? becameFriendAtAge = _unset,
+    Object? motherId = _unset,
+    Object? fatherId = _unset,
   }) {
     return Person(
       id: id,
@@ -276,6 +319,8 @@ class Person {
       becameFriendAtAge: becameFriendAtAge == _unset
           ? this.becameFriendAtAge
           : becameFriendAtAge as int?,
+      motherId: motherId == _unset ? this.motherId : motherId as String?,
+      fatherId: fatherId == _unset ? this.fatherId : fatherId as String?,
     );
   }
 }

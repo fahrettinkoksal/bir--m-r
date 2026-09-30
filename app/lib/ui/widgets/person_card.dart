@@ -98,6 +98,9 @@ BirOmurAccent _accentFor(Person person) {
     case RelationType.eskiEs:
       return BirOmurAccents.gul;
     case RelationType.cocuk:
+    // Üvey çocuk çocukla aynı renkte: ekranda ayrı bir sınıf gibi
+    // durmaz, etiketi zaten "Üvey kız/oğul" yazıyor (Paket AO §39).
+    case RelationType.uveyCocuk:
     case RelationType.unlu:
       return BirOmurAccents.pirinc;
     case RelationType.torun:
@@ -108,7 +111,14 @@ BirOmurAccent _accentFor(Person person) {
     case RelationType.kardes:
     case RelationType.uveyAnne:
     case RelationType.uveyBaba:
+    // Üvey ve yarım kardeş de çekirdek ailenin rengini taşır.
+    case RelationType.uveyKardes:
+    case RelationType.yariKardes:
       return BirOmurAccents.nar;
+    // Eşin ailesi kendi rengiyle ayrışır (Paket AO §38).
+    case RelationType.kayinvalide:
+    case RelationType.kayinpeder:
+      return BirOmurAccents.mor;
     case RelationType.arkadas:
     case RelationType.sinifArkadasi:
     case RelationType.kogusArkadasi:
