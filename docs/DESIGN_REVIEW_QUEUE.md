@@ -5350,3 +5350,55 @@ Brief §13 "anlamlı dezavantajlı olsun ama kariyeri öldürmesin" dedi. Kariye
 Soru: (A) doğru — tam zamanlı iş ile zirve birlikte olmaz; (B) fazla sert, full-time fırsat katsayısı (0,84) biraz yükseltilsin; (C) part-time ile full-time arasındaki fark açılsın, full-time daha yumuşak olsun.
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-187 — Paket AO: dinamik aile ağının bıraktığı sayılar ve bilerek çizilen sınırlar
+
+**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/generation/parent_divorce.dart`, `app/lib/domain/generation/step_siblings.dart`, `app/lib/domain/generation/in_laws.dart`, `app/lib/domain/interaction/elder_care.dart`, `app/lib/data/event_pool_family_gathering.dart`, `app/test/paket_ao_500_aile_test.dart`.
+
+**Bağlam.** Paket AO aileyi statik bir NPC listesinden çıkarıp yaşayan bir ağa çevirdi: ebeveyn boşanması, yeniden evlilik, üvey ve yarım kardeş, eşin önceki çocuğu, kayın aile, yaşlı bakımı ve soy kaydı. Aşağıdakilerin hepsi `prototypeOnly`; hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+#### 1 — Ebeveyn boşanma ihtimali: yıllık en fazla %5,5 doğru mu?
+
+Brief §1 "her hayat boşanmayla sonuçlanmasın" ve "flat %10 gibi kaba sistem kurma" dedi. Kurulan model gizli bir **dayanıklılık** değeri: ailenin maddi durumu, oyuncunun mutluluğu, ebeveynlerle yakınlık ve ebeveyn adlarından türeyen sabit bir aile sapması. `prototypeOnlyMaxYearlyChance = 0,055`, pencere 4-45 yaş.
+
+Ölçüm 500 aile hayatında yapıldı (sayılar raporda). Soru: (A) oran doğru; (B) daha seyrek olsun; (C) daha sık olsun.
+
+#### 2 — Üvey kardeşin çocuğu yeğen sayılmıyor: bilerek çizilen sınır
+
+Yarım kardeşin (`yariKardes`) çocuğu gerçek bir yeğen olarak doğuyor — kan bağı var. Üvey kardeşin (`uveyKardes`) çocuğu **üretilmiyor**. Sebep kodda yazılı: kan bağı yok ve her üvey kardeşe ayrıca çocuk üretmek §46'nın uyardığı kişi kalabalığını doğuruyor.
+
+Ama gerçek hayatta birlikte büyüdüğün üvey kardeşin çocuğu da senin yeğenindir. Bu bir V1 sınırı, kesin kural değil. Soru: (A) sınır kalsın; (B) üvey kardeşin çocuğu da yeğen olsun; (C) yalnızca aynı hanede büyümüş üvey kardeş için olsun.
+
+#### 3 — Yaşlı bakımı: yıllık masraf asgari ücretin %35'i doğru mu?
+
+`ElderCare.prototypeOnlyYearlyCostShare = 0,35`. Kardeş katkısı kardeşin **kendi** ekonomik durumundan geliyor: çok yoksul ve yoksul kardeş katkı vermiyor (§36 — havadan para üretilmiyor), orta hâlli %25, varlıklı %40, çok varlıklı %50; toplam masrafı aşamıyor.
+
+Soru: (A) doğru; (B) bakım daha pahalı olsun, gerçek bir yük hissedilsin; (C) kardeş katkısı daha cömert olsun.
+
+#### 4 — Eşin önceki çocuğu %18: az mı, çok mu?
+
+`InLaws.prototypeOnlyStepChildChance = 0,18`, yalnızca 26 yaş üstü eş için. Brief §18 "her sevgilinin otomatik geçmiş çocuğu olmasın" dedi; bu yüzden en olası sonuç "yok". Ama eşin yaşı ilerledikçe oran artmıyor — 27 yaşındaki eşle 45 yaşındaki eş aynı ihtimali taşıyor.
+
+Soru: (A) sabit %18 kalsın; (B) eşin yaşıyla artsın (40 üstünde daha olası); (C) oran düşürülsün.
+
+#### 5 — Kayın aile yakınlığı 30-45 arası başlıyor
+
+`InLaws.prototypeOnlyInLawStartBond = 30` (+0-14 rastgele). Üvey çocuk ise 15-24 ile başlıyor (§20 — "kendi çocuğun gibi 90 bond ile başlamasın"). Kayın aile için aynı gerekçe geçerli mi, yoksa evlilikle gelen bir yakınlık payı olmalı mı?
+
+Soru: (A) doğru; (B) daha düşük başlasın, zamanla kurulsun; (C) eşle olan yakınlığa bağlansın.
+
+#### 6 — Aile buluşması olayları: altı olay yeterli mi?
+
+`kFamilyGatheringEvents` altı olay taşıyor ve hepsi **gerçek kişiye** bağlı: kayıtta o bağ yoksa olay hiç çıkmıyor (§45 — olmayan akraba uydurulmaz). Havuzun geri kalanıyla aynı seyrekleştirmeye tabi (§46 — olay spamı yok).
+
+Soru: (A) yeterli; (B) genişletilsin (cenaze, taşınma, aile kavgası); (C) bayram/tatil gibi tekrar eden bir takvim kurulsun.
+
+#### 7 — Velayet kararı yalnızca çocukların yakınlığına bakıyor
+
+D-160'tan beri `HouseholdBudget.decideCustody` çocukların oyuncuya ortalama yakınlığına bakıyor: ≥60 oyuncuda, ≤40 eski eşte, arası ortak. Paket AO bu kurala **dokunmadı**, yalnızca sonucu çocuğun kendi kartında görünür yaptı (§26-§27).
+
+Ama gerçekte velayet gelire, şehre ve çocuğun yaşına da bakar. Brief §25 "V1'de devasa custody mahkeme sistemi kurma" dediği için genişletilmedi.
+
+Soru: (A) olduğu gibi kalsın; (B) çocuğun yaşı da hesaba katılsın (küçük çocuk anneye); (C) ayrı bir pakette bakılsın.
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.

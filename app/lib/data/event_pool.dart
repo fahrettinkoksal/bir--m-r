@@ -14,6 +14,7 @@ import 'event_pool_course.dart';
 import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
 import 'event_pool_elder.dart';
+import 'event_pool_family_gathering.dart';
 import 'event_pool_extra.dart';
 import 'event_pool_exam.dart';
 import 'event_pool_infancy.dart';
@@ -1700,6 +1701,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
 
   // İleri yaş, emeklilik ve torunlar (Paket 12).
   ...kElderEvents,
+  // Paket AO §30: aile buluşmaları. Her olay gerçek bir kişiye
+  // bağlanır; kişi yoksa olay çıkmaz.
+  ...kFamilyGatheringEvents,
 
   // İlk yıllar: 0-4 yaş (Paket 13).
   ...kInfancyEvents,
