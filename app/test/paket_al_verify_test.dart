@@ -64,6 +64,19 @@ GameState _rekabete(GameState s, String artId) {
 
 CombatCareer _k(GameState s) => CombatCareerEngine.activeCareer(s)!;
 
+/// Kariyer kurulduktan **sonra** sağlığı düşürür.
+///
+/// Paket AM rekabete başlamak için sağlık 80 şartı getirdi (§4). Bu
+/// testlerin ölçtüğü şey sağlığın **kazanma ihtimaline** etkisi; o ölçüm
+/// aynen duruyor, yalnızca kurulum yolu yeni kurala uyduruldu. Zaten
+/// oyunda da doğru sıra bu: sporcu sağlıklıyken başlar, sonra
+/// sakatlanıp düşer (§5 — kariyer silinmez).
+GameState _saglik(GameState s, int deger) => s.copyWith(
+      player: s.player.copyWith(
+        stats: s.player.stats.copyWith(health: deger),
+      ),
+    );
+
 /// Bekleyen müsabaka kurar. Kademe ve rakip gücü motorun kendi
 /// kataloğundan gelir; yalnızca tohum ve unvan bayrağı testten verilir.
 GameState _bout(
@@ -228,9 +241,12 @@ void main() {
       ]);
       olcum['form 20→95'] = (sans(dusukForm), sans(yuksekForm));
 
-      // sağlık
+      // sağlık (kariyer sağlıklıyken kurulur, sonra düşer — Paket AM §5)
       olcum['sağlık 45→95'] = (
-        sans(_rekabete(_sporcu(artId: 'judo', level: 6, health: 45), 'judo')),
+        sans(_saglik(
+          _rekabete(_sporcu(artId: 'judo', level: 6, health: 95), 'judo'),
+          45,
+        )),
         sans(_rekabete(_sporcu(artId: 'judo', level: 6, health: 95), 'judo')),
       );
 
@@ -293,14 +309,17 @@ void main() {
           b1, _k(b1), _k(b1).pendingBout!, CampChoice.yogun);
 
       // En zayıf sporcu, en güçlü rakip, en kötü hazırlık.
+      // Kariyer sağlıklıyken kurulur, sonra dibe vurur (Paket AM §5).
       GameState zavalli = _rekabete(
-        _sporcu(artId: 'kung_fu', level: 2, age: 50, health: 40),
+        _sporcu(artId: 'kung_fu', level: 2, age: 50, health: 90),
         'kung_fu',
       );
-      zavalli = zavalli.copyWith(combatCareers: <CombatCareer>[
-        for (final CombatCareer c in zavalli.combatCareers)
-          c.copyWith(form: 0, reputation: 0, seriousInjuryCount: 5),
-      ]);
+      zavalli = _saglik(zavalli, 40).copyWith(
+        combatCareers: <CombatCareer>[
+          for (final CombatCareer c in zavalli.combatCareers)
+            c.copyWith(form: 0, reputation: 0, seriousInjuryCount: 5),
+        ],
+      );
       final GameState b2 = _bout(zavalli, rating: 100);
       final double alt = CombatCareerEngine.winChance(
           b2, _k(b2), _k(b2).pendingBout!, CampChoice.dinlen);

@@ -266,9 +266,11 @@ void main() {
       expect(yazar.minHobbyStage, 2);
     });
 
-    test('mankenliğin yaş üst sınırı yok', () {
+    test('mankenliğin yaş üst sınırı yok, görünüş şartı 80', () {
       final JobType manken = jobById('manken')!;
-      expect(manken.minAppearance, 70);
+      // Paket AM: Faho'nun kesin kararıyla 70'ten 80'e çıktı. D-064
+      // buna göre güncellendi; test gevşetilmedi, yeni karara bağlandı.
+      expect(manken.minAppearance, 80);
       // Yaş üst sınırı diye bir alan yok; olmadığını burada sabitliyoruz.
       expect(manken.minAge, lessThanOrEqualTo(18));
     });

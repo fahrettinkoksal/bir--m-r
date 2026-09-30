@@ -55,6 +55,18 @@ GameState _sporcu({
   );
 }
 
+/// Kariyer kurulduktan **sonra** sağlığı düşürür.
+///
+/// Paket AM rekabete başlamak için sağlık 80 şartı getirdi (§4). Bu
+/// testlerin ölçtüğü şey sağlığın kazanma ihtimaline etkisi; ölçüm aynen
+/// duruyor, yalnızca kurulum yeni kurala uyduruldu. Oyunda da doğru sıra
+/// bu: sporcu sağlıklıyken başlar, sonra düşer (§5).
+GameState _saglik(GameState s, int deger) => s.copyWith(
+      player: s.player.copyWith(
+        stats: s.player.stats.copyWith(health: deger),
+      ),
+    );
+
 /// Rekabete başlatır ve kariyeri döner.
 GameState _rekabete(GameState s, String artId) {
   final r = CombatCareerEngine.startCompeting(s, _art(artId));
@@ -223,8 +235,8 @@ void main() {
           guclu, k1, k1.pendingBout!, CampChoice.yogun);
 
       // Çok zayıf oyuncu, çok güçlü rakip.
-      GameState zayif = _sporcu(artId: 'boks', level: 2, age: 19, health: 45);
-      zayif = _rekabete(zayif, 'boks');
+      GameState zayif = _sporcu(artId: 'boks', level: 2, age: 19, health: 90);
+      zayif = _saglik(_rekabete(zayif, 'boks'), 45);
       zayif = _musabakaKur(zayif, opponentRating: 96);
       final CombatCareer k2 = CombatCareerEngine.activeCareer(zayif)!;
       final double alt = CombatCareerEngine.winChance(
@@ -250,8 +262,8 @@ void main() {
       iyi = _musabakaKur(iyi, opponentRating: 70);
       final CombatCareer ki = CombatCareerEngine.activeCareer(iyi)!;
 
-      GameState kotu = _sporcu(artId: 'judo', level: 3, age: 26, health: 60);
-      kotu = _rekabete(kotu, 'judo');
+      GameState kotu = _sporcu(artId: 'judo', level: 3, age: 26, health: 90);
+      kotu = _saglik(_rekabete(kotu, 'judo'), 60);
       kotu = _musabakaKur(kotu, opponentRating: 70);
       final CombatCareer kk = CombatCareerEngine.activeCareer(kotu)!;
 

@@ -60,8 +60,34 @@ abstract final class CombatCareerEngine {
   // Sayılar
   // =================================================================
 
-  /// prototypeOnly: rekabete başlamak için gereken en az sağlık.
-  static const int prototypeOnlyMinHealth = 40;
+  /// prototypeOnly: rekabete **başlamak** için gereken en az sağlık.
+  ///
+  /// Faho'nun kararı (Paket AM, §4): **80**. Eskiden 40'tı ve bu,
+  /// sağlığı kötü bir karakterin profesyonel dövüş sporcusu olmasına
+  /// izin veriyordu. Altı sanatın hepsinde geçerli.
+  ///
+  /// **Bu eşik yalnızca rekabetçi kariyere aittir.** Normal spor
+  /// aktiviteleri (yürüyüş, esneme) ve dövüş sanatı **dersleri** bu
+  /// eşikten etkilenmez (§14, §15): sağlığı 55 olan biri yürüyüşe
+  /// çıkabilir, 60 olan biri teknik ders alabilir.
+  static const int prototypeOnlyMinHealth = 80;
+
+  /// prototypeOnly: **müsabakaya çıkmak** için gereken en az sağlık.
+  ///
+  /// Başlama eşiğinden bilerek düşük (§5): 85 sağlıkla kariyere başlayan
+  /// sporcu sakatlanıp 72'ye düştü diye kariyerini kaybetmez, dövüşmeye
+  /// devam eder. 70'in altına inerse **geçici** olarak müsabakaya
+  /// çıkamaz; toparlanınca kapı yeniden açılır. Kayıt hiçbir durumda
+  /// silinmez.
+  static const int prototypeOnlyMinBoutHealth = 70;
+
+  /// prototypeOnly: **pro/elit kademeye çıkmak** için gereken en az
+  /// sağlık.
+  ///
+  /// §16: tekniği yetse bile fiziksel olarak o seviyeye çıkacak durumda
+  /// olmayan sporcu terfi etmez. Kalıcı kilit değil — sağlık yeniden
+  /// 80'e gelince kapı açılır.
+  static const int prototypeOnlyMinEliteHealth = 80;
 
   /// prototypeOnly: bir yılda çıkılabilecek en fazla müsabaka.
   ///
@@ -228,11 +254,23 @@ abstract final class CombatCareerEngine {
     }
     if (state.player.stats.health < prototypeOnlyMinHealth) {
       return InteractionAvailability.blocked(
-        'Sağlığın müsabakaya çıkacak durumda değil.',
+        'Rekabetçi spor kariyerine başlamak için sağlığının en az '
+        '$prototypeOnlyMinHealth olması gerekiyor; şu an '
+        '${state.player.stats.health}.',
       );
     }
     return const InteractionAvailability.allowed();
   }
+
+  /// Rekabetçi kariyer kapısının sağlık durumu — "73 / 80" gibi (§18).
+  ///
+  /// Ekranda gösterilir; oyuncu eksiğinin ne kadar olduğunu görsün.
+  static String healthGateLabel(GameState state) =>
+      '${state.player.stats.health} / $prototypeOnlyMinHealth';
+
+  /// Sağlık şu an müsabakaya çıkmaya yetiyor mu (§5)?
+  static bool canFightHealthWise(GameState state) =>
+      state.player.stats.health >= prototypeOnlyMinBoutHealth;
 
   /// Rekabete başlar.
   static ({GameState state, bool applied, String text}) startCompeting(
@@ -526,11 +564,26 @@ abstract final class CombatCareerEngine {
         text: 'Bekleyen bir müsabaka yok.',
       );
     }
+    // Sakatlık önce bakılır (§6): ciddi sakatlığı olan oyuncu sağlığı
+    // 90 olsa bile dövüşemez ve bu durumda oyuncuya sağlık cümlesi
+    // değil sakatlık cümlesi gösterilir. Sakatlık sisteminin üstüne
+    // ikinci bir anlamsız ceza binmez; iki kapı ayrı ayrı durur.
     if (kariyer.isInjured) {
       return BoutResult(
         state: state,
         applied: false,
         text: 'Sakatlığın geçmeden müsabakaya çıkamazsın.',
+      );
+    }
+    // Geçici sağlık engeli (§5). Kariyer **durur, silinmez**: kademe,
+    // rekor, sıralama ve şampiyonluklar yerinde kalır.
+    if (state.player.stats.health < prototypeOnlyMinBoutHealth) {
+      return BoutResult(
+        state: state,
+        applied: false,
+        text: 'Sağlığın şu an müsabakaya çıkacak durumda değil. '
+            'Toparlanman gerekiyor: en az $prototypeOnlyMinBoutHealth '
+            'sağlık gerekiyor, şu an ${state.player.stats.health}.',
       );
     }
     final int ucret = campCost(camp);
@@ -680,6 +733,7 @@ abstract final class CombatCareerEngine {
 
     // --- kademe atlama ----------------------------------------------
     bool yukseldi = false;
+    String? terfiEngeli;
     if (kazandi && bout.tier == yeni.tier && yeni.tier < yol.tiers.length - 1) {
       final int kademeGalibiyeti = yeni.totalWins;
       final MartialProgress p = _progress(state, kariyer.artId);
@@ -689,11 +743,25 @@ abstract final class CombatCareerEngine {
       // kademede gerçekten iz bırakmak gerekiyor. İtibar galibiyetle
       // artıp mağlubiyetle düştüğü için bu, "kolay rakip topla"maya
       // karşı doğal bir süzgeç.
-      if (kademeGalibiyeti >=
+      final bool sporculukTuttu = kademeGalibiyeti >=
               prototypeOnlyWinsToPromote * (yeni.tier + 1) &&
           yeni.reputation >= prototypeOnlyReputationToPromote * (yeni.tier + 1) &&
           p.level >= gerekenSeviye &&
-          state.player.age >= sonraki.minAge) {
+          state.player.age >= sonraki.minAge;
+
+      // Pro/elit kademeye fiziksel uygunluk (§16). Bu kapı **kalıcı
+      // değil**: sağlık yeniden eşiğe gelince terfi yolu açılır ve
+      // kariyer kaydına hiç dokunulmaz.
+      final bool elitKademe = yeni.tier + 1 >= yol.turnsProAtTier;
+      final bool fizikselTuttu = !elitKademe ||
+          state.player.stats.health >= prototypeOnlyMinEliteHealth;
+      if (sporculukTuttu && !fizikselTuttu) {
+        terfiEngeli = 'Teknik seviyen yeterli ama fiziksel olarak bu '
+            'seviyeye çıkacak durumda değilsin: ${sonraki.label} için '
+            'en az $prototypeOnlyMinEliteHealth sağlık gerekiyor, şu an '
+            '${state.player.stats.health}.';
+      }
+      if (sporculukTuttu && fizikselTuttu) {
         yeni = yeni.copyWith(tier: yeni.tier + 1, ranking: 0).remember(
               state.player.age,
               '${sonraki.label} kademesine çıktın.',
@@ -778,6 +846,7 @@ abstract final class CombatCareerEngine {
         titleWon: unvanAlindi,
         promoted: yukseldi,
         circuit: yol,
+        promotionBlocked: terfiEngeli,
       ),
       won: kazandi,
       purse: odul,
@@ -799,6 +868,7 @@ abstract final class CombatCareerEngine {
     required bool titleWon,
     required bool promoted,
     required CombatCircuit circuit,
+    String? promotionBlocked,
   }) {
     final StringBuffer b = StringBuffer();
     b.writeln('Rakibin ${bout.opponent.name}.');
@@ -825,6 +895,12 @@ abstract final class CombatCareerEngine {
     if (promoted) {
       b.writeln();
       b.writeln('Bir üst kademeye çıktın.');
+    }
+    // §16: terfi hakkı doğdu ama sağlık yetmedi. Oyuncu sessizce
+    // bekletilmez, sebebi yazılır.
+    if (promotionBlocked != null) {
+      b.writeln();
+      b.writeln(promotionBlocked);
     }
     if (injury != InjurySeverity.yok) {
       b.writeln();

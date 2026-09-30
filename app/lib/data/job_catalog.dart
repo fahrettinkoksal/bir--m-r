@@ -70,6 +70,8 @@ class JobType {
     this.minIntelligence = 0,
     this.minCharisma = 0,
     this.minAppearance = 0,
+    this.minHealth = 0,
+    this.physicalNote,
     this.levels = const <String>[],
     this.martialArtId,
     this.hobbyId,
@@ -125,7 +127,49 @@ class JobType {
   /// prototypeOnly: işe girmek için gereken en az görünüş.
   ///
   /// Yalnızca görünüşün mesleğin kendisi olduğu işlerde kullanılır.
+  /// Satış danışmanı ya da resepsiyonist gibi işlerde **bilerek 0**:
+  /// oradaki doğru stat karizmadır (Paket AM, §12).
+  ///
+  /// Bu bir **işe giriş** şartıdır. İşe girdikten sonra görünüş
+  /// düşerse oyuncu kovulmaz (D-064).
   final int minAppearance;
+
+  /// prototypeOnly: işe girmek için gereken en az sağlık (Paket AM, §1).
+  ///
+  /// **Yalnızca işin doğası gerçekten beden istiyorsa** doldurulur.
+  /// Muhasebecinin, yazılımcının ya da öğretmenin sağlık şartı yoktur
+  /// ve olmayacak (§11): bu alan fiziksel gerçekçilik içindir, "her
+  /// işte bütün statlar yüksek olsun" sistemi değil.
+  ///
+  /// Öneri bandı: hafif fiziksel 45-50, orta 50-60, ağır 60-70. Elit
+  /// sporcu seviyesi (80) yalnızca rekabetçi dövüş kariyerine aittir
+  /// (`CombatCareerEngine`), mesleklere değil.
+  ///
+  /// **ÖLÇÜMLE DARALTILDI.** İlk yazımda kurye (50), depo personeli (55),
+  /// oto tamircisi (50), tesisatçı (50) ve kaynakçı (60) de eşik
+  /// almıştı. Bunlar erişilebilir meslek kataloğunun büyük bir bölümünü
+  /// oluşturuyor ve kapanmaları **oyunun ekonomisini kaydırdı**:
+  /// `paket_ae_calibration_test` ölçümünde `girisim+yatirim`in her
+  /// ölçüde ezdiği strateji sayısı **5/14'ten 9/14'e** çıktı (maaş
+  /// yolları zayıflayınca işletme yolu göreli olarak baskın hâle geldi)
+  /// ve `paket_ag_payback_test`'te terzi atölyesinin dağılımı daraldı.
+  ///
+  /// Brief §10 "her fiziksel işe zorla eşik koyma, gerçekten anlamlı
+  /// değilse 0 bırak" diyor ve toplu denge operasyonunu yasaklıyor. Bu
+  /// yüzden eşik yalnızca brief'in adını verdiği üç kamu mesleğinde
+  /// tutuldu: itfaiyeci 70, polis 65, güvenlik 55. Bunlar gerçek bir
+  /// fiziksel yeterlilik sınavı olan, katalogun küçük bir dilimi.
+  /// Diğerleri Q-185 #2'de Faho'ya bırakıldı.
+  ///
+  /// [minAppearance] gibi bu da bir **giriş** şartıdır; işe girdikten
+  /// sonra sağlık düşerse kovulma olmaz.
+  final int minHealth;
+
+  /// Sağlık şartının mesleğe özel gerekçesi; boşsa genel metin kullanılır.
+  ///
+  /// "İşe uygun değilsin" gibi kuru bir cümle yerine oyuncunun
+  /// anlayacağı doğal bir sebep yazılır (§19).
+  final String? physicalNote;
 
   /// Bu meslekteki görev basamakları (giriş seviyesinden yukarı).
   ///
@@ -261,6 +305,9 @@ const List<JobType> kJobCatalog = <JobType>[
     synergies: <CareerSynergy>[
       CareerSynergy('spor', SynergyStrength.orta),
     ],
+    // §9: sağlık raporu isteniyor ama iş ağır fiziksel değil.
+    minHealth: 55,
+    physicalNote: 'Güvenlik görevliliği için sağlık raporu isteniyor.',
   ),
   JobType(
     id: 'cagri_merkezi',
@@ -654,6 +701,11 @@ const List<JobType> kJobCatalog = <JobType>[
     synergies: <CareerSynergy>[
       CareerSynergy('spor', SynergyStrength.kucuk),
     ],
+    // §7: polis alımlarında fiziksel yeterlilik sınavı var. Ama
+    // polislik profesyonel sporculuk değil — elit sporcu eşiğine (80)
+    // çıkarılmadı.
+    minHealth: 65,
+    physicalNote: 'Polis alımlarında fiziksel yeterlilik sınavı var.',
   ),
   JobType(
     id: 'itfaiyeci',
@@ -672,6 +724,10 @@ const List<JobType> kJobCatalog = <JobType>[
     synergies: <CareerSynergy>[
       CareerSynergy('spor', SynergyStrength.orta),
     ],
+    // §8: itfaiye eri alımının fiziksel parkuru polisten ağır.
+    minHealth: 70,
+    physicalNote: 'İtfaiye alımında geçilmesi gereken bir fiziksel '
+        'yeterlilik parkuru var.',
   ),
   JobType(
     id: 'memur',
@@ -777,8 +833,16 @@ const List<JobType> kJobCatalog = <JobType>[
     minAge: 18,
     yearlySalary: 820000,
     band: SalaryBand.yaraticiDegisken,
+    // Faho'nun kesin kararı (Paket AM, §2): görünüş **80**. Eskiden 70
+    // idi ve bu, mankenliği ortalama görünüşlü bir karaktere de açık
+    // bırakıyordu. Mesleğin ana sert şartı görünüştür.
+    //
+    // Karizma bilerek 45'te bırakıldı: görünüş duvarı on puan
+    // yükseldiği için karizmayı da yükseltmek ikinci bir gereksiz duvar
+    // olurdu (§2). Mankenlik sadece görünüş değildir, ama asıl kapı
+    // görünüş olsun.
     minCharisma: 45,
-    minAppearance: 70,
+    minAppearance: 80,
     levels: <String>['Manken', 'Podyum mankeni', 'Yüzü afişe basılan manken'],
     synergies: <CareerSynergy>[
       CareerSynergy('dans', SynergyStrength.kucuk),

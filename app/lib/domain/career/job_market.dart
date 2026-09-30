@@ -21,7 +21,9 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/pending_interview.dart';
+import '../models/stats.dart';
 import 'career_synergy.dart';
+import 'job_requirement.dart';
 import '../../text/turkish_text.dart';
 
 class JobOutcome {
@@ -163,14 +165,32 @@ class JobMarket {
         return 'Bu iş için uygun bir eğitim geçmişi gerekiyor.';
       }
     }
-    if (state.player.stats.intelligence < job.minIntelligence) {
-      return 'Bu iş için zekân yeterli görülmüyor.';
+    // Stat şartları (Paket AM, §19). Gerekçeler **sayıyla** yazılıyor:
+    // oyuncu "neden giremiyorum?" diye tahmin yürütmesin, eksiğinin ne
+    // kadar olduğunu görsün.
+    final Stats stat = state.player.stats;
+    if (stat.intelligence < job.minIntelligence) {
+      return 'Bu iş için zekânın en az ${job.minIntelligence} olması '
+          'gerekiyor; şu an ${stat.intelligence}.';
     }
-    if (state.player.stats.charisma < job.minCharisma) {
-      return 'Bu iş için karizman yeterli görülmüyor.';
+    if (stat.charisma < job.minCharisma) {
+      return 'Bu iş için karizmanın en az ${job.minCharisma} olması '
+          'gerekiyor; şu an ${stat.charisma}.';
     }
-    if (state.player.stats.appearance < job.minAppearance) {
-      return 'Bu iş görünüşle giriliyor ve seni uygun bulmadılar.';
+    if (stat.appearance < job.minAppearance) {
+      // Görünüşle girilen tek meslek mankenlik; metin ona göre yazıldı.
+      return 'Ajans seni podyum için uygun bulmadı. Bu kariyer için en az '
+          '${job.minAppearance} dış görünüş gerekiyor; şu an '
+          '${stat.appearance}.';
+    }
+    // Fiziksel yeterlilik (§1). **Yalnızca** işin doğası beden istiyorsa
+    // dolu; ofis ve uzmanlık mesleklerinde `minHealth` 0 olduğu için bu
+    // blok hiç çalışmaz (§11).
+    if (stat.health < job.minHealth) {
+      final String gerekce = job.physicalNote ??
+          'Bu iş fiziksel olarak daha iyi durumda olmanı gerektiriyor.';
+      return '$gerekce Sağlığının en az ${job.minHealth} olması '
+          'gerekiyor; şu an ${stat.health}.';
     }
     // Hobiyle açılan meslekler (yazarlık, müzisyenlik): diploma değil,
     // yıllarca sürdürülmüş gerçek bir uğraş aranır. Kayıt uydurulmaz;
@@ -205,6 +225,54 @@ class JobMarket {
       }
     }
     return '';
+  }
+
+  /// İş ilanında gösterilecek gereksinim satırları (Paket AM, §18).
+  ///
+  /// Amaç tek: oyuncu "neden giremiyorum?" diye tahmin yürütmesin.
+  /// Yalnızca **bu işin gerçekten koyduğu** şartlar listelenir; şartı
+  /// olmayan stat hiç görünmez. Yaş her işte var, o yüzden hep listede.
+  ///
+  /// Eğitim, şehir, sabıka ve ehliyet gibi metinle daha iyi anlatılan
+  /// şartlar burada değil, [requirementReason] içinde durur.
+  List<JobRequirement> requirementLines(GameState state, JobType job) {
+    final Stats stat = state.player.stats;
+    return <JobRequirement>[
+      JobRequirement(
+        label: 'Yaş',
+        need: 'en az ${job.minAge}',
+        have: '${state.player.age}',
+        met: state.player.age >= job.minAge,
+      ),
+      if (job.minIntelligence > 0)
+        JobRequirement(
+          label: 'Zekâ',
+          need: 'en az ${job.minIntelligence}',
+          have: '${stat.intelligence}',
+          met: stat.intelligence >= job.minIntelligence,
+        ),
+      if (job.minCharisma > 0)
+        JobRequirement(
+          label: 'Karizma',
+          need: 'en az ${job.minCharisma}',
+          have: '${stat.charisma}',
+          met: stat.charisma >= job.minCharisma,
+        ),
+      if (job.minAppearance > 0)
+        JobRequirement(
+          label: 'Dış görünüş',
+          need: 'en az ${job.minAppearance}',
+          have: '${stat.appearance}',
+          met: stat.appearance >= job.minAppearance,
+        ),
+      if (job.minHealth > 0)
+        JobRequirement(
+          label: 'Sağlık',
+          need: 'en az ${job.minHealth}',
+          have: '${stat.health}',
+          met: stat.health >= job.minHealth,
+        ),
+    ];
   }
 
   /// Sabıka kaydının bu işe engel olup olmadığı (D-128).

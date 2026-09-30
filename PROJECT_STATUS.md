@@ -3322,6 +3322,93 @@ dokunmayı yasaklıyor, mevcut testi gevşetmek de yasak. Karar Q-184
 açık). **Doğrulanmayan:** gerçek cihazda oynanmadı; Android APK bu
 oturumda cihazda test edilmedi.
 
+## PAKET AM — MANTIKSAL MESLEK / FİZİKSEL UYGUNLUK ŞARTLARI
+
+Bazı kariyer kapıları mevcut statlarla fazla gevşekti. Bu paket
+"bu mesleğin doğası hangi statı gerçekten gerektirir?" sorusunu
+uyguladı — **keyfi stat duvarı kurmadan**. Her işe "80 zekâ + 80 sağlık
++ 80 karizma" gibi kapılar konmadı; şart mesleğin kendisinden geldi.
+
+### İki kesin karar (Faho)
+
+| | Önce | Sonra |
+| --- | --- | --- |
+| Manken dış görünüş | 70 | **80** |
+| Rekabetçi dövüş kariyerine başlama sağlığı | 40 | **80** |
+
+D-064'ün "görünüş 70 şartı korunur" hükmü Faho'nun bu paketteki kesin
+kararıyla **80**'e güncellendi.
+
+### Sağlık üç kademeye ayrıldı (combat)
+
+Tek bir eşik yerine üç kapı, çünkü kariyere **başlamak** ile sakatlanıp
+toparlanmayı beklemek aynı şey değil:
+
+- kariyere başlama: **80**
+- pro/elit kademeye terfi: **80** (kalıcı kilit değil; sağlık gelince açılır)
+- normal müsabakaya çıkma: **70**
+- 70'in altı: **geçici** engel. Kariyer durur, **silinmez** — kademe,
+  rekor, sıralama ve şampiyonluklar yerinde kalır.
+
+Ciddi sakatlık ayrı bir kapı olarak duruyor: sağlığı 90 olan oyuncu da
+sakatken dövüşemez ve ona sağlık cümlesi değil sakatlık cümlesi
+gösterilir. İki ceza üst üste binmiyor.
+
+### `JobType.minHealth` (yeni alan, varsayılan 0)
+
+Eşik konan meslekler — brief'in adını verdiği üç kamu mesleği:
+
+| Meslek | minHealth |
+| --- | --- |
+| İtfaiyeci | 70 |
+| Polis | 65 |
+| Güvenlik görevlisi | 55 |
+
+Her birinde mesleğe özel `physicalNote` var; oyuncu "işe uygun değilsin"
+değil, gerçek sebebi ve eksiğinin ne kadar olduğunu okuyor.
+
+**Ölçümle alınmış bir karar:** §10'un aday saydığı beş işe (kurye 50,
+depo personeli 55, oto tamircisi 50, tesisatçı 50, kaynakçı 60) da eşik
+konmuştu ve **ölçüm bunu geri aldırdı**. Bu beş iş erişilebilir
+kataloğun büyük bir dilimi; kapanmaları maaş yollarını zayıflatıp
+`girisim+yatirim` stratejisinin her ölçüde ezdiği strateji sayısını
+**5/14'ten 9/14'e** çıkardı ve terzi atölyesinin payback dağılımını
+darlattı. Brief toplu denge operasyonunu yasakladığı için eşikler
+kaldırıldı; geri alındıktan sonra iki ölçüm de baseline değerine döndü
+(dominans yine 5/14). Karar Q-185 #2'de Faho'da.
+
+**Bilerek 0 bırakılanlar:** bütün ofis/uzmanlık meslekleri (yazılımcı,
+muhasebeci, öğretmen, banka personeli, üç mühendislik, gazeteci, yazar,
+müzisyen, doktor, hemşire, psikolog, eczacı, memur, veri analisti),
+yaratıcı meslekler, dövüş eğitmenlikleri ve **bütün yarım zamanlı
+gençlik işleri**. Sağlık statı 45 olan birinin muhasebeci olamaması
+saçma olurdu.
+
+**Görünüş bariyeri yalnızca mankenlikte** (katalogda tek). Satış
+danışmanı, resepsiyonist ve gazetecide doğru stat karizma; hard
+appearance gate eklenmedi.
+
+### Ne kapanmadı
+
+- Normal spor aktiviteleri (koşu, ağırlık, esneme) sağlık 55 ile açık.
+- Dövüş sanatı **dersleri** sağlık 60 ile açık — ders almak müsabakaya
+  çıkmak değil.
+- `minAppearance` ve `minHealth` **işe giriş** şartı; işe girdikten
+  sonra stat düşerse otomatik kovma yok (D-064).
+
+### UI
+
+İş ilanında ve kapalı işler listesinde gereksinimler ✓/✗ olarak
+gösteriliyor; tutan şartta yalnızca ad, tutmayanda eşik ve mevcut değer
+yazılıyor. Dövüş ekranında "Rekabetçi kariyer için sağlık: 73 / 80"
+satırı var. Yüzde ya da formül gösterilmiyor.
+
+29 hedefli test: `app/test/paket_am_fiziksel_sartlar_test.dart`.
+
+**Dokunulmayan:** Q-184 #1'deki ders/form telafisi anahtar hatası (§21
+gereği), boks/taekwondo hassasiyeti (Q-183 #6), genel denge.
+**Doğrulanmayan:** gerçek cihazda oynanmadı.
+
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 

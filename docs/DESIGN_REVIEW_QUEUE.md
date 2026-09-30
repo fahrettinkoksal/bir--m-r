@@ -5170,3 +5170,48 @@ Soru: bu liste doğru mu; ayrıca gerçek bir "spor içeriği" türü (antrenman
 Kazanılan önemli rövanş en fazla 6 ün puanı veriyor, azalan getiriyle (ikinci ödül yarısı, üçüncüsü üçte biri) ve yıllık 6 puan tavanıyla. Ölçümde tavan hiç aşılmadı ve 25 paylaşımlık spam sonrası Ün 100'ü geçmedi. Soru: tavan doğru mu?
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır, `DECISIONS.md`'ye kesin kural yazılmaz ve boks/taekwondo katsayılarına (Q-183 #6) dokunulmaz.
+
+---
+
+### Q-185 — Paket AM: fiziksel uygunluk eşiklerinin kalibrasyonu
+
+**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/data/job_catalog.dart`, `app/lib/domain/career/job_market.dart`, `app/lib/domain/combat/combat_career_engine.dart`, `app/test/paket_am_fiziksel_sartlar_test.dart`.
+
+**Bağlam.** Paket AM iki kesin kararı uyguladı (manken görünüş **80**, rekabetçi dövüş kariyeri sağlık **80**) ve `JobType.minHealth` alanını ekledi. Aşağıdakiler Faho'nun kesin olarak belirlemediği, brief'in "öneri" dediği sayılar; hepsi `prototypeOnly` ve karar bekliyor.
+
+#### 1 — Mankenin karizma şartı 45'te bırakıldı
+
+Brief "45 veya 50" dedi ve "gereksiz yüksek ikinci duvar kurma" uyarısı yaptı. Görünüş duvarı 70'ten 80'e çıktığı için karizma **45'te bırakıldı**: ana sert şart görünüş olsun. Soru: 50'ye çıkarılsın mı, yoksa 45 doğru mu?
+
+#### 2 — Aday fiziksel mesleklere eşik KONMADI (ölçüm kararı)
+
+Brief §10 beş iş saydı ("gerekiyorsa düşük/orta eşik koy") ve bandı verdi. İlk yazımda hepsine kondu: kurye 50, depo personeli 55, oto tamircisi 50, tesisatçı 50, kaynakçı 60.
+
+**Ölçüm bunu geri aldırdı.** Bu beş iş erişilebilir meslek kataloğunun büyük bir dilimi. Kapandıklarında maaş yolları zayıfladı ve oyunun ekonomisi kaydı:
+
+| Ölçüm | Eşiksiz (baseline) | Eşikli | Geri alındıktan sonra |
+| --- | --- | --- | --- |
+| `girisim+yatirim`in her ölçüde ezdiği strateji | 5/14 | **9/14** | 5/14 |
+| Terzi atölyesi payback açıklığı (iyi%10 − kötü%10) | 26,0 | **21,0** | 26,0 |
+
+İkinci ölçüm `paket_ag_payback_test`'in "dağılım çok dar" korumasını kırdı. Brief "bu paket bahanesiyle 55 mesleğin bütün dengesini baştan yazma" ve "toplu denge operasyonu YAPMA" dediği için eşikler kaldırıldı; eşik yalnızca brief'in adını verdiği üç kamu mesleğinde (itfaiyeci 70, polis 65, güvenlik 55) tutuldu. Bunlar gerçek bir fiziksel yeterlilik sınavı olan, katalogun küçük bir dilimi ve ekonomiyi kaydırmadı.
+
+Soru: (A) olduğu gibi kalsın — fiziksel gerçekçilik kamu mesleklerinde yeter; (B) bu beş işe de eşik konsun ve **ayrı bir denge paketinde** ekonomi ölçümleri yeniden kalibre edilsin; (C) daha hafif eşikler (45) denenip yeniden ölçülsün.
+
+#### 3 — Eşik konmayan sınır meslekler
+
+Şunlara bilerek `minHealth: 0` bırakıldı ama tartışmaya açık: **elektrikçi** (yükseğe çıkma, dar alan), **CNC operatörü** (ayakta vardiya), **aşçı** (sıcak mutfak, uzun saatler ayakta), **hemşire** (vardiya, hasta kaldırma). Brief "gerçekten anlamlı değilse 0 bırak" dediği için dokunulmadı. Soru: bunlardan biri hafif banda (45-50) girsin mi?
+
+#### 4 — Dövüş eğitmenliklerinde sağlık şartı yok
+
+Karate/judo/boks vb. eğitmenlikleri yalnızca teknik basamak istiyor. Sağlığı 45 olan bir boks antrenörü mümkün. Teknik basamak şartı zaten yıllarca çalışmayı gerektirdiği için ikinci kapı konmadı. Soru: eğitmenlik için hafif bir sağlık şartı (örneğin 50) mantıklı mı?
+
+#### 5 — Pro/elit terfi kapısı fiilen tek basamağı bağlıyor
+
+Altı sanatın hepsinde `turnsProAtTier: 3` ve kademeler 0-3. Dolayısıyla §16'nın "pro/elit kademeye terfi için sağlık 80" kuralı pratikte **yalnızca 2 → 3 geçişini** bağlıyor. Alt kademe terfileri (0→1, 1→2) sağlığa bakmıyor. Soru: bu doğru mu, yoksa bütün terfiler sağlığa bakmalı mı?
+
+#### 6 — Yarım zamanlı gençlik işlerine eşik konmadı
+
+`yz_kurye`, `yz_sanayi_cirak`, `yz_hali_saha` fiziksel işler ama 16 yaşındaki bir çocuğun sağlık statı 50 diye market reyonunda çalışamaması oyunun amacına aykırı görüldü. Soru: gençlik işlerinde de hafif bir eşik olsun mu?
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır. `DECISIONS.md`'de yalnızca Faho'nun kesin kararı olan manken 80 işlendi (D-064); diğer eşikler karara dönüştürülmedi.

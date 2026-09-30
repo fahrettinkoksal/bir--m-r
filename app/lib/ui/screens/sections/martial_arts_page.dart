@@ -65,6 +65,7 @@ class _MartialArtsPageState extends State<MartialArtsPage> {
             progress: controller.martialProgress(art),
             availability: controller.martialAvailability(art),
             competeAvailability: controller.combatStartAvailability(art),
+            healthGate: controller.combatHealthGate(),
             competing: controller.combatCareer(art) != null,
             onCompete: () {
               final ActivityOutcome? outcome = controller.startCompeting(art);
@@ -104,6 +105,7 @@ class _ArtCard extends StatelessWidget {
     required this.progress,
     required this.availability,
     required this.competeAvailability,
+    required this.healthGate,
     required this.onCompete,
     required this.competing,
     required this.lessonsThisAge,
@@ -120,6 +122,9 @@ class _ArtCard extends StatelessWidget {
 
   /// Rekabete başlama durumu (Paket AL, §3).
   final InteractionAvailability competeAvailability;
+
+  /// "73 / 80" biçiminde sağlık kapısı (Paket AM, §18).
+  final String healthGate;
   final VoidCallback onCompete;
   final bool competing;
   final int lessonsThisAge;
@@ -226,6 +231,22 @@ class _ArtCard extends StatelessWidget {
                 key: Key('dovus_rekabet_gerekce_${art.id}'),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            // §18: rekabetçi kariyer kapısının sağlık durumu açıkça
+            // gösterilir — oyuncu eksiğinin ne kadar olduğunu görsün.
+            // Ders alan ama henüz rekabet etmeyen sporcuda görünür.
+            if (!competing && progress.lessons > 0) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(
+                'Rekabetçi kariyer için sağlık: $healthGate',
+                key: Key('dovus_saglik_kapisi_${art.id}'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: competeAvailability.isAllowed
+                      ? theme.colorScheme.onSurfaceVariant
+                      : theme.colorScheme.error,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -400,6 +421,7 @@ class _CombatPanelState extends State<_CombatPanel> {
     final CombatTier kademe = yol.tiers[k.tier.clamp(0, yol.tiers.length - 1)];
     final PendingBout? bekleyen = k.pendingBout;
     final bool catisma = controller.hasSchoolSportConflict();
+    final bool saglikYeterli = controller.combatHealthAllowsBout();
     // §29: yüzde göstermeden, işin hazırlığa etkisini anlatan satır.
     final String? isNotu = controller.sportWorkloadNote();
     // §26: yalnızca 18 yaş altında ve yaşayan ebeveyn varsa dolu döner.
@@ -483,6 +505,14 @@ class _CombatPanelState extends State<_CombatPanel> {
                 sol: 'Sakatlık',
                 sag: '${k.injury.label} · ${k.injuryYearsLeft} yıl',
               ),
+            // §5, §18: geçici sağlık engeli. Kariyer durur, silinmez;
+            // satır bunu açıkça söyler.
+            if (!k.isRetired && !k.isInjured && !saglikYeterli)
+              _SatirCift(
+                sol: 'Sağlık',
+                sag: 'Müsabakaya çıkacak durumda değil '
+                    '(${controller.combatHealthGate()})',
+              ),
 
             // --- sıradaki fırsat -------------------------------------
             if (!k.isRetired && bekleyen != null) ...<Widget>[
@@ -553,7 +583,7 @@ class _CombatPanelState extends State<_CombatPanel> {
                   for (final CampChoice c in CampChoice.values)
                     OutlinedButton(
                       key: Key('spor_kamp_${c.name}'),
-                      onPressed: k.isInjured || catisma
+                      onPressed: k.isInjured || catisma || !saglikYeterli
                           ? null
                           : () {
                               final ({bool applied, String text, bool won})? r =

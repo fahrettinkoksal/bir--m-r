@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/job_catalog.dart';
 import '../../../data/university_catalog.dart';
 import '../../../domain/career/job_market.dart';
+import '../../../domain/career/job_requirement.dart';
 import '../../../domain/education/education_path.dart';
 import '../../../domain/models/career.dart';
 import '../../../domain/models/game_state.dart';
@@ -338,6 +339,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
               job: job,
               availability: controller.jobApplicationAvailability(job),
               synergyNote: controller.jobSynergyNote(job),
+              requirements: controller.jobRequirementLines(job),
               onApply: () async {
                 final JobOutcome? outcome = controller.applyForJob(job);
                 if (outcome == null) return;
@@ -366,6 +368,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
             job: job,
             availability: controller.jobApplicationAvailability(job),
             synergyNote: controller.jobSynergyNote(job),
+            requirements: controller.jobRequirementLines(job),
             onApply: () async {
               final JobOutcome? outcome = controller.applyForJob(job);
               if (outcome == null) return;
@@ -410,12 +413,39 @@ class _JobSearchPageState extends State<JobSearchPage> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '${giris.key.name}: ${giris.value}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          '${giris.key.name}: ${giris.value}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                        // §18: kapalı işte de eksik şart açıkça yazılır.
+                        for (final JobRequirement r
+                            in controller.jobRequirementLines(giris.key))
+                          if (!r.met)
+                            Text(
+                              '✗ ${r.line}',
+                              key: Key(
+                                'kapali_sart_${giris.key.id}_${r.label}',
+                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                      ],
                     ),
                   ),
                 ],
@@ -432,6 +462,7 @@ class _JobCard extends StatelessWidget {
     required this.job,
     required this.availability,
     required this.onApply,
+    required this.requirements,
     this.synergyNote,
   });
 
@@ -444,6 +475,9 @@ class _JobCard extends StatelessWidget {
   /// Doğal dille yazılır; yüzde gösterilmez. Avantaj yoksa `null` gelir
   /// ve satır hiç görünmez: boş vaat olmaz.
   final String? synergyNote;
+
+  /// Bu işin koyduğu şartlar ve hangilerinin tuttuğu (Paket AM, §18).
+  final List<JobRequirement> requirements;
 
   @override
   Widget build(BuildContext context) {
@@ -475,6 +509,45 @@ class _JobCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+
+            // --- gereksinimler (Paket AM, §18) --------------------
+            // Yalnızca bu işin gerçekten koyduğu şartlar; şartı olmayan
+            // stat hiç görünmez. Tutan şartta yalnızca ad, tutmayanda
+            // eşik ve mevcut değer yazılır.
+            if (requirements.length > 1) ...<Widget>[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                runSpacing: 2,
+                children: <Widget>[
+                  for (final JobRequirement r in requirements)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          r.met ? Icons.check_rounded : Icons.close_rounded,
+                          size: 14,
+                          color: r.met
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.error,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          r.line,
+                          key: Key('is_sart_${job.id}_${r.label}'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: r.met
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.error,
+                            fontWeight:
+                                r.met ? FontWeight.w400 : FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ],
             if (synergyNote != null) ...<Widget>[
               const SizedBox(height: 8),
               Row(

@@ -49,6 +49,7 @@ import '../domain/interaction/finger.dart';
 import '../domain/interaction/fertility_treatment.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
+import '../domain/career/job_requirement.dart';
 import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
 import '../domain/education/school_performance.dart';
@@ -1870,6 +1871,30 @@ class GameController extends ChangeNotifier {
         CombatCareerEngine.retire(current, RetirementReason.kendiKarari);
     if (r.applied) _commitCombat(r.state);
     return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// İş ilanında gösterilecek gereksinim satırları (Paket AM, §18).
+  ///
+  /// Oyuncu bir işe neden giremediğini tahmin etmesin: hangi şart
+  /// tutuyor, hangisi tutmuyor, eksik ne kadar.
+  List<JobRequirement> jobRequirementLines(JobType job) {
+    final GameState? current = _state;
+    if (current == null) return const <JobRequirement>[];
+    return _jobs.requirementLines(current, job);
+  }
+
+  /// Rekabetçi dövüş kariyeri kapısının sağlık durumu — "73 / 80" (§18).
+  String combatHealthGate() {
+    final GameState? current = _state;
+    if (current == null) return '';
+    return CombatCareerEngine.healthGateLabel(current);
+  }
+
+  /// Sağlık şu an müsabakaya çıkmaya yetiyor mu (§5, §18)?
+  bool combatHealthAllowsBout() {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return CombatCareerEngine.canFightHealthWise(current);
   }
 
   /// Emeklilik baskısı var mı (yaş, sakatlık, düşen performans)?
