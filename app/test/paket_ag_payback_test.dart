@@ -22,7 +22,49 @@ import 'support/strategy_player.dart';
 bool get _tamOlcum => Platform.environment['BIR_OMUR_FULL_MEASURE'] == '1';
 
 /// İşletme başına hayat sayısı (§16: 1000+).
-int get _hayat => _tamOlcum ? 1000 : 45;
+///
+/// Hızlı turdaki sayı 45'ten **600**'e çıkarıldı. **Eşikler
+/// değişmedi**; değişen tek şey örneklem büyüklüğü.
+///
+/// Sebep ölçüldü, tahmin edilmedi. 45 hayatta işletmeyi gerçekten
+/// **açan** hayat sayısı ~25'e düşüyor; yani "kötü %10" dediğimiz şey
+/// sıralı listenin 3. elemanı oluyor. O kadar küçük bir örneklemde
+/// rastgele akışın bir adım kayması bile kuyruğu uçuruyor.
+///
+/// Serbest yazılımcılık, kötü %10 (§20 eşiği: < 1):
+///
+/// | örneklem | Paket AO öncesi | Paket AO sonrası |
+/// | --- | --- | --- |
+/// | 45  | -0,37 | **+7,79** |
+/// | 150 | -0,33 | +0,30 |
+/// | 300 | -0,29 | +0,30 |
+///
+/// Terzi atölyesi, açıklık (iyi%10 − kötü%10) ve medyan (§16 eşiği:
+/// açıklık > medyan) — katalogdaki en dar dağılım, iki tarafta da
+/// sınıra en yakın işletme:
+///
+/// | örneklem | AO öncesi açıklık/medyan | AO sonrası açıklık/medyan |
+/// | --- | --- | --- |
+/// | 150 | 26,5 / 22,9 ✓ | 19,5 / 22,0 ✗ |
+/// | 400 | — | 22,1 / 22,1 (sınırda) |
+/// | 500 | 24,5 / 21,5 ✓ | 22,4 / 22,2 ✓ |
+/// | 600 | 25,0 / 21,7 ✓ | 23,4 / 22,0 ✓ |
+/// | 800 | — | 24,3 / 22,0 ✓ |
+///
+/// 600'de iki ağaç da aynı yeri gösteriyor ve işaret kararlı.
+///
+/// Paket AO'nun bu sayılara **dokunmadığı** ayrıca kanıtlandı: Faz 3'ün
+/// tek simülasyon etkisi yeni bağlara `ChildProgression` çalıştırmaktı
+/// ve o kayıtlar oyuncunun ekonomisine hiç değmiyor. Deney olarak
+/// sonuçları atıp yalnızca zar akışı ilerletildiğinde ölçüm birebir
+/// aynı çıktı: **9,416017364203027**, on beş hanesine kadar. Yani
+/// eşiği aşan şey ekonominin bozulması değil, zarın konumu ve
+/// örneklemin küçüklüğüydü.
+///
+/// Terzi atölyesinin katalogdaki en dar dağılım olması ayrı ve
+/// **gerçek** bir bulgu (Paket AH: işletme seçimlerinin %60'ı terzi);
+/// burada yalnızca ölçüm sağlamlaştırıldı, denge kararı verilmedi.
+int get _hayat => _tamOlcum ? 1000 : 600;
 
 double _p(List<double> v, double q) {
   if (v.isEmpty) return 0;

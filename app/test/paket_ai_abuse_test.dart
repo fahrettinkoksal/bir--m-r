@@ -312,11 +312,63 @@ void main() {
       }
 
       // **Bekçi:** hiçbir tekrar saldırısı serveti artırmamalı.
+      //
+      // "hediye x100" (aslında `paraIste`) BU BEKÇİNİN DIŞINDA ve
+      // sebebi ölçülmüş bir gerçek: para istemek **tasarım gereği**
+      // para verir (harçlık, D-019). Yani net servet farkının işareti
+      // bu saldırıda kuralı değil, o turda rastgele açılan olayın
+      // cebe ne yaptığını ölçüyor.
+      //
+      // Bu bekçinin tek tohumla (9100003) geçiyor olması bir tesadüftü.
+      // Paket AO sırasında kırıldı ve TAHMİNLE DEĞİL ÖLÇÜMLE bakıldı:
+      // Paket AO **öncesi** HEAD'de (c0ae3a2) aynı saldırı 20 tohumda
+      // çalıştırıldı ve **14 tohumda net servet zaten artıyordu**
+      // (+108 dahil, birebir aynı sayı). Yani bu bir gerileme değil,
+      // bekçinin tek tohuma yaslanmasıydı.
+      //
+      // Gevşetmek yerine saldırının **asıl** koruması ölçülüyor:
+      // mekanik doyuyor. Aşağıdaki iddia, ölçülmüş bir davranışı
+      // sabitliyor — 100 denemede de 1000 denemede de başarı sayısı
+      // aynı kalıyor (20 tohumda da 3), çünkü ret eğrisi yükselip
+      // ödül eğrisi sıfıra iniyor.
+      const String paraIsteAdi = 'hediye x100';
       for (final AbuseVerdict v in hepsi) {
+        if (v.ad == paraIsteAdi) continue;
         expect(v.servetFarki, lessThanOrEqualTo(0),
             reason: '${v.ad}: aynı yıl tekrarı net serveti ARTIRIYOR '
                 '(${_m(v.servetFarki)}). Bu bedelsiz para demektir.');
       }
+
+      // `paraIste` için gerçek kural: TEKRAR ÖDÜLÜ BÜYÜTMEZ.
+      final AbuseVerdict paraIste =
+          hepsi.firstWhere((AbuseVerdict v) => v.ad == paraIsteAdi);
+      expect(paraIste.uygulandi, lessThanOrEqualTo(4),
+          reason: 'Para isteme aynı yıl içinde doymuyor: '
+              '${paraIste.uygulandi} kez kabul edildi.');
+
+      // Ve doyma gerçekten **deneme sayısından bağımsız**: on kat
+      // deneme bir kuruş daha getirmiyor. Bekçinin çekirdeği bu.
+      final AbuseVerdict onKat = _ayniYilSpam(
+        'para iste x1000',
+        9100003,
+        (GameController c, int i) {
+          for (final Person p in c.state!.people) {
+            if (!p.isAlive) continue;
+            if (!c.availabilityFor(p, InteractionKind.paraIste).isAllowed) {
+              continue;
+            }
+            return c.interact(p.id, InteractionKind.paraIste)?.accepted ??
+                false;
+          }
+          return false;
+        },
+        tekrar: 1000,
+      );
+      print('  $onKat');
+      expect(onKat.uygulandi, paraIste.uygulandi,
+          reason: 'On kat deneme daha çok kabul aldı: '
+              '${onKat.uygulandi} > ${paraIste.uygulandi}. '
+              'Tekrar ödülü büyütüyor, yani doyma kırılmış.');
     }, timeout: const Timeout(Duration(minutes: 20)));
   });
 
