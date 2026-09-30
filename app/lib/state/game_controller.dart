@@ -33,6 +33,8 @@ import '../data/finger_catalog.dart';
 import '../domain/models/wealth.dart';
 import '../data/media_catalog.dart';
 import '../domain/social/media_opportunities.dart';
+import '../domain/generation/parent_divorce.dart';
+import '../domain/interaction/elder_care.dart';
 import '../domain/interaction/child_naming.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
@@ -460,6 +462,85 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  // =================================================================
+  // Paket AO — aile kararları
+  // =================================================================
+
+  /// §4: ebeveynler ayrıldı ve oyuncuya "kiminle kalacaksın?" soruluyor
+  /// mu?
+  ///
+  /// `ParentDivorce` Paket AO/1'de yazıldı ama hiçbir ekrandan
+  /// ulaşılamıyordu: boşanma oluyor, varsayılan hane kuruluyor, oyuncuya
+  /// hiç sorulmuyordu. Kararın gerçekten oyuncunun olması için kapı
+  /// buradan açılıyor.
+  bool hasParentDivorceChoice() {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return ParentDivorce.isPending(current);
+  }
+
+  /// §4: oyuncu hangi ebeveynle kalacağını seçti.
+  ///
+  /// Seçim yapılmazsa oyun kilitlenmez; boşanma anında kurulan
+  /// varsayılan hane geçerli kalır.
+  ActivityOutcome? chooseDivorceHousehold(DivorceHouseholdChoice secim) {
+    final GameState? current = _state;
+    if (current == null || !ParentDivorce.isPending(current)) return null;
+    _state = ParentDivorce.choose(current, secim);
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(
+      applied: true,
+      text: secim == DivorceHouseholdChoice.anne
+          ? 'Annenle kalmayı seçtin.'
+          : 'Babanla kalmayı seçtin.',
+    );
+  }
+
+  /// §35: bu kişi için bakım kararı anlamlı mı?
+  bool needsElderCare(Person person) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return ElderCare.needsCare(current, person);
+  }
+
+  /// §35-§36: yaşlı ebeveyn bakımının bu yılki cepten maliyeti ve varsa
+  /// kardeş katkısı. Ekran gerçek sayıyı gösterir, tahmin etmez.
+  ({int cost, int siblingShare, List<String> siblingNames})? elderCareCost() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final int maliyet = ElderCare.yearlyCost();
+    final ({int amount, List<String> names}) katki =
+        ElderCare.siblingContribution(current, maliyet);
+    return (
+      cost: maliyet,
+      siblingShare: katki.amount,
+      siblingNames: katki.names,
+    );
+  }
+
+  /// §35: bakım kararını uygular.
+  ActivityOutcome? decideElderCare(String personId, ElderCareChoice secim) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final Person? kisi = current.personById(personId);
+    if (kisi == null || !ElderCare.needsCare(current, kisi)) return null;
+    final ElderCareResult sonuc = ElderCare.apply(
+      state: current,
+      parent: kisi,
+      choice: secim,
+      rng: _random,
+    );
+    // Para yetmediyse durum değişmez; "yardım ettin" yazılmaz.
+    final bool uygulandi = !identical(sonuc.state, current);
+    if (uygulandi) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return ActivityOutcome(applied: uygulandi, text: sonuc.text);
   }
 
   /// Bu kişiye şu an **gerçekten alınabilecek** hediyeler (D-134).

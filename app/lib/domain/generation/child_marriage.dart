@@ -105,16 +105,31 @@ abstract final class ChildMarriage {
 
     // Bağ değiştiğinde yalnızca bildirimin başlığı ve kimlik öneki
     // değişir; kural tek yerde durur (D-158).
-    final bool cocuk = relation == RelationType.cocuk;
+    //
+    // Paket AO §28: üvey/yarım kardeş ve üvey çocuk da buraya girer.
+    // Başlık ikili bir bayraktan değil bağın **kendi** adından türetilir
+    // ki her yeni bağ için ikinci bir sistem yazılmasın. Çocuk ve kardeş
+    // için üretilen kimlik öneği ve başlık aynen korunur.
+    final String onEk = switch (relation) {
+      RelationType.cocuk => 'cocuk',
+      RelationType.kardes => 'kardes',
+      _ => relation.name,
+    };
+    final String baslik = switch (relation) {
+      RelationType.cocuk => 'Çocuğun evlendi',
+      RelationType.kardes => 'Kardeşin evlendi',
+      RelationType.uveyKardes => 'Üvey kardeşin evlendi',
+      RelationType.yariKardes => 'Yarım kardeşin evlendi',
+      RelationType.uveyCocuk => 'Üvey çocuğun evlendi',
+      _ => 'Ailenden biri evlendi',
+    };
     return ChildMarriageResult(
       person: guncel,
       notice: PendingNotice(
-        id: '${cocuk ? 'cocuk' : 'kardes'}-evlilik-${child.id}-$playerAge',
+        id: '$onEk-evlilik-${child.id}-$playerAge',
         kind: NoticeKind.aileDonum,
         age: playerAge,
-        title: davetli
-            ? 'Düğün davetiyesi'
-            : (cocuk ? 'Çocuğun evlendi' : 'Kardeşin evlendi'),
+        title: davetli ? 'Düğün davetiyesi' : baslik,
         text: metin,
         personId: child.id,
       ),

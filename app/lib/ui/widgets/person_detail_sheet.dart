@@ -6,6 +6,9 @@ import '../../data/wedding_catalog.dart';
 import '../../domain/activities/outing.dart';
 import '../../domain/interaction/intimacy.dart';
 
+import '../../domain/activities/activity_engine.dart';
+import '../../domain/economy/household_budget.dart';
+import '../../domain/interaction/elder_care.dart';
 import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
 import '../../domain/models/game_state.dart';
@@ -51,6 +54,13 @@ class PersonDetailSheet extends StatefulWidget {
 
 class _PersonDetailSheetState extends State<PersonDetailSheet> {
   InteractionOutcome? _lastOutcome;
+
+  /// Son bakım kararının sonucu (Paket AO §35).
+  ///
+  /// `InteractionOutcome` kullanılmadı: bakım bir `InteractionKind`
+  /// değil, kendi kararı. Sahte bir tür uydurup listeye sokmak yerine
+  /// sonuç burada duruyor.
+  String? _bakimSonucu;
   String? _notice;
 
   void _run(InteractionKind kind) {
@@ -409,6 +419,48 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                         : 'Ayrı evde yaşıyor')
                     : '—',
               ),
+              // Paket AO §26-§27: velayet düzeni. D-160'tan beri boşanmada
+              // hesaplanıyordu ama yalnızca boşanma metninde ve Evlilik
+              // Geçmişi sayfasında yazıyordu; çocuğun kendi kartında
+              // hiçbir iz yoktu. Oyuncu "çocuğum kiminle yaşıyor" diye
+              // baktığında cevabı burada bulmalı. Kayıt yoksa satır yok:
+              // dev bir velayet sistemi kurulmadı (§25 V1 sınırı).
+              if (state.alimony != null &&
+                  state.alimony!.isActive &&
+                  person.isAlive &&
+                  (person.id == state.alimony!.otherPersonId ||
+                      (person.relation == RelationType.cocuk &&
+                          person.age <
+                              HouseholdBudget.prototypeOnlyChildSupportUntil)))
+                _Row(
+                  label: 'Velayet',
+                  value: state.alimony!.custody.label,
+                ),
+              // Paket AO §39: kişi nerede yaşıyor? Ayrı evdeki bir
+              // akrabanın aynı şehirde mi başka şehirde mi olduğu
+              // hiçbir ekranda yazmıyordu. Kayıt yoksa satır da yok;
+              // uydurulmuyor.
+              if (person.isAlive && person.city != null)
+                _Row(label: 'Yaşadığı şehir', value: person.city!),
+              // Paket AO §14-§15, §39: soy bağı. Üvey mi, yarım mı, öz
+              // mü — bunu etiket söylüyor ama **neden** öyle olduğunu
+              // ancak ortak ebeveyn gösterir. Yalnızca kayıtta duran ve
+              // kişi listesinde gerçekten bulunan ebeveyn yazılır.
+              ...<Widget>[
+                for (final ({String etiket, String? id}) ebeveyn
+                    in <({String etiket, String? id})>[
+                  (etiket: 'Annesi', id: person.motherId),
+                  (etiket: 'Babası', id: person.fatherId),
+                ])
+                  if (ebeveyn.id != null &&
+                      state.personById(ebeveyn.id!) != null)
+                    _Row(
+                      label: ebeveyn.etiket,
+                      value: state.personById(ebeveyn.id!)!.fullName,
+                    )
+                  else if (ebeveyn.id == state.player.id)
+                    _Row(label: ebeveyn.etiket, value: 'Sen'),
+              ],
               // Ortak geçmişiniz (Paket 14): yalnızca kayıtlarda gerçekten
               // duran anlar. Kayıt yoksa bölüm hiç gösterilmez.
               Builder(
@@ -519,6 +571,65 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 )
               else
                 _Actions(available: available, onSelected: _run),
+              // --- Yaşlı ebeveyn bakımı (Paket AO §35, §36) ----------
+              //
+              // `ElderCare` Paket AO/1'de yazıldı ama hiçbir ekrandan
+              // ulaşılamıyordu: yaşlanan anne-babaya yapılabilecek tek
+              // şey yine "Sohbet et"ti. Karar burada, kişinin kendi
+              // kartında veriliyor. Bakım ihtiyacı yoksa bölüm hiç
+              // çizilmez — boş başlık gösterilmiyor.
+              if (GameScope.of(context).needsElderCare(person)) ...<Widget>[
+                const SizedBox(height: 16),
+                Text('Bakım', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                Builder(
+                  builder: (BuildContext context) {
+                    final ({
+                      int cost,
+                      int siblingShare,
+                      List<String> siblingNames
+                    })? hesap = GameScope.of(context).elderCareCost();
+                    if (hesap == null) return const SizedBox.shrink();
+                    final int cepten =
+                        (hesap.cost - hesap.siblingShare).clamp(0, hesap.cost);
+                    return Text(
+                      hesap.siblingShare > 0
+                          ? 'Bu yılki bakım masrafı ${trMoney(hesap.cost)}. '
+                              '${hesap.siblingNames.join(' ve ')} '
+                              '${trMoney(hesap.siblingShare)} katkı '
+                              'veriyor; sana ${trMoney(cepten)} düşüyor.'
+                          : 'Bu yılki bakım masrafı ${trMoney(hesap.cost)}. '
+                              'Katkı verebilecek kardeşin yok.',
+                      key: const Key('elder_care_cost_note'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: <Widget>[
+                    for (final ElderCareChoice secim in ElderCareChoice.values)
+                      OutlinedButton(
+                        key: Key('elder_care_${secim.name}'),
+                        onPressed: () {
+                          final ActivityOutcome? o = GameScope.of(context)
+                              .decideElderCare(widget.personId, secim);
+                          if (o == null) return;
+                          setState(() => _bakimSonucu = o.text);
+                        },
+                        child: Text(secim.label),
+                      ),
+                  ],
+                ),
+                if (_bakimSonucu != null) ...<Widget>[
+                  const SizedBox(height: 8),
+                  _Note(text: _bakimSonucu!),
+                ],
+              ],
               // Evlilik yalnızca sevgilide sunulur; koşul sağlanmıyorsa
               // düğme yerine gerekçe yazılır (sahte düğme olmaz).
               if (person.isAlive &&

@@ -140,11 +140,20 @@ class LifeProgression {
           // Kardeş de kendi hayatını yaşar (D-158): okur, iş bulur,
           // emekli olur. Kayıt kardeşi doğuştan taşıyordu ama hayatı
           // hiç ilerlemiyordu. Yeğen kaydı da bu yüzden hiç oluşmuyordu.
+          // Paket AO §28: üvey kardeş, yarım kardeş ve üvey çocuk da
+          // kendi hayatını yaşar. Paket AO/1'de bu kişiler gerçek kayıt
+          // olarak doğdu ama listede yalnızca yaşlanıyorlardı: okula
+          // başlamıyor, iş bulmuyor, emekli olmuyorlardı. Yarım kardeş
+          // 0 yaşında doğduğu için bu en çok onda görünüyordu — kırk
+          // yaşına gelene kadar hiçbir şey yaşamamış oluyordu.
           final bool kendiHayati =
               person.relation == RelationType.cocuk ||
               person.relation == RelationType.torun ||
               person.relation == RelationType.yegen ||
-              person.relation == RelationType.kardes;
+              person.relation == RelationType.kardes ||
+              person.relation == RelationType.uveyKardes ||
+              person.relation == RelationType.yariKardes ||
+              person.relation == RelationType.uveyCocuk;
           if (!person.isAlive || !kendiHayati) {
             return person;
           }
@@ -163,12 +172,22 @@ class LifeProgression {
     final List<Person> evlilikSonrasi = <Person>[];
     for (final Person kisi in peopleWithChildren) {
       // Aynı kural iki bağa da işler: kardeş de evlenir (D-158).
+      // Paket AO §28: üvey kardeş, yarım kardeş ve üvey çocuk da yetişkin
+      // olunca kendi evliliğini yapar. Bağ kişinin kendi kaydından
+      // okunur; `ChildMarriage` zaten bağ başına davranıyor, ikinci bir
+      // evlilik sistemi kurulmadı.
+      const Set<RelationType> kendiEvliligiOlanlar = <RelationType>{
+        RelationType.kardes,
+        RelationType.uveyKardes,
+        RelationType.yariKardes,
+        RelationType.uveyCocuk,
+      };
       final ChildMarriageResult? evlilik = ChildMarriage.maybeMarry(
         child: kisi,
         playerAge: newAge,
         rng: _rng,
-        relation: kisi.relation == RelationType.kardes
-            ? RelationType.kardes
+        relation: kendiEvliligiOlanlar.contains(kisi.relation)
+            ? kisi.relation
             : RelationType.cocuk,
       );
       if (evlilik == null) {
@@ -263,7 +282,15 @@ class LifeProgression {
     final List<Person> yeniYegenler = <Person>[];
     final List<String> yegenHaberleri = <String>[];
     for (final Person kardes in esliKisiler) {
-      if (kardes.relation != RelationType.kardes) continue;
+      // Paket AO §12-§13: yarım kardeş **kan bağıdır** — onun çocuğu da
+      // gerçekten yeğendir. Üvey kardeş bilerek dışarıda bırakıldı: kan
+      // bağı yok ve her üvey kardeşe ayrıca çocuk üretmek §46'nın
+      // uyardığı kişi kalabalığını doğuruyor. Bu bir V1 sınırı, kesin
+      // kural değil; soru `docs/DESIGN_REVIEW_QUEUE.md` Q-187'de.
+      if (kardes.relation != RelationType.kardes &&
+          kardes.relation != RelationType.yariKardes) {
+        continue;
+      }
       final Person? yegen = Grandchildren.maybeBornTo(
         state: state.copyWith(
           people: List<Person>.unmodifiable(<Person>[
@@ -274,7 +301,9 @@ class LifeProgression {
         ),
         parent: kardes,
         rng: _rng,
-        parentRelation: RelationType.kardes,
+        // Bağ kişinin kendi kaydından gelir: `maybeBornTo` ebeveynin
+        // bağını doğruluyor, sabit `kardes` yazmak yarım kardeşi elerdi.
+        parentRelation: kardes.relation,
         childRelation: RelationType.yegen,
         idPrefix: 'yegen',
       );
