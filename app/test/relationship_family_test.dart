@@ -203,7 +203,9 @@ void main() {
         () {
       final ({GameState state, Person partner}) v = sevgiliyle(54, bond: 98);
       GameState state = v.state;
-      final int kisiSayisi = state.people.length;
+      final Set<String> oncekiler = <String>{
+        for (final Person p in state.people) p.id,
+      };
       for (int seed = 0; seed < 30 && !state.isMarried; seed++) {
         final GameState deneme =
             evlilik.propose(state, v.partner.id, Random(seed)).state;
@@ -220,7 +222,32 @@ void main() {
         }
       }
       expect(state.isMarried, isTrue);
-      expect(state.people.length, kisiSayisi, reason: 'İkinci kişi üretilmez');
+      // Paket AO §21: evlilikte eşin **ailesi** de hayata girebiliyor
+      // (kayınvalide/kayınpeder, varsa eşin önceki çocuğu). Bu yüzden
+      // toplam kişi sayısı artık sabit değil.
+      //
+      // Testin adındaki kural değişmedi ve GEVŞETİLMEDİ: aşağıdaki iki
+      // iddia "yeni kişi üretilmez" vekilinden **daha güçlü**, çünkü
+      // sayıya değil kuralın kendisine bakıyor:
+      //   * ortada tek bir eş var ve o eş aynı kimlik,
+      //   * eklenen herkes yalnızca kayın aile ya da üvey çocuk.
+      expect(
+        state.people.where((Person p) => p.relation == RelationType.es).length,
+        1,
+        reason: 'Eş için ikinci kişi üretilmez',
+      );
+      for (final Person p in state.people) {
+        if (oncekiler.contains(p.id)) continue;
+        expect(
+          <RelationType>[
+            RelationType.kayinvalide,
+            RelationType.kayinpeder,
+            RelationType.uveyCocuk,
+          ],
+          contains(p.relation),
+          reason: 'Evlilikte beklenmeyen kişi eklendi: ${p.relation}',
+        );
+      }
       expect(state.spouse!.id, v.partner.id);
       // Aynı evlilik ikinci kez kurulamaz.
       expect(

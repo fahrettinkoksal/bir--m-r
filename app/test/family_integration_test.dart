@@ -106,9 +106,30 @@ void main() {
     expect(checkInvariants(state, where: 'başlangıç'), isEmpty);
 
     // 1) Evlilik: aynı kimlik, yeni kişi yok.
-    final int kisiSayisi = state.people.length;
+    final Set<String> evlilikOncesi = <String>{
+      for (final Person p in state.people) p.id,
+    };
     state = evlilik.marry(state, baslangic.partner.id).state;
-    expect(state.people.length, kisiSayisi, reason: 'İkinci NPC üretilmemeli');
+    // Paket AO §21: evlilikte eşin ailesi de hayata girebiliyor, o yüzden
+    // toplam sayı sabit değil. Kural aynı ve daha güçlü doğrulanıyor:
+    // tek eş, aynı kimlik, eklenenler yalnızca kayın aile / üvey çocuk.
+    expect(
+      state.people.where((Person p) => p.relation == RelationType.es).length,
+      1,
+      reason: 'Eş için ikinci NPC üretilmemeli',
+    );
+    for (final Person p in state.people) {
+      if (evlilikOncesi.contains(p.id)) continue;
+      expect(
+        <RelationType>[
+          RelationType.kayinvalide,
+          RelationType.kayinpeder,
+          RelationType.uveyCocuk,
+        ],
+        contains(p.relation),
+        reason: 'Evlilikte beklenmeyen kişi eklendi: ${p.relation}',
+      );
+    }
     expect(state.isMarried, isTrue);
     expect(state.spouse!.inPlayerHousehold, isTrue);
     expect(checkInvariants(state, where: 'evlilik'), isEmpty);

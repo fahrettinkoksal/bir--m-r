@@ -180,11 +180,14 @@ abstract final class ParentDivorce {
       parentalStatus: ParentalStatus.bosanmis,
     );
 
-    // Oyuncu kendi hanesini kurmuşsa ebeveyn hanesi onu ilgilendirmez;
-    // yine de ebeveynler artık aynı evde değildir.
+    // Hane ayrılır. Oyuncu kendi hanesini kurmuş olsa bile ebeveynler
+    // artık aynı evde değildir; ama **oyuncunun** hane durumu boşanma
+    // yüzünden kötüleşmez (aşağıdaki nota bakınız).
     next = _splitHousehold(
       next,
-      stayWith: newAge >= prototypeOnlyOwnHouseholdAge ? null : varsayilan,
+      stayWith: varsayilan,
+      // Boşanma **öncesi** ölçülüyor: oyuncu aile evinde miydi?
+      playerAtFamilyHome: _atFamilyHome(state),
     );
 
     final String metin = '${anne.firstName} ile ${baba.firstName} '
@@ -243,7 +246,14 @@ abstract final class ParentDivorce {
   /// §4: oyuncu hangi ebeveynle kalacağını seçti.
   static GameState choose(GameState state, DivorceHouseholdChoice secim) {
     if (!isPending(state)) return state;
-    GameState next = _splitHousehold(state, stayWith: secim);
+    // Boşanma anında ayrılan taraf zaten haneden çıkarıldı; oyuncunun
+    // aile evinde olup olmadığı **kalan** taraftan okunuyor, yeni bir
+    // kayıt alanı eklemeye gerek kalmıyor.
+    GameState next = _splitHousehold(
+      state,
+      stayWith: secim,
+      playerAtFamilyHome: _atFamilyHome(state),
+    );
     next = next.copyWith(
       storyFlags: <String>{...next.storyFlags}..remove(pendingChoiceFlag),
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
@@ -264,37 +274,50 @@ abstract final class ParentDivorce {
   // §3, §4 — hane
   // =================================================================
 
-  /// Haneyi ayırır: seçilen ebeveyn oyuncunun hanesinde kalır, diğeri
-  /// çıkar. **Kimse silinmez**, ikisi de anne/baba olarak listede durur.
+  /// Haneyi ayırır: seçilen ebeveyn oyuncuyla kalır, diğeri çıkar.
+  /// **Kimse silinmez**, ikisi de anne/baba olarak listede durur.
   ///
-  /// [stayWith] `null` ise oyuncu zaten kendi hanesindedir; iki ebeveyn
-  /// de oyuncunun hanesinden çıkar.
+  /// DİKKAT — kalan ebeveyn kendi hane durumunu **korur**, `true`
+  /// yazılmaz. Sebebi bir ölçüm: ilk yazımda 24 yaş üstü oyuncuda iki
+  /// ebeveyn de haneden çıkarılıyordu ve bu, **hâlâ ailesinin yanında
+  /// yaşayan** bir yetişkini bir anda "kendi evinde" sayıyordu.
+  /// `LivingCosts.livesWithFamily` buna bakıyor, dolayısıyla yaşam gideri
+  /// ve işletme geri ödeme dağılımı kayıyordu (`paket_ag_payback` ve
+  /// `paket_ae_calibration` kırıldı).
+  ///
+  /// Doğrusu şu: boşanma iki ebeveyni **birbirinden** ayırır, oyuncuyu
+  /// evsiz bırakmaz. Bu yüzden kural tek yönlü — bir ebeveynin hane
+  /// üyeliği ya aynı kalır ya da `false` olur, hiçbir zaman `false`'tan
+  /// `true`'ya dönmez.
   static GameState _splitHousehold(
     GameState state, {
-    required DivorceHouseholdChoice? stayWith,
+    required DivorceHouseholdChoice stayWith,
+    required bool playerAtFamilyHome,
   }) {
     final List<Person> yeni = <Person>[];
     for (final Person p in state.people) {
-      if (p.relation == RelationType.anne) {
-        yeni.add(p.copyWith(
-          inPlayerHousehold: stayWith == DivorceHouseholdChoice.anne,
-        ));
-      } else if (p.relation == RelationType.baba) {
-        yeni.add(p.copyWith(
-          inPlayerHousehold: stayWith == DivorceHouseholdChoice.baba,
-        ));
-      } else if (p.relation == RelationType.uveyAnne) {
+      final bool kalan = switch (p.relation) {
+        RelationType.anne => stayWith == DivorceHouseholdChoice.anne,
+        RelationType.baba => stayWith == DivorceHouseholdChoice.baba,
         // Üvey ebeveyn kendi eşinin yanındadır.
-        yeni.add(p.copyWith(
-          inPlayerHousehold: stayWith == DivorceHouseholdChoice.baba,
-        ));
-      } else if (p.relation == RelationType.uveyBaba) {
-        yeni.add(p.copyWith(
-          inPlayerHousehold: stayWith == DivorceHouseholdChoice.anne,
-        ));
-      } else {
+        RelationType.uveyAnne => stayWith == DivorceHouseholdChoice.baba,
+        RelationType.uveyBaba => stayWith == DivorceHouseholdChoice.anne,
+        _ => false,
+      };
+      final bool ilgili = p.relation == RelationType.anne ||
+          p.relation == RelationType.baba ||
+          p.relation == RelationType.uveyAnne ||
+          p.relation == RelationType.uveyBaba;
+      if (!ilgili) {
         yeni.add(p);
+        continue;
       }
+      // Kalan taraf oyuncuyla kalır — ama yalnızca oyuncu zaten aile
+      // evinde yaşıyorsa. Kendi evini kurmuş oyuncuya boşanma yüzünden
+      // ebeveyn taşınmaz.
+      yeni.add(p.copyWith(
+        inPlayerHousehold: kalan && playerAtFamilyHome,
+      ));
     }
     return state.copyWith(people: List<Person>.unmodifiable(yeni));
   }
@@ -373,6 +396,11 @@ abstract final class ParentDivorce {
         ? 'Annenle kalıyorsun. Babanı görmeye devam edeceksin.'
         : 'Babanla kalıyorsun. Anneni görmeye devam edeceksin.';
   }
+
+  /// Oyuncu (bu anda) anne ya da babasıyla aynı hanede mi?
+  static bool _atFamilyHome(GameState state) => state.people.any((Person p) =>
+      (p.relation == RelationType.anne || p.relation == RelationType.baba) &&
+      p.inPlayerHousehold);
 
   static Person? _parent(GameState state, RelationType tur) {
     for (final Person p in state.people) {

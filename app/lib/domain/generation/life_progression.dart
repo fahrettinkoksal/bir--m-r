@@ -1025,7 +1025,23 @@ class LifeProgression {
 
     for (int i = 0; i < people.length; i++) {
       final Person p = people[i];
-      if (p.relation != RelationType.cocuk) continue;
+      // Paket AO: büyüyüp evden çıkanlar yalnızca oyuncunun kendi
+      // çocukları değil. Üvey ve yarım kardeşler ile eşin önceki
+      // çocuğu da büyüyünce kendi hayatını kurar.
+      //
+      // DİKKAT — bu yalnızca anlatı değil, **ekonomik** bir kural.
+      // `LivingCosts.livesWithFamily` "hanede yetişkin bir akraba var
+      // mı?" diye bakıyor. Üvey kardeş/üvey çocuk hanede kalıp
+      // yaşlanınca oyuncu ömrü boyunca "ailesinin yanında yaşıyor"
+      // sayılıyor ve kira ödemiyordu; `paket_ae_calibration` bunu
+      // dominans kaymasıyla yakaladı.
+      const Set<RelationType> evdenCikanlar = <RelationType>{
+        RelationType.cocuk,
+        RelationType.uveyKardes,
+        RelationType.yariKardes,
+        RelationType.uveyCocuk,
+      };
+      if (!evdenCikanlar.contains(p.relation)) continue;
       if (!p.isAlive || !p.inPlayerHousehold) continue;
       if (p.age < Parenthood.prototypeOnlyLeaveHomeAge) continue;
 

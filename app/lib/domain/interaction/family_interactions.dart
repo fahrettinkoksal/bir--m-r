@@ -62,6 +62,10 @@ class FamilyInteractions {
     InteractionKind.hediyeVer: _Reward(bond: 10, happiness: 3),
     InteractionKind.hediyeIste: _Reward(bond: 2, happiness: 5),
     InteractionKind.paraIste: _Reward(bond: 1, happiness: 2),
+    // Paket AO §25: ortak çocuğu konuşmak. Boşanmış iki insanın
+    // yakınlığını **büyütmez** — mesele çocuk, ilişkiyi onarmak değil.
+    // Küçük bir yakınlık ve oyuncuya küçük bir iç rahatlığı.
+    InteractionKind.cocukKonus: _Reward(bond: 2, happiness: 2),
   };
 
   /// prototypeOnly: oyuncunun hediye için ayırabileceği en düşük bütçe.
