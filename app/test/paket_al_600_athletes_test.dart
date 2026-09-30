@@ -247,8 +247,30 @@ void main() {
         reason: 'Sporcuların çoğu rekabete hiç başlayamıyor.');
 
     // §40: çoğu sporcu orta düzeyde kalıyor, bir kısmı çok kazanıyor.
-    expect(_medyan(tumGelirler), lessThan(Economy.netYearlyMinimumWage * 12),
-        reason: 'Spor otomatik zenginlik makinesine dönmüş.');
+    //
+    // PAKET AN — BU EŞİK YENİDEN TEMELLENDİRİLDİ (12x → 22x).
+    //
+    // Eşik 12x (4,04 M₺) iken yazıldı ve o sırada "çalışan sporcu formunu
+    // daha iyi korur" kuralı **çalışmıyordu**: `MartialArtsEngine` ders
+    // sayacını 'dovus|artId' yazıyor, `CombatCareerEngine` onu
+    // 'artId|dovus' diye okuyordu (Q-184 #1). Yani 4,04 M₺ sağlıklı bir
+    // dengenin değeri değil, ölü bir mekaniğin yan ürünüydü.
+    //
+    // Paket AN hatayı düzeltti. Formu ayakta kalan sporcu daha çok maç
+    // yapıyor ve bu ölçümün **brüt** medyanı 6,22 M₺'ye çıktı. Paket AL/2
+    // bu testi gevşetmek yerine düzeltmeyi geri almıştı; Paket AN'in
+    // kuralı tersi: "yanlış çalışan kod bir denge mekaniği değildir".
+    //
+    // Eşik gevşetilip unutulmadı, iki şey yapıldı:
+    //   * Buradaki tavan ölçülen değerin üstüne, gerçek bir kaçağı
+    //     yakalayacak kadar yakın kondu (22x = 7,41 M₺; ölçülen 18,5x).
+    //   * Dengenin **asıl** bekçisi artık brüt değil NET ölçüm:
+    //     `paket_an_spor_kalibrasyon_test.dart`, medyan net 3,5–5,0 M₺
+    //     bandını bağlıyor (Paket AN §6, §7). Brüt purse yanıltıcı;
+    //     ders, koç, kamp ve tedavi giderleri orada sayılıyor.
+    expect(_medyan(tumGelirler), lessThan(Economy.netYearlyMinimumWage * 22),
+        reason: 'Spor otomatik zenginlik makinesine dönmüş. Net ölçüm '
+            'paket_an_spor_kalibrasyon_test.dart içinde.');
     expect(_yuzdelik(tumGelirler, 0.90),
         greaterThan(_medyan(tumGelirler)),
         reason: 'Gelir dağılımı düz; iyi sporcu ayrışmıyor.');

@@ -28,6 +28,7 @@ import '../models/combat_career.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/martial_progress.dart';
+import 'martial_lesson_counter.dart';
 import 'sport_family_support.dart';
 import 'sport_rivalry.dart';
 import 'sport_workload.dart';
@@ -137,6 +138,13 @@ abstract final class CombatCareerEngine {
   /// prototypeOnly: formun yıllık doğal kaybı.
   static const int prototypeOnlyFormDecayPerYear = 8;
 
+  /// prototypeOnly: bir dersin forma katkısı.
+  ///
+  /// [prototypeOnlyFormDecayPerYear] ile birlikte okunur: yalnızca
+  /// derslerden başabaş noktası `8 / 1,6 = 5` ders/yıl. Müsabakalar ve
+  /// zirve kondisyonu da telafi ettiği için gerçek başabaş daha aşağıda.
+  static const double prototypeOnlyFormPerLesson = 1.6;
+
   /// prototypeOnly: en üst teknik basamaktaki sporcunun sürdürdüğü
   /// kondisyonun forma katkısı.
   ///
@@ -153,13 +161,40 @@ abstract final class CombatCareerEngine {
   static const int prototypeOnlyReputationToPromote = 18;
 
   /// prototypeOnly: şampiyonluk maçına çağrılmak için gereken sıralama.
-  static const int prototypeOnlyTitleShotRank = 2;
+  ///
+  /// Paket AN'de 2'den **1**'e çekildi. Sebep ölçüm: Q-184 #1'deki
+  /// anahtar hatası düzeltilince form ayakta kaldı, sporcular daha çok
+  /// maç yaptı ve adanmış 600 sporcu kohortunda şampiyonluk %18,2'den
+  /// **%33,8**'e çıktı — "nadir ama imkânsız değil" bandının üstü.
+  ///
+  /// Kemer maçına kemerin **bir numaralı** rakibi çağrılıyor. Sıralama
+  /// zincirin gerçekten çalışan tek halkası: rank ≤ 2'ye 600 sporcunun
+  /// 363'ü, rank 1'e 290'ı ulaşıyor.
+  static const int prototypeOnlyTitleShotRank = 1;
 
   /// prototypeOnly: şampiyonluk maçına çağrılmak için gereken itibar.
+  ///
+  /// **Bu eşik fiilen filtre değil ve yükseltilerek filtre yapılamaz.**
+  /// Paket AN ölçümü: 600 adanmış sporcunun 575'i itibar 70'i, **530'u
+  /// 100'ü** görüyor. İtibar yalnızca yukarı gidiyor (galibiyette
+  /// +3+fameGain, mağlubiyette −2) ve 40 maçlık bir kariyerde 100'e
+  /// doyuyor; eşiği 100 yapmak bile 600'ün 530'unu geçirir.
+  ///
+  /// Bu yüzden Paket AN sayıyı **değiştirmedi**: 90 yazmak filtre
+  /// kurmuş gibi görünüp hiçbir şey yapmaz. Şart "spor çevresinde ad
+  /// yapmış olmak" anlamını koruyor (acemi sporcu kemer maçına
+  /// çağrılmıyor), ama seçici halka sıralama. İtibarın bir aşınması
+  /// olmadığı için doyduğu gerçeği Q-186 #2'de Faho'da.
   static const int prototypeOnlyTitleShotReputation = 70;
 
   /// prototypeOnly: şartlar tuttuğunda unvan maçı çıkma ihtimali.
-  static const double prototypeOnlyTitleShotChance = 0.40;
+  ///
+  /// Paket AN'de 0,40'tan **0,30**'a çekildi. Tek başına bir sayı
+  /// düşürmek değil (§8): sıralama şartıyla birlikte çalışıyor. Kapı
+  /// açık bir sporcu kariyeri boyunca ortalama birkaç fırsat gördüğü
+  /// için 0,40 pratikte "kapı açıldıysa kemer maçı kesin" demeye
+  /// yaklaşıyordu.
+  static const double prototypeOnlyTitleShotChance = 0.30;
 
   /// prototypeOnly: sporun getirebileceği en yüksek Ün.
   ///
@@ -1187,27 +1222,16 @@ abstract final class CombatCareerEngine {
     // Gerçekte teknik öğrenmeyi bitiren sporcu çalışmayı bırakmaz.
     // Artık iki şey daha telafi ediyor: o yıl çıkılan müsabakalar ve
     // zirvedeki sporcunun sürdürdüğü kondisyon.
-    // BİLİNEN PROD BUG — Paket AL/2'de bulundu, BİLEREK düzeltilmedi.
     //
-    // Anahtar sırası ters. `MartialArtsEngine` ders sayacını
-    // `interactionKey('dovus', artId)` olarak **yazıyor**; burası
-    // `interactionCount(artId, 'dovus')` diye **okuyor**.
-    // `interactionKey` iki parçayı sırayla birleştirdiği için bu iki
-    // anahtar farklı ('dovus|karate' ≠ 'karate|dovus'), yani `dersler`
-    // her yıl 0 dönüyor ve "çalışmak formu telafi eder" kuralı Paket
-    // AL'den beri hiç işlemiyor.
+    // PAKET AN — ANAHTAR HATASI DÜZELTİLDİ.
     //
-    // **Neden düzeltilmedi.** Düzeltme denendi ve dengeyi kaydırdı:
-    // `paket_al_600_athletes_test.dart` kohortunun medyan kariyer geliri
-    // 4,04 M₺'den 6,51 M₺'ye çıktı ve o testin kendi denge koruması
-    // ("Spor otomatik zenginlik makinesine dönmüş") kırıldı. Paket AL/2
-    // bir entegrasyon paketiydi; brief §0 ödül çarpanlarına ve
-    // şampiyonluk oranlarına dokunmayı yasaklıyor, mevcut testi
-    // gevşetmek de yasak. Karar Q-184 #1'de Faho'ya bırakıldı.
-    //
-    // Telafi bu arada ölmüyor: o yıl çıkılan müsabakalar ve zirvedeki
-    // sporcunun kondisyonu (aşağıda) çalışmaya devam ediyor.
-    final int dersler = state.interactionCount(k.artId, 'dovus');
+    // Burası `interactionCount(artId, 'dovus')` diye okuyordu; yazan
+    // taraf `interactionKey('dovus', artId)` yazıyordu. Anahtar sırası
+    // ters olduğu için `dersler` her yıl 0 dönüyor ve "çalışan sporcu
+    // formunu daha iyi korur" kuralı Paket AL'den beri hiç işlemiyordu.
+    // Artık iki taraf da [MartialLessonCounter] kullanıyor; anahtar tek
+    // yerde kuruluyor, elle tekrar yazılmıyor (§1).
+    final int dersler = MartialLessonCounter.read(state, k.artId);
     final int macSayisi = state.interactionCount(k.artId, boutCounterKind);
     final MartialProgress teknik = _progress(state, k.artId);
     final int zirveBakimi = teknik.isTopRank ? prototypeOnlyTopRankUpkeep : 0;
@@ -1217,8 +1241,28 @@ abstract final class CombatCareerEngine {
     // altına inmiyor; yani iş formu doğrudan eritmiyor, korumayı
     // zorlaştırıyor. Kazanma ihtimaline doğrudan bir kesinti yok (§25).
     final int isYuku = SportWorkload.formUpkeepCost(state);
+    // Ders katsayısı Paket AN'de 1,2'den **1,6**'ya çıkarıldı.
+    //
+    // Sebep ölçüm. Q-184 #1'deki anahtar hatası düzeltilince telafi ilk
+    // defa gerçekten çalıştı ve 150 sporcu × 4 bandında şu çıktı:
+    //
+    //   ders/yıl      0     2     4     8
+    //   kariyer sonu form   2,0   3,3  14,7  60,2
+    //
+    // Bu azalan getiri değil, **eşik etkisi**: yıllık kayıp 8 olduğu için
+    // telafi 8'i geçene kadar form çöküyor, geçtiği anda tırmanıyor.
+    // 1,2 katsayısında yalnızca derslerden başabaş noktası 8/1,2 ≈ 6,7
+    // derse denk geliyordu; yılda 4 ders alan sporcu "aktif biçimde
+    // antrenman yapıyor" olmasına rağmen formunu tutamıyordu (§4'ün ilk
+    // cümlesi). 1,6'da başabaş 5 derse iniyor ve uçurum yumuşuyor.
+    //
+    // Tavan yerinde: telafi 18'i geçmiyor, o yüzden ders sayısını
+    // artırmak formu 100'e kilitlemiyor (§4, §12).
     final int telafi =
-        ((dersler * 1.2).round() + macSayisi * 4 + zirveBakimi - isYuku)
+        ((dersler * prototypeOnlyFormPerLesson).round() +
+                macSayisi * 4 +
+                zirveBakimi -
+                isYuku)
             .clamp(0, 18);
     int yeniForm = k.form - prototypeOnlyFormDecayPerYear + telafi;
     if (state.player.stats.health < 50) yeniForm -= 5;

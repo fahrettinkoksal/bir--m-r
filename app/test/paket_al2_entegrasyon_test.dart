@@ -24,6 +24,7 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/domain/activities/martial_arts_engine.dart';
 import 'package:bir_omur/domain/combat/combat_career_engine.dart';
+import 'package:bir_omur/domain/combat/martial_lesson_counter.dart';
 import 'package:bir_omur/domain/combat/sport_family_support.dart';
 import 'package:bir_omur/domain/combat/sport_rivalry.dart';
 import 'package:bir_omur/domain/combat/sport_school_conflict.dart';
@@ -985,8 +986,10 @@ void main() {
       final MartialArt a = sanat('karate');
       final GameState calisan = sporcu(age: 26, level: 5).copyWith(
         interactionCounts: <String, int>{
-          // Motorun okuduğu anahtar (bkz. aşağıdaki BİLİNEN BUG testi).
-          GameState.interactionKey(a.id, 'dovus'): 4,
+          // Tek kanonik anahtar (Paket AN, §1). Eskiden burada motorun
+          // yanlış OKUDUĞU ters sıra yazılıyordu; anahtar hatası
+          // düzeltildiği için artık ürünün gerçek anahtarı kullanılıyor.
+          MartialLessonCounter.key(a.id): 4,
         },
       );
       final GameState issiz = calisan;
@@ -1012,54 +1015,50 @@ void main() {
       expect(SportWorkload.note(issiz), isNull);
     });
 
-    test('BİLİNEN BUG: ders telafisi sayacı iki tarafta ters yazılmış', () {
-      // Bu test bir düzeltmeyi değil, **bulunan ve bilerek
-      // düzeltilmeyen** bir hatayı kilitliyor (Q-184 #1).
-      //
-      // `MartialArtsEngine` ders sayacını 'dovus|<artId>' anahtarıyla
-      // yazıyor; `CombatCareerEngine.advanceYear` ise onu
-      // '<artId>|dovus' diye okuyor. İki anahtar farklı olduğu için
+    test('ÜRÜNÜN YAZDIĞI anahtar telafiyi gerçekten üretiyor', () {
+      // Bu test eskiden bir hatayı kilitliyordu: `MartialArtsEngine` ders
+      // sayacını 'dovus|<artId>' yazıyor, `CombatCareerEngine` ise onu
+      // '<artId>|dovus' diye okuyordu; iki anahtar farklı olduğu için
       // "çalışmak formu telafi eder" kuralı Paket AL'den beri hiç
-      // işlemiyor.
+      // işlemiyordu (Q-184 #1).
       //
-      // Düzeltme denendi ve 600 sporcu ölçümünün medyan gelirini
-      // 4,04 M₺'den 6,51 M₺'ye çıkardı; brief §0 bu paketin dengeye
-      // dokunmasını yasakladığı için geri alındı. Karar Faho'da.
-      //
-      // Test, hatanın **hangi yönde** durduğunu belgeliyor: düzeltme
-      // yapıldığı gün bu test kırılır ve o zaman bilinçli olarak
-      // güncellenir.
+      // Paket AN hatayı düzeltti: iki taraf da `MartialLessonCounter`
+      // kullanıyor. Test artık hatanın değil **doğru davranışın**
+      // bekçisi: ürünün yazdığı anahtar telafi üretmeli, üretmediği gün
+      // bug geri gelmiş demektir.
       final MartialArt a = sanat('karate');
       final GameState taban = sporcu(age: 26, level: 5);
-      final GameState motorunOkudugu = taban.copyWith(
+      final GameState urununYazdigi = taban.copyWith(
         interactionCounts: <String, int>{
-          GameState.interactionKey(a.id, 'dovus'): 4,
+          MartialLessonCounter.key(a.id): 4,
         },
       );
-      final GameState motorunYazdigi = taban.copyWith(
+      // Eski hatalı okuma sırası. Artık hiçbir şey ifade etmemeli:
+      // ürün bu anahtarı yazmıyor, motor da onu okumuyor.
+      final GameState eskiTersSira = taban.copyWith(
         interactionCounts: <String, int>{
-          GameState.interactionKey('dovus', a.id): 4,
+          GameState.interactionKey(a.id, MartialLessonCounter.kind): 4,
         },
       );
       final int yok =
           kariyer(CombatCareerEngine.advanceYear(taban, 27, Random(2)).state)
               .form;
-      final int okunan = kariyer(
-              CombatCareerEngine.advanceYear(motorunOkudugu, 27, Random(2))
-                  .state)
-          .form;
       final int yazilan = kariyer(
-              CombatCareerEngine.advanceYear(motorunYazdigi, 27, Random(2))
+              CombatCareerEngine.advanceYear(urununYazdigi, 27, Random(2))
                   .state)
           .form;
-      print('-- BUG: form — sayaçsız $yok / motorun OKUDUĞU anahtar '
-          '$okunan / ürünün YAZDIĞI anahtar $yazilan --');
-      expect(okunan, greaterThan(yok),
-          reason: 'Motor telafiyi hesaplayabiliyor...');
-      expect(yazilan, yok,
-          reason: '...ama ürünün gerçekte yazdığı anahtarı okumuyor. '
-              'Bu eşitlik bozulursa hata düzeltilmiş demektir; Q-184 #1 '
-              'kararıyla birlikte bu test güncellenmeli.');
+      final int tersSira = kariyer(
+              CombatCareerEngine.advanceYear(eskiTersSira, 27, Random(2))
+                  .state)
+          .form;
+      print('-- ANAHTAR: form — sayaçsız $yok / ürünün YAZDIĞI anahtar '
+          '$yazilan / eski ters sıra $tersSira --');
+      expect(yazilan, greaterThan(yok),
+          reason: 'Ürünün yazdığı anahtar telafi üretmiyor: Q-184 #1 '
+              'anahtar hatası geri gelmiş.');
+      expect(tersSira, yok,
+          reason: 'Ters sıralı eski anahtar hâlâ okunuyor. İki anahtarın '
+              'ikisi de sayılırsa aynı ders iki kez sayılır (§2).');
     });
 
     test('işten ayrılınca ceza da kalkıyor', () {
@@ -1184,8 +1183,8 @@ void main() {
             player: s.player.copyWith(age: yas),
             // Yıl dönümü: sayaçlar sıfırlanır (oyunun kendi davranışı).
             interactionCounts: <String, int>{
-              // Düzenli çalışan genç sporcu.
-              GameState.interactionKey('dovus', kOnce.artId): 3,
+              // Düzenli çalışan genç sporcu (kanonik anahtar, Paket AN §1).
+              MartialLessonCounter.key(kOnce.artId): 3,
             },
             education: yas <= 18
                 ? s.education.copyWith(grade: min(12, yas - 5))
@@ -1371,11 +1370,10 @@ void main() {
           s = s.copyWith(
             player: s.player.copyWith(age: yas),
             interactionCounts: <String, int>{
-              // Her yıl düzenli çalışan sporcu. Anahtar bilerek motorun
-              // OKUDUĞU sırada yazılıyor: ürünün yazdığı sıra bilinen
-              // bir hata yüzünden okunmuyor (Q-184 #1) ve bu ölçüm o
-              // hatanın gölgesinde kalmasın.
-              GameState.interactionKey(k.artId, 'dovus'): 4,
+              // Her yıl düzenli çalışan sporcu. Paket AN anahtar
+              // hatasını düzelttiği için artık ürünün gerçekten yazdığı
+              // tek kanonik anahtar kullanılıyor (§1).
+              MartialLessonCounter.key(k.artId): 4,
             },
           );
           s = CombatCareerEngine.advanceYear(s, yas, rng).state;

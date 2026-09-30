@@ -4,6 +4,7 @@ import '../hobby/hobby_tracker.dart';
 import '../../text/turkish_text.dart';
 import '../effects/effect_diff.dart';
 import '../models/game_state.dart';
+import '../combat/martial_lesson_counter.dart';
 import '../combat/sport_family_support.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
@@ -74,8 +75,11 @@ class MartialArtsEngine {
   }
 
   /// Bu yaşta bu sanattan kaç ders alındı?
+  ///
+  /// Anahtar elle kurulmuyor: yazan da okuyan da [MartialLessonCounter]
+  /// kullanıyor (Paket AN, §1).
   int lessonsThisAge(GameState state, MartialArt art) =>
-      state.interactionCount('dovus', art.id);
+      MartialLessonCounter.read(state, art.id);
 
   /// Ders alınabilir mi?
   InteractionAvailability availability(GameState state, MartialArt art) {
@@ -296,7 +300,7 @@ class MartialArtsEngine {
         // harcanan aile kredisi geri gelir ve aynı destek ikinci kez
         // kullanılabilir (Paket AL/2, §31 — double payment).
         ...odenmis.interactionCounts,
-        GameState.interactionKey('dovus', art.id):
+        MartialLessonCounter.key(art.id):
             lessonsThisAge(state, art) + 1,
         GameState.interactionKey('aktivite', lessonHealthCounterId):
             lessonHealthGained(state) + dersSaglik,

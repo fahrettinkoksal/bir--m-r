@@ -3415,5 +3415,155 @@ gereği), boks/taekwondo hassasiyeti (Q-183 #6), genel denge.
 ## ChatGPT / Claude devri
 Yeni oturumda `DECISIONS.md`, bu dosya, `docs/PROTOTYPE_UI.md`, `docs/CLAUDE_PROTOTYPE_TASK.md` ve ilgili sistem belgelerini oku. **Önerileri kesin karar sayma.** Yeni karar alınırsa ilgili belgeleri güncelle; tamamlanmamış işleri tamamlandı yazma.
 
+## PAKET AN — SPOR FORM BUG FIX + YENİDEN KALİBRASYON
+
+Q-184 #1'de doğrulanmış bir production bug düzeltildi ve arkasından spor
+dengesi **doğru çalışan motorun üzerinde** yeniden kuruldu. Yanlış çalışan
+kod bir denge mekaniği değildir.
+
+### Hata ve düzeltme
+
+`MartialArtsEngine` ders sayacını `'dovus|<artId>'` yazıyor,
+`CombatCareerEngine.advanceYear` ise `'<artId>|dovus'` diye okuyordu.
+`GameState.interactionKey` iki parçayı **sırayla** birleştirdiği için bu
+iki anahtar farklıydı ve "çalışan sporcu formunu daha iyi korur" kuralı
+Paket AL'den Paket AM'e kadar **hiç işlemedi**.
+
+Anahtar artık tek yerde kuruluyor:
+`app/lib/domain/combat/martial_lesson_counter.dart` →
+`MartialLessonCounter.key(artId)`. Yazan da okuyan da onu kullanıyor;
+string sırası hiçbir yerde elle tekrar yazılmıyor.
+
+**Eski kayıtlar migrate edilmedi ve edilmesi gerekmiyor:** hatalı olan
+okuma tarafıydı, yazma tarafı baştan beri doğru biçimi yazıyordu. Ters
+sıralı anahtar için bilerek fallback konmadı — o biçimi hiçbir kod yolu
+hiç yazmadı, ve yazılmamış bir biçim için fallback aynı dersi iki kez
+sayma riskini bedavaya alırdı.
+
+### Kalibrasyon: nedenin ayrıştırılması
+
+Bug düzelince fazla para nereden geldi? Ayrıştırıldı: kariyer uzunluğu
+neredeyse sabit (24 → 26 yıl), maç sayısı +%29, ama **şampiyonluk
++%160**. Para şampiyonluktan geliyordu.
+
+Ayrıca bir düzeltme: Paket AL/2'nin "4,04 M₺ → 6,51 M₺" rakamları
+**brüt** ölçümdü. Net tarafta (ders, koç, kamp ve tedavi düşüldükten
+sonra) düzeltilmiş motor 4,01 M₺ veriyor — hedef bandın (3,5–5,0 M₺)
+içinde. Yani gelir tarafı kalibrasyon istemiyordu; **ödül çarpanlarına
+(tier purse, title purse) dokunulmadı.**
+
+Unvan zinciri ölçüldü ve üç halkasından ikisinin no-op olduğu çıktı:
+
+| zincir halkası | 600 sporcuda |
+| --- | --- |
+| en iyi sıralaması ≤ 2 | 363 |
+| itibarı ≥ 70 | 575 |
+| **itibarı 100'e doyan** | **530** |
+| en üst kademeye çıkan | 570 |
+
+İtibar yalnızca yukarı gidiyor ve tavana doyuyor; eşiği 100 yapmak bile
+600'ün 530'unu geçirirdi. Gerçekten seçici tek halka sıralama.
+
+Üç sayı değişti:
+
+| sabit | Önce | Sonra | Gerekçe |
+| --- | --- | --- | --- |
+| `prototypeOnlyTitleShotRank` | 2 | **1** | Kemer maçına bir numaralı rakip çağrılır |
+| `prototypeOnlyTitleShotChance` | 0,40 | **0,30** | 0,40 "kapı açıldıysa kemer maçı kesin"e yaklaşıyordu |
+| `prototypeOnlyFormPerLesson` | 1,2 | **1,6** | Uçurum düzeltmesi, gelir ayarı değil |
+
+Ders katsayısı neden değişti: yıllık form kaybı 8 olduğu için telafi 8'i
+geçene kadar form çöküyor, geçtiği anda tırmanıyor. 1,2'de yalnızca
+derslerden başabaş ≈ 6,7 ders/yıl; yılda 4 ders alan sporcunun formu
+kariyer sonunda 14,7'ye iniyordu. 1,6'da başabaş 5 derse indi ve bant
+0 → 2,0 · 2 → 6,2 · 4 → **32,0** · 8 → 61,9 oldu. Telafi tavanı (18)
+yerinde, yani ders sayısını artırmak formu 100'e kilitlemiyor.
+
+`prototypeOnlyTitleShotReputation` (70) **bilerek değiştirilmedi**: 90
+yazmak filtre kurmuş gibi görünüp hiçbir şey yapmazdı.
+
+### Nihai ölçüm — 600 adanmış sporcu, koçsuz kohort
+
+| ölçüm | BUGLU | FIXED RAW | FIXED + KALİBRE |
+| --- | --- | --- | --- |
+| kariyer sonu form | 38 | 56 | 57 |
+| ortalama müsabaka | 31 | 40 | 40,2 |
+| medyan kariyer yılı | 24 | 26 | 26 |
+| elit/pro | — | %95,0 | %95,0 |
+| şampiyon | %8,8 | %33,8 | **%22,0** |
+| medyan BRÜT | 3,35 M₺ | 6,45 M₺ | 6,28 M₺ |
+| medyan NET | 1,48 M₺ | 4,01 M₺ | **3,82 M₺** |
+
+Şampiyonluk Q-183'ün %18,2 referansına yakın bir yere indi ve imkânsız
+olmadı. Net gelir hedef bandın içinde. `paket_al_600_athletes_test`
+bağımsız harness'ıyla aynı sonucu veriyor (%21,7).
+
+BUGLU sütunu git history'ye dokunmadan üretiliyor: ölçüm fixture'ı
+`advanceYear` öncesi ders sayacını siliyor, yani ders alınıyor, parası
+ödeniyor, teknik basamak kazanılıyor ama form motoru dersi görmüyor —
+hatanın tam davranışı.
+
+### Sanat tablosu (600 sporcu, kalibrasyon sonrası)
+
+| sanat | elit% | şamp% | ort.maç | medyan yıl | ciddi sakat% | brüt medyan | NET medyan | iyi %10 | kötü %10 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Boks | 89 | 9 | 32,3 | 23 | 49 | 5,42 M | 3,59 M | 6,71 M | 0,24 M |
+| Yağlı güreş | 92 | 22 | 38,6 | 27 | 31 | 6,44 M | 4,10 M | 8,14 M | 1,27 M |
+| Judo | 97 | 23 | 40,8 | 28 | 34 | 6,28 M | 3,77 M | 6,83 M | 1,12 M |
+| Karate | 97 | 26 | 43,8 | 28 | 26 | 6,85 M | 4,25 M | 7,73 M | 1,88 M |
+| Taekwondo | 99 | 25 | 43,3 | 29 | 31 | 6,84 M | 4,16 M | 6,88 M | 1,23 M |
+| Kung fu | 96 | 27 | 42,7 | 28 | 31 | 5,90 M | 3,35 M | 5,83 M | 0,70 M |
+
+### Brüt değil net (§7)
+
+Rekabete başlayan 600 sporcunun toplamı:
+
+| kalem | tutar |
+| --- | --- |
+| + müsabaka ödülü | 3.097 M₺ |
+| + sponsorluk | 684 M₺ |
+| − ders ücreti | 66 M₺ |
+| − koç ücreti | 0 (koçsuz kohort) |
+| − kamp + tedavi | 1.338 M₺ (kampın liste fiyatı 1.232 M₺) |
+| = **NET** | **2.378 M₺** |
+
+Kamp ve tedavi motorun aynı çağrısında tahsil edildiği için cüzdanda
+birlikte ölçülüyor; kampın liste fiyatı ayrıca veriliyor.
+
+Başlık kohortu **koçsuz**, çünkü §5'teki "bug öncesi 4,04 M₺" referansı
+Paket AL kohortundan geliyor ve o kohort koç tutmuyordu. Koçun bedeli
+ayrı ölçüldü ve bir bulgu çıktı: koç başarıyı artırıyor (şampiyon 132 →
+175) ama net geliri düşürüyor (3,82 M₺ → 2,70 M₺). Karar Q-186 #3'te.
+
+### Dokunulmayanlar
+
+- Ödül çarpanları: tier purse, title purse, ödül sıklığı — net gelir
+  bandın içinde olduğu için gerek yoktu (§8).
+- Yıllık maç tavanı (4): gerçekleşen dağılım 40,2 maç / 26 yıl ≈ 1,55
+  maç/yıl, yani tavan sorun değil (§9).
+- Boks / taekwondo farkı: kendiliğinden daraldı (5,4× → 2,8×), §11
+  gereği müdahale edilmedi.
+- Paket AM'in sağlık kuralları: kariyere başlama 80, elit terfi 80,
+  müsabaka 70 — hepsi yerinde ve testli (§16, §24).
+- Q-184'ün diğer maddeleri (aile desteği, okul çatışması, sosyal boost,
+  rivalry ün) — §23.
+
+### Testler
+
+- `app/test/paket_an_form_telafisi_test.dart` — 18 koruma testi: kanonik
+  anahtar, production yolu, eski kayıt uyumu, çift sayım yok, telafinin
+  sınırı, iş yükü, yaş eğrisi, sakatlık kapısı, 80/70 sağlık kuralları.
+- `app/test/paket_an_spor_kalibrasyon_test.dart` — 5 ölçüm: A (6 sanat ×
+  100), §19 (BUGLU vs kalibre), koç politikası, B (0/2/4/8 ders),
+  C (işsiz/part-time/full-time).
+- `app/test/paket_al2_entegrasyon_test.dart` — "BİLİNEN BUG" belge testi
+  **doğru davranış testine çevrildi** (§21). Bir bug testle sonsuza kadar
+  korunmaz.
+- `app/test/paket_al_600_athletes_test.dart` — brüt medyan koruması
+  12× asgari ücretten **22×**'e yeniden temellendirildi. Gevşetip
+  unutulmadı: eski 12x eşiği ölü bir mekaniğin yan ürünüydü, yeni tavan
+  ölçülen 18,5×'in hemen üstünde ve dengenin asıl bekçisi artık
+  `paket_an_spor_kalibrasyon_test`'teki **net** band.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

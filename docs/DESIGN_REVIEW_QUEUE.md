@@ -5121,21 +5121,71 @@ Soru: (A) olduğu gibi kalsın — boksun zorluğu kemerin değerini artırır; 
 
 ### Q-184 — Paket AL/2: spor kariyeri entegrasyonlarının kalibrasyonu
 
-**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/combat/sport_family_support.dart`, `sport_school_conflict.dart`, `sport_rivalry.dart`, `sport_workload.dart`, `app/lib/domain/social/sport_social_boost.dart`, `app/test/paket_al2_entegrasyon_test.dart`.
+**Durum:** #1 **ÇÖZÜLDÜ** (Paket AN). Diğer maddeler öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/combat/sport_family_support.dart`, `sport_school_conflict.dart`, `sport_rivalry.dart`, `sport_workload.dart`, `martial_lesson_counter.dart`, `app/lib/domain/social/sport_social_boost.dart`, `app/test/paket_al2_entegrasyon_test.dart`, `app/test/paket_an_spor_kalibrasyon_test.dart`.
 
 **Bağlam.** Paket AL/2, Q-183'teki beş maddeyi uyguladı (bkz. Q-183 güncellemesi). Brief §0 "dengeye gereksiz dokunma" dediği için mevcut kazanma bandı, sakatlık oranları, şampiyonluk oranları, yaş eğrisi ve ödül çarpanlarına **dokunulmadı**. Aşağıdakiler yeni mekaniklerin kendi sayıları ve ölçümde çıkan gözlemler; hepsi `prototypeOnly` ve karar bekliyor.
 
-#### 1 — Bulunan PROD bug: ders telafisi sayacı hiç okunmuyormuş
+#### 1 — Bulunan PROD bug: ders telafisi sayacı hiç okunmuyormuş — **ÇÖZÜLDÜ (Paket AN)**
 
-`MartialArtsEngine` ders sayacını `interactionKey('dovus', artId)` olarak **yazıyor**, `CombatCareerEngine.advanceYear` ise `interactionCount(artId, 'dovus')` diye **okuyordu**. `interactionKey` iki parçayı sırayla birleştirdiği için bu iki anahtar farklı (`dovus|karate` ≠ `karate|dovus`). Sonuç: Paket AL'den beri "çalışmak formu telafi eder" kuralı **hiç işlememiş**.
+**Durum: ÇÖZÜLDÜ.** Hata Paket AL/2'de bulundu, Paket AN'de düzeltildi ve arkasından spor dengesi yeniden kuruldu.
 
-Ölçüm (150 kariyer, yılda 4 ders alan sporcu): kariyer sonu form **2,0 → 30,2**, kariyer boyu müsabaka **20,7 → 30,5**.
+**Hata neydi.** `MartialArtsEngine` ders sayacını `interactionKey('dovus', artId)` olarak **yazıyor**, `CombatCareerEngine.advanceYear` ise `interactionCount(artId, 'dovus')` diye **okuyordu**. `interactionKey` iki parçayı sırayla birleştirdiği için bu iki anahtar farklı (`dovus|karate` ≠ `karate|dovus`). Sonuç: Paket AL'den Paket AM'e kadar "çalışmak formu telafi eder" kuralı **hiç işlememiş**.
 
-**DÜZELTİLMEDİ — bilerek.** Düzeltme denendi ve **dengeyi ciddi biçimde kaydırdı.** Paket AL'in 600 sporcu ölçümü (`app/test/paket_al_600_athletes_test.dart`) dersleri `MartialArtsEngine` üzerinden gerçekten alıyor; anahtar düzeltilince o kohortun **medyan kariyer geliri 4,04 M₺'den 6,51 M₺'ye** çıktı ve testin kendi denge koruması ("Spor otomatik zenginlik makinesine dönmüş") kırıldı.
+**Nasıl düzeltildi.** Anahtar artık tek yerde kuruluyor: `app/lib/domain/combat/martial_lesson_counter.dart` → `MartialLessonCounter.key(artId)`. Hem yazan hem okuyan taraf onu kullanıyor; string sırası hiçbir yerde elle tekrar yazılmıyor. Yazma tarafı baştan beri doğru biçimi yazdığı için **eski kayıtlar migrate edilmedi ve edilmesi gerekmiyor**; ters sıralı anahtar için bilerek fallback konmadı, çünkü o biçimi hiçbir kod yolu hiç yazmadı (yazılmamış bir biçim için fallback aynı dersi iki kez sayma riskini bedavaya alırdı).
 
-Brief §0 bu paket için "mevcut ödül çarpanları ve şampiyonluk oranları değiştirme; bu bir entegrasyon paketi, yeni denge turu değil" diyor; mevcut testleri gevşetmek de yasak. Bu yüzden düzeltme **geri alındı** ve hata burada, ölçülmüş hâliyle Faho'ya bırakıldı. Hatanın varlığını kilitleyen bir belge testi eklendi (`app/test/paket_al2_entegrasyon_test.dart`, "ders telafisi sayacı iki tarafta ters yazılmış").
+Düzeltme ürünün kendi yolundan doğrulandı: `MartialArtsEngine.takeLesson` ile gerçekten ders alınıyor (parası cüzdandan çıkıyor), sonra `advanceYear` telafiyi görüyor. Debug ile `interactionCounts` yazılan bir test değil.
 
-Soru: (A) hata düzeltilsin ve spor gelir/şampiyonluk bandı yeniden kalibre edilsin (ayrı bir denge paketi); (B) düzeltilsin ve mevcut band olduğu gibi kabul edilsin (spor daha kazançlı olur); (C) `advanceYear`'ın ders telafisi tamamen kaldırılsın — zaten hiç çalışmamış, form telafisi müsabaka ve zirve bakımından gelmeye devam etsin.
+**Raw etki (düzeltildi, henüz kalibre edilmedi).** Aynı seed'lerle 600 adanmış sporcu:
+
+| ölçüm | BUGLU | FIXED RAW |
+| --- | --- | --- |
+| kariyer sonu form | 38 | 56 |
+| ortalama müsabaka | 31 | 40 |
+| şampiyon (600 içinde) | 53 | **203 (%33,8)** |
+| medyan BRÜT gelir | 3,35 M₺ | 6,45 M₺ |
+| medyan NET gelir | 1,48 M₺ | **4,01 M₺** |
+
+**Önemli düzeltme: Paket AL/2'de bu satıra yazılan "4,04 M₺ → 6,51 M₺" rakamları BRÜT ölçümdü** (`careerEarnings + sponsorEarnings`), yani ders, koç, kamp ve tedavi giderleri düşülmemişti. Net tarafta bakıldığında düzeltilmiş motor **4,01 M₺** veriyor — spor gelirinin hedef bandının (3,5–5,0 M₺) içinde. Yani bug fix'in *gelir* tarafında kalibrasyona ihtiyacı yoktu; sorun **şampiyonluk oranındaydı**.
+
+**Ne kalibre edildi.** Fazla paranın kaynağı ayrıştırıldı: kariyer uzunluğu neredeyse sabit (24 → 26 yıl), maç sayısı +%29, ama şampiyonluk **+%160**. Para şampiyonluktan geliyordu. Bu yüzden ödül çarpanlarına (tier purse, title purse) **dokunulmadı** — net gelir zaten bandın içindeydi. Unvan zinciri ölçüldü:
+
+| zincir halkası | 600 sporcuda |
+| --- | --- |
+| en iyi sıralaması ≤ 2 olan | 363 |
+| itibarı ≥ 70 olan | **575** |
+| itibarı 100'e ulaşan | **530** |
+| ikisi birden (kapı açılan) | 328 |
+| kapı açıkken ortalama fırsat | 3,5 |
+
+Zincirin üç halkasından ikisi fiilen no-op'tu: **itibar eşiği yükseltilerek filtre yapılamaz**, çünkü itibar yalnızca yukarı gidiyor (galibiyette +3+fameGain, mağlubiyette −2) ve 40 maçlık kariyerde 100'e doyuyor; eşiği 100 yapmak bile 600'ün 530'unu geçirirdi. En üst kademeye de 600'ün 570'i çıkıyor. Gerçekten seçici olan tek halka **sıralama**.
+
+Yapılan üç değişiklik:
+
+1. `prototypeOnlyTitleShotRank` **2 → 1**. Kemer maçına kemerin bir numaralı rakibi çağrılıyor.
+2. `prototypeOnlyTitleShotChance` **0,40 → 0,30**. Kapı açık bir sporcu kariyerinde ortalama birkaç fırsat gördüğü için 0,40 pratikte "kapı açıldıysa kemer maçı kesin"e yaklaşıyordu.
+3. `prototypeOnlyFormPerLesson` **1,2 → 1,6** (yeni adlandırılmış sabit). Bu bir gelir ayarı değil, **uçurum düzeltmesi**: yıllık form kaybı 8 olduğu için telafi 8'i geçene kadar form çöküyor, geçtiği anda tırmanıyordu. 1,2'de yalnızca derslerden başabaş ≈ 6,7 ders/yıldı; yılda 4 ders alan sporcunun formu §4'ün ilk cümlesine rağmen çöküyordu (kariyer sonu form 14,7). 1,6'da başabaş 5 derse iniyor ve bant 0 → 2,0 · 2 → 6,2 · 4 → **32,0** · 8 → 61,9 oluyor. Tavan (telafi ≤ 18) yerinde, yani ders sayısını artırmak formu 100'e kilitlemiyor.
+
+**İtibar eşiği (70) bilerek değiştirilmedi:** 90 yazmak filtre kurmuş gibi görünüp hiçbir şey yapmazdı. Şart anlamını koruyor (acemi sporcu kemer maçına çağrılmıyor) ama seçici halka sıralama. İtibarın bir aşınması olmayışı Q-186 #2'de.
+
+**Nihai durum (600 adanmış sporcu, koçsuz kohort):**
+
+| ölçüm | BUGLU | FIXED RAW | FIXED + KALİBRE |
+| --- | --- | --- | --- |
+| kariyer sonu form | 38 | 56 | 57 |
+| ortalama müsabaka | 31 | 40 | 40,2 |
+| medyan kariyer yılı | 24 | 26 | 26 |
+| elit/pro | — | %95,0 | %95,0 |
+| şampiyon | 53 (%8,8) | 203 (%33,8) | **132 (%22,0)** |
+| medyan BRÜT | 3,35 M₺ | 6,45 M₺ | 6,28 M₺ |
+| medyan NET | 1,48 M₺ | 4,01 M₺ | **3,82 M₺** |
+| en iyi %10 NET | — | 8,57 M₺ | 7,04 M₺ |
+| en kötü %10 NET | — | 0,98 M₺ | 0,98 M₺ |
+
+Şampiyonluk, Q-183'te ölçülen **%18,2** referansına yakın bir yere indi ve imkânsız olmadı. Net gelir hedef bandın içinde. `paket_al_600_athletes_test` bağımsız harness'ıyla aynı sonucu veriyor (%21,7).
+
+Ölçüm: `app/test/paket_an_spor_kalibrasyon_test.dart` (A/B/C kohortları + koç + §19 karşılaştırması). Korumalar: `app/test/paket_an_form_telafisi_test.dart` (18 test).
+
+**Q-184 #1 kapandı.** Kalan açık sayılar Q-186'da.
 
 #### 2 — Dar gelirli ailede destek yapısal olarak sıfır
 
@@ -5215,3 +5265,88 @@ Altı sanatın hepsinde `turnsProAtTier: 3` ve kademeler 0-3. Dolayısıyla §16
 `yz_kurye`, `yz_sanayi_cirak`, `yz_hali_saha` fiziksel işler ama 16 yaşındaki bir çocuğun sağlık statı 50 diye market reyonunda çalışamaması oyunun amacına aykırı görüldü. Soru: gençlik işlerinde de hafif bir eşik olsun mu?
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır. `DECISIONS.md`'de yalnızca Faho'nun kesin kararı olan manken 80 işlendi (D-064); diğer eşikler karara dönüştürülmedi.
+
+---
+
+### Q-186 — Paket AN: bug fix sonrası spor kalibrasyonunun açık sayıları
+
+**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/combat/combat_career_engine.dart`, `app/lib/domain/combat/martial_lesson_counter.dart`, `app/test/paket_an_spor_kalibrasyon_test.dart`, `app/test/paket_an_form_telafisi_test.dart`.
+
+**Bağlam.** Paket AN, Q-184 #1'deki anahtar hatasını düzeltti ve arkasından spor dengesini yeniden kurdu (ayrıntı Q-184 #1'de). Aşağıdakiler o kalibrasyonun Faho onayı beklemeyen değil, **bekleyen** tarafı: hepsi `prototypeOnly` ve ölçümle seçildi, ama doğru "his" olup olmadıkları tasarım kararı.
+
+#### 1 — Şampiyonluk oranı %22,0 doğru mu?
+
+Adanmış 600 sporcu kohortunda: bug varken %8,8, bug düzelince %33,8, kalibrasyondan sonra **%22,0**. Q-183'te ölçülen ve Q-182'de Faho'ya sorulan referans **%18,2**.
+
+Hedef sayı brief'te verilmedi; Paket AN "çok yükseldiyse zinciri incele, ama şampiyonluğu yeniden fiilen imkânsız yapma" dediği için ölçüm eski referansa yakın bir yere çekildi. Bu kohort **kendini tamamen adamış** sporcular; sıradan bir oyuncunun oranı çok daha düşük.
+
+Soru: (A) %22 doğru; (B) %18'e daha yakın olsun (unvan fırsatı 0,30'dan 0,25'e); (C) daha cömert olsun (%25-30).
+
+#### 2 — İtibar bir gate değil: aşınması olmalı mı?
+
+Ölçüm: 600 adanmış sporcunun **575'i** itibar 70'i, **530'u 100'ü** görüyor. İtibar yalnızca yukarı gidiyor (galibiyette +3+fameGain, mağlubiyette −2), bir aşınması yok ve 40 maçlık kariyerde tavana doyuyor. Bu yüzden `prototypeOnlyTitleShotReputation` eşiği kaç yazılırsa yazılsın filtre olamıyor; Paket AN sayıya dokunmadı (90 yazmak filtre kurmuş gibi görünüp hiçbir şey yapmazdı).
+
+Formun yıllık kaybı var, sıralama uzun arada aşınıyor, ama itibar hiç düşmüyor. Soru: (A) olduğu gibi kalsın — spor çevresindeki ad kalıcıdır; (B) itibara yıllık küçük bir aşınma eklensin (uzun süre maça çıkmayan sporcu unutulur), böylece eşik gerçek bir kapı olur; (C) itibar şartı unvan zincirinden tamamen çıkarılsın, çünkü işlevsiz.
+
+#### 3 — Koç kendi parasını çıkarmıyor
+
+Ölçüm (600 sporcu, aynı seed'ler, üç harcama politikası):
+
+| politika | kariyer sonu form | medyan koç gideri | medyan NET gelir | şampiyon |
+| --- | --- | --- | --- | --- |
+| hiç koç tutmaz | 57 | 0 | **3,82 M₺** | 132 |
+| basiretli | 62 | 0,37 M₺ | 3,65 M₺ | 144 |
+| parası yettikçe elit koç | 67 | 1,70 M₺ | **2,70 M₺** | 175 |
+
+Koç işe yarıyor (form +10, şampiyon 132 → 175) ama ücreti **her yıl** tekrar ödendiği için net geliri düşürüyor. Yani oyuncu için koç, parayı değil başarıyı satın alan bir seçim. Bu kasıtlı olabilir de olmayabilir de; Paket AN koç ücretine **dokunmadı** çünkü brief ödül ve gider çarpanlarını ancak "fazla para çıkıyorsa" değiştirmeyi istiyordu ve net gelir zaten bandın içindeydi.
+
+Soru: (A) olduğu gibi kalsın — iyi koç lüks bir tercih, şampiyonluk parayla satın alınır; (B) elit koç ücreti düşsün ki kendi parasını çıkarsın; (C) koç kalitesi hazırlığa daha çok katkı versin.
+
+#### 4 — Ders katsayısı 1,6: rampa doğru eğimde mi?
+
+`prototypeOnlyFormPerLesson` 1,2'den 1,6'ya çıkarıldı. 150 sporcu × 4 band, kariyer sonu ortalama form:
+
+| ders/yıl | 0 | 2 | 4 | 8 |
+| --- | --- | --- | --- | --- |
+| 1,2 ile | 2,0 | 3,3 | 14,7 | 60,2 |
+| **1,6 ile** | 2,0 | 6,2 | **32,0** | 61,9 |
+
+Sebep bir uçurumdu: yıllık form kaybı 8 olduğu için telafi 8'i geçene kadar form çöküyor, geçtiği anda tırmanıyor. 1,2'de yalnızca derslerden başabaş ≈ 6,7 ders/yıldı, yani yılda 4 ders alan sporcu "aktif antrenman yapıyor" olmasına rağmen formunu tutamıyordu. 1,6'da başabaş 5 derse indi.
+
+Soru: (A) 1,6 doğru; (B) daha da yumuşasın (2,0 — yılda 3 ders bile tutsun); (C) 1,2'ye dönülsün, yılda 8 ders gerçek bir eşik olsun.
+
+#### 5 — Boks / taekwondo farkına müdahale edilmedi
+
+Brief §11 "bug fix farkı doğal olarak daraltıyorsa ekstra müdahale etme" dedi. Ölçüm:
+
+| aşama | boks şampiyon | taekwondo şampiyon | oran |
+| --- | --- | --- | --- |
+| Q-183 (bug varken) | 5 | 27 | 5,4× |
+| FIXED RAW | 15 | 47 | 3,1× |
+| FIXED + KALİBRE | **9** | **25** | 2,8× |
+
+Fark **kendiliğinden daraldı**, o yüzden dokunulmadı. Boks hâlâ en düşük şampiyonluk, en yüksek ciddi sakatlık (%49 vs %31), en az maç (32,3 vs 43,3) ve en kısa kariyer (23 vs 29 yıl) ile öne çıkıyor — ama §11'in "her yönden cezalı" şartı tam tutmuyor: net gelirde boks 3,59 M₺ ile kung fu'nun (3,35 M₺) üstünde, yani en düşük değil. Boks ayrıca katalogda en yüksek unvan ödülüne (`titlePurseShare` 4,5) ve en yüksek kademe ödüllerine sahip; risk primi zaten var.
+
+Soru: (A) dokunulmasın; (B) boksa küçük bir ek risk primi verilsin; (C) boksun ciddi sakatlık oranı biraz düşürülsün.
+
+#### 6 — Elit/pro seviyeye adanmışların %95'i çıkıyor
+
+Kalibrasyondan sonra da 600 sporcunun **570'i** en üst kademeye ulaşıyor. Kademe atlamak 3 galibiyet + kademe başına 18 itibar istiyor; 40 maçlık bir kariyerde bu şart pratikte kesin geçiliyor. Paket AN buna dokunmadı, çünkü asıl sorun şampiyonluktaydı ve brief toplu bir denge turu istemedi.
+
+Soru: (A) olduğu gibi kalsın — kendini adayan sporcu elit olur, ayrışma şampiyonlukta olsun; (B) elit kademe daha seçici olsun; (C) ayrı bir denge paketinde bakılsın.
+
+#### 7 — Full-time çalışan sporcu şampiyon olamıyor gibi
+
+150 sporcu × 3 band:
+
+| iş | kariyer sonu form | ort. maç | medyan NET | elit | şampiyon |
+| --- | --- | --- | --- | --- | --- |
+| işsiz | 56,1 | 40,0 | 3,83 M₺ | 143 | 36 |
+| part-time | 50,2 | 35,5 | 2,84 M₺ | 137 | 15 |
+| full-time | 46,0 | 29,1 | 1,44 M₺ | 130 | **4** |
+
+Brief §13 "anlamlı dezavantajlı olsun ama kariyeri öldürmesin" dedi. Kariyer ölmüyor (150'nin 130'u yine elit oluyor, net gelir 1,44 M₺), ama şampiyonluk 36 → 4'e iniyor. Bu gerçekçi olabilir (tam zamanlı çalışırken dünya şampiyonu olmak zor) ama sayı sert.
+
+Soru: (A) doğru — tam zamanlı iş ile zirve birlikte olmaz; (B) fazla sert, full-time fırsat katsayısı (0,84) biraz yükseltilsin; (C) part-time ile full-time arasındaki fark açılsın, full-time daha yumuşak olsun.
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
