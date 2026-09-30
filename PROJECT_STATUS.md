@@ -3565,5 +3565,124 @@ ayrı ölçüldü ve bir bulgu çıktı: koç başarıyı artırıyor (şampiyon
   ölçülen 18,5×'in hemen üstünde ve dengenin asıl bekçisi artık
   `paket_an_spor_kalibrasyon_test`'teki **net** band.
 
+## PAKET AO — AİLE / İLİŞKİLER V2: DİNAMİK AİLE AĞI
+
+**Ana tasarım kuralı (Faho):** "Aile menüsü bir NPC listesi olmasın.
+İnsanların kendi hayatı olsun. AMA hiçbir kişi, sadece hikâye metninde
+var olmasın."
+
+### Yeni bağ türleri (enum sonuna eklendi, eski kayıtlar bozulmadı)
+
+`uveyKardes`, `yariKardes`, `uveyCocuk`, `kayinvalide`, `kayinpeder`.
+Yeni bir öbek: `RelationGroup.esinAilesi`.
+
+Kan bağı ayrımı `kanBagi` içinde: üvey kardeş ve üvey çocuk çekirdek
+ailede listelenir ama kan bağı **değildir**; yarım kardeş kan bağıdır
+çünkü bir biyolojik ebeveyn ortaktır.
+
+### Soy kaydı (§14-§15)
+
+`Person.motherId` / `Person.fatherId` eklendi. İkinci bir Person sistemi
+kurulmadı; sahte `'player'` sabiti yok, `state.player.id` kullanılıyor.
+`lib/domain/models/kinship.dart` akrabalık sorularının tek adresi.
+
+**Kapatılan iki gerçek boşluk:**
+
+1. Yarım kardeş mirastan hiçbir şey almıyordu. Artık **yalnızca ortak
+   olan ebeveynden** miras alıyor; üvey bağlar bilerek dışarıda.
+2. Üvey kardeş romantik filtreden geçiyordu. Filtre artık yalnızca
+   `kanBagi` bayrağına değil, gerçek soy kaydına bakıyor (§16).
+
+### Ebeveyn boşanması (§1-§6)
+
+Düz bir yıllık yüzde değil: aileye özel, gizli bir **dayanıklılık**
+(maddi durum, oyuncunun mutluluğu, ebeveyn yakınlığı, ebeveyn
+adlarından türeyen sabit aile sapması). Yıllık tavan %5,5, pencere 4-45.
+
+İki ebeveyn de listede **kalır**; hane gerçekten ayrılır; 12-23 yaş
+arasında oyuncuya "kiminle kalacaksın?" sorulur; mutluluk etkisi yaşa
+bağlıdır (sabit −20 değil).
+
+**Ölçümle bulunan hata:** ilk yazımda 24 yaş üstü oyuncuda iki ebeveyn
+de haneden çıkarılıyordu ve hâlâ ailesinin yanında yaşayan bir yetişkin
+bir anda "kendi evinde" sayılıyordu — `LivingCosts.livesWithFamily` buna
+bakıyor, yani yaşam gideri kayıyordu. Kural tek yönlü yapıldı.
+
+### Erişilemeyen üç motor (ikinci fazda kapatıldı)
+
+Denetim, AO/1'de yazılan üç şeyin oyuncuya **hiç ulaşmadığını** buldu:
+
+- `ParentDivorce.isPending`/`choose` hiçbir ekrandan çağrılmıyordu.
+- `ElderCare` hiçbir yerden çağrılmıyordu: dosya vardı, oyunda yoktu.
+- Beş yeni bağ hiçbir listeye düşmüyordu: kaydı vardı, ekranda yoktu.
+
+Üçü de bağlandı. Kod yazılmış olması oyunda erişilebilir olması demek
+değildir; bu paketin en pahalı dersi buydu.
+
+### İlişkiler ekranı (§38-§39)
+
+Beş aile öbeği: **çekirdek aile / kendi ailem / geniş aile / eşinin
+ailesi / geçmiş ilişkiler**, artı aile dışı. Boş başlık çizilmiyor.
+Kardeşler kendi sayfasına alındı; öz, üvey ve yarım kardeş bir arada.
+
+Kişi kartına **yaşadığı şehir**, **soy bağı** (annesi/babasi) ve
+boşanma varsa **velayet düzeni** satırları eklendi.
+
+`state.children` **değiştirilmedi**: miras, velayet ve kuşak devamı
+biyolojik çocuğa bakmaya devam ediyor. Değişen yalnızca ekranın
+gösterdiği liste.
+
+### 500 aile hayatı (§49) — yalnızca ölçüm
+
+Genel 3000 hayat denetimi **yapılmadı**. Aile odaklı arketip, 500 tohum.
+Oranları güzelleştirmek için ne bot ne kural oynandı.
+
+| ölçüm | sonuç |
+| --- | --- |
+| Ebeveyn boşanması | %51,4 |
+| Üvey ebeveyn geldi | %78,0 |
+| Üvey kardeş oluştu | %38,4 |
+| Yarım kardeş doğdu | %15,0 |
+| Eşin önceki çocuğu | %18,4 |
+| Kayın aile kuruldu | %81,0 |
+| Oyuncu evlendi | %90,2 |
+| Kişi sayısı (medyan) | 62 |
+
+Bozukluk sayaçları: mükerrer kimlik **0**, geçersiz romantik bağ **0**,
+kopuk soy kaydı **0**, yaşayan ebeveynde tutarsız yaş **0**.
+
+**Ölçümün açtığı yanlış alarm.** İlk turda 103 "çocuk ebeveyninden
+büyük" vakası çıktı. Test gevşetilmedi; sayaç ikiye ayrıldı ve hepsinin
+**vefat etmiş** ebeveyn olduğu görüldü. Sebep kaydın kendi anlamı:
+vefat edenin yaşı öldüğü yaşta donar ("32 yaşında vefat etti" böyle
+saklanır), genç ölen bir ebeveynin çocuğu yıllar sonra o yaşı geçer.
+Yanlış olan oyun değil, ilk yazılan değişmezdi. İki sayaç da raporda
+duruyor.
+
+### Testler
+
+- `app/test/paket_ao_aile_v2_test.dart` — 48 hedefli test (AO/1, AO/2).
+- `app/test/paket_ao_faz2_test.dart` — 16 hedefli test: kendi hayatlar,
+  buluşma havuzu, yaşlı bakımı, hane seçimi.
+- `app/test/paket_ao_500_aile_test.dart` — §49 ölçümü.
+
+**Yazarken kendini ele veren iki test.** Yeğen testi önce boştu:
+üretilen yeğenin kimliği ebeveynin kimliğini taşımıyor, yani iddia her
+koşulda doğruydu. İki yönlü yazıldı — yarım kardeşten yeğen **geliyor**
+(pozitif kontrol), üvey kardeşten gelmiyor. Pozitif kontrol de ilk anda
+kırıldı, ama sebep ürün değil harness'tı: `advanceOneYear` ekranda
+çözülmemiş olay varken hiçbir şey yapmadan dönüyor.
+
+### Bilerek yapılmayanlar (§51)
+
+Dev aile ağacı görseli, DNA testi, evlat edinme akışı, velayet mahkemesi
+simülasyonu, karmaşık nafaka davaları, aile şirketi, aile içi suç.
+
+### Açık sorular
+
+Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
+masrafı, eşin önceki çocuğu oranı, kayın aile yakınlığı, buluşma havuzu
+ve velayet kararı. Hiçbiri `DECISIONS.md`'ye yazılmadı.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
