@@ -1013,6 +1013,7 @@ class GameState {
     int? stage,
     int? lastEventAge,
     int? resolvedAtAge,
+    FamilyIssueResponse? response,
   }) {
     bool bulundu = false;
     final List<FamilyIssue> yeni = <FamilyIssue>[
@@ -1025,6 +1026,7 @@ class GameState {
               stage: stage,
               lastEventAge: lastEventAge,
               resolvedAtAge: resolvedAtAge,
+              response: response,
             );
           }()
         else

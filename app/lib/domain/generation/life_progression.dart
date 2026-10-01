@@ -5,6 +5,7 @@ import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
 import '../combat/combat_career_engine.dart';
 import '../combat/sport_school_conflict.dart';
+import '../family/child_school_issue.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
 import '../life/life_goals.dart';
@@ -765,6 +766,39 @@ class LifeProgression {
     }
     if (yenidenEvlilikler.notices.isNotEmpty) {
       afterDeaths = Notices.enqueue(afterDeaths, yenidenEvlilikler.notices);
+    }
+
+    // --- Paket AP §5-§7: çocuğun okul hayatı --------------------------
+    //
+    // Sıra: önce **süren** mesele ilerletilir, sonra yenisi açılabilir.
+    // Tersi olsa o yıl açılan mesele aynı yıl içinde sonuçlanabilirdi;
+    // karar ile sonuç aynı yıla düşmemeli (§1).
+    final ({GameState state, List<String> logTexts}) okulYili =
+        ChildSchoolIssue.advanceYear(afterDeaths, newAge, _rng);
+    afterDeaths = okulYili.state;
+    for (final String satir in okulYili.logTexts) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
+
+    final ({GameState state, PendingNotice? notice}) yeniOkulSorunu =
+        ChildSchoolIssue.maybeOpen(afterDeaths, _rng);
+    afterDeaths = yeniOkulSorunu.state;
+    if (yeniOkulSorunu.notice != null) {
+      afterDeaths =
+          Notices.enqueue(afterDeaths, <PendingNotice>[yeniOkulSorunu.notice!]);
+    }
+
+    // §7: aile hayatı yalnızca sorun değildir — çocuğun başarısı da
+    // oyuncuya ulaşır. Açık bir okul meselesi varken çıkmaz ki
+    // "dersleri kötü" ile "derece yaptı" aynı yıl yazılmasın.
+    final ({GameState state, PendingNotice? notice, String? logText}) basari =
+        ChildSchoolIssue.maybeAchievement(afterDeaths, newAge, _rng);
+    afterDeaths = basari.state;
+    if (basari.logText != null) {
+      afterDeaths = _logLine(afterDeaths, newAge, basari.logText!);
+    }
+    if (basari.notice != null) {
+      afterDeaths = Notices.enqueue(afterDeaths, <PendingNotice>[basari.notice!]);
     }
 
     // Anne ve baba ayrılabilir (Paket AO §1-§6). Boşanma **önce** işlenir:

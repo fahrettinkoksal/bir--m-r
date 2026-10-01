@@ -33,6 +33,8 @@ import '../data/finger_catalog.dart';
 import '../domain/models/wealth.dart';
 import '../data/media_catalog.dart';
 import '../domain/social/media_opportunities.dart';
+import '../domain/family/child_school_issue.dart';
+import '../domain/models/family_issue.dart';
 import '../domain/generation/parent_divorce.dart';
 import '../domain/interaction/elder_care.dart';
 import '../domain/interaction/child_naming.dart';
@@ -479,6 +481,45 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return false;
     return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §5-§7 — çocuğun okul meselesi
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen çocuk okul meselesi; yoksa `null`.
+  ///
+  /// Paket AO'da üç motorun hiçbir ekrandan ulaşılamadığı görülmüştü.
+  /// Bu yüzden kapı motorla aynı pakette açılıyor.
+  FamilyIssue? pendingChildSchoolIssue() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return ChildSchoolIssue.pendingIssue(current);
+  }
+
+  /// Bu seçenek neden seçilemiyor; seçilebiliyorsa `null` (D-095).
+  String? childSchoolBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return ChildSchoolIssue.blockReason(current, cevap);
+  }
+
+  /// Oyuncu çocuğunun okul meselesinde kararını verdi.
+  ///
+  /// Karar sonucu **belirlemez** (§1): sonuç bir sonraki yıl açıklanır.
+  ActivityOutcome? chooseChildSchoolResponse(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null || !ChildSchoolIssue.isPending(current)) return null;
+    final String? engel = ChildSchoolIssue.blockReason(current, cevap);
+    if (engel != null) {
+      return ActivityOutcome(applied: false, text: engel);
+    }
+    final ({GameState state, String text}) sonuc =
+        ChildSchoolIssue.choose(current, cevap, _random);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
   }
 
   /// §4: oyuncu hangi ebeveynle kalacağını seçti.

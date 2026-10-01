@@ -855,6 +855,14 @@ FamilyIssueKind? _familyIssueKindOrNull(String? name) {
   return null;
 }
 
+FamilyIssueResponse? _familyIssueResponseOrNull(String? name) {
+  if (name == null) return null;
+  for (final FamilyIssueResponse cevap in FamilyIssueResponse.values) {
+    if (cevap.name == name) return cevap;
+  }
+  return null;
+}
+
 FamilyIssueStatus? _familyIssueStatusOrNull(String? name) {
   if (name == null) return null;
   for (final FamilyIssueStatus durum in FamilyIssueStatus.values) {
@@ -872,6 +880,7 @@ Map<String, Object?> _encodeFamilyIssue(FamilyIssue i) => <String, Object?>{
       'status': i.status.name,
       'stage': i.stage,
       'resolvedAtAge': i.resolvedAtAge,
+      'response': i.response?.name,
     };
 
 /// Aile meselesini okur; **tanınmayan tür kaydı bozmaz**.
@@ -902,6 +911,8 @@ FamilyIssue? _decodeFamilyIssue(Map<String, Object?> json) {
         FamilyIssueStatus.acik,
     stage: _intOr(json, 'stage', 0),
     resolvedAtAge: _intOrNull(json, 'resolvedAtAge'),
+    // Tanınmayan cevap "hiç sorulmamış" sayılır; mesele yine açılır.
+    response: _familyIssueResponseOrNull(_stringOrNull(json, 'response')),
   );
 }
 

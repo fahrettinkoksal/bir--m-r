@@ -34,6 +34,35 @@ enum FamilyIssueKind {
   final String label;
 }
 
+/// Oyuncunun bir aile meselesine verdiği cevap.
+///
+/// **Tek** bir küme olarak tutuluyor: her mesele türü için ayrı bir
+/// cevap enum'u yazmak §4'ün "gereksiz generic framework kurma"
+/// kuralına ters düşerdi. Cevabın ne anlama geldiğini meselenin kendi
+/// kodu yorumlar.
+///
+/// Yeni değer her zaman listenin **sonuna** eklenir.
+enum FamilyIssueResponse {
+  /// Yanında durdu: zaman ve ilgi verdi.
+  destekOldu('Yanında oldu'),
+
+  /// Konuştu, akıl verdi; karar karşı tarafta kaldı.
+  konustu('Konuştu'),
+
+  /// Para harcadı (özel ders, borç, destek).
+  paraVerdi('Maddi destek verdi'),
+
+  /// Karışmamayı seçti.
+  karismadi('Karışmadı'),
+
+  /// Açıkça reddetti.
+  reddetti('Reddetti');
+
+  const FamilyIssueResponse(this.label);
+
+  final String label;
+}
+
 /// Bir aile meselesinin bugünkü durumu.
 enum FamilyIssueStatus {
   /// Sürüyor; oyuncu bir şey yapabilir.
@@ -73,6 +102,7 @@ class FamilyIssue {
     this.status = FamilyIssueStatus.acik,
     this.stage = 0,
     this.resolvedAtAge,
+    this.response,
   });
 
   /// Kayıt içinde tekil kimlik.
@@ -99,6 +129,14 @@ class FamilyIssue {
   /// Kapandığı yaş; hâlâ açıksa `null`.
   final int? resolvedAtAge;
 
+  /// Oyuncunun bu meseleye verdiği **son** cevap; hiç sorulmadıysa
+  /// `null`.
+  ///
+  /// Sonraki yıllar bunu okur: "geçen yıl ne yaptın" sorusunun cevabı
+  /// burada durur. Oyuncunun seçimi karşı tarafın kararını belirlemez
+  /// (§1), yalnızca ihtimali kaydırır.
+  final FamilyIssueResponse? response;
+
   bool get isOpen => status == FamilyIssueStatus.acik;
 
   /// Kaç yıldır sürüyor (verilen yaşa göre).
@@ -116,6 +154,7 @@ class FamilyIssue {
     int? stage,
     int? lastEventAge,
     int? resolvedAtAge,
+    FamilyIssueResponse? response,
   }) =>
       FamilyIssue(
         id: id,
@@ -126,5 +165,6 @@ class FamilyIssue {
         status: status ?? this.status,
         stage: stage ?? this.stage,
         resolvedAtAge: resolvedAtAge ?? this.resolvedAtAge,
+        response: response ?? this.response,
       );
 }
