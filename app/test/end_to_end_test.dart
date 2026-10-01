@@ -760,22 +760,42 @@ void main() {
         final int maas = state.career.job?.yearlySalary ?? 0;
         final int kira = Housing.yearlyRentIncome(state);
         final int gider = LivingCosts.yearlyCost(state);
+        final Set<String> mirasOnce = <String>{...state.settledEstates};
 
         state = state.copyWith(pendingEvent: null, pendingCrisis: null);
         state = LifeProgression(rng).advanceOneYear(state);
         toplamYas++;
 
-        // Tek yılda gelir, maaş+kira+miras toplamını aşamaz.
+        // Tek yılda gelen para **açıklanabilir** olmalı.
+        //
+        // Eskiden burada "maaş + kira + 5.000.000" diye sabit bir pay
+        // vardı ve o pay mirası temsil ediyordu. Ölçüm gösterdi ki bu
+        // yanlış bir çıpa: varlıklı bir akrabanın mirası tek yılda
+        // 21.000.000 ₺ gelebiliyor (tohum 706, yaş 81 — vefat eden abi).
+        // Eşiği büyütmek de keyfi olurdu; sorulması gereken soru "ne
+        // kadar" değil, "neden" idi.
+        //
+        // Yeni kural daha sıkı: büyük bir artış yalnızca o yıl **yeni
+        // bir miras kapandıysa** kabul edilir. Sebepsiz para çoğalması
+        // yine yakalanır.
         final int artis = state.player.wallet - cuzdanOnce + gider;
-        if (artis > maas + kira + 5000000) {
+        final bool yeniMiras = state.settledEstates
+            .any((String id) => !mirasOnce.contains(id));
+        if (artis > maas + kira + 5000000 && !yeniMiras) {
           sorunlar.add('tohum $seed yaş ${state.player.age}: '
-              'beklenmeyen gelir artışı $artis');
+              'açıklanamayan gelir artışı $artis');
         }
 
-        // Aynı mirasın iki kez dağıtılmadığını doğrula.
-        for (final String id in state.settledEstates) {
-          if (!odenenMiras.add(id)) continue;
+        // Kapanmış miras **geri açılmaz**: bir kez kapandıysa sonraki
+        // yıllarda da kapalı kalmalı, yoksa aynı miras ikinci kez
+        // dağıtılabilirdi.
+        for (final String id in mirasOnce) {
+          if (!state.settledEstates.contains(id)) {
+            sorunlar.add('tohum $seed yaş ${state.player.age}: '
+                'kapanmış miras yeniden açıldı ($id)');
+          }
         }
+        odenenMiras.addAll(state.settledEstates);
 
         sorunlar.addAll(
           checkInvariants(state, where: 'tohum $seed'),
