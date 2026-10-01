@@ -743,15 +743,19 @@ abstract final class FamilyDisputes {
   /// **Yılda en fazla bir kişi**: aile topluca boşalmaz. Kayıt
   /// silinmez, bağ türü değişmez; yalnızca küs işareti konur ve Paket
   /// AO'nun barış kapısı açılır — barışma yine garanti değil (§34).
-  static ({GameState state, PendingNotice? notice}) maybeFamilyFallout(
+  ///
+  /// **Pencere açmıyor, günlüğe yazıyor** (§72): oyuncuya bir şey
+  /// sormuyor, haber veriyor. Küslük zaten kişi kartında tek satır
+  /// olarak görünüyor (§59-§60).
+  static ({GameState state, String? logText}) maybeFamilyFallout(
     GameState state,
     int newAge,
     Random rng,
   ) {
     final List<Person> adaylar = falloutCandidates(state).toList();
-    if (adaylar.isEmpty) return (state: state, notice: null);
+    if (adaylar.isEmpty) return (state: state, logText: null);
     if (!rng.chance(prototypeOnlyFalloutChance)) {
-      return (state: state, notice: null);
+      return (state: state, logText: null);
     }
     final Person kisi = adaylar.first;
     final String metin = '${kisi.firstName} ile aranız iyice açıldı; '
@@ -763,17 +767,7 @@ abstract final class FamilyDisputes {
       ]),
     );
     next = _log(next, metin);
-    return (
-      state: next,
-      notice: PendingNotice(
-        id: 'aile-kusluk-${kisi.id}-$newAge',
-        kind: NoticeKind.aileDonum,
-        age: newAge,
-        title: 'Araya soğukluk girdi',
-        text: metin,
-        personId: kisi.id,
-      ),
-    );
+    return (state: next, logText: metin);
   }
 
   // =================================================================

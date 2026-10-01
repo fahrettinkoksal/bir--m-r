@@ -102,6 +102,20 @@ void main() {
     // İlişkiler → Romantik bağlar alt menüsünde sevgili statüsüyle görünür.
     await tester.tap(find.byKey(const Key('tab_iliskiler')));
     await tester.pumpAndSettle();
+    // Paket AP §56: İlişkiler ekranının başına bekleyen aile kararı
+    // kartı geldi. Liste tembel kuruluyor, yani başa eklenen her içerik
+    // alttaki satırların **hiç inşa edilmemesine** yol açıyor. Ölçüldü:
+    // bu hayatta bir miras anlaşmazlığı kartı açılıyor ve "Romantik
+    // bağlar" satırı ekranın dışında kalıyor.
+    //
+    // İddia gevşetilmedi: satır yine **tam olarak bir kez** bulunmak
+    // zorunda; yalnızca listeye kaydırılıyor.
+    await tester.scrollUntilVisible(
+      find.text('Romantik bağlar'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Romantik bağlar'), findsOneWidget);
 
     await tester.tap(find.text('Romantik bağlar'));

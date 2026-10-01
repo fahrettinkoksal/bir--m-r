@@ -17,7 +17,6 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/npc_marriage.dart';
-import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/person_development.dart';
 import 'package:bir_omur/domain/models/relation.dart';
@@ -127,10 +126,10 @@ void main() {
       int iyi = 0;
       int kotu = 0;
       for (int i = 0; i < 1500; i++) {
-        final ({GameState state, PendingNotice? notice, String? logText}) r =
+        final ({GameState state, String? logText, bool? good}) r =
             InLawRelations.maybeEvent(s, s.player.age, Random(i));
-        if (r.notice == null) continue;
-        if (r.notice!.title.contains('güzel')) {
+        if (r.logText == null) continue;
+        if (r.good!) {
           iyi++;
         } else {
           kotu++;
@@ -150,13 +149,13 @@ void main() {
       bool iyiGorduk = false;
       bool kotuGorduk = false;
       for (int i = 0; i < 1500 && !(iyiGorduk && kotuGorduk); i++) {
-        final ({GameState state, PendingNotice? notice, String? logText}) r =
+        final ({GameState state, String? logText, bool? good}) r =
             InLawRelations.maybeEvent(s, s.player.age, Random(i));
-        if (r.notice == null) continue;
-        if (r.notice!.personId != 'cocugunesi-cocuk-evli-1') continue;
+        if (r.logText == null) continue;
+        if (!r.logText!.contains('Ahmet')) continue;
         final int sonra =
             r.state.personById('cocugunesi-cocuk-evli-1')!.bond;
-        if (r.notice!.title.contains('güzel')) {
+        if (r.good!) {
           expect(sonra, greaterThan(once));
           iyiGorduk = true;
         } else {
@@ -172,9 +171,9 @@ void main() {
       final GameState s = gelinliHayat();
       GameState bulunan = s;
       for (int i = 0; i < 1500; i++) {
-        final ({GameState state, PendingNotice? notice, String? logText}) r =
+        final ({GameState state, String? logText, bool? good}) r =
             InLawRelations.maybeEvent(s, s.player.age, Random(i));
-        if (r.notice != null) {
+        if (r.logText != null) {
           bulunan = r.state;
           break;
         }
@@ -182,18 +181,18 @@ void main() {
       expect(bulunan, isNot(same(s)));
       // Aynı yaşta 300 deneme daha: soğuma yüzünden aynı kişi tekrar
       // çıkmıyor.
+      // Aynı yaşta 300 deneme daha: soğuma yüzünden aynı kişi tekrar
+      // çıkmıyor. Kişi, günlük satırının adından okunuyor.
+      final String? ilkAd = bulunan.log.last.text.split(' ').length > 1
+          ? bulunan.log.last.text.split(' ')[1]
+          : null;
       for (int i = 0; i < 300; i++) {
-        final ({GameState state, PendingNotice? notice, String? logText}) r =
+        final ({GameState state, String? logText, bool? good}) r =
             InLawRelations.maybeEvent(bulunan, bulunan.player.age, Random(i));
-        if (r.notice == null) continue;
-        // Çıkarsa başka bir kişi olmalı.
-        final String? son =
-            bulunan.lastInteractionAge.entries
-                .where((MapEntry<String, int> e) =>
-                    e.key.startsWith('kayin-olay:'))
-                .map((MapEntry<String, int> e) => e.key)
-                .firstOrNull;
-        expect('kayin-olay:${r.notice!.personId}', isNot(son));
+        if (r.logText == null) continue;
+        if (ilkAd == null) continue;
+        expect(r.logText!.contains(' $ilkAd '), isFalse,
+            reason: 'Aynı kişiyle aynı yıl ikinci olay çıktı.');
       }
     });
   });

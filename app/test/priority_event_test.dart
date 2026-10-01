@@ -216,9 +216,58 @@ void main() {
 
       expect(ulasan8, greaterThan(0));
       expect(ulasan12, greaterThan(0));
-      // Ölçümde bu oran %38 ve %28'di; öncelikle birlikte herkes görmeli.
-      expect(goren8, ulasan8, reason: '8. sınıfa ulaşan herkes görmeli');
-      expect(goren12, ulasan12, reason: '12. sınıfa ulaşan herkes görmeli');
+
+      // Paket AP notu — iddia **daraltıldı ve bir yerde güçlendirildi**.
+      //
+      // Eskiden burada "ulaşan herkes görür" yazıyordu ve geçiyordu. Ama
+      // motor bunu hiçbir zaman garanti etmedi: `priority` ağırlığı
+      // 120^kademe ile çarpıyor, yani öncelikli olay "neredeyse kesin"
+      // çıkıyor — kesin değil. `event_engine.dart` bunu açıkça böyle
+      // yazıyor.
+      //
+      // Paket AP zar sırasını kaydırdığı için 20 tohumdan birinde
+      // (t=18) sınav olayı kaybetti. Ölçtüm: o hayatta oyuncu 12.
+      // sınıfta **tek yıl** kalıyor (17 yaşında) ve o yıl ağırlıklı
+      // çekiliş priority-0 bir olaya düştü. Yani eski iddia kurayla
+      // geçiyordu.
+      //
+      // Doğru koruma iki parçalı:
+      //
+      // 1. **Mekanizma**, zarla değil kesin: sınav olayının etkin
+      //    ağırlığı, havuzdaki **bütün** priority-0 olayların toplam
+      //    ağırlığının onlarca katı olmalı. Ölçüldü: sınav olayı
+      //    86.400-129.600 bandında, havuzun tamamındaki priority-0
+      //    toplamı 1.738 — yani en düşük sınav olayında bile ~50 kat.
+      //    Gerçek bir yılda rakiplerin çoğu uygun bile olmadığı için
+      //    pay daha da yüksek. Bu "neredeyse kesin"in ölçülebilir hâli
+      //    ve zar sırasından bağımsız. Eşik 40 kat: ölçülen en düşük
+      //    oranın (49,7) altında ama hâlâ ezici.
+      // 2. **Uçtan uca**: ulaşanların ezici çoğunluğu görmeli. Tek bir
+      //    şanssız çekiliş testi kırmasın ama oran da düşmesin.
+      expect(goren8 / ulasan8, greaterThanOrEqualTo(0.9),
+          reason: '8. sınıf: $goren8/$ulasan8');
+      expect(goren12 / ulasan12, greaterThanOrEqualTo(0.9),
+          reason: '12. sınıf: $goren12/$ulasan12');
+    });
+
+    test('sınav olayının ağırlığı penceresindeki rakipleri eziyor', () {
+      // Mekanizma testi: zar yok, ölçüm yok — doğrudan motorun kendi
+      // ağırlık fonksiyonu.
+      final GameState s =
+          LifeGenerator.seeded(5).generate(mode: StartMode.tamamenRastgele);
+      for (final GameEvent sinav in kExamEvents) {
+        final double sinavAgirligi =
+            EventEngine.prototypeOnlyEffectiveWeight(s, sinav);
+        double rakipToplami = 0;
+        for (final GameEvent e in kEventPool) {
+          if (e.id == sinav.id) continue;
+          if (e.priority > 0) continue;
+          rakipToplami += EventEngine.prototypeOnlyEffectiveWeight(s, e);
+        }
+        expect(sinavAgirligi, greaterThan(rakipToplami * 40),
+            reason: '${sinav.id}: ağırlık $sinavAgirligi, '
+                'priority-0 rakipler toplamı $rakipToplami');
+      }
     });
   });
 }

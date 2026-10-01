@@ -620,18 +620,31 @@ class _AileKarariKarti extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          for (final FamilyDecisionOption secenek in karar.options) ...<Widget>[
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                key: Key('aile_karari_${secenek.response.name}'),
-                onPressed:
-                    secenek.isAllowed ? () => onCevap(secenek.response) : null,
-                child: Text(secenek.label),
-              ),
-            ),
+          // Seçenekler yan yana sarmalanıyor, alt alta değil.
+          //
+          // İlk yazımda her seçenek tam genişlikte bir düğmeydi ve kart
+          // menünün yarısını kaplıyordu: `romance_widget_test` "Romantik
+          // bağlar" satırını bulamaz hâle geldi, çünkü liste tembel
+          // kuruluyor ve satır hiç inşa edilmiyordu. Yani kart yalnızca
+          // testi değil, ekranı da boğuyordu.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              for (final FamilyDecisionOption secenek in karar.options)
+                OutlinedButton(
+                  key: Key('aile_karari_${secenek.response.name}'),
+                  onPressed: secenek.isAllowed
+                      ? () => onCevap(secenek.response)
+                      : null,
+                  child: Text(secenek.label),
+                ),
+            ],
+          ),
+          // Seçilemeyen seçeneklerin gerekçesi tek blokta toplanıyor.
+          for (final FamilyDecisionOption secenek in karar.options)
             if (!secenek.isAllowed) ...<Widget>[
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 secenek.blockedReason!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -639,8 +652,6 @@ class _AileKarariKarti extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 8),
-          ],
         ],
       ),
     );

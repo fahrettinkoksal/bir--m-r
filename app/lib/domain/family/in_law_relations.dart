@@ -126,8 +126,24 @@ abstract final class InLawRelations {
   }
 
   /// Bu yıl bir kayın aile olayı çıkar mı?
-  static ({GameState state, PendingNotice? notice, String? logText})
-      maybeEvent(GameState state, int newAge, Random rng) {
+  ///
+  /// **Pencere açmıyor, günlüğe yazıyor.** Ölçüm şunu gösterdi:
+  /// Paket AP'nin bütün aile olayları pencere açınca yılda ortalama
+  /// bildirim sayısı 1'in üstüne çıktı ve `critical_notice_test` haklı
+  /// olarak kırıldı (§72: olay yağmuru olmasın).
+  ///
+  /// Hangi olayın pencere hak ettiği ayrımı şu: **oyuncuya bir şey
+  /// soran** olaylar pencere açar (kararlar), yalnızca haber veren
+  /// olaylar günlüğe düşer. Kayın aile olayı haber veriyor; üstelik
+  /// kişinin kartındaki yakınlık değişimi de görünüyor.
+  ///
+  /// [good] iyi haber mi kötü haber mi olduğunu söyler; çağıran gerekirse
+  /// metni ona göre sunabilir.
+  static ({GameState state, String? logText, bool? good}) maybeEvent(
+    GameState state,
+    int newAge,
+    Random rng,
+  ) {
     final double ihtimal = state.familyDrama.scale(
       prototypeOnlyEventChance,
       FamilyDramaArea.kayin,
@@ -167,20 +183,9 @@ abstract final class InLawRelations {
           ),
         ]),
       );
-      return (
-        state: next,
-        notice: PendingNotice(
-          id: 'kayin-olay-${kisi.id}-$newAge',
-          kind: NoticeKind.aileDonum,
-          age: newAge,
-          title: olay.good ? 'Aileden güzel bir haber' : 'Ailede bir gerginlik',
-          text: metin,
-          personId: kisi.id,
-        ),
-        logText: metin,
-      );
+      return (state: next, logText: metin, good: olay.good);
     }
-    return (state: state, notice: null, logText: null);
+    return (state: state, logText: null, good: null);
   }
 
   // =================================================================

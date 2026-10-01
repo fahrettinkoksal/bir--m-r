@@ -857,26 +857,17 @@ class LifeProgression {
     // §33: yıllarca biriken uzaklaşma küslüğe dönüşebilir. Sebepsiz
     // küslük yok: yalnızca reddedilmiş ya da karışılmamış bir meselesi
     // olan ve yakınlığı dibe inmiş yakın. Yılda en fazla bir kişi.
-    final ({GameState state, PendingNotice? notice}) aileKusluk =
-        FamilyDisputes.maybeFamilyFallout(afterDeaths, newAge, _rng);
-    afterDeaths = aileKusluk.state;
-    if (aileKusluk.notice != null) {
-      afterDeaths =
-          Notices.enqueue(afterDeaths, <PendingNotice>[aileKusluk.notice!]);
-    }
+    afterDeaths =
+        FamilyDisputes.maybeFamilyFallout(afterDeaths, newAge, _rng).state;
 
     // --- Paket AP §26-§27: kayın aile ve gelin/damat -----------------
     //
     // Olay havuzu bilinçli olarak dengeli: "kayınvalide = sürekli
     // sorun" stereotipi yok (§26). Çatışma ise oyuncuya bir karar
     // bırakır ve üç cevabın hepsi bir şeye mal olur (§27).
-    final ({GameState state, PendingNotice? notice, String? logText})
-        kayinOlayi = InLawRelations.maybeEvent(afterDeaths, newAge, _rng);
-    afterDeaths = kayinOlayi.state;
-    if (kayinOlayi.notice != null) {
-      afterDeaths =
-          Notices.enqueue(afterDeaths, <PendingNotice>[kayinOlayi.notice!]);
-    }
+    // Kayın aile olayı **günlüğe** yazılıyor, pencere açmıyor (§72):
+    // oyuncuya bir şey sormuyor, haber veriyor.
+    afterDeaths = InLawRelations.maybeEvent(afterDeaths, newAge, _rng).state;
 
     final ({GameState state, PendingNotice? notice}) kayinCatismasi =
         InLawRelations.maybeConflict(afterDeaths, newAge, _rng);
