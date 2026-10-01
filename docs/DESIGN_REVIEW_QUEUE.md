@@ -5402,3 +5402,87 @@ Ama gerçekte velayet gelire, şehre ve çocuğun yaşına da bakar. Brief §25 
 Soru: (A) olduğu gibi kalsın; (B) çocuğun yaşı da hesaba katılsın (küçük çocuk anneye); (C) ayrı bir pakette bakılsın.
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz.
+
+### Q-188 — Paket AP: oynanan aile hayatının bıraktığı sayılar ve bilerek çizilen sınırlar
+
+**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/models/family_drama.dart`, `app/lib/domain/models/family_issue.dart`, `app/lib/domain/family/` (tamamı), `app/lib/domain/economy/living_costs.dart`, `app/test/paket_ap_olcum_test.dart`.
+
+**Bağlam.** Paket AO aileyi yaşayan bir ağa çevirmişti ama aile hâlâ **olup bitenlerin kaydıydı**. Paket AP aileyi **oynanan** bir sisteme çevirdi: çocuğun okul meselesi, yetişkin çocuğun para sıkıntısı ve eve dönüşü, gelin/damat, kayın aile çatışması, kardeşle para, yaşlı bakımı ve miras itirazı artık oyuncuya karar soruyor. Aşağıdaki sayıların hepsi `prototypeOnly`; hiçbiri `DECISIONS.md`'ye yazılmadı. **Q-187 ayrı bir soru olarak açık kalıyor; ona dokunulmadı.**
+
+**500 aile odaklı hayat ölçümü (§76).** 20.392 yıl oynandı. Hayat başına aile kararı: medyan 2, p25 1, p75 3, p95 5, en yüksek 8. 500 hayatın 69'unda hiç karar çıkmadı, 16'sında altı ve üstü çıktı. Açılan mesele türleri: çocuk parası 291, çocuk okulu 278, kardeş parası 259, bakım 162, miras 111. Bozulma sayaçları sıfır: aynı yıl birden fazla karar 0, aile kararı para üretti 0, kayıt taşması 0, değişmez ihlali 0.
+
+#### 1 — Yılda en fazla **bir** büyük aile kararı: doğru sınır mı?
+
+Brief §3 bunu açıkça istedi ve `GameState.canOpenFamilyDecision` tek kapı olarak uyguladı: beş çocuğu olan oyuncu aynı yıl beş kriz yaşamıyor. Ölçümde medyan 2 karar/hayat çıktı — yani aile hayatı yılın her yılını doldurmuyor.
+
+Ama bu sınır bazı hayatlarda aileyi **fazla sessiz** bırakıyor olabilir: 500 hayatın 69'unda hiç aile kararı çıkmadı. Soru: (A) sınır doğru; (B) iki karar/yıl olabilsin ama farklı alanlardan (biri çocuk biri kardeş); (C) sınır kalsın, karar **ihtimali** yükseltilsin.
+
+#### 2 — Gizli dram profili bandı: 0,55-1,45 doğru mu?
+
+`FamilyDramaProfile` hayatın aile dram eğilimini `seed`'den deterministik türetiyor ve **yalnızca sıklığı** ölçekliyor; olayın kendisine, sonucuna ya da kararın etkisine karışmıyor. Band bilinçli olarak 2 değil: "bazı aileler daha hareketli" demek "bazı ailelerde her yıl kavga var" demek değil.
+
+Ölçüm: 400 tohumda hem sakin (f<0,8) hem hareketli (f>1,2) aile çıkıyor. Soru: (A) band doğru; (B) genişletilsin, uçlar daha belirgin olsun; (C) daraltılsın, hayatlar birbirine benzesin.
+
+#### 3 — Çocuğun okul meselesinde toparlanma ihtimalleri
+
+Beş cevabın toparlanma ihtimali: özel ders %50, birlikte ders çalışma %45, konuşma %32, karışmama %18, reddetme %14. Hiçbiri 0 ya da 1 değil — §1 "çocuk oyuncunun kuklası değildir" dedi, yani en iyi seçim de tutmayabiliyor.
+
+Soru: (A) oranlar doğru; (B) para ile ilgi arasındaki fark azalsın (para her şeyi çözmesin); (C) karışmama daha çok cezalandırılsın.
+
+#### 4 — Evdeki yetişkin çocuğun gideri: yılda 42.000 ₺ doğru mu?
+
+§12 "bedava dekoratif hane değişimi olmasın" dedi; eve dönen yetişkin çocuk `LivingCosts`'ta yeni bir gider kalemi doğuruyor. Bakılan küçük çocuk kaleminden (72.000 ₺) düşük: yetişkin çocuk kendi masrafının bir kısmını karşılıyor sayılıyor. **Çalışan** yetişkin çocuk bu kalemi hiç doğurmuyor.
+
+Soru: (A) tutar doğru; (B) yük daha ağır olsun, karar gerçekten zorlasın; (C) çalışan çocuk da küçük bir kalem doğursun.
+
+#### 5 — Eve dönen çocuğun kalma penceresi: beş yıl
+
+Ölçüm bir çatışma gösterdi: `_childrenLeaveHome` 25 yaşını geçmiş **her** çocuğu her yıl haneden çıkarıyor, yani oyuncunun "gelsin" demesi bir yıl sonra kendiliğinden geri alınıyordu. Dönüş artık kaydediliyor ve beş yıl boyunca yıllık kural o çocuğa dokunmuyor.
+
+Soru: (A) beş yıl doğru; (B) daha kısa (iki yıl) — çocuk çabuk toparlansın; (C) süre yerine koşul olsun (iş bulana kadar kalır).
+
+#### 6 — Kardeşin verebileceği para: birikiminin %40'ı, en çok 150.000 ₺
+
+§29 "kan bağı = bedava ATM olmasın" ve "uydurma milyonluk hesap açma" dedi. Kardeş ancak **kendi kaydındaki** paradan veriyor, hepsini vermiyor ve bir üst sınır var. Kaydı olmayan kardeş hiç para veremiyor. Kabul garanti değil: yakınlık 40'ın altında reddediyor, üstünde de zar atılıyor (%30-85).
+
+Soru: (A) doğru; (B) üst sınır kalksın, zengin kardeş gerçekten zengin gibi davransın; (C) borç geri ödeme takibi eklensin (şu an borç kaydı tutulmuyor — bilinçli V1 sınırı).
+
+#### 7 — Yaşlı bakımı: yılda 96.000 ₺ üstlenme, 48.000 ₺ katkı
+
+§31 "ben bakarım demek gerçek kapasite istesin" dedi. Parası olmayan oyuncuya seçenek gerekçesiyle kapalı. Bakımı üstlenmek ebeveynle yakınlığı +8, karışmamak ebeveyni -5 ve kardeşleri -4 etkiliyor.
+
+Soru: (A) tutarlar doğru; (B) bakım zaman da götürsün (o yıl başka bir şey yapılamasın); (C) kardeşlerin katkısı da hesaba katılsın (Q-187 #3 ile birlikte düşünülmeli).
+
+#### 8 — Miras itirazı: gelen mirasın %30'u, %22 ihtimalle
+
+İtiraz ancak o yıl **gerçekten** miras geldiyse çıkıyor ve tutar gelen mirastan türetiliyor. Kabul edilirse para cüzdandan kardeşin kaydına **taşınıyor** — §36 geregi yeni para doğmuyor.
+
+Soru: (A) doğru; (B) itiraz daha seyrek olsun; (C) itirazın hukuki bir yolu olsun (avukat, mahkeme) — bu ayrı bir paket işi.
+
+#### 9 — Aile içinde küslük: yakınlık 12 altı, %25 ihtimal
+
+Ölçüm bir boşluk gösterdi: `FriendshipDepth._maybeFallout` yalnızca **arkadaş** bağı için çalışıyordu, yani aile üyesi hiçbir zaman küs düşmüyordu (500 hayatta sıfır). §33 aile içinde küslüğü açıkça istiyor.
+
+Eklenen kural: yalnızca oyuncunun **reddettiği ya da karışmadığı** bir meselesi olan ve yakınlığı 12'nin altına inmiş yakın küs düşebiliyor, %25 ihtimalle, yılda en fazla bir kişi. Sebepsiz küslük yok. Yeniden ölçüm: 500 hayatta 8 kus kişi.
+
+Soru: (A) oran doğru — "aile tamamen kopmasın" (§33) sağlanmış; (B) daha sık olsun, küslük gerçek bir risk olsun; (C) küslüğün sebebi kişi kartında yazılsın (şu an yalnızca süre yazıyor — §60 "uydurma sebep yazma" dediği için).
+
+#### 10 — Tavsiyenin etkisi: en çok +0,10 ihtimal payı, üç yılda sönüyor
+
+§1 ve §41: oyuncu çocuğuna "üniversiteye git" diyemiyor, oturup konuşuyor ve karar çocuğun kendisinde kalıyor. Tavsiye `ChildProgression`'ın kendi kararlarının ihtimaline küçük bir pay ekliyor. Ölçüm (400 tohum, aynı zar dizisi): üniversiteye başlayan sayısı payla artıyor ama 400'ün hepsi gitmiyor.
+
+Soru: (A) pay doğru; (B) daha güçlü olsun, tavsiye hissedilsin; (C) tavsiye konusu seçilebilsin (okul / iş / evlilik ayrı ayrı).
+
+#### 11 — Hangi aile olayı pencere açar, hangisi günlüğe düşer?
+
+Ölçüm `critical_notice_test`'i kırdı: Paket AP'nin bütün aile olayları pencere açınca yıllık ortalama bildirim 0,99'dan 1,11'e çıktı (§72 "olay yağmuru olmasın"). Ayrım kondu: **oyuncuya bir şey soran** olay pencere açar (kararlar), yalnızca haber veren olay günlüğe düşer (kayın aile olayı, aile içi küslük). Yeniden ölçüm: ortalama 0,99.
+
+Soru: (A) ayrım doğru; (B) kayın aile olayı da pencere açsın, bildirim tavanı yükseltilsin; (C) günlüğe düşen olaylar için ayrı bir "aile haberleri" ekranı olsun.
+
+#### 12 — Torunun soy bağı: eşi olmayan çocukta ikinci ebeveyn boş kalıyor
+
+§49 gereği torun artık iki gerçek ebeveynle doğuyor: oyuncunun çocuğu ve gelin/damat. Çocuk evli değilse ikinci alan **boş** kalıyor — §53 "uydurma kimlik yazma" dediği için. Ölçüm: 500 hayatta 1.328 torunun iki ebeveyni, 496 torunun tek ebeveyni var.
+
+Soru: (A) doğru — bilinmeyen bilgi uydurulmuyor; (B) evli olmayan çocuğa da bir partner kaydı üretilsin; (C) torunun kartında "diğer ebeveyni bilinmiyor" yazsın.
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz. Ölçüm testi (`paket_ap_olcum_test.dart`) oranları **güzelleştirmiyor**, yalnızca ölçüyor ve bozulmayı yakalıyor.

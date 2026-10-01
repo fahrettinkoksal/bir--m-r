@@ -3726,5 +3726,141 @@ Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
 masrafı, eşin önceki çocuğu oranı, kayın aile yakınlığı, buluşma havuzu
 ve velayet kararı. Hiçbiri `DECISIONS.md`'ye yazılmadı.
 
+# Paket AP — aile dramaları ve yetişkin çocukların kendi hayatı V2
+
+Paket AO aileyi statik bir NPC listesinden yaşayan bir ağa çevirmişti ama
+aile hâlâ **olup bitenlerin kaydıydı**: boşanıyor, doğuyor, ölüyordu;
+oyuncu izliyordu. Paket AP aileyi **oynanan** bir sisteme çevirdi.
+
+## Ne yapıldı
+
+**Çocuğun eşi gerçek bir insan oldu (§14-§18).** `cocugunEsi` ve
+`eskiCocugunEsi` bağ türleri eklendi (enum sonuna, sıra bozulmadı);
+gelin/damat gerçek bir `Person` kaydı olarak doğuyor, kimliği
+evlilikten türediği için aynı evlilik her yıl yeni eş üretmiyor.
+`NpcMarriageRecord` ile NPC evlilik durumu (evli / boşandı / dul) ve
+geçmiş evlilikler kayda geçiyor. Paket AP öncesi kayıtlarda yalnızca ad
+vardı; geriye dönük NPC **uydurulmadı**.
+
+**Çocuğun kendi evlilik hayatı (§19-§23, §50).** Boşanma, yeniden
+evlenme ve dulluk. Eski eş kayıttan silinmiyor, torunun soy bağı
+bozulmuyor, yeniden evlenen çocuk **yeni** bir kişiyle evleniyor.
+
+**Kuşak devamı korundu (§62-§65, §74).** Bu paketin en kritik yeri:
+gelin/damat gerçek bir kişi olduğu anda kuşak devamındaki
+`default: return null` dalı onu **sessizce düşürür** hâle geldi — `torun`
+bir zamanlar tam olarak böyle kaybolmuştu. Evli çocukla devam edildiğinde
+eşi yeni oyuncunun eşi oluyor ve evlilik yürüyen bir kayıt olarak
+taşınıyor: "12 yıldır evli insan bekâr başlamıyor".
+
+**Gizli dram eğilimi (§2).** Her hayatın aile dram eğilimi `seed`'den
+deterministik türetiliyor, kayda yazılmıyor, oyuncuya gösterilmiyor ve
+**yalnızca sıklığı** ölçekliyor. 400 tohumda hem sakin hem hareketli
+aile çıkıyor.
+
+**Yılda en fazla bir büyük aile karari (§3).** Tek kapı:
+`GameState.canOpenFamilyDecision`. Beş çocuklu oyuncu aynı yıl beş kriz
+yaşamıyor.
+
+**Çok yıllı mesele kaydı (§4, §51).** `FamilyIssue`: kim, ne, kaçıncı
+yıl, hangi aşama, oyuncu ne cevap verdi. `storyFlags` bu soruları
+taşıyamıyordu. Kapanan mesele silinmiyor; liste 40 ile sınırlı ve sınır
+aşılırsa en eski **kapalı** meseleler düşüyor.
+
+**Yedi gerçek karar.** Çocuğun okul meselesi (§5-§7), yetişkin çocuğun
+para sıkıntısı ve eve dönüşü (§8-§13), kayın aile çatışması (§27),
+kardeşle para (§28-§29), yaşlı bakımı (§30-§32), miras itirazı
+(§35-§36). Hepsi `GameController` üzerinden ekrana bağlı.
+
+**Para yoktan üretilmiyor (§9, §36, §70).** Her transferde oyuncunun
+cüzdanı + bütün kayıtların birikimi toplamı **aynı** kalıyor; masraflı
+kararlarda azalıyor, asla artmıyor. 500 hayatlık ölçümde sıfır ihlal.
+
+**Hane değişimi gerçek (§12).** Eve dönen çocuk gerçekten haneye
+giriyor ve `LivingCosts` yeni bir gider kalemi görüyor.
+
+**Tavsiye ihtimali kaydırıyor, karar vermiyor (§1, §40-§41).** Oyuncu
+çocuğuna "üniversiteye git" diyemiyor; konuşuyor, karar çocuğun
+kendisinde kalıyor. Tavsiye yoksa pay **tam olarak 0** ve hiçbir ek zar
+atılmıyor — zar sırası korunuyor.
+
+**Stereotip yok (§26).** "Kayınvalide = sürekli sorun" reddedildi: olay
+havuzu dört iyi, dört kötü ve kalıcı bir test çıkan olayların
+dağılımının tek yöne kaymadığını ölçüyor.
+
+**Torunun soy bağı (§49).** Yeni torun motoru kurulmadı; var olan
+motorun boş bıraktığı `motherId`/`fatherId` alanları yazıldı. Eşi
+olmayan çocukta ikinci alan boş kalıyor — uydurma kimlik yazılmıyor.
+
+## Ölçüm (§76) — 500 aile odaklı hayat, oran güzelleştirmesi yok
+
+20.392 yıl. Hayat başına aile kararı: medyan 2, p25 1, p75 3, p95 5, en
+yüksek 8. 500 hayatın 69'unda hiç karar çıkmadı, 16'sında altı ve üstü.
+Mesele türleri: çocuk parası 291, çocuk okulu 278, kardeş parası 259,
+bakım 162, miras 111. Bozulma sayaçları sıfır.
+
+## Ölçümün ortaya çıkardığı gerçek hatalar
+
+Hepsi tahminle değil **ölçümle** bulundu ve ürün tarafında düzeltildi:
+
+1. **17 yaşında sisteme giren kişi aynı yıl liseyi bitiriyordu.**
+   `ChildProgression` kaydı açtığı yıl bir de sınıf atlatıyordu; kişi hiç
+   okumadığı bir yılı geçmiş sayılıyordu ve 17 yaşında `issiz` kalıyordu
+   — oyunun "6-17 arası herkes öğrencidir" değişmezi kırılıyordu. Paket
+   AO üvey kardeşi bu motora bağlayınca yol açılmıştı; tohum sırası
+   örtüyordu.
+2. **Aile içinde küslük hiç olmuyordu.** `FriendshipDepth` yalnızca
+   arkadaş bağı için çalışıyordu. Sebebi olmayan küslük olmayacak şekilde
+   eklendi: 500 hayatta 8 kişi.
+3. **Eve dönüş bir yıl sonra kendiliğinden geri alınıyordu.**
+   `_childrenLeaveHome` 25 üstü her çocuğu her yıl çıkarıyor; dönüş
+   kaydedilmediği için §12 dekoratif kalıyordu.
+4. **Bildirim baskısı.** Bütün aile olayları pencere açınca yıllık
+   ortalama bildirim 0,99'dan 1,11'e çıktı. Ayrım kondu: soran olay
+   pencere açar, haber veren olay günlüğe düşer. Yeniden ölçüm: 0,99.
+5. **Stat artışı `Stats.gain` dışından yapılıyordu.** `stat_gain_test`
+   yakaladı; oyunun azalan verim kuralı atlanıyordu.
+
+## Eski testlerde düzeltilen sessiz varsayımlar
+
+Hiçbiri "testi yeşil yapmak için" gevşetilmedi; her biri ölçüldü:
+
+* **"Çocuk evli doğmaz"** → §63 evli çocuğun evliliğini taşımayı açıkça
+  istiyor. İddia daraltıldı: taşınan evlilik **çocuğun kendi** eşiyle
+  olmalı, ölen oyuncunun eşi devralınmamalı.
+* **"Aynı çocuk birden fazla kez evlenmiyor"** → §23 yeniden evlenmeyi
+  istiyor. İddia **güçlendirildi**: evli çocuk tekrar evlenemez ve her ek
+  düğünün kapanmış bir evlilik kaydı olmalı.
+* **"Çocuk on yılda on yaşına gelir"** → çocuk ölebilir (ölçüm: 300
+  hayatta 0-1). Vefat edenin yaşı ölüm yılında donar. Yan bulgu: aynı
+  sınıftaki bir test çocuk ilk yıl ölürse **hiçbir şey sınamadan** yeşil
+  kalıyordu; pozitif kontrol eklendi.
+* **"Tek yılda gelir maaş+kira+5 milyonu aşamaz"** → varlıklı akrabanın
+  mirası tek yılda 21 milyon gelebiliyor. Eşik büyütülmedi, **kural
+  değiştirildi**: büyük artış yalnızca o yıl yeni bir miras kapandıysa
+  kabul ediliyor.
+* **"12. sınıfa ulaşan herkes sınav olayını görür"** → motor bunu hiç
+  garanti etmedi ("neredeyse kesin"). Zarsız bir **mekanizma** testi
+  eklendi (sınav olayının ağırlığı priority-0 havuzunun onlarca katı) ve
+  uçtan uca iddia %90'a çekildi.
+* **Bisiklet olayı ve işletme geri ödemesi** → örneklem kurası; pencere
+  genişletildi, eşikler aynı kaldı.
+
+## Bilerek yapılmayanlar
+
+NPC-NPC tam sosyal graph, borç geri ödeme takibi, velayet mahkemesi,
+miras davası, aile şirketi, dev aile ağacı görseli. Küslüğün sebebi kişi
+kartında yazılmıyor: kayıtta sebep yok ve §60 uydurma sebep yazmayı
+yasaklıyor.
+
+## Açık sorular
+
+Q-188: yıllık karar sınırı, dram profili bandı, okul meselesi
+toparlanma oranları, evdeki yetişkin çocuk gideri, eve dönüş penceresi,
+kardeşin verebileceği para, bakım tutarları, miras itirazı oranı, aile
+içi küslük oranı, tavsiye payı, hangi olayın pencere açacağı ve torunun
+tek ebeveynli doğması. Hiçbiri `DECISIONS.md`'ye yazılmadı. **Q-187
+ayrıca açık kalıyor; ona dokunulmadı.**
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
