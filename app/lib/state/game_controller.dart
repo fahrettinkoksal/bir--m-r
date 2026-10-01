@@ -36,6 +36,7 @@ import '../domain/social/media_opportunities.dart';
 import '../domain/family/adult_child_support.dart';
 import '../domain/family/child_advice.dart';
 import '../domain/family/child_school_issue.dart';
+import '../domain/family/family_disputes.dart';
 import '../domain/family/in_law_relations.dart';
 import '../domain/models/family_issue.dart';
 import '../domain/generation/parent_divorce.dart';
@@ -484,6 +485,120 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return false;
     return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §28-§32, §35-§36 — kardeş, bakım ve miras meseleleri
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen kardeş para isteği; yoksa `null`.
+  FamilyIssue? pendingSiblingMoneyAsk() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.pendingSiblingAsk(current);
+  }
+
+  /// Bu cevap neden seçilemiyor; seçilebiliyorsa `null` (D-095).
+  String? siblingMoneyBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.siblingAskBlockReason(current, cevap);
+  }
+
+  /// Oyuncu kardeşin para isteğine cevap verdi.
+  ActivityOutcome? respondSiblingMoneyAsk(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (FamilyDisputes.pendingSiblingAsk(current) == null) return null;
+    final String? engel =
+        FamilyDisputes.siblingAskBlockReason(current, cevap);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text}) sonuc =
+        FamilyDisputes.respondSiblingAsk(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Oyuncu kardeşinden borç ister. **Kardeş her zaman evet demez.**
+  ActivityOutcome? borrowFromSibling(String personId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final String? engel =
+        FamilyDisputes.borrowBlockReason(current, personId);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text, bool accepted}) sonuc =
+        FamilyDisputes.borrowFromSibling(current, personId, _random);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Oyuncuya sorulmayı bekleyen bakım meselesi; yoksa `null`.
+  FamilyIssue? pendingCareDispute() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.pendingCareDispute(current);
+  }
+
+  /// Bu bakım cevabı neden seçilemiyor; seçilebiliyorsa `null`.
+  String? careDisputeBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.careBlockReason(current, cevap);
+  }
+
+  /// Oyuncu bakım meselesinde kararını verdi.
+  ActivityOutcome? respondCareDispute(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (FamilyDisputes.pendingCareDispute(current) == null) return null;
+    final String? engel = FamilyDisputes.careBlockReason(current, cevap);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text}) sonuc =
+        FamilyDisputes.respondCare(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Oyuncuya sorulmayı bekleyen miras anlaşmazlığı; yoksa `null`.
+  FamilyIssue? pendingEstateDispute() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.pendingEstateDispute(current);
+  }
+
+  /// İtiraz edilen tutar.
+  int estateDisputeAmount() {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return FamilyDisputes.contestedAmount(current);
+  }
+
+  /// Bu cevap neden seçilemiyor; seçilebiliyorsa `null`.
+  String? estateDisputeBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.estateBlockReason(current, cevap);
+  }
+
+  /// Oyuncu miras anlaşmazlığında kararını verdi.
+  ActivityOutcome? respondEstateDispute(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (FamilyDisputes.pendingEstateDispute(current) == null) return null;
+    final String? engel = FamilyDisputes.estateBlockReason(current, cevap);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text}) sonuc =
+        FamilyDisputes.respondEstateDispute(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
   }
 
   // =================================================================

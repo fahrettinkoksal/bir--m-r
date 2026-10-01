@@ -8,6 +8,7 @@ import '../combat/sport_school_conflict.dart';
 import '../family/adult_child_support.dart';
 import '../family/child_advice.dart';
 import '../family/child_school_issue.dart';
+import '../family/family_disputes.dart';
 import '../family/in_law_relations.dart';
 import '../family/family_mood.dart';
 import '../career/retirement.dart';
@@ -833,6 +834,26 @@ class LifeProgression {
           Notices.enqueue(afterDeaths, <PendingNotice>[paraIstegi.notice!]);
     }
 
+    // --- Paket AP §28-§32: kardeşle para ve yaşlı bakımı -------------
+    //
+    // İkisi de §3'ün tek kapısından geçiyor: aynı yıl hem kardeş para
+    // isteyip hem bakım meselesi açılmıyor.
+    final ({GameState state, PendingNotice? notice}) kardesParasi =
+        FamilyDisputes.maybeSiblingAsk(afterDeaths, newAge, _rng);
+    afterDeaths = kardesParasi.state;
+    if (kardesParasi.notice != null) {
+      afterDeaths =
+          Notices.enqueue(afterDeaths, <PendingNotice>[kardesParasi.notice!]);
+    }
+
+    final ({GameState state, PendingNotice? notice}) bakimMeselesi =
+        FamilyDisputes.maybeCareDispute(afterDeaths, newAge, _rng);
+    afterDeaths = bakimMeselesi.state;
+    if (bakimMeselesi.notice != null) {
+      afterDeaths =
+          Notices.enqueue(afterDeaths, <PendingNotice>[bakimMeselesi.notice!]);
+    }
+
     // --- Paket AP §26-§27: kayın aile ve gelin/damat -----------------
     //
     // Olay havuzu bilinçli olarak dengeli: "kayınvalide = sürekli
@@ -1330,6 +1351,9 @@ class LifeProgression {
     // Aynı yıl gelen miras payları tek bildirimde toplanır (D-097);
     // üst üste açılan pencere sayısı azalır, hiçbir pay kaybolmaz.
     final List<PendingNotice> mirasBildirimleri = <PendingNotice>[];
+    // Paket AP §35: itiraz edilecek tutar **gerçekten** o yıl eline
+    // geçen paradan türetiliyor; uydurma bir rakam değil.
+    int buYilGelenMiras = 0;
     for (final Person person in state.people) {
       if (person.isAlive) continue;
       if (next.settledEstates.contains(person.id)) continue;
@@ -1351,6 +1375,7 @@ class LifeProgression {
       if (mirasBildirimi != null) {
         mirasBildirimleri.add(mirasBildirimi);
       }
+      buYilGelenMiras += pay.money;
       for (final String satir in sonuc.logLines) {
         next = next.copyWith(
           log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
@@ -1366,6 +1391,22 @@ class LifeProgression {
     );
     if (toplu != null) {
       next = Notices.enqueue(next, <PendingNotice>[toplu]);
+    }
+
+    // Paket AP §35-§36: miras kapandıktan sonra kardeş itiraz edebilir.
+    // Mesele burada açılıyor çünkü tutar yalnızca burada biliniyor.
+    // İtiraz **para üretmiyor**: kabul edilirse para cüzdandan kardeşin
+    // kaydına taşınıyor.
+    final ({GameState state, PendingNotice? notice}) itiraz =
+        FamilyDisputes.maybeEstateDispute(
+      next,
+      newAge,
+      _rng,
+      inheritedThisYear: buYilGelenMiras,
+    );
+    next = itiraz.state;
+    if (itiraz.notice != null) {
+      next = Notices.enqueue(next, <PendingNotice>[itiraz.notice!]);
     }
     return next;
   }
