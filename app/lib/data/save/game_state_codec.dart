@@ -9,6 +9,7 @@
 library;
 
 import '../../domain/models/company_vitals.dart';
+import '../../domain/models/family_issue.dart';
 import '../../domain/models/loan.dart';
 import '../../domain/models/pending_race.dart';
 import '../../domain/life/year_review.dart';
@@ -258,6 +259,10 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       'lastSportAge': state.lastSportAge,
       'lastGroomingAge': state.lastGroomingAge,
       'lastLearningAge': state.lastLearningAge,
+      // Paket AP §4. Eksik anahtar boş liste okunur; eski kayıt
+      // bozulmaz.
+      'familyIssues':
+          state.familyIssues.map(_encodeFamilyIssue).toList(growable: false),
       'licenses': state.licenses.toList(growable: false),
       'pendingLicenseExam': state.pendingLicenseExam == null
           ? null
@@ -841,6 +846,64 @@ Alimony _decodeAlimony(Map<String, Object?> json) => Alimony(
       endedAtAge: _intOrNull(json, 'endedAtAge'),
       paidYears: _intOr(json, 'paidYears', 0),
     );
+
+FamilyIssueKind? _familyIssueKindOrNull(String? name) {
+  if (name == null) return null;
+  for (final FamilyIssueKind tur in FamilyIssueKind.values) {
+    if (tur.name == name) return tur;
+  }
+  return null;
+}
+
+FamilyIssueStatus? _familyIssueStatusOrNull(String? name) {
+  if (name == null) return null;
+  for (final FamilyIssueStatus durum in FamilyIssueStatus.values) {
+    if (durum.name == name) return durum;
+  }
+  return null;
+}
+
+Map<String, Object?> _encodeFamilyIssue(FamilyIssue i) => <String, Object?>{
+      'id': i.id,
+      'kind': i.kind.name,
+      'personId': i.personId,
+      'openedAtAge': i.openedAtAge,
+      'lastEventAge': i.lastEventAge,
+      'status': i.status.name,
+      'stage': i.stage,
+      'resolvedAtAge': i.resolvedAtAge,
+    };
+
+/// Aile meselesini okur; **tanınmayan tür kaydı bozmaz**.
+///
+/// Mesele türleri zamanla eklenecek. Daha yeni bir sürümden gelen bir
+/// kayıt okunurken tanınmayan bir tür çıkarsa, o mesele düşer ve hayatın
+/// kalanı açılır. Aileyi silmek yerine bir meseleyi unutmak daha az
+/// zarar verir; mesele kişinin kendi kaydında değil, yalnızca burada
+/// durur.
+FamilyIssue? _decodeFamilyIssue(Map<String, Object?> json) {
+  // `_enumByNameOrNull` tanınmayan adı **hata** sayıyor; burada istenen
+  // bu değil, o yüzden hoşgörülü arama elde yapılıyor.
+  final FamilyIssueKind? tur = _familyIssueKindOrNull(
+    _stringOrNull(json, 'kind'),
+  );
+  if (tur == null) return null;
+  final int acilis = _int(json, 'openedAtAge');
+  return FamilyIssue(
+    id: _stringOrNull(json, 'id') ??
+        FamilyIssue.idFor(tur, _string(json, 'personId'), acilis),
+    kind: tur,
+    personId: _string(json, 'personId'),
+    openedAtAge: acilis,
+    lastEventAge: _intOr(json, 'lastEventAge', acilis),
+    // Durum okunamazsa en güvenli karşılık "sürüyor": kapandığını
+    // uydurmak, meseleyi oyuncuya bir kez daha göstermekten kötüdür.
+    status: _familyIssueStatusOrNull(_stringOrNull(json, 'status')) ??
+        FamilyIssueStatus.acik,
+    stage: _intOr(json, 'stage', 0),
+    resolvedAtAge: _intOrNull(json, 'resolvedAtAge'),
+  );
+}
 
 Map<String, Object?> _encodeChronic(ChronicCondition c) => <String, Object?>{
       'typeId': c.typeId,
@@ -1557,6 +1620,13 @@ GameState decodeGameState(Map<String, Object?> json) {
     lastSportAge: _intOrNull(json, 'lastSportAge'),
     lastGroomingAge: _intOrNull(json, 'lastGroomingAge'),
     lastLearningAge: _intOrNull(json, 'lastLearningAge'),
+    familyIssues: List<FamilyIssue>.unmodifiable(
+      _optionalRawList(json, 'familyIssues')
+          .map((Object? e) =>
+              _decodeFamilyIssue(_asMap(e, 'familyIssues[]')))
+          .whereType<FamilyIssue>()
+          .toList(growable: false),
+    ),
     // Eski kayıtlarda ehliyet yoktur; boş kümeyle açılır.
     licenses: Set<String>.unmodifiable(
       json['licenses'] == null

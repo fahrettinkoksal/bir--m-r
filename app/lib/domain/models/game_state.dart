@@ -6,6 +6,8 @@ import 'blackjack_game.dart';
 import 'business.dart';
 import 'criminal_record.dart';
 import 'education.dart';
+import 'family_drama.dart';
+import 'family_issue.dart';
 import 'book_progress.dart';
 import 'combat_career.dart';
 import 'martial_progress.dart';
@@ -130,6 +132,7 @@ class GameState {
     this.lastSportAge,
     this.lastGroomingAge,
     this.lastLearningAge,
+    this.familyIssues = const <FamilyIssue>[],
     this.licenses = const <String>{},
     this.pendingLicenseExam,
     this.settledEstates = const <String>{},
@@ -932,6 +935,122 @@ class GameState {
   /// Oyuncunun en son zihnini çalıştırdığı (kitap, kurs) yaş.
   final int? lastLearningAge;
 
+  /// Birden fazla yıl süren aile meseleleri (Paket AP §4).
+  ///
+  /// Kapanmış meseleler de listede kalır: "üç yıl önce ne olmuştu"
+  /// sorusunun cevabı kaybolmasın (§51). Liste [prototypeOnlyMaxIssues]
+  /// ile sınırlı tutulur ki kayıt şişmesin.
+  final List<FamilyIssue> familyIssues;
+
+  /// prototypeOnly: kayıtta tutulan en fazla aile meselesi sayısı.
+  static const int prototypeOnlyMaxIssues = 40;
+
+  /// Hâlâ süren aile meseleleri.
+  Iterable<FamilyIssue> get openFamilyIssues =>
+      familyIssues.where((FamilyIssue i) => i.isOpen);
+
+  /// Bu kişinin süren meselesi; yoksa `null`.
+  FamilyIssue? openFamilyIssueFor(String personId, [FamilyIssueKind? kind]) {
+    for (final FamilyIssue mesele in familyIssues) {
+      if (!mesele.isOpen) continue;
+      if (mesele.personId != personId) continue;
+      if (kind != null && mesele.kind != kind) continue;
+      return mesele;
+    }
+    return null;
+  }
+
+  /// Bu yıl **büyük** bir aile kararı daha çıkabilir mi? (Paket AP §3)
+  ///
+  /// Kural: bir yılda en fazla bir büyük aile kararı. Beş çocuğu olan
+  /// oyuncu aynı yıl beş aile krizi yaşamaz; aile hayatı oyunun geri
+  /// kalanını boğmaz.
+  ///
+  /// Sayaç ayrı bir save alanında değil, meselelerin kendi
+  /// `lastEventAge` değerinde duruyor: §3'ün sorduğu soruyu zaten o
+  /// alan cevaplıyor, ikinci bir alan açmak gerekmedi.
+  bool get canOpenFamilyDecision {
+    for (final FamilyIssue mesele in familyIssues) {
+      if (mesele.lastEventAge == player.age) return false;
+      if (mesele.openedAtAge == player.age) return false;
+    }
+    return true;
+  }
+
+  /// Bu hayatın gizli aile dram eğilimi (Paket AP §2).
+  ///
+  /// Kayıttan okunmaz, tohumdan türetilir; o yüzden eski kayıtlar da
+  /// bir profille açılır.
+  FamilyDramaProfile get familyDrama => FamilyDramaProfile.forSeed(seed);
+
+  /// Yeni bir aile meselesi açar; aynı mesele ikinci kez açılmaz.
+  ///
+  /// [canOpenFamilyDecision] yanlışsa hiçbir şey yapılmaz: §3'ün
+  /// sınırı tek kapıdan geçsin.
+  GameState openFamilyIssue({
+    required FamilyIssueKind kind,
+    required String personId,
+  }) {
+    if (!canOpenFamilyDecision) return this;
+    if (openFamilyIssueFor(personId, kind) != null) return this;
+    final FamilyIssue yeni = FamilyIssue(
+      id: FamilyIssue.idFor(kind, personId, player.age),
+      kind: kind,
+      personId: personId,
+      openedAtAge: player.age,
+      lastEventAge: player.age,
+    );
+    return copyWith(familyIssues: _trimIssues(<FamilyIssue>[
+      ...familyIssues,
+      yeni,
+    ]));
+  }
+
+  /// Bir meseleyi günceller; kimlik bulunamazsa durum değişmez.
+  GameState updateFamilyIssue(
+    String issueId, {
+    FamilyIssueStatus? status,
+    int? stage,
+    int? lastEventAge,
+    int? resolvedAtAge,
+  }) {
+    bool bulundu = false;
+    final List<FamilyIssue> yeni = <FamilyIssue>[
+      for (final FamilyIssue mesele in familyIssues)
+        if (mesele.id == issueId)
+          () {
+            bulundu = true;
+            return mesele.copyWith(
+              status: status,
+              stage: stage,
+              lastEventAge: lastEventAge,
+              resolvedAtAge: resolvedAtAge,
+            );
+          }()
+        else
+          mesele,
+    ];
+    if (!bulundu) return this;
+    return copyWith(familyIssues: List<FamilyIssue>.unmodifiable(yeni));
+  }
+
+  /// Kayıt şişmesin: en eskiler düşer, **açık** meseleler korunur.
+  static List<FamilyIssue> _trimIssues(List<FamilyIssue> hepsi) {
+    if (hepsi.length <= prototypeOnlyMaxIssues) {
+      return List<FamilyIssue>.unmodifiable(hepsi);
+    }
+    final List<FamilyIssue> acik =
+        hepsi.where((FamilyIssue i) => i.isOpen).toList();
+    final List<FamilyIssue> kapali =
+        hepsi.where((FamilyIssue i) => !i.isOpen).toList();
+    final int yer = prototypeOnlyMaxIssues - acik.length;
+    if (yer <= 0) return List<FamilyIssue>.unmodifiable(acik);
+    return List<FamilyIssue>.unmodifiable(<FamilyIssue>[
+      ...kapali.sublist(kapali.length - yer),
+      ...acik,
+    ]);
+  }
+
   /// Şu an kaç yıldır spor yapılmadığı; hiç yapılmadıysa `null`.
   int? get yearsSinceSport => _yearsSince(lastSportAge);
 
@@ -1137,6 +1256,7 @@ class GameState {
     int? lastSportAge,
     int? lastGroomingAge,
     int? lastLearningAge,
+    List<FamilyIssue>? familyIssues,
     Set<String>? licenses,
     Object? pendingLicenseExam = _unsetEvent,
     Set<String>? settledEstates,
@@ -1267,6 +1387,7 @@ class GameState {
       lastSportAge: lastSportAge ?? this.lastSportAge,
       lastGroomingAge: lastGroomingAge ?? this.lastGroomingAge,
       lastLearningAge: lastLearningAge ?? this.lastLearningAge,
+      familyIssues: familyIssues ?? this.familyIssues,
       licenses: licenses ?? this.licenses,
       pendingLicenseExam: pendingLicenseExam == _unsetEvent
           ? this.pendingLicenseExam
