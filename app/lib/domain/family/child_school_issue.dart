@@ -162,6 +162,10 @@ abstract final class ChildSchoolIssue {
               age: acik.player.age,
               text: metin,
               category: LogCategory.aile,
+              // §55: `SharedHistory` kişinin ortak geçmişini günlükteki
+              // `personId` alanından topluyor. Boş kalırsa aile meselesi
+              // o kişinin kartında hiç görünmüyor.
+              personId: cocuk.id,
             ),
           ]),
         ),
@@ -259,6 +263,7 @@ abstract final class ChildSchoolIssue {
           age: next.player.age,
           text: metin,
           category: LogCategory.aile,
+          personId: cocuk.id,
         ),
       ]),
     );

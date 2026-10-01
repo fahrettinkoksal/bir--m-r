@@ -180,6 +180,8 @@ abstract final class InLawRelations {
             age: newAge,
             text: metin,
             category: LogCategory.aile,
+            // §55: ortak geçmiş günlükteki `personId`'den toplanıyor.
+            personId: kisi.id,
           ),
         ]),
       );
@@ -256,7 +258,13 @@ abstract final class InLawRelations {
       },
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...acik.log,
-        LifeLogEntry(age: newAge, text: metin, category: LogCategory.aile),
+        // §55: ortak geçmiş günlükteki `personId`'den toplanıyor.
+        LifeLogEntry(
+          age: newAge,
+          text: metin,
+          category: LogCategory.aile,
+          personId: taraflar.parent.id,
+        ),
       ]),
     );
     return (
@@ -356,6 +364,7 @@ abstract final class InLawRelations {
           age: next.player.age,
           text: metin,
           category: LogCategory.aile,
+          personId: ebeveyn.id,
         ),
       ]),
     );

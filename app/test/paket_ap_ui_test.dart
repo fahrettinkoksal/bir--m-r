@@ -10,6 +10,7 @@ import 'dart:math';
 
 import 'package:bir_omur/domain/family/family_decision.dart';
 import 'package:bir_omur/domain/family/family_disputes.dart';
+import 'package:bir_omur/domain/interaction/shared_history.dart';
 import 'package:bir_omur/domain/models/family_issue.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
@@ -339,6 +340,57 @@ void main() {
       );
       expect(bekar.spouseName, isNull);
       expect(bekar.isMarried, isFalse);
+    });
+  });
+
+  group('§55 — aile meselesi kişinin ortak geçmişine düşüyor', () {
+    test('karar günlüğe kişiyle birlikte yazılıyor', () {
+      // `SharedHistory` kişinin ortak geçmişini günlükteki `personId`
+      // alanından topluyor. İlk yazımda bu alan boş kalıyordu, yani
+      // Paket AP'nin bütün aile anları kişinin kartında hiç
+      // görünmüyordu.
+      GameState s = okullCocukluHayat();
+      s = s.openFamilyIssue(
+        kind: FamilyIssueKind.cocukOkul,
+        personId: 'cocuk-ui',
+      );
+      s = FamilyDecisions.answer(
+        s,
+        FamilyIssueResponse.destekOldu,
+        Random(1),
+      ).state;
+
+      final Person cocuk = s.personById('cocuk-ui')!;
+      final List<SharedMoment> anlar = SharedHistory.of(s, cocuk);
+      expect(
+        anlar.any((SharedMoment m) => m.text.contains('ders çalışmaya')),
+        isTrue,
+        reason: 'Aile kararı kişinin ortak geçmişinde görünmeli.',
+      );
+    });
+
+    test('kardeşle para meselesi kardeşin geçmişine düşüyor', () {
+      final GameState taban = okullCocukluHayat(playerAge: 50);
+      final String? kardesId = taban.people
+          .where((Person p) => p.relation == RelationType.kardes)
+          .map((Person p) => p.id)
+          .firstOrNull;
+      if (kardesId == null) return;
+      GameState s = taban.openFamilyIssue(
+        kind: FamilyIssueKind.kardesPara,
+        personId: kardesId,
+      );
+      s = FamilyDisputes.respondSiblingAsk(
+        s,
+        FamilyIssueResponse.reddetti,
+      ).state;
+      final List<SharedMoment> anlar =
+          SharedHistory.of(s, s.personById(kardesId)!);
+      expect(
+        anlar.any((SharedMoment m) => m.text.contains('para')),
+        isTrue,
+        reason: 'Kardeşle para meselesi onun geçmişinde görünmeli.',
+      );
     });
   });
 

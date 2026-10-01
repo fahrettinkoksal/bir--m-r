@@ -114,6 +114,8 @@ abstract final class ChildAdvice {
           age: next.player.age,
           text: metin,
           category: LogCategory.aile,
+          // §55: ortak geçmiş günlükteki `personId`'den toplanıyor.
+          personId: personId,
         ),
       ]),
     );

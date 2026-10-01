@@ -185,6 +185,8 @@ abstract final class AdultChildSupport {
             age: newAge,
             text: metin,
             category: LogCategory.aile,
+            // §55: ortak geçmiş günlükteki `personId`'den toplanıyor.
+            personId: cocuk.id,
           ),
         ]),
       );
@@ -336,6 +338,7 @@ abstract final class AdultChildSupport {
           age: next.player.age,
           text: metin,
           category: LogCategory.aile,
+          personId: cocuk.id,
         ),
       ]),
     );
@@ -427,6 +430,7 @@ abstract final class AdultChildSupport {
           age: next.player.age,
           text: metin,
           category: LogCategory.aile,
+          personId: cocuk.id,
         ),
       ]),
     );

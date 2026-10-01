@@ -229,7 +229,7 @@ abstract final class FamilyDisputes {
       status: FamilyIssueStatus.cozuldu,
       resolvedAtAge: next.player.age,
     );
-    return (state: _log(next, metin), text: metin);
+    return (state: _log(next, metin, personId: kardes.id), text: metin);
   }
 
   /// Oyuncu kardeşinden borç isteyebilir mi; isteyemiyorsa gerekçesi.
@@ -296,13 +296,21 @@ abstract final class FamilyDisputes {
     if (kapasite <= 0) {
       const String metin0 = 'Kardeşinin de durumu iyi değil; '
           'verebileceği bir şey yok.';
-      return (state: _log(next, metin0), text: metin0, accepted: false);
+      return (
+        state: _log(next, metin0, personId: personId),
+        text: metin0,
+        accepted: false,
+      );
     }
     if (kardes.bond < prototypeOnlyBorrowBond) {
       final String metin1 = '${kardes.firstName} "şu an olmaz" dedi. '
           'Aranız zaten mesafeliydi.';
       next = _bumpBond(next, personId, -2);
-      return (state: _log(next, metin1), text: metin1, accepted: false);
+      return (
+        state: _log(next, metin1, personId: personId),
+        text: metin1,
+        accepted: false,
+      );
     }
 
     // Yakınlık arttıkça kabul ihtimali artıyor ama garanti olmuyor.
@@ -310,14 +318,22 @@ abstract final class FamilyDisputes {
     if (rng.nextInt(100) >= sans) {
       final String metin2 = '${kardes.firstName} uzun uzun anlattı: '
           'kendi borçları varmış. Bu kez olmadı.';
-      return (state: _log(next, metin2), text: metin2, accepted: false);
+      return (
+        state: _log(next, metin2, personId: personId),
+        text: metin2,
+        accepted: false,
+      );
     }
 
     next = _transfer(next, personId, -kapasite);
     next = _bumpBond(next, personId, -3);
     final String metin = '${kardes.firstName} ${kapasite ~/ 1000} bin ₺ '
         'verdi. "Acele etmene gerek yok" dedi.';
-    return (state: _log(next, metin), text: metin, accepted: true);
+    return (
+      state: _log(next, metin, personId: personId),
+      text: metin,
+      accepted: true,
+    );
   }
 
   // =================================================================
@@ -396,7 +412,7 @@ abstract final class FamilyDisputes {
             'Kardeşlerinle "kim bakacak" konusunu konuşmanız gerekiyor.'
         : '${ebeveyn.firstName} artık tek başına idare edemiyor. '
             'Bu meselede yanında kimse yok.';
-    final GameState next = _log(acik, metin);
+    final GameState next = _log(acik, metin, personId: ebeveyn.id);
     return (
       state: next,
       notice: PendingNotice(
@@ -529,7 +545,7 @@ abstract final class FamilyDisputes {
       status: FamilyIssueStatus.cozuldu,
       resolvedAtAge: next.player.age,
     );
-    return (state: _log(next, metin), text: metin);
+    return (state: _log(next, metin, personId: ebeveyn.id), text: metin);
   }
 
   // =================================================================
@@ -584,7 +600,7 @@ abstract final class FamilyDisputes {
       stage: itirazTutari ~/ 1000,
     );
     return (
-      state: _log(next, metin),
+      state: _log(next, metin, personId: kardes.id),
       notice: PendingNotice(
         id: 'miras-itiraz-${kardes.id}-$newAge',
         kind: NoticeKind.aileDonum,
@@ -691,7 +707,7 @@ abstract final class FamilyDisputes {
       status: FamilyIssueStatus.cozuldu,
       resolvedAtAge: next.player.age,
     );
-    return (state: _log(next, metin), text: metin);
+    return (state: _log(next, metin, personId: kardes.id), text: metin);
   }
 
   // =================================================================
@@ -766,7 +782,7 @@ abstract final class FamilyDisputes {
           if (p.id == kisi.id) p.copyWith(estrangedSinceAge: newAge) else p,
       ]),
     );
-    next = _log(next, metin);
+    next = _log(next, metin, personId: kisi.id);
     return (state: next, logText: metin);
   }
 
@@ -814,13 +830,21 @@ abstract final class FamilyDisputes {
     );
   }
 
-  static GameState _log(GameState state, String text) => state.copyWith(
+  /// Günlüğe bir satır yazar.
+  ///
+  /// [personId] **verilmeli**: `SharedHistory` kişinin ortak geçmişini
+  /// günlükteki `personId` alanından topluyor (§55). Alan boş kalırsa
+  /// aile meselesi o kişinin kartında hiç görünmüyor — ilk yazımda
+  /// böyleydi.
+  static GameState _log(GameState state, String text, {String? personId}) =>
+      state.copyWith(
         log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
           ...state.log,
           LifeLogEntry(
             age: state.player.age,
             text: text,
             category: LogCategory.aile,
+            personId: personId,
           ),
         ]),
       );
