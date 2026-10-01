@@ -13,6 +13,7 @@ import 'grandchildren.dart';
 import '../social/social_engine.dart';
 import '../../data/media_catalog.dart';
 import 'child_marriage.dart';
+import 'child_marriage_life.dart';
 import '../social/media_opportunities.dart';
 import '../social/social_income.dart';
 import '../models/sponsorship.dart';
@@ -724,6 +725,47 @@ class LifeProgression {
     // Büyüyen çocuklar kendi hayatlarını kurar: haneden çıkarlar ama
     // kayıtları silinmez, görüşülmeye devam edilir.
     afterDeaths = _childrenLeaveHome(afterDeaths, newAge);
+
+    // --- Paket AP §19-§23, §50: yetişkin çocuğun evlilik hayatı ------
+    //
+    // Sıra önemli ve bilinçli:
+    //
+    // 1. Eşi vefat edenler **dul** yazılır. Ölümün kendisi yukarıdaki
+    //    genel ölüm motorundan geldi (gelin/damat sıradan bir kişidir);
+    //    eksik olan şey kaydın güncellenmesiydi.
+    // 2. Sonra boşanmalar işlenir.
+    // 3. En sonda yeniden evlenmeler. Böylece aynı yıl içinde bir kişi
+    //    hem boşanıp hem yeniden evlenemez: `maybeRemarry` soğuma
+    //    süresi arıyor ve bu yıl boşanan kişide o süre henüz 0.
+    for (final ChildMarriageYear tur in <ChildMarriageYear>[
+      ChildMarriageLife.applySpouseDeaths(afterDeaths, newAge),
+    ]) {
+      afterDeaths = tur.state;
+      for (final String satir in tur.logTexts) {
+        afterDeaths = _logLine(afterDeaths, newAge, satir);
+      }
+      if (tur.notices.isNotEmpty) {
+        afterDeaths = Notices.enqueue(afterDeaths, tur.notices);
+      }
+    }
+    final ChildMarriageYear bosanmalar =
+        ChildMarriageLife.maybeDivorce(afterDeaths, newAge, _rng);
+    afterDeaths = bosanmalar.state;
+    for (final String satir in bosanmalar.logTexts) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
+    if (bosanmalar.notices.isNotEmpty) {
+      afterDeaths = Notices.enqueue(afterDeaths, bosanmalar.notices);
+    }
+    final ChildMarriageYear yenidenEvlilikler =
+        ChildMarriageLife.maybeRemarry(afterDeaths, newAge, _rng);
+    afterDeaths = yenidenEvlilikler.state;
+    for (final String satir in yenidenEvlilikler.logTexts) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
+    if (yenidenEvlilikler.notices.isNotEmpty) {
+      afterDeaths = Notices.enqueue(afterDeaths, yenidenEvlilikler.notices);
+    }
 
     // Anne ve baba ayrılabilir (Paket AO §1-§6). Boşanma **önce** işlenir:
     // ayrılan ebeveynin yeniden evlenmesi ancak boşanma durumu yazıldıktan

@@ -102,9 +102,13 @@ abstract final class ChildMarriage {
     required Random rng,
     RelationType relation = RelationType.cocuk,
     GameState? state,
+    bool forceMarriage = false,
   }) {
     if (!eligible(child, relation: relation)) return null;
-    if (!rng.chance(chanceFor(child.age))) return null;
+    // Paket AP §23: yeniden evlenme kararı çağıran tarafta verildi
+    // (soğuma süresi + kendi ihtimali). O zarı burada ikinci kez atmak
+    // kararı sessizce iki kapıya bağlardı.
+    if (!forceMarriage && !rng.chance(chanceFor(child.age))) return null;
 
     // Eşin cinsiyeti çocuğun cinsiyetinin karşıtı seçilir; bu bir
     // prototip basitleştirmesidir, kesin kural değildir (Q-133).
