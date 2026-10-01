@@ -14,6 +14,7 @@ import '../models/marriage.dart';
 import '../models/career.dart';
 import '../models/owned_item.dart';
 import '../models/rental.dart';
+import '../models/npc_marriage.dart';
 import '../models/person_development.dart';
 import '../models/parental_status.dart';
 import '../models/person.dart';
@@ -165,6 +166,9 @@ abstract final class GenerationContinuation {
         motherLine: anneTarafi,
         otherParentId: cocuk.development?.otherParentId,
         childId: childId,
+        // Paket AP §62-§65: devam edilen çocuğun **kendi** evlilik kaydı.
+        // Eşi yeni oyuncunun eşi, eski eşi yeni oyuncunun eski eşi olur.
+        childDevelopment: cocuk.development,
       );
       if (yeniBag == null) continue; // yeni kuşakta bağı yok
       // Eski oyuncunun torunu yeni oyuncunun **çocuğu** oldu: küçükse
@@ -342,6 +346,17 @@ abstract final class GenerationContinuation {
         confidence: state.market.confidence,
         priceIndex: state.market.priceIndex,
       ),
+      // --- Paket AP §62-§65: devam edilen çocuğun evliliği ----------
+      //
+      // Buraya kadar yeni oyuncu **her zaman bekar** başlıyordu: bu alan
+      // hiç yazılmıyordu, yani `null` kalıyordu. Çocuğun eşi artık
+      // gerçek bir kişi olduğu için bu sessiz bir kayıp olurdu —
+      // "12 yıldır evli" bir insan bir anda hiç evlenmemiş sayılırdı.
+      //
+      // Kayıt çocuğun **kendi** evlilik kaydından kuruluyor; uydurma bir
+      // evlilik üretilmiyor. Eşi Person olmayan eski kayıtlarda (§17)
+      // `null` kalır: sahte bir eş kimliği yazmaktan iyidir.
+      marriage: _marriageForNextGeneration(cocuk),
       // Ebeveynlerin durumu gerçeğe dayanır: evlilik kaydı yoksa evli
       // yazılmaz (D-047).
       parentalStatus: _parentalStatusFor(state, cocuk),
@@ -429,7 +444,31 @@ abstract final class GenerationContinuation {
     required bool motherLine,
     String? otherParentId,
     required String childId,
+    PersonDevelopment? childDevelopment,
   }) {
+    // --- Paket AP §62-§65: devam edilen çocuğun evliliği --------------
+    //
+    // **Bu dal olmasa kayıt sessizce düşerdi.** Aşağıdaki `default`
+    // bilinmeyen bağları `null` döndürüp kişiyi listeden çıkarıyor;
+    // `torun` bir zamanlar tam olarak böyle kaybolmuştu ve Faho onu
+    // "çocuğumun hayatına geçtiğimde çocuklarım görünmedi" diye
+    // bildirmişti. Paket AP gelin/damadı gerçek bir kişi yaptığı için
+    // aynı tuzak yeniden açılmıştı.
+    //
+    // Devam edilen çocuk 12 yıldır evliyse yeni oyuncu "bekar"
+    // başlamamalı (§63): eşi gerçekten **eşidir**.
+    if (childDevelopment != null) {
+      if (person.id == childDevelopment.spousePersonId &&
+          childDevelopment.isMarried) {
+        return RelationType.es;
+      }
+      // Boşanmış ya da dul çocukla devam: eski eş **eski eş** olur
+      // (§64, §65). Vefat etmiş eş de kayıtta kalır.
+      final bool gecmisEs = childDevelopment.pastMarriages.any(
+        (NpcMarriageRecord m) => m.spousePersonId == person.id,
+      );
+      if (gecmisEs) return RelationType.eskiEs;
+    }
     // Torunlar (D-087).
     //
     // **Faho'nun bildirdiği hata:** "ölüp çocuğumun hayatı ile devam
@@ -527,9 +566,63 @@ abstract final class GenerationContinuation {
             ? RelationType.babaTarafiDede
             : RelationType.anneTarafiDede;
 
+      // Paket AP §15: **başka** bir çocuğun eşi. Devam edilen çocuğun
+      // eşiyse yukarıdaki dalda `es` oldu; buraya düşen kişi yeni
+      // oyuncunun kardeşinin eşidir.
+      //
+      // V1'de "kardeşin eşi" diye bir bağ yok ve uydurulmayacak: ona
+      // teyze/yenge gibi bir kan bağı yazmak yanlış olur. Hayatta var
+      // olmuş bir insan olarak **tanıdık** kalır — üvey çocuk ve üvey
+      // kardeş için verilen kararın aynısı.
+      case RelationType.cocugunEsi:
+      case RelationType.eskiCocugunEsi:
+        return RelationType.arkadas;
+
       default:
         return null;
     }
+  }
+
+  /// Devam edilen çocuğun evlilik kaydını oyuncunun [Marriage] kaydına
+  /// çevirir (Paket AP §62-§65).
+  ///
+  /// Üç durum:
+  ///
+  /// * **Evli** (§62-§63): yürüyen evlilik, eşin gerçek kimliğiyle.
+  ///   Evlilik yaşı çocuğun yaşıdır ve çocuk artık oyuncu olduğu için
+  ///   ölçek zaten doğru — yeniden çıpalanmasına gerek yok.
+  /// * **Boşanmış** (§64): kayıt `bosandi` olarak taşınır, eski eş
+  ///   kişi listesinde `eskiEs` olur.
+  /// * **Dul** (§65): kayıt `dul` olarak taşınır, vefat etmiş eş
+  ///   kayıttan kaybolmaz.
+  ///
+  /// Eşi gerçek bir kişi olmayan eski kayıtlarda `null` döner: var
+  /// olmayan bir kimliğe evlilik bağlanmaz (§17).
+  static Marriage? _marriageForNextGeneration(Person cocuk) {
+    final PersonDevelopment? d = cocuk.development;
+    if (d == null) return null;
+
+    if (d.isMarried && d.spousePersonId != null && d.marriedAtAge != null) {
+      return Marriage(
+        spouseId: d.spousePersonId!,
+        marriedAtAge: d.marriedAtAge!,
+        status: MarriageStatus.evli,
+      );
+    }
+
+    // Bitmiş evlilikler arasından **kimliği bilinen en sonuncusu**.
+    for (final NpcMarriageRecord m in d.pastMarriages.reversed) {
+      if (m.spousePersonId == null) continue;
+      return Marriage(
+        spouseId: m.spousePersonId!,
+        marriedAtAge: m.marriedAtAge,
+        status: m.status == NpcMarriageStatus.dul
+            ? MarriageStatus.dul
+            : MarriageStatus.bosandi,
+        endedAtAge: m.endedAtAge,
+      );
+    }
+    return null;
   }
 
   /// Taşınan yakınlık: kayıt silinmez, nötre doğru çekilir (prototypeOnly).
