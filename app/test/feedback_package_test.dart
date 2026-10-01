@@ -183,7 +183,15 @@ void main() {
   group('Uygulanan etkiler', () {
     test('olay seçimi para ve eşya kazancını rozet olarak bildirir', () {
       EventChoiceResult? bisikletSonucu;
-      for (int seed = 0; seed < 40 && bisikletSonucu == null; seed++) {
+      // Tohum penceresi geniş tutuluyor ve **ilk bulunanda** çıkılıyor.
+      //
+      // Ölçüm: `bisiklet_hediyesi` 200 tohumun 10-14'ünde çıkıyor
+      // (%5-7). 40 tohumluk pencerede hiç çıkmama olasılığı ~%13; yani
+      // olayın kendisiyle ilgisi olmayan her değişiklik (bir yere bir
+      // zar eklemek bütün akışı kaydırıyor) bu testi kura ile
+      // kırabiliyordu. Pencere genişletildi, eşik gevşetilmedi: olay
+      // yine **gerçekten** çıkmak zorunda.
+      for (int seed = 0; seed < 200 && bisikletSonucu == null; seed++) {
         final GameController controller = GameController(random: Random(seed));
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 60 && bisikletSonucu == null; i++) {

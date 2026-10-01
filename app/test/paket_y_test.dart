@@ -592,8 +592,20 @@ void main() {
   });
 
   group('Aile dönüm noktaları ekrana ulaşıyor (D-154 düzeltmesi)', () {
-    test('aynı çocuk birden fazla kez evlenmiyor ve bildirim geliyor', () {
-      int cokEvlenen = 0;
+    // Paket AP §23 bu testin iddiasını daralttı.
+    //
+    // Testin yakaladığı asıl hata (AC/0) şuydu: çocuğun evliliği kayda
+    // geçmediği için **aynı çocuk her yıl yeniden evleniyordu**. O hata
+    // hâlâ yakalanmalı.
+    //
+    // Ama Paket AP'de çocuk gerçekten boşanabiliyor ve dul kalabiliyor;
+    // §23 bundan sonra yeniden evlenmeyi açıkça istiyor. Yani "hayatta
+    // bir kez düğün" artık yanlış kural. Doğru kural şudur ve test bunu
+    // ölçüyor: **evli bir çocuk tekrar evlenemez** ve her ek düğünün
+    // karşılığında kapanmış bir evlilik kaydı olmalı.
+    test('evli çocuk tekrar evlenmiyor; ek düğünün kapanmış kaydı var', () {
+      int evliykenEvlenen = 0;
+      int kayitsizDugun = 0;
       int bildirimGelen = 0;
       for (int seed = 0; seed < 25; seed++) {
         GameState s = hayat(seed: seed, age: 55);
@@ -622,24 +634,43 @@ void main() {
         // evlenmemesi.
         int dugunBildirimi = 0;
         for (int i = 0; i < 12 && !s.deceased; i++) {
+          // Yıl başlarken evli miydi? Düğün o yıl gelirse bu "evliyken
+          // ikinci kez evlenme" demek olur — AC/0'ın hatası tam buydu.
+          final bool yilBasindaEvli =
+              s.personById('cocuk-1')?.development?.isMarried ?? false;
           s = motor.advanceOneYear(s);
-          dugunBildirimi += s.notices
+          final int buYil = s.notices
               .where((PendingNotice n) =>
                   n.id.startsWith('cocuk-evlilik-cocuk-1-'))
               .length;
+          if (buYil > 0 && yilBasindaEvli) evliykenEvlenen++;
+          dugunBildirimi += buYil;
           s = s.copyWith(
             pendingEvent: null,
             pendingCrisis: null,
             notices: const <PendingNotice>[],
           );
         }
-        if (dugunBildirimi > 1) cokEvlenen++;
+        // Her ek düğünün arkasında kapanmış (boşanma/dulluk) bir evlilik
+        // kaydı olmalı: kayıt tutulmadan yeniden evlenilmiyor.
+        final int kapanmisEvlilik = s
+                .personById('cocuk-1')
+                ?.development
+                ?.pastMarriages
+                .length ??
+            0;
+        if (dugunBildirimi > kapanmisEvlilik + 1) kayitsizDugun++;
         if (dugunBildirimi > 0) bildirimGelen++;
       }
       expect(
-        cokEvlenen,
+        evliykenEvlenen,
         0,
-        reason: 'Çocuk evliliği kalıcı olmalı; aynı kişi tekrar evlenmemeli',
+        reason: 'Evli çocuk ikinci kez evlenemez; evlilik kayda geçmeli',
+      );
+      expect(
+        kayitsizDugun,
+        0,
+        reason: 'Her ek düğünün kapanmış bir evlilik kaydı olmalı (§23)',
       );
       expect(
         bildirimGelen,

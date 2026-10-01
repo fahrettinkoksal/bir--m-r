@@ -176,6 +176,19 @@ abstract final class ChildProgression {
     if (!person.isAlive) return (person: person, news: const <String>[]);
 
     final int age = person.age;
+    // Kayıt **bu yıl** mı açıldı? [ensureRecord] kişinin bugünkü sınıfını
+    // yaşından kuruyor; aynı çağrıda bir de sınıf atlatılırsa kişi hiç
+    // okumadığı bir yılı geçmiş sayılıyor.
+    //
+    // Bu, 17 yaşında sisteme giren kişide oyunun kendi değişmezini
+    // kırıyordu: aynı yıl "liseyi bitirdi" yazılıyor, [_sync] de onu
+    // `issiz` yapıyordu — hâlbuki 6-17 yaş arası herkes öğrencidir
+    // (`age_up_test`: "yaşa bağlı tutarlılık korunur"). Paket AO üvey
+    // kardeşi bu motora bağlayınca yol açıldı; hatayı tohum sırası
+    // örtüyordu. 6 yaşında giren kişinin 1. sınıf yerine 2. sınıfta
+    // başlaması da aynı sebepten kaynaklanıyordu.
+    final bool yeniKayit =
+        person.development == null || !person.development!.tracksLife;
     PersonDevelopment dev = ensureRecord(person, rng);
     final List<String> haberler = <String>[];
     final String ad = person.firstName;
@@ -204,7 +217,7 @@ abstract final class ChildProgression {
         // Dönüm noktası yalnızca **gerçekten o yıl** başlandıysa yazılır.
         if (age == prototypeOnlySchoolStartAge) kaydet('$ad okula başladı.');
       }
-    } else if (dev.grade != null) {
+    } else if (dev.grade != null && !yeniKayit) {
       final int yeniSinif = dev.grade! + 1;
       if (yeniSinif > 12 || age >= prototypeOnlyMaxSchoolAge) {
         dev = dev.copyWith(

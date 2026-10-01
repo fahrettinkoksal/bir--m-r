@@ -13,7 +13,9 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/hobby_progress.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
+import 'package:bir_omur/domain/models/npc_marriage.dart';
 import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/person_development.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/domain/pets/pet_care.dart';
@@ -272,6 +274,10 @@ void main() {
     expect(varisler, isNotEmpty, reason: 'Devam edilecek çocuk olmalı');
 
     final int mirasOncesiCuzdan = olum.player.wallet;
+    // Devam edilen çocuğun **kendi** evlilik kaydı: devamdan sonra
+    // taşınan evliliğin ona mı ait olduğunu bununla karşılaştırıyoruz.
+    final PersonDevelopment? varisGelisimi =
+        olum.personById(varisler.first)?.development;
     final String engel = controller.continueAsChild(varisler.first);
     expect(engel, isEmpty, reason: 'Devam engellenmemeli');
 
@@ -317,16 +323,43 @@ void main() {
       isEmpty,
       reason: 'Çocuk babasının/annesinin hobisini devralmaz',
     );
-    expect(
-      yeni.marriage,
-      isNull,
-      reason: 'Çocuk evli doğmaz',
-    );
-    expect(
-      yeni.pastMarriages,
-      isEmpty,
-      reason: 'Çocuğun geçmiş evliliği olamaz',
-    );
+    // Paket AP §63 bu iddiayı daralttı: eskiden burada "çocuk evli
+    // doğmaz" diye `marriage == null` aranıyordu. Çocuğun eşi o zaman
+    // yalnızca bir **isimdi**, taşınacak bir evlilik kaydı yoktu.
+    //
+    // Paket AP'de gelin/damat gerçek bir kişi oldu ve §63 açıkça
+    // "12 yıldır evli insan bekâr başlamaz" dedi. Yani evlilik artık
+    // taşınabiliyor — ama yalnızca **çocuğun kendi** evliliği. Testin
+    // asıl koruduğu şey bu: ölen oyuncunun evliliği devralınmasın,
+    // uydurma geçmiş yazılmasın.
+    final Marriage? devredilenEvlilik = yeni.marriage;
+    if (devredilenEvlilik != null) {
+      expect(
+        varisGelisimi?.spousePersonId,
+        devredilenEvlilik.spouseId,
+        reason: '§63: taşınan evlilik çocuğun kendi eşiyle olmalı.',
+      );
+      expect(
+        devredilenEvlilik.spouseId,
+        isNot(olum.marriage?.spouseId),
+        reason: 'Ölen oyuncunun eşi devralınmaz.',
+      );
+      expect(
+        devredilenEvlilik.marriedAtAge,
+        varisGelisimi?.marriedAtAge,
+        reason: 'Evlilik yaşı çocuğun kendi kaydından gelir.',
+      );
+    }
+    // Geçmiş evlilik yalnızca çocuğun kendi boşanma/dulluk kaydından
+    // doğabilir; bu senaryoda çocuğun öyle bir kaydı yok.
+    if ((varisGelisimi?.pastMarriages ?? const <NpcMarriageRecord>[])
+        .isEmpty) {
+      expect(
+        yeni.pastMarriages,
+        isEmpty,
+        reason: 'Çocuğun olmayan geçmiş evliliği uydurulmaz',
+      );
+    }
     expect(
       yeni.log.every((dynamic e) => (e.age as int) <= yeni.player.age),
       isTrue,
