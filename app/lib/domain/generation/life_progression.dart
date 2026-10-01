@@ -5,6 +5,7 @@ import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
 import '../combat/combat_career_engine.dart';
 import '../combat/sport_school_conflict.dart';
+import '../family/adult_child_support.dart';
 import '../family/child_advice.dart';
 import '../family/child_school_issue.dart';
 import '../family/family_mood.dart';
@@ -809,6 +810,26 @@ class LifeProgression {
     }
     if (basari.notice != null) {
       afterDeaths = Notices.enqueue(afterDeaths, <PendingNotice>[basari.notice!]);
+    }
+
+    // --- Paket AP §8-§13: yetişkin çocuğun kendi ayakları ------------
+    //
+    // Önce kendiliğinden olan kısım (iş bulup evden çıkma, şehir
+    // değiştirme), sonra yeni para isteği. Tersi olsa aynı yıl hem
+    // "para istiyor" hem "başka şehre taşındı" çıkabilirdi.
+    final ({GameState state, List<String> logTexts}) yetiskinYili =
+        AdultChildSupport.advanceYear(afterDeaths, newAge, _rng);
+    afterDeaths = yetiskinYili.state;
+    for (final String satir in yetiskinYili.logTexts) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
+
+    final ({GameState state, PendingNotice? notice}) paraIstegi =
+        AdultChildSupport.maybeRequest(afterDeaths, newAge, _rng);
+    afterDeaths = paraIstegi.state;
+    if (paraIstegi.notice != null) {
+      afterDeaths =
+          Notices.enqueue(afterDeaths, <PendingNotice>[paraIstegi.notice!]);
     }
 
     // --- Paket AP §42-§46: ailenin oyuncuya dokunan tarafı -----------

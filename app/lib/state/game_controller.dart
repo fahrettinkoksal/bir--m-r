@@ -33,6 +33,7 @@ import '../data/finger_catalog.dart';
 import '../domain/models/wealth.dart';
 import '../data/media_catalog.dart';
 import '../domain/social/media_opportunities.dart';
+import '../domain/family/adult_child_support.dart';
 import '../domain/family/child_advice.dart';
 import '../domain/family/child_school_issue.dart';
 import '../domain/models/family_issue.dart';
@@ -482,6 +483,73 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return false;
     return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §8-§13 — yetişkin çocuğun para isteği ve eve dönüşü
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen para isteği; yoksa `null`.
+  FamilyIssue? pendingChildMoneyRequest() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return AdultChildSupport.pendingRequest(current);
+  }
+
+  /// Bu cevapta ödenecek tutar.
+  int childMoneyAmount(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return AdultChildSupport.amountFor(current, cevap);
+  }
+
+  /// Bu cevap neden seçilemiyor; seçilebiliyorsa `null` (D-095).
+  String? childMoneyBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return AdultChildSupport.blockReason(current, cevap);
+  }
+
+  /// Oyuncu çocuğunun para isteğine cevap verdi.
+  ///
+  /// Verilen para cüzdandan düşer ve çocuğun kaydına eklenir; toplam
+  /// değişmez (§9).
+  ActivityOutcome? respondChildMoneyRequest(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null || !AdultChildSupport.isPending(current)) return null;
+    final String? engel = AdultChildSupport.blockReason(current, cevap);
+    if (engel != null) {
+      return ActivityOutcome(applied: false, text: engel);
+    }
+    final ({GameState state, String text}) sonuc =
+        AdultChildSupport.respond(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Eve dönmek isteyen çocuğun meselesi; yoksa `null`.
+  FamilyIssue? pendingChildMoveBack() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return AdultChildSupport.pendingMoveBack(current);
+  }
+
+  /// Oyuncu çocuğun eve dönmesine izin verdi ya da vermedi.
+  ///
+  /// Kabul edilirse çocuk gerçekten haneye girer ve yaşam gideri
+  /// artar (§12): dekoratif bir değişiklik değil.
+  ActivityOutcome? answerChildMoveBack(bool accept) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (AdultChildSupport.pendingMoveBack(current) == null) return null;
+    final ({GameState state, String text}) sonuc =
+        AdultChildSupport.answerMoveBack(current, accept);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
   }
 
   // =================================================================

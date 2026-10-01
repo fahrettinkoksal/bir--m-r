@@ -3,6 +3,8 @@ import '../interaction/parenthood.dart';
 import '../models/game_state.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
+import '../models/wealth.dart';
 import 'business_engine.dart';
 import 'investment_engine.dart';
 import 'housing.dart';
@@ -132,6 +134,35 @@ abstract final class LivingCosts {
   static const CostItem prototypeOnlyChildCost =
       CostItem(label: 'Çocuk gideri', base: 72000, incomeShare: 0.03);
 
+  /// prototypeOnly: eve geri dönen **yetişkin** çocuğun yıllık gideri
+  /// (Paket AP §12).
+  ///
+  /// Bakılan küçük çocuktan ayrı ve daha düşük: yetişkin çocuk kendi
+  /// masrafının bir kısmını karşılar, ama fatura, yemek ve ısınma
+  /// büyür. §12 "bedava dekoratif hane değişimi olmasın" dedi: eve
+  /// dönüş gerçek bir hane kararıysa gideri de gerçek olmalı.
+  ///
+  /// Çalışan yetişkin çocuk bu kalemi **doğurmaz**: kendi kazancıyla
+  /// katkı verdiği varsayılır. Yani asıl yük işsiz çocukta.
+  static const CostItem prototypeOnlyAdultChildCost =
+      CostItem(label: 'Evdeki yetişkin çocuk', base: 42000, incomeShare: 0.01);
+
+  /// prototypeOnly: "yetişkin" sayılan yaş.
+  static const int prototypeOnlyAdultChildAge = 18;
+
+  /// Hanede yaşayan, **çalışmayan** yetişkin çocuklar.
+  ///
+  /// Gerçek kişi kayıtlarından sayılır; uydurma bir sayaç tutulmaz
+  /// (D-038).
+  static List<Person> adultChildrenAtHome(GameState state) => state.people
+      .where((Person p) =>
+          p.relation == RelationType.cocuk &&
+          p.isAlive &&
+          p.inPlayerHousehold &&
+          p.age >= prototypeOnlyAdultChildAge &&
+          p.employment != EmploymentStatus.calisiyor)
+      .toList(growable: false);
+
   /// Oyuncu **ailesinin** yanında mı yaşıyor?
   ///
   /// Eş ve çocuklar sayılmaz: onlarla kurulan hane oyuncunun kendi
@@ -184,6 +215,7 @@ abstract final class LivingCosts {
     final LivingSituation durum = situationOf(state);
     final int gelir = yearlyIncome(state);
     final int cocukSayisi = Parenthood.dependentChildren(state).length;
+    final int yetiskinEvde = adultChildrenAtHome(state).length;
     // Geliri olmayan ve ailesinin yanında yaşayanın yükünü aile taşır
     // (D-123).
     final List<CostItem> kalemler =
@@ -202,6 +234,16 @@ abstract final class LivingCosts {
                 ? prototypeOnlyChildCost.label
                 : '${prototypeOnlyChildCost.label} ($cocukSayisi çocuk)',
             amount: prototypeOnlyChildCost.amountFor(gelir) * cocukSayisi,
+          ),
+        // Paket AP §12: eve geri dönen yetişkin çocuk.
+        if (yetiskinEvde > 0)
+          (
+            label: yetiskinEvde == 1
+                ? prototypeOnlyAdultChildCost.label
+                : '${prototypeOnlyAdultChildCost.label} '
+                    '($yetiskinEvde kişi)',
+            amount:
+                prototypeOnlyAdultChildCost.amountFor(gelir) * yetiskinEvde,
           ),
         // Araç giderleri (D-148): sahip olunan her motorlu araç için
         // zorunlu trafik sigortası, kasko ve motorlu taşıtlar vergisi.
