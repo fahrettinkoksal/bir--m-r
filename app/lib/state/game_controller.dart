@@ -36,6 +36,7 @@ import '../domain/social/media_opportunities.dart';
 import '../domain/family/adult_child_support.dart';
 import '../domain/family/child_advice.dart';
 import '../domain/family/child_school_issue.dart';
+import '../domain/family/in_law_relations.dart';
 import '../domain/models/family_issue.dart';
 import '../domain/generation/parent_divorce.dart';
 import '../domain/interaction/elder_care.dart';
@@ -483,6 +484,32 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return false;
     return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §27 — eş ile kendi ailen arasında kalmak
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen aile çatışması; yoksa `null`.
+  FamilyIssue? pendingInLawConflict() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return InLawRelations.pendingConflict(current);
+  }
+
+  /// Oyuncu çatışmada taraf tuttu ya da tutmadı.
+  ///
+  /// Üç cevabın hepsi bir şeye mal olur; bedava seçenek yok (§27).
+  ActivityOutcome? resolveInLawConflict(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (!InLawRelations.isConflictPending(current)) return null;
+    final ({GameState state, String text}) sonuc =
+        InLawRelations.resolveConflict(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
   }
 
   // =================================================================

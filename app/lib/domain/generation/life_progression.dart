@@ -8,6 +8,7 @@ import '../combat/sport_school_conflict.dart';
 import '../family/adult_child_support.dart';
 import '../family/child_advice.dart';
 import '../family/child_school_issue.dart';
+import '../family/in_law_relations.dart';
 import '../family/family_mood.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
@@ -830,6 +831,29 @@ class LifeProgression {
     if (paraIstegi.notice != null) {
       afterDeaths =
           Notices.enqueue(afterDeaths, <PendingNotice>[paraIstegi.notice!]);
+    }
+
+    // --- Paket AP §26-§27: kayın aile ve gelin/damat -----------------
+    //
+    // Olay havuzu bilinçli olarak dengeli: "kayınvalide = sürekli
+    // sorun" stereotipi yok (§26). Çatışma ise oyuncuya bir karar
+    // bırakır ve üç cevabın hepsi bir şeye mal olur (§27).
+    final ({GameState state, PendingNotice? notice, String? logText})
+        kayinOlayi = InLawRelations.maybeEvent(afterDeaths, newAge, _rng);
+    afterDeaths = kayinOlayi.state;
+    if (kayinOlayi.notice != null) {
+      afterDeaths =
+          Notices.enqueue(afterDeaths, <PendingNotice>[kayinOlayi.notice!]);
+    }
+
+    final ({GameState state, PendingNotice? notice}) kayinCatismasi =
+        InLawRelations.maybeConflict(afterDeaths, newAge, _rng);
+    afterDeaths = kayinCatismasi.state;
+    if (kayinCatismasi.notice != null) {
+      afterDeaths = Notices.enqueue(
+        afterDeaths,
+        <PendingNotice>[kayinCatismasi.notice!],
+      );
     }
 
     // --- Paket AP §42-§46: ailenin oyuncuya dokunan tarafı -----------

@@ -119,6 +119,25 @@ abstract final class Grandchildren {
       second: null,
     );
 
+    // --- Paket AP §49: torunun soy bağı ------------------------------
+    //
+    // Paket AO lineage modelini kurmuştu (`motherId` / `fatherId`) ama
+    // torun doğarken o alanlar boş kalıyordu: torunun yalnızca
+    // `development.otherParentId` içinde bir ebeveyni vardı.
+    //
+    // Paket AP'de gelin/damat gerçek bir kişi oldu, yani torunun **iki**
+    // gerçek ebeveyni var ve ikisi de kayıtta duruyor. Burada yeni bir
+    // torun motoru kurulmuyor (§49: "yeni torun motoru kurma"); var olan
+    // motorun eksik bıraktığı iki alan yazılıyor.
+    //
+    // Hangi alan hangisine yazılacağı ebeveynin cinsiyetinden okunuyor;
+    // eş kaydı yoksa yalnızca bilinen taraf yazılır — uydurma bir
+    // ebeveyn kimliği yazılmaz (§53).
+    final String? esKimligi = child.development?.spousePersonId;
+    final bool ebeveynKadin = child.gender == Gender.kadin;
+    final String? anneId = ebeveynKadin ? child.id : esKimligi;
+    final String? babaId = ebeveynKadin ? esKimligi : child.id;
+
     return Person(
       id: id,
       firstName: rng.pick(
@@ -129,6 +148,8 @@ abstract final class Grandchildren {
       relation: childRelation,
       age: 0,
       isAlive: true,
+      motherId: anneId,
+      fatherId: babaId,
       // Torun oyuncunun hanesinde yaşamaz; kendi ailesiyle büyür.
       inPlayerHousehold: false,
       employment: EmploymentStatus.cocuk,
