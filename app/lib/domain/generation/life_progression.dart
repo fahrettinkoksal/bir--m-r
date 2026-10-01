@@ -5,7 +5,9 @@ import '../career/craft_mastery.dart';
 import '../career/career_progress.dart';
 import '../combat/combat_career_engine.dart';
 import '../combat/sport_school_conflict.dart';
+import '../family/child_advice.dart';
 import '../family/child_school_issue.dart';
+import '../family/family_mood.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
 import '../life/life_goals.dart';
@@ -159,8 +161,16 @@ class LifeProgression {
           if (!person.isAlive || !kendiHayati) {
             return person;
           }
+          // Paket AP §41: oyuncunun verdiği tavsiye kişinin **kendi**
+          // kararlarının ihtimalini kaydırır. Tavsiye yoksa pay 0'dır
+          // ve hiçbir şey değişmez; ek zar atılmadığı için zar sırası
+          // da kaymaz.
           final ({Person person, List<String> news}) sonuc =
-              ChildProgression.advance(person, _rng);
+              ChildProgression.advance(
+            person,
+            _rng,
+            adviceBoost: ChildAdvice.boostFor(state, person),
+          );
           cocukHaberleri.addAll(sonuc.news);
           return sonuc.person;
         })
@@ -799,6 +809,22 @@ class LifeProgression {
     }
     if (basari.notice != null) {
       afterDeaths = Notices.enqueue(afterDeaths, <PendingNotice>[basari.notice!]);
+    }
+
+    // --- Paket AP §42-§46: ailenin oyuncuya dokunan tarafı -----------
+    //
+    // Gurur ve endişe **o yıl gerçekten olan** bir şeyden doğar ve
+    // soğuma süresine tabidir: dört yıl süren bir mesele dört kez
+    // mutluluk düşürmez. Yakınlık ve mesafe etkinin büyüklüğünü
+    // değiştirir, varlığını değil.
+    //
+    // Okul bloğundan **sonra** çalışıyor: o yılın başarısı ve o yıl
+    // konuşulan mesele artık kayda geçmiş durumda.
+    final ({GameState state, List<String> logTexts}) aileDuygusu =
+        FamilyMood.advanceYear(afterDeaths, newAge);
+    afterDeaths = aileDuygusu.state;
+    for (final String satir in aileDuygusu.logTexts) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
     }
 
     // Anne ve baba ayrılabilir (Paket AO §1-§6). Boşanma **önce** işlenir:

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../generation/random_util.dart';
+import 'family_mood.dart';
 import '../models/family_drama.dart';
 import '../models/family_issue.dart';
 import '../models/game_state.dart';
@@ -435,8 +436,11 @@ abstract final class ChildSchoolIssue {
   ///
   /// Yeni bir save alanı açmak gerekmedi: `lastInteractionAge` zaten
   /// "bu kişiyle bu şey en son hangi yıl oldu" sorusunu tutuyor.
+  ///
+  /// Anahtar `FamilyMood` ile **paylaşılıyor**: gurur etkisi de aynı
+  /// kaydı okuyor, iki yerde iki gerçeklik oluşmasın.
   static String _achievementKey(String personId) =>
-      'cocuk-basari:$personId';
+      FamilyMood.achievementKey(personId);
 
   static bool _achievementOffCooldown(
     GameState state,
@@ -474,16 +478,18 @@ abstract final class ChildSchoolIssue {
         intelligence.clamp(-prototypeOnlyMaxStatStep, prototypeOnlyMaxStatStep);
     final int mutluluk =
         happiness.clamp(-prototypeOnlyMaxStatStep, prototypeOnlyMaxStatStep);
+    // Artış `Stats.gain` üzerinden geçiyor: oyunun azalan verim kuralı
+    // tek yerde duruyor ve `stat_gain_test` bunu kalıcı olarak
+    // denetliyor. İlk yazımda doğrudan toplama yapılmıştı; o testin
+    // yakaladığı gerçek bir kural ihlaliydi.
     final List<Person> yeni = <Person>[
       for (final Person p in state.people)
         if (p.id == personId && p.development != null)
           p.copyWith(
             development: p.development!.copyWith(
-              stats: p.development!.stats.copyWith(
-                intelligence:
-                    (p.development!.stats.intelligence + zeka).clamp(0, 100),
-                happiness:
-                    (p.development!.stats.happiness + mutluluk).clamp(0, 100),
+              stats: p.development!.stats.gain(
+                intelligence: zeka,
+                happiness: mutluluk,
               ),
             ),
           )

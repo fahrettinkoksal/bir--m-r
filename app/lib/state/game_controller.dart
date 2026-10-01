@@ -33,6 +33,7 @@ import '../data/finger_catalog.dart';
 import '../domain/models/wealth.dart';
 import '../data/media_catalog.dart';
 import '../domain/social/media_opportunities.dart';
+import '../domain/family/child_advice.dart';
 import '../domain/family/child_school_issue.dart';
 import '../domain/models/family_issue.dart';
 import '../domain/generation/parent_divorce.dart';
@@ -481,6 +482,37 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return false;
     return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §40-§41 — yetişkin çocuğa akıl vermek
+  // =================================================================
+
+  /// Bu çocuğa akıl verilebilir mi; verilemiyorsa gerekçesi (D-095).
+  String? childAdviceBlockReason(String personId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return ChildAdvice.blockReason(current, personId);
+  }
+
+  /// Oyuncu çocuğuyla oturup hayatı konuşur.
+  ///
+  /// Sonuç söylenmez: karar çocuğun kendisinde kalır (§1, §40). Tavsiye
+  /// yalnızca sonraki yılların ihtimalini biraz kaydırır ve üç yılda
+  /// söner.
+  ActivityOutcome? adviseChild(String personId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final String? engel = ChildAdvice.blockReason(current, personId);
+    if (engel != null) {
+      return ActivityOutcome(applied: false, text: engel);
+    }
+    final ({GameState state, String text}) sonuc =
+        ChildAdvice.advise(current, personId);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
   }
 
   // =================================================================

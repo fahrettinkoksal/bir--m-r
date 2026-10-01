@@ -169,10 +169,18 @@ abstract final class ChildProgression {
   /// [person] yaşı **zaten artırılmış** olarak verilir. Dönen `news`
   /// satırları oyuncunun hayat günlüğüne yazılabilecek aile haberleridir;
   /// aynı satırlar kişinin kendi geçmişine de işlenir.
+  /// [adviceBoost] oyuncunun o kişiye verdiği tavsiyenin ihtimal payı
+  /// (Paket AP §1, §41). Tavsiye yoksa **tam olarak 0**'dır ve hiçbir
+  /// ek zar atılmaz; oyunun zar sırası kaymaz.
+  ///
+  /// Pay yalnızca kişinin **kendi** kararlarının ihtimalini kaydırır:
+  /// üniversiteye gitme eğilimi ve iyi işe yönelme eğilimi. Kararı yine
+  /// kişinin kendi zarı verir (§1: çocuk oyuncunun kuklası değildir).
   static ({Person person, List<String> news}) advance(
     Person person,
-    Random rng,
-  ) {
+    Random rng, {
+    double adviceBoost = 0,
+  }) {
     if (!person.isAlive) return (person: person, news: const <String>[]);
 
     final int age = person.age;
@@ -272,7 +280,8 @@ abstract final class ChildProgression {
         age <= prototypeOnlyUniversityDecisionAge) {
       // Üniversiteye gitme eğilimi zekâyla artar ama garanti değildir.
       final double sans =
-          ((dev.stats.intelligence - 35) / 100).clamp(0.05, 0.7);
+          ((dev.stats.intelligence - 35) / 100 + adviceBoost)
+              .clamp(0.05, 0.75);
       if (rng.chance(sans)) {
         // Bölüm **o yıl gerçekten seçilir**; sonradan uydurulmaz.
         final UniversityProgram bolum = _pickProgram(dev, rng);
@@ -318,7 +327,7 @@ abstract final class ChildProgression {
         !dev.isStudent &&
         !dev.isUniversityStudent &&
         rng.chance(prototypeOnlyJobChance)) {
-      final JobType? bulunan = _findJob(dev, age, rng);
+      final JobType? bulunan = _findJob(dev, age, rng, adviceBoost);
       if (bulunan != null) {
         dev = dev.copyWith(jobId: bulunan.id, jobStartedAtAge: age);
         kaydet('$ad ${trLower(bulunan.name)} olarak işe başladı.');
@@ -430,7 +439,12 @@ abstract final class ChildProgression {
   }
 
   /// Koşullarına uyan işlerden birini seçer; uygun iş yoksa `null`.
-  static JobType? _findJob(PersonDevelopment dev, int age, Random rng) {
+  static JobType? _findJob(
+    PersonDevelopment dev,
+    int age,
+    Random rng, [
+    double adviceBoost = 0,
+  ]) {
     final List<JobType> uygun = kJobCatalog.where((JobType job) {
       if (age < job.minAge) return false;
       // Dövüş sanatı eğitmenliği oyuncunun yıllarca çalışmasıyla açılır;
@@ -452,7 +466,9 @@ abstract final class ChildProgression {
     final List<JobType> sirali = <JobType>[...uygun]
       ..sort((JobType a, JobType b) => b.yearlySalary.compareTo(a.yearlySalary));
     // Zekâsı yüksek kişi daha iyi işe yönelir; yine de garanti değildir.
-    if (rng.chance((dev.stats.intelligence / 130).clamp(0.1, 0.8))) {
+    if (rng.chance(
+      (dev.stats.intelligence / 130 + adviceBoost).clamp(0.1, 0.85),
+    )) {
       return sirali.first;
     }
     return rng.pick(sirali);
