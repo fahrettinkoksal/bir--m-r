@@ -4,6 +4,7 @@ import '../../data/education_tracks.dart';
 import '../../data/job_catalog.dart';
 import '../../data/university_catalog.dart';
 import 'education.dart';
+import 'npc_marriage.dart';
 import 'stats.dart';
 
 /// Bir kişinin hayatında **gerçekten yaşanmış** bir dönüm noktası.
@@ -62,6 +63,9 @@ class PersonDevelopment {
     this.adopted = false,
     this.marriedAtAge,
     this.spouseName,
+    this.spousePersonId,
+    this.marriageStatus,
+    this.pastMarriages = const <NpcMarriageRecord>[],
   });
 
   /// Kişinin kendi karakter değerleri (D-046 ile doğumda oluşturulur).
@@ -143,12 +147,53 @@ class PersonDevelopment {
   /// kuşak devamında olduğu gibi taşınır.
   final int? marriedAtAge;
 
-  /// Evlendiği kişinin adı. Bu kişi ayrı bir kayıt olarak tutulmaz;
-  /// oyuncunun hayatına giren yalnızca adıdır.
+  /// Evlendiği kişinin adı.
+  ///
+  /// Paket AP'ye kadar oyuncunun hayatına giren **yalnızca bu ad**dı.
+  /// Artık yeni evliliklerde eş gerçek bir [Person] olarak kayda giriyor
+  /// ([spousePersonId]) ve bu alan onun adını taşıyor. Alan korundu
+  /// çünkü Paket AP öncesinde kurulmuş kayıtlarda elimizdeki tek bilgi
+  /// bu (§17) — o kayıtlara geriye dönük NPC uydurulmaz.
   final String? spouseName;
 
-  /// Evli mi?
-  bool get isMarried => marriedAtAge != null;
+  /// Eşin kalıcı kişi kimliği; eski kayıtlarda `null` (§17).
+  final String? spousePersonId;
+
+  /// Bu kişinin **şu anki** evlilik durumu.
+  ///
+  /// `null` iki şey demek olabilir: hiç evlenmemiş, **ya da** Paket AP
+  /// öncesinde kurulmuş bir kayıt. İkisini [marriedAtAge] ayırır ve
+  /// [isMarried] bu ayrımı yapar.
+  final NpcMarriageStatus? marriageStatus;
+
+  /// Bitmiş evlilikler; en eskisi başta. Kayıt silinmez (§18).
+  final List<NpcMarriageRecord> pastMarriages;
+
+  /// Şu anda yürüyen bir evliliği var mı?
+  ///
+  /// **Paket AP'de düzeltilen kabul:** eskiden `marriedAtAge != null`
+  /// yeterliydi, yani bir kez evlenen kişi sonsuza kadar evli sayılıyordu.
+  /// Artık çocuk boşanabiliyor ve dul kalabiliyor (§18-§19), o yüzden
+  /// ölçü durumun kendisi.
+  ///
+  /// Eski kayıt uyumu: durumu yazılmamış ama evlilik yaşı olan kayıt
+  /// **evli** sayılır — Paket AP öncesinde boşanma yolu hiç yoktu.
+  bool get isMarried => marriageStatus == null
+      ? marriedAtAge != null
+      : marriageStatus == NpcMarriageStatus.evli;
+
+  /// Boşanmış mı? (Yürüyen evliliği yok ve geçmişinde boşanma var.)
+  bool get isDivorced => marriageStatus == NpcMarriageStatus.bosandi;
+
+  /// Eşini kaybetmiş mi?
+  bool get isWidowed => marriageStatus == NpcMarriageStatus.dul;
+
+  /// Hiç evlenmiş mi? (Yürüyen ya da geçmiş.)
+  bool get hasEverMarried =>
+      marriedAtAge != null || pastMarriages.isNotEmpty;
+
+  /// Yeniden evlenebilir mi? (§23 — yürüyen evlilik varken olmaz.)
+  bool get canRemarry => !isMarried && hasEverMarried;
 
   bool get isStudent => grade != null;
   bool get isUniversityStudent => university == UniversityStatus.okuyor;
@@ -208,6 +253,9 @@ class PersonDevelopment {
     bool? adopted,
     Object? marriedAtAge = _unsetDev,
     Object? spouseName = _unsetDev,
+    Object? spousePersonId = _unsetDev,
+    Object? marriageStatus = _unsetDev,
+    List<NpcMarriageRecord>? pastMarriages,
   }) {
     return PersonDevelopment(
       stats: stats ?? this.stats,
@@ -244,6 +292,13 @@ class PersonDevelopment {
           : marriedAtAge as int?,
       spouseName:
           spouseName == _unsetDev ? this.spouseName : spouseName as String?,
+      spousePersonId: spousePersonId == _unsetDev
+          ? this.spousePersonId
+          : spousePersonId as String?,
+      marriageStatus: marriageStatus == _unsetDev
+          ? this.marriageStatus
+          : marriageStatus as NpcMarriageStatus?,
+      pastMarriages: pastMarriages ?? this.pastMarriages,
     );
   }
 

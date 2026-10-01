@@ -49,6 +49,11 @@ abstract final class Kinship {
       case RelationType.uveyCocuk:
       case RelationType.kayinvalide:
       case RelationType.kayinpeder:
+      // Paket AP §67: gelin/damat ve **eski** gelin/damat romantik
+      // havuza girmez. "Eski gelin artık akraba değil, flört
+      // uygulamasında çıksın" kabul edilebilir bir şey değil.
+      case RelationType.cocugunEsi:
+      case RelationType.eskiCocugunEsi:
         return true;
       // Eş ve eski eş zaten romantik bağın kendisi; "yeni ilişki
       // havuzuna" alınmazlar ama bu bir akrabalık yasağı değildir, o

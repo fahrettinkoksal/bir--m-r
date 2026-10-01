@@ -96,7 +96,24 @@ enum RelationType {
   // Kayın aile (§21): eşin yaşayan ebeveynleri. Boşanınca kayıt kalır,
   // yalnızca gündelik erişim kapanır.
   kayinvalide,
-  kayinpeder;
+  kayinpeder,
+
+  // --- Paket AP: aile dramaları ---------------------------------------
+  //
+  // Listenin **sonuna** eklendi; enum sırası bozulmadı.
+
+  // Çocuğun eşi (§15): gelin ya da damat. Paket AP'ye kadar bu kişi
+  // yalnızca `PersonDevelopment.spouseName` içinde bir **isim**di. Artık
+  // gerçek bir kişi: onunla vakit geçirilir, torunun biyolojik ebeveyni
+  // olabilir ve kuşak devamında yeni oyuncunun **eşi** olur (§62).
+  //
+  // İçeride cinsiyetten bağımsız; ekrandaki "Gelin"/"Damat" ayrımı
+  // etiket üretilirken yapılır.
+  cocugunEsi,
+
+  // Çocuğun eski eşi (§21): çocuk boşandığında kayıt **silinmez**.
+  // Torunun biyolojik ebeveyniyse soy bağı aynen korunur (§22).
+  eskiCocugunEsi;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -126,6 +143,11 @@ enum RelationType {
         return RelationGroup.esinAilesi;
       case RelationType.torun:
       case RelationType.yegen:
+      // Paket AP §15: gelin/damat oyuncunun geniş ailesidir. Eski
+      // gelin/damat da kayıtta kalır; ilişkiler ekranı onu "Akrabalar"
+      // listesine koymaz, çocuğun kartından görünür (§57).
+      case RelationType.cocugunEsi:
+      case RelationType.eskiCocugunEsi:
         return RelationGroup.genis;
       case RelationType.anneanne:
       case RelationType.babaanne:
@@ -174,6 +196,10 @@ enum RelationType {
       // dışlanmaz.
       this != RelationType.uveyKardes &&
       this != RelationType.uveyCocuk &&
+      // Paket AP §15: gelin/damat geniş ailede listelenir ama **kan bağı
+      // değildir**. Miras ve kalıtım kuralları onlara işlemez (§66).
+      this != RelationType.cocugunEsi &&
+      this != RelationType.eskiCocugunEsi &&
       (group == RelationGroup.cekirdek || group == RelationGroup.genis);
 
   /// Birlikte hane kurulan bağ mı? (Eş ve çocuklar.)
@@ -283,6 +309,10 @@ String relationLabel({
       return 'Kayınvalide';
     case RelationType.kayinpeder:
       return 'Kayınpeder';
+    case RelationType.cocugunEsi:
+      return gender == Gender.kadin ? 'Gelin' : 'Damat';
+    case RelationType.eskiCocugunEsi:
+      return gender == Gender.kadin ? 'Eski gelin' : 'Eski damat';
   }
 }
 
@@ -375,5 +405,9 @@ String relationPossessive({
       return 'Kayınvaliden';
     case RelationType.kayinpeder:
       return 'Kayınpederin';
+    case RelationType.cocugunEsi:
+      return gender == Gender.kadin ? 'Gelinin' : 'Damadın';
+    case RelationType.eskiCocugunEsi:
+      return gender == Gender.kadin ? 'Eski gelinin' : 'Eski damadın';
   }
 }

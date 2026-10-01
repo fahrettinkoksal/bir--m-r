@@ -165,6 +165,23 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
         InteractionKind.hediyeVer,
       };
 
+    // --- Paket AP: aile dramaları ------------------------------------
+
+    // Gelin / damat (§24): vakit geçirilir, sohbet edilir, hediye
+    // verilir. **Para/hediye istemek açılmaz** — çocuğunun eşinden para
+    // istemek bu sürümün tasarladığı bir ilişki değil.
+    //
+    // Bağ otomatik iyi ya da otomatik kötü değildir (§24): açılan kapı
+    // yakınlığı hazır vermez, zamanla kurulur.
+    case RelationType.cocugunEsi:
+      return _arkadas;
+
+    // Çocuk boşandıktan sonra eski gelin/damat ile gündelik etkileşim
+    // kapanır (§21): kayıt kalır, kapı kapanır. Torunun ebeveyniyse soy
+    // bağı yine korunur ama bu bir etkileşim hakkı değil.
+    case RelationType.eskiCocugunEsi:
+      return _yok;
+
     case RelationType.eskiSevgili:
       return _yok;
 

@@ -118,6 +118,9 @@ BirOmurAccent _accentFor(Person person) {
     // Eşin ailesi kendi rengiyle ayrışır (Paket AO §38).
     case RelationType.kayinvalide:
     case RelationType.kayinpeder:
+    // Paket AP §15: gelin/damat da evlilikle gelen aile; aynı renk.
+    case RelationType.cocugunEsi:
+    case RelationType.eskiCocugunEsi:
       return BirOmurAccents.mor;
     case RelationType.arkadas:
     case RelationType.sinifArkadasi:

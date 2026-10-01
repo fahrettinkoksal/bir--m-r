@@ -55,6 +55,7 @@ import '../../domain/models/pending_interview.dart';
 import '../../domain/models/pending_license_exam.dart';
 import '../../domain/models/marriage.dart';
 import '../../domain/models/person.dart';
+import '../../domain/models/npc_marriage.dart';
 import '../../domain/models/person_development.dart';
 import '../../domain/models/playing_card.dart';
 import '../../domain/models/celebrity_contact.dart';
@@ -948,6 +949,21 @@ Map<String, Object?> _encodeDevelopment(PersonDevelopment d) =>
       'adopted': d.adopted,
       'marriedAtAge': d.marriedAtAge,
       'spouseName': d.spouseName,
+      // Paket AP §14-§18, §61: NPC evliliği artık gerçek bir eş kaydına
+      // bağlı ve geçmişi var. Eski kayıtlarda bu üç alan yok; okuma
+      // tarafı onları `null` / boş liste olarak karşılıyor.
+      'spousePersonId': d.spousePersonId,
+      'marriageStatus': d.marriageStatus?.name,
+      'pastMarriages': <Map<String, Object?>>[
+        for (final NpcMarriageRecord m in d.pastMarriages)
+          <String, Object?>{
+            'spouseName': m.spouseName,
+            'spousePersonId': m.spousePersonId,
+            'marriedAtAge': m.marriedAtAge,
+            'endedAtAge': m.endedAtAge,
+            'status': m.status.name,
+          },
+      ],
       'milestones': <Map<String, Object?>>[
         for (final LifeMilestone m in d.milestones)
           <String, Object?>{'age': m.age, 'text': m.text},
@@ -997,6 +1013,34 @@ PersonDevelopment _decodeDevelopment(Map<String, Object?> json) {
     adopted: json['adopted'] == true,
     marriedAtAge: _intOrNull(json, 'marriedAtAge'),
     spouseName: _stringOrNull(json, 'spouseName'),
+    // Paket AP §17: eski kayıtta bu alanlar yok. Geriye dönük sahte bir
+    // eş Person'ı **uydurulmaz**; kayıt isimle yaşamaya devam eder ve
+    // `isMarried` eski davranışı korur (durum yoksa evlilik yaşına
+    // bakar).
+    spousePersonId: _stringOrNull(json, 'spousePersonId'),
+    marriageStatus: _enumByNameOrNull(
+      NpcMarriageStatus.values,
+      _stringOrNull(json, 'marriageStatus'),
+      'development.marriageStatus',
+    ),
+    pastMarriages: List<NpcMarriageRecord>.unmodifiable(<NpcMarriageRecord>[
+      for (final Object? e in _optionalRawList(json, 'pastMarriages'))
+        NpcMarriageRecord(
+          spouseName: _string(_asMap(e, 'pastMarriage'), 'spouseName'),
+          spousePersonId:
+              _stringOrNull(_asMap(e, 'pastMarriage'), 'spousePersonId'),
+          marriedAtAge: _int(_asMap(e, 'pastMarriage'), 'marriedAtAge'),
+          endedAtAge: _intOrNull(_asMap(e, 'pastMarriage'), 'endedAtAge'),
+          // Durumu okunamayan geçmiş kayıt **boşanma** sayılır: kaydın
+          // geçmişe taşınmış olması zaten bittiğini söylüyor.
+          status: _enumByNameOrNull(
+                NpcMarriageStatus.values,
+                _stringOrNull(_asMap(e, 'pastMarriage'), 'status'),
+                'pastMarriage.status',
+              ) ??
+              NpcMarriageStatus.bosandi,
+        ),
+    ]),
     milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
       for (final Object? e in _optionalRawList(json, 'milestones'))
         LifeMilestone(

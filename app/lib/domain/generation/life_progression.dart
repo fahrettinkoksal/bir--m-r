@@ -170,6 +170,8 @@ class LifeProgression {
     final List<PendingNotice> aileBildirimleri = <PendingNotice>[];
     final List<String> aileHaberleri = <String>[];
     final List<Person> evlilikSonrasi = <Person>[];
+    /// Paket AP §16: bu yıl evlenenlerin **gerçek eş kayıtları**.
+    final List<Person> yeniEsler = <Person>[];
     for (final Person kisi in peopleWithChildren) {
       // Aynı kural iki bağa da işler: kardeş de evlenir (D-158).
       // Paket AO §28: üvey kardeş, yarım kardeş ve üvey çocuk da yetişkin
@@ -182,6 +184,13 @@ class LifeProgression {
         RelationType.yariKardes,
         RelationType.uveyCocuk,
       };
+      // Paket AP §16: eş artık gerçek bir kişi olarak üretiliyor. Durum
+      // veriliyor ki kimlik çakışması denetlenebilsin ve şehir/soyadı
+      // gerçek kayıttan türetilebilsin.
+      //
+      // `people` listesi döngü içinde büyüdüğü için **o anki** hâli
+      // veriliyor: aynı yıl iki çocuk evlenirse ikinci eş, birincinin
+      // kimliğini görebilir ve çakışma oluşmaz.
       final ChildMarriageResult? evlilik = ChildMarriage.maybeMarry(
         child: kisi,
         playerAge: newAge,
@@ -189,17 +198,26 @@ class LifeProgression {
         relation: kendiEvliligiOlanlar.contains(kisi.relation)
             ? kisi.relation
             : RelationType.cocuk,
+        state: state.copyWith(
+          people: List<Person>.unmodifiable(<Person>[
+            ...peopleWithChildren,
+            ...evlilikSonrasi,
+            ...yeniEsler,
+          ]),
+        ),
       );
       if (evlilik == null) {
         evlilikSonrasi.add(kisi);
         continue;
       }
       evlilikSonrasi.add(evlilik.person);
+      // Yalnızca metinde kalan eş yok: gerçek kayıt listeye giriyor.
+      if (evlilik.spouse != null) yeniEsler.add(evlilik.spouse!);
       aileBildirimleri.add(evlilik.notice);
       aileHaberleri.add(evlilik.logText);
     }
     final List<Person> evlilikliKisiler =
-        List<Person>.unmodifiable(evlilikSonrasi);
+        List<Person>.unmodifiable(<Person>[...evlilikSonrasi, ...yeniEsler]);
 
     // Yetişkin çocukların kendi çocukları olabilir (Paket 12). Torun
     // gerçek bir kişi kaydıdır ve doğduğu yıl oluşturulur.
