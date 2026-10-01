@@ -16,11 +16,23 @@ class PersonCard extends StatelessWidget {
     required this.person,
     required this.playerAge,
     required this.onTap,
+    this.statusLine,
+    this.spouseLine,
   });
 
   final Person person;
   final int playerAge;
   final VoidCallback onTap;
+
+  /// Paket AP §59: süren aile meselesini ya da küslüğü anlatan tek
+  /// satır. İç sayı göstermez; yoksa `null` ve kart eskisi gibi görünür.
+  final String? statusLine;
+
+  /// Paket AP §57: çocuğun eşi — "Eşi: Ahmet" gibi tek satır.
+  ///
+  /// Gelin/damat artık gerçek bir kişi olduğu için çocuğun kartında
+  /// görünmesi gerekiyordu; eskiden hiçbir yerde yazmıyordu.
+  final String? spouseLine;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +81,30 @@ class PersonCard extends StatelessWidget {
                       const _HouseholdBadge(),
                   ],
                 ),
+                // Paket AP §57: çocuğun eşi.
+                if (spouseLine != null) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(
+                    spouseLine!,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                // Paket AP §59-§60: süren mesele ya da küslük.
+                if (statusLine != null) ...<Widget>[
+                  const SizedBox(height: 3),
+                  Text(
+                    statusLine!,
+                    key: const Key('kisi_karti_aile_durumu'),
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: BirOmurAccents.gul.deep,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

@@ -4,7 +4,11 @@ import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../data/pet_catalog.dart';
 import '../../../domain/pets/pet_care.dart';
+import '../../../domain/family/family_decision.dart';
 import '../../../domain/generation/parent_divorce.dart';
+import '../../../domain/activities/activity_engine.dart';
+import '../../../domain/models/family_issue.dart';
+import '../../../domain/models/person_development.dart';
 import '../../../domain/models/relation.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
@@ -241,6 +245,11 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             PersonCard(
               person: person,
               playerAge: playerAge,
+              // Paket AP §57, §59-§60: çocuğun eşi ve süren aile
+              // meselesi kartın üzerinde görünür. İkisi de gerçek
+              // kayıttan okunur; yoksa satır hiç çıkmaz.
+              spouseLine: _esSatiri(person),
+              statusLine: GameScope.of(context).familyStatusLine(person),
               onTap: () => _openPerson(person.id),
             ),
             const SizedBox(height: 10),
@@ -296,6 +305,29 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             baba: baba,
             onSecim: (DivorceHouseholdChoice secim) {
               GameScope.of(context).chooseDivorceHousehold(secim);
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 14),
+        ],
+        // --- BEKLEYEN AİLE KARARI (Paket AP §56) --------------------
+        //
+        // Paket AP yedi aile kararı getirdi. Hepsi tek bir kart olarak
+        // soruluyor; motorların her biri için ayrı kart yazılmadı.
+        //
+        // Paket AO'da üç motorun hiçbir ekrandan ulaşılamadığı
+        // görülmüştü; kapı bu yüzden motorlarla aynı pakette açıldı.
+        if (_aileKarari(context) != null) ...<Widget>[
+          _AileKarariKarti(
+            karar: _aileKarari(context)!,
+            onCevap: (FamilyIssueResponse cevap) {
+              final ActivityOutcome? sonuc =
+                  GameScope.of(context).answerFamilyDecision(cevap);
+              if (sonuc != null && !sonuc.applied) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(sonuc.text)),
+                );
+              }
               setState(() {});
             },
           ),
@@ -533,6 +565,88 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
 /// İki ebeveyn de listede kalır; bu soru yalnızca oyuncunun hangi
 /// hanede yaşayacağını belirler. Ebeveynlerden biri kayıtta yoksa soru
 /// da çıkmaz — olmayan kişi seçenek olarak gösterilmez.
+/// Bekleyen aile kararı; yoksa `null`.
+FamilyDecision? _aileKarari(BuildContext context) =>
+    GameScope.of(context).pendingFamilyDecision();
+
+/// Kişinin eşini anlatan satır; eşi yoksa `null` (Paket AP §57).
+///
+/// Ad **gerçek kayıttan** gelir; uydurma isim yazılmaz (§58).
+String? _esSatiri(Person person) {
+  final PersonDevelopment? gelisim = person.development;
+  if (gelisim == null) return null;
+  final String? ad = gelisim.spouseName;
+  if (ad == null || ad.isEmpty) return null;
+  if (gelisim.isMarried) return 'Eşi: $ad';
+  if (gelisim.isWidowed) return 'Eşini kaybetti';
+  if (gelisim.isDivorced) return 'Boşandı';
+  return null;
+}
+
+/// Bekleyen aile kararını soran kart (Paket AP §56-§58).
+///
+/// Metinler doğal Türkçe; iç sayı göstermez. Seçilemeyen seçenek
+/// **görünür** ama pasiftir ve gerekçesi altında yazar (D-095).
+class _AileKarariKarti extends StatelessWidget {
+  const _AileKarariKarti({required this.karar, required this.onCevap});
+
+  final FamilyDecision karar;
+  final ValueChanged<FamilyIssueResponse> onCevap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+      key: const Key('aile_karari_karti'),
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(Comic.yaricapBuyuk),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            karar.title,
+            style: theme.textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            karar.text,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 10),
+          for (final FamilyDecisionOption secenek in karar.options) ...<Widget>[
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                key: Key('aile_karari_${secenek.response.name}'),
+                onPressed:
+                    secenek.isAllowed ? () => onCevap(secenek.response) : null,
+                child: Text(secenek.label),
+              ),
+            ),
+            if (!secenek.isAllowed) ...<Widget>[
+              const SizedBox(height: 2),
+              Text(
+                secenek.blockedReason!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _HaneSecimiKarti extends StatelessWidget {
   const _HaneSecimiKarti({
     required this.anne,

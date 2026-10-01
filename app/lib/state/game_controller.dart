@@ -36,6 +36,7 @@ import '../domain/social/media_opportunities.dart';
 import '../domain/family/adult_child_support.dart';
 import '../domain/family/child_advice.dart';
 import '../domain/family/child_school_issue.dart';
+import '../domain/family/family_decision.dart';
 import '../domain/family/family_disputes.dart';
 import '../domain/family/in_law_relations.dart';
 import '../domain/models/family_issue.dart';
@@ -485,6 +486,50 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (current == null) return false;
     return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §56-§60 — bekleyen aile kararı (tek kapı)
+  // =================================================================
+
+  /// Oyuncunun karşısında bekleyen aile kararı; yoksa `null`.
+  ///
+  /// Yedi motorun hepsi tek bir soru olarak okunuyor; ekran yedi ayrı
+  /// kart yazmak zorunda değil.
+  FamilyDecision? pendingFamilyDecision() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDecisions.pending(current);
+  }
+
+  /// Oyuncu bekleyen aile kararını cevapladı.
+  ActivityOutcome? answerFamilyDecision(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final FamilyDecision? karar = FamilyDecisions.pending(current);
+    if (karar == null) return null;
+    final FamilyDecisionOption? secenek = karar.options
+        .where((FamilyDecisionOption o) => o.response == cevap)
+        .firstOrNull;
+    if (secenek != null && !secenek.isAllowed) {
+      return ActivityOutcome(
+        applied: false,
+        text: secenek.blockedReason!,
+      );
+    }
+    final ({GameState state, String text}) sonuc =
+        FamilyDecisions.answer(current, cevap, _random);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Kişi kartında görünecek aile durumu satırı; yoksa `null` (§59).
+  String? familyStatusLine(Person person) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDecisions.statusLineFor(current, person);
   }
 
   // =================================================================
