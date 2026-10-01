@@ -695,6 +695,88 @@ abstract final class FamilyDisputes {
   }
 
   // =================================================================
+  // §33 — aile içinde küslük
+  // =================================================================
+
+  /// prototypeOnly: bu yakınlığın altındaki aile üyesi küs düşebilir.
+  ///
+  /// Düşük tutuldu: §33 "bir tartışma yüzünden aile tamamen kopmasın"
+  /// dedi. Buraya ancak **yıllarca** biriken bir uzaklaşma getirir.
+  static const int prototypeOnlyFalloutBond = 12;
+
+  /// prototypeOnly: küs düşme ihtimali (eşiğin altındaki kişi için).
+  ///
+  /// Garanti değil: eşiğin altına inmek küslük demek değildir.
+  static const double prototypeOnlyFalloutChance = 0.25;
+
+  /// Küs düşebilecek aile üyeleri.
+  ///
+  /// Yalnızca oyuncunun **reddettiği ya da karışmadığı** bir meselesi
+  /// olan yakın: sebepsiz küslük olmaz. Bu, §60'ın "uydurma sebep
+  /// yazma" kuralının diğer yüzü — kayıtta bir sebep yoksa küslük de
+  /// olmaz.
+  static Iterable<Person> falloutCandidates(GameState state) {
+    final Set<String> meseleliKisiler = <String>{
+      for (final FamilyIssue m in state.familyIssues)
+        if (m.response == FamilyIssueResponse.reddetti ||
+            m.response == FamilyIssueResponse.karismadi)
+          m.personId,
+    };
+    const Set<RelationType> yakinlar = <RelationType>{
+      RelationType.cocuk,
+      RelationType.kardes,
+      RelationType.uveyKardes,
+      RelationType.yariKardes,
+      RelationType.anne,
+      RelationType.baba,
+    };
+    return state.people.where((Person p) =>
+        p.isAlive &&
+        !p.isEstranged &&
+        p.bond <= prototypeOnlyFalloutBond &&
+        meseleliKisiler.contains(p.id) &&
+        yakinlar.contains(p.relation));
+  }
+
+  /// Bu yıl bir aile üyesiyle küs düşülür mü?
+  ///
+  /// **Yılda en fazla bir kişi**: aile topluca boşalmaz. Kayıt
+  /// silinmez, bağ türü değişmez; yalnızca küs işareti konur ve Paket
+  /// AO'nun barış kapısı açılır — barışma yine garanti değil (§34).
+  static ({GameState state, PendingNotice? notice}) maybeFamilyFallout(
+    GameState state,
+    int newAge,
+    Random rng,
+  ) {
+    final List<Person> adaylar = falloutCandidates(state).toList();
+    if (adaylar.isEmpty) return (state: state, notice: null);
+    if (!rng.chance(prototypeOnlyFalloutChance)) {
+      return (state: state, notice: null);
+    }
+    final Person kisi = adaylar.first;
+    final String metin = '${kisi.firstName} ile aranız iyice açıldı; '
+        'bir süredir konuşmuyorsunuz.';
+    GameState next = state.copyWith(
+      people: List<Person>.unmodifiable(<Person>[
+        for (final Person p in state.people)
+          if (p.id == kisi.id) p.copyWith(estrangedSinceAge: newAge) else p,
+      ]),
+    );
+    next = _log(next, metin);
+    return (
+      state: next,
+      notice: PendingNotice(
+        id: 'aile-kusluk-${kisi.id}-$newAge',
+        kind: NoticeKind.aileDonum,
+        age: newAge,
+        title: 'Araya soğukluk girdi',
+        text: metin,
+        personId: kisi.id,
+      ),
+    );
+  }
+
+  // =================================================================
   // Yardımcılar
   // =================================================================
 

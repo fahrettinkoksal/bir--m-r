@@ -259,6 +259,42 @@ void main() {
       expect(LivingCosts.adultChildrenAtHome(sonra), isEmpty);
     });
 
+    test('§12: eve dönüş yıllık kuralla hemen geri alınmıyor', () {
+      // Bu test gerçek bir çatışmayı koruyor: `_childrenLeaveHome`
+      // 25 yaşını geçmiş HER çocuğu her yıl haneden çıkarıyor. Dönüş
+      // kaydedilmezse oyuncunun "gelsin" kararı bir yıl sonra
+      // kendiliğinden geri alınıyor ve hane değişimi dekoratif kalıyor.
+      GameState s = donmekIsteyen();
+      s = AdultChildSupport.answerMoveBack(s, true).state;
+      expect(c(s).inPlayerHousehold, isTrue);
+      expect(AdultChildSupport.recentlyReturned(s, c(s)), isTrue);
+
+      // Üretim yolundan üç yıl: çocuk hâlâ hanede.
+      final LifeProgression motor = LifeProgression(Random(5));
+      for (int i = 0; i < 3 && !s.deceased; i++) {
+        s = s.copyWith(pendingEvent: null, pendingCrisis: null);
+        s = motor.advanceOneYear(s);
+        final Person? cocuk = s.personById('cocuk-yetiskin');
+        if (cocuk == null || !cocuk.isAlive) return;
+        // İş bulup kendi isteğiyle çıkmadıysa hanede kalmalı.
+        if (cocuk.development?.isEmployed ?? false) return;
+        expect(cocuk.inPlayerHousehold, isTrue,
+            reason: '${i + 1}. yıl: eve dönüş geri alınmış.');
+      }
+    });
+
+    test('pencere dolunca normal kural yeniden işliyor', () {
+      GameState s = donmekIsteyen();
+      s = AdultChildSupport.answerMoveBack(s, true).state;
+      final GameState cokSonra = s.copyWith(
+        player: s.player.copyWith(
+          age: s.player.age + AdultChildSupport.prototypeOnlyStayYears,
+        ),
+      );
+      expect(AdultChildSupport.recentlyReturned(cokSonra, c(cokSonra)),
+          isFalse);
+    });
+
     test('çalışan yetişkin çocuk evde olsa da gider kalemi doğurmuyor', () {
       final GameState s =
           yetiskinCocukla(hanede: true, isiVar: true, cocukBirikimi: 300000);

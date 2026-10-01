@@ -474,6 +474,147 @@ void main() {
     });
   });
 
+  group('§33 — aile içinde küslük: sebebi olmadan olmaz', () {
+    /// Reddedilmiş bir meselesi olan ve yakınlığı dibe inmiş kardeş.
+    GameState kopmayaYakin({int bag = 5, bool reddedildi = true}) {
+      GameState s = kardesliHayat(bag: bag);
+      s = s.openFamilyIssue(
+        kind: FamilyIssueKind.kardesPara,
+        personId: 'kardes-ap',
+      );
+      s = s.updateFamilyIssue(
+        s.familyIssues.first.id,
+        response: reddedildi
+            ? FamilyIssueResponse.reddetti
+            : FamilyIssueResponse.paraVerdi,
+        status: FamilyIssueStatus.cozuldu,
+        resolvedAtAge: s.player.age,
+      );
+      return s.copyWith(
+        people: List<Person>.unmodifiable(<Person>[
+          for (final Person p in s.people)
+            if (p.id == 'kardes-ap') p.copyWith(bond: bag) else p,
+        ]),
+      );
+    }
+
+    test('sebebi olmayan kişi küs düşmüyor', () {
+      // Yakınlık dibe inmiş ama mesele reddedilmemiş.
+      final GameState s = kopmayaYakin(reddedildi: false);
+      expect(FamilyDisputes.falloutCandidates(s), isEmpty);
+      for (int i = 0; i < 200; i++) {
+        final GameState sonra = FamilyDisputes.maybeFamilyFallout(
+          s,
+          s.player.age,
+          Random(i),
+        ).state;
+        expect(sonra.personById('kardes-ap')!.isEstranged, isFalse);
+      }
+    });
+
+    test('yakınlığı iyi olan kişi küs düşmüyor', () {
+      final GameState s = kopmayaYakin(bag: 70);
+      expect(FamilyDisputes.falloutCandidates(s), isEmpty);
+    });
+
+    test('yıllarca biriken uzaklaşma küslüğe dönüşebiliyor', () {
+      final GameState s = kopmayaYakin();
+      expect(FamilyDisputes.falloutCandidates(s), isNotEmpty);
+      bool oldu = false;
+      bool olmadi = false;
+      for (int i = 0; i < 200; i++) {
+        final GameState sonra = FamilyDisputes.maybeFamilyFallout(
+          s,
+          s.player.age,
+          Random(i),
+        ).state;
+        if (sonra.personById('kardes-ap')!.isEstranged) {
+          oldu = true;
+        } else {
+          olmadi = true;
+        }
+      }
+      expect(oldu, isTrue, reason: 'Küslük hiç olmuyor.');
+      expect(olmadi, isTrue,
+          reason: '§33: eşiğin altına inmek küslük garantisi olmamalı.');
+    });
+
+    test('küs düşen kişi kayıttan silinmiyor, bağ türü değişmiyor', () {
+      final GameState s = kopmayaYakin();
+      for (int i = 0; i < 200; i++) {
+        final GameState sonra = FamilyDisputes.maybeFamilyFallout(
+          s,
+          s.player.age,
+          Random(i),
+        ).state;
+        final Person? kardes = sonra.personById('kardes-ap');
+        if (kardes == null || !kardes.isEstranged) continue;
+        expect(kardes.relation, RelationType.kardes);
+        expect(kardes.estrangedSinceAge, s.player.age);
+        // Barış kapısı açık (Paket AO).
+        expect(
+          FriendshipDepth.makeUpAvailability(sonra, 'kardes-ap').isAllowed,
+          isFalse,
+          reason: 'Aynı yıl barışılamaz; bir yıl geçmeli.',
+        );
+        return;
+      }
+      fail('200 denemede hiç küslük olmadı.');
+    });
+
+    test('bir yılda en fazla bir kişiyle küs düşülüyor', () {
+      GameState s = kopmayaYakin();
+      // İkinci bir sorunlu yakın ekle.
+      final Person ikinci = Person(
+        id: 'kardes-iki',
+        firstName: 'Ece',
+        lastName: s.player.lastName,
+        gender: Gender.kadin,
+        relation: RelationType.kardes,
+        age: 46,
+        isAlive: true,
+        inPlayerHousehold: false,
+        employment: EmploymentStatus.issiz,
+        wealth: WealthTier.yoksul,
+        bond: 4,
+        development: const PersonDevelopment(
+          tracksLife: true,
+          finishedSchool: true,
+          money: 1000,
+          stats: _ortaStats,
+        ),
+      );
+      s = s.copyWith(
+        people: List<Person>.unmodifiable(<Person>[...s.people, ikinci]),
+        familyIssues: List<FamilyIssue>.unmodifiable(<FamilyIssue>[
+          ...s.familyIssues,
+          FamilyIssue(
+            id: 'm-iki',
+            kind: FamilyIssueKind.kardesPara,
+            personId: 'kardes-iki',
+            openedAtAge: s.player.age - 1,
+            lastEventAge: s.player.age - 1,
+            status: FamilyIssueStatus.cozuldu,
+            resolvedAtAge: s.player.age - 1,
+            response: FamilyIssueResponse.reddetti,
+          ),
+        ]),
+      );
+      expect(FamilyDisputes.falloutCandidates(s).length, 2);
+      for (int i = 0; i < 200; i++) {
+        final GameState sonra = FamilyDisputes.maybeFamilyFallout(
+          s,
+          s.player.age,
+          Random(i),
+        ).state;
+        final int kusSayisi =
+            sonra.people.where((Person p) => p.isEstranged).length;
+        expect(kusSayisi, lessThanOrEqualTo(1),
+            reason: 'Aile topluca boşalmamalı.');
+      }
+    });
+  });
+
   group('§37-§39 — eski eşle ortak ebeveynlik otomatik romantizm değil', () {
     test('eski eş romantik havuza geri dönmüyor', () {
       // Ortak çocuk olsa bile eski eş "sevgili adayı" olmuyor: oyunun

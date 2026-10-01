@@ -854,6 +854,17 @@ class LifeProgression {
           Notices.enqueue(afterDeaths, <PendingNotice>[bakimMeselesi.notice!]);
     }
 
+    // §33: yıllarca biriken uzaklaşma küslüğe dönüşebilir. Sebepsiz
+    // küslük yok: yalnızca reddedilmiş ya da karışılmamış bir meselesi
+    // olan ve yakınlığı dibe inmiş yakın. Yılda en fazla bir kişi.
+    final ({GameState state, PendingNotice? notice}) aileKusluk =
+        FamilyDisputes.maybeFamilyFallout(afterDeaths, newAge, _rng);
+    afterDeaths = aileKusluk.state;
+    if (aileKusluk.notice != null) {
+      afterDeaths =
+          Notices.enqueue(afterDeaths, <PendingNotice>[aileKusluk.notice!]);
+    }
+
     // --- Paket AP §26-§27: kayın aile ve gelin/damat -----------------
     //
     // Olay havuzu bilinçli olarak dengeli: "kayınvalide = sürekli
@@ -1259,6 +1270,11 @@ class LifeProgression {
       if (!evdenCikanlar.contains(p.relation)) continue;
       if (!p.isAlive || !p.inPlayerHousehold) continue;
       if (p.age < Parenthood.prototypeOnlyLeaveHomeAge) continue;
+      // Paket AP §12: oyuncunun onayıyla eve dönen çocuk bu kuralla
+      // hemen geri çıkarılmaz. Yoksa "gelsin" demek bir yıl sonra
+      // kendiliğinden geri alınıyordu ve hane kararı dekoratif
+      // kalıyordu. Pencere dolunca normal kural yeniden işler.
+      if (AdultChildSupport.recentlyReturned(state, p)) continue;
 
       people[i] = p.copyWith(inPlayerHousehold: false);
       degisti = true;

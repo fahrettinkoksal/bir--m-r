@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../data/name_pool.dart';
 import '../generation/random_util.dart';
+import '../interaction/parenthood.dart';
 import '../models/family_drama.dart';
 import '../models/family_issue.dart';
 import '../models/game_state.dart';
@@ -77,6 +78,29 @@ abstract final class AdultChildSupport {
 
   /// İsteğin soğuma anahtarı.
   static String requestKey(String personId) => 'cocuk-para:$personId';
+
+  /// Eve dönüşün kaydedildiği anahtar.
+  ///
+  /// Yeni bir save alanı açmak gerekmedi: `lastInteractionAge` zaten
+  /// "bu kişiyle bu şey en son hangi yıl oldu" sorusunu tutuyor.
+  static String returnKey(String personId) => 'cocuk-eve-donus:$personId';
+
+  /// prototypeOnly: eve dönen çocuğun kalabileceği yıl sayısı.
+  ///
+  /// Bu pencere olmadan §12 anlamsız kalıyordu: `_childrenLeaveHome`
+  /// 25 yaşını geçmiş **her** çocuğu her yıl haneden çıkarıyor, yani
+  /// oyuncunun "gelsin" demesi bir yıl sonra kendiliğinden geri
+  /// alınıyordu. Hane değişimi gerçek olacaksa bir süre durmalı.
+  static const int prototypeOnlyStayYears = 5;
+
+  /// Bu çocuk oyuncunun onayıyla **yakın zamanda** eve döndü mü?
+  ///
+  /// `_childrenLeaveHome` bunu okuyor ve o çocuğu haneden çıkarmıyor.
+  static bool recentlyReturned(GameState state, Person child) {
+    final int? donus = state.lastInteractionAge[returnKey(child.id)];
+    if (donus == null) return false;
+    return state.player.age - donus < prototypeOnlyStayYears;
+  }
 
   // =================================================================
   // §8 — sıkıntı gerçek mi?
@@ -369,6 +393,12 @@ abstract final class AdultChildSupport {
             else
               p,
         ]),
+        // Dönüş kaydediliyor ki yıllık "çocuklar evden çıkar" kuralı
+        // oyuncunun kararını bir yıl sonra geri almasın.
+        lastInteractionAge: <String, int>{
+          ...next.lastInteractionAge,
+          returnKey(cocuk.id): next.player.age,
+        },
       );
       metin = '${cocuk.firstName} eşyalarını toplayıp eve döndü.';
     } else {
@@ -427,7 +457,18 @@ abstract final class AdultChildSupport {
       if (gelisim == null) continue;
 
       // Eve dönmüş çocuk iş bulduysa yeniden kendi evine çıkabilir.
+      //
+      // DİKKAT — yaş eşiği `Parenthood.prototypeOnlyLeaveHomeAge`'den
+      // okunuyor, buradaki yetişkinlik yaşından değil.
+      //
+      // İlk yazımda 20 yaşındaki çalışan çocuk da evden çıkıyordu ve bu
+      // oyunun kendi kuralıyla çelişiyordu: çocuklar 25'inde kendi
+      // evine çıkar (`_childrenLeaveHome`). `family_integration` testi
+      // bunu yakaladı — 20 yaşında çalışan bir çocuk hanede olmadığı
+      // için "çocuk hanede kalır" iddiası kırıldı. Kural iki yerde iki
+      // farklı sayı olmasın diye tek kaynaktan okunuyor.
       if (cocuk.inPlayerHousehold &&
+          cocuk.age >= Parenthood.prototypeOnlyLeaveHomeAge &&
           gelisim.isEmployed &&
           rng.chance(prototypeOnlyMoveOutChance)) {
         next = next.copyWith(
