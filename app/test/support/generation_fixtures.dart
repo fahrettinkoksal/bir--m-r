@@ -68,6 +68,13 @@ GameState olenOyuncu({
   int wallet = 400000,
   List<OwnedItem> items = const <OwnedItem>[],
   bool bosanmis = false,
+  // Paket AQ: bu düzenek **vefat etmiş** oyuncunun durumunu kuruyor ve
+  // sağlığı o yüzden 0. Bazı testler aynı aileyi kullanıp oyuncuyu
+  // `deceased: false` ile yaşatıyor; sağlık 0 ile yaşayan oyuncu artık
+  // geçersiz bir durum (zorunlu kritik sağlık durumu açılır ve yaş
+  // ilerlemez), bu yüzden o testler yaşayan bir sağlık değeri veriyor.
+  // Varsayılan 0: mevcut çağıranların davranışı değişmiyor.
+  int oyuncuSagligi = 0,
 }) {
   final List<Person> people = <Person>[
     kisi(
@@ -132,10 +139,10 @@ GameState olenOyuncu({
       gender: oyuncuCinsiyeti,
       age: olumYasi,
       birthCity: 'Ankara',
-      stats: const Stats(
+      stats: Stats(
         appearance: 50,
         happiness: 50,
-        health: 0,
+        health: oyuncuSagligi,
         intelligence: 50,
         charisma: 50,
       ),
