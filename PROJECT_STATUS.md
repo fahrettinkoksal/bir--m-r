@@ -4157,6 +4157,80 @@ muhafazakâr taraf).
 kararı istemiyor: iz zaten konuyor, eksik olan onu okuyan taraf. Sıradaki
 içerik paketinin hedef listesi bu.
 
+## Paket AS/2: Q-190 ve Q-191 uygulandı, sessiz izlere karşılık yazıldı (3 Ekim 2026)
+
+Faho sohbette iki kararı onayladı; ikisi de uygulandı ve **ölçüldü**.
+
+### Q-191 — zincir devam halkalarına ×8 ağırlık
+
+`EventEngine.prototypeOnlyChainContinuationBoost = 8` (`prototypeOnly`).
+Oyuncunun `requiredFlags`'ı karşılanmış olayları — yani zaten açtığı
+devam halkaları — ağırlığını ×8 alıyor. İlk halka normal ağırlıkta
+yarışır, yani **zincire girme ihtimali değişmedi**; değişen, girdikten
+sonra devamını görme ihtimali. Dönüm noktası katsayısının (×120) çok
+altında. Tekrar sönümü ve `forbiddenFlags` üstüne çalışmaya devam ediyor:
+halka bir kez çıkınca havuzdan düşer.
+
+### Q-190 — kavga ettiğin kişi kalıcı tanışıklık kaydı
+
+`suc_gece_tartismasi/karsilik_ver` artık `startsFriendship` ile kişi
+üretiyor; `rememberPersonAs` onu `kavgaKarsisi` rolüne kilitliyor ve
+`suc_kavga_karsisindaki` yıllar sonra aynı kişiyle açılıyor. Bekçi
+testindeki `kKararBekleyen` listesi kaldırıldı.
+
+### AS/2 — yankı olayları
+
+Yeni dosya `app/lib/data/event_pool_echo.dart`: **10 olay**, hepsi var
+olan ama hiç okunmayan bir izi okuyor. Yeni mekanik yok; kurulum zaten
+yazılmıştı, eksik olan sonucuydu.
+
+| Yankı | Okuduğu iz | Neden önemli |
+| --- | --- | --- |
+| `yanki_bosanma_yil_donumu` | `bosandi` | Boşanıyordun, oyun bir daha hiç anmıyordu |
+| `yanki_ilk_ebeveynlik` | `cocuk_sahibi` | Baba/anne oluyordun, yankısı yoktu |
+| `yanki_ilk_gun_hatirlandi` | `cocuk_ilk_gun_yalniz` | Çocuğun okulun ilk günü yalnız kalmıştı |
+| `yanki_yalnizlik_muhasebesi` | `bekar_yalnizligi_secti` | Dört ayrı seçim besliyordu |
+| `yanki_ertelenen_tanisma` | `bekar_tanismayi_erteledi` | Üç ayrı seçim besliyordu |
+| `yanki_susmanin_bedeli` | `esle_susuldu` | Tartışmada susmuştun |
+| `yanki_zam_sonucu` | `zam_istendi` | Zam istemiştin, cevabı gelmiyordu |
+| `yanki_borc_geri_dondu` | `orta_borc_verdi` | Borç vermiştin, geri dönmüyordu |
+| `yanki_torun_buyudu` | `torunla_vakit` | Torunla geçen gün hatırlanmıyordu |
+| `yanki_dolandirici_tekrar` | `dolandiriciya_kanmadi` | Kanmamıştın, tekrar denenmiyordu |
+
+### Ölçülen sonuç
+
+| Ölçüm | Önce | Sonra |
+| --- | --- | --- |
+| İz arayan 67 olaydan hiç ekrana gelmeyen | 10 | **0** |
+| └ OYUN (aday bile olamadı) | 1 | 0 |
+| └ ZİNCİR (önceki halka hiç çıkmadı) | 1 | 0 |
+| └ BOT (olay geldi, kol seçilmedi) | 1 | 0 |
+| └ NORMAL (aday oldu, kurayı kaybetti) | 7 | 0 |
+| Aday havuza giren farklı olay | 380 | 392 |
+| Yıllık toplam etkin ağırlık (ortanca) | 268 | 318 |
+| Yıllık aday havuz boyutu (ortanca) | 80 | 80 |
+| Hiçbir yerin okumadığı iz | 32 | **22** |
+
+Havuz boğulmadı: aday sayısı aynı kaldı, toplam ağırlık %19 arttı ve
+**daha fazla** farklı olay ekrana geldi.
+
+### Kalıcı bekçiler
+
+`app/test/paket_as_yanki_test.dart` — altı iddia: yankı havuzu boş değil;
+her yankı **var olan** bir izi arıyor (uydurma iz = sessizce ölü içerik);
+her yankı kendi tekrarını engelliyor ve **her kol** kapanış izini koyuyor;
+kimlikler tekil; sonuç metinleri var ve 260 karakterin altında
+(`docs/WRITING_STYLE_TR.md` §8); yasak kalıp ve yasak sokak ağzı yok (§2,
+§6).
+
+`paket_ar_hikaye_izi_test.dart` ölçütü 32'den **22**'ye sıkılaştırıldı:
+kazanım geri alınamaz.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; iz, rol bekçisi, yankı,
+katalog, çeşitlilik, öncelik ve zincir testleri yeşil. Tam süit koşuyor.
+**Android APK ya da Windows derlemesi bu pakette denenmedi** — yerel kapta
+araç zinciri yok, CI'da derlenir.
+
 ## Açık sorular
 
 Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
@@ -4166,13 +4240,9 @@ etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
 `DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
 de dokunulmadı.**
 
-Q-190: kavga ettiğin kişi kalıcı bir kayıt (tanışıklık) olsun mu?
-`suc_kavga_karsisindaki` halkası bu karara bağlı; önerilen (A) ama
-onaylanmadan uygulanmadı.
-
-Q-191: zincir devam halkaları kura kaybediyor — dört adımlı hikâyenin
-3. halkasına ulaşma ihtimali ölçüldü, on binde bir. Önerilen çözüm
-devam halkalarına ×8 katsayı; **uygulanmadı**, onay bekliyor.
+Q-190 ve Q-191 **kararlaştırıldı** (3 Ekim 2026, Faho onayladı) ve
+uygulandı; ayrıntı yukarıdaki Paket AS/2 bölümünde. Kuyrukta kalan tek
+açık grup Q-189 ile Q-187/Q-188.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

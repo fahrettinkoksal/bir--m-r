@@ -268,12 +268,16 @@ void main() {
         }
       }
 
-      // 3 Ekim 2026'da ölçülen durum (AS/1). Bağımsız bir taramayla da
-      // doğrulandı: 6 mekanik, 32 sessiz. Hata değil, eksik: yazılmış bir
-      // iz hiçbir yerde okunmuyor. Sayı **artmamalı** — yeni iz koyan bir
-      // seçim yazıldıysa onu okuyan bir olay ya da motor kuralı da
-      // yazılmalı.
-      const int olculenSessiz = 32;
+      // 3 Ekim 2026'da ölçülen durum. AS/1 ölçütü düzeltti (38 yerine
+      // 6 mekanik + 32 sessiz; bağımsız bir taramayla da doğrulandı),
+      // AS/2 ise on tanesine karşılık yazdı (`event_pool_echo.dart`) ve
+      // sayı **22**'ye indi.
+      //
+      // Hata değil, eksik: yazılmış bir iz hiçbir yerde okunmuyor. Sayı
+      // **artmamalı** — yeni iz koyan bir seçim yazıldıysa onu okuyan bir
+      // olay ya da motor kuralı da yazılmalı. Ölçüt her düşüşte
+      // sıkılaştırılır; böylece kazanım geri alınamaz.
+      const int olculenSessiz = 22;
       expect(
         sessiz.length,
         lessThanOrEqualTo(olculenSessiz),

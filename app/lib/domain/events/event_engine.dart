@@ -102,6 +102,37 @@ class EventEngine {
   /// için ("o yıl neredeyse kesin çıkar").
   static const double prototypeOnlyPriorityBoost = 120;
 
+  // -----------------------------------------------------------------
+  // Zincir devamı önceliği (Paket AS/2, Q-190/Q-191)
+  // -----------------------------------------------------------------
+  //
+  // Ölçüm (AR/3, 21.307 oyun yılı): yıllık aday havuzunda ortanca **80**
+  // olay ve **268** toplam etkin ağırlık var. Yani ağırlık 4'lük bir
+  // olayın bir yıldaki payı %1,5. Öğretmen zincirinin dört halkası
+  // sırayla ~%4,4 → %7,3 → %28,2 ihtimalle çıkıyor ve bunlar her halkada
+  // doğru kolu seçme ihtimaliyle **çarpılıyor**: 3. halkaya ulaşma
+  // ihtimali kabaca **on binde bir**. Beş olay yazılmıştı; kimse sonunu
+  // görmüyordu.
+  //
+  // Oyuncu bir zincirin ilk halkasını görüp bir kol seçtiğinde ona bir
+  // **söz** verilmiş oluyor. Devamını kuraya bırakmak o sözü tutmamaktır.
+  // Bu yüzden `requiredFlags`'ı karşılanmış olaylar — yani oyuncunun
+  // zaten açtığı devam halkaları — orta güçlü bir katsayı alır.
+
+  /// Oyuncunun **zaten açtığı** devam halkasının ağırlık katsayısı
+  /// (`prototypeOnly`).
+  ///
+  /// Dönüm noktası katsayısının (`prototypeOnlyPriorityBoost` = 120) çok
+  /// altında: havuzu boğmaz ama zinciri de kuraya bırakmaz. Ölçülen
+  /// tabanla ×8, beş yıllık pencerede %7,3'ü ~%45'e, yirmi iki yıllık
+  /// pencerede %28'i ~%90'a çıkarır.
+  ///
+  /// Katsayı yalnızca **iz arayan** olaya uygulanır; ilk halka normal
+  /// ağırlıkta yarışır, yani zincire girme ihtimali değişmez. Tekrar
+  /// sönümü (`prototypeOnlyRepeatWeightDecay`) ve `forbiddenFlags` üstüne
+  /// çalışmaya devam eder: halka bir kez çıkınca havuzdan düşer.
+  static const double prototypeOnlyChainContinuationBoost = 8;
+
   /// Olayın **bu hayatta kaç kez çıktığına** göre azalan ağırlığı.
   static double prototypeOnlyEffectiveWeight(GameState state, GameEvent event) {
     // Dönüm noktaları bütün havuzun önüne geçer (Paket 21).
@@ -109,12 +140,23 @@ class EventEngine {
         ? 1
         : pow(prototypeOnlyPriorityBoost, event.priority).toDouble();
 
+    // Oyuncunun açtığı devam halkası öne geçer (Paket AS/2).
+    //
+    // Koşul yalnızca "iz arıyor" değil, "istediği izlerin **hepsi**
+    // konmuş": motor zaten bunu süzüyor ama katsayı aday dışı bir
+    // çağrıda da doğru davransın diye burada bir daha bakılıyor.
+    final double zincir = event.requirement.requiredFlags.isNotEmpty &&
+            state.storyFlags.containsAll(event.requirement.requiredFlags)
+        ? prototypeOnlyChainContinuationBoost
+        : 1;
+
     final int gorulme = state.eventSeenCount(event.id);
-    if (gorulme == 0) return event.weight * oncelik;
+    if (gorulme == 0) return event.weight * oncelik * zincir;
     final double oran =
         pow(prototypeOnlyRepeatWeightDecay, gorulme).toDouble();
     return event.weight *
         oncelik *
+        zincir *
         (oran < prototypeOnlyMinWeightRatio
             ? prototypeOnlyMinWeightRatio
             : oran);

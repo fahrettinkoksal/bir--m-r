@@ -5620,7 +5620,13 @@ alt onlukta da sermayesini çıkaramayan hayatlar olmalı; (C) ölçüt
 tamamen kaldırılsın, dağılım yalnızca raporlansın.
 
 ### Q-190 — Kavga ettiğin kişi kalıcı bir kayıt olsun mu?
-**Durum:** Karar bekliyor (öneri hazır). **Kaynak:** `app/lib/data/event_pool_crime.dart` (`suc_gece_tartismasi`, `suc_kavga_karsisindaki`), `app/test/paket_ar_rol_bekcisi_test.dart` (`kKararBekleyen`), [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+**Durum:** **Kararlaştırıldı (3 Ekim 2026, Faho sohbette onayladı: seçenek A).** **Kaynak:** `app/lib/data/event_pool_crime.dart` (`suc_gece_tartismasi`, `suc_kavga_karsisindaki`), `app/test/paket_ar_rol_bekcisi_test.dart`, [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+
+**Uygulandı.** Kavgaya giren seçim (`karsilik_ver`) artık `startsFriendship`
+ile kalıcı bir **tanışıklık** kaydı açıyor; `rememberPersonAs` o kişiyi
+`kavgaKarsisi` rolüne kilitliyor ve `suc_kavga_karsisindaki` yıllar sonra
+aynı kişiyle açılıyor. Bekçi testindeki `kKararBekleyen` listesi
+kaldırıldı — bekleyen halka kalmadı.
 
 **Bağlam — bulunan hata.** Paket AR/2 ölçtü ki dört hikâye zincirinin ilk
 halkası bir kişiyi role kilitlemek istiyor ama olayın hiç kişi koşulu yok.
@@ -5671,7 +5677,22 @@ kalır ve `paket_ar_rol_bekcisi_test.dart` içindeki `kKararBekleyen` listesinde
 eklenmek yerine düzeltilecek.
 
 ### Q-191 — Zincir halkaları kura kaybediyor: dört adımlı hikâyenin sonunu kimse görmüyor
-**Durum:** Karar bekliyor (öneri hazır, **uygulanmadı**). **Kaynak:** `app/lib/domain/events/event_engine.dart` (`prototypeOnlyEffectiveWeight`, `prototypeOnlyPriorityBoost`), `app/lib/data/event_pool_chains.dart`, `app/test/paket_ar_zincir_teshis_test.dart`, [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+**Durum:** **Kararlaştırıldı (3 Ekim 2026, Faho sohbette onayladı: seçenek A, katsayı ×8).** **Kaynak:** `app/lib/domain/events/event_engine.dart` (`prototypeOnlyChainContinuationBoost`), `app/lib/data/event_pool_chains.dart`, `app/test/paket_ar_zincir_teshis_test.dart`, [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+
+**Uygulandı ve ölçüldü (40 kapsam hayatı).** Oyuncunun `requiredFlags`'ı
+karşılanmış devam halkaları ağırlığını ×8 alıyor; ilk halka normal
+ağırlıkta yarışır, yani **zincire girme ihtimali değişmedi.** Tekrar
+sönümü ve `forbiddenFlags` üstüne çalışmaya devam ediyor.
+
+| Ölçüm | Önce | Sonra |
+| --- | --- | --- |
+| İz arayan 67 olaydan hiç çıkmayan | 10 | **0** |
+| Aday havuza giren farklı olay | 380 | 392 |
+| Yıllık toplam etkin ağırlık (ortanca) | 268 | 318 |
+| Yıllık aday havuz boyutu (ortanca) | 80 | 80 |
+
+Zincirler canlandı, havuz boğulmadı. Katsayı `prototypeOnly` kalıyor: tek
+yer, tek satır, gerekirse değişir.
 
 **Bağlam.** Paket AR/2'nin teşhisi ölü halkaları dört sınıfa ayırdı ve biri
 yeni: **ZİNCİR** — izi koyacak olayın kendisi hiç ekrana gelmemiş. Yani

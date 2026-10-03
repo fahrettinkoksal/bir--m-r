@@ -158,3 +158,4 @@ completed	Paket AR/1: hikâye izi denetimi — 38 sessiz iz, 13 ölü zincir hal
 completed	Paket AR/2: ölü halkaları OYUN/BOT/NORMAL sınıflandır ve kırık rol kilitlerini düzelt
 completed	Paket AR/3: teşhisi dört sınıfa çıkar, kura tabanını ölç (Q-191)
 completed	Paket AS/1: "sessiz iz" ölçütünü düzelt — mekanik ile gerçekten sessizi ayır (38 → 6 + 32)
+completed	Paket AS/2: Q-190 ve Q-191 uygula, sessiz izlere 10 yankı olayı yaz (ölü halka 10 → 0)

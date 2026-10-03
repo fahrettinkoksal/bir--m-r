@@ -45,20 +45,11 @@ bool _kisiOlabilir(GameEvent e) {
 bool _kisiUretiyor(EventChoice c) =>
     c.startsRomance || c.startsFriendship || c.startsSchoolFriendship;
 
-/// Faho'nun kararını bekleyen, bilinen tek halka.
-///
-/// `suc_gece_tartismasi` sokakta tartışılan **yabancıyı** hikâye rolüne
-/// kilitlemek istiyor. Rol AR/2'de doğru seçime taşındı (kavganın
-/// gerçekten olduğu seçime), ama karşı taraf kayıtlı bir kişi değil:
-/// motor rolü hâlâ kaydedemiyor, `suc_kavga_karsisindaki` uykuda.
-///
-/// Çözüm bir tasarım kararı istiyor — "kavga ettiğin kişi İlişkiler
-/// ekranında *tanışıklık* olarak görünsün mü?" — ve kuyrukta duruyor.
-/// Karar gelince bu liste boşalacak. **Liste büyümemeli:** yeni bir
-/// kırık halka buraya eklenmek yerine düzeltilmeli.
-const Set<String> kKararBekleyen = <String>{
-  'suc_gece_tartismasi/karsilik_ver',
-};
+// Q-190 kararlaştırıldıktan sonra bekleyen halka kalmadı: kavga
+// ettiğin kişi artık kalıcı bir tanışıklık olarak kaydediliyor, bu
+// yüzden `suc_gece_tartismasi` seçimi kendi kişisini üretiyor ve
+// bekçinin ilk iddiası onu zaten geçiriyor. Liste kaldırıldı; yeni bir
+// kırık halka çıkarsa test kırmızı dönecek ve düzeltilecek.
 
 void main() {
   test('rol kilitleyen her seçimin kilitleyecek bir kişisi var', () {
@@ -67,7 +58,6 @@ void main() {
       for (final EventChoice c in e.choices) {
         if (c.rememberPersonAs == null) continue;
         if (_kisiUretiyor(c) || _kisiOlabilir(e)) continue;
-        if (kKararBekleyen.contains('${e.id}/${c.id}')) continue;
         kirik.add('${e.id}/${c.id} → "${c.rememberPersonAs}" rolünü '
             'kilitlemek istiyor ama olayın kişisi yok');
       }

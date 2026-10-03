@@ -13,6 +13,7 @@ import 'event_pool_childhood.dart';
 import 'event_pool_course.dart';
 import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
+import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_family_gathering.dart';
 import 'event_pool_extra.dart';
@@ -1731,5 +1732,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // dönemdi; `docs/EKSIKLER.md` ölçtü.
   ...kChildhoodEvents,
   ...kCrimeEvents,
+  // Yankı olayları: sessiz izleri okuyan taraf (Paket AS/2).
+  ...kEchoEvents,
   ...kFriendshipEvents,
 ];

@@ -106,15 +106,20 @@ const List<GameEvent> kCrimeEvents = <GameEvent>[
         charisma: 1,
         addFlags: <String>{CrimeFlags.kavgayaGirdi},
         crimeId: 'sokak_kavgasi',
-        // Rol buradaydı değil: `arkadasini_sok` seçimindeydi. Ama o seçim
-        // **kavgadan çekildi** izini koyuyor, devam olayı
-        // (`suc_kavga_karsisindaki`) ise `kavgayaGirdi` istiyor. Yani rol
-        // doğru kişiye bağlansa bile o halka hiç açılamazdı. Rol, kavganın
+        // Rol önce `arkadasini_sok` seçimindeydi. Ama o seçim **kavgadan
+        // çekildi** izini koyuyor, devam olayı
+        // (`suc_kavga_karsisindaki`) ise `kavgayaGirdi` istiyor: rol doğru
+        // kişiye bağlansa bile o halka hiç açılamazdı. Rol, kavganın
         // gerçekten olduğu seçime taşındı (Paket AR/2).
         //
-        // Halka hâlâ uykuda: karşı taraf kayıtlı bir kişi değil, bu yüzden
-        // motor rolü kaydedemiyor. "Kavga ettiğin kişi İlişkiler ekranında
-        // tanışıklık olarak görünsün mü?" sorusu tasarım kuyruğunda.
+        // Karşı taraf artık **kalıcı bir tanışıklık** olarak kaydediliyor
+        // (Q-190, Faho onayladı). Gerekçe: zincirin bütün anlamı "o kişi
+        // yıllar sonra karşına çıkar"; kaydı olmayan biri geri dönemez.
+        // Arkadaş değil, tanınan bir yüz — `startAcquaintance` tam o
+        // ölçek. Motor kişiyi bu seçim yapılırsa üretir, sonra
+        // `rememberPersonAs` onu role kilitler ve
+        // `suc_kavga_karsisindaki` yıllar sonra aynı kişiyle açılır.
+        startsFriendship: true,
         rememberPersonAs: CrimeRoles.kavgaKarsisi,
       ),
     ],
