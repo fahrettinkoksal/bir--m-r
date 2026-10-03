@@ -24,6 +24,7 @@ import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/business_catalog.dart';
 import 'package:bir_omur/data/celebrity_catalog.dart';
 import 'package:bir_omur/data/education_tracks.dart';
+import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/data/finger_catalog.dart';
 import 'package:bir_omur/data/gift_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
@@ -157,6 +158,19 @@ class CoverageResult {
   /// kapandıktan sonra konuyorsa halka ölüdür.
   final Map<String, int> flagAges = <String, int>{};
 
+  /// Her yılın aday havuzunun **boyutu** (yıl başına bir giriş).
+  ///
+  /// Bir zincir halkasının neden çıkmadığını anlamak için tek başına
+  /// ağırlığı bilmek yetmiyor: o ağırlık kaç rakibe karşı yarışıyor?
+  final List<int> eligibleCounts = <int>[];
+
+  /// Her yılın aday havuzundaki **toplam etkin ağırlık**.
+  ///
+  /// Kura ağırlıkla yapılıyor, sayıyla değil. Bir halkanın o yıl çıkma
+  /// payı kabaca `kendi etkin ağırlığı / bu toplam`. Böylece "neden
+  /// çıkmıyor" sorusu tahminden ölçüme dönüyor.
+  final List<double> eligibleWeightSums = <double>[];
+
   /// Aktivite kimliği → oyunun verdiği engel gerekçesi (son görülen).
   final Map<String, String> blockedActivities = <String, String>{};
 
@@ -232,7 +246,16 @@ CoverageResult runCoverageLife({
     final GameState s = c.state!;
     r.cities.add(s.player.currentCity);
     if (s.player.age != islenenYas) {
-      r.eligibleEvents.addAll(const EventEngine().debugEligibleIds(s, rng));
+      final Set<String> adaylar =
+          const EventEngine().debugEligibleIds(s, rng).toSet();
+      r.eligibleEvents.addAll(adaylar);
+      r.eligibleCounts.add(adaylar.length);
+      double toplamAgirlik = 0;
+      for (final GameEvent e in kEventPool) {
+        if (!adaylar.contains(e.id)) continue;
+        toplamAgirlik += EventEngine.prototypeOnlyEffectiveWeight(s, e);
+      }
+      r.eligibleWeightSums.add(toplamAgirlik);
     }
     for (final String iz in s.storyFlags) {
       r.flagAges.putIfAbsent(iz, () => s.player.age);

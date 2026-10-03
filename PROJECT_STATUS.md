@@ -4052,6 +4052,34 @@ doğru kişiye bağlansa bile halka açılamazdı. Rol kavgaya giren seçime
 taşındı. Halka hâlâ uykuda: karşı taraf kayıtlı bir kişi değil ve onu
 kayda geçirmek tasarım kararı istiyor (**Q-190**).
 
+### AR/3 — teşhis dört sınıfa çıktı ve kura tabanı ölçüldü
+
+"BOT" etiketi iki ayrı şeyi gizliyordu. Ayrıldı:
+
+- **ZİNCİR** — izi koyacak **olay** hiç ekrana gelmedi. Sorun botun
+  seçimi değil, zincirin derinliği.
+- **BOT** — olay geldi ama bot başka kolu seçti. Yol açık.
+
+Bu ayrım `zincir_ogretmen_3`'ü BOT'tan ZİNCİR'e taşıdı ve asıl soruyu
+ortaya çıkardı. Kura tabanı ölçüldü (21.307 oyun yılı):
+
+| Ölçüm | Değer |
+| --- | --- |
+| Yıllık aday havuz boyutu | ortanca 80 olay (ortalama 73,7; en çok 112) |
+| Yıllık toplam etkin ağırlık | ortanca 268 |
+| Ağırlık 4'lük halkanın yıllık payı | %1,5 |
+| Ağırlık 5 | %1,87 |
+| Ağırlık 7 | %2,62 |
+
+Öğretmen zinciri (beş olay yazılmış, 10 → 45 yaş): 1. halka ~%4,4,
+2. halka %7,3, 3. halka %28,2 — ve bunlar her halkada kol seçme
+ihtimaliyle **çarpılıyor**. 3. halkaya ulaşma ihtimali kabaca **on binde
+bir**. Yazılmış içeriğin karşılığı alınmıyor.
+
+Bu bir denge kararı, teknik hata değil: **Q-191**'de öneri (devam
+halkalarına ×8 katsayı) ve ölçüm birlikte duruyor. **Uygulanmadı** —
+Faho Windows paketini test ettirirken temponun altından değişmemesi için.
+
 ### Kalıcı bekçiler
 
 `app/test/paket_ar_rol_bekcisi_test.dart` — dört iddia: rol kilitleyen her
@@ -4085,6 +4113,10 @@ de dokunulmadı.**
 Q-190: kavga ettiğin kişi kalıcı bir kayıt (tanışıklık) olsun mu?
 `suc_kavga_karsisindaki` halkası bu karara bağlı; önerilen (A) ama
 onaylanmadan uygulanmadı.
+
+Q-191: zincir devam halkaları kura kaybediyor — dört adımlı hikâyenin
+3. halkasına ulaşma ihtimali ölçüldü, on binde bir. Önerilen çözüm
+devam halkalarına ×8 katsayı; **uygulanmadı**, onay bekliyor.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

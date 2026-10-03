@@ -5669,3 +5669,84 @@ karar sorulmadan uygulanmadı. Çözümü varsa: bu kayıtlara ayrı bir etiket
 kalır ve `paket_ar_rol_bekcisi_test.dart` içindeki `kKararBekleyen` listesinde
 **tek madde** olarak durur. O liste büyümeyecek: yeni bir kırık halka
 eklenmek yerine düzeltilecek.
+
+### Q-191 — Zincir halkaları kura kaybediyor: dört adımlı hikâyenin sonunu kimse görmüyor
+**Durum:** Karar bekliyor (öneri hazır, **uygulanmadı**). **Kaynak:** `app/lib/domain/events/event_engine.dart` (`prototypeOnlyEffectiveWeight`, `prototypeOnlyPriorityBoost`), `app/lib/data/event_pool_chains.dart`, `app/test/paket_ar_zincir_teshis_test.dart`, [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+
+**Bağlam.** Paket AR/2'nin teşhisi ölü halkaları dört sınıfa ayırdı ve biri
+yeni: **ZİNCİR** — izi koyacak olayın kendisi hiç ekrana gelmemiş. Yani
+sorun ne botun seçimi ne de bir kod hatası; zincirin **derinliği**.
+
+**Ölçüm (21.307 oyun yılı, 40 kapsam hayatı).** Olay kurası ağırlıkla
+yapılıyor. Ölçülen taban:
+
+| Ölçüm | Değer |
+| --- | --- |
+| Yıllık aday havuz boyutu | ortanca **80** olay (ortalama 73,7; en çok 112) |
+| Yıllık toplam etkin ağırlık | ortanca **268** |
+| Ağırlık 4'lük bir halkanın yıllık payı | **%1,5** |
+| Ağırlık 5 | %1,87 |
+| Ağırlık 7 | %2,62 |
+
+Öğretmen zinciri (`zincir_ogretmen_1…4`, 10 → 45 yaş, beş olay yazılmış):
+
+| Halka | Ağırlık | Pencere | Pencere boyunca |
+| --- | --- | --- | --- |
+| 1. halka | 3 | 4 yıl (10-13) | ~%4,4 (üstüne: yaşayan öğretmen + öğrencilik şartı) |
+| 2. halka | 4 | 5 yıl (14-18) | **%7,3** |
+| 3. halka | 4 | 22 yıl (24-45) | %28,2 |
+
+Bunlar bağımsız değil, **çarpılıyor** — ve her halkada doğru kolu seçme
+ihtimali de var (iki kollu halkada ½). Zincirin 3. halkasına ulaşma
+ihtimali kabaca `0,044 × ½ × 0,073 × ½ × 0,282` ≈ **on binde bir**.
+40 hayatta görülmemesi şaşırtıcı değil; **9.000 hayatta bir** görülüyor.
+
+Aynı sorun kısa pencereli ikinci halkalarda da var:
+`cocukluk_ilk_kelime_anisi_anne` (6 yıl, %10,7) ve `ergen_reddedilme`
+(6 yıl, %10,7).
+
+**Mesele şu:** bu olaylar yazıldı, metinleri var, kodda duruyor — ama
+oyuncu zincire girdikten sonra bile devamını görme ihtimali kurada
+kayboluyor. Yazılmış içeriğin karşılığı alınmıyor.
+
+**Mevcut kesin kural.** Motorun zaten bir önceliklendirme kademesi var:
+`priority` alanı ağırlığı `120^priority` ile çarpıyor ve bu bilinçli
+olarak çok güçlü ("dönüm noktası neredeyse kesin çıkar"). Zincir
+halkalarının hiçbirinde `priority` yok; ağırlık 3-7 bandında havuzun
+kalanıyla eşit yarışıyorlar.
+
+**Seçenekler.**
+- **(A)** Oyuncunun **zaten açtığı** devam halkalarına orta güçlü bir
+  katsayı: `requiredFlags`'ı karşılanmış bir olayın ağırlığı ×6 … ×8.
+  Dönüm noktası katsayısının (×120) çok altında, yani havuzu boğmaz ama
+  zinciri de kuraya bırakmaz. Ölçülen tabanla ×8: 2. halka %7,3 → ~%45,
+  3. halka %28 → ~%90. Zincire giren oyuncunun sonunu görme ihtimali on
+  binde birden **beşte bire** çıkar.
+- **(B)** Katsayı yok, ağırlıklar elle yükseltilir (zincir devamlarına
+  12-20 yazılır). Daha öngörülebilir ama her yeni zincirde elle
+  ayarlanması gerekir ve unutulur — bu paketin bulduğu hata tam olarak
+  "yazar bir şeyi unuttu, test yakalamadı" idi.
+- **(C)** Zincir devamları pencereye bağlı kalsın ama pencereler
+  genişletilsin (ör. 2. halka 14-18 değil 14-24). Hikâyenin anlamı
+  bozulabilir: "alan seçimi haftası" 24 yaşında olmaz.
+- **(D)** Olduğu gibi kalsın; derin zincirler nadir sürpriz olsun.
+
+**Claude'un önerisi: (A), katsayı ×8.** Gerekçe: oyuncu zincirin ilk
+halkasını görüp bir kol seçtiğinde bir **söz** verilmiş oluyor; devamı
+kuraya bırakmak o sözü tutmamak. Katsayı tek yerde durur, yeni zincirde
+elle ayar gerekmez, ve ×120'lik dönüm noktası katmanını bozmaz. Sayı
+`prototypeOnly` kalır.
+
+**(A)'nın bilinen pürüzü:** zincire giren oyuncunun yılları bir süre
+zincir tarafından domine edilebilir. Panzehiri var — motorun tekrar
+sönümleme mekanizması (`prototypeOnlyRepeatWeightDecay`) zaten çalışıyor
+ve halka bir kez çıkınca `forbiddenFlags` onu havuzdan tamamen çıkarıyor.
+Yine de katsayı onaylanırsa **ölçmek şart**: 40 hayat yeniden koşulup
+zincir tamamlama oranı ve yıllık olay dağılımı karşılaştırılmalı.
+
+**Varsayılan işlem: şu an uygulanmadı ve onay gelene kadar uygulanmayacak.**
+İki sebep: (1) bu her oyuncunun olay temposunu değiştiren bir denge
+kararı, teknik hata düzeltmesi değil; (2) Faho Windows test paketini bir
+arkadaşına verirken temponun altından değişmesi testi anlamsızlaştırır.
+Teşhis ve ölçüm altyapısı commit'lendi; karar gelince uygulanıp aynı
+ölçümle karşılaştırılacak.
