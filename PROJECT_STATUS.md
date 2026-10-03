@@ -3862,5 +3862,121 @@ içi küslük oranı, tavsiye payı, hangi olayın pencere açacağı ve torunun
 tek ebeveynli doğması. Hiçbiri `DECISIONS.md`'ye yazılmadı. **Q-187
 ayrıca açık kalıyor; ona dokunulmadı.**
 
+# Paket AQ — kritik statlar, sağlık 0 tutarlılığı ve düşük stat etkileri
+
+Faho bildirdi: **sağlık 0'a düşüyor ve karakter hiçbir şey olmamış gibi
+yaşamaya, spor yapmaya, seyahat etmeye, çalışmaya ve yıllarca yaş almaya
+devam ediyor.** Ölçüldü ve bildirilenden ağır çıktı: AQ öncesi ağaçta
+(7427107) 500 hayatın 34.121 yılının **7.100'ü** sağlık 0 iken yaşanmıştı.
+
+## Kök neden
+
+İki ayrı şey vardı ve ikisi de ayrı ayrı düzeltildi.
+
+**1) Sağlık 0 olunca hiçbir şey olmuyordu.** Tek tüketici
+`Mortality.prototypeOnlyYearlyChance`'ın en çok iki katına çıkan
+çarpanıydı — otuz yaşında yıllık ölüm ihtimalini binde 1'den binde 2'ye
+çıkarıyor. Bir de bir kerelik günlük satırı. Aktivite, seyahat, estetik,
+iş ve okul yollarının **hiçbiri** sağlığı bir durum olarak okumuyordu.
+Yan bulgu: `ageUp` ve `advanceOneYear` bekleyen sağlık krizini
+denetlemiyordu, yani kriz ekranda asılı kalırken yıllar geçiyordu.
+
+**2) Sağlık 0'a inmek kaçınılmazdı — tek yönlü dişli.** D-116 hastalığın
+sağlık bedelini 1-3'ten 10-18'e çıkardı ama toparlanmayı sabit 7'de
+bıraktı ve yalnızca **hastalanılmayan** yıllarda çalıştırdı; yani çukuru
+açan yıl onu hiç kapatmıyordu. İzole ölçüm (net yıllık sağlık değişimi):
+sağlık 25'te **−5,1**, yaş kaç olursa olsun. Ayrıca toparlanma tavanı 71
+yaşından sonra `0` dönüyordu — yaşlanmanın kendisi sağlığı 30'un altına
+indirmezken tavanın 0 olması kendi kuralıyla çelişiyordu (70-79 yaşta
+ortalama sağlık 17,1).
+
+## Ne kuruldu
+
+Yeni bir kriz çerçevesi **kurulmadı**: zorunlu çözüm mevcut
+`PendingCrisis` / `HealthCrisisEngine` yolundan geçiyor — aynı pencere,
+aynı kayıt alanı, aynı save/load, aynı ölüm geçişi. Katalogda tek yeni
+kriz var (`kritik_saglik`, `isCritical`) ve rastgele havuzda yer almıyor.
+
+* **Bantlar** (`CriticalHealth`): 26-100 olağan · 11-25 kritik derecede
+  düşük · 1-10 hayati tehlike · 0 acil. Her yere `if (health < 10)`
+  kopyalanmadı, tek yerden sorulur.
+* **Zorunlu çözüm** sağlık 0'a inince açılır ve çözülmeden yaş
+  ilerlemez. Üretim yollarının hepsinden denetlenir: yıl başı, hastalık
+  (sebep: hastalık), kronik yıpratma (sebep: rahatsızlık), yıl sonu, olay
+  seçimi (sebep: karar), aktivite ve olağan krizin ardından.
+* **Kurtulma zar değil**: yaş, taşınan rahatsızlıklar, daha önce atlatılmış
+  hayati tehlikeler ve seçim hesaba katılır. Üç seçenek: acil servis
+  (bedelsiz, her yaşta açık), özel tedavi (240.000 ₺), evde bekle.
+  Kurtulan karakter 10-25 bandında açılır — ne 100 ne 1.
+* **Tek ölüm**: yaşa bağlı ölüm bekleyen krizi kapatır, kriz ölümü olağan
+  ölüm yolundan geçer. 500 hayatta çifte ölüm **0**.
+* **Dişli düzeltmesi**: toparlanma artık her yıl işler (hastalığın bedeli
+  önce uygulanır, pay kalan açığa göre hesaplanır), payı çukurla büyür
+  (%35, yıllık tavan 14, 70 üstü yarım) ve tavanı yaşlanmanın kendi
+  tabanının altına düşmez.
+* **Düşük sağlıkta**: ağır eylem kapanır (koşu, ağırlık, cezaevi sporu —
+  hafif yürüyüş ve esneme açık), 3 geceden uzun tur kapanır, elektif
+  estetik 1-10'da kapanır ve 11-25'te mevcut risk motoru 1,8 kat çalışır.
+  **Sağlık merkezi hiçbir bantta kapanmaz.**
+* **Diğer statlar**: mutluluk Paket AQ'dan önce hiçbir sistemin girdisi
+  değildi — zam/terfi ve okul ortalamasına kondu, karşı ağırlık olarak
+  dipte eğlencenin getirisi artırıldı (sarmal yok). Karizmanın tek boşluğu
+  mülakattı; ikinci şansı ölçeklendiriyor. Görünüş ve zekâda boşluk
+  bulunamadı, dokunulmadı. Hiçbir stat 0'ı ölüm üretmiyor.
+
+## Ölçüm (A/B, aynı 500 tohum, aynı düzenek)
+
+| | AQ öncesi | AQ sonrası |
+|---|---|---|
+| tamamlanan hayat | 373 / 500 | **437 / 500** |
+| sağlık 0 iken yaşanan yıl | **7.100** | **156** (hepsi çözüm bekliyor) |
+| ortalama ölüm yaşı | 64,5 | **68,0** |
+| p25 / medyan / p75 | 57 / 67 / 75 | 65 / 71 / 75 |
+| 60 yaş öncesi ölüm | %29,8 | **%15,6** |
+| 80+ | %2,4 | %1,4 |
+
+500 tam hayat (34.733 yıl): sağlık 0 gören hayat 110 (%22,0), ilk 0 yaşı
+medyan **73**, kritik durumdan kurtulma %38,5. Hedefi sıfır olan
+sayaçların tamamı sıfır. Bant dağılımı: olağan %94,2 · kritik düşük %2,5
+· hayati tehlike %2,8 · acil %0,4. Düşük sağlıkta rapor oranı %24,8
+(yüksek sağlıkta %6,9). Karizma, görünüş ve zekâ **hiçbir** yılda 0
+görülmedi — yaşlanma tabanları tutuyor.
+
+## Yol boyunca çıkan gerçek hatalar
+
+* **Yıl sonu kaçağı** → işletme zararı, adli süreç ve yarım zamanlı iş
+  sağlığı yıl içindeki denetimden **sonra** düşürüyordu (tohum 56, yaş
+  73). Yıl kapanmadan son bir denetim eklendi.
+* **Olay seçimi kaçağı** → 500 hayatın 20'sinde olay seçimi sağlığı 0'a
+  indiriyor ve oyuncu yıl ilerletmeden sağlık kazandıran bir aktiviteye
+  gidip durumu sessizce kapatabiliyordu. `EventEngine.resolve` ve
+  `ActivityEngine.perform` de denetliyor.
+* **Değer ayrıntısı penceresi taşıyordu** → yeni durum satırları gelince
+  360 px / yazı ×1,5'te 560 piksel taştı (ölçüldü; AQ öncesi taşmıyordu).
+  Pencere artık kendi içinde kayıyor.
+* **Değişmez fazla katıydı** → "sağlık 0 + bekleyen **kritik** durum yok"
+  yanlış iddiaydı: ekranda olağan bir kriz varken de oyuncu ilerleyemiyor
+  ve kriz kapanınca kritik durum devralıyor. Koşul doğrusuna çevrildi.
+
+## Bilerek yapılmayanlar
+
+Generic "all stats condition framework", ikinci bir hastane akışı, ayrı
+bir devamsızlık/sınıf tekrarı sistemi, kritik krizden sonra rastgele
+kronik tanı, NPC'ler için ayrıntılı sağlık simülasyonu, kritik durumun
+süresini tutan yeni bir kayıt alanı. `Mortality`'nin düşük sağlık
+çarpanına **dokunulmadı**: çifte sayım şüphesi ölçüldü ve ortalama ölüm
+yaşını hiç değiştirmediği görüldü.
+
+**Hiçbir sürüm gerçek Windows veya Android cihazda oynanmadı.**
+
+## Açık sorular
+
+Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
+toparlanma payı ve tavanı, düşük sağlıkta kapanan eylemler, iş tarafı
+etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
+`Mortality` çarpanı, 80+ oranındaki düşüş ve özel tedavi ücreti. Hiçbiri
+`DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
+de dokunulmadı.**
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

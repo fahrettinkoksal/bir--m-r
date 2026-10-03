@@ -5486,3 +5486,115 @@ Soru: (A) ayrım doğru; (B) kayın aile olayı da pencere açsın, bildirim tav
 Soru: (A) doğru — bilinmeyen bilgi uydurulmuyor; (B) evli olmayan çocuğa da bir partner kaydı üretilsin; (C) torunun kartında "diğer ebeveyni bilinmiyor" yazsın.
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz. Ölçüm testi (`paket_ap_olcum_test.dart`) oranları **güzelleştirmiyor**, yalnızca ölçüyor ve bozulmayı yakalıyor.
+
+### Q-189 — Paket AQ: kritik sağlık bantları, kurtulma eşikleri ve düşük stat etkileri
+
+**Durum:** Öneri / karar bekliyor. **Kaynak:** [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80), `app/lib/domain/life/critical_health.dart`, `app/lib/domain/life/stat_floor_effects.dart`, `app/lib/domain/life/sick_leave.dart`, `app/lib/domain/life/aging.dart`, `app/lib/data/health_crisis_catalog.dart`, `app/test/paket_aq_olcum_test.dart`.
+
+**Bağlam.** Faho bildirdi: sağlık 0'a düşüyor ve karakter normal şekilde yaşamaya, spor yapmaya, seyahat etmeye, çalışmaya ve yıllarca yaş almaya devam ediyor. Ölçüldü ve haklıydı — hem de bildirilenden ağır biçimde: AQ öncesi ağaçta (7427107) 500 hayatın 34.121 yılının **7.100'ü** sağlık 0 iken yaşanmıştı. Sağlık 0'ın tek karşılığı `Mortality`'nin en çok iki katına çıkan çarpanıydı; otuz yaşında yıllık ölüm ihtimalini binde 1'den binde 2'ye çıkarıyordu, yani hiçbir şey.
+
+Paket AQ sağlık 0'ı **zorunlu bir karara** çevirdi ve bunu yaparken sağlığın 0'a *nasıl* indiğini de ölçtü. İki ayrı eski hata çıktı:
+
+1. **Tek yönlü dişli.** D-116 hastalığın sağlık bedelini 1-3'ten 10-18'e çıkardı ama toparlanmayı sabit 7'de bıraktı ve toparlanmayı yalnızca **hastalanılmayan** yıllarda çalıştırdı. Yani çukuru açan yıl onu hiç kapatmıyordu. İzole ölçüm (net yıllık sağlık değişimi): sağlık 25'te **−5,1**, yaş kaç olursa olsun. Sağlık 40'ın altına bir kez inen karakter geri dönemiyordu.
+2. **Toparlanma tavanı 71 yaşından sonra `0`.** Yaşlanmanın kendisi sağlığı 30'un (`StatAging.prototypeOnlyHealthFloor`) altına indirmiyor, ama tavan 0 olduğu için ileri yaşta hastalığın açtığı çukur hiç kapanmıyordu: 300 hayatta 70-79 yaş aralığında ortalama sağlık **17,1**.
+
+İkisi de D-116'nın kendi yazılı gerekçesine ("toparlanma hastalığın açtığı çukuru kapatır; kalıcı olan yıpranma yaşlanmadır") göre düzeltildi. **Aşağıdaki sayıların hepsi `prototypeOnly`; hiçbiri `DECISIONS.md`'ye yazılmadı. Q-187 ve Q-188 ayrı sorular olarak açık kalıyor; ikisine de dokunulmadı.**
+
+**A/B ölçüm (aynı 500 tohum, aynı düzenek, AQ öncesi ağaç worktree ile).**
+
+| | AQ öncesi | AQ sonrası |
+|---|---|---|
+| tamamlanan hayat | 373 / 500 | **437 / 500** |
+| sağlık 0 iken yaşanan yıl | **7.100** | **156** (hepsi çözüm bekliyor) |
+| ortalama ölüm yaşı | 64,5 | **68,0** |
+| p25 / medyan / p75 | 57 / 67 / 75 | 65 / 71 / 75 |
+| 60 yaş öncesi ölüm | %29,8 | **%15,6** |
+| 80+ | %2,4 | %1,4 |
+
+**500 tam hayat ölçümü (34.733 yıl).** Sağlık 0 gören hayat 110 (%22,0); ilk 0 yaşı p25/medyan/p75 = 72/73/74; kritik durumdan kurtulma 87, ölüm 139 (kurtulma %38,5). Bant dağılımı: olağan %94,2 · kritik derecede düşük %2,5 · hayati tehlike %2,8 · acil %0,4. Hedefi sıfır olan sayaçların **tamamı sıfır**: sağlık 0 iken sessizce yaşanan yıl 0, kritik durum bypass 0, çifte ölüm 0, parasız soft lock 0, kritik durumda açık aktivite 0, vefat sonrası kalan kriz 0.
+
+#### 1 — Sağlık bantları: 26-100 / 11-25 / 1-10 / 0 doğru mu?
+
+Brief'in önerdiği bantlar olduğu gibi alındı. Olağan bandın altında ağır fiziksel eylem kapanıyor (koşu, ağırlık, cezaevi sporu — hafif yürüyüş ve esneme **açık kalıyor**); 1-10 bandında uzun tur ve elektif estetik de kapanıyor; 0'da zorunlu çözüm açılıyor.
+
+Soru: (A) bantlar doğru; (B) kritik bandın üst sınırı 26 fazla yüksek — ağır spor 20'nin altında kapansın yeter; (C) bant sayısı üçe insin (olağan / düşük / acil).
+
+#### 2 — Acil tabloyu atlatma ihtimali: taban %74, ölçülen kurtulma %38,5
+
+Zar sabit değil: yaş (12 altı +0,02 … 80 üstü −0,34), taşınan her kalıcı rahatsızlık (−0,09), daha önce atlatılmış her hayati tehlike (−0,11) ve seçimin kendi payı (acil servis +0,08, özel tedavi +0,16, evde bekle −0,18) hesaba katılıyor. Sınırlar 0,12-0,94: en iyi şartlarda bile garanti yok, en kötüsünde bile ihtimal var.
+
+Ölçülen sonuç: 226 kritik durumun 87'si kurtulmayla, 139'u ölümle bitti. Ölümlerin ortalama yaşı 73 civarı, yani bu **yaşlılık ölümünün** bir yolu oldu.
+
+Soru: (A) oranlar doğru; (B) kurtulma daha yüksek olsun (%50+) — ölüm yolu zaten `Mortality`'de var; (C) "evde bekle" seçeneği daha ağır cezalansın, tedaviye gitmek daha belirleyici olsun.
+
+#### 3 — Kurtulan karakterin sağlığı: 10-25 bandı
+
+Ne 100 (hiçbir şey olmamış gibi), ne 1 (ertesi yıl aynı tablo). Üst sınır bilerek olağan bandın altında: kurtulan karakter bir süre ağır iş ve elektif işlem yapamıyor. İleri yaşta (70+) 6 puan daha düşük açılıyor. Kalıcı ceza yok: toparlanma (D-116) normal yoldan işliyor ve ölçümde kritik banttaki yıllar bütün yılların %5,3'ü.
+
+Soru: (A) bant doğru; (B) daha yüksek olsun, kurtulan oyuncu cezalı hissetmesin; (C) kurtulmanın etkisi yıl sayısıyla da tutulsun (şu an süre tutulmuyor, etki yalnızca düşük sağlıkta kalmak).
+
+#### 4 — Toparlanmanın çukura oranı: %35, yıllık tavan 14, 70 üstü yarım
+
+Dişli düzeltmesinin kalbi bu. Sabit 7 artık **taban**; çukur derinse o yılın payı büyüyor ama 14'ü geçmiyor (yoksa sağlığı 2 olan karakter bir yılda 30'a çıkar ve kritik durumu atlatmanın ağırlığı kalmaz). İleri yaşta pay yarıya iniyor ama **sıfırlanmıyor**.
+
+Soru: (A) doğru; (B) pay daha küçük olsun, düşük sağlıktan çıkmak daha zor olsun; (C) toparlanma oyuncunun yaptığı bir şeye bağlansın (spor, sağlık merkezi) — şu an bedenin kendi işi.
+
+#### 5 — Toparlanma tavanı 71+ yaşta 30 (eskiden 0)
+
+Tavan artık yaşlanmanın kendi tabanının altına düşmüyor. Gerekçe kuralın kendisinden: yaşlanma sağlığı 30'un altına indirmiyorsa, "yaşlanmanın kalıcı kaybını geri vermez" diye tasarlanan tavan da 0 olamaz.
+
+Soru: (A) doğru; (B) 71+ için tavan 30 fazla cömert, 20 olsun; (C) tavan yaşla kademeli inmeye devam etsin (80'de 25, 90'da 20).
+
+#### 6 — Düşük sağlıkta ne kapanıyor: ağır aktivite, uzun tur, elektif işlem
+
+Ağır eylem işareti kataloğa `ActivityIntensity` olarak eklendi ve yalnızca **üç** eylem ağır işaretlendi (koşu, ağırlık, cezaevi sporu); devasa bir kondisyon sistemi kurulmadı. Tur sınırı kataloğun kendi `nights` değerinden okunuyor: 3 geceye kadar açık, üstü kapalı. Elektif estetik 1-10 bandında kapalı, 11-25 bandında açık ama mevcut risk motoru 1,8 kat çalışıyor. **Sağlık merkezi hiçbir bantta kapanmıyor** — tedavi yolu kapanırsa oyuncu çıkışsız kalır.
+
+Soru: (A) doğru; (B) daha çok eylem ağır sayılsın (dövüş dersleri, bazı eğlenceler); (C) risk çarpanı yerine kapı tamamen kapansın.
+
+#### 7 — İş tarafı: uzun yokluk işveren uyarısı doğuruyor
+
+Kritik durumu atlatan çalışan karakterin kaydına mevcut işveren uyarısı (D-078) yazılıyor; uyarı tek başına kimseyi işten atmıyor, mevcut işten çıkarılma ihtimaline en çok %16 pay ekliyor. Ayrıca düşük sağlıkta hastalık ihtimali **zaten** mevcut sistemde yükseliyordu; ikinci bir çarpan eklenmedi. Ölçüm: sağlık ≤25 olan yılların %24,8'inde rapor alınıyor, sağlık ≥70 olanların %6,9'unda.
+
+Soru: (A) doğru; (B) kritik durum doğrudan gelir kaybı da yazsın; (C) üst üste kritik durum işten çıkarılmaya götürsün.
+
+#### 8 — Mutluluğun ilk gerçek sonucu: motivasyon 0,85 / 0,70
+
+Denetlendi: mutluluk Paket AQ'dan önce **hiçbir sistemin girdisi değildi** — yalnızca hayat değerlendirmesinde ve sağlık raporunda sonuç olarak görünüyordu. İki yere kondu: zam/terfi talebinin kabul ihtimali ve okul ortalamasının zekâya doğru **yukarı** kayması. Aşağı kayma mutluluğa bakmıyor; "mutsuzum → notlarım düştü → daha mutsuzum" sarmalı kurulmadı. Karşı ağırlık olarak en alt bantta eğlencenin mutluluk getirisi +3 artıyor.
+
+Ölçüm: 34.733 yılın 196'sında mutluluk 0 görüldü; hiçbirinde ölüm ya da kendine zarar sonucu üretilmedi (kalıcı test).
+
+Soru: (A) çarpanlar doğru; (B) daha güçlü olsun, mutsuzluk gerçekten hissedilsin; (C) mutluluk ilişkilere de girsin (şu an bağ ayrı sistem, bilerek karıştırılmadı).
+
+#### 9 — Karizmanın mülakattaki rolü: ikinci şans ×0,7 / ×0,35
+
+Denetlendi: karizma meslek koşulunda (`minCharisma`), Finger eşleşmesinde, terfi talebinde ve sosyal medyada **zaten** kullanılıyordu; ikinci ceza eklenmedi. Tek boşluk mülakatın kendisiydi: sonuç bir bilgi sorusuna ve geçmiş sinerjisine bakıyor, karizmaya hiç bakmıyordu. Artık yalnızca **cevabı tutmayan** adayın geçmişiyle kurtulma ihtimalini ölçeklendiriyor. Doğru cevap veren aday hiçbir karizma bandında reddedilmiyor.
+
+Soru: (A) doğru; (B) karizma mülakatta daha belirleyici olsun; (C) karizma düşükken bazı meslekler listede hiç görünmesin (şu an gerekçesiyle kapalı görünüyor — D-095).
+
+#### 10 — Görünüş ve zekâ: boşluk bulunamadı, dokunulmadı
+
+Görünüş meslek koşulunda (mankenlik 80) ve Finger eşleşmesinde, zekâ okul ortalamasında, meslek koşulunda, sınavlarda ve kurslarda zaten kullanılıyor. Yeni bir etki eklenmedi; alakasız çapraz etki (kredi, aile, okul) üretilmediği kalıcı testle sabitlendi.
+
+Ölçüm: 34.733 yılda karizma, görünüş ve zekâ **hiçbir** yılda 0 görülmedi — yaşlanma tabanları (15/15/30) tutuyor, yani "90 yaşına geldi diye zekâ 0" durumu yok.
+
+Soru: (A) doğru, ekleme gerekmiyor; (B) görünüşün flört dışında bir alanı daha olsun; (C) zekânın gündelik kararlarda görünür bir payı olsun.
+
+#### 11 — `Mortality`'nin düşük sağlık çarpanı: denetlendi, dokunulmadı
+
+Kritik yol eklenince bu çarpanın çifte sayım olup olmadığı soruldu. Üst ucu 1,0'a çekilerek **ölçüldü**: 200 hayatta ortalama ölüm yaşı 58,4'ten 58,4'e, yani hiç değişmedi. Asıl sorun bu çarpan değil, hastalık/toparlanma dişlisiydi; o düzeltildikten sonra ortalama ölüm yaşı 68,0 oldu — AQ öncesindeki 64,5'in **üstünde**. Ölçüm bir sorun göstermediği için onaylı eğriye (D-036) dokunulmadı.
+
+Soru: (A) dokunulmaması doğru; (B) kritik yol artık düşük sağlık riskini taşıdığına göre çarpan kaldırılsın; (C) çarpan kalsın ama üst ucu 1,5'e çekilsin.
+
+#### 12 — 80+ yaşayan oranı %2,4'ten %1,4'e indi
+
+Tek yönlü bir iyileşme değil: ortalama ölüm yaşı ve erken ölüm oranı belirgin biçimde iyileşti ama çok uzun ömürler biraz azaldı (9 hayattan 6'ya; örnek küçük, gürültü bandında olabilir). Sebebi ileri yaşta sağlığın kritik banda inmesi ve orada bir karar noktası doğması.
+
+Soru: (A) kabul edilebilir; (B) 80 üstü için kurtulma ihtimali ayrıca yükseltilsin; (C) daha büyük bir örnekle (2000 hayat) yeniden ölçülsün, sonra karar verilsin.
+
+#### 13 — Özel tedavi ücreti: 240.000 ₺
+
+Kritik durumun en iyi seçeneği. Acil servis **bedelsiz** ve her yaşta açık (parasız oyuncu kilitlenmiyor — kalıcı test); özel tedavi parası olana açık ve atlatma ihtimaline +0,16 katıyor. Tutar 2026 ölçeğinde (`docs/ECONOMY_2026.md`) net yıllık asgari ücretin kabaca %70'i.
+
+Soru: (A) tutar doğru; (B) daha pahalı olsun, para gerçekten fark yaratsın; (C) ücret yaşa veya tablonun ağırlığına göre değişsin.
+
+**Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz. Ölçüm testi (`paket_aq_olcum_test.dart`) oranları **güzelleştirmiyor**; yalnızca ölçüyor ve değişmez ihlallerini (sağlık 0 iken sessizce yaşamak, bypass, çifte ölüm, soft lock) sıfırda tutuyor.
