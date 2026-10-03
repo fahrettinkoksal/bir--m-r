@@ -26,7 +26,22 @@ jobs:
     # üreticisini veriyor ve derleme "could not find any instance of Visual
     # Studio" hatasıyla düşüyor. VS 2022 içeren imaja sabitliyoruz.
     runs-on: windows-2022
-    timeout-minutes: 45
+    # **Paket AQ'da 45'ten 120'ye çıkarıldı.**
+    #
+    # Sebep ölçüldü: Paket AQ hastalık/toparlanma dişlisini düzeltti ve
+    # hayatlar uzadı — ortalama ölüm yaşı 64,5'ten 68,0'a, 500 hayattan
+    # ölümle tamamlananın sayısı 373'ten 437'ye çıktı. Süitin içinde
+    # yüzlerce tam hayat oynayan ölçüm testleri var; her hayat daha çok
+    # yıl sürdüğü için süit bütünüyle uzadı.
+    #
+    # 45 dakikalık bütçe iki koşuda da **testler sırasında** doldu ve iş
+    # iptal oldu. Logda tek bir hata yok, bütün satırlar yeşil: yani
+    # bütçe yetmiyordu, test kırılmıyordu. En son ölçümde Windows
+    # koşusu 45 dakikada süitin yaklaşık üçte ikisini bitirmişti.
+    #
+    # Yeni bütçe gözlemlenen ihtiyacın (≈80 dakika) üstünde bir pay
+    # bırakıyor; koşucu hızındaki değişkenliğe yer var.
+    timeout-minutes: 120
 
     defaults:
       run:
