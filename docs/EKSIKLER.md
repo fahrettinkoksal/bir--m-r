@@ -499,9 +499,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 
 **Bu bir öneridir; sıralamayı Faho ile ChatGPT verir (Q-137).**
 
-1. **Ölü hikâye izlerini araştır** — 10 iz hiç konmuyor. Yeni içerik
-   yazmadan önce yazılmış içeriğin çalıştığından emin olmak gerekir.
-   Ucuz, ve gerçek bir hata çıkarsa değerli.
+1. ~~**Ölü hikâye izlerini araştır**~~ **Yapıldı (Paket AR, 3 Ekim 2026).**
+   Ucuzdu ve gerçek bir hata çıktı: dört zincirin ilk halkası bir kişiyi
+   hikâye rolüne kilitlemek istiyordu ama olayların hiç kişi koşulu yoktu,
+   bu yüzden motor rolü **sessizce** kaydetmiyor ve devam halkaları her
+   oyuncuda ömür boyu ulaşılamaz kalıyordu. Üçü düzeltildi (ölü halka
+   13 → 10, "oyun hatası" sınıfı 4 → 1); kalan biri Q-190'da karar
+   bekliyor. Kalıcı bekçi: `app/test/paket_ar_rol_bekcisi_test.dart`.
+   Ayrıca ölçüldü: konan ama hiçbir olayın okumadığı **38 sessiz iz** var
+   (hata değil, yarım kalmış hikâye) ve sayı artamaz.
 2. **Çocukluk ve ergenlik olayları** (0-17 için 40-50 olay). Oyunun en
    fakir ve en duygusal dönemi.
 3. ~~**Suç ve hukuk sistemi.**~~ **Yapıldı (D-128, V1).** V2 için açık

@@ -43,6 +43,7 @@ import 'package:bir_omur/data/university_catalog.dart';
 import 'package:bir_omur/data/wedding_catalog.dart';
 import 'package:bir_omur/domain/casino/roulette.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
+import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/law/prison_life.dart';
@@ -144,6 +145,18 @@ class CoverageResult {
   /// Ekrana gerçekten gelen olayların kimlikleri.
   final Set<String> firedEvents = <String>{};
 
+  /// Yıl başında **aday havuza giren** olayların kimlikleri.
+  ///
+  /// "Çıkmadı" ile "çıkamazdı" ayrı şeyler: bir olay aday olup kurayı
+  /// kaybettiyse içerik sağlam, nadir. Hiç aday olamadıysa önünde başka
+  /// bir kapı var demektir.
+  final Set<String> eligibleEvents = <String>{};
+
+  /// Her izin **ilk konduğu yaş**. Bir zincirin ikinci halkası neden
+  /// çıkmadığını anlamak için gerekli: iz, olayın yaş penceresi
+  /// kapandıktan sonra konuyorsa halka ölüdür.
+  final Map<String, int> flagAges = <String, int>{};
+
   /// Aktivite kimliği → oyunun verdiği engel gerekçesi (son görülen).
   final Map<String, String> blockedActivities = <String, String>{};
 
@@ -218,6 +231,12 @@ CoverageResult runCoverageLife({
   while (!c.state!.deceased && guard++ < 8000) {
     final GameState s = c.state!;
     r.cities.add(s.player.currentCity);
+    if (s.player.age != islenenYas) {
+      r.eligibleEvents.addAll(const EventEngine().debugEligibleIds(s, rng));
+    }
+    for (final String iz in s.storyFlags) {
+      r.flagAges.putIfAbsent(iz, () => s.player.age);
+    }
     r.storyFlags.addAll(s.storyFlags);
     final ActiveEvent? acikOlay = s.pendingEvent;
     if (acikOlay != null) r.firedEvents.add(acikOlay.eventId);

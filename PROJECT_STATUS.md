@@ -4002,6 +4002,77 @@ saat saklardı. Düzeltmeden sonra ölçülen gerçek CI süresi **18 dakika**
 
 Hiçbir test silinmedi, atlanmadı, gevşetilmedi; ürün kodu değişmedi.
 
+## Paket AR: ölü hikâye izleri ve kırık rol kilitleri (3 Ekim 2026)
+
+`docs/EKSIKLER.md` §7'nin birinci maddesi: "Ölü hikâye izlerini araştır —
+10 iz hiç konmuyor." Araştırıldı; **gerçek bir üretim hatası** çıktı.
+
+### Ne ölçüldü
+
+40 kapsam hayatı (5 plan × 4 tohum × 2 denetim), olaylar oynanarak.
+
+| Ölçüm | AR öncesi | AR sonrası |
+| --- | --- | --- |
+| İz arayan olay | 67 | 67 |
+| Bunlardan hiç ekrana gelmeyen | 13 | **10** |
+| └ OYUN (aday havuza bile giremeyen) | 4 | **1** |
+| └ BOT (izi koyan seçimi bot seçmiyor) | 6 | 2 |
+| └ NORMAL (aday oldu, ağırlık kurasını kaybetti) | 6 | 7 |
+| Aday havuza giren farklı olay | — | 380 |
+| Konan ama hiçbir olayın okumadığı iz | 38 | 38 |
+
+Sınıflandırma **ölçülüyor, çıkarsanmıyor**: ilk denemede "iz zamanında
+kondu, demek ki kurayı kaybetti" diye varsaymıştım ve sonuç yanlış çıktı.
+`EventEngine.debugEligibleIds` her yıl çağrılarak olayın gerçekten aday
+havuza girip girmediği soruldu; cevap 0 OYUN'u 4 OYUN'a çevirdi.
+
+### Bulunan hata
+
+Motor bir kişiyi hikâye rolüne yalnızca **olayın bir kişisi varsa**
+kaydeder (`event_engine.dart`: `bondTargetId == null` ise `storyPeople`
+yazılmaz). Dört zincirin ilk halkası `rememberPersonAs` taşıyordu ama
+olayların hiç kişi koşulu yoktu. Rol sessizce kaydedilmiyor, o rolü arayan
+bütün devam halkaları **her oyuncuda** ömür boyu ulaşılamaz kalıyordu.
+Bot sınırı değil, üretim hatası.
+
+Üçü düzeltildi:
+
+- `suc_arkadasin_teklifi` — metin "**Arkadaşın** sesini alçalttı" diyor;
+  yaşayan arkadaş koşulu eklendi. `suc_teklif_ikinci_kez` OYUN → BOT
+  (yol açıldı, botun seçmediği suç seçimi kaldı), `suc_teklifi_ihbar`
+  listeden tamamen düştü.
+- `suc_borc_istendi` — metin "Bir **tanıdık** kapıya geldi" diyor; aynı
+  koşul eklendi. `suc_borc_odenmedi` ve `suc_borc_hukuk` açıldı.
+- `yaz_isi` — kilitlediği rolü **hiçbir olay aramıyordu**; iki yönden ölü
+  bildirim ve artık boş kalan `ExtraRoles` sınıfı kaldırıldı.
+
+Dördüncüsünde ayrıca rol yanlış seçimdeydi: kavgadan **çekilen** seçimde
+duruyordu, oysa devam olayı kavganın gerçekten olmasını istiyor — rol
+doğru kişiye bağlansa bile halka açılamazdı. Rol kavgaya giren seçime
+taşındı. Halka hâlâ uykuda: karşı taraf kayıtlı bir kişi değil ve onu
+kayda geçirmek tasarım kararı istiyor (**Q-190**).
+
+### Kalıcı bekçiler
+
+`app/test/paket_ar_rol_bekcisi_test.dart` — dört iddia: rol kilitleyen her
+seçimin kilitleyecek bir kişisi var; aranan her rolü kilitleyen bir seçim
+var; kilitlenen her rolü arayan bir olay var (ölü rol yok); istenen bağ
+türü tanınan bir tür. Q-190 kararını bekleyen tek halka `kKararBekleyen`
+listesinde adıyla duruyor; liste büyümeyecek.
+
+`app/test/paket_ar_hikaye_izi_test.dart` — aranan her izin bir üreticisi
+var; sessiz iz sayısı 38'i geçemez. Motor tarafında konan izler **elle
+yazılmıyor, `lib/` taranıyor**: elle tutulan ilk liste `evlendi` izini
+atlamış ve test canlı bir izi "hiç konmuyor" sanıp yanlış hata vermişti.
+
+`app/test/paket_ar_zincir_teshis_test.dart` — teşhis koşusu; sayı iddia
+etmez, yalnızca ölçümün çalıştığını iddia eder.
+
+Ürün dengesi değişmedi; hiçbir test silinmedi, atlanmadı, gevşetilmedi.
+Doğrulama: `flutter analyze` çıkış kodu 0; suç, zincir, katalog ve iz
+testleri (70 test) yeşil. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta Android SDK ve Windows araç zinciri yok.
+
 ## Açık sorular
 
 Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
@@ -4010,6 +4081,10 @@ etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
 `Mortality` çarpanı, 80+ oranındaki düşüş ve özel tedavi ücreti. Hiçbiri
 `DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
 de dokunulmadı.**
+
+Q-190: kavga ettiğin kişi kalıcı bir kayıt (tanışıklık) olsun mu?
+`suc_kavga_karsisindaki` halkası bu karara bağlı; önerilen (A) ama
+onaylanmadan uygulanmadı.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

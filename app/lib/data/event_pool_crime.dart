@@ -95,7 +95,6 @@ const List<GameEvent> kCrimeEvents = <GameEvent>[
         charisma: 2,
         bond: 3,
         addFlags: <String>{CrimeFlags.kavgadanCekildi},
-        rememberPersonAs: CrimeRoles.kavgaKarsisi,
       ),
       EventChoice(
         id: 'karsilik_ver',
@@ -107,6 +106,16 @@ const List<GameEvent> kCrimeEvents = <GameEvent>[
         charisma: 1,
         addFlags: <String>{CrimeFlags.kavgayaGirdi},
         crimeId: 'sokak_kavgasi',
+        // Rol buradaydı değil: `arkadasini_sok` seçimindeydi. Ama o seçim
+        // **kavgadan çekildi** izini koyuyor, devam olayı
+        // (`suc_kavga_karsisindaki`) ise `kavgayaGirdi` istiyor. Yani rol
+        // doğru kişiye bağlansa bile o halka hiç açılamazdı. Rol, kavganın
+        // gerçekten olduğu seçime taşındı (Paket AR/2).
+        //
+        // Halka hâlâ uykuda: karşı taraf kayıtlı bir kişi değil, bu yüzden
+        // motor rolü kaydedemiyor. "Kavga ettiğin kişi İlişkiler ekranında
+        // tanışıklık olarak görünsün mü?" sorusu tasarım kuyruğunda.
+        rememberPersonAs: CrimeRoles.kavgaKarsisi,
       ),
     ],
   ),
@@ -184,6 +193,13 @@ const List<GameEvent> kCrimeEvents = <GameEvent>[
       minAge: 17,
       maxAge: 40,
       maxComfort: FinancialComfort.zor,
+      // Metin "Arkadaşın sesini alçalttı" diyor: teklifi getiren belli
+      // bir arkadaştır. Bu koşul olmadan olayın kişisi olmuyordu, bu
+      // yüzden seçimlerin `rememberPersonAs: teklifEden` kilidi motorda
+      // sessizce düşüyor ve `suc_teklif_ikinci_kez` ile
+      // `suc_teklifi_ihbar` halkaları ömür boyu ulaşılamaz kalıyordu
+      // (Paket AR/2). Yazarın niyeti geri getirildi.
+      livingRelations: <RelationType>{RelationType.arkadas},
       forbiddenFlags: <String>{
         CrimeFlags.teklifiReddetti,
         CrimeFlags.teklifeUydu,
@@ -408,6 +424,11 @@ const List<GameEvent> kCrimeEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 22,
       minComfort: FinancialComfort.idare,
+      // Metin "Bir tanıdık kapıya geldi" diyor: borcu isteyen tanınan
+      // biridir. Kişi koşulu olmadığı için `rememberPersonAs: borclu`
+      // kilidi motorda düşüyordu ve `suc_borc_odenmedi` ile
+      // `suc_borc_hukuk` halkaları hiç açılamıyordu (Paket AR/2).
+      livingRelations: <RelationType>{RelationType.arkadas},
       forbiddenFlags: <String>{CrimeFlags.borcVerdi},
     ),
     weight: 6,

@@ -5618,3 +5618,54 @@ karşılaştırmadan **daha geniş** kapsam.
 Soru: (A) yeni ölçüt doğru; (B) terzi atölyesinin tabanı fazla yüksek,
 alt onlukta da sermayesini çıkaramayan hayatlar olmalı; (C) ölçüt
 tamamen kaldırılsın, dağılım yalnızca raporlansın.
+
+### Q-190 — Kavga ettiğin kişi kalıcı bir kayıt olsun mu?
+**Durum:** Karar bekliyor (öneri hazır). **Kaynak:** `app/lib/data/event_pool_crime.dart` (`suc_gece_tartismasi`, `suc_kavga_karsisindaki`), `app/test/paket_ar_rol_bekcisi_test.dart` (`kKararBekleyen`), [PR #80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+
+**Bağlam — bulunan hata.** Paket AR/2 ölçtü ki dört hikâye zincirinin ilk
+halkası bir kişiyi role kilitlemek istiyor ama olayın hiç kişi koşulu yok.
+Motor rolü yalnızca olayın kişisi varsa kaydeder; yoksa **sessizce**
+kaydetmez ve o rolü arayan bütün devam halkaları ömür boyu ulaşılamaz
+kalır. Bu bot sınırı değil, her oyuncunun başına gelen bir üretim hatasıydı.
+
+Üçü hata olarak düzeltildi (ölçüldü: ölü halka 13 → 10, OYUN sınıfı 4 → 1):
+- `suc_arkadasin_teklifi` — metin "**Arkadaşın** sesini alçalttı" diyor;
+  yaşayan arkadaş koşulu eklendi, zincir açıldı.
+- `suc_borc_istendi` — metin "Bir **tanıdık** kapıya geldi" diyor; aynı
+  koşul eklendi, `suc_borc_odenmedi` ve `suc_borc_hukuk` açıldı.
+- `yaz_isi` — kilitlediği rolü **hiçbir olay aramıyordu**; iki yönden ölü
+  bildirim kaldırıldı.
+
+**Kalan tek halka ve asıl soru.** `suc_gece_tartismasi` sokakta tartışılan
+**yabancıyı** `suc_kavga_karsisindaki` rolüne kilitlemek istiyor ("Aylar
+sonra markette karşılaştınız"). Rol ayrıca yanlış seçimdeydi: kavgadan
+**çekilen** seçimdeydi, oysa devam olayı kavganın gerçekten olmasını
+istiyor — yani rol doğru kişiye bağlansa bile halka açılamazdı. Rol AR/2'de
+kavgaya giren seçime taşındı. Ama karşı taraf oyunun tanıdığı bir kişi
+değil, bu yüzden halka hâlâ uykuda.
+
+**Mevcut kesin kural.** Oyunun kişi üretme yolu `startsFriendship`, ve adı
+`startAcquaintance`: kişi **tanışıklık** olarak İlişkiler ekranına girer,
+kalıcı kimliği olur, yıllar sonra geri dönebilir.
+
+**Seçenekler.**
+- **(A)** Kavgaya giren seçim yeni bir tanışıklık kaydı açsın. Zincir
+  çalışır; kişi yıllar sonra markette karşına çıkar, "selam ver" seçimi
+  bağ +6 ile gerçekten bir şeyi kapatır.
+- **(B)** `suc_kavga_karsisindaki` kişisiz yazılsın: `personRole` kaldırılır,
+  metin belirsiz biriyle anlatılır, bağ etkisi düşer.
+- **(C)** Zincir olduğu gibi uykuda kalsın.
+
+**Claude'un önerisi: (A).** Zincirin bütün anlamı "o kişi yıllar sonra geri
+döner"; kaydı olmayan biri geri dönemez. Tanışıklık statüsü de doğru ölçek
+— arkadaş değil, tanınan bir yüz.
+
+**(A)'nın bilinen pürüzü:** kavga ettiğin kişi İlişkiler ekranında
+"tanışıklık" diye listelenir. Mantıklı ama tuhaf görünebilir; bu yüzden
+karar sorulmadan uygulanmadı. Çözümü varsa: bu kayıtlara ayrı bir etiket
+(örn. "tanıdık yüz") ya da İlişkiler ekranında ayrı bir grup.
+
+**Varsayılan işlem:** Onay gelene kadar `suc_gece_tartismasi` halkası uykuda
+kalır ve `paket_ar_rol_bekcisi_test.dart` içindeki `kKararBekleyen` listesinde
+**tek madde** olarak durur. O liste büyümeyecek: yeni bir kırık halka
+eklenmek yerine düzeltilecek.

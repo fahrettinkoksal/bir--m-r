@@ -44,11 +44,12 @@ abstract final class ExtraFlags {
   static const String zamIstendi = 'zam_istendi';
 }
 
-/// Bu paketin kilitlediği kişi rolleri.
-abstract final class ExtraRoles {
-  /// Yaz işinde tanışılan usta/arkadaş.
-  static const String yazIsiArkadasi = 'yaz_isi_arkadasi';
-}
+// Not (Paket AR/2): burada bir `ExtraRoles.yazIsiArkadasi` rolü vardı ve
+// `yaz_isi/basla` seçimi onu kilitlemek istiyordu. Ama (a) o rolü arayan
+// hiçbir olay yazılmamıştı, (b) olayın kişi koşulu olmadığı için motor
+// rolü zaten hiç kaydetmiyordu. İki yönden de ölü olan bildirim
+// kaldırıldı. Yaz işinde tanışılan bir iş arkadaşının yıllar sonra geri
+// dönmesi yazılmaya değer bir içerik; tasarım kuyruğunda duruyor.
 
 const List<GameEvent> kExtraEvents = <GameEvent>[
   // =====================================================================
@@ -347,7 +348,6 @@ const List<GameEvent> kExtraEvents = <GameEvent>[
         health: -2,
         intelligence: 2,
         charisma: 2,
-        rememberPersonAs: ExtraRoles.yazIsiArkadasi,
       ),
       EventChoice(
         id: 'reddet',
