@@ -21,6 +21,7 @@ gömülüdür.
 | Fikir havuzu | Açık konular | `BACKLOG.md` |
 | Ölçümler | Yüzlerce tam hayat oynatılarak üretilmiş ölçüm tabloları | `PROJECT_STATUS.md` |
 | Testler | Hangi testin hangi sistemi koruduğu, test başlıklarıyla | `app/test` |
+| CI koşuları | Bütün GitHub Actions koşuları: sonuç, süre, dal, commit | `ci_runs.json` önbelleği |
 | Hata kayıtları | Hata düzeltmesi commit'leri | git |
 | Dokümanlar | Belgeler ve ne işe yaradıkları | `*.md`, `docs/*.md` |
 | Hareketler | Bütün commit geçmişi | git |
@@ -45,6 +46,18 @@ bağımlılık yok.
 
 Yalnızca veriyi görmek için: `python3 docs/planner/build.py --json`
 
+### CI geçmişi
+
+`build.py` **ağa çıkmaz**; CI koşularını `ci_runs.json` önbelleğinden okur.
+Önbelleği tazelemek için ayrıca:
+
+```
+python3 docs/planner/fetch_ci.py --all
+```
+
+`gh` komutu gerekir. Ağ kapalıysa ya da `gh` yoksa betik hata verir ve
+mevcut önbelleğe dokunmaz; pano da eski geçmişle üretilmeye devam eder.
+
 ## Her paketin sonunda
 
 1. `docs/planner/tasks.tsv` dosyasına paketin görevlerini ekleyin.
@@ -52,7 +65,10 @@ Yalnızca veriyi görmek için: `python3 docs/planner/build.py --json`
    `pending`. Başlık `Paket XX/n: …` kalıbını izlerse pano paketi ve
    modülü kendiliğinden tanır.
 2. `python3 docs/planner/build.py` çalıştırın.
-3. `docs/planner/index.html` ile `tasks.tsv`'yi commit'e ekleyin.
+3. İsterseniz `python3 docs/planner/fetch_ci.py --all` ile CI geçmişini
+   tazeleyin.
+4. `docs/planner/index.html`, `tasks.tsv` ve (tazelediyseniz)
+   `ci_runs.json` dosyalarını commit'e ekleyin.
 
 Karar, soru, backlog, kod ölçüsü, içerik ve commit verisi **elle
 güncellenmez** — betik onları her çalıştığında depodan yeniden okur.

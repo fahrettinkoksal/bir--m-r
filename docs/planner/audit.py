@@ -185,3 +185,40 @@ def ekranlar() -> list:
             })
     out.sort(key=lambda x: (x['kind'] != 'Ekran', -x['lines']))
     return out
+
+
+# ---------------------------------------------------------------------
+def ci_kosulari() -> dict:
+    """`ci_runs.json` önbelleğindeki CI koşu geçmişi.
+
+    Önbellek `fetch_ci.py` ile tazelenir. Burada ağa çıkılmaz: pano
+    çevrimdışı üretilebilsin diye geçmiş depoda duruyor.
+    """
+    import datetime
+    import json as _json
+    yol = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       'ci_runs.json')
+    if not os.path.isfile(yol):
+        return {'runs': [], 'cached': False}
+    ham = _json.load(open(yol, encoding='utf-8'))
+    out = []
+    for r in ham.get('runs', []):
+        bas, bit = r.get('run_started_at'), r.get('updated_at')
+        dk = None
+        if bas and bit:
+            try:
+                a = datetime.datetime.fromisoformat(bas.replace('Z', '+00:00'))
+                b = datetime.datetime.fromisoformat(bit.replace('Z', '+00:00'))
+                dk = round((b - a).total_seconds() / 60, 1)
+            except ValueError:
+                dk = None
+        out.append({
+            'n': r.get('run_number'), 'job': r.get('name', ''),
+            'branch': r.get('head_branch', ''), 'sha': (r.get('head_sha') or '')[:7],
+            'status': r.get('status', ''), 'result': r.get('conclusion') or 'devam',
+            'date': (r.get('created_at') or '')[:10],
+            'time': (r.get('created_at') or '')[11:16],
+            'minutes': dk, 'title': r.get('display_title', '')[:160],
+            'url': r.get('html_url', ''),
+        })
+    return {'runs': out, 'cached': True, 'total': ham.get('total')}

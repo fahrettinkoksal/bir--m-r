@@ -243,6 +243,9 @@ select.field{cursor:pointer}
 .palhint{padding:9px 18px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);
   font-family:var(--f-mono);display:flex;gap:14px;flex-wrap:wrap}
 
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:3px;display:block}
 .tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
 .tbl th{text-align:left;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
   color:var(--ink-3);font-weight:700;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -392,6 +395,7 @@ var VIEWS=[
   {sep:true},
   {id:'olcum',     ad:'Ölçümler',    ic:'∿', n:function(){return S.measureTables;}},
   {id:'testler',   ad:'Testler',     ic:'⊹', n:function(){return D.tests.length;}},
+  {id:'ci',        ad:'CI koşuları', ic:'◉', n:function(){return S.ciRuns;}},
   {id:'hatalar',   ad:'Hata kayıtları',ic:'⚑', n:function(){return S.bugCommits;}},
   {id:'dokuman',   ad:'Dokümanlar',  ic:'▤', n:function(){return D.docs.length;}},
   {id:'hareket',   ad:'Hareketler',  ic:'↻', n:function(){return D.commits.length;}}
@@ -461,7 +465,15 @@ function acSoru(q){
 function acCommit(c){
   ac(c.sha,c.subject, (c.bug?tag('t-warn','Hata düzeltmesi'):tag('t-mute','Geliştirme'))+
     (c.pack?'<span class="tag t-mute"><i></i>'+E(packAd(c.pack))+'</span>':''),
-    [['Tarih',c.date,true]].concat(c.body?[['Commit açıklaması',c.body]]:[]));
+    [['Tarih',c.date,true]]
+    .concat((function(){
+      var k=(D.ci||[]).filter(function(r){ return r.sha===c.sha; });
+      if(!k.length) return [];
+      return [['CI', k.map(function(r){
+        return ciBilgi(r.result).l+' — '+r.job+(r.minutes!=null?' ('+r.minutes+' dk)':'');
+      }).join('\n'), true]];
+    })())
+    .concat(c.body?[['Commit açıklaması',c.body]]:[]));
 }
 function acModul(m){
   ac(m.code,m.name,'',
@@ -499,6 +511,8 @@ function palVeri(){
     out.push({k:c.name,t:i.name,g:'İçerik',f:function(){acIcerik(c.key,ix);}}); }); });
   (D.pending||[]).forEach(function(p,ix){
     out.push({k:p.module,t:p.name+' = '+p.value,g:'Sayı',f:function(){acBekleyen(D.pending[ix]);}}); });
+  (D.ci||[]).forEach(function(r,ix){
+    out.push({k:'#'+r.n,t:r.title||r.job,g:'CI',f:function(){acCi(D.ci[ix]);}}); });
   (D.tests||[]).forEach(function(t,ix){
     out.push({k:t.module,t:t.name,g:'Test',f:function(){acTest(D.tests[ix]);}}); });
   (D.events||[]).forEach(function(e,ix){
@@ -581,6 +595,8 @@ function vOzet(){
     tile('Onay bekleyen sayı',S.pendingNumbers,S.pendingFiles+' dosyada · prototypeOnly')+
     tile('Test',S.testCases,S.testFiles+' dosya · '+Math.round(S.testLines/1000)+'B satır')+
     tile('Doküman',S.docs,S.docLines.toLocaleString('tr')+' satır belge')+
+    tile('CI koşusu',S.ciRuns,(S.ciByResult.success||0)+' yeşil · medyan '+
+      (S.ciMedianMinutes||'—')+' dk')+
     '</div>';
 
   h+='<section class="sect card"><h2>Günlük commit yoğunluğu</h2>'+
@@ -1116,11 +1132,140 @@ function vEkranlar(){
   return h;
 }
 
+/* ---------- CI KOŞULARI ---------- */
+var CIR={success:{l:'Yeşil',c:'t-ok',r:'var(--ok)'},
+         failure:{l:'Kırmızı',c:'t-warn',r:'var(--warn)'},
+         cancelled:{l:'İptal',c:'t-wait',r:'var(--wait)'},
+         devam:{l:'Sürüyor',c:'t-live',r:'var(--live)'}};
+var ciLimit=80;
+function ciBilgi(r){ return CIR[r]||{l:r,c:'t-mute',r:'var(--ink-3)'}; }
+function vCi(){
+  var q=tr(st.q), fs=F('res'), fj=F('job'), fb=F('br');
+  var runs=D.ci||[];
+  if(!runs.length) return '<p class="empty">CI geçmişi önbelleği yok. '+
+    'Depo kökünden <code>python3 docs/planner/fetch_ci.py --all</code> çalıştırın.</p>';
+  var isler={}, dallar={};
+  runs.forEach(function(r){ isler[r.job]=(isler[r.job]||0)+1;
+    dallar[r.branch]=(dallar[r.branch]||0)+1; });
+  var list=runs.filter(function(r){
+    if(fs&&r.result!==fs) return false;
+    if(fj&&r.job!==fj) return false;
+    if(fb&&r.branch!==fb) return false;
+    return !q || tr(r.sha+' '+r.title+' '+r.branch+' '+r.job).indexOf(q)>=0;
+  });
+  var enCok=Object.keys(dallar).sort(function(a,b){return dallar[b]-dallar[a];}).slice(0,8);
+  var h=araclar('Commit, başlık ya da dal ara…',
+    [{id:'res',hepsi:'Tüm sonuçlar',ops:Object.keys(CIR).filter(function(k){
+        return (S.ciByResult||{})[k];}).map(function(k){
+        return {v:k,l:CIR[k].l+' ('+S.ciByResult[k]+')'};})},
+     {id:'job',hepsi:'Tüm işler',ops:Object.keys(isler).map(function(k){
+        return {v:k,l:k+' ('+isler[k]+')'};})},
+     {id:'br',hepsi:'Tüm dallar',ops:enCok.map(function(k){
+        return {v:k,l:k.split('/').pop()+' ('+dallar[k]+')'};})}],
+    list.length+' / '+runs.length+' koşu');
+  var basari=Math.round((S.ciByResult.success||0)/runs.length*100);
+  h+='<div class="tiles" style="margin-bottom:14px">'+
+    tile('Koşu',runs.length,(S.ciByResult.success||0)+' yeşil · '+
+      (S.ciByResult.failure||0)+' kırmızı · '+(S.ciByResult.cancelled||0)+' iptal')+
+    tile('Yeşil oranı','%'+basari,'bütün dallar birlikte')+
+    tile('Medyan süre',(S.ciMedianMinutes||'—')+' dk','iş başına')+
+    tile('En uzun koşu',(S.ciMaxMinutes||'—')+' dk','sonsuz döngünün olduğu gün')+
+    '</div>';
+  h+='<section class="card"><h2>Günlük koşular ve sonuçları</h2>'+
+    '<p class="lead">Her sütun bir gün; renkler o günün sonuçları.</p>'+
+    '<div class="chartwrap"><div class="tip" id="tip"></div>'+ciGrafik(runs)+'</div>'+
+    '<div class="legend"><span><i style="background:var(--ok)"></i>Yeşil</span>'+
+    '<span><i style="background:var(--wait)"></i>İptal</span>'+
+    '<span><i style="background:var(--warn)"></i>Kırmızı</span></div></section>';
+  if(!list.length) return h+'<p class="empty" style="margin-top:14px">Eşleşen koşu yok.</p>';
+  var kesit=list.slice(0,ciLimit);
+  h+='<div class="rows" style="margin-top:16px">'+kesit.map(function(r){
+    var b=ciBilgi(r.result);
+    return '<button class="row" type="button" data-ci="'+runs.indexOf(r)+'">'+
+      '<span class="rid">#'+r.n+'</span><span class="rbody">'+
+      '<span class="rt">'+E(r.title||r.job)+'</span>'+
+      '<span class="rm">'+E(r.date)+' '+E(r.time)+' · '+E(r.job)+' · '+
+      E(r.sha)+' · '+E(r.branch.split('/').pop())+'</span></span>'+
+      '<span class="rr">'+(r.minutes!=null?'<span class="mono">'+r.minutes+' dk</span>':'')+
+      tag(b.c,b.l)+'</span></button>';
+  }).join('')+'</div>';
+  if(list.length>ciLimit) h+='<button class="more" id="more" type="button">Daha eski ('+
+    Math.min(80,list.length-ciLimit)+')</button>';
+  return h;
+}
+function ciGrafik(runs){
+  var gun={};
+  runs.forEach(function(r){
+    if(!r.date) return;
+    if(!gun[r.date]) gun[r.date]={success:0,failure:0,cancelled:0,devam:0};
+    if(gun[r.date][r.result]!=null) gun[r.date][r.result]++; else gun[r.date].devam++;
+  });
+  var g=Object.keys(gun).sort().map(function(d){
+    var v=gun[d]; v.date=d; v.top=v.success+v.failure+v.cancelled+v.devam; return v; });
+  var dar=window.innerWidth<700;
+  var W=dar?400:860,H=dar?150:190,L=dar?24:32,R=8,T=22,B=24,iw=W-L-R,ih=H-T-B;
+  var max=g.reduce(function(a,x){return Math.max(a,x.top);},0);
+  var top=Math.ceil(max/10)*10||10, step=iw/g.length, bw=Math.max(6,step-2);
+  var y=function(v){ return T+ih-(v/top)*ih; };
+  var s='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" '+
+    'preserveAspectRatio="xMidYMid meet" aria-label="Günlük CI koşuları, sonuca göre yığılmış; '+
+    'en yoğun gün '+max+' koşu">';
+  [0,top/2,top].forEach(function(v){
+    s+='<line class="grid" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/>'+
+      '<text class="axis" x="'+(L-6)+'" y="'+(y(v)+3.3).toFixed(1)+'" text-anchor="end">'+v+'</text>';
+  });
+  g.forEach(function(x,i){
+    var xx=L+i*step+(step-bw)/2, alt=T+ih;
+    var dizi=[['success','var(--ok)'],['cancelled','var(--wait)'],['failure','var(--warn)']];
+    s+='<g data-d="'+x.date+'" data-n="'+x.top+'" data-s="'+x.success+'" data-f="'+x.failure+
+       '" data-c="'+x.cancelled+'" data-x="'+(xx+bw/2).toFixed(1)+'" data-y="'+y(x.top).toFixed(1)+'">'+
+       '<rect class="hit" x="'+(L+i*step).toFixed(1)+'" y="'+T+'" width="'+step.toFixed(1)+
+       '" height="'+ih+'"/>';
+    dizi.forEach(function(p){
+      var n=x[p[0]]; if(!n) return;
+      var yuk=(n/top)*ih-2;
+      if(yuk<1.5) yuk=1.5;
+      s+='<rect x="'+xx.toFixed(1)+'" y="'+(alt-yuk).toFixed(1)+'" width="'+bw.toFixed(1)+
+         '" height="'+yuk.toFixed(1)+'" rx="2" fill="'+p[1]+'"/>';
+      alt-=(n/top)*ih;
+    });
+    s+='</g>';
+  });
+  [0,g.length-1].forEach(function(i){
+    var x=L+i*step+step/2;
+    s+='<text class="axis" x="'+x.toFixed(1)+'" y="'+(H-7)+'" text-anchor="'+
+      (i===0?'start':'end')+'">'+g[i].date.slice(5)+'</text>';
+  });
+  return s+'</svg>';
+}
+function ciGrafikBagla(){
+  var svg=document.querySelector('.chart'), tip=document.getElementById('tip');
+  if(!svg||!tip) return;
+  var vb=svg.getAttribute('viewBox').split(' '), W=+vb[2], H=+vb[3];
+  svg.addEventListener('pointermove',function(e){
+    var g=e.target.closest('g[data-d]'); if(!g){ tip.dataset.on='0'; return; }
+    var b=svg.getBoundingClientRect();
+    tip.textContent=g.dataset.d+' · '+g.dataset.s+' yeşil, '+g.dataset.f+
+      ' kırmızı, '+g.dataset.c+' iptal';
+    tip.style.left=(+g.dataset.x/W*b.width)+'px'; tip.style.top=(+g.dataset.y/H*b.height)+'px';
+    tip.dataset.on='1';
+  });
+  svg.addEventListener('pointerleave',function(){ tip.dataset.on='0'; });
+}
+function acCi(r){
+  var b=ciBilgi(r.result);
+  ac('KOŞU #'+r.n, r.title||r.job, tag(b.c,b.l),
+    [['İş',r.job,true],['Sonuç',b.l+(r.minutes!=null?'  ·  '+r.minutes+' dakika':''),true],
+     ['Ne zaman',r.date+' '+r.time,true],
+     ['Dal',r.branch,true],['Commit',r.sha,true],
+     ['GitHub',r.url,true]]);
+}
+
 /* ---------- çizim ---------- */
 var FN={ozet:vOzet,yol:vYol,gorevler:vGorevler,moduller:vModuller,kararlar:vKararlar,
         sorular:vSorular,backlog:vBacklog,hatalar:vHatalar,dokuman:vDok,hareket:vHareket,
         icerik:vIcerik,olaylar:vOlaylar,bekleyen:vBekleyen,olcum:vOlcum,
-        testler:vTestler,ekranlar:vEkranlar};
+        testler:vTestler,ekranlar:vEkranlar,ci:vCi};
 var ADI={}; VIEWS.forEach(function(v){ if(v.id) ADI[v.id]=v.ad; });
 var view=document.getElementById('view');
 function ciz(){
@@ -1138,15 +1283,17 @@ function ciz(){
     '</code> · HEAD <code>'+E(M.head)+'</code> · '+S.firstCommit+' – '+S.lastCommit+'.</p></footer>';
   araclarBagla();
   if(st.view==='ozet') grafikBagla();
+  if(st.view==='ci') ciGrafikBagla();
   var m=document.getElementById('more');
   if(m) m.addEventListener('click',function(){
     if(st.view==='olaylar') olayLimit+=60;
     else if(st.view==='bekleyen') bekLimit+=120;
+    else if(st.view==='ci') ciLimit+=80;
     else limit+=70;
     ciz(); });
 }
 view.addEventListener('click',function(e){
-  var b=e.target.closest('[data-task],[data-dec],[data-q],[data-sha],[data-mod],[data-pack],[data-set],[data-item],[data-ev],[data-pend],[data-test]');
+  var b=e.target.closest('[data-task],[data-dec],[data-q],[data-sha],[data-mod],[data-pack],[data-set],[data-item],[data-ev],[data-pend],[data-test],[data-ci]');
   if(!b) return;
   var d=b.dataset;
   if(d.task) return acGorev(D.tasks[+d.task-1]);
@@ -1160,10 +1307,12 @@ view.addEventListener('click',function(e){
   if(d.ev)  return acOlay(D.events[+d.ev]);
   if(d.pend) return acBekleyen(D.pending[+d.pend]);
   if(d.test) return acTest(D.tests[+d.test]);
+  if(d.ci)   return acCi(D.ci[+d.ci]);
 });
 var kova=window.innerWidth<700;
 window.addEventListener('resize',function(){
-  var y=window.innerWidth<700; if(y!==kova){ kova=y; if(st.view==='ozet') ciz(); }
+  var y=window.innerWidth<700;
+  if(y!==kova){ kova=y; if(st.view==='ozet'||st.view==='ci') ciz(); }
 });
 ciz();
 })();

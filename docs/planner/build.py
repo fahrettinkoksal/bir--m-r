@@ -490,12 +490,13 @@ def main() -> None:
     tst = audit.testler(test_coz)
     olcum = audit.olcumler()
     ekran = audit.ekranlar()
+    ci = audit.ci_kosulari()
     icerik_sayi = sum(x['count'] for x in ic)
     olay_havuz = Counter(o['pool'] for o in ol)
 
     veri = dict(
         events=ol, content=ic, pending=bekleyen, crossRef=capraz,
-        tests=tst, measures=olcum, screens=ekran,
+        tests=tst, measures=olcum, screens=ekran, ci=ci['runs'],
         meta=dict(
             project='Bir Ömür',
             subtitle='Türkiye odaklı mobil yaşam simülasyonu',
@@ -532,6 +533,13 @@ def main() -> None:
             testCases=sum(t['tests'] for t in tst),
             measureTables=len(olcum),
             screens=len(ekran),
+            ciRuns=len(ci['runs']),
+            ciByResult=dict(Counter(r['result'] for r in ci['runs'])),
+            ciMedianMinutes=(lambda v: v[len(v) // 2] if v else None)(
+                sorted(r['minutes'] for r in ci['runs']
+                       if r['minutes'] is not None)),
+            ciMaxMinutes=max([r['minutes'] for r in ci['runs']
+                              if r['minutes'] is not None] or [0]),
         ),
     )
     if '--json' in sys.argv:
@@ -560,6 +568,8 @@ def main() -> None:
         o['events'], o['contentItems'], o['commits']), file=sys.stderr)
     print('  {} onay bekleyen sayı · {} ölçüm tablosu · {} test'.format(
         o['pendingNumbers'], o['measureTables'], o['testCases']),
+        file=sys.stderr)
+    print('  {} CI koşusu (önbellek: fetch_ci.py)'.format(o['ciRuns']),
         file=sys.stderr)
 
 
