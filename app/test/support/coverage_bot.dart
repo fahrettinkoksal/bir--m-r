@@ -138,6 +138,12 @@ class CoverageResult {
   final Set<String> cities = <String>{};
   final Set<String> eventChoices = <String>{};
 
+  /// Hayat boyunca **konan** hikâye izleri (D-008, D-022).
+  final Set<String> storyFlags = <String>{};
+
+  /// Ekrana gerçekten gelen olayların kimlikleri.
+  final Set<String> firedEvents = <String>{};
+
   /// Aktivite kimliği → oyunun verdiği engel gerekçesi (son görülen).
   final Map<String, String> blockedActivities = <String, String>{};
 
@@ -212,6 +218,9 @@ CoverageResult runCoverageLife({
   while (!c.state!.deceased && guard++ < 8000) {
     final GameState s = c.state!;
     r.cities.add(s.player.currentCity);
+    r.storyFlags.addAll(s.storyFlags);
+    final ActiveEvent? acikOlay = s.pendingEvent;
+    if (acikOlay != null) r.firedEvents.add(acikOlay.eventId);
     if (s.player.stats.intelligence > r.maxIntelligence) {
       r.maxIntelligence = s.player.stats.intelligence;
     }
