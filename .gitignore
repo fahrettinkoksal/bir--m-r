@@ -1,0 +1,4 @@
+
+# Pano üreticisinin Python önbelleği
+__pycache__/
+*.pyc

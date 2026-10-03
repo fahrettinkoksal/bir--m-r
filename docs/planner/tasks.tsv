@@ -1,0 +1,156 @@
+# durum	başlık — Bir Ömür paket planı. Panonun görev kaynağı; her paket sonunda güncellenir.
+completed	Kadın oyuncuda askerlik "Yapılmadı" görünmesini düzelt
+completed	Pasif kalan seçimleri denetle ve gerekçelerini göster
+completed	Dövüş sanatı derslerinde tekrar tıklama yükünü azalt
+completed	Sosyal medyaya çapraz ve yıllık takipçi büyümesi ekle
+completed	Meslek kataloğunu genişlet (mankenlik, yazarlık vb.)
+completed	Çok adımlı olay zincirleri ekle
+completed	2026 ekonomi çıpasını merkezi yapıya kur
+completed	Meslek kataloğunu 30-35 işe genişlet ve maaşları kalibre et
+completed	Diğer para değerlerini kategori bazında 2026'ya kalibre et
+completed	Ev/araba ilanlarını yaşanan şehirle filtrele ve şehir fiyat katsayısı ekle
+completed	Q-103..Q-114 kesin kararlarını koda ve belgelere işle
+completed	Paket A: bildirilen beş hatayı düzelt
+completed	Paket B: statlar yaşla düşsün ve bakım gerektirsin
+completed	Paket C: sağlık bildirimleri, mini oyunlar ve estetik
+completed	Paket D: aktivite sonuç bildirimleri ve boşanma bildirimi
+completed	Paket E: mağaza ayrımı ve banka/kredi sistemi
+completed	Paket F: Finger, evcil hayvanlar, seyahat ve vasiyet menüsü
+completed	Paket G: bildirilen gerçek hatalar
+completed	Paket H: lise alan seçimi ve doğumda isim
+completed	Paket I: geri bildirim ve sonuç görünürlüğü
+completed	Paket J: stat sistemi hissedilir olsun
+completed	Paket K: sosyal medya, sponsorluk ve ün
+completed	Paket L: Finger ilişki niyeti ve flört durumu
+completed	Paket M: banka, harçlık ve konut kredisi
+completed	Paket N: evcil hayvan ve aile tepkileri
+completed	Paket Z: simülasyon ölçümleri ve son rapor
+completed	Paket O: bildirilen gerçek hatalar (hayvan bildirimi, çocuk adı, Finger sevgili yolu, okul kilidi)
+completed	Paket Q: sosyal medya — sponsorluk, ün düşüşü, kendiliğinden teklifler
+completed	Paket R: ilgilenilmeyen flört bitsin, torun/çocuk düğünü bildirimi
+completed	Paket S: yaşam gideri gerekçesi ve dökümü
+pending	Paket O: 10 ölü hikâye izini denetle ve sınıflandır
+completed	Paket V/3: kurgusal araç model adları
+completed	Paket V/4: 2. el araç pazarı (ilan detaylı)
+completed	Paket V/5: mağaza menülerini grupla ve stabilleştir
+completed	Paket V/6: kefalet, avukat ve cezaevi arkadaşlıkları
+completed	Paket V/7: üvey anne/baba
+completed	Paket W/1: lise sonrası üniversiteye başvurulamıyor
+completed	Paket X/1: İkiz gebelik
+completed	Paket X/2: Ailece (çoklu kişiyle) aktivite
+completed	Paket X/3: Katalogları genişlet
+completed	Paket Y/1: Kronik hastalık ve sağlık geçmişi
+completed	Paket Y/2: Eşin kendi hayatı
+completed	Paket Y/3: Meslekte ustalık ve itibar
+completed	Paket Y/4: Hayat hedefleri
+completed	Paket Z/1: Araç muayenesi, kaza ve satış
+completed	Paket Z/2: Kardeşin kendi hayatı ve yeğenler
+completed	Paket Z/3: Şehirlerin kendi karakteri
+completed	Paket Z/4: Hane bütçesi, nafaka ve velayet
+completed	Paket Z/5: Çete ve suç V2
+completed	Paket AA/1: Piyasa rejimi ve yatırım kataloğu
+completed	Paket AA/2: Portföy motoru (al/sat, maliyet, vadeli)
+completed	Paket AA/3: Servet, miras ve boşanma entegrasyonu
+completed	Paket AA/4: Yatırımlar ekranı
+completed	Paket AA/5: Piyasa haberi ve yatırım olayları
+completed	Paket AA/6: Ölçüm, kalibrasyon ve belgeler
+completed	Paket AB/1: Kiralama veri modeli ve kayıt
+completed	Paket AB/2: Kira motoru (piyasa bandı, adaylar, tahsilat)
+completed	Paket AB/3: Konut kondisyonu, bakım ve değer değişimi
+completed	Paket AB/4: Evlerim ekranı ve konut detayı
+completed	Paket AB/5: Konut ve kiracı olayları (25-35)
+completed	Paket AB/6: Ölçüm, exploit taraması ve belgeler
+completed	Erken altyapı: PlayerBot arketipleri ve karar mantığı
+completed	Erken altyapı: ürün simülasyonu 10x100 + 500 rastgele hayat
+completed	Erken altyapı: 10 uzun UI smoke hayatı
+completed	Erken altyapı: eski basit ölçümleri etiketle ve belgeleri güncelle
+completed	Teşhis A-C: servet bileşenleri, yaş eğrisi, arketip kırılımı
+completed	Teşhis D-F: karşılaştırmalı senaryolar, gider koruması, miras etkisi
+completed	Teşhis G-L: evlilik hunisi, blocker'lar, tekrar evlenme
+completed	Teşhis M-O: erişilmeyen meslek, işletme ve olaylar
+completed	Teşhis P-Q: botun kendi mekanikliğini eleştir
+completed	Paket AC/0: tekrar evlenme hata düzeltmesi
+completed	Paket AC/1: kurgusal şirketler ve olay katmanı
+completed	Paket AC/2: piyasa rejimi V2 — çok yıllı krizler
+completed	Paket AC/3: zorunlu satış, komisyon ve çeşitlendirme
+completed	Paket AC/4: min-max ve adversarial oyuncu testleri
+completed	Paket AC/5: enflasyon mimari raporu ve belgeler
+completed	Paket AD/0: gerçek tarih ve ekonomi bağımlılığı denetimi
+completed	Paket AD/1: sabit drift'i kaldır — getiri piyasadan doğsun
+completed	Paket AD/2: şirket sağlık modeli
+completed	Paket AD/3: yatırım karar mekanikleri — panik, FOMO, şirket sorunu
+completed	Paket AD/4: kontrolsüz borç hata düzeltmesi
+completed	Paket AD/5: servetin kullanımı — para harcama kanalları denetimi
+completed	Paket AD/6: 10 strateji × 20/40/60 ölçüm ve kalibrasyon
+completed	Paket AE/1: işletme veri modeli — fiyat, itibar, personel, bakım, reklam
+completed	Paket AE/2: talep ve kâr motoru — piyasa ortalaması, elastikiyet, gider
+completed	Paket AE/3: işletme olay motoru — türe özel olaylar, afet, denetim
+completed	Paket AE/4: yatırım önemli olay bildirimleri ve sert düşüş
+completed	Paket AE/5: işletme ekranı ve yıllık rapor
+completed	Paket AE/6: ölçüm — pasif/aktif/girişim+yatırım, fiyat ve reklam exploit
+completed	Paket AF/1: PerfectEntrepreneurBot — oyunu çözmeye çalışan bot
+completed	Paket AF/2: 14 işletmenin ROI tablosu (500+ hayat/işletme)
+completed	Paket AF/3: alt-mekanik abuse taraması (fiyat, reklam, bakım, personel)
+completed	Paket AF/4: maaş + işletme + yatırım fırsat maliyeti
+completed	Paket AF/5: 12 strateji × 1000 hayat ve dominans analizi
+completed	Paket AF/6: teşhis raporu ve çözüm önerileri
+completed	Paket AG/1: pozitif kuyruk — "iş tuttu" olayları ve kalıcı avantaj
+completed	Paket AG/2: serbest yazılımcılık — ortalamayı değil dağılımı düzelt
+completed	Paket AG/3: katalog kalibrasyonu — medyan payback 2,5-6 yıl
+completed	Paket AG/4: reklamın pozitif kuyruğu ve viral kampanya
+completed	Paket AG/5: başarı/başarısızlık hikâyesi bildirimleri
+completed	Paket AG/6: payback dağılımı ölçümü ve strateji karşılaştırması
+completed	Paket AG/7: testler ve rapor
+completed	Paket AH/1: botun kapsamını denetle — hangi sistemler gerçekten kullanılıyor
+completed	Paket AH/2: eksik teşhis alanlarını ekle (test tarafı)
+completed	Paket AH/3: 3000 tam hayat denetim testini yaz ve çalıştır
+completed	Paket AH/4: bulguları OYUN/BOT/NORMAL diye sınıflandır ve raporla
+completed	Paket AI/1: kod tabanlı kesin aksiyon envanteri
+completed	Paket AI/2: AbuseBot — save/load, aynı yıl spam, arbitraj, stat farming
+completed	Paket AJ/1: kurs ilerleme — ücretsiz dersler, ücret aşamaları, ödüller
+completed	Paket AL/1: 18 yaş altı spor masraflarına aile desteği
+completed	Paket AL/2: okul + spor çatışması
+completed	Paket AL/3: spor başarısı → sosyal medya
+completed	Paket AL/4: rivalry ün, sosyal ve rakip ilerlemesi
+completed	Paket AL/5: iş + spor zaman maliyeti
+completed	Paket AL/6: UI, save/load ve hedefli testler
+completed	Paket AL/7: 600 hedefli senaryo, belgeler ve rapor
+completed	Paket AM/1: JobType'a minHealth alanı ve gereksinim kontrolü
+completed	Paket AM/2: manken görünüş 80, sonradan düşüş kovmasın
+completed	Paket AM/3: combat sağlık kademeleri
+completed	Paket AM/4: fiziksel meslek eşikleri ve katalog denetimi
+completed	Paket AM/5: UI gereksinim gösterimi ve başvuru mesajları
+completed	Paket AM/6: hedefli testler, süit, CI ve rapor
+completed	Paket AN/1: tek kanonik ders anahtarı ve hata düzeltmesi
+completed	Paket AN/2: net gelirli ölçüm altyapısı (A/B/C kohortları)
+completed	Paket AN/3: raw etkiyi ayrıştır ve kalibre et
+completed	Paket AN/4: guard testleri ve eski hata testini çevir
+completed	Paket AN/5: Q-184 #1 kapat, süit, CI ve rapor
+completed	Paket AO/1: lineage modeli ve yeni bağ türleri
+completed	Paket AO/2: romantik yasak akrabalık ve miras yorumu
+completed	Paket AO/3: ebeveyn boşanması, hane ve çocuk üzerindeki etki
+completed	Paket AO/4: boşanma sonrası yeniden evlilik, üvey ve yarım kardeş
+completed	Paket AO/5: üvey çocuk ve kayın aile
+completed	Paket AO/6: eski eş co-parenting, velayet ve yaşlı bakımı
+completed	Paket AO/7: aile haberleri, buluşmalar, küslük ve korumalar
+completed	Paket AO/8: UI gruplama, kişi kartı, kuşak devamı ve save/load
+completed	Paket AO/9: hedefli testler, 500 aile hayatı, belgeler ve rapor
+completed	Paket AP/0: mevcut aile sistemlerini denetle (okuma turu)
+completed	Paket AP/1: çocuğun eşi gerçek Person + NPC evlilik modeli
+completed	Paket AP/2: çocuk boşanması, yeniden evlilik, dulluk
+completed	Paket AP/3: FamilyDramaProfile, spam koruması, FamilyThread
+completed	Paket AP/4: okul sorunları, başarılar, tavsiye etkisi
+completed	Paket AP/5: yetişkin çocuk para desteği, eve dönüş, şehir değişimi
+completed	Paket AP/6: gelin/damat, kayın aile olayları, torun soy bağı
+completed	Paket AP/7: kardeş parası, bakım çatışması, küslük, miras, co-parenting
+completed	Paket AP/8: UI — çocuk kartı, eşi, aile sorunu satırı, küslük sebebi
+completed	Paket AP/9: save/load, kuşak devamı, miras, romantik koruma
+completed	Paket AP/10: exploit korumaları, hedefli testler, 500 aile hayatı
+completed	Paket AP/11: Q-188, belgeler, süit, CI ve rapor
+completed	Paket AQ/0: mevcut sağlık sistemlerini denetle ve kök nedeni ölç
+completed	Paket AQ/1: kritik sağlık bantları ve sağlık 0 zorunlu çözümü
+completed	Paket AQ/2: yaş alma blokajı, tek ölüm, save/load
+completed	Paket AQ/3: düşük sağlıkta aktivite/seyahat/estetik/iş etkileri
+completed	Paket AQ/4: mutluluk/karizma/görünüş/zekâ düşük stat etkileri
+completed	Paket AQ/5: UI kritik sağlık göstergesi ve bildirim spam koruması
+in_progress	Paket AQ/6: testler, 500 hayat ölçümü, build, Q-189, rapor
