@@ -27,6 +27,7 @@ import 'event_pool_wealth.dart';
 import 'event_pool_property.dart';
 import 'event_pool_pet.dart';
 import 'event_pool_romance.dart';
+import 'event_pool_schoolyears.dart';
 import 'event_pool_social.dart';
 import 'event_pool_travel.dart';
 import 'event_pool_work.dart';
@@ -1734,5 +1735,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
   ...kCrimeEvents,
   // Yankı olayları: sessiz izleri okuyan taraf (Paket AS/2).
   ...kEchoEvents,
+  // 9-12 yaş: ortaokula giden yıllar (Paket AT).
+  ...kSchoolYearEvents,
   ...kFriendshipEvents,
 ];

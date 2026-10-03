@@ -4231,6 +4231,68 @@ katalog, çeşitlilik, öncelik ve zincir testleri yeşil. Tam süit koşuyor.
 **Android APK ya da Windows derlemesi bu pakette denenmedi** — yerel kapta
 araç zinciri yok, CI'da derlenir.
 
+## Paket AT: 9-12 yaş boşluğu — oyunun ilk on dakikası (3 Ekim 2026)
+
+**Neden bu iş.** Oynanabilirliği artırmak için nereye yazılacağı
+tahminle değil ölçümle seçildi. Olay havuzu yaş başına sayıldı ve
+"kapısız" olaylar ayrıldı — kapısız olay, iz/kişi/sahiplik/iş/okul
+koşulu olmayan, yani neredeyse her oyuncuda çıkabilen olay.
+
+| Yaş | Olay | Kapısız (önce) | Kapısız (sonra) |
+| --- | --- | --- | --- |
+| 0 | 31 | 1 | 1 |
+| 6 | 46 | 9 | 9 |
+| 9 | 73 → 86 | 15 | **29** |
+| 10 | 73 → 93 | 15 | **29** |
+| 11 | 75 → 95 | 16 | **30** |
+| 12 | 75 → 95 | 14 | **28** |
+| 17 | 111 → 112 | 22 | 22 |
+| 40 | 271 | 78 | 78 |
+
+İki bulgu: çocukluk orta yaşın onda biri kadar kapısız içerikle
+açılıyordu, ve `event_pool_childhood.dart` 1-8 ile 13-15 yaşlara
+yoğunlaşmış, **9-12 arası tamamen boştu.** Oysa bu dönem oyunun ilk on
+dakikası ve her oyuncunun gördüğü tek bölüm.
+
+**Yeni dosya:** `app/lib/data/event_pool_schoolyears.dart` — 9-12 yaş,
+**20 olay**. Dönemin karakteri: çocuk ilk kez kendi başına bir şey
+yapıyor. Henüz işi, parası ya da ilişkisi yok; elindeki tek şey
+kararları.
+
+Okul tarafı: karne günü, tahta nöbeti, ödev kopyası, beden dersinde
+takım seçimi, sınıf gezisi parası. Para tarafı: ilk kez yalnız markete
+gönderilme, bakkal veresiyesi, bir şey için biriktirme. Mahalle ve ev:
+bisikletle mahalle sınırı, sokak kedisi, üst kata taşınan çocuk, ekran
+süresi kavgası, sofra kurma, ilk kalın kitap, yaz tatilinde kuzenler.
+
+**İçinde dört küçük zincir var ve hepsi kendi izini kendi okuyor:**
+sorumluluk aldıysan tören görevi gelir; ödev kopyaladıysan tahtaya
+kalkarsın; veresiye aldıysan defter kapanır; biriktirdiysen kutu dolar
+ve o alışkanlık ergenlikte geri döner. Dışarıya sessiz iz
+bırakılmadı — bekçi testi ilk denemede bir tanesini yakaladı
+(`birikimTamamlandi` okunmuyordu) ve karşılığı yazıldı.
+
+**Ölçülen sonuç (40 kapsam hayatı):** iz arayan olay 67 → 83, bunlardan
+hiç çıkmayan 4, **OYUN sınıfı 0** — yani kırık zincir yok. Aday havuza
+giren farklı olay 392 → 411.
+
+Çıkmayan dördü ve nedenleri:
+- `yanki_yalnizlik_muhasebesi`, `yanki_ertelenen_tanisma` — okudukları
+  izler **bekâr kalan** oyuncuda konuyor ("evli değil ve ilişkide
+  değil" şartı). Kapsam botu her hayatta evleniyor, bu yüzden iz hiç
+  konmuyor. Gerçek oyuncu için erişilebilir ama **botla ölçülemiyor**;
+  bu bir ölçüm boşluğu, oyun hatası değil.
+- `zincir_ogretmen_3` — ZİNCİR'den **BOT**'a geçti: önceki halka artık
+  ekrana geliyor (Q-191'in etkisi), bot sadece o kolu seçmiyor.
+- `savundugun_arkadas` — aday oldu, ağırlık kurasını kaybetti. Nadir.
+
+Hâlâ fakir kalan bant **0-6 yaş** (1-9 kapısız olay). Bebeğin karar
+alanı doğası gereği dar; yine de sıradaki içerik boşluğu burası.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; iz, yankı, rol bekçisi,
+katalog ve zincir testleri yeşil (46 test). **Android APK ya da Windows
+derlemesi bu pakette denenmedi** — yerel kapta araç zinciri yok.
+
 ## Açık sorular
 
 Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
