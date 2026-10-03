@@ -4101,6 +4101,62 @@ Doğrulama: `flutter analyze` çıkış kodu 0; suç, zincir, katalog ve iz
 testleri (70 test) yeşil. **Android APK ya da Windows derlemesi bu
 pakette denenmedi** — yerel kapta Android SDK ve Windows araç zinciri yok.
 
+## Paket AS/1: "sessiz iz" sayısı yanlış şeyi sayıyordu (3 Ekim 2026)
+
+AR/1'in **38 sessiz iz** ölçümü abartılıydı. O test yalnızca katalog
+olaylarının `requiredFlags`/`forbiddenFlags` listesine bakıyor; motorun
+`state.storyFlags.contains(...)` ile okuduğu izleri saymıyordu.
+
+Ayrım yapıldı ve iki bağımsız taramayla (Dart testi ve ayrı bir betik)
+aynı sonuç çıktı:
+
+| Sınıf | Sayı | Anlamı |
+| --- | --- | --- |
+| Katalogda aranmayan iz | 38 | — |
+| **MEKANİK** | **6** | Motor okuyor, etkisi var, anlatısı yok |
+| **GERÇEKTEN SESSİZ** | **32** | Hiçbir yer okumuyor; yazılan iz boşa gidiyor |
+
+Mekanik olanlar: `sinav8_kaygi` / `sinav8_destek` / `sinav12_kaygi` /
+`sinav12_destek` (`EducationPath` sınav puanına ∓4 veriyor),
+`iste_sorumluluk_aldi` (`CareerProgress`), `kurs_destegi`
+(`CourseProgress` — iz varken yılda 4 ders ücretsiz). Bunlar eksik içerik
+değil; hikâye karşılığı olmayan mekanik.
+
+Bekçinin ölçütü 38'den **32**'ye indirildi: artık doğru şeyi sayıyor ve
+daha sıkı.
+
+### Yol boyunca iki tarama hatası (ikisi de kendi yazdığım kodda)
+
+**1. Noktasız sabit.** İlk tarama yalnızca `Sinif.sabit` biçimini
+arıyordu; aynı sınıf içinden kullanılan `storyFlags.contains(flagX)`
+biçimini kaçırdı ve `iste_sorumluluk_aldi` ile `kurs_destegi` yanlışlıkla
+"kimse okumuyor" sayıldı. Bağımsız betikle karşılaştırınca fark çıktı.
+
+**2. Çakışan ad kendini eziyordu.** Sabit haritası ad → tek değer olarak
+kuruluydu, bu yüzden çakışmayı bildiren test **0** basıyor ve yanlış
+güven veriyordu. Harita ad → **değer kümesi** yapıldı; gerçek sayı 6:
+
+| Ad | Değerler |
+| --- | --- |
+| `borcVerdi` | `orta_borc_verdi` \| `suc_borc_verdi` \| `zincir_borc_verdi` |
+| `arkadasaYardimEtti` | `arkadas_zor_gunde_yaninda` \| `arkadasa_yardim_etti` |
+| `isyerindeSustu` | `suc_isyerinde_sustu` \| `zincir_isyerinde_sustu` |
+
+Üç ayrı sınıfta aynı Dart adının farklı izleri var. Ada güvenen bir
+denetim bunları tek iz sanar ve "bu iz okunuyor" diye yanlış rapor verir —
+tam olarak AR paketinin bulduğu hata sınıfı. Yeni test bu tuzağı sabitler
+ve belirsiz adları **okunmuş saymaz** (denetimi gevşetmemek için
+muhafazakâr taraf).
+
+### Bundan sonrası
+
+32 sessiz iz, yazılmış ama karşılığı olmayan içerik: `bosandi`,
+`cocuk_sahibi`, `bekar_yalnizligi_secti` (dört seçim besliyor),
+`bekar_tanismayi_erteledi` (üç seçim), `bebeklik_*`, `esle_susuldu`,
+`torunla_vakit`, `zam_istendi`… Bunları okuyan olayları yazmak tasarım
+kararı istemiyor: iz zaten konuyor, eksik olan onu okuyan taraf. Sıradaki
+içerik paketinin hedef listesi bu.
+
 ## Açık sorular
 
 Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,

@@ -71,6 +71,79 @@ Set<String> _motordanKonanIzler() {
   return out;
 }
 
+/// Bütün `static const String` iz sabitleri: ad -> **değer kümesi**.
+///
+/// Küme olmak zorunda: `lib/` içinde aynı Dart adını taşıyan ama farklı
+/// değere sahip sabitler var (`ChainFlags.borcVerdi` =
+/// 'zincir_borclu_arkadas', `MidlifeFlags.borcVerdi` = 'orta_borc_verdi',
+/// `CrimeFlags.borcVerdi` = 'suc_borclu'). İlk denemede bu harita
+/// ad -> tek değer olarak kurulmuştu; çakışan ad kendini eziyordu ve
+/// çakışmayı bildiren test **0** basıyordu — yani yanlış güven veriyordu.
+Map<String, Set<String>> _izSabitleri() {
+  final Map<String, Set<String>> out = <String, Set<String>>{};
+  for (final FileSystemEntity f in Directory('lib').listSync(recursive: true)) {
+    if (f is! File || !f.path.endsWith('.dart')) continue;
+    for (final RegExpMatch m
+        in RegExp("static const String (\\w+)\\s*=\\s*'([^']+)'")
+            .allMatches(f.readAsStringSync())) {
+      out.putIfAbsent(m.group(1)!, () => <String>{}).add(m.group(2)!);
+    }
+  }
+  return out;
+}
+
+/// Motorun **okuduğu** izler — katalog dışında kalan bütün kontroller.
+///
+/// AR/1 "sessiz iz" derken yalnızca katalog olaylarının
+/// `requiredFlags`/`forbiddenFlags` listesine bakıyordu ve bu sayıyı
+/// **abartıyordu**: `sinav8_kaygi` hiçbir olay tarafından aranmıyor ama
+/// `EducationPath` onu okuyup sınav puanına −4 veriyor. Yani iz sessiz
+/// değil; yalnızca hikâye karşılığı yok. İki durum ayrı şeydir:
+///
+///   MEKANİK          — motor okuyor, etkisi var, anlatısı yok.
+///   GERÇEKTEN SESSİZ — hiçbir yer okumuyor; yazılan iz boşa gidiyor.
+///
+/// `storyFlags`/`flags` üzerindeki `contains` çağrıları taranır. Sabit adı
+/// hem `Sinif.sabit` hem **noktasız** `sabit` biçiminde geçebilir; ilk
+/// denemede yalnızca noktalı biçim aranıyordu ve
+/// `storyFlags.contains(flagSorumlulukAldi)` gözden kaçmıştı.
+///
+/// **Belirsiz ad okunmuş sayılmaz.** Bir ad birden fazla değere
+/// gösteriyorsa hangi izin okunduğu bu taramayla bilinemez; o izi
+/// "okunuyor" kabul etmek denetimi gevşetir ve ölü içeriği saklar. Bu
+/// yüzden belirsiz adlar atlanır ve [belirsiz] listesine yazılır.
+Set<String> _motordanOkunanIzler(
+  Map<String, Set<String>> sabitler, {
+  required Set<String> belirsiz,
+}) {
+  final RegExp cagri =
+      RegExp(r'(?:storyFlags|flags)\s*\.\s*contains\(\s*([^)]+?)\s*\)');
+  final RegExp ad = RegExp(r'\b(?:\w+\.)?(\w+)\b');
+  final RegExp metin = RegExp(r"'([^'\n]+)'");
+  final Set<String> out = <String>{};
+  for (final FileSystemEntity f in Directory('lib').listSync(recursive: true)) {
+    if (f is! File || !f.path.endsWith('.dart')) continue;
+    if (f.path.replaceAll(r'\', '/').contains('/data/')) continue;
+    final String kaynak = f.readAsStringSync();
+    for (final RegExpMatch m in cagri.allMatches(kaynak)) {
+      final String arg = m.group(1)!;
+      for (final RegExpMatch k in ad.allMatches(arg)) {
+        final Set<String>? v = sabitler[k.group(1)!];
+        if (v == null) continue;
+        if (v.length > 1) {
+          belirsiz.add('${k.group(1)} -> ${(v.toList()..sort()).join(" | ")}');
+          continue;
+        }
+        out.add(v.single);
+      }
+      for (final RegExpMatch k in metin.allMatches(arg)) {
+        out.add(k.group(1)!);
+      }
+    }
+  }
+  return out;
+}
+
 Set<String> _katalogdanKonan() {
   final Set<String> out = <String>{};
   for (final GameEvent e in kEventPool) {
@@ -141,26 +214,38 @@ void main() {
       );
     });
 
-    test('konan ama hiç okunmayan iz sayısı artmıyor', () {
-      final List<String> sessiz =
-          (konan.difference(aranan).difference(silinen)).toList()..sort();
-
-      // 3 Ekim 2026'da ölçülen durum. Bu izler bir seçimle konuyor ama
-      // hiçbir olay onları aramıyor: yazılmış hikâye yarım kalıyor.
-      // Hata değil, eksik. Sayı **artmamalı**: yeni iz koyan bir seçim
-      // yazıldıysa onu okuyan bir olay da yazılmalı.
-      // 3 Ekim 2026'da `kEventPool`'un tamamı üzerinde ölçüldü.
-      const int olculenSessiz = 38;
-      expect(
-        sessiz.length,
-        lessThanOrEqualTo(olculenSessiz),
-        reason: 'Konan ama okunmayan iz sayısı $olculenSessiz idi, '
-            'şimdi ${sessiz.length}. Yeni iz koyan seçim yazıldıysa onu '
-            'okuyan olay da yazılmalı.\nSessiz izler: ${sessiz.join(", ")}',
-      );
+    test('hiçbir yerin okumadığı iz sayısı artmıyor', () {
+      // Katalogda aranmayan izler. Bir kısmını motor okuyor olabilir — o
+      // zaman iz sessiz değil, yalnızca anlatısı yok. Ayrım AS/1'de
+      // ölçülmeye başladı; eski 38 sayısı yanlış şeyi sayıyordu.
+      final Set<String> katalogsuz =
+          konan.difference(aranan).difference(silinen);
+      final Set<String> belirsiz = <String>{};
+      final Set<String> motorOkur =
+          _motordanOkunanIzler(_izSabitleri(), belirsiz: belirsiz);
+      final List<String> mekanik = katalogsuz.intersection(motorOkur).toList()
+        ..sort();
+      final List<String> sessiz = katalogsuz.difference(motorOkur).toList()
+        ..sort();
 
       // ignore: avoid_print
-      print('\nSessiz izler (konan, okunmayan) — ${sessiz.length} adet:');
+      print('\n'
+          '======================================================\n'
+          'İZİN KARŞILIĞI VAR MI?\n'
+          '======================================================\n'
+          'Katalogda aranmayan iz             : ${katalogsuz.length}\n'
+          '  MEKANİK (motor okuyor)           : ${mekanik.length}\n'
+          '  GERÇEKTEN SESSİZ (kimse okumuyor): ${sessiz.length}');
+
+      // ignore: avoid_print
+      print('\nMEKANİK — etkisi var, hikâyesi yok:');
+      for (final String iz in mekanik) {
+        // ignore: avoid_print
+        print('  $iz');
+      }
+
+      // ignore: avoid_print
+      print('\nGERÇEKTEN SESSİZ — yazılan iz boşa gidiyor:');
       for (final String iz in sessiz) {
         final List<String> koyan = <String>[];
         for (final GameEvent e in kEventPool) {
@@ -171,8 +256,67 @@ void main() {
         // ignore: avoid_print
         print('  $iz  <- ${koyan.isEmpty ? "motor" : koyan.join(", ")}');
       }
+
+      if (belirsiz.isNotEmpty) {
+        // Belirsiz ad okunmuş sayılmadı; burada görünür kalsın ki elle
+        // bakılabilsin.
+        // ignore: avoid_print
+        print('\nBelirsiz sabit adı (okunmuş SAYILMADI):');
+        for (final String b in (belirsiz.toList()..sort())) {
+          // ignore: avoid_print
+          print('  $b');
+        }
+      }
+
+      // 3 Ekim 2026'da ölçülen durum (AS/1). Bağımsız bir taramayla da
+      // doğrulandı: 6 mekanik, 32 sessiz. Hata değil, eksik: yazılmış bir
+      // iz hiçbir yerde okunmuyor. Sayı **artmamalı** — yeni iz koyan bir
+      // seçim yazıldıysa onu okuyan bir olay ya da motor kuralı da
+      // yazılmalı.
+      const int olculenSessiz = 32;
+      expect(
+        sessiz.length,
+        lessThanOrEqualTo(olculenSessiz),
+        reason: 'Hiçbir yerin okumadığı iz sayısı $olculenSessiz idi, '
+            'şimdi ${sessiz.length}. Yeni iz koyan seçim yazıldıysa onu '
+            'okuyan olay ya da motor kuralı da yazılmalı.\n'
+            'Sessiz izler: ${sessiz.join(", ")}',
+      );
+
+      // Tarama bozulursa sayı sahte biçimde düşer ve test boşa geçer.
+      expect(motorOkur, isNotEmpty,
+          reason: 'Motorun okuduğu hiç iz bulunamadı; contains taraması '
+              'bozulmuş olabilir.');
     });
 
+    test('aynı Dart adını paylaşan iz sabitleri belgelenmiş', () {
+      // `ChainFlags.borcVerdi` = 'zincir_borclu_arkadas',
+      // `MidlifeFlags.borcVerdi` = 'orta_borc_verdi' ve
+      // `CrimeFlags.borcVerdi` = 'suc_borclu' üç ayrı izdir. Ada güvenen
+      // bir denetim bunları tek iz sanar ve "bu iz okunuyor" diye yanlış
+      // rapor verir. Bu test tuzağı görünür tutar.
+      final Map<String, Set<String>> sabitler = _izSabitleri();
+      final List<String> cakisan = sabitler.entries
+          .where((MapEntry<String, Set<String>> e) => e.value.length > 1)
+          .map((MapEntry<String, Set<String>> e) =>
+              '${e.key} -> ${(e.value.toList()..sort()).join(" | ")}')
+          .toList()
+        ..sort();
+      // ignore: avoid_print
+      print('\nAynı Dart adını paylaşan iz sabitleri (${cakisan.length}):');
+      for (final String c in cakisan) {
+        // ignore: avoid_print
+        print('  $c');
+      }
+      // Tuzağın hâlâ var olduğunu sabitle: çakışma **sıfıra düşerse** bu
+      // testin varlık sebebi kalkar, ama o zamana kadar denetimlerin
+      // değer üzerinden çalışması zorunludur.
+      expect(sabitler, isNotEmpty, reason: 'İz sabitleri taraması boş.');
+      expect(cakisan, isNotEmpty,
+          reason: 'Çakışan ad bulunamadı. Tarama ad -> **küme** kurmuyorsa '
+              'çakışma kendini ezer ve bu test yanlış güven verir; '
+              '_izSabitleri() gerçekten küme döndürüyor mu?');
+    });
     test('her izin en az bir koyan ya da arayan tarafı var', () {
       // Katalogda geçen ama ne konan ne aranan bir iz kalmamalı; böyle
       // bir iz yalnızca yazım hatası olabilir.

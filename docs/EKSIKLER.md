@@ -506,8 +506,11 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    oyuncuda ömür boyu ulaşılamaz kalıyordu. Üçü düzeltildi (ölü halka
    13 → 10, "oyun hatası" sınıfı 4 → 1); kalan biri Q-190'da karar
    bekliyor. Kalıcı bekçi: `app/test/paket_ar_rol_bekcisi_test.dart`.
-   Ayrıca ölçüldü: konan ama hiçbir olayın okumadığı **38 sessiz iz** var
-   (hata değil, yarım kalmış hikâye) ve sayı artamaz.
+   Ayrıca ölçüldü (AS/1'de düzeltildi): katalogda aranmayan 38 izin
+   **6'sı mekanik** (motor okuyor, etkisi var, anlatısı yok) ve
+   **32'si gerçekten sessiz** (hiçbir yer okumuyor). O 32 iz yazılmış ama
+   karşılığı olmayan içerik ve sıradaki içerik paketinin hedef listesi.
+   Bekçi ölçütü artık 32; sayı artamaz.
 2. **Çocukluk ve ergenlik olayları** (0-17 için 40-50 olay). Oyunun en
    fakir ve en duygusal dönemi.
 3. ~~**Suç ve hukuk sistemi.**~~ **Yapıldı (D-128, V1).** V2 için açık
