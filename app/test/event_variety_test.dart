@@ -8,7 +8,6 @@ import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,13 +43,26 @@ Map<String, int> hayatOyna(int seed, {int maxAge = 95}) {
     while (c.state!.hasNotice) {
       c.dismissNotice();
     }
-    if (c.state!.hasPendingCrisis) {
-      final PendingCrisis k = c.state!.pendingCrisis!;
-      c.respondToCrisis(k.crisis!.choices.first.id);
-    }
+    // **Paket AQ'da düzeltildi: bu satır sonsuz döngü üretiyordu.**
+    //
+    // Eskiden krizin **ilk** seçeneği karşılanabilir mi diye bakılmadan
+    // seçiliyordu. `dusme` gibi krizlerde ilk seçenek para istiyor
+    // (`needsMoney`); parasız oyuncuda yanıt uygulanmıyor ve kriz açık
+    // kalıyor. Paket AQ'dan önce bu sessizce geçiyordu çünkü `ageUp`
+    // bekleyen krizi denetlemiyordu — kriz ekranda asılı kalırken yıl
+    // ilerliyordu. Artık ilerlemiyor, yani dış döngü hiç bitmiyordu:
+    // tam süit bu dosyada takıldı ve CI 45 dakikalık bütçesinde iptal
+    // oldu.
+    //
+    // Gerçek oyuncu da karşılanabilir bir seçenek seçmek zorunda;
+    // yardımcı onu yapıyor. Dış döngüye ayrıca bir koruma kondu: yaş
+    // ilerlemiyorsa hayat biter, test asla kilitlenmez.
+    resolvePendingCrisis(c);
     // Lise alanı seçilmeden yaş atlanmaz (D-094).
     resolveEducationChoices(c);
+    final int yasOnce = c.state!.player.age;
     c.ageUp();
+    if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
   }
   c.dispose();
   return gorulen;

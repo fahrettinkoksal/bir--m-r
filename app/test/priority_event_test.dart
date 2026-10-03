@@ -7,7 +7,6 @@ import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -199,13 +198,16 @@ void main() {
           while (c.state!.hasNotice) {
             c.dismissNotice();
           }
-          if (c.state!.hasPendingCrisis) {
-            final PendingCrisis k = c.state!.pendingCrisis!;
-            c.respondToCrisis(k.crisis!.choices.first.id);
-          }
+          // Karşılanabilir seçenek seçilir (Paket AQ): krizin ilk
+          // seçeneği para isteyebiliyor ve ödenemeyen yanıt krizi açık
+          // bırakıyor. Paket AQ'dan sonra açık kriz yaş almayı
+          // kilitlediği için bu dış döngüyü sonsuza çeviriyordu.
+          resolvePendingCrisis(c);
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
           resolveEducationChoices(c);
+          final int yasOnce = c.state!.player.age;
           c.ageUp();
+          if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
         }
         if (v8) ulasan8++;
         if (v12) ulasan12++;

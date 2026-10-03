@@ -171,17 +171,17 @@ void resolveEducationChoices(GameController controller) {
 /// Her zaman **karşılanabilir** bir seçenek seçer; her krizde böyle bir
 /// seçenek olduğu kalıcı bir testle güvenceye alınmıştır. Yanıt verildiyse
 /// `true` döner.
-bool resolvePendingCrisis(GameController controller) {
+bool resolvePendingCrisis(GameController controller, {bool preferLast = false}) {
   final PendingCrisis? bekleyen = controller.state?.pendingCrisis;
   if (bekleyen == null) return false;
   final HealthCrisis? kriz = bekleyen.crisis;
   if (kriz == null) return false;
-  for (final CrisisChoice secenek in kriz.choices) {
-    if (!controller.canChooseCrisis(secenek)) continue;
-    controller.respondToCrisis(secenek.id);
-    return true;
-  }
-  return false;
+  final List<CrisisChoice> acik = kriz.choices
+      .where(controller.canChooseCrisis)
+      .toList(growable: false);
+  if (acik.isEmpty) return false;
+  controller.respondToCrisis(preferLast ? acik.last.id : acik.first.id);
+  return true;
 }
 
 /// Ekranda açık bir eğitim seçimi penceresi varsa **oyuncunun yapacağını**

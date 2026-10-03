@@ -37,9 +37,10 @@ bool sevgiliOldu(int seed) {
         c.dismissNotice();
       }
     }
-    if (c.state!.hasPendingCrisis) {
-      c.respondToCrisis(c.state!.pendingCrisis!.crisis!.choices.last.id);
-    }
+    // Karşılanabilir seçeneklerin **sonuncusu** seçilir (Paket AQ):
+    // testin özgün niyeti son seçenekti, ama ödenemeyen bir yanıt krizi
+    // açık bırakıyor ve açık kriz artık yaş almayı kilitliyor.
+    resolvePendingCrisis(c, preferLast: true);
     for (final Person p in c.state!.people) {
       if (p.relation == RelationType.sevgili || p.relation == RelationType.es) {
         oldu = true;
@@ -47,7 +48,9 @@ bool sevgiliOldu(int seed) {
     }
     // Lise alanı seçilmeden yaş atlanmaz (D-094).
     resolveEducationChoices(c);
+    final int yasOnce = c.state!.player.age;
     c.ageUp();
+    if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
   }
   return oldu;
 }
