@@ -7,9 +7,10 @@ import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 /// Dönüm noktası önceliği (Paket 21).
 ///
@@ -197,11 +198,16 @@ void main() {
           while (c.state!.hasNotice) {
             c.dismissNotice();
           }
-          if (c.state!.hasPendingCrisis) {
-            final PendingCrisis k = c.state!.pendingCrisis!;
-            c.respondToCrisis(k.crisis!.choices.first.id);
-          }
+          // Karşılanabilir seçenek seçilir (Paket AQ): krizin ilk
+          // seçeneği para isteyebiliyor ve ödenemeyen yanıt krizi açık
+          // bırakıyor. Paket AQ'dan sonra açık kriz yaş almayı
+          // kilitlediği için bu dış döngüyü sonsuza çeviriyordu.
+          resolvePendingCrisis(c);
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(c);
+          final int yasOnce = c.state!.player.age;
           c.ageUp();
+          if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
         }
         if (v8) ulasan8++;
         if (v12) ulasan12++;
@@ -212,9 +218,58 @@ void main() {
 
       expect(ulasan8, greaterThan(0));
       expect(ulasan12, greaterThan(0));
-      // Ölçümde bu oran %38 ve %28'di; öncelikle birlikte herkes görmeli.
-      expect(goren8, ulasan8, reason: '8. sınıfa ulaşan herkes görmeli');
-      expect(goren12, ulasan12, reason: '12. sınıfa ulaşan herkes görmeli');
+
+      // Paket AP notu — iddia **daraltıldı ve bir yerde güçlendirildi**.
+      //
+      // Eskiden burada "ulaşan herkes görür" yazıyordu ve geçiyordu. Ama
+      // motor bunu hiçbir zaman garanti etmedi: `priority` ağırlığı
+      // 120^kademe ile çarpıyor, yani öncelikli olay "neredeyse kesin"
+      // çıkıyor — kesin değil. `event_engine.dart` bunu açıkça böyle
+      // yazıyor.
+      //
+      // Paket AP zar sırasını kaydırdığı için 20 tohumdan birinde
+      // (t=18) sınav olayı kaybetti. Ölçtüm: o hayatta oyuncu 12.
+      // sınıfta **tek yıl** kalıyor (17 yaşında) ve o yıl ağırlıklı
+      // çekiliş priority-0 bir olaya düştü. Yani eski iddia kurayla
+      // geçiyordu.
+      //
+      // Doğru koruma iki parçalı:
+      //
+      // 1. **Mekanizma**, zarla değil kesin: sınav olayının etkin
+      //    ağırlığı, havuzdaki **bütün** priority-0 olayların toplam
+      //    ağırlığının onlarca katı olmalı. Ölçüldü: sınav olayı
+      //    86.400-129.600 bandında, havuzun tamamındaki priority-0
+      //    toplamı 1.738 — yani en düşük sınav olayında bile ~50 kat.
+      //    Gerçek bir yılda rakiplerin çoğu uygun bile olmadığı için
+      //    pay daha da yüksek. Bu "neredeyse kesin"in ölçülebilir hâli
+      //    ve zar sırasından bağımsız. Eşik 40 kat: ölçülen en düşük
+      //    oranın (49,7) altında ama hâlâ ezici.
+      // 2. **Uçtan uca**: ulaşanların ezici çoğunluğu görmeli. Tek bir
+      //    şanssız çekiliş testi kırmasın ama oran da düşmesin.
+      expect(goren8 / ulasan8, greaterThanOrEqualTo(0.9),
+          reason: '8. sınıf: $goren8/$ulasan8');
+      expect(goren12 / ulasan12, greaterThanOrEqualTo(0.9),
+          reason: '12. sınıf: $goren12/$ulasan12');
+    });
+
+    test('sınav olayının ağırlığı penceresindeki rakipleri eziyor', () {
+      // Mekanizma testi: zar yok, ölçüm yok — doğrudan motorun kendi
+      // ağırlık fonksiyonu.
+      final GameState s =
+          LifeGenerator.seeded(5).generate(mode: StartMode.tamamenRastgele);
+      for (final GameEvent sinav in kExamEvents) {
+        final double sinavAgirligi =
+            EventEngine.prototypeOnlyEffectiveWeight(s, sinav);
+        double rakipToplami = 0;
+        for (final GameEvent e in kEventPool) {
+          if (e.id == sinav.id) continue;
+          if (e.priority > 0) continue;
+          rakipToplami += EventEngine.prototypeOnlyEffectiveWeight(s, e);
+        }
+        expect(sinavAgirligi, greaterThan(rakipToplami * 40),
+            reason: '${sinav.id}: ağırlık $sinavAgirligi, '
+                'priority-0 rakipler toplamı $rakipToplami');
+      }
     });
   });
 }

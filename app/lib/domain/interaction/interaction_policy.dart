@@ -70,11 +70,18 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.sinifArkadasi:
       return _temel.union(<InteractionKind>{InteractionKind.hediyeVer});
 
+    // Ünlüyle gündelik hayatta vakit geçirilmez; temas sosyal medya
+    // üzerinden kurulur. Burada yalnızca sohbet anlamlıdır.
+    case RelationType.unlu:
+      return const <InteractionKind>{InteractionKind.sohbet};
+
     case RelationType.ogretmen:
       return _ogretmen;
 
     case RelationType.arkadas:
     case RelationType.sevgili:
+    // Flörtle de vakit geçirilir, sohbet edilir, hediye alınır (D-107).
+    case RelationType.flort:
       return _arkadas;
 
     // İş arkadaşıyla vakit geçirilir ve sohbet edilir; para istemek iş
@@ -101,17 +108,91 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.cocuk:
       return _arkadas;
 
-    // Torunla vakit geçirilir, sohbet edilir ve hediye verilir; torundan
-    // para veya hediye istemek anlamlı değildir (Paket 12).
+    // Torun ve yeğenle vakit geçirilir, sohbet edilir ve hediye verilir;
+    // onlardan para veya hediye istemek anlamlı değildir (Paket 12,
+    // D-087).
     case RelationType.torun:
+    case RelationType.yegen:
       return const <InteractionKind>{
         InteractionKind.vakitGecir,
         InteractionKind.sohbet,
         InteractionKind.hediyeVer,
       };
 
-    case RelationType.eskiSevgili:
-    case RelationType.eskiEs:
+    // Koğuş arkadaşıyla vakit geçirilir ve sohbet edilir (D-140).
+    // İçeride hediye alışverişi yoktur; dışarıda da bu bağ arkadaşlık
+    // gibi işler ama para/hediye kapıları açılmaz.
+    case RelationType.kogusArkadasi:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+      };
+
+    // Üvey ebeveynle aynı evde yaşanır: vakit geçirilir, sohbet edilir,
+    // hediyeleşilir. Para istemek bağa göre açılır ama başta kapalıdır;
+    // bu sürümde aile kapılarının hepsi açık (D-141).
+    case RelationType.uveyAnne:
+    case RelationType.uveyBaba:
+      return _aile;
+
+    // --- Paket AO: Aile V2 -------------------------------------------
+
+    // Üvey ve yarım kardeş: aynı evde büyüyen kardeşlerdir. Biyolojik
+    // kardeşle aynı kapılar açılır — ikisi arasındaki fark kan bağında
+    // ve mirastadır, gündelik ilişkide değil (§11).
+    case RelationType.uveyKardes:
+    case RelationType.yariKardes:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+        InteractionKind.hediyeVer,
+        InteractionKind.hediyeIste,
+      };
+
+    // Üvey çocuk: çocukla aynı kapılar. Bağ **düşük başlar** ve zamanla
+    // kurulur (§20); açık olan kapı bağın kendisini hazır vermez.
+    case RelationType.uveyCocuk:
+      return _arkadas;
+
+    // Kayınvalide / kayınpeder (§23): vakit geçirilir, sohbet edilir,
+    // hediye verilir. **Para istemek açılmaz** — brief bunu bu pakette
+    // bilerek dışarıda bıraktı, yüksek yakınlıkta ayrı bir karar konusu.
+    case RelationType.kayinvalide:
+    case RelationType.kayinpeder:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+        InteractionKind.hediyeVer,
+      };
+
+    // --- Paket AP: aile dramaları ------------------------------------
+
+    // Gelin / damat (§24): vakit geçirilir, sohbet edilir, hediye
+    // verilir. **Para/hediye istemek açılmaz** — çocuğunun eşinden para
+    // istemek bu sürümün tasarladığı bir ilişki değil.
+    //
+    // Bağ otomatik iyi ya da otomatik kötü değildir (§24): açılan kapı
+    // yakınlığı hazır vermez, zamanla kurulur.
+    case RelationType.cocugunEsi:
+      return _arkadas;
+
+    // Çocuk boşandıktan sonra eski gelin/damat ile gündelik etkileşim
+    // kapanır (§21): kayıt kalır, kapı kapanır. Torunun ebeveyniyse soy
+    // bağı yine korunur ama bu bir etkileşim hakkı değil.
+    case RelationType.eskiCocugunEsi:
       return _yok;
+
+    case RelationType.eskiSevgili:
+      return _yok;
+
+    // Paket AO §25: eski eşle **gündelik** yakınlık etkileşimleri hâlâ
+    // kapalı — boşandınız, her şey eskisi gibi değil. Ama ortak çocuk
+    // varsa iletişim tamamen bitmez: çocuk hakkında konuşulur.
+    //
+    // Ortak çocuğun olup olmadığı burada bilinemez (bu işlev yalnızca
+    // bağ türünü görür); tür **anlamlı** sayılır ve gerçek koşul
+    // `FamilyInteractions.availability` içinde denetlenir.
+    case RelationType.eskiEs:
+      return const <InteractionKind>{InteractionKind.cocukKonus};
   }
 }

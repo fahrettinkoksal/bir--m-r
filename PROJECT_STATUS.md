@@ -924,20 +924,3199 @@ ifadeler düzeltildi; sonraki büyük sistem önerileri
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` dosyasında **yalnızca öneri** olarak
 toplandı.
 
+**Paket 49 — Faho'nun oyun içi geri bildirimleri.** PC'de oynanan
+sürümden çıkan altı madde işlendi:
+
+1. **Askerlik hatası düzeltildi.** Kadın oyuncu 18 yaşından sonra
+   "Askerlik · Yapılmadı" satırını görüyordu; zorunlu askerliği yokken
+   yerine getirilmemiş bir yükümlülük varmış gibi okunuyordu. Kayıt
+   değişmedi (değişseydi gönüllü subaylık yolu da kapanırdı), görüntü
+   düzeltildi.
+2. **Kalıcı pasif seçenek denetimi.** Açık düğmelerin hepsi gerekçesini
+   zaten yazıyordu; asıl risk ekranda durup hiç açılamayan içerikti.
+   `test/content_reachability_test.dart` bunu kalıcı hâle getirdi.
+3. **Dövüş sanatı eğitimi.** Karate siyah kuşağı 110 ders ve yılda en
+   fazla 20 ders demek: 110 ayrı tıklama. "Yılı çalış" eylemi eklendi;
+   ücret, yıllık sınır ve basamak eşikleri **birebir aynı**. Süre kararı
+   Q-111'de.
+4. **Sosyal medya.** Bir platformdaki kazanç artık diğer açık hesaplara
+   yansıyor ve kitlesi büyük hesap yıl geçtikçe kendiliğinden büyüyor.
+   Durgun hesabın erimesi **Claude'un eklediği varsayımdır**, Q-112'de
+   onaya sunuldu.
+5. **Meslek kataloğu 9'dan 15'e.** Aşçı, kuaför, muhasebeci, manken,
+   yazar, müzisyen. Mankenlik görünüşle, yazarlık okuma hobisiyle,
+   müzisyenlik müzik hobisiyle açılıyor. Sayılar Q-113'te.
+6. **Olay zincirleri.** Yıllara yayılan 4 zincir, 17 olay, 8 dal.
+   Sayılar Q-114'te.
+
+Bu pakette **hiçbir sayısal denge değeri kendi başına değiştirilmedi**;
+hepsi `prototypeOnly` kaldı ve kararlar Q-111…Q-114 olarak kuyrukta.
+
+**Paket 50 — Q-103…Q-114 kararları, 2026 ekonomisi ve şehir filtresi.**
+Faho on iki tasarım sorusunun tamamını karara bağladı; kararlar
+`DECISIONS.md` içine **D-054…D-065** olarak, ekonomi kararı **D-053**,
+şehir filtresi **D-066** olarak işlendi. Kuyruktaki Q-103…Q-114
+"KARARLAŞTIRILDI" durumuna geçti.
+
+- **2026 Türkiye ekonomisi.** Bütün tutarlar 2026 TL satın alma gücü;
+  nominal enflasyon simüle edilmiyor. Çıpa: net yıllık asgari ücret
+  336.900 ₺. Maaşlar yedi gelir bandına ayrıldı ve her bant test
+  edilerek korunuyor. Gerekçeli eski/yeni tablosu:
+  `docs/ECONOMY_2026.md`.
+- **Meslek kataloğu 9 → 44.** Hizmet, teknik, ofis, sağlık,
+  mühendislik, kamu ve yaratıcı sektörler temsil ediliyor. Sağlık ve
+  iletişim meslekleri için üniversite kataloğuna beş bölüm eklendi;
+  ulaşılamayan iş üretilmedi.
+- **Ev/araç ilanları yaşanan ille sınırlandı.** "Türkiye geneli"
+  liste kalktı, şehir bazlı fiyat katsayısı eklendi.
+- **Kütüphane 8 → 23 kitap**, okuma eşikleri 0/3/7/12/20; hobi
+  basamak adları ve süreleri karara uyduruldu.
+
+**Paket G — bildirilen gerçek hatalar (D-087…D-093).** Kuşak devamında
+torunlar kayboluyordu; `RelationType.yegen` eklenerek düzeltildi. Finger
+ekranındaki donmanın gerçek sebebi bulundu (menü bileşeni uzun metni
+sınırsız genişlikte yerleştiriyordu) ve dar ekran testi eklendi. At
+yarışı bahsi emanete alınıp sonuç atomik kesinleşiyor; blackjack'te el
+sonunda tekrar oynanabiliyor. Aynı işe aynı yıl ikinci başvuru kapandı.
+Finans olayları gerçek mali duruma bakıyor. İlgisizlik artık hızlanarak
+yakınlık düşürüyor ve uzaklaşan yakın için sitem olayı eklendi.
+
+**Paket H — lise alan seçimi ve doğumda isim (D-094, D-095).** Liseye
+geçen oyuncu alan seçmeden yaş atlayamıyor: **Yaş Al** düğmesi sessiz
+kalmıyor, seçim penceresi açılıyor ve seçim yapılmadan kapanmıyor.
+Seçilen alan günlüğe yazılıyor, sonuç aynı pencerede gösteriliyor ve
+üniversite koşullarında gerçek kaynak oluyor. Bebek doğduğunda adı
+doğum bildiriminin içinden değiştirilebiliyor; ad yalnızca doğum
+yılında, 2-16 harf ve yalnızca harf olarak kabul ediliyor, soyadı
+değişmiyor.
+
+**Paket I — geri bildirim ve sonuç görünürlüğü (D-096…D-098).** Yaş
+alındığında biten yılın özeti ana ekranın üstünde kart olarak duruyor:
+"23 yaşın böyle geçti". Satırlar yılın başındaki fotoğrafla bugünün
+farkından üretiliyor, uydurma kazanç yazamıyor. Kritik iş ve kredi
+haberleri (işten çıkarılma, işveren uyarısı, kaçan taksit) artık
+bildirim oluyor. Bildirim yoğunluğu 100 hayat üzerinde ölçüldü: en kötü
+yıl yedi pencereydi, aynı yıl gelen miras payları tek bildirimde
+toplanarak ve acılı yılda burç penceresi kapatılarak altıya indi
+(ortalama 0,39/yıl). Olay havuzundaki 467 seçimin tamamı denetlendi:
+etkisiz seçim yok, yalnızca görünmez işaret bırakan seçim yok; kural
+testle sabitlendi.
+
+**Paket J — statlar gerçekten hissedilsin (D-099…D-102).** Kazançlar
+artık azalan getiriyle işleniyor: +5'lik bir kazanç 40'tan +5, 70'ten +4,
+88'den +1 getiriyor. Çabayla ulaşılabilecek tavan 95; yılda +4 kazandıran
+bir alışkanlık 40 yıl sürse bile 100'e ulaşmıyor (eskiden ulaşıyordu).
+Kural tek noktadan geçiyor ve bunu atlayan yeni bir yol açılamasın diye
+kaynak taramalı bir testle sabitlendi. Sağlık Merkezi'nin yıllık toplam
+sağlık kazancı 17'den 6'ya indirildi (check-up ile stat kasma açığı).
+Hastalık artık sağlığı da düşürüyor. Dövüş sanatı spor bakımına sayılıyor.
+Görünüş düşüşü yaklaşık dörtte bir yumuşatıldı. Saç dökülmesi karizmayı
+değil görünüşü etkiliyor; saç ekimi ileri basamaktan iki kademe düşürüyor.
+
+**Paket K — sosyal medya, sponsorluk ve Ün (D-103…D-106).** Aktiviteler
+altında **Ün ve Medya Fırsatları** bölümü açıldı; Ün 40 olmadan menüde
+hiç görünmüyor. Yedi kurgusal medya işi var (dergi röportajından reklam
+yüzü olmaya). Sponsorluk için platform başına en az 5.000 takipçi
+gerekiyor ve ücret kitlenin tamamıyla ölçekleniyor: 5.000 → 32.500 ₺,
+500.000 → 478.000 ₺. Kabul edilip paylaşılmayan sponsorlukta ödeme yok,
+mutluluk düşüyor ve o platformdaki kitlenin %4'ü gidiyor. Tanınan biri
+yeni hesabı sıfırdan açmıyor: mevcut kitlesinin %8'i (en çok 40.000)
+taşınıyor. Ünlüye yılda iki kez yazılabiliyor ve geri takip edenler
+İlişkiler ekranında "Ünlüler ve tanıdıklar" başlığında duruyor. Takipçi
+sayıları Türkçe binlik ayracıyla yazılıyor (2.232).
+
+**Paket L — Finger: niyet, flört ve süzgeç (D-107).** Tanışmak artık
+sevgili olmak değil: araya **flört** basamağı girdi. Hem oyuncunun hem
+adayın "ne aradığı" profilde yazıyor ve buluşmanın sonucu ikisine birden
+bakıyor. Flört kendiliğinden sevgiliye dönmüyor; oyuncu teklif ediyor ve
+yakınlık yeterliyse resmîleşiyor. Adaylar ekonomik duruma göre
+süzülebiliyor. Beğeni kotası yılda 5'ten 12'ye çıktı, premium 30 kaldı.
+
+**Paket M — banka, konut kredisi ve harçlık (D-108).** Banka
+Varlıklar'dan Aktiviteler'e taşındı; Varlıklar'da yalnızca açık borç
+hatırlatması kaldı. Kredi tutarı artık elle yazılıyor. Konut kredisi
+eklendi: daha ucuz (aylık %2,45 / %3,40), 10 yıla kadar vadeli ve daha
+büyük. Basit kredi karnesi (İyi/Orta/Riskli/Çok riskli) banka ekranının
+üstünde gerekçesiyle duruyor; icra ve haciz için zemin bırakıldı.
+Harçlık isteyince alınan tutar sonucun içinde yazıyor.
+
+**Paket N — hayvanlar ve aile tepkisi (D-109, D-110).** Evcil hayvan
+sahiplendirilebiliyor: vefat değil, kaydı duruyor ve "Yeni yuvasına
+gidenler" başlığında görünüyor. Hayvan ekranı üçe ayrıldı. Kayıp hayvan
+sonsuza kadar kayıp kalmıyor; üç yılın sonunda durum kapanıyor ve hayvan
+ölmüş sayılmıyor. Özel izin gerektiren tür (timsah) gerçekten zorlaştı:
+25 yaş, kendi evi ve bedelin yarısı kadar izin masrafı. 18-20 yaşında
+çocuk sahibi olan oyuncuya ailenin tepkisi eklendi; evliyse destek,
+değilse endişe — ikisi de gerçekten uygulanıyor.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
+gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
+"Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
+değeri ve Hayvan Detayı ekranı (D-058), "Hobilerim" bölümü (D-057),
+bitirilmiş kitabın yeniden okunması, 0-5 ve 80+ yaş havuzlarının
+genişletilmesi, olay örtüşmesinin %40-45 bandına indirilmesi ve
+kariyer olaylarının payı (D-061), zincir sonundaki gerçek kariyer
+teklifi ve kişisiz kapanış olayları (D-065), çoklu kişiyle aktivite
+(D-059).
+
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1539 geçti, 15 atlandı, 0 başarısız**. Atlananların
+`flutter test` **1660 geçti, 15 atlandı, 0 başarısız**. Atlananların
 tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleridir.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
-**CI:** GitHub Actions hesabın ödeme/harcama limiti nedeniyle hiçbir işi
-başlatmıyor; bu turda da yeni Windows sürümü veya Android APK
-üretilemedi. Engelin sebebi kod ya da iş akışı yapılandırması değildir.
+**CI:** Depo public yapıldıktan sonra GitHub Actions normal çalışıyor.
+Windows test sürümü `claude/paket54-belge-denetimi` dalının
+`6f3a852` commitinden üretildi ve artifact olarak yüklendi. Android APK
+bu ortamda hâlâ üretilemiyor (Android SDK indirilemiyor).
+**Hiçbir sürüm gerçek Windows ya da Android cihazda oynanmadı.**
+
+## Paket A-F: Faho'nun 24 Eylül listesi (D-067 … D-085)
+
+Faho'nun uzun revizyon listesi altı pakette kodlandı. Her paket ayrı
+commit; hepsi `claude/stoic-maxwell-6rkrit` dalında.
+
+**Paket A — bildirilen beş hata (D-067…D-071).** Ev sahibi olan
+oyuncuya kira zammı olayı çıkması, çalışmayana iş yeri olayı çıkması,
+gebeliğin 46 yaşta tamamen kapanması, yıllarca ilgilenilmeyen eşle
+yakınlığın tam kalması, bedelli sonrası subay/astsubay yolunun da
+kapanması.
+
+**Paket B — statlar yaşla düşer, bakım karşılık verir (D-072, D-073).**
+Beş değerin her birinin kendi başlangıç yaşı ve tabanı var. Spor,
+berber ve okumak kaybı belirgin biçimde yavaşlatıyor. Erkeklerde saç
+dökülmesi eklendi; oran androjenetik alopesinin yaygın epidemiyolojik
+özetine göre seçildi ve test bunu ölçüyor.
+
+**Paket C — sağlık bildirimleri, göz mini oyunu, estetik, hastalık
+(D-076…D-078).** Check-up altı vücut sistemi için gerçek duruma dayalı
+rapor üretiyor ve gerekirse tahlile yönlendiriyor. Göz muayenesi mini
+oyun oldu. Estetik bölümü eklendi; fiyatlar Türkiye piyasasından
+2026 ölçeğine taşındı. Hastalanınca işe gidilemiyor, raporun ilk iki
+günü ödenmiyor ve işveren uzun raporu sorun ediyor.
+
+**Paket D — aktivite bildirimleri, kişi keyfi, boşanmada mal paylaşımı
+(D-074, D-075).** Eğlence programının sonucu ekran bildirimi olarak,
+kime ne kattığı satır satır yazılıyor. Kişilerin yakınlıktan ayrı bir
+keyfi var ve D-059'un "davet edilen reddedebilir" kuralı artık gerçekten
+çalışıyor. Boşanmada evlilik içinde edinilen mallar paylaşılıyor.
+
+**Paket E — mağaza ayrımı, araç masrafı, banka (D-079, D-080).** Üç
+otomobil galerisi, iki motosiklet galerisi, ayrı aksesuarcılar, orta ve
+lüks emlakçı. Motorlu araçlar masraf çıkarıyor. Fakbank ve Bankavrupa;
+faiz oranları 2026 ihtiyaç kredisi bandından alındı.
+
+**Paket F — Finger, hayvanlar, seyahat, Son Kararlar (D-081…D-085).**
+Finger'da yaş bandı hatası düzeltildi (deste yaşla yenilenmiyordu),
+beğeni kotası, premium ve kendi profilin eklendi. Hayvan türleri
+genişledi; kaçma ve hastalık eklendi. Seyahat "Tatil yap" ve "Taşın"
+diye ikiye ayrıldı. Vasiyet menüsü "Son Kararlar" oldu ve hayatın sonuna
+dair karar oraya eklendi.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** suç ve hapis sistemi
+(Faho "ileride gelecek" dedi), hayvan detayı ekranı, çoklu kişiyle
+aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
+eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
+
+**Ölçümler (gerçekten çalıştırıldı — `app/test/measurements_test.dart`).**
+
+| Ölçüm | Sonuç |
+|---|---|
+| 100 hayat, ortalama ömür | 72,4 |
+| Hayat sonunda ortalama görünüş | 31,1 (en düşük 3, en yüksek 71) |
+| Hayat sonunda ortalama mutluluk | 66,4 (1 – 89) |
+| Hayat sonunda ortalama sağlık | 20,6 (0 – 73) |
+| Hayat sonunda ortalama zekâ | 78,0 (40 – 93) |
+| Hayat sonunda ortalama karizma | 72,0 (27 – 92) |
+| 100'e dayanan değer sayısı | **0** |
+| Görünüş: 20 yaş → 80 yaş | 51,9 → 19,5 |
+| Sağlık: 20 yaş → 80 yaş | 56,4 → 16,0 |
+| Görüşülmeyen çocukla yakınlık | 1 yıl 100 · 5 yıl 94 · 10 yıl 74 · 15 yıl 44 · 20 yıl 20 (taban) |
+| Tek yılda en çok bildirim | 7 (üç vefat, üç cenaze, tek toplu miras); ortalama 0,39 |
+
+### Paket O-S sonrası ölçümler (D-111 … D-124)
+
+Faho'nun 24 Eylül tarihli ikinci geri bildirim listesinden sonra
+yeniden ölçüldü (100 hayat):
+
+| Ölçüm | Önce | Sonra |
+|---|---|---|
+| Sağlık: 20 → 70 yaş | 69,9 → 38,4 gibi yavaş | **69,9 → 13,8** |
+| Sağlık 40 yaşta | 66,2 | **55,6** |
+| Karizma: 20 → 70 yaş | 52,6 → 38,4 | **52,6 → 28,7** |
+| Ortalama ömür | 72,4 | **74,2** |
+| Yıl başına bildirim penceresi | 0,39 | **0,71** (en kötü yıl 7 → 6) |
+| Sponsorluk ücreti (100.000 takipçi) | 118.000 ₺ | **15.000 ₺** |
+| Sıradan paylaşımın geliri | değişken | **0** |
+
+Hastalığın bedeli −1/−2/−3'ten ciddiyete bağlı **−10 / −14 / −18**'e
+çıkarıldı; tek başına uygulandığında 40 yaşta ortalama sağlık **0,8**'e
+düştüğü ölçüldüğü için **toparlanma** eklendi (hastalanılmayan yılda +7,
+yaşa göre düşen bir tavana kadar).
+
+**Açık kalan sayılar:** Q-116 … Q-136 (`docs/DESIGN_REVIEW_QUEUE.md`).
+Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
+kadar kesin denge değeri sayılmaz.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2024 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket O + P: ölü hikâye izleri, çocukluk ve metin üslubu (25 Eylül 2026, D-125 … D-127)
+
+Faho iki iş istedi: (1) "hiç konmayan 10 hikâye izini araştır, **tahminle
+flag ekleme, gerçek sebebi bul**", (2) 0-17 yaş için yeni olaylar ve
+metinlerin "yapay zekâ yazmış gibi" durmaması.
+
+**Gerçek sebep bulundu (D-125).** On izin hiçbiri ölü içerik değildi.
+Motor aynı yaşta ikinci olay sunmak için `progressSinceLastEvent`
+sayacına bakıyor, ama bu sayaç kodda **tek bir yerde** artıyordu: aile
+etkileşimleri. Spor, kurs, berber, eşya kullanımı, Finger — hiçbiri
+ilerleme saymıyordu. Yani aktif oynayan oyuncu hiçbir şey yapmayanla
+aynı sayıda olay görüyordu. Düzeltildi; on izin **onu da** konuyor ve
+bir gerileme testiyle sabitlendi.
+
+**Çocukluk havuzu (D-126).** 0-17 yaş için **51 yeni olay** yazıldı
+(`lib/data/event_pool_childhood.dart`). Çocukluk arkadaşı ve ilk
+hoşlanılan kişi **gerçek `Person` kaydı** olarak kuruluyor.
+
+**Metin üslubu (D-127).** `docs/WRITING_STYLE_TR.md` yazıldı ve iki
+somut mekanik metin değiştirildi: aktivite sonucu ("X tamamlandı" →
+mekâna göre yazılmış, kendini tekrar etmeyen cümleler) ve sosyal medya
+paylaşım sonucu. **İş mantığına ve etki değerlerine dokunulmadı.**
+
+| Ölçü (120 hayat, oyuncu gibi oynanarak) | Önce | Sonra |
+|---|---|---|
+| Bir hayatta görülen farklı olay | 48 | **110** |
+| Havuz | 221 | **272** |
+| 120 hayatta hiç çıkmayan olay | 61 | **18** |
+| 0-5 yaşta farklı olay | 11 | **24** |
+| 6-12 yaşta farklı olay | 25 | **53** |
+| 13-17 yaşta farklı olay | 30 | **62** |
+| Ortalama ömür | 74 | 80,4 |
+
+**Dürüstçe yazılması gereken yan etki:** havuz büyüyünce **dar pencereli
+zincir halkaları seyreldi** — D-125'ten hemen sonra hiç çıkmayan olay 9
+idi, 51 çocukluk olayından sonra 18 oldu. Yeni içerik kötü değil; dar
+pencereli zincirler yarışmayı kaybediyor. Motorun zincirlere öncelik
+verip vermemesi tasarım kararıdır, **Q-138**'de soruldu.
+
+**Kuyruk temizliği:** sonradan alınan kararlarla örtüşen dört soru
+kapatıldı — Q-115 → D-106, Q-116 → D-102, Q-117 → D-102, Q-121 → D-107
+(kısmen). Tarihsel kayıt **silinmedi**. Yeni sorular: **Q-138** (olay
+yoğunluğu ve zincir önceliği), **Q-139** (çocukluk temaları ve etki
+değerleri), **Q-140** (üslup belgesi ve robotik kalıp tavanı).
+
+**Açık kalan sayılar:** tamamen açık **66** soru, sayıları onay bekleyen
+39 soru (`docs/DESIGN_REVIEW_QUEUE.md`). Bütün yeni sayılar
+`prototypeOnly`'dir.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2037 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket T: Suç ve Hukuk V1 + sokak kültürü dili (25 Eylül 2026, D-128, D-129)
+
+Faho iki iş istedi: (1) suç/hukuk sistemini ilk kez ekle ama **ilk sürümü
+kontrollü tut**, (2) yeni içeriklerde günümüz Türkiye'sinin doğal konuşma
+biçimi kullanılsın.
+
+**Kapsam bilinçli olarak dar.** Amaç suç işlemeyi öğretmek değil,
+seçimlerin hukuki ve toplumsal sonucunu canlandırmak. Hiçbir metinde suç
+işleme yöntemi, kaçış, saklanma, delil ya da denetimden kurtulma
+anlatılmıyor; olaylar yüksek seviyede **seçimler** olarak kalıyor ve
+sonucu motor yürütüyor. **Ağır/organize suç bu sürümde yok.**
+
+**Eklenenler:**
+- 11 suç türü (trafikten yaralamaya, hafif/orta/ağır ağırlıkta)
+- Hukuki durumlar: idari ceza · soruşturma · dava · takipsizlik · karar
+  (beraat / uyarı / para cezası / erteleme / hapis) · sabıka · hapis ·
+  denetim dönemi
+- **31 olay, 5 çok adımlı zincir** (`lib/data/event_pool_crime.dart`)
+- Ayrı **duruşma ekranı**: avukat + savunma tutumu aynı pencerede
+- 4 kademeli avukat kataloğu (2026 ücretleriyle); **sonucu garanti etmez**
+- Sabıkanın işe etkisi: `RecordRule.serbest / temizGerekir / agirEngeller`
+- Basit hapis: iş biter, gelir kesilir, bağlar zayıflar, dışarının
+  aktiviteleri kapanır, içeride 4 güvenli aktivite açılır
+- **Adli Geçmiş** bölümü (Okul/Meslek altında)
+- Hayat sonu değerlendirmesinde suç geçmişi **anılır ama puanlanmaz**
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):**
+
+| Oynayış | Dosyası olan | Sabıkalı | Mahkemeye çıkan | Hapis yatan |
+|---|---|---|---|---|
+| Riskli seçim yapan | 97 | 56 | 75 | 22 |
+| **Temiz oynayan** | **0** | **0** | **0** | **0** |
+
+**Suç zorunlu içerik değil:** her olayda suça girmeyen bir kapı var ve
+riskli seçim yapmayan 100 hayatta tek bir dosya bile açılmıyor. Bu bir
+testle sabit.
+
+**Dil (D-129):** `docs/WRITING_STYLE_TR.md` §14 yazıldı. Polis kısa ve
+ciddi, hâkim resmî, avukat yarı resmî; sokak ağzı yalnızca sokakta.
+Polisin karikatürleşmemesi ve hâkimin sokak ağzı kullanmaması testle
+sabit.
+
+**Açık kalan sayılar:** Q-141 (kapsam ve sıklık), Q-142 (avukat
+ücretleri), Q-143 (sabıkanın işlere etkisi ve hapsin bedeli). Bütün
+sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2072 geçti, 15 atlandı, 0 başarısız** (bunların **35'i** bu pakette yeni).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket U: arkadaşlık, yarım zamanlı iş, girişimcilik ve eksik ekranlar (26 Eylül 2026, D-130 … D-133)
+
+Faho'nun seçimi: arkadaşlığı derinleştir · girişimcilik ve kendi işini kur ·
+yarım zamanlı işler · ucuz kazançlar (eksik ekranlar). **Hayat hedefleri
+bilinçli olarak eklenmedi.**
+
+### Arkadaşlık (D-130)
+Kodla doğrulanan eksik: 60 hayatta **1.141 sınıf arkadaşı** üretiliyordu,
+yalnızca **30'u** arkadaş oluyordu — çünkü oyuncunun bir tanıdığı arkadaş
+yapmak için **hiçbir düğmesi yoktu.** Artık dört şey var: yakın arkadaş
+olma teklifi (garanti değil), küslük, barışma ve arkadaşın kendi hayatı
+(taşınır, evlenir, iş değiştirir, zor gün geçirir). 13 yeni olay, üç
+zincir — biri D-126'da kaydedilip hiç dönmeyen **çocukluk arkadaşının
+yıllar sonra dönüşü**.
+
+**Ölçüm düzeltmesi:** "34/60 hayatta hiç arkadaş yok" sayısı hatalıydı;
+simülasyon hiç kimseyle vakit geçirmiyordu. Simülasyona etkileşim eklendi.
+
+| Ölçü (100 hayat) | Önce | Sonra |
+|---|---|---|
+| Hiç arkadaşı olmayan hayat | 34/60 (hatalı ölçüm) | **0** |
+| Yakın arkadaşla ölen | 0 | **88** |
+| Ortalama arkadaş | 0,5 | **6,8** |
+| Ortalama yakın arkadaş | 0,0 | **3,3** |
+| Küslük yaşayan | — | 89 |
+
+### Yarım zamanlı iş (D-131)
+D-126'daki "yaz işi istemek" olayı hiçbir kapıya çıkmıyordu ve öğrencinin
+çalışması mümkün değildi. 8 yarım zamanlı iş, yeni bir maaş bandı
+(90.000-260.000 ₺/yıl, asgari ücret tabanı uygulanmaz), 16 mülakat sorusu.
+Okurken çalışmanın bedeli var: zekâ katkısı yarıya iner, yılda −2 sağlık.
+
+### Girişimcilik (D-132)
+44 mesleğin hepsi maaşlıydı. 13 iş türü geldi (sermaye 84.000-2.900.000 ₺).
+Maaş garantidir, kendi işi değildir: işin durumu 0-100 arası, 25'in altında
+para yer, 0'da batar. Üç hamle: işine bak, para yatır, işi devret.
+Ekonomiye bağlı; banka zarar eden işi gelir saymıyor. Yeni ekran: Kendi İşim.
+
+### Eksik ekranlar (D-133)
+Hobilerim · Evlilik Geçmişi · evcil hayvan detayı · çoklu kişiyle aktivite.
+Dördü de kodda vardı ama oyuncu göremiyordu.
+
+**Açık kalan sayılar:** Q-144 (arkadaşlık eşikleri), Q-145 (arkadaşlık
+olayları), Q-146 (yarım zamanlı iş ve kendi işi sayıları), Q-147 (ekranlar
+ve kalabalık aktivite). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2145 geçti, 15 atlandı, 0 başarısız** (bunların **73'ü** bu pakette yeni:
+friendship_depth 23, part_time_work 12, business 28, missing_screens 10).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket V: hediye seçimi, menüler, 2. el araç pazarı, kefalet ve üvey ebeveyn (26 Eylül 2026, D-134 … D-141)
+
+Faho'nun sekiz maddelik listesi. **D-134 … D-141 numaraları bu pakette
+kullanıldı ama `DECISIONS.md`'ye yazılmadı:** `CLAUDE.md` "kullanıcı onayı
+olmadan `DECISIONS.md` içine karar ekleme" diyor. Numaralar kodda ve bu
+dosyada geçiyor; kesin kural hâline gelmeleri Faho'nun onayına bağlı.
+
+### Hediye seçimi (D-134)
+"Anneme tıkladım, hediye vere tıkladım; tavla, buket çiçek, çeyrek altın,
+bilezik gibi şeyler olsun; tavla hediye edersem beğenmesin." Hediye artık
+rastgele değil: açılır listeden seçiliyor, karşı taraf **beğenmeyebiliyor**.
+13 yeni hediye, 10 hediye kategorisi, bağ türüne ve yaşa göre zevk tablosu.
+Beğenilmeyen hediye bağı düşürüyor ama parayı geri getirmiyor.
+
+### Evcil hayvan menüsü (D-135)
+Edinme listesi tek yığından altı gruba ayrıldı: Kediler, Köpekler, Kuşlar,
+Kemirgenler ve tavşan, Su ve sürüngen, Egzotik.
+
+### Kurgusal araç adları (D-136)
+13 araç kurgusal marka+model adı aldı (Foros, Tunca, Veran, Doruk, Alvera,
+Sarp, Rüzgâr). Gerçek marka yok, telif sorunu yok. Sınıf bilgisi
+`ItemType.segment` alanında ayrı duruyor ve ad altında yazıyor.
+
+### 2. el araç pazarı (D-137)
+Yeni mağaza. İlanda model adı, satıcı (sahibinden/galeriden), fiyat, sıfır
+fiyatı, yaş, km, durum ve beş satır "Araç detayları" var: "şasi ve podyede
+oynama yoktur", "bel altı temizlik", "boyalı ama değişeni yok", "tramer
+kaydı", "muayenesi yeni". Alınan araç **ilanın kondisyonuyla** giriyor.
+Havuz şehir + yaşa göre belirlenimli; yıl geçince tazeleniyor. Model yılı
+yazılmıyor: oyunda takvim yılı yok.
+
+### Menü düzeni (D-138)
+Mağazalar: on bir satırlık düz liste üç öbeğe ayrıldı (Gündelik alışveriş /
+Araç ve aksesuar / Konut), sıra sabit; raf içi ürünler ucuzdan pahalıya
+sıralı. **Meslek:** "Bu yıl yapabileceklerin" ve "Kayıtlar ve durum" diye
+iki başlık; askerlik, kendi işi ve adli geçmiş artık "iş ara" ile aynı
+kolonda karışmıyor. **İlişkiler:** alt listeler "Listeler" başlığı altında.
+Aktiviteler ekranı zaten başlıklıydı, dokunulmadı.
+
+### Kefalet ve tutukluluk (D-139)
+Ağır bir dosyada tutuklama kararı çıkabiliyor (%45, 18 yaş altına
+uygulanmıyor). Kefalet **tutukluluğu** kaldırıyor, cezayı satın almıyor.
+İki kapı: kendi cüzdanından yatırmak ya da aileden istemek (red
+edilebilir, aynı yıl ikinci kez istenmez). Kefalet teminat: duruşmaya
+çıkılınca geri veriliyor — ödeyen aileden biriyse para ona dönüyor.
+Tutuklulukta geçen süre cezadan düşülüyor. Tutukluluk en çok 2 yıl;
+süre dolarsa tutuksuz yargılama sürüyor.
+
+### Cezaevi hayatı ve çeteleşmenin ilk adımı (D-140)
+Koğuşta sohbet (en çok 3 koğuş arkadaşı, tahliyeden sonra listede kalıyor),
+kurallara uymak (iyi hâl), **sözü geçen gruba yakın durmak** ve gruptan
+uzaklaşmak. İyi hâl ≥ 60 + cezanın yarısı + koğuş itibarı < 50 ise
+koşullu salıverilme geliyor; gruba yakın durmak o kapıyı kapatıyor.
+Çete tarafı bilinçli olarak **sayaçta**: dışarıda örgüt, gelir ya da emir
+zinciri yok (Q-148).
+
+### Üvey anne / baba (D-141)
+Ebeveynlerden biri vefat ettiyse, hayatta kalan ebeveyn yas süresinden
+sonra yeniden evlenebiliyor. Gelen kişi çekirdek ailede listeleniyor,
+bağ 18'den başlıyor, **kan bağı sayılmıyor**. Vefat eden ebeveyn kayıttan
+silinmiyor. Üvey kardeş ve miras bu sürümde yok (Q-149).
+
+**Açık kalan sayılar:** Q-148 (kefalet, tutukluluk, çete sınırı),
+Q-149 (üvey ebeveyn), Q-150 (2. el pazar fiyatları), Q-151 (araç adları),
+Q-152 (mağaza menü düzeni). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2219 geçti, 15 atlandı, 0 başarısız** (bunların **74'ü**
+bu pakette yeni: gift_choice 15, used_vehicle_market 19,
+used_vehicle_widget 3, bail_prison 32, bail_prison_widget 5).
+**Gerçek Windows veya Android cihazda oynanmadı; APK derlenmedi.**
+
+## Paket W: Faho'nun 13 maddelik hata listesi (26 Eylül 2026, D-142 … D-150)
+
+Çoğu **gerçek hataydı**; her biri önce reproduce edildi, sonra düzeltildi
+ve bildirilen cümleyle bir teste bağlandı. D-142 … D-150 numaraları
+`DECISIONS.md`'ye **yazılmadı** (bkz. Paket V notu): onay Faho'da.
+
+| Bildirilen | Sebep | Durum |
+|---|---|---|
+| "lise bittikten sonra hiçbir üniversiteye başvuramıyorum" | Pencerenin kartı engeli `String?` tutup `== null` ile ölçüyordu; motor boş dize döndürdüğü için düğme hep kapalıydı | Düzeltildi (D-142); pencere kaldırılıp Okul ekranına taşındı |
+| "kendi işime para yatır düğmesi aktif olmuyor" | Metin kutusu yazılınca yeniden çizim tetiklenmiyordu | Düzeltildi |
+| "işine bak'a sonsuz tıklayabiliyorum" | Yıllık sayaç `lastTendedAge`e bakıp en çok 1 döndürüyordu, sınır 2 idi | Düzeltildi |
+| "Finger'de çok varlıklı tanıştığım kişi orta halli görünüyor" | Kişi kaydı kurulurken profilin serveti atılıp sabit `ortaHalli` yazılıyordu | Düzeltildi |
+| "her sayfada bildirim var" | Sayfa çevirme genel aktivite yolundan geçiyordu | Düzeltildi (D-145): bildirim yalnızca kitap bitince |
+| "doğduğumda evde olan hayvanın bakımı harçlığımdan çıkıyor" | Bakım gideri sahiplenme durumuna bakmıyordu | Düzeltildi (D-144) |
+| "evde hayvan vardı ama iletişim yoktu" | Menü yalnızca sahiplenme yaşından (7) itibaren açılıyordu | Düzeltildi (D-146); sayfa İlişkiler'e taşındı |
+| "aynı arkadaş bildirimleri çok fazla" | Bekleme süresi yoktu, her haber türünün tek metni vardı | Düzeltildi (D-149) |
+| "medya fırsatları kolay para, ünüm hiç düşmüyor" | 8 iş × yılda bir = bir yılda sekizi birden | Düzeltildi (D-147) |
+| "cümleler saçma kurulmuş" | Metin neyin verildiğini yazmıyordu | Düzeltildi (D-150), kural belgeye yazıldı |
+| "araç vergisi/sigortası çıksın" | Yoktu | Eklendi (D-148) |
+| "kendi işim varken işveren laf etsin" | Yoktu | Eklendi (D-143) |
+| "sponsorluk paylaşmadan para gelmesin" | Zaten böyleydi (D-104) | Doğrulandı, dokunulmadı |
+
+**Açık kalan sayılar:** Q-153 (araç gideri oranları, kaskonun isteğe bağlı
+olup olmayacağı, medya ve arkadaş haberi bekleme süreleri, aile hayvanının
+bakımının yetişkinlikte kime ait olduğu).
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2261 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+after_school_widget (5), business_widget (4), business_test +6,
+paket_w_test (25), pet_widget_test +2.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket X — A grubu ve kataloglar (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. **Önce denetim yapıldı ve önerilerimin bir
+kısmının zaten kodlanmış olduğu görüldü** — öneri listesini 25 Eylül tarihli
+`docs/EKSIKLER.md`'ye dayandırmıştım, o belge güncel değildi. Yanlış
+söylediklerim:
+
+| Önerdiğim | Gerçek durum |
+|---|---|
+| Hayvan detay sayfası yok | **Var** — `pet_detail_sheet.dart` (D-133) |
+| Evlilik geçmişi ekranı yok | **Var** — `marriage_history_page.dart` (D-133) |
+| "Hobilerim" görünümü yok | **Var** — `hobbies_page.dart` (D-133) |
+| Dul ile boşanmış aynı statüde | **Ayrı** — `MarriageStatus.dul`, dul eş `eskiEs`'e düşmüyor |
+| Çoklu kişiyle aktivite yok | **Var** — `perform(others:)` + `costForParty` (D-133) |
+| Küslük/barışma yok | **Var** — `friendship_depth.dart` (D-130) |
+
+`docs/EKSIKLER.md` bu altı madde için düzeltildi. A grubunda **gerçekten
+eksik olan tek şey ikiz gebelikti**.
+
+### D-151 — İkiz gebelik
+Doğum anında %2,8 ihtimalle ikinci bebek de geliyor. Gebelik kaydı **tek**
+kalıyor; ikinci bebek aynı doğumun parçası olduğu için "aynı yıl ikinci
+bebek olmaz" kuralı yalnızca açık `twin` bayrağıyla atlanıyor — oyuncunun
+düğmesi bu bayrağı hiç geçmiyor. İkiz aynı diğer ebeveynden olur, adı ve
+kimliği ayrıdır, **en fazla çocuk sınırını aşmaz** (üç çocuklu oyuncuda
+doğum tek bebekle kapanır) ve iki pencere yerine **tek** ikiz bildirimi
+açılır. Üçüz yok. Sayı `prototypeOnly` — **Q-154**.
+
+### D-152 — Kataloglar genişletildi
+`docs/EKSIKLER.md` §4.3'teki darlık ölçümüne karşılık:
+
+| Katalog | Önce | Sonra |
+|---|---|---|
+| Hobi | 4 | **12** |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Dövüş sanatı | 3 | **6** |
+
+Yeni hobiler: mutfak, fotoğraf, dans, satranç, yazmak, bahçe, yabancı dil,
+bilgisayar. İlk altısı için **altı yeni kurs** eklendi; son ikisi zaten var
+olan dil ve bilgisayar kurslarını besliyor, yeni düğme gerekmedi.
+Kataloğun kendi kuralı korundu: **her hobiyi gerçekten var olan bir eylem
+besler**, sahte hobi yok (kalıcı test).
+
+Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek
+düzenlerden derlendi: boksta kuşak yoktur, o yüzden amatör yaş
+kategorileri ve profesyonel sıralama kullanıldı; judo kyu/dan, taekwondo
+gup/dan.
+
+**Mevcut koruma testleri üç gerçek boşluk yakaladı ve hiçbirini
+gevşetmedim:**
+1. `economy_calibration_test` — `boks_antrenoru` maaşı `kuafor` ile
+   çakışıyordu (440.000 ₺); 438.000 ₺ yapıldı.
+2. `score_interview_test` / `martial_arts_test` / `content_reachability_test`
+   — üç yeni eğitmenlik işinin **mülakat sorusu yoktu**, yani iş listede
+   görünüp başvurulamayacaktı. Dokuz soru yazıldı (her işe üç).
+3. `martial_arts_widget_test` — ekran bir `ListView` olduğu için altta
+   kalan yeni dallar hiç inşa edilmiyordu. Test **gevşetilmedi**,
+   güçlendirildi: artık her dala kaydırarak ulaşılabildiği doğrulanıyor.
+
+Sayılar `prototypeOnly` — **Q-155**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2275 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_x_test` (14).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket Y ve Z — B ve C grupları (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. A grubu ve kataloglar **Paket X**'te bitti;
+B grubu **Paket Y**'de, C grubu **Paket Z**'de.
+
+### B grubu — D-153 … D-156
+
+| Paket | Karar | Ne geldi |
+|---|---|---|
+| Y/1 | **D-153** | Kronik durumlar ve Sağlık Geçmişi |
+| Y/2 | **D-154** | Eşin kendi hayatı + düşen aile bildirimleri düzeltildi |
+| Y/3 | **D-155** | Meslekte ustalık ve itibar |
+| Y/4 | **D-156** | Hayat hedefleri |
+
+**D-153.** Sağlık tek bir sayıydı, krizler birbirinden bağımsızdı, atlatılan
+kriz hiçbir iz bırakmıyordu. Altı kronik durum geldi (dördü kriz sonrası,
+ikisi yaşla). Takip edilmeyen durum her yıl sağlıktan düşürüyor, kriz
+riskini yükseltiyor ve check-up raporunda ilgili satırı aşağı çekiyor.
+Takip **yönetir**, ortadan kaldırmaz. Yeni Sağlık Geçmişi bölümü. Sayılar
+**Q-156**.
+
+**D-154.** Eşin kariyeri, emekliliği ve birikimi artık mevcut
+`ChildProgression` ile ilerliyor; paralel sistem kurulmadı. Eş
+hastalanabiliyor ve bu oyuncunun mutluluğuna gerçekten uygulanıyor. Sayılar
+**Q-157**.
+
+**D-155.** Ustalık (Çırak → Kalfa → Usta → Başusta → Duayen) işe, itibar
+kariyere ait. İkisi de **mevcut kayıttan türetiliyor**, yeni alan
+eklenmedi. Zam/terfi şansı, iş güvencesi, kariyer ekranı ve hayat sonu
+Emek ekseni bunları görüyor. Sayılar **Q-158**.
+
+**D-156.** 19 hedef, beş alanda. Ulaşıldığı **yaş** kaydediliyor ve bir daha
+değişmiyor. Hedefler başta seçilmiyor, yol boyunca açılıyor ve **hiçbir
+ödül vermiyor** — ikisi de prototipin tercihi, **Q-159**'da soruldu.
+
+### C grubu — D-157 … D-161
+
+| Paket | Karar | Ne geldi |
+|---|---|---|
+| Z/1 | **D-157** | Araç muayenesi + kazada araç hasarı |
+| Z/2 | **D-158** | Kardeşin kendi hayatı ve yeğenler |
+| Z/3 | **D-159** | Şehrin iş piyasası |
+| Z/4 | **D-160** | Hane bütçesi, velayet ve nafaka |
+| Z/5 | **D-161** | Denetim yaptırımı, sicilin solması, çevre |
+
+**D-157.** Önce neyin zaten var olduğu ayrıldı: arıza/tamir (D-079), yıllık
+sigorta-kasko-vergi (D-148) ve aracı satmak zaten vardı. Gerçekten eksik
+olan ikisi eklendi: **muayene** (iki yılda bir, kondisyonu düşük araç
+geçmez, geciken idari bedel öder) ve **kazada araç hasarı** — kaza iki
+yerde yaşanıyordu ama ikisi de araç kaydına hiç dokunmuyordu. Sayılar
+**Q-160**.
+
+**D-158.** Kardeş artık okuyor, iş buluyor, emekli oluyor, evleniyor ve
+çocuğu oluyor; kardeşin çocuğu **yeğen** olarak doğuyor. `RelationType.yegen`
+D-087'den beri tanımlıydı ama doğal yoldan hiç oluşmuyordu. Üç mevcut parça
+genelleştirildi, yeni sistem kurulmadı. Sayılar **Q-161**.
+
+**D-159.** Şehrin yeni kaldıracı **iş piyasasının genişliği**: yalnızca en
+üst bant dar piyasada bulunmuyor ve gerekçe açıkça yazılıyor. Geçim gideri
+ve maaş çarpanı **denendi ve bilerek geri alındı** — gerekçesi ölçümle
+birlikte **Q-162**'de.
+
+**D-160.** ⚠️ **Bu paket Q-118'deki "nafaka ve velayet şimdilik yazılmasın"
+kararını değiştiriyor.** Çalışan eş maaşının %35'ini haneye koyuyor;
+boşanmada velayet çocukların yakınlığından, nafaka ödeyen tarafın gerçek
+gelirinden hesaplanıyor. Geri alması kolay: tek kayıt alanı, tek motor.
+**Q-163**.
+
+**D-161.** Denetim dönemi artık şehir dışına çıkmayı kapatıyor; sicil
+zamanla **başvuruda sayılmaz** oluyor (kayıt silinmiyor); koğuşta kurulan
+itibar tahliyeden sonra bir **teklif kartına** dönüşüyor ("karış" /
+"karışma"). Karışmak kolay para değil: %45 ihtimalle dosya açılıyor.
+**İçerik sınırı korundu ve kalıcı testle sabitlendi:** hiçbir metin yöntem,
+plan, kaçma, saklanma, iz gizleme ya da yakalanmaktan kurtulma anlatmıyor.
+Ağır/organize suç bilerek eklenmedi. **Q-164**.
+
+### Bu iki pakette bulunan ve düzeltilen gerçek hatalar
+
+Hepsi **ölçülerek** bulundu, tahminle dokunulmadı; hiçbir test
+gevşetilmedi:
+
+1. **Çocuk evliliği kalıcı değildi.** `ChildMarriage`'in güncellediği kişi
+   kaydı boru hattına hiç girmiyordu; **aynı çocuk her yıl yeniden
+   evleniyordu** (ölçüm: 12 yılda 4 düğün → 1).
+2. **Aile dönüm noktası bildirimleri ekrana hiç ulaşmıyordu** (çocuğun
+   düğünü, torunun doğumu): üretiliyor ama hiçbir yere yazılmıyordu.
+3. **Kardeş mirası yanlış kişiye gidiyordu.** Kardeş evlenip çocuk sahibi
+   olabildiği için mirası önce kendi hanesine gitmeli. Ölçüm: düzeltmeden
+   önce 300 hayatta oyuncu yaşlılıkta 43 milyon ₺'ye kadar beklenmedik
+   miras alıyor, toplam oynanan yıl 22.445'ten 1.427'ye düşüyordu.
+4. **`Person.schoolLevel` iki anlamı birden taşıyor** (soyda "şu anki
+   kademe", okul tanışıklığında "tanışılan kademe"); okul çağındaki kardeş
+   sınıf listesine karışıyordu.
+5. **`ChildProgression.ensureRecord` serveti sıfırlıyordu:** "çok varlıklı"
+   eş bir yılda "çok yoksul" görünürdü — Finger'daki hatanın aynısı.
+6. **Test yardımcısı**, oyuncu kriz yanıtlanırken vefat ettiğinde
+   çöküyordu.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2392 geçti, 15 atlandı, 0 başarısız**. Bu iki pakette yeni:
+`paket_y_test` (51), `paket_y_widget_test` (6), `paket_z_test` (60).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+### DECISIONS.md'ye dokunulmadı
+D-134 … D-161 yalnızca kodda ve bu dosyada duruyor. `CLAUDE.md` kuralı
+gereği kullanıcı onayı olmadan `DECISIONS.md`'ye karar yazılmadı.
+
+## Paket AA — Yatırım, portföy ve servet (26 Eylül 2026, D-162)
+
+Varlıklar altına **Yatırımlar** geldi. Beş tür: Vadeli Hesap, Altın,
+Döviz Sepeti, Dengeli Fon, Karma Hisse Sepeti. **Gerçek şirket, fon,
+hisse ya da banka adı hiçbir yerde geçmiyor**; canlı fiyat çekilmiyor;
+hiçbir metin yatırım tavsiyesi vermiyor. Banka Aktiviteler'de kaldı
+(D-108).
+
+**Piyasa rejimi.** Yılın bir rejimi var (durgun / normal / güçlü / kriz)
+ve iki gizli parametresi (enflasyon baskısı, piyasa güveni). Rejim iki
+ortak etken üretiyor — risk iştahı (hisse, fon) ve korunma talebi
+(altın, döviz) — varlıklar bu etkenlere kendi ağırlıklarıyla tepki
+veriyor. Böylece kriz yılında hisse düşerken altın portföyü tutabiliyor.
+Ölçüm: 10.000 yılda kriz yıllarının %83'ünde hisse düşüyor, %95'inde
+altın hisseden iyi durumda.
+
+**Piyasa yaş başına bir kez ilerliyor.** Ekranı kapatıp açmak, al-sat
+yapmak ya da kaydı geri yüklemek fiyatı yeniden çevirmiyor. Piyasa
+kendi rastgele akışını kullanıyor (tohum hayatın kimliğinden ve yaştan
+türeyen sabit bir karma), oyunun ana akışından çekiliş çalmıyor.
+
+**Portföy.** Maliyet esası, ortalama maliyet, kısmi satış, gerçekleşen
+ve gerçekleşmeyen kâr/zarar, tür bazlı geçmiş. Vadeli hesap 1 yıl
+kilitli ve vadesinde zarar yazmıyor; erken bozmak faizi yakıyor,
+anapara tam geri geliyor. 18 yaş sınırı var, çocuk adına hesap yok.
+Cüzdan hiçbir yolda eksiye düşmüyor.
+
+**Servet, miras, boşanma.** Tek bir net varlık hesabı (`NetWorth`)
+kuruldu; eşya değeri boşanma paylaşımıyla aynı fonksiyondan geliyor.
+Hayat sonu değerlendirmesi artık cüzdan değil "eldeki nakit + portföy"
+okuyor. Kuşak devrinde portföy bir kez nakde çevrilip miras havuzuna
+giriyor — kaybolmuyor, iki kez de sayılmıyor. Evlilik içinde açılan
+pozisyonlar edinilmiş mal sayılıp paylaşıma giriyor; cüzdan yetmezse
+eksik kısım normal satış muhasebesinden geçen zorunlu satışla
+toplanıyor.
+
+**Ölçümler (`app/test/paket_aa_measure_test.dart`, gerçekten
+çalıştırıldı):** 10.000 piyasa yılı, her tür için 1.000 ayrı yirmi
+yıllık yol, 100 hayatın ölüm anındaki serveti — hem yatırım yapan hem
+yapmayan hâliyle. Yıllık ortalamalar: vadeli %6,0 · altın %7,0 · döviz
+%6,5 · fon %8,0 · hisse %10,0. 100.000 ₺ ile 20 yıl: medyan 314-410 bin
+₺, en riskli türde en iyi %10 1,87 milyon ₺ ve yolların %10'u
+anaparanın altında bitiyor. 100 hayatın en zengini 110 milyon ₺;
+**hiçbir hayat milyarder bitmiyor.**
+
+**Getiriler gerçek Türkiye enflasyonuna göre kalibre edilmedi, bilerek.**
+Görevin 3. maddesindeki %32'lik örnek ile 24. maddesindeki "%40-60
+büyütme, oyunun ekonomisini parçalar" yasağı çelişiyordu; 24. madde esas
+alındı ve çelişki kodda da, Q-165/1'de de yazılı duruyor.
+
+**Açık kalan gerçek bulgu:** geçim gideri portföyden tahsil edilmiyor,
+yalnızca cüzdandan. Bu yüzden yatırım yapan hayat, hiç yatırım yapmayan
+aynı hayattan ölçümde 24 kat zengin bitiyor — farkın büyük kısmı
+getiriden değil, paranın geçim giderinden korunmasından geliyor. Bu bir
+ürün kararı; Q-165/5'te duruyor ve **uydurulmadı.**
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2428 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_aa_test` (26), `paket_aa_widget_test` (7), `paket_aa_measure_test`
+(3 ölçüm). **Gerçek Windows veya Android cihazda oynanmadı.**
+
+Yeni olaylar havuza girince rastgele akış kaydığı için dört mevcut test
+kırıldı. Hiçbiri gevşetilmedi ya da silinmedi: üçünde tohum yeniden
+çıpalandı (tohum 5'te oyuncu 8 yaşında vefat ediyor), birinde bildirim
+sınırı yeniden ölçüldü ve o yılın sekiz kaleminin hiçbirinin piyasa
+bildirimi olmadığı gerekçeye yazıldı. Kökteki kırılganlık
+`docs/EKSIKLER.md` §6'da duruyor ve motor değişikliği onay bekliyor.
+
+### DECISIONS.md'ye dokunulmadı
+D-162 de yalnızca kodda ve bu dosyada duruyor.
+
+## Paket AB — Ev sahibi, kiracı ve kiralık gayrimenkul (27 Eylül 2026, D-163)
+
+Konut bir sayıydı. Artık kiracısı, kirası, defteri ve bakımı olan bir
+varlık. **Varlıklar > Evlerim** ekranı geldi; her ev kullanım durumuyla
+(oturuluyor / kirada / boş) listeleniyor.
+
+**Denetimde bulunan gerçek eksikler.** Kira katalog değerinden
+hesaplanıyordu: İstanbul'da 6,6 milyona alınan daire ile Amasya'da 3
+milyona alınan daire aynı kirayı getiriyordu ve şehir katsayısı (D-159)
+kirada hiç görünmüyordu. Kiracı yoktu — `rentedOut` tek bir bayraktı,
+boşluk her yıl hafızası olmayan bir %12 zarıydı. Depozito, sözleşme,
+ödeme geçmişi ve kiracının kendi isteğiyle çıkması yoktu. Konutun
+kondisyonu hiç değişmiyordu ve bakım diye bir şey yoktu. Boş evin
+maliyeti yoktu, evin değeri ömür boyu sabitti.
+
+**Kiracı Person değil**, bilerek: her yıl birkaç aday gelse İlişkiler
+ekranı oyuncunun hiç tanışmadığı yüzlerce kişiyle dolardı. Kayıt hafif
+ama kalıcı; aynı kiracı ertesi yıl başka isimle görünmüyor. Adaylar
+deterministik: ekranı kapatıp açmak yeni aday üretmiyor. Kiracıyı oyuncu
+seçiyor ve görünen ödeme geçmişi gizli güvenilirliğin bulanık yansıması.
+
+**Çoklu ev sahipliği için kayıt göçü gerekmedi:** `items` zaten liste,
+`residenceItemId` zaten tek alan. Üç yeni alan tamamen ek; eski kayıtta
+bayrak taşıyan konut için deterministik bir sözleşme üretiliyor ve eski
+kira tutarı korunuyor.
+
+**Ölçümler (`app/test/paket_ab_measure_test.dart`, gerçekten
+çalıştırıldı).** 10.000 konut-yılı: doluluk %97,5 · kiracının ortalama
+kalma süresi 4,6 yıl · kiranın hiç gelmediği yıl %4,1 · belirgin hasar
+%5,3 · brüt getiri %4,06 · **net getiri %3,70**. Mortgage'lı ev:
+3,2 milyonluk daire, yıllık kira 144 bin, taksit 1.016 bin → **net nakit
+akışı −881 bin ₺**; "bedava ev" exploit'i yok. 100 hayat × 3 senaryo:
+94 hayat hiç konut sahibi olmadan ölüyor, medyan üç senaryoda da aynı
+(⚠️ **basit simülasyon** ölçümü; gerçek oyuncu davranışıyla ev sahipliği
+%40,3 çıkıyor — aşağıdaki "Test stratejisi revizyonu" bölümü);
+ev sahibi olabilen 6 hayatta çok ev almak medyan serveti 10,0M → 11,9M
+yapıyor. **4+ ev ile ölen karakter hiç çıkmadı** — gayrimenkul maaşlı
+çalışmayı anlamsızlaştırmıyor, çoğu oyuncunun eli yetişmiyor.
+
+**Kalibrasyon ölçümle düzeltildi.** Aday modeli iki kez elendi: ilki
+piyasa kirasında her zaman aday üretiyordu (doluluk %100, ev bir yıl bile
+boş kalmıyordu); ikincisi fahiş kira isteyen eve bile %55 ihtimalle aday
+gönderiyordu. Üçüncüsü tek formülle çözdü: Poisson. Ayrıca şehrin
+**kiracı akışı** ile **kira fiyatı** çarpanları ayrıldı; öncesinde ikisi
+aynı dar banttaydı ve küçük il ile büyük il arasında fark
+hissedilmiyordu.
+
+**Bulunan iki gerçek exploit, ikisi de düzeltildi:** (1) kiradaki ev
+satılınca sözleşme listede kalıyor ve elde olmayan evden kira gelmeye
+devam ediyordu; (2) boşanmada eşe geçen kiralık ev aynı hayalet
+sözleşmeyi bırakıyordu. `GameState.removeItem` artık sözleşmeyi ve
+defteri de siliyor (tek çıkış noktası).
+
+**Mirasta kiracı konutla devrediliyor:** "babandan kalan daire hâlâ
+kirada." Sözleşme mirasçının yaş ölçeğine yeniden çıpalanıyor, oturma
+süresi korunuyor. Defterin para sayaçları taşınmıyor; taşınan tek şey
+evin güncel değeri.
+
+30 yeni konut/kiracı/ev sahibi olayı eklendi. İki taraf ayrı kapıdan
+geçiyor: ev sahibi tarafı (`requiresLetProperty`, `requiresVacantProperty`)
+ve kiracı tarafı (`requiresTenant`). Hiçbir metin hukuki yol göstermiyor;
+tahliye ve icra anlatılmıyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2463 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_ab_test` (23), `paket_ab_widget_test` (9), `paket_ab_measure_test`
+(3 ölçüm). **Gerçek Windows veya Android cihazda oynanmadı.**
+
+Mevcut testler gevşetilmedi, yeni akışa göre güçlendirildi: kiraya verme
+aday seçmeden geçiyor, kayıt testi kiracının kimliğini/kirasını/
+depozitosunu karşılaştırıyor, e2e cüzdan iddiası mülk defterine
+çivilendi ve miras testi kiracının oturma süresinin korunduğunu ölçüyor.
+
+Q-165/5 ("geçim gideri portföyden tahsil edilsin mi?") **açık bırakıldı**;
+bu paket onu sessizce kapatmak için kullanılmadı.
+
+### DECISIONS.md'ye dokunulmadı
+D-163 de yalnızca kodda ve bu dosyada duruyor.
+
+## Test stratejisi revizyonu — gerçek oyuncu davranışı (27 Eylül 2026)
+
+**Sorun:** ürün metrikleri basit bir botla ölçülüyordu. O bot sürekli
+"Yaş Al"a basıyor, olaylarda rastgele/ilk seçeneği seçiyor, üniversiteyi
+varsayılan olarak atlıyor, kariyer geliştirmiyor, parasını yönetmiyor ve
+yatırım/girişim/konut/sosyal sistemlerini oyuncu gibi kullanmıyordu.
+Regresyon avlamak için yeterli, **"kaç kişi ev alabiliyor"** sorusu için
+değil.
+
+**Gelen:** `app/test/support/player_bot.dart` — 10 oyuncu arketipi
+(kariyer, yatırımcı, girişimci, aile, sosyal, eğitim, rahat, riskli,
+spor, rastgele-geçerli). Her arketip hedef ve hafızayla oynuyor:
+üniversite kararını hayat başında bir kez veriyor ve lise sonrası
+vazgeçmiyor, yaşam rezervi ayırıp üstünü arketipe göre yatırıma/ev
+peşinatına/iş sermayesine dağıtıyor, zam ve terfi istiyor, maaşı düşükse
+iş değiştiriyor, partnerine özel zaman ayırıp evleniyor, çocuk yapıyor,
+boşanabiliyor, hobi ve dövüş sanatını hayat boyu aynısını sürdürüyor.
+
+**Kurallar:** `debugSetState` ile para/stat/ilişki/ev/iş **verilmiyor**;
+her şey `GameController`'ın gerçek public aksiyonlarından geçiyor.
+Olaylarda `choices.first` **yasak** — seçim para, sağlık, ilişki,
+kariyer, risk ve arketip üzerinden puanlanıyor, üstüne %15-30 insani
+kayma payı var. Hafıza test tarafında; `GameState`'e alan eklenmedi.
+
+**İki test türü ayrıldı:** unit/regresyon testleri bir sistemi doğrular
+ve ilk açık seçeneği kullanabilir; **ürün simülasyonu**
+(`product_simulation_test.dart`) gerçek oyuncuya benzer ve yalnızca ürün
+dengesi tartışması için kullanılır. Raporları karıştırılmaz.
+
+### Ölçüm: 1.500 tam hayat (10 arketip × 100 + 500 rastgele-geçerli)
+
+Hepsi doğumdan ölüme; **1500/1500 hayat ölümle bitti, takılan sıfır**.
+
+| Alan | Sonuç |
+|---|---|
+| Ortalama ölüm yaşı | 74,1 (medyan 77) |
+| Üniversiteye giden / mezun | %48,5 / %48,4 |
+| Bölüm çeşitliliği | 20/20 |
+| Çalışan / emekli | %98,9 / %85,6 |
+| Görülen meslek | 50/55 |
+| Ortalama farklı iş / iş değişimi | 2,52 / 1,56 |
+| Ölüm anı net servet (medyan) | 134,4M ₺ |
+| Yatırım yapan | %92,1 |
+| **Ev sahibi** | **%40,3** |
+| Yatırım evi / kiraya veren | %28,3 / %28,3 |
+| İş sahibi | %23,5 |
+| Evlenen / boşanan / tekrar evlenen | %22,0 / %6,4 / **%0,0** |
+| Çocuklu / ortalama çocuk / torun gören | %33,4 / 1,27 / %30,1 |
+| Arkadaşı olan / küslük yaşayan | %51,4 / %43,8 |
+| Sosyal medya açan | %43,3 |
+| Kronik / check-up / spor | %74,2 / %97,4 / %99,4 |
+| Sabıkalı / hapis yatan | %18,2 / %6,9 |
+| **Olay havuzundan görülen** | **349/361 (%96,7)** |
+| Hobi / dövüş sanatı / işletme türü | 11/12 · 6/6 · 9/13 |
+
+**Arketip bazlı (medyan servet):** yatırımcı 231M · girişimci 178M ·
+rastgele 163M · riskli 152M · kariyer 143M · eğitim 123M · spor 113M ·
+rahat 111M · aile 102M · sosyal 25M.
+
+### Simülasyon sırasında bulunan gerçek hatalar (hepsi bot tarafında)
+
+1. **Yıl hiç bitmiyordu.** Eylemler bildirim üretiyor, ana döngü
+   bildirimi kapatıp başa dönüyor ve aynı yıl eylemleri yeniden
+   yapıyordu. Hayatların %25,6'sı 6000 turluk güvenlik sınırına çarpıyor
+   ve ölçüme "ölmedi" diye giriyordu. Eylemler artık yaş başına bir kez.
+2. **Bebeğe kendi adını verme sonsuz döngüsü.** `ChildNaming.rename`
+   aynı adı değişiklik saymıyor, isim penceresi kapanmıyor ve bot her
+   turda başa dönüyordu.
+3. **Bekleyen düğün kapanmıyordu.** Doğru akış `holdWedding`; bot
+   `marry` çağırıyordu ve iki hayat sonsuz döngüye girdi.
+4. **Tek yılda üst üste konut kredisi.** Ev listesi boyunca her ev için
+   ayrı kredi çekiliyordu; serveti şişiriyordu.
+5. **Bot oyundan daha katıydı:** çocuk için evlilik şartı koyuyordu, oysa
+   oyun sevgiliyle de izin veriyor (D-047). Düzeltilince "çocuklu" oranı
+   %5,4 → %33,4 çıktı.
+6. **Yanlış aktivite kimliği** (`check_up` yerine `genel_kontrol`):
+   check-up oranı %0,0 ölçülüyordu, gerçekte %97,4.
+7. **Bot hiç boşanmıyordu** → "boşanan %0,0" metriği anlamsızdı.
+8. **Metrik tanımı hatası:** "mahkemeye çıkan" açılmış her dosyayı
+   sayıyordu (%51); karara bağlanmış dosya ölçülünce %26,1.
+
+### Dikkat çeken sonuçlar (karar Faho + ChatGPT'de)
+
+* **Servet medyanı 134M ₺.** Sebebi bulundu ve bot hatası değil: yatırım
+  getirisi bir ömür boyunca bileşik büyüyor ve oyunda anlamlı bir servet
+  gideri yok. Bot portföyünü hiç harcamıyor; gerçek oyuncu harcar ama
+  oyun bunu zorunlu kılmıyor.
+* **Tekrar evlenen %0,0.** Boşanma sonrası yeni partner + yakınlık 45
+  eşiği pratikte ulaşılamıyor.
+* **Evlenen %22** ama partneri olan %94,9: evlilik dar bir kapı.
+* **Sosyal arketip en yoksul** (25M) — yatırım yapmayan profil.
+* **Hiç girilmeyen 5 meslek:** kurye, doktor, eczacı, yazar, yz_kurye.
+* **Hiç görülmeyen 12 olay**, çoğu suç zinciri devamı ve araç olayları.
+* **İşletme türü 9/13**: dört tür hiç kurulmuyor.
+
+**Hiçbir denge değiştirilmedi.** Bu turda yalnızca test altyapısı
+düzeltildi; oyunun sayılarına dokunulmadı.
+
+### UI smoke life
+
+10 uzun hayat **arayüzden** oynanıyor (`ui_smoke_life_test.dart`):
+menüler açılıyor, sayfa kaydırılıyor, düğmeye basılıyor, pencere
+seçiliyor, sekmeler geziliyor. Amaç "motor çalışıyor ama buton
+ulaşılamıyor" hatasını yakalamak. 1.000 hayatın tamamını arayüzden
+oynamak çok yavaş olurdu.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
+
+## Ürün simülasyonu kök neden analizi (27 Eylül 2026)
+
+**Amaç:** son PlayerBot ölçümündeki altı aşırı sayıyı denge değiştirerek
+"düzeltmek" değil, **nedenini ölçmek**. Bu turda oyun dengesinde bir tek
+sabit, eşik, fiyat, getiri ya da şart **değişmedi**; kod da düzeltilmedi.
+Ayrıntılı karar soruları `docs/DESIGN_REVIEW_QUEUE.md` **Q-167**'de.
+
+**Gelen dosyalar:**
+* `app/test/support/bot_diagnostics.dart` — `BotDiag` (servet bileşenleri,
+  para akışları, evlilik hunisinin her basamağı, ayrılık sonrası huni,
+  meslek/işletme uygunluğu, bot eylem sıklıkları) ve `BotOverrides`
+  (teşhis için **botun tercihini** kapatır; oyunun sayılarına dokunmaz).
+* `app/test/diagnosis_root_cause_test.dart` — 16 bölümlük rapor.
+  1000 hayat (10 arketip × 100, hepsi ölümle bitti, takılan 0) + 5
+  senaryo × 200 karşılaştırma + 500 hedefli ayrılık hayatı.
+* `app/test/diagnosis_remarriage_lock_test.dart` — 9 test, tekrar evlenme
+  %0'ın kök nedeninin **deterministik kanıtı**.
+
+**Ölçüm bütünlüğü:** teşhis botun rastgele akışına dokunmuyor —
+`product_simulation_test.dart` çıktısı teşhis eklendikten sonra **satır
+satır aynı** kaldı (yalnızca geçen süre satırı değişti). `debugSetState`
+ile para/stat/ilişki/ev/iş verilmedi.
+
+**Bulunan sebepler (özet):**
+
+| Soru | Sebep |
+|---|---|
+| Servet medyan ~134M | Net servetin **%97,8'i portföy**. Eğri hiçbir yaşta patlamıyor; her 5 yılda 1,34-1,94x büyüyor. Yatırımsız senaryo **0,150x**; yatırım yapmayan tek arketip (`social`) 20,7M ile ölüyor. |
+| Gayrimenkul | Serveti **azaltıyor**: gayrimenkulsüz senaryo **1,202x**. "Ev al, bedava gelir" exploit'i yok, tersi var. |
+| Miras / işletme | Etkisiz. 50M üstü hayatlarda mirasın payı **medyan %0,15**; işletmesiz senaryo 0,977x. |
+| Q-165/5 (gider portföyden tahsil edilmiyor) | Ölçüldü ama **ana sebep değil**: korunan yıl medyan 2, ödenmeyen gider %8,2. Portföy/maliyet katı 6,6x. Sürükleyici gerçek getiri. |
+| Partner %94,9 / evli %22 | İki kapı. (1) Bot yalnızca %47,1 evlenmek istiyor (**bot parametresi**). (2) İsteyenlerin **%49'u hiç sevgili edinemiyor** — bütün kayıp orada. Yakınlık 45 eşiği kayıp üretmiyor (%50,1 → %49,7); görülen en yüksek yakınlık medyan 100. |
+| Tekrar evlenme %0 | **GERÇEK HATA.** `Finger` "evli mi" sorusunu `state.marriage != null` ile soruyor; boşanmada/dullukta kayıt bilerek silinmediği için bu koşul bir kez evlenen herkes için hayat boyu doğru. `finger.dart:443/552/680/711` romantik yolların hepsini kalıcı kapatıyor. `marryBlockReason` izin veriyor ama evlenecek sevgili edinilemiyor. |
+| 5 girilmeyen meslek + 4 kurulmayan işletme + 12 görülmeyen olay | Büyük kısmı **tek bir bot eksiği**: PlayerBot hiç ehliyet almıyor (`applyForLicense` çağrılmıyor) → 2 meslek + 1 işletme + 5 olay kapanıyor. |
+
+**Sevgili kapısının mekaniği:** Finger adaylarının %25'i baştan yalnızca
+arkadaşlık istiyor (flört değil arkadaş üretir, D-107). Flört oluşursa
+yakınlığı `rng.between(45, 62)`, resmîleştirme eşiği **60** → doğrudan
+geçme ihtimali %16,7. Kalanı için flörtle vakit geçirmek gerekiyor ama
+**bot flörtle hiç vakit geçirmiyor** (`_spendTimeWithFamily` listesinde
+flört yok) ve ilgilenilmeyen flört Paket R ile bitiyor. Ölçüm: flört
+edinen 412 hayatın **228'i (%55,3) hiç sevgiliye çevirmiyor** — huninin
+228 kayıplık basamağıyla birebir aynı.
+
+**Kendi ölçüm hatalarım (düzeltildi, raporda açıkça yazıyor):**
+* Spor ve check-up'ı "bir kez yaptı mı" diye ölçmüştüm; on arketipte de
+  %95-100 çıktı ve "bot fazla mekanik" diye yorumlamaya hazırdım. Yanlış
+  metrikti: bot yılda bir profile bağlı zar atıyor, 57 yılda düşük
+  olasılık bile doygunlaşıyor. Yıllık sıklıkla ölçünce arketipler
+  ayrışıyor (spor/yıl 0,21-0,97).
+* Eski eş kaydını "bağı artık `es` değil" diye ölçtüm, %37,7 çıktı ve
+  kayıt bozuluyor sandım. Dullukta eş vefat eder ve bağı `es` kalabilir.
+  Doğru ölçümle: kayıt korunma **%100**, boşanmada bağ güncellenme
+  **%100**, yeniden bekâr sayılma **%100**. Kayıt yönetimi doğru.
+* İlk yazımda `diag.wantedMarriage`'ı hayatın başında okumuştum;
+  `_Intent`'in `late final` alanları erişim sırasına göre zar attığı için
+  bu bütün niyet zarlarını kaydırdı (ölüm yaşı 74,1 → 74,2, üniversite
+  %48,5 → %47,4). Teşhis akışa dokunmamalı; botun kendi okuduğu yere
+  taşındı ve çıktı yeniden birebir aynı oldu.
+* Evlilik hunisine monoton olmayan basamaklar koymuştum (bot niyeti,
+  flört) ve tablo eksi kayıp yüzdesi basıyordu; ikisi huninin yanına
+  ayrı bilgi olarak taşındı. "Uygun ama teklif etmeyen" oranını bütün
+  korpusta ölçmüştüm (%48,6); neredeyse tamamı hiç evlenmek istememiş
+  hayatlardı. Evlenmek isteyenlerde gerçek değer **%0,6**.
+
+**Denge değişmedi.** Bot tarafındaki 7 eksik (ehliyet, flört kuru, Finger
+niyeti, her fırsatta yatırım, sermaye birikmemesi, maaş süzgeci, herkesin
+çalışması) ürün kararı değil; yine de düzeltilirse **bütün ürün
+metrikleri değişeceği için** Faho'ya bildirilmeden dokunulmadı.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
+
+## Paket AC — yatırım riskleri, piyasa şokları ve servet dengesi V2 (27 Eylül 2026)
+
+**Temel prensip:** botu zayıflatarak problem gizlenmedi, **oyun dengelendi**.
+Gerçek oyuncu her yıl yatırım yapabilir; oyun ekonomisi o stratejiye
+dayanmalı. Karar soruları `docs/DESIGN_REVIEW_QUEUE.md` **Q-168**'de.
+
+**Gelen sistemler**
+
+* **12 kurgusal şirket, 10 sektör** (`data/company_catalog.dart`). Hiçbiri
+  gerçek değil; gerçek şirket/banka/fon/kurum/kişi adı geçmiyor.
+* **Olay katmanı** (`domain/economy/incident_engine.dart`): konkordato,
+  iflas, kayyum, yönetim skandalı, bilanço şoku, sermaye artırımı,
+  temettü, satın alma haberi, sektör krizi/atağı, regülatör incelemesi.
+  Şirket durumu **kademeli** ilerliyor — sağlıklı şirket tek yılda iflas
+  etmiyor, oyuncu yolda haberleri görüyor.
+* **İşlem sırasının kapanması**: kayyum/konkordato ve panikte alım **ve**
+  satım 1-2 yıl duruyor. "Satayım kurtulayım" her zaman mümkün değil.
+* **Fon riski**: yönetici değişimi, yanlış yatırım, strateji değişimi,
+  birleşme, **tasfiye** (pozisyon piyasa değerinden nakde döner). Fon tek
+  hisse gibi davranmıyor.
+* **Çok yıllı kriz** (1-3 yıl) ve yeni **toparlanma** rejimi. "Krizde al,
+  ertesi yıl kesin toparlar" garantisi kalktı: krizden doğrudan güçlü yıla
+  atlanamıyor.
+* **Faiz şoku** (%5/yıl) ve **kur şoku** (%7/yıl, **iki yönlü** — döviz
+  her zaman kazanan değil).
+* **Maliyetler**: alım-satım komisyonu %0,2, fon yönetim gideri %1,1/yıl,
+  gerçekleşen kârdan %10 kesinti. Zararda kesinti yok, zarar mahsubu yok.
+  Komisyon **maliyet esasına girmiyor**.
+* **Zorunlu portföy satışı**: cüzdan geçim giderini karşılamazsa açık
+  portföyden kapanıyor. Portföy artık görünmez kasa değil.
+* **Yoğunlaşma riski**: tek riskli varlıkta toplanan portföy daha oynak.
+  Çeşitlendirme kazanç garantisi vermiyor, yalnızca oynaklığı düşürüyor.
+  **Yapay yatırım limiti yok** — isteyen parasının tamamını yatırıyor.
+* **24 yeni piyasa/şirket olayı** (`data/event_pool_market.dart`).
+  Hiçbirinde "şunu al kesin yükselir" yok; hiçbir seçenek doğru cevap
+  değil.
+
+**Ölçüm (40.000 piyasa yılı)**
+
+Rejim: normal %45,0 · durgun %24,8 · güçlü %20,3 · kriz %7,5 ·
+toparlanma %2,4. Kriz bölümü ortalama **2,09 yıl**, en uzun 6.
+Şirket batışı yıllık **%0,64**. İşlem kapalı yıl %4,5. Olay görülen yıl
+%31,1 — çoğu yıl sessiz.
+
+Yıllık getiri: hisse %9,2 (std %24,8) > fon %7,5 > altın %6,9 >
+döviz %6,4 > vadeli %6,0. **Risk merdiveni doğru.** 20 yıllık yolda
+anaparanın altında bitme: hisse %19,3 · fon %3,4 · altın %0,4 ·
+döviz %0,1 — hiçbir tür risksiz değil.
+
+**Min-max oyuncu (8 strateji × 20/40/60 yıl, 3.000 strateji hayatı)**
+
+60 yılda yatırımın kendi getirisi (maaş karışmaz): %100 hisse medyan
+7,41x, kötü%10 **0,69x**, yatırım zarar ettiren **%13,6**. Sadece altın
+18,23x. Yatırım yapmayan hiçbir hayatta 50M'ye ulaşmıyor; yatırım yapan
+stratejilerde 50M+ %57-76.
+
+**Paket AC öncesi / sonrası (aynı tohumlar)**
+
+| Ölçü | Önce | Sonra |
+|---|---|---|
+| Ürün simülasyonu medyan net servet | 134.365k ₺ | **97.250k ₺** (−%27,6) |
+| Teşhis korpusu medyan servet | 122.254k ₺ | 88.541k ₺ (−%27,6) |
+| Portföyün servetteki payı | %97,8 | %95,8 |
+| Tekrar evlenen | %0,0 | **%0,5** |
+
+**Tekrar evlenme bug fix (Q-167/3 kapandı)**
+
+`finger.dart`'ta dört yerde ve `life_progression.dart:1696`'da
+`state.marriage != null` yerine **`state.isMarried`** kullanılıyor artık.
+Boşanmada/dullukta evlilik kaydı bilerek silinmediği için eski koşul bir
+kez evlenen herkes için hayat boyu doğruydu ve bütün romantik yollar
+kalıcı kapanıyordu. `PlayerBot`'ta da aynı hata vardı (teklif kapısı).
+Ayrılık sonrası huni: yeni flört %0,0 → **%47,5**, yeni sevgili → %8,5,
+tekrar evlenme → **%5,7** (teşhis korpusu). Yeni regresyon testi tam
+oyuncu yolunu yürüyor: **iki eşin ikisi de Finger'dan geliyor**, elle
+sevgili enjekte edilmiyor.
+
+**Bulunan yeni defekt: kontrolsüz borç büyümesi**
+
+`banking.dart advanceYear`: ödenmeyen taksitte borç her yıl faiziyle
+büyüyor ama `remainingPayments` azalmıyor ve hiçbir haciz/yapılandırma/
+silme mekanizması yok. Kredi hiç kapanmıyor. Ölçümde bir hayatta
+**1.788.495k ₺ borç** ve **−1.601.336k ₺ net servet** çıktı (125 hayatta
+1). **Düzeltilmedi**: doğru çözüm ürün kararı (Q-168/10).
+
+**Saldırgan oyuncu taraması: exploit bulunamadı.** Kayıt geri yükleyip
+piyasayı yeniden çevirmek, aynı yılı tekrar ilerletmek, al-sat döngüsü,
+kredi arbitrajı, parayı portföye saklayıp boşanma payından kaçmak, ikinci
+boşanma, aynı mirası iki kez almak, kapalı sırada zorunlu satışla çıkmak,
+vadeli aç-boz döngüsü — hepsi engelli. Al-sat döngüsü 20 turda 1.000k →
+923k **kaybettiriyor**.
+
+**Düzeltilen kendi hatalarım (ölçümle bulundu, raporda yazılı)**
+
+* Krizi çok yıllı yapmak kriz yıllarını %8'den **%17,8'e** çıkardı ve
+  risk merdivenini tersine çevirdi (hisse %6,4 < altın %7,9). Krize giriş
+  ihtimali yarıya indirildi: kriz **daha uzun ama daha seyrek**, payı
+  korundu, merdiven düzeldi.
+* Korunma primi her kriz yılında tekrar uygulanıyordu; **Döviz Sepeti'nde
+  1.000 yirmi yıllık yolun hiçbiri anaparanın altında bitmiyordu**.
+  Güvenli limana kaçış krizin **başında** olur: uzayan kriz yılında prim
+  eriyor, toparlanmada geri veriliyor.
+* Kriz kilidinde bire bir kaydırma hatası: ortalama 3,13 yıl, en uzun 11
+  çıkıyordu. Düzeltilince 2,09 / 6 oldu.
+* Yoğunlaşma zammı **bütün getiriyi** çarpıyordu, yani eğilimi de: yoğun
+  portföyün beklenen getirisi yükseliyordu. Ölçümde bir hayat **10,2
+  milyar ₺** ile öldü ve AA'nın bekçisi kırıldı. Doğrusu yalnızca
+  eğilimden sapmayı büyütmek.
+* "Başlangıç parasının altında bitti" ölçüsünü strateji riski sanmıştım;
+  bu hayatlar 60 yıl maaş da alıyor, o yüzden neredeyse hiç gerçekleşmiyor
+  ve "%100 hisse hiç kaybetmiyor" diye okunacaktı. Doğru ölçü yatırımın
+  kendi getirisi: (portföy + gerçekleşen kâr) / anapara.
+
+**Bilerek yapılmayanlar**
+
+* **Nominal enflasyon motoru (§18):** kurulmadı, yalnızca mimari
+  raporlandı (Q-168). Sadece yatırım fiyatını nominal büyütmek yasaktı ve
+  yapılmadı. Asıl mesele şu: **%9,2 reel getiri 60 yılda ~200 kat eder.**
+  Risk katmanı medyanı %27,6 düşürdü ama üst kuyruk **eğilim × ufuk**
+  çarpımından geliyor; olay katmanı onu tek başına çözemez.
+* **Tekil hisse (§10):** karma sepetle tek şirket riski karıştırılmadı;
+  ayrı paket önerisi olarak bırakıldı.
+* **Geçim gideri seçenekli akışı (§19):** zorunlu satış otomatik yapıldı.
+  Üç seçenekli akış yeni bir bekleyen pencere demek ve teşhis turunda
+  bekleyen pencerelerin gerçek kilitlenme riski ölçülmüştü.
+
+**Denge sayıları değişmedi:** yatırım eğilimleri (hisse %10, fon %8,
+altın %7, döviz %6,5, vadeli %6) **aynı**. Değişen şey riskin kendisi.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2549 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı.**
+
+## Paket AD (1/6) — oyunun kendi ekonomisi: sabit getiri eğilimi kaldırıldı (27 Eylül 2026)
+
+Faho'nun "EKONOMİ TASARIM PRENSİBİ REVİZYONU" briefinin **§1-§6 ve
+§22-§23** kısmı. Kalan altı başlık (§7-§21) ayrı turlarda; aşağıda
+"yapılmayanlar" olarak açıkça yazılı. Sorular `docs/DESIGN_REVIEW_QUEUE.md`
+**Q-169**'da; `DECISIONS.md`'ye kesin kural **yazılmadı**.
+
+**Kesin olan (§2, Faho'nun açık yetkisi):** "Yatırım türlerinin SABİT
+POZİTİF DRIFT garantisi olmasın." Bu, Q-168/1'de bekleyen soruyu kapattı.
+
+### Ne yapıldı
+
+- **`drift` alanı kaldırıldı.** Yerine `carry` (varlığın *ürettiği* akış:
+  hisse %2,8 · fon %2,2 · **altın 0** · **döviz 0** · vadeli %3) ve
+  `annualFee` (fonda %1,4 yönetim ücreti) geldi.
+- **Vadeli %6 → %3.** §11: ana işlevi nakdi korumak, servet büyütmek değil.
+- **Değerleme ısısı** (`MarketState.valuationHeat`, 0-100, gizli): pahalı
+  varlığın beklentisi düşer, balon kırılma zarı atılır; ucuzlayanda tersi.
+- **Çağ gelgiti** (`MarketState.riskTide` / `hedgeTide`, gizli): hayat
+  ölçeğinde yavaş (yarı ömür ~11 yıl), ortalaması sıfır eğilim. §4'ün tek
+  gerçek çözümü — aşağıya bak.
+- **Risk primi rejim sıklığından doğuyor**, tür başına yazılı sayı değil.
+- Banka ekranındaki oyuncuya görünen **"2026" ifadesi kaldırıldı**;
+  `docs/ECONOMY_2026.md` tarihsel araştırma notu olarak işaretlendi.
+  Denetimde production ekonomi kodunda gerçek tarihe bağlı **hiçbir hesap
+  bulunmadı** (`DateTime.now()` yalnızca ses soğuması ve kayıt zaman
+  damgası).
+
+### Kalibrasyon sırasında bulunan iki gerçek sorun
+
+Ikisi de ölçümle bulundu, tahminle değil.
+
+1. **Tek yönlü balon sistematik vergiye dönüşüyordu.** Yalnızca "balon
+   kırılması" varken altın yıllık ortalama **%-0,3**, hisse geometrik
+   **%-0,2** ölçüldü: "uzun vadede kesin zengin" sorunu "uzun vadede kesin
+   batık" sorununa dönmüştü. Aynası eklendi (dipte sert toparlanma zarı).
+2. **§6 ile §4 birbirine çalışıyor.** Balon mekaniği yıllık getirilere eksi
+   otokorelasyon veriyor ve uzun vadeli ortalamanın dağılımını
+   *sıkıştırıyor*: 40 yıllık log ortalamanın standart sapması bağımsız
+   yıllar varsayımıyla %3,87 olmalıyken **%2,39** ölçüldü. Bu yüzden 40 yıl
+   hisse tutanın en kötü %10'u bile 2,47 kat yapıyordu. Çağ gelgiti bu
+   sıkışmayı dengelemek için eklendi ve genliği ölçümle büyütüldü.
+
+### Ölçüm (`app/test/paket_ad_measure_test.dart`, gerçekten çalıştırıldı)
+
+Yıllık, 60.000 yıl, tek varlık:
+
+| Tür | ortalama | geometrik | stdev | eksi kapanan yıl |
+|---|---|---|---|---|
+| altın | %4,0 | %3,4 | %11,8 | %37 |
+| döviz | %3,7 | %3,2 | %10,6 | %37 |
+| fon | %5,3 | %4,5 | %12,6 | %34 |
+| hisse | %9,2 | %6,5 | %23,1 | %34 |
+
+Tek varlığa yatırıp hiç dokunmamak (1000 yol, oyunun sürtünmesi **hariç**):
+
+| Yıl | Tür | Medyan | Kötü %10 | Anapara altı |
+|---|---|---|---|---|
+| 40 | hisse | 15,25x | 1,61x | **%5,0** (önce %2,9) |
+| 60 | altın | 7,42x | 2,26x | %1,2 (**önce medyan 18x**) |
+
+60 yıllık bot stratejileri (yatırımın kendi getirisi, sürtünme **dahil**):
+
+| Strateji | Medyan kat | Kötü %10 | Zarar eden |
+|---|---|---|---|
+| %100 hisse | 4,85x | 0,49x | **%16,8** |
+| sadece altın | 3,97x | 1,04x | %7,2 |
+| dengeli (4 varlık) | 2,50x | 1,23x | %3,2 |
+
+Artık hisse **en yüksek medyanı ve en kötü tabanı** birlikte veriyor; altın
+arada; dengeli en güvenli. Hiçbir strateji baskın değil (§12).
+
+### Bu turda bilerek yapılmayanlar
+
+- **§7-§9 şirket sağlık modeli** (gizli sağlık, kaldıraç, büyüme, yönetim
+  kalitesi) — AD/2.
+- **§16 kontrolsüz borç düzeltmesi** — AD/4. Faho yetki verdi, ayrı tur.
+- **§13 servetin kullanımı / harcama kanalları** — AD/5.
+- **§18-§21 on strateji × 20/40/60 kalibrasyonu** — AD/6. **§18'in dağılım
+  hedefi (normal oyuncu milyonlar · milyarderlik çok nadir) henüz
+  doğrulanmadı.**
+- Enflasyon motoru — Q-168'de duruyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2552 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (2/6) — borç yaşam döngüsü: kontrolsüz borç bug'ı düzeltildi (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **§8-§11 ve §24** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-170**'te; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Hatanın ölçülen hâli
+
+₺200.000 kredi, cüzdan sıfır, 60 yıl: borç 20. yılda 9,7 milyar, 40. yılda
+474 trilyon, 60. yılda **9.223.372.036.854.775.807** — yani `int`in tepesi.
+Bu bir **tamsayı taşması**, sadece çirkin bir kuyruk değil.
+`remainingPayments` hiç azalmıyor; kredi ölümsüz.
+
+Aynı satırda iki hata daha: büyüme `l.bank.yearlyRate` ile hesaplanıyor ve
+`purpose`'u yok sayıyordu (ödenmeyen **konut** kredisi ihtiyaç kredisi
+oranıyla büyüyordu), ve taksitin %90'ı cüzdanda olsa bile hiç ödeme
+yapılmıyordu.
+
+### Gelen yaşam döngüsü
+
+`normal → gecikme → ciddi gecikme → tahsil → yapılandırma → kapanış`.
+Kısmi ödeme var; 2. kaçakta banka portföye ve **oturulmayan** mala uzanır;
+3. kaçakta borç donup taksite bölünür (en fazla iki kez); gecikme faizi
+baştan borçlanılan tutarın **iki katını** geçmez; hak bittiyse borç zarar
+yazılıp kapanır; kredi notu izi on yıl sayılıp siliniyor (§11: ömür boyu
+yasak yok). **Oturulan ev hiçbir koşulda satılmıyor**, mal satışı en
+küçükten başlıyor.
+
+### Ölçüm (1000 borçlu hayat, 60 yıl — gerçekten çalıştırıldı)
+
+| Ölçüm | Değer |
+|---|---|
+| Gecikme gören | %99,7 |
+| Zorunlu tahsil gören | %66,3 |
+| Yapılandırma gören | %33,2 |
+| Zarar yazılarak kapanan | %33,2 |
+| **Hiç kapanmayan** | **0** |
+| Kapanma süresi | medyan 6 yıl · en uzun 16 |
+| Görülen en büyük borç | medyan 388.540 · **en büyük 997.780** |
+
+### Kalibrasyonda düzelttiğim kendi hatalarım
+
+1. **Yapılandırma rahatlatmak yerine hızlandırıyordu**: şişmiş borca yeniden
+   bileşik faiz bindiği için taksit ₺90.000 → ₺725.651 → ₺3.647.779 oluyordu.
+   Doğrusu borcun donup vadeye bölünmesi (₺90.000 → ₺40.000 → ₺26.667).
+2. **Tahsil testim boştu**: taze üretilen hayatın hiç eşyası olmadığını fark
+   etmemişim, "oturulan ev satılmadı" testi hiçbir şeyi kanıtlamıyordu ve
+   ölçümde tahsil %0,0 çıkıyordu. Gerçek mal veren yardımcı yazıldı → %66,3.
+3. Gecikme faizi tavanını **anaparaya** bağlamıştım; `outstanding` baştan
+   anapara değil vade boyunca ödenecek toplam olduğu için tavan borcu kendi
+   başlangıç bakiyesinin altına kırpıyordu ve mevcut bir test haklı olarak
+   kırıldı. Çıpa `Loan.originalDebt` oldu. **Test gevşetilmedi.**
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2562 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (3/6) — şirket sağlık modeli (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/2 (§1-§5) ve §23** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-171**'de; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Ne geldi
+
+Her kurgusal şirketin beş **gizli, kalıcı, yıldan yıla değişen** göstergesi
+var (mali sağlık, borç baskısı, büyüme, yönetim kalitesi, güven) ve on
+sektörün kendi gücü. Hepsi kayda giriyor, hiçbiri oyuncuya sayı olarak
+gösterilmiyor.
+
+Olaylar artık bunlardan doğuyor: hangi şirketin habere konu olacağı,
+haberin iyi mi kötü mü olacağı, krizden çıkma ihtimali (yönetim kalitesi)
+ve hangi sektörün kriz/atak yaşayacağı. 24 olayın yedisi şirketin **gerçek
+durumuna** kapılı — oyuncu sapasağlam bir şirket için konkordato haberi
+okuyamıyor.
+
+Kapanan şirketin sepetteki payını dört yıl sonra **yeni bir ad** devralıyor
+(altı yedek kurgusal şirket). Kapanan şirket geri dönmüyor.
+
+### Bulduğum yapısal kusur (Paket AC'den kalma)
+
+1200 yıllık ilk ölçümde şirketlerin yalnızca **%31'i normal**, %68'i kalıcı
+sıkıntılı çıktı. Sebep: şirketin durumu yalnızca **olaya konu olduğunda**
+değişiyordu ve bir şirket ortalama yetmiş yılda bir seçiliyor; kötüleşme
+tam iyileşmeden olası olduğu için durumlar yutucu hâle geliyordu. Oyun
+kuşaklar arası devam ettiği için bu, ilerleyen kayıtlarda "bütün şirketler
+hasta" demek. Çözüm: göstergeleri düzelen şirket **sessizce** bir kademe
+iyileşebiliyor. Kötü haber her zaman duyurulur, iyi haber sessiz olabilir.
+
+İlk denemede fazla cömert davrandım (eşik 0,50) ve kapanma 1200 yılda 1'e
+düştü — Paket AC'nin eklediği riski kendi elimle söndürüyordum. Eşiği
+ölçümle 0,44'e çektim.
+
+### Ölçüm (14.396 şirket-yılı — gerçekten çalıştırıldı)
+
+| Durum | Pay |
+|---|---|
+| normal | %65,8 |
+| inceleme | %22,1 |
+| sıkıntı | %10,1 |
+| kayyum | %0,6 |
+| konkordato | %0,2 |
+
+Geçişler (1200 yıl): kötüleşen 79 · toparlanan 18 · kapanan 3 · yerine gelen
+yeni şirket 3. Durum değişimi şirket-yıllarının **%0,8'i**. 200 tek yıllık
+koşuda **normalden doğrudan kapanan şirket 0**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2571 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (4/6) — yatırım kararları gerçek oldu (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/3 (§6, §7)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-172**'de.
+
+### Bulduğum sorun
+
+Paket AC panik, balon ve şirket olaylarını getirmişti ama **seçeneklerinin
+tek etkisi mutluluktu**: "sat", "bekle", "al" seçmek portföyde hiçbir şey
+değiştirmiyordu. Karar değil, süslü metindi. Ayrıca panik olayı sapasağlam
+bir yılda, FOMO olayı soğuk bir piyasada çıkabiliyordu.
+
+### Ne yapıldı
+
+`EventChoice` artık portföy hamlesi taşıyabiliyor (kısmi sat, kısmi al, kâr
+al) ve hamle `InvestmentEngine`'in kendi al/sat yollarından geçiyor —
+komisyon, kesinti, işlem durması ve maliyet esası aynen işliyor. İkinci bir
+ekonomi motoru kurulmadı. Hamle başarısız olabilir (işlem durmuş, para yok,
+zararda kâr alınamaz).
+
+Panik ve devre kesici olayları **gerçek kriz**, FOMO olayı **gerçek ısı**
+ister. Konkordato ve bilanço şoku olaylarına "azalt" / "çık" seçenekleri
+eklendi.
+
+### Ölçüm (gerçekten çalıştırıldı)
+
+500 panik yolunda, panikte %35 satan ile hiç dokunmayan on yıl sonra
+karşılaştırıldı: **satan 154, bekleyen 346**. Panikte satmak çoğu zaman
+yanlış ama %31 oranında doğru — tek doğru cevap yok. 29 finansal olayın
+hepsinde en az beş yıl tekrar aralığı var: bildirim yağmuru yok.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2578 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (5/6) — servetin kullanımı (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/5 (§12-§17)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-173**'te.
+
+### Denetimin bulduğu sorun
+
+Oyundaki en pahalı şey **₺16.000.000'luk villaydı**; diğer kategorilerin
+tepesi önemsiz (saat ₺28.000, takı ₺42.000). Oysa altmış yıl yatırım yapanın
+portföyü ₺30.000.000'u aşıyor. Paranın harcanacak yeri olmayınca "her şeyi
+yatır" doğal olarak tek akıllı strateji oluyor.
+
+### Ne geldi
+
+- **Lüks katman:** yazlık (₺6,2M-₺145M), tekne (₺4,8M-₺38M), koleksiyon
+  (₺3,1M-₺22M). Tavan ₺16M'dan **₺145M'a** çıktı. Hepsi normal eşya: net
+  servete giriyor, boşanmada paylaşılıyor, mirasa kalıyor, borç tahsilinde
+  satılabiliyor.
+- **Servet kapısı:** üç yeni mağaza ve "Lüks ve koleksiyon" öbeği. Eşiğin
+  altındaki oyuncu kategoriyi görmüyor (koleksiyon ₺8M · yazlık ₺12M ·
+  marina ₺25M).
+- **Bakım masrafı:** yazlık %1,2 · tekne %5,5 · koleksiyon %0,8; araç
+  giderleriyle aynı mantıkta, gider dökümünde ayrı satır. Motoryat sahibinin
+  yıllık gideri ₺12.000 → ₺2.102.000.
+- **Yapay zengin vergisi yok:** cüzdanında ₺400.000.000 olan ama malı
+  olmayan oyuncunun gideri değişmiyor. Testle sabitlendi.
+- **Servet seviyesine açılan beş olay:** aile para istiyor (≥₺2M), çocuğun
+  eğitimi (≥₺3M), uzun tatil (≥₺5M), bağış (≥₺10M), özel etkinlik (≥₺20M).
+  Sağlık masrafı 55 yaş üstü, ağırlık 3, tekrar aralığı 12 yıl — nadir.
+
+### Kırılan üç test de gerçek bir şeyi yakaladı
+
+1. Bağış olayının bir seçeneğini **etkisiz** yazmışım; mevcut kural haklıydı.
+2. "Her mağaza kategorisi açık" iddiası servet kapısıyla çelişiyordu; test
+   yeni kuralı öğrenecek biçimde güncellendi ve üstüne "eşiğin altında
+   kapalı" iddiası **eklendi**.
+3. Mağaza öbeği testi "Konut" başlığının ekranda kalmasına bel bağlıyordu;
+   liste uzayınca kırıldı, her başlığa ayrı kaydırılacak biçimde düzeltildi.
+
+İki tohuma çakılı test de kaydı (EKSIKLER §6): tekrar evlenme tam yolu
+60→240 tohum, kuşak senaryosu 32→33. 30-80 aralığında **32 dışındaki 48
+tohumun hepsi çalışıyor**. Hiçbir iddia gevşetilmedi.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2584 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (6/6) — strateji kalibrasyonu · **AD TAMAMLANDI** (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/6 (§18-§22)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-174**'te; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Bulduğum asıl hata: "ceza" diye yazdığım şey piyango biletiymiş
+
+30.000 yolluk ilk tam ölçümde 60 yıllık %100 hisse stratejisi: en iyi %10
+**₺1.558M**, görülen en yüksek **₺211.732M**, milyarder payı **%12,7**.
+
+Sebep Paket AC'den kalma yoğunlaşma mekanizmasıydı: tek varlığa yığılan
+portföyde getirinin **sapmasını** 1,55 ile çarpıyor ve yorumunda "beklenen
+değer kaymaz" yazıyordu. **Bunu ben yazmıştım ve tek yıl için doğru,
+bileşik servet için değil.** Sapmayı büyütmek yıllık oynaklığı %23'ten
+~%36'ya çıkarıyor; altmış yıl bileşiklenince medyanı düşürürken üst kuyruğu
+patlatıyor.
+
+Düzeltme: yoğunlaşma artık **beklenen getiriyi de düşürüyor** (§9),
+oynaklık zammı 0,55 → 0,25, risk primi 0,056 → 0,048.
+
+| %100 hisse, 60 yıl | Başlangıç | Sonra |
+|---|---|---|
+| iyi %10 | ₺1.558M | **₺371M** |
+| görülen en yüksek | ₺211.732M | **₺7.460M** |
+| milyarder payı | %12,7 | **%3,8** |
+
+2000 tam hayat: medyan ₺62,0M → **₺50,9M**, milyarder %2,5 → **%1,3**,
+en yüksek ₺396.089M → **₺38.103M**.
+
+### §22 — BULUNAN DOMİNANT STRATEJİ (Faho'nun kararı gerekiyor)
+
+**`girişim + yatırım` diğer dokuzunun hepsini, her ufukta, hem medyanda hem
+en kötü %10'da geçiyor** (60 yıl: medyan ₺52,2M, kötü%10 ₺10,4M — ikisi de
+listenin tepesi). İşletme, yatırımın üstüne bedava bir kat ekliyor.
+
+Bu pakette işletme dengesine **dokunulmadı**: işletme ekonomisi Paket U'da
+kalibre edildi, değiştirmek ayrı bir ürün kararı (Q-174/1). Bekçi bulguyu
+dondurdu; yeni bir baskın strateji çıkarsa test kırılır. Piyasa
+stratejileri arasında baskın yok.
+
+### Botu güçlendirdim, zayıflatmadım (§18)
+
+Ehliyet (en büyük tek eksik: 2 meslek + 1 işletme + 5 olay), Finger niyeti,
+flörtle vakit geçirme. Ehliyette gerçek bir hata buldum: ilk kurulumumda
+yılda bir soru cevaplıyordum ve 60 hayatın 34'ü sınava girip **hiçbiri**
+geçemiyordu (rastgele tahminin beklediği %26'nın çok altında) — sınav üç
+soruluk, yıllara yayılınca cevaplar düşüyordu. Tek oturuşta bitirilince 34
+denemenin 30'u ehliyet alıyor.
+
+Stratejiler 8 → 10 (`sadece fon`, `karma normal oyuncu`). Min-max
+stratejiler olduğu gibi duruyor.
+
+### Ölçümün iki kademesi
+
+Ağır ölçüm (30.000 yol + 2000 tam hayat, ~25 dakika) `BIR_OMUR_FULL_MEASURE=1`
+ile açılıyor — depodaki golden testlerle aynı kalıp. Her turda çalışan
+sürüm aynı kodu daha az yolla koşup bekçi görevi yapıyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2586 geçti, 15 atlandı, 0 başarısız**. Ağır ölçüm elle
+çalıştırıldı. **Gerçek cihazda oynanmadı; Android APK bu makinede
+derlenmedi.**
+
+---
+
+## PAKET AD TAMAMLANDI (1/6 … 6/6)
+
+| Paket | Konu | Commit |
+|---|---|---|
+| AD/1 | Sabit getiri eğilimi kaldırıldı, getiri piyasadan doğuyor | `1c75f41` |
+| AD/2 | Borç yaşam döngüsü (kontrolsüz borç bug'ı) | `7f965a5` |
+| AD/3 | Şirket sağlık modeli | `2065baa` |
+| AD/4 | Yatırım kararları gerçek oldu (panik, FOMO) | `7324ce1` |
+| AD/5 | Servetin kullanımı (lüks katman, harcama kanalları) | `766c90a` |
+| AD/6 | Strateji kalibrasyonu | `d3db879` + bu commit |
+
+**Bulunan gerçek buglar:** kontrolsüz borç (int taşması, ₺9,2×10¹⁸),
+ödenmeyen konut kredisinin ihtiyaç kredisi faiziyle büyümesi, all-or-nothing
+taksit, şirket durumlarının yutucu olması, olay seçimlerinin portföyde hiçbir
+şey yapmaması, yoğunlaşma cezasının piyango bileti olması, botun ehliyet
+sınavını hiç geçememesi.
+
+**§25 tarih bağımsızlığı doğrulandı:** production ekonomi kodunda
+`DateTime.now()` kullanımı **yok** (yalnızca ses soğuması ve kayıt zaman
+damgası); oyuncuya gösterilen hiçbir metinde gerçek dünya yılı **yok**;
+`lib/` altındaki bütün "2026" geçişleri yorum satırı.
+
+**§27 saldırgan oyuncu taraması: EXPLOIT BULUNAMADI.** Paket AD'nin dört
+yeni sistemine sekiz saldırı denendi ve hepsi engellendi — sınırsız
+yapılandırma (2'de duruyor, kredi kapanıyor), malı satıp borcu iki kez
+kapatmak (net servet 300k → 150k, zorunlu satış zarar ettiriyor),
+kayıt/yükleme ile borç durumunu sıfırlamak (aynen korunuyor), olay
+hamlesiyle işlem durmasını delmek (portföy değişmiyor), olay hamlesiyle
+komisyonsuz al-sat döngüsü (20 turda ₺20.899 kaybettiriyor), lüks varlığı
+zorla satarak para üretmek (₺37,7M → ₺28,2M), kredi notu izini kayıtla
+temizlemek (iz duruyor), şirket durumunu kayıtla yeniden çevirmek (aynen
+çıkıyor).
+
+**Karar bekleyen sorular:** Q-169 … Q-174. `DECISIONS.md`'ye hiçbir kesin
+kural yazılmadı.
+
+---
+
+## PAKET AE TAMAMLANDI (1/6 … 6/6)
+
+**Konu:** Girişimcilik V2 — işletme yönetimi, fiyat, müşteri, personel ve
+krizler.
+
+**Neden:** AD/6 ölçümünde `girişim + yatırım` diğer dokuz stratejiyi
+birden eziyordu (Q-174/1). Çözüm işletme kârını yapay olarak kesmek
+değil, işletmeyi gerçek bir **oyun sistemi** hâline getirmekti: oyuncu iş
+kurunca "her yıl otomatik kâr alan kişi" değil, işini yöneten bir işletme
+sahibi olsun.
+
+| Paket | Konu |
+|---|---|
+| AE/1 | İşletme veri modeli: fiyat, itibar, personel, bakım, reklam, 5 yıllık döküm |
+| AE/2 | Talep ve kâr motoru: bölge ortalaması, elastikiyet, gider kalemleri |
+| AE/3 | 70+ işletme olayı, kalıcı rekabet baskısı, afet ve denetim |
+| AE/4 | Yatırım önemli olay bildirimleri ve sert düşüş ölçümü |
+| AE/5 | İşletme ekranı ve yıllık rapor |
+| AE/6 | Pasif/aktif/girişim+yatırım ölçümü, fiyat ve reklam exploit taraması |
+
+**Katalog 14 işletmeye çıktı:** Oto yıkama eklendi. Her işletmenin kendi
+sattığı şey ve fiyat başlığı var (halı sahada "Maç / saat ücreti",
+kuaförde "Saç kesim ortalaması"). Bölge ortalaması şehirden, ekonomi
+rejiminden ve kurgusal rekabetten üretiliyor — **gerçek yıla ya da gerçek
+fiyata bağlı değil** (§3, §25).
+
+**Bulunan altı gerçek bug (hepsi ölçümle yakalandı):**
+
+1. `condition` talebe neredeyse hiç etki etmiyordu — durumu 10/100 olan
+   büfe hâlâ kâr ediyordu.
+2. Fiyat exploit'i: sabit esneklikli talep eğrisinde esneklik 1'in altında
+   kalan her işte "fiyatı sonuna kadar yükselt" mutlak baskındı; 14
+   işletmenin 10'unda en pahalı seçenek kazanıyordu.
+3. `IncidentKind.opensNotice` AC'den beri tanımlıydı ama hiçbir yerde
+   okunmuyordu: konkordato, kayyum, şirket kapanması sessizce geçiyordu.
+4. Reklam tuzaktı: kampanya sonsuza kadar sürüyor, azalan marjinal etki
+   yüzünden bedeli her işletmede katkısını aşıyordu.
+5. Katalogdaki `volatility` kâra hiç yansımıyordu — lokanta (0,60) ile
+   terzi (0,25) aynı oynaklıkta davranıyordu.
+6. İyi yönetilen işletme risksizdi: aktif sahibin kapanma oranı **%0** ve
+   `isletme aktif` oyunun en güvenli stratejisiydi.
+
+**§32 — dominans, AD/6'dan bu yana:**
+
+| Ölçü | AE öncesi | AE sonrası |
+|---|---|---|
+| `girişim + yatırım`ın her ölçüde ezdiği strateji | 10 / 11 | **6 / 11** |
+| kötü %10 | ₺13,2M | **₺8,0M** |
+| medyan | ₺71,5M | ₺65,1M |
+| aktif sahibin işletme kapanma oranı | %0 | **%9** |
+
+Medyanda hâlâ birinci; §32 bunu yasaklamıyor ("Başarılı işletmeci çok para
+kazanabilir"), yasak olan her koşulda ezmesi. Magnitude sorusu Faho'ya
+Q-175/4 olarak soruldu.
+
+**§34 fiyat exploit taraması:** optimum 14 işletmede piyasa 10 / ucuz 3 /
+pahalı 1. Ne en pahalı ne en ucuz her zaman kazanmıyor; optimum
+işletmenin itibarına göre de kayıyor.
+
+**§35 reklam exploit taraması:** büyük kampanya ortalamada 14 işletmenin
+9'unda kazandırıyor ama **tek tek hayatların %26,2'sinde para
+kaybettiriyor** — garanti değil.
+
+**§27 sert düşüş:** %100 hisse portföyünde 6600 yılın %16,3'ü ≥%20, %9,6'sı
+≥%30, %5,1'i ≥%40 düşüyor. Dağıtılmış portföyde ≥%20 oranı %1,89. Bu
+dağılım AD/1'in onaylı kalibrasyonundan doğuyor; AE'de değiştirilmedi ve
+Q-175/2 olarak soruldu.
+
+**§23/§36:** 8.784 işletme-yılı işlendi (ağır ölçümde daha fazla), 283
+erken kapanma. Kayıt tamamen additive; eski kayıt varsayılanla açılıyor.
+
+**Karar bekleyen sorular:** Q-169 … Q-175. `DECISIONS.md`'ye hiçbir kesin
+kural yazılmadı.
+
+**Doğrulanmayan:** Gerçek cihazda oynanmadı; Android APK bu makinede
+derlenmedi.
+
+---
+
+## PAKET AF — TEŞHİS TAMAMLANDI (denge değiştirilmedi)
+
+**Konu:** "Oyunu çözen akıllı oyuncu girişim + yatırım ile ekonomiyi
+kırıyor mu?"
+
+**Bu tur ölçümdür.** Hiçbir denge değeri değiştirilmedi; Faho'nun kararı
+uyarınca pasif işletme sahibinin %98 batış oranı yumuşatılmadı.
+
+**Gelen test altyapısı:** `PerfectEntrepreneurBot` — işletmeleri görünür
+ROI'ye göre karşılaştıran, fiyatı **geçmiş sonuçlarından öğrenerek**
+optimize eden (gelecek bilgisi yok, hafıza her hayatta sıfırlanıyor),
+reklamı ancak karşılığını görürse veren, kötü işletmeyi kapatıp daha
+iyisine geçen ve artan parayı yatıran bot. Debug para/stat yok. Ayrıca
+§11'in 12 stratejisini tamamlamak için `kariyer + yatırım` ve
+`kariyer + işletme + yatırım`.
+
+**Sonuç: alt mekanikler temiz, abuse katalog sayılarında.**
+
+Fiyat optimizasyonu piyasaya göre yalnızca ×1,04; reklam aşırı güçlü
+değil (optimal oyuncu **hiç reklam vermiyor** — aynı para borsada daha
+çok getiriyor); bakımı geciktirme exploiti yok, tersine kaybettiriyor;
+personelde gerçek trade-off var; maaş + işletme **bedava kombinasyon
+değil** (fırsat maliyeti oranı 0,79); işletme kârının borsaya akması üst
+kuyruğu %100 hisseden daha az patlatıyor.
+
+**Asıl bulgu:** bütün işletmelerin sermayesi yıllık kârına göre çok
+küçük — geri ödeme süresi **0,16 ile 2,24 yıl**. İki yıldan sonra işletme
+fiilen bedava bir gelir akışı.
+
+**Serbest yazılımcılık kırık bir aykırı değer:** sermaye ₺84k, geri ödeme
+**0,16 yıl**, medyan ROI 340×, kapanma %5 ve **kötü %10'u bile 159×**.
+Diğer bütün işletmelerde kötü %10 sıfır civarı ya da negatif. Kadrosu,
+mekânı ve kirası olmadığı için kötü yılı yok. Çözücü bot 40 hayatın
+28'inde bunu seçiyor.
+
+**§13 dominans:** katı tanımla (medyan VE kötü %10 VE risk ≤) hiçbir
+strateji diğerlerinin hepsini ezmiyor; çözücü 6/14'ünü eziyor. Ama hem
+medyanda (ikincinin 1,77 katı) hem kötü %10'da (2,7 katı) birinci.
+
+**Karar bekleyen:** Q-176 (yedi soru). Öneri — yapay kâr kesme yerine
+sermaye/kâr oranını düzeltmek; ayrıntı ve önce/sonra ölçüm önerisi
+`docs/DESIGN_REVIEW_QUEUE.md` içinde.
+
+**Doğrulanmayan:** Gerçek cihazda oynanmadı.
+
+## PAKET AG TAMAMLANDI (1/7 … 7/7)
+
+**Konu:** işletme ekonomisi kalibrasyonu — ortalama denge, ama **hayatın
+sürprizleri korunarak**.
+
+**Tasarım kuralı:** bu bir hayat simülasyonu. İşletmeler "her seferinde
+3-6 yılda amorti olur" gibi deterministik çalışmayacak. Aynı işletme her
+hayatta aynı sonucu vermemeli.
+
+**Katalog (§6, §14).** 14 işletmenin sermaye/kâr oranı yeniden kuruldu:
+nominal geri ödeme **0,16-2,24 yıldan 1,52-5,58 yıla** çıktı. Oynaklık da
+yükseldi (lokanta 0,60 → 0,66, serbest 0,55 → 0,95), çünkü §14
+işletmelerin birbirinden farklı olmasını istiyor. Kataloğun en küçük işi
+(terzi) bilerek bir yıllık asgari ücretin altında tutuldu — genç oyuncuya
+erişilebilir bir yol kalsın diye; ucuz giriş **düşük tavanla** dengelendi.
+
+**Serbest yazılımcılık (§4, §5, §20).** AF'de kötü %10'u bile 159 kat
+kazandırıyordu. Ortalaması ezilmedi, **dağılımı genişletildi**: sermaye
+0,25 → 1,60 asgari ücret, sabit gider payı 0,06 → 0,18, tedarik
+0,05 → 0,08 ve altı yeni olay (abonelik, tahsil edilemeyen iş, iş
+gelmeyen dönem, büyük müşteri kaybı + iki pozitif). Kötü %10 geri ödeme
+katsayısı **159 → −0,4**; iyi %10 **64,1** olarak kaldı. Yılların %1,4'ü
+zarar (önceden %0).
+
+**Lokanta ve bakkal (§15).** Sadece kâr artırılmadı, gider yapısı
+düzeltildi (lokanta personel 0,28 → 0,24 ve tedarik 0,32 → 0,29; bakkal
+tedarik 0,58 → 0,52). Kapanma: lokanta %79 → %46, bakkal %60 → %38.
+40 hayatta çok iyi giden: bakkal 23, lokanta 4.
+
+**Pozitif kuyruk (§2, §3, §7, §9).** 16 yeni olay — mahalle seni
+benimsedi, video patladı, turnuva tuttu, yemeğin adı çıktı, kurumsal
+anlaşma, karşıdaki kapandı, bölge hareketlendi, referans zinciri, bayram
+siparişleri, düğün sezonu. Hepsi mevcut `demandPressure` altyapısını
+kullanıyor: 1-3 yıl süren güçlü avantaj, **sonsuz buff değil**. Popup
+yazıp geçmiyorlar; talebi ve itibarı gerçekten değiştiriyorlar.
+
+**Viral reklam (§10, §11).** Kampanya her zaman aynı ROI'yi vermiyor:
+tutma ihtimali mahalle %4, sosyal medya %9, büyük %14 (ölçülen 4,0 / 9,1
+/ 14,0). Tutan kampanya o yılki katkıyı 3,6 katına çıkarıyor ve bir iki
+yıl süren talep bırakıyor. Kampanya bedelleri bu kuyruğu fiyatlıyor
+(büyük 0,170 → 0,232); aksi hâlde en pahalı kampanya **her işte**
+kazandıran garanti hamle oluyordu ve AE §35 exploit'i geri geliyordu.
+
+**Hikâye bildirimleri (§12, §13).** Kozmetik değil: ölçü geçen yıla göre
+**gerçekleşen ciro**, üstelik yıl tutulan bütün geçmişe göre de uç
+olmalı — düşüşten sonraki toparlanma haber değil. 2949 işletme-yılında
+199 başarı, 173 başarısızlık; yıl başına pencere 0,65.
+
+**Ölçüm boşluğu kapatıldı (Q-176/6).** Nakliyecilik ehliyet istiyor ve
+ölçüm botu ehliyet almıyordu; tablo onu boş gösteriyordu. Bot artık
+gerçek oyuncu yolundan sınava girip cevaplıyor (`debugSetState` ile
+ehliyet **verilmiyor**). Nakliyecilik artık ölçülüyor: medyan 2,8 yıl,
+%37 hiç amorti etmiyor.
+
+**Sonuç (§17-§19).** Dağılım genişledi, dominans kalmadı:
+
+| strateji | AF medyan → AG | AF kötü %10 → AG | AG iyi %10 |
+|---|---|---|---|
+| mükemmel girişimci | 93,1M → **51,6M** | 24,7M → **13,9M** | 228,3M |
+| kariyer + işletme + yatırım | 52,5M → 38,8M | 9,3M → 4,7M | 232,7M |
+| girişim + yatırım | 41,0M → 18,1M | 11,9M → 4,4M | 181,8M |
+
+§13'ün katı tanımıyla **bütün diğerlerini ezen strateji yok**; çözücü
+9/14. Fırsat maliyeti oranı 0,79 → 0,68. Hiçbir işletmede "otomatik
+zenginlik" kalmadı: her 14 işletmede sermayesini çıkaramayan hayatlar
+var, kötü %10 katsayısı 13'ünde sıfırın altında.
+
+**Yapay hard cap yok (§21):** kâr tavanı, servet tavanı ya da "çok
+kazandın artık düş" mekaniği eklenmedi.
+
+**Karar bekleyen:** Q-177. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AH — TAM YAŞAM DENETİMİ TAMAMLANDI (teşhis; denge değiştirilmedi)
+
+**Konu:** AD + AE + AF + AG paketlerinden sonra oyunun doğumdan ölüme
+bütün döngüsünü yeniden ölçmek.
+
+**Bu tur teşhistir.** Hiçbir denge sayısı değiştirilmedi, `lib/` içinde
+yalnızca okuma yapıldı; bütün değişiklikler test tarafında.
+
+**Ölçüm:** 10 arketip × 200 + 1000 rastgele-geçerli = **3000 tam hayat**,
+doğumdan ölüme. **Takılan hayat: 0.** Ölüm yaşı medyan 76.
+
+### §2 — botun kapsamı denetlendi, üç bot hatası çıktı
+
+`GameController`'ın 225 genel eyleminin botta kullanılmayan 100'ü
+listelendi. Üçü gerçek eksikti:
+
+1. **İşletme yönetimi hiç kullanılmıyordu.** Bot AE'nin getirdiği
+   `setBusinessPrice`, `setBusinessAd`, `maintainBusiness` ve
+   `businessStaff` ekranlarının hiçbirini açmıyordu. Yani AE'den beri
+   "gerçek oyuncu" ölçümlerinde işletme yönetimi hiç ölçülmemiş.
+2. **Yatırım hiç satılmıyordu.** Portföy yalnızca oyunun zorunlu
+   bozdurmasıyla küçülüyordu.
+3. **Yakın arkadaşlık hiçbir zaman çalışamıyordu.** Teklif koşulu
+   `relation == arkadas` idi; oysa `arkadas` zaten yakın arkadaşlığın
+   kendisi. Üstelik bot sınıf/iş arkadaşıyla hiç vakit geçirmediği için
+   yakınlıkları olay dışında hiç artmıyordu.
+
+Üçü de düzeltildi (bot tarafı; oyunun sayıları sabit). Yakın arkadaşlık
+hunisi düzelmenin öncesi/sonrası: tanışıklık yakınlığı medyan **35 → 47**,
+şartı sağlayan **%1,9 → %16,9**, kabul alan **%1,6 → %15,8**.
+
+### Ölçülen son durum (3000 hayat)
+
+* **Ekonomi.** Ölüm serveti medyan ₺48,2M, kötü %10 ₺11,9M, iyi %10
+  ₺160,0M. 50M+ %48,5 · 100M+ %21,5 · 250M+ %4,6 · 500M+ %1,6 · 1B+
+  %0,50. Negatif net servetle ölen %0,1, borçlu ölen %1,5. Servetin
+  %75,6'sı portföyden, %6,3'ü gayrimenkulden, %3,9'u mirastan.
+* **İşletme.** Açan %23,3; 26.272 işletme-yılı. Kapanan %14,3, zarar yılı
+  %1,9, reklamlı yıl %36,1, viral 629 yıl. İşletme kârı medyan ₺5,3M,
+  iyi %10 ₺17,2M; işten servet yapan %19,7.
+* **Yatırım.** Yapan %93,7. Tek varlıkta tek yılda ≥%20 düşüş gören
+  %95,8, ≥%30 %67,6, ≥%40 %51,1. Skandal/regülatör %99,0,
+  konkordato/kayyum/kapanma %16,3, zorunlu satış %49,3, yatırımı
+  zararla biten %18,8. 19 piyasa olay türünün hepsi görüldü.
+* **Kariyer.** Çalışan %99,4, emekli %86,1, ortalama 39,6 yıl çalışma,
+  1,0 yıl işsiz yetişkin yıl. Meslek kapsamı 53/55.
+* **İlişki.** Partneri olan %93,1, evlenen %48,0, boşanan %17,8, dul
+  kalan %15,7, tekrar evlenen %12,4, çocuklu %37,7, torun gören %34,2.
+* **Sağlık.** Kronik yaşayan %76,4, check-up %96,5, sağlık krizi %69,0.
+* **Suç.** Dosyası olan %57,8, sabıkalı %20,1, davaya giden %27,5,
+  mahkûm %20,1, hapis %7,5, denetimli %6,8.
+* **İçerik.** Olay 381/391 (%97,4), bölüm 20/20, hobi 11/12, dövüş 6/6,
+  meslek 53/55, **işletme 9/14**.
+
+### §11 — baskın hayat yolu var mı?
+
+Yok. En zengin %10 ile bütün hayatlar arasındaki fark küçük: üniversite
+%47 / %48, işletme %15 / %23, yatırım %100 / %94, ev %55 / %46, kiraya
+veren %41 / %28, evli %50 / %48. Zenginliğin tek ayırt edici işareti
+**yatırım ve kira geliri**; işletme zenginlerde daha az bile.
+
+### §12 — açık kalan, sınıflandırılmış bulgular
+
+* **Beş işletme hiç açılmadı** (pastane, nakliye, halı saha, spor
+  salonu, lokanta) ve terzi tek başına seçimlerin %69,5'i. Bot hatası
+  ağır basıyor (nakit biriktirmiyor), ama ardında ürün sorusu var.
+* **Yazar mesleği erişilemiyor:** okuma hobisi aşama 2 istiyor, o hobi
+  yalnızca kütüphanede kitap bitirerek ilerliyor ve bot kitap açmıyor.
+* **Yakın arkadaşlık eşiği 55** düzeltmeden sonra bile hayatların
+  %16,9'unda sağlanıyor.
+* **Erişilmeyen 10 olayın 5'i suç zinciri devamı**, 3'ü ün, 2'si okuma
+  hobisi.
+
+**Karar bekleyen:** Q-178. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AI — AKSİYON KAPSAMI VE ABUSE DENETİMİ (teşhis; denge değiştirilmedi)
+
+**Soru:** oyuncunun yapabildiği her şey gerçekten test ediliyor mu ve bu
+sistemlerden biri abuse edilerek oyun kırılabiliyor mu?
+
+Üç bot ayrı tutuldu: **PlayerBot** hayatı temsil eder, **CoverageBot**
+her şeye dokunur, **AbuseBot** kırmaya çalışır.
+
+### §1 — envanter artık elle tutulmuyor
+
+`test/support/action_inventory.dart`, `game_controller.dart`'ı test
+çalışırken okuyup üyeleri koddan çıkarıyor. Sınıflandırma isme değil
+davranışa bakıyor: gövdesi `_state = …` atan, `notifyListeners()` ya da
+`_autoSave()` çağıran — veya bunu yapan başka bir üyeyi çağıran — üye
+**aksiyon**; geri kalanı sorgu.
+
+| | sayı |
+|---|---|
+| toplam public üye | 225 |
+| **oyuncu aksiyonu** | **109** |
+| sorgu | 106 |
+| oyun dışı (debug, kayıt, ayar) | 10 |
+
+### §2 — ACTION COVERAGE %94,5
+
+400 hedefli hayatta (10 plan × 40) **103/109** aksiyon gerçekten çalıştı,
+**takılan hayat 0**. İçerik: 14/14 işletme, 6/6 dövüş sanatı, 20/20
+bölüm, 52 meslek, 5/5 yatırım türü, 4/4 sosyal platform, 806 olay-seçenek
+kolu.
+
+Kalan 6: `acceptCrewOffer`, `declineCrewOffer` (çete teklifi hiç
+açılmadı), `payBailSelf`, `askFamilyForBail` (kefalet anı yakalanamadı),
+`endLifeByChoice` (95+ ve bilinçli), `askFamilyForBedelli` (1295 deneme,
+oyunun gerekçesi hep "Askerlik meselen kapandı").
+
+### Bulunan gerçek sorunlar
+
+1. **Save-scum vektörü (doğrulandı).** Oyunun zarı
+   `GameController._random` kurucuda bir kez üretiliyor ve `GameState`
+   içinde taşınmıyor — yani **kayda girmiyor**. Kaydı geri yüklemek
+   kumar sonucunu yeniden attırıyor: 30 tekrarın en iyisi blackjack'te
+   +135k, rulette +90k. Düzeltilmedi; çözüm seçimi ürün kararı.
+2. **Ücretli aktiviteler pratikte erişilemiyor.** 60 hayatta yapılan 16
+   aktivitenin hiçbiri ücretli kurs değil; oyunun gerekçesi hep
+   "cüzdanında yeterli para yok". Hiç yatırım/alışveriş yapmayan kontrol
+   grubu da tek bir kursa giremedi. 12 hobinin 10'u ve onlara bağlı
+   içerik bu kapının arkasında.
+
+   > **DÜZELTME (Paket AJ ölçümü).** Burada ayrıca "AH'deki *Yazar
+   > mesleği erişilemiyor* bulgusunun asıl sebebi de bu" yazmıştım.
+   > **Yanlış.** `okuma` hobisinin `activityIds` listesi boş: onu
+   > besleyen hiçbir kurs yok, yalnızca kütüphanede **bitirilen** kitap
+   > ilerletiyor ve kitap okumak ücretsiz. Yazar'ın koşulu 7 bitirilmiş
+   > kitap + 20 yaş + 55 zekâ; kurs ücreti hiç girmiyor. Paket AJ'nin
+   > kurs düzeltmesi Yazar'ı açmıyor. Test:
+   > `paket_aj_course_test.dart` → "Yazar mesleği kursla değil, bedava
+   > okumayla açılıyor".
+3. **Sorgu/aksiyon uyuşmazlığı.** Lise sonrası `availableTracks()` 7
+   lise alanı döndürüyor ama `chooseTrack` "Şu an lise alanı
+   seçemezsin." diyor. Menü, aksiyonun kabul etmediği seçenekleri
+   gösteriyor.
+
+### Abuse sonuçları — para basan tekrar yok
+
+Aynı yıl 100-400 tekrarın hiçbiri net serveti artırmıyor: aktivite
+−780k, kitap −120k, hediye −2k, eşya al-sat −9k (komisyon), blackjack
+−14k (kasa avantajı), yatırım al-sat 0, sosyal medya 0. Stat farming'de
+tek yılda hiçbir stat 100'e çıkmıyor (mutluluk 93'e kadar).
+
+**Karar bekleyen:** Q-179. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AJ — KURS / HOBİ ERİŞİLEBİLİRLİĞİ (Faho'nun brief'i uyarınca)
+
+Paket AI'nın ikinci bulgusunun (ücretli kurslara girilemiyor) ürün
+cevabı. Faho'nun **KURS / HOBİ ERİŞİLEBİLİRLİK V2** brief'i kodlandı:
+kurslar erişilebilir oldu ama bedava stat çeşmesine dönüşmedi.
+
+### Kurs ilerleme sistemi
+
+`app/lib/domain/hobby/course_progress.dart` — ders sayacı hobinin kendi
+deneyimi (`HobbyProgress.experience`); ayrı bir sayaç kurulmadı.
+
+| Ders | Kademe | Ücret (müzik kursu) |
+|---|---|---|
+| 1-5 | Tanışma | 0 ₺ |
+| 6-10 | Başlangıç | 4.800 ₺ (katalogun 0,40 katı) |
+| 11-20 | Normal | 12.000 ₺ (katalog fiyatı) |
+| 20+ | İleri seviye | 26.400 ₺ (katalogun 2,2 katı) |
+
+Kademeler **oyunun kendi ekonomik ölçeğinden** türüyor: katalog fiyatı
+"normal" kademeyi anlatıyor, ötekiler onun katı. Asgari ücret çıpası
+kayarsa kademeler de birlikte kayıyor. Gerçek bir ülkenin güncel
+fiyatlarına bağlanmadı.
+
+### Bedava stat farming'e karşı üç kapı
+
+1. **Ders başına stat katsayısı düşük** (0,2), asıl ödül kilometre
+   taşlarında (5/10/20/35, katsayı 2,5). Ölçüldü: tek tanışma dersi
+   **+2 stat**, 5. ders **+15**.
+2. **Yıllık ücretsiz ders tavanı 6** — bütün kurslar toplamında. Aynı
+   yıl on kursu dolaşıp yirmi bedava ders toplanamıyor. Ölçüldü: 6.
+3. **Tanışma dönemi hobi ömrü boyunca bir kez.** Bitince ücret başlıyor.
+
+### 18 yaş altı: aileden destek (§4-§9)
+
+Ücret gerekiyor ve çocuğun cüzdanı yetmiyorsa kartta yaşayan ebeveynler
+düğme olarak çıkıyor. **Ebeveyn yoksa bölüm hiç görünmüyor** — sahte
+düğme yok. 18'den sonra kapı kapanıyor.
+
+Karar tek zar değil. 200 istekte kabul sayısı:
+
+| Etken | Ölçüm |
+|---|---|
+| Varlık | yoksul 46 · orta hallı 90 · varlıklı 134 |
+| Yakınlık | uzak (20) 77 · yakın (95) 118 |
+| Devamlılık | yeni 100 · 5 yıldır aynı kurs 145 |
+
+Ayrıca yarıda bırakılan her kurs kabul şansını düşürüyor.
+
+**Para yoktan yaratılmıyor.** Ebeveynin yıllık kurs bütçesi varlık
+düzeyinden ve asgari ücret çıpasından türüyor (orta hallı anne:
+33.690 ₺/yıl). Ölçüldü: 400 istekte toplam **33.600 ₺** verildi, bütçe
+33.690. Kabul edilen ücret o hobiye kredi yazılıyor ve ders yapılırken
+**bir kez** harcanıyor; kaydet/yükle ile ikinci kredi alınamıyor.
+
+### Ret kalıcı değil: ücretsiz yollar (§7)
+
+`app/lib/data/event_pool_course.dart` — dört olay: belediye atölyesi
+(8-17), okul kulübü (10-18, öğrenciyken), öğretmenin desteği (11-18),
+akrabanın desteği (9-17). Hepsi `kurs_destegi` izi bırakıyor; iz varken
+dersler yıl içinde dört derse kadar ücretsiz. Sonsuz bedava ders değil,
+bir yıl açık kalan kapı. Burslu yıl tanışma hakkını yemiyor.
+
+Ret ayrıca o yıla özgü: sayaçlar yıl başında sıfırlandığı için oyuncu
+seneye yeniden sorabiliyor.
+
+### İleri seviye ne satıyor (§12)
+
+Her kademe ücretinin karşılığını da söylüyor; ileri seviyede kart
+"Özel hoca, ileri ekipman ve yarışma hazırlığı bu ücrete dahil" diyor.
+Ücretsiz tanışma dersinde bu satır görünmüyor.
+
+### Kurs bir hayat yolunun başlangıcı (§13)
+
+Kart kursun nereye götürdüğünü gösteriyor: *"Müzisyen için 10 ders daha
+(Düzenli basamağı)"*, yol açıldıysa *"Müzisyen yolu açık"*. Bağ
+uydurulmuyor — meslek kataloğunun `hobbyId` / `minHobbyStage` alanları
+zaten işe giriş koşulu; burada aynı koşul oyuncunun görebileceği hale
+çevriliyor. İkinci bir eşleme tablosu tutulmadı, **yeni kilit
+eklenmedi**. Meslek bağı olmayan hobide satır hiç görünmüyor.
+
+Ölçüldü: okuma → **Yazar** (Düzenli basamağı, 7 birim), müzik →
+**Müzisyen** (10 ders). Müzik testi dersleri gerçekten kursa girerek
+topluyor ve iş kataloğunun `minHobbyStage` koşulunun da sağlandığını
+doğruluyor.
+
+**Yazar mesleği kursla açılmıyor.** `okuma` hobisinin `activityIds`
+listesi boş; onu besleyen kurs yok, yalnızca kütüphanede bitirilen
+kitap ilerletiyor ve o ücretsiz. Yazar'ın koşulu **7 bitirilmiş kitap +
+20 yaş + 55 zekâ**. Kitaplar 5-24 sayfa ve her sayfa bir eylem, yani 7
+kitap kabaca 50-100 okuma eylemi demek — AH'de Yazar'ın 3000 hayatta
+hiç görülmemesinin sebebi kurs ücreti değil, bu. Paket AJ bunu
+değiştirmedi; denge sorusu olarak Q-180 #5'te duruyor.
+12 hobinin yalnızca 2'si bir mesleğe çıkıyor; kalan 10'u için bağ
+kurmak tasarım kararı — Q-180 #4.
+
+### Ölçülen erişilebilirlik
+
+| Ölçüm | Paket AI (önce) | Paket AJ (sonra) |
+|---|---|---|
+| Girilebilen ücretli kurs | 0 / 10 | **10 / 10** |
+| İlerletilebilen hobi | 2 / 12 | **12 / 12** |
+
+### Değiştirilen testler (silinmedi, yeniden yazıldı)
+
+İki test Paket AJ'nin değiştirdiği eski kuralı doğruluyordu:
+
+* `activity_venues_test` "dil kursu zekâyı gerçekten artırır" — her ders
+  katalog fiyatını alır ve stati bir kerede verir diyordu. Yerine **üç**
+  test: ilk ders bedava ve hobiyi ilerletiyor, 5. ders kilometre taşı
+  ödülünü veriyor, tanışma bitince ücret cüzdandan çıkıyor.
+* `activity_venues_widget_test` "parası yetmeyen eylemin düğmesi
+  kapalıdır" — "kurslarda ücretsiz eylem yok, hepsi kapalı" diyordu.
+  Yerine **iki** test: parasız çocuk tanışma dersine girebiliyor, ve
+  tanışma bitince parası yetmeyen yetişkinin kursu gerçekten kapanıyor.
+
+28 test: `app/test/paket_aj_course_test.dart`.
+
+**Karar bekleyen:** Q-180 (prototip sayıları, tanışma hakkının ömürlük
+olması, yetişkinin ücretsiz yolu, hobi-meslek bağı).
+**Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AK — HOBİ / KURS → KARİYER SİNERJİSİ
+
+Paket AJ 12 hobiyi erişilebilir yaptı ama katalogda hobiye bağlı
+yalnızca iki meslek vardı ve ikisi de **sert şart**: Yazar (okuma) ve
+Müzisyen (müzik). Çocukken başlanan fotoğraf kursu hayatın geri
+kalanında hiçbir kapı açmıyordu. Bu paket o boşluğu **kilit koymadan**
+dolduruyor.
+
+### Temel kural: hiçbir kapı kapanmadı
+
+Faho'nun kararı: kurs/hobi yapmamış oyuncunun bugün girebildiği
+mesleklerin **hiçbiri kapanmayacak**. Bu yüzden sinerji
+`JobType.hobbyId` / `minHobbyStage` sert şartından **ayrı** bir alanda
+(`JobType.synergies`) duruyor ve `JobMarket.requirementReason` içine
+hiç girmiyor.
+
+Ölçüldü: hiç hobisi olmayan oyuncu ile bütün hobileri Usta olan
+oyuncunun 19 sinerjili meslekteki **engel gerekçeleri birebir aynı**.
+Yanlış cevap veren hobisiz aday 200 başvurunun 200'ünde de eskisi gibi
+reddediliyor; doğru cevap veren hobisiz aday eskisi gibi işe giriyor.
+
+### Avantaj nereden geliyor
+
+Üç yerden, üçü de sınırlı. Maaşa ve gelir bandına **hiç dokunmuyor**.
+
+| Kanal | Ne yapıyor | Tavan |
+|---|---|---|
+| Mülakat | Cevap tutmazsa geçmiş ikinci bir şans veriyor | %45 |
+| Başlangıç ustalığı | İşe sıfır çırak olarak başlanmıyor | 5 yıl (= Kalfa) |
+| Terfi | Hobi sürüyorsa çok küçük devam payı | +0,05 |
+
+Pay hobinin **basamağından** geliyor, o yıl kaç ders alındığından değil.
+
+| Basamak | Pay | Fotoğrafçıda mülakat ikinci şansı |
+|---|---|---|
+| Hevesli | 0,00 | %0 |
+| Meraklı | 0,25 | %11 |
+| Düzenli | 0,55 | %25 |
+| Tutkulu | 0,80 | %36 |
+| Usta | 1,00 | %45 |
+
+**Usta bile garanti değil.** Aşçılıkta bilerek yanlış cevap verilen 200
+başvuruda: hobisiz **0**, Düzenli **44**, Usta **94**. Artıyor, ama
+hiçbir zaman 200 olmuyor.
+
+### Hobi → meslek tablosu (§23)
+
+| Hobi | Meslekler |
+|---|---|
+| Resim | Ressam/tasarımcı (güçlü) · Grafik tasarımcı (güçlü) |
+| Mutfak | Aşçı (güçlü) |
+| Fotoğraf | Fotoğrafçı (güçlü) · Gazeteci (küçük) |
+| Bilgisayar | Yazılım geliştirici (güçlü) · Veri analisti (orta) · Teknik servis (küçük) |
+| Yazmak | Yazar (güçlü) · Gazeteci (orta) |
+| Yabancı dil | Resepsiyonist (güçlü) · Satış danışmanı (orta) · Gazeteci (orta) · Banka personeli, Çağrı merkezi, İK uzmanı (küçük) |
+| Spor | Güvenlik (orta) · İtfaiyeci (orta) · Polis (küçük) |
+| Dans | Manken (küçük) |
+| Satranç | Veri analisti (küçük) |
+| Müzik | Müzisyen (orta) — sert şart ayrıca duruyor |
+| Okumak | Yazar (orta) — sert şart ayrıca duruyor |
+| **Bahçe** | **Bağ yok** |
+
+Bahçe bilerek boş: §13 uyarınca her hobinin mevcut bir mesleğe
+bağlanması gerekmiyor, zorlama bağ kurulmadı. İleride Bahçıvan/Peyzaj
+eklenirse tek satırla bağlanır. Test bunu koruyor: bahçe hiçbir
+meslekte görünmüyorsa test geçer.
+
+Spor bağları yasal eğitim, yaş ve sabıka şartlarını **bypass etmiyor**;
+yazmak hobisi Yazar'ın okuma şartını bypass etmiyor (ölçüldü).
+
+### Aktif / bırakılmış hobi (§20)
+
+Geçmiş silinmiyor ama aktif olanla aynı da değil. Usta resim:
+aktif **1,00**, 12 yıldır ara verilmiş **0,55**. Bırakılmış hobi terfi
+payı **hiç** vermiyor: geçmiş ustalık işe başlarken sayıldı, terfi
+masasında ikinci kez sayılmıyor.
+
+### Başlangıç ustalığı (§18)
+
+Usta fotoğrafçı işe **Kalfa** olarak başlıyor (5 yıl pay), hobisiz
+oyuncu **Çırak**. Usta olarak başlamak mümkün değil: Usta 8 yıl ister,
+tavan 5.
+
+Pay yalnızca ustalık merdivenine işliyor. Ölçüldü: 28 yaşında işe
+girmiş 30 yaşındaki oyuncunun `yearsInJob` ve `totalWorkYears`
+değerleri **2**, ustalık merdivenindeki etkin yıl **2 + pay**. Maaş
+katalog maaşı olarak kalıyor. İşten ayrılınca pay sıfırlanıyor.
+
+### Abuse (§22)
+
+* 12 hobiden **birer ders** alan oyuncunun en yüksek kariyer payı
+  **0,00** — Hevesli basamağının payı sıfır.
+* Gazetecinin üç bağını birden Usta yapmak avantajı çarpmıyor: tek hobi
+  **0,65**, üç hobi **0,81** (toplasa 1,95 olurdu). En güçlü bağ esas,
+  ikincisi yalnızca küçük pay ekliyor.
+* Hobi deneyimini 500 artırmak terfi payını **değiştirmiyor**.
+* 19 sinerjili mesleğin hepsinde maaş katalog maaşı olarak kalıyor.
+
+### Kayıt
+
+Tek yeni alan: `CareerState.synergyHeadStart` (int). Eski kayıtlar
+0 ile yükleniyor, kayıt bozulmuyor.
+
+### Arayüz
+
+* **Kurs kartı** (§15): "Kariyer avantajları — • Yazılım geliştirici —
+  güçlü avantaj · • Veri analisti — anlamlı avantaj · • Teknik servis —
+  orta avantaj". Bırakılmış hobide "(uzun zamandır ara verdin)".
+* **İş ilanı** (§16): "Bilgisayar hobin bu başvuruda sana güçlü avantaj
+  sağlıyor." Yüzde gösterilmiyor; test bunu kontrol ediyor.
+* Avantajı olmayan işte satır **hiç** görünmüyor.
+
+23 test: `app/test/paket_ak_synergy_test.dart`.
+
+**Karar bekleyen:** Q-181. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AL — PROFESYONEL DÖVÜŞ / SPOR KARİYERİ V1
+
+Altı dövüş sanatı "ders al → basamak yüksel → eğitmenlik" olmaktan
+çıkıp gerçek bir yaşam yoluna dönüştü: çocuk yaşta kulüp, amatör
+müsabaka, bölge, ulusal, profesyonel/elit, sponsor, sakatlık, düşüş,
+şampiyonluk, emeklilik, eğitmenlik.
+
+**Ana tasarım kuralı.** "En iyi antrenmanı yaptım, o zaman kesin
+kazanmalıyım" değil: *"Doğru kararlarla şansımı yükselttim, ama
+karşımda başka bir insan var."*
+
+### Ne eklendi, ne bozulmadı
+
+`MartialProgress` **dokunulmadı**: teknik ilerleme (ders, kuşak) aynı
+motorda duruyor. Rekabet ayrı bir modelde: `CombatCareer`. İkinci bir
+ders sistemi kurulmadı (§5), yeni bir stamina motoru yok (§36).
+Eğitmenlik mesleklerinin `instructorFromLevel` şartı **aynen** duruyor
+(§30, testle korunuyor).
+
+### Altı sanatın kendi yolu (§1, §23)
+
+| Sanat | Kademeler | Şampiyonluk |
+|---|---|---|
+| Boks | Amatör maçlar → Bölgesel → Ulusal amatör → Profesyonel ring | Kemer maçı |
+| Yağlı güreş | Yerel güreş → Boy müsabakaları → Bölgesel organizasyon → Büyük organizasyon | Başpehlivanlık |
+| Judo | Kulüp → Bölge → Ulusal → Elit turnuva | Uluslararası şampiyonluk |
+| Karate | Kulüp → Bölge → Ulusal → Elit kumite turnuvası | Ulusal şampiyonluk |
+| Taekwondo | Kulüp → Bölge → Ulusal → Elit turnuva | Ulusal şampiyonluk |
+| Kung fu | Okul içi → Açık turnuva → Bölgesel → Ulusal yarışma | Ulusal şampiyonluk |
+
+Organizasyonlar **kurgusal**; hiçbir federasyon, lig ya da şirket
+verisine bağlı değil. Ödüller net yıllık asgari ücretin katı olarak
+yazıldı (§14): çıpa kayarsa ödüller birlikte kayar, gerçek güncel fiyat
+hardcode edilmedi. Amatör kademe **para kazandırmıyor**.
+
+### Maç motoru (§7, §37)
+
+Sonuç ne yalnızca zar ne yalnızca stat karşılaştırması. Güç hesabı:
+teknik %42, form %24, sağlık %16, deneyim %10, itibar %8 — hepsi yaş
+eğrisi, hazırlık ve sakatlık geçmişiyle ölçekleniyor. Kazanma ihtimali
+**hiçbir zaman 0 ya da 1 değil**: band %10-%85.
+
+Ölçüldü: 300 maçta favori **87** kez kaybetti, underdog **30** kez
+kazandı. Judoda aynı sporcu için hazırlık farkı: dinlenerek %39,
+dengeli %44, yoğun kamp %53.
+
+### Form, kamp, antrenör
+
+Form 0-100; her yıl aşınır, çalışmak ve müsabaka telafi eder. Kamp üç
+seçenek (§10): dengeli / yoğun / dinlen — yoğun kamp hazırlığı artırır
+ama parayı, sağlığı ve sakatlık riskini de artırır. Antrenör üç kalite
+(kulüp hocası / deneyimli koç / elit koç); elit koç ancak üst kademede
+kabul ediyor ve **garanti galibiyet yok**.
+
+### Sakatlık (§18-§20)
+
+Ölçüldü: 400 maçta yoğun kampla **59**, dinlenerek **9** sakatlık.
+Sakatlık kariyer kademesini ya da şampiyonlukları **silmiyor**; formu
+düşürüyor, müsabakayı geçici kapatıyor, cepten masraf çıkarıyor.
+"Riski göze al" gerçekten riskli: 200 kararda **98** kez durum
+ağırlaştı.
+
+### Yaş (§21)
+
+Zirve 27; sonrası yavaş düşüş, sanatın yıpratıcılığına göre biraz
+farklı. Sert kesim yok. Ölçülen boks gücü: 20y **60,4** · 27y **65,0** ·
+33y **57,2** · 38y **50,7** · 45y **41,6**.
+
+### Save/load (§44)
+
+Müsabaka fırsatı üretildiği anda **sonucun tohumu kayda yazılıyor**.
+Ölçüldü: aynı müsabakayı kaydedip yükleyip tekrar oynamak aynı sonucu,
+aynı ödülü ve aynı sakatlığı veriyor. Bu çözüm yalnızca spor
+kariyerine uygulandı; oyunun genel rastgelelik mimarisine
+dokunulmadı.
+
+### 600 sporcu ölçümü (§49)
+
+6 sanat × 100 hedefli sporcu. **Kohort sıradan bir hayat değil**: bot
+her yıl çalışıyor, her fırsatı değerlendiriyor, yalnızca oyun zorlayınca
+bırakıyor.
+
+| Sanat | Elit/pro | Şampiyon | Erken bırakan | Ciddi sakatlanan | Medyan gelir |
+|---|---|---|---|---|---|
+| Boks | 63 | 5 | 3 | 33 | 1.573.324 ₺ |
+| Yağlı güreş | 88 | 25 | 1 | 32 | 5.441.778 ₺ |
+| Judo | 75 | 10 | 6 | 29 | 2.491.377 ₺ |
+| Karate | 80 | 18 | 0 | 29 | 3.682.320 ₺ |
+| Taekwondo | 78 | 27 | 0 | 32 | 2.971.461 ₺ |
+| Kung fu | 81 | 24 | 2 | 40 | 3.392.585 ₺ |
+
+Toplam: rekabete başlayan **%100**, elit/pro **%77,5**, şampiyon
+**%18,2**. Gelir: en kötü %10 **134.760 ₺**, medyan **3.048.104 ₺**, en
+iyi %10 **9.099.675 ₺**, en iyi **17.435.417 ₺** (asgari ücret çıpası
+336.900 ₺). Absürt sonuç, negatif rekor ya da uçuk gelir yok.
+
+### Ölçümün bulduğu iki gerçek sorun (düzeltildi)
+
+1. **Şampiyonluk pratikte kapalıydı.** İlk yazımda sıralamaya 12.
+   sıradan girilip her galibiyette bir basamak çıkılıyordu; 600
+   sporcuda **tek** şampiyon çıktı. Merdiven düzeltildi: 10. sıradan
+   giriş, alt sıralarda iki basamak.
+2. **Zirvedeki sporcunun formu çöküyordu.** En üst teknik basamağa
+   çıkan sporcuya ders motoru artık ders vermiyor ("öğrenecek ders
+   kalmadı"), dolayısıyla form telafisi sıfırlanıyor ve sporcu otuzlu
+   yaşların başında emekliliğe itiliyordu. Artık müsabakalar ve
+   zirvedeki kondisyon da forma katkı veriyor.
+
+### Abuse (§42)
+
+Aynı yıl 40 denemede yapılabilen müsabaka **3** (tavan 4). Aynı
+müsabakanın ödülü iki kez alınamıyor. Sakatken müsabaka yapılamıyor.
+Emekli olup aynı dalda yeniden başlanamıyor. Sıralaması olmayan
+şampiyonluk maçına çağrılmıyor (200 denemede 0). İki dalda birden
+rekabet edilemiyor.
+
+### Kayıt
+
+Tek yeni alan: `GameState.combatCareers`. Eski kayıtlarda yok, boş
+liste ile yükleniyor; test bunu doğruluyor.
+
+### Arayüz (§26, §27)
+
+Mevcut dövüş sanatı ekranı çöpe atılmadı, derinleştirildi: üstte
+kariyer paneli (kademe, form, rekor, sıralama, kariyer geliri,
+antrenör, sakatlık, sıradaki müsabaka ve rakip), altında eski ders
+kartları. Kararlar: üç kamp seçeneği, koç tut, riski göze al, spordan
+çekil, kariyeri gör (son 10 önemli an). Sıradan antrenman geçmişe
+yazılmıyor.
+
+25 test: `app/test/paket_al_combat_career_test.dart` (24) +
+`app/test/paket_al_600_athletes_test.dart` (1, 600 kariyer).
+
+**Karar bekleyen:** Q-182. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AL/VERIFY — BAĞIMSIZ DOĞRULAMA
+
+Yeni özellik eklenmedi, denge değiştirilmedi, 3000 hayat testi
+yapılmadı. Tek soru: **Paket AL brief'te söylediğimiz gibi mi
+çalışıyor, testlerinde hata var mı, eksik uygulanmış madde var mı?**
+
+### Bulunan iki TEST hatası (düzeltildi)
+
+1. **"sakatken müsabaka yapılamıyor" testi hiçbir şeyi sınamıyordu.**
+   Yorum "fırsat da çıkmıyor" diyordu ama iddia `isNotNull` idi — ve o
+   iddia **her zaman** geçiyordu, çünkü testin kendisi bir satır önce
+   bekleyen müsabakayı kuruyor, `offerBout` da bekleyen müsabaka varsa
+   onu geri veriyor. Sakatlık kapısı hiç sınanmamış.
+   Ürünün gerçek kuralı iki kapılı ve ikisi de motorda **var**: sakat
+   sporcuya yeni fırsat üretilmiyor, elinde bekleyen müsabaka olsa bile
+   dövüşemiyor. Test artık ikisini de ayrı ayrı sınıyor (50 tohumda 0
+   fırsat; sağlam sporcuda fırsat çıkıyor — yani kapı sakatlıktan
+   kapanıyor, her koşulda kapalı değil).
+
+2. **`requirementReason(...).contains('basamak')` iddiası asla doğru
+   olamazdı.** Motorun ürettiği metin "basamağına gelmen gerekiyor";
+   Türkçe yumuşamayla `'basamağına'`, `'basamak'` alt dizesini
+   içermiyor (ğ ≠ k). Yani eğitmenlik testinin son iddiası her zaman
+   geçiyordu. Ayrıca `dusuk` değişkeni iki kez atanıyordu; ilk atama
+   ölü koddu ve yorumla çelişiyordu. İkisi de düzeltildi; iddia artık
+   iki yönlü ve gerçek dizeyle: basamağı tutmayanda engel gerekçesi
+   eğitmenlik basamağını **söylüyor**, tutanda **kalkıyor**.
+
+### PROD BUG bulunmadı
+
+27 yeni doğrulama testi ürünün gerçek kapılarından geçti; çökme, state
+bozulması, çift ödeme ya da save/load hatası çıkmadı.
+
+### Doğrulanan davranışlar
+
+| Konu | Ölçüm |
+|---|---|
+| 6/6 sanat tam yol | başla → kazan → kaybet → kademe 3 → pro → emekli, hepsi ürün API'siyle |
+| Maç motoru bileşenleri | teknik, form, sağlık, deneyim, hazırlık, yaş, sakatlık geçmişi — **yedisi de** ihtimali değiştiriyor |
+| Bant uç durumda | en zayıf %10 · en güçlü %85 (0 ve 1 yok) |
+| Save/load | 6/6 sanatta sonuç, ödül, sakatlık, sıralama ve şampiyonluk birebir aynı |
+| Hazırlık kararı canlı | 200 müsabakanın **18'inde** kamp tercihi sonucu değiştirdi |
+| Çift ödeme | unvan maçı tek ödeme; ikinci çağrı ve kaydet/yükle sonrası 0 ₺ |
+| Şampiyonluk | 6/6 sanatta ürün kapılarından ulaşılabilir, geçmişe yazılıyor |
+| Şampiyon sonrası | unvan kaybı → tekrar şampiyonluk zinciri çalışıyor; kariyer bitmiyor |
+| Sıralama | galibiyet 10 → mağlubiyet 12 → 5 yıl ara 20; band 0-20, negatif yok |
+| Sakatlık | 600 maçta yok 471 · hafif 85 · orta 36 · ciddi 8 — üç seviye de çıkıyor |
+| "Riski göze al" | 200 kararda ağırlaşan 98 · kurtulan 102 (cosmetic değil) |
+| Antrenör | elit koç 94.332 ₺/yıl, yılda **bir kez** kesiliyor; kazanma %37 → %44; garanti değil |
+| Ün kademeleri | yerel 0 · ulusal 3 · elit 6 · şampiyonluk 18; spor tavanı 70 |
+| Sponsor | kademe 1'de 0 · itibar 20'de 0 · kademe 2 itibar 50'de 57 · +ün 172 · +şampiyonluk 174 (300 denemede) |
+| Yaş | 20y 60,4 · 27y 65,0 · 33y 57,8 · 35y 55,4 · 45y 43,5 · 55y 31,5 — duvar yok, 50+ dominans yok |
+| Emeklilik | üç sebep de çalışıyor, emekli geri dönemiyor, bekleyen müsabaka temizleniyor |
+| Boş durum | kariyeri olmayan ve bozuk `artId` taşıyan oyuncuda hiçbir okuma çökmüyor |
+
+### Brief'te yazılı olup UYGULANMAMIŞ maddeler
+
+Bunlar bu turda **eklenmedi** (verify turu); raporlandı ve Q-183'e
+yazıldı.
+
+| Madde | Durum |
+|---|---|
+| **§4 / §16** 18 yaş altı sporcuya aile desteği (ekipman, yol, kulüp, turnuva) | **YOK.** Paket AJ'nin `CourseSupport` sistemi combat tarafında hiç çağrılmıyor. Genç sporcunun kamp/koç masrafı yalnızca kendi cüzdanından çıkıyor. |
+| **§35 / §17** Okul + spor çatışması ("Turnuva sınav haftasına denk geldi") | **YOK.** Böyle bir olay ya da karar noktası kodda yok. |
+| **§16 / §14** Spor başarısının sosyal medya içerik performansına etkisi | **DOLAYLI.** Şampiyon ile aynı takipçili sıradan oyuncu, paylaşım başına **aynı** sonucu alıyor. Spor yalnızca Ün'ü yükseltiyor; Ün de medya işlerini (`kMediaSectionMinFame`, `job.minFame`) ve ünlü iş birliklerini (`minFame 25`) açıyor. Yani etkisi var ama paylaşım performansında değil. |
+| **§9** Rivalry'nin ün/ilgi üzerindeki "küçük etkisi" | **YOK.** Rakip kaydı, tekrar karşılaşma ve karşılıklı skor **gerçek state** (ölçüldü: kendi kademesinde 200 fırsatta 49 kez geri geldi), ama rivalry ne üne ne ödüle ne de fırsat sıklığına dokunuyor. |
+| **§36 / §18** İş + spor çatışması | **YALNIZCA PARA/SAĞLIK.** Ölçüldü: çalışan ve çalışmayan sporcunun kazanma ihtimali (%40 vs %40), maç sonucu ve 200 denemedeki fırsat sayısı (133 vs 133) **birebir aynı**. İş durumu spor motoruna hiç girmiyor. |
+
+### Belgelenen sınır (hata değil)
+
+Tanıdık rakip yalnızca gücü oyuncunun **bugünkü** kademesine yakınken
+geri gelebiliyor. Oyuncu üst kademeye çıkınca alt kademedeki eski
+rakipler bandın dışında kalıyor: ölçüldü, kendi kademesinde 200
+fırsatta **49**, üst kademeye çıkınca **0**. Kayıt kaybolmuyor, çökme
+yok; ama brief'in "aynı rakiple rövanş, final, kemer maçı" fikri
+kademeler arası taşınmıyor.
+
+### §22 — boks (%5) ve taekwondo (%27) farkı BUG mu?
+
+**Hayır, katsayıların bileşik sonucu.** Maç başına fark küçük:
+
+| Sanat | Kademe-3 rakip | Unvan rakibi | Sakatlık | Yıpranma | Denk şans | Unvan şansı |
+|---|---|---|---|---|---|---|
+| Boks | 76 | 92 | 0,22 | 1,15 | %62 | %40 |
+| Yağlı güreş | 74 | 90 | 0,18 | 1,10 | %65 | %43 |
+| Judo | 75 | 91 | 0,16 | 1,00 | %64 | %42 |
+| Karate | 74 | 90 | 0,14 | 0,95 | %65 | %43 |
+| Taekwondo | 74 | 90 | 0,14 | 0,95 | %65 | %43 |
+| Kung fu | 72 | 88 | 0,12 | 0,85 | %68 | %46 |
+
+**Dikkat çeken nokta:** unvan maçı başına fark yalnızca **3 puan**
+(%40 vs %43), ama 600 hayatlık sonuç **5'e 27** — beş kattan fazla.
+Fark tek bir büyük katsayıdan değil, üç küçük katsayının kariyer
+boyunca **birbirini çarpmasından** doğuyor: daha güçlü rakip → daha az
+terfi; daha yüksek sakatlık → kaybedilen yıllar → sıralama aşınması;
+daha hızlı yaş aşınması → daha kısa elit pencere. Bu hassasiyetin
+kendisi Faho'ya bildirildi (Q-183 #6); **hiçbir sayı değiştirilmedi.**
+
+### §23 — dominance
+
+Hiçbir sanat dört ölçütün (elit oranı, şampiyonluk, sakatlık, gelir)
+dördünde birden önde değil: en çok elit yağlı güreş (88), en çok
+şampiyon taekwondo (27), en az sakatlık judo/karate (29), en yüksek
+gelir yağlı güreş (5,44 M₺).
+
+**Ters yönde bir uyarı var:** boks dört ölçütün üçünde **son sırada**
+(elit 63, şampiyon 5, gelir 1,57 M₺) ve sakatlıkta da üst sıralarda.
+Denge sorusu olarak Q-183 #6'da duruyor.
+
+27 doğrulama testi: `app/test/paket_al_verify_test.dart`.
+
+**Karar bekleyen:** Q-183. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AL/2 — SPOR KARİYERİ ENTEGRASYONLARI
+
+Paket AL/VERIFY beş brief maddesinin **yazıldığı ama uygulanmadığını**
+tespit etmişti. Bu paket o beşini gerçekten kodladı: her biri için
+production kod, gerçek state etkisi, hedefli test ve gereken yerde UI
+var. **Yeni denge turu değil**; mevcut kazanma bandı, sakatlık oranları,
+şampiyonluk oranları, yaş eğrisi ve ödül çarpanlarına dokunulmadı.
+
+### Önce / sonra
+
+| Konu | Paket AL/VERIFY sonunda | Paket AL/2 sonunda |
+| --- | --- | --- |
+| 18 yaş altı aile desteği | Yok. Genç sporcunun kamp/koç masrafı yalnızca kendi cüzdanından. | Dört masraf başlığında aileden destek istenebiliyor; **Paket AJ ile aynı ebeveyn yıllık bütçesi** paylaşılıyor. Kabul oranı varlığa göre %0 / %0 / %23 / %58 / %69. |
+| Okul + spor | Karar noktası yok. | Yılda en fazla bir kez çıkan gerçek çatışma; iki seçim de farklı state üretiyor. 200 kariyer × 8 okul yılında 44 çatışma. |
+| Spor başarısı → sosyal medya | Şampiyon ile sıradan oyuncu **birebir aynı** paylaşım performansı. | Spor içeriğinde şampiyon **+%41**; spor dışı içerikte fark **tam olarak 0**. |
+| Rivalry | Kayıt tutuluyordu, hiçbir sonucu yoktu. Üst kademeye çıkınca eski rakip 0 kez geliyordu. | Rekabet gücü ölçülüyor; kazanılan önemli rövanş ün ve sosyal ilgi getiriyor (azalan getiri + yıllık tavan). Önemli rakip oyuncuyla birlikte yükseliyor, yaşlanınca düşüyor. |
+| İş + spor | Çalışan ve çalışmayan sporcu **birebir aynı**: aynı fırsat, aynı kazanma ihtimali. | Kişi başı müsabaka 13,3 / 10,7 / 9,1; full-time fırsat kaybı %32; kariyer sonu form 48 / 29 / 20. Kazanma ihtimaline **doğrudan** kesinti yok. |
+
+### Yeni dosyalar
+
+- `app/lib/domain/combat/sport_family_support.dart` (§1-§5)
+- `app/lib/domain/combat/sport_school_conflict.dart` (§6-§9)
+- `app/lib/domain/combat/sport_rivalry.dart` (§15-§19)
+- `app/lib/domain/combat/sport_workload.dart` (§20-§25)
+- `app/lib/domain/social/sport_social_boost.dart` (§10-§14)
+- `app/test/paket_al2_entegrasyon_test.dart` (38 test + §34 ölçümü)
+
+### Bulunan PROD bug — raporlandı, DÜZELTİLMEDİ
+
+`CombatCareerEngine.advanceYear` ders sayacını ters anahtar sırasıyla
+okuyor (`karate|dovus`), oysa `MartialArtsEngine` `dovus|karate`
+yazıyor. Paket AL'den beri "çalışmak formu telafi eder" kuralı hiç
+işlememiş.
+
+Düzeltme **denendi ve geri alındı**: 600 sporcu ölçümünde medyan kariyer
+geliri 4,04 M₺ → 6,51 M₺ çıkıp testin kendi denge koruması kırıldı.
+Brief §0 bu pakette ödül çarpanlarına ve şampiyonluk oranlarına
+dokunmayı yasaklıyor, mevcut testi gevşetmek de yasak. Karar Q-184
+#1'de Faho'ya bırakıldı; hatanın varlığı bir belge testiyle kilitlendi.
+
+### Ölçümle düzeltilen iki kalibrasyon (ikisi de bu paketin kendi
+### mekanikleri)
+
+1. Okul çatışması ilk yazımda yalnızca kademe ≥ 1'de çıkıyordu ve 200
+   sporcuda **1 kez** çıktı — fiilen ölü özellik. Kapı, 4+ müsabaka
+   yapmış sporcuyu da kapsayacak şekilde genişletildi.
+2. Tam zamanlı iş cezası ilk yazımda kariyeri öldürüyordu (kariyer sonu
+   form 3,8, fırsat kaybı %55). Katsayılar yumuşatıldı.
+
+**Karar bekleyen:** Q-184 (ve Q-183 #6 boks/taekwondo hassasiyeti hâlâ
+açık). **Doğrulanmayan:** gerçek cihazda oynanmadı; Android APK bu
+oturumda cihazda test edilmedi.
+
+## PAKET AM — MANTIKSAL MESLEK / FİZİKSEL UYGUNLUK ŞARTLARI
+
+Bazı kariyer kapıları mevcut statlarla fazla gevşekti. Bu paket
+"bu mesleğin doğası hangi statı gerçekten gerektirir?" sorusunu
+uyguladı — **keyfi stat duvarı kurmadan**. Her işe "80 zekâ + 80 sağlık
++ 80 karizma" gibi kapılar konmadı; şart mesleğin kendisinden geldi.
+
+### İki kesin karar (Faho)
+
+| | Önce | Sonra |
+| --- | --- | --- |
+| Manken dış görünüş | 70 | **80** |
+| Rekabetçi dövüş kariyerine başlama sağlığı | 40 | **80** |
+
+D-064'ün "görünüş 70 şartı korunur" hükmü Faho'nun bu paketteki kesin
+kararıyla **80**'e güncellendi.
+
+### Sağlık üç kademeye ayrıldı (combat)
+
+Tek bir eşik yerine üç kapı, çünkü kariyere **başlamak** ile sakatlanıp
+toparlanmayı beklemek aynı şey değil:
+
+- kariyere başlama: **80**
+- pro/elit kademeye terfi: **80** (kalıcı kilit değil; sağlık gelince açılır)
+- normal müsabakaya çıkma: **70**
+- 70'in altı: **geçici** engel. Kariyer durur, **silinmez** — kademe,
+  rekor, sıralama ve şampiyonluklar yerinde kalır.
+
+Ciddi sakatlık ayrı bir kapı olarak duruyor: sağlığı 90 olan oyuncu da
+sakatken dövüşemez ve ona sağlık cümlesi değil sakatlık cümlesi
+gösterilir. İki ceza üst üste binmiyor.
+
+### `JobType.minHealth` (yeni alan, varsayılan 0)
+
+Eşik konan meslekler — brief'in adını verdiği üç kamu mesleği:
+
+| Meslek | minHealth |
+| --- | --- |
+| İtfaiyeci | 70 |
+| Polis | 65 |
+| Güvenlik görevlisi | 55 |
+
+Her birinde mesleğe özel `physicalNote` var; oyuncu "işe uygun değilsin"
+değil, gerçek sebebi ve eksiğinin ne kadar olduğunu okuyor.
+
+**Ölçümle alınmış bir karar:** §10'un aday saydığı beş işe (kurye 50,
+depo personeli 55, oto tamircisi 50, tesisatçı 50, kaynakçı 60) da eşik
+konmuştu ve **ölçüm bunu geri aldırdı**. Bu beş iş erişilebilir
+kataloğun büyük bir dilimi; kapanmaları maaş yollarını zayıflatıp
+`girisim+yatirim` stratejisinin her ölçüde ezdiği strateji sayısını
+**5/14'ten 9/14'e** çıkardı ve terzi atölyesinin payback dağılımını
+darlattı. Brief toplu denge operasyonunu yasakladığı için eşikler
+kaldırıldı; geri alındıktan sonra iki ölçüm de baseline değerine döndü
+(dominans yine 5/14). Karar Q-185 #2'de Faho'da.
+
+**Bilerek 0 bırakılanlar:** bütün ofis/uzmanlık meslekleri (yazılımcı,
+muhasebeci, öğretmen, banka personeli, üç mühendislik, gazeteci, yazar,
+müzisyen, doktor, hemşire, psikolog, eczacı, memur, veri analisti),
+yaratıcı meslekler, dövüş eğitmenlikleri ve **bütün yarım zamanlı
+gençlik işleri**. Sağlık statı 45 olan birinin muhasebeci olamaması
+saçma olurdu.
+
+**Görünüş bariyeri yalnızca mankenlikte** (katalogda tek). Satış
+danışmanı, resepsiyonist ve gazetecide doğru stat karizma; hard
+appearance gate eklenmedi.
+
+### Ne kapanmadı
+
+- Normal spor aktiviteleri (koşu, ağırlık, esneme) sağlık 55 ile açık.
+- Dövüş sanatı **dersleri** sağlık 60 ile açık — ders almak müsabakaya
+  çıkmak değil.
+- `minAppearance` ve `minHealth` **işe giriş** şartı; işe girdikten
+  sonra stat düşerse otomatik kovma yok (D-064).
+
+### UI
+
+İş ilanında ve kapalı işler listesinde gereksinimler ✓/✗ olarak
+gösteriliyor; tutan şartta yalnızca ad, tutmayanda eşik ve mevcut değer
+yazılıyor. Dövüş ekranında "Rekabetçi kariyer için sağlık: 73 / 80"
+satırı var. Yüzde ya da formül gösterilmiyor.
+
+29 hedefli test: `app/test/paket_am_fiziksel_sartlar_test.dart`.
+
+**Dokunulmayan:** Q-184 #1'deki ders/form telafisi anahtar hatası (§21
+gereği), boks/taekwondo hassasiyeti (Q-183 #6), genel denge.
+**Doğrulanmayan:** gerçek cihazda oynanmadı.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
 
 ## ChatGPT / Claude devri
 Yeni oturumda `DECISIONS.md`, bu dosya, `docs/PROTOTYPE_UI.md`, `docs/CLAUDE_PROTOTYPE_TASK.md` ve ilgili sistem belgelerini oku. **Önerileri kesin karar sayma.** Yeni karar alınırsa ilgili belgeleri güncelle; tamamlanmamış işleri tamamlandı yazma.
+
+## PAKET AN — SPOR FORM BUG FIX + YENİDEN KALİBRASYON
+
+Q-184 #1'de doğrulanmış bir production bug düzeltildi ve arkasından spor
+dengesi **doğru çalışan motorun üzerinde** yeniden kuruldu. Yanlış çalışan
+kod bir denge mekaniği değildir.
+
+### Hata ve düzeltme
+
+`MartialArtsEngine` ders sayacını `'dovus|<artId>'` yazıyor,
+`CombatCareerEngine.advanceYear` ise `'<artId>|dovus'` diye okuyordu.
+`GameState.interactionKey` iki parçayı **sırayla** birleştirdiği için bu
+iki anahtar farklıydı ve "çalışan sporcu formunu daha iyi korur" kuralı
+Paket AL'den Paket AM'e kadar **hiç işlemedi**.
+
+Anahtar artık tek yerde kuruluyor:
+`app/lib/domain/combat/martial_lesson_counter.dart` →
+`MartialLessonCounter.key(artId)`. Yazan da okuyan da onu kullanıyor;
+string sırası hiçbir yerde elle tekrar yazılmıyor.
+
+**Eski kayıtlar migrate edilmedi ve edilmesi gerekmiyor:** hatalı olan
+okuma tarafıydı, yazma tarafı baştan beri doğru biçimi yazıyordu. Ters
+sıralı anahtar için bilerek fallback konmadı — o biçimi hiçbir kod yolu
+hiç yazmadı, ve yazılmamış bir biçim için fallback aynı dersi iki kez
+sayma riskini bedavaya alırdı.
+
+### Kalibrasyon: nedenin ayrıştırılması
+
+Bug düzelince fazla para nereden geldi? Ayrıştırıldı: kariyer uzunluğu
+neredeyse sabit (24 → 26 yıl), maç sayısı +%29, ama **şampiyonluk
++%160**. Para şampiyonluktan geliyordu.
+
+Ayrıca bir düzeltme: Paket AL/2'nin "4,04 M₺ → 6,51 M₺" rakamları
+**brüt** ölçümdü. Net tarafta (ders, koç, kamp ve tedavi düşüldükten
+sonra) düzeltilmiş motor 4,01 M₺ veriyor — hedef bandın (3,5–5,0 M₺)
+içinde. Yani gelir tarafı kalibrasyon istemiyordu; **ödül çarpanlarına
+(tier purse, title purse) dokunulmadı.**
+
+Unvan zinciri ölçüldü ve üç halkasından ikisinin no-op olduğu çıktı:
+
+| zincir halkası | 600 sporcuda |
+| --- | --- |
+| en iyi sıralaması ≤ 2 | 363 |
+| itibarı ≥ 70 | 575 |
+| **itibarı 100'e doyan** | **530** |
+| en üst kademeye çıkan | 570 |
+
+İtibar yalnızca yukarı gidiyor ve tavana doyuyor; eşiği 100 yapmak bile
+600'ün 530'unu geçirirdi. Gerçekten seçici tek halka sıralama.
+
+Üç sayı değişti:
+
+| sabit | Önce | Sonra | Gerekçe |
+| --- | --- | --- | --- |
+| `prototypeOnlyTitleShotRank` | 2 | **1** | Kemer maçına bir numaralı rakip çağrılır |
+| `prototypeOnlyTitleShotChance` | 0,40 | **0,30** | 0,40 "kapı açıldıysa kemer maçı kesin"e yaklaşıyordu |
+| `prototypeOnlyFormPerLesson` | 1,2 | **1,6** | Uçurum düzeltmesi, gelir ayarı değil |
+
+Ders katsayısı neden değişti: yıllık form kaybı 8 olduğu için telafi 8'i
+geçene kadar form çöküyor, geçtiği anda tırmanıyor. 1,2'de yalnızca
+derslerden başabaş ≈ 6,7 ders/yıl; yılda 4 ders alan sporcunun formu
+kariyer sonunda 14,7'ye iniyordu. 1,6'da başabaş 5 derse indi ve bant
+0 → 2,0 · 2 → 6,2 · 4 → **32,0** · 8 → 61,9 oldu. Telafi tavanı (18)
+yerinde, yani ders sayısını artırmak formu 100'e kilitlemiyor.
+
+`prototypeOnlyTitleShotReputation` (70) **bilerek değiştirilmedi**: 90
+yazmak filtre kurmuş gibi görünüp hiçbir şey yapmazdı.
+
+### Nihai ölçüm — 600 adanmış sporcu, koçsuz kohort
+
+| ölçüm | BUGLU | FIXED RAW | FIXED + KALİBRE |
+| --- | --- | --- | --- |
+| kariyer sonu form | 38 | 56 | 57 |
+| ortalama müsabaka | 31 | 40 | 40,2 |
+| medyan kariyer yılı | 24 | 26 | 26 |
+| elit/pro | — | %95,0 | %95,0 |
+| şampiyon | %8,8 | %33,8 | **%22,0** |
+| medyan BRÜT | 3,35 M₺ | 6,45 M₺ | 6,28 M₺ |
+| medyan NET | 1,48 M₺ | 4,01 M₺ | **3,82 M₺** |
+
+Şampiyonluk Q-183'ün %18,2 referansına yakın bir yere indi ve imkânsız
+olmadı. Net gelir hedef bandın içinde. `paket_al_600_athletes_test`
+bağımsız harness'ıyla aynı sonucu veriyor (%21,7).
+
+BUGLU sütunu git history'ye dokunmadan üretiliyor: ölçüm fixture'ı
+`advanceYear` öncesi ders sayacını siliyor, yani ders alınıyor, parası
+ödeniyor, teknik basamak kazanılıyor ama form motoru dersi görmüyor —
+hatanın tam davranışı.
+
+### Sanat tablosu (600 sporcu, kalibrasyon sonrası)
+
+| sanat | elit% | şamp% | ort.maç | medyan yıl | ciddi sakat% | brüt medyan | NET medyan | iyi %10 | kötü %10 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Boks | 89 | 9 | 32,3 | 23 | 49 | 5,42 M | 3,59 M | 6,71 M | 0,24 M |
+| Yağlı güreş | 92 | 22 | 38,6 | 27 | 31 | 6,44 M | 4,10 M | 8,14 M | 1,27 M |
+| Judo | 97 | 23 | 40,8 | 28 | 34 | 6,28 M | 3,77 M | 6,83 M | 1,12 M |
+| Karate | 97 | 26 | 43,8 | 28 | 26 | 6,85 M | 4,25 M | 7,73 M | 1,88 M |
+| Taekwondo | 99 | 25 | 43,3 | 29 | 31 | 6,84 M | 4,16 M | 6,88 M | 1,23 M |
+| Kung fu | 96 | 27 | 42,7 | 28 | 31 | 5,90 M | 3,35 M | 5,83 M | 0,70 M |
+
+### Brüt değil net (§7)
+
+Rekabete başlayan 600 sporcunun toplamı:
+
+| kalem | tutar |
+| --- | --- |
+| + müsabaka ödülü | 3.097 M₺ |
+| + sponsorluk | 684 M₺ |
+| − ders ücreti | 66 M₺ |
+| − koç ücreti | 0 (koçsuz kohort) |
+| − kamp + tedavi | 1.338 M₺ (kampın liste fiyatı 1.232 M₺) |
+| = **NET** | **2.378 M₺** |
+
+Kamp ve tedavi motorun aynı çağrısında tahsil edildiği için cüzdanda
+birlikte ölçülüyor; kampın liste fiyatı ayrıca veriliyor.
+
+Başlık kohortu **koçsuz**, çünkü §5'teki "bug öncesi 4,04 M₺" referansı
+Paket AL kohortundan geliyor ve o kohort koç tutmuyordu. Koçun bedeli
+ayrı ölçüldü ve bir bulgu çıktı: koç başarıyı artırıyor (şampiyon 132 →
+175) ama net geliri düşürüyor (3,82 M₺ → 2,70 M₺). Karar Q-186 #3'te.
+
+### Dokunulmayanlar
+
+- Ödül çarpanları: tier purse, title purse, ödül sıklığı — net gelir
+  bandın içinde olduğu için gerek yoktu (§8).
+- Yıllık maç tavanı (4): gerçekleşen dağılım 40,2 maç / 26 yıl ≈ 1,55
+  maç/yıl, yani tavan sorun değil (§9).
+- Boks / taekwondo farkı: kendiliğinden daraldı (5,4× → 2,8×), §11
+  gereği müdahale edilmedi.
+- Paket AM'in sağlık kuralları: kariyere başlama 80, elit terfi 80,
+  müsabaka 70 — hepsi yerinde ve testli (§16, §24).
+- Q-184'ün diğer maddeleri (aile desteği, okul çatışması, sosyal boost,
+  rivalry ün) — §23.
+
+### Testler
+
+- `app/test/paket_an_form_telafisi_test.dart` — 18 koruma testi: kanonik
+  anahtar, production yolu, eski kayıt uyumu, çift sayım yok, telafinin
+  sınırı, iş yükü, yaş eğrisi, sakatlık kapısı, 80/70 sağlık kuralları.
+- `app/test/paket_an_spor_kalibrasyon_test.dart` — 5 ölçüm: A (6 sanat ×
+  100), §19 (BUGLU vs kalibre), koç politikası, B (0/2/4/8 ders),
+  C (işsiz/part-time/full-time).
+- `app/test/paket_al2_entegrasyon_test.dart` — "BİLİNEN BUG" belge testi
+  **doğru davranış testine çevrildi** (§21). Bir bug testle sonsuza kadar
+  korunmaz.
+- `app/test/paket_al_600_athletes_test.dart` — brüt medyan koruması
+  12× asgari ücretten **22×**'e yeniden temellendirildi. Gevşetip
+  unutulmadı: eski 12x eşiği ölü bir mekaniğin yan ürünüydü, yeni tavan
+  ölçülen 18,5×'in hemen üstünde ve dengenin asıl bekçisi artık
+  `paket_an_spor_kalibrasyon_test`'teki **net** band.
+
+## PAKET AO — AİLE / İLİŞKİLER V2: DİNAMİK AİLE AĞI
+
+**Ana tasarım kuralı (Faho):** "Aile menüsü bir NPC listesi olmasın.
+İnsanların kendi hayatı olsun. AMA hiçbir kişi, sadece hikâye metninde
+var olmasın."
+
+### Yeni bağ türleri (enum sonuna eklendi, eski kayıtlar bozulmadı)
+
+`uveyKardes`, `yariKardes`, `uveyCocuk`, `kayinvalide`, `kayinpeder`.
+Yeni bir öbek: `RelationGroup.esinAilesi`.
+
+Kan bağı ayrımı `kanBagi` içinde: üvey kardeş ve üvey çocuk çekirdek
+ailede listelenir ama kan bağı **değildir**; yarım kardeş kan bağıdır
+çünkü bir biyolojik ebeveyn ortaktır.
+
+### Soy kaydı (§14-§15)
+
+`Person.motherId` / `Person.fatherId` eklendi. İkinci bir Person sistemi
+kurulmadı; sahte `'player'` sabiti yok, `state.player.id` kullanılıyor.
+`lib/domain/models/kinship.dart` akrabalık sorularının tek adresi.
+
+**Kapatılan iki gerçek boşluk:**
+
+1. Yarım kardeş mirastan hiçbir şey almıyordu. Artık **yalnızca ortak
+   olan ebeveynden** miras alıyor; üvey bağlar bilerek dışarıda.
+2. Üvey kardeş romantik filtreden geçiyordu. Filtre artık yalnızca
+   `kanBagi` bayrağına değil, gerçek soy kaydına bakıyor (§16).
+
+### Ebeveyn boşanması (§1-§6)
+
+Düz bir yıllık yüzde değil: aileye özel, gizli bir **dayanıklılık**
+(maddi durum, oyuncunun mutluluğu, ebeveyn yakınlığı, ebeveyn
+adlarından türeyen sabit aile sapması). Yıllık tavan %5,5, pencere 4-45.
+
+İki ebeveyn de listede **kalır**; hane gerçekten ayrılır; 12-23 yaş
+arasında oyuncuya "kiminle kalacaksın?" sorulur; mutluluk etkisi yaşa
+bağlıdır (sabit −20 değil).
+
+**Ölçümle bulunan hata:** ilk yazımda 24 yaş üstü oyuncuda iki ebeveyn
+de haneden çıkarılıyordu ve hâlâ ailesinin yanında yaşayan bir yetişkin
+bir anda "kendi evinde" sayılıyordu — `LivingCosts.livesWithFamily` buna
+bakıyor, yani yaşam gideri kayıyordu. Kural tek yönlü yapıldı.
+
+### Erişilemeyen üç motor (ikinci fazda kapatıldı)
+
+Denetim, AO/1'de yazılan üç şeyin oyuncuya **hiç ulaşmadığını** buldu:
+
+- `ParentDivorce.isPending`/`choose` hiçbir ekrandan çağrılmıyordu.
+- `ElderCare` hiçbir yerden çağrılmıyordu: dosya vardı, oyunda yoktu.
+- Beş yeni bağ hiçbir listeye düşmüyordu: kaydı vardı, ekranda yoktu.
+
+Üçü de bağlandı. Kod yazılmış olması oyunda erişilebilir olması demek
+değildir; bu paketin en pahalı dersi buydu.
+
+### İlişkiler ekranı (§38-§39)
+
+Beş aile öbeği: **çekirdek aile / kendi ailem / geniş aile / eşinin
+ailesi / geçmiş ilişkiler**, artı aile dışı. Boş başlık çizilmiyor.
+Kardeşler kendi sayfasına alındı; öz, üvey ve yarım kardeş bir arada.
+
+Kişi kartına **yaşadığı şehir**, **soy bağı** (annesi/babasi) ve
+boşanma varsa **velayet düzeni** satırları eklendi.
+
+`state.children` **değiştirilmedi**: miras, velayet ve kuşak devamı
+biyolojik çocuğa bakmaya devam ediyor. Değişen yalnızca ekranın
+gösterdiği liste.
+
+### 500 aile hayatı (§49) — yalnızca ölçüm
+
+Genel 3000 hayat denetimi **yapılmadı**. Aile odaklı arketip, 500 tohum.
+Oranları güzelleştirmek için ne bot ne kural oynandı.
+
+| ölçüm | sonuç |
+| --- | --- |
+| Ebeveyn boşanması | %51,4 |
+| Üvey ebeveyn geldi | %78,0 |
+| Üvey kardeş oluştu | %38,4 |
+| Yarım kardeş doğdu | %15,0 |
+| Eşin önceki çocuğu | %18,4 |
+| Kayın aile kuruldu | %81,0 |
+| Oyuncu evlendi | %90,2 |
+| Kişi sayısı (medyan) | 62 |
+
+Bozukluk sayaçları: mükerrer kimlik **0**, geçersiz romantik bağ **0**,
+kopuk soy kaydı **0**, yaşayan ebeveynde tutarsız yaş **0**.
+
+**Ölçümün açtığı yanlış alarm.** İlk turda 103 "çocuk ebeveyninden
+büyük" vakası çıktı. Test gevşetilmedi; sayaç ikiye ayrıldı ve hepsinin
+**vefat etmiş** ebeveyn olduğu görüldü. Sebep kaydın kendi anlamı:
+vefat edenin yaşı öldüğü yaşta donar ("32 yaşında vefat etti" böyle
+saklanır), genç ölen bir ebeveynin çocuğu yıllar sonra o yaşı geçer.
+Yanlış olan oyun değil, ilk yazılan değişmezdi. İki sayaç da raporda
+duruyor.
+
+### Testler
+
+- `app/test/paket_ao_aile_v2_test.dart` — 48 hedefli test (AO/1, AO/2).
+- `app/test/paket_ao_faz2_test.dart` — 16 hedefli test: kendi hayatlar,
+  buluşma havuzu, yaşlı bakımı, hane seçimi.
+- `app/test/paket_ao_500_aile_test.dart` — §49 ölçümü.
+
+**Yazarken kendini ele veren iki test.** Yeğen testi önce boştu:
+üretilen yeğenin kimliği ebeveynin kimliğini taşımıyor, yani iddia her
+koşulda doğruydu. İki yönlü yazıldı — yarım kardeşten yeğen **geliyor**
+(pozitif kontrol), üvey kardeşten gelmiyor. Pozitif kontrol de ilk anda
+kırıldı, ama sebep ürün değil harness'tı: `advanceOneYear` ekranda
+çözülmemiş olay varken hiçbir şey yapmadan dönüyor.
+
+### Tam süitin kırdığı üç bekçi — üçü de ölçümle çözüldü
+
+Paket AO tamamlandıktan sonra tam süitte üç test kırıldı. Üçü de tahminle
+değil ölçümle incelendi ve üçünde de aynı sonuç çıktı: kırılan şey ürün
+değil, **bekçinin kendisiydi**. Hiçbir eşik düşürülmedi.
+
+**1. `paket_ai_abuse` §24 — "para isteme net serveti artırıyor (+108)".**
+Para istemek tasarım gereği para verir (harçlık, D-019); net servet
+farkının işareti bu saldırıda kuralı değil, o turda açılan rastgele
+olayın cebe ne yaptığını ölçüyordu. Paket AO **öncesi** HEAD'de aynı
+saldırı 20 tohumda koşuldu: **14 tohumda net servet zaten artıyordu**,
+birebir +108 dahil. Bekçi tek tohumla tesadüfen geçiyormuş.
+
+Gevşetmek yerine saldırının asıl koruması iddiaya çevrildi: **mekanik
+doyuyor.** 100 denemede de 1000 denemede de kabul sayısı aynı (20 tohumda
+da 3). Yeni iddia: kabul ≤ 4 **ve** on kat deneme bir kabul daha
+getirmiyor. Diğer altı saldırıda "servet artmasın" bekçisi aynen duruyor.
+
+**2-3. `paket_ag_payback` §16 ve §20 — dağılım kuyrukları.** Hızlı turda
+işletme başına 45 hayat koşuluyordu ve işletmeyi gerçekten **açan** hayat
+~25'e düşüyordu; yani "kötü %10" sıralı listenin 3. elemanıydı.
+
+| örneklem | serbest yazılım kötü%10 (AO öncesi → sonrası) |
+| --- | --- |
+| 45 | −0,37 → **+7,79** |
+| 150 | −0,33 → +0,30 |
+| 300 | −0,29 → +0,30 |
+
+Örneklem 45'ten **600**'e çıkarıldı; eşikler ve istatistik aynen kaldı.
+
+Paket AO'nun bu sayılara dokunmadığı ayrıca **kanıtlandı**: Faz 3'ün tek
+simülasyon etkisi yeni bağlara `ChildProgression` çalıştırmaktı ve o
+kayıtlar oyuncunun ekonomisine hiç değmiyor. Deney olarak sonuçlar atılıp
+yalnızca zar akışı ilerletildiğinde ölçüm birebir aynı çıktı:
+**9,416017364203027**, on beş hanesine kadar. Fark tamamen zarın
+konumundan geliyordu.
+
+Yan bulgu (gerçek, denge kararı verilmedi): **terzi atölyesi** katalogdaki
+en dar dağılım ve §16 sınırına iki ağaçta da en yakın işletme — Paket
+AH'nin "işletme seçimlerinin %60'ı terzi" bulgusuyla aynı yöne işaret
+ediyor.
+
+### Bilerek yapılmayanlar (§51)
+
+Dev aile ağacı görseli, DNA testi, evlat edinme akışı, velayet mahkemesi
+simülasyonu, karmaşık nafaka davaları, aile şirketi, aile içi suç.
+
+### Açık sorular
+
+Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
+masrafı, eşin önceki çocuğu oranı, kayın aile yakınlığı, buluşma havuzu
+ve velayet kararı. Hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+# Paket AP — aile dramaları ve yetişkin çocukların kendi hayatı V2
+
+Paket AO aileyi statik bir NPC listesinden yaşayan bir ağa çevirmişti ama
+aile hâlâ **olup bitenlerin kaydıydı**: boşanıyor, doğuyor, ölüyordu;
+oyuncu izliyordu. Paket AP aileyi **oynanan** bir sisteme çevirdi.
+
+## Ne yapıldı
+
+**Çocuğun eşi gerçek bir insan oldu (§14-§18).** `cocugunEsi` ve
+`eskiCocugunEsi` bağ türleri eklendi (enum sonuna, sıra bozulmadı);
+gelin/damat gerçek bir `Person` kaydı olarak doğuyor, kimliği
+evlilikten türediği için aynı evlilik her yıl yeni eş üretmiyor.
+`NpcMarriageRecord` ile NPC evlilik durumu (evli / boşandı / dul) ve
+geçmiş evlilikler kayda geçiyor. Paket AP öncesi kayıtlarda yalnızca ad
+vardı; geriye dönük NPC **uydurulmadı**.
+
+**Çocuğun kendi evlilik hayatı (§19-§23, §50).** Boşanma, yeniden
+evlenme ve dulluk. Eski eş kayıttan silinmiyor, torunun soy bağı
+bozulmuyor, yeniden evlenen çocuk **yeni** bir kişiyle evleniyor.
+
+**Kuşak devamı korundu (§62-§65, §74).** Bu paketin en kritik yeri:
+gelin/damat gerçek bir kişi olduğu anda kuşak devamındaki
+`default: return null` dalı onu **sessizce düşürür** hâle geldi — `torun`
+bir zamanlar tam olarak böyle kaybolmuştu. Evli çocukla devam edildiğinde
+eşi yeni oyuncunun eşi oluyor ve evlilik yürüyen bir kayıt olarak
+taşınıyor: "12 yıldır evli insan bekâr başlamıyor".
+
+**Gizli dram eğilimi (§2).** Her hayatın aile dram eğilimi `seed`'den
+deterministik türetiliyor, kayda yazılmıyor, oyuncuya gösterilmiyor ve
+**yalnızca sıklığı** ölçekliyor. 400 tohumda hem sakin hem hareketli
+aile çıkıyor.
+
+**Yılda en fazla bir büyük aile karari (§3).** Tek kapı:
+`GameState.canOpenFamilyDecision`. Beş çocuklu oyuncu aynı yıl beş kriz
+yaşamıyor.
+
+**Çok yıllı mesele kaydı (§4, §51).** `FamilyIssue`: kim, ne, kaçıncı
+yıl, hangi aşama, oyuncu ne cevap verdi. `storyFlags` bu soruları
+taşıyamıyordu. Kapanan mesele silinmiyor; liste 40 ile sınırlı ve sınır
+aşılırsa en eski **kapalı** meseleler düşüyor.
+
+**Yedi gerçek karar.** Çocuğun okul meselesi (§5-§7), yetişkin çocuğun
+para sıkıntısı ve eve dönüşü (§8-§13), kayın aile çatışması (§27),
+kardeşle para (§28-§29), yaşlı bakımı (§30-§32), miras itirazı
+(§35-§36). Hepsi `GameController` üzerinden ekrana bağlı.
+
+**Para yoktan üretilmiyor (§9, §36, §70).** Her transferde oyuncunun
+cüzdanı + bütün kayıtların birikimi toplamı **aynı** kalıyor; masraflı
+kararlarda azalıyor, asla artmıyor. 500 hayatlık ölçümde sıfır ihlal.
+
+**Hane değişimi gerçek (§12).** Eve dönen çocuk gerçekten haneye
+giriyor ve `LivingCosts` yeni bir gider kalemi görüyor.
+
+**Tavsiye ihtimali kaydırıyor, karar vermiyor (§1, §40-§41).** Oyuncu
+çocuğuna "üniversiteye git" diyemiyor; konuşuyor, karar çocuğun
+kendisinde kalıyor. Tavsiye yoksa pay **tam olarak 0** ve hiçbir ek zar
+atılmıyor — zar sırası korunuyor.
+
+**Stereotip yok (§26).** "Kayınvalide = sürekli sorun" reddedildi: olay
+havuzu dört iyi, dört kötü ve kalıcı bir test çıkan olayların
+dağılımının tek yöne kaymadığını ölçüyor.
+
+**Torunun soy bağı (§49).** Yeni torun motoru kurulmadı; var olan
+motorun boş bıraktığı `motherId`/`fatherId` alanları yazıldı. Eşi
+olmayan çocukta ikinci alan boş kalıyor — uydurma kimlik yazılmıyor.
+
+## Ölçüm (§76) — 500 aile odaklı hayat, oran güzelleştirmesi yok
+
+20.392 yıl. Hayat başına aile kararı: medyan 2, p25 1, p75 3, p95 5, en
+yüksek 8. 500 hayatın 69'unda hiç karar çıkmadı, 16'sında altı ve üstü.
+Mesele türleri: çocuk parası 291, çocuk okulu 278, kardeş parası 259,
+bakım 162, miras 111. Bozulma sayaçları sıfır.
+
+## Ölçümün ortaya çıkardığı gerçek hatalar
+
+Hepsi tahminle değil **ölçümle** bulundu ve ürün tarafında düzeltildi:
+
+1. **17 yaşında sisteme giren kişi aynı yıl liseyi bitiriyordu.**
+   `ChildProgression` kaydı açtığı yıl bir de sınıf atlatıyordu; kişi hiç
+   okumadığı bir yılı geçmiş sayılıyordu ve 17 yaşında `issiz` kalıyordu
+   — oyunun "6-17 arası herkes öğrencidir" değişmezi kırılıyordu. Paket
+   AO üvey kardeşi bu motora bağlayınca yol açılmıştı; tohum sırası
+   örtüyordu.
+2. **Aile içinde küslük hiç olmuyordu.** `FriendshipDepth` yalnızca
+   arkadaş bağı için çalışıyordu. Sebebi olmayan küslük olmayacak şekilde
+   eklendi: 500 hayatta 8 kişi.
+3. **Eve dönüş bir yıl sonra kendiliğinden geri alınıyordu.**
+   `_childrenLeaveHome` 25 üstü her çocuğu her yıl çıkarıyor; dönüş
+   kaydedilmediği için §12 dekoratif kalıyordu.
+4. **Bildirim baskısı.** Bütün aile olayları pencere açınca yıllık
+   ortalama bildirim 0,99'dan 1,11'e çıktı. Ayrım kondu: soran olay
+   pencere açar, haber veren olay günlüğe düşer. Yeniden ölçüm: 0,99.
+5. **Stat artışı `Stats.gain` dışından yapılıyordu.** `stat_gain_test`
+   yakaladı; oyunun azalan verim kuralı atlanıyordu.
+
+## Eski testlerde düzeltilen sessiz varsayımlar
+
+Hiçbiri "testi yeşil yapmak için" gevşetilmedi; her biri ölçüldü:
+
+* **"Çocuk evli doğmaz"** → §63 evli çocuğun evliliğini taşımayı açıkça
+  istiyor. İddia daraltıldı: taşınan evlilik **çocuğun kendi** eşiyle
+  olmalı, ölen oyuncunun eşi devralınmamalı.
+* **"Aynı çocuk birden fazla kez evlenmiyor"** → §23 yeniden evlenmeyi
+  istiyor. İddia **güçlendirildi**: evli çocuk tekrar evlenemez ve her ek
+  düğünün kapanmış bir evlilik kaydı olmalı.
+* **"Çocuk on yılda on yaşına gelir"** → çocuk ölebilir (ölçüm: 300
+  hayatta 0-1). Vefat edenin yaşı ölüm yılında donar. Yan bulgu: aynı
+  sınıftaki bir test çocuk ilk yıl ölürse **hiçbir şey sınamadan** yeşil
+  kalıyordu; pozitif kontrol eklendi.
+* **"Tek yılda gelir maaş+kira+5 milyonu aşamaz"** → varlıklı akrabanın
+  mirası tek yılda 21 milyon gelebiliyor. Eşik büyütülmedi, **kural
+  değiştirildi**: büyük artış yalnızca o yıl yeni bir miras kapandıysa
+  kabul ediliyor.
+* **"12. sınıfa ulaşan herkes sınav olayını görür"** → motor bunu hiç
+  garanti etmedi ("neredeyse kesin"). Zarsız bir **mekanizma** testi
+  eklendi (sınav olayının ağırlığı priority-0 havuzunun onlarca katı) ve
+  uçtan uca iddia %90'a çekildi.
+* **Bisiklet olayı ve işletme geri ödemesi** → örneklem kurası; pencere
+  genişletildi, eşikler aynı kaldı.
+
+## Bilerek yapılmayanlar
+
+NPC-NPC tam sosyal graph, borç geri ödeme takibi, velayet mahkemesi,
+miras davası, aile şirketi, dev aile ağacı görseli. Küslüğün sebebi kişi
+kartında yazılmıyor: kayıtta sebep yok ve §60 uydurma sebep yazmayı
+yasaklıyor.
+
+## Açık sorular
+
+Q-188: yıllık karar sınırı, dram profili bandı, okul meselesi
+toparlanma oranları, evdeki yetişkin çocuk gideri, eve dönüş penceresi,
+kardeşin verebileceği para, bakım tutarları, miras itirazı oranı, aile
+içi küslük oranı, tavsiye payı, hangi olayın pencere açacağı ve torunun
+tek ebeveynli doğması. Hiçbiri `DECISIONS.md`'ye yazılmadı. **Q-187
+ayrıca açık kalıyor; ona dokunulmadı.**
+
+# Paket AQ — kritik statlar, sağlık 0 tutarlılığı ve düşük stat etkileri
+
+Faho bildirdi: **sağlık 0'a düşüyor ve karakter hiçbir şey olmamış gibi
+yaşamaya, spor yapmaya, seyahat etmeye, çalışmaya ve yıllarca yaş almaya
+devam ediyor.** Ölçüldü ve bildirilenden ağır çıktı: AQ öncesi ağaçta
+(7427107) 500 hayatın 34.121 yılının **7.100'ü** sağlık 0 iken yaşanmıştı.
+
+## Kök neden
+
+İki ayrı şey vardı ve ikisi de ayrı ayrı düzeltildi.
+
+**1) Sağlık 0 olunca hiçbir şey olmuyordu.** Tek tüketici
+`Mortality.prototypeOnlyYearlyChance`'ın en çok iki katına çıkan
+çarpanıydı — otuz yaşında yıllık ölüm ihtimalini binde 1'den binde 2'ye
+çıkarıyor. Bir de bir kerelik günlük satırı. Aktivite, seyahat, estetik,
+iş ve okul yollarının **hiçbiri** sağlığı bir durum olarak okumuyordu.
+Yan bulgu: `ageUp` ve `advanceOneYear` bekleyen sağlık krizini
+denetlemiyordu, yani kriz ekranda asılı kalırken yıllar geçiyordu.
+
+**2) Sağlık 0'a inmek kaçınılmazdı — tek yönlü dişli.** D-116 hastalığın
+sağlık bedelini 1-3'ten 10-18'e çıkardı ama toparlanmayı sabit 7'de
+bıraktı ve yalnızca **hastalanılmayan** yıllarda çalıştırdı; yani çukuru
+açan yıl onu hiç kapatmıyordu. İzole ölçüm (net yıllık sağlık değişimi):
+sağlık 25'te **−5,1**, yaş kaç olursa olsun. Ayrıca toparlanma tavanı 71
+yaşından sonra `0` dönüyordu — yaşlanmanın kendisi sağlığı 30'un altına
+indirmezken tavanın 0 olması kendi kuralıyla çelişiyordu (70-79 yaşta
+ortalama sağlık 17,1).
+
+## Ne kuruldu
+
+Yeni bir kriz çerçevesi **kurulmadı**: zorunlu çözüm mevcut
+`PendingCrisis` / `HealthCrisisEngine` yolundan geçiyor — aynı pencere,
+aynı kayıt alanı, aynı save/load, aynı ölüm geçişi. Katalogda tek yeni
+kriz var (`kritik_saglik`, `isCritical`) ve rastgele havuzda yer almıyor.
+
+* **Bantlar** (`CriticalHealth`): 26-100 olağan · 11-25 kritik derecede
+  düşük · 1-10 hayati tehlike · 0 acil. Her yere `if (health < 10)`
+  kopyalanmadı, tek yerden sorulur.
+* **Zorunlu çözüm** sağlık 0'a inince açılır ve çözülmeden yaş
+  ilerlemez. Üretim yollarının hepsinden denetlenir: yıl başı, hastalık
+  (sebep: hastalık), kronik yıpratma (sebep: rahatsızlık), yıl sonu, olay
+  seçimi (sebep: karar), aktivite ve olağan krizin ardından.
+* **Kurtulma zar değil**: yaş, taşınan rahatsızlıklar, daha önce atlatılmış
+  hayati tehlikeler ve seçim hesaba katılır. Üç seçenek: acil servis
+  (bedelsiz, her yaşta açık), özel tedavi (240.000 ₺), evde bekle.
+  Kurtulan karakter 10-25 bandında açılır — ne 100 ne 1.
+* **Tek ölüm**: yaşa bağlı ölüm bekleyen krizi kapatır, kriz ölümü olağan
+  ölüm yolundan geçer. 500 hayatta çifte ölüm **0**.
+* **Dişli düzeltmesi**: toparlanma artık her yıl işler (hastalığın bedeli
+  önce uygulanır, pay kalan açığa göre hesaplanır), payı çukurla büyür
+  (%35, yıllık tavan 14, 70 üstü yarım) ve tavanı yaşlanmanın kendi
+  tabanının altına düşmez.
+* **Düşük sağlıkta**: ağır eylem kapanır (koşu, ağırlık, cezaevi sporu —
+  hafif yürüyüş ve esneme açık), 3 geceden uzun tur kapanır, elektif
+  estetik 1-10'da kapanır ve 11-25'te mevcut risk motoru 1,8 kat çalışır.
+  **Sağlık merkezi hiçbir bantta kapanmaz.**
+* **Diğer statlar**: mutluluk Paket AQ'dan önce hiçbir sistemin girdisi
+  değildi — zam/terfi ve okul ortalamasına kondu, karşı ağırlık olarak
+  dipte eğlencenin getirisi artırıldı (sarmal yok). Karizmanın tek boşluğu
+  mülakattı; ikinci şansı ölçeklendiriyor. Görünüş ve zekâda boşluk
+  bulunamadı, dokunulmadı. Hiçbir stat 0'ı ölüm üretmiyor.
+
+## Ölçüm (A/B, aynı 500 tohum, aynı düzenek)
+
+| | AQ öncesi | AQ sonrası |
+|---|---|---|
+| tamamlanan hayat | 373 / 500 | **437 / 500** |
+| sağlık 0 iken yaşanan yıl | **7.100** | **156** (hepsi çözüm bekliyor) |
+| ortalama ölüm yaşı | 64,5 | **68,0** |
+| p25 / medyan / p75 | 57 / 67 / 75 | 65 / 71 / 75 |
+| 60 yaş öncesi ölüm | %29,8 | **%15,6** |
+| 80+ | %2,4 | %1,4 |
+
+500 tam hayat (34.733 yıl): sağlık 0 gören hayat 110 (%22,0), ilk 0 yaşı
+medyan **73**, kritik durumdan kurtulma %38,5. Hedefi sıfır olan
+sayaçların tamamı sıfır. Bant dağılımı: olağan %94,2 · kritik düşük %2,5
+· hayati tehlike %2,8 · acil %0,4. Düşük sağlıkta rapor oranı %24,8
+(yüksek sağlıkta %6,9). Karizma, görünüş ve zekâ **hiçbir** yılda 0
+görülmedi — yaşlanma tabanları tutuyor.
+
+## Yol boyunca çıkan gerçek hatalar
+
+* **Yıl sonu kaçağı** → işletme zararı, adli süreç ve yarım zamanlı iş
+  sağlığı yıl içindeki denetimden **sonra** düşürüyordu (tohum 56, yaş
+  73). Yıl kapanmadan son bir denetim eklendi.
+* **Olay seçimi kaçağı** → 500 hayatın 20'sinde olay seçimi sağlığı 0'a
+  indiriyor ve oyuncu yıl ilerletmeden sağlık kazandıran bir aktiviteye
+  gidip durumu sessizce kapatabiliyordu. `EventEngine.resolve` ve
+  `ActivityEngine.perform` de denetliyor.
+* **Değer ayrıntısı penceresi taşıyordu** → yeni durum satırları gelince
+  360 px / yazı ×1,5'te 560 piksel taştı (ölçüldü; AQ öncesi taşmıyordu).
+  Pencere artık kendi içinde kayıyor.
+* **Değişmez fazla katıydı** → "sağlık 0 + bekleyen **kritik** durum yok"
+  yanlış iddiaydı: ekranda olağan bir kriz varken de oyuncu ilerleyemiyor
+  ve kriz kapanınca kritik durum devralıyor. Koşul doğrusuna çevrildi.
+
+## Bilerek yapılmayanlar
+
+Generic "all stats condition framework", ikinci bir hastane akışı, ayrı
+bir devamsızlık/sınıf tekrarı sistemi, kritik krizden sonra rastgele
+kronik tanı, NPC'ler için ayrıntılı sağlık simülasyonu, kritik durumun
+süresini tutan yeni bir kayıt alanı. `Mortality`'nin düşük sağlık
+çarpanına **dokunulmadı**: çifte sayım şüphesi ölçüldü ve ortalama ölüm
+yaşını hiç değiştirmediği görüldü.
+
+**Hiçbir sürüm gerçek Windows veya Android cihazda oynanmadı.**
+
+## CI'ı yiyen sonsuz döngü (Paket AQ'nun yan ürünü)
+
+Paket AQ'dan sonra CI iki kez **tam süre bütçesinde** iptal oldu ve
+logda tek bir hata yoktu. İlk okuma "süit uzadı, bütçe yetmiyor" oldu ve
+bütçe 45'ten 120'ye çıkarıldı. **O teşhis yanlıştı.**
+
+Gerçek sebep logdaki sessizlikti: Windows işinde 06:19:25 ile 08:12:52
+arasında neredeyse iki saat boyunca tek satır çıktı yok. Bu yavaşlık
+değil, takılmaydı. Üç test sonsuz döngüye giriyordu — `end_to_end_test`
+senaryo 8, `event_catalog_test` tekrar kalitesi, `health_package_test`
+hastalık ömrü. Üçü de her yıl bekleyen sağlık krizini silip (ya da hiç
+bakmayıp) `advanceOneYear`'ı yeniden çağırıyor; Paket AQ sağlık 0 iken
+yaş almayı durdurduğu için yaş hiç ilerlemiyordu.
+
+Dart'ın test zaman aşımı bunu yakalayamaz: `senaryo 8`'in üstünde zaten
+`Timeout(minutes: 5)` vardı ve hiç tetiklenmedi, çünkü senkron bir
+`while` döngüsü hiç yield etmiyor. Bu sınıf hatanın tek savunması
+döngünün kendi ilerleme kontrolü.
+
+Çözüm `app/test/support/corpus_year.dart`: tek bir yıl adımı. Sıradan
+kriz yine atlanıyor (ölçülen şey o değil), **kritik kriz silinmiyor,
+`HealthCrisisEngine` üzerinden cevaplanıyor** — ölçüm hayatları da
+oyuncunun geçtiği yoldan geçiyor. Yıl ilerlemezse `StateError` atıyor.
+Takıldığı kanıtlanan üç dosya ve aynı deseni taşıyan ikisi
+(`stat_aging_test`, `city_school_work_test`) buna bağlandı.
+
+Bütçe 120'den **60**'a indirildi: 120 kalması bir sonraki takılmayı iki
+saat saklardı. Düzeltmeden sonra ölçülen gerçek CI süresi **18 dakika**
+(Windows 17 dk 49 sn, Android 17 dk 5 sn — süit + build dahil), yani
+"süit 80 dakikaya çıktı" iddiası da yanlıştı.
+
+Hiçbir test silinmedi, atlanmadı, gevşetilmedi; ürün kodu değişmedi.
+
+## Paket AR: ölü hikâye izleri ve kırık rol kilitleri (3 Ekim 2026)
+
+`docs/EKSIKLER.md` §7'nin birinci maddesi: "Ölü hikâye izlerini araştır —
+10 iz hiç konmuyor." Araştırıldı; **gerçek bir üretim hatası** çıktı.
+
+### Ne ölçüldü
+
+40 kapsam hayatı (5 plan × 4 tohum × 2 denetim), olaylar oynanarak.
+
+| Ölçüm | AR öncesi | AR sonrası |
+| --- | --- | --- |
+| İz arayan olay | 67 | 67 |
+| Bunlardan hiç ekrana gelmeyen | 13 | **10** |
+| └ OYUN (aday havuza bile giremeyen) | 4 | **1** |
+| └ BOT (izi koyan seçimi bot seçmiyor) | 6 | 2 |
+| └ NORMAL (aday oldu, ağırlık kurasını kaybetti) | 6 | 7 |
+| Aday havuza giren farklı olay | — | 380 |
+| Konan ama hiçbir olayın okumadığı iz | 38 | 38 |
+
+Sınıflandırma **ölçülüyor, çıkarsanmıyor**: ilk denemede "iz zamanında
+kondu, demek ki kurayı kaybetti" diye varsaymıştım ve sonuç yanlış çıktı.
+`EventEngine.debugEligibleIds` her yıl çağrılarak olayın gerçekten aday
+havuza girip girmediği soruldu; cevap 0 OYUN'u 4 OYUN'a çevirdi.
+
+### Bulunan hata
+
+Motor bir kişiyi hikâye rolüne yalnızca **olayın bir kişisi varsa**
+kaydeder (`event_engine.dart`: `bondTargetId == null` ise `storyPeople`
+yazılmaz). Dört zincirin ilk halkası `rememberPersonAs` taşıyordu ama
+olayların hiç kişi koşulu yoktu. Rol sessizce kaydedilmiyor, o rolü arayan
+bütün devam halkaları **her oyuncuda** ömür boyu ulaşılamaz kalıyordu.
+Bot sınırı değil, üretim hatası.
+
+Üçü düzeltildi:
+
+- `suc_arkadasin_teklifi` — metin "**Arkadaşın** sesini alçalttı" diyor;
+  yaşayan arkadaş koşulu eklendi. `suc_teklif_ikinci_kez` OYUN → BOT
+  (yol açıldı, botun seçmediği suç seçimi kaldı), `suc_teklifi_ihbar`
+  listeden tamamen düştü.
+- `suc_borc_istendi` — metin "Bir **tanıdık** kapıya geldi" diyor; aynı
+  koşul eklendi. `suc_borc_odenmedi` ve `suc_borc_hukuk` açıldı.
+- `yaz_isi` — kilitlediği rolü **hiçbir olay aramıyordu**; iki yönden ölü
+  bildirim ve artık boş kalan `ExtraRoles` sınıfı kaldırıldı.
+
+Dördüncüsünde ayrıca rol yanlış seçimdeydi: kavgadan **çekilen** seçimde
+duruyordu, oysa devam olayı kavganın gerçekten olmasını istiyor — rol
+doğru kişiye bağlansa bile halka açılamazdı. Rol kavgaya giren seçime
+taşındı. Halka hâlâ uykuda: karşı taraf kayıtlı bir kişi değil ve onu
+kayda geçirmek tasarım kararı istiyor (**Q-190**).
+
+### AR/3 — teşhis dört sınıfa çıktı ve kura tabanı ölçüldü
+
+"BOT" etiketi iki ayrı şeyi gizliyordu. Ayrıldı:
+
+- **ZİNCİR** — izi koyacak **olay** hiç ekrana gelmedi. Sorun botun
+  seçimi değil, zincirin derinliği.
+- **BOT** — olay geldi ama bot başka kolu seçti. Yol açık.
+
+Bu ayrım `zincir_ogretmen_3`'ü BOT'tan ZİNCİR'e taşıdı ve asıl soruyu
+ortaya çıkardı. Kura tabanı ölçüldü (21.307 oyun yılı):
+
+| Ölçüm | Değer |
+| --- | --- |
+| Yıllık aday havuz boyutu | ortanca 80 olay (ortalama 73,7; en çok 112) |
+| Yıllık toplam etkin ağırlık | ortanca 268 |
+| Ağırlık 4'lük halkanın yıllık payı | %1,5 |
+| Ağırlık 5 | %1,87 |
+| Ağırlık 7 | %2,62 |
+
+Öğretmen zinciri (beş olay yazılmış, 10 → 45 yaş): 1. halka ~%4,4,
+2. halka %7,3, 3. halka %28,2 — ve bunlar her halkada kol seçme
+ihtimaliyle **çarpılıyor**. 3. halkaya ulaşma ihtimali kabaca **on binde
+bir**. Yazılmış içeriğin karşılığı alınmıyor.
+
+Bu bir denge kararı, teknik hata değil: **Q-191**'de öneri (devam
+halkalarına ×8 katsayı) ve ölçüm birlikte duruyor. **Uygulanmadı** —
+Faho Windows paketini test ettirirken temponun altından değişmemesi için.
+
+### Kalıcı bekçiler
+
+`app/test/paket_ar_rol_bekcisi_test.dart` — dört iddia: rol kilitleyen her
+seçimin kilitleyecek bir kişisi var; aranan her rolü kilitleyen bir seçim
+var; kilitlenen her rolü arayan bir olay var (ölü rol yok); istenen bağ
+türü tanınan bir tür. Q-190 kararını bekleyen tek halka `kKararBekleyen`
+listesinde adıyla duruyor; liste büyümeyecek.
+
+`app/test/paket_ar_hikaye_izi_test.dart` — aranan her izin bir üreticisi
+var; sessiz iz sayısı 38'i geçemez. Motor tarafında konan izler **elle
+yazılmıyor, `lib/` taranıyor**: elle tutulan ilk liste `evlendi` izini
+atlamış ve test canlı bir izi "hiç konmuyor" sanıp yanlış hata vermişti.
+
+`app/test/paket_ar_zincir_teshis_test.dart` — teşhis koşusu; sayı iddia
+etmez, yalnızca ölçümün çalıştığını iddia eder.
+
+Ürün dengesi değişmedi; hiçbir test silinmedi, atlanmadı, gevşetilmedi.
+Doğrulama: `flutter analyze` çıkış kodu 0; suç, zincir, katalog ve iz
+testleri (70 test) yeşil. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta Android SDK ve Windows araç zinciri yok.
+
+## Açık sorular
+
+Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
+toparlanma payı ve tavanı, düşük sağlıkta kapanan eylemler, iş tarafı
+etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
+`Mortality` çarpanı, 80+ oranındaki düşüş ve özel tedavi ücreti. Hiçbiri
+`DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
+de dokunulmadı.**
+
+Q-190: kavga ettiğin kişi kalıcı bir kayıt (tanışıklık) olsun mu?
+`suc_kavga_karsisindaki` halkası bu karara bağlı; önerilen (A) ama
+onaylanmadan uygulanmadı.
+
+Q-191: zincir devam halkaları kura kaybediyor — dört adımlı hikâyenin
+3. halkasına ulaşma ihtimali ölçüldü, on binde bir. Önerilen çözüm
+devam halkalarına ×8 katsayı; **uygulanmadı**, onay bekliyor.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

@@ -1,4 +1,10 @@
+import '../life/critical_health.dart';
 import 'dart:math';
+
+import '../economy/net_worth.dart';
+import '../../data/company_catalog.dart';
+import '../law/legal_engine.dart';
+import '../models/criminal_record.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -8,8 +14,11 @@ import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
+import '../economy/investment_engine.dart';
 import '../models/game_event.dart';
+import '../models/market_state.dart';
 import '../activities/travel.dart';
+import '../economy/living_costs.dart';
 import '../models/game_state.dart';
 import '../models/hobby_progress.dart';
 import '../hobby/hobby_tracker.dart';
@@ -17,6 +26,7 @@ import '../../data/hobby_catalog.dart';
 import '../../data/pet_catalog.dart';
 import '../models/trip.dart';
 import '../models/life_log.dart';
+import '../economy/financial_strain.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
@@ -249,10 +259,105 @@ class EventEngine {
     // çıkar (Paket 40). Vefat etmiş ya da hanede olmayan hayvan sayılmaz.
     if (req.requiresLivingPet && _eventPet(state, req) == null) return false;
 
+    // Yatırım kapıları (D-162): portföyü olmayana "hisselerin düştü"
+    // denmez, portföyü olana "hiç yatırım yapmadın" denmez.
+    if (req.requiresPortfolio && state.portfolioValue <= 0) return false;
+    if (req.forbidsPortfolio && state.portfolioValue > 0) return false;
+
+    // **Şirket durumu kapıları (Paket AD, §4).** Olay metni şirketi adıyla
+    // anlatıyorsa, o şirket gerçekten o durumda olmalı. Yoksa oyuncu
+    // sapasağlam bir şirket için konkordato haberi okuyor.
+    final CompanyStatus? gerekenDurum = req.requiresCompanyStatus;
+    if (gerekenDurum != null) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.statusOf(c.id) == gerekenDurum);
+      if (!varMi) return false;
+    }
+    if (req.requiresStrainedCompany) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.vitalsOf(c.id).isStrained);
+      if (!varMi) return false;
+    }
+    // **Servet kapısı (Paket AD, §13, §17).** Zenginin hayatı farklı
+    // hissettirmeli: bazı olaylar ancak belirli servet seviyesinde çıkar.
+    final int? gerekenServet = req.minNetWorth;
+    if (gerekenServet != null && NetWorth.of(state) < gerekenServet) {
+      return false;
+    }
+
+    // **Piyasa hâli kapıları (Paket AD, §6-§7).** Panik olayı sakin bir
+    // yılda çıkmasın; FOMO olayı gerçekten ısınmış piyasada çıksın.
+    if (req.requiresCrisis &&
+        !(state.market.regime == MarketRegime.kriz ||
+            state.market.halts.isNotEmpty)) {
+      return false;
+    }
+    final String? sicakTur = req.requiresHotAsset;
+    if (sicakTur != null &&
+        state.market.heatOf(sicakTur) < req.requiresHotAssetHeat) {
+      return false;
+    }
+    if (req.requiresThrivingCompany) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.vitalsOf(c.id).isThriving);
+      if (!varMi) return false;
+    }
+
+    // Kiralama kapıları (D-163). Kiracısı olmayana "kiracın aradı"
+    // denmez; boş evi olmayana "ev boş duruyor" denmez.
+    if (req.requiresLetProperty && state.leases.isEmpty) return false;
+    if (req.requiresVacantProperty &&
+        !state.items.any((OwnedItem i) =>
+            i.isProperty &&
+            i.id != state.residenceItemId &&
+            state.leaseOf(i.id) == null)) {
+      return false;
+    }
+
+    // Adli kapılar (D-128). Dosyası olmayana "mahkemeyi bekliyorsun",
+    // sabıkası olmayana "bir de şu kayıt var" denmez. Cezaevindeyken
+    // dışarıdaki hiçbir olay çıkmaz: içerideki hayat ayrıdır.
+    if (state.isImprisoned) return false;
+    if (req.requiresOpenCase && state.legal.openCase == null) return false;
+    if (req.requiresRecord && !state.legal.hasRecord) return false;
+    if (req.requiresReleased) {
+      final bool hicGirmedi = state.legal.cases.every(
+        (CriminalCase c) => c.verdict != Verdict.hapis,
+      );
+      if (hicGirmedi || state.legal.isImprisoned) return false;
+    }
+
     // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
+    // Mali durum kapıları (D-092): varlıklı oyuncuya yoksulluk metni,
+    // parasız oyuncuya varlık metni çıkmaz. Durum mutlak bir işaretten
+    // değil, **gerçek hesaptan** okunur.
+    if (req.maxComfort != null || req.minComfort != null) {
+      final FinancialComfort durum = FinancialStrain.comfortOf(state);
+      if (req.maxComfort != null && durum.index > req.maxComfort!.index) {
+        return false;
+      }
+      if (req.minComfort != null && durum.index < req.minComfort!.index) {
+        return false;
+      }
+    }
+
+    // Evi olan oyuncuya "eşin ev istiyor" olayı çıkmaz (D-085).
+    if (req.forbidsProperty &&
+        state.items.any((OwnedItem i) => i.isProperty)) {
+      return false;
+    }
+    if (req.forbidsVehicle &&
+        state.items.any((OwnedItem i) => i.isVehicle)) {
+      return false;
+    }
+    // Kirada oturmayan oyuncuya ev sahibi olayı çıkmaz.
+    if (req.requiresTenant &&
+        LivingCosts.situationOf(state) != LivingSituation.kirada) {
+      return false;
+    }
     if (req.requiresMinYearsInJob > 0 &&
         state.career.yearsInJob(state.player.age) <
             req.requiresMinYearsInJob) {
@@ -315,6 +420,18 @@ class EventEngine {
       final List<Person> neglected = state.people.where((Person p) {
         if (!p.isAlive) return false;
         if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+        // **Gerçek hata (D-093):** bu seçici yalnızca hane koşuluna
+        // bakıyordu; `requireOutsideHousehold` ve `requireReachable`
+        // koşullarını yok sayıyordu. Yani "uzaktaki yakınla" kurulan bir
+        // olay, aynı evde yaşayan ya da hiç erişilemeyen biriyle
+        // kurulabiliyordu. Aşağıdaki iki satır o boşluğu kapatır.
+        if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+        if (req.requireReachable && !state.isReachable(p)) return false;
+        // Bağ türü belirtilmişse ona da uyulur.
+        if (req.livingRelations.isNotEmpty &&
+            !req.livingRelations.contains(p.relation)) {
+          return false;
+        }
         final int? last = state.lastInteractionAge[p.id];
         if (last == null) {
           // Hiç temas kurulmamışsa, oyuncunun etkileşim kurabildiği yaştan
@@ -366,6 +483,9 @@ class EventEngine {
             c,
       ]),
       personId: candidate.person?.id,
+      // Geçmiş bir seçimin ya da kişinin devamıysa işaretlenir.
+      isContinuation: candidate.event.requirement.requiredFlags.isNotEmpty ||
+          candidate.event.requirement.personRole != null,
     );
   }
 
@@ -485,12 +605,12 @@ class EventEngine {
       }
     }
 
-    final Stats stats = working.player.stats.copyWith(
-      happiness: working.player.stats.happiness + choice.happiness,
-      health: working.player.stats.health + choice.health,
-      intelligence: working.player.stats.intelligence + choice.intelligence,
-      charisma: working.player.stats.charisma + choice.charisma,
-      appearance: working.player.stats.appearance + choice.appearance,
+    final Stats stats = working.player.stats.gain(
+      happiness: choice.happiness,
+      health: choice.health,
+      intelligence: choice.intelligence,
+      charisma: choice.charisma,
+      appearance: choice.appearance,
     );
     final PlayerCharacter player = working.player.copyWith(
       stats: stats,
@@ -580,6 +700,39 @@ class EventEngine {
     if (choice.endsRomance && active.personId != null) {
       working = romance.end(working, active.personId!, logText: null);
     }
+
+    // Riskli seçimin hukuki tarafı (D-128). Motor kararı kendi verir;
+    // seçim yalnızca süreci başlatır.
+    final String? sucId = choice.crimeId;
+    if (sucId != null) {
+      working = LegalEngine.openCase(working, sucId, rng ?? Random());
+    }
+
+    // Portföy hamlesi (Paket AD, §AD/3). Suç seçiminde olduğu gibi: karar
+    // burada verilmez, ilgili motora devredilir. Hamle başarısız olabilir
+    // (işlem durmuş, para yetmiyor, pozisyon yok) ve bu normaldir.
+    final PortfolioAction? hamle = choice.portfolioAction;
+    if (hamle != null) {
+      working = InvestmentEngine.applyEventAction(
+        working,
+        action: hamle,
+        typeId: choice.portfolioTypeId,
+        share: choice.portfolioShare,
+      );
+    }
+
+    // Seçimin sağlık bedeli acil banda indirdiyse zorunlu kritik durum
+    // **burada** açılır (Paket AQ).
+    //
+    // Yalnızca yaş ilerletme yolunda denetlemek yetmiyordu: ölçümde 500
+    // hayatın 20'sinde olay seçimi sağlığı 0'a indiriyor ve oyuncu yıl
+    // ilerletmeden önce sağlık kazandıran bir aktiviteye gidip durumu
+    // sessizce kapatabiliyordu. Sebep biliniyor: kararın kendisi.
+    working = CriticalHealth.enforce(
+      state: working,
+      age: working.player.age,
+      cause: CriticalHealthCause.karar,
+    );
 
     return working;
   }

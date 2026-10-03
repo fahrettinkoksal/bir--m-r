@@ -63,11 +63,28 @@ abstract final class Intimacy {
   static const int prototypeOnlyWorryAfter = 4;
 
   /// Kadının yaşına göre ihtimal çarpanı (`prototypeOnly`).
+  /// prototypeOnly: taşıyacak tarafın yaşına göre gebelik çarpanı.
+  ///
+  /// **Faho'nun isteği:** "55'e kadar hamile kalınabilir olsun, yaş
+  /// ilerledikçe ihtimal düşsün." Eskiden 45 yaşında çarpan sıfırlanıyor
+  /// ve kapı tamamen kapanıyordu.
+  ///
+  /// Sayılar gerçeğe yaslandı, isteğin rakamına değil: doğal gebelik
+  /// 40'tan sonra hızla seyrekleşir, 45-49 arasında nadirdir ve 50
+  /// sonrasında son derece ender görülür (menopoz ortalaması Türkiye'de
+  /// 47-51 aralığındadır). Bu yüzden kapı 55'e kadar **açık** ama üst
+  /// yaşlarda ihtimal sıfıra çok yakın: oyuncu deneyebilir, ama bu bir
+  /// plan olmaz.
   static double prototypeOnlyAgeFactor(int womanAge) {
     if (womanAge <= 29) return 1.0;
     if (womanAge <= 34) return 0.8;
     if (womanAge <= 39) return 0.5;
-    if (womanAge <= 44) return 0.25;
+    if (womanAge <= 42) return 0.25;
+    if (womanAge <= 44) return 0.12;
+    if (womanAge <= 46) return 0.05;
+    if (womanAge <= 48) return 0.02;
+    if (womanAge <= 50) return 0.008;
+    if (womanAge <= 55) return 0.002;
     return 0;
   }
 
@@ -96,12 +113,39 @@ abstract final class Intimacy {
     return '';
   }
 
+  /// prototypeOnly: aynı yıl tekrarlanan denemelerde ihtimalin çarpanı
+  /// (D-086).
+  ///
+  /// Faho bildirdi: "senede 1 kez değil, azalarak". Eskiden yılda tek bir
+  /// gebelik hesabı yapılıyordu ve ikinci kez baş başa kalmanın hiçbir
+  /// karşılığı yoktu. Artık **her deneme sayılır**, ama aynı yıl
+  /// tekrarlandıkça ihtimal hızla düşer: üst üste tıklayarak gebelik
+  /// garantiye alınamaz.
+  static const List<double> prototypeOnlyRepeatDecay = <double>[
+    1.0,
+    0.5,
+    0.25,
+    0.12,
+    0.06,
+  ];
+
+  /// Bu yıl kaç kez gebelik hesabı yapıldı?
+  ///
+  /// Sayaç yaşa bağlıdır: kayıttaki deneme başka bir yaşa aitse bu yıl
+  /// hiç denenmemiş sayılır.
+  static int conceptionTriesThisAge(GameState state) =>
+      state.lastConceptionTryAge == state.player.age
+          ? state.conceptionTriesAtAge
+          : 0;
+
   /// Bu yıl gebelik hesabı yapılabilir mi?
   ///
-  /// Aynı yıl ikinci bir deneme ihtimali katlamaz ve süren bir hamilelik
-  /// varken yeni gebelik hesaplanmaz.
+  /// Süren bir hamilelik varken yeni gebelik hesaplanmaz. Aynı yıl
+  /// tekrarlanan denemeler **sayılır ama azalarak** (D-086); belli bir
+  /// tekrardan sonra o yıl için kapanır.
   static bool canConceiveThisYear(GameState state) =>
-      !state.isExpecting && state.lastConceptionTryAge != state.player.age;
+      !state.isExpecting &&
+      conceptionTriesThisAge(state) < prototypeOnlyRepeatDecay.length;
 
   /// Hamile olan taraf: oyuncu mu, partner mi?
   ///
@@ -122,7 +166,14 @@ abstract final class Intimacy {
     final int kadinYasi = oyuncuKadin ? state.player.age : partner.age;
     final int erkekYasi = oyuncuKadin ? partner.age : state.player.age;
     if (erkekYasi > Parenthood.prototypeOnlyMaxFatherAge) return 0;
-    return prototypeOnlyBaseChance * prototypeOnlyAgeFactor(kadinYasi);
+    // Aynı yıl tekrarlanan denemede ihtimal azalır (D-086).
+    final int deneme = conceptionTriesThisAge(state);
+    final double tekrarCarpani = deneme < prototypeOnlyRepeatDecay.length
+        ? prototypeOnlyRepeatDecay[deneme]
+        : 0.0;
+    return prototypeOnlyBaseChance *
+        prototypeOnlyAgeFactor(kadinYasi) *
+        tekrarCarpani;
   }
 
   /// Uzun süredir deneyip sonuç alamamış mı?
@@ -182,10 +233,8 @@ class IntimacyEngine {
     GameState next = state.copyWith(
       people: List<Person>.unmodifiable(people),
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  Intimacy.prototypeOnlyHappiness)
-              .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: Intimacy.prototypeOnlyHappiness,
         ),
       ),
       // Yakınlaşmak da bir temastır; ilgisizlik sayacı sıfırlanır.
@@ -211,13 +260,17 @@ class IntimacyEngine {
         state: next,
         outcome: const FamilyOutcome(
           applied: true,
-          text: 'Baş başa bir akşam geçirdiniz. Bu yıl için şansınızı '
-              'zaten denediniz; bir sonraki yaşta yeniden mümkün.',
+          text: 'Baş başa bir akşam geçirdiniz. Bu yıl yeterince '
+              'denediniz; bir sonraki yaşta yeniden mümkün.',
         ),
       );
     }
 
-    next = next.copyWith(lastConceptionTryAge: state.player.age);
+    // Deneme sayacı yaşa aittir ve yeni yaşta kendiliğinden sıfırlanır.
+    next = next.copyWith(
+      lastConceptionTryAge: state.player.age,
+      conceptionTriesAtAge: Intimacy.conceptionTriesThisAge(state) + 1,
+    );
 
     // Yaş, çocuk sayısı gibi kesin engeller önce.
     final String cocukEngeli = const Parenthood().blockReason(next);
@@ -231,7 +284,10 @@ class IntimacyEngine {
       );
     }
 
-    final double sans = Intimacy.conceptionChance(next, partner);
+    // İhtimal **sayaç artmadan önceki** duruma göre hesaplanır: bu yılın
+    // ilk denemesi tam ihtimalle işlemeli, azalma ikinci denemeden
+    // itibaren başlamalı (D-086).
+    final double sans = Intimacy.conceptionChance(state, partner);
     if (rng.nextDouble() < sans) {
       // **Bebek hemen gelmez (Paket 26).** Hamilelik başlar; doğum bir
       // sonraki yaş ilerlemesinde olur.

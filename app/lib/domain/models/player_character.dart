@@ -22,6 +22,7 @@ class PlayerCharacter {
     this.hairStyle,
     this.infertile = false,
     this.birthDate,
+    this.hairLossStage = 0,
   }) : currentCity = currentCity ?? birthCity;
 
   final String id;
@@ -69,6 +70,17 @@ class PlayerCharacter {
   /// seçim metin olarak saklanır ve Ben ekranında görünür.
   final String? hairStyle;
 
+  /// Erkeklerde yaşa bağlı saç dökülmesinin basamağı (D-073).
+  ///
+  /// `0` hiç dökülme yok, `1` seyrelme, `2` belirgin açılma, `3` ileri
+  /// derecede dökülme. Basamak **geri gitmez**; yalnızca saç ektirmek
+  /// gibi bir işlem düşürebilir. Dış görünüş ve karizma etkisi basamak
+  /// **ilerlediği yıl bir kez** uygulanır, her yıl tekrar tekrar değil.
+  final int hairLossStage;
+
+  /// Saçı dökülmeye başlamış mı?
+  bool get hasHairLoss => hairLossStage > 0;
+
   /// Ekranda gösterilecek bakiye metni.
   String get walletLabel => trMoney(wallet);
 
@@ -87,6 +99,7 @@ class PlayerCharacter {
     String? currentCity,
     bool? infertile,
     BirthDate? birthDate,
+    int? hairLossStage,
   }) {
     return PlayerCharacter(
       id: id,
@@ -102,6 +115,7 @@ class PlayerCharacter {
       hairStyle: hairStyle ?? this.hairStyle,
       infertile: infertile ?? this.infertile,
       birthDate: birthDate ?? this.birthDate,
+      hairLossStage: hairLossStage ?? this.hairLossStage,
     );
   }
 }

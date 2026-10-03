@@ -244,6 +244,38 @@ class _BlackjackTablePageState extends State<BlackjackTablePage> {
           else ...<Widget>[
             _ResultPanel(oyun: oyun),
             const SizedBox(height: 12),
+            // El bittiğinde tek seçenek "Masadan kalk" değildir (D-090):
+            // oyuncu aynı bahisle devam edebilir ya da bahsini
+            // değiştirebilir. Yeni el, önceki elin sonucu **kesinleşmiş**
+            // durum üzerinden açılır; para iki kez el değiştirmez.
+            _BlockReason(controller.betAvailability(oyun.bet)),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                key: const Key('blackjack_again'),
+                onPressed: controller.betAvailability(oyun.bet).isAllowed
+                    ? () => setState(() {
+                          controller.closeBlackjackHand();
+                          _sonMesaj = controller.dealBlackjack(oyun.bet)?.text;
+                        })
+                    : null,
+                child: Text('Aynı bahisle tekrar (${trMoney(oyun.bet)})'),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonal(
+                key: const Key('blackjack_change_bet'),
+                onPressed: () => setState(() {
+                  controller.closeBlackjackHand();
+                  _secilenBahis = oyun.bet;
+                  _sonMesaj = null;
+                }),
+                child: const Text('Bahsi değiştir'),
+              ),
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
@@ -251,6 +283,7 @@ class _BlackjackTablePageState extends State<BlackjackTablePage> {
                 onPressed: () => setState(() {
                   controller.closeBlackjackHand();
                   _sonMesaj = null;
+                  widget.onBack();
                 }),
                 child: const Text('Masadan kalk'),
               ),
@@ -610,10 +643,34 @@ class _HorseRacePageState extends State<HorseRacePage> {
       setState(() => _sonMesaj = sonuc?.text);
       return;
     }
+    // Bahis yatırıldı; sonuç **henüz kesinleşmedi** (D-089). Ekranda
+    // yalnızca "koşu başlıyor" yazar.
     setState(() {
       _sonMesaj = sonuc.text;
       _kosuNo++;
       _kosuyor = true;
+    });
+  }
+
+  /// Bahis yapmadan koşuyu izler (D-089).
+  ///
+  /// Para hiç el değiştirmez; yalnızca kadro yenilenip koşu oynatılır.
+  void _bahissizKos(GameController controller) {
+    controller.newRaceField();
+    setState(() {
+      _sonMesaj = 'Bahis yapmadan izliyorsun.';
+      _kosuNo++;
+      _kosuyor = true;
+    });
+  }
+
+  /// Animasyon bitti: bekleyen bahis **tek ve atomik** işlemle kesinleşir.
+  void _kosuBitti(GameController controller) {
+    if (!mounted) return;
+    final CasinoOutcome? sonuc = controller.settleRace();
+    setState(() {
+      _kosuyor = false;
+      if (sonuc != null && sonuc.applied) _sonMesaj = sonuc.text;
     });
   }
 
@@ -652,9 +709,7 @@ class _HorseRacePageState extends State<HorseRacePage> {
             result: controller.lastRace,
             raceId: _kosuNo,
             betLane: _kulvar,
-            onFinished: () {
-              if (mounted) setState(() => _kosuyor = false);
-            },
+            onFinished: () => _kosuBitti(controller),
           ),
           const SizedBox(height: 14),
           Text('Hangi ata oynuyorsun?', style: theme.textTheme.titleMedium),
@@ -699,15 +754,12 @@ class _HorseRacePageState extends State<HorseRacePage> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
-              key: const Key('horse_race_new_field'),
-              onPressed: _kosuyor
-                  ? null
-                  : () => setState(() {
-                        controller.newRaceField();
-                        _kulvar = 1;
-                        _sonMesaj = null;
-                      }),
-              child: const Text('Yeni kadro'),
+              // "Yeni kadro" kaldırıldı (D-089): oyuncu kadroyu beğenene
+              // kadar yenileyip en iyi oranı seçebiliyordu. Yerine bahis
+              // yapmadan izleme kondu.
+              key: const Key('horse_race_watch'),
+              onPressed: _kosuyor ? null : () => _bahissizKos(controller),
+              child: const Text('Bahis yapmadan yarışı başlat'),
             ),
           ),
           // Sonuç ancak koşu bitince yazılır.

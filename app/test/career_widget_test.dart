@@ -46,7 +46,10 @@ void main() {
   }
 
   Future<void> pumpApp(WidgetTester tester, GameState state) async {
-    tester.view.physicalSize = const Size(1200, 4200);
+    // Meslek menüsü D-128 ve D-132 ile uzadı (Adli Geçmiş, Kendi İşim).
+    // Görüş alanı bütün satırlar görünecek kadar yükseltildi; iddialar
+    // aynı kaldı.
+    tester.view.physicalSize = const Size(1200, 5600);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);

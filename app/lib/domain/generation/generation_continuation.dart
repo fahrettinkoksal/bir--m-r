@@ -4,6 +4,7 @@ import '../../data/item_catalog.dart';
 import '../life/inheritance.dart';
 import '../life/will.dart';
 import '../life/mortality.dart';
+import '../models/market_state.dart';
 import '../models/education.dart';
 import '../models/game_settings.dart';
 import '../models/game_state.dart';
@@ -12,6 +13,8 @@ import '../models/life_log.dart';
 import '../models/marriage.dart';
 import '../models/career.dart';
 import '../models/owned_item.dart';
+import '../models/rental.dart';
+import '../models/npc_marriage.dart';
 import '../models/person_development.dart';
 import '../models/parental_status.dart';
 import '../models/person.dart';
@@ -23,6 +26,7 @@ import 'life_progression.dart';
 import 'random_util.dart';
 import '../../text/turkish_text.dart';
 import '../pets/pet_care.dart';
+import '../life/year_review.dart';
 
 /// Kuşak devamı: **"Çocuğum olarak devam et"** (Paket E3,
 /// `docs/GENERATION_PROPOSAL.md` §5).
@@ -107,7 +111,16 @@ abstract final class GenerationContinuation {
     final List<Person> mirascilar = _heirOrder(state);
     final Person? sagKalanEs = _survivingSpouse(state);
     // Borç miras kalmaz: eksi bakiye yeni kuşağa geçmez (prototypeOnly).
-    final int nakit = eskiOyuncu.wallet > 0 ? eskiOyuncu.wallet : 0;
+    //
+    // **Portföy burada nakde çevrilir (D-162).** Yatırımlar yeni kuşağa
+    // canlı pozisyon olarak geçmez: geçseydi maliyet esasını da taşımak
+    // gerekirdi ve "dedenin aldığı altının maliyeti" gibi anlamı olmayan
+    // bir kayıt doğardı. Bunun yerine ölüm anındaki **güncel değeri** tek
+    // seferlik mirasa girer. Yeni durumda `investments` ve `termDeposits`
+    // boş başladığı için çifte sayım oluşmaz.
+    final int portfoy = state.portfolioValue;
+    final int nakit =
+        (eskiOyuncu.wallet > 0 ? eskiOyuncu.wallet : 0) + portfoy;
     final int esPayi = sagKalanEs == null
         ? 0
         : (nakit * Inheritance.prototypeOnlySpouseShare).round();
@@ -152,13 +165,27 @@ abstract final class GenerationContinuation {
         marriage: state.marriage,
         motherLine: anneTarafi,
         otherParentId: cocuk.development?.otherParentId,
+        childId: childId,
+        // Paket AP §62-§65: devam edilen çocuğun **kendi** evlilik kaydı.
+        // Eşi yeni oyuncunun eşi, eski eşi yeni oyuncunun eski eşi olur.
+        childDevelopment: cocuk.development,
       );
       if (yeniBag == null) continue; // yeni kuşakta bağı yok
+      // Eski oyuncunun torunu yeni oyuncunun **çocuğu** oldu: küçükse
+      // artık onun hanesinde yaşar. Torun kaydında hane `false`'tu,
+      // çünkü oyuncunun değil kendi ailesinin yanındaydı — o aile de
+      // şimdi bu hane (D-087).
+      final bool torundanCocuk =
+          kisi.relation == RelationType.torun && yeniBag == RelationType.cocuk;
+      final bool hanede = torundanCocuk
+          ? kisi.isAlive && kisi.age < prototypeOnlyAdultAge
+          : kisi.isAlive && kisi.inPlayerHousehold;
+
       yeniKisiler.add(
         kisi.copyWith(
           relation: yeniBag,
           bond: _carriedBond(kisi.bond),
-          inPlayerHousehold: kisi.isAlive && kisi.inPlayerHousehold,
+          inPlayerHousehold: hanede,
           estate: <String>[...kisi.estate, ...?baskasinaKalan[kisi.id]],
           // Okul bağları eski oyuncuya aitti; yeni kuşağa taşınmaz.
           schoolTie: null,
@@ -233,7 +260,7 @@ abstract final class GenerationContinuation {
     if (!haneYetiskini && cocuk.age >= prototypeOnlyAdultAge) {
       for (final OwnedItem esya in cocugaKalan) {
         if (itemTypeOrFallback(esya.typeId).kind == ItemKind.konut &&
-            !esya.rentedOut) {
+            state.leaseOf(esya.id) == null) {
           oturulanKonut = esya;
           break;
         }
@@ -288,6 +315,48 @@ abstract final class GenerationContinuation {
       // korunur, sahte yeni hayvan üretilmez. Vefat etmiş ya da hanede
       // olmayan hayvan taşınmaz: evcil hayvan miras kalemi değildir.
       pets: PetCare.carryOver(state.pets),
+      // Piyasa dünyanın bir parçası: oyuncu ölünce endeks sıfırlanmaz.
+      // Ama "şu yaşta ilerletildi" işareti **taşınmaz**; taşınsa yeni
+      // oyuncunun piyasası bir daha hiç ilerlemezdi.
+      // **Kiracı konutla birlikte devrediliyor (D-163).** Mirasçı evi
+      // devralıyorsa kiracı ortadan kaybolmaz: "babandan kalan Ankara'daki
+      // daire hâlâ kirada." Sözleşmenin başlangıç yaşı mirasçının yaş
+      // ölçeğine **yeniden çıpalanıyor**, yoksa "35 yaşında başlamış"
+      // sözleşme 22 yaşındaki mirasçıda eksi yıl gösterirdi.
+      leases: List<Lease>.unmodifiable(<Lease>[
+        for (final OwnedItem esya in cocugaKalan)
+          if (state.leaseOf(esya.id) != null)
+            _rebaseLease(state.leaseOf(esya.id)!, state.player.age, cocuk.age),
+      ]),
+      // Defterin **para sayaçları taşınmıyor**, bilerek: "bu ev bana ne
+      // kazandırdı" sorusu her kuşak için yeniden başlar. Taşınan tek şey
+      // evin güncel değeri; taşınmasa ev alış fiyatına geri dönerdi.
+      propertyLedgers: List<PropertyLedger>.unmodifiable(<PropertyLedger>[
+        for (final OwnedItem esya in cocugaKalan)
+          if (state.ledgerOf(esya.id).valueBasis != null)
+            PropertyLedger(
+              propertyItemId: esya.id,
+              valueBasis: state.ledgerOf(esya.id).valueBasis,
+              depositHeld: state.leaseOf(esya.id)?.deposit ?? 0,
+            ),
+      ]),
+      market: MarketState(
+        regime: state.market.regime,
+        inflationPressure: state.market.inflationPressure,
+        confidence: state.market.confidence,
+        priceIndex: state.market.priceIndex,
+      ),
+      // --- Paket AP §62-§65: devam edilen çocuğun evliliği ----------
+      //
+      // Buraya kadar yeni oyuncu **her zaman bekar** başlıyordu: bu alan
+      // hiç yazılmıyordu, yani `null` kalıyordu. Çocuğun eşi artık
+      // gerçek bir kişi olduğu için bu sessiz bir kayıp olurdu —
+      // "12 yıldır evli" bir insan bir anda hiç evlenmemiş sayılırdı.
+      //
+      // Kayıt çocuğun **kendi** evlilik kaydından kuruluyor; uydurma bir
+      // evlilik üretilmiyor. Eşi Person olmayan eski kayıtlarda (§17)
+      // `null` kalır: sahte bir eş kimliği yazmaktan iyidir.
+      marriage: _marriageForNextGeneration(cocuk),
       // Ebeveynlerin durumu gerçeğe dayanır: evlilik kaydı yoksa evli
       // yazılmaz (D-047).
       parentalStatus: _parentalStatusFor(state, cocuk),
@@ -317,6 +386,10 @@ abstract final class GenerationContinuation {
 
     // Küçük yaşta devam eden çocuk açıklamasız bir hanede bırakılmaz.
     yeni = LifeProgression.ensureCaregiver(yeni, cocuk.age);
+
+    // Yeni kuşak kendi yılının başından sayar; eski oyuncunun fotoğrafı
+    // taşınmaz ve eski yılın özeti ekranda kalmaz (D-096).
+    yeni = yeni.copyWith(yearMark: YearMark.of(yeni), lastYearSummary: null);
 
     return (state: yeni, blockReason: '');
   }
@@ -370,7 +443,50 @@ abstract final class GenerationContinuation {
     required Marriage? marriage,
     required bool motherLine,
     String? otherParentId,
+    required String childId,
+    PersonDevelopment? childDevelopment,
   }) {
+    // --- Paket AP §62-§65: devam edilen çocuğun evliliği --------------
+    //
+    // **Bu dal olmasa kayıt sessizce düşerdi.** Aşağıdaki `default`
+    // bilinmeyen bağları `null` döndürüp kişiyi listeden çıkarıyor;
+    // `torun` bir zamanlar tam olarak böyle kaybolmuştu ve Faho onu
+    // "çocuğumun hayatına geçtiğimde çocuklarım görünmedi" diye
+    // bildirmişti. Paket AP gelin/damadı gerçek bir kişi yaptığı için
+    // aynı tuzak yeniden açılmıştı.
+    //
+    // Devam edilen çocuk 12 yıldır evliyse yeni oyuncu "bekar"
+    // başlamamalı (§63): eşi gerçekten **eşidir**.
+    if (childDevelopment != null) {
+      if (person.id == childDevelopment.spousePersonId &&
+          childDevelopment.isMarried) {
+        return RelationType.es;
+      }
+      // Boşanmış ya da dul çocukla devam: eski eş **eski eş** olur
+      // (§64, §65). Vefat etmiş eş de kayıtta kalır.
+      final bool gecmisEs = childDevelopment.pastMarriages.any(
+        (NpcMarriageRecord m) => m.spousePersonId == person.id,
+      );
+      if (gecmisEs) return RelationType.eskiEs;
+    }
+    // Torunlar (D-087).
+    //
+    // **Faho'nun bildirdiği hata:** "ölüp çocuğumun hayatı ile devam
+    // ettiğimde torunlarım vardı, fakat çocuğumun hayatına geçtiğimde
+    // çocuklarım görünmedi." Sebebi buydu: `torun` hiçbir dalda
+    // karşılanmıyor, aşağıdaki `default` ile **tamamen düşüyordu**.
+    //
+    // Torunun kaydında kendi ebeveyninin kimliği yazılıdır
+    // (`development.otherParentId`, bkz. `grandchildren.dart`). Devam
+    // edilen çocuğun torunları yeni oyuncunun **çocuğu**, diğer
+    // çocukların torunları **yeğeni** olur. Hiçbiri silinmez.
+    if (person.relation == RelationType.torun) {
+      final String? torununEbeveyni = person.development?.otherParentId;
+      if (torununEbeveyni == childId) return RelationType.cocuk;
+      // Ebeveyni bilinmeyen torun uydurulmaz; yine de kaydı korunur.
+      return RelationType.yegen;
+    }
+
     // Çocuğun kaydında yazan diğer biyolojik ebeveyn her durumda
     // ebeveyndir: evlilik olmadan doğan çocuğun da iki ebeveyni vardır
     // (D-047).
@@ -400,6 +516,10 @@ abstract final class GenerationContinuation {
             ? RelationType.anneTarafiDede
             : RelationType.babaTarafiDede;
       case RelationType.kardes:
+      // Paket AO §41: yarım kardeş de eski oyuncunun kardeşidir, yani
+      // yeni oyuncunun teyzesi/dayısı/halası/amcasıdır. Kan bağı
+      // olduğu için biyolojik kardeşle aynı yoldan geçer.
+      case RelationType.yariKardes:
         if (motherLine) {
           return person.gender == Gender.kadin
               ? RelationType.teyze
@@ -408,9 +528,101 @@ abstract final class GenerationContinuation {
         return person.gender == Gender.kadin
             ? RelationType.hala
             : RelationType.amca;
+
+      // --- Paket AO §41: yeni bağların çevrimi ---------------------------
+      //
+      // Bu dallar olmasaydı hepsi aşağıdaki `default` ile **düşerdi**;
+      // bu projede kayıt silinmez. Torunda yaşanan hatanın (D-087) aynısı
+      // tekrarlanmasın diye her yeni bağ açıkça karşılanıyor.
+
+      // Üvey kardeş: eski oyuncuyla kan bağı yoktu, yeni oyuncuyla hiç
+      // yok. Ama hayatında var olmuş bir insan; **tanıdık** olarak kalır.
+      // Yanlışlıkla teyze/dayı yapılmaz — biyolojik bağ uydurulmuş olur.
+      case RelationType.uveyKardes:
+        return RelationType.arkadas;
+
+      // Üvey ebeveyn: eski oyuncunun üvey annesi/babası, yeni oyuncunun
+      // kanından değildir. Büyükanne/büyükbaba yapılmaz.
+      case RelationType.uveyAnne:
+      case RelationType.uveyBaba:
+        return RelationType.arkadas;
+
+      // Üvey çocuk: eski oyuncunun eşinin çocuğu. Devam edilen çocukla
+      // **kan bağı yoktur**, dolayısıyla kardeş yapılamaz (§41'in açık
+      // uyarısı). Hayatta kalan bir tanıdıktır.
+      case RelationType.uveyCocuk:
+        return RelationType.arkadas;
+
+      // Kayın aile: eski oyuncunun eşinin ebeveynleri. Devam edilen
+      // çocuğun **büyükanne/büyükbabasıdır** — bu gerçek bir kan bağı,
+      // çünkü çocuk o eşten olma. Anne tarafı mı baba tarafı mı,
+      // [motherLine] söylüyor.
+      case RelationType.kayinvalide:
+        return motherLine
+            ? RelationType.babaanne
+            : RelationType.anneanne;
+      case RelationType.kayinpeder:
+        return motherLine
+            ? RelationType.babaTarafiDede
+            : RelationType.anneTarafiDede;
+
+      // Paket AP §15: **başka** bir çocuğun eşi. Devam edilen çocuğun
+      // eşiyse yukarıdaki dalda `es` oldu; buraya düşen kişi yeni
+      // oyuncunun kardeşinin eşidir.
+      //
+      // V1'de "kardeşin eşi" diye bir bağ yok ve uydurulmayacak: ona
+      // teyze/yenge gibi bir kan bağı yazmak yanlış olur. Hayatta var
+      // olmuş bir insan olarak **tanıdık** kalır — üvey çocuk ve üvey
+      // kardeş için verilen kararın aynısı.
+      case RelationType.cocugunEsi:
+      case RelationType.eskiCocugunEsi:
+        return RelationType.arkadas;
+
       default:
         return null;
     }
+  }
+
+  /// Devam edilen çocuğun evlilik kaydını oyuncunun [Marriage] kaydına
+  /// çevirir (Paket AP §62-§65).
+  ///
+  /// Üç durum:
+  ///
+  /// * **Evli** (§62-§63): yürüyen evlilik, eşin gerçek kimliğiyle.
+  ///   Evlilik yaşı çocuğun yaşıdır ve çocuk artık oyuncu olduğu için
+  ///   ölçek zaten doğru — yeniden çıpalanmasına gerek yok.
+  /// * **Boşanmış** (§64): kayıt `bosandi` olarak taşınır, eski eş
+  ///   kişi listesinde `eskiEs` olur.
+  /// * **Dul** (§65): kayıt `dul` olarak taşınır, vefat etmiş eş
+  ///   kayıttan kaybolmaz.
+  ///
+  /// Eşi gerçek bir kişi olmayan eski kayıtlarda `null` döner: var
+  /// olmayan bir kimliğe evlilik bağlanmaz (§17).
+  static Marriage? _marriageForNextGeneration(Person cocuk) {
+    final PersonDevelopment? d = cocuk.development;
+    if (d == null) return null;
+
+    if (d.isMarried && d.spousePersonId != null && d.marriedAtAge != null) {
+      return Marriage(
+        spouseId: d.spousePersonId!,
+        marriedAtAge: d.marriedAtAge!,
+        status: MarriageStatus.evli,
+      );
+    }
+
+    // Bitmiş evlilikler arasından **kimliği bilinen en sonuncusu**.
+    for (final NpcMarriageRecord m in d.pastMarriages.reversed) {
+      if (m.spousePersonId == null) continue;
+      return Marriage(
+        spouseId: m.spousePersonId!,
+        marriedAtAge: m.marriedAtAge,
+        status: m.status == NpcMarriageStatus.dul
+            ? MarriageStatus.dul
+            : MarriageStatus.bosandi,
+        endedAtAge: m.endedAtAge,
+      );
+    }
+    return null;
   }
 
   /// Taşınan yakınlık: kayıt silinmez, nötre doğru çekilir (prototypeOnly).
@@ -529,4 +741,22 @@ abstract final class GenerationContinuation {
       startedAtAge: 6,
     );
   }
+}
+
+/// Devredilen sözleşmeyi mirasçının yaş ölçeğine yeniden çıpalar.
+///
+/// Geçen yıl sayısı korunur: eski oyuncuda 6 yıldır oturan kiracı,
+/// mirasçının kaydında da 6 yıldır oturuyor görünür.
+Lease _rebaseLease(Lease lease, int oldAge, int heirAge) {
+  final int gecenYil = (oldAge - lease.startedAtAge).clamp(0, 120);
+  return Lease(
+    propertyItemId: lease.propertyItemId,
+    tenant: lease.tenant,
+    yearlyRent: lease.yearlyRent,
+    deposit: lease.deposit,
+    startedAtAge: (heirAge - gecenYil).clamp(0, heirAge),
+    onTimeYears: lease.onTimeYears,
+    lateYears: lease.lateYears,
+    unpaidYears: lease.unpaidYears,
+  );
 }

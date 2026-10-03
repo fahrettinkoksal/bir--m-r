@@ -28,6 +28,7 @@ const List<String> sehirler = <String>[
   'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Adana', 'Trabzon', 'Gaziantep',
   'Konya', 'Eskişehir', 'Samsun', 'Diyarbakır', 'Kayseri', 'Antalya',
   'Zonguldak', 'Malatya', 'Erzurum', 'Aydın', 'Sivas', 'Van', 'Denizli',
+  'Kocaeli', 'Amasya',
 ];
 
 const List<String> meslekler = <String>[

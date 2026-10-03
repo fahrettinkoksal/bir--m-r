@@ -16,11 +16,23 @@ class PersonCard extends StatelessWidget {
     required this.person,
     required this.playerAge,
     required this.onTap,
+    this.statusLine,
+    this.spouseLine,
   });
 
   final Person person;
   final int playerAge;
   final VoidCallback onTap;
+
+  /// Paket AP §59: süren aile meselesini ya da küslüğü anlatan tek
+  /// satır. İç sayı göstermez; yoksa `null` ve kart eskisi gibi görünür.
+  final String? statusLine;
+
+  /// Paket AP §57: çocuğun eşi — "Eşi: Ahmet" gibi tek satır.
+  ///
+  /// Gelin/damat artık gerçek bir kişi olduğu için çocuğun kartında
+  /// görünmesi gerekiyordu; eskiden hiçbir yerde yazmıyordu.
+  final String? spouseLine;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +81,30 @@ class PersonCard extends StatelessWidget {
                       const _HouseholdBadge(),
                   ],
                 ),
+                // Paket AP §57: çocuğun eşi.
+                if (spouseLine != null) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(
+                    spouseLine!,
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                // Paket AP §59-§60: süren mesele ya da küslük.
+                if (statusLine != null) ...<Widget>[
+                  const SizedBox(height: 3),
+                  Text(
+                    statusLine!,
+                    key: const Key('kisi_karti_aile_durumu'),
+                    textAlign: TextAlign.left,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: BirOmurAccents.gul.deep,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -93,18 +129,38 @@ BirOmurAccent _accentFor(Person person) {
   switch (person.relation) {
     case RelationType.es:
     case RelationType.sevgili:
+    case RelationType.flort:
     case RelationType.eskiSevgili:
     case RelationType.eskiEs:
       return BirOmurAccents.gul;
     case RelationType.cocuk:
+    // Üvey çocuk çocukla aynı renkte: ekranda ayrı bir sınıf gibi
+    // durmaz, etiketi zaten "Üvey kız/oğul" yazıyor (Paket AO §39).
+    case RelationType.uveyCocuk:
+    case RelationType.unlu:
+      return BirOmurAccents.pirinc;
     case RelationType.torun:
+    case RelationType.yegen:
       return BirOmurAccents.mavi;
     case RelationType.anne:
     case RelationType.baba:
     case RelationType.kardes:
+    case RelationType.uveyAnne:
+    case RelationType.uveyBaba:
+    // Üvey ve yarım kardeş de çekirdek ailenin rengini taşır.
+    case RelationType.uveyKardes:
+    case RelationType.yariKardes:
       return BirOmurAccents.nar;
+    // Eşin ailesi kendi rengiyle ayrışır (Paket AO §38).
+    case RelationType.kayinvalide:
+    case RelationType.kayinpeder:
+    // Paket AP §15: gelin/damat da evlilikle gelen aile; aynı renk.
+    case RelationType.cocugunEsi:
+    case RelationType.eskiCocugunEsi:
+      return BirOmurAccents.mor;
     case RelationType.arkadas:
     case RelationType.sinifArkadasi:
+    case RelationType.kogusArkadasi:
       return BirOmurAccents.turuncu;
     case RelationType.isArkadasi:
       return BirOmurAccents.mor;

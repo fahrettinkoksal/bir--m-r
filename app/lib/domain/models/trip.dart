@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 /// **gerçekten araba sahibi olan, ehliyeti olan ve aracı yola çıkacak
 /// durumda olan** oyuncuya açılır; sahte düğme gösterilmez.
 enum TravelMode {
-  otobus('Otobüs', 'Uzun ama ucuz; camdan şehirler geçer.', 2200),
-  tren('Tren', 'Sarsıntısız, biraz daha pahalı.', 3400),
-  ucak('Uçak', 'En hızlısı, en pahalısı.', 7800),
-  kendiArabasi('Kendi arabanla', 'Yakıt ve yol; araç yıpranır.', 3000);
+  otobus('Otobüs', 'Uzun ama ucuz; camdan şehirler geçer.', 4500),
+  tren('Tren', 'Sarsıntısız, biraz daha pahalı.', 7000),
+  ucak('Uçak', 'En hızlısı, en pahalısı.', 16000),
+  kendiArabasi('Kendi arabanla', 'Yakıt ve yol; araç yıpranır.', 6500);
 
   const TravelMode(this.label, this.description, this.prototypeOnlyCost);
 

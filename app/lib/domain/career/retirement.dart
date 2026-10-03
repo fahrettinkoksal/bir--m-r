@@ -133,8 +133,8 @@ abstract final class Retirement {
     final GameState next = state.copyWith(
       career: career,
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + prototypeOnlyHappiness,
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyHappiness,
         ),
       ),
     );

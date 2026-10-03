@@ -43,7 +43,10 @@ void main() {
       expect(r.outcome.applied, isTrue);
       expect(r.state.player.wallet, 1000 - kesim.cost);
       expect(r.state.player.stats.appearance, greaterThan(gorunusOnce));
-      expect(r.state.log.last.text, contains(kesim.label));
+      // D-127: günlük artık "Saç kestir tamamlandı" demiyor, olanı
+      // anlatıyor. Bağ yine sıkı: günlüğe yazılan metin, ekranda
+      // gösterilen sonucun **aynısı** olmalı.
+      expect(r.state.log.last.text, r.outcome.text);
       expect(
         r.outcome.effects.map((dynamic e) => e.text as String),
         contains('Cüzdan -${kesim.cost} ₺'),

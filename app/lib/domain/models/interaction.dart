@@ -18,7 +18,14 @@ enum InteractionKind {
   sohbet('Sohbet Et'),
   hediyeVer('Hediye Ver'),
   hediyeIste('Hediye İste'),
-  paraIste('Para İste');
+  paraIste('Para İste'),
+
+  // Paket AO §25: ortak çocuğu olan eski eşle co-parenting.
+  //
+  // Listenin **sonuna** eklendi. Boşanmış iki insanın çocuk yüzünden
+  // konuşmaya devam etmesi gündelik bir yakınlık etkileşimi değildir;
+  // o yüzden mevcut türlerden birine yamanmadı, kendi türü oldu.
+  cocukKonus('Çocuğu Konuş');
 
   const InteractionKind(this.label);
 

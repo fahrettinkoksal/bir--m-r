@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support/generation_fixtures.dart';
 import 'support/test_flow.dart';
 
-/// Aktiviteler → Seyahat akışı (Paket 11).
+/// Aktiviteler → Tatil yap akışı (Paket 11, D-083 ile ikiye ayrıldı).
 void main() {
   late GameController controller;
 
@@ -60,7 +60,10 @@ void main() {
   testWidgets('Aktiviteler menüsünde Seyahat var ve gezi gerçekten yapılır',
       (WidgetTester tester) async {
     await pumpApp(tester, gezgin());
-    await tapMenuRow(tester, 'Seyahat');
+    await tapMenuRow(tester, 'Tatil yap');
+    // D-083 ile sayfanın başına hazır tur paketleri geldi; şehir seçimi
+    // aşağıda kalıyor ve tembel liste onu henüz kurmamış oluyor.
+    await scrollToFinder(tester, find.text('Nereye?'));
 
     // Şehir seçilmeden yola çıkılamaz.
     expect(find.byKey(const Key('trip_go')), findsNothing);
@@ -87,7 +90,10 @@ void main() {
   testWidgets('yakınla gidilince ücret artar ve kayıtta kişi görünür',
       (WidgetTester tester) async {
     await pumpApp(tester, gezgin());
-    await tapMenuRow(tester, 'Seyahat');
+    await tapMenuRow(tester, 'Tatil yap');
+    // D-083 ile sayfanın başına hazır tur paketleri geldi; şehir seçimi
+    // aşağıda kalıyor ve tembel liste onu henüz kurmamış oluyor.
+    await scrollToFinder(tester, find.text('Nereye?'));
 
     final String sehir = controller.travelDestinations().first;
     await tester.tap(find.byKey(Key('trip_city_$sehir')));
@@ -112,29 +118,40 @@ void main() {
   testWidgets('parası yetmeyene düğme yerine gerekçe gösterilir',
       (WidgetTester tester) async {
     await pumpApp(tester, gezgin(wallet: 200));
-    await tapMenuRow(tester, 'Seyahat');
+    await tapMenuRow(tester, 'Tatil yap');
+    // D-083 ile sayfanın başına hazır tur paketleri geldi; şehir seçimi
+    // aşağıda kalıyor ve tembel liste onu henüz kurmamış oluyor.
+    await scrollToFinder(tester, find.text('Nereye?'));
 
     final String sehir = controller.travelDestinations().first;
     await tester.tap(find.byKey(Key('trip_city_$sehir')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('trip_go')), findsNothing);
-    expect(find.textContaining('yeterli para yok'), findsOneWidget);
+    // D-083 ile sayfada tur paketleri de var; parası yetmeyen oyuncuya
+    // hem turlar hem gezi için gerekçe yazılır. Önemli olan, düğme
+    // yerine gerekçe gösterilmesi (D-038).
+    expect(find.textContaining('yeterli para yok'), findsWidgets);
     expect(controller.state!.trips, isEmpty);
   });
 
   testWidgets('arabası olmayana kendi aracı seçeneği hiç gösterilmez',
       (WidgetTester tester) async {
     await pumpApp(tester, gezgin());
-    await tapMenuRow(tester, 'Seyahat');
+    await tapMenuRow(tester, 'Tatil yap');
+    // D-083 ile sayfanın başına hazır tur paketleri geldi; şehir seçimi
+    // aşağıda kalıyor ve tembel liste onu henüz kurmamış oluyor.
+    await scrollToFinder(tester, find.text('Nereye?'));
 
     expect(find.byKey(const Key('trip_mode_otobus')), findsOneWidget);
     expect(find.byKey(const Key('trip_mode_kendiArabasi')), findsNothing);
   });
 
-  testWidgets('küçük yaşta Seyahat menüde görünmez',
+  testWidgets('küçük yaşta tatil ve taşınma menüde görünmez',
       (WidgetTester tester) async {
     await pumpApp(tester, gezgin(age: 12));
-    expect(find.text('Seyahat'), findsNothing);
+    // D-083: menü ikiye ayrıldı; ikisi de küçük yaşta görünmez.
+    expect(find.text('Tatil yap'), findsNothing);
+    expect(find.text('Taşın'), findsNothing);
   });
 }

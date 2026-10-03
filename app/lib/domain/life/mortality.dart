@@ -62,6 +62,18 @@ abstract final class Mortality {
 
     if (health != null) {
       // 50 sağlık nötr; düşük sağlık riski en çok iki katına çıkarır.
+      //
+      // **Paket AQ'da denetlendi.** Kritik sağlık yolu eklenince bu
+      // çarpanın çifte sayım olup olmadığı soruldu: düşük sağlık hem
+      // yıllık eğriyi yükseltiyor hem de artık kendi görünür ölüm
+      // yolunu taşıyor. Çarpanın üst ucu 1,0'a çekilerek **ölçüldü**:
+      // 200 hayatta ortalama ölüm yaşı 58,4'ten 58,4'e, yani hiç
+      // değişmedi. Asıl sorun bu çarpan değil, hastalık/toparlanma
+      // dişlisiydi (bkz. `SickLeaves.prototypeOnlyRecoveryGapShare`); o
+      // düzeltildikten sonra ortalama ölüm yaşı 66,4 oldu — kritik yol
+      // eklenmeden önceki 66,7 ile aynı bant. Ölçüm bir sorun
+      // göstermediği için onaylı eğriye dokunulmadı; soru Q-189'da
+      // Faho ve ChatGPT'ye bırakıldı.
       final double carpan = (1.5 - health / 100).clamp(0.5, 2.0);
       temel *= carpan;
     }

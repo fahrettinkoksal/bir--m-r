@@ -67,6 +67,8 @@ void main() {
             expect(sonuc!.text, isNot(contains('{')),
                 reason: '${event.eventId} sonucunda yer tutucu kaldı');
           } else {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveEducationChoices(controller);
             controller.ageUp();
           }
         }
@@ -181,7 +183,15 @@ void main() {
   group('Uygulanan etkiler', () {
     test('olay seçimi para ve eşya kazancını rozet olarak bildirir', () {
       EventChoiceResult? bisikletSonucu;
-      for (int seed = 0; seed < 40 && bisikletSonucu == null; seed++) {
+      // Tohum penceresi geniş tutuluyor ve **ilk bulunanda** çıkılıyor.
+      //
+      // Ölçüm: `bisiklet_hediyesi` 200 tohumun 10-14'ünde çıkıyor
+      // (%5-7). 40 tohumluk pencerede hiç çıkmama olasılığı ~%13; yani
+      // olayın kendisiyle ilgisi olmayan her değişiklik (bir yere bir
+      // zar eklemek bütün akışı kaydırıyor) bu testi kura ile
+      // kırabiliyordu. Pencere genişletildi, eşik gevşetilmedi: olay
+      // yine **gerçekten** çıkmak zorunda.
+      for (int seed = 0; seed < 200 && bisikletSonucu == null; seed++) {
         final GameController controller = GameController(random: Random(seed));
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 60 && bisikletSonucu == null; i++) {
@@ -206,6 +216,8 @@ void main() {
             );
             if (bisiklet) bisikletSonucu = sonuc;
           } else {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveEducationChoices(controller);
             controller.ageUp();
           }
         }
@@ -317,6 +329,8 @@ void main() {
         for (int i = 0; i < 160; i++) {
           final GameState state = controller.state!;
           if (!state.hasPendingEvent) {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveEducationChoices(controller);
             controller.ageUp();
             continue;
           }
@@ -497,7 +511,10 @@ void main() {
     });
 
     test('hediye bedeli oyuncunun kendi cüzdanından düşer', () {
-      final GameState state = aileli(32, wallet: 300);
+      // 2026 kalibrasyonu: hediye bütçesi tabanı 20 ₺'den 120 ₺'ye,
+      // varlıklı yakına alınan hediye 150 ₺'den 500 ₺'ye çıktı.
+      // Cüzdan fixture'ı ölçeğe çekildi; iddia aynen duruyor.
+      final GameState state = aileli(32, wallet: 3000);
       final Person anne = yetiskinYakin(state);
       final InteractionResult sonuc = interactions.perform(
         state: state,
@@ -510,7 +527,7 @@ void main() {
       // Hediyenin bedeli katalogdan gelir; sabit değildir.
       final String verilen = sonuc.outcome.givenPossession!;
       final GiftItem hediye = giftById(verilen)!;
-      expect(sonuc.state.player.wallet, 300 - hediye.value);
+      expect(sonuc.state.player.wallet, 3000 - hediye.value);
       expect(sonuc.state.personById(anne.id)!.bond, greaterThan(anne.bond));
       expect(
         sonuc.outcome.effects.map((AppliedEffect e) => e.text),

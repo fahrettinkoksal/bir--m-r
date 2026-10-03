@@ -8,9 +8,10 @@ import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 /// Olay çeşitliliği (Paket 20).
 ///
@@ -42,11 +43,26 @@ Map<String, int> hayatOyna(int seed, {int maxAge = 95}) {
     while (c.state!.hasNotice) {
       c.dismissNotice();
     }
-    if (c.state!.hasPendingCrisis) {
-      final PendingCrisis k = c.state!.pendingCrisis!;
-      c.respondToCrisis(k.crisis!.choices.first.id);
-    }
+    // **Paket AQ'da düzeltildi: bu satır sonsuz döngü üretiyordu.**
+    //
+    // Eskiden krizin **ilk** seçeneği karşılanabilir mi diye bakılmadan
+    // seçiliyordu. `dusme` gibi krizlerde ilk seçenek para istiyor
+    // (`needsMoney`); parasız oyuncuda yanıt uygulanmıyor ve kriz açık
+    // kalıyor. Paket AQ'dan önce bu sessizce geçiyordu çünkü `ageUp`
+    // bekleyen krizi denetlemiyordu — kriz ekranda asılı kalırken yıl
+    // ilerliyordu. Artık ilerlemiyor, yani dış döngü hiç bitmiyordu:
+    // tam süit bu dosyada takıldı ve CI 45 dakikalık bütçesinde iptal
+    // oldu.
+    //
+    // Gerçek oyuncu da karşılanabilir bir seçenek seçmek zorunda;
+    // yardımcı onu yapıyor. Dış döngüye ayrıca bir koruma kondu: yaş
+    // ilerlemiyorsa hayat biter, test asla kilitlenmez.
+    resolvePendingCrisis(c);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveEducationChoices(c);
+    final int yasOnce = c.state!.player.age;
     c.ageUp();
+    if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
   }
   c.dispose();
   return gorulen;
@@ -133,6 +149,8 @@ void main() {
       c.startNewLife(mode: StartMode.tamamenRastgele);
       int guard = 0;
       while (!c.state!.hasPendingEvent && guard++ < 20) {
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       expect(c.state!.hasPendingEvent, isTrue);
@@ -207,8 +225,17 @@ void main() {
             !r.requiresSocialAccount;
       }).length;
       // Bu paketin amacı, nasıl bir hayat yaşanırsa yaşansın orta yaşın
-      // dolu geçmesi.
-      expect(kosulsuz, greaterThanOrEqualTo(kMidlifeEvents.length - 2));
+      // dolu geçmesi. D-085 ile eşin ev/araba beklentisi eklendi; bunlar
+      // doğaları gereği koşulludur. Kural artık mutlak sayı değil
+      // **oran**: havuzun büyük çoğunluğu koşulsuz kalmalı ki bekâr,
+      // işsiz ve mülksüz bir hayat da dolu geçsin.
+      expect(
+        kosulsuz / kMidlifeEvents.length,
+        greaterThanOrEqualTo(0.75),
+        reason: '$kosulsuz / ${kMidlifeEvents.length} koşulsuz',
+      );
+      // Koşulsuz olayların mutlak sayısı da bir tabanın altına inemez.
+      expect(kosulsuz, greaterThanOrEqualTo(20));
     });
 
     test('iki olay önceki kararı hatırlar', () {

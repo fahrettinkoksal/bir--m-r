@@ -209,6 +209,8 @@ void main() {
       for (int i = 0; i < 8 && !c.state!.deceased; i++) {
         c.interact(anne.id, InteractionKind.vakitGecir);
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
         resolvePendingEvents(c);
       }

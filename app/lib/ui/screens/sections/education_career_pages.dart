@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../data/education_tracks.dart';
 import '../../../data/job_catalog.dart';
 import '../../../data/university_catalog.dart';
 import '../../../domain/career/job_market.dart';
+import '../../../domain/career/job_requirement.dart';
 import '../../../domain/education/education_path.dart';
 import '../../../domain/models/career.dart';
 import '../../../domain/models/game_state.dart';
@@ -13,116 +13,6 @@ import '../../widgets/interview_sheet.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../../text/turkish_text.dart';
-
-/// Lise alanı seçimi.
-///
-/// Puanın yettiği alanlar düğme olur; yetmeyenler gerekçesiyle soluk
-/// gösterilir. Puan ne olursa olsun en az üç alan açıktır.
-class TrackChoicePage extends StatefulWidget {
-  const TrackChoicePage({super.key, required this.onBack});
-
-  final VoidCallback onBack;
-
-  @override
-  State<TrackChoicePage> createState() => _TrackChoicePageState();
-}
-
-class _TrackChoicePageState extends State<TrackChoicePage> {
-  String? _sonuc;
-
-  @override
-  Widget build(BuildContext context) {
-    final GameController controller = GameScope.of(context);
-    final GameState state = controller.state!;
-    final int puan = state.education.placementScore ?? 0;
-    final List<EducationTrackInfo> acik = controller.availableTracks();
-
-    return SectionScaffold(
-      icon: Icons.alt_route_rounded,
-      title: 'Lise alanı seç',
-      subtitle: 'Yerleştirme puanın: $puan',
-      backLabel: 'Okul',
-      onBack: widget.onBack,
-      children: <Widget>[
-        const InfoPanel(
-          icon: Icons.school_outlined,
-          text: 'Seçtiğin alan eğitim geçmişine yazılır. İleride '
-              'başvurabileceğin üniversite bölümlerini ve iş seçeneklerini '
-              'etkiler.',
-        ),
-        const SizedBox(height: 12),
-        for (final EducationTrackInfo alan in kEducationTracks) ...<Widget>[
-          _TrackCard(
-            info: alan,
-            enabled: acik.contains(alan),
-            onSelect: () {
-              final String? metin = controller.chooseTrack(alan.track)?.text;
-              setState(() => _sonuc = metin);
-            },
-          ),
-          const SizedBox(height: 10),
-        ],
-        if (_sonuc != null) ...<Widget>[
-          const SizedBox(height: 4),
-          InfoPanel(icon: Icons.check_circle_outline, text: _sonuc!),
-        ],
-      ],
-    );
-  }
-}
-
-class _TrackCard extends StatelessWidget {
-  const _TrackCard({
-    required this.info,
-    required this.enabled,
-    required this.onSelect,
-  });
-
-  final EducationTrackInfo info;
-  final bool enabled;
-  final VoidCallback onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(info.label, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(
-              info.description,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: <Widget>[
-                Text(
-                  info.minScore == 0
-                      ? 'Puan şartı yok'
-                      : 'En az ${info.minScore} puan',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const Spacer(),
-                FilledButton.tonal(
-                  onPressed: enabled ? onSelect : null,
-                  child: Text(enabled ? 'Bu alanı seç' : 'Puanın yetmiyor'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 /// Lise sonrası yol seçimi ve üniversite başvurusu.
 class AfterSchoolPage extends StatefulWidget {
@@ -201,18 +91,31 @@ class _AfterSchoolPageState extends State<AfterSchoolPage> {
           ],
           const SizedBox(height: 4),
           OutlinedButton(
+            key: const Key('after_school_skip'),
             onPressed: () {
               final String? metin = controller.skipUniversity()?.text;
               setState(() => _sonuc = metin);
             },
             child: const Text('Üniversiteye gitmeyeceğim, iş arayacağım'),
           ),
-        ] else
+        ] else ...<Widget>[
           const InfoPanel(
             icon: Icons.info_outline,
-            text: 'Üniversite başvurusu için uygun bir durum yok. '
-                'İş aramaya Meslek bölümünden devam edebilirsin.',
+            text: 'Puanınla başvurabileceğin bir bölüm yok. '
+                'İş hayatına geçmeyi seçebilirsin.',
           ),
+          const SizedBox(height: 10),
+          // Uygun bölüm yokken de bu kapı açık kalmalı: karar verilmeden
+          // yaş alınamadığı için (D-111) kapalı olsaydı oyuncu kilitlenirdi.
+          OutlinedButton(
+            key: const Key('after_school_skip'),
+            onPressed: () {
+              final String? metin = controller.skipUniversity()?.text;
+              setState(() => _sonuc = metin);
+            },
+            child: const Text('Üniversiteye gitmeyeceğim, iş arayacağım'),
+          ),
+        ],
         if (_sonuc != null) ...<Widget>[
           const SizedBox(height: 12),
           InfoPanel(icon: Icons.campaign_outlined, text: _sonuc!),
@@ -374,6 +277,7 @@ class _ProgramCard extends StatelessWidget {
                   ),
                 ),
                 FilledButton.tonal(
+                  key: Key('after_school_apply_${program.id}'),
                   onPressed: blockReason.isEmpty ? onApply : null,
                   child: Text(blockReason.isEmpty ? 'Başvur' : 'Uygun değil'),
                 ),
@@ -421,10 +325,50 @@ class _JobSearchPageState extends State<JobSearchPage> {
             text: 'Şu an koşullarını sağladığın bir iş yok. Eğitimini '
                 'ilerletmek veya yaşının büyümesi seçenekleri açabilir.',
           ),
-        for (final JobType job in acik) ...<Widget>[
+        // Yarım zamanlı işler ayrı grupta durur (D-131): okuyan oyuncu
+        // hangilerinin ona açık olduğunu tek bakışta görsün.
+        if (acik.any((JobType j) => j.partTime)) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Yarım zamanlı',
+            accent: BirOmurAccents.pirinc,
+          ),
+          const SizedBox(height: 8),
+          for (final JobType job in acik.where((JobType j) => j.partTime))
+            ...<Widget>[
+            _JobCard(
+              job: job,
+              availability: controller.jobApplicationAvailability(job),
+              synergyNote: controller.jobSynergyNote(job),
+              requirements: controller.jobRequirementLines(job),
+              onApply: () async {
+                final JobOutcome? outcome = controller.applyForJob(job);
+                if (outcome == null) return;
+                if (outcome.interviewStarted && context.mounted) {
+                  await InterviewSheet.show(context);
+                  if (!context.mounted) return;
+                  setState(() => _sonuc = null);
+                  return;
+                }
+                setState(() => _sonuc = outcome.text);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (acik.any((JobType j) => !j.partTime)) ...<Widget>[
+            const MenuGroupTitle(
+              text: 'Tam zamanlı',
+              accent: BirOmurAccents.mor,
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+        for (final JobType job in acik.where((JobType j) => !j.partTime))
+            ...<Widget>[
           _JobCard(
             job: job,
             availability: controller.jobApplicationAvailability(job),
+            synergyNote: controller.jobSynergyNote(job),
+            requirements: controller.jobRequirementLines(job),
             onApply: () async {
               final JobOutcome? outcome = controller.applyForJob(job);
               if (outcome == null) return;
@@ -469,12 +413,39 @@ class _JobSearchPageState extends State<JobSearchPage> {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '${giris.key.name}: ${giris.value}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          '${giris.key.name}: ${giris.value}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                        // §18: kapalı işte de eksik şart açıkça yazılır.
+                        for (final JobRequirement r
+                            in controller.jobRequirementLines(giris.key))
+                          if (!r.met)
+                            Text(
+                              '✗ ${r.line}',
+                              key: Key(
+                                'kapali_sart_${giris.key.id}_${r.label}',
+                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                      ],
                     ),
                   ),
                 ],
@@ -491,11 +462,22 @@ class _JobCard extends StatelessWidget {
     required this.job,
     required this.availability,
     required this.onApply,
+    required this.requirements,
+    this.synergyNote,
   });
 
   final JobType job;
   final dynamic availability;
   final VoidCallback onApply;
+
+  /// Hobi geçmişinin bu başvuruya kattığı avantaj (Paket AK, §16).
+  ///
+  /// Doğal dille yazılır; yüzde gösterilmez. Avantaj yoksa `null` gelir
+  /// ve satır hiç görünmez: boş vaat olmaz.
+  final String? synergyNote;
+
+  /// Bu işin koyduğu şartlar ve hangilerinin tuttuğu (Paket AM, §18).
+  final List<JobRequirement> requirements;
 
   @override
   Widget build(BuildContext context) {
@@ -527,6 +509,69 @@ class _JobCard extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+
+            // --- gereksinimler (Paket AM, §18) --------------------
+            // Yalnızca bu işin gerçekten koyduğu şartlar; şartı olmayan
+            // stat hiç görünmez. Tutan şartta yalnızca ad, tutmayanda
+            // eşik ve mevcut değer yazılır.
+            if (requirements.length > 1) ...<Widget>[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                runSpacing: 2,
+                children: <Widget>[
+                  for (final JobRequirement r in requirements)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          r.met ? Icons.check_rounded : Icons.close_rounded,
+                          size: 14,
+                          color: r.met
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.error,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          r.line,
+                          key: Key('is_sart_${job.id}_${r.label}'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: r.met
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.error,
+                            fontWeight:
+                                r.met ? FontWeight.w400 : FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+            if (synergyNote != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      synergyNote!,
+                      key: Key('is_sinerji_${job.id}'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 10),
             Row(
               children: <Widget>[

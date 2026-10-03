@@ -6,6 +6,7 @@ import '../../data/university_catalog.dart';
 import '../life/aging.dart';
 import '../models/education.dart';
 import '../models/person.dart';
+import '../models/relation.dart';
 import '../models/person_development.dart';
 import '../models/stats.dart';
 import '../models/wealth.dart';
@@ -49,7 +50,7 @@ abstract final class ChildProgression {
   ///
   /// Birikim maaştan bu gider düşülerek oluşur; böylece her çalışan çocuk
   /// otomatik olarak zengin olmaz.
-  static const int prototypeOnlyYearlyCost = 140000;
+  static const int prototypeOnlyYearlyCost = 320000;
 
   /// prototypeOnly: iş arayan bir yılda iş bulma olasılığı.
   static const double prototypeOnlyJobChance = 0.45;
@@ -120,7 +121,35 @@ abstract final class ChildProgression {
       finishedSchool: liseBitti,
       jobId: isKimligi,
       jobStartedAtAge: isKimligi == null ? null : age,
+      // **Birikim sıfırdan başlamaz.** [_sync] ekonomik durumu birikimden
+      // yeniden yazdığı için, kaydı yeni açılan bir yetişkinin birikimi
+      // sıfır kalırsa "çok varlıklı" biri bir yılda "çok yoksul"
+      // görünürdü. Elinde zaten bir etiket varsa birikim o etiketin
+      // tabanından başlar; uydurma bir zenginlik eklenmez, var olan
+      // bilgi korunur (D-154).
+      money: person.wealth == null
+          ? 0
+          : prototypeOnlyMoneyFloorFor(person.wealth!),
     );
+  }
+
+  /// prototypeOnly: [prototypeOnlyWealthFor]'un tersi — etiketin tabanı.
+  ///
+  /// Aynı eşikleri kullanır; ikisi birbirinden ayrılırsa kalıcı bir test
+  /// bunu yakalar.
+  static int prototypeOnlyMoneyFloorFor(WealthTier tier) {
+    switch (tier) {
+      case WealthTier.cokVarlikli:
+        return 3000000;
+      case WealthTier.varlikli:
+        return 900000;
+      case WealthTier.ortaHalli:
+        return 200000;
+      case WealthTier.yoksul:
+        return 30000;
+      case WealthTier.cokYoksul:
+        return 0;
+    }
   }
 
   /// prototypeOnly: özellik bilgisi olmayan kişi için nötr değerler.
@@ -140,13 +169,34 @@ abstract final class ChildProgression {
   /// [person] yaşı **zaten artırılmış** olarak verilir. Dönen `news`
   /// satırları oyuncunun hayat günlüğüne yazılabilecek aile haberleridir;
   /// aynı satırlar kişinin kendi geçmişine de işlenir.
+  /// [adviceBoost] oyuncunun o kişiye verdiği tavsiyenin ihtimal payı
+  /// (Paket AP §1, §41). Tavsiye yoksa **tam olarak 0**'dır ve hiçbir
+  /// ek zar atılmaz; oyunun zar sırası kaymaz.
+  ///
+  /// Pay yalnızca kişinin **kendi** kararlarının ihtimalini kaydırır:
+  /// üniversiteye gitme eğilimi ve iyi işe yönelme eğilimi. Kararı yine
+  /// kişinin kendi zarı verir (§1: çocuk oyuncunun kuklası değildir).
   static ({Person person, List<String> news}) advance(
     Person person,
-    Random rng,
-  ) {
+    Random rng, {
+    double adviceBoost = 0,
+  }) {
     if (!person.isAlive) return (person: person, news: const <String>[]);
 
     final int age = person.age;
+    // Kayıt **bu yıl** mı açıldı? [ensureRecord] kişinin bugünkü sınıfını
+    // yaşından kuruyor; aynı çağrıda bir de sınıf atlatılırsa kişi hiç
+    // okumadığı bir yılı geçmiş sayılıyor.
+    //
+    // Bu, 17 yaşında sisteme giren kişide oyunun kendi değişmezini
+    // kırıyordu: aynı yıl "liseyi bitirdi" yazılıyor, [_sync] de onu
+    // `issiz` yapıyordu — hâlbuki 6-17 yaş arası herkes öğrencidir
+    // (`age_up_test`: "yaşa bağlı tutarlılık korunur"). Paket AO üvey
+    // kardeşi bu motora bağlayınca yol açıldı; hatayı tohum sırası
+    // örtüyordu. 6 yaşında giren kişinin 1. sınıf yerine 2. sınıfta
+    // başlaması da aynı sebepten kaynaklanıyordu.
+    final bool yeniKayit =
+        person.development == null || !person.development!.tracksLife;
     PersonDevelopment dev = ensureRecord(person, rng);
     final List<String> haberler = <String>[];
     final String ad = person.firstName;
@@ -175,7 +225,7 @@ abstract final class ChildProgression {
         // Dönüm noktası yalnızca **gerçekten o yıl** başlandıysa yazılır.
         if (age == prototypeOnlySchoolStartAge) kaydet('$ad okula başladı.');
       }
-    } else if (dev.grade != null) {
+    } else if (dev.grade != null && !yeniKayit) {
       final int yeniSinif = dev.grade! + 1;
       if (yeniSinif > 12 || age >= prototypeOnlyMaxSchoolAge) {
         dev = dev.copyWith(
@@ -230,7 +280,8 @@ abstract final class ChildProgression {
         age <= prototypeOnlyUniversityDecisionAge) {
       // Üniversiteye gitme eğilimi zekâyla artar ama garanti değildir.
       final double sans =
-          ((dev.stats.intelligence - 35) / 100).clamp(0.05, 0.7);
+          ((dev.stats.intelligence - 35) / 100 + adviceBoost)
+              .clamp(0.05, 0.75);
       if (rng.chance(sans)) {
         // Bölüm **o yıl gerçekten seçilir**; sonradan uydurulmaz.
         final UniversityProgram bolum = _pickProgram(dev, rng);
@@ -276,7 +327,7 @@ abstract final class ChildProgression {
         !dev.isStudent &&
         !dev.isUniversityStudent &&
         rng.chance(prototypeOnlyJobChance)) {
-      final JobType? bulunan = _findJob(dev, age, rng);
+      final JobType? bulunan = _findJob(dev, age, rng, adviceBoost);
       if (bulunan != null) {
         dev = dev.copyWith(jobId: bulunan.id, jobStartedAtAge: age);
         kaydet('$ad ${trLower(bulunan.name)} olarak işe başladı.');
@@ -366,10 +417,12 @@ abstract final class ChildProgression {
   static Stats _driftStats(PersonDevelopment dev, int age, Random rng) {
     Stats stats = dev.stats;
     if ((dev.isStudent || dev.isUniversityStudent) && rng.chance(0.35)) {
-      stats = stats.copyWith(intelligence: stats.intelligence + 1);
+      stats = stats.gain(
+        intelligence: 1,
+      );
     }
     if (age > 50 && rng.chance(0.4)) {
-      stats = stats.copyWith(health: stats.health - 1);
+      stats = stats.gain(health: -1);
     }
     final int gorunus = Aging.yearlyDelta(
       age: age,
@@ -378,13 +431,20 @@ abstract final class ChildProgression {
       rng: rng,
     );
     if (gorunus != 0) {
-      stats = stats.copyWith(appearance: stats.appearance + gorunus);
+      stats = stats.gain(
+        appearance: gorunus,
+      );
     }
     return stats;
   }
 
   /// Koşullarına uyan işlerden birini seçer; uygun iş yoksa `null`.
-  static JobType? _findJob(PersonDevelopment dev, int age, Random rng) {
+  static JobType? _findJob(
+    PersonDevelopment dev,
+    int age,
+    Random rng, [
+    double adviceBoost = 0,
+  ]) {
     final List<JobType> uygun = kJobCatalog.where((JobType job) {
       if (age < job.minAge) return false;
       // Dövüş sanatı eğitmenliği oyuncunun yıllarca çalışmasıyla açılır;
@@ -406,7 +466,9 @@ abstract final class ChildProgression {
     final List<JobType> sirali = <JobType>[...uygun]
       ..sort((JobType a, JobType b) => b.yearlySalary.compareTo(a.yearlySalary));
     // Zekâsı yüksek kişi daha iyi işe yönelir; yine de garanti değildir.
-    if (rng.chance((dev.stats.intelligence / 130).clamp(0.1, 0.8))) {
+    if (rng.chance(
+      (dev.stats.intelligence / 130 + adviceBoost).clamp(0.1, 0.85),
+    )) {
       return sirali.first;
     }
     return rng.pick(sirali);
@@ -430,11 +492,25 @@ abstract final class ChildProgression {
       durum = EmploymentStatus.issiz;
     }
 
+    // `Person.schoolLevel` iki ayrı anlam taşıyor: **soy** için "şu anki
+    // kademe", okul tanışıklıkları için "hangi kademede tanışıldığı"
+    // (`_agePerson` bu kuralı açıkça yazıyor). Bu yüzden yalnızca soydan
+    // gelen kişilerde yazılır. Kardeş D-158'den sonra burada ilerliyor;
+    // onun kademesini yazmak okul listelerini kirletiyordu — okul çağında
+    // bir kardeş "sınıf arkadaşı" sayılıyordu. Kardeşin kendi kademesi
+    // `development.schoolLevel` içinde durmaya devam eder.
+    const Set<RelationType> kademeYazilanlar = <RelationType>{
+      RelationType.cocuk,
+      RelationType.torun,
+      RelationType.yegen,
+    };
     return person.copyWith(
       development: dev,
       employment: durum,
       occupation: durum == EmploymentStatus.calisiyor ? dev.job?.name : null,
-      schoolLevel: dev.schoolLevel,
+      schoolLevel: kademeYazilanlar.contains(person.relation)
+          ? dev.schoolLevel
+          : person.schoolLevel,
       wealth: person.age < 18 ? null : prototypeOnlyWealthFor(dev.money),
     );
   }

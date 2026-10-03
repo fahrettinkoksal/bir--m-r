@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/social_catalog.dart';
+import '../../../domain/social/celebrity_engine.dart';
+import '../../../domain/models/celebrity_contact.dart';
+import '../../../data/celebrity_catalog.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/social_account.dart';
@@ -46,6 +49,23 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           final SocialOutcome? outcome = controller.postContent(content);
           setState(() => _sonuc = outcome);
         },
+        onContact: (Celebrity celebrity, CelebrityAction action) {
+          final CelebrityResult? r = controller.contactCelebrity(
+            celebrity,
+            action,
+          );
+          if (r == null) return;
+          // Ünlü sonucu da paylaşım sonucuyla aynı kartta gösterilir;
+          // ayrı bir bildirim penceresi açılmaz.
+          setState(
+            () => _sonuc = SocialOutcome(
+              applied: r.applied,
+              text: r.text,
+              followerDelta: r.followerDelta,
+              earned: r.earned,
+            ),
+          );
+        },
         onBack: () => setState(() {
           _acikPlatform = null;
           _sonuc = null;
@@ -59,7 +79,7 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
       title: 'Sosyal medya',
       subtitle: state.socialAccounts.isEmpty
           ? 'Hesap açmak zorunda değilsin.'
-          : 'Toplam ${state.totalFollowers} takipçi',
+          : 'Toplam ${trNumber(state.totalFollowers)} takipçi',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
@@ -82,20 +102,23 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
         for (final SponsorDeal deal in controller.openSponsorDeals) ...<Widget>[
           InfoPanel(
             icon: Icons.assignment_turned_in_outlined,
-            text: '${trUpperFirst(deal.label)} sponsorluğunu kabul ettin. '
+            text:
+                '${trUpperFirst(deal.label)} sponsorluğunu kabul ettin. '
                 'Ücret (${trMoney(deal.fee)}), ${deal.platform.label} '
                 'üzerinde bir paylaşım yapınca ödenecek.',
           ),
           const SizedBox(height: 12),
         ],
-        for (final SocialPlatform platform in SocialPlatform.values) ...<Widget>[
+        for (final SocialPlatform platform
+            in SocialPlatform.values) ...<Widget>[
           _PlatformCard(
             platform: platform,
             account: state.accountFor(platform),
             availability: controller.socialAccountAvailability(platform),
             onOpenAccount: () {
-              final SocialOutcome? outcome =
-                  controller.openSocialAccount(platform);
+              final SocialOutcome? outcome = controller.openSocialAccount(
+                platform,
+              );
               setState(() => _sonuc = outcome);
             },
             onEnter: () => setState(() {
@@ -113,7 +136,8 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
         if (state.totalSocialEarnings > 0) ...<Widget>[
           InfoPanel(
             icon: Icons.payments_outlined,
-            text: 'Sosyal medyadan bugüne kadar '
+            text:
+                'Sosyal medyadan bugüne kadar '
                 '${trMoney(state.totalSocialEarnings)} kazandın. Gelir, '
                 'paylaşımın gerçekten ilgi görmesine bağlıdır; her '
                 'paylaşım para kazandırmaz.',
@@ -122,7 +146,8 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
         ],
         const InfoPanel(
           icon: Icons.info_outline,
-          text: 'Mesajlaşma henüz yazılmadı; yazılmamış özellikler düğme '
+          text:
+              'Mesajlaşma henüz yazılmadı; yazılmamış özellikler düğme '
               'olarak gösterilmiyor. Sponsorlar kurgusaldır ve bütün '
               'tutarlar oyun parasıdır.',
         ),
@@ -172,7 +197,8 @@ class _PlatformCard extends StatelessWidget {
                   ),
                   if (hesapVar)
                     Text(
-                      '${account!.followers} ${platform.audienceWord}',
+                      '${trNumber(account!.followers)} '
+                      '${platform.audienceWord}',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -202,8 +228,7 @@ class _PlatformCard extends StatelessWidget {
                       ),
                     ),
                     FilledButton.tonal(
-                      onPressed:
-                          availability.isAllowed ? onOpenAccount : null,
+                      onPressed: availability.isAllowed ? onOpenAccount : null,
                       child: const Text('Hesap aç'),
                     ),
                   ],
@@ -223,6 +248,7 @@ class _PlatformPage extends StatelessWidget {
     required this.account,
     required this.outcome,
     required this.onPost,
+    required this.onContact,
     required this.onBack,
   });
 
@@ -230,6 +256,7 @@ class _PlatformPage extends StatelessWidget {
   final SocialAccount account;
   final SocialOutcome? outcome;
   final void Function(SocialContent content) onPost;
+  final void Function(Celebrity celebrity, CelebrityAction action) onContact;
   final VoidCallback onBack;
 
   @override
@@ -237,12 +264,16 @@ class _PlatformPage extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final GameController controller = GameScope.of(context);
     final List<SocialContent> icerikler = contentsFor(platform);
+    final List<Celebrity> celebrities = controller.celebritiesOnPlatform(
+      platform,
+    );
 
     return SectionScaffold(
       icon: Icons.trending_up_rounded,
       accent: BirOmurAccents.cini,
       title: platform.label,
-      subtitle: '${account.followers} ${platform.audienceWord} · '
+      subtitle:
+          '${trNumber(account.followers)} ${platform.audienceWord} · '
           '${account.postCount} paylaşım · '
           'bu yıl kalan: ${controller.remainingSocialPosts(platform)}',
       backLabel: 'Sosyal medya',
@@ -268,23 +299,20 @@ class _PlatformPage extends StatelessWidget {
                     children: <Widget>[
                       Expanded(
                         child: Text(
-                          controller
-                                  .socialPostAvailability(icerik)
-                                  .isAllowed
+                          controller.socialPostAvailability(icerik).isAllowed
                               ? ''
                               : (controller
-                                      .socialPostAvailability(icerik)
-                                      .reason ??
-                                  ''),
+                                        .socialPostAvailability(icerik)
+                                        .reason ??
+                                    ''),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
                       FilledButton.tonal(
-                        onPressed: controller
-                                .socialPostAvailability(icerik)
-                                .isAllowed
+                        onPressed:
+                            controller.socialPostAvailability(icerik).isAllowed
                             ? () => onPost(icerik)
                             : null,
                         child: const Text('Paylaş'),
@@ -321,12 +349,43 @@ class _PlatformPage extends StatelessWidget {
             ),
           ),
         ],
+        // --- Ünlüler (Faho'nun isteği) ---------------------------------
+        //
+        // Ünlüler kurgusaldır. Temas kurmak garanti bir kazanç değil:
+        // çoğu deneme karşılıksız kalır ve bu ekranda saklanmaz.
+        if (celebrities.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 14),
+          Text(
+            '${platform.label} ünlüleri',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Yazmak bedava, karşılık almak değil. Kitlen büyüdükçe '
+            'fark edilme ihtimalin artar.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final Celebrity unlu in celebrities) ...<Widget>[
+            _CelebrityCard(
+              celebrity: unlu,
+              contact: controller.celebrityContact(unlu),
+              onContact: (CelebrityAction eylem) => onContact(unlu, eylem),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ],
         if (account.posts.isNotEmpty) ...<Widget>[
           const SizedBox(height: 14),
           Text(
             'Son paylaşımların',
-            style: theme.textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 6),
           for (final SocialPost post in account.posts.reversed.take(6))
@@ -334,7 +393,8 @@ class _PlatformPage extends StatelessWidget {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 '${post.age} yaşında · ${post.label} · '
-                '${post.followerDelta >= 0 ? '+' : ''}${post.followerDelta} '
+                '${post.followerDelta >= 0 ? '+' : ''}'
+                '${trNumber(post.followerDelta)} '
                 '${platform.audienceWord}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -346,7 +406,6 @@ class _PlatformPage extends StatelessWidget {
     );
   }
 }
-
 
 /// Bekleyen sponsorluk teklifi kartı.
 ///
@@ -421,6 +480,115 @@ class _SponsorOfferCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Tek bir ünlünün kartı.
+///
+/// Kapalı eylem **çalışmayan düğme olarak konmaz**: gerekçesi yazılır.
+class _CelebrityCard extends StatelessWidget {
+  const _CelebrityCard({
+    required this.celebrity,
+    required this.contact,
+    required this.onContact,
+  });
+
+  final Celebrity celebrity;
+  final CelebrityContact? contact;
+  final void Function(CelebrityAction action) onContact;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(celebrity.field.icon, color: theme.colorScheme.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        celebrity.fullName,
+                        style: theme.textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${celebrity.field.label} · '
+                        '${trNumber(celebrity.followers)} '
+                        '${celebrity.platform.audienceWord}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              contact?.label ?? 'Hiç yazmadın',
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final CelebrityAction eylem in CelebrityAction.values)
+              Builder(
+                builder: (BuildContext context) {
+                  final InteractionAvailability uygunluk = controller
+                      .celebrityAvailability(celebrity, eylem);
+                  if (!uygunluk.isAllowed) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        '${eylem.label}: ${uygunluk.reason}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    );
+                  }
+                  final int yuzde = controller.celebrityChancePercent(
+                    celebrity,
+                    eylem,
+                  );
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            '${eylem.label} · karşılık ihtimali ~%$yuzde',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        FilledButton.tonal(
+                          key: Key('unlu_${celebrity.id}_${eylem.name}'),
+                          onPressed: () => onContact(eylem),
+                          child: const Text('Gönder'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

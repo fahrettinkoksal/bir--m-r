@@ -173,6 +173,8 @@ void main() {
         c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 20; i++) {
           resolvePendingEvents(c);
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(c);
           c.ageUp();
           final List<String> ids =
               c.state!.people.map((Person p) => p.id).toList();
@@ -192,6 +194,8 @@ void main() {
         c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 20; i++) {
           resolvePendingEvents(c);
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(c);
           c.ageUp();
           for (final Person p in c.state!.people) {
             if (p.schoolTie != null) {

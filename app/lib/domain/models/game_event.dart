@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
+import '../../data/company_catalog.dart';
 import '../../data/item_catalog.dart';
+import '../economy/financial_strain.dart';
 import 'relation.dart';
 
 /// Olayın hangi yaşam alanından geldiği (D-023).
@@ -43,6 +45,11 @@ class EventRequirement {
     this.requiresSocialAccount = false,
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
+    this.requiresTenant = false,
+    this.forbidsProperty = false,
+    this.maxComfort,
+    this.minComfort,
+    this.forbidsVehicle = false,
     this.requiresMinYearsInJob = 0,
     this.minFame = 0,
     this.requiresTripMemory = false,
@@ -54,11 +61,44 @@ class EventRequirement {
     this.minPetAge = 0,
     this.minPetYearsTogether = 0,
     this.requiresActiveHobby = false,
+    this.requiresOpenCase = false,
+    this.requiresRecord = false,
+    this.requiresReleased = false,
+    this.requiresPortfolio = false,
+    this.requiresCompanyStatus,
+    this.minNetWorth,
+    this.requiresCrisis = false,
+    this.requiresHotAsset,
+    this.requiresHotAssetHeat = 68,
+    this.requiresStrainedCompany = false,
+    this.requiresThrivingCompany = false,
+    this.forbidsPortfolio = false,
+    this.requiresLetProperty = false,
+    this.requiresVacantProperty = false,
   });
 
   /// Paket 39: bu olay yalnızca bu hobiyle uğraşmış oyuncuya çıkar.
   ///
   /// Hobi geçmişi **gerçek kayıttan** okunur; uydurulmaz.
+  /// Olayın çıkabileceği **en rahat** mali kademe (D-092).
+  ///
+  /// Yoksulluk anlatan olaylar buna bağlanır: cüzdanında milyonlar olan
+  /// oyuncuya "ay sonunu zor getirdin" çıkmaz. `null` ise kısıt yoktur.
+  final FinancialComfort? maxComfort;
+
+  /// Olayın çıkabileceği **en dar** mali kademe (D-092).
+  ///
+  /// Varlık gerektiren olaylar buna bağlanır. `null` ise kısıt yoktur.
+  final FinancialComfort? minComfort;
+
+  /// Oyuncunun **hiç konutu olmaması** gerekiyor mu? (D-085)
+  ///
+  /// Eşin ev istediği olay, zaten evi olan oyuncuya çıkmaz.
+  final bool forbidsProperty;
+
+  /// Oyuncunun **hiç aracı olmaması** gerekiyor mu? (D-085)
+  final bool forbidsVehicle;
+
   final String? requiredHobbyId;
 
   /// prototypeOnly: hobinin kaç yıl sürmüş olması gerektiği.
@@ -70,6 +110,61 @@ class EventRequirement {
   /// Olay yalnızca **yaşayan ve hanede olan** bir evcil hayvanı olan
   /// oyuncuya çıkar (Paket 40). Metindeki `{hayvan}` o hayvanın gerçek
   /// adıyla doldurulur.
+  /// Olay yalnızca **gerçekten yatırımı olan** oyuncuya çıksın (D-162).
+  ///
+  /// Portföyü olmayana "hisseler düştü, ne yapacaksın" sorulmaz.
+  final bool requiresPortfolio;
+
+  /// **Şirket durumu kapısı** (Paket AD, §4).
+  ///
+  /// Doluysa, olay yalnızca sepette bu durumda **en az bir şirket varsa**
+  /// sunulur. Sebebi: Paket AC'de bu olayların metni şirketi adıyla
+  /// anlatıyordu ama olay şirketin gerçek hâline bakmıyordu — oyuncu
+  /// tamamen sağlıklı bir şirket için "konkordato başvurdu" haberi
+  /// okuyabiliyordu. §4 bunu istedi: "olaylar state'ten doğsun."
+  final CompanyStatus? requiresCompanyStatus;
+
+  /// **En düşük net servet** (₺) — servet seviyesine açılan hayat
+  /// (Paket AD, §13, §17).
+  ///
+  /// Zengin oyuncunun hayatı asgari ücretliyle aynı hissettirmemeli:
+  /// belirli servet seviyelerinde farklı fırsatlar, farklı aile talepleri
+  /// ve farklı yaşam tarzı olayları çıkar. Net servet **portföy ve mal
+  /// dahil, borç düşülmüş** okunur (`NetWorth.of`).
+  final int? minNetWorth;
+
+  /// Piyasa gerçekten kriz/panik hâlinde mi olsun (Paket AD, §6)?
+  ///
+  /// Panik olayını sakin bir yılda göstermek oyuncuya yalan söylemek olur.
+  final bool requiresCrisis;
+
+  /// Bu varlığın değerleme ısısı yüksek olsun (Paket AD, §7).
+  ///
+  /// FOMO olayı **gerçekten** ısınmış piyasada çıksın. Isı oyuncuya
+  /// gösterilmiyor; oyuncu yalnızca "herkes bundan bahsediyor" cümlesini
+  /// görüyor ve zirveyi önceden bilemiyor.
+  final String? requiresHotAsset;
+
+  /// [requiresHotAsset] için gereken en düşük ısı.
+  final int requiresHotAssetHeat;
+
+  /// Sepette **zorda** bir şirket olmasını ister (gizli göstergelerden).
+  final bool requiresStrainedCompany;
+
+  /// Sepette **iyi giden** bir şirket olmasını ister.
+  final bool requiresThrivingCompany;
+
+  /// Olay yalnızca **hiç yatırımı olmayan** oyuncuya çıksın.
+  final bool forbidsPortfolio;
+
+  /// Olay yalnızca **kiracısı olan** ev sahibine çıksın (D-163).
+  ///
+  /// Kiracısı olmayana "kiracın aradı" denmez.
+  final bool requiresLetProperty;
+
+  /// Olay yalnızca **boş, kiraya verilmeyi bekleyen** evi olana çıksın.
+  final bool requiresVacantProperty;
+
   final bool requiresLivingPet;
 
   /// Hayvanın kendi yaşı en az kaç olmalı?
@@ -80,6 +175,23 @@ class EventRequirement {
 
   /// Hobi **hâlâ sürüyor** sayılmalı mı? (Uzun süredir bırakılmışsa çıkmaz.)
   final bool requiresActiveHobby;
+
+  /// Süren bir adli dosya (soruşturma ya da dava) gerekir mi? (D-128)
+  ///
+  /// İfade ve bekleyiş olayları bunu kullanır; dosyası olmayana
+  /// "mahkemeyi bekliyorsun" denmez.
+  final bool requiresOpenCase;
+
+  /// Sabıka kaydı gerekir mi? (D-128)
+  ///
+  /// Sabıkası olmayan oyuncuya "kayıt var" olayı çıkmaz.
+  final bool requiresRecord;
+
+  /// Hapisten **çıkmış** olmak gerekir mi? (D-128)
+  ///
+  /// Tahliye sonrası olayları içindir; hiç içeri girmemiş oyuncuya
+  /// çıkmaz. İçerideyken de çıkmaz.
+  final bool requiresReleased;
 
   final int minAge;
   final int maxAge;
@@ -169,6 +281,13 @@ class EventRequirement {
   /// İşsiz oyuncuya iş yerinde geçen olay çıkmaz (Paket 9).
   final bool requiresEmployed;
 
+  /// Oyuncunun **kirada** yaşıyor olmasını gerektirir.
+  ///
+  /// Ev sahibi, kira zammı ve depozito gibi olaylar içindir. Kendi
+  /// evinde oturan ya da ailesinin yanında yaşayan oyuncuya "ev sahibi
+  /// aradı" denmez.
+  final bool requiresTenant;
+
   /// Şu anki işte geçmiş olması gereken en az yıl.
   ///
   /// İşe girdiği gün "yıllardır buradasın" denmesin diye kullanılır.
@@ -179,6 +298,30 @@ class EventRequirement {
   /// Devam olayları bunu kullanır: yıllar önce savunduğun arkadaş, yıllar
   /// sonra **aynı kişi** olarak karşına çıkar. Kişi artık yoksa olay çıkmaz.
   final String? personRole;
+}
+
+/// Bir olay seçiminin portföye **gerçek** etkisi (Paket AD, §AD/3).
+///
+/// **Neden var.** Paket AC'de panik ve balon olayları vardı ama
+/// seçeneklerinin tek etkisi mutluluktu: "sat", "bekle", "al" seçmek
+/// portföyde hiçbir şey değiştirmiyordu. Yani karar değil, süslü metindi.
+/// §6 ve §7 bunu istedi — oyuncu panikte ve balonda gerçekten karar
+/// verebilsin.
+///
+/// **İkinci bir ekonomi motoru kurulmuyor:** hamle `InvestmentEngine`'in
+/// kendi al/sat yollarından geçiyor, yani komisyon, kazanç kesintisi,
+/// işlem durması ve maliyet esası aynen işliyor. Aynı kalıp suç
+/// seçimlerinde de var (`crimeId` -> `LegalEngine`).
+enum PortfolioAction {
+  /// Pozisyonun bir kısmını sat. Zararı gerçekleştirir; daha fazla
+  /// düşmekten korur ama toparlanmayı da kaçırır.
+  satKismi,
+
+  /// Cüzdandaki nakdin bir kısmıyla al. Dip olabilir, olmayabilir.
+  alKismi,
+
+  /// **Kâr al:** yalnızca pozisyon kârdaysa bir kısmını sat.
+  karAl,
 }
 
 /// Bir olay seçeneği ve sonuçları.
@@ -203,6 +346,10 @@ class EventChoice {
     this.startsSchoolFriendship = false,
     this.startsFriendship = false,
     this.rememberPersonAs,
+    this.crimeId,
+    this.portfolioAction,
+    this.portfolioTypeId = 'hisse',
+    this.portfolioShare = 0.25,
   });
 
   final String id;
@@ -210,6 +357,23 @@ class EventChoice {
 
   /// Seçimden sonra gösterilen ve hayat günlüğüne yazılan özgün metin.
   final String resultText;
+
+  /// Bu seçim hukuki bir sürecin önünü açıyorsa o olayın kimliği
+  /// ([CrimeType.id], D-128).
+  ///
+  /// Seçim yapılınca motor dosyayı açar: idari ceza kesilir ya da
+  /// soruşturma başlar. **Sonucu seçim değil, süreç belirler**; oyuncuya
+  /// "şunu seçersen yakalanmazsın" diyen hiçbir bilgi verilmez.
+  final String? crimeId;
+
+  /// Bu seçim portföyde gerçekten bir şey yapıyorsa hamlesi.
+  final PortfolioAction? portfolioAction;
+
+  /// Hamlenin uygulanacağı yatırım türü.
+  final String portfolioTypeId;
+
+  /// Hamlenin büyüklüğü: pozisyonun (ya da nakdin) payı.
+  final double portfolioShare;
 
   final int happiness;
   final int health;
@@ -348,10 +512,18 @@ class ActiveEvent {
     required this.text,
     required this.choices,
     this.personId,
+    this.isContinuation = false,
   });
 
   final String eventId;
   final EventCategory category;
+
+  /// Bu olay geçmiş bir seçimin devamı mı?
+  ///
+  /// Faho'nun Q-114 kararı: oyuncuya büyük bir "QUEST" etiketi
+  /// konmayacak ama devam olayında küçük, doğal bir işaret olabilir.
+  /// Ekranda "Geçmişten" rozeti olarak görünür.
+  final bool isContinuation;
 
   /// Yer tutucuları doldurulmuş, ekranda gösterilecek metin.
   final String text;

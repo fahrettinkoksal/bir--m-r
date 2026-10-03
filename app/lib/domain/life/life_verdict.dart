@@ -1,8 +1,14 @@
 /// Hayat sonu değerlendirmesi: "nasıl bir hayattı?"
 library;
 
+import '../../text/turkish_text.dart';
+import '../career/craft_mastery.dart';
+import '../economy/net_worth.dart';
 import '../models/book_progress.dart';
 import '../models/career.dart';
+import '../../data/crime_catalog.dart';
+import '../models/business.dart';
+import '../models/criminal_record.dart';
 import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../../data/martial_arts_catalog.dart';
@@ -196,11 +202,14 @@ abstract final class LifeVerdictBuilder {
     puan += (calisilanYil ~/ 2).clamp(0, 34);
     puan += (state.career.level * 5).clamp(0, 18);
     if (state.career.isRetired) puan += 10;
-    if (state.player.wallet >= 250000) {
+    // **Yatırım da paradır** (D-162). Bütün parasını portföye koymuş
+    // oyuncu "cüzdanı boş" diye yoksul sayılmaz.
+    final int eldeki = NetWorth.liquid(state);
+    if (eldeki >= 250000) {
       puan += 16;
-    } else if (state.player.wallet >= 50000) {
+    } else if (eldeki >= 50000) {
       puan += 8;
-    } else if (state.player.wallet > 0) {
+    } else if (eldeki > 0) {
       puan += 3;
     }
     if (state.career.milestones.isNotEmpty) puan += 6;
@@ -209,6 +218,13 @@ abstract final class LifeVerdictBuilder {
     // veriliyordu ama değerlendirme bunu hiç görmüyordu: terhis olmuş
     // bir binbaşı ile hiç askere gitmemiş biri aynı sayılıyordu.
     puan += _askerlikPuani(state);
+
+    // Meslekte ustalık (D-155): aynı işte otuz yıl çalışmış biri ile üç
+    // yıl çalışmış biri değerlendirmede de aynı sayılmamalı. Basamak
+    // **ulaşıldığı için** sayılır; iş değişmişse en yüksek basamak
+    // geçmişten okunur.
+    puan += (_enYuksekUstalik(state, olumYasi) * prototypeOnlyMasteryPoint)
+        .clamp(0, prototypeOnlyMasteryMax);
 
     final String not;
     if (gecmis.isEmpty && state.military.status == MilitaryStatus.tamamlandi) {
@@ -220,12 +236,44 @@ abstract final class LifeVerdictBuilder {
     } else {
       not = '${gecmis.length} işte toplam $calisilanYil yıl çalıştın.';
     }
+    final int ustalik = _enYuksekUstalik(state, olumYasi);
+    final String notTam = ustalik >= MasteryStage.usta.index
+        ? '$not Mesleğinde '
+            '${trLower(MasteryStage.values[ustalik].label)} oldun.'
+        : not;
     return VerdictAxis(
       id: 'emek',
       label: 'Emek',
       value: puan.clamp(0, 100),
-      note: not,
+      note: notTam,
     );
+  }
+
+  /// prototypeOnly: her ustalık basamağının Emek eksenine katkısı.
+  static const int prototypeOnlyMasteryPoint = 4;
+
+  /// prototypeOnly: ustalığın Emek eksenine en fazla katkısı.
+  static const int prototypeOnlyMasteryMax = 16;
+
+  /// Hayat boyunca ulaşılan **en yüksek** ustalık basamağının sırası.
+  ///
+  /// Süren iş ve biten kayıtlar birlikte bakılır; iş değiştirmek kazanılan
+  /// ustalığı silmez, çünkü o yıllar gerçekten yaşandı.
+  static int _enYuksekUstalik(GameState state, int olumYasi) {
+    int enYuksek = 0;
+    for (final JobHistoryEntry e in state.career.history) {
+      final int bitis = e.endedAtAge ?? olumYasi;
+      final int yil = (bitis - e.startedAtAge).clamp(0, 80);
+      final int basamak = CraftMastery.stageForYears(yil).index;
+      if (basamak > enYuksek) enYuksek = basamak;
+    }
+    final int? basla = state.career.startedAtAge;
+    if (basla != null) {
+      final int basamak =
+          CraftMastery.stageForYears((olumYasi - basla).clamp(0, 80)).index;
+      if (basamak > enYuksek) enYuksek = basamak;
+    }
+    return enYuksek;
   }
 
   /// Deneyim: gezdiğin yerler, okuduğun kitaplar, edindiğin şeyler.
@@ -389,6 +437,55 @@ abstract final class LifeVerdictBuilder {
         age: ilkIs.startedAtAge,
         text: 'İlk işine girdin: ${ilkIs.title}.',
       ));
+    }
+
+    // Kendi işi (D-132): kurmak da batmak da hayatın somut anı.
+    for (final Business b in state.businesses) {
+      final String ad = b.type?.name ?? 'kendi işini';
+      ilkler.add(VerdictFirst(
+        age: b.startedAtAge,
+        text: '$ad açtın.',
+      ));
+      final int? kapanis = b.closedAtAge;
+      if (kapanis == null) continue;
+      ilkler.add(VerdictFirst(
+        age: kapanis,
+        text: b.endReason == BusinessEndReason.batti
+            ? '$ad battı.'
+            : '$ad devrettin.',
+      ));
+    }
+
+    // Adli geçmiş anılır ama **puanlanmaz** (D-128). "Suç işledi = kötü
+    // insan" gibi bir ahlaki yargı yok; yalnızca somut geçmiş yazılır.
+    for (final CriminalCase dosya in state.legal.cases) {
+      if (dosya.stage != CaseStage.karar) continue;
+      final int? yas = dosya.decidedAtAge;
+      final CrimeType? suc = dosya.crime;
+      if (yas == null || suc == null) continue;
+      switch (dosya.verdict) {
+        case Verdict.hapis:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: '${suc.label} nedeniyle '
+                '${dosya.prisonYears} yıl cezaevinde kaldın.',
+          ));
+        case Verdict.beraat:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: '${suc.label} dosyasından beraat ettin.',
+          ));
+        case Verdict.paraCezasi:
+        case Verdict.erteleme:
+        case Verdict.uyari:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: 'Bir ${suc.category.label.toLowerCase()} dosyası '
+                'nedeniyle mahkemeye çıktın.',
+          ));
+        case Verdict.yok:
+          break;
+      }
     }
 
     final TripRecord? ilkGezi = state.trips.isEmpty
