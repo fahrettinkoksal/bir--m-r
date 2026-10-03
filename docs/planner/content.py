@@ -114,11 +114,18 @@ def kayitlar(metin: str, sinif: str) -> list:
         if kapanis < 0:
             continue
         govde = metin[acilis + 1:kapanis]
-        kayit = {}
+        # Yapıcı *tanımı* (`const Foo(this.a, this.b)`) bir kayıt değildir.
+        if re.search(r'(^|[,{])\s*(required\s+)?this\.', govde):
+            continue
+        kayit, sira = {}, 0
         for arg in _ust_duzey_parcala(govde):
             a = re.match(r'\s*([A-Za-z_]\w*)\s*:\s*(.+)', arg, re.S)
             if a:
                 kayit[a.group(1)] = _deger(a.group(2))
+            elif arg.strip():
+                # Konumsal argüman: `FortuneReading('metin', 5)`.
+                kayit['p%d' % sira] = _deger(arg)
+                sira += 1
         if kayit:
             out.append(kayit)
     return out
@@ -144,11 +151,57 @@ def enumlar(metin: str, ad: str) -> list:
             if d2:
                 out.append({'id': d2.group(1), 'name': d2.group(1), 'args': []})
             continue
-        args = [_deger(a) for a in _ust_duzey_parcala(d.group(2))]
-        args = [a for a in args if isinstance(a, str) and a and
-                not a.startswith('Icons.') and not a.startswith('Color')]
-        out.append({'id': d.group(1), 'name': args[0] if args else d.group(1),
-                    'args': args[1:]})
+        adli, args = {}, []
+        for ham in _ust_duzey_parcala(d.group(2)):
+            a = re.match(r'\s*([A-Za-z_]\w*)\s*:\s*(.+)', ham, re.S)
+            if a:
+                adli[a.group(1)] = _deger(a.group(2))
+            else:
+                args.append(_deger(ham))
+        temiz = lambda v: (isinstance(v, str) and v and
+                           not v.startswith('Icons.') and not v.startswith('Color'))
+        args = [a for a in args if temiz(a)]
+        if adli:
+            ad = next((adli[k] for k in ('label', 'name', 'title', 'text')
+                       if temiz(adli.get(k))), d.group(1))
+            kalan = [str(v) for k, v in adli.items()
+                     if k not in ('label', 'name', 'title') and temiz(v)]
+            out.append({'id': str(adli.get('id', d.group(1))), 'name': str(ad),
+                        'args': kalan[:4]})
+        else:
+            out.append({'id': d.group(1), 'name': args[0] if args else d.group(1),
+                        'args': args[1:]})
+    return out
+
+
+def metin_listeleri(metin: str, adlar: list) -> list:
+    """`const List<String> kFoo = <String>[ '...', ... ];` listelerini okur."""
+    out = []
+    for ad in adlar:
+        m = re.search(r'List<String>\s+' + ad + r'\s*=\s*(?:const\s*)?'
+                      r'<String>\s*\[', metin)
+        if not m:
+            continue
+        acilis = metin.index('[', m.end() - 1)
+        son = _blok_sonu(metin, acilis)
+        if son < 0:
+            continue
+        for p in _ust_duzey_parcala(metin[acilis + 1:son]):
+            d = _deger(p)
+            if isinstance(d, str) and len(d) > 1:
+                out.append({'grup': ad, 'metin': d})
+    return out
+
+
+def sabitler(metin: str) -> list:
+    """`static const <tip> ad = deger;` bildirimlerini okur."""
+    out = []
+    for m in re.finditer(r'(?:static\s+)?const\s+([A-Za-z_][\w<>, ?]*?)\s+'
+                         r'([A-Za-z_]\w*)\s*=\s*([^;]+);', metin):
+        d = re.sub(r'\s+', ' ', m.group(3)).strip()
+        if d.startswith('<') or d.startswith('['):
+            continue
+        out.append({'tip': m.group(1).strip(), 'ad': m.group(2), 'deger': d[:120]})
     return out
 
 
@@ -321,6 +374,48 @@ SETLER = [
          desc='Hobide ilerleme kademeleri ve gereken deneyim.',
          ad=['label'], alt=['memory'],
          sayi=[('Deneyim', 'experience', '')]),
+    dict(key='interview', name='Mülakat soruları', file='interview_catalog.dart',
+         cls='InterviewQuestion', mod='JOB',
+         desc='İşe alım mülakatlarında sorulan sorular ve doğru cevaplar.',
+         ad=['prompt', 'question', 'text'], alt=['explanation', 'note'], sayi=[]),
+    dict(key='bizincident', name='İşletme olayları',
+         file='business_incident_catalog.dart', cls='BusinessIncident', mod='BIZ',
+         desc='İşletmenin başına gelenler: denetim, afet, personel sorunu, '
+              'fırsat.',
+         ad=['title', 'label', 'name'], alt=['text', 'description'], sayi=[]),
+    dict(key='circuit', name='Dövüş turnuvaları',
+         file='combat_circuit_catalog.dart', cls='CombatCircuit', mod='SPR',
+         desc='Katılınabilen dövüş organizasyonları, unvanları ve kademeleri.',
+         ad=['titleLabel', 'proLabel', 'artId'], alt=['proLabel'], sayi=[]),
+    dict(key='coffee', name='Kahve falı okumaları', file='fortune_catalog.dart',
+         cls='FortuneReading', mod='ACT',
+         desc='Fal metinleri. Oyun içi eğlence; gerçek bir iddiası yok.',
+         ad=['p0', 'text'], alt=['p1'], sayi=[]),
+    dict(key='tarot', name='Tarot kartları', file='fortune_catalog.dart',
+         cls='TarotCard', mod='ACT', desc='Fal menüsündeki kartlar ve anlamları.',
+         ad=['p0', 'name'], alt=['p1', 'text'], sayi=[]),
+    dict(key='zodiac', name='Astroloji dönemleri', file='fortune_catalog.dart',
+         cls='ZodiacPeriod', mod='CORE',
+         desc='Fal ve burç içeriğinde geçen dönemler (Merkür retrosu gibi) ve '
+              'etkiledikleri elementler.',
+         ad=['name', 'label'], alt=['text', 'description'], sayi=[]),
+    dict(key='media', name='Medya fırsatları', file='media_catalog.dart',
+         cls='MediaOpportunity', mod='SOC',
+         desc='Ün arttıkça gelen program, röportaj ve iş birliği teklifleri.',
+         ad=['title', 'label', 'name'], alt=['description', 'text'], sayi=[]),
+    dict(key='licenseq', name='Ehliyet sınavı soruları',
+         file='license_questions.dart', cls='LicenseQuestion', mod='VEH',
+         desc='Sınavda sorulan trafik soruları ve açıklamaları.',
+         ad=['prompt', 'question', 'text'], alt=['explanation'], sayi=[]),
+    dict(key='lottery', name='Piyango ikramiyeleri', file='lottery_catalog.dart',
+         cls='LotteryPrize', mod='ECO',
+         desc='Çekiliş ikramiyeleri ve kazanma ihtimalleri.',
+         ad=['label', 'name'], alt=['description'],
+         sayi=[('İkramiye', ['amount', 'prize', 'value'], '₺')]),
+    dict(key='edutrack', name='Lise alanları', file='education_tracks.dart',
+         cls='EducationTrackInfo', mod='EDU',
+         desc='Seçilebilen lise alanları ve açtığı bölümler.',
+         ad=['name', 'label'], alt=['description'], sayi=[]),
 ]
 
 ENUMLAR = [
@@ -330,6 +425,39 @@ ENUMLAR = [
     dict(key='military', name='Askerlik yolları', file='military_catalog.dart',
          en='MilitaryTrack', mod='CORE',
          desc='Askerlik seçenekleri: süre, koşul ve sonuçları.'),
+    dict(key='licensetype', name='Ehliyet türleri', file='license_catalog.dart',
+         en='LicenseType', mod='VEH',
+         desc='Motosiklet ve otomobil ehliyeti; birbirinden bağımsız.'),
+    dict(key='salaryband', name='Maaş bantları', file='economy.dart',
+         en='SalaryBand', mod='ECO',
+         desc='Mesleklerin gelir bantları; bütün maaşlar bu ölçeğe oturur.'),
+    dict(key='draw', name='Çekiliş türleri', file='lottery_catalog.dart',
+         en='LotteryDraw', mod='ECO', desc='Piyango çekiliş biçimleri.'),
+    dict(key='edutrackenum', name='Eğitim yolları', file='education_tracks.dart',
+         en='EducationTrack', mod='EDU', desc='Eğitim kademeleri ve alanlar.'),
+    dict(key='petgrup', name='Evcil hayvan türleri', file='pet_catalog.dart',
+         en='PetGroup', mod='ACT', desc='Sahiplenilebilen hayvan grupları.'),
+]
+
+# Düz metin listeleri: isim havuzları, tanışma uygulaması satırları.
+METINLER = [
+    dict(key='finger', name='Tanışma uygulaması metinleri',
+         file='finger_catalog.dart', mod='FAM',
+         desc='Profil cümleleri, ilgi alanları, eşleşme ve ret satırları.',
+         listeler=['kFingerBios', 'kFingerInterests', 'kFingerMatchLines',
+                   'kFingerNoMatchLines']),
+    dict(key='names', name='İsim havuzu', file='name_pool.dart', mod='CORE',
+         desc='Karakter ve evcil hayvan üretiminde kullanılan isimler.',
+         listeler=['kadinIsimleri', 'erkekIsimleri', 'evcilHayvanIsimleri',
+                   'evcilHayvanTurleri', 'meslekler']),
+]
+
+# Sayı sabiti tutan dosyalar: ekonomi çıpası.
+SABITLER = [
+    dict(key='economy', name='2026 ekonomi çıpası', file='economy.dart',
+         mod='ECO',
+         desc='Bütün fiyatların, maaşların ve giderlerin dayandığı taban '
+              'sayılar. Bir yerde değişirse oyunun tamamı kayar.'),
 ]
 
 def icerik() -> list:
@@ -369,6 +497,28 @@ def icerik() -> list:
         out.append({'key': s['key'], 'name': s['name'], 'mod': s.get('mod', ''),
                     'desc': s['desc'], 'file': DATA + '/' + s['file'],
                     'count': len(kayit), 'items': kayit})
+    for t in METINLER:
+        metin = _oku(t['file'])
+        ham = metin_listeleri(metin, t['listeler']) if metin else []
+        if not ham:
+            continue
+        out.append({'key': t['key'], 'name': t['name'], 'mod': t.get('mod', ''),
+                    'desc': t['desc'], 'file': DATA + '/' + t['file'],
+                    'count': len(ham),
+                    'items': [{'id': '', 'name': x['metin'][:160],
+                               'sub': x['grup'], 'nums': [], 'attrs': []}
+                              for x in ham]})
+    for sb in SABITLER:
+        metin = _oku(sb['file'])
+        ham = sabitler(metin) if metin else []
+        if not ham:
+            continue
+        out.append({'key': sb['key'], 'name': sb['name'], 'mod': sb.get('mod', ''),
+                    'desc': sb['desc'], 'file': DATA + '/' + sb['file'],
+                    'count': len(ham),
+                    'items': [{'id': x['ad'], 'name': x['ad'],
+                               'sub': x['tip'] + ' = ' + x['deger'],
+                               'nums': [], 'attrs': []} for x in ham]})
     for e in ENUMLAR:
         ham = enumlar(_oku(e['file']), e['en'])
         if not ham:

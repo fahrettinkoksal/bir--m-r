@@ -12,17 +12,25 @@ gömülüdür.
 | Yol haritası | Paketler zaman sırasında, tarih ve commit sayısıyla | `tasks.tsv` + git |
 | Görevler | Kanban panosu ve liste; modül/paket/durum filtresi | `tasks.tsv` |
 | Modüller | 18 ürün modülü; dosya, satır, test, görev, commit | `app/lib`, `app/test` |
-| Oyun içeriği | Meslek, eşya, aktivite, şehir, hastalık, şirket… | `app/lib/data/*.dart` |
+| Oyun içeriği | 43 katalog: meslek, eşya, aktivite, mülakat sorusu, işletme olayı, şehir, hastalık, şirket, fal, ehliyet sorusu, ekonomi çıpası… | `app/lib/data/*.dart` |
 | Olaylar | Bütün olay metinleri, seçenekleri ve yaş aralıkları | `app/lib/data/event_pool*.dart` |
-| Kararlar (D) | Kesinleşmiş kurallar | `DECISIONS.md` |
-| Sorular (Q) | Tasarım kuyruğu ve durumları | `docs/DESIGN_REVIEW_QUEUE.md` |
+| Ekranlar | Ekranlar ve yeniden kullanılan bileşenler | `app/lib/ui` |
+| Kararlar (D) | Kesinleşmiş kurallar + her kararın kodda geçtiği dosyalar | `DECISIONS.md`, `app/lib`, `app/test` |
+| Sorular (Q) | Tasarım kuyruğu, durumları ve kod bağlantıları | `docs/DESIGN_REVIEW_QUEUE.md` |
+| Onay bekleyen | `prototypeOnly` işaretli bütün denge sayıları: değeri, ne işe yaradığı, hangi dosyanın kaçıncı satırında | `app/lib` |
 | Fikir havuzu | Açık konular | `BACKLOG.md` |
+| Ölçümler | Yüzlerce tam hayat oynatılarak üretilmiş ölçüm tabloları | `PROJECT_STATUS.md` |
+| Testler | Hangi testin hangi sistemi koruduğu, test başlıklarıyla | `app/test` |
 | Hata kayıtları | Hata düzeltmesi commit'leri | git |
 | Dokümanlar | Belgeler ve ne işe yaradıkları | `*.md`, `docs/*.md` |
 | Hareketler | Bütün commit geçmişi | git |
 
 `Ctrl+K` her şeyde arar: `D-116`, `Q-189`, bir commit kısa kodu, bir meslek
-adı ya da bir olay metni.
+adı, bir olay metni, bir `prototypeOnly` sayısı ya da bir test dosyası.
+
+**Onay bekleyen sayılar** bölümü özellikle işe yarar: oyunun çalıştığı ama
+`DECISIONS.md`'de kesin kural olmayan bütün denge değerleri orada, kod
+açıklamalarıyla birlikte. Hangi sayının onayını bekliyorum sorusunun cevabı.
 
 ## Tazeleme
 

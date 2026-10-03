@@ -243,6 +243,14 @@ select.field{cursor:pointer}
 .palhint{padding:9px 18px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-3);
   font-family:var(--f-mono);display:flex;gap:14px;flex-wrap:wrap}
 
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+.tbl th{text-align:left;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.tbl td:first-child{font-weight:600}
+.tbl tr:hover td{background:var(--panel-2)}
+.tblwrap{overflow-x:auto;margin:0 -4px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .empty{background:var(--panel);border:1px dashed var(--line);border-radius:var(--r);
   padding:34px 18px;text-align:center;color:var(--ink-2);font-size:13px}
 .more{display:block;margin:14px auto 0;background:var(--panel);border:1px solid var(--line);
@@ -375,11 +383,15 @@ var VIEWS=[
   {sep:true},
   {id:'icerik',    ad:'Oyun içeriği', ic:'▦', n:function(){return S.contentItems;}},
   {id:'olaylar',   ad:'Olaylar',     ic:'✉', n:function(){return S.events;}},
+  {id:'ekranlar',  ad:'Ekranlar',    ic:'▣', n:function(){return S.screens;}},
   {sep:true},
   {id:'kararlar',  ad:'Kararlar (D)',ic:'✓', n:function(){return D.decisions.length;}},
   {id:'sorular',   ad:'Sorular (Q)', ic:'?', n:function(){return D.questions.length;}},
+  {id:'bekleyen',  ad:'Onay bekleyen',ic:'◷', n:function(){return S.pendingNumbers;}},
   {id:'backlog',   ad:'Fikir havuzu',ic:'✦', n:function(){return D.backlog.length;}},
   {sep:true},
+  {id:'olcum',     ad:'Ölçümler',    ic:'∿', n:function(){return S.measureTables;}},
+  {id:'testler',   ad:'Testler',     ic:'⊹', n:function(){return D.tests.length;}},
   {id:'hatalar',   ad:'Hata kayıtları',ic:'⚑', n:function(){return S.bugCommits;}},
   {id:'dokuman',   ad:'Dokümanlar',  ic:'▤', n:function(){return D.docs.length;}},
   {id:'hareket',   ad:'Hareketler',  ic:'↻', n:function(){return D.commits.length;}}
@@ -427,15 +439,24 @@ function acGorev(t){
      ['Paketteki görev',(p.done||0)+' / '+(p.tasks||0)+' tamam'],
      ['Pakete ait commit',(p.commits||0)+(p.bugs?' · '+p.bugs+' hata düzeltmesi':''),true]]);
 }
+function kodBagi(id,tur){
+  var h=((D.crossRef||{})[tur]||{})[id]||[];
+  return h.length ? [['Kodda geçtiği yerler ('+h.length+')',h.join('\n'),true]]
+    : [['Kodda geçtiği yerler','Bu kimlik kaynak dosyalarda geçmiyor. '+
+        'Kural metinle anlatılmış ama kodda anılmamış olabilir.',true]];
+}
 function acKarar(d){
   ac(d.id,d.title, tag('t-ok','Kesin kural')+(d.fromQuestion?tag('t-mute',d.fromQuestion):''),
-    [['Karar',d.text]].concat(d.fromQuestion?[['Kaynak soru',d.fromQuestion+' — tasarım kuyruğunda tartışıldı, sonra karara bağlandı.',true]]:[]));
+    [['Karar',d.text]]
+    .concat(d.fromQuestion?[['Kaynak soru',d.fromQuestion+' — tasarım kuyruğunda tartışıldı, sonra karara bağlandı.',true]]:[])
+    .concat(kodBagi(d.id,'decisions')));
 }
 function acSoru(q){
   var alan=(q.sections||[]).map(function(b){ return [b.label,b.text]; });
   if(q.source) alan.push(['Kaynak',q.source,true]);
   if(!alan.length) alan.push(['Durum',q.rawState||'—',true]);
-  ac(q.id,q.title, tag(QS[q.state].c,QS[q.state].l)+(q.pack?mchip('Paket '+q.pack):''), alan);
+  ac(q.id,q.title, tag(QS[q.state].c,QS[q.state].l)+(q.pack?mchip('Paket '+q.pack):''),
+     alan.concat(kodBagi(q.id,'questions')));
 }
 function acCommit(c){
   ac(c.sha,c.subject, (c.bug?tag('t-warn','Hata düzeltmesi'):tag('t-mute','Geliştirme'))+
@@ -476,6 +497,10 @@ function palVeri(){
   D.commits.forEach(function(c){ out.push({k:c.sha,t:c.subject,g:'Commit',f:function(){acCommit(c);}}); });
   (D.content||[]).forEach(function(c){ c.items.forEach(function(i,ix){
     out.push({k:c.name,t:i.name,g:'İçerik',f:function(){acIcerik(c.key,ix);}}); }); });
+  (D.pending||[]).forEach(function(p,ix){
+    out.push({k:p.module,t:p.name+' = '+p.value,g:'Sayı',f:function(){acBekleyen(D.pending[ix]);}}); });
+  (D.tests||[]).forEach(function(t,ix){
+    out.push({k:t.module,t:t.name,g:'Test',f:function(){acTest(D.tests[ix]);}}); });
   (D.events||[]).forEach(function(e,ix){
     out.push({k:e.id,t:e.text.slice(0,70),g:'Olay',f:function(){acOlay(D.events[ix]);}}); });
   D.docs.forEach(function(x){ out.push({k:'DOC',t:x.path,g:'Doküman',f:function(){
@@ -553,7 +578,8 @@ function vOzet(){
     tile('Commit',S.commits,S.days+' günde · '+S.bugCommits+' hata düzeltmesi')+
     tile('Oyun içeriği',S.contentItems,S.contentSets+' katalog')+
     tile('Olay',S.events,S.eventPools+' havuzda')+
-    tile('Test',S.testFiles,Math.round(S.testLines/1000)+'B satır test kodu')+
+    tile('Onay bekleyen sayı',S.pendingNumbers,S.pendingFiles+' dosyada · prototypeOnly')+
+    tile('Test',S.testCases,S.testFiles+' dosya · '+Math.round(S.testLines/1000)+'B satır')+
     tile('Doküman',S.docs,S.docLines.toLocaleString('tr')+' satır belge')+
     '</div>';
 
@@ -972,10 +998,129 @@ function acOlay(e){
      ['Havuz','app/lib/data/event_pool'+(e.pool==='ana'?'':'_'+e.pool)+'.dart',true]]);
 }
 
+/* ---------- ONAY BEKLEYEN SAYILAR ---------- */
+var bekLimit=120;
+function vBekleyen(){
+  var q=tr(st.q), fm=F('mod');
+  var list=(D.pending||[]).filter(function(p){
+    if(fm&&p.module!==fm) return false;
+    return !q || tr(p.name+' '+p.value+' '+p.doc+' '+p.file).indexOf(q)>=0;
+  });
+  var h=araclar('Sayı, dosya ya da açıklamada ara…',
+    [{id:'mod',hepsi:'Tüm modüller',ops:modOps()}],
+    list.length+' / '+S.pendingNumbers+' sayı');
+  h+='<div class="note"><span><b>Bunlar senin onayını bekleyen denge '+
+    'değerleri.</b> Hepsi koda <code>prototypeOnly</code> diye işaretlenmiş: '+
+    'oyun bu sayılarla çalışıyor ama hiçbiri <code>DECISIONS.md</code>\u2019de '+
+    'kesin kural değil. '+S.pendingFiles+' dosyaya dağılmış durumda.</span></div>';
+  if(!list.length) return h+'<p class="empty">Eşleşen sayı yok.</p>';
+  var kesit=list.slice(0,bekLimit);
+  h+='<div class="rows" style="margin-top:12px">'+kesit.map(function(p,i){
+    return '<button class="row" type="button" data-pend="'+(D.pending.indexOf(p))+'">'+
+      '<span class="rid" style="color:'+modHue(p.module)+'">'+E(p.module)+'</span>'+
+      '<span class="rbody"><span class="rt" style="font-family:var(--f-mono);font-size:12.5px">'+
+      E(p.name)+' <span style="color:var(--ink-3)">=</span> '+E(p.value)+'</span>'+
+      '<span class="rm">'+E(p.doc?p.doc.slice(0,150):p.file.split('/').slice(-1)[0])+'</span></span>'+
+      '</button>';
+  }).join('')+'</div>';
+  if(list.length>bekLimit) h+='<button class="more" id="more" type="button">Daha fazla ('+
+    Math.min(120,list.length-bekLimit)+')</button>';
+  return h;
+}
+function acBekleyen(p){
+  ac('ONAY BEKLİYOR', p.name, mchip(p.module)+tag('t-wait','prototypeOnly'),
+    [['Değer',p.type+' '+p.name+' = '+p.value,true],
+     ['Ne işe yarıyor',p.doc||'Kodda açıklama satırı yok.'],
+     ['Nerede',p.file+':'+p.line,true],
+     ['Durum','Bu sayı onaylanmadı. Oyun onunla çalışıyor ama DECISIONS.md\u2019de '+
+      'kesin kural değil; değişebilir.']]);
+}
+
+/* ---------- ÖLÇÜMLER ---------- */
+function vOlcum(){
+  var q=tr(st.q);
+  var list=(D.measures||[]).filter(function(m){
+    if(!q) return true;
+    var hepsi=m.title+' '+m.section+' '+m.head.join(' ')+' '+
+      m.rows.map(function(r){return r.join(' ');}).join(' ');
+    return tr(hepsi).indexOf(q)>=0;
+  });
+  var h=araclar('Ölçümde ara… (ölüm yaşı, payback, ROI…)',null,
+    list.length+' / '+(D.measures||[]).length+' tablo');
+  h+='<p class="lead" style="margin:-6px 0 14px;color:var(--ink-2);font-size:12.5px">'+
+    'Yüzlerce tam hayat oynatılarak üretilmiş gerçek ölçümler. '+
+    '<code>PROJECT_STATUS.md</code> içinden okundu; oranlar güzelleştirilmedi, '+
+    'yalnızca ölçüldü.</p>';
+  if(!list.length) return h+'<p class="empty">Eşleşen ölçüm yok.</p>';
+  h+=list.map(function(m){
+    return '<section class="card sect"><h2>'+E(m.title)+'</h2>'+
+      (m.section&&m.section!==m.title?'<p class="lead">'+E(m.section)+'</p>':'')+
+      '<div class="tblwrap"><table class="tbl"><thead><tr>'+
+      m.head.map(function(c){return '<th>'+E(c)+'</th>';}).join('')+
+      '</tr></thead><tbody>'+m.rows.map(function(r){
+        return '<tr>'+r.map(function(c){
+          return '<td'+(/^[\d.,%₺\-+ ]+$/.test(c)?' class="num"':'')+'>'+E(c)+'</td>';
+        }).join('')+'</tr>';
+      }).join('')+'</tbody></table></div></section>';
+  }).join('');
+  return h;
+}
+
+/* ---------- TESTLER ---------- */
+function vTestler(){
+  var q=tr(st.q), fm=F('mod');
+  var list=(D.tests||[]).filter(function(t){
+    if(fm&&t.module!==fm) return false;
+    return !q || tr(t.name+' '+t.groups.join(' ')+' '+t.titles.join(' ')).indexOf(q)>=0;
+  });
+  var h=araclar('Test dosyası ya da test adında ara…',
+    [{id:'mod',hepsi:'Tüm modüller',ops:modOps()}],
+    list.length+' / '+(D.tests||[]).length+' dosya · '+S.testCases+' test');
+  h+='<p class="lead" style="margin:-6px 0 14px;color:var(--ink-2);font-size:12.5px">'+
+    'Her sistemi koruyan testler. Bir dosyaya tıklayınca içindeki test '+
+    'başlıkları açılır.</p>';
+  if(!list.length) return h+'<p class="empty">Eşleşen test yok.</p>';
+  h+='<div class="rows">'+list.map(function(t,i){
+    return '<button class="row" type="button" data-test="'+(D.tests.indexOf(t))+'">'+
+      '<span class="rid" style="color:'+modHue(t.module)+'">'+E(t.module)+'</span>'+
+      '<span class="rbody"><span class="rt" style="font-family:var(--f-mono);font-size:12.5px">'+
+      E(t.name)+'</span><span class="rm">'+E(t.groups.slice(0,3).join(' · ')||t.file)+'</span></span>'+
+      '<span class="rr"><span class="tag t-mute"><i></i>'+t.tests+' test</span></span></button>';
+  }).join('')+'</div>';
+  return h;
+}
+function acTest(t){
+  ac('TEST', t.name, mchip(t.module)+tag('t-ok',t.tests+' test'),
+    [['Gruplar',t.groups.length?t.groups.join('\n'):'—'],
+     ['Test başlıkları',t.titles.length?t.titles.join('\n'):'—'],
+     ['Dosya',t.file+'  ·  '+t.lines.toLocaleString('tr')+' satır',true]]);
+}
+
+/* ---------- EKRANLAR ---------- */
+function vEkranlar(){
+  var q=tr(st.q);
+  var list=(D.screens||[]).filter(function(x){
+    return !q || tr(x.name+' '+x.kind+' '+x.classes.join(' ')).indexOf(q)>=0; });
+  var h=araclar('Ekran ya da bileşen ara…',null,list.length+' / '+(D.screens||[]).length+' dosya');
+  h+='<p class="lead" style="margin:-6px 0 14px;color:var(--ink-2);font-size:12.5px">'+
+    'Oyuncunun gördüğü her şey: ekranlar ve yeniden kullanılan bileşenler.</p>';
+  if(!list.length) return h+'<p class="empty">Eşleşen dosya yok.</p>';
+  h+='<div class="rows">'+list.map(function(x){
+    return '<div class="row" style="cursor:default">'+
+      '<span class="rid">'+(x.kind==='Ekran'?'◻':'·')+'</span>'+
+      '<span class="rbody"><span class="rt" style="font-family:var(--f-mono);font-size:12.5px">'+
+      E(x.name)+'</span><span class="rm">'+E(x.classes.join(' · '))+'</span></span>'+
+      '<span class="rr">'+tag(x.kind==='Ekran'?'t-live':'t-mute',x.kind)+
+      '<span class="mono">'+x.lines.toLocaleString('tr')+' satır</span></span></div>';
+  }).join('')+'</div>';
+  return h;
+}
+
 /* ---------- çizim ---------- */
 var FN={ozet:vOzet,yol:vYol,gorevler:vGorevler,moduller:vModuller,kararlar:vKararlar,
         sorular:vSorular,backlog:vBacklog,hatalar:vHatalar,dokuman:vDok,hareket:vHareket,
-        icerik:vIcerik,olaylar:vOlaylar};
+        icerik:vIcerik,olaylar:vOlaylar,bekleyen:vBekleyen,olcum:vOlcum,
+        testler:vTestler,ekranlar:vEkranlar};
 var ADI={}; VIEWS.forEach(function(v){ if(v.id) ADI[v.id]=v.ad; });
 var view=document.getElementById('view');
 function ciz(){
@@ -995,10 +1140,13 @@ function ciz(){
   if(st.view==='ozet') grafikBagla();
   var m=document.getElementById('more');
   if(m) m.addEventListener('click',function(){
-    if(st.view==='olaylar') olayLimit+=60; else limit+=70; ciz(); });
+    if(st.view==='olaylar') olayLimit+=60;
+    else if(st.view==='bekleyen') bekLimit+=120;
+    else limit+=70;
+    ciz(); });
 }
 view.addEventListener('click',function(e){
-  var b=e.target.closest('[data-task],[data-dec],[data-q],[data-sha],[data-mod],[data-pack],[data-set],[data-item],[data-ev]');
+  var b=e.target.closest('[data-task],[data-dec],[data-q],[data-sha],[data-mod],[data-pack],[data-set],[data-item],[data-ev],[data-pend],[data-test]');
   if(!b) return;
   var d=b.dataset;
   if(d.task) return acGorev(D.tasks[+d.task-1]);
@@ -1010,6 +1158,8 @@ view.addEventListener('click',function(e){
   if(d.set){ st.f.icerik=st.f.icerik||{}; st.f.icerik.set=d.set; st.q=''; return ciz(); }
   if(d.item){ var p=d.item.split('|'); return acIcerik(p[0],+p[1]); }
   if(d.ev)  return acOlay(D.events[+d.ev]);
+  if(d.pend) return acBekleyen(D.pending[+d.pend]);
+  if(d.test) return acTest(D.tests[+d.test]);
 });
 var kova=window.innerWidth<700;
 window.addEventListener('resize',function(){

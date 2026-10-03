@@ -23,6 +23,7 @@ import sys
 from collections import Counter, defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import audit    # noqa: E402
 import content  # noqa: E402  (yol yukarıda ayarlandı)
 
 BURASI = os.path.dirname(os.path.abspath(__file__))
@@ -199,6 +200,22 @@ MODULLER = [
 ]
 
 
+DOSYA_MODUL = {}
+
+
+def modul_coz(yol: str) -> str:
+    """Kaynak dosyayı modüle bağlar; eşleşmeyen `CORE` sayılır."""
+    return DOSYA_MODUL.get(yol.replace('\\', '/'), 'CORE')
+
+
+def test_coz(ad: str) -> str:
+    """Test dosyasının adını modüle bağlar (ilk eşleşen kazanır)."""
+    for m in MODULLER:
+        if any(a in ad for a in m['tests']):
+            return m['code']
+    return 'CORE'
+
+
 def modul_istatistik() -> list:
     test_dosyalar = [os.path.join(APP, 'test', d)
                      for d in os.listdir(os.path.join(APP, 'test'))
@@ -213,7 +230,10 @@ def modul_istatistik() -> list:
         for g in m.get('globs', []):
             import glob as _g
             kaynak += _g.glob(os.path.join(APP, g))
-        kd, ks = satir_say(sorted(set(kaynak)))
+        kaynak = sorted(set(kaynak))
+        for y in kaynak:
+            DOSYA_MODUL.setdefault(y.replace('\\', '/'), m['code'])
+        kd, ks = satir_say(kaynak)
         eslesen = [t for t in test_dosyalar
                    if any(a in os.path.basename(t) for a in m['tests'])]
         td, ts = satir_say(eslesen)
@@ -465,11 +485,17 @@ def main() -> None:
         ['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode().strip()
 
     ol, ic = content.olaylar(), content.icerik()
+    bekleyen = audit.onay_bekleyen(modul_coz)
+    capraz = audit.karar_kod()
+    tst = audit.testler(test_coz)
+    olcum = audit.olcumler()
+    ekran = audit.ekranlar()
     icerik_sayi = sum(x['count'] for x in ic)
     olay_havuz = Counter(o['pool'] for o in ol)
 
     veri = dict(
-        events=ol, content=ic,
+        events=ol, content=ic, pending=bekleyen, crossRef=capraz,
+        tests=tst, measures=olcum, screens=ekran,
         meta=dict(
             project='Bir Ömür',
             subtitle='Türkiye odaklı mobil yaşam simülasyonu',
@@ -499,6 +525,13 @@ def main() -> None:
             days=len({c['date'] for c in cms}),
             events=len(ol), eventPools=len(olay_havuz),
             contentSets=len(ic), contentItems=icerik_sayi,
+            pendingNumbers=len(bekleyen),
+            pendingFiles=len({x['file'] for x in bekleyen}),
+            linkedDecisions=len(capraz['decisions']),
+            linkedQuestions=len(capraz['questions']),
+            testCases=sum(t['tests'] for t in tst),
+            measureTables=len(olcum),
+            screens=len(ekran),
         ),
     )
     if '--json' in sys.argv:
@@ -525,6 +558,9 @@ def main() -> None:
         file=sys.stderr)
     print('  {} olay · {} içerik kaydı · {} commit'.format(
         o['events'], o['contentItems'], o['commits']), file=sys.stderr)
+    print('  {} onay bekleyen sayı · {} ölçüm tablosu · {} test'.format(
+        o['pendingNumbers'], o['measureTables'], o['testCases']),
+        file=sys.stderr)
 
 
 if __name__ == '__main__':
