@@ -102,6 +102,13 @@ void main() {
           final int onceki = controller.state!.player.age;
           // Lise alanı seçilmeden yaş atlanmaz (D-094).
           resolveEducationChoices(controller);
+          // Bekleyen sağlık krizi de yaş almayı kilitler (Paket AQ):
+          // kritik sağlık durumu bu kayıt üzerinden çalışıyor ve
+          // çözülmeden yıl ilerlemiyor. Gerçek oyuncu da bu pencereyi
+          // kapatmak zorunda. İddia aynen duruyor: yanıtlandıktan sonra
+          // yaş **bir** ilerliyor.
+          resolvePendingCrisis(controller);
+          if (controller.state!.deceased) break;
           controller.ageUp();
           expect(controller.state!.player.age, onceki + 1);
           // Yaş alındıktan sonra ekranda **en fazla bir** olay olur.
@@ -516,6 +523,10 @@ void main() {
         controller.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 26; i++) {
           // Oyuncu vefat ettiyse hayat tamamlanmıştır; yaş ilerlemez.
+          if (controller.state!.deceased) break;
+          // Bekleyen sağlık krizi yaş almayı kilitler (Paket AQ); gerçek
+          // oyuncu gibi önce o kapatılır. İddia aynen duruyor.
+          resolvePendingCrisis(controller);
           if (controller.state!.deceased) break;
           final int logOnce = controller.state!.log.length;
           // Lise alanı seçilmeden yaş atlanmaz (D-094).

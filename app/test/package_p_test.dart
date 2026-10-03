@@ -125,15 +125,54 @@ void main() {
       expect(orta, greaterThan(yasli));
     });
 
-    test('ileri yaşta toparlanma yoktur', () {
+    // **Paket AQ'da güncellendi.** Bu test "ileri yaşta toparlanma
+    // **yoktur**" diyordu ve o davranış bir hatayı kural sayıyordu:
+    // toparlanma 70 yaşından sonra tamamen kapalı olduğu için ileri
+    // yaşta sağlığın 0'a inmesi **kaçınılmaz** hâle geliyordu. Ölçüldü:
+    // 300 hayatta 70-79 yaş aralığında ortalama sağlık 17,1 ve
+    // hayatların %88'inde sağlık bir kez 0'a indi. Üstelik kuralın
+    // kendisi de çelişikti — yaşlanma sağlığı 30'un
+    // (`StatAging.prototypeOnlyHealthFloor`) altına indirmiyor, ama
+    // tavan 0 olduğu için hastalığın açtığı çukur hiç kapanmıyordu.
+    //
+    // Yeni kural **gevşetme değil**: iddia hem korunuyor (ileri yaşta
+    // toparlanma belirgin biçimde **az**) hem de genişliyor (sıfır
+    // değil, açığı aşmıyor ve üretim yolunda kullanılan gerçek tavan
+    // yaşlanmanın tabanının altına düşmüyor).
+    test('ileri yaşta toparlanma az ama var', () {
+      final int genc = SickLeaves.recoveryFor(
+        age: SickLeaves.prototypeOnlyRecoveryMaxAge - 10,
+        health: 20,
+        ceiling: 90,
+      );
+      final int yasli = SickLeaves.recoveryFor(
+        age: SickLeaves.prototypeOnlyRecoveryMaxAge + 1,
+        health: 20,
+        ceiling: 90,
+      );
+      expect(yasli, greaterThan(0), reason: 'toparlanma tamamen kapalı olamaz');
+      expect(yasli, lessThan(genc), reason: 'ileri yaşta daha az toparlanmalı');
+
+      // Açığı aşmıyor: tavanın bir puan altındaki karakter bir puandan
+      // fazla toparlanmaz.
       expect(
         SickLeaves.recoveryFor(
           age: SickLeaves.prototypeOnlyRecoveryMaxAge + 1,
-          health: 20,
-          ceiling: 90,
+          health: 29,
+          ceiling: 30,
         ),
-        0,
+        lessThanOrEqualTo(1),
       );
+
+      // Üretim yolunda kullanılan gerçek tavan: hiçbir yaşta
+      // yaşlanmanın kendi tabanının altına düşmüyor.
+      for (int yas = 60; yas <= 110; yas++) {
+        expect(
+          StatAging.prototypeOnlyHealthCeilingFor(yas),
+          greaterThanOrEqualTo(StatAging.prototypeOnlyHealthFloor),
+          reason: '$yas yaşında toparlanma tavanı tabanın altında',
+        );
+      }
     });
   });
 

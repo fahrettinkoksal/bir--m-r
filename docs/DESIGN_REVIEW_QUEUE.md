@@ -5598,3 +5598,23 @@ Kritik durumun en iyi seçeneği. Acil servis **bedelsiz** ve her yaşta açık 
 Soru: (A) tutar doğru; (B) daha pahalı olsun, para gerçekten fark yaratsın; (C) ücret yaşa veya tablonun ağırlığına göre değişsin.
 
 **Varsayılan işlem:** Onay gelene dek bu sayılar `prototypeOnly` kalır ve `DECISIONS.md`'ye kesin kural yazılmaz. Ölçüm testi (`paket_aq_olcum_test.dart`) oranları **güzelleştirmiyor**; yalnızca ölçüyor ve değişmez ihlallerini (sağlık 0 iken sessizce yaşamak, bypass, çifte ölüm, soft lock) sıfırda tutuyor.
+
+#### 14 — Terzi atölyesinin payback dağılımı ölçütü yeniden yazıldı
+
+Paket AQ'nun yan etkisi: sağlık dişlisi düzelince hayatlar erken
+çökmüyor, bu yüzden terzi atölyesinin **kötü kuyruğu** 6,8'den 11,1'e
+çıktı ve onluklar arası açıklık 25,2'den 19,2'ye indi (ölçüldü, AQ öncesi
+ağaç worktree ile). `paket_ag_payback_test.dart`'ın §16 bekçisi
+"açıklık > medyan" diyordu ve kırıldı.
+
+Dağılım **daralmadı**: üst onluk alt onluğun hâlâ yaklaşık üç katı
+(11,1 → 30,2). Daralan şey ölçütün gizli varsayımıydı — on dört
+işletmenin on üçünde kötü %10 sıfır civarında (-0,1 ile -0,7), ama terzi
+atölyesinin tabanı pozitif. Ölçüt üç ayrı dejenerasyon biçimini birlikte
+yakalayacak biçimde yeniden yazıldı (açıklık ≥ medyanın yarısı, iyi
+kuyruk ≥ medyanın 1,3 katı, kötü kuyruk ≤ medyanın 0,7 katı) — eski tek
+karşılaştırmadan **daha geniş** kapsam.
+
+Soru: (A) yeni ölçüt doğru; (B) terzi atölyesinin tabanı fazla yüksek,
+alt onlukta da sermayesini çıkaramayan hayatlar olmalı; (C) ölçüt
+tamamen kaldırılsın, dağılım yalnızca raporlansın.

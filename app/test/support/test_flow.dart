@@ -6,6 +6,7 @@ import 'package:bir_omur/domain/generation/school_people.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/widgets.dart';
@@ -156,6 +157,31 @@ void resolveAfterSchoolChoice(GameController controller) {
 void resolveEducationChoices(GameController controller) {
   resolveTrackChoice(controller);
   resolveAfterSchoolChoice(controller);
+}
+
+/// Cevap bekleyen sağlık krizini **oyuncunun yerine** kapatır (D-044,
+/// Paket AQ).
+///
+/// Arayüzsüz testler için: `answerPendingCrisis` bir `WidgetTester`
+/// istiyor. Paket AQ'dan sonra bekleyen bir sağlık krizi yaş almayı
+/// kilitliyor (kritik sağlık durumu bu kayıt üzerinden çalışıyor), yani
+/// yaş ilerleten her test krizi de yanıtlamak zorunda — gerçek oyuncunun
+/// yapmak zorunda olduğu gibi.
+///
+/// Her zaman **karşılanabilir** bir seçenek seçer; her krizde böyle bir
+/// seçenek olduğu kalıcı bir testle güvenceye alınmıştır. Yanıt verildiyse
+/// `true` döner.
+bool resolvePendingCrisis(GameController controller) {
+  final PendingCrisis? bekleyen = controller.state?.pendingCrisis;
+  if (bekleyen == null) return false;
+  final HealthCrisis? kriz = bekleyen.crisis;
+  if (kriz == null) return false;
+  for (final CrisisChoice secenek in kriz.choices) {
+    if (!controller.canChooseCrisis(secenek)) continue;
+    controller.respondToCrisis(secenek.id);
+    return true;
+  }
+  return false;
 }
 
 /// Ekranda açık bir eğitim seçimi penceresi varsa **oyuncunun yapacağını**

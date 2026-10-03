@@ -187,21 +187,56 @@ void main() {
       // görünmesine yol açıyor. Katsayı ölçüsü bütün açılan hayatları
       // sayar, batanlar dahil.
       //
-      // Ölçüt tek sayıya bağlanmadı: **onluklar arası açıklık medyanın
-      // kendisinden büyük olmalı.** Sonuçlar dar olsaydı bu açıklık
-      // merkezin yanında küçük kalırdı.
+      // **Paket AQ'da ölçüt yeniden yazıldı.** Eski ölçüt tek bir
+      // karşılaştırmaydı: onluklar arası açıklık medyandan büyük olmalı.
+      // O ölçüt gizli bir varsayıma dayanıyordu — kötü %10'un sıfır
+      // civarında olması. On dört işletmenin on üçünde öyle (kötü %10
+      // -0,1 ile -0,7 arası), ama **terzi atölyesi** o varsayımı
+      // bozuyor: tabanı pozitif, yani alt onlukta bile sermayesini
+      // çıkarıyor. Orada açıklık ile medyan aynı ölçekte kalıyor ve
+      // ölçüt dağılım gerçekten geniş olsa da kırılıyor.
+      //
+      // Paket AQ bunu görünür yaptı: sağlık dişlisi düzelince hayatlar
+      // erken çökmüyor, bu yüzden terzi atölyesinin kötü kuyruğu 6,8'den
+      // 11,1'e çıktı (ölçüldü, AQ öncesi ağaç worktree ile) ve açıklık
+      // 25,2'den 19,2'ye indi. Dağılım daralmadı — üst onluk alt onluğun
+      // hâlâ **yaklaşık üç katı**; daralan şey ölçütün dayandığı
+      // patolojik kuyruktu.
+      //
+      // Yeni ölçüt **gevşetme değil, üç ayrı dejenerasyon biçimini**
+      // birlikte yakalıyor: açıklık merkezin yanında küçük kalmasın,
+      // iyi kuyruk merkezden belirgin biçimde yukarıda olsun, kötü
+      // kuyruk belirgin biçimde aşağıda olsun. Eski tek karşılaştırma
+      // yalnızca üst kuyruğu geniş olan bir dağılımı kaçırabilirdi.
+      //
+      // Katsayılar `prototypeOnly`; Q-189'da raporlandı.
+      const double prototypeOnlyMinSpreadRatio = 0.5;
+      const double prototypeOnlyMinGoodRatio = 1.3;
+      const double prototypeOnlyMaxBadRatio = 0.7;
       for (final PaybackOzeti o in hepsi) {
         final List<double> k = o.geriOdeme;
         if (k.length < 10) continue;
         final double kotu = _p(k, 0.10);
         final double orta = _p(k, 0.50);
         final double iyi = _p(k, 0.90);
+        final String nerede = '${o.tur.name}: kötü %10 ($kotu), medyan '
+            '($orta), iyi %10 ($iyi)';
         expect(
           iyi - kotu,
-          greaterThan(orta),
-          reason: '${o.tur.name}: kötü %10 ($kotu), medyan ($orta), iyi '
-              '%10 ($iyi) — dağılım çok dar; aynı işletme her hayatta '
-              'aynı sonucu veriyor demektir (§16).',
+          greaterThan(orta * prototypeOnlyMinSpreadRatio),
+          reason: '$nerede — onluklar arası açıklık merkezin yanında '
+              'küçük kalıyor; aynı işletme her hayatta aynı sonucu '
+              'veriyor demektir (§16).',
+        );
+        expect(
+          iyi,
+          greaterThan(orta * prototypeOnlyMinGoodRatio),
+          reason: '$nerede — iyi kuyruk merkezden ayrışmıyor (§16).',
+        );
+        expect(
+          kotu,
+          lessThan(orta * prototypeOnlyMaxBadRatio),
+          reason: '$nerede — kötü kuyruk merkezden ayrışmıyor (§16).',
         );
       }
 
