@@ -3969,6 +3969,39 @@ yaşını hiç değiştirmediği görüldü.
 
 **Hiçbir sürüm gerçek Windows veya Android cihazda oynanmadı.**
 
+## CI'ı yiyen sonsuz döngü (Paket AQ'nun yan ürünü)
+
+Paket AQ'dan sonra CI iki kez **tam süre bütçesinde** iptal oldu ve
+logda tek bir hata yoktu. İlk okuma "süit uzadı, bütçe yetmiyor" oldu ve
+bütçe 45'ten 120'ye çıkarıldı. **O teşhis yanlıştı.**
+
+Gerçek sebep logdaki sessizlikti: Windows işinde 06:19:25 ile 08:12:52
+arasında neredeyse iki saat boyunca tek satır çıktı yok. Bu yavaşlık
+değil, takılmaydı. Üç test sonsuz döngüye giriyordu — `end_to_end_test`
+senaryo 8, `event_catalog_test` tekrar kalitesi, `health_package_test`
+hastalık ömrü. Üçü de her yıl bekleyen sağlık krizini silip (ya da hiç
+bakmayıp) `advanceOneYear`'ı yeniden çağırıyor; Paket AQ sağlık 0 iken
+yaş almayı durdurduğu için yaş hiç ilerlemiyordu.
+
+Dart'ın test zaman aşımı bunu yakalayamaz: `senaryo 8`'in üstünde zaten
+`Timeout(minutes: 5)` vardı ve hiç tetiklenmedi, çünkü senkron bir
+`while` döngüsü hiç yield etmiyor. Bu sınıf hatanın tek savunması
+döngünün kendi ilerleme kontrolü.
+
+Çözüm `app/test/support/corpus_year.dart`: tek bir yıl adımı. Sıradan
+kriz yine atlanıyor (ölçülen şey o değil), **kritik kriz silinmiyor,
+`HealthCrisisEngine` üzerinden cevaplanıyor** — ölçüm hayatları da
+oyuncunun geçtiği yoldan geçiyor. Yıl ilerlemezse `StateError` atıyor.
+Takıldığı kanıtlanan üç dosya ve aynı deseni taşıyan ikisi
+(`stat_aging_test`, `city_school_work_test`) buna bağlandı.
+
+Bütçe 120'den **60**'a indirildi: 120 kalması bir sonraki takılmayı iki
+saat saklardı. Düzeltmeden sonra ölçülen gerçek CI süresi **18 dakika**
+(Windows 17 dk 49 sn, Android 17 dk 5 sn — süit + build dahil), yani
+"süit 80 dakikaya çıktı" iddiası da yanlıştı.
+
+Hiçbir test silinmedi, atlanmadı, gevşetilmedi; ürün kodu değişmedi.
+
 ## Açık sorular
 
 Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
