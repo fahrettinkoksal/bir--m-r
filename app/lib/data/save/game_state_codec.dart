@@ -284,9 +284,14 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
           : <String, Object?>{
               'crisisId': state.pendingCrisis!.crisisId,
               'age': state.pendingCrisis!.age,
+              // Paket AQ: kritik sağlık durumunun bilinen sebebi. Yoksa
+              // yazılmaz; eski kayıtlarda da bulunmaz.
+              if (state.pendingCrisis!.causeId != null)
+                'causeId': state.pendingCrisis!.causeId,
             },
       'lastCrisisAge': state.lastCrisisAge,
       'healthWarned': state.healthWarned,
+      'healthDangerWarned': state.healthDangerWarned,
       'residenceItemId': state.residenceItemId,
       'movedOut': state.movedOut,
       'generation': state.generation,
@@ -1684,9 +1689,17 @@ GameState decodeGameState(Map<String, Object?> json) {
               'crisisId',
             ),
             age: _int(_asMap(json['pendingCrisis'], 'pendingCrisis'), 'age'),
+            // Eski kayıtlarda sebep yoktur; `null` kalır ve ekranda
+            // uydurma sebep yazılmaz.
+            causeId: _stringOrNull(
+              _asMap(json['pendingCrisis'], 'pendingCrisis'),
+              'causeId',
+            ),
           ),
     lastCrisisAge: _intOrNull(json, 'lastCrisisAge'),
     healthWarned: json['healthWarned'] == true,
+    // Eski kayıtlarda hayati tehlike uyarısı yoktur; verilmemiş sayılır.
+    healthDangerWarned: json['healthDangerWarned'] == true,
     residenceItemId: _stringOrNull(json, 'residenceItemId'),
     movedOut: json['movedOut'] == true,
     // Eski kayıtlarda evlilik kaydı yoktur; hayat bekâr sürer, kişiler

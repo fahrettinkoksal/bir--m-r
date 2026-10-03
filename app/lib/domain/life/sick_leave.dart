@@ -100,8 +100,8 @@ abstract final class SickLeaves {
   static const int prototypeOnlyModerateDays = 5;
   static const int prototypeOnlySevereDays = 7;
 
-  /// prototypeOnly: hastalanılmayan bir yılda bedenin **toparlanması**
-  /// (D-116).
+  /// prototypeOnly: hastalanılmayan bir yılda bedenin **en az** ne kadar
+  /// toparlandığı (D-116).
   ///
   /// Hastalığın bedeli ölçüldükten sonra gerekti: toparlanma olmadan
   /// −10'luk kayıplar birikiyor ve sağlık kırk yaşında sıfıra
@@ -111,6 +111,43 @@ abstract final class SickLeaves {
   /// Toparlanma bir tavana kadar çalışır: yaşlanmanın aldığını geri
   /// vermez, yalnızca hastalığın açtığı çukuru kapatır.
   static const int prototypeOnlyRecoveryPerYear = 7;
+
+  /// prototypeOnly: çukurun bir yılda kapanan payı (Paket AQ).
+  ///
+  /// **Neden eklendi:** D-116 hastalığın bedelini 1-3'ten 10-18'e
+  /// çıkardı ama toparlanmayı sabit 7'de bıraktı. İkisi bir çifttir;
+  /// yalnızca biri büyüdüğü için denge sağlığın alt yarısında tersine
+  /// döndü. Ölçüldü (izole edilmiş hastalık/toparlanma kolu, net yıllık
+  /// sağlık değişimi):
+  ///
+  /// | sağlık | 20 yaş | 45 yaş | 72 yaş |
+  /// |---|---|---|---|
+  /// | 80 | +4,0 | −2,0 | −2,5 |
+  /// | 60 | +2,0 | +2,0 | −4,2 |
+  /// | 40 | −0,6 | −0,6 | −6,3 |
+  /// | 25 | **−5,1** | **−5,1** | **−10,7** |
+  /// | 10 | **−5,1** | **−5,1** | **−10,7** |
+  ///
+  /// Yani sağlık 40'ın altına bir kez indiğinde — yaş kaç olursa olsun —
+  /// yılda ~5 puan kaybediyor ve geri dönüşü yok: beklenen yıllık kayıp
+  /// (0,50 × 17 ≈ 8,6) toparlanmanın yıllık tavanından (7) büyük. Bu tek
+  /// yönlü dişli, sağlık 0'ın her hayatın varış noktası olmasının
+  /// sebebi.
+  ///
+  /// Düzeltme D-116'nın **kendi gerekçesini** uygular: toparlanma
+  /// "hastalığın açtığı çukuru kapatır". Çukur ne kadar derinse o yılın
+  /// payı o kadar büyük olur; sabit 7 artık **taban**, tavan değil.
+  /// Yaşlanmanın kalıcı kaybı hâlâ geri verilmiyor, çünkü pay yine
+  /// yaşa göre düşen tavana kadar işliyor.
+  static const double prototypeOnlyRecoveryGapShare = 0.35;
+
+  /// prototypeOnly: bir yılda toparlanabilecek en çok puan (Paket AQ).
+  ///
+  /// Payın çukurla büyümesi gerekiyordu ama sınırsız olmamalı: sağlığı
+  /// 2 olan karakter bir yılda 30'a çıkarsa kritik durumu atlatmanın
+  /// hiçbir ağırlığı kalmaz. Tabanın iki katı.
+  static const int prototypeOnlyMaxRecoveryPerYear =
+      prototypeOnlyRecoveryPerYear * 2;
 
   /// prototypeOnly: toparlanmanın çalıştığı en yüksek yaş.
   ///
@@ -126,12 +163,24 @@ abstract final class SickLeaves {
     required int health,
     required int ceiling,
   }) {
-    if (age > prototypeOnlyRecoveryMaxAge) return 0;
     if (health >= ceiling) return 0;
     final int fark = ceiling - health;
-    return fark < prototypeOnlyRecoveryPerYear
-        ? fark
-        : prototypeOnlyRecoveryPerYear;
+    // Çukur derinse o yılın payı büyür (Paket AQ); sabit değer tabandır,
+    // ama payın da bir tavanı var.
+    final int pay = (fark * prototypeOnlyRecoveryGapShare).round();
+    int istenen =
+        pay > prototypeOnlyRecoveryPerYear ? pay : prototypeOnlyRecoveryPerYear;
+    if (istenen > prototypeOnlyMaxRecoveryPerYear) {
+      istenen = prototypeOnlyMaxRecoveryPerYear;
+    }
+    final int tamPay = istenen < fark ? istenen : fark;
+    // İleri yaşta beden aynı hızla toparlanmaz: pay yarıya iner ama
+    // sıfırlanmaz. Eskiden bu yaştan sonra toparlanma hiç yoktu ve
+    // sağlık 0'a inmek kaçınılmaz hâle geliyordu (ölçüldü).
+    if (age > prototypeOnlyRecoveryMaxAge) {
+      return tamPay <= 1 ? tamPay : tamPay ~/ 2;
+    }
+    return tamPay;
   }
 
   /// prototypeOnly: sağlığı bu değerin altındaysa hastalık bir puan

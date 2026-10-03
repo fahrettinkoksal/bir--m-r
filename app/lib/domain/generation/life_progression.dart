@@ -13,6 +13,7 @@ import '../family/in_law_relations.dart';
 import '../family/family_mood.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
+import '../life/critical_health.dart';
 import '../life/life_goals.dart';
 import '../life/year_review.dart';
 import 'grandchildren.dart';
@@ -118,6 +119,26 @@ class LifeProgression {
     // Ekranda çözülmemiş bir olay varken yaş ilerlemez: olaylar üst üste
     // binmez.
     if (state.hasPendingEvent) return state;
+
+    // Çözülmemiş sağlık krizi varken de yaş ilerlemez (Paket AQ).
+    //
+    // Bu bir hatanın düzeltmesi: `rollCrisis` ekranda kriz varken yeni
+    // kriz açmıyordu ama **yaş ilerliyordu**. Yani oyuncu krizi
+    // yanıtlamadan yıllarca ileri gidebiliyor, kriz ekranda asılı
+    // kalıyordu. Kritik sağlık durumu da aynı kayıt üzerinden
+    // çalıştığından zorunlu çözüm bu satırla gerçekten zorunlu oluyor.
+    if (state.hasPendingCrisis) return state;
+
+    // Sağlık yıl başında zaten acil banda inmişse (örneğin bir
+    // aktivitenin ya da olay seçiminin ardından) yaş **ilerlemeden**
+    // zorunlu çözüm açılır. Böylece hiçbir yol "sağlık 0 ama hayat
+    // devam ediyor" durumunu bir sonraki yıla taşıyamaz.
+    final GameState acilKontrol = CriticalHealth.enforce(
+      state: state,
+      age: state.player.age,
+      cause: CriticalHealth.causeFromState(state),
+    );
+    if (acilKontrol.hasPendingCrisis) return acilKontrol;
 
     // Biten yılın özeti yaşlanmadan **önce** hesaplanır: fotoğraf yılın
     // başında alınmıştır, karşılaştırma yılın sonundaki hâlle yapılır
@@ -381,6 +402,7 @@ class LifeProgression {
       state.education,
       newAge,
       intelligence: state.player.stats.intelligence,
+      happiness: state.player.stats.happiness,
       log: log,
     );
     education = _applyUniversityExam(
@@ -913,6 +935,8 @@ class LifeProgression {
     // Kronik durumlar: takip edilmeyen rahatsızlık her yıl sağlıktan
     // düşürür; ileri yaşta yenisi ortaya çıkabilir (D-153). Kriz gibi
     // ekranı kesmez, çünkü oyuncunun vereceği bir karar yoktur.
+    // Taşınan rahatsızlığın yıllık yıpratması bu çağrının içinde;
+    // sağlığı acil banda indirirse sebep kesin bilinir (Paket AQ).
     afterDeaths = ChronicEngine.advanceYear(
       state: afterDeaths,
       newAge: newAge,
@@ -1013,6 +1037,20 @@ class LifeProgression {
     // ekrana gelir.
     afterDeaths = _maybeHealthCrisis(afterDeaths, newAge);
 
+    // Sağlık bu yıl acil banda indiyse zorunlu çözüm **aynı yıl** açılır
+    // (Paket AQ). Sebep yıl içinde sağlığı düşüren sistemden okunur:
+    // taşınan rahatsızlık varsa o, ileri yaşta beden çöküşü, yoksa
+    // sebep yazılmaz — uydurulmaz.
+    //
+    // `_maybeHealthCrisis`ten **sonra** çağrılıyor: o yıl olağan bir
+    // kriz açıldıysa kritik çözüm onun üstüne binmez, olağan kriz
+    // kapanınca (`HealthCrisisEngine.respond`) devralır.
+    afterDeaths = CriticalHealth.enforce(
+      state: afterDeaths,
+      age: newAge,
+      cause: CriticalHealth.causeFromState(afterDeaths),
+    );
+
     // Sağlığı belirgin kötüleşen karaktere anlaşılır bir uyarı (D-036).
     afterDeaths = _maybeHealthWarning(afterDeaths, newAge);
 
@@ -1080,6 +1118,25 @@ class LifeProgression {
     withTrack = withTrack.copyWith(
       lastYearSummary: yilOzeti,
       yearMark: YearMark.of(withTrack),
+    );
+
+    // Yılın **son** kritik sağlık denetimi (Paket AQ).
+    //
+    // Yukarıdaki denetim sağlık sistemlerinin (yaşlanma, hastalık,
+    // kronik) hemen ardında duruyor ve sebebi oradan okuyor. Ama yılın
+    // geri kalanında da sağlığı düşüren yollar var: işletme zararı
+    // (D-132), adli süreç (D-128) ve okurken çalışmanın bedeli (D-131).
+    // Ölçüm bir kaçak gösterdi: 500 hayatta tohum 56, yaş 73 —
+    // sağlık 0, kritik durum yok, hayat devam ediyor. Bu yüzden yıl
+    // kapanmadan **son** bir denetim daha var; çağrı etkisizse durumu
+    // aynen döndürüyor.
+    //
+    // Sebep bu noktada kayıttan okunuyor; hangi sistemin indirdiği
+    // kesin bilinmediği için **uydurulmuyor**.
+    withTrack = CriticalHealth.enforce(
+      state: withTrack,
+      age: newAge,
+      cause: CriticalHealth.causeFromState(withTrack),
     );
 
     // Yeni yaşın tek açılış olayı.
@@ -1573,31 +1630,22 @@ class LifeProgression {
       rng: _rng,
       isStudent: state.education.isSchoolStudent,
     );
-    if (!hastalik.happened) {
-      // Hastalanılmayan yılda beden toparlanır (D-116).
-      //
-      // Hastalığın bedeli −10'a çıkınca gerekti: toparlanma olmadan
-      // kayıplar birikiyor ve sağlık kırk yaşında sıfıra yapışıyordu
-      // (ölçüldü: 100 hayat, 40 yaşta ortalama sağlık 0,8). Toparlanma
-      // yaşlanmanın kalıcı kaybını geri vermez; tavanı yaşa göre düşen
-      // bir sınırdır, yalnızca hastalığın açtığı çukuru kapatır.
-      final int tavan = StatAging.prototypeOnlyHealthCeilingFor(newAge);
-      final int pay = SickLeaves.recoveryFor(
-        age: newAge,
-        health: state.player.stats.health,
-        ceiling: tavan,
-      );
-      if (pay <= 0) return girdi;
-      return (
-        state: state.copyWith(
-          player: state.player.copyWith(
-            stats: state.player.stats.gain(health: pay),
-          ),
-        ),
-        logText: girdi.logText,
-      );
-    }
-
+    // Bedenin toparlanması (D-116) **her yıl** işler, hastalanılan yılda
+    // da.
+    //
+    // **Paket AQ düzeltmesi.** Toparlanma yalnızca hastalanılmayan
+    // yıllarda uygulanıyordu; yani çukuru açan yıl onu hiç kapatmıyordu.
+    // Bu D-116'nın kendi gerekçesiyle çelişiyor ("toparlanma hastalığın
+    // açtığı çukuru kapatır"): mart ayında gribe yakalanan insan aralık
+    // ayında iyileşmiş olur. Sonuç tek yönlü bir dişliydi — beklenen
+    // yıllık kayıp (≈0,50 × 17 ≈ 8,6) toparlanmanın yıllık payından
+    // büyük olduğu için sağlık 40'ın altına bir kez inince geri
+    // dönmüyordu. Ölçüldü: 300 hayatın 265'inde sağlık 0'a indi,
+    // 70-79 yaşta ortalama sağlık 17,1.
+    //
+    // Sıra önemli: hastalığın bedeli **önce** uygulanır, toparlanma
+    // kalan açığa göre hesaplanır. Böylece ağır hastalık yine ağır
+    // gelir, ama bir ömür boyu kapanmayan bir yara açmaz.
     final int kayip = hastalik.wageLoss.clamp(0, state.player.wallet);
     GameState next = state.copyWith(
       player: state.player.copyWith(
@@ -1608,6 +1656,24 @@ class LifeProgression {
         ),
       ),
     );
+    final int tavan = StatAging.prototypeOnlyHealthCeilingFor(newAge);
+    final int pay = SickLeaves.recoveryFor(
+      age: newAge,
+      health: next.player.stats.health,
+      ceiling: tavan,
+    );
+    if (pay > 0) {
+      next = next.copyWith(
+        player: next.player.copyWith(
+          stats: next.player.stats.gain(health: pay),
+        ),
+      );
+    }
+    if (!hastalik.happened) {
+      // Hastalanılmayan yılda anlatılacak bir şey yok; yalnızca
+      // toparlanma uygulanmış olur.
+      return (state: next, logText: girdi.logText);
+    }
     if (hastalik.employerUpset) {
       next = next.copyWith(
         career: next.career.copyWith(
@@ -1664,6 +1730,13 @@ class LifeProgression {
         ),
       );
     }
+    // Hastalık sağlığı acil banda indirdiyse zorunlu çözüm **burada**
+    // açılır: sebep kesin biliniyor, uydurmaya gerek yok (Paket AQ).
+    next = CriticalHealth.enforce(
+      state: next,
+      age: newAge,
+      cause: CriticalHealthCause.hastalik,
+    );
     return (state: next, logText: girdi.logText);
   }
 
@@ -1767,24 +1840,75 @@ class LifeProgression {
   /// Sağlık belirgin biçimde düştüyse bir kez uyarır.
   ///
   /// Uyarı her ölümü haber vermez; yalnızca durumu görünür kılar.
+  ///
+  /// **Bant geçişine** bakar (Paket AQ), değere değil: aynı bant içinde
+  /// 22'den 20'ye düşmek yeni bir uyarı doğurmaz. İki ayrı bant iki ayrı
+  /// bayrakla tutulur, çünkü tek bayrakla "kritik derecede düşük"ten
+  /// "hayati tehlike"ye geçiş hiç haber verilmiyordu. Bant düzelince
+  /// bayrak sıfırlanır ve bir dahaki inişte yeniden konuşur.
   GameState _maybeHealthWarning(GameState state, int newAge) {
-    if (state.player.stats.health > prototypeOnlyHealthWarningBelow) {
-      return state.healthWarned ? state.copyWith(healthWarned: false) : state;
+    final HealthBand bant = CriticalHealth.bandFor(state);
+
+    // Acil bant kendi zorunlu çözüm penceresini açıyor; üstüne ayrıca
+    // uyarı konmaz (bildirim yığılmasın).
+    if (bant == HealthBand.acil) return state;
+
+    if (bant == HealthBand.normal) {
+      if (!state.healthWarned && !state.healthDangerWarned) return state;
+      return state.copyWith(
+        healthWarned: false,
+        healthDangerWarned: false,
+      );
     }
-    if (state.healthWarned) return state;
-    return state.copyWith(
-      healthWarned: true,
-      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-        ...state.log,
-        LifeLogEntry(
-          age: newAge,
-          text:
-              'Sağlığın belirgin biçimde kötüleşti; kendine dikkat '
-              'etmen gerekiyor.',
-          category: LogCategory.kisisel,
+
+    // 1-10: hayati tehlike. Bu bandın ilk kez görülmesi bir pencereyi
+    // hak eder; oyuncu "Sağlık: 5" yazısını açıklamasız görmesin.
+    if (bant == HealthBand.hayatiTehlike && !state.healthDangerWarned) {
+      return Notices.enqueue(
+        state.copyWith(
+          healthWarned: true,
+          healthDangerWarned: true,
+          log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+            ...state.log,
+            LifeLogEntry(
+              age: newAge,
+              text: 'Sağlığın hayati tehlike seviyesine indi.',
+              category: LogCategory.kisisel,
+            ),
+          ]),
         ),
-      ]),
-    );
+        <PendingNotice>[
+          PendingNotice(
+            id: 'saglik-tehlike-$newAge',
+            kind: NoticeKind.saglik,
+            age: newAge,
+            title: 'Sağlığın hayati tehlike seviyesinde',
+            text: 'Bu hâlde ağır bir işe kalkışmak ya da uzun yola '
+                'çıkmak mümkün değil. Dinlenmen ve sağlığına bakman '
+                'gerekiyor.',
+          ),
+        ],
+      );
+    }
+
+    // 11-25: kritik derecede düşük. Günlüğe yazılır, pencere açılmaz;
+    // her düşük sağlık yılı için pencere açmak bildirim spamı olurdu.
+    if (bant == HealthBand.kritikDusuk && !state.healthWarned) {
+      return state.copyWith(
+        healthWarned: true,
+        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+          ...state.log,
+          LifeLogEntry(
+            age: newAge,
+            text:
+                'Sağlığın belirgin biçimde kötüleşti; kendine dikkat '
+                'etmen gerekiyor.',
+            category: LogCategory.kisisel,
+          ),
+        ]),
+      );
+    }
+    return state;
   }
 
   bool _playerDies(GameState state) => Mortality.diesThisYear(
@@ -1801,6 +1925,11 @@ class LifeProgression {
       deathAge: newAge,
       deathCause: gerekce,
       pendingEvent: null,
+      // Hayat tamamlandı: bekleyen kritik sağlık durumu da kapanır.
+      // Aksi hâlde vefat eden oyuncuya kriz penceresi açılır ve **ikinci
+      // bir ölüm** üretilebilirdi (Paket AQ). Mortality bu yıl zaten
+      // sonucu verdi; kişi bir kez ölür.
+      pendingCrisis: null,
       log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
         ...state.log,
         LifeLogEntry(
@@ -2221,6 +2350,7 @@ class LifeProgression {
     EducationState current,
     int newAge, {
     required int intelligence,
+    required int happiness,
     required List<LifeLogEntry> log,
   }) {
     // Üniversite öğrencisi her yıl bir sınıf ilerler ve süre dolunca mezun
@@ -2255,6 +2385,7 @@ class LifeProgression {
     final int ortalama = SchoolPerformance.prototypeOnlyYearEndAverage(
       current: current.gradeAverage ?? 50,
       intelligence: intelligence,
+      happiness: happiness,
       rng: _rng,
     );
 

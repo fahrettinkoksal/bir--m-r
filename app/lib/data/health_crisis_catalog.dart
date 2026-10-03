@@ -61,7 +61,15 @@ class HealthCrisis {
     required this.maxAge,
     required this.baseSurvival,
     required this.choices,
+    this.isCritical = false,
   });
+
+  /// Sağlığın kendisinden doğan **zorunlu** kriz mi? (Paket AQ)
+  ///
+  /// Kritik krizde atlatma ihtimali ve kurtulma sonrası sağlık katalogdan
+  /// değil `CriticalHealth`ten okunur: yaş, sağlık geçmişi ve taşınan
+  /// rahatsızlıklar hesaba katılır. Olağan krizlerde hiçbir şey değişmez.
+  final bool isCritical;
 
   final String id;
   final CrisisKind kind;
@@ -260,11 +268,78 @@ const List<HealthCrisis> kHealthCrises = <HealthCrisis>[
       ),
     ],
   ),
+
+  // --- Kritik sağlık: zorunlu çözüm (Paket AQ) --------------------------
+  //
+  // Sağlık 0'a indiğinde açılır. **İkinci bir kriz çerçevesi kurulmadı**:
+  // aynı `PendingCrisis` kaydı, aynı pencere, aynı save/load ve aynı
+  // ölüm geçişi kullanılıyor. Buradaki fark, krizin bir hastalık
+  // kataloğundan değil sağlığın kendisinden doğması.
+  //
+  // Yaş aralığı bilerek açık: sağlık her yaşta 0'a inebilir ve her yaşta
+  // bir karşılığı olmalı.
+  //
+  // `baseSurvival` burada **kullanılmaz** (`CriticalHealth.survivalChance`
+  // devralır); kayıt bütünlüğü için gerçeğe yakın bir değer duruyor.
+  //
+  // Üç seçenek de **parasız oyuncuya açık** olmak zorunda değil ama en az
+  // biri açık: acil servis bedelsizdir. Böylece cüzdanı boş karakter
+  // ekranda kilitlenmez.
+  HealthCrisis(
+    id: 'kritik_saglik',
+    kind: CrisisKind.hastalik,
+    isCritical: true,
+    text:
+        'Sağlığın bu hâlde devam edemeyeceğin bir noktaya indi. Bir karar '
+        'vermen gerekiyor.',
+    minAge: 0,
+    maxAge: 120,
+    baseSurvival: 0.74,
+    choices: <CrisisChoice>[
+      CrisisChoice(
+        id: 'acil_servis',
+        label: 'Acil servise git',
+        resultText:
+            'Acil serviste seni hemen aldılar. Tedavi tuttu; bir süre '
+            'kendine gelmen gerekiyor.',
+        cost: 0,
+        survivalBonus: 0.08,
+        healthChange: -14,
+      ),
+      CrisisChoice(
+        id: 'ozel_tedavi',
+        label: 'Özel bir hastanede tedavi ol',
+        resultText:
+            'Özel hastanede süreci baştan sona takip ettiler. Tedavi '
+            'tuttu; bir süre kendine gelmen gerekiyor.',
+        cost: 240000, // prototypeOnly
+        survivalBonus: 0.16,
+        healthChange: -24,
+        needsMoney: true,
+      ),
+      CrisisChoice(
+        id: 'evde_bekle',
+        label: 'Evde dinlenip geçmesini bekle',
+        resultText:
+            'Günlerce yataktan çıkamadın. Sonunda biraz toparlandın ama '
+            'bedenin bunu unutmadı.',
+        cost: 0,
+        survivalBonus: -0.18,
+        healthChange: -8,
+      ),
+    ],
+  ),
 ];
 
-/// Yaşa uygun krizler.
+/// Yaşa uygun **olağan** krizler.
+///
+/// Kritik sağlık krizi (Paket AQ) bu listede yer almaz: o kriz rastgele
+/// çıkmaz, sağlığın acil banda inmesiyle açılır. Aksi hâlde sağlığı
+/// yerinde olan bir karakterin karşısına "bu hâlde devam edemezsin"
+/// penceresi çıkardı.
 List<HealthCrisis> crisesForAge(int age) => kHealthCrises
-    .where((HealthCrisis c) => age >= c.minAge && age <= c.maxAge)
+    .where((HealthCrisis c) =>
+        !c.isCritical && age >= c.minAge && age <= c.maxAge)
     .toList(growable: false);
 
 HealthCrisis? healthCrisisById(String id) {

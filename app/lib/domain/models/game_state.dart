@@ -149,6 +149,7 @@ class GameState {
     this.pendingCrisis,
     this.lastCrisisAge,
     this.healthWarned = false,
+    this.healthDangerWarned = false,
     this.marriage,
     this.pastMarriages = const <Marriage>[],
     this.generation = 1,
@@ -729,6 +730,15 @@ class GameState {
   /// Düşük sağlık uyarısı verildi mi? Aynı uyarı her yıl tekrarlanmaz.
   final bool healthWarned;
 
+  /// Hayati tehlike bandı uyarısı verildi mi? (Paket AQ)
+  ///
+  /// [healthWarned] "kritik derecede düşük" bandına (11-25) girildiğinde
+  /// bir kez konuşur. Bu alan ise 1-10 bandı içindir: iki bant ayrı
+  /// şeylerdir ve tek bayrakla ayrılamıyordu, bu yüzden 22 → 8 düşüşü
+  /// oyuncuya hiç haber verilmiyordu. Her +1/-1 için pencere açılmasın
+  /// diye bant **geçişinde** bir kez çalışır ve bant düzelince sıfırlanır.
+  final bool healthDangerWarned;
+
   /// Oyuncunun evlilik kaydı; hiç evlenilmediyse `null` (D-045 önerisi).
   ///
   /// Kayıt boşanmadan veya eşin vefatından sonra da **silinmez**; yalnızca
@@ -1281,6 +1291,7 @@ class GameState {
     Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
+    bool? healthDangerWarned,
     Object? marriage = _unsetEvent,
     List<Marriage>? pastMarriages,
     int? generation,
@@ -1424,6 +1435,7 @@ class GameState {
           : pendingTrial as PendingTrial?,
       lastCrisisAge: lastCrisisAge ?? this.lastCrisisAge,
       healthWarned: healthWarned ?? this.healthWarned,
+      healthDangerWarned: healthDangerWarned ?? this.healthDangerWarned,
       marriage:
           marriage == _unsetEvent ? this.marriage : marriage as Marriage?,
       pastMarriages: pastMarriages ?? this.pastMarriages,

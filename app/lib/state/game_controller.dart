@@ -408,6 +408,13 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return;
     // Hayat tamamlandıysa yaş ilerlemez.
     if (current.deceased) return;
+    // Cevap bekleyen sağlık krizi varken de ilerlemez (Paket AQ).
+    //
+    // Kritik sağlık durumu bu kayıt üzerinden çalışıyor; oyuncu kritik
+    // ekranı görmeden yıl atlayamaz. `advanceOneYear` de aynı kapıyı
+    // ayrıca denetliyor — motor tek başına çağrıldığında da kural
+    // geçerli olsun diye.
+    if (current.hasPendingCrisis) return;
     // Lise alanı seçilmeden yeni yaşa geçilmez (D-094).
     if (current.education.awaitingTrackChoice) return;
     // Lise bittikten sonraki yol seçilmeden de geçilmez (D-111).

@@ -1,3 +1,4 @@
+import '../life/critical_health.dart';
 import 'dart:math';
 
 import '../economy/net_worth.dart';
@@ -719,6 +720,19 @@ class EventEngine {
         share: choice.portfolioShare,
       );
     }
+
+    // Seçimin sağlık bedeli acil banda indirdiyse zorunlu kritik durum
+    // **burada** açılır (Paket AQ).
+    //
+    // Yalnızca yaş ilerletme yolunda denetlemek yetmiyordu: ölçümde 500
+    // hayatın 20'sinde olay seçimi sağlığı 0'a indiriyor ve oyuncu yıl
+    // ilerletmeden önce sağlık kazandıran bir aktiviteye gidip durumu
+    // sessizce kapatabiliyordu. Sebep biliniyor: kararın kendisi.
+    working = CriticalHealth.enforce(
+      state: working,
+      age: working.player.age,
+      cause: CriticalHealthCause.karar,
+    );
 
     return working;
   }

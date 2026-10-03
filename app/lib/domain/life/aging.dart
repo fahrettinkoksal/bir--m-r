@@ -188,12 +188,22 @@ abstract final class StatAging {
   /// kaybını geri vermez**. Bu yüzden tavan yaşla düşer: yirmi yaşındaki
   /// beden hastalık sonrası neredeyse tamamen toparlanır, yetmişindeki
   /// toparlanmaz.
+  ///
+  /// **Paket AQ düzeltmesi:** 70 yaşından sonra tavan `0` dönüyordu, yani
+  /// toparlanma tamamen kapalıydı. Bu kendi kuralıyla çelişiyordu:
+  /// yaşlanmanın *kendisi* sağlığı [prototypeOnlyHealthFloor]'un (30)
+  /// altına indirmiyor, ama tavan 0 olduğu için hastalığın açtığı çukur
+  /// hiç kapanmıyor ve ileri yaşta sağlık **kaçınılmaz** biçimde 0'a
+  /// iniyordu. Ölçüldü: 300 hayatta 70-79 yaş aralığında ortalama sağlık
+  /// **17,1**, ve hayatların %88'inde sağlık bir kez 0'a indi. Tavan
+  /// artık yaşlanmanın kendi tabanının altına düşmüyor; ileri yaşta
+  /// toparlanma **az** ama **var**.
   static int prototypeOnlyHealthCeilingFor(int age) {
     if (age <= 30) return 90;
     if (age <= 45) return 80;
     if (age <= 60) return 68;
     if (age <= 70) return 55;
-    return 0; // Bu yaştan sonra toparlanma yok.
+    return prototypeOnlyHealthFloor;
   }
   static const int prototypeOnlyIntelligenceFloor = 30;
   static const int prototypeOnlyHappinessFloor = 25;
