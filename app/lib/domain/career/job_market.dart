@@ -1,3 +1,4 @@
+import '../life/stat_floor_effects.dart';
 import 'dart:math';
 
 import '../../data/city_catalog.dart';
@@ -439,8 +440,15 @@ class JobMarket {
     // fotoğraf çeken birinin dosyasına bakıyorlar. Garanti değil:
     // en yüksek sinerjide bile zar atılıyor (tavan
     // `prototypeOnlyMaxInterviewRescue`).
+    // Karizma mülakatta sayılır (Paket AQ). Mülakatın tek karar noktası
+    // cevabı tutmayan adayın geçmişiyle kurtulmasıydı ve karizma oraya
+    // hiç girmiyordu; artık ölçeklendiriyor. Doğru cevap veren aday
+    // hiçbir karizma bandında reddedilmez.
     final double ikinciSans =
-        CareerSynergyRules.interviewRescueChance(state, job);
+        CareerSynergyRules.interviewRescueChance(state, job) *
+            StatFloorEffects.interviewRescueFactor(
+              state.player.stats.charisma,
+            );
     final bool gecmisKurtardi = !dogru &&
         ikinciSans > 0 &&
         (rng ?? Random()).nextDouble() < ikinciSans;

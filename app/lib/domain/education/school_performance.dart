@@ -1,3 +1,4 @@
+import '../life/stat_floor_effects.dart';
 import 'dart:math';
 
 import '../../text/turkish_text.dart';
@@ -98,8 +99,18 @@ abstract final class SchoolPerformance {
     required int current,
     required int intelligence,
     required Random rng,
+    int happiness = 100,
   }) {
-    final double kayma = (intelligence - current) * prototypeOnlyDrift;
+    // Mutluluk okul performansına girer (Paket AQ): zekâ zaten
+    // sayılıyordu, mutluluk hiçbir yerin girdisi değildi. Mutsuz
+    // öğrenci zekâsının götürdüğü yere daha yavaş yaklaşır.
+    //
+    // Yalnızca **yukarı** kaymayı yavaşlatır: aşağı kaymayı
+    // hızlandırmaz, yoksa "mutsuzum → notlarım düştü → daha mutsuzum"
+    // sarmalı kurulurdu.
+    final double carpan = StatFloorEffects.motivationFactor(happiness);
+    double kayma = (intelligence - current) * prototypeOnlyDrift;
+    if (kayma > 0) kayma *= carpan;
     final int sans =
         rng.between(-prototypeOnlyYearlyLuck, prototypeOnlyYearlyLuck);
     return (current + kayma.round() + sans).clamp(0, 100);

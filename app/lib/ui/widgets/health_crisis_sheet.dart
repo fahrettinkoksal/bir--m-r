@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/health_crisis_catalog.dart';
+import '../../domain/life/critical_health.dart';
 import '../../domain/life/health_crisis_engine.dart';
 import '../../domain/models/pending_crisis.dart';
 import '../../state/game_controller.dart';
@@ -105,6 +106,19 @@ class _HealthCrisisSheetState extends State<HealthCrisisSheet> {
               const KilimDivider(),
               const SizedBox(height: 16),
               Text(kriz.text, style: theme.textTheme.titleMedium),
+              // Kritik sağlık durumunun **bilinen** sebebi (Paket AQ).
+              // Kayıtta sebep yoksa satır çıkmaz; uydurma sebep
+              // yazılmaz.
+              if (CriticalHealth.causeLine(bekleyen) != null) ...<Widget>[
+                const SizedBox(height: 10),
+                Text(
+                  CriticalHealth.causeLine(bekleyen)!,
+                  key: const Key('kritik_saglik_sebebi'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               for (int i = 0; i < kriz.choices.length; i++) ...<Widget>[
                 SizedBox(

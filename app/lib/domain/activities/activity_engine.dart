@@ -16,6 +16,8 @@ import '../hobby/hobby_tracker.dart';
 import '../life/upkeep_tracker.dart';
 import '../models/interaction.dart';
 import '../life/hair_loss.dart';
+import '../life/critical_health.dart';
+import '../life/stat_floor_effects.dart';
 import '../life/health_report.dart';
 import '../life/notices.dart';
 import '../models/life_log.dart';
@@ -83,6 +85,13 @@ class ActivityEngine {
   /// Yıllık sağlık kazancı sayacının anahtarı.
   static const String healthCentreCounterId = 'saglik_merkezi_kazanc';
 
+  /// prototypeOnly: sağlık kritik derecede düşükken elektif işlemin
+  /// risk çarpanı (Paket AQ).
+  ///
+  /// Kapı kapanmadığı bantta riskin anlamlı bir rolü olsun diye var;
+  /// riski garantiye çevirmeyecek kadar ölçülü.
+  static const double prototypeOnlyLowHealthRiskFactor = 1.8;
+
   /// Bir eylemin bu yaşta kaç kez yapıldığı.
   int timesDone(GameState state, ActivityAction action) =>
       state.interactionCount('aktivite', action.id);
@@ -98,6 +107,43 @@ class ActivityEngine {
   static const double prototypeOnlyCourseMilestoneFactor = 2.5;
 
   InteractionAvailability availability(GameState state, ActivityAction action) {
+    // Çözülmemiş bir sağlık krizi varken hiçbir eylem yapılmaz
+    // (Paket AQ).
+    //
+    // Arayüzde kriz penceresi kapatılamaz biçimde açık duruyor, yani
+    // oyuncu buraya zaten ulaşamıyor. Kural yine de motora yazıldı:
+    // "sağlık 0 → spor salonuna gir → +5 sağlık → kriz yok" açığı bir
+    // arayüz tesadüfüne bırakılmamalı. Bekleyen kritik durum çözülmeden
+    // olağan toparlanma yolu kapalı.
+    if (state.hasPendingCrisis) {
+      return const InteractionAvailability.blocked(
+        'Önce sağlık durumunla ilgilenmen gerekiyor.',
+      );
+    }
+
+    // Ağır fiziksel eylem, sağlık kritik bandın altındayken kapalı
+    // (Paket AQ). Hafif eylemler (yürüyüş, esneme) açık kalır: düşük
+    // sağlık "hiç hareket edemez" demek değil.
+    final HealthBand bant = CriticalHealth.bandFor(state);
+    if (action.intensity == ActivityIntensity.agir &&
+        bant.blocksHeavyEffort) {
+      return InteractionAvailability.blocked(
+        'Sağlığın ${bant.label}; bu kadar zorlayıcı bir şeye şu an '
+        'kalkışamazsın. Hafif bir yürüyüş yapabilirsin.',
+      );
+    }
+
+    // Elektif estetik işlem: hayati tehlike bandında kapı kapanır
+    // (Paket AQ). 11-25 bandında kapı açık kalır ama **mevcut risk
+    // motoru** (D-077) daha yüksek bir riskle çalışır; yeni bir risk
+    // sistemi kurulmadı.
+    if (action.venue == ActivityVenue.estetik && bant.blocksRiskyChoice) {
+      return InteractionAvailability.blocked(
+        'Sağlığın ${bant.label}; elektif bir işlem için uygun '
+        'durumda değilsin.',
+      );
+    }
+
     // Cezaevi ile dışarısı birbirine karışmaz (D-128). İçerideyken
     // berbere gidilmez; dışarıdayken cezaevi avlusunda tur atılmaz.
     if (action.onlyInPrison && !state.isImprisoned) {
@@ -236,8 +282,16 @@ class ActivityEngine {
 
     // Estetik işlemler risksiz değildir (D-077). Kötü sonuçta ücret yine
     // ödenir, kazanç uygulanmaz ve mutluluk düşer.
-    final bool kotuSonuc =
-        action.riskChance > 0 && rng.nextDouble() < action.riskChance;
+    //
+    // Sağlık kritik derecede düşükken risk artar (Paket AQ): kapı
+    // kapanmıyor ama bedenin durumu işlemin sonucunu etkiliyor. Mevcut
+    // risk motoru kullanılıyor, ikinci bir risk sistemi yok.
+    final double riskCarpani =
+        CriticalHealth.bandFor(state) == HealthBand.kritikDusuk
+            ? prototypeOnlyLowHealthRiskFactor
+            : 1.0;
+    final bool kotuSonuc = action.riskChance > 0 &&
+        rng.nextDouble() < (action.riskChance * riskCarpani).clamp(0.0, 0.9);
 
     // Sağlık Merkezi'nin yıllık toplam sağlık kazancı sınırlıdır (D-100).
     final int saglikHakki = action.venue == ActivityVenue.saglikMerkezi
@@ -248,6 +302,20 @@ class ActivityEngine {
     final int saglikKazanci =
         min(_scaled(action.health, factor), saglikHakki);
 
+    // Mutluluğu dipte olan karaktere eğlence daha çok iyi gelir
+    // (Paket AQ). Düşük mutluluğun iş/okul tarafında bir bedeli var;
+    // bu da onun **karşı ağırlığı**: tek yönlü bir çöküş kurulmasın,
+    // dipten çıkış yolu kapanmasın. Yalnızca eğlencede ve yalnızca
+    // kazanç pozitifken işler.
+    final int temelMutluluk = _scaled(action.happiness, factor);
+    final int mutlulukKazanci = action.venue == ActivityVenue.eglence
+        ? temelMutluluk +
+            StatFloorEffects.reliefBonus(
+              happiness: state.player.stats.happiness,
+              gain: temelMutluluk,
+            )
+        : temelMutluluk;
+
     final Stats stats = kotuSonuc
         ? state.player.stats.gain(
             happiness: prototypeOnlyBadOutcomeHappiness,
@@ -255,7 +323,7 @@ class ActivityEngine {
         : state.player.stats.gain(
             appearance: _scaled(action.appearance, factor),
             charisma: _scaled(action.charisma, factor),
-            happiness: _scaled(action.happiness, factor),
+            happiness: mutlulukKazanci,
             health: saglikKazanci,
             intelligence: _scaled(action.intelligence, factor),
           );
@@ -366,6 +434,15 @@ class ActivityEngine {
     final List<AppliedEffect> etkiler = diffAppliedEffects(state, sonDurum);
     sonDurum = _announce(state, sonDurum, action, metin, etkiler, null);
     sonDurum = _announceHealth(state, sonDurum, action, metin, etkiler);
+
+    // Kötü sonuçlanan bir işlem ya da sağlıktan götüren bir eylem acil
+    // banda indirdiyse zorunlu kritik durum **burada** açılır
+    // (Paket AQ): bekleyen durum bir sonraki yıla ertelenmez.
+    sonDurum = CriticalHealth.enforce(
+      state: sonDurum,
+      age: sonDurum.player.age,
+      cause: CriticalHealthCause.karar,
+    );
 
     return ActivityResult(
       state: sonDurum,

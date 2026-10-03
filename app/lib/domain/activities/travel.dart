@@ -5,6 +5,7 @@ import '../../data/license_catalog.dart';
 import '../../data/name_pool.dart';
 import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
+import '../life/critical_health.dart';
 import '../law/legal_engine.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
@@ -151,6 +152,20 @@ abstract final class Travel {
     if (city == state.player.currentCity) {
       return const InteractionAvailability.blocked(
         'Zaten bu şehirde yaşıyorsun.',
+      );
+    }
+    // Çözülmemiş sağlık krizi varken yola çıkılmaz (Paket AQ).
+    if (state.hasPendingCrisis) {
+      return const InteractionAvailability.blocked(
+        'Önce sağlık durumunla ilgilenmen gerekiyor.',
+      );
+    }
+    // Hayati tehlike bandında şehirler arası yolculuk kapalı; kritik
+    // derecede düşük bantta açık kalır.
+    final HealthBand bant = CriticalHealth.bandFor(state);
+    if (bant.blocksRiskyChoice) {
+      return InteractionAvailability.blocked(
+        'Sağlığın ${bant.label}; şu an yola çıkacak durumda değilsin.',
       );
     }
     // Denetim döneminin somut yaptırımı (D-161): şehir dışına çıkmak
@@ -318,6 +333,31 @@ abstract final class Travel {
   /// olarak burada gerçekten iki kişilik konaklama satın alınır.
   static const double prototypeOnlyTourCompanionFactor = 2.0;
 
+  /// prototypeOnly: sağlık kritik derecede düşükken çıkılabilecek en uzun
+  /// tur (gece) — Paket AQ.
+  ///
+  /// Kataloğun en kısa paketi 3 gece; sınır 3'te olunca kısa paketler
+  /// açık, uzun paketler kapalı kalıyor.
+  static const int prototypeOnlyMaxTourNightsWhenLow = 3;
+
+  /// Sağlık yüzünden bu tura çıkılamıyorsa gerekçe; engel yoksa boş
+  /// metin (Paket AQ).
+  static String tourHealthBlockReason(GameState state, TourPackage tour) {
+    if (state.hasPendingCrisis) {
+      return 'Önce sağlık durumunla ilgilenmen gerekiyor.';
+    }
+    final HealthBand bant = CriticalHealth.bandFor(state);
+    if (bant == HealthBand.normal) return '';
+    if (bant.blocksRiskyChoice) {
+      return 'Sağlığın ${bant.label}; tura çıkacak durumda değilsin.';
+    }
+    if (tour.nights > prototypeOnlyMaxTourNightsWhenLow) {
+      return 'Sağlığın ${bant.label}; ${tour.nights} gecelik bir tur '
+          'şu an sana ağır gelir. Daha kısa bir paket seçebilirsin.';
+    }
+    return '';
+  }
+
   /// prototypeOnly: turun mutluluğa kattığı taban.
   ///
   /// Gece sayısına göre artar: bir haftalık tur, üç gecelik turdan daha
@@ -348,6 +388,14 @@ abstract final class Travel {
       return const InteractionAvailability.blocked(
         'Bu yıl yeterince gezdin; seneye yeniden.',
       );
+    }
+    // Sağlık düşükken **uzun** tur kapanır (Paket AQ).
+    //
+    // Her seyahat kilitlenmiyor: kısa paketler açık kalır. Ölçüt
+    // uydurulmadı, kataloğun kendi `nights` değeri kullanıldı.
+    final String saglikEngeli = tourHealthBlockReason(state, tour);
+    if (saglikEngeli.isNotEmpty) {
+      return InteractionAvailability.blocked(saglikEngeli);
     }
     if (companionId != null) {
       final Person? yoldas = state.personById(companionId);

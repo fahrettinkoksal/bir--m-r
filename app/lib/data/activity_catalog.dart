@@ -62,6 +62,23 @@ enum ActivityVenue {
   }
 }
 
+/// Bir eylemin **fiziksel yoğunluğu** (Paket AQ).
+///
+/// Sağlığı kritik seviyedeki karakter ağırlık kaldırmaya gidemez ama
+/// hafif bir yürüyüş yapabilir. "Düşük sağlık = hiç hareket edemez"
+/// diye bir genelleme yok; devasa bir kondisyon sistemi de kurulmadı:
+/// yalnızca gerçekten ağır olan birkaç eylem işaretli.
+enum ActivityIntensity {
+  /// Yürüyüş, esneme, oturarak yapılanlar. Hiçbir sağlık kapısı yok.
+  hafif,
+
+  /// Zorlayan ama ağır olmayan eylemler.
+  orta,
+
+  /// Bedeni gerçekten zorlayan eylemler: koşu bandı, ağırlık.
+  agir,
+}
+
 /// Tek bir aktivite eylemi.
 @immutable
 class ActivityAction {
@@ -87,7 +104,14 @@ class ActivityAction {
     this.riskChance = 0,
     this.minAgeNote,
     this.onlyInPrison = false,
+    this.intensity = ActivityIntensity.hafif,
   });
+
+  /// Eylemin fiziksel yoğunluğu (Paket AQ).
+  ///
+  /// Varsayılan [ActivityIntensity.hafif]: işaretlenmemiş hiçbir eylem
+  /// sağlık yüzünden kapanmaz.
+  final ActivityIntensity intensity;
 
   /// Yalnızca cezaevindeyken yapılabilir mi? (D-128)
   ///
@@ -225,6 +249,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
   // --- Spor salonu -------------------------------------------------------
   ActivityAction(
     id: 'kosu',
+    intensity: ActivityIntensity.agir,
     venue: ActivityVenue.sporSalonu,
     label: 'Koşu yap',
     description: 'Bandın üstünde kırk dakika; ilk on dakika en zoru.',
@@ -237,6 +262,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
   ),
   ActivityAction(
     id: 'agirlik',
+    intensity: ActivityIntensity.agir,
     venue: ActivityVenue.sporSalonu,
     label: 'Ağırlık kaldır',
     description: 'Ağırlıklar, sayılan tekrarlar ve ertesi gün ağrıyan her yer.',
@@ -684,6 +710,7 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
   ),
   ActivityAction(
     id: 'cezaevi_spor',
+    intensity: ActivityIntensity.agir,
     venue: ActivityVenue.cezaevi,
     label: 'Spor yap',
     description: 'Avluda tur. Sayıyorsun, sonra saymayı bırakıyorsun.',

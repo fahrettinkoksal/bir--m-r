@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../domain/life/aging.dart';
+import '../../domain/life/critical_health.dart';
 import '../../domain/life/hair_loss.dart';
+import '../../domain/life/stat_floor_effects.dart';
 
 import '../../domain/life/astrology.dart';
 import '../../domain/models/game_settings.dart';
@@ -11,6 +13,7 @@ import '../../text/turkish_text.dart';
 import '../theme/bir_omur_theme.dart';
 import 'character_face.dart';
 import 'comic.dart';
+import 'kilim_divider.dart';
 import 'settings_sheet.dart';
 import 'stat_bar.dart';
 
@@ -31,6 +34,11 @@ class CharacterHeader extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      // Değer satırlarının yanına durum açıklamaları gelince (Paket AQ)
+      // içerik dar ekranda ve büyük yazı ölçeğinde taşıyordu: ölçüldü,
+      // 360 px / yazı ×1,5'te 560 piksel. Pencere artık kendi içinde
+      // kayıyor — bildirim penceresinde yapılan düzeltmenin aynısı.
+      isScrollControlled: true,
       builder: (BuildContext context) => _StatDetailSheet(state: state),
     );
   }
@@ -174,6 +182,12 @@ class CharacterHeader extends StatelessWidget {
     // Bakım durumu ve geçim sıkıntısı gerçek kayıtlardan okunur (D-033,
     // D-037); yalnızca olağandışı durumlarda yazılır.
     final List<String> ekler = <String>[
+      // Sağlık kritik bantta ise **ilk** sırada yazar (Paket AQ):
+      // oyuncu "Sağlık: 5" sayısını açıklamasız görmesin. Pencere
+      // açılmaz, yalnızca durum satırında görünür — her yıl popup
+      // çıkarmak bildirim spamı olurdu.
+      if (CriticalHealth.bandFor(state).isLow)
+        'sağlık ${CriticalHealth.bandFor(state).label}',
       if (state.careStatus != CareStatus.aileYaninda)
         trLower(state.careStatus.label),
       if (state.hardshipYears > 0) 'geçim sıkıntısı',
@@ -300,26 +314,63 @@ class _StatDetailSheet extends StatelessWidget {
 
   final GameState state;
 
+  /// Düşük değerlerin anlamını anlatan satırlar (Paket AQ).
+  static List<Widget> _durumSatirlari(BuildContext context, GameState state) {
+    final ThemeData theme = Theme.of(context);
+    final HealthBand bant = CriticalHealth.bandFor(state);
+    final List<String> satirlar = <String>[
+      if (bant.isLow)
+        'Sağlığın ${bant.label}. Bu hâlde ağır bir işe kalkışmak, uzun '
+            'yola çıkmak ya da elektif bir işleme girmek mümkün değil.',
+      ...StatFloorEffects.statusLines(state),
+    ];
+    if (satirlar.isEmpty) return const <Widget>[];
+    return <Widget>[
+      const SizedBox(height: 10),
+      const KilimDivider(),
+      const SizedBox(height: 12),
+      for (final String satir in satirlar)
+        Padding(
+          key: Key('stat_durum_${satirlar.indexOf(satir)}'),
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text(
+            satir,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: BirOmurAccents.gul.deep,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Karakter değerleri', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 14),
-            for (final StatEntry entry in state.player.stats.entries) ...<Widget>[
-              StatBar(label: entry.label, value: entry.value),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('Karakter değerleri', style: theme.textTheme.titleLarge),
               const SizedBox(height: 14),
+              for (final StatEntry entry in state.player.stats.entries)
+                ...<Widget>[
+                  StatBar(label: entry.label, value: entry.value),
+                  const SizedBox(height: 14),
+                ],
+              // Ün açılmadıysa hiç gösterilmez (D-027).
+              if (state.player.fameUnlocked)
+                StatBar(label: 'Ün', value: state.player.fame!),
+              // Değerin **ne anlama geldiği** (Paket AQ). Yalnızca
+              // gerçekten düşük değerler için satır çıkar; teknik terim
+              // ya da iç sayı gösterilmez.
+              ..._durumSatirlari(context, state),
             ],
-            // Ün açılmadıysa hiç gösterilmez (D-027).
-            if (state.player.fameUnlocked)
-              StatBar(label: 'Ün', value: state.player.fame!),
-          ],
+          ),
         ),
       ),
     );

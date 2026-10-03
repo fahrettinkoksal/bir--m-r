@@ -3,6 +3,7 @@ import 'dart:math';
 import '../../data/job_catalog.dart';
 import '../life/sick_leave.dart';
 import '../../text/turkish_text.dart';
+import '../life/stat_floor_effects.dart';
 import 'craft_mastery.dart';
 import '../models/career.dart';
 import '../models/game_state.dart';
@@ -205,6 +206,15 @@ abstract final class CareerProgress {
 
     // Üst basamaklarda terfi zorlaşır.
     sans -= career.level * 0.08;
+
+    // Mutluluk da işin içine girer (Paket AQ).
+    //
+    // Zekâ ve karizma zaten sayılıyordu; mutluluk hiçbir sistemin
+    // **girdisi** değildi — yalnızca hayat değerlendirmesinde sonuç
+    // olarak görünüyordu. Mutsuz insan işini aynı istekle yapmaz.
+    // Çarpan ölçülü: mutluluk 0 olan karakter işinden atılmıyor, zam ve
+    // terfi talebi biraz daha zor kabul ediliyor.
+    sans *= StatFloorEffects.motivationFactor(state.player.stats.happiness);
 
     return sans.clamp(prototypeOnlyMinChance, prototypeOnlyMaxChance);
   }
