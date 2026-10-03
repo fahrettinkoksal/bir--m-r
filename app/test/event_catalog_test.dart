@@ -6,13 +6,13 @@ import 'package:bir_omur/data/event_pool_stages.dart';
 import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
-import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/corpus_year.dart';
 
 const EventEngine motor = EventEngine();
 
@@ -405,8 +405,7 @@ void main() {
         String? oncekiOlay;
 
         while (!state.deceased && state.player.age < 90) {
-          state = state.copyWith(pendingEvent: null, pendingCrisis: null);
-          state = LifeProgression(rng).advanceOneYear(state);
+          state = advanceCorpusYear(rng, state);
           final ActiveEvent? olay = state.pendingEvent;
           if (olay == null) {
             oncekiOlay = null;

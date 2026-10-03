@@ -4,7 +4,6 @@ import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
-import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/life/aging.dart';
 import 'package:bir_omur/domain/life/hair_loss.dart';
 import 'package:bir_omur/domain/life/upkeep_tracker.dart';
@@ -12,6 +11,7 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/stats.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/corpus_year.dart';
 
 /// Statların yaşla düşmesi ve bakımın karşılığı (D-072, D-073).
 ///
@@ -378,9 +378,9 @@ void main() {
         GameState s = LifeGenerator.seeded(seed)
             .generate(mode: StartMode.tamamenRastgele);
         final Stats basla = s.player.stats;
-        final LifeProgression lp = LifeProgression(Random(seed + 9000));
+        final Random rng = Random(seed + 9000);
         while (!s.deceased && s.player.age < 105) {
-          s = lp.advanceOneYear(s.copyWith(pendingEvent: null));
+          s = advanceCorpusYear(rng, s);
         }
         final Stats bitir = s.player.stats;
         if (s.deathAge != null && s.deathAge! >= 65) {

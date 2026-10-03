@@ -32,6 +32,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support/invariants.dart';
 
 import 'support/test_flow.dart';
+import 'support/corpus_year.dart';
 
 /// Ekrandaki olayı ve krizi kapatarak bir yaş ilerletir.
 void yasAl(GameController controller) {
@@ -762,8 +763,7 @@ void main() {
         final int gider = LivingCosts.yearlyCost(state);
         final Set<String> mirasOnce = <String>{...state.settledEstates};
 
-        state = state.copyWith(pendingEvent: null, pendingCrisis: null);
-        state = LifeProgression(rng).advanceOneYear(state);
+        state = advanceCorpusYear(rng, state);
         toplamYas++;
 
         // Tek yılda gelen para **açıklanabilir** olmalı.

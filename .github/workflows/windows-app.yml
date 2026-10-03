@@ -26,22 +26,33 @@ jobs:
     # üreticisini veriyor ve derleme "could not find any instance of Visual
     # Studio" hatasıyla düşüyor. VS 2022 içeren imaja sabitliyoruz.
     runs-on: windows-2022
-    # **Paket AQ'da 45'ten 120'ye çıkarıldı.**
+    # **Paket AQ'da 45'ten 60'a çıkarıldı.**
     #
-    # Sebep ölçüldü: Paket AQ hastalık/toparlanma dişlisini düzeltti ve
-    # hayatlar uzadı — ortalama ölüm yaşı 64,5'ten 68,0'a, 500 hayattan
-    # ölümle tamamlananın sayısı 373'ten 437'ye çıktı. Süitin içinde
-    # yüzlerce tam hayat oynayan ölçüm testleri var; her hayat daha çok
-    # yıl sürdüğü için süit bütünüyle uzadı.
+    # Bu satır bir kez 120'ye çıkarılmıştı ve o gerekçe YANLIŞTI. O
+    # zaman "süit uzadı, bütçe yetmiyor" denmişti; çünkü iptal olan
+    # koşunun logunda tek bir hata yoktu, bütün satırlar yeşildi.
     #
-    # 45 dakikalık bütçe iki koşuda da **testler sırasında** doldu ve iş
-    # iptal oldu. Logda tek bir hata yok, bütün satırlar yeşil: yani
-    # bütçe yetmiyordu, test kırılmıyordu. En son ölçümde Windows
-    # koşusu 45 dakikada süitin yaklaşık üçte ikisini bitirmişti.
+    # Gerçek sebep sonradan ölçüldü: logda 06:19 ile 08:12 arasında
+    # **neredeyse iki saat boyunca tek satır çıktı yoktu.** Bu yavaşlık
+    # değil, takılmaydı. Üç test sonsuz döngüye giriyordu
+    # (`end_to_end_test` senaryo 8, `event_catalog_test` tekrar
+    # kalitesi, `health_package_test` hastalık ömrü): hepsi her yıl
+    # bekleyen sağlık krizini silip `advanceOneYear`'ı yeniden
+    # çağırıyordu, Paket AQ ise sağlık 0 iken yaş almayı durdurduğu
+    # için yaş hiç ilerlemiyordu.
     #
-    # Yeni bütçe gözlemlenen ihtiyacın (≈80 dakika) üstünde bir pay
-    # bırakıyor; koşucu hızındaki değişkenliğe yer var.
-    timeout-minutes: 120
+    # Dart'ın test zaman aşımı bunu yakalayamaz: senkron bir `while`
+    # döngüsü hiç yield etmediği için `Timeout` tetiklenmez. Bu yüzden
+    # savunma `test/support/corpus_year.dart` içinde, döngünün kendi
+    # ilerleme kontrolünde duruyor — yıl ilerlemezse yüksek sesle
+    # patlıyor.
+    #
+    # Döngüler düzeltildikten sonra o üç dosya + yamalanan iki dosya
+    # (100 test) yerelde 31 saniyede bitiyor. Bütçenin 120 kalması bir
+    # sonraki takılmayı iki saat saklardı; 45 ise Paket AQ ile gerçekten
+    # uzayan hayatlara (ortalama ölüm yaşı 64,5 -> 68,0) pay bırakmıyor.
+    # 60, hem pay bırakıyor hem takılmayı erken açığa çıkarıyor.
+    timeout-minutes: 60
 
     defaults:
       run:

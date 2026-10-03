@@ -4,7 +4,6 @@ import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
-import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/life/eye_exam.dart';
 import 'package:bir_omur/domain/life/health_report.dart';
 import 'package:bir_omur/domain/life/hair_loss.dart';
@@ -13,6 +12,7 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/corpus_year.dart';
 
 /// Sağlık bildirimleri, göz muayenesi mini oyunu, estetik ve hastalık
 /// (D-076, D-077, D-078).
@@ -437,9 +437,9 @@ void main() {
       for (int seed = 0; seed < 40; seed++) {
         GameState s = LifeGenerator.seeded(seed)
             .generate(mode: StartMode.tamamenRastgele);
-        final LifeProgression lp = LifeProgression(Random(seed + 500));
+        final Random rng = Random(seed + 500);
         while (!s.deceased && s.player.age < 70) {
-          s = lp.advanceOneYear(s.copyWith(pendingEvent: null));
+          s = advanceCorpusYear(rng, s);
         }
         if (s.log.any((dynamic e) =>
             (e.text as String).contains('hasta yattın') ||
