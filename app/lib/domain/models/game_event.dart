@@ -4,6 +4,7 @@ import '../../data/company_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../economy/financial_strain.dart';
 import 'relation.dart';
+import 'school_club_progress.dart';
 
 /// Olayın hangi yaşam alanından geldiği (D-023).
 enum EventCategory {
@@ -54,6 +55,9 @@ class EventRequirement {
     this.minFame = 0,
     this.requiresTripMemory = false,
     this.requiresRetired = false,
+    this.requiresActiveClubId,
+    this.minClubYears = 0,
+    this.minSquadRole,
     this.requiredHobbyId,
     this.minHobbyYears = 0,
     this.minHobbyStage = 0,
@@ -98,6 +102,21 @@ class EventRequirement {
 
   /// Oyuncunun **hiç aracı olmaması** gerekiyor mu? (D-085)
   final bool forbidsVehicle;
+
+  /// Olay yalnızca bu okul kulübünde **aktif** üyeliği olan oyuncuya
+  /// çıkar (Paket AU).
+  ///
+  /// Hobi koşulunun (`requiredHobbyId`) aynı fikri: geçmiş kayıttan
+  /// okunur, uydurulmaz. Kulüp olayları takımda olmayan birine
+  /// gelmesin.
+  final String? requiresActiveClubId;
+
+  /// Kulüpte en az kaç sezon geçmiş olmalı.
+  final int minClubYears;
+
+  /// Kadroda en az bu rol (takım sporları için). `null` ise rol
+  /// aranmaz — yedek de olayı görebilir.
+  final SquadRole? minSquadRole;
 
   final String? requiredHobbyId;
 

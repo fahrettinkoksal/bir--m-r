@@ -20,6 +20,7 @@ import '../models/market_state.dart';
 import '../activities/travel.dart';
 import '../economy/living_costs.dart';
 import '../models/game_state.dart';
+import '../models/school_club_progress.dart';
 import '../models/hobby_progress.dart';
 import '../hobby/hobby_tracker.dart';
 import '../../data/hobby_catalog.dart';
@@ -282,6 +283,17 @@ class EventEngine {
     if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
       return false;
     }
+    // Kulüp olayları yalnızca o kulüpte **aktif** üyeliği olana çıkar
+    // (Paket AU). Kayıttan okunur, uydurulmaz.
+    final String? kulupId = req.requiresActiveClubId;
+    if (kulupId != null) {
+      final SchoolClubProgress? uyelik = state.schoolClubs.activeFor(kulupId);
+      if (uyelik == null) return false;
+      if (uyelik.yearsActive < req.minClubYears) return false;
+      final SquadRole? enAzRol = req.minSquadRole;
+      if (enAzRol != null && uyelik.role.index < enAzRol.index) return false;
+    }
+
     // Hobi olayları yalnızca gerçekten o hobiyle uğraşmış oyuncuya
     // çıkar (Paket 39). Geçmiş kayıttan okunur, uydurulmaz.
     final String? hobiId = req.requiredHobbyId;
