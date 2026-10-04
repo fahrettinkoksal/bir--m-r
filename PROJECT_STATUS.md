@@ -3720,7 +3720,115 @@ ediyor.
 Dev aile ağacı görseli, DNA testi, evlat edinme akışı, velayet mahkemesi
 simülasyonu, karmaşık nafaka davaları, aile şirketi, aile içi suç.
 
-### Açık sorular
+### Paket AU: okul kulüpleri, spor geçmişi ve futbol yolu (4 Ekim 2026)
+
+Oynanabilirlik paketi. Okulda bir kulübe girmek, o kulüpte yıllarca
+kalmak, rol kazanmak ve bu geçmişin profesyonel futbol kapısını açıp
+açmaması tek bir zincir hâline getirildi. **Mevcut sistemler yeniden
+kurulmadı:** hobi ilerlemesi `hobby/`, dövüş kariyeri `combat/`, spor
+masrafı/çatışması AL/2'de olduğu yerde kaldı; kulüpler kendi klasöründe
+(`domain/sports/`) duruyor ve hobi kimlikleriyle var olan ilerlemeye
+bağlanıyor.
+
+### Yapılanlar
+
+- **AU/1 — veri.** `data/school_club_catalog.dart`: 13 kulüp, üç kategori
+  (spor, akademik, sanat). `models/school_club_progress.dart`: kalıcı
+  üyelik kaydı (sezon sayısı, beceri, performans, rol, kaptanlık yaşı,
+  dereceler) ve `SquadRole` (Yedek → Rotasyon → İlk 11 → Önemli oyuncu →
+  Kaptan). `GameState`'e `schoolClubs` ve `footballCareer` alanları,
+  kayda (`game_state_codec`) kodlama/okuma; eski kayıtlar boş listeyle
+  yükleniyor.
+- **Gizli atletik yatkınlık.** `PlayerCharacter.athleticPotential`
+  doğumda bir kez belirleniyor (25-85), **oyuncuya gösterilmiyor**,
+  `copyWith` ile değiştirilemiyor, çocuğa miras geçmiyor (kendi zarını
+  atıyor). `infertile` alanı bunun emsali.
+- **AU/2 — motor.** `sports/school_club_engine.dart`: engel gerekçeleri,
+  seçme (tryout), yılda bir antrenman, azalan getirili beceri artışı,
+  sezon ilerlemesi, rol değişimi (sezonda tek kademe), ayrılma (kayıt
+  silinmiyor, `active: false`), okul değişiminde üyeliğin düşmesi ama
+  geçmişin ve becerinin kalması.
+- **Seçme saf kura değil, ama kesin de değil.** Puan statlardan ve
+  geçmişten geliyor; üstüne 40'lık zar ve puandan bağımsız %8 sürpriz ret
+  var. Yani sağlık 100 + yüksek yatkınlık **kabul garantisi değil** —
+  kendi testim bunu ilk yazımda yakaladı ve düzeltildi.
+- **AU/2 — futbol kapısı.** `sports/football_career.dart`:
+  `FootballPath.evaluate` zar atmadan, gerekçeli bir uygunluk kararı
+  veriyor (`FootballStage`: geçmişYok → gelişiyor → denemeyeUygun →
+  aktifProfesyonel → emekli). Profesyonel futbol **`kJobCatalog` içinde
+  bir iş değil** ve `CombatCareer` içine sıkıştırılmadı; kendi modeli
+  var. Test bunu ayrıca denetliyor.
+- **AU/3 — yıl akışı.** Kulüp sezonu `life_progression` içinde yaş
+  artmadan önce ilerliyor; günlüğe satır, dönüm noktalarına bildirim
+  yazıyor. Okul değiştiğinde kanca çalışıyor.
+- **AU/4 — olaylar.** `data/event_pool_school_clubs.dart`: 29 olay.
+  Olayın gereksinimine üç yeni alan eklendi (`requiresActiveClubId`,
+  `minClubYears`, `minSquadRole`) ve motor bunları okuyor. Takım arkadaşı
+  olayları var olan `sinifArkadasi` bağını kullanıyor; **ikinci bir kişi
+  üretim sistemi yok, uydurma isim yok.**
+
+### Bu pakette ÇIKAN iki CI kırmızısı ve kök nedenleri
+
+Commit `8da66c9` CI'da iki testi kırdı (Windows **ve** Ubuntu, yani
+platform sorunu değil). Log adları vermiyordu; tam süit ham çıktıyla
+yerelde koşularak bulundu.
+
+1. **`family_interaction_test` — "etkileşim sonucu kişi kimliğini
+   bozmaz".** Test kişi listesinin **birebir aynı** kalmasını istiyordu.
+   Oysa o yıllarda çözülen okul olayları meşru olarak yeni bir arkadaş
+   kaydı ekleyebiliyor; kimlikler bozulmuyordu, listeye `arkadas-1`
+   ekleniyordu. Varsayım yanlıştı. Test gevşetilmedi, **daha sıkı**
+   yazıldı: eski kayıtların hepsi aynı sırada duruyor mu, kimlik alanları
+   (ad, soyad, cinsiyet, bağ) değişmiş mi, kimlik tekrarı var mı, sonradan
+   eklenen kayıt gerçekten yeni mi. Eski hâli yalnızca annenin bağına
+   bakıyordu.
+2. **`critical_notice_test` — bir yıldaki bildirim penceresi 8'i aştı
+   (9 oldu).** Sınır büyütülmedi. O yılın dökümü ölçüldü: dokuzuncu kalem
+   **bir kulüp bildirimi değildi**, aynı yıl açılan **ikinci hedef
+   penceresiydi** (seed 1, 18 yaş: düğün davetiyesi, annenin vefatı,
+   cenaze, lise bitişi, hastalık, miras, miras anlaşmazlığı ve iki ayrı
+   "Bir hedefe ulaştın"). Aynı başlıkla üst üste iki pencere açmak zaten
+   bildirim yağmuru; `LifeGoals` artık yılda **tek pencere** açıyor
+   ("Hedeflere ulaştın", hedefleri birlikte sayıyor), tek hedefte eski
+   metin aynen kalıyor. Yeniden ölçüm: en kötü yıl **8**, ortalama 0,89.
+
+Yani AU hiçbir bildirim eklemedi; havuzu büyüttüğü için rastgele akış
+kaydı ve iki eski kırılganlık ortaya çıktı. İkisi de kök nedeninden
+düzeltildi.
+
+### Bu pakette YAPILMAYANLAR (dürüst liste)
+
+- **Gerçek 2026-27 lig ve kulüp kataloğu YAZILMADI.** Brief "hafızadan
+  yazma, önce resmi kaynağı kontrol et" diyor. Bu oturumun ağ politikası
+  **tüm dış adresleri reddediyor** (tff.org, resmi lig siteleri, UEFA,
+  Wikipedia dahil hepsi bağlanmıyor). Doğrulanmamış kulüp listesi
+  yazmamak için hiç yazılmadı; `docs/FOOTBALL_DATA_SOURCES.md` de bu
+  yüzden açılmadı. `paket_au_football_catalog_test` de bu sebeple yok.
+- **Spor Kariyeri menüsü ve kulüp kartları (UI) yapılmadı.**
+- **PlayerBot kulüplere girmiyor**, dolayısıyla 500 okul odaklı hayatın
+  ölçümü ve `paket_au_measurement_test` de yok.
+- **Android APK ya da Windows derlemesi bu pakette denenmedi** — yerel
+  kapta araç zinciri yok. "Build edildi" denmiyor.
+
+### Sıradaki paketler (yol haritası)
+
+- **AV — Spor Kariyeri arayüzü.** Kulüp kartı (rol, sezon, beceri,
+  dereceler), seçme ekranı ve gerekçeli engel metinleri, futbol
+  uygunluğunun oyuncuya okunur hâli. Var olan gezinme bozulmadan.
+- **AW — bot ve ölçüm.** PlayerBot profiline göre kulüp seçsin (sporcu /
+  akademi / sanat), herkes futbolcu olmasın; 500 okul odaklı hayat
+  ölçülüp oranlar yazılsın. Güzelleştirme yok, ölçüm.
+- **AX — gerçek lig ve kulüp kataloğu.** Ağ erişimi olan bir ortamda
+  TFF ve resmi lig/federasyon kaynaklarından 2026-27 listesi
+  doğrulanacak, kaynaklar `docs/FOOTBALL_DATA_SOURCES.md`'ye yazılacak.
+  Logo, arma, forma ve gerçek oyuncu/teknik direktör adı yok.
+- **AY — profesyonel futbol hayatı.** Sezon özeti, sakatlık, form,
+  kariyer sonu ve futbol sonrası hayat. Tam sezon simülasyonu, lig
+  tablosu, fikstür, transfer pazarı, sözleşme/maaş pazarlığı, Avrupa
+  kupaları ve millî takım **bu yol haritasının dışında** kalmaya devam
+  ediyor.
+
+## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
 masrafı, eşin önceki çocuğu oranı, kayın aile yakınlığı, buluşma havuzu
@@ -4301,6 +4409,12 @@ etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
 `Mortality` çarpanı, 80+ oranındaki düşüş ve özel tedavi ücreti. Hiçbiri
 `DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
 de dokunulmadı.**
+
+**Q-192 yeni ve açık:** okul kulüpleri ile futbol yolunun dokuz sayısı
+(aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı, beceri büyüme
+hızı, profesyonel için asgari geçmiş, scout sıklığı, giriş yaşı,
+kaptanlık eşiği, okul-kulüp çatışması). Hepsi `prototypeOnly`; hiçbiri
+`DECISIONS.md`'ye yazılmadı.
 
 Q-190 ve Q-191 **kararlaştırıldı** (3 Ekim 2026, Faho onayladı) ve
 uygulandı; ayrıntı yukarıdaki Paket AS/2 bölümünde. Kuyrukta kalan tek

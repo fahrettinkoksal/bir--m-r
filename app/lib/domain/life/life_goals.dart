@@ -15,10 +15,16 @@ import '../models/pending_notice.dart';
 import 'notices.dart';
 
 abstract final class LifeGoals {
-  /// prototypeOnly: bir yılda en fazla kaç hedef bildirimi gösterilir.
+  /// prototypeOnly: bir yılda en fazla kaç hedefin adı bildirimde anılır.
   ///
   /// Bir yılda beş hedef birden tamamlanırsa beş pencere üst üste
   /// açılmaz; kalanı yine kaydedilir, yalnızca bildirimi yazılmaz.
+  ///
+  /// Bir yılda kaç hedef tamamlanırsa tamamlansın **tek pencere** açılır:
+  /// aynı başlıklı iki pencere üst üste açmak bildirim yağmuru sayılıyor
+  /// (D-162). Ölçüm: 100 hayatta en kötü yıl dokuz pencereydi ve bunun
+  /// ikisi aynı başlıklı hedef bildirimiydi; birleştirmeyle sekize indi
+  /// (`critical_notice_test`).
   static const int prototypeOnlyMaxNoticesPerYear = 2;
 
   /// Bu yıl yeni ulaşılan hedefleri kaydeder.
@@ -36,19 +42,28 @@ abstract final class LifeGoals {
     }
     if (yeni.isEmpty) return state;
 
-    final List<PendingNotice> bildirimler = <PendingNotice>[];
+    // Anılacak hedefler: en fazla sabitteki kadar, sırası korunur.
+    final List<String> anilanIdler = <String>[];
+    final List<String> etiketler = <String>[];
     for (final String id in yeni.keys) {
-      if (bildirimler.length >= prototypeOnlyMaxNoticesPerYear) break;
+      if (etiketler.length >= prototypeOnlyMaxNoticesPerYear) break;
       final LifeGoal? hedef = lifeGoalById(id);
       if (hedef == null) continue;
-      bildirimler.add(
+      anilanIdler.add(id);
+      etiketler.add(hedef.label);
+    }
+
+    // Tek hedefte eski metin aynen kalır; birden fazlasında tek pencere.
+    final List<PendingNotice> bildirimler = <PendingNotice>[
+      if (etiketler.length == 1)
         Notices.goalReached(
           playerAge: newAge,
-          goalId: id,
-          label: hedef.label,
-        ),
-      );
-    }
+          goalId: anilanIdler.first,
+          label: etiketler.first,
+        )
+      else if (etiketler.length > 1)
+        Notices.goalsReached(playerAge: newAge, labels: etiketler),
+    ];
 
     return state.copyWith(
       goalsReachedAt: Map<String, int>.unmodifiable(<String, int>{

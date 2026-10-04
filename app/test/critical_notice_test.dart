@@ -77,13 +77,17 @@ void main() {
       enCok,
       lessThanOrEqualTo(8),
       reason: 'Ölçülen en kötü yıl sekiz penceredir. 100 hayat '
-          'ölçüldü; en kötüsü 51 yaşında üç vefat, bir cenaze masrafı, '
-          'bir hastalık, bir miras, bir arkadaş haberi ve bir hedef '
-          'bildirimi. Vefat ve cenaze kişiye özeldir, birleştirilmez; '
-          'daha fazlası bildirim yağmuru sayılır. Sayı D-162 ile yedi '
-          'iken sekize çıktı: yatırım olayları havuza girince rastgele '
-          'akış kaydı ve bu kalemler aynı yıla düştü. Kalemlerin hiçbiri '
-          'piyasa bildirimi değil, sınır gevşetilmedi — yeniden ölçüldü.'
+          'ölçüldü; en kötüsü (seed 1) 18 yaşında bir düğün davetiyesi, '
+          'annenin vefatı, cenaze masrafı, lise bitişi, bir hastalık, '
+          'bir miras, bir miras anlaşmazlığı ve bir hedef bildirimi. '
+          'Vefat ve cenaze kişiye özeldir, birleştirilmez; daha fazlası '
+          'bildirim yağmuru sayılır. Sayı D-162 ile yedi iken yatırım '
+          'olayları havuza girince sekize çıkmıştı. Paket AU okul kulübü '
+          'olaylarını havuza eklediğinde rastgele akış yine kaydı ve '
+          'dokuz oldu; dokuzuncu kalem bir KULÜP bildirimi DEĞİLDİ, aynı '
+          'yıl açılan İKİNCİ hedef penceresiydi. Sınır gevşetilmedi: '
+          'hedef bildirimleri tek pencerede toplandı (LifeGoals) ve en '
+          'kötü yıl yeniden sekize indi.'
     );
     expect(
       toplamBildirim / toplamYil,

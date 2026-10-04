@@ -5771,3 +5771,78 @@ kararı, teknik hata düzeltmesi değil; (2) Faho Windows test paketini bir
 arkadaşına verirken temponun altından değişmesi testi anlamsızlaştırır.
 Teşhis ve ölçüm altyapısı commit'lendi; karar gelince uygulanıp aynı
 ölçümle karşılaştırılacak.
+
+### Q-192 — Okul kulüpleri ve futbol yolunun sayıları (Paket AU)
+
+**Durum: öneri hazır, karar bekliyor.** Paket AU okul kulüplerini, çok
+yıllı spor geçmişini ve profesyonel futbola uygunluk kapısını kurdu.
+Aşağıdaki sayıların **hepsi `prototypeOnly`**; Faho onaylamadan hiçbiri
+`DECISIONS.md`'ye girmeyecek. Kodda tek yerde sabit duruyorlar, değişmesi
+kolay.
+
+**Etkilenen kod.** `app/lib/domain/sports/school_club_engine.dart`,
+`app/lib/domain/sports/football_career.dart`,
+`app/lib/data/school_club_catalog.dart`. PR
+[#80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+
+**1 — Aynı anda kaç kulüp?** `prototypeOnlyMaxActiveClubs = 2`.
+*Öneri: 2 kalsın.* Bir spor + bir akademik/sanat kulübü gerçekçi; üçüncüsü
+hem takvimi hem de ekranı şişiriyor. Alternatif: lisede 3, ortaokulda 2.
+
+**2 — Seçme eşiği.** `prototypeOnlyTryoutPass = 55`,
+`prototypeOnlyTryoutLuckSpan = 40`, `prototypeOnlyTryoutUpsetPercent = 8`.
+Puan fiziksel kulüplerde `yatkınlık×45 + sağlık×35` (÷100), diğerlerinde
+`karizma×45 + zekâ×35` (÷100), üstüne deneyim payı
+`(sezon×4 + en iyi beceri÷4)` en çok 30.
+*Öneri: olduğu gibi kalsın.* Brief'in şartı tutuyor: sağlık 100 + yüksek
+yatkınlık **kesin kabul değil** — %8'lik sürpriz ret puandan bağımsız
+çalışıyor, ve 40'lık zar düşük puanı matematiksel olarak imkânsız
+kılmıyor. Test bunu 60 tohumla ölçüyor (`paket_au_school_clubs_test`).
+
+**3 — Atletik yatkınlığın ağırlığı.** Doğumda bir kez belirleniyor
+(25-85 bandı), oyuncuya **gösterilmiyor**. Seçme puanında fiziksel
+kulüplerde %45, profesyonellik puanında %10 ağırlık taşıyor.
+*Öneri: %45 / %10 kalsın.* Yatkınlık yolu açıyor ama tek başına
+yetmiyor; sezon sayısı (en çok 35 puan) ve beceri (35) daha baskın. Yani
+"çalışan, yatkınlığı ortalama" oyuncu "yatkın ama geç başlayan"ı geçiyor.
+Bu bilinçli bir tercih; tersi istenirse yatkınlık ağırlığı yükseltilir.
+
+**4 — Beceri büyüme hızı.** `prototypeOnlyMaxSkillGainPerSeason = 9`,
+azalan getirili (tavana yaklaşınca kazanç düşüyor).
+*Öneri: 9 kalsın.* 4. sınıfta giren oyuncu 12. sınıfta ~55-70 beceriye
+çıkıyor; bu da profesyonellik eşiğinin (45) üstü ama garanti değil.
+
+**5 — Profesyonel için asgari geçmiş.** `prototypeOnlyMinSeasons = 3`,
+`prototypeOnlyMinSkill = 45`, `prototypeOnlyMinHealth = 55`,
+`prototypeOnlyMinScore = 55`.
+*Öneri: olduğu gibi kalsın.* Brief'in kesin şartı burada duruyor:
+futbol geçmişi olmayan 18 yaşındaki sağlıklı/karizmatik/zeki oyuncu
+**kapıdan geçemiyor** ve gerekçesini okuyor ("futbol geçmişin yok").
+
+**6 — Scout sıklığı.** `prototypeOnlyScoutMinAge = 15`,
+`prototypeOnlyScoutMinScore = 48`, ayrıca en az 2 sezon ve İlk 11+ rol.
+*Öneri: eşikler kalsın, ama sıklık henüz ölçülmedi.* Kaç hayatta scout
+geliyor, AU ölçüm adımında (500 okul odaklı hayat) çıkacak. Sayı çok
+yüksek çıkarsa eşik değil **frekans** kısılmalı.
+
+**7 — Profesyonele giriş yaşı.** `prototypeOnlyMinTrialAge = 16`,
+`prototypeOnlyMaxFirstTrialAge = 23`.
+*Öneri: 16-23 kalsın.* 23 üstü ilk deneme kapanıyor; bu "kaçırdığın tren"
+hissini veriyor ve geç başlayan oyuncuyu dürüstçe reddediyor.
+
+**8 — Kaptanlık eşiği.** Rol puanı ≥78 **ve** en az 3 sezon. Rol tek
+sezonda yalnızca bir kademe değişiyor (hem yükselirken hem düşerken).
+*Öneri: olduğu gibi kalsın.* Kaptanlık kıdem istiyor, bu doğru; tek
+kademe kuralı da "bir yılda yedekten kaptana" saçmalığını engelliyor.
+
+**9 — Okul ile kulüp çatışması: BU PAKETTE YOK.** Dürüst olmak gerekirse
+okul kulübü şu an ders başarısını **etkilemiyor**. AL/2'de kurulan
+okul+spor çatışması `sports` sistemine bağlı, kulüplere değil.
+*Öneri: çatışma eklenmesin ya da çok hafif olsun.* Gerekçe: kulüp zaten
+yılda bir antrenman hakkı ve 2 kulüp sınırıyla kısıtlı; üstüne not cezası
+koymak oyuncuyu kulüpten kaçırır. İstenirse yalnızca **3+ sezon İlk 11
+ve üstü** oynayan oyuncuda küçük bir ders eforu maliyeti düşünülebilir.
+Bu bir **karar sorusu**, hata değil.
+
+**Varsayılan işlem:** onay gelene kadar sayılar bu hâliyle `prototypeOnly`
+kalır ve `DECISIONS.md`'ye yazılmaz.

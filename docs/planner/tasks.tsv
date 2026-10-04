@@ -153,10 +153,19 @@ completed	Paket AQ/2: yaş alma blokajı, tek ölüm, save/load
 completed	Paket AQ/3: düşük sağlıkta aktivite/seyahat/estetik/iş etkileri
 completed	Paket AQ/4: mutluluk/karizma/görünüş/zekâ düşük stat etkileri
 completed	Paket AQ/5: UI kritik sağlık göstergesi ve bildirim spam koruması
-in_progress	Paket AQ/6: testler, 500 hayat ölçümü, build, Q-189, rapor
+completed	Paket AQ/6: testler, 500 hayat ölçümü, build, Q-189, rapor
 completed	Paket AR/1: hikâye izi denetimi — 38 sessiz iz, 13 ölü zincir halkası
 completed	Paket AR/2: ölü halkaları OYUN/BOT/NORMAL sınıflandır ve kırık rol kilitlerini düzelt
 completed	Paket AR/3: teşhisi dört sınıfa çıkar, kura tabanını ölç (Q-191)
 completed	Paket AS/1: "sessiz iz" ölçütünü düzelt — mekanik ile gerçekten sessizi ayır (38 → 6 + 32)
 completed	Paket AS/2: Q-190 ve Q-191 uygula, sessiz izlere 10 yankı olayı yaz (ölü halka 10 → 0)
 completed	Paket AT: 9-12 yaş boşluğuna 20 olay (kapısız içerik 15 → 29)
+completed	Paket AU/1: kulüp kataloğu, kalıcı üyelik kaydı ve gizli atletik yatkınlık
+completed	Paket AU/2: kulüp motoru, seçme (kesin kabul yok) ve futbol uygunluk kapısı
+completed	Paket AU/3: kulüp sezonunu yıl akışına bağla, okul değişimi kancası
+completed	Paket AU/4: 29 kulüp olayı ve üç yeni olay gereksinimi alanı
+completed	Paket AU/5: CI iki kırmızısının kök nedeni — kırılgan kimlik testi ve çift hedef penceresi
+pending	Paket AV: Spor Kariyeri menüsü ve kulüp kartları (UI)
+pending	Paket AW: PlayerBot kulüp seçimi ve 500 okul odaklı hayat ölçümü
+pending	Paket AX: gerçek 2026-27 lig/kulüp kataloğu (ağ erişimi gerekiyor)
+pending	Paket AY: profesyonel futbol hayatı — sezon özeti, sakatlık, kariyer sonu

@@ -286,6 +286,23 @@ abstract final class Notices {
         text: '$label. Hayat Hedefleri bölümünde duruyor.',
       );
 
+  /// Aynı yıl birden fazla hayat hedefine ulaşıldı (D-156).
+  ///
+  /// Aynı başlıklı iki pencere üst üste açılmasın diye tek pencerede
+  /// toplanır. Bilgilendirmedir: ödül vermez, karar sormaz, hiçbir
+  /// değeri değiştirmez.
+  static PendingNotice goalsReached({
+    required int playerAge,
+    required List<String> labels,
+  }) =>
+      PendingNotice(
+        id: 'hedefler-$playerAge',
+        kind: NoticeKind.aileDonum,
+        age: playerAge,
+        title: 'Hedeflere ulaştın',
+        text: '${labels.join(', ')}. Hayat Hedefleri bölümünde duruyor.',
+      );
+
   /// Kronik durum kaydına girdi (D-153).
   ///
   /// Bilgilendirmedir: karar sormaz, hiçbir değeri değiştirmez. Metin

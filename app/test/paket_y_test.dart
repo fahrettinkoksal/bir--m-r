@@ -917,7 +917,7 @@ void main() {
       );
     });
 
-    test('bir yılda en fazla iki hedef bildirimi açılır', () {
+    test('bir yılda birden fazla hedef tek pencerede toplanır', () {
       // Aynı anda birçok hedefi sağlayan bir durum kur.
       GameState s = hayat(age: 40, wallet: kGoalMillion + 5);
       s = s.copyWith(
@@ -930,10 +930,27 @@ void main() {
       final GameState sonra =
           LifeGoals.advanceYear(state: s, newAge: 40);
       expect(sonra.goalsReachedAt.length, greaterThan(2));
+      final List<PendingNotice> hedefPencereleri = sonra.notices
+          .where((PendingNotice n) => n.id.startsWith('hedefler-'))
+          .toList();
       expect(
-        sonra.notices.where((PendingNotice n) => n.id.startsWith('hedef-')),
-        hasLength(LifeGoals.prototypeOnlyMaxNoticesPerYear),
-        reason: 'Beş pencere üst üste açılmaz; kayıt yine tutulur',
+        hedefPencereleri,
+        hasLength(1),
+        reason: 'Aynı başlıklı pencere üst üste açılmaz; kayıt yine tutulur',
+      );
+      // Tek pencere, sabitteki kadar hedefin adını anıyor.
+      final List<String> anilan = kLifeGoals
+          .where((LifeGoal g) => sonra.goalsReachedAt.containsKey(g.id))
+          .map((LifeGoal g) => g.label)
+          .where((String l) => hedefPencereleri.first.text.contains(l))
+          .toList();
+      expect(anilan, hasLength(LifeGoals.prototypeOnlyMaxNoticesPerYear));
+      // Tek hedefte eski tekil pencere korunuyor.
+      GameState tek = hayat(age: 44, wallet: kGoalMillion + 5);
+      tek = LifeGoals.advanceYear(state: tek, newAge: 44);
+      expect(
+        tek.notices.where((PendingNotice n) => n.id.startsWith('hedef-')),
+        hasLength(1),
       );
     });
 
