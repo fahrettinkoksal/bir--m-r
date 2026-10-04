@@ -52,6 +52,7 @@ import '../models/game_state.dart';
 import '../interaction/bond_decay.dart';
 import '../interaction/finger.dart';
 import '../models/life_log.dart';
+import '../sports/school_club_engine.dart';
 import '../models/zodiac.dart';
 import '../career/military_service.dart';
 import '../casino/lottery.dart';
@@ -379,8 +380,23 @@ class LifeProgression {
       );
     }
 
+    // Okul kulüpleri / takımlar: sezon yaş geçişinde işlenir (Paket AU).
+    //
+    // Yaş **artmadan** çağrılır ki sezon biten yılın yaşıyla kaydedilsin;
+    // hayat hedeflerinde (`LifeGoals`) olduğu gibi. Her sezon popup
+    // üretmez: `log` günlüğe yazılır, yalnızca kilometre taşı (kaptanlık)
+    // bildirim olur.
+    final ({
+      GameState state,
+      List<String> log,
+      List<String> milestones,
+    }) kulupSezonu = const SchoolClubEngine().advanceSeason(state, _rng);
+    state = kulupSezonu.state;
+
     final List<LifeLogEntry> log = <LifeLogEntry>[
       ...state.log,
+      for (final String satir in kulupSezonu.log)
+        LifeLogEntry(age: newAge, text: satir, category: LogCategory.kisisel),
       for (final String haber in yegenHaberleri)
         LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
       LifeLogEntry(
@@ -451,6 +467,15 @@ class LifeProgression {
           log: log,
         );
     final List<Person> peopleWithSchool = okulSonucu.people;
+
+    // Okul değişti mi? (Paket AU) Kademe atlayınca ya da şehir değişince
+    // yeni okul kimliği gelir. O zaman **aktif** kulüp üyelikleri kapanır
+    // ama geçmiş silinmez: yeni okulda yeniden başvurulur, geçmiş deneyim
+    // kabul ihtimaline yardım eder.
+    if (okulSonucu.education.schoolId != education.schoolId) {
+      state = const SchoolClubEngine()
+          .onSchoolChanged(state, okulSonucu.education.schoolId);
+    }
 
     // Çocuk, torun, yeğen ve kardeşin bu yıl yaşadığı önemli gelişmeler
     // aile haberi olarak günlüğe girer; kişinin kendi geçmişinde zaten
@@ -606,6 +631,17 @@ class LifeProgression {
       notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
         ...state.notices,
         ...aileBildirimleri,
+        // Kulüp kilometre taşları (Paket AU). Yalnızca kaptanlık gibi
+        // önemli anlar bildirim olur; normal sezon günlükte kalır, çünkü
+        // her yıl beş popup kimseye iyi gelmez.
+        for (int i = 0; i < kulupSezonu.milestones.length; i++)
+          PendingNotice(
+            id: 'kulup-donum-$newAge-$i',
+            kind: NoticeKind.okul,
+            age: newAge,
+            title: 'Takımda bir ilk',
+            text: kulupSezonu.milestones[i],
+          ),
       ]),
     );
 
