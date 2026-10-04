@@ -23,7 +23,31 @@ class PlayerCharacter {
     this.infertile = false,
     this.birthDate,
     this.hairLossStage = 0,
+    this.storedAthleticPotential,
   }) : currentCity = currentCity ?? birthCity;
+
+  /// Atletik potansiyel (0-100) — **doğumda bir kez** belirlenir.
+  ///
+  /// Sağlık değildir, karizma değildir, futbol becerisi de değildir.
+  /// Yalnızca bedensel/sportif gelişime yatkınlıktır: aynı antrenmanla
+  /// kimin daha hızlı ilerlediğini belirler.
+  ///
+  /// **Oyuncuya sayı olarak gösterilmez.** Spor yapmaya başlayınca
+  /// kabaca bir fikir edinilir ("Zorlanıyor", "Yetenekli" gibi).
+  ///
+  /// **Save/load sonrası yeniden çekilmez:** değer kayda yazılır ve
+  /// [storedAthleticPotential] olarak geri okunur.
+  ///
+  /// Yüksek potansiyel kendiliğinden profesyonellik getirmez; düşük
+  /// potansiyel de matematiksel olarak imkânsız kılmaz. Belirleyici olan
+  /// **geçmiş + çalışma + yetenek + sağlık** birlikte.
+  int get athleticPotential =>
+      storedAthleticPotential ?? _turetilmisAtletikPotansiyel(id);
+
+  /// Kayda yazılan potansiyel. Alanı taşımayan **eski kayıtlarda** `null`
+  /// olur ve kimlikten deterministik olarak türetilir — her yüklemede aynı
+  /// değer çıkar, rastgele yeniden atılmaz.
+  final int? storedAthleticPotential;
 
   final String id;
   final String firstName;
@@ -116,6 +140,22 @@ class PlayerCharacter {
       infertile: infertile ?? this.infertile,
       birthDate: birthDate ?? this.birthDate,
       hairLossStage: hairLossStage ?? this.hairLossStage,
+      // Doğumda belirlenir ve bir daha değişmez: `copyWith` parametresi
+      // bilerek yoktur, değer olduğu gibi taşınır.
+      storedAthleticPotential: storedAthleticPotential,
     );
   }
+}
+
+/// Alanı taşımayan eski kayıtlar için kimlikten türetilen potansiyel.
+///
+/// Rastgele değil **deterministik**: aynı kayıt her yüklemede aynı değeri
+/// alır. Geçmiş uydurmak değil; eksik alanı kararlı biçimde doldurmaktır.
+int _turetilmisAtletikPotansiyel(String id) {
+  int h = 0;
+  for (final int kod in id.codeUnits) {
+    h = (h * 31 + kod) & 0x7fffffff;
+  }
+  // 25-85: oyuncu statlarıyla aynı prototypeOnly bant.
+  return 25 + (h % 61);
 }

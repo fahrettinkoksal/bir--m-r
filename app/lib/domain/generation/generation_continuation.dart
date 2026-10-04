@@ -248,6 +248,9 @@ abstract final class GenerationContinuation {
       ),
       // Ün taşınmaz (D-027: baştan kapalıdır).
       fame: null,
+      // Atletik potansiyel **miras alınmaz**: çocuk kendi bedeniyle
+      // gelir. Ebeveynin kulüp geçmişi de çocuğa geçmez (Paket AU).
+      storedAthleticPotential: rng.between(25, 85),
       // Kendi birikimi + mirastan payına düşen. İki kalem ayrı kaynaktır,
       // aynı para iki kez üretilmez.
       wallet: (gelisim?.money ?? 0) + cocukPayi,

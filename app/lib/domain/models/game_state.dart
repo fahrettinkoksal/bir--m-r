@@ -11,6 +11,7 @@ import 'family_issue.dart';
 import 'book_progress.dart';
 import 'combat_career.dart';
 import 'martial_progress.dart';
+import 'school_club_progress.dart';
 import 'hobby_progress.dart';
 import 'lottery_ticket.dart';
 import '../../data/finger_catalog.dart';
@@ -91,6 +92,7 @@ class GameState {
     this.books = const <BookProgress>[],
     this.martialArts = const <MartialProgress>[],
     this.combatCareers = const <CombatCareer>[],
+    this.schoolClubs = const <SchoolClubProgress>[],
     this.hobbies = const <HobbyProgress>[],
     this.chronicConditions = const <ChronicCondition>[],
     this.goalsReachedAt = const <String, int>{},
@@ -420,6 +422,15 @@ class GameState {
   /// bu liste müsabakayı tutar (rakip, sıralama, sakatlık, ödül,
   /// emeklilik). Eski kayıtlarda yoktur ve boş olarak yüklenir.
   final List<CombatCareer> combatCareers;
+
+  /// Okul kulüpleri ve takımlarındaki kalıcı geçmiş (Paket AU).
+  ///
+  /// Aktif üyelikler ve **bitmiş** üyelikler aynı listede durur: okul
+  /// değişince ya da ayrılınca kayıt silinmez, `active` kapanır. Çocuklukta
+  /// kurulan futbol geçmişi profesyonel yolun önkoşulu olduğu için bu
+  /// listenin kaybolmaması kritiktir. Eski kayıtlarda yoktur ve boş
+  /// yüklenir; geçmiş **uydurulmaz**.
+  final List<SchoolClubProgress> schoolClubs;
 
   /// Paket 39: kalıcı hobi geçmişi (müzik, resim, okuma, spor).
   ///
@@ -1230,6 +1241,7 @@ class GameState {
     List<BookProgress>? books,
     List<MartialProgress>? martialArts,
     List<CombatCareer>? combatCareers,
+    List<SchoolClubProgress>? schoolClubs,
     List<HobbyProgress>? hobbies,
     List<ChronicCondition>? chronicConditions,
     Map<String, int>? goalsReachedAt,
@@ -1339,6 +1351,7 @@ class GameState {
       books: books ?? this.books,
       martialArts: martialArts ?? this.martialArts,
       combatCareers: combatCareers ?? this.combatCareers,
+      schoolClubs: schoolClubs ?? this.schoolClubs,
       hobbies: hobbies ?? this.hobbies,
       chronicConditions: chronicConditions ?? this.chronicConditions,
       goalsReachedAt: goalsReachedAt ?? this.goalsReachedAt,

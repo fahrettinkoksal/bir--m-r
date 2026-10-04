@@ -20,6 +20,7 @@ import '../../domain/models/blackjack_game.dart';
 import '../../domain/models/book_progress.dart';
 import '../../domain/models/combat_career.dart';
 import '../../domain/models/martial_progress.dart';
+import '../../domain/models/school_club_progress.dart';
 import '../../domain/models/hobby_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
 import '../finger_catalog.dart';
@@ -113,6 +114,10 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // okuma tarafı boş liste ile yükler.
       'combatCareers':
           state.combatCareers.map(_encodeCombat).toList(growable: false),
+      // Okul kulübü geçmişi (Paket AU). Alan eklemeli: eski kayıtta
+      // yoktur, boş liste ile yüklenir ve geçmiş uydurulmaz.
+      'schoolClubs':
+          state.schoolClubs.map(_encodeSchoolClub).toList(growable: false),
       // Hobi geçmişi (Paket 39). Alan eklemeli.
       'hobbies': state.hobbies.map(_encodeHobby).toList(growable: false),
       // Kronik durumlar ve sağlık geçmişi (D-153). Alan eklemeli:
@@ -517,6 +522,10 @@ Map<String, Object?> _encodePlayer(PlayerCharacter p) => <String, Object?>{
       'hairStyle': p.hairStyle,
       'hairLossStage': p.hairLossStage,
       'infertile': p.infertile,
+      // Atletik potansiyel (Paket AU): doğumda belirlenir, **yeniden
+      // çekilmez**. Alanı taşımayan eski kayıtta null kalır ve kimlikten
+      // deterministik türetilir.
+      'athleticPotential': p.storedAthleticPotential,
       // Doğum ayı ve günü (Paket 27). **Yıl yoktur** (D-003).
       'birthMonth': p.birthDate?.month,
       'birthDay': p.birthDate?.day,
@@ -566,6 +575,46 @@ Map<String, Object?> _encodeOpponent(CombatOpponent o) => <String, Object?>{
       'fameAwards': o.fameAwards,
       'opponentTier': o.tier,
     };
+
+Map<String, Object?> _encodeSchoolClub(SchoolClubProgress p) =>
+    <String, Object?>{
+      'clubId': p.clubId,
+      'schoolId': p.schoolId,
+      'joinedAtAge': p.joinedAtAge,
+      'joinedAtGrade': p.joinedAtGrade,
+      'active': p.active,
+      'leftAtAge': p.leftAtAge,
+      'yearsActive': p.yearsActive,
+      'skill': p.skill,
+      'performance': p.performance,
+      'role': p.role.name,
+      'captainSinceAge': p.captainSinceAge,
+      'competitions': p.competitions,
+      'awards': p.awards,
+      'lastPracticedAge': p.lastPracticedAge,
+    };
+
+SchoolClubProgress _decodeSchoolClub(Map<String, Object?> json) =>
+    SchoolClubProgress(
+      clubId: _string(json, 'clubId'),
+      schoolId: _string(json, 'schoolId'),
+      joinedAtAge: _int(json, 'joinedAtAge'),
+      joinedAtGrade: _int(json, 'joinedAtGrade'),
+      active: _boolOr(json, 'active', varsayilan: true),
+      leftAtAge: _intOrNull(json, 'leftAtAge'),
+      yearsActive: _intOr(json, 'yearsActive', 0),
+      skill: _intOr(json, 'skill', 0),
+      performance: _intOr(json, 'performance', 50),
+      role: _enumByName(
+        SquadRole.values,
+        _stringOrNull(json, 'role') ?? SquadRole.yedek.name,
+        'schoolClubs[].role',
+      ),
+      captainSinceAge: _intOrNull(json, 'captainSinceAge'),
+      competitions: _intOr(json, 'competitions', 0),
+      awards: _intOr(json, 'awards', 0),
+      lastPracticedAge: _intOrNull(json, 'lastPracticedAge'),
+    );
 
 Map<String, Object?> _encodeCombat(CombatCareer c) => <String, Object?>{
       'artId': c.artId,
@@ -1528,6 +1577,13 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeMartial(_asMap(e, 'martialArts[]')))
           .toList(growable: false),
     ),
+    // Paket AU: eski kayıtta yok; boş liste ile yüklenir. Oyuncunun
+    // yaşamadığı bir kulüp geçmişi **uydurulmaz**.
+    schoolClubs: List<SchoolClubProgress>.unmodifiable(
+      _optionalRawList(json, 'schoolClubs')
+          .map((Object? e) => _decodeSchoolClub(_asMap(e, 'schoolClubs[]')))
+          .toList(growable: false),
+    ),
     // Paket AL: eski kayıtta yok; boş liste ile yüklenir.
     combatCareers: List<CombatCareer>.unmodifiable(
       _optionalRawList(json, 'combatCareers')
@@ -1845,6 +1901,9 @@ PlayerCharacter _decodePlayer(Map<String, Object?> json, String path) {
     hairLossStage: _intOr(json, 'hairLossStage', 0),
     // Eski kayıtlarda doğurganlık bilgisi yoktur; kısır sayılmaz.
     infertile: _boolOr(json, 'infertile'),
+    // Atletik potansiyel (Paket AU). Eski kayıtta yoktur: null kalır ve
+    // kimlikten deterministik türetilir, uydurulmaz.
+    storedAthleticPotential: _intOrNull(json, 'athleticPotential'),
     // Eski kayıtlarda doğum ayı/günü yoktur; boş kalır. Burç o zaman
     // hayatın tohumundan **deterministik** türetilir (Paket 27), yani
     // eski hayat da burcunu görür ve her açılışta aynı burcu görür.

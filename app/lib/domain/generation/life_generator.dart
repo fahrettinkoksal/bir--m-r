@@ -321,6 +321,10 @@ class LifeGenerator {
       ),
       // Ün başlangıçta açık değildir (D-027).
       fame: null,
+      // Atletik potansiyel doğumda **gizlice** belirlenir (Paket AU):
+      // oyuncuya sayı gösterilmez, spor yapıldıkça kabaca anlaşılır.
+      // prototypeOnly aralık: statlarla aynı bant.
+      storedAthleticPotential: _rng.between(25, 85),
       // Doğurganlık hayat başında **gizlice** belirlenir; oyuncuya
       // söylenmez, ancak denedikçe anlaşılır (Paket 25).
       infertile: Intimacy.rollPlayerInfertility(_rng),
