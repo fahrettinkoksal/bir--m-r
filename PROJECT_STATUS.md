@@ -3828,6 +3828,75 @@ düzeltildi.
   kupaları ve millî takım **bu yol haritasının dışında** kalmaya devam
   ediyor.
 
+## Paket AV: Spor Kariyeri menüsü ve kulüp kartları (4 Ekim 2026)
+
+AU'nun en görünür boşluğu kapandı. AU kulüpleri, rolleri, çok yıllı
+geçmişi ve futbol uygunluk kapısını kurmuştu; ama oyuncu bunların
+**hiçbirini ekranda göremiyordu**. Kulüp olayları hayat akışında
+çıkıyor, takımdaki yeri görünmüyordu.
+
+### Yapılanlar
+
+- **Kulüpler sayfası** (`ui/screens/sections/school_clubs_page.dart`).
+  Okul menüsüne `Kulüpler` satırı eklendi; alt yazısı aktif üyeliği
+  söylüyor (ör. "Futbol takımı — İlk 11"). Sayfa üç bölüm:
+  1. **Üye olduğun kulüpler** — kart başına rol, sezon sayısı, beceri ve
+     bandı, kaptanlık yaşı; kart açılınca katılım yaşı/sınıfı,
+     performans, yarışma ve derece sayısı, kulübün tanıtım metni.
+  2. **Katılabileceğin kulüpler** — sınıfa açık olanlar. Seçmeli kulüp
+     "sonuç kesin değil" diye işaretli. Engel varsa düğme **konmuyor**,
+     yerine motorun gerekçesi yazılıyor.
+  3. **Geçmiş kulüp kayıtların** — ayrılınan ya da okul değişimiyle
+     kapanan üyelikler; kaç sezon, beceri, kaptanlık, derece.
+- **Antrenman ve ayrılma** karttan yapılıyor. Antrenman yılda bir kez;
+  hakkı bitince düğme kaybolup gerekçe yazılıyor. Ayrılma düğmesi kart
+  açıkken görünüyor ve "geçmiş kaydın silinmez" diyor — gerçekten de
+  silinmiyor.
+- **Spor Kariyeri sayfası** (`ui/screens/sections/sports_career_page.dart`).
+  Profesyonel futbol bir `kJobCatalog` işi değil; kendi sayfası var.
+  Durum kartı uygunluğu, **gerekçesini**, hazırlık puanını, sezon
+  sayısını, en iyi beceriyi, başlama yaşını ve kaptanlığı gösteriyor.
+  Altında gençlik geçmişi kademe kademe listeleniyor. Scout ilgisi varsa
+  ayrı bir satır çıkıyor ve "bu bir teklif değil" diye açıkça yazıyor.
+- **Satır yalnızca hak edilince görünüyor.** Futbol geçmişi olmayan
+  oyuncuda Spor Kariyeri satırı yok: boş sayfaya götüren menü satırı
+  konmadı. Satır hem Okul hem Meslek menüsünde var, çünkü uygunluk 16
+  yaşında (lise sırasında) başlıyor ve okul bitince de sürüyor.
+- **Denetleyici eylemleri** (`state/game_controller.dart`): `clubBlock`,
+  `joinClub`, `canTrainClub`, `trainClub`, `leaveClub`,
+  `footballEligibility`. Motorun imzaları **değiştirilmedi** (testleri
+  var); antrenmanın geri bildirim metni denetleyicide üretiliyor ve
+  beceri hiç artmazsa bu da dürüstçe yazılıyor, "arttı" diye
+  uydurulmuyor.
+
+### Ekran yeni kural koymuyor
+
+Katılma engelleri, seçme sonucu, antrenman sınırı ve uygunluk kararı
+tamamen motordan (`SchoolClubEngine`, `FootballPath`) geliyor. Sayfa
+hiçbir sayıyı kendi hesaplamıyor. Q-192'deki dokuz sayı hâlâ
+`prototypeOnly` ve hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+### Henüz yazılmayan, sayfada açıkça söylenen
+
+Profesyonel sözleşme, kulüp seçimi ve sezon akışı yok. Spor Kariyeri
+sayfası bunu kendi üstünde yazıyor; sahte düğme konmadı. Gerçek 2026-27
+lig ve kulüp kataloğu da **yazılmadı** (ağ politikası tüm dış adresleri
+reddediyor; 4 Ekim 05:41 ve 07:1x kontrollerinde tff.org yine 000).
+
+### Doğrulama
+
+`app/test/paket_av_sports_ui_test.dart` — 11 widget testi: menü satırının
+varlığı, katılabilir kulüplerin listelenmesi, kartın rol/sezon/beceri
+yazması, antrenmanın yılda bir kez açılması (hem düğme hem gerekçe),
+antrenmana basınca kaydın gerçekten güncellenmesi, kritik sağlıkta
+fiziksel kulübün engelinin gerekçesiyle çıkması, ayrılınca kaydın
+geçmişe geçip silinmemesi, futbol geçmişi yokken satırın görünmemesi,
+yeterli geçmişte kapının açılması, yetersiz geçmişte gerekçenin yazması
+ve profesyonel adımın henüz yazılmadığının söylenmesi.
+
+`flutter analyze` çıkış kodu 0. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta araç zinciri yok; CI derliyor.
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım

@@ -15,6 +15,10 @@ import '../domain/combat/sport_family_support.dart';
 import '../domain/combat/sport_rivalry.dart';
 import '../domain/combat/sport_school_conflict.dart';
 import '../domain/combat/sport_workload.dart';
+import '../data/school_club_catalog.dart';
+import '../domain/models/school_club_progress.dart';
+import '../domain/sports/football_career.dart';
+import '../domain/sports/school_club_engine.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
@@ -1315,6 +1319,90 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return sonuc.text;
+  }
+
+  // --- Okul kulüpleri (Paket AV) ---------------------------------------
+  //
+  // Motorun imzaları değiştirilmedi; geri bildirim metni burada üretilir.
+
+  static const SchoolClubEngine _kulupMotoru = SchoolClubEngine();
+
+  /// Bu kulübe şu an katılmanın engeli (yoksa `null`).
+  ///
+  /// Gerekçe metni motordan gelir; ekranda kuru "olmaz" yazılmaz.
+  ClubBlock? clubBlock(SchoolClub club) {
+    final GameState? current = _state;
+    if (current == null) return const ClubBlock('Oyun yüklenmedi.');
+    return _kulupMotoru.blockFor(current, club);
+  }
+
+  /// Kulübe katılmayı dener. Seçmeli kulüpte sonuç kesin değildir.
+  ClubJoinOutcome joinClub(SchoolClub club) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) {
+      return const ClubJoinOutcome(
+        accepted: false,
+        reason: 'Önce ekrandaki olayı sonuçlandır.',
+      );
+    }
+    final ClubJoinOutcome sonuc = _kulupMotoru.join(current, club, _random);
+    final GameState? yeni = sonuc.state;
+    if (sonuc.accepted && yeni != null) {
+      _state = yeni;
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc;
+  }
+
+  /// Bu yıl bu kulüpte antrenman yapılabilir mi?
+  bool canTrainClub(String clubId) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return _kulupMotoru.canTrain(current, clubId);
+  }
+
+  /// Antrenmana gider; beceri değişimini metin olarak döner.
+  ///
+  /// Yılda bir kez (motorun kuralı). Beceri hiç artmazsa bu da dürüstçe
+  /// yazılır; "arttı" diye uydurulmaz.
+  String? trainClub(String clubId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final SchoolClubProgress? once = current.schoolClubs.activeFor(clubId);
+    if (once == null) return null;
+    if (!_kulupMotoru.canTrain(current, clubId)) {
+      return 'Bu yılın antrenmanını yaptın. Gelecek yıl yine çalışabilirsin.';
+    }
+    final GameState sonra = _kulupMotoru.train(current, clubId, _random);
+    final SchoolClubProgress? yeniKayit = sonra.schoolClubs.activeFor(clubId);
+    _state = sonra;
+    _autoSave();
+    notifyListeners();
+    final int fark = (yeniKayit?.skill ?? once.skill) - once.skill;
+    if (fark <= 0) {
+      return 'Çalıştın ama bu antrenman beceriye yansımadı. '
+          'Beceri ${once.skill}.';
+    }
+    return 'Antrenman iyi geçti. Beceri ${once.skill} → '
+        '${yeniKayit?.skill ?? once.skill}.';
+  }
+
+  /// Kulüpten ayrılır. Geçmiş kaydı **silinmez**.
+  void leaveClub(String clubId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return;
+    if (current.schoolClubs.activeFor(clubId) == null) return;
+    _state = _kulupMotoru.leave(current, clubId);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Profesyonel futbol yolunun o anki durumu ve gerekçesi.
+  FootballEligibility? footballEligibility() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FootballPath.evaluate(current);
   }
 
   /// Emeklilik şu an mümkün mü?

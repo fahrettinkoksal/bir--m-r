@@ -25,6 +25,11 @@ import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../widgets/track_choice_sheet.dart';
 import 'education_career_pages.dart';
+import '../../../data/school_club_catalog.dart';
+import 'school_clubs_page.dart';
+import 'sports_career_page.dart';
+import '../../../domain/models/school_club_progress.dart';
+import '../../../domain/sports/football_career.dart';
 import '../../../text/turkish_text.dart';
 
 /// Okul / Meslek ana menüsü (NAV-001).
@@ -73,7 +78,7 @@ class SchoolCareerScreen extends StatelessWidget {
 ///
 /// Burada yalnızca **okulla ilgili** gruplar bulunur. Arkadaşlık düzeyi ve
 /// özel ilişkiler İlişkiler menüsünden yönetilir.
-enum _SchoolPage { kok, sinifArkadaslari, ogretmenler }
+enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, kulupler, sporKariyeri }
 
 class _SchoolView extends StatefulWidget {
   const _SchoolView({required this.state, required this.onBack});
@@ -95,6 +100,19 @@ class _SchoolViewState extends State<_SchoolView> {
     _page = page;
     _sonuc = null;
   });
+
+  /// Menü satırının alt yazısı: hangi kulüpte hangi roldesin.
+  String _aktifKulupOzeti(GameState state) {
+    final List<SchoolClubProgress> aktif = state.schoolClubs.activeOnes;
+    return aktif.map((SchoolClubProgress p) {
+      final String ad = kSchoolClubs
+          .where((SchoolClub c) => c.id == p.clubId)
+          .map((SchoolClub c) => c.name)
+          .firstOrNull ??
+          'Kulüp';
+      return '$ad — ${p.role.label}';
+    }).join(' · ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +149,10 @@ class _SchoolViewState extends State<_SchoolView> {
           playerAge: state.player.age,
           onBack: () => _go(_SchoolPage.kok),
         );
+      case _SchoolPage.kulupler:
+        return SchoolClubsPage(onBack: () => _go(_SchoolPage.kok));
+      case _SchoolPage.sporKariyeri:
+        return SportsCareerPage(onBack: () => _go(_SchoolPage.kok));
       case _SchoolPage.kok:
         break;
     }
@@ -237,6 +259,33 @@ class _SchoolViewState extends State<_SchoolView> {
           trailingText: '${ogretmenler.length}',
           onTap: () => _go(_SchoolPage.ogretmenler),
         ),
+        const SizedBox(height: 10),
+        // Kulüpler (Paket AV): AU üyelik, rol ve sezon geçmişini kurdu
+        // ama oyuncu hiçbir ekranda göremiyordu.
+        MenuRow(
+          key: const Key('school_clubs_row'),
+          title: 'Kulüpler',
+          subtitle: state.schoolClubs.activeOnes.isEmpty
+              ? 'Okul takımları ve kulüplere katıl'
+              : _aktifKulupOzeti(state),
+          icon: Icons.emoji_events_outlined,
+          accent: BirOmurAccents.yesil,
+          trailingText: '${state.schoolClubs.activeOnes.length}',
+          onTap: () => _go(_SchoolPage.kulupler),
+        ),
+        // Spor Kariyeri yalnızca gerçekten bir futbol geçmişi varsa
+        // görünür: boş sayfaya götüren satır konmaz.
+        if (FootballPath.youthSummary(state).isNotEmpty) ...<Widget>[
+          const SizedBox(height: 10),
+          MenuRow(
+            key: const Key('school_sports_career_row'),
+            title: 'Spor Kariyeri',
+            subtitle: 'Futbol geçmişin ve profesyonellik durumu',
+            icon: Icons.sports_soccer_outlined,
+            accent: BirOmurAccents.cini,
+            onTap: () => _go(_SchoolPage.sporKariyeri),
+          ),
+        ],
         if (_sonuc != null) ...<Widget>[
           InfoPanel(icon: Icons.info_outline, text: _sonuc!),
           const SizedBox(height: 10),
@@ -364,6 +413,7 @@ enum _CareerPage {
   askerlik,
   adliGecmis,
   kendiIsi,
+  sporKariyeri,
 }
 
 class _CareerView extends StatefulWidget {
@@ -420,6 +470,11 @@ class _CareerViewState extends State<_CareerView> {
         return JobSearchPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.kariyerGecmisi:
         return CareerHistoryPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.sporKariyeri:
+        return SportsCareerPage(
+          onBack: () => _go(_CareerPage.kok),
+          backLabel: 'Meslek',
+        );
       case _CareerPage.kok:
         break;
     }
@@ -748,6 +803,20 @@ class _CareerViewState extends State<_CareerView> {
           onTap: () => _go(_CareerPage.adliGecmis),
         ),
         const SizedBox(height: 10),
+        // Spor Kariyeri (Paket AV): profesyonel futbol bir kJobCatalog
+        // işi değil, kendi yolu var. Satır yalnızca gerçek bir futbol
+        // geçmişi varsa görünür.
+        if (FootballPath.youthSummary(state).isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('career_sports_row'),
+            title: 'Spor Kariyeri',
+            subtitle: 'Futbol geçmişin ve profesyonellik durumu',
+            icon: Icons.sports_soccer_outlined,
+            accent: BirOmurAccents.yesil,
+            onTap: () => _go(_CareerPage.sporKariyeri),
+          ),
+          const SizedBox(height: 10),
+        ],
         // Kariyer geçmişi: eski işler silinmez.
         if (state.career.allEntries().isNotEmpty) ...<Widget>[
           MenuRow(
