@@ -5974,7 +5974,15 @@ ve profesyonel kapının 500 hayatta **sıfır** çıkmasını hata sayıyor.
 Oran kalibrasyonu Faho'nun işi; ama "var ama hiç olmuyor" durumu bir
 hatadır ve bir daha sessizce geri gelmeyecek.
 
-**Beceri gelişim sayıları için karar bekleniyor.** Onaylarsan
-`DECISIONS.md`'ye girer; reddedersen eski değerlere dönülür ve
-kaptanlık ile profesyonel kapı yeniden kapanır (bunu bilerek
-söylüyorum: eski değerlerle o iki yol ölçülebilir biçimde ölüydü).
+**Beceri gelişim sayıları da KARARLAŞTIRILDI (4 Ekim 2026).** Faho
+onayladı; **D-136** olarak `DECISIONS.md`'ye girdi ve sabitler
+`prototypeOnly` etiketinden çıkarıldı (`maxSkillGainPerSeason = 12`,
+`skillPotentialDivisor = 10`).
+
+**Q-192'nin bu eki kapandı.** Üç sayı onaylandı ve uygulandı: kaptanlık
+eşiği 70 (D-134), futbol sezon katsayısı 9 (D-135), beceri gelişim
+tabanı (D-136). Q-192'nin **ana maddelerindeki diğer sayılar hâlâ
+`prototypeOnly`** ve ayrı ayrı karar bekliyor: aktif kulüp sınırı,
+seçme eşiği, yatkınlığın seçmedeki ağırlığı, profesyonel için asgari
+geçmiş, scout sıklığı, profesyonele giriş yaşı ve okul-kulüp
+çatışması (9. madde: bu pakette hâlâ YOK).

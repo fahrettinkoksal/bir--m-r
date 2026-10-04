@@ -272,7 +272,7 @@ void main() {
       final r = _motor.advanceSeason(s, Random(5));
       final int artis = r.state.schoolClubs.single.skill - once;
       expect(artis,
-          lessThanOrEqualTo(SchoolClubEngine.prototypeOnlyMaxSkillGainPerSeason));
+          lessThanOrEqualTo(SchoolClubEngine.maxSkillGainPerSeason));
     });
   });
 

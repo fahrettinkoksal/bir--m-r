@@ -56,16 +56,27 @@ class SchoolClubEngine {
   /// Seçmede geçmiş sezonun payı (`prototypeOnly`).
   static const int prototypeOnlyExperienceWeight = 4;
 
-  /// Tek sezonda becerinin çıkabileceği en büyük artış (`prototypeOnly`).
-  static const int prototypeOnlyMaxSkillGainPerSeason = 12;
-
-  /// prototypeOnly: atletik yatkınlığın sezon gelişimine katkı böleni.
+  /// D-136: tek sezonda becerinin çıkabileceği en büyük artış.
   ///
-  /// Küçük bölen = yatkınlığın payı büyük. 20 iken yatkınlığı 55 olan
-  /// oyuncu sezon başına yalnızca 2 puanlık taban alıyordu; 10 ile 5
-  /// alıyor. Yatkınlık yine tek başına yetmez: `perf` payı ve azalan
-  /// getiri çarpanı duruyor.
-  static const int prototypeOnlySkillPotentialDivisor = 10;
+  /// **Faho onayladı (4 Ekim 2026).** 9'dan 12'ye çıktı. Tavan bir
+  /// güvenlik sınırıdır: azalan getiri çarpanı (`kalan`) zaten erken
+  /// yılların dışında bu tavana yaklaştırmıyor, ama tek yılda sıçrama
+  /// olmasın diye duruyor.
+  static const int maxSkillGainPerSeason = 12;
+
+  /// D-136: atletik yatkınlığın sezon gelişimine katkı böleni.
+  ///
+  /// **Faho onayladı (4 Ekim 2026).** 20'den 10'a indi; küçük bölen =
+  /// yatkınlığın payı büyük. Eski değerde yatkınlığı 55 olan oyuncu
+  /// sezon başına yalnızca 2 puanlık taban alıyordu ve beceri 4 sezonda
+  /// medyan 13'te kalıyordu — rol eşikleri (İlk 11 için 45, Kaptan için
+  /// 70) beceri 60-80 varsaydığı için takımda yükselmek matematiksel
+  /// olarak imkânsıza yakındı.
+  ///
+  /// **Yatkınlık yine tek başına yetmez:** performans payı ve azalan
+  /// getiri çarpanı duruyor, yani çalışan ve uzun süre kalan oyuncu
+  /// yatkın ama geç başlayanı geçmeye devam ediyor.
+  static const int skillPotentialDivisor = 10;
 
   /// Seçmenin geçme eşiği (`prototypeOnly`).
   static const int prototypeOnlyTryoutPass = 55;
@@ -393,10 +404,10 @@ class SchoolClubEngine {
       // büyüklüğü.
       final int kalan = (100 - p.skill).clamp(0, 100);
       final int temel = (state.player.athleticPotential ~/
-              prototypeOnlySkillPotentialDivisor) +
+              skillPotentialDivisor) +
           (perf >= 60 ? 3 : 2);
       final int artis =
-          (temel * kalan ~/ 100).clamp(0, prototypeOnlyMaxSkillGainPerSeason);
+          (temel * kalan ~/ 100).clamp(0, maxSkillGainPerSeason);
       final int yeniBeceri = (p.skill + artis).clamp(0, 100);
       final int yeniYil = p.yearsActive + 1;
 

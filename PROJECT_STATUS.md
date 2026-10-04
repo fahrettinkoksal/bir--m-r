@@ -4004,13 +4004,19 @@ olduğu için performans düşük kalıyor, performans düşük olduğu için
 sezon gelişiminin tabanı küçük kalıyor. Rol eşikleri beceri 60-80
 varsayıyordu, okul kulübü ancak 13-25'e çıkıyordu.
 
-### Üçüncü değişiklik: beceri gelişiminin tabanı (ONAYLANMADI)
+### Üçüncü değişiklik: beceri gelişiminin tabanı (D-136, ONAYLANDI)
 
 Faho "çöz" dediği için kök nedene gittim: yatkınlık böleni `20 → 10`,
-sezon tavanı `9 → 12`. **Azalan getiri korundu** — tavana yaklaşan
-oyuncu yavaşlıyor, tek yılda sıçrama yok. Bu iki sayı Q-192'nin 4.
-maddesi ve Faho onu ayrıca onaylamadı; bu yüzden **`prototypeOnly`
-kaldı** ve kural olarak `DECISIONS.md`'ye yazılmadı.
+sezon tavanı `9 → 12`. **Azalan getiri korundu** — artış
+`(100 - beceri)` çarpanıyla ölçekleniyor, tavana yaklaşan oyuncu
+yavaşlıyor, tek yılda sıçrama yok. Yatkınlık yine tek başına yetmiyor:
+performans payı duruyor, yani çalışan ve uzun süre kalan oyuncu
+yatkın ama geç başlayanı geçiyor.
+
+**Faho bu sayıları da onayladı (4 Ekim 2026)** ve **D-136** olarak
+`DECISIONS.md`'ye girdiler; sabitler `prototypeOnly` etiketinden
+çıkarıldı (`maxSkillGainPerSeason`, `skillPotentialDivisor`). Q-192'nin
+eki böylece kapandı — üç sayı onaylandı (D-134, D-135, D-136).
 
 ### Son ölçüm (aynı 500 okul odaklı hayat)
 
@@ -4627,9 +4633,9 @@ etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
 `DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
 de dokunulmadı.**
 
-**Q-192 kısmen kararlaştırıldı (4 Ekim):** kaptanlık eşiği (D-134) ve
-futbol sezon katsayısı (D-135) Faho tarafından onaylandı ve uygulandı.
-Beceri gelişim sayıları ve kalan maddeler hâlâ `prototypeOnly`.
+**Q-192'nin eki kararlaştırıldı (4 Ekim):** kaptanlık eşiği (D-134),
+futbol sezon katsayısı (D-135) ve beceri gelişim tabanı (D-136) Faho
+tarafından onaylandı, uygulandı ve `DECISIONS.md`'ye girdi.
 
 **Q-192'nin açık kalan maddeleri:** okul kulüpleri ile futbol yolunun dokuz sayısı
 (aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı, beceri büyüme
