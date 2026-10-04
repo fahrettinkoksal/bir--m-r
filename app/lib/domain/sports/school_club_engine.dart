@@ -57,7 +57,15 @@ class SchoolClubEngine {
   static const int prototypeOnlyExperienceWeight = 4;
 
   /// Tek sezonda becerinin çıkabileceği en büyük artış (`prototypeOnly`).
-  static const int prototypeOnlyMaxSkillGainPerSeason = 9;
+  static const int prototypeOnlyMaxSkillGainPerSeason = 12;
+
+  /// prototypeOnly: atletik yatkınlığın sezon gelişimine katkı böleni.
+  ///
+  /// Küçük bölen = yatkınlığın payı büyük. 20 iken yatkınlığı 55 olan
+  /// oyuncu sezon başına yalnızca 2 puanlık taban alıyordu; 10 ile 5
+  /// alıyor. Yatkınlık yine tek başına yetmez: `perf` payı ve azalan
+  /// getiri çarpanı duruyor.
+  static const int prototypeOnlySkillPotentialDivisor = 10;
 
   /// Seçmenin geçme eşiği (`prototypeOnly`).
   static const int prototypeOnlyTryoutPass = 55;
@@ -79,6 +87,20 @@ class SchoolClubEngine {
 
   /// Bedensel kulüp için en az sağlık (`prototypeOnly`, Paket AQ uyumlu).
   static const int prototypeOnlyMinHealthForPhysical = 25;
+
+  /// D-134: kaptanlık için gereken rol puanı eşiği.
+  ///
+  /// **Faho onayladı (4 Ekim 2026).** Eşik 78'den 70'e indi. Ölçülen
+  /// sebep: 500 okul odaklı hayatta kaptanlık **hiç** olmuyordu. Rol
+  /// puanı `beceri×45 + (sezon×6, en çok 30) + performans×20 +
+  /// karizma×5` (÷100) ve okul çağında ulaşılabilir en iyi bileşim
+  /// 69-79 arasında kalıyor; 78 tam sınırdaydı, yani yalnızca
+  /// neredeyse kusursuz bir bileşim geçiyordu.
+  ///
+  /// **Kıdem şartı ve tek kademe sınırı aynen duruyor:** kaptanlık en az
+  /// üç sezon ister ve rol bir sezonda yalnızca bir kademe değişir.
+  /// Eşik düştü, kıdem gevşemedi.
+  static const int captainScoreThreshold = 70;
 
   // -----------------------------------------------------------------
   // Uygunluk
@@ -355,10 +377,24 @@ class SchoolClubEngine {
               rng.nextInt(16))
           .clamp(0, 100);
 
-      // Beceri gelişimi: yaşa uygun, tek yılda sıçramayan.
+      // Beceri gelişimi: yaşa uygun, tek yılda sıçramayan ama okul
+      // hayatı boyunca gerçekten bir yere varan.
+      //
+      // ÖLÇÜLEN HATA (Paket AX): eski katsayılarla beceri 4 sezon
+      // sonunda medyan **13**'te kalıyordu. Rol eşikleri (İlk 11 için 45,
+      // Kaptan için 70) beceri 60-80 varsayıyor; yani takımda yükselmek
+      // matematiksel olarak imkânsıza yakındı. Üstelik döngüsel:
+      // beceri düşük → performans düşük → `temel` küçük kalıyor →
+      // beceri yine düşük. 500 hayatta kaptanlık %0 çıkmasının sebebi
+      // eşikler değil **bu** idi.
+      //
+      // Azalan getiri korundu (`kalan` çarpanı): tavana yaklaşan oyuncu
+      // yavaşlar, tek yılda sıçrama olmaz. Değişen yalnızca tabanın
+      // büyüklüğü.
       final int kalan = (100 - p.skill).clamp(0, 100);
-      final int temel =
-          (state.player.athleticPotential ~/ 20) + (perf >= 60 ? 2 : 1);
+      final int temel = (state.player.athleticPotential ~/
+              prototypeOnlySkillPotentialDivisor) +
+          (perf >= 60 ? 3 : 2);
       final int artis =
           (temel * kalan ~/ 100).clamp(0, prototypeOnlyMaxSkillGainPerSeason);
       final int yeniBeceri = (p.skill + artis).clamp(0, 100);
@@ -406,6 +442,21 @@ class SchoolClubEngine {
   /// Yıllar, sezon performansı ve küçük bir karizma payı birlikte çalışır:
   /// bir yıl iyi oynayan çocuk kaptan olmaz; yıllarca takımda kalan ve
   /// performansı tutan olur.
+  /// Takımdaki yeri belirleyen rol puanı (0-100 ölçeğinde değil, ham).
+  ///
+  /// Tek kaynak: hem rol ataması hem ölçüm bunu kullanır, formül iki
+  /// yere kopyalanmaz.
+  static int roleScore({
+    required int skill,
+    required int years,
+    required int performance,
+    required int charisma,
+  }) =>
+      skill * 45 ~/ 100 +
+      (years * 6).clamp(0, 30) +
+      performance * 20 ~/ 100 +
+      charisma * 5 ~/ 100;
+
   SquadRole _roleFor({
     required int skill,
     required int years,
@@ -413,12 +464,14 @@ class SchoolClubEngine {
     required int charisma,
     required SquadRole current,
   }) {
-    final int puan = skill * 45 ~/ 100 +
-        (years * 6).clamp(0, 30) +
-        performance * 20 ~/ 100 +
-        charisma * 5 ~/ 100;
+    final int puan = roleScore(
+      skill: skill,
+      years: years,
+      performance: performance,
+      charisma: charisma,
+    );
     SquadRole hedef;
-    if (puan >= 78 && years >= 3) {
+    if (puan >= captainScoreThreshold && years >= 3) {
       hedef = SquadRole.kaptan;
     } else if (puan >= 62) {
       hedef = SquadRole.onemliOyuncu;

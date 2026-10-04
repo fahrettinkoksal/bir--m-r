@@ -3978,6 +3978,73 @@ alternatifler `docs/DESIGN_REVIEW_QUEUE.md` → Q-192 EKİ.
 hayat), `paket_au_school_clubs_test` 24/24 yeşil. **Android APK ya da
 Windows derlemesi bu pakette denenmedi.**
 
+## Paket AX: iki çıkmaz sokak açıldı — ve teşhisim yanlıştı (4 Ekim 2026)
+
+Faho AW'nin sonunda bıraktığım iki öneriyi onayladı: kaptanlık rol
+puanı eşiği **78 → 70** (D-134) ve hazırlık puanının sezon katsayısı
+**7 → 9** (D-135). İkisi de uygulandı ve `DECISIONS.md`'ye girdi.
+
+### Önce kendi hatamı yazmam gerekiyor
+
+Q-192 ekinde "okul çağında ulaşılabilir en iyi bileşim 69-79 arasında,
+eşik 78 tam sınırda" demiştim. O sayı **iyimser varsayımlarla
+hesaplanmış teorik bir üst sınırdı** (9 sezon, beceri 70, performans
+70), gerçek dağılım değil. Eşiği 70'e indirip yeniden ölçtüm:
+**kaptanlık yine %0 çıktı.** Önerim doğru yeri işaret etmiyordu.
+
+### İkinci kez tahmin etmek yerine ölçtüm
+
+`SchoolClubEngine.roleScore` tek kaynak olarak açıldı (formül motorla
+ölçüm arasında kopyalanmadı) ve rol puanının gerçek dağılımı ölçüldü:
+puan medyanı **39**, en yükseği 66 — yani Önemli oyuncu eşiği (62) bile
+aşılamıyordu. O andaki beceri medyanı **13**, sezon 4, performans 38.
+
+**Darboğaz eşik değil beceriydi.** Üstelik döngüsel: beceri düşük
+olduğu için performans düşük kalıyor, performans düşük olduğu için
+sezon gelişiminin tabanı küçük kalıyor. Rol eşikleri beceri 60-80
+varsayıyordu, okul kulübü ancak 13-25'e çıkıyordu.
+
+### Üçüncü değişiklik: beceri gelişiminin tabanı (ONAYLANMADI)
+
+Faho "çöz" dediği için kök nedene gittim: yatkınlık böleni `20 → 10`,
+sezon tavanı `9 → 12`. **Azalan getiri korundu** — tavana yaklaşan
+oyuncu yavaşlıyor, tek yılda sıçrama yok. Bu iki sayı Q-192'nin 4.
+maddesi ve Faho onu ayrıca onaylamadı; bu yüzden **`prototypeOnly`
+kaldı** ve kural olarak `DECISIONS.md`'ye yazılmadı.
+
+### Son ölçüm (aynı 500 okul odaklı hayat)
+
+| Ölçülen | Önce | Sonra |
+|---|---|---|
+| Kaptanlık yapan | %0,0 | **%3,6** (18) |
+| Profesyonel kapı açılan | %0,2 | **%1,4** (7) |
+| Rol puanı (medyan) | 39 | 46 |
+| Beceri (medyan) | 13 | 26 |
+| Hazırlık puanı (medyan / en yüksek) | 47 / 80 | 53 / 85 |
+| Scout ilgisi gören | %2,6 | %3,4 |
+
+Rol dağılımı düzgün bir piramide döndü: Yedek 148 · Rotasyon 126 ·
+İlk 11 104 · Önemli oyuncu 39 · **Kaptan 18**. Futbol oynayanların
+**%10,1'i** profesyonel kapıdan geçiyor. Kulübe girme (%87), kategori
+dengesi (akademi %52,2 · sanat %66,7 · spor %57,5) ve futbolun kulüpler
+arasındaki yeri (yedinci, %13,6) değişmedi.
+
+**Burada durdum.** Daha ileri gitmek kaptanlığı sıradanlaştırırdı; okul
+takımının kaptanı olmak nadir olmalı.
+
+### Kalıcı bekçi
+
+`paket_au_measurement_test` artık kaptanlığın ve profesyonel kapının
+500 hayatta **sıfır** çıkmasını hata sayıyor. Oran kalibrasyonu
+Faho'nun işi; "var ama hiç olmuyor" bir hatadır ve sessizce geri
+gelmeyecek.
+
+### Doğrulama
+
+`flutter analyze` çıkış kodu 0; `paket_au_measurement_test` +
+`paket_au_school_clubs_test` + `paket_au_football_path_test` 40/40
+yeşil. **Android APK ya da Windows derlemesi bu pakette denenmedi.**
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
@@ -4560,7 +4627,11 @@ etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
 `DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
 de dokunulmadı.**
 
-**Q-192 yeni ve açık:** okul kulüpleri ile futbol yolunun dokuz sayısı
+**Q-192 kısmen kararlaştırıldı (4 Ekim):** kaptanlık eşiği (D-134) ve
+futbol sezon katsayısı (D-135) Faho tarafından onaylandı ve uygulandı.
+Beceri gelişim sayıları ve kalan maddeler hâlâ `prototypeOnly`.
+
+**Q-192'nin açık kalan maddeleri:** okul kulüpleri ile futbol yolunun dokuz sayısı
 (aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı, beceri büyüme
 hızı, profesyonel için asgari geçmiş, scout sıklığı, giriş yaşı,
 kaptanlık eşiği, okul-kulüp çatışması). Hepsi `prototypeOnly`; hiçbiri

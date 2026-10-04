@@ -461,6 +461,12 @@ class BotLifeResult {
   /// Kaç kez antrenmana gitti.
   int clubTrainings = 0;
 
+  /// Ulaşılan en yüksek rol puanı ve o anın bileşenleri (teşhis).
+  int bestRoleScore = 0;
+  int bestRoleScoreSkill = 0;
+  int bestRoleScoreYears = 0;
+  int bestRoleScorePerf = 0;
+
   /// Kulüpten kendi isteğiyle ayrıldı mı.
   bool leftClub = false;
 
@@ -2299,6 +2305,19 @@ void _olcFutbolYolu(GameState s, BotLifeResult sonuc) {
       sonuc.bestSquadRole = p.role;
     }
     if (p.wasCaptain) sonuc.wasClubCaptain = true;
+    // Teşhis: rol puanının gerçekte nereye kadar çıktığı.
+    final int puan = SchoolClubEngine.roleScore(
+      skill: p.skill,
+      years: p.yearsActive,
+      performance: p.performance,
+      charisma: s.player.stats.charisma,
+    );
+    if (puan > sonuc.bestRoleScore) {
+      sonuc.bestRoleScore = puan;
+      sonuc.bestRoleScoreSkill = p.skill;
+      sonuc.bestRoleScoreYears = p.yearsActive;
+      sonuc.bestRoleScorePerf = p.performance;
+    }
   }
   final FootballEligibility uygunluk = FootballPath.evaluate(s);
   if (uygunluk.seasons > sonuc.footballSeasons) {

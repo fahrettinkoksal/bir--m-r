@@ -5906,3 +5906,75 @@ alır ve geri kalanını beceri/sağlıkla tamamlar.
 **Bunların hiçbiri uygulanmadı.** İkisi de oyuncunun hissettiği dengeyi
 değiştirir; onay gelene kadar sayılar bu hâliyle kalıyor ve
 `DECISIONS.md`'ye yazılmıyor.
+
+### Q-192 EKİ — KARARLAŞTIRILDI (4 Ekim 2026), ama teşhisim yanlıştı
+
+**Faho iki değişikliği onayladı** ve ikisi de uygulandı: kaptanlık rol
+puanı eşiği **78 → 70** (D-134) ve hazırlık puanının sezon katsayısı
+**7 → 9** (D-135).
+
+**Kendi teşhisimi düzeltmem gerekiyor.** Eki ilk yazdığımda "okul
+çağında ulaşılabilir en iyi bileşim 69-79 arasında, eşik 78 tam
+sınırda" demiştim. O sayı **iyimser varsayımlarla hesaplanmış teorik
+bir üst sınırdı** (9 sezon, beceri 70, performans 70), gerçek
+hayatlardaki dağılım değil. Eşik 70'e indikten sonra yeniden ölçtüm:
+**kaptanlık yine %0 çıktı.**
+
+Bu yüzden ikinci kez tahmin etmedim; rol puanının gerçek dağılımını
+ölçtüm (`SchoolClubEngine.roleScore` tek kaynak olarak açıldı, formül
+iki yere kopyalanmadı):
+
+| Ölçülen | Sonuç |
+|---|---|
+| Rol puanı (medyan / en yüksek) | **39** / 66 |
+| O andaki beceri (medyan) | **13** |
+| O andaki sezon (medyan) | 4 |
+| O andaki performans (medyan) | 38 |
+| Eşikler | Rotasyon 28 · İlk 11 45 · Önemli oyuncu 62 · Kaptan 70 |
+
+**Gerçek darboğaz eşik değil beceriydi.** Önemli oyuncu eşiği (62) bile
+aşılamıyordu. Üstelik döngüsel: beceri düşük olduğu için performans
+düşük kalıyor, performans düşük olduğu için sezon gelişiminin tabanı
+küçük kalıyor, beceri yine düşük kalıyor. Rol eşikleri beceri 60-80
+varsayıyordu; okul kulübü ancak 13-25'e çıkıyordu.
+
+**Üçüncü değişiklik — ONAYLANMADI, `prototypeOnly`.** Faho "çöz" dediği
+için kök nedene gittim: beceri gelişiminin **tabanı** büyütüldü
+(yatkınlık böleni `20 → 10`, sezon tavanı `9 → 12`). **Azalan getiri
+korundu** — tavana yaklaşan oyuncu yavaşlıyor, tek yılda sıçrama yok.
+Bu iki sayı Q-192'nin 4. maddesidir ve Faho onu ayrıca onaylamadı, bu
+yüzden `prototypeOnly` kaldı ve `DECISIONS.md`'ye **kural olarak**
+yazılmadı; D-134 ve D-135 yalnızca Faho'nun açıkça onayladığı iki sayıyı
+kaydediyor.
+
+**Son ölçüm (aynı 500 hayat):**
+
+| Ölçülen | Önce | Sonra |
+|---|---|---|
+| Kaptanlık yapan | %0,0 | **%3,6** (18) |
+| Profesyonel kapı açılan | %0,2 | **%1,4** (7) |
+| Rol puanı (medyan) | 39 | 46 |
+| Beceri (medyan) | 13 | 26 |
+| Hazırlık puanı (medyan / en yüksek) | 47 / 80 | 53 / 85 |
+| Scout ilgisi | %2,6 | %3,4 |
+| Kulübü bırakan | %11,2 | %9,6 |
+
+Rol dağılımı artık düzgün bir piramit: Yedek 148 · Rotasyon 126 ·
+İlk 11 104 · Önemli oyuncu 39 · **Kaptan 18**. Futbol oynayanların
+**%10,1'i** profesyonel kapıdan geçiyor.
+
+**Burada durdum.** Daha ileri gitmek kaptanlığı sıradanlaştırırdı;
+okul takımının kaptanı olmak nadir olmalı. Kulübe girme (%87), kategori
+dengesi (akademi %52,2 · sanat %66,7 · spor %57,5) ve futbolun kulüpler
+arasındaki yeri (yedinci, %13,6) değişmedi — "herkes futbolcu olmasın"
+yasağı duruyor.
+
+**Kalıcı bekçi eklendi.** `paket_au_measurement_test` artık kaptanlığın
+ve profesyonel kapının 500 hayatta **sıfır** çıkmasını hata sayıyor.
+Oran kalibrasyonu Faho'nun işi; ama "var ama hiç olmuyor" durumu bir
+hatadır ve bir daha sessizce geri gelmeyecek.
+
+**Beceri gelişim sayıları için karar bekleniyor.** Onaylarsan
+`DECISIONS.md`'ye girer; reddedersen eski değerlere dönülür ve
+kaptanlık ile profesyonel kapı yeniden kapanır (bunu bilerek
+söylüyorum: eski değerlerle o iki yol ölçülebilir biçimde ölüydü).

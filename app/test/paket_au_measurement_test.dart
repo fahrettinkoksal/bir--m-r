@@ -18,6 +18,7 @@ library;
 import 'package:bir_omur/data/school_club_catalog.dart';
 import 'package:bir_omur/domain/models/school_club_progress.dart';
 import 'package:bir_omur/domain/sports/football_career.dart';
+import 'package:bir_omur/domain/sports/school_club_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
@@ -68,6 +69,10 @@ void main() {
     final Map<PlayerArchetype, int> arketipFutbol =
         <PlayerArchetype, int>{};
 
+    final List<int> rolPuanlari = <int>[];
+    final List<int> rolBecerileri = <int>[];
+    final List<int> rolSezonlari = <int>[];
+    final List<int> rolPerformanslari = <int>[];
     final List<int> sezonlar = <int>[];
     final List<int> futbolSezonlari = <int>[];
     final List<int> futbolPuanlari = <int>[];
@@ -89,6 +94,12 @@ void main() {
       if (r.wasClubCaptain) kaptanOlan++;
       if (r.leftClub) birakan++;
       if (r.clubTrainings > 0) antrenmanYapan++;
+      if (r.bestRoleScore > 0) {
+        rolPuanlari.add(r.bestRoleScore);
+        rolBecerileri.add(r.bestRoleScoreSkill);
+        rolSezonlari.add(r.bestRoleScoreYears);
+        rolPerformanslari.add(r.bestRoleScorePerf);
+      }
       if (r.clubSeasonsTotal > 0) sezonlar.add(r.clubSeasonsTotal);
 
       for (final String k in r.clubCategories) {
@@ -175,6 +186,15 @@ void main() {
       print('  $k  ${kulupSayaci[k]}  ${_yuzde(kulupSayaci[k]!, kOlcumHayati)}');
     }
     print('');
+    print('ROL PUANI TESHISI (ulasilan en yuksek)');
+    print('  puan medyan ${_medyan(rolPuanlari)} · en yuksek '
+        '${rolPuanlari.isEmpty ? 0 : (List<int>.of(rolPuanlari)..sort()).last}');
+    print('  o andaki beceri medyan ${_medyan(rolBecerileri)} · sezon medyan '
+        '${_medyan(rolSezonlari)} · performans medyan '
+        '${_medyan(rolPerformanslari)}');
+    print('  esikler: Rotasyon 28 · Ilk 11 45 · Onemli oyuncu 62 · Kaptan '
+        '${SchoolClubEngine.captainScoreThreshold} (+ en az 3 sezon)');
+    print('');
     print('EN YUKSEK ROL');
     for (final String k in rolSayaci.keys.toList()..sort()) {
       print('  $k  ${rolSayaci[k]}');
@@ -218,6 +238,28 @@ void main() {
         reason: 'Tek kategori görüldü: bot profilden bağımsız seçiyor',
       );
     }
+
+    // --- Çıkmaz sokak bekçileri (D-134, D-135) ------------------------
+    //
+    // İkisi de bir kez ölçülüp düzeltildi; bir daha sessizce ölmesinler.
+    // Eşik "sıfırdan büyük": oran kalibrasyonu Faho'nun işi, ama "var
+    // ama 500 hayatta hiç olmuyor" durumu bir hatadır.
+    expect(
+      kaptanOlan,
+      greaterThan(0),
+      reason: 'Kaptanlık 500 hayatta hiç olmadı. D-134 öncesinde böyleydi: '
+          'rol puanı eşiği değil BECERİ gelişimi darboğazdı (beceri '
+          'medyanı 13, rol puanı medyanı 39). Düzeltmeden sonra ölçüm: '
+          'kaptanlık 18 (%3,6), rol puanı medyanı 46, beceri medyanı 26.',
+    );
+    expect(
+      futbolKapisiAcilan,
+      greaterThan(0),
+      reason: 'Profesyonel futbol kapısı 500 hayatta hiç açılmadı. D-135 '
+          'öncesinde 1 kez açılıyordu (%0,2); sezon katsayısı 7 → 9 ve '
+          'beceri gelişimi düzeltildikten sonra 7 (%1,4), yani futbol '
+          'oynayanların %10,1i. Kapı tamamen kapanırsa bu bir hatadır.',
+    );
 
     // Ölçülen kulüpler gerçekten katalogda olmalı.
     for (final String id in kulupSayaci.keys) {

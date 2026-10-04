@@ -201,6 +201,21 @@ abstract final class FootballPath {
   /// Scout ilgisi için en az hazırlık puanı (`prototypeOnly`).
   static const int prototypeOnlyScoutMinScore = 48;
 
+  /// D-135: hazırlık puanında bir sezonun ağırlığı.
+  ///
+  /// **Faho onayladı (4 Ekim 2026).** Katsayı 7'den 9'a çıktı; tavan
+  /// (35) aynı kaldı. Ölçülen sebep: 500 okul odaklı hayatta
+  /// profesyonel deneme kapısı **yalnızca bir kez** açıldı. Darboğaz
+  /// eşik değil sezon sayısıydı — futbol oynayanların sezon medyanı 3
+  /// ve 3 sezon eski katsayıyla yalnızca 21 puan veriyordu.
+  ///
+  /// **Eşik bilinçli olarak düşürülmedi.** Eşiği düşürmek "futbol
+  /// geçmişi zayıf olan da geçsin" demek olurdu; katsayıyı yükseltmek
+  /// "erken başlayıp uzun oynayan geçer" diyor. Tavan korunduğu için
+  /// dört sezondan sonra sezon biriktirmenin getirisi durur: puanın
+  /// kalanı beceri, sağlık ve yatkınlıktan gelir.
+  static const int seasonScoreWeight = 9;
+
   /// Oyuncunun futbol geçmişini değerlendirir.
   static FootballEligibility evaluate(GameState state) {
     final int seasons = state.schoolClubs.seasonsInSport(kFootballSportId);
@@ -244,7 +259,7 @@ abstract final class FootballPath {
     final int erkenBaslama = startedAt == null
         ? 0
         : (14 - startedAt).clamp(0, 6) * 3; // 11'de başlamak 9 puan
-    final int score = (seasons * 7).clamp(0, 35) +
+    final int score = (seasons * seasonScoreWeight).clamp(0, 35) +
         skill * 35 ~/ 100 +
         erkenBaslama +
         health * 10 ~/ 100 +
