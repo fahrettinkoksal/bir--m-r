@@ -50,6 +50,10 @@ import 'package:bir_omur/domain/interaction/marriage_engine.dart';
 import 'package:bir_omur/data/job_catalog.dart';
 import 'package:bir_omur/data/lawyer_catalog.dart';
 import 'package:bir_omur/data/martial_arts_catalog.dart';
+import 'package:bir_omur/data/school_club_catalog.dart';
+import 'package:bir_omur/domain/models/school_club_progress.dart';
+import 'package:bir_omur/domain/sports/football_career.dart';
+import 'package:bir_omur/domain/sports/school_club_engine.dart';
 import 'package:bir_omur/data/pet_catalog.dart';
 import 'package:bir_omur/domain/activities/travel.dart';
 import 'package:bir_omur/domain/models/trip.dart';
@@ -428,6 +432,51 @@ class BotLifeResult {
   final Set<String> martialArts = <String>{};
   int finalHealth = 0;
 
+  // Okul kulüpleri ve spor kariyeri (Paket AW)
+  //
+  // Hepsi okunan değer; bot bunları "başarmaya" çalışmıyor, profiline
+  // göre davranıyor ve sonuç ölçülüyor.
+
+  /// Hayat boyunca hiç kulübe girdi mi (seçmeyi geçti mi).
+  bool joinedAnyClub = false;
+
+  /// Denediği ama seçmeyi geçemediği oldu mu.
+  bool clubTryoutRejected = false;
+
+  /// Girdiği kulüplerin kimlikleri.
+  final Set<String> clubIds = <String>{};
+
+  /// Girdiği kulüplerin kategorileri (spor / akademi / sanat).
+  final Set<String> clubCategories = <String>{};
+
+  /// Tüm kulüplerde geçirdiği toplam sezon.
+  int clubSeasonsTotal = 0;
+
+  /// Ulaştığı en yüksek takım rolü (null = hiç kulüpte olmadı).
+  SquadRole? bestSquadRole;
+
+  /// Herhangi bir kulüpte kaptanlık yaptı mı.
+  bool wasClubCaptain = false;
+
+  /// Kaç kez antrenmana gitti.
+  int clubTrainings = 0;
+
+  /// Kulüpten kendi isteğiyle ayrıldı mı.
+  bool leftClub = false;
+
+  // Futbol yolu
+  int footballSeasons = 0;
+  int footballBestSkill = 0;
+
+  /// Profesyonel deneme kapısı hayat boyunca bir kez bile açıldı mı.
+  bool footballEligibleEver = false;
+
+  /// En yüksek hazırlık puanı.
+  int footballBestScore = 0;
+
+  /// Scout ilgisi bir kez bile oluştu mu.
+  bool footballScoutSeen = false;
+
   // Suç
   bool hasRecord = false;
   bool wentToTrial = false;
@@ -735,6 +784,7 @@ BotLifeResult playBotLife({
         c.nameChild(bebek.id, _botChildName(bebek, rng));
         break;
       }
+      _handleSchoolClubs(c, profile, rng, sonuc);
       _handleLicense(c, profile, intent, rng, sonuc);
       _handleCareer(c, profile, intent, rng, sonuc);
       _handleMoney(c, profile, intent, rng, sonuc);
@@ -2149,6 +2199,152 @@ void _spendTimeWithFamily(
 /// Bot yılda birkaç aksiyon yapıyor — her yıl yirmi tane değil, ama hayat
 /// boyunca sistemleri gerçekten kullanacak kadar. Hobi ve dövüş sanatı
 /// hafızadan geliyor: her yıl başka bir hobiye atlamıyor.
+/// Okul kulüpleri (Paket AW).
+///
+/// Bot kulübü **profiline göre** seçer; herkes futbolcu olmaz. Spor
+/// odaklı bot spor kulüplerine, eğitim odaklı akademik kulüplere, sosyal
+/// bot sanat kulüplerine yönelir — ama hepsinin küçük bir payı diğer
+/// kategorilere de gider, çünkü gerçek oyuncu da hep aynı şeyi seçmez.
+///
+/// Spor kategorisinde futbol **özel muamele görmez**: beş spor kulübü
+/// arasından seçilir. Böylece ölçümde "herkes futbolcu oldu" gibi sahte
+/// bir sonuç çıkmaz.
+///
+/// Fonksiyon oyunun kurallarını hiç delmez: engelleri, seçmeyi ve yılda
+/// bir antrenman sınırını motor söyler.
+void _handleSchoolClubs(
+  GameController c,
+  BotProfile profile,
+  Random rng,
+  BotLifeResult sonuc,
+) {
+  GameState s = c.state!;
+  // Ölçüm her yıl yapılır, kulüp eylemleri yalnızca öğrenciyken.
+  //
+  // ÖLÇÜM HATASI (bulundu ve düzeltildi): bu fonksiyon öğrenci değilse
+  // hemen çıkıyordu, oysa profesyonel futbol uygunluğu 16-23 yaş
+  // aralığında. Mezuniyet sonrası yıllar (19-23) hiç ölçülmüyordu ve
+  // "profesyonel kapı hiç açılmadı" sonucu bu körlükten geliyordu.
+  _olcFutbolYolu(c.state!, sonuc);
+  if (!s.education.isStudent) return;
+  final int sinif = s.education.grade ?? 0;
+
+  // --- 1) Yeni kulübe girme isteği -----------------------------------
+  //
+  // Her yıl değil: kulüp seçmek bir karar, her yıl tekrarlanan bir
+  // tıklama değil. İstek profilin spor/hobi eğiliminden doğar.
+  final double katilmaIstegi =
+      (profile.sportDesire + profile.hobbyDesire) / 2 * 0.55;
+  if (rng.nextDouble() < katilmaIstegi) {
+    final List<SchoolClub> adaylar = <SchoolClub>[
+      for (final SchoolClub k in kSchoolClubs)
+        if (s.schoolClubs.activeFor(k.id) == null &&
+            k.openForGrade(sinif) &&
+            c.clubBlock(k) == null)
+          k,
+    ];
+    if (adaylar.isNotEmpty) {
+      final SchoolClub hedef = _botKulupSec(adaylar, profile, rng);
+      final ClubJoinOutcome sonucKatilim = c.joinClub(hedef);
+      if (sonucKatilim.accepted) {
+        sonuc.joinedAnyClub = true;
+        sonuc.clubIds.add(hedef.id);
+        sonuc.clubCategories.add(hedef.category.name);
+      } else if (hedef.requiresTryout) {
+        sonuc.clubTryoutRejected = true;
+      }
+      s = c.state!;
+    }
+  }
+
+  // --- 2) Antrenman ---------------------------------------------------
+  //
+  // Yılda bir kez (motorun kuralı). Bot her yıl gitmez: spor odaklı bot
+  // daha sık gider.
+  final double antrenmanIstegi = 0.35 + profile.sportDesire * 0.5;
+  for (final SchoolClubProgress uyelik in s.schoolClubs.activeOnes) {
+    if (!c.canTrainClub(uyelik.clubId)) continue;
+    if (rng.nextDouble() > antrenmanIstegi) continue;
+    if (c.trainClub(uyelik.clubId) != null) sonuc.clubTrainings++;
+  }
+
+  // --- 3) Bırakma -----------------------------------------------------
+  //
+  // Nadir: yedek kalan ve spor isteği düşük olan bot bir süre sonra
+  // bırakabilir. Kaptanı ya da ilk 11'i bırakmaz.
+  s = c.state!;
+  for (final SchoolClubProgress uyelik in s.schoolClubs.activeOnes) {
+    if (uyelik.yearsActive < 2) continue;
+    if (uyelik.role.isAtLeastFirstEleven) continue;
+    if (rng.nextDouble() < 0.08 * (1 - profile.sportDesire)) {
+      c.leaveClub(uyelik.clubId);
+      sonuc.leftClub = true;
+      break;
+    }
+  }
+
+  // --- 4) Ölçüm (okuma; oyuna dokunmaz) -------------------------------
+  _olcFutbolYolu(c.state!, sonuc);
+}
+
+/// Kulüp rolü ve futbol yolunun o anki durumunu okur.
+///
+/// Yalnızca **okur**: oyunun durumuna ve zarına dokunmaz. Her yıl
+/// çağrılır, çünkü profesyonel uygunluk mezuniyetten sonra da (23 yaşına
+/// kadar) değerlendirilebilir.
+void _olcFutbolYolu(GameState s, BotLifeResult sonuc) {
+  for (final SchoolClubProgress p in s.schoolClubs) {
+    final SquadRole? enIyi = sonuc.bestSquadRole;
+    if (enIyi == null || p.role.index > enIyi.index) {
+      sonuc.bestSquadRole = p.role;
+    }
+    if (p.wasCaptain) sonuc.wasClubCaptain = true;
+  }
+  final FootballEligibility uygunluk = FootballPath.evaluate(s);
+  if (uygunluk.seasons > sonuc.footballSeasons) {
+    sonuc.footballSeasons = uygunluk.seasons;
+  }
+  if (uygunluk.skill > sonuc.footballBestSkill) {
+    sonuc.footballBestSkill = uygunluk.skill;
+  }
+  if (uygunluk.score > sonuc.footballBestScore) {
+    sonuc.footballBestScore = uygunluk.score;
+  }
+  if (uygunluk.eligible) sonuc.footballEligibleEver = true;
+  if (FootballPath.scoutInterest(s)) sonuc.footballScoutSeen = true;
+}
+
+/// Adaylardan profile uygun bir kulüp seçer.
+///
+/// Ağırlıklar `prototypeOnly`: botun davranışı ölçüm aracıdır, oyun
+/// kuralı değil. Hiçbir kategori sıfır almaz — gerçek oyuncu da bazen
+/// beklenmedik bir kulübe girer.
+SchoolClub _botKulupSec(
+  List<SchoolClub> adaylar,
+  BotProfile profile,
+  Random rng,
+) {
+  double agirlik(SchoolClub k) {
+    switch (k.category) {
+      case SchoolClubCategory.spor:
+        return 1 + profile.sportDesire * 4;
+      case SchoolClubCategory.akademi:
+        return 1 + profile.university * 3;
+      case SchoolClubCategory.sanat:
+        return 1 + profile.hobbyDesire * 3;
+    }
+  }
+
+  final double toplam =
+      adaylar.fold<double>(0, (double t, SchoolClub k) => t + agirlik(k));
+  double zar = rng.nextDouble() * toplam;
+  for (final SchoolClub k in adaylar) {
+    zar -= agirlik(k);
+    if (zar <= 0) return k;
+  }
+  return adaylar.last;
+}
+
 void _handleActivities(
   GameController c,
   BotProfile profile,
@@ -2367,6 +2563,20 @@ void _collectFinalMetrics(GameController c, BotLifeResult sonuc) {
   sonuc.finalDebt = NetWorth.debt(s);
   sonuc.finalHealth = s.player.stats.health;
   sonuc.finalFame = s.totalFollowers;
+
+  // Kulüp sezonları: ölüm anında tüm kayıtlar okunur.
+  sonuc.clubSeasonsTotal = s.schoolClubs.fold<int>(
+    0,
+    (int t, SchoolClubProgress p) => t + p.yearsActive,
+  );
+  for (final SchoolClubProgress p in s.schoolClubs) {
+    sonuc.clubIds.add(p.clubId);
+    if (p.wasCaptain) sonuc.wasClubCaptain = true;
+    final SquadRole? enIyi = sonuc.bestSquadRole;
+    if (enIyi == null || p.role.index > enIyi.index) {
+      sonuc.bestSquadRole = p.role;
+    }
+  }
 
   sonuc.graduatedUniversity = s.education.universityFinished;
   sonuc.programId ??= s.education.universityProgramId;

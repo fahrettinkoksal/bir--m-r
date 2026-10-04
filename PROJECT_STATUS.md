@@ -3897,6 +3897,87 @@ ve profesyonel adımın henüz yazılmadığının söylenmesi.
 `flutter analyze` çıkış kodu 0. **Android APK ya da Windows derlemesi bu
 pakette denenmedi** — yerel kapta araç zinciri yok; CI derliyor.
 
+## Paket AW: bot kulüp seçiyor, 500 hayat ölçüldü, bir hata bulundu (4 Ekim 2026)
+
+### Bot artık kulüp seçiyor — ve herkes futbolcu olmuyor
+
+`test/support/player_bot.dart` içine `_handleSchoolClubs` eklendi. Bot
+kulübü **profiline göre** seçiyor: spor odaklı spor kulüplerine, eğitim
+odaklı akademik olanlara, hobi/sosyal odaklı sanat kulüplerine ağırlık
+veriyor; ama hiçbir kategori sıfır almıyor, çünkü gerçek oyuncu da hep
+aynı şeyi seçmez. **Spor kategorisinde futbol özel muamele görmüyor**,
+beş spor kulübü arasından çekiliyor. Antrenman isteği profile bağlı,
+bırakma kararı nadir ve İlk 11 ya da kaptanı bırakmıyor.
+
+### ÖLÇÜLEN HATA: okul bitince üyelik kapanmıyordu
+
+İlk ölçüm saçma bir sayı verdi: **toplam sezon medyanı 58, en fazlası
+160.** Okul hayatı en çok ~12 yıl kulüp demek.
+
+Kök neden benim AU/3'teki eksiğimdi: `SchoolClubEngine.advanceSeason`
+aktif üyeliğin sezonunu, oyuncunun **hâlâ öğrenci olup olmadığına
+bakmadan** artırıyordu. `blockFor` "kulüpler yalnızca okula devam
+ederken açık" diyordu ama sezon ilerlemesi bu kuralı bilmiyordu. Mezun
+olan oyuncunun üyeliği açık kalıyor ve `yearsActive` ömür boyu
+artıyordu — 70 yaşındaki karakter hâlâ "okul futbol takımında"
+sayılıyordu.
+
+Düzeltme: okul bittiğinde aktif üyelikler kapanıyor (`leftAtAge`
+yazılıyor), kayıt **silinmiyor**, günlüğe bir satır düşüyor. Yeni ölçüm:
+**toplam sezon medyanı 7, en fazla 24.** İki kalıcı bekçi testi eklendi
+(`paket_au_school_clubs_test`): mezun olunca üyelik kapanıyor ve geçmiş
+kalıyor; okul bittikten sonra 20 yıl boyunca sezon bir daha hiç
+artmıyor.
+
+### İKİNCİ HATA: ölçüm kodum kördü
+
+Düzeltmeden sonra "profesyonel kapı hiç açılmadı" çıktı. Sebebi oyun
+değildi, **benim ölçüm kodumdu**: `_handleSchoolClubs` öğrenci değilse
+hemen çıkıyordu, oysa profesyonel uygunluk 16-23 yaş aralığında.
+Mezuniyet sonrası yıllar (19-23) hiç ölçülmüyordu. Ölçüm bloğu ayrı bir
+fonksiyona (`_olcFutbolYolu`) çıkarılıp her yıl çağrılır hale getirildi.
+
+### 500 okul odaklı hayatın sonucu
+
+| Ölçülen | Sonuç |
+|---|---|
+| Kulübe giren | %87,0 |
+| Antrenmana giden | %79,8 |
+| Seçmede reddedilen | %9,2 |
+| Kulübü bırakan | %11,2 |
+| Toplam sezon (medyan / en fazla) | 7 / 24 |
+| Kaptanlık yapan | **%0,0** |
+| Futbol oynayan | %13,6 |
+| Profesyonel kapı açılan | **%0,2** |
+| Scout ilgisi gören | %2,6 |
+| Hazırlık puanı (medyan / en yüksek) | 47 / 80 |
+
+Kategori dağılımı dengeli: akademi %52,4, sanat %66,9, spor %57,2.
+Futbol takımı kulüpler arasında yedinci (%13,6). Arketip ayrımı
+çalışıyor: spor odaklı %100 kulüp / %33 futbol, eğitim odaklı %89 / %5.
+**Brief'in "herkes futbolcu olmasın" yasağı tutuyor.**
+
+### İki çıkmaz sokak — ölçüldü, Q-192'ye yazıldı, UYGULANMADI
+
+1. **Kaptanlık 500 hayatta hiç olmadı.** Rol puanı eşiği 78 tam sınırda
+   duruyor; okul çağında ulaşılabilir en iyi bileşim 69-79 arasında.
+   Önerim eşiğin 70'e inmesi; 3 sezon kuralı ve tek kademe sınırı aynen
+   kalsın.
+2. **Profesyonel kapı 500 hayatta 1 kez açıldı.** Darboğaz eşik değil
+   sezon sayısı: futbol oynayanların sezon medyanı 3 ve puanın sezon
+   bileşeni `sezon×7`. Önerim eşiği düşürmek değil sezon katsayısını
+   `sezon×9` yapmak — "erken başlayıp uzun oynayan geçer" demek bu.
+
+İkisi de oyuncunun hissettiği dengeyi değiştirir, bu yüzden **onay
+gelene kadar uygulanmadı** ve `DECISIONS.md`'ye yazılmadı. Ayrıntı ve
+alternatifler `docs/DESIGN_REVIEW_QUEUE.md` → Q-192 EKİ.
+
+### Doğrulama
+
+`flutter analyze` çıkış kodu 0; `paket_au_measurement_test` yeşil (500
+hayat), `paket_au_school_clubs_test` 24/24 yeşil. **Android APK ya da
+Windows derlemesi bu pakette denenmedi.**
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım

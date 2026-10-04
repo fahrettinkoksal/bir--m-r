@@ -307,6 +307,34 @@ class SchoolClubEngine {
         milestones: const <String>[],
       );
     }
+
+    // Okul bittiyse üyelik de biter (Paket AW düzeltmesi).
+    //
+    // ÖLÇÜLEN HATA: bu kontrol yoktu. `blockFor` "kulüpler yalnızca
+    // okula devam ederken açık" diyordu ama sezon ilerlemesi öğrenci
+    // olup olmadığına bakmıyordu. Mezun olan oyuncunun üyeliği açık
+    // kalıyor ve `yearsActive` ömür boyu artıyordu: 500 hayatlık
+    // ölçümde toplam sezon medyanı 58, en fazlası 160 çıktı — yani
+    // 70 yaşındaki karakter hâlâ "okul futbol takımında" sayılıyordu.
+    // Kayıt silinmez, geçmiş korunur; yalnızca üyelik kapanır.
+    if (!state.education.isStudent) {
+      final List<SchoolClubProgress> kapanan = <SchoolClubProgress>[
+        for (final SchoolClubProgress p in state.schoolClubs)
+          if (p.active)
+            p.copyWith(active: false, leftAtAge: state.player.age)
+          else
+            p,
+      ];
+      return (
+        state: state.copyWith(
+          schoolClubs: List<SchoolClubProgress>.unmodifiable(kapanan),
+        ),
+        log: <String>[
+          'Okul bitti; kulüp üyeliğin de kapandı. Geçmişin duruyor.',
+        ],
+        milestones: const <String>[],
+      );
+    }
     final List<String> log = <String>[];
     final List<String> milestones = <String>[];
     final List<SchoolClubProgress> guncel = <SchoolClubProgress>[];

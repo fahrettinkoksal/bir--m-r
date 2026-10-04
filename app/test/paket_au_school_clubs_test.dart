@@ -426,6 +426,74 @@ void main() {
       expect(a.player.athleticPotential, inInclusiveRange(0, 100));
     });
   });
+
+  group('Okul bitince üyelik kapanır (Paket AW düzeltmesi)', () {
+    // ÖLÇÜLEN HATA: sezon ilerlemesi öğrenci olup olmadığına bakmıyordu;
+    // mezun olan oyuncunun üyeliği açık kalıyor ve yearsActive ömür boyu
+    // artıyordu (500 hayatta toplam sezon medyanı 58, en fazla 160).
+    test('mezun olan oyuncunun üyeliği kapanır, geçmişi kalır', () {
+      GameState s = _ogrenci(3, age: 17, grade: 12, schoolId: 'okul-lise-1')
+          .copyWith(
+        schoolClubs: <SchoolClubProgress>[
+          SchoolClubProgress(
+            clubId: 'futbol_takimi',
+            schoolId: 'okul-lise-1',
+            joinedAtAge: 11,
+            joinedAtGrade: 5,
+            yearsActive: 6,
+            skill: 60,
+            performance: 60,
+            role: SquadRole.ilkOnBir,
+          ),
+        ],
+      );
+
+      // Okul sürerken sezon ilerliyor.
+      final ({GameState state, List<String> log, List<String> milestones})
+          okulda = const SchoolClubEngine().advanceSeason(s, Random(4));
+      expect(
+        okulda.state.schoolClubs.activeFor('futbol_takimi')!.yearsActive,
+        7,
+      );
+
+      // Okul bitince üyelik kapanıyor ve sezon ARTMIYOR.
+      s = s.copyWith(
+        education: const EducationState(finished: true, startedAtAge: 6),
+      );
+      final ({GameState state, List<String> log, List<String> milestones})
+          mezun = const SchoolClubEngine().advanceSeason(s, Random(4));
+      expect(mezun.state.schoolClubs.activeFor('futbol_takimi'), isNull);
+      // Kayıt silinmedi; geçmiş duruyor.
+      expect(mezun.state.schoolClubs, hasLength(1));
+      expect(mezun.state.schoolClubs.first.yearsActive, 6);
+      expect(mezun.state.schoolClubs.first.leftAtAge, 17);
+      expect(mezun.log, isNotEmpty);
+    });
+
+    test('okul bittikten sonra sezon bir daha hiç artmaz', () {
+      GameState s = _ogrenci(3, age: 40).copyWith(
+        education: const EducationState(finished: true, startedAtAge: 6),
+        schoolClubs: <SchoolClubProgress>[
+          SchoolClubProgress(
+            clubId: 'futbol_takimi',
+            schoolId: 'okul-lise-1',
+            joinedAtAge: 11,
+            joinedAtGrade: 5,
+            yearsActive: 8,
+            skill: 70,
+            performance: 60,
+            role: SquadRole.kaptan,
+            captainSinceAge: 16,
+          ),
+        ],
+      );
+      for (int i = 0; i < 20; i++) {
+        s = const SchoolClubEngine().advanceSeason(s, Random(i)).state;
+      }
+      expect(s.schoolClubs.first.yearsActive, 8);
+      expect(s.schoolClubs.activeOnes, isEmpty);
+    });
+  });
 }
 
 /// Küme içinde arama; test okunurluğu için ayrı tutuldu.

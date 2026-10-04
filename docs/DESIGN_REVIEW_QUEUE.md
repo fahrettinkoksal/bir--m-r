@@ -5846,3 +5846,63 @@ Bu bir **karar sorusu**, hata değil.
 
 **Varsayılan işlem:** onay gelene kadar sayılar bu hâliyle `prototypeOnly`
 kalır ve `DECISIONS.md`'ye yazılmaz.
+
+### Q-192 EKİ — 500 hayat ölçüldü: iki çıkmaz sokak çıktı (Paket AW)
+
+**Durum: ölçüm bitti, iki sayı için karar bekliyor.** Q-192'deki
+sayıların hepsi hâlâ `prototypeOnly`; aşağıdaki iki maddeyi **kendi
+başıma değiştirmedim** çünkü ikisi de denge kararı.
+
+**Ölçüm.** 500 okul odaklı hayat (sport, education, casual, social,
+family arketipleri), `app/test/paket_au_measurement_test.dart`. Bot
+kulübü profiline göre seçiyor; futbol özel muamele görmüyor.
+
+| Ölçülen | Sonuç |
+|---|---|
+| Kulübe giren | %87,0 |
+| Antrenmana giden | %79,8 |
+| Seçmede reddedilen | %9,2 |
+| Kulübü bırakan | %11,2 |
+| Toplam sezon (medyan / en fazla) | 7 / 24 |
+| **Kaptanlık yapan** | **%0,0** |
+| Futbol oynayan | %13,6 |
+| **Profesyonel kapı açılan** | **%0,2** (500 hayatta 1) |
+| Scout ilgisi gören | %2,6 |
+| Hazırlık puanı (medyan / en yüksek) | 47 / 80 |
+
+Kategori dağılımı dengeli çıktı: akademi %52,4, sanat %66,9, spor %57,2.
+Futbol takımı kulüpler arasında **yedinci** sırada (%13,6). Arketip
+ayrımı çalışıyor: spor odaklı botun %100'ü kulübe giriyor ve %33'ü
+futbol oynuyor, eğitim odaklıda bu %89 ve %5. Yani **"herkes futbolcu
+oldu" sorunu yok** — brief'in açık yasağı tutuyor.
+
+**Çıkmaz sokak 1 — kaptanlık 500 hayatta hiç olmadı.**
+Rol puanı `beceri×45 + (sezon×6, en çok 30) + performans×20 +
+karizma×5` (÷100) ve kaptanlık ≥78 **artı** en az 3 sezon istiyor. Okul
+çağında ulaşılabilir en iyi bileşim yaklaşık 69-79 arasında kalıyor:
+9 sezon 30 (tavan), 12. sınıfta beceri 55-70 → 25-31, performans 60-75
+→ 12-15, karizma 50-70 → 2-3. Yani eşik tam sınırda duruyor ve pratikte
+yalnızca neredeyse kusursuz bir bileşimle geçiliyor. Rol dağılımı
+"Önemli oyuncu"da 8'de, "İlk 11"de 97'de kalıyor.
+*Claude'un önerisi: eşik 78 → **70**.* Gerekçe: kaptanlık kıdem ve
+başarı istemeli ama ulaşılamaz olmamalı; 70 ile iyi oynayan ve 4-5 sezon
+kalan oyuncu kaptan olabilir, bir yıl oynayan olamaz. 3 sezon kuralı ve
+tek kademe sınırı **aynen kalsın**. Değişiklik onaylanırsa aynı 500
+hayatla yeniden ölçülüp oran raporlanacak.
+
+**Çıkmaz sokak 2 — profesyonel futbol kapısı 500 hayatta 1 kez açıldı.**
+Hazırlık puanı medyanı 47, eşik 55; en yüksek 80 yani kapı matematiksel
+olarak kapalı değil, sadece çok dar. Asıl darboğaz **sezon sayısı**:
+futbol oynayanların sezon medyanı 3 ve puanın sezon bileşeni
+`sezon×7` (en çok 35) — 3 sezonda yalnızca 21 puan geliyor.
+*Claude'un önerisi: eşiği değil **sezon katsayısını** değiştir —
+`sezon×7` yerine `sezon×9` (tavan 35 aynı).* Gerekçe: eşiği düşürmek
+"futbol geçmişi zayıf olan da geçsin" demek olur ki brief'in ruhuna
+aykırı; sezon katsayısını artırmak "erken başlayıp uzun süre oynayan
+geçer" diyor, ki istenen tam bu. 5 sezon oynayan 45 puanı sezondan
+alır ve geri kalanını beceri/sağlıkla tamamlar.
+*Alternatif:* eşik 55 → 50. Daha basit ama ayrımı zayıflatır.
+
+**Bunların hiçbiri uygulanmadı.** İkisi de oyuncunun hissettiği dengeyi
+değiştirir; onay gelene kadar sayılar bu hâliyle kalıyor ve
+`DECISIONS.md`'ye yazılmıyor.
