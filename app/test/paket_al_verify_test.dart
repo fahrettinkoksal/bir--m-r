@@ -944,12 +944,12 @@ void main() {
       expect(yerel, lessThan(ulusal));
       expect(ulusal, lessThan(elit));
       expect(elit, lessThan(sampiyon));
-      expect(CombatCareerEngine.prototypeOnlySportFameCap, lessThan(100),
+      expect(CombatCareerEngine.sportFameCap, lessThan(100),
           reason: 'Spor tek başına Ün 100 yapabiliyor.');
       print('');
       print('-- §15: ün kazancı — yerel $yerel · ulusal $ulusal · '
           'elit $elit · şampiyonluk $sampiyon '
-          '(spor tavanı ${CombatCareerEngine.prototypeOnlySportFameCap}) --');
+          '(spor tavanı ${CombatCareerEngine.sportFameCap}) --');
     });
 
     test('emeklilikte ün sıfırlanmıyor', () {

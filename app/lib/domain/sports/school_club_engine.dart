@@ -95,8 +95,12 @@ class SchoolClubEngine {
   /// giremez.
   static const int tryoutUpsetPercent = 8;
 
-  /// Bedensel kulüp için en az sağlık (`prototypeOnly`, Paket AQ uyumlu).
-  static const int prototypeOnlyMinHealthForPhysical = 25;
+  /// D-147: bedensel kulüp için en az sağlık.
+  ///
+  /// AQ'nun kritik sağlık bantlarıyla uyumlu: 25 altında oyuncu
+  /// bedensel bir kulübe **giremez**, çünkü o bantta zaten günlük
+  /// hayat zorlaşıyor. Faho onayladı (5 Ekim 2026).
+  static const int minHealthForPhysical = 25;
 
   /// D-134: kaptanlık için gereken rol puanı eşiği.
   ///
@@ -139,7 +143,7 @@ class SchoolClubEngine {
           'kulüpte aktif olabilirsin. Birinden ayrılman gerekiyor.');
     }
     if (club.physical &&
-        state.player.stats.health < prototypeOnlyMinHealthForPhysical) {
+        state.player.stats.health < minHealthForPhysical) {
       return const ClubBlock(
         'Sağlığın şu an bedensel bir takıma dayanmaz; önce toparlanman '
         'gerekiyor.',

@@ -103,7 +103,7 @@ class FootballProEngine {
 
   /// profesyonel futbolun getirebileceği en yüksek Ün.
   ///
-  /// Dövüş kariyerindeki `prototypeOnlySportFameCap` ile aynı sayı ve
+  /// Dövüş kariyerindeki `CombatCareerEngine.sportFameCap` (D-148) ile aynı sayı ve
   /// aynı gerekçe (§17): spor tek başına kamuoyu ününü doldurmaz,
   /// Ün 100 için sosyal medya da gerekir.
   ///

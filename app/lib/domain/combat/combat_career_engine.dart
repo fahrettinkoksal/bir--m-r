@@ -196,11 +196,13 @@ abstract final class CombatCareerEngine {
   /// yaklaşıyordu.
   static const double prototypeOnlyTitleShotChance = 0.30;
 
-  /// prototypeOnly: sporun getirebileceği en yüksek Ün.
+  /// D-148: sporun getirebileceği en yüksek Ün.
   ///
   /// Spor tek başına oyuncuyu Ün 100 yapmaz (§17); kamuoyu ünü için
-  /// sosyal medya da gerekir.
-  static const int prototypeOnlySportFameCap = 70;
+  /// sosyal medya da gerekir. **Futbol aynı tavanı paylaşır** (D-141):
+  /// iki sporun aynı sayıyı görmesi tutarlılıktır, kopya değil.
+  /// Faho onayladı (5 Ekim 2026).
+  static const int sportFameCap = 70;
 
   /// Sayaç anahtarları (`interactionCounts` her yıl sıfırlanır).
   static const String boutCounterKind = 'musabaka';
@@ -1026,7 +1028,7 @@ abstract final class CombatCareerEngine {
     final int toplam = gain + (title ? 12 : 0);
     if (toplam <= 0) return state;
     final int mevcut = state.player.fame ?? 0;
-    final int yeni = (mevcut + toplam).clamp(0, prototypeOnlySportFameCap);
+    final int yeni = (mevcut + toplam).clamp(0, sportFameCap);
     if (yeni <= mevcut) return state;
     return state.copyWith(player: state.player.copyWith(fame: yeni));
   }

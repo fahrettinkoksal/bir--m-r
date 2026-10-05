@@ -16,9 +16,11 @@ library;
 import 'package:bir_omur/data/life_goal_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/life/life_verdict.dart';
+import 'package:bir_omur/domain/combat/combat_career_engine.dart';
 import 'package:bir_omur/domain/models/combat_career.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/sports/football_career.dart';
+import 'package:bir_omur/domain/sports/football_pro_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 GameState _hayat(int seed, {int age = 40}) {
@@ -336,6 +338,19 @@ void main() {
         ],
       );
       expect(hedef.reached(kemerli), isTrue);
+    });
+
+    test('iki spor aynı Ün tavanını paylaşıyor (D-141 / D-148)', () {
+      // Aynı sayıyı paylaşmak bilinçli bir tutarlılık tercihi; biri
+      // değişirse diğeri de konuşulmalı, sessizce ayrılmamalı.
+      expect(
+        FootballProEngine.footballFameCap,
+        CombatCareerEngine.sportFameCap,
+        reason: 'Futbol ve dövüşün Ün tavanı ayrışmış; D-148 ikisinin '
+            'aynı tavanı görmesini kural sayıyor.',
+      );
+      expect(FootballProEngine.footballFameCap, lessThan(100),
+          reason: 'Spor tek başına Ün 100 yapmamalı.');
     });
 
     test('hedef kimlikleri tekil kalıyor', () {

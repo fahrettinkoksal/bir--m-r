@@ -6380,3 +6380,17 @@ ikisi de bu iki kuyruğun dışında: okul kulübünde fiziksel kulüp için
 sağlık tabanı (`prototypeOnlyMinHealthForPhysical = 25`) ve dövüşün Ün
 tavanı (`prototypeOnlySportFameCap = 70`, Q-186). İstenirse ayrıca
 konuşulur.
+
+### Son iki `prototypeOnly` sayı kararlaştırıldı (5 Ekim 2026)
+
+Faho onayladı: **"ikisini de onayladım uygula."** Futbol/kulüp/dövüş
+zincirinde onay bekleyen sayı kalmadı.
+
+| Karar | Sayı |
+|---|---|
+| **D-147** | Bedensel kulübe giriş için en az sağlık: **25** (AQ bantlarıyla uyumlu; giriş engeli, mevcut üyeliği bozmaz) |
+| **D-148** | Sporun Ün tavanı: **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-141 ile bilinçli tutarlılık) |
+
+Bununla birlikte **Q-186'nın bu maddesi de kapandı.** Okul kulüpleri,
+profesyonel futbol ve dövüş rekabeti artık baştan sona onaylı
+sayılarla çalışıyor; bu üç sistemde `prototypeOnly` sabit kalmadı.

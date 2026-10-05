@@ -4342,6 +4342,24 @@ yok.** Bir alan bilerek kayda girmeyecekse `kKaydaGirmeyenAlanlar` içine
 test kırıldı ve alanın adını söyledi, sonra geri alındı. Yani boşa geçen
 bir süs değil.
 
+## Son iki sayı kararlaştırıldı: zincirde onay bekleyen kalmadı (5 Ekim 2026)
+
+Faho onayladı: "ikisini de onayladım uygula."
+
+| Karar | Sayı |
+|---|---|
+| **D-147** | Bedensel kulübe giriş için en az sağlık **25** — AQ'nun kritik sağlık bantlarıyla uyumlu. Taban **girişi** engeller, mevcut üyeliği bozmaz (D-129 mantığı) ve engel gerekçesiyle ekranda yazılır (D-063). |
+| **D-148** | Sporun Ün tavanı **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-141 ile bilinçli tutarlılık). Tavan bir duvar değil bir ayrım: üstü yalnızca sosyal medyayla açılır, ama sporcu olmak sponsorluk/medya kapısını açar. |
+
+Yeni kalıcı bekçi: bir test iki sporun Ün tavanının **aynı kalmasını**
+zorunlu tutuyor — biri değişirse diğeri de konuşulmalı, sessizce
+ayrışmamalı.
+
+**Okul kulüpleri, profesyonel futbol ve dövüş rekabeti artık baştan
+sona onaylı sayılarla çalışıyor; bu üç sistemde `prototypeOnly` sabit
+kalmadı.** (Projenin başka alanlarında onay bekleyen sayılar duruyor;
+panodaki sayaç onları gösteriyor.)
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
