@@ -16,6 +16,7 @@ library;
 import 'package:bir_omur/data/life_goal_catalog.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/life/life_verdict.dart';
+import 'package:bir_omur/domain/models/combat_career.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/sports/football_career.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,6 +88,36 @@ void main() {
       expect(emek(uzun), greaterThan(emek(kisa)));
     });
 
+    test('aynı sezonda çok gol atan daha çok sayıyor', () {
+      // ÖLÇÜLEN HATA (düzeltildi): sezon ağırlığı 2 iken 15 sezonluk
+      // kariyer tek başına tavanı dolduruyordu ve 200 gol atan ile hiç
+      // gol atmayan aynı puanı alıyordu.
+      int emek(GameState s) => LifeVerdictBuilder.build(s).axes
+          .firstWhere((VerdictAxis x) => x.id == 'emek')
+          .value;
+      final GameState golsuz = _hayat(10).copyWith(
+        footballCareer: _kariyer(goals: 0),
+      );
+      final GameState golcu = _hayat(10).copyWith(
+        footballCareer: _kariyer(goals: 200),
+      );
+      expect(emek(golcu), greaterThan(emek(golsuz)),
+          reason: 'Gol katkısı tavanın altında kalıp görünmez olmuş');
+    });
+
+    test('aynı sezonda çok maç oynayan daha çok sayıyor', () {
+      int emek(GameState s) => LifeVerdictBuilder.build(s).axes
+          .firstWhere((VerdictAxis x) => x.id == 'emek')
+          .value;
+      final GameState yedek = _hayat(11).copyWith(
+        footballCareer: _kariyer(appearances: 30),
+      );
+      final GameState asKadro = _hayat(11).copyWith(
+        footballCareer: _kariyer(appearances: 420),
+      );
+      expect(emek(asKadro), greaterThan(emek(yedek)));
+    });
+
     test('futbol tek başına Emek eksenini doldurmuyor', () {
       // Tavan var: o eksende okul, iş, birikim ve askerlik de var.
       final GameState s = _hayat(3).copyWith(
@@ -126,6 +157,108 @@ void main() {
           .firstWhere((VerdictAxis x) => x.id == 'emek')
           .value;
       expect(emek(s), emek(_hayat(6)));
+    });
+  });
+
+  group('Hayatın hükmü dövüş REKABETİNİ sayıyor (Faho onayı)', () {
+    // ÖNEMLİ AYRIM: dövüş **eğitimi** zaten sayılıyordu — `_dovusPuani`
+    // state.martialArts basamaklarını okuyup Deneyim eksenine katkı
+    // veriyor. Sayılmayan şey **rekabetin kendisiydi**: maçlar,
+    // şampiyonluklar, kademe ve ringde geçen yıllar Emek ekseninde
+    // sıfır ediyordu.
+    CombatCareer kariyer({
+      int startedAtAge = 18,
+      int proWins = 20,
+      int proLosses = 5,
+      int championships = 0,
+      int tier = 2,
+      int? retiredAtAge = 34,
+    }) =>
+        CombatCareer(
+          artId: 'boks',
+          startedCompetitiveAtAge: startedAtAge,
+          proWins: proWins,
+          proLosses: proLosses,
+          championships: championships,
+          tier: tier,
+          retiredAtAge: retiredAtAge,
+        );
+
+    int emek(GameState s) => LifeVerdictBuilder.build(s).axes
+        .firstWhere((VerdictAxis x) => x.id == 'emek')
+        .value;
+
+    test('dövüşçünün Emek puanı hiç dövüşmemiş birinden yüksek', () {
+      final GameState yok = _hayat(20);
+      final GameState dovuscu = yok.copyWith(
+        combatCareers: <CombatCareer>[kariyer()],
+      );
+      expect(emek(dovuscu), greaterThan(emek(yok)));
+    });
+
+    test('şampiyonluk fark yaratıyor', () {
+      final GameState kemersiz = _hayat(21).copyWith(
+        combatCareers: <CombatCareer>[kariyer()],
+      );
+      final GameState kemerli = _hayat(21).copyWith(
+        combatCareers: <CombatCareer>[kariyer(championships: 3)],
+      );
+      expect(emek(kemerli), greaterThan(emek(kemersiz)));
+    });
+
+    test('hiç maç yapmamış lisanslı dövüşçü maç yapandan az sayıyor', () {
+      final GameState macsiz = _hayat(22).copyWith(
+        combatCareers: <CombatCareer>[
+          kariyer(proWins: 0, proLosses: 0, startedAtAge: 33),
+        ],
+      );
+      final GameState macli = _hayat(22).copyWith(
+        combatCareers: <CombatCareer>[kariyer()],
+      );
+      expect(emek(macli), greaterThan(emek(macsiz)));
+    });
+
+    test('dövüş tek başına Emek eksenini doldurmuyor', () {
+      final GameState s = _hayat(23).copyWith(
+        combatCareers: <CombatCareer>[
+          kariyer(proWins: 90, proLosses: 2, championships: 8, tier: 3,
+              startedAtAge: 16),
+        ],
+      );
+      expect(emek(s), lessThan(100));
+    });
+
+    test('iki dalda dövüşmek ekseni ikiye katlamıyor', () {
+      final GameState tek = _hayat(24).copyWith(
+        combatCareers: <CombatCareer>[
+          kariyer(proWins: 60, championships: 5, tier: 3, startedAtAge: 16),
+        ],
+      );
+      final GameState cift = _hayat(24).copyWith(
+        combatCareers: <CombatCareer>[
+          kariyer(proWins: 60, championships: 5, tier: 3, startedAtAge: 16),
+          kariyer(proWins: 60, championships: 5, tier: 3, startedAtAge: 16),
+        ],
+      );
+      // Tavan paylaşılıyor: ikinci kariyer puanı katlamaz.
+      expect(emek(cift), lessThanOrEqualTo(emek(tek) + 1));
+    });
+
+    test('dövüşçüye "hiç çalışmadın" denmiyor, şampiyonluk anılıyor', () {
+      final GameState s = _hayat(25).copyWith(
+        combatCareers: <CombatCareer>[kariyer(championships: 2)],
+      );
+      final VerdictAxis eksen = LifeVerdictBuilder.build(s).axes
+          .firstWhere((VerdictAxis x) => x.id == 'emek');
+      expect(eksen.note.contains('Hiç bir işte çalışmadın'), isFalse);
+      expect(eksen.note, contains('şampiyonluk'));
+    });
+
+    test('dövüşmemiş hayatın notu değişmedi', () {
+      final VerdictAxis eksen = LifeVerdictBuilder.build(_hayat(26)).axes
+          .firstWhere((VerdictAxis x) => x.id == 'emek');
+      expect(eksen.note.contains('müsabaka'), isFalse);
+      expect(eksen.note.contains('şampiyonluk'), isFalse);
     });
   });
 

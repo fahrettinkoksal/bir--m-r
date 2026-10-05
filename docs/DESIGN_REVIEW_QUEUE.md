@@ -6229,3 +6229,62 @@ satırının göründüğünü ve futbolsuz hayatta görünmediğini.
 dosyada hiç geçmiyor. Yani kemer kazanmış bir dövüşçü de bu eksende
 sıfır alıyor. Bu AY'den önce gelen bir eksik; kapsamımı kendi başıma
 genişletmemek için **dokunmadım.** Ayrı bir pakette düzeltilebilir.
+
+### Q-193 EKİ 3 — Dövüş rekabeti de hükme girdi (Faho onayı, 5 Ekim 2026)
+
+**Durum: Faho "dövüş kariyerini de hükme ekle" dedi, uygulandı. İki sayı
+karar bekliyor; biri de benim yanlış teşhisimin düzeltmesi.**
+
+**Önce kendi hatamı düzeltiyorum.** AY/3'te "`LifeVerdict` dövüş
+kariyerini de saymıyor, kemer kazanmış bir dövüşçü o eksende sıfır
+alıyor" demiştim. Grep çıktısını `head -12` ile kestiğim için eksik
+bakmışım. Gerçek şu: dövüş **eğitimi** zaten sayılıyordu —
+`_dovusPuani` `state.martialArts` basamaklarını okuyup **Deneyim**
+eksenine 30'a kadar katkı veriyor. Sayılmayan şey **rekabetin
+kendisiydi**: `combatCareers` o dosyada hiç geçmiyordu, yani maçlar,
+şampiyonluklar, ulaşılan kademe ve ringde geçen yıllar **Emek**
+ekseninde sıfır ediyordu. Boşluk gerçekti ama benim dediğimden dardı.
+
+**Eklenen.** `_dovusKariyerPuani`: rekabette geçen yıl ağır basar, maç
+sayısı ve şampiyonluk üstüne biner, kademe küçük bir pay verir. Bütün
+dövüş kariyerleri toplanıp **tek tavana** vurulur; iki dalda birden
+dövüşmek ekseni ikiye katlamaz. Hüküm notu da düzeltildi: dövüşçüye
+"hiç çalışmadın" denmiyor ve şampiyonluk varsa anılıyor.
+
+**Testim yazarken ikinci bir hata yakaladı — ve o hata futbolda da
+vardı.** Yıl ağırlığı 2 iken 16 yıl rekabet eden bir dövüşçü **tek
+başına tavanı dolduruyordu**; şampiyonluk, maç ve kademe hiçbir şey
+eklemiyordu, yani başarı dekoratifti. Dövüşte bulunca futbolda da
+ölçtüm: **aynı hata oradaydı.** Sezon ağırlığı 2 × 15 sezon (ölçülen
+medyan) = 30 = tavan, dolayısıyla 300 maçta 200 gol atan ile hiç gol
+atmayan **aynı puanı** alıyordu. Bu, AY'de bulduğum "dekoratif deneme
+eşiği" ile birebir aynı sınıf hata. İkisinde de ağırlık 1'e indirildi.
+
+| Senaryo (Emek ekseni) | Düzeltmeden önce | Sonra |
+|---|---|---|
+| 16 yıl dövüş, 0 şampiyonluk | tavan (30) | 23 |
+| 16 yıl dövüş, 3 şampiyonluk | tavan (30) | tavan (30) |
+| 15 sezon futbol, 0 gol | tavan (30) | 22 |
+| 15 sezon futbol, 200 gol | tavan (30) | tavan (30) |
+
+#### Karar bekleyen sayılar
+
+**1 — Dövüş rekabetinin katkısı.** `prototypeOnlyCombatYearPoint = 1`,
+`prototypeOnlyCombatChampionshipPoint = 5`,
+`prototypeOnlyCombatMax = 30`; üstüne maç başına (`toplamMaç/8`, en çok
+8) ve kademe (`kademe×2`, en çok 6). *Öneri: kalsın.* Ölçek futbolla
+aynı mantıkta ve iki spor aynı tavanı görüyor.
+
+**2 — Futbol sezon ağırlığı.** `prototypeOnlyFootballSeasonPoint`
+2 → **1**. *Öneri: kalsın.* Bu bir kalibrasyon değil **hata
+düzeltmesi**: eski değerle maç ve gol katkısı hiç görünmüyordu.
+
+**Kalıcı bekçi.** `paket_ay3_football_life_test` (18 test) artık şunları
+koruyor: dövüşçünün Emek puanı dövüşmemiş hayattan yüksek, şampiyonluk
+fark yaratıyor, maç yapmamış lisanslı dövüşçü maç yapandan az sayıyor,
+iki dal ekseni katlamıyor, dövüş ve futbol tek başına ekseni
+doldurmuyor, **aynı sezonda çok gol atan ve çok maç oynayan daha çok
+sayıyor** (yeni düzeltmenin bekçisi), ve sporsuz hayatların notu
+değişmiyor.
+
+**`DECISIONS.md`'ye yine dokunulmadı**; iki sayı da `prototypeOnly`.

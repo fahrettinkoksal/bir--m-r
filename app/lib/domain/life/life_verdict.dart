@@ -15,6 +15,7 @@ import '../../data/martial_arts_catalog.dart';
 import '../../data/military_catalog.dart';
 import '../models/marriage.dart';
 import '../models/hobby_progress.dart';
+import '../models/combat_career.dart';
 import '../sports/football_career.dart';
 import '../hobby/hobby_tracker.dart';
 import '../../data/hobby_catalog.dart';
@@ -229,6 +230,17 @@ abstract final class LifeVerdictBuilder {
     // sayılıyordu.
     puan += _futbolPuani(state);
 
+    // Dövüş **rekabet kariyeri** de emektir (Faho onayladı, 5 Ekim 2026).
+    //
+    // Ayrım önemli: dövüş **eğitimi** zaten sayılıyordu — aşağıdaki
+    // `_dovusPuani` `state.martialArts` basamaklarını okuyup Deneyim
+    // eksenine katkı veriyor. Sayılmayan şey **rekabetin kendisiydi**:
+    // `combatCareers` bu dosyada hiç geçmiyordu, yani maçlar,
+    // şampiyonluklar, ulaşılan kademe ve ringde geçen yıllar Emek
+    // ekseninde **sıfır** ediyordu. Dövüş de `kJobCatalog` işi değil,
+    // `career.history` boş kalıyor; futbolla aynı körlük.
+    puan += _dovusKariyerPuani(state, olumYasi);
+
     // Meslekte ustalık (D-155): aynı işte otuz yıl çalışmış biri ile üç
     // yıl çalışmış biri değerlendirmede de aynı sayılmamalı. Basamak
     // **ulaşıldığı için** sayılır; iş değişmişse en yüksek basamak
@@ -238,12 +250,18 @@ abstract final class LifeVerdictBuilder {
 
     final FootballCareer? futbol = state.footballCareer;
     final bool futbolVar = futbol != null && futbol.proSeasons > 0;
+    final int dovusMaci = _dovusMacSayisi(state);
+    final bool dovusVar = dovusMaci > 0;
 
     final String not;
-    // Futbolcuya "hiç çalışmadın" denmez: o hayatın emeği sahada geçti.
+    // Sporcuya "hiç çalışmadın" denmez: o hayatın emeği sahada,
+    // ringde ya da minderde geçti.
     if (gecmis.isEmpty && futbolVar) {
       not = '${futbol.proSeasons} sezon profesyonel futbol oynadın; '
           'futbol dışında bir işte çalışmadın.';
+    } else if (gecmis.isEmpty && dovusVar) {
+      not = '$dovusMaci müsabakaya çıktın; sporun dışında bir işte '
+          'çalışmadın.';
     } else if (gecmis.isEmpty &&
         state.military.status == MilitaryStatus.tamamlandi) {
       not = 'Hiçbir işte çalışmadın ama askerliğini tamamladın.';
@@ -264,6 +282,13 @@ abstract final class LifeVerdictBuilder {
     if (futbolVar && gecmis.isNotEmpty) {
       notTam = '$notTam Ayrıca ${futbol.proSeasons} sezon profesyonel '
           'futbol oynadın.';
+    }
+    // Şampiyonluk bir hayat başarısıdır; hükümde anılmadan geçmez.
+    final int kemer = _sampiyonlukSayisi(state);
+    if (kemer > 0) {
+      notTam = '$notTam Dövüşte $kemer şampiyonluk kazandın.';
+    } else if (dovusVar && gecmis.isNotEmpty) {
+      notTam = '$notTam Ayrıca $dovusMaci müsabakaya çıktın.';
     }
     return VerdictAxis(
       id: 'emek',
@@ -394,8 +419,66 @@ abstract final class LifeVerdictBuilder {
   /// ağır basar, başarı (maç ve gol) üstüne biner. Tavan var: futbol
   /// tek başına Emek eksenini doldurmaz, çünkü o eksende okul, iş,
   /// birikim ve askerlik de var.
-  static const int prototypeOnlyFootballSeasonPoint = 2;
+  /// **ÖLÇÜLEN HATA (düzeltildi):** bu sayı 2 iken 15 sezonluk bir
+  /// kariyer (ölçülen medyan) tek başına tavanı dolduruyordu ve maç ile
+  /// gol katkısı hiç görünmüyordu — 300 maçta 200 gol atan ile hiç gol
+  /// atmayan aynı puanı alıyordu. Dövüşte aynı hatayı bulunca futbolda
+  /// da ölçtüm ve buradaydı. Sezon ağırlığı 1'e indirildi.
+  static const int prototypeOnlyFootballSeasonPoint = 1;
   static const int prototypeOnlyFootballMax = 30;
+
+  /// prototypeOnly: dövüş kariyerinin Emek eksenine katkısı.
+  ///
+  /// Ölçek futbolla aynı mantıkta: rekabette geçen yıl ağır basar,
+  /// başarı (maç ve şampiyonluk) üstüne biner. **Tavan futbolla aynı
+  /// havuzu paylaşmaz ama o da sınırlı:** iki dalda birden dövüşen
+  /// oyuncu ekseni ikiye katlamasın diye bütün kariyerler toplanıp
+  /// tek tavana vurulur.
+  /// **ÖLÇÜLEN HATA (düzeltildi):** bu sayı 2 iken 16 yıl rekabet eden
+  /// bir dövüşçü tek başına tavanı (30) dolduruyordu; şampiyonluk, maç
+  /// ve kademe hiçbir şey eklemiyordu. Yani başarı dekoratifti. Yıl
+  /// ağırlığı 1'e indirildi: uzun kariyer hâlâ ağır basıyor ama kemer
+  /// kazanmak gerçekten fark yaratıyor.
+  static const int prototypeOnlyCombatYearPoint = 1;
+  static const int prototypeOnlyCombatChampionshipPoint = 5;
+  static const int prototypeOnlyCombatMax = 30;
+
+  /// Dövüş kariyerlerinin Emek eksenine katkısı (Faho onayı, 5 Ekim).
+  static int _dovusKariyerPuani(GameState state, int olumYasi) {
+    if (state.combatCareers.isEmpty) return 0;
+
+    int puan = 0;
+    for (final CombatCareer k in state.combatCareers) {
+      final int bitis = k.retiredAtAge ?? olumYasi;
+      final int yil = (bitis - k.startedCompetitiveAtAge).clamp(0, 40);
+      puan += yil * prototypeOnlyCombatYearPoint;
+      // Ringe gerçekten çıkmak: lisanslı olup dövüşmemek aynı değil.
+      final int mac = k.amateurWins + k.amateurLosses + k.proWins + k.proLosses;
+      puan += (mac ~/ 8).clamp(0, 8);
+      puan += k.championships * prototypeOnlyCombatChampionshipPoint;
+      // Üst kademeye çıkmak kendi başına bir emek.
+      puan += (k.tier * 2).clamp(0, 6);
+    }
+    return puan.clamp(0, prototypeOnlyCombatMax);
+  }
+
+  /// Bütün dövüş kariyerlerindeki toplam müsabaka sayısı.
+  static int _dovusMacSayisi(GameState state) {
+    int toplam = 0;
+    for (final CombatCareer k in state.combatCareers) {
+      toplam += k.amateurWins + k.amateurLosses + k.proWins + k.proLosses;
+    }
+    return toplam;
+  }
+
+  /// Bütün dövüş kariyerlerindeki toplam şampiyonluk sayısı.
+  static int _sampiyonlukSayisi(GameState state) {
+    int toplam = 0;
+    for (final CombatCareer k in state.combatCareers) {
+      toplam += k.championships;
+    }
+    return toplam;
+  }
 
   /// Profesyonel futbol kariyerinin Emek eksenine katkısı (Paket AY/3).
   static int _futbolPuani(GameState state) {

@@ -4204,6 +4204,45 @@ Doğrulama: `flutter analyze` çıkış kodu 0; `paket_ay3_football_life_test`
 (9) ve `life_summary_widget_test` (5) yeşil. **Android APK ya da Windows
 derlemesi bu pakette denenmedi.**
 
+## Paket AY/4: dövüş rekabeti de hükme girdi (5 Ekim 2026, Faho onayı)
+
+Faho "dövüş kariyerini de hükme ekle" dedi; eklendi.
+
+**Önce kendi hatamı düzeltiyorum.** AY/3'te "`LifeVerdict` dövüş
+kariyerini saymıyor, kemer kazanmış dövüşçü o eksende sıfır alıyor"
+demiştim; grep çıktısını kestiğim için eksik bakmışım. Gerçek: dövüş
+**eğitimi** zaten sayılıyordu (`_dovusPuani` → Deneyim ekseni, 30'a
+kadar). Sayılmayan şey **rekabetin kendisiydi** — maçlar,
+şampiyonluklar, kademe ve ringde geçen yıllar Emek ekseninde sıfır
+ediyordu. Boşluk gerçekti ama dediğimden dardı.
+
+**Eklenen:** `_dovusKariyerPuani` — rekabet yılı ağır basar, maç ve
+şampiyonluk üstüne biner, kademe küçük pay verir. Bütün dövüş
+kariyerleri toplanıp **tek tavana** vurulur; iki dalda dövüşmek ekseni
+katlamaz. Hüküm notu da düzeltildi: dövüşçüye "hiç çalışmadın"
+denmiyor, şampiyonluk anılıyor.
+
+**Testim ikinci bir hata yakaladı ve o hata futbolda da vardı.** Yıl
+ağırlığı 2 iken 16 yıl rekabet tek başına tavanı dolduruyordu; başarı
+dekoratifti. Dövüşte bulunca futbolda da ölçtüm: aynı hata oradaydı —
+15 sezon (ölçülen medyan) × 2 = tavan, yani 300 maçta 200 gol atan ile
+hiç gol atmayan aynı puanı alıyordu. AY'deki "dekoratif deneme eşiği"
+ile birebir aynı sınıf hata. İkisinde de ağırlık 1'e indirildi.
+
+| Senaryo (Emek ekseni) | Önce | Sonra |
+|---|---|---|
+| 16 yıl dövüş, 0 şampiyonluk | tavan (30) | 23 |
+| 16 yıl dövüş, 3 şampiyonluk | tavan (30) | tavan (30) |
+| 15 sezon futbol, 0 gol | tavan (30) | 22 |
+| 15 sezon futbol, 200 gol | tavan (30) | tavan (30) |
+
+İki sayı **Q-193 ekine** yazıldı, karar bekliyor.
+**`DECISIONS.md`'ye dokunulmadı.**
+
+Doğrulama: `flutter analyze` çıkış kodu 0; `paket_ay3_football_life_test`
+18 test yeşil. **Android APK ya da Windows derlemesi bu pakette
+denenmedi.**
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
