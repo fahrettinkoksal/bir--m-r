@@ -15,6 +15,7 @@ import '../../data/martial_arts_catalog.dart';
 import '../../data/military_catalog.dart';
 import '../models/marriage.dart';
 import '../models/hobby_progress.dart';
+import '../sports/football_career.dart';
 import '../hobby/hobby_tracker.dart';
 import '../../data/hobby_catalog.dart';
 import '../models/martial_progress.dart';
@@ -219,6 +220,15 @@ abstract final class LifeVerdictBuilder {
     // bir binbaşı ile hiç askere gitmemiş biri aynı sayılıyordu.
     puan += _askerlikPuani(state);
 
+    // Profesyonel futbol da emektir (Paket AY/3).
+    //
+    // **ÖLÇÜLEN HATA:** askerlikle birebir aynı körlük. 15 sezon oynamış,
+    // 300 maç çıkmış, futboldan 35 milyon ₺ kazanmış bir oyuncu bu
+    // eksende **sıfır** alıyordu, çünkü futbol `kJobCatalog` işi değil ve
+    // `career.history` boş kalıyor. Hükme göre o hayat "hiç çalışmamış"
+    // sayılıyordu.
+    puan += _futbolPuani(state);
+
     // Meslekte ustalık (D-155): aynı işte otuz yıl çalışmış biri ile üç
     // yıl çalışmış biri değerlendirmede de aynı sayılmamalı. Basamak
     // **ulaşıldığı için** sayılır; iş değişmişse en yüksek basamak
@@ -226,8 +236,16 @@ abstract final class LifeVerdictBuilder {
     puan += (_enYuksekUstalik(state, olumYasi) * prototypeOnlyMasteryPoint)
         .clamp(0, prototypeOnlyMasteryMax);
 
+    final FootballCareer? futbol = state.footballCareer;
+    final bool futbolVar = futbol != null && futbol.proSeasons > 0;
+
     final String not;
-    if (gecmis.isEmpty && state.military.status == MilitaryStatus.tamamlandi) {
+    // Futbolcuya "hiç çalışmadın" denmez: o hayatın emeği sahada geçti.
+    if (gecmis.isEmpty && futbolVar) {
+      not = '${futbol.proSeasons} sezon profesyonel futbol oynadın; '
+          'futbol dışında bir işte çalışmadın.';
+    } else if (gecmis.isEmpty &&
+        state.military.status == MilitaryStatus.tamamlandi) {
       not = 'Hiçbir işte çalışmadın ama askerliğini tamamladın.';
     } else if (gecmis.isEmpty) {
       not = 'Hiç bir işte çalışmadın.';
@@ -237,10 +255,16 @@ abstract final class LifeVerdictBuilder {
       not = '${gecmis.length} işte toplam $calisilanYil yıl çalıştın.';
     }
     final int ustalik = _enYuksekUstalik(state, olumYasi);
-    final String notTam = ustalik >= MasteryStage.usta.index
+    String notTam = ustalik >= MasteryStage.usta.index
         ? '$not Mesleğinde '
             '${trLower(MasteryStage.values[ustalik].label)} oldun.'
         : not;
+    // Hem iş hem futbol varsa ikisi birlikte yazılır; futbol bir
+    // dipnot değil, hayatın bir dönemi.
+    if (futbolVar && gecmis.isNotEmpty) {
+      notTam = '$notTam Ayrıca ${futbol.proSeasons} sezon profesyonel '
+          'futbol oynadın.';
+    }
     return VerdictAxis(
       id: 'emek',
       label: 'Emek',
@@ -364,6 +388,27 @@ abstract final class LifeVerdictBuilder {
   ///
   /// Yalnızca **gerçekten olmuş** durumlar sayılır: tamamlanan hizmet ve
   /// ulaşılan rütbe. Bedelli ödemek hizmet sayılmaz; kaçmak hiç sayılmaz.
+  /// prototypeOnly: profesyonel futbolun Emek eksenine katkısı.
+  ///
+  /// Ölçeği askerlikle aynı mantıkta tutuldu: sahada geçen yıl sayısı
+  /// ağır basar, başarı (maç ve gol) üstüne biner. Tavan var: futbol
+  /// tek başına Emek eksenini doldurmaz, çünkü o eksende okul, iş,
+  /// birikim ve askerlik de var.
+  static const int prototypeOnlyFootballSeasonPoint = 2;
+  static const int prototypeOnlyFootballMax = 30;
+
+  /// Profesyonel futbol kariyerinin Emek eksenine katkısı (Paket AY/3).
+  static int _futbolPuani(GameState state) {
+    final FootballCareer? k = state.footballCareer;
+    if (k == null || k.proSeasons == 0) return 0;
+
+    int puan = k.proSeasons * prototypeOnlyFootballSeasonPoint;
+    // Sahada gerçekten oynamak: kadroda durup maça çıkmamak aynı değil.
+    puan += (k.totalAppearances ~/ 40).clamp(0, 8);
+    puan += (k.totalGoals ~/ 20).clamp(0, 6);
+    return puan.clamp(0, prototypeOnlyFootballMax);
+  }
+
   static int _askerlikPuani(GameState state) {
     final MilitaryState a = state.military;
     if (a.status != MilitaryStatus.tamamlandi) return 0;

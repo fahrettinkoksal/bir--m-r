@@ -6155,3 +6155,77 @@ medyanının sponsorluk bandının altına düşmesine izin vermiyor.
 
 **Bu ek `DECISIONS.md`'ye hiçbir şey yazmadı.** İki sayı da
 `prototypeOnly`; Faho onaylarsa kurala dönüşür.
+
+### Q-193 EKİ 2 — Futbol hayatın geri kalanına bağlı değildi (Paket AY/3)
+
+**Durum: üç hata düzeltildi, iki sayı + bir hedef karar bekliyor.**
+
+AY ve AY/2'de iki kez aynı sınıf hata buldum: *sistem var, futbol ona
+bağlanmamış.* Aynı yöntemle kalanları taradım. **Üç gerçek boşluk daha
+çıktı** — ve kendi denetimimde **bir yanlış teşhis** yaptım, onu da
+aşağıda düzeltiyorum.
+
+**H1 — Hayatın hükmü futbolu hiç saymıyordu.** `LifeVerdict`'in Emek
+ekseni okul, iş geçmişi, birikim, askerlik ve ustalığa bakıyor. Futbol
+`kJobCatalog` işi olmadığı için `career.history` boş kalıyor; 15 sezon
+oynamış, 300 maç çıkmış, futboldan 35 milyon ₺ kazanmış bir oyuncu bu
+eksende **sıfır** alıyordu. Hükme göre o hayat "hiç çalışmamış"tı.
+Üstelik eksenin notu birebir **"Hiç bir işte çalışmadın."** yazıyordu —
+düpedüz yanlış bir cümle. Düzeltme askerliğin emsalini izliyor: Paket
+37'de askerlik tam bu gerekçeyle eklenmişti ("terhis olmuş bir binbaşı
+ile hiç askere gitmemiş biri aynı sayılıyordu").
+
+**H2 — Ömür sonu özetinde futbol görünmüyordu.** `life_summary_screen`
+meslek satırında futbolcuya **"Çalışmadı"** yazıyor, kariyeri hiç
+anmıyordu. Artık ayrı bir "Futbol" satırı var (kaç sezon, kaç maç, kaç
+gol, nasıl bitti) ve meslek satırı "Profesyonel futbolcu" diyor. İç
+sayılar (form, itibar, beceri) gösterilmiyor.
+
+**H3 — Hayat hedefleri futbolu tanımıyordu.** Katalogda dövüş için
+`dovus_ust_basamak` ("Bir dövüş dalında en üste çık") vardı; futbolun
+karşılığı yoktu. Profesyonel futbol oyundaki en dar yollardan biri
+(okul odaklı hayatların %1,4'ü) ama hiçbir hedefe dokunmuyordu.
+
+**Kendi yanlış teşhisim (düzeltiyorum).** Denetimde "yıl
+değerlendirmesi futbolu bilmiyor" diye dördüncü bir boşluk saymıştım.
+Yanlıştı: `YearReview` D-096 gereği **fark** üzerinden çalışıyor —
+"özet niyetten değil fotoğrafla bugünün farkından üretilir" — ve sistem
+adı saymıyor. Futbol sezonu oraya zaten cüzdan, Ün ve sağlık farkı
+olarak düşüyor. `footballCareer` araması bu tasarım için yanlış bir
+ölçüttü; oraya futbol eklemek D-096'yı bozardı, **dokunmadım.**
+
+#### Karar bekleyen
+
+**1 — Futbolun Emek eksenine katkısı.**
+`prototypeOnlyFootballSeasonPoint = 2` (sezon başına),
+`prototypeOnlyFootballMax = 30` (tavan); üstüne maç başına
+(`toplamMaç/40`, en çok 8) ve gol başına (`toplamGol/20`, en çok 6).
+*Öneri: kalsın.* Ölçeği askerlikle aynı mantıkta: sahada geçen yıl ağır
+basar, başarı üstüne biner. Tavan şart, çünkü o eksende okul, iş,
+birikim ve askerlik de var; futbol tek başına Emek'i doldurmamalı.
+
+**2 — Hedefin kendisi ve eşiği.** `profesyonel_futbol` —
+"Profesyonel futbol oyna", eşik **tek sezon**. *Öneri: kalsın.*
+Gerekçe: kapı zaten dar, oraya ulaşmak başlı başına başarı; dövüş
+hedefi de "en üste çık" diyor ama futbolda **girmek** en üsttür.
+*Alternatif (Faho isterse):* eşik 5 sezon ya da 100 maç yapılabilir;
+o zaman hedef "tutunmak" olur, "ulaşmak" değil. **Hedefi tamamen
+reddetme hakkın da duruyor:** hedef katalogu oyuncuya görünen
+içeriktir, benim tek başıma kalıcılaştıracağım bir şey değil.
+
+**Kalıcı bekçi eklendi.** `paket_ay3_football_life_test` futbolcunun
+Emek puanının futbolsuz hayattan yüksek olmasını, futbol tek başına
+ekseni doldurmamasını, "hiç çalışmadın" cümlesinin futbolcuya
+yazılmamasını ve hedefin yalnızca gerçekten sezon oynanınca
+tamamlanmasını denetliyor. `life_summary_widget_test` de futbol
+satırının göründüğünü ve futbolsuz hayatta görünmediğini.
+
+**Bu ek `DECISIONS.md`'ye hiçbir şey yazmadı.** Sayılar ve hedef
+`prototypeOnly`.
+
+#### Bir de senin kararına bırakılan, kapsamım dışı bir bulgu
+
+`LifeVerdict` **dövüş kariyerini de saymıyor** — `combatCareers` o
+dosyada hiç geçmiyor. Yani kemer kazanmış bir dövüşçü de bu eksende
+sıfır alıyor. Bu AY'den önce gelen bir eksik; kapsamımı kendi başıma
+genişletmemek için **dokunmadım.** Ayrı bir pakette düzeltilebilir.

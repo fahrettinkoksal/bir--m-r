@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/sports/football_career.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,6 +43,47 @@ void main() {
     controller.debugSetState(state);
     await tester.pumpAndSettle();
   }
+
+  testWidgets('futbol kariyeri ömür özetinde görünür (Paket AY/3)',
+      (WidgetTester tester) async {
+    // ÖLÇÜLEN HATA: 15 sezon, 300 maçlık bir profesyonel kariyer ömür
+    // sonunda hiç yazılmıyordu ve "Meslek: Çalışmadı" deniyordu.
+    final GameState state = tamamlanmisHayat().copyWith(
+      footballCareer: FootballCareer(
+        startedAtAge: 19,
+        position: FootballPosition.forvet,
+        active: false,
+        retiredAtAge: 34,
+        lastSeasonAge: 34,
+        exitReason: FootballExit.yas,
+        careerEarnings: 35000000,
+        seasonHistory: <FootballSeason>[
+          for (int i = 0; i < 15; i++)
+            FootballSeason(
+              age: 19 + i,
+              appearances: 20,
+              goals: 2,
+              rating: 60,
+              earned: 2000000,
+            ),
+        ],
+      ),
+    );
+    await pumpApp(tester, state);
+
+    expect(find.text('Futbol'), findsOneWidget);
+    expect(find.textContaining('15 sezon'), findsWidgets);
+    expect(find.textContaining('300 maç'), findsWidgets);
+    // Futbolcuya "Çalışmadı" yazılmaz.
+    expect(find.text('Çalışmadı'), findsNothing);
+    expect(find.text('Profesyonel futbolcu'), findsOneWidget);
+  });
+
+  testWidgets('futbol oynamamış hayatta futbol satırı yok (Paket AY/3)',
+      (WidgetTester tester) async {
+    await pumpApp(tester, tamamlanmisHayat());
+    expect(find.text('Futbol'), findsNothing);
+  });
 
   testWidgets('ölümden sonra hayat özeti gösterilir',
       (WidgetTester tester) async {

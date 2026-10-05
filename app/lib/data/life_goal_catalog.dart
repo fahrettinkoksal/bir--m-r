@@ -209,6 +209,20 @@ final List<LifeGoal> kLifeGoals = <LifeGoal>[
       return dal.levelForLessons(m.lessons) >= dal.ranks.length - 1;
     }),
   ),
+  // Futbolun hedefi, dövüş hedefinin eşi (Paket AY/3).
+  //
+  // Katalogda dövüş için `dovus_ust_basamak` vardı, futbolun karşılığı
+  // yoktu: profesyonel futbola ulaşmak oyundaki en dar yollardan biri
+  // (ölçümde okul odaklı hayatların %1,4'ü) ama hiçbir hedefe
+  // dokunmuyordu. **prototypeOnly:** eşik tek sezon; Faho hedefin
+  // kendisini ya da eşiği değiştirebilir (Q-193).
+  LifeGoal(
+    id: 'profesyonel_futbol',
+    label: 'Profesyonel futbol oyna',
+    description: 'Okul takımından başlayıp profesyonel bir sezon oyna.',
+    area: GoalArea.kendin,
+    reached: (GameState s) => (s.footballCareer?.proSeasons ?? 0) > 0,
+  ),
   LifeGoal(
     id: 'kitap_bitir',
     label: 'Bir kitabı bitir',

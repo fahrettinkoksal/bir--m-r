@@ -8,6 +8,8 @@ import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/models/person.dart';
+import '../../domain/sports/football_career.dart';
+import '../../text/turkish_text.dart';
 import '../../state/game_scope.dart';
 import '../widgets/kilim_divider.dart';
 import '../widgets/life_verdict_panel.dart';
@@ -115,9 +117,21 @@ class LifeSummaryScreen extends StatelessWidget {
                   value: state.career.isEmployed
                       ? state.career.label
                       : state.career.pastJobIds.isEmpty
-                          ? 'Çalışmadı'
+                          // Futbolcuya "Çalışmadı" yazılmaz (Paket AY/3):
+                          // o hayatın emeği sahada geçti.
+                          ? ((state.footballCareer?.proSeasons ?? 0) > 0
+                              ? 'Profesyonel futbolcu'
+                              : 'Çalışmadı')
                           : 'Son iş: ${state.career.label}',
                 ),
+                // Futbol kariyeri ömür özetinde görünür (Paket AY/3).
+                // Eskiden hiç yazılmıyordu: 15 sezon, 300 maçlık bir
+                // kariyer ömür sonunda yok sayılıyordu.
+                if ((state.footballCareer?.proSeasons ?? 0) > 0)
+                  _Satir(
+                    label: 'Futbol',
+                    value: _futbolOzeti(state.footballCareer!),
+                  ),
                 _Satir(label: 'Cüzdan', value: state.player.walletLabel),
                 _Satir(label: 'Eşya sayısı', value: '${state.items.length}'),
                 if (state.licenses.isNotEmpty)
@@ -258,4 +272,21 @@ class _Satir extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Ömür özetindeki futbol satırı (Paket AY/3).
+///
+/// İç sayılar (form, itibar, beceri) gösterilmez; oyuncunun hatırlayacağı
+/// şeyler yazılır: kaç sezon, kaç maç, kaç gol, nasıl bitti.
+String _futbolOzeti(FootballCareer k) {
+  final String golKismi = k.position == FootballPosition.kaleci
+      ? ''
+      : ', ${k.totalGoals} gol';
+  final String bitis = k.active
+      ? ' · sürüyor'
+      : k.exitReason == null
+          ? ''
+          : ' · bitiş: ${trLower(k.exitReason!.label)}';
+  return '${k.proSeasons} sezon, ${k.totalAppearances} maç$golKismi'
+      '$bitis';
 }

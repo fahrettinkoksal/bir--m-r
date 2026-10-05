@@ -4165,6 +4165,45 @@ Doğrulama: `flutter analyze` çıkış kodu 0; AY motor testleri (32),
 `package_q` ve `social_media` süitleri (62) yeşil. **Android APK ya da
 Windows derlemesi bu pakette denenmedi.**
 
+## Paket AY/3: futbol hayatın geri kalanına bağlı değildi (5 Ekim 2026)
+
+AY ve AY/2'de iki kez aynı sınıf hata buldum: *sistem var, futbol ona
+bağlanmamış.* Aynı yöntemle kalanları taradım; **üç gerçek boşluk daha**
+çıktı.
+
+**H1 — Hayatın hükmü futbolu hiç saymıyordu.** `LifeVerdict`'in Emek
+ekseni iş geçmişine bakıyor; futbol `kJobCatalog` işi olmadığı için 15
+sezon oynamış, 300 maç çıkmış, 35 milyon ₺ kazanmış bir oyuncu **sıfır**
+alıyordu ve eksenin notu **"Hiç bir işte çalışmadın."** yazıyordu.
+Düzeltme askerliğin emsalini izliyor (Paket 37, aynı gerekçe).
+
+**H2 — Ömür sonu özetinde futbol görünmüyordu.** Meslek satırı futbolcuya
+**"Çalışmadı"** diyordu. Artık ayrı bir "Futbol" satırı var (sezon, maç,
+gol, bitiş sebebi) ve meslek satırı "Profesyonel futbolcu" yazıyor.
+
+**H3 — Hayat hedefleri futbolu tanımıyordu.** Katalogda dövüş için
+`dovus_ust_basamak` vardı, futbolun eşi yoktu. `profesyonel_futbol`
+hedefi eklendi (eşik: tek sezon, `prototypeOnly`).
+
+**Kendi yanlış teşhisimi düzeltiyorum.** Denetimde "yıl değerlendirmesi
+futbolu bilmiyor" diye dördüncü bir boşluk saymıştım; yanlıştı.
+`YearReview` D-096 gereği **fark** üzerinden çalışıyor ve sistem adı
+saymaz; futbol sezonu oraya zaten cüzdan, Ün ve sağlık farkı olarak
+düşüyor. `footballCareer` araması o tasarım için yanlış bir ölçüttü.
+Oraya futbol eklemek D-096'yı bozardı, **dokunmadım.**
+
+**Kapsamım dışı bir bulgu, Faho'nun kararına bırakıldı:** `LifeVerdict`
+**dövüş kariyerini de saymıyor** (`combatCareers` o dosyada hiç
+geçmiyor). Kemer kazanmış bir dövüşçü de bu eksende sıfır alıyor. AY'den
+önce gelen bir eksik; kendi başıma kapsam genişletmemek için dokunmadım.
+
+İki sayı ve hedefin kendisi **Q-193 ekine** yazıldı, karar bekliyor.
+**`DECISIONS.md`'ye dokunulmadı.**
+
+Doğrulama: `flutter analyze` çıkış kodu 0; `paket_ay3_football_life_test`
+(9) ve `life_summary_widget_test` (5) yeşil. **Android APK ya da Windows
+derlemesi bu pakette denenmedi.**
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
