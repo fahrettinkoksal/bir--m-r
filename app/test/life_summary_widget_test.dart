@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/combat_career.dart';
 import 'package:bir_omur/domain/sports/football_career.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
@@ -77,6 +78,47 @@ void main() {
     // Futbolcuya "Çalışmadı" yazılmaz.
     expect(find.text('Çalışmadı'), findsNothing);
     expect(find.text('Profesyonel futbolcu'), findsOneWidget);
+  });
+
+  testWidgets('dövüş kariyeri ömür özetinde görünür (Paket AY/5)',
+      (WidgetTester tester) async {
+    // AY/3'te futbol satırını eklediğimde tutarsızlık doğdu:
+    // futbolcunun kariyeri ömür sonunda yazılıyor, kemer kazanmış
+    // dövüşçünün yazılmıyordu.
+    final GameState state = tamamlanmisHayat().copyWith(
+      combatCareers: <CombatCareer>[
+        const CombatCareer(
+          artId: 'boks',
+          startedCompetitiveAtAge: 18,
+          proWins: 24,
+          proLosses: 6,
+          championships: 2,
+          tier: 3,
+          retiredAtAge: 34,
+          retirementReason: RetirementReason.yas,
+        ),
+      ],
+    );
+    await pumpApp(tester, state);
+
+    expect(find.textContaining('30 maç'), findsWidgets);
+    expect(find.textContaining('24 galibiyet'), findsWidgets);
+    expect(find.textContaining('2 şampiyonluk'), findsWidgets);
+    // Dövüşçüye "Çalışmadı" yazılmaz.
+    expect(find.text('Çalışmadı'), findsNothing);
+    expect(find.text('Dövüş sporcusu'), findsOneWidget);
+  });
+
+  testWidgets('hiç dövüşmemiş lisanslı kayıt özeti şişirmiyor (AY/5)',
+      (WidgetTester tester) async {
+    final GameState state = tamamlanmisHayat().copyWith(
+      combatCareers: <CombatCareer>[
+        const CombatCareer(artId: 'boks', startedCompetitiveAtAge: 30),
+      ],
+    );
+    await pumpApp(tester, state);
+    expect(find.textContaining('galibiyet'), findsNothing);
+    expect(find.text('Çalışmadı'), findsOneWidget);
   });
 
   testWidgets('futbol oynamamış hayatta futbol satırı yok (Paket AY/3)',

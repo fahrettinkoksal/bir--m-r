@@ -6288,3 +6288,41 @@ sayıyor** (yeni düzeltmenin bekçisi), ve sporsuz hayatların notu
 değişmiyor.
 
 **`DECISIONS.md`'ye yine dokunulmadı**; iki sayı da `prototypeOnly`.
+
+### Q-193 EKİ 4 — Dövüş ömür özetinde de görünüyor (Paket AY/5)
+
+**Durum: bir tutarsızlık kapandı, bir hedef önerisi karar bekliyor.**
+
+**Kapanan tutarsızlık benim yarattığımdı.** AY/3'te ömür sonu özetine
+"Futbol" satırını ekledim; dövüş orada yoktu ve ben de bakmadım.
+Sonuç: 15 sezonluk bir futbol kariyeri ömür sonunda yazılıyor, **iki
+kemer kazanmış bir dövüşçünün kariyeri hiç yazılmıyordu** — üstelik
+meslek satırı ona "Çalışmadı" diyordu. Aynı eksiklik hükümde de vardı
+ve AY/4'te kapandı; artık özet de aynı yerde duruyor.
+
+Eklenen: her dövüş kariyeri için bir satır (dal adı · kaç maç, kaç
+galibiyet, kaç şampiyonluk, nasıl bitti). İç sayılar (form, itibar,
+sıralama) gösterilmiyor. **Lisans alıp hiç dövüşmemiş kayıt özeti
+şişirmiyor**; meslek satırı dövüşçüye "Dövüş sporcusu" diyor.
+
+#### Karar bekleyen öneri: şampiyonluk hedefi
+
+Katalogda `dovus_ust_basamak` var ama o **eğitim basamağıyla** ilgili:
+"bir dalın en üst basamağına ulaş". **Unvan kazanmanın hedefi yok.**
+Futbola AY/3'te `profesyonel_futbol` hedefini ekledim; dövüşün
+rekabet başarısının karşılığı eksik kaldı.
+
+*Önerim:* `dovus_sampiyonluk` — "Bir dövüş dalında şampiyon ol",
+alanı `kendin`, eşik **en az bir şampiyonluk**.
+
+**Bu hedefi kendi başıma EKLEMEDİM.** Gerekçe: `profesyonel_futbol`
+hâlâ senin onayını bekliyor; bir karar beklerken ikinci bir onaysız
+hedef eklemek hedef katalogunu onaysız içerikle doldurmak olur. İkisine
+birlikte karar vermen daha doğru:
+
+- İkisini de onaylarsın → iki sporun da rekabet başarısı hedefe bağlanır.
+- İkisini de reddedersin → `profesyonel_futbol` geri çekilir, katalog
+  eski hâline döner.
+- Birini onaylarsın → diğerini çıkarırım ve gerekçesini buraya yazarım.
+
+**`DECISIONS.md`'ye yine dokunulmadı.**

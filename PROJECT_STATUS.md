@@ -4243,6 +4243,30 @@ Doğrulama: `flutter analyze` çıkış kodu 0; `paket_ay3_football_life_test`
 18 test yeşil. **Android APK ya da Windows derlemesi bu pakette
 denenmedi.**
 
+## Paket AY/5: dövüş ömür özetinde de görünüyor (5 Ekim 2026)
+
+**Kapattığım tutarsızlık benim yarattığımdı.** AY/3'te ömür sonu
+özetine "Futbol" satırını ekledim; dövüş orada yoktu ve bakmadım.
+Sonuç: 15 sezonluk futbol kariyeri ömür sonunda yazılıyor, **iki kemer
+kazanmış bir dövüşçünün kariyeri hiç yazılmıyordu** ve meslek satırı
+ona "Çalışmadı" diyordu. Aynı eksiklik hükümde de vardı, AY/4'te
+kapanmıştı; artık özet de aynı yerde.
+
+Eklenen: her dövüş kariyeri için bir satır (dal adı · maç, galibiyet,
+şampiyonluk, bitiş sebebi). İç sayılar gösterilmiyor. Lisans alıp hiç
+dövüşmemiş kayıt özeti şişirmiyor; meslek satırı dövüşçüye "Dövüş
+sporcusu" diyor.
+
+**Eklemediğim şey:** katalogda şampiyonluk hedefi yok
+(`dovus_ust_basamak` eğitim basamağıyla ilgili, unvanla değil).
+`dovus_sampiyonluk` önerisini **Q-193 ekine yazdım, kendim
+eklemedim** — `profesyonel_futbol` hâlâ onay beklerken ikinci bir
+onaysız hedef eklemek hedef katalogunu onaysız içerikle doldurmak olur.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; `life_summary_widget_test`
+7 test yeşil. **Android APK ya da Windows derlemesi bu pakette
+denenmedi.**
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
