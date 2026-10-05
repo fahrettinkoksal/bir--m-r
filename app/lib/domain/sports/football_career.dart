@@ -246,7 +246,7 @@ class FootballEligibility {
 /// Uygunluk kuralları. Eşiklerin hepsi `prototypeOnly` — Q-192.
 abstract final class FootballPath {
   /// Profesyonel denemeye girilebilecek en küçük yaş (`prototypeOnly`).
-  static const int prototypeOnlyMinTrialAge = 16;
+  static const int minTrialAge = 16;
 
   /// Profesyonel denemeye **ilk** girilebilecek en büyük yaş
   /// (`prototypeOnly`).
@@ -254,25 +254,25 @@ abstract final class FootballPath {
   /// 45 yaşında ilk kez profesyonel futbola giriş olmamalı. Gerçek
   /// transfer/emeklilik eğrisi AV'nin işi; burada makul bir genç
   /// yetişkin penceresi var.
-  static const int prototypeOnlyMaxFirstTrialAge = 23;
+  static const int maxFirstTrialAge = 23;
 
   /// En az kaç sezon okul/gençlik futbolu (`prototypeOnly`).
-  static const int prototypeOnlyMinSeasons = 3;
+  static const int minSeasons = 3;
 
   /// En az futbol becerisi (`prototypeOnly`).
-  static const int prototypeOnlyMinSkill = 45;
+  static const int minSkill = 45;
 
   /// Profesyonel deneme için en az sağlık (`prototypeOnly`).
-  static const int prototypeOnlyMinHealth = 55;
+  static const int minHealth = 55;
 
   /// Geçme eşiği (`prototypeOnly`).
-  static const int prototypeOnlyMinScore = 55;
+  static const int minScore = 55;
 
   /// Scout ilgisinin başlayabileceği en küçük yaş (`prototypeOnly`).
-  static const int prototypeOnlyScoutMinAge = 15;
+  static const int scoutMinAge = 15;
 
   /// Scout ilgisi için en az hazırlık puanı (`prototypeOnly`).
-  static const int prototypeOnlyScoutMinScore = 48;
+  static const int scoutMinScore = 48;
 
   /// D-135: hazırlık puanında bir sezonun ağırlığı.
   ///
@@ -352,7 +352,7 @@ abstract final class FootballPath {
         wasCaptain: captain,
       );
     }
-    if (age < prototypeOnlyMinTrialAge) {
+    if (age < minTrialAge) {
       return FootballEligibility(
         eligible: false,
         stage: FootballStage.gelisiyor,
@@ -365,7 +365,7 @@ abstract final class FootballPath {
         wasCaptain: captain,
       );
     }
-    if (age > prototypeOnlyMaxFirstTrialAge) {
+    if (age > maxFirstTrialAge) {
       return FootballEligibility(
         eligible: false,
         stage: FootballStage.gelisiyor,
@@ -377,7 +377,7 @@ abstract final class FootballPath {
         wasCaptain: captain,
       );
     }
-    if (health < prototypeOnlyMinHealth) {
+    if (health < minHealth) {
       return FootballEligibility(
         eligible: false,
         stage: FootballStage.gelisiyor,
@@ -389,9 +389,9 @@ abstract final class FootballPath {
         wasCaptain: captain,
       );
     }
-    if (seasons < prototypeOnlyMinSeasons ||
-        skill < prototypeOnlyMinSkill ||
-        score < prototypeOnlyMinScore) {
+    if (seasons < minSeasons ||
+        skill < minSkill ||
+        score < minScore) {
       return FootballEligibility(
         eligible: false,
         stage: FootballStage.gelisiyor,
@@ -427,13 +427,13 @@ abstract final class FootballPath {
         u.stage == FootballStage.emekli) {
       return false;
     }
-    if (state.player.age < prototypeOnlyScoutMinAge) return false;
+    if (state.player.age < scoutMinAge) return false;
     if (u.seasons < 2) return false;
     final SchoolClubProgress? aktif =
         state.schoolClubs.activeFor(footballClub.id);
     // Scout izlemek için sahada olmak gerekir: ilk 11 ya da üstü.
     if (aktif == null || !aktif.role.isAtLeastFirstEleven) return false;
-    return u.score >= prototypeOnlyScoutMinScore;
+    return u.score >= scoutMinScore;
   }
 
   /// Oyuncunun gençlik futbolu özeti (Spor Kariyeri ekranı için).

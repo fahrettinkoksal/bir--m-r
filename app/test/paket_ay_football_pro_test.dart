@@ -171,8 +171,8 @@ void main() {
     test('eşik kapının alt sınırının ÜSTÜNDE: sınırdaki aday takılır', () {
       // Kapıdan geçmenin alt sınırı: puan 55, sağlık 55.
       // En zayıf adayın deneme puanı = 55 + 55*15/100 = 63.
-      const int enZayifAdayPuani = FootballPath.prototypeOnlyMinScore +
-          FootballPath.prototypeOnlyMinHealth * 15 ~/ 100;
+      const int enZayifAdayPuani = FootballPath.minScore +
+          FootballPath.minHealth * 15 ~/ 100;
       expect(
         FootballProEngine.trialPass,
         greaterThan(enZayifAdayPuani),

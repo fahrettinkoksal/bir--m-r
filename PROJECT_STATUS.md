@@ -4293,6 +4293,35 @@ Q-193'ün parçası değil ve bu turda Faho'nun önüne konmadı; kapı
 eşikleri (`FootballPath.prototypeOnlyMinScore`, `prototypeOnlyMinHealth`)
 ve dövüşün `prototypeOnlySportFameCap` sayısı **hâlâ `prototypeOnly`**.
 
+## Q-192 ANA MADDELER KARARLAŞTIRILDI: Q-192 kapandı (5 Ekim 2026)
+
+Faho onayladı: "ana maddeleri onayladım uygula." Dokuz maddenin tamamı
+karara bağlı — ikisi (4 ve 8) 4 Ekim'de D-136/D-134 olarak girmişti,
+kalanlar bugün:
+
+| Madde | Karar |
+|---|---|
+| Aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı | **D-144** |
+| Asgari geçmiş, scout sıklığı, giriş yaşı | **D-145** |
+| Okul-kulüp çatışması | **D-146** — çatışma **eklenmeyecek** |
+
+**9. madde neden farklı:** o bir sayı değil, olmayan bir özellikti.
+Kararı "şu sayıyı sabitle" diye değil, **"bu çatışma eklenmeyecek"**
+diye yazdım; yani kararın içeriği yapmamak ve bu artık belgeli bir
+kural, sessiz bir eksiklik değil.
+
+12 sabit daha `prototypeOnly` etiketinden çıktı. **Kapsam dikkati:**
+`prototypeOnlyMinHealth` adı üç ayrı sınıfta (futbol kapısı, okul
+kulübü, dövüş) vardı; kör bir değiştirme dövüşün sabitini de bozardı.
+Yeniden adlandırma dosya bazında ve nitelikli adla (`FootballPath.`,
+`SchoolClubEngine.`) yapıldı; `CombatCareerEngine.prototypeOnlyMinHealth`
+**dokunulmadan** kaldı.
+
+**Hâlâ `prototypeOnly` kalan iki sayı** (ikisi de bu kuyrukların
+dışında): okul kulübünde fiziksel kulüp sağlık tabanı
+(`prototypeOnlyMinHealthForPhysical = 25`) ve dövüşün Ün tavanı
+(`prototypeOnlySportFameCap = 70`, Q-186).
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım

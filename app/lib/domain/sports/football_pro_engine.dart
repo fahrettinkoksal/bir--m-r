@@ -33,7 +33,7 @@ class FootballProEngine {
   ///
   /// **ÖLÇÜLEN HATA (düzeltildi):** eşik 62 iken deneme dekoratifti.
   /// Kapıdan geçmenin alt sınırı zaten hazırlık puanı
-  /// `FootballPath.prototypeOnlyMinScore` (55) ve sağlık
+  /// `FootballPath.minScore` (55) ve sağlık
   /// `prototypeOnlyMinHealth` (55); en zayıf aday bile
   /// 55 + 55*15/100 = 63 puanla geliyor, yani zarsız dahi 62'yi
   /// geçiyordu. 1200 spor odaklı hayatta kapıya gelen 49 kişinin

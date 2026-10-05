@@ -6351,3 +6351,32 @@ Faho'nun önüne konmadı; `FootballPath.prototypeOnlyMinScore`,
 `prototypeOnlyMinHealth` gibi **kapı eşikleri hâlâ `prototypeOnly`**.
 Dövüşün `prototypeOnlySportFameCap` sayısı da (Q-186) kendi
 kuyruğunda bekliyor. Faho isterse onlar da ayrıca konuşulur.
+
+### Q-192 ANA MADDELER KARARLAŞTIRILDI (5 Ekim 2026) — Q-192 kapandı
+
+Faho onayladı: **"ana maddeleri onayladım uygula."** Q-192'nin dokuz
+maddesinin tamamı artık karara bağlı:
+
+| Madde | Karar |
+|---|---|
+| 1 — Aktif kulüp sınırı (2) | **D-144** |
+| 2 — Seçme eşiği (55 / kura 40 / sürpriz %8) | **D-144** |
+| 3 — Yatkınlığın ağırlığı (%45 seçme, %10 profesyonellik) | **D-144** |
+| 4 — Beceri büyüme hızı | **D-136** (4 Ekim'de karara girmişti) |
+| 5 — Profesyonel için asgari geçmiş (3 sezon, beceri 45, sağlık 55, puan 55) | **D-145** |
+| 6 — Scout sıklığı (15 yaş, puan 48, 2 sezon, İlk 11+) | **D-145** |
+| 7 — Profesyonele giriş yaşı (16-23) | **D-145** |
+| 8 — Kaptanlık eşiği | **D-134** (4 Ekim'de karara girmişti) |
+| 9 — Okul-kulüp çatışması | **D-146** — çatışma **eklenmeyecek**; yokluğu artık bilinçli kural |
+
+**9. madde neden farklı:** o bir sayı değil, **olmayan bir özellikti.**
+Onayı "şu sayıyı sabitle" diye değil, "bu çatışma eklenmeyecek" diye
+yazdım; yani kararın içeriği **yapmamak**. Sonradan istenirse 3+ sezon
+İlk 11 ve üstü oynayan oyuncu için küçük bir ders eforu maliyeti ayrıca
+konuşulabilir.
+
+**Q-192 ve Q-193 kapandı.** Hâlâ `prototypeOnly` kalan iki şey var ve
+ikisi de bu iki kuyruğun dışında: okul kulübünde fiziksel kulüp için
+sağlık tabanı (`prototypeOnlyMinHealthForPhysical = 25`) ve dövüşün Ün
+tavanı (`prototypeOnlySportFameCap = 70`, Q-186). İstenirse ayrıca
+konuşulur.

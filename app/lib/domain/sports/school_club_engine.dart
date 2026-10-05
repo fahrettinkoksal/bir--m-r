@@ -48,10 +48,9 @@ class SchoolClubEngine {
 
   /// Aynı anda sürdürülebilecek en fazla aktif kulüp (`prototypeOnly`).
   ///
-  /// Bir öğrenci on üç kulübün hepsinde aktif olmasın; ama iki kulüp
-  /// (ör. futbol + satranç) makul. Sayı **Q-192**'de tartışılıyor, kesin
-  /// kural değildir.
-  static const int prototypeOnlyMaxActiveClubs = 2;
+  /// D-144: bir öğrenci on üç kulübün hepsinde aktif olmasın; ama iki
+  /// kulüp (ör. futbol + satranç) makul. Faho onayladı (5 Ekim 2026).
+  static const int maxActiveClubs = 2;
 
   /// Seçmede geçmiş sezonun payı (`prototypeOnly`).
   static const int prototypeOnlyExperienceWeight = 4;
@@ -78,14 +77,14 @@ class SchoolClubEngine {
   /// yatkın ama geç başlayanı geçmeye devam ediyor.
   static const int skillPotentialDivisor = 10;
 
-  /// Seçmenin geçme eşiği (`prototypeOnly`).
-  static const int prototypeOnlyTryoutPass = 55;
+  /// D-144: seçmenin geçme eşiği.
+  static const int tryoutPass = 55;
 
   /// Seçme kurasının genişliği (`prototypeOnly`).
   ///
   /// Yeterince geniş tutuldu ki **düşük puanlı** aday da matematiksel
   /// olarak elenmiş olmasın: 20 puanlı birinin de küçük bir şansı kalır.
-  static const int prototypeOnlyTryoutLuckSpan = 40;
+  static const int tryoutLuckSpan = 40;
 
   /// Puan ne olursa olsun elenme payı, yüzde (`prototypeOnly`).
   ///
@@ -94,7 +93,7 @@ class SchoolClubEngine {
   /// puanlı oyuncuda kabul **kesinleşiyordu**; test bunu yakaladı. Kadro
   /// dar, antrenörün tercihi var: en hazır aday bile bazen listeye
   /// giremez.
-  static const int prototypeOnlyTryoutUpsetPercent = 8;
+  static const int tryoutUpsetPercent = 8;
 
   /// Bedensel kulüp için en az sağlık (`prototypeOnly`, Paket AQ uyumlu).
   static const int prototypeOnlyMinHealthForPhysical = 25;
@@ -135,8 +134,8 @@ class SchoolClubEngine {
     if (state.schoolClubs.activeFor(club.id) != null) {
       return ClubBlock('${club.name} zaten üyesisin.');
     }
-    if (state.schoolClubs.activeOnes.length >= prototypeOnlyMaxActiveClubs) {
-      return ClubBlock('Aynı anda en fazla $prototypeOnlyMaxActiveClubs '
+    if (state.schoolClubs.activeOnes.length >= maxActiveClubs) {
+      return ClubBlock('Aynı anda en fazla $maxActiveClubs '
           'kulüpte aktif olabilirsin. Birinden ayrılman gerekiyor.');
     }
     if (club.physical &&
@@ -201,9 +200,9 @@ class SchoolClubEngine {
     // İki ayrı kura. Birincisi puana eklenen kenar pay: düşük puanlı
     // adayın da küçük bir şansı kalsın. İkincisi puandan **bağımsız**
     // elenme payı: en hazır aday bile kesin kabul almasın.
-    final int zar = rng.nextInt(prototypeOnlyTryoutLuckSpan);
-    final bool surpriz = rng.nextInt(100) < prototypeOnlyTryoutUpsetPercent;
-    final bool kabul = !surpriz && puan + zar >= prototypeOnlyTryoutPass;
+    final int zar = rng.nextInt(tryoutLuckSpan);
+    final bool surpriz = rng.nextInt(100) < tryoutUpsetPercent;
+    final bool kabul = !surpriz && puan + zar >= tryoutPass;
 
     if (!kabul) {
       final String neden = surpriz

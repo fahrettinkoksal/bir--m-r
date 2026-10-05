@@ -208,9 +208,9 @@ void main() {
     print('Futbol sezonu (medyan) ${_medyan(futbolSezonlari)}');
     print('Hazirlik puani (medyan) ${_medyan(futbolPuanlari)} · en yuksek '
         '${futbolPuanlari.isEmpty ? 0 : (List<int>.of(futbolPuanlari)..sort()).last}');
-    print('Esik: puan >= ${FootballPath.prototypeOnlyMinScore}, sezon >= '
-        '${FootballPath.prototypeOnlyMinSeasons}, beceri >= '
-        '${FootballPath.prototypeOnlyMinSkill}');
+    print('Esik: puan >= ${FootballPath.minScore}, sezon >= '
+        '${FootballPath.minSeasons}, beceri >= '
+        '${FootballPath.minSkill}');
     print('');
     print('PROFESYONEL FUTBOL (Paket AY)');
     print('Denemeye giren        $denemeyeGiren  ${_yuzde(denemeyeGiren, kOlcumHayati)}');
@@ -331,6 +331,6 @@ void main() {
     }
 
     // Futbol kapısının eşikleri prototypeOnly ama sıfır olamaz.
-    expect(FootballPath.prototypeOnlyMinSeasons, greaterThan(0));
+    expect(FootballPath.minSeasons, greaterThan(0));
   }, timeout: const Timeout(Duration(minutes: 20)));
 }

@@ -125,7 +125,7 @@ void main() {
       final SchoolClub muzik = schoolClubById('muzik_kulubu')!;
       s = _motor.join(s, muzik, Random(1)).state!;
       expect(s.schoolClubs.activeOnes.length,
-          SchoolClubEngine.prototypeOnlyMaxActiveClubs);
+          SchoolClubEngine.maxActiveClubs);
 
       final SchoolClub halk = schoolClubById('halk_oyunlari')!;
       final ClubBlock? engel = _motor.blockFor(s, halk);
