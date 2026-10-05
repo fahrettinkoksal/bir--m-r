@@ -277,9 +277,14 @@ void main() {
       expect(find.textContaining('sezon'), findsWidgets);
     });
 
-    testWidgets('profesyonel adımın henüz yazılmadığı dürüstçe söyleniyor', (
+    testWidgets('eksik olanlar dürüstçe söyleniyor', (
       WidgetTester tester,
     ) async {
+      // Bu test eskiden "profesyonel sözleşme ve sezon akışı henüz
+      // yazılmadı" cümlesini arıyordu. Paket AY o adımı yazdı, yani o
+      // cümle artık DOĞRU DEĞİL ve ekranda durması dürüstlük değil
+      // yanlış bilgi olurdu. Test gevşetilmedi: hâlâ gerçekten eksik
+      // olanın yazıldığını ölçüyor, ama artık doğru listeyi arıyor.
       await okulAc(
         tester,
         hayat(
@@ -290,9 +295,10 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('school_sports_career_row')));
       await tester.pumpAndSettle();
+      expect(find.textContaining('transfer pazarı'), findsOneWidget);
       expect(
-        find.textContaining('Profesyonel sözleşme, kulüp seçimi ve sezon'),
-        findsOneWidget,
+        find.textContaining('sezon akışı henüz yazılmadı'),
+        findsNothing,
       );
     });
   });

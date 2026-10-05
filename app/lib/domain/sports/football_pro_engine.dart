@@ -232,12 +232,15 @@ class FootballProEngine {
         : null;
     // Sakatlık sağlığa gerçekten dokunur; yoksa kariyeri sakatlıktan
     // bitiren yol ölü kalır.
-    final int saglikBedeli = !sakatlandi
+    final int hamBedel = !sakatlandi
         ? 0
         : (agir
             ? prototypeOnlySevereInjuryHealthCost
             : prototypeOnlyInjuryHealthCost);
-    final int sezonSonuSaglik = (saglik - saglikBedeli).clamp(1, 100);
+    // Futbol **tek başına öldürmez**: bedel sağlığı 1'in altına indirmez.
+    // Ölüm sağlık sisteminin işi (AQ); bir sakatlık onu tetiklemez.
+    final int saglikBedeli = hamBedel.clamp(0, (saglik - 1).clamp(0, 100));
+    final int sezonSonuSaglik = saglik - saglikBedeli;
 
     // --- Sezon puanı: beceri ağır basar, form ve sağlık pay verir ----
     final int yasEtkisi = yas <= prototypeOnlyDeclineAge
@@ -324,7 +327,9 @@ class FootballProEngine {
       footballCareer: guncel,
       player: state.player.copyWith(
         wallet: state.player.wallet + kazanc,
-        stats: state.player.stats.copyWith(health: sezonSonuSaglik),
+        // D-099: stat değişimi `gain` üzerinden geçer. Düşüşler tam
+        // uygulanır, yani sakatlık bedeli pazarlık etmez.
+        stats: state.player.stats.gain(health: -saglikBedeli),
       ),
     );
     return (state: yeni, log: log, milestone: donum);
