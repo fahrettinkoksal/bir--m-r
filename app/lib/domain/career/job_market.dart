@@ -68,17 +68,12 @@ class JobResult {
 class JobMarket {
   const JobMarket();
 
-  /// prototypeOnly: koşulları sağlayan bir başvurunun taban kabul olasılığı.
-  static const double prototypeOnlyBaseChance = 0.5;
+  // Not: burada eksiksiz bir "işe alım olasılığı" modeli bildiriliyordu
+  // (taban %50, eğitim payı %25, stat payı %15, tavan %90) ve dördü de
+  // hiç okunmuyordu. İşe alım deterministik: `applicationAvailability`
+  // koşulları denetler, mülakat sorusu doğru cevaplanırsa iş verilir.
+  // Eğitim bir **kapı**dır, olasılık payı değil.
 
-  /// prototypeOnly: uygun eğitim geçmişinin eklediği pay.
-  static const double prototypeOnlyEducationBonus = 0.25;
-
-  /// prototypeOnly: yüksek zekâ/karizmanın eklediği pay.
-  static const double prototypeOnlyStatBonus = 0.15;
-
-  /// prototypeOnly: en yüksek kabul olasılığı; iş asla garanti değildir.
-  static const double prototypeOnlyMaxChance = 0.9;
 
   /// prototypeOnly: bir yaşta aynı işe yapılabilecek en fazla başvuru
   /// (D-091).

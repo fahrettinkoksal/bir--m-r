@@ -4962,5 +4962,65 @@ Q-190 ve Q-191 **kararlaştırıldı** (3 Ekim 2026, Faho onayladı) ve
 uygulandı; ayrıntı yukarıdaki Paket AS/2 bölümünde. Kuyrukta kalan tek
 açık grup Q-189 ile Q-187/Q-188.
 
+## Paket BA: onaysız sayı taraması (5 Ekim 2026)
+
+Faho Q-194'ü onayladı ("onayladım tarama yap"). Tarama `lib/` içindeki
+**869** `prototypeOnly` bildiriminin tamamını kapsadı; üç desen arandı:
+ölü sabit, doymuş tavan, dekoratif sınır.
+
+**Bulgular:** 19 ölü sabit (bildirilmiş, hiç okunmuyor), 1 doymuş tavan,
+1 dekoratif sınır, 1 yanlış adlandırma, 1 sınır hatası.
+
+**Uygulandı (yeni oyun kuralı değil):**
+
+| # | İş | Neden karar gerektirmedi |
+|---|---|---|
+| 1 | 15 ölü sabit silindi, yerlerine gerçek sayının nerede olduğunu söyleyen not bırakıldı | Ölü kod; hiçbiri okunmuyordu |
+| 2 | Mali kademe sınır hatası düzeltildi | Onaylı **D-092**'nin ihlaliydi |
+| 3 | Açık iş tavanı (`prototypeOnlyMaxOpenBusinesses`) kapıya bağlandı | Davranış aynı kaldı (değer 1) |
+| 4 | `ElderCare.prototypeOnlyHealthThreshold` → `prototypeOnlyCareHappinessBelow` | Ad yanlıştı; ölçü değişmedi |
+| 5 | Kalıcı bekçi: `prototype_only_dead_constant_test.dart` | Test, kural değil |
+
+**En ağır ölü sabit grubu:** `JobMarket` eksiksiz bir "işe alım
+olasılığı" modeli bildiriyordu — taban %50, **eğitim payı %25**, stat
+payı %15, tavan %90 — ve dördü de hiç okunmuyordu. İşe alım gerçekte
+deterministik: koşullar sağlanır ve mülakat sorusu doğru cevaplanırsa iş
+verilir. Eğitim bir **kapı**dır, olasılık payı değil. Dosyayı okuyan
+(ben dahil) tersini sanıyordu.
+
+**Düzeltilen sınır hatası (D-092):** gideri olmayan oyuncunun mali
+kademesi, bandın **üst sınırı** döndürülerek veriliyordu; karşılaştırmalar
+`<` olduğu için sınır değeri bir üst bandı veriyordu. Cebinde 50 lirası
+olan ve gideri olmayan çocuk `rahat` değil **`varlikli`** sayılıyordu,
+parasız olan da `zor` değil `idare`. Olay motoru o çocuğa varlık metni
+çıkarıp yoksulluk metnini kapatıyordu — D-092 tam bunun olmamasını
+söylüyor.
+
+**Karar bekleyen (Q-195, Faho'ya soruldu):**
+
+1. **Doymuş tavan — zam talebi.** Ölçüm: zam şansında statların etkisi
+   **8. yıl kıdemde tamamen bitiyor** (stat 10 ve stat 100 aynı: 0,850);
+   yetenekli çalışanda 4. yılda. Ustalık basamakları Usta **8**, Başusta
+   **16**, Duayen **28** yıl olduğu için **D-155'in ustalık/itibar payı
+   ve Paket AK'nın hobi sinerjisi, Usta'dan yukarıdaki her basamakta
+   matematiksel olarak ölü.** Pay hesabının kendisi doğru (ölçtüm,
+   basamak başına artıyor; test kalıcı olarak denetliyor) — sorun tavanın
+   onu yutması. D-142'nin birebir aynısı.
+2. **Dekoratif sınır — rütbeli askerlik.** Ölçülen en küçük kabul şansı
+   **0,302**; bildirilen alt sınır **0,05 hiçbir yolda erişilemiyor**.
+3. **Dört bağlanmamış mekanik:** göz muayenesinin sağlık katkısı (hiç
+   verilmiyor), kefalet yakınlık eşiği (hiç aranmıyor), hükümde "dolu
+   eksen" sınıflandırması (hiç kullanılmıyor), dükkâna özgü olay
+   süzgeci (hiç uygulanmıyor). Her biri için önerim Q-195'te.
+
+**Taramanın kendi hatası da kayda geçti:** tarayıcının ilk hâli adları
+küresel arıyordu; `prototypeOnlyBaseChance` beş ayrı sınıfta geçtiği
+için `JobMarket`'ınki "okunuyor" sayılıyordu. Sınıf kapsamlı hâle
+getirilince ölü sabit sayısı 16'dan 19'a çıktı.
+
+**Doğrulama:** `flutter analyze` temiz; yeni iki dosya dahil hedefli küme
+58 test yeşil; tam süit koşuldu. Android APK **derlenmedi ve cihazda
+denenmedi**.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

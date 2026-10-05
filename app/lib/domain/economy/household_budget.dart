@@ -105,13 +105,10 @@ abstract final class HouseholdBudget {
           p.age < prototypeOnlyChildSupportUntil)
       .toList(growable: false);
 
-  /// prototypeOnly: velayetin oyuncuda kalması için gereken yakınlık payı.
-  ///
-  /// Karar **uydurulmaz**: çocukların oyuncuya olan ortalama yakınlığı ile
-  /// eski eşe olan yakınlığı karşılaştırılır. Eşin yakınlığı bilinmediği
-  /// için ölçü, çocukların oyuncuya yakınlığıdır: yakınlık yüksekse
-  /// çocuklar oyuncuda kalır, düşükse diğer tarafta.
-  static const int prototypeOnlyCustodyBond = 50;
+  // Not: velayet için 50'lik tek bir yakınlık eşiği tutuluyordu ve hiç
+  // okunmuyordu. `decideCustody` gerçekte aşağıdaki 40/60 bandını
+  // kullanıyor: altı eski eşe, üstü oyuncuya, arası ortak.
+
 
   /// prototypeOnly: ortak düzen için yakınlık aralığı.
   static const int prototypeOnlyJointBandLow = 40;

@@ -80,15 +80,11 @@ class MarriageEngine {
   static const double prototypeOnlyMinAcceptChance = 0.08;
   static const double prototypeOnlyMaxAcceptChance = 0.95;
 
-  /// prototypeOnly: **artık kullanılmıyor** (Paket 25).
-  ///
-  /// Tek ve sabit bir nikâh masrafı vardı; sevgilisi olan hayatların
-  /// çoğu bu duvara takılıp hiç evlenemiyordu (ölçüm: 44 hayattan 25'i
-  /// teklif verebilecek duruma geliyordu, engel neredeyse hep paraydı).
-  /// Yerine cüzdana göre seçilen düğün geldi (`kWeddingStyles`). Sabit
-  /// alan, eski kayıtlarla ve testlerle uyum için duruyor.
-  @Deprecated('Paket 25: yerine kWeddingStyles geldi.')
-  static const int prototypeOnlyWeddingCost = 240000;
+  // Not: tek ve sabit bir nikâh masrafı (240.000) burada
+  // tutuluyordu. Yorumu "eski kayıtlarla ve testlerle uyum için"
+  // durduğunu söylüyordu; oysa **hiçbir** test ve kod onu
+  // okumuyordu. Masraf Paket 25'ten beri cüzdana göre seçilen
+  // düğünden geliyor (`kWeddingStyles`, 0-380.000).
 
   /// prototypeOnly: boşanmada eşe kalan nakit payı.
   ///
@@ -98,12 +94,16 @@ class MarriageEngine {
   /// biriktiği izlenmediği için oran olduğu gibi bırakıldı (Q-118).
   static const double prototypeOnlyDivorceShare = 0.25;
 
-  /// prototypeOnly: evlilik ve boşanmanın mutluluk etkisi.
-  static const int prototypeOnlyWeddingHappiness = 12;
+  // Not: düğünün mutluluk payı burada tutuluyordu ve hiç
+  // okunmuyordu; gerçek değer düğün stilinden geliyor
+  // (`WeddingStyle.prototypeOnlyHappiness`, 4-16).
+
+  /// prototypeOnly: boşanmanın mutluluk etkisi.
   static const int prototypeOnlyDivorceHappiness = -15;
 
-  /// prototypeOnly: nikâhta yakınlığa eklenen değer.
-  static const int prototypeOnlyWeddingBond = 10;
+  // Not: nikâhta yakınlığa eklenen değer burada da tutuluyordu ve
+  // hiç okunmuyordu; gerçek değer düğün stilinden geliyor
+  // (`WeddingStyle.prototypeOnlyBond`, 3-12).
 
   /// Bu kişiyle evlenmeye engel; engel yoksa boş metin.
   String marryBlockReason(GameState state, Person person) {

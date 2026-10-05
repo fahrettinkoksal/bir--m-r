@@ -88,6 +88,13 @@ abstract final class BusinessEngine {
     return null;
   }
 
+  /// Şu an açık olan iş sayısı.
+  ///
+  /// `state.businesses` bir **liste**dir: tavan yapısal değil, kuraldan
+  /// gelir. Sayı bu yüzden kapıda sabit üzerinden denetlenir.
+  static int openBusinessCount(GameState state) =>
+      state.businesses.where((Business b) => b.isOpen).length;
+
   /// İşten gelen yıllık gelir (zarar eksi döner).
   ///
   /// Gelir hesaplarında maaşla aynı kefeye girer (D-033).
@@ -147,7 +154,7 @@ abstract final class BusinessEngine {
         'Cezaevindeyken iş kurulmaz.',
       );
     }
-    if (openBusiness(state) != null) {
+    if (openBusinessCount(state) >= prototypeOnlyMaxOpenBusinesses) {
       return const InteractionAvailability.blocked(
         'Zaten açık bir işin var. Bir işi ayakta tutmak yeterince zor.',
       );

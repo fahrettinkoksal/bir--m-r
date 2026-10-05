@@ -110,9 +110,10 @@ class LifeProgression {
 
   /// prototypeOnly: hanede bakım verebilecek sayılan yetişkinlik yaşı.
   static const int prototypeOnlyAdultAge = 18;
+  // Not: "bu sağlık değerinin altında uyarı verilir" diye 25'lik bir
+  // eşik tutuluyordu ve hiç okunmuyordu. Uyarı artık Paket AQ'nun
+  // bantlarından çıkıyor: `CriticalHealth.prototypeOnlyNormalFrom`.
 
-  /// prototypeOnly: bu sağlık değerinin altında uyarı verilir.
-  static const int prototypeOnlyHealthWarningBelow = 25;
 
   /// prototypeOnly: her yıl mutluluğa geri dönen yas oranı.
   static const double prototypeOnlyGriefRecoveryRatio = 1 / 3;

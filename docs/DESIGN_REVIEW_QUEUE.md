@@ -6451,3 +6451,175 @@ başlayıp (`casino` 12, `pets` 14, `models` 16) ısınmayı öneririm,
 çünkü büyük alanlar tek oturumda okunamaz.
 
 **Hiçbir şey uygulanmadı; bu bir gündem önerisi.** Karar senin.
+
+---
+
+### Q-195 — Paket BA taramasının bulguları: dört ölü mekanik, bir doymuş tavan, bir dekoratif sınır
+
+**Durum:** karar bekliyor (5 Ekim 2026)
+**Bağlam:** Q-194 onaylandı ("onayladım tarama yap"). Tarama `lib/` içindeki
+**869** `prototypeOnly` bildiriminin tamamını kapsadı.
+**Etkilenen kod:** `test/prototype_only_dead_constant_test.dart`,
+`test/paket_ba_sabit_taramasi_test.dart` (yeni), `career_progress.dart`,
+`craft_mastery.dart`, `military_service.dart`, `eye_exam.dart`,
+`legal_engine.dart`, `life_verdict.dart`, `business_incidents.dart`
+
+### Taramanın yöntemi ve neden işe yaradığı
+
+Q-194'te önerdiğim ölçüt kullanıldı: **sabitin etkisini sıfırla, ölçüm
+değişiyor mu diye bak.** Üç desen arandı:
+
+| Desen | Ne demek | Bulunan |
+|---|---|---|
+| **Ölü sabit** | Bildirilmiş, hiç okunmuyor | 19 |
+| **Doymuş tavan** | Tavan tek bileşenle doluyor, diğerleri hiç sayılmıyor | 1 |
+| **Dekoratif sınır** | Sınır erişilemiyor, hiçbir şeyi elemiyor | 1 |
+
+Tarayıcının ilk hâli **yanlış sonuç veriyordu**: adları küresel
+aradığı için `prototypeOnlyBaseChance` beş ayrı sınıfta geçtiğinden
+`JobMarket`'ınki "okunuyor" sayılıyordu. Sınıf kapsamlı hâle getirilince
+ölü sabit sayısı 16'dan **19**'a çıktı. Bunu, yöntemin kendisinin de
+denetlenmesi gerektiğinin kaydı olarak yazıyorum.
+
+### Uygulanan (karar gerektirmeyen, onaylı kurala uygun)
+
+Bunlar yeni oyun kuralı değil; ya kodun kendi yazılı niyetine, ya da
+**zaten onaylanmış** bir karara uymak için yapıldı:
+
+1. **15 ölü sabit silindi**, her biri yerine *gerçek* sayının nerede
+   olduğunu söyleyen bir not bırakıldı. En ağırı: `JobMarket` eksiksiz
+   bir "işe alım olasılığı" modeli bildiriyordu (taban %50, **eğitim
+   payı %25**, stat payı %15, tavan %90) ve dördü de hiç okunmuyordu —
+   işe alım gerçekte deterministik: koşullar sağlanır ve mülakat sorusu
+   doğru cevaplanırsa iş verilir. Dosyayı okuyan (ben dahil) eğitimin
+   işe alım şansına %25 kattığını sanıyordu. Eğitim bir **kapı**dır.
+2. **Mali kademe sınır hatası düzeltildi (D-092 ihlali).** Gideri
+   olmayan oyuncunun kademesi `ratio` içinden bandın **üst sınırı**
+   döndürülerek veriliyordu; karşılaştırmalar `<` olduğu için sınır
+   değeri bir **üst** bandı veriyordu. Sonuç: cebinde 50 lirası olan ve
+   gideri olmayan çocuk `rahat` değil **`varlikli`** sayılıyordu, parasız
+   olan da `zor` değil `idare`. Olay motoru (`event_engine.dart:392`) o
+   çocuğa varlık metni çıkarıp yoksulluk metnini kapatıyordu — D-092
+   tam bunun olmamasını söylüyor.
+3. **Açık iş tavanı sabite bağlandı.** `prototypeOnlyMaxOpenBusinesses`
+   = 1 hiç okunmuyordu; kural `openBusiness(state) != null` ile
+   uygulanıyordu. Sabiti değiştirmek hiçbir şeyi değiştirmiyordu.
+   Davranış **aynı** kaldı (değer 1), artık kapı sabiti okuyor.
+4. **`ElderCare.prototypeOnlyHealthThreshold` → `prototypeOnlyCareHappinessBelow`.**
+   Adı sağlık diyordu, kod **mutluluğu** okuyordu. `Person`'ın sağlık
+   alanı yok (sağlık yalnızca oyuncuda ve `Pet`'te). Ölçü değişmedi,
+   yalnızca ad doğruyu söylüyor.
+5. **Kalıcı bekçi eklendi:** `prototype_only_dead_constant_test.dart`.
+   Bir sabit bildirilip hiç okunmazsa test kırılır. Kırıldığı
+   doğrulandı (15 sabiti isimleriyle saydı).
+
+### Karar bekleyen #1 — Doymuş tavan: zam talebinde kıdem
+
+**Ölçüm (`paket_ba_sabit_taramasi_test.dart`):**
+
+| Kıdem | stat 10 | stat 100 |
+|---|---|---|
+| 1 yıl | 0,428 | 0,653 |
+| 3 yıl | 0,592 | 0,817 |
+| 4 yıl | 0,643 | **0,850** |
+| 7 yıl | 0,800 | 0,850 |
+| **8 yıl** | **0,850** | **0,850** |
+| 16 yıl | 0,850 | 0,850 |
+| 30 yıl | 0,850 | 0,850 |
+
+Zam şansı `taban 0,35 + kıdem × 0,05` ile başlıyor, tavan 0,85.
+**8. yıldan sonra zekâ, karizma, ustalık, itibar, hobi sinerjisi ve iyi
+sicil — hiçbiri hiçbir şey yapmıyor.** Yetenekli bir çalışanda bu 4.
+yılda bitiyor.
+
+Ustalık basamakları: Çırak 0, Kalfa 3, **Usta 8**, **Başusta 16**,
+**Duayen 28** yıl. Yani:
+
+> **D-155'in ustalık ve itibar payı, Usta'dan yukarıdaki her basamakta
+> matematiksel olarak ölü.** Aynısı Paket AK'nın hobi sinerjisi payı
+> için de geçerli. İkisi de tam olarak işe yaramaları gereken yerde
+> çalışmıyor.
+
+Pay hesabının kendisi doğru: ölçtüm, basamak başına artıyor (test bunu
+kalıcı olarak denetliyor). Sorun tavanın onu yutması. Bu D-142'nin
+birebir aynısı — orada da yıl ağırlığı golü ve maçı yutuyordu.
+
+*Önerim ve varsayılanım:* **kıdem ağırlığını 0,05'ten 0,02'ye indir.**
+O zaman 30 yıllık kıdem tek başına +0,60 yerine +0,25 verir, tavan
+ancak diğer bileşenler de iyiyken dolar ve ustalık/itibar/sinerji
+gerçekten fark yaratır. Sayı D-142'de yaptığımızın aynısı: ağırlığı
+düşürüp bileşenlere yer açmak.
+
+*Seçenek B:* tavanı 0,85'ten 0,95'e çıkar. Daha kolay ama zayıfı da
+yukarı taşır; kıdem yine baskın kalır (15 yılda yine tek başına doyurur).
+
+*Seçenek C:* kıdem payına kendi küçük tavanını koy (ör. en çok +0,25),
+tavanı ve diğer ağırlıkları hiç değiştirme. En az yan etkili olan bu;
+ama kod biraz daha karışır.
+
+*Seçenek D:* dokunma. Kıdemin baskın olması **kasıtlı** ise, o zaman
+D-155'in metnini düzeltmek gerekir: "ustalık zam talebini kolaylaştırır"
+cümlesi 8 yıl üstü için doğru değil.
+
+### Karar bekleyen #2 — Dekoratif sınır: rütbeli askerlikte alt sınır
+
+**Ölçüm:** kabul şansı `taban + zekâ × 0,35 + sağlık × 0,20`, sınırlar
+0,05–0,95.
+
+| Yol | stat 0 | stat 50 | stat 100 |
+|---|---|---|---|
+| astsubay (taban 0,45) | 0,452 | 0,725 | 0,950 |
+| subay (taban 0,30) | 0,302 | 0,575 | 0,850 |
+
+Ölçülen en küçük şans **0,302**. Bildirilen alt sınır **0,05 hiçbir yolda
+erişilemiyor** — D-137'nin aynısı. Üst sınır yalnızca astsubayda ısırıyor;
+subay yolunda 0,95 de erişilemez.
+
+*Önerim ve varsayılanım:* **alt sınırı 0,05'ten kaldır** (ya da gerçek
+en kötü duruma, 0,30'a çek) ve yorumuna "en kötü durumda bile %30"
+yaz. Sayı değişmediği için oyun değişmez; yanlış bilgi veren sabit
+gider. Subay yolunun tabanının astsubaydan düşük olması (0,30 < 0,45)
+kasıtlı görünüyor ve ona dokunmayı önermiyorum.
+
+### Karar bekleyen #3 — Dört bağlanmamış mekanik
+
+Bu dördü silinmedi; bekçinin muafiyet listesinde **gerekçeleriyle**
+duruyor. Her biri için sorum aynı: **bağlayalım mı, silelim mi?**
+
+| Sabit | Değer | Yorumunun söylediği | Kodun yaptığı |
+|---|---|---|---|
+| `EyeExam.prototypeOnlyHealthGain` | 2 | "Muayene olmanın kendisi küçük bir katkıdır" | Muayene **hiç** sağlık vermiyor; dosya yalnızca metin üretiyor |
+| `LegalEngine.prototypeOnlyBailMinBond` | 30 | "Aileden kefalet isteği için gereken asgari yakınlık" | Yakınlık **hiç** aranmıyor; herkesten kefalet istenebiliyor |
+| `LifeVerdictBuilder.prototypeOnlyStrongThreshold` | 65 | "Bir eksenin *dolu* sayıldığı eşik" | Hüküm "dolu eksen" diye bir şey **hiç** kullanmıyor |
+| `BusinessIncidents.prototypeOnlyShopOnlyTags` | liste | Yalnızca dükkâna özgü olay etiketleri | Süzgeç **hiç** uygulanmıyor |
+
+*Önerim ve varsayılanım, tek tek:*
+
+1. **Göz muayenesi: bağla.** 2 sağlık küçük ve zararsız; muayenenin
+   hiçbir şey yapmaması oyuncuya yalan söylüyor (menüde iş gibi
+   duruyor). `Stats.gain(health: 2)` ile, D-099'a uygun.
+2. **Kefalet yakınlığı: bağla.** "Yıllardır görüşmediğin kuzenin seni
+   kefaletle çıkarıyor" tuhaf; eşik 30 düşük ve gerekçesi ekranda
+   yazılabilir (D-063).
+3. **Hükümde dolu eksen: sil.** Hüküm metni D-096'dan beri eksen
+   puanlarını cümleye çeviriyor; ayrı bir "dolu" sınıflandırması
+   kullanılmıyor ve bir yer de aramıyor. Yeni bir metin katmanı
+   açmak ayrı bir iş olur.
+4. **Dükkân etiketleri: önce ölçüm.** Süzgecin yokluğu dükkâna özgü
+   olayların başka işletme türlerine de çıkmasına yol açıyor olabilir;
+   bunu önce ölçmek, sonra karar vermek gerekir. Kendi başına küçük bir
+   paket.
+
+### Not: taramanın temize çıkardıkları
+
+Doymuş/dekoratif sanıp ölçüp **sağlam** bulduklarım da var; bir dahaki
+turda yeniden bakılmasın diye yazıyorum: `financial_strain` bant zinciri
+(sikinti/zor/idare/rahat, dördü de erişilebilir), `child_marriage` yaş
+payı, `vehicle_trouble` kaza şansı (tavan yalnızca kondisyon ≤ 3 ve en
+ucuz araçta ısırıyor), `item_actions` temizlik/tamir tavanları,
+`business_engine` zarar serisi, `banking` aktif kredi tavanı.
+
+İki tanesi **sınırda** ve senin kararını bekleyecek kadar büyük değil,
+ama kayda geçiyor: 2. el araçta yaş kaybı tabanı **10 yaştan sonra
+doyuyor** (10 yaşındaki araçla 25 yaşındaki araç aynı yaş katsayısını
+görüyor) ve `banking` kaçan taksit cezası **4 kaçıştan sonra** doyuyor.

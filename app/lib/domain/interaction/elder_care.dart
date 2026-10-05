@@ -51,8 +51,15 @@ abstract final class ElderCare {
   /// prototypeOnly: bakım ihtiyacının doğduğu en küçük ebeveyn yaşı.
   static const int prototypeOnlyMinParentAge = 70;
 
-  /// prototypeOnly: bakım ihtiyacının doğduğu sağlık eşiği.
-  static const int prototypeOnlyHealthThreshold = 45;
+  /// prototypeOnly: bakım ihtiyacının doğduğu **mutluluk** eşiği.
+  ///
+  /// Adı uzun süre `prototypeOnlyHealthThreshold`'du ve bu yanlıştı:
+  /// `Person`'ın sağlık alanı **yok** (sağlık yalnızca oyuncuda ve
+  /// `Pet`'te tutuluyor), kod da baştan beri mutluluğu okuyordu. Yani
+  /// yaşlı ebeveynin bakıma muhtaç sayılması sağlığından değil
+  /// mutluluğundan çıkıyor. Ad düzeltildi; ölçü aynı kaldı — ebeveyne
+  /// sağlık alanı eklemek ayrı bir tasarım kararı (Q-195).
+  static const int prototypeOnlyCareHappinessBelow = 45;
 
   /// prototypeOnly: oyuncunun bu karara verebileceği en küçük yaş.
   static const int prototypeOnlyMinPlayerAge = 20;
@@ -74,7 +81,7 @@ abstract final class ElderCare {
     }
     if (state.player.age < prototypeOnlyMinPlayerAge) return false;
     if (person.age < prototypeOnlyMinParentAge) return false;
-    return person.happiness <= prototypeOnlyHealthThreshold ||
+    return person.happiness <= prototypeOnlyCareHappinessBelow ||
         person.age >= prototypeOnlyMinParentAge + 10;
   }
 

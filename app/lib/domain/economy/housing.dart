@@ -47,11 +47,11 @@ class Housing {
   /// prototypeOnly: taşınmanın tek seferlik masrafı (nakliye, depozito).
   static const int prototypeOnlyMoveCost = 45000;
 
-  /// prototypeOnly: konutun değerinin yıllık kira geliri oranı.
-  static const double prototypeOnlyYearlyRentYield = 0.045;
+  // Not: yıllık kira getirisi (0,045) ve boşluk ihtimali (0,12) burada
+  // tutuluyordu ve hiçbiri okunmuyordu. Kirayı Paket AB'den beri
+  // `RentalEngine` hesaplıyor; onun kendi sayıları var ve getiri oranı
+  // **farklı** (0,042). İki ayrı sayıdan biri sessizce ölüydü.
 
-  /// prototypeOnly: kiracının bulunamadığı, gelirin gelmediği yıl ihtimali.
-  static const double prototypeOnlyVacancyChance = 0.12;
 
   /// Oyuncunun **aile evinde** hayatta bir yetişkin var mı?
   ///

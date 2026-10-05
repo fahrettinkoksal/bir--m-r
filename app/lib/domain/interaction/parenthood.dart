@@ -42,11 +42,11 @@ class Parenthood {
   /// prototypeOnly: bu prototipte en fazla çocuk sayısı.
   static const int prototypeOnlyMaxChildren = 4;
 
-  /// prototypeOnly: evlilik dışı çocuk için gereken asgari yakınlık.
-  ///
-  /// Evlilik zorunlu değildir (D-047); ilişkinin gerçekten yürüdüğü bu
-  /// eşikle aranır.
-  static const int prototypeOnlyUnmarriedMinBond = 60;
+  // Not: evlilik dışı çocuk için bir yakınlık eşiği tutuluyordu ve hiç
+  // okunmuyordu — çünkü eşiğin kendisi Paket 25'te kaldırıldı
+  // (gerekçesi `blockReason` içinde yazılı). Sabit, kaldırılmış kuralı
+  // yürürlükteymiş gibi gösteriyordu.
+
 
   /// prototypeOnly: doğum ve hazırlık masrafı (₺).
   static const int prototypeOnlyBirthCost = 65000;

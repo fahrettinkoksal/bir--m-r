@@ -70,7 +70,9 @@ abstract final class FinancialStrain {
     final int gider = yearlyOutgoings(state);
     final int giris = state.player.wallet + yearlyIncome(state);
     if (gider <= 0) {
-      // Gideri yoksa sıkıntı da yok; nakitsizse yine de rahat sayılmaz.
+      // Gideri yoksa oran tanımsızdır; kademeyi `comfortOf` doğrudan
+      // veriyor. Buradan dönen sayı yalnızca "bölme yapılamadı"
+      // demektir, bir kademe **değildir**.
       return giris > 0 ? prototypeOnlyRahatBelow : prototypeOnlyZorBelow;
     }
     return giris / gider;
@@ -80,6 +82,22 @@ abstract final class FinancialStrain {
   static FinancialComfort comfortOf(GameState state) {
     // Geçim sıkıntısı zaten ölçülmüş bir durumdur; ona güvenilir.
     if (state.hardshipYears > 0) return FinancialComfort.sikinti;
+
+    // Gideri olmayan oyuncuda (ailesinin yanında yaşayan çocuk, borçsuz
+    // öğrenci) bölme yapılamaz; kademe doğrudan verilir.
+    //
+    // **Ölçülmüş hata (Paket BA):** bu durum `ratio` içinden bandın üst
+    // sınırını döndürerek çözülüyordu. Karşılaştırmalar `<` olduğu için
+    // sınır değeri bir **üst** bandı veriyordu: cebinde 50 lirası olan
+    // ve gideri olmayan çocuk `rahat` değil **`varlikli`** sayılıyordu,
+    // parasız olan da `zor` değil `idare`. Bu, D-092'nin tersiydi:
+    // olay motoru o çocuğa varlık metni çıkarıp yoksulluk metnini
+    // kapatıyordu. Kademe artık sınır değeri üzerinden tahmin
+    // edilmiyor, adıyla veriliyor.
+    if (yearlyOutgoings(state) <= 0) {
+      final int giris = state.player.wallet + yearlyIncome(state);
+      return giris > 0 ? FinancialComfort.rahat : FinancialComfort.zor;
+    }
 
     final double oran = ratio(state);
     if (oran < prototypeOnlySikintiBelow) return FinancialComfort.sikinti;

@@ -145,9 +145,10 @@ abstract final class Economy {
   // Eşikler
   // -------------------------------------------------------------------
 
-  /// prototypeOnly: aileden istenebilecek küçük para aralığı.
-  static const int prototypeOnlyPocketMoneyMin = 400;
-  static const int prototypeOnlyPocketMoneyMax = 1800;
+  // Not: "aileden istenebilecek küçük para" için burada bir aralık
+  // tutuluyordu (400-1800) ve hiç okunmuyordu. Gerçek harçlık, karşı
+  // tarafın servet kademesine göre
+  // `FamilyInteractions.prototypeOnlyAllowanceByWealth` içinden gelir.
 
   /// "Değerli eşya" sayılan eşik.
   static const int valuableThreshold = 25000;
