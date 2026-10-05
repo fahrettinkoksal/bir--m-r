@@ -109,8 +109,10 @@ class VerdictFirst {
 /// Eşikler ve ağırlıklar `prototypeOnly`'dir: Faho onaylamadan kalıcı
 /// oyun kuralı sayılmaz (`docs/DESIGN_REVIEW_QUEUE.md`, Q-090).
 abstract final class LifeVerdictBuilder {
-  /// Bir eksenin "dolu" sayıldığı eşik.
-  static const int prototypeOnlyStrongThreshold = 65;
+  // Not: bir eksenin "dolu" sayıldığı 65'lik bir eşik tutuluyordu ve
+  // hiçbir yerde okunmuyordu. Hüküm metni eksen puanlarını doğrudan
+  // cümleye çeviriyor (D-096); ayrı bir "dolu eksen" sınıflandırması
+  // ne kullanılıyor ne de bir yer arıyor.
 
   /// Bir eksenin "boş" sayıldığı eşik.
   static const int prototypeOnlyWeakThreshold = 30;
@@ -413,7 +415,7 @@ abstract final class LifeVerdictBuilder {
   ///
   /// Yalnızca **gerçekten olmuş** durumlar sayılır: tamamlanan hizmet ve
   /// ulaşılan rütbe. Bedelli ödemek hizmet sayılmaz; kaçmak hiç sayılmaz.
-  /// D-142: profesyonel futbolun Emek eksenine katkısı.
+  /// D-169: profesyonel futbolun Emek eksenine katkısı.
   ///
   /// Ölçeği askerlikle aynı mantıkta tutuldu: sahada geçen yıl sayısı
   /// ağır basar, başarı (maç ve gol) üstüne biner. Tavan var: futbol
@@ -427,7 +429,7 @@ abstract final class LifeVerdictBuilder {
   static const int footballSeasonPoint = 1;
   static const int footballVerdictMax = 30;
 
-  /// D-142: dövüş rekabet kariyerinin Emek eksenine katkısı.
+  /// D-169: dövüş rekabet kariyerinin Emek eksenine katkısı.
   ///
   /// Ölçek futbolla aynı mantıkta: rekabette geçen yıl ağır basar,
   /// başarı (maç ve şampiyonluk) üstüne biner. **Tavan futbolla aynı

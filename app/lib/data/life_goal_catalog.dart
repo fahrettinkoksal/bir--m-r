@@ -210,7 +210,7 @@ final List<LifeGoal> kLifeGoals = <LifeGoal>[
       return dal.levelForLessons(m.lessons) >= dal.ranks.length - 1;
     }),
   ),
-  // D-143: futbolun rekabet başarısının hedefi.
+  // D-170: futbolun rekabet başarısının hedefi.
   //
   // Profesyonel futbola ulaşmak oyundaki en dar yollardan biri
   // (ölçümde okul odaklı hayatların %1,4'ü) ama hiçbir hedefe
@@ -223,7 +223,7 @@ final List<LifeGoal> kLifeGoals = <LifeGoal>[
     area: GoalArea.kendin,
     reached: (GameState s) => (s.footballCareer?.proSeasons ?? 0) > 0,
   ),
-  // D-143: dövüşün rekabet başarısının hedefi.
+  // D-170: dövüşün rekabet başarısının hedefi.
   //
   // Katalogda `dovus_ust_basamak` vardı ama o **eğitim basamağıyla**
   // ilgili ("bir dalın en üst basamağına ulaş"); unvan kazanmanın

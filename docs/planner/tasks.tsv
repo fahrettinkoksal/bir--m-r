@@ -183,3 +183,8 @@ completed	Paket BA/1: 869 onaysız sayıyı tara — ölü sabit, doymuş tavan,
 completed	Paket BA/2: 15 ölü sabiti sil, kalıcı bekçiyi ekle (prototype_only_dead_constant_test)
 completed	Paket BA/3: mali kademe sınır hatası (D-092 ihlali) ve işletme tavanı düzeltildi
 pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik
+completed	Paket BA/4: D-176 kıdem tavanı — D-155 ustalık payı ilk kez çalışıyor
+completed	Paket BA/5: D-177 askerlikte erişilemeyen alt sınır kaldırıldı
+completed	Paket BA/6: Q-195 üç yanlış maddem düzeltildi (kopya sabitler, test okuma yüzeyi)
+completed	Paket BA/7: karar numarası çakışması — kararlarım D-164…D-175'e taşındı
+pending	Q-196: 27 tanımsız karar numarası (kodda yetki, DECISIONS.md'de yok)

@@ -4275,13 +4275,13 @@ dört ekinin tamamı karara dönüştü. Sabitler `prototypeOnly` etiketinden
 
 | Karar | Konu |
 |---|---|
-| **D-137** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10 |
-| **D-138** | Sezon ve kariyer sonu: 34 maç, düşüş 31, sert bırakma 39, 3 zayıf sezon |
-| **D-139** | Kazanç bandı 1-40 yıllık asgari ücret (dağılım darlığı bilinen eksik, AZ'ye bırakıldı) |
-| **D-140** | Kariyeri bitiren sakatlık tek olaydır: 4/16 bedel, %22 ağır, %16 + yaş başına %5 |
-| **D-141** | Futbol Ün kazandırır (tavan 70); oynamak Ün bakımının kendisidir |
-| **D-142** | Sporda geçen hayat Emek eksenine girer (futbol ve dövüş, tavan 30) |
-| **D-143** | İki hedef: `profesyonel_futbol`, `dovus_sampiyonluk` |
+| **D-164** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10 |
+| **D-165** | Sezon ve kariyer sonu: 34 maç, düşüş 31, sert bırakma 39, 3 zayıf sezon |
+| **D-166** | Kazanç bandı 1-40 yıllık asgari ücret (dağılım darlığı bilinen eksik, AZ'ye bırakıldı) |
+| **D-167** | Kariyeri bitiren sakatlık tek olaydır: 4/16 bedel, %22 ağır, %16 + yaş başına %5 |
+| **D-168** | Futbol Ün kazandırır (tavan 70); oynamak Ün bakımının kendisidir |
+| **D-169** | Sporda geçen hayat Emek eksenine girer (futbol ve dövüş, tavan 30) |
+| **D-170** | İki hedef: `profesyonel_futbol`, `dovus_sampiyonluk` |
 
 Onaylanan `dovus_sampiyonluk` hedefi eklendi; AY/5'te önerip
 beklettiğim hedef artık katalogda ve testi var.
@@ -4301,9 +4301,9 @@ kalanlar bugün:
 
 | Madde | Karar |
 |---|---|
-| Aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı | **D-144** |
-| Asgari geçmiş, scout sıklığı, giriş yaşı | **D-145** |
-| Okul-kulüp çatışması | **D-146** — çatışma **eklenmeyecek** |
+| Aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı | **D-171** |
+| Asgari geçmiş, scout sıklığı, giriş yaşı | **D-172** |
+| Okul-kulüp çatışması | **D-173** — çatışma **eklenmeyecek** |
 
 **9. madde neden farklı:** o bir sayı değil, olmayan bir özellikti.
 Kararı "şu sayıyı sabitle" diye değil, **"bu çatışma eklenmeyecek"**
@@ -4348,8 +4348,8 @@ Faho onayladı: "ikisini de onayladım uygula."
 
 | Karar | Sayı |
 |---|---|
-| **D-147** | Bedensel kulübe giriş için en az sağlık **25** — AQ'nun kritik sağlık bantlarıyla uyumlu. Taban **girişi** engeller, mevcut üyeliği bozmaz (D-129 mantığı) ve engel gerekçesiyle ekranda yazılır (D-063). |
-| **D-148** | Sporun Ün tavanı **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-141 ile bilinçli tutarlılık). Tavan bir duvar değil bir ayrım: üstü yalnızca sosyal medyayla açılır, ama sporcu olmak sponsorluk/medya kapısını açar. |
+| **D-174** | Bedensel kulübe giriş için en az sağlık **25** — AQ'nun kritik sağlık bantlarıyla uyumlu. Taban **girişi** engeller, mevcut üyeliği bozmaz (D-129 mantığı) ve engel gerekçesiyle ekranda yazılır (D-063). |
+| **D-175** | Sporun Ün tavanı **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-168 ile bilinçli tutarlılık). Tavan bir duvar değil bir ayrım: üstü yalnızca sosyal medyayla açılır, ama sporcu olmak sponsorluk/medya kapısını açar. |
 
 Yeni kalıcı bekçi: bir test iki sporun Ün tavanının **aynı kalmasını**
 zorunlu tutuyor — biri değişirse diğeri de konuşulmalı, sessizce
@@ -5005,7 +5005,7 @@ söylüyor.
    ve Paket AK'nın hobi sinerjisi, Usta'dan yukarıdaki her basamakta
    matematiksel olarak ölü.** Pay hesabının kendisi doğru (ölçtüm,
    basamak başına artıyor; test kalıcı olarak denetliyor) — sorun tavanın
-   onu yutması. D-142'nin birebir aynısı.
+   onu yutması. D-169'nin birebir aynısı.
 2. **Dekoratif sınır — rütbeli askerlik.** Ölçülen en küçük kabul şansı
    **0,302**; bildirilen alt sınır **0,05 hiçbir yolda erişilemiyor**.
 3. **Dört bağlanmamış mekanik:** göz muayenesinin sağlık katkısı (hiç
@@ -5021,6 +5021,56 @@ getirilince ölü sabit sayısı 16'dan 19'a çıktı.
 **Doğrulama:** `flutter analyze` temiz; yeni iki dosya dahil hedefli küme
 58 test yeşil; tam süit koşuldu. Android APK **derlenmedi ve cihazda
 denenmedi**.
+
+## Paket BA/2: Q-195 uygulandı, karar numaraları düzeltildi (5 Ekim 2026)
+
+Faho onayladı: "HERŞEYİ ONAYLIYORUM HER ŞEYİ YAP."
+
+**Uygulanan kararlar:**
+
+| Karar | Ne |
+|---|---|
+| **D-176** | Kıdemin zam/terfi payı 0,05 → 0,02 **ve** paya 0,15 tavanı. Önerdiğim 0,02 tek başına yetmedi: ölçüm doymanın 8. yıldan 16. yıla (tam Başusta'ya) kaydığını gösterdi. Tavanla birlikte statların etkisi hiçbir kıdemde bitmiyor; Usta/Başusta/Duayen geçişleri zam şansını değiştiriyor (7→8: 0,590→0,663; 15→16: 0,679→0,750; 27→28: 0,761→0,832). D-155 ilk kez gerçekten çalışıyor. |
+| **D-177** | Rütbeli askerlikte erişilemeyen 0,05 alt sınırı kaldırıldı; en kötü durum %30, üst sınır 0,95. Davranış değişmedi, yanlış bilgi veren sayı gitti. |
+
+**Q-195'teki üç maddem yanlıştı; düzeltildi:**
+
+1. "Göz muayenesi sağlık vermiyor" — **yanlış.** Katalogdaki
+   `goz_muayenesi` kaydının `health: 2` alanı uygulanıyor. Sabit
+   kopyaydı; önerdiğim gibi bağlasaydım katkı **ikiye çıkacaktı**.
+2. "Kefalette yakınlık aranmıyor" — **yanlış.** `PrisonLife._minBond =
+   30` aranıyor. İkinci kopya tek kaynağa indirildi.
+3. "Dükkân olay süzgeci uygulanmıyor" — **yarı yanlış.** Motorda bilerek
+   uygulanmıyor, güvence katalog tarafında ve sabiti **test** okuyor.
+   Taramam yalnızca `lib`e baktığı için ölü sandı.
+
+Taramanın iki kusuru düzeltildi: ad çakışmalarında yanlış negatif (sınıf
+kapsamlı yapıldı) ve okuma yüzeyine `test`in eklenmemesi. İkincisi
+düzeltilince ölü sabit bekçisi **boş muafiyet listesiyle** geçiyor.
+
+**Karar numarası çakışması (benim hatam, düzeltildi):** Paket AY'de
+Faho'nun onayladığı on iki kararı `DECISIONS.md`'ye D-137…D-148 diye
+yazmıştım; oysa kod o numaraları **zaten** başka kurallar için
+kullanıyordu (1 Ekim'de D-139 altı dosyada kefalet/cezaevi, D-146 dört
+dosyada İlişkiler menüsü). Kararlarım **D-164…D-175**'e taşındı —
+içerik aynı, yalnızca etiket. Taşıma git diff'ten yalnızca bu oturumda
+benim eklediğim satırlar hedeflenerek yapıldı.
+
+**Açığa çıkan asıl sorun (Q-196, karar bekliyor):** D-137'den D-163'e
+kadar **27 numara** kodda yetki olarak kullanılıyor ve hiçbirinin
+`DECISIONS.md`'de tanımı yok. Bunları kendim yazmadım: CLAUDE.md'nin
+değişmeyen kuralı gereği bir karar ancak Faho onaylayınca girer.
+Yirmi yedisi, konularıyla ve gerekçeleriyle yeni bekçinin muafiyet
+listesinde bekliyor.
+
+**Kalıcı bekçi:** `decision_reference_test.dart` — kodda tanımsız bir
+karar numarasına atıf verildiği anda kırılır.
+
+**Doğrulama:** `flutter analyze` temiz; D-176 ve D-177 bekçilerinin eski
+davranışta kırıldığı ayrıca doğrulandı (kıdem payı 0,05'e ve tavan
+9,9'a çevrilip ölçüldü: "statların etkisi 8 yıl kıdemde bitiyor" ve
+"15→16 yıl geçişinde ustalık basamağı zam şansını değiştirmiyor:
+0.850 → 0.850"). Android APK **derlenmedi ve cihazda denenmedi**.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

@@ -499,9 +499,20 @@ abstract final class MilitaryService {
         : InteractionAvailability.blocked(engel);
   }
 
+  /// prototypeOnly: rütbeli yola kabul ihtimalinin üst sınırı.
+  ///
+  /// Alt sınır **yok** (D-177). Eskiden 0,05 yazılıydı ve hiçbir yolda
+  /// erişilemiyordu: en düşük taban subay yolunun 0,30'u, yani ölçülen
+  /// en kötü durum zaten %30'du. Sıfır olmayan bir taban gerekiyorsa
+  /// yolun kendi tabanı o işi yapıyor; 0,05 yalnızca yanlış bilgi
+  /// veriyordu (D-137 ile aynı desen).
+  static const double prototypeOnlyAcceptCeiling = 0.95;
+
   /// prototypeOnly: rütbeli yola kabul ihtimali.
   ///
-  /// Zekâ ve sağlık yukarı çeker; er yolunda başvuru yoktur.
+  /// Zekâ ve sağlık yukarı çeker; er yolunda başvuru yoktur. En kötü
+  /// durumda bile şans **%30'un altına inmez**: taban yolun kendisinden
+  /// gelir.
   static double prototypeOnlyAcceptChance(
     GameState state,
     MilitaryTrack track,
@@ -509,10 +520,8 @@ abstract final class MilitaryService {
     if (track == MilitaryTrack.er) return 1;
     final double zeka = state.player.stats.intelligence / 100;
     final double saglik = state.player.stats.health / 100;
-    return (track.prototypeOnlyBaseChance + zeka * 0.35 + saglik * 0.20).clamp(
-      0.05,
-      0.95,
-    );
+    final double ham = track.prototypeOnlyBaseChance + zeka * 0.35 + saglik * 0.20;
+    return ham > prototypeOnlyAcceptCeiling ? prototypeOnlyAcceptCeiling : ham;
   }
 
   /// Askerliğe katılır ya da rütbeli yola başvurur.

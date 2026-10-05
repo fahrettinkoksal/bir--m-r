@@ -63,7 +63,7 @@ void main() {
   });
 
   // ===================================================================
-  // 2) Doymuş tavan: zam/terfi şansında kıdem (D-142 sınıfı hata)
+  // 2) Doymuş tavan: zam/terfi şansında kıdem (D-169 sınıfı hata)
   // ===================================================================
   group('Zam talebinde kıdem tavanı doyuruyor mu?', () {
     /// Belirli kıdemde, belirli statlarla çalışan oyuncu.
@@ -110,9 +110,16 @@ void main() {
           'Ustalık basamakları: Kalfa 3, Usta 8, Başusta 16, Duayen 28 '
           'yıl.\n');
 
-      // Kalıcı değil, **yön bağımsız** denetim: şans her zaman kendi
-      // sınırları içinde kalmalı. Doymanın kendisi bir tasarım sorusu
-      // (Q-195); burada ölçülüp raporlanıyor, kural yazılmıyor.
+      // KALICI BEKÇİ (D-176): kıdem hiçbir noktada tek başına tavanı
+      // doldurmamalı. Doldurduğu an zekâ, karizma, ustalık, itibar ve
+      // hobi sinerjisi **hiçbir şey** yapmaz hâle gelir — hata tam
+      // olarak buydu.
+      expect(doyduguYil, isNull,
+          reason: 'Statların etkisi $doyduguYil yıl kıdemde bitiyor. '
+              'Kıdem tek başına tavanı dolduruyorsa D-155 (ustalık ve '
+              'itibar) ve Paket AK (hobi sinerjisi) o kıdemden sonra '
+              'ölü demektir.');
+
       for (int yil = 1; yil <= 30; yil++) {
         for (final int stat in <int>[10, 100]) {
           final double s = CareerProgress.prototypeOnlyChance(
@@ -121,6 +128,25 @@ void main() {
           expect(s, greaterThanOrEqualTo(CareerProgress.prototypeOnlyMinChance));
           expect(s, lessThanOrEqualTo(CareerProgress.prototypeOnlyMaxChance));
         }
+      }
+    });
+
+    test('ustalık basamağına çıkmak zam şansını gerçekten değiştiriyor', () {
+      // D-155 ustalığın zam talebini kolaylaştırdığını söylüyor. Pay
+      // hesabının doğru olması yetmez; **sonucun** değişmesi gerekir.
+      // Eski tavanda Usta/Başusta/Duayen geçişlerinin sonuca etkisi
+      // sıfırdı.
+      for (final (int, int) gecis in <(int, int)>[(7, 8), (15, 16), (27, 28)]) {
+        final double once = CareerProgress.prototypeOnlyChance(
+            calisan(yil: gecis.$1, stat: 10),
+            terfi: false);
+        final double sonra = CareerProgress.prototypeOnlyChance(
+            calisan(yil: gecis.$2, stat: 10),
+            terfi: false);
+        expect(sonra, greaterThan(once),
+            reason: '${gecis.$1} → ${gecis.$2} yıl geçişinde yeni ustalık '
+                'basamağı zam şansını değiştirmiyor: '
+                '${once.toStringAsFixed(3)} → ${sonra.toStringAsFixed(3)}.');
       }
     });
 
@@ -166,10 +192,14 @@ void main() {
     print('\nRütbeli askerlik kabul şansı:\n${satirlar.join('\n')}\n'
         'Ölçülen en küçük: ${enKucuk.toStringAsFixed(3)}\n');
 
-    // Sınırın kendisi bir tasarım sorusu; burada yalnızca şansın
-    // tanımlı aralıkta kaldığı denetleniyor.
-    expect(enKucuk, greaterThan(0));
-    expect(enKucuk, lessThanOrEqualTo(1));
+    // KALICI BEKÇİ (D-177): yazılı bir alt sınır varsa **erişilebilir**
+    // olmalı. Eskiden 0,05 yazıyordu ve ölçülen en kötü durum 0,30'du;
+    // sınır hiçbir şeyi elemiyordu (D-164 ile aynı desen). Alt sınır
+    // kaldırıldı; taban artık yolun kendi tabanı.
+    expect(enKucuk, greaterThanOrEqualTo(0.30),
+        reason: 'En kötü durum 0,30 olmalı: taban subay yolunun kendi '
+            'tabanından geliyor.');
+    expect(enKucuk, lessThanOrEqualTo(MilitaryService.prototypeOnlyAcceptCeiling));
   });
 
   // ===================================================================

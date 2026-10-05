@@ -6335,13 +6335,13 @@ dört ekinin tamamı karara dönüştü; sabitler `prototypeOnly` etiketinden
 
 | Karar | Konu |
 |---|---|
-| **D-137** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10; kapıya gelenin kabul edilmesi bilinçli kabul edildi |
-| **D-138** | Sezon ve kariyer sonu: 34 maç tavanı, düşüş 31, sert bırakma 39, 3 zayıf sezon, zayıf puan 42 |
-| **D-139** | Kazanç bandı 1-40 yıllık asgari ücret; dağılımın darlığı **bilinen eksik**, AZ'ye bırakıldı |
-| **D-140** | Kariyeri bitiren sakatlık tek olaydır: bedel 4/16, ağır payı %22, bitirme %16 + yaş başına %5 |
-| **D-141** | Futbol Ün kazandırır (tavan 70) ve **oynamak Ün bakımının kendisidir** (D-118 ölçüsü güncellendi) |
-| **D-142** | Sporda geçen hayat Emek eksenine girer: futbol sezon 1/tavan 30, dövüş yıl 1 + şampiyonluk 5/tavan 30 |
-| **D-143** | İki hedef: `profesyonel_futbol` ve `dovus_sampiyonluk` |
+| **D-164** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10; kapıya gelenin kabul edilmesi bilinçli kabul edildi |
+| **D-165** | Sezon ve kariyer sonu: 34 maç tavanı, düşüş 31, sert bırakma 39, 3 zayıf sezon, zayıf puan 42 |
+| **D-166** | Kazanç bandı 1-40 yıllık asgari ücret; dağılımın darlığı **bilinen eksik**, AZ'ye bırakıldı |
+| **D-167** | Kariyeri bitiren sakatlık tek olaydır: bedel 4/16, ağır payı %22, bitirme %16 + yaş başına %5 |
+| **D-168** | Futbol Ün kazandırır (tavan 70) ve **oynamak Ün bakımının kendisidir** (D-118 ölçüsü güncellendi) |
+| **D-169** | Sporda geçen hayat Emek eksenine girer: futbol sezon 1/tavan 30, dövüş yıl 1 + şampiyonluk 5/tavan 30 |
+| **D-170** | İki hedef: `profesyonel_futbol` ve `dovus_sampiyonluk` |
 
 **Onaysız bırakılan tek şey, bilerek:** Q-192'nin **ana maddeleri**
 (aktif kulüp sınırı, seçme eşiği, yatkınlığın seçmedeki ağırlığı,
@@ -6359,15 +6359,15 @@ maddesinin tamamı artık karara bağlı:
 
 | Madde | Karar |
 |---|---|
-| 1 — Aktif kulüp sınırı (2) | **D-144** |
-| 2 — Seçme eşiği (55 / kura 40 / sürpriz %8) | **D-144** |
-| 3 — Yatkınlığın ağırlığı (%45 seçme, %10 profesyonellik) | **D-144** |
+| 1 — Aktif kulüp sınırı (2) | **D-171** |
+| 2 — Seçme eşiği (55 / kura 40 / sürpriz %8) | **D-171** |
+| 3 — Yatkınlığın ağırlığı (%45 seçme, %10 profesyonellik) | **D-171** |
 | 4 — Beceri büyüme hızı | **D-136** (4 Ekim'de karara girmişti) |
-| 5 — Profesyonel için asgari geçmiş (3 sezon, beceri 45, sağlık 55, puan 55) | **D-145** |
-| 6 — Scout sıklığı (15 yaş, puan 48, 2 sezon, İlk 11+) | **D-145** |
-| 7 — Profesyonele giriş yaşı (16-23) | **D-145** |
+| 5 — Profesyonel için asgari geçmiş (3 sezon, beceri 45, sağlık 55, puan 55) | **D-172** |
+| 6 — Scout sıklığı (15 yaş, puan 48, 2 sezon, İlk 11+) | **D-172** |
+| 7 — Profesyonele giriş yaşı (16-23) | **D-172** |
 | 8 — Kaptanlık eşiği | **D-134** (4 Ekim'de karara girmişti) |
-| 9 — Okul-kulüp çatışması | **D-146** — çatışma **eklenmeyecek**; yokluğu artık bilinçli kural |
+| 9 — Okul-kulüp çatışması | **D-173** — çatışma **eklenmeyecek**; yokluğu artık bilinçli kural |
 
 **9. madde neden farklı:** o bir sayı değil, **olmayan bir özellikti.**
 Onayı "şu sayıyı sabitle" diye değil, "bu çatışma eklenmeyecek" diye
@@ -6388,8 +6388,8 @@ zincirinde onay bekleyen sayı kalmadı.
 
 | Karar | Sayı |
 |---|---|
-| **D-147** | Bedensel kulübe giriş için en az sağlık: **25** (AQ bantlarıyla uyumlu; giriş engeli, mevcut üyeliği bozmaz) |
-| **D-148** | Sporun Ün tavanı: **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-141 ile bilinçli tutarlılık) |
+| **D-174** | Bedensel kulübe giriş için en az sağlık: **25** (AQ bantlarıyla uyumlu; giriş engeli, mevcut üyeliği bozmaz) |
+| **D-175** | Sporun Ün tavanı: **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-168 ile bilinçli tutarlılık) |
 
 Bununla birlikte **Q-186'nın bu maddesi de kapandı.** Okul kulüpleri,
 profesyonel futbol ve dövüş rekabeti artık baştan sona onaylı
@@ -6432,9 +6432,9 @@ Bugün aynı sınıf hatayı **iki kez** buldum ve ikisi de sayının
 değerinden değil, sayının **diğer mekanikleri işlevsiz bırakmasından**
 geliyordu:
 
-1. **Dekoratif eşik** (D-137): deneme eşiği 62'ydi, ama kapıdan geçen
+1. **Dekoratif eşik** (D-164): deneme eşiği 62'ydi, ama kapıdan geçen
    en zayıf aday 63 puanla geliyordu — eşik hiçbir şey elemiyordu.
-2. **Doymuş tavan** (D-142): Emek ekseninde yıl ağırlığı 2 iken 15
+2. **Doymuş tavan** (D-169): Emek ekseninde yıl ağırlığı 2 iken 15
    sezon tek başına tavanı dolduruyordu — gol ve maç **hiç** sayılmıyordu.
 
 İkisi de testten değil **ölçümden** çıktı, çünkü testler "çalışıyor mu"
@@ -6541,13 +6541,13 @@ Ustalık basamakları: Çırak 0, Kalfa 3, **Usta 8**, **Başusta 16**,
 > çalışmıyor.
 
 Pay hesabının kendisi doğru: ölçtüm, basamak başına artıyor (test bunu
-kalıcı olarak denetliyor). Sorun tavanın onu yutması. Bu D-142'nin
+kalıcı olarak denetliyor). Sorun tavanın onu yutması. Bu D-169'nin
 birebir aynısı — orada da yıl ağırlığı golü ve maçı yutuyordu.
 
 *Önerim ve varsayılanım:* **kıdem ağırlığını 0,05'ten 0,02'ye indir.**
 O zaman 30 yıllık kıdem tek başına +0,60 yerine +0,25 verir, tavan
 ancak diğer bileşenler de iyiyken dolar ve ustalık/itibar/sinerji
-gerçekten fark yaratır. Sayı D-142'de yaptığımızın aynısı: ağırlığı
+gerçekten fark yaratır. Sayı D-169'de yaptığımızın aynısı: ağırlığı
 düşürüp bileşenlere yer açmak.
 
 *Seçenek B:* tavanı 0,85'ten 0,95'e çıkar. Daha kolay ama zayıfı da
@@ -6572,7 +6572,7 @@ cümlesi 8 yıl üstü için doğru değil.
 | subay (taban 0,30) | 0,302 | 0,575 | 0,850 |
 
 Ölçülen en küçük şans **0,302**. Bildirilen alt sınır **0,05 hiçbir yolda
-erişilemiyor** — D-137'nin aynısı. Üst sınır yalnızca astsubayda ısırıyor;
+erişilemiyor** — D-164'nin aynısı. Üst sınır yalnızca astsubayda ısırıyor;
 subay yolunda 0,95 de erişilemez.
 
 *Önerim ve varsayılanım:* **alt sınırı 0,05'ten kaldır** (ya da gerçek
@@ -6623,3 +6623,120 @@ ucuz araçta ısırıyor), `item_actions` temizlik/tamir tavanları,
 ama kayda geçiyor: 2. el araçta yaş kaybı tabanı **10 yaştan sonra
 doyuyor** (10 yaşındaki araçla 25 yaşındaki araç aynı yaş katsayısını
 görüyor) ve `banking` kaçan taksit cezası **4 kaçıştan sonra** doyuyor.
+
+---
+
+### Q-195 KARARLAŞTIRILDI (5 Ekim 2026) — ve üç maddem yanlıştı
+
+Faho onayladı: "HERŞEYİ ONAYLIYORUM HER ŞEYİ YAP." Uygulanırken **kendi
+üç maddemin yanlış olduğu çıktı**; düzeltmeleri aşağıda, gerekçeleriyle.
+
+#### Uygulandı
+
+| Karar | Ne oldu |
+|---|---|
+| **D-176** | Kıdemin zam/terfi payı 0,05 → **0,02** ve paya **0,15 tavanı** kondu. Önerdiğim 0,02 tek başına **yetmedi**: ölçüm doymanın 8. yıldan 16. yıla, yani tam Başusta'ya kaydığını gösterdi. Tavanla birlikte statların etkisi **hiçbir kıdemde bitmiyor** ve Usta/Başusta/Duayen geçişleri zam şansını gözle görülür değiştiriyor (7→8: 0,590→0,663; 15→16: 0,679→0,750; 27→28: 0,761→0,832). |
+| **D-177** | Rütbeli askerlikte erişilemeyen 0,05 alt sınırı kaldırıldı; taban yolun kendisinden geliyor, en kötü durum **%30**. Üst sınır 0,95 kaldı. Davranış değişmedi. |
+| Hükümde "dolu eksen" | `prototypeOnlyStrongThreshold` **silindi**. Gerçekten ölüydü: hüküm eksen puanlarını doğrudan cümleye çeviriyor (D-096), ayrı bir sınıflandırma ne kullanılıyor ne aranıyor. |
+
+#### Yanlış olan üç maddem
+
+Q-195'te "dört bağlanmamış mekanik" yazmıştım. **Üçü bağlanmamış
+değildi**; taramamın kusurlarıydı:
+
+1. **Göz muayenesi sağlık vermiyor** demiştim — **yanlış.** Katkı
+   veriliyor: `kActivityCatalog` içindeki `goz_muayenesi` kaydının
+   `health: 2` alanı aktivite motorunda uygulanıyor
+   (`activity_engine.dart:303/327`). `EyeExam.prototypeOnlyHealthGain`
+   aynı sayının **kopyasıydı**. Önerdiğim gibi "bağlasaydım" katkı
+   **ikiye çıkacaktı** — yani önerim bir hata üretecekti. Kopya silindi.
+2. **Kefalette yakınlık aranmıyor** demiştim — **yanlış.** Aranıyor:
+   `PrisonLife._minBond = 30`. `LegalEngine.prototypeOnlyBailMinBond`
+   aynı sayının ikinci kopyasıydı. Artık tek kaynak var: `PrisonLife`
+   public sabiti okuyor.
+3. **Dükkân olay süzgeci uygulanmıyor** demiştim — **yarı yanlış.**
+   Motorda bilerek uygulanmıyor ve bunun gerekçesi sabitin kendi
+   yorumunda yazılı: süzgeç denetimi serbest yazılımcıdan koparıyordu,
+   doğru güvence katalog tarafında. Sabiti **test** okuyor
+   (`paket_ae_business_test.dart`). Benim taramam yalnızca `lib`e
+   bakıyordu, bu yüzden ölü sandı.
+
+**Taramanın düzeltilen kusurları:** (a) adları küresel aradığı için ad
+çakışmalarında yanlış negatif veriyordu — sınıf kapsamlı yapıldı; (b)
+okuma yüzeyi yalnızca `lib`ti — `test` de eklendi. İkinci kusur
+düzeltilince bekçi **boş muafiyet listesiyle** geçiyor: `lib`deki her
+`prototypeOnly` sabiti bir yerde okunuyor.
+
+Dersi yazıyorum: bir sayının "hiç okunmuyor" olması, o mekaniğin
+**yok** olduğu anlamına gelmiyor. Mekanik başka yerde, başka bir sayıyla
+kurulmuş olabilir. Üç maddede de bunu atladım; ikisinde değişiklik
+yapmadan önce koda bakmak kurtardı.
+
+---
+
+### Q-196 — Yirmi yedi karar numarası kodda yetki gibi kullanılıyor, arkasında yazılı karar yok
+
+**Durum:** karar bekliyor (5 Ekim 2026)
+**Nasıl bulundu:** Q-195 uygulanırken, yeni kararlara numara verirken.
+**Etkilenen kod:** `test/decision_reference_test.dart` (yeni bekçi),
+`DECISIONS.md`, ve D-137…D-163'e atıf veren onlarca dosya
+
+#### Önce benim hatam
+
+Paket AY'de senin onayladığın on iki kararı `DECISIONS.md`'ye
+**D-137…D-148** diye yazdım. Oysa kod tabanı o numaraları **zaten**
+başka kurallar için kullanıyordu — 1 Ekim'deki commit'te `D-139` altı
+dosyada kefalet/cezaevi, `D-146` dört dosyada İlişkiler menüsü,
+`D-147` üç dosyada medya işi sınırı demekti. Benim yazdığım metinler
+onların üstüne bindi: koddaki "D-139" artık `DECISIONS.md`'de "futbol
+kazancı asgari ücret çıpasından türer" diyen bir karara işaret
+ediyordu.
+
+**Düzelttim:** on iki kararım **D-164…D-175**'e taşındı. İçerik aynı,
+yalnızca etiket değişti; senin onayladığın hiçbir cümleye dokunulmadı.
+Bugünkü iki yeni karar da D-176 ve D-177 oldu. Taşıma, git diff'ten
+yalnızca bu oturumda **benim eklediğim** satırlar hedeflenerek yapıldı;
+eski atıflara dokunulmadı.
+
+#### Asıl bulgu
+
+Düzeltme, daha büyük bir şeyi açığa çıkardı: **D-137'den D-163'e kadar
+27 numara** kod tabanında yetki olarak kullanılıyor ve **hiçbirinin**
+`DECISIONS.md`'de tanımı yok. Örnekler:
+
+| Numara | Kodda ne demek (atıf yerlerinden) | Kaç dosya |
+|---|---|---|
+| D-139 | Kefalet kartı, kefaletle dışarıda olmak | 8 |
+| D-140 | Koğuş hayatı ve cezaevi eylemleri | 13 |
+| D-137 | Araç ilanlarının yalnızca pazarda dolması | 10 |
+| D-155 | Meslekte ustalık ve itibar | — |
+| D-151 | İkiz gebelik: aynı doğumun ikinci bebeği | — |
+| D-159 | Şehirlerin kendi karakteri ve katsayıları | — |
+| D-160 | Boşanmada nafaka ve velayet | — |
+
+Tam liste `test/decision_reference_test.dart` içinde, her biri konusuyla.
+
+Bunlar **uydurulamaz.** CLAUDE.md'nin değişmeyen kuralı: bir karar
+`DECISIONS.md`'ye ancak sen sohbette onayladıktan sonra girer. Yirmi
+yedi kural metnini kendim yazsaydım, görmediğin kurallara senin adına
+imza atmış olurdum. "Her şeyi onaylıyorum" da bunu kapsamaz: o onay
+gördüğün Q-195'e verildi.
+
+**Kalıcı bekçi eklendi:** `decision_reference_test.dart`. Bundan sonra
+tanımsız bir numaraya atıf verildiği anda test kırılır. Yirmi yedi
+numara, muafiyet listesinde **konularıyla ve gerekçeleriyle** bekliyor.
+
+*Önerim ve varsayılanım:* bunları **paket paket** yazalım. Her pakette
+5-6 numarayı ele alırım: koddaki davranışı okur, kuralın ne olduğunu
+**senin onayına** bir cümleyle sunarım, onaylarsan `DECISIONS.md`'ye
+girer ve bekçinin listesinden düşer. Kefalet/cezaevi (D-139, D-140) en
+çok dosyada geçtiği için oradan başlamayı öneriyorum.
+
+*Alternatif:* numaraları olduğu gibi bırakıp koddaki atıfları silmek.
+Bunu **önermiyorum**: atıflar kodun neden böyle olduğunu anlatan tek
+iz; silmek bilgiyi yok eder.
+
+*Üçüncü yol (en hızlı):* her numara için koddan çıkardığım kuralı tek
+cümleyle yazarım, "Claude'un okuduğu" diye işaretlenir ve sen onaylayana
+kadar **kesin kural sayılmaz**. Böylece `DECISIONS.md` eksiksiz olur ama
+hiçbir şey senin onayın olmadan kural olmaz.

@@ -42,6 +42,7 @@ import '../models/pending_notice.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
+import 'legal_engine.dart';
 
 /// Cezaevinde yapılabilecek şeyler.
 enum PrisonAction {
@@ -195,7 +196,11 @@ abstract final class PrisonLife {
         .toList(growable: false);
   }
 
-  static const int _minBond = 30;
+  // Eşik tek yerde durur: `LegalEngine.prototypeOnlyBailMinBond`.
+  // Burada ayrı bir 30 tutuluyordu; aynı sayının iki kopyası vardı ve
+  // biri (LegalEngine'deki, belgesi daha iyi yazılmış olanı) hiç
+  // okunmuyordu.
+  static const int _minBond = LegalEngine.prototypeOnlyBailMinBond;
 
   static bool _canBeAsked(RelationType relation) => switch (relation) {
         RelationType.anne ||

@@ -38,20 +38,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// henüz bağlanmamış bir mekaniğin sayısı burada bekleyebilir, ama bu bir
 /// tercih olmalı, unutulmuş bir eksik değil. Gerekçe, kuyruktaki soruya
 /// ya da karara işaret etmelidir.
-const Map<String, String> kOkunmayanSabitler = <String, String>{
-  'EyeExam.prototypeOnlyHealthGain':
-      'Göz muayenesinin sağlığa katkısı hiç bağlanmadı; muayene şu an '
-          'yalnızca metin üretiyor. Bağlanacak mı, silinecek mi: Q-195.',
-  'LegalEngine.prototypeOnlyBailMinBond':
-      'Aileden kefalet isteğinde yakınlık eşiği hiç aranmıyor. Eşik '
-          'gelecek mi: Q-195.',
-  'LifeVerdictBuilder.prototypeOnlyStrongThreshold':
-      '"Dolu eksen" sınıflandırması hükümde hiç kullanılmıyor. '
-          'Kullanılacak mı: Q-195.',
-  'BusinessIncidents.prototypeOnlyShopOnlyTags':
-      'Yalnızca dükkâna özgü olay etiketleri hiç süzgeçten geçmiyor: '
-          'Q-195.',
-};
+const Map<String, String> kOkunmayanSabitler = <String, String>{};
 
 /// `static const`/`static final` bildirimi.
 final RegExp _statikKalibi = RegExp(
@@ -82,8 +69,16 @@ bool _okuyor(String satir, String ad) {
 
 void main() {
   test('her prototypeOnly sabiti bir yerde okunuyor', () {
-    final List<File> dosyalar = Directory('lib')
-        .listSync(recursive: true)
+    // Okuma yüzeyi `lib` **ve** `test`.
+    //
+    // İlk hâli yalnızca `lib`e bakıyordu ve bu yanlış sonuç verdi:
+    // `BusinessIncidents.prototypeOnlyShopOnlyTags` ölü sanıldı, oysa
+    // onu bilerek **test** okuyor (motorda süzgeç uygulanmıyor, güvence
+    // katalog tarafında; `paket_ae_business_test.dart` kümeyi oradan
+    // denetliyor). Bir sabitin tek okuyucusu bir test olabilir; bu onu
+    // ölü yapmaz, çünkü değiştirildiğinde bir şey kırılır.
+    final List<File> dosyalar = <Directory>[Directory('lib'), Directory('test')]
+        .expand((Directory d) => d.listSync(recursive: true))
         .whereType<File>()
         .where((File f) => f.path.endsWith('.dart'))
         .toList(growable: false);
@@ -104,6 +99,9 @@ void main() {
       bool statik
     })>[];
     for (final String p in satirlar.keys) {
+      // Bildirimler yalnızca `lib`ten toplanır: testlerin kendi
+      // yardımcı sabitleri bu denetimin konusu değil.
+      if (!p.startsWith('lib')) continue;
       String? sinif;
       final List<String> ls = satirlar[p]!;
       for (int i = 0; i < ls.length; i++) {

@@ -129,10 +129,12 @@ abstract final class EyeExam {
     return 'Hekim: gözlerinde bir sorun görünmüyor.';
   }
 
-  /// Muayenenin sağlığa katkısı.
-  ///
-  /// Mini oyunun sonucu **sağlığı değiştirmez**; muayene olmanın kendisi
-  /// küçük bir katkıdır. Oyuncu iyi oynadı diye karakteri sağlıklı
-  /// olmaz.
-  static const int prototypeOnlyHealthGain = 2;
+  // Not: muayenenin sağlığa katkısı burada da (2) tutuluyordu ve hiç
+  // okunmuyordu — çünkü katkı zaten veriliyor: `kActivityCatalog`
+  // içindeki `goz_muayenesi` kaydının `health: 2` alanı, aktivite
+  // motorunda uygulanıyor. İki ayrı yerde duran aynı sayıdan biri
+  // sessizce ölüydü; bağlansaydı katkı ikiye çıkardı.
+  //
+  // Mini oyunun sonucu sağlığı değiştirmez: muayene olmanın kendisi
+  // küçük bir katkıdır, oyuncu iyi oynadı diye karakter sağlıklı olmaz.
 }

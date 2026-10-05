@@ -304,7 +304,7 @@ void main() {
       );
     });
 
-    test('dövüş şampiyonluk hedefi var ve unvan istiyor (D-143)', () {
+    test('dövüş şampiyonluk hedefi var ve unvan istiyor (D-170)', () {
       final LifeGoal hedef = kLifeGoals
           .firstWhere((LifeGoal g) => g.id == 'dovus_sampiyonluk');
       expect(hedef.area, GoalArea.kendin);
@@ -340,13 +340,13 @@ void main() {
       expect(hedef.reached(kemerli), isTrue);
     });
 
-    test('iki spor aynı Ün tavanını paylaşıyor (D-141 / D-148)', () {
+    test('iki spor aynı Ün tavanını paylaşıyor (D-168 / D-175)', () {
       // Aynı sayıyı paylaşmak bilinçli bir tutarlılık tercihi; biri
       // değişirse diğeri de konuşulmalı, sessizce ayrılmamalı.
       expect(
         FootballProEngine.footballFameCap,
         CombatCareerEngine.sportFameCap,
-        reason: 'Futbol ve dövüşün Ün tavanı ayrışmış; D-148 ikisinin '
+        reason: 'Futbol ve dövüşün Ün tavanı ayrışmış; D-175 ikisinin '
             'aynı tavanı görmesini kural sayıyor.',
       );
       expect(FootballProEngine.footballFameCap, lessThan(100),

@@ -26,7 +26,7 @@ class FootballProEngine {
 
   // --- Onaylı sayılar (Q-193, 5 Ekim 2026) ---------------------------
   //
-  // Faho onayladı; D-137…D-141 olarak `DECISIONS.md`'ye girdi. Kulüp ve
+  // Faho onayladı; D-164…D-168 olarak `DECISIONS.md`'ye girdi. Kulüp ve
   // lig kademesi gelince (Paket AZ) kazanç bandı yeniden konuşulacak.
 
   /// Denemenin geçme eşiği. Hazırlık puanı + zar bu eşiği geçmeli.
@@ -103,7 +103,7 @@ class FootballProEngine {
 
   /// profesyonel futbolun getirebileceği en yüksek Ün.
   ///
-  /// Dövüş kariyerindeki `CombatCareerEngine.sportFameCap` (D-148) ile aynı sayı ve
+  /// Dövüş kariyerindeki `CombatCareerEngine.sportFameCap` (D-175) ile aynı sayı ve
   /// aynı gerekçe (§17): spor tek başına kamuoyu ününü doldurmaz,
   /// Ün 100 için sosyal medya da gerekir.
   ///

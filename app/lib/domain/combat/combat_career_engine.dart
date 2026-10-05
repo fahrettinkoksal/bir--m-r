@@ -196,10 +196,10 @@ abstract final class CombatCareerEngine {
   /// yaklaşıyordu.
   static const double prototypeOnlyTitleShotChance = 0.30;
 
-  /// D-148: sporun getirebileceği en yüksek Ün.
+  /// D-175: sporun getirebileceği en yüksek Ün.
   ///
   /// Spor tek başına oyuncuyu Ün 100 yapmaz (§17); kamuoyu ünü için
-  /// sosyal medya da gerekir. **Futbol aynı tavanı paylaşır** (D-141):
+  /// sosyal medya da gerekir. **Futbol aynı tavanı paylaşır** (D-168):
   /// iki sporun aynı sayıyı görmesi tutarlılıktır, kopya değil.
   /// Faho onayladı (5 Ekim 2026).
   static const int sportFameCap = 70;

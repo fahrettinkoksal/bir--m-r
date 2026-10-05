@@ -48,7 +48,7 @@ class SchoolClubEngine {
 
   /// Aynı anda sürdürülebilecek en fazla aktif kulüp (`prototypeOnly`).
   ///
-  /// D-144: bir öğrenci on üç kulübün hepsinde aktif olmasın; ama iki
+  /// D-171: bir öğrenci on üç kulübün hepsinde aktif olmasın; ama iki
   /// kulüp (ör. futbol + satranç) makul. Faho onayladı (5 Ekim 2026).
   static const int maxActiveClubs = 2;
 
@@ -77,7 +77,7 @@ class SchoolClubEngine {
   /// yatkın ama geç başlayanı geçmeye devam ediyor.
   static const int skillPotentialDivisor = 10;
 
-  /// D-144: seçmenin geçme eşiği.
+  /// D-171: seçmenin geçme eşiği.
   static const int tryoutPass = 55;
 
   /// Seçme kurasının genişliği (`prototypeOnly`).
@@ -95,7 +95,7 @@ class SchoolClubEngine {
   /// giremez.
   static const int tryoutUpsetPercent = 8;
 
-  /// D-147: bedensel kulüp için en az sağlık.
+  /// D-174: bedensel kulüp için en az sağlık.
   ///
   /// AQ'nun kritik sağlık bantlarıyla uyumlu: 25 altında oyuncu
   /// bedensel bir kulübe **giremez**, çünkü o bantta zaten günlük

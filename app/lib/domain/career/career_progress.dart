@@ -61,7 +61,25 @@ abstract final class CareerProgress {
   static const double prototypeOnlyPromotionBaseChance = 0.25;
 
   /// prototypeOnly: işte geçen her yılın eklediği pay.
-  static const double prototypeOnlyYearBonus = 0.05;
+  ///
+  /// **Ölçülmüş hata (D-176):** bu pay 0,05'ti ve kendi tavanı yoktu.
+  /// Taban 0,35 ile birlikte **8. yılda** üst sınırı (0,85) tek başına
+  /// dolduruyordu; o noktadan sonra zekâ, karizma, ustalık, itibar, hobi
+  /// sinerjisi ve iyi sicil — hiçbiri hiçbir şey yapmıyordu. Ustalık
+  /// basamakları Usta 8, Başusta 16, Duayen 28 yıl olduğu için D-155'in
+  /// ustalık/itibar payı tam da işe yaraması gereken basamaklarda ölüydü.
+  /// Payı 0,02'ye indirmek yetmedi (ölçüm: doyma 8. yıldan 16. yıla,
+  /// yani Başusta'ya kaydı), bu yüzden paya **kendi tavanı** da kondu.
+  static const double prototypeOnlyYearBonus = 0.02;
+
+  /// prototypeOnly: kıdemin tek başına ekleyebileceği en fazla pay.
+  ///
+  /// Kıdem bundan sonra **ustalık basamakları ve itibar** üzerinden
+  /// değer kazanmaya devam eder (D-155); ham yıl sayısı sonsuza kadar
+  /// birikmez. Böylece uzun süre kalmak tek başına üst sınırı
+  /// doldurmaz: tavana ulaşmak için stat, ustalık, itibar ya da iyi
+  /// sicil gerekir.
+  static const double prototypeOnlyYearBonusCap = 0.15;
 
   /// prototypeOnly: yüksek zekâ/karizmanın eklediği en fazla pay.
   static const double prototypeOnlyStatBonus = 0.25;
@@ -183,7 +201,8 @@ abstract final class CareerProgress {
     final int yil = career.yearsInJob(state.player.age);
     double sans =
         terfi ? prototypeOnlyPromotionBaseChance : prototypeOnlyRaiseBaseChance;
-    sans += yil * prototypeOnlyYearBonus;
+    sans += (yil * prototypeOnlyYearBonus)
+        .clamp(0.0, prototypeOnlyYearBonusCap);
 
     // Zekâ ve karizmanın ortalaması: iş yerinde hem işini bilmek hem
     // derdini anlatabilmek işe yarar.
