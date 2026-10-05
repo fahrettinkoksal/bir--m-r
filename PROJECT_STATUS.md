@@ -4322,6 +4322,26 @@ dışında): okul kulübünde fiziksel kulüp sağlık tabanı
 (`prototypeOnlyMinHealthForPhysical = 25`) ve dövüşün Ün tavanı
 (`prototypeOnlySportFameCap = 70`, Q-186).
 
+## Kalıcı bekçi: kayda girmeyen alan kalmasın (5 Ekim 2026)
+
+Bu oturumun en pahalı dersini teste çevirdim. `GameState.footballCareer`
+Paket AU/1'de eklenmiş ve **kodeke hiç yazılmamıştı**; PROJECT_STATUS'ta
+"kayda girdi" diye yazdığım cümle yanlıştı. O sırada hiç futbol kariyeri
+oluşamadığı için eksik **gizli kaldı** ve ancak Paket AY'de, kariyer
+gerçekten oluşmaya başlayınca ortaya çıktı. Yani hata haftalarca sessizce
+durdu ve hiçbir test bunu söylemiyordu.
+
+`save_field_coverage_test` artık `GameState`'in bütün alanlarını kaynak
+taramasıyla çıkarıp kodekte karşılığı olup olmadığını denetliyor (aynı
+yöntem `stat_gain_test` içinde D-099 kaçakları için kullanılıyor; Flutter'da
+çalışma anı yansıması yok). **Ölçüm: 101 alanın hepsi kodekte, canlı hata
+yok.** Bir alan bilerek kayda girmeyecekse `kKaydaGirmeyenAlanlar` içine
+**gerekçesiyle** eklenir; o liste şu an boş ve boş olması iyidir.
+
+**Bekçinin kendisi de sınandı:** `GameState`'e yapay bir alan eklendi,
+test kırıldı ve alanın adını söyledi, sonra geri alındı. Yani boşa geçen
+bir süs değil.
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
