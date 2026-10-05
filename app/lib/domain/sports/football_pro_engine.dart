@@ -24,7 +24,10 @@ import 'football_career.dart';
 class FootballProEngine {
   const FootballProEngine();
 
-  // --- prototypeOnly sayılar (Q-193) ---------------------------------
+  // --- Onaylı sayılar (Q-193, 5 Ekim 2026) ---------------------------
+  //
+  // Faho onayladı; D-137…D-141 olarak `DECISIONS.md`'ye girdi. Kulüp ve
+  // lig kademesi gelince (Paket AZ) kazanç bandı yeniden konuşulacak.
 
   /// Denemenin geçme eşiği. Hazırlık puanı + zar bu eşiği geçmeli.
   ///
@@ -36,49 +39,49 @@ class FootballProEngine {
   /// geçiyordu. 1200 spor odaklı hayatta kapıya gelen 49 kişinin
   /// 49'u (%100) profesyonel oldu; tek retler %10'luk sürprizdi.
   /// Eşik, sınırdaki adayın gerçekten takılacağı yere taşındı.
-  static const int prototypeOnlyTrialPass = 78;
+  static const int trialPass = 78;
 
   /// Denemedeki kura aralığı. Geniş tutuldu ki yüksek puan bile
   /// garanti olmasın, düşük puan da matematiksel olarak imkânsız
   /// olmasın.
-  static const int prototypeOnlyTrialLuckSpan = 34;
+  static const int trialLuckSpan = 34;
 
   /// Puandan bağımsız sürpriz ret payı (%). Deneme saf kura değildir
   /// ama kesinlik de yoktur.
-  static const int prototypeOnlyTrialUpsetPercent = 10;
+  static const int trialUpsetPercent = 10;
 
   /// Bir sezonda çıkılabilecek en çok maç.
-  static const int prototypeOnlyMaxAppearances = 34;
+  static const int maxAppearances = 34;
 
   /// Kariyerin kendiliğinden bitmeye başladığı yaş.
-  static const int prototypeOnlyDeclineAge = 31;
+  static const int declineAge = 31;
 
   /// Bu yaşta kariyer her hâlükârda biter.
-  static const int prototypeOnlyHardRetireAge = 39;
+  static const int hardRetireAge = 39;
 
   /// Üst üste bu kadar zayıf sezon geçerse sözleşme yenilenmez.
-  static const int prototypeOnlyWeakSeasonsToRelease = 3;
+  static const int weakSeasonsToRelease = 3;
 
   /// Zayıf sezon sayılan puan eşiği.
-  static const int prototypeOnlyWeakRating = 42;
+  static const int weakRating = 42;
 
   /// Sakatlığın kariyeri bitirdiği sağlık eşiği.
-  static const int prototypeOnlyCareerEndingHealth = 32;
+  static const int careerEndingHealth = 32;
 
   /// Sıradan bir sezon sakatlığının sağlık bedeli.
   ///
   /// **ÖLÇÜLEN HATA (düzeltildi):** sakatlık sağlığa hiç dokunmuyordu.
   /// 49 kariyerin %91,8'i sakatlık yaşadı ama `FootballExit.sakatlik`
   /// bir kez bile olmadı: futbol sağlığı düşürmediği için
-  /// [prototypeOnlyCareerEndingHealth] eşiğine futboldan hiç
+  /// [careerEndingHealth] eşiğine futboldan hiç
   /// inilemiyordu. Yol ölü koddu.
-  static const int prototypeOnlyInjuryHealthCost = 4;
+  static const int injuryHealthCost = 4;
 
   /// Ağır sakatlığın sağlık bedeli.
-  static const int prototypeOnlySevereInjuryHealthCost = 16;
+  static const int severeInjuryHealthCost = 16;
 
   /// Bir sakatlığın ağır olma payı (%).
-  static const int prototypeOnlySevereInjuryPercent = 22;
+  static const int severeInjuryPercent = 22;
 
   /// Ağır bir sakatlığın kariyeri **doğrudan** bitirme payı (%).
   ///
@@ -90,15 +93,15 @@ class FootballProEngine {
   /// şey tek bir ağır sakatlıktır: 27 yaşındaki bir diz, yılların
   /// birikimi değil. Bu yüzden ağır sakatlık artık kendi başına bir
   /// bitirme ihtimali taşıyor; yaş ilerledikçe artıyor.
-  static const int prototypeOnlySevereInjuryCareerEndPercent = 16;
+  static const int severeInjuryCareerEndPercent = 16;
 
   /// Ağır sakatlığın bitirme payına yaş başına eklenen pay (%).
   ///
-  /// [prototypeOnlyDeclineAge] üstündeki her yıl için eklenir: aynı
+  /// [declineAge] üstündeki her yıl için eklenir: aynı
   /// sakatlık 34 yaşında 24 yaşından daha çok kariyer bitirir.
-  static const int prototypeOnlySevereInjuryAgeBonus = 5;
+  static const int severeInjuryAgeBonus = 5;
 
-  /// prototypeOnly: profesyonel futbolun getirebileceği en yüksek Ün.
+  /// profesyonel futbolun getirebileceği en yüksek Ün.
   ///
   /// Dövüş kariyerindeki `prototypeOnlySportFameCap` ile aynı sayı ve
   /// aynı gerekçe (§17): spor tek başına kamuoyu ününü doldurmaz,
@@ -109,19 +112,19 @@ class FootballProEngine {
   /// tanınmamış kalıyordu; sponsorluk ve medya işleri (minFame 3-78)
   /// futbolcuya hiç açılmıyordu. "Futbol sonrası hayat" diye yazdığım
   /// kapsam fiilen boştu.
-  static const int prototypeOnlyFootballFameCap = 70;
+  static const int footballFameCap = 70;
 
-  /// prototypeOnly: bir profesyonel sezonun taban Ün kazancı.
+  /// bir profesyonel sezonun taban Ün kazancı.
   ///
   /// Sahada olmak tek başına tanınmak demektir; kötü sezon da olsa
   /// adın geçer.
-  static const int prototypeOnlySeasonFameBase = 2;
+  static const int seasonFameBase = 2;
 
-  /// prototypeOnly: sezon puanının Ün'e katkı böleni (50 üstü kısım).
-  static const int prototypeOnlySeasonFameRatingDivisor = 10;
+  /// sezon puanının Ün'e katkı böleni (50 üstü kısım).
+  static const int seasonFameRatingDivisor = 10;
 
-  /// prototypeOnly: kaç gol başına 1 Ün.
-  static const int prototypeOnlyGoalsPerFame = 4;
+  /// kaç gol başına 1 Ün.
+  static const int goalsPerFame = 4;
 
   /// Yıllık kazancın **yıllık asgari ücret** cinsinden tabanı ve tavanı.
   ///
@@ -129,8 +132,8 @@ class FootballProEngine {
   /// futbolculuk zengin etmez (taban 1 = asgari ücret seviyesi); üst
   /// seviyede ciddi para vardır (tavan 40). Gerçek kulüp kataloğu
   /// gelince lig kademesi bu bandı daraltacak.
-  static const int prototypeOnlyMinSalaryInYearlyWages = 1;
-  static const int prototypeOnlyMaxSalaryInYearlyWages = 40;
+  static const int minSalaryInYearlyWages = 1;
+  static const int maxSalaryInYearlyWages = 40;
 
   // --- Deneme ---------------------------------------------------------
 
@@ -174,9 +177,9 @@ class FootballProEngine {
     }
 
     final int puan = trialScore(state);
-    final int zar = rng.nextInt(prototypeOnlyTrialLuckSpan);
-    final bool surpriz = rng.nextInt(100) < prototypeOnlyTrialUpsetPercent;
-    final bool kabul = !surpriz && puan + zar >= prototypeOnlyTrialPass;
+    final int zar = rng.nextInt(trialLuckSpan);
+    final bool surpriz = rng.nextInt(100) < trialUpsetPercent;
+    final bool kabul = !surpriz && puan + zar >= trialPass;
 
     // Girildiği yıl, sonuç ne olursa olsun kayda geçer.
     final GameState denendi =
@@ -251,7 +254,7 @@ class FootballProEngine {
         (8 + (yas - 20).clamp(0, 20) + (100 - saglik) ~/ 6).clamp(5, 55);
     final bool sakatlandi = rng.nextInt(100) < sakatlikSansi;
     final bool agir = sakatlandi &&
-        rng.nextInt(100) < prototypeOnlySevereInjuryPercent;
+        rng.nextInt(100) < severeInjuryPercent;
     final String? sakatlik = sakatlandi
         ? (agir ? 'ağır ${_sakatlikAdi(rng)}' : _sakatlikAdi(rng))
         : null;
@@ -260,17 +263,17 @@ class FootballProEngine {
     final int hamBedel = !sakatlandi
         ? 0
         : (agir
-            ? prototypeOnlySevereInjuryHealthCost
-            : prototypeOnlyInjuryHealthCost);
+            ? severeInjuryHealthCost
+            : injuryHealthCost);
     // Futbol **tek başına öldürmez**: bedel sağlığı 1'in altına indirmez.
     // Ölüm sağlık sisteminin işi (AQ); bir sakatlık onu tetiklemez.
     final int saglikBedeli = hamBedel.clamp(0, (saglik - 1).clamp(0, 100));
     final int sezonSonuSaglik = saglik - saglikBedeli;
 
     // --- Sezon puanı: beceri ağır basar, form ve sağlık pay verir ----
-    final int yasEtkisi = yas <= prototypeOnlyDeclineAge
+    final int yasEtkisi = yas <= declineAge
         ? 0
-        : -((yas - prototypeOnlyDeclineAge) * 4);
+        : -((yas - declineAge) * 4);
     final int puan = (beceri * 45 ~/ 100 +
             k.form * 25 ~/ 100 +
             saglik * 15 ~/ 100 +
@@ -282,9 +285,9 @@ class FootballProEngine {
 
     // --- Maç ve gol ---------------------------------------------------
     final int mac = sakatlandi
-        ? (prototypeOnlyMaxAppearances * puan ~/ 220).clamp(0, 20)
-        : (prototypeOnlyMaxAppearances * (55 + puan) ~/ 160)
-            .clamp(0, prototypeOnlyMaxAppearances);
+        ? (maxAppearances * puan ~/ 220).clamp(0, 20)
+        : (maxAppearances * (55 + puan) ~/ 160)
+            .clamp(0, maxAppearances);
     final int gol = _gol(k.position, mac, puan, rng);
 
     // --- Kazanç: seviyeden türetilir, pazarlık yok -------------------
@@ -306,7 +309,7 @@ class FootballProEngine {
       earned: kazanc,
     );
 
-    final bool zayif = puan < prototypeOnlyWeakRating;
+    final bool zayif = puan < weakRating;
     FootballCareer guncel = k.copyWith(
       form: yeniForm,
       reputation: yeniItibar,
@@ -328,12 +331,12 @@ class FootballProEngine {
     // Futbol, dövüş kariyeriyle aynı yoldan Ün'e bağlanır; tavan aynı.
     // Böylece futbolcu sponsorluk ve medya işlerine (minFame 3-78)
     // erişebilir ve "futbol sonrası hayat" gerçekten bir şeye dayanır.
-    final int unKazanci = prototypeOnlySeasonFameBase +
-        (puan - 50).clamp(0, 50) ~/ prototypeOnlySeasonFameRatingDivisor +
-        gol ~/ prototypeOnlyGoalsPerFame;
+    final int unKazanci = seasonFameBase +
+        (puan - 50).clamp(0, 50) ~/ seasonFameRatingDivisor +
+        gol ~/ goalsPerFame;
     final int mevcutUn = state.player.fame ?? 0;
     final int yeniUn =
-        (mevcutUn + unKazanci).clamp(0, prototypeOnlyFootballFameCap);
+        (mevcutUn + unKazanci).clamp(0, footballFameCap);
 
     // --- Kariyer sonu kontrolü ----------------------------------------
     final FootballExit? cikis = _cikisSebebi(
@@ -399,24 +402,24 @@ class FootballProEngine {
     required int zayifSezon,
     required Random rng,
   }) {
-    if (yas >= prototypeOnlyHardRetireAge) return FootballExit.yas;
+    if (yas >= hardRetireAge) return FootballExit.yas;
     // Düşen sağlık yolu: yıllar içinde yıpranan oyuncu.
-    if (sakatlandi && saglik < prototypeOnlyCareerEndingHealth) {
+    if (sakatlandi && saglik < careerEndingHealth) {
       return FootballExit.sakatlik;
     }
     // Tek olay yolu: bir ağır sakatlık kariyeri kapatabilir.
     if (agirSakatlik) {
-      final int sans = prototypeOnlySevereInjuryCareerEndPercent +
-          (yas - prototypeOnlyDeclineAge).clamp(0, 8) *
-              prototypeOnlySevereInjuryAgeBonus;
+      final int sans = severeInjuryCareerEndPercent +
+          (yas - declineAge).clamp(0, 8) *
+              severeInjuryAgeBonus;
       if (rng.nextInt(100) < sans) return FootballExit.sakatlik;
     }
-    if (zayifSezon >= prototypeOnlyWeakSeasonsToRelease) {
+    if (zayifSezon >= weakSeasonsToRelease) {
       return FootballExit.sozlesmeYenilenmedi;
     }
-    if (yas > prototypeOnlyDeclineAge) {
+    if (yas > declineAge) {
       // Yaş ilerledikçe bırakma ihtimali artar; keskin bir duvar yok.
-      final int sans = (yas - prototypeOnlyDeclineAge) * 12;
+      final int sans = (yas - declineAge) * 12;
       if (rng.nextInt(100) < sans) return FootballExit.yas;
     }
     return null;
@@ -443,9 +446,9 @@ class FootballProEngine {
   int _yillikKazanc({required int puan, required int itibar}) {
     final int seviye = (puan * 65 + itibar * 35) ~/ 100;
     // Kare eğri: seviye yükseldikçe kazanç hızlanır ama tavanı aşmaz.
-    final int katsayi = prototypeOnlyMinSalaryInYearlyWages +
-        (prototypeOnlyMaxSalaryInYearlyWages -
-                prototypeOnlyMinSalaryInYearlyWages) *
+    final int katsayi = minSalaryInYearlyWages +
+        (maxSalaryInYearlyWages -
+                minSalaryInYearlyWages) *
             seviye *
             seviye ~/
             10000;

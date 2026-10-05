@@ -413,7 +413,7 @@ abstract final class LifeVerdictBuilder {
   ///
   /// Yalnızca **gerçekten olmuş** durumlar sayılır: tamamlanan hizmet ve
   /// ulaşılan rütbe. Bedelli ödemek hizmet sayılmaz; kaçmak hiç sayılmaz.
-  /// prototypeOnly: profesyonel futbolun Emek eksenine katkısı.
+  /// D-142: profesyonel futbolun Emek eksenine katkısı.
   ///
   /// Ölçeği askerlikle aynı mantıkta tutuldu: sahada geçen yıl sayısı
   /// ağır basar, başarı (maç ve gol) üstüne biner. Tavan var: futbol
@@ -424,10 +424,10 @@ abstract final class LifeVerdictBuilder {
   /// gol katkısı hiç görünmüyordu — 300 maçta 200 gol atan ile hiç gol
   /// atmayan aynı puanı alıyordu. Dövüşte aynı hatayı bulunca futbolda
   /// da ölçtüm ve buradaydı. Sezon ağırlığı 1'e indirildi.
-  static const int prototypeOnlyFootballSeasonPoint = 1;
-  static const int prototypeOnlyFootballMax = 30;
+  static const int footballSeasonPoint = 1;
+  static const int footballVerdictMax = 30;
 
-  /// prototypeOnly: dövüş kariyerinin Emek eksenine katkısı.
+  /// D-142: dövüş rekabet kariyerinin Emek eksenine katkısı.
   ///
   /// Ölçek futbolla aynı mantıkta: rekabette geçen yıl ağır basar,
   /// başarı (maç ve şampiyonluk) üstüne biner. **Tavan futbolla aynı
@@ -439,9 +439,9 @@ abstract final class LifeVerdictBuilder {
   /// ve kademe hiçbir şey eklemiyordu. Yani başarı dekoratifti. Yıl
   /// ağırlığı 1'e indirildi: uzun kariyer hâlâ ağır basıyor ama kemer
   /// kazanmak gerçekten fark yaratıyor.
-  static const int prototypeOnlyCombatYearPoint = 1;
-  static const int prototypeOnlyCombatChampionshipPoint = 5;
-  static const int prototypeOnlyCombatMax = 30;
+  static const int combatYearPoint = 1;
+  static const int combatChampionshipPoint = 5;
+  static const int combatVerdictMax = 30;
 
   /// Dövüş kariyerlerinin Emek eksenine katkısı (Faho onayı, 5 Ekim).
   static int _dovusKariyerPuani(GameState state, int olumYasi) {
@@ -451,15 +451,15 @@ abstract final class LifeVerdictBuilder {
     for (final CombatCareer k in state.combatCareers) {
       final int bitis = k.retiredAtAge ?? olumYasi;
       final int yil = (bitis - k.startedCompetitiveAtAge).clamp(0, 40);
-      puan += yil * prototypeOnlyCombatYearPoint;
+      puan += yil * combatYearPoint;
       // Ringe gerçekten çıkmak: lisanslı olup dövüşmemek aynı değil.
       final int mac = k.amateurWins + k.amateurLosses + k.proWins + k.proLosses;
       puan += (mac ~/ 8).clamp(0, 8);
-      puan += k.championships * prototypeOnlyCombatChampionshipPoint;
+      puan += k.championships * combatChampionshipPoint;
       // Üst kademeye çıkmak kendi başına bir emek.
       puan += (k.tier * 2).clamp(0, 6);
     }
-    return puan.clamp(0, prototypeOnlyCombatMax);
+    return puan.clamp(0, combatVerdictMax);
   }
 
   /// Bütün dövüş kariyerlerindeki toplam müsabaka sayısı.
@@ -485,11 +485,11 @@ abstract final class LifeVerdictBuilder {
     final FootballCareer? k = state.footballCareer;
     if (k == null || k.proSeasons == 0) return 0;
 
-    int puan = k.proSeasons * prototypeOnlyFootballSeasonPoint;
+    int puan = k.proSeasons * footballSeasonPoint;
     // Sahada gerçekten oynamak: kadroda durup maça çıkmamak aynı değil.
     puan += (k.totalAppearances ~/ 40).clamp(0, 8);
     puan += (k.totalGoals ~/ 20).clamp(0, 6);
-    return puan.clamp(0, prototypeOnlyFootballMax);
+    return puan.clamp(0, footballVerdictMax);
   }
 
   static int _askerlikPuani(GameState state) {

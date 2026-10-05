@@ -6326,3 +6326,28 @@ birlikte karar vermen daha doğru:
 - Birini onaylarsın → diğerini çıkarırım ve gerekçesini buraya yazarım.
 
 **`DECISIONS.md`'ye yine dokunulmadı.**
+
+### Q-193 KARARLAŞTIRILDI (5 Ekim 2026) — yedi karar DECISIONS.md'ye girdi
+
+Faho onayladı: **"onayladım hepsini uygula."** Q-193'ün ana maddeleri ve
+dört ekinin tamamı karara dönüştü; sabitler `prototypeOnly` etiketinden
+çıkarıldı ve doc yorumlarına karar numarası yazıldı.
+
+| Karar | Konu |
+|---|---|
+| **D-137** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10; kapıya gelenin kabul edilmesi bilinçli kabul edildi |
+| **D-138** | Sezon ve kariyer sonu: 34 maç tavanı, düşüş 31, sert bırakma 39, 3 zayıf sezon, zayıf puan 42 |
+| **D-139** | Kazanç bandı 1-40 yıllık asgari ücret; dağılımın darlığı **bilinen eksik**, AZ'ye bırakıldı |
+| **D-140** | Kariyeri bitiren sakatlık tek olaydır: bedel 4/16, ağır payı %22, bitirme %16 + yaş başına %5 |
+| **D-141** | Futbol Ün kazandırır (tavan 70) ve **oynamak Ün bakımının kendisidir** (D-118 ölçüsü güncellendi) |
+| **D-142** | Sporda geçen hayat Emek eksenine girer: futbol sezon 1/tavan 30, dövüş yıl 1 + şampiyonluk 5/tavan 30 |
+| **D-143** | İki hedef: `profesyonel_futbol` ve `dovus_sampiyonluk` |
+
+**Onaysız bırakılan tek şey, bilerek:** Q-192'nin **ana maddeleri**
+(aktif kulüp sınırı, seçme eşiği, yatkınlığın seçmedeki ağırlığı,
+profesyonel için asgari geçmiş, scout sıklığı, profesyonele giriş yaşı,
+okul-kulüp çatışması). Bunlar Q-193'ün parçası değil ve bu turda
+Faho'nun önüne konmadı; `FootballPath.prototypeOnlyMinScore`,
+`prototypeOnlyMinHealth` gibi **kapı eşikleri hâlâ `prototypeOnly`**.
+Dövüşün `prototypeOnlySportFameCap` sayısı da (Q-186) kendi
+kuyruğunda bekliyor. Faho isterse onlar da ayrıca konuşulur.

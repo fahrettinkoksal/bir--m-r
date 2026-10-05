@@ -174,7 +174,7 @@ void main() {
       const int enZayifAdayPuani = FootballPath.prototypeOnlyMinScore +
           FootballPath.prototypeOnlyMinHealth * 15 ~/ 100;
       expect(
-        FootballProEngine.prototypeOnlyTrialPass,
+        FootballProEngine.trialPass,
         greaterThan(enZayifAdayPuani),
         reason: 'Eşik en zayıf adayın puanının altındaysa deneme '
             'dekoratiftir: kapıdan geçen herkes kabul edilir.',
@@ -305,7 +305,7 @@ void main() {
             _hayat(
               31,
               age: 27,
-              health: FootballProEngine.prototypeOnlyCareerEndingHealth + 10,
+              health: FootballProEngine.careerEndingHealth + 10,
             ),
           ),
         );
@@ -335,13 +335,13 @@ void main() {
   group('Kariyer sonu', () {
     test('39 yaşında kariyer her hâlükârda biter ve sebebi yazılır', () {
       final GameState s = _profesyonel(
-        _gucluGecmis(_hayat(11, age: FootballProEngine.prototypeOnlyHardRetireAge)),
+        _gucluGecmis(_hayat(11, age: FootballProEngine.hardRetireAge)),
       );
       final GameState sonra = kMotor.advanceSeason(s, Random(2)).state;
       final FootballCareer k = sonra.footballCareer!;
       expect(k.active, isFalse);
       expect(k.exitReason, FootballExit.yas);
-      expect(k.retiredAtAge, FootballProEngine.prototypeOnlyHardRetireAge);
+      expect(k.retiredAtAge, FootballProEngine.hardRetireAge);
     });
 
     test('üst üste zayıf sezon sözleşmeyi bitirir', () {
@@ -363,7 +363,7 @@ void main() {
           ],
         ),
         form: 15,
-        weakSeasons: FootballProEngine.prototypeOnlyWeakSeasonsToRelease - 1,
+        weakSeasons: FootballProEngine.weakSeasonsToRelease - 1,
       );
       final FootballCareer k = kMotor.advanceSeason(s, Random(1)).state
           .footballCareer!;
@@ -438,14 +438,14 @@ void main() {
       }
       expect(
         s.player.fame!,
-        lessThanOrEqualTo(FootballProEngine.prototypeOnlyFootballFameCap),
+        lessThanOrEqualTo(FootballProEngine.footballFameCap),
       );
       expect(s.player.fame!, lessThan(100));
     });
 
     test('kariyer sonu metni oyuncuya ne kaldığını söylüyor', () {
       final GameState s = _profesyonel(
-        _gucluGecmis(_hayat(43, age: FootballProEngine.prototypeOnlyHardRetireAge)),
+        _gucluGecmis(_hayat(43, age: FootballProEngine.hardRetireAge)),
       );
       final ({GameState state, List<String> log, String? milestone}) r =
           kMotor.advanceSeason(s, Random(2));
@@ -542,7 +542,7 @@ void main() {
       expect(
         kazanc,
         lessThanOrEqualTo(
-          FootballProEngine.prototypeOnlyMaxSalaryInYearlyWages *
+          FootballProEngine.maxSalaryInYearlyWages *
               Economy.netYearlyMinimumWage,
         ),
       );

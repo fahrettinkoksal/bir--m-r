@@ -25,6 +25,7 @@ import '../domain/models/hobby_progress.dart';
 import '../domain/models/martial_progress.dart';
 import '../domain/models/owned_item.dart';
 import '../domain/models/relation.dart';
+import '../domain/models/combat_career.dart';
 import '../domain/models/person.dart';
 import 'hobby_catalog.dart';
 import 'martial_arts_catalog.dart';
@@ -209,19 +210,31 @@ final List<LifeGoal> kLifeGoals = <LifeGoal>[
       return dal.levelForLessons(m.lessons) >= dal.ranks.length - 1;
     }),
   ),
-  // Futbolun hedefi, dövüş hedefinin eşi (Paket AY/3).
+  // D-143: futbolun rekabet başarısının hedefi.
   //
-  // Katalogda dövüş için `dovus_ust_basamak` vardı, futbolun karşılığı
-  // yoktu: profesyonel futbola ulaşmak oyundaki en dar yollardan biri
+  // Profesyonel futbola ulaşmak oyundaki en dar yollardan biri
   // (ölçümde okul odaklı hayatların %1,4'ü) ama hiçbir hedefe
-  // dokunmuyordu. **prototypeOnly:** eşik tek sezon; Faho hedefin
-  // kendisini ya da eşiği değiştirebilir (Q-193).
+  // dokunmuyordu. Eşik **tek sezon**: futbolda girmek zaten en üsttür.
+  // Faho onayladı (5 Ekim 2026).
   LifeGoal(
     id: 'profesyonel_futbol',
     label: 'Profesyonel futbol oyna',
     description: 'Okul takımından başlayıp profesyonel bir sezon oyna.',
     area: GoalArea.kendin,
     reached: (GameState s) => (s.footballCareer?.proSeasons ?? 0) > 0,
+  ),
+  // D-143: dövüşün rekabet başarısının hedefi.
+  //
+  // Katalogda `dovus_ust_basamak` vardı ama o **eğitim basamağıyla**
+  // ilgili ("bir dalın en üst basamağına ulaş"); unvan kazanmanın
+  // karşılığı yoktu. Faho onayladı (5 Ekim 2026).
+  LifeGoal(
+    id: 'dovus_sampiyonluk',
+    label: 'Bir dövüş dalında şampiyon ol',
+    description: 'Rekabete gir ve bir unvan kazan.',
+    area: GoalArea.kendin,
+    reached: (GameState s) =>
+        s.combatCareers.any((CombatCareer k) => k.championships > 0),
   ),
   LifeGoal(
     id: 'kitap_bitir',

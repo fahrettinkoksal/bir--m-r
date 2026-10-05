@@ -107,7 +107,7 @@ void main() {
         sorunlar.add('seed ${r.seed}: sezon yok ama futboldan para var');
       }
       final int? yas = r.footballRetireAge;
-      if (yas != null && yas > FootballProEngine.prototypeOnlyHardRetireAge) {
+      if (yas != null && yas > FootballProEngine.hardRetireAge) {
         sorunlar.add('seed ${r.seed}: $yas yaşında hâlâ profesyonel');
       }
     }
@@ -152,7 +152,7 @@ void main() {
     print('Un hic gelmeyen        $unHicGelmeyen  ${_yuzde(unHicGelmeyen, kabulEdilen)}');
     print('Zirve Un    medyan ${_medyan(zirveUnler)} · en az ${_enAz(zirveUnler)}'
         ' · en fazla ${_enCok(zirveUnler)} (tavan '
-        '${FootballProEngine.prototypeOnlyFootballFameCap})');
+        '${FootballProEngine.footballFameCap})');
     print('Emeklilikte medyan ${_medyan(emeklilikUnleri)}');
     print('Hayat sonu  medyan ${_medyan(sonUnler)}  (emeklilikten sonra solar)');
     print('Medya/sponsorluk katalogu minFame 3-78 bandinda.');
@@ -166,8 +166,8 @@ void main() {
     print('Sezon basi medyan ${_medyan(sezonBasiKazanc)} TL');
     print('  = ${(_medyan(sezonBasiKazanc) / Economy.netYearlyMinimumWage).toStringAsFixed(1)} '
         'yillik asgari ucret · bant '
-        '${FootballProEngine.prototypeOnlyMinSalaryInYearlyWages}-'
-        '${FootballProEngine.prototypeOnlyMaxSalaryInYearlyWages}');
+        '${FootballProEngine.minSalaryInYearlyWages}-'
+        '${FootballProEngine.maxSalaryInYearlyWages}');
     print('');
     print('Bu bir OLCUM. Hangi sayinin degisecegine Faho karar verir');
     print('(Q-193). Hicbir oran bu dosyada guzellestirilmedi.');
@@ -210,7 +210,7 @@ void main() {
     );
     expect(
       _enCok(zirveUnler),
-      lessThanOrEqualTo(FootballProEngine.prototypeOnlyFootballFameCap),
+      lessThanOrEqualTo(FootballProEngine.footballFameCap),
       reason: 'Futbol tek başına Ün tavanını aşıyor.',
     );
 
@@ -219,7 +219,7 @@ void main() {
       expect(
         _enCok(sezonBasiKazanc),
         lessThanOrEqualTo(
-          FootballProEngine.prototypeOnlyMaxSalaryInYearlyWages *
+          FootballProEngine.maxSalaryInYearlyWages *
               Economy.netYearlyMinimumWage,
         ),
         reason: 'Sezon başı kazanç bandın tavanını aştı.',

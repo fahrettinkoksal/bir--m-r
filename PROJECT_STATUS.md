@@ -4267,6 +4267,32 @@ Doğrulama: `flutter analyze` çıkış kodu 0; `life_summary_widget_test`
 7 test yeşil. **Android APK ya da Windows derlemesi bu pakette
 denenmedi.**
 
+## Q-193 KARARLAŞTIRILDI: yedi karar DECISIONS.md'ye girdi (5 Ekim 2026)
+
+Faho onayladı: "onayladım hepsini uygula." Q-193'ün ana maddeleri ve
+dört ekinin tamamı karara dönüştü. Sabitler `prototypeOnly` etiketinden
+çıkarıldı, doc yorumlarına karar numarası yazıldı.
+
+| Karar | Konu |
+|---|---|
+| **D-137** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10 |
+| **D-138** | Sezon ve kariyer sonu: 34 maç, düşüş 31, sert bırakma 39, 3 zayıf sezon |
+| **D-139** | Kazanç bandı 1-40 yıllık asgari ücret (dağılım darlığı bilinen eksik, AZ'ye bırakıldı) |
+| **D-140** | Kariyeri bitiren sakatlık tek olaydır: 4/16 bedel, %22 ağır, %16 + yaş başına %5 |
+| **D-141** | Futbol Ün kazandırır (tavan 70); oynamak Ün bakımının kendisidir |
+| **D-142** | Sporda geçen hayat Emek eksenine girer (futbol ve dövüş, tavan 30) |
+| **D-143** | İki hedef: `profesyonel_futbol`, `dovus_sampiyonluk` |
+
+Onaylanan `dovus_sampiyonluk` hedefi eklendi; AY/5'te önerip
+beklettiğim hedef artık katalogda ve testi var.
+
+**Bilerek onaysız bırakılan:** Q-192'nin ana maddeleri (aktif kulüp
+sınırı, seçme eşiği, yatkınlığın ağırlığı, profesyonel için asgari
+geçmiş, scout sıklığı, giriş yaşı, okul-kulüp çatışması). Bunlar
+Q-193'ün parçası değil ve bu turda Faho'nun önüne konmadı; kapı
+eşikleri (`FootballPath.prototypeOnlyMinScore`, `prototypeOnlyMinHealth`)
+ve dövüşün `prototypeOnlySportFameCap` sayısı **hâlâ `prototypeOnly`**.
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım

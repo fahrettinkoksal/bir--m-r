@@ -302,6 +302,42 @@ void main() {
       );
     });
 
+    test('dövüş şampiyonluk hedefi var ve unvan istiyor (D-143)', () {
+      final LifeGoal hedef = kLifeGoals
+          .firstWhere((LifeGoal g) => g.id == 'dovus_sampiyonluk');
+      expect(hedef.area, GoalArea.kendin);
+
+      // Dövüş yok: tamamlanmadı.
+      expect(hedef.reached(_hayat(30)), isFalse);
+
+      // Rekabet var ama unvan yok: hâlâ tamamlanmadı.
+      final GameState unvansiz = _hayat(30).copyWith(
+        combatCareers: <CombatCareer>[
+          const CombatCareer(
+            artId: 'boks',
+            startedCompetitiveAtAge: 18,
+            proWins: 30,
+            tier: 3,
+          ),
+        ],
+      );
+      expect(hedef.reached(unvansiz), isFalse);
+
+      // Bir şampiyonluk: tamamlandı.
+      final GameState kemerli = _hayat(30).copyWith(
+        combatCareers: <CombatCareer>[
+          const CombatCareer(
+            artId: 'boks',
+            startedCompetitiveAtAge: 18,
+            proWins: 30,
+            championships: 1,
+            tier: 3,
+          ),
+        ],
+      );
+      expect(hedef.reached(kemerli), isTrue);
+    });
+
     test('hedef kimlikleri tekil kalıyor', () {
       final Set<String> idler = kLifeGoals.map((LifeGoal g) => g.id).toSet();
       expect(idler.length, kLifeGoals.length);
