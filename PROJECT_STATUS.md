@@ -4051,6 +4051,74 @@ gelmeyecek.
 `paket_au_school_clubs_test` + `paket_au_football_path_test` 40/40
 yeşil. **Android APK ya da Windows derlemesi bu pakette denenmedi.**
 
+## Paket AY: kapının arkası yazıldı — ve üç hata ölçümle çıktı (5 Ekim 2026)
+
+Paket AU profesyonel futbol kapısını kurmuştu ama **kapıdan geçilmiyordu**:
+uygunluk hesaplanıyor, oyuncu "girebilirsin" yazısını okuyor, sonra hiçbir
+şey olmuyordu. AY o eksiği kapattı.
+
+**Ne yazıldı.** `football_pro_engine.dart` (yeni): deneme, sezon
+(form, puan, maç, gol, sakatlık, kazanç, itibar), dört ayrı kariyer sonu
+sebebi ve futbol sonrası hayat. Kazanç **gerçekten cüzdana** yazılıyor;
+sezonlar `life_progression` içinde yaş ilerledikçe işleniyor ve günlüğe
+cümle, ilk sezonda ve kariyer sonunda bildirim üretiyor. Ekran
+(`sports_career_page.dart`) artık kariyer kartını, sezon listesini,
+"Profesyonel denemeye gir" ve "Futbolu bırak" satırlarını gösteriyor.
+
+**Önce bulunan gizli hata.** `GameState.footballCareer` AU/1'de eklenmiş
+ama **kodeke hiç yazılmamıştı**. PROJECT_STATUS'ta "kayda girdi" diye
+yazdığım cümle yanlıştı; o zaman hiç kariyer oluşamadığı için eksik gizli
+kalmıştı. Kariyer ve bütün sezon geçmişi artık kaydediliyor ve birebir
+geri okunuyor; eski kayıtta alan yoksa `null` kalıyor, **uydurma kariyer
+üretilmiyor.**
+
+**Ölçüm ayrı bir kohort gerektirdi.** AW'nin 500 okul odaklı hayatı
+yalnızca **6** profesyonel kariyer üretti — kapı dar (doğru), ama
+kariyerin kendisini ölçmek için fazla küçük bir örneklem. Bu yüzden
+`paket_ay_football_measurement_test` kuruldu: **1200 spor odaklı hayat**,
+49 kariyer. Ölçüm üç hata gösterdi:
+
+1. **Deneme yılda bir kez değildi.** Oyuncu aynı yıl içinde düğmeye kabul
+   alana kadar basabiliyordu. `footballTrialAge` eklendi (kodeke de).
+2. **Deneme eşiği dekoratifti.** Kapıdan geçmenin alt sınırı 63 puan
+   üretiyordu, eşik ise 62'ydi: zarsız bile geçiliyordu. Eşik 78 oldu ve
+   kalıcı bir test eşiğin "en zayıf aday puanı"nın üstünde kalmasını
+   zorunlu tutuyor.
+3. **`FootballExit.sakatlik` ölü koddu.** Kariyerlerin %91,8'i sakatlık
+   yaşadı, hiçbiri sakatlıktan bitmedi. Sakatlık sağlığa dokunmuyordu ve
+   model yanlıştı: kariyeri bitiren şey yılların birikimi değil **tek bir
+   ağır sakatlıktır**. İkisi de düzeltildi.
+
+| Bitiş sebebi | Düzeltmeden önce | Sonra |
+|---|---|---|
+| Yaş | %91,7 | %81,3 |
+| Sakatlık | **%0,0** | **%8,3** |
+| Sözleşme yenilenmedi | %6,3 | %8,3 |
+| Kendi kararı | %2,1 | %2,1 |
+
+**Ölçüm (1200 spor odaklı hayat, 49 kariyer):** kapı açılan %4,2 ·
+kabul edilen %4,1 · pro sezon medyan 15 (en az 9, en fazla 19) · maç
+medyan 309 · gol medyan 31 · sakatlık yaşayan %91,8 · bırakma yaşı
+medyan 34 (en erken 29) · sezon başı kazanç medyan 7,4 yıllık asgari
+ücret · kariyer toplamı medyan 113 yıllık asgari ücret.
+
+**Düzeltmediğim, Faho'ya bıraktığım üç şey (Q-193).** Kapıya gelen
+herkesin sonunda profesyonel olması (%100) — sebebi eşik değil, kapının
+kendisinin zaten eleme yapması; kimsenin 1-3 sezonluk kısa kariyeri
+olmaması; kazanç dağılımının fazla dar olması (~2 kat). Üçü de
+`prototypeOnly` sayı kararı ya da kapsam kararı; **hiçbiri
+`DECISIONS.md`'ye yazılmadı.**
+
+**Ölçümün kendisinde de bir körlük buldum.** Bot kararını ölçümden önce
+veriyordu; deneme kabul edilen yılda kariyer kurulduğu için
+`FootballPath.evaluate` artık `aktifProfesyonel` dönüyor ve `eligible`
+hiç `true` görülmüyordu. Ölçüm "kapı açılmadan profesyonel oldu" diyordu;
+oyun doğruydu, ölçüm kördü. Sıra düzeltildi.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; AY motor testleri (32) ve AY
+ekran testleri (4) yeşil. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta araç zinciri yok.
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
@@ -4642,6 +4710,12 @@ tarafından onaylandı, uygulandı ve `DECISIONS.md`'ye girdi.
 hızı, profesyonel için asgari geçmiş, scout sıklığı, giriş yaşı,
 kaptanlık eşiği, okul-kulüp çatışması). Hepsi `prototypeOnly`; hiçbiri
 `DECISIONS.md`'ye yazılmadı.
+
+**Q-193 (yeni, Paket AY):** profesyonel futbolun sayıları — deneme
+eşiği ve kura aralığı, kapıya gelenin kabul oranı, kariyer uzunluğu
+dağılımı, kazanç bandı ve itibar duyarlılığı, sakatlık sayıları, sezon ve
+kariyer sonu eşikleri. Hepsi `prototypeOnly`; hiçbiri `DECISIONS.md`'ye
+yazılmadı.
 
 Q-190 ve Q-191 **kararlaştırıldı** (3 Ekim 2026, Faho onayladı) ve
 uygulandı; ayrıntı yukarıdaki Paket AS/2 bölümünde. Kuyrukta kalan tek

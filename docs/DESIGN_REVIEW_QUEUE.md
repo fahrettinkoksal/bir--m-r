@@ -5986,3 +5986,116 @@ tabanı (D-136). Q-192'nin **ana maddelerindeki diğer sayılar hâlâ
 seçme eşiği, yatkınlığın seçmedeki ağırlığı, profesyonel için asgari
 geçmiş, scout sıklığı, profesyonele giriş yaşı ve okul-kulüp
 çatışması (9. madde: bu pakette hâlâ YOK).
+
+### Q-193 — Profesyonel futbol hayatının sayıları (Paket AY)
+
+**Durum: öneri hazır, karar bekliyor.** Paket AY, AU'nun kurduğu kapının
+arkasını yazdı: deneme, sezon, form, sakatlık, kazanç, kariyer sonu ve
+futbol sonrası hayat. Aşağıdaki sayıların **hepsi `prototypeOnly`**;
+Faho onaylamadan hiçbiri `DECISIONS.md`'ye girmeyecek.
+
+**Etkilenen kod.** `app/lib/domain/sports/football_pro_engine.dart`,
+`app/lib/domain/sports/football_career.dart`,
+`app/lib/ui/screens/sections/sports_career_page.dart`. PR
+[#80](https://github.com/fahrettinkoksal/bir--m-r/pull/80).
+
+**Ölçüm.** `paket_ay_football_measurement_test` — 1200 spor odaklı hayat.
+AW'nin 500 hayatlık kohortu yalnızca 6 kariyer üretmişti; kariyerin
+kendisini ölçmek için fazla küçüktü, bu yüzden ayrı bir kohort kuruldu.
+
+#### Ölçerken bulduğum üç hata (düzeltildi, karar beklemiyor)
+
+**H1 — Deneme yılda bir kez değildi.** `canAttemptFootballTrial` yaşa
+bakmıyordu: oyuncu aynı yıl içinde "Profesyonel denemeye gir" düğmesine
+kabul alana kadar basabiliyordu. Deneme bir fırsat olmaktan çıkıp kura
+makinesine dönüşmüştü. `GameState.footballTrialAge` eklendi (kodeke de
+yazıldı), deneme yılda bir kez oldu.
+
+**H2 — Deneme eşiği dekoratifti.** Kapıdan geçmenin alt sınırı hazırlık
+puanı 55 ve sağlık 55; en zayıf aday bile `55 + 55×15/100 = 63` puanla
+geliyordu, eşik ise 62'ydi. Yani **zarsız bile geçiliyordu**; tek retler
+%10'luk sürpriz paydı. Eşik 78'e taşındı. Kalıcı bir test artık eşiğin
+"en zayıf aday puanı"nın üstünde kalmasını zorunlu tutuyor.
+
+**H3 — `FootballExit.sakatlik` ölü koddu.** 49 kariyerin %91,8'i sakatlık
+yaşadı ama hiçbiri sakatlıktan bitmedi. İki ayrı sebep vardı: (a) sakatlık
+sağlığa hiç dokunmuyordu, (b) kariyeri bitiren sakatlık, sağlığın yıllar
+içinde 32'nin altına inmesine bağlanmıştı — oysa sağlıklı bir futbolcu 14
+sezonda oraya inmiyor. Modelin kendisi yanlıştı: gerçekte kariyeri bitiren
+şey **tek bir ağır sakatlıktır**, yılların birikimi değil. Şimdi sakatlık
+sağlığı düşürüyor *ve* ağır sakatlığın kendi başına bitirme ihtimali var.
+
+| Bitiş sebebi | Düzeltmeden önce | Sonra |
+|---|---|---|
+| Yaş | %91,7 | %81,3 |
+| Sakatlık | **%0,0** | **%8,3** |
+| Sözleşme yenilenmedi | %6,3 | %8,3 |
+| Kendi kararı | %2,1 | %2,1 |
+
+En kısa kariyer 11 sezondan 9'a, en erken bırakma 32 yaşından 29'a indi.
+
+#### Karar bekleyen sayılar
+
+**1 — Deneme.** `prototypeOnlyTrialPass = 78`,
+`prototypeOnlyTrialLuckSpan = 34`, `prototypeOnlyTrialUpsetPercent = 10`.
+*Öneri: olduğu gibi kalsın, ama 2. maddeyi birlikte oku.*
+
+**2 — Kapıya gelen herkes profesyonel oluyor (%100).** H2 düzeltildikten
+sonra bile kapıya gelen 49 hayatın 49'u sonunda kabul edildi. Sebep eşik
+değil: **kapının kendisi zaten eleme yapıyor.** `FootballPath` puan ≥ 55,
+sezon ≥ 3, beceri ≥ 45 istiyor; bunu geçen oyuncunun hazırlık puanı
+çoğunlukla 80-100 bandında oluyor ve hangi eşiği koyarsan koy geçiyor.
+Üstelik 16-23 yaş penceresinde her yıl yeniden denenebiliyor.
+
+*Önerim ve varsayılanım: olduğu gibi bırakalım.* Gerekçe: kapı dar
+(spor odaklı hayatların %4,2'si, genel okul kohortunda %1,4) ve darlık
+doğru yerde — çocuklukta kurulmuş gerçek bir futbol geçmişi istiyor.
+"Kapıya geldiysen artık senin hakkın" hikâye olarak da tutarlı.
+*Alternatif (Faho isterse):* kapıyı gevşetip (puan ≥ 45 gibi) denemeyi
+asıl eleme yapmak. O zaman daha çok oyuncu denemeye girer, çoğu geri
+döner ve "denemeye girdim, alamadılar" diye bir hikâye doğar. Bu daha
+dramatik ama daha çok hayal kırıklığı üretir. **Benim varsayılanım
+birincisi; karar senin.**
+
+**3 — Kariyer uzunluğu.** Pro sezon medyanı **15**, en az 9, en fazla 19;
+bırakma yaşı medyanı 34. *Burada bir eksik görüyorum:* gerçek futbolda
+sözleşme alan çoğu genç 1-3 sezonda eleniyor. Oyunda **kimsenin kısa
+kariyeri yok**, çünkü kadroya giren oyuncu rekabetle karşılaşmıyor.
+*Önerim:* ilk 3 sezonda ayrı bir "tutunamama" ihtimali olsun (ör. ilk
+sezon sonunda düşük puanlıysa %25 serbest kalma). Bu AY'nin kapsamını
+biraz aşıyor; **AZ'ye bırakmayı öneriyorum**, çünkü asıl çözümü kulüp
+ve lig kademesi gelince anlamlı olacak.
+
+**4 — Kazanç.** `prototypeOnlyMinSalaryInYearlyWages = 1`,
+`prototypeOnlyMaxSalaryInYearlyWages = 40`. Ölçüm: sezon başı medyan
+**7,4 yıllık asgari ücret**, kariyer toplamı medyan **113 yıllık asgari
+ücret** (≈38,1 milyon ₺, 2026 alım gücü). *Soru:* dağılım fazla dar —
+medyan 38,1 milyon, en yüksek 73,8 milyon, yani yalnızca ~2 kat fark.
+Gerçek futbolda uçurum çok daha büyük. *Önerim:* bandı değiştirmeyelim
+ama kazancın itibara duyarlılığını artıralım; bu da kulüp/lig kademesi
+gelince (AZ) anlamlı olur. **Varsayılanım: şimdilik dokunma.**
+
+**5 — Sakatlık sayıları.** `prototypeOnlyInjuryHealthCost = 4`,
+`prototypeOnlySevereInjuryHealthCost = 16`,
+`prototypeOnlySevereInjuryPercent = 22`,
+`prototypeOnlySevereInjuryCareerEndPercent = 16` (+ 31 yaş üstü her yıl
+için %5). *Öneri: olduğu gibi kalsın.* Sonuç %8,3 sakatlıktan bitiş;
+hissedilir ama kaderi belirlemiyor. Sağlık hiçbir ölçümde sıfıra inmedi
+ve bunu kalıcı bir test koruyor: **futbol tek başına öldürmüyor.**
+
+**6 — Sezon ve kariyer sonu sayıları.** `prototypeOnlyMaxAppearances = 34`,
+`prototypeOnlyDeclineAge = 31`, `prototypeOnlyHardRetireAge = 39`,
+`prototypeOnlyWeakSeasonsToRelease = 3`, `prototypeOnlyWeakRating = 42`,
+`prototypeOnlyCareerEndingHealth = 32`. *Öneri: olduğu gibi kalsın.*
+
+#### Bu pakette bilerek YAPILMAYANLAR
+
+Maç maç simülasyon, lig tablosu, fikstür, transfer pazarı, sözleşme ve
+maaş pazarlığı, Avrupa kupaları, millî takım, yurt dışına gitme.
+**Gerçek kulüp ve lig adları da yok:** katalog ağ erişimi gerektiriyor,
+bu ortamda dış ağ kapalı (tff.org denendi, her seferinde bağlantı yok) ve
+brief "2026-2027 sezonu için kulüp listesini hafızadan yazma" diyor.
+Kulüp/lig alanları `null` duruyor, **uydurma kulüp adı üretilmiyor** ve
+katalog geldiğinde (Paket AZ) dolacak. Ekrandaki "henüz yazılmadı" notu
+bu listeye göre güncellendi; sezon akışı artık yazıldığı için o cümle
+kaldırıldı.

@@ -95,6 +95,7 @@ class GameState {
     this.combatCareers = const <CombatCareer>[],
     this.schoolClubs = const <SchoolClubProgress>[],
     this.footballCareer,
+    this.footballTrialAge,
     this.hobbies = const <HobbyProgress>[],
     this.chronicConditions = const <ChronicCondition>[],
     this.goalsReachedAt = const <String, int>{},
@@ -440,6 +441,14 @@ class GameState {
   /// çünkü ileride kulüp, lig, sezon, kontrat ve transfer taşıyacak.
   /// Okul futbolu bu alanı açmaz; profesyonel deneme açar.
   final FootballCareer? footballCareer;
+
+  /// Profesyonel futbol denemesine en son girilen yaş (Paket AY).
+  ///
+  /// **Neden var:** deneme yılda bir kezdir. Bu alan olmadan oyuncu aynı
+  /// yıl içinde düğmeye kabul alana kadar basabiliyordu; ölçümde kapıya
+  /// gelen 49 hayatın 49'u profesyonel oldu. Deneme bir fırsattır,
+  /// çevirmeli bir kura makinesi değil.
+  final int? footballTrialAge;
 
   /// Paket 39: kalıcı hobi geçmişi (müzik, resim, okuma, spor).
   ///
@@ -1252,6 +1261,7 @@ class GameState {
     List<CombatCareer>? combatCareers,
     List<SchoolClubProgress>? schoolClubs,
     FootballCareer? footballCareer,
+    int? footballTrialAge,
     List<HobbyProgress>? hobbies,
     List<ChronicCondition>? chronicConditions,
     Map<String, int>? goalsReachedAt,
@@ -1363,6 +1373,7 @@ class GameState {
       combatCareers: combatCareers ?? this.combatCareers,
       schoolClubs: schoolClubs ?? this.schoolClubs,
       footballCareer: footballCareer ?? this.footballCareer,
+      footballTrialAge: footballTrialAge ?? this.footballTrialAge,
       hobbies: hobbies ?? this.hobbies,
       chronicConditions: chronicConditions ?? this.chronicConditions,
       goalsReachedAt: goalsReachedAt ?? this.goalsReachedAt,

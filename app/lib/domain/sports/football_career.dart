@@ -36,25 +36,58 @@ enum FootballPosition {
   final String label;
 }
 
-/// Bir profesyonel sezonun özeti. Sezon simülasyonu AV'de gelecek;
-/// burada yalnızca taşınacak kabuk var.
+/// Bir profesyonel sezonun özeti (Paket AY).
+///
+/// **Maç maç simülasyon yok.** Sezon tek seferde özetlenir: kaç maç,
+/// kaç gol, nasıl bir sezon (puan), sakatlık oldu mu ve o yıl ne
+/// kazanıldı. Lig tablosu, fikstür ve rakip takımlar bu paketin
+/// dışındadır.
 @immutable
 class FootballSeason {
   const FootballSeason({
     required this.age,
-    required this.clubId,
-    required this.leagueId,
+    this.clubId,
+    this.leagueId,
     this.appearances = 0,
     this.goals = 0,
     this.rating = 0,
+    this.injury,
+    this.earned = 0,
   });
 
   final int age;
-  final String clubId;
-  final String leagueId;
+
+  /// Kulüp ve lig kimliği. **Gerçek kulüp kataloğu henüz yazılmadığı
+  /// için `null`.** Uydurma kulüp adı üretilmez; katalog geldiğinde bu
+  /// alanlar dolacak ve eski kayıtlar bozulmayacak.
+  final String? clubId;
+  final String? leagueId;
+
   final int appearances;
   final int goals;
+
+  /// Sezonun genel puanı (0-100). Formu ve itibarı besler.
   final int rating;
+
+  /// O sezon yaşanan sakatlık (yoksa `null`). Metin tıbbi tavsiye
+  /// vermez, yalnızca ne olduğunu söyler.
+  final String? injury;
+
+  /// O sezonun kazancı (₺). Sözleşme pazarlığı yok; tutar seviyeden
+  /// türetilir.
+  final int earned;
+}
+
+/// Kariyerin neden bittiği. **Kuru "bitti" yazılmaz.**
+enum FootballExit {
+  yas('Yaş'),
+  sakatlik('Sakatlık'),
+  sozlesmeYenilenmedi('Sözleşme yenilenmedi'),
+  kendiKarari('Kendi kararı');
+
+  const FootballExit(this.label);
+
+  final String label;
 }
 
 /// Profesyonel futbol kariyeri durumu.
@@ -65,10 +98,14 @@ class FootballCareer {
     required this.position,
     this.active = true,
     this.retiredAtAge,
+    this.exitReason,
     this.currentClubId,
     this.currentLeagueId,
     this.form = 50,
     this.reputation = 0,
+    this.lastSeasonAge,
+    this.weakSeasons = 0,
+    this.careerEarnings = 0,
     this.seasonHistory = const <FootballSeason>[],
   });
 
@@ -89,7 +126,35 @@ class FootballCareer {
   /// okul futbolu ün açmaz.
   final int reputation;
 
+  /// Kariyer neden bitti (sürüyorsa `null`).
+  final FootballExit? exitReason;
+
+  /// Sezonu en son hangi yaşta işlediğimiz. Aynı yıl iki sezon
+  /// işlenmesini engeller — oyunun başka yerlerindeki "yaş başına bir
+  /// kez" kuralının aynısı.
+  final int? lastSeasonAge;
+
+  /// Üst üste kaç zayıf sezon geçti. Sözleşmenin yenilenmemesi buna
+  /// bakar; tek kötü sezon kariyeri bitirmez.
+  final int weakSeasons;
+
+  /// Kariyer boyunca futboldan kazanılan toplam (₺).
+  final int careerEarnings;
+
   final List<FootballSeason> seasonHistory;
+
+  /// Kaç sezon profesyonel oynandı.
+  int get proSeasons => seasonHistory.length;
+
+  /// Kariyer boyunca atılan gol.
+  int get totalGoals =>
+      seasonHistory.fold<int>(0, (int t, FootballSeason s) => t + s.goals);
+
+  /// Kariyer boyunca çıkılan maç.
+  int get totalAppearances => seasonHistory.fold<int>(
+        0,
+        (int t, FootballSeason s) => t + s.appearances,
+      );
 
   /// Kariyerin genel seviyesi `footballSkill`ten okunur; burada kopyası
   /// tutulmaz ki iki yerde farklı değer oluşmasın.
@@ -99,11 +164,15 @@ class FootballCareer {
   FootballCareer copyWith({
     bool? active,
     int? retiredAtAge,
+    FootballExit? exitReason,
     String? currentClubId,
     String? currentLeagueId,
     FootballPosition? position,
     int? form,
     int? reputation,
+    int? lastSeasonAge,
+    int? weakSeasons,
+    int? careerEarnings,
     List<FootballSeason>? seasonHistory,
   }) =>
       FootballCareer(
@@ -111,10 +180,14 @@ class FootballCareer {
         position: position ?? this.position,
         active: active ?? this.active,
         retiredAtAge: retiredAtAge ?? this.retiredAtAge,
+        exitReason: exitReason ?? this.exitReason,
         currentClubId: currentClubId ?? this.currentClubId,
         currentLeagueId: currentLeagueId ?? this.currentLeagueId,
         form: form ?? this.form,
         reputation: reputation ?? this.reputation,
+        lastSeasonAge: lastSeasonAge ?? this.lastSeasonAge,
+        weakSeasons: weakSeasons ?? this.weakSeasons,
+        careerEarnings: careerEarnings ?? this.careerEarnings,
         seasonHistory: seasonHistory ?? this.seasonHistory,
       );
 }

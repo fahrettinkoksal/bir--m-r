@@ -18,6 +18,7 @@ import '../domain/combat/sport_workload.dart';
 import '../data/school_club_catalog.dart';
 import '../domain/models/school_club_progress.dart';
 import '../domain/sports/football_career.dart';
+import '../domain/sports/football_pro_engine.dart';
 import '../domain/sports/school_club_engine.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
@@ -1394,6 +1395,54 @@ class GameController extends ChangeNotifier {
     if (current == null || current.hasPendingEvent) return;
     if (current.schoolClubs.activeFor(clubId) == null) return;
     _state = _kulupMotoru.leave(current, clubId);
+    _autoSave();
+    notifyListeners();
+  }
+
+  // --- Profesyonel futbol (Paket AY) -----------------------------------
+
+  static const FootballProEngine _futbolMotoru = FootballProEngine();
+
+  /// Profesyonel denemeye şu an girilebilir mi?
+  ///
+  /// Kapı kapalıysa gerekçesi `footballEligibility().reason` içinde.
+  bool canAttemptFootballTrial() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return false;
+    if (current.footballCareer != null) return false;
+    // Deneme yılda bir kez: girildiyse düğme bu yıl kapanır.
+    if (current.footballTrialAge == current.player.age) return false;
+    return FootballPath.evaluate(current).eligible;
+  }
+
+  /// Profesyonel denemeye girer; sonucu gerekçesiyle döner.
+  ///
+  /// Kabul **garanti değildir** — kapı açık olsa bile kadro dolabilir.
+  ({bool accepted, String reason}) attemptFootballTrial() {
+    final GameState? current = _state;
+    if (current == null) {
+      return (accepted: false, reason: 'Oyun yüklenmedi.');
+    }
+    if (current.hasPendingEvent) {
+      return (accepted: false, reason: 'Önce ekrandaki olayı sonuçlandır.');
+    }
+    final ({GameState state, bool accepted, String reason}) sonuc =
+        _futbolMotoru.attemptTrial(current, _random);
+    if (sonuc.accepted) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return (accepted: sonuc.accepted, reason: sonuc.reason);
+  }
+
+  /// Futbolu kendi kararıyla bırakır.
+  void retireFromFootball() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return;
+    final FootballCareer? k = current.footballCareer;
+    if (k == null || !k.active) return;
+    _state = _futbolMotoru.retire(current);
     _autoSave();
     notifyListeners();
   }

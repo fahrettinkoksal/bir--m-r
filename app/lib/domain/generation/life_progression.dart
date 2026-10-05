@@ -53,6 +53,7 @@ import '../interaction/bond_decay.dart';
 import '../interaction/finger.dart';
 import '../models/life_log.dart';
 import '../sports/school_club_engine.dart';
+import '../sports/football_pro_engine.dart';
 import '../models/zodiac.dart';
 import '../career/military_service.dart';
 import '../casino/lottery.dart';
@@ -393,9 +394,17 @@ class LifeProgression {
     }) kulupSezonu = const SchoolClubEngine().advanceSeason(state, _rng);
     state = kulupSezonu.state;
 
+    // Profesyonel futbol sezonu (Paket AY). Okul kulübünden ayrı:
+    // kulüp sezonu öğrencilik dönemine, bu yetişkin kariyere bakar.
+    final ({GameState state, List<String> log, String? milestone})
+        futbolSezonu = const FootballProEngine().advanceSeason(state, _rng);
+    state = futbolSezonu.state;
+
     final List<LifeLogEntry> log = <LifeLogEntry>[
       ...state.log,
       for (final String satir in kulupSezonu.log)
+        LifeLogEntry(age: newAge, text: satir, category: LogCategory.kisisel),
+      for (final String satir in futbolSezonu.log)
         LifeLogEntry(age: newAge, text: satir, category: LogCategory.kisisel),
       for (final String haber in yegenHaberleri)
         LifeLogEntry(age: newAge, text: haber, category: LogCategory.aile),
@@ -641,6 +650,16 @@ class LifeProgression {
             age: newAge,
             title: 'Takımda bir ilk',
             text: kulupSezonu.milestones[i],
+          ),
+        // Futbol kariyerinin dönüm noktaları (Paket AY): ilk sezon ve
+        // kariyerin bitişi. Sıradan sezon günlükte kalır.
+        if (futbolSezonu.milestone != null)
+          PendingNotice(
+            id: 'futbol-donum-$newAge',
+            kind: NoticeKind.kariyer,
+            age: newAge,
+            title: 'Futbol kariyeri',
+            text: futbolSezonu.milestone!,
           ),
       ]),
     );

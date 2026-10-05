@@ -21,6 +21,7 @@ import '../../domain/models/book_progress.dart';
 import '../../domain/models/combat_career.dart';
 import '../../domain/models/martial_progress.dart';
 import '../../domain/models/school_club_progress.dart';
+import '../../domain/sports/football_career.dart';
 import '../../domain/models/hobby_progress.dart';
 import '../../domain/models/lottery_ticket.dart';
 import '../finger_catalog.dart';
@@ -118,6 +119,14 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
       // yoktur, boş liste ile yüklenir ve geçmiş uydurulmaz.
       'schoolClubs':
           state.schoolClubs.map(_encodeSchoolClub).toList(growable: false),
+      // Paket AY: futbol kariyeri kayda girer. AU/1'de alan GameState'e
+      // eklenmiş ama KODEKE YAZILMAMIŞTI; o zaman hiç kariyer
+      // oluşamadığı için eksik gizli kalmıştı.
+      'footballCareer': state.footballCareer == null
+          ? null
+          : _encodeFootball(state.footballCareer!),
+      // Deneme yılda bir kez: hangi yaşta girildiği kayda geçer.
+      'footballTrialAge': state.footballTrialAge,
       // Hobi geçmişi (Paket 39). Alan eklemeli.
       'hobbies': state.hobbies.map(_encodeHobby).toList(growable: false),
       // Kronik durumlar ve sağlık geçmişi (D-153). Alan eklemeli:
@@ -614,6 +623,76 @@ SchoolClubProgress _decodeSchoolClub(Map<String, Object?> json) =>
       competitions: _intOr(json, 'competitions', 0),
       awards: _intOr(json, 'awards', 0),
       lastPracticedAge: _intOrNull(json, 'lastPracticedAge'),
+    );
+
+Map<String, Object?> _encodeFootball(FootballCareer c) => <String, Object?>{
+      'startedAtAge': c.startedAtAge,
+      'position': c.position.name,
+      'active': c.active,
+      'retiredAtAge': c.retiredAtAge,
+      'exitReason': c.exitReason?.name,
+      'currentClubId': c.currentClubId,
+      'currentLeagueId': c.currentLeagueId,
+      'form': c.form,
+      'reputation': c.reputation,
+      'lastSeasonAge': c.lastSeasonAge,
+      'weakSeasons': c.weakSeasons,
+      'careerEarnings': c.careerEarnings,
+      'seasons':
+          c.seasonHistory.map(_encodeFootballSeason).toList(growable: false),
+    };
+
+Map<String, Object?> _encodeFootballSeason(FootballSeason s) =>
+    <String, Object?>{
+      'age': s.age,
+      'clubId': s.clubId,
+      'leagueId': s.leagueId,
+      'appearances': s.appearances,
+      'goals': s.goals,
+      'rating': s.rating,
+      'injury': s.injury,
+      'earned': s.earned,
+    };
+
+FootballCareer _decodeFootball(Map<String, Object?> json) => FootballCareer(
+      startedAtAge: _int(json, 'startedAtAge'),
+      position: _enumByName(
+        FootballPosition.values,
+        _stringOrNull(json, 'position') ?? FootballPosition.ortaSaha.name,
+        'footballCareer.position',
+      ),
+      active: _boolOr(json, 'active', varsayilan: true),
+      retiredAtAge: _intOrNull(json, 'retiredAtAge'),
+      exitReason: _enumByNameOrNull(
+        FootballExit.values,
+        _stringOrNull(json, 'exitReason'),
+        'footballCareer.exitReason',
+      ),
+      currentClubId: _stringOrNull(json, 'currentClubId'),
+      currentLeagueId: _stringOrNull(json, 'currentLeagueId'),
+      form: _intOr(json, 'form', 50),
+      reputation: _intOr(json, 'reputation', 0),
+      lastSeasonAge: _intOrNull(json, 'lastSeasonAge'),
+      weakSeasons: _intOr(json, 'weakSeasons', 0),
+      careerEarnings: _intOr(json, 'careerEarnings', 0),
+      seasonHistory: List<FootballSeason>.unmodifiable(
+        _optionalRawList(json, 'seasons')
+            .map((Object? e) =>
+                _decodeFootballSeason(_asMap(e, 'footballCareer.seasons[]')))
+            .toList(growable: false),
+      ),
+    );
+
+FootballSeason _decodeFootballSeason(Map<String, Object?> json) =>
+    FootballSeason(
+      age: _int(json, 'age'),
+      clubId: _stringOrNull(json, 'clubId'),
+      leagueId: _stringOrNull(json, 'leagueId'),
+      appearances: _intOr(json, 'appearances', 0),
+      goals: _intOr(json, 'goals', 0),
+      rating: _intOr(json, 'rating', 0),
+      injury: _stringOrNull(json, 'injury'),
+      earned: _intOr(json, 'earned', 0),
     );
 
 Map<String, Object?> _encodeCombat(CombatCareer c) => <String, Object?>{
@@ -1584,6 +1663,12 @@ GameState decodeGameState(Map<String, Object?> json) {
           .map((Object? e) => _decodeSchoolClub(_asMap(e, 'schoolClubs[]')))
           .toList(growable: false),
     ),
+    // Paket AY: eski kayıtta alan yoksa null kalır; uydurma kariyer
+    // üretilmez.
+    footballCareer: json['footballCareer'] == null
+        ? null
+        : _decodeFootball(_asMap(json['footballCareer'], 'footballCareer')),
+    footballTrialAge: _intOrNull(json, 'footballTrialAge'),
     // Paket AL: eski kayıtta yok; boş liste ile yüklenir.
     combatCareers: List<CombatCareer>.unmodifiable(
       _optionalRawList(json, 'combatCareers')

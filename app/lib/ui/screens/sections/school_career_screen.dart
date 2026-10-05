@@ -275,7 +275,8 @@ class _SchoolViewState extends State<_SchoolView> {
         ),
         // Spor Kariyeri yalnızca gerçekten bir futbol geçmişi varsa
         // görünür: boş sayfaya götüren satır konmaz.
-        if (FootballPath.youthSummary(state).isNotEmpty) ...<Widget>[
+        if (FootballPath.youthSummary(state).isNotEmpty ||
+            state.footballCareer != null) ...<Widget>[
           const SizedBox(height: 10),
           MenuRow(
             key: const Key('school_sports_career_row'),
@@ -806,7 +807,8 @@ class _CareerViewState extends State<_CareerView> {
         // Spor Kariyeri (Paket AV): profesyonel futbol bir kJobCatalog
         // işi değil, kendi yolu var. Satır yalnızca gerçek bir futbol
         // geçmişi varsa görünür.
-        if (FootballPath.youthSummary(state).isNotEmpty) ...<Widget>[
+        if (FootballPath.youthSummary(state).isNotEmpty ||
+            state.footballCareer != null) ...<Widget>[
           MenuRow(
             key: const Key('career_sports_row'),
             title: 'Spor Kariyeri',

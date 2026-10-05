@@ -56,6 +56,17 @@ void main() {
     int birakan = 0;
     int futbolOynayan = 0;
     int futbolKapisiAcilan = 0;
+    // Paket AY: kapıdan geçtikten sonrası.
+    int denemeyeGiren = 0;
+    int denemeKabul = 0;
+    int denemeRet = 0;
+    final List<int> proSezonlari = <int>[];
+    final List<int> proKazanclari = <int>[];
+    final List<int> proMaclari = <int>[];
+    final List<int> proGolleri = <int>[];
+    int sakatlikYasayan = 0;
+    final Map<String, int> bitisSebepleri = <String, int>{};
+    final List<int> birakmaYaslari = <int>[];
     int scoutGoren = 0;
     int antrenmanYapan = 0;
 
@@ -122,6 +133,34 @@ void main() {
       if (r.footballEligibleEver) futbolKapisiAcilan++;
       if (r.footballScoutSeen) scoutGoren++;
 
+      if (r.footballTrialAttempted) denemeyeGiren++;
+      denemeRet += r.footballTrialRejections;
+      if (r.footballTrialAccepted) {
+        denemeKabul++;
+        proSezonlari.add(r.footballProSeasons);
+        proKazanclari.add(r.footballEarnings);
+        proMaclari.add(r.footballProAppearances);
+        proGolleri.add(r.footballProGoals);
+        if (r.footballInjurySeasons > 0) sakatlikYasayan++;
+        final String? sebep = r.footballExitReason;
+        if (sebep != null) {
+          bitisSebepleri[sebep] = (bitisSebepleri[sebep] ?? 0) + 1;
+        }
+        final int? birakmaYasi = r.footballRetireAge;
+        if (birakmaYasi != null) birakmaYaslari.add(birakmaYasi);
+      }
+
+      // Paket AY bekçileri: kapı açılmadan profesyonel olunamaz.
+      if (r.footballTrialAccepted && !r.footballEligibleEver) {
+        sorunlar.add('seed ${r.seed}: kapı açılmadan profesyonel oldu');
+      }
+      if (r.footballProSeasons > 0 && !r.footballTrialAccepted) {
+        sorunlar.add('seed ${r.seed}: deneme kabul yok ama pro sezon var');
+      }
+      if (r.footballEarnings > 0 && r.footballProSeasons == 0) {
+        sorunlar.add('seed ${r.seed}: sezon oynamadan futboldan para');
+      }
+
       // --- Tutarlılık denetimleri (ölçümün kendisi değil, bekçi) ------
       //
       // Futbol geçmişi olmayan biri kapıdan geçmiş olamaz.
@@ -172,6 +211,27 @@ void main() {
     print('Esik: puan >= ${FootballPath.prototypeOnlyMinScore}, sezon >= '
         '${FootballPath.prototypeOnlyMinSeasons}, beceri >= '
         '${FootballPath.prototypeOnlyMinSkill}');
+    print('');
+    print('PROFESYONEL FUTBOL (Paket AY)');
+    print('Denemeye giren        $denemeyeGiren  ${_yuzde(denemeyeGiren, kOlcumHayati)}');
+    print('Kabul edilen          $denemeKabul  ${_yuzde(denemeKabul, kOlcumHayati)}'
+        '  (denemeye girenlerin ${_yuzde(denemeKabul, denemeyeGiren)})');
+    print('Toplam ret            $denemeRet');
+    print('Pro sezon (medyan)    ${_medyan(proSezonlari)} · en fazla '
+        '${proSezonlari.isEmpty ? 0 : (List<int>.of(proSezonlari)..sort()).last}');
+    print('Mac (medyan)          ${_medyan(proMaclari)}');
+    print('Gol (medyan)          ${_medyan(proGolleri)}');
+    print('Kazanc (medyan)       ${_medyan(proKazanclari)} TL · en yuksek '
+        '${proKazanclari.isEmpty ? 0 : (List<int>.of(proKazanclari)..sort()).last} TL');
+    print('Sakatlik yasayan      $sakatlikYasayan  ${_yuzde(sakatlikYasayan, denemeKabul)}');
+    print('Birakma yasi (medyan) ${_medyan(birakmaYaslari)}');
+    print('BITIS SEBEPLERI');
+    if (bitisSebepleri.isEmpty) {
+      print('  (hic kariyer bitmedi)');
+    }
+    for (final String k in bitisSebepleri.keys.toList()..sort()) {
+      print('  $k  ${bitisSebepleri[k]}  ${_yuzde(bitisSebepleri[k]!, denemeKabul)}');
+    }
     print('');
     print('KATEGORI DAGILIMI (kulube giren hayatlar icinde)');
     for (final String k in kategoriSayaci.keys.toList()..sort()) {

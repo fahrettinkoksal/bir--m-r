@@ -483,6 +483,34 @@ class BotLifeResult {
   /// Scout ilgisi bir kez bile oluştu mu.
   bool footballScoutSeen = false;
 
+  // Profesyonel futbol (Paket AY)
+
+  /// Profesyonel denemeye bir kez bile girdi mi.
+  bool footballTrialAttempted = false;
+
+  /// Denemelerden en az biri kabul edildi mi.
+  bool footballTrialAccepted = false;
+
+  /// Kaç kez denemeye girip reddedildi.
+  int footballTrialRejections = 0;
+
+  /// Oynanan profesyonel sezon sayısı.
+  int footballProSeasons = 0;
+
+  /// Profesyonel sezonlarda toplam maç ve gol.
+  int footballProAppearances = 0;
+  int footballProGoals = 0;
+
+  /// Sakatlıkla geçen sezon sayısı.
+  int footballInjurySeasons = 0;
+
+  /// Futboldan kazanılan toplam para (₺).
+  int footballEarnings = 0;
+
+  /// Kariyerin bitiş sebebi ve yaşı; kariyer yoksa null.
+  String? footballExitReason;
+  int? footballRetireAge;
+
   // Suç
   bool hasRecord = false;
   bool wentToTrial = false;
@@ -2231,7 +2259,16 @@ void _handleSchoolClubs(
   // hemen çıkıyordu, oysa profesyonel futbol uygunluğu 16-23 yaş
   // aralığında. Mezuniyet sonrası yıllar (19-23) hiç ölçülmüyordu ve
   // "profesyonel kapı hiç açılmadı" sonucu bu körlükten geliyordu.
+  // SIRA ÖNEMLİ: önce ölçüm, sonra karar.
+  //
+  // ÖLÇÜM HATASI (bulundu ve düzeltildi): karar önce gelince, deneme
+  // kabul edilen yılda kariyer kurulduğu için `FootballPath.evaluate`
+  // artık `aktifProfesyonel` dönüyordu ve `eligible` hiç `true`
+  // görülmüyordu. Ölçüm "kapı açılmadan profesyonel oldu" diyordu;
+  // oyun doğruydu, ölçüm kördü.
   _olcFutbolYolu(c.state!, sonuc);
+  _handleProFootball(c, profile, rng, sonuc);
+  s = c.state!;
   if (!s.education.isStudent) return;
   final int sinif = s.education.grade ?? 0;
 
@@ -2291,6 +2328,67 @@ void _handleSchoolClubs(
 
   // --- 4) Ölçüm (okuma; oyuna dokunmaz) -------------------------------
   _olcFutbolYolu(c.state!, sonuc);
+}
+
+/// Profesyonel futbol kararı: kapı açıksa denemeye girer mi?
+///
+/// Bot her uygun yılda denemeye girmez; girmek bir karar. İstek spor
+/// eğiliminden doğar, böylece "kapı açılan herkes profesyonel oldu" gibi
+/// sahte bir ölçüm çıkmaz. Ağırlıklar `prototypeOnly`: botun davranışı
+/// ölçüm aracıdır, oyun kuralı değil.
+///
+/// Sezonun kendisi bot tarafından işlenmez; `life_progression` yaş
+/// ilerlerken işler. Burada yalnızca karar verilir ve sonuç okunur.
+void _handleProFootball(
+  GameController c,
+  BotProfile profile,
+  Random rng,
+  BotLifeResult sonuc,
+) {
+  final GameState s = c.state!;
+  final FootballCareer? kariyer = s.footballCareer;
+
+  if (kariyer == null) {
+    if (!c.canAttemptFootballTrial()) return;
+    // Spor odaklı bot neredeyse her yıl dener; diğerleri seyrek.
+    final double istek = 0.25 + profile.sportDesire * 0.65;
+    if (rng.nextDouble() > istek) return;
+    sonuc.footballTrialAttempted = true;
+    final ({bool accepted, String reason}) sonucDeneme =
+        c.attemptFootballTrial();
+    if (sonucDeneme.accepted) {
+      sonuc.footballTrialAccepted = true;
+    } else {
+      sonuc.footballTrialRejections++;
+    }
+    return;
+  }
+
+  // Kariyer varsa ölçülür. Bot kendi isteğiyle bırakmayı da düşünür:
+  // formu dibe vurmuş ve yaşı geçmiş bir futbolcu kalmayabilir.
+  _olcProfesyonelFutbol(kariyer, sonuc);
+  if (kariyer.active &&
+      kariyer.form < 25 &&
+      s.player.age >= 33 &&
+      rng.nextDouble() < 0.4) {
+    c.retireFromFootball();
+    _olcProfesyonelFutbol(c.state!.footballCareer!, sonuc);
+  }
+}
+
+/// Profesyonel kariyerin o anki toplamlarını ölçüme yazar.
+void _olcProfesyonelFutbol(FootballCareer k, BotLifeResult sonuc) {
+  sonuc.footballProSeasons = k.proSeasons;
+  sonuc.footballProAppearances = k.totalAppearances;
+  sonuc.footballProGoals = k.totalGoals;
+  sonuc.footballEarnings = k.careerEarnings;
+  sonuc.footballInjurySeasons = k.seasonHistory
+      .where((FootballSeason sz) => sz.injury != null)
+      .length;
+  if (!k.active) {
+    sonuc.footballExitReason = k.exitReason?.name;
+    sonuc.footballRetireAge = k.retiredAtAge;
+  }
 }
 
 /// Kulüp rolü ve futbol yolunun o anki durumunu okur.
