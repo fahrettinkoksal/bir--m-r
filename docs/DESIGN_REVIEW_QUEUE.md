@@ -6394,3 +6394,60 @@ zincirinde onay bekleyen sayı kalmadı.
 Bununla birlikte **Q-186'nın bu maddesi de kapandı.** Okul kulüpleri,
 profesyonel futbol ve dövüş rekabeti artık baştan sona onaylı
 sayılarla çalışıyor; bu üç sistemde `prototypeOnly` sabit kalmadı.
+
+### Q-194 — 838 onaysız sayı için gündem önerisi (5 Ekim 2026)
+
+**Durum: öneri hazır, karar bekliyor. Hiçbir şey uygulanmadı.**
+
+Futbol/kulüp/dövüş zinciri kapandıktan sonra "sırada ne var" sorusunu
+tahminle değil ölçümle yanıtlamak için `lib` içindeki **bildirilmiş**
+`prototypeOnly` sabitleri saydım (kullanım yerleri değil, bildirimler).
+
+**838 sabit, 20 alana dağılmış:**
+
+| Sayı | Alan | En kalabalık dosyalar |
+|---|---|---|
+| 184 | `domain/economy` | business_engine 29 · market_engine 26 · business_market 18 · banking 15 · rental_engine 15 |
+| 98 | `domain/generation` | child_progression 12 · life_progression 12 · trait_inheritance 10 |
+| 97 | `domain/interaction` | item_actions 16 · marriage_engine 14 · parenthood 11 · bond_decay 10 |
+| 83 | `domain/life` | — |
+| 66 | `domain/career` | — |
+| 62 | `domain/family` | — |
+| 57 | `domain/social` | — |
+| 43 | `domain/combat` | — |
+| 35 | `domain/activities` | — |
+| 25 | `domain/education` · 25 `domain/law` · 16 `domain/models` · 14 `domain/pets` · 12 `domain/casino` | — |
+
+#### Önerim: toplu onay YAPMA
+
+Bu 838 sayıyı karara çevirmek bana cazip görünmüyor ve sana da
+önermiyorum. Gerekçe: çoğu **iç ayar** ve zaten ölçümle doğrulanmış
+(AA-AG paketleri ekonomiyi binlerce hayatla ölçtü). Hepsini kurala
+çevirmek, ayarlanabilir kalması gereken sayıları dondurur ve her küçük
+kalibrasyon için senden onay istemem gerekir — kuyruk tıkanır.
+
+#### Önerim: bunun yerine iki desene bakalım
+
+Bugün aynı sınıf hatayı **iki kez** buldum ve ikisi de sayının
+değerinden değil, sayının **diğer mekanikleri işlevsiz bırakmasından**
+geliyordu:
+
+1. **Dekoratif eşik** (D-137): deneme eşiği 62'ydi, ama kapıdan geçen
+   en zayıf aday 63 puanla geliyordu — eşik hiçbir şey elemiyordu.
+2. **Doymuş tavan** (D-142): Emek ekseninde yıl ağırlığı 2 iken 15
+   sezon tek başına tavanı dolduruyordu — gol ve maç **hiç** sayılmıyordu.
+
+İkisi de testten değil **ölçümden** çıktı, çünkü testler "çalışıyor mu"
+diye bakıyordu, "fark yaratıyor mu" diye değil.
+
+*Önerim ve varsayılanım:* bir sonraki paket **toplu onay değil, bu iki
+deseni kod tabanında taramak** olsun. Yöntem hazır: bir sabitin etkisini
+sıfırla ve ölçüm değişiyor mu diye bak — değişmiyorsa o sabit ya
+dekoratif ya da doymuş. Ekonomi (184 sabit) ve etkileşim (97) en büyük
+iki alan olduğu için oradan başlamayı öneriyorum.
+
+*Alternatif (sen istersen):* alan alan toplu onay; o zaman en küçükten
+başlayıp (`casino` 12, `pets` 14, `models` 16) ısınmayı öneririm,
+çünkü büyük alanlar tek oturumda okunamaz.
+
+**Hiçbir şey uygulanmadı; bu bir gündem önerisi.** Karar senin.
