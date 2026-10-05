@@ -98,6 +98,31 @@ class FootballProEngine {
   /// sakatlık 34 yaşında 24 yaşından daha çok kariyer bitirir.
   static const int prototypeOnlySevereInjuryAgeBonus = 5;
 
+  /// prototypeOnly: profesyonel futbolun getirebileceği en yüksek Ün.
+  ///
+  /// Dövüş kariyerindeki `prototypeOnlySportFameCap` ile aynı sayı ve
+  /// aynı gerekçe (§17): spor tek başına kamuoyu ününü doldurmaz,
+  /// Ün 100 için sosyal medya da gerekir.
+  ///
+  /// **ÖLÇÜLEN HATA (Paket AY/2):** futbol `fame` alanına hiç
+  /// dokunmuyordu. 300 maç oynamış, 31 gol atmış bir profesyonel
+  /// tanınmamış kalıyordu; sponsorluk ve medya işleri (minFame 3-78)
+  /// futbolcuya hiç açılmıyordu. "Futbol sonrası hayat" diye yazdığım
+  /// kapsam fiilen boştu.
+  static const int prototypeOnlyFootballFameCap = 70;
+
+  /// prototypeOnly: bir profesyonel sezonun taban Ün kazancı.
+  ///
+  /// Sahada olmak tek başına tanınmak demektir; kötü sezon da olsa
+  /// adın geçer.
+  static const int prototypeOnlySeasonFameBase = 2;
+
+  /// prototypeOnly: sezon puanının Ün'e katkı böleni (50 üstü kısım).
+  static const int prototypeOnlySeasonFameRatingDivisor = 10;
+
+  /// prototypeOnly: kaç gol başına 1 Ün.
+  static const int prototypeOnlyGoalsPerFame = 4;
+
   /// Yıllık kazancın **yıllık asgari ücret** cinsinden tabanı ve tavanı.
   ///
   /// Sözleşme pazarlığı YOK; tutar seviyeden türetilir. Alt ligde
@@ -298,6 +323,18 @@ class FootballProEngine {
             '${agir ? '; toparlanmak uzun sürdü' : ''}.',
     ];
 
+    // --- Ün: sahada olmak tanınmak demektir ---------------------------
+    //
+    // Futbol, dövüş kariyeriyle aynı yoldan Ün'e bağlanır; tavan aynı.
+    // Böylece futbolcu sponsorluk ve medya işlerine (minFame 3-78)
+    // erişebilir ve "futbol sonrası hayat" gerçekten bir şeye dayanır.
+    final int unKazanci = prototypeOnlySeasonFameBase +
+        (puan - 50).clamp(0, 50) ~/ prototypeOnlySeasonFameRatingDivisor +
+        gol ~/ prototypeOnlyGoalsPerFame;
+    final int mevcutUn = state.player.fame ?? 0;
+    final int yeniUn =
+        (mevcutUn + unKazanci).clamp(0, prototypeOnlyFootballFameCap);
+
     // --- Kariyer sonu kontrolü ----------------------------------------
     final FootballExit? cikis = _cikisSebebi(
       yas: yas,
@@ -315,9 +352,11 @@ class FootballProEngine {
         exitReason: cikis,
       );
       log.add(_bitisCumlesi(cikis, guncel));
+      // Kariyer sonu bir kapanış değil, bir geçiş: oyuncunun eline ne
+      // kaldığı yazılır. Önceki hâli yalnızca sayı sayıyordu.
       donum = 'Futbol kariyerin bitti: ${cikis.label.toLowerCase()}. '
           '${guncel.proSeasons} sezon, ${guncel.totalAppearances} maç, '
-          '${guncel.totalGoals} gol.';
+          '${guncel.totalGoals} gol. ${_sonrasiCumlesi(yeniUn)}';
     } else if (guncel.proSeasons == 1) {
       donum = 'İlk profesyonel sezonunu tamamladın: $mac maç, $gol gol.';
     }
@@ -327,6 +366,8 @@ class FootballProEngine {
       footballCareer: guncel,
       player: state.player.copyWith(
         wallet: state.player.wallet + kazanc,
+        // Ün yalnızca yükseliyorsa yazılır; tavana dayanmışsa dokunulmaz.
+        fame: yeniUn > mevcutUn ? yeniUn : state.player.fame,
         // D-099: stat değişimi `gain` üzerinden geçer. Düşüşler tam
         // uygulanır, yani sakatlık bedeli pazarlık etmez.
         stats: state.player.stats.gain(health: -saglikBedeli),
@@ -444,6 +485,24 @@ class FootballProEngine {
     return gol > 0
         ? '$nasil: $mac maç, $gol gol.'
         : '$nasil: $mac maça çıktın, gol atamadın.';
+  }
+
+  /// Kariyer bittiğinde oyuncunun eline ne kaldığını söyleyen cümle.
+  ///
+  /// Ün, futbol sonrası hayatın asıl sermayesi: sponsorluk ve medya
+  /// işleri Ün eşiğine bakıyor. Bu yüzden bitiş metni oyuncuya
+  /// tanınırlığının nereye düştüğünü söyler, "bitti" deyip susmaz.
+  String _sonrasiCumlesi(int un) {
+    if (un >= 55) {
+      return 'Adın futbolun dışında da biliniyor; teklifler gelmeye '
+          'devam edebilir.';
+    }
+    if (un >= 25) {
+      return 'Futbolu bilen çevrede tanınıyorsun; bu tanınırlık bir '
+          'süre daha işine yarar.';
+    }
+    return 'Sahadan uzaklaşınca adın çabuk unutulur; bundan sonrası '
+        'futbol dışındaki seçimlerine bağlı.';
   }
 
   String _bitisCumlesi(FootballExit cikis, FootballCareer k) =>

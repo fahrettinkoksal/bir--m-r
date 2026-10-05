@@ -715,8 +715,15 @@ class SocialEngine {
     final int? mevcut = state.player.fame;
     if (mevcut == null || mevcut <= prototypeOnlyFameFloor) return state;
 
-    final int sonPaylasim = _lastPostAge(state);
-    final int sessizYil = newAge - sonPaylasim;
+    // Görünürlük yalnızca paylaşımdan gelmez (Paket AY/2).
+    //
+    // D-118'in gerekçesi "tanınmışlık bakım ister". Sahada 30 maç
+    // oynamak bakımın kendisidir: aktif bir profesyonel futbolcu
+    // sosyal medyada sessiz kalsa da adı geçer. Bu kontrol olmadan
+    // futbolun kazandırdığı Ün (sezon başına ~3) yıllık %12 sönümlemeye
+    // yeniliyor ve futbolcu hiç tanınmıyordu.
+    final int sonGorunurluk = _lastVisibleAge(state);
+    final int sessizYil = newAge - sonGorunurluk;
     if (sessizYil < prototypeOnlyFameSilenceYears) return state;
 
     final double hiz = sessizYil >= prototypeOnlyFameFastDecayYears
@@ -739,6 +746,17 @@ class SocialEngine {
   static const int prototypeOnlyFameFloor = 5;
 
   /// En son paylaşım yapılan yaş; hiç paylaşım yoksa hesabın açıldığı yaş.
+  /// Oyuncunun kamuoyunda en son göründüğü yaş.
+  ///
+  /// Paylaşım ya da **oynanan profesyonel futbol sezonu**; hangisi daha
+  /// yeniyse. Emeklilikten sonra bu sayı ilerlemez, yani emekli
+  /// futbolcunun ünü zamanla solar — olması gereken de bu.
+  int _lastVisibleAge(GameState state) {
+    final int paylasim = _lastPostAge(state);
+    final int sezon = state.footballCareer?.lastSeasonAge ?? 0;
+    return sezon > paylasim ? sezon : paylasim;
+  }
+
   int _lastPostAge(GameState state) {
     int enSon = 0;
     for (final SocialAccount a in state.socialAccounts) {

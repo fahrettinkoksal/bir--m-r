@@ -7,6 +7,7 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/social_account.dart';
+import 'package:bir_omur/domain/sports/football_career.dart';
 import 'package:bir_omur/domain/models/sponsorship.dart';
 import 'package:bir_omur/domain/social/media_opportunities.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
@@ -145,6 +146,62 @@ void main() {
         s.player.fame,
         greaterThanOrEqualTo(SocialEngine.prototypeOnlyFameFloor),
       );
+    });
+
+    test('aktif profesyonel futbolcunun Ünü sessizlikten düşmez', () {
+      // Paket AY/2: D-118'in gerekçesi "tanınmışlık bakım ister".
+      // Sahada 30 maç oynamak bakımın kendisidir; aktif futbolcu
+      // sosyal medyada sessiz kalsa da adı geçer. Bu kontrol olmadan
+      // futbolun kazandırdığı Ün yıllık %12 sönümlemeye yeniliyordu.
+      GameState s = taban(age: 30, fame: 60).copyWith(
+        socialAccounts: <SocialAccount>[
+          hesap(
+            platform: SocialPlatform.values.first,
+            followers: 20000,
+            createdAtAge: 20,
+            posts: const <SocialPost>[
+              SocialPost(contentId: 'x', age: 25, followerDelta: 10),
+            ],
+          ),
+        ],
+        footballCareer: const FootballCareer(
+          startedAtAge: 19,
+          position: FootballPosition.forvet,
+          lastSeasonAge: 30,
+        ),
+      );
+      final int once = s.player.fame!;
+      s = const SocialEngine().advanceYear(s, 31).state;
+      expect(s.player.fame, once,
+          reason: 'Geçen sezonu oynamış futbolcu sessiz sayılmamalı');
+    });
+
+    test('emekli futbolcunun Ünü zamanla solar', () {
+      // Sahadan uzaklaşınca görünürlük biter: kayıt duruyor ama ün
+      // sönümlemeye açık. Olması gereken de bu.
+      GameState s = taban(age: 40, fame: 60).copyWith(
+        socialAccounts: <SocialAccount>[
+          hesap(
+            platform: SocialPlatform.values.first,
+            followers: 20000,
+            createdAtAge: 20,
+            posts: const <SocialPost>[
+              SocialPost(contentId: 'x', age: 25, followerDelta: 10),
+            ],
+          ),
+        ],
+        footballCareer: const FootballCareer(
+          startedAtAge: 19,
+          position: FootballPosition.forvet,
+          active: false,
+          retiredAtAge: 34,
+          lastSeasonAge: 34,
+          exitReason: FootballExit.yas,
+        ),
+      );
+      final int once = s.player.fame!;
+      s = const SocialEngine().advanceYear(s, 41).state;
+      expect(s.player.fame, lessThan(once));
     });
 
     test('bu yıl paylaşım yapıldıysa Ün düşmez', () {

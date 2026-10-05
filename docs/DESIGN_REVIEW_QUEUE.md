@@ -6099,3 +6099,59 @@ Kulüp/lig alanları `null` duruyor, **uydurma kulüp adı üretilmiyor** ve
 katalog geldiğinde (Paket AZ) dolacak. Ekrandaki "henüz yazılmadı" notu
 bu listeye göre güncellendi; sezon akışı artık yazıldığı için o cümle
 kaldırıldı.
+
+### Q-193 EKİ — "Futbol sonrası hayat" fiilen boştu (Paket AY/2)
+
+**Durum: hata düzeltildi, iki yeni sayı karar bekliyor.**
+
+AY'yi kapatırken kapsamına "futbol sonrası hayat" yazmıştım. Ölçtüm:
+**yazmamışım.** Kariyer bitiyor ve hiçbir şey olmuyordu. Somut hata:
+**futbol `fame` alanına hiç dokunmuyordu.** 300 maç oynamış, 31 gol
+atmış, 35 milyon ₺ kazanmış bir profesyonel tanınmamış kalıyordu;
+medya ve sponsorluk işleri (katalog `minFame` 3-78) futbolcuya hiç
+açılmıyordu. Dövüş kariyeri bunu ta Paket AL'de yapmış (`_applySportFame`,
+§17); futbol o yola bağlanmamıştı.
+
+**İkinci hata: sönümleme futbolcuyu cezalandırıyordu.** D-118 Ün'ü
+"sosyal medyada sessizlik" ölçüsüyle yılda %12 düşürüyor. Sahada 30 maç
+oynayan bir futbolcu "sessiz" sayılıyordu; futbolun kazandırdığı Ün
+(sezon başına ~3) sönümlemeye yeniliyordu. D-118'in gerekçesi
+"tanınmışlık bakım ister" — **oynamak bakımın kendisidir.** Görünürlük
+ölçüsü artık paylaşım ile oynanan son sezonun yenisini alıyor.
+Emeklilikten sonra bu sayı ilerlemediği için **emekli futbolcunun ünü
+solmaya devam ediyor**; olması gereken de bu.
+
+**Ölçüm (aynı 1200 spor odaklı hayat, 49 kariyer):**
+
+| Ölçülen | Önce | Sonra |
+|---|---|---|
+| Ün hiç gelmeyen kariyer | **%100** | **%0** |
+| Zirve Ün (medyan) | 0 | **43** (en az 11, en fazla 70 = tavan) |
+| Emeklilik anındaki Ün (medyan) | 0 | **52** |
+| Hayat sonundaki Ün (medyan) | 0 | **34** (soluyor) |
+
+**Yan etki, bekçisiz kalmasın diye not:** Ün açılınca bot sosyal/medya
+yollarını da kullanmaya başladı ve hayatlar çeşitlendi. Kariyer uzunluğu
+**medyan 15 → 14, en az 9 → 4 sezon**, en erken bırakma **29 → 25 yaş**
+oldu. Yani Q-193'ün 3. maddesindeki "kimsenin kısa kariyeri yok" sorunu
+kendiliğinden kısmen çözüldü — kurgu değil, ölçüm.
+
+#### Karar bekleyen iki sayı
+
+**1 — Ün tavanı.** `prototypeOnlyFootballFameCap = 70`. *Öneri: kalsın.*
+Dövüşteki `prototypeOnlySportFameCap` ile birebir aynı sayı ve aynı
+gerekçe: spor tek başına kamuoyu ününü doldurmaz, Ün 100 için sosyal
+medya da gerekir. İki sporun aynı tavanı paylaşması tutarlılık.
+
+**2 — Sezon başına Ün.** `prototypeOnlySeasonFameBase = 2`,
+`prototypeOnlySeasonFameRatingDivisor = 10`, `prototypeOnlyGoalsPerFame = 4`.
+Yani bir sezon = 2 + (puan−50)/10 + gol/4. *Öneri: kalsın.* Ölçülen
+sonuç: sıradan bir kariyer 43, iyi bir kariyer tavana dayanıyor, kötü
+bir kariyer 11'de kalıyor. Dağılım geniş ve kimse bedava ünlü olmuyor.
+
+**Kalıcı bekçi eklendi.** `paket_ay_football_measurement_test` artık
+"profesyonel oynayıp Ün hiç kazanmamak"ı hata sayıyor ve zirve Ün
+medyanının sponsorluk bandının altına düşmesine izin vermiyor.
+
+**Bu ek `DECISIONS.md`'ye hiçbir şey yazmadı.** İki sayı da
+`prototypeOnly`; Faho onaylarsa kurala dönüşür.

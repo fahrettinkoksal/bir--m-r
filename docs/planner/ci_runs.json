@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 422,
+ "total": 424,
  "runs": [
+  {
+   "id": 37270236502,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "d8434654b32399be71a95cd4cba29a8211832e80",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 214,
+   "event": "push",
+   "created_at": "2026-10-05T05:59:43Z",
+   "updated_at": "2026-10-05T06:14:18Z",
+   "run_started_at": "2026-10-05T05:59:43Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/37270236502",
+   "display_title": "Paket AY düzeltmeleri: D-099 kanonik yolu ve eskiyen dürüstlük testi"
+  },
+  {
+   "id": 37270236496,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "d8434654b32399be71a95cd4cba29a8211832e80",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 211,
+   "event": "push",
+   "created_at": "2026-10-05T05:59:43Z",
+   "updated_at": "2026-10-05T06:17:20Z",
+   "run_started_at": "2026-10-05T05:59:43Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/37270236496",
+   "display_title": "Paket AY düzeltmeleri: D-099 kanonik yolu ve eskiyen dürüstlük testi"
+  },
   {
    "id": 37232421670,
    "name": "Android debug APK",

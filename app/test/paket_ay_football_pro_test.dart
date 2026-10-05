@@ -402,6 +402,66 @@ void main() {
     });
   });
 
+  group('Ün: futbol sonrası hayatın sermayesi (Paket AY/2)', () {
+    test('profesyonel sezon Ün kazandırıyor', () {
+      // ÖLÇÜLEN HATA: futbol fame alanına hiç dokunmuyordu; 300 maç
+      // oynamış bir profesyonel tanınmamış kalıyordu.
+      final GameState once = _profesyonel(_gucluGecmis(_hayat(40, age: 21)));
+      expect(once.player.fame ?? 0, 0);
+      final GameState sonra = kMotor.advanceSeason(once, Random(3)).state;
+      expect(sonra.player.fame, isNotNull);
+      expect(sonra.player.fame!, greaterThan(0));
+    });
+
+    test('uzun kariyer sponsorluk eşiklerine ulaşıyor', () {
+      GameState s = _profesyonel(_gucluGecmis(_hayat(41, age: 20)));
+      for (int yas = 20; yas <= 34; yas++) {
+        s = s.copyWith(player: s.player.copyWith(age: yas));
+        s = kMotor.advanceSeason(s, Random(yas * 3)).state;
+      }
+      // Katalogdaki medya/sponsorluk işleri minFame 3-78 bandında.
+      // 15 sezonluk bir kariyer orta bandı açmalı.
+      expect(s.player.fame, isNotNull);
+      expect(s.player.fame!, greaterThan(20),
+          reason: 'Uzun kariyer sonunda futbolcu hâlâ tanınmıyor');
+    });
+
+    test('Ün tavanı var: futbol tek başına 100 yapmaz', () {
+      GameState s = _profesyonel(
+        _gucluGecmis(_hayat(42, age: 18, health: 100), seasons: 9, skill: 95),
+        form: 100,
+        reputation: 100,
+      );
+      for (int yas = 18; yas <= 38; yas++) {
+        s = s.copyWith(player: s.player.copyWith(age: yas));
+        s = kMotor.advanceSeason(s, Random(yas * 5)).state;
+      }
+      expect(
+        s.player.fame!,
+        lessThanOrEqualTo(FootballProEngine.prototypeOnlyFootballFameCap),
+      );
+      expect(s.player.fame!, lessThan(100));
+    });
+
+    test('kariyer sonu metni oyuncuya ne kaldığını söylüyor', () {
+      final GameState s = _profesyonel(
+        _gucluGecmis(_hayat(43, age: FootballProEngine.prototypeOnlyHardRetireAge)),
+      );
+      final ({GameState state, List<String> log, String? milestone}) r =
+          kMotor.advanceSeason(s, Random(2));
+      expect(r.milestone, isNotNull);
+      // Kuru "bitti" değil: sonrasına dair bir cümle var.
+      expect(
+        r.milestone!,
+        anyOf(
+          contains('teklifler'),
+          contains('tanınıyorsun'),
+          contains('unutulur'),
+        ),
+      );
+    });
+  });
+
   group('Futbol sonrası hayat', () {
     test('futbolculuk hâlâ bir kJobCatalog işi DEĞİL', () {
       expect(

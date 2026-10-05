@@ -511,6 +511,15 @@ class BotLifeResult {
   String? footballExitReason;
   int? footballRetireAge;
 
+  /// Futbol kariyeri boyunca ulaşılan en yüksek Ün (Paket AY/2).
+  int footballPeakFame = 0;
+
+  /// Kariyer bittiği andaki Ün.
+  int? footballFameAtRetirement;
+
+  /// Hayatın sonundaki Ün: emeklilikten sonra solup solmadığı.
+  int footballFameAtDeath = 0;
+
   // Suç
   bool hasRecord = false;
   bool wentToTrial = false;
@@ -2268,6 +2277,7 @@ void _handleSchoolClubs(
   // oyun doğruydu, ölçüm kördü.
   _olcFutbolYolu(c.state!, sonuc);
   _handleProFootball(c, profile, rng, sonuc);
+  _olcFutbolUnu(c.state!, sonuc);
   s = c.state!;
   if (!s.education.isStudent) return;
   final int sinif = s.education.grade ?? 0;
@@ -2388,6 +2398,20 @@ void _olcProfesyonelFutbol(FootballCareer k, BotLifeResult sonuc) {
   if (!k.active) {
     sonuc.footballExitReason = k.exitReason?.name;
     sonuc.footballRetireAge = k.retiredAtAge;
+  }
+}
+
+/// Ün ölçümü: futbolun kamuoyu ününe dönüşüp dönüşmediği (Paket AY/2).
+void _olcFutbolUnu(GameState s, BotLifeResult sonuc) {
+  if (s.footballCareer == null) return;
+  final int un = s.player.fame ?? 0;
+  if (un > sonuc.footballPeakFame) sonuc.footballPeakFame = un;
+  sonuc.footballFameAtDeath = un;
+  final FootballCareer k = s.footballCareer!;
+  if (!k.active &&
+      sonuc.footballFameAtRetirement == null &&
+      s.player.age == k.retiredAtAge) {
+    sonuc.footballFameAtRetirement = un;
   }
 }
 

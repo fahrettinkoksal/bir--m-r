@@ -4119,6 +4119,52 @@ Doğrulama: `flutter analyze` çıkış kodu 0; AY motor testleri (32) ve AY
 ekran testleri (4) yeşil. **Android APK ya da Windows derlemesi bu
 pakette denenmedi** — yerel kapta araç zinciri yok.
 
+## Paket AY/2: "futbol sonrası hayat" dedim, yazmamışım (5 Ekim 2026)
+
+AY'yi kapatırken kapsamına "futbol sonrası hayat" yazdım. Ölçtüm ve
+**yanlış çıktı:** kariyer bitiyor, hiçbir şey olmuyordu.
+
+**Hata 1 — futbol `fame` alanına hiç dokunmuyordu.** 300 maç oynamış,
+31 gol atmış, 35 milyon ₺ kazanmış bir profesyonel **tanınmamış**
+kalıyordu. Medya ve sponsorluk işleri (`minFame` 3-78) futbolcuya hiç
+açılmıyordu. Dövüş kariyeri bunu Paket AL'de yapmıştı; futbol o yola
+bağlanmamıştı. Artık profesyonel sezon Ün kazandırıyor, tavan dövüşteki
+sayının aynısı (70): spor tek başına Ün 100 yapmaz.
+
+**Hata 2 — sönümleme futbolcuyu cezalandırıyordu.** D-118 Ün'ü "sosyal
+medyada sessizlik" ölçüsüyle yılda %12 düşürüyor; sahada 30 maç oynayan
+futbolcu sessiz sayılıyordu ve futbolun kazandırdığı Ün sönümlemeye
+yeniliyordu. D-118'in gerekçesi "tanınmışlık bakım ister" — oynamak
+bakımın kendisidir. Görünürlük ölçüsü artık paylaşım ile oynanan son
+sezonun yenisini alıyor. Emeklilikten sonra ilerlemediği için **emekli
+futbolcunun ünü solmaya devam ediyor.**
+
+**Hata 3 — kariyer sonu metni kuruydu.** "Bitti: şu kadar sezon, maç,
+gol" deyip susuyordu. Artık oyuncuya elinde ne kaldığını söylüyor;
+tanınırlığı yüksekse tekliflerin sürebileceğini, düşükse adının çabuk
+unutulacağını yazıyor.
+
+| Ölçülen (1200 spor odaklı hayat, 49 kariyer) | Önce | Sonra |
+|---|---|---|
+| Ün hiç gelmeyen kariyer | %100 | **%0** |
+| Zirve Ün (medyan) | 0 | **43** (en az 11, en fazla 70 = tavan) |
+| Emeklilik anındaki Ün (medyan) | 0 | **52** |
+| Hayat sonundaki Ün (medyan) | 0 | **34** (soluyor) |
+
+**Beklenmedik yan etki (ölçüldü, kurgulanmadı):** Ün açılınca bot
+sosyal/medya yollarını da kullanmaya başladı, hayatlar çeşitlendi.
+Kariyer uzunluğu medyan 15 → 14, **en az 9 → 4 sezon**, en erken bırakma
+**29 → 25 yaş**. Q-193'ün 3. maddesindeki "kimsenin kısa kariyeri yok"
+sorunu böylece kısmen kendiliğinden çözüldü.
+
+İki yeni sayı (`prototypeOnlyFootballFameCap`, sezon başına Ün formülü)
+**Q-193 ekine** yazıldı ve karar bekliyor. **`DECISIONS.md`'ye
+dokunulmadı.**
+
+Doğrulama: `flutter analyze` çıkış kodu 0; AY motor testleri (32),
+`package_q` ve `social_media` süitleri (62) yeşil. **Android APK ya da
+Windows derlemesi bu pakette denenmedi.**
+
 ## Açık sorular
 
 Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım

@@ -54,6 +54,11 @@ void main() {
     final List<int> sezonBasiKazanc = <int>[];
     final List<int> birakmaYaslari = <int>[];
     final Map<String, int> bitisSebepleri = <String, int>{};
+    // Paket AY/2: futbol kamuoyu ününe dönüşüyor mu, sonra soluyor mu?
+    final List<int> zirveUnler = <int>[];
+    final List<int> emeklilikUnleri = <int>[];
+    final List<int> sonUnler = <int>[];
+    int unHicGelmeyen = 0;
 
     final List<String> sorunlar = <String>[];
 
@@ -77,6 +82,11 @@ void main() {
         sezonBasiKazanc.add(r.footballEarnings ~/ r.footballProSeasons);
       }
       if (r.footballInjurySeasons > 0) sakatlikYasayan++;
+      zirveUnler.add(r.footballPeakFame);
+      sonUnler.add(r.footballFameAtDeath);
+      if (r.footballPeakFame == 0) unHicGelmeyen++;
+      final int? emeklilikUnu = r.footballFameAtRetirement;
+      if (emeklilikUnu != null) emeklilikUnleri.add(emeklilikUnu);
 
       final String? sebep = r.footballExitReason;
       if (sebep != null) {
@@ -138,6 +148,15 @@ void main() {
       print('  ${e.name.padRight(22)} $sayi  ${_yuzde(sayi, kariyeriBiten)}');
     }
     print('');
+    print('UN — FUTBOL SONRASI HAYATIN SERMAYESI (Paket AY/2)');
+    print('Un hic gelmeyen        $unHicGelmeyen  ${_yuzde(unHicGelmeyen, kabulEdilen)}');
+    print('Zirve Un    medyan ${_medyan(zirveUnler)} · en az ${_enAz(zirveUnler)}'
+        ' · en fazla ${_enCok(zirveUnler)} (tavan '
+        '${FootballProEngine.prototypeOnlyFootballFameCap})');
+    print('Emeklilikte medyan ${_medyan(emeklilikUnleri)}');
+    print('Hayat sonu  medyan ${_medyan(sonUnler)}  (emeklilikten sonra solar)');
+    print('Medya/sponsorluk katalogu minFame 3-78 bandinda.');
+    print('');
     print('KAZANC (2026 alim gucu, net yillik asgari ucret '
         '${Economy.netYearlyMinimumWage} TL)');
     print('Kariyer toplami medyan ${_medyan(kazanclar)} TL');
@@ -172,6 +191,28 @@ void main() {
     // Kapıdan geçmeyen profesyonel olamaz — bu kural, ölçüm değil.
     expect(kabulEdilen, lessThanOrEqualTo(denemeyeGiren));
     expect(denemeyeGiren, lessThanOrEqualTo(kapiAcilan));
+
+    // Paket AY/2 bekçisi: futbol kamuoyu ününe dönüşmeli.
+    //
+    // ÖLÇÜLEN HATA: futbol fame alanına hiç dokunmuyordu ve 300 maç
+    // oynamış bir profesyonel tanınmamış kalıyordu. Bu bir daha
+    // sessizce geri gelmesin.
+    expect(
+      unHicGelmeyen,
+      0,
+      reason: 'Profesyonel futbol oynayıp Ün hiç kazanmayan hayat var: '
+          'futbol kamuoyu ününe bağlanmamış.',
+    );
+    expect(
+      _medyan(zirveUnler),
+      greaterThan(20),
+      reason: 'Futbolcunun zirve Ünü sponsorluk bandının altında kalıyor.',
+    );
+    expect(
+      _enCok(zirveUnler),
+      lessThanOrEqualTo(FootballProEngine.prototypeOnlyFootballFameCap),
+      reason: 'Futbol tek başına Ün tavanını aşıyor.',
+    );
 
     // Sezon başı kazanç bandın dışına taşmamalı.
     if (sezonBasiKazanc.isNotEmpty) {
