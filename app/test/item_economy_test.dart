@@ -21,6 +21,7 @@ import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/test_flow.dart';
@@ -591,7 +592,11 @@ void main() {
       expect(r.state.possessions, isNot(contains('bisiklet')));
       expect(
         r.outcome.effects.map((AppliedEffect e) => e.text),
-        contains('Cüzdan +$bedel ₺'),
+        // Beklenti biçimli hâle çevrildi: para değişimi artık binlik
+        // ayraçla yazılıyor (`AppliedEffect.text`). Eski hâli ayraçsız
+        // yazımı — yani hatayı — sabitliyordu. İddia gevşemedi, bedel
+        // yine birebir aranıyor.
+        contains('Cüzdan +${trMoney(bedel)}'),
       );
       expect(r.state.log.last.text, contains('satıldı'));
     });

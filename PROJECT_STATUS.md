@@ -5270,11 +5270,18 @@ Satırı bağlamıyla okuyunca gerçek ortaya çıktı: o satır bakiye değil
 668.814 ₺ günlükte) tutarsızlık değil: ekran 45 yaşın maaşını, günlük
 41-42 yaşın maaşını yazıyor. İkisi de kontrol edilmeden raporlanmadı.
 
-İki bekçinin de düzeltmeden **önce** düştüğü kanıtlandı. İki eski test
-beklentisi biçimli hâle çevrildi (`year_summary_test`,
-`feedback_package_test`): eski beklentiler ayraçsız yazımı — yani
-hatanın kendisini — sabitliyordu. **İddia gevşemedi**, tutar yine
-birebir aranıyor; `trMoney` üzerinden.
+İki bekçinin de düzeltmeden **önce** düştüğü kanıtlandı.
+
+**Dört eski test beklentisi biçimli hâle çevrildi** (`year_summary_test`,
+`feedback_package_test`, `item_economy_test`, `activities_test`): eski
+beklentiler ayraçsız yazımı — yani hatanın kendisini — sabitliyordu.
+**İddia gevşemedi**, tutar yine birebir aranıyor; `trMoney` üzerinden.
+
+Dördünü tek tek süitten öğrenmedim: ilk ikisi hedefli koşuda, üçüncüsü
+tam süitte çıktı; o noktada **deseni depo genelinde taradım**
+(`'…+<dört+ haneli> ₺'` ve `'…+$değişken ₺'` kalıpları, `trMoney`
+geçenler hariç) ve dördüncüsü de böyle bulundu. Tam süit yeşillenmeden
+gönderilmedi; üçüncü kırılma CI'ya gitmedi.
 
 ## Görsel döküm: 3-6 Ekim 2026
 

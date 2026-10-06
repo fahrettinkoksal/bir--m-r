@@ -11,6 +11,7 @@ import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/book_progress.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const ActivityEngine activities = ActivityEngine();
@@ -49,7 +50,10 @@ void main() {
       expect(r.state.log.last.text, r.outcome.text);
       expect(
         r.outcome.effects.map((dynamic e) => e.text as String),
-        contains('Cüzdan -${kesim.cost} ₺'),
+        // Beklenti biçimli hâle çevrildi: para değişimi artık binlik
+        // ayraçla yazılıyor (`AppliedEffect.text`). İddia gevşemedi,
+        // kesimin bedeli yine birebir aranıyor.
+        contains('Cüzdan -${trMoney(kesim.cost)}'),
       );
     });
 
