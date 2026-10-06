@@ -7258,10 +7258,12 @@ de görünmedi.** Kritik sağlık, gebelik/doğum ve emeklilik sonrası da bu
 11 karede yok. Bunları görmek ayrı iş: ya kurulu durum (dolu hayat
 değil) ya tohum taraması.
 
-### Q-199 — Hapisteyken maaş akmaya devam ediyor (D-128 kodda işlemiyor)
+### Q-199 — Tutukluyken maaş akmaya devam ediyor
 
-**Durum:** hükümlü hâli **onaylı kuralın uygulanması** (D-128), tutuklu
-hâli karar bekliyor (6 Ekim 2026)
+**Durum:** karar bekliyor (6 Ekim 2026).
+**DÜZELTME:** bu kaydın ilk hâli yanlıştı — "hükümlüde de maaş akıyor,
+D-128 kodda işlemiyor" diye yazmıştım. **Hükümlü tarafı doğru çalışıyor.**
+Düzeltme ve ölçüm aşağıda.
 **Nasıl bulundu:** `app/test/ekran_dokumu_ozel_durum_test.dart` — üçüncü
 tur döküm. İlk iki tur sıradan hayatları okudu; cezaevi, duruşma, kritik
 sağlık, doğum ve emeklilik ekranları hiçbirinde görünmemişti çünkü o
@@ -7282,34 +7284,50 @@ Oto tamircisi olarak bir yılın doldu; 631.800 ₺ cüzdanına girdi.
 Oto tamircisi olarak 3 yılı doldurdun: artık kalfa sayılıyorsun.
 ```
 
-**Ölçüm (tek yıl ilerletilmiş, aynı tohum, aynı iş ve maaş):**
+#### Önce: kendi yanlış ölçümüm (ders olarak duruyor)
 
-| Durum | Yıl sonu cüzdan | İş | Maaş |
-|---|---|---|---|
-| Hükümlü (`releaseAtAge` dolu) | 393.840 ₺ | duruyor | 500.000 ₺ |
-| Tutuklu (`detainedSinceAge` dolu) | 393.840 ₺ | duruyor | 500.000 ₺ |
-| Serbest | 393.840 ₺ | duruyor | 500.000 ₺ |
+İlk ölçümümde durumu **elle kurdum** — `LegalState(releaseAtAge: 45)`
+yazıp bir yıl ilerlettim — ve üç durumda da (hükümlü, tutuklu, serbest)
+cüzdanın birebir aynı çıktığını gördüm. Buradan "hükümlüde de maaş
+akıyor, D-128 kodda işlemiyor" sonucunu çıkardım. **Yanlıştı.**
 
-Üçü **birebir aynı**. `paySalaryFor` hapse hiç bakmıyor; `isImprisoned`
-kontrolü yalnızca **iş başvurusunda** var (`job_market.dart:136`).
-Kariyeri sonlandıran bir kod da yok.
+`releaseAtAge`'i elle set etmek, cezaya girişi yürüten kodu
+(`LegalEngine._enterPrison`) **hiç çalıştırmıyor**. O kod işi zaten
+bitiriyor: `closeCurrentJob(reason: JobEndReason.hapis)` ve günlüğe
+"içerideyken kimse yerini tutmuyor" satırı. Üstelik bunun **kalıcı
+bekçisi de var**: `crime_law_test.dart` → "hapis işi bitirir ve kayıt
+geçmişe geçer". Yani kurduğum durum gerçek oyunda **oluşamaz**:
+"hükümlü ama hâlâ işi olan" bir oyuncu yok.
 
-D-128 şöyle diyor: *"Hapis basittir: zaman ilerler, **iş biter** ve kayıt
-geçmişe yazılır (silinmez), **gelir kesilir**, yakınlarla bağ zayıflar,
-mutluluk ve sağlık düşer."* Yani bu yeni bir denge sorusu değil,
-**onaylı kuralın kodda olmaması**.
+Bu, bu oturumda üçüncü kez aynı desen: **durumu kurmak yanlış bulgu
+üretir.** (Önceki ikisi: `copyWith(age: 8)` ile 22 yaşında anne, ve yıl
+özetindeki "eksi cüzdan" satırı.) Döküm testlerinin başına da yazıldı.
 
-*Yapacağım (onay beklemeden, D-128 uygulaması):* hükümlü oyuncunun işi
-cezaevine girerken **biter** (kayıt `career.history`'de kalır, silinmez)
-ve maaş ödenmez. Motoru değiştirdiği için tam süit koşacak; bot
-ölçümlerinde servet eğrisi kayabilir, kayarsa ölçümü yazacağım.
+#### Gerçek ölçüm: 120 bot hayatı, elle kurulmuş durum yok
 
-*Senin kararını bekleyen ayrım:* **tutukluluk** D-128'de geçmiyor.
-Gerçekte tutuklu kişi işini hemen kaybetmez ama çalışamaz da.
+| Durum | Geçen yıl | Bunların kaçında iş VAR |
+|---|---|---|
+| **Hükümlü** | 13 | **0** |
+| **Tutuklu** | 32 | **27** (%84) |
 
-Önerim ve varsayılanım: **tutuklulukta maaş ödenmez, iş bitmez** —
+Hükümlü tarafı temiz. Açık olan **tutukluluk**: dökümdeki hayatın
+günlüğünde şu iki satır yan yanaydı —
+
+```
+Bir yıl daha tutuklu geçti. Dosya hâlâ açık.
+Oto tamircisi olarak bir yılın doldu; 631.800 ₺ cüzdanına girdi.
+Oto tamircisi olarak 3 yılı doldurdun: artık kalfa sayılıyorsun.
+```
+
+Tutuklu oyuncu çalışamaz ama maaşı tam yatıyor ve **kıdemi bile
+ilerliyor**. D-128 yalnızca "hapis" diyor; tutukluluk orada geçmiyor,
+yani bu bir kural boşluğu.
+
+*Önerim ve varsayılanım:* **tutuklulukta maaş ödenmez, iş bitmez** —
 oyuncu tahliye olunca işine döner; dosya mahkûmiyetle kapanırsa iş o
 zaman biter. Böylece tutukluluk ile hüküm arasındaki fark oyunda
 hissedilir ve "suçsuz çıktım ama işimi de kaybettim" gibi bir ceza
-doğmaz. Alternatif: tutuklulukta da işi bitirmek (daha sert, daha basit).
-Karar senin; sen diyene kadar tutuklu hâline dokunmayacağım.
+doğmaz. Kıdem de ilerlememeli: içeride geçen yıl ustalığa sayılmaz.
+Alternatif: tutuklulukta da işi bitirmek (daha sert, daha basit) — bunu
+önermiyorum, çünkü beraat eden oyuncu işini de kaybetmiş olur.
+Karar senin; sen diyene kadar tutuklu hâline dokunmuyorum.

@@ -5331,19 +5331,31 @@ Aranan yol daha yavaş, karşılığında gerçek.
 (61) · emekli (61). **Bulunamadı:** yeni doğan bebek — bu tohumlarda
 oluşmadı; çıktı "BULUNAMADI" yazıyor ve okundu sayılmıyor.
 
-### Ölçülen bulgu: hapiste maaş akmaya devam ediyor
+### Ölçülen bulgu: **tutukluyken** maaş akmaya devam ediyor
 
 Cezaevi karesinin günlüğünde "Bir yıl daha tutuklu geçti" ile "Oto
 tamircisi olarak bir yılın doldu; 631.800 ₺ cüzdanına girdi" yan yanaydı.
-Tek yıl ilerleterek ölçtüm — hükümlü, tutuklu ve serbest oyuncunun yıl
-sonu cüzdanı **birebir aynı** (393.840 ₺), işi duruyor, maaşı değişmiyor.
-`paySalaryFor` hapse hiç bakmıyor; `isImprisoned` kontrolü yalnızca iş
-başvurusunda var.
 
-D-128 "Hapis basittir: zaman ilerler, **iş biter** … **gelir kesilir**"
-diyor. Yani yeni bir denge sorusu değil, **onaylı kuralın kodda
-olmaması**. Hükümlü hâli uygulanacak (tam süit gerekiyor); **tutukluluk**
-D-128'de geçmediği için karar Faho'da — ayrım Q-199'da yazılı.
+**Önce yanlış ölçtüm ve yanlış rapor ettim.** Durumu elle kurdum
+(`LegalState(releaseAtAge: 45)`), üç durumda da cüzdan aynı çıktı ve
+"hükümlüde de maaş akıyor, D-128 kodda işlemiyor" dedim. `releaseAtAge`'i
+elle set etmek cezaya girişi yürüten kodu (`LegalEngine._enterPrison`)
+hiç çalıştırmıyor; o kod işi zaten bitiriyor
+(`closeCurrentJob(reason: JobEndReason.hapis)`) ve bunun kalıcı bekçisi
+de var (`crime_law_test.dart`). Kurduğum durum gerçek oyunda oluşamaz.
+**Bu oturumda üçüncü kez aynı desen: durumu kurmak yanlış bulgu üretir.**
+
+**Gerçek ölçüm — 120 bot hayatı, elle kurulmuş durum yok:**
+
+| Durum | Geçen yıl | Bunların kaçında iş VAR |
+|---|---|---|
+| Hükümlü | 13 | **0** |
+| Tutuklu | 32 | **27** (%84) |
+
+Hükümlü tarafı doğru çalışıyor; **düzeltilecek bir şey yoktu.** Açık
+olan tutukluluk: oyuncu çalışamazken maaşı tam yatıyor ve kıdemi
+ilerliyor. D-128 yalnızca "hapis" diyor, tutukluluk orada geçmiyor —
+kural boşluğu. Karar Faho'da, Q-199'da yazılı; koda dokunulmadı.
 
 ## Görsel döküm: 3-6 Ekim 2026
 
