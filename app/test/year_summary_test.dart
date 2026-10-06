@@ -187,7 +187,11 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Mutluluk -6'), findsOneWidget);
-    expect(find.text('Cüzdan +1200 ₺'), findsOneWidget);
+    // Beklenti biçimli hâle çevrildi: para değişimi artık binlik
+    // ayraçla yazılıyor (`AppliedEffect.text`). Eskiden "+1200 ₺"
+    // bekleniyordu; o beklenti ayraçsız yazımı — yani hatayı —
+    // sabitliyordu. İddia gevşemedi, düzeltildi.
+    expect(find.text('Cüzdan +1.200 ₺'), findsOneWidget);
     // Günlük başlığı kartın altında durmaya devam eder.
     expect(find.text('Hayat günlüğü'), findsOneWidget);
   });

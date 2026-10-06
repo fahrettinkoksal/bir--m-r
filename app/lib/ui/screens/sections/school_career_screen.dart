@@ -442,7 +442,7 @@ class _CareerViewState extends State<_CareerView> {
     // Lise bitti ve karar bekleniyorsa doğrudan başvuru sayfası açılır
     // (D-142); oyuncu menüde aramak zorunda kalmaz.
     if (widget.openAfterSchool &&
-        widget.state.education.awaitingAfterSchoolChoice) {
+        EducationPath.needsAfterSchoolChoice(widget.state)) {
       _page = _CareerPage.mezuniyetSonrasi;
     }
   }
@@ -490,7 +490,7 @@ class _CareerViewState extends State<_CareerView> {
         (egitim.isSchoolStudent && yarimZamanliCagi);
 
     // Başlık boş kalmasın: bu yıl tıklanabilir bir eylem var mı?
-    final bool eylemVar = egitim.awaitingAfterSchoolChoice ||
+    final bool eylemVar = EducationPath.needsAfterSchoolChoice(state) ||
         state.hasPendingInterview ||
         (isAranabilir && !state.career.isRetired) ||
         (state.career.isEmployed && !state.career.isRetired) ||
@@ -626,7 +626,25 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 8),
         ],
-        if (egitim.awaitingAfterSchoolChoice) ...<Widget>[
+        // Satır motorun kapısını okur, çıplak bayrağı değil.
+        //
+        // **Ölçülmüş hata.** Burada `egitim.awaitingAfterSchoolChoice`
+        // vardı. O bayrak "lise bitti, üniversite kaydı yok" demekten
+        // ibaret ve **hiç kapanmıyor**: oyuncu üniversiteye gitmemeye
+        // karar verdikten sonra da, otuzu geçtikten sonra da açık
+        // kalıyor. Bot dökümünde 35 yaşında, 13 yıldır CNC operatörü
+        // olarak çalışan, "Üretim şefi" unvanlı oyuncunun ekranında
+        // satır hâlâ duruyordu: "Mezuniyet sonrası · Üniversiteye
+        // başvur veya iş hayatına gir". 55 ve 70 yaşta da aynı.
+        //
+        // Motor bu durumu doğru biliyor: `needsAfterSchoolChoice` üç
+        // koşula bakıyor (bayrak + yaş ≤ 30 + "üniversiteye gitmedim"
+        // izi yok) ve yıl kilidini ona göre açıyor. Üstelik
+        // `skipUniversity`'nin kendi açıklaması "mezuniyet sonrası
+        // ekranı kapanır" diyor — ekran kapanmıyordu, yalnızca kilit
+        // kalkıyordu. Satır artık aynı kapıdan okuyor; iki yerde iki
+        // ayrı doğru kalmıyor.
+        if (EducationPath.needsAfterSchoolChoice(state)) ...<Widget>[
           MenuRow(
             title: 'Mezuniyet sonrası',
             subtitle: 'Üniversiteye başvur veya iş hayatına gir',

@@ -21,6 +21,7 @@ import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/test_flow.dart';
@@ -531,7 +532,11 @@ void main() {
       expect(sonuc.state.personById(anne.id)!.bond, greaterThan(anne.bond));
       expect(
         sonuc.outcome.effects.map((AppliedEffect e) => e.text),
-        contains('Cüzdan -${hediye.value} ₺'),
+        // Beklenti biçimli hâle çevrildi: para değişimi artık binlik
+        // ayraçla yazılıyor (`AppliedEffect.text`). `trMoney` zaten
+        // oyunun geri kalanının kullandığı biçim; iddia gevşemedi,
+        // hediyenin bedeli yine birebir aranıyor.
+        contains('Cüzdan -${trMoney(hediye.value)}'),
       );
       // Hediyenin adı sonuç metninde geçer.
       expect(sonuc.outcome.text.toLowerCase(),

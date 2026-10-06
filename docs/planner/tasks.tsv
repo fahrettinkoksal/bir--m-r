@@ -200,3 +200,6 @@ completed	Paket BD/3: ölüm cümlesindeki "nedeniyle" eki koşulsuzdu, düzelti
 completed	Paket BD/4: hayvan satırının boş durumu bütün kataloğu diziyordu, kısaltıldı
 completed	Paket BD/5: günlük satırı küçük harfle başlıyordu — iki olayda yer tutucu düzeltildi
 pending	Q-198: ekran dökümünden sekiz soru (askerlik yaşı, emeklilik şartı, ad çakışması...)
+completed	Paket BE/1: bot dökümü — dolu hayatın beş ekranı okundu (iş, eş, çocuk, ev)
+completed	Paket BE/2: "Mezuniyet sonrası" satırı hiç kapanmıyordu, motorun kapısına bağlandı
+completed	Paket BE/3: para değişimi binlik ayraçsız yazılıyordu, trNumber uygulandı

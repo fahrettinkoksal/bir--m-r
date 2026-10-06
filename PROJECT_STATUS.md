@@ -5234,6 +5234,48 @@ büyütünce altındaki beş satır göründü. "Ailesinin yanında" ile vefat
 etmiş ebeveyn de hata değil — `Housing.residenceOf` hanede yetişkin
 kalıp kalmadığına bakıyor.
 
+## Paket BE: dürbün dolu hayata çevrildi, iki hata daha (6 Ekim 2026)
+
+Paket BD'nin dökümü **tek bir hayatı** gördü: kendi kendine yaş alan,
+iş aramayan, evlenmeyen, ev almayan bir oyuncu. Çıkan hayat yoksul,
+işsiz ve hiç evlenmemiş bir adam oldu — yani oyunun **en çok kod
+barındıran** ekranları hâlâ okunmamıştı: işi varken Meslek, eşi ve
+çocuğu varken İlişkiler, evi ve yatırımı varken Varlıklar.
+
+Yeni test `app/test/ekran_dokumu_bot_test.dart` bunu kapatıyor.
+`playBotLife` bütün kararları veren botu doğumdan ölüme oynatıyor;
+`onYear` ile hedef yaşların durumu fotoğraflanıp ekranlara basılıyor.
+Üç arketip, beş kare: kariyer (35 ve 55), aile (40 ve 65), yatırımcı
+(45). Dökülen hayatlar gerçekten dolu — 2,8 milyon ₺ cüzdan, 13 yıl
+kıdem, "Üretim şefi" unvanı, dört çocuk, 74 kişilik çevre, kira geliri.
+
+**Bu, BD'de yanlış bulgu üreten "zorlama durum" değil.** O hata
+`copyWith(age: 70)` ile oyuncuyu yaşlandırıp dünyayı yerinde
+bırakmaktı; buradaki kare gerçekten yaşanmış bir hayatın o yılki kaydı.
+Ayrım dosyanın başında yazılı.
+
+### İki kesin hata — düzeltildi
+
+| Hata | Nerede | Bekçi |
+|---|---|---|
+| **"Mezuniyet sonrası" satırı hiç kapanmıyordu.** 35 yaşında, 13 yıldır CNC operatörü olarak çalışan, yıllık 1,17 milyon ₺ kazanan oyuncunun ekranında "Bu yıl yapabileceklerin · Mezuniyet sonrası · Üniversiteye başvur veya iş hayatına gir" duruyordu; 45 ve 55'te de aynı. Arayüz çıplak `awaitingAfterSchoolChoice` bayrağını okuyordu — o bayrak "lise bitti, üniversite kaydı yok" demekten ibaret ve **hiç kapanmaz**. Motor aynı durumu doğru biliyor: `needsAfterSchoolChoice` üç koşula bakıyor (bayrak + yaş ≤ 30 + "üniversiteye gitmedim" izi yok). Yani iki yerde iki ayrı doğru vardı ve ekranda yanlış olan görünüyordu. Üstelik `skipUniversity`'nin kendi açıklaması "mezuniyet sonrası ekranı kapanır" diyor; kapanan yalnızca kilitti. Üç kullanım yeri de artık motorun kapısını okuyor. | `school_career_screen.dart:445, 493, 647` | `paket_be_mezuniyet_satiri_test.dart` |
+| **Para değişimi binlik ayraçsız yazılıyordu.** Yıl özeti kartında "Cüzdan -988619 ₺". `AppliedEffect.text` sayıyı ham basıyordu; stat satırlarında (+5) sorun yok ama birimi ` ₺` olanlarda yedi haneli sayı tek blok oluyordu. İki yerde görünüyordu — yıl özeti ve olay sonucu penceresi — yani **parası değişen her olay**. | `applied_effect.dart` | `paket_be_para_bicimi_test.dart` |
+
+İkinci hatada **neredeyse yanlış bulgu raporluyordum.** Satırı ilk
+görüşte "ekran cüzdanı eksi gösteriyor, D-080 ihlal edilmiş" sanıp
+raporlayacaktım; dökümün başlığı aynı anda `cüzdan 2772029 ₺` yazıyordu.
+Satırı bağlamıyla okuyunca gerçek ortaya çıktı: o satır bakiye değil
+**yıllık değişim** ve değeri doğru. Yanlış olan tek şey biçimdi. Aynı
+şekilde maaş ile günlük satırı arasındaki fark da (881.229 ₺ ekranda,
+668.814 ₺ günlükte) tutarsızlık değil: ekran 45 yaşın maaşını, günlük
+41-42 yaşın maaşını yazıyor. İkisi de kontrol edilmeden raporlanmadı.
+
+İki bekçinin de düzeltmeden **önce** düştüğü kanıtlandı. İki eski test
+beklentisi biçimli hâle çevrildi (`year_summary_test`,
+`feedback_package_test`): eski beklentiler ayraçsız yazımı — yani
+hatanın kendisini — sabitliyordu. **İddia gevşemedi**, tutar yine
+birebir aranıyor; `trMoney` üzerinden.
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün

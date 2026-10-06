@@ -7143,3 +7143,64 @@ kiraya çıkıldı) yeniden yazılır. Böylece bilgi kaybolmaz, tekrar gider.
   değil: `Housing.residenceOf` hanede **yetişkin** kalıp kalmadığına
   bakıyor, ebeveynin sağ olmasına değil. O hayatta evde bir kişi daha
   var.
+
+### Q-198 EKİ — bot dökümü: iki hata daha düzeltildi, bir soru eklendi
+
+**Durum:** Q-198'in sekiz sorusu hâlâ karar bekliyor; bu ek yalnızca
+yeni bulguları ekliyor (6 Ekim 2026).
+**Nasıl bulundu:** `app/test/ekran_dokumu_bot_test.dart` — yeni test.
+
+Q-198'in dökümü **tek bir hayatı** gördü ve o hayat yoksul, işsiz, hiç
+evlenmemiş biriydi. Yani şu ekranlar hâlâ okunmamıştı: işi varken
+Meslek, eşi ve çocuğu varken İlişkiler, evi ve yatırımı varken
+Varlıklar. Yeni test botu doğumdan ölüme oynatıp hedef yaşların
+durumunu fotoğraflıyor; üç arketip, beş kare.
+
+#### Düzeltilen iki hata (teknik; onay beklemedi)
+
+1. **"Mezuniyet sonrası" satırı hiç kapanmıyordu.** 35 yaşında, 13
+   yıldır CNC operatörü, "Üretim şefi" unvanlı, yıllık 1,17 milyon ₺
+   kazanan oyuncunun ekranında duruyordu: *"Bu yıl yapabileceklerin ·
+   Mezuniyet sonrası · Üniversiteye başvur veya iş hayatına gir"*. 45 ve
+   55 yaşta da aynı; Q-198'in ilk dökümünde 30 ve 70'te de görünmüştü
+   ama orada "tasarım gereği olabilir" diye geçmiştim — **yanlış
+   geçmişim**, kıdemli bir çalışanda görünce kesinleşti. Arayüz çıplak
+   `awaitingAfterSchoolChoice` bayrağını okuyordu; motor ise üç koşullu
+   `needsAfterSchoolChoice`'u. İki yerde iki ayrı doğru vardı.
+   `skipUniversity`'nin kendi açıklaması "mezuniyet sonrası ekranı
+   kapanır" diyor — kapanan yalnızca yıl kilidiydi. Üç kullanım yeri de
+   motorun kapısına bağlandı. Bekçi:
+   `paket_be_mezuniyet_satiri_test.dart`.
+2. **Para değişimi binlik ayraçsız yazılıyordu:** yıl özeti kartında
+   *"Cüzdan -988619 ₺"*. `AppliedEffect.text` sayıyı ham basıyordu.
+   Parası değişen **her** olayın sonuç penceresinde ve her yıl özetinde
+   görünüyordu. Bekçi: `paket_be_para_bicimi_test.dart`.
+
+   **Bunu neredeyse yanlış raporluyordum.** İlk görüşte "ekran cüzdanı
+   eksi gösteriyor, D-080 ihlal edilmiş" sanacaktım; dökümün başlığı
+   aynı anda `cüzdan 2772029 ₺` yazıyordu. Satırı bağlamıyla okuyunca
+   gerçek ortaya çıktı: o satır bakiye değil **yıllık değişim**, değeri
+   doğru, yanlış olan biçim. Aynı şekilde "ekranda maaş 881.229 ₺,
+   günlükte 668.814 ₺" farkı da tutarsızlık değil — ekran 45 yaşın,
+   günlük 41-42 yaşın maaşını yazıyor.
+
+#### 9. Yıllık tekrar sorunu dolu hayatta daha ağır
+
+Q-198 #8'de "aynı günlük satırı yıllarca tekrarlanıyor" demiştim; orada
+tek satırdı (geçim gideri). Dolu hayatta **üç satır birden** her yıl
+birebir tekrarlanıyor:
+
+```
+Yıllık geçim giderin 205.207 ₺ cüzdanından çıktı.
+Kira gelirin bu yıl 163.079 ₺ oldu.
+Aşçı olarak bir yılın doldu; 668.814 ₺ cüzdanına girdi.
+```
+
+Kırk yıllık bir hayatta bu 120 satır eder ve hikâye satırlarını
+aralarında bulmak zorlaşır.
+
+*Önerim ve varsayılanım:* Q-198 #8'deki kuralı bu üçüne de uygula —
+satır **durum değişince** yazılsın (ilk yıl, tutar değişince, bittiği
+yıl). Alternatif: üç satırı tek bir "yılın hesabı" satırında birleştirip
+her yıl yazmak. İkisi de bilgiyi korur; birincisini öneriyorum çünkü
+tekrarı asıl çözen o.
