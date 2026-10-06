@@ -5169,5 +5169,15 @@ hiçbir cihazda çalıştırılmadı.**
 **Paket AZ:** gerçek 2026-27 lig/kulüp kataloğu — ağ kapalı, tff.org on
 dördüncü kez `000`.
 
+## Görsel döküm: 3-6 Ekim 2026
+
+`docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün
+paketler, iki doymuş tavan ölçümünün önce/sonra grafiği, taramanın
+bilançosu ve güncel durum. Tarayıcıda doğrudan açılır.
+
+Elle yazılmış bir rapordur: `docs/planner/index.html` gibi betikle
+üretilmez ve kendiliğinden tazelenmez. İçindeki rakamlar yazıldığı andaki
+ölçümlerdir (43 commit, +14.908 satır, 133 → 178 karar, 3.360 test).
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

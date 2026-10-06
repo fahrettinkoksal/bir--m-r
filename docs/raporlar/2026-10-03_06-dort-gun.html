@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  Bir Ömür — 3-6 Ekim 2026 çalışma dökümü.
+
+  Elle yazılmış rapordur; `docs/planner/index.html` gibi betikle
+  üretilmez, kendiliğinden tazelenmez. Rakamlar yazıldığı andaki
+  ölçümlerdir: 43 commit, +14.908 satır, 133 → 178 karar, 3.360 test.
+  Tarayıcıda doğrudan açılır, bağımlılığı yoktur (yalnızca Google
+  Fonts'tan üç yazı tipi çeker; internet yoksa yedek yazı tipine düşer).
+-->
+<style>
+  /* Artifact iskeletinin verdiği taban: tek başına açıldığında da aynı görünsün. */
+  :root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px);
+          padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, sans-serif; background: #f7f7f5; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>Bir Ömür · Dört Gün</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Düzen: tek kolon, 940px, bölümler saç teli çizgilerle ayrılıyor; ölçüm panosu havası. */
+  :root {
+    --kagit: #f2f3f5;
+    --yuzey: #ffffff;
+    --murekkep: #15191f;
+    --soluk: #5c6472;
+    --tel: #d6d9de;
+    --olcum: #a8651a;
+    --hata: #a8323c;
+    --duzeldi: #1d6b63;
+    --disp: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+    --govde: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --sayi: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --kagit: #101317; --yuzey: #181c22; --murekkep: #e7eaee; --soluk: #98a1b0;
+      --tel: #2b313a; --olcum: #d79a4e; --hata: #e2727c; --duzeldi: #58b3a7;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --kagit: #101317; --yuzey: #181c22; --murekkep: #e7eaee; --soluk: #98a1b0;
+    --tel: #2b313a; --olcum: #d79a4e; --hata: #e2727c; --duzeldi: #58b3a7;
+    color-scheme: dark;
+  }
+
+  body { background: var(--kagit); color: var(--murekkep); font-family: var(--govde); line-height: 1.5; }
+  .sayfa { max-width: 940px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 56px; }
+  h1, h2, h3 { font-family: var(--disp); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(32px, 7vw, 52px); line-height: 1.05; }
+  h2 { font-size: clamp(20px, 3.4vw, 26px); }
+  h3 { font-size: 15px; font-weight: 600; }
+  .ust { font-family: var(--sayi); font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+         text-transform: uppercase; color: var(--soluk); }
+  p { margin: 0; max-width: 62ch; }
+  section { border-top: 1px solid var(--tel); padding-block: 32px; }
+  section:first-of-type { border-top: 0; }
+
+  /* künye */
+  .kunye { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; }
+  .kunye div { display: flex; flex-direction: column; gap: 2px; }
+  .kunye b { font-family: var(--sayi); font-size: 23px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kunye span { font-size: 12px; color: var(--soluk); }
+
+  /* zaman çizgisi */
+  .gunler { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+  @media (max-width: 720px) { .gunler { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 400px) { .gunler { grid-template-columns: 1fr; } }
+  .gun { background: var(--yuzey); border: 1px solid var(--tel); padding: 14px; display: flex;
+         flex-direction: column; gap: 10px; min-width: 0; }
+  .gun header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .gun .tarih { font-family: var(--disp); font-size: 17px; font-weight: 700; }
+  .gun .adet { font-family: var(--sayi); font-size: 12px; color: var(--soluk); font-variant-numeric: tabular-nums; }
+  .cubuk { height: 5px; background: var(--tel); position: relative; }
+  .cubuk i { position: absolute; inset: 0 auto 0 0; background: var(--olcum); }
+  .gun ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .gun li { font-size: 13px; display: flex; gap: 7px; min-width: 0; }
+  .gun li code { font-family: var(--sayi); font-size: 11px; font-weight: 600; color: var(--olcum);
+                 flex: 0 0 auto; padding-top: 1px; }
+
+  /* grafikler */
+  .grafikler { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+  @media (max-width: 760px) { .grafikler { grid-template-columns: 1fr; } }
+  figure { margin: 0; background: var(--yuzey); border: 1px solid var(--tel); padding: 14px; min-width: 0; }
+  figure figcaption { font-size: 13px; color: var(--soluk); margin-top: 8px; }
+  figure h3 { margin-bottom: 2px; }
+  svg { display: block; width: 100%; height: auto; }
+  .anahtar { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--soluk); }
+  .anahtar span { display: inline-flex; align-items: center; gap: 6px; }
+  .anahtar i { width: 16px; height: 2px; display: inline-block; }
+
+  /* tablo */
+  .sarma { overflow-x: auto; margin-top: 18px; border: 1px solid var(--tel); background: var(--yuzey); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--tel); vertical-align: top; }
+  thead th { font-family: var(--sayi); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+             color: var(--soluk); font-weight: 500; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.n { font-family: var(--sayi); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .once { color: var(--hata); }
+  .sonra { color: var(--duzeldi); font-weight: 500; }
+  .ok { color: var(--soluk); padding-inline: 2px; }
+
+  /* sistem haritası */
+  .harita { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 20px; }
+  .kutu { background: var(--yuzey); border: 1px solid var(--tel); padding: 12px 13px; min-width: 0; }
+  .kutu h3 { color: var(--olcum); font-family: var(--sayi); font-size: 11px; letter-spacing: 0.08em;
+             text-transform: uppercase; font-weight: 600; }
+  .kutu ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+  .kutu li { font-size: 12.5px; border: 1px solid var(--tel); padding: 2px 7px; }
+  .kutu li[data-yeni] { border-color: var(--olcum); color: var(--olcum); font-weight: 500; }
+
+  /* durum */
+  .durum { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 20px; }
+  .rozet { background: var(--yuzey); border: 1px solid var(--tel); border-left: 3px solid var(--tel); padding: 12px 14px; }
+  .rozet[data-iyi] { border-left-color: var(--duzeldi); }
+  .rozet[data-acik] { border-left-color: var(--olcum); }
+  .rozet[data-yok] { border-left-color: var(--hata); }
+  .rozet b { display: block; font-family: var(--disp); font-size: 15px; }
+  .rozet span { font-size: 12.5px; color: var(--soluk); }
+  footer { border-top: 1px solid var(--tel); margin-top: 8px; padding-top: 18px; font-size: 12.5px; color: var(--soluk); }
+</style>
+</head>
+<body>
+
+<div class="sayfa">
+
+  <p class="ust">3 – 6 Ekim 2026 · çalışma dökümü</p>
+  <h1>Dört günde ne oldu</h1>
+  <div class="kunye">
+    <div><b>43</b><span>commit</span></div>
+    <div><b>+14.908</b><span>satır (lib + test)</span></div>
+    <div><b>133 → 178</b><span>kesin karar</span></div>
+    <div><b>3.360</b><span>test, hepsi yeşil</span></div>
+    <div><b>3</b><span>yeni kalıcı bekçi</span></div>
+  </div>
+
+  <section>
+    <p class="ust">01 · gün gün</p>
+    <h2>Üç gün sistem yazdık, bir gün yazdığımızı denetledik</h2>
+    <div class="gunler">
+
+      <div class="gun">
+        <header><span class="tarih">3 Ekim</span><span class="adet">19 commit</span></header>
+        <div class="cubuk"><i style="width:100%"></i></div>
+        <ul>
+          <li><code>AQ</code><span>Sağlık 0 artık zorunlu bir karar; kritik sağlık bantları</span></li>
+          <li><code>AR</code><span>Hikâye izi denetimi: 13 ölü zincir halkası bulundu</span></li>
+          <li><code>AS</code><span>Sessiz izlere 10 yankı olayı yazıldı</span></li>
+          <li><code>AT</code><span>9–12 yaş boşluğuna 20 olay</span></li>
+          <li><code>—</code><span>Geliştirme panosu: depodan üretilen tek dosya</span></li>
+        </ul>
+      </div>
+
+      <div class="gun">
+        <header><span class="tarih">4 Ekim</span><span class="adet">9 commit</span></header>
+        <div class="cubuk"><i style="width:47%"></i></div>
+        <ul>
+          <li><code>AU</code><span>Okul kulübü sistemi: katalog, motor, 29 olay</span></li>
+          <li><code>AV</code><span>Spor Kariyeri menüsü ve kulüp kartları</span></li>
+          <li><code>AW</code><span>Bot kulüp seçiyor; 500 hayat ölçüldü</span></li>
+          <li><code>AX</code><span>Kaptanlık %0 → %3,6; futbol kapısı açıldı</span></li>
+        </ul>
+      </div>
+
+      <div class="gun">
+        <header><span class="tarih">5 Ekim</span><span class="adet">13 commit</span></header>
+        <div class="cubuk"><i style="width:68%"></i></div>
+        <ul>
+          <li><code>AY</code><span>Profesyonel futbol: deneme, sezon, sakatlık, kariyer sonu</span></li>
+          <li><code>AY/2–5</code><span>Futbol sonrası hayat, hüküm, dövüş, ömür özeti</span></li>
+          <li><code>BA</code><span>Onaysız sayı taraması: <b>19 ölü sabit</b></span></li>
+          <li><code>—</code><span>D-176, D-177 ve karar numarası çakışması</span></li>
+        </ul>
+      </div>
+
+      <div class="gun">
+        <header><span class="tarih">6 Ekim</span><span class="adet">2 commit</span></header>
+        <div class="cubuk"><i style="width:11%"></i></div>
+        <ul>
+          <li><code>BB</code><span>Taramanın tamamlanması; 27 karar taslağı</span></li>
+          <li><code>BC</code><span>27 karar yazıldı; D-178 kulüp seçme tavanı</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <p class="ust">02 · son iki günün asıl işi</p>
+    <h2>Aynı hatayı iki yerde yakaladık: tavan tek bileşenle doluyordu</h2>
+    <p>Bir sayı duruyor, kural gibi görünüyor, ama hiçbir şey yapmıyor. Sebep şu: üst sınıra
+      tek bir bileşen tek başına ulaşıyor, geri kalan her şey o noktadan sonra ölüyor.</p>
+
+    <div class="grafikler">
+
+      <figure>
+        <h3>Zam talebi kabul şansı</h3>
+        <figcaption>Kıdem payı 0,05 → 0,02 ve paya kendi tavanı (0,15) kondu. <b>D-176</b></figcaption>
+        <svg viewBox="0 0 560 230" role="img" aria-label="Zam şansı grafiği: önce 8. yılda statların etkisi bitiyor, sonra hiç bitmiyor">
+          <!-- ızgara -->
+          <g stroke="var(--tel)" stroke-width="1" fill="none">
+            <line x1="56" y1="20" x2="540" y2="20"/>
+            <line x1="56" y1="100" x2="540" y2="100"/>
+            <line x1="56" y1="180" x2="540" y2="180"/>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--soluk)">
+            <text x="48" y="24" text-anchor="end">0,90</text>
+            <text x="48" y="104" text-anchor="end">0,62</text>
+            <text x="48" y="184" text-anchor="end">0,35</text>
+            <text x="56" y="198">1 yıl</text>
+            <text x="298" y="198" text-anchor="middle">15</text>
+            <text x="540" y="198" text-anchor="end">30 yıl</text>
+          </g>
+          <!-- ölü bölge: önce -->
+          <rect x="172.9" y="20" width="367.1" height="160" fill="var(--hata)" opacity="0.10"/>
+          <text x="180" y="36" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--hata)">ÖNCE: ölü bölge</text>
+          <!-- önce: iki çizgi üst üste biniyor -->
+          <polyline fill="none" stroke="var(--hata)" stroke-width="2" stroke-dasharray="4 3"
+            points="56,157.3 72.7,142.5 89.4,109.6 106.1,94.8 122.8,79.3 139.5,63.9 156.2,49.1 172.9,34.5 540,34.5"/>
+          <polyline fill="none" stroke="var(--hata)" stroke-width="2"
+            points="56,91.9 72.7,77.1 89.4,44.2 106.1,34.5 540,34.5"/>
+          <!-- sonra -->
+          <polyline fill="none" stroke="var(--duzeldi)" stroke-width="2" stroke-dasharray="4 3"
+            points="56,166 72.7,159.9 89.4,135.8 106.1,129.7 122.8,123 139.5,116.3 156.2,110.2 172.9,89 189.6,88.4 206.3,87.8 239.6,86.4 289.7,84.3 373.1,63.7 456.5,60.5 539.9,39.8"/>
+          <polyline fill="none" stroke="var(--duzeldi)" stroke-width="2"
+            points="56,98.5 72.7,92.4 89.4,68.2 106.1,62.1 122.8,55.4 139.5,48.7 156.2,42.6 172.9,34.5 540,34.5"/>
+          <!-- aradaki fark -->
+          <line x1="539.9" y1="34.5" x2="539.9" y2="39.8" stroke="var(--duzeldi)" stroke-width="5"/>
+          <text x="532" y="58" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--duzeldi)" text-anchor="end">fark duruyor</text>
+          <text x="56" y="218" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="var(--soluk)">
+            düz çizgi: zekâ + karizma 100 · kesikli: 10
+          </text>
+        </svg>
+        <div class="anahtar">
+          <span><i style="background:var(--hata)"></i>önce · 8. yılda biter</span>
+          <span><i style="background:var(--duzeldi)"></i>sonra · hiç bitmez</span>
+        </div>
+      </figure>
+
+      <figure>
+        <h3>Okul kulübü seçme puanı</h3>
+        <figcaption>Deneyim payının sezon ağırlığı 4 → 2. <b>D-178</b></figcaption>
+        <svg viewBox="0 0 560 230" role="img" aria-label="Kulüp seçme puanı: önce 8. sezonda beceri ölüyor, sonra her sezon sayılıyor">
+          <g stroke="var(--tel)" stroke-width="1" fill="none">
+            <line x1="56" y1="20" x2="540" y2="20"/>
+            <line x1="56" y1="100" x2="540" y2="100"/>
+            <line x1="56" y1="180" x2="540" y2="180"/>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--soluk)">
+            <text x="48" y="24" text-anchor="end">30</text>
+            <text x="48" y="104" text-anchor="end">15</text>
+            <text x="48" y="184" text-anchor="end">0</text>
+            <text x="56" y="198">0 sezon</text>
+            <text x="298" y="198" text-anchor="middle">6</text>
+            <text x="540" y="198" text-anchor="end">12 sezon</text>
+          </g>
+          <rect x="378.7" y="20" width="161.3" height="160" fill="var(--hata)" opacity="0.10"/>
+          <text x="386" y="36" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--hata)">ÖNCE: ölü</text>
+          <polyline fill="none" stroke="var(--hata)" stroke-width="2" stroke-dasharray="4 3"
+            points="56,180 96.3,158.7 136.7,137.3 177,116 217.3,94.7 257.7,73.3 298,52 338.3,30.7 378.7,20 540,20"/>
+          <polyline fill="none" stroke="var(--hata)" stroke-width="2"
+            points="56,46.7 96.3,25.3 136.7,20 540,20"/>
+          <polyline fill="none" stroke="var(--duzeldi)" stroke-width="2" stroke-dasharray="4 3"
+            points="56,180 96.3,169.3 136.7,158.7 177,148 217.3,137.3 257.7,126.7 298,116 338.3,105.3 378.7,94.7 419,84 459.3,73.3 499.7,62.7 540,52"/>
+          <polyline fill="none" stroke="var(--duzeldi)" stroke-width="2"
+            points="56,46.7 96.3,36 136.7,25.3 177,20 540,20"/>
+          <line x1="540" y1="20" x2="540" y2="52" stroke="var(--duzeldi)" stroke-width="5"/>
+          <text x="532" y="68" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--duzeldi)" text-anchor="end">fark duruyor</text>
+          <text x="56" y="218" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="var(--soluk)">
+            düz çizgi: beceri 100 · kesikli: beceri 0
+          </text>
+        </svg>
+        <div class="anahtar">
+          <span><i style="background:var(--hata)"></i>önce · 8. sezonda biter</span>
+          <span><i style="background:var(--duzeldi)"></i>sonra · hiç bitmez</span>
+        </div>
+      </figure>
+
+    </div>
+
+    <p style="margin-top:18px">Birincisinde sonuç şuydu: <b>D-155</b>'in ustalık payı, Usta (8 yıl),
+      Başusta (16) ve Duayen (28) basamaklarının <em>hepsinde</em> matematiksel olarak ölüydü —
+      yani tam işe yaraması gereken yerde çalışmıyordu. İkincisinde sekiz yıl kulüpte duran oyuncu,
+      aynı sürede çalışıp beceriyi 100'e çıkaranla seçmede aynı puanı alıyordu.</p>
+  </section>
+
+  <section>
+    <p class="ust">03 · taramanın bilançosu</p>
+    <h2>Ölçülen ve düzeltilen</h2>
+    <div class="sarma">
+      <table>
+        <thead>
+          <tr><th>Ne</th><th>Önce</th><th>Sonra</th><th>Nasıl bulundu</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Hiç okunmayan <code>prototypeOnly</code> sabiti</td>
+              <td class="n once">19</td><td class="n"><span class="ok">→</span> <span class="sonra">0</span></td>
+              <td>869 bildirimin tamamı tarandı</td></tr>
+          <tr><td>Kodda yetki, <code>DECISIONS.md</code>'de karşılığı yok</td>
+              <td class="n once">27</td><td class="n"><span class="ok">→</span> <span class="sonra">0</span></td>
+              <td>Yeni karar-atıf bekçisi</td></tr>
+          <tr><td>Zam şansında statların öldüğü kıdem</td>
+              <td class="n once">8 yıl</td><td class="n"><span class="ok">→</span> <span class="sonra">hiç</span></td>
+              <td>Kıdem–stat ölçüm tablosu</td></tr>
+          <tr><td>Kulüp seçmesinde becerinin öldüğü sezon</td>
+              <td class="n once">8 sezon</td><td class="n"><span class="ok">→</span> <span class="sonra">hiç</span></td>
+              <td>Aynı yöntem, ikinci alan</td></tr>
+          <tr><td>Gideri olmayan parasız çocuğun mali kademesi</td>
+              <td class="once">Varlıklı</td><td><span class="ok">→</span> <span class="sonra">Zor</span></td>
+              <td>Sınır değeri bir üst bandı veriyordu (D-092 ihlali)</td></tr>
+          <tr><td>Askerlikte yazılı alt sınır</td>
+              <td class="n once">0,05</td><td class="n"><span class="ok">→</span> <span class="sonra">kaldırıldı</span></td>
+              <td>Ölçülen en kötü durum zaten 0,30</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px"><b>En büyük tek bulgu:</b> <code>JobMarket</code> eksiksiz bir
+      “işe alım olasılığı” modeli bildiriyordu — taban %50, eğitim payı %25, stat payı %15,
+      tavan %90 — ve dördü de hiç okunmuyordu. İşe alım gerçekte deterministik: koşullar
+      sağlanır ve mülakat sorusu doğru cevaplanırsa iş verilir. Eğitim bir <em>kapı</em>,
+      olasılık payı değil.</p>
+  </section>
+
+  <section>
+    <p class="ust">04 · dört günde büyüyen taraf</p>
+    <h2>Spor, oyunun yeni kolu oldu</h2>
+    <div class="harita">
+      <div class="kutu"><h3>Spor</h3><ul>
+        <li data-yeni>Okul kulübü</li><li data-yeni>Kaptanlık</li><li data-yeni>Profesyonel futbol</li>
+        <li data-yeni>Sezon &amp; sakatlık</li><li data-yeni>Kariyer sonu</li><li>Dövüş kariyeri</li><li>Rakip</li>
+      </ul></div>
+      <div class="kutu"><h3>Sağlık</h3><ul>
+        <li data-yeni>Kritik bantlar</li><li data-yeni>Sağlık 0 kararı</li><li>Kronik hastalık</li><li>Sağlık merkezi</li>
+      </ul></div>
+      <div class="kutu"><h3>Hikâye</h3><ul>
+        <li data-yeni>9–12 yaş olayları</li><li data-yeni>10 yankı olayı</li><li data-yeni>29 kulüp olayı</li><li>Zincirler</li>
+      </ul></div>
+      <div class="kutu"><h3>Hayatın hükmü</h3><ul>
+        <li data-yeni>Emek ekseninde spor</li><li data-yeni>Ömür özetinde futbol</li><li data-yeni>İki yeni hedef</li>
+      </ul></div>
+      <div class="kutu"><h3>Zaten vardı</h3><ul>
+        <li>Okul &amp; üniversite</li><li>Meslek &amp; ustalık</li><li>İşletme</li><li>Yatırım</li>
+        <li>Konut &amp; kiracılık</li><li>Aile (3 kuşak)</li><li>İlişkiler</li><li>Suç &amp; cezaevi</li><li>Sosyal medya</li>
+      </ul></div>
+    </div>
+    <p style="margin-top:14px"><span style="color:var(--olcum);font-weight:500">Turuncu</span> olanlar
+      bu dört günde geldi.</p>
+  </section>
+
+  <section>
+    <p class="ust">05 · bugün nerede duruyoruz</p>
+    <h2>Durum</h2>
+    <div class="durum">
+      <div class="rozet" data-iyi><b>3.360 test yeşil</b><span>232 test dosyası; CI iki işte de <code>success</code></span></div>
+      <div class="rozet" data-iyi><b>APK derleniyor</b><span>Her push'ta Android ve Windows paketi üretiliyor, indirilebilir</span></div>
+      <div class="rozet" data-iyi><b>178 karar yazılı</b><span>Kodda tanımsız karar numarası kalmadı</span></div>
+      <div class="rozet" data-yok><b>Hiç oynanmadı</b><span>Testler kodun tutarlı olduğunu söylüyor; ekranları kimse görmedi</span></div>
+      <div class="rozet" data-acik><b>Paket AZ bloke</b><span>Gerçek 2026-27 lig kataloğu — ağ kapalı, uydurma veri girilmedi</span></div>
+      <div class="rozet" data-acik><b>842 sayı onaysız</b><span>Çoğu iç kalibrasyon; iki hata deseni tarandı ve kapandı</span></div>
+    </div>
+  </section>
+
+  <footer>
+    Dört günün üç kalıcı bekçisi: ölü sabit, karar atfı, doymuş tavan. Üçünün de eski davranışta
+    kırıldığı ayrıca doğrulandı — bekçi, kırıldığı görülmeden bekçi sayılmaz.
+  </footer>
+
+</div>
+</body>
+</html>
