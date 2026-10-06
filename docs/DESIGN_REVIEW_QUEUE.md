@@ -6885,3 +6885,69 @@ payının ağırlığı **4'ten 2'ye** indi (önerdiğim seçenek A). Ölçüm:
 Becerinin etkisi artık **hiçbir sezonda bitmiyor**. Ölçüm testi kalıcı
 bekçiye çevrildi: sezon tek başına tavanı doldurursa test kırılır.
 D-136'nın beceri gelişim sayıları ve D-171'in kulüp sınırı değişmedi.
+
+---
+
+### Q-197 EKİ — eşik taraması da bitti; tarama artık depoda bir araç
+
+**Durum:** bilgi (6 Ekim 2026) — karar beklemiyor
+
+**Önce bir düzeltme:** Paket BB'de "tarama kalan alanlara uzatıldı"
+yazdım. Doğru değildi: kalan 16 alanda yalnızca **doymuş tavan**
+desenini taramıştım, **dekoratif eşik** tarafını yapmamıştım. Şimdi
+yapıldı.
+
+#### Eşik taraması sonucu
+
+Mekanik olarak karar verilebilen alt sınıf **temiz**: olasılık eşiği
+0'ın altında ya da 1'in üstünde olan yok, stat eşiği 0-100 aralığının
+dışında olan yok. 855 bildirim tarandı.
+
+D-164'ün ince hâli (kapı arkasındaki eşik) kaynak taramasıyla
+görülemez, çünkü betik erişilebilir aralığı bilemez. Kalan alanlarda
+böyle tek bir zincir var — **okul kulübü seçmesi** — ve elle ölçüldü:
+
+```
+kabul = !sürpriz && puan + zar >= 55      zar ∈ [0,39]
+```
+
+Puanı **15 ve altı** olan aday hiç geçemiyor (15 + 39 < 55), 16-54
+arası kuraya kalıyor, 55 üstü %8 sürpriz dışında geçiyor. En zayıf
+erişilebilir puan 8 (yatkınlık 0, sağlık 25), yani "hiç geçemez" dalı
+gerçekten erişiliyor. Eşik eliyor — D-164'ün tersi. **Sağlam.**
+
+#### Sınırda iki not (hata değil, kayda geçiyor)
+
+1. **Emekli aylığı oranı** `0,35 + yıl × 0,01`, tavan 0,75. Tavan 40.
+   çalışma yılında doluyor; ondan sonra fazladan yıl aylığı
+   yükseltmiyor. 40 yıl uzun bir kariyer ve oranın bir tavanı olması
+   makul — dokunulmadı.
+2. **Teklif stilinin kabul payı** (`+0,18`'e kadar) dış tavana
+   (0,95) giriyor. Ölçüm: yakınlık 80'e kadar payın tamamı işliyor,
+   85'te 0,174, 90'da 0,087, **95'te 0,000**. Yani en pahalı teklif
+   (85.000 ₺) yakınlık 95'te kabul şansına hiçbir şey katmıyor.
+
+   **Ama hata demiyorum ve değiştirmiyorum.** Yakınlık 95 zaten
+   `prototypeOnlyCertainBond`: orada kabul şansı tasarımca izin verilen
+   en yükseğe (0,95) çıkmış oluyor ve "hiçbir teklif kesin değildir"
+   kuralı bilinçli. Üstelik stilin **mutluluk ve yakınlık ödülleri
+   yaşıyor** (`propose` içinde ayrıca uygulanıyor), yani para boşa
+   gitmiyor. D-176'daki hata geniş bir aralıkta her şeyi öldürüyordu;
+   bu yalnızca ölçeğin en ucunda ve yalnızca bir bileşeni etkiliyor.
+
+   İstersen bakılabilecek hâli şu olurdu: iç şansın tavanını
+   `0,95 − en büyük stil payı` yapmak, böylece stil her zaman yer
+   bulur ve toplam yine 0,95'i geçmez. Karar senin; önermiyorum.
+
+#### Tarama artık tekrarlanabilir
+
+`scripts/sabit_taramasi.py` — depo kökünden çalışır, ağa çıkmaz, üç
+deseni birden tarar ve hangisinin kesin hangisinin **aday** olduğunu
+ayırır. Betiğin ne göremediği de içine yazılı: tavan ve eşik
+adaylarında kararı ölçüm verir, kaynak taraması vermez. Bilinen yanlış
+pozitif türleri (stat tavanı, dizin kısıtı, yalnızca testin okuduğu
+sabit) ayıklanıyor.
+
+Bugünkü çıktısı: **ölü sabit 0**, dekoratif eşik 0, tavan adayı 28
+(hepsi incelendi; ikisi yukarıdaki sınırda notlar, kalanı stat tavanı
+ya da tek bileşenli).

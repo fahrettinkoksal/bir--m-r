@@ -5128,6 +5128,13 @@ hiçbir şey değiştirmiyor (soruşturma zaten kesin).
 `lib/` içinde davranış değiştiren değişiklik **yok** (script, belge ve
 test eklendi), bu yüzden test seçimi kuralına göre tam süit koşulmadı.
 
+**Düzeltme (6 Ekim, Q-197 EKİ):** "tarama kalan alanlara uzatıldı"
+cümlesi eksikti — kalan 16 alanda yalnızca doymuş tavan desenini
+taramıştım, dekoratif eşik tarafını yapmamıştım. Şimdi yapıldı:
+mekanik alt sınıf temiz (0 bulgu), tek gerçek eşik zinciri (okul
+kulübü seçmesi) elle ölçülüp sağlam bulundu. Tarama artık
+`scripts/sabit_taramasi.py` ile tekrarlanabilir.
+
 ## Paket BC: 27 karar yazıldı, Q-197 uygulandı (6 Ekim 2026)
 
 Faho onayladı: "önerini uygula."
