@@ -207,4 +207,5 @@ completed	Paket BF/1: döküm altı arketipe çıktı — üniversite, işletme,
 completed	Paket BF/2: ekranda ham null ("Sınıf: null. sınıf") düzeltildi, beş ekran taranıyor
 pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi kartı yok
 completed	Paket BG/1: özel durum dökümü — cezaevi, duruşma, kritik sağlık, emeklilik taranarak bulundu
-pending	Q-199: tutukluyken maaş akmaya devam ediyor (hükümlü tarafı doğru çıktı)
+completed	Q-199: tutukluyken maaş akmaya devam ediyor (hükümlü tarafı doğru çıktı)
+completed	Paket BH/1: D-179 — tutuklulukta maaş yok, kıdem donuyor, iş bitmiyor

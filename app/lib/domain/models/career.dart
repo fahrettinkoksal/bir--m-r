@@ -99,6 +99,7 @@ class CareerState {
     this.pension,
     this.employerWarnings = 0,
     this.synergyHeadStart = 0,
+    this.detainedYears = 0,
   });
 
   const CareerState.none() : this();
@@ -124,6 +125,17 @@ class CareerState {
   /// bilgi yalnızca durumu doğru göstermek için tutulur. Şehir değişince
   /// işin ne olacağı kararı kuyrukta (Q-065). Eski kayıtlarda `null`'dır.
   final String? jobCity;
+
+  /// Bu işte **tutukluyken** geçen yıl sayısı (Q-199).
+  ///
+  /// Tutukluluk işi bitirmez ama oyuncu o yıl çalışmaz: maaş ödenmez ve
+  /// o yıl **kıdeme sayılmaz**. Kıdem `yaş - başlangıç` ile hesaplandığı
+  /// için içeride geçen yıllar burada tutulup o hesaptan düşülür;
+  /// `startedAtAge` oynanmaz, çünkü ekran "Başlangıç: 22 yaşında" diye
+  /// onu gösteriyor ve o bilgi doğru kalmalı.
+  ///
+  /// Eski kayıtlarda `0`'dır. Faho onayladı (6 Ekim 2026, Q-199).
+  final int detainedYears;
 
   /// Şu anki işteki görev seviyesi (0 = giriş seviyesi).
   final int level;
@@ -184,7 +196,8 @@ class CareerState {
     for (final JobHistoryEntry e in history) {
       toplam += e.years ?? 0;
     }
-    if (startedAtAge != null) toplam += currentAge - startedAtAge!;
+    // Süren iş: tutuklulukta geçen yıllar çalışma yılı sayılmaz (Q-199).
+    if (startedAtAge != null) toplam += yearsInJob(currentAge);
     return toplam;
   }
 
@@ -204,9 +217,15 @@ class CareerState {
   /// Gerçekten ödenen yıllık maaş.
   int get yearlySalary => salary ?? job?.yearlySalary ?? 0;
 
-  /// Bu işte kaç yıl geçti?
-  int yearsInJob(int currentAge) =>
-      startedAtAge == null ? 0 : currentAge - startedAtAge!;
+  /// Bu işte **çalışarak** kaç yıl geçti?
+  ///
+  /// Tutukluyken geçen yıllar düşülür (Q-199): içeride geçen yıl
+  /// ustalığa, zam hakkına ve terfiye sayılmaz. Tek sıkıştırma noktası
+  /// burasıdır — ustalık, zam, terfi, işten çıkarma, olay koşulu ve
+  /// Meslek ekranı hepsi bu getter'ı okuyor.
+  int yearsInJob(int currentAge) => startedAtAge == null
+      ? 0
+      : (currentAge - startedAtAge! - detainedYears).clamp(0, 120);
 
   /// Kariyer geçmişi: biten kayıtlar + süren iş (varsa en sonda).
   List<JobHistoryEntry> allEntries() => <JobHistoryEntry>[
@@ -291,6 +310,7 @@ class CareerState {
     Object? pension = _unsetCareer,
     int? employerWarnings,
     int? synergyHeadStart,
+    int? detainedYears,
   }) {
     return CareerState(
       jobId: jobId == _unsetCareer ? this.jobId : jobId as String?,
@@ -320,6 +340,7 @@ class CareerState {
       pension: pension == _unsetCareer ? this.pension : pension as int?,
       employerWarnings: employerWarnings ?? this.employerWarnings,
       synergyHeadStart: synergyHeadStart ?? this.synergyHeadStart,
+      detainedYears: detainedYears ?? this.detainedYears,
     );
   }
 }

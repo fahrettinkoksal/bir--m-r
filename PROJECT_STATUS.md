@@ -5357,6 +5357,38 @@ olan tutukluluk: oyuncu çalışamazken maaşı tam yatıyor ve kıdemi
 ilerliyor. D-128 yalnızca "hapis" diyor, tutukluluk orada geçmiyor —
 kural boşluğu. Karar Faho'da, Q-199'da yazılı; koda dokunulmadı.
 
+## Paket BH: D-179 — tutuklulukta maaş yok, kıdem donuyor (6 Ekim 2026)
+
+Faho onayladı: "tutukluda da uygula." Q-199 kapandı, kural
+`DECISIONS.md` içine **D-179** olarak girdi.
+
+**Ne değişti.** Tutuklulukta iş **bitmez** (tahliye olan işine döner),
+maaş **ödenmez**, o yıl **kıdeme sayılmaz**. Dosya mahkûmiyetle kapanırsa
+iş o zaman biter — D-128 devreye girer. Daha sert seçenek (tutuklulukta
+da işi bitirmek) bilerek alınmadı: beraat eden oyuncu işini de kaybetmiş
+olurdu.
+
+**Kıdem nasıl donduruldu.** `startedAtAge` oynanmadı — Meslek ekranı
+"Başlangıç: 22 yaşında" diye onu gösteriyor ve o bilgi doğru kalmalı.
+İçeride geçen yıllar yeni `CareerState.detainedYears` alanında tutulup
+`yearsInJob`'dan düşülüyor. `yearsInJob` tek sıkıştırma noktası:
+ustalık, zam, terfi, işten çıkarma, olay koşulu ve ekran hepsi oradan
+okuyor. Alan kodeke de yazıldı; yoksa kayıt yüklenince kıdem geri sıçrar
+ve oyuncu içeride geçen yılları kazanırdı.
+
+**Ölçüm (120 bot hayatı, elle kurulmuş durum yok):**
+
+| | Önce | Sonra |
+|---|---|---|
+| Tutuklu geçen yıl | 32 | 33 |
+| Bunların kaçında iş duruyor | 27 | 28 (tasarım böyle) |
+| Bunların kaçında **maaş akıyor** | **27** | **0** |
+| Kıdem donan hayat / toplam yıl | — | 25 hayat / 46 yıl |
+
+Bekçinin düzeltmeden önce düştüğü kanıtlandı. Hükümlü tarafına
+dokunulmadı: o zaten doğru çalışıyordu ve kendi bekçisi vardı
+(`crime_law_test.dart`).
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün

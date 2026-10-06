@@ -1386,6 +1386,7 @@ Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
       // İşveren uyarıları (D-078). Alan eklemeli; eski kayıtta sıfır.
       'employerWarnings': c.employerWarnings,
       'synergyHeadStart': c.synergyHeadStart,
+      'detainedYears': c.detainedYears,
     };
 
 Map<String, Object?> _encodeCareerMilestone(CareerMilestone m) =>
@@ -2541,6 +2542,7 @@ CareerState _decodeCareer(Map<String, Object?> json) => CareerState(
       employerWarnings: _intOr(json, 'employerWarnings', 0),
       // Paket AK: eski kayıtta yok; 0 ile yüklenir, kayıt bozulmaz.
       synergyHeadStart: _intOr(json, 'synergyHeadStart', 0),
+      detainedYears: _intOr(json, 'detainedYears', 0),
     );
 
 CareerMilestone _decodeCareerMilestone(Map<String, Object?> json) =>

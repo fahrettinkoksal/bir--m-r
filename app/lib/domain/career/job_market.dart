@@ -568,6 +568,19 @@ class JobMarket {
   /// Yeni yaşa geçerken maaşı **bir kez** öder.
   ///
   /// [CareerState.lastPaidAge] aynı dönemin ikinci kez ödenmesini engeller.
+  ///
+  /// **Tutukluyken maaş ödenmez (Q-199, Faho onayladı 6 Ekim 2026).**
+  /// Hüküm giyen oyuncunun işi zaten bitiyor
+  /// (`LegalEngine._enterPrison`, D-128), ama **tutukluluk** o kuralda
+  /// geçmiyordu: dosya sürerken içeride olan oyuncunun maaşı tam
+  /// yatmaya devam ediyordu. Bot dökümünde bir hayatın günlüğünde
+  /// "Bir yıl daha tutuklu geçti" ile "bir yılın doldu; 631.800 ₺
+  /// cüzdanına girdi" yan yanaydı; 120 hayatta tutuklu geçen 32 yılın
+  /// **27'sinde** oyuncunun işi duruyor ve maaşı akıyordu.
+  ///
+  /// Kural: **iş bitmez, maaş ödenmez, o yıl kıdeme sayılmaz.** Tahliye
+  /// olan oyuncu işine döner; dosya mahkûmiyetle kapanırsa işi o zaman
+  /// biter (D-128). Böylece beraat eden oyuncu işini de kaybetmiş olmaz.
   ({GameState state, String? logText}) paySalaryFor(
     GameState state,
     int newAge,
@@ -577,6 +590,21 @@ class JobMarket {
     final int? sonOdeme = state.career.lastPaidAge;
     if (sonOdeme != null && sonOdeme >= newAge) {
       return (state: state, logText: null);
+    }
+
+    if (state.legal.isDetained) {
+      // Yıl **işlenmiş** sayılır: `lastPaidAge` ilerler ki aynı yıl
+      // ikinci kez buraya girilmesin, `detainedYears` de bir kez artsın.
+      return (
+        state: state.copyWith(
+          career: state.career.copyWith(
+            lastPaidAge: newAge,
+            detainedYears: state.career.detainedYears + 1,
+          ),
+        ),
+        logText: '${state.career.title} işin duruyor ama içeridesin: '
+            'bu yıl maaş yatmadı, kıdemin de ilerlemedi.',
+      );
     }
 
     return (

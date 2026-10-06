@@ -7260,7 +7260,12 @@ değil) ya tohum taraması.
 
 ### Q-199 — Tutukluyken maaş akmaya devam ediyor
 
-**Durum:** karar bekliyor (6 Ekim 2026).
+**Durum:** KARARLAŞTIRILDI — Faho "tutukluda da uygula" dedi (6 Ekim
+2026). Kural `DECISIONS.md` içine **D-179** olarak yazıldı: tutuklulukta
+iş bitmez, maaş ödenmez, o yıl kıdeme sayılmaz. Düzeltmeden sonra ölçüm:
+tutuklu geçen 33 yılın 28'inde iş duruyor (tasarım böyle), **maaşı akan
+0** (önce 32 yılın 27'sinde akıyordu); 25 hayatta toplam 46 yıl kıdem
+donmuş. Kalıcı bekçi: `paket_bh_tutuklu_maas_test.dart`.
 **DÜZELTME:** bu kaydın ilk hâli yanlıştı — "hükümlüde de maaş akıyor,
 D-128 kodda işlemiyor" diye yazmıştım. **Hükümlü tarafı doğru çalışıyor.**
 Düzeltme ve ölçüm aşağıda.
