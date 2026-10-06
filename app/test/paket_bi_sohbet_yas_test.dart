@@ -106,6 +106,45 @@ void main() {
     });
   });
 
+  group('ergen çocukla sohbet (Q-200)', () {
+    // Havuzlar özel; kademe **ayırt edici satırlarla** denetleniyor.
+    const String cocukKalibi = 'hikâyenin yarısı gerçek'; // 4-12 havuzu
+    const String genelKalibi = 'uzun uzun konuştunuz'; // yetişkin havuzu
+    const String buyukKalibi = 'kendi yaşındayken';
+
+    for (final int yas in <int>[13, 15, 17]) {
+      test('$yas yaşındaki çocuk ne küçük çocuk ne yetişkin havuzunda', () {
+        final List<String> metinler = _metinler(
+          kisi: _kisi(age: yas, relation: RelationType.cocuk),
+          kind: InteractionKind.sohbet,
+          playerAge: 45,
+        );
+        for (final String m in metinler) {
+          expect(m.contains(cocukKalibi), isFalse,
+              reason: '$yas yaşındaki ergen 4-12 havuzundan konuşuyor: $m');
+          expect(m.contains(genelKalibi), isFalse,
+              reason: '$yas yaşındaki ergen yetişkin havuzundan '
+                  'konuşuyor: $m');
+          expect(m.contains(buyukKalibi), isFalse, reason: m);
+        }
+        // Kademe gerçekten bir havuz olmalı, tek satır değil.
+        expect(metinler.toSet().length, greaterThanOrEqualTo(3),
+            reason: 'ergen havuzu tek satıra inmiş');
+      });
+    }
+
+    test('18 yaşındaki çocuk yetişkin havuzuna geçer', () {
+      // Kademe fazla genişlemesin: 18'inde ergen satırı bitmeli.
+      final List<String> metinler = _metinler(
+        kisi: _kisi(age: 22, relation: RelationType.cocuk),
+        kind: InteractionKind.sohbet,
+        playerAge: 50,
+      );
+      expect(metinler.any((String m) => m.contains(genelKalibi)), isTrue,
+          reason: '22 yaşındaki çocuk yetişkin havuzuna düşmüyor');
+    });
+  });
+
   group('"kendi yaşındayken" satırı', () {
     const String kalip = 'kendi yaşındayken';
 

@@ -7339,8 +7339,10 @@ Karar senin; sen diyene kadar tutuklu hâline dokunmuyorum.
 
 ### Q-200 — Bebek "okulda olanları anlattı": sohbet havuzunun yaş kademesi eksik
 
-**Durum:** iki metin hatası **düzeltildi** (kural değişmedi, onay
-gerekmedi); bir soru **karar bekliyor**.
+**Durum:** KARARLAŞTIRILDI — iki metin hatası düzeltildi (kural
+değişmedi, onay gerekmedi); ergen kademesi sorusuna Faho "ergen
+kademesi de ekle" dedi (6 Ekim 2026) ve kademe eklendi. Yaş kademesi
+kuralı `DECISIONS.md` içine **D-180** olarak yazıldı.
 
 **Nasıl bulundu:** dördüncü döküm turu. Üçüncü turda "YENİ DOĞAN BEBEK"
 BULUNAMADI çıkmıştı ve bunu oyunun eksiği sanmaya başlamıştım —
@@ -7402,6 +7404,15 @@ ilişkilerden biri ve şu an en yavan yeri. Alternatif: boş bırakmak;
 önermiyorum ama kabul edilebilir, çünkü genel havuz yanlış değil,
 yalnızca kişisiz. Sen "ekle" demezsen kademeyi eklemiyorum, bu tablo
 kuyrukta kalır.
+
+**KARAR (6 Ekim 2026):** Faho "ergen kademesi de ekle" dedi.
+`_sohbetErgen` eklendi (4 satır), kapsam vakit geçirmedekiyle aynı:
+13-17 yaş, çocuk bağı. 18 yaşında yetişkin havuzuna geçiliyor. Satırlar
+ergenin ağzından değil **ebeveynin gördüğü kadarıyla** yazıldı: kısa
+temas, yarım cümle, sonra beklenmedik bir açılma. Bekçi 7'den **11
+teste** çıktı; kademe koddan çıkarıldığında üç testin kırmızıya düştüğü
+ölçüldü, 18+ kontrolü yeşil kaldı. Kural D-180 oldu; tablo artık dört
+kademede eşit.
 
 #### ÖLÇÜLMEMİŞ (bulgu olarak yazmıyorum)
 

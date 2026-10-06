@@ -5444,8 +5444,16 @@ annenin "kendi yaşındayken" satırı durmalı.
 (31) · kritik sağlık (61) · emekli (61) · **yeni doğan bebek (34)**.
 Hâlâ okunmamış: denetim dönemi, gebelik/doğum akışı.
 
-Ayrıntı ve karar bekleyen soru (sohbette ergen kademesi):
-`docs/DESIGN_REVIEW_QUEUE.md` → Q-200.
+**Q-200 kararlaştırıldı (aynı gün):** Faho "ergen kademesi de ekle"
+dedi. `_sohbetErgen` eklendi — 13-17 yaş, çocuk bağı, vakit
+geçirmedekiyle aynı aralık; 18 yaşında yetişkin havuzuna geçiliyor.
+Kademe koddan çıkarıldığında üç testin kırmızıya düştüğü ölçüldü.
+Kural `DECISIONS.md` → **D-180**: sohbet ve vakit geçirme metinleri aynı
+dört kademeyi kullanır (0-3 / 4-12 / 13-17 / 18+), yaş kontrolü bağ
+türünün önüne geçer, bir satır konuşanın yaşını varsayıyorsa o varsayım
+koda yazılır. Bekçi 11 teste çıktı.
+
+Ayrıntı: `docs/DESIGN_REVIEW_QUEUE.md` → Q-200.
 
 ## Görsel döküm: 3-6 Ekim 2026
 

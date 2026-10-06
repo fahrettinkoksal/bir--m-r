@@ -95,7 +95,7 @@ const List<String> _sohbetEs = <String>[
       'senden duymayı beklemiş.',
 ];
 
-/// Henüz konuşmayan ya da yeni konuşan çocukla "sohbet" (0-3).
+/// Henüz konuşmayan ya da yeni konuşan çocukla "sohbet" (0-3) — D-180.
 ///
 /// Bu havuz **ölçülen bir hatayla** eklendi: sohbet metni çocuk için
 /// `age <= 12` ile seçiliyordu, dolayısıyla doğduğu yıl bebeğin
@@ -119,6 +119,22 @@ const List<String> _sohbetCocuk = <String>[
       'gerçekten baktınız.',
   '{ad} ile korkularından konuştunuz; ciddiye alındığını anlayınca '
       'rahatladı.',
+];
+
+/// Ergen çocukla sohbet (13-17) — D-180 (Q-200, 6 Ekim 2026).
+///
+/// Kademe "vakit geçir" dalındakiyle aynı aralıkta: 13-17 yaş, çocuk
+/// bağı. Eklenmeden önce 15 yaşındaki çocukla sohbet, iş arkadaşıyla
+/// sohbetle **aynı** havuzdan çıkıyordu. Satırlar ergenin kendi
+/// ağzından değil, ebeveynin gördüğü kadarıyla yazıldı: kısa temas,
+/// yarım cümle, sonra beklenmedik bir açılma.
+const List<String> _sohbetErgen = <String>[
+  '{ad} kulaklığın tekini çıkardı, o kadarıyla dinledi. Sonunda iki '
+      'cümle de o söyledi.',
+  '{ad} bir arkadaşının adını geçirdi. Üstüne gitmedin, kendi anlattı.',
+  '{ad} "anlamazsın" diye başladı, sonuna kadar anlattı.',
+  '{ad} bir şeye çok kızgındı. Haklı olup olmadığını sormadın, '
+      'dinledin.',
 ];
 
 const List<String> _sohbetGenel = <String>[
@@ -242,6 +258,8 @@ String interactionText({
       pool = _sohbetEs;
     } else if (person.relation == RelationType.cocuk && person.age <= 12) {
       pool = _sohbetCocuk;
+    } else if (person.relation == RelationType.cocuk && person.age <= 17) {
+      pool = _sohbetErgen;
     } else if (person.age > playerAge) {
       pool = <String>[..._sohbetGenel, ..._sohbetBuyukten];
     } else {
