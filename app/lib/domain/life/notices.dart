@@ -6,6 +6,7 @@ import '../models/zodiac.dart';
 import '../../data/fortune_catalog.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
+import 'mortality.dart';
 
 /// Cenazeye katılım seçenekleri (D-050).
 ///
@@ -127,8 +128,8 @@ abstract final class Notices {
       age: playerAge,
       personId: person.id,
       title: 'Bir kaybın var',
-      text: '$bag ${person.fullName}, ${person.age} yaşında $cause '
-          'nedeniyle hayatını kaybetti.',
+      text: '$bag ${person.fullName}, ${person.age} yaşında '
+          '${Mortality.causeClause(cause)} hayatını kaybetti.',
       happinessDelta: happinessDelta,
     );
   }

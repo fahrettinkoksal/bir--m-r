@@ -35,6 +35,32 @@ class TrialSheet extends StatefulWidget {
 class _TrialSheetState extends State<TrialSheet> {
   String _avukatId = kSelfDefenceTier.id;
 
+  /// Pencereyi kapatır — **yalnızca kendi rotası en üstteyse**.
+  ///
+  /// **Ölçülmüş çökme.** Eskiden burada doğrudan
+  /// `if (mounted) Navigator.of(context).maybePop()` vardı.
+  /// `maybePop` en üstteki rotayı kapatır, bu pencerenin rotasını değil.
+  /// `home_shell` bekleyen bildirim/olay/kriz penceresini açarken önce
+  /// bütün rotaları kapatıp hemen ardından yenisini açıyor; duruşma
+  /// sayfası o sırada çıkış animasyonunda olduğu için hâlâ `mounted` ve
+  /// hâlâ yeniden kuruluyor. Kendini kapatmak isterken en üstte artık
+  /// yeni pencerenin rotası duruyor ve o rotanın kapsamı aynı karede
+  /// henüz kurulmamış oluyor; `ModalRoute.willPop` içindeki
+  /// `assert(scope != null)` düşüyor ve oyuncu kırmızı hata ekranı
+  /// görüyor. Oyuncuya bakan yolu: duruşmada tutum seçildikten sonra
+  /// kararın bildirimi geldiği an.
+  ///
+  /// `isCurrent` denetimi iki durumu da doğru karşılıyor: üstte başka
+  /// pencere varsa buranın kapatacak bir şeyi yok (kabuk bu sayfayı
+  /// zaten kapattı), yoksa pencere normal yolda kendini kapatır.
+  /// Gerileme testi: `test/paket_bd_durusma_penceresi_test.dart`.
+  void _kendiniKapat() {
+    if (!mounted) return;
+    final ModalRoute<Object?>? rota = ModalRoute.of(context);
+    if (rota == null || !rota.isCurrent) return;
+    Navigator.of(context).maybePop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -44,9 +70,7 @@ class _TrialSheetState extends State<TrialSheet> {
     // Karar verildiyse pencere kendini kapatır; sonucu bildirim anlatır
     // (D-114), burada ikinci kez yazılmaz.
     if (durusma == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).maybePop();
-      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _kendiniKapat());
       return const SizedBox.shrink();
     }
 
@@ -113,7 +137,7 @@ class _TrialSheetState extends State<TrialSheet> {
                         stance: tutum,
                         lawyerId: _avukatId,
                       );
-                      if (mounted) Navigator.of(context).maybePop();
+                      _kendiniKapat();
                     },
                     style: OutlinedButton.styleFrom(
                       alignment: Alignment.centerLeft,

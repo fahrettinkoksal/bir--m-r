@@ -194,3 +194,9 @@ completed	Paket BB/3: tarama kalan alanlara uzatıldı, 34 tavan adayı incelend
 pending	Q-197: okul kulübü seçmesinde beceri 8. sezondan sonra ölüyor
 completed	Paket BC/1: Q-196 — 27 karar DECISIONS.md'ye yazıldı, bekçi listesi boşaldı
 completed	Paket BC/2: D-178 — kulüp seçmesinde sezon tavanı, beceri artık hep sayılıyor
+completed	Paket BD/1: ekran dökümü testi — hayat arayüzden yaşanıyor, beş ekran okunuyor
+completed	Paket BD/2: duruşma penceresi kapanmış rotada çöküyordu, düzeltildi
+completed	Paket BD/3: ölüm cümlesindeki "nedeniyle" eki koşulsuzdu, düzeltildi
+completed	Paket BD/4: hayvan satırının boş durumu bütün kataloğu diziyordu, kısaltıldı
+completed	Paket BD/5: günlük satırı küçük harfle başlıyordu — iki olayda yer tutucu düzeltildi
+pending	Q-198: ekran dökümünden sekiz soru (askerlik yaşı, emeklilik şartı, ad çakışması...)

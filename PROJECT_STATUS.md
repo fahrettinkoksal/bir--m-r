@@ -5176,6 +5176,64 @@ hiçbir cihazda çalıştırılmadı.**
 **Paket AZ:** gerçek 2026-27 lig/kulüp kataloğu — ağ kapalı, tff.org on
 dördüncü kez `000`.
 
+## Paket BD: ekranlar ilk kez okundu, üç hata düzeltildi (6 Ekim 2026)
+
+**Oyun hâlâ hiçbir cihazda oynanmadı** ama ekranların görünür metni ilk
+kez okundu. Yeni test `app/test/ekran_dokumu_test.dart` bir hayatı
+**gerçek arayüzden** (düğmelere basarak) 8 · 17 · 30 · 70 yaşına kadar
+yaşatıp Hayat ekranı ve dört menünün bütün metnini basıyor. Bir bekçi
+değil **dürbün**: tek kalıcı iddiası hiçbir ekranın boş kalmaması.
+
+Dürbünü kurmak üç kez yanlış kurulumdan geçti; üçü de dosyanın başına
+ölçülmüş hata olarak yazıldı:
+
+1. Evreyi `copyWith(age: 8)` ile kurmak dünyayı yaşlandırmıyor; 8
+   yaşındaki çocuğun annesi 22 göründü. Hata sanıp raporlayacaktım,
+   400 hayatlık ölçüm gerçeği söyledi (annenin doğumdaki yaşı en az
+   **17**, medyan 30). Evreler artık gerçekten yaşanarak kuruluyor.
+2. `ageUp()`'ın **beş** kapısı var (olay, ölüm, kriz, lise alanı
+   D-094, lise sonrası yol D-111). İlk yazımda ikisi karşılanıyordu;
+   17/30/70 evrelerinin üçü de **14 yaşında** takılı kaldı.
+3. Durumu koddan değiştirmek **pencereyi kapatmıyor.** Açık kalan
+   `EventDialog` modal olduğu için sekme dokunuşları bariyere çarptı ve
+   dört evrenin hepsinde beş ekran da **aynı** metni verdi. "Sekmeler
+   çalışmıyor" sanacaktım. Döküm artık hayatı UI smoke testinin ortak
+   akış yardımcılarıyla yaşıyor.
+
+### Dökümün bulduğu dört kesin hata — düzeltildi
+
+| Hata | Nerede | Bekçi |
+|---|---|---|
+| **Duruşmadan sonra kırmızı hata ekranı.** `TrialSheet` kareden sonra `Navigator.maybePop()` çağırıyordu; `maybePop` **en üstteki** rotayı kapatır. Kabuk bekleyen pencereyi açarken bütün rotaları kapatıp hemen yenisini açıyor, yeni rotanın kapsamı aynı karede kurulmamış oluyor ve `ModalRoute.willPop` içindeki `assert(scope != null)` düşüyor. Oyuncuya bakan yolu: duruşmada tutum seçtikten sonra kararın bildirimi geldiği an. `TrialSheet`in **hiç** arayüz testi yoktu. | `trial_sheet.dart` | `paket_bd_durusma_penceresi_test.dart` |
+| **Ölüm cümlesi bozuk kuruluyordu:** "uykusunda, sakin bir şekilde **nedeniyle** vefat etti". Tek hayatta beş kez; üçüncü yazım yeri oyunun **son cümlesi**: "70 yaşında uzun bir ömrün ardından nedeniyle hayatını kaybettin." Gerekçeler doğru, ek koşulsuzdu. | `mortality.dart`, `life_progression.dart`, `notices.dart` | `paket_bd_olum_cumlesi_test.dart` |
+| **Hayvan satırı bütün kataloğu tek satıra diziyordu** (104 karakter, 10 tür " ya da " ile). İlk düzeltmem de yetmedi: grup saymak **94** karakter ölçtü, desen aynı kaldı. Boş durum artık sayı veriyor. | `relationships_screen.dart` | `paket_bd_ekran_alt_metni_test.dart` |
+| **Günlük satırı küçük harfle başlıyordu:** "arkadaşın Hasan ile bir saat konuştunuz." Motor doğru ve belgeli (`{sahip}` cümle başı, `{sahipk}` cümle içi); iki olay sonucu `{sahipk}` ile başlıyordu. Üçüncü aday incelendi ve dokunulmadı — orada yer tutucu gerçekten cümle içinde. | `event_pool.dart:464, :509` | `paket_bd_ekran_alt_metni_test.dart` |
+
+Dört bekçinin de düzeltmeden **önce** düştüğü kanıtlandı: duruşma
+çökmesi birebir üretildi, ölüm cümlesi bekçisi eski davranışta iki
+bulguyu adıyla söyledi, hayvan bekçisi **kendi ilk düzeltmemi**
+yakaladı (grup saymak 94 karakterdi), yer tutucu bekçisi hatayı olay ve
+seçim adıyla gösterdi.
+
+### Karar bekleyen sekiz soru: Q-198
+
+Askerlik celbinin 70 yaşında hâlâ beklemesi · hiç çalışmamış oyuncuya
+emekli aylığı · okul ekranının kendi ekranıyla çelişen dipnotu · ilkokul
+kartındaki "Son sınıfa kalan 9 yıl" · aynı ekranda "Lise 4. sınıf" ve
+"12. sınıf" · **kardeşin ebeveynle aynı adı taşıması (ölçüldü: kardeşi
+olan hayatların %10'u, 37/370)** · geliri olmayan oyuncunun aracının
+kapanmayan açık üretmesi (D-123 ile D-148 çatışıyor) · aynı günlük
+satırının dokuz yıl üst üste birebir tekrarlanması. Her birinin
+önerisi ve varsayılanı kuyrukta yazılı; **hiçbiri `DECISIONS.md`'ye
+girmedi.**
+
+Dökümün kendi sınırları da kuyrukta yazılı: yalnızca **çizilmiş** metni
+okur, uzun listelerin alt satırları hiç kurulmaz. İlk okumada
+"Hayat işleri" başlığını boş görüp hata sanacaktım; görüş alanını
+büyütünce altındaki beş satır göründü. "Ailesinin yanında" ile vefat
+etmiş ebeveyn de hata değil — `Housing.residenceOf` hanede yetişkin
+kalıp kalmadığına bakıyor.
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün

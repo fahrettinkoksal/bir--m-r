@@ -6951,3 +6951,195 @@ sabit) ayıklanıyor.
 Bugünkü çıktısı: **ölü sabit 0**, dekoratif eşik 0, tavan adayı 28
 (hepsi incelendi; ikisi yukarıdaki sınırda notlar, kalanı stat tavanı
 ya da tek bileşenli).
+
+### Q-198 — Ekran dökümü: sekiz soru (dört hata zaten düzeltildi)
+
+**Durum:** karar bekliyor (6 Ekim 2026)
+**Nasıl bulundu:** `app/test/ekran_dokumu_test.dart` — yeni bir test.
+Oyun hiçbir cihazda oynanmadığı için ekranların **tamamını** kimse
+okumamıştı: 54 widget testi var, hepsi tek bir satırı arıyor. Bu test
+bir hayatı gerçek arayüzden (düğmelere basarak) 8 · 17 · 30 · 70
+yaşına kadar yaşatıp beş ekranın görünür metnini basıyor. Dökümü
+okudum; aşağıdakiler çıktı.
+
+**Etkilenen kod:** `ekran_dokumu_test.dart`, `trial_sheet.dart`,
+`mortality.dart`, `relationships_screen.dart`,
+`school_career_screen.dart`, `life_progression.dart`
+
+#### Önce: dökümün bulduğu dört kesin hata — onay beklemeden düzeltildi
+
+Dördü de teknik hata; oyun kuralı değiştirmiyor, bu yüzden
+`DECISIONS.md`'ye dokunmadan düzeltildi (CLAUDE.md: "Acil teknik
+hataları ürün kararı diye oyalama").
+
+1. **Duruşmadan sonra kırmızı hata ekranı.** `TrialSheet`, duruşma
+   kapanınca kareden sonra `Navigator.maybePop()` çağırıyordu.
+   `maybePop` **en üstteki** rotayı kapatır, sayfanın kendi rotasını
+   değil. `home_shell` bekleyen bildirim/olay penceresini açarken önce
+   bütün rotaları kapatıp hemen yenisini açıyor; yeni rotanın kapsamı
+   aynı karede henüz kurulmamış olduğu için
+   `ModalRoute.willPop` içindeki `assert(scope != null)` düşüyor.
+   Oyuncuya bakan yolu: **duruşmada tutum seçtikten sonra kararın
+   bildirimi geldiği an.** `TrialSheet`in hiç arayüz testi yoktu;
+   3.360 testin hiçbiri bunu görmedi. Düzeltme: sayfa yalnızca kendi
+   rotası en üstteyse kapanıyor. Gerileme testi:
+   `paket_bd_durusma_penceresi_test.dart` (düzeltmeden önce aynı iddiayla
+   düşüyor, kanıtlandı).
+2. **Ölüm cümlesi bozuk kuruluyordu.** Tek bir hayatın günlüğünde beş
+   kez: *"Babaannen Sevgi Erdoğan uykusunda, sakin bir şekilde
+   **nedeniyle** vefat etti."* `Mortality.causeFor` iki tür metin
+   döndürüyor — isim öbeği ("yaşlılığa bağlı nedenler") ve zarf öbeği
+   ("uykusunda, sakin bir şekilde") — ama üç yazım yeri eki koşulsuz
+   ekliyordu. Üçüncüsü oyunun **son cümlesi**: *"70 yaşında uzun bir
+   ömrün ardından nedeniyle hayatını kaybettin."* Düzeltme:
+   `Mortality.causeClause` zarf öbeğine ek eklemiyor. Bekçi
+   (`paket_bd_olum_cumlesi_test.dart`) yeni bir gerekçe eklenip
+   sınıflandırılmazsa düşüyor.
+3. **İlişkiler ekranında hayvan satırı bütün kataloğu tek satıra
+   diziyordu:** *"Kedi ya da Köpek ya da Muhabbet kuşu ya da Kaplumbağa
+   ya da Balık ya da Kanarya ya da Papağan ya da Hamster ya da Tavşan ya
+   da Timsah."* — 104 karakter. **İlk düzeltmem de yetmedi:** tür
+   yerine grup saymayı denedim, bekçi testi **94 karakter** ölçtü; desen
+   aynı kalıyordu. Boş durum artık sayı veriyor: "Henüz hayvanın yok ·
+   10 tür arasından seçebilirsin". Uzunluk katalogdan bağımsız, tam
+   liste yine sahiplenme sayfasında. Bekçi:
+   `paket_bd_ekran_alt_metni_test.dart` (alt metin 70 karakteri aşarsa
+   ya da türleri tek tek sayarsa düşer).
+4. **Günlük satırı küçük harfle başlıyordu:** *"arkadaşın Hasan ile bir
+   saat konuştunuz."* Motor doğru ve belgeli — `{sahip}` cümle başı
+   ("Arkadaşın"), `{sahipk}` cümle içi ("arkadaşın") — hata
+   içerikteydi: iki olay sonucu `{sahipk}` ile **başlıyordu**
+   (`event_pool.dart:464`, `:509`). Üçüncü aday (`:368`) incelendi ve
+   **dokunulmadı**: orada yer tutucu gerçekten cümle içinde. Bekçi
+   bütün `kEventPool`'u tarıyor, yani yeni olay yanlış yer tutucuyla
+   eklenirse düşer.
+
+#### 1. Askerlik celbi 70 yaşında hâlâ bekliyor
+
+Meslek ekranı, 70 yaşındaki oyuncuya **"Askerlik · Celbin geldi; bir
+karar vermen gerekiyor"** yazıyor. Aynı satır 30 yaşında da duruyordu;
+yani celp hiç zaman aşımına uğramıyor. Türkiye'de yükümlülüğün bir üst
+yaşı var ve oyunda da askerliğin açık kalması oyuncuya kırk yıl boyunca
+"karar vermen gerekiyor" demek demek.
+
+*Önerim ve varsayılanım:* yükümlülük **41 yaşında** kapanır; o yaştan
+sonra satır "Yükümlülük yaş sınırından kapandı" diye **durum** gösterir,
+eylem olmaz. 41 çünkü yoklama kaçağı/bakaya kaydı pratikte bu yaş
+civarında tamamen düşüyor ve oyunda yuvarlak bir sayı. Bedelli ve
+rütbeli yollar (D-069) bu yaşa kadar açık kalır. Kabul edersen
+`DECISIONS.md`'ye girer; etmezsen ne yazsın?
+
+#### 2. Hiç çalışmamış oyuncuya "Emekli ol · yıllık aylığın 60.000 ₺"
+
+70 yaşında, bir gün bile çalışmamış, iş geçmişi boş oyuncunun ekranında
+emeklilik satırı duruyor ve aylığı hesaplıyor. Emekli aylığı oranı
+`0,35 + yıl × 0,01` (Q-197 EKİ'nde notu var) ama **taban prim yılı
+şartı yok**: 0 yıl çalışan da taban oranı alıyor.
+
+*Önerim ve varsayılanım:* emeklilik için **en az 10 çalışma yılı**
+şartı. Şart dolmadıysa satır gizlenmez, **gerekçesi yazılır** (D-063):
+"Emeklilik için en az 10 yıl çalışman gerekiyor; şu an 0 yılın var."
+10 yıl, oyunun ölçeğinde bir kariyerin görünür en kısa hâli. Alternatif:
+şartı hiç koymamak ve bunu "oyun gerçekçilikten önce okunurluğu seçer"
+diye yazıya geçirmek — ben önermiyorum, çünkü hiç çalışmamış bir hayata
+maaş vermek ekonominin diğer bütün dengelerini yanlış gösterir.
+
+#### 3. Okul ekranının dipnotu artık yanlış bilgi veriyor
+
+Dipnot: *"Sınav, not ve diploma sistemi henüz yazılmadı."* Oysa **aynı
+ekranda** şunlar yazıyor: "Not ortalaman 71", "Yerleştirme puanı 70",
+"Üniversite sınav puanı 87", "Bu yılın sonunda Üniversite sınavı var".
+Dipnot kendi ekranıyla çelişiyor; oyuncu hangisine inanacağını bilemez.
+
+*Önerim ve varsayılanım:* dipnotu **bugünkü gerçeğe** çevir: not
+ortalaması, yerleştirme ve üniversite sınavı **var**; olmayan şey ders
+bazlı sınav ve diploma belgesi. Metin önerim: "Okul olayları yaş aldıkça
+karşına çıkar. Arkadaşlık düzeyini İlişkiler bölümünden takip
+edebilirsin. Ders bazlı sınav ve diploma belgesi henüz yok; not
+ortalaması, yerleştirme ve üniversite sınavı işliyor." Bu bir metin
+düzeltmesi, kural değişikliği değil — onay verirsen aynı pakette
+yazıyorum.
+
+#### 4. "Son sınıfa kalan" satırı ilkokul kartında yanıltıyor
+
+8 yaşındaki 3. sınıf öğrencisinin kartı "İlkokul" başlıklı ve içinde
+"Sınıf: 3. sınıf", hemen altında **"Son sınıfa kalan: 9 yıl"**. Satır
+bütün öğrenimin sonunu (12. sınıf) sayıyor ama ilkokul kartında
+okunduğunda "ilkokulun son sınıfına 9 yıl" gibi duruyor — ki ilkokulun
+sonuna 2 yıl var.
+
+*Önerim ve varsayılanım:* etiketi **"Okul bitişine kalan"** yap. Sayı
+aynı kalır, karışıklık biter. İkinci seçenek satırı kademeye göre
+bölmek (ilkokul sonu / lise sonu) — daha doğru ama iki satır eder,
+önermiyorum.
+
+#### 5. Aynı ekranda iki ayrı sınıf numarası
+
+Üst başlık **"Lise 4. sınıf"**, hemen altındaki kart **"Sınıf: 12.
+sınıf"**. İkisi de Türkiye'de kullanılıyor ama tek ekranda ikisini
+birden göstermek oyuncuya iki farklı şey gibi görünüyor.
+
+*Önerim ve varsayılanım:* ikisini birleştir — **"Lise 4 (12. sınıf)"**
+hem başlıkta hem kartta. Tek bir doğru okuma kalır.
+
+#### 6. Kardeş, anne ya da babayla aynı adı taşıyor (ölçüldü: %10)
+
+Dökümdeki hayatta baba **Mehmet Erdoğan**, abi de **Mehmet**. Günlükte
+"Mehmet ortaokula geçti", "Mehmet evleniyor", "Abin Mehmet eşini
+kaybetti" satırları babayla karışıyor.
+
+**Ölçüm (500 hayat):** kardeşi olan 370 hayatın **37'sinde** (%10)
+kardeşlerden biri bir ebeveynle aynı ilk adı taşıyor. Üretimde ad
+çakışması koruması yok.
+
+*Önerim ve varsayılanım:* kardeş adı çekilirken **hanedeki adlar
+dışlanır** (anne, baba, oyuncu ve önceki kardeşler). Türkiye'de baba
+adını taşıyan oğul olur ama oyunun günlüğü soyadsız yazıyor, yani
+okunurluk kaybı kazançtan büyük. Ad havuzu bu kadar daralmayı taşıyor
+mu diye ölçüp yazarım.
+
+#### 7. Geliri olmayan oyuncunun aracı kapanmayan açık üretiyor
+
+70 yaşındaki oyuncunun gider dökümü: "Kişisel harcama 12.000 ₺" (D-123:
+geliri olmayıp ailesinin yanında yaşayanın yükünü aile taşır) **artı**
+"Tunca Ege 1.2: sigorta, kasko ve vergi **64.680 ₺**" (D-148). Geliri 0,
+cüzdanı 0; her yıl 76.680 ₺ açık ve her yıl "geçim sıkıntısı". Kırk yıl
+böyle geçiyor.
+
+İki onaylı karar birbirine giriyor: aile kişisel yükü taşıyor ama aracın
+vergisini taşımıyor; oyuncunun da ödeyecek parası yok ve araçtan
+kurtulmak için bir şey yapması söylenmiyor.
+
+*Önerim ve varsayılanım:* **oyuncuya çıkış göster, kuralı değiştirme.**
+Üst üste iki yıl araç giderini karşılayamayan oyuncuya "aracı sat"
+bildirimi gelir (satış zaten var); karar oyuncunun. Aracı alıp
+sürdürmenin bedeli olsun ama kapanmayan açık **sessiz** kalmasın.
+Alternatif — geliri olmayanın aracında gideri aileye yıkmak — D-123'ü
+araçlara genişletir; önermiyorum, araç isteğe bağlı bir satın alma.
+
+#### 8. Aynı günlük satırı yıllarca birebir tekrarlanıyor
+
+30 yaşındaki oyuncunun günlüğünde **dokuz yıl üst üste** aynı cümle:
+"Geçim giderin 12.000 ₺ tuttu, elinde 0 ₺ vardı. 12.000 ₺ açık kaldı;
+bu yıl geçim sıkıntısı çektin." 70 yaşında aynısı 76.680 ₺ ile sürüyor.
+Günlük hayatın hikâyesi olmalı; aynı cümlenin kırk kopyası hikâyeyi
+boğuyor ve oyuncunun hikâye satırlarını bulmasını zorlaştırıyor.
+
+*Önerim ve varsayılanım:* satır **durum değişince** yazılsın. Sıkıntı
+başladığı yıl tam cümle yazılır; **sürdüğü** yıllarda yazılmaz; bittiği
+yıl "geçim sıkıntısı geçti" yazılır. Tutar değişirse (araç alındı,
+kiraya çıkıldı) yeniden yazılır. Böylece bilgi kaybolmaz, tekrar gider.
+İkinci seçenek her yıl yazmaya devam edip kısaltmak — tekrarı
+çözmediği için önermiyorum.
+
+#### Dökümün kendi sınırları (hata sanmayın diye yazıyorum)
+
+- Döküm yalnızca **çizilmiş** metni okur. Uzun listelerde ekranın
+  altına düşen satırlar hiç kurulmaz. İlk okumada Aktiviteler'de
+  "Hayat işleri" başlığını **boş** gördüm ve hata sanacaktım; görüş
+  alanını büyütünce altındaki Sosyal medya, Banka, Ehliyet, Evlat
+  Edinme ve Son Kararlar satırları göründü. Ürün hatası değildi.
+- "Ailesinin yanında · 70 yaşında, anne ve baba vefat etmiş" da hata
+  değil: `Housing.residenceOf` hanede **yetişkin** kalıp kalmadığına
+  bakıyor, ebeveynin sağ olmasına değil. O hayatta evde bir kişi daha
+  var.

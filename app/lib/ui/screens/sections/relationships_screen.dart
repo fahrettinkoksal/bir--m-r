@@ -27,16 +27,45 @@ import 'pets_page.dart';
 /// Evcil hayvan satırının alt metni: gerçek kayda bakar, uydurmaz.
 ///
 /// D-146 ile Aktiviteler ekranından buraya taşındı.
+///
+/// **Ölçülmüş hata — boş durum bütün kataloğu tek satıra diziyordu.**
+/// Hayvanı olmayan oyuncuda alt metin sahiplenilebilir **türlerin
+/// tamamını** " ya da " ile birleştiriyordu; ekran dökümünde satır şöyle
+/// çıktı:
+///
+///     Kedi ya da Köpek ya da Muhabbet kuşu ya da Kaplumbağa ya da
+///     Balık ya da Kanarya ya da Papağan ya da Hamster ya da Tavşan ya
+///     da Timsah
+///
+/// 104 karakter: bir alt satırda okunması imkânsız ve katalog
+/// büyüdükçe daha da uzuyor.
+///
+/// **İlk düzeltmem de yetmedi.** Tür yerine **grup** saymayı denedim
+/// ("kediler, köpekler, kuşlar, kemirgenler ve tavşan, su ve sürüngen,
+/// egzotik") — bekçi testi ölçtü, **94 karakter**. Yani desen aynı
+/// kalıyordu, yalnızca kısalıyordu. Boş durum artık **sayı** veriyor:
+/// uzunluk katalogdan bağımsız. Satır yine sahiplenme sayfasına
+/// götürüyor; oyuncu tam listeyi orada görüyor (D-063: boş durum ne
+/// olduğunu ve nereye gittiğini söyler).
 String _hayvanAltMetni(GameState state) {
   final List<Pet> yasayan = PetCare.livingPets(state);
   if (yasayan.isEmpty) {
-    return adoptablePetSpecies.map((PetSpecies s) => s.label).join(' ya da ');
+    return 'Henüz hayvanın yok · '
+        '${adoptablePetSpecies.length} tür arasından seçebilirsin';
   }
   if (yasayan.length == 1) {
     return '${yasayan.first.name} seninle yaşıyor';
   }
   return '${yasayan.length} hayvana bakıyorsun';
 }
+
+/// Test için açılan kapı: alt metni doğrudan okur.
+///
+/// Gerileme testi (`paket_bd_ekran_alt_metni_test.dart`) metnin
+/// uzunluğunu ve kataloğu saymadığını denetliyor; bunun için bütün
+/// ekranı kurmak gerekmiyor.
+@visibleForTesting
+String debugPetSubtitle(GameState state) => _hayvanAltMetni(state);
 
 enum RelationshipSubPage {
   akrabalar,

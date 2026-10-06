@@ -461,7 +461,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         id: 'otur',
         label: 'Bırak elindekini, otur konuş',
         resultText:
-            '{sahipk} {kisi} ile uzun uzun oturdunuz. Sitem, yerini '
+            '{sahip} {kisi} ile uzun uzun oturdunuz. Sitem, yerini '
             'sohbete bıraktı.',
         happiness: 3,
         bond: 7,
@@ -506,7 +506,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
         id: 'hemen_konus',
         label: 'Ara ve uzun uzun konuş',
         resultText:
-            '{sahipk} {kisi} ile bir saat konuştunuz. Aradaki mesafe '
+            '{sahip} {kisi} ile bir saat konuştunuz. Aradaki mesafe '
             'kapanmadı ama ilk adım atıldı.',
         happiness: 2,
         bond: 8,

@@ -1248,7 +1248,8 @@ class LifeProgression {
           age: newAge,
           text:
               '${trUpperFirst(etiket)} '
-              '${person.fullName} $gerekce nedeniyle vefat etti.',
+              '${person.fullName} '
+              '${Mortality.causeClause(gerekce)} vefat etti.',
           category: LogCategory.aile,
           // Kayıt kişiye bağlanır (Paket 43): ortak geçmiş vefatın
           // **gerçek** yılını buradan okur, uydurmaz.
@@ -1990,7 +1991,8 @@ class LifeProgression {
         ...state.log,
         LifeLogEntry(
           age: newAge,
-          text: '$newAge yaşında $gerekce nedeniyle hayatını kaybettin.',
+          text: '$newAge yaşında '
+              '${Mortality.causeClause(gerekce)} hayatını kaybettin.',
           category: LogCategory.yasDegisimi,
         ),
       ]),
