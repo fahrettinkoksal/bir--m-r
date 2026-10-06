@@ -6740,3 +6740,119 @@ iz; silmek bilgiyi yok eder.
 cümleyle yazarım, "Claude'un okuduğu" diye işaretlenir ve sen onaylayana
 kadar **kesin kural sayılmaz**. Böylece `DECISIONS.md` eksiksiz olur ama
 hiçbir şey senin onayın olmadan kural olmaz.
+
+---
+
+### Q-196 EKİ — 27 numaranın kural metni koddan çıkarıldı (onay bekliyor)
+
+**Durum:** onay bekliyor (6 Ekim 2026)
+
+Faho "1-2-3 yap" dedi. Aşağıdaki 27 kural metnini **koddan okudum**;
+çoğunun yorumunda Faho'nun kendi cümlesi alıntılı duruyor, yani bu bir
+**yeniden kurma**, uydurma değil. Yine de hiçbiri `DECISIONS.md`'ye
+girmedi: oraya ancak sen onayladıktan sonra girer.
+
+Onaylarsan tek seferde işlerim ve bekçinin muafiyet listesinden düşerler.
+Yanlış okuduğumu düşündüğün satırı söyle, düzeltirim.
+
+| No | Koddan okunan kural | Kaynak |
+|---|---|---|
+| **D-137** | **2. el araç pazarı** galerilerin yerine geçmez, yanına eklenir: ilan sahibinden alınan araç envantere **ilanın kondisyonuyla** girer, yorgun araç gerçekten yorgundur. Model yılı yazılmaz. | `used_vehicle_market.dart` |
+| **D-138** | Mağaza rafları **ucuzdan pahalıya** sıralanır; eşit fiyatta ad sırası kullanılır ki sıra çalıştırmalar arası oynamasın. | `shop_catalog.dart:617` |
+| **D-139** | **Kefalet:** tutuklu oyuncu kefaleti kendi yatırabilir ya da aileden isteyebilir; sonuç garanti değildir. Kaçış, saklanma, iz gizleme **modellenmez**. | `prison_life.dart` |
+| **D-140** | **Koğuş hayatı:** içeride geçen yıllar koğuş arkadaşlığı, iyi hâl ve "sözü geçen gruba yakın durma" ile dolar; seçenekler yöntem değil **insan tutumu**dur. | `prison_life.dart` |
+| **D-141** | **Üvey anne/baba:** ebeveyni vefat eden oyuncuda hayatta kalan ebeveyn yeniden evlenebilir; gelen kişi kalıcı kimliğiyle üvey ebeveyn olur, **bağ düşük başlar**. Çocuğa onay sorulmaz, kimse listeden silinmez. | `step_parents.dart` |
+| **D-142** | **Lise sonrası karar pop-up ile sorulmaz**; oyuncu Okul/Meslek başvuru sayfasına düşer. Kural aynı: karar verilmeden yaş alınamaz (D-111). Lise **alanı** penceresi kalır. | `home_shell.dart:149` |
+| **D-143** | **İşveren ikinci iş için laf eder:** maaşlı işte çalışırken işletme yönetmek ikisini de tam yapmamak demektir. | `business_market.dart:134` |
+| **D-144** | **Sahiplenilmeyen hayvanın bakımı oyuncudan çıkmaz.** Oyuncu doğduğunda evde olan hayvan ailenin hayvanıdır; yaşlanır, hastalanır, vefat eder — ama parası çocuğun harçlığından gitmez. | `pet_care.dart:422` |
+| **D-145** | **Sayfa başına pop-up çıkmaz:** kitap bildirimi yalnızca **kitap bittiğinde** gelir. | `game_controller.dart:2569` |
+| **D-146** | **Evcil hayvanlar İlişkiler menüsünde durur**, Aktiviteler'de değil: hayvan bir aktivite değil, bir ilişkidir. Aynı sayfa iki menüde durmaz. | `activities_screen.dart:613` |
+| **D-147** | **Medya işi başvurusu her seferinde kabul edilmez** ve bir yılda yapılabilecek toplam medya işi sınırlıdır; kabul tabanı 0,45'ten **0,30**'a indi. Ün payı durur: tanınmış biri daha kolay kabul edilir. | `media_opportunities.dart:119` |
+| **D-148** | **Araç giderleri:** araç yıllık sigorta/vergi masrafı çıkarır. | `living_costs.dart` |
+| **D-149** | **Arkadaş haberi tekrarı engellenir:** hangi kişiden ve hangi haber türünden en son ne zaman haber geldiği kayda girer. Eski kayıtlarda boş açılır, geriye dönük geçmiş **uydurulmaz**. | `game_state.dart:638` |
+| **D-150** | **Cümle bütünlüğü:** olay metinleri ne verildiğini yazar ("dededen şeker" olayında fıstık ezmesi sürüldüğü ve "Annene yok" dendiği metinde geçer). | `paket_w_test.dart:545` |
+| **D-151** | **İkiz, "aynı yıl ikinci bebek olmaz" kuralının istisnasıdır:** ikinci bebek aynı doğumun parçasıdır. Oyuncunun düğmesi bu istisnayı hiç geçmez. | `parenthood.dart:138` |
+| **D-152** | **Kurslar ikinci tur:** her kurs **gerçek bir hobiyi** besler; beslemeyen süs eylemi eklenmez. | `activity_catalog.dart:596` |
+| **D-153** | **Kronik sağlık durumu:** atlatılan kriz kalıcı kayıt bırakır ve sonraki yılları etkiler. Yeni bir sağlık sistemi değildir; **tıbbi bilgi değildir** (ad, doz, tedavi tarifi geçmez). | `chronic_catalog.dart` |
+| **D-154** | **Eşin kendi hayatı ilerler:** iş değiştirir, emekli olur, bir yıl hastalanabilir. Paralel sistem kurulmaz, mevcut ilerleme kullanılır; önemli haberler oyuncuya bildirim olarak gelir. | `spouse_life.dart` |
+| **D-155** | **Ustalık işe, itibar kariyere aittir.** Ustalık iş değişince sıfırlanır; itibar **kaybolmaz** — bir ömrün emeği tek işverene bağlı değildir. Yeni kayıt alanı eklenmez, ikisi mevcut kayıttan türetilir. | `craft_mastery.dart` |
+| **D-156** | **Hayat hedefleri yol boyunca açılır**, hayat başında seçilmez. **Hiçbir hedef ödül vermez**: ulaşılan hedef kaydedilir, ekranda durur, hayat sonunda anılır. | `life_goal_catalog.dart` |
+| **D-157** | **Araç muayenesi iki yılda bir** gelir, her araç için ayrı takip edilir; kondisyonu eşiğin altındaki araç **geçmez** (ücret yine ödenir). | `vehicle_inspection.dart` |
+| **D-158** | **Kardeş de kendi hayatını yaşar:** okur, iş bulur, emekli olur. Üvey/yarım kardeş ve üvey çocuk da aynı kurala girer; kural **tek yerde** durur. | `life_progression.dart:169` |
+| **D-159** | **Şehrin katsayısı kirada da görünür:** İstanbul'da 6,6 milyona alınan daire ile Amasya'da 3 milyona alınan daire aynı kirayı getirmez. | `rental_engine.dart` |
+| **D-160** | **Hane bütçesi, nafaka ve velayet:** boşanmanın çocuklara ve paraya dair sonuçları vardır. Q-118'in "şimdilik yazılmasın" kararını Faho'nun açık isteğiyle değiştirir; hukuk simülasyonu değildir. | `household_budget.dart` |
+| **D-161** | **Çevre (çeteleşmenin dışarıya taşması):** koğuşta kurulan bağ tahliyeden sonra da sayılır. Oyuncunun gördüğü tek şey yüksek seviyeli bir seçim: "teklif geldi, karıştın mı". **Yöntem hiç anlatılmaz**; karışmak serbest kazanç yolu değildir. | `crew_life.dart` |
+| **D-162** | **Yatırım türleri soyuttur** (gerçek şirket/fon/banka adı geçmez, canlı fiyat çekilmez, tavsiye verilmez) ve **garantili yıllık eğilim kaldırıldı**: getiri piyasadan doğar. | `investment_catalog.dart` |
+| **D-163** | **Kiralama motoru:** evin kiracısı, kirası, defteri ve bakımı vardır. Yeni konut sistemi kurulmaz; mülk hâlâ `OwnedItem`, taşınma hâlâ `Housing`. | `rental_engine.dart` |
+
+**Not — iki numara düzeltildi:** `vehicle_inspection.dart`'ın başlığı
+muayeneyi **D-157** diye anıyor ve aynı yorum **D-148**'i "yıllık
+sigorta/vergi" diye ayırıyor. Tabloyu buna göre yazdım; ilk okumamda
+ikisini karıştırmıştım.
+
+---
+
+### Q-197 — Okul kulübü seçmesinde beceri 8. sezondan sonra ölüyor
+
+**Durum:** karar bekliyor (6 Ekim 2026)
+**Nasıl bulundu:** Paket BA taramasının kalan alanlara uzatılması.
+**Etkilenen kod:** `school_club_engine.dart:180`, ölçüm
+`paket_ba_sabit_taramasi_test.dart`
+
+Seçme puanının deneyim payı şöyle:
+
+```dart
+final int deneyim =
+    (seasons * prototypeOnlyExperienceWeight + bestSkill ~/ 4)
+        .clamp(0, 30);
+```
+
+`experienceWeight` 4, tavan 30. Ölçüm:
+
+| Sezon | beceri 0 | beceri 50 | beceri 100 |
+|---|---|---|---|
+| 2 | 8 | 20 | 30 |
+| 5 | 20 | **30** | **30** |
+| 7 | 28 | **30** | **30** |
+| **8** | **30** | **30** | **30** |
+| 12 | 30 | 30 | 30 |
+
+**8. sezondan sonra beceri puana hiç girmiyor.** 5. sezondan sonra da
+yalnızca çok düşük beceride fark kalıyor. Okul yaklaşık **12 sezon**
+sürdüğü için bu aralık gerçekten yaşanıyor: sekiz yıl kulüpte duran
+oyuncuyla, aynı sekiz yılda çalışıp beceriyi 100'e çıkaran oyuncu
+seçmede **aynı** puanı alıyor.
+
+Bu D-169'un (sporda geçen hayat) ve D-176'nın (zam tavanı) birebir aynı
+deseni: alt puanın tavanı tek bileşenle doluyor, diğeri ölüyor.
+
+*Önerim ve varsayılanım:* **ağırlığı 4'ten 2'ye indir.** O zaman 12
+sezon tek başına 24 verir, tavan ancak beceriyle birlikte dolar ve
+antrenman hep bir şey ifade eder. D-176'da işe yarayan düzeltmenin
+aynısı; sayı küçük, etkisi ölçülebilir.
+
+*Seçenek B:* deneyim tavanını 30'dan 40'a çıkar. Daha kolay ama sezon
+yine baskın kalır (10 sezonda tek başına doyurur).
+
+*Seçenek C:* beceri payını `bestSkill ~/ 4` yerine `~/ 3` yap (en çok 33)
+ve tavanı 45'e çek. Beceriyi sezondan **daha** değerli yapar; bu bir
+denge tercihidir, önermiyorum çünkü okul kulübü esas olarak devamlılık
+ödülü.
+
+*Seçenek D:* dokunma. O zaman D-171'in "yatkınlığın ağırlığı" maddesinin
+yanına şunu yazmak gerekir: sekiz sezondan sonra seçme puanı yalnızca
+potansiyel ve sağlıkla belirlenir.
+
+#### Taramanın kalan alanlardaki diğer sonucu
+
+34 tavan adayı tarandı. Biri dışında hepsi sağlam çıktı; çoğu "değer +
+kazanç, 0-100'e kıstırılmış" biçiminde ve oradaki tavan **stat
+tavanı**dır, hata değil. Yanlış pozitiflerden biri kayda değer:
+`combat_career_engine.dart:545`'teki `clamp(0, 2)` bir puan tavanı değil,
+`coachLevel` için **dizin** kısıtı.
+
+Bir madde de sınırda ve kararını bekleyecek kadar büyük değil, ama
+kayda geçiyor: `crime_catalog`'da `courtChance: 1.0` olan suç için
+sabıka payı (`prototypeOnlyPriorRecordWeight` 0,15) **hiçbir şey
+değiştirmiyor**, çünkü soruşturma zaten kesin ve sonuç 0,95'e
+kıstırılıyor. Diğer suçlarda sabıka çalışıyor (örn. 0,85 → 0,95).

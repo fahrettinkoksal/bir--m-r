@@ -188,3 +188,7 @@ completed	Paket BA/5: D-177 askerlikte erişilemeyen alt sınır kaldırıldı
 completed	Paket BA/6: Q-195 üç yanlış maddem düzeltildi (kopya sabitler, test okuma yüzeyi)
 completed	Paket BA/7: karar numarası çakışması — kararlarım D-164…D-175'e taşındı
 pending	Q-196: 27 tanımsız karar numarası (kodda yetki, DECISIONS.md'de yok)
+completed	Paket BB/1: Android derleme engeli ölçüldü, setup script ve belge yazıldı
+completed	Paket BB/2: Q-196 — 27 karar numarasının metni koddan çıkarıldı (onay bekliyor)
+completed	Paket BB/3: tarama kalan alanlara uzatıldı, 34 tavan adayı incelendi
+pending	Q-197: okul kulübü seçmesinde beceri 8. sezondan sonra ölüyor

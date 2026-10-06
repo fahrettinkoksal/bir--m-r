@@ -13,6 +13,7 @@ import 'package:bir_omur/domain/career/career_progress.dart';
 import 'package:bir_omur/domain/career/craft_mastery.dart';
 import 'package:bir_omur/domain/career/military_service.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
+import 'package:bir_omur/domain/sports/school_club_engine.dart';
 import 'package:bir_omur/domain/economy/financial_strain.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/career.dart';
@@ -203,7 +204,45 @@ void main() {
   });
 
   // ===================================================================
-  // 4) Dekoratif sabit: açık iş tavanı artık kapıdan okunuyor
+  // 4) Doymuş alt puan: okul kulübü seçmesinde beceri
+  // ===================================================================
+  test('ÖLÇÜM: okul kulübü seçme puanında beceri hangi sezonda ölür', () {
+    // Deneyim payı `(sezon × ağırlık + beceri ~/ 4)` ve tavanı 30.
+    // Ağırlık 4 olduğu için sezon tek başına tavanı doldurabiliyor;
+    // o noktadan sonra antrenmanla kazanılan beceri puana **hiç**
+    // girmiyor. D-169 ve D-176 ile aynı desen.
+    const int agirlik = SchoolClubEngine.prototypeOnlyExperienceWeight;
+    const int tavan = 30;
+    final List<String> tablo = <String>[];
+    int? olduguSezon;
+    for (int sezon = 0; sezon <= 12; sezon++) {
+      final List<int> puanlar = <int>[
+        for (final int beceri in <int>[0, 50, 100])
+          (sezon * agirlik + beceri ~/ 4).clamp(0, tavan),
+      ];
+      tablo.add('  $sezon sezon: beceri 0 → ${puanlar[0]}, '
+          '50 → ${puanlar[1]}, 100 → ${puanlar[2]}');
+      if (olduguSezon == null && puanlar.toSet().length == 1) {
+        olduguSezon = sezon;
+      }
+    }
+    // ignore: avoid_print
+    print('\nOkul kulübü deneyim payı (ağırlık $agirlik, tavan $tavan):\n'
+        '${tablo.join('\n')}\n'
+        'Becerinin etkisi şu sezonda bitiyor: '
+        '${olduguSezon ?? "hiç bitmiyor"}\n'
+        'Okul ~12 sezon sürüyor, yani bu aralık gerçekten yaşanıyor.\n');
+
+    // Yön bağımsız denetim: pay tanımlı aralıkta kalmalı. Doymanın
+    // kendisi tasarım sorusu (Q-197); burada ölçülüp raporlanıyor.
+    expect(olduguSezon, isNotNull,
+        reason: 'Ölçüm beklentisi değişmiş: beceri artık hiç ölmüyorsa '
+            'Q-197 kapanmış olmalı ve bu test bekçiye çevrilmeli.');
+    expect(agirlik, greaterThan(0));
+  });
+
+  // ===================================================================
+  // 5) Dekoratif sabit: açık iş tavanı artık kapıdan okunuyor
   // ===================================================================
   test('açık iş tavanı sabit üzerinden denetleniyor', () {
     // Tavan uygulanıyordu ama sabit üzerinden değil: `openBusiness`

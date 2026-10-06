@@ -5072,5 +5072,61 @@ davranışta kırıldığı ayrıca doğrulandı (kıdem payı 0,05'e ve tavan
 "15→16 yıl geçişinde ustalık basamağı zam şansını değiştirmiyor:
 0.850 → 0.850"). Android APK **derlenmedi ve cihazda denenmedi**.
 
+## Paket BB: derleme zinciri, 27 karar taslağı, tarama tamamlandı (6 Ekim 2026)
+
+Faho "1-2-3 yap" dedi.
+
+### 1) Android derleme zinciri — engel bulundu, script hazır
+
+**Oyun hâlâ derlenmedi ve hiçbir cihazda çalıştırılmadı.** Bu kapta
+Android SDK yok. Ölçüm, engelin tek bir host olduğunu gösterdi:
+
+| Host | Durum |
+|---|---|
+| `dl.google.com` | **000** — gateway CONNECT'e 403 (ağ politikası reddi) |
+| `maven.google.com` | 301 açık |
+| `services.gradle.org` | 200 açık |
+| `repo1.maven.org` | 200 açık |
+| `pub.dev` | 200 açık |
+
+Yani Gradle/Maven tarafı zaten açık; SDK paketlerinin indiği
+`dl.google.com` kapalı. `scripts/setup_android_sdk.sh` yazıldı
+(sürümler Flutter 3.35.5'in kendi varsayılanlarından okundu: compileSdk
+36, targetSdk 36, minSdk 24) ve `docs/ANDROID_BUILD_SETUP.md` ne
+yapılacağını adım adım anlatıyor. Ağ politikasına host eklenince script
+çalışır.
+
+### 2) Q-196 — 27 karar numarasının metni koddan çıkarıldı
+
+D-137…D-163 arası 27 numaranın kural metni koddan okundu ve kuyruğa
+**onay bekleyen taslak** olarak yazıldı (Q-196 EKİ). Çoğunun yorumunda
+Faho'nun kendi cümlesi alıntılı duruyor; bu bir yeniden kurma, uydurma
+değil. **Hiçbiri `DECISIONS.md`'ye girmedi** — oraya ancak Faho
+onayladıktan sonra girer (CLAUDE.md'nin değişmeyen kuralı).
+
+Taslakları yazarken iki numarayı ilk okumamda karıştırdığımı gördüm ve
+düzelttim: muayene **D-157**, yıllık araç sigortası/vergisi **D-148**.
+
+### 3) Tarama kalan alanlara uzatıldı
+
+Ölü sabit sınıfı artık bekçiyle kapalı (tüm `lib` taranıyor), bu yüzden
+yalnızca **doymuş tavan** ve **dekoratif eşik** arandı. 34 tavan adayı
+incelendi; biri dışında hepsi sağlam. Çoğu "değer + kazanç, 0-100'e
+kıstırılmış" biçiminde ve oradaki tavan stat tavanıdır.
+
+**Bulgu (Q-197, karar bekliyor):** okul kulübü seçme puanının deneyim
+payı `(sezon × 4 + beceri ~/ 4)` ve tavanı 30. Ölçüm: **8. sezondan
+sonra beceri puana hiç girmiyor**; 5. sezondan sonra yalnızca çok düşük
+beceride fark kalıyor. Okul ~12 sezon sürdüğü için bu aralık gerçekten
+yaşanıyor. D-169 ve D-176 ile aynı desen. Önerim ağırlığı 4'ten 2'ye
+indirmek; dört seçenek Q-197'de.
+
+Sınırda bir madde kayda geçti: `courtChance: 1.0` olan suçta sabıka payı
+hiçbir şey değiştirmiyor (soruşturma zaten kesin).
+
+**Doğrulama:** `flutter analyze` temiz; hedefli küme yeşil. Bu pakette
+`lib/` içinde davranış değiştiren değişiklik **yok** (script, belge ve
+test eklendi), bu yüzden test seçimi kuralına göre tam süit koşulmadı.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
