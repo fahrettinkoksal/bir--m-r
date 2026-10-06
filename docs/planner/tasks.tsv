@@ -203,3 +203,6 @@ pending	Q-198: ekran dökümünden sekiz soru (askerlik yaşı, emeklilik şart�
 completed	Paket BE/1: bot dökümü — dolu hayatın beş ekranı okundu (iş, eş, çocuk, ev)
 completed	Paket BE/2: "Mezuniyet sonrası" satırı hiç kapanmıyordu, motorun kapısına bağlandı
 completed	Paket BE/3: para değişimi binlik ayraçsız yazılıyordu, trNumber uygulandı
+completed	Paket BF/1: döküm altı arketipe çıktı — üniversite, işletme, riskli hayat
+completed	Paket BF/2: ekranda ham null ("Sınıf: null. sınıf") düzeltildi, beş ekran taranıyor
+pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi kartı yok

@@ -5283,6 +5283,36 @@ tam süitte çıktı; o noktada **deseni depo genelinde taradım**
 geçenler hariç) ve dördüncüsü de böyle bulundu. Tam süit yeşillenmeden
 gönderilmedi; üçüncü kırılma CI'ya gitmedi.
 
+## Paket BF: döküm altı arketipe çıktı, ekranda ham null (6 Ekim 2026)
+
+`ekran_dokumu_bot_test.dart` üç arketipten **altıya** çıkarıldı
+(üniversite, işletme, riskli hayat eklendi): 11 kare, 3.584 döküm
+satırı. Çıktıyı desen taramasıyla süzdüm — ayraçsız para **yok**
+(Paket BE düzeltmesi yerinde çalışıyor), "Mezuniyet sonrası" satırı
+hiçbir karede **yok** (o düzeltme de yerinde), ama bir şey çıktı:
+
+**Ekranda ham `null`.** 21 yaşındaki psikoloji öğrencisinin Okul
+ekranında "Sınıf · null. sınıf". `_SchoolView` hem 1-12. sınıf hem
+üniversite öğrencisine gösteriliyor ve kartın satırları K-12 için
+yazılmış; komşuların hepsinde `!= null` koruması varken eksik olan tek
+satır buydu. "Son sınıfa kalan" da `?? 12` ile "0 yıl" yazıyordu —
+üniversite öğrencisi için anlamsız. İkisi de koşula alındı.
+
+Bekçi (`paket_bf_ekranda_null_test.dart`) yalnızca o satırı değil **beş
+ekranın bütün görünür metnini** tarıyor: herhangi bir yerde "null"
+geçerse düşer. Düzeltmeden önce `[null. sınıf]` diyerek düştüğü
+kanıtlandı. Testi yazarken **aynı kurulum hatasını ikinci kez yaptım**
+(her okumada uygulamayı baştan açmak); dosyanın içine not edildi.
+
+**Kayda geçen eksik:** "Riskli hayat" arketipi seçtiğim tohumda suç
+işlemedi, yani **cezaevi, duruşma ve denetim dönemi ekranları hâlâ
+okunmadı.** Kritik sağlık, gebelik/doğum ve emeklilik sonrası da bu 11
+karede yok. Uydurmuyorum; testin başına ve kuyruğa eksik olarak yazıldı.
+
+Karar bekleyen onuncu soru Q-198 EKİ 2'de: üniversite öğrencisi K-12
+kartını görüyor (lise alanı, lise yerleştirme puanı, "Sınıf Arkadaşları
+0"), kendi kartı yok. Önerim ve varsayılanı yazılı; **koda dokunmadım.**
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün

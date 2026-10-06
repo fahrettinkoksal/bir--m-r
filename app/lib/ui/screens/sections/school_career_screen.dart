@@ -168,7 +168,26 @@ class _SchoolViewState extends State<_SchoolView> {
           icon: Icons.school_outlined,
           title: egitim.level?.label ?? 'Okul',
           rows: <({String label, String value})>[
-            (label: 'Sınıf', value: '${egitim.grade}. sınıf'),
+            // Sınıf satırı yalnızca **gerçekten bir sınıf varsa** yazılır.
+            //
+            // **Ölçülmüş hata — ekranda ham `null`.** Satır
+            // `'${egitim.grade}. sınıf'` diye koşulsuz kuruluyordu.
+            // `_SchoolView` hem 1-12. sınıf hem **üniversite**
+            // öğrencisine gösteriliyor (`isStudent = enrolled ||
+            // isUniversityStudent`) ve üniversitede `grade` boş; bot
+            // dökümünde 21 yaşındaki psikoloji öğrencisinin ekranında
+            // **"Sınıf: null. sınıf"** yazıyordu. Komşu satırların
+            // hepsinde zaten `!= null` koruması var; eksik olan tek
+            // satır buydu.
+            //
+            // Aynı sebeple "Son sınıfa kalan" da koşula alındı: o sayı
+            // 12. sınıfa kalan yılı anlatıyor, üniversite öğrencisi için
+            // anlamı yok ("0 yıl" diye görünüyordu).
+            //
+            // Üniversite öğrencisine K-12 kartının gösterilmesi ayrı bir
+            // konu; kararı Faho'ya bırakıldı (Q-198 EKİ).
+            if (egitim.grade != null)
+              (label: 'Sınıf', value: '${egitim.grade}. sınıf'),
             // Not ortalaması yalnızca gerçekten oluştuysa gösterilir
             // (Paket 13); uydurma not yazılmaz.
             if (egitim.gradeAverage != null)
@@ -186,10 +205,11 @@ class _SchoolViewState extends State<_SchoolView> {
               (label: 'Yerleştirme puanı', value: '${egitim.placementScore}'),
             if (egitim.startedAtAge != null)
               (label: 'Başlangıç', value: '${egitim.startedAtAge} yaşında'),
-            (
-              label: 'Son sınıfa kalan',
-              value: '${12 - (egitim.grade ?? 12)} yıl',
-            ),
+            if (egitim.grade != null)
+              (
+                label: 'Son sınıfa kalan',
+                value: '${12 - egitim.grade!} yıl',
+              ),
           ],
         ),
         const SizedBox(height: 12),

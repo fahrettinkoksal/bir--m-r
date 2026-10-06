@@ -24,6 +24,18 @@
 // kaydı — anne gerçekten yaşlandı, çocuk gerçekten doğdu, iş gerçekten
 // bulundu. Ekran basılmadan önce bekleyen pencereler **arayüzden**
 // kapatılıyor (modal pencere dokunuşları yutuyor).
+// **Hâlâ okunmamış ekranlar (uydurmuyorum, eksik olarak yazıyorum).**
+// "Riskli hayat" arketipi seçildiği tohumda suç işlemedi — ekranda
+// "Adli kaydın temiz" yazdı — yani **cezaevi, duruşma ve denetim
+// dönemi ekranları bu dökümde de görünmedi.** Aynı şekilde kritik
+// sağlık ekranı, gebelik/doğum ve emeklilik sonrası da bu beş karede
+// yok. Bunları görmek için ya durumu kurmak (kurulu durum, dolu hayat
+// değil) ya da tohum taramak gerekiyor; ikisi de ayrı iş.
+//
+// Görünen ekranlar: işi olan Meslek (unvan, maaş, ustalık, itibar,
+// kariyer geçmişi), eş ve çocuklu İlişkiler (kayın aile, evlilik
+// geçmişi, aile kararları), ev-araç-yatırım dolu Varlıklar, üniversite
+// yılları ve işletme sahibi bir hayat.
 library;
 
 import 'dart:math';
@@ -211,6 +223,12 @@ void main() {
     PlayerArchetype.career: (31, <int>[35, 55]),
     PlayerArchetype.family: (47, <int>[40, 65]),
     PlayerArchetype.investor: (53, <int>[45]),
+    // Üniversite yılları: eğitim ekranının hiç okunmamış hâli.
+    PlayerArchetype.education: (67, <int>[21, 26]),
+    // İşletme ekranı: sermaye, personel, reklam, yıllık rapor.
+    PlayerArchetype.entrepreneur: (71, <int>[38, 58]),
+    // Adli süreç ve cezaevi: suç/hukuk ekranları.
+    PlayerArchetype.risky: (73, <int>[28, 50]),
   };
 
   for (final MapEntry<PlayerArchetype, (int, List<int>)> girdi

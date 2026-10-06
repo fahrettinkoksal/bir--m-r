@@ -7204,3 +7204,56 @@ satır **durum değişince** yazılsın (ilk yıl, tutar değişince, bittiği
 yıl). Alternatif: üç satırı tek bir "yılın hesabı" satırında birleştirip
 her yıl yazmak. İkisi de bilgiyi korur; birincisini öneriyorum çünkü
 tekrarı asıl çözen o.
+
+### Q-198 EKİ 2 — döküm altı arketipe çıktı: ekranda ham `null`
+
+**Durum:** bir hata düzeltildi, bir soru karar bekliyor (6 Ekim 2026).
+**Nasıl bulundu:** `ekran_dokumu_bot_test.dart` üç arketipten **altıya**
+çıkarıldı (üniversite, işletme, riskli hayat eklendi); 11 kare, 3.584
+döküm satırı.
+
+#### Düzeltilen hata: "Sınıf: null. sınıf"
+
+21 yaşındaki psikoloji öğrencisinin Okul ekranında:
+
+```
+Okul
+Sınıf
+null. sınıf
+```
+
+`_SchoolView` hem 1-12. sınıf hem **üniversite** öğrencisine gösteriliyor
+(`isStudent = enrolled || isUniversityStudent`) ve kartın satırları K-12
+için yazılmış. Komşu satırların hepsinde `!= null` koruması var; eksik
+olan tek satır "Sınıf"tı. Aynı sebeple "Son sınıfa kalan" da `?? 12` ile
+"0 yıl" yazıyordu — o sayı 12. sınıfa kalan yılı anlatır, üniversite
+öğrencisi için anlamı yok. İkisi de koşula alındı.
+
+Bekçi `paket_bf_ekranda_null_test.dart` yalnızca bu satırı değil,
+**beş ekranın bütün görünür metnini** tarıyor: herhangi bir yerde
+"null" geçerse düşer. Düzeltmeden önce `[null. sınıf]` diyerek düştüğü
+kanıtlandı.
+
+#### 10. Üniversite öğrencisi K-12 kartını görüyor
+
+Ham `null` gitti ama kartın kendisi yerinde: 21 yaşındaki üniversite
+öğrencisi "Okul" başlıklı bir kartta **lise alanını** ("Alan: Müzik"),
+lise yerleştirme puanını ve "Sınıf Arkadaşları 0 / Öğretmenler 0"
+satırlarını görüyor. Üstteki başlık "Psikoloji 4. sınıf" diyor, yani
+veri var; kartta yok.
+
+*Önerim ve varsayılanım:* üniversite öğrencisine **kendi kartı**
+gösterilsin — bölüm, sınıf (`universityYear`), üniversite sınav puanı ve
+mezuniyete kalan yıl. Lise bilgileri "Eğitim geçmişi" altına taşınır
+(mezun oyuncuda zaten orada duruyor). "Sınıf Arkadaşları / Öğretmenler"
+üniversitede sıfır kalacaksa satır hiç gösterilmez (D-063: çalışmayan
+kapı gösterilmez). Bu bir ekran tasarımı kararı; kodu senin onayından
+sonra yazarım.
+
+#### Hâlâ okunmamış ekranlar (kayda geçiyor)
+
+"Riskli hayat" arketipi seçtiğim tohumda suç işlemedi ("Adli kaydın
+temiz"), yani **cezaevi, duruşma ve denetim dönemi ekranları bu dökümde
+de görünmedi.** Kritik sağlık, gebelik/doğum ve emeklilik sonrası da bu
+11 karede yok. Bunları görmek ayrı iş: ya kurulu durum (dolu hayat
+değil) ya tohum taraması.
