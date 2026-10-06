@@ -6856,3 +6856,32 @@ kayda geçiyor: `crime_catalog`'da `courtChance: 1.0` olan suç için
 sabıka payı (`prototypeOnlyPriorRecordWeight` 0,15) **hiçbir şey
 değiştirmiyor**, çünkü soruşturma zaten kesin ve sonuç 0,95'e
 kıstırılıyor. Diğer suçlarda sabıka çalışıyor (örn. 0,85 → 0,95).
+
+---
+
+### Q-196 ve Q-197 KARARLAŞTIRILDI (6 Ekim 2026)
+
+Faho onayladı: "önerini uygula."
+
+**Q-196 — 27 karar `DECISIONS.md`'ye girdi.** D-137…D-163 arası 27
+numaranın kural metni koddan yeniden kurulmuş hâliyle yazıldı. Her
+maddenin başında bunun bir **yeniden kurma** olduğu ve numaranın kodda
+yetki olarak kullanılmasına rağmen yazılı karşılığı bulunmadığı
+belirtiliyor. `DECISIONS.md` artık 177 karar taşıyor.
+
+`decision_reference_test.dart`'ın muafiyet listesi **boşaldı**: kodda
+atıf verilen her karar numarasının artık yazılı bir karşılığı var.
+Bundan sonra tanımsız bir numaraya atıf verildiği anda test kırılır.
+
+**Q-197 — D-178 olarak uygulandı.** Okul kulübü seçmesinde deneyim
+payının ağırlığı **4'ten 2'ye** indi (önerdiğim seçenek A). Ölçüm:
+
+| Sezon | beceri 0 | beceri 50 | beceri 100 |
+|---|---|---|---|
+| 3 | 6 | 18 | 30 |
+| 8 | 16 | 28 | 30 |
+| 12 | 24 | **30** | 30 |
+
+Becerinin etkisi artık **hiçbir sezonda bitmiyor**. Ölçüm testi kalıcı
+bekçiye çevrildi: sezon tek başına tavanı doldurursa test kırılır.
+D-136'nın beceri gelişim sayıları ve D-171'in kulüp sınırı değişmedi.

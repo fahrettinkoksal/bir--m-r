@@ -52,8 +52,20 @@ class SchoolClubEngine {
   /// kulüp (ör. futbol + satranç) makul. Faho onayladı (5 Ekim 2026).
   static const int maxActiveClubs = 2;
 
-  /// Seçmede geçmiş sezonun payı (`prototypeOnly`).
-  static const int prototypeOnlyExperienceWeight = 4;
+  /// Seçmede geçmiş sezonun payı.
+  ///
+  /// **D-178: 4'ten 2'ye indi.** Ölçülmüş hata: deneyim payı
+  /// `(sezon × ağırlık + beceri ~/ 4)` ve tavanı 30. Ağırlık 4 iken
+  /// sezon tek başına tavanı dolduruyordu ve **8. sezondan sonra
+  /// antrenmanla kazanılan beceri puana hiç girmiyordu** — sekiz yıl
+  /// kulüpte duran oyuncuyla, aynı sürede çalışıp beceriyi 100'e
+  /// çıkaran oyuncu seçmede aynı puanı alıyordu. Okul ~12 sezon
+  /// sürdüğü için bu aralık gerçekten yaşanıyor. D-169 (sporda geçen
+  /// hayat) ve D-176 (zam tavanı) ile aynı desen.
+  ///
+  /// Ağırlık 2 iken 12 sezon tek başına 24 verir; tavan ancak beceriyle
+  /// birlikte dolar, yani antrenman hep bir şey ifade eder.
+  static const int prototypeOnlyExperienceWeight = 2;
 
   /// D-136: tek sezonda becerinin çıkabileceği en büyük artış.
   ///

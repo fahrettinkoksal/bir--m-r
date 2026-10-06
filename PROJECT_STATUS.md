@@ -5128,5 +5128,46 @@ hiçbir şey değiştirmiyor (soruşturma zaten kesin).
 `lib/` içinde davranış değiştiren değişiklik **yok** (script, belge ve
 test eklendi), bu yüzden test seçimi kuralına göre tam süit koşulmadı.
 
+## Paket BC: 27 karar yazıldı, Q-197 uygulandı (6 Ekim 2026)
+
+Faho onayladı: "önerini uygula."
+
+### Q-196 kapandı — `DECISIONS.md` artık eksiksiz
+
+D-137…D-163 arası **27 numaranın** kural metni koddan yeniden kurulup
+`DECISIONS.md`'ye yazıldı. Her maddenin başında bunun bir yeniden kurma
+olduğu ve numaranın kodda yetki olarak kullanılmasına rağmen yazılı
+karşılığı bulunmadığı belirtiliyor. Çoğunda Faho'nun kendi cümlesi
+alıntılı duruyor — örneğin D-144 (sahiplenilmeyen hayvanın bakımı) ve
+D-145 (sayfa başına pop-up çıkmaz) doğrudan onun bildirdiği hatalardı.
+
+`DECISIONS.md` **178 karar** taşıyor ve `decision_reference_test.dart`'ın
+muafiyet listesi **boşaldı**: kodda atıf verilen her karar numarasının
+artık yazılı bir karşılığı var.
+
+### Q-197 kapandı — D-178
+
+Okul kulübü seçmesinde deneyim payının ağırlığı **4'ten 2'ye** indi.
+
+| Sezon | beceri 0 | beceri 50 | beceri 100 |
+|---|---|---|---|
+| 3 | 6 | 18 | 30 |
+| 8 | 16 | 28 | 30 |
+| 12 | 24 | 30 | 30 |
+
+Önce 8. sezondan sonra beceri puana **hiç** girmiyordu; şimdi etkisi
+**hiçbir sezonda bitmiyor**. Ölçüm testi kalıcı bekçiye çevrildi.
+D-136'nın beceri gelişim sayıları ve D-171'in kulüp sınırı değişmedi.
+
+### Hâlâ bekleyen
+
+**Android derleme:** ağ politikası `dl.google.com`'u reddediyor; script
+ve belge hazır (`scripts/setup_android_sdk.sh`,
+`docs/ANDROID_BUILD_SETUP.md`), ayar Faho'da. Oyun **hâlâ derlenmedi ve
+hiçbir cihazda çalıştırılmadı.**
+
+**Paket AZ:** gerçek 2026-27 lig/kulüp kataloğu — ağ kapalı, tff.org on
+dördüncü kez `000`.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

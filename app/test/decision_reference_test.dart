@@ -11,10 +11,13 @@
 //
 // Numaralarım D-164…D-175'e taşındı (içerik aynı, yalnızca etiket).
 //
-// Tarama ayrıca şunu gösterdi: **D-149…D-163 kodda kullanılıyor ama
-// `DECISIONS.md`'de hiç tanımlı değil.** On beş numara, yetki olarak
-// gösteriliyor ve arkasında yazılı bir karar yok. Bunlar uydurulamaz:
-// kuyruğa taşındı (Q-196) ve aşağıda **gerekçeleriyle** bekliyor.
+// Tarama ayrıca şunu gösterdi: **D-137…D-163 arası 27 numara kodda
+// yetki olarak kullanılıyordu ama `DECISIONS.md`'de hiç tanımlı
+// değildi.** Kural metinleri koddan yeniden kuruldu — çoğunun yorumunda
+// Faho'nun kendi cümlesi alıntılıydı — ve Faho'nun onayıyla (6 Ekim
+// 2026, Q-196) `DECISIONS.md`'ye girdi. Muafiyet listesi bu yüzden
+// **boş**: artık kodda atıf verilen her numaranın yazılı bir karşılığı
+// var.
 //
 // Bu dosya o sınıf hatayı anında yakalar: tanımsız bir numaraya atıf
 // verildiği anda test kırılır.
@@ -29,51 +32,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Boş olması iyidir. Buraya bir numara yalnızca **gerekçesiyle**
 /// eklenir. Hiçbiri Claude tarafından uydurulmaz: kararın metnini Faho
 /// yazar ya da onaylar (Q-196).
-const Map<String, String> kTanimsizKararlar = <String, String>{
-  // Konular **atıf yerlerinden** türetildi; kararların metni yazılı
-  // değil. Claude bunları uydurmaz (CLAUDE.md: kullanıcı onayı olmadan
-  // DECISIONS.md'ye karar eklenmez). Hepsi Q-196'da bekliyor.
-  'D-137': 'Araç ilanlarının yalnızca pazarda dolması (2. el araç '
-      'pazarı, Paket V/4). Q-196.',
-  'D-138': 'Mağazaların üç öbekte durması (Paket V/5). Q-196.',
-  'D-139': 'Kefalet kartı ve kefaletle dışarıda olmak (Paket V/6). '
-      'Q-196.',
-  'D-140': 'Koğuş hayatı ve cezaevi eylemleri (Paket V/6). Q-196.',
-  'D-141': 'Üvey anne ve üvey baba (Paket V/7). Q-196.',
-  'D-142': 'Okul/kariyer ekranında gerekçeyle sorulmaması. Q-196.',
-  'D-143': 'İşveren tarafının karşılığı (iş hayatı). Q-196.',
-  'D-144': 'Sahiplenilmeyen hayvanın bakım giderinin oyuncudan '
-      'çıkmaması (Paket N). Q-196.',
-  'D-145': 'Pop-up çıkmama kuralı (bildirim eşiği). Q-196.',
-  'D-146': 'İlişkiler menüsü ve kişi sayfası (Paket AO/8). Q-196.',
-  'D-147': 'Bir yılda yapılabilecek toplam medya işi (Paket K/Q). '
-      'Q-196.',
-  'D-148': 'Araç giderleri (yaşam gideri dökümü, Paket S). Q-196.',
-  'D-149': 'Arkadaş haberlerinin hangi yaşta geldiği ve tekrar '
-      'sayacı. Q-196.',
-  'D-150': 'Cümle bütünlüğü kuralı (Paket W). Q-196.',
-  'D-151': 'İkiz gebelik: aynı doğumun ikinci bebeği (Paket X/1). '
-      'Q-196.',
-  'D-152': 'Birden çok dövüş dalı (Paket X/2-X/3). Q-196.',
-  'D-153': 'Sağlık Geçmişi sayfası ve kronik hastalık (Paket Y/1). '
-      'Q-196.',
-  'D-154': 'Eşin kendi hayatının oyuncuyu da etkilemesi (Paket Y/2). '
-      'Q-196.',
-  'D-155': 'Meslekte ustalık ve itibar; zam talebinin yalnızca kıdeme '
-      'bağlı olmaması (Paket Y/3). Q-196.',
-  'D-156': 'Hayat Hedefleri sayfası (Paket Y/4). Q-196.',
-  'D-157': 'Kazada sürücünün de aracın da hasar görmesi (Paket Z/1). '
-      'Q-196.',
-  'D-158': 'Çocuğun evlenmesi; kuralın tek yerde durması (Paket Z/2). '
-      'Q-196.',
-  'D-159': 'Şehirlerin kendi karakteri ve 0-1 katsayıları '
-      '(Paket Z/3). Q-196.',
-  'D-160': 'Boşanmada nafaka ve velayet (Paket Z/4). Q-196.',
-  'D-161': 'Teklifin yalnızca gerçekten gelebiliyorsa görünmesi. '
-      'Q-196.',
-  'D-162': 'Yatırım türleri ve risk kademeleri (Paket AA/1). Q-196.',
-  'D-163': 'Konut, kiracı ve ev sahibi olayları (Paket AB/5). Q-196.',
-};
+const Map<String, String> kTanimsizKararlar = <String, String>{};
 
 void main() {
   test('kodda atıf verilen her karar DECISIONS.md\'de tanımlı', () {

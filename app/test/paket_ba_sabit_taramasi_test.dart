@@ -233,11 +233,13 @@ void main() {
         '${olduguSezon ?? "hiç bitmiyor"}\n'
         'Okul ~12 sezon sürüyor, yani bu aralık gerçekten yaşanıyor.\n');
 
-    // Yön bağımsız denetim: pay tanımlı aralıkta kalmalı. Doymanın
-    // kendisi tasarım sorusu (Q-197); burada ölçülüp raporlanıyor.
-    expect(olduguSezon, isNotNull,
-        reason: 'Ölçüm beklentisi değişmiş: beceri artık hiç ölmüyorsa '
-            'Q-197 kapanmış olmalı ve bu test bekçiye çevrilmeli.');
+    // KALICI BEKÇİ (D-178): sezon tek başına deneyim tavanını
+    // dolduramaz. Doldurduğu an antrenmanla kazanılan beceri seçmede
+    // **hiçbir şey** yapmaz hâle gelir — hata tam olarak buydu.
+    expect(olduguSezon, isNull,
+        reason: 'Becerinin etkisi $olduguSezon sezonda bitiyor. Sezon '
+            'tek başına tavanı dolduruyorsa kulüpte durmak ile '
+            'çalışmak aynı kapıya çıkar.');
     expect(agirlik, greaterThan(0));
   });
 
