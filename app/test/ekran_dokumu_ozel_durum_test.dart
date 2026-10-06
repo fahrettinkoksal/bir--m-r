@@ -32,6 +32,7 @@ library;
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/person.dart';
@@ -175,6 +176,15 @@ void main() {
       yilIci: true,
     ),
     Durum('EMEKLİ', (GameState s) => s.career.isRetired),
+    // Beşinci tur: kalan iki okunmamış ekran. İkisi de yıl içinde
+    // yaşanıp yıl sonunda kaybolabiliyor, bu yüzden yıl içi kancayla
+    // aranıyor (gebelik doğumla kapanır, denetim dönemi yaşla biter).
+    Durum(
+      'DENETİM DÖNEMİ',
+      (GameState s) => s.legal.probationUntilAge != null,
+      yilIci: true,
+    ),
+    Durum('GEBELİK', (GameState s) => s.isExpecting, yilIci: true),
   ];
 
   testWidgets('EKRAN DÖKÜMÜ — özel durumlar (taranarak bulundu)',
@@ -208,6 +218,69 @@ void main() {
           },
         );
       }
+    }
+
+    // 1b) **Gebelik botun kapısından geçmiyor.** Bot `haveChild()`
+    // çağırıyor ve çocuğu tek hamlede yaratıyor; oyuncunun yolu ise
+    // korunmadan yakınlaşmak → gebelik → ertesi yıl doğum (Q-201,
+    // `paket_bj_oyuncu_yolu_cocuk_test.dart`). Bu yüzden gebelik karesi
+    // taramayla değil, **oyuncunun kendi düğmesiyle** üretiliyor:
+    // bot gerçek bir hayat oynuyor, evli olduğu bir yıl alınıyor ve
+    // oradan sonrası gerçek eylem. Durum elle kurulmuyor.
+    if (!kareler.containsKey('GEBELİK')) {
+      final GameController kurucu = GameController(random: Random(77));
+      for (final PlayerArchetype arketip in arketipler) {
+        if (kareler.containsKey('GEBELİK')) break;
+        for (int seed = 1; seed <= 20; seed++) {
+          if (kareler.containsKey('GEBELİK')) break;
+          GameState? evliKare;
+          String? partnerId;
+          playBotLife(
+            archetype: arketip,
+            seed: seed * 101 + arketip.index,
+            onPreAge: (GameState s) {
+              if (evliKare != null) return;
+              if (s.player.age < 22 || s.player.age > 38) return;
+              if (s.isExpecting || s.player.infertile) return;
+              final Person? es = Intimacy.partnerOf(s);
+              if (es == null || es.infertile) return;
+              if (Intimacy.blockReason(s, es).isNotEmpty) return;
+              evliKare = s;
+              partnerId = es.id;
+            },
+          );
+          if (evliKare == null) continue;
+          kurucu.debugSetState(evliKare!);
+          for (int yil = 0; yil < 8 && !kurucu.state!.isExpecting; yil++) {
+            int guard = 0;
+            while (guard++ < 40) {
+              if (kurucu.state!.deceased) break;
+              if (kurucu.state!.hasNotice) {
+                kurucu.dismissNotice();
+                continue;
+              }
+              if (kurucu.state!.hasPendingEvent) {
+                kurucu.chooseEventOption(
+                    kurucu.state!.pendingEvent!.choices.first.id);
+                continue;
+              }
+              break;
+            }
+            if (kurucu.state!.deceased) break;
+            if (kurucu.intimacyAvailability(partnerId!).isAllowed) {
+              kurucu.beIntimate(partnerId!, Protection.korunmadan);
+            }
+            if (kurucu.state!.isExpecting) break;
+            final int once = kurucu.state!.player.age;
+            kurucu.ageUp();
+            if (kurucu.state!.player.age == once) break;
+          }
+          if (kurucu.state!.isExpecting) {
+            kareler['GEBELİK'] = (kurucu.state!, seed, arketip);
+          }
+        }
+      }
+      kurucu.dispose();
     }
 
     final StringBuffer rapor = StringBuffer()

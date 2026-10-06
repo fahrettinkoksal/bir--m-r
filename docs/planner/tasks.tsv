@@ -213,3 +213,7 @@ completed	Paket BI/1: dürbünün kör noktası — yıl içi kanca (onPreAge), 
 completed	Paket BI/2: döküm "Hayat" bölümü yanlış sekmeyi basıyordu — ortak anaEkrana yardımcısı
 completed	Paket BI/3: bebekle sohbette okul/soru/korku kapandı, "kendi yaşındayken" yalnızca büyükte
 completed	Q-200 / D-180: sohbete ergen (13-17) kademesi eklendi, dört kademe eşitlendi
+completed	Paket BJ/1: denetim dönemi ve gebelik ekranları okundu, okunmamış ekran kalmadı
+completed	Paket BJ/2: oyuncunun çocuk yolu ölçüldü — 20 çiftin 18'i gebe, 12/12 doğumla kapandı
+pending	Q-201: bot haveChild() kullanıyor, oyuncu bu kapıyı kullanamıyor
+pending	Q-202: gebelik yalnızca eşin kişi kartında görünüyor

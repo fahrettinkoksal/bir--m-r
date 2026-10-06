@@ -5455,6 +5455,46 @@ koda yazılır. Bekçi 11 teste çıktı.
 
 Ayrıntı: `docs/DESIGN_REVIEW_QUEUE.md` → Q-200.
 
+## Paket BJ — beşinci döküm turu: son iki ekran ve botun yanlış kapısı (6 Ekim 2026)
+
+**Okunmamış iki ekran kaldığı için kuruldu.** Denetim dönemi 120 bot
+hayatında bulundu (35 yaş). Gebelik **bulunamadı** — ve sebebi okumaya
+değer.
+
+`GameController.haveChild()` **arayüzün hiçbir yerinden çağrılmıyor**.
+Oyuncunun çocuk sahibi olma yolu tek: korunmadan yakınlaşma →
+`Pregnancy` → ertesi yıl doğum. Bot ise `haveChild()` çağırıp çocuğu tek
+hamlede yaratıyor, yani gebelik aşaması hiç oluşmuyor. Bugüne kadarki
+aile ölçümleri oyuncunun **kullanamadığı** bir kapıdan yapılmış. Ürün
+hatası değil, ölçüm boşluğu; botu değiştirmek bütün aile ölçümlerini
+kaydıracağı için tek başıma yapmadım (Q-201).
+
+**Oyuncunun yolu ölçüldü ve sağlam çıktı** (`paket_bj_oyuncu_yolu_cocuk_test.dart`):
+20 çiftin **18'i (%90)** sekiz yılda gebe kalıyor, ortanca bekleme 1
+yıl; gebe kalmayan iki çift tam olarak ölçümde kısır çıkan iki çift. 12
+gebeliğin **12'si** dört yıl içinde doğumla kapanıyor.
+
+**Kendi kurgumda beşinci hata.** İlk ölçümüm "20 çiftin 14'ü sekiz yılda
+gebe kalmadı" diyordu. Sebep oyunda değil bendeydi: döngüm yaş alınca
+çıkan olayı bir sonraki denemeden önce kapatmıyordu ve `_runFamily`
+bekleyen olay varken `null` dönüyor — **doğru davranış**, oyuncu da olay
+penceresi açıkken menüye dokunamaz. Sırayı düzeltince oran %30'dan
+%90'a çıktı. Desen artık net: **oyunun kapısından geçmeyen her ölçüm
+yalan söylüyor.**
+
+**Gebelik ekranı sonunda okundu** (28 yaş) — döküm bu kareyi taramayla
+değil oyuncunun kendi düğmesiyle üretiyor. Okununca yeni bir soru çıktı:
+beş ekranın **hiçbirinde** gebeliği söyleyen satır yok. Tek gösterim
+yeri eşin kişi kartı (`person_pregnancy_note`). Oyuncu "bebek yolda"
+cümlesini bir kez görüyor, sonra ekranda iz kalmıyor (Q-202).
+
+**Okunan ekranlar artık tam:** cezaevi (50) · bekleyen duruşma (31) ·
+kritik sağlık (63) · yeni doğan bebek (34) · emekli (61) · denetim
+dönemi (35) · gebelik (28). Döküm turlarının başladığı listede okunmamış
+ekran kalmadı.
+
+Ayrıntı: `docs/DESIGN_REVIEW_QUEUE.md` → Q-201, Q-202.
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün

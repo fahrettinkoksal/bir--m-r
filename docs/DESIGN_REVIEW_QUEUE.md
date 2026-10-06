@@ -7423,3 +7423,72 @@ duruma **yalnızca krizi arayüz dışından yanıtlayarak** düştüm; oyuncunu
 elinde o yol yok. Ürün hatası diye raporlamıyorum; gerçek oyunda
 erişilebilir olup olmadığı ölçülmedi. Test yardımcısı artık bu pencereyi
 kapatıyor (`test_flow.dart`).
+
+### Q-201 — Bot, oyuncunun kullanamadığı kapıdan çocuk sahibi oluyor
+
+**Durum:** ölçüm yazılı, **karar bekliyor**. Kod değişmedi; yalnızca
+ölçüm ve bekçi eklendi.
+
+**Nasıl bulundu.** Beşinci döküm turunda "GEBELİK" 120 bot hayatında
+BULUNAMADI çıktı. Dördüncü turun dersi gereği önce dürbüne baktım,
+kanca doğruydu. Kusur başka yerde: `GameController.haveChild()`
+**arayüzün hiçbir yerinden çağrılmıyor** (`lib/ui` altında tek çağrı
+yok). Oyuncunun çocuk sahibi olma yolu tek — eş/sevgiliyle korunmadan
+yakınlaşmak → `Pregnancy` kaydı → ertesi yıl doğum. Bot ise
+`haveChild()` çağırıyor ve çocuğu **tek hamlede** yaratıyor.
+
+Yani bugüne kadarki bütün aile ölçümleri (çocuk sayısı, kardeş adı
+çakışması, nesil devamı, miras) oyuncunun **kullanamadığı** bir kapıdan
+yapıldı. Ürün hatası değil, **ölçüm boşluğu** — ama ölçümün değerini
+doğrudan etkiliyor.
+
+**Oyuncunun yolu ölçüldü ve sağlam çıktı** (`paket_bj_oyuncu_yolu_cocuk_test.dart`):
+
+| Ölçüm | Sonuç |
+|---|---|
+| Korunmadan yakınlaşan çift | 20 (bot hayatlarından, elle kurulmuş durum yok) |
+| Sekiz yılda gebe kalan | **18 (%90)** |
+| Gebe kalmayan 2 çift | ikisi de ölçümde **kısır** çıkan çiftler |
+| Ortanca bekleme | 1 yıl |
+| Gebelik dört yılda doğumla kapandı | **12/12** |
+
+*Önerim ve varsayılanım:* botun aile politikası **oyuncunun kapısına**
+taşınsın — `haveChild()` yerine korunmadan yakınlaşma. Böylece gebelik,
+bekleme yılları ve doğum akışı her ölçümde gerçekten yaşanır.
+**Ama bu botun davranışını değiştirir**, yani çocuklu hayat oranı ve ona
+bağlı bütün ölçümler (3400 testin bir kısmı dâhil) kayar; o yüzden tek
+başıma yapmıyorum. Alternatif: `haveChild()`'ı yalnızca test kapısı
+sayıp botu olduğu gibi bırakmak — ucuz ama ölçüm boşluğu kalır.
+
+**ÖLÇÜM KURGUSUNDA KENDİ HATAM (beşinci kez).** İlk kurgumda döngü
+`beIntimate` → yaş al sırasıyla çalışıyordu; yaş alınca çıkan olay bir
+sonraki denemeden önce kapatılmıyordu. `_runFamily` bekleyen olay varken
+`null` dönüyor — **doğru davranış**, oyuncu da olay penceresi açıkken
+menüye dokunamaz. Sonuç: "20 çiftin 14'ü sekiz yılda gebe kalmadı" diye
+bir bulgu üretmiştim. Sırayı düzeltince oran %30'dan %90'a çıktı. Yine
+bildirmeden önce yakalandı; kurgu hatalarının deseni artık belli:
+**oyunun kapısından geçmeyen her ölçüm yalan söylüyor.**
+
+### Q-202 — Gebelik yalnızca eşin kişi kartında görünüyor
+
+**Durum:** ölçüldü, **karar bekliyor**. Kod değişmedi.
+
+Gebelik karesi dökümde okundu (28 yaş, oyuncu gebe). Beş ekranın
+**hiçbirinde** gebeliği söyleyen tek satır yok: Hayat ekranında yok,
+günlükte yok, başlık satırında yok, İlişkiler listesinde yok,
+Aktiviteler'de yok. Kodda tek gösterim yeri `person_detail_sheet.dart`
+→ `person_pregnancy_note`: yani oyuncu **eşinin kişi kartını açarsa**
+görüyor.
+
+Pratikte şu oluyor: oyuncu korunmadan yakınlaşıyor, "bebek yolda"
+cümlesini bir kez görüyor, sonra ekranda hiçbir iz kalmıyor. Oyunu
+kapatıp dönerse bebek beklediğini anlamasının tek yolu eşin kartını
+açmak.
+
+*Önerim ve varsayılanım:* gebelik **Hayat ekranında** görünsün — başlık
+altındaki durum satırına ("28 yaşında · Okul bitti" satırının yanına ya
+da altına) bir "bebek bekliyorsunuz" bilgisi, ve İlişkiler ekranındaki
+"Çocuklar" satırında bekleyen doğumun belirtilmesi. Alternatif: yalnızca
+günlüğe bir satır yazmak (ucuz ama o da yıllar arasında kayboluyor).
+Hangisini istersen ona göre yaparım; sen demeden ekrana bir şey
+eklemiyorum.
