@@ -88,6 +88,23 @@ Future<void> answerPendingCrisis(
       await tester.pumpAndSettle();
     }
   }
+
+  // **Sonuç penceresi yanıttan sonra açılabilir.** `home_shell` pencereyi
+  // kare sonundaki geri çağrıda açıyor; kriz arayüz dışından
+  // yanıtlandığında pencere boş sonuçla ("Durum kapandı.") açılıyor ve
+  // kendi kendine kapanmıyor, altındaki sekmeleri de kilitliyor. Ekran
+  // dökümünün dördüncü turunda bu pencere yüzünden bir kare yanlış
+  // ekranı basmıştı. **Ürün hatası diye raporlanmadı:** bu duruma
+  // yalnızca krizi arayüz dışından yanıtlayarak düşülüyor, oyuncunun
+  // elinde o yol yok; gerçek oyunda pencere hep bir seçimle kapanıyor.
+  await tester.pumpAndSettle();
+  if (find.byKey(const Key('crisis_result_title')).evaluate().isNotEmpty) {
+    final Finder kapat = find.text('Kapat');
+    if (kapat.evaluate().isNotEmpty) {
+      await tester.tap(kapat.last, warnIfMissed: false);
+      await tester.pumpAndSettle();
+    }
+  }
 }
 
 /// Ekranda bekleyen bildirim varsa kapatır (D-050).
@@ -415,4 +432,28 @@ Future<void> scrollToFinder(
     maxScrolls: maxScrolls,
   );
   await tester.pumpAndSettle();
+}
+
+/// Sekme gezintisinden sonra **ana ekrana** (Hayat) döner.
+///
+/// **Ölçülen hata (ekran dökümü, dördüncü tur).** Üç döküm testi de tek
+/// bir arayüz ağacında birden çok kare basıyor ve her kareyi "Hayat"
+/// bölümüyle açıyordu. Ama seçili sekme kareler arasında **kalıcı**:
+/// bir önceki karede Aktiviteler sekmesinde kalınmışsa, sonraki karenin
+/// "Hayat" diye etiketlenen bölümü aslında Aktiviteler ekranını
+/// basıyordu. Döküm, okuduğu ekranın adını yanlış söylüyordu; bu da
+/// dürbünün en tehlikeli kusuru, çünkü yanlış ekranı doğru sanıp hata
+/// arıyorsun.
+///
+/// `Key('section_back')` bölüm ekranlarının geri çıkartmasıdır
+/// (`SectionScaffold`); kaybolana kadar basılır. Dönülemezse `false`
+/// döner, çağıran bunu gizlemek yerine çıktısında yazar.
+Future<bool> anaEkrana(WidgetTester tester) async {
+  for (int i = 0; i < 8; i++) {
+    final Finder geri = find.byKey(const Key('section_back'));
+    if (geri.evaluate().isEmpty) return true;
+    await tester.tap(geri.first, warnIfMissed: false);
+    await tester.pumpAndSettle();
+  }
+  return find.byKey(const Key('section_back')).evaluate().isEmpty;
 }

@@ -95,6 +95,23 @@ const List<String> _sohbetEs = <String>[
       'senden duymayı beklemiş.',
 ];
 
+/// Henüz konuşmayan ya da yeni konuşan çocukla "sohbet" (0-3).
+///
+/// Bu havuz **ölçülen bir hatayla** eklendi: sohbet metni çocuk için
+/// `age <= 12` ile seçiliyordu, dolayısıyla doğduğu yıl bebeğin
+/// günlüğüne "okulda olanları anlattı" düşüyordu. Hemen aşağıdaki
+/// "vakit geçir" dalı bebeği zaten ayırmıştı; sohbet dalı atlamıştı.
+/// Satırlar 0 ile 3 yaş arasının tamamına uymalı: bebeğin konuştuğu
+/// varsayılmaz.
+const List<String> _sohbetBebek = <String>[
+  '{ad} ile konuştun; sen anlatırken yüzüne baktı, sesin tanıdık geldi.',
+  '{ad} bir şeyler söyledi; hepsi kelime değildi, sen de aynı '
+      'ciddiyetle karşılık verdin.',
+  '{ad} ile göz göze kaldınız. Uzun bir cümle kurmadınız, gerek de '
+      'olmadı.',
+  '{ad} adını duyunca döndü. Bu kadarı bile bir sohbete sayılır.',
+];
+
 const List<String> _sohbetCocuk = <String>[
   '{ad} okulda olanları anlattı; hikâyenin yarısı gerçek, yarısı '
       'abartıydı, ikisi de güzeldi.',
@@ -107,11 +124,20 @@ const List<String> _sohbetCocuk = <String>[
 const List<String> _sohbetGenel = <String>[
   '{ad} ile uzun uzun konuştunuz; söylemek isteyip söyleyemediğin şeyi '
       'sonunda söyledin.',
-  '{ad} sana kendi yaşındayken neler yaptığını anlattı; bazı şeyler '
-      'hiç değişmemiş.',
   '{ad} ile bir konuda tartıştınız, sonunda ikiniz de biraz haklı '
       'çıktınız.',
   '{ad} seni dinledi, araya girmedi; bu bile iyi geldi.',
+];
+
+/// Yalnızca **oyuncudan büyük** kişinin söyleyebileceği satırlar.
+///
+/// "Kendi yaşındayken" diyebilmek için konuşanın oyuncudan büyük olması
+/// gerekiyor. Satır genel havuzun içindeydi; ölçümde 15 yaşındaki çocuk
+/// 45 yaşındaki oyuncuya bunu söylüyordu. Küçük kardeş, sınıf arkadaşı
+/// ve yeğen de aynı havuza düşüyordu.
+const List<String> _sohbetBuyukten = <String>[
+  '{ad} sana kendi yaşındayken neler yaptığını anlattı; bazı şeyler '
+      'hiç değişmemiş.',
 ];
 
 const List<String> _redGenel = <String>[
@@ -208,10 +234,16 @@ String interactionText({
   } else if (kind == InteractionKind.sohbet) {
     // Sohbet de kişiye göre değişir: eşle konuşmakla çocukla konuşmak
     // aynı şey değildir.
-    if (person.relation == RelationType.es) {
+    if (person.age <= 3) {
+      // Yaş her şeyin önünde: 0-3 yaş kim olursa olsun okuldan,
+      // sorulardan ve korkulardan söz edemez.
+      pool = _sohbetBebek;
+    } else if (person.relation == RelationType.es) {
       pool = _sohbetEs;
     } else if (person.relation == RelationType.cocuk && person.age <= 12) {
       pool = _sohbetCocuk;
+    } else if (person.age > playerAge) {
+      pool = <String>[..._sohbetGenel, ..._sohbetBuyukten];
     } else {
       pool = _sohbetGenel;
     }

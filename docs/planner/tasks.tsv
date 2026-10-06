@@ -209,3 +209,7 @@ pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi ka
 completed	Paket BG/1: özel durum dökümü — cezaevi, duruşma, kritik sağlık, emeklilik taranarak bulundu
 completed	Q-199: tutukluyken maaş akmaya devam ediyor (hükümlü tarafı doğru çıktı)
 completed	Paket BH/1: D-179 — tutuklulukta maaş yok, kıdem donuyor, iş bitmiyor
+completed	Paket BI/1: dürbünün kör noktası — yıl içi kanca (onPreAge), yeni doğan bebek ekranı okundu
+completed	Paket BI/2: döküm "Hayat" bölümü yanlış sekmeyi basıyordu — ortak anaEkrana yardımcısı
+completed	Paket BI/3: bebekle sohbette okul/soru/korku kapandı, "kendi yaşındayken" yalnızca büyükte
+pending	Q-200: sohbette ergen (13-17) kademesi eklenecek mi

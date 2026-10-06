@@ -18,6 +18,15 @@
 // Bir koşul taranan tohumlarda hiç oluşmazsa test **"BULUNAMADI"**
 // yazar ve geçer. Bu bilerek: bulunamamak bir ürün hatası değil, ama
 // "okundu" da sayılmaz — çıktıda açıkça görünür.
+//
+// **ÖLÇÜLEN HATA (dördüncü tur).** İlk yazımda "YENİ DOĞAN BEBEK"
+// BULUNAMADI çıkıyordu ve bunu oyunun bir eksiği sanmaya başlamıştım.
+// Değildi: tarama kancası `onYear`, yani **yaş aldıktan sonra**
+// çalışıyor; doğduğu yıl 0 yaşında olan bebeği `ageUp()` 1 yaşına
+// taşıdığı için o kare hiç görünmüyordu. 60 hayatta ölçüm: yıl içinde
+// 0 yaşında çocuk **77 kare**, yıl sonunda **0 kare**. Yıl içi durumlar
+// bu yüzden `onPreAge` ile aranıyor. Ders yine aynı: aranan şey
+// bulunamadığında önce dürbüne bak.
 library;
 
 import 'dart:math';
@@ -44,7 +53,12 @@ const List<(String, String)> kSekmeler = <(String, String)>[
 
 /// Aranan özel durum.
 class Durum {
-  const Durum(this.ad, this.kosul, {this.ekranTemizlenmesin = false});
+  const Durum(
+    this.ad,
+    this.kosul, {
+    this.ekranTemizlenmesin = false,
+    this.yilIci = false,
+  });
 
   final String ad;
   final bool Function(GameState) kosul;
@@ -52,6 +66,12 @@ class Durum {
   /// Kritik sağlık ve duruşma gibi durumlarda bekleyen pencere
   /// **durumun kendisi**; onu kapatmak dökülecek şeyi yok eder.
   final bool ekranTemizlenmesin;
+
+  /// Yalnızca **yıl içinde** var olan durum: yaş alma öncesinde aranır.
+  ///
+  /// Yeni doğan bebek böyledir; `onYear` ile hiç bulunamaz (dosya
+  /// başlığındaki ölçüm).
+  final bool yilIci;
 }
 
 void main() {
@@ -94,6 +114,17 @@ void main() {
     for (int tur = 0; tur < 40; tur++) {
       await tester.pumpAndSettle();
       if (controller.state!.deceased) return;
+      // **Önceki kareden kalan kriz penceresi.** Kritik sağlık karesi
+      // bilerek pencereyi açık bırakıyor; bir sonraki kare açıldığında
+      // o pencere hâlâ gezinti yığınında duruyor ve yeni durumda kriz
+      // olmadığı için boş sonuçla ("Durum kapandı.") görünüp sekmeleri
+      // kilitliyor. Dördüncü turda bebek karesi tam bu yüzden yanlış
+      // ekranı basmıştı.
+      if (controller.state!.hasPendingCrisis ||
+          find.byKey(const Key('crisis_result_title')).evaluate().isNotEmpty) {
+        await answerPendingCrisis(tester, controller);
+        continue;
+      }
       if (controller.state!.hasNotice) {
         await answerPendingNotices(tester, controller);
         continue;
@@ -141,6 +172,7 @@ void main() {
       'YENİ DOĞAN BEBEK',
       (GameState s) => s.people.any((Person p) =>
           p.relation == RelationType.cocuk && p.isAlive && p.age == 0),
+      yilIci: true,
     ),
     Durum('EMEKLİ', (GameState s) => s.career.isRetired),
   ];
@@ -160,7 +192,15 @@ void main() {
           seed: seed * 101 + arketip.index,
           onYear: (GameState s) {
             for (final Durum d in aranan) {
-              if (kareler.containsKey(d.ad)) continue;
+              if (d.yilIci || kareler.containsKey(d.ad)) continue;
+              if (d.kosul(s)) {
+                kareler[d.ad] = (s, seed, arketip);
+              }
+            }
+          },
+          onPreAge: (GameState s) {
+            for (final Durum d in aranan) {
+              if (!d.yilIci || kareler.containsKey(d.ad)) continue;
               if (d.kosul(s)) {
                 kareler[d.ad] = (s, seed, arketip);
               }
@@ -206,6 +246,12 @@ void main() {
             'kriz ${s.hasPendingCrisis} · emekli ${s.career.isRetired}')
         ..writeln('=' * 68);
 
+      // Bekleyen pencere varken geri çıkartması modal bariyerin
+      // arkasında kalır; o durumlarda ana ekrana dönmek denenmez.
+      if (!d.ekranTemizlenmesin && !await anaEkrana(tester)) {
+        dokum.writeln('\n!!! ANA EKRANA DÖNÜLEMEDİ — aşağıdaki "Hayat" '
+            'bölümü başka bir ekran olabilir.');
+      }
       final List<String> hayat = metinler(tester);
       dokum.writeln('\n--- Hayat / açık pencere --- (${hayat.length} metin)');
       for (final String x in hayat) {

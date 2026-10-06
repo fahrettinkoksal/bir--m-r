@@ -186,6 +186,11 @@ void main() {
       ..writeln('=' * 68);
 
     final List<String> bos = <String>[];
+    // Seçili sekme kareler arasında kalıcı (`anaEkrana`).
+    if (!await anaEkrana(tester)) {
+      rapor.writeln('\n!!! ANA EKRANA DÖNÜLEMEDİ — aşağıdaki "Hayat" '
+          'bölümü başka bir ekran olabilir.');
+    }
     final List<String> hayat = metinler(tester);
     rapor.writeln('\n--- Hayat (varsayılan) --- (${hayat.length} metin)');
     for (final String x in hayat) {

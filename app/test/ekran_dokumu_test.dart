@@ -197,6 +197,15 @@ void main() {
       final List<String> bosEkranlar = <String>[];
 
       // Hayat ekranı: hiçbir sekme seçili değilken görünen varsayılan.
+      //
+      // Seçili sekme kareler arasında kalıcı; önce ana ekrana dönülmezse
+      // bu bölüm bir önceki karenin sekmesini basar ve adını yanlış
+      // söyler (`anaEkrana`nın başlığındaki ölçüm).
+      final bool anaEkranda = await anaEkrana(tester);
+      if (!anaEkranda) {
+        rapor.writeln('\n!!! ANA EKRANA DÖNÜLEMEDİ — aşağıdaki "Hayat" '
+            'bölümü başka bir ekran olabilir.');
+      }
       final List<String> hayat = metinler(tester);
       rapor.writeln('\n--- Hayat (varsayılan ekran) --- '
           '(${hayat.length} metin)');

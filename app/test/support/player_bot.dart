@@ -670,6 +670,16 @@ BotLifeResult playBotLife({
   required int seed,
   /// Yalnızca teşhis için: her yılın sonunda çağrılır.
   void Function(GameState state)? onYear,
+  /// Yalnızca teşhis için: yaş alma **öncesinde**, yıl içinde çağrılır.
+  ///
+  /// `onYear` yaş aldıktan **sonra** çalışır; bu yüzden yalnızca o yıl
+  /// içinde var olan durumlar ona hiç görünmez. En somut örneği yeni
+  /// doğan bebek: doğduğu yıl 0 yaşındadır, `ageUp()` onu 1 yaşına
+  /// taşır, dolayısıyla `onYear` ile taranan 120 hayatta "0 yaşında
+  /// çocuk" **hiç** bulunamadı — oyunda eksik olduğu için değil, kanca
+  /// yanlış yerde olduğu için. Yıl içi durum arayan ölçümler bunu
+  /// kullanır.
+  void Function(GameState state)? onPreAge,
   /// Teşhis turunda botun politikasını kısıtlar. Oyunun sayıları
   /// **değişmez**; yalnızca botun tercihleri kapanır.
   BotOverrides overrides = BotOverrides.none,
@@ -846,6 +856,7 @@ BotLifeResult playBotLife({
     // doğru hesaplayabiliriz.
     _snapshotBeforeAge(c.state!, diag);
     _snapshotAhBefore(c.state!, diag);
+    if (onPreAge != null) onPreAge(c.state!);
     c.ageUp();
     if (c.state!.player.age == oncekiYas) {
       // İlerlemeyi engelleyen bir şey kaldıysa döngüyü kırmak yerine

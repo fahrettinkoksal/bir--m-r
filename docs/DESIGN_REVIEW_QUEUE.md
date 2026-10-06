@@ -7336,3 +7336,79 @@ doğmaz. Kıdem de ilerlememeli: içeride geçen yıl ustalığa sayılmaz.
 Alternatif: tutuklulukta da işi bitirmek (daha sert, daha basit) — bunu
 önermiyorum, çünkü beraat eden oyuncu işini de kaybetmiş olur.
 Karar senin; sen diyene kadar tutuklu hâline dokunmuyorum.
+
+### Q-200 — Bebek "okulda olanları anlattı": sohbet havuzunun yaş kademesi eksik
+
+**Durum:** iki metin hatası **düzeltildi** (kural değişmedi, onay
+gerekmedi); bir soru **karar bekliyor**.
+
+**Nasıl bulundu:** dördüncü döküm turu. Üçüncü turda "YENİ DOĞAN BEBEK"
+BULUNAMADI çıkmıştı ve bunu oyunun eksiği sanmaya başlamıştım —
+değildi, **benim kancam yanlış yerdeydi**: tarama `onYear` ile yapılıyor,
+o da `ageUp()`'tan **sonra** çalışıyor, doğduğu yıl 0 yaşında olan bebek
+1 yaşına taşınmış oluyor. Ölçüm (60 hayat): yıl içinde 0 yaşında çocuk
+**77 kare**, yıl sonunda **0 kare**. Bu, bu oturumda aynı desenin
+dördüncü tekrarı; bu kez bulguyu bildirmeden önce yakaladım.
+`playBotLife`'a yıl içi kanca (`onPreAge`) eklendi, bebek karesi
+bulundu (34 yaş) ve ekran gerçekten okundu.
+
+**Okunan günlükte iki satır yan yanaydı:**
+
+```
+Kemal adında bir oğlunuz oldu. Doğum masrafı 65.000 ₺ tuttu.
+Kemal okulda olanları anlattı; hikâyenin yarısı gerçek, yarısı abartıydı…
+```
+
+**Etkilenen kod:** `lib/data/interaction_texts.dart`
+
+#### Düzeltilen 1 — bebek sohbet havuzu yoktu
+
+Sohbet metni çocuk için `age <= 12` ile seçiliyordu; 0-3 yaş da
+okul/soru/korku havuzuna giriyordu. **Hemen altındaki "vakit geçir"
+dalı bebeği zaten ayırmış** (`age <= 3` → `_vakitGecirBebek`); sohbet
+dalı atlamıştı. Yani yeni bir kural konmadı, dosyanın kendi kademesi
+sohbete de uygulandı. `_sohbetBebek` eklendi (4 satır) ve yaş kontrolü
+bağ türünün **önüne** alındı: 0-3 yaş kim olursa olsun (yeğen, kardeş)
+okuldan söz etmiyor.
+
+#### Düzeltilen 2 — "kendi yaşındayken" satırı küçüklerin de ağzındaydı
+
+`_sohbetGenel` havuzundaki *"{ad} sana kendi yaşındayken neler yaptığını
+anlattı"* satırı, oyuncudan küçük olan herkese de düşüyordu. Ölçümde 15
+yaşındaki çocuk 45 yaşındaki oyuncuya bunu söylüyordu; küçük kardeş,
+sınıf arkadaşı ve yeğen de aynı havuzdaydı. Satır `_sohbetBuyukten`
+havuzuna alındı ve yalnızca `person.age > playerAge` iken havuza
+ekleniyor. Yeni sayı uydurulmadı: eşik, satırın kendi anlamı.
+
+**Kalıcı bekçi:** `app/test/paket_bi_sohbet_yas_test.dart` (7 test).
+Düzeltmeden önce 5'i kırmızıydı. İki kontrol testi de var: 9 yaşındaki
+çocuğun okul satırı **durmalı**, 70 yaşındaki annenin "kendi
+yaşındayken" satırı **durmalı** — düzeltme havuzları fazla
+budamasın diye.
+
+#### KARAR BEKLİYOR — sohbette ergen kademesi olsun mu?
+
+Şu an kademeler eşit değil:
+
+| Etkileşim | 0-3 | 4-12 | 13-17 | 18+ |
+|---|---|---|---|---|
+| Vakit geçir | bebek | çocuk | **ergen** | genel / ziyaret |
+| Sohbet | bebek *(yeni)* | çocuk | — | genel |
+
+Yani 15 yaşındaki çocukla sohbet, iş arkadaşıyla sohbetle aynı havuzdan
+çıkıyor. *Önerim ve varsayılanım:* sohbete de **ergen kademesi** (3-4
+satır) eklensin — ergenle konuşmak oyunun en çok anlatacak şeyi olan
+ilişkilerden biri ve şu an en yavan yeri. Alternatif: boş bırakmak;
+önermiyorum ama kabul edilebilir, çünkü genel havuz yanlış değil,
+yalnızca kişisiz. Sen "ekle" demezsen kademeyi eklemiyorum, bu tablo
+kuyrukta kalır.
+
+#### ÖLÇÜLMEMİŞ (bulgu olarak yazmıyorum)
+
+`health_crisis_sheet.dart` krizi bitmişken açılırsa içeriksiz bir
+**"Geçmiş olsun · Durum kapandı."** penceresi gösteriyor ve kendi
+kendine kapanmıyor. Döküm turunda bu pencere sekmeleri kilitledi, ama o
+duruma **yalnızca krizi arayüz dışından yanıtlayarak** düştüm; oyuncunun
+elinde o yol yok. Ürün hatası diye raporlamıyorum; gerçek oyunda
+erişilebilir olup olmadığı ölçülmedi. Test yardımcısı artık bu pencereyi
+kapatıyor (`test_flow.dart`).

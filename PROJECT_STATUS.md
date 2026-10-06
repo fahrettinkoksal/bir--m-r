@@ -5389,6 +5389,64 @@ Bekçinin düzeltmeden önce düştüğü kanıtlandı. Hükümlü tarafına
 dokunulmadı: o zaten doğru çalışıyordu ve kendi bekçisi vardı
 (`crime_law_test.dart`).
 
+## Paket BI — dördüncü döküm turu: dürbünün kendi kör noktaları (6 Ekim 2026)
+
+**Çıkış noktası.** Üçüncü turda "YENİ DOĞAN BEBEK" BULUNAMADI çıkmıştı.
+Bunu oyunun eksiği sanmaya başlamıştım; değildi. Tarama kancası
+`onYear`, o da `ageUp()`'tan **sonra** çalışıyor: doğduğu yıl 0 yaşında
+olan bebek bir sonraki kareye 1 yaşında geliyor. Ölçüm (60 hayat): yıl
+içinde 0 yaşında çocuk **77 kare**, yıl sonunda **0 kare**. Oyunda eksik
+olan bir şey yoktu, dürbün yanlış yere bakıyordu.
+
+Bu oturumda aynı desenin **dördüncü** tekrarı (öncekiler: `copyWith(age:
+8)` ile 22 yaşında anne, yıl özetinin "eksi cüzdan" satırı, tutukluluk
+yerine hükümlülük bulgusu). Bu kez bulguyu Faho'ya bildirmeden önce
+yakaladım.
+
+**Dürbünde düzeltilen üç şey:**
+
+1. `playBotLife`'a **yıl içi kanca** eklendi (`onPreAge`). Yıl içinde
+   var olup yıl sonunda kaybolan hiçbir durum artık görünmez değil.
+2. Üç döküm testi de tek arayüz ağacında birden çok kare basıyor ve
+   seçili sekme kareler arasında **kalıcı**. "Hayat" diye etiketlenen
+   bölüm, bir önceki karede hangi sekmede kalınmışsa onu basıyordu —
+   döküm okuduğu ekranın adını yanlış söylüyordu. Ortak `anaEkrana`
+   yardımcısı (`Key('section_back')`) eklendi; dönülemezse çıktı bunu
+   **yazıyor**, sessizce geçmiyor.
+3. Kritik sağlık karesi pencereyi bilerek açık bırakıyor; o pencere bir
+   sonraki kareye taşınıp içeriksiz "Durum kapandı." hâline düşüyor ve
+   sekmeleri kilitliyordu. Temizleme artık onu da kapatıyor.
+
+**Bulunan iki gerçek hata (ikisi de metin, kural değişmedi).** Bebek
+karesi okunduğunda günlükte şu iki satır yan yanaydı:
+
+```
+Kemal adında bir oğlunuz oldu. Doğum masrafı 65.000 ₺ tuttu.
+Kemal okulda olanları anlattı; hikâyenin yarısı gerçek, yarısı abartıydı…
+```
+
+| # | Hata | Kök neden |
+|---|---|---|
+| 1 | 0-3 yaşındaki çocuk "okulda olanları anlattı" | Sohbet havuzu çocuk için `age <= 12`; **aynı dosyanın** "vakit geçir" dalı bebeği `age <= 3` ile zaten ayırmıştı, sohbet dalı atlamıştı |
+| 2 | 15 yaşındaki çocuk 45 yaşındaki oyuncuya "kendi yaşındayken neler yaptığını anlattı" | Satır genel havuzdaydı; küçük kardeş, sınıf arkadaşı, yeğen de aynı havuza düşüyordu |
+
+Birinci için `_sohbetBebek` eklendi ve yaş kontrolü bağ türünün önüne
+alındı (0-3 yaş kim olursa olsun okuldan söz etmiyor). İkincisi
+`_sohbetBuyukten` havuzuna alındı, yalnızca `person.age > playerAge`
+iken havuza giriyor — yeni sayı uydurulmadı, eşik satırın kendi anlamı.
+
+**Kalıcı bekçi:** `paket_bi_sohbet_yas_test.dart` (7 test; düzeltmeden
+önce 5'i kırmızıydı). İki kontrol testi düzeltmenin fazla budamasını da
+engelliyor: 9 yaşındaki çocuğun okul satırı durmalı, 70 yaşındaki
+annenin "kendi yaşındayken" satırı durmalı.
+
+**Okunan ekranlar (3. + 4. tur):** cezaevi (50 yaş) · bekleyen duruşma
+(31) · kritik sağlık (61) · emekli (61) · **yeni doğan bebek (34)**.
+Hâlâ okunmamış: denetim dönemi, gebelik/doğum akışı.
+
+Ayrıntı ve karar bekleyen soru (sohbette ergen kademesi):
+`docs/DESIGN_REVIEW_QUEUE.md` → Q-200.
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün
