@@ -206,3 +206,5 @@ completed	Paket BE/3: para değişimi binlik ayraçsız yazılıyordu, trNumber 
 completed	Paket BF/1: döküm altı arketipe çıktı — üniversite, işletme, riskli hayat
 completed	Paket BF/2: ekranda ham null ("Sınıf: null. sınıf") düzeltildi, beş ekran taranıyor
 pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi kartı yok
+completed	Paket BG/1: özel durum dökümü — cezaevi, duruşma, kritik sağlık, emeklilik taranarak bulundu
+pending	Q-199: hapisteyken maaş akmaya devam ediyor (D-128 kodda işlemiyor)

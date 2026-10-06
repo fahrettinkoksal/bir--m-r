@@ -7257,3 +7257,59 @@ temiz"), yani **cezaevi, duruşma ve denetim dönemi ekranları bu dökümde
 de görünmedi.** Kritik sağlık, gebelik/doğum ve emeklilik sonrası da bu
 11 karede yok. Bunları görmek ayrı iş: ya kurulu durum (dolu hayat
 değil) ya tohum taraması.
+
+### Q-199 — Hapisteyken maaş akmaya devam ediyor (D-128 kodda işlemiyor)
+
+**Durum:** hükümlü hâli **onaylı kuralın uygulanması** (D-128), tutuklu
+hâli karar bekliyor (6 Ekim 2026)
+**Nasıl bulundu:** `app/test/ekran_dokumu_ozel_durum_test.dart` — üçüncü
+tur döküm. İlk iki tur sıradan hayatları okudu; cezaevi, duruşma, kritik
+sağlık, doğum ve emeklilik ekranları hiçbirinde görünmemişti çünkü o
+duruma düşmek şans işi. Durum **kurulmadı, arandı**: bot 120 hayat
+oynadı, koşul gerçekten oluştuğunda o yılın karesi fotoğraflandı. Dördü
+bulundu (cezaevi 50 yaş, duruşma 31, kritik sağlık 61, emekli 61);
+**yeni doğan bebek bu tohumlarda oluşmadı** ve çıktıda "BULUNAMADI"
+yazıyor — okundu sayılmıyor.
+
+**Etkilenen kod:** `job_market.dart` (`paySalaryFor`),
+`life_progression.dart:522`
+
+Cezaevi karesinin günlüğünde şu iki satır yan yana duruyordu:
+
+```
+Bir yıl daha tutuklu geçti. Dosya hâlâ açık.
+Oto tamircisi olarak bir yılın doldu; 631.800 ₺ cüzdanına girdi.
+Oto tamircisi olarak 3 yılı doldurdun: artık kalfa sayılıyorsun.
+```
+
+**Ölçüm (tek yıl ilerletilmiş, aynı tohum, aynı iş ve maaş):**
+
+| Durum | Yıl sonu cüzdan | İş | Maaş |
+|---|---|---|---|
+| Hükümlü (`releaseAtAge` dolu) | 393.840 ₺ | duruyor | 500.000 ₺ |
+| Tutuklu (`detainedSinceAge` dolu) | 393.840 ₺ | duruyor | 500.000 ₺ |
+| Serbest | 393.840 ₺ | duruyor | 500.000 ₺ |
+
+Üçü **birebir aynı**. `paySalaryFor` hapse hiç bakmıyor; `isImprisoned`
+kontrolü yalnızca **iş başvurusunda** var (`job_market.dart:136`).
+Kariyeri sonlandıran bir kod da yok.
+
+D-128 şöyle diyor: *"Hapis basittir: zaman ilerler, **iş biter** ve kayıt
+geçmişe yazılır (silinmez), **gelir kesilir**, yakınlarla bağ zayıflar,
+mutluluk ve sağlık düşer."* Yani bu yeni bir denge sorusu değil,
+**onaylı kuralın kodda olmaması**.
+
+*Yapacağım (onay beklemeden, D-128 uygulaması):* hükümlü oyuncunun işi
+cezaevine girerken **biter** (kayıt `career.history`'de kalır, silinmez)
+ve maaş ödenmez. Motoru değiştirdiği için tam süit koşacak; bot
+ölçümlerinde servet eğrisi kayabilir, kayarsa ölçümü yazacağım.
+
+*Senin kararını bekleyen ayrım:* **tutukluluk** D-128'de geçmiyor.
+Gerçekte tutuklu kişi işini hemen kaybetmez ama çalışamaz da.
+
+Önerim ve varsayılanım: **tutuklulukta maaş ödenmez, iş bitmez** —
+oyuncu tahliye olunca işine döner; dosya mahkûmiyetle kapanırsa iş o
+zaman biter. Böylece tutukluluk ile hüküm arasındaki fark oyunda
+hissedilir ve "suçsuz çıktım ama işimi de kaybettim" gibi bir ceza
+doğmaz. Alternatif: tutuklulukta da işi bitirmek (daha sert, daha basit).
+Karar senin; sen diyene kadar tutuklu hâline dokunmayacağım.

@@ -5313,6 +5313,38 @@ Karar bekleyen onuncu soru Q-198 EKİ 2'de: üniversite öğrencisi K-12
 kartını görüyor (lise alanı, lise yerleştirme puanı, "Sınıf Arkadaşları
 0"), kendi kartı yok. Önerim ve varsayılanı yazılı; **koda dokunmadım.**
 
+## Paket BG: özel durumlar taranarak bulundu (6 Ekim 2026)
+
+İlk iki döküm turu sıradan hayatları okudu. Cezaevi, bekleyen duruşma,
+kritik sağlık, yeni doğan ve emeklilik ekranları hiçbirinde görünmedi —
+o duruma düşmek şans işi. Üçüncü tur
+(`app/test/ekran_dokumu_ozel_durum_test.dart`) bunu çözüyor: durum
+**kurulmuyor, aranıyor.** Bot 120 hayat oynuyor, her yıl koşullar
+denetleniyor ve koşul gerçekten oluştuğunda o yılın karesi
+fotoğraflanıyor.
+
+Durumu `copyWith` ile kurmak cazipti ama ilk turda tam o yüzden yanlış
+bulgu üretmiştim (oyuncuyu yaşlandırıp dünyayı yerinde bırakmak).
+Aranan yol daha yavaş, karşılığında gerçek.
+
+**Bulundu:** cezaevi (50 yaş) · bekleyen duruşma (31) · kritik sağlık
+(61) · emekli (61). **Bulunamadı:** yeni doğan bebek — bu tohumlarda
+oluşmadı; çıktı "BULUNAMADI" yazıyor ve okundu sayılmıyor.
+
+### Ölçülen bulgu: hapiste maaş akmaya devam ediyor
+
+Cezaevi karesinin günlüğünde "Bir yıl daha tutuklu geçti" ile "Oto
+tamircisi olarak bir yılın doldu; 631.800 ₺ cüzdanına girdi" yan yanaydı.
+Tek yıl ilerleterek ölçtüm — hükümlü, tutuklu ve serbest oyuncunun yıl
+sonu cüzdanı **birebir aynı** (393.840 ₺), işi duruyor, maaşı değişmiyor.
+`paySalaryFor` hapse hiç bakmıyor; `isImprisoned` kontrolü yalnızca iş
+başvurusunda var.
+
+D-128 "Hapis basittir: zaman ilerler, **iş biter** … **gelir kesilir**"
+diyor. Yani yeni bir denge sorusu değil, **onaylı kuralın kodda
+olmaması**. Hükümlü hâli uygulanacak (tam süit gerekiyor); **tutukluluk**
+D-128'de geçmediği için karar Faho'da — ayrım Q-199'da yazılı.
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün
