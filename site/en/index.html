@@ -38,31 +38,31 @@
   <div class="sarmal kahraman">
     <span class="etiket">Open beta · in development</span>
     <h1>One life, end to end.</h1>
-    <div class="afis" role="img" aria-label="The game in play: the main screen, a waking-at-night event, relationships, activities and dark mode in turn.">
-      <div class="afis-telefon">
-        <img class="afis-kare" src="/assets/ekran-hayat.webp" width="480" height="1013" decoding="async" alt="The main screen: character summary and five stats on top, the life diary below.">
+    <div class="afis">
+      <div class="afis-telefon" aria-hidden="true">
+        <img class="afis-kare etkin" src="/assets/ekran-hayat.webp" width="480" height="1013" decoding="async" alt="">
         <img class="afis-kare" src="/assets/ekran-olay.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
         <img class="afis-kare" src="/assets/ekran-iliskiler.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
         <img class="afis-kare" src="/assets/ekran-aktiviteler.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
         <img class="afis-kare" src="/assets/ekran-karanlik.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
       </div>
       <div class="afis-govde">
-        <div class="afis-yazi">
-          <p class="afis-satir">Nine years old. A year passed; the diary filled.</p>
+        <div class="afis-yazi" aria-hidden="true">
+          <p class="afis-satir etkin">Nine years old. A year passed; the diary filled.</p>
           <p class="afis-satir">You woke in the middle of the night. What now?</p>
           <p class="afis-satir">Mother, father, siblings — all of them here.</p>
           <p class="afis-satir">What today: the library or the gym?</p>
           <p class="afis-satir">The same life, at night.</p>
         </div>
-        <div class="afis-alt" aria-hidden="true">
-          <div class="afis-noktalar">
-            <span class="afis-nokta"></span>
+        <div class="afis-alt">
+          <div class="afis-noktalar" aria-hidden="true">
+            <span class="afis-nokta etkin"></span>
             <span class="afis-nokta"></span>
             <span class="afis-nokta"></span>
             <span class="afis-nokta"></span>
             <span class="afis-nokta"></span>
           </div>
-          <span class="afis-dugme">Age Up</span>
+          <button type="button" class="afis-dugme" aria-label="Show the next screen in the banner">Age Up</button>
         </div>
       </div>
     </div>
@@ -73,22 +73,23 @@
       courtroom. Seventy years later, what's left is the sum of what you
       chose.
     </p>
-    <p class="giris">
+    <div class="giris-ikili">
+      <p class="giris">
       Bir Ömür ("a lifetime") is a deep life simulation: school, work,
       family, money, health, law, hobbies, generations. All of it inside one
       life, and all of it reading the rest. The track you pick at school
       decides which jobs you can take; your health decides whether you can
       keep one; a court decision decides whether your salary arrives. What
       you choose at twenty finds you at forty.
-    </p>
-
-    <p class="giris">
+      </p>
+      <p class="giris">
       Its world isn't built from invented numbers: the economy, wages and
       prices are anchored — by measurement — to Turkey today. The events,
       texts and rules were written from scratch for this game; not one line
       was carried over from another. The game is in Turkish; this page is
       the English summary.
-    </p>
+      </p>
+    </div>
 
     <div class="gunluk">
       <h2>Life log — lines from the game</h2>
@@ -476,5 +477,51 @@
   </div>
 </footer>
 
+<script>
+// Afiş: dört saniyede bir kendi ilerler, Yaş Al'a basılınca hemen ilerler
+// ve sayaç sıfırlanır. Betik çalışmazsa ilk kare sabit kalır.
+(function () {
+  var afis = document.querySelector('.afis');
+  if (!afis) return;
+  var kume = [
+    afis.querySelectorAll('.afis-kare'),
+    afis.querySelectorAll('.afis-satir'),
+    afis.querySelectorAll('.afis-nokta')
+  ];
+  var dugme = afis.querySelector('.afis-dugme');
+  if (!kume[0].length) return;
+  var simdi = 0;
+  var sayac = null;
+  var azHareket = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function goster(i) {
+    simdi = (i + kume[0].length) % kume[0].length;
+    for (var k = 0; k < kume.length; k++) {
+      for (var n = 0; n < kume[k].length; n++) {
+        kume[k][n].classList.toggle('etkin', n === simdi);
+      }
+    }
+  }
+
+  function ilerle() {
+    if (dugme) {
+      dugme.classList.add('basildi');
+      window.setTimeout(function () { dugme.classList.remove('basildi'); }, 180);
+    }
+    goster(simdi + 1);
+  }
+
+  function kur() {
+    if (sayac) window.clearInterval(sayac);
+    if (!azHareket) sayac = window.setInterval(ilerle, 4000);
+  }
+
+  if (dugme) {
+    dugme.addEventListener('click', function () { ilerle(); kur(); });
+  }
+  kur();
+})();
+</script>
 </body>
 </html>

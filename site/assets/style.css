@@ -168,7 +168,7 @@ h1 {
 .giris {
   font-size: clamp(1.05rem, 2.4vw, 1.25rem);
   color: var(--murekkep);
-  max-width: 46ch;
+  max-width: 68ch;
   margin: 0 0 14px;
 }
 
@@ -521,16 +521,13 @@ figure.sema figcaption {
 }
 
 /* ---- Afiş: oynanıyormuş gibi ----
-   Yatay bir şerit: solda telefon, sağda o karenin satırı, altında
-   noktalar ve her tur başında basılan bir "Yaş Al" düğmesi.
-
-   Geçiş kuralı önemli: çıkan kare, giren kare **tamamen gelene kadar**
-   duruyor. İlk sürümde ikisi aynı anda bitip başlıyordu ve her dört
-   saniyede bir afiş 0,4 saniye boş kalıyordu.
-
-   JavaScript yok; beş kare, beş satır, beş nokta aynı 20 saniyelik
-   döngüde dörder saniye arayla açılıyor. `prefers-reduced-motion`
-   açıksa hareket tamamen duruyor. */
+   Yatay şerit: solda telefon, sağda o karenin satırı, altında noktalar
+   ve **gerçekten çalışan** bir Yaş Al düğmesi. Düğmeye basılınca bir
+   sonraki ekrana geçiyor ve sayaç sıfırlanıyor; kimse basmazsa dört
+   saniyede bir kendi ilerliyor. Küçük bir betik sürüyor (sayfanın
+   sonunda); betik çalışmazsa ilk kare sabit duruyor, sayfa bozulmuyor.
+   `prefers-reduced-motion` açıkken kendiliğinden ilerleme kapalı,
+   düğme yine çalışıyor. */
 
 .afis {
   display: flex;
@@ -563,18 +560,10 @@ figure.sema figcaption {
   object-fit: cover;
   object-position: top center;
   opacity: 0;
-  animation: afis-kare 20s linear infinite;
+  transition: opacity 0.5s ease;
 }
 
-/* Çıkan kare 22%'ye kadar duruyor; giren kare 20-23 arasında üstüne
-   biniyor. Böylece arada boş kare kalmıyor. */
-@keyframes afis-kare {
-  0%   { opacity: 0; }
-  3%   { opacity: 1; }
-  22%  { opacity: 1; }
-  25%  { opacity: 0; }
-  100% { opacity: 0; }
-}
+.afis-kare.etkin { opacity: 1; }
 
 .afis-govde {
   flex: 1 1 auto;
@@ -595,16 +584,11 @@ figure.sema figcaption {
   line-height: 1.22;
   letter-spacing: -0.01em;
   opacity: 0;
-  animation: afis-satir 20s linear infinite;
+  transform: translateY(9px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-@keyframes afis-satir {
-  0%   { opacity: 0; transform: translateY(9px); }
-  3%   { opacity: 1; transform: translateY(0); }
-  19%  { opacity: 1; transform: translateY(0); }
-  22%  { opacity: 0; transform: translateY(-9px); }
-  100% { opacity: 0; transform: translateY(-9px); }
-}
+.afis-satir.etkin { opacity: 1; transform: translateY(0); }
 
 .afis-alt {
   display: flex;
@@ -622,43 +606,38 @@ figure.sema figcaption {
   border-radius: 50%;
   border: 2px solid var(--kontur);
   background: var(--kagit-koyu);
-  animation: afis-nokta 20s linear infinite;
+  transition: background 0.3s ease;
 }
 
-@keyframes afis-nokta {
-  0%   { background: var(--kagit-koyu); }
-  3%   { background: var(--kirmizi); }
-  22%  { background: var(--kirmizi); }
-  25%  { background: var(--kagit-koyu); }
-  100% { background: var(--kagit-koyu); }
-}
+.afis-nokta.etkin { background: var(--kirmizi); }
 
-/* Her tur başında basılan düğme: oyunu birinin oynadığı hissi buradan
-   geliyor. Tıklanabilir değil, afişin parçası. */
+/* Oyundaki çıkartma düğmenin aynısı: basınca gölgesi kayboluyor. */
 .afis-dugme {
-  display: inline-block;
+  font: inherit;
   font-size: 0.86rem;
   font-weight: 800;
   color: #ffffff;
   background: var(--kirmizi);
   border: 2px solid var(--kontur);
   border-radius: 999px;
-  padding: 4px 16px;
+  padding: 5px 18px;
   box-shadow: 0 3px 0 var(--kontur);
-  animation: afis-bas 4s linear infinite;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
-@keyframes afis-bas {
-  0%, 82%   { transform: translateY(0); box-shadow: 0 3px 0 var(--kontur); }
-  90%       { transform: translateY(3px); box-shadow: 0 0 0 var(--kontur); }
-  97%, 100% { transform: translateY(0); box-shadow: 0 3px 0 var(--kontur); }
+.afis-dugme:hover { background: var(--kirmizi-koyu); }
+
+.afis-dugme:active,
+.afis-dugme.basildi {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--kontur);
 }
 
-.afis-kare:nth-child(1), .afis-satir:nth-child(1), .afis-nokta:nth-child(1) { animation-delay: 0s; }
-.afis-kare:nth-child(2), .afis-satir:nth-child(2), .afis-nokta:nth-child(2) { animation-delay: 4s; }
-.afis-kare:nth-child(3), .afis-satir:nth-child(3), .afis-nokta:nth-child(3) { animation-delay: 8s; }
-.afis-kare:nth-child(4), .afis-satir:nth-child(4), .afis-nokta:nth-child(4) { animation-delay: 12s; }
-.afis-kare:nth-child(5), .afis-satir:nth-child(5), .afis-nokta:nth-child(5) { animation-delay: 16s; }
+.afis-dugme:focus-visible {
+  outline: 3px solid var(--turkuaz-koyu);
+  outline-offset: 2px;
+}
 
 @media (max-width: 560px) {
   .afis { gap: 16px; padding: 14px 16px; }
@@ -667,7 +646,23 @@ figure.sema figcaption {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .afis-kare, .afis-satir, .afis-nokta, .afis-dugme { animation: none; }
-  .afis-kare:nth-child(1), .afis-satir:nth-child(1) { opacity: 1; }
-  .afis-nokta:nth-child(1) { background: var(--kirmizi); }
+  .afis-kare, .afis-satir, .afis-nokta, .afis-dugme { transition: none; }
+}
+
+/* ---- Kahraman metni: iki sütun ----
+   Tek dar sütun geniş ekranda sağ yarıyı boş bırakıyordu. Satır uzunluğu
+   okunur kalsın diye tam genişliğe yaymak yerine iki sütuna bölündü. */
+
+.giris-ikili {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 36px;
+  margin-top: 6px;
+}
+
+.giris-ikili .giris { max-width: none; margin-bottom: 0; }
+
+@media (max-width: 760px) {
+  .giris-ikili { grid-template-columns: 1fr; gap: 0; }
+  .giris-ikili .giris { margin-bottom: 14px; }
 }
