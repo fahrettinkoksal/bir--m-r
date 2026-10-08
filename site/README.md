@@ -39,6 +39,25 @@ cPanel → **Email Accounts** → `info@biromur.com` oluştur. Claude for
 Startups başvurusu, sitenin alan adıyla **eşleşen** bir şirket e-postası
 istiyor; bu yüzden başvuruyu gmail/outlook ile değil bu adresle yap.
 
+## Görsel dil
+
+Site oyunun kendi görsel dilini kullanıyor; renkler ve ölçüler elle
+seçilmedi, `app/lib/ui/theme/bir_omur_theme.dart` ve
+`app/lib/ui/widgets/comic.dart` dosyalarından alındı:
+
+- Kâğıt `#fff3e2`, kart beyaz, mürekkep `#2a2233`, soluk `#7a6e86`;
+  karanlık modda `#1b1526` / `#2f2742` / `#f8f1e6`.
+- Vurgu renkleri oyunun paleti: kırmızı `#ff4d5b`, turkuaz `#2fc4c9`,
+  sarı `#ffc93c`, mor `#9b6bff`.
+- Kart: 2,5 piksel kontur, 22 piksel yarıçap ve **bulanık olmayan**
+  4 piksel kaydırılmış gölge. Çizgi roman hissi buradan geliyor;
+  yumuşak gölge kullanma.
+- Yazı tipi oyunun yazı tipi: Baloo2 (400/600/800), `assets/fonts/`
+  altında woff2 olarak barındırılıyor. Lisans OFL, metni yanında.
+  Google Fonts'tan çekme; site dışarıya hiçbir istek atmıyor.
+
+Oyunun teması değişirse buradaki değerler de güncellenmeli.
+
 ## İçeriği güncellerken
 
 - Türkçe sayfa `index.html`, İngilizce sayfa `en/index.html`. İkisi ayrı
