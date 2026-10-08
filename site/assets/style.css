@@ -666,3 +666,120 @@ figure.sema figcaption {
   .giris-ikili { grid-template-columns: 1fr; gap: 0; }
   .giris-ikili .giris { margin-bottom: 14px; }
 }
+
+/* ---- Kaydırınca beliren bloklar ----
+   Gizlilik yalnızca keyframe'in içinde duruyor: `.gorundu` sınıfı
+   eklenmezse blok normal haliyle görünür. Betik çalışmasa, gecikse ya
+   da gözcü hiç tetiklenmese bile sayfadan içerik kaybolmuyor. */
+
+/* `both` yok: animasyon hiç başlamazsa blok normal haliyle görünür.
+   `both` olsaydı başlamayan animasyon bloğu kalıcı gizlerdi. */
+[data-goster].gorundu { animation: belir 0.55s ease; }
+
+@keyframes belir {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- Kartlar parmağın altında kalkıyor ---- */
+
+@media (hover: hover) {
+  .kart, .ekran img {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .kart:hover, .ekran img:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 0 var(--kontur);
+  }
+}
+
+/* ---- Ömür şeridi ----
+   Aynı kural: çizgi ve kilometre taşları varsayılan olarak tam
+   görünür; `.gorundu` gelirse soldan sağa dolma ve sırayla belirme
+   animasyonu oynar. */
+
+.zaman { position: relative; margin-top: 8px; }
+
+.zaman-cizgi {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 27px;
+  height: 6px;
+  background: var(--kagit-koyu);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.zaman-dolgu {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--kirmizi);
+  transform-origin: left center;
+}
+
+.gorundu .zaman-dolgu { animation: zaman-dol 1.6s ease 0.2s both; }
+
+@keyframes zaman-dol {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.zaman-adimlar {
+  position: relative;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+}
+
+.zaman-adimlar li {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+}
+
+.gorundu .zaman-adimlar li {
+  animation: belir 0.4s ease both;
+  animation-delay: calc(var(--s) * 0.16s + 0.3s);
+}
+
+.zaman-nokta {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 18px auto 10px;
+  border-radius: 50%;
+  background: var(--kart);
+  border: 3px solid var(--kontur);
+}
+
+.zaman-adimlar li:last-child .zaman-nokta { background: var(--kirmizi); }
+
+.zaman-adimlar li b {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.zaman-adimlar li small {
+  display: block;
+  margin-top: 2px;
+  color: var(--soluk);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 560px) {
+  .zaman-adimlar li small { font-size: 0.74rem; }
+  .zaman-adimlar li b { font-size: 0.95rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-goster].gorundu,
+  .gorundu .zaman-dolgu,
+  .gorundu .zaman-adimlar li { animation: none; }
+}
