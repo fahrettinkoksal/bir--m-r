@@ -43,11 +43,15 @@ istiyor; bu yüzden başvuruyu gmail/outlook ile değil bu adresle yap.
 
 - Türkçe sayfa `index.html`, İngilizce sayfa `en/index.html`. İkisi ayrı
   dosya; birinde metin değişince diğerini de güncelle.
-- Sitedeki sayılar (180 karar, 3.408 test, 122 bin satır kod, 95 bin satır
-  test, 55 meslek, 400'ü aşkın olay) depodan ölçüldü. Depo büyüyünce bu
+- Sitedeki sayılar (180 karar, test sayısı, 122 bin satır kod, 95 bin satır
+  test, 55 meslek, 461 olay, 12 hobi/60 basamak, 22 kitap, 39 aktivite,
+  21 hedef, 10 hayvan türü, 22 şehir, 58 dövüş kademesi) depodan ölçüldü.
+  Ölçüm betiği: katalog dosyalarındaki girdileri saymak; olay sayısı
+  `data/event_pool*.dart` içindeki `GameEvent(` sayısı. Depo büyüyünce bu
   sayılar bayatlar — güncellemeden önce yeniden ölç, tahminle yazma.
 - "Hayat günlüğü" bölümündeki satırlar oyunun gerçek çıktısından alındı.
   Değiştireceksen yine oyundan al; elle örnek cümle uydurma.
-- Ekran görüntüsü bilerek konmadı: oyun henüz hiçbir cihazda oynanmadı,
-  elimizde gerçek bir görüntü yok. Görüntü eklenince `assets/` altına
-  koyup `og:image` etiketini de ekle.
+- Ekran görüntüsü henüz konmadı: oyun açık beta olarak paylaşılıyor ama
+  siteye koyacak bir görüntü dosyası elimizde yok. Görüntü eklenince
+  `assets/` altına koyup `og:image` etiketini de ekle. Uydurma mockup
+  koyma; görüntü oyunun kendisinden gelsin.
