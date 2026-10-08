@@ -51,7 +51,16 @@ istiyor; bu yüzden başvuruyu gmail/outlook ile değil bu adresle yap.
   sayılar bayatlar — güncellemeden önce yeniden ölç, tahminle yazma.
 - "Hayat günlüğü" bölümündeki satırlar oyunun gerçek çıktısından alındı.
   Değiştireceksen yine oyundan al; elle örnek cümle uydurma.
-- Ekran görüntüsü henüz konmadı: oyun açık beta olarak paylaşılıyor ama
-  siteye koyacak bir görüntü dosyası elimizde yok. Görüntü eklenince
-  `assets/` altına koyup `og:image` etiketini de ekle. Uydurma mockup
-  koyma; görüntü oyunun kendisinden gelsin.
+- Ekran görüntüleri (`assets/ekran-*.webp`) ve paylaşım görseli
+  (`assets/og-biromur.png`) oyunun **kendi arayüzünden** üretildi, montaj
+  değil. Yenilemek için:
+
+  ```bash
+  cd app
+  BIR_OMUR_SCREENSHOTS=1 flutter test --update-goldens test/golden_screens_test.dart
+  ```
+
+  Bu, `app/test/goldens/*.png` dosyalarını 1080x2280 olarak tazeler. Sonra
+  seçilenleri ölçekleyip WebP'ye çevir (Pillow ile; 480 piksel genişlik,
+  kalite 82) ve paylaşım görselini yeniden kur. Uydurma mockup koyma;
+  görüntü oyunun kendisinden gelsin. Arayüz değişince görüntüler bayatlar.

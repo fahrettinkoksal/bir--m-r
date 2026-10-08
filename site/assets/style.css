@@ -417,3 +417,31 @@ figure.sema figcaption {
   font-size: 10.5px;
   font-family: inherit;
 }
+
+/* ---- Ekran görüntüleri ----
+   Kaynak: oyunun kendi arayüzü (app/test/goldens). Burada yalnızca
+   ölçeklendi; montaj ya da rötuş yok. */
+
+.ekranlar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+  margin: 0 0 22px;
+}
+
+.ekran { margin: 0; }
+
+.ekran img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--cizgi);
+  border-radius: 18px;
+  background: var(--kagit-kart);
+}
+
+.ekran figcaption {
+  margin-top: 10px;
+  font-size: 0.86rem;
+  color: var(--murekkep-soluk);
+}
