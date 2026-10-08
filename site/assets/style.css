@@ -1,0 +1,332 @@
+/* Bir Ömür — site stili.
+   Tek dosya, bağımlılık yok, derleme adımı yok: cPanel'e olduğu gibi
+   yüklenir. Renkler :root üzerinde token; karanlık mod aşağıda. */
+
+:root {
+  --kagit: #fbf7f0;
+  --kagit-kart: #ffffff;
+  --murekkep: #1b1714;
+  --murekkep-soluk: #5c5349;
+  --cizgi: #e4dcd0;
+  --nar: #b3341f;
+  --nar-soluk: #f3e3df;
+  --firuze: #1f6f6b;
+  --olcu: 980px;
+  --yuvarlak: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --kagit: #15120f;
+    --kagit-kart: #1e1a16;
+    --murekkep: #f3ece2;
+    --murekkep-soluk: #a99c8c;
+    --cizgi: #322b24;
+    --nar: #e4654c;
+    --nar-soluk: #2a1a16;
+    --firuze: #4fb3ab;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--kagit);
+  color: var(--murekkep);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.sarmal {
+  max-width: var(--olcu);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ---- Üst şerit ---- */
+
+.ust {
+  border-bottom: 1px solid var(--cizgi);
+  background: var(--kagit);
+}
+
+.ust .sarmal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 62px;
+  flex-wrap: wrap;
+}
+
+.marka {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1.05rem;
+  text-decoration: none;
+  color: var(--murekkep);
+}
+
+.marka span { color: var(--nar); }
+
+.dil {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.dil a {
+  color: var(--murekkep-soluk);
+  text-decoration: none;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.dil a:hover { color: var(--murekkep); }
+
+.dil a[aria-current="true"] {
+  color: var(--murekkep);
+  border-color: var(--cizgi);
+  background: var(--kagit-kart);
+  font-weight: 600;
+}
+
+/* ---- Kahraman alanı ---- */
+
+.kahraman { padding: 56px 0 8px; }
+
+.etiket {
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nar);
+  background: var(--nar-soluk);
+  border-radius: 999px;
+  padding: 5px 12px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: clamp(2.1rem, 6vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin: 0 0 18px;
+  font-weight: 800;
+}
+
+.giris {
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  color: var(--murekkep-soluk);
+  max-width: 44ch;
+  margin: 0 0 14px;
+}
+
+.durum-notu {
+  font-size: 0.95rem;
+  color: var(--murekkep-soluk);
+  border-left: 3px solid var(--cizgi);
+  padding: 2px 0 2px 14px;
+  margin: 26px 0 0;
+  max-width: 52ch;
+}
+
+/* ---- Günlük kartı ---- */
+
+.gunluk {
+  margin: 44px 0 0;
+  background: var(--kagit-kart);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yuvarlak);
+  padding: 22px 22px 18px;
+  box-shadow: 0 1px 0 var(--cizgi);
+}
+
+.gunluk h2 {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--murekkep-soluk);
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.gunluk .yas {
+  font-size: 0.82rem;
+  color: var(--nar);
+  font-weight: 700;
+  margin: 16px 0 6px;
+}
+
+.gunluk .yas:first-of-type { margin-top: 10px; }
+
+.gunluk ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gunluk li {
+  padding: 7px 0 7px 16px;
+  border-top: 1px solid var(--cizgi);
+  position: relative;
+  font-size: 0.97rem;
+}
+
+.gunluk li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 17px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cizgi);
+}
+
+.gunluk .para { color: var(--firuze); font-variant-numeric: tabular-nums; }
+
+.gunluk footer {
+  margin-top: 14px;
+  font-size: 0.82rem;
+  color: var(--murekkep-soluk);
+}
+
+/* ---- Bölümler ---- */
+
+section { padding: 54px 0; border-top: 1px solid var(--cizgi); }
+
+section:first-of-type { border-top: 0; }
+
+h2.baslik {
+  font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  font-weight: 750;
+}
+
+.alt-baslik {
+  color: var(--murekkep-soluk);
+  max-width: 58ch;
+  margin: 0 0 30px;
+}
+
+p { margin: 0 0 16px; }
+
+p:last-child { margin-bottom: 0; }
+
+/* ---- Sayı şeridi ---- */
+
+.sayilar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--cizgi);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yuvarlak);
+  overflow: hidden;
+}
+
+.sayilar div {
+  background: var(--kagit-kart);
+  padding: 20px 18px;
+}
+
+.sayilar b {
+  display: block;
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.sayilar small {
+  display: block;
+  margin-top: 4px;
+  color: var(--murekkep-soluk);
+  font-size: 0.86rem;
+}
+
+/* ---- Kart ızgarası ---- */
+
+.izgara {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.kart {
+  background: var(--kagit-kart);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yuvarlak);
+  padding: 20px;
+}
+
+.kart h3 {
+  margin: 0 0 8px;
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.kart p {
+  margin: 0;
+  font-size: 0.94rem;
+  color: var(--murekkep-soluk);
+}
+
+/* ---- Liste ---- */
+
+ul.duz {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+ul.duz li {
+  padding: 12px 0;
+  border-top: 1px solid var(--cizgi);
+  font-size: 0.97rem;
+}
+
+ul.duz li:first-child { border-top: 0; }
+
+ul.duz b { font-weight: 650; }
+
+ul.duz span { color: var(--murekkep-soluk); }
+
+/* ---- İletişim ---- */
+
+.iletisim a {
+  color: var(--nar);
+  font-weight: 650;
+  text-decoration: none;
+  border-bottom: 1px solid var(--nar-soluk);
+}
+
+.iletisim a:hover { border-bottom-color: var(--nar); }
+
+/* ---- Alt şerit ---- */
+
+footer.alt {
+  border-top: 1px solid var(--cizgi);
+  padding: 28px 0 44px;
+  color: var(--murekkep-soluk);
+  font-size: 0.88rem;
+}
+
+footer.alt .sarmal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+footer.alt a { color: var(--murekkep-soluk); }

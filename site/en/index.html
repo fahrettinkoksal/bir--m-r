@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bir Ömür — a life simulation set in Turkey</title>
+<meta name="description" content="Bir Ömür is a Turkish-language mobile life simulation: play one life from birth to death. School, work, family, money, health and the courts — one decision per year. In development.">
+<link rel="canonical" href="https://biromur.com/en/">
+<link rel="alternate" hreflang="tr" href="https://biromur.com/">
+<link rel="alternate" hreflang="en" href="https://biromur.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://biromur.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bir Ömür — a life simulation set in Turkey">
+<meta property="og:description" content="One life, from birth to death. School, work, family, money, health and the courts — one decision per year. A Turkish-language mobile life simulation, in development.">
+<meta property="og:url" content="https://biromur.com/en/">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="ust">
+  <div class="sarmal">
+    <a class="marka" href="/en/">Bir <span>Ömür</span></a>
+    <nav class="dil" aria-label="Language">
+      <a href="/" lang="tr">Türkçe</a>
+      <a href="/en/" aria-current="true" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="sarmal kahraman">
+    <span class="etiket">In development</span>
+    <h1>One life, end to end.</h1>
+    <p class="giris">
+      You don't get to pick the family you're born into. After that it's one
+      decision a year: school, work, money, love, health, sometimes a
+      courtroom. Seventy years later, what's left is the sum of what you
+      chose.
+    </p>
+    <p class="giris">
+      Bir Ömür ("a lifetime") is a mobile life simulation set in Turkey. The
+      events, rules and economy are written from scratch for this game, and
+      the numbers — from the minimum wage to apartment prices — are anchored
+      to Turkey in 2026. The game is in Turkish; this page is the English
+      summary.
+    </p>
+
+    <div class="gunluk">
+      <h2>Life log — lines from the game</h2>
+      <p class="yas">Age 34</p>
+      <ul>
+        <li>You had a son named Kemal. The birth cost <span class="para">₺65,000</span>.</li>
+        <li>You failed the driving test: 0 of 3 correct. You needed at least 2.</li>
+        <li>You completed a year as a journeyman mechanic; <span class="para">₺267,166</span> went into your wallet.</li>
+      </ul>
+      <p class="yas">Age 50</p>
+      <ul>
+        <li>Another year passed in pre-trial detention. The case is still open.</li>
+        <li>Your job at the garage is still yours, but you're inside: no salary this year, and no seniority either.</li>
+        <li>Your stepmother Esra Erdoğan died peacefully in her sleep.</li>
+      </ul>
+      <footer>
+        These lines are taken from the game's own output — not hand-written
+        samples, but the log of two years that were actually played.
+      </footer>
+    </div>
+
+    <p class="durum-notu">
+      The game has not shipped. It isn't in any store and there's no open
+      beta. Every number below was measured from today's repository.
+    </p>
+  </div>
+
+  <section id="game">
+    <div class="sarmal">
+      <h2 class="baslik">What's in it</h2>
+      <p class="alt-baslik">
+        One year, one "age up" button. Behind it, systems that talk to each
+        other: a choice in one of them finds you in another, years later.
+      </p>
+      <div class="izgara">
+        <div class="kart">
+          <h3>School and work</h3>
+          <p>Primary school through university, exams and tracks. 55 professions, with interviews, raises, promotions, mastery and retirement.</p>
+        </div>
+        <div class="kart">
+          <h3>Family</h3>
+          <p>Parents, siblings, step-family. Marriage, children, grandchildren — and when a generation ends, the game can continue as your child.</p>
+        </div>
+        <div class="kart">
+          <h3>Money</h3>
+          <p>Cost of living, banks and loans, buying a home or a car, rental income, an investment portfolio and your own business.</p>
+        </div>
+        <div class="kart">
+          <h3>Health</h3>
+          <p>Stats that decline with age, chronic illness, critical health crises — and upkeep that measurably pays off.</p>
+        </div>
+        <div class="kart">
+          <h3>Law</h3>
+          <p>Investigation, bail, a lawyer, trial, prison and probation. In pre-trial detention no salary arrives and seniority freezes.</p>
+        </div>
+        <div class="kart">
+          <h3>Life</h3>
+          <p>Hobbies, sport, social media, pets, travel, life goals and more than 400 events.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="sarmal">
+      <h2 class="baslik">How it's built</h2>
+      <p class="alt-baslik">
+        Bir Ömür is written by one person and one AI: the design decisions are
+        Fahrettin Köksal's, most of the code was written with Claude Code.
+        The interesting part isn't the tool — it's the discipline around it.
+      </p>
+
+      <div class="sayilar">
+        <div><b>180</b><small>written, settled rules</small></div>
+        <div><b>3,408</b><small>automated tests, 0 failures on the last run</small></div>
+        <div><b>122k</b><small>lines of game code</small></div>
+        <div><b>95k</b><small>lines of test code</small></div>
+      </div>
+
+      <ul class="duz" style="margin-top:28px">
+        <li><b>Every rule is written down.</b> <span>The game's 180 settled decisions live numbered in one file, and the code that implements one cites its number. A test makes every number cited in code mandatory to exist.</span></li>
+        <li><b>An unapproved number is never "final".</b> <span>Every balance value stays tagged <code>prototypeOnly</code> until it's decided. If a constant stops being read and goes dead, a separate test breaks.</span></li>
+        <li><b>Measure, don't guess.</b> <span>A bot plays the game birth-to-death thousands of times, and balance calls are made from those runs. No value gets changed because it "feels better".</span></li>
+        <li><b>The screens get read.</b> <span>Tests play the game through its own interface and dump every piece of text on screen. That dump has read seven hard-to-reach states, from prison to pregnancy, and found eight real bugs.</span></li>
+        <li><b>No test is deleted or loosened.</b> <span>When a fix breaks an old expectation, the expectation is rewritten or the bug is accepted — never skipped to get back to green.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="sarmal">
+      <h2 class="baslik">What we won't do</h2>
+      <p class="alt-baslik">
+        Life simulation is a genre that gets cheap easily. A few limits were
+        set at the start.
+      </p>
+      <div class="izgara">
+        <div class="kart">
+          <h3>No copied content</h3>
+          <p>Events, text and art are written for this game. Nothing is carried over from another title.</p>
+        </div>
+        <div class="kart">
+          <h3>No real names</h3>
+          <p>Companies, banks, vehicle models and celebrities are fictional. No real person or brand is used.</p>
+        </div>
+        <div class="kart">
+          <h3>No how-to</h3>
+          <p>The crime and law system describes consequences. No text describes a usable method.</p>
+        </div>
+        <div class="kart">
+          <h3>Not financial advice</h3>
+          <p>The in-game market is fiction and isn't presented as a real recommendation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="sarmal">
+      <h2 class="baslik">Status</h2>
+      <p class="alt-baslik">Where things actually stand today.</p>
+      <ul class="duz">
+        <li><b>Tech</b> <span>— Flutter; Android first, with a Windows build as well.</span></li>
+        <li><b>Playable</b> <span>— a life runs end to end: birth, school, work, family, ageing, death and the next generation.</span></li>
+        <li><b>Release</b> <span>— not in any store, no open beta. Every push builds an Android and a Windows package automatically; those are for closed testing.</span></li>
+        <li><b>Next</b> <span>— interface rough edges, content depth and balance decisions. No dates: we'd rather test first.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="contact" class="iletisim">
+    <div class="sarmal">
+      <h2 class="baslik">Contact</h2>
+      <p class="alt-baslik">
+        For closed-test access, press material or any question, write to us.
+      </p>
+      <p><a href="mailto:info@biromur.com">info@biromur.com</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="alt">
+  <div class="sarmal">
+    <span>Bir Ömür — in development by Fahrettin Köksal.</span>
+    <span><a href="/" lang="tr">Türkçe</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
