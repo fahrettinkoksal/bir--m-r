@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bir Ömür — Türkiye'de geçen bir hayat simülasyonu</title>
-<meta name="description" content="Bir Ömür, doğumdan ölüme bir hayatı oynadığınız Türkçe mobil hayat simülasyonu. Okul, meslek, aile, para, sağlık ve hukuk; her yıl bir karar. Geliştirme aşamasında.">
+<meta name="description" content="Bir Ömür, doğumdan ölüme bir hayatı oynadığınız Türkçe mobil hayat simülasyonu. 55 meslek, piyasa rejimli yatırım, kendi işletmen, kiracılı kira geliri, hukuk, sağlık ve kuşaklar — her yıl bir karar. Açık beta.">
 <link rel="canonical" href="https://biromur.com/">
 <link rel="alternate" hreflang="tr" href="https://biromur.com/">
 <link rel="alternate" hreflang="en" href="https://biromur.com/en/">
 <link rel="alternate" hreflang="x-default" href="https://biromur.com/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Bir Ömür — Türkiye'de geçen bir hayat simülasyonu">
-<meta property="og:description" content="Doğumdan ölüme bir hayat. Okul, meslek, aile, para, sağlık ve hukuk; her yıl bir karar. Türkçe mobil hayat simülasyonu, geliştirme aşamasında.">
+<meta property="og:description" content="Doğumdan ölüme bir hayat. Okul, meslek, aile, para, işletme, hukuk ve sağlık birbirine bağlı; her yıl bir karar. Türkçe mobil hayat simülasyonu, açık beta.">
 <meta property="og:url" content="https://biromur.com/">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:image" content="https://biromur.com/assets/og-biromur.png">
@@ -47,6 +47,12 @@
       Bir Ömür, Türkiye'de geçen bir mobil hayat simülasyonu. Metinler,
       kurallar ve ekonomi buraya özgün yazıldı; asgari ücretten ev
       fiyatlarına kadar sayılar 2026 Türkiye'sine çıpalandı.
+    </p>
+
+    <p class="giris">
+      Menü dolu bir oyun değil. Piyasanın o yılki rejimi, şirketlerin
+      sağlığı, kiracının ödeme geçmişi, tutukluluğun maaşa etkisi — hepsi
+      aynı yılın içinde, birbirine bakarak işliyor.
     </p>
 
     <div class="gunluk">
@@ -143,7 +149,7 @@
       <div class="izgara">
         <div class="kart">
           <h3>Okul ve meslek</h3>
-          <p>İlkokuldan üniversiteye, sınavlar ve alan seçimi. 55 meslek; mülakat, zam, terfi, ustalık ve emeklilik.</p>
+          <p>İlkokuldan üniversiteye on kademe, 20 üniversite programı, 13 okul kulübü. 55 meslek; mülakat, zam, terfi, ustalık ve emeklilik.</p>
         </div>
         <div class="kart">
           <h3>Aile</h3>
@@ -151,15 +157,15 @@
         </div>
         <div class="kart">
           <h3>Para</h3>
-          <p>Geçim gideri, banka, kredi, ev ve araç alımı, kira geliri, yatırım portföyü ve kendi işletmen.</p>
+          <p>Geçim gideri, iki banka ve kredi, 22 şehirde ev ve araç pazarı, kiracılı kira geliri, yatırım portföyü ve 14 işletme türünden kendi işin.</p>
         </div>
         <div class="kart">
           <h3>Sağlık</h3>
-          <p>Yaşla düşen değerler, kronik hastalık, kritik sağlık krizleri ve bakımın gerçekten işe yaradığı bir sistem.</p>
+          <p>Yaşla düşen beş değer, altı kronik hastalık, sekiz kriz, check-up ve estetik. Bakım ölçülebilir biçimde işe yarıyor.</p>
         </div>
         <div class="kart">
           <h3>Hukuk</h3>
-          <p>Soruşturma, kefalet, avukat, duruşma, cezaevi ve denetim dönemi. Tutuklulukta maaş yatmıyor, kıdem donuyor.</p>
+          <p>Sekiz kategoride 11 suç, üç kademe avukat. Soruşturma, kefalet, duruşma, cezaevi ve denetim dönemi. Tutuklulukta maaş yatmıyor, kıdem donuyor.</p>
         </div>
         <div class="kart">
           <h3>Hayat</h3>
@@ -213,6 +219,41 @@
   </div>
   <figcaption>Sistemler ayrı menüler değil. Okulda seçtiğin alan hangi işe girebileceğini, sağlığın hangi işi sürdürebileceğini belirliyor; tutuklanırsan maaş kesiliyor, kefalet de paradan çıkıyor. Para → hukuk → meslek → para: döngü kapanıyor, bir karar yıllar sonra seni buluyor.</figcaption>
       </figure>
+    </div>
+  </section>
+
+  <section id="derinlik">
+    <div class="sarmal">
+      <h2 class="baslik">Yüzeyin altında</h2>
+      <p class="alt-baslik">
+        Ekranda birkaç düğme var. Altında her yıl sırayla işleyen motorlar çalışıyor. Aşağıdakilerin hepsi oyunun içinde, bugün çalışır durumda.
+      </p>
+      <ul class="duz">
+        <li><b>Piyasa rejimi</b> <span>— Her varlık ayrı zar atmıyor. Yılın bir rejimi var — durgun, normal, güçlü, kriz — ve iki gizli parametresi: enflasyon baskısı ile piyasa güveni. Bunlardan risk iştahı ve korunma talebi doğuyor; hisse ile fon birincisine, altın ile döviz ikincisine kendi ağırlığıyla tepki veriyor. Kriz yılında hisse düşerken altın portföyü tutabiliyor, ama her kriz aynı sonucu vermiyor.</span></li>
+        <li><b>Kurgusal şirketler</b> <span>— On sektörde 12 şirketin gizli göstergeleri yıldan yıla yürüyor. İyi şirket yıllarca iyi kalabiliyor, kötüsü toparlanabiliyor; yönetim kalitesi yavaş değişiyor ve kötü haberi yumuşatıyor. Şirket haberleri rastgele manşet değil, bu durumdan doğuyor.</span></li>
+        <li><b>Kendi işletmen</b> <span>— 14 işletme türü, üç ölçek. Fiyat, personel, bakım, reklam ve itibar ayrı ayrı yönetiliyor; talep piyasa ortalamasına göre fiyat esnekliğiyle hesaplanıyor. 102 işletme olayı var: denetim, afet, personel sorunu, tutan reklam.</span></li>
+        <li><b>Konut ve kira</b> <span>— Kira katalog değerinden değil, şehrin katsayısından ve evin durumundan hesaplanıyor. Kiracının mesleği, ödeme geçmişi ve sözleşmesi var; depozito, boşluk dönemi, çıkış ve bakım defteri tutuluyor. İstanbul'daki daire ile Amasya'daki daire aynı kirayı getirmiyor.</span></li>
+        <li><b>Banka ve borç</b> <span>— İki banka, farklı faiz ve farklı onay sıkılığı. Başvuru gerçekten değerlendiriliyor, karar zar atışı değil. Taksit ödenemezse borç faiziyle büyüyor; cüzdan eksiye düşmüyor, borç birikiyor.</span></li>
+        <li><b>Hukuk</b> <span>— Sekiz kategoride 11 suç türü, üç kademe avukat. Soruşturma, kefalet, duruşma, cezaevi ve denetim dönemi ayrı ayrı işliyor. Tutuklulukta maaş yatmıyor ve kıdem donuyor — ama iş bitmiyor, seni bekliyor.</span></li>
+        <li><b>Sağlık</b> <span>— Altı kronik hastalık, sekiz sağlık krizi, altı vücut sistemi için check-up raporu. Beş değerin her birinin kendi yaşlanma eğrisi var; spor, berber, kitap ve kurs bu düşüşü ölçülebilir biçimde yavaşlatıyor. Kritik sağlıkta yaş almak kilitleniyor: önce karar vermen gerekiyor.</span></li>
+        <li><b>Aile ve kuşaklar</b> <span>— Üvey ve yarım kardeş, kayın aile, torun, soy bağı. Boşanmada evlilik içinde satın alınarak edinilen mal paylaşılıyor; evlilikten önceki, miras ve hediye kişisel mal kalıyor. Velayet, nafaka, yaşlı bakımı ve miras ayrı kurallar. Kuşak bittiğinde oyun çocuğunla devam ediyor.</span></li>
+        <li><b>Kariyer</b> <span>— 55 meslek, 167 soruluk mülakat havuzu. Ustalık ve itibar yıllarla birikiyor; yıllarca sürdürdüğün hobi mülakatta ikinci şans ve işe başlarken ustalık yılı getiriyor. Hastalık raporunun ilk iki günü ödenmiyor, uzun rapor işvereni rahatsız ediyor.</span></li>
+        <li><b>Hile kapıları kapalı</b> <span>— Piyasa yaş başına bir kez ilerliyor ve endeks kayda yazılıyor: ekranı kapatıp açarak, al-sat yaparak ya da eski kaydı yükleyerek fiyat yeniden çevrilemiyor. Aynı yıl aynı eylemi tekrarlayıp ödül toplamak da kapalı; davet edilen kişinin reddi yıl içinde sabit kalıyor.</span></li>
+      </ul>
+      <div class="sayilar" style="margin-top:22px">
+        <div><b>55</b><small>meslek</small></div>
+        <div><b>167</b><small>mülakat sorusu</small></div>
+        <div><b>20</b><small>üniversite programı</small></div>
+        <div><b>14</b><small>işletme türü</small></div>
+        <div><b>102</b><small>işletme olayı</small></div>
+        <div><b>12</b><small>kurgusal şirket</small></div>
+        <div><b>22</b><small>şehir</small></div>
+        <div><b>79</b><small>eşya türü</small></div>
+        <div><b>57</b><small>mağaza ürünü</small></div>
+        <div><b>11</b><small>suç türü</small></div>
+        <div><b>33</b><small>hediye</small></div>
+        <div><b>461</b><small>olay</small></div>
+      </div>
     </div>
   </section>
 
