@@ -175,6 +175,12 @@ void main() {
       // (D-050).
       await answerPendingCrisis(tester, controller);
       await answerPendingNotices(tester, controller);
+      // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111). Bu adım
+      // eksikti: lise alan penceresi açılınca "Yaş Al" hiçbir şey
+      // yapmıyor, döngü 14 yaşında boşa dönüyor ve hayat hiç romantik
+      // yaşa gelmiyordu. Hata mesajı ise "sevgili edinilemedi" diyerek
+      // oyunu suçluyordu.
+      await resolveEducationSheets(tester, controller);
       while (controller.state!.hasPendingEvent) {
         if (controller.state!.deceased) return;
         await answerPendingCrisis(tester, controller);
@@ -193,8 +199,23 @@ void main() {
       }
       if (done()) return;
       if (controller.state!.deceased) return;
+      final int oncekiYas = controller.state!.player.age;
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
+      // Yaş ilerlemediyse ve ekranda bekleyen bir pencere de yoksa, yaş
+      // almayı kilitleyen yeni bir kapı eklenmiş demektir. Sessizce
+      // dönmek testi yanıltıyor: asıl engel yerine "hedefe ulaşılamadı"
+      // yazıyor. Burada doğrudan söylenir.
+      if (controller.state!.player.age == oncekiYas &&
+          !controller.state!.hasPendingEvent &&
+          !controller.state!.hasPendingCrisis &&
+          !controller.state!.deceased &&
+          !controller.needsEducationChoice) {
+        fail('Yaş ilerlemedi ve ekranda bekleyen pencere yok '
+            '(yaş $oncekiYas). "Yaş Al" düğmesini kilitleyen yeni bir '
+            'kapı eklenmiş olabilir; bu yardımcının da onu kapatması '
+            'gerekiyor.');
+      }
     }
   }
 
