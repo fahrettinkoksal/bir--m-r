@@ -520,38 +520,39 @@ figure.sema figcaption {
   }
 }
 
-/* ---- Afiş: dönen ekranlar ----
-   Sitede hiç hareket yoktu. Üç telefon yan yana duruyor ve her biri
-   oyunun kendi ekranlarını farklı sırada geçiriyor; altındaki satır
-   onlarla birlikte değişiyor. JavaScript yok: beş kare, beş satır,
-   beş nokta aynı 20 saniyelik döngüde dörder saniye arayla açılıyor.
-   `prefers-reduced-motion` açıksa hareket tamamen duruyor. */
+/* ---- Afiş: oynanıyormuş gibi ----
+   Yatay bir şerit: solda telefon, sağda o karenin satırı, altında
+   noktalar ve her tur başında basılan bir "Yaş Al" düğmesi.
+
+   Geçiş kuralı önemli: çıkan kare, giren kare **tamamen gelene kadar**
+   duruyor. İlk sürümde ikisi aynı anda bitip başlıyordu ve her dört
+   saniyede bir afiş 0,4 saniye boş kalıyordu.
+
+   JavaScript yok; beş kare, beş satır, beş nokta aynı 20 saniyelik
+   döngüde dörder saniye arayla açılıyor. `prefers-reduced-motion`
+   açıksa hareket tamamen duruyor. */
 
 .afis {
-  margin: 30px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 28px 0 6px;
   background: var(--kart);
   border: var(--kalinlik) solid var(--kontur);
   border-radius: var(--yaricap-buyuk);
   box-shadow: 0 var(--golge) 0 var(--kontur);
-  padding: 22px 20px 18px;
-  text-align: center;
-}
-
-.afis-telefonlar {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
+  padding: 18px 22px;
 }
 
 .afis-telefon {
   position: relative;
-  width: 182px;
-  height: 286px;
+  flex: 0 0 150px;
+  width: 150px;
+  height: 196px;
   border: var(--kalinlik) solid var(--kontur);
   border-radius: 16px;
   overflow: hidden;
   background: var(--kagit);
-  flex: 0 0 auto;
 }
 
 .afis-kare {
@@ -565,27 +566,33 @@ figure.sema figcaption {
   animation: afis-kare 20s linear infinite;
 }
 
+/* Çıkan kare 22%'ye kadar duruyor; giren kare 20-23 arasında üstüne
+   biniyor. Böylece arada boş kare kalmıyor. */
 @keyframes afis-kare {
   0%   { opacity: 0; }
-  2%   { opacity: 1; }
-  18%  { opacity: 1; }
-  20%  { opacity: 0; }
+  3%   { opacity: 1; }
+  22%  { opacity: 1; }
+  25%  { opacity: 0; }
   100% { opacity: 0; }
+}
+
+.afis-govde {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .afis-yazi {
   position: relative;
-  min-height: 2.6em;
-  margin-top: 18px;
+  min-height: 3.2em;
 }
 
 .afis-satir {
   position: absolute;
   inset: 0;
   margin: 0;
-  font-size: clamp(1.1rem, 2.6vw, 1.45rem);
+  font-size: clamp(1.15rem, 2.7vw, 1.6rem);
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.22;
   letter-spacing: -0.01em;
   opacity: 0;
   animation: afis-satir 20s linear infinite;
@@ -594,17 +601,20 @@ figure.sema figcaption {
 @keyframes afis-satir {
   0%   { opacity: 0; transform: translateY(9px); }
   3%   { opacity: 1; transform: translateY(0); }
-  18%  { opacity: 1; transform: translateY(0); }
-  20%  { opacity: 0; transform: translateY(-9px); }
+  19%  { opacity: 1; transform: translateY(0); }
+  22%  { opacity: 0; transform: translateY(-9px); }
   100% { opacity: 0; transform: translateY(-9px); }
 }
 
-.afis-noktalar {
+.afis-alt {
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 6px;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
 }
+
+.afis-noktalar { display: flex; gap: 8px; }
 
 .afis-nokta {
   width: 10px;
@@ -617,10 +627,31 @@ figure.sema figcaption {
 
 @keyframes afis-nokta {
   0%   { background: var(--kagit-koyu); }
-  2%   { background: var(--kirmizi); }
-  18%  { background: var(--kirmizi); }
-  20%  { background: var(--kagit-koyu); }
+  3%   { background: var(--kirmizi); }
+  22%  { background: var(--kirmizi); }
+  25%  { background: var(--kagit-koyu); }
   100% { background: var(--kagit-koyu); }
+}
+
+/* Her tur başında basılan düğme: oyunu birinin oynadığı hissi buradan
+   geliyor. Tıklanabilir değil, afişin parçası. */
+.afis-dugme {
+  display: inline-block;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: var(--kirmizi);
+  border: 2px solid var(--kontur);
+  border-radius: 999px;
+  padding: 4px 16px;
+  box-shadow: 0 3px 0 var(--kontur);
+  animation: afis-bas 4s linear infinite;
+}
+
+@keyframes afis-bas {
+  0%, 82%   { transform: translateY(0); box-shadow: 0 3px 0 var(--kontur); }
+  90%       { transform: translateY(3px); box-shadow: 0 0 0 var(--kontur); }
+  97%, 100% { transform: translateY(0); box-shadow: 0 3px 0 var(--kontur); }
 }
 
 .afis-kare:nth-child(1), .afis-satir:nth-child(1), .afis-nokta:nth-child(1) { animation-delay: 0s; }
@@ -629,19 +660,14 @@ figure.sema figcaption {
 .afis-kare:nth-child(4), .afis-satir:nth-child(4), .afis-nokta:nth-child(4) { animation-delay: 12s; }
 .afis-kare:nth-child(5), .afis-satir:nth-child(5), .afis-nokta:nth-child(5) { animation-delay: 16s; }
 
-@media (max-width: 620px) {
-  .afis { padding: 16px 14px 14px; }
-  .afis-telefon:nth-child(n+3) { display: none; }
-  .afis-telefon { width: 46%; max-width: 170px; height: 232px; }
-}
-
-@media (max-width: 400px) {
-  .afis-telefon:nth-child(n+2) { display: none; }
-  .afis-telefon { width: 160px; }
+@media (max-width: 560px) {
+  .afis { gap: 16px; padding: 14px 16px; }
+  .afis-telefon { flex-basis: 112px; width: 112px; height: 168px; }
+  .afis-yazi { min-height: 4.4em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .afis-kare, .afis-satir, .afis-nokta { animation: none; }
+  .afis-kare, .afis-satir, .afis-nokta, .afis-dugme { animation: none; }
   .afis-kare:nth-child(1), .afis-satir:nth-child(1) { opacity: 1; }
   .afis-nokta:nth-child(1) { background: var(--kirmizi); }
 }
