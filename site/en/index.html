@@ -91,25 +91,6 @@
       </p>
     </div>
 
-    <div class="gunluk">
-      <h2>Life log — lines from the game</h2>
-      <p class="yas">Age 34</p>
-      <ul>
-        <li>You had a son named Kemal. The birth cost <span class="para">₺65,000</span>.</li>
-        <li>You failed the driving test: 0 of 3 correct. You needed at least 2.</li>
-        <li>You completed a year as a journeyman mechanic; <span class="para">₺267,166</span> went into your wallet.</li>
-      </ul>
-      <p class="yas">Age 50</p>
-      <ul>
-        <li>Another year passed in pre-trial detention. The case is still open.</li>
-        <li>Your job at the garage is still yours, but you're inside: no salary this year, and no seniority either.</li>
-        <li>Your stepmother Esra Erdoğan died peacefully in her sleep.</li>
-      </ul>
-      <footer>
-        These lines are taken from the game's own output — not hand-written
-        samples, but the log of two years that were actually played.
-      </footer>
-    </div>
 
     <p class="durum-notu">
       The game isn't in any store yet; it is shared with communities as an
@@ -117,6 +98,86 @@
       number below was measured from today's repository.
     </p>
   </div>
+
+  <section id="play" class="oyna">
+    <div class="sarmal">
+      <h2 class="baslik">A whole life, in your browser</h2>
+      <p class="alt-baslik">
+        The game's own engine played the life below: a test bot made the
+        decisions, the game produced the events and the text. Not one line
+        was written for this site. The full log runs to 1,034 lines; at
+        most three per year made it here, 230 in total. Press
+        <b>Age Up</b> and walk through 79 years, one year at a time.
+        (The game is in Turkish; these lines are translated from its own
+        output.)
+      </p>
+
+      <div class="hayat" data-hayat data-goster>
+        <div class="hayat-ust">
+          <div class="hayat-kim">
+            <p class="hayat-isim">İlhan Özkan</p>
+            <p class="hayat-nere">
+              <span class="hayat-cip">Van</span>
+              <span class="hayat-cip" data-okul>Not in school yet</span>
+              <span class="hayat-cip hayat-cip-is" data-is hidden></span>
+            </p>
+          </div>
+          <p class="hayat-yas"><b data-yas>0</b><span>years old</span></p>
+        </div>
+
+        <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
+
+        <div class="hayat-govde">
+          <div class="hayat-statlar">
+          <div class="hayat-stat">
+            <span>Happiness</span>
+            <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
+            <em data-deger="0">77</em>
+          </div>
+          <div class="hayat-stat">
+            <span>Health</span>
+            <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
+            <em data-deger="1">74</em>
+          </div>
+          <div class="hayat-stat">
+            <span>Intelligence</span>
+            <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
+            <em data-deger="2">56</em>
+          </div>
+          <div class="hayat-stat">
+            <span>Charisma</span>
+            <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
+            <em data-deger="3">53</em>
+          </div>
+          <div class="hayat-stat">
+            <span>Looks</span>
+            <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
+            <em data-deger="4">36</em>
+          </div>
+            <p class="hayat-para">Wallet <b data-cuzdan>₺0</b></p>
+          </div>
+
+          <div class="hayat-defter" data-defter tabindex="0" role="log">
+            <div class="hayat-yil">
+              <p class="hayat-yil-bas">Age 0</p>
+              <ul>
+              <li class="onemli">You were born in the city of Van. You were named İlhan Özkan.</li>
+              <li>Your mother Sevgi and your father Onur live together.</li>
+              <li>You are an only child.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="hayat-kumanda">
+          <button type="button" class="hayat-dugme" data-yasal>Age Up</button>
+          <button type="button" class="hayat-yan" data-oto aria-pressed="false">Play automatically</button>
+          <button type="button" class="hayat-yan" data-bastan>Restart</button>
+          <span class="hayat-sayac"><b data-sira>1</b> / 79 years</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section id="game">
     <div class="sarmal">
@@ -500,6 +561,7 @@
   </div>
 </footer>
 
+<script src="/assets/life.js"></script>
 <script>
 // Afiş: dört saniyede bir kendi ilerler, Yaş Al'a basılınca hemen ilerler
 // ve sayaç sıfırlanır. Betik çalışmazsa ilk kare sabit kalır.
@@ -606,6 +668,189 @@
       if (!hedefler[k].classList.contains('gorundu')) goster(hedefler[k]);
     }
   }, 2500);
+})();
+
+// Oynanabilir ömür: oyunun kendi tur kaydını yıl yıl gösterir. Yıl 0
+// HTML'de gömülü olduğu için betik çalışmazsa kart okunur kalır.
+(function () {
+  var veri = window.BIR_OMUR_HAYAT;
+  var kart = document.querySelector('[data-hayat]');
+  if (!veri || !kart || !veri.yillar || veri.yillar.length < 2) return;
+
+  var yillar = veri.yillar;
+  var sonIndeks = yillar.length - 1;
+  var t = veri.t || {};
+  var yerel = t.yerel || 'tr-TR';
+  var defter = kart.querySelector('[data-defter]');
+  var elYas = kart.querySelector('[data-yas]');
+  var elOkul = kart.querySelector('[data-okul]');
+  var elIs = kart.querySelector('[data-is]');
+  var elPara = kart.querySelector('[data-cuzdan]');
+  var elCizgi = kart.querySelector('[data-cizgi]');
+  var elSira = kart.querySelector('[data-sira]');
+  var dYas = kart.querySelector('[data-yasal]');
+  var dOto = kart.querySelector('[data-oto]');
+  var dBastan = kart.querySelector('[data-bastan]');
+  var raylar = kart.querySelectorAll('[data-stat]');
+  var degerler = kart.querySelectorAll('[data-deger]');
+  if (!defter || !dYas || !dOto || !dBastan) return;
+
+  var ilkDefter = defter.innerHTML;
+  var azHareket = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var simdi = 0;
+  var sayac = null;
+  var kendiBasladi = false;
+
+  function sayi(n) {
+    try { return n.toLocaleString(yerel); } catch (e) { return String(n); }
+  }
+
+  // Üst bilgi ve statlar: o yılın gerçek değerleri.
+  function basliklar(i) {
+    var y = yillar[i];
+    elYas.textContent = y.y;
+    elOkul.textContent = y.o;
+    if (y.i) {
+      elIs.textContent = y.i;
+      elIs.hidden = false;
+    } else {
+      elIs.textContent = '';
+      elIs.hidden = true;
+    }
+    elPara.textContent = (t.para || '{n} ₺').replace('{n}', sayi(y.p));
+    elCizgi.style.width = Math.max(1, Math.round((i / sonIndeks) * 100)) + '%';
+    elSira.textContent = i + 1;
+    for (var k = 0; k < raylar.length; k++) {
+      if (y.s[k] === undefined) continue;
+      raylar[k].style.width = y.s[k] + '%';
+      if (degerler[k]) degerler[k].textContent = y.s[k];
+    }
+  }
+
+  function yilBlogu(y) {
+    var kutu = document.createElement('div');
+    kutu.className = 'hayat-yil yeni';
+    var bas = document.createElement('p');
+    bas.className = 'hayat-yil-bas';
+    bas.textContent = (t.yilBas || '{yas}').replace('{yas}', y.y);
+    kutu.appendChild(bas);
+    var liste = document.createElement('ul');
+    for (var i = 0; i < y.g.length; i++) {
+      var satir = document.createElement('li');
+      satir.textContent = y.g[i][0];
+      if (y.g[i][1]) satir.className = 'onemli';
+      if (!azHareket) satir.style.animationDelay = (i * 0.12) + 's';
+      liste.appendChild(satir);
+    }
+    kutu.appendChild(liste);
+    return kutu;
+  }
+
+  function ekle(i) {
+    var eski = defter.querySelector('.hayat-yil.yeni');
+    if (eski) eski.classList.remove('yeni');
+    defter.appendChild(yilBlogu(yillar[i]));
+    // Günlük uzadıkça baştan kırp: sayfa ağırlaşmasın.
+    while (defter.children.length > 36) defter.removeChild(defter.firstChild);
+    defter.scrollTop = defter.scrollHeight;
+  }
+
+  function dur() {
+    if (sayac) {
+      window.clearInterval(sayac);
+      sayac = null;
+    }
+    dOto.setAttribute('aria-pressed', 'false');
+    dOto.textContent = t.oto || 'Otomatik oynat';
+  }
+
+  function basla() {
+    if (sayac || simdi >= sonIndeks) return;
+    sayac = window.setInterval(ilerle, 1500);
+    dOto.setAttribute('aria-pressed', 'true');
+    dOto.textContent = t.dur || 'Duraklat';
+  }
+
+  function bitir() {
+    dur();
+    dYas.disabled = true;
+    if (defter.querySelector('.hayat-son')) return;
+    var kutu = document.createElement('div');
+    kutu.className = 'hayat-son';
+    var bas = document.createElement('p');
+    bas.className = 'hayat-son-bas';
+    bas.textContent = t.sonBas || '';
+    var ozet = document.createElement('p');
+    ozet.textContent = (t.sonOzet || '')
+      .replace('{yil}', veri.olum)
+      .replace('{cocuk}', veri.cocuk)
+      .replace('{torun}', veri.torun)
+      .replace('{unvan}', veri.unvan);
+    var not = document.createElement('p');
+    not.className = 'hayat-son-not';
+    not.textContent = (t.sonNot || '')
+      .replace('{tam}', sayi(veri.tamSatir))
+      .replace('{satir}', veri.satir);
+    kutu.appendChild(bas);
+    kutu.appendChild(ozet);
+    kutu.appendChild(not);
+    defter.appendChild(kutu);
+    defter.scrollTop = defter.scrollHeight;
+  }
+
+  function ilerle() {
+    if (simdi >= sonIndeks) {
+      bitir();
+      return;
+    }
+    simdi++;
+    basliklar(simdi);
+    ekle(simdi);
+    if (simdi >= sonIndeks) bitir();
+  }
+
+  dYas.addEventListener('click', function () {
+    dur();
+    ilerle();
+  });
+
+  dOto.addEventListener('click', function () {
+    if (sayac) {
+      dur();
+    } else if (simdi >= sonIndeks) {
+      bastanAl();
+      basla();
+    } else {
+      basla();
+    }
+  });
+
+  function bastanAl() {
+    dur();
+    simdi = 0;
+    dYas.disabled = false;
+    defter.innerHTML = ilkDefter;
+    basliklar(0);
+    defter.scrollTop = 0;
+  }
+
+  dBastan.addEventListener('click', bastanAl);
+
+  // Kart ekrana girince kendi oynamaya başlar; hareketi azaltan ayar
+  // açıksa beklemez, kullanıcı düğmeye basar.
+  if (!azHareket && 'IntersectionObserver' in window) {
+    var gozcu = new IntersectionObserver(function (girisler) {
+      for (var i = 0; i < girisler.length; i++) {
+        if (girisler[i].isIntersecting && !kendiBasladi) {
+          kendiBasladi = true;
+          basla();
+          gozcu.disconnect();
+        }
+      }
+    }, { threshold: 0.35 });
+    gozcu.observe(kart);
+  }
 })();
 </script>
 </body>

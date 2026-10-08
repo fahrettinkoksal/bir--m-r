@@ -185,68 +185,328 @@ h1 {
 
 /* ---- Günlük kartı (oyundaki hayat günlüğü gibi) ---- */
 
-.gunluk {
-  margin: 40px 0 0;
+/* ---- Oynanabilir ömür (#oyna) ----
+   Oyunun "Hayat" ekranının site karşılığı: üstte kim ve kaç yaşında,
+   solda beş stat, sağda günlük. Yıl 0 HTML'de gömülü; betik çalışmazsa
+   kart olduğu gibi okunur kalır. */
+
+/* Kahraman bloğunun hemen altında: üstten biraz daha yakın dursun. */
+.oyna { padding-top: 40px; }
+
+.hayat {
+  margin: 26px 0 0;
   background: var(--kart);
   border: var(--kalinlik) solid var(--kontur);
   border-radius: var(--yaricap-buyuk);
-  padding: 20px 20px 18px;
   box-shadow: 0 var(--golge) 0 var(--kontur);
+  padding: 18px 18px 16px;
 }
 
-.gunluk h2 {
-  font-size: 1.05rem;
-  color: var(--murekkep);
-  margin: 0 0 2px;
+.hayat-ust {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Esnek kutu çocukları: uzun etiketler taşmasın, kırpılmadan sarsın. */
+.hayat-kim { min-width: 0; flex: 1 1 220px; }
+
+/* Sol sütun da günlük gibi bir panel: iki sütun aynı ağırlıkta dursun. */
+.hayat-statlar {
+  min-width: 0;
+  background: var(--kagit);
+  border: 2px solid var(--kontur);
+  border-radius: var(--yaricap);
+  padding: 14px 14px 12px;
+}
+
+.hayat-isim {
+  margin: 0;
   font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
 }
 
-.gunluk .yas {
-  display: inline-block;
-  font-size: 0.8rem;
-  color: var(--murekkep);
-  background: var(--sari);
+.hayat-nere {
+  margin: 7px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hayat-cip {
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--kagit-koyu);
   border: 2px solid var(--kontur);
   border-radius: 999px;
-  padding: 1px 12px;
-  font-weight: 700;
-  margin: 18px 0 8px;
+  padding: 1px 11px;
 }
 
-.gunluk .yas:first-of-type { margin-top: 12px; }
+.hayat-cip-is { background: var(--turkuaz-yumusak); }
 
-.gunluk ul {
+.hayat-yas {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--sari);
+  color: #2a2233;
+  border: 2px solid var(--kontur);
+  border-radius: var(--yaricap);
+  box-shadow: 0 3px 0 var(--kontur);
+  padding: 3px 15px 5px;
+}
+
+.hayat-yas b {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hayat-yas span { font-size: 0.8rem; font-weight: 700; }
+
+.hayat-omur {
+  margin: 15px 0 0;
+  height: 12px;
+  background: var(--kagit-koyu);
+  border: 2px solid var(--kontur);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hayat-omur i {
+  display: block;
+  height: 100%;
+  background: var(--kirmizi);
+  transition: width 0.5s ease;
+}
+
+.hayat-govde {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 250px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.hayat-stat {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 9px;
+}
+
+.hayat-ray {
+  display: block;
+  height: 12px;
+  background: var(--kagit-koyu);
+  border: 2px solid var(--kontur);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hayat-ray b {
+  display: block;
+  height: 100%;
+  background: var(--turkuaz);
+  transition: width 0.45s ease;
+}
+
+.hayat-stat:nth-child(1) .hayat-ray b { background: var(--sari); }
+.hayat-stat:nth-child(2) .hayat-ray b { background: var(--yesil); }
+.hayat-stat:nth-child(3) .hayat-ray b { background: var(--turkuaz); }
+.hayat-stat:nth-child(4) .hayat-ray b { background: var(--mor); }
+.hayat-stat:nth-child(5) .hayat-ray b { background: var(--kirmizi); }
+
+.hayat-stat em {
+  font-style: normal;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.hayat-para {
+  margin: 14px 0 0;
+  font-size: 0.86rem;
+  color: var(--soluk);
+  font-weight: 700;
+}
+
+.hayat-para b {
+  color: var(--turkuaz-koyu);
+  font-variant-numeric: tabular-nums;
+}
+
+.hayat-defter {
+  height: 306px;
+  overflow-y: auto;
+  background: var(--kagit);
+  border: 2px solid var(--kontur);
+  border-radius: var(--yaricap);
+  padding: 12px 14px 14px;
+}
+
+.hayat-defter:focus-visible {
+  outline: 3px solid var(--turkuaz-koyu);
+  outline-offset: 2px;
+}
+
+.hayat-yil-bas {
+  display: inline-block;
+  font-size: 0.76rem;
+  background: var(--sari);
+  color: #2a2233;
+  border: 2px solid var(--kontur);
+  border-radius: 999px;
+  padding: 0 11px;
+  font-weight: 800;
+  margin: 12px 0 2px;
+}
+
+.hayat-yil ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.gunluk li {
-  padding: 8px 0 8px 22px;
+.hayat-yil li {
+  padding: 6px 0 6px 20px;
   position: relative;
-  font-size: 0.97rem;
+  font-size: 0.93rem;
+  line-height: 1.5;
 }
 
-.gunluk li + li { border-top: 2px dotted var(--kagit-koyu); }
+.hayat-yil li + li { border-top: 2px dotted var(--kagit-koyu); }
 
-.gunluk li::before {
+.hayat-yil li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 16px;
-  width: 10px;
-  height: 10px;
+  top: 13px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--mor);
   border: 2px solid var(--kontur);
 }
 
-.gunluk .para { color: var(--turkuaz-koyu); font-weight: 600; }
+.hayat-yil li.onemli { font-weight: 700; }
+.hayat-yil li.onemli::before { background: var(--kirmizi); }
 
-.gunluk footer {
-  margin-top: 16px;
-  font-size: 0.85rem;
+/* Yalnizca yeni gelen yilin satirlari kayarak girer. */
+.hayat-yil.yeni li { animation: satir-gir 0.4s ease both; }
+
+@keyframes satir-gir {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.hayat-son {
+  margin: 14px 0 2px;
+  background: var(--turkuaz-yumusak);
+  border: 2px solid var(--kontur);
+  border-radius: var(--yaricap);
+  padding: 12px 14px;
+}
+
+.hayat-son p { margin: 0; }
+
+.hayat-son-bas {
+  font-weight: 800;
+  font-size: 1.02rem;
+}
+
+.hayat-son-not {
+  font-size: 0.82rem;
   color: var(--soluk);
+  margin-top: 4px;
+}
+
+.hayat-kumanda {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hayat-dugme,
+.hayat-yan {
+  font: inherit;
+  font-weight: 800;
+  border: 2px solid var(--kontur);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--kontur);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.hayat-dugme {
+  font-size: 1rem;
+  color: #ffffff;
+  background: var(--kirmizi);
+  padding: 7px 26px;
+}
+
+.hayat-dugme:hover { background: var(--kirmizi-koyu); }
+
+.hayat-yan {
+  font-size: 0.85rem;
+  color: var(--murekkep);
+  background: var(--kart);
+  padding: 6px 16px;
+}
+
+.hayat-yan:hover { background: var(--kagit-koyu); }
+
+.hayat-yan[aria-pressed="true"] {
+  background: var(--turkuaz);
+  color: #2a2233;
+}
+
+.hayat-dugme:active,
+.hayat-yan:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--kontur);
+}
+
+.hayat-dugme:focus-visible,
+.hayat-yan:focus-visible {
+  outline: 3px solid var(--turkuaz-koyu);
+  outline-offset: 2px;
+}
+
+.hayat-dugme[disabled] {
+  background: var(--kagit-koyu);
+  color: var(--soluk);
+  cursor: default;
+  box-shadow: 0 3px 0 var(--kontur);
+}
+
+.hayat-sayac {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--soluk);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .hayat-govde { grid-template-columns: minmax(0, 1fr); }
+  .hayat-defter { height: 272px; }
+  .hayat-sayac { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hayat-omur i,
+  .hayat-ray b { transition: none; }
+  .hayat-yil.yeni li { animation: none; }
 }
 
 /* ---- Bölümler ---- */
@@ -357,7 +617,7 @@ ul.duz span { color: var(--soluk); }
 
 .iletisim a {
   display: inline-block;
-  color: var(--murekkep);
+  color: #2a2233;
   background: var(--sari);
   font-weight: 700;
   text-decoration: none;

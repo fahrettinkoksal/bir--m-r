@@ -15,6 +15,10 @@ Derleme adımı yok, bağımlılık yok. Dosyalar olduğu gibi sunucuya kopyalan
    public_html/sitemap.xml
    public_html/assets/style.css
    public_html/assets/favicon.svg
+   public_html/assets/hayat.js
+   public_html/assets/life.js
+   public_html/assets/ekran-*.webp
+   public_html/assets/fonts/*.woff2
    public_html/en/index.html
    ```
 
@@ -68,8 +72,21 @@ Oyunun teması değişirse buradaki değerler de güncellenmeli.
   Ölçüm betiği: katalog dosyalarındaki girdileri saymak; olay sayısı
   `data/event_pool*.dart` içindeki `GameEvent(` sayısı. Depo büyüyünce bu
   sayılar bayatlar — güncellemeden önce yeniden ölç, tahminle yazma.
-- "Hayat günlüğü" bölümündeki satırlar oyunun gerçek çıktısından alındı.
-  Değiştireceksen yine oyundan al; elle örnek cümle uydurma.
+- **"Bir ömür, tarayıcıda" bölümü** (`#oyna`, İngilizcede `#play`) oyunun
+  kendi tur kaydını oynatıyor. Veri `assets/hayat.js` (Türkçe) ve
+  `assets/life.js` (İngilizce) dosyalarında; ikisi de elle yazılmadı.
+  Kaynak: `app/test/support/player_bot.dart` içindeki
+  `playBotLife(archetype: PlayerArchetype.family, seed: 777)`. Geçici bir
+  test dosyası her yılın `onPreAge` anında yaş, şehir, okul, iş, cüzdan ve
+  beş statı, ölüm yılını da `onYear` ile alıp JSON'a döktü; sonra yılda en
+  çok üç satır seçildi (muhasebe satırları elendi, aynı kalıp hayat boyunca
+  en çok üç kez, yıl içinde bir kez). 150 karakteri geçen tek satır ilk
+  cümlelerine kısaltıldı. Tam günlük 1.034 satır, seçilen 230.
+  Yenilemek istersen aynı yolu izle: satır **uydurma**, oyundan al.
+  İngilizce dosya aynı hayatın çevirisi; sayılar ve sıralama değişmiyor.
+- Kartın ilk yılı (0 yaş) HTML'e gömülü: betik çalışmazsa bölüm boş
+  görünmesin. Yılda bir satır bile değiştirsen bu gömülü blok ile veri
+  dosyası birbirini tutmalı.
 - Ekran görüntüleri (`assets/ekran-*.webp`) ve paylaşım görseli
   (`assets/og-biromur.png`) oyunun **kendi arayüzünden** üretildi, montaj
   değil. Yenilemek için:
