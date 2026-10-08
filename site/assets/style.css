@@ -330,3 +330,90 @@ footer.alt .sarmal {
 }
 
 footer.alt a { color: var(--murekkep-soluk); }
+
+/* ---- Şemalar (inline SVG) ----
+   Renkler sayfanın token'larından gelir; sunum niteliği olarak var()
+   çalışmadığı için SVG öğelerine sınıf veriliyor ve stil burada. Böylece
+   karanlık modda da okunur kalıyor. */
+
+figure.sema {
+  margin: 0 0 30px;
+  background: var(--kagit-kart);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--yuvarlak);
+  padding: 20px 18px 14px;
+}
+
+figure.sema + .izgara { margin-top: 0; }
+
+figure.sema svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  color: var(--murekkep);
+}
+
+figure.sema figcaption {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cizgi);
+  font-size: 0.86rem;
+  color: var(--murekkep-soluk);
+}
+
+.s-kutu {
+  fill: var(--kagit);
+  stroke: var(--cizgi);
+  stroke-width: 1.5;
+}
+
+.s-kutu-vurgu {
+  fill: var(--nar-soluk);
+  stroke: var(--nar);
+  stroke-width: 1.5;
+}
+
+.s-ad {
+  fill: var(--murekkep);
+  font-size: 13px;
+  font-weight: 650;
+  font-family: inherit;
+}
+
+.s-ad-vurgu { fill: var(--nar); }
+
+.s-alt {
+  fill: var(--murekkep-soluk);
+  font-size: 10.5px;
+  font-family: inherit;
+}
+
+.s-ok {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.s-ok-donus {
+  fill: none;
+  stroke: var(--firuze);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.s-ok-bas { fill: currentColor; }
+
+.s-ok-bas-donus { fill: var(--firuze); }
+
+.s-etiket {
+  fill: var(--murekkep-soluk);
+  font-size: 10.5px;
+  font-family: inherit;
+}
+
+.s-etiket-donus {
+  fill: var(--firuze);
+  font-size: 10.5px;
+  font-family: inherit;
+}
