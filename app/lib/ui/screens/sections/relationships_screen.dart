@@ -14,6 +14,7 @@ import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
+import '../../widgets/pregnancy_notice.dart';
 import '../../widgets/section_scaffold.dart';
 import 'marriage_history_page.dart';
 import 'pets_page.dart';
@@ -359,6 +360,20 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
               }
               setState(() {});
             },
+          ),
+          const SizedBox(height: 14),
+        ],
+        // --- BEKLEYEN DOĞUM (Paket BK/1) ----------------------------
+        //
+        // Gebelik Paket 26'dan beri kayıtta ama ekranda yalnızca o
+        // kişinin kartında görünüyordu: ailenin ekranında yolda olan
+        // bebeğin izi yoktu (Q-202). Bekleyen bir doğum, bekleyen bir
+        // karar kadar görünür olmalı; o yüzden karar kartlarının yanında
+        // duruyor.
+        if (state.isExpecting) ...<Widget>[
+          PregnancyCard(
+            key: const Key('relationships_pregnancy_card'),
+            state: state,
           ),
           const SizedBox(height: 14),
         ],

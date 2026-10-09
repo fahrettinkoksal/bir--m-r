@@ -5,6 +5,7 @@ import '../../domain/models/game_state.dart';
 import '../../state/game_scope.dart';
 import '../widgets/effect_chips.dart';
 import '../widgets/life_log_view.dart';
+import '../widgets/pregnancy_notice.dart';
 import '../widgets/section_header.dart';
 
 /// Ana ekranın gövdesi: hayat günlüğü / olay akışı.
@@ -26,27 +27,43 @@ class LifeScreen extends StatelessWidget {
     // Biten yılın özeti günlüğün üstünde durur (D-096): oyuncu satırları
     // taramadan yılın nasıl geçtiğini görür.
     final YearSummary? ozet = state.lastYearSummary;
-    final int basliklar = ozet == null ? 1 : 2;
+
+    // Günlüğün üstündeki sabit bloklar. Eskiden indeks aritmetiğiyle
+    // sayılıyordu; bekleyen doğum kartı üçüncü blok olunca aritmetik
+    // okunmaz hâle geliyordu, bu yüzden liste hâline getirildi. Günlük
+    // blokları hâlâ tembel kurulur: burada yalnızca üç küçük widget var.
+    final List<Widget> ustBloklar = <Widget>[
+      // Bekleyen doğum en üstte (Paket BK/1): bir yıl süren, sonunda
+      // haneyi büyüten bir durum tek bir günlük satırına sığmıyor
+      // (Q-202).
+      if (state.isExpecting)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: PregnancyCard(
+            key: const Key('life_pregnancy_card'),
+            state: state,
+          ),
+        ),
+      if (ozet != null)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _YearSummaryCard(summary: ozet),
+        ),
+      const Padding(
+        padding: EdgeInsets.only(bottom: 10),
+        child: SectionHeader(
+          title: 'Hayat günlüğü',
+          subtitle: 'Başından geçenlerin kaydı',
+        ),
+      ),
+    ];
+    final int basliklar = ustBloklar.length;
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 20),
       itemCount: bloklar.length + basliklar + 1,
       itemBuilder: (BuildContext context, int index) {
-        if (ozet != null && index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _YearSummaryCard(summary: ozet),
-          );
-        }
-        if (index == basliklar - 1) {
-          return const Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: SectionHeader(
-              title: 'Hayat günlüğü',
-              subtitle: 'Başından geçenlerin kaydı',
-            ),
-          );
-        }
+        if (index < basliklar) return ustBloklar[index];
         if (index == bloklar.length + basliklar) {
           return Padding(
             padding: const EdgeInsets.only(top: 14),

@@ -14,6 +14,7 @@ import '../theme/bir_omur_theme.dart';
 import 'character_face.dart';
 import 'comic.dart';
 import 'kilim_divider.dart';
+import 'pregnancy_notice.dart';
 import 'settings_sheet.dart';
 import 'stat_bar.dart';
 
@@ -188,6 +189,12 @@ class CharacterHeader extends StatelessWidget {
       // çıkarmak bildirim spamı olurdu.
       if (CriticalHealth.bandFor(state).isLow)
         'sağlık ${CriticalHealth.bandFor(state).label}',
+      // Bekleyen doğum (Paket BK/1): gebelik bir yıl sürüyor ve
+      // sonunda hane bir kişi büyüyor; oyuncu bunu her yıl
+      // görebilmeli. Günlüğe düşen tek satır yıllar arasında
+      // kayboluyordu (Q-202).
+      if (PregnancyNotice.shortLabel(state) != null)
+        PregnancyNotice.shortLabel(state)!,
       if (state.careStatus != CareStatus.aileYaninda)
         trLower(state.careStatus.label),
       if (state.hardshipYears > 0) 'geçim sıkıntısı',
