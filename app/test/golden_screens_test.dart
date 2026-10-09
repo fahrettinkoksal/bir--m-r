@@ -40,6 +40,14 @@ import 'support/test_flow.dart';
 /// ```
 const String _kSwitch = 'BIR_OMUR_SCREENSHOTS';
 
+/// Tanıtım animasyonunun kareleri (`test/kare/`). Ayrı anahtar, çünkü 20
+/// kare basıyor ve ekran görüntüsü koşusunu uzatmasının anlamı yok:
+///
+/// ```
+/// BIR_OMUR_KARE=1 flutter test --update-goldens test/golden_screens_test.dart --name "kare dizisi"
+/// ```
+const String _kKareSwitch = 'BIR_OMUR_KARE';
+
 /// Ekran görüntüleri gerçek uygulamaya benzesin diye Flutter'ın kendi
 /// Roboto ve Material Icons dosyaları yüklenir. Aksi halde yazılar tek tip
 /// kalınlıkta, ikonlar ise boş kare olarak çıkıyordu ve tasarım
@@ -97,11 +105,12 @@ Future<void> _loadReadableFont() async {
 
 void main() {
   final bool enabled = Platform.environment[_kSwitch] == '1';
+  final bool kareEnabled = Platform.environment[_kKareSwitch] == '1';
 
   late GameController controller;
 
   setUpAll(() async {
-    if (enabled) await _loadReadableFont();
+    if (enabled || kareEnabled) await _loadReadableFont();
   });
 
   setUp(() {
@@ -616,4 +625,33 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 5));
     await shot(tester, '15_at_yarisi.png');
   }, skip: !enabled);
+
+  /// Tanıtım animasyonunun kaynağı: tek hayat yıl yıl oynanır ve her yılın
+  /// ana ekranı `test/kare/NN.png` olarak basılır. Kareler depoya girmez;
+  /// `site/assets/biromur-basin-kiti.zip` içindeki animasyon bunlardan
+  /// kuruluyor (yöntem `site/README.md` içinde).
+  testWidgets('kare dizisi', (WidgetTester tester) async {
+    await startLife(tester);
+    for (int adim = 0; adim <= 21; adim++) {
+      await answerPendingCrisis(tester, controller);
+      await answerPendingNotices(tester, controller);
+      await resolveEducationSheets(tester, controller);
+      while (controller.state!.hasPendingEvent) {
+        final ActiveEvent event = controller.state!.pendingEvent!;
+        await tester.tap(find.text(event.choices.first.label));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Devam'));
+        await tester.pumpAndSettle();
+      }
+      final String ad =
+          controller.state!.player.age.toString().padLeft(2, '0');
+      await expectLater(
+        find.byType(BirOmurApp),
+        matchesGoldenFile('kare/$ad.png'),
+      );
+      if (adim == 21 || controller.state!.deceased) break;
+      await tester.tap(find.byKey(const Key('age_up_button')));
+      await tester.pumpAndSettle();
+    }
+  }, skip: !kareEnabled, timeout: const Timeout(Duration(minutes: 10)));
 }

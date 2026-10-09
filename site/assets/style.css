@@ -34,14 +34,19 @@
   --kagit-koyu: #f3e3c8;
   --kart: #ffffff;
   --murekkep: #2a2233;
-  --soluk: #7a6e86;
+  /* Kâğıt zeminde 5,28 (eski #7a6e86 yalnızca 4,35 veriyordu). */
+  --soluk: #6d6178;
   --kontur: #2a2233;
 
   --kirmizi: #ff4d5b;
   --kirmizi-koyu: #d42a3c;
   --kirmizi-yumusak: #ffdcdf;
+  /* Beyaz yazı taşıyan kırmızı zemin. Oyunun kırmızısı (#ff4d5b) beyazla
+     yalnızca 3,25 veriyor; bu ton 5,0. Dekoratif kırmızı yine --kirmizi. */
+  --kirmizi-zemin: #d42a3c;
+  --kirmizi-zemin-koyu: #b31827;
   --turkuaz: #2fc4c9;
-  --turkuaz-koyu: #10999e;
+  --turkuaz-koyu: #0a7579;
   --turkuaz-yumusak: #cff3f4;
   --sari: #ffc93c;
   --yesil: #46c97a;
@@ -67,6 +72,10 @@
     --kontur: #0d0a14;
     --kirmizi-yumusak: #5b1c26;
     --turkuaz-yumusak: #134a4c;
+    /* Gece zemininde koyu vurgular sönüyor: #d42a3c kart üstünde 2,82,
+       #10999e de düşük. Parlak tonlar 4,34 ve 6,62 veriyor. */
+    --kirmizi-koyu: #ff4d5b;
+    --turkuaz-koyu: #2fc4c9;
   }
 }
 
@@ -148,7 +157,7 @@ body {
   display: inline-block;
   font-size: 0.85rem;
   color: #ffffff;
-  background: var(--kirmizi);
+  background: var(--kirmizi-zemin);
   border: 2px solid var(--kontur);
   box-shadow: 0 3px 0 var(--kontur);
   border-radius: 999px;
@@ -198,8 +207,65 @@ h1 {
    solda beş stat, sağda günlük. Yıl 0 HTML'de gömülü; betik çalışmazsa
    kart olduğu gibi okunur kalır. */
 
+/* Hayat sekmeleri: üç ayrı sonun tıklamadan görünmesi için kartın üstünde.
+   Betik yoksa seçim yapılamaz ama şerit yanıltmaz — ilk sekme işaretli
+   kalır ve kartta o hayat durur. */
+.hayat-sekmeler {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 26px 0 0;
+}
+
+.hayat-sekme {
+  font: inherit;
+  text-align: left;
+  color: var(--murekkep);
+  background: var(--kart);
+  border: 2px solid var(--kontur);
+  border-radius: var(--yaricap);
+  box-shadow: 0 3px 0 var(--kontur);
+  padding: 8px 16px 9px;
+  cursor: pointer;
+  flex: 1 1 180px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.hayat-sekme b {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.hayat-sekme span {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--soluk);
+}
+
+.hayat-sekme:hover { background: var(--kagit-koyu); }
+
+.hayat-sekme.etkin {
+  background: var(--kirmizi-zemin);
+  color: #ffffff;
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--kontur);
+}
+
+.hayat-sekme.etkin span { color: #ffffff; }
+
+.hayat-sekme:focus-visible {
+  outline: 3px solid var(--turkuaz-koyu);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hayat-sekme { transition: none; }
+}
+
 .hayat {
-  margin: 28px 0 0;
+  margin: 12px 0 0;
   background: var(--kart);
   border: var(--kalinlik) solid var(--kontur);
   border-radius: var(--yaricap-buyuk);
@@ -455,11 +521,11 @@ h1 {
 .hayat-dugme {
   font-size: 1rem;
   color: #ffffff;
-  background: var(--kirmizi);
+  background: var(--kirmizi-zemin);
   padding: 7px 26px;
 }
 
-.hayat-dugme:hover { background: var(--kirmizi-koyu); }
+.hayat-dugme:hover { background: var(--kirmizi-zemin-koyu); }
 
 .hayat-yan {
   font-size: 0.85rem;
@@ -685,6 +751,40 @@ ul.duz span { color: var(--soluk); }
 }
 
 .iletisim a:hover { transform: translateY(1px); box-shadow: 0 2px 0 var(--kontur); }
+
+/* Basın kiti satırı: iletişim adresinin altında, ondan bir ton sönük. */
+.kit {
+  margin-top: 26px;
+  font-size: 0.95rem;
+  color: var(--soluk);
+  max-width: 62ch;
+}
+
+/* `.iletisim a` bütün bağlantıları sarıya boyuyor; e-posta birincil
+   düğme kalsın, kit ikincil olsun diye seçici onu geçecek kadar özgül. */
+.iletisim .kit-bag {
+  display: inline-block;
+  margin-top: 2px;
+  color: var(--murekkep);
+  background: var(--kart);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: 2px solid var(--kontur);
+  border-radius: 999px;
+  box-shadow: 0 3px 0 var(--kontur);
+  padding: 6px 18px;
+}
+
+.iletisim .kit-bag:hover {
+  background: var(--kagit-koyu);
+  transform: none;
+}
+
+.iletisim .kit-bag:focus-visible {
+  outline: 3px solid var(--turkuaz-koyu);
+  outline-offset: 2px;
+}
 
 /* ---- Alt şerit ---- */
 

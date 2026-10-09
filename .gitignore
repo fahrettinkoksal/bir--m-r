@@ -2,3 +2,7 @@
 # Pano üreticisinin Python önbelleği
 __pycache__/
 *.pyc
+
+# Tanıtım animasyonunun ara kareleri. Yalnızca BIR_OMUR_KARE=1 ile
+# üretilir, basın kitine girdikten sonra depoda durmasının anlamı yok.
+app/test/kare/

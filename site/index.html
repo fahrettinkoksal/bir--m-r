@@ -47,10 +47,21 @@
 
     <p class="giris giris-kanca">
       Aşağıdaki üç hayat aynı bebekten başlıyor: aynı anne baba, aynı şehir,
-      aynı yıl. Biri 56 yaşında bitiyor, biri 86'ya gidiyor. Aradaki tek
-      fark, her yıl verilen kararlar.
+      aynı yıl. Biri 56 yaşında bitiyor, biri 86'ya gidiyor. Değişen tek
+      şey kararlar — gerisini oyun yazdı.
     </p>
 
+    <div class="hayat-sekmeler" role="group" aria-label="Hangi hayat">
+      <button type="button" class="hayat-sekme" data-sekme="0" aria-pressed="false">
+        <b>56 yaşında bitti</b><span>Spor ve hobi</span>
+      </button>
+      <button type="button" class="hayat-sekme etkin" data-sekme="1" aria-pressed="true">
+        <b>78 yaşında bitti</b><span>Aile</span>
+      </button>
+      <button type="button" class="hayat-sekme" data-sekme="2" aria-pressed="false">
+        <b>86 yaşında bitti</b><span>Rahat</span>
+      </button>
+    </div>
     <div class="hayat" id="oyna" data-hayat data-goster>
       <div class="hayat-ust">
         <div class="hayat-kim">
@@ -111,9 +122,8 @@
       <div class="hayat-kumanda">
         <button type="button" class="hayat-dugme" data-yasal>Yaş Al</button>
         <button type="button" class="hayat-yan" data-oto aria-pressed="false">Otomatik oynat</button>
-        <button type="button" class="hayat-yan" data-baska>Başka bir hayat</button>
         <button type="button" class="hayat-yan" data-bastan>Baştan</button>
-        <span class="hayat-sayac" data-sayac><b data-sira>1</b> / 79 yıl · 1. hayat</span>
+        <span class="hayat-sayac" data-sayac><b data-sira>1</b> / 79 yıl</span>
       </div>
     </div>
     <p class="hayat-kaynak">
@@ -526,6 +536,13 @@
         istemek için de aynı adres.
       </p>
       <p><a href="mailto:info@biromur.com">info@biromur.com</a></p>
+
+      <p class="kit">
+        Oyunu bir yerde paylaşacaksan hazır malzeme var: uygulamanın kendi
+        sekiz ekranı tam çözünürlükte, yirmi yılı yirmi karede gösteren
+        hareketli kayıt, paylaşım görseli ve iki dilde tanıtım metni.
+      </p>
+      <p><a class="kit-bag" href="/assets/biromur-basin-kiti.zip" download>Basın kitini indir — 2,7 MB</a></p>
     </div>
   </section>
 
@@ -621,7 +638,7 @@
   var elSayac = kart.querySelector('[data-sayac]');
   var dYas = kart.querySelector('[data-yasal]');
   var dOto = kart.querySelector('[data-oto]');
-  var dBaska = kart.querySelector('[data-baska]');
+  var sekmeler = document.querySelectorAll('[data-sekme]');
   var dBastan = kart.querySelector('[data-bastan]');
   var raylar = kart.querySelectorAll('[data-stat]');
   var degerler = kart.querySelectorAll('[data-deger]');
@@ -629,8 +646,8 @@
 
   var azHareket = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var hangi = 0;
-  var hayat = veri.hayatlar[0];
+  var hangi = Math.min(veri.basla || 0, veri.hayatlar.length - 1);
+  var hayat = veri.hayatlar[hangi];
   var yillar = hayat.yillar;
   var sonIndeks = yillar.length - 1;
   var simdi = 0;
@@ -667,8 +684,7 @@
     elCizgi.style.width = Math.max(1, Math.round((i / sonIndeks) * 100)) + '%';
     if (elSayac) {
       elSayac.textContent = yaz(t.sayac || '{sira} / {toplam}', {
-        sira: i + 1, toplam: yillar.length, no: hangi + 1,
-        etiket: hayat.etiket
+        sira: i + 1, toplam: yillar.length
       });
     }
     for (var k = 0; k < raylar.length; k++) {
@@ -774,6 +790,11 @@
     defter.appendChild(yilBlogu(yillar[0]));
     basliklar(0);
     defter.scrollTop = 0;
+    for (var s = 0; s < sekmeler.length; s++) {
+      var secili = s === hangi;
+      sekmeler[s].classList.toggle('etkin', secili);
+      sekmeler[s].setAttribute('aria-pressed', secili ? 'true' : 'false');
+    }
   }
 
   dYas.addEventListener('click', function () {
@@ -792,12 +813,19 @@
 
   dBastan.addEventListener('click', function () { hayatiKur(hangi); });
 
-  if (dBaska) {
-    dBaska.addEventListener('click', function () {
-      hayatiKur(hangi + 1);
-      if (!azHareket) basla();
-    });
+  // Sekmeler: hangi hayatın oynadığını seçer, seçilen hayat 0 yaştan başlar.
+  for (var si = 0; si < sekmeler.length; si++) {
+    (function (dugme) {
+      dugme.addEventListener('click', function () {
+        var hedef = parseInt(dugme.getAttribute('data-sekme'), 10);
+        if (isNaN(hedef) || hedef === hangi) return;
+        hayatiKur(hedef);
+        if (!azHareket) basla();
+      });
+    })(sekmeler[si]);
   }
+
+  hayatiKur(hangi);
 
   // Kart ekrana girince kendi oynamaya başlar; hareketi azaltan ayar
   // açıksa beklemez, kullanıcı düğmeye basar.
