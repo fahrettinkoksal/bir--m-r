@@ -33,6 +33,7 @@ library;
 
 import '../domain/models/game_event.dart';
 import '../domain/models/relation.dart';
+import 'event_pool.dart';
 
 /// Eşikteki yılların hikâye izleri.
 abstract final class ThresholdFlags {
@@ -55,7 +56,133 @@ abstract final class ThresholdFlags {
   static const String arkadasKarsiligi = 'esik_arkadas_karsiligi';
 }
 
+/// İlişki başlatan olayların kapı yasakları.
+///
+/// Zaten ilişkisi olan ya da evli oyuncuya tanışma olayı çıkmaz; katalog
+/// bekçisi (`romance_reach_test.dart`) bunu şart koşuyor.
+const Set<String> _tanismaYasaklari = <String>{
+  StoryFlags.romantikIliskide,
+  StoryFlags.evlendi,
+};
+
 const List<GameEvent> kThresholdYearsEvents = <GameEvent>[
+  // ---------------------------------------------------------------
+  // Tanışma: ilk ilişki çoğu hayatta bu bantta kuruluyor
+  //
+  // **Ölçülmüş sebep.** Paket BN'nin ilk hâli 16-20 bandına 29 olay
+  // ekledi ve rastgele seçen oyuncunun ilişki kurma oranı 150 hayatta
+  // %65,3'ten %52,7'ye düştü: yılda bir olay yuvası var, havuz
+  // büyüdükçe tanışma olayı kurayı daha az kazanıyor. Üstüne
+  // katalogdaki yetişkin tanışma olayları **24 yaşında** başlıyordu,
+  // yani ilk ilişkinin en doğal yaşı boştu. Bu üç olay seyreltmeyi
+  // tersine çevirir: bandın kendi tanışma kapısı.
+  GameEvent(
+    id: 'esik_mahallede_tanisma',
+    category: EventCategory.kisisel,
+    text:
+        'Arkadaş grubuna yeni biri katıldı. Aynı masada iki kez oturdunuz '
+        've üçüncüsünde adını sen sordun.',
+    requirement: EventRequirement(
+      minAge: 17,
+      maxAge: 20,
+      forbiddenFlags: _tanismaYasaklari,
+    ),
+    weight: 12,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'numarasini_aldi',
+        label: 'Numarasını al',
+        resultText:
+            'İki gün sonra buluştunuz. Artık birliktesiniz; İlişkiler '
+            'bölümünde {kisi} görünüyor.',
+        happiness: 8,
+        charisma: 3,
+        startsRomance: true,
+      ),
+      EventChoice(
+        id: 'arkadas_kaldi',
+        label: 'Arkadaş kal',
+        resultText:
+            'Grup aynı kaldı, siz de öyle. Bir süre sonra o başka biriyle '
+            'geldi.',
+        happiness: -1,
+        charisma: 1,
+      ),
+    ],
+  ),
+
+  GameEvent(
+    id: 'esik_kampuste_tanisma',
+    category: EventCategory.okul,
+    text:
+        'Sınıfta yanına oturan biri notlarını istedi. Kütüphanede '
+        'buluşmaya karar verdiniz ve ders bir saatte bitti, sohbet '
+        'bitmedi.',
+    requirement: EventRequirement(
+      minAge: 18,
+      maxAge: 20,
+      requiresSchoolStudent: true,
+      forbiddenFlags: _tanismaYasaklari,
+    ),
+    weight: 12,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'devam_etti',
+        label: 'Buluşmaya devam et',
+        resultText:
+            'Kütüphane bahaneydi ve ikiniz de biliyordunuz. Artık '
+            'birliktesiniz; İlişkiler bölümünde {kisi} görünüyor.',
+        happiness: 8,
+        charisma: 2,
+        intelligence: 1,
+        startsRomance: true,
+      ),
+      EventChoice(
+        id: 'ders_kaldi',
+        label: 'Dersi derste bırak',
+        resultText:
+            'Notları verdin, vize geçti. Kütüphanede bir daha '
+            'karşılaşmadınız.',
+        intelligence: 2,
+      ),
+    ],
+  ),
+
+  GameEvent(
+    id: 'esik_iste_tanisma',
+    category: EventCategory.yetiskinlik,
+    text:
+        'İlk işinde vardiya arkadaşınla mola saatleri aynı. Bugün '
+        '"çıkışta bir şey içelim mi" diye soruyor.',
+    requirement: EventRequirement(
+      minAge: 18,
+      maxAge: 20,
+      requiresEmployed: true,
+      forbiddenFlags: _tanismaYasaklari,
+    ),
+    weight: 12,
+    choices: <EventChoice>[
+      EventChoice(
+        id: 'cikti',
+        label: 'Çıkışta buluş',
+        resultText:
+            'Bir saatlik mola üç saate döndü. Artık birliktesiniz; '
+            'İlişkiler bölümünde {kisi} görünüyor.',
+        happiness: 8,
+        charisma: 3,
+        startsRomance: true,
+      ),
+      EventChoice(
+        id: 'isi_iste_birakti',
+        label: 'İşi işte bırak',
+        resultText:
+            'Teşekkür edip servise bindin. Vardiya arkadaşlığı vardiya '
+            'arkadaşlığı olarak kaldı.',
+        happiness: -1,
+      ),
+    ],
+  ),
+
   // ---------------------------------------------------------------
   // 16-18: okulun son yılları, kararın ağırlığı
   // ---------------------------------------------------------------

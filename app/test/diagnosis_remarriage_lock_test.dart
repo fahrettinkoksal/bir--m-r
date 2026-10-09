@@ -43,6 +43,7 @@ import 'dart:math';
 
 import 'package:bir_omur/data/finger_catalog.dart';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
+import 'package:bir_omur/domain/features/feature_catalog.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/interaction/finger.dart';
@@ -424,11 +425,25 @@ void main() {
         final Random rng = Random(seed * 31 + 7);
 
         // Yalnızca yaş ve cüzdan; ilişki/stat/kişi verilmiyor.
+        //
+        // **İçerik modülleri kapalı (Paket BN).** Bu test bir
+        // **mekanik yolu** tarıyor: Finger → flört → sevgili → evlilik
+        // → boşanma → yeniden evlilik. Motor aday taramasında yaş
+        // denetiminden önce kişi çözümü yapıp `rng` tükettiği için,
+        // havuza eklenen her olay — 30 yaşındaki bu hayatta hiç
+        // çıkamayacak bir çocukluk olayı bile — zar sırasını kaydırıyor
+        // ve hangi tohumun yürüdüğünü değiştiriyor. Paket BN'nin
+        // havuzu eklenince 240 tohumun hiçbiri yürümedi; iddia
+        // ("yol açık") değişmedi, taranan tohumların kimliği değişti.
+        // Modüller kapalı taranınca ölçüm içerikten bağımsız olur.
         c.debugSetState(
           c.state!.copyWith(
             pendingEvent: null,
             notices: const <PendingNotice>[],
             player: c.state!.player.copyWith(age: 30, wallet: 3000000),
+            settings: c.state!.settings.copyWith(
+              features: FeatureSwitches.allOff,
+            ),
           ),
         );
 

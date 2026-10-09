@@ -5751,5 +5751,52 @@ dördü** yaşandı. Bırakılan 8 izin hepsinin okuyan tarafı var.
 Sınav önceliği bekçisi de yeniden ölçüldü: 12. sınıfta uygun rakip
 toplamı 188'den 221'e çıktı, oran 456-586 bandında kaldı (eşik 150).
 
+### Tam süitin yakaladığı üç şey — biri gerçek gerileme
+
+**1. Gerçek gerileme: ilişki erişilebilirliği düştü.** Rastgele seçen
+oyuncunun (yalnızca olay yanıtlayan, ilişki menüsünü hiç kullanmayan)
+ilişki kurma oranı 150 hayatta ölçüldü:
+
+| Durum | İlişki kuruldu |
+| --- | --- |
+| Modüller kapalı (taban) | 98/150 · **%65,3** |
+| Paket BN'nin ilk hâli | 79/150 · **%52,7** |
+| + üç tanışma olayı (ağırlık 4) | 82/150 · %54,7 |
+| + tanışma ağırlığı 12 | 94/150 · **%62,7** |
+
+Sebep yapısal: yılda **bir** olay yuvası var; havuz büyüdükçe tanışma
+olayı kurayı daha az kazanıyor. Üstüne katalogdaki yetişkin tanışma
+olayları **24 yaşında** başlıyordu, yani ilk ilişkinin en doğal yaşı
+(17-20) boştu. Çözüm seyreltmeyi tersine çevirmek oldu: bandın kendi
+tanışma kapısı — mahallede, kampüste ve ilk işte tanışma (üçü de
+`startsRomance`, ağırlık 12, ilişkisi olana çıkmıyor). Eski bekçinin
+ölçtüğü 30 hayat: 11/30 → **18/30** (eşik >10).
+
+**2 ve 3. Ölçüm yalıtımı: iki bekçi içeriğe bağımlıydı.** `paket_ae
+§32` (girişim+yatırım dominansı) ve `diagnosis_remarriage_lock` (tam
+oyuncu yolu) kırıldı. Sebebi dengede değil: motor aday taramasında
+**yaş/koşul denetiminden önce** her havuz girdisi için kişi çözümü
+yapıyor ve bu `rng` tüketiyor. Yani havuza eklenen bir olay, o olayın
+hiç çıkamayacağı bir hayatta bile zar sırasını kaydırıyor. §32'nin
+kendi başlığı bunu zaten yazmıştı: "yıllık ilerlemeye tek bir
+`nextDouble()` eklendiğinde ilk ailenin sayısı 5'ten 10'a çıkıyor."
+
+Kanıt: Paket BN'nin bütün para etkilerini sıfırlayıp §32 yeniden
+koşuldu — sonuç **birebir aynı** kaldı (`[8, 10, 9, 4, 11, 9, 2]`,
+medyan 9). Yani denge değişmemişti, zar konumu değişmişti.
+
+İkisi de **ölçüm yalıtımıyla** düzeltildi, eşik gevşetilmedi: strateji
+ölçümü ve mekanik yolu taraması artık içerik modülleri **kapalı**
+koşuluyor. §32'nin medyanı 5'e döndü (tarihsel taban 5-7; eşik hâlâ
+≤8) ve tekrar evlenme yolu ilk tohumlarda yürüdü. Bundan sonraki içerik
+paketleri bu iki bekçiyi kaydırmaz.
+
+**Açık kalan mimari bulgu.** Zar tüketiminin havuz girdisi başına
+olması kendi başına bir kırılganlık: `_pick` kişi çözümünü koşul
+denetiminden sonraya alsa hem bu sorun kökten biter hem de tarama
+hızlanır. Bu, motorun çekirdeğinde bir değişiklik ve bütün tohumlu
+ölçümleri bir kez kaydırır; ayrı bir paket olarak planlandı
+(`docs/CLAUDE_ROADMAP.md`).
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

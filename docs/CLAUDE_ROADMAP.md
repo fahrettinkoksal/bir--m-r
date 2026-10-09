@@ -67,13 +67,24 @@ karşılaşılabilecek olay sayısı 18 yaşında 34, 19'da 26,5, 30'da 77.
 Çocukluktan sonra en ince bant buydu. 29 olay eklendi, dördü yıllar
 sonra geri dönen karşılık. Modül: `esikteki_yillar`.
 
-### Paket BO — ev, eşya ve mahalle derinliği
+### Paket BO — motorun zar tüketimi (sıradaki)
+`EventEngine._pick` kişi çözümünü koşul denetiminden **sonraya** alsın.
+Bugün her havuz girdisi için kişi çözülüyor ve `rng` tüketiliyor; bu
+yüzden havuza eklenen her olay bütün tohumlu ölçümleri kaydırıyor
+(Paket BN'de üç bekçi bu yüzden kırıldı). Değişiklik aday kümesini
+değiştirmez, yalnızca zar tüketimini azaltır — ama bütün tohumlu
+sonuçları **bir kez** kaydırır, o yüzden kendi paketi ve kendi ölçüm
+turu olmalı. Kazanç: sonraki içerik paketleri bekçileri kırmaz, tarama
+da hızlanır.
+
+### Paket BP — ev, eşya ve mahalle derinliği
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` §6: konut alınıyor, kiraya veriliyor,
 içinde hiçbir şey olmuyor. Eşya envanteri evle ilişkilenmiyor.
 
-### Paket BP — çocukluk ve ergenlik olayları
-`docs/EKSIKLER.md` §7'nin 2. maddesi: 0-17 aralığı oyunun en duygusal
-ama en ince içerikli dönemi.
+### Paket BQ — görünüm seçimi (açık/koyu)
+Oyunda koyu tema **var** (`BirOmurTheme.dark()`) ama oyuncu
+seçemiyor: `ThemeMode.system` sabit. Ayarlara üç seçenek (sistem /
+açık / koyu) eklenecek; kayıtta duracak.
 
 ## Ölçülmüş dersler
 
@@ -99,6 +110,18 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
 - **Paket BN.** Eski belgeye göre paket seçmek iki kez yanlış bant
   gösterdi (arkadaşlık D-130'da bitmiş, sessiz izler AS/2'de bitmiş).
   Paketi ölçüm seçer.
+- **Paket BN.** İçerik eklemek **kapı olaylarını** seyreltir: yılda bir
+  olay yuvası var ve tanışma gibi bir alt sistemin kapısı, süs
+  olaylarıyla aynı ağırlıkta yarışırsa kaybeder. Ölçüldü: 16-20 bandına
+  29 olay eklenince ilişki kurma oranı %65,3'ten %52,7'ye düştü;
+  bandın kendi tanışma olayları (ağırlık 12) %62,7'ye çıkardı. Yeni
+  banda içerik eklerken o bandın kapılarını da aç.
+- **Paket BN.** Motor, aday taramasında yaş/koşul denetiminden **önce**
+  kişi çözümü yapıp `rng` tüketiyor. Sonuç: havuza eklenen her olay, o
+  olayın hiç çıkamayacağı hayatlarda bile zar sırasını kaydırıyor ve
+  tohumlu ölçümleri kırıyor. Geçici çözüm: mekanik ve ekonomi
+  ölçümlerini modüller **kapalı** koşmak. Kalıcı çözümü ayrı paket:
+  aşağıdaki BO.
 
 ## Pano
 

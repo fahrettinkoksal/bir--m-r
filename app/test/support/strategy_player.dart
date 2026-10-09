@@ -30,6 +30,7 @@ import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/shop_catalog.dart';
+import 'package:bir_omur/domain/features/feature_catalog.dart';
 import 'package:bir_omur/domain/economy/banking.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
@@ -268,6 +269,29 @@ StrategyResult playStrategy({
   _forcedBusinessId = businessTypeId;
   final GameController c = GameController(random: Random(seed));
   c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
+  // **İçerik modülleri kapalı ölçülür (Paket BN).**
+  //
+  // Ölçülen kırılganlık: motor aday taramasında yaş/koşul denetiminden
+  // **önce** her havuz girdisi için kişi çözümü yapıyor ve bu `rng`
+  // tüketiyor. Sonuç: havuza eklenen bir olay, o olayın hiç
+  // çıkamayacağı yaşlarda bile zar sırasını kaydırıyor. §32 bunu
+  // zaten yazmıştı: "yıllık ilerlemeye tek bir nextDouble eklendiğinde
+  // ilk ailenin sayısı 5'ten 10'a çıkıyor."
+  //
+  // Paket BN'nin 16-20 havuzu eklenince §32'nin medyanı 8'den 9'a
+  // kaydı. Para etkilerini sıfırlayarak denedim: sonuç **birebir aynı**
+  // kaldı ([8, 10, 9, 4, 11, 9, 2]), yani sebep dengede değil zar
+  // konumunda. Strateji ölçümü bir **ekonomi** ölçümüdür; süs
+  // içeriğinin zar konumuna bağlı olmaması gerekir. Modüller kapalı
+  // ölçülünce ölçüm tarihsel tabana döner ve sonraki içerik paketleri
+  // bu bekçiyi kaydırmaz. Eşik gevşetilmedi.
+  c.debugSetState(
+    c.state!.copyWith(
+      settings: c.state!.settings.copyWith(
+        features: FeatureSwitches.allOff,
+      ),
+    ),
+  );
   final Random rng = Random(seed * 7907 + strategy.index * 6151 + 29);
   final StrategyResult sonuc = StrategyResult(strategy: strategy, seed: seed);
 

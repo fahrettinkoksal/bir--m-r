@@ -7855,3 +7855,42 @@ yıl gerçekten çıkabilecek olay" sayısı. Sonuç: 16'da 41,7 · 17'de 46,2
 kapalıyken 60 hayatta 0 olay sızdı ve 200 durumda zar birebir aynı
 kaldı. Sınav önceliği bekçisi: 12. sınıfta rakip toplamı 188 → 221,
 oran 456-586 (eşik 150).
+
+### Q-209 — Paket BN'nin üç yan etkisi ve verilen kararlar
+
+**Durum: kararlar verildi ve uygulandı (Claude, devredilen yetkiyle,
+9 Ekim 2026).**
+
+**1. Gerçek gerileme — ilişki erişilebilirliği.** 16-20 bandına 29 olay
+eklenince, yalnızca olay yanıtlayan oyuncunun ilişki kurma oranı 150
+hayatta %65,3'ten **%52,7**'ye düştü. Sebep yapısal: yılda bir olay
+yuvası var; havuz büyüdükçe tanışma olayı kurayı daha az kazanıyor.
+Üstüne katalogdaki yetişkin tanışma olayları 24 yaşında başlıyordu —
+ilk ilişkinin en doğal yaşı boştu.
+
+**Karar:** bandın kendi tanışma kapısı açıldı — mahallede, kampüste ve
+ilk işte tanışma (üçü de `startsRomance`, ilişkisi olana çıkmıyor).
+Ağırlık ölçümle seçildi: 4'te oran %54,7, **12'de %62,7**. Onaylı
+romans kataloğunun sayılarına dokunulmadı; düzeltme tamamen Paket BN
+modülünün içinde, yani anahtarla birlikte geri alınabilir.
+
+**2-3. Ölçüm yalıtımı — iki bekçi içeriğe bağımlıydı.** `paket_ae §32`
+(girişim+yatırım dominansı) ve `diagnosis_remarriage_lock` (tam oyuncu
+yolu) kırıldı. Sebep dengede değil: motor aday taramasında yaş/koşul
+denetiminden **önce** her havuz girdisi için kişi çözümü yapıyor ve bu
+`rng` tüketiyor; havuza eklenen olay, o olayın hiç çıkamayacağı bir
+hayatta bile zar sırasını kaydırıyor.
+
+Kanıt: Paket BN'nin bütün para etkileri sıfırlanıp §32 yeniden koşuldu,
+sonuç **birebir aynı** kaldı (`[8, 10, 9, 4, 11, 9, 2]`, medyan 9).
+
+**Karar:** eşikler gevşetilmedi; iki ölçüm **içerik modülleri kapalı**
+koşuluyor. Gerekçe: ikisi de ekonomi/mekanik ölçümü, süs içeriğinin zar
+konumuna bağlı olmamalı. §32'nin medyanı tarihsel tabana (5) döndü,
+eşik hâlâ ≤8.
+
+**Açık mimari bulgu (sıradaki paket).** Kalıcı çözüm `EventEngine._pick`
+içinde kişi çözümünü koşul denetiminden sonraya almak. Aday kümesini
+değiştirmez ama bütün tohumlu ölçümleri bir kez kaydırır; o yüzden
+kendi paketi ve kendi ölçüm turu olacak (`docs/CLAUDE_ROADMAP.md`,
+Paket BO).
