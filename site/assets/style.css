@@ -806,6 +806,22 @@ footer.alt a { color: var(--soluk); }
 
 /* ---- Ekran görüntüleri ---- */
 
+/* Ebeveynlik bölümü: solda ekran, sağda maddeler. */
+.ebeveyn {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.ebeveyn .ekran img { width: 100%; height: auto; }
+
+@media (max-width: 760px) {
+  .ebeveyn { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .ebeveyn .ekran { max-width: 320px; margin: 0 auto; }
+}
+
 .ekranlar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));

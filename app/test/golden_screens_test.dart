@@ -2,7 +2,14 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/generation/child_progression.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/interaction/family_planning.dart';
+import 'package:bir_omur/domain/interaction/marriage_engine.dart';
+import 'package:bir_omur/domain/interaction/parenthood.dart';
+import 'package:bir_omur/domain/interaction/romance.dart';
+import 'package:bir_omur/domain/life/year_review.dart';
+import 'package:bir_omur/domain/models/pregnancy.dart';
 import 'package:bir_omur/domain/life/life_verdict.dart';
 import 'package:bir_omur/domain/models/career.dart';
 import 'package:bir_omur/domain/models/education.dart';
@@ -14,6 +21,8 @@ import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/person_development.dart';
+import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/player_character.dart';
@@ -328,6 +337,66 @@ void main() {
     await tester.tap(find.text('Vakit Geçir'));
     await tester.pumpAndSettle();
     await shot(tester, '08_etkilesim.png');
+  }, skip: !enabled);
+
+  // Paket BK — ebeveynlik ekranı.
+  //
+  // Durum **motorlarla** kuruluyor: ilişki `Romance`, evlilik
+  // `MarriageEngine`, çocuk `Parenthood`, çocuğun gelişim kaydı
+  // `ChildProgression.ensureRecord` ile açılıyor. Elle yazılan tek şey
+  // çocuğun yaşı: ekran görüntüsü için okul çağında bir çocuk gerekiyor
+  // ve gerçek oyunda o yaşa on yıl yaş alarak varılıyor.
+  testWidgets('ebeveynlik: çocuğun kartı ve eylemleri',
+      (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 38);
+
+    final Random rng = Random(31);
+    GameState s = controller.state!;
+    final ({GameState state, Person partner}) r = const Romance().start(s, rng);
+    s = const MarriageEngine().marry(r.state, r.partner.id).state;
+    s = const Parenthood().haveChild(s, rng, coParentId: r.partner.id).state;
+    s = const FamilyPlanning()
+        .setPlan(s, r.partner.id, FamilyPlan.istiyor)
+        .state;
+
+    // Çocuk okul çağına gelsin. Yaş elle veriliyor, **kaydı motor
+    // açıyor**: `ensureRecord` o yaşa uygun kademeyi, sınıfı ve
+    // değerleri kendisi yazıyor; ekranda uydurma bir kademe çıkmasın.
+    final Person bebek = s.children.single;
+    final Person okulCagi = bebek.copyWith(age: 10, development: null);
+    final PersonDevelopment cocukKaydi =
+        ChildProgression.ensureRecord(okulCagi, rng);
+    s = s.copyWith(
+      people: List<Person>.unmodifiable(<Person>[
+        for (final Person p in s.people)
+          if (p.id == bebek.id)
+            okulCagi.copyWith(
+              development: cocukKaydi,
+              employment: EmploymentStatus.ogrenci,
+              schoolLevel: cocukKaydi.schoolLevel,
+            )
+          else
+            p,
+      ]),
+    );
+    // Yılın başındaki fotoğraf: çocuğun yıl özeti bundan doğuyor.
+    s = s.copyWith(yearMark: YearMark.of(s));
+    controller.debugSetState(s);
+    await tester.pumpAndSettle();
+
+    await openTab(tester, 'iliskiler');
+    await tapMenuRow(tester, 'Çocuklar');
+    await tapMenuRow(tester, controller.state!.children.single.fullName);
+    // Kart uzun: ebeveynlik eylemleri ve akıl verme düğmesi görüş
+    // alanının altında kalıyor. Pencere biraz kaydırılıyor ki ekran
+    // görüntüsü asıl yeniliği göstersin.
+    await tester.drag(
+      find.byType(SingleChildScrollView).last,
+      const Offset(0, -392),
+    );
+    await tester.pumpAndSettle();
+    await shot(tester, '16_ebeveynlik.png');
   }, skip: !enabled);
 
   testWidgets('karanlık mod: ana ekran okunaklı kalır',

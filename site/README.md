@@ -135,3 +135,12 @@ Oyunun teması değişirse buradaki değerler de güncellenmeli.
   seçilenleri ölçekleyip WebP'ye çevir (Pillow ile; 480 piksel genişlik,
   kalite 82) ve paylaşım görselini yeniden kur. Uydurma mockup koyma;
   görüntü oyunun kendisinden gelsin. Arayüz değişince görüntüler bayatlar.
+
+- **Ebeveynlik ekranı** (`assets/ekran-ebeveynlik.webp`) 9 Ekim 2026'da
+  eklendi; kaynağı `app/test/goldens/16_ebeveynlik.png`. Senaryo
+  `golden_screens_test.dart` içinde: ilişki `Romance`, evlilik
+  `MarriageEngine`, çocuk `Parenthood`, çocuğun gelişim kaydı
+  `ChildProgression.ensureRecord` ile **motorlardan** kuruluyor. Elle
+  verilen tek şey çocuğun yaşı (10): gerçek oyunda o yaşa on yıl yaş
+  alarak varılıyor ve ekran görüntüsü için on yıl oynatmak gerekmiyor.
+  Karttaki kademe, sınıf ve değerler kayıttan okunuyor, uydurulmuyor.
