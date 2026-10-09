@@ -63,6 +63,24 @@ içinde hiçbir şey olmuyor. Eşya envanteri evle ilişkilenmiyor.
 `docs/EKSIKLER.md` §7'nin 2. maddesi: 0-17 aralığı oyunun en duygusal
 ama en ince içerikli dönemi.
 
+## Ölçülmüş dersler
+
+Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
+çarpmasın.
+
+- **Paket BM.** Yeni içerik havuzun **ağırlık bütçesini** yiyor. Sınav
+  olaylarının önceliğini koruyan bekçi, rakip toplamını bütün havuz
+  üzerinden alıyordu; havuz büyüdükçe pay eriyordu ve bekçi, ilk yıllar
+  havuzu eklenmeden önce zaten eşiğin 0,5 üstündeydi. Bekçi düzeltildi
+  (Q-207) ama ders duruyor: içerik eklerken ağırlık sayılarının havuz
+  genelindeki etkisini ölç.
+- **Paket BM.** Yeni içerik **zar sırasını kaydırır**: sabit tohumla
+  kurulan senaryo testleri (ekran dökümü gibi) beklenmedik yerde
+  kırılabilir. Hayatı oynayan testler hedefe **ulaşana kadar** tohum
+  denemeli.
+- **Paket BL.** Modül kapısı zar atılmadan **önce** olmalı; yoksa
+  kapalı modül bile hayatın akışını değiştirir.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

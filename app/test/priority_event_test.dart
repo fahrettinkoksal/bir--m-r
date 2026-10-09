@@ -253,23 +253,67 @@ void main() {
     });
 
     test('sınav olayının ağırlığı penceresindeki rakipleri eziyor', () {
-      // Mekanizma testi: zar yok, ölçüm yok — doğrudan motorun kendi
+      // Mekanizma testi: zar yok, çekiliş yok — doğrudan motorun kendi
       // ağırlık fonksiyonu.
-      final GameState s =
-          LifeGenerator.seeded(5).generate(mode: StartMode.tamamenRastgele);
+      //
+      // **Paket BM'de düzeltilen ölçüm hatası.** Bu testin ilk hâli
+      // rakip toplamını **bütün havuz** üzerinden alıyordu: yaş koşulu,
+      // sınıf koşulu, kişi koşulu hiç bakılmadan her priority-0 olay
+      // rakip sayılıyordu. Sonuç, testin adının söylediği şeyi
+      // ("penceresindeki rakipler") ölçmüyordu — sınav 8. sınıfta, yani
+      // 13 yaşında çıkıyor; 0-7 yaş olayları o yıl **çıkamaz** ama
+      // rakip hanesine yazılıyordu.
+      //
+      // Ölçülen sonucu: havuz büyüdükçe pay eriyor ve eşik, içerik
+      // eklenmesini imkânsız hâle getiriyordu. Paket BM'nin ilk yıllar
+      // havuzundan **önce** zaten 40,5'e inmişti (eşik 40); 31 olay
+      // eklenince 39,2'ye düştü. Yani bekçi, oyunun kuralını değil
+      // havuzun büyüklüğünü ölçüyordu. Uçtan uca koruma (yukarıdaki
+      // test: ulaşanların %90'ı sınav olayını görüyor) bu sırada hiç
+      // bozulmadı.
+      //
+      // Düzeltilmiş hâli: rakip kümesi, sınavın **gerçekten yarıştığı**
+      // yılda uygun olan olaylardır (`debugEligibleIds`). Eşik, aynı
+      // yaklaşımla yeniden ölçülüp en düşük oranın altına konuldu.
+      // Soru Faho'ya iletildi: `docs/DESIGN_REVIEW_QUEUE.md` Q-207.
+      const EventEngine motor = EventEngine();
+      final List<String> satirlar = <String>[];
+      // Rakip kümesi hayata göre değişir (kim yaşıyor, hangi şehir,
+      // hangi eşya): tek hayat ölçmek yanıltır. Dört ayrı hayatın **en
+      // kalabalık** rakip kümesi alınır, yani en kötü durum.
+      const List<int> tohumlar = <int>[9, 21, 37, 53];
       for (final GameEvent sinav in kExamEvents) {
-        final double sinavAgirligi =
-            EventEngine.prototypeOnlyEffectiveWeight(s, sinav);
-        double rakipToplami = 0;
-        for (final GameEvent e in kEventPool) {
-          if (e.id == sinav.id) continue;
-          if (e.priority > 0) continue;
-          rakipToplami += EventEngine.prototypeOnlyEffectiveWeight(s, e);
+        final int sinif = sinav.requirement.minGrade ?? 8;
+        double enKotuRakip = 0;
+        double sinavAgirligi = 0;
+        for (final int tohum in tohumlar) {
+          final GameState s =
+              ogrenci(age: sinif + 5, grade: sinif, seed: tohum);
+          final Set<String> uygun = motor.debugEligibleIds(s, Random(tohum));
+          sinavAgirligi = EventEngine.prototypeOnlyEffectiveWeight(s, sinav);
+          double rakipToplami = 0;
+          for (final GameEvent e in kEventPool) {
+            if (e.id == sinav.id) continue;
+            if (e.priority > 0) continue;
+            if (!uygun.contains(e.id)) continue;
+            rakipToplami += EventEngine.prototypeOnlyEffectiveWeight(s, e);
+          }
+          if (rakipToplami > enKotuRakip) enKotuRakip = rakipToplami;
         }
-        expect(sinavAgirligi, greaterThan(rakipToplami * 40),
-            reason: '${sinav.id}: ağırlık $sinavAgirligi, '
-                'priority-0 rakipler toplamı $rakipToplami');
+        satirlar.add('${sinav.id}: ağırlık ${sinavAgirligi.toStringAsFixed(0)}'
+            ' · en kalabalık yılda uygun rakip toplamı '
+            '${enKotuRakip.toStringAsFixed(0)}'
+            ' · oran ${(sinavAgirligi / enKotuRakip).toStringAsFixed(1)}');
+        // Eşik, ölçülen en düşük oranın altında ama hâlâ anlamlı:
+        // gerçek bir seyrelmeyi (payın üçte birini kaybetmesini)
+        // yakalar. Eski 40 eşiği havuzun büyüklüğünü ölçtüğü için
+        // içerik eklenmesini imkânsız hâle getirmişti.
+        expect(sinavAgirligi, greaterThan(enKotuRakip * 150),
+            reason: '${sinav.id}: ağırlık $sinavAgirligi, en kalabalık '
+                'yılda uygun priority-0 rakiplerin toplamı $enKotuRakip');
       }
+      // ignore: avoid_print
+      print(satirlar.join('\n'));
     });
   });
 }

@@ -5667,9 +5667,43 @@ havuz + modül kapalı / modülün olayları hiç olmayan havuz) 240 durumda
 aynı olayı veriyor.
 
 **Ölçüm (`app/test/paket_bm_ilk_yillar_test.dart`, 6 test):** modül
-kapalıyken 60 hayatta **0** olay sızdı; açıkken 31 olayın **29'u**
+kapalıyken 60 hayatta **0** olay sızdı; açıkken 31 olayın **27'si**
 görüldü ve karşılık olaylarının 3'ü yaşandı. Modül kapalıyken ilk
 yıllar paket öncesi hâline dönüyor.
+
+### Tam süitin yakaladığı üç şey
+
+Hedefli testler yeşilken tam süit **3 hata** verdi (3.513 geçti, 17
+atlandı). Üçü de bu paketin eseriydi ve üçü de düzeltildi:
+
+1. **Yer tutuculu seçenek etiketi.** `{sahipk}` "annen" veriyor, yani
+   etiket "annen seçtiği ad" gibi bozuk bir Türkçe kuruyordu.
+   `paket_bd_ekran_alt_metni_test.dart` bunu bağımsız olarak yakaladı;
+   etiket yer tutucusuz yazıldı.
+2. **Ekran dökümü 70 yaşına ulaşamıyordu.** Döküm testi hayatı
+   gerçekten oynayarak kuruyor; yeni içerik zar sırasını kaydırdığı
+   için sabit tohumun hayatı 54'te kalp krizinden öldü ve döküm "ekranlar
+   boş" diye kırıldı — oysa ölçtüğü şey 70 yaşındaki ekranlar. Döküm
+   artık hedef yaşa **yaşayarak ulaşan** ilk tohumu kullanıyor; denetim
+   (boş ekran olmamalı) aynı kaldı.
+3. **Sınav ağırlığı bekçisi — ölçüm hatası çıktı.** Bekçi, sınav
+   olayının ağırlığını "penceresindeki rakipler" diye adlandırdığı bir
+   toplamla karşılaştırıyordu; ama toplam **bütün havuzu** sayıyordu:
+   yaş, sınıf ve kişi koşulu bakılmadan. Sınav 8. sınıfta, yani 13
+   yaşında çıkıyor; 0-7 yaş olayları o yıl **çıkamaz** ama rakip
+   hanesine yazılıyordu. Ölçüldü: bekçi, ilk yıllar havuzundan
+   **önce** zaten 40,5'te duruyordu (eşik 40) — yani oyunun kuralını
+   değil havuzun büyüklüğünü ölçüyordu ve her içerik paketini
+   imkânsız hâle getiriyordu. Rakip kümesi artık sınavın gerçekten
+   yarıştığı yılda **uygun olan** olaylar (dört ayrı hayatın en
+   kalabalık kümesi): 8. sınıfta 256, 12. sınıfta 188. Ölçülen en
+   düşük oran **337,5**; eşik 150'ye çekildi — eskisinden çok daha
+   dar bir bant. Uçtan uca koruma (ulaşanların %90'ı sınav olayını
+   görüyor) bu süreçte hiç bozulmadı. Bekçinin yöntem değişikliği
+   Faho'nun onayına açıldı: **Q-207**.
+
+İlk yıllar olaylarının ağırlığı 3 (karşılık olayları 4): ince bantta
+rakip az olduğu için 3 yeterli ve havuzun ağırlık bütçesini yemiyor.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

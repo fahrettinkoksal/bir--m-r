@@ -81,7 +81,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ),
     repeatable: true,
     minAgeGap: 2,
-    weight: 5,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'kucaktan_kucaga',
@@ -119,7 +119,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ),
     repeatable: true,
     minAgeGap: 2,
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'kucakta_gezdirildi',
@@ -154,7 +154,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
       livingRelations: <RelationType>{RelationType.anne},
       requireSameHousehold: true,
     ),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'kres',
@@ -203,7 +203,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ),
     repeatable: true,
     minAgeGap: 2,
-    weight: 5,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'sinir',
@@ -285,7 +285,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ),
     repeatable: true,
     minAgeGap: 2,
-    weight: 5,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'sure_sinirli',
@@ -401,7 +401,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     requirement: EventRequirement(minAge: 3, maxAge: 6),
     repeatable: true,
     minAgeGap: 2,
-    weight: 5,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'paylas',
@@ -443,7 +443,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     requirement: EventRequirement(minAge: 3, maxAge: 7),
     repeatable: true,
     minAgeGap: 2,
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'evde_pansuman',
@@ -473,7 +473,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
         'Elinde bir kâğıt ve para, ilk kez tek başına bakkala '
         'gönderiliyorsun. Dükkân üç kapı ötede.',
     requirement: EventRequirement(minAge: 4, maxAge: 7),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'tam_getirdi',
@@ -507,7 +507,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     requirement: EventRequirement(minAge: 4, maxAge: 7),
     repeatable: true,
     minAgeGap: 2,
-    weight: 5,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'oyuna_katil',
@@ -545,7 +545,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
       requireSameHousehold: true,
       personMaxAge: 4,
     ),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'yardim_et',
@@ -622,7 +622,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ),
     repeatable: true,
     minAgeGap: 3,
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'kumbara',
@@ -728,7 +728,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
       maxAge: 6,
       livingRelations: <RelationType>{RelationType.anne},
     ),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'iceri_kostu',
@@ -760,7 +760,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
         'Bisikletin yan tekerleri sökülüyor. Sokak düz, ama sana hiç düz '
         'görünmüyor.',
     requirement: EventRequirement(minAge: 5, maxAge: 7),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'denedi',
@@ -792,7 +792,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
         'Tabelalardaki harfleri tek tek soruyorsun. Evde kimse soruların '
         'sonunu göremiyor.',
     requirement: EventRequirement(minAge: 5, maxAge: 7),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'okumayi_sokti',
@@ -826,7 +826,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
       maxAge: 7,
       livingRelations: <RelationType>{RelationType.anne},
     ),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'vitrindeki',
@@ -897,7 +897,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ),
     repeatable: true,
     minAgeGap: 3,
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'kalabalik',
@@ -1086,7 +1086,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
       livingRelations: <RelationType>{RelationType.anne},
       requireSameHousehold: true,
     ),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'buyukten_gelen',
@@ -1119,7 +1119,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
         'İlk kez kahkahayla güldün. Evde herkes aynı hareketi tekrar '
         'etmeye çalışıyor.',
     requirement: EventRequirement(minAge: 0, maxAge: 1),
-    weight: 5,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'tekrar_guldu',
@@ -1151,7 +1151,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     requirement: EventRequirement(minAge: 0, maxAge: 1),
     repeatable: true,
     minAgeGap: 2,
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'gezdirildi',
@@ -1182,7 +1182,7 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
         'Fotoğraf çekilecek. Üstüne giydirilen takım kaşındırıyor, ışık '
         'gözünü alıyor.',
     requirement: EventRequirement(minAge: 0, maxAge: 2),
-    weight: 4,
+    weight: 3,
     choices: <EventChoice>[
       EventChoice(
         id: 'poz_verdi',

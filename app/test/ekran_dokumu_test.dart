@@ -91,11 +91,15 @@ void main() {
   /// satırları göründü. Bu bir yerleşim testi değil döküm: amacı
   /// metnin tamamını görmek, gerçek telefonu taklit etmek değil.
   /// Yerleşimi `ui_smoke_life_test.dart` gerçek ölçüde sınıyor.
-  Future<void> ac(WidgetTester tester) async {
+  Future<void> ac(WidgetTester tester, {int? tohum}) async {
     tester.view.physicalSize = const Size(1200, 14000);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    if (tohum != null) {
+      controller.dispose();
+      controller = GameController(random: Random(tohum));
+    }
     await tester.pumpWidget(BirOmurApp(controller: controller));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Rastgele bir hayat'));
@@ -180,10 +184,35 @@ void main() {
     '70 yaşında yaşlı': 70,
   };
 
+  /// prototypeOnly: hedef yaşa ulaşan bir hayat bulmak için denenen
+  /// tohumlar.
+  ///
+  /// **Neden liste.** Döküm bir hayatı gerçekten oynayarak kuruyor;
+  /// oyuncu yolda ölürse ekranda ölüm özeti kalıyor, sekmeler hiç
+  /// olmuyor ve döküm "ekranlar boş" diye kırılıyor — ama ölçtüğü şey
+  /// 70 yaşındaki ekranlar. Tek sabit tohum buna dayanmıyor: içerik
+  /// havuzu değiştikçe zar sırası kayıyor ve o hayat başka bir yerde
+  /// ölüyor (Paket BM'de tohum 7'nin hayatı 54'te kalp krizinden
+  /// öldü). Bu yüzden döküm, hedef yaşa **yaşayarak** ulaşan ilk
+  /// tohumu kullanır. Denetimin kendisi değişmedi: ekran hâlâ boş
+  /// olmamalı.
+  const List<int> tohumlar = <int>[7, 11, 23, 41, 57, 73, 91, 109];
+
   for (final MapEntry<String, int> evre in evreler.entries) {
     testWidgets('EKRAN DÖKÜMÜ — ${evre.key}', (WidgetTester tester) async {
-      await ac(tester);
-      await buyut(tester, evre.value);
+      int denenen = 0;
+      for (final int tohum in tohumlar) {
+        denenen++;
+        await ac(tester, tohum: tohum);
+        await buyut(tester, evre.value);
+        final GameState ara = controller.state!;
+        if (!ara.deceased && ara.player.age >= evre.value) break;
+        if (tohum == tohumlar.last) {
+          // Hiçbiri ulaşmadıysa son hayatla devam: döküm yine basılır
+          // ve gerçek yaş başlıkta yazar.
+          break;
+        }
+      }
       await ekraniTemizle(tester);
       final GameState son = controller.state!;
       final StringBuffer rapor = StringBuffer()
@@ -191,7 +220,8 @@ void main() {
         ..writeln('EKRAN DÖKÜMÜ · ${evre.key} '
             '(gerçek yaş: ${son.player.age}, '
             'bekleyen olay: ${son.hasPendingEvent}, '
-            'bildirim: ${son.hasNotice})')
+            'bildirim: ${son.hasNotice}, '
+            'denenen tohum: $denenen)')
         ..writeln('=' * 68);
 
       final List<String> bosEkranlar = <String>[];
