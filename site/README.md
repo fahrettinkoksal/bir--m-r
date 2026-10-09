@@ -72,8 +72,10 @@ Oyunun teması değişirse buradaki değerler de güncellenmeli.
   Ölçüm betiği: katalog dosyalarındaki girdileri saymak; olay sayısı
   `data/event_pool*.dart` içindeki `GameEvent(` sayısı. Depo büyüyünce bu
   sayılar bayatlar — güncellemeden önce yeniden ölç, tahminle yazma.
-- **"Bir ömür, tarayıcıda" bölümü** (`#oyna`, İngilizcede `#play`) oyunun
-  kendi tur kaydını oynatıyor. Veri `assets/hayat.js` (Türkçe) ve
+- **Oynanabilir ömür kartı** (`#oyna`, İngilizcede `#play`) oyunun
+  kendi tur kaydını oynatıyor. Sayfanın en güçlü parçası olduğu için
+  başlığın hemen altında, ilk ekranda duruyor; eski afiş şeridi kaldırıldı
+  (aynı işi daha zayıf yapıyordu). Veri `assets/hayat.js` (Türkçe) ve
   `assets/life.js` (İngilizce) dosyalarında; ikisi de elle yazılmadı.
   Kaynak: `app/test/support/player_bot.dart` içindeki
   `playBotLife(archetype: PlayerArchetype.family, seed: 777)`. Geçici bir
@@ -84,7 +86,9 @@ Oyunun teması değişirse buradaki değerler de güncellenmeli.
   cümlelerine kısaltıldı. Tam günlük 1.034 satır, seçilen 230.
   Yenilemek istersen aynı yolu izle: satır **uydurma**, oyundan al.
   İngilizce dosya aynı hayatın çevirisi; sayılar ve sıralama değişmiyor.
-- Kartın ilk yılı (0 yaş) HTML'e gömülü: betik çalışmazsa bölüm boş
+- "Yüzeyin altında" listesinin ilk dört maddesi açık, kalan altısı
+  `<details class="devami">` içinde. Yerli HTML; betik olmadan da açılıyor.
+- Kartın ilk yılı (0 yaş) HTML'e gömülü: betik çalışmazsa kart boş
   görünmesin. Yılda bir satır bile değiştirsen bu gömülü blok ile veri
   dosyası birbirini tutmalı.
 - Ekran görüntüleri (`assets/ekran-*.webp`) ve paylaşım görseli

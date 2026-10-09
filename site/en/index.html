@@ -38,40 +38,84 @@
   <div class="sarmal kahraman">
     <span class="etiket">Open beta · in development</span>
     <h1>One life, end to end.</h1>
-    <div class="afis">
-      <div class="afis-telefon" aria-hidden="true">
-        <img class="afis-kare etkin" src="/assets/ekran-hayat.webp" width="480" height="1013" decoding="async" alt="">
-        <img class="afis-kare" src="/assets/ekran-olay.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-        <img class="afis-kare" src="/assets/ekran-iliskiler.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-        <img class="afis-kare" src="/assets/ekran-aktiviteler.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-        <img class="afis-kare" src="/assets/ekran-karanlik.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-      </div>
-      <div class="afis-govde">
-        <div class="afis-yazi" aria-hidden="true">
-          <p class="afis-satir etkin">Nine years old. A year passed; the diary filled.</p>
-          <p class="afis-satir">You woke in the middle of the night. What now?</p>
-          <p class="afis-satir">Mother, father, siblings — all of them here.</p>
-          <p class="afis-satir">What today: the library or the gym?</p>
-          <p class="afis-satir">The same life, at night.</p>
-        </div>
-        <div class="afis-alt">
-          <div class="afis-noktalar" aria-hidden="true">
-            <span class="afis-nokta etkin"></span>
-            <span class="afis-nokta"></span>
-            <span class="afis-nokta"></span>
-            <span class="afis-nokta"></span>
-            <span class="afis-nokta"></span>
-          </div>
-          <button type="button" class="afis-dugme" aria-label="Show the next screen in the banner">Age Up</button>
-        </div>
-      </div>
-    </div>
 
     <p class="giris">
       You don't get to pick the family you're born into. After that it's one
       decision a year: school, work, money, love, health, sometimes a
       courtroom. Seventy years later, what's left is the sum of what you
       chose.
+    </p>
+
+    <div class="hayat" id="play" data-hayat data-goster>
+      <div class="hayat-ust">
+        <div class="hayat-kim">
+          <p class="hayat-isim">İlhan Özkan</p>
+          <p class="hayat-nere">
+            <span class="hayat-cip">Van</span>
+            <span class="hayat-cip" data-okul>Not in school yet</span>
+            <span class="hayat-cip hayat-cip-is" data-is hidden></span>
+          </p>
+        </div>
+        <p class="hayat-yas"><b data-yas>0</b><span>years old</span></p>
+      </div>
+
+      <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
+
+      <div class="hayat-govde">
+        <div class="hayat-statlar">
+        <div class="hayat-stat">
+          <span>Happiness</span>
+          <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
+          <em data-deger="0">77</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Health</span>
+          <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
+          <em data-deger="1">74</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Intelligence</span>
+          <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
+          <em data-deger="2">56</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Charisma</span>
+          <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
+          <em data-deger="3">53</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Looks</span>
+          <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
+          <em data-deger="4">36</em>
+        </div>
+          <p class="hayat-para">Wallet <b data-cuzdan>₺0</b></p>
+        </div>
+
+        <div class="hayat-defter" data-defter tabindex="0" role="log">
+          <div class="hayat-yil">
+            <p class="hayat-yil-bas">Age 0</p>
+            <ul>
+            <li class="onemli">You were born in the city of Van. You were named İlhan Özkan.</li>
+            <li>Your mother Sevgi and your father Onur live together.</li>
+            <li>You are an only child.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hayat-kumanda">
+        <button type="button" class="hayat-dugme" data-yasal>Age Up</button>
+        <button type="button" class="hayat-yan" data-oto aria-pressed="false">Play automatically</button>
+        <button type="button" class="hayat-yan" data-bastan>Restart</button>
+        <span class="hayat-sayac"><b data-sira>1</b> / 79 years</span>
+      </div>
+    </div>
+    <p class="hayat-kaynak">
+      The game's own engine played this life: a test bot made the decisions,
+      the game produced the events and the text. Not one line was written for
+      this site. The full log runs to 1,034 lines; at most three per year made
+      it here, 230 in total. The game is in Turkish; these lines are
+      translated from its own output.
     </p>
     <div class="giris-ikili">
       <p class="giris">
@@ -99,85 +143,6 @@
     </p>
   </div>
 
-  <section id="play" class="oyna">
-    <div class="sarmal">
-      <h2 class="baslik">A whole life, in your browser</h2>
-      <p class="alt-baslik">
-        The game's own engine played the life below: a test bot made the
-        decisions, the game produced the events and the text. Not one line
-        was written for this site. The full log runs to 1,034 lines; at
-        most three per year made it here, 230 in total. Press
-        <b>Age Up</b> and walk through 79 years, one year at a time.
-        (The game is in Turkish; these lines are translated from its own
-        output.)
-      </p>
-
-      <div class="hayat" data-hayat data-goster>
-        <div class="hayat-ust">
-          <div class="hayat-kim">
-            <p class="hayat-isim">İlhan Özkan</p>
-            <p class="hayat-nere">
-              <span class="hayat-cip">Van</span>
-              <span class="hayat-cip" data-okul>Not in school yet</span>
-              <span class="hayat-cip hayat-cip-is" data-is hidden></span>
-            </p>
-          </div>
-          <p class="hayat-yas"><b data-yas>0</b><span>years old</span></p>
-        </div>
-
-        <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
-
-        <div class="hayat-govde">
-          <div class="hayat-statlar">
-          <div class="hayat-stat">
-            <span>Happiness</span>
-            <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
-            <em data-deger="0">77</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Health</span>
-            <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
-            <em data-deger="1">74</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Intelligence</span>
-            <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
-            <em data-deger="2">56</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Charisma</span>
-            <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
-            <em data-deger="3">53</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Looks</span>
-            <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
-            <em data-deger="4">36</em>
-          </div>
-            <p class="hayat-para">Wallet <b data-cuzdan>₺0</b></p>
-          </div>
-
-          <div class="hayat-defter" data-defter tabindex="0" role="log">
-            <div class="hayat-yil">
-              <p class="hayat-yil-bas">Age 0</p>
-              <ul>
-              <li class="onemli">You were born in the city of Van. You were named İlhan Özkan.</li>
-              <li>Your mother Sevgi and your father Onur live together.</li>
-              <li>You are an only child.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="hayat-kumanda">
-          <button type="button" class="hayat-dugme" data-yasal>Age Up</button>
-          <button type="button" class="hayat-yan" data-oto aria-pressed="false">Play automatically</button>
-          <button type="button" class="hayat-yan" data-bastan>Restart</button>
-          <span class="hayat-sayac"><b data-sira>1</b> / 79 years</span>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section id="game">
     <div class="sarmal">
@@ -355,13 +320,19 @@
         <li><b>Fictional companies</b> <span>— Twelve companies across ten sectors carry hidden indicators that move year to year. A good company can stay good for years, a bad one can recover; management quality changes slowly and softens bad news. Company news isn't a random headline — it comes out of that state.</span></li>
         <li><b>A business of your own</b> <span>— 14 business types in three scales. Price, staff, upkeep, advertising and reputation are each managed separately; demand is computed from price elasticity against the market average. 102 business events: inspections, disasters, staff trouble, an ad that lands.</span></li>
         <li><b>Property and rent</b> <span>— Rent comes from the city coefficient and the flat's condition, not from a catalogue price. The tenant has an occupation, a payment history and a contract; deposit, vacancy, move-out and a maintenance ledger are all kept. A flat in Istanbul and one in Amasya do not earn the same rent.</span></li>
-        <li><b>Banks and debt</b> <span>— Two banks, different rates and different approval strictness. An application is genuinely assessed; the answer is not a dice roll. Miss an instalment and the debt grows with interest — the wallet never goes negative, the debt accumulates.</span></li>
-        <li><b>Law</b> <span>— Eleven offence types in eight categories, three tiers of lawyer. Investigation, bail, trial, prison and probation each run separately. In detention no salary arrives and seniority freezes — but the job doesn't end, it waits for you.</span></li>
-        <li><b>Health</b> <span>— Six chronic conditions, eight health crises, a check-up report across six body systems. Each of the five stats has its own ageing curve; sport, the barber, books and courses measurably slow the decline. At critical health, ageing up locks: you have to decide first.</span></li>
-        <li><b>Family and generations</b> <span>— Step- and half-siblings, in-laws, grandchildren, bloodlines. A divorce splits what was bought during the marriage; what came before it, plus inheritance and gifts, stays personal property. Custody, alimony, elder care and inheritance each have their own rules. When a generation ends, the game continues as your child.</span></li>
-        <li><b>Career</b> <span>— 55 professions, a pool of 167 interview questions. Mastery and reputation build up over years; a hobby you kept for years earns a second chance at interview and a head start in mastery. The first two days of sick leave are unpaid, and long leave makes an employer uneasy.</span></li>
-        <li><b>No back doors</b> <span>— The market advances once per age and the index is written to the save: you cannot re-roll a price by closing the screen, by trading, or by loading an older save. Repeating the same action within one year to farm rewards is closed too, and a person who turned down an invitation stays turned down for that year.</span></li>
       </ul>
+      <details class="devami">
+        <summary><b>Six more</b>
+          <span>housing and rent · banking and debt · law · health · family and generations · careers</span></summary>
+        <ul class="duz">
+          <li><b>Banks and debt</b> <span>— Two banks, different rates and different approval strictness. An application is genuinely assessed; the answer is not a dice roll. Miss an instalment and the debt grows with interest — the wallet never goes negative, the debt accumulates.</span></li>
+          <li><b>Law</b> <span>— Eleven offence types in eight categories, three tiers of lawyer. Investigation, bail, trial, prison and probation each run separately. In detention no salary arrives and seniority freezes — but the job doesn't end, it waits for you.</span></li>
+          <li><b>Health</b> <span>— Six chronic conditions, eight health crises, a check-up report across six body systems. Each of the five stats has its own ageing curve; sport, the barber, books and courses measurably slow the decline. At critical health, ageing up locks: you have to decide first.</span></li>
+          <li><b>Family and generations</b> <span>— Step- and half-siblings, in-laws, grandchildren, bloodlines. A divorce splits what was bought during the marriage; what came before it, plus inheritance and gifts, stays personal property. Custody, alimony, elder care and inheritance each have their own rules. When a generation ends, the game continues as your child.</span></li>
+          <li><b>Career</b> <span>— 55 professions, a pool of 167 interview questions. Mastery and reputation build up over years; a hobby you kept for years earns a second chance at interview and a head start in mastery. The first two days of sick leave are unpaid, and long leave makes an employer uneasy.</span></li>
+          <li><b>No back doors</b> <span>— The market advances once per age and the index is written to the save: you cannot re-roll a price by closing the screen, by trading, or by loading an older save. Repeating the same action within one year to farm rewards is closed too, and a person who turned down an invitation stays turned down for that year.</span></li>
+        </ul>
+      </details>
       <div class="sayilar" style="margin-top:22px" data-goster>
         <div><b>55</b><small>professions</small></div>
         <div><b>167</b><small>interview questions</small></div>
@@ -563,51 +534,6 @@
 
 <script src="/assets/life.js"></script>
 <script>
-// Afiş: dört saniyede bir kendi ilerler, Yaş Al'a basılınca hemen ilerler
-// ve sayaç sıfırlanır. Betik çalışmazsa ilk kare sabit kalır.
-(function () {
-  var afis = document.querySelector('.afis');
-  if (!afis) return;
-  var kume = [
-    afis.querySelectorAll('.afis-kare'),
-    afis.querySelectorAll('.afis-satir'),
-    afis.querySelectorAll('.afis-nokta')
-  ];
-  var dugme = afis.querySelector('.afis-dugme');
-  if (!kume[0].length) return;
-  var simdi = 0;
-  var sayac = null;
-  var azHareket = window.matchMedia
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function goster(i) {
-    simdi = (i + kume[0].length) % kume[0].length;
-    for (var k = 0; k < kume.length; k++) {
-      for (var n = 0; n < kume[k].length; n++) {
-        kume[k][n].classList.toggle('etkin', n === simdi);
-      }
-    }
-  }
-
-  function ilerle() {
-    if (dugme) {
-      dugme.classList.add('basildi');
-      window.setTimeout(function () { dugme.classList.remove('basildi'); }, 180);
-    }
-    goster(simdi + 1);
-  }
-
-  function kur() {
-    if (sayac) window.clearInterval(sayac);
-    if (!azHareket) sayac = window.setInterval(ilerle, 4000);
-  }
-
-  if (dugme) {
-    dugme.addEventListener('click', function () { ilerle(); kur(); });
-  }
-  kur();
-})();
-
 // Kaydırınca belirme + sayan sayılar. Betik çalışmazsa hiçbir şey
 // gizlenmiyor: gizleme kuralı yalnızca html.js varken geçerli.
 (function () {

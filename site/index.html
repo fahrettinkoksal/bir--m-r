@@ -38,39 +38,82 @@
   <div class="sarmal kahraman">
     <span class="etiket">Açık beta · geliştirme sürüyor</span>
     <h1>Bir hayat, baştan sona.</h1>
-    <div class="afis">
-      <div class="afis-telefon" aria-hidden="true">
-        <img class="afis-kare etkin" src="/assets/ekran-hayat.webp" width="480" height="1013" decoding="async" alt="">
-        <img class="afis-kare" src="/assets/ekran-olay.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-        <img class="afis-kare" src="/assets/ekran-iliskiler.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-        <img class="afis-kare" src="/assets/ekran-aktiviteler.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-        <img class="afis-kare" src="/assets/ekran-karanlik.webp" width="480" height="1013" decoding="async" loading="lazy" alt="" aria-hidden="true">
-      </div>
-      <div class="afis-govde">
-        <div class="afis-yazi" aria-hidden="true">
-          <p class="afis-satir etkin">Dokuz yaşındasın. Yıl geçti, günlük doldu.</p>
-          <p class="afis-satir">Gecenin ortasında uyandın. Ne yapacaksın?</p>
-          <p class="afis-satir">Annen, baban, kardeşlerin — hepsi burada.</p>
-          <p class="afis-satir">Bugün ne yapsan? Kütüphane mi, salon mu?</p>
-          <p class="afis-satir">Gece de aynı hayat sürüyor.</p>
-        </div>
-        <div class="afis-alt">
-          <div class="afis-noktalar" aria-hidden="true">
-            <span class="afis-nokta etkin"></span>
-            <span class="afis-nokta"></span>
-            <span class="afis-nokta"></span>
-            <span class="afis-nokta"></span>
-            <span class="afis-nokta"></span>
-          </div>
-          <button type="button" class="afis-dugme" aria-label="Afişte sonraki ekrana geç">Yaş Al</button>
-        </div>
-      </div>
-    </div>
 
     <p class="giris">
       Doğduğun aileyi seçmiyorsun. Sonrasında her yıl bir karar veriyorsun:
       okul, iş, para, aşk, sağlık, bazen de mahkeme. Yetmiş yıl sonra geriye
       kalan şey, verdiğin kararların toplamı oluyor.
+    </p>
+
+    <div class="hayat" id="oyna" data-hayat data-goster>
+      <div class="hayat-ust">
+        <div class="hayat-kim">
+          <p class="hayat-isim">İlhan Özkan</p>
+          <p class="hayat-nere">
+            <span class="hayat-cip">Van</span>
+            <span class="hayat-cip" data-okul>Okula başlamadı</span>
+            <span class="hayat-cip hayat-cip-is" data-is hidden></span>
+          </p>
+        </div>
+        <p class="hayat-yas"><b data-yas>0</b><span>yaş</span></p>
+      </div>
+
+      <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
+
+      <div class="hayat-govde">
+        <div class="hayat-statlar">
+        <div class="hayat-stat">
+          <span>Mutluluk</span>
+          <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
+          <em data-deger="0">77</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Sağlık</span>
+          <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
+          <em data-deger="1">74</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Zekâ</span>
+          <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
+          <em data-deger="2">56</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Karizma</span>
+          <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
+          <em data-deger="3">53</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Görünüş</span>
+          <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
+          <em data-deger="4">36</em>
+        </div>
+          <p class="hayat-para">Cüzdan <b data-cuzdan>0 ₺</b></p>
+        </div>
+
+        <div class="hayat-defter" data-defter tabindex="0" role="log">
+          <div class="hayat-yil">
+            <p class="hayat-yil-bas">0 yaş</p>
+            <ul>
+            <li class="onemli">Van şehrinde dünyaya geldin. Adın İlhan Özkan kondu.</li>
+            <li>Annen Sevgi ile baban Onur birlikte yaşıyor.</li>
+            <li>Ailenin tek çocuğusun.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hayat-kumanda">
+        <button type="button" class="hayat-dugme" data-yasal>Yaş Al</button>
+        <button type="button" class="hayat-yan" data-oto aria-pressed="false">Otomatik oynat</button>
+        <button type="button" class="hayat-yan" data-bastan>Baştan</button>
+        <span class="hayat-sayac"><b data-sira>1</b> / 79 yıl</span>
+      </div>
+    </div>
+    <p class="hayat-kaynak">
+      Bu hayatı oyunun motoru oynadı: kararları test botu verdi, olayları ve
+      metinleri oyun üretti. Hiçbir satır bu site için yazılmadı. Oyunun
+      tuttuğu tam günlük 1.034 satır; buraya yılda en çok üçü, toplam 230
+      satır girdi.
     </p>
     <div class="giris-ikili">
       <p class="giris">
@@ -97,83 +140,6 @@
     </p>
   </div>
 
-  <section id="oyna" class="oyna">
-    <div class="sarmal">
-      <h2 class="baslik">Bir ömür, tarayıcıda</h2>
-      <p class="alt-baslik">
-        Aşağıdaki hayatı oyunun motoru oynadı: kararları test botu verdi,
-        olayları ve metinleri oyun üretti. Hiçbir satır bu site için
-        yazılmadı. Oyunun tuttuğu tam günlük 1.034 satır; buraya yılda
-        en çok üçü, toplam 230 satır girdi.
-        <b>Yaş Al</b>'a bas — 79 yılı yıl yıl geç.
-      </p>
-
-      <div class="hayat" data-hayat data-goster>
-        <div class="hayat-ust">
-          <div class="hayat-kim">
-            <p class="hayat-isim">İlhan Özkan</p>
-            <p class="hayat-nere">
-              <span class="hayat-cip">Van</span>
-              <span class="hayat-cip" data-okul>Okula başlamadı</span>
-              <span class="hayat-cip hayat-cip-is" data-is hidden></span>
-            </p>
-          </div>
-          <p class="hayat-yas"><b data-yas>0</b><span>yaş</span></p>
-        </div>
-
-        <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
-
-        <div class="hayat-govde">
-          <div class="hayat-statlar">
-          <div class="hayat-stat">
-            <span>Mutluluk</span>
-            <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
-            <em data-deger="0">77</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Sağlık</span>
-            <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
-            <em data-deger="1">74</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Zekâ</span>
-            <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
-            <em data-deger="2">56</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Karizma</span>
-            <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
-            <em data-deger="3">53</em>
-          </div>
-          <div class="hayat-stat">
-            <span>Görünüş</span>
-            <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
-            <em data-deger="4">36</em>
-          </div>
-            <p class="hayat-para">Cüzdan <b data-cuzdan>0 ₺</b></p>
-          </div>
-
-          <div class="hayat-defter" data-defter tabindex="0" role="log">
-            <div class="hayat-yil">
-              <p class="hayat-yil-bas">0 yaş</p>
-              <ul>
-              <li class="onemli">Van şehrinde dünyaya geldin. Adın İlhan Özkan kondu.</li>
-              <li>Annen Sevgi ile baban Onur birlikte yaşıyor.</li>
-              <li>Ailenin tek çocuğusun.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="hayat-kumanda">
-          <button type="button" class="hayat-dugme" data-yasal>Yaş Al</button>
-          <button type="button" class="hayat-yan" data-oto aria-pressed="false">Otomatik oynat</button>
-          <button type="button" class="hayat-yan" data-bastan>Baştan</button>
-          <span class="hayat-sayac"><b data-sira>1</b> / 79 yıl</span>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <section id="oyun">
     <div class="sarmal">
@@ -352,13 +318,19 @@
         <li><b>Kurgusal şirketler</b> <span>— On sektörde 12 şirketin gizli göstergeleri yıldan yıla yürüyor. İyi şirket yıllarca iyi kalabiliyor, kötüsü toparlanabiliyor; yönetim kalitesi yavaş değişiyor ve kötü haberi yumuşatıyor. Şirket haberleri rastgele manşet değil, bu durumdan doğuyor.</span></li>
         <li><b>Kendi işletmen</b> <span>— 14 işletme türü, üç ölçek. Fiyat, personel, bakım, reklam ve itibar ayrı ayrı yönetiliyor; talep piyasa ortalamasına göre fiyat esnekliğiyle hesaplanıyor. 102 işletme olayı var: denetim, afet, personel sorunu, tutan reklam.</span></li>
         <li><b>Konut ve kira</b> <span>— Kira katalog değerinden değil, şehrin katsayısından ve evin durumundan hesaplanıyor. Kiracının mesleği, ödeme geçmişi ve sözleşmesi var; depozito, boşluk dönemi, çıkış ve bakım defteri tutuluyor. İstanbul'daki daire ile Amasya'daki daire aynı kirayı getirmiyor.</span></li>
-        <li><b>Banka ve borç</b> <span>— İki banka, farklı faiz ve farklı onay sıkılığı. Başvuru gerçekten değerlendiriliyor, karar zar atışı değil. Taksit ödenemezse borç faiziyle büyüyor; cüzdan eksiye düşmüyor, borç birikiyor.</span></li>
-        <li><b>Hukuk</b> <span>— Sekiz kategoride 11 suç türü, üç kademe avukat. Soruşturma, kefalet, duruşma, cezaevi ve denetim dönemi ayrı ayrı işliyor. Tutuklulukta maaş yatmıyor ve kıdem donuyor — ama iş bitmiyor, seni bekliyor.</span></li>
-        <li><b>Sağlık</b> <span>— Altı kronik hastalık, sekiz sağlık krizi, altı vücut sistemi için check-up raporu. Beş değerin her birinin kendi yaşlanma eğrisi var; spor, berber, kitap ve kurs bu düşüşü ölçülebilir biçimde yavaşlatıyor. Kritik sağlıkta yaş almak kilitleniyor: önce karar vermen gerekiyor.</span></li>
-        <li><b>Aile ve kuşaklar</b> <span>— Üvey ve yarım kardeş, kayın aile, torun, soy bağı. Boşanmada evlilik içinde satın alınarak edinilen mal paylaşılıyor; evlilikten önceki, miras ve hediye kişisel mal kalıyor. Velayet, nafaka, yaşlı bakımı ve miras ayrı kurallar. Kuşak bittiğinde oyun çocuğunla devam ediyor.</span></li>
-        <li><b>Kariyer</b> <span>— 55 meslek, 167 soruluk mülakat havuzu. Ustalık ve itibar yıllarla birikiyor; yıllarca sürdürdüğün hobi mülakatta ikinci şans ve işe başlarken ustalık yılı getiriyor. Hastalık raporunun ilk iki günü ödenmiyor, uzun rapor işvereni rahatsız ediyor.</span></li>
-        <li><b>Hile kapıları kapalı</b> <span>— Piyasa yaş başına bir kez ilerliyor ve endeks kayda yazılıyor: ekranı kapatıp açarak, al-sat yaparak ya da eski kaydı yükleyerek fiyat yeniden çevrilemiyor. Aynı yıl aynı eylemi tekrarlayıp ödül toplamak da kapalı; davet edilen kişinin reddi yıl içinde sabit kalıyor.</span></li>
       </ul>
+      <details class="devami">
+        <summary><b>Altı başlık daha</b>
+          <span>konut ve kira · banka ve borç · hukuk · sağlık · aile ve kuşaklar · kariyer</span></summary>
+        <ul class="duz">
+          <li><b>Banka ve borç</b> <span>— İki banka, farklı faiz ve farklı onay sıkılığı. Başvuru gerçekten değerlendiriliyor, karar zar atışı değil. Taksit ödenemezse borç faiziyle büyüyor; cüzdan eksiye düşmüyor, borç birikiyor.</span></li>
+          <li><b>Hukuk</b> <span>— Sekiz kategoride 11 suç türü, üç kademe avukat. Soruşturma, kefalet, duruşma, cezaevi ve denetim dönemi ayrı ayrı işliyor. Tutuklulukta maaş yatmıyor ve kıdem donuyor — ama iş bitmiyor, seni bekliyor.</span></li>
+          <li><b>Sağlık</b> <span>— Altı kronik hastalık, sekiz sağlık krizi, altı vücut sistemi için check-up raporu. Beş değerin her birinin kendi yaşlanma eğrisi var; spor, berber, kitap ve kurs bu düşüşü ölçülebilir biçimde yavaşlatıyor. Kritik sağlıkta yaş almak kilitleniyor: önce karar vermen gerekiyor.</span></li>
+          <li><b>Aile ve kuşaklar</b> <span>— Üvey ve yarım kardeş, kayın aile, torun, soy bağı. Boşanmada evlilik içinde satın alınarak edinilen mal paylaşılıyor; evlilikten önceki, miras ve hediye kişisel mal kalıyor. Velayet, nafaka, yaşlı bakımı ve miras ayrı kurallar. Kuşak bittiğinde oyun çocuğunla devam ediyor.</span></li>
+          <li><b>Kariyer</b> <span>— 55 meslek, 167 soruluk mülakat havuzu. Ustalık ve itibar yıllarla birikiyor; yıllarca sürdürdüğün hobi mülakatta ikinci şans ve işe başlarken ustalık yılı getiriyor. Hastalık raporunun ilk iki günü ödenmiyor, uzun rapor işvereni rahatsız ediyor.</span></li>
+          <li><b>Hile kapıları kapalı</b> <span>— Piyasa yaş başına bir kez ilerliyor ve endeks kayda yazılıyor: ekranı kapatıp açarak, al-sat yaparak ya da eski kaydı yükleyerek fiyat yeniden çevrilemiyor. Aynı yıl aynı eylemi tekrarlayıp ödül toplamak da kapalı; davet edilen kişinin reddi yıl içinde sabit kalıyor.</span></li>
+        </ul>
+      </details>
       <div class="sayilar" style="margin-top:22px" data-goster>
         <div><b>55</b><small>meslek</small></div>
         <div><b>167</b><small>mülakat sorusu</small></div>
@@ -560,51 +532,6 @@
 
 <script src="/assets/hayat.js"></script>
 <script>
-// Afiş: dört saniyede bir kendi ilerler, Yaş Al'a basılınca hemen ilerler
-// ve sayaç sıfırlanır. Betik çalışmazsa ilk kare sabit kalır.
-(function () {
-  var afis = document.querySelector('.afis');
-  if (!afis) return;
-  var kume = [
-    afis.querySelectorAll('.afis-kare'),
-    afis.querySelectorAll('.afis-satir'),
-    afis.querySelectorAll('.afis-nokta')
-  ];
-  var dugme = afis.querySelector('.afis-dugme');
-  if (!kume[0].length) return;
-  var simdi = 0;
-  var sayac = null;
-  var azHareket = window.matchMedia
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function goster(i) {
-    simdi = (i + kume[0].length) % kume[0].length;
-    for (var k = 0; k < kume.length; k++) {
-      for (var n = 0; n < kume[k].length; n++) {
-        kume[k][n].classList.toggle('etkin', n === simdi);
-      }
-    }
-  }
-
-  function ilerle() {
-    if (dugme) {
-      dugme.classList.add('basildi');
-      window.setTimeout(function () { dugme.classList.remove('basildi'); }, 180);
-    }
-    goster(simdi + 1);
-  }
-
-  function kur() {
-    if (sayac) window.clearInterval(sayac);
-    if (!azHareket) sayac = window.setInterval(ilerle, 4000);
-  }
-
-  if (dugme) {
-    dugme.addEventListener('click', function () { ilerle(); kur(); });
-  }
-  kur();
-})();
-
 // Kaydırınca belirme + sayan sayılar. Betik çalışmazsa hiçbir şey
 // gizlenmiyor: gizleme kuralı yalnızca html.js varken geçerli.
 (function () {
