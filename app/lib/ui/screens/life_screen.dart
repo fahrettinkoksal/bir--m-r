@@ -125,11 +125,46 @@ class _YearSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            EffectChips(
-              key: const Key('year_summary_effects'),
-              effects: summary.effects,
-            ),
+            if (summary.effects.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 10),
+              EffectChips(
+                key: const Key('year_summary_effects'),
+                effects: summary.effects,
+              ),
+            ],
+            // --- Çocukların yılı (Paket BK/5) ---------------------
+            //
+            // Ebeveynliğin karşılığı burada görünür: ödev, harçlık,
+            // kurs ve kural çocuğun kaydını değiştirdiyse farkı bu
+            // satırlarda yazar. Değişen bir şey yoksa satır da yok.
+            for (final ChildYearSummary cocuk in summary.children)
+              Padding(
+                key: Key('year_summary_child_${cocuk.childId}'),
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      '${cocuk.name} · ${cocuk.age} yaşında',
+                      style: theme.textTheme.labelLarge,
+                    ),
+                    for (final String an in cocuk.milestones)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(
+                          an,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    if (cocuk.effects.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 6),
+                      EffectChips(effects: cocuk.effects),
+                    ],
+                  ],
+                ),
+              ),
           ],
         ),
       ),

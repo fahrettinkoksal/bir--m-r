@@ -636,13 +636,21 @@ class FamilyInteractions {
       );
     }
 
-    final List<double> refusalTable = kind.transfersResource
-        ? prototypeOnlyAskRefusalChance
-        : prototypeOnlyRefusalChance;
+    // Hızlı artan ret tablosu **isteme** içindir (istismar koruması);
+    // veren taraf için geçerli değil (Paket BK/3-BK/5 düzeltmesi:
+    // harçlık ve kurs `transfersResource` olduğu için yanlış tabloya
+    // düşüyordu ve zar tutarsa reddedilebiliyordu — çocuk harçlığı
+    // "reddetmez").
+    final List<double> refusalTable =
+        kind.transfersResource && !kind.playerGives
+            ? prototypeOnlyAskRefusalChance
+            : prototypeOnlyRefusalChance;
     final double refusalChance =
         refusalTable[min(done, refusalTable.length - 1)];
 
-    if (kind != InteractionKind.hediyeVer && rng.chance(refusalChance)) {
+    // Oyuncunun verdiği türler reddedilmez (D-020 reddi isteme için
+    // yazdı). Reddedilebilen çocuk eylemleri ödev ve kuraldır.
+    if (!kind.playerGives && rng.chance(refusalChance)) {
       return _refuse(state: state, person: person, kind: kind, rng: rng);
     }
     return _accept(

@@ -10,6 +10,7 @@ import '../../domain/activities/activity_engine.dart';
 import '../../domain/economy/household_budget.dart';
 import '../../domain/family/child_rules.dart';
 import '../../domain/family/child_stage.dart';
+import '../../domain/life/year_review.dart';
 import '../../domain/interaction/elder_care.dart';
 import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
@@ -553,6 +554,40 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     ),
                   ),
                 const SizedBox(height: 10),
+              ],
+              // --- Paket BK/5: çocuğun biten yılı -------------------
+              //
+              // Oyuncunun kendi yıl özeti gibi: yılın başındaki
+              // fotoğrafla bugünün farkı. "Senin yaptığın ne işe
+              // yaradı" sorusunun cevabı burada — uydurma değil,
+              // ölçülen fark (`ChildMark`).
+              if (person.relation == RelationType.cocuk) ...<Widget>[
+                ...<Widget>[
+                  for (final ChildYearSummary ozet
+                      in state.lastYearSummary?.children ??
+                          const <ChildYearSummary>[])
+                    if (ozet.childId == widget.personId) ...<Widget>[
+                      const SizedBox(height: 14),
+                      Text(
+                        'Bu yıl (${ozet.age} yaşında)',
+                        key: const Key('person_child_year'),
+                        style: theme.textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 6),
+                      for (final String an in ozet.milestones)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            an,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      if (ozet.effects.isNotEmpty)
+                        EffectChips(effects: ozet.effects),
+                    ],
+                ],
               ],
               // --- Paket BK/3: ebeveynlik ---------------------------
               //

@@ -228,6 +228,25 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'charisma': state.yearMark!.stats.charisma,
               'wallet': state.yearMark!.wallet,
               'fame': state.yearMark!.fame,
+              // Çocukların yıl başı fotoğrafı (Paket BK/5). Eski
+              // kayıtlarda yoktur; boş okunur ve o yıl çocuk özeti
+              // çıkmaz — geriye dönük fark **uydurulmaz**.
+              'childMarks': <String, Object?>{
+                for (final MapEntry<String, ChildMark> e
+                    in state.yearMark!.childMarks.entries)
+                  e.key: <String, Object?>{
+                    'appearance': e.value.stats.appearance,
+                    'happiness': e.value.stats.happiness,
+                    'health': e.value.stats.health,
+                    'intelligence': e.value.stats.intelligence,
+                    'charisma': e.value.stats.charisma,
+                    'money': e.value.money,
+                    'interests': e.value.interests,
+                    'bond': e.value.bond,
+                    'ownHappiness': e.value.happiness,
+                    'milestones': e.value.milestones,
+                  },
+              },
             },
       'lastYearSummary': state.lastYearSummary == null
           ? null
@@ -239,6 +258,25 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
                     'label': e.label,
                     'delta': e.delta,
                     'unit': e.unit,
+                  },
+              ],
+              // Çocukların aynı yıl özeti (Paket BK/5).
+              'children': <Map<String, Object?>>[
+                for (final ChildYearSummary c
+                    in state.lastYearSummary!.children)
+                  <String, Object?>{
+                    'childId': c.childId,
+                    'name': c.name,
+                    'age': c.age,
+                    'effects': <Map<String, Object?>>[
+                      for (final AppliedEffect e in c.effects)
+                        <String, Object?>{
+                          'label': e.label,
+                          'delta': e.delta,
+                          'unit': e.unit,
+                        },
+                    ],
+                    'milestones': c.milestones,
                   },
               ],
             },
@@ -2324,6 +2362,31 @@ YearMark _decodeYearMark(Map<String, Object?> json) => YearMark(
       ),
       wallet: _int(json, 'wallet'),
       fame: _intOrNull(json, 'fame'),
+      childMarks: json['childMarks'] == null
+          ? const <String, ChildMark>{}
+          : <String, ChildMark>{
+              for (final MapEntry<String, Object?> e
+                  in _asMap(json['childMarks'], 'yearMark.childMarks')
+                      .entries)
+                e.key: _decodeChildMark(
+                  _asMap(e.value, 'yearMark.childMarks.${e.key}'),
+                ),
+            },
+    );
+
+ChildMark _decodeChildMark(Map<String, Object?> json) => ChildMark(
+      stats: Stats(
+        appearance: _int(json, 'appearance'),
+        happiness: _int(json, 'happiness'),
+        health: _int(json, 'health'),
+        intelligence: _int(json, 'intelligence'),
+        charisma: _int(json, 'charisma'),
+      ),
+      money: _int(json, 'money'),
+      interests: _stringList(json, 'interests'),
+      bond: _int(json, 'bond'),
+      happiness: _int(json, 'ownHappiness'),
+      milestones: _int(json, 'milestones'),
     );
 
 YearSummary _decodeYearSummary(Map<String, Object?> json) => YearSummary(
@@ -2337,6 +2400,34 @@ YearSummary _decodeYearSummary(Map<String, Object?> json) => YearSummary(
             label: _string(e, 'label'),
             delta: _intOrNull(e, 'delta'),
             unit: e['unit'] is String ? e['unit']! as String : '',
+          ),
+      ]),
+      // Çocukların özeti (Paket BK/5). Eski kayıtta yoktur; boş liste
+      // okunur ve geriye dönük bir yıl özeti uydurulmaz.
+      children: List<ChildYearSummary>.unmodifiable(<ChildYearSummary>[
+        for (final Map<String, Object?> c
+            in _optionalRawList(json, 'children').map(
+          (Object? raw) => _asMap(raw, 'lastYearSummary.children'),
+        ))
+          ChildYearSummary(
+            childId: _string(c, 'childId'),
+            name: _string(c, 'name'),
+            age: _int(c, 'age'),
+            effects: List<AppliedEffect>.unmodifiable(<AppliedEffect>[
+              for (final Map<String, Object?> e
+                  in _optionalRawList(c, 'effects').map(
+                (Object? raw) =>
+                    _asMap(raw, 'lastYearSummary.children.effects'),
+              ))
+                AppliedEffect(
+                  label: _string(e, 'label'),
+                  delta: _intOrNull(e, 'delta'),
+                  unit: e['unit'] is String ? e['unit']! as String : '',
+                ),
+            ]),
+            milestones: List<String>.unmodifiable(
+              _stringList(c, 'milestones'),
+            ),
           ),
       ]),
     );
