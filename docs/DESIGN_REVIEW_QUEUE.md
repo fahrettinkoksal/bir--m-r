@@ -7670,3 +7670,68 @@ içinde. BK/5'te testin yakaladığı bir tutarsızlık düzeltildi: harçlık v
 kurs `transfersResource` olduğu için **isteme** reddi tablosuna düşüyordu
 ve zar tutarsa çocuk harçlığı reddediyordu; artık veren taraf
 reddedilmiyor (`hediyeVer` ile aynı kural).
+
+## Modül anahtarları (Paket BL, 9 Ekim 2026)
+
+### Q-206 — Modül anahtarı hayata mı, cihaza mı ait olsun?
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Şu an uygulanan
+hâl (1) ve geri almak tek satırlık iş.
+
+**Bağlam.** Faho 9 Ekim'de geliştirmeyi Claude'a bıraktı ve tek şart
+koydu: beğenilmeyen bir özellik genel yapı bozulmadan çıkarılabilsin.
+Paket BL bu altyapıyı kurdu (`docs/FEATURE_FLAGS.md`): her yeni özellik
+kendi anahtarıyla gelir, Ayarlar → *Modüller* içinden kapatılır, kapalı
+modül ekranda yer tutmaz ve motor da onu reddeder.
+
+Altyapı kurulurken cevabı Faho'ya ait **iki** soru çıktı. İkisi de
+kalibrasyon değil, oyuncunun beklentisiyle ilgili.
+
+**Soru 1 — anahtar nerede saklanmalı?** Şu an `GameSettings.features`
+içinde, yani **hayatın kaydında**: kumarhane anahtarı ve ses ayarı da
+orada (D-032). Sonucu: aynı cihazda iki ayrı hayat farklı modüllerle
+oynanabiliyor, kayıt geri yüklenince oyuncunun o hayatta seçtiği hâl
+geri geliyor. Ama oyuncu "bu özelliği istemiyorum" dediğinde bunu
+genellikle **uygulama için** söyler; yeni hayat başlattığında modülün
+geri gelmesi şaşırtıcı olabilir.
+
+1. **Hayatın kaydında** (bugünkü hâl). Mevcut ayar mimarisiyle aynı yer;
+   yeni kayıt alanı, yeni dosya ve göç adımı gerekmiyor.
+2. **Cihazda** (uygulama ayarı): kapatılan modül bütün hayatlarda kapalı
+   kalır. Oyuncunun beklentisine daha yakın ama ayar mimarisi ikiye
+   bölünür: bir kısmı kayıtta, bir kısmı cihazda.
+3. **İkisi birden:** cihazda bir varsayılan, hayat başında ondan
+   kopyalanan bir kayıt. En esnek, en çok iş.
+
+**Önerim ve varsayılanım: (1).** Sebebi tek: ses ve kumarhane anahtarı da
+kayıtta ve ayarları iki ayrı yere bölmek, ileride "hangisi kazanır"
+sorusunu doğurur. Faho (2) derse taşıma küçük bir iştir — anahtarın
+okunduğu tek yer `GameState.featureOn`.
+
+**Soru 2 — kapalı modülün geçmişi silinsin mi?** Modül açıkken günlüğe
+düşmüş satırlar ve kayda girmiş değerler, modül kapatıldığında ne olsun?
+Şu an **kalıyor**: günlük hayatın kaydı sayılıyor, geçmiş yazılmıyor.
+Yalnızca kuralın etkisi kesiliyor (daha önce konmuş kural okul sorununun
+zarını artık kaydırmıyor).
+
+1. **Geçmiş kalsın** (bugünkü hâl): "o yıl çocuğumun ödevine oturdum"
+   satırı günlükte durur, ama yeni satır düşmez.
+2. **Geçmiş de gizlensin:** kapalı modülün günlük satırları listelenmez.
+   Daha tutarlı görünür ama oyuncunun hayat günlüğünde delik açar.
+
+**Önerim ve varsayılanım: (1).** Günlük, oyunun hafızası; geriye dönük
+değiştirmek Paket I'nin "olan oldu, ekranda yazılı" yaklaşımına aykırı.
+
+**Etkilenen kod:** `app/lib/domain/features/feature_catalog.dart`,
+`app/lib/domain/models/game_settings.dart`,
+`app/lib/data/save/game_state_codec.dart` (kayıt yeri),
+`app/lib/ui/widgets/settings_sheet.dart` (ekran).
+
+**Yapmayacağım (onay gelmeden):** anahtarı cihaz ayarına taşımak ya da
+günlüğü geriye dönük filtrelemek.
+
+**Ölçüm kaydı.** Her modül kapalı ve açık ayrı ayrı oynandı
+(`app/test/paket_bl_modul_izolasyon_test.dart`, 13 test): kapalı tarafta
+iz sayısı sıfır, açık tarafta sıfırdan büyük. Hepsi kapalı 100 hayatta
+ortalama yaş 70,4; evlenen 89, çocuğu olan 71, iş tutan 99 — yani
+modüller kapalıyken oyun paket öncesi gibi çalışıyor.
