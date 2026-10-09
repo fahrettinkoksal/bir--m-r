@@ -7492,3 +7492,68 @@ da altına) bir "bebek bekliyorsunuz" bilgisi, ve İlişkiler ekranındaki
 günlüğe bir satır yazmak (ucuz ama o da yıllar arasında kayboluyor).
 Hangisini istersen ona göre yaparım; sen demeden ekrana bir şey
 eklemiyorum.
+
+### Q-203 — Ebeveynlik: çocuk bir bildirim satırı olmaktan çıksın (Paket BK)
+
+**Durum:** yön **Faho tarafından sohbette onaylandı** (9 Ekim 2026: "olur
+yap"). Ayrıntılar ve sayılar **öneri**; onay gelene dek hepsi
+`prototypeOnly` kalır ve `DECISIONS.md`'ye hiçbir şey yazılmaz. Bu kayıt
+**Q-201 ve Q-202'yi kapsar**; o iki soru silinmedi, burada cevaplanıyor.
+
+**Nasıl çıktı.** Faho "oyuna yeni ne ekleyelim" diye sordu. Depoyu
+okudum; hafızadan değil, dosyadan:
+
+| Soru | Bulgu |
+|---|---|
+| Çocuğa özel kaç eylem var? | **Sıfır.** `InteractionKind` altı tür: Vakit Geçir, Sohbet Et, Hediye Ver, Hediye İste, Para İste, Çocuğu Konuş (sonuncusu yalnızca eski eşle co-parenting). Hepsi annene de çocuğuna da aynı. |
+| Oyuncu çocuk sahibi olmayı seçebiliyor mu? | Dolaylı: eş/sevgili kartı → yakınlaşma → "korunmadan". `haveChild()` arayüzden hiç çağrılmıyor (Q-201). |
+| Gebelik ekranda görünüyor mu? | Yalnızca eşin kişi kartında (Q-202). |
+| Çocuk için bir şey yapabiliyor muyum? | Yalnızca **tepki olarak**: `FamilyIssue` bir sorun açınca (okul, para, evlilik) Yanında ol / Konuş / Para ver / Karışma / Reddet. Önden yapılacak hiçbir şey yok. |
+| Çocuğun adını koyabiliyor muyum? | Evet, doğum bildiriminde (`notice_sheet.dart` → `nameChild`). Bu **eksik değil**. |
+
+**Asıl mesele.** Oyuncunun kendi 0–18 yaşı dolu: okul kademesi, öğretmen
+adı, sınıf arkadaşı sayısı, harçlık, kulüp, annenin tepkisi. Oyuncu
+ebeveyn olunca bu zenginlik kayboluyor — çocuk kendi hayatını arka planda
+yaşıyor (okul, iş, evlilik, torun; AO/AP paketleri kurdu) ama oyuncunun
+eli yok. Oyun "kararların fark yaratıyor" diyor; en büyük hayat
+kararlarından birinde oyuncunun elinde tek bir düğme bile yok.
+
+**Önerilen paket (BK), altı aşama:**
+
+1. **BK/1 — Gebelik görünür olsun (Q-202).** Hayat ekranındaki durum
+   satırında ve İlişkiler ekranında bekleyen doğum; doğuma kalan yıl.
+   Günlüğe tek satır yetmiyor, yıllar arasında kayboluyor.
+2. **BK/2 — Çocuk sahibi olmayı seçmek (Q-201).** Eş/sevgili kartındaki
+   yakınlaşma yolu kalsın ama niyet açık bir eylem olsun ("Çocuk
+   düşünüyoruz"). Botun aile politikası da oyuncunun kapısına taşınsın;
+   böylece her ölçüm gerçekten oyuncunun yaşadığı yoldan geçer. **Dikkat:
+   bu botun davranışını değiştirir, çocuklu hayat oranı ve ona bağlı
+   ölçümler kayar.** Ölçüm öncesi/sonrası raporlanacak.
+3. **BK/3 — Çocuğa özel eylemler.** Yeni `InteractionKind` değerleri:
+   ödevine otur, harçlık ver, hobiye yazdır, kural koy, okul alanı için
+   fikir ver. Her birinin çocuğun statlarına ve yakınlığa **ölçülebilir**
+   etkisi; etki büyüklükleri `prototypeOnly`.
+4. **BK/4 — Yaş kademesi.** Bebek (0–2), çocuk (3–12), ergen (13–17),
+   yetişkin (18+) için eylem listesi farklı olsun. D-180 ile sohbet
+   kademeleri zaten dört; aynı kademeleme buraya da gelsin.
+5. **BK/5 — Çocuğun yıl özeti.** Oyuncunun yıl özeti gibi, çocuğun da:
+   bu yıl ne oldu, senin yaptığın ne işe yaradı.
+6. **BK/6 — Ölçüm, testler, belgeler.** 500 aile hayatı; önce/sonra
+   karşılaştırma; `docs/FAMILY_SYSTEM.md` ve `PROJECT_STATUS.md`
+   güncellemesi; bekçi testleri.
+
+**Yapmayacaklarım (onay gelmeden):** `DECISIONS.md`'ye kural yazmak; etki
+sayılarını kalıcı denge kuralı saymak; mevcut `FamilyIssue` tepkilerini
+değiştirmek; çocuk üzerinden yeni bir para/istismar kanalı açmak (BK/6'da
+ayrıca taranacak).
+
+**Etkilenen kod:** `app/lib/domain/models/interaction.dart`,
+`app/lib/domain/interaction/{parenthood,family_interactions,intimacy}.dart`,
+`app/lib/domain/models/pregnancy.dart`, `app/lib/state/game_controller.dart`,
+`app/lib/ui/widgets/person_detail_sheet.dart`,
+`app/lib/ui/screens/` (Hayat ve İlişkiler ekranları),
+`app/test/support/player_bot.dart`.
+
+**Varsayılan işlem:** aşamalar sırayla, her biri kendi testleriyle ve
+ölçümüyle gelir; sayılar onay gelene dek `prototypeOnly`. BK/2'nin bot
+etkisi ölçülmeden sonraki aşamaya geçilmez.
