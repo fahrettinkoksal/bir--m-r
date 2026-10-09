@@ -70,6 +70,8 @@ class GameState {
     this.lastInteractionAge = const <String, int>{},
     this.pendingWedding,
     this.pregnancy,
+    this.familyPlan = FamilyPlan.belirsiz,
+    this.familyPlanPartnerId,
     this.military = const MilitaryState(),
     this.legal = const LegalState(),
     this.businesses = const <Business>[],
@@ -204,6 +206,21 @@ class GameState {
   final Pregnancy? pregnancy;
 
   bool get isExpecting => pregnancy != null;
+
+  /// Çiftin çocuk planı (Paket BK/2, Q-201).
+  ///
+  /// Kayıt **çifte** aittir: planı hangi partnerle konuştuğun
+  /// [familyPlanPartnerId] içinde durur. Ayrılıp başkasıyla
+  /// birlikte olan oyuncunun eski niyeti yeni ilişkiye taşınmaz;
+  /// [familyPlanFor] o yüzden kimliği karşılaştırır.
+  final FamilyPlan familyPlan;
+
+  /// Planın konuşulduğu kişinin kimliği; plan yoksa `null`.
+  final String? familyPlanPartnerId;
+
+  /// Bu kişiyle konuşulmuş plan; konuşulmamışsa [FamilyPlan.belirsiz].
+  FamilyPlan familyPlanFor(String partnerId) =>
+      familyPlanPartnerId == partnerId ? familyPlan : FamilyPlan.belirsiz;
 
   /// Askerlik durumu (Paket 29).
   final MilitaryState military;
@@ -1239,6 +1256,8 @@ class GameState {
     Map<String, int>? lastInteractionAge,
     Object? pendingWedding = _unsetEvent,
     Object? pregnancy = _unsetEvent,
+    FamilyPlan? familyPlan,
+    Object? familyPlanPartnerId = _unsetEvent,
     MilitaryState? military,
     int? unprotectedTries,
     int? ivfAttempts,
@@ -1346,6 +1365,10 @@ class GameState {
       pregnancy: pregnancy == _unsetEvent
           ? this.pregnancy
           : pregnancy as Pregnancy?,
+      familyPlan: familyPlan ?? this.familyPlan,
+      familyPlanPartnerId: familyPlanPartnerId == _unsetEvent
+          ? this.familyPlanPartnerId
+          : familyPlanPartnerId as String?,
       military: military ?? this.military,
       unprotectedTries: unprotectedTries ?? this.unprotectedTries,
       ivfAttempts: ivfAttempts ?? this.ivfAttempts,

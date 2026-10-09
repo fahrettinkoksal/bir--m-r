@@ -37,6 +37,7 @@ import 'package:bir_omur/data/finger_catalog.dart';
 import 'package:bir_omur/data/license_catalog.dart';
 import 'package:bir_omur/domain/models/pending_license_exam.dart';
 import 'package:bir_omur/domain/models/finger_profile.dart';
+import 'package:bir_omur/domain/models/pregnancy.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/domain/career/craft_mastery.dart';
@@ -44,6 +45,7 @@ import 'package:bir_omur/domain/career/job_market.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:bir_omur/domain/interaction/divorce_settlement.dart';
+import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
 import 'package:bir_omur/domain/interaction/friendship_depth.dart';
 import 'package:bir_omur/domain/interaction/marriage_engine.dart';
@@ -2123,16 +2125,39 @@ void _handleRelationships(
   // (D-047). İlk ölçümde bot yalnızca evliyken deniyordu ve "çocuklu
   // %5,4" çıkıyordu; bot oyundan daha katı davranıyordu. Çocuk isteyen
   // oyuncu ısrarcıdır, bu yüzden deneme ihtimali de yükseltildi.
+  //
+  // **Paket BK/2 — bot artık oyuncunun kapısından geçiyor (Q-201).**
+  // Burada `c.haveChild()` çağrılıyordu: arayüzün **hiçbir yerinden**
+  // ulaşılamayan bir kapı (Paket BJ bunu yazılı bıraktı). O çağrı
+  // çocuğu tek hamlede yaratıyor; gebeliği, korunma tercihini, yaş
+  // eğrisini, aynı yıl azalan ihtimali ve **kısırlığı** atlıyordu.
+  // Ölçüldü: 3×100 hayatta gebelik %0,0 ve aile arketipinde kısır
+  // oyuncuların 11/11'i çocuk sahibi oluyordu.
+  //
+  // Artık bot da oyuncunun yolunu yürüyor: niyeti **plana** yazar
+  // (`setFamilyPlan`), sonra korunmadan yakınlaşır. Çocuk gelirse
+  // ertesi yıl doğar.
   s = c.state!;
-  if (intent.wantsChildren &&
-      s.player.age >= 22 &&
-      rng.nextDouble() < 0.6 &&
-      c.childAvailability().isAllowed) {
-    c.haveChild();
-    while (c.state!.hasNotice) {
-      c.dismissNotice();
+  final Person? esSevgili = Intimacy.partnerOf(s);
+  if (esSevgili != null && s.player.age >= 22) {
+    // Niyet kayda girer: "düşünmüyoruz" demek de bir karardır.
+    final FamilyPlan hedef =
+        intent.wantsChildren ? FamilyPlan.istiyor : FamilyPlan.istemiyor;
+    if (s.familyPlanFor(esSevgili.id) != hedef) {
+      c.setFamilyPlan(esSevgili.id, hedef);
+      s = c.state!;
     }
-    if (c.state!.hasPendingEvent) return;
+    // Deneme: planı "düşünüyoruz" olan çift korunmadan yakınlaşır.
+    // Gebelik bir ihtimal; garanti değil.
+    if (hedef.triesForChild &&
+        rng.nextDouble() < 0.6 &&
+        c.intimacyAvailability(esSevgili.id).isAllowed) {
+      c.tryForChild(esSevgili.id);
+      while (c.state!.hasNotice) {
+        c.dismissNotice();
+      }
+      if (c.state!.hasPendingEvent) return;
+    }
   }
 
   // Kısırlık çıktıysa tedaviyi dener: aile odaklı oyuncu vazgeçmez.

@@ -255,6 +255,20 @@ class IntimacyEngine {
     }
 
     // Korunmadan: gebelik bir **ihtimal**.
+    //
+    // Bebek zaten yoldaysa metin "bu yıl yeterince denediniz" diyordu:
+    // doğru değil, çünkü sebep deneme sayısı değil süren gebelikti
+    // (Paket BK/2'de görüldü — BK/1 gebeliği ekranda gösterince iki
+    // metin birbirini yalanlıyordu).
+    if (state.isExpecting) {
+      return FamilyResult(
+        state: next,
+        outcome: const FamilyOutcome(
+          applied: true,
+          text: 'Baş başa bir akşam geçirdiniz. Bebeğiniz zaten yolda.',
+        ),
+      );
+    }
     if (!Intimacy.canConceiveThisYear(state)) {
       return FamilyResult(
         state: next,

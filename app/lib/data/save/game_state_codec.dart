@@ -368,6 +368,11 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
               'startedAtAge': state.pregnancy!.startedAtAge,
               'expecting': state.pregnancy!.expecting.name,
             },
+      // Çocuk planı (Paket BK/2): niyet kayda girer, uygulama kapansa
+      // da "çocuk düşünüyoruz" kararı kaybolmaz. Plan **çifte** ait
+      // olduğu için kiminle konuşulduğu da yazılır.
+      'familyPlan': state.familyPlan.name,
+      'familyPlanPartnerId': state.familyPlanPartnerId,
       // Askerlik kaydı (Paket 29); yarım kalan hizmet kaybolmaz.
       // Kurulmuş işler (D-132). Eski kayıtlarda yoktur; boş açılır.
       'businesses': <Object?>[
@@ -1866,6 +1871,16 @@ GameState decodeGameState(Map<String, Object?> json) {
     pregnancy: json['pregnancy'] == null
         ? null
         : _decodePregnancy(_asMap(json['pregnancy'], 'pregnancy')),
+    // Eski kayıtlarda çocuk planı yoktur; **geriye dönük niyet
+    // uydurulmaz**, plan "konuşulmadı" olarak açılır (Paket BK/2).
+    familyPlan: json['familyPlan'] == null
+        ? FamilyPlan.belirsiz
+        : _enumByName(
+            FamilyPlan.values,
+            json['familyPlan'] as String,
+            'familyPlan',
+          ),
+    familyPlanPartnerId: json['familyPlanPartnerId'] as String?,
     // Eski kayıtlarda askerlik kaydı yoktur; **geriye dönük askerlik
     // uydurulmaz**, durum "yapılmadı" olarak açılır (Paket 29).
     military: json['military'] == null

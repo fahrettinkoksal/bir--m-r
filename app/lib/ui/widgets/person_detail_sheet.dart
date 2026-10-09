@@ -279,11 +279,124 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     );
   }
 
+  /// Çiftin çocuk planı: niyet artık açık bir eylem (Paket BK/2, Q-201).
+  ///
+  /// Faho'nun Paket 25 kararı yerinde: **"çocuk yap" düğmesi yok**,
+  /// çocuk bir ihtimal. Eksik olan, oyuncunun bu ihtimali isteyip
+  /// istemediğini söyleyebilmesiydi — niyet hiçbir yere yazılmıyordu.
+  /// Plan burada görünür, kayda girer ve korunma penceresinde
+  /// hatırlanır.
+  List<Widget> _familyPlanSection(GameState state, Person person) {
+    final GameController c = GameScope.of(context);
+    if (!c.familyPlanAvailability(widget.personId).isAllowed) {
+      return const <Widget>[];
+    }
+    final ThemeData theme = Theme.of(context);
+    final FamilyPlan plan = c.familyPlanWith(widget.personId);
+    // Bebek yoldaysa "deniyoruz" düğmesi anlamsız: motor o yıl yeni
+    // gebelik hesaplamıyor.
+    final bool bebekYolda = state.isExpecting &&
+        state.pregnancy!.partnerId == widget.personId;
+    return <Widget>[
+      const SizedBox(height: 12),
+      InkWell(
+        key: const Key('person_family_plan_row'),
+        onTap: () => _chooseFamilyPlan(person),
+        borderRadius: BorderRadius.circular(Comic.yaricap),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(Comic.yaricap),
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                Icons.family_restroom_rounded,
+                size: 19,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Çocuk planı',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      plan.label,
+                      key: const Key('person_family_plan_value'),
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (plan.triesForChild && !bebekYolda) ...<Widget>[
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            key: const Key('person_try_for_child'),
+            onPressed: () => _tryForChild(person),
+            icon: const Icon(Icons.child_friendly_rounded),
+            label: const Text('Çocuk deniyoruz'),
+          ),
+        ),
+      ],
+    ];
+  }
+
+  Future<void> _chooseFamilyPlan(Person person) async {
+    final FamilyPlan? secim = await showModalBottomSheet<FamilyPlan>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext context) => _FamilyPlanSheet(
+        person: person,
+        current: GameScope.of(context).familyPlanWith(widget.personId),
+      ),
+    );
+    if (secim == null || !mounted) return;
+    final FamilyOutcome? sonuc =
+        GameScope.of(context).setFamilyPlan(widget.personId, secim);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
+  /// Açık deneme: arkada **aynı** motor çalışır (korunmadan yakınlaşma).
+  void _tryForChild(Person person) {
+    final FamilyOutcome? sonuc =
+        GameScope.of(context).tryForChild(widget.personId);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
   Future<void> _intimacy(Person person) async {
     final Protection? secim = await showModalBottomSheet<Protection>(
       context: context,
       showDragHandle: true,
-      builder: (BuildContext context) => _ProtectionSheet(person: person),
+      builder: (BuildContext context) => _ProtectionSheet(
+        person: person,
+        plan: GameScope.of(context).familyPlanWith(widget.personId),
+      ),
     );
     if (secim == null || !mounted) return;
     final FamilyOutcome? sonuc =
@@ -687,6 +800,8 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     text: 'Baş başa kalmak için: '
                         '${GameScope.of(context).intimacyAvailability(widget.personId).reason}',
                   ),
+                // Niyet açık bir eylem (Paket BK/2).
+                ..._familyPlanSection(state, person),
               ],
 
               // Eşe özel eylemler: çocuk sahibi olmak ve boşanma.
@@ -710,6 +825,8 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     text: 'Baş başa kalmak için: '
                         '${GameScope.of(context).intimacyAvailability(widget.personId).reason}',
                   ),
+                // Niyet açık bir eylem (Paket BK/2).
+                ..._familyPlanSection(state, person),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
@@ -1302,9 +1419,14 @@ class _StyleRow extends StatelessWidget {
 /// Metin kapalı ve ölçülüdür; sahne anlatılmaz. Ne kastedildiği
 /// başlıktaki simgeden ve seçeneklerin kendisinden anlaşılır.
 class _ProtectionSheet extends StatelessWidget {
-  const _ProtectionSheet({required this.person});
+  const _ProtectionSheet({required this.person, required this.plan});
 
   final Person person;
+
+  /// Çiftin çocuk planı (Paket BK/2): hangi seçeneğin öne çıkacağını
+  /// **o** belirler. Karar hâlâ oyuncunun; plan yalnızca konuşulanı
+  /// hatırlatır ve ihtimale dokunmaz.
+  final FamilyPlan plan;
 
   @override
   Widget build(BuildContext context) {
@@ -1328,6 +1450,16 @@ class _ProtectionSheet extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            if (plan != FamilyPlan.belirsiz) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Konuştuğunuz plan: ${plan.label.toLowerCase()}.',
+                key: const Key('protection_plan_note'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
             const SizedBox(height: 14),
             const KilimDivider(),
             const SizedBox(height: 14),
@@ -1355,6 +1487,109 @@ class _ProtectionSheet extends StatelessWidget {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      // Konuşulan planla eşleşen seçenek işaretlenir.
+                      // Düğmenin **rengi** değişmiyor: dolu düğme
+                      // üstünde ipucu yazısının kontrastı ölçülmedi,
+                      // ölçmeden renk değiştirmek yerine satır eklendi.
+                      if (_planEslesiyor(plan, p)) ...<Widget>[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Konuştuğunuz plan bu.',
+                          key: Key('protection_plan_match_${p.name}'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Konuşulan plan bu korunma seçeneğiyle aynı şeyi mi söylüyor?
+bool _planEslesiyor(FamilyPlan plan, Protection p) => switch (plan) {
+  FamilyPlan.istiyor => p == Protection.korunmadan,
+  FamilyPlan.istemiyor => p == Protection.korunarak,
+  FamilyPlan.belirsiz => false,
+};
+
+/// Çocuk planı seçimi (Paket BK/2, Q-201).
+///
+/// Üç seçenek de her zaman açıktır: "düşünmüyoruz" demek de bir karardır
+/// ve kayda girer. Pencere **çocuk getirmez**; gebelik hâlâ korunmadan
+/// yakınlaşmanın ihtimalidir.
+class _FamilyPlanSheet extends StatelessWidget {
+  const _FamilyPlanSheet({required this.person, required this.current});
+
+  final Person person;
+  final FamilyPlan current;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              '${person.firstName} ile çocuk planı',
+              style: theme.textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Kararınız kayda girer ve baş başa kaldığınızda '
+              'hatırlanır. Plan tek başına çocuk getirmez.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 14),
+            const KilimDivider(),
+            const SizedBox(height: 14),
+            for (final FamilyPlan plan in FamilyPlan.values) ...<Widget>[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: Key('family_plan_${plan.name}'),
+                  onPressed: () => Navigator.of(context).pop(plan),
+                  style: OutlinedButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(plan.label, style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 2),
+                      Text(
+                        plan.description,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (plan == current) ...<Widget>[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Şu anki kararınız.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

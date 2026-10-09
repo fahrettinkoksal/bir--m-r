@@ -121,6 +121,7 @@ import '../domain/models/trip.dart';
 import '../domain/social/social_engine.dart';
 import '../data/military_catalog.dart';
 import '../domain/career/military_service.dart';
+import '../domain/interaction/family_planning.dart';
 import '../domain/interaction/intimacy.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
@@ -133,6 +134,7 @@ import '../domain/models/owned_item.dart';
 import '../domain/models/rental.dart';
 import '../domain/models/pending_interview.dart';
 import '../domain/models/person.dart';
+import '../domain/models/pregnancy.dart';
 import '../data/pet_catalog.dart';
 import '../domain/pets/pet_care.dart';
 import '../domain/activities/outing.dart';
@@ -152,6 +154,7 @@ class GameController extends ChangeNotifier {
   final Romance _romance = const Romance();
   final MarriageEngine _marriages = const MarriageEngine();
   final Parenthood _parenthood = const Parenthood();
+  final FamilyPlanning _familyPlanning = const FamilyPlanning();
   final ItemActions _items = const ItemActions();
   final EducationPath _education = const EducationPath();
   final JobMarket _jobs = const JobMarket();
@@ -4010,6 +4013,46 @@ class GameController extends ChangeNotifier {
           _random,
         ),
       );
+
+  /// Çiftin çocuk planı; konuşulmamışsa [FamilyPlan.belirsiz]
+  /// (Paket BK/2).
+  FamilyPlan familyPlanWith(String personId) =>
+      _state?.familyPlanFor(personId) ?? FamilyPlan.belirsiz;
+
+  /// Çocuk planını konuşmaya engel var mı? (Paket BK/2)
+  InteractionAvailability familyPlanAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final Person? person = current.personById(personId);
+    if (person == null) {
+      return const InteractionAvailability.blocked('Bu kişi kayıtlarda yok.');
+    }
+    final String engel = _familyPlanning.blockReason(current, person);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Çiftin çocuk planını yazar (Paket BK/2, Q-201).
+  ///
+  /// **Çocuk getirmez.** Yalnızca niyet kayda girer; gebelik hâlâ
+  /// korunmadan yakınlaşmanın ihtimalidir (Faho'nun Paket 25 kararı).
+  FamilyOutcome? setFamilyPlan(String personId, FamilyPlan plan) =>
+      _runFamily(
+        (GameState current) =>
+            _familyPlanning.setPlan(current, personId, plan),
+      );
+
+  /// Çocuk denemesi: planı "düşünüyoruz" olan çift için açık eylem
+  /// (Paket BK/2).
+  ///
+  /// Arkada **aynı motor** çalışır: korunmadan yakınlaşma. Ayrı bir
+  /// ihtimal, ayrı bir sayaç ya da ayrı bir kural yok; yalnızca
+  /// oyuncunun niyeti tek dokunuşla görünür hâle geliyor.
+  FamilyOutcome? tryForChild(String personId) =>
+      beIntimate(personId, Protection.korunmadan);
 
   /// Evlat edinme başvurusuna engel var mı?
   InteractionAvailability adoptionAvailability() {
