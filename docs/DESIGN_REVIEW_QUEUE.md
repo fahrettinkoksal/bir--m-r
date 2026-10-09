@@ -7735,3 +7735,62 @@ günlüğü geriye dönük filtrelemek.
 iz sayısı sıfır, açık tarafta sıfırdan büyük. Hepsi kapalı 100 hayatta
 ortalama yaş 70,4; evlenen 89, çocuğu olan 71, iş tutan 99 — yani
 modüller kapalıyken oyun paket öncesi gibi çalışıyor.
+
+### Q-207 — Sınav ağırlığı bekçisinin yöntemi değişti: onayın var mı?
+
+**Durum:** değişiklik **yapıldı** (çünkü bekçi oyunun kuralını değil
+havuzun büyüklüğünü ölçüyordu ve her içerik paketini imkânsız hâle
+getiriyordu), ama yöntem kararı Faho'nun. Geri almak tek dosyada tek
+testlik iş.
+
+**Ne vardı.** `app/test/priority_event_test.dart` içindeki "sınav
+olayının ağırlığı penceresindeki rakipleri eziyor" bekçisi, sınav
+olayının etkin ağırlığını havuzdaki **bütün** priority-0 olayların
+ağırlık toplamına bölüyor ve oranın 40'tan büyük olmasını istiyordu.
+Eşik, Paket AN'de ölçülen en düşük oranın (49,7) altına konulmuştu.
+
+**Ölçülen sorun.** Toplam, yaş/sınıf/kişi koşuluna hiç bakmıyor. Sınav
+olayı 8. sınıfta, yani 13 yaşında çıkıyor; Paket BM'nin 0-7 yaş
+olayları o yıl **çıkamaz** ama rakip hanesine yazılıyordu. Üstelik:
+
+| Ölçüm | Değer |
+|---|---|
+| Havuzun priority-0 toplamı (BM'den önce) | 2.133 → oran **40,5** |
+| Aynı toplam (BM'nin 31 olayından sonra) | 2.203 → oran **39,2** |
+| Sınavın gerçekten yarıştığı yılda uygun rakip toplamı (8. sınıf) | **256** → oran 337,5 |
+| Aynı ölçüm, 12. sınıf | **188** → oran 689,4 |
+
+Yani bekçi, ilk yıllar havuzu eklenmeden **önce** zaten eşiğin 0,5
+üstündeydi. Bu hâliyle hiçbir içerik paketi geçemezdi: 31 olayın
+ağırlığı en düşük değere (1) çekilse bile oran 40'ın altına iniyor.
+Oysa aynı dosyadaki **uçtan uca** koruma — 8. ve 12. sınıfa ulaşan
+oyuncuların %90'ından fazlası sınav olayını görüyor — bu süreçte hiç
+bozulmadı. Yani ürün kuralı ("sınav yılı neredeyse kesin yaşanır")
+yerinde; sorun bekçinin ölçtüğü şeydeydi.
+
+**Yapılan.** Rakip kümesi artık sınavın gerçekten yarıştığı yılda
+**uygun olan** olaylar (`EventEngine.debugEligibleIds`, dört ayrı
+hayatın en kalabalık kümesi). Eşik, aynı yaklaşımla yeniden ölçülüp
+**150**'ye çekildi; ölçülen en düşük oran 337,5. Bu, eskisinden daha
+dar bir bant: gerçek bir seyrelme (payın üçte ikisini kaybetmek)
+testi kırar, havuzun büyümesi kırmaz.
+
+**Seçenekler**
+1. **Olduğu gibi kalsın** (bugünkü hâl): rakip kümesi o yılın uygun
+   olayları, eşik 150.
+2. **Eski yöntem geri gelsin**, eşik düşürülsün (ör. 35). Bekçi yine
+   havuz büyüklüğünü ölçer; bir sonraki içerik paketinde yine kırılır.
+3. **Sınav olaylarının ağırlığı yükseltilsin** (ör. en zayıf olan
+   `sinav8_gece` 6'dan 7'ye). Eski yöntem geçerli kalır ama bu,
+   sınav yılı içinde hangi sahnenin çıktığı dağılımını da değiştirir;
+   onaylı içerik karışımına dokunmak istemedim.
+
+**Önerim ve varsayılanım: (1).** Testin adı zaten "penceresindeki
+rakipler" diyordu; ölçüm artık adını tutuyor ve eşik daha dar.
+
+**Etkilenen kod:** `app/test/priority_event_test.dart` (yalnızca test),
+`app/lib/data/event_pool_early_years.dart` (ilk yıllar olaylarının
+ağırlığı 3, karşılık olayları 4).
+
+**Yapmayacağım (onay gelmeden):** sınav olaylarının ağırlıklarına veya
+`priority` kademesine dokunmak; uçtan uca korumanın eşiğini değiştirmek.
