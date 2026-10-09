@@ -215,5 +215,10 @@ completed	Paket BI/3: bebekle sohbette okul/soru/korku kapandı, "kendi yaşınd
 completed	Q-200 / D-180: sohbete ergen (13-17) kademesi eklendi, dört kademe eşitlendi
 completed	Paket BJ/1: denetim dönemi ve gebelik ekranları okundu, okunmamış ekran kalmadı
 completed	Paket BJ/2: oyuncunun çocuk yolu ölçüldü — 20 çiftin 18'i gebe, 12/12 doğumla kapandı
-pending	Q-201: bot haveChild() kullanıyor, oyuncu bu kapıyı kullanamıyor
-pending	Q-202: gebelik yalnızca eşin kişi kartında görünüyor
+completed	Q-202 / BK/1: bekleyen doğum üst künyede, Hayat ve İlişkiler ekranında görünür
+completed	Q-201 / BK/2: çocuk planı açık eylem oldu, bot haveChild() yerine gebelik yolundan geçiyor
+completed	Paket BK/3: çocuğa özel dört eylem (ödev, harçlık, hobi, kural) ve adviseChild kapısı
+completed	Paket BK/4: çocuğun yaş kademesi D-180 eşikleriyle (0-3 / 4-12 / 13-17 / 18+)
+pending	Paket BK/5: çocuğun yıl özeti
+pending	Paket BK/6: 500 aile hayatı, belgeler, bekçi testleri ve exploit taraması
+pending	Q-204: gebelik 55'e kadar açık ama doğum 45'te kapalı — karar bekliyor

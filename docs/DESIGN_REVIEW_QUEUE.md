@@ -7557,3 +7557,60 @@ ayrıca taranacak).
 **Varsayılan işlem:** aşamalar sırayla, her biri kendi testleriyle ve
 ölçümüyle gelir; sayılar onay gelene dek `prototypeOnly`. BK/2'nin bot
 etkisi ölçülmeden sonraki aşamaya geçilmez.
+
+**BK/1-BK/4 yapıldı (9 Ekim 2026).** Kayıt burada tutuluyor; kuyruk
+silinmiyor:
+
+| Aşama | Durum | Ölçülen |
+|---|---|---|
+| BK/1 — gebelik görünür | yapıldı (`ab7eb13`) | üst künye + Hayat kartı + İlişkiler kartı; 11 test |
+| BK/2 — çocuk planı, bot oyuncunun kapısında | yapıldı (`9c69215`) | gebelik %0 → %42; kısır ama çocuklu 11/11 → tüp bebek yolu; 15 test |
+| BK/3 — çocuğa özel eylemler | yapıldı (`16af118`) | dört yeni tür %54-%73 kullanım; `adviseChild` kapısı açıldı; 16 test |
+| BK/4 — yaş kademesi | yapıldı | kademe D-180'den; 13 bekçi testi |
+
+**BK/4'te bir çakışma düzeltildi.** Yukarıda kademe "bebek 0–2" diye
+önerilmişti; **D-180 onaylı kuralı 0-3 / 4-12 / 13-17 / 18+ diyor.**
+Öneri kurala uyduruldu, ikinci bir yaş sınırı eklenmedi — D-180'in
+kendisi tam bu yüzden yazılmıştı (sohbet dalı 12, vakit geçirme dalı 3
+diyordu). Kademe **listenin şeklini** belirliyor; kademe içindeki ince
+koşullar (harçlık 7 yaşından, kurs 6 yaşından) eylemin kendi
+uygunluğunda duruyor.
+
+### Q-204 — Gebelik 55'e kadar açık, doğum 45'te kapalı: hangi taraf doğru?
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Sayıya
+dokunulmadı.
+
+**Nasıl çıktı.** BK/2'de bot oyuncunun yoluna taşındı ve gebelik yolu
+ilk kez ölçüme girdi. İki kural birbirini kesiyor:
+
+| Kural | Nerede | Ne diyor |
+|---|---|---|
+| `Intimacy.prototypeOnlyAgeFactor` | `intimacy.dart` | 55 yaşına kadar gebelik **mümkün** (46-48'de %2, 51-55'te %0,2). Faho'nun isteği yazılı: "55'e kadar hamile kalınabilir olsun, yaş ilerledikçe ihtimal düşsün." |
+| `Parenthood.prototypeOnlyMaxMotherAge` | `parenthood.dart` | Anne **45**'ten büyükse çocuk sahibi olma yolu kapalı. |
+
+Doğum **bir sonraki yaşta** olduğu için 45'inde gebe kalan karakter
+46'sında doğum sırasına geliyor ve `_applyBirth` doğumu
+gerçekleştiremiyor: gebelik günlüğe bir satırla kapanıyor. Yani 45-55
+aralığında **gebelik yazılıyor ama bebek gelmiyor.**
+
+**Seçenekler**
+
+1. **Doğum sınırını gebelik eğrisine açmak** (`maxMotherAge` 45 → 56):
+   gebelik olduysa doğum da olur. 51-55'te ihtimal %0,2 olduğu için
+   oyunda neredeyse hiç görülmez, ama "oldu da olmadı" çelişkisi
+   kalkar.
+2. **Gebeliği 44'te kapatmak** (`ageFactor` 45+ → 0): Faho'nun "55'e
+   kadar" isteğinden geri adım.
+3. **Olduğu gibi bırakıp metni düzeltmek:** gebelik kapanırken sebebi
+   oyuncuya açıkça yazılır.
+
+**Önerim ve varsayılanım:** (1). Faho'nun açık isteği 55'ti ve eğri
+gerçeğe yaslanmış durumda; çelişkiyi kaldırmanın en az kural değiştiren
+yolu doğum kapısını gebelik kapısıyla eşitlemek.
+
+**Etkilenen kod:** `app/lib/domain/interaction/parenthood.dart`,
+`app/lib/domain/generation/life_progression.dart` (`_applyBirth`).
+
+**Yapmayacağım (onay gelmeden):** sayıyı değiştirmek. Karar gelene kadar
+45 sınırı yerinde kalıyor.
