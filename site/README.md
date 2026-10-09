@@ -77,13 +77,17 @@ Oyunun teması değişirse buradaki değerler de güncellenmeli.
   başlığın hemen altında, ilk ekranda duruyor; eski afiş şeridi kaldırıldı
   (aynı işi daha zayıf yapıyordu). Veri `assets/hayat.js` (Türkçe) ve
   `assets/life.js` (İngilizce) dosyalarında; ikisi de elle yazılmadı.
-  Kaynak: `app/test/support/player_bot.dart` içindeki
-  `playBotLife(archetype: PlayerArchetype.family, seed: 777)`. Geçici bir
-  test dosyası her yılın `onPreAge` anında yaş, şehir, okul, iş, cüzdan ve
-  beş statı, ölüm yılını da `onYear` ile alıp JSON'a döktü; sonra yılda en
-  çok üç satır seçildi (muhasebe satırları elendi, aynı kalıp hayat boyunca
-  en çok üç kez, yıl içinde bir kez). 150 karakteri geçen tek satır ilk
-  cümlelerine kısaltıldı. Tam günlük 1.034 satır, seçilen 230.
+  **Üç hayat var ve üçü de aynı tohumdan**: `app/test/support/player_bot.dart`
+  içindeki `playBotLife(seed: 777)` üç ayrı arketiple (`family`, `sport`,
+  `casual`) oynandı. Tohum doğumu belirlediği için üçünde de aynı bebek,
+  aynı anne baba, aynı şehir çıkıyor; değişen tek şey botun kararları —
+  ölümler 78, 56 ve 86 yaşında. Sitenin söylediği "aynı doğum, farklı
+  kararlar" iddiası buradan geliyor; uydurma değil, ölçülmüş.
+  Geçici bir test dosyası her yılın `onPreAge` anında yaş, şehir, okul, iş,
+  cüzdan ve beş statı, ölüm yılını da `onYear` ile alıp JSON'a döktü; sonra
+  yılda en çok üç satır seçildi (muhasebe satırları elendi, aynı kalıp hayat
+  boyunca en çok üç kez, yıl içinde bir kez). 150 karakteri geçen satırlar
+  ilk cümlelerine kısaltıldı. Üçünün tam günlüğü 2.764 satır, seçilen 647.
   Yenilemek istersen aynı yolu izle: satır **uydurma**, oyundan al.
   İngilizce dosya aynı hayatın çevirisi; sayılar ve sıralama değişmiyor.
 - "Yüzeyin altında" listesinin ilk dört maddesi açık, kalan altısı

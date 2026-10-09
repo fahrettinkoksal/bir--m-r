@@ -172,6 +172,14 @@ h1 {
   margin: 0 0 14px;
 }
 
+/* Kartın hemen üstündeki kanca cümlesi: giriş metninden bir ton öne çıksın. */
+.giris-kanca {
+  font-weight: 600;
+  border-left: 4px solid var(--kirmizi);
+  padding-left: 14px;
+  margin-top: 18px;
+}
+
 .durum-notu {
   font-size: 0.95rem;
   color: var(--murekkep);

@@ -46,6 +46,12 @@
       chose.
     </p>
 
+    <p class="giris giris-kanca">
+      The three lives below start from the same baby: the same parents, the
+      same city, the same year. One ends at 56, another runs to 86. The only
+      difference is the decisions taken, year by year.
+    </p>
+
     <div class="hayat" id="play" data-hayat data-goster>
       <div class="hayat-ust">
         <div class="hayat-kim">
@@ -106,16 +112,19 @@
       <div class="hayat-kumanda">
         <button type="button" class="hayat-dugme" data-yasal>Age Up</button>
         <button type="button" class="hayat-yan" data-oto aria-pressed="false">Play automatically</button>
+        <button type="button" class="hayat-yan" data-baska>Another life</button>
         <button type="button" class="hayat-yan" data-bastan>Restart</button>
-        <span class="hayat-sayac"><b data-sira>1</b> / 79 years</span>
+        <span class="hayat-sayac" data-sayac><b data-sira>1</b> / 79 years · life 1</span>
       </div>
     </div>
     <p class="hayat-kaynak">
-      The game's own engine played this life: a test bot made the decisions,
-      the game produced the events and the text. Not one line was written for
-      this site. The full log runs to 1,034 lines; at most three per year made
-      it here, 230 in total. The game is in Turkish; these lines are
-      translated from its own output.
+      The game's own engine played all three: a test bot made the decisions,
+      the game produced the events and the text. Same seed, same birth — one
+      ends at 56 after a long illness, one leaves four children and nine
+      grandchildren at 78, one runs to 86. Not one line was written for this
+      site; the three full logs come to 2,764 lines, and at most three per
+      year made it here. The game is in Turkish; these lines are translated
+      from its own output.
     </p>
     <div class="giris-ikili">
       <p class="giris">
@@ -596,15 +605,14 @@
   }, 2500);
 })();
 
-// Oynanabilir ömür: oyunun kendi tur kaydını yıl yıl gösterir. Yıl 0
-// HTML'de gömülü olduğu için betik çalışmazsa kart okunur kalır.
+// Oynanabilir ömür: oyunun kendi tur kayıtlarını yıl yıl gösterir. Üç hayat
+// da aynı tohumdan, aynı doğumdan başlıyor; değişen tek şey kararlar.
+// Yıl 0 HTML'de gömülü olduğu için betik çalışmazsa kart okunur kalır.
 (function () {
   var veri = window.BIR_OMUR_HAYAT;
   var kart = document.querySelector('[data-hayat]');
-  if (!veri || !kart || !veri.yillar || veri.yillar.length < 2) return;
+  if (!veri || !kart || !veri.hayatlar || !veri.hayatlar.length) return;
 
-  var yillar = veri.yillar;
-  var sonIndeks = yillar.length - 1;
   var t = veri.t || {};
   var yerel = t.yerel || 'tr-TR';
   var defter = kart.querySelector('[data-defter]');
@@ -613,23 +621,37 @@
   var elIs = kart.querySelector('[data-is]');
   var elPara = kart.querySelector('[data-cuzdan]');
   var elCizgi = kart.querySelector('[data-cizgi]');
-  var elSira = kart.querySelector('[data-sira]');
+  var elSayac = kart.querySelector('[data-sayac]');
   var dYas = kart.querySelector('[data-yasal]');
   var dOto = kart.querySelector('[data-oto]');
+  var dBaska = kart.querySelector('[data-baska]');
   var dBastan = kart.querySelector('[data-bastan]');
   var raylar = kart.querySelectorAll('[data-stat]');
   var degerler = kart.querySelectorAll('[data-deger]');
   if (!defter || !dYas || !dOto || !dBastan) return;
 
-  var ilkDefter = defter.innerHTML;
   var azHareket = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hangi = 0;
+  var hayat = veri.hayatlar[0];
+  var yillar = hayat.yillar;
+  var sonIndeks = yillar.length - 1;
   var simdi = 0;
   var sayac = null;
   var kendiBasladi = false;
 
   function sayi(n) {
     try { return n.toLocaleString(yerel); } catch (e) { return String(n); }
+  }
+
+  function yaz(kalip, deger) {
+    var cikti = kalip || '';
+    for (var anahtar in deger) {
+      if (Object.prototype.hasOwnProperty.call(deger, anahtar)) {
+        cikti = cikti.split('{' + anahtar + '}').join(deger[anahtar]);
+      }
+    }
+    return cikti;
   }
 
   // Üst bilgi ve statlar: o yılın gerçek değerleri.
@@ -644,9 +666,14 @@
       elIs.textContent = '';
       elIs.hidden = true;
     }
-    elPara.textContent = (t.para || '{n} ₺').replace('{n}', sayi(y.p));
+    elPara.textContent = yaz(t.para || '{n} ₺', { n: sayi(y.p) });
     elCizgi.style.width = Math.max(1, Math.round((i / sonIndeks) * 100)) + '%';
-    elSira.textContent = i + 1;
+    if (elSayac) {
+      elSayac.textContent = yaz(t.sayac || '{sira} / {toplam}', {
+        sira: i + 1, toplam: yillar.length, no: hangi + 1,
+        etiket: hayat.etiket
+      });
+    }
     for (var k = 0; k < raylar.length; k++) {
       if (y.s[k] === undefined) continue;
       raylar[k].style.width = y.s[k] + '%';
@@ -659,7 +686,7 @@
     kutu.className = 'hayat-yil yeni';
     var bas = document.createElement('p');
     bas.className = 'hayat-yil-bas';
-    bas.textContent = (t.yilBas || '{yas}').replace('{yas}', y.y);
+    bas.textContent = yaz(t.yilBas || '{yas}', { yas: y.y });
     kutu.appendChild(bas);
     var liste = document.createElement('ul');
     for (var i = 0; i < y.g.length; i++) {
@@ -688,36 +715,36 @@
       sayac = null;
     }
     dOto.setAttribute('aria-pressed', 'false');
-    dOto.textContent = t.oto || 'Otomatik oynat';
+    dOto.textContent = t.oto || '';
   }
 
   function basla() {
     if (sayac || simdi >= sonIndeks) return;
     sayac = window.setInterval(ilerle, 1500);
     dOto.setAttribute('aria-pressed', 'true');
-    dOto.textContent = t.dur || 'Duraklat';
+    dOto.textContent = t.dur || '';
   }
 
   function bitir() {
     dur();
     dYas.disabled = true;
     if (defter.querySelector('.hayat-son')) return;
+    var sonMu = hangi === veri.hayatlar.length - 1;
     var kutu = document.createElement('div');
     kutu.className = 'hayat-son';
     var bas = document.createElement('p');
     bas.className = 'hayat-son-bas';
     bas.textContent = t.sonBas || '';
     var ozet = document.createElement('p');
-    ozet.textContent = (t.sonOzet || '')
-      .replace('{yil}', veri.olum)
-      .replace('{cocuk}', veri.cocuk)
-      .replace('{torun}', veri.torun)
-      .replace('{unvan}', veri.unvan);
+    ozet.textContent = yaz(t.sonOzet, {
+      yil: hayat.olum, cocuk: hayat.cocuk,
+      torun: hayat.torun, unvan: hayat.unvan
+    });
     var not = document.createElement('p');
     not.className = 'hayat-son-not';
-    not.textContent = (t.sonNot || '')
-      .replace('{tam}', sayi(veri.tamSatir))
-      .replace('{satir}', veri.satir);
+    not.textContent = yaz(sonMu ? (t.sonNotSon || t.sonNot) : t.sonNot, {
+      tam: sayi(hayat.tamSatir), satir: hayat.satir
+    });
     kutu.appendChild(bas);
     kutu.appendChild(ozet);
     kutu.appendChild(not);
@@ -736,6 +763,22 @@
     if (simdi >= sonIndeks) bitir();
   }
 
+  // Seçili hayatı en baştan kurar: günlük temizlenir, 0 yaş veriden yazılır.
+  function hayatiKur(i) {
+    dur();
+    hangi = ((i % veri.hayatlar.length) + veri.hayatlar.length)
+      % veri.hayatlar.length;
+    hayat = veri.hayatlar[hangi];
+    yillar = hayat.yillar;
+    sonIndeks = yillar.length - 1;
+    simdi = 0;
+    dYas.disabled = false;
+    while (defter.firstChild) defter.removeChild(defter.firstChild);
+    defter.appendChild(yilBlogu(yillar[0]));
+    basliklar(0);
+    defter.scrollTop = 0;
+  }
+
   dYas.addEventListener('click', function () {
     dur();
     ilerle();
@@ -744,24 +787,20 @@
   dOto.addEventListener('click', function () {
     if (sayac) {
       dur();
-    } else if (simdi >= sonIndeks) {
-      bastanAl();
-      basla();
     } else {
+      if (simdi >= sonIndeks) hayatiKur(hangi);
       basla();
     }
   });
 
-  function bastanAl() {
-    dur();
-    simdi = 0;
-    dYas.disabled = false;
-    defter.innerHTML = ilkDefter;
-    basliklar(0);
-    defter.scrollTop = 0;
-  }
+  dBastan.addEventListener('click', function () { hayatiKur(hangi); });
 
-  dBastan.addEventListener('click', bastanAl);
+  if (dBaska) {
+    dBaska.addEventListener('click', function () {
+      hayatiKur(hangi + 1);
+      if (!azHareket) basla();
+    });
+  }
 
   // Kart ekrana girince kendi oynamaya başlar; hareketi azaltan ayar
   // açıksa beklemez, kullanıcı düğmeye basar.
