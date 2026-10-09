@@ -6,18 +6,24 @@ oyunu oynayanların isteyeceği şeyleri ekle." Tek şart: eklenen bir
 özellik beğenilmezse çıkarılabilsin — bunun altyapısı Paket BL'de
 kuruldu (`docs/FEATURE_FLAGS.md`).
 
-Bu dosya **Claude'un planıdır**, kesin karar değildir. Faho herhangi bir
-satırı iptal edebilir; sırası da değişebilir. Her paket bittiğinde burası
-tazelenir.
+Bu dosya **Claude'un planıdır**. Faho herhangi bir satırı iptal edebilir;
+sırası da değişebilir. Her paket bittiğinde burası tazelenir.
+
+**9 Ekim 2026, ikinci talimat:** "bana soru sorma, geç; tüm yetkiyi sana
+verdim." Bundan sonra Claude kararı kendisi verir, uygular ve kaydını
+`docs/DESIGN_REVIEW_QUEUE.md`'ye **karar olarak** yazar — soru olarak
+değil. Geri alma yolu her kayıtta yazılı kalır.
 
 ## Değişmeyen sınırlar
 
 Yetki geliştirmeye verildi, kural yazmaya değil. Claude kendi başına:
 
-- `DECISIONS.md`'ye karar **yazmaz**; yeni sayılar `prototypeOnly` kalır
-  ve kalibrasyon soruları `docs/DESIGN_REVIEW_QUEUE.md`'ye girer;
-- açık soruların koduna dokunmaz: **Q-187, Q-188** (dokunma), **Q-198**,
-  **Q-204**, **Q-205**, **Q-189**;
+- `DECISIONS.md`'ye karar **yazmaz** (orası Faho'nun kendi defteri); yeni
+  sayılar `prototypeOnly` kalır ve verilen kararlar
+  `docs/DESIGN_REVIEW_QUEUE.md`'ye kayıt olarak girer;
+- 9 Ekim öncesinde açılmış soruların koduna dokunmaz: **Q-187, Q-188**
+  (dokunma), **Q-198**, **Q-204**, **Q-205**, **Q-189** — Faho isterse
+  döner;
 - gerçek kişi/kulüp/şirket adı, gerçek yatırım tavsiyesi, suçun gerçek
   yöntemi yazmaz; `docs/WRITING_STYLE_TR.md` geçerlidir;
 - oranları "güzelleştirmez", **ölçer**; test silmez, test gevşetmez;

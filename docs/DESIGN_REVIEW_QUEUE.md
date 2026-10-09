@@ -2,6 +2,26 @@
 
 **Amaç:** Claude Code geliştirmede kullanıcıdan oyun tasarımı, arayüz, içerik veya denge kararı gerektiren bir durumla karşılaşırsa bunu sohbetin içinde kaybolan soru olarak bırakmasın. Buraya **öneri / karar bekliyor** statüsüyle yazsın; Faho ile ChatGPT burada tartışıp kararlaştırsın. **Bu dosyadaki hiçbir seçenek kendiliğinden onaylı değildir.** Kesinleşmiş kural yalnızca Faho'nun onayı üzerine `DECISIONS.md` ve ilgili tasarım belgesine geçirilir.
 
+## 9 Ekim 2026 — yetki Claude'a devredildi
+
+Faho sohbette şunu söyledi: "oyunun bundan sonraki geliştirilmesini sana
+bırakıyorum… bana sormadan tüm geliştirmeyi yapmanı istiyorum" ve
+ardından "bana soru sorma, geç; tüm yetkiyi sana verdim".
+
+Bu tarihten sonra kuyruk bir **bekleme odası değil, karar kaydıdır**:
+
+- Claude kararı kendisi verir, uygular ve buraya **ne karar verdiğini,
+  neden ve nasıl geri alınacağını** yazar. "Karar bekliyor" statüsü yeni
+  maddeler için kullanılmaz.
+- Bu tarihten **önce** açılmış sorular (Q-187, Q-188, Q-198 ve ekleri,
+  Q-189, Q-204, Q-205 …) olduğu gibi duruyor: onlara dokunulmaz, Faho
+  isterse döner.
+- `DECISIONS.md` Faho'nun kendi kayıt defteri olarak kalır; Claude oraya
+  yazmaz. Kalıcı kural gibi davranan sayılar `prototypeOnly` etiketiyle
+  kodda durur ve kararı burada yazılır.
+- Geri alma her zaman mümkün: her özellik kendi modül anahtarıyla gelir
+  (`docs/FEATURE_FLAGS.md`) ve her karar kaydında geri alma yolu yazılır.
+
 ## Claude için iş akışı
 1. Yeni karar gerektiğinde mevcut `DECISIONS.md`, ilgili `docs/` belgeleri ve bu kuyruğu kontrol et. Daha önce kararlaştırılmış konuyu yeniden sorma.
 2. Tekil `Q-###` numarasıyla **soru**, neden gerekli olduğu, mevcut ürün kuralı, mümkün seçenekler, uygulamaya etkisi, **Claude'un önerisi (yalnızca öneri)** ve **varsayılan işlem: onay gelene dek ürün kuralını değiştirme** başlıklarıyla kaydet. Uygun olduğunda etkilenen kod/dosya veya PR bağlantısını ekle.
@@ -7675,8 +7695,10 @@ reddedilmiyor (`hediyeVer` ile aynı kural).
 
 ### Q-206 — Modül anahtarı hayata mı, cihaza mı ait olsun?
 
-**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Şu an uygulanan
-hâl (1) ve geri almak tek satırlık iş.
+**Durum: karar verildi (Claude, devredilen yetkiyle, 9 Ekim 2026).**
+Seçilen: **(1) anahtar hayatın kaydında durur** ve **(1) kapalı modülün
+günlükteki geçmişi silinmez.** Gerekçe aşağıda; geri alma yolu da
+yazılı (anahtarın okunduğu tek yer `GameState.featureOn`).
 
 **Bağlam.** Faho 9 Ekim'de geliştirmeyi Claude'a bıraktı ve tek şart
 koydu: beğenilmeyen bir özellik genel yapı bozulmadan çıkarılabilsin.
@@ -7736,12 +7758,13 @@ iz sayısı sıfır, açık tarafta sıfırdan büyük. Hepsi kapalı 100 hayatt
 ortalama yaş 70,4; evlenen 89, çocuğu olan 71, iş tutan 99 — yani
 modüller kapalıyken oyun paket öncesi gibi çalışıyor.
 
-### Q-207 — Sınav ağırlığı bekçisinin yöntemi değişti: onayın var mı?
+### Q-207 — Sınav ağırlığı bekçisinin yöntemi
 
-**Durum:** değişiklik **yapıldı** (çünkü bekçi oyunun kuralını değil
-havuzun büyüklüğünü ölçüyordu ve her içerik paketini imkânsız hâle
-getiriyordu), ama yöntem kararı Faho'nun. Geri almak tek dosyada tek
-testlik iş.
+**Durum: karar verildi (Claude, devredilen yetkiyle, 9 Ekim 2026).**
+Seçilen: **(1) rakip kümesi, sınavın gerçekten yarıştığı yılda uygun
+olan olaylardır; eşik 150.** Sebep: bekçi oyunun kuralını değil havuzun
+büyüklüğünü ölçüyordu ve her içerik paketini imkânsız hâle getiriyordu.
+Geri almak tek dosyada tek testlik iş.
 
 **Ne vardı.** `app/test/priority_event_test.dart` içindeki "sınav
 olayının ağırlığı penceresindeki rakipleri eziyor" bekçisi, sınav
