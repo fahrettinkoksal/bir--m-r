@@ -219,6 +219,7 @@ completed	Q-202 / BK/1: bekleyen doğum üst künyede, Hayat ve İlişkiler ekra
 completed	Q-201 / BK/2: çocuk planı açık eylem oldu, bot haveChild() yerine gebelik yolundan geçiyor
 completed	Paket BK/3: çocuğa özel dört eylem (ödev, harçlık, hobi, kural) ve adviseChild kapısı
 completed	Paket BK/4: çocuğun yaş kademesi D-180 eşikleriyle (0-3 / 4-12 / 13-17 / 18+)
-pending	Paket BK/5: çocuğun yıl özeti
-pending	Paket BK/6: 500 aile hayatı, belgeler, bekçi testleri ve exploit taraması
+completed	Paket BK/5: çocuğun yıl özeti (ChildMark fotoğrafı, ölçülen fark)
+completed	Paket BK/6: 500 aile hayatı, istismar taraması ve belgeler
 pending	Q-204: gebelik 55'e kadar açık ama doğum 45'te kapalı — karar bekliyor
+pending	Q-205: çocukla yakınlık medyanı tavanda (100) — karar bekliyor

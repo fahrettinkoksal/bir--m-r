@@ -7614,3 +7614,59 @@ yolu doğum kapısını gebelik kapısıyla eşitlemek.
 
 **Yapmayacağım (onay gelmeden):** sayıyı değiştirmek. Karar gelene kadar
 45 sınırı yerinde kalıyor.
+
+### Q-205 — Çocukla yakınlık tavana yapışıyor: medyan 100
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Sayıya
+dokunulmadı.
+
+**Nasıl çıktı.** BK/6'nın 500 aile hayatı ölçümünde çocukla yakınlık
+medyanı **100** çıktı, yani üst sınır. İlk tepki "yeni ebeveynlik
+eylemleri yakınlığı şişirdi" olurdu; ölçtüm, öyle değil:
+
+| Arketip | Çocuk eylemi kullanımı | Çocukla yakınlık medyanı |
+|---|---|---|
+| family | %54-%73 | 100 |
+| casual | %19-%33 | 100 |
+| career | %10-%16 | 100 |
+
+Çocuk eylemlerinin neredeyse hiç kullanılmadığı `career` arketipinde de
+medyan 100. Yani doygunluk **BK'nın getirdiği eylemlerden değil**,
+gündelik etkileşim döngüsünden geliyor: `prototypeOnlyRewardCurve` aynı
+yıl içinde eriyor ama **her yeni yaşta sıfırlanıyor**. 15 yıl boyunca
+her yıl vakit geçiren bir ebeveyn tavanı görüyor.
+
+**Sonucu ne?** Yakınlık çocukta bir ayırt edici olmaktan çıkıyor: ilgisiz
+ebeveynle ilgili ebeveynin çocuğu aynı sayıda buluşuyor. Küslük (D-130),
+okul sorunu sebebi "mesafe" ve kuralın dinlenmesi gibi **yakınlığa bakan**
+kurallar da bu yüzden nadiren devreye giriyor.
+
+**Seçenekler**
+1. **Yaşla birlikte azalan bir tavan** (ör. çocuk büyüdükçe gündelik
+   etkileşimin tek başına ulaşabileceği sınır düşer; kalanı özel
+   eylemlerden gelir). En çok iş, en anlamlı sonuç.
+2. **Çok yıllı doyum:** fayda eğrisi her yaşta tamamen sıfırlanmasın,
+   yıllar arasında kısmen taşınsın.
+3. **Yakınlık doğal olarak gerilesin:** ilgilenilmeyen yıl yakınlığı
+   düşürüyor (D-025 benzeri) ama ilgilenen ebeveynde tavan korunur.
+4. Olduğu gibi bırakmak: tavan bir sorun sayılmayabilir — çocuğuyla
+   her yıl vakit geçiren ebeveynin arası gerçekten çok iyi olabilir.
+
+**Önerim ve varsayılanım:** (2). En küçük değişiklikle doygunluğu kırar
+ve mevcut eğrinin dışına yeni bir sistem eklemez. (1) daha iyi sonuç
+verir ama ayrı bir tasarım konusu.
+
+**Etkilenen kod:**
+`app/lib/domain/interaction/family_interactions.dart`
+(`prototypeOnlyRewardCurve` ve `interactionCounts` anahtarı).
+
+**Yapmayacağım (onay gelmeden):** eğriyi ya da tavanı değiştirmek. Bu
+oyunun her ilişkisini etkiler, yalnızca çocuğu değil.
+
+**BK/5-BK/6 kaydı (9 Ekim 2026):** BK/5 `2d44583` (çocuğun yıl özeti, 14
+test), BK/6 `4e35a1a` (500 aile hayatı + 11 istismar testi). Paket BK
+tamamlandı; belgeler `docs/FAMILY_SYSTEM.md` §6 ve `PROJECT_STATUS.md`
+içinde. BK/5'te testin yakaladığı bir tutarsızlık düzeltildi: harçlık ve
+kurs `transfersResource` olduğu için **isteme** reddi tablosuna düşüyordu
+ve zar tutarsa çocuk harçlığı reddediyordu; artık veren taraf
+reddedilmiyor (`hediyeVer` ile aynı kural).

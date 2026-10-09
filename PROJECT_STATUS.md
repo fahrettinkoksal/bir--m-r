@@ -5495,6 +5495,58 @@ ekran kalmadı.
 
 Ayrıntı: `docs/DESIGN_REVIEW_QUEUE.md` → Q-201, Q-202.
 
+## Paket BK — ebeveynlik: çocuk bir bildirim satırı olmaktan çıktı (9 Ekim 2026)
+
+Faho "oyuna yeni ne ekleyelim" diye sordu; depo okundu (hafızadan değil,
+dosyadan) ve en büyük boşluk ebeveynlikte bulundu. Yön onaylandı
+("olur yap"), altı aşama sırayla gönderildi. Ayrıntı:
+`docs/FAMILY_SYSTEM.md` §6 ve `docs/DESIGN_REVIEW_QUEUE.md` Q-203.
+
+| Aşama | Ne oldu |
+|---|---|
+| BK/1 `ab7eb13` | Bekleyen doğum üç yerde görünür: üst künye durum satırı, Hayat ekranı kartı, İlişkiler ekranı kartı. Diğer ebeveyn hayatta değilse bebek söz verilmiyor (motor o durumda doğumu gerçekleştirmiyor). 11 test. **Q-202 cevaplandı.** |
+| BK/2 `9c69215` | Çocuk planı açık bir eylem oldu; bot `haveChild()` kısayolu yerine oyuncunun gebelik yolundan geçiyor. 15 test. **Q-201 cevaplandı.** |
+| BK/3 `16af118` | Çocuğa özel dört eylem (ödev, harçlık, hobi, kural) ve kapısı olmayan `adviseChild` ekrana bağlandı. 16 test. |
+| BK/4 `0e29377` | Yaş kademesi; eşikler **D-180'den** alındı (0-3 / 4-12 / 13-17 / 18+). 13 bekçi testi. |
+| BK/5 `2d44583` | Çocuğun yıl özeti: yılın başındaki fotoğrafla bugünün farkı. 14 test. |
+| BK/6 `4e35a1a` | 500 aile hayatı ölçümü ve istismar taraması (11 test). |
+
+### Ölçümün en sert bulgusu: ölçüm boşluğu
+
+Paket BJ şunu yazılı bırakmıştı: bot `haveChild()` çağırıyor, oyuncu o
+kapıya **hiç** ulaşamıyor. BK/2'de kapandı ve ölçüldü:
+
+- **Gebelik görülen hayat %0,0 → %42,0.** Paket 26'nın gebelik sistemi,
+  Paket 25'in korunma seçimi, kısırlık modeli, 55 yaşa kadar inen yaş
+  eğrisi, ikiz kuralı (D-151) ve tüp bebek yolu **hiç** ölçülmemişti.
+- **Kısır ama çocuklu: family arketipinde 11/11 → %4.** `haveChild()`
+  `infertile` bayrağını hiç okumuyordu. Kalan %4 tüp bebek, yani
+  tasarlanmış yol.
+- Çocuk sayısı prototip tavanından (medyan 4) ortalamaya indi (medyan 2);
+  ilk çocuk yaşı medyanı 23 → 27.
+
+### İki yeni soru (karar Faho'nun, sayıya dokunulmadı)
+
+- **Q-204:** gebelik 55 yaşına kadar mümkün (Faho'nun isteği) ama doğum
+  `maxMotherAge 45`'te kapalı. Doğum bir sonraki yaşta olduğu için
+  45-55 arasında gebelik yazılıyor, bebek gelmiyor.
+- **Q-205:** çocukla yakınlık medyanı 100 — tavan. Üç arketipte de aynı,
+  çocuk eylemlerinin %10-15 kullanıldığı `career` arketipinde bile; yani
+  doygunluk BK'nın getirdiği eylemlerden değil, her yıl tekrarlanabilen
+  gündelik etkileşim döngüsünden geliyor.
+
+### Kapısı olmayan sistem kalıbı
+
+Bu pakette ikinci kez aynı hata bulundu: motor yazılmış, testi de var,
+ama arayüzde düğmesi yok. `haveChild()` (Faho'nun kararıyla kapalı,
+yerine gebelik yolu) ve `adviseChild()` (Paket AP §40-§46, kapı BK/3'te
+açıldı). Yeni bir motor yazılırken kapısının aynı pakette açılması
+gerektiği `relationships_screen.dart` içinde zaten yazılıydı; bu kez de
+doğrulandı.
+
+Tam süit her aşamada koşuldu: BK/5 sonrası **3482 test geçti, 16
+atlandı, 0 hata.** CI BK/4'e kadar iki işte de yeşil.
+
 ## Görsel döküm: 3-6 Ekim 2026
 
 `docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün

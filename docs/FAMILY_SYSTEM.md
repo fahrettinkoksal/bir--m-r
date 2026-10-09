@@ -39,6 +39,76 @@ Anne, baba ve diğer aile bireyleri oyuncudan bağımsız gelişmeler yaşayabil
 ## 4. Claude'a aktarılacak önerilen veri yaklaşımı — HENÜZ ONAYLANMADI
 Her aile bireyinin kalıcı kişi kimliği, akrabalık bağı, yaşı, mesleği/çalışma durumu, kendi ekonomik kaynakları, ilişki durumu, yaşam durumu ve hanesi ayrı tutulabilir. Oyuncu–kişi ilişki verisi ve **kişi + etkileşim türü için yakın geçmiş** de ayrı izlenebilir; böylece anneyle zaman geçirmek babayla zaman geçirmekle karışmaz. Aile sekmesi ve olay motoru aynı kişilerin tutarlı durumunu kullanmalı. Kesin veri şeması, formüller ve eşik değerleri belirlenmedi.
 
+## 6. Ebeveynlik — Paket BK (9 Ekim 2026)
+
+**Yön Faho tarafından sohbette onaylandı** ("olur yap", Q-203). Aşağıdaki
+**sayılar onay beklemiyor çünkü hiçbiri kalıcı kural değil**: hepsi
+`prototypeOnly` ve kodda o adla duruyor. Kalıcı kural yalnızca
+`DECISIONS.md`'ye Faho'nun onayıyla girer.
+
+### Neden gerekti (ölçülen bulgu)
+
+Oyuncunun kendi 0–18 yaşı dolu: okul kademesi, öğretmen, sınıf arkadaşı,
+harçlık, kulüp. Oyuncu **ebeveyn** olunca bu zenginlik kayboluyordu.
+Dosyadan ölçüldü: altı etkileşim türünün hiçbiri çocuğa özel değildi,
+annene de çocuğuna da aynı liste çıkıyordu; çocuk için yapılabilecek tek
+şey bir sorun açıldığında **tepki vermekti**.
+
+### Artık ne var
+
+| Konu | Durum |
+|---|---|
+| Bekleyen doğum | Üst künye durum satırı, Hayat ekranı kartı, İlişkiler ekranı kartı (BK/1). Diğer ebeveyn hayatta değilse bebek söz verilmiyor. |
+| Çocuk planı | Eş/sevgili kartında açık eylem: düşünüyoruz / düşünmüyoruz / konuşmadınız. Plan **çifte** ait, kayda giriyor, korunma penceresinde hatırlatılıyor (BK/2). |
+| "Çocuk yap" düğmesi | **Yok** — Faho'nun Paket 25 kararı yerinde. Plan ihtimali değiştirmiyor; gebelik hâlâ korunmadan yakınlaşmanın ihtimali. |
+| Çocuğa özel eylemler | Ödevine Otur · Harçlık Ver · Hobiye Yazdır · Kural Koy (BK/3). Hedefleri çocuğun kendi kaydı: zekâ, birikim, ilgi alanları, evdeki kural. |
+| Akıl vermek | `ChildAdvice` (Paket AP) motoru vardı ama **hiçbir ekrandan çağrılmıyordu**; kapı BK/3'te açıldı. |
+| Yaş kademesi | Bebek 0-3 · çocuk 4-12 · ergen 13-17 · yetişkin 18+ — eşikler **D-180'den** (BK/4). Liste kademeye göre daralıyor; kademe içindeki ince koşullar (harçlık 7 yaşından, kurs 6 yaşından) eylemin kendi uygunluğunda. |
+| Çocuğun yıl özeti | Yılın başındaki fotoğrafla (`ChildMark`) bugünün farkı; Hayat ekranında ve çocuğun kartında (BK/5). Yıl içinde doğan bebeğin özeti çıkmıyor. |
+
+### Botun kapısı = oyuncunun kapısı
+
+BK/2'ye kadar bot `GameController.haveChild()` çağırıyordu; o kapı
+arayüzden **hiç** açılmıyordu. Yani bütün aile ölçümleri oyuncunun
+kullanamadığı bir yoldan geçmişti (Q-201). Bot artık niyetini plana
+yazıp korunmadan yakınlaşıyor. Önce/sonra (3 arketip × 100 hayat):
+
+| Ölçü | Önce | Sonra |
+|---|---|---|
+| Gebelik görülen | %0,0 | %42,0 |
+| Kısır ama çocuklu (family) | %11 (11/11) | %4 — hepsi tüp bebek yolu |
+| Çocuklu hayat (toplam) | %58,3 | %42,0 |
+| family çocuk sayısı ort. | 3,60 (medyan 4) | 2,16 (medyan 2) |
+| family ilk çocuk yaşı medyanı | 23 | 27 |
+| family ikiz (D-151) | %0 | %10 |
+| family tüp bebek deneyen | %0 | %23 |
+
+Gebelik, ikiz ve tüp bebek sistemleri **ilk kez** ölçüme girdi.
+
+### 500 aile hayatı (BK/6)
+
+eş/sevgili %99,2 · çocuklu %74,2 · gebelik %74,4 · ikiz %3,4 · tüp bebek
+%15,4 · çocuk sayısı medyan 2 · en az bir çocuk eylemi %73,6 (ödev
+%60,2, harçlık %58,8, hobi %54,4, kural %62,8, akıl ver %73,2) · çocuk
+zekâsı medyan 69 (n=1000).
+
+İstismar taraması (11 test) temiz: harçlık tek yönlü gider, kurs ücreti
+her uğraş için tam ödeniyor, ödeve 200 kez oturmak zekâyı 100 yapmıyor,
+kural okul sorununu en çok yarıya indiriyor ve arası kopuk çocukta hiç
+işlemiyor, kayıt alıp vermek bir eylemi iki kez uygulamıyor.
+
+### Onay bekleyen / açık
+
+- **Q-204:** gebelik 55 yaşına kadar mümkün ama doğum 45'te kapalı.
+  45-55 arasında gebelik yazılıyor, bebek gelmiyor. Sayıya dokunulmadı.
+- **Q-205:** çocukla yakınlık medyanı 100 — tavan. Üç arketipte de aynı,
+  yani doygunluk BK'nın eylemlerinden değil gündelik etkileşim
+  döngüsünden geliyor.
+- Etki büyüklükleri (`prototypeOnlyHomeworkIntelligence`,
+  `prototypeOnlyAllowanceBySchool`, `prototypeOnlyHobbyCost`,
+  `ChildRules.prototypeOnlyRelief` …) **denge kararı değil**; Faho
+  onaylamadıkça kalıcı kural sayılmaz.
+
 ## 5. Açık sorular
 1. Aile sekmesinde diğer akrabalar için hangi bilgiler gösterilecek?
 2. Çocuk doğduğunda ebeveyn dışındaki bakım verenler nasıl modellenir?
