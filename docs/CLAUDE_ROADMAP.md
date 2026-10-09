@@ -56,10 +56,16 @@ yazılıydı** (D-130). Belgedeki "arkadaşlıkta bunlar yok" satırı bugünün
 durumu değil. Aynı dersi bu oturumda ikinci kez aldım: belgeye değil
 koda bak.
 
-### Paket BN — sessiz kalan hikâye izleri
-Paket AR ölçtü: yazılmış ama hiçbir yerin okumadığı **32 hikâye izi**
-var. Yeni sistem gerekmiyor; var olan izlerin karşılığını yazmak oyunun
-en ucuz derinleşme yolu (`docs/NEXT_DEVELOPMENT_OPTIONS.md` §10).
+### Paket BN — eşikteki yıllar (16-20 yaş) · **bitti**
+İlk plan "sessiz hikâye izleri"ydi; ölçtüm ve **o iş bitmiş** çıktı:
+bugün gerçekten sessiz kalan iz **bir** tane (Paket AS/2 yankı
+olaylarını yazmış). Zincir teşhisi de 0 "OYUN" bulgusu verdi — zincirler
+kırık değil, sadece derin.
+
+Bunun yerine oyuncu tarafında ölçüm yaptım: o yıl gerçekten
+karşılaşılabilecek olay sayısı 18 yaşında 34, 19'da 26,5, 30'da 77.
+Çocukluktan sonra en ince bant buydu. 29 olay eklendi, dördü yıllar
+sonra geri dönen karşılık. Modül: `esikteki_yillar`.
 
 ### Paket BO — ev, eşya ve mahalle derinliği
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` §6: konut alınıyor, kiraya veriliyor,
@@ -86,6 +92,13 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   denemeli.
 - **Paket BL.** Modül kapısı zar atılmadan **önce** olmalı; yoksa
   kapalı modül bile hayatın akışını değiştirir.
+- **Paket BN.** "Nereye içerik gerek?" sorusunun doğru ölçüsü katalogdaki
+  olay sayısı değil, **o yıl gerçekten uygun olan** olay sayısı
+  (`debugEligibleIds`): katalogda kalabalık görünen yetişkinlik
+  olaylarının çoğu iş/ev/portföy şartına bağlı ve çocuğa hiç çıkmıyor.
+- **Paket BN.** Eski belgeye göre paket seçmek iki kez yanlış bant
+  gösterdi (arkadaşlık D-130'da bitmiş, sessiz izler AS/2'de bitmiş).
+  Paketi ölçüm seçer.
 
 ## Pano
 

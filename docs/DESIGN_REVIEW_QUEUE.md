@@ -7817,3 +7817,41 @@ ağırlığı 3, karşılık olayları 4).
 
 **Yapmayacağım (onay gelmeden):** sınav olaylarının ağırlıklarına veya
 `priority` kademesine dokunmak; uçtan uca korumanın eşiğini değiştirmek.
+
+### Q-208 — Paket BN: içerik bandı neden 16-20 seçildi (karar kaydı)
+
+**Durum: karar verildi ve uygulandı (Claude, devredilen yetkiyle,
+9 Ekim 2026).** Geri alma: Ayarlar → Modüller → *Eşikteki yıllar*.
+
+**Nasıl seçildi.** İki aday vardı ve ikisi de belgeye dayanıyordu;
+ölçüm ikisini de çürüttü:
+
+1. *Sessiz hikâye izleri* (`docs/EKSIKLER.md` §7). Ölçüldü: bugün
+   gerçekten sessiz kalan iz **bir** tane
+   (`is_arkadasini_yalniz_birakti`); Paket AS/2 yankı olaylarını yazmış.
+2. *Kırık zincirler* (Q-138 çevresi). Ölçüldü: zincir teşhisi **0
+   "OYUN" bulgusu** veriyor. 10 "ZİNCİR" bulgusunun hepsi derinlik
+   çarpımı, bir tanesi de botun kolu seçmemesi. Motor zaten devam
+   halkasına ×8 katsayı veriyor (`prototypeOnlyChainContinuationBoost`).
+
+Bunun yerine oyuncu tarafı ölçüldü: 40 oynanan hayatta, her yaşta "o
+yıl gerçekten çıkabilecek olay" sayısı. Sonuç: 16'da 41,7 · 17'de 46,2
+· **18'de 34,3** · **19'da 26,5** · 20'de 42,5 — karşılığında 25'te 67,
+30'da 77, 40'ta 80. En ince bant, hayatın en çok şey olan yıllarıydı.
+
+**Verilen kararlar**
+
+- Bant **16-20**; 29 olay, dördü yıllar sonra geri dönen karşılık.
+- **Askerlik ve siyaset bu havuzun dışında.** Askerlik ayrı bir sistem
+  ve cinsiyete bağlı; olay havuzunda cinsiyet koşulu yok, o yüzden
+  yanlış kişiye çıkan bir olay yazmadım. Siyasi tercih de oyunun
+  kapsamı dışında.
+- **Para sınırı:** 18'den önce masrafı hane öder (metin anlatır,
+  cüzdana dokunmaz), 18'den sonra oyuncunun cüzdanı gerçekten değişir.
+- **Ağırlık 3** (karşılık olayları 4): Paket BM'de ölçülen havuz
+  ağırlık bütçesine uygun, ince bantta yeterli.
+
+**Ölçülen sonuç.** 18 yaş 34,3 → 50,6; 19 yaş 26,5 → 43,5. Modül
+kapalıyken 60 hayatta 0 olay sızdı ve 200 durumda zar birebir aynı
+kaldı. Sınav önceliği bekçisi: 12. sınıfta rakip toplamı 188 → 221,
+oran 456-586 (eşik 150).

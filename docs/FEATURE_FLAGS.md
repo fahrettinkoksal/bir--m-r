@@ -50,6 +50,7 @@ gelir.
 | `cocuk_kurallari` | Çocuğa kural koyma | BK/3 | Kural satırı kalkar; okul sorunu ihtimali yalnızca çocuğun kendi kaydına bakar. Daha önce konmuş kural da etkisini yitirir. |
 | `cocuk_yil_ozeti` | Çocuğun yıl özeti | BK/5 | Yıl özetinde çocuk bloğu görünmez; çocuğun kartı aynı kalır. |
 | `ilk_yillar_olaylari` | İlk yıllar olayları | BM | 0-7 yaş havuzuna eklenen 31 olay ve ilk yılların karşılıkları çıkmaz; ilk yıllar paket öncesi gibi geçer. |
+| `esikteki_yillar` | Eşikteki yıllar | BN | 16-20 yaş havuzuna eklenen 29 olay ve eşikteki kararların karşılıkları çıkmaz; lise sonu ve ilk iş yılları paket öncesi gibi geçer. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.

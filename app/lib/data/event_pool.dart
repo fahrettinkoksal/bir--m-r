@@ -14,6 +14,7 @@ import 'event_pool_course.dart';
 import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
 import 'event_pool_early_years.dart';
+import 'event_pool_threshold_years.dart';
 import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_family_gathering.dart';
@@ -1746,4 +1747,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // bandın ne kadar ince olduğunu ölçtü; modül anahtarı
   // `FeatureId.ilkYillarOlaylari`.
   ...kEarlyYearsEvents,
+  // Eşikteki yıllar: 16-20 yaş (Paket BN). Oynanan hayatlarda o yıl
+  // uygun olan olay sayısı 18 yaşında 34, 30 yaşında 77 ölçüldü;
+  // modül anahtarı `FeatureId.esiktekiYillar`.
+  ...kThresholdYearsEvents,
 ];

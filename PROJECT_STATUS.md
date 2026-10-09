@@ -5705,5 +5705,51 @@ atlandı). Üçü de bu paketin eseriydi ve üçü de düzeltildi:
 İlk yıllar olaylarının ağırlığı 3 (karşılık olayları 4): ince bantta
 rakip az olduğu için 3 yeterli ve havuzun ağırlık bütçesini yemiyor.
 
+## Paket BN — eşikteki yıllar (16-20 yaş içeriği)
+
+**9 Ekim 2026.** Yetki devredildikten sonraki ilk paket. Bant seçimi
+yine ölçümle yapıldı, belgeyle değil: oyuncunun **o yıl gerçekten
+karşılaşabileceği** olay sayısı 40 oynanan hayatta yaşa göre ölçüldü
+(`EventEngine.debugEligibleIds`).
+
+| Yaş | Uygun olay (modülden önce) | Modül açık |
+| --- | --- | --- |
+| 16 | 41,7 | 46,0 |
+| 17 | 46,2 | 56,3 |
+| 18 | 34,3 | **50,6** |
+| 19 | 26,5 | **43,5** |
+| 20 | 42,5 | 56,7 |
+
+Karşılaştırma için aynı ölçüm: 25 yaşında 67, 30'da 77, 40'ta 80. Yani
+çocukluktan sonra **en ince bant hayatın en çok şey olan yıllarıydı**:
+sınav sonucu, tercih listesi, ilk iş başvurusu, ilk maaş, evden çıkma,
+dağılan arkadaş grubu. Katalogda bu banda sıkı sıkıya bağlı yalnızca
+beş olay vardı. En dip 19 yaşıydı (26,5).
+
+**Eklenen:** `app/lib/data/event_pool_threshold_years.dart`, **29 olay**.
+Yirmi beşi 16-20 yaş (hazırlık kursu, ailenin senin adına yaptığı plan,
+mezuniyet gecesi, tercih listesi, sonuç bekleme, çıraklık, ehliyet
+kursu, yarı zamanlı iş, sağlık ihmali, ilk randevu hesabı, ilk
+başvuru, evden çıkma, ilk kira, gece dönüşü, ilk banka hesabı,
+kampüsün ilk ayı, okulu bırakma düşüncesi, mahalleden ayrılma, ilk
+maaşı paylaşma, eski öğretmenle karşılaşma, akran karşılaştırması),
+dördü **karşılık olayı**: gençken direksiyona geçen 21-35 yaşında uzun
+yolu sürüyor, çırak olan ustalığıyla iş alıyor, evden erken çıkan yeni
+taşınana yardım ediyor, lise grubu dağılanlar yıllar sonra buluşuyor.
+
+**Kurallar:** 18'den önce masrafı hane öder (metin anlatır, cüzdana
+dokunmaz), 18'den sonra para gerçekten oyuncunun cüzdanından çıkar;
+askerlik ve siyaset bu havuzun dışında (ikisi de ayrı sistem ve ayrı
+karar); gerçek kurum/marka adı yok. Ağırlık 3, karşılık olayları 4 —
+Paket BM'de ölçülen havuz ağırlık bütçesine uygun.
+
+**Ölçüm (`app/test/paket_bn_esikteki_yillar_test.dart`, 6 test):** modül
+kapalıyken 60 hayatta **0** olay sızdı ve 200 durumda zar birebir aynı
+kaldı; açıkken 29 olayın 23'ü görüldü ve **dört karşılık olayının
+dördü** yaşandı. Bırakılan 8 izin hepsinin okuyan tarafı var.
+
+Sınav önceliği bekçisi de yeniden ölçüldü: 12. sınıfta uygun rakip
+toplamı 188'den 221'e çıktı, oran 456-586 bandında kaldı (eşik 150).
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

@@ -101,6 +101,20 @@ enum FeatureId {
       'app/lib/data/event_pool_early_years.dart',
       'app/test/paket_bm_ilk_yillar_test.dart',
     ],
+  ),
+
+  /// Paket BN — 16-20 yaş olay havuzu ve eşikteki yılların karşılıkları.
+  esiktekiYillar(
+    saveKey: 'esikteki_yillar',
+    title: 'Eşikteki yıllar',
+    lostWhenOff:
+        'Lise sonu, tercih, ilk iş, evden çıkma ve dağılan arkadaş '
+        'grubu olayları kalkar; 16-20 yaş daha sessiz geçer.',
+    paket: 'Paket BN — eşikteki yıllar',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_threshold_years.dart',
+      'app/test/paket_bn_esikteki_yillar_test.dart',
+    ],
   );
 
   const FeatureId({
