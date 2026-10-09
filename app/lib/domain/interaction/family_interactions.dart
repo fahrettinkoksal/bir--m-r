@@ -4,6 +4,7 @@ import '../../data/gift_catalog.dart';
 import '../../data/interaction_texts.dart';
 import '../effects/effect_diff.dart';
 import '../family/child_rules.dart';
+import '../family/child_stage.dart';
 import '../generation/child_progression.dart';
 import '../generation/random_util.dart';
 import '../models/game_state.dart';
@@ -165,7 +166,13 @@ class FamilyInteractions {
   /// Koşulu sağlanmayan tür listelenmez; böylece hiçbir zaman
   /// gerçekleşemeyecek bir eylem tıklanabilir görünmez.
   List<InteractionKind> availableKinds(GameState state, Person person) {
-    final Set<InteractionKind> anlamli = meaningfulKindsFor(person.relation);
+    // Çocukta liste **kademeye** göre daralır (Paket BK/4): bebeğin
+    // kartında ödev ya da kural satırı hiç çıkmaz. Kademe eşikleri
+    // D-180'den gelir.
+    final Set<InteractionKind> anlamli =
+        person.relation == RelationType.cocuk
+            ? meaningfulKindsForChildStage(ChildStage.of(person.age))
+            : meaningfulKindsFor(person.relation);
     return InteractionKind.values
         .where((InteractionKind k) =>
             anlamli.contains(k) && availability(state, person, k).isAllowed)
@@ -315,6 +322,17 @@ class FamilyInteractions {
         if (gelisim == null) {
           return InteractionAvailability.blocked(
             '${person.firstName} hakkında yeterli kayıt yok.',
+          );
+        }
+        // Kademe dışındaysa gerekçe **kademeyi** söyler (Paket BK/4):
+        // "henüz çok küçük" ile "artık kendi kararını veriyor" ayrı
+        // şeylerdir.
+        final ChildStage kademe = ChildStage.of(person.age);
+        if (!meaningfulKindsForChildStage(kademe).contains(kind)) {
+          return InteractionAvailability.blocked(
+            kademe == ChildStage.bebek
+                ? '${person.firstName} bunun için henüz çok küçük.'
+                : '${person.firstName} artık kendi kararlarını veriyor.',
           );
         }
         return switch (kind) {

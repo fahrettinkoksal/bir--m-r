@@ -9,6 +9,7 @@ import '../../domain/interaction/intimacy.dart';
 import '../../domain/activities/activity_engine.dart';
 import '../../domain/economy/household_budget.dart';
 import '../../domain/family/child_rules.dart';
+import '../../domain/family/child_stage.dart';
 import '../../domain/interaction/elder_care.dart';
 import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
@@ -489,6 +490,14 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               // onlarda eğitim/birikim satırı gösterilmez.
               if (person.relation == RelationType.cocuk &&
                   person.development != null) ...<Widget>[
+                // Kademe (Paket BK/4): yapılabilen eylemlerin listesi
+                // buna göre değişiyor, o yüzden ekranda yazıyor.
+                // Eşikler D-180'den: 0-3 / 4-12 / 13-17 / 18+.
+                _Row(
+                  key: const Key('person_child_stage'),
+                  label: 'Kademe',
+                  value: ChildStage.of(person.age).label,
+                ),
                 _Row(
                   label: 'Eğitim',
                   value: person.development!.educationLabel,
@@ -1237,7 +1246,7 @@ List<LifeMilestone> _sonAnlar(PersonDevelopment dev) {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.label, required this.value});
+  const _Row({super.key, required this.label, required this.value});
 
   final String label;
   final String value;

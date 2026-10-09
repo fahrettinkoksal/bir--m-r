@@ -10,6 +10,7 @@
 /// Q-037).
 library;
 
+import '../family/child_stage.dart';
 import '../models/interaction.dart';
 import '../models/relation.dart';
 
@@ -41,6 +42,39 @@ const Set<InteractionKind> _ogretmen = <InteractionKind>{
 /// Ayrılıktan sonra hangi etkileşimlerin açık kalacağı henüz
 /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4); şimdilik hiçbiri.
 const Set<InteractionKind> _yok = <InteractionKind>{};
+
+/// Ebeveynlik eylemleri (Paket BK/3).
+const Set<InteractionKind> _ebeveynlik = <InteractionKind>{
+  InteractionKind.odevYardim,
+  InteractionKind.harclikVer,
+  InteractionKind.hobiyeYazdir,
+  InteractionKind.kuralKoy,
+};
+
+/// Çocuğun **kademesinde** anlamlı olan etkileşimler (Paket BK/4).
+///
+/// Kademeler D-180'den gelir (0-3, 4-12, 13-17, 18+); bu dosyada yeni
+/// bir yaş sınırı tanımlanmadı.
+///
+/// * **Bebek (0-3):** kucağa alınır, konuşulur, oyuncak alınır. Ödev,
+///   harçlık, kurs ve kural bu yaşta yoktur — düğme de **görünmez**,
+///   çünkü gerekçesiyle kapanan bir düğme bile bebek kartında anlamsız
+///   bir satır olurdu.
+/// * **Çocuk (4-12) ve ergen (13-17):** ebeveynlik eylemleri açılır.
+///   Kademe içindeki ince koşullar (harçlık 7 yaşından, kurs 6
+///   yaşından, ödev için okula gitmek) eylemin kendi uygunluk
+///   denetiminde durur.
+/// * **Yetişkin (18+):** ebeveynlik eylemleri kapanır; yetişkin
+///   çocuğa kural konulmaz, harçlık verilmez. Onun yerine kendi kapısı
+///   olan **akıl verme** (`ChildAdvice`, 14 yaşından itibaren) var.
+Set<InteractionKind> meaningfulKindsForChildStage(ChildStage stage) {
+  final Set<InteractionKind> temel = meaningfulKindsFor(RelationType.cocuk);
+  return switch (stage) {
+    ChildStage.bebek => temel.difference(_ebeveynlik),
+    ChildStage.cocuk || ChildStage.ergen => temel,
+    ChildStage.yetiskin => temel.difference(_ebeveynlik),
+  };
+}
 
 /// Bir ilişki türünde anlamlı olan etkileşimler.
 Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
@@ -106,16 +140,11 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     // Çocukla vakit geçirilir ve hediye verilir; çocuktan hediye ya da
     // para istemek bu prototipte açılmaz (Q-064).
     // Kendi çocuğu: gündelik etkileşimlerin yanında **ebeveynlik**
-    // eylemleri de açıktır (Paket BK/3). Hangisinin bu yaşta anlamlı
-    // olduğunu `FamilyInteractions.availability` söyler; burada
-    // yalnızca türün bu bağda anlamlı olduğu yazılı.
+    // eylemleri de açıktır (Paket BK/3). Hangisinin hangi **kademede**
+    // anlamlı olduğunu [meaningfulKindsForChildStage] söyler; bu tablo
+    // yaşı bilmediği için bağda mümkün olan **tüm** türleri döner.
     case RelationType.cocuk:
-      return _arkadas.union(const <InteractionKind>{
-        InteractionKind.odevYardim,
-        InteractionKind.harclikVer,
-        InteractionKind.hobiyeYazdir,
-        InteractionKind.kuralKoy,
-      });
+      return _arkadas.union(_ebeveynlik);
 
     // Torun ve yeğenle vakit geçirilir, sohbet edilir ve hediye verilir;
     // onlardan para veya hediye istemek anlamlı değildir (Paket 12,
