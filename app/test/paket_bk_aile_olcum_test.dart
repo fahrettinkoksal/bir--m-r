@@ -55,6 +55,7 @@ int _medyan(List<int> liste) {
   int tupBebekDeneyen,
   Map<String, int> cocukEylemi,
   List<int> cocukZekalari,
+  List<int> cocukYakinliklari,
   List<int> cocukBirikimleri,
   List<int> cocukSayilari,
   List<int> ilkCocukYaslari,
@@ -75,6 +76,7 @@ int _medyan(List<int> liste) {
     'akilVer': 0,
   };
   final List<int> cocukZekalari = <int>[];
+  final List<int> cocukYakinliklari = <int>[];
   final List<int> cocukBirikimleri = <int>[];
   final List<int> cocukSayilari = <int>[];
   final List<int> ilkCocukYaslari = <int>[];
@@ -91,6 +93,7 @@ int _medyan(List<int> liste) {
     bool tupBebekDenedi = false;
     final Set<String> buHayattaEylem = <String>{};
     final Map<String, int> sonZeka = <String, int>{};
+    final Map<String, int> sonBag = <String, int>{};
     final Map<String, int> sonBirikim = <String, int>{};
 
     final BotLifeResult sonuc = playBotLife(
@@ -116,6 +119,7 @@ int _medyan(List<int> liste) {
           final PersonDevelopment? dev = cocuk.development;
           if (dev == null) continue;
           sonZeka[cocuk.id] = dev.stats.intelligence;
+          sonBag[cocuk.id] = cocuk.bond;
           // Birikim **18 yaşında** okunur: harçlığın ölçüsü bu.
           // Sonraki yıllarda çocuğun kendi maaşı giriyor ve harçlığın
           // payı görünmez oluyordu (ilk ölçümde medyan 8,75M çıktı —
@@ -145,6 +149,7 @@ int _medyan(List<int> liste) {
       cocukEylemi[tur] = (cocukEylemi[tur] ?? 0) + 1;
     }
     cocukZekalari.addAll(sonZeka.values);
+    cocukYakinliklari.addAll(sonBag.values);
     cocukBirikimleri.addAll(sonBirikim.values);
     cocukSayilari.add(sonuc.childCount);
     if (sonuc.childCount > 0) {
@@ -163,6 +168,7 @@ int _medyan(List<int> liste) {
     tupBebekDeneyen: tupBebek,
     cocukEylemi: cocukEylemi,
     cocukZekalari: cocukZekalari,
+    cocukYakinliklari: cocukYakinliklari,
     cocukBirikimleri: cocukBirikimleri,
     cocukSayilari: cocukSayilari,
     ilkCocukYaslari: ilkCocukYaslari,
@@ -170,7 +176,124 @@ int _medyan(List<int> liste) {
   );
 }
 
+/// prototypeOnly: BK/6'nın tek arketipli büyük ölçümü.
+const int kAileHayati = 500;
+
 void main() {
+  test(
+    'ÖLÇÜM: $kAileHayati aile hayatı — BK sonrası ebeveynlik tablosu',
+    () {
+      int esOlan = 0;
+      int cocuklu = 0;
+      int gebelikGoren = 0;
+      int ikiz = 0;
+      int tupBebek = 0;
+      final List<int> cocukSayilari = <int>[];
+      final List<int> cocukZekalari = <int>[];
+      final List<int> yakinliklar = <int>[];
+      final Map<String, int> eylem = <String, int>{
+        for (final InteractionKind k in InteractionKind.values)
+          if (k.childOnly) k.name: 0,
+        'akilVer': 0,
+      };
+      int enAzBirEylem = 0;
+      int kuralliHayat = 0;
+
+      for (int i = 0; i < kAileHayati; i++) {
+        bool gebelik = false;
+        bool ikizGordu = false;
+        bool tup = false;
+        bool kurall = false;
+        final Set<String> eylemler = <String>{};
+        final Map<String, int> zeka = <String, int>{};
+        final Map<String, int> bag = <String, int>{};
+
+        final BotLifeResult sonuc = playBotLife(
+          archetype: PlayerArchetype.family,
+          seed: 5000 + i * 13,
+          onPreAge: (GameState s) {
+            if (s.isExpecting) gebelik = true;
+            if (s.ivfAttempts > 0) tup = true;
+            if (s.children.where((Person c) => c.age == 0).length >= 2) {
+              ikizGordu = true;
+            }
+            for (final String anahtar in s.interactionCounts.keys) {
+              final String tur = anahtar.split('|').last;
+              if (eylem.containsKey(tur)) eylemler.add(tur);
+            }
+            for (final String anahtar in s.lastInteractionAge.keys) {
+              if (anahtar.startsWith('cocuk-tavsiye:')) {
+                eylemler.add('akilVer');
+              }
+              if (anahtar.startsWith('cocuk-kural:')) kurall = true;
+            }
+            for (final Person c in s.children) {
+              final PersonDevelopment? dev = c.development;
+              if (dev == null) continue;
+              zeka[c.id] = dev.stats.intelligence;
+              bag[c.id] = c.bond;
+            }
+          },
+        );
+
+        if (sonuc.everPartner || sonuc.married) esOlan++;
+        if (gebelik) gebelikGoren++;
+        if (ikizGordu) ikiz++;
+        if (tup) tupBebek++;
+        if (kurall) kuralliHayat++;
+        cocukSayilari.add(sonuc.childCount);
+        if (sonuc.childCount > 0) cocuklu++;
+        if (eylemler.isNotEmpty) enAzBirEylem++;
+        for (final String t in eylemler) {
+          eylem[t] = (eylem[t] ?? 0) + 1;
+        }
+        cocukZekalari.addAll(zeka.values);
+        yakinliklar.addAll(bag.values);
+      }
+
+      print('');
+      print('=' * 70);
+      print('PAKET BK/6 — $kAileHayati AILE HAYATI');
+      print('=' * 70);
+      print('Es/sevgili olan       $esOlan  ${_yuzde(esOlan, kAileHayati)}');
+      print('Cocuklu hayat         $cocuklu  '
+          '${_yuzde(cocuklu, kAileHayati)}');
+      print('Gebelik goren         $gebelikGoren  '
+          '${_yuzde(gebelikGoren, kAileHayati)}');
+      print('Ikiz goren            $ikiz  ${_yuzde(ikiz, kAileHayati)}');
+      print('Tup bebek deneyen     $tupBebek  '
+          '${_yuzde(tupBebek, kAileHayati)}');
+      print('Cocuk sayisi ort.     '
+          '${_ortalama(cocukSayilari).toStringAsFixed(2)}  '
+          '(medyan ${_medyan(cocukSayilari)})');
+      print('');
+      print('EBEVEYNLIK (BK/3-BK/5)');
+      print('En az bir cocuk eylemi $enAzBirEylem  '
+          '${_yuzde(enAzBirEylem, kAileHayati)}');
+      for (final MapEntry<String, int> e in eylem.entries) {
+        print('  ${e.key.padRight(14)} ${e.value}  '
+            '${_yuzde(e.value, kAileHayati)}');
+      }
+      print('Evde kural konulan    $kuralliHayat  '
+          '${_yuzde(kuralliHayat, kAileHayati)}');
+      print('Cocuk zekasi medyan   ${_medyan(cocukZekalari)}  '
+          '(n=${cocukZekalari.length})');
+      print('Cocukla yakinlik medyan ${_medyan(yakinliklar)}');
+      print('=' * 70);
+
+      // Bozulma eşikleri: sistem erişilebilir mi, açık saçmalık var mı.
+      expect(gebelikGoren, greaterThan(0),
+          reason: 'Gebelik yolu erişilemez hâle gelmiş');
+      expect(cocuklu, greaterThan(0));
+      expect(cocuklu, lessThan(kAileHayati));
+      expect(enAzBirEylem, greaterThan(0),
+          reason: 'Çocuğa özel eylemler erişilemez hâle gelmiş');
+      expect(_medyan(cocukZekalari), lessThan(100),
+          reason: 'Çocuk statları tavana yapışmış');
+    },
+    timeout: const Timeout(Duration(minutes: 30)),
+  );
+
   test(
     'ÖLÇÜM: ${kArketipler.length} × $kHayatBasina hayat — çocuk yolu',
     () {
@@ -195,6 +318,7 @@ void main() {
           int tupBebekDeneyen,
           Map<String, int> cocukEylemi,
           List<int> cocukZekalari,
+          List<int> cocukYakinliklari,
           List<int> cocukBirikimleri,
           List<int> cocukSayilari,
           List<int> ilkCocukYaslari,
@@ -232,6 +356,8 @@ void main() {
         }
         print('  cocuk zekasi medyan ${_medyan(r.cocukZekalari)}  '
             '(n=${r.cocukZekalari.length})');
+        print('  cocukla yakinlik medyan '
+            '${_medyan(r.cocukYakinliklari)}  (tavan 100)');
         // Harçlığın ölçüsü **oranla** okunur: bot yılda bir-iki
         // kişiyle ilgileniyor ve türü rastgele seçiyor, bu yüzden
         // çocukların çoğuna hiç harçlık gitmiyor. Medyan 0 çıkması
