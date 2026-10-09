@@ -214,6 +214,88 @@ const List<String> _hediyeDoyum = <String>[
 ];
 
 /// İstenecek hediye kalmadığında gösterilir; sahte bir kazanç yaratılmaz.
+// =====================================================================
+// Paket BK/3 — çocuğa özel eylemler
+//
+// Satırlar ebeveynin gördüğü kadarıyla yazıldı: sonuç abartılmaz,
+// çocuk oyuncunun kuklası gibi konuşmaz. Ödevin faydası da kuralın
+// bedeli de cümlede duruyor (docs/WRITING_STYLE_TR.md).
+// =====================================================================
+
+const List<String> _odevKucuk = <String>[
+  '{ad} ile masaya oturdunuz. Üç soruda bir dikkati dağıldı ama '
+      'defteri bitti.',
+  '{ad}\'a soruyu iki kez anlattın, üçüncüsünde kendisi anlattı sana.',
+  '{ad} ile çarpım tablosunu tekrar ettiniz; sıkıldı, sonra yarıştınız.',
+  '{ad} ödevi bitirince defteri gösterdi. Beğendiğini söyledin, '
+      'ciddiye aldı.',
+];
+
+const List<String> _odevErgen = <String>[
+  '{ad} ile ders çalıştınız. "Biliyorum zaten" dedi, bilmediği yerde '
+      'durdu.',
+  '{ad} kitabı önüne aldı, sen yanına oturdun. Çok konuşmadınız, iş '
+      'oldu.',
+  '{ad} ile konuyu tekrar ettiniz; iki soruda takıldı, üçüncüsünü '
+      'kendisi çözdü.',
+  '{ad} sınav haftasıydı. Masayı toplamakla başladın, sonu çalışmaya '
+      'vardı.',
+];
+
+const List<String> _harclikKucuk = <String>[
+  '{ad}\'a harçlığını verdin. Önce saydı, sonra sakladı.',
+  '{ad} harçlığını alınca ne alacağını uzun uzun planladı.',
+  '{ad}\'a harçlık verdin; "biriktireceğim" dedi, bir kısmını '
+      'biriktirdi.',
+];
+
+const List<String> _harclikErgen = <String>[
+  '{ad}\'a harçlığını verdin. Teşekkür etti, nereye gittiğini '
+      'sormadın.',
+  '{ad} harçlığı aldı ve hesabını kendi tutmaya başladı.',
+  '{ad}\'a harçlık verdin; arkadaşlarıyla çıkabilmek rahatlattı onu.',
+];
+
+const List<String> _hobiyeYazdir = <String>[
+  '{ad}\'ı {hobi} kursuna yazdırdın. İlk hafta çekindi, sonra '
+      'bırakmak istemedi.',
+  '{ad} {hobi} ile uğraşmaya başladı; eve döndüğünde anlatacak bir '
+      'şeyi oluyor artık.',
+  '{ad}\'ı {hobi} için kaydettirdin. Yeni yüzler, yeni bir düzen.',
+];
+
+/// Kurs açılmadığında (ilgi alanı uydurulmaz) kullanılan metin.
+const List<String> _hobiGenel = <String>[
+  '{ad} için bir uğraş aradınız; bu sefer uygun bir şey çıkmadı.',
+];
+
+const List<String> _kuralKucuk = <String>[
+  '{ad}\'a ders saati koydun. İtiraz etti, sonra oturdu.',
+  '{ad} ile ekran süresini konuştunuz; kuralı sen koydun, suratını o '
+      'astı.',
+  '{ad}\'a akşam yemeğinden sonra ödev kuralı getirdin. Hoşuna '
+      'gitmedi.',
+];
+
+const List<String> _kuralErgen = <String>[
+  '{ad}\'a eve dönüş saati koydun. "Herkesin saati var" dedi, '
+      'tartıştınız.',
+  '{ad} ile sınır çizdiniz: bu kural senin, uymak onun.',
+  '{ad}\'a hafta içi kuralı getirdin. Kapıyı biraz sert kapattı.',
+];
+
+const List<String> _odevRed = <String>[
+  '{ad}: "Bitirdim ben, bakmana gerek yok." Defteri göstermedi.',
+  '{ad} bugün oturmak istemedi; zorlamadın.',
+  '{ad}: "Sonra yapacağım." Sonra da yapmadı.',
+];
+
+const List<String> _kuralRed = <String>[
+  '{ad} kuralı dinlemedi. Sesini yükseltmedin, iş orada kaldı.',
+  '{ad}: "Beni hiç anlamıyorsun." Kapı kapandı, kural havada kaldı.',
+  '{ad} omuz silkti. Bu sefer sözün geçmedi.',
+];
+
 const List<String> _hediyeKalmadi = <String>[
   '{ad} etrafına bakındı: "Verecek bir şey bulamadım, elim boş kalmasın '
       'istemezdim."',
@@ -231,12 +313,21 @@ String interactionText({
   /// Hediye taşıyan etkileşimlerde eşyanın adı; metinde `{esya}` yerine
   /// geçer. Hediye gerçekten el değiştirmediyse `null`'dır.
   String? giftName,
+
+  /// Hobiye yazdırmada çocuğun gerçekten başladığı uğraş; metinde
+  /// `{hobi}` yerine geçer (Paket BK/3). Kurs açılmadıysa `null`'dır ve
+  /// o zaman `{hobi}` içeren metin hiç seçilmez.
+  String? hobbyName,
 }) {
   final List<String> pool;
   if (!accepted) {
     pool = switch (kind) {
       InteractionKind.paraIste => _paraRed,
       InteractionKind.hediyeIste || InteractionKind.hediyeVer => _hediyeRed,
+      // Paket BK/3: çocuk ödeve oturmayı ve kuralı gerçekten
+      // reddedebilir; reddi "sonra konuşuruz" diye yazılmaz.
+      InteractionKind.odevYardim => _odevRed,
+      InteractionKind.kuralKoy => _kuralRed,
       _ => _redGenel,
     };
   } else if (noNewBenefit) {
@@ -247,6 +338,16 @@ String interactionText({
     pool = _hediyeIsteKabul;
   } else if (kind == InteractionKind.paraIste) {
     pool = _paraIsteKabul;
+  } else if (kind == InteractionKind.odevYardim) {
+    // Paket BK/3: ödev kademeye göre anlatılır — ilkokul masasıyla lise
+    // masası aynı şey değil.
+    pool = person.age <= 12 ? _odevKucuk : _odevErgen;
+  } else if (kind == InteractionKind.harclikVer) {
+    pool = person.age <= 12 ? _harclikKucuk : _harclikErgen;
+  } else if (kind == InteractionKind.hobiyeYazdir) {
+    pool = hobbyName == null ? _hobiGenel : _hobiyeYazdir;
+  } else if (kind == InteractionKind.kuralKoy) {
+    pool = person.age <= 12 ? _kuralKucuk : _kuralErgen;
   } else if (kind == InteractionKind.sohbet) {
     // Sohbet de kişiye göre değişir: eşle konuşmakla çocukla konuşmak
     // aynı şey değildir.
@@ -298,9 +399,12 @@ String interactionText({
       .replaceAll('{bag}', trLower(person.labelFor(playerAge)));
   // Eşya adı yoksa `{esya}` içeren metin hiç kullanılmaz; yine de ekrana
   // doldurulmamış yer tutucu çıkmasın diye burada da güvenceye alınır.
-  return giftName == null
+  final String esyali = giftName == null
       ? metin.replaceAll('{esya}', 'küçük bir hediye')
       : metin.replaceAll('{esya}', trLower(giftName));
+  return hobbyName == null
+      ? esyali
+      : esyali.replaceAll('{hobi}', trLower(hobbyName));
 }
 
 /// Verilecek hediye kalmadığında kullanılacak metin.

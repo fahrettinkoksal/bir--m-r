@@ -3,6 +3,8 @@ import 'dart:math';
 import '../../data/gift_catalog.dart';
 import '../../data/interaction_texts.dart';
 import '../effects/effect_diff.dart';
+import '../family/child_rules.dart';
+import '../generation/child_progression.dart';
 import '../generation/random_util.dart';
 import '../models/game_state.dart';
 import '../models/gift_record.dart';
@@ -10,6 +12,8 @@ import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
+import '../models/person_development.dart';
+import '../models/education.dart';
 import '../models/player_character.dart';
 import '../models/relation.dart';
 import '../models/stats.dart';
@@ -66,6 +70,14 @@ class FamilyInteractions {
     // yakınlığını **büyütmez** — mesele çocuk, ilişkiyi onarmak değil.
     // Küçük bir yakınlık ve oyuncuya küçük bir iç rahatlığı.
     InteractionKind.cocukKonus: _Reward(bond: 2, happiness: 2),
+    // Paket BK/3 — çocuğa özel eylemler. Buradaki sayılar **oyuncunun**
+    // tarafı: yakınlık ve kendi keyfi. Çocuğun kendi kaydındaki etki
+    // `_childEffect` içinde ve ayrı yazılı.
+    InteractionKind.odevYardim: _Reward(bond: 5, happiness: 3),
+    InteractionKind.harclikVer: _Reward(bond: 4, happiness: 2),
+    InteractionKind.hobiyeYazdir: _Reward(bond: 5, happiness: 3),
+    // Kural sevilmez: yakınlık **geri gider**.
+    InteractionKind.kuralKoy: _Reward(bond: -2, happiness: -1),
   };
 
   /// prototypeOnly: oyuncunun hediye için ayırabileceği en düşük bütçe.
@@ -88,6 +100,59 @@ class FamilyInteractions {
 
   /// prototypeOnly: hediye/para istenebilmesi için gereken asgari yakınlık.
   static const int prototypeOnlyAskMinBond = 25;
+
+  // --- Paket BK/3: çocuğa özel eylemlerin sayıları ------------------
+  //
+  // Hepsi `prototypeOnly` (Q-203). Çocuğun statlarına `Stats.gain` ile
+  // işlenir: yükselen değerde her yeni puan pahalılaşır, yani aynı
+  // eylemi ömür boyu tekrarlamak çocuğu 100'e yapıştırmaz. Aynı yıl
+  // tekrarlanan denemede ise `prototypeOnlyRewardCurve` eriyor.
+
+  /// prototypeOnly: ödeve birlikte oturmanın çocuğun zekâsına etkisi.
+  static const int prototypeOnlyHomeworkIntelligence = 3;
+
+  /// prototypeOnly: ödevin çocuğun kendi keyfine etkisi.
+  static const int prototypeOnlyHomeworkHappiness = 2;
+
+  /// prototypeOnly: harçlığın anlam kazandığı en küçük yaş.
+  static const int prototypeOnlyAllowanceMinAge = 7;
+
+  /// prototypeOnly: hobiye yazdırmanın yaş aralığı.
+  static const int prototypeOnlyHobbyMinAge = 6;
+  static const int prototypeOnlyHobbyMaxAge = 17;
+
+  /// prototypeOnly: okul kademesine göre yıllık harçlık (₺).
+  ///
+  /// Çocuğun birikimi (`PersonDevelopment.money`) gerçek bir kayıt:
+  /// 18'inden sonra ekonomik durumunu, yetişkinlikte "eli darda mı"
+  /// sorusunu ve taşınma gücünü belirliyor.
+  static const Map<SchoolLevel, int> prototypeOnlyAllowanceBySchool =
+      <SchoolLevel, int>{
+    SchoolLevel.ilkokul: 1200,
+    SchoolLevel.ortaokul: 3000,
+    SchoolLevel.lise: 6000,
+  };
+
+  /// prototypeOnly: okul kaydı olmayan çocuk için harçlık.
+  static const int prototypeOnlyAllowanceDefault = 2400;
+
+  /// prototypeOnly: harçlığın çocuğun keyfine etkisi.
+  static const int prototypeOnlyAllowanceHappiness = 3;
+
+  /// prototypeOnly: bir hobiye yazdırmanın yıllık bedeli (₺).
+  static const int prototypeOnlyHobbyCost = 9000;
+
+  /// prototypeOnly: hobinin çocuğun keyfine etkisi.
+  static const int prototypeOnlyHobbyHappiness = 5;
+
+  /// prototypeOnly: hobinin çocuğun karizmasına etkisi.
+  ///
+  /// Hobi bir uğraş **ve** bir çevre: kurs, takım, atölye. Etki
+  /// küçüktür ve `Stats.gain` eğrisiyle daha da küçülür.
+  static const int prototypeOnlyHobbyCharisma = 2;
+
+  /// prototypeOnly: kuralın çocuğun keyfine etkisi (düşer).
+  static const int prototypeOnlyRuleHappiness = -4;
 
   /// prototypeOnly: hediye/para isteme reddi, istismarı engellemek için
   /// normal etkileşimlerden daha hızlı artar.
@@ -232,6 +297,39 @@ class FamilyInteractions {
         }
         return const InteractionAvailability.allowed();
 
+      // --- Paket BK/3: çocuğa özel eylemler -------------------------
+      //
+      // Hepsi yalnızca oyuncunun **kendi** çocuğu için ve kapı
+      // gerekçesiyle kapanır (D-095): "neden yapamıyorum" ekranda
+      // yazar.
+      case InteractionKind.odevYardim:
+      case InteractionKind.harclikVer:
+      case InteractionKind.hobiyeYazdir:
+      case InteractionKind.kuralKoy:
+        if (person.relation != RelationType.cocuk) {
+          return const InteractionAvailability.blocked(
+            'Bu yalnızca kendi çocuğun için.',
+          );
+        }
+        final PersonDevelopment? gelisim = person.development;
+        if (gelisim == null) {
+          return InteractionAvailability.blocked(
+            '${person.firstName} hakkında yeterli kayıt yok.',
+          );
+        }
+        return switch (kind) {
+          InteractionKind.odevYardim => _odevUygun(person, gelisim),
+          InteractionKind.harclikVer => _harclikUygun(state, person),
+          InteractionKind.hobiyeYazdir => _hobiUygun(state, person, gelisim),
+          // Kuralın koşulu kendi dosyasında yazılı (ChildRules).
+          _ => () {
+            final String? engel = ChildRules.blockReason(state, person);
+            return engel == null
+                ? const InteractionAvailability.allowed()
+                : InteractionAvailability.blocked(engel);
+          }(),
+        };
+
       case InteractionKind.hediyeIste:
       case InteractionKind.paraIste:
         if (!_canBeAsked(person)) {
@@ -257,6 +355,178 @@ class FamilyInteractions {
         }
         return const InteractionAvailability.allowed();
     }
+  }
+
+  // --- Paket BK/3: çocuğa özel eylemin çocuktaki karşılığı ----------
+
+  /// Eylemin çocuğun **kendi** kaydında yaptığı değişim.
+  ///
+  /// Oyuncunun tarafı (`_rewards`) ayrıdır. Burası çocuğun zekâsı,
+  /// keyfi, birikimi ve ilgi alanları: yani ebeveynliğin gerçekten bir
+  /// yere yazıldığı yer. `null` dönerse çocuk tarafında bir şey
+  /// olmamıştır.
+  _ChildEffect? _childEffect({
+    required GameState state,
+    required Person child,
+    required InteractionKind kind,
+    required double factor,
+    required Random rng,
+    required int moneySpent,
+  }) {
+    final PersonDevelopment? dev = child.development;
+    if (dev == null || !kind.childOnly) return null;
+
+    switch (kind) {
+      case InteractionKind.odevYardim:
+        // Zekâ `Stats.gain` ile artar: yükseldikçe her puan pahalılaşır.
+        final Stats yeni = dev.stats.gain(
+          intelligence: _scaled(prototypeOnlyHomeworkIntelligence, factor),
+          happiness: _scaled(prototypeOnlyHomeworkHappiness, factor),
+        );
+        return _ChildEffect(
+          development: dev.copyWith(stats: yeni),
+          happinessDelta: _scaled(prototypeOnlyHomeworkHappiness, factor),
+        );
+
+      case InteractionKind.harclikVer:
+        // Harçlık çocuğun **birikimine** girer: 18'inden sonra ekonomik
+        // durumunu, eli darda olup olmadığını ve taşınma gücünü bu kayıt
+        // belirliyor.
+        return _ChildEffect(
+          development: dev.copyWith(
+            money: (dev.money + moneySpent).clamp(0, 1 << 40),
+          ),
+          happinessDelta: _scaled(prototypeOnlyAllowanceHappiness, factor),
+        );
+
+      case InteractionKind.hobiyeYazdir:
+        final List<String> bos = _bosHobiler(dev);
+        if (bos.isEmpty) return null;
+        final String yeni = bos[rng.nextInt(bos.length)];
+        return _ChildEffect(
+          development: dev.copyWith(
+            interests: List<String>.unmodifiable(<String>[
+              ...dev.interests,
+              yeni,
+            ]),
+            stats: dev.stats.gain(
+              charisma: _scaled(prototypeOnlyHobbyCharisma, factor),
+              happiness: _scaled(prototypeOnlyHobbyHappiness, factor),
+            ),
+          ),
+          happinessDelta: _scaled(prototypeOnlyHobbyHappiness, factor),
+          newInterest: yeni,
+        );
+
+      case InteractionKind.kuralKoy:
+        // Kuralın bedeli çocuğun keyfi; karşılığı okul sorununun
+        // ihtimalinin bir süre düşmesi (`ChildRules`). Kayıt
+        // `lastInteractionAge` içinde tutulur; yeni alan açılmadı.
+        return _ChildEffect(
+          development: dev,
+          happinessDelta: prototypeOnlyRuleHappiness,
+          marks: <String, int>{
+            ChildRules.ruleKey(child.id): state.player.age,
+          },
+        );
+
+      case InteractionKind.vakitGecir:
+      case InteractionKind.sohbet:
+      case InteractionKind.hediyeVer:
+      case InteractionKind.hediyeIste:
+      case InteractionKind.paraIste:
+      case InteractionKind.cocukKonus:
+        return null;
+    }
+  }
+
+  // --- Paket BK/3: çocuğa özel eylemlerin koşulları ------------------
+
+  /// Ödeve birlikte oturulabilir mi?
+  ///
+  /// Okula gitmeyen çocuğun ödevi yoktur: kapı gerekçesiyle kapanır.
+  InteractionAvailability _odevUygun(Person child, PersonDevelopment dev) {
+    if (!dev.isStudent) {
+      return InteractionAvailability.blocked(
+        '${child.firstName} şu an okula gitmiyor.',
+      );
+    }
+    if (dev.university != null) {
+      return InteractionAvailability.blocked(
+        '${child.firstName} üniversitede; derslerini kendi çalışıyor.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Harçlık verilebilir mi?
+  ///
+  /// Para gerçekten el değiştirmeyecekse düğme açılmaz (ECO-001):
+  /// cüzdanda o kadar yoksa gerekçesi yazılır.
+  InteractionAvailability _harclikUygun(GameState state, Person child) {
+    if (child.age < prototypeOnlyAllowanceMinAge) {
+      return InteractionAvailability.blocked(
+        '${child.firstName} harçlık harcayacak yaşta değil.',
+      );
+    }
+    final int tutar = _harclikTutari(child);
+    if (state.player.wallet < tutar) {
+      return InteractionAvailability.blocked(
+        'Harçlık için ${trMoney(tutar)} gerekiyor.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Hobiye yazdırılabilir mi?
+  InteractionAvailability _hobiUygun(
+    GameState state,
+    Person child,
+    PersonDevelopment dev,
+  ) {
+    if (child.age < prototypeOnlyHobbyMinAge) {
+      return InteractionAvailability.blocked(
+        '${child.firstName} bir kursa yazılacak yaşta değil.',
+      );
+    }
+    if (child.age > prototypeOnlyHobbyMaxAge) {
+      return InteractionAvailability.blocked(
+        '${child.firstName} kendi uğraşını kendisi seçiyor.',
+      );
+    }
+    if (_bosHobiler(dev).isEmpty) {
+      return InteractionAvailability.blocked(
+        '${child.firstName} zaten uğraşabileceği kadar işin içinde.',
+      );
+    }
+    if (state.player.wallet < prototypeOnlyHobbyCost) {
+      return InteractionAvailability.blocked(
+        'Kurs ücreti ${trMoney(prototypeOnlyHobbyCost)}; cüzdanında bu '
+        'kadar yok.',
+      );
+    }
+    return const InteractionAvailability.allowed();
+  }
+
+  /// Çocuğun henüz edinmediği ilgi alanları.
+  ///
+  /// Katalog **çocuğun kendi ilerleme dosyasından** okunur
+  /// (`ChildProgression.prototypeOnlyInterests`); ikinci bir liste
+  /// uydurulmadı.
+  List<String> _bosHobiler(PersonDevelopment dev) {
+    if (dev.interests.length >= ChildProgression.prototypeOnlyMaxInterests) {
+      return const <String>[];
+    }
+    return ChildProgression.prototypeOnlyInterests
+        .where((String i) => !dev.interests.contains(i))
+        .toList(growable: false);
+  }
+
+  /// Bu çocuğa verilecek yıllık harçlık.
+  int _harclikTutari(Person child) {
+    final SchoolLevel? kademe = child.development?.schoolLevel;
+    return prototypeOnlyAllowanceBySchool[kademe] ??
+        prototypeOnlyAllowanceDefault;
   }
 
   /// Karşı tarafın oyuncuya alabileceği, henüz sahip olunmayan hediyeler.
@@ -458,6 +728,27 @@ class FamilyInteractions {
           return _noGiftAvailable(state: state, person: person, rng: rng);
         }
         alinanHediye = uygun[rng.nextInt(uygun.length)];
+      // --- Paket BK/3: çocuğa özel eylemler -------------------------
+      //
+      // Harçlık ve kurs ücreti oyuncunun **kendi cüzdanından** çıkar
+      // (ECO-001). Tutar aynı yıl tekrarında eriyor: `factor`, dördüncü
+      // harçlığın hem faydasını hem tutarını küçültür — "her yıl değil,
+      // her tıklamada para" olmasın.
+      case InteractionKind.harclikVer:
+        moneyDelta = -_scaled(_harclikTutari(person), factor);
+        if (moneyDelta == 0) {
+          return _refuse(
+            state: state,
+            person: person,
+            kind: kind,
+            rng: rng,
+            noNewBenefit: true,
+          );
+        }
+      case InteractionKind.hobiyeYazdir:
+        moneyDelta = -prototypeOnlyHobbyCost;
+      case InteractionKind.odevYardim:
+      case InteractionKind.kuralKoy:
       case InteractionKind.vakitGecir:
       case InteractionKind.sohbet:
       // Çocuğu konuşmak para ya da eşya devretmez (§25): co-parenting
@@ -465,6 +756,19 @@ class FamilyInteractions {
       case InteractionKind.cocukKonus:
         break;
     }
+
+    // Paket BK/3: çocuğa özel eylemin **çocuğun kendi kaydındaki**
+    // etkisi. Oyuncunun statları ayrı; buradaki değişim çocuğun zekâsı,
+    // keyfi, birikimi ve ilgi alanlarıdır. Metinden **önce** hesaplanır:
+    // hangi hobiye yazıldığı sonuç cümlesinde geçiyor.
+    final _ChildEffect? cocukEtkisi = _childEffect(
+      state: state,
+      child: person,
+      kind: kind,
+      factor: factor,
+      rng: rng,
+      moneySpent: -moneyDelta,
+    );
 
     // Hediye beğenisi (D-134). Faho'nun isteği: "tavla hediye edersem
     // beğenmesin". Yanlış hediye para götürür, yakınlık getirmez.
@@ -510,10 +814,16 @@ class FamilyInteractions {
       noNewBenefit: noNewBenefit,
       playerAge: state.player.age,
       giftName: (alinanHediye ?? verilenHediye)?.name,
+      hobbyName: cocukEtkisi?.newInterest,
     );
     String metin = kind == InteractionKind.paraIste && moneyDelta > 0
         ? '$sahne Cüzdanına ${trMoney(moneyDelta)} girdi.'
         : sahne;
+    // Çocuğa özel eylemlerde **ne kadar** para çıktığı cümlede yazar
+    // (D-108): oyuncu cüzdanına bakmak zorunda kalmasın.
+    if (moneyDelta < 0 && kind.childOnly) {
+      metin = '$metin ${trMoney(-moneyDelta)} cüzdanından çıktı.';
+    }
     // Tepki anlatının içine değil, **arkasına** yazılır: oyuncu ne
     // olduğunu görsün (D-127 §3, anlatı ile sonuç ayrı).
     if (tepki != null && verilenHediye != null) {
@@ -545,9 +855,16 @@ class FamilyInteractions {
     // içi ilerlemeye bakar (D-024, D-025).
     final Map<String, int> lastSeen =
         Map<String, int>.from(state.lastInteractionAge)
-          ..[person.id] = state.player.age;
+          ..[person.id] = state.player.age
+          // Kuralın konulduğu yıl gibi işaretler (Paket BK/3).
+          ..addAll(cocukEtkisi?.marks ?? const <String, int>{});
 
-    final GameState next = _apply(state, person, outcome).copyWith(
+    final GameState next = _apply(
+      state,
+      person,
+      outcome,
+      childEffect: cocukEtkisi,
+    ).copyWith(
       interactionCounts: Map<String, int>.unmodifiable(counts),
       lastInteractionAge: Map<String, int>.unmodifiable(lastSeen),
       // Yalnızca gerçekten kazanç sağlayan etkileşim ilerleme sayılır;
@@ -582,11 +899,20 @@ class FamilyInteractions {
   }
 
   /// Sonucu kişiye, ana karaktere ve gerekiyorsa hayat günlüğüne işler.
-  GameState _apply(GameState state, Person person, InteractionOutcome outcome) {
+  GameState _apply(
+    GameState state,
+    Person person,
+    InteractionOutcome outcome, {
+    _ChildEffect? childEffect,
+  }) {
     final List<Person> people = state.people
         .map(
           (Person p) => p.id == person.id
-              ? p.copyWith(bond: (p.bond + outcome.bondDelta).clamp(0, 100))
+              ? childEffect == null
+                  ? p.copyWith(bond: (p.bond + outcome.bondDelta).clamp(0, 100))
+                  : childEffect
+                      .applyTo(p)
+                      .copyWith(bond: (p.bond + outcome.bondDelta).clamp(0, 100))
               : p,
         )
         .toList(growable: false);
@@ -665,4 +991,35 @@ class _Reward {
   final int bond;
   final int happiness;
   final int charisma;
+}
+
+/// Çocuğa özel bir eylemin çocuğun kaydındaki karşılığı (Paket BK/3).
+///
+/// Ayrı bir sınıf olmasının sebebi: etki **tek yerde** uygulanmalı
+/// (`_apply`), ama hesabı türüne göre değişiyor. Böylece çocuğun kaydını
+/// iki ayrı yerden değiştiren bir kod yolu oluşmuyor.
+class _ChildEffect {
+  const _ChildEffect({
+    required this.development,
+    this.happinessDelta = 0,
+    this.newInterest,
+    this.marks = const <String, int>{},
+  });
+
+  /// Çocuğun güncellenmiş gelişim kaydı.
+  final PersonDevelopment development;
+
+  /// Çocuğun **kendi** keyfindeki değişim (`Person.happiness`, D-074).
+  final int happinessDelta;
+
+  /// Bu eylemle edinilen yeni ilgi alanı; yoksa `null`.
+  final String? newInterest;
+
+  /// `lastInteractionAge` içine yazılacak işaretler (ör. kural yılı).
+  final Map<String, int> marks;
+
+  Person applyTo(Person child) => child.copyWith(
+        development: development,
+        happiness: (child.happiness + happinessDelta).clamp(0, 100),
+      );
 }

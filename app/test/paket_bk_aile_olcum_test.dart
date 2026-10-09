@@ -14,6 +14,9 @@
 library;
 
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/interaction.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/person_development.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
@@ -50,6 +53,9 @@ int _medyan(List<int> liste) {
   int kisirOyuncu,
   int kisirAmaCocuklu,
   int tupBebekDeneyen,
+  Map<String, int> cocukEylemi,
+  List<int> cocukZekalari,
+  List<int> cocukBirikimleri,
   List<int> cocukSayilari,
   List<int> ilkCocukYaslari,
   int ikizGoren,
@@ -61,6 +67,15 @@ int _medyan(List<int> liste) {
   int kisirAmaCocuklu = 0;
   int tupBebek = 0;
   int ikiz = 0;
+  // Paket BK/3: çocuğa özel eylemler gerçekten kullanılıyor mu?
+  // Kullanılmayan bir sistem ölçülmemiş sistemdir (Q-201'in dersi).
+  final Map<String, int> cocukEylemi = <String, int>{
+    for (final InteractionKind k in InteractionKind.values)
+      if (k.childOnly) k.name: 0,
+    'akilVer': 0,
+  };
+  final List<int> cocukZekalari = <int>[];
+  final List<int> cocukBirikimleri = <int>[];
   final List<int> cocukSayilari = <int>[];
   final List<int> ilkCocukYaslari = <int>[];
 
@@ -74,6 +89,9 @@ int _medyan(List<int> liste) {
     // başarısız deneme gerekiyor; o yüzden bot bu kapıya ancak gebelik
     // yolunu yürüyorsa ulaşabilir.
     bool tupBebekDenedi = false;
+    final Set<String> buHayattaEylem = <String>{};
+    final Map<String, int> sonZeka = <String, int>{};
+    final Map<String, int> sonBirikim = <String, int>{};
 
     final BotLifeResult sonuc = playBotLife(
       archetype: arketip,
@@ -84,6 +102,26 @@ int _medyan(List<int> liste) {
         if (s.isExpecting) gebelik = true;
         if (s.player.infertile) kisirMi = true;
         if (s.ivfAttempts > 0) tupBebekDenedi = true;
+        // Hangi çocuk eylemi kullanıldı? Anahtar "<kişi>|<tür>".
+        for (final String anahtar in s.interactionCounts.keys) {
+          final String tur = anahtar.split('|').last;
+          if (cocukEylemi.containsKey(tur)) buHayattaEylem.add(tur);
+        }
+        if (s.lastInteractionAge.keys
+            .any((String k) => k.startsWith('cocuk-tavsiye:'))) {
+          buHayattaEylem.add('akilVer');
+        }
+        // Çocuğun kendi kaydı: en son görülen değerler yazılır.
+        for (final Person cocuk in s.children) {
+          final PersonDevelopment? dev = cocuk.development;
+          if (dev == null) continue;
+          sonZeka[cocuk.id] = dev.stats.intelligence;
+          // Birikim **18 yaşında** okunur: harçlığın ölçüsü bu.
+          // Sonraki yıllarda çocuğun kendi maaşı giriyor ve harçlığın
+          // payı görünmez oluyordu (ilk ölçümde medyan 8,75M çıktı —
+          // o sayı yetişkin çocuğun kariyeriydi, harçlık değil).
+          if (cocuk.age == 18) sonBirikim[cocuk.id] = dev.money;
+        }
         if (ilkCocukYasi == null && s.children.isNotEmpty) {
           ilkCocukYasi = s.player.age;
         }
@@ -103,6 +141,11 @@ int _medyan(List<int> liste) {
     }
     if (enFazlaAyniYil >= 2) ikiz++;
     if (tupBebekDenedi) tupBebek++;
+    for (final String tur in buHayattaEylem) {
+      cocukEylemi[tur] = (cocukEylemi[tur] ?? 0) + 1;
+    }
+    cocukZekalari.addAll(sonZeka.values);
+    cocukBirikimleri.addAll(sonBirikim.values);
     cocukSayilari.add(sonuc.childCount);
     if (sonuc.childCount > 0) {
       cocuklu++;
@@ -118,6 +161,9 @@ int _medyan(List<int> liste) {
     kisirOyuncu: kisir,
     kisirAmaCocuklu: kisirAmaCocuklu,
     tupBebekDeneyen: tupBebek,
+    cocukEylemi: cocukEylemi,
+    cocukZekalari: cocukZekalari,
+    cocukBirikimleri: cocukBirikimleri,
     cocukSayilari: cocukSayilari,
     ilkCocukYaslari: ilkCocukYaslari,
     ikizGoren: ikiz,
@@ -147,6 +193,9 @@ void main() {
           int kisirOyuncu,
           int kisirAmaCocuklu,
           int tupBebekDeneyen,
+          Map<String, int> cocukEylemi,
+          List<int> cocukZekalari,
+          List<int> cocukBirikimleri,
           List<int> cocukSayilari,
           List<int> ilkCocukYaslari,
           int ikizGoren,
@@ -176,6 +225,25 @@ void main() {
             '${_ortalama(r.cocukSayilari).toStringAsFixed(2)}  '
             '(medyan ${_medyan(r.cocukSayilari)}, '
             'en fazla ${r.cocukSayilari.reduce((int x, int y) => x > y ? x : y)})');
+        print('--- cocuga ozel eylemler (BK/3) ---');
+        for (final MapEntry<String, int> e in r.cocukEylemi.entries) {
+          print('  ${e.key.padRight(18)} ${e.value}  '
+              '${_yuzde(e.value, r.hayat)}');
+        }
+        print('  cocuk zekasi medyan ${_medyan(r.cocukZekalari)}  '
+            '(n=${r.cocukZekalari.length})');
+        // Harçlığın ölçüsü **oranla** okunur: bot yılda bir-iki
+        // kişiyle ilgileniyor ve türü rastgele seçiyor, bu yüzden
+        // çocukların çoğuna hiç harçlık gitmiyor. Medyan 0 çıkması
+        // harçlığın işlemediği anlamına gelmez — birikimi olan
+        // çocukların payı ve tutarı burada.
+        final List<int> birikenler = r.cocukBirikimleri
+            .where((int m) => m > 0)
+            .toList(growable: false);
+        print('  18 yasinda birikimi olan ${birikenler.length}/'
+            '${r.cocukBirikimleri.length}  '
+            '${_yuzde(birikenler.length, r.cocukBirikimleri.length)}  '
+            '(medyan ${_medyan(birikenler)})');
         print('Ilk cocuk yasi       medyan '
             '${_medyan(r.ilkCocukYaslari)}  '
             '(ort. ${_ortalama(r.ilkCocukYaslari).toStringAsFixed(1)})');

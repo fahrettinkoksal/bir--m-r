@@ -2253,6 +2253,21 @@ void _spendTimeWithFamily(
     }
   }
 
+  // **Paket BK/3 — çocuğa akıl vermek.** `adviseChild` motoru Paket
+  // AP'de yazıldı ve testleri de vardı, ama ne arayüzden ne bottan
+  // çağrılıyordu: `haveChild` ile aynı kapısızlık. Kapı BK/3'te açıldı;
+  // bot da aynı kapıdan geçiyor, yoksa sistem yine ölçülmemiş kalır.
+  for (final Person cocuk in yakinlar) {
+    if (cocuk.relation != RelationType.cocuk) continue;
+    if (c.childAdviceBlockReason(cocuk.id) != null) continue;
+    if (rng.nextDouble() >= profile.familyDesire) continue;
+    c.adviseChild(cocuk.id);
+    while (c.state!.hasNotice) {
+      c.dismissNotice();
+    }
+    if (c.state!.hasPendingEvent) return;
+  }
+
   if (yakinlar.isEmpty) return;
   // Yılda bir-iki kişiyle: her yıl herkesle uğraşmak gerçekçi değil.
   final int adet = rng.nextDouble() < profile.familyDesire ? 2 : 1;

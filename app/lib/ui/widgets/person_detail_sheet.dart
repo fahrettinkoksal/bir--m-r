@@ -8,6 +8,7 @@ import '../../domain/interaction/intimacy.dart';
 
 import '../../domain/activities/activity_engine.dart';
 import '../../domain/economy/household_budget.dart';
+import '../../domain/family/child_rules.dart';
 import '../../domain/interaction/elder_care.dart';
 import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
@@ -389,6 +390,21 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     });
   }
 
+  /// Çocuğa akıl vermek (Paket AP §40, kapısı BK/3'te açıldı).
+  ///
+  /// Motor Paket AP'de yazıldı: soğuma süresi, üç yılda sönen etki,
+  /// yakınlığa bağlı dinlenme. Ama `adviseChild` **hiçbir ekrandan**
+  /// çağrılmıyordu — `haveChild` ile aynı durum (Q-201). Kapı burada.
+  void _adviseChild() {
+    final ActivityOutcome? sonuc =
+        GameScope.of(context).adviseChild(widget.personId);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
   Future<void> _intimacy(Person person) async {
     final Protection? secim = await showModalBottomSheet<Protection>(
       context: context,
@@ -424,6 +440,13 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
         availability.isAllowed
             ? GameScope.of(context).availableKindsFor(person)
             : const <InteractionKind>[];
+
+    // Çocuğa akıl verme kapısının gerekçesi (Paket BK/3). Burada
+    // hesaplanıyor: iç içe geçmiş bir koşulun içinde `GameScope` çağırmak
+    // hem okunmuyor hem de çözümleyiciyi zorluyordu.
+    final String? cocukAkilEngeli = person.relation == RelationType.cocuk
+        ? GameScope.of(context).childAdviceBlockReason(widget.personId)
+        : null;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -522,6 +545,18 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                   ),
                 const SizedBox(height: 10),
               ],
+              // --- Paket BK/3: ebeveynlik ---------------------------
+              //
+              // Evdeki kural kayıtta duruyor ve okul sorununun
+              // ihtimalini düşürüyor; oyuncu bunu bir yerden
+              // görebilmeli (`ChildRules`).
+              if (person.relation == RelationType.cocuk &&
+                  person.isAlive &&
+                  ChildRules.activeFor(state, person))
+                const _Row(
+                  label: 'Evdeki kural',
+                  value: 'Koydun, sözü hâlâ geçiyor',
+                ),
               // Hane bilgisi bağ türünden bağımsızdır (D-014): tanışıklık,
               // arkadaşlık veya akrabalık kimseyi hanene eklemez.
               _Row(
@@ -684,6 +719,34 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 )
               else
                 _Actions(available: available, onSelected: _run),
+              // --- Çocuğa akıl vermek (AP §40-§46, kapı BK/3) --------
+              //
+              // Motor Paket AP'de yazıldı ve testleri de var; ama
+              // `adviseChild` **hiçbir ekrandan** çağrılmıyordu.
+              // `haveChild` ile aynı hata: sistem duruyor, kapı yok.
+              // Koşul sağlanmıyorsa düğme yerine gerekçe yazılır
+              // (D-095) — sahte düğme olmaz.
+              if (person.relation == RelationType.cocuk &&
+                  person.isAlive) ...<Widget>[
+                const SizedBox(height: 16),
+                Text('Yol göstermek', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                if (cocukAkilEngeli == null)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      key: const Key('person_child_advice_button'),
+                      onPressed: _adviseChild,
+                      icon: const Icon(Icons.forum_outlined),
+                      label: const Text('Oturup hayatı konuşun'),
+                    ),
+                  )
+                else
+                  _Note(
+                    key: const Key('person_child_advice_note'),
+                    text: cocukAkilEngeli,
+                  ),
+              ],
               // --- Yaşlı ebeveyn bakımı (Paket AO §35, §36) ----------
               //
               // `ElderCare` Paket AO/1'de yazıldı ama hiçbir ekrandan

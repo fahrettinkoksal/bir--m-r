@@ -105,8 +105,17 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
 
     // Çocukla vakit geçirilir ve hediye verilir; çocuktan hediye ya da
     // para istemek bu prototipte açılmaz (Q-064).
+    // Kendi çocuğu: gündelik etkileşimlerin yanında **ebeveynlik**
+    // eylemleri de açıktır (Paket BK/3). Hangisinin bu yaşta anlamlı
+    // olduğunu `FamilyInteractions.availability` söyler; burada
+    // yalnızca türün bu bağda anlamlı olduğu yazılı.
     case RelationType.cocuk:
-      return _arkadas;
+      return _arkadas.union(const <InteractionKind>{
+        InteractionKind.odevYardim,
+        InteractionKind.harclikVer,
+        InteractionKind.hobiyeYazdir,
+        InteractionKind.kuralKoy,
+      });
 
     // Torun ve yeğenle vakit geçirilir, sohbet edilir ve hediye verilir;
     // onlardan para veya hediye istemek anlamlı değildir (Paket 12,

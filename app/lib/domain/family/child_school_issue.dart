@@ -4,6 +4,7 @@ import '../generation/random_util.dart';
 import 'family_mood.dart';
 import '../models/family_drama.dart';
 import '../models/family_issue.dart';
+import 'child_rules.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/pending_notice.dart';
@@ -109,8 +110,11 @@ abstract final class ChildSchoolIssue {
     final double taban = (prototypeOnlyBaseChance +
             (sebepler.length - 1) * prototypeOnlyPerReasonBonus)
         .clamp(0.0, prototypeOnlyMaxChance);
+    // Evde konulmuş taze bir kural ihtimali azaltır (Paket BK/3).
+    // Kural yoksa çarpan **tam olarak 1,0**: hiçbir hesap kaymaz.
+    final double kurall = taban * ChildRules.reliefFor(state, child);
     return state.familyDrama.scale(
-      taban,
+      kurall,
       FamilyDramaArea.cocuk,
       cap: prototypeOnlyMaxChance,
     );
