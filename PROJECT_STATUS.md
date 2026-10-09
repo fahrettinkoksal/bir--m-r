@@ -5557,5 +5557,119 @@ Elle yazılmış bir rapordur: `docs/planner/index.html` gibi betikle
 üretilmez ve kendiliğinden tazelenmez. İçindeki rakamlar yazıldığı andaki
 ölçümlerdir (43 commit, +14.908 satır, 133 → 178 karar, 3.360 test).
 
+## Paket BL — çıkarılabilir özellikler (modül anahtarları)
+
+**9 Ekim 2026.** Faho geliştirmeyi Claude'a bıraktı ve tek şart koydu:
+eklenen bir özellik beğenilmezse genel yapı bozulmadan çıkarılabilsin.
+Paket BL o altyapıyı kurdu; bundan sonraki her özellik bu sözleşmeye
+göre gelir. Ayrıntı ve silme tarifi: `docs/FEATURE_FLAGS.md`.
+
+- **Katalog:** `app/lib/domain/features/feature_catalog.dart`. Her modül
+  bir satır: kalıcı kayıt anahtarı, oyuncuya görünen ad, kapatınca neyin
+  kaybolduğu, geldiği paket, yalnızca o özellik için var olan dosyalar.
+- **Kayıt:** `GameSettings.features`; kayda yalnızca **varsayılandan
+  sapmalar** yazılır. Eski kayıt yeni modülü varsayılan hâliyle açar,
+  silinmiş modülün anahtarı okunurken atılır.
+- **Tek kapı, fail-closed:** modül kapalıyken eylem listelenmez *ve*
+  motor reddeder. Kapı yerleri: `PregnancyNotice.sentence` (gebelik),
+  `FamilyPlanning.blockReason` (plan), `FamilyInteractions.availability`
+  (çocuk eylemleri ve kural), `ChildRules.reliefFor` (kuralın zarı),
+  `YearReview._summarizeChildren` (yıl özeti).
+- **Oyuncu tarafı:** Ayarlar → *Modüller*, pakete göre gruplu; her
+  satırın altında kapatınca ne kaybolacağı yazıyor, "Hepsini aç" ile
+  varsayılana dönülüyor. Kumarhane anahtarı (D-032) kendi yerinde kaldı.
+- **Paket BK'nın beş özelliği** geriye dönük olarak anahtara bağlandı:
+  `gebelik_gorunurlugu`, `cocuk_plani`, `ebeveynlik_eylemleri`,
+  `cocuk_kurallari`, `cocuk_yil_ozeti`.
+
+**Ölçüm (`app/test/paket_bl_modul_izolasyon_test.dart`, 13 test).** Her
+modül hem kapalı hem açık oynandı; açık taraf ölçülmezse test boş
+geçerdi:
+
+| Modül | Kapalı | Açık |
+| --- | --- | --- |
+| Gebelik bildirimi | 186 gebelik yılı, **0** cümle | 186 gebelik yılı, 186 cümle |
+| Çocuk planı | 4.381 eş/sevgili yılı, **0** kayıt, **0** açık kapı | 4.777 planlı yıl |
+| Çocuk eylemleri + kural | 7.710 çocuk yılı, **0** eylem, **0** kural, **0** kaymış zar | 5.691 eylem, 1.988 kural satırı |
+| Çocuğun yıl özeti | **0** blok | 2.201 blok |
+
+Gebelik yılı sayısının iki tarafta birebir aynı çıkması motorun
+anahtardan etkilenmediğini gösteriyor: kapanan şey yalnızca görünürlük.
+
+**Hepsi kapalı 100 hayat:** ortalama yaş 70,4; evlenen 89, çocuğu olan
+71, iş tutan 99. Yani bütün modüller kapalıyken oyun paket öncesi gibi
+çalışıyor. Her modül tek tek kapalı 20 hayat da sonuna kadar gitti.
+
+**Oyuncu tarafı testi** (`app/test/paket_bl_modul_ayar_test.dart`, 4
+test): ayarlardan kapatılan modülün satırı çocuğun kartından kalkıyor,
+ayrı anahtardaki kural satırı yerinde kalıyor, "Hepsini aç" geri
+getiriyor ve kapalı modül kayıt gidiş-dönüşünden kapalı çıkıyor.
+
+Hiçbir sayı `DECISIONS.md`'ye girmedi; modül anahtarı bir mimari
+sözleşmedir, oyun kuralı değil.
+
+## Paket BM — ilk yıllar (0-7 yaş içeriği)
+
+**9 Ekim 2026.** Modül altyapısı kurulduktan sonraki ilk içerik paketi.
+Seçim gerekçesi ölçümdür, belge değil: katalogda yaş aralığı yazılı 430
+olay yaşa göre tarandığında ilk yılların ne kadar ince olduğu çıktı.
+
+| Yaş | Modül kapalı (aday olay) | Modül açık |
+| --- | --- | --- |
+| 0 | 3,0 | **8,6** |
+| 1 | 7,9 | 14,5 |
+| 2 | 8,9 | 17,2 |
+| 3 | 13,6 | 23,3 |
+| 4 | 11,5 | 25,7 |
+| 5 | 10,0 | 24,6 |
+| 6 | 15,4 | 30,7 |
+| 7 | 29,3 | 41,1 |
+
+Sayılar **motorun kendi uygunluk hesabından** geliyor
+(`EventEngine.debugEligibleIds`), oynanan 60 hayatın içinde, her yaşta
+"şu an çıkabilecek olay" sayısının ortalaması. Karşılaştırma aynı
+tohumlarla, yalnızca modül anahtarı değiştirilerek yapıldı.
+
+Neden önemli: her yeni hayat 0 yaşında başlıyor. Oyuncunun ilk yedi
+dokunuşu bu havuzdan geliyordu ve ikinci hayatta aynı olaylar tekrar
+ediyordu — oyunun ilk izlenimi en dar yerdeydi.
+
+**Eklenen:** `app/lib/data/event_pool_early_years.dart`, **31 olay**.
+Yirmi yedisi 0-7 yaş (hane kararları, mahalle, bakkal, sokak oyunu,
+anaokulu ilk günü, okul alışverişi, bayram harçlığı, kardeş kıskançlığı,
+gece hastalıkları), dördü **karşılık olayı**: yan tekerleri söktüren
+çocuk 8-12 yaşında mahallenin önünde gidiyor, kumbaraya atan 9-14
+yaşında kumbarayı kırıyor, harfleri okul öncesi söken 7-11 yaşında
+sınıfta sesli okuyor, sokak oyununa katılan 10-15 yaşında mahalle
+takımını kuruyor.
+
+**Kurallar:** çocuğun cüzdanından para çıkmaz (hastane, kreş, okul
+alışverişi hanenin gideri; çocuğa **gelen** harçlık yazılır); kararları
+aile verir ve metin bunu böyle anlatır; nostalji ile bugün aynı havuzda,
+doğum yılı motoru yok; ağır konuda espri yok; gerçek marka ve kişi adı
+geçmez. Bütün sayılar `prototypeOnly`.
+
+**Sessiz iz bırakılmadı.** Paket AR'nin ölçtüğü hata — iz konur, hiçbir
+olay onu aramaz — bu pakette tekrarlanmasın diye bırakılan 8 izin
+hepsinin okuyan tarafı yazıldı ve test bunu şart koşuyor. `paket_ar`
+bekçisi ("okunmayan iz sayısı artmıyor") yeşil kaldı.
+
+**Testin yakaladığı gerçek hata — kapalı modül zarı kaydırıyordu.**
+Olay kapısı ilk hâlinde `EventEngine._matches` içindeydi, yani **kişi
+çözümünden sonra**. Kişi çözümü `rng` tüketiyor; dolayısıyla kapalı bir
+modülün olayları bile oyunun rastgele akışını kaydırıyordu. Ölçülen
+etki küçük değildi: bütün modüller kapalı 100 hayatta ortalama ömür
+70,4'ten **72,1'e** çıkmıştı — yani "kapalı" modül hayatı
+değiştiriyordu. Kapı `_pick` döngüsünün en başına, zardan önceye
+alındı; ortalama ömür **70,4'e döndü** (evlenen 89, çocuğu olan 71, iş
+tutan 99 — paket öncesiyle birebir aynı). Kalıcı bekçi: iki motor (tam
+havuz + modül kapalı / modülün olayları hiç olmayan havuz) 240 durumda
+aynı olayı veriyor.
+
+**Ölçüm (`app/test/paket_bm_ilk_yillar_test.dart`, 6 test):** modül
+kapalıyken 60 hayatta **0** olay sızdı; açıkken 31 olayın **29'u**
+görüldü ve karşılık olaylarının 3'ü yaşandı. Modül kapalıyken ilk
+yıllar paket öncesi hâline dönüyor.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

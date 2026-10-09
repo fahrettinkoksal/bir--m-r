@@ -36,7 +36,7 @@ class LifeScreen extends StatelessWidget {
       // Bekleyen doğum en üstte (Paket BK/1): bir yıl süren, sonunda
       // haneyi büyüten bir durum tek bir günlük satırına sığmıyor
       // (Q-202).
-      if (state.isExpecting)
+      if (PregnancyNotice.visible(state))
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: PregnancyCard(

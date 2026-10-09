@@ -8,6 +8,7 @@ import '../data/education_tracks.dart';
 import '../data/item_catalog.dart';
 import '../data/hobby_catalog.dart';
 import '../data/job_catalog.dart';
+import '../domain/features/feature_catalog.dart';
 import '../domain/career/career_synergy.dart';
 import '../domain/models/combat_career.dart';
 import '../domain/combat/combat_career_engine.dart';
@@ -4242,6 +4243,37 @@ class GameController extends ChangeNotifier {
     _state = current.copyWith(settings: settings);
     _autoSave();
     notifyListeners();
+  }
+
+  /// Modül anahtarı açık mı? (Paket BL)
+  ///
+  /// Hayat yoksa katalog varsayılanı geçerlidir; başlangıç ekranında da
+  /// soru sorulabilsin.
+  bool featureOn(FeatureId id) =>
+      _state?.featureOn(id) ?? FeatureSwitches.defaults.isOn(id);
+
+  /// Modülü aç/kapat ve kaydı tazele (Paket BL).
+  ///
+  /// Anahtar **hayat kaydının içinde** durur: aynı cihazda iki ayrı
+  /// hayat farklı modüllerle oynanabilir ve kayıt geri yüklendiğinde
+  /// oyuncunun seçtiği hâl geri gelir.
+  void setFeature(FeatureId id, bool on) {
+    final GameState? current = _state;
+    if (current == null) return;
+    updateSettings(
+      current.settings.copyWith(
+        features: current.settings.features.toggled(id, on),
+      ),
+    );
+  }
+
+  /// Bütün modülleri katalog varsayılanına döndür.
+  void resetFeatures() {
+    final GameState? current = _state;
+    if (current == null) return;
+    updateSettings(
+      current.settings.copyWith(features: FeatureSwitches.defaults),
+    );
   }
 
   /// Oyuncunun kendi belirlediği yıllık bahis limiti.

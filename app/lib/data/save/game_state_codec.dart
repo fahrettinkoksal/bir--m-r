@@ -30,6 +30,7 @@ import '../lottery_catalog.dart';
 import '../../domain/models/career.dart';
 import '../../domain/models/education.dart';
 import '../../domain/models/game_event.dart';
+import '../../domain/features/feature_catalog.dart';
 import '../../domain/models/game_settings.dart';
 import '../../domain/models/chronic_condition.dart';
 import '../../domain/models/game_state.dart';
@@ -532,6 +533,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
         'casinoEnabled': state.settings.casinoEnabled,
         'wagerLimitPerAge': state.settings.wagerLimitPerAge,
         'soundEnabled': state.settings.soundEnabled,
+        // Modül anahtarları (Paket BL): yalnızca varsayılandan sapanlar
+        // yazılır, böylece katalog büyüdükçe kayıt büyümez.
+        'features': state.settings.features.overrides,
       },
       'deceased': state.deceased,
       'deathAge': state.deathAge,
@@ -1972,6 +1976,16 @@ GameState decodeGameState(Map<String, Object?> json) {
             // Eski kayıtlarda ses ayarı yoktur; açık kabul edilir.
             soundEnabled:
                 _asMap(json['settings'], 'settings')['soundEnabled'] != false,
+            // Modül anahtarları: alan yoksa katalog varsayılanı geçerli,
+            // tanınmayan anahtar sessizce atılır (silinmiş özellik).
+            features: _asMap(json['settings'], 'settings')['features'] == null
+                ? FeatureSwitches.defaults
+                : FeatureSwitches.fromMap(
+                    _asMap(
+                      _asMap(json['settings'], 'settings')['features'],
+                      'features',
+                    ),
+                  ),
           ),
     deathAge: _intOrNull(json, 'deathAge'),
     deathCause: _stringOrNull(json, 'deathCause'),

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../features/feature_catalog.dart';
 import '../models/applied_effect.dart';
 import '../models/game_state.dart';
 import '../models/person.dart';
@@ -216,6 +217,11 @@ abstract final class YearReview {
     YearMark mark,
     GameState state,
   ) {
+    // Modül anahtarı (Paket BL): kapalıyken yıl özetinde çocuk bloğu
+    // hiç kurulmaz. Çocuğun kendi kartı etkilenmez.
+    if (!state.featureOn(FeatureId.cocukYilOzeti)) {
+      return const <ChildYearSummary>[];
+    }
     final List<ChildYearSummary> ozetler = <ChildYearSummary>[];
     for (final Person cocuk in state.children) {
       if (!cocuk.isAlive) continue;

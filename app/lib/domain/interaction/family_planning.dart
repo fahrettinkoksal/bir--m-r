@@ -12,6 +12,7 @@
 /// istediği kayda girer.
 library;
 
+import '../features/feature_catalog.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
@@ -27,8 +28,14 @@ class FamilyPlanning {
   /// Engeller yakınlaşmanın engelleriyle **aynı**: plan eş ya da
   /// sevgiliyle konuşulur, yetişkinlikten itibaren. Ayrı bir kural
   /// uydurulmadı.
-  String blockReason(GameState state, Person person) =>
-      Intimacy.blockReason(state, person);
+  String blockReason(GameState state, Person person) {
+    // Modül anahtarı (Paket BL): kapalıyken plan satırı ekranda hiç
+    // görünmez ve motor da yazmaz — tek kapı burasıdır, çünkü
+    // [setPlan] de bu gerekçeyi sorar.
+    final String? modul = state.featureBlockReason(FeatureId.cocukPlani);
+    if (modul != null) return modul;
+    return Intimacy.blockReason(state, person);
+  }
 
   /// Çiftin planını yazar.
   ///

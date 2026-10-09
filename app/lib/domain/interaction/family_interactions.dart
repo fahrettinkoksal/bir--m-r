@@ -7,6 +7,7 @@ import '../family/child_rules.dart';
 import '../family/child_stage.dart';
 import '../generation/child_progression.dart';
 import '../generation/random_util.dart';
+import '../features/feature_catalog.dart';
 import '../models/game_state.dart';
 import '../models/gift_record.dart';
 import '../models/interaction.dart';
@@ -313,6 +314,17 @@ class FamilyInteractions {
       case InteractionKind.harclikVer:
       case InteractionKind.hobiyeYazdir:
       case InteractionKind.kuralKoy:
+        // Modül anahtarı (Paket BL). Kapalı modülün satırı listelenmez:
+        // [availableKinds] yalnızca izin verilenleri döndürür, [perform]
+        // da aynı kapıdan geçer. Kural koyma ayrı anahtardır çünkü
+        // tek başına bir mekanik (okul sorununu azaltır) getirir.
+        final FeatureId modul = kind == InteractionKind.kuralKoy
+            ? FeatureId.cocukKurallari
+            : FeatureId.ebeveynlikEylemleri;
+        final String? modulEngeli = state.featureBlockReason(modul);
+        if (modulEngeli != null) {
+          return InteractionAvailability.blocked(modulEngeli);
+        }
         if (person.relation != RelationType.cocuk) {
           return const InteractionAvailability.blocked(
             'Bu yalnızca kendi çocuğun için.',

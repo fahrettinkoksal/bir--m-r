@@ -13,6 +13,7 @@ import 'event_pool_childhood.dart';
 import 'event_pool_course.dart';
 import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
+import 'event_pool_early_years.dart';
 import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_family_gathering.dart';
@@ -1741,4 +1742,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // Okul kulübü ve takım olayları (Paket AU).
   ...kSchoolClubEvents,
   ...kFriendshipEvents,
+  // İlk yıllar: 0-7 yaş (Paket BM). Yaşa göre dağılım taraması bu
+  // bandın ne kadar ince olduğunu ölçtü; modül anahtarı
+  // `FeatureId.ilkYillarOlaylari`.
+  ...kEarlyYearsEvents,
 ];

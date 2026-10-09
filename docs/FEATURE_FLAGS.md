@@ -1,0 +1,87 @@
+# Çıkarılabilir özellikler — modül anahtarları
+
+**Durum:** Paket BL'de kuruldu (9 Ekim 2026). Bu dosya bir **mimari
+sözleşmedir**, oyun kuralı değildir: `DECISIONS.md` yalnızca Faho'nun
+sohbette onayladığı kararları tutar.
+
+## Neden var
+
+Faho'nun isteği: "yaptığın geliştirmelerden birini beğenmezsem, genel
+yapı bozulmadan o özelliği çıkartabilelim."
+
+Oyunda bunun bir örneği zaten vardı: kumarhane isteğe bağlı bir modüldür
+ve kapatılınca menüde hiç görünmez (D-032). Paket BL o tek örneği
+**kurala** çeviriyor: bundan sonra eklenen her özellik kendi anahtarıyla
+gelir.
+
+## Sözleşme
+
+1. **Her yeni özellik kataloğa bir satır olarak girer.** Katalog:
+   `app/lib/domain/features/feature_catalog.dart`.
+2. **Tek kapı.** Özellik koda tek bir yerden bağlanır ve o yer anahtara
+   bakar. Dağınık `if` yoksa çıkarmak da kolaydır.
+3. **Kapalıyken iz kalmaz (fail-closed).** Anahtar kapalıysa eylem
+   listelenmez *ve* motor çağrıldığında reddeder. Kapalı modül ekranda
+   yer tutmaz: sahte düğme, boş kart, artakalan boşluk bırakılmaz.
+4. **Kapalı modül zara dokunmaz.** Anahtar kapalıyken oyun, o modül hiç
+   yazılmamış gibi davranır: aynı tohum aynı hayatı verir. İlk hâlde
+   olay kapısı kişi çözümünden **sonraydı** ve kapalı modülün olayları
+   bile `rng` tüketiyordu; hepsi kapalı 100 hayatta ortalama ömür
+   70,4'ten 72,1'e kaymıştı. Kapı zardan önceye alındı, ortalama 70,4'e
+   döndü ve 240 durumda iki motor (tam havuz + kapalı modül / modülsüz
+   havuz) aynı olayı verdi.
+5. **Kapalıyken oyun çalışır.** Modül kapalı 100 hayat sonuna kadar
+   gider; evlilik, çocuk ve kariyer yaşanmaya devam eder. Bunu
+   `app/test/paket_bl_modul_izolasyon_test.dart` ölçer.
+6. **Anahtar kayıtta durur.** `GameSettings.features` içinde, yalnızca
+   **varsayılandan sapmalar** yazılır. Katalog büyüdükçe kayıt büyümez;
+   eski kayıtlar yeni modülü varsayılan hâliyle açar; silinmiş bir
+   modülün anahtarı kayıtta kalmışsa sessizce atılır.
+7. **Oyuncu da kapatabilir.** Ayarlar → *Modüller*. Her satırın altında
+   kapatınca neyin kaybolduğu yazar.
+
+## Katalog
+
+| Kayıt anahtarı | Modül | Paket | Kapatınca ne olur |
+| --- | --- | --- | --- |
+| `gebelik_gorunurlugu` | Gebelik bildirimi | BK/1 | Bekleyen doğum hayat ve ilişkiler ekranında yazmaz; bebek yine doğar. |
+| `cocuk_plani` | Çocuk planı | BK/2 | Eşle çocuk konusunu konuşma satırı kalkar; çocuk yalnızca korunmasız birlikte olmakla gelir. |
+| `ebeveynlik_eylemleri` | Çocuğa özel eylemler | BK/3 | Ödev, harçlık ve hobiye yazdırma satırları çıkmaz; sohbet/vakit/hediye kalır. |
+| `cocuk_kurallari` | Çocuğa kural koyma | BK/3 | Kural satırı kalkar; okul sorunu ihtimali yalnızca çocuğun kendi kaydına bakar. Daha önce konmuş kural da etkisini yitirir. |
+| `cocuk_yil_ozeti` | Çocuğun yıl özeti | BK/5 | Yıl özetinde çocuk bloğu görünmez; çocuğun kartı aynı kalır. |
+| `ilk_yillar_olaylari` | İlk yıllar olayları | BM | 0-7 yaş havuzuna eklenen 31 olay ve ilk yılların karşılıkları çıkmaz; ilk yıllar paket öncesi gibi geçer. |
+
+Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
+satırının bu dosyada yazılı olmasını şart koşar.
+
+## Bir özelliği tamamen silme tarifi
+
+Anahtarı kapatmak özelliği görünmez yapar. Kodu da gitsin istiyorsan:
+
+1. **Anahtarı kapat ve oyna.** Ayarlar → Modüller. Oyun beklediğin gibi
+   çalışıyorsa silmeye değer.
+2. **Bağları gör:** depo kökünde `grep -rn "FeatureId.<ad>" app/` .
+   Çıkan her satır o özelliğin koda değdiği yerdir — başka yerde
+   olmadığını sözleşmenin 2. maddesi garanti eder.
+3. **Kendi dosyalarını sil:** katalog satırındaki `removableFiles`
+   listesi, yalnızca o özellik için var olan dosyaları sayar.
+4. **Katalog satırını sil**, sonra `dart analyze lib/ test/` koştur.
+   `FeatureId.<ad>` artık yok olduğu için **derleyici** kalan bütün
+   bağları tek tek gösterir. Kalan yer kalmadığında silme tamamdır.
+
+Kayıt uyumu için ek iş yok: silinen modülün anahtarı eski kayıtlarda
+kalsa bile okunurken atılır.
+
+## Testler ne garanti ediyor
+
+`app/test/paket_bl_modul_izolasyon_test.dart`:
+
+- katalog bekçisi: anahtarlar benzersiz, `removableFiles` yolları
+  gerçekten duruyor, her modül bu belgede yazılı;
+- kayıt: kapatma/açma gidiş-dönüşü, tanınmayan anahtarın atılması,
+  alanı olmayan eski kaydın varsayılana düşmesi;
+- her modül için **kapalı** ve **açık** taraf ayrı ayrı oynanır:
+  kapalıda iz sayısı sıfır, açıkta sıfırdan büyük. Açık taraf
+  ölçülmezse test boş geçerdi;
+- hepsi kapalı 100 hayat: hayatlar sonuna kadar gidiyor, evlilik/çocuk/
+  kariyer duruyor.

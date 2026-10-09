@@ -26,6 +26,7 @@ library;
 
 import 'dart:math';
 
+import 'package:bir_omur/domain/features/feature_catalog.dart';
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/business_catalog.dart';
 import 'package:bir_omur/data/education_tracks.dart';
@@ -689,10 +690,22 @@ BotLifeResult playBotLife({
   /// varsayılan kapalı; açıkken **kendi ayrı zarını** kullanır, oyunun
   /// rastgele akışına dokunmaz.
   bool scanEventEligibility = false,
+  /// Modül anahtarları (Paket BL). Varsayılan: katalog varsayılanı.
+  ///
+  /// İzolasyon ölçümü bunu kullanır: aynı tohum, aynı arketip, yalnızca
+  /// bir modül kapalı. Oyunun sayıları değişmez.
+  FeatureSwitches features = FeatureSwitches.defaults,
 }) {
   final BotProfile profile = kBotProfiles[archetype]!;
   final GameController c = GameController(random: Random(seed));
   c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
+  if (!features.allDefault) {
+    c.debugSetState(
+      c.state!.copyWith(
+        settings: c.state!.settings.copyWith(features: features),
+      ),
+    );
+  }
 
   // Botun kendi zarı oyunun zarından **ayrı**: bot kararları oyunun
   // rastgele akışını kaydırmasın.

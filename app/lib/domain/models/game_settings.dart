@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../features/feature_catalog.dart';
+
 /// Oyuncunun kendi ayarları.
 ///
 /// Kumarhane **isteğe bağlı bir modüldür** ve buradan tamamen kapatılabilir
@@ -10,6 +12,7 @@ class GameSettings {
     this.casinoEnabled = true,
     this.wagerLimitPerAge,
     this.soundEnabled = true,
+    this.features = FeatureSwitches.defaults,
   });
 
   /// Kumarhane modülü açık mı?
@@ -25,14 +28,22 @@ class GameSettings {
   /// limiti. `null` ise yalnızca oyunun geçici üst sınırı geçerlidir.
   final int? wagerLimitPerAge;
 
+  /// Çıkarılabilir özellik anahtarları (Paket BL).
+  ///
+  /// Kumarhane anahtarı (D-032) bu katalogdan **önce** vardı ve kendi
+  /// alanında kalır; yeni özelliklerin hepsi buradan açılıp kapanır.
+  final FeatureSwitches features;
+
   GameSettings copyWith({
     bool? casinoEnabled,
     Object? wagerLimitPerAge = _unset,
     bool? soundEnabled,
+    FeatureSwitches? features,
   }) =>
       GameSettings(
         casinoEnabled: casinoEnabled ?? this.casinoEnabled,
         soundEnabled: soundEnabled ?? this.soundEnabled,
+        features: features ?? this.features,
         wagerLimitPerAge: wagerLimitPerAge == _unset
             ? this.wagerLimitPerAge
             : wagerLimitPerAge as int?,

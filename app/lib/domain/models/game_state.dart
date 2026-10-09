@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../data/social_catalog.dart';
+import '../features/feature_catalog.dart';
 
 import 'blackjack_game.dart';
 import 'business.dart';
@@ -758,6 +759,17 @@ class GameState {
 
   /// Oyuncunun kendi ayarları (D-032).
   final GameSettings settings;
+
+  /// Çıkarılabilir özellik açık mı? (Paket BL)
+  ///
+  /// Motorlar ve ekranlar bu tek kapıdan sorar; kapalı özellik hem
+  /// listelenmez hem de çağrıldığında reddedilir. Ayrıntı:
+  /// `docs/FEATURE_FLAGS.md`.
+  bool featureOn(FeatureId id) => settings.features.isOn(id);
+
+  /// Kapalı özelliğin kısa gerekçesi; açıkken `null`.
+  String? featureBlockReason(FeatureId id) =>
+      featureOn(id) ? null : '${id.title} ayarlardan kapatılmış.';
 
   /// Oyuncunun **oturduğu** konutun eşya kimliği (D-043).
   ///

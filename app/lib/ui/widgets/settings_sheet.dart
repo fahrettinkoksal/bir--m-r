@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../sound/sound_scope.dart';
 import '../sound/sound_service.dart';
 
+import '../../domain/features/feature_catalog.dart';
 import '../../domain/models/game_settings.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
@@ -140,6 +141,68 @@ class _SettingsSheetState extends State<SettingsSheet> {
                       ),
                   ],
                 ),
+              ],
+              const SizedBox(height: 18),
+              const KilimDivider(),
+              const SizedBox(height: 14),
+              // --- Modüller (Paket BL) ----------------------------------
+              //
+              // Sonradan eklenen her özellik buradan kapatılabilir.
+              // Kapalı modül ekranda yer tutmaz; kapatınca neyin
+              // kaybolduğu satırın altında yazar.
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text('Modüller', style: theme.textTheme.titleMedium),
+                  ),
+                  if (!ayarlar.features.allDefault)
+                    TextButton(
+                      key: const Key('settings_features_reset'),
+                      onPressed: () {
+                        controller.resetFeatures();
+                        setState(() {});
+                      },
+                      child: const Text('Hepsini aç'),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Sonradan eklenen özellikler. Kapattığın modül oyunda hiç '
+                'görünmez; oyunun geri kalanı aynı şekilde çalışır. '
+                'Ayarı bu hayatın kaydında durur.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              for (final MapEntry<String, List<FeatureId>> grup
+                  in FeatureId.byPaket.entries) ...<Widget>[
+                const SizedBox(height: 12),
+                Text(
+                  grup.key,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                for (final FeatureId modul in grup.value)
+                  SwitchListTile(
+                    key: Key('settings_feature_${modul.saveKey}'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(modul.title),
+                    subtitle: Text(
+                      ayarlar.features.isOn(modul)
+                          ? 'Açık.'
+                          : 'Kapalı. ${modul.lostWhenOff}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    value: ayarlar.features.isOn(modul),
+                    onChanged: (bool acik) {
+                      controller.setFeature(modul, acik);
+                      setState(() {});
+                    },
+                  ),
               ],
               const SizedBox(height: 18),
               SizedBox(

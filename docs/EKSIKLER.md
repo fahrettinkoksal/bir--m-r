@@ -224,6 +224,15 @@ karşılaşma, arkadaş grubu.
 Aile (yakınlık, ihmal, sitem, miras) ve romantik ilişki (flört → sevgili →
 evlilik → boşanma) derinken, arkadaşlık bunların yanında çok sığ kalıyor.
 
+> **Güncelleme (9 Ekim 2026, Paket BM).** Bu bölüm **eskimiş**: yukarıda
+> "yok" diye sayılanların çoğu D-130'da kodlandı —
+> `app/lib/domain/interaction/friendship_depth.dart` yakın arkadaş olma
+> teklifi, küslük, barışma ve arkadaşın kendi hayatını (taşınma,
+> evlilik, iş değişikliği, zor gün) içeriyor. Kalan gerçek eksikler:
+> **arkadaş grubu** ve **çocukluk arkadaşıyla yıllar sonra karşılaşma**.
+> Bölümü silmiyorum çünkü ölçümün kaydı; ama bir sonraki paket seçilirken
+> buradaki listeye değil koda bakılmalı.
+
 ### 3.2 Çocuğun hayatı tek yönlü
 Çocuk kendi hayatını yaşıyor (okul, meslek, birikim — D-045) ve artık
 evleniyor (D-121). Ama: boşanamıyor, işsiz kalamıyor, hastalanamıyor,

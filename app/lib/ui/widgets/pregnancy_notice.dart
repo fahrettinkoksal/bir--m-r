@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/features/feature_catalog.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/person.dart';
 import '../../domain/models/pregnancy.dart';
@@ -21,6 +22,8 @@ abstract final class PregnancyNotice {
   /// Diğer ebeveyn kayıttan düşmüşse ya da hayatta değilse motor doğumu
   /// gerçekleştirmiyor; o durumda bebeği söz veren bir cümle yazılmaz.
   static String? sentence(GameState state) {
+    // Modül kapalıysa hiçbir ekranda satır yoktur (Paket BL).
+    if (!state.featureOn(FeatureId.gebelikGorunurlugu)) return null;
     final Pregnancy? bekleyen = state.pregnancy;
     if (bekleyen == null) return null;
 
@@ -46,7 +49,15 @@ abstract final class PregnancyNotice {
   ///
   /// Durum satırı yalnızca olağandışı durumları yazar; bekleyen doğum da
   /// böyle bir durumdur: bir yıl sürer, sonra hane bir kişi büyür.
+  /// Kart ve çevresindeki boşluk çizilsin mi?
+  ///
+  /// Çağıran ekranlar bunu sorar; modül kapalıyken yalnızca kart değil
+  /// kartın etrafındaki boşluk da kalkar (D-032 kalıbı: kapalı modül
+  /// ekranda yer tutmaz).
+  static bool visible(GameState state) => sentence(state) != null;
+
   static String? shortLabel(GameState state) {
+    if (!state.featureOn(FeatureId.gebelikGorunurlugu)) return null;
     final Pregnancy? bekleyen = state.pregnancy;
     if (bekleyen == null) return null;
     return bekleyen.expecting == ExpectingParty.oyuncu

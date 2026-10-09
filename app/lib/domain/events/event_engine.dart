@@ -4,6 +4,7 @@ import 'dart:math';
 import '../economy/net_worth.dart';
 import '../../data/company_catalog.dart';
 import '../law/legal_engine.dart';
+import '../features/feature_events.dart';
 import '../models/criminal_record.dart';
 
 import 'package:flutter/foundation.dart';
@@ -194,6 +195,12 @@ class EventEngine {
   ActiveEvent? _pick(GameState state, Random rng) {
     final List<_Candidate> candidates = <_Candidate>[];
     for (final GameEvent event in pool) {
+      // Modül kapısı **zardan önce** (Paket BM): kapalı modülün olayı
+      // için kişi çözümü yapılırsa `rng` tüketilir ve kapalı modül bile
+      // hayatın akışını kaydırır. Ölçülen etki küçük değildi: hepsi
+      // kapalı 100 hayatta ortalama ömür 70,4'ten 72,1'e kaymıştı.
+      // Kapalı modül oyunun zarına dokunmaz.
+      if (!FeatureEvents.allowed(state, event.id)) continue;
       if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
       if (!_repeatGapPassed(state, event)) continue;
       final Person? person = _resolvePerson(state, event, rng);
@@ -245,6 +252,10 @@ class EventEngine {
 
   /// Olayın koşullarını denetler. Kişi gerekiyorsa [person] dolu olmalıdır.
   bool _matches(GameState state, GameEvent event, Person? person) {
+    // Modül kapısı (Paket BL): kapalı bir içerik modülünün olayı hiç
+    // aday olmaz. Tek yer burasıdır; `_pick`, `canHappen` ve
+    // `debugEligibleIds` üçü de buradan geçer.
+    if (!FeatureEvents.allowed(state, event.id)) return false;
     final EventRequirement req = event.requirement;
     final int age = state.player.age;
 

@@ -370,7 +370,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         // bebeğin izi yoktu (Q-202). Bekleyen bir doğum, bekleyen bir
         // karar kadar görünür olmalı; o yüzden karar kartlarının yanında
         // duruyor.
-        if (state.isExpecting) ...<Widget>[
+        if (PregnancyNotice.visible(state)) ...<Widget>[
           PregnancyCard(
             key: const Key('relationships_pregnancy_card'),
             state: state,

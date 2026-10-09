@@ -19,6 +19,7 @@
 /// Sayısal değerler `prototypeOnly`'dir (Q-203).
 library;
 
+import '../features/feature_catalog.dart';
 import '../models/game_state.dart';
 import '../models/person.dart';
 
@@ -77,6 +78,9 @@ abstract final class ChildRules {
   /// Hiç kural konulmadıysa **tam olarak 1,0** döner: hiçbir hesap
   /// değişmez ve aynı tohum aynı hayatı verir.
   static double reliefFor(GameState state, Person child) {
+    // Modül kapalıysa daha önce konmuş kural da etkisini yitirir:
+    // tam 1.0 döner, yani zar hiç kaymaz (Paket BL).
+    if (!state.featureOn(FeatureId.cocukKurallari)) return 1.0;
     final int? son = setAtAge(state, child.id);
     if (son == null) return 1.0;
     final int gecenYil = state.player.age - son;

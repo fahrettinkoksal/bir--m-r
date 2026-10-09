@@ -182,16 +182,13 @@ completed	D-147 ve D-148: kulüp sağlık tabanı ve sporun Ün tavanı onayland
 completed	Paket BA/1: 869 onaysız sayıyı tara — ölü sabit, doymuş tavan, dekoratif sınır
 completed	Paket BA/2: 15 ölü sabiti sil, kalıcı bekçiyi ekle (prototype_only_dead_constant_test)
 completed	Paket BA/3: mali kademe sınır hatası (D-092 ihlali) ve işletme tavanı düzeltildi
-pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik
 completed	Paket BA/4: D-176 kıdem tavanı — D-155 ustalık payı ilk kez çalışıyor
 completed	Paket BA/5: D-177 askerlikte erişilemeyen alt sınır kaldırıldı
 completed	Paket BA/6: Q-195 üç yanlış maddem düzeltildi (kopya sabitler, test okuma yüzeyi)
 completed	Paket BA/7: karar numarası çakışması — kararlarım D-164…D-175'e taşındı
-pending	Q-196: 27 tanımsız karar numarası (kodda yetki, DECISIONS.md'de yok)
 completed	Paket BB/1: Android derleme engeli ölçüldü, setup script ve belge yazıldı
 completed	Paket BB/2: Q-196 — 27 karar numarasının metni koddan çıkarıldı (onay bekliyor)
 completed	Paket BB/3: tarama kalan alanlara uzatıldı, 34 tavan adayı incelendi
-pending	Q-197: okul kulübü seçmesinde beceri 8. sezondan sonra ölüyor
 completed	Paket BC/1: Q-196 — 27 karar DECISIONS.md'ye yazıldı, bekçi listesi boşaldı
 completed	Paket BC/2: D-178 — kulüp seçmesinde sezon tavanı, beceri artık hep sayılıyor
 completed	Paket BD/1: ekran dökümü testi — hayat arayüzden yaşanıyor, beş ekran okunuyor
@@ -199,13 +196,11 @@ completed	Paket BD/2: duruşma penceresi kapanmış rotada çöküyordu, düzelt
 completed	Paket BD/3: ölüm cümlesindeki "nedeniyle" eki koşulsuzdu, düzeltildi
 completed	Paket BD/4: hayvan satırının boş durumu bütün kataloğu diziyordu, kısaltıldı
 completed	Paket BD/5: günlük satırı küçük harfle başlıyordu — iki olayda yer tutucu düzeltildi
-pending	Q-198: ekran dökümünden sekiz soru (askerlik yaşı, emeklilik şartı, ad çakışması...)
 completed	Paket BE/1: bot dökümü — dolu hayatın beş ekranı okundu (iş, eş, çocuk, ev)
 completed	Paket BE/2: "Mezuniyet sonrası" satırı hiç kapanmıyordu, motorun kapısına bağlandı
 completed	Paket BE/3: para değişimi binlik ayraçsız yazılıyordu, trNumber uygulandı
 completed	Paket BF/1: döküm altı arketipe çıktı — üniversite, işletme, riskli hayat
 completed	Paket BF/2: ekranda ham null ("Sınıf: null. sınıf") düzeltildi, beş ekran taranıyor
-pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi kartı yok
 completed	Paket BG/1: özel durum dökümü — cezaevi, duruşma, kritik sağlık, emeklilik taranarak bulundu
 completed	Q-199: tutukluyken maaş akmaya devam ediyor (hükümlü tarafı doğru çıktı)
 completed	Paket BH/1: D-179 — tutuklulukta maaş yok, kıdem donuyor, iş bitmiyor
@@ -221,5 +216,18 @@ completed	Paket BK/3: çocuğa özel dört eylem (ödev, harçlık, hobi, kural)
 completed	Paket BK/4: çocuğun yaş kademesi D-180 eşikleriyle (0-3 / 4-12 / 13-17 / 18+)
 completed	Paket BK/5: çocuğun yıl özeti (ChildMark fotoğrafı, ölçülen fark)
 completed	Paket BK/6: 500 aile hayatı, istismar taraması ve belgeler
+completed	Paket BL/1: modül anahtarı altyapısı (FeatureId kataloğu, kayıt, tek kapı)
+completed	Paket BL/2: Paket BK'nın beş özelliği geriye dönük anahtara bağlandı
+completed	Paket BL/3: Ayarlar → Modüller bölümü (kapatınca ne kaybolur yazılı)
+completed	Paket BL/4: izolasyon ölçümü — her modül kapalı/açık 100 hayat, 13 test
+completed	Paket BL/5: docs/FEATURE_FLAGS.md sözleşmesi ve silme tarifi
+completed	Paket BM: ilk yıllar havuzu — 31 olay (0-7 yaş) ve dört karşılık olayı
+completed	Paket BM: modül kapısı (EventEngine tek nokta) ve 0-7 aday olay ölçümü
+pending	Paket BN: sessiz kalan hikâye izleri ve dar pencereli zincirler
+pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik
+pending	Q-196: 27 tanımsız karar numarası (kodda yetki, DECISIONS.md'de yok)
+pending	Q-197: okul kulübü seçmesinde beceri 8. sezondan sonra ölüyor
+pending	Q-198: ekran dökümünden sekiz soru (askerlik yaşı, emeklilik şartı, ad çakışması...)
+pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi kartı yok
 pending	Q-204: gebelik 55'e kadar açık ama doğum 45'te kapalı — karar bekliyor
 pending	Q-205: çocukla yakınlık medyanı tavanda (100) — karar bekliyor
