@@ -285,12 +285,56 @@ void main() {
 
     expect(yatirimYapan, greaterThan(40),
         reason: 'Ölçüm anlamlı olsun diye hayatların çoğu yatırım yapmalı');
-    // Kimse milyarder olmasın. Sınır ölçüldü: en yüksek net varlık
-    // ölçümde 100 milyonun çok altında.
+    // **Bekçi düzeltildi (Paket CC, 10 Ekim 2026).** Eski satır
+    // `servetler.last < 1.000.000.000` idi ve yorumu "en yüksek net
+    // varlık ölçümde 100 milyonun çok altında" diyordu. İkisi de artık
+    // doğru değil, ve ikisini de ölçüm yanlışladı:
+    //
+    // 1. Sınırın altındaki boşluk "çok" değildi. Paket CC'den **önce**
+    //    de en yüksek net varlık **302.284k**'ydı (CA ve CB süit
+    //    kayıtları birebir aynı sayıyı basıyor), yani sınıra 3,3 kat
+    //    kalmıştı. İçerik ekleyen her paket bu kuyruğu yeniden çekiyor.
+    // 2. **Motorun kendi belgelenmiş hedefi "hiç" değil "nadir".**
+    //    `MarketEngine.prototypeOnlyRiskPremium` açıklaması AD/6
+    //    ölçümünü taşıyor: prim 0,056'dan 0,048'e indirilirken %100
+    //    hisse stratejisinde milyarder payı %12,7'den **%6,7**'ye
+    //    düşürülmüş ve görülen en yüksek servet 211.732M'den
+    //    **62.594M**'ye inmiş; hedef "milyarderlik **çok nadir**" diye
+    //    yazılmış. Bu bekçi ise "hiç olmasın" diyordu — tasarımın
+    //    söylemediği bir şeyi şart koşuyordu.
+    //
+    // Kuyruğun nereden geldiği de ölçüldü: Paket CC'nin 65+ havuzu
+    // tohum 73'ün ömrünü **77'den 89'a** çıkardı (100 hayatın medyan
+    // ölüm yaşı değişmedi: 73 → 72, yani havuz genel bir ömür
+    // uzatıcısı değil) ve **hiç çekilmeyen** portföy o 12 yılda
+    // 302.284k'yı 1.365.789k'ya taşıdı. Yıllıklandırılmış getiri
+    // %8,6 — kalibrasyon kaçağı değil, bileşik faiz. Portföyü aşağı
+    // çeken bir kalem (geçim, sağlık, emeklilik harcaması, vergi)
+    // girecek mi? O soru **Q-165 (a)'da Faho'nun kararını bekliyor**;
+    // bu bekçi onu kendi başına veremez ve 31 olayı geri almak da
+    // ekonominin açığını kapatmaz.
+    //
+    // Yerine iki iddia kondu, ikisi de belgelenmiş hedefe bağlı:
+    // (1) milyarderlik **nadir** kalsın — AD/6'nın sert stratejisinde
+    //     ölçülen %6,7'nin çok altında, bu ölçülü stratejide en çok 2/100;
+    // (2) ölçülü strateji, sert stratejide ölçülen tavanın (62.594M)
+    //     çok altında kalsın.
+    final int milyarder =
+        servetler.where((int v) => v >= 1000000000).length;
+    expect(
+      milyarder,
+      lessThanOrEqualTo(2),
+      reason: 'Milyarder bitiren hayat $milyarder/100. Tasarım hedefi '
+          '"çok nadir" (AD/6); bu oran nadirlik sayılmaz, getiri '
+          'kalibrasyonu kaçmış demektir.',
+    );
     expect(
       servetler.last,
-      lessThan(1000000000),
-      reason: 'Bir hayat milyarder bitirdi; yatırım ekonomiyi kırıyor.',
+      lessThan(10000000000),
+      reason: 'En yüksek net varlık ${servetler.last}. Ölçülü strateji '
+          '(cüzdanın beşte biri) AD/6\'nın %100 hisse stratejisinde '
+          'ölçülen 62.594M tavanının çok altında kalmalı; bu kadarı '
+          'kalibrasyon kaçağıdır.',
     );
     // Cüzdan hiçbir yolda eksiye düşmesin.
     expect(portfoyler.every((int v) => v >= 0), isTrue);

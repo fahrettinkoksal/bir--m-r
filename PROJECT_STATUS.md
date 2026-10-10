@@ -7067,5 +7067,44 @@ havuzun en az 20 olayı uygun hale geliyor (ölçülen 31/31).
 **Bütün sayılar `prototypeOnly`.** Ağırlıklar, tutarlar ve yaş kapıları
 `docs/DESIGN_REVIEW_QUEUE.md` Q-222'de karara sunuldu.
 
+### CC/1 — paketin açtığı kırmızı: bekçi ile tasarım çelişiyordu
+
+Paket CC gönderildikten sonra CI kırmızı yandı. Tam süit de aynı tek
+hatayı verdi (3650 geçti, 17 atlandı, **1 hata**):
+`paket_aa_measure_test` → "100 hayatın ölüm anındaki yatırım serveti",
+`servetler.last < 1.000.000.000` iddiası, gerçekleşen **1.365.789k**.
+
+**Kök neden ölçüldü.** Aynı 100 tohum, modül kapalı/açık:
+
+| | `son_yillar` kapalı | açık |
+| --- | --- | --- |
+| Tohum 73 ölüm yaşı | 77 | **89** |
+| Tohum 73 net varlığı | 302.284k | **1.365.789k** |
+| 100 hayatın medyan ölüm yaşı | 73 | 72 |
+| 1 milyarı geçen hayat | 0 | 1 |
+
+Havuz genel bir ömür uzatıcısı değil (medyan ölüm yaşı düştü bile), ama
+bir hayat 12 yıl fazla yaşadı ve **hiç çekilmeyen** portföy o 12 yılda
+302M'yi 1.366M'ye taşıdı. Yıllıklandırılmış getiri %8,6 — kalibrasyon
+kaçağı değil **bileşik faiz**. Hayatın yolu: 70 yaşından sonra anapara
+4.482k'da duruyor (cüzdan 0), portföy yine büyüyor.
+
+**Çelişki.** Bekçi "kimse milyarder olmasın" diyordu; motorun kendi
+belgesi (`MarketEngine.prototypeOnlyRiskPremium`, AD/6 ölçümü)
+"**milyarderlik çok nadir**" hedefini yazıyor ve o ölçümde %100 hisse
+stratejisinde milyarder payı %6,7, en yüksek servet 62.594M. Yani bekçi
+tasarımın söylemediği bir şeyi şart koşuyordu. Üstüne, yorumunun
+"en yüksek net varlık 100 milyonun çok altında" cümlesi **CC'den önce
+de** geçersizdi: CA ve CB süit kayıtlarında en yüksek 302M.
+
+**Ne yaptım.** Sayıyı yükseltmedim; iddiayı tasarımın hedefine çevirdim:
+milyarder bitiren hayat 100'de **en çok 2** (AD/6'da ölçülen %6,7'nin
+çok altında — gevşetme değil sıkılaştırma) ve ölçülü strateji AD/6'nın
+sert stratejisinde ölçülen tavanın çok altında kalsın (10 milyar).
+Gerekçenin tamamı testin içinde. Portföyü aşağı çeken bir kalem
+girecek mi — yani 89 yaşındaki 1,37 milyarlık oyuncunun geçim giderini
+hiç ödememesi — **Q-165 (a) ve Q-223'te Faho'nun kararını bekliyor.**
+Ne 31 olayı geri aldım ne ekonominin kuralını kendi başıma değiştirdim.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

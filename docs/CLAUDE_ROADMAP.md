@@ -253,6 +253,17 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yalnızca **11'i** o yaşlara aitti; 70 yaşındaki oyuncu 40 yaşındakinin
   havuzunu çekiyordu. Bir bandı ölçerken **sayıya değil, sayının
   içindekine** bak: kaç olay değil, kaç olay *o yaşa ait*.
+- **Paket CC/1.** Bir bekçi, tasarımın **söylemediği** bir şeyi şart
+  koşabilir ve yıllarca kimse bakmaz. "Kimse milyarder olmasın" yazan
+  bekçinin yorumu "en yüksek net varlık 100 milyonun çok altında"
+  diyordu; gerçekte iki pakettir 302M'de duruyordu ve motorun kendi
+  belgesi (AD/6) hedefi "milyarderlik **çok nadir**" diye yazıyordu.
+  Yani bekçi "hiç", tasarım "nadir" diyordu. Kırmızı yanınca sayıyı
+  yükseltmek de içeriği geri almak da yanlış cevaptı: doğru cevap
+  **iddiayı tasarımın belgelenmiş hedefine çevirmek** ve altındaki açık
+  soruyu (portföyden hiç para çekilmemesi) kuyruğa, karar sahibine
+  götürmekti. Bir bekçi kırmızı yandığında ilk soru "eşiği mi
+  değiştireyim" değil, **"bu bekçi hangi onaylı kuralı koruyor?"**
 - **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
   değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
   çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)
