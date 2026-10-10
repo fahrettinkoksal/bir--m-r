@@ -328,6 +328,28 @@ medya açarak, emekli olarak):
 119, geziye çıkan 119, sosyal medya açan 119, emekli olan 106, evlenen
 69, çocuk sahibi olan 49.
 
+**TAZELENDİ — Paket CD ölçümü (10 Ekim 2026).** Aşağıdaki tablo
+10 Ekim öncesine aittir ve **büyük kısmı geçersizdir**. Bugünkü ölçüm
+(150 hayat, iki mod):
+
+| Mod | Hiç görülmeyen çok dallı olay | Tek dalı gezilen | Bütün dalları gezilen |
+| --- | --- | --- | --- |
+| Kapsam **kapalı** (varsayılan bot) | 22 | 117 | 456 |
+| Kapsam **açık** (`choiceCoverage`) | **13** | **54** | **528** |
+
+Çok dallı olay sayısı 595. İki listede **ortak** olan yalnızca altı
+olay — gerçek şüpheliler bunlar: `ilk_yil_kardes_kiskancligi`,
+`kulup_futbol_antrenor_barisma`, `kulup_futbol_kritik_gol`,
+`kulup_futbol_penalti_sonrasi`, `kulup_secimin_sonucu`,
+`suc_ceza_odemesi`. Gerisi **moda ve tohuma bağlı**: botun seçim
+politikası değişince liste neredeyse tamamen değişiyor.
+
+Eski tablodaki şu kayıtlar ölçümle **yanlışlandı**: "simülasyon araba
+almıyor" (araç sahibi olan **143/150**), `araba_yolda_kaldi`
+(görüldü **25/150**), `direksiyon_basinda` (1/150), `savundugun_arkadas`
+(4/150), `zincir_ogretmen_2` (6/150), `zincir_ogretmen_3` (3/150),
+`sinav8_son_hafta` (1/150), hayvan olaylarının tamamı (yukarıda).
+
 **Hiç çıkmayan 18 olay ve gerçek sebepleri:**
 
 | Olay | Sınıf | Sebep |

@@ -264,6 +264,14 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   soruyu (portföyden hiç para çekilmemesi) kuyruğa, karar sahibine
   götürmekti. Bir bekçi kırmızı yandığında ilk soru "eşiği mi
   değiştireyim" değil, **"bu bekçi hangi onaylı kuralı koruyor?"**
+- **Paket CD.** "Bu olay hiç çıkmıyor" raporu, botun **seçim
+  politikasının** raporudur. En iyi puanlı dalı alan bot, çok dallı 595
+  olayın 117'sinin yalnızca bir dalını geziyordu ve 22'sini hiç
+  görmüyordu; yarı yarıya en düşük dalı alan kapsam modunda liste 13'e
+  indi ve iki listenin **ortak** kısmı yalnızca altı olay oldu. Yani
+  "görülmedi" listesi politikaya ve tohuma bağlıydı. Gerçek şüpheli,
+  **iki politikada da** kaçan olaydır; birinde kaçan olay yalnızca
+  botun tercihidir.
 - **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
   değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
   çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)

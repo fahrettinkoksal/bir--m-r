@@ -457,6 +457,10 @@ class BotLifeResult {
   /// Hayat boyunca **bitirilen** kitapların kimlikleri (Paket CB).
   /// "Okumak" hobisinin tek besleyicisi budur.
   final Set<String> booksFinished = <String>{};
+
+  /// Olay kimliği -> o hayatta seçilen dalların kimlikleri (Paket CD).
+  /// İçeriğin iki yarısının da gezilip gezilmediğini ölçer.
+  final Map<String, Set<String>> choicesTaken = <String, Set<String>>{};
   int finalHealth = 0;
 
   /// Ölümde mutluluk (0-100). Denge ölçümlerinde sağlıkla birlikte
@@ -574,13 +578,38 @@ class BotLifeResult {
 
 /// Botun hafızası. **Test tarafı**; `GameState`'e alan eklenmedi.
 class _Intent {
-  _Intent(this.profile, this.rng, this.overrides, {this.jobCoverage = false});
+  _Intent(
+    this.profile,
+    this.rng,
+    this.overrides, {
+    this.jobCoverage = false,
+    this.choiceCoverage = false,
+  });
 
   final BotProfile profile;
   final Random rng;
 
   /// Meslek kapsamı modu (Paket BY). Yalnızca iş seçimini değiştirir.
   final bool jobCoverage;
+
+  /// Olay **dallarını** gezme modu (Paket CD).
+  ///
+  /// Kapalıyken bot her olayda en iyi puanlı seçeneği alır (artı
+  /// `slip` payı). Bu, bazı dalların **hiç** seçilmemesine yol
+  /// açıyordu: `zincir_emanet_2` 150 hayatta 17 kez göründü ve
+  /// 17'sinde de `bekle` seçildi, çünkü `iste` dalı bond -12
+  /// taşıyor ve skorlayıcı bağ kaybına çok duyarlı. Dolayısıyla o
+  /// zincirin bütün bir kolu (`zincir_emanet_3_iste`) hiç
+  /// ölçülmüyordu — arkasındaki bir hata da görünmezdi.
+  ///
+  /// Açıkken bot yarı yarıya **en düşük** puanlı seçeneği alır. Bu
+  /// bir oyuncu taklidi değil, **kapsam aracıdır**: denge ölçümünde
+  /// kullanılmaz, içeriğin iki yarısının da gezilmesi için
+  /// kullanılır.
+  ///
+  /// Varsayılan kapalı ve zar yalnızca açıkken çekilir: mevcut
+  /// tohumlu ölçümler birebir aynı kalır (Paket BO sözleşmesi).
+  final bool choiceCoverage;
 
   /// Teşhis turunda kapatılan politikalar. Varsayılan hiçbir şeyi
   /// kapatmaz; kapatırken bile niyet zarı **atılır** (aşağıda), böylece
@@ -764,6 +793,7 @@ BotLifeResult playBotLife({
   /// sebeplerin bir kısmı botun kendi seçim kuralıydı (`muzisyen` 34 kez
   /// ilanda açıldı, bot üst üçte birden seçtiği için hiç başvurmadı).
   bool jobCoverage = false,
+  bool choiceCoverage = false,
 }) {
   final BotProfile profile = kBotProfiles[archetype]!;
   final GameController c = GameController(random: Random(seed));
@@ -780,7 +810,13 @@ BotLifeResult playBotLife({
   // rastgele akışını kaydırmasın.
   final Random rng = Random(seed * 7919 + archetype.index * 104729 + 13);
   final _Intent intent =
-      _Intent(profile, rng, overrides, jobCoverage: jobCoverage);
+      _Intent(
+    profile,
+    rng,
+    overrides,
+    jobCoverage: jobCoverage,
+    choiceCoverage: choiceCoverage,
+  );
   final BotLifeResult sonuc = BotLifeResult(archetype: archetype, seed: seed);
   final BotDiag diag = sonuc.diag;
   // Teşhis taramasının **ayrı** zarı: oyunun akışını kaydırmasın.
@@ -827,6 +863,9 @@ BotLifeResult playBotLife({
       );
       if (secim.crimeId != null) sonuc.crimeIds.add(secim.crimeId!);
       diag.eventsAnswered++;
+      sonuc.choicesTaken
+          .putIfAbsent(olay.eventId, () => <String>{})
+          .add(secim.id);
       c.chooseEventOption(secim.id);
       continue;
     }
@@ -1317,8 +1356,15 @@ EventChoice _chooseEventChoice({
     return havuz[rng.nextInt(havuz.length)];
   }
 
+  // Dal gezme modu (Paket CD): yarı yarıya **en düşük** puanlı seçenek.
+  // Zar yalnızca mod açıkken çekilir; kapalıyken akış birebir aynı.
+  final bool enDusuguSec =
+      intent.choiceCoverage && rng.nextDouble() < 0.5;
+
   double enIyiPuan = double.negativeInfinity;
+  double enDusukPuan = double.infinity;
   EventChoice? enIyi;
+  EventChoice? enDusuk;
   for (final EventChoice ch in secenekler) {
     final double puan = _scoreChoice(
       choice: ch,
@@ -1331,6 +1377,16 @@ EventChoice _chooseEventChoice({
     if (puan + gurultu > enIyiPuan) {
       enIyiPuan = puan + gurultu;
       enIyi = ch;
+    }
+    if (puan - gurultu < enDusukPuan) {
+      enDusukPuan = puan - gurultu;
+      enDusuk = ch;
+    }
+  }
+  if (enDusuguSec && enDusuk != null) {
+    // Cebinde olmayan parayı çıkaran dal, kapsam uğruna bile seçilmez.
+    if (enDusuk.money >= 0 || state.player.wallet + enDusuk.money >= 0) {
+      return enDusuk;
     }
   }
   return enIyi ?? secenekler[rng.nextInt(secenekler.length)];
@@ -2862,6 +2918,9 @@ bool _clearInterruptions(
     );
     if (secim.crimeId != null) sonuc.crimeIds.add(secim.crimeId!);
     sonuc.diag.eventsAnswered++;
+    sonuc.choicesTaken
+        .putIfAbsent(olay.eventId, () => <String>{})
+        .add(secim.id);
     c.chooseEventOption(secim.id);
   }
   return false;

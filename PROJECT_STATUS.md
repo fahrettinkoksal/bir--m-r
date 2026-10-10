@@ -7106,5 +7106,58 @@ girecek mi — yani 89 yaşındaki 1,37 milyarlık oyuncunun geçim giderini
 hiç ödememesi — **Q-165 (a) ve Q-223'te Faho'nun kararını bekliyor.**
 Ne 31 olayı geri aldım ne ekonominin kuralını kendi başıma değiştirdim.
 
+## Paket CD — olay dallarını gezen kapsam modu (10 Ekim 2026)
+
+### Ölçülen sorun
+
+`docs/EKSIKLER.md`'deki "hiç çıkmayan olaylar" listesini tazelemek için
+yedi zincir halkasının hunisi ölçüldü (150 hayat): izi yazan olay kaç
+hayatta görüldü, iz kaç hayatta bırakıldı, olay kaç hayatta uygun hale
+geldi, kaç hayatta görüldü. Beşi artık görülüyordu. Ama ölçüm başka bir
+şeyi gösterdi: **botun seçim politikası içeriğin yarısını ölçüm dışı
+bırakıyor.** Çok dallı 595 olayın 117'sinin yalnızca bir dalı
+gezilmişti, 22'si hiç görülmemişti. Bir dalın arkasındaki hata görünmez
+olur; Paket BY/1'de ölü kodun "etki yok" diye görünmesi aynı aileden
+bir sorundu.
+
+### Ne eklendi
+
+`playBotLife(choiceCoverage: true)`: bot yarı yarıya **en düşük** puanlı
+dalı alır. Oyuncu taklidi değil, **kapsam aracı** — denge ölçümlerinde
+kullanılmaz. Varsayılan kapalı ve zar yalnızca açıkken çekilir, yani
+mevcut tohumlu ölçümler birebir aynı kalır (Paket BO sözleşmesi, bekçide
+üç tohumla kanıtlı). Ayrıca `BotLifeResult.choicesTaken` eklendi: olay
+başına seçilen dalların kimlikleri.
+
+| 150 hayat | Kapsam kapalı | Kapsam açık |
+| --- | --- | --- |
+| Bütün dalları gezilen olay | 456 | **528** |
+| Yalnızca tek dalı gezilen | 117 | **54** |
+| Hiç görülmeyen | 22 | **13** |
+| Görülen tekil olay | 573 | **582** |
+
+**Asıl kazanç listede değil, listenin anlamında.** İki modun "hiç
+görülmeyen" listeleri neredeyse örtüşmüyor; ortak olan yalnızca altı
+olay. Yani "bu olay hiç çıkmıyor" raporu botun seçim politikasına
+bağlıydı ve tek koşuya dayanıyordu. Bundan sonra gerçek şüpheli,
+**iki modda da** kaçan olaydır.
+
+### Kendi iddiamı düzelttim
+
+İlk tohum bloğunda `zincir_emanet_2` 17 hayatta görülüp 17'sinde de
+`bekle` seçilmişti; "bot bu dalı hiç seçmiyor, bir kol tamamen ölçüm
+dışı" diye yazdım. İkinci blokta (`9500+`) `iste` **iki modda da** birer
+hayatta seçildi. Dal engelli değil; ilk halka nadir (17/150). Tek tohum
+bloğuna dayanan bulgu bulgudan sayılmaz — Paket BY/1'in dersi, bu kez
+kendi üstümde.
+
+### Bekçi
+
+`test/paket_cd_secim_kapsami_test.dart` (3 test): varsayılan kapalı hâl
+üç tohumda birebir aynı hayatı veriyor, seçilen dallar kaydediliyor ve
+kaydedilen her dal gerçekten o olayın bir seçeneği, kapsam modu bütün
+dalları gezilen olay sayısını gerçekten artırıyor (60 hayatta en az
++10; ölçülen 150 hayatta +72).
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
