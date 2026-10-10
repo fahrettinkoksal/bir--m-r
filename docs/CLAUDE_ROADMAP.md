@@ -115,11 +115,9 @@ güçlü.
 
 ### Paket BR adayları (ölçülmüş, sıralanmadı)
 
-- **İlk eve taşınma hatırlatması.** Paket BP'de ölçüldü: oyuncu ev
-  alabiliyor ama taşınmayı yalnızca *Evlerim* ekranındaki düğmeden
-  öğreniyor; hatırlatan satır yok. Ölçüm botunun da aynı yere düşmesi
-  (ev alıp hiç taşınmaması) bunun gerçek bir görünürlük boşluğu
-  olduğunu gösteriyor.
+- ~~**İlk eve taşınma hatırlatması.**~~ **Yapıldı (Paket BR/1).** Konut
+  alımının sonucuna tek cümle eklendi; yalnızca kendi evinde oturmayana
+  çıkıyor (Q-213).
 - **Komşunun kalıcı kişi olması.** Paket BP apartmanı metinde yaşattı.
   Komşuyu gerçek kişi yapmak yeni bağ türü, ilişkiler ekranı satırı ve
   erişilebilirlik kuralı gerektirir; kendi paketi olmalı.

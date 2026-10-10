@@ -6077,5 +6077,29 @@ zorlamasının kayıttan güçlü olması.
 
 Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-212.
 
+## Paket BR/1 — ilk eve taşınma hatırlatması (10 Ekim 2026)
+
+Paket BP'nin ölçümünden çıkan boşluk: mülk sahibi olmak oturmak demek
+değil (D-043) ve taşınma yalnızca *Evlerim* ekranındaki bir düğme —
+ilk evini alan oyuncuya bunu söyleyen tek satır yoktu. Ölçüm botu da
+aynı yere düştü: ev alıp hiç taşınmadı (ev sahibi olan 25 hayatın
+18'i kendi evinde tek yıl bile geçirmemişti).
+
+Satın alma sonucuna tek cümle eklendi: "Oturmak istersen Evlerim
+ekranından bu eve taşınabilirsin; taşınma masrafı 45.000 ₺." Kuralı
+dar: yalnızca **konut** alımında ve yalnızca oyuncu kendi evinde
+oturmuyorken çıkar. Yatırım için ikinci ev alana çıkmaz. Masraf metne
+gömülmedi, `Housing.prototypeOnlyMoveCost` sabitinden yazılıyor.
+
+Yeni mekanik yok: satın alma oturulan evi değiştirmiyor, karar hâlâ
+oyuncunun.
+
+**Bekçi:** `app/test/paket_br_tasinma_hatirlatmasi_test.dart` (4 test):
+kirada oturana çıkıyor, kendi evinde oturana çıkmıyor, konut dışı
+alışverişte çıkmıyor, satın alma oturulan evi değiştirmiyor ve masraf
+gerçek sabitten geliyor.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-213.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

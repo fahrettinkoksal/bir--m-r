@@ -485,8 +485,22 @@ class ItemActions {
           : null,
     );
 
-    final String metin =
-        '${product.name} satın alındı. ${trMoney(fiyat)} ödedin.';
+    // **Taşınma hatırlatması (Paket BR).** Mülk sahibi olmak oturmak
+    // demek değil (D-043) ve taşınma yalnızca *Evlerim* ekranındaki bir
+    // düğme; ilk evini alan oyuncuya bunu söyleyen tek satır yoktu.
+    // Ölçüm botu da aynı yere düştü: ev alıp hiç taşınmadı (Paket BP'de
+    // ölçüldü — ev sahibi olan 25 hayatın 18'i kendi evinde tek yıl bile
+    // geçirmemişti). Hatırlatma yalnızca **konut** alımında ve yalnızca
+    // kendi evinde oturmayan oyuncuya çıkar; yatırım için ikinci ev alan
+    // oyuncuya çıkmaz.
+    final bool konutAlimi = product.type.kind == ItemKind.konut;
+    final bool kendiEvindeDegil =
+        Housing.residenceOf(state) != ResidenceKind.kendiEvinde;
+    final String metin = konutAlimi && kendiEvindeDegil
+        ? '${product.name} satın alındı. ${trMoney(fiyat)} ödedin. '
+            'Oturmak istersen Evlerim ekranından bu eve taşınabilirsin; '
+            'taşınma masrafı ${trMoney(Housing.prototypeOnlyMoveCost)}.'
+        : '${product.name} satın alındı. ${trMoney(fiyat)} ödedin.';
     return ItemActionResult(
       state: _withLog(next, metin),
       outcome: ItemOutcome(
