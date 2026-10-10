@@ -121,7 +121,7 @@ const List<GameEvent> kThresholdYearsEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 18,
       maxAge: 20,
-      requiresSchoolStudent: true,
+      requiresStudent: true,
       forbiddenFlags: _tanismaYasaklari,
     ),
     weight: 12,
@@ -813,7 +813,7 @@ const List<GameEvent> kThresholdYearsEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 18,
       maxAge: 20,
-      requiresSchoolStudent: true,
+      requiresStudent: true,
     ),
     weight: 3,
     choices: <EventChoice>[
@@ -846,7 +846,7 @@ const List<GameEvent> kThresholdYearsEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 18,
       maxAge: 20,
-      requiresSchoolStudent: true,
+      requiresStudent: true,
     ),
     repeatable: true,
     minAgeGap: 2,
@@ -883,7 +883,7 @@ const List<GameEvent> kThresholdYearsEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 18,
       maxAge: 20,
-      requiresSchoolStudent: true,
+      requiresStudent: true,
     ),
     weight: 3,
     choices: <EventChoice>[

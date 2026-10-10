@@ -355,6 +355,11 @@ class EventEngine {
     if (req.requiresSchoolStudent && !state.education.isSchoolStudent) {
       return false;
     }
+    // Paket BZ: 1-12 **ya da** üniversite. 18-20 yaş olaylarının kapısı
+    // budur; `requiresSchoolStudent` üniversiteliyi dışarıda bırakıyor.
+    if (req.requiresStudent && !state.education.isStudent) {
+      return false;
+    }
     final int? grade = state.education.grade;
     if (req.minGrade != null && (grade == null || grade < req.minGrade!)) {
       return false;

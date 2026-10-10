@@ -35,6 +35,7 @@ class EventRequirement {
     this.requiredPossessions = const <String>{},
     this.requiredPossessionKinds = const <ItemKind>{},
     this.requiresSchoolStudent = false,
+    this.requiresStudent = false,
     this.minGrade,
     this.maxGrade,
     this.requiresNeglectedRelative = false,
@@ -243,6 +244,17 @@ class EventRequirement {
 
   /// Okula devam ediyor olmayı gerektirir (yaş değil, eğitim durumu).
   final bool requiresSchoolStudent;
+
+  /// **Herhangi bir öğrencilik** gerektirir: 1-12. sınıf ya da
+  /// üniversite (Paket BZ).
+  ///
+  /// `requiresSchoolStudent` yalnızca 1-12'ye bakıyor
+  /// (`EducationState.isSchoolStudent => enrolled`). 18-20 yaş
+  /// olaylarının çoğu için doğru kapı bu değil: o yaşta oyuncu
+  /// genellikle **üniversitede** ya da çalışıyor. Kampüs/üniversite
+  /// metni taşıyan dört olay bu yüzden hiç çıkmıyordu — koşul içerikle
+  /// çelişiyordu.
+  final bool requiresStudent;
 
   /// Sınıf aralığı (1-12). Verilirse oyuncunun o sınıfta olması gerekir.
   final int? minGrade;

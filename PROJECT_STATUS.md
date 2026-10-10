@@ -6666,5 +6666,52 @@ istiyor (bölüm, hobi basamağı, kuşak, büyük şehir). Bu bilinçli bir
 derinlik mi, yoksa fazla mı? Q-219'da önerimle birlikte duruyor; bu
 pakette **hiçbir meslek gereksinimi değiştirilmedi**.
 
+## Paket BZ — dört olay yanlış kapıdaydı (10 Ekim 2026)
+
+Paket BY'nin denetim raporunda kalan "hiç görülmeyen olaylar" listesinin
+dördü Paket BN'in kendi havuzundandı:
+`esik_universite_ilk_ay`, `esik_kampuste_tanisma`, `esik_kampus_kantin`,
+`esik_okulu_birakma`. Bu kez sebep havuz rekabeti **değildi**.
+
+### Koşul içerikle çelişiyordu
+
+Dördü de `requiresSchoolStudent: true` istiyordu. O kapının tanımı
+`EducationState.isSchoolStudent => enrolled` ve kodda yorumu da açık:
+**"Yalnızca 1-12. sınıf öğrenciliği."** 18-20 yaşındaki oyuncu ise
+genellikle **üniversitede** (`enrolled` kapalı, `isUniversityStudent`
+açık) ya da çalışıyor. Yani kimliğinde "üniversite" ve "kampüs" yazan
+olaylar hedef kitlesine **hiç çıkmıyordu**; tek açık yol 18 yaşında
+hâlâ 12. sınıfta olmaktı ve o da tek yıllık bir pencere.
+
+### Ölçüm (150 hayat, aynı tohumlar)
+
+18-20 arasında **74 hayat üniversiteli** (yarısı). Buna karşılık:
+
+| Olay | Önce uygun | Önce görülen | Sonra uygun | Sonra görülen |
+| --- | --- | --- | --- | --- |
+| `esik_universite_ilk_ay` | 8 | **0** | 81 | 3 |
+| `esik_kampuste_tanisma` | 7 | **0** | 75 | 14 |
+| `esik_kampus_kantin` | 8 | **0** | 81 | 5 |
+| `esik_okulu_birakma` | 8 | **0** | 81 | 3 |
+
+### Düzeltme
+
+`EventRequirement`'a **`requiresStudent`** eklendi: 1-12 **ya da**
+üniversite (`education.isStudent`). Dört olay ona bağlandı. Yeni bir
+oyun kuralı yazılmadı, hiçbir denge sayısına dokunulmadı; yazarın
+niyeti geri getirildi. 12. sınıf olayları (ör.
+`sinav12_aile_baskisi`) bilerek 1-12 kapısında kaldı: onların metni
+gerçekten lise sonu.
+
+### Bekçi
+
+`test/paket_bz_esik_ogrenci_kapisi_test.dart` (4 test): dört olay 1-12
+kapısını kullanmıyor; **kimliğinde ya da metninde kampüs/üniversite
+geçen hiçbir olay** sınıf aralığı belirtmeden 1-12 kapısında kalamaz
+(hatayı kaynağında yakalayan tarayıcı); 18-20 arası üniversiteli bir
+**bot karesinde** olayların en az üçü uygun hale geliyor; 120 oynanan
+hayatta en az 6 hayat bu olaylardan birini görüyor (düzeltme öncesi
+sıfırdı).
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

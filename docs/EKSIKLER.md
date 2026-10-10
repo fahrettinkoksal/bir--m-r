@@ -445,6 +445,14 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   tıp + zekâ 75 + büyük şehir birleşimiyle 1.000 hayatta yalnızca 3 yıl
   ilanda göründü; 2M+ sermayeli işletmeler botun bütün artan parayı
   portföye koyması yüzünden hiç karşılanamadı.
+- ~~**Eşikteki yılların dört olayı hiç görülmüyor.**~~ **Düzeltildi
+  (Paket BZ, 10 Ekim 2026).** Sebep havuz değil, koşulun içerikle
+  çelişmesiydi: kampüs metni taşıyan dört olay `requiresSchoolStudent`
+  (yalnızca 1-12. sınıf) istiyordu, 18-20 yaşındaki oyuncu ise
+  genellikle üniversitede. Ölçüm: 150 hayatta 18-20 arası 74 hayat
+  üniversiteli; olayların uygun hale gelmesi 7-8'den 75-81'e çıktı ve
+  dördü de ilk kez göründü. `requiresStudent` (1-12 ya da üniversite)
+  eklendi; kural değişmedi.
 - **Görülmeyen olayların 3'ü erişilebilir**, yalnızca havuz çekilişinde
   kaybediyor (`yardimin_karsiligi`, `sinav8_son_hafta`,
   `zincir_ogretmen_3`). Geri kalanlar ehliyet, hobi `okuma` ya da suç
