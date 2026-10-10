@@ -121,9 +121,10 @@ güçlü.
 - **Komşunun kalıcı kişi olması.** Paket BP apartmanı metinde yaşattı.
   Komşuyu gerçek kişi yapmak yeni bağ türü, ilişkiler ekranı satırı ve
   erişilebilirlik kuralı gerektirir; kendi paketi olmalı.
-- **Eşyanın evle ilişkisi.** `docs/NEXT_DEVELOPMENT_OPTIONS.md` §6'nın
-  kalan yarısı: envanterdeki eşya hangi evde duruyor, taşınınca ne
-  oluyor, ev eşyası yıpranıyor mu.
+- ~~**Eşyanın evle ilişkisi.**~~ **Yapıldı (Paket BT).** 18 ev eşyası,
+  "Ev ve yaşam" mağazası, döşeme seviyesi, yıllık yıpranma ve "Evinin
+  hâli" ekranı. Model: eşya oyuncunun, binanın değil — taşınınca
+  eşya seninle geliyor. Yazlığı ayrı döşemek açık bırakıldı (Q-216).
 
 ## Ölçülmüş dersler
 
@@ -193,6 +194,14 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   doğruydu (hamile olan kişi vefat etmişti) ama aynı satır kadın
   oyuncunun bebeğini de yok sayıyordu. Tek koşulun iki farklı durumu
   kapattığı yerde biri genellikle yanlıştır.
+- **Paket BT.** Yeni bir sistem eklerken "eşyası olmayan hayatta tek
+  zar atılmaz" kuralını baştan kur: döngü yalnızca sahip olunan eşya
+  üzerinde dönünce paket, eski tohumlu ölçümlerin hiçbirini kaydırmadı
+  (BO ve BM'de bunu sonradan düzeltmek zorunda kalmıştık).
+- **Paket BT.** Servet ortalaması tek bloğa güvenilemeyecek kadar
+  oynak: aynı özelliğin servet etkisi bir blokta -12,2 M, ikinci blokta
+  +13,2 M çıktı. Para etkisini **yön** üzerinden okumak gerekiyor,
+  büyüklük üzerinden değil.
 - **Paket BP.** Ölçüm botu bir özelliği hiç kullanmıyorsa, o özelliğin
   içeriği "erişilemez" görünür. Bot oturmak için aldığı eve
   taşınamıyordu; düzeltmeden önce yeni havuz 7/25 hayatta görünüyordu,

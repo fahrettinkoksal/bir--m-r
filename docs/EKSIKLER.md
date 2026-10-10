@@ -527,6 +527,14 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   olmuyor (eski davranış), bebeği oyuncu taşıyorsa doğum oluyor ve
   çocuk vefat etmiş ebeveynin mevcut kaydına bağlanıyor (uydurma
   ebeveyn yok, D-046/D-047). Prototip davranışı; karar kaydı Q-215.
+- ~~**Evin içi boştu: ev eşyası diye üç şey vardı.**~~ **Düzeltildi
+  (Paket BT, 10 Ekim 2026).** Konut alınıyor, taşınılıyor, kiraya
+  veriliyor ama evin içinde hiçbir şey yoktu; katalogda `evEsyasi`
+  olarak çay takımı, seccade ve bisiklet bakım seti duruyordu. 18 ev
+  eşyası, yeni "Ev ve yaşam" mağazası, 0-100 döşeme seviyesi, yıllık
+  yıpranma ve "Evinin hâli" ekranı eklendi. Ölçüldü: 200 hayatın
+  175'i/182'si evini döşüyor, ortalama seviye 73,8/78,1; servet etkisi
+  gürültü bandında. Sayılar `prototypeOnly`, karar kaydı Q-216.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

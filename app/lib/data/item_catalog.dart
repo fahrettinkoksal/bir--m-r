@@ -320,12 +320,151 @@ const List<ItemType> kItemTypes = <ItemType>[
   ),
 
   // --- Ev eşyası ------------------------------------------------------------
+  //
+  // **Paket BT — evini döşemek.** Konut alınıyor, taşınılıyor, kiraya
+  // veriliyor; ama evin içi boştu: katalogda ev eşyası diye yalnızca çay
+  // takımı, seccade ve bisiklet bakım seti vardı
+  // (`docs/NEXT_DEVELOPMENT_OPTIONS.md` §6). Buzdolabı olmayan bir evde
+  // yaşamak oyunda hiçbir şey ifade etmiyordu.
+  //
+  // Fiyatlar `lib/data/economy.dart` ölçeğine oturur (net aylık asgari
+  // ücret 28.075,50 ₺): büyük beyaz eşya bir asgari ücretin biraz
+  // üstünde, mobilya takımları iki aylığa yakın, küçük eşya günlük
+  // alışveriş bandında. Hepsi `prototypeOnly` (Q-041, Q-216).
   ItemType(
     id: 'cay_takimi',
     name: 'Çay takımı',
     icon: Icons.emoji_food_beverage_outlined,
     kind: ItemKind.evEsyasi,
     baseValue: 2400,
+  ),
+  // Temel yuvalar: evin yaşanabilir olması için gerekenler.
+  ItemType(
+    id: 'buzdolabi',
+    name: 'Buzdolabı',
+    icon: Icons.kitchen_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 32000,
+  ),
+  ItemType(
+    id: 'camasir_makinesi',
+    name: 'Çamaşır makinesi',
+    icon: Icons.local_laundry_service_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 24000,
+  ),
+  ItemType(
+    id: 'firin_ocak',
+    name: 'Fırın ve ocak',
+    icon: Icons.countertops_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 19000,
+  ),
+  ItemType(
+    id: 'yatak_odasi',
+    name: 'Yatak odası takımı',
+    icon: Icons.king_bed_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 55000,
+  ),
+  ItemType(
+    id: 'koltuk_takimi',
+    name: 'Koltuk takımı',
+    icon: Icons.weekend_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 45000,
+  ),
+  ItemType(
+    id: 'yemek_masasi',
+    name: 'Yemek masası takımı',
+    icon: Icons.table_restaurant_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 26000,
+  ),
+  // Konfor yuvaları: evi yaşanabilir değil, iyi yapanlar.
+  ItemType(
+    id: 'televizyon',
+    name: 'Televizyon',
+    icon: Icons.tv_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 27000,
+  ),
+  ItemType(
+    id: 'klima',
+    name: 'Klima',
+    icon: Icons.ac_unit_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 25000,
+  ),
+  ItemType(
+    id: 'bulasik_makinesi',
+    name: 'Bulaşık makinesi',
+    icon: Icons.wash_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 21000,
+  ),
+  ItemType(
+    id: 'hali',
+    name: 'Halı',
+    icon: Icons.texture_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 9500,
+  ),
+  ItemType(
+    id: 'perde',
+    name: 'Perde',
+    icon: Icons.window_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 6500,
+  ),
+  ItemType(
+    id: 'kitaplik',
+    name: 'Kitaplık',
+    icon: Icons.library_books_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 7200,
+  ),
+  ItemType(
+    id: 'elektrikli_supurge',
+    name: 'Elektrikli süpürge',
+    icon: Icons.cleaning_services_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 7800,
+  ),
+  ItemType(
+    id: 'mikrodalga',
+    name: 'Mikrodalga',
+    icon: Icons.microwave_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 5800,
+  ),
+  ItemType(
+    id: 'su_isiticisi',
+    name: 'Su ısıtıcısı',
+    icon: Icons.coffee_maker_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 1800,
+  ),
+  ItemType(
+    id: 'utu',
+    name: 'Ütü',
+    icon: Icons.iron_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 2900,
+  ),
+  ItemType(
+    id: 'avize',
+    name: 'Avize',
+    icon: Icons.light_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 5200,
+  ),
+  ItemType(
+    id: 'nevresim',
+    name: 'Nevresim takımı',
+    icon: Icons.bed_outlined,
+    kind: ItemKind.evEsyasi,
+    baseValue: 3100,
   ),
 
   // --- Elektronik -------------------------------------------------------

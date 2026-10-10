@@ -51,6 +51,17 @@ enum ShopCategory {
   genel('Genel mağaza', 'Gündelik eşya, kitap, kıyafet', Icons.storefront_outlined),
   elektronik('Elektronik', 'Telefon, bilgisayar, konsol', Icons.devices_outlined),
   sporHobi('Spor ve hobi', 'Spor ekipmanı, müzik, kamp', Icons.sports_basketball_outlined),
+
+  /// **Ev ve yaşam** (Paket BT). Evin içini döşeyen eşya.
+  ///
+  /// Ayrı kategori, çünkü ayrı bir ihtiyaç: buzdolabı ile kulaklık aynı
+  /// rafta aranmaz. Oyuncu kendi evine ya da kiralığa çıktığında ilk
+  /// gittiği yer burasıdır.
+  evYasam(
+    'Ev ve yaşam',
+    'Beyaz eşya, mobilya, ev tekstili',
+    Icons.chair_outlined,
+  ),
   // --- Araç galerileri (D-079) -----------------------------------------
   //
   // Tek bir "Araç galerisi" hem ikinci el otomobili hem lüks otomobili
@@ -323,6 +334,120 @@ const List<ShopProduct> kShopCatalog = <ShopProduct>[
     typeId: 'cay_takimi',
     description: 'Eve misafir geldiğinde işe yarar.',
     category: ShopCategory.genel,
+    minAge: 16,
+  ),
+
+  // --- Ev ve yaşam (Paket BT) -------------------------------------------
+  //
+  // **Yaş kuralı.** Büyük eşya 18'den itibaren: kendi hanesini kuran
+  // oyuncunun işi. Küçük eşya (su ısıtıcısı, ütü, nevresim, halı, perde)
+  // 16'dan itibaren alınabilir; çocuk da evine bir şey alabilir.
+  ShopProduct(
+    typeId: 'buzdolabi',
+    description: 'Mutfağın olmazsa olmazı. Soğuk zincir evde başlar.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'camasir_makinesi',
+    description: 'Elde yıkamak bir hafta sonra cazibesini kaybediyor.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'firin_ocak',
+    description: 'Sıcak yemek için gereken en temel şey.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'yatak_odasi',
+    description: 'Yatak, dolap, komodin. Uykunun yarısı buradan geliyor.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'koltuk_takimi',
+    description: 'Misafir gelince oturacak bir yer; akşamları senin yerin.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'yemek_masasi',
+    description: 'Masa ve sandalyeler. Yemek ayakta yenmiyor.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'televizyon',
+    description: 'Akşamları salonun ortak dili.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'klima',
+    description: 'Yazın anlaşılıyor kıymeti.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'bulasik_makinesi',
+    description: 'Akşam yemeğinden sonra bir saat kazandırıyor.',
+    category: ShopCategory.evYasam,
+    minAge: 18,
+  ),
+  ShopProduct(
+    typeId: 'hali',
+    description: 'Zemin soğuk; halı evi ev yapan şeylerden biri.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'perde',
+    description: 'Komşunun merakına da, sabah güneşine de iyi geliyor.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'kitaplik',
+    description: 'Kitaplar yerde durmasın.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'elektrikli_supurge',
+    description: 'Süpürgeyle yapılan temizlik bir başka.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'mikrodalga',
+    description: 'Dünün yemeğini bugüne bağlıyor.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'su_isiticisi',
+    description: 'Çay demlemenin en kısa yolu.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'utu',
+    description: 'Kırışık gömlekle işe gitmek bir yere kadar.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'avize',
+    description: 'Tavandan gelen ışık odanın havasını değiştiriyor.',
+    category: ShopCategory.evYasam,
+    minAge: 16,
+  ),
+  ShopProduct(
+    typeId: 'nevresim',
+    description: 'Temiz nevresimle yatağa girmek küçük bir lüks.',
+    category: ShopCategory.evYasam,
     minAge: 16,
   ),
 

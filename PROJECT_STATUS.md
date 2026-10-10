@@ -6234,5 +6234,61 @@ taraf vefat etti" durumunu denetliyor.
 **Bu bir prototip davranışıdır.** `DECISIONS.md`'ye yazılmadı; soru,
 önerim ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-215'te.
 
+## Paket BT — evini döşemek (10 Ekim 2026)
+
+`docs/NEXT_DEVELOPMENT_OPTIONS.md` §6'nın kalan yarısı: konut alınıyor,
+taşınılıyor, kiraya veriliyor; ama **evin içi boştu**. Katalogda ev
+eşyası diye üç şey vardı (çay takımı, seccade, bisiklet bakım seti) ve
+hiçbiri bir ihtiyaca karşılık gelmiyordu.
+
+### Ne eklendi
+
+| Parça | Ayrıntı |
+| --- | --- |
+| Katalog | 18 ev eşyası: 6 temel (buzdolabı, çamaşır makinesi, fırın-ocak, yatak odası, koltuk, yemek masası), 12 konfor |
+| Mağaza | Yeni kategori **Ev ve yaşam** (gündelik öbeğinde); büyük eşya 18, küçük eşya 16 yaşından itibaren |
+| Döşeme seviyesi | 0-100; temel yuvalar ağırlığın %65'i, konfor %35'i |
+| Yıpranma | Oturulan evdeki ev eşyası yılda 1-3 puan yıpranır; 40'ın altına düşen eşya yuvayı **doldurmaz** (bakım mevcut eylemle yapılır) |
+| Etki | Seviye 65 ve üstündeyse yılda **+1 mutluluk**; düşük döşemenin **cezası yok** |
+| Ekran | Varlıklar > **Evinin hâli**: seviye çubuğu, temel/konfor yuvaları, yıpranmış eşya uyarısı, eksiklerin toplam tutarı |
+| Anahtar | `ev_dosemesi` (Paket BL sözleşmesi); kapalıyken ekran yok, seviye 0, yıpranma yok |
+
+**Model: eşya senin, binanın değil.** Döşeme oturulan evin değil, sahip
+olunan ev eşyasının hâli. Taşınınca eşya seninle gelir — oyun bunu
+zaten söylüyordu ("eşyalarını taşıdın") — ve eski kayıtlara yeni bir
+alan eklenmedi. Yazlığı ayrı döşemek ayrı bir paket; soru Q-216'da.
+
+### Ölçüm (200 hayat, iki blok, aynı tohumlarla anahtar açık/kapalı)
+
+| Ölçü | Blok 1 açık / kapalı | Blok 2 açık / kapalı |
+| --- | --- | --- |
+| Ortalama döşeme seviyesi | **73,8** / 0 | **78,1** / 0 |
+| Alınan ev eşyası (ort) | 22,07 / 0 | 24,16 / 0 |
+| Evini döşeyen hayat | **175/200** / 0 | **182/200** / 0 |
+| Ölümde mutluluk (ort) | 76,3 / 74,2 | 74,4 / 74,2 |
+| Ölümde net servet (ort) | 66,4 M / 78,6 M | 111,5 M / 98,3 M |
+| Ölüm yaşı (ort) | 70,58 / 70,61 | 72,58 / 72,23 |
+| Ev sahibi | 111/200 / 116/200 | 118/200 / 115/200 |
+
+İçerik **erişilebilir**: hayatların yedide altısı evini döşüyor ve
+ortalama seviye 74-78. Mutluluk katkısı küçük ve yönü tutarlı (+2,1 ve
++0,2). Servet farkının **yönü iki blok arasında ters döndü** (-12,2 M,
++13,2 M), ev sahipliği farkı da yön değiştirdi: ikisi de gürültü bandı
+(Paket BO dersi). Ölüm yaşı değişmedi.
+
+### Bekçiler
+
+`test/paket_bt_ev_dosemesi_test.dart` (20 test): her yuvanın katalogda
+gerçek bir eşyası ve **tek bir** mağaza ürünü var; fiyatlar 2026
+ölçeğinde; boş ev 0, tam ev 100, yalnızca temel ihtiyaçlar %65;
+buzdolabı televizyondan ağır; 40'ın altına düşen eşya yuvayı
+doldurmuyor; aynı türden iki eşyanın iyisi sayılıyor; anahtar kapalıyken
+seviye 0, ekran yok ve eşya yıpranmıyor; ailesinin yanında yaşayandan
+döşeme istenmiyor; ev eşyası olmayan hayatta **zar kaymıyor**; döşeme
+kapat-aç sonrası aynı; ekranda satır ve yuvalar görünüyor.
+
+**Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; sorular
+ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-216'da.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

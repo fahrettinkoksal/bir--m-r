@@ -129,6 +129,22 @@ enum FeatureId {
       'app/lib/data/event_pool_home.dart',
       'app/test/paket_bp_oturulan_ev_test.dart',
     ],
+  ),
+
+  /// Paket BT — evini döşemek: ev eşyası yuvaları, döşeme seviyesi,
+  /// yıllık yıpranma ve "Evinin hâli" ekranı.
+  evDosemesi(
+    saveKey: 'ev_dosemesi',
+    title: 'Evini döşemek',
+    lostWhenOff:
+        'Evinin hâli ekranı ve döşeme seviyesi kalkar; ev eşyası yine '
+        'alınır ama evin dolu olup olmadığı hiçbir şeyi değiştirmez.',
+    paket: 'Paket BT — evini döşemek',
+    removableFiles: <String>[
+      'app/lib/domain/economy/furnishing.dart',
+      'app/lib/ui/screens/sections/furnishing_page.dart',
+      'app/test/paket_bt_ev_dosemesi_test.dart',
+    ],
   );
 
   const FeatureId({

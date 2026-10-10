@@ -8,6 +8,7 @@ import '../../../domain/economy/used_vehicle_market.dart';
 import '../../../domain/interaction/item_actions.dart';
 import '../../../domain/economy/housing.dart';
 import '../../../domain/economy/living_costs.dart';
+import '../../../domain/economy/furnishing.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/owned_item.dart';
 import '../../../state/game_controller.dart';
@@ -16,6 +17,7 @@ import '../../theme/bir_omur_theme.dart';
 import '../../widgets/effect_chips.dart';
 import '../../widgets/item_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
+import 'furnishing_page.dart';
 import 'investments_page.dart';
 import 'properties_page.dart';
 import '../../../text/turkish_text.dart';
@@ -26,7 +28,7 @@ import '../../../text/turkish_text.dart';
 /// burada toplanır. Ailenin ekonomik durumu buraya karıştırılmaz: aile
 /// varlığı oyuncunun harcanabilir parası değildir.
 /// Varlıklar alt sayfaları.
-enum _AssetsPage { kok, magazalar, kategori, yatirimlar, evler }
+enum _AssetsPage { kok, magazalar, kategori, yatirimlar, evler, doseme }
 
 class AssetsScreen extends StatefulWidget {
   const AssetsScreen({super.key, required this.onBack});
@@ -96,6 +98,12 @@ class _AssetsScreenState extends State<AssetsScreen> {
 
     if (_page == _AssetsPage.yatirimlar) {
       return InvestmentsPage(
+        onBack: () => setState(() => _page = _AssetsPage.kok),
+      );
+    }
+
+    if (_page == _AssetsPage.doseme) {
+      return FurnishingPage(
         onBack: () => setState(() => _page = _AssetsPage.kok),
       );
     }
@@ -180,6 +188,23 @@ class _AssetsScreenState extends State<AssetsScreen> {
                     (Housing.yearlyRentIncome(state) / 12).round(),
                   ),
             onTap: () => setState(() => _page = _AssetsPage.evler),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Evinin hâli (Paket BT): döşeme yalnızca kendi hanesini kuran
+        // oyuncu için anlamlı. Ailesinin yanında yaşayan birinin evini
+        // o döşemiyor; satır da görünmez. Modül kapalıysa yine yok.
+        if (Furnishing.appliesTo(state)) ...<Widget>[
+          MenuRow(
+            key: const Key('assets_furnishing_row'),
+            title: 'Evinin hâli',
+            subtitle: '${Furnishing.levelLabel(state)} · '
+                '${Furnishing.essentialsFilled(state)}/'
+                '${Furnishing.essentialCount} temel ihtiyaç',
+            icon: Icons.chair_outlined,
+            accent: BirOmurAccents.yesil,
+            trailingText: '%${Furnishing.level(state)}',
+            onTap: () => setState(() => _page = _AssetsPage.doseme),
           ),
           const SizedBox(height: 12),
         ],

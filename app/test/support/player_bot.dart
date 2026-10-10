@@ -66,6 +66,7 @@ import 'package:bir_omur/data/shop_catalog.dart';
 import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/data/university_catalog.dart';
 import 'package:bir_omur/domain/economy/banking.dart';
+import 'package:bir_omur/domain/economy/furnishing.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/economy/net_worth.dart';
 import 'package:bir_omur/domain/economy/rental_engine.dart';
@@ -410,6 +411,12 @@ class BotLifeResult {
   bool letProperty = false;
   bool ownedVehicle = false;
   bool ownedBusiness = false;
+
+  /// Ölümde evin döşeme seviyesi (0-100, Paket BT).
+  int furnishingLevel = 0;
+
+  /// Hayat boyunca alınan ev eşyası sayısı (Paket BT).
+  int homeItemsBought = 0;
   final Set<String> businessTypes = <String>{};
 
   // Aile
@@ -434,6 +441,10 @@ class BotLifeResult {
   final Set<String> hobbies = <String>{};
   final Set<String> martialArts = <String>{};
   int finalHealth = 0;
+
+  /// Ölümde mutluluk (0-100). Denge ölçümlerinde sağlıkla birlikte
+  /// okunur (Paket BT'de ev döşemenin etkisi buradan ölçüldü).
+  int finalHappiness = 0;
 
   // Okul kulüpleri ve spor kariyeri (Paket AW)
   //
@@ -1883,6 +1894,40 @@ void _handleMoney(
     }
   }
 
+  // ---- Ev eşyası (Paket BT) ----------------------------------------
+  //
+  // Gerçek oyuncu kendi hanesini kurunca evini döşer: önce temel
+  // ihtiyaçlar (buzdolabı, çamaşır makinesi, yatak), sonra konfor.
+  // Yılda **bir** eşya alır — bütün evi tek yılda döşemek gerçek bir
+  // oyuncu davranışı değil ve ölçümü de bozar.
+  s = c.state!;
+  if (Furnishing.appliesTo(s)) {
+    final List<FurnishingSlot> eksikler = Furnishing.missing(s);
+    if (eksikler.isNotEmpty) {
+      // Temel yuva önce; aynı sınıfta katalog sırası korunur.
+      final FurnishingSlot hedef = eksikler.firstWhereOrNullBot(
+            (FurnishingSlot y) => y.essential,
+          ) ??
+          eksikler.first;
+      final ShopProduct? urun = shopProductsFor(s.player.age)
+          .firstWhereOrNullBot((ShopProduct p) => p.typeId == hedef.typeId);
+      // Eşyaya cüzdanın üçte birinden fazlasını vermez: ev döşemek
+      // birikimi silip süpüren bir iş değil.
+      if (urun != null && urun.price <= serbest() * 0.34) {
+        final ItemOutcome? sonucu = c.buyProduct(urun);
+        if (sonucu?.applied ?? false) sonuc.homeItemsBought++;
+      }
+    }
+    // Yıpranıp iş görmez olan eşyaya bakım yaptırır.
+    final List<OwnedItem> yipranmis = Furnishing.wornOut(c.state!);
+    if (yipranmis.isNotEmpty && rng.nextDouble() < 0.5) {
+      final OwnedItem esya = yipranmis.first;
+      if (c.itemAvailability(esya, ItemActionKind.bakim).isAllowed) {
+        c.performItemAction(esya.id, ItemActionKind.bakim);
+      }
+    }
+  }
+
   // ---- Kredi borcu -------------------------------------------------
   s = c.state!;
   if (s.loans.isNotEmpty) {
@@ -2814,6 +2859,7 @@ void _collectFinalMetrics(GameController c, BotLifeResult sonuc) {
   sonuc.finalNetWorth = NetWorth.of(s);
   sonuc.finalDebt = NetWorth.debt(s);
   sonuc.finalHealth = s.player.stats.health;
+  sonuc.finalHappiness = s.player.stats.happiness;
   sonuc.finalFame = s.totalFollowers;
 
   // Kulüp sezonları: ölüm anında tüm kayıtlar okunur.
@@ -2836,6 +2882,7 @@ void _collectFinalMetrics(GameController c, BotLifeResult sonuc) {
     sonuc.wentToUniversity = true;
   }
 
+  sonuc.furnishingLevel = Furnishing.level(s);
   sonuc.ownedHome = s.properties.isNotEmpty;
   sonuc.ownedRental = s.properties
       .where((OwnedItem i) => i.id != s.residenceItemId)

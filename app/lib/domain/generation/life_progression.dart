@@ -60,6 +60,7 @@ import '../casino/lottery.dart';
 import '../life/astrology.dart';
 import '../../data/fortune_catalog.dart';
 import '../models/gender.dart';
+import '../economy/furnishing.dart';
 import '../models/pregnancy.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
@@ -1092,6 +1093,11 @@ class LifeProgression {
       );
     }
 
+    // Ev eşyası (Paket BT): oturulan evdeki eşya yıpranır, iyi döşenmiş
+    // ev yılın mutluluğuna küçük bir katkı yapar. Anahtar kapalıysa ve
+    // ev eşyası yoksa hiçbir şey yapmaz — zar da tüketmez.
+    afterDeaths = _applyFurnishing(afterDeaths);
+
     // Hane bakımı: küçük yaştaki oyuncu haneyi boş bırakmaz.
     afterDeaths = ensureCaregiver(afterDeaths, newAge);
 
@@ -2082,6 +2088,43 @@ class LifeProgression {
           happinessDelta: gercek,
         ),
       ]),
+    );
+  }
+
+  /// Ev eşyasının yıllık yıpranması ve iyi döşenmiş evin katkısı
+  /// (Paket BT).
+  ///
+  /// **Zar sözleşmesi.** Döngü yalnızca **sahip olunan ev eşyası
+  /// üzerinde** döner; eşyası olmayan hayatta tek zar atılmaz, yani bu
+  /// paket eski tohumlu ölçümleri kaydırmaz (Paket BO dersi).
+  ///
+  /// Ailesinin yanında yaşayan oyuncunun evini o döşemiyor; o hâlde
+  /// yıpranma da katkı da yoktur. Düşük döşemenin **cezası yok**.
+  GameState _applyFurnishing(GameState state) {
+    if (!Furnishing.appliesTo(state)) return state;
+
+    GameState sonuc = state;
+    for (final OwnedItem esya in state.items) {
+      final bool yuvada = Furnishing.slots
+          .any((FurnishingSlot s) => s.typeId == esya.typeId);
+      if (!yuvada) continue;
+      final int yipranma = _rng.nextInt(
+            Furnishing.prototypeOnlyMaxYearlyWear -
+                Furnishing.prototypeOnlyMinYearlyWear +
+                1,
+          ) +
+          Furnishing.prototypeOnlyMinYearlyWear;
+      sonuc = sonuc.updateItem(
+        esya.copyWith(condition: esya.condition - yipranma),
+      );
+    }
+
+    final int mutluluk = Furnishing.yearlyHappiness(sonuc);
+    if (mutluluk == 0) return sonuc;
+    return sonuc.copyWith(
+      player: sonuc.player.copyWith(
+        stats: sonuc.player.stats.gain(happiness: mutluluk),
+      ),
     );
   }
 
