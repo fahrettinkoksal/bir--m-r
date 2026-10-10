@@ -40,6 +40,7 @@ import 'package:bir_omur/domain/models/pending_license_exam.dart';
 import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/domain/models/pregnancy.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
+import 'package:bir_omur/data/insurance_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
 import 'package:bir_omur/data/name_pool.dart';
 import 'package:bir_omur/domain/career/craft_mastery.dart';
@@ -399,6 +400,9 @@ class BotLifeResult {
   int raiseAttempts = 0;
   int raisesGranted = 0;
   int promotions = 0;
+  /// Hayat boyunca yaptırılan sigorta poliçeleri (Paket CA).
+  final Set<String> insurancePolicies = <String>{};
+
   /// Meslekte **itibar** (0-100), kademe değil.
   int masteryReputation = 0;
 
@@ -1734,6 +1738,18 @@ void _handleMoney(
 ) {
   GameState s = c.state!;
   if (s.player.age < 18) return;
+
+  // Sigorta (Paket CA): temkinli oyuncu poliçe yaptırır, risk sevenin
+  // umurunda değil. Yalnızca **alınabilir** poliçe için zar atılır; yani
+  // modül kapalıyken ya da koşul tutmazken akış kaymaz.
+  for (final InsuranceKind tur in InsuranceKind.values) {
+    if (c.insuranceBlockReason(tur) != null) continue;
+    final double istek = 0.12 + (1 - profile.riskAppetite) * 0.35;
+    if (rng.nextDouble() > istek) continue;
+    final ({bool applied, String message}) sonucu = c.buyInsurance(tur);
+    if (sonucu.applied) sonuc.insurancePolicies.add(tur.name);
+  }
+  s = c.state!;
 
   final int yillikGider = max(1, LivingCosts.yearlyCost(s));
   // Rezerv: tasarruf eğilimi yüksek olan daha çok yastık altı tutar.

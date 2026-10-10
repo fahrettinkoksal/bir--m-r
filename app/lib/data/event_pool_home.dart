@@ -33,6 +33,7 @@
 /// (`docs/FEATURE_FLAGS.md`).
 library;
 
+import 'insurance_catalog.dart';
 import '../domain/models/game_event.dart';
 import 'item_catalog.dart';
 
@@ -112,6 +113,8 @@ const List<GameEvent> kHomeEvents = <GameEvent>[
     requirement: EventRequirement(minAge: 20, requiresOwnedResidence: true),
     repeatable: true,
     minAgeGap: 6,
+    // Paket CA: ani hasar, konut poliçesinin kapsamında.
+    insuredRisk: InsuranceKind.konut,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -165,6 +168,8 @@ const List<GameEvent> kHomeEvents = <GameEvent>[
     text: 'Çatı akıyor. Yönetim payına düşen tutarı yazdı: yapılırsa '
         'bu yaz, yapılmazsa gelecek kış daha pahalı.',
     requirement: EventRequirement(minAge: 24, requiresOwnedResidence: true),
+    // Paket CA: ani hasar, konut poliçesinin kapsamında.
+    insuredRisk: InsuranceKind.konut,
     weight: 3,
     choices: <EventChoice>[
       EventChoice(
@@ -752,6 +757,8 @@ const List<GameEvent> kHomeEvents = <GameEvent>[
       requiredFlags: <String>{HomeFlags.tesisatEski},
       forbiddenFlags: <String>{HomeFlags.tesisatKarsiligi},
     ),
+    // Paket CA: ani hasar, konut poliçesinin kapsamında.
+    insuredRisk: InsuranceKind.konut,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(

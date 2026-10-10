@@ -11,6 +11,7 @@ library;
 import '../../domain/models/company_vitals.dart';
 import '../../domain/models/family_issue.dart';
 import '../../domain/models/loan.dart';
+import '../../domain/models/insurance_policy.dart';
 import '../../domain/models/pending_race.dart';
 import '../../domain/life/year_review.dart';
 import '../../domain/models/applied_effect.dart';
@@ -33,6 +34,7 @@ import '../../domain/models/game_event.dart';
 import '../../domain/features/feature_catalog.dart';
 import '../../domain/models/game_settings.dart';
 import '../../domain/models/chronic_condition.dart';
+import '../insurance_catalog.dart';
 import '../../domain/models/game_state.dart';
 import '../../domain/models/health_history.dart';
 import '../../domain/models/household.dart';
@@ -461,6 +463,18 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
                   'demandIndex': y.demandIndex,
                 },
             ],
+          },
+      ],
+      // Sigorta poliçeleri (Paket CA). Eski kayıtlarda yoktur; boş açılır.
+      'insurance': <Object?>[
+        for (final InsurancePolicy p in state.insurance)
+          <String, Object?>{
+            'kind': p.kind.name,
+            'startedAtAge': p.startedAtAge,
+            'premiumsPaid': p.premiumsPaid,
+            'claimsPaid': p.claimsPaid,
+            'claimCount': p.claimCount,
+            'lapsedAtAge': p.lapsedAtAge,
           },
       ],
       // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
@@ -1937,6 +1951,14 @@ GameState decodeGameState(Map<String, Object?> json) {
       for (final Object? e in _optionalRawList(json, 'businesses'))
         _decodeBusiness(_asMap(e, 'business')),
     ]),
+    // Eski kayıtlarda sigorta yoktur; **geriye dönük poliçe
+    // uydurulmaz**, liste boş açılır (Paket CA).
+    insurance: List<InsurancePolicy>.unmodifiable(<InsurancePolicy>[
+      for (final Object? e in _optionalRawList(json, 'insurance'))
+        if (_decodeInsurance(_asMap(e, 'insurance'))
+            case final InsurancePolicy p)
+          p,
+    ]),
     // Eski kayıtlarda adli kayıt yoktur; **temiz** açılır (D-128).
     legal: json['legal'] == null
         ? const LegalState()
@@ -3235,3 +3257,22 @@ LandlordRecord _decodeLandlord(Map<String, Object?> json) => LandlordRecord(
             ) ??
             LandlordTemperament.olculu,
     );
+
+
+/// Sigorta poliçesi okuma (Paket CA).
+///
+/// Tanınmayan tür **atılır**: ileri sürümde yazılmış bir poliçe eski
+/// sürümü çökertmez, yalnızca görünmez olur.
+InsurancePolicy? _decodeInsurance(Map<String, Object?> json) {
+  final InsuranceKind? kind =
+      insuranceKindByKey(_stringOrNull(json, 'kind') ?? '');
+  if (kind == null) return null;
+  return InsurancePolicy(
+    kind: kind,
+    startedAtAge: _intOr(json, 'startedAtAge', 0),
+    premiumsPaid: _intOr(json, 'premiumsPaid', 0),
+    claimsPaid: _intOr(json, 'claimsPaid', 0),
+    claimCount: _intOr(json, 'claimCount', 0),
+    lapsedAtAge: _intOrNull(json, 'lapsedAtAge'),
+  );
+}

@@ -128,6 +128,9 @@ import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
+import '../data/insurance_catalog.dart';
+import '../domain/economy/insurance.dart';
+import '../domain/models/insurance_policy.dart';
 import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
 import '../domain/models/interaction.dart';
@@ -3831,6 +3834,57 @@ class GameController extends ChangeNotifier {
   ///
   /// Sonuç metni her hâlde döner: ad değiştiyse yeni ad, değişmediyse
   /// sebebi. Sessizce başarısız olmaz.
+  // =================================================================
+  // Sigorta (Paket CA)
+  // =================================================================
+
+  /// Bu poliçe alınabilir mi? Alınamıyorsa **gerekçe** (D-063).
+  String? insuranceBlockReason(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) return 'Hayat başlamadı.';
+    return Insurance.blockReason(current, kind);
+  }
+
+  /// Yürürlükteki poliçe (yoksa `null`).
+  InsurancePolicy? activePolicy(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return Insurance.activeOf(current, kind);
+  }
+
+  /// Poliçe başlatır; ilk prim peşin ödenir.
+  ({bool applied, String message}) buyInsurance(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Hayat başlamadı.');
+    }
+    final String? engel = Insurance.blockReason(current, kind);
+    if (engel != null) return (applied: false, message: engel);
+    final ({GameState state, String text}) sonuc =
+        Insurance.buy(current, kind);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.text);
+  }
+
+  /// Poliçeyi iptal eder. Ödenen primler geri gelmez.
+  ({bool applied, String message}) cancelInsurance(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Hayat başlamadı.');
+    }
+    if (Insurance.activeOf(current, kind) == null) {
+      return (applied: false, message: '${kind.label} yok.');
+    }
+    final ({GameState state, String text}) sonuc =
+        Insurance.cancel(current, kind);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.text);
+  }
+
   ({bool applied, String message}) nameChild(String childId, String name) {
     final GameState? current = _state;
     if (current == null) {

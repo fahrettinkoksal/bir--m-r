@@ -176,6 +176,25 @@ enum FeatureId {
     removableFiles: <String>[
       'app/test/paket_bx_ugras_onceligi_test.dart',
     ],
+  ),
+
+  /// Paket CA — sigorta: sağlık, konut ve kasko poliçeleri; yıllık prim,
+  /// muafiyet ve hasarda karşılık.
+  sigorta(
+    saveKey: 'sigorta',
+    title: 'Sigorta',
+    lostWhenOff:
+        'Sigorta ekranı ve poliçeler kalkar; yıllık prim çıkmaz, hasarda '
+        'karşılık olmaz. Zarar Paket CA öncesi gibi tamamen oyuncunun '
+        'cebinden çıkar. Kayıttaki poliçeler silinmez, donar.',
+    paket: 'Paket CA — sigorta',
+    removableFiles: <String>[
+      'app/lib/data/insurance_catalog.dart',
+      'app/lib/domain/models/insurance_policy.dart',
+      'app/lib/domain/economy/insurance.dart',
+      'app/lib/ui/screens/sections/insurance_page.dart',
+      'app/test/paket_ca_sigorta_test.dart',
+    ],
   );
 
   const FeatureId({

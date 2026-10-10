@@ -6780,5 +6780,85 @@ etiketi oyuncunun işini varsayan bir olay (`işin var`, `patronun`,
 listesi **yok**; Paket BD'nin "koşulsuz nedeniyle" bulgusuyla aynı
 sınıf hata bir daha sessizce giremez.
 
+## Paket CA — sigorta: paranın savunma tarafı (10 Ekim 2026)
+
+Oyunda para neredeyse tamamen **saldırı** aracıydı: ev al, araba al,
+işletme kur, portföy büyüt. Kötü bir yılın faturasını küçültmenin
+hiçbir yolu yoktu. Oyun fikri zaten konuşuyordu — `ev_sigorta_teklifi`
+olayı 9.000 ₺ poliçe teklif ediyor, `ev_sigorta_ise_yaradi` olayında
+"cebinden sadece muafiyet tutarı çıktı" diyor — ama bu tek seferlik bir
+anlatıydı.
+
+### Ne eklendi
+
+| Parça | Ayrıntı |
+| --- | --- |
+| Katalog | İki poliçe: **sağlık** (yıllık 5.000 ₺, muafiyet 3.000, karşılama %80) ve **konut** (yıllık 2.500 ₺, muafiyet 4.000, karşılama %85) |
+| Motor | `Insurance`: prim tahsilatı, dayanağı düşen poliçenin kapanması, hasarda karşılık. **Zar tüketmez**, poliçesi olmayanın akışı birebir eskisi |
+| Sağlık kapısı | Kriz tedavi masrafı poliçeden geçer; pahalı tedavi **seçilebilir** hale gelir |
+| Ev kapısı | `insuredRisk` etiketi: dört ani hasar olayı (mutfak sızıntısı, çatı akması, kısa devre, su borusu) |
+| Ekran | Aktiviteler > **Sigorta**: koşullar, poliçe dökümü (ödenen prim / karşılanan), iptal, geçmiş poliçeler |
+| Anahtar | `sigorta` (Paket BL sözleşmesi) |
+
+**Yıpranma kapsam dışı.** Kombi ölmesi, tesisatın eskimesi, pencerenin
+üşütmesi poliçeye girmiyor; sigorta **ani hasarı** karşılar. Bu ayrım
+katalogdaki açıklamayla ("su basması, tesisat, çatı hasarı") birebir
+aynı.
+
+**Kasko bilerek yok.** Oyunda kaza aracın kondisyonunu düşürüyor ve
+onarım "bakım" kalemiyle ödeniyor; yani kaza onarımı ile rutin bakım
+aynı yerden geçiyor. Kaskoyu o kaleme bağlamak rutin bakımı da
+sigortalı yapardı. Doğru bağlanacağı yer Q-220'de.
+
+### Ölçüm — ve dürüst sonuç
+
+İlk kalibrasyon (sağlık 18.000, konut 9.000) 200 hayatta **hiçbir
+hayatta kâra geçmedi**: ömür boyu ödenen prim medyanı 1.044.000 ₺,
+karşılanan medyanı 45.600 ₺. Yani karar değil tuzaktı. Primler ölçülen
+hasar dağılımına göre indirildi (karşılanan p75 109.600 ₺, p90 175.200
+₺ → yirmi yıllık prim p75 hasara denk gelecek şekilde 5.000 + 2.500).
+
+Yeni ölçüm (200 hayat): poliçe yaptıran 200/200, karşılık gören 130,
+medyan prim 290.000 ₺, medyan karşılanan 57.600 ₺, **kârda biten hayat
+1/200**.
+
+İki bağımsız blokta (150+150 hayat) sigortalı/sigortasız kohort:
+
+| Ölçü | Blok 1 kapalı → açık | Blok 2 kapalı → açık |
+| --- | --- | --- |
+| Medyan ölüm yaşı | 74 → **75** | 74 → **75** |
+| 70 altı ölüm | 38 → 34 | 34 → **36** (ters yön) |
+| Medyan servet | 43,6M → 42,1M (−%3,4) | 37,7M → 36,7M (−%2,9) |
+
+**Erken ölüm farkı gürültü** (yön iki blokta ters döndü). Medyan ömür
+farkı iki blokta da +1 yıl ama medyan kaba bir ölçü; tek başına kanıt
+saymıyorum. Servet maliyeti ise tutarlı: ~%3.
+
+**Asıl bulgu.** Medyan oyuncunun serveti 37-43 milyon; 85.000 ₺'lik
+tedavi ya da 70.000 ₺'lik çatı hasarı onun için gürültü. Yani sigorta
+**zengin oyuncu için anlamsız**. Anlamlı olduğu yer parası olmayan
+oyuncu: poliçe varsa cepten çıkacak tutar muafiyete iner ve **hayat
+kurtaran tedavi seçilebilir hale gelir**. Bu, bekçide kural olarak
+kanıtlanıyor (poliçeli oyuncu seçebiliyor, poliçesiz aynı parayla
+seçemiyor).
+
+Bu yüzden ekran oyuncuya bunu açıkça yazıyor: *"Sigorta kazanç
+getirmez; kötü bir yılın faturasını küçültür."*
+
+### Bekçi
+
+`test/paket_ca_sigorta_test.dart` (10 test): ilk prim peşin çıkıyor,
+muafiyetin altındaki hasarda poliçe devreye girmiyor, büyük hasarda
+muafiyet + karşılanmayan pay cepten çıkıyor, poliçesiz oyuncu zararın
+tamamını ödüyor, anahtar kapalıyken ne prim ne karşılık var, yıllık
+prim kayda işleniyor, primi ödenemeyen poliçe **borç yazmadan** düşüyor
+ve kaydı silinmiyor, kapat-aç ile korunuyor, sağlık poliçesi
+karşılanamayan tedaviyi karşılanabilir yapıyor, katalogda hiçbir yere
+bağlı olmayan ("hollow") poliçe yok.
+
+**Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; prim
+kalibrasyonu, yaşa göre artan prim önerisi ve kasko sorusu
+`docs/DESIGN_REVIEW_QUEUE.md` Q-220'de.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

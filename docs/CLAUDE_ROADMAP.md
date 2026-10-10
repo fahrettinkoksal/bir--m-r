@@ -221,6 +221,16 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   **kural** gibi görünür: 20 isimle ve medyan 58 kişiyle iki yaşayan
   kişinin aynı adı taşıması 283/300 hayatta oluyordu. Önce havuzun
   kapasitesini ölç, sonra kural tartış (Q-198 #6).
+- **Paket CA.** Yeni bir ekonomik sistemin değerini **oyunun kendi
+  ölçeğine karşı** ölç. Sigortayı ekledim, ilk kalibrasyonda poliçe 200
+  hayatın hiçbirinde kâra geçmedi (ömür primi 1.044.000 ₺, karşılanan
+  45.600 ₺) — yani karar değil tuzaktı. Primleri ölçülen hasar
+  dağılımına göre indirdim, ama asıl bulgu başkaydı: medyan oyuncunun
+  serveti 37-43 **milyon**, oysa sigortalanabilir en büyük zarar 85.000
+  ₺. O ölçekte hiçbir poliçe fark etmez. Bir sistemin "faydalı" olup
+  olmadığını sormadan önce **oyuncunun cebiyle zararın büyüklüğünü
+  karşılaştır**; aksi hâlde doğru çalışan ama anlamsız bir mekanik
+  yazarsın.
 - **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
   değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
   çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)

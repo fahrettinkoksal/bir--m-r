@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../data/company_catalog.dart';
+import '../../data/insurance_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../economy/financial_strain.dart';
 import 'relation.dart';
@@ -501,6 +502,7 @@ class GameEvent {
     this.repeatable = false,
     this.minAgeGap = prototypeOnlyDefaultRepeatGap,
     this.weight = 1,
+    this.insuredRisk,
     this.priority = 0,
   }) : assert(minAgeGap >= 1, 'Tekrar aralığı en az bir yaş olmalıdır.');
 
@@ -529,6 +531,14 @@ class GameEvent {
 
   /// Aynı anda uygun olan olaylar arasında görece ağırlık (prototypeOnly).
   final int weight;
+
+  /// Bu olayın zararı **sigortalanabilir** bir riske mi ait? (Paket CA)
+  ///
+  /// Doluysa ve oyuncunun o türde yürürlükte poliçesi varsa, seçimin
+  /// **eksi para** etkisi muafiyet + karşılanmayan paya iner. Boşsa
+  /// hiçbir şey değişmez; yani etiketlenmemiş olay Paket CA öncesi gibi
+  /// davranır.
+  final InsuranceKind? insuredRisk;
 
   /// Dönüm noktası önceliği (Paket 21).
   ///

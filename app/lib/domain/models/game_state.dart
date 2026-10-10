@@ -5,6 +5,7 @@ import '../features/feature_catalog.dart';
 
 import 'blackjack_game.dart';
 import 'business.dart';
+import 'insurance_policy.dart';
 import 'criminal_record.dart';
 import 'education.dart';
 import 'family_drama.dart';
@@ -76,6 +77,7 @@ class GameState {
     this.military = const MilitaryState(),
     this.legal = const LegalState(),
     this.businesses = const <Business>[],
+    this.insurance = const <InsurancePolicy>[],
     this.pendingTrial,
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
@@ -232,6 +234,13 @@ class GameState {
   /// kayıtlarda bu alan yoktur ve boş açılır — geriye dönük iş
   /// **uydurulmaz**.
   final List<Business> businesses;
+
+  /// Yürürlükteki ve düşmüş sigorta poliçeleri (Paket CA).
+  ///
+  /// Kayıt silinmez: düşen poliçe `lapsedAtAge` ile listede kalır, çünkü
+  /// "ne kadar prim ödedim, ne kadarı karşılandı" sorusu ekranda
+  /// uydurmadan yanıtlanabilsin.
+  final List<InsurancePolicy> insurance;
 
   /// Adli durum: dosyalar, sabıka, hapis ve denetim dönemi (D-128).
   ///
@@ -1360,6 +1369,7 @@ class GameState {
     Object? pendingCrisis = _unsetEvent,
     LegalState? legal,
     List<Business>? businesses,
+    List<InsurancePolicy>? insurance,
     Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
@@ -1509,6 +1519,9 @@ class GameState {
       businesses: businesses == null
           ? this.businesses
           : List<Business>.unmodifiable(businesses),
+      insurance: insurance == null
+          ? this.insurance
+          : List<InsurancePolicy>.unmodifiable(insurance),
       pendingTrial: pendingTrial == _unsetEvent
           ? this.pendingTrial
           : pendingTrial as PendingTrial?,

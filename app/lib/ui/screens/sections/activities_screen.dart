@@ -14,7 +14,9 @@ import '../../../domain/life/astrology.dart';
 import '../../../domain/interaction/adoption.dart';
 import '../../../domain/interaction/intimacy.dart';
 import '../../../domain/interaction/parenthood.dart';
+import '../../../domain/features/feature_catalog.dart';
 import '../../../domain/models/game_state.dart';
+import '../../../domain/models/insurance_policy.dart';
 import '../../../domain/models/hobby_progress.dart';
 import '../../../domain/models/person.dart';
 import '../../../state/game_scope.dart';
@@ -40,6 +42,7 @@ import '../../../domain/social/media_opportunities.dart';
 import 'media_page.dart';
 import '../../../domain/economy/banking.dart';
 import 'bank_page.dart';
+import 'insurance_page.dart';
 
 /// Aktiviteler ana menüsü (NAV-001).
 ///
@@ -75,6 +78,7 @@ enum _ActivityPage {
   sosyalMedya,
   medya,
   banka,
+  sigorta,
   kumarhane,
   piyango,
   finger,
@@ -242,6 +246,8 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         return MediaPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.banka:
         return BankPage(onBack: () => _go(_ActivityPage.kok));
+      case _ActivityPage.sigorta:
+        return InsurancePage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.kumarhane:
         return CasinoPage(onBack: () => _go(_ActivityPage.kok));
       case _ActivityPage.piyango:
@@ -577,6 +583,22 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
             icon: Icons.account_balance_outlined,
             accent: BirOmurAccents.mavi,
             onTap: () => _go(_ActivityPage.banka),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Sigorta (Paket CA): poliçe yaptırmak bir eylemdir, bankanın
+        // hemen altında durur. Modül kapalıysa satır hiç yok.
+        if (state.featureOn(FeatureId.sigorta) &&
+            state.player.age >= 18) ...<Widget>[
+          MenuRow(
+            key: const Key('activities_sigorta'),
+            title: 'Sigorta',
+            subtitle: state.insurance.any((InsurancePolicy p) => p.isActive)
+                ? '${state.insurance.where((InsurancePolicy p) => p.isActive).length} poliçe yürürlükte'
+                : 'Sağlık ve konut poliçesi — kötü yılın faturasını küçültür',
+            icon: Icons.shield_outlined,
+            accent: BirOmurAccents.cini,
+            onTap: () => _go(_ActivityPage.sigorta),
           ),
           const SizedBox(height: 10),
         ],

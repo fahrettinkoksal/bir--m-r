@@ -11,11 +11,13 @@ import '../models/criminal_record.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../data/event_pool.dart';
+import '../../data/insurance_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
+import '../economy/insurance.dart';
 import '../economy/investment_engine.dart';
 import '../models/game_event.dart';
 import '../models/market_state.dart';
@@ -812,10 +814,23 @@ class EventEngine {
       charisma: choice.charisma,
       appearance: choice.appearance,
     );
+    // Sigorta (Paket CA): olay sigortalanabilir bir riske etiketliyse ve
+    // oyuncunun o türde poliçesi varsa **zarar** muafiyet + karşılanmayan
+    // paya iner. Kazanç tarafına dokunulmaz, sigorta cüzdana para
+    // eklemez. Etiketsiz olayda ve poliçesi olmayan oyuncuda satır
+    // birebir eskisi gibi çalışır; zar tüketilmez.
+    final InsuranceKind? risk = _eventById(active.eventId)?.insuredRisk;
+    final ({int paid, int covered, String? note}) sigorta =
+        risk == null || choice.money >= 0
+            ? (paid: choice.money, covered: 0, note: null)
+            : Insurance.settle(working, risk, -choice.money);
+    final int paraEtkisi =
+        risk == null || choice.money >= 0 ? choice.money : -sigorta.paid;
+
     final PlayerCharacter player = working.player.copyWith(
       stats: stats,
       // Cüzdan eksiye düşmez; borç/eksi bakiye kuralları kararlaştırılmadı.
-      wallet: (working.player.wallet + choice.money).clamp(0, 1 << 31),
+      wallet: (working.player.wallet + paraEtkisi).clamp(0, 1 << 31),
     );
 
     // Etki, olayın kişisine; ilişki başlatan seçimde yeni partnere işlenir.
@@ -844,6 +859,12 @@ class EventEngine {
         state,
         katalog,
       );
+    }
+    // Poliçe devreye girdiyse oyuncu bunu görür ve kayıt sayaca işlenir
+    // (Paket CA). Para sessizce azalmaz.
+    if (risk != null && sigorta.covered > 0) {
+      working = Insurance.recordClaim(working, risk, sigorta.covered);
+      resultText = '$resultText\n\n${sigorta.note}';
     }
 
     working = working.copyWith(

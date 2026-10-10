@@ -33,6 +33,7 @@ import '../../data/education_tracks.dart';
 import '../models/education.dart';
 import '../models/game_event.dart';
 import '../economy/household_budget.dart';
+import '../economy/insurance.dart';
 import '../economy/rental_engine.dart';
 import '../economy/investment_engine.dart';
 import '../economy/vehicle_inspection.dart';
@@ -1107,6 +1108,16 @@ class LifeProgression {
     // ev yılın mutluluğuna küçük bir katkı yapar. Anahtar kapalıysa ve
     // ev eşyası yoksa hiçbir şey yapmaz — zar da tüketmez.
     afterDeaths = _applyFurnishing(afterDeaths);
+
+    // Sigorta primi (Paket CA): yürürlükteki poliçelerin yıllık primi
+    // cüzdandan çıkar, dayanağı düşen poliçe kapanır. Poliçesi olmayan
+    // oyuncuda hiçbir şey yapmaz ve **zar tüketmez**.
+    final ({GameState state, List<String> logLines}) sigorta =
+        Insurance.advanceYear(afterDeaths);
+    afterDeaths = sigorta.state;
+    for (final String satir in sigorta.logLines) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
 
     // Hane bakımı: küçük yaştaki oyuncu haneyi boş bırakmaz.
     afterDeaths = ensureCaregiver(afterDeaths, newAge);

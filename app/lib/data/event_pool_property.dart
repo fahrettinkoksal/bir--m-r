@@ -23,6 +23,7 @@
 /// Ağırlıklar ve tutarlar `prototypeOnly`'dir (Q-166).
 library;
 
+import 'insurance_catalog.dart';
 import '../domain/models/game_event.dart';
 
 const List<GameEvent> kPropertyEvents = <GameEvent>[
@@ -202,6 +203,8 @@ const List<GameEvent> kPropertyEvents = <GameEvent>[
     requirement: EventRequirement(minAge: 22, requiresLetProperty: true),
     repeatable: true,
     minAgeGap: 5,
+    // Paket CA: ani hasar, konut poliçesinin kapsamında.
+    insuredRisk: InsuranceKind.konut,
     weight: 4,
     choices: <EventChoice>[
       EventChoice(

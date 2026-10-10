@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import '../../data/health_crisis_catalog.dart';
+import '../../data/insurance_catalog.dart';
+import '../economy/insurance.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../../domain/economy/vehicle_trouble.dart';
@@ -111,8 +113,14 @@ class HealthCrisisEngine {
       );
 
   /// Bu seçenek şu an seçilebilir mi?
+  ///
+  /// Paket CA: sağlık poliçesi varsa oyuncunun cebinden çıkacak tutar
+  /// **muafiyet + karşılanmayan pay** kadardır; pahalı tedaviyi
+  /// karşılayabilir hâle gelir. Poliçe yoksa kural birebir eskisi.
   bool canChoose(GameState state, CrisisChoice choice) =>
-      !choice.needsMoney || state.player.wallet >= choice.cost;
+      !choice.needsMoney ||
+      state.player.wallet >=
+          Insurance.settle(state, InsuranceKind.saglik, choice.cost).paid;
 
   /// Krize yanıt verir.
   ///
@@ -143,7 +151,13 @@ class HealthCrisisEngine {
       return _blocked(state, 'Bu seçenek için cüzdanında yeterli para yok.');
     }
 
-    final int bedel = secim.cost.clamp(0, state.player.wallet);
+    // Sağlık sigortası (Paket CA): poliçe varsa tedavi masrafının
+    // muafiyet üstü kısmı karşılanır. Sigorta cüzdana para **eklemez**,
+    // yalnızca bu yılın masrafını azaltır; poliçe yoksa satır birebir
+    // eskisi gibi çalışır ve zar tüketilmez.
+    final ({int paid, int covered, String? note}) sigorta =
+        Insurance.settle(state, InsuranceKind.saglik, secim.cost);
+    final int bedel = sigorta.paid.clamp(0, state.player.wallet);
     // Kritik sağlık krizinde (Paket AQ) atlatma ihtimali katalogdan
     // gelmez: yaş, taşınan rahatsızlıklar ve daha önce kaç kez aynı
     // eşiğe gelindiği hesaba katılır. Rastgele bir yarı yarıya zar yok.
@@ -156,6 +170,9 @@ class HealthCrisisEngine {
       pendingCrisis: null,
       player: state.player.copyWith(wallet: state.player.wallet - bedel),
     );
+    // Karşılık poliçe kaydına işlenir: "bu poliçe kâra geçti mi" sorusu
+    // ekranda uydurmadan yanıtlanabilsin.
+    next = Insurance.recordClaim(next, InsuranceKind.saglik, sigorta.covered);
 
     if (!atlatti) {
       // Hayat, olağan ölüm yolundan tamamlanır; kayıtlar silinmez.
@@ -266,9 +283,14 @@ class HealthCrisisEngine {
         ? CriticalHealth.resultTextFor(state: next, choice: secim)
         : secim.resultText;
 
-    final String metin = kronik.typeId == null
+    final String izli = kronik.typeId == null
         ? sonucMetni
         : '$sonucMetni Ama bu bir iz bıraktı.';
+    // Poliçe devreye girdiyse oyuncu bunu **görür**: para sessizce
+    // azalmaz (D-063 ile aynı ilke).
+    final String? sigortaNotu = sigorta.note;
+    final String metin =
+        sigortaNotu == null ? izli : '$izli\n\n$sigortaNotu';
 
     next = _log(next, sonucMetni);
 
