@@ -43,6 +43,8 @@ import 'dart:math';
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,23 +89,58 @@ void main() {
   ///
   /// Hayat **bir kez** oynanıyor; istenen yaşların hepsi aynı hayattan
   /// geliyor, böylece ekranlar arasında süreklilik var.
-  Map<int, GameState> botHayati({
+  ///
+  /// **Ölü kare alınmaz (Paket BS/0).** `onYear` hayatın son yılında da
+  /// çağrılıyor; o karede oyun bilerek "Bir ömür tamamlandı" özetini
+  /// gösterir ve alt sekmeler yoktur. Eski yazımda o kare de
+  /// fotoğraflanıyordu: aile arketipi 40 yaşında öldüğü bir tohumda
+  /// "dört sekme yok" diye düştü — ekran değil kare yanlıştı.
+  ///
+  /// **Tohum sabit değil, hedef sabit.** Bot her pakette biraz değişiyor
+  /// (zar akışı kayıyor) ve sabitlenmiş tohum bir gün ölü/boş bir hayata
+  /// düşüyor. Hedef yaşlara **canlı** ulaşan ve arketipin okumak istediği
+  /// ekranı gerçekten dolduran bir hayat bulunana kadar tohum ilerler.
+  /// Sabitlenmiş tohum işini yapıyorsa ilk denemede döner, döküm aynı
+  /// kalır.
+  ({Map<int, GameState> kareler, int tohum}) botHayati({
     required PlayerArchetype arketip,
     required int seed,
     required Set<int> yaslar,
+    bool Function(GameState)? gerek,
   }) {
-    final Map<int, GameState> kareler = <int, GameState>{};
-    playBotLife(
-      archetype: arketip,
-      seed: seed,
-      onYear: (GameState s) {
-        if (yaslar.contains(s.player.age)) {
-          kareler.putIfAbsent(s.player.age, () => s);
-        }
-      },
-    );
-    return kareler;
+    for (int deneme = 0; deneme < 24; deneme++) {
+      final int tohum = seed + deneme * 101;
+      final Map<int, GameState> kareler = <int, GameState>{};
+      playBotLife(
+        archetype: arketip,
+        seed: tohum,
+        onYear: (GameState s) {
+          if (s.deceased) return;
+          if (yaslar.contains(s.player.age)) {
+            kareler.putIfAbsent(s.player.age, () => s);
+          }
+        },
+      );
+      if (kareler.length < yaslar.length) continue;
+      final GameState son = kareler[yaslar.reduce(max)]!;
+      if (gerek != null && !gerek(son)) continue;
+      return (kareler: kareler, tohum: tohum);
+    }
+    return (kareler: <int, GameState>{}, tohum: seed);
   }
+
+  /// Arketipin dökümden beklediği hayat.
+  ///
+  /// Aile dökümünün amacı eş/çocuk/torun ekranını okumak; hiç evlenmemiş
+  /// bir hayatta o ekran yine boş kalır. Diğer arketiplerin sabit
+  /// tohumları zaten istenen hayatı veriyor, onlara koşul koymuyorum —
+  /// koşul ancak tohum işini yapmazsa devreye girer.
+  bool Function(GameState)? arketipGeregi(PlayerArchetype a) =>
+      switch (a) {
+        PlayerArchetype.family => (GameState s) => s.people.any(
+            (Person p) => p.relation == RelationType.cocuk && p.isAlive),
+        _ => null,
+      };
 
   /// Uygulama **bir kez** açılır.
   ///
@@ -244,21 +281,29 @@ void main() {
 
     testWidgets('EKRAN DÖKÜMÜ (bot) — ${arketip.label}',
         (WidgetTester tester) async {
-      final Map<int, GameState> kareler = botHayati(
+      final ({Map<int, GameState> kareler, int tohum}) hayat = botHayati(
         arketip: arketip,
         seed: seed,
         yaslar: yaslar.toSet(),
+        gerek: arketipGeregi(arketip),
       );
-      expect(kareler, isNotEmpty,
-          reason: '${arketip.label} hayatı hedef yaşlara ulaşmadı: '
-              'bot erken öldü ya da kilitlendi. Dökülecek bir şey yok.');
+      final Map<int, GameState> kareler = hayat.kareler;
+      expect(kareler.length, yaslar.length,
+          reason: '${arketip.label}: 24 tohumun hiçbirinde '
+              '${yaslar.join("/")} yaşlarına canlı ulaşan bir hayat '
+              'bulunamadı. Dökülecek bir şey yok.');
 
       final List<String> bosEkranlar = <String>[];
       for (final int yas in yaslar) {
-        final GameState? durum = kareler[yas];
-        if (durum == null) continue; // O yaşa ulaşılmadı; iddia yok.
+        // Yukarıdaki iddia geçtiyse her hedef yaşın canlı karesi var;
+        // eskiden ulaşılmayan yaş sessizce atlanıyordu.
+        final GameState durum = kareler[yas]!;
         bosEkranlar.addAll(
-          await dok(tester, '${arketip.label} · $yas yaş', durum),
+          await dok(
+          tester,
+          '${arketip.label} · $yas yaş · tohum ${hayat.tohum}',
+          durum,
+        ),
         );
       }
 

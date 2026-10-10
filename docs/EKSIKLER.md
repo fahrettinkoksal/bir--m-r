@@ -492,6 +492,32 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   hata yoktu; ölçüm aracı o yolu hiç yürümüyordu. Politika düzeltildi
   (oturmak için alınan ev işaretlenir, kiraya verilmez, taşınma her yıl
   yeniden denenir): kendi evinde hiç oturmayan 18/25 → 5/25.
+- ~~**Bot tanışıklığa yoğunlaşmıyor; yakın arkadaşlık eşiğine
+  ulaşamıyor.**~~ **Düzeltildi (Paket BS/0, 10 Ekim 2026).** Ölçülen
+  huni (80 hayat): tanışıklık (sınıf/iş arkadaşı) **80/80** hayatta
+  var, ama yakın arkadaşlık teklifinin uygun olduğu bir yıl yalnızca
+  **27/80** hayatta geliyordu. Sebep oyunda değil: bot her yıl on
+  kişilik sınıftan **rastgele** birini seçiyor, bağ kimsede birikmiyor
+  ve her yıl sönüyordu. Hayat boyunca en iyi tanışıklık bağının medyanı
+  **51**, eşik 55 — bot eşiğin dört puan altında ölüyordu. Gerçek
+  oyuncu dağıtmaz, birine yoğunlaşır; politika buna çevrildi (beşte bir
+  insanî rastgelelik payıyla). Sonuç: teklif uygun yılı 27 → **61/80**,
+  teklifi kabul edilen 27 → **60**, hayatında arkadaşı olan 58 →
+  **78/80**, en iyi bağ medyanı 51 → **60**. Eşiğe ve hiçbir oyun
+  sayısına dokunulmadı.
+- ~~**Ekran dökümü ölü hayatın karesini basıyor ve sabit tohuma
+  güveniyor.**~~ **Düzeltildi (Paket BS/0, 10 Ekim 2026).** Yukarıdaki
+  bot düzeltmesi zar akışını kaydırdı; `ekran_dokumu_bot_test.dart`
+  aile arketipi için sabitlenmiş tohumda hayat 40 yaşında öldü. Döküm
+  o yılın karesini de fotoğrafladığı için ekranda oyunun bilerek
+  gösterdiği "Bir ömür tamamlandı" özeti vardı ve test "dört sekme
+  yok" diye düştü — ekran değil **kare** yanlıştı. İki şey düzeltildi:
+  (1) ölü yılın karesi artık alınmıyor, (2) tohum sabit değil **hedef**
+  sabit; hedef yaşlara canlı ulaşan (aile dökümünde çocuğu da olan) bir
+  hayat bulunana kadar tohum ilerliyor. Sabit tohum işini yapıyorsa
+  döküm aynı kalıyor. Test aynı zamanda **sıkılaştı**: eskiden
+  ulaşılmayan hedef yaş sessizce atlanıyordu, artık her hedef yaşın
+  canlı karesi zorunlu.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

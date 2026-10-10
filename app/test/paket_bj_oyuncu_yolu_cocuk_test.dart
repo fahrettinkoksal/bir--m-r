@@ -21,6 +21,18 @@
 // kurulmuyor — bot gerçek hayatlar oynuyor, evli/sevgili olduğu bir yıl
 // yakalanıyor, oradan sonrası oyuncunun kendi düğmesiyle sürüyor.
 //
+// **Her gebelik bebekle kapanmaz (Paket BS/0'da ölçüldü).** İlk yazımda
+// iddia "dokuz gebeliğin dokuzu doğumla kapandı" idi; bot davranışı
+// değişip kareler kayınca 8/9 çıktı ve test düştü. Teşhis: dokuzuncu
+// karede **hamile olan kız arkadaş o yıl vefat etti**, oyun da günlüğe
+// "Bekleyen bebek dünyaya gelemedi." yazıp gebeliği kapattı. Yani oyun
+// doğru davrandı, testin iddiası bir kural değildi. Gerçek kural şu ve
+// test artık onu bekliyor: gebelik **açık kalamaz** (dört yıl içinde
+// kapanır) ve bebeksiz kapandıysa **kayıtlı bir gerekçesi** olmalı
+// (diğer biyolojik ebeveyn vefat etmiş ya da kayıttan düşmüş). Üstüne
+// bir oran tabanı var: doğumla kapanan, gebeliklerin en az beşte
+// dördü olmalı.
+//
 // **Neden istatistik.** Gebelik bir ihtimal: yıllık taban %45 ve hayat
 // başında %8 kısırlık var (`Intimacy.prototypeOnly…`). Tek çift üstünden
 // kurulan bir iddia bu yüzden kararsızdır — ilk yazımda tam bu yüzden
@@ -34,6 +46,7 @@ import 'dart:math';
 import 'package:bir_omur/data/health_crisis_catalog.dart';
 import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -170,6 +183,10 @@ void main() {
 
     int gebelikGoren = 0;
     int dogumlaKapanan = 0;
+    // Bebeksiz **ama gerekçeli** kapanış: diğer biyolojik ebeveyn
+    // hamilelik sırasında vefat etmiş ya da kayıttan düşmüş olabilir.
+    // Oyun bunu sessizce yapmıyor, günlüğe yazıyor (`_applyBirth`).
+    int gerekceliKapanan = 0;
     for (int i = 0; i < kareler.length; i++) {
       final Kare kare = kareler[i];
       final GameController c = GameController(random: Random(4100 + i))
@@ -198,12 +215,23 @@ void main() {
           lessThanOrEqualTo(c.state!.player.age));
 
       final int oncekiCocuk = c.state!.children.length;
+      final int gebelikYasi = c.state!.player.age;
       int gebelikYili = 0;
+      bool yilIlerledi = true;
       while (c.state!.isExpecting && gebelikYili < 4) {
-        if (!_yilGec(c)) break;
+        if (!_yilGec(c)) {
+          yilIlerledi = false;
+          break;
+        }
         gebelikYili++;
       }
-      if (!c.state!.isExpecting && c.state!.children.length > oncekiCocuk) {
+      // **Kural: gebelik açık kalamaz.** Dört yıl içinde ya doğumla ya
+      // da kayıtlı bir gerekçeyle kapanmalı; "hâlâ gebe" bir kilittir.
+      expect(c.state!.isExpecting, isFalse,
+          reason: 'gebelik dört yıl açık kaldı (yaş $gebelikYasi → '
+              '${c.state!.player.age}, yıl ilerledi $yilIlerledi, ölü '
+              '${c.state!.deceased}): doğum akışı kilitlenmiş.');
+      if (c.state!.children.length > oncekiCocuk) {
         dogumlaKapanan++;
         // Doğan çocuk gerçekten yeni olmalı.
         expect(
@@ -211,17 +239,37 @@ void main() {
                 p.relation == RelationType.cocuk && p.isAlive && p.age <= 1),
             isNotEmpty,
             reason: 'doğumdan sonra 0-1 yaşında çocuk yok');
+      } else {
+        // **Bebeksiz kapanış gerekçesiz olamaz.** Ölçümde çıkan tek
+        // örnek şuydu: hamile olan kız arkadaş o yıl vefat etti ve
+        // günlüğe "Bekleyen bebek dünyaya gelemedi." yazıldı. Oyunun
+        // kuralı bu; iddia bunu tanımalı ama sessiz kayba izin
+        // vermemeli.
+        final Person? diger = c.state!.personById(kare.partnerId);
+        final bool ebeveynGitti = diger == null || !diger.isAlive;
+        final bool gunlukteVar = c.state!.log.any((LifeLogEntry e) =>
+            e.age >= gebelikYasi && e.text.contains('bebek'));
+        expect(ebeveynGitti || gunlukteVar, isTrue,
+            reason: 'gebelik bebeksiz ve gerekçesiz kapandı (yaş '
+                '$gebelikYasi → ${c.state!.player.age}): diğer ebeveyn '
+                'hayatta ve günlükte sebep yok.');
+        gerekceliKapanan++;
       }
       c.dispose();
     }
 
     // ignore: avoid_print
     print('OLCUM — gebelik: $gebelikGoren gebelik, '
-        '$dogumlaKapanan tanesi dört yıl içinde doğumla kapandı');
+        '$dogumlaKapanan tanesi dört yıl içinde doğumla kapandı, '
+        '$gerekceliKapanan tanesi gerekçeyle (ebeveyn vefatı) kapandı');
 
     expect(gebelikGoren, greaterThan(0), reason: 'hiç gebelik oluşmadı');
-    expect(dogumlaKapanan, gebelikGoren,
-        reason: 'bazı gebelikler dört yılda kapanmadı ya da çocuk kayda '
-            'girmedi: $dogumlaKapanan/$gebelikGoren');
+    // Her gebelik kapandı: yukarıdaki iddialar bunu tek tek denetledi.
+    expect(dogumlaKapanan + gerekceliKapanan, gebelikGoren);
+    // Gerekçeli kapanış **istisna** olmalı. Ebeveyn vefatı seyrek bir
+    // olay; beşte birden fazlası doğum yolunun tıkandığını gösterir.
+    expect(dogumlaKapanan * 5, greaterThanOrEqualTo(gebelikGoren * 4),
+        reason: 'gebeliklerin yalnızca $dogumlaKapanan/$gebelikGoren '
+            'tanesi doğumla kapandı; doğum yolu tıkanmış olabilir.');
   });
 }

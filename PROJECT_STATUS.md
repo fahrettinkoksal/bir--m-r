@@ -6101,5 +6101,92 @@ gerçek sabitten geliyor.
 
 Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-213.
 
+## Paket BS/0 — arkadaşlık erişilebilirliği: ölçüm turu (10 Ekim 2026)
+
+Paket BP ve BQ'nun 400'er hayatlık ölçümlerinde dikkat çeken iki sayı
+vardı: hayat başına ortalama arkadaş **0,70** ve yakın arkadaş **0,04**.
+Bir hayat simülasyonunda "arkadaşın yok" büyük bir eksik; ama önce
+sorulması gereken soru şu: bu oyunun kapısı mı kapalı, yoksa ölçüm botu
+o yolu yürümüyor mu?
+
+### Ölçülen huni (80 hayat)
+
+| Aşama | Sayı |
+| --- | --- |
+| Tanışıklık (sınıf/iş arkadaşı) gören hayat | 80/80 |
+| Yakın arkadaş teklifinin **uygun olduğu** yılı olan | 27/80 |
+| Teklif deneyen | 27 |
+| Teklifi **kabul edilen** | 27/27 (%100) |
+| Hayatında bir kez bile arkadaşı olan | 58/80 |
+| Hayat boyunca en iyi tanışıklık bağı | ortalama 50,3 · **medyan 51** |
+
+Eşik 55. Yani bot, ömrü boyunca eşiğin **dört puan** altında kalıyordu
+ve eşiği geçtiğinde teklif **her zaman** kabul ediliyordu. Oyunun
+kapısı açık; sorun ölçüm aracındaydı.
+
+### Kök neden: bot dağıtıyor, yoğunlaşmıyor
+
+Bot her yıl bir etkileşim hakkını on kişilik sınıftan **rastgele** bir
+kişiye harcıyordu. Bağ her yıl sönümleniyor (Paket 24), dolayısıyla
+kimsede birikmiyordu. Gerçek oyuncu arkadaş edinmek isterken dağıtmaz,
+birine yoğunlaşır. Politika buna çevrildi: en yüksek bağlı tanışıklık
+seçilir, beşte bir oranında insanî rastgelelik kalır.
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Teklif uygun yılı olan | 27/80 | **61/80** |
+| Teklifi kabul edilen | 27 | **60** |
+| Hayatında arkadaşı olan | 58/80 | **78/80** |
+| En iyi tanışıklık bağı (medyan) | 51 | **60** |
+| Ölümde arkadaş sayısı (ortalama) | 0,90 | **1,48** |
+
+### Dengeye etkisi (400'er hayat, iki blok)
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Ortalama arkadaş | 0,70 / 0,69 | **1,35 / 1,24** |
+| Ortalama yakın arkadaş | 0,04 | **0,50 / 0,44** |
+| Ortalama son sağlık | 25,9 / 24,3 | 28,6 / 26,1 |
+| Ortalama ölüm yaşı | 72,67 / 72,61 | 72,29 / 72,54 |
+| Evlenen | %53 / %56 | %54 / %54 |
+| Ev sahibi | %58 / %63 | %64 / %61 |
+
+Arkadaş sayısı ikiye katlandı, yakın arkadaş neredeyse sıfırdan hayatın
+yarısına çıktı. Sağlık iki puan yükseldi (etkileşim keyif ve sağlık
+veriyor). Ölüm yaşı, evlilik ve ev sahipliği gürültü bandında.
+
+**Oyun tarafında hiçbir sayı değişmedi.** Yakın arkadaşlık eşiği (55),
+bağ sönümlenmesi ve etkileşim etkileri aynen duruyor. Bu bir ölçüm
+aracı düzeltmesidir; bundan sonraki bütün sosyal ölçümler bu tabandan
+okunacak.
+
+### Ölçüm kalıcı bekçiye çevrildi
+
+Huni ölçümü geçici dosyada kalmadı: `test/paket_bs_arkadaslik_test.dart`
+aynı 80 hayatı her süitte oynuyor ve **ölçülenin çok altında** tabanlar
+bekliyor (tanışıklık gören ≥72, teklif uygun yılı ≥27, kabul ≥20,
+arkadaşı olan ≥40, en iyi bağ medyanı ≥45, ölümde ortalama arkadaş
+≥0,6). Bu sayılar denge hedefi değil; arkadaşlık yolu bir gün yeniden
+kapanırsa süit bunu sessizce geçmesin diye var.
+
+### Yan bulgu: döküm testi ölü kareyi basıyordu
+
+Bot düzeltmesi zar akışını kaydırdı ve `ekran_dokumu_bot_test.dart`
+aile arketipinde düştü: sabitlenmiş tohumda hayat 40 yaşında ölüyor,
+döküm o yılın karesini fotoğraflıyor, ekranda da oyunun bilerek
+gösterdiği "Bir ömür tamamlandı" özeti oluyordu — alt sekmeler yok.
+Ekran değil **kare** yanlıştı.
+
+Düzeltme: (1) ölü yılın karesi alınmıyor, (2) tohum sabit değil hedef
+sabit — hedef yaşlara **canlı** ulaşan ve aile dökümünde çocuğu da olan
+bir hayat bulunana kadar tohum ilerliyor (24 deneme). Sabit tohum işini
+yapıyorsa döküm aynı kalıyor. Test bu arada sıkılaştı: eskiden
+ulaşılmayan hedef yaş sessizce atlanıyordu, artık her hedef yaşın canlı
+karesi zorunlu. Ders yazıldı: **bota dokunan her paket, tohuma
+sabitlenmiş testleri de kaydırır; bu testler tohuma değil hedefe
+bakmalı.**
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-214.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

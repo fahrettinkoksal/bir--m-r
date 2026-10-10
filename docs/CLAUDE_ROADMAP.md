@@ -175,6 +175,18 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   mı?" sorusunun cevabı 30'du, ama hepsi başkasının eviydi. Katalogdaki
   olay sayısı değil, oyuncunun o durumdayken gördüğü olay sayısı
   ölçülür.
+- **Paket BS/0.** Düşük bir ürün sayısını bildirmeden önce **huniyi**
+  ölç: "hayat başına 0,7 arkadaş" bir oyun eksiği gibi duruyordu, oysa
+  tanışıklık 80/80 hayatta vardı, teklif eşiği geçtiğinde %100 kabul
+  ediliyordu ve sorun botun her yıl rastgele birine zaman ayırmasıydı.
+  Aşama aşama saymak, "oyun mu bot mu" sorusunu tek turda bitirdi.
+- **Paket BS/0.** Paket BM'nin dersi ("hayatı oynayan test hedefe
+  ulaşana kadar tohum denemeli") ekran dökümünde uygulanmamıştı ve
+  botun davranışı değişince orada kırıldı. İkinci yarısı da yazıldı:
+  hayatın **son yılının karesi ölü karedir** — oyun o karede bilerek
+  özet ekranı gösterir, alt sekme yoktur. Bot hayatından kare alan her
+  test canlı kare istemeli; yoksa düşen şey ekran değil, karenin
+  kendisi olur.
 - **Paket BP.** Ölçüm botu bir özelliği hiç kullanmıyorsa, o özelliğin
   içeriği "erişilemez" görünür. Bot oturmak için aldığı eve
   taşınamıyordu; düzeltmeden önce yeni havuz 7/25 hayatta görünüyordu,

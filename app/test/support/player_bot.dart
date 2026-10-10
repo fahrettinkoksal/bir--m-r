@@ -2293,7 +2293,19 @@ void _spendTimeWithFamily(
               p.relation == RelationType.arkadas))
       .toList(growable: false);
   if (tanisiklar.isNotEmpty && rng.nextDouble() < profile.socialDesire) {
-    final Person kisi = tanisiklar[rng.nextInt(tanisiklar.length)];
+    // **Ölçülen bot hatası (Paket BS/0).** Bot her yıl tanışıklar
+    // arasından **rastgele** birini seçiyordu. Sınıfta on kişi var,
+    // yılda bir etkileşim hakkı var ve bağ her yıl sönüyor: yakınlık
+    // kimsede birikmiyordu. 80 hayatta ölçüldü — hayat boyunca en iyi
+    // tanışıklık bağının medyanı **51**, yakın arkadaşlık eşiği 55.
+    // Yani bot eşiğin dört puan altında ölüyordu. Gerçek oyuncu
+    // dağıtmaz, **birine yoğunlaşır**: en yüksek bağlı kişi seçilir.
+    final List<Person> sirali = List<Person>.of(tanisiklar)
+      ..sort((Person a, Person b) => b.bond.compareTo(a.bond));
+    // Yine de insanî pay var: beşte bir rastgele biri seçilir.
+    final Person kisi = rng.nextDouble() < 0.2
+        ? tanisiklar[rng.nextInt(tanisiklar.length)]
+        : sirali.first;
     final List<InteractionKind> acik = c.availableKindsFor(kisi);
     if (acik.isNotEmpty) {
       sonuc.diag.interactions++;
