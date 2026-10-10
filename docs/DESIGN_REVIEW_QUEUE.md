@@ -8973,3 +8973,72 @@ hatırlanmalı: 4-5 yaşta oyuncu zaten iki olay görebiliyor.
 **Etkilenen kod:** `app/lib/domain/events/event_engine.dart`
 (`prototypeOnlyMaxExtraEventsPerAge`,
 `prototypeOnlyProgressPerExtraEvent`).
+
+### Q-227 — Arkadaş grubu: eşikler, seyreklik ve grubun adı
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Sayılar
+`prototypeOnly`; kod yürürlükte ama hiçbir sayı kalıcı kural değil.
+
+**Nasıl çıktı.** `docs/EKSIKLER.md` §3.1'de arkadaşlığın kalan iki
+eksiği yazılıydı. Koda bakıldı: çocukluk arkadaşıyla karşılaşma D-130'da
+kodlanmış, **arkadaş grubu ise hiç yoktu**. Paket CI'de yazıldı: kalıcı
+grup kaydı, oyuncunun kurma düğmesi, grupla buluşma (Paket X/2'nin
+aktivite yolundan), üyenin ayrılması, grubun dağılması ve dokuz olay.
+
+**Yürürlükteki sayılar (hepsi `prototypeOnly`)**
+
+| Sayı | Değer | Nereden geldi |
+|---|---|---|
+| En az üye | 3 | İki kişi zaten arkadaşlık; "grup"un en küçük hâli üç |
+| En çok üye | 6 | Aktivite yolu 8 refakatçi taşıyor; buluşmaya eş/çocuk da gelebilsin diye altında |
+| Aday bağı | 45 | `Outing.prototypeOnlyCloseFriendBond` — ayrı sayı uydurulmadı |
+| Aday bağ türü | yalnızca `arkadas` | `Outing.companionRelations` eksi aile |
+| En küçük yaş | 10 | Oyunun etkileşim sunduğu ilk yaşlar (Paket CH: 1-3'te hiç eylem yok) |
+
+**Ölçülen sonuç (120 hayat, bütün arketipler):** grup **8** hayatta
+kuruluyor, **2'sinde** en az bir buluşma oluyor, **7** grup dağılıyor,
+dokuz olayın **5'i** görülüyor.
+
+**Seyrekliğin sebebi kapı değil, huni.** Aday sayısının hayat boyu en
+yüksek değeri:
+
+| bağ ≥ | ortanca aday | üç kişiye ulaşan hayat |
+|---|---|---|
+| 30 | 5 | 120/120 |
+| 35 | 5 | 120/120 |
+| 40 | 2 | 26/120 |
+| 45 | 2 | 16/120 |
+
+35 ile 40 arasındaki kırılma şundan: **sınıf arkadaşının başlangıç bağı
+35-55** (Paket BS/0). "Bağ ≥ 35" pratikte "herhangi bir sınıf arkadaşı"
+demek olurdu.
+
+**Seçenekler**
+
+1. **Olduğu gibi kalsın (önerim ve varsayılanım).** Grup, oyuncunun üç
+   kişiye gerçekten zaman ayırdığı hayatlarda kurulur; her hayatta
+   olmaması doğru. Profesyonel futbol kapısı da bilerek %4,2'de
+   bırakılmıştı (D-164).
+2. **Refakatçi listesini genişletmek:** `Outing.companionRelations`'a
+   sınıf arkadaşı, iş arkadaşı ve komşu eklenir. O zaman grup bağ ≥ 45
+   ile de 16/120'ye, aday kümesi genişlediği için daha yukarıya çıkar —
+   ama bu **grubun değil aktivite sisteminin** kuralını değiştirir:
+   kiminle sinemaya gidilebileceği sorusu bütün oyunu ilgilendirir.
+3. **Ölçüm botunun ilgisini yaymak:** bot bugün bağı tek kişide
+   topluyor (Paket BS/0'ın bilinçli kararı) ve bu yüzden bağı 45+ olan
+   insan ortanca **1-2** kalıyor. Bot üç kişiyi birlikte beslerse grup
+   ölçümde daha sık görünür. **Oyunu değiştirmez, ölçümü değiştirir** —
+   yani "oyuncu gerçekte ne yapar" sorusuna bağlı.
+
+**İkinci soru — grubun adı.** Oyun adı kendisi koyuyor ve oyuncunun o
+anki çevresinden türetiyor: 19 yaş altı "Okul çevresi", üniversitedeyse
+"Üniversite çevresi", çalışıyorsa "İş çevresi", değilse "Mahalle
+çevresi". Alternatif: adı oyuncunun yazması (bebek adı gibi,
+`ChildNaming` kuralıyla). Önerim: şimdilik oyun koysun; isim yazma
+ekranı ayrı bir iş.
+
+**Yapmayacağım (onay gelmeden):** eşikleri değiştirmek, refakatçi
+listesini genişletmek, bot politikasını değiştirmek.
+
+**Etkilenen kod:** `app/lib/domain/interaction/friend_circles.dart`,
+`app/lib/domain/activities/outing.dart`, `app/test/support/player_bot.dart`.
