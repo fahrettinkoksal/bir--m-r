@@ -394,6 +394,17 @@ class EventEngine {
     if (req.requiresFriendCircle && FriendCircles.activeOf(state) == null) {
       return false;
     }
+    // Yaşlılıkta bakım sayaçları (Paket CM): kaç yıl destek görüldüğü
+    // ve kaç yıl tek başına çevrildiği kayıttan okunur. Modül kapalıysa
+    // bu olaylar zaten aday olmaz (havuz `FeatureEvents` ile bağlı).
+    if (req.minElderSupportYears > 0 &&
+        state.elderSupport.yearsSupported < req.minElderSupportYears) {
+      return false;
+    }
+    if (req.minElderAloneYears > 0 &&
+        state.elderSupport.yearsAlone < req.minElderAloneYears) {
+      return false;
+    }
     // Ün gerektiren olaylar: kitle gerçekten oluşmadan çıkmaz.
     if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
       return false;

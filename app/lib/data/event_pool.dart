@@ -21,6 +21,7 @@ import 'event_pool_neighbour.dart';
 import 'event_pool_threshold_years.dart';
 import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
+import 'event_pool_elder_support.dart';
 import 'event_pool_family_gathering.dart';
 import 'event_pool_extra.dart';
 import 'event_pool_exam.dart';
@@ -1771,4 +1772,5 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // yaşa ait değildi. Modül anahtarı `FeatureId.sonYillar`.
   ...kLateYearsEvents,
   ...kFriendCircleEvents,
+  ...kElderSupportEvents,
 ];

@@ -437,6 +437,14 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CM.** Bir sistem kayıt tutuyorsa o kayıt **hikâyeye
+  dönmeli**; yoksa oyuncu için sayaç değil, boşluk olur. Bakım kaydı
+  Paket CJ'den beri duruyordu ve hiçbir olay onu okumuyordu.
+- **Paket CM.** Koşulu izle değil **sayaçla** kur. "Üç yıldır yanımda"
+  diyen bir cümle, hikâye izine bağlanırsa bir kez destek görmekle
+  ömür boyu çıkar ve yalan söyler. İki yeni istek alanı (`minElder…`)
+  kayıttan okuyor; bekçi de "sayaç tutmadan aday olan olay sayısı = 0"
+  diye ölçüyor.
 - **Paket CL.** Yeni bir kart yazdıktan sonra onu **bütün ekran
   olarak** bir kez oku. Anahtar testi aradığını bulur; döküm ekranda
   ne olduğunu gösterir. İki yeni kartın ikisi de kendi testlerinden

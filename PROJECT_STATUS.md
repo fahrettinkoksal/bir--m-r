@@ -7682,5 +7682,61 @@ Aynı ekranda bakım kartıyla birlikte göründüğünde iki "bakım" aynı
 şey sanılabilir. Onaylı bir metin olduğu için dokunulmadı; Faho
 isterse kartın başlığı ("Bu yıl kim yanında?") zaten ayırt edici.
 
+## Paket CM — yaşlılığın karşılığı: kaydı okuyan altı olay (10 Ekim 2026)
+
+Paket CJ bakım kaydını tutuyordu — kaç yıl aileden destek görüldü, kaç
+yıl kimseye yüklenmeden çevrildi — ama o kayıt hiçbir yerde **hikâyeye
+dönmüyordu**. Q-228'in beşinci maddesinde kendi önerim olarak
+bırakılmıştı; bu paket onu kapatıyor.
+
+### Ölçüm önce yapıldı (250 hayat, ölüm anı kaydı)
+
+| Ölçü | Değer |
+| --- | --- |
+| Hiç karar vermemiş hayat | 130 |
+| Destek görülen yıl | 50 hayat · ortanca 4 · en çok 17 |
+| Kimseye yüklenmeden çevrilen yıl | 72 hayat · ortanca 3 · en çok 13 |
+| 2+ yıl destek gören hayat | 43 |
+| 3+ yıl tek başına çeviren hayat | 44 |
+
+Eşikler buradan: olaylar 2, 3 ve 4 yıl isteyen üç kademede duruyor.
+
+### Koşul hikâye izi değil, **sayaç**
+
+`EventRequirement`'a iki alan geldi: `minElderSupportYears` ve
+`minElderAloneYears`. Motor bunları zardan önce, kayıttan okuyor.
+Hikâye izi kullanılsaydı bir kez destek görmek ömür boyu yeterdi ve
+"üç yıldır yanımda" diyen cümle yalan olabilirdi — Paket CI'de grup
+için verilen kararın aynısı.
+
+Havuz yeni iz **bırakmıyor**: yazsaydı onları okuyan üçüncü bir katman
+gerekirdi (Paket AR'nin ölçtüğü sessiz iz sorunu). Hikâye burada
+kapanıyor.
+
+### Altı olay
+
+| Olay | Kapı |
+| --- | --- |
+| `bakim_karsilik_aliskanlik` | 2 yıl destek |
+| `bakim_karsilik_yorgunluk` | 3 yıl destek |
+| `bakim_karsilik_torun_gorur` | 3 yıl destek + yaşayan torun (8+) |
+| `bakim_karsilik_komsu_farketti` | 2 yıl tek başına |
+| `bakim_karsilik_kimseyi_aramadim` | 3 yıl tek başına |
+| `bakim_karsilik_defter_notu` | 4 yıl tek başına |
+
+**Erişim ölçüldü:** 250 hayatta altı olayın **hepsi** görüldü
+(ulaşılamayan yok), 14 hayat en az birini gördü; 2+ destekli kare 205,
+2+ yalnız kare 252. Havuz `FeatureEvents` ile `yaslilik_bakimi`
+anahtarına bağlı: modül kapalıyken hiçbiri aday olmuyor.
+
+### Bekçi
+
+`test/paket_cm_bakim_karsiligi_test.dart` (6 test): altı olayın hepsi
+görülüyor · kaydın iki tarafı da yaşanıyor · **sayaç tutmadan hiçbir
+olay aday olmuyor** · modül kapalıyken havuz aday olmuyor · havuz
+modül eşlemesiyle birebir ve iz bırakmıyor · metinler yasak kalıp
+taşımıyor ve hepsi 70+ yaşta. Modül eşlemesi kaldırılınca 6 testin
+2'si kırmızıya döndü.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

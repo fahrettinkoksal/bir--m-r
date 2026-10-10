@@ -47,6 +47,8 @@ class EventRequirement {
     this.requireReachable = false,
     this.requiresSocialAccount = false,
     this.requiresFriendCircle = false,
+    this.minElderSupportYears = 0,
+    this.minElderAloneYears = 0,
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
     this.requiresTenant = false,
@@ -297,6 +299,17 @@ class EventRequirement {
   /// olan kayıt**. İz kullanılsaydı grup dağıldıktan sonra da olaylar
   /// gelirdi (izler silinmez).
   final bool requiresFriendCircle;
+
+  /// Yaşlılıkta **aileden destek görülen** en az yıl sayısı (Paket CM).
+  ///
+  /// Koşul hikâye izi değil **yürürlükteki sayaç**
+  /// (`GameState.elderSupport.yearsSupported`): "üç yıldır yanımda"
+  /// diyen bir olay, o üç yıl gerçekten yaşanmadan çıkmaz. İz
+  /// kullanılsaydı bir kez destek görmek ömür boyu yeterdi.
+  final int minElderSupportYears;
+
+  /// Yaşlılıkta **kimseye yüklenmeden** çevrilen en az yıl sayısı.
+  final int minElderAloneYears;
 
   /// Sahip olunması gereken ehliyetler.
   ///
