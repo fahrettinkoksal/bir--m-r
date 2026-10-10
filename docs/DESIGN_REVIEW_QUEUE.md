@@ -9042,3 +9042,84 @@ listesini genişletmek, bot politikasını değiştirmek.
 
 **Etkilenen kod:** `app/lib/domain/interaction/friend_circles.dart`,
 `app/lib/domain/activities/outing.dart`, `app/test/support/player_bot.dart`.
+
+### Q-228 — Yaşlılıkta bakım: eşikler, kapılar ve çocuğun payı
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Sayılar
+`prototypeOnly`; kod yürürlükte ama hiçbir sayı kalıcı kural değil.
+Modül anahtarı: `yaslilik_bakimi`.
+
+**Nasıl çıktı.** `docs/EKSIKLER.md` §3.2'nin son maddesi "çocuk …
+oyuncuya bakamıyor" diyordu. Koda bakıldı: o listenin dört maddesi
+çoktan kapanmış (boşanma Paket AP/2, işsizlik `ChildProgression`,
+oyuncudan para `FamilyIssueKind.cocukPara`, torunun hayatı
+`grandchildren.dart`), belge bayatmış. Kapalı kalan tek madde bu ve
+gerçekten boştu: `ElderCare` (Paket AO §35-§36) oyuncunun **yaşlı
+ebeveynine** bakmasını modelliyor, tersi hiç yazılmamıştı.
+
+**Ölçüm (250 bot hayatı).** 70 yaşını 185 hayat gördü; 1356 yaşlılık
+yılı yaşandı; 585'inde sağlık bandı düşüktü; 488'inde yetişkin çocuk,
+322'sinde yaşayan eş vardı. Oyuncuya dönük bakım satırı: **0**. Yani
+oyuncunun yaşlılığı, kurduğu aileye göre hiç değişmiyordu.
+
+**Yürürlükteki sayılar (hepsi `prototypeOnly`)**
+
+| Sayı | Değer | Nereden geldi |
+|---|---|---|
+| En küçük yaş | 70 | `ElderCare.prototypeOnlyMinParentAge` ile aynı sayı; ayrı sayı uydurulmadı |
+| Yaş tek başına yeter | 80 | `ElderCare`'in "minAge + 10" kuralının aynısı |
+| Sağlık koşulu | bandın düşük olması | `CriticalHealth.bandFor(...).isLow` — yeni eşik yazılmadı |
+| Yardımcı olabilecek kişiler | eş + 25 yaş üstü çocuk | Bakımı fiilen omuzlayabilecek yakınlar |
+| Kapatan bağ tabanı | 25 | Ayırt edici ölçü değil; oyuncunun gerçekten uzaklaştırdığı kişiyi dışarıda bırakır |
+| Yıllık bakım masrafı | asgari ücretin 0,30'u (101.070 ₺) | `ElderCare` payı 0,35; oyuncu kendi hanesinde olduğu için biraz düşük |
+| Çocuk payı | orta hâlli 0,20 · varlıklı 0,35 · çok varlıklı 0,50 | `ElderCare.siblingContribution`'ın kademeleri |
+| Çocuk payı tavanı | faturanın %60'ı | Ölçümde tavan yokken ortanca **%100** çıktı ve "para gerçekten cepten çıkar" (ECO-001) boşa düşüyordu |
+| Yanında olmanın etkisi | oyuncu +7 mutluluk, yakınlık +5±1, **yardımcı −4 mutluluk** | `ElderCare.yanindaKal`'ın (oyuncuya −6) aynadaki hâli |
+| Masrafı karşılamanın etkisi | +3 mutluluk, katkı verene yakınlık +2 | Para bakımı alır, yılın yalnızlığını almaz |
+
+**Eşik neden bağ değil.** Yaşlılıkta en yakın çocuğun bağı: min 48,
+**ortanca 100**. Bağa yaslanan bir kapı pratikte "her zaman açık"
+olurdu — Q-205 bunu zaten soruyor. Ayırt eden şey **kimin var olduğu**:
+yaşlılık yıllarının **%53'ünde** ne eş ne yetişkin çocuk var.
+
+**Ölçülen sonuç (250 hayat, üç kapı):** 756 bakım yılı — 160 "ailene
+yüklen", 332 "masrafı karşıla", 262 "kendin idare et". Modül
+açık/kapalı farkı: ölüm yaşı ortalaması 72,37 / 72,32; net servet
+ortancası 39.660.061 / 39.656.136. İkisi de gürültü: paket dengeyi
+kaydırmıyor.
+
+**Karar soruları**
+
+1. **Eşik 70 + düşük bant doğru mu?** Bugünkü hâliyle yaşlılık
+   yıllarının **%43'ünde** kart çıkıyor. Daha seyrek istenirse yaş 75'e
+   çekilebilir ya da yalnızca "hayati tehlike" bandı sayılabilir.
+   **Önerim ve varsayılanım:** olduğu gibi kalsın — eşik `ElderCare`'in
+   kendi sayılarından türedi, yeni bir denge uydurulmadı.
+2. **Çocuğun payı %60 tavanıyla doğru mu?** Alternatif: tavan yok
+   (çocuklar faturayı tamamen kapatabilir, ölçümde ortanca sonuç buydu)
+   ya da daha düşük bir tavan. **Önerim:** %60 kalsın; oyuncunun cebinden
+   her yıl bir şey çıkması ECO-001'in kuralı.
+3. **Kardeş de yanında olabilsin mi?** `ElderCare` masrafa kardeşi
+   katıyor; burada yalnızca eş ve çocuk var. Oyuncu 70'indeyken kardeşi
+   de yaşlı olduğu için bakımı omuzlaması zayıf bir varsayım.
+   **Önerim:** eş + çocukla kalsın; kardeş için ayrı bir "birbirine
+   bakan iki yaşlı kardeş" hikâyesi gerekir, o ayrı bir iş.
+4. **Çocuğun yanına taşınmak** bir kapı olmalı mı? Bugün yok. Oturulan
+   ev üç türden biri (`ResidenceKind`: aile yanında / kirada / kendi
+   evinde) ve "çocuğunun evi" dördüncü bir tür demek — yaşam gideri,
+   sigorta, döşeme ve kodek birden etkilenir. **Önerim:** V1'de
+   açılmasın; istenirse ayrı paket.
+5. **Yaşlılık içeriği bu kayda bağlanmalı mı?** Kayıt kaç yıl destek
+   görüldüğünü ve kaç yılın tek başına çevrildiğini tutuyor; `son_*`
+   havuzundaki (Paket CC) olaylar bunu henüz okumuyor. **Önerim:** bir
+   sonraki içerik turunda "üç yıldır çocuğun yanında" ya da "kimse
+   gelmiyor" izlerini okuyan olaylar yazılsın.
+
+**Yapmayacağım (onay gelmeden):** eşikleri ya da payları değiştirmek,
+dördüncü bir ev türü eklemek, sağlığa/ölüm eğrisine dokunmak.
+
+**Etkilenen kod:** `app/lib/domain/interaction/elder_support.dart`,
+`app/lib/domain/models/elder_support.dart`,
+`app/lib/ui/widgets/elder_support_card.dart`,
+`app/test/paket_cj_yaslilik_bakimi_test.dart`,
+`app/test/paket_cj_bakim_karti_test.dart`.
