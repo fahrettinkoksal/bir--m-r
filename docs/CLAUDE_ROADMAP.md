@@ -367,6 +367,19 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yerden kurulunca (`Parenthood.birthSentence`) arayan da yazan da aynı
   kalıbı kullanıyor. Bir metin sonradan değişebilen bir veri taşıyorsa
   (ad, şehir, iş), o metni **tek bir yerde** kur.
+- **Paket CH.** Olumsuz sonuç da bulgudur ve bekçisi olmalı. "Hangi
+  yıllarda hiçbir şey olmuyor?" sorusunun cevabı "hiçbiri" çıktı; buna
+  rağmen paketin çıktısı boş değil, çünkü o durumu **sabitleyen** bir
+  bekçi bıraktı: bir bandın karanlığa düşmesi (BZ/CD/CC'de tek tek
+  olaylarda yakalanan desenin bant ölçeği) artık tek bir testte
+  görünür. Ölçüp "sorun yok" demek, ölçümü atmak değil; eşiği yazıp
+  gitmek demek.
+- **Paket CH.** Bir sayıyı rapor etmeden önce "bu tavanı oyun mu koydu,
+  araç mı?" diye sor — ama cevabı **ikisi birden** olabilir. Çocukluğun
+  yıl başına 1,0 yoğunluğu yaş 1-3'te oyunun kendi tercihi (hiç eylem
+  sunmuyor, D-180), yaş 4-5'te ise aracın tabanı (oyun 32 etkileşim
+  sunuyor, bot 1-2 kullanıyor). Aynı sayının iki yarısı iki farklı
+  sebepten; tek bir cümleyle sınıflandırmak yanlış olurdu.
 
 ## Pano
 

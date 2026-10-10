@@ -569,6 +569,14 @@ class BotLifeResult {
 
   // İçerik
   final Set<String> seenEvents = <String>{};
+
+  /// Hangi yaşta hangi olaylar görüldü (Paket CH).
+  ///
+  /// `seenEvents` bir kümedir ve yaşı kaybeder; "hangi yıl hiç olay
+  /// çıkmadı" sorusu bu yüzden yanıtlanamıyordu. Burada yıl yıl kayıt
+  /// tutuluyor. Oyunun akışına dokunmaz, zar tüketmez: yalnızca
+  /// görülen olayın kimliğini yaşının altına yazar.
+  final Map<int, List<String>> eventsByAge = <int, List<String>>{};
   final Set<String> cities = <String>{};
   bool traveled = false;
   bool hadPet = false;
@@ -860,6 +868,9 @@ BotLifeResult playBotLife({
     final ActiveEvent? olay = s.pendingEvent;
     if (olay != null) {
       sonuc.seenEvents.add(olay.eventId);
+      sonuc.eventsByAge
+          .putIfAbsent(s.player.age, () => <String>[])
+          .add(olay.eventId);
       final EventChoice secim = _chooseEventChoice(
         state: s,
         event: olay,
@@ -2915,6 +2926,9 @@ bool _clearInterruptions(
     final ActiveEvent? olay = s.pendingEvent;
     if (olay == null) return true;
     sonuc.seenEvents.add(olay.eventId);
+    sonuc.eventsByAge
+        .putIfAbsent(s.player.age, () => <String>[])
+        .add(olay.eventId);
     final EventChoice secim = _chooseEventChoice(
       state: s,
       event: olay,

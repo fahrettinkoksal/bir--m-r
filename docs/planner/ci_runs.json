@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 572,
+ "total": 574,
  "runs": [
+  {
+   "id": 38067098077,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "6c5230d449c1a835884040c4b5137aef690f4ff6",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 289,
+   "event": "push",
+   "created_at": "2026-10-10T16:18:04Z",
+   "updated_at": "2026-10-10T16:40:08Z",
+   "run_started_at": "2026-10-10T16:18:04Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38067098077",
+   "display_title": "Kuyruk: Q-225 — içerideyken hayvanın bakımı ve sağlığı"
+  },
+  {
+   "id": 38067098072,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "6c5230d449c1a835884040c4b5137aef690f4ff6",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 286,
+   "event": "push",
+   "created_at": "2026-10-10T16:18:04Z",
+   "updated_at": "2026-10-10T16:45:06Z",
+   "run_started_at": "2026-10-10T16:18:04Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38067098072",
+   "display_title": "Kuyruk: Q-225 — içerideyken hayvanın bakımı ve sağlığı"
+  },
   {
    "id": 38064069286,
    "name": "Windows test sürümü",

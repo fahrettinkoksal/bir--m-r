@@ -7345,5 +7345,61 @@ hayvanı olan hükümlü yıl, yeni doğmuş bebek). Eski kodda (yeni
 yardımcılar yerinde, davranış geri alınmış) **beş testin dördü
 kırılıyor**; yalnızca yeni yardımcının kendi testi geçiyor.
 
+## Paket CH — hangi yaşlarda hiçbir şey olmuyor? (10 Ekim 2026)
+
+Üç pakettir aynı desen çıkıyordu: yazılmış içerik bir kapı yüzünden hiç
+görünmüyor (BZ dört olay, CD zincir halkaları, CC 65+). O paketler tek
+tek olaylara baktı; buradaki soru daha kaba ve oyuncuya daha yakın:
+**bir yıl hiç olaysız geçiyor mu?**
+
+Araca yaş kırılımı eklendi (`BotLifeResult.eventsByAge`): `seenEvents`
+bir kümedir ve yaşı kaybediyordu. Kayıt zar tüketmez.
+
+### Ana bulgu: boş yıl yok
+
+400 hayat, bütün arketipler. Yaş 1'den 77'ye kadar **her yaşta**
+hayatların %91-100'ünde en az bir olay çıkıyor; en kötü yaş 66 (%96).
+
+| Bant | Olaylı yıl | Yıl başına olay | Farklı olay |
+| --- | --- | --- | --- |
+| 0-9 | %90 | 1,06 | 113 |
+| 10-19 | %100 | 1,61 | 203 |
+| 20-29 | %100 | 1,75 | 219 |
+| 30-39 | %100 | 1,76 | 256 |
+| 40-49 | %100 | 1,76 | 258 |
+| 50-59 | %99 | 1,74 | 259 |
+| 60-69 | %99 | 1,71 | 270 |
+| 70-79 | %97 | 1,58 | 224 |
+| 80-89 | %89 | 1,40 | 146 |
+
+### İki şey ayrıldı
+
+1. **Yaş 0 yapısı gereği olaysız.** Motor yılın olayını yaş alırken
+   çekip yeni yaşa yazıyor; doğduğu yıl çekiliş olmuyor. **Mahsur
+   kalmış içerik yok:** havuzlarda `maxAge: 0` olan tek bir olay
+   yazılmamış, bebeklik olayları 0-2 / 0-3 / 1-3 pencereleriyle 1
+   yaşından itibaren çıkıyor.
+2. **Yaş 1-3'te oyun hiçbir eylem sunmuyor** (120 karede ortanca 0;
+   yaş 4-5'te 32, yaş 6+'da 57-77). D-180'in kademesiyle tutarlı. Yani
+   ilk dört yılda oyuncunun yapabileceği tek şey "Yaş Al" ve yıl başına
+   tam bir olay. Yeterli mi? Tasarım sorusu, kuyrukta (Q-226).
+
+### Aracın kısıtı da ölçüldü
+
+Yaş 4-5'te oyun 32 etkileşim sunarken bot yılda 1-2 tanesini
+kullanıyor; ek olay eşiği üç ilerleme adımı (D-125). Yani çocukluğun
+1,06'lık yoğunluğu **oyunun tavanı değil, aracın tabanı** — bu yüzden
+bekçideki bütün iddialar taban, tavan yok.
+
+### Bekçi
+
+`test/paket_ch_yas_bandi_yogunlugu_test.dart` (200 hayat, 30 sn): hiçbir
+yaş (1-70) hayatların %85'inden azında olaysız kalmayacak · 10-69
+bantlarında yıl başına en az 1,30 olay · çocukluk bandında en az 0,90 ·
+her bantta en az 60 (çocukluk) / 120 (yetişkin) farklı olay görülecek.
+**Isırdığı gösterildi:** `prototypeOnlyMaxExtraEventsPerAge` 1 → 0
+yapıldığında yetişkin yoğunluğu 1,75 → 1,00'e düşüyor ve test kırmızı
+yanıyor.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
