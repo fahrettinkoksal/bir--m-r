@@ -7894,3 +7894,87 @@ içinde kişi çözümünü koşul denetiminden sonraya almak. Aday kümesini
 değiştirmez ama bütün tohumlu ölçümleri bir kez kaydırır; o yüzden
 kendi paketi ve kendi ölçüm turu olacak (`docs/CLAUDE_ROADMAP.md`,
 Paket BO).
+
+### Q-210 — Paket BO: motorun zar sözleşmesi ve erişilebilirlik süzgeci
+
+**Durum: karar verildi ve uygulandı (Claude, devredilen yetkiyle,
+9 Ekim 2026).** Bu bir **motor düzeltmesidir**, oyun kuralı değil:
+`DECISIONS.md`'ye dokunulmadı, hiçbir onaylı sayı değişmedi.
+
+**Sorun (ölçülmüş).** `EventEngine._pick` aday taramasında kişi çözümünü
+koşul denetiminden **önce** yapıyordu. Kişi çözümü `rng` tüketir;
+dolayısıyla 40 yaşın olayı, 7 yaşındaki bir hayatta hiç çıkamayacağı
+hâlde zar sırasını ilerletiyordu. Sonuç: havuza tek bir olay eklemek
+bütün tohumlu ölçümleri kaydırıyordu. Paket BM ve BN'de beş bekçi testi
+yalnızca bu yüzden kırıldı; hiçbiri gerçek bir oyun hatası değildi.
+Bekçinin kırılması normalleşirse bekçi işe yaramaz.
+
+**Karar 1 — tarama sırası.** Yeni sıra: (1) ucuz kapılar (modül,
+görülme, tekrar aralığı), (2) kişiden bağımsız koşullar, (3) kişi
+**adayları** — zar tüketmeden, (4) ağırlıklı çekiliş: **bir** zar,
+(5) yalnızca kazanan olayın kişisi: en çok bir zar. Yani uygun olmayan
+olay eklemek akışa hiç dokunmaz.
+
+**Karar 2 — `requireReachable` artık aday süzgeci.** Eskiden koşul
+`_matches` içinde, kişi **çekildikten sonra** denetleniyordu: başka
+şehirdeki arkadaş çekilirse olay eleniyordu, aynı şehirde erişilebilir
+bir arkadaş olsa bile. D-093 tam bu hatayı "ilgilenilmeyen yakın"
+seçicisinde kapatmış, öbür dalı açık bırakmıştı. Koşul artık seçicinin
+içinde; kilitli kimlikte (hikâye kişisi, gezi arkadaşı) seçim olmadığı
+için davranış aynı kalıyor — kişi erişilemezse olay çıkmıyor.
+
+**Ölçüm — denge kaymadı.** İki bağımsız tohum bloğunda 400'er hayat,
+dört arketip (`casual`, `family`, `career`, `investor`):
+
+| Ölçü | Blok 1 eski → yeni | Blok 2 eski → yeni |
+| --- | --- | --- |
+| Ortalama ölüm yaşı | 73,00 → 72,91 | 73,05 → 73,37 |
+| Evlenen | %56 → %53 | %54 → %55 |
+| Çocuklu | %40 → %38 | %40 → %40 |
+| Üniversite | %58 → %54 | %54 → %55 |
+| Ev sahibi | %61 → %59 | %61 → %63 |
+| Medyan servet | 49,3M → 50,4M | 44,9M → 47,9M |
+| Hayat başına farklı olay | 97,9 → 97,8 | 98,5 → 99,3 |
+| Erişilen farklı olay (havuz kapsamı) | 498 → 499 | 499 → 502 |
+
+Sapmanın **yönü bloklar arasında ters döndü**; sistematik etki yok,
+tohum gürültüsü var. Tek tutarlı işaret havuz kapsamının +1 ve +3
+artması: erişilebilirlik süzgeci birkaç olayı açıyor — beklenen yön.
+(İlk 160 hayatlık turda medyan servet %18 kaymış görünüyordu; 400
+hayatta fark %2'ye indi. Ölçüyü büyütmeden "değişmedi" denmez.)
+
+**Bekçi.** `app/test/paket_bo_zar_bagimsizligi_test.dart`: uygun
+olmayan 60 olay eklenmiş havuz 320 durumda birebir aynı sonucu
+veriyor; erişilebilir arkadaş varken olay 30 tohumun hepsinde çıkıyor
+ve hep erişilebilir kişi seçiliyor; tek arkadaş erişilemezse olay hiç
+çıkmıyor; `debugEligibleIds` tohumdan bağımsız. Bu bekçi **eski
+motorda iki testten kalıyor** — yani neyi koruduğu kodda kanıtlı.
+
+**Karar 3 — okul öğretmensiz kalmaz.** Zar sırası kayınca sekiz tohumlu
+sınıf testi düştü ve gerçek bir boşluk çıktı: bir kademede tanınan
+öğretmen **bir** kişi (`prototypeOnlyTeacherCount = 1`); o kişi vefat
+edince yerine kimse gelmiyordu, oyuncu o kademeyi öğretmensiz
+bitiriyordu. Öğretmen 28-58 yaş arasında üretiliyor, yıllık ölüm
+ihtimali binde 1,2-4 — yani tohum başına ~%1. Test bir kuralı değil
+**kurayı** ölçüyordu. Eşik gevşetilmedi, ürün tarafı düzeltildi: ölüm
+turundan **sonra** okul öğretmensizse yerine yeni öğretmen gelir ve
+günlüğe satır düşer ("Vefat eden öğretmeninin yerine … geldi."). Vefat
+eden kayıt silinmez. Modül anahtarı verilmedi: bu bir boşluk kapatma,
+beğenilip beğenilmeyecek bir özellik değil — öğretmensiz sınıf oyunun
+kendi kuralına aykırı.
+
+**Karar 4 — smoke testi takılmayı yutmayacak.** `ui_smoke_life_test`
+"arayüzden en az on yıl ilerlenebilmeli" diyor ama döngü takılınca
+sessizce çıkıyordu: on yılı geçmiş bir hayatta arayüz 65 yaşında
+kilitlense bile test yeşil kalıyordu. Ölçüldü: 10 hayatın **2'sinde**
+duruşma penceresi modal kalıyor ve "Yaş Al" dokunuşu pencereye gidiyor.
+Karar: takılma ile ölüm ayrıldı (ölüm → başka tohum, takılma → test
+hemen düşer ve kapalı kapıyı yazar) ve duruşma penceresi smoke akışında
+arayüzden kapatılıyor. Bekçi gevşetilmedi, sertleştirildi.
+
+**Geri alma yolu.** Modül anahtarı yok: bunlar motor ve tutarlılık
+düzeltmesi, özellik değil. Geri almak = Paket BO commit'ini geri almak
+(`app/lib/domain/events/event_engine.dart`,
+`app/lib/domain/generation/life_progression.dart`,
+`app/lib/domain/generation/school_people.dart`). Geri alınırsa bekçi
+testi de düşer ve tohumlu ölçümler yeniden kayar.
