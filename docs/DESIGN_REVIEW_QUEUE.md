@@ -8176,3 +8176,65 @@ Bu, Paket BM'de yazılmış dersin uygulanmamış yarısıydı.
 
 **Geri alma yolu.** `test/support/player_bot.dart` içindeki seçim
 satırı. Ürün kodu değişmedi.
+
+### Q-215 — Diğer biyolojik ebeveynin vefatı bekleyen bebeği yok saymalı mı?
+
+**Durum: prototipte düzeltildi, Faho'nun onayını bekliyor (Claude,
+10 Ekim 2026).** `DECISIONS.md`'ye yazılmadı; davranış `prototypeOnly`
+sayılıyor ve tek bir koşulda duruyor.
+
+**Nasıl çıktı.** Q-214'ün ölçümünde gebelik testi 8/9 verdi. Teşhiste
+dokuzuncu karede hamile olan kız arkadaşın o yıl vefat ettiği, oyunun
+günlüğe "Bekleyen bebek dünyaya gelemedi." yazıp gebeliği kapattığı
+görüldü. O kare **doğruydu**: bebeği taşıyan kişi vefat etmişti.
+
+**Asıl soru.** Kuralı yazan satır bebeği kimin taşıdığına bakmıyordu:
+
+```dart
+if (diger == null || !diger.isAlive) → 'Bekleyen bebek dünyaya gelemedi.'
+```
+
+Yani **kadın oyuncu hamileyken babanın vefatı da** bebeği doğmamış
+yapıyordu. Oyuncunun kendi bedeninde taşıdığı bebek, başka birinin
+ölümüyle yok sayılıyor.
+
+**Mevcut kesin kurallar.** `DECISIONS.md` bu konuda sessiz. İlgili
+kurallar: D-046 (çocuğun özellikleri iki biyolojik ebeveynden gelir,
+olmayan veri **uydurulmaz**), D-047 (çocuğun iki biyolojik ebeveyninin
+kimliği doğru kaydedilir), D-037 (sahte akrabalık üretilmez).
+
+**Seçenekler.**
+
+1. **Taşıyan tarafa göre ayır (önerim ve uygulanan varsayılan).** Kayıt
+   silinmişse ya da bebeği taşıyan taraf vefat ettiyse doğum olmaz
+   (eski davranış). Bebeği **oyuncu** taşıyorsa diğer ebeveynin vefatı
+   doğumu engellemez: çocuk vefat etmiş ebeveynin **mevcut kaydına**
+   bağlanır — uydurma ebeveyn yazılmaz, D-046/D-047 korunur. Günlüğe
+   "… bebeğinin dünyaya gelişini göremedi." satırı düşer ve doğum
+   bildirimi vefat etmiş ebeveyni "bunu bekliyordunuz" diye anmaz.
+2. **Eski kural kalsın.** Hangi taraf taşıyorsa taşısın, diğer
+   ebeveynin vefatı gebeliği kapatır. Tek satır, basit; ama oyuncunun
+   kendi hamileliği başkasının ölümüne bağlı kalır.
+3. **Kayıt olmasa da bebek doğsun.** Reddettim: bağlanacak ebeveyn
+   kaydı yoksa çocuğun diğer ebeveyni **uydurulmak** zorunda kalır,
+   bu D-046 ve D-037'ye aykırı.
+
+**Gerekçem.** Bu bir denge sayısı değil, bir tutarlılık sorunu: aynı
+satır iki farklı durumu kapatıyordu ve bunlardan biri yanlıştı.
+Seçenek 1 yeni bir sayı getirmiyor, yeni bir kapı açmıyor; yalnızca
+mevcut kuralı "bebeği kim taşıyor" sorusuna bağlıyor.
+
+**Açık bıraktığım alt sorular (karar değil, gözlem).**
+· Babasını hiç görmemiş çocuk için ekranda ayrı bir satır/işaret olsun
+  mu (ilişkiler ekranında "babası doğumundan önce vefat etti")?
+· Hamilelik sırasındaki ebeveyn vefatı oyuncunun mutluluğuna ayrı bir
+  etki yapmalı mı? Şimdilik yalnızca vefatın kendi etkisi var, ek bir
+  ceza yazmadım.
+· Dul kalan oyuncunun doğumdan sonraki hane/velayet durumu mevcut
+  altyapıdan geliyor; ayrı bir kural yazmadım.
+
+**Geri alma yolu.** `lib/domain/generation/life_progression.dart`
+içindeki `_applyBirth` ayrımı (üç satır) ve `Parenthood`'un
+`allowDeceasedCoParent` bayrağı. Bayrak varsayılan olarak **kapalı**:
+onu kaldırmak eski davranışa döner. Bekçi:
+`test/paket_bs1_vefat_eden_ebeveyn_test.dart` (8 test).
