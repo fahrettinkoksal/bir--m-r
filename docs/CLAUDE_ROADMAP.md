@@ -272,6 +272,14 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   "görülmedi" listesi politikaya ve tohuma bağlıydı. Gerçek şüpheli,
   **iki politikada da** kaçan olaydır; birinde kaçan olay yalnızca
   botun tercihidir.
+- **Paket CE.** Derin bir zincir, kısa bir pencerede **matematik
+  gereği** tamamlanmaz. Futbol kulübünde üyelik ortalama 3,9 yıl sürüyor
+  ve o süre boyunca 1,6 kulüp olayı çıkıyor; oysa havuzda 14 futbol
+  olayı var ve ikinci halkalar aynı pencerede ikinci bir çekiliş
+  istiyor. Yani içerik, motorun hiç üretmediği bir yoğunluğa göre
+  yazılmış. İçerik yazarken "kaç olay var" değil **"oyuncu o pencerede
+  kaç çekiliş alıyor"** sorusunu sor; ikisi tutmuyorsa ya olay
+  garantilenir ya zincir tek olayın içine gömülür.
 - **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
   değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
   çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)

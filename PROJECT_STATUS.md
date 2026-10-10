@@ -7159,5 +7159,41 @@ kaydedilen her dal gerçekten o olayın bir seçeneği, kapsam modu bütün
 dalları gezilen olay sayısını gerçekten artırıyor (60 hayatta en az
 +10; ölçülen 150 hayatta +72).
 
+## Paket CE — kulüp zincirinin derinliği pencereye sığmıyor (10 Ekim 2026)
+
+Paket CD'nin iki modlu taraması "iki modda da kaçan" altı olay
+bırakmıştı. Altısının hunisi tek tek ölçüldü (150 hayat, kapsam açık):
+
+| Olay | Kök sebep |
+| --- | --- |
+| `kulup_futbol_antrenor_barisma` | iz 1/150 → uygun 1 → görüldü 0 |
+| `kulup_futbol_kritik_gol` | iz 2/150 (ilk 11'e çıkan) → görüldü 0 |
+| `kulup_futbol_penalti_sonrasi` | iz **0**: penaltı kaçırma hiç çıkmamış |
+| `kulup_secimin_sonucu` | iz 1 → görüldü 1 (spor kohortunda açıldı) |
+| `ilk_yil_kardes_kiskancligi` | iz gerekmiyor; uygun 24 → görüldü 1 (**çekiliş kaybı**) |
+| `suc_ceza_odemesi` | sabıkalı 62; uygun 15 → görüldü 3 (**çekiliş kaybı**) |
+
+Dördünde darboğaz aynı ve asıl bulgu burada:
+
+| Ölçü | Değer |
+| --- | --- |
+| Futbol takımına giren hayat | 29/150 spor (karışık arketipte 16/150) |
+| En uzun üyelik (ortalama) | **3,9 yıl** |
+| O hayatlarda görülen futbol olayı | **1,6** (en çok 5) |
+| Futbol havuzundaki olay sayısı | 14 |
+
+**Bu bir hata değil, yoğunluk uyuşmazlığı.** İkinci halkalar hem ilk
+halkanın izini hem **aynı pencerede ikinci bir çekilişi** istiyor;
+3,9 yılda 1,6 kulüp olayı çıkıyor. Paket BX'in 6× önceliği tek halkayı
+öne çekti, yoğunluğu değiştirmedi. Çözüm bir mekanik kararı ve
+**Q-224'te Faho'yu bekliyor** (önerim: üyelik sürerken yılda bir kulüp
+olayı garanti edilsin).
+
+**Kendi başıma yapmadığım şey:** ne ağırlık büyüttüm ne zinciri
+kısalttım. Ölçümün yöntemi ve havuzun bütünlüğü bekçiye bağlandı:
+`test/paket_ce_kulup_zinciri_test.dart` (3 test) — yetim halka yok,
+üyelik penceresi gerçekten var (ortalama ≥2 yıl), kulüp içeriği üyeye
+ulaşıyor.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
