@@ -6458,5 +6458,69 @@ yol altına indi. Bekçi artık bunu denetliyor: sönümleme kapatılırsa ya
 da oranı sessizce düşürülürse hiçbir yol tabana inemez ve test kırmızı
 verir.
 
+## Paket BW/0 — ad çakışmasının kaynağı araçta çıktı (10 Ekim 2026)
+
+Paket BV, çocuğu olan hayatların ~%14'ünde çocuğun hanedeki yaşayan
+biriyle aynı adı taşıdığını ölçmüş ve **kaynağı bulamamıştı**: sınıf ve
+iş arkadaşı üretiminde koruma vardı, bebek adlandırmasında da vardı.
+Bu paket kaynağı aradı ve buldu.
+
+### Teşhis: 52/63 çakışma çocuk-çocuk çakışmasıydı
+
+Çakışan kişinin **ilişkisini** sayan bir ölçüm (300 hayat) tabloyu tek
+turda açtı:
+
+| Çakışan taraf | Sayı |
+| --- | --- |
+| çocuk ↔ **çocuk** | 52 |
+| çocuk ↔ sınıf arkadaşı | 9 |
+| çocuk ↔ kardeş | 1 |
+| çocuk ↔ yeğen | 1 |
+
+Örnekler de aynı yere bakıyordu: Nehir, Deniz, Can, Eylül, Aras, Ada.
+`PlayerBot` her bebeği **sekiz adlı sabit bir listeden** adlandırıyordu
+(`Ada, Deniz, Ege, Mira, Aras, Nehir, Can, Eylül`). İki çocuklu bir
+hayatta aynı adın tekrarı böylece matematiksel olarak kaçınılmazdı;
+üç çocukta ihtimal üçte bire çıkıyordu. Yani **oyun değil ölçüm aracı**
+çakışma üretiyordu — Paket BS/0 ile aynı sınıf hata (bot kısıtı oyunun
+kuralı gibi okunuyor).
+
+Oyunun kendi adlandırması (`Parenthood.haveChild`) kayıttaki adları
+zaten dışlıyordu. Bot da artık aynısını yapıyor: havuz oyunun havuzu,
+dışlanan adlar kayıttaki adlar.
+
+### Oyun tarafında gerçekten eksik olan üç yol
+
+Aynı tarama kişi üreten yolları da gezdi. Korumasız kalan üç yer
+bulundu ve kapatıldı:
+
+| Yol | Durum |
+| --- | --- |
+| `Romance.start` (sevgili) | filtresizdi → `pickFreshName` |
+| `Friendship.startSchoolFriend` | filtresizdi → `pickFreshName` |
+| `Friendship.startAcquaintance` | filtresizdi → `pickFreshName` |
+| `Neighbours._generate`, `SchoolPeople`, `InLaws`, üvey aile, bebek adı | koruma **zaten vardı** |
+
+Hayat üretimindeki **ebeveyn, kardeş, büyükanne/büyükbaba, amca/hala**
+adlarına yine dokunulmadı: o kural Q-198 #6'da Faho'nun kararını
+bekliyor.
+
+### Ölçüm (300 hayat, aynı tohumlar)
+
+| Ölçü | Paket BV öncesi | Paket BV sonrası | Paket BW/0 sonrası |
+| --- | --- | --- | --- |
+| İki yaşayan kişi aynı adda | 283/300 | 105/300 | **25/300** |
+| Çocuğu hanedeki bir adı taşıyan hayat | — | 28/99 | **0/99** |
+
+### Bekçi
+
+`test/paket_bw_ad_cakismasi_test.dart` (3 test): 60 hayatta çocuk
+hanedeki yaşayan bir adı taşımıyor (tavan 1 hayat — havuz tükenme
+kaçışı belgelendi), 60 hayatta aynı adı taşıyan iki yaşayan kişi
+dörtte birin altında kalıyor, ve **kalabalık bir bot hayatından
+alınan kayıt üzerinde** sevgili/okul arkadaşı/tanışıklık üretimi 25
+tohumda kayıttaki bir adı seçmiyor. Durum kurulmadı; kalabalık kayıt
+oynanan hayatlardan arandı.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

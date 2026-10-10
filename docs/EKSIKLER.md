@@ -562,10 +562,16 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   çıkarıldı ve gelin/damat ile torun üretiminde eksik olan "kullanılan
   adı seçme" koruması eklendi: 283/300 → 106/300. Hayat üretimindeki
   ebeveyn/kardeş adları Q-198 #6'da Faho'nun kararını bekliyor.
-- **Çocuk-hane ad çakışmasının kalan %14'ü (açık).** Paket BV'den sonra
-  çocuğu olan hayatların yaklaşık yedide birinde çocuk, hanedeki
-  yaşayan biriyle aynı adı taşıyor. Sınıf ve iş arkadaşı üretiminde
-  koruma var; kaynağı henüz bulunmadı. Not Q-198 #6'ya yazıldı.
+- ~~**Çocuk-hane ad çakışmasının kalan %14'ü.**~~ **Kaynağı bulundu ve
+  düzeltildi (Paket BW/0, 10 Ekim 2026) — kaynak oyun değil ÖLÇÜM
+  ARACIYDI.** Çakışmaların 52/63'ü çocuk-çocuk çakışmasıydı: `PlayerBot`
+  her bebeği sekiz adlı sabit bir listeden adlandırıyordu, iki çocuklu
+  hayatta tekrar kaçınılmazdı. Bot artık oyunun havuzunu ve kayıttaki
+  adların dışlanmasını kullanıyor. Aynı turda oyun tarafında gerçekten
+  korumasız olan üç yol da kapatıldı (sevgili, okul arkadaşı,
+  tanışıklık). Çocuğu hanedeki bir adı taşıyan hayat 28/99 → **0/99**;
+  iki yaşayan kişinin aynı adı taşıması 105/300 → **25/300**.
+  Ebeveyn/kardeş adları hâlâ Q-198 #6'da karar bekliyor.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

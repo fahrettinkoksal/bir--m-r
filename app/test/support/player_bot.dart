@@ -41,6 +41,7 @@ import 'package:bir_omur/domain/models/finger_profile.dart';
 import 'package:bir_omur/domain/models/pregnancy.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/item_catalog.dart';
+import 'package:bir_omur/data/name_pool.dart';
 import 'package:bir_omur/domain/career/craft_mastery.dart';
 import 'package:bir_omur/domain/career/job_market.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
@@ -85,6 +86,7 @@ import 'package:bir_omur/domain/models/market_incident.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/domain/models/pending_trial.dart';
+import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/investment.dart';
@@ -877,7 +879,7 @@ BotLifeResult playBotLife({
       // ilerleniyor; isim vermek zorunlu değil.
       for (final Person bebek in s.people) {
         if (!bebek.isAlive || !c.canNameChild(bebek.id)) continue;
-        c.nameChild(bebek.id, _botChildName(bebek, rng));
+        c.nameChild(bebek.id, _botChildName(s, bebek, rng));
         break;
       }
       _handleSchoolClubs(c, profile, rng, sonuc);
@@ -3006,11 +3008,31 @@ void _collectFinalMetrics(GameController c, BotLifeResult sonuc) {
 
 /// Bebeğe verilecek ad. Mevcut adından **farklı** olmalı, yoksa isim
 /// penceresi kapanmıyor.
-String _botChildName(Person baby, Random rng) {
-  const List<String> havuz = <String>[
-    'Ada', 'Deniz', 'Ege', 'Mira', 'Aras', 'Nehir', 'Can', 'Eylül',
-  ];
-  final List<String> uygun =
-      havuz.where((String ad) => ad != baby.firstName).toList(growable: false);
-  return uygun[rng.nextInt(uygun.length)];
+///
+/// **Paket BW/0 — sekiz adlı sabit liste ölçümü bozuyordu.** Bot her
+/// bebeği aynı sekiz addan biriyle adlandırıyordu (Ada, Deniz, Ege,
+/// Mira, Aras, Nehir, Can, Eylül). İki çocuklu bir hayatta aynı adın
+/// tekrarı böylece matematiksel olarak kaçınılmazdı ve ölçüm bunu
+/// "oyun çocuğa hanedeki bir adı veriyor" diye okuyordu: Paket BV'nin
+/// açık bıraktığı %14'lük çakışmanın 52/63'ü çocuk-çocuk çakışmasıydı,
+/// yani **botun kendi listesi**.
+///
+/// Oyunun kendi adlandırması (`Parenthood.haveChild`) kayıttaki adları
+/// zaten dışlıyor. Bot artık aynısını yapıyor: havuz oyunun havuzu,
+/// dışlanan adlar kayıttaki adlar. Böylece araç oyunun üretmediği bir
+/// çakışmayı üretmiyor.
+String _botChildName(GameState state, Person baby, Random rng) {
+  final List<String> havuz =
+      baby.gender == Gender.kadin ? kadinIsimleri : erkekIsimleri;
+  final Set<String> kullanilan = <String>{
+    state.player.firstName,
+    for (final Person p in state.people) p.firstName,
+  };
+  final List<String> bos = havuz
+      .where((String ad) => ad != baby.firstName && !kullanilan.contains(ad))
+      .toList(growable: false);
+  // Havuz tükendiyse ad değiştirilmez: `ChildNaming.rename` aynı adı
+  // değişiklik saymaz, bot da sonucu ne olursa olsun ilerler.
+  if (bos.isEmpty) return baby.firstName;
+  return bos[rng.nextInt(bos.length)];
 }

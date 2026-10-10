@@ -221,6 +221,13 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   **kural** gibi görünür: 20 isimle ve medyan 58 kişiyle iki yaşayan
   kişinin aynı adı taşıması 283/300 hayatta oluyordu. Önce havuzun
   kapasitesini ölç, sonra kural tartış (Q-198 #6).
+- **Paket BW/0.** Bir bulguyu kapatmadan önce **çakışan tarafın kim
+  olduğunu say**. "Çocuk hanedeki bir adı taşıyor" bulgusunun 52/63'ü
+  çocuk-çocuk çakışmasıydı ve sebebi oyun değil, botun sekiz adlı
+  sabit isim listesiydi. Ölçüm aracının kendi kısıtı üç pakettir
+  oyunun kuralı gibi okunuyor (BS/0 arkadaşlık, BU komşu, BW ad):
+  yeni bir oranı rapor etmeden önce "bu sayıyı oyun mu üretti, araç
+  mı?" sorusunu sor.
 - **Paket BV.** İçerik değişikliği de zar kaydırır: isim havuzunu
   büyütmek, piyasa tohumu oyuncunun **adından** türediği için bütün
   işletme/yatırım yollarını kaydırdı ve tek tohuma dayanan dört bekçiyi
