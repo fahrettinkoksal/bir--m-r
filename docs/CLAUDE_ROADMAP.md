@@ -187,6 +187,12 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   özet ekranı gösterir, alt sekme yoktur. Bot hayatından kare alan her
   test canlı kare istemeli; yoksa düşen şey ekran değil, karenin
   kendisi olur.
+- **Paket BS/1.** Düşen bir testin teşhisi testin iddiasını haklı
+  çıkarsa bile orada durma: aynı satırın **başka durumda** ne yaptığına
+  bak. "Diğer ebeveyn hayatta değilse doğum olmaz" ölçülen karede
+  doğruydu (hamile olan kişi vefat etmişti) ama aynı satır kadın
+  oyuncunun bebeğini de yok sayıyordu. Tek koşulun iki farklı durumu
+  kapattığı yerde biri genellikle yanlıştır.
 - **Paket BP.** Ölçüm botu bir özelliği hiç kullanmıyorsa, o özelliğin
   içeriği "erişilemez" görünür. Bot oturmak için aldığı eve
   taşınamıyordu; düzeltmeden önce yeni havuz 7/25 hayatta görünüyordu,

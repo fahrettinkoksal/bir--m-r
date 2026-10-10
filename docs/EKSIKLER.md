@@ -518,6 +518,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   döküm aynı kalıyor. Test aynı zamanda **sıkılaştı**: eskiden
   ulaşılmayan hedef yaş sessizce atlanıyordu, artık her hedef yaşın
   canlı karesi zorunlu.
+- ~~**Diğer biyolojik ebeveynin vefatı, oyuncunun kendi hamileliğini
+  de siliyordu.**~~ **Düzeltildi (Paket BS/1, 10 Ekim 2026).** Kuralı
+  yazan tek satır (`_applyBirth`) bebeği kimin taşıdığına bakmıyordu:
+  hamile olan partner vefat ettiğinde doğru davranıyor, kadın oyuncu
+  hamileyken babanın vefatında ise bebeği doğmamış yapıyordu. Kural
+  ayrıldı: kayıt silinmişse ya da taşıyan taraf vefat ettiyse doğum
+  olmuyor (eski davranış), bebeği oyuncu taşıyorsa doğum oluyor ve
+  çocuk vefat etmiş ebeveynin mevcut kaydına bağlanıyor (uydurma
+  ebeveyn yok, D-046/D-047). Prototip davranışı; karar kaydı Q-215.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

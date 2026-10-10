@@ -6188,5 +6188,51 @@ bakmalı.**
 
 Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-214.
 
+## Paket BS/1 — vefat eden ebeveyn bekleyen bebeği yok saymasın (10 Ekim 2026)
+
+Paket BS/0'ın teşhisi bir yan bulgu bıraktı. Gebelik testinin düştüğü
+kare doğruydu (hamile olan kız arkadaş vefat etmişti, bebek dünyaya
+gelemezdi) ama kuralı yazan satır bebeği **kimin taşıdığına
+bakmıyordu**:
+
+```dart
+if (diger == null || !diger.isAlive) → 'Bekleyen bebek dünyaya gelemedi.'
+```
+
+Yani kadın oyuncu hamileyken **babanın** vefatı da bebeği doğmamış
+yapıyordu: oyuncunun kendi hamileliği başkasının ölümüyle siliniyordu.
+
+### Kural taşıyan tarafa göre ayrıldı
+
+| Durum | Davranış |
+| --- | --- |
+| Ebeveynin kaydı silinmiş | Doğum olmaz, günlüğe yazılır (eski) |
+| Bebeği **taşıyan taraf** vefat etti | Doğum olmaz, günlüğe yazılır (eski) |
+| Bebeği **oyuncu** taşıyor, diğer ebeveyn vefat etti | **Bebek doğar** |
+
+Doğan çocuk vefat etmiş ebeveynin **mevcut kaydına** bağlanır; uydurma
+ebeveyn yazılmaz (D-046, D-047) ve kayıt silinmez. Günlüğe "… bebeğinin
+dünyaya gelişini göremedi." satırı düşer; doğum bildirimi vefat etmiş
+ebeveyni "sen ve X bunu bekliyordunuz" diye anmaz.
+
+`Parenthood` tarafında kapı **açıkça** isteniyor:
+`allowDeceasedCoParent` bayrağı varsayılan olarak kapalı, yalnızca
+`_applyBirth` bu izni veriyor. Oyuncunun hiçbir düğmesi vefat etmiş
+biriyle çocuk üretemez.
+
+### Bekçiler
+
+`test/paket_bs1_vefat_eden_ebeveyn_test.dart` (8 test): bebek doğuyor,
+soyadı vefat etmiş babadan geliyor, kayıt silinmiyor, günlük satırı
+yazılıyor, bildirim vefat etmiş ebeveyni bekleyen gibi anmıyor, taşıyan
+taraf vefat ettiğinde doğum **olmuyor**, kaydı silinmiş ebeveynde doğum
+olmuyor, varsayılan `Parenthood` yolu kapalı kalıyor ve doğan çocuk
+kapat-aç ile korunuyor. `pregnancy_test.dart`'taki eski tek iddia
+silinmedi, **ikiye ayrıldı**: artık erkek oyuncuyla kurulup "taşıyan
+taraf vefat etti" durumunu denetliyor.
+
+**Bu bir prototip davranışıdır.** `DECISIONS.md`'ye yazılmadı; soru,
+önerim ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-215'te.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

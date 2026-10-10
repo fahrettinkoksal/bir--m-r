@@ -74,13 +74,22 @@ class Parenthood {
   /// Evlilik zorunlu değildir (D-047): eş yoksa **hayattaki sevgili**
   /// değerlendirilir. Akraba hiçbir durumda bu listeye girmez; yalnızca
   /// romantik bağlar sayılır.
-  static Person? coParent(GameState state, {String? preferredId}) {
+  static Person? coParent(
+    GameState state, {
+    String? preferredId,
+    bool allowDeceasedCoParent = false,
+  }) {
     // Hamilelik kaydında diğer ebeveyn belliyse **o** kullanılır: bebek
     // bekleme sırasında ayrılık olsa bile başka birinin çocuğu olmaz
     // (Paket 26).
     if (preferredId != null) {
       final Person? kayitli = state.personById(preferredId);
-      if (kayitli != null && kayitli.isAlive) return kayitli;
+      if (kayitli == null) return null;
+      // **Vefat etmiş ebeveyn (Paket BS/1).** Bebeği oyuncu taşıyorsa,
+      // diğer biyolojik ebeveynin vefatı bebeği yok saymaz: kayıt
+      // yerinde duruyor, çocuk o kayda bağlanır. Bu izin **açıkça**
+      // istenir; varsayılan davranış eskisi gibidir.
+      if (kayitli.isAlive || allowDeceasedCoParent) return kayitli;
       return null;
     }
     if (state.isMarried) return state.spouse;
@@ -95,8 +104,13 @@ class Parenthood {
     GameState state, {
     String? coParentId,
     bool twin = false,
+    bool allowDeceasedCoParent = false,
   }) {
-    final Person? partner = coParent(state, preferredId: coParentId);
+    final Person? partner = coParent(
+      state,
+      preferredId: coParentId,
+      allowDeceasedCoParent: allowDeceasedCoParent,
+    );
     if (partner == null) {
       return 'Çocuk sahibi olmak için eşin ya da sevgilin olmalı.';
     }
@@ -166,9 +180,14 @@ class Parenthood {
     Random rng, {
     String? coParentId,
     bool twin = false,
+    bool allowDeceasedCoParent = false,
   }) {
-    final String engel =
-        blockReason(state, coParentId: coParentId, twin: twin);
+    final String engel = blockReason(
+      state,
+      coParentId: coParentId,
+      twin: twin,
+      allowDeceasedCoParent: allowDeceasedCoParent,
+    );
     if (engel.isNotEmpty) {
       return FamilyResult(
         state: state,
@@ -193,7 +212,11 @@ class Parenthood {
     // Soyadı: prototipte çocuk **babanın** soyadını alır. Evlenince eşin
     // soyadının değişip değişmeyeceği ayrı bir tasarım sorusudur (Q-063);
     // kimsenin kaydı bu yüzden değiştirilmez.
-    final Person es = coParent(state, preferredId: coParentId)!;
+    final Person es = coParent(
+      state,
+      preferredId: coParentId,
+      allowDeceasedCoParent: allowDeceasedCoParent,
+    )!;
     final String soyad = state.player.gender == Gender.erkek
         ? state.player.lastName
         : es.lastName;

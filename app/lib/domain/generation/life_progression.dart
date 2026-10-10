@@ -2088,15 +2088,33 @@ class LifeProgression {
   /// Süren hamileliği doğumla sonuçlandırır (Paket 26).
   ///
   /// Bebek **bir sonraki yaşta** doğar. Diğer ebeveyn hamilelik kaydında
-  /// tutulan kişidir; uydurma bir ebeveyn yazılmaz. O kişi artık hayatta
-  /// değilse ya da kayıttan düşmüşse doğum gerçekleşmez ve hamilelik
-  /// sessizce kapanmaz: günlüğe yazılır.
+  /// tutulan kişidir; uydurma bir ebeveyn yazılmaz.
+  ///
+  /// **Vefat, bebeği kime bağlı olduğuna göre etkiler (Paket BS/1).**
+  /// Eski kural "diğer ebeveyn hayatta değilse doğum olmaz"dı ve bebeği
+  /// kimin taşıdığına bakmıyordu. Ölçümde çıkan örnek doğruydu — hamile
+  /// olan kız arkadaş vefat etmişti, bebek doğamazdı — ama aynı satır
+  /// kadın oyuncunun bebeğini de yok sayıyordu: babanın vefatı bebeği
+  /// doğmamış yapıyordu. Kural ayrıldı:
+  ///
+  /// · Kayıtta hiç yoksa (silinmiş kayıt): doğum olmaz, günlüğe yazılır.
+  /// · Bebeği **taşıyan taraf** vefat ettiyse: doğum olmaz, günlüğe
+  ///   yazılır.
+  /// · Bebeği **oyuncu taşıyorsa** ve diğer ebeveyn vefat ettiyse:
+  ///   bebek doğar, çocuk o kayda bağlanır (uydurma ebeveyn yazılmaz,
+  ///   D-047/D-046) ve günlüğe ebeveynin bunu göremediği yazılır.
+  ///
+  /// Bu bir prototip davranışıdır; `DECISIONS.md`'ye yazılmadı (Q-215).
   GameState _applyBirth(GameState state, int newAge) {
     final Pregnancy? bekleyen = state.pregnancy;
     if (bekleyen == null) return state;
 
     final Person? diger = state.personById(bekleyen.partnerId);
-    if (diger == null || !diger.isAlive) {
+    final bool digerVefat = diger != null && !diger.isAlive;
+    // Bebeği taşıyan taraf vefat ettiyse bebek dünyaya gelemez.
+    final bool tasiyanVefat =
+        digerVefat && bekleyen.expecting == ExpectingParty.partner;
+    if (diger == null || tasiyanVefat) {
       return _logLine(
         state.copyWith(pregnancy: null),
         newAge,
@@ -2108,6 +2126,7 @@ class LifeProgression {
       state.copyWith(pregnancy: null),
       _rng,
       coParentId: bekleyen.partnerId,
+      allowDeceasedCoParent: digerVefat,
     );
     if (!dogum.outcome.applied) {
       // Sınır (ör. en fazla çocuk sayısı) engelledi; hamilelik kapanır
@@ -2134,6 +2153,7 @@ class LifeProgression {
         _rng,
         coParentId: bekleyen.partnerId,
         twin: true,
+        allowDeceasedCoParent: digerVefat,
       );
       if (deneme.outcome.applied) ikiz = deneme;
     }
@@ -2151,7 +2171,10 @@ class LifeProgression {
             childId: bebek.id,
             childName: bebek.firstName,
             isGirl: bebek.gender == Gender.kadin,
-            otherParentName: diger.firstName,
+            // Vefat etmiş ebeveynin adı bildirimde anılmaz: "sen ve X
+            // bir yıldır bunu bekliyordunuz" cümlesi o hâlde yanlış
+            // olur. Kayıt yerinde durur, cümle sahiplenmez.
+            otherParentName: digerVefat ? null : diger.firstName,
           )
         else
           Notices.twinBirth(
@@ -2161,10 +2184,20 @@ class LifeProgression {
             firstIsGirl: bebek.gender == Gender.kadin,
             secondName: ikizBebek.firstName,
             secondIsGirl: ikizBebek.gender == Gender.kadin,
-            otherParentName: diger.firstName,
+            otherParentName: digerVefat ? null : diger.firstName,
           ),
       ]),
     );
+
+    // Diğer ebeveyn bebeği göremediyse bu günlüğe yazılır. Ölüm ciddi
+    // bir konudur: espri yok, teselli cümlesi yok (D-127).
+    if (digerVefat) {
+      sonuc = _logLine(
+        sonuc,
+        newAge,
+        '${diger.firstName} bebeğinin dünyaya gelişini göremedi.',
+      );
+    }
 
     // Çok genç yaşta çocuk sahibi olmak ailede karşılıksız kalmaz
     // (D-110). Tepki **evlilik durumuna** bakar ve gerçekten uygulanır.
