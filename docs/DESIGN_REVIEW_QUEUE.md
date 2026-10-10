@@ -9109,11 +9109,19 @@ kaydırmıyor.
    evinde) ve "çocuğunun evi" dördüncü bir tür demek — yaşam gideri,
    sigorta, döşeme ve kodek birden etkilenir. **Önerim:** V1'de
    açılmasın; istenirse ayrı paket.
-5. **Yaşlılık içeriği bu kayda bağlanmalı mı?** Kayıt kaç yıl destek
-   görüldüğünü ve kaç yılın tek başına çevrildiğini tutuyor; `son_*`
-   havuzundaki (Paket CC) olaylar bunu henüz okumuyor. **Önerim:** bir
-   sonraki içerik turunda "üç yıldır çocuğun yanında" ya da "kimse
-   gelmiyor" izlerini okuyan olaylar yazılsın.
+5. **Yaşlılık içeriği bu kayda bağlanmalı mı?** — **YAPILDI (Paket
+   CM, 10 Ekim 2026).** Kayıt artık hikâyeye dönüyor: altı olay
+   `minElderSupportYears` / `minElderAloneYears` ile **sayacı** okuyor
+   (hikâye izi değil; iz olsaydı bir kez destek görmek ömür boyu
+   yeterdi ve "üç yıldır yanımda" cümlesi yalan olabilirdi).
+   Eşikler ölçümden geldi (250 hayat: destek ortancası 4 yıl, yalnız
+   ortancası 3 yıl; 2+ destekli 43 hayat, 3+ yalnız 44 hayat) ve
+   kademeler 2/3/4 yıl. Erişim ölçüldü: altı olayın **hepsi** görüldü,
+   14 hayat en az birini gördü. Havuz `yaslilik_bakimi` anahtarına
+   bağlı; modül kapalıyken hiçbiri aday olmuyor.
+   **Geri alma:** `app/lib/data/event_pool_elder_support.dart` ve
+   `FeatureEvents.pools` satırı kaldırılır; bekçi
+   (`paket_cm_bakim_karsiligi_test.dart`) bunu kırmızıya çevirir.
 
 **Yapmayacağım (onay gelmeden):** eşikleri ya da payları değiştirmek,
 dördüncü bir ev türü eklemek, sağlığa/ölüm eğrisine dokunmak.
