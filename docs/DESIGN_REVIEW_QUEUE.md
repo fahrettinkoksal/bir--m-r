@@ -9123,3 +9123,73 @@ dördüncü bir ev türü eklemek, sağlığa/ölüm eğrisine dokunmak.
 `app/lib/ui/widgets/elder_support_card.dart`,
 `app/test/paket_cj_yaslilik_bakimi_test.dart`,
 `app/test/paket_cj_bakim_karti_test.dart`.
+
+### Q-229 — Kardeş kıskançlığının yaş penceresi ve sabıkalının zenginliği
+
+**Durum:** birinci madde **uygulandı** (sayılar `prototypeOnly`,
+geri alma yolu yazılı), ikinci madde **ölçülmüş bir bulgu** ve kararı
+Faho'nun.
+
+#### 1. `ilk_yil_kardes_kiskancligi` kapısı 4 → 6 (uygulandı)
+
+**Nasıl çıktı.** Paket CD'nin "hiç görülmeyen altı olay" listesindeki
+futbol dışı iki olay tek tek ölçüldü. Beklenen çıkış 1,47 (200 hayat)
+olduğu için "görülmedi" tek başına kapının kırık olduğunu
+göstermiyordu — ama kapının kendisi ilan ettiği yaş bandını
+kullanmıyordu: tam kardeş oyuncudan **her zaman büyük** doğuyor, bu
+yüzden "kardeş ≤ 4 yaş" koşulu 3-7 bandını tek yıla indiriyordu.
+
+| personMaxAge | aday kare (200 hayat) | beklenen çıkış | kapı açılan hayat |
+|---|---|---|---|
+| 4 (eski) | 81 | 2,07 | 54 |
+| 5 | 145 | 3,75 | 73 |
+| **6 (yeni)** | **224** | **5,84** | **89** |
+| 7 | 315 | 8,09 | 99 |
+| 9 | 474 | 11,68 | 115 |
+
+**Kararım ve gerekçesi:** eşik **6**. Altı yaşına kadar kardeşin
+bakımı evin ilgisini gerçekten üstünde tutar, olayın metni değişmeden
+doğru kalır ve ilan edilen beş yılın hepsi kullanılmaya başlar
+({3:82, 4:67, 5:49, 6:16, 7:10}). 7 ve 9 da çalışır ama "evin ilgisi
+bebekte" cümlesi 8-9 yaşındaki bir kardeş için zorlama olurdu.
+
+Ayrıca kapıya **`yariKardes`** eklendi: oyunda **yeni doğan** kardeş
+yalnızca yarım kardeş olarak geliyor (`step_siblings.dart`, `age: 0`),
+yani olayın asıl anlattığı durum tam o kapının dışında kalıyordu.
+
+**Geri alma:** `app/lib/data/event_pool_early_years.dart` içinde
+`personMaxAge: 6` → `4` ve `livingRelations` kümesinden `yariKardes`
+çıkarılır; bekçi (`paket_ck_gorulmeyen_iki_olay_test.dart`) bunu
+kırmızıya çevirir, yani geri alma sessiz kalmaz. Modül anahtarı
+zaten var: `ilk_yillar_olaylari`.
+
+#### 2. Sabıkalı oyuncu neden varlıklı? (karar bekliyor)
+
+`suc_ceza_odemesi` sabıka **ve** dar bütçe istiyor (`maxComfort: zor`).
+Ölçüm (200 hayat): **912 sabıkalı yılın 729'u `varlikli`**, 152'si
+`rahat`, yalnızca 10'u dar. Yatırım, ev ve işletme kapatılmış kohortta
+(75 hayat) bile 955 sabıkalı yılın 811'i `varlikli` — yani serveti
+yatırım değil **başka bir şey** büyütüyor (maaş, suç geliri, miras).
+
+Bu bir hata değil ama bir sonuç: **suçun ekonomik bedeli oyunda
+görünmüyor.** Seçenekler:
+
+1. **Olduğu gibi kalsın (varsayılanım).** Suç sistemi Paket Z/5 ve
+   AF/AG'de ölçülerek kalibre edildi; tek bir olayı görünür kılmak için
+   kalibre edilmiş bir ekonomiyi oynatmak doğru bir sebep değil.
+   `suc_ceza_odemesi` yoksul sabıkalıya saklı kalır ve gerçek oyuncu
+   (yatırım yapmayan, parasını harcayan) ona ulaşır.
+2. **Sabıkanın gelir tarafına dokunmak:** sabıkalıya kapanan meslekler
+   zaten var (D-128); üstüne maaş tavanı ya da kredi kapısı eklenebilir.
+   Bu, ölçülmesi gereken ayrı bir paket (10 strateji × N hayat) ve
+   mevcut payback dağılımlarını kaydırır.
+3. **Olayın kapısını gevşetmek** (`maxComfort: idare`): içerik görünür
+   olur ama "cebinde daha azı var" cümlesi idare eden bir oyuncu için
+   yalan olur. **Önermiyorum.**
+
+**Yapmayacağım (onay gelmeden):** suç gelirlerine, maaş tavanına ya da
+`maxComfort` eşiğine dokunmak.
+
+**Etkilenen kod:** `app/lib/data/event_pool_early_years.dart`,
+`app/lib/data/event_pool_crime.dart`,
+`app/test/paket_ck_gorulmeyen_iki_olay_test.dart`.
