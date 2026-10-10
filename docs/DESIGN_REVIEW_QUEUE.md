@@ -8238,3 +8238,69 @@ içindeki `_applyBirth` ayrımı (üç satır) ve `Parenthood`'un
 `allowDeceasedCoParent` bayrağı. Bayrak varsayılan olarak **kapalı**:
 onu kaldırmak eski davranışa döner. Bekçi:
 `test/paket_bs1_vefat_eden_ebeveyn_test.dart` (8 test).
+
+### Q-216 — Evini döşemek: model, sayılar ve açık bıraktıklarım
+
+**Durum: prototipte eklendi, Faho'nun onayını bekliyor (Claude,
+10 Ekim 2026).** `DECISIONS.md`'ye yazılmadı; bütün sayılar
+`prototypeOnly` ve modül anahtarı `ev_dosemesi` ile tamamen
+kapatılabiliyor.
+
+**Neden eklendi.** `docs/NEXT_DEVELOPMENT_OPTIONS.md` §6: konut
+alınıyor, taşınılıyor, kiraya veriliyor ama evin içi boştu. Katalogda
+ev eşyası diye üç şey vardı (çay takımı, seccade, bisiklet bakım seti).
+Oyuncunun parasını hayat kalitesine çevirecek bir kanal da eksikti
+(Paket AD/5'in bulgusu: "paranın harcanacak yeri yok").
+
+**Kurduğum model.** Döşeme **oturulan evin** değil, **sahip olunan ev
+eşyasının** hâli. 18 yuva (6 temel, 12 konfor), her yuva bir ihtiyaç.
+Taşınınca eşya seninle gelir; oyun bunu zaten söylüyordu ("eşyalarını
+taşıdın"). Böylece eski kayıtlara yeni alan eklemek gerekmedi.
+
+**Alternatif (reddettim, ama senin kararın).** Her evin kendi eşyası
+olması: yazlık ayrı döşenir, kiraya verilen eve eşya bırakılmaz, miras
+kalan ev dolu gelir. Daha zengin ama `OwnedItem`'a yeni bir alan, kayıt
+göçü ve "taşınırken neyi götürüyorsun" akışı demek. Bence kendi paketi
+olmalı; bu paket onun yolunu kapatmıyor.
+
+**Sayılar (hepsi `prototypeOnly`, önerim).**
+· Temel yuvaların seviyedeki payı **%65**: buzdolabısız ama televizyonlu
+  ev "yarı döşenmiş" sayılmasın diye.
+· Kullanılabilirlik eşiği **40 kondisyon**: bozuk buzdolabı buzdolabı
+  yerine geçmiyor.
+· Yıllık yıpranma **1-3 puan**: bir buzdolabı on yılda bir bakım ister.
+· İyi döşenmiş evin katkısı **seviye 65'ten sonra yılda +1 mutluluk**;
+  düşük döşemeye **ceza yok** — parası olmayan oyuncu cezalandırılmaz.
+
+**Ölçüldü (200 hayat, iki blok).** Hayatların 175/200 ve 182/200'ü evini
+döşüyor, ortalama seviye 73,8 ve 78,1. Ölümde mutluluk +2,1 ve +0,2.
+Servet farkının yönü iki blok arasında ters döndü (-12,2 M, +13,2 M):
+gürültü. Ölüm yaşı değişmedi.
+
+**Açık bıraktığım sorular (karar değil, gözlem).**
+· Kiralık evde oturan da döşüyor; kiradan çıkarken eşyayı götürüyor.
+  Doğru mu, yoksa kiralık ev "eşyalı/eşyasız" diye ayrılmalı mı?
+· Ev eşyası **miras** kalmıyor; vefat eden ebeveynin evinden eşya
+  gelmiyor. Miras sistemi eşyayı taşıyor (D-037) ama ev eşyası için
+  ayrı bir kural yazmadım.
+· Düşük döşemenin hiç cezası yok. "Buzdolabı olmayan evde sağlık
+  düşsün" gibi bir kural isteyip istemediğini bilmiyorum; ben
+  istemiyorum (ceza, parası olmayanı iki kez vurur).
+· Ev eşyası olayları (buzdolabı bozuldu, çamaşır makinesi su yaptı) bu
+  pakette yok; Paket BP'nin ev havuzu bina tarafını anlatıyor. Eşyaya
+  bağlı olay havuzu ayrı bir paket olabilir.
+· "Evini tamamen döşemek" bir **hayat hedefi** (D-156) olabilir ama
+  eklemedim: hedef listesi statik, modül kapalıyken ulaşılamaz bir
+  hedefi ekranda bırakmak "kapalı modül görünmez" kuralına ters düşer.
+  İstersen hedef listesine duruma bakan bir süzgeç ekleyip bunu da
+  koyarım.
+· Aynı eşyayı ikinci kez almak serbest (iki buzdolabı); seviye iyisini
+  sayıyor. Mağazada "zaten var" uyarısı koymadım, çünkü eski buzdolabını
+  atmadan yenisini almak gerçek bir davranış.
+
+**Geri alma yolu.** Ayarlar > Modüller > "Evini döşemek" kapat: ekran
+kalkar, seviye 0 olur, yıpranma durur, 18 eşya mağazada kalır ama
+hiçbir şeyi etkilemez. Tamamen silmek için `FeatureId.evDosemesi`
+satırındaki `removableFiles` listesi yeter
+(`furnishing.dart`, `furnishing_page.dart`, `paket_bt_ev_dosemesi_test.dart`)
+artı katalog ve mağaza satırları.
