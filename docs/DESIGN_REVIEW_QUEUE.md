@@ -7147,6 +7147,39 @@ yaşayan biriyle aynı adı taşıyor (örnekler: sınıf arkadaşı, iş
 arkadaşı, kardeş, yeğen). Sınıf ve iş arkadaşı üretiminde koruma var,
 yani kaynağı henüz bulamadım; ayrı bir teşhis turu gerekiyor.
 
+**Düzeltme — kaynağı buldum, hata bende değil oyunda da değildi
+(Paket BW/0, 10 Ekim 2026).** Bir tur sonra çakışan tarafın **kim**
+olduğunu saydım:
+
+| Çakışan taraf | Sayı |
+| --- | --- |
+| çocuk ↔ **çocuk** | 52 |
+| çocuk ↔ sınıf arkadaşı | 9 |
+| çocuk ↔ kardeş | 1 |
+| çocuk ↔ yeğen | 1 |
+
+Yani vakaların 52/63'ü "iki çocuğumun adı aynı" idi ve sebebi **ölçüm
+botuydu**: bot her bebeği sekiz adlı sabit bir listeden adlandırıyordu
+(Ada, Deniz, Ege, Mira, Aras, Nehir, Can, Eylül). İki çocuklu hayatta
+tekrar kaçınılmaz, üç çocukta ihtimal üçte bir. Oyunun kendi bebek
+adlandırması kayıttaki adları **zaten** dışlıyordu; yukarıdaki %14
+rakamı bu yüzden oyunu değil aracı ölçüyordu. Botu düzelttim.
+
+Aynı taramada oyun tarafında gerçekten korumasız **üç yol** çıktı ve
+onları kapattım: sevgili (`Romance.start`), okul arkadaşı ve
+tanışıklık (`Friendship`). Komşu, okul kişileri, kayın aile, üvey aile
+ve bebek adı korumalıydı.
+
+Yeni ölçüm (300 hayat): çocuğu hanedeki bir adı taşıyan hayat 28/99 →
+**0/99**; iki yaşayan kişinin aynı adı taşıması 105/300 → **25/300**.
+
+**Sana kalan karar değişmedi, ama gerekçesi zayıfladı:** ebeveyn ve
+kardeş adlarını dışlayıp dışlamayacağımız hâlâ senin kararın. Ölçülen
+kardeş-ebeveyn çakışması %1 düzeyinde; yani "dede adını taşıyan torun"
+kültürel olarak doğal diye bırakmak da artık bir maliyet üretmiyor.
+Önerim aynı: **havuz genişliği yeter, kural yazmayalım** — ama
+istersen dışlama kuralını da yazarım.
+
 #### 7. Geliri olmayan oyuncunun aracı kapanmayan açık üretiyor
 
 70 yaşındaki oyuncunun gider dökümü: "Kişisel harcama 12.000 ₺" (D-123:
