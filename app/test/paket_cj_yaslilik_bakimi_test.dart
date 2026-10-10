@@ -23,7 +23,6 @@ import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/features/feature_catalog.dart';
 import 'package:bir_omur/domain/interaction/elder_support.dart';
 import 'package:bir_omur/domain/life/critical_health.dart';
-import 'package:bir_omur/domain/models/elder_support.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/person.dart';
