@@ -8054,3 +8054,37 @@ Kapatılınca 28 olay hiç listelenmez ve zar kaymaz. Tamamen silmek için
 satırı, `FeatureEvents.pools` satırı ve test dosyası. Motor kapısı
 (`requiresOwnedResidence`) kalırsa zarar vermez; kullanan olay kalmaz.
 Bot politikası ayrı: test altyapısı, ürün kodu değil.
+
+### Q-212 — Paket BQ: görünüm seçimi
+
+**Durum: karar verildi ve uygulandı (Claude, devredilen yetkiyle,
+10 Ekim 2026).** `DECISIONS.md`'ye dokunulmadı: bu bir oyuncu tercihi,
+oyun kuralı değil.
+
+**Ölçülen sorun.** Koyu tema koddaydı (`BirOmurTheme.dark()`, golden
+testleri iki temayı da çekiyor) ama oyuncunun seçeneği yoktu:
+uygulamanın kökünde `themeMode: ThemeMode.system` sabitti.
+
+**Karar 1 — seçim kayıtta, enum domain'de.** `AppThemeChoice`
+(sistem / açık / koyu) `GameSettings` içinde duruyor ve kayda anahtar
+olarak yazılıyor. Flutter'ın `ThemeMode`'u kayda girmiyor; eşleme
+arayüz katmanında. Gerekçe: kayıt biçimi arayüz kütüphanesinin
+sıralamasına bağlanmamalı, yoksa Flutter tarafında bir değişiklik eski
+kayıtları bozar.
+
+**Karar 2 — modül anahtarı verilmedi.** `docs/FEATURE_FLAGS.md` kuralı
+"her yeni özellik kendi anahtarıyla gelir" diyor; burada anahtarın
+kendisi zaten seçimin içinde: *Cihaza göre* eski davranışın birebir
+aynısı. İkinci bir anahtar eklemek "kapatınca ne olur" sorusuna
+"hiçbir şey" cevabını verirdi.
+
+**Karar 3 — test zorlaması kayıttan güçlü.** `BirOmurApp.themeMode`
+boşsa kayıttaki seçim geçerli; dolu verilince o kip uygulanıyor. Golden
+testleri aynı kareyi iki temada da çekmeye devam ediyor; bu yüzden
+zorlama kaldırılmadı.
+
+**Geri alma yolu.** Oyuncu tarafında: Ayarlar → Görünüm → *Cihaza
+göre*. Koddan tamamen çıkarmak için `AppThemeChoice`, `GameSettings`
+alanı, kodek satırı, ayar bölümü ve
+`app/test/paket_bq_gorunum_test.dart`. `BirOmurApp.themeMode`
+parametresi zaten paket öncesinde de vardı; kalabilir.
