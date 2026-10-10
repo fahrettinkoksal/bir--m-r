@@ -7572,5 +7572,69 @@ sabit `false` yapıldığında **16 testin 14'ü** kırmızıya döndü; geçen
 ikisi "modül kapalıyken hiçbir şey olmaz" testleri, yani iki dünyada
 da doğru olanlar.
 
+## Paket CK — "hiç görülmeyen" iki olay: kapı mı, seyreklik mi, bot mu? (10 Ekim 2026)
+
+Paket CD'nin ölçümü 150 hayatta iki modda da görülmeyen **altı** olayı
+"gerçek şüpheli" diye işaretlemişti. Dördü kulüp/futbol zincirinin
+halkası (Q-224'ün alanı, dokunulmadı); futbol dışı ikisi bu pakette
+tek tek ölçüldü.
+
+### Önce olasılık hesaplandı, sonra kod okundu
+
+Aday havuzu `EventEngine.debugEligibleIds` ile, seçilme payı
+havuzdaki ağırlıklardan (200 hayat):
+
+| Olay | Aday kare | Beklenen çıkış | Görülen | P(hiç çıkmama) |
+| --- | --- | --- | --- | --- |
+| `ilk_yil_kardes_kiskancligi` (eski kapı) | 54 | 1,47 | 0 | %23 |
+| `suc_ceza_odemesi` | 10 | 0,12 | 0 | %89 |
+
+**İki sıfır da şans dahilinde.** "Görülmedi" tek başına kapının kırık
+olduğunu göstermiyor; bunu hesaplamadan "ulaşılamaz" demek yanlış
+olurdu.
+
+### Kardeş kıskançlığı: kapı ilan ettiği bandı kullanmıyordu
+
+Tam kardeş oyuncudan **her zaman büyük** doğuyor (`life_generator`:
+yaş 1..maxSiblingAge, %5 ikiz hariç). Bu yüzden `personMaxAge: 4`
+koşulu yalnızca ikizde ya da oyuncu **tam 3 yaşındayken** sağlanıyordu:
+3-7 bandı pratikte tek yıla inmişti. Eşik taraması (200 hayat):
+
+| personMaxAge | aday kare | beklenen çıkış | kapı açılan hayat |
+| --- | --- | --- | --- |
+| 4 (eski) | 81 | 2,07 | 54 |
+| 5 | 145 | 3,75 | 73 |
+| **6 (yeni)** | **224** | **5,84** | **89** |
+| 7 | 315 | 8,09 | 99 |
+| 9 | 474 | 11,68 | 115 |
+
+6 seçildi: altı yaşına kadar kardeşin bakımı evin ilgisini gerçekten
+üstünde tutar, metin değişmeden doğru kalır ve ilan edilen beş yılın
+hepsi kullanılır ({3:82, 4:67, 5:49, 6:16, 7:10}).
+
+Ayrıca `yariKardes` kapıya eklendi: oyunda **yeni doğan** kardeş
+yalnızca yarım kardeş olarak geliyor (`step_siblings.dart`, `age: 0`),
+yani olayın asıl anlattığı durum tam o kapının dışında kalıyordu —
+Paket BZ'nin "yanlış kapı" deseninin aynısı.
+
+### Ceza ödemesi: sınır oyunda değil, botta
+
+Olay sabıka **ve** dar bütçe istiyor (`maxComfort: zor`). Varsayılan
+botun **912 sabıkalı yılının 729'u `varlikli`**; dar bütçeli yıl
+yalnızca 10. Yatırım, ev ve işletme kapatılmış kohortta (75 hayat,
+`BotOverrides`) olay **gerçekten çıktı** — yani içerik ulaşılabilir,
+eksik olan şey botun yoksul kalabilmesi. Ekonomiye dokunulmadı;
+"sabıkalı oyuncu neden zengin" sorusu **Q-229**'da.
+
+### Bekçi
+
+`test/paket_ck_gorulmeyen_iki_olay_test.dart` (5 test): olay ilan
+ettiği bantta gerçekten aday oluyor (aday kare > 120, beklenen > 3,0,
+kapı > 50 hayatta) · yeni kapı eski kapıdan en az 1,5× geniş · kapı
+hem tam hem yarım kardeşi kabul ediyor ve aynı haneyi istiyor ·
+varsayılan botun sabıkalısının çoğu varlıklı (sınıflandırma bekçisi) ·
+yoksullaştırılmış kohortta kapı açılıyor. Bekçinin ısırdığı
+doğrulandı: eski kapıya döndürülünce 5 testin 3'ü kırmızı.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

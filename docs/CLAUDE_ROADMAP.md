@@ -424,6 +424,24 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   durumu kurmak değil, botun o politikasını `BotOverrides` ile
   kapatmak oldu — oyunun sayıları değişmedi, tarama karar **öncesi**
   kareyi buldu.
+- **Paket CK.** "Hiç görülmedi" bir sonuç değil, bir **olasılık
+  sorusu**. Olayın aday olduğu kare sayısını ve ağırlık payını
+  hesaplayınca beklenen çıkış 1,47 ve 0,12 çıktı; 150-200 hayatta
+  sıfır görmek bunların ikisinde de şans dahilinde (%23 ve %89).
+  Hesaplamadan "ulaşılamaz içerik" demek, Paket CD'nin listesinde iki
+  olayı haksız yere suçlu bırakmıştı.
+- **Paket CK.** Kapıyı yazarken **üretimin ne ürettiğine** bak. Olay
+  3-7 yaş diyordu ama koşulu "kardeş ≤ 4 yaş"dı; tam kardeş oyuncudan
+  her zaman büyük doğduğu için bu, bandı tek yıla indiriyordu. Eşiği
+  seçmek için tarama yapıldı (4/5/6/7/9) ve 6'da hem beklenen çıkış
+  2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
+  başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
+  olduğu** nokta.
+- **Paket CK.** İçerik ulaşılamaz görünüyorsa "oyun mu, bot mu" sorusu
+  cevaplanabilir: `BotOverrides` ile botu yoksullaştırınca
+  `suc_ceza_odemesi` çıktı. Oyunun ekonomisine dokunmadan içeriğin
+  ulaşılabilir olduğu **kanıtlandı**; geriye kalan "sabıkalı oyuncu
+  neden varlıklı" sorusu ise ayrı bir denge işi, kuyruğa yazıldı.
 - **Paket CJ.** Bir etkiyi ölçerken tavanı unutma. "Yakınlık artmalı"
   iddiası, bağı zaten **100** olan karede sınanamaz (yaşlılıkta en
   yakın çocuğun bağ ortancası tam olarak bu, Q-205). Bekçi artık

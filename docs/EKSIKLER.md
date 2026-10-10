@@ -410,6 +410,36 @@ olay — gerçek şüpheliler bunlar: `ilk_yil_kardes_kiskancligi`,
 `suc_ceza_odemesi`. Gerisi **moda ve tohuma bağlı**: botun seçim
 politikası değişince liste neredeyse tamamen değişiyor.
 
+> **PAKET CK ÖLÇÜMÜ (10 Ekim 2026) — "görülmedi" ile "ulaşılamaz" aynı
+> şey değil.** Yukarıdaki altı şüphelinin futbol dışı ikisi tek tek
+> ölçüldü (200 hayat; aday havuzu `debugEligibleIds` ile, seçilme payı
+> ağırlıklardan):
+>
+> | Olay | Aday kare | Beklenen çıkış | Görülen | Hiç çıkmama olasılığı |
+> |---|---|---|---|---|
+> | `ilk_yil_kardes_kiskancligi` (eski kapı) | 54 | 1,47 | 0 | e^-1,47 ≈ %23 |
+> | `suc_ceza_odemesi` | 10 | 0,12 | 0 | e^-0,12 ≈ %89 |
+>
+> Yani iki sıfır da **şans dahilinde**; kapının kırık olduğunun kanıtı
+> değil. Buna karşılık kardeş olayının kapısı ilan ettiği yaş bandını
+> kullanmıyordu: tam kardeş oyuncudan **her zaman büyük** doğuyor
+> (`life_generator`: yaş 1..maxSiblingAge, %5 ikiz hariç), bu yüzden
+> "4 yaşından küçük kardeş" yalnızca ikizde ya da oyuncu tam 3
+> yaşındayken oluşuyordu — 3-7 bandı pratikte **tek yıla** inmişti.
+> Eşik taraması (200 hayat): eşik 4 → 81 kare / 2,07; **eşik 6 → 224
+> kare / 5,84** ve yaş dağılımı {3:82, 4:67, 5:49, 6:16, 7:10}.
+> Kapı 6'ya açıldı ve `yariKardes` eklendi — oyunda **yeni doğan**
+> kardeş yalnızca yarım kardeş olarak geliyor (`step_siblings.dart`,
+> `age: 0`), yani olayın asıl anlattığı durum kapının dışındaydı
+> (Paket BZ'nin deseni).
+>
+> `suc_ceza_odemesi` için sınır **oyunda değil botta**: olay sabıka
+> **ve** dar bütçe istiyor, varsayılan botun 912 sabıkalı yılının
+> **729'u `varlikli`**. Yatırım/ev/işletme kapatılmış kohortta (75
+> hayat) olay gerçekten çıktı. Ekonomiye dokunulmadı; "sabıkalı oyuncu
+> neden zengin" sorusu **Q-229**'da. Kalıcı bekçi:
+> `test/paket_ck_gorulmeyen_iki_olay_test.dart`.
+
 Eski tablodaki şu kayıtlar ölçümle **yanlışlandı**: "simülasyon araba
 almıyor" (araç sahibi olan **143/150**), `araba_yolda_kaldi`
 (görüldü **25/150**), `direksiyon_basinda` (1/150), `savundugun_arkadas`

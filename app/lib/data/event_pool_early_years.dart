@@ -532,6 +532,22 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     ],
   ),
 
+  // **Kapısı ölçümle açıldı (Paket CK).** İlk yazımda kapı
+  // `personMaxAge: 4` ve yalnızca `kardes`'ti; bu, ilan edilen 3-7
+  // bandını pratikte **tek bir yıla** indiriyordu. Sebep üretimde:
+  // tam kardeş oyuncudan **her zaman büyük** doğuyor
+  // (`life_generator`: yaş 1..maxSiblingAge, %5 ikiz hariç), yani
+  // "4 yaşından küçük kardeş" ancak ikizde ya da oyuncu tam 3
+  // yaşındayken bir yaş büyük kardeşte oluşuyordu. 200 bot hayatında
+  // ölçüldü: eşik 4 → 81 aday kare, beklenen çıkış 2,07; eşik 6 → 224
+  // kare, 5,84 ve oyuncunun yaş dağılımı {3:82, 4:67, 5:49, 6:16,
+  // 7:10}. Altı yaşına kadar kardeşin bakımı evin ilgisini gerçekten
+  // üstünde tutar; metin aynı kaldı.
+  //
+  // `yariKardes` de eklendi: oyunda **yeni doğan** kardeş yalnızca
+  // yarım kardeş olarak geliyor (`step_siblings.dart`, `age: 0`), yani
+  // olayın asıl anlattığı durum tam o kapının dışındaydı (Paket BZ'nin
+  // "yanlış kapı" deseni). Sayılar `prototypeOnly` (Q-229).
   GameEvent(
     id: 'ilk_yil_kardes_kiskancligi',
     category: EventCategory.aile,
@@ -541,9 +557,12 @@ const List<GameEvent> kEarlyYearsEvents = <GameEvent>[
     requirement: EventRequirement(
       minAge: 3,
       maxAge: 7,
-      livingRelations: <RelationType>{RelationType.kardes},
+      livingRelations: <RelationType>{
+        RelationType.kardes,
+        RelationType.yariKardes,
+      },
       requireSameHousehold: true,
-      personMaxAge: 4,
+      personMaxAge: 6,
     ),
     weight: 3,
     choices: <EventChoice>[
