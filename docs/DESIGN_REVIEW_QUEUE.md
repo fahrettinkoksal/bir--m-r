@@ -8867,3 +8867,52 @@ ve iki adımlı zincir gerçekten tamamlanır. Alternatifler:
 üyelik penceresi gerçekten var (ortalama ≥2 yıl; ölçülen 3,9) ve kulüp
 içeriği üyeye ulaşıyor. Karar verilene kadar bu dosya gevşetilmiş bir
 iddia taşımıyor.
+
+### Q-225 — İçerideyken hayvana ne oluyor: bakımı kim ödüyor, hayvan nasıl geçiniyor?
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Hiçbir sayıya
+dokunulmadı.
+
+**Nasıl çıktı.** Paket CG'de özel durum dökümü okunurken cezaevindeki
+hayatın günlüğünde şu satırlar yan yanaydı:
+
+```
+Bir yıl daha içeride geçti. Dışarısı kendi hâlinde akıyor.
+Hayvan bakımına 14.200 ₺ gitti.
+Pamuk hastalandı; veterinere görünmesi gerekiyor.
+```
+
+Aynı hayatta Aktiviteler sekmesinde yalnızca "İçeride yapılabilecekler"
+bölümü vardı (`Görüş, kitap, spor, sakin kalmak`). Yani:
+
+| Olan | Nerede |
+|---|---|
+| Yıllık bakım parası oyuncunun cüzdanından çıkıyor | `PetCare` yıllık geçiş; hükümlülüğe bakmıyor |
+| Hayvan hastalanıyor, sağlığı eriyor, vefat ihtimali artıyor | aynı yerde (D-082) |
+| Veterinere götürme yolu kapalı | Aktiviteler sekmesi içerideyken yalnızca cezaevi bölümünü gösteriyor |
+| `PetCare.availability` hükümlülüğe bakmıyor | yani yol **yalnızca ekranda** kapalı |
+
+**Paket CG'de yalnızca metin düzeltildi:** bildirim artık kapalı bir
+kapıyı göstermiyor ("İçeriden veterinere götüremiyorsun; tahliye olunca
+bakabilirsin."). Parayı, sağlığı ve vefat ihtimalini **değiştirmedim**,
+çünkü üçü de denge kararı.
+
+**Seçenekler**
+
+1. **Aile bakar, para yine çıkar (önerim ve varsayılanım).** Hayvan
+   hanede kalıyor; hastalık ve vefat işliyor ama **tedavi edilmemiş
+   sayılmıyor**: içeride geçen yıllarda sağlık erimesi uygulanmaz.
+   Gerekçe: oyuncu kendi seçimiyle değil, kapı kapalı olduğu için
+   bakamıyor; cezanın bedeli hayvanın ölümü olmamalı. Para çıkmaya
+   devam eder (bakım yapılıyor, ödeyen oyuncu).
+2. **Hiçbir şey değişmesin:** hayvan içerideyken de ihmal edilmiş
+   sayılsın. Sert ama tutarlı: "içeri girmek hayatındaki her şeyi
+   etkiler".
+3. **Hayvan hanede kalmasın:** içeri girince hayvan bir yakına geçsin
+   (`inPlayerHousehold = false`), bakım parası kesilsin, tahliyede geri
+   dönme ihtimali olsun. En zengin seçenek, en çok yeni iş.
+
+**Yapmayacağım (onay gelmeden):** bakım parasını kesmek, sağlık
+erimesini durdurmak ya da hayvanı haneden çıkarmak.
+
+**Etkilenen kod:** `app/lib/domain/pets/pet_care.dart`.
