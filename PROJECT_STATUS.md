@@ -7477,5 +7477,100 @@ kurulamıyor · kayıt kapat/aç turunu atlatıyor · 120 hayatta grup
 kuruluyor, buluşuluyor, dağılan grup kayıtta kalıyor ve gerekçesi
 günlükte duruyor.
 
+## Paket CJ — yaşlılıkta kim yanında? (10 Ekim 2026)
+
+`docs/EKSIKLER.md` §3.2'nin son maddesi okundu ("çocuk … oyuncuya
+bakamıyor") ve **koda bakıldı**: listenin dört maddesi (boşanma, işsiz
+kalma, oyuncudan para isteme, torunun kendi hayatı) çoktan kapanmış,
+belge bayatmış. Kapalı kalan tek madde buydu ve gerçekten boştu:
+`ElderCare` (Paket AO §35-§36) oyuncunun yaşlı ebeveynine bakmasını
+modelliyor, **tersi** hiç yazılmamıştı.
+
+### Ölçüm önce yapıldı (250 bot hayatı)
+
+| Ölçü | Değer |
+| --- | --- |
+| 70 yaşını gören hayat | 185 / 250 |
+| Toplam yaşlılık yılı (70+) | 1356 |
+| … düşük sağlık bandında | 585 (kritik 254 + hayati tehlike 331) |
+| … yetişkin çocuğu olan | 488 |
+| … yaşayan eşi olan | 322 |
+| … ne eşi ne çocuğu olan | **721 (%53)** |
+| Oyuncuya dönük bakım satırı | **0** |
+
+Yani oyuncunun yaşlılığı, kurduğu aileye göre **hiç** değişmiyordu.
+
+### Eşik bağ olamıyor — bu da ölçüldü
+
+Yaşlılıkta en yakın çocuğun bağı: min 48, **ortanca 100**. Bağ eşiğine
+yaslanan bir kapı pratikte "her zaman açık" olurdu (bu Q-205'in zaten
+sorduğu sorun). Ayırt eden şey **kimin var olduğu** (%53'ünde kimse
+yok) ve maddi tarafta **kimin gücünün yettiği**. Bağ yalnızca çok
+düşükse (25 altı) kapıyı kapatıyor.
+
+### Üç kapı, üçünün de bedeli var
+
+| Kapı | Ne oluyor |
+| --- | --- |
+| Ailene yüklen | Eş ya da yetişkin çocuk o yıl yanında olur: oyuncunun mutluluğu artar, yakınlık artar, **yükü omuzlayanın mutluluğu düşer** (`ElderCare.yanindaKal`'ın aynadaki hâli) |
+| Bakım masrafını karşıla | Para **gerçekten** cepten çıkar; gücü yeten çocuklar faturanın en çok %60'ını üstlenir, kalanı oyuncu öder |
+| Kendin idare et | Hiçbir şey hareket etmez; yıl sayaca yazılır ve günlüğe satır düşer |
+
+Yılda **bir** karar (`lastDecidedAge`); aynı yıl ikinci karar kapalı.
+Cezaevinde kapı hiç açılmıyor (Paket CG'nin kuralı). Sağlık **faucet'i
+yok**: bu paket sağlığa ya da ölüm eğrisine dokunmuyor, parayı ve
+mutluluğu oynatıyor — mutluluk hayat sonu değerlendirmesinin "Huzur"
+eksenine zaten giriyor (`life_verdict`).
+
+| Parça | Nerede |
+| --- | --- |
+| Kayıt | `GameState.elderSupport` + kodek (sayaçlar geri gitmez) |
+| Motor | `domain/interaction/elder_support.dart` |
+| Anahtar | `FeatureId.yaslilikBakimi` + `docs/FEATURE_FLAGS.md` satırı |
+| Ekran | Hayat ekranının üstündeki "Bu yıl kim yanında?" kartı |
+| Bot | aktivite rutininin **başında**; zar tüketmiyor |
+
+### Ölçüm paketi üç kez düzeltti
+
+1. **Para yönü yanlıştı.** İlk yazımda çocuk oyuncunun **cebine** para
+   koyuyordu. Ölçüm gösterdi ki kapı hiç açılmıyor: 736 bakım yılının
+   yalnızca 8'inde oyuncunun cüzdanı masrafı karşılamıyordu (ölüm anı
+   net servet ortancası ~39,6 milyon ₺). Kapı `ElderCare`'in kendi
+   deseniyle çevrildi: para **cepten çıkar**, çocuk faturanın bir
+   kısmını üstlenir. Böylece hem havadan para üretilmiyor hem de kapı
+   her oyuncu için anlamlı.
+2. **Çocuklar faturanın tamamını kapatıyordu.** İki üç varlıklı çocuk
+   tavanı dolduruyor, 285 yılın ortancası faturanın **%100'ü**
+   oluyordu — "para gerçekten çıkar" boşa düşüyordu. Pay %60 ile
+   sınırlandı; cepten çıkan ortanca 40.428 ₺ oldu.
+3. **Bot 295 kararı kaçırıyordu.** 712 bakım yılının 417'sinde karar
+   verilebiliyordu; kalanında yılın başında bekleyen bir olay vardı ve
+   `decideElderSupport` bekleyen olayla çalışmıyor. Blok artık
+   kesintiyi yerinde karşılıyor (Paket CB'nin deseni): kaçan yıl
+   **295 → 2**.
+
+**Son durum (250 hayat):** 756 bakım yılı — 160'ında ailesine
+yüklendi, 332'sinde masrafı karşıladı, 262'sini kendi çevirdi. Modül
+açık/kapalı farkı ölçüldü: ölüm yaşı ortalaması 72,37 / 72,32, net
+servet ortancası 39.660.061 / 39.656.136 — ikisi de gürültü
+seviyesinde, yani paket oyunun dengesini kaydırmıyor.
+
+### Bekçi
+
+`test/paket_cj_yaslilik_bakimi_test.dart` (16 test) + 
+`test/paket_cj_bakim_karti_test.dart` (4 arayüz testi). Bütün kareler
+**aranarak** bulunuyor: tek taramada (200 hayat) yardımcısı olan yıl,
+kimsesi olmayan yıl, çocuk katkısı olan yıl, cepten çıkanı
+ödeyemeyen yıl, bandı iyi olan yıl ve cezaevi karesi toplanıyor.
+Botun kendi kararı `BotOverrides(noElderSupport: true)` ile kapatıldı:
+bot kararı yılın başında verdiği için taranan her kare "bu yılın
+kararı verilmiş" oluyordu ve kapıların gerekçeleri ölçülemiyordu (ilk
+koşuda altı test bu yüzden kırmızıydı).
+
+Bekçinin ısırdığı doğrulandı: `needsSupport` Paket CJ öncesi gibi
+sabit `false` yapıldığında **16 testin 14'ü** kırmızıya döndü; geçen
+ikisi "modül kapalıyken hiçbir şey olmaz" testleri, yani iki dünyada
+da doğru olanlar.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

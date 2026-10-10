@@ -246,11 +246,49 @@ evlilik → boşanma) derinken, arkadaşlık bunların yanında çok sığ kalı
 > **Q-227**'de karar bekliyor. Yani §3.1'in listesinde kalan gerçek
 > eksik **kalmadı**.
 
-### 3.2 Çocuğun hayatı tek yönlü
+### 3.2 Çocuğun hayatı tek yönlü — **beş maddenin dördü kapandı**
 Çocuk kendi hayatını yaşıyor (okul, meslek, birikim — D-045) ve artık
 evleniyor (D-121). Ama: boşanamıyor, işsiz kalamıyor, hastalanamıyor,
 oyuncudan para isteyemiyor, oyuncuya bakamıyor. Torun doğuyor ama
 torunun kendi hayatı yok.
+
+> **Düzeltme (10 Ekim 2026, Paket CJ'nin okuma turu).** Yukarıdaki
+> liste bu belge yazıldıktan sonra büyük ölçüde kapandı; envanter
+> güncellenmemişti. Kodda doğrulandı:
+>
+> | Madde | Bugün |
+> |---|---|
+> | boşanamıyor | `child_marriage_life.dart` — boşanma, yeniden evlilik, dulluk (Paket AP/2) |
+> | işsiz kalamıyor | `ChildProgression.prototypeOnlyJobLossChance` (0,03/yıl) |
+> | oyuncudan para isteyemiyor | `FamilyIssueKind.cocukPara` (Paket AP/5) |
+> | torunun kendi hayatı yok | `grandchildren.dart` torunu `tracksLife: true` ile doğuruyor; `life_progression.dart` onu her yıl ilerletiyor |
+> | **oyuncuya bakamıyor** | **Paket CJ ile kapandı** (aşağıdaki §3.8) |
+>
+> Açık kalan tek madde: **çocuk hastalanamıyor.** Eşin kendi hayatında
+> hastalık var (`SpouseLife.prototypeOnly…`, D-154); `ChildProgression`
+> içinde hiç yok. Simetri eksikliği ölçülmedi, tasarım sorusu da
+> sorulmadı — sıradaki okuma turuna not düşüldü.
+
+### 3.8 Oyuncunun kendi yaşlılığı — **eklendi (Paket CJ)**
+**Ölçüm (10 Ekim 2026, 250 bot hayatı).** Oyuncu 70 yaşını 185 hayatta
+gördü; toplam **1356 yaşlılık yılı** yaşandı. O yılların 585'inde
+sağlık bandı düşüktü (kritik 254, hayati tehlike 331), 488'inde
+yetişkin çocuğu, 322'sinde yaşayan eşi vardı — ve **hiçbirinde** bir
+aile üyesi oyuncu için bir şey yapmadı. Günlükte tek satır yoktu.
+Yaşlı ebeveyne bakmak oyunda vardı (`ElderCare`, Paket AO §35-§36);
+tersi hiç yazılmamıştı.
+
+İkinci ölçüm (yaşlılık yıllarının %53'ünde ne eş ne yetişkin çocuk
+var) paketin eşiğini de belirledi: ayırt eden şey bağ değil **kimin
+var olduğu**. Yaşlılıkta en yakın çocuğun bağı çoğu karede tavanda
+(ortanca 100, min 48) olduğu için bağ eşiği taşıyıcı olamıyor — bu
+Q-205'in zaten sorduğu şey.
+
+Paket CJ 70 yaşından sonra düşük sağlık bandında (ya da 80 yaşından
+sonra her hâlde) yılda **bir** karar açıyor: ailene yüklen · bakım
+masrafını karşıla (gücü yeten çocuklar faturanın en çok %60'ını
+üstlenir) · kendin idare et. Sayılar `prototypeOnly`, sorular
+**Q-228**.
 
 ### 3.3 "Hobilerim" görünümü — **eklendi (D-133)**
 > **Düzeltme (26 Eylül 2026):** Bu madde bu belge yazıldıktan sonra

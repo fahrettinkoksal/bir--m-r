@@ -5,6 +5,7 @@ import '../features/feature_catalog.dart';
 
 import 'blackjack_game.dart';
 import 'business.dart';
+import 'elder_support.dart';
 import 'friend_circle.dart';
 import 'insurance_policy.dart';
 import 'criminal_record.dart';
@@ -80,6 +81,7 @@ class GameState {
     this.businesses = const <Business>[],
     this.insurance = const <InsurancePolicy>[],
     this.friendCircles = const <FriendCircle>[],
+    this.elderSupport = const ElderSupportState(),
     this.pendingTrial,
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
@@ -251,6 +253,15 @@ class GameState {
   /// yanıtlanabilsin (D-029, D-038 ile aynı ilke). Eski kayıtlarda bu
   /// alan yoktur ve boş açılır; geriye dönük grup **uydurulmaz**.
   final List<FriendCircle> friendCircles;
+
+  /// Oyuncunun **kendi** yaşlılığında ailesinden gördüğü destek
+  /// (Paket CJ).
+  ///
+  /// Yaşlı ebeveyn bakımının (`ElderCare`, Paket AO §35) tersi:
+  /// 70 yaşından sonra bu yılı kimin omuzladığı burada durur.
+  /// Eski kayıtlarda bu alan yoktur ve boş açılır; geriye dönük
+  /// bakım geçmişi **uydurulmaz**.
+  final ElderSupportState elderSupport;
 
   /// Adli durum: dosyalar, sabıka, hapis ve denetim dönemi (D-128).
   ///
@@ -1381,6 +1392,7 @@ class GameState {
     List<Business>? businesses,
     List<InsurancePolicy>? insurance,
     List<FriendCircle>? friendCircles,
+    ElderSupportState? elderSupport,
     Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
@@ -1536,6 +1548,7 @@ class GameState {
       friendCircles: friendCircles == null
           ? this.friendCircles
           : List<FriendCircle>.unmodifiable(friendCircles),
+      elderSupport: elderSupport ?? this.elderSupport,
       pendingTrial: pendingTrial == _unsetEvent
           ? this.pendingTrial
           : pendingTrial as PendingTrial?,

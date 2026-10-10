@@ -66,6 +66,7 @@ gelir.
 | `son_yillar` | Son yıllar | CC | 65+ için yazılan 31 olay (emekliliğin ilk pazartesisi, günün düzeni, merdiven, ilaç kutusu, torunla eski zaman, çırağa öğretmek, fidan, komşuyla sabah düzeni, emekli bütçesi, dolandırıcı telefonu) ve altı karşılığı çıkmaz; son yıllar orta yaşın havuzuyla geçer. Ölçüldü: 65+ taramasında uygun olan 228 olaydan yalnızca 11'i o yaşlara aitti. |
 | `sigorta` | Sigorta | CA | Sigorta ekranı ve poliçeler kalkar: yıllık prim çıkmaz, hasarda karşılık olmaz, sağlık krizinin ve ev hasarının faturası Paket CA öncesi gibi tamamen oyuncunun cebinden çıkar. Kayıttaki poliçeler silinmez, donar. |
 | `arkadas_grubu` | Arkadaş grubu | CI | Grup kurma düğmesi ve "Arkadaş grubum" kartı kalkar; sekiz grup olayı çıkmaz, üyenin ayrılması ve grubun dağılması işlemez. Arkadaşlık tek tek yürür (Paket CI öncesi gibi); birden çok kişiyle aktiviteye gitmek yine mümkündür, o Paket X/2'nin yolu. Kayıttaki gruplar silinmez, donar. |
+| `yaslilik_bakimi` | Yaşlılıkta bakım | CJ | Yaşlılıkta "kim yanında?" kartı ve üç kapı kalkar; aile oyuncunun yaşlılığına karışmaz, maddi destek gelmez. Yaşlı ebeveyne bakmak (Paket AO §35) yerinde kalır — kalkan şey onun oyuncuya dönük tersi. Kayıttaki sayaçlar silinmez, donar. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.

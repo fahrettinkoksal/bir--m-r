@@ -11,6 +11,7 @@ library;
 import '../../domain/models/company_vitals.dart';
 import '../../domain/models/family_issue.dart';
 import '../../domain/models/loan.dart';
+import '../../domain/models/elder_support.dart';
 import '../../domain/models/friend_circle.dart';
 import '../../domain/models/insurance_policy.dart';
 import '../../domain/models/pending_race.dart';
@@ -490,6 +491,16 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'dispersedAtAge': c.dispersedAtAge,
           },
       ],
+      // Yaşlılıkta aileden görülen destek (Paket CJ). Sayaçlar geri
+      // gitmez; eski kayıtlarda yoktur ve boş açılır.
+      'elderSupport': <String, Object?>{
+        'yearsSupported': state.elderSupport.yearsSupported,
+        'yearsAlone': state.elderSupport.yearsAlone,
+        'lastDecidedAge': state.elderSupport.lastDecidedAge,
+        'lastHelperId': state.elderSupport.lastHelperId,
+        'receivedTotal': state.elderSupport.receivedTotal,
+        'paidTotal': state.elderSupport.paidTotal,
+      },
       // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
       // **uydurulmaz**.
       'legal': <String, Object?>{
@@ -1982,6 +1993,15 @@ GameState decodeGameState(Map<String, Object?> json) {
             case final FriendCircle c)
           c,
     ]),
+    // Eski kayıtlarda yaşlılık bakımı yoktur; sayaçlar sıfırdan
+    // başlar (Paket CJ). Yanında olan kişi kayıtta yoksa kimlik
+    // düşürülür: silinmiş bir kişiye işaret eden kayıt tutmayız.
+    elderSupport: json['elderSupport'] == null
+        ? const ElderSupportState()
+        : _decodeElderSupport(
+            _asMap(json['elderSupport'], 'elderSupport'),
+            people,
+          ),
     // Eski kayıtlarda adli kayıt yoktur; **temiz** açılır (D-128).
     legal: json['legal'] == null
         ? const LegalState()
@@ -3048,6 +3068,29 @@ T? _enumByNameOrNull<T extends Enum>(
   String key,
 ) =>
     name == null ? null : _enumByName(values, name, key);
+
+/// Yaşlılıkta aileden görülen desteği okur (Paket CJ).
+///
+/// Sayaçlar olduğu gibi okunur. **Yardımcı kimliği** ise kayıttaki
+/// kişilere karşı denetlenir: silinmiş bir kişiye işaret eden kimlik
+/// düşürülür, sayaçlar durur — "kaç yıl destek gördüm" sorusu kişi
+/// kaydından bağımsızdır.
+ElderSupportState _decodeElderSupport(
+  Map<String, Object?> json,
+  List<Person> people,
+) {
+  final String? yardimci = _stringOrNull(json, 'lastHelperId');
+  final bool duruyor =
+      yardimci != null && people.any((Person p) => p.id == yardimci);
+  return ElderSupportState(
+    yearsSupported: _intOr(json, 'yearsSupported', 0),
+    yearsAlone: _intOr(json, 'yearsAlone', 0),
+    lastDecidedAge: _intOrNull(json, 'lastDecidedAge'),
+    lastHelperId: duruyor ? yardimci : null,
+    receivedTotal: _intOr(json, 'receivedTotal', 0),
+    paidTotal: _intOr(json, 'paidTotal', 0),
+  );
+}
 
 /// Adli durumu okur.
 ///

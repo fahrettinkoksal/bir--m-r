@@ -41,6 +41,7 @@ class BotOverrides {
     this.noInvesting = false,
     this.noProperty = false,
     this.noBusiness = false,
+    this.noElderSupport = false,
   });
 
   /// Bot hiç yatırım yapmaz (portföy kurmaz).
@@ -52,6 +53,14 @@ class BotOverrides {
   /// Bot işletme kurmaya çalışmaz.
   final bool noBusiness;
 
+  /// Bot yaşlılıkta bakım kararını **vermez** (Paket CJ).
+  ///
+  /// Ölçüm için gerekli: bot kararı yılın başında verdiği için
+  /// `onPreAge` ile taranan her kare "bu yılın kararı verilmiş" oluyor
+  /// ve kapıların kendi gerekçeleri ölçülemiyordu. Bu kapalıyken
+  /// tarama karar **öncesi** kareyi bulur. Oyunun sayıları değişmez.
+  final bool noElderSupport;
+
   static const BotOverrides none = BotOverrides();
 
   String get label {
@@ -59,6 +68,7 @@ class BotOverrides {
       if (noInvesting) 'yatirimsiz',
       if (noProperty) 'gayrimenkulsuz',
       if (noBusiness) 'isletmesiz',
+      if (noElderSupport) 'bakimsiz',
     ];
     return kapali.isEmpty ? 'normal' : kapali.join('+');
   }

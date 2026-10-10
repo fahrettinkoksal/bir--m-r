@@ -230,6 +230,27 @@ enum FeatureId {
       'app/lib/data/event_pool_friend_circle.dart',
       'app/test/paket_ci_arkadas_grubu_test.dart',
     ],
+  ),
+
+  /// Paket CJ — yaşlılıkta bakım: oyuncu 70'ten sonra bu yılı kimin
+  /// omuzladığına karar verir. `ElderCare`'in (yaşlı ebeveyn bakımı)
+  /// oyuncuya dönük tersi.
+  yaslilikBakimi(
+    saveKey: 'yaslilik_bakimi',
+    title: 'Yaşlılıkta bakım',
+    lostWhenOff:
+        'Yaşlılıkta "kim yanında?" kartı ve üç kapı kalkar; aile '
+        'oyuncunun yaşlılığına karışmaz ve maddi destek gelmez. '
+        'Yaşlılık Paket CJ öncesi gibi geçer: yaşlı ebeveyne bakmak '
+        '(Paket AO §35) yerinde kalır, tersi işlemez. Kayıttaki '
+        'sayaçlar silinmez, donar.',
+    paket: 'Paket CJ — yaşlılıkta bakım',
+    removableFiles: <String>[
+      'app/lib/domain/models/elder_support.dart',
+      'app/lib/domain/interaction/elder_support.dart',
+      'app/lib/ui/widgets/elder_support_card.dart',
+      'app/test/paket_cj_yaslilik_bakimi_test.dart',
+    ],
   );
 
   const FeatureId({

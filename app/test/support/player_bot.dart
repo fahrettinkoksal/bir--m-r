@@ -48,6 +48,7 @@ import 'package:bir_omur/domain/career/job_market.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/domain/economy/investment_engine.dart';
 import 'package:bir_omur/domain/interaction/divorce_settlement.dart';
+import 'package:bir_omur/domain/interaction/elder_support.dart';
 import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
 import 'package:bir_omur/domain/interaction/friendship_depth.dart';
@@ -577,6 +578,19 @@ class BotLifeResult {
   bool formedFriendCircle = false;
   int friendCircleMeets = 0;
   int friendCircleDispersed = 0;
+
+  /// Yaşlılıkta bakım (Paket CJ): hangi kapıdan kaç yıl geçildi?
+  ///
+  /// Karar oyuncunun kendi düğmesinden geçer; bot basmazsa
+  /// yaşlılık yine Paket CJ öncesi gibi geçer ve kapılar
+  /// "erişilemez" görünür (Paket BP dersi).
+  int elderSupportNeedYears = 0;
+  int elderSupportFamilyYears = 0;
+  int elderSupportMoneyYears = 0;
+  int elderSupportAloneYears = 0;
+  int elderSupportReceived = 0;
+  int elderSupportPaid = 0;
+  int elderSupportSkippedYears = 0;
 
   /// Hangi yaşta hangi olaylar görüldü (Paket CH).
   ///
@@ -2969,6 +2983,75 @@ void _handleActivities(
       c.dismissNotice();
     }
     return c.state!.hasPendingEvent;
+  }
+
+  // ---- Yaşlılıkta bakım (Paket CJ) ---------------------------------
+  //
+  // **Rutinin en başında.** 70'inden sonra düşük sağlık bandındaki bir
+  // yılın ilk işi bu; ayrıca her eylem bir olay tetikleyip yılı erken
+  // bırakabiliyor (D-125) ve sona konan iş sıraya hiç gelmiyor —
+  // Paket CI'nin grup bloğunda ölçülen şeyin aynısı.
+  //
+  // **Kararın kendisi zar tüketmez:** seçim profilden çıkar ve eşik
+  // (0,5) **botun** politikası, oyunun sayısı değil. Araya giren olayı
+  // yerinde karşılamak ise olayı botun kendi zarıyla yanıtlar — bot o
+  // olayı zaten o yıl içinde yanıtlıyordu, yalnızca sırası öne
+  // geçiyor. Etkisi ölçüldü (250 hayat, modül açık/kapalı): ölüm yaşı
+  // ortalaması 72,37 / 72,32, net servet ortancası binde bir fark.
+  if (!intent.overrides.noElderSupport &&
+      c.elderSupportNeeded &&
+      !c.elderSupportDecided) {
+    sonuc.elderSupportNeedYears++;
+    // **Araya giren olay yerinde karşılanır** (Paket CB'nin deseni).
+    // İlk ölçümde 712 bakım yılının 295'i kararsız kaldı: o yılların
+    // başında bekleyen bir olay vardı ve `decideElderSupport` bekleyen
+    // olay varken `null` dönüyor. Gerçek oyuncu da pencereyi kapatıp
+    // kararına döner.
+    if (!_clearInterruptions(c, profile, intent, rng, sonuc)) return;
+    s = c.state!;
+    // Kesintiyi karşılamak durumu değiştirebilir (olay sağlığı
+    // düzeltebilir): o zaman karar düşer ama yılın geri kalanı
+    // bırakılmaz.
+    if (c.elderSupportNeeded && !c.elderSupportDecided) {
+      final ({
+        int cost,
+        int childShare,
+        int outOfPocket,
+        List<String> childNames
+      })? hesap = c.elderSupportCost();
+      final bool paraKapisi =
+          c.elderSupportBlockReason(ElderSupportChoice.bakimiOdet).isEmpty;
+      final bool aileKapisi =
+          c.elderSupportBlockReason(ElderSupportChoice.aileyeYuklen).isEmpty;
+      final ElderSupportChoice secim;
+      if (aileKapisi && profile.familyDesire >= 0.5) {
+        secim = ElderSupportChoice.aileyeYuklen;
+      } else if (paraKapisi && profile.healthCare >= 0.5) {
+        // Sağlığına para harcayan oyuncu bakımını da satın alır.
+        secim = ElderSupportChoice.bakimiOdet;
+      } else {
+        secim = ElderSupportChoice.kendiIdareEt;
+      }
+      final bool uygulandi = c.decideElderSupport(secim)?.applied ?? false;
+      if (uygulandi) {
+        switch (secim) {
+          case ElderSupportChoice.aileyeYuklen:
+            sonuc.elderSupportFamilyYears++;
+          case ElderSupportChoice.bakimiOdet:
+            sonuc.elderSupportMoneyYears++;
+            sonuc.elderSupportReceived += hesap?.childShare ?? 0;
+            sonuc.elderSupportPaid += hesap?.outOfPocket ?? 0;
+          case ElderSupportChoice.kendiIdareEt:
+            sonuc.elderSupportAloneYears++;
+        }
+        s = c.state!;
+      } else {
+        sonuc.elderSupportSkippedYears++;
+      }
+      if (kesildiMi()) return;
+    } else {
+      sonuc.elderSupportSkippedYears++;
+    }
   }
 
   // ---- Arkadaş grubu (Paket CI) -------------------------------------

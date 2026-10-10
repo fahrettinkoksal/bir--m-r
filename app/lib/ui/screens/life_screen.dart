@@ -4,6 +4,7 @@ import '../../domain/life/year_review.dart';
 import '../../domain/models/game_state.dart';
 import '../../state/game_scope.dart';
 import '../widgets/effect_chips.dart';
+import '../widgets/elder_support_card.dart';
 import '../widgets/life_log_view.dart';
 import '../widgets/pregnancy_notice.dart';
 import '../widgets/section_header.dart';
@@ -43,6 +44,15 @@ class LifeScreen extends StatelessWidget {
             key: const Key('life_pregnancy_card'),
             state: state,
           ),
+        ),
+      // Yaşlılıkta bakım kararı (Paket CJ): bekleyen doğum gibi bir yıl
+      // süren, kararı verilince kapanan bir durum. Yaşlı ebeveyn bakımı
+      // kişinin kartında duruyor; bunun konusu oyuncunun kendi yılı
+      // olduğu için günlüğün üstünde.
+      if (ElderSupportCard.visible(state))
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: ElderSupportCard(key: Key('life_elder_support_card')),
         ),
       if (ozet != null)
         Padding(

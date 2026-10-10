@@ -399,6 +399,36 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   35-55 aralığında, yani 35 eşiği "herhangi bir sınıf arkadaşı" demek.
   Eşik oyunun kendi sayısına (`Outing.prototypeOnlyCloseFriendBond`)
   bağlandı; uydurulmadı.
+- **Paket CJ.** "Belgede eksik yazıyor" bir bulgu değil, bir **iddia**;
+  önce koda bak. §3.2'nin beş maddesinden dördü çoktan kapanmıştı
+  (boşanma, işsizlik, oyuncudan para isteme, torunun hayatı) ve belge
+  bayatmıştı. Beşincisi gerçekten boştu — paket onun üzerine kuruldu,
+  belgenin tamamına değil.
+- **Paket CJ.** Bir sistemin **aynadaki hâli** varsa, sayıları ondan al.
+  Yaşlılıkta bakım `ElderCare`'in tersi: yaş eşiği (70), "yaş tek
+  başına yeter" kuralı (+10), çocuk payı kademeleri ve "havadan para
+  üretilmez" kuralı oradan geldi. Yeni denge uydurmak yerine var olan
+  dengeyi çevirmek, hem Faho'ya anlatılabilir hem de tek yerden
+  değiştirilebilir oluyor.
+- **Paket CJ.** Para yönünü ölçüm düzeltti. İlk yazımda çocuk oyuncunun
+  **cebine** para koyuyordu; ölçüm gösterdi ki 736 bakım yılının
+  yalnızca 8'inde oyuncunun parası yetmiyor (ölüm anı net servet
+  ortancası ~39,6 milyon ₺), yani kapı pratikte hiç açılmayacaktı. Yön
+  çevrildi: para cepten çıkar, çocuk faturanın bir kısmını üstlenir.
+  Tavan koymadan ölçtüğümde çocuklar faturanın **%100'ünü** kapatıyordu
+  ve "para gerçekten çıkar" boşa düşüyordu; pay %60 ile sınırlandı.
+- **Paket CJ.** Ölçüm aracının kendi gölgesine dikkat et: bot kararı
+  yılın başında verdiği için `onPreAge` ile taranan **her** kare "bu
+  yılın kararı verilmiş" oluyordu ve kapıların gerekçeleri hiç
+  ölçülemiyordu (ilk koşuda altı test bu yüzden kırmızıydı). Çözüm
+  durumu kurmak değil, botun o politikasını `BotOverrides` ile
+  kapatmak oldu — oyunun sayıları değişmedi, tarama karar **öncesi**
+  kareyi buldu.
+- **Paket CJ.** Bir etkiyi ölçerken tavanı unutma. "Yakınlık artmalı"
+  iddiası, bağı zaten **100** olan karede sınanamaz (yaşlılıkta en
+  yakın çocuğun bağ ortancası tam olarak bu, Q-205). Bekçi artık
+  etkisi ölçülebilen kareyi arıyor ve o karelerin **sayısına** da bir
+  taban koyuyor: tavan her kareyi yutmaya başlarsa test bunu söyler.
 
 ## Pano
 

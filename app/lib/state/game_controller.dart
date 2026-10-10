@@ -48,6 +48,7 @@ import '../domain/family/in_law_relations.dart';
 import '../domain/models/family_issue.dart';
 import '../domain/generation/parent_divorce.dart';
 import '../domain/interaction/elder_care.dart';
+import '../domain/interaction/elder_support.dart';
 import '../domain/interaction/child_naming.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
@@ -883,6 +884,70 @@ class GameController extends ChangeNotifier {
       rng: _random,
     );
     // Para yetmediyse durum değişmez; "yardım ettin" yazılmaz.
+    final bool uygulandi = !identical(sonuc.state, current);
+    if (uygulandi) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return ActivityOutcome(applied: uygulandi, text: sonuc.text);
+  }
+
+  // =====================================================================
+  // Yaşlılıkta bakım (Paket CJ) — `ElderCare`'in oyuncuya dönük tersi
+  // =====================================================================
+
+  /// Oyuncunun bu yıl bakıma ihtiyacı var mı?
+  bool get elderSupportNeeded =>
+      _state != null && ElderSupport.needsSupport(_state!);
+
+  /// Bu yılın kararı verildi mi?
+  bool get elderSupportDecided =>
+      _state != null && ElderSupport.decidedThisYear(_state!);
+
+  /// Yanında olabilecek kişiler; sıra eş, sonra en yakın çocuk.
+  List<Person> get elderSupportHelpers =>
+      _state == null ? const <Person>[] : ElderSupport.helpers(_state!);
+
+  /// Bu yılın bakım masrafı ve gücü yeten çocukların katkısı.
+  ///
+  /// Ekran **gerçek** sayıyı gösterir, tahmin etmez.
+  ({
+    int cost,
+    int childShare,
+    int outOfPocket,
+    List<String> childNames
+  })? elderSupportCost() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({int amount, List<String> names, List<String> ids}) katki =
+        ElderSupport.contribution(current);
+    return (
+      cost: ElderSupport.yearlyCost(),
+      childShare: katki.amount,
+      outOfPocket: ElderSupport.outOfPocket(current),
+      childNames: katki.names,
+    );
+  }
+
+  /// Bu kapı neden kapalı? Engel yoksa boş metin (D-038).
+  String elderSupportBlockReason(ElderSupportChoice choice) => _state == null
+      ? 'Etkin bir hayat yok.'
+      : ElderSupport.blockReason(_state!, choice);
+
+  /// Yaşlılık kararını uygular. Engel varsa durum değişmez.
+  ActivityOutcome? decideElderSupport(
+    ElderSupportChoice choice, {
+    String? helperId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ElderSupportResult sonuc = ElderSupport.apply(
+      state: current,
+      choice: choice,
+      rng: _random,
+      helperId: helperId,
+    );
     final bool uygulandi = !identical(sonuc.state, current);
     if (uygulandi) {
       _state = sonuc.state;
