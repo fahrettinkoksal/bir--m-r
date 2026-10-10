@@ -437,6 +437,19 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CL.** Yeni bir kart yazdıktan sonra onu **bütün ekran
+  olarak** bir kez oku. Anahtar testi aradığını bulur; döküm ekranda
+  ne olduğunu gösterir. İki yeni kartın ikisi de kendi testlerinden
+  geçiyordu ama biri aynı cümleyi üst üste iki kez yazıyor, öteki
+  oyuncunun grubunu üst düzeyde hiç göstermiyordu.
+- **Paket CL.** Bekçi yazarken "bu test eski davranışta kırmızı olur
+  mu?" sorusunu **çalıştırarak** sor. Tekrar denetimim `contains` ile
+  yazılmıştı ve eski metni kaçırıyordu: tek fark baştaki büyük harf.
+  Isırma denemesi olmasa bekçi yeşil görünüp hiçbir şey korumayacaktı.
+- **Paket CL.** Ekranda bir satırın özet verme kalıbı varsa, komşu
+  satırlar ondan geri kalmamalı. Hayvan satırı "Leblebi seninle
+  yaşıyor" derken arkadaş satırı sabit bir cümle yazıyordu; oyuncunun
+  kurduğu grup o yüzden görünmez kalmıştı.
 - **Paket CK.** İçerik ulaşılamaz görünüyorsa "oyun mu, bot mu" sorusu
   cevaplanabilir: `BotOverrides` ile botu yoksullaştırınca
   `suc_ceza_odemesi` çıktı. Oyunun ekonomisine dokunmadan içeriğin

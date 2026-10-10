@@ -43,11 +43,28 @@
 // Bebek karesi de bir hata verdi: doğum satırı oyunun verdiği geçici
 // adı tutuyor, ad verme ikinci bir satır ekliyordu; günlükte aynı yılda
 // iki ad duruyordu. Bekçi: `paket_cg_icerde_tasinma_ve_bebek_adi_test`.
+// **BU TUR NE BULDU (Paket CL, 10 Ekim 2026).** Dökümün kapsamına bu
+// oturumun iki yeni kartı eklendi (`YAŞLILIKTA BAKIM`, `ARKADAŞ
+// GRUBU`); dokuz karenin hepsi bulundu ve çıktı okununca iki kusur
+// çıktı — ikisi de **kendi testlerinin göremediği** türdendi, çünkü o
+// testler anahtar ve tek tek metin denetliyor, döküm ise ekranın
+// tamamını basıyor:
+//
+//   · Bakım kartı kapının gerekçesini durum satırında da yazıyordu:
+//     "Yanında olabilecek kimse yok." cümlesi üst üste iki kez.
+//   · Grubu süren oyuncu İlişkiler ekranının üst düzeyinde grubunun
+//     **hiç izini** görmüyordu; grup kartı yalnızca Arkadaşlar alt
+//     sayfasında. Aynı ekranda hayvan satırı "Leblebi seninle
+//     yaşıyor" diye özet veriyordu, yani kalıp zaten vardı.
+//
+// Bekçi: `paket_cl_ekran_okumasi_test.dart`.
 library;
 
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/interaction/elder_support.dart';
+import 'package:bir_omur/domain/interaction/friend_circles.dart';
 import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
@@ -201,6 +218,26 @@ void main() {
       yilIci: true,
     ),
     Durum('GEBELİK', (GameState s) => s.isExpecting, yilIci: true),
+    // Altıncı tur (Paket CL): bu oturumda yazılan iki kart hiçbir
+    // dökümde **bütün ekran** olarak çizilmemişti. Kendi testleri
+    // anahtar ve metin denetliyor; döküm ise ekranın tamamını basıyor
+    // ve üç turda sekiz gerçek hata tam bu farktan çıktı.
+    //
+    // Bakım kararı yıl içinde yaşanıyor ve **botun kendi kararı**
+    // kapıları kapattığı için (karar yılın başında veriliyor) bu kare
+    // aşağıda ayrı bir turda, `BotOverrides(noElderSupport: true)` ile
+    // aranıyor: oyunun sayıları değişmez, yalnızca botun tercihi
+    // kapanır ve kapılar açık yakalanır.
+    Durum(
+      'YAŞLILIKTA BAKIM',
+      (GameState s) =>
+          ElderSupport.needsSupport(s) && !ElderSupport.decidedThisYear(s),
+      yilIci: true,
+    ),
+    Durum(
+      'ARKADAŞ GRUBU',
+      (GameState s) => FriendCircles.activeOf(s) != null,
+    ),
   ];
 
   testWidgets('EKRAN DÖKÜMÜ — özel durumlar (taranarak bulundu)',
@@ -297,6 +334,32 @@ void main() {
         }
       }
       kurucu.dispose();
+    }
+
+    // 1c) **Bakım kararı botun kendi kapısından geçiyor.** Bot kararı
+    // yılın başında veriyor, bu yüzden `onPreAge` ile taranan her kare
+    // "bu yılın kararı verilmiş" oluyor ve üç kapı hiç çizilmiyor
+    // (Paket CJ'nin bekçisinde ölçülen şeyin aynısı). Kare burada
+    // botun o politikası kapatılarak aranıyor; durum yine **bulunuyor**.
+    if (!kareler.containsKey('YAŞLILIKTA BAKIM')) {
+      for (final PlayerArchetype arketip in arketipler) {
+        if (kareler.containsKey('YAŞLILIKTA BAKIM')) break;
+        for (int seed = 1; seed <= tohumSayisi; seed++) {
+          if (kareler.containsKey('YAŞLILIKTA BAKIM')) break;
+          playBotLife(
+            archetype: arketip,
+            seed: seed * 101 + arketip.index,
+            overrides: const BotOverrides(noElderSupport: true),
+            onPreAge: (GameState s) {
+              if (kareler.containsKey('YAŞLILIKTA BAKIM')) return;
+              if (ElderSupport.needsSupport(s) &&
+                  !ElderSupport.decidedThisYear(s)) {
+                kareler['YAŞLILIKTA BAKIM'] = (s, seed, arketip);
+              }
+            },
+          );
+        }
+      }
     }
 
     final StringBuffer rapor = StringBuffer()

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/features/feature_catalog.dart';
+import '../../../domain/interaction/friend_circles.dart';
 import '../../../domain/models/friend_circle.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
@@ -61,6 +62,26 @@ String _hayvanAltMetni(GameState state) {
     return '${yasayan.first.name} seninle yaşıyor';
   }
   return '${yasayan.length} hayvana bakıyorsun';
+}
+
+/// Arkadaşlar satırının alt metni (Paket CL).
+///
+/// **Neden değişti.** Paket CI grubu yazdı ama grup kartı yalnızca
+/// Arkadaşlar **alt sayfasının** içinde duruyordu: ekran dökümü 57
+/// yaşında, grubu süren bir hayatı bastı ve İlişkiler ekranının üst
+/// düzeyinde grubun **tek izi yoktu**. Aynı ekranda hayvan satırı
+/// "Leblebi seninle yaşıyor" diye özet veriyor; kalıp zaten vardı.
+///
+/// Modül kapalıysa ya da süren grup yoksa satır eski alt metnini
+/// taşır (D-032: kapalı modül ekranda yer tutmaz).
+String _arkadasAltMetni(GameState state) {
+  const String varsayilan = 'Okul ve hayat arkadaşların';
+  if (!FriendCircles.isOn(state)) return varsayilan;
+  final FriendCircle? grup = FriendCircles.activeOf(state);
+  if (grup == null) return varsayilan;
+  final int uye = FriendCircles.membersOf(state, grup).length;
+  if (uye == 0) return varsayilan;
+  return '${grup.name} · $uye kişi · ${grup.formedAtAge} yaşından beri';
 }
 
 /// Test için açılan kapı: alt metni doğrudan okur.
@@ -586,7 +607,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         if (arkadasSayisi > 0) ...<Widget>[
           MenuRow(
             title: 'Arkadaşlar',
-            subtitle: 'Okul ve hayat arkadaşların',
+            subtitle: _arkadasAltMetni(state),
             key: const Key('relationships_friends_row'),
             icon: Icons.handshake_outlined,
             accent: BirOmurAccents.turuncu,

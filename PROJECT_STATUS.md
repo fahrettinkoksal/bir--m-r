@@ -7636,5 +7636,51 @@ varsayılan botun sabıkalısının çoğu varlıklı (sınıflandırma bekçisi
 yoksullaştırılmış kohortta kapı açılıyor. Bekçinin ısırdığı
 doğrulandı: eski kapıya döndürülünce 5 testin 3'ü kırmızı.
 
+## Paket CL — dökümü yeni kartların üstüne tut (10 Ekim 2026)
+
+Paket CI (arkadaş grubu) ve Paket CJ (yaşlılıkta bakım) kendi
+testleriyle korunuyordu ama **bütün ekran olarak** hiç basılmamıştı.
+Ekran dökümünün üç turu sekiz gerçek hatayı tam bu farkla bulmuştu:
+anahtar testi aradığını bulur, döküm **ekranda ne olduğunu** gösterir.
+
+Dökümün kapsamına iki kare eklendi ve dokuzunun hepsi bulundu
+(`YAŞLILIKTA BAKIM`: Riskli hayat, tohum 1, yaş 70 · `ARKADAŞ GRUBU`:
+Aile odaklı, tohum 27, yaş 57). Bakım karesi için botun kendi kararı
+`BotOverrides(noElderSupport: true)` ile kapatıldı: bot kararı yılın
+başında verdiği için `onPreAge` ile taranan her kare "bu yılın kararı
+verilmiş" oluyor ve üç kapı hiç çizilmiyordu.
+
+### Çıktı okununca iki kusur çıktı
+
+1. **Bakım kartı aynı cümleyi iki kez yazıyordu.** Kimsesiz bir
+   hayatta durum satırı "… ve yanında olabilecek kimse yok." diyor,
+   hemen altındaki kapı da gerekçe olarak "Yanında olabilecek kimse
+   yok." yazıyordu. Durum satırı artık yalnızca **olanı** söylüyor;
+   yokluğu söyleyen yer kapının kendi gerekçesi (D-038).
+2. **Grup üst düzeyde görünmüyordu.** 57 yaşında, grubu süren bir
+   hayatta İlişkiler ekranının üst düzeyinde grubun tek izi yoktu:
+   kart yalnızca Arkadaşlar alt sayfasında duruyor. Aynı ekranda
+   hayvan satırı "Leblebi seninle yaşıyor" diye özet veriyor — kalıp
+   zaten vardı. Arkadaşlar satırının alt metni artık grubu söylüyor:
+   "İş çevresi · 3 kişi · 56 yaşından beri". Modül kapalıysa ya da
+   süren grup yoksa satır eski metnine dönüyor.
+
+### Bekçinin kendi kusuru da bu turda çıktı
+
+İlk yazımda tekrar denetimi `contains(engel)` ile yapılıyordu ve
+**ısırmıyordu**: eski cümle "… ve yanında olabilecek kimse yok."
+diyordu, gerekçe ise "Yanında olabilecek kimse yok." — tek fark
+baştaki harf. Karşılaştırma büyük/küçük harf ve nokta
+normalleştirmesiyle yapılınca bekçi gerçekten ısırdı: eski davranışta
+4 testin 2'si kırmızı.
+
+### Gözlem (değişiklik yapılmadı)
+
+Künyedeki durum satırı 70 yaşında "uzun süredir bakım yok" yazıyor; o
+**kuaför/öz bakım** ölçüsüdür (`StatAging`), yaşlılık bakımı değil.
+Aynı ekranda bakım kartıyla birlikte göründüğünde iki "bakım" aynı
+şey sanılabilir. Onaylı bir metin olduğu için dokunulmadı; Faho
+isterse kartın başlığı ("Bu yıl kim yanında?") zaten ayırt edici.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

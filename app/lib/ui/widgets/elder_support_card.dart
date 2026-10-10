@@ -119,9 +119,14 @@ class _ElderSupportCardState extends State<ElderSupportCard> {
     })? hesap,
   ) {
     final List<String> parcalar = <String>[];
+    // **Kapının gerekçesi burada tekrarlanmaz.** Ekran dökümü (Paket
+    // CL) bu kartı 70 yaşında, kimsesiz bir hayatta bastı ve
+    // "Yanında olabilecek kimse yok." cümlesi üst üste iki kez
+    // çıkıyordu: bir kez durum satırında, bir kez de düğmenin altında.
+    // Durum satırı artık yalnızca **olanı** yazıyor; yokluğu söyleyen
+    // yer kapının kendi gerekçesi (D-038).
     parcalar.add(yardimcilar.isEmpty
-        ? 'Bu yılı çevirmek eskisi gibi kolay değil ve yanında '
-            'olabilecek kimse yok.'
+        ? 'Bu yılı çevirmek eskisi gibi kolay değil.'
         : 'Bu yılı çevirmek eskisi gibi kolay değil. Yanında '
             '${yardimcilar.map((Person p) => p.firstName).join(', ')} '
             'olabilir.');
