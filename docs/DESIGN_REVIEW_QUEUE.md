@@ -8304,3 +8304,53 @@ hiçbir şeyi etkilemez. Tamamen silmek için `FeatureId.evDosemesi`
 satırındaki `removableFiles` listesi yeter
 (`furnishing.dart`, `furnishing_page.dart`, `paket_bt_ev_dosemesi_test.dart`)
 artı katalog ve mağaza satırları.
+
+### Q-217 — Komşu gerçek kişi oldu: kapsam ve açık sorular
+
+**Durum: prototipte eklendi, Faho'nun onayını bekliyor (Claude,
+10 Ekim 2026).** `DECISIONS.md`'ye yazılmadı; bütün sayılar
+`prototypeOnly` ve modül anahtarı `komsular` ile tamamen kapatılabilir.
+
+**Neden eklendi.** Paket BP apartmanı metinde yaşatıyordu ve kendi
+dosyasına "komşunun kalıcı kişi olması ayrı bir paket" diye yazmıştı;
+yol haritası da aynı sırayı veriyordu.
+
+**Kurduğum model.** Komşuluk **oturulan eve** bağlı: `Person.homeTie`
+hangi evin komşusu olduğunu tutar (`ev:<konut>` ya da `kira:<şehir>`).
+Kendi evine ya da kiralığa çıkınca 1-3 komşu tanınır; taşınınca
+komşuluk biter, yakınlık 55'i geçmişse kişi **arkadaş** olur (nerede
+tanışıldığı kayıtta kalır), geçmemişse eski komşu olarak kayıtta durur.
+Ailesinin yanında yaşayanın komşusu olmaz: apartmanı o seçmiyor.
+
+**Sayılar (hepsi `prototypeOnly`, önerim).** Komşu sayısı 1-3;
+başlangıç yakınlığı 8-22 (sınıf arkadaşının 35-55'inden bilerek düşük —
+selam verilen biri henüz tanıdık değil); görüşmeye devam eşiği 55
+(yakın arkadaşlık eşiğiyle aynı); komşu yaşı 19-78.
+
+**Açık bıraktığım sorular (karar değil, gözlem).**
+· **Komşuyla romantik yol açılmadı.** Akrabalık yasağı değil, kapsam
+  kararı: tanışma yolları (Finger, mevcut tanışma olayları) aynen
+  duruyor. "Komşuyla flört olabilsin mi?" senin kararın; bence önce
+  komşuluk oturmalı.
+· **Kirada komşuluk anahtarı şehir düzeyinde.** Oyun hangi dairede
+  kiracı olduğunu tutmuyor; aynı şehirde kiradan kiraya geçmek komşuyu
+  değiştirmiyor. Daire düzeyinde ayırmak kiracılık kaydı ister (yeni
+  alan + kayıt göçü).
+· **Net servet iki blokta da %6 düştü** (56,9→60,4 M ve 52,7→56,6 M
+  arası). Komşu olayları para istiyor ve bot seçenekleri rastgele
+  seçiyor. Paranın harcanacak yeri olması Paket AD/5'in istediği şeydi,
+  ama tutarları birlikte gözden geçirebiliriz.
+· **Ev eşyası gibi komşu da miras bırakmıyor/almıyor;** vefat eden
+  komşunun ailesi kayda girmiyor. Apartmana yeni taşınan kişi de
+  modellenmedi: komşu listesi taşınmadıkça sabit.
+· **Botun yıllık etkileşim bütçesi** oyunun kotası değil (ayrı bulgu,
+  `docs/EKSIKLER.md`): sosyal ölçümler oyunun üst sınırını değil botun
+  bütçesini gösteriyor.
+
+**Geri alma yolu.** Ayarlar > Modüller > "Komşular" kapat: komşu
+üretilmez, ekran satırı çıkmaz, 12 olay hiç listelenmez (mevcut
+kayıttaki komşular kayıtta kalır ama gündelik listeye girmez).
+Tamamen silmek için `FeatureId.komsular` satırındaki `removableFiles`
+listesi (`neighbours.dart`, `event_pool_neighbour.dart`,
+`paket_bu_komsular_test.dart`) artı `RelationType.komsu/eskiKomsu`
+satırları — kalan bağları derleyici gösterir.
