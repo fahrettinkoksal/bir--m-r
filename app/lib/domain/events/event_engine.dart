@@ -15,6 +15,7 @@ import '../../data/insurance_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
+import '../interaction/friend_circles.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
 import '../economy/insurance.dart';
@@ -386,6 +387,11 @@ class EventEngine {
     // Ehliyet ve sosyal medya hesabı: olmayan şeyle olay kurulmaz.
     if (!state.licenses.containsAll(req.requiredLicenses)) return false;
     if (req.requiresSocialAccount && state.socialAccounts.isEmpty) {
+      return false;
+    }
+    // Arkadaş grubu (Paket CI): kayıt yürürlükte değilse grup olayı
+    // çıkmaz. Modül kapısı zardan önce zaten geçildi (Paket BM/2).
+    if (req.requiresFriendCircle && FriendCircles.activeOf(state) == null) {
       return false;
     }
     // Ün gerektiren olaylar: kitle gerçekten oluşmadan çıkmaz.

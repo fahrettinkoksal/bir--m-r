@@ -380,6 +380,25 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   sunmuyor, D-180), yaş 4-5'te ise aracın tabanı (oyun 32 etkileşim
   sunuyor, bot 1-2 kullanıyor). Aynı sayının iki yarısı iki farklı
   sebepten; tek bir cümleyle sınıflandırmak yanlış olurdu.
+- **Paket CI.** Yeni bir sistem yazarken önce **oyunda o işi yapan yol
+  var mı** diye bak. Arkadaş grubu için ayrı bir buluşma motoru yazmak
+  cazipti; oysa birden çok kişiyle aktiviteye gitmek Paket X/2'de
+  zaten vardı. Grup yalnızca **kalıcı kimlik** ekledi: kimlerle, ne
+  zamandan beri, kim ayrıldı. Maliyet, kota ve etki tek yerden okunuyor.
+- **Paket CI.** Kendi kurguna da ölçümle bak. Grup üç kez yanlış
+  kurulmuştu ve üçünü de bot ölçümü söyledi: (1) aday kümesi oyunun
+  refakatçi kuralından geniş olduğu için grup kurulup **hiç
+  buluşamıyordu**; (2) bot bloğu aktivite rutininin sonunda olduğu için
+  sıraya hiç gelmiyordu (D-125 yılı erken bırakıyor); (3) buluşmaya
+  bütün üyeler gönderildiği için, bağ sönünce buluşma sessizce
+  düşüyordu. Hiçbiri kodu okuyarak görünmedi; "120 hayatta kaç kez
+  oldu?" sorusu gösterdi.
+- **Paket CI.** Bir eşiği seçerken dağılımın **kırılma noktasını** ara.
+  Grup adayı için bağ eşiği 35'te her hayatta üç kişi buluyordu, 40'ta
+  yalnızca beşte birinde. Sebep: sınıf arkadaşının başlangıç bağı
+  35-55 aralığında, yani 35 eşiği "herhangi bir sınıf arkadaşı" demek.
+  Eşik oyunun kendi sayısına (`Outing.prototypeOnlyCloseFriendBond`)
+  bağlandı; uydurulmadı.
 
 ## Pano
 

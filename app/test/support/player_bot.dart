@@ -570,6 +570,14 @@ class BotLifeResult {
   // İçerik
   final Set<String> seenEvents = <String>{};
 
+  /// Arkadaş grubu kurdu mu, kaç kez grupla buluştu (Paket CI)?
+  ///
+  /// Grup oyuncunun kendi düğmesiyle kurulur; bot o düğmeye basmazsa
+  /// grup içeriği "erişilemez" görünür (Paket BP dersi).
+  bool formedFriendCircle = false;
+  int friendCircleMeets = 0;
+  int friendCircleDispersed = 0;
+
   /// Hangi yaşta hangi olaylar görüldü (Paket CH).
   ///
   /// `seenEvents` bir kümedir ve yaşı kaybeder; "hangi yıl hiç olay
@@ -2961,6 +2969,39 @@ void _handleActivities(
       c.dismissNotice();
     }
     return c.state!.hasPendingEvent;
+  }
+
+  // ---- Arkadaş grubu (Paket CI) -------------------------------------
+  //
+  // **Oyuncunun düğmesinden geçer.** Grup kendiliğinden oluşmaz; bot da
+  // kurmazsa dokuz grup olayı hiç ölçülmez (Paket BP: "bot o yolu
+  // yürümüyorsa içerik erişilemez görünür").
+  //
+  // **Neden rutinin başında.** İlk yazımda blok eğlencenin yanına,
+  // yani listenin sonuna konmuştu ve 120 hayatta **tek bir buluşma**
+  // ölçülmedi. Sebep bu rutinin kendi yapısı: her eylem bir olay
+  // tetikleyebiliyor ve `kesildiMi()` yılı erken bırakıyor (D-125).
+  // Sona konan iş sıraya hiç gelmiyor — CB'de kitap okumanın, BX'te
+  // kulüp işinin başına gelen şeyin aynısı. Grup, sosyal oyuncunun
+  // önce yaptığı şeydir; burada duruyor.
+  if (c.friendCircle == null) {
+    if (c.friendCircleBlockReason.isEmpty &&
+        rng.nextDouble() < profile.socialDesire * 0.5) {
+      if (c.formFriendCircle().applied) {
+        sonuc.formedFriendCircle = true;
+      }
+      if (kesildiMi()) return;
+    }
+  } else if (rng.nextDouble() < profile.socialDesire * 0.6) {
+    // Grupla buluşmak: aktivite yolundan geçiyor (tek kanonik yol).
+    final ActivityAction? bulusma = _actionByIdBot('sinema');
+    if (bulusma != null && c.activityAvailability(bulusma).isAllowed) {
+      sonuc.diag.activityActions++;
+      if (c.meetFriendCircle(bulusma)?.applied ?? false) {
+        sonuc.friendCircleMeets++;
+      }
+      if (kesildiMi()) return;
+    }
   }
 
   // ---- Hobi --------------------------------------------------------

@@ -5,6 +5,7 @@ import '../features/feature_catalog.dart';
 
 import 'blackjack_game.dart';
 import 'business.dart';
+import 'friend_circle.dart';
 import 'insurance_policy.dart';
 import 'criminal_record.dart';
 import 'education.dart';
@@ -78,6 +79,7 @@ class GameState {
     this.legal = const LegalState(),
     this.businesses = const <Business>[],
     this.insurance = const <InsurancePolicy>[],
+    this.friendCircles = const <FriendCircle>[],
     this.pendingTrial,
     this.unprotectedTries = 0,
     this.ivfAttempts = 0,
@@ -241,6 +243,14 @@ class GameState {
   /// "ne kadar prim ödedim, ne kadarı karşılandı" sorusu ekranda
   /// uydurmadan yanıtlanabilsin.
   final List<InsurancePolicy> insurance;
+
+  /// Arkadaş grupları (Paket CI).
+  ///
+  /// En fazla **biri** sürüyor (`isActive`); dağılan gruplar listede
+  /// kalır, çünkü "kimlerle takılırdım" sorusu hayat sonunda da
+  /// yanıtlanabilsin (D-029, D-038 ile aynı ilke). Eski kayıtlarda bu
+  /// alan yoktur ve boş açılır; geriye dönük grup **uydurulmaz**.
+  final List<FriendCircle> friendCircles;
 
   /// Adli durum: dosyalar, sabıka, hapis ve denetim dönemi (D-128).
   ///
@@ -1370,6 +1380,7 @@ class GameState {
     LegalState? legal,
     List<Business>? businesses,
     List<InsurancePolicy>? insurance,
+    List<FriendCircle>? friendCircles,
     Object? pendingTrial = _unsetEvent,
     int? lastCrisisAge,
     bool? healthWarned,
@@ -1522,6 +1533,9 @@ class GameState {
       insurance: insurance == null
           ? this.insurance
           : List<InsurancePolicy>.unmodifiable(insurance),
+      friendCircles: friendCircles == null
+          ? this.friendCircles
+          : List<FriendCircle>.unmodifiable(friendCircles),
       pendingTrial: pendingTrial == _unsetEvent
           ? this.pendingTrial
           : pendingTrial as PendingTrial?,

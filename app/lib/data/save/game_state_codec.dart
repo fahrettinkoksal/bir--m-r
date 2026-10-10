@@ -11,6 +11,7 @@ library;
 import '../../domain/models/company_vitals.dart';
 import '../../domain/models/family_issue.dart';
 import '../../domain/models/loan.dart';
+import '../../domain/models/friend_circle.dart';
 import '../../domain/models/insurance_policy.dart';
 import '../../domain/models/pending_race.dart';
 import '../../domain/life/year_review.dart';
@@ -475,6 +476,18 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
             'claimsPaid': p.claimsPaid,
             'claimCount': p.claimCount,
             'lapsedAtAge': p.lapsedAtAge,
+          },
+      ],
+      // Arkadaş grupları (Paket CI). Eski kayıtlarda yoktur; boş açılır.
+      // Dağılan grup da yazılır: kayıt silinmez (D-029, D-038).
+      'friendCircles': <Object?>[
+        for (final FriendCircle c in state.friendCircles)
+          <String, Object?>{
+            'name': c.name,
+            'memberIds': c.memberIds,
+            'formedAtAge': c.formedAtAge,
+            'lastMetAge': c.lastMetAge,
+            'dispersedAtAge': c.dispersedAtAge,
           },
       ],
       // Adli durum (D-128). Eski kayıtlarda yoktur; geriye dönük sabıka
@@ -1959,6 +1972,16 @@ GameState decodeGameState(Map<String, Object?> json) {
             case final InsurancePolicy p)
           p,
     ]),
+    // Eski kayıtlarda arkadaş grubu yoktur; **geriye dönük grup
+    // uydurulmaz**, liste boş açılır (Paket CI). Üyesi kayıtta
+    // bulunmayan grup da yüklenmez: "grubu olan ama kimsesi olmayan"
+    // bir hayat tutarsız olurdu.
+    friendCircles: List<FriendCircle>.unmodifiable(<FriendCircle>[
+      for (final Object? e in _optionalRawList(json, 'friendCircles'))
+        if (_decodeFriendCircle(_asMap(e, 'friendCircles'), people)
+            case final FriendCircle c)
+          c,
+    ]),
     // Eski kayıtlarda adli kayıt yoktur; **temiz** açılır (D-128).
     legal: json['legal'] == null
         ? const LegalState()
@@ -3263,6 +3286,33 @@ LandlordRecord _decodeLandlord(Map<String, Object?> json) => LandlordRecord(
 ///
 /// Tanınmayan tür **atılır**: ileri sürümde yazılmış bir poliçe eski
 /// sürümü çökertmez, yalnızca görünmez olur.
+/// Arkadaş grubu kaydını çözer (Paket CI).
+///
+/// **Kayıtta bulunmayan üye atılır** ve üyesi kalmayan grup hiç
+/// yüklenmez: "grubu olan ama kimsesi olmayan" bir hayat tutarsız
+/// olurdu (evlilik kaydındaki aynı denetimin küçük hâli).
+FriendCircle? _decodeFriendCircle(
+  Map<String, Object?> json,
+  List<Person> people,
+) {
+  final String ad = _stringOrNull(json, 'name') ?? '';
+  if (ad.isEmpty) return null;
+  final Object? ham = json['memberIds'];
+  final List<String> uyeler = <String>[
+    if (ham is List)
+      for (final Object? e in ham)
+        if (e is String && people.any((Person p) => p.id == e)) e,
+  ];
+  if (uyeler.isEmpty) return null;
+  return FriendCircle(
+    name: ad,
+    memberIds: List<String>.unmodifiable(uyeler),
+    formedAtAge: _intOr(json, 'formedAtAge', 0),
+    lastMetAge: _intOrNull(json, 'lastMetAge'),
+    dispersedAtAge: _intOrNull(json, 'dispersedAtAge'),
+  );
+}
+
 InsurancePolicy? _decodeInsurance(Map<String, Object?> json) {
   final InsuranceKind? kind =
       insuranceKindByKey(_stringOrNull(json, 'kind') ?? '');

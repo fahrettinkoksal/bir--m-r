@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/features/feature_catalog.dart';
+import '../../../domain/models/friend_circle.dart';
 import '../../../domain/models/game_state.dart';
 import '../../../domain/models/person.dart';
 import '../../../data/pet_catalog.dart';
@@ -10,6 +12,7 @@ import '../../../domain/activities/activity_engine.dart';
 import '../../../domain/models/family_issue.dart';
 import '../../../domain/models/person_development.dart';
 import '../../../domain/models/relation.dart';
+import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/person_card.dart';
@@ -292,6 +295,13 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         backLabel: 'İlişkiler',
         onBack: () => setState(() => _subPage = null),
         children: <Widget>[
+          // Arkadaş grubu (Paket CI): yalnızca Arkadaşlar alt
+          // sayfasında ve yalnızca modül açıkken görünür.
+          if (_subPage == RelationshipSubPage.arkadaslar &&
+              state.featureOn(FeatureId.arkadasGrubu)) ...<Widget>[
+            const _FriendCircleCard(),
+            const SizedBox(height: 10),
+          ],
           for (final Person person in kisiler) ...<Widget>[
             PersonCard(
               person: person,
@@ -796,6 +806,106 @@ class _HaneSecimiKarti extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Arkadaş grubu kartı (Paket CI).
+///
+/// **Grup kendiliğinden oluşmaz.** D-130'un en pahalı dersi şu: oyuncunun
+/// düğmesi olmayan bir sistem hiç kullanılmaz. Bu kart kurma düğmesini
+/// taşır; grup varsa kimlerle ve ne zamandan beri olduğunu yazar.
+///
+/// Engel varsa düğme **gizlenmez**, gerekçesiyle soluk durur (D-038).
+class _FriendCircleCard extends StatefulWidget {
+  const _FriendCircleCard();
+
+  @override
+  State<_FriendCircleCard> createState() => _FriendCircleCardState();
+}
+
+class _FriendCircleCardState extends State<_FriendCircleCard> {
+  String? _sonuc;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final FriendCircle? grup = controller.friendCircle;
+    final List<Person> uyeler = controller.friendCircleMembers;
+    final String engel = controller.friendCircleBlockReason;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(Icons.groups_2_outlined,
+                    color: theme.colorScheme.secondary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    grup == null ? 'Arkadaş grubu' : grup.name,
+                    key: const Key('friend_circle_title'),
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              grup == null
+                  ? 'Birkaç yakın arkadaşını bir arada tutan bir grup '
+                      'kurabilirsin.'
+                  : '${uyeler.map((Person p) => p.firstName).join(', ')} '
+                      '· ${grup.formedAtAge} yaşından beri',
+              key: const Key('friend_circle_line'),
+              style: theme.textTheme.bodyMedium,
+            ),
+            if (grup != null && grup.lastMetAge != null) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(
+                'Son buluşma: ${grup.lastMetAge} yaşında',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (grup == null) ...<Widget>[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: const Key('friend_circle_form'),
+                  onPressed: engel.isNotEmpty
+                      ? null
+                      : () => setState(() {
+                            _sonuc = controller.formFriendCircle().message;
+                          }),
+                  child: const Text('Grup kur'),
+                ),
+              ),
+              if (engel.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 6),
+                Text(
+                  engel,
+                  key: const Key('friend_circle_block'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+            if (_sonuc != null) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(_sonuc!, style: theme.textTheme.bodySmall),
+            ],
+          ],
+        ),
       ),
     );
   }

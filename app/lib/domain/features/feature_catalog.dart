@@ -210,6 +210,26 @@ enum FeatureId {
       'app/lib/ui/screens/sections/insurance_page.dart',
       'app/test/paket_ca_sigorta_test.dart',
     ],
+  ),
+
+  /// Paket CI — arkadaş grubu: kalıcı bir grup kaydı, grupla buluşma,
+  /// üyenin ayrılması ve grubun dağılması.
+  arkadasGrubu(
+    saveKey: 'arkadas_grubu',
+    title: 'Arkadaş grubu',
+    lostWhenOff:
+        'Grup kurma düğmesi ve "Arkadaş grubum" kartı kalkar; grup '
+        'olayları çıkmaz, üye ayrılması ve dağılma işlemez. Arkadaşlık '
+        'tek tek yürür (Paket CI öncesi gibi) ve birden çok kişiyle '
+        'aktiviteye gitmek yine mümkündür — o Paket X/2\'nin yolu. '
+        'Kayıttaki gruplar silinmez, donar.',
+    paket: 'Paket CI — arkadaş grubu',
+    removableFiles: <String>[
+      'app/lib/domain/models/friend_circle.dart',
+      'app/lib/domain/interaction/friend_circles.dart',
+      'app/lib/data/event_pool_friend_circle.dart',
+      'app/test/paket_ci_arkadas_grubu_test.dart',
+    ],
   );
 
   const FeatureId({

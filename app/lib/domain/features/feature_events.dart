@@ -11,6 +11,7 @@ library;
 
 import '../../data/event_pool_early_years.dart';
 import '../../data/event_pool_home.dart';
+import '../../data/event_pool_friend_circle.dart';
 import '../../data/event_pool_late_years.dart';
 import '../../data/event_pool_neighbour.dart';
 import '../../data/event_pool_threshold_years.dart';
@@ -28,6 +29,7 @@ abstract final class FeatureEvents {
     FeatureId.oturulanEv: kHomeEvents,
     FeatureId.komsular: kNeighbourEvents,
     FeatureId.sonYillar: kLateYearsEvents,
+    FeatureId.arkadasGrubu: kFriendCircleEvents,
   };
 
   /// Olay kimliğinden modüle eşleme; bir kez kurulur.

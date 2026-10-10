@@ -46,6 +46,7 @@ class EventRequirement {
     this.requireOutsideHousehold = false,
     this.requireReachable = false,
     this.requiresSocialAccount = false,
+    this.requiresFriendCircle = false,
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
     this.requiresTenant = false,
@@ -288,6 +289,14 @@ class EventRequirement {
   ///
   /// Hesabı olmayan oyuncuya sosyal medya üzerinden mesaj gelmez.
   final bool requiresSocialAccount;
+
+  /// Süren bir **arkadaş grubu** gerektirir (Paket CI).
+  ///
+  /// Grup kaydı olmayan oyuncuya "grup" diye bir şey anlatılmaz; grup
+  /// dağılınca da anlatılmaz, çünkü koşul hikâye izi değil **yürürlükte
+  /// olan kayıt**. İz kullanılsaydı grup dağıldıktan sonra da olaylar
+  /// gelirdi (izler silinmez).
+  final bool requiresFriendCircle;
 
   /// Sahip olunması gereken ehliyetler.
   ///

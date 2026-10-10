@@ -102,6 +102,7 @@ import '../data/business_catalog.dart';
 import '../data/gift_catalog.dart';
 import '../domain/economy/business_engine.dart';
 import '../domain/economy/business_market.dart';
+import '../domain/interaction/friend_circles.dart';
 import '../domain/interaction/friendship_depth.dart';
 import '../domain/models/business.dart';
 import '../domain/law/legal_engine.dart';
@@ -130,6 +131,7 @@ import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
 import '../data/insurance_catalog.dart';
 import '../domain/economy/insurance.dart';
+import '../domain/models/friend_circle.dart';
 import '../domain/models/insurance_policy.dart';
 import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
@@ -1575,6 +1577,97 @@ class GameController extends ChangeNotifier {
             others: others,
           ),
   );
+
+  // =====================================================================
+  // Arkadaş grubu (Paket CI)
+  // =====================================================================
+  //
+  // **Grup yeni bir etkileşim motoru değil.** Buluşma `performActivity`
+  // yolundan geçiyor (Paket X/2'nin çoklu refakatçi desteği): maliyet,
+  // yıllık kota, bağ ve mutluluk tek yerden okunuyor. Burada tutulan
+  // tek şey **kalıcı kimlik** — kimlerle takıldığın ve ne zamandır.
+
+  /// Süren grup; yoksa `null`.
+  FriendCircle? get friendCircle =>
+      _state == null ? null : FriendCircles.activeOf(_state!);
+
+  /// Grubun yaşayan ve küs olmayan üyeleri.
+  List<Person> get friendCircleMembers {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    final FriendCircle? grup = FriendCircles.activeOf(current);
+    if (grup == null) return const <Person>[];
+    return FriendCircles.membersOf(current, grup);
+  }
+
+  /// Gruba çağrılabilecek adaylar (bağa göre azalan sırada).
+  List<Person> get friendCircleCandidates =>
+      _state == null ? const <Person>[] : FriendCircles.eligible(_state!);
+
+  /// Grup kurmaya engel; engel yoksa boş metin.
+  String get friendCircleBlockReason => _state == null
+      ? 'Etkin bir hayat yok.'
+      : FriendCircles.blockReason(_state!);
+
+  /// Grubu kurar.
+  ({bool applied, String message}) formFriendCircle() {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Etkin bir hayat yok.');
+    }
+    final ({GameState state, bool applied, String text}) sonuc =
+        FriendCircles.form(current);
+    if (!sonuc.applied) return (applied: false, message: sonuc.text);
+    // Grup kurmak anlamlı bir ilerlemedir (D-125) ve sonucu pencerede
+    // görünür (D-096: her uygulanmış eylem bildirim bırakır).
+    _state = _countProgress(
+      current,
+      _announce(
+        current,
+        sonuc.state,
+        sonuc.text,
+        title: 'Arkadaş grubu',
+        tag: 'grup',
+      ),
+    );
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.text);
+  }
+
+  /// Grupla buluşur: eylem **aktivite yolundan** uygulanır.
+  ///
+  /// Üye yoksa `null` döner. Buluşma gerçekleştiyse grubun son buluşma
+  /// yaşı kayda girer.
+  ActivityOutcome? meetFriendCircle(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    // **O gün kim gelebiliyorsa onunla.** İlk yazımda bütün üyeler
+    // refakatçi olarak gönderiliyordu ve ölçümde 120 hayatta neredeyse
+    // hiç buluşma olmadı: `Outing.companionAvailability` arkadaşın
+    // bağının **o anda** 45 ve üstü olmasını istiyor, bağ ise her yıl
+    // sönüyor (D-130). Yani grup kuruluyor, bir süre sonra kimse
+    // "gelebilir" sayılmıyor ve buluşma sessizce düşüyordu. Grup kaydı
+    // yerinde kalır; gelen gelir.
+    final List<Person> uyeler = friendCircleMembers
+        .where((Person p) =>
+            Outing.companionAvailability(current, action, p).isAllowed)
+        .toList(growable: false);
+    if (uyeler.isEmpty) return null;
+    final ActivityOutcome? sonuc = performActivity(
+      action,
+      companion: uyeler.first,
+      others: uyeler.skip(1).toList(growable: false),
+    );
+    if (sonuc == null || !sonuc.applied) return sonuc;
+    final GameState? sonra = _state;
+    if (sonra != null) {
+      _state = FriendCircles.markMet(sonra);
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc;
+  }
 
   // =====================================================================
   // Kurs ücreti ve aileden destek (Paket AJ)

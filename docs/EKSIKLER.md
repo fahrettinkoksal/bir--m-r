@@ -232,6 +232,19 @@ evlilik → boşanma) derinken, arkadaşlık bunların yanında çok sığ kalı
 > **arkadaş grubu** ve **çocukluk arkadaşıyla yıllar sonra karşılaşma**.
 > Bölümü silmiyorum çünkü ölçümün kaydı; ama bir sonraki paket seçilirken
 > buradaki listeye değil koda bakılmalı.
+>
+> **GÜNCELLEME (10 Ekim 2026, Paket CI).** Yukarıdaki iki kalan eksik
+> koda bakılarak denetlendi. **Çocukluk arkadaşıyla karşılaşma zaten
+> kodlu** (`event_pool_friendship.dart`, D-130'un zinciri); o satır
+> eskimiş. **Arkadaş grubu gerçekten yoktu** ve Paket CI'de yazıldı:
+> kalıcı grup kaydı (`GameState.friendCircles`, kodeke dahil), oyuncunun
+> kurma düğmesi, grupla buluşma (Paket X/2'nin aktivite yolundan),
+> üyenin ayrılması, grubun dağılması ve dokuz grup olayı. Modül
+> anahtarı: `arkadas_grubu`. Ölçüm: 120 hayatın 8'inde grup kuruluyor —
+> seyrek, çünkü oyunun arkadaşlık hunisi hayat başına ortanca **2**
+> yakın arkadaş veriyor ve grup üç kişi istiyor. Eşiği gevşetmek
+> **Q-227**'de karar bekliyor. Yani §3.1'in listesinde kalan gerçek
+> eksik **kalmadı**.
 
 ### 3.2 Çocuğun hayatı tek yönlü
 Çocuk kendi hayatını yaşıyor (okul, meslek, birikim — D-045) ve artık

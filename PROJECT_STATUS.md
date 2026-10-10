@@ -7401,5 +7401,81 @@ her bantta en az 60 (çocukluk) / 120 (yetişkin) farklı olay görülecek.
 yapıldığında yetişkin yoğunluğu 1,75 → 1,00'e düşüyor ve test kırmızı
 yanıyor.
 
+## Paket CI — arkadaş grubu (10 Ekim 2026)
+
+`docs/EKSIKLER.md` §3.1 arkadaşlığın eksiklerini saymıştı; D-130 çoğunu
+kapattı ve o bölümün 9 Ekim güncellemesi kalan iki eksiği yazdı:
+**arkadaş grubu** ve çocukluk arkadaşıyla yıllar sonra karşılaşma.
+Koda bakıldı: ikincisi D-130'un zincirlerinde **kodlu**
+(`event_pool_friendship.dart`), grup ise hiç yoktu —
+`arkadasGrubu`/`friendGroup` tek bir dosyada geçmiyordu.
+
+### Yeni bir etkileşim motoru yazılmadı
+
+Birden çok kişiyle aktiviteye gitmek zaten vardı (Paket X/2, `Outing`):
+maliyet kişi başına çarpılıyor, her katılımcıyla bağ artıyor. Eksik olan
+**kalıcı kimlik**ti: kimlerle takıldığın, ne zamandır, kim ayrıldı.
+Buluşma yine aktivite yolundan geçiyor, böylece ekonomi ve etki tek
+yerden okunuyor.
+
+| Parça | Nerede |
+| --- | --- |
+| Kayıt | `GameState.friendCircles` + kodek (dağılan grup silinmez) |
+| Motor | `domain/interaction/friend_circles.dart` (kurma, aday, yıllık bakım) |
+| Olaylar | `data/event_pool_friend_circle.dart` — 9 olay, üçü karşılık |
+| Anahtar | `FeatureId.arkadasGrubu` + `docs/FEATURE_FLAGS.md` satırı |
+| Ekran | İlişkiler → Arkadaşlar'ın başındaki grup kartı ("Grup kur") |
+| Bot | aktivite rutininin başında: kurar ve grupla buluşur |
+
+### Ölçüm paketi üç kez şekillendirdi (120 hayat)
+
+1. **Aday kümesi fazla genişti.** Sınıf arkadaşı, iş arkadaşı ve komşu
+   da gruba alınıyordu; grup 11 hayatta kuruldu ama **tek bir buluşma
+   olmadı**, çünkü `Outing.companionRelations` o üç türü taşımıyor —
+   üye sinemaya gelemiyor. Aday kümesi artık oyunun kendi refakatçi
+   kuralından okunuyor (yalnızca `arkadas`, bağ ≥ 45).
+2. **Bot bloğu listenin sonundaydı.** Aktivite rutini her eylemden
+   sonra olay çıkabildiği için yılı erken bırakıyor (D-125); sona konan
+   iş sıraya hiç gelmiyordu. Blok rutinin başına alındı: grup kuran
+   hayat **2 → 8**.
+3. **Buluşmaya bütün üyeler gönderiliyordu.** Refakatçi kuralı
+   arkadaşın bağının **o anda** 45+ olmasını istiyor, bağ ise her yıl
+   sönüyor. Artık o gün gelebilen üyelerle buluşuluyor: buluşma **0 →
+   3**.
+
+**Son durum:** 120 hayatın **8'inde** grup kuruluyor, **2'sinde** en az
+bir buluşma oluyor, **7'sinde** üye ayrılma satırı görülüyor, **7** grup
+dağılıyor, 9 olayın **5'i** görülüyor.
+
+### Eşik ölçülerek bırakıldı
+
+Aday sayısının hayat boyu en yüksek değeri (120 hayat):
+
+| bağ ≥ | ortanca aday | üç kişiye ulaşan hayat |
+| --- | --- | --- |
+| 30 | 5 | 120/120 |
+| 35 | 5 | 120/120 |
+| 40 | 2 | 26/120 |
+| 45 | 2 | 16/120 |
+
+35 ile 40 arasındaki kırılmanın sebebi şu: **sınıf arkadaşının
+başlangıç bağı 35-55 aralığında** (Paket BS/0). Yani "bağ ≥ 35"
+pratikte "herhangi bir sınıf arkadaşı" demek olurdu ve grup, birlikte
+vakit geçirilmemiş insanlardan kurulurdu. 45 eşiği `Outing`'in kendi
+"yakın arkadaş" sayısıdır ve **yatırım yapılmış** bağı ister. Bedeli
+yazılı: grup her hayatta kurulamıyor. Gevşetmek Q-227'de soruldu.
+
+### Bekçi
+
+`test/paket_ci_arkadas_grubu_test.dart` (11 test): kimlik benzersizliği
+ve ana havuza kayıt · her olay süren grup istiyor · yazılan her iz
+okunuyor (bu iddia **kendi içeriğimdeki üç sessiz izi yakaladı**,
+kaldırıldı) · yasak kalıp yok · havuz modüle bağlı · modül kapalıyken
+kurulamıyor, yıllık bakım işlemiyor, olay aday olmuyor, ölçüm
+kaymıyor · kapı açıkken üyeler aday kümesinden geliyor ve ikinci grup
+kurulamıyor · kayıt kapat/aç turunu atlatıyor · 120 hayatta grup
+kuruluyor, buluşuluyor, dağılan grup kayıtta kalıyor ve gerekçesi
+günlükte duruyor.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

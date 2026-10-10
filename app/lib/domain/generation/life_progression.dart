@@ -45,6 +45,7 @@ import '../interaction/parenthood.dart';
 import '../life/inheritance.dart';
 import '../../data/job_catalog.dart';
 import '../economy/business_engine.dart';
+import '../interaction/friend_circles.dart';
 import '../interaction/friendship_depth.dart';
 import '../law/legal_engine.dart';
 import '../life/mortality.dart';
@@ -1166,6 +1167,12 @@ class LifeProgression {
     // Arkadaşlıklar (D-130): ilgilenilmeyen arkadaşlık kopabilir ve
     // arkadaşın kendi hayatında bir şey olur. İkisi de seyrektir.
     afterDeaths = FriendshipDepth.advanceYear(afterDeaths, newAge, _rng);
+
+    // Arkadaş grubu (Paket CI): vefat eden ya da küsen üye gruptan
+    // düşer, üye sayısı en aza inerse grup dağılır. İkisi de günlüğe
+    // yazılır; sessiz kayıp yok. Grubu olmayan oyuncuda etkisi yoktur
+    // ve zar tüketmez.
+    afterDeaths = FriendCircles.yearly(afterDeaths);
 
     // Adli süreç (D-128): açık soruşturma ilerler, dosya mahkemeye
     // gidebilir, hapisteki yıl işler ve süresi dolan tahliye olur.

@@ -15,6 +15,7 @@ import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
 import 'event_pool_early_years.dart';
 import 'event_pool_home.dart';
+import 'event_pool_friend_circle.dart';
 import 'event_pool_late_years.dart';
 import 'event_pool_neighbour.dart';
 import 'event_pool_threshold_years.dart';
@@ -1769,4 +1770,5 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // olaydan yalnızca 11'i o yaşlara aitti; bant aç değildi ama içerik
   // yaşa ait değildi. Modül anahtarı `FeatureId.sonYillar`.
   ...kLateYearsEvents,
+  ...kFriendCircleEvents,
 ];

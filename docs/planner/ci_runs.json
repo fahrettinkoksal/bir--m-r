@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 574,
+ "total": 576,
  "runs": [
+  {
+   "id": 38069618826,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "24dfc8f4af41a896f79c9162e5e5cd014f6b120d",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 290,
+   "event": "push",
+   "created_at": "2026-10-10T16:55:21Z",
+   "updated_at": "2026-10-10T17:22:36Z",
+   "run_started_at": "2026-10-10T16:55:21Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38069618826",
+   "display_title": "Kuyruk: Q-226 — ilk üç yıl tek tuşlu bir ara sahne mi kalsın?"
+  },
+  {
+   "id": 38069618809,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "24dfc8f4af41a896f79c9162e5e5cd014f6b120d",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 287,
+   "event": "push",
+   "created_at": "2026-10-10T16:55:21Z",
+   "updated_at": "2026-10-10T17:22:35Z",
+   "run_started_at": "2026-10-10T16:55:21Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38069618809",
+   "display_title": "Kuyruk: Q-226 — ilk üç yıl tek tuşlu bir ara sahne mi kalsın?"
+  },
   {
    "id": 38067098077,
    "name": "Android debug APK",
