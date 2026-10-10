@@ -1681,7 +1681,8 @@ const List<GameEvent> kEventPool = <GameEvent>[
       ),
       EventChoice(
         id: 'kisa_kes',
-        label: 'Kısa kes, işin var',
+        // Paket BZ/1: etiket iş varsaymıyor; olayın koşulunda iş yok.
+        label: 'Kısa kes, bugün olmaz',
         resultText:
             'Çayını içti, kalktı. Kapıda "bir ara uğrarım" dedi; '
             'uğramadı.',

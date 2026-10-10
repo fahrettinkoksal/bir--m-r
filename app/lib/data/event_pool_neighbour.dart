@@ -153,7 +153,9 @@ const List<GameEvent> kNeighbourEvents = <GameEvent>[
     category: EventCategory.kisisel,
     text: 'Gece yarısı üst kattan yine ses geliyor. {kisi} '
         'evde misafir ağırlıyor belli ki.\n\n'
-        'Sabah işin var.',
+        // Paket BZ/1: eskiden "Sabah işin var." yazıyordu ve olayın
+        // koşulunda iş yok; emekliye de öğrenciye de çıkıyor.
+        'Saat ikiyi geçti, sen hâlâ uyanıksın.',
     requirement: EventRequirement(
       minAge: 18,
       livingRelations: <RelationType>{RelationType.komsu},
