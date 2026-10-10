@@ -7697,6 +7697,37 @@ yolu doğum kapısını gebelik kapısıyla eşitlemek.
 **Yapmayacağım (onay gelmeden):** sayıyı değiştirmek. Karar gelene kadar
 45 sınırı yerinde kalıyor.
 
+**EK (10 Ekim 2026, Paket CF/1 ölçümü) — çelişki yukarıda yazıldığından
+daha dallı; soru ve öneri aynı kalıyor.** 45 çiftlik gebelik hunisi
+ölçülürken üç ayrı yaş kapısı olduğu görüldü ve koddan doğrulandı:
+
+| Yol | Kapı | Gebelik için üst yaş |
+|---|---|---|
+| Korunmadan yakınlaşma | `IntimacyEngine.perform`, zar **atılmadan önce** `Parenthood.blockReason`'a bakıyor | **45** |
+| Tüp bebek | `fertility_treatment.dart`, kendi eğrisi; `maxMotherAge`'e **hiç bakmıyor** | **55** |
+| Doğum | `_applyBirth` → `Parenthood.haveChild` → `blockReason` | **45** |
+
+Bunun iki sonucu var:
+
+1. **`Intimacy.prototypeOnlyAgeFactor`'ın 46-55 bandı doğal yolda ölü
+   koddur.** 46 yaşındaki anne için zar hiç atılmıyor; oyuncu "Baş başa
+   bir akşam geçirdiniz." metnini parantezli engelle görüyor. Yani
+   doğal yolda "gebelik yazılıyor ama bebek gelmiyor" **olmuyor**;
+   gebelik hiç yazılmıyor. Yukarıdaki tablo bu yüzden düzeltildi.
+2. **Tüp bebek yolunda ise gebelik gerçekten yazılıyor ve doğum hiç
+   olamıyor.** 46-55 arasında tüp bebek başarı eğrisi %0,3-2 arası
+   değer veriyor, gebelik kaydı açılıyor, ertesi yıl `haveChild`
+   `maxMotherAge`'e çarpıyor ve günlüğe "Bekleyen bebek dünyaya
+   gelemedi." yazılıyor. Oyuncu tedaviye para ve yıl harcıyor.
+3. **Doğal yolda da bir sınır yılı var:** 45'inde gebe kalan karakter
+   46'sında doğum sırasına geliyor ve doğum kapıya çarpıyor. Yani
+   çelişki tek bir yılda (45) doğal yolda da yaşanıyor.
+
+Seçenek (1) üç satırı birden kapatıyor; seçenek (2) iki ayrı eğriyi
+(`prototypeOnlyAgeFactor` ve `prototypeOnlySuccessByAge`) birlikte
+değiştirmeyi gerektirir. Önerim değişmedi: **(1)**. Karar Faho'nun;
+hiçbir sayıya dokunulmadı.
+
 ### Q-205 — Çocukla yakınlık tavana yapışıyor: medyan 100
 
 **Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Sayıya
