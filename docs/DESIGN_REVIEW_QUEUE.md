@@ -8711,3 +8711,73 @@ iki durumda da aynı (54/51), yani havuz zara dokunmuyor.
 **Dokunmadığım yer.** Ölüm ve ölüm anı bu havuzun konusu değil; onu
 sağlık motoru ile `life_progression` yürütüyor. Mevcut 11 yaşlılık
 olayına da dokunmadım; yeni havuz onların yanına eklendi.
+
+### Q-223 — Milyarder: "hiç olmasın" mı "çok nadir olsun" mu? (bekçi ile tasarım çelişiyordu)
+
+**Durum: ölçüldü, bekçi tasarımın belgelenmiş hedefine çevrildi, karar
+Faho'nun (Claude, 10 Ekim 2026).** `DECISIONS.md`'ye girmedi.
+
+**Nasıl çıktı.** Paket CC'yi gönderdikten sonra CI kırmızı yandı:
+`paket_aa_measure_test` içindeki "OLCUM: 100 hayatın ölüm anındaki
+yatırım serveti" bekçisi, `servetler.last < 1.000.000.000` iddiasında
+kaldı — bir hayat **1.365.789k** ile bitirdi.
+
+**Kök neden ölçüldü, tahmin edilmedi.** Aynı 100 tohum, modül kapalı ve
+açık:
+
+| | `son_yillar` kapalı | açık |
+| --- | --- | --- |
+| Tohum 73 ölüm yaşı | **77** | **89** |
+| Tohum 73 net varlığı | 302.284k | **1.365.789k** |
+| 100 hayatın medyan ölüm yaşı | 73 | 72 |
+| 1 milyarı geçen hayat | 0 | 1 |
+
+Yani 65+ havuzu **genel bir ömür uzatıcısı değil** (medyan ölüm yaşı
+düştü bile), ama bir hayat 12 yıl fazla yaşadı. O 12 yılda portföy
+302M'den 1.366M'ye çıktı; yıllıklandırılmış getiri **%8,6** — yani
+kalibrasyon kaçağı değil, **bileşik faiz**. Hayatın yolu da bunu
+gösteriyor: 70 yaşından sonra anapara 4.482k'da duruyor (cüzdan 0),
+portföy yine büyüyor, çünkü **portföyden hiçbir şey çekilmiyor**.
+
+**İki belge çelişiyordu.**
+
+- Bekçi: "Kimse milyarder olmasın." Yorumu "en yüksek net varlık
+  ölçümde 100 milyonun çok altında" diyordu. **İkisi de geçersizdi:**
+  CC'den önce de en yüksek 302M'ydi (CA ve CB süit kayıtları birebir
+  aynı sayıyı basıyor), yani sınıra 3,3 kat kalmıştı.
+- Motor: `MarketEngine.prototypeOnlyRiskPremium` açıklaması AD/6
+  ölçümünü taşıyor — prim 0,056'dan 0,048'e indirilirken %100 hisse
+  stratejisinde **milyarder payı %12,7'den %6,7'ye** düşürülmüş, görülen
+  en yüksek servet 211.732M'den 62.594M'ye inmiş ve hedef
+  "**milyarderlik çok nadir**" diye yazılmış. Yani tasarım "hiç olmasın"
+  demiyor.
+
+**Bekçide ne yaptım.** Sayıyı yükseltmedim, iddiayı tasarımın hedefine
+çevirdim: (1) milyarder bitiren hayat **100'de en çok 2** — AD/6'da
+ölçülen %6,7'nin çok altında, yani gevşetme değil sıkılaştırma;
+(2) bu ölçülü strateji (cüzdanın beşte biri) AD/6'nın sert
+stratejisinde ölçülen 62.594M tavanının çok altında kalsın (sınır
+10 milyar). Gerekçenin tamamı testin içinde yazılı.
+
+**Sana bir soru (Q-165 (a)'nın devamı).** O soru hâlâ açık: "60 yıllık
+kesintisiz bileşiklenme kalsın mı, yoksa portföyü aşağı çeken bir kalem
+girsin mi?" Şimdi elimizde somut bir örnek var.
+
+1. **Önerim: portföyü aşağı çeken bir kalem girsin.** En dürüst yeri
+   geçim gideri: cüzdan yetmediğinde gider **portföyden** tahsil edilsin
+   (Q-165/5). Bugün 1,37 milyar lirası olan 89 yaşındaki oyuncu, cüzdanı
+   0 olduğu için geçim giderini **hiç ödemiyor** — bu gerçekçilikten
+   önce bir tutarsızlık. Onay verirsen ölçüp uygularım; kuyruğun üst
+   kısmındaki ölçüme göre bu, hayatların %46,7'sine dokunur ve
+   korunan yıl medyanı 2.
+2. **Ya da olduğu gibi kalsın:** yatırım bir biriktirme yeri olsun,
+   milyarderlik 100'de 1-2 hayatta kalan bir kuyruk olarak dursun.
+   O zaman bekçinin yeni hâli zaten bunu ölçüyor.
+3. **Yapay servet tavanı koymayı önermiyorum:** sayıyı kesmek sebebi
+   gizler, oyuncu da neden kesildiğini anlamaz.
+
+**Not — kendi kaydımı düzeltiyorum.** Bekçinin yorumunu ben yazmıştım
+("100 milyonun çok altında"); o cümle yazıldığı günden beri geçerli
+değildi ve iki paket boyunca ölçüm 302M'de durduğu hâlde kimse
+bakmadı. Bundan sonra kuyruk iddiası yazarken sayıyı değil **dağılımı**
+basacağım.
