@@ -8477,3 +8477,45 @@ işletme, süren gebelik, açık dava, aktif evcil hayvan. Önerim: **şimdilik
 hayır** — önce kulüp/hobi ölçümü otursun, sonra tek tek bakarız. Katsayı
 tek sabit (`prototypeOnlyActivePursuitBoost`) olduğu için genişletmek
 kolay, geri almak da kolay.
+
+### Q-219 — 55 mesleğin 16'sı çok yıllı bir ön koşul istiyor: bilinçli derinlik mi?
+
+**Durum: tasarım sorusu, Faho'nun kararını bekliyor (Claude, 10 Ekim
+2026).** Bu pakette **hiçbir meslek gereksinimi değiştirilmedi**
+(Paket BY); yalnızca ölçüldü ve ölçüm aracı düzeltildi.
+
+**Nasıl çıktı.** Denetim raporu aylardır "55 mesleğin 12'sine hiç
+girilmedi" diyordu. Yeni kapsam modu sebebi mesleğe göre ayırdı ve
+sayının **bir içerik eksiği olmadığı** çıktı:
+
+| Öbek | Kaç meslek | Gerekçe |
+| --- | --- | --- |
+| Üniversite bölümü | 9 | banka personeli, hemşire, yazılım geliştirici, veri analisti, elektrik/inşaat/makine mühendisi, öğretmen, psikolog |
+| Dövüş derecesi | 6 | dört eğitmenlik + güreş/boks antrenörlüğü (siyah kuşak, başaltı, profesyonel) |
+| Hobi basamağı | 2 | yazar (Okumak → Düzenli), müzisyen (Müzik → Düzenli) |
+| Büyük şehir | 2 | doktor, eczacı |
+| **Botun kendi kuralı** | 1 | `yz_kurye` — 240 hayatta 210 yıl ilanda açıktı, engel "25 yaşından sonra yarım zamanlı iş kabul etmem" kuralıydı. **Düzeltildi** (ölçüm aracı). |
+
+Katalog tutarlılığı ayrıca test ediliyor: aranan bölüm, hobi basamağı ve
+sanat derecesi gerçekten var ve bir ömürde ulaşılabilir
+(`content_reachability_test.dart`; bu pakette eksik olan **ehliyet**
+legini de ekledim). Yani bu 16 meslek **erişilemez değil**, planlama
+istiyor.
+
+**Soru sana.** Bu derinlik istediğin şey mi?
+
+1. **Olduğu gibi kalsın (önerim).** Kariyer kataloğunun derinliği tam
+   buradan geliyor: doktor olmak için tıp + büyük şehir, eğitmen olmak
+   için gerçekten siyah kuşak gerekiyor. Oyuncu gerekçeyi ekranda
+   görüyor (D-063, Paket AM §18), yani kapı kapalı değil, **hedef**.
+2. **Bir kısmı gevşesin.** Örneğin hobi basamağı isteyen iki meslek
+   (yazar, müzisyen) bir basamak aşağı inebilir; ya da büyük şehir
+   koşulu "orta şehir de olur"a çevrilebilir.
+3. **Yol haritası gösterilsin.** Gereksinimi yazmak yeterli değilse,
+   meslek kartına "buraya nasıl gelinir" satırı eklenebilir (hangi
+   bölüm, hangi hobi basamağı). Bu bir **arayüz** işi; kuralı
+   değiştirmez ve istersen ayrı paket olarak yaparım.
+
+**Varsayılanım (1).** Onay gelmezse hiçbir şey değişmez; ölçüm artık
+sebebi öbekleyerek raporluyor, yani "12 meslek kapalı" satırı bir daha
+yanlış ize götürmeyecek.
