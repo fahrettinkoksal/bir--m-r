@@ -142,6 +142,10 @@ BirOmurAccent _accentFor(Person person) {
     case RelationType.torun:
     case RelationType.yegen:
       return BirOmurAccents.mavi;
+    // Komşu (Paket BU): apartmanın rengi, evin rengiyle aynı.
+    case RelationType.komsu:
+    case RelationType.eskiKomsu:
+      return BirOmurAccents.yesil;
     case RelationType.anne:
     case RelationType.baba:
     case RelationType.kardes:

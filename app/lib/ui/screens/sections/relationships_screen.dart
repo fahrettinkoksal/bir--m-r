@@ -92,6 +92,12 @@ enum RelationshipSubPage {
   // karışmaz, kendi başlığında durur (D-106).
   tanidiklar,
 
+  /// Paket BU: komşular kendi sayfasında.
+  ///
+  /// Apartman Paket BP'de metinde yaşıyordu; komşunun adı yoktu. Artık
+  /// komşu kalıcı bir kişi: taşınınca listeden düşer, kaydı kalır.
+  komsular,
+
   /// D-133: ikinci evlilik D-036'da geldi ama geçmiş evlilikler
   /// hiçbir ekranda görünmüyordu.
   evlilikGecmisi,
@@ -169,6 +175,17 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
   List<Person> _tanidiklar(GameState state) =>
       state.byGroup(RelationGroup.tanidiklar);
 
+  /// Komşular (Paket BU): önce oturulan evin komşuları, sonra eskiler.
+  List<Person> _komsular(GameState state) {
+    final List<Person> simdiki = state.people
+        .where((Person p) => p.relation == RelationType.komsu)
+        .toList(growable: false);
+    final List<Person> eskiler = state.people
+        .where((Person p) => p.relation == RelationType.eskiKomsu)
+        .toList(growable: false);
+    return <Person>[...simdiki, ...eskiler];
+  }
+
   /// Çocuklar en büyükten küçüğe. Vefat edenler de listede kalır (D-029).
   ///
   /// Paket AO §18-§20: eşin önceki ilişkisinden olan çocuğu da burada
@@ -226,6 +243,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.cocuklar => _cocuklar(state),
         RelationshipSubPage.torunlar => _torunlar(state),
         RelationshipSubPage.tanidiklar => _tanidiklar(state),
+        RelationshipSubPage.komsular => _komsular(state),
         // Buraya ulaşılmaz: evlilik geçmişi yukarıda ayrı ekran olarak
         // açılıyor. Derleyicinin tam kapsama isteği için duruyor.
         RelationshipSubPage.evlilikGecmisi => const <Person>[],
@@ -240,6 +258,7 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
         RelationshipSubPage.cocuklar => 'Çocuklar',
         RelationshipSubPage.torunlar => 'Torunlar',
         RelationshipSubPage.tanidiklar => 'Ünlüler ve tanıdıklar',
+        RelationshipSubPage.komsular => 'Komşular',
         RelationshipSubPage.evlilikGecmisi => 'Evlilik Geçmişi',
         RelationshipSubPage.evcilHayvanlar => 'Evcil hayvanlar',
       };
@@ -260,6 +279,8 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
           'Çocuklarının çocukları. Kendi hayatlarını yaşarlar.',
         RelationshipSubPage.tanidiklar =>
           'Sana geri dönen ünlüler. Arkadaş değiller; tanışıklık.',
+        RelationshipSubPage.komsular =>
+          'Oturduğun evin komşuları. Taşınınca kayıt kalır.',
         RelationshipSubPage.evlilikGecmisi => '',
         RelationshipSubPage.evcilHayvanlar => '',
       };
@@ -574,6 +595,22 @@ class _RelationshipsScreenState extends State<RelationshipsScreen> {
             trailingText: '$tanidikSayisi',
             onTap: () =>
                 setState(() => _subPage = RelationshipSubPage.tanidiklar),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Komşular (Paket BU). Satır yalnızca kayıtta komşu varken
+        // görünür: modül kapalıysa ya da oyuncu ailesinin yanında
+        // yaşıyorsa hiç çıkmaz.
+        if (_komsular(state).isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('relationships_neighbours_row'),
+            title: 'Komşular',
+            subtitle: 'Oturduğun evin komşuları',
+            icon: Icons.apartment_outlined,
+            accent: BirOmurAccents.yesil,
+            trailingText: '${_komsular(state).length}',
+            onTap: () =>
+                setState(() => _subPage = RelationshipSubPage.komsular),
           ),
           const SizedBox(height: 10),
         ],

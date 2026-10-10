@@ -38,6 +38,7 @@ class Person {
     this.development,
     this.estrangedSinceAge,
     this.becameFriendAtAge,
+    this.homeTie,
     this.infertile = false,
     this.motherId,
     this.fatherId,
@@ -206,6 +207,17 @@ class Person {
   /// kayıtlarda `null`'dır ve geriye dönük bir tarih **uydurulmaz**.
   final int? becameFriendAtAge;
 
+  /// **Komşuluk bağının evi** (Paket BU): bu kişi hangi oturulan eve
+  /// bağlı olarak komşu oldu?
+  ///
+  /// `'ev:<konut kimliği>'` ya da `'kira:<şehir>'`. Oyuncu başka bir eve
+  /// taşınınca bu anahtar artık geçerli olmaz; kişi **eski komşu** olur
+  /// ve gündelik listelerden düşer. Kayıt silinmez.
+  ///
+  /// Komşu olmayan kişilerde `null` kalır; eski kayıtlarda da `null`
+  /// gelir ve hiçbir şeyi değiştirmez.
+  final String? homeTie;
+
   /// Şu an küs mü?
   bool get isEstranged => estrangedSinceAge != null;
 
@@ -281,6 +293,7 @@ class Person {
     bool? infertile,
     Object? estrangedSinceAge = _unset,
     Object? becameFriendAtAge = _unset,
+    Object? homeTie = _unset,
     Object? motherId = _unset,
     Object? fatherId = _unset,
   }) {
@@ -319,6 +332,7 @@ class Person {
       becameFriendAtAge: becameFriendAtAge == _unset
           ? this.becameFriendAtAge
           : becameFriendAtAge as int?,
+      homeTie: homeTie == _unset ? this.homeTie : homeTie as String?,
       motherId: motherId == _unset ? this.motherId : motherId as String?,
       fatherId: fatherId == _unset ? this.fatherId : fatherId as String?,
     );

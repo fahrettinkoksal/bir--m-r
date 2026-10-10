@@ -118,9 +118,10 @@ güçlü.
 - ~~**İlk eve taşınma hatırlatması.**~~ **Yapıldı (Paket BR/1).** Konut
   alımının sonucuna tek cümle eklendi; yalnızca kendi evinde oturmayana
   çıkıyor (Q-213).
-- **Komşunun kalıcı kişi olması.** Paket BP apartmanı metinde yaşattı.
-  Komşuyu gerçek kişi yapmak yeni bağ türü, ilişkiler ekranı satırı ve
-  erişilebilirlik kuralı gerektirir; kendi paketi olmalı.
+- ~~**Komşunun kalıcı kişi olması.**~~ **Yapıldı (Paket BU).** `komsu`
+  ve `eskiKomsu` bağ türleri, `Person.homeTie` ev bağı, taşınmada devir,
+  12 kişi hedefli olay, Komşular ekranı ve `komsular` modül anahtarı.
+  Ölçüldü: komşu tanıyan hayat 145/200 ve 149/200.
 - ~~**Eşyanın evle ilişkisi.**~~ **Yapıldı (Paket BT).** 18 ev eşyası,
   "Ev ve yaşam" mağazası, döşeme seviyesi, yıllık yıpranma ve "Evinin
   hâli" ekranı. Model: eşya oyuncunun, binanın değil — taşınınca
@@ -202,6 +203,16 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   oynak: aynı özelliğin servet etkisi bir blokta -12,2 M, ikinci blokta
   +13,2 M çıktı. Para etkisini **yön** üzerinden okumak gerekiyor,
   büyüklük üzerinden değil.
+- **Paket BU.** Yeni bir kişi türü eklerken onun **başlangıç bağının
+  sıralamadaki yerine** bak: komşunun başlangıç yakınlığı (8-22) sınıf
+  arkadaşından (35-55) düşük olduğu için botun "en yüksek bağlıya
+  yoğunlaş" politikası komşuyu hiç seçmedi ve içerik 200 hayatta
+  **sıfır** kez arkadaşlığa dönüştü. Ölçüm aracının önceliklendirmesi,
+  yeni içeriği görünmez yapabilir.
+- **Paket BU.** "Bot yapmıyor" ile "oyun yapamıyor" ayrımını tek
+  teşhisle çöz: komşuyla her yıl vakit geçiren oyuncunun bağı 2-4 yılda
+  eşiği geçiyordu. Botun bütçesini ölçmek yerine **oyunun üst sınırını**
+  ölçen küçük bir probe, paketin yönünü bir turda belirledi.
 - **Paket BP.** Ölçüm botu bir özelliği hiç kullanmıyorsa, o özelliğin
   içeriği "erişilemez" görünür. Bot oturmak için aldığı eve
   taşınamıyordu; düzeltmeden önce yeni havuz 7/25 hayatta görünüyordu,

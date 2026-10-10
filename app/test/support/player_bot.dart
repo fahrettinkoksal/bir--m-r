@@ -415,6 +415,12 @@ class BotLifeResult {
   /// Ölümde evin döşeme seviyesi (0-100, Paket BT).
   int furnishingLevel = 0;
 
+  /// Hayat boyunca tanınan komşu sayısı (Paket BU).
+  int neighboursMet = 0;
+
+  /// Komşuluktan arkadaşlığa dönüşen kişi sayısı (Paket BU).
+  int neighbourFriends = 0;
+
   /// Hayat boyunca alınan ev eşyası sayısı (Paket BT).
   int homeItemsBought = 0;
   final Set<String> businessTypes = <String>{};
@@ -2273,7 +2279,10 @@ void _handleRelationships(
   for (final Person p in c.state!.people) {
     if (!p.isAlive) continue;
     final bool tanisiklik = p.relation == RelationType.sinifArkadasi ||
-        p.relation == RelationType.isArkadasi;
+        p.relation == RelationType.isArkadasi ||
+        // Paket BU: komşu da yakın arkadaşlık teklif edilebilecek bir
+        // tanışıklıktır; motor izin veriyor, bot da denemeli.
+        p.relation == RelationType.komsu;
     if (tanisiklik) {
       sonuc.diag.sawAcquaintance = true;
       if (p.bond > sonuc.diag.bestAcquaintanceBond) {
@@ -2335,6 +2344,11 @@ void _spendTimeWithFamily(
           !p.isEstranged &&
           (p.relation == RelationType.sinifArkadasi ||
               p.relation == RelationType.isArkadasi ||
+              // Komşu da bir tanışıklıktır (Paket BU): gerçek oyuncu
+              // kapı komşusuyla da vakit geçirir ve komşu yakın arkadaş
+              // olabilir. Bot bunu yapmazsa komşuluk içeriği
+              // "erişilemez" görünür (Paket BP dersi).
+              p.relation == RelationType.komsu ||
               p.relation == RelationType.arkadas))
       .toList(growable: false);
   if (tanisiklar.isNotEmpty && rng.nextDouble() < profile.socialDesire) {
@@ -2355,6 +2369,34 @@ void _spendTimeWithFamily(
     if (acik.isNotEmpty) {
       sonuc.diag.interactions++;
       c.interact(kisi.id, acik[rng.nextInt(acik.length)]);
+    }
+
+    // **Ölçülen ikinci bot kısıtı (Paket BU).** Yukarıdaki "birine
+    // yoğunlaş" politikası komşuyu hiç seçmiyordu: komşunun başlangıç
+    // bağı (8-22) sınıf arkadaşından (35-55) düşük, dolayısıyla sıralama
+    // onu hiç öne çıkarmıyor. 200 hayatta ölçüldü — komşu 149 hayatta
+    // tanınıyor ama **hiçbirinde** arkadaşlığa dönüşmüyordu.
+    //
+    // Oyunda böyle bir kısıt yok: yıllık genel etkileşim kotası
+    // bulunmuyor, sınır aynı kişiyle aynı eylemin aynı yıldaki
+    // getirisinde (D-026). Teşhis bunu ölçtü: komşuyla her yıl vakit
+    // geçiren oyuncu 12 karenin 9'unda eşiği (55) **2-4 yılda** geçiyor.
+    // Yani eksik olan oyunun kapısı değil, botun bütçesiydi. Bot artık
+    // kapı komşusuna da yılda bir sıra ayırıyor.
+    final List<Person> komsular = tanisiklar
+        .where((Person p) => p.relation == RelationType.komsu)
+        .toList(growable: false);
+    if (komsular.isNotEmpty && rng.nextDouble() < profile.socialDesire) {
+      final Person komsu = komsular.first.id == kisi.id && komsular.length > 1
+          ? komsular[1]
+          : komsular.first;
+      if (komsu.id != kisi.id) {
+        final List<InteractionKind> komsuAcik = c.availableKindsFor(komsu);
+        if (komsuAcik.isNotEmpty) {
+          sonuc.diag.interactions++;
+          c.interact(komsu.id, komsuAcik[rng.nextInt(komsuAcik.length)]);
+        }
+      }
     }
   }
 
@@ -2883,6 +2925,17 @@ void _collectFinalMetrics(GameController c, BotLifeResult sonuc) {
   }
 
   sonuc.furnishingLevel = Furnishing.level(s);
+  sonuc.neighboursMet = s.people
+      .where((Person p) =>
+          p.relation == RelationType.komsu ||
+          p.relation == RelationType.eskiKomsu)
+      .length;
+  // Komşuluktan gelen arkadaş: `homeTie` nerede tanışıldığını tutuyor,
+  // taşınmada silinmiyor. Yani "arkadaş + ev bağı" = eski komşu.
+  sonuc.neighbourFriends = s.people
+      .where((Person p) =>
+          p.relation == RelationType.arkadas && p.homeTie != null)
+      .length;
   sonuc.ownedHome = s.properties.isNotEmpty;
   sonuc.ownedRental = s.properties
       .where((OwnedItem i) => i.id != s.residenceItemId)

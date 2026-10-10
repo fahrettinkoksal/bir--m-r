@@ -113,7 +113,25 @@ enum RelationType {
 
   // Çocuğun eski eşi (§21): çocuk boşandığında kayıt **silinmez**.
   // Torunun biyolojik ebeveyniyse soy bağı aynen korunur (§22).
-  eskiCocugunEsi;
+  eskiCocugunEsi,
+
+  // --- Paket BU: komşu --------------------------------------------------
+  //
+  // Paket BP apartmanı **metinde** yaşattı: üst kat gece mobilya çekiyor,
+  // yandaki daire satılığa çıkıyor, apartman toplantısında aidat
+  // oylanıyor. Ama komşu bir isim değildi: olay metni geçip gidiyordu,
+  // ertesi yıl kimse hatırlamıyordu. Komşu artık kalıcı kimliği olan bir
+  // kişi: adı var, yaşlanıyor, yakınlık biriktiriyor, arkadaşa dönüşebilir.
+  //
+  // **Komşuluk oturulan eve bağlıdır:** taşınınca bu bağ [eskiKomsu]
+  // olur, kayıt silinmez.
+  komsu,
+
+  // Eski komşu: taşındıktan sonraki hâl. Gündelik listelerde görünmez
+  // ama kayıt durur; yakınlığı yüksekse taşınırken arkadaşa dönüşmüştür.
+  //
+  // Yeni değerler listenin **sonuna** eklenir; eski kayıtlar bozulmasın.
+  eskiKomsu;
 
   /// Aile ekranındaki gruplama. Kesin ekran bölümlemesi henüz
   /// kararlaştırılmadı (`docs/PROTOTYPE_UI.md` §4, açık soru); bu gruplama
@@ -170,6 +188,11 @@ enum RelationType {
       // karışmaz, **kendi başlığında** durur (D-106).
       case RelationType.unlu:
         return RelationGroup.tanidiklar;
+      // Komşular kendi başlığında durur (Paket BU): ne arkadaş ne
+      // akraba; apartmanın kendi listesi.
+      case RelationType.komsu:
+      case RelationType.eskiKomsu:
+        return RelationGroup.komsular;
       case RelationType.sevgili:
       case RelationType.eskiSevgili:
       case RelationType.eskiEs:
@@ -215,7 +238,9 @@ enum RelationGroup {
   // Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
   tanidiklar('Ünlüler ve tanıdıklar'),
   // Paket AO §38: kayınvalide ve kayınpeder kendi başlığında durur.
-  esinAilesi('Eşinin ailesi');
+  esinAilesi('Eşinin ailesi'),
+  // Paket BU: apartmanın kendi listesi.
+  komsular('Komşular');
 
   const RelationGroup(this.title);
 
@@ -287,6 +312,10 @@ String relationLabel({
       return gender == Gender.kadin ? 'Yeğen (kız)' : 'Yeğen (erkek)';
     case RelationType.unlu:
       return 'Ünlü';
+    case RelationType.komsu:
+      return 'Komşu';
+    case RelationType.eskiKomsu:
+      return 'Eski komşu';
     case RelationType.kogusArkadasi:
       return 'Koğuş arkadaşı';
     case RelationType.uveyAnne:
@@ -348,6 +377,10 @@ String relationPossessive({
       return 'Anne tarafından deden';
     case RelationType.babaTarafiDede:
       return 'Baba tarafından deden';
+    case RelationType.komsu:
+      return 'Komşun';
+    case RelationType.eskiKomsu:
+      return 'Eski komşun';
     case RelationType.teyze:
       return 'Teyzen';
     case RelationType.dayi:

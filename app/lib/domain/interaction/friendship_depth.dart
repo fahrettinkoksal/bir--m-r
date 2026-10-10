@@ -99,6 +99,10 @@ abstract final class FriendshipDepth {
     const Set<RelationType> uygun = <RelationType>{
       RelationType.sinifArkadasi,
       RelationType.isArkadasi,
+      // Komşu (Paket BU): kapı komşusu da yakın arkadaş olabilir.
+      // Yakınlık eşiği ve ret payı aynı; komşuya ayrı bir kolaylık
+      // tanınmadı.
+      RelationType.komsu,
     };
     if (!uygun.contains(kisi.relation)) {
       return InteractionAvailability.blocked(

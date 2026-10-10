@@ -61,6 +61,7 @@ gelir.
 | `esikteki_yillar` | Eşikteki yıllar | BN | 16-20 yaş havuzuna eklenen 29 olay ve eşikteki kararların karşılıkları çıkmaz; lise sonu ve ilk iş yılları paket öncesi gibi geçer. |
 | `oturulan_ev` | Oturduğun ev | BP | Kendi evinde oturana çıkan 28 olay (kombi, çatı, küf, apartman toplantısı, komşu, dönüşüm) ve yedi karşılığı çıkmaz; kendi evine çıkmak paket öncesi gibi sessiz geçer. |
 | `ev_dosemesi` | Evini döşemek | BT | Evinin hâli ekranı, döşeme seviyesi, ev eşyasının yıllık yıpranması ve iyi döşenmiş evin yıllık mutluluk katkısı kalkar; 18 ev eşyası mağazada kalır ama evin dolu olup olmadığı hiçbir şeyi değiştirmez. |
+| `komsular` | Komşular | BU | Apartmanda adı olan komşu olmaz: ilişkiler ekranındaki Komşular bölümü, komşuyla sohbet/vakit/hediye ve 12 komşu olayı çıkmaz. Kendi evinde oturmak Paket BP'nin olaylarıyla devam eder. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.

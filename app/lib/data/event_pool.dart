@@ -15,6 +15,7 @@ import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
 import 'event_pool_early_years.dart';
 import 'event_pool_home.dart';
+import 'event_pool_neighbour.dart';
 import 'event_pool_threshold_years.dart';
 import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
@@ -1757,4 +1758,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // evinde oturanın konut havuzundan aday olayı 30/40/50/60 yaşında 0,
   // kiracının 8. Modül anahtarı `FeatureId.oturulanEv`.
   ...kHomeEvents,
+  // Komşular (Paket BU). Paket BP'nin kapattığı boşluğun diğer yarısı:
+  // apartman metinde yaşıyordu ama komşunun adı yoktu. Bu havuzun
+  // bütün olayları **gerçek bir komşuyu** hedefler; modül anahtarı
+  // `FeatureId.komsular`.
+  ...kNeighbourEvents,
 ];

@@ -6290,5 +6290,83 @@ kapat-aç sonrası aynı; ekranda satır ve yuvalar görünüyor.
 **Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; sorular
 ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-216'da.
 
+## Paket BU — komşu gerçek kişi oldu (10 Ekim 2026)
+
+Paket BP apartmanı **metinde** yaşattı: kombi susuyor, çatı akıyor, üst
+kat gece mobilya çekiyor, yandaki daire satılığa çıkıyor. O dosyanın
+kendi notu şöyleydi: "Komşu ve apartman metinde yaşar; yeni kişi kaydı
+açılmaz. Komşunun kalıcı kişi olması ayrı bir paket." Bu, o paket.
+
+### Ne eklendi
+
+| Parça | Ayrıntı |
+| --- | --- |
+| Bağ türü | `komsu` ve `eskiKomsu`; ilişkiler ekranında kendi öbeği (**Komşular**) |
+| Ev bağı | `Person.homeTie` — hangi evin komşusu: `ev:<konut>` ya da `kira:<şehir>` |
+| Üretim | Kendi evine ya da kiralığa çıkınca 1-3 komşu tanınır (yaş 19-78, başlangıç yakınlığı 8-22) |
+| Devir | Taşınınca komşuluk biter: yakınlık 55+ ise **arkadaş** olur (nerede tanışıldığı kayıtta kalır), değilse eski komşu |
+| Etkileşim | Sohbet, vakit geçirme, hediye verme; para/hediye **istemek** yok |
+| Arkadaşlık | Komşu yakın arkadaş olabilir — eşik ve ret payı sınıf arkadaşıyla aynı |
+| Olaylar | 12 komşu olayı; hepsi gerçek kişiyi hedefler, dördü kendi izinin karşılığı |
+| Anahtar | `komsular` — kapalıyken komşu üretilmez, ekran yok, havuz hiç listelenmez |
+
+**Ailesinin yanında yaşayanın komşusu yok:** apartmanı o seçmiyor,
+ekran da ondan bir şey istemiyor. Kirada komşuluk anahtarı **şehir**
+düzeyinde; oyun hangi dairede kiracı olduğunu tutmadığı için aynı
+şehirde kiradan kiraya geçmek komşuyu değiştirmiyor (bilinçli
+sadeleştirme, Q-217).
+
+### Ölçüm (200'er hayat, iki blok, aynı tohumlarla anahtar açık/kapalı)
+
+| Ölçü | Blok 1 açık / kapalı | Blok 2 açık / kapalı |
+| --- | --- | --- |
+| Komşu tanıyan hayat | **145/200** / 0 | **149/200** / 0 |
+| Hayat başına tanınan komşu | 2,88 / 0 | 2,70 / 0 |
+| Komşu olayı gören hayat | **144/200** / 0 | — |
+| Hayat başına görülen komşu olayı | 4,77 / 0 | — |
+| Komşuluktan arkadaşı olan hayat | 38/200 / 0 | 34/200 / 0 |
+| Ölümde arkadaş sayısı (ort) | 1,74 / 1,51 | 1,86 / 1,40 |
+| Ölümde mutluluk (ort) | 75,9 / 76,4 | 77,1 / 76,2 |
+| Ölümde net servet (ort) | 56,9 M / 60,4 M | 52,7 M / 56,6 M |
+| Ölüm yaşı (ort) | 72,83 / 72,91 | 70,41 / 69,93 |
+
+İçerik **erişilebilir**: hayatların yaklaşık üçte ikisi komşu tanıyor ve
+dörtte üçü komşu olayı görüyor. Arkadaş sayısı iki blokta da artıyor
+(+0,23 ve +0,46) — komşuluk gerçekten arkadaşlığa dönüşüyor. Mutluluk
+ve ölüm yaşı farkının yönü iki blok arasında **ters dönüyor**: gürültü.
+Net servet iki blokta da **%6 düşüyor** (yön tutarlı): komşu olayları
+para istiyor (aidat 4.000, usta 9.000, küçük masraf 900) ve bot
+seçenekleri rastgele seçiyor. Paranın harcanacak yeri olması Paket
+AD/5'in istediği şeydi; yine de sayı Q-217'de açık duruyor.
+
+### Ölçüm aracında ikinci kısıt bulundu (BOT)
+
+İlk turda komşuluk **hiçbir** hayatta arkadaşlığa dönüşmedi (0/200).
+Sebep oyunda değildi: botun yıllık tek etkileşim hakkı, "en yüksek
+bağlı tanışıklığa yoğunlaş" politikası yüzünden her zaman sınıf/iş
+arkadaşına gidiyordu — komşunun başlangıç bağı (8-22) sınıf
+arkadaşından (35-55) düşük olduğu için sıralamada hiç öne çıkmıyordu.
+
+Teşhis bunu ölçtü (12 gerçek bot karesi): **komşuyla her yıl vakit
+geçiren oyuncu 9 karede eşiği (55) 2-4 yılda geçiyor** ve bağ 100'e
+kadar çıkıyor. Yani oyunun kapısı açık ve cömert. Oyunda yıllık genel
+etkileşim kotası da yok; sınır aynı kişiyle aynı eylemin aynı yıldaki
+getirisinde (D-026). Bot artık kapı komşusuna da yılda bir sıra
+ayırıyor; sonuç 0/200 → 38/200 ve 34/200.
+
+### Bekçiler
+
+`test/paket_bu_komsular_test.dart` (20 test): bağ türü öbeği, etiketler,
+akrabalık yasağına girmemesi, etkileşim listeleri, yakın arkadaşlık
+teklifi, ev anahtarı (kendi evi/kira/aile), aynı ve başka şehir
+erişilebilirliği, üretim (sayı, ev bağı, hane dışı, başlangıç bağı),
+ailesinin yanında üretilmemesi, taşınmada devir (eski komşu / arkadaş),
+uyumlu düzende hiçbir şeyin değişmemesi, anahtar kapalı izolasyonu,
+kapat-aç, olay havuzunun kişi hedefi ve modül bağı, izlerin okunması,
+60 hayatlık huni tabanı ve iki ekran testi.
+
+**Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; sorular
+ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-217'de.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

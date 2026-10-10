@@ -1247,6 +1247,15 @@ class GameState {
       case RelationType.arkadas:
       case RelationType.sevgili:
         return !baskaSehirde;
+      // Komşu (Paket BU): komşuluk **oturulan eve** bağlıdır. Kişinin
+      // `homeTie` anahtarı bugünkü evin anahtarıyla aynı olduğu sürece
+      // erişilebilir; taşınınca `Neighbours.reconcile` onu eski komşu
+      // yapar ve bu dal da kapanır.
+      case RelationType.komsu:
+        return !baskaSehirde;
+      // Eski komşu: kayıt durur, gündelik listede görünmez.
+      case RelationType.eskiKomsu:
+        return false;
       default:
         break;
     }

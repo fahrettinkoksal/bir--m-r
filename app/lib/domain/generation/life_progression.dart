@@ -17,6 +17,7 @@ import '../life/critical_health.dart';
 import '../life/life_goals.dart';
 import '../life/year_review.dart';
 import 'grandchildren.dart';
+import 'neighbours.dart';
 import '../social/social_engine.dart';
 import '../../data/media_catalog.dart';
 import 'child_marriage.dart';
@@ -1091,6 +1092,15 @@ class LifeProgression {
           ),
         ]),
       );
+    }
+
+    // Komşular (Paket BU): oturulan ev değiştiyse eski komşular
+    // devredilir ve yeni evin komşuları tanınır. Düzen zaten uyumluysa
+    // hiçbir şey yapılmaz ve **zar atılmaz**.
+    final NeighbourUpdate komsuluk = Neighbours.reconcile(afterDeaths, _rng);
+    afterDeaths = komsuluk.state;
+    for (final String satir in komsuluk.logLines) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
     }
 
     // Ev eşyası (Paket BT): oturulan evdeki eşya yıpranır, iyi döşenmiş

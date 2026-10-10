@@ -535,6 +535,23 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   yıpranma ve "Evinin hâli" ekranı eklendi. Ölçüldü: 200 hayatın
   175'i/182'si evini döşüyor, ortalama seviye 73,8/78,1; servet etkisi
   gürültü bandında. Sayılar `prototypeOnly`, karar kaydı Q-216.
+- ~~**Komşu bir isim değildi: apartman metinde yaşıyordu.**~~
+  **Düzeltildi (Paket BU, 10 Ekim 2026).** Paket BP'nin 28 ev olayında
+  komşu geçiyordu ama kalıcı kişi kaydı yoktu; metin geçip gidiyor,
+  ertesi yıl kimse hatırlamıyordu. `komsu`/`eskiKomsu` bağ türleri,
+  `Person.homeTie` ev bağı, taşınmada devir (yakınlık 55+ ise arkadaş),
+  12 kişi hedefli olay ve ilişkiler ekranında Komşular bölümü eklendi.
+  Ölçüldü: komşu tanıyan hayat 145/200 ve 149/200, komşu olayı gören
+  144/200. Karar kaydı Q-217.
+- **Botun yıllık etkileşim bütçesi oyunun kotası değil (BOT, açık).**
+  Oyunda yıllık genel etkileşim kotası yok (sınır aynı kişi + aynı
+  eylem + aynı yıl getirisinde, D-026); bot ise yılda bir-iki kişiyle
+  uğraşıyor. Paket BU'da ölçüldü: bu kısıt yüzünden komşuluk 200
+  hayatın hiçbirinde arkadaşlığa dönüşmüyordu, oysa komşuyla her yıl
+  vakit geçiren oyuncu eşiği 2-4 yılda geçiyor. Bot komşuya da sıra
+  ayıracak şekilde düzeltildi ama **genel kısıt duruyor**: sosyal
+  ölçümler bu yüzden oyunun üst sınırını değil, botun bütçesini
+  gösteriyor.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

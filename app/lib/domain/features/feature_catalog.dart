@@ -145,6 +145,22 @@ enum FeatureId {
       'app/lib/ui/screens/sections/furnishing_page.dart',
       'app/test/paket_bt_ev_dosemesi_test.dart',
     ],
+  ),
+
+  /// Paket BU — komşular: oturulan eve bağlı, adı olan kişiler.
+  komsular(
+    saveKey: 'komsular',
+    title: 'Komşular',
+    lostWhenOff:
+        'Apartmanda adı olan komşu olmaz; ilişkiler ekranındaki Komşular '
+        'bölümü ve komşu olayları çıkmaz. Kendi evinde oturmak Paket '
+        'BP\'nin olaylarıyla devam eder.',
+    paket: 'Paket BU — komşular',
+    removableFiles: <String>[
+      'app/lib/domain/generation/neighbours.dart',
+      'app/lib/data/event_pool_neighbour.dart',
+      'app/test/paket_bu_komsular_test.dart',
+    ],
   );
 
   const FeatureId({

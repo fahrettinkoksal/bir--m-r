@@ -104,6 +104,21 @@ Set<InteractionKind> meaningfulKindsFor(RelationType relation) {
     case RelationType.sinifArkadasi:
       return _temel.union(<InteractionKind>{InteractionKind.hediyeVer});
 
+    // Komşu (Paket BU): kapı komşusuyla sohbet edilir, vakit geçirilir,
+    // bayramda bir şey götürülür. Para ya da hediye **istemek** komşuluk
+    // ilişkisinde anlamlı değil.
+    case RelationType.komsu:
+      return const <InteractionKind>{
+        InteractionKind.vakitGecir,
+        InteractionKind.sohbet,
+        InteractionKind.hediyeVer,
+      };
+
+    // Eski komşu: taşındın, gündelik temas bitti. Kayıt kalır, liste
+    // boş döner (erişilebilirlik de kapalıdır).
+    case RelationType.eskiKomsu:
+      return const <InteractionKind>{};
+
     // Ünlüyle gündelik hayatta vakit geçirilmez; temas sosyal medya
     // üzerinden kurulur. Burada yalnızca sohbet anlamlıdır.
     case RelationType.unlu:

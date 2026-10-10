@@ -55,6 +55,13 @@ abstract final class Kinship {
       case RelationType.cocugunEsi:
       case RelationType.eskiCocugunEsi:
         return true;
+      // Komşu akraba değildir (Paket BU): burada `false`. Komşuyla
+      // romantik yol bu pakette **açılmadı** — Finger ve mevcut
+      // tanışma yolları aynen duruyor — ama bu bir akrabalık yasağı
+      // değil, kapsam kararı (Q-217).
+      case RelationType.komsu:
+      case RelationType.eskiKomsu:
+        return false;
       // Eş ve eski eş zaten romantik bağın kendisi; "yeni ilişki
       // havuzuna" alınmazlar ama bu bir akrabalık yasağı değildir, o
       // yüzden burada `false`. Romantik motor onları ayrıca eler.

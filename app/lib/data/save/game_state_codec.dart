@@ -1170,6 +1170,7 @@ Map<String, Object?> _encodePerson(Person p) => <String, Object?>{
       // kimse küs açılmaz ve geriye dönük tarih uydurulmaz.
       'estrangedSinceAge': p.estrangedSinceAge,
       'becameFriendAtAge': p.becameFriendAtAge,
+      'homeTie': p.homeTie,
       // Biyolojik soy bağı (Paket AO §14). Eski kayıtlarda yoktur ve
       // `null` kalır; geriye dönük soy ağacı **uydurulmaz** (§47).
       'motherId': p.motherId,
@@ -2616,6 +2617,7 @@ Person _decodePerson(Map<String, Object?> json) {
         : _decodeDevelopment(_asMap(json['development'], 'person.development')),
     estrangedSinceAge: _intOrNull(json, 'estrangedSinceAge'),
     becameFriendAtAge: _intOrNull(json, 'becameFriendAtAge'),
+    homeTie: _stringOrNull(json, 'homeTie'),
     // Paket AO §47: eski kayıtta soy bağı yoktur, `null` açılır.
     motherId: _stringOrNull(json, 'motherId'),
     fatherId: _stringOrNull(json, 'fatherId'),
