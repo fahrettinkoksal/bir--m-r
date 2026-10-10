@@ -6610,5 +6610,61 @@ futbola giren oyuncuların **en az yarısı** kulüp olayı görüyor
 (zincirden en az 4 ayrı olay). Aktif üyelik kaydı kurulmuyor, oynanan
 hayatlardan **aranıyor**.
 
+## Paket BY — meslek kapsamı: 12 meslek neden hiç girilmiyor? (10 Ekim 2026)
+
+Denetim raporu aylardır aynı satırı yazıyordu: **"55 mesleğin 12'sine
+hiç girilmedi."** Bu satır bir içerik eksiği gibi okunuyordu. Bu paket
+sebebi mesleğe göre ayırdı.
+
+### Kapsam modu (yeni ölçüm aracı)
+
+`playBotLife(jobCoverage: true)` — **varsayılan kapalı**, yani hiçbir
+denge ölçümü kaymıyor. Açıkken bot
+işe maaşa göre değil **bu hayatta girmediği işlere** göre başvuruyor,
+yarım zamanlı yaş filtresi kalkıyor ve çalışırken de girilmemiş bir iş
+açıksa ona geçiyor. Amaç dengeyi ölçmek değil, kataloğun hangi
+mesleğine **girilebildiğini** ölçmek.
+
+### Bulgu 1 — bir meslek botun kendi kuralı yüzünden görünmezdi
+
+`yz_kurye` (motorlu kurye, yarım zamanlı) 240 hayatta **210 yıl ilanda
+açık** görünüyor ve hiç girilmiyordu. İlk okunan kilit gerekçesi
+"motosiklet ehliyeti gerekiyor" idi ve yanlış ize götürüyordu: bot
+ehliyeti alıyor, iş açılıyor, ama **"25 yaşından sonra yarım zamanlı iş
+kabul etmem"** kuralı başvuruyu engelliyordu. O kural denge ölçümü için
+doğru (40 yaşında kafe garsonluğu gerçekçi değil); kapsam ölçümünde
+kaldırıldı ve meslek hemen girildi.
+
+### Bulgu 2 — kalanların hepsinin yazılı bir gerekçesi var
+
+| Öbek | Meslekler | Gerekçe |
+| --- | --- | --- |
+| Üniversite bölümü | banka personeli, hemşire, yazılım geliştirici, veri analisti, elektrik/inşaat/makine mühendisi, öğretmen, psikolog | "Bu iş için uygun bir eğitim geçmişi gerekiyor." |
+| Hobi basamağı | yazar (Okumak → Düzenli), müzisyen (Müzik → Düzenli) | hobide basamak |
+| Dövüş derecesi | karate, kungfu, judo, taekwondo eğitmenliği, güreş ve boks antrenörlüğü | siyah kuşak / başaltı / profesyonel |
+| Büyük şehir | doktor, eczacı | "Denizli bu iş için dar bir piyasa." |
+
+Bunların hiçbiri **erişilemez** değil: katalog tutarlılığı
+`content_reachability_test.dart` ile zaten korunuyor (aranan bölüm,
+hobi basamağı, sanat derecesi gerçekten var ve ulaşılabilir). Bu pakette
+o dosyaya eksik olan **ehliyet** legi de eklendi: olmayan bir ehliyet
+kimliği isteyen iş artık testten geçmez.
+
+Yani 12 sayısı "oyunda 12 meslek kapalı" değil, **"ölçüm botu çok yıllı
+ön koşul peşine düşmüyor"** demekti. Ölçüm 60 kapsam hayatında
+**28/55**, 240 hayatta **37-42/55** meslek gezdi; girilemeyen her
+mesleğin ekranda yazılı bir gerekçesi vardı (gerekçesi boş kilit: 0).
+
+### Bekçi
+
+`test/paket_by_meslek_kapsami_test.dart` (3 test): kapsam modu 120
+hayatta en az 28 mesleğe giriyor, aynı tohumlarla **varsayılan bottan
+daha geniş** geziyor, ve gerekçesi boş kilit yok (D-063).
+
+**Açık kalan tasarım sorusu.** 55 mesleğin 16'sı çok yıllı bir ön koşul
+istiyor (bölüm, hobi basamağı, kuşak, büyük şehir). Bu bilinçli bir
+derinlik mi, yoksa fazla mı? Q-219'da önerimle birlikte duruyor; bu
+pakette **hiçbir meslek gereksinimi değiştirilmedi**.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

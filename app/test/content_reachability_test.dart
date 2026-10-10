@@ -14,6 +14,7 @@ import 'package:bir_omur/data/education_tracks.dart';
 import 'package:bir_omur/data/hobby_catalog.dart';
 import 'package:bir_omur/data/interview_catalog.dart';
 import 'package:bir_omur/data/job_catalog.dart';
+import 'package:bir_omur/data/license_catalog.dart';
 import 'package:bir_omur/data/martial_arts_catalog.dart';
 import 'package:bir_omur/data/university_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,6 +78,25 @@ void main() {
       for (final JobType job in kJobCatalog) {
         expect(job.minIntelligence, lessThanOrEqualTo(100), reason: job.id);
         expect(job.minCharisma, lessThanOrEqualTo(100), reason: job.id);
+      }
+    });
+
+    test('aranan ehliyetler gerçekten var (Paket BY)', () {
+      // Ölçümde `yz_kurye` 240 hayatta 210 yıl ilanda açık görünüp hiç
+      // girilmemişti. Sebep botun kendi kuralıydı, katalog tutarlıydı —
+      // ama bu leg denetlenmiyordu: olmayan bir ehliyet kimliği isteyen
+      // iş ilan panosunda görünür ve hiçbir oyuncu açamaz.
+      final Set<String> ehliyetler = <String>{
+        for (final LicenseType t in LicenseType.values) t.id,
+      };
+      for (final JobType job in kJobCatalog) {
+        for (final String id in job.requiredLicenses) {
+          expect(
+            ehliyetler,
+            contains(id),
+            reason: '${job.id} olmayan bir ehliyet istiyor: $id',
+          );
+        }
       }
     });
 

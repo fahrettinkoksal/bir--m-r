@@ -421,6 +421,18 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   yatırım, kariyer erişimi) belgelerde **etiketli** duruyor ve ürün
   kararı için kullanılmaz. Unit/regresyon testleri ilk açık seçeneği
   kullanmaya devam edebilir; ikisinin raporu karıştırılmaz.
+- **"55 mesleğin 12'sine hiç girilmedi" satırı çözüldü (Paket BY,
+  10 Ekim 2026).** Sayı bir içerik eksiği değil, **ölçüm aracının
+  kapsamıydı**. Yeni kapsam modu (`playBotLife(jobCoverage: true)`,
+  varsayılan kapalı) mesleğe göre ayırdı: `yz_kurye` 240 hayatta 210 yıl
+  ilanda açıktı ama botun "25 yaşından sonra yarım zamanlı iş kabul
+  etmem" kuralı başvurmasını engelliyordu; kalan mesleklerin hepsinin
+  yazılı bir gerekçesi var (üniversite bölümü 9, hobi basamağı 2, dövüş
+  derecesi 6, büyük şehir 2). Katalog tutarlılığı
+  `content_reachability_test.dart` ile korunuyor ve bu pakette eksik
+  olan **ehliyet** legi de eklendi. Kapsam modu 60 hayatta 28/55, 240
+  hayatta 37-42/55 meslek geziyor; gerekçesi boş kilit yok. Çok yıllı ön
+  koşulların fazla olup olmadığı tasarım sorusu olarak Q-219'da.
 - **Hiç girilmeyen meslekler, kurulmayan işletmeler ve görülmeyen
   olayların sebebi ölçüldü (Q-167).** Tek bir ölçüm eksiği üç yerde
   birden karşımıza çıkıyor: **PlayerBot hiç ehliyet almıyor**

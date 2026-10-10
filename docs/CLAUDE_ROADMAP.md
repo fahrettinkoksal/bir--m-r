@@ -221,6 +221,13 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   **kural** gibi görünür: 20 isimle ve medyan 58 kişiyle iki yaşayan
   kişinin aynı adı taşıması 283/300 hayatta oluyordu. Önce havuzun
   kapasitesini ölç, sonra kural tartış (Q-198 #6).
+- **Paket BY.** "Hiç girilmeyen meslek" sayısını tek bir sayı olarak
+  rapor etmek aylarca yanlış ize götürdü. Doğru rapor **gerekçeye göre
+  öbeklenmiş** olandır: botun kendi kuralı mı, üniversite bölümü mü,
+  hobi basamağı mı, şehir mi? `yz_kurye` 210 yıl ilanda açıktı ve ilk
+  okunan kilit gerekçesi ("ehliyet") yanlıştı — gerçek sebep botun yaş
+  filtresiydi. Kilit gerekçesini **o yılın** durumundan oku, hayatın
+  ilk kaydından değil.
 - **Paket BX.** "Hiç görülmeyen olay" iki ayrı şey olabilir: **kapı
   kapalı** ya da **çekiliş kaybediyor**. İkisini ayırmadan düzeltmeye
   kalkmak yanlış yeri tamir ettirir. Ayıran ölçüm tek satır: olay kaç

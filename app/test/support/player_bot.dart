@@ -565,10 +565,13 @@ class BotLifeResult {
 
 /// Botun hafızası. **Test tarafı**; `GameState`'e alan eklenmedi.
 class _Intent {
-  _Intent(this.profile, this.rng, this.overrides);
+  _Intent(this.profile, this.rng, this.overrides, {this.jobCoverage = false});
 
   final BotProfile profile;
   final Random rng;
+
+  /// Meslek kapsamı modu (Paket BY). Yalnızca iş seçimini değiştirir.
+  final bool jobCoverage;
 
   /// Teşhis turunda kapatılan politikalar. Varsayılan hiçbir şeyi
   /// kapatmaz; kapatırken bile niyet zarı **atılır** (aşağıda), böylece
@@ -725,6 +728,16 @@ BotLifeResult playBotLife({
   /// İzolasyon ölçümü bunu kullanır: aynı tohum, aynı arketip, yalnızca
   /// bir modül kapalı. Oyunun sayıları değişmez.
   FeatureSwitches features = FeatureSwitches.defaults,
+  /// **Meslek kapsamı modu (Paket BY).** Varsayılan kapalı: hiçbir denge
+  /// ölçümü kaymaz.
+  ///
+  /// Açıkken bot işsizken açık ilanlar arasından **maaşa göre** değil,
+  /// *bu hayatta henüz girmediği* işler arasından seçer. Amaç dengeyi
+  /// ölçmek değil, kataloğun hangi mesleğine **girilebildiğini** ölçmek:
+  /// 1.000 hayatlık denetimde 55 mesleğin 12'sine hiç girilmiyordu ve
+  /// sebeplerin bir kısmı botun kendi seçim kuralıydı (`muzisyen` 34 kez
+  /// ilanda açıldı, bot üst üçte birden seçtiği için hiç başvurmadı).
+  bool jobCoverage = false,
 }) {
   final BotProfile profile = kBotProfiles[archetype]!;
   final GameController c = GameController(random: Random(seed));
@@ -740,7 +753,8 @@ BotLifeResult playBotLife({
   // Botun kendi zarı oyunun zarından **ayrı**: bot kararları oyunun
   // rastgele akışını kaydırmasın.
   final Random rng = Random(seed * 7919 + archetype.index * 104729 + 13);
-  final _Intent intent = _Intent(profile, rng, overrides);
+  final _Intent intent =
+      _Intent(profile, rng, overrides, jobCoverage: jobCoverage);
   final BotLifeResult sonuc = BotLifeResult(archetype: archetype, seed: seed);
   final BotDiag diag = sonuc.diag;
   // Teşhis taramasının **ayrı** zarı: oyunun akışını kaydırmasın.
@@ -1563,6 +1577,38 @@ void _handleCareer(
             (yarimZamanliUygun || !j.partTime))
         .toList(growable: true);
     if (acik.isEmpty) return;
+
+    // Kapsam modu (Paket BY): maaş sıralaması yerine **girilmemiş iş**
+    // tercih edilir. Dengeyi ölçmez; kataloğun erişilebilirliğini ölçer.
+    //
+    // Yarım zamanlı yaş filtresi de kalkar. Ölçüm şunu gösterdi:
+    // `yz_kurye` 240 hayatta **210 yıl** ilanda açık görünüyor ve hiç
+    // girilmiyordu — sebebi ehliyet değil, botun "25 yaşından sonra
+    // yarım zamanlı iş kabul etmem" kuralıydı. O kural denge ölçümü için
+    // doğru (40 yaşında kafe garsonluğu gerçekçi değil) ama kapsam
+    // ölçümünde içeriği görünmez yapıyor.
+    if (intent.jobCoverage) {
+      final List<JobType> tumAcik = c
+          .openJobs()
+          .where((JobType j) => c.jobApplicationAvailability(j).isAllowed)
+          .toList(growable: false);
+      final List<JobType> yeni = tumAcik
+          .where((JobType j) => !sonuc.jobIds.contains(j.id))
+          .toList(growable: false);
+      final List<JobType> havuz = yeni.isEmpty ? tumAcik : yeni;
+      if (havuz.isEmpty) return;
+      final JobType kapsamSecimi = havuz[rng.nextInt(havuz.length)];
+      sonuc.diag.jobApplications++;
+      sonuc.diag.jobApplied[kapsamSecimi.id] =
+          (sonuc.diag.jobApplied[kapsamSecimi.id] ?? 0) + 1;
+      final JobOutcome? kapsamSonucu = c.applyForJob(kapsamSecimi);
+      if (kapsamSonucu != null) {
+        intent.yearsInCurrentJob = 0;
+        if (kapsamSecimi.partTime) sonuc.partTime = true;
+      }
+      return;
+    }
+
     acik.sort((JobType a, JobType b) => b.yearlySalary.compareTo(a.yearlySalary));
     // Üst üçte birden seçmeye çalışır; yarım zamanlı işi öğrenciyken
     // kabul eder.
@@ -1612,6 +1658,31 @@ void _handleCareer(
   // Ustalık: meslekte ilerlemek için çalışıp öğrenir.
   if (c.studyAvailability().isAllowed && rng.nextDouble() < 0.45) {
     c.study();
+  }
+
+  // Kapsam modu (Paket BY): çalışırken de **girilmemiş** bir iş açıksa
+  // ona geçer. Ölçüm sebebi: bot işe yalnızca işsizken başvuruyor,
+  // mezun olduktan sonra da işsiz kalmıyor; bu yüzden diplomayla açılan
+  // meslekler (psikolog 10 yıl, öğretmen 8 yıl ilanda açıktı) hiç
+  // denenmiyordu. Bu bir kariyer modeli değil, katalog gezintisi.
+  if (intent.jobCoverage && intent.yearsInCurrentJob >= 1) {
+    final List<JobType> gezilmemis = c
+        .openJobs()
+        .where((JobType j) =>
+            !sonuc.jobIds.contains(j.id) &&
+            c.jobApplicationAvailability(j).isAllowed)
+        .toList(growable: false);
+    if (gezilmemis.isNotEmpty) {
+      final JobType hedef = gezilmemis[rng.nextInt(gezilmemis.length)];
+      sonuc.diag.jobApplications++;
+      sonuc.diag.jobApplied[hedef.id] =
+          (sonuc.diag.jobApplied[hedef.id] ?? 0) + 1;
+      if (c.applyForJob(hedef) != null) {
+        intent.yearsInCurrentJob = 0;
+        if (hedef.partTime) sonuc.partTime = true;
+      }
+      return;
+    }
   }
 
   // İş değiştirme: en az 3 yıl aynı işte durduysa ve daha iyi maaşlı
