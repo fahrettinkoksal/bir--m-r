@@ -1660,26 +1660,35 @@ void _handleCareer(
     c.study();
   }
 
-  // Kapsam modu (Paket BY): çalışırken de **girilmemiş** bir iş açıksa
-  // ona geçer. Ölçüm sebebi: bot işe yalnızca işsizken başvuruyor,
-  // mezun olduktan sonra da işsiz kalmıyor; bu yüzden diplomayla açılan
-  // meslekler (psikolog 10 yıl, öğretmen 8 yıl ilanda açıktı) hiç
-  // denenmiyordu. Bu bir kariyer modeli değil, katalog gezintisi.
-  if (intent.jobCoverage && intent.yearsInCurrentJob >= 1) {
+  // Kapsam modu (Paket BY/1): çalışırken **girilmemiş** bir iş açıksa
+  // işten ayrılıp ona geçer.
+  //
+  // **İlk yazımı ölü koddu (Paket BY/1'de ölçülüp bulundu).** Oyunun
+  // kuralı net: `applicationAvailability` çalışan oyuncuya "Önce mevcut
+  // işinden ayrılman gerekiyor" diyor. Dal `isAllowed` ile süzdüğü için
+  // aday listesi her zaman boş kalıyordu; yani kapsam modunun tek
+  // gerçek etkisi yarım zamanlı yaş filtresinin kalkmasıydı. Ölçüm bunu
+  // açıkça gösterdi: üç tohum öbeğinde kapsam modunun gezdiği meslek
+  // sayısı varsayılan bottan **daha geniş değildi** (35/30, 33/34,
+  // 32/27). Gerçek oyuncu meslek değiştirmek için istifa eder; kapsam
+  // botu da artık öyle yapıyor. Bu bir kariyer modeli değil, katalog
+  // gezintisi: yalnızca `jobCoverage` açıkken çalışır.
+  if (intent.jobCoverage && intent.yearsInCurrentJob >= 2) {
     final List<JobType> gezilmemis = c
         .openJobs()
-        .where((JobType j) =>
-            !sonuc.jobIds.contains(j.id) &&
-            c.jobApplicationAvailability(j).isAllowed)
+        .where((JobType j) => !sonuc.jobIds.contains(j.id))
         .toList(growable: false);
     if (gezilmemis.isNotEmpty) {
       final JobType hedef = gezilmemis[rng.nextInt(gezilmemis.length)];
-      sonuc.diag.jobApplications++;
-      sonuc.diag.jobApplied[hedef.id] =
-          (sonuc.diag.jobApplied[hedef.id] ?? 0) + 1;
-      if (c.applyForJob(hedef) != null) {
-        intent.yearsInCurrentJob = 0;
-        if (hedef.partTime) sonuc.partTime = true;
+      c.quitJob();
+      if (c.jobApplicationAvailability(hedef).isAllowed) {
+        sonuc.diag.jobApplications++;
+        sonuc.diag.jobApplied[hedef.id] =
+            (sonuc.diag.jobApplied[hedef.id] ?? 0) + 1;
+        if (c.applyForJob(hedef) != null) {
+          intent.yearsInCurrentJob = 0;
+          if (hedef.partTime) sonuc.partTime = true;
+        }
       }
       return;
     }

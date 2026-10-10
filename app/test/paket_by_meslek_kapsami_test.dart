@@ -9,11 +9,21 @@
 ///   girilmemişti — sebep ehliyet değil, botun "25 yaşından sonra yarım
 ///   zamanlı iş kabul etmem" kuralıydı. Denge ölçümünde doğru olan o
 ///   kural, kapsam ölçümünde içeriği görünmez yapıyordu.
-/// * Kalanların hepsinin **yazılı bir gerekçesi** var: üniversite
-///   bölümü, hobi basamağı, dövüş sanatı derecesi ya da büyük şehir.
+/// * **Paket BY/1 düzeltmesi:** kapsam modunun ilk yazımında "çalışırken
+///   girilmemiş işe geç" dalı **ölü koddu**. Oyunun kuralı net —
+///   `applicationAvailability` çalışan oyuncuya "Önce mevcut işinden
+///   ayrılman gerekiyor" diyor — ve dal `isAllowed` ile süzdüğü için
+///   aday listesi hep boş kalıyordu. Ölçüm bunu açıkça gösterdi: üç
+///   tohum öbeğinde kapsam modu varsayılan bottan **daha geniş
+///   gezmiyordu** (birleşim 35/30, 33/34, 32/27). Gerçek oyuncu meslek
+///   değiştirmek için istifa eder; kapsam botu da artık öyle yapıyor.
+///   Düzeltmeden sonra aynı tohumlarda birleşim 35→44, 33→42, 32→43 ve
+///   hayat başına girilen iş 2,5 → 14 oldu.
+/// * 240 kapsam hayatında kataloğun **52/55 mesleğine** girildi.
+///   Kalan üçünün yazılı gerekçesi var: `eczaci` büyük şehir,
+///   `elektrik_muhendisi` üniversite bölümü, `yazar` hobi basamağı.
 ///   Katalog tutarlılığı ayrıca `content_reachability_test.dart` ile
-///   korunuyor; yani bunlar erişilemez değil, **çok yıllı ön koşul**
-///   isteyen meslekler.
+///   korunuyor.
 ///
 /// Bu dosya üç şeyi korur: kapsam modunun kataloğun büyük kısmını
 /// gezmesi, kapsam modunun varsayılan bottan **gerçekten** daha geniş
@@ -53,10 +63,11 @@ void main() {
       final ({Set<String> girilen, Map<String, String> kilit}) s =
           _kosu(adet: 120, kapsam: true, tohumBaslangici: 8800);
 
-      // Ölçüm: 240 hayatta 37-42/55 (yol tohuma göre oynuyor).
-      // Taban yarıdan biraz üstü: altına inmesi kapsam modunun bozulduğu
-      // ya da bir meslek öbeğinin erişilemez hale geldiği anlamına gelir.
-      expect(s.girilen.length, greaterThanOrEqualTo(28),
+      // Ölçüm (Paket BY/1 düzeltmesinden sonra): 240 hayatta 52/55,
+      // 60 hayatta 42-44/55. Taban 38: altına inmesi kapsam modunun
+      // bozulduğu ya da bir meslek öbeğinin erişilemez hale geldiği
+      // anlamına gelir.
+      expect(s.girilen.length, greaterThanOrEqualTo(38),
           reason: '120 kapsam hayatında yalnızca ${s.girilen.length}/'
               '${kJobCatalog.length} mesleğe girildi');
     }, timeout: const Timeout(Duration(minutes: 40)));
@@ -68,9 +79,14 @@ void main() {
       final ({Set<String> girilen, Map<String, String> kilit}) kapsam =
           _kosu(adet: adet, kapsam: true, tohumBaslangici: 9400);
 
-      expect(kapsam.girilen.length, greaterThan(varsayilan.girilen.length),
-          reason: 'kapsam modu genişletmiyor: varsayılan '
-              '${varsayilan.girilen.length}, kapsam '
+      // Ölçüm: üç tohum öbeğinde 44/35, 42/33, 43/32 — yani fark 9-11
+      // meslek. İddia "biraz daha geniş" değil, **belirgin biçimde**
+      // geniş: beşte bir pay. Paket BY/1 öncesi bu iddia yanlıştı ve
+      // sessizce tohuma bağlıydı.
+      expect(kapsam.girilen.length * 5,
+          greaterThanOrEqualTo(varsayilan.girilen.length * 6),
+          reason: 'kapsam modu belirgin biçimde genişletmiyor: '
+              'varsayılan ${varsayilan.girilen.length}, kapsam '
               '${kapsam.girilen.length}');
     }, timeout: const Timeout(Duration(minutes: 40)));
 

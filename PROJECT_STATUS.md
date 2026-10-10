@@ -6661,10 +6661,54 @@ mesleğin ekranda yazılı bir gerekçesi vardı (gerekçesi boş kilit: 0).
 hayatta en az 28 mesleğe giriyor, aynı tohumlarla **varsayılan bottan
 daha geniş** geziyor, ve gerekçesi boş kilit yok (D-063).
 
-**Açık kalan tasarım sorusu.** 55 mesleğin 16'sı çok yıllı bir ön koşul
-istiyor (bölüm, hobi basamağı, kuşak, büyük şehir). Bu bilinçli bir
-derinlik mi, yoksa fazla mı? Q-219'da önerimle birlikte duruyor; bu
-pakette **hiçbir meslek gereksinimi değiştirilmedi**.
+### Düzeltme (BY/1) — yukarıdaki 16 sayısı bozuk bir araçla ölçülmüştü
+
+**Kendi ölçümüm yanlıştı ve bunu bir sonraki tur buldu.** Kapsam
+modunun "çalışırken girilmemiş işe geç" dalı **ölü koddu**: oyunun
+kuralı net — `JobMarket.applicationAvailability` çalışan oyuncuya
+"Önce mevcut işinden ayrılman gerekiyor" diyor — ve dal adayları
+`isAllowed` ile süzdüğü için liste **her zaman boş** kalıyordu. Yani
+kapsam modunun tek gerçek etkisi yarım zamanlı yaş filtresinin
+kalkmasıydı.
+
+Hatayı ortaya çıkaran şey, bekçinin Paket BZ'den sonra kırmızı
+vermesiydi: "kapsam modu varsayılan bottan daha geniş geziyor" iddiası
+tohum dünyası değişince düştü. Üç tohum öbeğiyle ölçtüm:
+
+| Tohum (60 hayat) | Varsayılan birleşim | Kapsam birleşim (ölü kodla) |
+| --- | --- | --- |
+| 9400 | 35 | **30** |
+| 7100 | 33 | 34 |
+| 3300 | 32 | **27** |
+
+Yani iddia yanlıştı; ilk turda gördüğüm "42'ye 37" farkı **gürültüydü**.
+Gerçek oyuncu meslek değiştirmek için istifa eder; kapsam botu da artık
+öyle yapıyor (`quitJob` + başvuru, yalnızca `jobCoverage` açıkken).
+Düzeltmeden sonra aynı tohumlar:
+
+| Tohum (60 hayat) | Varsayılan | Kapsam | Hayat başına iş (varsayılan → kapsam) |
+| --- | --- | --- | --- |
+| 9400 | 35 | **44** | 2,55 → **14,13** |
+| 7100 | 33 | **42** | 2,47 → **13,45** |
+| 3300 | 32 | **43** | 2,63 → **14,02** |
+
+**Ve asıl sonuç değişti:** 240 kapsam hayatında kataloğun **52/55**
+mesleğine girildi. Hiç girilmeyen yalnızca üç meslek kaldı:
+
+| Meslek | Gerekçe |
+| --- | --- |
+| `eczaci` | büyük şehir piyasası |
+| `elektrik_muhendisi` | üniversite bölümü |
+| `yazar` | Okumak hobisinde "Düzenli" basamağı |
+
+Yani "16 meslek çok yıllı ön koşul istiyor" tablosu **bozuk araçla
+ölçülmüş bir sonuçtu**; katalog pratikte neredeyse tamamen
+erişilebilir. Q-219 buna göre düzeltildi.
+
+**Açık kalan tasarım sorusu.** Üç meslek (eczacı, elektrik mühendisi,
+yazar) belirli bir ön koşul istiyor: büyük şehir, üniversite bölümü,
+hobi basamağı. Bu bilinçli bir derinlik mi? Q-219'da önerimle birlikte
+duruyor; **hiçbir meslek gereksinimi değiştirilmedi**.
 
 ## Paket BZ — dört olay yanlış kapıdaydı (10 Ekim 2026)
 
@@ -6712,6 +6756,29 @@ geçen hiçbir olay** sınıf aralığı belirtmeden 1-12 kapısında kalamaz
 **bot karesinde** olayların en az üçü uygun hale geliyor; 120 oynanan
 hayatta en az 6 hayat bu olaylardan birini görüyor (düzeltme öncesi
 sıfırdı).
+
+## Paket BZ/1 — metin iş varsayıyorsa koşul da istemeli (10 Ekim 2026)
+
+Paket BZ'nin tarayıcı fikrini bütün olay havuzlarına uyguladım: olay
+metninin varsaydığı şey (eş, çocuk, iş, ev, araç, işletme) koşulda
+garanti edilmiş mi? 1200'ü aşkın içerik kaydında **iki** gerçek bulgu
+çıktı:
+
+| Bulgu | Sorun |
+| --- | --- |
+| `komsu_gurultu` (Paket BU) | metin "Sabah **işin var**." diyordu; koşulda iş yok, yani emekliye ve öğrenciye de çıkıyordu |
+| aile ziyareti olayının bir etiketi | "Kısa kes, **işin var**" — aynı varsayım, aynı koşul eksiği |
+
+Üç "ilk maaş" olayının hepsinde `requiresEmployed: true` vardı; yani
+sistem doğru kurulmuş, bu ikisi sızmış. İkisi de herkese doğru olan
+cümleye çevrildi ("Saat ikiyi geçti, sen hâlâ uyanıksın." / "Kısa kes,
+bugün olmaz").
+
+**Bekçi:** `test/paket_bz1_metin_kosul_test.dart` — metni ya da
+etiketi oyuncunun işini varsayan bir olay (`işin var`, `patronun`,
+`maaşın`, `işyerin`) `requiresEmployed` istemek zorunda. Muafiyet
+listesi **yok**; Paket BD'nin "koşulsuz nedeniyle" bulgusuyla aynı
+sınıf hata bir daha sessizce giremez.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

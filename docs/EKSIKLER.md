@@ -426,9 +426,14 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   kapsamıydı**. Yeni kapsam modu (`playBotLife(jobCoverage: true)`,
   varsayılan kapalı) mesleğe göre ayırdı: `yz_kurye` 240 hayatta 210 yıl
   ilanda açıktı ama botun "25 yaşından sonra yarım zamanlı iş kabul
-  etmem" kuralı başvurmasını engelliyordu; kalan mesleklerin hepsinin
-  yazılı bir gerekçesi var (üniversite bölümü 9, hobi basamağı 2, dövüş
-  derecesi 6, büyük şehir 2). Katalog tutarlılığı
+  etmem" kuralı başvurmasını engelliyordu. **Düzeltme (BY/1):** kapsam
+  modunun "çalışırken girilmemiş işe geç" dalı ölü koddu (oyun çalışan
+  oyuncunun başvurusunu engelliyor); istifa edip başvuracak şekilde
+  düzeltilince 240 hayatta **52/55** mesleğe girildi ve hiç girilmeyen
+  yalnızca üç meslek kaldı: eczacı (büyük şehir), elektrik mühendisi
+  (bölüm), yazar (hobi basamağı). İlk turda yazdığım "16 meslek çok
+  yıllı ön koşul istiyor" tablosu bozuk araçla ölçülmüştü. Katalog
+  tutarlılığı
   `content_reachability_test.dart` ile korunuyor ve bu pakette eksik
   olan **ehliyet** legi de eklendi. Kapsam modu 60 hayatta 28/55, 240
   hayatta 37-42/55 meslek geziyor; gerekçesi boş kilit yok. Çok yıllı ön

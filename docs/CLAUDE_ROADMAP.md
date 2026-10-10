@@ -221,6 +221,15 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   **kural** gibi görünür: 20 isimle ve medyan 58 kişiyle iki yaşayan
   kişinin aynı adı taşıması 283/300 hayatta oluyordu. Önce havuzun
   kapasitesini ölç, sonra kural tartış (Q-198 #6).
+- **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
+  değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
+  çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)
+  ve ben farkı **tek tohum öbeğinde** görüp "genişletiyor" diye
+  yazmıştım; üç öbekle ölçünce fark kayboldu (35/30, 33/34, 32/27). Bir
+  aracın işe yaradığını söylemeden önce **aynı tohumlarla iki modu**
+  karşılaştır ve farkın tohum değişince ayakta kalıp kalmadığına bak.
+  Düzeltmeden sonra fark tartışmasız oldu: 52/55 meslek, hayat başına
+  2,5 → 14 iş.
 - **Paket BZ.** Bir olay hiç çıkmıyorsa **koşulunu metniyle karşılaştır**.
   Kimliğinde "üniversite" ve "kampüs" yazan dört olay
   `requiresSchoolStudent` istiyordu ve o kapı yalnızca 1-12. sınıfı
