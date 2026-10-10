@@ -192,20 +192,39 @@ class EventEngine {
   }
 
   /// Uygun olaylar arasından ağırlıklı seçim yapar ve kişisini çözer.
+  ///
+  /// **Zar sözleşmesi (Paket BO).** Bu tarama, havuzda kaç olay olduğundan
+  /// bağımsız olarak zar tüketir. Eskiden tersiydi: kişi çözümü koşul
+  /// denetiminden **önce** yapıldığı için, o yaşta hiç çıkamayacak bir
+  /// olay bile `rng`'yi tüketiyordu. Sonuç: havuza tek bir olay eklemek
+  /// bütün tohumlu ölçümleri kaydırıyordu — bir oturumda beş bekçi testi
+  /// bu yüzden kırıldı. Artık sıra şu:
+  ///
+  /// 1. Ucuz kapılar (modül, görülme, tekrar aralığı) — zar tüketmez.
+  /// 2. Kişiden bağımsız koşullar (`_matches`, `requirePerson: false`) —
+  ///    zar tüketmez.
+  /// 3. Kişi **adayları** (`_eligiblePeople`) — zar tüketmez.
+  /// 4. Ağırlıklı çekiliş — **bir** zar.
+  /// 5. Yalnızca kazanan olayın kişisi (`_pickPerson`) — en çok bir zar.
+  ///
+  /// Yani uygun olmayan olay eklemek akışa hiç dokunmaz; uygun olan
+  /// eklemek yalnızca çekilişi değiştirir.
   ActiveEvent? _pick(GameState state, Random rng) {
     final List<_Candidate> candidates = <_Candidate>[];
     for (final GameEvent event in pool) {
-      // Modül kapısı **zardan önce** (Paket BM): kapalı modülün olayı
-      // için kişi çözümü yapılırsa `rng` tüketilir ve kapalı modül bile
-      // hayatın akışını kaydırır. Ölçülen etki küçük değildi: hepsi
-      // kapalı 100 hayatta ortalama ömür 70,4'ten 72,1'e kaymıştı.
-      // Kapalı modül oyunun zarına dokunmaz.
+      // Modül kapısı (Paket BM): kapalı bir içerik modülünün olayı hiç
+      // aday olmaz ve oyunun zarına dokunmaz.
       if (!FeatureEvents.allowed(state, event.id)) continue;
       if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
       if (!_repeatGapPassed(state, event)) continue;
-      final Person? person = _resolvePerson(state, event, rng);
-      if (!_matches(state, event, person)) continue;
-      candidates.add(_Candidate(event, person));
+      // Koşullar kişiden **önce** denetlenir: 40 yaşın olayı için 7
+      // yaşında kişi aranmaz.
+      if (!_matches(state, event, null, requirePerson: false)) continue;
+      // Kişi adayları zar tüketmeden çıkarılır; **hangisi** olduğu
+      // çekilişi kazanan olay için sonradan seçilir.
+      final List<Person> adaylar = _eligiblePeople(state, event);
+      if (_needsPerson(event.requirement) && adaylar.isEmpty) continue;
+      candidates.add(_Candidate(event, adaylar));
     }
     if (candidates.isEmpty) return null;
 
@@ -216,7 +235,7 @@ class EventEngine {
               prototypeOnlyEffectiveWeight(state, c.event))
           .toList(),
     );
-    return _toActive(state, chosen);
+    return _toActive(state, chosen.event, _pickPerson(chosen.people, rng));
   }
 
   /// Yalnızca ölçüm içindir: olayın kişisiz koşullarını denetler.
@@ -237,21 +256,37 @@ class EventEngine {
   /// soruyu yüzlerce tohumla çekiliş yaparak yanıtlamak yanıltıcıydı:
   /// dönüm noktası ağırlıkları devreye girince (Paket 21) çekilişi hep
   /// aynı olay kazanıyor ve diğerleri "imkânsız" gibi görünüyordu.
+  ///
+  /// **Paket BO'dan sonra zar gerekmiyor:** kişi seçimi uygunluğu
+  /// belirlemiyor, yalnızca aday **varlığı** belirliyor. Bu yüzden sonuç
+  /// artık tohumdan bağımsız. `rng` parametresi eski çağrılar bozulmasın
+  /// diye duruyor ve yok sayılır. Eskiden tohuma bağlıydı ve bu yanlıştı:
+  /// erişilemeyen bir kardeş çekilince, erişilebilir kardeşi olan olay
+  /// "imkânsız" görünüyordu.
   @visibleForTesting
-  Set<String> debugEligibleIds(GameState state, Random rng) {
+  Set<String> debugEligibleIds(GameState state, [Random? rng]) {
     final Set<String> sonuc = <String>{};
     for (final GameEvent event in pool) {
       if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
       if (!_repeatGapPassed(state, event)) continue;
-      final Person? person = _resolvePerson(state, event, rng);
-      if (!_matches(state, event, person)) continue;
+      if (!_matches(state, event, null, requirePerson: false)) continue;
+      if (_needsPerson(event.requirement) &&
+          _eligiblePeople(state, event).isEmpty) {
+        continue;
+      }
       sonuc.add(event.id);
     }
     return sonuc;
   }
 
   /// Olayın koşullarını denetler. Kişi gerekiyorsa [person] dolu olmalıdır.
-  bool _matches(GameState state, GameEvent event, Person? person) {
+  ///
+  /// [requirePerson] yalnızca `_pick` ve `debugEligibleIds` içindir: orada
+  /// kişi adayları ayrı çıkarıldığı için kişi varlığı burada
+  /// denetlenmez (Paket BO). Dışarıdan çağıran her yol varsayılanı
+  /// kullanır; yani kişi gerektiren olay kişisiz geçemez.
+  bool _matches(GameState state, GameEvent event, Person? person,
+      {bool requirePerson = true}) {
     // Modül kapısı (Paket BL): kapalı bir içerik modülünün olayı hiç
     // aday olmaz. Tek yer burasıdır; `_pick`, `canHappen` ve
     // `debugEligibleIds` üçü de buradan geçer.
@@ -273,7 +308,7 @@ class EventEngine {
     }
     // Kişi gerektiren olay, uygun kişi bulunamadıysa elenir: aksi hâlde
     // metindeki yer tutucular boş kalır ve olmayan kişiyle olay çıkar.
-    if (_needsPerson(req) && person == null) return false;
+    if (requirePerson && _needsPerson(req) && person == null) return false;
     if (!state.storyFlags.containsAll(req.requiredFlags)) return false;
     if (req.forbiddenFlags.any(state.storyFlags.contains)) return false;
     if (!state.possessions.containsAll(req.requiredPossessions)) return false;
@@ -429,10 +464,10 @@ class EventEngine {
       return false;
     }
     // Gündelik erişilebilirlik isteyen olaylarda kişi gerçekten
-    // ulaşılabilir olmalı.
-    if (req.requireReachable && person != null && !state.isReachable(person)) {
-      return false;
-    }
+    // ulaşılabilir olmalı. **Bu denetim `_eligiblePeople` içine taşındı**
+    // (Paket BO): burada yapılırsa "erişilemeyen kişi çekildi" diye
+    // elenen olay, erişilebilir bir kardeşi olsa bile çıkmıyordu.
+    // Koşulun yeri seçicidir; eleme değil, aday süzgeci.
     return true;
   }
 
@@ -453,32 +488,62 @@ class EventEngine {
       req.requiresTripMemory ||
       req.personRole != null;
 
-  /// Olayın kişisini seçer; uygun kişi yoksa `null` döner ve olay elenir.
-  Person? _resolvePerson(GameState state, GameEvent event, Random rng) {
+  /// Kazanan olayın kişisini seçer.
+  ///
+  /// Aday yoksa `null`; tek aday varsa zar atılmaz. Zar yalnızca
+  /// **gerçekten seçim varken** tüketilir (Paket BO).
+  static Person? _pickPerson(List<Person> adaylar, Random rng) {
+    if (adaylar.isEmpty) return null;
+    if (adaylar.length == 1) return adaylar.first;
+    return adaylar[rng.nextInt(adaylar.length)];
+  }
+
+  /// Tek kişiyi aday listesine çevirir ve erişilebilirlik süzgecini
+  /// uygular. Kilitli kimlik (hikâye kişisi, gezi arkadaşı) için seçim
+  /// yoktur: kişi erişilemezse olay çıkmaz.
+  static List<Person> _onlyIfUsable(
+    GameState state,
+    EventRequirement req,
+    Person? kisi,
+  ) {
+    if (kisi == null) return const <Person>[];
+    if (req.requireReachable && !state.isReachable(kisi)) {
+      return const <Person>[];
+    }
+    return <Person>[kisi];
+  }
+
+  /// Olayın kişi **adayları**. Boş liste, kişi gerektiren olayın
+  /// elenmesi demektir.
+  ///
+  /// **Zar tüketmez** (Paket BO). Eskiden bu iş `_resolvePerson` içinde
+  /// `rng` ile yapılıyordu ve havuzdaki her olay için çağrıldığı için
+  /// havuz büyüdükçe bütün tohumlu sonuçlar kayıyordu.
+  List<Person> _eligiblePeople(GameState state, GameEvent event) {
     final EventRequirement req = event.requirement;
 
     // Gezi anısı: olayın kişisi, yıllar önce birlikte yola çıktığın
     // kişidir. Gezi yoksa ya da kişi vefat ettiyse olay çıkmaz.
     if (req.requiresTripMemory) {
       final TripRecord? gezi = Travel.memorableTrip(state);
-      if (gezi == null) return null;
-      return state.personById(gezi.companionId!);
+      if (gezi == null) return const <Person>[];
+      return _onlyIfUsable(state, req, state.personById(gezi.companionId!));
     }
 
     // Hikâyede kilitlenmiş kişi: yıllar sonra da aynı kimlik kullanılır.
     final String? role = req.personRole;
     if (role != null) {
       final String? personId = state.storyPeople[role];
-      if (personId == null) return null;
+      if (personId == null) return const <Person>[];
       final Person? person = state.personById(personId);
-      if (person == null || !person.isAlive) return null;
+      if (person == null || !person.isAlive) return const <Person>[];
       if (req.personMinAge != null && person.age < req.personMinAge!) {
-        return null;
+        return const <Person>[];
       }
       if (req.personMaxAge != null && person.age > req.personMaxAge!) {
-        return null;
+        return const <Person>[];
       }
-      return person;
+      return _onlyIfUsable(state, req, person);
     }
 
     if (req.requiresNeglectedRelative) {
@@ -505,52 +570,55 @@ class EventEngine {
         }
         return state.player.age - last >= prototypeOnlyNeglectAgeGap;
       }).toList(growable: false);
-      if (neglected.isEmpty) return null;
-      return neglected[rng.nextInt(neglected.length)];
+      return neglected;
     }
 
-    if (req.livingRelations.isEmpty) return null;
+    if (req.livingRelations.isEmpty) return const <Person>[];
 
     final List<Person> uygun = state.people.where((Person p) {
       if (!p.isAlive) return false;
       if (!req.livingRelations.contains(p.relation)) return false;
       if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
       if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+      // **Erişilebilirlik burada süzülür (Paket BO).** D-093 aynı hatayı
+      // "ilgilenilmeyen yakın" seçicisinde kapatmıştı; bu dal açık
+      // kalmıştı. Eskiden erişilemeyen bir kardeş çekilince olay
+      // elenirdi — erişilebilir kardeşi varken bile.
+      if (req.requireReachable && !state.isReachable(p)) return false;
       // Kişinin kendi yaşı: çocuk olayları doğru yaşa bağlanır.
       if (req.personMinAge != null && p.age < req.personMinAge!) return false;
       if (req.personMaxAge != null && p.age > req.personMaxAge!) return false;
       return true;
     }).toList(growable: false);
-    if (uygun.isEmpty) return null;
-    return uygun[rng.nextInt(uygun.length)];
+    return uygun;
   }
 
-  ActiveEvent _toActive(GameState state, _Candidate candidate) {
+  ActiveEvent _toActive(GameState state, GameEvent event, Person? person) {
     return ActiveEvent(
-      eventId: candidate.event.id,
-      category: candidate.event.category,
+      eventId: event.id,
+      category: event.category,
       text: _fillPet(
         _fillTrip(
-          _fill(candidate.event.text, candidate.person, state.player.age),
+          _fill(event.text, person, state.player.age),
           state,
-          candidate.event,
+          event,
         ),
         state,
-        candidate.event,
+        event,
       ),
       // Seçenek etiketlerindeki yer tutucular da doldurulur; ekranda
       // "{kisi}" yazmaz.
       choices: List<EventChoice>.unmodifiable(<EventChoice>[
-        for (final EventChoice c in candidate.event.choices)
+        for (final EventChoice c in event.choices)
           if (c.label.contains('{'))
-            c.withLabel(_fill(c.label, candidate.person, state.player.age))
+            c.withLabel(_fill(c.label, person, state.player.age))
           else
             c,
       ]),
-      personId: candidate.person?.id,
+      personId: person?.id,
       // Geçmiş bir seçimin ya da kişinin devamıysa işaretlenir.
-      isContinuation: candidate.event.requirement.requiredFlags.isNotEmpty ||
-          candidate.event.requirement.personRole != null,
+      isContinuation: event.requirement.requiredFlags.isNotEmpty ||
+          event.requirement.personRole != null,
     );
   }
 
@@ -804,8 +872,11 @@ class EventEngine {
 }
 
 class _Candidate {
-  const _Candidate(this.event, this.person);
+  const _Candidate(this.event, this.people);
 
   final GameEvent event;
-  final Person? person;
+
+  /// Olayın kişi adayları. Çekilişi kazanana kadar **hangisi** olduğu
+  /// seçilmez (Paket BO).
+  final List<Person> people;
 }

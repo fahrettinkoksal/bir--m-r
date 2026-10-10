@@ -67,17 +67,29 @@ karşılaşılabilecek olay sayısı 18 yaşında 34, 19'da 26,5, 30'da 77.
 Çocukluktan sonra en ince bant buydu. 29 olay eklendi, dördü yıllar
 sonra geri dönen karşılık. Modül: `esikteki_yillar`.
 
-### Paket BO — motorun zar tüketimi (sıradaki)
-`EventEngine._pick` kişi çözümünü koşul denetiminden **sonraya** alsın.
-Bugün her havuz girdisi için kişi çözülüyor ve `rng` tüketiliyor; bu
-yüzden havuza eklenen her olay bütün tohumlu ölçümleri kaydırıyor
-(Paket BN'de üç bekçi bu yüzden kırıldı). Değişiklik aday kümesini
-değiştirmez, yalnızca zar tüketimini azaltır — ama bütün tohumlu
-sonuçları **bir kez** kaydırır, o yüzden kendi paketi ve kendi ölçüm
-turu olmalı. Kazanç: sonraki içerik paketleri bekçileri kırmaz, tarama
-da hızlanır.
+### Paket BO — motorun zar sözleşmesi · **bitti**
+`EventEngine._pick` artık kişiyi **çekilişi kazanan olay için** çözüyor.
+Eskiden her havuz girdisi için kişi çözülüyor ve `rng` tüketiliyordu; o
+yaşta hiç çıkamayacak bir olay bile zar sırasını kaydırıyordu. Yeni
+sıra: ucuz kapılar → kişiden bağımsız koşullar → kişi **adayları**
+(zarsız) → bir zarla çekiliş → kazananın kişisi. Yan ürün olarak
+`requireReachable` koşulu aday süzgecine taşındı: erişilemeyen bir
+kardeş çekildi diye elenen olay, erişilebilir kardeş varken artık
+eleniyor değil (D-093 aynı hatayı öbür seçicide kapatmıştı).
 
-### Paket BP — ev, eşya ve mahalle derinliği
+Dengenin kaymadığı iki bağımsız blokta 400'er hayatla ölçüldü; sapma
+yönü bloklar arasında ters döndü, yani sistematik etki yok
+(`PROJECT_STATUS.md`). Bekçi: `app/test/paket_bo_zar_bagimsizligi_test.dart`
+— eski motorda kırılıyor, yenisinde geçiyor.
+
+Tam süit iki gerçek boşluk gösterdi. Biri: okulun **tek** öğretmeni
+vefat edince yerine kimse gelmiyordu — ölüm turundan sonra öğretmensiz
+kalan sınıfa artık yeni öğretmen geliyor ve günlüğe satır düşüyor.
+İkincisi: UI smoke testi takılmayı sessizce yutuyordu; 10 hayatın
+2'sinde duruşma penceresi modal kalıp arayüzü kilitliyordu ve test
+yine geçiyordu. İkisi de ölçülüp düzeltildi (`PROJECT_STATUS.md`).
+
+### Paket BP — ev, eşya ve mahalle derinliği (sıradaki)
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` §6: konut alınıyor, kiraya veriliyor,
 içinde hiçbir şey olmuyor. Eşya envanteri evle ilişkilenmiyor.
 
@@ -120,8 +132,27 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   kişi çözümü yapıp `rng` tüketiyor. Sonuç: havuza eklenen her olay, o
   olayın hiç çıkamayacağı hayatlarda bile zar sırasını kaydırıyor ve
   tohumlu ölçümleri kırıyor. Geçici çözüm: mekanik ve ekonomi
-  ölçümlerini modüller **kapalı** koşmak. Kalıcı çözümü ayrı paket:
-  aşağıdaki BO.
+  ölçümlerini modüller **kapalı** koşmak. Kalıcı çözüm Paket BO'da
+  geldi.
+- **Paket BO.** Motorun çekirdeğini değiştiren bir paket, dengeyi
+  **dağılımla** savunmak zorunda: tek tohum, tek blok ve tek metrik
+  yanıltıyor. 160 hayatta medyan servet %18 kaymış görünüyordu; 400
+  hayatta fark %2'ye indi ve ikinci tohum bloğunda sapmanın yönü ters
+  döndü. Ölçüyü büyütmeden "değişmedi" denmez.
+- **Paket BO.** Zar sırasını değiştirmek, gizli duran gerçek boşlukları
+  görünür yapar: sekiz tohumla koşan sınıf testi bir kuralı değil
+  kurayı ölçüyordu ve kaydırınca okulun tek öğretmeninin vefatı ortaya
+  çıktı. Tohuma çakılı bir bekçi düştüğünde ilk soru "tohum mu kaydı?"
+  değil, "bu testin iddiası gerçekten bir kural mı?" olmalı.
+- **Paket BO.** "Döngüden çık" bir bekçiyi kör eder: `if (!ilerledi)
+  break;` yazan smoke testi, arayüz 65 yaşında kilitlenmişken bile
+  yeşil kalıyordu çünkü iddia yalnızca "on yıl geçti mi" diye
+  soruyordu. Bir döngüden erken çıkmanın **sebebi** ya iddiaya
+  girmeli ya da testi düşürmeli.
+- **Paket BO.** Bekçi yazarken bekçinin **eski kodda kırıldığını** da
+  göster. Paket BO'nun bekçisi eski motorda iki testten kalıyor, yeni
+  motorda geçiyor; yoksa testin neyi koruduğu belgede kalır, kodda
+  kalmaz.
 
 ## Pano
 

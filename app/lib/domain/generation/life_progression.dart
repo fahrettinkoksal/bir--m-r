@@ -518,6 +518,18 @@ class LifeProgression {
       log: log,
     );
 
+    // **Okul öğretmensiz kalmaz (Paket BO).** Denetim ölüm turundan
+    // *sonra* yapılır: öğretmen sınıfın kurulduğu yıl vefat edebiliyor
+    // (ölçüldü — sekiz tohumdan birinde oluyordu) ve o hâlde oyuncu o
+    // kademeyi öğretmensiz bitiriyordu.
+    final List<Person> peopleWithTeacher = _replaceTeacherIfNeeded(
+      state: state,
+      people: olumSonucu.people,
+      education: okulSonucu.education,
+      newAge: newAge,
+      log: log,
+    );
+
     // Maaş yeni yaşa geçerken **bir kez** ödenir.
     ({GameState state, String? logText}) maas = const JobMarket().paySalaryFor(
       state.copyWith(player: state.player.copyWith(age: newAge)),
@@ -622,7 +634,7 @@ class LifeProgression {
     final GameState advanced = state.copyWith(
       // Maaş ödemesi cüzdanı ve ödeme dönemini günceller.
       player: maas.state.player.copyWith(age: newAge),
-      people: List<Person>.unmodifiable(olumSonucu.people),
+      people: List<Person>.unmodifiable(peopleWithTeacher),
       log: List<LifeLogEntry>.unmodifiable(log),
       // Tekrar sayaçları yaşa aittir: yeni yaşta aynı etkinlik yeniden
       // anlamlı fayda verebilir. Yenilemenin tam mı kısmi mi olacağı
@@ -2306,6 +2318,60 @@ class LifeProgression {
         ),
       ]),
     );
+  }
+
+  /// Okulun öğretmeni yoksa yerine yenisini getirir.
+  ///
+  /// Bir kademede tanınan öğretmen bir kişidir; o kişi vefat edince
+  /// sınıf öğretmensiz kalıyor ve yerine kimse gelmiyordu (Paket BO).
+  /// Gerçek hayatta da öğretmen değişir: boşluk burada kapanır.
+  List<Person> _replaceTeacherIfNeeded({
+    required GameState state,
+    required List<Person> people,
+    required EducationState education,
+    required int newAge,
+    required List<LifeLogEntry> log,
+  }) {
+    final SchoolLevel? level = education.level;
+    final String? okulKimligi = education.schoolId;
+    // Okulu olmayana öğretmen atanmaz: bırakan, mezun olan ya da hiç
+    // başlamamış oyuncu bu kapıdan geçmez.
+    if (level == null || okulKimligi == null || !education.isSchoolStudent) {
+      return people;
+    }
+    if (people.any((Person p) => p.isTeacherIn(okulKimligi))) {
+      return people;
+    }
+    // Öğretmen kaydı hiç yok mu, yoksa vefat mı etti? Metin buna göre
+    // kurulur; olmayan ölüm anlatılmaz.
+    final bool vefatEtti = people.any(
+      (Person p) =>
+          !p.isAlive &&
+          p.schoolTie == SchoolTie.ogretmen &&
+          p.schoolId == okulKimligi,
+    );
+    const SchoolPeople okul = SchoolPeople();
+    final String sehir = state.player.currentCity;
+    final List<Person> yeni = okul.buildReplacementTeacher(
+      state: state.copyWith(
+        player: state.player.copyWith(age: newAge),
+        people: List<Person>.unmodifiable(people),
+      ),
+      level: level,
+      rng: _rng,
+      city: SchoolPeople.cityOfClassId(education.classId) ?? sehir,
+    );
+    if (yeni.isEmpty) return people;
+    log.add(
+      LifeLogEntry(
+        age: newAge,
+        text: vefatEtti
+            ? 'Vefat eden öğretmeninin yerine ${yeni.first.fullName} geldi.'
+            : 'Sınıfının öğretmeni ${yeni.first.fullName} oldu.',
+        category: LogCategory.kisisel,
+      ),
+    );
+    return <Person>[...people, ...yeni];
   }
 
   /// Yeni bir sınıf ortamı gerekiyorsa kurar.

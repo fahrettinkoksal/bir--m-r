@@ -30,6 +30,14 @@ gelir.
    70,4'ten 72,1'e kaymıştı. Kapı zardan önceye alındı, ortalama 70,4'e
    döndü ve 240 durumda iki motor (tam havuz + kapalı modül / modülsüz
    havuz) aynı olayı verdi.
+
+   **Paket BO bu kuralı yapısal hâle getirdi.** Artık yalnızca kapalı
+   modül değil, **uygun olmayan hiçbir olay** zara dokunmuyor: kişi
+   çözümü koşul denetiminden sonraya alındı ve kişi yalnızca çekilişi
+   kazanan olay için seçiliyor. Yani havuza olay eklemek, o olayın
+   çıkamadığı hayatlarda akışı hiç değiştirmiyor
+   (`app/test/paket_bo_zar_bagimsizligi_test.dart`: 60 uygun olmayan
+   olay eklenmiş havuz, 320 durumda birebir aynı sonucu veriyor).
 5. **Kapalıyken oyun çalışır.** Modül kapalı 100 hayat sonuna kadar
    gider; evlilik, çocuk ve kariyer yaşanmaya devam eder. Bunu
    `app/test/paket_bl_modul_izolasyon_test.dart` ölçer.

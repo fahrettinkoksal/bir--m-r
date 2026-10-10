@@ -492,15 +492,17 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   sermayeli işletmeye ulaşamıyor; her arketip çalışıyor (%98-100),
   işsiz kalmayı seçen profil yok. Bunlar düzeltilirse **bütün ürün
   metrikleri değişir**, bu yüzden Faho'ya bildirilmeden yapılmadı.
-- **Olay havuzuna içerik eklemek tohuma çakılı testleri kaydırıyor.**
-  `EventEngine._pick`, havuzdaki **her** olay için kişiyi çözüyor
+- ~~**Olay havuzuna içerik eklemek tohuma çakılı testleri
+  kaydırıyor.**~~ **Düzeltildi (Paket BO, 9 Ekim 2026).**
+  `EventEngine._pick` havuzdaki **her** olay için kişiyi çözüyordu
   (`_resolvePerson`, çekiliş tüketiyor) ve yaş kapısına ancak ondan
-  sonra bakıyor. Sonuç: 20 yaş üstü bir olay eklemek çocukluk yıllarının
-  rastgele akışını da kaydırıyor. D-162'de bu dört testi kırdı; hiçbiri
-  gevşetilmedi, tohumları yeniden çıpalandı ve gerekçesi yazıldı. Kalıcı
-  çözüm yaş kapısını kişi çözmeden önce bakmak; **bu bir motor
-  değişikliği olduğu için onay bekliyor**, yatırım paketinin yan etkisi
-  olarak yapılmadı.
+  sonra bakıyordu. Sonuç: 20 yaş üstü bir olay eklemek çocukluk
+  yıllarının rastgele akışını da kaydırıyordu. D-162'de dört, Paket
+  BM/BN'de beş testi kırdı; hiçbiri gevşetilmedi. Satır yıllarca "motor
+  değişikliği olduğu için onay bekliyor" diyordu; 9 Ekim'de geliştirme
+  yetkisi devredilince yapıldı. Yeni sıra: koşullar → kişi adayları
+  (zarsız) → çekiliş → yalnızca kazananın kişisi. Bekçi:
+  `app/test/paket_bo_zar_bagimsizligi_test.dart`; karar kaydı Q-210.
 
 ---
 

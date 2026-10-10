@@ -1,7 +1,12 @@
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/data/lawyer_catalog.dart';
+import 'package:bir_omur/domain/education/education_path.dart';
+import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/models/pending_trial.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:bir_omur/ui/sound/sound_service.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +50,34 @@ void main() {
         await answerPendingCrisis(tester, c);
         continue;
       }
+      // **Duruşma penceresi (Paket BO).** Modal bir sayfa: kapatılmadan
+      // Yaş Al'a basılamıyor ve hayat orada duruyordu. Eski test bunu
+      // sessizce yutuyordu: döngüden çıkıyor, on yılı geçtiği için
+      // geçiyordu. Yani "arayüzden ilerlenebiliyor" iddiası 65 yaşında
+      // çökmüş hâldeyken bile yeşil kalıyordu.
+      if (c.state!.pendingTrial != null) {
+        final Finder tutum = find.byKey(
+          Key('trial_stance_${DefenceStance.pismanlik.name}'),
+        );
+        if (tutum.evaluate().isNotEmpty) {
+          await tester.ensureVisible(tutum);
+          await tester.pumpAndSettle();
+          await tester.tap(tutum);
+          await tester.pumpAndSettle();
+        }
+        if (c.state!.pendingTrial != null) {
+          // Düğmeye ulaşılamadıysa motordan kapat: testin işi pencereyi
+          // beklemek değil. (Ulaşılamazlığın kendisi `trial_sheet`
+          // testlerinin konusu.)
+          c.respondToTrial(
+            stance: DefenceStance.pismanlik,
+            lawyerId: kSelfDefenceTier.id,
+          );
+          await tester.pumpAndSettle();
+        }
+        continue;
+      }
+
       final ActiveEvent? olay = c.state!.pendingEvent;
       if (olay != null) {
         // Seçenek etiketine bas; **ilk şık değil**, rastgele geçerli bir
@@ -76,17 +109,38 @@ void main() {
 
   /// Bir yılı arayüzden geçirir: bekleyen pencereleri kapatır, sonra
   /// Yaş Al'a basar.
-  Future<bool> uiYilGecir(WidgetTester tester, GameController c) async {
+  ///
+  /// İlerlenemediğinde **neden** ilerlenemediğini de döndürür. Eskiden
+  /// yalnızca `false` dönüyordu ve testin hata mesajı "bir pencere ya da
+  /// düğme ulaşılamıyor" demekle kalıyordu; hangi kapının kapalı olduğu
+  /// elle aranmak zorundaydı (Paket BO).
+  Future<({bool ilerledi, String sebep})> uiYilGecir(
+    WidgetTester tester,
+    GameController c,
+  ) async {
     // Bekleyen olay/kriz/bildirim varsa arayüzden kapat.
     await bekleyenleriKapat(tester, c);
     await resolveEducationSheets(tester, c);
 
     final Finder yasAl = find.byKey(const Key('age_up_button'));
-    if (yasAl.evaluate().isEmpty) return false;
+    if (yasAl.evaluate().isEmpty) {
+      return (ilerledi: false, sebep: 'Yaş Al düğmesi ekranda yok');
+    }
     final int once = c.state!.player.age;
     await tester.tap(yasAl);
     await tester.pumpAndSettle();
-    return c.state!.player.age > once || c.state!.deceased;
+    if (c.state!.player.age > once || c.state!.deceased) {
+      return (ilerledi: true, sebep: '');
+    }
+    final GameState d = c.state!;
+    return (
+      ilerledi: false,
+      sebep: 'düğmeye basıldı, yaş ilerlemedi '
+          '(olay: ${d.hasPendingEvent}, bildirim: ${d.hasNotice}, '
+          'kriz: ${d.hasPendingCrisis}, '
+          'lise alanı: ${d.education.awaitingTrackChoice}, '
+          'lise sonrası: ${EducationPath.needsAfterSchoolChoice(d)})',
+    );
   }
 
   /// Bütün sekmeleri gezer ve ilk menü satırlarını açıp kapatır.
@@ -128,41 +182,86 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final GameController c = GameController(random: Random(seed * 41));
-      addTearDown(c.dispose);
-      await tester.pumpWidget(
-        BirOmurApp(controller: c, sound: SoundService.silent()),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Rastgele bir hayat'));
-      await tester.pumpAndSettle();
-
+      // **Tohum denemesi (Paket BO).** İddia "arayüzden on yıl
+      // ilerlenebilir". Oyuncu yedi yaşında vefat ettiyse bu iddia
+      // yanlış değil, **ölçülemez** olur: erken ölüm oyunun kendi
+      // sonucu, arayüz hatası değil. O yüzden on yılı gören bir hayat
+      // bulunana kadar tohum denenir.
+      //
+      // Takılma ile ölüm **ayrı** tutulur: yaş alınamıyorsa (ölmemişken
+      // ilerlenemiyorsa) test hemen düşer, başka tohum denenmez. Yoksa
+      // gerçek bir "düğmeye ulaşılamıyor" hatası tohum değiştirilerek
+      // gizlenebilirdi.
       int yil = 0;
       int gezinti = 0;
-      while (!c.state!.deceased && yil < 70) {
-        final bool ilerledi = await uiYilGecir(tester, c);
-        if (!ilerledi) break;
-        yil++;
-        // Her beş yılda bir bütün menüleri gez: ulaşılabilirlik sürekli
-        // denetlenir, yalnızca başta değil.
-        if (yil % 5 == 0) {
-          await sekmeleriGez(tester, c);
-          gezinti++;
-          // Yaş Al'a geri dön.
-          final Finder hayat = find.byKey(const Key('tab_hayat'));
-          if (hayat.evaluate().isNotEmpty) {
-            await tester.tap(hayat);
-            await tester.pumpAndSettle();
+      int denenen = seed * 41;
+      for (final int ek in <int>[0, 1000, 2000, 3000]) {
+        denenen = seed * 41 + ek;
+        // Yeniden denemede ağacı tamamen söküp kuruyoruz: aynı tipte
+        // yeni bir kök pump edilince Flutter eski `State`'leri koruyor
+        // ve uygulama önceki hayatın ekranında kalıyordu.
+        if (ek > 0) {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        }
+        final GameController c = GameController(random: Random(denenen));
+        addTearDown(c.dispose);
+        await tester.pumpWidget(
+          BirOmurApp(controller: c, sound: SoundService.silent()),
+        );
+        await tester.pumpAndSettle();
+        final Finder baslat = find.text('Rastgele bir hayat');
+        if (baslat.evaluate().isNotEmpty) {
+          await tester.tap(baslat);
+          await tester.pumpAndSettle();
+        } else {
+          // Yeniden denemede başlangıç ekranı gelmiyor: önceki hayatın
+          // kaydı duruyor ve uygulama onu açıyor. Hayat motordan
+          // başlatılır; başlangıç ekranının kendisi ilk denemede
+          // zaten gezildi.
+          c.startNewLife(mode: StartMode.tamamenRastgele, seed: denenen);
+          await tester.pumpAndSettle();
+        }
+
+        yil = 0;
+        gezinti = 0;
+        bool takildi = false;
+        String takilmaSebebi = '';
+        while (!c.state!.deceased && yil < 70) {
+          final ({bool ilerledi, String sebep}) adim =
+              await uiYilGecir(tester, c);
+          if (!adim.ilerledi) {
+            takildi = true;
+            takilmaSebebi = adim.sebep;
+            break;
+          }
+          yil++;
+          // Her beş yılda bir bütün menüleri gez: ulaşılabilirlik
+          // sürekli denetlenir, yalnızca başta değil.
+          if (yil % 5 == 0) {
+            await sekmeleriGez(tester, c);
+            gezinti++;
+            // Yaş Al'a geri dön.
+            final Finder hayat = find.byKey(const Key('tab_hayat'));
+            if (hayat.evaluate().isNotEmpty) {
+              await tester.tap(hayat);
+              await tester.pumpAndSettle();
+            }
           }
         }
+        expect(takildi, isFalse,
+            reason: 'Arayüzden yaş alınamadı (tohum $denenen, yaş '
+                '${c.state!.player.age}): $takilmaSebebi');
+        expect(tester.takeException(), isNull);
+        if (yil > 10) break;
       }
 
       // İddialar: hayat gerçekten arayüzden yürüdü ve menüler açıldı.
       expect(yil, greaterThan(10),
-          reason: 'Arayüzden en az on yıl ilerlenebilmeli; ilerlenemiyorsa '
-              'bir pencere ya da düğme ulaşılamıyor');
+          reason: 'Arayüzden en az on yıl ilerlenebilmeli; denenen bütün '
+              'tohumlarda hayat on yıldan önce bitti (son tohum: '
+              '$denenen)');
       expect(gezinti, greaterThan(0), reason: 'Menüler hiç gezilmedi');
-      expect(tester.takeException(), isNull);
     });
   }
 }

@@ -5798,5 +5798,128 @@ hızlanır. Bu, motorun çekirdeğinde bir değişiklik ve bütün tohumlu
 ölçümleri bir kez kaydırır; ayrı bir paket olarak planlandı
 (`docs/CLAUDE_ROADMAP.md`).
 
+## Paket BO — motorun zar sözleşmesi (9 Ekim 2026)
+
+Bu paket içerik eklemedi; **motorun kendi kırılganlığını** kapattı.
+
+### Ölçülen sorun
+
+`EventEngine._pick` aday taramasında kişi çözümünü koşul denetiminden
+**önce** yapıyordu. Kişi çözümü `rng` tüketir; dolayısıyla 40 yaşın
+olayı, 7 yaşındaki bir hayatta hiç çıkamayacağı hâlde zar sırasını
+ilerletiyordu. Sonuç: **havuza tek bir olay eklemek bütün tohumlu
+ölçümleri kaydırıyordu.** Paket BM ve BN'de beş bekçi testi yalnızca bu
+yüzden kırıldı (sınav önceliği, ekran dökümü, sınıf arkadaşı kademesi,
+tekrar evlenme kilidi, olay çeşitliliği); hiçbiri gerçek bir oyun
+hatası değildi. `docs/EKSIKLER.md` bu satırı "motor değişikliği olduğu
+için onay bekliyor" diye taşıyordu; 9 Ekim'de geliştirme yetkisi
+devredilince yapıldı.
+
+### Yeni sıra
+
+1. Ucuz kapılar (modül, görülme, tekrar aralığı) — zar tüketmez.
+2. Kişiden bağımsız koşullar — zar tüketmez.
+3. Kişi **adayları** (`_eligiblePeople`) — zar tüketmez.
+4. Ağırlıklı çekiliş — **bir** zar.
+5. Yalnızca kazanan olayın kişisi (`_pickPerson`) — en çok bir zar.
+
+Yani uygun olmayan olay eklemek akışa hiç dokunmaz; uygun olan eklemek
+yalnızca çekilişi değiştirir. `debugEligibleIds` de artık tohumdan
+bağımsız: "hangi olaylar mümkün" sorusunun cevabı zara bağlı değil.
+
+### Yan ürün: erişilebilirlik artık aday süzgeci
+
+`requireReachable` koşulu `_matches` içinde, kişi **çekildikten sonra**
+denetleniyordu: başka şehirdeki arkadaş çekilirse olay eleniyordu, aynı
+şehirde erişilebilir bir arkadaş olsa bile. D-093 tam bu hatayı
+"ilgilenilmeyen yakın" seçicisinde kapatmış, öbür dalı açık bırakmıştı.
+Koşul artık seçicinin içinde (15 olayın 13'ü bu dalda).
+
+### Denge kaymadı — iki blok 400 hayat
+
+Dört arketip (`casual`, `family`, `career`, `investor`), iki bağımsız
+tohum bloğu:
+
+| Ölçü | Blok 1 eski → yeni | Blok 2 eski → yeni |
+| --- | --- | --- |
+| Ortalama ölüm yaşı | 73,00 → 72,91 | 73,05 → 73,37 |
+| Medyan ölüm yaşı | 75 → 75 | 75 → 75 |
+| Evlenen | %56 → %53 | %54 → %55 |
+| Boşanan | %21 → %21 | %22 → %24 |
+| Çocuklu | %40 → %38 | %40 → %40 |
+| Çalışan | %100 → %99 | %100 → %99 |
+| Üniversite | %58 → %54 | %54 → %55 |
+| Ev sahibi | %61 → %59 | %61 → %63 |
+| Medyan servet | 49,3M → 50,4M | 44,9M → 47,9M |
+| Hayat başına farklı olay | 97,9 → 97,8 | 98,5 → 99,3 |
+| Erişilen farklı olay | 498 → 499 | 499 → 502 |
+
+Sapmanın **yönü bloklar arasında ters döndü**: blok 1'de yeni motor
+biraz aşağıda, blok 2'de biraz yukarıda. Sistematik etki yok, tohum
+gürültüsü var. Tek tutarlı işaret havuz kapsamının +1 ve +3 artması —
+erişilebilirlik süzgeci birkaç olayı açıyor, beklenen yön.
+
+**Ölçünün büyüklüğü de bir ders.** İlk tur 160 hayattı ve medyan servet
+%18 kaymış görünüyordu; 400 hayatta fark %2'ye indi. Ölçüyü büyütmeden
+"değişmedi" denmez.
+
+### Tam süitin yakaladığı gerçek boşluk: öğretmensiz sınıf
+
+Zar sırası kayınca `package1_test.dart`'ın sekiz tohumlu sınıf testi
+düştü: tohum 0'da okulun **tek** öğretmeni (`prototypeOnlyTeacherCount
+= 1`) sınıfın kurulduğu yıl vefat ediyordu ve yerine kimse gelmiyordu.
+Öğretmen 28-58 yaş arasında üretiliyor, yıllık ölüm ihtimali binde
+1,2-4; yani bu her tohumda ~%1 ihtimalle oluyordu ve test bir kuralı
+değil **kurayı** ölçüyordu. Eşik gevşetilmedi; **ürün tarafı
+düzeltildi**: ölüm turundan sonra okul öğretmensizse yerine yeni
+öğretmen gelir ve günlüğe satır düşer ("Vefat eden öğretmeninin yerine
+… geldi."). Vefat eden kayıt silinmez.
+
+Denetim neden ölüm turundan **sonra**: öğretmen sınıfın kurulduğu yıl
+ölebiliyor; kontrol sınıf kurulumunun yanında olsa o yıl sınıf
+öğretmensiz kalırdı.
+
+### İkinci gerçek bulgu: UI smoke testi takılmayı yutuyordu
+
+`ui_smoke_life_test.dart` on hayatı gerçek arayüzden oynuyor ve "en az
+on yıl ilerlenebilmeli" diyor. Zar kayınca 2. hayat yedi yaşında vefat
+etti ve test düştü — ama kurcalayınca iddianın **iki ayrı** eksiği
+çıktı:
+
+1. **Erken ölüm, arayüz hatası değil.** Oyuncu yedi yaşında vefat
+   ettiyse "on yıl ilerlenebilir" iddiası yanlış değil, *ölçülemez*.
+   Artık on yılı gören bir hayat bulunana kadar tohum deneniyor
+   (ekran dökümünde de aynı kalıp kullanılıyor).
+2. **Takılma sessizce yutuluyordu.** Döngü `if (!ilerledi) break;`
+   diyordu; on yılı geçmiş bir hayatta arayüz 65 yaşında kilitlense
+   bile test yeşil kalıyordu. Ölçüldü: 10 hayatın **2'sinde** arayüz
+   kilitleniyordu. Sebep **duruşma penceresi**: modal açık kalıyor,
+   "Yaş Al" düğmesine basılan dokunuş pencereye gidiyor ve yıl
+   ilerlemiyor. Smoke akışı olay/bildirim/krizi kapatıyordu, duruşmayı
+   kapatmıyordu.
+
+Düzeltme: takılma ile ölüm **ayrıldı** — ölmemişken ilerlenemiyorsa
+test *hemen* düşer ve hangi kapının kapalı olduğunu yazar (olay,
+bildirim, kriz, lise alanı, lise sonrası). Duruşma penceresi artık
+arayüzden kapatılıyor (`trial_stance_*` düğmesi); düğmeye
+ulaşılamazsa motordan kapatılıyor. Yani bekçi gevşemedi, **sertleşti**.
+
+### Bekçi
+
+`app/test/paket_bo_zar_bagimsizligi_test.dart` (5 test): uygun olmayan
+60 olay eklenmiş havuz 320 durumda birebir aynı sonucu veriyor;
+erişilebilir arkadaş varken olay 30 tohumun hepsinde çıkıyor ve hep
+erişilebilir kişi seçiliyor; tek arkadaş erişilemezse olay hiç
+çıkmıyor; `debugEligibleIds` tohumdan bağımsız; öğretmeni vefat eden
+sınıfa yeni öğretmen geliyor. İlk iki test **eski motorda kalıyor** —
+bekçinin neyi koruduğu kodda kanıtlı.
+
+**Süit.** Yerelde tam süit: **3527 geçti, 17 atlandı, 0 düştü**
+(`flutter test`). Paket BO'nun üç turu da kayda değer: ilk turda iki
+test düştü (öğretmen ve UI smoke), ikinci turda bir (UI smoke),
+üçüncüde sıfır.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-210.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
