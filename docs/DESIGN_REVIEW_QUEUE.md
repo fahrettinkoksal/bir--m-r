@@ -8781,3 +8781,58 @@ girsin mi?" Şimdi elimizde somut bir örnek var.
 değildi ve iki paket boyunca ölçüm 302M'de durduğu hâlde kimse
 bakmadı. Bundan sonra kuyruk iddiası yazarken sayıyı değil **dağılımı**
 basacağım.
+
+### Q-224 — Kulüp zinciri: üyelik sürerken olay garanti edilsin mi?
+
+**Durum: ölçüldü, karar Faho'nun (Claude, 10 Ekim 2026).** Koda
+dokunulmadı; bu bir mekanik kararı.
+
+**Ölçüm (150 spor hayatı, `choiceCoverage` açık).** Paket CD'nin iki
+modlu taraması "iki modda da kaçan" altı olay bıraktı; dördü futbol
+kulübü zincirinin halkalarıydı. Huni:
+
+| Ölçü | Değer |
+| --- | --- |
+| Futbol takımına giren hayat | 29/150 (karışık arketipte 16/150) |
+| En uzun üyelik (ortalama) | **3,9 yıl** |
+| O hayatlarda görülen futbol olayı (ortalama) | **1,6** (en çok 5) |
+| Futbol havuzundaki olay sayısı | 14 |
+
+Görülen dağılım: `ilk_antrenman` 14, `takim_arkadasi` 8, `turnuva` 6,
+`sakatlik` 6, `antrenor_tartismasi` 5, `ders_catismasi` 5,
+`ilk_on_bir` 2, `scout` 1. Hiç izi bırakılmayanlar:
+`penaltiKacirdi` 0/150, `antrenorleGerginlik` 1/150,
+`ilkOnBireCikti` 2/150.
+
+**Bu bir hata değil, yoğunluk uyuşmazlığı.** Zincirin ikinci halkaları
+(`kulup_futbol_antrenor_barisma`, `kulup_futbol_kritik_gol`,
+`kulup_futbol_penalti_sonrasi`) hem ilk halkanın izini hem **aynı
+üyelik penceresinde ikinci bir çekilişi** istiyor. Üyelik 3,9 yıl
+sürüyor ve o süre boyunca 1,6 kulüp olayı çıkıyor: iki adımlı zincir bu
+yoğunlukta matematik gereği nadir kalıyor. Paket BX'in öncelik
+katsayısı (6×) tek halkayı öne çekti ama **yoğunluğu** değiştirmiyor —
+havuzda 595 olay var ve kulüp olayları her yıl aynı çekilişte yarışıyor.
+
+**Sana bir soru.**
+
+**Üyelik sürerken kulüp olayı yılda bir garanti edilsin mi? (önerim:
+evet)** Yani oyuncu bir kulüpte aktifken yılın olaylarından **biri**
+genel havuzdan değil o kulübün havuzundan seçilsin (koşullar yine
+geçerli olsun). O zaman 3,9 yıllık üyelik ≈ 3-4 kulüp olayı demek olur
+ve iki adımlı zincir gerçekten tamamlanır. Alternatifler:
+
+1. **Garanti yılda bir** (önerim). Bir hikâyeyi yazıp oyuncuya hiç
+   göstermemekten iyidir; kulüp zaten oyuncunun kendi seçimi.
+2. **Olduğu gibi kalsın:** kulüp içeriği nadir bir ikramiye olsun.
+   O zaman 14 olayın 6-7'si pratikte ölü içerik demektir; bunu bilerek
+   kabul etmek de bir karar.
+3. **Zinciri kısaltmak:** ikinci halkaları birinci halkanın
+   **sonucuna** gömmek (ayrı olay değil, aynı olayın ikinci ekranı).
+   İçeriği korur, çekiliş gerektirmez; ama yazılı sekiz olayın yapısı
+   değişir.
+
+**Ölçümün yöntemi korunuyor.** `test/paket_ce_kulup_zinciri_test.dart`
+(3 test): yetim halka yok (her istenen izi bırakan bir olay var),
+üyelik penceresi gerçekten var (ortalama ≥2 yıl; ölçülen 3,9) ve kulüp
+içeriği üyeye ulaşıyor. Karar verilene kadar bu dosya gevşetilmiş bir
+iddia taşımıyor.
