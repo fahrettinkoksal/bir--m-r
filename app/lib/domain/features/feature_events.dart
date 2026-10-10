@@ -10,6 +10,7 @@
 library;
 
 import '../../data/event_pool_early_years.dart';
+import '../../data/event_pool_home.dart';
 import '../../data/event_pool_threshold_years.dart';
 import '../models/game_event.dart';
 import '../models/game_state.dart';
@@ -22,6 +23,7 @@ abstract final class FeatureEvents {
       <FeatureId, List<GameEvent>>{
     FeatureId.ilkYillarOlaylari: kEarlyYearsEvents,
     FeatureId.esiktekiYillar: kThresholdYearsEvents,
+    FeatureId.oturulanEv: kHomeEvents,
   };
 
   /// Olay kimliğinden modüle eşleme; bir kez kurulur.

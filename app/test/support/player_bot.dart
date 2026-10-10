@@ -620,6 +620,17 @@ class _Intent {
   /// Bu hayatta ev almaya çalışıldı mı (tekrar tekrar denemesin diye).
   int homeAttemptAge = -99;
   int rentalAttemptAge = -99;
+
+  /// **Oturmak için** alınan evin kimliği (Paket BP).
+  ///
+  /// Ölçülen bot hatası: bot oturmak için ev alıyor, taşınma masrafına
+  /// (45.000 ₺) parası kalmadığı için taşınamıyor, sonra `_rentOutVacant`
+  /// o evi "boş ev" sayıp kiraya veriyordu. Kirada olan eve taşınılamaz,
+  /// dolayısıyla bot bir daha asla kendi evinde oturmuyordu. 40 hayatta
+  /// ölçüldü: ev sahibi olan 25 hayatın **18'i** kendi evinde tek yıl
+  /// bile geçirmemiş. Gerçek oyuncu oturmak için aldığı evi kiraya
+  /// vermez; parası olunca taşınır.
+  String? homeForLivingId;
   int businessAttemptAge = -99;
 
   // ------------------------------------------------------------------
@@ -1786,7 +1797,8 @@ void _handleMoney(
       s.player.age >= 24 &&
       s.player.age - intent.homeAttemptAge >= 2) {
     intent.homeAttemptAge = s.player.age;
-    _tryBuyHome(c, profile, rng, sonuc, forRental: false, reserve: rezerv);
+    _tryBuyHome(c, profile, rng, sonuc, intent,
+        forRental: false, reserve: rezerv);
   }
 
   // ---- Kiralık ev --------------------------------------------------
@@ -1796,10 +1808,21 @@ void _handleMoney(
       s.player.age >= 28 &&
       s.player.age - intent.rentalAttemptAge >= 3) {
     intent.rentalAttemptAge = s.player.age;
-    _tryBuyHome(c, profile, rng, sonuc, forRental: true, reserve: rezerv);
+    _tryBuyHome(c, profile, rng, sonuc, intent,
+        forRental: true, reserve: rezerv);
+  }
+  // Oturmak için alınan eve, parası yetince taşın (Paket BP).
+  final String? oturulacak = intent.homeForLivingId;
+  if (oturulacak != null && c.state!.residenceItemId != oturulacak) {
+    final OwnedItem? ev = c.state!.itemById(oturulacak);
+    if (ev == null) {
+      intent.homeForLivingId = null;
+    } else if (c.moveBlockReason(ev).isEmpty) {
+      c.moveInto(ev);
+    }
   }
   // Boş yatırım evini kiraya ver.
-  _rentOutVacant(c, rng, sonuc);
+  _rentOutVacant(c, rng, sonuc, intent);
 
   // ---- Yatırım -----------------------------------------------------
   if (s.player.age >= kInvestmentMinAge &&
@@ -1877,7 +1900,8 @@ void _tryBuyHome(
   GameController c,
   BotProfile profile,
   Random rng,
-  BotLifeResult sonuc, {
+  BotLifeResult sonuc,
+  _Intent intent, {
   required bool forRental,
   required int reserve,
 }) {
@@ -1925,17 +1949,28 @@ void _tryBuyHome(
     sonuc.ownedRental = true;
   } else {
     sonuc.ownedHome = true;
-    // İlk ev oturmak için: gerçekten taşınır.
+    // İlk ev oturmak için: gerçekten taşınır. Taşınma masrafına para
+    // kalmadıysa ev **oturmak için ayrılmış** kalır ve sonraki yıllarda
+    // yeniden denenir (Paket BP).
     final OwnedItem yeni = c.state!.properties.last;
+    intent.homeForLivingId = yeni.id;
     if (c.moveBlockReason(yeni).isEmpty) c.moveInto(yeni);
   }
 }
 
 /// Boş yatırım evlerini gerçek akışla kiraya verir.
-void _rentOutVacant(GameController c, Random rng, BotLifeResult sonuc) {
+void _rentOutVacant(
+  GameController c,
+  Random rng,
+  BotLifeResult sonuc,
+  _Intent intent,
+) {
   final GameState s = c.state!;
   for (final OwnedItem ev in s.properties) {
     if (ev.id == s.residenceItemId) continue;
+    // Oturmak için alınan ev kiraya verilmez: kirada olan eve
+    // taşınılamıyor ve bot bir daha kendi evinde oturamıyordu.
+    if (ev.id == intent.homeForLivingId) continue;
     if (c.leaseOf(ev) != null) {
       sonuc.letProperty = true;
       continue;

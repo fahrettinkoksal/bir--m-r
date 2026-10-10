@@ -14,6 +14,7 @@ import 'event_pool_course.dart';
 import 'event_pool_crime.dart';
 import 'event_pool_friendship.dart';
 import 'event_pool_early_years.dart';
+import 'event_pool_home.dart';
 import 'event_pool_threshold_years.dart';
 import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
@@ -1751,4 +1752,9 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // uygun olan olay sayısı 18 yaşında 34, 30 yaşında 77 ölçüldü;
   // modül anahtarı `FeatureId.esiktekiYillar`.
   ...kThresholdYearsEvents,
+  // Oturduğun ev (Paket BP). Katalogda kiracı, kiraya veren ve boş ev
+  // kapıları vardı; **oturulan evin kapısı yoktu**. Ölçüldü: kendi
+  // evinde oturanın konut havuzundan aday olayı 30/40/50/60 yaşında 0,
+  // kiracının 8. Modül anahtarı `FeatureId.oturulanEv`.
+  ...kHomeEvents,
 ];

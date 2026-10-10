@@ -483,6 +483,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   (Q-167/2) — ikisi de açık.
   `second_marriage_test.dart` geçiyordu çünkü orada sevgili elle
   kuruluyordu; oyuncunun gerçek yolu test edilmiyordu.
+- ~~**Bot oturmak için aldığı eve taşınmıyor.**~~ **Düzeltildi (Paket
+  BP, 10 Ekim 2026).** Ölçüldü: ev sahibi olan 25 hayatın 18'i kendi
+  evinde tek yıl bile geçirmemiş. Zincir şuydu: bot ev alıyor, taşınma
+  masrafı (45.000 ₺) kalmadığı için `moveInto` reddediliyor, sonra
+  `_rentOutVacant` o evi "boş ev" sayıp kiraya veriyor ve kirada olan
+  eve taşınılamadığı için bot bir daha kendi evinde oturmuyor. Oyunda
+  hata yoktu; ölçüm aracı o yolu hiç yürümüyordu. Politika düzeltildi
+  (oturmak için alınan ev işaretlenir, kiraya verilmez, taşınma her yıl
+  yeniden denenir): kendi evinde hiç oturmayan 18/25 → 5/25.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

@@ -47,6 +47,7 @@ class EventRequirement {
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
     this.requiresTenant = false,
+    this.requiresOwnedResidence = false,
     this.forbidsProperty = false,
     this.maxComfort,
     this.minComfort,
@@ -306,6 +307,16 @@ class EventRequirement {
   /// evinde oturan ya da ailesinin yanında yaşayan oyuncuya "ev sahibi
   /// aradı" denmez.
   final bool requiresTenant;
+
+  /// Oyuncunun **kendi evinde oturuyor** olmasını gerektirir (Paket BP).
+  ///
+  /// Mülk sahibi olmak yetmez: evi olup ailesinin yanında yaşayan ya da
+  /// evini kiraya verip kirada oturan oyuncuya "evinin kombisi patladı"
+  /// denmez. Ölçülen boşluk buydu: katalogda kiracı kapısı 11, kiraya
+  /// veren kapısı 14, boş ev kapısı 8 olayda vardı; **oturulan evin
+  /// kapısı hiç yoktu**. Kendi evinde oturan 40 yaşındaki oyuncunun
+  /// konut havuzundan aday olayı sıfırdı, kiracının sekiz.
+  final bool requiresOwnedResidence;
 
   /// Şu anki işte geçmiş olması gereken en az yıl.
   ///

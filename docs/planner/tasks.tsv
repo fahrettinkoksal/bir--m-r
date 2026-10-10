@@ -234,6 +234,10 @@ completed	Paket BO: iki blok 400 hayat önce/sonra denge ölçümü (sapma yön�
 completed	Paket BO: zar bağımsızlığı bekçisi — eski motorda kırılıyor, yenisinde geçiyor
 completed	Paket BO: öğretmeni vefat eden sınıfa yeni öğretmen gelir (gerçek boşluk)
 completed	Paket BO: UI smoke takılmayı yutmuyor — duruşma penceresi arayüzden kapanıyor
+completed	Paket BP: oturulan ev kapısı (requiresOwnedResidence) ve 28 olay
+completed	Paket BP: yedi karşılık olayı — bırakılan izlerin hepsi okunuyor
+completed	Paket BP: aday olay sayısı kendi evinde 0'dan 19'a
+completed	Paket BP: bot hatası — alınan eve taşınmıyordu (18/25 → 5/25)
 pending	Paket BO: motorun zar tüketimi — kişi çözümü koşul denetiminden sonra
 pending	Q-207: sınav ağırlığı bekçisinin yöntemi — onay bekliyor
 pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik

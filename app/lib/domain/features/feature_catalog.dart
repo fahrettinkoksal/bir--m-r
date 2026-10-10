@@ -115,6 +115,20 @@ enum FeatureId {
       'app/lib/data/event_pool_threshold_years.dart',
       'app/test/paket_bn_esikteki_yillar_test.dart',
     ],
+  ),
+
+  /// Paket BP — oturulan evin olayları.
+  oturulanEv(
+    saveKey: 'oturulan_ev',
+    title: 'Oturduğun ev',
+    lostWhenOff:
+        'Kombi, çatı, küf, apartman toplantısı, komşu ve dönüşüm '
+        'olayları kalkar; kendi evinde oturmak yine sessiz geçer.',
+    paket: 'Paket BP — oturduğun ev',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_home.dart',
+      'app/test/paket_bp_oturulan_ev_test.dart',
+    ],
   );
 
   const FeatureId({

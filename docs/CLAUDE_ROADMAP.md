@@ -89,14 +89,41 @@ kalan sınıfa artık yeni öğretmen geliyor ve günlüğe satır düşüyor.
 2'sinde duruşma penceresi modal kalıp arayüzü kilitliyordu ve test
 yine geçiyordu. İkisi de ölçülüp düzeltildi (`PROJECT_STATUS.md`).
 
-### Paket BP — ev, eşya ve mahalle derinliği (sıradaki)
-`docs/NEXT_DEVELOPMENT_OPTIONS.md` §6: konut alınıyor, kiraya veriliyor,
-içinde hiçbir şey olmuyor. Eşya envanteri evle ilişkilenmiyor.
+### Paket BP — oturduğun ev · **bitti**
+Seçim gerekçesi ölçümdür: katalogdaki 524 olayın kapıları sayıldı —
+kiracı 11, kiraya veren 14, boş ev 8, **oturulan ev 0**. Motorda böyle
+bir koşul bile yoktu, dolayısıyla kendi evinde oturan oyuncunun konut
+havuzundan aday olayı 30/40/50/60 yaşında sıfırdı (kiracının sekiz).
+Evini alınca hayat sessizleşiyordu.
 
-### Paket BQ — görünüm seçimi (açık/koyu)
+`requiresOwnedResidence` kapısı eklendi ve 28 olay yazıldı; yedisi
+yıllar sonra kendi izini okuyan karşılık. Modül: `oturulan_ev`.
+
+Tam süit bir bot hatası gösterdi: bot oturmak için aldığı eve taşınma
+masrafı kalmadığı için taşınamıyor, sonra o ev "boş ev" sayılıp kiraya
+veriliyor ve bir daha asla kendi evinde oturmuyordu (ev sahibi 25
+hayatın 18'i). Politika düzeltildi; oturulan ev olayını gören hayat
+7/25'ten 20/25'e çıktı.
+
+### Paket BQ — görünüm seçimi (sıradaki)
+
 Oyunda koyu tema **var** (`BirOmurTheme.dark()`) ama oyuncu
 seçemiyor: `ThemeMode.system` sabit. Ayarlara üç seçenek (sistem /
 açık / koyu) eklenecek; kayıtta duracak.
+
+### Paket BR adayları (ölçülmüş, sıralanmadı)
+
+- **İlk eve taşınma hatırlatması.** Paket BP'de ölçüldü: oyuncu ev
+  alabiliyor ama taşınmayı yalnızca *Evlerim* ekranındaki düğmeden
+  öğreniyor; hatırlatan satır yok. Ölçüm botunun da aynı yere düşmesi
+  (ev alıp hiç taşınmaması) bunun gerçek bir görünürlük boşluğu
+  olduğunu gösteriyor.
+- **Komşunun kalıcı kişi olması.** Paket BP apartmanı metinde yaşattı.
+  Komşuyu gerçek kişi yapmak yeni bağ türü, ilişkiler ekranı satırı ve
+  erişilebilirlik kuralı gerektirir; kendi paketi olmalı.
+- **Eşyanın evle ilişkisi.** `docs/NEXT_DEVELOPMENT_OPTIONS.md` §6'nın
+  kalan yarısı: envanterdeki eşya hangi evde duruyor, taşınınca ne
+  oluyor, ev eşyası yıpranıyor mu.
 
 ## Ölçülmüş dersler
 
@@ -144,6 +171,15 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   kurayı ölçüyordu ve kaydırınca okulun tek öğretmeninin vefatı ortaya
   çıktı. Tohuma çakılı bir bekçi düştüğünde ilk soru "tohum mu kaydı?"
   değil, "bu testin iddiası gerçekten bir kural mı?" olmalı.
+- **Paket BP.** İçerik eklemeden önce **kapıyı** say: "konut olayı var
+  mı?" sorusunun cevabı 30'du, ama hepsi başkasının eviydi. Katalogdaki
+  olay sayısı değil, oyuncunun o durumdayken gördüğü olay sayısı
+  ölçülür.
+- **Paket BP.** Ölçüm botu bir özelliği hiç kullanmıyorsa, o özelliğin
+  içeriği "erişilemez" görünür. Bot oturmak için aldığı eve
+  taşınamıyordu; düzeltmeden önce yeni havuz 7/25 hayatta görünüyordu,
+  sonra 20/25. Yeni içerik ölçülmüyorsa önce **botun o yolu yürüyüp
+  yürümediğine** bak.
 - **Paket BO.** "Döngüden çık" bir bekçiyi kör eder: `if (!ilerledi)
   break;` yazan smoke testi, arayüz 65 yaşında kilitlenmişken bile
   yeşil kalıyordu çünkü iddia yalnızca "on yıl geçti mi" diye

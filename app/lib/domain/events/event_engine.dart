@@ -19,6 +19,7 @@ import '../economy/investment_engine.dart';
 import '../models/game_event.dart';
 import '../models/market_state.dart';
 import '../activities/travel.dart';
+import '../economy/housing.dart';
 import '../economy/living_costs.dart';
 import '../models/game_state.dart';
 import '../models/school_club_progress.dart';
@@ -456,6 +457,12 @@ class EventEngine {
     // Kirada oturmayan oyuncuya ev sahibi olayı çıkmaz.
     if (req.requiresTenant &&
         LivingCosts.situationOf(state) != LivingSituation.kirada) {
+      return false;
+    }
+    // Kendi evinde oturmayana ev sahipliği olayı çıkmaz (Paket BP).
+    // Mülk sahipliği yetmiyor: oturulan ev kaydından okunur.
+    if (req.requiresOwnedResidence &&
+        Housing.residenceOf(state) != ResidenceKind.kendiEvinde) {
       return false;
     }
     if (req.requiresMinYearsInJob > 0 &&

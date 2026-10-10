@@ -59,6 +59,7 @@ gelir.
 | `cocuk_yil_ozeti` | Çocuğun yıl özeti | BK/5 | Yıl özetinde çocuk bloğu görünmez; çocuğun kartı aynı kalır. |
 | `ilk_yillar_olaylari` | İlk yıllar olayları | BM | 0-7 yaş havuzuna eklenen 31 olay ve ilk yılların karşılıkları çıkmaz; ilk yıllar paket öncesi gibi geçer. |
 | `esikteki_yillar` | Eşikteki yıllar | BN | 16-20 yaş havuzuna eklenen 29 olay ve eşikteki kararların karşılıkları çıkmaz; lise sonu ve ilk iş yılları paket öncesi gibi geçer. |
+| `oturulan_ev` | Oturduğun ev | BP | Kendi evinde oturana çıkan 28 olay (kombi, çatı, küf, apartman toplantısı, komşu, dönüşüm) ve yedi karşılığı çıkmaz; kendi evine çıkmak paket öncesi gibi sessiz geçer. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.

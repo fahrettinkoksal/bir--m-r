@@ -5921,5 +5921,125 @@ test düştü (öğretmen ve UI smoke), ikinci turda bir (UI smoke),
 
 Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-210.
 
+## Paket BP — oturduğun ev (10 Ekim 2026)
+
+### Ölçülen sorun: evini alınca hayat sessizleşiyordu
+
+Katalogdaki konut olaylarının hepsi **başkasının** eviydi. 524 olayın
+kapıları sayıldı:
+
+| Kapı | Olay sayısı |
+| --- | --- |
+| `requiresTenant` (oyuncu kirada) | 11 |
+| `requiresLetProperty` (kiraya verdiği ev) | 14 |
+| `requiresVacantProperty` (boş ev) | 8 |
+| **oturulan ev** | **0 — motorda böyle bir koşul yoktu** |
+
+Oynanabilir sonucu daha net: kendi evinde oturan oyuncunun konut
+havuzundan aday olayı 30, 40, 50 ve 60 yaşında **0**; kiracının 8.
+Toplam aday olay sayısı da kiracıda yüksekti (40 yaşında 67'ye karşı
+56). Yani oyuncu hayatının en büyük alışverişini yapıp kendi evine
+çıkınca hayatı **sessizleşiyordu**.
+
+### Yapılan
+
+**Motor kapısı (tek yer).** `EventRequirement.requiresOwnedResidence`:
+mülk sahibi olmak yetmez, oyuncunun o evde **oturuyor** olması gerekir
+(D-043 ayrımına uyar). Evini kiraya verip kirada oturana bu olaylar
+çıkmaz.
+
+**İçerik: 28 olay** (`app/lib/data/event_pool_home.dart`), dördü
+başlık altında:
+
+- *Ev yıpranır:* kombi, mutfak sızıntısı, eski tesisat, çatı,
+  pencereler, banyo küfü, boya.
+- *Apartman:* aidat oylaması, yönetici arayışı, üst kat gürültüsü,
+  komşunun anahtarı, otopark yeri.
+- *Yuva:* kendi evinde ilk kış, misafir odası, mutfak yenileme,
+  balkon, bayram temizliği.
+- *Sahiplik kararları:* konut sigortası, kapı güvenliği, yandaki
+  satılık daire, kentsel dönüşüm.
+
+**Yedi karşılık olayı** bırakılan izleri okur: yamalı kombi geri döner,
+ertelenen çatının bedeli iki katına çıkar, eski tesisat kısa devre
+yapar, sigorta işe yarar, güçlendirilen kapı işini görür, komşuya
+edilen iyilik geri döner, dönüşüm tamamlanır. 14 izin 14'ünün karşılığı
+var; sessiz iz yok (Paket AR kuralı).
+
+Para tutarları mevcut konut havuzuyla aynı ölçekte: usta 9.000, kombi
+26.000-31.000, taşınma 45.000 çıpaları (hepsi `prototypeOnly`).
+Komşu ve apartman **metinde** yaşar; yeni kişi kaydı açılmadı (komşunun
+kalıcı kişi olması yeni bağ türü, ekran listeleri ve erişilebilirlik
+gerektirir — ayrı paket).
+
+Modül: `oturulan_ev`.
+
+### Ölçüm: aday olay sayısı 0'dan 19'a
+
+Kendi evinde oturan oyuncu, 10 tohum ortalaması
+(`app/test/paket_bp_oturulan_ev_test.dart`):
+
+| Yaş | Oturulan ev havuzundan aday olay |
+| --- | --- |
+| 22 | 11 |
+| 30 | 19 |
+| 40 | 19 |
+| 50 | 19 |
+| 65 | 19 |
+
+Kiracıya ve ailesinin yanında yaşayana 40 durumda **hiç** çıkmıyor.
+Modül kapalıyken 30 durumda tek olay sızmıyor ve 60 durumda iki motor
+(tam havuz + kapalı modül / modülsüz havuz) aynı olayı veriyor.
+
+### Tam süitin gösterdiği bot hatası: alınan eve taşınılmıyordu
+
+Oynanan 40 hayatta ölçüldü: ev sahibi olan 25 hayatın **18'i kendi
+evinde tek yıl bile geçirmemiş**. Sebep oyunda değil, ölçüm botunda:
+
+1. Bot oturmak için ev alıyor, parasının çoğu eve gidiyor.
+2. Taşınma masrafı (45.000 ₺) kalmadığı için `moveInto` reddediliyor.
+3. Bir sonraki adımda `_rentOutVacant` o evi "boş ev" sayıp **kiraya
+   veriyor**.
+4. Kirada olan eve taşınılamadığı için bot bir daha asla kendi evinde
+   oturmuyor.
+
+Gerçek oyuncu oturmak için aldığı evi kiraya vermez ve parası olunca
+taşınır. Bot politikası buna göre düzeltildi (oturmak için alınan ev
+işaretlenir, kiraya verilmez, taşınma her yıl yeniden denenir).
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Kendi evinde hiç oturmayan ev sahibi | 18/25 | **5/25** |
+| Oturulan ev olayı gören | 7/25 | **20/25** |
+| Havuzun erişilen olayı | 19/28 | **26/28** |
+
+### Denge: iki blokta 400'er hayat, modül açık/kapalı
+
+| Ölçü | Blok 1 açık → kapalı | Blok 2 açık → kapalı |
+| --- | --- | --- |
+| Ortalama ölüm yaşı | 72,67 → 72,57 | 72,61 → 72,55 |
+| Evlenen | %53 → %54 | %56 → %56 |
+| Çocuklu | %38 → %38 | %40 → %40 |
+| Ev sahibi | %58 → %58 | %63 → %63 |
+| Medyan servet | 47,0M → 46,9M | 47,9M → 44,4M |
+| Ortalama son sağlık | 25,9 → 26,5 | 24,3 → 24,8 |
+| Hayat başına farklı olay | 97,9 → 97,3 | 99,0 → 98,4 |
+
+İki blokta **aynı yönde** çıkan iki işaret var ve ikisi de beklenen:
+hayat başına farklı olay +0,5 (içerik gerçekten erişiliyor) ve
+ortalama son sağlık −0,5 (ihmal edilen evin bedeli var: küf, soğuk,
+kendi yaptığın boya). Ölüm yaşı, evlilik, çocuk ve ev sahipliği
+değişmiyor. Medyan servetteki +%0,3 ve +%8 ters yönlü değil ama
+tutarsız; Paket BO'da ölçülen gürültü bandının içinde.
+
+### Bekçi
+
+`app/test/paket_bp_oturulan_ev_test.dart` (8 test): havuzun yapısı ve
+kapısı, izlerin okunduğu, kiracı/aile yanında hiç çıkmadığı, kendi
+evinde bant boyunca sürdüğü, modül kapalıyken sızmadığı ve zarı
+kaydırmadığı, oynanan hayatta gerçekten çıktığı.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-211.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
