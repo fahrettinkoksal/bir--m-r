@@ -8519,3 +8519,31 @@ istiyor.
 **Varsayılanım (1).** Onay gelmezse hiçbir şey değişmez; ölçüm artık
 sebebi öbekleyerek raporluyor, yani "12 meslek kapalı" satırı bir daha
 yanlış ize götürmeyecek.
+
+**Düzeltme (Paket BY/1, 10 Ekim 2026) — yukarıdaki tablo bozuk bir
+araçla ölçülmüştü, soru küçüldü.** Kapsam modunun "çalışırken girilmemiş
+işe geç" dalı **ölü koddu**: oyun çalışan oyuncunun başvurusunu
+engelliyor ("Önce mevcut işinden ayrılman gerekiyor") ve dal bunu
+`isAllowed` ile süzdüğü için aday listesi hep boş kalıyordu. Üç tohum
+öbeğiyle ölçtüm; kapsam modu varsayılan bottan **daha geniş
+gezmiyordu** (birleşim 35/30, 33/34, 32/27). İlk turda gördüğüm "42'ye
+37" farkı gürültüydü.
+
+Gerçek oyuncu meslek değiştirmek için istifa eder; kapsam botu da artık
+öyle yapıyor. Düzeltmeden sonra aynı tohumlarda birleşim 35→44, 33→42,
+32→43 ve hayat başına girilen iş 2,5 → 14. **Asıl sonuç:** 240 kapsam
+hayatında kataloğun **52/55** mesleğine girildi.
+
+Hiç girilmeyen yalnızca üç meslek kaldı:
+
+| Meslek | Gerekçe |
+| --- | --- |
+| eczacı | büyük şehir piyasası |
+| elektrik mühendisi | üniversite bölümü |
+| yazar | Okumak hobisinde "Düzenli" basamağı |
+
+Yani "16 meslek çok yıllı ön koşul istiyor" tablosu geçersiz; katalog
+pratikte neredeyse tamamen erişilebilir. **Önerim aynı kalıyor (1):**
+bu üç meslek hedef olarak kalsın, gereksinimleri ekranda yazılı ve
+oyuncu planlayarak ulaşabiliyor. Bu turda da hiçbir meslek gereksinimi
+değiştirilmedi.
