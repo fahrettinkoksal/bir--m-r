@@ -334,7 +334,7 @@ medya açarak, emekli olarak):
 |---|---|---|
 | `hayvan_komsu_sikayet`, `hayvan_yaslandi`, `hayvan_cocukla`, `hayvan_sokakta_yavru` | Simülasyon uğramıyor | Simülasyon hiç **evcil hayvan sahiplenmiyor**. Gerçek oyuncu ulaşır. |
 | `direksiyon_basinda`, `araba_yolda_kaldi` | Simülasyon uğramıyor | Ehliyet + araç gerekiyor; simülasyon araba almıyor. Gerçek oyuncu ulaşır. |
-| `hobi_arkadas_resim_ister`, `hobi_sevgili_kitapci`, `hobi_yillar_sonra_donus`, `hobi_okuma_gecesi` | Simülasyon uğramıyor | Belirli hobide **basamak** ve bazılarında sevgili/arkadaş şartı var. Gerçek oyuncu ulaşır. |
+| `hobi_arkadas_resim_ister`, `hobi_sevgili_kitapci`, `hobi_yillar_sonra_donus`, `hobi_okuma_gecesi` | Simülasyon uğramıyor | Belirli hobide **basamak** ve bazılarında sevgili/arkadaş şartı var. Gerçek oyuncu ulaşır. **Paket CB (10 Ekim 2026): ikisi çözüldü.** Bot kütüphaneye hiç uğramıyordu (`okuma` hobisinin tek besleyicisi bitirilen kitap). Bot okumaya başlayınca `hobi_okuma_gecesi` 0 → 33/35, `hobi_sevgili_kitapci` 1 → 34/38 (120 hayat × 2 tohum bloğu). Ayrıca katalogda üç kimlik çakışması ve ulaşılamayan bir basamak çıktı; ikisi de düzeltildi. |
 | `savundugun_arkadas`, `yardimin_karsiligi`, `bisiklet_zinciri`, `zincir_ogretmen_2`, `zincir_ogretmen_3`, `zincir_emanet_3_iste`, `sinav8_son_hafta` | **Dar pencere** | Zincirin ikinci halkası, ilk halkanın izini **çok dar bir yaş/sınıf aralığında** arıyor. `sinav8_son_hafta` hem izi hem **8. sınıfı** istiyor: ikisi de tek bir okul yılına sığmak zorunda. |
 | `cocukluk_ilk_kelime_anisi_anne` | Rastlantı | Yeni yazıldı; 120 hayatta oyuncu hep "baba" ya da "hayır" dedi. Karşılığı (`..._baba`) çıkıyor, yani yol açık. |
 
@@ -585,6 +585,16 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   12 kişi hedefli olay ve ilişkiler ekranında Komşular bölümü eklendi.
   Ölçüldü: komşu tanıyan hayat 145/200 ve 149/200, komşu olayı gören
   144/200. Karar kaydı Q-217.
+- **Kapsam botu (`coverage_bot`) kitabı bitiremiyor (BOT, açık).**
+  Paket CB'de `player_bot`'un okuma dalı düzeltildi: araya giren
+  bildirim ve olay yerinde karşılanıyor (D-125 — her aktivite
+  "ilerleme" sayılıyor, sayfa çevirmek de bir aktivite). Aynı sorun
+  `coverage_bot` içinde **duruyor**: okuma döngüsü ilk kesintide
+  `_kesildi(c)` ile çıkıyor, yani kapsam hayatlarında kitap 0-1 sayfada
+  kalıyor. Oraya dokunmadım çünkü `paket_ai_action_coverage` ve
+  `paket_ar_*` teşhisleri o aracı kullanıyor; tek paketde iki ölçüm
+  aracını birden değiştirmek bulguyu okunmaz hale getirir. Kapsam
+  raporundaki "kitap" sayısı bu yüzden gerçek üst sınırı göstermiyor.
 - **Botun yıllık etkileşim bütçesi oyunun kotası değil (BOT, açık).**
   Oyunda yıllık genel etkileşim kotası yok (sınır aynı kişi + aynı
   eylem + aynı yıl getirisinde, D-026); bot ise yılda bir-iki kişiyle

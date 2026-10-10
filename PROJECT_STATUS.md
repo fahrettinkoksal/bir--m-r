@@ -6860,5 +6860,122 @@ bağlı olmayan ("hollow") poliçe yok.
 kalibrasyonu, yaşa göre artan prim önerisi ve kasko sorusu
 `docs/DESIGN_REVIEW_QUEUE.md` Q-220'de.
 
+## Paket CB — kütüphane: çakışan kimlik, ulaşılamayan basamak, okumayan bot (10 Ekim 2026)
+
+Paket BX ve BZ'den sonra denetimde hâlâ hiç görülmeyen iki olay
+(`hobi_okuma_gecesi`, `hobi_sevgili_kitapci`) ve hiç girilmeyen bir
+meslek (`yazar`) kalmıştı. Üçü de aynı kapıya bağlıydı: **"okumak"
+hobisinin basamağı.** O kapıyı açtığında arkasında üç ayrı sorun çıktı.
+
+### 1. Üç kitap iki kez tanımlıydı (OYUN — hata)
+
+Q-110'da kütüphane 8'den 23 satıra çıkarılırken üç kimlik ve üç ad
+yeniden kullanılmış: `gokyuzu_defteri`, `sayilarin_dili`, `uzun_kis`.
+Katalog 22 satır ama **19 tekil kimlik** taşıyordu.
+
+İlerleme kaydı kimliğe bağlı (`state.bookProgress(book.id)`). Sonuç:
+
+- `sayilarin_dili` (16+) ve `uzun_kis` (18+) çiftleri **aynı yaş
+  penceresinde** rafta duruyordu. Oyuncu aynı adı iki kez görüyor,
+  birini bitirince öteki de "Bitirdin." oluyor ve hobiye hiç deneyim
+  yazılmıyordu.
+- `gokyuzu_defteri` çiftinin pencereleri kesişmiyordu ama `bookById`
+  her zaman ilk satırı döndürüyordu; çocukluğunda o kitabı bitiren
+  oyuncu yetişkin sürümünü **hiç açamıyordu**.
+
+Ölçüm (25 yaşında, gerçek motor): raftaki 15 kitabın hepsi tek tek
+bitirildi, hobiye **13** deneyim yazıldı. İki kitap sessizce kayboldu.
+
+Düzeltme: Q-110'un üç satırına kendi kimliği ve kendi adı verildi
+(*Bulut Sayan Çocuk*, *Çarpım Tablosunun Dışında*, *Avluya Bakan
+Pencere*).
+
+### 2. Merdivenin tepesi ulaşılamazdı (OYUN)
+
+"Okumak" hobisini yalnızca **bitirilen kitap** besliyor ve bitmiş kitap
+yeniden okunamıyor; yani bir hayatın tavanı kütüphanedeki **tekil**
+kitap sayısıdır. Çakışmalar ayıklandıktan sonra 19 tekil kitap kalıyor,
+"Usta" basamağı ise 20 deneyim istiyor: **tepe hiçbir hayatta
+ulaşılamıyordu.** Eski bekçi tavanı `kBookCatalog.length` (22) ile
+saydığı için bunu göremiyordu — çakışma bekçiyi de kör etmiş.
+
+Eşiklere dokunmadım (Q-106/Q-110'da `prototypeOnly`, onay Faho'nun).
+Yerine raf büyüdü: **17 yeni kitap**, dört yeni tür (şiir, polisiye,
+tarih, anı) ve ilk kez 30/32/35/40/45 yaşında açılan kitaplar. Artık
+raf orta yaşta da yenileniyor.
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Katalog | 22 satır / 19 tekil | **39 satır / 39 tekil** |
+| Ömür boyu tavan | 19 deneyim → basamak 3 | **39 → basamak 4 ("Usta")** |
+| 20 yaşından sonra rafta kalan | 13 kitap → basamak 3 | **29 kitap → basamak 4** |
+| 45 yaşında rafta | 15 kitap | **29 kitap** |
+
+Bütün adlar ve yazarlar özgündür; gerçek bir eser ya da yazar
+kullanılmadı. Sayfalarda metin yok (telifli içerik kullanılmaz).
+
+**Zekâ kasması yok.** `Stats.gain` azalan getiriyle çalışıyor (D-099);
+39 kitap okumak zekâyı 100'e yapıştırmıyor, her kitap bir öncekinden
+daha az katıyor.
+
+### 3. Ekran: 29 kitap düz liste olmaz (UI)
+
+Raf büyüdüğü için kütüphane türüne göre gruplandı (`MenuGroupTitle`,
+Paket V/5'teki mağaza deseninin aynısı) ve **bitirdiklerin** en alta
+indi. Alt başlık da artık "12 kitap duruyor, 8 tanesini bitirdin"
+diyor.
+
+### 4. Bot hiç kitap okumuyordu (BOT — ölçüm aracı)
+
+`okuma` hobisinin `activityIds` kümesi **boş**: onu besleyen tek şey
+kütüphane. Bot kütüphaneye hiç uğramıyordu, dolayısıyla 1.000 hayatlık
+denetimlerde bu hobi hiç ilerlemiyor ve ona bağlı iki olay ile `yazar`
+mesleği "hiç görülmedi" diye raporlanıyordu. **Eksik oyunda değil
+ölçüm aracındaydı.**
+
+İlk deneme de yetmedi: bot kitabı açıyor ama bitiremiyordu. Sebep
+**D-125** — her aktivite "ilerleme" sayılıyor ve ilerleme birikince
+motor ek bir olay soruyor; sayfa çevirmek de bir aktivite olduğu için
+uzun bir kitap mutlaka olayla kesiliyor, botun ise olayı karşılayıp
+okumaya dönecek yolu yoktu. Ölçüm: 12 hayatta kitaplar 0-1 sayfada
+kalıyordu.
+
+Düzeltme: okuma dalı araya giren bildirim ve olayı **yerinde**
+karşılıyor (gerçek oyuncu da pencereyi kapatıp okumaya döner) ve
+yarım kalan kitabı ertesi yıl kaldığı yerden sürdürüyor. Olay yine
+ölçüme giriyor; kısayol yok.
+
+| 120 hayat × 2 bağımsız tohum bloğu | Önce | Sonra |
+| --- | --- | --- |
+| Kitap bitiren hayat | 3 / 6 | **36 / 42** |
+| `hobi_okuma_gecesi` | 0 / 0 | **33 / 35** |
+| `hobi_sevgili_kitapci` | 1 / 1 | **34 / 38** |
+| `yazar` mesleğine giren | 0 / 0 | **2 / 5** |
+| En çok bitirilen kitap | 3 | **36 / 37** |
+
+`yazar`ın 2-5'te kalması beklenen: meslek ayrıca zekâ 55 ve 20 yaş
+istiyor, üstüne botun o işi **seçmesi** gerekiyor. Yol artık açık;
+sayı botun iş seçimine bağlı.
+
+### Bekçi
+
+`test/paket_cb_kutuphane_kimlik_test.dart` (11 test): her kitabın
+kimliği tekil, aynı ad iki kez rafta değil, `bookById` her satırı
+kendisine çözüyor, hiçbir yaşta aynı kimlikten iki satır görünmüyor,
+tekil kitap sayısı merdivenin tepesine yetiyor, yetişkin olarak
+başlayan da ilerleyebiliyor, yazarlığın istediği basamak ulaşılabilir,
+raftaki her kitabı bitirmek hobiye **satır sayısı kadar** deneyim
+yazıyor, 90 hayatlık huni testi (okuyan bot merdiveni tırmanıyor, iki
+olay görünüyor) ve iki ekran testi: 45 yaşındaki rafta her tür için tek
+grup başlığı ve her ad **bir kez** görünüyor, bitirilen kitap
+"Bitirdiklerin" bölümüne iniyor.
+
+`test/hobby_test.dart` ile `test/content_reachability_test.dart`'taki
+eski tavan bekçileri de satır sayısından **tekil kimliğe** çevrildi —
+gevşetme değil, sıkılaştırma (19 < 22).
+
+**Bütün sayılar `prototypeOnly`.** Merdiven eşikleri, kitap sayısı ve
+sayfa başına tıklama yükü `docs/DESIGN_REVIEW_QUEUE.md` Q-221'de.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

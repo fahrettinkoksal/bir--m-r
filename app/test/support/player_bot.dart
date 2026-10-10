@@ -80,6 +80,7 @@ import 'package:bir_omur/domain/models/martial_progress.dart';
 import 'package:bir_omur/domain/models/business.dart';
 import 'package:bir_omur/domain/models/criminal_record.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/models/book_progress.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
 import 'package:bir_omur/domain/models/loan.dart';
@@ -452,6 +453,10 @@ class BotLifeResult {
   bool didSport = false;
   final Set<String> hobbies = <String>{};
   final Set<String> martialArts = <String>{};
+
+  /// Hayat boyunca **bitirilen** kitapların kimlikleri (Paket CB).
+  /// "Okumak" hobisinin tek besleyicisi budur.
+  final Set<String> booksFinished = <String>{};
   int finalHealth = 0;
 
   /// Ölümde mutluluk (0-100). Denge ölçümlerinde sağlıkla birlikte
@@ -628,6 +633,23 @@ class _Intent {
   late final MartialArt? favouriteArt = rng.nextDouble() < profile.sportDesire
       ? MartialArt.values[rng.nextInt(MartialArt.values.length)]
       : null;
+
+  /// Kitap okur mu? (Paket CB)
+  ///
+  /// **Bu bir bot eksiğiydi, oyun eksiği değildi.** "Okumak" hobisinin
+  /// `activityIds` kümesi boştur: onu besleyen tek şey kütüphanede
+  /// **bitirilen kitap**. Bot hiç kitap açmadığı için `okuma` hobisi
+  /// hiçbir hayatta ilerlemiyor, dolayısıyla `yazar` mesleği ve ona
+  /// bağlı iki olay (`hobi_okuma_gecesi`, `hobi_sevgili_kitapci`)
+  /// 1.000 hayatlık denetimde bile hiç görünmüyordu. Favori hobisi
+  /// okumak olan bot artık gerçekten okuyor; okumayı seçmeyenler de
+  /// ara sıra bir kitap bitiriyor.
+  late final bool reads = favouriteHobby == HobbyKind.okuma ||
+      rng.nextDouble() < 0.18 + profile.hobbyDesire * 0.35;
+
+  /// O yıl kitap okundu mu? (Yılda bir kitap; sayfa sayısı kadar tıklama
+  /// zaten gerçek oyuncunun yaptığı iş.)
+  int lastReadAge = -99;
 
   /// Yatırım türü tercihi: profile göre sabit bir sepet.
   late final List<String> investmentBasket = overrides.noInvesting
@@ -2802,6 +2824,49 @@ SchoolClub _botKulupSec(
   return adaylar.last;
 }
 
+/// Okuma sırasında araya giren bildirim ve olayları karşılar (Paket CB).
+///
+/// D-125'ten beri her aktivite "ilerleme" sayılıyor ve ilerleme birikince
+/// motor ek bir olay soruyor. Sayfa çevirmek de bir aktivite olduğu için
+/// 20 sayfalık bir kitap mutlaka olayla kesilir; ana döngü ise yılda bir
+/// kesintiyi karşılıyor. Bu yüzden okuma dalı kesintiyi **yerinde**
+/// karşılar: gerçek oyuncu da pencereyi kapatıp okumaya döner.
+///
+/// Olay yine ölçüme girer (`seenEvents`, `diag.eventsAnswered`); bot
+/// burada oyunun görmediği bir kısayol kullanmaz.
+///
+/// Dönen değer: `true` ise ekran temiz, okumaya devam edilebilir.
+/// `false` ise kesinti bitmedi; çağıran yılı bırakır.
+bool _clearInterruptions(
+  GameController c,
+  BotProfile profile,
+  _Intent intent,
+  Random rng,
+  BotLifeResult sonuc,
+) {
+  for (int tur = 0; tur < 60; tur++) {
+    final GameState s = c.state!;
+    if (s.hasNotice) {
+      c.dismissNotice();
+      continue;
+    }
+    final ActiveEvent? olay = s.pendingEvent;
+    if (olay == null) return true;
+    sonuc.seenEvents.add(olay.eventId);
+    final EventChoice secim = _chooseEventChoice(
+      state: s,
+      event: olay,
+      profile: profile,
+      intent: intent,
+      rng: rng,
+    );
+    if (secim.crimeId != null) sonuc.crimeIds.add(secim.crimeId!);
+    sonuc.diag.eventsAnswered++;
+    c.chooseEventOption(secim.id);
+  }
+  return false;
+}
+
 void _handleActivities(
   GameController c,
   BotProfile profile,
@@ -2832,6 +2897,57 @@ void _handleActivities(
         if (kesildiMi()) return;
         break;
       }
+    }
+  }
+
+  // ---- Kütüphane (Paket CB) ----------------------------------------
+  //
+  // Yılda **bir** kitap: açılan kitap sayfa sayfa bitirilir. Araya giren
+  // bildirim ve olaylar `_clearInterruptions` ile karşılanır, çünkü
+  // D-125'ten beri **her aktivite "ilerleme" sayılıyor** ve ilerleme
+  // birikince motor ek bir olay soruyor; sayfa çevirmek de bir aktivite
+  // olduğu için uzun bir kitap mutlaka olayla kesiliyor. Gerçek oyuncu
+  // açılan pencereyi kapatıp okumaya devam eder.
+  //
+  // Yarım kalan kitap varsa önce o bitirilir; yoksa raftan hiç
+  // açılmamış biri seçilir. Bitmiş kitap yeniden açılmadığı için raf
+  // tükenince bu dal kendiliğinden sessizleşir.
+  if (intent.reads && s.player.age >= 6 && intent.lastReadAge != s.player.age) {
+    intent.lastReadAge = s.player.age;
+    final List<BookInfo> raf = c.availableBooks();
+    BookInfo? kitap;
+    for (final BookInfo k in raf) {
+      final BookProgress? ilerleme = c.state!.bookProgress(k.id);
+      if (ilerleme != null && !ilerleme.finished) {
+        kitap = k;
+        break;
+      }
+    }
+    if (kitap == null) {
+      final List<BookInfo> acilmamis = raf
+          .where((BookInfo k) => c.state!.bookProgress(k.id) == null)
+          .toList(growable: false);
+      if (acilmamis.isNotEmpty) {
+        kitap = acilmamis[rng.nextInt(acilmamis.length)];
+      }
+    }
+    if (kitap != null) {
+      if (!_clearInterruptions(c, profile, intent, rng, sonuc)) return;
+      if (c.state!.bookProgress(kitap.id) == null) c.openBook(kitap);
+      bool bitti = false;
+      for (int sayfa = 0; sayfa <= kitap.pages; sayfa++) {
+        if (!_clearInterruptions(c, profile, intent, rng, sonuc)) return;
+        if (c.state!.bookProgress(kitap.id)?.finished ?? false) {
+          bitti = true;
+          break;
+        }
+        if (c.turnBookPage(kitap) == null) break;
+      }
+      if (bitti) {
+        sonuc.booksFinished.add(kitap.id);
+        sonuc.hobbies.add(HobbyKind.okuma.id);
+      }
+      if (kesildiMi()) return;
     }
   }
 

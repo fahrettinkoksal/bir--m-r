@@ -499,11 +499,35 @@ class _LibraryPageState extends State<LibraryPage> {
 
     final List<BookInfo> kitaplar = controller.availableBooks();
 
+    // Paket CB: raf 39 kitaba çıktı; 45 yaşında 29 satır düz liste
+    // hâlinde okunmuyordu. Kitaplar türüne göre gruplanıyor,
+    // bitirdikleri en alta iniyor.
+    bool bitti(BookInfo k) => state.bookProgress(k.id)?.finished ?? false;
+    final List<BookInfo> okunacak =
+        kitaplar.where((BookInfo k) => !bitti(k)).toList(growable: false);
+    final List<BookInfo> okunan =
+        kitaplar.where(bitti).toList(growable: false);
+
+    Widget kart(BookInfo kitap) => _BookCard(
+          book: kitap,
+          progress: state.bookProgress(kitap.id),
+          onOpen: () {
+            controller.openBook(kitap);
+            setState(() {
+              _acikKitap = kitap;
+              _sonuc = null;
+            });
+          },
+        );
+
     return SectionScaffold(
       icon: Icons.local_library_rounded,
       accent: BirOmurAccents.mavi,
       title: 'Kütüphane',
-      subtitle: 'Yaşına uygun ${kitaplar.length} kitap var.',
+      subtitle: okunan.isEmpty
+          ? 'Yaşına uygun ${kitaplar.length} kitap var.'
+          : '${okunacak.length} kitap duruyor, '
+              '${okunan.length} tanesini bitirdin.',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
@@ -512,19 +536,26 @@ class _LibraryPageState extends State<LibraryPage> {
             icon: Icons.menu_book_outlined,
             text: 'Bu yaşta okuyabileceğin bir kitap yok.',
           ),
-        for (final BookInfo kitap in kitaplar) ...<Widget>[
-          _BookCard(
-            book: kitap,
-            progress: state.bookProgress(kitap.id),
-            onOpen: () {
-              controller.openBook(kitap);
-              setState(() {
-                _acikKitap = kitap;
-                _sonuc = null;
-              });
-            },
+        for (final BookKind tur in BookKind.values) ...<Widget>[
+          if (okunacak.any((BookInfo k) => k.kind == tur)) ...<Widget>[
+            MenuGroupTitle(text: tur.label, accent: BirOmurAccents.mavi),
+            for (final BookInfo kitap in okunacak)
+              if (kitap.kind == tur) ...<Widget>[
+                kart(kitap),
+                const SizedBox(height: 10),
+              ],
+            const SizedBox(height: 4),
+          ],
+        ],
+        if (okunan.isNotEmpty) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Bitirdiklerin',
+            accent: BirOmurAccents.pirinc,
           ),
-          const SizedBox(height: 10),
+          for (final BookInfo kitap in okunan) ...<Widget>[
+            kart(kitap),
+            const SizedBox(height: 10),
+          ],
         ],
       ],
     );

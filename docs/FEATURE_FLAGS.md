@@ -68,6 +68,22 @@ gelir.
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.
 
+### Hangi paket anahtar almaz
+
+Sözleşme **yeni özellik** için anahtar şart koşar; her değişiklik yeni
+özellik değildir. Anahtar almayan üç tür iş:
+
+1. **Hata düzeltmesi.** Çakışan iki kitap kimliğini ayırmak (Paket CB)
+   geri alınabilir bir seçenek değil, bozuk olanı onarmaktır.
+2. **Var olan kataloğun büyümesi.** Kütüphaneye 17 kitap eklemek (CB),
+   araç modeli ya da mülakat sorusu eklemek yeni bir sistem kurmaz:
+   düğme, ekran ve kural aynı kalır. Beğenilmezse satırlar silinir.
+3. **Ekranın okunur hale gelmesi.** Uzun listeyi gruplamak (V/5 mağaza,
+   CB kütüphane) özellik değil düzen; kapatılacak bir şey yok.
+
+Kuralın sınırı net: **yeni bir eylem, yeni bir ekran ya da yıllık akışa
+yeni bir hesap** giriyorsa anahtar alır.
+
 ## Bir özelliği tamamen silme tarifi
 
 Anahtarı kapatmak özelliği görünmez yapar. Kodu da gitsin istiyorsan:

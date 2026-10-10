@@ -284,6 +284,11 @@ completed	Paket CA: sağlık krizi ve dört ev hasarı olayı poliçeden geçiyo
 completed	Paket CA: Sigorta ekranı (döküm, iptal, geçmiş poliçeler)
 completed	Paket CA: ölçüm — primler hasar dağılımına göre kalibre edildi
 completed	Paket CA: 10 testli bekçi ve Q-220 (yaşa göre prim, kasko)
+completed	Paket CB: kütüphanede üç kimlik çakışması (22 satır / 19 tekil)
+completed	Paket CB: okuma merdiveninin tepesi ulaşılamazdı — raf 39 kitaba çıktı
+completed	Paket CB: kütüphane ekranı türe göre gruplandı, bitirdiklerin en alta
+completed	Paket CB: bot kitap okumuyordu — D-125 kesintisi yerinde karşılanıyor
+completed	Paket CB: 11 testli bekçi, iki eski tavan bekçisi sıkılaştırıldı ve Q-221
 pending	Paket BO: motorun zar tüketimi — kişi çözümü koşul denetiminden sonra
 pending	Q-207: sınav ağırlığı bekçisinin yöntemi — onay bekliyor
 pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik

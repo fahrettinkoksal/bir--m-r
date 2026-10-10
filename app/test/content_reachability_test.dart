@@ -117,8 +117,11 @@ void main() {
       // besliyor ve bitmiş kitap yeniden okunamıyor. Yani o hobinin
       // tavanı kütüphanedeki kitap sayısıdır. Tavanın üstünde bir
       // basamak isteyen iş, ilan panosunda görünüp hiç açılmaz.
-      int? tavan(HobbyKind hobi) =>
-          hobi == HobbyKind.okuma ? kBookCatalog.length : null;
+      // Paket CB: satır değil **tekil kimlik** sayılır (çakışan kimliğin
+      // ikinci satırı hiç bitirilemez).
+      int? tavan(HobbyKind hobi) => hobi == HobbyKind.okuma
+          ? kBookCatalog.map((BookInfo b) => b.id).toSet().length
+          : null;
 
       for (final JobType job in kJobCatalog) {
         final String? hobiId = job.hobbyId;

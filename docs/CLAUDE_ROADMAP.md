@@ -231,6 +231,22 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   olmadığını sormadan önce **oyuncunun cebiyle zararın büyüklüğünü
   karşılaştır**; aksi hâlde doğru çalışan ama anlamsız bir mekanik
   yazarsın.
+- **Paket CB.** Bir bekçi, koruduğu şeyin **yanlış ölçüsünü** sayarsa
+  hatayı gizler. "Okuma hobisinin tavanı kütüphanedeki kitap sayısıdır"
+  diyen test `kBookCatalog.length` (22) sayıyordu; katalogda üç kimlik
+  iki kez tanımlıydı, yani gerçek tavan 19'du ve merdivenin tepesi ("Usta",
+  20 deneyim) **hiçbir hayatta ulaşılamıyordu**. Çakışma hem oyunu hem
+  bekçiyi aynı anda bozmuş. Katalog bekçisi yazarken satır değil
+  **tüketilebilir tekil birim** say: kimlik, pencere, tekrar kuralı.
+- **Paket CB.** "Bot bu sistemi hiç kullanmıyor" bulgusu, sistemin
+  **tek besleyicisinin** ne olduğunu sormadan yorumlanamaz. `okuma`
+  hobisinin `activityIds` kümesi boştu; onu yalnızca kütüphanede
+  bitirilen kitap besliyor. Bota okuma eklemek de yetmedi: D-125'ten
+  beri her aktivite "ilerleme" sayılıyor ve sayfa çevirmek bir aktivite
+  olduğu için kitap mutlaka olayla kesiliyordu — bot 0-1 sayfada
+  kalıyordu. Çok adımlı bir eylemi ölçmek istiyorsan **araya giren
+  pencereyi de ölçüm aracının karşılaması** gerekir; yoksa "oyuncu bunu
+  yapamıyor" diye yanlış bir OYUN bulgusu yazarsın.
 - **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
   değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
   çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)
