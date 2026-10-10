@@ -8603,3 +8603,63 @@ kanıtlandı).
 **Dokunmadığım yer.** `ev_sigorta_teklifi` / `ev_sigorta_ise_yaradi`
 olay ikilisi olduğu gibi duruyor. Sistem ile birleştirmek (olayın
 poliçe yaptırması) mümkün ama o da bir karar; istersen yaparım.
+
+### Q-221 — Kütüphane: okuma merdiveni eşikleri, kitap sayısı ve sayfa başına tıklama
+
+**Durum: prototipte düzeltildi + büyütüldü, Faho'nun onayını bekliyor
+(Claude, 10 Ekim 2026).** `DECISIONS.md`'ye yazılmadı; eşikler ve kitap
+sayısı `prototypeOnly` (Q-106, Q-110).
+
+**İki gerçek hata vardı; onları karar diye bekletmedim, düzelttim.**
+
+1. **Üç kitap iki kez tanımlıydı.** Q-110'un genişletmesinde üç kimlik
+   ve üç ad yeniden kullanılmış (`gokyuzu_defteri`, `sayilarin_dili`,
+   `uzun_kis`): 22 satır, **19 tekil kimlik**. İlerleme kaydı kimliğe
+   bağlı olduğu için ikisi aynı yaş penceresinde rafta duruyor, birini
+   bitirince öteki "Bitirdin." oluyor ve hobiye hiç deneyim yazılmıyordu.
+   Ölçüm: 25 yaşında raftaki 15 kitabın hepsi bitirildi, hobiye **13**
+   deneyim yazıldı. Üç satıra kendi kimliği ve kendi adı verildi.
+2. **Merdivenin tepesi ulaşılamazdı.** Çakışma ayıklandıktan sonra 19
+   tekil kitap kalıyor, "Usta" basamağı 20 deneyim istiyor. Yani tepe
+   hiçbir hayatta ulaşılamıyordu — ve eski bekçi tavanı satır sayısıyla
+   (22) saydığı için bunu göremiyordu.
+
+**Eşiklere dokunmadım.** Merdiven sayıları senin onayına bağlı; onay
+olmadan sayı değiştirmek yerine **rafı büyüttüm**: 17 yeni kitap, dört
+yeni tür (şiir, polisiye, tarih, anı) ve ilk kez 30/32/35/40/45 yaşında
+açılan kitaplar. Artık raf orta yaşta da yenileniyor.
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Katalog | 22 satır / 19 tekil | 39 satır / 39 tekil |
+| Ömür boyu tavan | 19 → basamak 3 | 39 → basamak 4 ("Usta") |
+| 20 yaşından sonra rafta kalan | 13 kitap | 29 kitap |
+
+**Sana üç soru.**
+
+1. **Merdiven eşikleri böyle mi kalsın? (önerim: evet)** Şu an 0 / 3 / 7
+   / 12 / 20 deneyim (Hevesli → Meraklı → Düzenli → Tutkulu → Usta) ve
+   bir deneyim = **bir bitirilen kitap**. 39 kitaplık rafla her basamak
+   ulaşılabilir; yetişkin olarak okumaya başlayan oyuncu da 29 kitapla
+   tepeye çıkabiliyor. Alternatif, eşikleri düşürüp rafı küçük tutmaktı;
+   onu seçmedim çünkü içerik eklemek oyuncuya bir şey veriyor, eşiği
+   düşürmek yalnızca sayıyı değiştiriyor.
+2. **39 kitap çok mu?** Bir kitap ortalama 15 sayfa, yani 15 tıklama.
+   Rafın tamamı ~508 tıklamaya denk geliyor ve bu bir **ömür** boyunca
+   dağılıyor (yılda bir kitap bile tepeye yetiyor). Önerim: **kalsın**;
+   zorunlu değil, isteyen okur. Çok gelirse kitap sayısını değil
+   **sayfa sayılarını** indiririm.
+3. **Sayfa başına tıklama yükü azaltılsın mı? (önerim: şimdilik hayır)**
+   D-145'te "her sayfada bildirim atmasın, bitince atsın" demiştin ve
+   öyle çalışıyor. "Kitabı bir oturuşta bitir" düğmesi eklemek mümkün
+   ama okumayı tek tuşa indirir; sayfa çevirmek şu an uğraşın kendisi.
+   İstersen eklerim.
+
+**Ölçümden çıkan yan bulgu (bot tarafı, oyun değil).** `okuma`
+hobisinin tek besleyicisi kütüphane olduğu için ve bot kütüphaneye hiç
+uğramadığı için bu hobi ölçümlerde hiç ilerlemiyordu: `yazar` mesleği ve
+iki olay (`hobi_okuma_gecesi`, `hobi_sevgili_kitapci`) "hiç görülmedi"
+diye raporlanıyordu. Bot okumaya başlayınca üçü de açıldı (olaylar
+0 → 33/35 ve 1 → 34/38; `yazar` 0 → 2/5 — 120 hayat × 2 tohum bloğu).
+Yani Q-219'da "hiç girilmeyen meslek" diye yazdığım listede `yazar`
+artık yok; kalan üç mesleğin durumu Q-219'da olduğu gibi duruyor.
