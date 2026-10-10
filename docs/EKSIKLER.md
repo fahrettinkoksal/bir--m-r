@@ -332,7 +332,7 @@ medya açarak, emekli olarak):
 
 | Olay | Sınıf | Sebep |
 |---|---|---|
-| `hayvan_komsu_sikayet`, `hayvan_yaslandi`, `hayvan_cocukla`, `hayvan_sokakta_yavru` | Simülasyon uğramıyor | Simülasyon hiç **evcil hayvan sahiplenmiyor**. Gerçek oyuncu ulaşır. |
+| `hayvan_komsu_sikayet`, `hayvan_yaslandi`, `hayvan_cocukla`, `hayvan_sokakta_yavru` | **Bu satır geçersiz (Paket CC ölçümü, 10 Ekim 2026)** | O gün yazdığım "simülasyon hiç evcil hayvan sahiplenmiyor" ifadesi doğru değil: 120 hayat × 2 tohum bloğunda hayvan sahiplenen hayat 89 ve 92, ve **altı hayvan olayının hepsi görülüyor** (`hayvan_komsu_sikayet` 9/6, `hayvan_yaslandi` 9/6, `hayvan_sokakta_yavru` 7/9, `hayvan_cocukla` 1/0). En seyrek olan `hayvan_cocukla`: hem yaşayan hayvan hem 3-14 yaş çocuk hem aynı hane istiyor. Botun açık kalan eksiği aşağıda. |
 | `direksiyon_basinda`, `araba_yolda_kaldi` | Simülasyon uğramıyor | Ehliyet + araç gerekiyor; simülasyon araba almıyor. Gerçek oyuncu ulaşır. |
 | `hobi_arkadas_resim_ister`, `hobi_sevgili_kitapci`, `hobi_yillar_sonra_donus`, `hobi_okuma_gecesi` | Simülasyon uğramıyor | Belirli hobide **basamak** ve bazılarında sevgili/arkadaş şartı var. Gerçek oyuncu ulaşır. **Paket CB (10 Ekim 2026): ikisi çözüldü.** Bot kütüphaneye hiç uğramıyordu (`okuma` hobisinin tek besleyicisi bitirilen kitap). Bot okumaya başlayınca `hobi_okuma_gecesi` 0 → 33/35, `hobi_sevgili_kitapci` 1 → 34/38 (120 hayat × 2 tohum bloğu). Ayrıca katalogda üç kimlik çakışması ve ulaşılamayan bir basamak çıktı; ikisi de düzeltildi. |
 | `savundugun_arkadas`, `yardimin_karsiligi`, `bisiklet_zinciri`, `zincir_ogretmen_2`, `zincir_ogretmen_3`, `zincir_emanet_3_iste`, `sinav8_son_hafta` | **Dar pencere** | Zincirin ikinci halkası, ilk halkanın izini **çok dar bir yaş/sınıf aralığında** arıyor. `sinav8_son_hafta` hem izi hem **8. sınıfı** istiyor: ikisi de tek bir okul yılına sığmak zorunda. |
@@ -585,6 +585,27 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   12 kişi hedefli olay ve ilişkiler ekranında Komşular bölümü eklendi.
   Ölçüldü: komşu tanıyan hayat 145/200 ve 149/200, komşu olayı gören
   144/200. Karar kaydı Q-217.
+- ~~**65+ yaşta içerik yaşa ait değil.**~~ **Düzeltildi (Paket CC,
+  10 Ekim 2026).** Ölçüm: 60 hayatta 65-74 bandında yılda 75,3 olay
+  uygun hale geliyordu, yani bant **aç değildi** — ama o taramada
+  görülen 228 tekil olaydan yalnızca **11'i** o yaşlara aitti. 70
+  yaşındaki oyuncu 40 yaşındakinin havuzunu çekiyordu. 31 olay yazıldı
+  (25 ana + 6 karşılık); 65+ yılda uygun olay 75,0/77,1'den
+  93,9/94,9'a çıktı ve havuzun 31/31'i uygun hale gelip 30/31'i
+  görüldü (60 hayat × 2 tohum bloğu). Modül anahtarı `son_yillar`.
+- **Botun ölen hayvanın yerine yenisini almaması (BOT, açık).**
+  Ölçüm (120 hayat × 2 tohum bloğu): hayvan sahiplenen hayat 89 ve 92,
+  hayvanı ölen 83 ve 85 — ama **birden fazla hayvanı olan hayat 0/240**.
+  Sebep botun `s.pets.isEmpty` koşulu: ölen hayvan kayıtta kaldığı için
+  bu koşul bir daha hiç sağlanmıyor. **Oyun tarafı sağlam**
+  (`PetCare.prototypeOnlyMaxLivingPets = 3` ve ölen hayvan "yaşayan"
+  sayılmıyor), yani ikinci hayvan ve ölenin yerine yenisi yolları
+  ölçüm dışı kalıyor. Ayrıca bot her hayatta `PetSpecies.values`
+  sırasındaki ilk uygun türü alıyor (kedi 62/89) ve adı hep kendisi
+  veriyor; oyunun kendi ad havuzu (`kPetSuggestedNames`) hiç
+  kullanılmıyor. Not: `docs/EKSIKLER.md`'de daha önce yazdığım
+  "simülasyon hiç evcil hayvan sahiplenmiyor" ifadesi **geçersiz**;
+  ölçüm bunu yanlışladı ve altı hayvan olayının hepsi görülüyor.
 - **Kapsam botu (`coverage_bot`) kitabı bitiremiyor (BOT, açık).**
   Paket CB'de `player_bot`'un okuma dalı düzeltildi: araya giren
   bildirim ve olay yerinde karşılanıyor (D-125 — her aktivite

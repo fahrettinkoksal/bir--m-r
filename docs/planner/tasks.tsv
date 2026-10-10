@@ -289,6 +289,11 @@ completed	Paket CB: okuma merdiveninin tepesi ulaşılamazdı — raf 39 kitaba 
 completed	Paket CB: kütüphane ekranı türe göre gruplandı, bitirdiklerin en alta
 completed	Paket CB: bot kitap okumuyordu — D-125 kesintisi yerinde karşılanıyor
 completed	Paket CB: 11 testli bekçi, iki eski tavan bekçisi sıkılaştırıldı ve Q-221
+completed	Paket CC: 65+ ölçümü — 228 uygun olaydan yalnızca 11'i yaşa ait
+completed	Paket CC: son yıllar havuzu — 25 ana olay, beş başlık
+completed	Paket CC: altı hikâye izi ve altı karşılığı (sessiz iz yok)
+completed	Paket CC: FeatureId.sonYillar anahtarı ve fail-closed kapısı
+completed	Paket CC: 11 testli bekçi, modül izolasyonu ve Q-222
 pending	Paket BO: motorun zar tüketimi — kişi çözümü koşul denetiminden sonra
 pending	Q-207: sınav ağırlığı bekçisinin yöntemi — onay bekliyor
 pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik

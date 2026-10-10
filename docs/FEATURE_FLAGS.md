@@ -63,6 +63,7 @@ gelir.
 | `ev_dosemesi` | Evini döşemek | BT | Evinin hâli ekranı, döşeme seviyesi, ev eşyasının yıllık yıpranması ve iyi döşenmiş evin yıllık mutluluk katkısı kalkar; 18 ev eşyası mağazada kalır ama evin dolu olup olmadığı hiçbir şeyi değiştirmez. |
 | `komsular` | Komşular | BU | Apartmanda adı olan komşu olmaz: ilişkiler ekranındaki Komşular bölümü, komşuyla sohbet/vakit/hediye ve 12 komşu olayı çıkmaz. Kendi evinde oturmak Paket BP'nin olaylarıyla devam eder. |
 | `ugras_onceligi` | Sürdürülen uğraşa öncelik | BX | Oyuncunun o an içinde olduğu okul kulübü ya da hobinin olayları yıllık çekilişte genel havuzla aynı ağırlıkta yarışır. İçerik kaybolmaz ama ölçümde görüldüğü gibi okul yıllarında neredeyse hiç çıkmaz: 150 spor hayatında futbol zincirinin sekiz olayı 5 kez görünüyordu, öncelikle 21 kez. |
+| `son_yillar` | Son yıllar | CC | 65+ için yazılan 31 olay (emekliliğin ilk pazartesisi, günün düzeni, merdiven, ilaç kutusu, torunla eski zaman, çırağa öğretmek, fidan, komşuyla sabah düzeni, emekli bütçesi, dolandırıcı telefonu) ve altı karşılığı çıkmaz; son yıllar orta yaşın havuzuyla geçer. Ölçüldü: 65+ taramasında uygun olan 228 olaydan yalnızca 11'i o yaşlara aitti. |
 | `sigorta` | Sigorta | CA | Sigorta ekranı ve poliçeler kalkar: yıllık prim çıkmaz, hasarda karşılık olmaz, sağlık krizinin ve ev hasarının faturası Paket CA öncesi gibi tamamen oyuncunun cebinden çıkar. Kayıttaki poliçeler silinmez, donar. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog

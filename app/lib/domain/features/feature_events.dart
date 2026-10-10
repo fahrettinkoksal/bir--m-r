@@ -11,6 +11,7 @@ library;
 
 import '../../data/event_pool_early_years.dart';
 import '../../data/event_pool_home.dart';
+import '../../data/event_pool_late_years.dart';
 import '../../data/event_pool_neighbour.dart';
 import '../../data/event_pool_threshold_years.dart';
 import '../models/game_event.dart';
@@ -26,6 +27,7 @@ abstract final class FeatureEvents {
     FeatureId.esiktekiYillar: kThresholdYearsEvents,
     FeatureId.oturulanEv: kHomeEvents,
     FeatureId.komsular: kNeighbourEvents,
+    FeatureId.sonYillar: kLateYearsEvents,
   };
 
   /// Olay kimliğinden modüle eşleme; bir kez kurulur.

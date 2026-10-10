@@ -247,6 +247,12 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   kalıyordu. Çok adımlı bir eylemi ölçmek istiyorsan **araya giren
   pencereyi de ölçüm aracının karşılaması** gerekir; yoksa "oyuncu bunu
   yapamıyor" diye yanlış bir OYUN bulgusu yazarsın.
+- **Paket CC.** "Bu yaş bandı aç mı?" sorusunun cevabı "hayır" olsa bile
+  içerik sorunu olmayabilir demek değil. 65+ bandında yılda 75,3 olay
+  uygun hale geliyordu — kıtlık yok. Ama o taramadaki 228 olaydan
+  yalnızca **11'i** o yaşlara aitti; 70 yaşındaki oyuncu 40 yaşındakinin
+  havuzunu çekiyordu. Bir bandı ölçerken **sayıya değil, sayının
+  içindekine** bak: kaç olay değil, kaç olay *o yaşa ait*.
 - **Paket BY/1.** Ölü kod ölçümde "etki yok" diye görünür, hata diye
   değil. Kapsam modunun iş değiştirme dalı oyunun kuralı yüzünden hiç
   çalışmıyordu (`applicationAvailability` çalışan oyuncuyu engelliyor)

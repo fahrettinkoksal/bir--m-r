@@ -117,6 +117,21 @@ enum FeatureId {
     ],
   ),
 
+  /// Paket CC — 65+ olay havuzu ve son yılların karşılıkları.
+  sonYillar(
+    saveKey: 'son_yillar',
+    title: 'Son yıllar',
+    lostWhenOff:
+        'Emekliliğin ilk pazartesisi, torunla eski zaman, çırağa '
+        'öğretmek, komşuyla sabah düzeni ve diktiğin fidan gibi 65+ '
+        'olayları kalkar; son yıllar orta yaşın havuzuyla geçer.',
+    paket: 'Paket CC — son yıllar',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_late_years.dart',
+      'app/test/paket_cc_son_yillar_test.dart',
+    ],
+  ),
+
   /// Paket BP — oturulan evin olayları.
   oturulanEv(
     saveKey: 'oturulan_ev',

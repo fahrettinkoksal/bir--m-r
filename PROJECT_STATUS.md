@@ -6977,5 +6977,95 @@ gevşetme değil, sıkılaştırma (19 < 22).
 **Bütün sayılar `prototypeOnly`.** Merdiven eşikleri, kitap sayısı ve
 sayfa başına tıklama yükü `docs/DESIGN_REVIEW_QUEUE.md` Q-221'de.
 
+## Paket CC — son yıllar: 65+ için yazılmış 31 olay (10 Ekim 2026)
+
+### Ölçülen sorun
+
+Oynanan 60 hayatta, oyuncunun o yıl gerçekten karşılaşabileceği olay
+sayısı yaş yaş sayıldı (`EventEngine.debugEligibleIds`):
+
+| Yaş bandı | Yılda uygun olay |
+| --- | --- |
+| 8-12 | 51,2 |
+| 13-17 | 50,7 |
+| 18-24 | 55,9 |
+| 25-34 | 78,4 |
+| 35-49 | 84,4 |
+| 50-64 | 85,4 |
+| **65-74** | **75,3** |
+| 75-84 | 66,8 |
+
+Yani bant **aç değildi**. Asıl bulgu başkaydı: o taramada 65+ yaşta
+görülen **228 tekil olaydan yalnızca 11'i** o yaşlara aitti
+(`vasiyet_dusuncesi`, `sessiz_ev_aksami`, `eski_dostun_haberi`,
+`ileri_yas_muhasebe`, `unutulan_isim`, `mirasin_konusulmasi`,
+`radyo_ve_sessizlik`, `kapidaki_yardim`, `evin_anahtari`,
+`yillarin_hesabi`, `hayat_muhasebesi`). Gerisi orta yaşın havuzuydu:
+**70 yaşındaki oyuncu 40 yaşındakiyle aynı olayları çekiyordu.** Sorun
+kıtlık değil, içeriğin yaşa ait olmaması.
+
+Paket BM ilk yedi yıl için, Paket BN eşikteki yıllar için aynı işi
+yapmıştı; bu paket hayatın son bandı için yapıyor.
+
+### Ne eklendi
+
+`app/lib/data/event_pool_late_years.dart`: **31 olay** (25 ana + 6
+karşılık), beş başlıkta:
+
+| Başlık | Örnekler |
+| --- | --- |
+| Emekliliğin ritmi | Gidecek yeri olmayan ilk pazartesi, günün düzenini kurmak, parkta her gün aynı bankta oturan tanıdık |
+| Beden ve zaman | Üçüncü katta ilk kez ara vermek, gözlük numarası, dört ilaç kutusunu karıştırmak |
+| Torunlar | "Sen küçükken burada ne vardı?", "bunu bana öğretir misin?", tutulan sır, kapıda bekleyen harçlık |
+| Komşuluk ve mahalle | Karşı komşuyla "sabah perdeni aç" düzeni, üst kata taşınan çocuklu aile, bakkalın yazmayı unuttuğu hesap |
+| Bilgi ve devretme | Tavsiye isteyen genç, balkondaki takımı bir gence vermek, dikilen fidan, fotoğraf kutusunun arkasına isim yazmak |
+| Emekli bütçesi | Aynı ayda gelen faturalar, depodaki eski eşyayı satmak, kendini banka görevlisi gibi tanıtan telefon |
+
+**Altı iz, altı karşılık.** Oyuncunun bıraktığı her iz geri okunuyor:
+yazdığı defteri torunu buluyor; yarım saat ayırdığı genç yıllar sonra
+kendi işini açıp kapıya geliyor; diktiği fidan gölge yapıyor; sırrını
+tuttuğu torun daha büyük bir konuyla yine ona geliyor; komşuyla kurduğu
+sabah düzeni, perdeyi açmakta geciktiği gün işliyor; devrettiği takımı
+sokakta çırağın elinde görüyor. Karşılığı olmayan iz bırakmak Paket
+AR'nin ölçtüğü "sessiz iz" hatasıydı; bekçi bunu iki yönlü denetliyor.
+
+**Yeni mekanik yok.** Emeklilik, torun, komşu ve ev sistemleri olduğu
+gibi kullanılıyor; yeni ekran, düğme ya da yıllık hesap eklenmedi.
+Ölüm bu havuzun konusu değil — onu sağlık motoru ve `life_progression`
+yürütüyor; buradaki olaylar **yaşanan** yılları anlatıyor.
+
+### Ölçüm — paketin etkisi
+
+60 hayat × 2 bağımsız tohum bloğu, modül kapalı / açık:
+
+| Ölçü | Kapalı | Açık |
+| --- | --- | --- |
+| 65+ yılda ortalama uygun olay | 75,0 / 77,1 | **93,9 / 94,9** |
+| Havuzun uygun hale gelen olayı | 0/31 | **31/31** |
+| Havuzun gerçekten görülen olayı | 0/31 | **30/31** |
+| 65 yaşına gelen hayat | 54 / 51 | 54 / 51 |
+
+İki blokta da 31 olayın 30'u görüldü; görülmeyen olay **bloklar arasında
+değişti** (`son_karsilik_torun` ve `son_karsilik_defter`), yani
+sistematik olarak ulaşılamayan olay yok — karşılık olaylarının çekilişi.
+65 yaşına gelen hayat sayısı modül kapalıyken ve açıkken **birebir aynı**:
+havuz zara dokunmuyor.
+
+Yaşa özgü içerik **11'den 42'ye** çıktı (11 eski + 31 yeni).
+
+### Bekçi
+
+`test/paket_cc_son_yillar_test.dart` (11 test): havuz boş değil ve her
+olay 60 yaş ve sonrası, kimlikler tekil ve genel havuzda da tekil, her
+olayın metni ve en az iki seçeneği var, **bırakılan her iz okunuyor**,
+**okunan her iz bırakılabiliyor**, iz dizeleri olay kimlikleriyle
+çakışmıyor, `WRITING_STYLE_TR` §2'nin yasak kalıpları yok, havuz modül
+haritasında kayıtlı, anahtar kapalıyken hiçbir olayı aday olmuyor,
+kapalı modül zara dokunmuyor (üç tohumda aynı hayat) ve 65+ bandında
+havuzun en az 20 olayı uygun hale geliyor (ölçülen 31/31).
+
+**Bütün sayılar `prototypeOnly`.** Ağırlıklar, tutarlar ve yaş kapıları
+`docs/DESIGN_REVIEW_QUEUE.md` Q-222'de karara sunuldu.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
