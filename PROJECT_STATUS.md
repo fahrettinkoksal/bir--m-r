@@ -6368,5 +6368,95 @@ kapat-aç, olay havuzunun kişi hedefi ve modül bağı, izlerin okunması,
 **Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; sorular
 ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-217'de.
 
+## Paket BV — okunmayan ekranlar ve ad çakışması (10 Ekim 2026)
+
+Bu paket döküm okuyarak çıktı; iki ayrı iş aynı turda bulundu.
+
+### 1. Döküm artık **hâle** göre de kare alıyor
+
+Yaş planı belli ekranları hiç yakalamıyordu ve bunlar PROJECT_STATUS'un
+"hâlâ okunmamış ekranlar" listesinde yazılıydı: **yeni doğan bebek**,
+**tahliye sonrası denetim dönemi**, **süren gebelik**. Üçü de yaşa değil
+duruma bağlı. `ekran_dokumu_bot_test.dart` içine durum odaklı kare
+arayıcısı eklendi: hayatları oynatıp koşulu arar, durum kurmaz. Gebelik
+karesi botun hayatından alınıp **oyuncunun yolundan** (korunmadan
+yakınlaşma) sürdürülüyor, çünkü bot gebelik aşamasını hiç üretmiyor
+(Q-201). Üç kare de boş ekran vermedi.
+
+**Bulgu (görünürlük).** Denetim dönemindeki oyuncunun Okul/Meslek
+ekranındaki satırı yalnızca "Sicilinde bir kayıt var" diyordu; denetim
+dönemi ve şehir dışı yasağı bir tık daha içerideydi. Satır artık
+"Denetim dönemi · 43 yaşına kadar" yazıyor (Paket BR/1 ile aynı ilke:
+durum, oyuncunun baktığı yerde dursun).
+
+### 2. Ad çakışması ölçüldü ve havuz büyütüldü
+
+Yeni doğan karesinde bebek **Melike** adını aldı; aynı hayatta üç yıl
+önce "Sınıf arkadaşın Melike Güneş vefat etti" satırı vardı. Ölçüm
+(300 hayat):
+
+| Ölçü | Havuz 20 | Havuz 60 | Havuz 60 + üretim düzeltmesi |
+| --- | --- | --- | --- |
+| İki yaşayan kişi aynı adda | **283/300** | 198-209/300 | **106/300** |
+| Kardeş-ebeveyn ad çakışması | 9% | 1-4% | 1% |
+| Çocuk-hane ad çakışması | 3% | 12-15% | 14% |
+| Kayıttaki kişi sayısı | medyan 58 | medyan 58 | medyan 58 |
+
+Kayıttaki kişi sayısının medyanı **58**; cinsiyet başına 20 isimle aynı
+adı taşıyan iki kişi kural oluyordu. Havuzlar 60'a çıkarıldı (kadın,
+erkek, soyadı) — bu **içerik**, kural değil.
+
+**Üretim düzeltmesi.** Kişi üreten yerlerin çoğu aynı adı yakalayıp
+yeniden çekiyordu (`in_laws`, `step_siblings`, `step_parents`,
+`school_people`, `colleagues`); **gelin/damat** ve **torun** bunu
+yapmıyordu. Teşhiste çakışma örneklerinin tamamı bu ikisiydi. Ortak
+yardımcı (`Random.pickFreshName`) yazıldı ve bu iki yere uygulandı.
+
+**Dokunulmayan yer:** hayat üretimindeki **ebeveyn ve kardeş** adları.
+O soru Q-198 #6'da Faho'nun kararını bekliyor; bu paket yalnızca
+kuyruğun istediği ölçümü yaptı ve havuzun daralmayı taşıyabileceğini
+gösterdi. Kalan %14'lük çocuk-hane çakışmasının kaynağı henüz
+bulunmadı (sınıf/iş arkadaşı üretiminde koruma var); not Q-198'e
+yazıldı.
+
+### Bekçiler
+
+`test/paket_bv_isim_ve_ekran_test.dart` (4 test): havuzlar ≥50 ve
+tekrarsız, kadın/erkek havuzları kesişmiyor; `pickFreshName` boş yuva
+varken kullanılmış ad seçmiyor, havuz tükenince rastgele dönüyor;
+kalabalık kayıtta gelin/damat mevcut bir adı almıyor; denetim dönemi
+Okul/Meslek satırında yazıyor. Döküm testi 6 → **9 kare**.
+
+### Ad havuzu dört bekçiyi kırdı — hiçbiri gevşetilmedi
+
+Havuzu büyütmek masum bir içerik değişikliği değildi: işletme ve piyasa
+yolu `InvestmentEngine.marketSeed`'den geliyor ve o tohum oyuncunun
+**adından** türüyor. Ad değişti, bütün piyasa yolları kaydı. Süit dört
+testte kırmızı verdi; dördünde de kırılan şey oyunun kuralı değil,
+testin **ölçüm yöntemiydi**. Hiçbir eşik indirilmedi, hiçbir test
+silinmedi:
+
+| Test | Kırılma sebebi | Yapılan |
+| --- | --- | --- |
+| `paket_ac_test.dart` — oynaklık | 300 tekrar **aynı** piyasa yılını ölçüyordu; tek yolun oynaklığı sıfır çıkabiliyordu | her tekrar farklı piyasa yılı; iddia 300 ayrı yıl üzerinden okunuyor |
+| `paket_ag_tail_test.dart` — reklam bonusu sönümlemesi | tek tohumun son değerine elle konmuş eşik | 12 tohum; iddia motorun kendi sabitinden türetildi: `1 + 0,30·(1−r)^14` tabanına **en az bir hayatta inmek** ve yolların üçte ikisinde başlangıcın altına düşmek |
+| `ui_smoke_life_test.dart` — UI hayatı 8 | ekranda "Bir ömür tamamlandı" yazıyordu: oyuncu bekleyen pencereleri kapatırken vefat etmişti | ölüm takılma sayılmıyor; takılma sebebi artık açık sheet/dialog ve ekrandaki ilk metinleri de yazıyor |
+| `paket_ac_measure_test.dart` — şirket batışı | 125 hayatlık **dilimde** batış görülmemişti | bekçi koşunun tamamına genişletildi (tüm stratejiler, 1000 hayat) |
+
+Ortak ders: tek tohumla ölçülen bir sayı kural değildir. Bu dört bekçi
+artık dağılım ya da formül okuyor; bundan sonra biri kırmızı verirse
+sebebi ad havuzu değil, oyunun kendisi olur.
+
+**Sönümleme iddiası neden formülden türetildi.** Ölçüm, 14 yılın
+sonunda baskının yedi yoldan altısında başlangıcın (1,30) altına
+indiğini, birinde ise 1,315'e çıktığını gösterdi: **o 14 yıl içinde
+yeni kampanya/viral baskı eklenebiliyor.** Yani "her yolda düşer"
+iddiası yanlıştı, eşiği güzelleştirmek de ölçümü saklamak olurdu.
+Motorun kendi kuralı (`yeni = baskı + (1 − baskı)·r`) yeni baskı hiç
+gelmezse 14 yıl sonra 1,0686 verir; ölçümde iki yol tam bu değere, bir
+yol altına indi. Bekçi artık bunu denetliyor: sönümleme kapatılırsa ya
+da oranı sessizce düşürülürse hiçbir yol tabana inemez ve test kırmızı
+verir.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

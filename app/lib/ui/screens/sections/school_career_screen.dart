@@ -401,6 +401,15 @@ String _adliAltMetni(GameState state) {
   if (acik != null) {
     return '${acik.stage.label} · ${acik.crime?.label ?? 'dosya'}';
   }
+  // **Denetim dönemi satırda yazar (Paket BV).** Döküm turunda görüldü:
+  // tahliye olan oyuncunun bu satırı yalnızca "Sicilinde bir kayıt var"
+  // diyordu; denetim dönemi ve şehir dışı yasağı bir tık daha
+  // içerideydi. Oyuncunun baktığı yerde durması gereken bir durum
+  // (Paket BR/1 ile aynı ilke).
+  final int? denetim = hukuk.probationUntilAge;
+  if (denetim != null && state.player.age < denetim) {
+    return 'Denetim dönemi · $denetim yaşına kadar';
+  }
   final int kayit = hukuk.record.length;
   if (kayit == 0) return 'Adli kaydın temiz';
   return kayit == 1 ? 'Sicilinde bir kayıt var' : 'Sicilinde $kayit kayıt var';

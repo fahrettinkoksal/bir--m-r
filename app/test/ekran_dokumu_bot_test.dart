@@ -42,6 +42,7 @@ import 'dart:math';
 
 import 'package:bir_omur/app.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
+import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
@@ -256,6 +257,38 @@ void main() {
     return bos;
   }
 
+  /// **Duruma göre kare arayıcısı (Paket BV).**
+  ///
+  /// Yaş planı belli ekranları hiç yakalayamıyordu, çünkü o ekranlar
+  /// belli bir yaşta değil belli bir **hâlde** açılıyor: yeni doğan
+  /// bebek, tahliye sonrası denetim dönemi, süren gebelik. Bu üçü
+  /// dökümün eksik listesinde yazılıydı. Arayıcı hayatları oynatıp
+  /// koşulu **arıyor**; durum kurulmuyor.
+  ({GameState? kare, int tohum}) durumKaresi({
+    required PlayerArchetype arketip,
+    required bool Function(GameState) kosul,
+    int deneme = 60,
+    int tohumBaslangici = 11,
+  }) {
+    for (int d = 0; d < deneme; d++) {
+      final int tohum = tohumBaslangici + d * 29;
+      GameState? bulunan;
+      void bak(GameState s) {
+        if (bulunan != null || s.deceased) return;
+        if (kosul(s)) bulunan = s;
+      }
+
+      playBotLife(
+        archetype: arketip,
+        seed: tohum,
+        onPreAge: bak,
+        onYear: bak,
+      );
+      if (bulunan != null) return (kare: bulunan, tohum: tohum);
+    }
+    return (kare: null, tohum: 0);
+  }
+
   /// Hangi arketip hangi yaşlarda dökülecek.
   ///
   /// Kariyer odaklı: iş, unvan, maaş, ustalık. Aile odaklı: eş, çocuk,
@@ -312,4 +345,95 @@ void main() {
               'Boş ekran oyuncuya hiçbir şey anlatmaz (D-063).');
     });
   }
+
+  // ===================================================================
+  // Durum odaklı dökümler (Paket BV)
+  // ===================================================================
+  //
+  // PROJECT_STATUS'un "hâlâ okunmamış ekranlar" listesi: yeni doğan
+  // bebek, denetim dönemi, gebelik. Üçü de yaşa değil hâle bağlı.
+
+  testWidgets('EKRAN DÖKÜMÜ (durum) — yeni doğan bebek',
+      (WidgetTester tester) async {
+    final ({GameState? kare, int tohum}) bulgu = durumKaresi(
+      arketip: PlayerArchetype.family,
+      kosul: (GameState s) => s.children
+          .any((Person c) => c.isAlive && c.age == 0),
+    );
+    expect(bulgu.kare, isNotNull,
+        reason: '60 hayatta 0 yaşında çocuğu olan bir kare bulunamadı: '
+            'doğum akışı erişilemez olabilir');
+    final List<String> bos = await dok(
+      tester,
+      'Yeni doğan bebek · tohum ${bulgu.tohum}',
+      bulgu.kare!,
+    );
+    expect(bos, isEmpty,
+        reason: 'Şu ekranlar neredeyse boş: ${bos.join(", ")} (D-063).');
+  });
+
+  testWidgets('EKRAN DÖKÜMÜ (durum) — denetim dönemi',
+      (WidgetTester tester) async {
+    final ({GameState? kare, int tohum}) bulgu = durumKaresi(
+      arketip: PlayerArchetype.risky,
+      kosul: (GameState s) =>
+          s.legal.imprisonedSinceAge == null &&
+          (s.legal.probationUntilAge ?? 0) > s.player.age,
+    );
+    expect(bulgu.kare, isNotNull,
+        reason: '60 riskli hayatta tahliye sonrası denetim dönemi '
+            'yakalanamadı: ya ceza hiç verilmiyor ya denetim kaydı '
+            'tutulmuyor');
+    final List<String> bos = await dok(
+      tester,
+      'Denetim dönemi · tohum ${bulgu.tohum}',
+      bulgu.kare!,
+    );
+    expect(bos, isEmpty,
+        reason: 'Şu ekranlar neredeyse boş: ${bos.join(", ")} (D-063).');
+  });
+
+  testWidgets('EKRAN DÖKÜMÜ (durum) — süren gebelik',
+      (WidgetTester tester) async {
+    // **Bot gebelik aşamasını hiç üretmiyor** (`haveChild` ile tek
+    // hamlede çocuk yapıyor, Q-201). Bu yüzden kare botun hayatından
+    // alınıp gebelik **oyuncunun yolundan** kuruluyor: korunmadan
+    // yakınlaşma. Durum kurulmuyor, akış yürütülüyor.
+    final ({GameState? kare, int tohum}) bulgu = durumKaresi(
+      arketip: PlayerArchetype.family,
+      kosul: (GameState s) {
+        if (s.player.age < 24 || s.player.age > 38) return false;
+        if (s.isExpecting || s.children.isNotEmpty) return false;
+        final Person? es = Intimacy.partnerOf(s);
+        if (es == null) return false;
+        return Intimacy.blockReason(s, es).isEmpty;
+      },
+    );
+    expect(bulgu.kare, isNotNull,
+        reason: '60 hayatta yakınlaşmaya uygun kare bulunamadı');
+
+    const IntimacyEngine yakinlasma = IntimacyEngine();
+    GameState akan = bulgu.kare!;
+    final String esId = Intimacy.partnerOf(akan)!.id;
+    for (int i = 0; i < 40 && !akan.isExpecting; i++) {
+      akan = yakinlasma
+          .perform(akan, esId, Protection.korunmadan, Random(i))
+          .state;
+      if (akan.isExpecting) break;
+      akan = akan.copyWith(
+        player: akan.player.copyWith(age: akan.player.age + 1),
+      );
+    }
+    expect(akan.isExpecting, isTrue,
+        reason: 'kırk denemede gebelik oluşmadı: oyuncunun çocuk yolu '
+            'tıkanmış olabilir');
+
+    final List<String> bos = await dok(
+      tester,
+      'Süren gebelik · tohum ${bulgu.tohum}',
+      akan,
+    );
+    expect(bos, isEmpty,
+        reason: 'Şu ekranlar neredeyse boş: ${bos.join(", ")} (D-063).');
+  });
 }

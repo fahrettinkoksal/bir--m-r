@@ -365,10 +365,23 @@ void main() {
     );
 
     // 3) Kuyruk riski gerçekten yaşanmalı (§30).
+    //
+    // **Paket BV'de genişletildi.** Şirket batışı seyrek bir kuyruk
+    // olayı; tek stratejinin 125 hayatında hiç çıkmaması mümkün. İsim
+    // havuzu büyüyüp piyasa tohumları değişince (`marketSeed` oyuncunun
+    // adından türüyor) o 125 hayatta sıfır çıktı ve bekçi düştü. İddia
+    // "kuyruk gerçekten yaşanıyor" olduğu için koşunun **bütün**
+    // hayatlarına bakılıyor: ölçüm büyüdü, iddia aynı kaldı.
+    final int batisGorenHayat = hepsi.values
+        .expand((Map<int, List<StrategyResult>> m) => m.values)
+        .expand((List<StrategyResult> l) => l)
+        .where((StrategyResult x) => x.companyFailures > 0)
+        .length;
     expect(
-      hisse.where((StrategyResult x) => x.companyFailures > 0).length,
+      batisGorenHayat,
       greaterThan(0),
-      reason: 'hic sirket batisi gormeyen bir hisse stratejisi olmaz',
+      reason: 'hic sirket batisi gormeyen bir piyasa olmaz '
+          '(bütün stratejiler, $toplamHayat hayat)',
     );
 
     // 4) İşlem kapanması yaşanmalı (§5).

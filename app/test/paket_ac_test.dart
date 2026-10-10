@@ -615,11 +615,20 @@ void main() {
     });
 
     test('yoğunlaşma oynaklığı artırıyor, beklenen değeri kaydırmıyor', () {
-      // Aynı yıl, aynı piyasa: biri tek varlıkta, biri dağıtılmış.
+      // Aynı piyasa yılı, iki portföy: biri tek varlıkta, biri dağıtılmış.
+      //
+      // **Paket BV'de düzeltildi.** Döngü 300 kez dönüyordu ama her tur
+      // **aynı** piyasa yılını hesaplıyordu: `_hayat()` sabit tohumla
+      // kuruluyor ve piyasa tohumu oyuncunun adı + yaşından türüyor
+      // (`InvestmentEngine.marketSeed`). Yani 300 tur tek örneği 300 kez
+      // sayıyordu; isim havuzu büyüyüp ad değişince o tek örnek ters
+      // döndü ve bekçi düştü. Artık her tur **başka bir piyasa yılını**
+      // ölçüyor: iddia aynı, ölçüm gerçekten dağılım.
       int tekVarlikOynaklik = 0;
       int dagitilmisOynaklik = 0;
       for (int tohum = 0; tohum < 300; tohum++) {
-        GameState tek = _hayat(wallet: 0, age: 40).copyWith(
+        final int yas = 41 + tohum;
+        GameState tek = _hayat(wallet: 0, age: yas - 1).copyWith(
           investments: <Holding>[
             const Holding(
               typeId: 'hisse',
@@ -651,8 +660,8 @@ void main() {
             ),
           ],
         );
-        tek = InvestmentEngine.advanceYear(state: tek, newAge: 41);
-        dagitik = InvestmentEngine.advanceYear(state: dagitik, newAge: 41);
+        tek = InvestmentEngine.advanceYear(state: tek, newAge: yas);
+        dagitik = InvestmentEngine.advanceYear(state: dagitik, newAge: yas);
         tekVarlikOynaklik += (tek.portfolioValue - 400000).abs();
         dagitilmisOynaklik += (dagitik.portfolioValue - 400000).abs();
       }

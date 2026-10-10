@@ -552,6 +552,20 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   ayıracak şekilde düzeltildi ama **genel kısıt duruyor**: sosyal
   ölçümler bu yüzden oyunun üst sınırını değil, botun bütçesini
   gösteriyor.
+- ~~**Döküm üç ekranı hiç okumuyordu: yeni doğan, denetim dönemi,
+  gebelik.**~~ **Düzeltildi (Paket BV, 10 Ekim 2026).** Döküm yaşa göre
+  kare alıyordu; bu üçü yaşa değil **hâle** bağlı. Durum odaklı kare
+  arayıcısı eklendi, üç kare de okundu ve boş ekran çıkmadı. Denetim
+  döneminin Okul/Meslek satırında görünmemesi aynı turda düzeltildi.
+- ~~**Aynı adı taşıyan iki kişi kural gibiydi (283/300 hayat).**~~
+  **Düzeltildi (Paket BV, 10 Ekim 2026).** İsim havuzları 20'den 60'a
+  çıkarıldı ve gelin/damat ile torun üretiminde eksik olan "kullanılan
+  adı seçme" koruması eklendi: 283/300 → 106/300. Hayat üretimindeki
+  ebeveyn/kardeş adları Q-198 #6'da Faho'nun kararını bekliyor.
+- **Çocuk-hane ad çakışmasının kalan %14'ü (açık).** Paket BV'den sonra
+  çocuğu olan hayatların yaklaşık yedide birinde çocuk, hanedeki
+  yaşayan biriyle aynı adı taşıyor. Sınıf ve iş arkadaşı üretiminde
+  koruma var; kaynağı henüz bulunmadı. Not Q-198 #6'ya yazıldı.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
   Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger

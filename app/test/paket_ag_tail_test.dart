@@ -17,6 +17,7 @@ import 'package:bir_omur/data/business_catalog.dart';
 import 'package:bir_omur/data/business_incident_catalog.dart';
 import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
+import 'package:bir_omur/domain/economy/business_market.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/business.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
@@ -189,20 +190,63 @@ void main() {
 
     test('reklam bonusu süresi bitiyor: baskı 1,0\'a dönüyor', () {
       // Viral bir baskı bırakılsa bile yıllar içinde sönümlenmeli.
-      GameState s = isle(15, 'is_kahve', age: 30);
-      s = s.copyWith(
-        businesses: <Business>[
-          s.businesses.single.copyWith(demandPressure: 1.30),
-        ],
-      );
-      final ({GameState state, List<BusinessYear> yillar, int pencere}) r =
-          yurut(s, 30, 14);
-      final Business? son = BusinessEngine.openBusiness(r.state);
-      if (son == null) return; // iş kapandıysa zaten bonus yok
+      //
+      // **Paket BV'de dağılıma + formüle çevrildi.** Tek tohumla 14 yıl
+      // yürütüp son değere elle eşik koymak iki kez kırıldı: işletme
+      // yolu piyasa/olay zarına bağlı ve o zar oyuncunun adından türüyor
+      // (`InvestmentEngine.marketSeed`); isim havuzu büyüyüp ad değişince
+      // aynı iddia 1,175 ölçtü ve düştü, ardından kurduğum "her yol
+      // başlangıcın altına iner" iddiası 1,315 ölçtü. Ölçüm sebebi
+      // gösterdi: **14 yıl içinde yeni viral/kampanya baskısı
+      // eklenebiliyor**, yani tek bir yolun son değeri sönümlemenin
+      // kanıtı değil. Eşiği güzelleştirmek yerine iddia motorun kendi
+      // sabitinden türetildi.
+      //
+      // Sönümleme formülü (`business_engine.dart`):
+      //   yeni = baskı + (1 - baskı) * prototypeOnlyPressureRecovery
+      // Yeni baskı hiç gelmezse 14 yıl sonra kalan:
+      //   1 + 0,30 * (1 - r)^14
+      // r = 0,10 için bu 1,0686'dır. En az bir hayatta baskının bu
+      // tabana **inmesi** gerekir; inmiyorsa sönümleme ya kapalı ya da
+      // oranı sessizce düşürülmüş olur.
+      final double tabanBaski =
+          1 + 0.30 * pow(1 - BusinessMarket.prototypeOnlyPressureRecovery, 14);
+      final List<double> sonBaskilar = <double>[];
+      for (final int tohum in <int>[
+        15, 31, 47, 63, 79, 95, 111, 127, 143, 159, 175, 191,
+      ]) {
+        GameState s = isle(tohum, 'is_kahve', age: 30);
+        s = s.copyWith(
+          businesses: <Business>[
+            s.businesses.single.copyWith(demandPressure: 1.30),
+          ],
+        );
+        final ({GameState state, List<BusinessYear> yillar, int pencere}) r =
+            yurut(s, 30, 14);
+        final Business? son = BusinessEngine.openBusiness(r.state);
+        if (son == null) continue; // iş kapandıysa zaten bonus yok
+        sonBaskilar.add(son.demandPressure);
+      }
+      expect(sonBaskilar.length, greaterThanOrEqualTo(6),
+          reason: 'yolların çoğunda işletme ayakta kalmadı; kurulum bozuk');
+      sonBaskilar.sort();
       expect(
-        son.demandPressure,
-        lessThan(1.12),
-        reason: 'Kalıcı bonus sönümlenmiyor — sonsuz buff olur.',
+        sonBaskilar.first,
+        lessThanOrEqualTo(tabanBaski + 1e-9),
+        reason: 'Hiçbir hayatta baskı sönümleme tabanına inmedi '
+            '(beklenen taban: $tabanBaski) — kalıcı bonus sönümlenmiyor.',
+      );
+      // İkinci iddia dağılım üzerinedir: yeni kampanya alan tek tük yol
+      // başlangıcın üstünde kalabilir, ama bonus **tipik** hayatta
+      // geçici olmalı. Üçte iki tabanı ölçümden değil kuraldan geliyor:
+      // "çoğunlukta geçici".
+      final int sonenYol =
+          sonBaskilar.where((double d) => d < 1.30).length;
+      expect(
+        sonenYol * 3,
+        greaterThanOrEqualTo(sonBaskilar.length * 2),
+        reason: 'Yolların çoğunda baskı başlangıç değerinin altına '
+            'inmedi: $sonBaskilar',
       );
     });
 

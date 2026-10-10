@@ -122,9 +122,34 @@ void main() {
     await bekleyenleriKapat(tester, c);
     await resolveEducationSheets(tester, c);
 
+    // **Ölüm takılma değildir (Paket BV).** Bekleyenleri kapatırken
+    // hayat bitebilir: kritik sağlık çözümü ya da bir olay seçimi o yıl
+    // öldürebilir. O anda ekran "Bir ömür tamamlandı" özetine geçtiği
+    // için Yaş Al düğmesi **doğru biçimde** yoktur. Teşhis bunu
+    // gösterdi (tohum 328, yaş 69): test kilitlenme sanıyordu. Döngü
+    // dışarıda `deceased` ile kapanır.
+    if (c.state!.deceased) return (ilerledi: true, sebep: '');
+
     final Finder yasAl = find.byKey(const Key('age_up_button'));
     if (yasAl.evaluate().isEmpty) {
-      return (ilerledi: false, sebep: 'Yaş Al düğmesi ekranda yok');
+      // **Sebep ekranın kendisinden okunur (Paket BV).** "Düğme yok"
+      // tek başına hiçbir şey anlatmıyordu; Paket BO'da aynı belirtinin
+      // altında açık kalmış bir duruşma penceresi vardı ve teşhis
+      // elle yapıldı. Artık ekranda ne olduğu sebebe yazılıyor.
+      final List<String> ustteki = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((Text t) => t.data ?? '')
+          .where((String x) => x.trim().isNotEmpty)
+          .take(14)
+          .toList(growable: false);
+      final int sayfa = tester.widgetList(find.byType(BottomSheet)).length;
+      final int dialog = tester.widgetList(find.byType(Dialog)).length;
+      return (
+        ilerledi: false,
+        sebep: 'Yaş Al düğmesi ekranda yok '
+            '(alt pencere: $sayfa, diyalog: $dialog, '
+            'ekrandaki ilk metinler: ${ustteki.join(" / ")})',
+      );
     }
     final int once = c.state!.player.age;
     await tester.tap(yasAl);

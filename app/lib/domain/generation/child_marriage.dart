@@ -116,7 +116,15 @@ abstract final class ChildMarriage {
         child.gender == Gender.kadin ? Gender.erkek : Gender.kadin;
     final List<String> havuz =
         esCinsiyeti == Gender.kadin ? kadinIsimleri : erkekIsimleri;
-    final String esAdi = havuz[rng.nextInt(havuz.length)];
+    // Paket BV: gelin/damat adı kayıttaki adlardan seçilmez. Ölçümde
+    // çocuk-hane ad çakışmalarının örneklerinin çoğu buradan geliyordu.
+    // `state` isteğe bağlı (eski çağıranlar ad-only kullanıyor); yoksa
+    // dışlanacak ad listesi de boştur.
+    final String esAdi = rng.pickFreshName(havuz, <String>{
+      if (state != null) state.player.firstName,
+      if (state != null)
+        for (final Person p in state.people) p.firstName,
+    });
 
     // --- Eş gerçek bir kişi olarak kurulur (Paket AP §16) -------------
     //

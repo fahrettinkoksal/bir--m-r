@@ -213,6 +213,20 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   teşhisle çöz: komşuyla her yıl vakit geçiren oyuncunun bağı 2-4 yılda
   eşiği geçiyordu. Botun bütçesini ölçmek yerine **oyunun üst sınırını**
   ölçen küçük bir probe, paketin yönünü bir turda belirledi.
+- **Paket BV.** Döküm **yaşa** göre kare alıyorsa duruma bağlı
+  ekranları hiç göremez: yeni doğan, denetim dönemi ve gebelik aylarca
+  "okunmamış" listede kaldı. Hayatı oynatıp **hâli arayan** bir kare
+  arayıcısı üç ekranı tek turda açtı.
+- **Paket BV.** Küçük bir katalogda "rastgele ad" çakışma üretir ve bu
+  **kural** gibi görünür: 20 isimle ve medyan 58 kişiyle iki yaşayan
+  kişinin aynı adı taşıması 283/300 hayatta oluyordu. Önce havuzun
+  kapasitesini ölç, sonra kural tartış (Q-198 #6).
+- **Paket BV.** İçerik değişikliği de zar kaydırır: isim havuzunu
+  büyütmek, piyasa tohumu oyuncunun **adından** türediği için bütün
+  işletme/yatırım yollarını kaydırdı ve tek tohuma dayanan dört bekçiyi
+  kırdı. Kırılan bekçiyi **gevşetme**: iddiayı dağılıma ya da motorun
+  kendi formülüne bağla. Sönümleme bekçisi artık
+  `1 + 0,30·(1−r)^14` tabanını okuyor, elle konmuş bir eşiği değil.
 - **Paket BP.** Ölçüm botu bir özelliği hiç kullanmıyorsa, o özelliğin
   içeriği "erişilemez" görünür. Bot oturmak için aldığı eve
   taşınamıyordu; düzeltmeden önce yeni havuz 7/25 hayatta görünüyordu,

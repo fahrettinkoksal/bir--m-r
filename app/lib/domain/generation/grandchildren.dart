@@ -140,8 +140,14 @@ abstract final class Grandchildren {
 
     return Person(
       id: id,
-      firstName: rng.pick(
+      // Paket BV: torunun adı kayıttaki adlardan seçilmez (ölçüm:
+      // çakışma örneklerinin yarısı torundu).
+      firstName: rng.pickFreshName(
         cinsiyet == Gender.kadin ? kadinIsimleri : erkekIsimleri,
+        <String>{
+          state.player.firstName,
+          for (final Person p in state.people) p.firstName,
+        },
       ),
       lastName: child.lastName,
       gender: cinsiyet,
