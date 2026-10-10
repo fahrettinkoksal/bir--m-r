@@ -6522,5 +6522,93 @@ alınan kayıt üzerinde** sevgili/okul arkadaşı/tanışıklık üretimi 25
 tohumda kayıttaki bir adı seçmiyor. Durum kurulmadı; kalabalık kayıt
 oynanan hayatlardan arandı.
 
+## Paket BX — sürdürülen uğraşa öncelik (10 Ekim 2026)
+
+1.000 hayatlık denetim, okul futbol takımının **on iki olayından
+sekizinin hiç görülmediğini** söylüyordu. Bu paket sebebi aradı.
+
+### Huni: kapı kapalı değildi, çekiliş kaybediyordu
+
+150 spor odaklı hayat oynatıldı ve zincirin her adımı sayıldı:
+
+| Adım | Sayı |
+| --- | --- |
+| Bir kulübe giren hayat | 149/150 |
+| **Futbol** takımına giren | 44/150 (futbolda medyan **2 yıl**) |
+| İlk on bire çıkan | 13/150 (aktif yıl medyanı **0**) |
+| Zincir başı olayı (`kulup_futbol_ilk_on_bir`) görülen | **0** |
+
+Olay bazında "uygun hale geldi / görüldü":
+
+| Olay | Uygun | Görülen |
+| --- | --- | --- |
+| `antrenor_tartismasi` | 31 | 1 |
+| `turnuva` | 31 | 3 |
+| `ders_catismasi` | 30 | **0** |
+| `penalti` | 4 | 0 |
+| `kritik_gol` | **0** | 0 |
+
+Yani üç olay hayatların beşte birinde **uygun hale geliyor** ve 150
+hayatta toplam **4 kez** çıkıyor. Sebep aritmetik: yıllık aday havuzunda
+ortanca 80 olay ve ~268 etkin ağırlık var (AR/3 ölçümü); ağırlığı 6-7
+olan bir olayın bir yıldaki payı **%2,5**. Kulüp üyeliğinin penceresi
+ise 2-4 yıl. Bayrağa bağlı halkalar (`kritik_gol`, `penalti_sonrasi`,
+`antrenor_barisma`) bu yüzden **hiç uygun hale gelmiyordu**: önceki
+halka çıkmadan bayrak konmuyor.
+
+### İki düzeltme
+
+**1) Motor — sürdürülen uğraşa öncelik.** Paket AS/2 aynı sorunu
+zincirler için çözmüştü: oyuncunun açtığı devam halkası çekilişte ×8
+alıyor. Kulüp ve hobi olayları da aynı sözün kapsamında — oyuncu takıma
+girmeyi **seçti** ve o seçimin ömrü kısa. Fark: zincir koşulu bir
+bayrak, buradaki koşul **sürmekte olan bir durum**
+(`requiresActiveClubId`, `requiredHobbyId`). Katsayı `×6`
+(`prototypeOnlyActivePursuitBoost`), zincir katsayısının altında, dönüm
+noktasının (120) çok altında. İki gerekçe **çarpılmaz**: en güçlüsü
+kazanır. Anahtar: `ugras_onceligi` — kapalıyken Paket BX öncesi ağırlık
+birebir geri döner.
+
+**2) Araç — bot eski kulübüne yeniden yazılıyor.** Oyunun kuralı: okul
+değişince üyelik kapanır, yeni okulda yeniden başvurulur. Bot ise her
+yıl tek bir "kulübe gir" kararı veriyor ve kararı verdiğinde bütün
+uygun kulüpler arasından seçiyordu; futbola giren 44 hayatın **39'u**
+ömründe yalnızca **bir** üyelik kaydı açıyordu. Kadro rolü her okulda
+sıfırdan başladığı için ilk on bire yetecek yıl hiç birikmiyordu.
+Gerçek oyuncu girdiği takıma yeni okulunda da yazılır; bot da artık
+öyle yapıyor (ağırlık ×6, oyun kuralı değil araç davranışı).
+
+### Ölçüm (150 spor hayatı, aynı tohumlar)
+
+| Ölçü | Önce | Öncelik sonrası | + bot sadakati |
+| --- | --- | --- | --- |
+| Futbolda medyan yıl | 2 | 2 | **3** |
+| Futbol üyelik kaydı (1 / 2 / 3 kayıt) | 39 / 5 / 0 | 41 / 7 / 0 | 19 / 11 / **2** |
+| Zincirden toplam görülme | **5** | 21 | 19 |
+| Hiç görülmemiş olay | 8 | 6 | **5** |
+| `antrenor_barisma` | 0 | 0 | **1** (ilk kez) |
+| `ders_catismasi` | 0 | 1 | **3** |
+| `turnuva` | 3 | 15 | 10 |
+
+Bot sadakati futbol örneklemini küçültüyor (48 → 32 hayat) çünkü ilk
+seçilen kulübe bağlı kalıyor; buna karşılık **üyelik süresi** uzuyor ve
+zincir derinleşiyor. İkisi de aynı yönü gösterdiği için sadakat
+korundu: araç oyuncuya benzemeli, örneklem genişliği tohum sayısıyla
+çözülür.
+
+**Açık kalan.** `kritik_gol`, `penalti_sonrasi` ve `scout` hâlâ çok
+seyrek: üçü de "önceki halka + aktif üyelik + rol" üçlüsünü aynı yılda
+istiyor. Kulüp üyeliğinin okul değişiminde kapanması ve kadro
+merdiveninin dört yıl istemesi bir **tasarım** sorusu; Q-218'de
+Faho'nun kararını bekliyor. Oyun kuralı değiştirilmedi.
+
+### Bekçi
+
+`test/paket_bx_ugras_onceligi_test.dart` (3 test): katsayı anahtar
+kapalıyken 1 dönüyor, üyelik kapanınca düşüyor, ve 120 spor hayatında
+futbola giren oyuncuların **en az yarısı** kulüp olayı görüyor
+(zincirden en az 4 ayrı olay). Aktif üyelik kaydı kurulmuyor, oynanan
+hayatlardan **aranıyor**.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

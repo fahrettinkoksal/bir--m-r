@@ -4,6 +4,7 @@ import 'dart:math';
 import '../economy/net_worth.dart';
 import '../../data/company_catalog.dart';
 import '../law/legal_engine.dart';
+import '../features/feature_catalog.dart';
 import '../features/feature_events.dart';
 import '../models/criminal_record.dart';
 
@@ -136,6 +137,54 @@ class EventEngine {
   /// çalışmaya devam eder: halka bir kez çıkınca havuzdan düşer.
   static const double prototypeOnlyChainContinuationBoost = 8;
 
+  // -----------------------------------------------------------------
+  // Sürdürülen uğraş önceliği (Paket BX)
+  // -----------------------------------------------------------------
+  //
+  // Ölçüm (150 spor odaklı hayat, zincir hunisi): okul futbol takımının
+  // on iki olayından **sekizi** 1.000 hayatlık denetimde hiç
+  // görülmemişti. Huni şunu gösterdi: üç olay (`antrenor_tartismasi`,
+  // `turnuva`, `ders_catismasi`) hayatların 31/150'sinde **uygun hale
+  // geliyor** ama 150 hayatta toplam **4 kez** çıkıyor. Yani kapı değil,
+  // çekiliş kaybediyor: yıllık havuzda ortanca 80 aday ve ~268 etkin
+  // ağırlık varken (AR/3 ölçümü) ağırlığı 6-7 olan bir olayın payı
+  // %2,5; kulüp üyeliğinin penceresi ise yalnızca 2-4 yıl.
+  //
+  // Paket AS/2 aynı sorunu **zincirler** için çözmüştü: oyuncunun açtığı
+  // devam halkası ×8 alıyor. Kulüp ve hobi olayları da aynı sözün
+  // kapsamındadır — oyuncu takıma girmeyi **seçti** ve o seçimin ömrü
+  // kısa. Fark şu: zincir koşulu bir bayrak, buradaki koşul sürmekte
+  // olan bir **durum**.
+
+  /// prototypeOnly: oyuncunun **şu an sürdürdüğü** kısa pencereli
+  /// uğraşın (okul kulübü, hobi) olaylarına verilen katsayı.
+  ///
+  /// Zincir katsayısının (8) altında, dönüm noktası katsayısının (120)
+  /// çok altında. İki katsayı **çarpılmaz**: en güçlü gerekçe kazanır,
+  /// yoksa bayrağı da kulübü de olan olay ×48 ile havuzu boğardı.
+  static const double prototypeOnlyActivePursuitBoost = 6;
+
+  /// Olay, oyuncunun şu an sürdürdüğü bir uğraşa mı ait?
+  ///
+  /// Anahtar kapalıysa katsayı 1'dir: Paket BX öncesi davranış birebir
+  /// geri gelir (`FeatureId.ugrasOnceligi`).
+  static double _activePursuitBoost(GameState state, GameEvent event) {
+    if (!state.featureOn(FeatureId.ugrasOnceligi)) return 1;
+    final EventRequirement req = event.requirement;
+    final String? kulupId = req.requiresActiveClubId;
+    if (kulupId != null && state.schoolClubs.activeFor(kulupId) != null) {
+      return prototypeOnlyActivePursuitBoost;
+    }
+    final String? hobiId = req.requiredHobbyId;
+    if (hobiId != null) {
+      final HobbyKind? hobi = hobbyById(hobiId);
+      if (hobi != null && HobbyTracker.progressOf(state, hobi) != null) {
+        return prototypeOnlyActivePursuitBoost;
+      }
+    }
+    return 1;
+  }
+
   /// Olayın **bu hayatta kaç kez çıktığına** göre azalan ağırlığı.
   static double prototypeOnlyEffectiveWeight(GameState state, GameEvent event) {
     // Dönüm noktaları bütün havuzun önüne geçer (Paket 21).
@@ -148,10 +197,16 @@ class EventEngine {
     // Koşul yalnızca "iz arıyor" değil, "istediği izlerin **hepsi**
     // konmuş": motor zaten bunu süzüyor ama katsayı aday dışı bir
     // çağrıda da doğru davransın diye burada bir daha bakılıyor.
-    final double zincir = event.requirement.requiredFlags.isNotEmpty &&
-            state.storyFlags.containsAll(event.requirement.requiredFlags)
-        ? prototypeOnlyChainContinuationBoost
-        : 1;
+    final double zincirKatsayisi =
+        event.requirement.requiredFlags.isNotEmpty &&
+                state.storyFlags.containsAll(event.requirement.requiredFlags)
+            ? prototypeOnlyChainContinuationBoost
+            : 1;
+
+    // Sürdürülen uğraş da öne geçer (Paket BX). İki gerekçe çarpılmaz;
+    // en güçlüsü kazanır.
+    final double zincir =
+        max(zincirKatsayisi, _activePursuitBoost(state, event));
 
     final int gorulme = state.eventSeenCount(event.id);
     if (gorulme == 0) return event.weight * oncelik * zincir;

@@ -2497,7 +2497,14 @@ void _handleSchoolClubs(
           k,
     ];
     if (adaylar.isNotEmpty) {
-      final SchoolClub hedef = _botKulupSec(adaylar, profile, rng);
+      final SchoolClub hedef = _botKulupSec(
+        adaylar,
+        profile,
+        rng,
+        gecmisKulupler: <String>{
+          for (final SchoolClubProgress u in s.schoolClubs) u.clubId,
+        },
+      );
       final ClubJoinOutcome sonucKatilim = c.joinClub(hedef);
       if (sonucKatilim.accepted) {
         sonuc.joinedAnyClub = true;
@@ -2660,19 +2667,32 @@ void _olcFutbolYolu(GameState s, BotLifeResult sonuc) {
 /// Ağırlıklar `prototypeOnly`: botun davranışı ölçüm aracıdır, oyun
 /// kuralı değil. Hiçbir kategori sıfır almaz — gerçek oyuncu da bazen
 /// beklenmedik bir kulübe girer.
+/// Botun kulüp seçimi.
+///
+/// **Paket BX ölçüm düzeltmesi:** okul değişince üyelik kapanıyor
+/// (oyunun kuralı: yeni okulda yeniden başvurulur). Bot ise her yıl tek
+/// bir "kulübe gir" kararı veriyor ve kararı verdiğinde bütün uygun
+/// kulüpler arasından seçiyordu. Sonuç: futbol takımına giren 44 hayatın
+/// **39'u** ömründe yalnızca **bir** üyelik kaydı açıyordu; kadro rolü
+/// her okulda sıfırdan başladığı için ilk on bire çıkmaya yetecek yıl
+/// hiç birikmiyordu. Gerçek oyuncu, girdiği takıma yeni okulunda da
+/// yazılır. Artık **daha önce üyesi olunan kulüp** ağır basıyor; bu bir
+/// oyun kuralı değil, aracın oyuncuya benzemesi.
 SchoolClub _botKulupSec(
   List<SchoolClub> adaylar,
   BotProfile profile,
-  Random rng,
-) {
+  Random rng, {
+  Set<String> gecmisKulupler = const <String>{},
+}) {
   double agirlik(SchoolClub k) {
+    final double eskiden = gecmisKulupler.contains(k.id) ? 6 : 1;
     switch (k.category) {
       case SchoolClubCategory.spor:
-        return 1 + profile.sportDesire * 4;
+        return (1 + profile.sportDesire * 4) * eskiden;
       case SchoolClubCategory.akademi:
-        return 1 + profile.university * 3;
+        return (1 + profile.university * 3) * eskiden;
       case SchoolClubCategory.sanat:
-        return 1 + profile.hobbyDesire * 3;
+        return (1 + profile.hobbyDesire * 3) * eskiden;
     }
   }
 

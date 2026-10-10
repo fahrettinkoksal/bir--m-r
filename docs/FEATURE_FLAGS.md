@@ -62,6 +62,7 @@ gelir.
 | `oturulan_ev` | Oturduğun ev | BP | Kendi evinde oturana çıkan 28 olay (kombi, çatı, küf, apartman toplantısı, komşu, dönüşüm) ve yedi karşılığı çıkmaz; kendi evine çıkmak paket öncesi gibi sessiz geçer. |
 | `ev_dosemesi` | Evini döşemek | BT | Evinin hâli ekranı, döşeme seviyesi, ev eşyasının yıllık yıpranması ve iyi döşenmiş evin yıllık mutluluk katkısı kalkar; 18 ev eşyası mağazada kalır ama evin dolu olup olmadığı hiçbir şeyi değiştirmez. |
 | `komsular` | Komşular | BU | Apartmanda adı olan komşu olmaz: ilişkiler ekranındaki Komşular bölümü, komşuyla sohbet/vakit/hediye ve 12 komşu olayı çıkmaz. Kendi evinde oturmak Paket BP'nin olaylarıyla devam eder. |
+| `ugras_onceligi` | Sürdürülen uğraşa öncelik | BX | Oyuncunun o an içinde olduğu okul kulübü ya da hobinin olayları yıllık çekilişte genel havuzla aynı ağırlıkta yarışır. İçerik kaybolmaz ama ölçümde görüldüğü gibi okul yıllarında neredeyse hiç çıkmaz: 150 spor hayatında futbol zincirinin sekiz olayı 5 kez görünüyordu, öncelikle 21 kez. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.

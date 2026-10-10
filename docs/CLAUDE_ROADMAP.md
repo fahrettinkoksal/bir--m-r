@@ -221,6 +221,13 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   **kural** gibi görünür: 20 isimle ve medyan 58 kişiyle iki yaşayan
   kişinin aynı adı taşıması 283/300 hayatta oluyordu. Önce havuzun
   kapasitesini ölç, sonra kural tartış (Q-198 #6).
+- **Paket BX.** "Hiç görülmeyen olay" iki ayrı şey olabilir: **kapı
+  kapalı** ya da **çekiliş kaybediyor**. İkisini ayırmadan düzeltmeye
+  kalkmak yanlış yeri tamir ettirir. Ayıran ölçüm tek satır: olay kaç
+  hayatta **uygun hale geldi**, kaç hayatta **görüldü**. Futbol
+  zincirinde cevap 31'e 1 çıktı; yani koşullar değil, yıllık havuzdaki
+  pay sorunluydu. Bir içeriğin penceresi kısaysa (kulüp üyeliği 2-4 yıl)
+  genel havuzla aynı ağırlıkta yarışması onu görünmez yapar.
 - **Paket BW/0.** Bir bulguyu kapatmadan önce **çakışan tarafın kim
   olduğunu say**. "Çocuk hanedeki bir adı taşıyor" bulgusunun 52/63'ü
   çocuk-çocuk çakışmasıydı ve sebebi oyun değil, botun sekiz adlı

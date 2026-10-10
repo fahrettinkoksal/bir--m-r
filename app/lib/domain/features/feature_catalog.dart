@@ -161,6 +161,21 @@ enum FeatureId {
       'app/lib/data/event_pool_neighbour.dart',
       'app/test/paket_bu_komsular_test.dart',
     ],
+  ),
+
+  /// Paket BX — sürdürülen uğraşa öncelik: oyuncunun şu an içinde olduğu
+  /// okul kulübü ya da hobinin olayları yıllık çekilişte öne geçer.
+  ugrasOnceligi(
+    saveKey: 'ugras_onceligi',
+    title: 'Sürdürülen uğraşa öncelik',
+    lostWhenOff:
+        'Kulüp ve hobi olayları yıllık çekilişte genel havuzla aynı '
+        'ağırlıkta yarışır. İçerik kaybolmaz ama ölçümde görüldüğü gibi '
+        'okul yıllarında neredeyse hiç çıkmaz.',
+    paket: 'Paket BX — sürdürülen uğraşa öncelik',
+    removableFiles: <String>[
+      'app/test/paket_bx_ugras_onceligi_test.dart',
+    ],
   );
 
   const FeatureId({

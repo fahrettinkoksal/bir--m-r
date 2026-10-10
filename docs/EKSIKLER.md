@@ -438,6 +438,23 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   `zincir_ogretmen_3`). Geri kalanlar ehliyet, hobi `okuma` ya da suç
   zincirinin önceki halkasından gelen flag + hatırlanan kişi rolünün
   birlikte gerekmesi yüzünden oluşmuyor.
+  **Not (Paket BX, 10 Ekim 2026):** bu maddenin "ehliyet" kısmı artık
+  geçerli değil — bot %68,3 hayatta ehliyet alıyor (Q-167'nin o
+  bulgusu kapandı). "Havuz çekilişinde kaybediyor" kısmı ise ölçülüp
+  genelleştirildi: okul kulübü olayları hayatların beşte birinde uygun
+  hale geldiği hâlde 150 hayatta 4 kez çıkıyordu. Sürdürülen uğraşa
+  öncelik (`ugras_onceligi`) bunu 21 görülmeye çıkardı; kalan seyrek
+  halkalar Q-218'de.
+- ~~**Okul futbol takımının sekiz olayı hiç görülmüyor.**~~
+  **Büyük kısmı düzeltildi (Paket BX).** Kapı kapalı değildi: yıllık
+  havuzda ortanca 80 aday varken ağırlığı 6-7 olan olayın payı %2,5 ve
+  kulüp üyeliğinin penceresi 2-4 yıl. Motor tarafında sürdürülen
+  kulüp/hobi olayına ×6 öncelik verildi, araç tarafında bot okul
+  değişince eski kulübüne yeniden yazılıyor. Hiç görülmemiş olay 8 →
+  **5**; `antrenor_barisma` ilk kez göründü. Kalan üçü (`kritik_gol`,
+  `penalti_sonrasi`, `scout`) "önceki halka + aktif üyelik + rol"
+  üçlüsünü aynı yılda istiyor; kadro merdiveninin dört yıl istemesi
+  **tasarım sorusu** olarak Q-218'de.
 - **KONTROLSUZ BORÇ BÜYÜMESİ (Paket AC ölçümünde bulundu).**
   `banking.dart advanceYear`: ödenmeyen taksitte borç her yıl faiziyle
   büyüyor ama `remainingPayments` **azalmıyor** ve hiçbir haciz,
@@ -573,7 +590,8 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   iki yaşayan kişinin aynı adı taşıması 105/300 → **25/300**.
   Ebeveyn/kardeş adları hâlâ Q-198 #6'da karar bekliyor.
 - **PlayerBot'un bilinen davranış eksikleri (ürün kararı değil, Q-167/7).**
-  Ehliyet almıyor; flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
+  ~~Ehliyet almıyor~~ (**düzeltildi**: %68,3 hayatta ehliyet alınıyor);
+  flörtle hiç vakit geçirmiyor (bu yüzden yakınlık 60
   resmîleştirme eşiğine çıkmıyor ve sevgili kapısı daralıyor); Finger
   profilini niyete bakmadan seçiyor (adayların %25'i yalnızca arkadaşlık
   istiyor); yatırım yapabildiği **her** yıl yatırım yapıyor
