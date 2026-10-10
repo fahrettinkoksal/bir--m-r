@@ -615,7 +615,7 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   (25 ana + 6 karşılık); 65+ yılda uygun olay 75,0/77,1'den
   93,9/94,9'a çıktı ve havuzun 31/31'i uygun hale gelip 30/31'i
   görüldü (60 hayat × 2 tohum bloğu). Modül anahtarı `son_yillar`.
-- **Botun ölen hayvanın yerine yenisini almaması (BOT, açık).**
+- ~~**Botun ölen hayvanın yerine yenisini almaması (BOT).**~~ **Düzeltildi (Paket CF, 10 Ekim 2026):** birden fazla kez sahiplenen hayat 0/240'tan 44 ve 40'a, tür çeşitliliği kediden 10 türe, adlar oyunun kendi havuzuna geçti; izin isteyen tür (timsah) ilk kez gezildi. Eski kayıt:
   Ölçüm (120 hayat × 2 tohum bloğu): hayvan sahiplenen hayat 89 ve 92,
   hayvanı ölen 83 ve 85 — ama **birden fazla hayvanı olan hayat 0/240**.
   Sebep botun `s.pets.isEmpty` koşulu: ölen hayvan kayıtta kaldığı için

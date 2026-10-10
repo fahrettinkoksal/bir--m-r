@@ -7195,5 +7195,47 @@ kısalttım. Ölçümün yöntemi ve havuzun bütünlüğü bekçiye bağlandı:
 üyelik penceresi gerçekten var (ortalama ≥2 yıl), kulüp içeriği üyeye
 ulaşıyor.
 
+## Paket CF — hayvan sahiplenme aracının üç eksiği (10 Ekim 2026)
+
+`docs/EKSIKLER.md`'de açık duran bulgu kapatıldı. Ölçüm (120 hayat × 2
+bağımsız tohum bloğu) üç eksiği birden gösterdi:
+
+1. **Ölen hayvanın yerine yenisi hiç alınmıyordu.** Hayvan sahiplenen
+   hayat 89 ve 92, hayvanı ölen 83 ve 85 — ama **birden fazla hayvanı
+   olan hayat 0/240**. Sebep botun koşulu: `s.pets.isEmpty`. Ölen
+   hayvan kayıtta kaldığı için (kayıt silinmez, D-109) bu koşul bir
+   daha hiç sağlanmıyordu. **Oyun tarafı sağlamdı:**
+   `PetCare.prototypeOnlyMaxLivingPets = 3` ve ölen hayvan "yaşayan"
+   sayılmıyor; yani ikinci hayvan ve ölenin yerine yenisi yolları
+   ölçüm dışı kalıyordu.
+2. **Tür hep aynıydı.** Bot `PetSpecies.values` sırasındaki ilk uygun
+   türü alıyordu: kedi 62/89. Köpeğin, kuşun, kaplumbağanın farklı
+   masrafı, kaçma riski ve ömrü hiç ölçülmüyordu.
+3. **Adı bot veriyordu.** "Zeytin" 66/89; oyunun kendi ad havuzu
+   (`kPetSuggestedNames`) hiç gezilmiyordu.
+
+### Düzeltmeden sonra (aynı iki blok)
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Birden fazla kez sahiplenen | 0/240 | **44 / 40** |
+| Ölenin yerine yenisini alan | 0 | **39 / 37** |
+| Aynı anda en fazla yaşayan hayvan | 1 | **2** (oyun sınırı 3) |
+| Tür çeşitliliği | kedi %70 | **10 tür dengeli** |
+| Adlar | Zeytin %74 | **14 ad, oyunun havuzundan** |
+| `hayvan_cocukla` (en nadir olay) | 1 / 0 | **4 / 3** |
+
+**İlk kez ölçülen yol:** izin isteyen tür (**timsah**) 6 ve 5 hayatta
+sahiplenildi. `requiresPermit` kapısı, izin yaşı ve izin bedeli bugüne
+kadar hiç gezilmemişti.
+
+### Bekçi
+
+`test/paket_cf_hayvan_araci_test.dart`: 60 hayatta en az 20 hayat
+hayvan alıyor, en az 10'u **birden fazla kez** alıyor, en az 5 tür
+görülüyor, aynı anda yaşayan hayvan sayısı oyunun sınırını geçmiyor ve
+kayıtlı her ad oyunun ad havuzunda (botun kendi adını vermesi
+adlandırma yolunu ölçüm dışı bırakırdı).
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

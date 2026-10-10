@@ -461,6 +461,12 @@ class BotLifeResult {
   /// Olay kimliği -> o hayatta seçilen dalların kimlikleri (Paket CD).
   /// İçeriğin iki yarısının da gezilip gezilmediğini ölçer.
   final Map<String, Set<String>> choicesTaken = <String, Set<String>>{};
+
+  /// Hayat boyunca sahiplenilen hayvan türleri (Paket CF).
+  final Set<String> petSpecies = <String>{};
+
+  /// Kaç kez hayvan sahiplenildi (ölenin yerine yenisi dahil).
+  int petsAdopted = 0;
   int finalHealth = 0;
 
   /// Ölümde mutluluk (0-100). Denge ölçümlerinde sağlıkla birlikte
@@ -3133,14 +3139,40 @@ void _handleActivities(
     }
   }
 
-  // ---- Evcil hayvan ------------------------------------------------
+  // ---- Evcil hayvan (Paket CF) -------------------------------------
+  //
+  // **Üç bot eksiği birden düzeltildi.** Ölçüm (120 hayat × 2 tohum
+  // bloğu): hayvan sahiplenen hayat 89 ve 92, hayvanı ölen 83 ve 85 —
+  // ama **birden fazla hayvanı olan hayat 0/240**. Sebep eski koşuldu:
+  // `s.pets.isEmpty`. Ölen hayvan kayıtta kaldığı için (kayıt silinmez,
+  // D-109) bu koşul bir daha hiç sağlanmıyordu. Oyun tarafı sağlam —
+  // `PetCare.prototypeOnlyMaxLivingPets = 3` ve ölen hayvan "yaşayan"
+  // sayılmıyor — yani ikinci hayvan ve ölenin yerine yenisi yolları
+  // ölçüm dışı kalıyordu.
+  //
+  // İkincisi: bot her hayatta `PetSpecies.values` sırasındaki **ilk**
+  // uygun türü alıyordu (kedi 62/89). Köpeğin, kuşun ve kaplumbağanın
+  // farklı masrafı, kaçma riski ve ömrü hiç ölçülmüyordu.
+  //
+  // Üçüncüsü: adı bot veriyordu ("Zeytin" 66/89), yani oyunun kendi ad
+  // havuzu (`kPetSuggestedNames`) hiç gezilmiyordu. Artık boş ad
+  // geçiliyor ve adı **oyun** koyuyor.
   s = c.state!;
-  if (s.pets.isEmpty && s.player.age >= 12 && rng.nextDouble() < 0.06) {
-    for (final PetSpecies tur in PetSpecies.values) {
-      if (c.petAdoptionAvailability(tur).isAllowed) {
-        final String? mesaj = c.adoptPet(tur, 'Zeytin');
-        if (mesaj != null) sonuc.hadPet = true;
-        break;
+  final int yasayanHayvan = PetCare.livingPets(s).length;
+  if (yasayanHayvan < 2 &&
+      s.player.age >= 12 &&
+      rng.nextDouble() < (yasayanHayvan == 0 ? 0.06 : 0.02)) {
+    final List<PetSpecies> uygunTurler = PetSpecies.values
+        .where((PetSpecies t) => c.petAdoptionAvailability(t).isAllowed)
+        .toList(growable: false);
+    if (uygunTurler.isNotEmpty) {
+      final PetSpecies tur = uygunTurler[rng.nextInt(uygunTurler.length)];
+      // Boş ad: oyunun kendi ad havuzu kullanılsın.
+      final String? mesaj = c.adoptPet(tur, '');
+      if (mesaj != null) {
+        sonuc.hadPet = true;
+        sonuc.petSpecies.add(tur.id);
+        sonuc.petsAdopted++;
       }
     }
     if (kesildiMi()) return;
