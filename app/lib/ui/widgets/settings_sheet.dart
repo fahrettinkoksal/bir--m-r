@@ -145,6 +145,42 @@ class _SettingsSheetState extends State<SettingsSheet> {
               const SizedBox(height: 18),
               const KilimDivider(),
               const SizedBox(height: 14),
+              // --- Görünüm (Paket BQ) -----------------------------------
+              //
+              // Koyu tema oyunda baştan beri vardı ama oyuncu
+              // seçemiyordu: uygulamanın kökü `ThemeMode.system` ile
+              // sabitti. Seçim artık kayıtta duruyor.
+              Text('Görünüm', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text(
+                'Cihazının ayarını izleyebilir ya da kendin '
+                'seçebilirsin.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  for (final AppThemeChoice secim in AppThemeChoice.values)
+                    ChoiceChip(
+                      key: Key('settings_theme_${secim.saveKey}'),
+                      label: Text(secim.label),
+                      selected: ayarlar.themeChoice == secim,
+                      onSelected: (_) {
+                        controller.updateSettings(
+                          ayarlar.copyWith(themeChoice: secim),
+                        );
+                        setState(() {});
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              const KilimDivider(),
+              const SizedBox(height: 14),
               // --- Modüller (Paket BL) ----------------------------------
               //
               // Sonradan eklenen her özellik buradan kapatılabilir.

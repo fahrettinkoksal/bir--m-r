@@ -536,6 +536,9 @@ Map<String, Object?> encodeGameState(GameState state) => <String, Object?>{
         // Modül anahtarları (Paket BL): yalnızca varsayılandan sapanlar
         // yazılır, böylece katalog büyüdükçe kayıt büyümez.
         'features': state.settings.features.overrides,
+        // Görünüm seçimi (Paket BQ): anahtar olarak yazılır, Flutter'ın
+        // kendi sıralaması kayda girmez.
+        'themeChoice': state.settings.themeChoice.saveKey,
       },
       'deceased': state.deceased,
       'deathAge': state.deathAge,
@@ -1986,6 +1989,11 @@ GameState decodeGameState(Map<String, Object?> json) {
                       'features',
                     ),
                   ),
+            // Görünüm seçimi: alan yoksa ya da tanınmıyorsa cihazın
+            // ayarı geçerli (eski kayıtlar olduğu gibi açılır).
+            themeChoice: AppThemeChoice.byKey(
+              _asMap(json['settings'], 'settings')['themeChoice'],
+            ),
           ),
     deathAge: _intOrNull(json, 'deathAge'),
     deathCause: _stringOrNull(json, 'deathCause'),

@@ -105,11 +105,13 @@ veriliyor ve bir daha asla kendi evinde oturmuyordu (ev sahibi 25
 hayatın 18'i). Politika düzeltildi; oturulan ev olayını gören hayat
 7/25'ten 20/25'e çıktı.
 
-### Paket BQ — görünüm seçimi (sıradaki)
+### Paket BQ — görünüm seçimi · **bitti**
 
-Oyunda koyu tema **var** (`BirOmurTheme.dark()`) ama oyuncu
-seçemiyor: `ThemeMode.system` sabit. Ayarlara üç seçenek (sistem /
-açık / koyu) eklenecek; kayıtta duracak.
+Koyu tema koddaydı, seçim yoktu: uygulamanın kökü `ThemeMode.system`
+ile sabitti. Ayarlar → Görünüm'e üç seçenek geldi (cihaza göre / açık /
+koyu), seçim kayıtta duruyor ve anında uygulanıyor. Golden testlerinin
+tema zorlaması korundu: `BirOmurApp.themeMode` dolu verilince kayıttan
+güçlü.
 
 ### Paket BR adayları (ölçülmüş, sıralanmadı)
 

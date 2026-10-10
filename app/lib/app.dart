@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'domain/models/game_settings.dart';
 import 'state/game_controller.dart';
 import 'state/game_scope.dart';
 import 'ui/screens/home_shell.dart';
@@ -13,16 +14,18 @@ class BirOmurApp extends StatefulWidget {
   const BirOmurApp({
     super.key,
     this.controller,
-    this.themeMode = ThemeMode.system,
+    this.themeMode,
     this.sound,
   });
 
   /// Testlerde sabit tohumlu bir denetleyici verilebilir.
   final GameController? controller;
 
-  /// Açık/koyu tema seçimi. Varsayılan olarak **cihazın** ayarı kullanılır;
-  /// testlerde koyu tema doğrudan verilebilir.
-  final ThemeMode themeMode;
+  /// Tema kipini **zorlar**. Boşsa kayıttaki oyuncu seçimi geçerlidir
+  /// (Paket BQ); kayıt yoksa cihazın ayarı kullanılır. Dolu verilince
+  /// kayıt ne derse desin bu kip uygulanır — golden testleri aynı kareyi
+  /// iki temada da çekebilsin diye.
+  final ThemeMode? themeMode;
 
   /// Ses servisi; testlerde sessiz bir servis verilebilir.
   final SoundService? sound;
@@ -38,6 +41,9 @@ class _BirOmurAppState extends State<BirOmurApp> {
   /// Ses efektleri servisi. Ayar kapalıyken hiçbir ses çalınmaz.
   late final SoundService _sound = widget.sound ?? SoundService();
 
+  /// Kayıttan okunan görünüm seçimi (Paket BQ).
+  AppThemeChoice _temaSecimi = AppThemeChoice.sistem;
+
   @override
   void initState() {
     super.initState();
@@ -45,9 +51,26 @@ class _BirOmurAppState extends State<BirOmurApp> {
     _ayarlariUygula();
   }
 
-  /// Kayıttaki ses ayarını servise yansıtır.
+  /// Kayıttaki ses ve görünüm ayarını uygular.
   void _ayarlariUygula() {
     _sound.enabled = _controller.state?.settings.soundEnabled ?? true;
+    final AppThemeChoice secim =
+        _controller.state?.settings.themeChoice ?? AppThemeChoice.sistem;
+    if (secim != _temaSecimi) {
+      setState(() => _temaSecimi = secim);
+    }
+  }
+
+  /// Oyuncunun seçimi Flutter'ın kipine burada çevrilir: kayıt biçimi
+  /// arayüz kütüphanesine bağlanmaz.
+  ThemeMode get _temaKipi {
+    final ThemeMode? zorlanan = widget.themeMode;
+    if (zorlanan != null) return zorlanan;
+    return switch (_temaSecimi) {
+      AppThemeChoice.sistem => ThemeMode.system,
+      AppThemeChoice.acik => ThemeMode.light,
+      AppThemeChoice.koyu => ThemeMode.dark,
+    };
   }
 
   @override
@@ -69,7 +92,7 @@ class _BirOmurAppState extends State<BirOmurApp> {
           debugShowCheckedModeBanner: false,
           theme: BirOmurTheme.light(),
           darkTheme: BirOmurTheme.dark(),
-          themeMode: widget.themeMode,
+          themeMode: _temaKipi,
           home: const _Root(),
         ),
       ),

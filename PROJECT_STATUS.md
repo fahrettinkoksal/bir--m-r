@@ -6041,5 +6041,41 @@ kaydırmadığı, oynanan hayatta gerçekten çıktığı.
 
 Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-211.
 
+## Paket BQ — görünüm seçimi (10 Ekim 2026)
+
+### Ölçülen sorun
+
+Koyu tema oyunda **baştan beri vardı**: `BirOmurTheme.dark()` yazılı ve
+golden testleri aynı kareleri iki temada da çekiyor. Ama oyuncu
+seçemiyordu — uygulamanın kökünde tek satır vardı:
+`themeMode: ThemeMode.system`. Yani telefonun ayarı neyse oyun onu
+kullanıyordu; "ben koyu istiyorum" diyenin yapabileceği bir şey yoktu.
+
+### Yapılan
+
+- `AppThemeChoice` (sistem / açık / koyu) `GameSettings` içinde, kayıtta
+  anahtar olarak (`sistem`, `acik`, `koyu`) duruyor. Flutter'ın
+  `ThemeMode`'u kayda girmiyor: eşleme arayüz katmanında yapılıyor,
+  kayıt biçimi arayüz kütüphanesine bağlanmıyor.
+- Ayarlar → **Görünüm**: üç seçenek (`settings_theme_sistem`,
+  `settings_theme_acik`, `settings_theme_koyu`). Seçim anında uygulanıyor
+  ve kayda yazılıyor.
+- `BirOmurApp.themeMode` artık **zorlama** parametresi: boşsa kayıttaki
+  seçim, kayıt yoksa cihazın ayarı geçerli. Dolu verilince kayıt ne derse
+  desin o kip uygulanıyor — golden testleri aynı kareyi iki temada da
+  çekmeye devam ediyor.
+- Eski kayıt: alan yoksa ya da tanınmayan bir anahtar varsa cihazın
+  ayarına dönülüyor; kayıt bozulmuyor.
+
+### Bekçi
+
+`app/test/paket_bq_gorunum_test.dart` (9 test): kayıt gidiş-dönüşü, eski
+kayıt, tanınmayan anahtar, üç seçeneğin ekranda olması, koyu seçilince
+uygulamanın gerçekten koyuya geçmesi, **cihaz koyuyken açık seçiminin
+korunması**, oyun kapanıp açılınca seçimin durması ve test
+zorlamasının kayıttan güçlü olması.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-212.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
