@@ -8916,3 +8916,60 @@ bakabilirsin."). Parayı, sağlığı ve vefat ihtimalini **değiştirmedim**,
 erimesini durdurmak ya da hayvanı haneden çıkarmak.
 
 **Etkilenen kod:** `app/lib/domain/pets/pet_care.dart`.
+
+### Q-226 — İlk üç yıl: tek tuşlu bir ara sahne mi kalsın?
+
+**Durum:** öneri ve varsayılan hazır, **karar Faho'nun.** Hiçbir sayıya
+dokunulmadı.
+
+**Nasıl çıktı.** Paket CH yıl başına olay yoğunluğunu ölçtü (400 hayat,
+bütün arketipler). Boş yıl yok — ama iki sayı yan yana konduğunda ilk
+yılların şekli ortaya çıkıyor:
+
+| Yaş | Oyunun sunduğu etkileşim (ortanca) | Yıl başına olay |
+|---|---|---|
+| 0 | — | **0,00** (motor yılın olayını yaş alırken çeker) |
+| 1-3 | **0** (120 karenin hepsinde sıfır) | **1,00** |
+| 4-5 | 32 | 1,00 |
+| 6-9 | 57 | 1,15-1,51 |
+| 20-40 | 70+ | 1,75-1,80 |
+
+Yani oyuncunun ilk dört yılında (0-3) yapabileceği **tek şey "Yaş
+Al"**: menülerde tıklanacak bir eylem yok ve yıl başına tam bir olay
+görüyor. Bu D-180'in kademesiyle tutarlı (0-3 "konuşmayan ya da yeni
+konuşan"); etkileşimlerin kapalı olması bir hata değil, yazılı bir
+tercih. Soru şu: **oyunun ilk izlenimi dört tuş ve dört olay olarak mı
+kalsın?**
+
+Mahsur kalmış içerik **yok**: havuzlarda `maxAge: 0` olan tek bir olay
+yazılmamış ve bebeklik olayları (0-2, 0-3, 1-3 pencereleri) 1 yaşından
+itibaren çıkıyor. Yani eksik olan içerik değil, **tempo**.
+
+**Seçenekler**
+
+1. **Olduğu gibi kalsın (önerim ve varsayılanım).** İlk üç yıl kısa bir
+   ara sahne; oyuncu dört tuşta kendi karakterinin dünyaya geldiğini
+   okuyor ve 4 yaşında oyun açılıyor. Bir bebeğin karar vermesi zaten
+   inandırıcı değil ve BM'nin 31 ilk yıllar olayı 1-7 arasında zaten
+   dönüyor.
+2. **İlk yıllarda yıl başına iki olay.** `EventEngine` küçük yaşlarda
+   ek olayı ilerleme şartı olmadan açsın (0-5 için
+   `prototypeOnlyProgressPerExtraEvent` beklemesin). Ölçülen 1,06
+   yoğunluk ~2,0'a çıkar; 31 olayın hayat başına görünen payı iki
+   katına çıkar. Bedeli: ilk yıllar "olay yağmuru" gibi okunabilir.
+3. **Bebeklik için ebeveyn kararı.** 0-3'te oyuncu kendi adına değil
+   **ailesi adına** küçük seçimler yapsın (uyku düzeni, hastalıkta
+   hastane/ev — bunlar zaten `event_pool_infancy` içinde var).
+   İçeriği korur, yeni bir ekran gerektirir.
+
+**Botun kısıtı ayrıca yazılı:** yaş 4-5'te oyun 32 etkileşim sunarken
+ölçüm botu yılda 1-2 tanesini kullanıyor; ek olay eşiği üç ilerleme
+adımı (D-125). Yani 4-5 yaşın 1,00'lık yoğunluğu **oyunun tavanı
+değil**, aracın tabanı. Seçenek (2) değerlendirilirken bu ayrım
+hatırlanmalı: 4-5 yaşta oyuncu zaten iki olay görebiliyor.
+
+**Yapmayacağım (onay gelmeden):** tempo sayılarına dokunmak.
+
+**Etkilenen kod:** `app/lib/domain/events/event_engine.dart`
+(`prototypeOnlyMaxExtraEventsPerAge`,
+`prototypeOnlyProgressPerExtraEvent`).
