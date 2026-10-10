@@ -27,6 +27,22 @@
 // 0 yaşında çocuk **77 kare**, yıl sonunda **0 kare**. Yıl içi durumlar
 // bu yüzden `onPreAge` ile aranıyor. Ders yine aynı: aranan şey
 // bulunamadığında önce dürbüne bak.
+// **BU TUR NE BULDU (Paket CG, 10 Ekim 2026).** Yedi karenin hepsi
+// bulundu — "BULUNAMADI" kalmadı — ve çıktı okununca üç yer yanlış
+// yazıyordu. Üçü de hükümlü karesinden çıktı ve ikisi metin değil
+// **eksik kapı**ydı:
+//
+//   · Künye "Evde seninle 3 kişi yaşıyor" diyordu; oyuncu içerideydi.
+//   · Varlıklar "Yaşadığın yer: Ailesinin yanında" diyor ve "Kiralık
+//     eve çık" düğmesi **açık** duruyordu: konut motoru hiçbir yerde
+//     `isImprisoned`'a bakmıyordu.
+//   · Hasta hayvan bildirimi "Aktiviteler → Evcil Hayvanlar'dan
+//     veterinere götürebilirsin" diyordu; o sekmede içerideyken
+//     yalnızca "İçeride yapılabilecekler" var.
+//
+// Bebek karesi de bir hata verdi: doğum satırı oyunun verdiği geçici
+// adı tutuyor, ad verme ikinci bir satır ekliyordu; günlükte aynı yılda
+// iki ad duruyordu. Bekçi: `paket_cg_icerde_tasinma_ve_bebek_adi_test`.
 library;
 
 import 'dart:math';

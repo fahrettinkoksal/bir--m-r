@@ -936,7 +936,12 @@ class _ResidenceCardState extends State<_ResidenceCard> {
     final ResidenceKind durum = Housing.residenceOf(state);
     final OwnedItem? ev = Housing.residenceHome(state);
     final int kiraGeliri = Housing.yearlyRentIncome(state);
-    final bool yetiskin = state.player.age >= Housing.prototypeOnlyMinAge;
+    // Hükümlülük konut motorunda da engel (Paket CG): düğmeyi açık
+    // bırakmak oyuncuya içeriden ev değiştirme yolu veriyordu.
+    final bool icerde = state.isImprisoned;
+    final int? tahliye = state.legal.releaseAtAge;
+    final bool yetiskin =
+        state.player.age >= Housing.prototypeOnlyMinAge && !icerde;
 
     return Card(
       child: Padding(
@@ -955,13 +960,35 @@ class _ResidenceCardState extends State<_ResidenceCard> {
               ],
             ),
             const SizedBox(height: 8),
+            // **İçerideyken bu satır yanlış bilgi veriyordu (Paket CG).**
+            // Altıncı döküm turunda cezaevindeki hayat okundu: ekran
+            // "Ailesinin yanında · Samsun" diyor ve "Kiralık eve çık"
+            // düğmesi açık duruyordu. Oyuncu içeride; kayıtlı yeri
+            // duruyor ama **yaşadığı yer** orası değil. Kayıt
+            // silinmiyor, ikinci satırda duruyor.
             Text(
-              ev == null
-                  ? '${durum.label} · ${Housing.cityOf(state)}'
-                  : '${ev.name} · ${Housing.cityOf(state)}',
+              icerde
+                  ? (tahliye == null
+                      ? 'Cezaevinde'
+                      : 'Cezaevinde · tahliye $tahliye yaş')
+                  : ev == null
+                      ? '${durum.label} · ${Housing.cityOf(state)}'
+                      : '${ev.name} · ${Housing.cityOf(state)}',
               key: const Key('residence_label'),
               style: theme.textTheme.bodyMedium,
             ),
+            if (icerde) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(
+                'Kayıtlı yerin: '
+                '${ev == null ? durum.label : ev.name} · '
+                '${Housing.cityOf(state)}',
+                key: const Key('residence_registered_label'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             if (kiraGeliri > 0) ...<Widget>[
               const SizedBox(height: 4),
               Text(

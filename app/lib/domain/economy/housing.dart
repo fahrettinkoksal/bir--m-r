@@ -116,8 +116,27 @@ class Housing {
   // Taşınma
   // =====================================================================
 
+  /// İçerideyken taşınma işine bakılamaz (Paket CG).
+  ///
+  /// **Nasıl bulundu.** Ekran dökümünün yeni turunda cezaevindeki hayat
+  /// okundu: Varlıklar ekranı "Yaşadığın yer: Ailesinin yanında" diyor
+  /// ve **"Kiralık eve çık" düğmesi açık** duruyordu. Aktivite
+  /// (`activity_engine`), iş (`job_market`) ve işletme
+  /// (`business_engine`) motorları hükümlülüğe bakıyordu; konut motoru
+  /// hiçbir yerde bakmıyordu. Yani oyuncu içeriden ev değiştirebiliyordu.
+  static String imprisonedBlockReason(GameState state) {
+    if (!state.isImprisoned) return '';
+    final int? tahliye = state.legal.releaseAtAge;
+    return tahliye == null
+        ? 'Cezaevindesin; taşınma işine şimdi bakamazsın.'
+        : 'Cezaevindesin; taşınma işine tahliyeden ($tahliye yaş) sonra '
+            'bakabilirsin.';
+  }
+
   /// Bu eve taşınılabilir mi?
   String moveBlockReason(GameState state, OwnedItem home) {
+    final String icerde = imprisonedBlockReason(state);
+    if (icerde.isNotEmpty) return icerde;
     if (!home.isProperty) return 'Burası bir konut değil.';
     if (state.itemById(home.id) == null) return 'Bu mülk artık sende değil.';
     if (state.player.age < prototypeOnlyMinAge) {
@@ -180,6 +199,8 @@ class Housing {
   /// [city] verilirse **başka bir şehre** taşınılır; şehir yaşanan ilin
   /// komşusu olmak zorundadır ve ek masraf alınır.
   HousingResult moveToRental(GameState state, {String? city}) {
+    final String icerde = imprisonedBlockReason(state);
+    if (icerde.isNotEmpty) return _blocked(state, icerde);
     if (state.player.age < prototypeOnlyMinAge) {
       return _blocked(
         state,
@@ -227,6 +248,8 @@ class Housing {
 
   /// Ailesinin yanına döner.
   HousingResult moveBackToFamily(GameState state) {
+    final String icerde = imprisonedBlockReason(state);
+    if (icerde.isNotEmpty) return _blocked(state, icerde);
     if (!hasAdultAtFamilyHome(state)) {
       return _blocked(
         state,

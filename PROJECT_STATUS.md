@@ -7275,5 +7275,75 @@ kendi öngörüsü %64-91, ölçüm %87,5) · ortanca deneme en az 2 olacak ·
 ölüm ve kilitlenme beşte biri geçmeyecek. Toplam oran eşiği 0,4'e
 indirildi ve **neden kalibrasyon taşıyamadığı** test içine yazıldı.
 
+## Paket CG — içerideyken taşınma ve bebeğin iki adı (10 Ekim 2026)
+
+Özel durum dökümü (`ekran_dokumu_ozel_durum_test.dart`) yedi kareyi
+tarayıp buldu ve bastı; çıktı gözle okundu. İki satır birbirini
+yalanlıyordu.
+
+### 1) Cezaevindeki oyuncu evden taşınabiliyordu (OYUN)
+
+Künye "Evde seninle 3 kişi yaşıyor" diyor, Varlıklar ekranı "Yaşadığın
+yer: Ailesinin yanında · Samsun" yazıyor ve **"Kiralık eve çık" düğmesi
+açık** duruyordu. Sebep metin değil: aktivite (`activity_engine`), iş
+(`job_market`) ve işletme (`business_engine`) motorları
+`isImprisoned`'a bakıyordu, **konut motoru hiçbir yerde bakmıyordu.**
+Yani içeriden ev değiştirme yolu vardı.
+
+| Yer | Önce | Sonra |
+| --- | --- | --- |
+| Künye | `Evde seninle 3 kişi yaşıyor` | `Cezaevindesin · tahliye 25 yaş` |
+| Varlıklar / Yaşadığın yer | `Ailesinin yanında · Samsun` | `Cezaevinde · tahliye 25 yaş` |
+| Kayıtlı adres | — | `Kayıtlı yerin: Ailesinin yanında · Samsun` |
+| Taşınma düğmeleri | açık | yok |
+| `moveToRental` / `moveBackToFamily` / `moveBlockReason` | izin veriyordu | `Cezaevindesin; taşınma işine tahliyeden (25 yaş) sonra bakabilirsin.` |
+
+**Kayıt silinmedi:** nerede oturduğu ikinci satırda duruyor (D-109'un
+ilkesi).
+
+### 2) Bebeğin iki adı vardı (METİN)
+
+Bebek oyunun havuzundan bir adla doğuyor ve doğum satırı o adı yazıyor.
+Oyuncu ad verdiğinde yalnızca ikinci bir satır ekleniyordu; doğum
+satırı olduğu gibi kalıyordu:
+
+```
+Bebeğe Kemal adını verdin.
+...
+Nuri adında bir oğlunuz oldu. Doğum masrafı 65.000 ₺ tuttu.
+```
+
+Günlük oyunun hafızası; orada hiç var olmamış bir ad kalmamalı. Üç
+değişiklik: doğum cümlesi ve doğum kilometre taşı **tek yerden**
+kuruluyor (`Parenthood.birthSentence` / `birthMilestone`), doğum
+günlüğü satırı **çocuğun kimliğini** taşıyor (`personId`) ve ad
+verilince o satır ile çocuğun kendi kaydındaki kilometre taşı
+tazeleniyor. Dökümün yeni çıktısı: `Kemal adında bir oğlunuz oldu.`
+
+`personId`'nin ikinci faydası: doğum satırı artık kişi kartındaki
+"ortak geçmişiniz" bölümüne de giriyor.
+
+### 3) İçerideyken hasta hayvan bildirimi kapalı kapıyı gösteriyordu (METİN)
+
+Hükümlü oyuncunun Aktiviteler sekmesinde yalnızca "İçeride
+yapılabilecekler" bölümü var (döküm bunu da bastı: `Görüş, kitap, spor,
+sakin kalmak`). Buna karşın hayvan hastalandığında bildirim
+"Aktiviteler → Evcil Hayvanlar'dan veterinere götürebilirsin (X ₺)"
+diyordu. `PetCare.availability` de hükümlülüğe bakmıyor.
+
+Bildirim duruyor — hayvanının hastalandığını bilmek oyuncunun hakkı —
+ama artık yapılamayacak bir şeyi önermiyor: *"İçeriden veterinere
+götüremiyorsun; tahliye olunca bakabilirsin."* **Sayılara
+dokunulmadı:** bakım parasının içerideyken kimden çıkacağı ve hayvanın
+o yıllarda ne olacağı tasarım sorusu, kuyruğa yazıldı (Q-225).
+
+### Bekçi
+
+`test/paket_cg_icerde_tasinma_ve_bebek_adi_test.dart` (6 test). Durum
+kurulmuyor, **bot hayatları taranarak bulunuyor** (hükümlü yıl,
+hayvanı olan hükümlü yıl, yeni doğmuş bebek). Eski kodda (yeni
+yardımcılar yerinde, davranış geri alınmış) **beş testin dördü
+kırılıyor**; yalnızca yeni yardımcının kendi testi geçiyor.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

@@ -354,6 +354,19 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   çift denemeyi bırakıyor, yani iki sayı da seçilmiş örnekleme
   bakıyordu. Doğru soru "kaç çift gebe kaldı" değil, **"her deneme zara
   ulaştı mı"** idi — ve o 210/210 çıktı.
+- **Paket CG.** Bir ekranın yanlış satırı bazen metin hatası değil, bir
+  **kapının eksikliği**dir. Cezaevindeki hayatın Varlıklar ekranı
+  "Ailesinin yanında" yazıyordu; düzeltilecek şey cümle değil, konut
+  motorunun hükümlülüğe hiç bakmamasıydı — aktivite, iş ve işletme
+  motorları bakıyordu, konut atlanmıştı. Bir ekran yanlış bilgi
+  veriyorsa **o bilgiyi üreten motorun kapılarını** say: aynı kuralı
+  uygulayan kardeş motorlar varsa, eksik olan hangisi?
+- **Paket CG.** Aynı cümleyi iki yerin kurması, biri değişince ötekinin
+  sessizce eskimesidir. Doğum satırı adı elle yazıyordu, ad verme ise
+  yeni bir satır ekliyordu; sonuç aynı yılda iki addı. Cümle tek bir
+  yerden kurulunca (`Parenthood.birthSentence`) arayan da yazan da aynı
+  kalıbı kullanıyor. Bir metin sonradan değişebilen bir veri taşıyorsa
+  (ad, şehir, iş), o metni **tek bir yerde** kur.
 
 ## Pano
 

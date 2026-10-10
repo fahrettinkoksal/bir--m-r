@@ -1,8 +1,11 @@
 import '../../text/turkish_text.dart';
 import '../models/game_state.dart';
+import '../models/gender.dart';
 import '../models/life_log.dart';
 import '../models/person.dart';
+import '../models/person_development.dart';
 import '../models/relation.dart';
+import 'parenthood.dart';
 
 /// Doğumda çocuğa isim verme (D-095).
 ///
@@ -69,15 +72,22 @@ abstract final class ChildNaming {
       return (state: null, message: 'Bebeğin adı zaten $ad.');
     }
 
+    final String eskiAd = bebek.firstName;
     final List<Person> kisiler = state.people
-        .map((Person p) => p.id == childId ? p.copyWith(firstName: ad) : p)
+        .map((Person p) => p.id == childId
+            ? p.copyWith(
+                firstName: ad,
+                development: _tazelenmisKayit(p, eskiAd, ad),
+              )
+            : p)
         .toList(growable: false);
 
     return (
       state: state.copyWith(
         people: List<Person>.unmodifiable(kisiler),
         log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-          ...state.log,
+          for (final LifeLogEntry e in state.log)
+            _tazelenmisSatir(e, childId, bebek.gender, eskiAd, ad),
           LifeLogEntry(
             age: state.player.age,
             text: 'Bebeğe $ad adını verdin.',
@@ -87,6 +97,68 @@ abstract final class ChildNaming {
         ]),
       ),
       message: 'Bebeğin adı artık $ad.',
+    );
+  }
+
+  /// Doğum satırındaki **geçici** adı yeni adla değiştirir.
+  ///
+  /// **Nasıl bulundu (Paket CG, altıncı döküm turu).** Bebek oyunun ad
+  /// havuzundan bir adla doğuyor ve doğum satırı o adı yazıyor. Oyuncu
+  /// ad verdiğinde yalnızca ikinci bir satır ekleniyordu; doğum satırı
+  /// olduğu gibi kalıyordu. Sonuç, aynı yılda yan yana duran iki ad:
+  /// "Nuri adında bir oğlunuz oldu." ve "Bebeğe Kemal adını verdin."
+  /// Günlük oyunun hafızası; orada hiç var olmamış bir ad kalmamalı.
+  ///
+  /// Yalnızca **o çocuğun kimliğini taşıyan** ve **doğum cümlesi
+  /// kalıbına** uyan satır değişir; başka satıra dokunulmaz.
+  static LifeLogEntry _tazelenmisSatir(
+    LifeLogEntry e,
+    String childId,
+    Gender gender,
+    String eskiAd,
+    String yeniAd,
+  ) {
+    if (e.personId != childId) return e;
+    for (final bool ikiz in <bool>[false, true]) {
+      final String eskiCumle = Parenthood.birthSentence(
+          name: eskiAd, gender: gender, twin: ikiz);
+      if (!e.text.contains(eskiCumle)) continue;
+      return LifeLogEntry(
+        age: e.age,
+        text: e.text.replaceFirst(
+          eskiCumle,
+          Parenthood.birthSentence(
+              name: yeniAd, gender: gender, twin: ikiz),
+        ),
+        category: e.category,
+        personId: e.personId,
+      );
+    }
+    return e;
+  }
+
+  /// Çocuğun kendi kaydındaki doğum kilometre taşını tazeler.
+  ///
+  /// Kişi kartı bu listeyi gösteriyor; orada da eski ad kalıyordu.
+  static PersonDevelopment? _tazelenmisKayit(
+    Person p,
+    String eskiAd,
+    String yeniAd,
+  ) {
+    final PersonDevelopment? kayit = p.development;
+    if (kayit == null) return null;
+    final String eski = Parenthood.birthMilestone(eskiAd);
+    if (!kayit.milestones.any((LifeMilestone m) => m.text == eski)) {
+      return kayit;
+    }
+    return kayit.copyWith(
+      milestones: List<LifeMilestone>.unmodifiable(<LifeMilestone>[
+        for (final LifeMilestone m in kayit.milestones)
+          if (m.text == eski)
+            LifeMilestone(age: m.age, text: Parenthood.birthMilestone(yeniAd))
+          else
+            m,
+      ]),
     );
   }
 }

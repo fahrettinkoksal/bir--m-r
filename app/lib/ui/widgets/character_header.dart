@@ -176,9 +176,19 @@ class CharacterHeader extends StatelessWidget {
 
   static String _durumSatiri(GameState state) {
     final int hane = state.household.length;
-    final String haneMetni = hane == 0
-        ? 'Evde seninle yaşayan kimse yok'
-        : 'Evde seninle $hane kişi yaşıyor';
+    // **İçerideyken hane satırı yanlış bilgi veriyordu (Paket CG).**
+    // Altıncı döküm turunda cezaevindeki hayatın künyesi "Evde seninle
+    // 3 kişi yaşıyor" diyordu; oyuncu o evde değil, içeride. Hükümlülük
+    // künyenin **ilk** bilgisi olur ve tahliye yaşını da söyler;
+    // hanenin kaç kişi olduğu o yıl oyuncuyu ilgilendirmiyor.
+    final int? tahliye = state.legal.releaseAtAge;
+    final String haneMetni = state.isImprisoned
+        ? (tahliye == null
+            ? 'Cezaevindesin'
+            : 'Cezaevindesin · tahliye $tahliye yaş')
+        : hane == 0
+            ? 'Evde seninle yaşayan kimse yok'
+            : 'Evde seninle $hane kişi yaşıyor';
 
     // Bakım durumu ve geçim sıkıntısı gerçek kayıtlardan okunur (D-033,
     // D-037); yalnızca olağandışı durumlarda yazılır.

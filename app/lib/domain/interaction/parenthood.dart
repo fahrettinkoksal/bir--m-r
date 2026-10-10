@@ -255,20 +255,15 @@ class Parenthood {
           second: TraitInheritance.statsOf(esKaydi),
         ),
         milestones: <LifeMilestone>[
-          LifeMilestone(age: 0, text: '$isim dünyaya geldi.'),
+          LifeMilestone(age: 0, text: birthMilestone(isim)),
         ],
         // Diğer biyolojik ebeveyn: evli olunmasa da kayda geçer (D-047).
         otherParentId: esKaydi.id,
       ),
     );
 
-    final String metin = twin
-        ? (gender == Gender.kadin
-            ? 'İkizin diğeri kız oldu: $isim.'
-            : 'İkizin diğeri oğlan oldu: $isim.')
-        : (gender == Gender.kadin
-            ? '$isim adında bir kızınız oldu.'
-            : '$isim adında bir oğlunuz oldu.');
+    final String metin =
+        birthSentence(name: isim, gender: gender, twin: twin);
 
     // Masraf **cüzdanda ne varsa o kadar** düşer; borç yazılmaz ve
     // bakiye eksiye inmez (Paket 25).
@@ -302,6 +297,10 @@ class Parenthood {
               : '$metin Masrafı zor denkleştirdiniz; elinizdeki '
                   '${trMoney(odenen)} gitti.',
           category: LogCategory.aile,
+          // Satır çocuğun kimliğini taşır (Paket CG): adı değiştiğinde
+          // bu satır bulunup tazeleniyor, ayrıca kişi kartındaki
+          // "ortak geçmişiniz" bölümüne de giriyor.
+          personId: cocuk.id,
         ),
       ]),
     );
@@ -311,6 +310,31 @@ class Parenthood {
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }
+
+  /// Doğum cümlesi: tek bebek ya da ikizin ikincisi.
+  ///
+  /// **Tek yerden kurulur (Paket CG).** Bebek oyunun havuzundan bir
+  /// adla doğuyor ve oyuncu o adı değiştirebiliyor
+  /// (`ChildNaming.rename`). Eskiden cümle burada elle yazılıyordu ve
+  /// adı değiştiren taraf günlükteki satırı bulamıyordu: altıncı döküm
+  /// turunda "Nuri adında bir oğlunuz oldu." ile "Bebeğe Kemal adını
+  /// verdin." aynı yılda yan yanaydı. Artık arayan da yazan da aynı
+  /// kalıbı kullanıyor.
+  static String birthSentence({
+    required String name,
+    required Gender gender,
+    required bool twin,
+  }) =>
+      twin
+          ? (gender == Gender.kadin
+              ? 'İkizin diğeri kız oldu: $name.'
+              : 'İkizin diğeri oğlan oldu: $name.')
+          : (gender == Gender.kadin
+              ? '$name adında bir kızınız oldu.'
+              : '$name adında bir oğlunuz oldu.');
+
+  /// Çocuğun kendi kaydındaki doğum kilometre taşı.
+  static String birthMilestone(String name) => '$name dünyaya geldi.';
 
   /// Çocuğun yaşına karşılık gelen okul kademesi.
   ///

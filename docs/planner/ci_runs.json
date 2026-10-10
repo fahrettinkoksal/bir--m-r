@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 570,
+ "total": 572,
  "runs": [
+  {
+   "id": 38064069286,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "911fe96a22f100085cbb6360d43f6fe308de26d2",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 285,
+   "event": "push",
+   "created_at": "2026-10-10T15:33:05Z",
+   "updated_at": "2026-10-10T16:00:03Z",
+   "run_started_at": "2026-10-10T15:33:05Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38064069286",
+   "display_title": "Kuyruk: Q-204'e ölçüm eki — üç ayrı yaş kapısı var"
+  },
+  {
+   "id": 38064069264,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "911fe96a22f100085cbb6360d43f6fe308de26d2",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 288,
+   "event": "push",
+   "created_at": "2026-10-10T15:33:05Z",
+   "updated_at": "2026-10-10T15:57:28Z",
+   "run_started_at": "2026-10-10T15:33:05Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38064069264",
+   "display_title": "Kuyruk: Q-204'e ölçüm eki — üç ayrı yaş kapısı var"
+  },
   {
    "id": 38061060160,
    "name": "Android debug APK",

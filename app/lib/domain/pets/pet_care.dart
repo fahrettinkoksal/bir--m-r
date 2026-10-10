@@ -296,6 +296,28 @@ abstract final class PetCare {
   // Etkileşimler
   // -------------------------------------------------------------------
 
+  /// Hasta hayvan bildiriminin metni.
+  ///
+  /// **İçerideyken eski metin kapalı bir kapıyı gösteriyordu (Paket
+  /// CG).** Hükümlü oyuncunun Aktiviteler sekmesinde yalnızca "İçeride
+  /// yapılabilecekler" bölümü var; Evcil Hayvanlar yolu kapalı. Bildirim
+  /// yine geliyor — hayvanın hastalandığını bilmek oyuncunun hakkı — ama
+  /// yapılamayacak bir şeyi önermiyor.
+  ///
+  /// **Sayılara dokunulmadı.** Bakımın kimden çıkacağı ve hayvanın
+  /// içerideyken ne olacağı bir tasarım sorusu; kuyrukta duruyor
+  /// (Q-225).
+  static String illnessNoticeText(GameState state, Pet pet) {
+    final String bas = '${pet.name} bu yıl hastalandı '
+        '(sağlığı ${pet.health}).';
+    if (state.isImprisoned) {
+      return '$bas İçeriden veterinere götüremiyorsun; tahliye olunca '
+          'bakabilirsin.';
+    }
+    return '$bas Aktiviteler → Evcil Hayvanlar\'dan veterinere '
+        'götürebilirsin (${trMoney(speciesOf(pet).vetCost)}).';
+  }
+
   /// Bu etkileşim şu an yapılabilir mi?
   static InteractionAvailability availability(
     GameState state,
@@ -557,10 +579,7 @@ abstract final class PetCare {
             // parantez içinde; ardından nokta gelmiyor. Türkçe ek de
             // kullanılmıyor, çünkü ek son hanenin ünlüsüne göre değişir
             // (57'ye ama 60'a) ve sayı değişkendir.
-            text: '${guncel.name} bu yıl hastalandı (sağlığı '
-                '${guncel.health}). Aktiviteler → Evcil Hayvanlar\'dan '
-                'veterinere götürebilirsin '
-                '(${trMoney(tur.vetCost)}).',
+            text: illnessNoticeText(state, guncel),
           ),
         );
       }
