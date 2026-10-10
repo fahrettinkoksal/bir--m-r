@@ -8088,3 +8088,33 @@ göre*. Koddan tamamen çıkarmak için `AppThemeChoice`, `GameSettings`
 alanı, kodek satırı, ayar bölümü ve
 `app/test/paket_bq_gorunum_test.dart`. `BirOmurApp.themeMode`
 parametresi zaten paket öncesinde de vardı; kalabilir.
+
+### Q-213 — Paket BR/1: ilk eve taşınma hatırlatması
+
+**Durum: karar verildi ve uygulandı (Claude, devredilen yetkiyle,
+10 Ekim 2026).** Q-211'de "gözlem, karar değil" diye bırakmıştım;
+devredilen yetki gereği kararı verip uyguladım ve kaydı buraya aldım.
+`DECISIONS.md`'ye dokunulmadı, D-043 aynen duruyor.
+
+**Ölçülen boşluk.** Mülk sahibi olmak oturmak demek değil (D-043) ve
+taşınma yalnızca *Evlerim* ekranındaki bir düğme. İlk evini alan
+oyuncuya bunu söyleyen hiçbir satır yoktu. Paket BP'de ölçüm botu da
+aynı yere düştü: ev alıp taşınma masrafı kalmadığı için taşınamadı ve
+25 ev sahibinin 18'i kendi evinde tek yıl bile geçirmedi.
+
+**Karar.** Satın alma sonucuna tek cümle: "Oturmak istersen Evlerim
+ekranından bu eve taşınabilirsin; taşınma masrafı 45.000 ₺."
+
+Neden bildirim (`PendingNotice`) değil: bildirimin yılda sekizlik bir
+bütçesi var (`critical_notice_test`) ve bir kez gösterip bir daha
+göstermemek için kalıcı bir iz gerekir. Satın alma anı doğru an ve
+oyuncu o cümleyi zaten okuyor; yeni durum alanı gerekmedi.
+
+Neden yalnızca konut ve yalnızca kendi evinde oturmayan: yatırım için
+ikinci ev alan oyuncuya "taşın" demek yanlış olur. Masraf metne
+gömülmedi; `Housing.prototypeOnlyMoveCost` sabitinden yazılıyor
+(`paket_ba_sabit_taramasi_test` kuralı).
+
+**Geri alma yolu.** `ItemActions.buy` içindeki üç satırlık koşul ve
+`app/test/paket_br_tasinma_hatirlatmasi_test.dart`. Modül anahtarı
+verilmedi: kapatılacak bir özellik değil, bir cümle.
