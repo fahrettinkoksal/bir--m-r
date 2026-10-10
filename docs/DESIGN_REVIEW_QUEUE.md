@@ -8663,3 +8663,51 @@ diye raporlanıyordu. Bot okumaya başlayınca üçü de açıldı (olaylar
 0 → 33/35 ve 1 → 34/38; `yazar` 0 → 2/5 — 120 hayat × 2 tohum bloğu).
 Yani Q-219'da "hiç girilmeyen meslek" diye yazdığım listede `yazar`
 artık yok; kalan üç mesleğin durumu Q-219'da olduğu gibi duruyor.
+
+### Q-222 — Son yıllar havuzu: yaş kapıları, ağırlıklar ve "ne kadar hüzün"
+
+**Durum: prototipte eklendi, Faho'nun onayını bekliyor (Claude,
+10 Ekim 2026).** `DECISIONS.md`'ye yazılmadı; bütün sayılar
+`prototypeOnly` ve modül anahtarı `son_yillar` ile tamamen
+kapatılabilir.
+
+**Neden eklendi (ölçüm).** 60 hayatta yaş yaş sayıldı
+(`EventEngine.debugEligibleIds`): 65-74 bandında yılda **75,3** olay
+uygun hale geliyordu, yani bant **aç değildi**. Ama o taramada görülen
+**228 tekil olaydan yalnızca 11'i** o yaşlara aitti. Yani 70 yaşındaki
+oyuncu 40 yaşındakiyle aynı olayları çekiyordu. Paket BM (0-7) ve
+Paket BN (16-20) aynı işi iki bant için yapmıştı; bu paket son bandı
+aldı: 31 olay (25 ana + 6 karşılık).
+
+Ölçülen etki (60 hayat × 2 tohum bloğu, modül kapalı → açık): 65+ yılda
+uygun olay **75,0/77,1 → 93,9/94,9**; havuzun **31/31** olayı uygun hale
+geliyor, **30/31**'i gerçekten görülüyor. 65 yaşına gelen hayat sayısı
+iki durumda da aynı (54/51), yani havuz zara dokunmuyor.
+
+**Sana dört soru.**
+
+1. **Yaş kapısı 60 mı 65 mi olsun? (önerim: olduğu gibi kalsın)** Havuzun
+   çoğu 65+; emeklilik ritmine bağlı üç olay 60'tan açılıyor
+   (`requiresRetired` ile birlikte), beden/zaman olayları 66-68'de.
+   Böylece 60'ında emekli olan da bir şey görüyor, 80'indeki de.
+   Alternatif hepsini 65'e çekmekti; o zaman erken emekli olanın beş
+   yılı sessiz kalıyordu.
+2. **Tonu doğru buluyor musun? (önerim: böyle kalsın)** Bu bant hüzünlü
+   olmaya en açık yer; ben **ağırlığı hikâyeye, acıyı araya** koydum:
+   kaybı anlatan tek olay `son_dostun_cenazesi`, gerisi düzen kurmak,
+   öğretmek, devretmek ve torunla vakit. Daha ağır bir ton istersen
+   (hastalık, yalnızlık, bakım) ayrı paket olur; daha hafif istersen
+   cenaze olayını çıkarırım.
+3. **Altı iz yeterli mi?** Defter, çırak, fidan, torun sırrı, komşu
+   düzeni, devredilen takım. Her birinin karşılığı var ve bekçi
+   karşılıksız iz bırakılmasını engelliyor. Önerim: **altıda kalsın**;
+   oyuncunun son yıllarında altı farklı "geri dönen" yeterince dolu.
+4. **Para tutarları.** Emekli bütçesi küçük olduğu için tutarlar küçük
+   tutuldu: harçlık 2.000, fatura kısıntısı 1.500, eski eşya satışı
+   6.500, odayı öğrenciye vermek 3.500, gözlük 2.800, usta 1.200 ₺.
+   Hepsi `prototypeOnly`. Emekli aylığının kendisiyle oranını ölçüp
+   kalibre etmemi istersen söyle.
+
+**Dokunmadığım yer.** Ölüm ve ölüm anı bu havuzun konusu değil; onu
+sağlık motoru ile `life_progression` yürütüyor. Mevcut 11 yaşlılık
+olayına da dokunmadım; yeni havuz onların yanına eklendi.
