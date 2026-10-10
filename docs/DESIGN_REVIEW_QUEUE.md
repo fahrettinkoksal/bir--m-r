@@ -7978,3 +7978,79 @@ düzeltmesi, özellik değil. Geri almak = Paket BO commit'ini geri almak
 `app/lib/domain/generation/life_progression.dart`,
 `app/lib/domain/generation/school_people.dart`). Geri alınırsa bekçi
 testi de düşer ve tohumlu ölçümler yeniden kayar.
+
+### Q-211 — Paket BP: oturduğun ev ve botun taşınma hatası
+
+**Durum: kararlar verildi ve uygulandı (Claude, devredilen yetkiyle,
+10 Ekim 2026).** `DECISIONS.md`'ye dokunulmadı; D-043'ün "mülk
+sahipliği ile oturulan ev ayrıdır" kuralı aynen korundu, yeni kapı tam
+o kurala dayanıyor.
+
+**Ölçülen sorun.** Katalogdaki konut olaylarının hepsi *başkasının*
+eviydi. 524 olayın kapıları:
+
+| Kapı | Olay |
+| --- | --- |
+| `requiresTenant` (oyuncu kirada) | 11 |
+| `requiresLetProperty` (kiraya verdiği ev) | 14 |
+| `requiresVacantProperty` (boş ev) | 8 |
+| oturulan ev | **0 — motorda koşul bile yoktu** |
+
+Kendi evinde oturan oyuncunun konut havuzundan aday olayı 30/40/50/60
+yaşında **0**, kiracının 8. Toplam aday olay sayısı da kiracıda daha
+yüksekti. Yani oyuncu hayatının en büyük alışverişini yapıp kendi evine
+çıkınca hayatı sessizleşiyordu.
+
+**Karar 1 — tek kapı: `requiresOwnedResidence`.** Mülk sahibi olmak
+yetmez; oyuncunun o evde oturuyor olması gerekir. Evini kiraya verip
+kirada oturana bu olaylar çıkmaz (onun için kiracı ve kiraya veren
+havuzları var). Kapı motorda tek yerde denetlenir.
+
+**Karar 2 — 28 olay, yedisi karşılık.** Ev yıpranır (kombi, sızıntı,
+tesisat, çatı, pencere, küf, boya), ev bir binanın içindedir (aidat
+oylaması, yöneticilik, üst kat gürültüsü, komşunun anahtarı, otopark),
+ev bir yuvadır (ilk kış, misafir, mutfak, balkon, bayram temizliği),
+ev bir karardır (sigorta, kapı güvenliği, yandaki satılık daire,
+kentsel dönüşüm). Yedi karşılık olayı bırakılan izi yıllar sonra
+oyuncunun önüne koyar; 14 izin 14'ünün karşılığı var.
+
+Tutarlar mevcut konut havuzunun çıpalarına uygun (usta 9.000, kombi
+26.000-31.000, taşınma 45.000) ve hepsi `prototypeOnly`. Komşu ve
+apartman **metinde** yaşıyor: yeni kişi kaydı açılmadı. Komşunun
+kalıcı kişi olması (yeni bağ türü, ilişkiler ekranı, erişilebilirlik)
+ayrı bir paket olarak duruyor.
+
+**Karar 3 — bot politikası: alınan eve taşınılır.** Oynanan 40 hayatta
+ölçüldü: ev sahibi olan 25 hayatın **18'i** kendi evinde tek yıl bile
+geçirmemiş. Oyunda hata yok; ölçüm aracı o yolu yürümüyordu: bot ev
+alıyor, taşınma masrafına parası kalmıyor, sonra `_rentOutVacant` o evi
+"boş ev" sayıp kiraya veriyor ve kirada olan eve taşınılamadığı için
+bot bir daha asla kendi evinde oturmuyor. Gerçek oyuncu oturmak için
+aldığı evi kiraya vermez, parası olunca taşınır. Politika buna göre
+düzeltildi.
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Kendi evinde hiç oturmayan ev sahibi | 18/25 | 5/25 |
+| Oturulan ev olayı gören | 7/25 | 20/25 |
+| Havuzun erişilen olayı | 19/28 | 26/28 |
+
+**Denge.** İki bağımsız tohum bloğunda 400'er hayat, modül açık ve
+kapalı: ölüm yaşı, evlilik, çocuk ve ev sahipliği oranları değişmiyor.
+İki blokta aynı yönde çıkan iki işaret var ve ikisi de beklenen: hayat
+başına farklı olay **+0,5** (içerik erişiliyor), ortalama son sağlık
+**−0,5** (ihmal edilen evin bedeli var: küf, soğuk, kendi yaptığın
+boya). Medyan servetteki +%0,3 ve +%8 tutarsız; Paket BO'da ölçülen
+gürültü bandının içinde.
+
+**Gözlem (karar değil).** Oyuncu ev alıp kirada kalmayı seçebiliyor ve
+bu D-043'e göre doğru. Ama ilk evini alan oyuncuya taşınmayı
+hatırlatan hiçbir satır yok: taşınma yalnızca *Evlerim* ekranında bir
+düğme. Oyuna bir hatırlatma eklemek ürün kararı; Faho isterse açılır.
+
+**Geri alma yolu.** Modül: `oturulan_ev` (Ayarlar → Modüller).
+Kapatılınca 28 olay hiç listelenmez ve zar kaymaz. Tamamen silmek için
+`docs/FEATURE_FLAGS.md`'deki dört adımlı tarif: havuz dosyası, katalog
+satırı, `FeatureEvents.pools` satırı ve test dosyası. Motor kapısı
+(`requiresOwnedResidence`) kalırsa zarar vermez; kullanan olay kalmaz.
+Bot politikası ayrı: test altyapısı, ürün kodu değil.
