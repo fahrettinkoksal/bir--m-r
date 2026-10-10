@@ -8547,3 +8547,59 @@ pratikte neredeyse tamamen erişilebilir. **Önerim aynı kalıyor (1):**
 bu üç meslek hedef olarak kalsın, gereksinimleri ekranda yazılı ve
 oyuncu planlayarak ulaşabiliyor. Bu turda da hiçbir meslek gereksinimi
 değiştirilmedi.
+
+### Q-220 — Sigorta: prim kalibrasyonu, yaşa göre prim ve kasko
+
+**Durum: prototipte eklendi, Faho'nun onayını bekliyor (Claude,
+10 Ekim 2026).** `DECISIONS.md`'ye yazılmadı; bütün sayılar
+`prototypeOnly` ve modül anahtarı `sigorta` ile tamamen kapatılabilir.
+
+**Neden eklendi.** Oyunda para neredeyse tamamen saldırı aracı: ev,
+araba, işletme, portföy. Kötü bir yılın faturasını küçültmenin yolu
+yoktu. Oyun fikri zaten konuşuyordu (`ev_sigorta_teklifi` olayı 9.000 ₺
+poliçe teklif ediyor, karşılığında "cebinden sadece muafiyet tutarı
+çıktı" diyor); bu paket o tek seferlik anlatıyı sürekli bir sisteme
+çevirdi: iki poliçe (sağlık, konut), yıllık prim, muafiyet, karşılama
+payı, kriz tedavisi ve dört ani ev hasarı olayı.
+
+**Ölçüm ne dedi (önemli).** İlk kalibrasyonda (sağlık 18.000, konut
+9.000) poliçe **200 hayatın hiçbirinde kâra geçmedi**: ömür boyu prim
+medyanı 1.044.000 ₺, karşılanan medyanı 45.600 ₺. Primleri ölçülen
+hasar dağılımına göre indirdim (karşılanan p75 109.600 ₺, p90 175.200
+₺): sağlık 5.000, konut 2.500. Yeni ölçümde medyan prim 290.000 ₺,
+medyan karşılanan 57.600 ₺, kârda biten hayat **1/200**.
+
+İki bağımsız blokta (150+150 hayat) sigortalı/sigortasız kohort: medyan
+ölüm yaşı iki blokta da 74 → 75; **erken ölüm farkı gürültü** (yön ters
+döndü: 38→34 ve 34→36); medyan servet maliyeti tutarlı olarak ~%3.
+
+**Asıl bulgu:** medyan oyuncunun serveti 37-43 **milyon** ₺. O ölçekte
+85.000 ₺'lik tedavi ya da 70.000 ₺'lik çatı hasarı gürültü; sigorta
+zengin oyuncu için anlamsız. Anlamlı olduğu tek yer parası olmayan
+oyuncu: poliçe varsa cepten çıkacak tutar muafiyete iner ve hayat
+kurtaran tedavi **seçilebilir** hale gelir (bekçide kural olarak
+kanıtlandı).
+
+**Sana üç soru.**
+
+1. **Bu sistem kalsın mı?** Önerim: **kalsın**, ama ne olduğu dürüstçe
+   yazılı olarak kalsın — ekran "Sigorta kazanç getirmez; kötü bir yılın
+   faturasını küçültür" diyor. Bir güvenlik ağı; yatırım değil.
+   İstemezsen `sigorta` anahtarını kapatmak yeter, kod da
+   `removableFiles` listesiyle hazır.
+2. **Prim yaşa göre artsın mı? (önerim: evet)** Şu an prim sabit, yani
+   18 yaşında poliçe yaptırıp 70'ine kadar tutan oyuncu düşük riskli
+   yıllarda da tam prim ödüyor. Önerim: taban primi düşürüp 40 ve 60
+   yaşlarında katsayı eklemek (ör. ×1, ×1,5, ×2,2). Gerçeğe yakın ve
+   ömür boyu tutan oyuncuyu daha az kanatır. Onay verirsen ölçüp
+   uygularım.
+3. **Kasko ne olacak?** Şu an yok, bilerek: oyunda kaza aracın
+   kondisyonunu düşürüyor ve onarım "bakım" kalemiyle ödeniyor — yani
+   kaza onarımıyla rutin bakım aynı yerden geçiyor. Kaskoyu o kaleme
+   bağlamak rutin bakımı da sigortalı yapardı. Önerim: **kaza sonrası
+   onarım ayrı bir kalem olarak yazılsın**, kasko ona bağlanır. Bu ayrı
+   bir paket; onay verirsen sıraya alırım.
+
+**Dokunmadığım yer.** `ev_sigorta_teklifi` / `ev_sigorta_ise_yaradi`
+olay ikilisi olduğu gibi duruyor. Sistem ile birleştirmek (olayın
+poliçe yaptırması) mümkün ama o da bir karar; istersen yaparım.
