@@ -81,6 +81,10 @@ hiç kodlanmamış sistemler (suç ve hukuk, girişimcilik, üvey ebeveyn,
 hane bütçesi, ikiz gebelik), yarım kalmış sistemler (arkadaşlığın
 sığlığı, çocuğun tek yönlü hayatı, eksik ekranlar), ölçülmüş içerik
 boşlukları (çocukluk en fakir dönem) ve karar bekleyen 68 soru.
+**Çocukluk boşluğu 10 Ekim 2026'da ölçüldü (Paket CH):** boş yıl yok,
+ama 0-9 bandında yıl başına 1,06 olay varken yetişkinlikte 1,75 ve
+sebebi havuz değil tempo — yaş 1-3'te oyun hiçbir eylem sunmuyor.
+Karar bekleyen soru **Q-226**.
 Sıralama kararı `docs/DESIGN_REVIEW_QUEUE.md` **Q-137**'de bekliyor.
 
 ## Boşanmanın hukuki tarafı — bilerek ertelendi (Q-118 kararı)

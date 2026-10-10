@@ -296,6 +296,21 @@ Hayatın ilk **18 yılı** — kimliğin kurulduğu, oyuncunun karaktere
 bağlandığı dönem — en fakir kısımdı. Artık 6-17 bandı yetişkinliğin
 başıyla aynı ağırlıkta; en zayıf yer 0-5'te kaldı.
 
+> **GÜNCELLEME (10 Ekim 2026, Paket CH).** Yukarıdaki tablo **aday**
+> olay sayısını veriyor; "oyuncu o yıl kaç olay **gördü**" sorusu ilk
+> kez ölçüldü (400 hayat, `BotLifeResult.eventsByAge`). Sonuç: **boş
+> yıl yok** — yaş 1'den 77'ye kadar her yaşta hayatların %91-100'ünde
+> en az bir olay çıkıyor, en kötü yaş 66 (%96). Yıl başına olay 0-9
+> bandında **1,06**, 10-69 bantlarında **1,61-1,76**. Yani "0-5 en
+> zayıf" tespiti **duruyor** ama sebebi havuz değil **tempo**: yaş 0
+> yapısı gereği olaysız (motor yılın olayını yaş alırken çekiyor) ve
+> yaş 1-3'te oyun hiçbir eylem sunmuyor (120 karede ortanca **0**
+> etkileşim; yaş 4-5'te 32, yaş 6+'da 57-77), bu yüzden ek olay yolu
+> (D-125) küçük yaşlarda hiç açılmıyor. Mahsur kalmış içerik yok:
+> havuzlarda `maxAge: 0` olan tek bir olay yazılmamış. İlk üç yılın
+> temposu karar bekliyor (**Q-226**). Kalıcı bekçi:
+> `test/paket_ch_yas_bandi_yogunlugu_test.dart`.
+
 **Yapıldı (D-126):** 0-17 yaş için **51 olay** yazıldı — mahalle
 oyunları, komşunun camı, ilk arkadaşlık, servis, kantin, karne, sınıf
 başkanlığı, harçlık biriktirme, ilk hoşlanma, gruba girme/dışlanma,
