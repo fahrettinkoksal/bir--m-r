@@ -7237,5 +7237,43 @@ görülüyor, aynı anda yaşayan hayvan sayısı oyunun sınırını geçmiyor 
 kayıtlı her ad oyunun ad havuzunda (botun kendi adını vermesi
 adlandırma yolunu ölçüm dışı bırakırdı).
 
+## Paket CF/1 — %70 eşiği hiç desteklenmiyordu (10 Ekim 2026)
+
+Paket CF'nin bot değişikliği `paket_bj_oyuncu_yolu_cocuk_test`'i
+kırmızıya çevirdi: *"korunmadan yakınlaşan çiftlerin yalnızca %70'i
+sekiz yılda gebe kaldı"* — `Expected > 0.7, Actual 0.7`. Tarayıcının
+bulduğu kareler kaydığı için oran tam kafes noktasına oturmuştu.
+
+**Eşik indirilmedi; önce çözünürlük büyütüldü.** 20 çiftte her çift 10
+puan değerinde, yani oran kuantalı. Örneklem 45 çifte çıkarıldı ve asıl
+bulgu göründü: **gerçek oran %62**. Eski 20 çiftlik ölçüm şanslı bir
+örneklemdi ve 0,70 ona kalibre edilmişti; eşik hiçbir zaman
+desteklenmiyordu.
+
+### Oranın nereden geldiği ölçüldü (45 çift, 210 deneme)
+
+| Ölçü | Sayı | Anlamı |
+| --- | --- | --- |
+| Zara ulaşan deneme | **210 / 210** | Oyuncunun yolunda sessizce düşen deneme yok |
+| Motorun ihtimali baştan sıfır olan çift | **13 / 45 (%29)** | Kısırlık (%8 + %8) ya da aynı cinsiyet (Q-064) |
+| Bu 13 çiftin gebeliği | **0 / 104 deneme** | Kapı tam çalışıyor |
+| İhtimali olan çiftin gebe kalma oranı | **28 / 32 (%87,5)** | Yol açık |
+| Ölüm / yıl ilerlememe | **0 / 0** | Eksilme oranı açıklamıyor |
+| Ortanca deneme | **4** (1-8) | Erişim sorunu yok |
+
+Yani toplam %62 bir tıkanıklık değil, **tasarımın kendi kapısının
+payı**. Denemelerin %49'u (104/210) baştan sıfır ihtimalli çiftlerden
+geliyor.
+
+### Bekçi tek sayıdan huniye çevrildi
+
+Eski test tek bir toplam oran eşiği taşıyordu. Yerine altı iddia kondu
+(beşi yeni): zara ulaşmayan deneme olmayacak · sıfır ihtimalli çift
+asla gebe kalmayacak · sıfır ihtimalli çiftlerin payı yarıyı geçmeyecek
+· **ihtimali olan çiftlerin oranı %60'ın üstünde kalacak** (motorun
+kendi öngörüsü %64-91, ölçüm %87,5) · ortanca deneme en az 2 olacak ·
+ölüm ve kilitlenme beşte biri geçmeyecek. Toplam oran eşiği 0,4'e
+indirildi ve **neden kalibrasyon taşıyamadığı** test içine yazıldı.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

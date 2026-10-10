@@ -337,6 +337,23 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   göster. Paket BO'nun bekçisi eski motorda iki testten kalıyor, yeni
   motorda geçiyor; yoksa testin neyi koruduğu belgede kalır, kodda
   kalmaz.
+- **Paket CF/1.** Tam eşiğe oturan bir oran (`Expected > 0.7, Actual
+  0.7`) eşik sorunu değil **çözünürlük** sorunudur: 20 çiftte her çift
+  10 puan. Örneklemi büyüt. Büyütünce asıl bulgu çıktı: gerçek oran
+  %62, yani 0,70 hiçbir zaman desteklenmiyordu — eski eşik şanslı bir
+  20 çiftlik ölçüme kalibre edilmişti. Bir eşiği indirmeden önce
+  **oranın bileşenlerini** ölç: burada denemelerin yarısı (104/210)
+  tasarım gereği sıfır ihtimalli çiftlerden geliyordu, ihtimali olan
+  çiftlerin oranı ise %87,5'ti. Tek bir toplam sayı, biri tasarım
+  kapısı olan iki ayrı olguyu topluyorsa **kalibrasyon taşıyamaz**;
+  bekçiyi huniye çevir.
+- **Paket CF/1.** İki tahmin aracı ters yöne işaret ederse hatayı
+  araçta ara. Çift başına `1 − Π(1−p)` ile hesaplanan öngörü gözlemin
+  **altında** (22,1 vs 28), deneme başına `Σp` ile hesaplanan öngörü
+  **üstünde** (42,1 vs 28) çıktı. İkincisi de yanıltıcıydı: gebe kalan
+  çift denemeyi bırakıyor, yani iki sayı da seçilmiş örnekleme
+  bakıyordu. Doğru soru "kaç çift gebe kaldı" değil, **"her deneme zara
+  ulaştı mı"** idi — ve o 210/210 çıktı.
 
 ## Pano
 
