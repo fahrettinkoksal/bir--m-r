@@ -8118,3 +8118,61 @@ gömülmedi; `Housing.prototypeOnlyMoveCost` sabitinden yazılıyor
 **Geri alma yolu.** `ItemActions.buy` içindeki üç satırlık koşul ve
 `app/test/paket_br_tasinma_hatirlatmasi_test.dart`. Modül anahtarı
 verilmedi: kapatılacak bir özellik değil, bir cümle.
+
+### Q-214 — Paket BS/0: arkadaşlık hunisi ölçüldü, oyun değil bot hatası çıktı
+
+**Durum: ölçüm turu tamamlandı; oyun tarafında hiçbir karar
+gerekmedi (Claude, 10 Ekim 2026).** `DECISIONS.md`'ye dokunulmadı,
+yakın arkadaşlık eşiği (55) ve bağ sönümlenmesi aynen duruyor.
+
+**Soru.** Paket BP/BQ ölçümlerinde hayat başına ortalama arkadaş
+**0,70**, yakın arkadaş **0,04** çıktı. Bir hayat simülasyonunda bu
+büyük bir eksik görünüyor. Oyunun kapısı mı kapalı?
+
+**Ölçülen huni (80 hayat).** Tanışıklık (sınıf/iş arkadaşı) **80/80**
+hayatta var. Yakın arkadaş teklifinin uygun olduğu yıl yalnızca
+**27/80** hayatta geliyor; geldiğinde teklif **27/27 kabul** ediliyor.
+Hayat boyunca en iyi tanışıklık bağının medyanı **51**, eşik 55.
+
+Yani oyunun kapısı açık ve cömert: eşiği geçen herkes arkadaş
+ediniyor. Sorun botun ömrü boyunca eşiğin dört puan altında
+kalmasıydı.
+
+**Kök neden (bot).** Bot yılda bir etkileşim hakkını on kişilik
+sınıftan **rastgele** bir kişiye harcıyordu; bağ her yıl sönümlendiği
+için kimsede birikmiyordu. Gerçek oyuncu arkadaş edinmek isterken
+dağıtmaz, birine yoğunlaşır.
+
+**Yapılan (yalnızca ölçüm aracı).** Bot artık en yüksek bağlı
+tanışıklığı seçiyor; beşte bir oranında rastgelelik payı duruyor.
+Teklif uygun yılı 27 → **61/80**, kabul 27 → **60**, hayatında arkadaşı
+olan 58 → **78/80**, en iyi bağ medyanı 51 → **60**, ölümde arkadaş
+sayısı 0,90 → **1,48**.
+
+**Dengeye etkisi (400'er hayat, iki blok).** Ortalama arkadaş
+0,70 → 1,3; ortalama yakın arkadaş 0,04 → ~0,47; ortalama son sağlık
++2 puan (etkileşimin kendi etkisi). Ölüm yaşı, evlilik, çocuk ve ev
+sahipliği gürültü bandında.
+
+**Açık bırakılan gözlem (karar değil).** Ölümde arkadaş sayısı 1,48;
+yani arkadaşlar ömür boyunca kalıcı değil (vefat, küslük, sönümlenme).
+"Yaşlılıkta kaç arkadaş kalıyor" sorusu ayrı bir ölçüm turu ister;
+bunu Faho isterse paket yaparım.
+
+**Kalıcı bekçi.** Huni ölçümü geçici dosyada bırakılmadı:
+`test/paket_bs_arkadaslik_test.dart` aynı 80 hayatı her süitte oynuyor
+ve ölçülenin çok altında tabanlar bekliyor (kabul ≥20, arkadaşı olan
+≥40, en iyi bağ medyanı ≥45). Tabanlar denge hedefi değil; yol yeniden
+kapanırsa süit sessiz kalmasın diye.
+
+**Yan bulgu (ölçüm aracı).** Bot değişikliği zar akışını kaydırdığı
+için `ekran_dokumu_bot_test.dart` aile arketipinde düştü: sabitlenmiş
+tohumda hayat 40 yaşında ölüyor, döküm o yılın karesini fotoğraflıyor
+ve ekranda oyunun bilerek gösterdiği "Bir ömür tamamlandı" özeti
+oluyordu. Ölü karenin alt sekmesi yok; yani düşen şey ekran değil
+kareydi. Döküm artık ölü kare almıyor ve hedef yaşlara canlı ulaşan bir
+hayat bulunana kadar tohum ilerliyor (aile dökümünde çocuk da şart).
+Bu, Paket BM'de yazılmış dersin uygulanmamış yarısıydı.
+
+**Geri alma yolu.** `test/support/player_bot.dart` içindeki seçim
+satırı. Ürün kodu değişmedi.
