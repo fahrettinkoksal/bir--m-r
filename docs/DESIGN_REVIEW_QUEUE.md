@@ -7118,6 +7118,35 @@ adını taşıyan oğul olur ama oyunun günlüğü soyadsız yazıyor, yani
 okunurluk kaybı kazançtan büyük. Ad havuzu bu kadar daralmayı taşıyor
 mu diye ölçüp yazarım.
 
+**Ölçüm geldi (Paket BV, 10 Ekim 2026).** Söz verdiğim ölçümü yaptım;
+karar hâlâ sende, aşağıdaki sayılar sadece veri.
+
+| Ölçü (300 hayat) | Havuz 20 | Havuz 60 | Havuz 60 + üretim düzeltmesi |
+| --- | --- | --- | --- |
+| İki **yaşayan** kişi aynı adda | 283/300 | 198-209/300 | **106/300** |
+| Kardeş-ebeveyn ad çakışması | %9 | %1-4 | %1 |
+| Çocuk-hane ad çakışması | %3 | %12-15 | %14 |
+| Kayıttaki kişi sayısı | medyan 58 · en çok 97 | aynı | aynı |
+
+Üç şey çıktı:
+
+1. **Havuz daralmayı taşıyordu ama dardı.** Cinsiyet başına 20 isim ve
+   medyan 58 kişiyle çakışma matematiksel olarak kaçınılmazdı. Havuzu
+   60'a çıkardım (kadın, erkek, soyadı) — bu içerik, kural değil.
+2. **Senin sorduğun yer (kardeş-ebeveyn) kendiliğinden %9'dan %1'e
+   indi.** Yani "hanedeki adları dışla" kuralı artık **daha az acil**;
+   istersen yine koyarız, istersen havuz genişliği yeter.
+3. **Eksik koruma başka yerdeydi.** Kişi üreten yerlerin çoğu aynı adı
+   yakalayıp yeniden çekiyordu; **gelin/damat** ve **torun** bunu
+   yapmıyordu. Düzelttim (ortak yardımcı `Random.pickFreshName`).
+   Hayat üretimindeki **ebeveyn ve kardeş** adlarına **dokunmadım**:
+   orası senin kararın.
+
+**Açık kalan.** Çocuğu olan hayatların ~%14'ünde çocuk, hanedeki
+yaşayan biriyle aynı adı taşıyor (örnekler: sınıf arkadaşı, iş
+arkadaşı, kardeş, yeğen). Sınıf ve iş arkadaşı üretiminde koruma var,
+yani kaynağı henüz bulamadım; ayrı bir teşhis turu gerekiyor.
+
 #### 7. Geliri olmayan oyuncunun aracı kapanmayan açık üretiyor
 
 70 yaşındaki oyuncunun gider dökümü: "Kişisel harcama 12.000 ₺" (D-123:
