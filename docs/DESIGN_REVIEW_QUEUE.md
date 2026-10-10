@@ -8416,3 +8416,64 @@ Tamamen silmek için `FeatureId.komsular` satırındaki `removableFiles`
 listesi (`neighbours.dart`, `event_pool_neighbour.dart`,
 `paket_bu_komsular_test.dart`) artı `RelationType.komsu/eskiKomsu`
 satırları — kalan bağları derleyici gösterir.
+
+### Q-218 — Kulüp üyeliği okul değişince neden sıfırdan başlıyor?
+
+**Durum: tasarım sorusu, Faho'nun kararını bekliyor (Claude, 10 Ekim
+2026).** Bu turda **oyun kuralı değiştirilmedi**; yalnızca ölçüm
+yapıldı ve çekiliş ağırlığı ile ölçüm aracı düzeltildi (Paket BX,
+anahtar `ugras_onceligi`).
+
+**Nasıl çıktı.** 1.000 hayatlık denetim, okul futbol takımının on iki
+olayından sekizinin **hiç görülmediğini** söylüyordu. Huniyi 150 spor
+odaklı hayatta saydım:
+
+| Adım | Sayı |
+| --- | --- |
+| Bir kulübe giren | 149/150 |
+| Futbol takımına giren | 44/150 |
+| Futbolda geçirilen yıl (medyan) | **2** |
+| İlk on bire çıkan | 13/150 (aktif yıl medyanı 0) |
+| Zincir başı olayını gören | **0** |
+
+Sebep iki katmanlı. (1) **Çekiliş:** üç olay hayatların 31/150'sinde
+uygun hale geliyor ama 150 hayatta 4 kez çıkıyor — yıllık havuzda
+ortanca 80 aday varken ağırlığı 6-7 olan olayın payı %2,5. Bunu
+düzelttim: sürdürülen kulüp/hobi olayı ×6 öncelik alıyor (Paket AS/2'nin
+zincir önceliğiyle aynı fikir, katsayısı daha düşük). (2) **Merdiven:**
+kadroda ilk on bire çıkmak ~4 sezon istiyor, ama üyelik **okul
+değişince kapanıyor** (`SchoolClubEngine.onSchoolChanged`) ve yeni
+okulda `yearsActive` sıfırdan başlıyor. Ortaokul 4, lise 4 yıl olduğu
+için ilk on bire ancak **son sınıfta** çıkılıyor; o yıl üyelik de
+kapandığı için oyuncu o rolü hiç yaşamıyor.
+
+**Kodda ne yazıyor.** `onSchoolChanged`: "Yeni okulda üyelik otomatik
+taşınmaz; oyuncu yeniden başvurur." Beceri kısmen taşınıyor
+(`_tasinanBeceri`) ama **yıl ve rol** taşınmıyor. Bu bilinçli bir
+tercih gibi görünüyor, o yüzden dokunmadım.
+
+**Soru sana.** Üç seçenek var; hangisini istersin?
+
+1. **Olduğu gibi kalsın.** Yeni okul yeni takım demektir; oyuncu
+   yeniden kazanır. Maliyeti: kadro merdiveninin üst basamakları
+   (ilk on bir, önemli oyuncu, kaptan) ve ona bağlı beş olay pratikte
+   yalnızca "aynı okulda 4 yıl kalıp erken giren" oyuncuya açık.
+2. **Yıl taşınsın, rol taşınmasın (önerim).** Yeni okulda yine yedek
+   başlanır ama `yearsActive` birikmiş sayılır; yani üçüncü yılında
+   okul değiştiren oyuncu lisede sıfırdan dört yıl beklemez. Gerçeğe
+   de uygun: antrenör yeni gelen çocuğun kaç yıl oynadığını görür.
+   Rol yine sahada kazanılır.
+3. **Üyelik tamamen taşınsın.** Aynı kulübün yeni okul kaydı
+   otomatik açılır. En kolay yol ama "seçme var, yedek kalma var"
+   vaadini zayıflatır.
+
+**Varsayılanım (2).** Onay verirsen `prototypeOnly` bir taşıma payı
+(önerim: biriken yılın tamamı) ile uygularım ve huniyi yeniden ölçerim.
+Onay gelmezse 1 geçerli kalır; bu paket zaten kuralı değiştirmedi.
+
+**İkinci soru (daha küçük).** Sürdürülen uğraş önceliğini kulüp ve hobi
+dışında da kullanmalı mıyız? Aynı kalıp şu an şuralarda var: aktif
+işletme, süren gebelik, açık dava, aktif evcil hayvan. Önerim: **şimdilik
+hayır** — önce kulüp/hobi ölçümü otursun, sonra tek tek bakarız. Katsayı
+tek sabit (`prototypeOnlyActivePursuitBoost`) olduğu için genişletmek
+kolay, geri almak da kolay.
