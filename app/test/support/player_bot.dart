@@ -800,6 +800,19 @@ BotLifeResult playBotLife({
   required int seed,
   /// Yalnızca teşhis için: her yılın sonunda çağrılır.
   void Function(GameState state)? onYear,
+  /// Yalnızca teşhis için: **bekleyen bir şey** varken çağrılır
+  /// (bildirim, olay, kriz, duruşma, mülakat).
+  ///
+  /// **Neden ayrı kanca (Paket CR).** `onPreAge` adım 7'de çalışıyor;
+  /// bot bekleyen olayı, krizi ya da duruşmayı adım 1-6'da yanıtlayıp
+  /// `continue` ettiği için o kareler **hiçbir ölçüme görünmüyordu**.
+  /// Bu kör nokta üç kez yanlış bulgu üretti: yeni doğan bebek (Paket
+  /// CG), yaşlılıkta bakım kararı (Paket CJ) ve bekleyen duruşma —
+  /// son ölçümde 250 hayatta "duruşma gören hayat 0" çıktı, gerçek
+  /// sayı **57**'ydi. Bekleyen bir durumu ölçmek isteyen bu kancayı
+  /// kullanır.
+  void Function(GameState state)? onPending,
+
   /// Yalnızca teşhis için: yaş alma **öncesinde**, yıl içinde çağrılır.
   ///
   /// `onYear` yaş aldıktan **sonra** çalışır; bu yüzden yalnızca o yıl
@@ -869,6 +882,16 @@ BotLifeResult playBotLife({
   while (!c.state!.deceased && guard++ < 6000) {
     final GameState s = c.state!;
     sonuc.cities.add(s.player.currentCity);
+
+    // Bekleyen kare **yanıtlanmadan önce** ölçüme veriliyor (Paket CR).
+    if (onPending != null &&
+        (s.hasNotice ||
+            s.hasPendingEvent ||
+            s.pendingCrisis != null ||
+            s.hasPendingTrial ||
+            s.pendingInterview != null)) {
+      onPending(s);
+    }
 
     // ---- 1) Bekleyen şeyler ------------------------------------------
     if (s.hasNotice) {

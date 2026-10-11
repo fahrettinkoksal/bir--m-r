@@ -8062,5 +8062,63 @@ indirdim. Penaltı zincirinin izi hâlâ seyrek — futbol takımına giren
 21 üyelikten 6'sı ilk 11'e çıkıyor, olay o 6 karede çekilişe giriyor
 ve `penaltiKacirdi` izi üç seçenekten birinden doğuyor. Karar Faho'da.
 
+## Paket CR — bekleyen kareler ölçüme görünmüyordu (11 Ekim 2026)
+
+Paket CP, kapsam botunun çete ve kefalet aksiyonlarına hiç
+dokunmadığını göstermişti ("kapsam hayatlarında kimse tutuklanmıyor").
+Bu turda oyunun kendi suç hunisi ölçüldü ve **ölçüm aracı yalan
+söyledi**: 250 bot hayatında "duruşma gören hayat **0**" çıktı.
+
+**Sebep araçta.** `playBotLife` döngüsünde bekleyen şeyler adım 1-6'da
+yanıtlanıp `continue` ediliyor; teşhis kancası `onPreAge` ise adım
+7'de, yaş almanın hemen öncesinde çalışıyor. Yani bekleyen bir olay,
+kriz ya da duruşma varken **hiçbir ölçüm o kareyi göremiyordu.**
+Botun kendi kaydı (`wentToTrial`) doğru sayıyı veriyor: **57**.
+
+Bu kör nokta üçüncü kez yanlış bulgu üretti:
+
+| # | Paket | Yanlış görünen | Gerçek |
+| --- | --- | --- | --- |
+| 1 | CG | "yeni doğan bebek hiç yok" | `onYear` yaş aldıktan sonra çalışıyor; 60 hayatta 77 kare |
+| 2 | CJ | "bakım kapıları hiç açılmıyor" | bot kararı yılın başında veriyor; `BotOverrides.noElderSupport` eklendi |
+| 3 | CR | "duruşma hiç olmuyor" | bot adım 6'da yanıtlıyor; gerçek sayı 57 |
+
+### Düzeltme: `onPending` kancası
+
+Bekleyen kare **yanıtlanmadan önce** ölçüme veriliyor (bildirim, olay,
+kriz, duruşma, mülakat). `onPreAge` ve `onYear` olduğu gibi kaldı;
+kanca verilmezse hiç çalışmıyor, yani mevcut hiçbir ölçüm kaymadı.
+
+### Suç hunisi (250 hayat, doğru araçla)
+
+| Aşama | Hayat |
+| --- | --- |
+| Suç işleyen | 119 |
+| Duruşma gören | 57 |
+| İçeriden geçen | 21 |
+| Denetim dönemi gören | 21 |
+| Toplam hapis yılı | 36 |
+
+Arketip kırılımı: `risky` 25 suç / 19 duruşma / 8 içeride · `social`
+17/5/4 · `sport` 11/7/1 · `investor` 4/1/0. **Suç yolu ulaşılamaz
+değil:** Paket CP'nin bulgusu kapsam botunun suçlu planı
+olmamasından geliyor, oyunun kapısından değil.
+
+### Bekçi
+
+`app/test/paket_cr_bekleyen_kare_test.dart` (3 test): `onPending`
+bekleyen duruşmayı görüyor ve `onPreAge` **görmüyor** (kör nokta
+bilerek sabitlendi; botun yanıtlama sırası değişirse test bunu
+söyler) · `onPending` olay ve kriz karelerini de veriyor · suç
+hunisinin dört kademesi de yaşanıyor ve huni daralarak ilerliyor.
+
+**Isırma denemesi:** kanca çağrısı kaldırılınca üç testin ikisi
+kırmızı; huni testi (oyunun kendi sayıları) yeşil kalıyor.
+
+### Oyunun kodu değişmedi
+
+Değişen dosyalar yalnızca test tarafında: `test/support/player_bot.dart`
+ve yeni bekçi.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

@@ -437,6 +437,18 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CR.** Kancanın **nerede** çalıştığını bilmeden sayı
+  okumayın. Aynı kör nokta üç kez yanlış bulgu üretti: yeni doğan
+  bebek (CG), yaşlılıkta bakım kararı (CJ) ve bekleyen duruşma (CR —
+  250 hayatta "0" görünen sayının gerçeği 57). Üçünde de araç, botun
+  o kareyi **zaten yanıtlamış** olduğu bir noktada bakıyordu. Artık
+  bekleyen kareler için ayrı bir kanca var (`onPending`) ve kör nokta
+  bir testle sabitlendi: `onPreAge` bekleyen duruşmayı görmeye
+  başlarsa test bunu söyler.
+- **Paket CR.** "Hiç olmuyor" diyen bir sayıyı rapor etmeden önce
+  **ikinci bir kaynağa** bak. Botun kendi kaydı (`wentToTrial`) ilk
+  turda zaten doğruyu söylüyordu; iki kaynağı karşılaştırmak beş
+  dakikalık işti, yanlış bulguyu belgeye yazmak ise paket maliyeti.
 - **Paket CQ.** Bir alan **bazı** durumlarda atanıyorsa, ekran onu
   koşulsuz yazmamalı. Kulüp rolü yalnızca rekabetçi kulüplerde
   atanıyor; kart ise her kulüpte `role.label` yazıyordu ve fotoğraf

@@ -332,3 +332,4 @@ pending	Q-230: çocuk hastalığının kapsamı torun/yeğene genişlesin mi —
 completed	Paket CO: telefon boyutunda ilk izlenim (açılış ekranı ve taşma bekçisi)
 completed	Paket CP: kapsam botunun dokunmadığı 34 aksiyon (%74,6 → %89,9)
 completed	Paket CQ: kulüpteki yerin adı (rekabetçi olmayanda "Yedek" yazmıyor)
+completed	Paket CR: bekleyen kareler ölçüme görünmüyordu (onPending kancası)
