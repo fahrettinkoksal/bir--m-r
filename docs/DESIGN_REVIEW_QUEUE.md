@@ -9663,3 +9663,92 @@ inandırıcı tutar hem de medya kariyerini kararlı oyuncuya açık bırakır.
 `app/test/support/player_bot.dart` (Paket CY'nin araç düzeltmesi).
 İlgili: **Q-155** (katalog sayıları), Paket K ve Paket Q (sosyal medya),
 Paket AL/2 §10-§14 (spor → erişim çarpanı).
+
+---
+
+### Q-236 — Açık lise: geri dönüşün sayıları ve kapsamı
+
+**Durum:** öneri ve varsayılan yazıldı, karar bekliyor (Paket DC).
+
+**Bağlam.** Gebelik karesi okunurken çıktı: 35 yaşında, 18 yıldır aynı
+yarım zamanlı çıraklık işinde, yıllık maaşı 336.552 ₺ olan bir
+karakterin meslek ekranında iş arama satırı **yok** ve altında şu
+yazıyor: "tam zamanlı iş liseyi bitirdikten sonra açılır." Kayıttaki
+tek sebep, 9. sınıfta okulu bırakmış olması.
+
+Ölçüm iki şey gösterdi:
+
+| Ölçüm | Sonuç |
+|---|---|
+| `JobEducation.yok` iş | 25 |
+| `JobEducation.lise` iş | **17** |
+| `JobEducation.universite` iş | **13** |
+| Bulunan durumda (30 yaş, bırakmış) motorun izin verdiği iş | **13** (6'sı tam zamanlı) |
+| Aynı durumda ekranın gösterdiği satır | **0** |
+| 236 hayatta 30 yaşında diplomasız | 4 (%1,7), dördü de 3 yıl sınıfta kalıp ayrılmış |
+
+İki ayrı mesele çıktı ve **biri hataydı**: ekranın kapısı
+(`isAranabilir`) diploma istiyordu, motorun kapısı
+(`JobMarket.requirementReason`) istemiyordu. O hata Paket DC'de
+düzeltildi ve bekçisi yazıldı (`paket_dc_acik_lise_test.dart` §1b);
+tasarım kararı gerektirmiyordu, iki yerde iki ayrı doğru vardı.
+
+İkinci mesele **gerçek bir tasarım boşluğuydu**: diploma almanın yolu
+hiç yoktu. `açık lise`, `reEnroll`, `okula dön` diye aranan hiçbir şey
+kodda geçmiyordu. Yani okulu bırakmak oyunun **tek geri dönüşsüz**
+kararıydı ve 30 iş ömür boyu kapanıyordu.
+
+Paket DC açık liseyi `prototypeOnly` sayılarla ekledi
+(`FeatureId.acikLise`, varsayılan açık). Kararı bekleyen **sayılar ve
+kapsam**:
+
+| Parametre | Şu anki değer | Dayanağı |
+|---|---|---|
+| `prototypeOnlyMinAge` | 18 | Zorunlu eğitim çağındaki çocuk örgün okulda kalsın |
+| `prototypeOnlyYearlyFee` | 3.500 ₺ | Oyunun küçük ücret bandı (ehliyet sınavı 4.000-8.000 ₺); açık lise devlet okulu, bandın altında |
+| `prototypeOnlyFirstGrade` | 9 | Açık ortaokul kapsam dışı |
+| Süre | bırakılan sınıftan 12'ye, yılda 1 sınıf | Motorun yıllık adımı |
+| Geçme koşulu | yalnızca ücretin ödenmesi | Zorluk uydurulmadı |
+| Yıllık stat | mutluluk +2, zekâ +1 (`gain`, D-099) | Küçük ve azalan |
+| Diploma | mutluluk +8 | Tek seferlik |
+
+**Seçenekler**
+
+1. **Bu hâliyle onayla (önerim ve varsayılanım).** Geri dönüş var, ucuz,
+   çalışırken okunuyor ve 17 iş açılıyor. Ödeme dışında zorluk yok;
+   yani oyuncunun kararı "bu yılları buna ayırır mıyım" oluyor, zar
+   değil. Bedeli: diploma almak neredeyse garanti, yani "okulu
+   bırakmak" kararının ağırlığı azalır.
+2. **Geçme koşuluna zekâ/çalışma eklensin.** Örneğin düşük zekâda yıl
+   tekrarlanabilsin. Bedeli: yeni bir `prototypeOnly` eşik ve yeni bir
+   kalibrasyon turu; ayrıca ikinci şansın kendisi zar işine döner.
+3. **Açık ortaokul da eklensin** (9'un altında ayrılan için). Bedeli:
+   4 yıl daha ve ayrı bir kademe; ölçümde 9'un altında ayrılan hayat
+   çıkmadı (dört örneğin hepsi 9-10. sınıf), yani şimdilik karşılığı
+   olmayan içerik olur.
+4. **Yetişkin için üniversite yolu (AÖF) da eklensin.** Şu an diploma
+   alan 30 yaşın üstündeki oyuncu üniversiteye başvuramıyor, çünkü
+   `EducationPath.needsAfterSchoolChoice` 30 yaşla sınırlı (D-111) ve
+   üniversite kapısı yalnızca o satırdan açılıyor. Yani açık lise 17
+   işi açıyor, 13 iş hâlâ kapalı. Bedeli: ayrı bir paket; ama "ikinci
+   şans" fikrini yarım bırakmamak için en güçlü aday bu.
+
+**Benim görüşüm:** (1) şimdi, (4) sıradaki paket olarak. (2) ikinci
+şansı cezalandırır; (3)'ün ölçümde karşılığı yok.
+
+**Yapmayacağım (onay gelmeden):** bu sayıları `DECISIONS.md`'ye kesin
+kural olarak yazmak, `prototypeOnlyAfterSchoolMaxAge`'e (30)
+dokunmak, ya da AÖF'ü kendi başıma eklemek.
+
+**Etkilenen kod:**
+`app/lib/domain/education/open_high_school.dart` (bütün sayılar),
+`app/lib/domain/models/education.dart` (`openHighSchoolGrade`,
+`isOpenHighSchoolStudent`, `label`, `stageLabel`),
+`app/lib/domain/generation/life_progression.dart` (yıllık adım),
+`app/lib/ui/screens/sections/school_career_screen.dart`
+(`isAranabilir` düzeltmesi + açık lise satırı),
+`app/lib/domain/features/feature_catalog.dart` (`FeatureId.acikLise`),
+`app/lib/data/save/game_state_codec.dart`,
+`app/test/paket_dc_acik_lise_test.dart`.
+İlgili: **Q-082** (okuldan ayrılma), **Q-155** (katalog sayıları),
+D-111 (mezuniyet sonrası kilidi), D-131 (öğrenci yarım zamanlı çalışır).
