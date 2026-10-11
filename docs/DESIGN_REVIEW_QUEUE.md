@@ -3268,6 +3268,27 @@ Yazılan temalar: 0-5 — ilk kelime, kreş, ilk düşme, misafirlik, oyuncak ka
 4. Etki değerleri (`prototypeOnly`) onaylanıyor mu? Örnek: camı itiraf etmek karizma **+4** ve **−300 ₺**, kaçmak mutluluk **−2**.
 5. 0-5 bandı hâlâ en zayıfı (24 farklı olay). Bebeklik için daha fazla yazılsın mı, yoksa o yaş **hızlı geçmeli** mi?
 
+> **EK (11 Ekim 2026, Paket CX).** 5. sorunun **ilk yarısına** içerik
+> tarafından cevap verdim, ikinci yarısına dokunmadım: yaş yaş ölçünce
+> yaş 0'ın yalnızca **9** farklı aday olayı olduğu çıktı (yaş 12: 92).
+> yeni `event_pool_babyhood.dart` dosyasına 16 olay yazdım; yaş 0 tekil aday
+> 9 → **20**, yaş 1-2 ise 16/20 → **30/30**. Bunu kalıcı kuralı
+> değiştirmeden yaptım: içerik var olan **`ilk_yillar_olaylari`
+> anahtarına** bağlandı (kapatınca ilk yıllar Paket BM ve CX öncesi gibi
+> geçer) ve **tempo sayılarına dokunmadım**. "O yaş hızlı mı
+> geçmeli" hâlâ senin kararın (**Q-226**). Etki değerleri bu 16 olay için
+> de onay bekliyor; saydım: mutluluk **-2…+5**, bağ **+3…+5**, sağlık
+> **-1…+1**, görünüm **±2** (ilk saç kesimi). Para yalnızca **dört**
+> yerde var ve üçü doğum altını zincirine ait: altın bozdurulursa
+> **+4.200 TL** (0-1 yaş), saklanıp yıllar sonra okul masrafına
+> bozdurulursa **+9.500 TL** (7-18 yaş); ayrıca yaz sıcağı/mikrop
+> kaynaklı **-250 TL** iki yerde ve **-900 TL** bir yerde. Altının
+> değerlenmesini 4.200 → 9.500 diye **elle** yazdım (havuzlardaki diğer
+> para değerleri gibi sabit); merkezi 2026 çıpasına ya da
+> `investment_engine`'in `altin` getirisine **bağlı değil.** Bunu
+> bağlamak ister misin, yoksa sabit kalsın mı — senin kararın.
+> Bekçi: `app/test/paket_cx_bebeklik_test.dart`.
+
 ---
 
 ### Q-140 — Metin üslubu belgesi ve robotik kalıp tavanı
@@ -8973,6 +8994,33 @@ hatırlanmalı: 4-5 yaşta oyuncu zaten iki olay görebiliyor.
 **Etkilenen kod:** `app/lib/domain/events/event_engine.dart`
 (`prototypeOnlyMaxExtraEventsPerAge`,
 `prototypeOnlyProgressPerExtraEvent`).
+
+**EK (11 Ekim 2026, Paket CX) — yukarıdaki "eksik olan içerik değil,
+tempo" cümlesi ölçümün yarısıydı.** O cümleyi ben yazdım ve dayanağı
+"mahsur kalmış olay yok" tespitiydi; ama bir yıl için **kaç farklı**
+olayın aday olduğunu hiç saymamıştım. Saydım (60 bot hayatı, her karede
+`EventEngine.debugEligibleIds`):
+
+| Yaş | Aday ortalama | Tekil aday |
+|---|---|---|
+| 0 | 8,6 | **9** |
+| 1 | 14,4 | 16 |
+| 2 | 17,2 | 20 |
+| 12 | 52,4 | **92** |
+
+Yaş 0 **çeşitlilik** bakımından yaş 12'nin onda biriydi (0,098). Yani
+içerik de eksikti — ama farklı bir anlamda: bir hayatta görülen olay
+sayısı değil, **oynanışlar arasında farklı şey görme şansı**. Paket
+CX yeni `event_pool_babyhood.dart` dosyasına 16 olay ekledi ve oran
+0,098 → **0,220** oldu (yaş 0: 19,1 ortalama / 20 tekil).
+
+**Bu ek hiçbir şeyi karara bağlamıyor.** Zar hâlâ yılda bir kez
+dönüyor: yaş 0-3'ün **1,00'lık yoğunluğu ve dört tuşluk ilk izlenimi
+aynen duruyor.** Yukarıdaki üç seçenek de aynen geçerli; sadece (1)'in
+gerekçesi güçlendi (artık o dört tuşta her oynanışta farklı bir şey
+okunuyor) ve (2)'nin bedeli küçüldü (ikinci olay artık aynı dokuz
+olayın içinden değil, yirminin içinden gelir). Karar yine Faho'nun:
+**tempo sayılarına dokunmadım.**
 
 ### Q-227 — Arkadaş grubu: eşikler, seyreklik ve grubun adı
 
