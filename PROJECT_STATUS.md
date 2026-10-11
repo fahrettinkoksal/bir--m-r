@@ -8854,3 +8854,94 @@ aranan karenin seyrekliğiydi, oyunun davranışı değil. Paket CY'de
 Paket CI için yaptığımın aynısı: eşiği düşürmek yerine kohort
 **200 → 600** hayata çıkarıldı; 16 testin hepsi geçti ve eşikler
 yerinde kaldı. Bayat yorum ("200 hayatta 236 tane var") da tazelendi.
+
+## Paket DA — 21 yaşındaki oyuncunun gelini (11 Ekim 2026)
+
+Rutin "yeni doğan bebek karesi 120 hayatta bulunamadı" diyordu; kendim
+koştum ve **bayat** olduğu çıktı: dökümün 12 özel durumunun **hepsi**
+bulunuyor (yeni doğan bebek, denetim dönemi, gebelik dahil). Ama
+*bulunmak* ile *okunmak* aynı şey değil — o üç kare hiç gözle
+okunmamıştı. Okudum.
+
+**"YENİ DOĞAN BEBEK" karesinde (Riskli hayat, tohum 5, yaş 23)** 21 yaş
+günlüğünde şu satır vardı:
+
+> **Gelin** Yasemin bu sabah kapıyı çaldı, elinde bir tencere yemek vardı.
+
+21 yaşında evli çocuk olamaz. Aynı karede oyuncunun hiç çocuğu da yoktu.
+
+**Önce yanlış şüphelendim.** Başlıktaki "uzun süredir bakım yok"
+satırını yaşlılık bakımı sandım; `_bakimsiz` aslında **kendine bakım**
+(`yearsSinceGrooming`, berber) demek ve 23 yaşında doğru satır. Koda
+bakmadan bulgu yazmanın bedeli bu olurdu.
+
+**Kök neden.** `ChildMarriage.maybeMarry` yalnızca çocuk için değil
+kardeş, üvey kardeş, yarım kardeş ve üvey çocuk için de çağrılıyor
+(`life_progression`'daki `kendiEvliligiOlanlar`, Paket AP §23'ün
+yeniden evlenme döngüsü) ve doğru bağı `relation` parametresiyle
+alıyor. Ama `_createSpouse` eşin bağını **sabit** `cocugunEsi`
+yazıyordu. Yani **kardeşin eşi, oyuncunun gelini/damadı olarak
+kaydediliyordu.** `RelationType` içinde yenge/enişte diye bir tür
+hiç yok.
+
+**Ölçüm (150 bot hayatı, tohum 80000+i):**
+
+| | önce | sonra |
+|---|---|---|
+| `cocugunEsi` kaydı olan hayat | **127**/150 | 47/150 |
+| ilk görülme yaşı (min / ortanca) | **6** / 20 | 43 / 53 |
+| evlenebilir çocuğu yokken gelin/damatlı kare | **5.563** | **0** |
+| kardeşin eşi için açılmış kişi kaydı | **15.213** | **0** |
+| kardeş evliliğinin ad düzeyinde kaydı | 16.546 | 16.971 |
+
+**Bu bir tasarım kararı değil, hata.** Niyet zaten yazılıydı:
+`docs/DESIGN_REVIEW_QUEUE.md` "**kardeşin eşi kişi kaydı değil,
+yalnızca bir ad** (D-121 ile aynı sınırlama)" diyor. Kod kendi
+belgelenmiş niyetini ihlal ediyordu, o yüzden onay beklemeden
+düzeltildi: eş kaydı yalnızca `cocuk` ve `uveyCocuk` için açılıyor.
+Bilgi kaybı yok — kardeşin evliliği kendi kaydında duruyor
+(`spouseName` + kilometre taşı); yalnızca `spousePersonId` null oluyor
+ve onu okuyan yollar null'ı zaten karşılıyor.
+
+**Etkilediği yerler:** İlişkiler ekranında olmayan bir çocuğun eşi
+görünüyordu; `InLawRelations` kayın aile olayları o kişiyle
+çıkıyordu (ekranda okunan satır buydu); `interaction_policy` ve
+`kinship` onu çocuğun eşi sayıyordu. **Eski kayıtlar
+dokunulmadı** (depo kuralı: kayıt silinmez, donar) — düzeltme yeni
+hayatlarda geçerli.
+
+**Bekçi:** `app/test/paket_da_gelin_damat_test.dart` — 3 bölüm.
+Gelin/damat varsa evlenebilir yaşta çocuk da olmalı (bulunan karede,
+kurulan değil), en erken görülme yaşı 40'ın altına düşmemeli (ölçüm
+43), kardeş evliliği ad düzeyinde kaydedilmeli ama kişi kaydı
+açılmamalı.
+
+**Isırma denemesi:** kapı söküldü → üç bölüm de patladı ve eski
+sayılar birebir geri geldi (çocuksuz kare 5.563, en küçük yaş 6,
+kardeşin eşi için 15.213 kişi kaydı).
+
+**Düzeltme gizli bir araç hatasını da açığa çıkardı.** Tam süitte
+`ekran_dokumu_test.dart`'ın "70 yaşında yaşlı" dökümü patladı:
+"Found 0 widgets with text 'Rastgele bir hayat'". Sebep benim
+içeriğim değil, dökümün `ac()` yardımcısı: `pumpWidget` aynı tipte bir
+kök widget'ı yeniden basınca State korunuyor, uygulama oyun ekranında
+kalıyor ve başlangıç düğmesi bulunamıyor. Hata **hiç görünmemişti**
+çünkü ilk tohum her zaman 70'e ulaşıyordu, yani **yeniden açma yolu
+hiç yürünmemişti**. Paket DA zar akışını kaydırınca ilk tohum ölmeden
+70'e varmadı, döngü ikinci tohuma geçti ve araç çöktü. Düzeltme: her
+açılışa ayrı `ValueKey` + başlangıç ekranının geldiğini doğrulayan bir
+`expect` (artık sessizce tıklamaya çalışmıyor, gerekçeli patlıyor).
+Rutin bu tuzağı zaten not etmiş ("uygulamayı iki kez açma"); not
+`ekran_dokumu_ozel_durum_test.dart` için alınmıştı, bu dosyada
+korumasız duruyordu.
+
+**Bir tohum kırılganlığı daha.** `full_life_integration_test.dart`'ın
+"geçmiş evlilik kayıtta kalır" testi tek tohuma (19) bağlıydı ve o
+hayatın 28 yaşına kadar yaşamasını varsayıyordu; zar kayınca hayat daha
+önce bitti ve test "ölmedi" iddiasında patladı. Testin konusu geçmiş
+evliliğin kayıtta kalması, hangi tohumun 28'e ulaştığı değil: artık
+ulaşan tohum **aranıyor** (40 tohuma kadar). Eşik düşürülmedi.
+
+**Tam süit:** 3772 geçti, 17 atlandı; tek hata yukarıdaki tohum
+kırılganlığıydı ve süit başladıktan sonra yalnızca o test dosyası
+değişti, o da ayrıca koşulup doğrulandı. `flutter analyze`: temiz.

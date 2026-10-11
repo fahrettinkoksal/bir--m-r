@@ -380,10 +380,27 @@ void main() {
   });
 
   test('geçmiş evlilik ve ortak anılar hayat boyu kayıtta kalır', () {
-    final GameController controller = GameController(random: Random(19));
+    // **Tohum aranır, sabitlenmez (Paket DA).** Tek tohuma (19)
+    // bağlıydı ve 28 yaşına kadar yaşamasını varsayıyordu; Paket DA
+    // zar akışını kaydırınca o hayat daha önce bitti ve test "ölmedi"
+    // iddiasında patladı. Testin konusu geçmiş evliliğin kayıtta
+    // kalması, hangi tohumun 28'e ulaştığı değil: artık ulaşan tohum
+    // **bulunuyor**.
+    GameController? bulunan;
+    for (int tohum = 19; tohum < 19 + 40; tohum++) {
+      final GameController deneme = GameController(random: Random(tohum));
+      deneme.startNewLife(mode: StartMode.tamamenRastgele);
+      advanceToAge(deneme, 28);
+      if (!deneme.state!.deceased && deneme.state!.player.age >= 28) {
+        bulunan = deneme;
+        break;
+      }
+      deneme.dispose();
+    }
+    expect(bulunan, isNotNull,
+        reason: '40 tohumda 28 yaşına kadar yaşayan hayat bulunamadı');
+    final GameController controller = bulunan!;
     addTearDown(controller.dispose);
-    controller.startNewLife(mode: StartMode.tamamenRastgele);
-    advanceToAge(controller, 28);
     expect(controller.state!.deceased, isFalse);
 
     final Gender karsi = controller.state!.player.gender == Gender.erkek

@@ -137,7 +137,28 @@ abstract final class ChildMarriage {
     //
     // Kimlik **evlilikten** türetiliyor, yıl ya da sayaçtan değil:
     // aynı evlilik her yıl yeni bir eş üretemez (§16, §54).
-    final Person? es = state == null
+    // **Paket DA.** Eş kaydı yalnızca **çocuğun** eşi için açılır.
+    //
+    // `maybeMarry` kardeş, üvey kardeş, yarım kardeş ve üvey çocuk için
+    // de çağrılıyor (`life_progression`'daki `kendiEvliligiOlanlar`,
+    // Paket AP §23'ün yeniden evlenme döngüsü). `_createSpouse` ise
+    // bağı **sabit** `cocugunEsi` yazıyordu; yani kardeşin eşi
+    // oyuncunun gelini/damadı olarak kaydediliyordu.
+    //
+    // Ölçüldü (150 bot hayatı): 150 hayatın **127'sinde** `cocugunEsi`
+    // kaydı vardı, ilk görülme ortanca **20 yaş**, en küçüğü **6**; o
+    // karelerin hepsinde oyuncunun **hiç çocuğu yoktu**. Ekranda da
+    // görünüyordu: 21 yaşındaki oyuncunun günlüğünde "Gelin Yasemin
+    // bu sabah kapıyı çaldı" satırı (`InLawRelations`).
+    //
+    // Niyet zaten yazılıydı: `docs/DESIGN_REVIEW_QUEUE.md` "kardeşin
+    // eşi kişi kaydı değil, yalnızca bir ad" diyor. Evlilik kardeşin
+    // kendi kaydında duruyor (`spouseName`, kilometre taşı); kayıp
+    // yalnızca `spousePersonId` oluyor ve onu okuyan yollar null'ı
+    // zaten karşılıyor.
+    final bool gelinDamatOlur = relation == RelationType.cocuk ||
+        relation == RelationType.uveyCocuk;
+    final Person? es = (state == null || !gelinDamatOlur)
         ? null
         : _createSpouse(
             state: state,

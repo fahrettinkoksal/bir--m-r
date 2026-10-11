@@ -718,6 +718,30 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   Sessiz iz sayacı "22'yi geçmesin" diyordu; 22 izin hepsine karşılık
   yazıldıktan sonra ölçüt 0'a çekildi. Düşürmeyi atlasam sayı sessizce
   geri tırmanabilirdi ve test yine yeşil kalırdı.
+- **Paket DA.** Rutin notunu ve kendi eski raporlarımı **doğrula**.
+  "Yeni doğan bebek karesi 120 hayatta bulunamadı" diye yazılıydı; bir
+  kez koşunca dökümün 12 karesinin hepsinin bulunduğu çıktı. Bayat bir
+  "bulunamadı" notu, bulunmuş bir kareyi okumamıza engel oluyordu.
+  Ama *bulunmak* ile *okunmak* ayrı: o kareleri gözle okuyunca gerçek
+  bir hata çıktı.
+- **Paket DA.** Bir parametreyi okuyan fonksiyon, onu **kullanmak**
+  zorunda. `maybeMarry` doğru bağı `relation` ile alıyordu ama
+  `_createSpouse` eşin bağını sabit `cocugunEsi` yazıyordu: kardeşin
+  eşi oyuncunun gelini oldu, 150 hayatın 127'sinde, en küçüğü 6 yaşında.
+  Parametresi olup kullanılmayan bir alan, sessiz yanlış veri üretir.
+- **Paket DA.** Kuyruk bazen cevabı **zaten** yazmış oluyor. "Kardeşin
+  eşi kişi kaydı değil, yalnızca bir ad" satırı kuyrukta duruyordu;
+  kod onu ihlal ediyordu. Bu yüzden düzeltme onay beklemedi: belgelenmiş
+  niyetle kodun çelişmesi tasarım sorusu değil, hatadır. Önce kuyruğa
+  bak; orada yazılı niyet, bulgunun hangi sınıfa girdiğini söyler.
+- **Paket DA.** Zar akışını kaydıran bir düzeltme, **hiç
+  yürünmemiş yolları** da açar. Paket DA'nın faturası iki gizli araç
+  hatası oldu: dökümün `ac()` yardımcısı uygulamayı ikinci kez
+  açamıyordu (ilk tohum her zaman yettiği için o yol hiç
+  yürünmemişti) ve bir bütünleşme testi tek tohumun 28 yaşına kadar
+  yaşamasını varsayıyordu. İkisi de "yeşil" görünüyordu çünkü kimse o
+  dalı denememişti. Üretim kodunu kaydıran paket, aramalı testlerin
+  tohum varsayımlarını da gözden geçirmeli.
 
 ## Pano
 

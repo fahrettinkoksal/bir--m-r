@@ -91,6 +91,8 @@ void main() {
   /// satırları göründü. Bu bir yerleşim testi değil döküm: amacı
   /// metnin tamamını görmek, gerçek telefonu taklit etmek değil.
   /// Yerleşimi `ui_smoke_life_test.dart` gerçek ölçüde sınıyor.
+  int acilisSayaci = 0;
+
   Future<void> ac(WidgetTester tester, {int? tohum}) async {
     tester.view.physicalSize = const Size(1200, 14000);
     tester.view.devicePixelRatio = 3;
@@ -100,9 +102,24 @@ void main() {
       controller.dispose();
       controller = GameController(random: Random(tohum));
     }
-    await tester.pumpWidget(BirOmurApp(controller: controller));
+    // **Paket DA.** Her açılışa ayrı `key` veriliyor. `pumpWidget` aynı
+    // tipte bir kök widget'ı yeniden basınca State korunuyor, yani
+    // uygulama oyun ekranında kalıyor ve "Rastgele bir hayat" düğmesi
+    // bulunamıyordu. Hata gizliydi: ilk tohum her zaman istenen yaşa
+    // ulaştığı için **yeniden açma yolu hiç yürünmemişti**. Paket DA
+    // zar akışını kaydırınca ilk tohum 70'e ulaşmadı, döngü ikinci
+    // tohuma geçti ve araç patladı.
+    acilisSayaci++;
+    await tester.pumpWidget(BirOmurApp(
+      key: ValueKey<int>(acilisSayaci),
+      controller: controller,
+    ));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Rastgele bir hayat'));
+    final Finder baslat = find.text('Rastgele bir hayat');
+    expect(baslat, findsOneWidget,
+        reason: 'başlangıç ekranı gelmedi: uygulama yeniden açılmamış '
+            'olabilir (açılış $acilisSayaci)');
+    await tester.tap(baslat);
     await tester.pumpAndSettle();
   }
 
