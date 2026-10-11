@@ -168,6 +168,20 @@ abstract final class Travel {
         'Sağlığın ${bant.label}; şu an yola çıkacak durumda değilsin.',
       );
     }
+    // **Paket DB.** Cezaevindeyken şehir dışına çıkılmaz. Bu kapı
+    // yoktu: denetim dönemi (D-161, tahliye **sonrası**) kapalıyken
+    // hükümlülüğün kendisi açıktı. Ekranda okundu — 46 yaşında
+    // "Bir yıl daha içeride geçti" ile aynı yılın günlüğünde
+    // "Kayseri gezisi: Yalçın ile gittin (Otobüs)" satırı vardı.
+    // Ölçüldü: 150 hayatta 19 cezaevi karesi, o karelerde 1 gezi.
+    // Oyunun kendi duruşu bu: aktivite (`activity_engine`), işletme
+    // (`business_engine`), hayvan bakımı (`pet_care`) ve iş başvurusu
+    // (`job_market`) içeride zaten kapalı.
+    if (state.isImprisoned) {
+      return const InteractionAvailability.blocked(
+        'Cezaevindesin; şehir dışına çıkamazsın.',
+      );
+    }
     // Denetim döneminin somut yaptırımı (D-161): şehir dışına çıkmak
     // kapalı. Gerekçe açıkça yazılır.
     final String denetim = LegalEngine.probationBlockReason(state);
@@ -383,6 +397,20 @@ abstract final class Travel {
       return InteractionAvailability.blocked(
         '$prototypeOnlyMinAge yaşından itibaren tura çıkabilirsin.',
       );
+    }
+    // **Paket DB.** Tur da şehir dışına çıkmaktır; `availability`'deki
+    // iki kapı burada yoktu. Cezaevindeyken tur kapalı (yeni kapı) ve
+    // denetim dönemi de burada geçerli: D-161 "şehir dışına çıkmak
+    // kapalı" diyor, tur ikinci bir yoldu ve kapısız duruyordu. Yeni
+    // kural yazılmadı, var olan kural ikinci yola da uygulandı.
+    if (state.isImprisoned) {
+      return const InteractionAvailability.blocked(
+        'Cezaevindesin; tura çıkamazsın.',
+      );
+    }
+    final String turDenetim = LegalEngine.probationBlockReason(state);
+    if (turDenetim.isNotEmpty) {
+      return InteractionAvailability.blocked(turDenetim);
     }
     if (tripsThisAge(state) >= prototypeOnlyMaxTripsPerAge) {
       return const InteractionAvailability.blocked(

@@ -8945,3 +8945,51 @@ ulaşan tohum **aranıyor** (40 tohuma kadar). Eşik düşürülmedi.
 **Tam süit:** 3772 geçti, 17 atlandı; tek hata yukarıdaki tohum
 kırılganlığıydı ve süit başladıktan sonra yalnızca o test dosyası
 değişti, o da ayrıca koşulup doğrulandı. `flutter analyze`: temiz.
+
+## Paket DB — içerideyken dışarının iki kapısı açıktı (11 Ekim 2026)
+
+Paket DA'da başladığım işi bitirdim: dökümün okunmamış kalan iki
+karesini de gözle okudum. **Denetim dönemi** karesinde (Riskli hayat,
+tohum 3, yaş 47) 46 yaş günlüğünde şu satırlar **aynı yılda** duruyordu:
+
+> Bir yıl daha içeride geçti. Dışarısı kendi hâlinde akıyor.
+> Kayseri gezisi: Yalçın ile gittin (Otobüs), 8.100 ₺ harcadın.
+> Vlog çek: sabaha kadar bildirim yağdı. 54 abone geldi.
+
+Yani oyuncu cezaevindeyken şehir dışına çıkıyor ve vlog çekiyor.
+
+**Ölçüm (150 bot hayatı, tohum 80000+i):** 19-20 cezaevi karesi / 13-14
+hayat; o karelerde **1 gezi** ve **13 paylaşım** gerçekleşmiş.
+
+**Oyunun kendi duruşu zaten tutarlıydı:** aktivite
+(`activity_engine`), işletme (`business_engine`), hayvan bakımı
+(`pet_care`), iş başvurusu (`job_market`) ve olaylar (`event_engine`)
+içeride kapalı. Açık kalan iki delik seyahat ve paylaşımdı. Üçüncü bir
+şey de çıktı: `tourAvailability` ne cezaevini ne de **denetim
+dönemini** görüyordu — D-161 "şehir dışına çıkmak kapalı" diyor ve tur
+ikinci bir yoldu. **Yeni kural yazılmadı**, var olan duruş eksik kaldığı
+üç yere uygulandı:
+
+- `Travel.availability` → "Cezaevindesin; şehir dışına çıkamazsın."
+- `Travel.tourAvailability` → cezaevi + D-161'in denetim gerekçesi
+- `SocialEngine.postAvailability` → "Cezaevindesin; içeriden paylaşım
+  yapamazsın." (hesap kapanmaz, donar)
+
+Üçü de eylem yolunda etkili: `Travel.take`, `Travel.takeTour` ve
+`SocialEngine`'in paylaşım yolu uygunluğu zaten denetliyor.
+
+**Bekçi:** `app/test/paket_db_icerdeki_hayat_test.dart` — 3 bölüm.
+İçeride gezi/paylaşım gerçekleşmemesi (ölçüm 1 ve 13 → 0), kapıların
+bulunan karede kapalı okunması, denetim döneminde tur kapısının kapalı
+olması.
+
+**§3'ün ölçütünü düzelttim.** İlk yazışımda denetim dönemini
+`probationUntilAge != null` diye ölçtüm ve süresi **geçmiş** kayıtları
+da saydım: 254 karenin 224'ünde kapı haklı olarak açıktı, yani test
+kendi hatasını kod hatası sanıyordu. `LegalEngine.onProbation` ile
+gerçek ölçüt kullanılınca kare sayısı **14** oldu ve açık kapı **0**.
+Kayıtta bir alanın dolu olması, o dönemin hâlâ sürdüğü anlamına gelmez.
+
+**Isırma denemesi:** üç kapı söküldü → üç bölüm de patladı ve eski
+sayılar geri geldi (içeride 1 gezi + 13 paylaşım, 43 açık gezi kapısı,
+8 açık paylaşım kapısı, denetimde 9 açık tur kapısı).

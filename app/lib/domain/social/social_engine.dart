@@ -209,6 +209,17 @@ class SocialEngine {
     GameState state,
     SocialContent content,
   ) {
+    // **Paket DB.** Cezaevindeyken paylaşım yapılmaz. Bu kapı yoktu
+    // ve ekranda okundu: "Bir yıl daha içeride geçti" ile aynı yılın
+    // günlüğünde "Vlog çek: sabaha kadar bildirim yağdı. 54 abone
+    // geldi." satırı vardı. Ölçüldü: 150 hayatta 19 cezaevi karesi,
+    // o karelerde 13 paylaşım. Hesap kapanmaz, donar: tahliye olunca
+    // kaldığı yerden devam eder.
+    if (state.isImprisoned) {
+      return const InteractionAvailability.blocked(
+        'Cezaevindesin; içeriden paylaşım yapamazsın.',
+      );
+    }
     final SocialAccount? account = state.accountFor(content.platform);
     if (account == null) {
       return InteractionAvailability.blocked(

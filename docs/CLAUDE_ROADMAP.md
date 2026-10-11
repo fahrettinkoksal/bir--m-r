@@ -742,6 +742,18 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yaşamasını varsayıyordu. İkisi de "yeşil" görünüyordu çünkü kimse o
   dalı denememişti. Üretim kodunu kaydıran paket, aramalı testlerin
   tohum varsayımlarını da gözden geçirmeli.
+- **Paket DB.** Bir kuralın **ikinci yolu** kapısız kalabilir. D-161
+  denetim döneminde şehir dışını kapatıyordu ama yalnızca `availability`
+  yolunda; `tourAvailability` ikinci bir çıkış yoluydu ve iki kapıyı da
+  (cezaevi, denetim) görmüyordu. Bir kural yazıldığında "bu duruma
+  giden kaç yol var?" diye sormak gerekiyor — kapıyı bir yola koymak,
+  kuralı uygulamak değil.
+- **Paket DB.** Kayıtta bir alanın **dolu** olması, o dönemin hâlâ
+  sürdüğü anlamına gelmez. Denetim dönemini `probationUntilAge != null`
+  ile ölçtüm ve süresi geçmiş kayıtları da saydım: 254 karenin 224'ünde
+  kapı haklı olarak açıktı, bekçim kendi ölçüm hatasını kod hatası
+  sandı. Doğru ölçüt kodun kendi yüklemiydi (`LegalEngine.onProbation`)
+  ve kare sayısı 14'e indi.
 
 ## Pano
 
