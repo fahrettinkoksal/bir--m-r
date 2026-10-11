@@ -581,6 +581,33 @@ bir gerileme testiyle sabitlendi (`test/paket_op_test.dart`).
 > (`SchoolClubEngine.standingLabel`), motor ve olay kapıları
 > değişmedi. Futbol zincirinin seyrekliği Q-224'te duruyor.
 
+> **GÜNCELLEME (11 Ekim 2026, Paket CY) — ölçümün kendisi bir kapıyı
+> kapatıyordu.** §4.2'nin "oyuncu gibi oynanarak" ölçümü sosyal medyayı
+> **açıyordu** ama kullanmıyordu: bot yılda **bir** paylaşım yapıyor,
+> oyun ise altısına izin veriyor
+> (`SocialEngine.prototypeOnlyMaxPostsPerAge = 6`). Sonuç, 200 hayatta:
+>
+> | | yılda 1 paylaşım | ilgisi kadar (düzeltildi) |
+> |---|---|---|
+> | hesaplı karede en yüksek ün | 3 | 100 (tavan) |
+> | en yüksek takipçi | 1.994 | 2.353.481 |
+> | hesap + ün ≥ 5 | 0 hayat | 9 hayat |
+> | hesap + ün ≥ 40 | **0 hayat** | **5 hayat** |
+>
+> Yani `media_catalog.dart`'ın **14 medya işi** ve ün 40'ta açılan Medya
+> bölümü, ayrıca iki sosyal olay (`un_etkinlik_daveti` ün 5,
+> `un_is_daveti` ün 8) ölçümde hiç görünmüyordu — "sunulmayan içerik"
+> değil, **ölçülmeyen** içerik. Araç düzeltildi (bot ilgisi kadar
+> paylaşıyor, ünü önemseyen arketip ikinci platformu da açıyor) ve
+> dördü de aday oluyor. Kalıcı bekçi:
+> `app/test/paket_cy_un_tavani_test.dart`.
+>
+> Düzeltme ikinci bir soru açtı: erişim formülü paylaşım başına
+> **çarpımsal** (`takipçi × 0,06` her paylaşımda), yani yılda 1 paylaşım
+> ≈2.000 takipçi, yılda 6 paylaşım ≈2,3 milyon. Takipçinin doyma noktası
+> yok. Bu bir **denge kararı**: **Q-235**'te öneri ve varsayılanla
+> Faho'yu bekliyor; hiçbir sayıya dokunulmadı.
+
 ### 4.3 Kataloglar dar
 
 | Katalog | Ölçüldüğünde | **Bugün (D-152)** |

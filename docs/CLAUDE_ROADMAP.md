@@ -680,6 +680,26 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   dosyaya taşıdığımda o test artık onu görmüyordu — yani düzelmiş gibi
   oldu. Kapsamı kaybetmemek için denetimi kendi bekçimde daha genişine
   kurdum. Taşınan kod, taşınan sorumluluk demek değil.
+- **Paket CY.** "Hiç olmuyor" bulgusunun ilk şüphelisi **ölçen
+  araçtır**. Bir hikâye izi 150 hayatta sıfır kez yazılıyordu; sebebi
+  kapı ya da seyreklik değil, botun yılda bir paylaşım yapmasıydı —
+  oyun altısına izin veriyor. Araç kapasitenin altıda birini
+  kullandığı için **14 medya işi ve bir bölümün tamamı** ölçümde
+  görünmüyordu. "Sunulmayan içerik" ile "ölçülmeyen içerik" aynı şey
+  değil; ayrımı yapmanın yolu aracın oyunun verdiği hakkı kullanıp
+  kullanmadığını saymak.
+- **Paket CY.** Bir aracı düzeltmek, gizlenmiş bir **denge sorusunu**
+  açığa çıkarabilir. Bot ilgisi kadar paylaşınca takipçi 2.000'den
+  2,3 milyona çıktı: erişim formülü paylaşım başına çarpımsal ve
+  takipçinin doyma noktası yok. Bu benim düzeltmem değil; ölçtüm,
+  sayıları yazdım, **Q-235**'e öneri ve varsayılanla koydum ve hiçbir
+  `prototypeOnly` sayısına dokunmadım. Araç hatası benim, denge kararı
+  Faho'nun.
+- **Paket CY.** Bir bekçi, **tartışması süren** bir sayıyı eşiğe
+  bağlamamalı. Takipçi tavanı (2,3 milyon) Q-235'te açık bir soru, bu
+  yüzden bekçi onu yalnızca yazdırıyor; eşiğe bağladığım şey
+  tartışmasız olan: o içeriğin oyuncunun yolunda **ulaşılabilir**
+  kalması. Kalibrasyon onaylandığında bekçi kırmızıya dönmez.
 
 ## Pano
 

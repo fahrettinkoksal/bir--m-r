@@ -8686,3 +8686,84 @@ uyumunu kaynak düzeyinde.
 
 **Tam süit** koşuldu (içerik eklemek bütün hayatların zar akışını
 kaydırır — Paket CN dersi; hedefli küme yetmez).
+
+## Paket CY — ölçüm aracı bir kariyeri gizliyordu (11 Ekim 2026)
+
+Paket AR'ın bıraktığı listeyle başladım: **22 sessiz hikâye izi** —
+oyuncunun seçimi bir işaret bırakıyor ama hiçbir yer okumuyor. Hangisine
+karşılık yazmanın değdiğini anlamak için her birini ölçtüm (150 hayat,
+`onPreAge` ile `storyFlags` taraması): kaç hayatta yazılıyor ve hangi
+yaşta.
+
+Bir satır sırıttı: `sosyal_etkinlige_gitti` **150 hayatta 0 kez**.
+İzi yazan olay `un_etkinlik_daveti` ve kapısı `requiresSocialAccount` +
+`minFame: 5`.
+
+**Ölçüm (200 hayat, bütün arketipler).** Hesaplı karelerde en yüksek ün
+**3**, en yüksek takipçi 1.994. `hesap + ün ≥ 5`: **0 hayat**. Yani
+kapı hiç açılmıyordu. Aynı tarama `minFame: 8` (`un_is_daveti`) ve
+`kMediaSectionMinFame = 40` için de sıfır verdi — **14 medya işi ve
+Medya bölümünün tamamı** ölçümde hiç görünmüyordu.
+
+**Kök neden oyun değil, araç.** `test/support/player_bot.dart` yılda
+**bir** paylaşım yapıyordu (0,7 olasılıkla), oyun ise altısına izin
+veriyor (`SocialEngine.prototypeOnlyMaxPostsPerAge = 6`); üstüne bot ilk
+platformu açıp `break` ediyordu, yani çapraz paylaşım motoru
+(`prototypeOnlyCrossShare`) hiç ölçülmüyordu. Araç kapasitenin altıda
+birini kullanıyordu.
+
+**Düzeltildi (araç tarafı).** Bot artık ilgisi kadar paylaşıyor
+(`round(socialDesire × 6)`, her paylaşım için ayrıca `socialDesire`
+zarı) ve `socialDesire ≥ 0,5` olan arketip 18'inden sonra ikinci
+platformu da açıyor. Bu bir **optimizasyon değil**: ünü önemseyen
+oyuncu (social arketipi, `socialDesire` 0,95) yılda birkaç kez paylaşır.
+
+**Aynı 200 hayat, düzeltmeden sonra:**
+
+| | yılda 1 paylaşım | ilgisi kadar |
+|---|---|---|
+| hesaplı karede en yüksek ün | 3 | **100** (tavan) |
+| en yüksek takipçi | 1.994 | **2.353.481** |
+| bir yılda en çok paylaşım | 1 | **6** |
+| iki platformlu hayat | 0 | **22** |
+| hesap + ün ≥ 5 | 0 | **9** |
+| hesap + ün ≥ 40 | **0** | **5** |
+| aday olan ün olayı | 1/4 (`un_tanisma`) | **4/4** |
+
+**İkinci bulgu, karar Faho'nun.** Düzeltme erişim formülünü açığa
+çıkardı: `kazanç = (taban + karakter × 0,5 + takipçi × 0,06) ×
+tekrarCezası × şans × sporÇarpanı`. `takipçi × 0,06` **her
+paylaşımda** uygulanıyor, yani yıllık büyüme ≈ `1,06^paylaşım`:
+yılda 1 paylaşımda yetişkin ömrü ≈10 kat (2.000 takipçi), yılda 6
+paylaşımda ≈2,6 milyon kat. Arada basamak yok ve takipçinin **doyma
+noktası yok** (ün 100'de duruyor, takipçi sınırsız) — oysa
+`prototypeOnlyCarryOverCap = 40.000` tasarımın on binler mertebesini
+beklediğini gösteriyor. Bu bir denge kararı: **Q-235**'e öneri
+(doyma terimi), varsayılan ve iki alternatifle yazıldı. **Hiçbir
+`prototypeOnly` sayısına dokunulmadı.**
+
+**Bekçi:** `app/test/paket_cy_un_tavani_test.dart` — 4 bölüm. Medya
+kapısının ulaşılabilirliği (ün ≥ 5: taban 4, ün ≥ 40: taban 2; ölçüm
+9 ve 5), dört ün olayının gerçek karede aday olması, aracın oyunun
+verdiği paylaşım hakkını kullanması (bir yılda ≥ 3; ölçüm 6) ve ikinci
+platformun açılması, kataloğun en yüksek eşiğinin (78) ün tavanının
+(100) altında kalması.
+
+**Bekçi neyi iddia etmiyor:** takipçinin milyonlara çıkmasının doğru
+denge olduğunu. Tavan yalnızca **yazdırılıyor**, eşiğe bağlı değil —
+Q-235 onaylanıp doyma eğrisi eklenirse bu dosya kırmızıya dönmesin.
+
+**Isırma denemesi.** Bot eski hâline (yılda tek paylaşım) döndürüldü:
+§1, §2, §3 patladı ve eski sayılar birebir geri geldi — ün 3, takipçi
+1.994, bir yılda 1 paylaşım, iki platformlu hayat 0, aday olan ün olayı
+yalnız `un_tanisma`.
+
+**Tam süit** araç değişikliğinden sonra baştan koşuldu: 3762 geçti, 17
+atlandı, **0 hata** (40:15). Araç bütün hayatların zar akışını
+kaydırdığı için hedefli küme yetmezdi.
+
+**Kalan 21 sessiz iz duruyor.** Ölçümleri çıkarıldı (hangi iz kaç
+hayatta, hangi yaşta yazılıyor); karşılık olayları sıradaki içerik
+paketinin işi. En sık yazılanlar: `aile_sofrasina_katildi` 86/150,
+`orta_harcadi` 79/150, `aile_arasi_ara_buldu` 71/150, `gezide_tanisti`
+33/150, `evlilik_disi_cocuk` 32/150, `suc_direksiyon_uyarisi` 26/150.

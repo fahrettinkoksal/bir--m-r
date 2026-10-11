@@ -63,6 +63,7 @@ import 'package:bir_omur/domain/sports/school_club_engine.dart';
 import 'package:bir_omur/data/pet_catalog.dart';
 import 'package:bir_omur/domain/activities/travel.dart';
 import 'package:bir_omur/domain/models/trip.dart';
+import 'package:bir_omur/domain/models/social_account.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
 import 'package:bir_omur/domain/pets/pet_care.dart';
 import 'package:bir_omur/data/shop_catalog.dart';
@@ -3245,14 +3246,51 @@ void _handleActivities(
       }
       if (kesildiMi()) return;
     }
+    // **Paket CY.** Bot yılda **bir** paylaşım yapıyordu, oyun ise
+    // `SocialEngine.prototypeOnlyMaxPostsPerAge` kadarına (6) izin
+    // veriyor. Ölçülen sonuç: hesaplı karelerde ün tavanı 3'tü ve
+    // `minFame: 5` kapısı 200 hayatta hiç açılmadı. Araç kapasitenin
+    // altıda birini kullanıyordu; artık ilgisi kadar paylaşıyor.
+    // Bu bir **optimizasyon değil**: ünü önemseyen oyuncu (social
+    // arketipi, socialDesire 0,95) yılda birkaç kez paylaşır.
     final GameState g = c.state!;
-    if (g.socialAccounts.isNotEmpty && rng.nextDouble() < 0.7) {
-      final SocialPlatform p = g.socialAccounts.first.platform;
-      final List<SocialContent> icerik = contentsFor(p);
-      if (icerik.isNotEmpty && c.remainingSocialPosts(p) > 0) {
-        c.postContent(icerik[rng.nextInt(icerik.length)]);
-        if (kesildiMi()) return;
+    if (g.socialAccounts.isNotEmpty) {
+      // İlgi ne kadar yüksekse o yıl o kadar denenir; en az bir.
+      final int hedef =
+          (profile.socialDesire * SocialEngine.prototypeOnlyMaxPostsPerAge)
+              .round()
+              .clamp(1, SocialEngine.prototypeOnlyMaxPostsPerAge);
+      for (final SocialAccount hesap in g.socialAccounts) {
+        final SocialPlatform p = hesap.platform;
+        final List<SocialContent> icerik = contentsFor(p);
+        if (icerik.isEmpty) continue;
+        for (int n = 0; n < hedef; n++) {
+          if (c.remainingSocialPosts(p) <= 0) break;
+          if (rng.nextDouble() >= profile.socialDesire) break;
+          c.postContent(icerik[rng.nextInt(icerik.length)]);
+          if (kesildiMi()) return;
+        }
       }
+    }
+
+    // İkinci platform: ünü gerçekten önemseyen oyuncu tek yerde
+    // kalmaz. Çapraz paylaşım motoru (prototypeOnlyCrossShare) zaten
+    // yazılmış ama bot ilk platformda `break` ediyordu.
+    final GameState g2 = c.state!;
+    if (profile.socialDesire >= 0.5 &&
+        g2.socialAccounts.length < 2 &&
+        g2.player.age >= 18 &&
+        rng.nextDouble() < profile.socialDesire * 0.4) {
+      for (final SocialPlatform p in SocialPlatform.values) {
+        if (g2.socialAccounts.any((SocialAccount a) => a.platform == p)) {
+          continue;
+        }
+        if (c.socialAccountAvailability(p).isAllowed) {
+          c.openSocialAccount(p);
+          break;
+        }
+      }
+      if (kesildiMi()) return;
     }
     // Sponsorluk teklifi varsa değerlendir.
     if (c.state!.sponsorOffer != null) {
