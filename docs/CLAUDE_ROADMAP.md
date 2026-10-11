@@ -784,6 +784,32 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   kendisini de denetlemek** gerekiyor; çelişen iki satır varsa koda
   bakmalı.
 
+- **Paket DD.** Bir hata bulduğunda **sınıfını** tara. DC'nin kusuru
+  "kalıcı durum bir şeyi ömür boyu kapatıyor, geri dönüş yolu
+  yazılmamış" sınıfındandı; aynı soruyu bütün kalıcı durumlara sormak
+  ikinci bir örneği (%45 oranla, DC'nin %1,7'sinden çok daha büyük) ve
+  üçüncü bir şüpheliyi ortaya çıkardı. Tek bir hatayı düzeltip geçmek,
+  o hatanın en ucuz örneğini düzeltmek olabilir.
+- **Paket DD.** "Karar bekliyor mu?" ile "kapı açık mı?" **iki ayrı
+  sorudur**. Ekran ikisini tek yüklemle soruyordu
+  (`needsAfterSchoolChoice`) ve o yüklem "üniversiteye gitmedim" izini
+  okuyor; sonucu, kararı veren oyuncunun kapısının ömür boyu
+  kapanması oldu. Bir yüklemi ikinci bir soru için kullanmadan önce
+  adını okumak yetiyor: adı "needs", "awaiting", "pending" ile
+  başlıyorsa o bir **bekleme** yüklemidir, bir **izin** yüklemi değil.
+- **Paket DD.** Önceki bir düzeltmeyle çelişen bir bulgu, o düzeltmeyi
+  geri almak için gerekçe değil. Satır eskiden 70 yaşındakine bayat
+  duruyordu ve düzeltilmişti; benim bulgum kapının kapanmasıydı.
+  İkisini birden çözmek için satırı ikiye ayırmak gerekti: bekleyen
+  karar ayrı, yapılabilir eylem ayrı. "Ya o ya bu" diye bakarsam
+  birinin faturasını diğerine ödetirim.
+- **Paket DD.** Her tutarsızlık benim düzeltmem değil. Emeklilikte de
+  aynı şekil vardı (motor izin veriyor, ekran kapatıyor) ama açmak
+  emekli maaşı + maaş sömürüsü demekti; bu bir **denge kararı**, bir
+  tutarsızlık düzeltmesi değil. Ölçtüm, yazdım, kuyruğa koydum
+  (Q-237) ve koda dokunmadım. Düzeltmenin bedeli oyuncunun kazancını
+  değiştiriyorsa sınır oradadır.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

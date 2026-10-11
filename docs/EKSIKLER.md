@@ -978,14 +978,20 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    hayatı, üvey ebeveyn~~ **Yapıldı (D-134 … D-141).** Çetenin dışarı
    taşması (Q-148), üvey kardeş ve miras (Q-149) duruyor.
 
-8. **Geri dönüşsüz kararların denetimi** (yeni, 11 Ekim 2026). Paket
-   DC'de çıktı: okulu bırakmak oyunun **tek geri dönüşsüz** kararıydı
-   ve 30 işi ömür boyu kapatıyordu. Açık lise o kapıyı açtı. Aynı
-   soru başka yerlerde de sorulmalı: "üniversiteye gitmedim" izi
-   (D-111) kalıcı mı olmalı, 30 yaş üstünde üniversite yolu hiç
-   açılmayacak mı (**Q-236** seçenek 4), bir hobiyi/kulübü bırakmak
-   geri alınabiliyor mu? Ucuz bir tarama: her kalıcı bayrak için
-   "bunu geri alan bir yol var mı" diye sormak.
+8. ~~**Geri dönüşsüz kararların denetimi**~~ **Yapıldı (Paket DD,
+   11 Ekim 2026).** Tarandı; dört kalıcı durum için "bunu geri alan
+   bir yol var mı, yoksa yalnızca ekran mı kapatıyor?" sorusu
+   yanıtlandı:
+
+   | Kalıcı durum | Motor | Ekran | Hüküm |
+   |---|---|---|---|
+   | Diploma yok | 13 işe izin | 0 satır | Paket DC (açık lise) |
+   | "Üniversiteye gitmedim" izi | 88/88 hayatta izin | satır ömür boyu gizli | Paket DD'de düzeltildi (%45 hayat) |
+   | Emekli | 20/55 işe izin | satır gizli | **Q-237** (sömürü riski, düzeltilmedi) |
+   | İşletme kapanmış | kurulabilir | açık | sorun yok |
+
+   Kalan: 30 yaş üstünde üniversite **eğitimi** (AÖF) hâlâ yok
+   (**Q-236** seçenek 4) ve emeklilik kararı (**Q-237**).
 
 **Claude'un kişisel görüşü (26 Eylül 2026'da güncellendi):** "hayatlar
 birbirine benziyor" görüşünün **dört dayanağının dördü de kapandı**:

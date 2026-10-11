@@ -9106,3 +9106,75 @@ Aynı karede iki merdiven aynı kelimeleri paylaşıyor: iş basamağı
 doldurdun: artık başusta sayılıyorsun" yazıyor. Ölçtüm: çakışma 55
 işten **yalnızca birinde** (`yz_sanayi_cirak`). Paket yapacak kadar
 değil, Q-236'nın konusu da değil — not olarak burada.
+
+## Paket DD — 18'inde verilen bir karar, 32'sinde 13 işi kapatıyordu (11 Ekim 2026)
+
+Paket DC'de çıkan hata bir **sınıfın** örneğiydi, bu yüzden sınıfı
+taradım: her kalıcı durum için "bunu geri alan bir yol var mı, yoksa
+yalnızca ekran mı kapatıyor?"
+
+| Kalıcı durum | Motor ne diyor | Ekran ne yapıyor | Hüküm |
+|---|---|---|---|
+| Diploma yok (`droppedOut`) | 13 işe izin | 0 satır | Paket DC |
+| **"Üniversiteye gitmedim" izi** | **88/88 hayatta en az bir bölüme izin** | satır ömür boyu gizli | **bu paket** |
+| Emekli (`isRetired`) | 20/55 işe izin, `applicationAvailability` "İZİN" | iş arama satırı gizli | **Q-237** (sömürü riski) |
+| İşletme kapanmış | yeni işletme kurulabilir | satır açık | sorun yok |
+
+### Ölçüm (197 hayat, 32 yaşında bakıldı)
+
+- **88 hayatta (%45)** `universiteye_gitmedi` izi var, lise diploması
+  var, üniversite kaydı yok.
+- Bu 88'in **hepsinde** motor en az bir bölüme izin veriyor.
+  `EducationPath.eligibilityReason` o izi **hiç okumuyor**. Örnekler:
+  puanı 93 olan bir hayatta 20/20 bölüm uygun, 72 olanda 15/20, 50
+  olanda 8/20.
+- Her birine **11-13 iş** "Üniversite mezuniyeti gerekiyor." diye
+  kapalı kalıyor.
+
+Yani 18'inde "üniversiteye gitmeyeceğim" diyen oyuncu **bir daha hiç**
+başvuramıyordu — motor izin verdiği hâlde.
+
+### Kök neden: iki ayrı soru tek yüklemle sorulmuş
+
+Ekran üniversite kapısını `needsAfterSchoolChoice`'a bağlıyordu. O
+yüklem **"karar bekliyor mu?"** sorusunu yanıtlar ve "gitmedim" izini
+okur (D-111: kararı vermiş oyuncuyu sonsuza dek bekletmemek için).
+Oysa ekranın sorması gereken soru **"kapı açık mı?"**.
+
+Yeni yüklem eklendi: `EducationPath.canApplyToUniversity` — diploma
+var, üniversite kaydı yok, bitirilmemiş. Karar kilidi ve onun yaş
+sınırı (`prototypeOnlyAfterSchoolMaxAge = 30`) **değişmedi**.
+
+### Önceki düzeltmeyle gerilim ve çözümü
+
+Aynı dosyada kayıtlı bir düzeltme vardı: satır eskiden
+`awaitingAfterSchoolChoice`'a bağlıydı ve 35/55/70 yaşındaki oyuncuya
+"Mezuniyet sonrası · Üniversiteye başvur veya iş hayatına gir" diye
+**bayat** duruyordu. Onu geri almadım: karar satırı yine karar
+kilidine bağlı. Yeni satır **ayrı** ve adı eylemin kendisi
+("Üniversiteye başvur · Lise diploman var, bölüm kaydın yok"), bayat
+bir çerçeve değil. Başvuru ekranı (`AfterSchoolPage`) zaten bu durumu
+kaldırıyordu: puanı gösteriyor, bölümleri bölüm bölüm gerekçesiyle
+listeliyor, "iş hayatına gir" düğmesi duruyor — yalnızca oraya giden
+yol kapalıydı.
+
+### Bekçi ve ısırma denemesi
+
+`app/test/paket_dd_geri_donussuz_test.dart` (4 test). §1 motorun izi
+okumadığını bulunan durumla gösterir, §2 kararı vermemiş oyuncuda iki
+yüklemin birlikte doğru olabildiğini, §3 kaydolan/bitiren için kapının
+kapandığını, §4 gerçek ekranda satırı ve başvuru sayfasını denetler.
+
+| Isırma | Sonuç |
+|---|---|
+| Yeni satırın koşulu kapatıldı | §4 düştü: `Found 0 widgets with key 'career_universiteye_basvur'` |
+
+### Emeklilik: aynı şekil, ama düzeltmedim
+
+Tarama üçüncü bir örnek buldu: 61 yaşındaki emeklide motor 55 işin
+20'sine izin veriyor ve `applicationAvailability` tek bir işte bile
+"emeklisin" demiyor; kuralı yalnızca ekran kuruyor. İlk ikisi gibi
+düzeltmedim çünkü **sömürü riski var**: emekli maaşı yürürken maaş da
+almak iki gelir demek ve bu bir denge kararı. **Q-237**'de öneri ve
+varsayılanla duruyor (önerim: dönüş açılsın, ama işe girince emekli
+maaşı kesilsin).

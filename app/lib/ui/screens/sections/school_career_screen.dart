@@ -532,6 +532,8 @@ class _CareerViewState extends State<_CareerView> {
 
     // Başlık boş kalmasın: bu yıl tıklanabilir bir eylem var mı?
     final bool eylemVar = EducationPath.needsAfterSchoolChoice(state) ||
+        // Üniversite kapısı karar kilidinden ayrı (Paket DD).
+        EducationPath.canApplyToUniversity(state) ||
         state.hasPendingInterview ||
         // Açık lise kaydı ya da kayıt olma hakkı da bir eylemdir
         // (Paket DC).
@@ -694,6 +696,29 @@ class _CareerViewState extends State<_CareerView> {
             title: 'Mezuniyet sonrası',
             subtitle: 'Üniversiteye başvur veya iş hayatına gir',
             icon: Icons.alt_route_outlined,
+            accent: BirOmurAccents.mavi,
+            onTap: () => _go(_CareerPage.mezuniyetSonrasi),
+          ),
+          const SizedBox(height: 10),
+        ]
+        // **Paket DD.** Karar kilidi kapandıktan sonra da kapı açık
+        // kalır. Yukarıdaki satır "karar bekliyor" demek; bu satır
+        // "başvurabilirsin" demek. İkisi aynı koşula bağlıydı ve
+        // sonucu şuydu: 18'inde "üniversiteye gitmeyeceğim" diyen
+        // oyuncu bir daha hiç başvuramıyordu. Ölçüldü (197 hayat, 32
+        // yaş): 88'inde (%45) bu durum var ve 88'inin hepsinde motor
+        // en az bir bölüme izin veriyor.
+        //
+        // Başlık bilerek "Mezuniyet sonrası" değil: o çerçeve 35
+        // yaşındaki bir ustabaşı için bayattı (eski ölçüm, yukarıdaki
+        // nota bakın) ve o düzeltme yerinde duruyor. Bu satır
+        // yapılabilecek **eylemi** adıyla söyler.
+        else if (EducationPath.canApplyToUniversity(state)) ...<Widget>[
+          MenuRow(
+            key: const Key('career_universiteye_basvur'),
+            title: 'Üniversiteye başvur',
+            subtitle: 'Lise diploman var, bölüm kaydın yok',
+            icon: Icons.school_outlined,
             accent: BirOmurAccents.mavi,
             onTap: () => _go(_CareerPage.mezuniyetSonrasi),
           ),
