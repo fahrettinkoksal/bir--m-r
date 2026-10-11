@@ -8316,3 +8316,44 @@ taraması o satırı adıyla gösterdi.
 
 **Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
 oynanmadı.
+
+## Paket CU — "kendi başına yaşıyorsun" dediği evde iki kişi var (11 Ekim 2026)
+
+Paket CT'nin dul karesi dökümünden çıkan üçüncü bulgu. Aynı hayatın
+iki ekranı birbirini yalanlıyordu:
+
+| ekran | satır |
+|---|---|
+| Hayat (künye) | "Malatya · Kova · **Evde seninle 2 kişi yaşıyor**" |
+| Varlıklar | "Kirada, **kendi başına yaşıyorsun**." |
+
+**Kök neden.** `LivingSituation.kirada` **nerede** yaşandığını söyler,
+**kiminle** yaşandığını değil: `Housing.residenceOf` yalnızca ev
+kaydına bakıyor. Metin ise yalnızlığı koşulsuz iddia ediyordu. Gider
+hesabının kendisi haneyi zaten görüyor (bakılan çocuk ve evdeki
+yetişkin çocuk ayrı kalem), yani çelişki yalnızca cümlede —
+`docs/WRITING_STYLE_TR.md` §12: metin durumla çelişmez.
+
+**Çözüm.** Satır kayıttan okunuyor: hane boşsa "Kirada, kendi başına
+yaşıyorsun.", değilse "Kirada yaşıyorsun; evde seninle N kişi var."
+
+**Bekçi:** `app/test/paket_cu_yalnizlik_iddiasi_test.dart` — 200 bot
+hayatında kirada geçen her kare taranıyor; hanesi olan karede
+"kendi başına" iddiası sıfır olmalı ve sayı yazılmalı, gerçekten
+yalnız karede ise yalnızlık söylenebilmeli. Ölçümün iki tarafı da
+(yalnız ve haneli kare) taban koşuluyla zorunlu tutuldu.
+
+**Isırma denemesi:** eski satır geri getirildiğinde test kırmızıya
+düştü ve somut bir örnek verdi — hanesinde **5 kişi** olan oyuncuya
+"kendi başına yaşıyorsun" yazıyordu.
+
+**Kuyruğa yazılan ürün sorusu (Q-234).** Aynı dökümde şu satır da
+vardı: *"Orhan için cenazedeydin. Masraflara katkıda bulunmadın."* —
+oyuncu, aynı yıl mirasını aldığı **kendi eşinin** cenazesinde
+"katkıda bulunmamış" sayılıyor. Cenaze bildirimi bağ türüne bakmıyor;
+eş de uzak bir yakın gibi üç seçeneği görüyor. Bu bir metin hatası
+değil **kural kararı**, o yüzden düzeltilmedi: öneri ve varsayılan
+Q-234'te.
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.

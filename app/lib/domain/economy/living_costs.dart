@@ -400,7 +400,20 @@ abstract final class LivingCosts {
       case LivingSituation.aileYaninda:
         return 'Ailenin yanında yaşıyorsun.';
       case LivingSituation.kirada:
-        return 'Kirada, kendi başına yaşıyorsun.';
+        // **Yalnızlık iddiası kayıttan okunur (Paket CU).** Bu satır
+        // eskiden koşulsuz "kendi başına yaşıyorsun" diyordu. Oysa
+        // `LivingSituation.kirada` nerede yaşandığını söyler, **kiminle**
+        // yaşandığını değil: `Housing.residenceOf` yalnızca ev
+        // kaydına bakar. Dökümün dul karesi ikisini yan yana bastı —
+        // künye "Evde seninle 2 kişi yaşıyor" derken aynı hayatın
+        // Varlıklar ekranı "kendi başına yaşıyorsun" yazıyordu
+        // (WRITING_STYLE_TR §12: metin durumla çelişmez). Gider
+        // hesabının kendisi haneyi zaten görüyordu (bakılan çocuk ve
+        // evdeki yetişkin çocuk ayrı kalem).
+        final int hane = state.household.length;
+        return hane == 0
+            ? 'Kirada, kendi başına yaşıyorsun.'
+            : 'Kirada yaşıyorsun; evde seninle $hane kişi var.';
       case LivingSituation.kendiEvinde:
         return 'Kendi evinde yaşıyorsun; kira ödemiyorsun.';
     }
