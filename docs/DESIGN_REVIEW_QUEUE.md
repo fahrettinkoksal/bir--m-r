@@ -9816,3 +9816,74 @@ emekliliği hiç sormuyor),
 (`isAranabilir && !state.career.isRetired`),
 `app/test/paket_dd_geri_donussuz_test.dart` (tarama tablosu).
 İlgili: **Q-236** (açık lise), D-111, Paket AI/2 (AbuseBot).
+
+---
+
+### Q-238 — Zincirin girişi darboğaz: "kumbara" izi 300 hayatta 2 kez konuyor
+
+**Durum:** öneri + varsayılan hazır, **kararı bekliyor.** Hiçbir ağırlığa
+dokunulmadı; bu bir denge kararı, tutarsızlık düzeltmesi değil.
+
+**Nasıl çıktı.** Paket DG'nin 22 yeni olayı zar akışını kaydırınca Paket
+BM'nin bekçisi düştü: "İlk yılların izi sonradan hiç okunmadı." Suçlu
+aranırken DG aklandı — ve asıl sayı çıktı. 2×300 hayat, `casual`
+arketipi, tohum 22000+i:
+
+| iz (0-7 bandında konuyor) | DG açık: iz → karşılık | DG kapalı: iz → karşılık |
+|---|---|---|
+| `bisikletiDendedi` | 12 → 5 | 13 → 6 |
+| `kumbaraBasladi` | **2 → 1** | **2 → 0** |
+| `harfleriSoktu` | 8 → 2 | 12 → 7 |
+| `sokakOyunu` | 19 → 11 | 18 → 9 |
+| en az bir karşılık gören hayat | 19/300 (%6,3) | 21/300 (%7,0) |
+
+İki kohort aynı: **yeni içerik bu oranı düşürmedi.** Okunma tarafı da
+sağlam çalışıyor — Paket AS/2'nin ×8 zincir katsayısı sayesinde iz bir
+kez konduğunda karşılık %25-58 ihtimalle geliyor. Darboğaz **zincirin
+girişi**: izi koyan olayın kendisi çıkmıyor. `kumbaraBasladi` hayatların
+**%0,7'sinde** konuyor; yani yazılmış bir ikinci yarı pratikte hiç
+okunmuyor (Paket CD/CE'nin "dar pencereli halka" kusurunun girişteki
+hali).
+
+**Neden öyle.** AR/3 ölçümü: yıllık aday havuzunda ortanca 80 olay ve
+~268 etkin ağırlık var, yani ağırlık 4'lük bir olayın bir yıldaki payı
+%1,5. İzi koyan olayların penceresi 0-7 arası birkaç yıl. Payı düşük ×
+penceresi kısa = giriş kapanıyor. Karşılık olayları korundu çünkü
+katsayı **yalnızca iz arayana** uygulanıyor; ilk halka normal ağırlıkta
+yarışıyor (bu, AS/2'nin bilinçli kararı: "zincire girme ihtimali
+değişmez").
+
+**Seçenekler**
+
+1. **Hiçbir şey yapma; sayıyı kabul et (önerim ve varsayılanım).** Bir
+   hayatın her izi toplaması gerekmiyor; nadirlik hikâyeyi kişisel
+   kılıyor ve oyuncu zaten tekrar oynayacak. Bekçi artık zarsız olduğu
+   için bu oran değişse de süit sessiz kalmaz. Bedeli: yazılmış dört
+   karşılıktan biri (`kumbara`) pratikte ulaşılmıyor.
+2. **Giriş halkasına küçük bir katsayı.** İz **koyan** olaylar da
+   (yalnızca 0-7 bandında, yalnızca bir kez) ×2-3 alır. Bedeli: yeni
+   bir `prototypeOnly` katsayı ve AS/2'nin "giriş ihtimali değişmez"
+   kararının gözden geçirilmesi — yani Q-190/Q-191'e dokunur.
+3. **Pencereleri genişlet.** `kumbaraBasladi`'yı koyan olayın bandı
+   0-7'den 0-10'a çıkar. Bedeli: içerik 0-7 bandı için yazıldı;
+   "kumbara biriktirmeye başladın" 10 yaşında da okunur ama ilkokul
+   havuzuyla (Paket DG) konu çakışır.
+4. **Karşılığı başka bir ize bağla.** `kumbara` karşılığı
+   `harcligiBiriktirdi` (Paket DE) izini de kabul eder. Bedeli: iki
+   paketin izleri karışır, modül kapatılınca davranış bulanıklaşır.
+
+**Benim görüşüm:** (1). Ölçüm bir hata göstermiyor, bir **dağılım**
+gösteriyor; "ORANLARI GÜZELLEŞTİRME, ÖLÇ" kuralı da burada geçerli.
+Yine de (2) sorulmaya değer: dört karşılıktan birinin hiç okunmaması
+yazılan içeriğin boşa gitmesi demek. (3) ve (4) hikâyeyi bozar.
+
+**Yapmayacağım (onay gelmeden):** `prototypeOnlyChainContinuationBoost`
+(8) ya da `prototypeOnlyActivePursuitBoost` (6) değerlerine dokunmak,
+giriş halkalarına yeni katsayı eklemek, olay pencerelerini genişletmek,
+olay ağırlıklarını yükseltmek.
+
+**Etkilenen kod:** `app/lib/domain/events/event_engine.dart`
+(`prototypeOnlyEffectiveWeight`), `app/lib/data/event_pool_early_years.dart`
+(dört iz, dört karşılık), `app/test/paket_bm_ilk_yillar_test.dart`
+(bekçi artık zarsız: §1 katalog + §2 yapısal aday denetimi).
+İlgili: **Q-190/Q-191** (zincir önceliği), Paket CD, CE, CK, AR/3.
