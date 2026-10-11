@@ -9752,3 +9752,67 @@ dokunmak, ya da AÖF'ü kendi başıma eklemek.
 `app/test/paket_dc_acik_lise_test.dart`.
 İlgili: **Q-082** (okuldan ayrılma), **Q-155** (katalog sayıları),
 D-111 (mezuniyet sonrası kilidi), D-131 (öğrenci yarım zamanlı çalışır).
+
+---
+
+### Q-237 — Emeklilik geri alınabilir olmalı mı?
+
+**Durum:** öneri ve varsayılan yazıldı, karar bekliyor (Paket DD).
+
+**Bağlam.** Paket DD'de bütün kalıcı durumlara aynı soru soruldu:
+"bunu geri alan bir yol var mı, yoksa yalnızca ekran mı kapatıyor?"
+Tarama dört durum verdi:
+
+| Kalıcı durum | Motor ne diyor | Ekran ne yapıyor | Hüküm |
+|---|---|---|---|
+| Diploma yok (`droppedOut`) | 13 işe izin | 0 satır | Paket DC'de düzeltildi (açık lise) |
+| "Üniversiteye gitmedim" izi | 88/88 hayatta en az bir bölüme izin | satır ömür boyu gizli | Paket DD'de düzeltildi |
+| **Emekli (`isRetired`)** | **20/55 işe izin veriyor; `applicationAvailability` "İZİN" diyor** | iş arama satırı gizli (`isAranabilir && !isRetired`) | **BU SORU** |
+| İşletme kapanmış | yeni işletme kurulabilir | satır açık | Sorun yok |
+
+Bulunan durum (61 yaşında emekli): motorun koşul kapısı 55 işin
+**20'sine** izin veriyor ve `applicationAvailability` tek bir işte bile
+"emeklisin" demiyor. Yani üçüncü satır da ilk ikisiyle **aynı şekle**
+sahip: kuralı ekran kuruyor, motor kurmuyor.
+
+**Ama ilk ikisi gibi tek başıma düzeltmedim.** Sebep: emekliliğin
+ekonomik tarafı var. Emekli maaşı yürürken maaş da almak **sömürü
+olabilir** (iki gelir birden) ve bu bir denge kararıdır, bir tutarsızlık
+düzeltmesi değil. Paket DC'de ve DD'nin üniversite kısmında böyle bir
+risk yoktu: iş aramak ve üniversiteye başvurmak oyuncuya bedava gelir
+vermiyor.
+
+**Seçenekler**
+
+1. **Emeklilik geri alınabilir olsun, ama emekli maaşı dursun
+   (önerim ve varsayılanım).** İşe girince emekli maaşı kesilir, işten
+   ayrılınca yeniden başlar. Gerçeğe de yakın, sömürüyü de kapatır.
+   Oyuncu "sıkıldım, yine çalışmak istiyorum" diyebilir. Bedeli:
+   `Retirement` motoruna bir durum geçişi ve yeni bir bekçi.
+2. **Emeklilik kalıcı kalsın, ama ekran bunu söylesin.** Şu an iş
+   arama satırı sessizce kayboluyor; yerine gerekçe yazılır
+   ("Emeklisin; iş aramaya dönmek bu sürümde yok."). Bedeli: en ucuz
+   çözüm ama kapı kapalı kalır.
+3. **Emeklilik geri alınabilir olsun ve emekli maaşı da sürsün.**
+   Bedeli: iki gelir birden; AbuseBot'un (Paket AI/2) ilgileneceği bir
+   açık olur. Önermiyorum.
+4. **Kısmi dönüş: yalnızca yarım zamanlı işler açılsın.** Emekli maaşı
+   sürer. Bedeli: yeni bir `prototypeOnly` kural ve kalibrasyon;
+   gerçekte de karşılığı var ama oyunda açıklaması uzun.
+
+**Benim görüşüm:** (1). "Emekli oldum ama yine çalışmak istiyorum"
+oyuncunun gerçekten isteyeceği bir şey ve maaşın kesilmesi hem dengeyi
+hem hikâyeyi koruyor. (2) dürüst ama kapıyı kapalı bırakır; (3) sömürü
+açar.
+
+**Yapmayacağım (onay gelmeden):** `Retirement` motorunu değiştirmek,
+`isAranabilir`'in emeklilik kapısını kaldırmak, emekli maaşı kuralına
+dokunmak.
+
+**Etkilenen kod:** `app/lib/domain/career/retirement.dart`,
+`app/lib/domain/career/job_market.dart` (`applicationAvailability`
+emekliliği hiç sormuyor),
+`app/lib/ui/screens/sections/school_career_screen.dart`
+(`isAranabilir && !state.career.isRetired`),
+`app/test/paket_dd_geri_donussuz_test.dart` (tarama tablosu).
+İlgili: **Q-236** (açık lise), D-111, Paket AI/2 (AbuseBot).
