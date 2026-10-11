@@ -28,6 +28,7 @@ import '../social/social_income.dart';
 import '../models/sponsorship.dart';
 import '../career/job_market.dart';
 import '../education/education_path.dart';
+import '../education/open_high_school.dart';
 import '../education/school_performance.dart';
 import '../events/event_engine.dart';
 import '../../data/education_tracks.dart';
@@ -1176,6 +1177,16 @@ class LifeProgression {
     // ev yılın mutluluğuna küçük bir katkı yapar. Anahtar kapalıysa ve
     // ev eşyası yoksa hiçbir şey yapmaz — zar da tüketmez.
     afterDeaths = _applyFurnishing(afterDeaths);
+
+    // Açık lise (Paket DC): kayıtlı oyuncu bir sınıf ilerler, ücret
+    // cüzdandan çıkar, son sınıf bitince diploma yazılır. Kaydı
+    // olmayanda hiçbir şey yapmaz ve **zar tüketmez**.
+    final ({GameState state, List<String> logLines}) acikLise =
+        OpenHighSchool.advanceYear(afterDeaths);
+    afterDeaths = acikLise.state;
+    for (final String satir in acikLise.logLines) {
+      afterDeaths = _logLine(afterDeaths, newAge, satir);
+    }
 
     // Sigorta primi (Paket CA): yürürlükteki poliçelerin yıllık primi
     // cüzdandan çıkar, dayanağı düşen poliçe kapanır. Poliçesi olmayan

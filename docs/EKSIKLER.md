@@ -621,6 +621,17 @@ bir gerileme testiyle sabitlendi (`test/paket_op_test.dart`).
 
 Yeni sayılar onay bekliyor: **Q-155**.
 
+> **EK ÖLÇÜM (11 Ekim 2026, Paket DC) — kataloğun genişliği herkese
+> açık değil.** İş kataloğu 55'e çıktı ama eğitim koşuluna göre
+> kırılımı şöyle: `JobEducation.yok` **25**, `lise` **17**,
+> `universite` **13**. Yani lise diploması olmayan oyuncuya kataloğun
+> **30 işi** kapalı ve Paket DC'ye kadar o kapanma **ömür boyu**
+> sürüyordu: diploma almanın hiçbir yolu yoktu. 236 hayat 30 yaşında
+> tarandı; diplomasız yetişkin 4 hayatta (%1,7) çıkıyor, dördü de üç
+> yıl sınıfta kaldıktan sonra okuldan ayrılmış. Açık lise eklendi
+> (`FeatureId.acikLise`); 17 iş açılıyor, üniversite isteyen 13 iş
+> yetişkin için hâlâ kapalı (**Q-236** seçenek 4).
+
 ---
 
 ## 5. Karar bekleyen sorular
@@ -958,11 +969,23 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 5. **Görsel kimlik kararı (Q-001/Q-077).** Oyun bir yıl daha kodlanabilir
    ama nasıl göründüğü seçilmeden "bitti" denemez. **Sıradaki en büyük
    engel bu.**
-6. ~~Girişimcilik, eksik ekranlar~~ **Yapıldı (D-132, D-133).** Hobi
-   kataloğunun genişletilmesi (4 hobi) duruyor.
+6. ~~Girişimcilik, eksik ekranlar~~ **Yapıldı (D-132, D-133).**
+   ~~Hobi kataloğunun genişletilmesi (4 hobi) duruyor.~~ **Bu satır
+   eskimişti (11 Ekim 2026'da düzeltildi):** hobi kataloğu D-152'de
+   12'ye çıktı, §4.3 tablosu bunu zaten yazıyordu. Kalan dar
+   kataloglar sponsor kategorisi (7) ve evcil hayvan (10).
 7. ~~Hediye seçimi, menü düzeni, 2. el araç pazarı, kefalet ve cezaevi
    hayatı, üvey ebeveyn~~ **Yapıldı (D-134 … D-141).** Çetenin dışarı
    taşması (Q-148), üvey kardeş ve miras (Q-149) duruyor.
+
+8. **Geri dönüşsüz kararların denetimi** (yeni, 11 Ekim 2026). Paket
+   DC'de çıktı: okulu bırakmak oyunun **tek geri dönüşsüz** kararıydı
+   ve 30 işi ömür boyu kapatıyordu. Açık lise o kapıyı açtı. Aynı
+   soru başka yerlerde de sorulmalı: "üniversiteye gitmedim" izi
+   (D-111) kalıcı mı olmalı, 30 yaş üstünde üniversite yolu hiç
+   açılmayacak mı (**Q-236** seçenek 4), bir hobiyi/kulübü bırakmak
+   geri alınabiliyor mu? Ucuz bir tarama: her kalıcı bayrak için
+   "bunu geri alan bir yol var mı" diye sormak.
 
 **Claude'un kişisel görüşü (26 Eylül 2026'da güncellendi):** "hayatlar
 birbirine benziyor" görüşünün **dört dayanağının dördü de kapandı**:

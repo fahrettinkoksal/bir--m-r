@@ -304,6 +304,22 @@ enum FeatureId {
       'app/lib/data/event_pool_widowhood.dart',
       'app/test/paket_cs_dulluk_test.dart',
     ],
+  ),
+
+  acikLise(
+    saveKey: 'acik_lise',
+    title: 'Açık lise',
+    lostWhenOff:
+        'Okulu bırakan yetişkinin diploma alma yolu kapanır: kayıt '
+        'olunamaz, yürüyen kayıt da donar (ücret çıkmaz, sınıf '
+        'ilerlemez). Kayıt silinmez — anahtar yeniden açılırsa kaldığı '
+        'sınıftan devam eder. Diploma isteyen 17 iş yine kapalı kalır, '
+        'ama diploması olan oyuncu hiçbir şey kaybetmez.',
+    paket: 'Paket DC — okulu bırakanın ikinci şansı',
+    removableFiles: <String>[
+      'app/lib/domain/education/open_high_school.dart',
+      'app/test/paket_dc_acik_lise_test.dart',
+    ],
   );
 
   const FeatureId({

@@ -4,6 +4,7 @@ import '../../../data/event_pool_exam.dart';
 import '../../../domain/career/craft_mastery.dart';
 import '../../../domain/career/retirement.dart';
 import '../../../domain/education/education_path.dart';
+import '../../../domain/education/open_high_school.dart';
 import '../../../domain/models/education.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../domain/models/game_state.dart';
@@ -510,17 +511,32 @@ class _CareerViewState extends State<_CareerView> {
     }
 
     // Öğrenci de iş arayabilir: yarım zamanlı işler ona açık (D-131).
-    // Tam zamanlı iş kapısı yine liseyi bitirmeye bağlı; bunu
-    // `JobMarket.requirementReason` denetliyor.
+    //
+    // **Paket DC'de düzeltildi.** Buradaki koşul eskiden diploma
+    // istiyordu (`finished || universityFinished || öğrenci`). Sonucu:
+    // okulu bırakmış ve artık öğrenci olmayan bir oyuncuya "İş ara"
+    // satırı **ömür boyu** gösterilmiyordu ve altına motorun kuralı
+    // olmayan bir gerekçe yazılıyordu ("tam zamanlı iş liseyi
+    // bitirdikten sonra açılır"). Bulunan durumda ölçüldü (30 yaşında,
+    // okulu bırakmış): motorun koşul kapısı **13 işe izin veriyor**,
+    // altısı tam zamanlı — ekran bunların hiçbirini göstermiyordu.
+    //
+    // Doğru kural motorun kendisinde: `JobMarket.requirementReason`
+    // yaşa, eğitime, ehliyete, sabıkaya, şehre ve sağlığa iş iş bakar
+    // ve her birinin gerekçesini kendi yazar (D-063, Paket AM §18).
+    // Ekranın işi kapıyı yeniden kurmak değil, çalışma çağındaki
+    // oyuncuyu o listeye götürmek.
     final bool yarimZamanliCagi =
         state.player.age >= _enKucukYarimZamanliYas;
-    final bool isAranabilir = egitim.finished ||
-        egitim.universityFinished ||
-        (egitim.isSchoolStudent && yarimZamanliCagi);
+    final bool isAranabilir = yarimZamanliCagi;
 
     // Başlık boş kalmasın: bu yıl tıklanabilir bir eylem var mı?
     final bool eylemVar = EducationPath.needsAfterSchoolChoice(state) ||
         state.hasPendingInterview ||
+        // Açık lise kaydı ya da kayıt olma hakkı da bir eylemdir
+        // (Paket DC).
+        egitim.isOpenHighSchoolStudent ||
+        OpenHighSchool.enrollAvailability(state).isAllowed ||
         (isAranabilir && !state.career.isRetired) ||
         (state.career.isEmployed && !state.career.isRetired) ||
         (!state.career.isRetired &&
@@ -682,6 +698,85 @@ class _CareerViewState extends State<_CareerView> {
             onTap: () => _go(_CareerPage.mezuniyetSonrasi),
           ),
           const SizedBox(height: 10),
+        ],
+        // Açık lise (Paket DC): okulu bırakmış yetişkinin diploma yolu.
+        //
+        // Satır motorun kapısını okur. Uygun değilse **sahte düğme
+        // konmaz**, gerekçe yazılır (D-063). Diploması olan ya da hâlâ
+        // okuyan oyuncuda bu bölüm hiç görünmez: ona söylenecek bir şey
+        // yok.
+        if (!egitim.finished &&
+            !egitim.universityFinished &&
+            !egitim.isStudent &&
+            state.player.age >= _enKucukYarimZamanliYas) ...<Widget>[
+          Builder(
+            builder: (BuildContext context) {
+              final GameController oyun = GameScope.of(context);
+              final int? sinif = egitim.openHighSchoolGrade;
+              if (sinif != null) {
+                final int kalan =
+                    OpenHighSchool.remainingYears(state) ?? 0;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      _PanelCard(
+                        icon: Icons.menu_book_outlined,
+                        title: 'Açık lise',
+                        rows: <({String label, String value})>[
+                          (label: 'Sınıf', value: '$sinif. sınıf'),
+                          (
+                            label: 'Diplomaya kalan',
+                            value: kalan <= 1 ? 'Bu yıl' : '$kalan yıl',
+                          ),
+                          (
+                            label: 'Yıllık ücret',
+                            value: trMoney(
+                              OpenHighSchool.prototypeOnlyYearlyFee,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: () {
+                          final String? metin = oyun.leaveOpenHighSchool();
+                          setState(() => _sonuc = metin);
+                        },
+                        child: const Text('Açık lise kaydını bırak'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              final InteractionAvailability uygunluk =
+                  oyun.openHighSchoolAvailability();
+              if (!uygunluk.isAllowed) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: InfoPanel(
+                    icon: Icons.menu_book_outlined,
+                    text: 'Açık liseye kaydolamazsın: ${uygunluk.reason}',
+                  ),
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: MenuRow(
+                  key: const Key('career_acik_lise'),
+                  title: 'Açık lise',
+                  subtitle: 'Diplomanı tamamla; çalışırken okunur',
+                  icon: Icons.menu_book_outlined,
+                  accent: BirOmurAccents.mavi,
+                  onTap: () {
+                    final String? metin = oyun.enrollOpenHighSchool();
+                    setState(() => _sonuc = metin);
+                  },
+                ),
+              );
+            },
+          ),
         ],
         // Cevap bekleyen mülakat varsa en üstte.
         if (state.hasPendingInterview) ...<Widget>[
@@ -899,10 +994,14 @@ class _CareerViewState extends State<_CareerView> {
         if (!isAranabilir)
           InfoPanel(
             icon: Icons.work_outline,
+            // Gerekçe motorun kuralını söyler: iş arama yaşa bağlıdır,
+            // diplomaya değil. Diploma iş iş sorulur ve o gerekçe iş
+            // listesinde yazar (Paket DC).
             text: okulOncesi
                 ? 'Okul çağına gelince bu bölüm okul bilgilerini gösterecek.'
-                : 'Yarım zamanlı iş $_enKucukYarimZamanliYas yaşında, '
-                    'tam zamanlı iş liseyi bitirdikten sonra açılır.',
+                : 'İş arama $_enKucukYarimZamanliYas yaşında açılır. '
+                    'Okurken yarım zamanlı işlere, okul dışındayken '
+                    'koşullarını sağladığın bütün işlere başvurabilirsin.',
           ),
       ],
     );

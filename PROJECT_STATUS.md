@@ -8993,3 +8993,116 @@ Kayıtta bir alanın dolu olması, o dönemin hâlâ sürdüğü anlamına gelme
 **Isırma denemesi:** üç kapı söküldü → üç bölüm de patladı ve eski
 sayılar geri geldi (içeride 1 gezi + 13 paylaşım, 43 açık gezi kapısı,
 8 açık paylaşım kapısı, denetimde 9 açık tur kapısı).
+
+## Paket DC — okulu bırakmak oyunun tek geri dönüşsüz kararıydı (11 Ekim 2026)
+
+Dökümün üçüncü ve son okunmamış karesini (**gebelik**) okudum. Gebelik
+tarafı temiz çıktı — ikinci gebelik zaten kapalı (`intimacy.dart`,
+`fertility_treatment.dart`), metinler yerinde. Ama aynı karenin
+**meslek sekmesi** şunu gösterdi:
+
+```
+35 yaşında · Okul dışı
+Meslek            Sanayide çırak (yarım zamanlı)
+Yıllık maaş       336.552 ₺
+Bu işteki süren   18 yıl
+Ustalık           Başusta · sonraki basamağa 10 yıl
+...
+Yarım zamanlı iş 16 yaşında, tam zamanlı iş liseyi bitirdikten
+sonra açılır.
+```
+
+İş arama satırı **hiç yok**. Kayıttaki tek sebep: 9. sınıfta okulu
+bırakmış.
+
+### Ölçüm
+
+| Ölçü | Sonuç |
+|---|---|
+| Katalog `JobEducation.yok` | 25 iş |
+| Katalog `JobEducation.lise` | **17 iş** |
+| Katalog `JobEducation.universite` | **13 iş** |
+| Bulunan durumda (30 yaş, bırakmış) motorun izin verdiği iş | **13** (6'sı tam zamanlı) |
+| Aynı durumda ekranın gösterdiği satır | **0** |
+| 236 hayatta 30 yaşında diplomasız | 4 (%1,7) |
+| Bunlardan okulu bırakan | 4/4 (üç yıl sınıfta kaldıktan sonra) |
+
+### İki mesele çıktı; biri hataydı
+
+**1. Ekran motorla çelişiyordu (OYUN hatası).**
+`school_career_screen.dart`'taki koşul şuydu:
+
+```dart
+final bool isAranabilir = egitim.finished ||
+    egitim.universityFinished ||
+    (egitim.isSchoolStudent && yarimZamanliCagi);
+```
+
+Diploması olmayan ve artık öğrenci olmayan oyuncu üçünü de
+sağlamıyor → "İş ara" **ve** "İş değiştir" satırı ömür boyu
+gizleniyordu. Üstüne motorun kuralı olmayan bir gerekçe yazılıyordu.
+Motorun gerçek kapısı (`JobMarket.requirementReason`) tam zamanlı işi
+yalnızca **öğrenciye** kapatıyor (D-131) ve diplomayı iş iş soruyor.
+Koşul motorun kuralına indirildi: iş arama yaşa bağlı, hangi işin açık
+olduğunu motor söyler ve her birinin gerekçesini kendi yazar.
+
+**Bu kusur yalnızca ekranda olduğu için hiçbir bot ölçümü onu
+göremezdi:** bot `applyForJob`'u doğrudan çağırıyor, `isAranabilir`'den
+geçmiyor. Paket CT ve CU'nun dersi burada da geçerliydi — ekranı
+okumadan bulunmuyor.
+
+**2. Diploma almanın yolu hiç yoktu (içerik boşluğu).**
+`açık lise`, `reEnroll`, `okula dön` diye aranan hiçbir şey kodda
+geçmiyordu. Yani okulu bırakmak oyunun **tek geri dönüşsüz** kararıydı
+ve 30 iş ömür boyu kapanıyordu.
+
+### Eklenen: açık lise
+
+`lib/domain/education/open_high_school.dart`,
+`FeatureId.acikLise` (varsayılan açık), `prototypeOnly` sayılarla:
+18 yaş, 3.500 ₺/yıl, bırakılan sınıftan 12'ye yılda bir sınıf,
+geçme koşulu yalnızca ücretin ödenmesi.
+
+**Tasarımın kritik noktası:** kayıt `EducationState.enrolled` değil
+**ayrı bir alanda** (`openHighSchoolGrade`) tutuluyor. `enrolled`
+açılsa oyuncu `isSchoolStudent` sayılır ve `JobMarket` tam zamanlı işi
+kapatırdı — yani açık lisenin bütün anlamı (çalışırken okumak) yok
+olurdu. Bekçi bunu ayrıca denetliyor ve `enrolled` kullanılsa
+**düşüyor** (ısırma denemesi yapıldı).
+
+Diploma alınınca `asFinished()` kaydı kapatıyor, `droppedOut` geçmişi
+**silinmiyor** (oyuncunun geçmişi yeniden yazılmaz) ve 17 iş açılıyor.
+Bekçi 17 işin hiçbirinde artık "Lise mezuniyeti gerekiyor." çıkmadığını
+tek tek denetliyor.
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_dc_acik_lise_test.dart` (9 test, hepsi geçti). Durum
+**kurulmuyor, aranıyor**: `_diplomasizYetiskinAra()` bot hayatlarını
+tarar ve ilk uyan kareyi alır; §1b o kareyi gerçek ekrana
+`debugSetState` ile verir.
+
+| Isırma | Sonuç |
+|---|---|
+| Eski `isAranabilir` koşulu geri konuldu | §1b düştü: `Found 0 widgets with text "İş ara"` |
+| `enroll` `enrolled: true` de yazsaydı | §2a düştü: `isSchoolStudent` `true` çıktı |
+
+### Kapsam sınırı (bilerek) ve kuyruk
+
+Açık ortaokul yok (9'un altında ayrılan da 9'dan devam eder; ölçümde
+9'un altında ayrılan hayat çıkmadı). Yetişkin için üniversite yolu
+(AÖF) de yok: diploma alan 30 yaş üstü oyuncu üniversiteye
+başvuramıyor, çünkü `needsAfterSchoolChoice` 30 yaşla sınırlı (D-111).
+Yani açık lise 17 işi açıyor, 13 iş hâlâ kapalı. Sayılar ve kapsam
+**Q-236**'da karar bekliyor; önerim bu hâliyle onay, sıradaki paket
+olarak AÖF.
+
+### Yan bulgu (düzeltilmedi, not edildi)
+
+Aynı karede iki merdiven aynı kelimeleri paylaşıyor: iş basamağı
+(`levels: ['Çırak', 'Kalfa']`) ile ustalık basamağı
+(`Çırak/Kalfa/Usta/Başusta/Duayen`). Ekranda "Kalfa" rozeti ile
+"Ustalık: Başusta" birlikte duruyor; günlükte de "Kalfa olarak 16 yılı
+doldurdun: artık başusta sayılıyorsun" yazıyor. Ölçtüm: çakışma 55
+işten **yalnızca birinde** (`yz_sanayi_cirak`). Paket yapacak kadar
+değil, Q-236'nın konusu da değil — not olarak burada.

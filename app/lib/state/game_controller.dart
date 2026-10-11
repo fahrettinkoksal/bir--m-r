@@ -68,6 +68,7 @@ import '../domain/career/job_market.dart';
 import '../domain/career/job_requirement.dart';
 import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
+import '../domain/education/open_high_school.dart';
 import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
 import '../data/investment_catalog.dart';
@@ -1252,6 +1253,43 @@ class GameController extends ChangeNotifier {
   /// Üniversiteye gitmeyip iş hayatına yönelir.
   EducationOutcome? skipUniversity() =>
       _runEducation((GameState current) => _education.skipUniversity(current));
+
+  /// Açık liseye kayıt olunabilir mi? (Paket DC)
+  InteractionAvailability openHighSchoolAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return OpenHighSchool.enrollAvailability(current);
+  }
+
+  /// Açık lise kaydını bırakmak mümkün mü?
+  InteractionAvailability leaveOpenHighSchoolAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return OpenHighSchool.leaveAvailability(current);
+  }
+
+  /// Açık liseye kaydolur; sonuç metni döner, mümkün değilse `null`.
+  String? enrollOpenHighSchool() => _runOpenHighSchool(OpenHighSchool.enroll);
+
+  /// Açık lise kaydını bırakır.
+  String? leaveOpenHighSchool() => _runOpenHighSchool(OpenHighSchool.leave);
+
+  String? _runOpenHighSchool(
+    ({GameState state, String text})? Function(GameState) islem,
+  ) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ({GameState state, String text})? sonuc = islem(current);
+    if (sonuc == null) return null;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
 
   EducationOutcome? _runEducation(EducationResult Function(GameState) islem) {
     final GameState? current = _state;

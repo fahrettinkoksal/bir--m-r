@@ -755,6 +755,35 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   sandı. Doğru ölçüt kodun kendi yüklemiydi (`LegalEngine.onProbation`)
   ve kare sayısı 14'e indi.
 
+- **Paket DC.** Ekranın kendi kapısı, motorun kapısıyla **aynı kural
+  olmak zorunda**. `isAranabilir` diploma istiyordu, motor
+  (`requirementReason`) istemiyordu; sonucu diplomasız yetişkine iş
+  arama satırının **ömür boyu** gizlenmesi oldu. Ölçüldü: motor o
+  karede 13 işe izin veriyor, ekran 0 satır gösteriyor. Kural
+  motorda yazılıysa ekran onu **çağırmalı**, yeniden kurmamalı — iki
+  yerde iki ayrı doğru, biri her zaman yanlıştır.
+- **Paket DC.** Yalnızca ekranda olan kusuru **hiçbir bot ölçümü
+  bulamaz**. Bot `applyForJob`'u doğrudan çağırıyor, `isAranabilir`'den
+  geçmiyor; yani bu hata 3776 testin hiçbirinde görünmüyordu ve
+  ancak kare okunarak çıktı. CT ve CU'dan sonra üçüncü kez: **ekranı
+  okumak ayrı bir ölçüm aracıdır.**
+- **Paket DC.** Yeni bir durum eklerken "bu bayrağı kim daha okuyor"
+  diye sormak gerekiyor. Açık lise kaydı `EducationState.enrolled`
+  üzerine konsa oyuncu `isSchoolStudent` sayılacak ve `JobMarket` tam
+  zamanlı işi kapatacaktı — yani özelliğin bütün anlamı (çalışırken
+  okumak) kendi kaydı yüzünden yok olacaktı. Kayıt ayrı bir alana
+  kondu ve bekçi bunu ısırma denemesiyle sabitledi.
+- **Paket DC.** "Geri dönüşsüz karar" bir tasarım tercihi olabilir ama
+  **kaza olmamalı**. Okulu bırakmak 30 işi ömür boyu kapatıyordu ve
+  bunu kimse seçmemişti: geri dönüş yolu yazılmamıştı, o kadar. Her
+  kalıcı bayrak için "bunu geri alan bir yol var mı?" sorusu ucuz bir
+  tarama ve `docs/EKSIKLER.md` §7'ye madde olarak girdi.
+- **Paket DC.** Belgeler de eskiyor. §7'deki "hobi kataloğu (4 hobi)
+  duruyor" satırı D-152'den beri yanlıştı; aynı belgenin §4.3 tablosu
+  12 yazıyordu. Bir paket seçmek için belgeyi okurken **belgenin
+  kendisini de denetlemek** gerekiyor; çelişen iki satır varsa koda
+  bakmalı.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

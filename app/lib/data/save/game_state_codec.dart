@@ -1450,6 +1450,8 @@ Map<String, Object?> _encodeEducation(EducationState e) => <String, Object?>{
       'repeatedYears': e.repeatedYears,
       'droppedOut': e.droppedOut,
       'scholarshipSinceAge': e.scholarshipSinceAge,
+      // Açık lise kaydı (Paket DC).
+      'openHighSchoolGrade': e.openHighSchoolGrade,
 };
 
 Map<String, Object?> _encodeCareer(CareerState c) => <String, Object?>{
@@ -2853,6 +2855,9 @@ EducationState _decodeEducation(Map<String, Object?> json) {
     repeatedYears: _intOrNull(json, 'repeatedYears') ?? 0,
     droppedOut: json['droppedOut'] == true,
     scholarshipSinceAge: _intOrNull(json, 'scholarshipSinceAge'),
+    // Eski kayıtlarda açık lise alanı yoktur; yokluğu "kayıtlı değil"
+    // demektir ve uydurma sınıf yazılmaz (Paket DC).
+    openHighSchoolGrade: _intOrNull(json, 'openHighSchoolGrade'),
   );
 }
 
