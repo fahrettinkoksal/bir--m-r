@@ -42,7 +42,21 @@ import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/data/tour_catalog.dart';
 import 'package:bir_omur/data/university_catalog.dart';
 import 'package:bir_omur/data/wedding_catalog.dart';
+import 'package:bir_omur/data/school_club_catalog.dart';
+import 'package:bir_omur/domain/activities/outing.dart';
 import 'package:bir_omur/domain/casino/roulette.dart';
+import 'package:bir_omur/domain/combat/sport_family_support.dart';
+import 'package:bir_omur/domain/models/combat_career.dart';
+import 'package:bir_omur/domain/combat/sport_school_conflict.dart';
+import 'package:bir_omur/domain/features/feature_catalog.dart';
+import 'package:bir_omur/domain/generation/parent_divorce.dart';
+import 'package:bir_omur/domain/hobby/course_progress.dart';
+import 'package:bir_omur/domain/interaction/elder_care.dart';
+import 'package:bir_omur/domain/interaction/elder_support.dart';
+import 'package:bir_omur/domain/models/family_issue.dart';
+import 'package:bir_omur/domain/models/pregnancy.dart';
+import 'package:bir_omur/domain/models/school_club_progress.dart';
+import 'package:bir_omur/domain/sports/school_club_engine.dart';
 import 'package:bir_omur/domain/economy/business_engine.dart';
 import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
@@ -216,6 +230,8 @@ const List<_CoverageStep> _adimlar = <_CoverageStep>[
   _housing,
   _business,
   _gambling,
+  _familyChoices,
+  _clubsAndSport,
 ];
 
 /// Listedeki ilk uyan öğe ya da null.
@@ -1275,8 +1291,306 @@ void _extras(
   }
 
   // ---- Hayatın sonu --------------------------------------------------
-  if (c.state!.player.age >= 95 && rng.nextDouble() < 0.02) {
+  // Ölçüm: 400 kapsam hayatında 95 yaşına **hiç** ulaşılmadı, bu yüzden
+  // bu kapı hiç denenmiyordu. Kapı 85'e indi ve hayatın birkaçında
+  // (tohumun sekize bölümünden) deneniyor; ölen hayat kapsamı kesmesin
+  // diye seyrek tutuldu.
+  if (c.state!.player.age >= 88 && r.seed % 8 == 0) {
+    // **Ölçüt tersti (Paket CP).** `endLifeByChoice` başarıda `''`,
+    // engelde gerekçeyi döndürüyor; bot ise "boş değilse oldu"
+    // sayıyordu. Yani bu aksiyonun **başarısı** kapsam dışı,
+    // **başarısızlığı** kapsanmış sayılıyordu. Kapı 95 yaşında
+    // olduğu için hiç çalışmamış ve hata görünmemişti.
     log('endLifeByChoice', () => c.endLifeByChoice(),
-        uygulandi: (String v) => v.isNotEmpty);
+        uygulandi: (String v) => v.isEmpty);
+  }
+}
+
+/// Ailenin oyuncuya **sorduğu** kararlar ve aile yolları (Paket CP).
+///
+/// **Ölçülen eksik.** Paket AI'nın kapsam ölçümü 138 oyuncu
+/// aksiyonundan 34'ünü "hiç denenmedi" diye raporluyordu ve 29'u bu
+/// botta **hiç bağlı değildi**. Çoğu aileden geliyordu: kardeşin para
+/// istemesi, çocuğun eve dönmek istemesi, kayın çatışması, bakım
+/// anlaşmazlığı, miras tartışması, çocuğun okul meselesi, yaşlı
+/// ebeveyne bakım ve Paket CJ'nin yaşlılıkta bakım kararı. Hepsi
+/// oyuncunun ekranında bir kart olarak çıkıyor ama hiçbir araç
+/// bunlara dokunmuyordu.
+void _familyChoices(
+  GameController c,
+  CoveragePlan plan,
+  Random rng,
+  CoverageResult r,
+  ActionLog log,
+) {
+  final GameState s = c.state!;
+
+  // ---- Bekleyen aile kararları: hepsine cevap ver -------------------
+  //
+  // Cevap **değişiyor**: hep "destek oldu" denirse reddetme yolu hiç
+  // çalışmaz. Tohumdan türeyen bir seçim, kapsamı iki tarafa da açar.
+  final FamilyIssueResponse cevap = FamilyIssueResponse
+      .values[(r.seed + s.player.age) % FamilyIssueResponse.values.length];
+
+  /// Önce çeşitlendirilmiş cevabı dener; **para yetmediği için**
+  /// uygulanmazsa ücretsiz bir cevaba düşer.
+  ///
+  /// Ölçümde dört cevap yolu (kardeş parası, çocuğun parası, miras
+  /// itirazı, çocuğun okul meselesi) hep "cüzdanında o kadar yok" diye
+  /// düşüyordu: kapı çalışıyor ama yol hiç denenmemiş sayılıyordu.
+  /// Gerçek oyuncu da parası yoksa öteki seçeneği seçer.
+  void cevapla(String ad, ActivityOutcome? Function(FamilyIssueResponse) f) {
+    final ActivityOutcome? ilk = log.outcome(ad, () => f(cevap));
+    if (ilk?.applied ?? false) return;
+    for (final FamilyIssueResponse yedek in <FamilyIssueResponse>[
+      FamilyIssueResponse.konustu,
+      FamilyIssueResponse.karismadi,
+    ]) {
+      if (yedek == cevap) continue;
+      final ActivityOutcome? tekrar = log.outcome(ad, () => f(yedek));
+      if (tekrar?.applied ?? false) return;
+    }
+  }
+
+  if (c.pendingFamilyDecision() != null) {
+    cevapla('answerFamilyDecision', c.answerFamilyDecision);
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingSiblingMoneyAsk() != null) {
+    cevapla('respondSiblingMoneyAsk', c.respondSiblingMoneyAsk);
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingCareDispute() != null) {
+    cevapla('respondCareDispute', c.respondCareDispute);
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingEstateDispute() != null) {
+    cevapla('respondEstateDispute', c.respondEstateDispute);
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingInLawConflict() != null) {
+    cevapla('resolveInLawConflict', c.resolveInLawConflict);
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingChildMoneyRequest() != null) {
+    cevapla('respondChildMoneyRequest', c.respondChildMoneyRequest);
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingChildMoveBack() != null) {
+    log.outcome('answerChildMoveBack',
+        () => c.answerChildMoveBack(r.seed % 2 == 0));
+    if (_kesildi(c)) return;
+  }
+  if (c.pendingChildSchoolIssue() != null) {
+    cevapla('chooseChildSchoolResponse', c.chooseChildSchoolResponse);
+    if (_kesildi(c)) return;
+  }
+  if (c.hasParentDivorceChoice()) {
+    log.outcome(
+        'chooseDivorceHousehold',
+        () => c.chooseDivorceHousehold(
+              DivorceHouseholdChoice
+                  .values[r.seed % DivorceHouseholdChoice.values.length],
+            ));
+    if (_kesildi(c)) return;
+  }
+
+  // ---- Yaşlılıkta bakım (Paket CJ) ----------------------------------
+  for (final ElderSupportChoice secim in ElderSupportChoice.values) {
+    if (c.elderSupportBlockReason(secim).isNotEmpty) continue;
+    log.outcome('decideElderSupport', () => c.decideElderSupport(secim));
+    break;
+  }
+  if (_kesildi(c)) return;
+
+  // ---- Yaşlı ebeveyne bakım (Paket AO §35) --------------------------
+  for (final Person kisi in s.people) {
+    if (!kisi.isAlive) continue;
+    if (kisi.relation != RelationType.anne &&
+        kisi.relation != RelationType.baba) {
+      continue;
+    }
+    final ElderCareChoice secim = ElderCareChoice
+        .values[(r.seed + kisi.age) % ElderCareChoice.values.length];
+    log.outcome('decideElderCare', () => c.decideElderCare(kisi.id, secim));
+    if (_kesildi(c)) return;
+    break;
+  }
+
+  // ---- Çocuğa tavsiye, kardeşten borç ------------------------------
+  final Person? cocuk = s.people.firstOrNullCov(
+      (Person p) => p.isAlive && p.relation == RelationType.cocuk);
+  if (cocuk != null) {
+    log.outcome('adviseChild', () => c.adviseChild(cocuk.id));
+    if (_kesildi(c)) return;
+  }
+  final Person? kardes = s.people.firstOrNullCov(
+      (Person p) => p.isAlive && p.relation == RelationType.kardes);
+  if (kardes != null) {
+    log.outcome('borrowFromSibling', () => c.borrowFromSibling(kardes.id));
+    if (_kesildi(c)) return;
+  }
+
+  // ---- Çocuk planı ve deneme (Paket BK/2) ---------------------------
+  final Person? es = s.spouse;
+  if (es != null && es.isAlive) {
+    log.outcome(
+        'setFamilyPlan',
+        () => c.setFamilyPlan(
+              es.id,
+              FamilyPlan.values[(r.seed + s.player.age) %
+                  FamilyPlan.values.length],
+            ));
+    if (_kesildi(c)) return;
+    log.outcome('tryForChild', () => c.tryForChild(es.id));
+  }
+}
+
+/// Kulüp, arkadaş grubu ve sporun oyuncuya dönük kapıları (Paket CP).
+void _clubsAndSport(
+  GameController c,
+  CoveragePlan plan,
+  Random rng,
+  CoverageResult r,
+  ActionLog log,
+) {
+  final GameState s = c.state!;
+
+  // ---- Okul kulübü: gir, çalış, çık --------------------------------
+  final List<SchoolClubProgress> suren = s.schoolClubs
+      .where((SchoolClubProgress p) => p.active)
+      .toList(growable: false);
+  if (suren.isEmpty) {
+    final SchoolClub? aday = kSchoolClubs
+        .firstOrNullCov((SchoolClub k) => c.clubBlock(k) == null);
+    if (aday != null) {
+      log('joinClub', () => c.joinClub(aday),
+          uygulandi: (ClubJoinOutcome o) => o.accepted);
+      if (_kesildi(c)) return;
+    }
+  } else {
+    final SchoolClubProgress kulup = suren.first;
+    if (c.canTrainClub(kulup.clubId)) {
+      log('trainClub', () => c.trainClub(kulup.clubId));
+      if (_kesildi(c)) return;
+    }
+    // Ayrılma **seyrek**: her yıl çıkılsa kulüp hayatı hiç ilerlemez.
+    if (kulup.yearsActive >= 3 && r.seed % 5 == 0) {
+      log('leaveClub', () {
+        c.leaveClub(kulup.clubId);
+        return true;
+      });
+      if (_kesildi(c)) return;
+    }
+  }
+
+  // ---- Arkadaş grubu: kur, sonra buluş (Paket CI) ------------------
+  //
+  // Ölçümde `meetFriendCircle` hiç denenmiyordu, çünkü kapsam botu
+  // grubu **hiç kurmuyordu**: buluşmanın koşulu grubun varlığı.
+  if (c.friendCircleMembers.isEmpty && c.friendCircleBlockReason.isEmpty) {
+    log('formFriendCircle', () => c.formFriendCircle(),
+        uygulandi: (({bool applied, String message}) o) => o.applied);
+    if (_kesildi(c)) return;
+  }
+  if (c.friendCircleMembers.isNotEmpty) {
+    // **Birlikte yapılabilen** bir eylem seçilmeli: ilk yazımda
+    // "açık olan ilk eylem" seçiliyordu ve o çoğu zaman tek başına
+    // yapılan bir eylemdi. Sonuç: 25.038 deneme, sıfır buluşma ve
+    // "oyunda grup buluşması çalışmıyor" gibi görünen **yanlış** bir
+    // bulgu. Engel gerçekte "Bu eylem birlikte yapılmaz."ydı.
+    final ActivityAction? eylem = kActivityActions.firstOrNullCov(
+        (ActivityAction a) =>
+            Outing.supports(a) && c.activityAvailability(a).isAllowed);
+    if (eylem != null) {
+      log.outcome('meetFriendCircle', () => c.meetFriendCircle(eylem));
+      if (_kesildi(c)) return;
+    }
+  }
+
+  // ---- Dövüş sanatında müsabaka yolu -------------------------------
+  for (final MartialArt art in MartialArt.values) {
+    if (!c.combatStartAvailability(art).isAllowed) continue;
+    log.outcome('startCompeting', () => c.startCompeting(art));
+    if (_kesildi(c)) return;
+    break;
+  }
+  if (c.state!.combatCareers.isNotEmpty) {
+    log.outcome('setCombatCoach', () => c.setCombatCoach(r.seed % 3));
+    if (_kesildi(c)) return;
+    // **Kapıya bağlı.** İlk yazımda her yıl koşulsuz çağrılıyordu:
+    // 23.802 deneme, sıfır uygulama ("Geçmeyen bir sakatlığın yok").
+    // Kapsam ölçümü "denendi ama olmadı" diye doğru raporluyordu ama
+    // bu bilgi değil gürültüydü.
+    if (c.state!.combatCareers
+        .any((CombatCareer k) => k.isInjured)) {
+      log.outcome('pushThroughCombatInjury', () => c.pushThroughCombatInjury());
+      if (_kesildi(c)) return;
+    }
+    if (c.combatRetirementPressure() != null) {
+      log.outcome('retireFromCombat', () => c.retireFromCombat());
+      if (_kesildi(c)) return;
+    }
+  }
+
+  // ---- Futbolu bırakma ---------------------------------------------
+  if (c.state!.footballCareer != null && c.state!.player.age >= 33) {
+    log('retireFromFootball', () {
+      c.retireFromFootball();
+      return true;
+    });
+    if (_kesildi(c)) return;
+  }
+
+  // ---- Spor masrafına aile desteği ve okul/spor çatışması ----------
+  final Person? veli = c.state!.people.firstOrNullCov((Person p) =>
+      p.isAlive &&
+      (p.relation == RelationType.anne || p.relation == RelationType.baba));
+  // **Rekabet eden bir spor kariyeri şartı var** ("Henüz rekabet eden
+  // bir spor kariyerin yok"): hafif turda 861 boş deneme yapıyordu.
+  if (veli != null &&
+      c.state!.combatCareers.any((CombatCareer k) => !k.isRetired)) {
+    log.outcome('askSportSupport',
+        () => c.askSportSupport(SportExpense.values[r.seed % 4], veli));
+    if (_kesildi(c)) return;
+  }
+  // Aynı gerekçeyle kapıya bağlı: 29.837 boş deneme yapıyordu.
+  final bool catismaVar = c.state!.combatCareers.any((CombatCareer k) =>
+      SportSchoolConflict.isPending(c.state!, k));
+  if (catismaVar) {
+    log.outcome('resolveSchoolSportConflict',
+        () => c.resolveSchoolSportConflict(chooseSport: r.seed % 2 == 0));
+    if (_kesildi(c)) return;
+  }
+
+  // ---- Kurs ücretine aile desteği (Paket AJ) -----------------------
+  // Aileden destek yalnızca ücret gerçekten gerekiyorsa ve cüzdan
+  // yetmiyorsa soruluyor (ekranın kendi kuralı).
+  for (final ActivityAction a in kActivityActions) {
+    final CourseStanding? kurs = c.courseStanding(a);
+    if (kurs == null || kurs.fee == 0) continue;
+    if (c.state!.player.wallet >= kurs.fee) continue;
+    final List<Person> destekciler = c.courseSponsors(a);
+    if (destekciler.isEmpty) continue;
+    log.outcome('askFamilyForCourse',
+        () => c.askFamilyForCourse(a, destekciler.first.id));
+    if (_kesildi(c)) return;
+    break;
+  }
+
+  // ---- Modül anahtarları (Paket BL): Ayarlar ekranının kapıları -----
+  //
+  // Oyuncu bunları Ayarlar → Modüller'den açıp kapatıyor. Kapsam
+  // hayatında **kapatıp geri açıyoruz**: oyunun akışı değişmesin.
+  if (s.player.age == 20) {
+    log('setFeature', () {
+      c.setFeature(FeatureId.values.first, false);
+      c.setFeature(FeatureId.values.first, true);
+      return true;
+    });
+    log('resetFeatures', () {
+      c.resetFeatures();
+      return true;
+    });
   }
 }

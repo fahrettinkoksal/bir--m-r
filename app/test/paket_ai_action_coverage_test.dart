@@ -163,8 +163,13 @@ void main() {
     // Ölçülen değer dondurulmuyor, taban konuyor.
     expect(takilan, isEmpty,
         reason: 'Kapsam hayatı takıldıysa ölçüm güvenilmez: $sebep');
-    expect(kapsanan.length / aksiyonlar.length, greaterThan(0.5),
-        reason: 'Oyuncu aksiyonlarının yarısına bile dokunulmuyorsa '
-            'kapsam ölçümü anlamını yitirir.');
+    // **Taban Paket CP'de yükseltildi.** O pakete kadar 34 aksiyon hiç
+    // denenmiyordu (%74,6); 29'u bu botta hiç bağlı değildi. Bağlandı
+    // ve iki ölçüm hatası düzeltildi: hafif tur %87,7, tam tur %89,9.
+    // Taban ölçülenin altında ama eski durumun **üstünde**: kapsam
+    // Paket CP öncesine düşerse test kırmızıya döner.
+    expect(kapsanan.length / aksiyonlar.length, greaterThan(0.80),
+        reason: 'Oyuncu aksiyonlarının kapsamı Paket CP seviyesinin '
+            'altına düştü: ${kapsanan.length}/${aksiyonlar.length}');
   }, timeout: const Timeout(Duration(minutes: 60)));
 }

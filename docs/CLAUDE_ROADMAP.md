@@ -437,6 +437,20 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CP.** Ölçüm aracının **başarı ölçütünü** de sına.
+  `endLifeByChoice` başarıda boş metin döndürüyor; kapsam botu "boş
+  değilse oldu" sayıyordu, yani aksiyonun başarısını kapsam dışı,
+  başarısızlığını kapsanmış sayıyordu. Kapı hiç çalışmadığı için hata
+  yıllarca görünmedi. Bir aksiyonu kapsama bağlarken "oldu" kararının
+  nereden okunduğunu kontrol et.
+- **Paket CP.** "Denendi ama olmadı" **gerekçesiz** kabul edilmez.
+  Grup buluşması 25.038 kez denenip sıfır kez olmuştu ve bu "oyunda
+  grup buluşması çalışmıyor" gibi görünüyordu; gerçek engel "Bu eylem
+  birlikte yapılmaz."dı — bot yanlış eylemi seçiyordu. Doğru eylemle
+  aynı turda 1.367 buluşma oldu. Engelin **metnini** oku.
+- **Paket CP.** Aksiyonu kapısına bağla. Koşulsuz çağrılan iki aksiyon
+  53 binden fazla boş deneme üretiyordu; ölçüm bunu doğru raporluyordu
+  ama rapor bilgi değil gürültü oluyordu.
 - **Paket CO.** Aracın **ölçüsüne** de bak, yalnızca kapsamına değil.
   Depoda 65 pencere testi vardı ve hepsi telefon *genişliğinde*
   koşuyordu; kimse yüksekliğe bakmamıştı (3600-14000 px, gerçeğin

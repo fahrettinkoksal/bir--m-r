@@ -7919,5 +7919,82 @@ Bu bir oyun özelliği değil, yerleşim düzeltmesi: geri alma yolu tek
 dosyalık commit'in kendisi (`app/lib/ui/screens/start_screen.dart`).
 Karar kaydı Q-231'de.
 
+## Paket CP — kapsam botunun dokunmadığı kapılar (11 Ekim 2026)
+
+**Ölçüm önce yapıldı (400 hedefli hayat).** Paket AI'nın aksiyon
+envanteri `game_controller.dart` okunarak üretiliyor; kapsam ölçümü
+şunu söyledi:
+
+| Ölçü | Paket CP öncesi | Sonrası |
+| --- | --- | --- |
+| Oyuncu aksiyonu | 138 | 138 |
+| CoverageBot ile çalışan | 103 | **124** |
+| Denendi, koşulu oluşmadı | 1 | 1 |
+| Hiç denenmedi | **34** | 13 |
+| **Kapsam** | **%74,6** | **%89,9** |
+
+Hafif tur (60 hayat) %87,7. Otuz dördün **29'u botta hiç bağlı
+değildi**: aileden gelen bütün kararlar (kardeş parası, çocuğun eve
+dönüşü, kayın çatışması, bakım ve miras anlaşmazlığı, çocuğun okul
+meselesi), yaşlı ebeveyne bakım, Paket CJ'nin yaşlılıkta bakım kararı,
+okul kulübü (gir/çalış/çık), arkadaş grubuyla buluşma, dövüşte
+müsabaka yolu, çocuk planı ve Ayarlar'daki modül anahtarları. Hepsi
+oyuncunun ekranında bir kart; hiçbir araç dokunmuyordu.
+
+### Botu öğretince iki **ölçüm** hatası çıktı
+
+1. **`endLifeByChoice` ters ölçülüyordu.** Başarıda `''`, engelde
+   gerekçeyi döndürüyor; bot "boş değilse oldu" sayıyordu. Yani
+   aksiyonun **başarısı** kapsam dışı, **başarısızlığı** kapsanmış
+   sayılıyordu. Kapı 95 yaşında olduğu ve kapsam hayatlarında 95'e hiç
+   ulaşılmadığı için yıllarca görünmemişti.
+2. **Grup buluşması olmayacak eylemle deneniyordu.** "Açık olan ilk
+   eylem" seçiliyordu; o çoğu zaman tek başına yapılan bir eylem ve
+   `Outing.supports` yüzünden her çağrı düşüyordu: **25.038 deneme,
+   sıfır buluşma.** "Oyunda grup buluşması çalışmıyor" gibi görünen
+   yanlış bir bulgu; doğru eylem seçilince aynı turda **1.367
+   buluşma** oldu.
+
+Ayrıca iki aksiyon koşulsuz çağrılıyordu ve 53 binden fazla boş deneme
+üretiyordu (`pushThroughCombatInjury` 23.802,
+`resolveSchoolSportConflict` 29.837); ikisi de kendi kapısına bağlandı.
+`askSportSupport` da öyle (861 boş deneme).
+
+### Kalan 13 boşluğun sebebi ölçüldü
+
+Hiçbiri artık "bot bağlamadı" değil:
+
+- **Çete teklifi ve kefalet yolları** (`acceptCrewOffer`,
+  `declineCrewOffer`, `askFamilyForBail`, `payBailSelf`): kapsam
+  hayatlarında kimse tutuklanmıyor — suç yolu **olaylardan** geçiyor,
+  doğrudan bir oyuncu aksiyonu değil. Kapsam botunun suçlu planı yok.
+- **`retireFromFootball`**: profesyonel futbol kariyeri oluşmuyor.
+- **`askFamilyForCourse`**: ücretli kurs + yetersiz cüzdan + ödeyecek
+  ebeveyn üçü bir araya gelmiyor.
+- **`askFamilyForBedelli`**: askerlik meselesi kapanmış oluyor
+  (sıralama).
+- **Aile anlaşmazlıklarının bir kısmı**: 400 hayatta 1-10 kez çıkan
+  seyrek olaylar. Paket CK'nın dersi: "görülmedi" ulaşılamazlık değil.
+
+### Bekçi
+
+`app/test/paket_cp_kapsam_bekcisi_test.dart` (3 test): bağlanan 18
+aksiyon 30 hayatlık turda **gerçekten uygulanıyor** (ölçülen uygulama
+sayıları dosyada yazılı) · `endLifeByChoice` başarıda boş metin
+döndürüyor, engelde gerekçe (aracın yanlış okuduğu sözleşme) · grup
+buluşması birlikte yapılabilen eylem istiyor. Paket AI'nın kapsam
+tabanı da %50'den **%80**'e çıkarıldı.
+
+**Isırma denemesi:** iki yeni bölüm adım listesinden çıkarılınca CP
+bekçisi 18 aksiyonu sayarak kırmızıya dönüyor ve kapsam tabanı
+104/138 (%75,4) ile kırılıyor — yani taban eski durumu geçiriyor.
+
+### Bu paket oyunun kodunu değiştirmedi
+
+Değişen dosyalar yalnızca test tarafında: `test/support/coverage_bot.dart`,
+`test/paket_ai_action_coverage_test.dart` ve yeni bekçi. Oyunun
+davranışı aynı; ölçüm aracı artık oyuncunun kapılarının %90'ına
+dokunuyor.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
