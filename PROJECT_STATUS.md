@@ -8485,3 +8485,55 @@ testlerle seç.
 
 **Doğrulama:** `flutter analyze` → "No issues found!"; tam süit →
 **3754 test geçti, 17 atlandı, 0 hata** (35:06). Cihazda oynanmadı.
+
+## Paket CW — hedefli küme artık tahmin değil, araç işi (11 Ekim 2026)
+
+Paket CV/1 bir CI turuna mal oldu ve sebebi kodda değil **yöntemdeydi**:
+hedefli test kümesini `grep -rl 'ActivitiesScreen|activity_|
+ActivityVenue' test/` ile seçtim. Aktivite ekranını gezen 14 dosya bu
+desene uymuyordu; `martial_arts_widget_test.dart` onlardan biriydi ve
+tam o test gerçek bir gerilemeyi yakalayacaktı.
+
+**Sebep.** O test ne sınıf adını ne anahtarı anıyor; ekrana **görünen
+metinle** dokunuyor (`tapMenuRow(tester, 'Spor salonu')`). Dosya adına
+ya da sınıf adına bakan bir grep bunu asla bulamaz.
+
+**Araç:** `scripts/test_secimi.py` — değişen dosyayı **beş** sinyalle
+tarar ve hangisinin tuttuğunu yazar:
+
+| sinyal | ne arar |
+|---|---|
+| içe-alma | test, değişen dosyayı `import` ediyor |
+| dolaylı | test, değişen dosyayı içe alan bir lib dosyasını içe alıyor |
+| simge | dosyada tanımlanan genel sınıf/işlev/sabit adı testte geçiyor |
+| anahtar | dosyada yazılan `Key('...')` değeri testte geçiyor |
+| **metin** | **dosyadaki görünen arayüz metni testte geçiyor** |
+
+Kullanım (ağa çıkmaz, depo kökünden):
+
+```
+python3 scripts/test_secimi.py app/lib/ui/screens/sections/activities_screen.dart
+python3 scripts/test_secimi.py --degisenler          # git diff'ten al
+python3 scripts/test_secimi.py --degisenler --komut   # flutter test satırı
+python3 scripts/test_secimi.py --kendini-sina         # betiğin bekçisi
+```
+
+Motor/bot/zar akışı dosyası geçtiğinde çıktının başına **"tam süit
+gerekiyor"** uyarısı basar; betik "tam süit gerekmiyor" demez, yalnızca
+"şunlar da koşsun" der.
+
+**Ölçüm.** `activities_screen.dart` için 40 aday buluyor (benim elle
+seçtiğim desen 22 bulmuştu) ve kaçırdığım `martial_arts_widget_test`
+listede. `life_progression.dart` için 169 aday **ve** tam süit uyarısı.
+
+**Kendini sınama ve ısırma denemesi.** `--kendini-sina` üç çifti
+denetliyor. **İlk yazımda iki çift vardı ve ısırma denemesi
+TUTMADI:** metin sinyalini kapattığımda sınav yeşil kaldı, çünkü o iki
+çift anahtar ya da içe-alma ile de tutuyordu — yani asıl önemli sinyal
+çivilenmemişti, yanlış güven veriyordu. Üçüncü çift eklendi
+(`activities_screen.dart` → `adoption_widget_test.dart`, **yalnızca**
+metin sinyaliyle eşleşir) ve ısırma tuttu: metin sinyali kapalıyken
+çıkış kodu 1, "1 eşleşme kayboldu".
+
+Bu araç bir **kolaylık**, kapı değil: `scripts/sabit_taramasi.py` gibi
+depo kuralını zorlamaz, kuralı uygulamayı kolaylaştırır.

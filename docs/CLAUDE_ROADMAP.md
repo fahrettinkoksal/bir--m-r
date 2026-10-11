@@ -626,6 +626,17 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
 - **Paket CV/1.** Kendi bekçin de yanılabilir. Paket CV'nin testi kapıyı
   `minAge` sanıyordu; düzeltme doğruydu, test kodu haksız yere
   suçluyordu. Bekçi kuralı **gerçek kapıyı** okumalı, varsaydığını değil.
+- **Paket CW.** Hedefli kümeyi elle grep'lemek bir CI turuna mal oldu;
+  artık `scripts/test_secimi.py` var. Beş sinyal tarar (içe-alma,
+  dolaylı, simge, anahtar, **metin**) ve motor/bot dosyası geçtiğinde
+  "tam süit gerekiyor" der. Ekran değiştirdiysen `--degisenler --komut`
+  ile kümeyi al; adını tahmin etme.
+- **Paket CW.** Isırma denemesi **tutmadıysa** demo başarılı değildir.
+  Betiğin kendini sınaması iki çiftle yazıldı ve metin sinyalini
+  kapattığımda yeşil kaldı — o iki çift başka sinyallerle de tutuyordu,
+  yani sınav asıl korumak istediğim şeyi korumuyordu. Yalnızca o
+  sinyalle tutan bir çift eklenince ısırma tuttu. "Yeşil geçti" ile
+  "doğru şeyi koruyor" aynı şey değil.
 
 ## Pano
 
