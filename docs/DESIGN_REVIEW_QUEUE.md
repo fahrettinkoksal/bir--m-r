@@ -9377,3 +9377,65 @@ alınırsa katlanan kart da kalkar.
 
 **Etkilenen kod:** `app/lib/ui/screens/start_screen.dart`,
 `app/test/paket_co_telefon_yerlesimi_test.dart`.
+
+### Q-232 — Rekabetçi olmayan kulüpte oyuncunun yeri ne diye anılır?
+
+**Durum:** **uygulandı** (Paket CQ, 11 Ekim 2026). Etiketler ve
+eşikler `prototypeOnly` değil çünkü **yeni sayı yok**: spor
+tarafındaki kesmelerin (28 · 45 · 62) aynısı kullanıldı. Geri alma
+yolu tek fonksiyon.
+
+**Nasıl çıktı.** Paket CE'nin bıraktığı "ilk 11'e kim çıkıyor"
+sorusu kulüp kırılımıyla ölçüldü (150 bot hayatı, 321 üyelik). Rol
+eşiği genelde ulaşılabilir (83 üyelik ilk 11 ve üstü) ama dört
+kulüpte **hiç** rol yükselmiyor:
+
+| Kulüp | Üyelik | İlk 11+ | Puan ortanca (en çok) |
+|---|---|---|---|
+| `halk_oyunlari` | 43 | **0** | 30 (64) |
+| `muzik_kulubu` | 28 | **0** | 33 (55) |
+| `tiyatro_kulubu` | 26 | **0** | 42 (**73**) |
+| `fotograf_kulubu` | 21 | **0** | 39 (**70**) |
+
+Sebep: `SchoolClubEngine` rolü yalnızca `club.competitive` olan
+kulüpte atıyor. Kart ise her kulüpte `uyelik.role.label` yazıyordu —
+fotoğraf kulübünde sekiz yıl geçiren oyuncu ekranda **"Yedek"**
+okuyordu.
+
+#### Kararım: ekran tarafında türetilmiş ad (uygulandı)
+
+`SchoolClubEngine.standingLabel` saf bir fonksiyon. Rekabetçi kulüpte
+rolün adını döndürür; rekabetçi olmayanda aynı rol puanından türeyen
+bir ad:
+
+| Rol puanı | Rekabetçi kulüp | Rekabetçi olmayan |
+|---|---|---|
+| < 28 | Yedek | **Yeni üye** |
+| 28-44 | Rotasyon | **Düzenli üye** |
+| 45-61 | İlk 11 | **Çekirdek ekip** |
+| ≥ 62 | Önemli oyuncu / Kaptan | **Kulübün yüzü** |
+
+**Neden motor değil ekran.** Rol alanı kayda yazılıyor ve olay
+kapıları (`minSquadRole`) onu okuyor. Rolü rekabetçi olmayan
+kulüplerde de atasaydım, kayıt biçimi ve olay erişimi değişirdi —
+ikisi de bu kusuru düzeltmek için gereksiz risk. Beş olayın hepsi
+zaten `requiresActiveClubId` ile rekabetçi bir kulübe bağlı; bu
+eşleşme artık bekçili.
+
+**Ölçüm (düzeltmeden sonra):** rekabetçi olmayan 118 üyelikte Yeni üye
+58 · Düzenli üye 35 · Çekirdek ekip 20 · Kulübün yüzü 5. Dört kademe
+de kullanılıyor.
+
+**Yapmayacağım (onay gelmeden):** Q-224'teki yoğunluk kararına
+dokunmak (üyelik sürerken yılda bir kulüp olayı garantisi) · kulüp
+olaylarının ağırlığını büyütmek · `minSquadRole` eşiklerini indirmek ·
+rolü rekabetçi olmayan kulüplerde de motora yazmak · etiket adlarını
+oyunun başka yerinde (ör. künye, günlük) kullanmak.
+
+**Geri alma:** `standingLabel` içindeki `if (club.competitive)`
+satırının koşulu kaldırılırsa ekran eskisi gibi her kulüpte rolün
+adını yazar.
+
+**Etkilenen kod:** `app/lib/domain/sports/school_club_engine.dart`,
+`app/lib/ui/screens/sections/school_clubs_page.dart`,
+`app/test/paket_cq_kulup_etiketi_test.dart`.
