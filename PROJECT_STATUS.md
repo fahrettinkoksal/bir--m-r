@@ -7853,5 +7853,71 @@ Kapalıyken: çocuk hiç hastalanmaz, günlüğe satır düşmez, hanedeki
 (D-154) yerinde kalır, geçmişte yazılmış hastalık dönüm noktaları
 silinmez.
 
+## Paket CO — telefon boyutunda ilk izlenim (11 Ekim 2026)
+
+**Ölçülen kör nokta.** Depodaki pencere testleri mantıksal olarak
+360-400 px *genişlikte* koşuyor (fiziksel 1080-1200, dpr 3) ama
+*yükseklik* 3600 ile 14000 px arasında — gerçek telefonun 5-15 katı.
+Ekran dökümü de 1000x9000'lik tek parça kâğıda basıyor. Yani
+"**içerik telefona sığmıyor**" sınıfı bir kusur hiçbir testte
+görünmüyordu.
+
+### Bulunan kusur: oyunun iki modundan biri katlanmanın altında
+
+360x640'lık ekranda (720x1280'lik Android tabanı) açılış ekranı
+ölçüldü:
+
+| Parça | Alt kenar | 640'a sığıyor mu |
+| --- | --- | --- |
+| "Rastgele bir hayat" | 630 | evet (10 px kalmış) |
+| **"İsmimi ve cinsiyetimi seçeyim"** | **720** | **hayır** |
+| Dipnot ("Her iki modda da…") | 824 | hayır |
+
+Düğme ekranda **vardı** ama dokunulabilir değildi: bu dosyanın ilk
+yoklaması tam bu yüzden "hayat başlatılamadı" diye düştü
+(`hitTestable` 0). Oyuncu kaydırmadan oyunun iki başlangıç modundan
+birini hiç görmüyordu.
+
+### Düzeltme: içerik silinmiyor, kısa ekranda katlanıyor
+
+730 px'den kısa ekranlarda "Nasıl oynanır" kartı **katlanıyor** ve tek
+dokunuşla açılıyor (`start_how_to_expand`). Uzun ekranda yerleşim hiç
+değişmiyor. Eşik ölçümden: sıkıştırılmamış yerleşimde ikinci modun alt
+kenarı 720, bu yüzden eşik ondan biraz yukarıda.
+
+**Ölçüm (düzeltmeden sonra).** 600 · 640 · 700 · 720 · 730 · 760 · 820
+px yüksekliklerin **hepsinde** iki başlangıç modu da katlanmanın
+üstünde. Dipnot 730-820 arasında altta kalıyor; o ekranlarda zaten
+böyleydi ve dipnot bir eylem değil.
+
+### Oyunun geri kalanı temiz
+
+360x640'ta 8/17/30/45/70 yaşlarında dört sekme ve o hayatta açık olan
+bütün satır kapıları gezildi (16 sayfa): **sıfır taşma, sıfır ekran
+hatası**. Aynı tarama 200x300'lük saçma bir ekranda da sıfır veriyor —
+yerleşim kaydırma görünümleri ve esnek metinlerle kurulduğu için
+dayanıyor.
+
+### Bekçi
+
+`app/test/paket_co_telefon_yerlesimi_test.dart` (4 test): 360x640'ta
+iki başlangıç modu da kaydırmadan görünür ve dokunulabilir · kısa
+ekranda "Nasıl oynanır" tek dokunuşla açılıyor (üç satırın hepsi
+geliyor) · uzun ekranda kart açık, katlama düğmesi yok · telefon
+boyutunda hiçbir ekran taşmıyor.
+
+**Isırma denemesi:** düzeltme geri alındığında ilk iki test kırmızı
+("İsmimi ve cinsiyetimi seçeyim katlanmanın altında kaldı, alt kenar
+719,5, ekran 640"). Dördüncü madde bugün yeşil, o yüzden **aracın
+kendisi** sınandı: bilerek taşan bir `Row` basıldığında tarama
+"RenderFlex overflowed by 640 pixels" diyor — yani taşmayı gerçekten
+görüyor ve yarın bir ekran telefonda taşarsa kırmızıya dönecek.
+
+### Modül anahtarı yok
+
+Bu bir oyun özelliği değil, yerleşim düzeltmesi: geri alma yolu tek
+dosyalık commit'in kendisi (`app/lib/ui/screens/start_screen.dart`).
+Karar kaydı Q-231'de.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

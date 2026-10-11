@@ -548,6 +548,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
   koddan ve simülasyondan çıkarıldı, oynanarak değil.
 - **15 golden testi atlanıyor** (`BIR_OMUR_SCREENSHOTS=1` olmadan
   çalışmaz); görsel regresyon fiilen korumasız.
+  > **Ölçüm (11 Ekim 2026, Paket CO).** Görsel regresyonun bir kısmı
+  > golden beklemeden ölçülebiliyor: pencere testleri mantıksal
+  > 360-400 px *genişlikte* koşuyor ama *yükseklik* 3600-14000 px, yani
+  > "telefona sığmıyor" sınıfı kusur hiç görünmüyordu. 360x640'ta
+  > ölçüm açılış ekranında gerçek bir kusur buldu (ikinci başlangıç
+  > modu katlanmanın altında) ve oyunun geri kalanında **sıfır taşma**
+  > çıktı. Artık `paket_co_telefon_yerlesimi_test.dart` telefon
+  > boyutunu bekçiliyor; golden'ların yerini tutmaz (renk ve çizim
+  > denetlenmiyor) ama yerleşim tarafı korumasız değil.
 - **Bildirim yoğunluğu arttı**: D-114 sonrası yıl başına 0,39 → 0,71
   pencere. Oynanırken fazla gelebilir (Q-132).
 - **Kayıt göçü** her yeni alanda elle yazılıyor; alan sayısı arttıkça

@@ -437,6 +437,17 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CO.** Aracın **ölçüsüne** de bak, yalnızca kapsamına değil.
+  Depoda 65 pencere testi vardı ve hepsi telefon *genişliğinde*
+  koşuyordu; kimse yüksekliğe bakmamıştı (3600-14000 px, gerçeğin
+  5-15 katı). Ekran dökümü üç tur boyunca sekiz hata buldu ama
+  "içerik telefona sığmıyor" sınıfını **yapısal olarak** göremiyordu.
+  Oyunun kapağındaki iki modun biri 360x640'ta katlanmanın altındaydı.
+- **Paket CO.** Bugün yeşil olan bir bekçi için **aracı sına**.
+  Telefon taraması sıfır taşma buldu; bu ya oyunun sağlamlığı ya
+  aracın körlüğüydü. Bilerek taşan bir `Row` basıldığında tarama
+  "RenderFlex overflowed by 640 pixels" dedi — yani sağlamlık.
+  Sınanmamış yeşil test, hiçbir şeyi korumayan testtir.
 - **Paket CN.** Yeni bir yıllık zar atışı eklerken **nereden
   çekildiğine** karar ver. Çocuk başına yıllık bir atış ana diziden
   gelseydi 70 yıllık bir hayatta sıranın tamamı kayardı: tek bir
