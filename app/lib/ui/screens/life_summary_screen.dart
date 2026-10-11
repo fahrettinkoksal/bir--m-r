@@ -113,19 +113,30 @@ class LifeSummaryScreen extends StatelessWidget {
                     label: 'Bölüm',
                     value: state.education.program!.name,
                   ),
+                // **Paket DF'de düzeltildi.** Buradaki son dal
+                // `'Son iş: ' + career.label` yazıyordu ve
+                // `label` işsizde "Çalışmıyor" döndüğü için ekran
+                // **her emekli hayatta** "Son iş: Çalışmıyor" diyordu.
+                // Altı arketipin ömür sonu karesinde 5'i böyleydi ve
+                // aynı ekranın hüküm paneli doğruyu söylüyordu
+                // ("3 işte toplam 43 yıl çalıştın"). Son iş artık
+                // geçmişten okunuyor (`CareerState.lastJobLabel`).
                 _Satir(
                   label: 'Meslek',
                   value: state.career.isEmployed
                       ? state.career.label
-                      : state.career.pastJobIds.isEmpty
-                          // Sporcuya "Çalışmadı" yazılmaz (AY/3, AY/5):
-                          // o hayatın emeği sahada ya da ringde geçti.
-                          ? ((state.footballCareer?.proSeasons ?? 0) > 0
+                      : (_sonIs(state) ??
+                          // Sporcuya ve kendi işini kurmuş olana
+                          // "Çalışmadı" yazılmaz (AY/3, AY/5 ve DF):
+                          // o hayatın emeği sahada, ringde ya da
+                          // kendi dükkânında geçti.
+                          ((state.footballCareer?.proSeasons ?? 0) > 0
                               ? 'Profesyonel futbolcu'
                               : _dovusenKariyerler(state).isNotEmpty
                                   ? 'Dövüş sporcusu'
-                                  : 'Çalışmadı')
-                          : 'Son iş: ${state.career.label}',
+                                  : state.businesses.isNotEmpty
+                                      ? 'Kendi işini kurdu'
+                                      : 'Çalışmadı')),
                 ),
                 // Futbol kariyeri ömür özetinde görünür (Paket AY/3).
                 // Eskiden hiç yazılmıyordu: 15 sezon, 300 maçlık bir
@@ -254,6 +265,16 @@ class LifeSummaryScreen extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Ömürde çalışılmış son işin özet satırı; hiç çalışılmadıysa `null`.
+///
+/// Önek **bilerek duruyor**: "Aşçı" ile "Son iş: Aşçı" farklı şeyler
+/// söyler — ikincisi oyuncunun ölürken çalışmadığını da anlatır
+/// (Paket DF).
+String? _sonIs(GameState state) {
+  final String? ad = state.career.lastJobLabel;
+  return ad == null ? null : 'Son iş: $ad';
 }
 
 class _Satir extends StatelessWidget {

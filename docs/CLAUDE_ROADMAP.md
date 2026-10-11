@@ -846,6 +846,23 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yaş almadan önce kapanıyor, yani `onYear`'da kalmak zorunda.
   "Projede tek doğru kanca var" varsayımı iki testi de kırıyordu.
 
+- **Paket DF.** "Ekranları okudum" demek için **bitiş ekranını** da
+  okumak gerekiyor. Üç döküm de ölümde geri dönüyordu, yani her oyunun
+  en son gördüğü ekran hiç basılmamıştı — ve ilk basıldığında altı
+  karenin beşinde hata çıktı. Bir akışın başı ve ortası okunmuşsa
+  sonu da okunmalı; en kolay atlanan kare, oyuncunun en çok hatırladığı
+  kare olabilir.
+- **Paket DF.** Aynı ekranda iki ayrı yerden okunan aynı bilgi
+  **birbirini yalanlayabilir**. Hüküm paneli "3 işte toplam 43 yıl
+  çalıştın" diyordu, iki satır altındaki meslek satırı "Son iş:
+  Çalışmıyor". Biri geçmişi, diğeri bugünü okuyordu. Bir ekran aynı
+  şeyi iki kez söylüyorsa ikisinin **aynı kaynaktan** okuduğu
+  denetlenmeli.
+- **Paket DF.** Düzeltirken bilgi kaybetmemeye dikkat. "Son iş:"
+  önekini de düşürmüştüm; "Aşçı" ile "Son iş: Aşçı" farklı şeyler
+  söyler (ikincisi ölürken çalışmadığını da anlatır). Hatayı düzeltmek,
+  satırı sadeleştirmek değildir.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

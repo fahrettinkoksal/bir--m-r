@@ -9277,3 +9277,70 @@ pratikte de belirleyici.
 
 Süit: 3796 geçti, 17 atlandı, 0 hata. `flutter analyze` temiz.
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DF — her oyunun en son gördüğü ekran hiç okunmamıştı (11 Ekim 2026)
+
+Üç ekran dökümünün üçü de ölümde geri dönüyordu
+(`if (controller.state!.deceased) return;`) ve `ekran_dokumu_bot_test`
+bunu açıkça yazıyordu: "o karede oyun bilerek 'Bir ömür tamamlandı'
+özetini" gösteriyor. Yani **her oyunun son ekranı** bugüne kadar
+basılmamış ve gözle okunmamıştı. Yeni araç:
+`app/test/ekran_dokumu_omur_sonu_test.dart` — altı arketipin ömür sonu
+karesini basar (özeti kurmaz; bot hayatını ölüme kadar oynatıp son
+durumu uygulamaya verir).
+
+### İlk karede çıktı
+
+| Hüküm paneli (doğru) | Meslek satırı (yanlış) |
+|---|---|
+| "3 işte toplam 43 yıl çalıştın. Mesleğinde başusta oldun." | "Son iş: **Çalışmıyor**" |
+| "4 işte toplam 40 yıl çalıştın." | "Son iş: **Çalışmıyor**" |
+| "Tek bir işte 43 yıl geçirdin. Mesleğinde duayen oldun." | "Son iş: **Çalışmıyor**" |
+
+Altı karenin **beşi** böyleydi; altıncı ölürken hâlâ çalışıyordu ve
+doğru yazıyordu. Ekran hem anlamsız bir cümle kuruyor hem de **kendi
+hüküm paneliyle çelişiyordu**.
+
+**Kök neden.** Satır `'Son iş: ${career.label}'` yazıyordu ve
+`CareerState.label` = `job?.name ?? 'Çalışmıyor'`: bugünkü işi soruyor.
+Son iş **geçmişten** okunur. `CareerState.lastJobLabel` eklendi:
+`history` içindeki (ayrılış yaşı yazılmış) son giriş, o yoksa
+`pastJobIds`; katalogdan düşmüş kimlik atlanır, uydurma ad yazılmaz.
+
+**Önek bilerek duruyor.** Düzeltirken önce "Son iş:" önekini de
+düşürdüm ve bir bilgi kaybettim: "Aşçı" ile "Son iş: Aşçı" farklı
+şeyler söyler — ikincisi oyuncunun ölürken çalışmadığını da anlatır.
+Geri kondu. Döküm şimdi beş karede "Son iş: …", bir karede (ölümde
+çalışan) çıplak iş adı yazıyor.
+
+### İkinci eksik: işletme sahibine "Çalışmadı"
+
+Aynı dalda hiç maaşlı iş tutmamış ama **işletme kurmuş** oyuncuya
+"Çalışmadı" yazılıyordu. Futbolcu (AY/3) ve dövüşçü (AY/5) için bu
+düzeltilmişti; işletme sahibi atlanmıştı. Artık "Kendi işini kurdu"
+yazıyor.
+
+**Şüphemi ölçtüm ve ilk hâliyle yanlıştı:** 200 bot ölümünde bu dal
+**0 kez** yürünüyor (bot her hayatta bir işe giriyor). Ama motor izin
+veriyor — `BusinessEngine.openAvailability` maaşlı iş istemiyor
+(kapılar: öğrenci değil, yaş, zekâ, karizma, ehliyet, para). Yani bu da
+Paket DC §1 gibi **bot ölçümünün göremediği** bir yol; koruması kaynak
+taramasıyla yapıldı.
+
+### Bekçi ve ısırma denemesi
+
+`app/test/paket_df_omur_sonu_test.dart` (4 test): §1 yüklemin geçmişi
+okuduğunu bulunan durumla, §2 hiç çalışmamışta `null` döndüğünü,
+§3 gerçek ekranda satırın doğru yazıldığını, §4 kaynak taramasıyla
+hatanın tam şeklinin (`'Son iş: ${state.career.label}'`) geri
+gelemeyeceğini denetler.
+
+| Isırma | Sonuç |
+|---|---|
+| Eski satır geri konuldu | §3 düştü: ekranda `Found 1 widget with text "Son iş: Çalışmıyor"` |
+
+Dökümün kendisi de bir araç hatası çıkardı: uygulamayı ikinci kez
+açınca "Rastgele bir hayat" düğmesi yok (Paket DA'nın tuzağı). Aynı
+çözüm uygulandı (`ValueKey` ile her açılışta tazeleme).
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

@@ -211,6 +211,32 @@ class CareerState {
 
   String get label => job?.name ?? 'Çalışmıyor';
 
+  /// En son **çalışılmış** işin adı; hiç çalışılmadıysa `null`.
+  ///
+  /// **Neden ayrı yüklem (Paket DF).** [label] bugünkü işi söyler ve
+  /// işsizken "Çalışmıyor" döner. Ömür sonu özetindeki "Son iş:" satırı
+  /// onu kullanıyordu, bu yüzden **her emekli hayatta** ekranda
+  /// "Son iş: Çalışmıyor" yazıyordu — hem anlamsız hem de aynı ekranın
+  /// hüküm paneliyle çelişiyor ("3 işte toplam 43 yıl çalıştın").
+  /// Altı arketipin ömür sonu karesinde ölçüldü: **5'inde** böyleydi.
+  ///
+  /// Son iş bugünden değil **geçmişten** okunur: önce `history`
+  /// (kayıtta ayrılış yaşı olan son giriş), o yoksa [pastJobIds].
+  /// Katalogdan silinmiş bir iş kimliği atlanır; uydurma ad yazılmaz.
+  String? get lastJobLabel {
+    for (int i = history.length - 1; i >= 0; i--) {
+      final JobHistoryEntry e = history[i];
+      if (e.endedAtAge == null) continue;
+      final JobType? j = jobById(e.jobId);
+      if (j != null) return j.name;
+    }
+    for (int i = pastJobIds.length - 1; i >= 0; i--) {
+      final JobType? j = jobById(pastJobIds[i]);
+      if (j != null) return j.name;
+    }
+    return null;
+  }
+
   /// Şu anki görev adı (seviyeye göre); işsizse "Çalışmıyor".
   String get title => job == null ? 'Çalışmıyor' : jobTitleFor(job!, level);
 
