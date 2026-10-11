@@ -52,17 +52,35 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
 
-/// Kök menüdeki mekân satırları ve açılma yaşları.
-const List<(String, ActivityVenue)> kKapiliSatirlar =
-    <(String, ActivityVenue)>[
-  ('activity_berber', ActivityVenue.berber),
-  ('activity_spor', ActivityVenue.sporSalonu),
-  ('activity_saglik', ActivityVenue.saglikMerkezi),
-  ('activity_estetik', ActivityVenue.estetik),
-  ('activity_kurs', ActivityVenue.kurs),
-  ('activity_eglence', ActivityVenue.eglence),
-  ('activity_fal', ActivityVenue.falTarot),
-];
+/// Dövüş sanatlarının en küçük başlama yaşı (`martial_arts_catalog`).
+const int kDovusYasi = 7;
+
+/// Kök menüdeki mekân satırları ve **gerçek** açılma yaşları.
+///
+/// Yaş `ActivityVenue.minAge` değil **etkin kapı**: bir mekân satırı,
+/// sayfasının barındırdığı en erken şey ne zaman açılıyorsa o zaman
+/// açılır. Spor salonunun eylemleri 8'de başlıyor ama sayfası dövüş
+/// sanatları bölümünü de taşıyor ve o 7'de başlıyor; satırın kapısı bu
+/// yüzden 7. İlk yazımda bu tablo `minAge`'i doğru kapı sanmış ve kendi
+/// bekçim kodu haksız yere suçlamıştı.
+List<(String, String, int)> get kKapiliSatirlar => <(String, String, int)>[
+      ('activity_berber', ActivityVenue.berber.label,
+          ActivityVenue.berber.minAge),
+      ('activity_spor', ActivityVenue.sporSalonu.label,
+          ActivityVenue.sporSalonu.minAge < kDovusYasi
+              ? ActivityVenue.sporSalonu.minAge
+              : kDovusYasi),
+      ('activity_saglik', ActivityVenue.saglikMerkezi.label,
+          ActivityVenue.saglikMerkezi.minAge),
+      ('activity_estetik', ActivityVenue.estetik.label,
+          ActivityVenue.estetik.minAge),
+      ('activity_kurs', ActivityVenue.kurs.label,
+          ActivityVenue.kurs.minAge),
+      ('activity_eglence', ActivityVenue.eglence.label,
+          ActivityVenue.eglence.minAge),
+      ('activity_fal', ActivityVenue.falTarot.label,
+          ActivityVenue.falTarot.minAge),
+    ];
 
 void main() {
   testWidgets('hiçbir mekân satırı yaşından önce görünmez', (
@@ -106,17 +124,16 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      for (final (String anahtar, ActivityVenue mekan) in kKapiliSatirlar) {
+      for (final (String anahtar, String ad, int kapi)
+          in kKapiliSatirlar) {
         final bool goruluyor =
             find.byKey(Key(anahtar)).evaluate().isNotEmpty;
-        final bool olmali = yas >= mekan.minAge;
+        final bool olmali = yas >= kapi;
         if (goruluyor && !olmali) {
-          hatalar.add('$yas yaş: ${mekan.label} görünüyor '
-              '(en küçük ${mekan.minAge})');
+          hatalar.add('$yas yaş: $ad görünüyor (en küçük $kapi)');
         }
         if (!goruluyor && olmali) {
-          eksikler.add('$yas yaş: ${mekan.label} görünmüyor '
-              '(en küçük ${mekan.minAge})');
+          eksikler.add('$yas yaş: $ad görünmüyor (en küçük $kapi)');
         }
       }
 
@@ -138,6 +155,25 @@ void main() {
     expect(eksikler, isEmpty,
         reason: 'yaşı geldiği hâlde görünmeyen satır:\n'
             '${eksikler.join('\n')}');
+  });
+
+  test('mekân satırı içindeki en erken şeye göre açılır', () {
+    // **Paket CV'nin kendi gerilemesinin dersi.** Spor salonu satırına
+    // ilk konan kapı `ActivityVenue.sporSalonu.minAge` (8) idi; oysa o
+    // sayfa dövüş sanatları bölümünü de barındırıyor ve dövüş **7**
+    // yaşında başlıyor. Sonuç: 7 yaşındaki oyuncu karateye hiç
+    // ulaşamıyordu. `ActivityVenue.minAge` yalnızca o mekânın
+    // **eylemlerine** bakar; sayfanın ek satırlarını görmez.
+    //
+    // Bu test o ilişkiyi kayda geçirir: dövüş yaşı spor salonunun
+    // eylem yaşından küçük olduğu sürece satırın kapısı dövüş yaşı
+    // olmalı. Biri yükselirse test yeniden ölçmeye zorlar.
+    expect(kDovusYasi, lessThan(ActivityVenue.sporSalonu.minAge),
+        reason: 'dövüş yaşı artık spor salonundan küçük değil: kapı '
+            'yeniden ölçülmeli');
+    // Spor salonu satırının bekçisi `martial_arts_widget_test.dart`
+    // içinde: 4 yaşında satır yok, 7 yaşında satır **ve** dövüş bölümü
+    // var.
   });
 
   test('ölçülen eşikler kayıtta sabit', () {

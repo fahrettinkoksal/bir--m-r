@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../../data/life_goal_catalog.dart';
@@ -398,7 +399,21 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ),
           const SizedBox(height: 10),
         ],
-        if (state.player.age >= ActivityVenue.sporSalonu.minAge)
+        // **Mekân satırı, içindeki EN ERKEN şey ne zaman açılıyorsa o
+        // zaman açılır.** İlk yazımda bu satıra yalnızca
+        // `ActivityVenue.sporSalonu.minAge` (8) kondu ve bu bir
+        // **gerileme** oldu: dövüş sanatları 7 yaşında başlıyor
+        // (`_enKucukDovusYasi`) ama spor salonunun kapısı 8 olduğu için
+        // 7 yaşındaki oyuncu karateye hiç ulaşamıyordu. Hatayı mevcut
+        // bekçi yakaladı (`martial_arts_widget_test.dart` — "yaşı
+        // tutmayan oyuncuya bölüm gösterilmez": 4 yaşında "Spor
+        // salonu" satırına basamıyordu).
+        //
+        // `ActivityVenue.minAge` yalnızca o mekânın **eylemlerine**
+        // bakıyor; sayfanın barındırdığı ek satırları (`extraRows`)
+        // görmüyor. Kapı o yüzden ikisinin **küçüğü**.
+        if (state.player.age >=
+            min(ActivityVenue.sporSalonu.minAge, _enKucukDovusYasi))
           ...<Widget>[
           MenuRow(
             key: const Key('activity_spor'),

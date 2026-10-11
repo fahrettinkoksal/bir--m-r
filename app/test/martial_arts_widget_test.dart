@@ -114,6 +114,14 @@ void main() {
   testWidgets('yaşı tutmayan oyuncuya bölüm gösterilmez',
       (WidgetTester tester) async {
     // En küçük başlama yaşı 7 (karate); 4 yaşında bölüm çıkmamalı.
+    //
+    // **Paket CV'de güçlendirildi.** Eskiden bu test 4 yaşında "Spor
+    // salonu" satırına basıp dövüş satırının yokluğunu denetliyordu.
+    // Paket CV spor salonu satırına da yaş kapısı koydu ve test
+    // kırmızıya döndü — çünkü artık 4 yaşında basılacak satır bile
+    // yok. Bu **daha güçlü** bir güvence: iddia gevşetilmedi,
+    // yükseltildi. İki kat denetliyor: satır yok, dolayısıyla bölüm de
+    // erişilemez.
     tester.view.physicalSize = const Size(1200, 5200);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.resetPhysicalSize);
@@ -128,8 +136,40 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('tab_aktiviteler')));
     await tester.pumpAndSettle();
-    await tapMenuRow(tester, 'Spor salonu');
 
+    // 4 yaşında spor salonuna giden satır hiç yok (Paket CV).
+    expect(find.byKey(const Key('activity_spor')), findsNothing,
+        reason: '4 yaşındaki oyuncuya "Spor salonu" satırı açık');
     expect(find.byKey(const Key('spor_dovus')), findsNothing);
+  });
+
+  testWidgets('dövüş yaşı gelen oyuncu spor salonuna ulaşabilir',
+      (WidgetTester tester) async {
+    // **Paket CV'nin kendi gerilemesinin bekçisi.** Spor salonu
+    // satırına ilk konan kapı `ActivityVenue.sporSalonu.minAge` (8)
+    // idi; dövüş sanatları ise **7** yaşında başlıyor. Yani 7 yaşındaki
+    // oyuncu karateye ulaşamıyordu: kapı, sayfanın barındırdığı ek
+    // satırı görmüyordu. Kapı artık ikisinin küçüğü.
+    tester.view.physicalSize = const Size(1200, 5200);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      BirOmurApp(controller: controller, sound: SoundService.silent()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
+    controller.debugSetState(hayat(age: 7));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('activity_spor')), findsOneWidget,
+        reason: '7 yaşında dövüş başlıyor ama spor salonu satırı yok: '
+            'kapı sayfanın içindeki en erken şeyi görmüyor');
+    await tapMenuRow(tester, 'Spor salonu');
+    expect(find.byKey(const Key('spor_dovus')), findsOneWidget,
+        reason: '7 yaşındaki oyuncuya dövüş sanatları bölümü açılmıyor');
   });
 }

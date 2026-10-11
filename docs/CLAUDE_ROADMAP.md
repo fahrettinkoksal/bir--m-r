@@ -612,6 +612,20 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   bu pakette açılamadı; kareyi silmek ya da okundu saymak yerine açıcı
   neden açılamadığını dökümün başına yazıyor. Eksik, görünür bırakılmış
   bir eksik olarak kalıyor.
+- **Paket CV/1.** Bir kapı eklerken "bu sayfanın içinde başka ne var?"
+  diye sor. `ActivityVenue.minAge` yalnızca eylemlere bakıyor; spor
+  salonu sayfası ise dövüş sanatları bölümünü de taşıyor ve o daha
+  erken başlıyor. Kapıyı eylem yaşına koymak 7 yaşındaki oyuncunun
+  karatesini kapattı. Mekân satırı, içindeki **en erken** şeye göre
+  açılır.
+- **Paket CV/1.** Hedefli test kümesini değişen dosyanın **adıyla**
+  seçmek yetmez; o ekranı **gezen** testlerle seçilir. `ActivitiesScreen|
+  activity_|ActivityVenue` desenim aktivite ekranına değen 14 dosyayı
+  kaçırdı ve hata CI'da çıktı. Bir ekranı değiştirdiysen o ekranın
+  etiketlerini de (menü satırı adları) grep'e kat.
+- **Paket CV/1.** Kendi bekçin de yanılabilir. Paket CV'nin testi kapıyı
+  `minAge` sanıyordu; düzeltme doğruydu, test kodu haksız yere
+  suçluyordu. Bekçi kuralı **gerçek kapıyı** okumalı, varsaydığını değil.
 
 ## Pano
 

@@ -8447,3 +8447,41 @@ onu açan bir satır var. Kendi testleri var (`event_dialog`,
 
 **Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
 oynanmadı.
+
+## Paket CV/1 — kendi kapımın gerilemesi: 7 yaşındaki karate (11 Ekim 2026)
+
+Paket CV spor salonu satırına `ActivityVenue.sporSalonu.minAge` (**8**)
+kapısını koydu. CI bunu reddetti: `martial_arts_widget_test.dart` —
+*"yaşı tutmayan oyuncuya bölüm gösterilmez"* kırmızıya düştü
+(3751 geçti, **1 kırmızı**, 17 atlandı). Yerelde de aynı tek hata.
+
+**Gerçek gerileme.** Dövüş sanatları **7** yaşında başlıyor
+(`_enKucukDovusYasi`, `martial_arts_catalog`) ve bölüm spor salonu
+**sayfasının içinde** duruyor. `ActivityVenue.minAge` yalnızca o
+mekânın **eylemlerine** bakıyor, sayfanın barındırdığı ek satırları
+görmüyor. Kapıyı 8 yapmak 7 yaşındaki oyuncunun karatesini kapattı.
+
+**Kural:** bir mekân satırı, sayfasının içindeki **en erken** şey ne
+zaman açılıyorsa o zaman açılır. Kapı artık ikisinin küçüğü.
+
+**Testler gevşetilmedi, güçlendirildi:**
+
+- Düşen test artık iki kat denetliyor: 4 yaşında **satırın kendisi**
+  yok (`activity_spor`), dolayısıyla bölüm de erişilemez. Eski iddia
+  (`spor_dovus` yok) yerinde duruyor.
+- Yeni test: 7 yaşında satır **ve** dövüş bölümü açık olmalı — bu
+  gerilemenin kalıcı bekçisi.
+- Paket CV bekçisinin tablosu da yanlıştı: kapıyı `minAge` sanıyor ve
+  kodu haksız yere suçluyordu. Tablo artık **etkin kapıyı** okuyor ve
+  ayrı bir test dövüş yaşının spor salonu eylem yaşından küçük
+  olduğunu çiviliyor; biri yükselirse yeniden ölçmeye zorlar.
+
+**Test seçimi hatam.** Paket CV'nin hedefli kümesini
+`ActivitiesScreen|activity_|ActivityVenue` ile seçmiştim; aktivite
+ekranına değen **14 dosya** bu desene uymuyordu ve kümeye girmedi
+(`martial_arts_widget_test` bunlardan biri). Hata bu yüzden CI'da
+çıktı. Ders: kümeyi değişen dosyanın adıyla değil, o ekranı **gezen**
+testlerle seç.
+
+**Doğrulama:** `flutter analyze` → "No issues found!"; tam süit →
+**3754 test geçti, 17 atlandı, 0 hata** (35:06). Cihazda oynanmadı.
