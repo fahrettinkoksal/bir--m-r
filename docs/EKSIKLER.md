@@ -468,6 +468,15 @@ yazılmalı, yoksa o yaş hızlı mı geçmeli — Q-139'un 5. sorusu.
 > (aday tabanları, 14 olayın hepsinin gerçek karede aday olması, baba
 > hanede değilken beşik olayının aday olmaması, iz kapısı).
 
+> **TAZELENDİ — Paket DG ölçümü (11 Ekim 2026).** Bandı seçerken ölçü
+> değişti: "yıl başına olay" yerine **bant yılı başına farklı olay**.
+> 7-11 ilkokul bandı yıl başına 1,47 olayla ortalamaya yakın ama
+> çeşitlilikte **en düşük** (20,6; 21-29: 21,9; 30-39: 25,9; 12-15:
+> 32,5; 16-20: 33,2). Yani sorunu boş yıl değil **tekrar**. Paket DG o
+> banda 22 olay yazdı (`event_pool_primary.dart`,
+> `FeatureId.ilkokulYillari`). §7'nin 2. maddesinin CX ve DE'den
+> sonraki üçüncü adımı.
+
 > **TAZELENDİ — Paket DE ölçümü (11 Ekim 2026).** Bant bant yoğunluk
 > yeniden ölçüldü (160 hayat). Paket CX 0-2'yi doldurduktan sonra en
 > ince bant **3-6** kaldı: yıl başına **1,04** olay ve yalnızca **55**

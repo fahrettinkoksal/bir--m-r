@@ -863,6 +863,34 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   söyler (ikincisi ölürken çalışmadığını da anlatır). Hatayı düzeltmek,
   satırı sadeleştirmek değildir.
 
+- **Paket DG.** "Hangi bant ince?" sorusunun ölçüsü **yıl başına olay**
+  değil, **bant yılı başına farklı olay**. Yıl başına sayı 7-11'de
+  ortalamaya yakındı (1,47) ama çeşitlilik en düşüktü (20,6; 16-20'de
+  33,2). Yanlış ölçüyle bakıp "bu bant iyi" demek kolaydı; oyuncunun
+  hissettiği şey tekrardı.
+- **Paket DG.** Boşa çalışan iddia, olmayan iddiadan **daha
+  tehlikelidir**: yeşil görünür. §7'nin "okul dışı karede aday olmuyor"
+  döngüsü 400 karede 0 kez yürüdü, çünkü 7-11 bandında oyuncu kural
+  gereği her zaman okullu (okul 6'da başlıyor, 9. sınıftan önce
+  kalınmıyor, 15'ten önce bırakılamıyor). İddiayı silmek yerine
+  **varsayımı sabitledim**: o üç sayı banda kayarsa test kırılır ve
+  değiştiren kişi notu okur. Bir dalı deneyemiyorsan, deneyemediğinin
+  **sebebini** sabitle.
+- **Paket DG.** İçerik eklemek hiçbir sayıya dokunmadan **zar akışını
+  kaydırır**; düşen eski bekçi çoğu kez yeni hatayı değil, o bekçinin
+  **yanlış yüklemini** gösterir. İkisi birden düştü: futbol bekçisi
+  "kabul edilen" diyordu, niyeti "oynayan"dı (tohum 41961 imzalayıp 19
+  yaşında öldü); BM bekçisi "60 hayatta en az bir karşılık" diyordu,
+  ölçüldü ve o satırın baştan beri **%2'lik bir kura** olduğu çıktı.
+  Taban düşürmek de, kohortu şişirmek de çare değildi: iddianın zar
+  gerektirip gerektirmediğini sor. Karşılık olaylarının tek kapısı yaş
+  + iz olduğu için iddia **zarsız** kurulabiliyordu.
+- **Paket DG.** Arama ölçütünü iddianın kendisinden alan bekçi
+  **döngüseldir**: izin adı bozulursa kare hiç bulunmaz ve test sessizce
+  yeşil kalır. Bu yüzden yapısal bekçinin yanına zarsız bir **katalog**
+  denetimi kondu (her iz okunuyor mu). İki bölüm birbirinin kör
+  noktasıdır; her ikisi de ayrı mutasyonla denendi.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

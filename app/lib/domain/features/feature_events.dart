@@ -17,6 +17,7 @@ import '../../data/event_pool_friend_circle.dart';
 import '../../data/event_pool_late_years.dart';
 import '../../data/event_pool_neighbour.dart';
 import '../../data/event_pool_preschool.dart';
+import '../../data/event_pool_primary.dart';
 import '../../data/event_pool_threshold_years.dart';
 import '../../data/event_pool_traces.dart';
 import '../../data/event_pool_widowhood.dart';
@@ -47,6 +48,9 @@ abstract final class FeatureEvents {
     // `ilkYillarOlaylari` anahtarından **ayrı** tutuldu: ikisi aynı
     // pencereyi paylaşıyor ama ayrı paketler ve ayrı ayrı kapatılabilir.
     FeatureId.okulOncesiYillar: kPreschoolEvents,
+    // Paket DG: 7-11'in kendi havuzu. Yine ayrı anahtar — ilkokul
+    // bandı Paket BM'in 0-7 penceresiyle yalnızca 7'de kesişiyor.
+    FeatureId.ilkokulYillari: kPrimarySchoolEvents,
   };
 
   /// Olay kimliğinden modüle eşleme; bir kez kurulur.

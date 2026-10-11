@@ -337,6 +337,25 @@ enum FeatureId {
       'app/lib/data/event_pool_preschool.dart',
       'app/test/paket_de_okul_oncesi_test.dart',
     ],
+  ),
+
+  ilkokulYillari(
+    saveKey: 'ilkokul_yillari',
+    title: 'İlkokul yılları',
+    lostWhenOff:
+        '7-11 yaşın kendine ait 22 olayı çıkmaz: sıra arkadaşı, '
+        'tahtaya kalkma, karne günü, kopya teklifi, beden dersi takım '
+        'seçimi, tören günü, öğretmenin bir cümlesi, kantin parası, '
+        'sınıf fotoğrafı, kırtasiye, harçlık pazarlığı, kütüphaneden '
+        'ilk kitap, mahalle maçı, kavga ve barışma, kardeşe göz kulak '
+        'olmak, yaz tatilinin bitişi ve altı karşılık olayı. Okulun '
+        'kendisi, notlar ve mevcut okul olayları yerinde kalır — '
+        'yalnızca bu havuz susar.',
+    paket: 'Paket DG — ilkokul yılları',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_primary.dart',
+      'app/test/paket_dg_ilkokul_test.dart',
+    ],
   );
 
   const FeatureId({

@@ -20,6 +20,7 @@ import 'event_pool_late_years.dart';
 import 'event_pool_widowhood.dart';
 import 'event_pool_neighbour.dart';
 import 'event_pool_preschool.dart';
+import 'event_pool_primary.dart';
 import 'event_pool_threshold_years.dart';
 import 'event_pool_traces.dart';
 import 'event_pool_echo.dart';
@@ -1789,4 +1790,10 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // 1,04 olay ve yalnızca 55 farklı olay, ilkokulun yarısından az.
   // Modül anahtarı `FeatureId.okulOncesiYillar`.
   ...kPreschoolEvents,
+
+  // İlkokul yılları: 7-11 (Paket DG). `docs/EKSIKLER.md` §7'nin 2.
+  // maddesi ("çocukluk oyunun en fakir ve en duygusal dönemi") ve
+  // ölçüm: bant yılı başına farklı olay 20,6 — bütün bantların en
+  // düşüğü. Modül anahtarı `FeatureId.ilkokulYillari`.
+  ...kPrimarySchoolEvents,
 ];

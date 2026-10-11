@@ -9344,3 +9344,138 @@ açınca "Rastgele bir hayat" düğmesi yok (Paket DA'nın tuzağı). Aynı
 çözüm uygulandı (`ValueKey` ile her açılışta tazeleme).
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DG — ilkokul yılları: çeşitlilikte en düşük bant (11 Ekim 2026)
+
+`docs/EKSIKLER.md` §7'nin 2. maddesi: "Çocukluk ve ergenlik olayları —
+oyunun en fakir ve en duygusal dönemi." Paket CX 0-2'yi, Paket DE
+3-6'yı doldurdu. Sıradaki bandı **yıl başına olay** yerine **bant yılı
+başına farklı olay** ile seçtim; o ölçü daha doğru soruyu soruyor:
+
+| bant | yıl | yıl başına olay | farklı olay | **bant yılı başına farklı** |
+|---|---|---|---|---|
+| **7-11 ilkokul** | 5 | 1,47 | 103 | **20,6** |
+| 21-29 genç yetişkin | 9 | 1,76 | 197 | 21,9 |
+| 30-39 otuzlar | 10 | 1,81 | 259 | 25,9 |
+| 12-15 ergenlik | 4 | 1,57 | 130 | 32,5 |
+| 16-20 eşik | 5 | 1,67 | 166 | 33,2 |
+
+7-11'in yıl başına olay sayısı ortalamaya yakın (1,47) ama **çeşitlilik
+en düşük**: oyuncu beş yıl aynı yirmi olayın içinde dönüyor. Yani bu
+bandın sorunu "boş yıl" değil **tekrar**.
+
+### Eklenen
+
+`lib/data/event_pool_primary.dart`: **22 olay** — 16'sı 7-11
+penceresinde (sıra arkadaşı, tahtaya kalkma, karne günü, kopya teklifi,
+beden dersi takım seçimi, tören günü, öğretmenin bir cümlesi, kantin
+parası, sınıf fotoğrafı, kırtasiye, harçlık pazarlığı, kütüphaneden ilk
+kitap, mahalle maçı, kavga ve barışma, kardeşe göz kulak olmak, yaz
+tatilinin bitişi) ve **6'sı karşılık olayı**.
+
+Modül anahtarı: `FeatureId.ilkokulYillari` (yine ayrı; Paket BM'in 0-7
+penceresiyle yalnızca 7'de kesişiyor).
+
+**Bu yaşın tonu 0-6'dan farklı:** çocuk artık kendi kararını veriyor
+(kopyayı reddetmek, elini kaldırmak, parayı paylaşmak) ama sonuçlar
+yetişkin ölçeğinde yazılmıyor — ne kariyer ne büyük para. Okul olayları
+`requiresSchoolStudent` ile kapılı.
+
+### §7 boşa çalışıyordu; varsayımı sabitleyen bekçiye çevrildi
+
+İlk hâlinde §7 şöyle diyordu: "okul olayları, okul öğrencisi olmayan
+karede aday olmuyor" — 400 kare tarandı ve ölçüm **0/400** çıktı. Yani
+döngünün gövdesi hiç yürümedi ve iddia hiçbir şey kanıtlamıyordu.
+Sebebi tesadüf değil, kuralın kendisi:
+
+| kural | değer |
+|---|---|
+| `prototypeOnlySchoolStartAge` | 6 |
+| `prototypeOnlyFailMinGrade` (sınıfta kalma) | 9 |
+| `prototypeOnlyDropOutMinAge` (okulu bırakma) | 15 |
+
+7-11 bandında oyuncu **kural gereği** her zaman okullu. Boş iddianın
+yerine **varsayımın kendisi** sabitlendi: bu üç sayıdan biri bandın
+içine kayarsa test kırılır ve değiştiren kişi notu okur — o zaman okul
+kapısının çalışma zamanı dalı gerçekten denenebilir hâle gelmiş olur.
+
+### Bekçi ve ısırma denemesi
+
+`app/test/paket_dg_ilkokul_test.dart` (7 test; DE'nin bekçisinin kalıbı
+üstüne §7).
+
+| Isırma | Sonuç |
+|---|---|
+| Anahtar `FeatureEvents`'e bağlanmasa | §6 düştü: kapalıyken **3995** aday çıktı |
+
+### Zar kayması iki eski bekçiyi düşürdü; ikisi de düzeltildi, hiçbiri gevşetilmedi
+
+22 yeni olay yıllık havuzun ağırlık dağılımını değiştiriyor, yani
+**hiçbir sayıya dokunmasam da** tohum başına çıkan olay dizisi kayıyor.
+Bu kayma iki eski iddiayı düşürdü. İkisi de yanlış **yüklem** üstüne
+kuruluydu; ölçüm ikisinde de bunu gösterdi.
+
+**1. `paket_ay_football_measurement_test` — "kabul edilen" ≠ "oynayan".**
+İddia şuydu: profesyonele kabul edilen her hayatın zirve ünü > 0. 1200
+spor odaklı hayatta bir tanesi düştü. Suçlu tohum arandı ve bulundu:
+
+| tohum 41961 | değer |
+|---|---|
+| profesyonel sezon | **0** |
+| ölüm yaşı | **19** |
+| zirve ün | 0 |
+
+Sözleşmeyi imzaladı ve **ilk sezonundan önce öldü**. Ün kazanmaması
+hata değil. Kohortun tamamı ölçüldü:
+
+| ölçü | değer |
+|---|---|
+| profesyonele kabul edilen | 65 (%5,4) |
+| hiç sezon oynamayan | **1** (%1,5) |
+| **sezon oynayıp ünü 0 olan** | **0** |
+
+Yani Paket AY/2'nin koruduğu asıl hata (300 maç oynayan tanınmamış
+kalıyordu) geri gelmemiş. Yüklem niyetine çevrildi — "oynayıp ünü 0
+olan = 0" — ve hiç oynamayanın ün kazanmaması da ayrıca sabitlendi.
+
+**2. `paket_bm_ilk_yillar_test` — bekçi değil, %2'lik kura.**
+İddia şuydu: 60 hayatta en az bir "ilk yıl karşılığı" olayı çıkar.
+Ölçüm (2×300 hayat) bu satırın baştan beri kura olduğunu gösterdi:
+
+| | DG açık | DG kapalı |
+|---|---|---|
+| en az bir karşılık gören hayat | 19/300 (%6,3) | 21/300 (%7,0) |
+| **60 hayatta hiç çıkmama ihtimali** | **%2,0** | **%1,3** |
+
+İki kohort aynı: yeni içerik oranı düşürmedi, sadece kuraya denk geldi.
+Kohortu 300'e çıkarmak çareydi ama süite 600 hayat eklerdi — ve
+gereksizdi: karşılık olaylarının **tek** kapısı yaş + iz, yani iddia
+zar gerektirmiyor. Bekçi ikiye bölündü:
+
+- **§1 katalog (zarsız, 4 saniye):** ilk yılların koyduğu 8 izin hepsi
+  bir yerde okunuyor mu?
+- **§2 yapısal:** izi taşıyan, penceresi açık kare **aranır** (kurulmaz)
+  ve o karede okuyucu aday olmak zorundadır. 60 hayatta 20 kare bulundu,
+  20'sinde de aday.
+
+İkisi birbirinin kör noktası: koşula yanlış bir kapı eklenirse §2
+düşer, izin **adı** bozulursa §2 hiç kare bulamaz ama §1 düşer. İkisi
+de denendi:
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Okuyucuya 8-12 yaşında sağlanamaz kapı (`livingRelations: es`) | §2 | "8 yaşında iz var, pencere açık, ama aday değil" |
+| Okuyucunun aradığı izin adı bozuk | §1 | "ilk_yillar_kumbara sessiz iz: hiçbir olay onu okumuyor" |
+
+Araç kendi kör noktasını da gösterdi: `onPreAge` karesi karşılık
+çıktıktan **sonra** çalışıyor, karşılığın kendi `forbiddenFlags`'i de o
+kareyi eliyor — yani çabuk çıkan karşılığın karesi hiç görünmüyor
+(Paket CR'ın akrabası). Tablo artık "çıkmış hayat" sütununu da basıyor
+ve taban "kare bulundu **ya da** karşılık çıktı" diyor.
+
+Ölçümün yan ürünü bir denge sorusu: izi **koyan** olay da seyrek —
+`kumbaraBasladi` 300 hayatta **2** kez konuyor, yani yazılmış bir
+karşılık pratikte okunmuyor. Katsayıya dokunmadım; **Q-238** olarak
+kuyruğa öneri + varsayılanla girdi.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

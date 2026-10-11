@@ -220,8 +220,141 @@ void main() {
       expect(kapaliGorulen, 0, reason: 'Kapalı modülün olayı çıktı.');
       expect(acikGorulen, greaterThan(10),
           reason: 'Açık modülün olayları hayata hiç girmedi.');
-      expect(acikKarsilik, greaterThan(0),
-          reason: 'İlk yılların izi sonradan hiç okunmadı.');
+
+      // `acikKarsilik > 0` iddiası buradan **kaldırılmadı, aşağıdaki
+      // teste taşındı ve zarsız hale getirildi.** Gerekçe ölçüldü
+      // (Paket DG, 2×300 hayat):
+      //
+      // | iz | DG açık: iz → olay | DG kapalı: iz → olay |
+      // |---|---|---|
+      // | bisiklet | 12 → 5 | 13 → 6 |
+      // | kumbara  |  2 → 1 |  2 → 0 |
+      // | harfler  |  8 → 2 | 12 → 7 |
+      // | sokak    | 19 → 11| 18 → 9 |
+      // | en az bir karşılık gören hayat | 19/300 (%6,3) | 21/300 (%7,0) |
+      //
+      // İki kohort aynı: yeni içerik bu oranı düşürmedi. Ama p=%6,3'te
+      // 60 hayatta hiç görülmeme ihtimali **%2**. Yani bu satır bir
+      // bekçi değil, iki yüzde birlik bir kuraydı; Paket DG'nin zar
+      // kayması ona denk geldi. Kohortu 300'e çıkarmak da çareydi ama
+      // süit 600 hayat daha uzardı; iddianın kendisi zar gerektirmiyor
+      // (okuyucuların tek kapısı yaş + iz), bu yüzden yapısal bekçiye
+      // çevrildi. Sayı yine basılıyor: ÖLÇÜM kalıyor, kura gidiyor.
+      print('(Karşılık sayısı ÖLÇÜMdür; bekçisi aşağıdaki testte.)');
+    });
+
+    // -----------------------------------------------------------------
+    // İzin okunması — zarsız bekçi (Paket DG)
+    // -----------------------------------------------------------------
+    test('ilk yılların izi sonradan okunuyor', () {
+      // §1 KATALOG. İlk yılların koyduğu her iz bir yerde okunmalı.
+      // Paket AR'ın avladığı kusur: iz konur, kimse okumaz.
+      final Set<String> konan = <String>{};
+      for (final GameEvent olay in kEarlyYearsEvents) {
+        for (final EventChoice secim in olay.choices) {
+          konan.addAll(secim.addFlags);
+        }
+      }
+      final Set<String> okunan = <String>{};
+      for (final GameEvent olay in kEventPool) {
+        okunan.addAll(olay.requirement.requiredFlags);
+        okunan.addAll(olay.requirement.forbiddenFlags);
+      }
+      expect(konan, isNotEmpty, reason: 'İlk yıllar hiç iz koymuyor.');
+      for (final String iz in konan) {
+        expect(okunan.contains(iz), isTrue,
+            reason: '$iz sessiz iz: hiçbir olay onu okumuyor.');
+      }
+      print('İlk yılların koyduğu ${konan.length} izin hepsi okunuyor.');
+
+      // §2 OYNANAN HAYAT. Karşılık olayının tek kapısı yaş + iz. O
+      // halde iddia zar gerektirmez: izi taşıyan ve penceresi açık bir
+      // kare **bulunursa**, okuyucu o karede aday olmak **zorundadır**.
+      //
+      // Kare ARANIR, kurulmaz: `onPreAge` bütün bekleyen iş kapandıktan
+      // sonraki kare (Paket CR/DC dersi).
+      const EventEngine motor = EventEngine();
+      final Map<String, int> bulunanKare = <String, int>{};
+      final Map<String, int> adayCikti = <String, int>{};
+      final Map<String, int> zatenCikmis = <String, int>{};
+      final List<String> sorunlar = <String>[];
+
+      for (final GameEvent okuyucu in kEarlyYearsEvents) {
+        if (okuyucu.requirement.requiredFlags.isEmpty) continue;
+        bulunanKare[okuyucu.id] = 0;
+        adayCikti[okuyucu.id] = 0;
+        zatenCikmis[okuyucu.id] = 0;
+      }
+
+      for (int i = 0; i < kHayat; i++) {
+        final Set<String> buHayattaCikan = <String>{};
+        playBotLife(
+          archetype: PlayerArchetype.casual,
+          seed: 22000 + i,
+          onPreAge: (GameState s) {
+            for (final String id in bulunanKare.keys) {
+              if (s.seenEventIds.contains(id)) buHayattaCikan.add(id);
+            }
+            for (final GameEvent okuyucu in kEarlyYearsEvents) {
+              final EventRequirement k = okuyucu.requirement;
+              if (k.requiredFlags.isEmpty) continue;
+              if (s.player.age < k.minAge || s.player.age > k.maxAge) continue;
+              if (!s.storyFlags.containsAll(k.requiredFlags)) continue;
+              if (k.forbiddenFlags.any(s.storyFlags.contains)) continue;
+              bulunanKare[okuyucu.id] = bulunanKare[okuyucu.id]! + 1;
+              final Set<String> adaylar = motor.debugEligibleIds(
+                  s.copyWith(pendingEvent: null), Random(s.player.age * 31 + i));
+              // Tekrarlanamaz olay bir kez çıkınca adaylıktan düşer:
+              // "aday **ya da** çıkmış" (Paket CK dersi).
+              if (adaylar.contains(okuyucu.id) ||
+                  s.seenEventIds.contains(okuyucu.id)) {
+                adayCikti[okuyucu.id] = adayCikti[okuyucu.id]! + 1;
+              } else {
+                sorunlar.add('${okuyucu.id}: ${s.player.age} yaşında iz var, '
+                    'pencere açık, ama aday değil.');
+              }
+            }
+          },
+        );
+        for (final String id in buHayattaCikan) {
+          zatenCikmis[id] = zatenCikmis[id]! + 1;
+        }
+      }
+
+      print('');
+      print('İZ TAŞIYAN KARE / OKUYUCU ADAY  ($kHayat hayat)');
+      print('  "kare" = iz konmuş, pencere açık ve karşılık **henüz**');
+      print('  çıkmamış kare. Karşılık ×8 katsayısıyla ilk uygun yılda');
+      print('  çıkarsa kendi `forbiddenFlags`\'i sonraki kareleri eler,');
+      print('  yani kare=0 + çıkmış>0 sağlıklı bir sonuçtur.');
+      for (final String id in bulunanKare.keys) {
+        print('  ${id.padRight(28)} kare=${bulunanKare[id]!.toString().padLeft(4)}'
+            '  aday=${adayCikti[id]!.toString().padLeft(4)}'
+            '  çıkmış hayat=${zatenCikmis[id]!.toString().padLeft(3)}');
+      }
+
+      // Bulunan her karede okuyucu aday olmalı: tek istisna yok.
+      expect(sorunlar, isEmpty, reason: sorunlar.take(5).join('\n'));
+
+      // Araç ölü olmasın. "Kare bulundu" ya da "karşılık çıktı":
+      // ikisi de izin okunduğunu gösterir, biri yeter.
+      final int kareToplam =
+          bulunanKare.values.fold<int>(0, (int a, int b) => a + b);
+      final int cikmisToplam =
+          zatenCikmis.values.fold<int>(0, (int a, int b) => a + b);
+      expect(kareToplam + cikmisToplam, greaterThan(0),
+          reason: '$kHayat hayatta ne izi taşıyan kare bulundu ne karşılık '
+              'çıktı: iz koyan olaylar artık hiç çıkmıyor olabilir.');
+
+      // §1 ile §2 birlikte iki ayrı kusur sınıfını kapatır ve bu
+      // ayrım bilerek böyledir:
+      //   · §2 arama ölçütünü okuyucunun **kendi** koşulundan alır.
+      //     Bu yüzden koşula yeni bir kapı eklenirse (örn.
+      //     `requiresSchoolStudent`) motor o karede olayı eler ve §2
+      //     düşer — Paket BZ'nin "yanlış kapıdaki olay" kusuru.
+      //   · Ama izin adı yanlış yazılırsa §2 hiç kare bulamaz ve
+      //     sessiz kalır; o kusuru §1 yakalar: iz okuyucusuz kalır.
+      // İkisi birbirinin kör noktasıdır; biri silinirse diğeri yetmez.
     });
   });
 }

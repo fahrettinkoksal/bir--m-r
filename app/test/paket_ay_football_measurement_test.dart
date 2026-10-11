@@ -59,6 +59,7 @@ void main() {
     final List<int> emeklilikUnleri = <int>[];
     final List<int> sonUnler = <int>[];
     int unHicGelmeyen = 0;
+    int hicOynamayan = 0;
 
     final List<String> sorunlar = <String>[];
 
@@ -84,7 +85,20 @@ void main() {
       if (r.footballInjurySeasons > 0) sakatlikYasayan++;
       zirveUnler.add(r.footballPeakFame);
       sonUnler.add(r.footballFameAtDeath);
-      if (r.footballPeakFame == 0) unHicGelmeyen++;
+      // **Yüklem Paket DG'de düzeltildi.** Eskiden "kabul edilip ünü 0
+      // olan" sayılıyordu; doğru soru "**oynayıp** ünü 0 olan".
+      // Sözleşme imzalayıp ilk sezondan önce ölen birinin tanınmaması
+      // hata değil, hayatın kendisi.
+      if (r.footballProSeasons > 0 && r.footballPeakFame == 0) {
+        unHicGelmeyen++;
+      }
+      if (r.footballProSeasons == 0) {
+        hicOynamayan++;
+        if (r.footballPeakFame != 0) {
+          sorunlar.add('tohum ${41000 + i}: hiç sezon oynamadan ün '
+              'kazandı (${r.footballPeakFame}).');
+        }
+      }
       final int? emeklilikUnu = r.footballFameAtRetirement;
       if (emeklilikUnu != null) emeklilikUnleri.add(emeklilikUnu);
 
@@ -149,7 +163,11 @@ void main() {
     }
     print('');
     print('UN — FUTBOL SONRASI HAYATIN SERMAYESI (Paket AY/2)');
-    print('Un hic gelmeyen        $unHicGelmeyen  ${_yuzde(unHicGelmeyen, kabulEdilen)}');
+    print('Hic sezon oynamayan    $hicOynamayan  '
+        '${_yuzde(hicOynamayan, kabulEdilen)}  (imzalayip oynamadan '
+        'olen/birakan — unu 0 olmali)');
+    print('Oynayip un hic gelmeyen $unHicGelmeyen  '
+        '${_yuzde(unHicGelmeyen, kabulEdilen - hicOynamayan)}  (0 olmali)');
     print('Zirve Un    medyan ${_medyan(zirveUnler)} · en az ${_enAz(zirveUnler)}'
         ' · en fazla ${_enCok(zirveUnler)} (tavan '
         '${FootballProEngine.footballFameCap})');
@@ -197,12 +215,33 @@ void main() {
     // ÖLÇÜLEN HATA: futbol fame alanına hiç dokunmuyordu ve 300 maç
     // oynamış bir profesyonel tanınmamış kalıyordu. Bu bir daha
     // sessizce geri gelmesin.
+    //
+    // **Yüklem Paket DG'de düzeltildi (gevşetilmedi, niyetine
+    // çevrildi).** Eskiden "kabul edilip ünü 0 olan" sayılıyordu ve
+    // Paket DG'nin 22 olayı zar akışını kaydırdığında 1200 hayatın
+    // biri bu iddiayı düşürdü: tohum 41961 sözleşme imzaladı ve
+    // **19 yaşında, ilk sezonundan önce öldü**. Sezon oynamayanın
+    // tanınmaması hata değil. Ölçüm:
+    //
+    // | ölçü | değer |
+    // |---|---|
+    // | profesyonele kabul edilen | 65 |
+    // | hiç sezon oynamayan | **1** (41961, ölüm 19) |
+    // | **sezon oynayıp ünü 0 olan** | **0** |
+    //
+    // Yani AY/2'nin koruduğu hata geri gelmedi; yalnızca iddianın
+    // yüklemi yanlıştı.
     expect(
       unHicGelmeyen,
       0,
-      reason: 'Profesyonel futbol oynayıp Ün hiç kazanmayan hayat var: '
+      reason: 'Profesyonel sezon oynayıp Ün hiç kazanmayan hayat var: '
           'futbol kamuoyu ününe bağlanmamış.',
     );
+    // Ayrımın kendisi de sabitlendi: hiç oynamayan ün kazanmaz.
+    // (`sorunlar` listesi aşağıda zaten boş olmalı.)
+    expect(hicOynamayan, lessThan(kabulEdilen),
+        reason: 'Kabul edilenlerin hepsi hiç oynamamış görünüyor: '
+            'sezon sayacı çalışmıyor olabilir.');
     expect(
       _medyan(zirveUnler),
       greaterThan(20),
