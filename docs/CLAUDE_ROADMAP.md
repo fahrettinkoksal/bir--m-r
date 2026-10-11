@@ -700,6 +700,24 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yüzden bekçi onu yalnızca yazdırıyor; eşiğe bağladığım şey
   tartışmasız olan: o içeriğin oyuncunun yolunda **ulaşılabilir**
   kalması. Kalibrasyon onaylandığında bekçi kırmızıya dönmez.
+- **Paket CZ.** "Aday oldu mu" ile "gerçekten çıktı mı" aynı soru
+  değil. `debugEligibleIds` görülmüş tek seferlik olayı dışlar, yani
+  **ilk uygun yılında çıkan** bir olay aday taramasında hiç görünmez.
+  Bir karşılık olayımı "47 karede aday değil" diye ulaşılamaz sandım;
+  aynı 47 karede `seenEventIds` içinde işaretliydi — 20 yaşında
+  çıkmıştı. Ulaşılabilirliği ölçerken ikisini birlikte sor. Paket CR'ın
+  kör noktasıyla aynı aile: aracın neyi sorduğu, neyi ölçtüğünden
+  önemli.
+- **Paket CZ.** İçerik eklemenin faturası aynı pakette iki kez çıktı:
+  22 olay havuza girince Paket CJ'nin iki aramalı testi devrildi
+  (aranan kare 236'dan 19'a düştü, biri hiç bulunamadı). İkisi de
+  seyreklikti; kohort 600'e çıkarıldı, eşikler yerinde kaldı. Bir
+  paket içerik ekliyorsa, **aramalı** testlerin kohort büyüklüğü de o
+  paketin işidir.
+- **Paket CZ.** Bir ratchet ancak **düşürüldüğünde** kazanç olur.
+  Sessiz iz sayacı "22'yi geçmesin" diyordu; 22 izin hepsine karşılık
+  yazıldıktan sonra ölçüt 0'a çekildi. Düşürmeyi atlasam sayı sessizce
+  geri tırmanabilirdi ve test yine yeşil kalırdı.
 
 ## Pano
 

@@ -277,6 +277,19 @@ enum FeatureId {
   ),
 
   /// Paket CS — dulluğun kendi yılları.
+  izlerinKarsiligi(
+    saveKey: 'izlerin_karsiligi',
+    title: 'İzlerin karşılığı',
+    lostWhenOff:
+        'Geçmiş seçimlerin yıllar sonra geri dönmesi kalkar: yazılan '
+        'hikâye izleri kayıtta kalır ama hiçbir olay onları okumaz.',
+    paket: 'Paket CZ — izlerin karşılığı',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_traces.dart',
+      'app/test/paket_cz_izlerin_karsiligi_test.dart',
+    ],
+  ),
+
   dulluk(
     saveKey: 'dulluk',
     title: 'Dulluk yılları',

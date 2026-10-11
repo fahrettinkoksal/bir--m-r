@@ -8767,3 +8767,90 @@ hayatta, hangi yaşta yazılıyor); karşılık olayları sıradaki içerik
 paketinin işi. En sık yazılanlar: `aile_sofrasina_katildi` 86/150,
 `orta_harcadi` 79/150, `aile_arasi_ara_buldu` 71/150, `gezide_tanisti`
 33/150, `evlilik_disi_cocuk` 32/150, `suc_direksiyon_uyarisi` 26/150.
+
+## Paket CZ — sessiz izlerin karşılığı: 22 → 0 (11 Ekim 2026)
+
+Paket AR'ın bıraktığı liste kapandı. **Sessiz hikâye izi**: oyuncu bir
+seçim yapıyor, oyun o seçimi `storyFlags`'e not alıyor, sonra hiçbir yer
+o notu okumuyor. AR 32 tane bulmuştu, AS/2 onuna karşılık yazmıştı,
+**22'si duruyordu.**
+
+**Ölçüm (150 bot hayatı, tohum 80000+i).** Her izin kaç hayatta ve hangi
+yaşta yazıldığı, bir de iz yazıldıktan sonra kaç yıl yaşandığı:
+
+| iz | hayat/150 | yaş (min-ortanca-max) |
+|---|---|---|
+| `aile_sofrasina_katildi` | 87 | 8-28-73 |
+| `orta_harcadi` | 84 | 24-39-60 |
+| `aile_arasi_ara_buldu` | 74 | 19-35-64 |
+| `evlilik_disi_cocuk` | 28 | 23-27-42 |
+| `suc_direksiyon_uyarisi` | 27 | 32-59-81 |
+| `gezide_tanisti` | 25 | 30-57-78 |
+| `eski_is_yerine_ugradi` | 23 | 61-69-78 |
+| `bebeklik_ilk_ayrilik` | 19 | 2-3-4 |
+| `aile_bulusmasini_kacirdi` | 14 | 8-22-55 |
+| `gezide_para_bitti` | 14 | 26-49-85 |
+| `is_arkadasini_yalniz_birakti` | 14 | 18-33-47 |
+| `bebeklik_atesli_gece` | 13 | 1-2-3 |
+| `cocukluk_cam_itiraf` | 11 | 7-9-12 |
+| `is_teklifi_reddetti` | 9 | 20-36-62 |
+| diğer 8 iz | 0-6 | — |
+
+İz yazıldıktan sonra en az 21, çoğunda 40-88 yıl yaşanıyor; pencereler
+bu yüzden geniş tutuldu (Paket CD dersi: dar pencere ölü halka yapar).
+
+**Yapıldı.** Yeni havuz `app/lib/data/event_pool_traces.dart` — **22
+karşılık olayı**, her biri tek bir izi okur ve yorumlar: eski sofranın
+anlatılması, gelinmeyen buluşmanın lafa karışması, ailede yeniden araya
+girme çağrısı, bebekliğin ateşli gecesinin anlatılması, ilk ayrılığın
+hikâyesi, uykusuz gecelerin hatırlatılması, kırılan camın mahallede
+anlatılması, yalnız bıraktığın iş arkadaşıyla yeniden karşılaşma,
+reddedilen teklifin gittiği yer, zor müşterinin dönüşü, eski iş
+yerinden haber, yolda tanışılanın selamı, parasız kalınan gezinin
+anlatılması, harcanan birikimin aynı kararla geri gelmesi, verilen
+sözün hatırlatılması, aileye verilen cevabın yeniden masaya gelmesi,
+çocuğun kendi seçtiği yolun dönüm noktası, paylaşılan bebek bakımının
+hatırlanması, evlilik dışı gelen çocuğun soruları, etkinlikten kalan
+ismin iş için adını anması, kapatılan yorumların sessizliği,
+direksiyon uyarısının tekrarı.
+
+Havuz `FeatureId.izlerinKarsiligi` anahtarına bağlı (Paket CX dersi:
+BL'den sonra yeni içerik havuzu anahtarsız girmez) ve silme tarifi
+`removableFiles`'a yazıldı.
+
+**Sonuç: sessiz iz 22 → 0.** `paket_ar_hikaye_izi_test.dart`'ın ölçütü
+de 22'den **0**'a sıkıldı; kazanım geri alınamaz.
+
+**Ölçümümü yine düzelttim — Paket CR'ın kör noktasının aynısı.** §3'ü
+"izi yazılmış her olayın karşılığı en az bir karede **aday** olmalı"
+diye kurdum ve bir olay patladı: `iz_uykusuz_gecelerin_bedeli`, izin
+yazılı olduğu **47 karede de** aday değildi. Sebebi içerik ya da kapı
+değil: `debugEligibleIds` görülmüş tek seferlik olayı dışlıyor, yani
+**ilk uygun yılında çıkan** bir olay "hiç aday olmadı" gibi görünüyor.
+Aynı 47 karede olay `seenEventIds` içinde işaretliydi — yani 20
+yaşında gerçekten çıkmıştı. Ulaşılabilirliğin tanımı düzeltildi: "aday
+oldu **ya da** gerçekten çıktı". Doğru soru sorulunca 22 olayın 21'i
+ölçümde gerçekten çıkıyor (22'ncisinin izi bu kohortta hiç yazılmadı:
+`orta_arabaya_soz_verdi` 1/150).
+
+**Bekçi:** `app/test/paket_cz_izlerin_karsiligi_test.dart` — 4 bölüm.
+Her karşılığın tek iz okuması ve penceresinin geniş kalması, kapının
+sızdırmaması (izi olmayan karede aday yok), yazılan izlerin
+karşılığının gerçekten ulaşılması, anahtar kapalıyken hiçbirinin aday
+olmaması.
+
+**Isırma denemesi — iki mutasyon, ikisi de yakalandı:**
+
+1. Bir olayın `requiredFlags` kapısı söküldü → §2 patladı.
+2. Havuz `kEventPool`'dan çıkarıldı → AR'ın sayacı **22**'ye geri
+   döndü ve patladı, CZ §3 de 21 olayı ulaşılamaz diye saydı.
+
+**Tam süit iki kohortu daha deviriyordu.** 22 olay `kEventPool`'a
+girince zar akışı bütün hayatlarda kaydı ve
+`paket_cj_yaslilik_bakimi_test.dart` §2'nin iki testi patladı: "bağı
+tavanda olmayan kare" 236'dan **19**'a düştü (eşik 20) ve "cepten
+çıkanı ödeyemeyen bakım yılı" 200 hayatta **hiç bulunamadı**. İkisi de
+aranan karenin seyrekliğiydi, oyunun davranışı değil. Paket CY'de
+Paket CI için yaptığımın aynısı: eşiği düşürmek yerine kohort
+**200 → 600** hayata çıkarıldı; 16 testin hepsi geçti ve eşikler
+yerinde kaldı. Bayat yorum ("200 hayatta 236 tane var") da tazelendi.

@@ -944,8 +944,12 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    Ayrıca ölçüldü (AS/1'de düzeltildi): katalogda aranmayan 38 izin
    **6'sı mekanik** (motor okuyor, etkisi var, anlatısı yok) ve
    **32'si gerçekten sessiz** (hiçbir yer okumuyor). O 32 iz yazılmış ama
-   karşılığı olmayan içerik ve sıradaki içerik paketinin hedef listesi.
-   Bekçi ölçütü artık 32; sayı artamaz.
+   karşılığı olmayan içerik ve sıradaki içerik paketinin hedef listesiydi.
+   **Kapandı (11 Ekim 2026):** AS/2 onuna, **Paket CZ** kalan 22'sine
+   karşılık yazdı (`event_pool_traces.dart`, `FeatureId.izlerinKarsiligi`).
+   Sessiz iz sayısı **0**; bekçi ölçütü de 22'den 0'a sıkıldı
+   (`paket_ar_hikaye_izi_test.dart`). Motorun okuduğu ama anlatısı
+   olmayan 6 "mekanik" iz yerinde duruyor — onlar sessiz değil.
 2. **Çocukluk ve ergenlik olayları** (0-17 için 40-50 olay). Oyunun en
    fakir ve en duygusal dönemi.
 3. ~~**Suç ve hukuk sistemi.**~~ **Yapıldı (D-128, V1).** V2 için açık

@@ -17,6 +17,7 @@ import '../../data/event_pool_friend_circle.dart';
 import '../../data/event_pool_late_years.dart';
 import '../../data/event_pool_neighbour.dart';
 import '../../data/event_pool_threshold_years.dart';
+import '../../data/event_pool_traces.dart';
 import '../../data/event_pool_widowhood.dart';
 import '../models/game_event.dart';
 import '../models/game_state.dart';
@@ -40,6 +41,7 @@ abstract final class FeatureEvents {
     FeatureId.arkadasGrubu: kFriendCircleEvents,
     FeatureId.yaslilikBakimi: kElderSupportEvents,
     FeatureId.dulluk: kWidowhoodEvents,
+    FeatureId.izlerinKarsiligi: kTraceEchoEvents,
   };
 
   /// Olay kimliğinden modüle eşleme; bir kez kurulur.

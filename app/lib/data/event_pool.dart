@@ -20,6 +20,7 @@ import 'event_pool_late_years.dart';
 import 'event_pool_widowhood.dart';
 import 'event_pool_neighbour.dart';
 import 'event_pool_threshold_years.dart';
+import 'event_pool_traces.dart';
 import 'event_pool_echo.dart';
 import 'event_pool_elder.dart';
 import 'event_pool_elder_support.dart';
@@ -1778,6 +1779,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // Dulluk (Paket CS): 250 hayatta 502 yıl dul olarak oynanıyordu ve
   // o yılların tek olayı yoktu. Modül anahtarı `FeatureId.dulluk`.
   ...kWidowhoodEvents,
+  ...kTraceEchoEvents,
   ...kFriendCircleEvents,
   ...kElderSupportEvents,
 ];

@@ -63,11 +63,18 @@ class _Kareler {
   int gucuYetmeyenKatkisi = 0;
 }
 
-/// Tek tarama: 200 hayat, bütün kareler burada toplanır.
+/// Tek tarama: 600 hayat, bütün kareler burada toplanır.
+///
+/// **Kohort Paket CZ'de büyütüldü (200 → 600).** Aranan kareler seyrek:
+/// Paket CZ havuzu zarı kaydırınca "cepten çıkanı ödeyemeyen bakım
+/// yılı" 200 hayatta hiç bulunamadı ve "bağı tavanda olmayan kare"
+/// 236'dan 19'a düştü (eşik 20'ydi). Eşiği düşürmek yanlış cevap
+/// olurdu: ince kohort, gevşek eşikten daha tehlikelidir — yeşil kalır
+/// ama hiçbir şey söylemez (Paket CY dersi).
 _Kareler _tara() {
   final _Kareler k = _Kareler();
   for (final PlayerArchetype a in PlayerArchetype.values) {
-    for (int seed = 1; seed <= 20; seed++) {
+    for (int seed = 1; seed <= 60; seed++) {
       bool kartGordu = false;
       playBotLife(
         archetype: a,
@@ -225,7 +232,9 @@ void main() {
     });
 
     test('ailene yüklenmek bedava değil: yük omuzlayanın üstünde', () {
-      // Bağı tavanda olmayan kare: ölçümde 200 hayatta 236 tane var.
+      // Bağı tavanda olmayan kare. Ölçüm: 200 hayatta 236'ydı,
+      // Paket CZ'nin havuzu zarı kaydırınca aynı kohortta 19'a
+      // düştü; kohort 600 hayata çıkarıldı ve eşik yerinde kaldı.
       expect(kareler.yeriOlanYil, greaterThan(20),
           reason: 'etkisi ölçülebilen kare neredeyse kalmamış; bağ '
               'tavanı (Q-205) bütün kareleri yutuyor olabilir');
