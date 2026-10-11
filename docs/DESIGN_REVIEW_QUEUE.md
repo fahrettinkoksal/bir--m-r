@@ -9584,3 +9584,82 @@ bir kural yazmak demek ve o senin kararın.
 `app/lib/ui/widgets/notice_sheet.dart`. İlgili: **Q-198** (dulluk ve
 hane metinleri), Paket CS (dulluk havuzu), Paket CT (dul karesi
 dökümü).
+
+---
+
+### Q-235 — Takipçi eğrisinin doyması: yılda 1 paylaşım 2.000, yılda 6 paylaşım 2.300.000
+
+**Durum:** öneri + varsayılan hazır, **kararı bekliyor.** Hiçbir
+`prototypeOnly` sayısına dokunulmadı; bu bir denge kararı.
+
+**Nasıl çıktı.** Paket CY, sessiz hikâye izlerini sayarken
+`sosyal_etkinlige_gitti` izinin 150 hayatta **hiç** yazılmadığını
+gördü. Sebebi arandı ve ölçüm aracının kendisi çıktı: bot yılda
+**bir** paylaşım yapıyordu, oyun ise altısına izin veriyor
+(`SocialEngine.prototypeOnlyMaxPostsPerAge = 6`). Bot düzeltildi (ilgisi
+kadar paylaşıyor, ünü önemseyen arketip ikinci platformu da açıyor) ve
+aynı 200 hayat yeniden koşuldu:
+
+| Ölçüm | Bot yılda 1 paylaşım | Bot ilgisi kadar |
+|---|---|---|
+| Hesaplı karede en yüksek ün | **3** | **100** (tavan) |
+| En yüksek takipçi | 1.994 | **2.353.481** |
+| hesap + ün ≥ 5 | 0 hayat | 9 hayat |
+| hesap + ün ≥ 40 | **0 hayat** | **5 hayat** |
+
+Yani **ün 40'ın arkasındaki bütün medya kariyeri**
+(`media_catalog.dart`: 12 iş + `kMediaSectionMinFame = 40` ile açılan
+Medya bölümü) ve iki sosyal olay (`un_etkinlik_daveti` ün 5,
+`un_is_daveti` ün 8) ölçümde hiç açılmıyordu. Açılmama sebebi oyun
+değil **araçtı**; bu kısım düzeltildi ve Paket CY'nin bekçisi artık
+ulaşılabilirliği ölçüyor.
+
+**Karar bekleyen kısım bu değil.** Düzeltme şunu açığa çıkardı:
+erişim formülü **paylaşım başına çarpımsal**:
+
+```
+kazanç = (içeriğin tabanı + karakter × 0,5 + takipçi × 0,06)
+         × tekrarCezası × şans(0,5-1,5) × sporÇarpanı
+```
+
+`takipçi × 0,06` terimi her paylaşımda yeniden uygulanıyor, yani yıllık
+büyüme kabaca `1,06^paylaşım`. Yılda 1 paylaşımda yetişkin ömrü boyunca
+`1,06^40 ≈ 10` kat (≈2.000 takipçi); yılda 6 paylaşımda
+`1,42^40 ≈ 2,6 milyon`. Arada ara basamak yok: **oyuncunun yılda kaç
+kez paylaştığı, bütün sosyal medya kariyerini tek başına belirliyor.**
+Takipçinin **doyma noktası yok** (ün 100'de duruyor ama takipçi
+sınırsız), oysa `prototypeOnlyCarryOverCap = 40.000` tasarımın
+on binler mertebesini beklediğini gösteriyor.
+
+**Seçenekler**
+
+1. **Doyma eğrisi ekle (önerim ve varsayılanım).** `takipçi × 0,06`
+   terimi mevcut kitle büyüdükçe azalsın (örneğin
+   `0,06 / (1 + takipçi/50.000)`). Böylece ilk on binler hızlı gelir,
+   milyonlar yavaşlar; "yılda 6 paylaşım" hâlâ 1 paylaşımdan çok daha
+   iyi olur ama fark 1.000 kat değil ~20 kat olur. Medya kariyerinin
+   ün 40 kapısı (36.000 takipçi) kararlı paylaşımla ulaşılır kalır.
+   Bedeli: bir `prototypeOnly` sayısı daha ve yeni bir kalibrasyon turu.
+2. **Olduğu gibi kalsın.** Üne giden yol zor ve seyrek olsun; 200
+   hayatta 5'inin medya kariyerine ulaşması kabul edilir. Bedeli:
+   milyonluk takipçi sayıları ekranda tuhaf durabilir ve ünün 100
+   tavanına çarpması hikâyeyi düzleştirir.
+3. **Yıllık paylaşım hakkını düşür** (6 → 2-3). Çarpımsal yapı kalır
+   ama patlama yavaşlar. Bedeli: oyuncunun elindeki tek sosyal eylem
+   kısıtlanır; "ilgilenince karşılık veriyor" hissi zayıflar.
+
+**Benim görüşüm:** (1). Sorun paylaşımın ödüllendirilmesi değil, ödülün
+hiçbir yerde doymaması. Bir doyma terimi hem ekrandaki sayıları
+inandırıcı tutar hem de medya kariyerini kararlı oyuncuya açık bırakır.
+
+**Yapmayacağım (onay gelmeden):** `prototypeOnlyAudienceFactor`,
+`prototypeOnlyMaxPostsPerAge`, `prototypeOnlyFollowersPerFame` veya
+`kMediaSectionMinFame` sayılarına dokunmak.
+
+**Etkilenen kod:** `app/lib/domain/social/social_engine.dart`
+(`_reachFor`, `prototypeOnlyAudienceFactor`,
+`prototypeOnlyMaxPostsPerAge`, `prototypeOnlyFollowersPerFame`),
+`app/lib/data/media_catalog.dart` (`kMediaSectionMinFame`, 12 iş),
+`app/test/support/player_bot.dart` (Paket CY'nin araç düzeltmesi).
+İlgili: **Q-155** (katalog sayıları), Paket K ve Paket Q (sosyal medya),
+Paket AL/2 §10-§14 (spor → erişim çarpanı).
