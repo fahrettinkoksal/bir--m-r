@@ -9314,3 +9314,66 @@ silinmez.
 `app/lib/domain/generation/life_progression.dart`,
 `app/lib/domain/features/feature_catalog.dart`,
 `app/test/paket_cn_cocuk_hastaligi_test.dart`, `docs/FEATURE_FLAGS.md`.
+
+### Q-231 — Kısa telefonda açılış ekranı: ne katlanır, ne görünür?
+
+**Durum:** **uygulandı** (Paket CO, 11 Ekim 2026). Eşik
+`prototypeOnly`, geri alma yolu tek dosyalık commit. Karar gerektiren
+bir madde yok; tasarım yönü (Q-001) hâlâ Faho'nun.
+
+**Nasıl çıktı.** Depodaki 65 pencere testi mantıksal 360-400 px
+*genişlikte* koşuyor ama *yükseklik* 3600-14000 px — gerçek telefonun
+5-15 katı. Yani "içerik telefona sığmıyor" sınıfı bir kusur hiçbir
+testte görünmüyordu. 360x640'lık ekranda (720x1280'lik Android
+tabanı) ölçüm bir kusur buldu:
+
+| Parça | Alt kenar | 640'a sığıyor mu |
+|---|---|---|
+| "Rastgele bir hayat" | 630 | evet |
+| **"İsmimi ve cinsiyetimi seçeyim"** | **720** | **hayır** |
+| Dipnot | 824 | hayır |
+
+İkinci başlangıç modu ekranda vardı ama **dokunulabilir değildi**;
+oyuncu kaydırmadan oyunun iki modundan birini hiç görmüyordu.
+
+#### Kararım: içerik silinmez, kısa ekranda katlanır (uygulandı)
+
+730 px'den kısa ekranlarda "Nasıl oynanır" kartı katlanıyor ve tek
+dokunuşla açılıyor. Uzun ekranda yerleşim **hiç** değişmiyor.
+
+**Neden bu yol.** Üç seçenek vardı:
+
+1. **Kısa ekranda katlama (seçtiğim).** İçerik kaybolmuyor, uzun
+   ekran etkilenmiyor, görsel kimliğe (Q-001) dokunulmuyor, geri alma
+   tek satır.
+2. **Dipnotu ve tanıtım paragrafını kısaltmak.** Metni budamak kalıcı
+   bir kayıp; oyunun kapağındaki tanıtım cümlesi ürün kararı.
+3. **İki modu yan yana koymak.** 360 px genişlikte "İsmimi ve
+   cinsiyetimi seçeyim" etiketi sığmaz, sarma ya da taşma üretir.
+   **Önermiyorum.**
+
+**Eşik ölçümden:** sıkıştırılmamış yerleşimde ikinci modun alt kenarı
+720, bu yüzden eşik 730. Düzeltmeden sonra 600 · 640 · 700 · 720 ·
+730 · 760 · 820 px yüksekliklerin hepsinde iki mod da katlanmanın
+üstünde.
+
+#### Ölçülen ikinci sonuç: oyunun geri kalanı taşmıyor
+
+360x640'ta 8/17/30/45/70 yaşlarında dört sekme ve o hayatta açık olan
+bütün satır kapıları gezildi (16 sayfa): **sıfır taşma, sıfır ekran
+hatası.** 200x300'lük saçma bir ekranda bile sıfır. Aracın kör
+olmadığı ayrıca sınandı: bilerek taşan bir `Row` basıldığında tarama
+"RenderFlex overflowed by 640 pixels" diyor.
+
+**Yapmayacağım (onay gelmeden):** açılış ekranının tanıtım metnini
+kısaltmak · logoyu küçültmek · düğme etiketlerini değiştirmek · görsel
+kimliğe (palet, tipografi — Q-001/Q-077) dokunmak · golden testlerinin
+atlanma kararını değiştirmek.
+
+**Geri alma:** `app/lib/ui/screens/start_screen.dart` içindeki
+`prototypeOnlyShortScreenHeight` eşiği 0 yapılırsa kısa ekran
+sıkıştırması tamamen kapanır (eski davranış); dosyanın commit'i geri
+alınırsa katlanan kart da kalkar.
+
+**Etkilenen kod:** `app/lib/ui/screens/start_screen.dart`,
+`app/test/paket_co_telefon_yerlesimi_test.dart`.
