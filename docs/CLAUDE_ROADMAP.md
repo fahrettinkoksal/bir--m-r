@@ -596,6 +596,22 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   grep 19 yer gösterdi. Türkçe eki ada sabit yazmak isimlerin
   yarısında yanlış: ek, son ünlüye ve son ünsüze göre değişir. Doğru
   çözüm tek yerde bir işlev ve onu koruyan bir **kaynak taraması**.
+- **Paket CV.** Bir kalıp dosyanın içinde **kısmen** uygulanmışsa, geri
+  kalanını ara. `ActivityVenue.minAge` beş satıra kapı koymuş, üçünü
+  atlamıştı; sonuç 1 yaşındaki oyuncuya berber, spor salonu ve
+  kütüphane. Üç satırın `Key`'i de yoktu — test bulamadığı şeyi
+  koruyamaz. Kapı eklerken anahtar da ekle.
+- **Paket CV.** Ölçüm aracı **sessizce** başarısız olmamalı. Dökümün
+  pencere açıcısı bulamadığı şeyde `return` ediyordu; döküm sıradan bir
+  ekran basıyor ve ben "mülakat okundu" sanıyordum. Açıcı ne yaptığını
+  yazınca gerçek ortaya çıktı: ekran hiç değişmemiş. Bir adım daha:
+  ilk hata mesajım da fazla iddialıydı ("Meslek açıldı ama satır yok")
+  — sekmeye bastığımı doğrulamış, ekranın değiştiğini doğrulamamıştım.
+  Araç gördüğünü yazar, varsaydığını yazmaz.
+- **Paket CV.** "Okundu" ile "arandı" aynı şey değil. Mülakat penceresi
+  bu pakette açılamadı; kareyi silmek ya da okundu saymak yerine açıcı
+  neden açılamadığını dökümün başına yazıyor. Eksik, görünür bırakılmış
+  bir eksik olarak kalıyor.
 
 ## Pano
 

@@ -686,6 +686,7 @@ class _CareerViewState extends State<_CareerView> {
         // Cevap bekleyen mülakat varsa en üstte.
         if (state.hasPendingInterview) ...<Widget>[
           MenuRow(
+            key: const Key('career_mulakat_devam'),
             title: 'Mülakata devam et',
             subtitle: state.pendingInterview?.job?.name ?? '',
             icon: Icons.record_voice_over_outlined,

@@ -8357,3 +8357,93 @@ Q-234'te.
 
 **Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
 oynanmadı.
+
+## Paket CV — 1 yaşındaki oyuncuya berber, spor salonu ve kütüphane (11 Ekim 2026)
+
+Ekran dökümünün sekizinci turu. Paket CR'nin `onPending` kancası
+dökümün tarayıcısına bağlandı ve üç kare eklendi. **BEKLEYEN OLAY**
+karesi **1 yaşında** bir hayat yakaladı; Aktiviteler ekranının dökümü
+şunu bastı:
+
+> **Kendine bak**
+> Berber / Kuaför — Saç kestir, stil değiştir, bakım yaptır
+> Spor salonu — Koşu, ağırlık ve temel egzersiz
+> Sağlık Merkezi — Kontroller, aşı ve bir uzmanla konuşmak
+> **Öğren**
+> Kütüphane — Yaşına uygun kitap seç ve oku
+
+Bir yaşındaki bebeğe saç stili, ağırlık antrenmanı ve kitap.
+
+### Kök neden: kapı vardı, üç satıra uygulanmamıştı
+
+`ActivityVenue.minAge` zaten hesaplanıyor ve belgesi niyeti yazıyor:
+*"Menüde yaşına hiç uymayan bir alan gösterilmesin diye kullanılır:
+çalışmayan düğme konmaz."* Ölçülen eşikler ve kapının durumu:
+
+| mekân | en küçük eylem yaşı | kapı var mıydı |
+|---|---|---|
+| `cezaevi` | 0 | (hükümlülük kapısı) |
+| `saglikMerkezi` | 1 | ✓ |
+| **`berber`** | **4** | **yok** |
+| `eglence` | 4 | ✓ |
+| `kurs` | 6 | ✓ |
+| **`sporSalonu`** | **8** | **yok** |
+| `falTarot` | 10 | ✓ |
+| `estetik` | 18 | ✓ |
+
+Kütüphanenin kendi eylemi yok (kitap akışıyla çalışır) ve `minAge` 0
+dönüyor; oradaki doğru kapı kataloğun kendisi — `kBookCatalog` içindeki
+en küçük kitap yaşı **6**, yani 0-5 arasında açılan sayfa **boştu**.
+Üç satırın hiçbirinde `Key` de yoktu; bu yüzden hiçbir test onları
+aramıyordu.
+
+Düzeltme: üç satır da kapıya bağlandı (kütüphane `booksFor` okuyarak,
+yeni sayı uydurulmadan) ve anahtar aldı.
+
+### Bekçi
+
+`app/test/paket_cv_yas_kapisi_test.dart` (2 test): bot hayatlarından
+0-20 yaş arası kareler **aranıyor** ve her yaşta Aktiviteler ekranı
+çizilerek yedi mekân satırı + kütüphane denetleniyor. İki yönlü:
+yaşından önce açılan satır **ve** yaşı geldiği hâlde görünmeyen satır
+ikisi de kırmızı yapar (kapı fazla sıkılmasın). İkinci test ölçülen
+eşikleri kayda çiviliyor; katalog büyüyüp eşik düşerse yeniden ölçmeye
+zorlar.
+
+**Isırma denemesi:** berber kapısı devre dışı bırakıldığında test
+kırmızıya düştü ve dört yaşı adıyla saydı — "0 yaş: Berber / Kuaför
+görünüyor (en küçük 4)" … 3 yaşa kadar.
+
+### Aracın kendi iki kusuru
+
+1. **`ekranTemizlenmesin` kareleri önceki karenin ekranında
+   başlıyordu.** Duruşma ve kriz pencereleri yüklenen durumda
+   kendiliğinden açıldığı için bu hiç fark edilmemişti.
+2. **Açıcı sessizce başarısız oluyordu.** Bulamadığı şeyde `return`
+   ediyor, döküm sıradan bir ekran basıyor ve pencerenin açılmadığı
+   anlaşılmıyordu. Açıcı artık ne yaptığını **yazıyor** ve
+   bulamadığında ekranda ne gördüğünü sayıyor.
+
+### Dürüst kayıt: MÜLAKAT penceresi HÂLÂ OKUNMADI
+
+Kare bulunuyor — ölçüldü: `onPending` ile 120 hayatın **120'sinde**,
+toplam **950 kare** (eski `onPreAge` kancasıyla 180, 99 hayat; yani
+5,3 kat). Ama pencere açılmıyor: alt sekmeye basmak bu koşumda Meslek
+ekranını getirmiyor ve ekranda Aktiviteler kalıyor. Açıcı bunu dökümün
+başına yazıyor:
+
+> `AÇICI: "Mülakata devam et" satırı bulunamadı. Ekranda 62 metin var;
+> ilk altısı: Rabia Akın · 165 B ₺ · 17 yaşında · …`
+
+Satır koda konuldu ve anahtar aldı (`career_mulakat_devam`), kapısı da
+yerinde (`if (state.hasPendingInterview)`), yani eksik olan şey
+**arayüz gezinmesi**, ürün tarafı değil. Bu kare "okundu" sayılmıyor;
+dosyanın başındaki BULUNAMADI kuralının aynısı geçerli.
+
+**BEKLEYEN OLAY karesi bilerek kaldırıldı:** olay penceresi yalnızca
+yaş alırken doğuyor, yüklenen durumda ne kendiliğinden açılıyor ne de
+onu açan bir satır var. Kendi testleri var (`event_dialog`,
+`paket_bd_durusma_penceresi_test`).
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.

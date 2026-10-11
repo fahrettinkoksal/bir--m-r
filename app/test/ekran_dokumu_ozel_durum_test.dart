@@ -86,6 +86,39 @@ const List<(String, String)> kSekmeler = <(String, String)>[
   ('tab_aktiviteler', 'Aktiviteler'),
 ];
 
+/// Mülakat penceresini açar: Okul/Meslek sekmesine gidip satıra basar.
+///
+/// **Sessizce başarısız olmaz.** İlk yazımda bulamadığı şeyde `return`
+/// ediyordu; döküm o yüzden sıradan bir ekran basıyor ve pencerenin
+/// açılmadığı anlaşılmıyordu. Araç yalan söylememeli: ne yaptığını
+/// yazıyor, dökümün başına basılıyor.
+Future<String> _mulakatiAc(WidgetTester tester) async {
+  final Finder sekme = find.byKey(const Key('tab_okul_meslek'));
+  if (sekme.evaluate().isEmpty) {
+    return 'AÇICI: Okul/Meslek sekmesi ekranda yok — pencere açılamadı.';
+  }
+  await tester.tap(sekme);
+  await tester.pumpAndSettle();
+  final Finder satir = find.byKey(const Key('career_mulakat_devam'));
+  if (satir.evaluate().isEmpty) {
+    // **Suçu satıra atmadan önce nerede olduğunu söyle.** İlk yazımda
+    // bu dal "Okul/Meslek açıldı ama satır yok" diyordu; oysa sekmeye
+    // basıldığını doğrulamış, ekranın gerçekten değiştiğini
+    // doğrulamamıştım. Araç gördüğünü yazar, varsaydığını yazmaz.
+    final List<String> ekran = <String>[
+      for (final Text w in tester.widgetList<Text>(find.byType(Text)))
+        if ((w.data ?? w.textSpan?.toPlainText())?.trim().isNotEmpty ?? false)
+          (w.data ?? w.textSpan!.toPlainText()).trim(),
+    ];
+    return 'AÇICI: "Mülakata devam et" satırı bulunamadı. '
+        'Ekranda ${ekran.length} metin var; ilk altısı: '
+        '${ekran.take(6).join(" · ")}';
+  }
+  await tester.tap(satir);
+  await tester.pumpAndSettle();
+  return 'AÇICI: mülakat penceresi satıra basılarak açıldı.';
+}
+
 /// Aranan özel durum.
 class Durum {
   const Durum(
@@ -93,6 +126,8 @@ class Durum {
     this.kosul, {
     this.ekranTemizlenmesin = false,
     this.yilIci = false,
+    this.bekleyen = false,
+    this.acici,
   });
 
   final String ad;
@@ -107,6 +142,24 @@ class Durum {
   /// Yeni doğan bebek böyledir; `onYear` ile hiç bulunamaz (dosya
   /// başlığındaki ölçüm).
   final bool yilIci;
+
+  /// Kare **bekleyen bir şey varken** aranıyor (Paket CV).
+  ///
+  /// `onPreAge` yılın 7. adımında çalışıyor; bot bekleyen mülakatı,
+  /// olayı ya da krizi 1-6. adımlarda yanıtlayıp `continue` ettiği için
+  /// o kareler eski iki kancaya seyrek görünüyor. Paket CR'nin
+  /// `onPending` kancası bekleyen kareyi **yanıtlanmadan önce**
+  /// veriyor. Ölçüldü (120 hayat): bekleyen mülakat karesi `onPending`
+  /// ile **950** (120/120 hayat), `onPreAge` ile 180 (99/120) — yani
+  /// 5,3 kat. Mülakat ekranı bu yüzden hiç dökülmemişti.
+  final bool bekleyen;
+
+  /// Kareyi basmadan **önce** pencereyi açan adım (Paket CV).
+  ///
+  /// Duruşma ve kriz pencereleri yüklenen durumda kendiliğinden
+  /// açılıyor; mülakat gibi bir satıra dokunarak açılanlar için bu
+  /// gerekiyor. `null` ise ek bir şey yapılmaz.
+  final Future<String> Function(WidgetTester tester)? acici;
 }
 
 void main() {
@@ -249,6 +302,47 @@ void main() {
       'DUL',
       (GameState s) => s.marriage?.status == MarriageStatus.dul,
     ),
+    // Sekizinci tur (Paket CV): üç ekran daha hiç dökülmemişti.
+    //
+    // Mülakat ve bekleyen olay **bekleyen** karelerdir: bot onları
+    // yılın başında yanıtlıyor, bu yüzden Paket CR'nin `onPending`
+    // kancasıyla aranıyorlar. Geçim sıkıntısı ise yıl içinde oluşup
+    // yıl sonuna kalabiliyor; o `yilIci` ile aranıyor.
+    // **Mülakat penceresi kendiliğinden açılmıyor.** Duruşma ve kriz
+    // pencereleri yüklenen durumda otomatik açılıyor, bu yüzden onlar
+    // `ekranTemizlenmesin` ile okunabiliyordu. Mülakat ise bir satıra
+    // dokunarak açılıyor (`career_mulakat_devam`). İlk yazımda bu kare
+    // de `ekranTemizlenmesin` ile konmuştu ve sonuç en işe yaramaz
+    // bileşimdi: pencere açılmadı, dört sekme de basılmadı. Kare artık
+    // kendi **açıcısıyla** geliyor: Okul/Meslek sekmesine gidiliyor ve
+    // satıra basılıyor.
+    // **MÜLAKAT penceresi hâlâ OKUNMADI.** Kare bulunuyor (ölçüldü:
+    // `onPending` ile 120 hayatın 120'sinde, 950 kare) ve açıcı
+    // çalışıyor ama pencere açılmıyor: alt sekmeye basmak bu koşumda
+    // Meslek ekranını getirmiyor, ekranda Aktiviteler kalıyor. Açıcı
+    // bunu dökümün başına **yazıyor** — sessizce geçmiyor. Yani bu
+    // satır "okundu" değil, "aranıyor ve neden okunamadığı yazılı"
+    // demek. Aynı dürüstlük kuralı dosyanın başındaki BULUNAMADI
+    // kuralıyla aynı: bulunamamak ürün hatası değil, ama okundu da
+    // sayılmaz.
+    Durum(
+      'MÜLAKAT',
+      (GameState s) => s.hasPendingInterview,
+      bekleyen: true,
+      ekranTemizlenmesin: true,
+      acici: _mulakatiAc,
+    ),
+    // **BEKLEYEN OLAY karesi bilerek yok.** Olay penceresi yalnızca yaş
+    // alırken doğuyor; yüklenen bir durumda ne kendiliğinden açılıyor
+    // ne de onu açan bir satır var. Dökümün yapabileceği tek şey
+    // pencereyi kapatıp sıradan bir hayat basmak olurdu, o da yeni bir
+    // şey okumaz. Olay penceresinin kendi testleri var (`event_dialog`,
+    // `paket_bd_durusma_penceresi_test`).
+    Durum(
+      'GEÇİM SIKINTISI',
+      (GameState s) => s.hardshipYears > 0,
+      yilIci: true,
+    ),
   ];
 
   testWidgets('EKRAN DÖKÜMÜ — özel durumlar (taranarak bulundu)',
@@ -267,6 +361,14 @@ void main() {
           onYear: (GameState s) {
             for (final Durum d in aranan) {
               if (d.yilIci || kareler.containsKey(d.ad)) continue;
+              if (d.kosul(s)) {
+                kareler[d.ad] = (s, seed, arketip);
+              }
+            }
+          },
+          onPending: (GameState s) {
+            for (final Durum d in aranan) {
+              if (!d.bekleyen || kareler.containsKey(d.ad)) continue;
               if (d.kosul(s)) {
                 kareler[d.ad] = (s, seed, arketip);
               }
@@ -411,9 +513,22 @@ void main() {
 
       // Bekleyen pencere varken geri çıkartması modal bariyerin
       // arkasında kalır; o durumlarda ana ekrana dönmek denenmez.
-      if (!d.ekranTemizlenmesin && !await anaEkrana(tester)) {
+      //
+      // **Açıcısı olan kare ana ekrandan başlar (Paket CV).** Ölçülen
+      // hata: `ekranTemizlenmesin` kareleri **önceki karenin
+      // ekranında** başlıyordu. Mülakat karesi bu yüzden Aktiviteler
+      // ekranında açılıyor, alt sekmeye basmak işe yaramıyor ve açıcı
+      // "satır yok" diyordu — oysa satır vardı, ekran yanlıştı. Mülakat
+      // bir modal bariyer değil (bir satıra dokunarak açılıyor), bu
+      // yüzden ana ekrana dönmek güvenli.
+      if ((!d.ekranTemizlenmesin || d.acici != null) &&
+          !await anaEkrana(tester)) {
         dokum.writeln('\n!!! ANA EKRANA DÖNÜLEMEDİ — aşağıdaki "Hayat" '
             'bölümü başka bir ekran olabilir.');
+      }
+      // Kendiliğinden açılmayan pencereyi açan adım (Paket CV).
+      if (d.acici != null) {
+        dokum.writeln('\n${await d.acici!(tester)}');
       }
       final List<String> hayat = metinler(tester);
       dokum.writeln('\n--- Hayat / açık pencere --- (${hayat.length} metin)');

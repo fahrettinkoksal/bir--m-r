@@ -376,22 +376,40 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           text: 'Kendine bak',
           accent: BirOmurAccents.yesil,
         ),
-        MenuRow(
-          title: ActivityVenue.berber.label,
-          subtitle: 'Saç kestir, stil değiştir, bakım yaptır',
-          icon: Icons.content_cut_outlined,
-          accent: BirOmurAccents.mor,
-          onTap: () => _go(_ActivityPage.berber),
-        ),
-        const SizedBox(height: 10),
-        MenuRow(
-          title: ActivityVenue.sporSalonu.label,
-          subtitle: 'Koşu, ağırlık ve temel egzersiz',
-          icon: Icons.fitness_center_outlined,
-          accent: BirOmurAccents.yesil,
-          onTap: () => _go(_ActivityPage.spor),
-        ),
-        const SizedBox(height: 10),
+        // **Yaş kapısı üç satırda eksikti (Paket CV).** `ActivityVenue`
+        // zaten `minAge` hesaplıyor ve belgesi niyeti yazıyor:
+        // *"Menüde yaşına hiç uymayan bir alan gösterilmesin diye
+        // kullanılır: çalışmayan düğme konmaz."* Kapı beş satıra
+        // uygulanmış (sağlık 1, eğlence 4, kurs 6, fal 10, estetik
+        // 18) ama berber, spor salonu ve kütüphane açıkta kalmıştı.
+        // Dökümün sekizinci turu bunu bastı: **1 yaşındaki** oyuncunun
+        // Aktiviteler ekranında "Berber / Kuaför — Saç kestir, stil
+        // değiştir", "Spor salonu — Koşu, ağırlık" ve "Kütüphane"
+        // satırları duruyordu. Üç satırın da anahtarı yoktu, bu yüzden
+        // hiçbir test onları aramıyordu.
+        if (state.player.age >= ActivityVenue.berber.minAge) ...<Widget>[
+          MenuRow(
+            key: const Key('activity_berber'),
+            title: ActivityVenue.berber.label,
+            subtitle: 'Saç kestir, stil değiştir, bakım yaptır',
+            icon: Icons.content_cut_outlined,
+            accent: BirOmurAccents.mor,
+            onTap: () => _go(_ActivityPage.berber),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (state.player.age >= ActivityVenue.sporSalonu.minAge)
+          ...<Widget>[
+          MenuRow(
+            key: const Key('activity_spor'),
+            title: ActivityVenue.sporSalonu.label,
+            subtitle: 'Koşu, ağırlık ve temel egzersiz',
+            icon: Icons.fitness_center_outlined,
+            accent: BirOmurAccents.yesil,
+            onTap: () => _go(_ActivityPage.spor),
+          ),
+          const SizedBox(height: 10),
+        ],
         if (state.player.age >= ActivityVenue.saglikMerkezi.minAge) ...<Widget>[
           MenuRow(
             key: const Key('activity_saglik'),
@@ -421,7 +439,14 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           text: 'Öğren',
           accent: BirOmurAccents.mavi,
         ),
+        // Kütüphanenin kendi eylemi yok (kitap akışıyla çalışır), bu
+        // yüzden `minAge` 0 döner. Doğru kapı kataloğun kendisi:
+        // kitaplar **6** yaşında başlıyor, dolayısıyla daha küçük
+        // oyuncuya boş bir sayfa açan düğme konmaz. Sayı
+        // uydurulmuyor, `booksFor` okunuyor.
+        if (booksFor(state.player.age).isNotEmpty) ...<Widget>[
         MenuRow(
+          key: const Key('activity_kutuphane'),
           title: ActivityVenue.kutuphane.label,
           subtitle: 'Yaşına uygun kitap seç ve oku',
           icon: Icons.local_library_outlined,
@@ -429,6 +454,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           onTap: () => _go(_ActivityPage.kutuphane),
         ),
         const SizedBox(height: 10),
+        ],
         if (state.player.age >= ActivityVenue.kurs.minAge) ...<Widget>[
           MenuRow(
             key: const Key('activity_kurs'),
