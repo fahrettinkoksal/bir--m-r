@@ -592,6 +592,9 @@ class BotLifeResult {
   int elderSupportPaid = 0;
   int elderSupportSkippedYears = 0;
 
+  /// Çocuğun hastalandığı yıl sayısı (Paket CN ölçümü).
+  int childIllnessLines = 0;
+
   /// Hangi yaşta hangi olaylar görüldü (Paket CH).
   ///
   /// `seenEvents` bir kümedir ve yaşı kaybeder; "hangi yıl hiç olay
@@ -1020,7 +1023,15 @@ BotLifeResult playBotLife({
     _snapshotBeforeAge(c.state!, diag);
     _snapshotAhBefore(c.state!, diag);
     if (onPreAge != null) onPreAge(c.state!);
+    final int gunlukOnce = c.state!.log.length;
     c.ageUp();
+    // Paket CN ölçümü: yıl içinde günlüğe düşen çocuk hastalığı
+    // satırlarını say. Oyunun akışına dokunmaz, yalnızca okur.
+    for (final dynamic k in c.state!.log.skip(gunlukOnce)) {
+      if ((k.text as String).contains('bir süre hastalandı.')) {
+        sonuc.childIllnessLines++;
+      }
+    }
     if (c.state!.player.age == oncekiYas) {
       // İlerlemeyi engelleyen bir şey kaldıysa döngüyü kırmak yerine
       // bir sonraki turda bekleyenleri karşıla; iki kez üst üste

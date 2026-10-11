@@ -254,6 +254,24 @@ enum FeatureId {
       'app/test/paket_cj_yaslilik_bakimi_test.dart',
       'app/test/paket_cm_bakim_karsiligi_test.dart',
     ],
+  ),
+
+  /// Paket CN — çocuğun hastalanması: eşte D-154'ten beri olan kural
+  /// (`NpcIllness`) çocuğa da işler. Zar kişi-yıla özel türetilmiş
+  /// tohumdan gelir; ana akış kaymaz.
+  cocukHastaligi(
+    saveKey: 'cocuk_hastaligi',
+    title: 'Çocuğun hastalanması',
+    lostWhenOff:
+        'Çocuk hiç hastalanmaz: kendi sağlık/keyif kaydı düşmez, '
+        'günlüğe satır düşmez ve hanedeki çocuğun hastalığı '
+        'oyuncunun mutluluğunu etkilemez. Eşin hastalanması '
+        '(D-154) yerinde kalır. Geçmişte yazılmış hastalık dönüm '
+        'noktaları silinmez.',
+    paket: 'Paket CN — çocuğun hastalanması',
+    removableFiles: <String>[
+      'app/test/paket_cn_cocuk_hastaligi_test.dart',
+    ],
   );
 
   const FeatureId({

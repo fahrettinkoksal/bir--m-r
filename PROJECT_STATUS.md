@@ -7729,6 +7729,19 @@ kapanıyor.
 2+ yalnız kare 252. Havuz `FeatureEvents` ile `yaslilik_bakimi`
 anahtarına bağlı: modül kapalıyken hiçbiri aday olmuyor.
 
+> **Düzeltme (11 Ekim 2026, Paket CN).** Yukarıdaki "hepsi görüldü"
+> cümlesi **tek bir koşunun şansıydı.** Paket CN çocuğu
+> hastalandırınca sonraki yılların dalları kaydı ve aynı 250 hayatta
+> `bakim_karsilik_komsu_farketti` sıfır çekti; CM'in bekçisi kırmızıya
+> döndü. Ölçüm olayın erişilebilir olduğunu gösterdi: 250 hayatta
+> **261 aday kare, beklenen çıkış 3,53** (havuzun en çok aday üreteni)
+> ve 500 hayatta beklenen 6,88 → **görülen 7**. Bekçi gevşetilmedi,
+> ölçütü düzeltildi: erişilebilirlik artık olay başına **aday kare +
+> beklenen çıkış** ile (250 hayat), uçtan uca "gerçekten çıkıyor"
+> iddiası ise **500 hayatlık** kohortta sınanıyor (görülme
+> 8/4/6/7/9/8). Ulaşılamaz bir eşik denendiğinde yeni ölçüt "0 aday
+> kare" diyip kırmızıya dönüyor.
+
 ### Bekçi
 
 `test/paket_cm_bakim_karsiligi_test.dart` (6 test): altı olayın hepsi
@@ -7737,6 +7750,108 @@ olay aday olmuyor** · modül kapalıyken havuz aday olmuyor · havuz
 modül eşlemesiyle birebir ve iz bırakmıyor · metinler yasak kalıp
 taşımıyor ve hepsi 70+ yaşta. Modül eşlemesi kaldırılınca 6 testin
 2'si kırmızıya döndü.
+
+## Paket CN — çocuk da hastalanır (11 Ekim 2026)
+
+`EKSIKLER` §3.2 çocuğun hayatında beş eksik sayıyordu; Paket CJ'nin
+okuma turu dördünün kapandığını **kodda** doğrulamıştı. Kalan tek
+madde hastalıktı: eş D-154'ten beri hastalanıyor, `ChildProgression`
+içinde hastalık **hiç** yoktu. Çocuk okula gidiyor, iş buluyor,
+evleniyor, boşanıyor, işsiz kalıyor ama hiç hastalanmıyordu.
+
+### Kural kopyalanmadı, paylaşıldı
+
+`app/lib/domain/generation/npc_illness.dart` eşin kuralını tek kopya
+hâline getirdi: olasılık yaşla 0,012 → 0,022 → 0,038 → 0,055, sağlık
+−9, keyif −8, iki hastalık arasında en az 3 yıl, iz kişinin **kendi**
+dönüm noktasından okunur (ayrı alan eklenmedi). `SpouseLife` artık bu
+kuralı çağırıyor; sayıları ve zar sırasını değiştirmedi.
+
+**Ölçülerek doğrulandı:** eski kodla yeni kodun modül-kapalı koşusu
+40 hayatta (hastalık yılları, ölüm yaşı, kişi sayısı, son mutluluk)
+**satır satır aynı** çıktı. Refactor davranışı korumuş.
+
+### Zarın yeri — bu paketin asıl kararı
+
+Çocuk başına yıllık bir atış ana zar dizisinden çekilseydi 70 yıllık
+bir hayatta sıranın tamamı kayardı: tek bir içerik eklemesi bütün
+tohumlu ölçümleri ve bekçi testlerini kırardı (Paket BO'nun yakaladığı
+hata tam buydu). Atış `NpcIllness.derivedRandom(id, age)` ile
+**kişi-yıldan türeyen** kendi tohumundan yapılıyor:
+
+- Modül kapalıyken akış Paket CN öncesiyle birebir aynı.
+- Aynı kişi-yıl her zaman aynı sonucu verir → kaydı kapatıp açarak
+  hastalığı yeniden çevirmek **imkânsız** (piyasa endeksinde alınan
+  kararın aynısı).
+
+### Ölçüm (250 bot hayatı, açık/kapalı farkı)
+
+| Ölçü | Değer |
+| --- | --- |
+| Çocuk hastalığı satırı | 134 |
+| En az birini gören hayat | 53 |
+| Ölüm yaşı ortalaması (açık / kapalı) | 71,48 / 71,42 |
+
+Tek tek hayatlar yine ayrışıyor: hastalanan çocuğun statları
+değiştiği için **sonraki** yılların dalları kayıyor (bir hayatta ölüm
+yaşı 71 → 83). Bu modülün açık olmasının sonucu; ortalamaya etkisi
+gürültü düzeyinde.
+
+### Kapsam neden yalnızca çocuk
+
+İzlenen kişi sayısı (torun, yeğen, kardeş, üvey kardeş, yarım kardeş,
+üvey çocuk) ölçüldü: **ortanca 5, en çok 23.** Çocuk sayısı ortanca 0,
+en çok 4. Aynı kural bütün izlenen kişilere açılsa günlük ve oyuncunun
+mutluluğu taşardı. Genişletme sorusu Q-230'da; **yapılmadı.**
+
+### Hanedeki çocuğun yükü
+
+Hanedeki çocuğun hastalığı oyuncunun keyfinden −2 alıyor (eşin
+hastalığı −4; çocuk sayısı dörde kadar çıktığı için daha küçük
+tutuldu). Evden ayrılmış çocuğun hastalığı haber olarak geliyor ama bu
+yükü getirmiyor.
+
+**95 tek yıllık karede ölçüldü:** hane dışı 60/60 karede fark **0**.
+Hane içi 35 karede 17 kez tam −2, 9 kez −1, 9 kez 0. Soğuran şey tavan
+değil **azalan getiri** (`StatGain.apply`, yumuşak tavan 95): kayıp tam
+uygulanıyor, ama yılın sonraki kazançları daha düşük tabandan
+işlendiği için 1-2 puanı geri veriyor. Bu bütün statların davranışı,
+bu paketin değil.
+
+### Bekçi
+
+`app/test/paket_cn_cocuk_hastaligi_test.dart` (7 test): çocuk
+gerçekten hastalanıyor (120 hayatta 82 hastalık, 32 hayat) · iki
+hastalık arasında en az üç yıl · **zar sözleşmesi** (hastalık olmayan
+yılda açık/kapalı koşu günlük, kişiler ve oyuncu keyfi dahil birebir
+aynı) · hanedeki çocuk oyuncuya işler, ayrı yaşayan işlemez · aynı
+kişi-yıl kaydet/yükle ve **başka ana zarla** da aynı sonucu verir ·
+modül kapalıyken hiç hastalık yok · paylaşılan kural eşin sayılarını
+koruyor.
+
+**Isırma denemesi (üç bozma):** (1) hastalık bloğu kaldırılınca —
+yani Paket CN öncesi davranış — 7 testin 3'ü kırmızı; (2) zar
+türetilmiş tohum yerine ana diziden çekilince zar sözleşmesi testi
+kırmızı; (3) hane ayrımı kaldırılınca hane testi kırmızı.
+
+### Yan etki: Paket CM'in bekçisi kırıldı (ve düzeltildi)
+
+Çocuğun hastalanması dünyayı değiştiriyor: hastalanan çocuğun statları
+değişince **sonraki** yılların dalları kayıyor. Bu, CM'in "altı olayın
+hepsi 250 hayatta görüldü" testini kırdı. Ölçüm olayın erişilebilir
+olduğunu gösterdi (250 hayatta 261 aday kare, beklenen 3,53; 500
+hayatta görülen 7), bekçinin ölçütü düzeltildi — ayrıntı CM bölümündeki
+düzeltme notunda. Ders: "görülmedi" ulaşılamazlık ölçütü değil (Paket
+CK) ve bir görülme iddiası, beklenen çıkışın sıfırı inandırıcı
+kılmadığı kohortta sınanmalı.
+
+### Modül anahtarı
+
+`cocuk_hastaligi` (Ayarlar → Modüller → "Çocuğun hastalanması").
+Kapalıyken: çocuk hiç hastalanmaz, günlüğe satır düşmez, hanedeki
+çocuğun hastalığı oyuncunun mutluluğunu etkilemez; eşin hastalanması
+(D-154) yerinde kalır, geçmişte yazılmış hastalık dönüm noktaları
+silinmez.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

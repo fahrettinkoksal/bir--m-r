@@ -246,7 +246,7 @@ evlilik → boşanma) derinken, arkadaşlık bunların yanında çok sığ kalı
 > **Q-227**'de karar bekliyor. Yani §3.1'in listesinde kalan gerçek
 > eksik **kalmadı**.
 
-### 3.2 Çocuğun hayatı tek yönlü — **beş maddenin dördü kapandı**
+### 3.2 Çocuğun hayatı tek yönlü — **beş maddenin beşi kapandı**
 Çocuk kendi hayatını yaşıyor (okul, meslek, birikim — D-045) ve artık
 evleniyor (D-121). Ama: boşanamıyor, işsiz kalamıyor, hastalanamıyor,
 oyuncudan para isteyemiyor, oyuncuya bakamıyor. Torun doğuyor ama
@@ -264,10 +264,32 @@ torunun kendi hayatı yok.
 > | torunun kendi hayatı yok | `grandchildren.dart` torunu `tracksLife: true` ile doğuruyor; `life_progression.dart` onu her yıl ilerletiyor |
 > | **oyuncuya bakamıyor** | **Paket CJ ile kapandı** (aşağıdaki §3.8) |
 >
-> Açık kalan tek madde: **çocuk hastalanamıyor.** Eşin kendi hayatında
-> hastalık var (`SpouseLife.prototypeOnly…`, D-154); `ChildProgression`
-> içinde hiç yok. Simetri eksikliği ölçülmedi, tasarım sorusu da
-> sorulmadı — sıradaki okuma turuna not düşüldü.
+> **GÜNCELLEME (11 Ekim 2026, Paket CN): son madde de kapandı.** Çocuk
+> artık hastalanıyor. Kural eşten kopyalanmadı, **paylaşıldı**:
+> `app/lib/domain/generation/npc_illness.dart` eşin D-154'ten beri
+> kullandığı kuralı (olasılık yaşla 0,012 → 0,055, sağlık −9, keyif
+> −8, iki hastalık arası en az 3 yıl, iz kişinin kendi dönüm
+> noktasından okunur) tek kopya hâline getirdi ve `ChildProgression`
+> adımından sonra çocuğa da uyguluyor.
+>
+> Ölçüm (250 bot hayatı, modül açık/kapalı farkı): **134 çocuk
+> hastalığı satırı, 53 hayat en az birini görüyor.** Ölüm yaşı
+> ortalaması 71,48 / 71,42 — ömre etkisi gürültü düzeyinde. Hanedeki
+> çocuğun hastalığı oyuncunun keyfinden −2 alıyor; evden ayrılmış
+> çocuğun hastalığı haber olarak geliyor ama bu yükü getirmiyor
+> (95 tek yıllık karede 60/60 fark 0).
+>
+> **Zar ana diziden çekilmiyor:** atış `NpcIllness.derivedRandom(id,
+> age)` ile kişi-yıldan türeyen kendi tohumundan yapılıyor. Modül
+> kapalıyken akış Paket CN öncesiyle **birebir aynı** (40 hayatlık
+> damga satır satır eşleşti) ve kaydı kapatıp açarak hastalığı
+> yeniden çevirmek imkânsız. Modül anahtarı: `cocuk_hastaligi`.
+> Bekçi: `app/test/paket_cn_cocuk_hastaligi_test.dart` (7 test).
+> Kapsamın torun/yeğen/kardeşe genişletilmesi **ölçüldü ama
+> yapılmadı** (izlenen kişi ortancası 5, en çok 23 → günlük taşar);
+> soru Q-230'da.
+>
+> Böylece §3.2'nin beş maddesinin **beşi** kapandı.
 
 ### 3.8 Oyuncunun kendi yaşlılığı — **eklendi (Paket CJ)**
 **Ölçüm (10 Ekim 2026, 250 bot hayatı).** Oyuncu 70 yaşını 185 hayatta

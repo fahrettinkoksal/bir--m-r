@@ -437,6 +437,41 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CN.** Yeni bir yıllık zar atışı eklerken **nereden
+  çekildiğine** karar ver. Çocuk başına yıllık bir atış ana diziden
+  gelseydi 70 yıllık bir hayatta sıranın tamamı kayardı: tek bir
+  içerik eklemesi bütün tohumlu ölçümleri ve bekçileri kırardı (Paket
+  BO'nun yakaladığı hata tam buydu). Çözüm `derivedRandom(id, age)`:
+  kişi-yıldan türeyen kararlı tohum. İki bedava faydası var — modül
+  kapalıyken akış eskisiyle **birebir** aynı kalıyor ve kaydı kapatıp
+  açarak sonucu yeniden çevirmek imkânsız oluyor.
+- **Paket CN.** Bir **görülme** iddiası, beklenen çıkışın sıfırı
+  inandırıcı kılmadığı kohortta sınanmalı. CM'in "altı olayın hepsi
+  250 hayatta görüldü" testi tek bir koşunun şansıydı: Paket CN
+  dünyayı kaydırınca en çok aday üreten olay (261 kare, beklenen 3,53)
+  sıfır çekti ve bekçi kırmızıya döndü. Taban düşürülmedi; ölçüt
+  düzeltildi — erişilebilirlik **aday kare + beklenen çıkış** ile
+  ölçülüyor, görülme ise 500 hayatta. Yeni özellik eklerken yalnızca
+  kendi testini değil, **dünyayı kaydırdığı için kırılabilecek**
+  eski bekçileri de hesaba kat.
+- **Paket CN.** Refactor "davranışı korudum" demekle kanıtlanmaz,
+  **damgayla** kanıtlanır. Eşin hastalık kuralı paylaşılan bir dosyaya
+  taşınırken eski kodu bir `git worktree`'de bırakıp 40 hayatlık damga
+  (hastalık yılları, ölüm yaşı, kişi sayısı, son mutluluk) iki kodda
+  karşılaştırıldı: satır satır aynı. `chance(p)` ile
+  `nextDouble() < p` eşitliğini de bu yakalardı, gözle okumak değil.
+- **Paket CN.** Bir etkinin "uygulanmadığı" kareleri açıklamadan
+  bekçiye taban yazma. Hanedeki çocuğun −2'si 35 karenin 17'sinde tam
+  görünüyordu; kalanında 0 ve −1. Sebebi ne tavan ne tabandı:
+  **azalan getiri** (`StatGain.apply`) kaybı tam uyguluyor ama yılın
+  sonraki kazançları daha düşük tabandan işlendiği için 1-2 puanı geri
+  veriyor. Açıklamayı bulmadan "çoğunlukla −2" demek, ölçümü değil
+  tahmini yazmak olurdu.
+- **Paket CN.** Türetilmiş tohumun ölçüm için de faydası var: sonucu
+  **önceden bilinebilir** olduğu için bekçi "bu yıl tam bir çocuk
+  hastalanacak" karelerini seçip tek yıllık, kontrollü karşılaştırma
+  yapabiliyor. 120 hayatta ilk-hastalık yılı 21 kare veriyordu; aynı
+  bütçeyle tek yıllık tarama 95 kare verdi.
 - **Paket CM.** Bir sistem kayıt tutuyorsa o kayıt **hikâyeye
   dönmeli**; yoksa oyuncu için sayaç değil, boşluk olur. Bakım kaydı
   Paket CJ'den beri duruyordu ve hiçbir olay onu okumuyordu.

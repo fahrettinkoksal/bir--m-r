@@ -21,10 +21,9 @@ import 'dart:math';
 
 import '../models/game_state.dart';
 import '../models/person.dart';
-import '../models/person_development.dart';
 import '../models/relation.dart';
 import 'child_progression.dart';
-import 'random_util.dart';
+import 'npc_illness.dart';
 
 /// Bir yılın eşe dair sonucu.
 class SpouseYear {
@@ -48,27 +47,12 @@ class SpouseYear {
 }
 
 abstract final class SpouseLife {
-  /// prototypeOnly: eşin bir yılda hastalanma olasılığı.
-  ///
-  /// Yaşla artar; genç eş nadiren, yaşlı eş daha sık hastalanır.
-  static double prototypeOnlyIllnessChance(int age) {
-    if (age < 35) return 0.012;
-    if (age < 50) return 0.022;
-    if (age < 65) return 0.038;
-    return 0.055;
-  }
-
-  /// prototypeOnly: hastalığın eşin sağlığından düşürdüğü puan.
-  static const int prototypeOnlyIllnessHealth = -9;
-
-  /// prototypeOnly: hastalığın eşin keyfinden düşürdüğü puan.
-  static const int prototypeOnlyIllnessHappiness = -8;
-
   /// prototypeOnly: eşin hastalığının oyuncunun mutluluğuna etkisi.
+  ///
+  /// Hastalığın kendi sayıları (olasılık, sağlık/keyif düşüşü, iki
+  /// hastalık arası en az yıl) Paket CN'de `NpcIllness`'a taşındı:
+  /// aynı kuralın iki kopyası kalmasın. Değerler değişmedi.
   static const int prototypeOnlyPlayerWorry = -4;
-
-  /// prototypeOnly: iki hastalık arasında geçmesi gereken en az yıl.
-  static const int prototypeOnlyIllnessGap = 3;
 
   /// Oyuncunun **yürüyen** evliliğindeki eş; yoksa `null`.
   ///
@@ -137,51 +121,16 @@ abstract final class SpouseLife {
 
   /// Eş bu yıl hastalanır mı?
   ///
-  /// İki hastalık arasında en az [prototypeOnlyIllnessGap] yıl geçer;
-  /// hastalık kaydı eşin **kendi** dönüm noktalarından okunur, ayrı bir
-  /// alan eklenmez.
+  /// **Kural Paket CN'de paylaşıldı** (`NpcIllness`): sayılar, üç
+  /// yıllık ara ve izin dönüm noktasından okunması aynı kaldı,
+  /// yalnızca tek kopya oldu. Eş **ana zarı** kullanmaya devam ediyor;
+  /// çocuk tarafı kendi türetilmiş tohumunu kullanır, böylece eski
+  /// ölçümler bit bit aynı kalır.
   static ({Person person, String? text}) _maybeIllness(
     Person spouse,
     Random rng,
   ) {
-    final PersonDevelopment? dev = spouse.development;
-    if (dev == null) return (person: spouse, text: null);
-
-    final int? sonHastalik = _lastIllnessAge(dev);
-    if (sonHastalik != null &&
-        spouse.age - sonHastalik < prototypeOnlyIllnessGap) {
-      return (person: spouse, text: null);
-    }
-    if (!rng.chance(prototypeOnlyIllnessChance(spouse.age))) {
-      return (person: spouse, text: null);
-    }
-
-    final String metin = '${spouse.firstName} bir süre hastalandı.';
-    final PersonDevelopment yeni = dev
-        .copyWith(
-          stats: dev.stats.gain(
-            health: prototypeOnlyIllnessHealth,
-            happiness: prototypeOnlyIllnessHappiness,
-          ),
-        )
-        .withMilestone(spouse.age, metin);
-
-    return (
-      person: spouse.copyWith(
-        development: yeni,
-        happiness:
-            (spouse.happiness + prototypeOnlyIllnessHappiness).clamp(0, 100),
-      ),
-      text: metin,
-    );
-  }
-
-  /// Eşin geçmişindeki en son hastalık yılı; hiç yoksa `null`.
-  static int? _lastIllnessAge(PersonDevelopment dev) {
-    int? son;
-    for (final LifeMilestone m in dev.milestones) {
-      if (m.text.contains('hastalandı')) son = m.age;
-    }
-    return son;
+    final NpcIllnessYear sonuc = NpcIllness.maybe(spouse, rng);
+    return (person: sonuc.person, text: sonuc.text);
   }
 }

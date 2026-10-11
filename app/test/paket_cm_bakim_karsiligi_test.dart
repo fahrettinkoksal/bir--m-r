@@ -11,14 +11,39 @@
 // destek görmek ömür boyu yeterdi (Paket CI'nin aynı gerekçesi).
 //
 // **Ölçüm (250 bot hayatı).** 2+ destekli kare 205, 2+ yalnız kare
-// 252; altı olayın **hepsi** görüldü ve 14 hayat en az birini gördü.
-// Ulaşılamayan olay yok (Paket CD/CK'nın ölçütü).
+// 252. Ulaşılamayan olay yok (Paket CD/CK'nın ölçütü).
+//
+// **Paket CN'den sonra düzeltilen bekçi.** İlk yazımda "altı olayın
+// hepsi 250 hayatta görüldü" diye **tek bir koşunun şansına** bakan
+// bir test vardı. Paket CN çocuğu hastalandırınca (hastalanan çocuğun
+// statları değişiyor, sonraki yılların dalları kayıyor) aynı 250
+// hayatta `bakim_karsilik_komsu_farketti` sıfır çekti ve bekçi
+// kırmızıya döndü. Ölçüldü:
+//
+// | Olay | 250 hayat: aday · beklenen · görülen | 500 hayat |
+// |---|---|---|
+// | `…aliskanlik` | 173 · 2,04 · 5 | 366 · 4,28 · 8 |
+// | `…yorgunluk` | 148 · 1,75 · 2 | 295 · 3,47 · 4 |
+// | `…torun_gorur` | 108 · 1,26 · 2 | 206 · 2,41 · 6 |
+// | `…komsu_farketti` | **261 · 3,53 · 0** | 512 · 6,88 · **7** |
+// | `…kimseyi_aramadim` | 180 · 2,33 · 3 | 370 · 4,84 · 9 |
+// | `…defter_notu` | 129 · 1,34 · 4 | 275 · 2,80 · 8 |
+//
+// Yani olay havuzun **en çok aday üreteni**; erişilemez değil, o
+// kohortta şans tutmadı (beklenen 3,53 iken sıfır çekme ihtimali
+// ~%3). Paket CK'nın dersi buydu: "görülmedi" ulaşılamazlık ölçütü
+// değil. Bekçi gevşetilmedi, **ölçütü düzeltildi**: erişilebilirlik
+// artık her olay için **aday kare + beklenen çıkış** ile ölçülüyor
+// (250 hayat, kararlı sayılar), uçtan uca "gerçekten çıkıyor"
+// iddiası ise beklenen çıkışın sıfırı inandırıcı kılmadığı
+// **500 hayatlık** kohortta sınanıyor.
 //
 // Durum kurulmuyor: kareler bot hayatlarında bulunuyor.
 library;
 
 import 'dart:math';
 
+import 'package:bir_omur/data/event_pool.dart';
 import 'package:bir_omur/data/event_pool_elder_support.dart';
 import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/features/feature_catalog.dart';
@@ -32,9 +57,29 @@ import 'support/player_bot.dart';
 Set<String> get _havuzIds =>
     kElderSupportEvents.map((GameEvent e) => e.id).toSet();
 
+/// Olayın havuzdaki ağırlığı (Paket CK kalıbı).
+int _agirlik(String id) =>
+    kEventPool.firstWhere((GameEvent e) => e.id == id).weight;
+
+/// Bir olayın bir karede seçilme payı: kendi ağırlığı / aday toplamı.
+double _pay(String id, Set<String> adaylar) {
+  int toplam = 0;
+  for (final String aday in adaylar) {
+    toplam += _agirlik(aday);
+  }
+  if (toplam == 0 || !adaylar.contains(id)) return 0;
+  return _agirlik(id) / toplam;
+}
+
 /// Taramanın topladıkları.
 class _Olcum {
   final Map<String, int> gorulen = <String, int>{};
+
+  /// Olay başına aday kare sayısı ve beklenen çıkış (erişilebilirlik
+  /// ölçütü: tek koşunun şansına bakmaz).
+  final Map<String, int> adayKare = <String, int>{};
+  final Map<String, double> beklenen = <String, double>{};
+
   int gorenHayat = 0;
   int destekliKare = 0;
   int yalnizKare = 0;
@@ -67,6 +112,9 @@ _Olcum _tara() {
           final Set<String> adaylar = motor.debugEligibleIds(s, Random(13));
           for (final GameEvent e in kElderSupportEvents) {
             if (!adaylar.contains(e.id)) continue;
+            o.adayKare[e.id] = (o.adayKare[e.id] ?? 0) + 1;
+            o.beklenen[e.id] =
+                (o.beklenen[e.id] ?? 0) + _pay(e.id, adaylar);
             if (destek < e.requirement.minElderSupportYears ||
                 yalniz < e.requirement.minElderAloneYears) {
               o.erkenAday++;
@@ -100,14 +148,48 @@ void main() {
   final _Olcum olcum = _tara();
 
   group('Paket CM §1 — içerik gerçekten çıkıyor', () {
-    test('altı olayın hepsi görülüyor (ulaşılamayan yok)', () {
-      final Set<String> gorulmeyen =
-          _havuzIds.difference(olcum.gorulen.keys.toSet());
-      expect(gorulmeyen, isEmpty,
-          reason: 'bu olaylar 250 hayatta hiç çıkmadı: $gorulmeyen — '
-              'yazılmış ama erişilemez içerik bırakmıyoruz (Paket CD)');
+    test('altı olayın hepsi aday oluyor ve beklenen çıkışı var', () {
+      // Erişilebilirlik ölçütü: aday kare + beklenen çıkış. Tabanlar
+      // ölçülenin (en düşük: 108 kare / 1,26 beklenen) belirgin
+      // altında; sıfır aday ya da sıfıra yakın beklenen = erişilemez
+      // içerik (Paket CD/CK).
+      for (final String id in _havuzIds) {
+        expect(olcum.adayKare[id] ?? 0, greaterThan(50),
+            reason: '$id 250 hayatta neredeyse hiç aday olmuyor: '
+                '${olcum.adayKare[id] ?? 0} kare');
+        expect(olcum.beklenen[id] ?? 0, greaterThan(0.8),
+            reason: '$id beklenen çıkışı 250 hayatta 0,8\'in altında: '
+                '${olcum.beklenen[id] ?? 0}');
+      }
       expect(olcum.gorenHayat, greaterThan(4),
           reason: 'içerik neredeyse hiçbir hayatta görünmüyor');
+    });
+
+    test('her olay 500 hayatta gerçekten çıkıyor (uçtan uca)', () {
+      // 250 hayat bu iddia için **yetmiyor**: en seyrek olayın
+      // beklenen çıkışı 1,26: sıfır çekmesi %28 ihtimalli. 500
+      // hayatta ölçülen görülme 8/4/6/7/9/8.
+      final Map<String, int> gorulen = <String, int>{};
+      for (final PlayerArchetype a in PlayerArchetype.values) {
+        for (int seed = 1; seed <= 50; seed++) {
+          final BotLifeResult r = playBotLife(
+            archetype: a,
+            seed: seed * 97 + a.index,
+          );
+          for (final String id in r.seenEvents.intersection(_havuzIds)) {
+            gorulen[id] = (gorulen[id] ?? 0) + 1;
+          }
+        }
+      }
+      final Set<String> gorulmeyen =
+          _havuzIds.difference(gorulen.keys.toSet());
+      expect(gorulmeyen, isEmpty,
+          reason: 'bu olaylar 500 hayatta hiç çıkmadı: $gorulmeyen — '
+              'yazılmış ama erişilemez içerik bırakmıyoruz (Paket CD)');
+      expect(gorulen.values.fold<int>(0, (int t, int v) => t + v),
+          greaterThanOrEqualTo(20),
+          reason: 'havuzun toplam görülme sayısı beklenenin çok '
+              'altında: $gorulen');
     });
 
     test('kaydın iki tarafı da yaşanıyor', () {

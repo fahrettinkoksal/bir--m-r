@@ -11,6 +11,7 @@ import '../family/child_school_issue.dart';
 import '../family/family_disputes.dart';
 import '../family/in_law_relations.dart';
 import '../family/family_mood.dart';
+import '../features/feature_catalog.dart';
 import '../career/retirement.dart';
 import '../life/chronic_engine.dart';
 import '../life/critical_health.dart';
@@ -78,6 +79,7 @@ import '../life/upkeep_tracker.dart';
 import '../life/notices.dart';
 import '../models/pending_notice.dart';
 import 'child_progression.dart';
+import 'npc_illness.dart';
 import 'spouse_life.dart';
 import '../models/relation.dart';
 import '../models/wealth.dart';
@@ -168,6 +170,10 @@ class LifeProgression {
     // Çocuklar arka planda kendi hayatlarını yaşar (D-045). Önemli
     // ilerleme gerçekleştiği yılda kaydedilir; vefat edenlere dokunulmaz.
     final List<String> cocukHaberleri = <String>[];
+    // Hanedeki çocuğun hastalığı oyuncunun keyfini düşürür (Paket CN);
+    // evden ayrılmış çocuğun hastalığı haber olarak gelir ama aynı
+    // yükü getirmez.
+    int cocukHastaligiEndisesi = 0;
     final List<Person> peopleWithChildren = people
         .map((Person person) {
           // Torunlar da kendi hayatlarını yaşar (Paket 12): okula başlar,
@@ -203,7 +209,33 @@ class LifeProgression {
             adviceBoost: ChildAdvice.boostFor(state, person),
           );
           cocukHaberleri.addAll(sonuc.news);
-          return sonuc.person;
+          Person ilerleyen = sonuc.person;
+
+          // **Çocuk da hastalanır** (Paket CN). Eşte bu kural D-154'ten
+          // beri var; `EKSIKLER` §3.2'nin son açık maddesi buydu.
+          //
+          // Zar **ana diziden çekilmez**: kişi-yıla özel türetilmiş
+          // tohum kullanılır. Böylece bütün tohumlu ölçümler bit bit
+          // aynı kalır ve kaydı kapatıp açarak hastalığı yeniden
+          // çevirmek imkânsız olur. Yalnızca **çocuk** kapsamda:
+          // ölçümde izlenen kişi ortancası 5 (en çok 23) ama çocuk
+          // ortancası 0, en çok 4 — torun/yeğen de eklenirse günlük
+          // ve mutluluk taşar (Q-230).
+          if (ilerleyen.relation == RelationType.cocuk &&
+              state.featureOn(FeatureId.cocukHastaligi)) {
+            final NpcIllnessYear hastalik = NpcIllness.maybe(
+              ilerleyen,
+              NpcIllness.derivedRandom(ilerleyen.id, ilerleyen.age),
+            );
+            if (hastalik.text != null) {
+              ilerleyen = hastalik.person;
+              cocukHaberleri.add(hastalik.text!);
+              if (ilerleyen.inPlayerHousehold) {
+                cocukHastaligiEndisesi += NpcIllness.prototypeOnlyWorry;
+              }
+            }
+          }
+          return ilerleyen;
         })
         .toList(growable: false);
 
@@ -691,6 +723,17 @@ class LifeProgression {
       afterDeaths = afterDeaths.copyWith(
         player: afterDeaths.player.copyWith(
           stats: afterDeaths.player.stats.gain(happiness: esMutlulukEtkisi),
+        ),
+      );
+    }
+    // Hanedeki çocuğun hastalığı da oyuncuya işler (Paket CN); evden
+    // ayrılmış çocuğun hastalığı haber olarak gelir ama bu yükü
+    // getirmez.
+    if (cocukHastaligiEndisesi != 0) {
+      afterDeaths = afterDeaths.copyWith(
+        player: afterDeaths.player.copyWith(
+          stats: afterDeaths.player.stats
+              .gain(happiness: cocukHastaligiEndisesi),
         ),
       );
     }

@@ -67,6 +67,7 @@ gelir.
 | `sigorta` | Sigorta | CA | Sigorta ekranı ve poliçeler kalkar: yıllık prim çıkmaz, hasarda karşılık olmaz, sağlık krizinin ve ev hasarının faturası Paket CA öncesi gibi tamamen oyuncunun cebinden çıkar. Kayıttaki poliçeler silinmez, donar. |
 | `arkadas_grubu` | Arkadaş grubu | CI | Grup kurma düğmesi ve "Arkadaş grubum" kartı kalkar; sekiz grup olayı çıkmaz, üyenin ayrılması ve grubun dağılması işlemez. Arkadaşlık tek tek yürür (Paket CI öncesi gibi); birden çok kişiyle aktiviteye gitmek yine mümkündür, o Paket X/2'nin yolu. Kayıttaki gruplar silinmez, donar. |
 | `yaslilik_bakimi` | Yaşlılıkta bakım | CJ + CM | Yaşlılıkta "kim yanında?" kartı ve üç kapı kalkar; aile oyuncunun yaşlılığına karışmaz, maddi destek gelmez. Kaydı okuyan altı olay da aday havuzuna girmez (Paket CM: "üç yıldır yanımda" ya da "kimseyi aramamışım" hikâyeleri). Yaşlı ebeveyne bakmak (Paket AO §35) yerinde kalır — kalkan şey onun oyuncuya dönük tersi. Kayıttaki sayaçlar silinmez, donar. |
+| `cocuk_hastaligi` | Çocuğun hastalanması | CN | Çocuk hiç hastalanmaz: kendi sağlık/keyif kaydı düşmez, günlüğe satır düşmez, hanedeki çocuğun hastalığı oyuncunun mutluluğunu etkilemez. Eşin hastalanması (D-154) yerinde kalır — kural `NpcIllness`'ta paylaşıldı. Geçmişte yazılmış hastalık dönüm noktaları silinmez. |
 
 Tablo elle tutulur ama **bekçisi var**: izolasyon testi her katalog
 satırının bu dosyada yazılı olmasını şart koşar.
