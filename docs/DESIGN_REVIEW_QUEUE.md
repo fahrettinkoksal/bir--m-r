@@ -9201,3 +9201,116 @@ görünmüyor.** Seçenekler:
 **Etkilenen kod:** `app/lib/data/event_pool_early_years.dart`,
 `app/lib/data/event_pool_crime.dart`,
 `app/test/paket_ck_gorulmeyen_iki_olay_test.dart`.
+
+### Q-230 — Çocuğun hastalanması: sayılar, kapsam ve zarın yeri
+
+**Durum:** **uygulandı** (Paket CN, 11 Ekim 2026). Sayılar
+`prototypeOnly`, modül anahtarı `cocuk_hastaligi`, geri alma yolu
+aşağıda. Karar gerektiren tek madde **kapsamın genişletilmesi**
+(madde 3) — ölçüldü ama yapılmadı.
+
+**Nasıl çıktı.** `EKSIKLER` §3.2 çocuğun hayatında beş eksik
+sayıyordu; Paket CJ'nin okuma turu dördünün kapandığını kodda
+doğrulamıştı. Kalan madde hastalıktı: eş D-154'ten beri hastalanıyor,
+`ChildProgression` içinde hastalık **hiç** yoktu.
+
+#### 1. Kural kopyalanmadı, paylaşıldı (uygulandı)
+
+`npc_illness.dart` eşin kuralını tek kopya hâline getirdi: olasılık
+yaşla 0,012 → 0,022 → 0,038 → 0,055 · sağlık −9 · keyif −8 · iki
+hastalık arasında en az 3 yıl · iz kişinin **kendi** dönüm
+noktasından okunur (ayrı alan eklenmedi). `SpouseLife` artık bu
+kuralı çağırıyor.
+
+Refactor'ın davranışı koruduğu **ölçülerek** doğrulandı: eski kod bir
+`git worktree`'de bırakıldı ve 40 hayatlık damga (hastalık yılları,
+ölüm yaşı, kişi sayısı, son mutluluk) iki kodda karşılaştırıldı —
+modül kapalıyken **satır satır aynı**.
+
+#### 2. Zar kişi-yıldan türetiliyor (uygulandı — bu paketin asıl kararı)
+
+Çocuk başına yıllık bir atış ana zar dizisinden çekilseydi 70 yıllık
+bir hayatta sıranın tamamı kayar ve tek bir içerik eklemesi bütün
+tohumlu ölçümleri kırardı (Paket BO'nun yakaladığı hata). Atış
+`NpcIllness.derivedRandom(id, age)` ile yapılıyor:
+
+- Modül kapalıyken akış Paket CN öncesiyle birebir aynı.
+- Aynı kişi-yıl her zaman aynı sonucu verir → kaydı kapatıp açarak
+  hastalığı yeniden çevirmek **imkânsız**.
+
+Bekçi bunu doğrudan ölçüyor: hastalık **olmayan** bir yılda modül
+açık/kapalı koşular günlük, kişiler ve oyuncunun keyfi dahil birebir
+aynı olmalı. Zar ana diziye taşındığında bu test kırmızıya dönüyor
+(denendi).
+
+**Not — zarın yeri korundu ama dünya yine değişti.** Modül açıkken
+hastalanan çocuğun statları değişiyor, dolayısıyla **sonraki**
+yılların dalları kayıyor. Bu, Paket CM'in "altı olayın hepsi 250
+hayatta görüldü" bekçisini kırdı. Olay erişilemez değildi (250 hayatta
+261 aday kare, beklenen çıkış 3,53; 500 hayatta görülen 7); bekçinin
+ölçütü düzeltildi (aday kare + beklenen çıkış, görülme 500 hayatta).
+Ortalamalar kaymadı: ölüm yaşı 71,48 / 71,42.
+
+#### 3. Kapsam yalnızca çocuk (ölçülmüş bulgu — genişletme kararı Faho'nun)
+
+Aynı kural oyunun izlediği bütün kişilere (torun, yeğen, kardeş, üvey
+kardeş, yarım kardeş, üvey çocuk) açılabilirdi. Ölçüm:
+
+| Kapsam | Kişi sayısı (bot hayatları) |
+|---|---|
+| İzlenen kişilerin tamamı | ortanca **5**, en çok **23** |
+| Yalnızca çocuk | ortanca **0**, en çok **4** |
+
+Yirmi üç kişiye yılda bir atış, günlüğü "X bir süre hastalandı"
+satırlarıyla doldurur ve hane içindeki her kişi için mutluluk yükü
+birikir. Bu yüzden kapsam çocukla sınırlı tutuldu.
+
+**Seçenekler:**
+
+1. **Olduğu gibi kalsın (varsayılanım).** Çocuk oyuncunun en çok
+   baktığı kişi; simetri eksikliği oradaydı ve kapandı. Torunun
+   hastalanması oyuncuya "haber" olarak değerli olabilir ama yükü
+   taşıyacak bir karar yolu yok (bakım seçimi çocuk için de yok).
+2. **Torun ve yeğene de açılsın, günlük sınırıyla:** yılda en çok bir
+   NPC hastalık satırı yazılır. Ölçülmesi gereken ayrı bir iş; "en
+   çok bir satır" kuralı hangi kişiyi seçeceğine de karar vermeyi
+   gerektirir.
+3. **Hepsine açılsın.** Ölçüme göre **önermiyorum**: 23 kişilik
+   kuyruk günlüğü taşırır.
+
+#### 4. Hanedeki çocuğun yükü −2 (uygulandı)
+
+Eşin hastalığı oyuncunun keyfinden −4 alıyor
+(`SpouseLife.prototypeOnlyPlayerWorry`). Çocukta −2 tutuldu: çocuk
+sayısı dörde kadar çıkıyor ve dört ayrı −4 bir yılda ağır olurdu.
+Evden ayrılmış çocuğun hastalığı haber olarak geliyor ama bu yükü
+getirmiyor.
+
+**Ölçüm (95 tek yıllık kare):** hane dışı **60/60** karede fark 0.
+Hane içi 35 karede 17 kez tam −2, 9 kez −1, 9 kez 0. Soğuran şey
+tavan değil **azalan getiri** (`StatGain.apply`, yumuşak tavan 95):
+kayıp tam uygulanıyor, yılın sonraki kazançları daha düşük tabandan
+işlendiği için 1-2 puanı geri veriyor. Yani −2 bütün statların tabi
+olduğu kuralın içinde; ayrıca büyütülmedi.
+
+#### 5. Yapılmayanlar
+
+Hastalığın **tedavisi** yok: oyuncu çocuğun hastalığına para veya
+zaman harcayarak müdahale edemiyor. Eşte de yok; simetri korundu.
+Hastalık ölüme de yol açmıyor (ölüm kendi sistemi).
+
+**Yapmayacağım (onay gelmeden):** kapsamı torun/yeğen/kardeşe
+genişletmek · −2'yi büyütmek · hastalığa tedavi/masraf kararı
+eklemek · eşin −4'üne dokunmak · hastalığı ölüm sebebine bağlamak.
+
+**Geri alma:** Ayarlar → Modüller → "Çocuğun hastalanması" kapatılır.
+Kapalıyken çocuk hiç hastalanmaz, günlüğe satır düşmez, hanedeki
+çocuğun hastalığı oyuncunun mutluluğunu etkilemez; eşin hastalanması
+(D-154) yerinde kalır ve geçmişte yazılmış hastalık dönüm noktaları
+silinmez.
+
+**Etkilenen kod:** `app/lib/domain/generation/npc_illness.dart`,
+`app/lib/domain/generation/spouse_life.dart`,
+`app/lib/domain/generation/life_progression.dart`,
+`app/lib/domain/features/feature_catalog.dart`,
+`app/test/paket_cn_cocuk_hastaligi_test.dart`, `docs/FEATURE_FLAGS.md`.
