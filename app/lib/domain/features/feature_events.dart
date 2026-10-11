@@ -16,6 +16,7 @@ import '../../data/event_pool_elder_support.dart';
 import '../../data/event_pool_friend_circle.dart';
 import '../../data/event_pool_late_years.dart';
 import '../../data/event_pool_neighbour.dart';
+import '../../data/event_pool_preschool.dart';
 import '../../data/event_pool_threshold_years.dart';
 import '../../data/event_pool_traces.dart';
 import '../../data/event_pool_widowhood.dart';
@@ -42,6 +43,10 @@ abstract final class FeatureEvents {
     FeatureId.yaslilikBakimi: kElderSupportEvents,
     FeatureId.dulluk: kWidowhoodEvents,
     FeatureId.izlerinKarsiligi: kTraceEchoEvents,
+    // Paket DE: 3-6 yaşın kendi havuzu. Paket BM/CX'in
+    // `ilkYillarOlaylari` anahtarından **ayrı** tutuldu: ikisi aynı
+    // pencereyi paylaşıyor ama ayrı paketler ve ayrı ayrı kapatılabilir.
+    FeatureId.okulOncesiYillar: kPreschoolEvents,
   };
 
   /// Olay kimliğinden modüle eşleme; bir kez kurulur.

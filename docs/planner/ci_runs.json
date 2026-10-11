@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 626,
+ "total": 628,
  "runs": [
+  {
+   "id": 38167115502,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "dcc8e05ccf7f45f67764c3cc55daaf0789c9c1a8",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 316,
+   "event": "push",
+   "created_at": "2026-10-11T19:13:40Z",
+   "updated_at": "2026-10-11T19:42:23Z",
+   "run_started_at": "2026-10-11T19:13:40Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38167115502",
+   "display_title": "Paket DD: geri dönüşsüz kararların taraması"
+  },
+  {
+   "id": 38167115480,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "dcc8e05ccf7f45f67764c3cc55daaf0789c9c1a8",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 313,
+   "event": "push",
+   "created_at": "2026-10-11T19:13:40Z",
+   "updated_at": "2026-10-11T19:46:34Z",
+   "run_started_at": "2026-10-11T19:13:40Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38167115480",
+   "display_title": "Paket DD: geri dönüşsüz kararların taraması"
+  },
   {
    "id": 38163877064,
    "name": "Windows test sürümü",

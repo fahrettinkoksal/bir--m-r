@@ -810,6 +810,42 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   (Q-237) ve koda dokunmadım. Düzeltmenin bedeli oyuncunun kazancını
   değiştiriyorsa sınır oradadır.
 
+- **Paket DE.** Bir bandı doldurmak **sıradakini açığa çıkarır**. CX
+  0-2'yi doldurunca en ince bant 3-6 oldu (yıl başına 1,04 olay, 55
+  farklı olay — ilkokulun yarısı). "İçerik yeterli mi" sorusunun tek
+  dürüst cevabı bant bant ölçmek; tek bir ortalama (CH'nin 1,0-1,8'i)
+  nerede çalışılacağını söylemiyor.
+- **Paket DE.** Ölçtüğün sayının **neyle sınırlı** olduğunu bilmeden
+  hedef koyma. 3-6'da yıl başına olay sayısını havuz değiştiremez:
+  motor ek olay için üç ilerleme adımı istiyor (D-125) ve o yaşta çocuk
+  adım üretmiyor. Yani doğru hedef "yıl başına 1,5" değil, "o bir olay
+  hep aynı olmasın". Yanlış hedef seçilse havuz iki katına çıkar ve
+  ölçüm hiç değişmezdi.
+- **Paket DE.** Kendi bekçin kendi metnini yakaladığında **bekçiyi
+  gevşetme, metni değiştir**. §4'ün kaynak taraması düğün olayındaki
+  "tabaklardan ikisini" ifadesini işaretledi; yanlış pozitifti ama o
+  tarama CX'te gerçek bir hata bulmuştu. Bir kelimeyi yeniden yazmak,
+  bir bekçiyi kör etmekten ucuz.
+
+- **Paket DE.** Bir tabanı koyarken **beklenen değere ne kadar yakın**
+  olduğunu hesapla. CR'nin "içeriden geçen ≥ 10" tabanı 250 hayatta
+  beklenen değeri ~9 olan bir olaya konmuştu: kırmızıya dönmesi için
+  bir zar kaymasının olması yeterliydi ve oldu. Aynı şey CJ'de üç
+  tohumla yapılan karşılaştırmada çıktı (%6,4 ıskalama olasılığı).
+  Taban, ölçümün **belirgin** altında olmalı; "biraz altında" demek
+  "sıradaki pakette kırmızı" demek.
+- **Paket DE.** Yanlış teşhis koyarken de ölç. DD §4 düşünce önce
+  "satır tembel listede altta kaldı" dedim (kaydırma ekledim, yetmedi),
+  sonra sessiz kare süzgecini `onYear` üstüne koydum ve **hiç kare
+  bırakmadı**: `onYear` yılın olayı cevaplanmadan çalışıyor, orada
+  `hasPendingEvent` her zaman dolu. Doğru kanca `onPreAge`'di. İki
+  yanlış teşhisin ikisi de "makul"dü; ayıran şey ölçüm oldu.
+- **Paket DE.** Aynı dosyada iki test iki ayrı kanca isteyebilir. DD
+  §4 ekranı sürüyor, yani oyuncunun ekrana baktığı kareyi
+  (`onPreAge`) istiyor; DD §2 karar **kilidini** arıyor ve o kilit
+  yaş almadan önce kapanıyor, yani `onYear`'da kalmak zorunda.
+  "Projede tek doğru kanca var" varsayımı iki testi de kırıyordu.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

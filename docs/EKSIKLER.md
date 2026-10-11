@@ -468,6 +468,16 @@ yazılmalı, yoksa o yaş hızlı mı geçmeli — Q-139'un 5. sorusu.
 > (aday tabanları, 14 olayın hepsinin gerçek karede aday olması, baba
 > hanede değilken beşik olayının aday olmaması, iz kapısı).
 
+> **TAZELENDİ — Paket DE ölçümü (11 Ekim 2026).** Bant bant yoğunluk
+> yeniden ölçüldü (160 hayat). Paket CX 0-2'yi doldurduktan sonra en
+> ince bant **3-6** kaldı: yıl başına **1,04** olay ve yalnızca **55**
+> farklı olay (ilkokul 1,47 / 103; en zengin bant 30-39: 1,81 / 259).
+> Paket DE o banda 22 olay yazdı (`event_pool_preschool.dart`,
+> `FeatureId.okulOncesiYillar`). **Not:** yıl başına sayıyı havuz
+> değiştirmiyor — motor ek olay için üç ilerleme adımı istiyor (D-125)
+> ve bu yaşta çocuk adım üretmiyor; değişen şey o bir olayın
+> çeşitliliği.
+
 ### 4.2 Sunulmayan içerik — yeniden ölçüldü
 
 **Eski kayıt (geçersiz):** "120 hayatta 221 olayın 61'i hiç çıkmadı."

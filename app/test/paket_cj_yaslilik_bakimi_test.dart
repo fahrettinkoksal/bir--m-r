@@ -181,8 +181,19 @@ void main() {
           reason: 'kimsesiz yaşlılık hiç yaşanmıyor');
     });
 
+    // **Tohum kümesi Paket DE'de büyütüldü (11 Ekim 2026).** Eski hâli
+    // üç tohumdu (31, 62, 93). Ölçüm: 30 tohumun **18'inde** yaşlılık
+    // bakımı kararı çıkıyor (%60), yani üç tohumun **hepsinin**
+    // ıskalama olasılığı 0,4³ ≈ %6,4 idi. Paket DE 22 olay ekleyip zar
+    // akışını kaydırdığında tam oraya düştü ve "açıkken de karar
+    // çıkmıyor" diye kırmızı verdi — iddia doğruydu, kohort küçüktü.
+    // On iki tohumda aynı olasılık 0,4¹² ≈ %0,002.
+    const List<int> cjTohumlari = <int>[
+      31, 62, 93, 124, 155, 186, 217, 248, 279, 310, 341, 372,
+    ];
+
     test('modül kapalıyken yaşlılık Paket CJ öncesi gibi geçiyor', () {
-      for (final int seed in <int>[31, 62, 93]) {
+      for (final int seed in cjTohumlari) {
         final BotLifeResult kapali = playBotLife(
           archetype: PlayerArchetype.family,
           seed: seed,
@@ -202,7 +213,7 @@ void main() {
       // Açıkken aynı arketip kararı gerçekten görüyor: kapalı ölçümün
       // sıfırları "zaten hiç olmuyor"dan değil, anahtardan geliyor.
       int acikYil = 0;
-      for (final int seed in <int>[31, 62, 93]) {
+      for (final int seed in cjTohumlari) {
         acikYil += playBotLife(
           archetype: PlayerArchetype.family,
           seed: seed,

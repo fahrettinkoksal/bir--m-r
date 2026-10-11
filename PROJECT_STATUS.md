@@ -9178,3 +9178,102 @@ düzeltmedim çünkü **sömürü riski var**: emekli maaşı yürürken maaş d
 almak iki gelir demek ve bu bir denge kararı. **Q-237**'de öneri ve
 varsayılanla duruyor (önerim: dönüş açılsın, ama işe girince emekli
 maaşı kesilsin).
+
+## Paket DE — en ince bant 3-6 kaldı (11 Ekim 2026)
+
+Paket CX 0-2'yi doldurdu. Bandı yeniden ölçtüm (160 bot hayatı,
+`BotLifeResult.eventsByAge`):
+
+| bant | yıl başına olay | farklı olay |
+|---|---|---|
+| 0-2 bebeklik | 1,00 | 36 |
+| **3-6 okul öncesi** | **1,04** | **55** |
+| 7-11 ilkokul | 1,47 | 103 |
+| 12-15 ergenlik | 1,57 | 130 |
+| 16-20 eşik | 1,67 | 166 |
+| 21-29 genç yetişkin | 1,76 | 197 |
+| 30-39 otuzlar | 1,81 | 259 |
+| 40-49 kırklar | 1,74 | 269 |
+| 50-59 ellili | 1,71 | 280 |
+| 60-64 | 1,69 | 236 |
+| 65-74 yaşlılık | 1,63 | 267 |
+| 75+ son yıllar | 1,47 | 187 |
+
+`docs/EKSIKLER.md` §4.1 zaten "çocukluk en fakir dönemdi" diyordu;
+ölçüm hâlâ onu gösteriyor. 3-6'nın farklı olay sayısı ilkokulun
+yarısından az.
+
+### Yıl başına 1,04 sayısının tabanı var, tavanı yok
+
+Motor yılın bir olayını her zaman çeker; **ek** olay için üç ilerleme
+adımı ister (D-125) ve bu yaşta çocuk ilerleme adımı üretmiyor. Yani bu
+bandın yoğunluğu havuzun genişliğiyle değil motorun kuralıyla sınırlı.
+Bu paketin işi yıl başına sayıyı artırmak **değil**; o bir olayın hep
+aynı altı olay olmasını engellemek. Sayıyı değiştirmek isteyen bir
+karar gerekirse o D-125'e dokunur ve bana ait değil.
+
+### Eklenen
+
+`lib/data/event_pool_preschool.dart`: **22 olay** — 16'sı 3-6
+penceresinde (misafir önünde şiir, duvara çizgi, çizgi film pazarlığı,
+elektrik kesintisi, sokakta top, oyuncak kavgası, pazar günü, bayram
+harçlığı, büyüklerde kalmak, yazı köyde geçirmek, düğün, ilk bisiklet,
+okulun önünden geçmek, hastalık günü, mahalle doğum günü, stüdyo
+fotoğrafı) ve **6'sı karşılık olayı**.
+
+Modül anahtarı: `FeatureId.okulOncesiYillar`. Paket BM/CX'in
+`ilkYillarOlaylari` anahtarından **ayrı** tutuldu; ikisi aynı pencereyi
+paylaşıyor ama ayrı paketler ve Faho ikisini ayrı ayrı kapatabiliyor.
+BM'in bekçisi bundan etkilenmiyor: oran iddiası yalnızca 0 yaşında ve
+bu havuzun olayları 3+.
+
+### CX'in dersleri baştan uygulandı
+
+- `livingRelations` **ANY**'dir. Hiçbir metin iki kişiyi birlikte
+  varsaymıyor ve §4 bunu kaynak tarayarak da denetliyor.
+- Yazılan altı izin altısının da okuyanı var (Paket AR/CZ kuralı);
+  §5 iki yönlü denetliyor (yazılıp okunmayan **ve** okunup yazılmayan).
+- Erişilebilirlik "aday **veya** çıkmış" diye soruluyor (Paket CR/CZ'nin
+  kör noktası).
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_de_okul_oncesi_test.dart` (6 test).
+
+| Isırma | Sonuç |
+|---|---|
+| Anahtar `FeatureEvents`'e bağlanmasa | §6 düştü: kapalıyken **3343** aday çıktı |
+| Bir izin karşılık olayı izi okumasa | §5 düştü: `{okul_oncesi_sokak_oyunu}` okunmuyor |
+
+**Kendi bekçim kendi metnimi yakaladı:** §4'ün kaynak taraması düğün
+olayında "Masadaki tabaklardan **ikisi**ni bitirdin" cümlesini işaretledi.
+Yanlış pozitifti (tabaklardan söz ediyor, kişilerden değil) ama bekçiyi
+gevşetmek yerine metni değiştirdim — o tarama CX'te gerçek bir hata
+yakalamıştı ve zayıflatılmamalı.
+
+### Zar kayması üç kırılgan kohortu düşürdü (hepsi tamir edildi)
+
+22 olay eklemek zar akışını kaydırdı ve Paket DA'nın dersi tekrar
+çalıştı: **hiç yürünmemiş yollar açıldı, hiç ıskalanmamış kareler
+ıskalandı.** Üç test kırmızıya döndü. **Hiçbirinin tabanı
+düşürülmedi**; üçü de ölçülüp kohortu büyütülerek ya da aracı
+düzeltilerek tamir edildi.
+
+| Test | Neden düştü | Tamir |
+|---|---|---|
+| `paket_cr_bekleyen_kare_test` | "içeriden geçen" tabanı 10'du, 250 hayatta **beklenen değer ~9** — taban beklenenin üstündeydi | Kohort 250 → **600**; ölçüm: 239 suç · 128 duruşma · 22 içeride · 22 denetim. Tabanlar 180/80/12/12 |
+| `paket_cj_yaslilik_bakimi_test` | Karşılaştırma **3 tohumla** yapılıyordu; karar oranı %60, üçünün birden ıskalama olasılığı %6,4 | Tohum kümesi 3 → **12** (aynı olasılık %0,002) |
+| `paket_dd_geri_donussuz_test` §4 | Aranan kare değişti ve o karede **bir alt sayfa açıktı**: sekme düğmesi tıklanamadı | Arama `onYear` → **`onPreAge`** (Paket CR'nin ayrımı) + sessiz kare süzgeci; `scrollUntilVisible` |
+
+Üçüncüsünde iki kez yanlış teşhis koydum: ilk önce satırın tembel
+listede ekranın altında kaldığını sandım (kaydırma ekledim, yetmedi),
+sonra sessiz kare süzgecini `onYear` üstüne koydum ve **hiç kare
+bırakmadı** — çünkü `onYear` yılın olayı cevaplanmadan çalışıyor ve
+orada `hasPendingEvent` neredeyse her zaman dolu. Doğru kanca
+`onPreAge`'di. Aynı dersin tersi de çıktı: §2 karar **kilidini** arıyor
+ve o kilit `onPreAge`'den önce kapanıyor, yani §2 bilerek `onYear`'da
+kaldı. Paket CR'nin iki kancası arasındaki fark kâğıt üstünde değil,
+pratikte de belirleyici.
+
+Süit: 3796 geçti, 17 atlandı, 0 hata. `flutter analyze` temiz.
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

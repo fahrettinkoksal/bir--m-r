@@ -45,6 +45,30 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
 
+/// Ekranın gerçekten açılabildiği **sessiz** kare mi?
+///
+/// Paket DE'de öğrenildi: aranan karede bekleyen bir iş varsa (kriz,
+/// duruşma, mülakat, düğün, yarış, ehliyet sınavı ya da lise alanı
+/// seçimi) uygulama bir alt sayfa açıyor ve sekme düğmesi tıklanamıyor
+/// hâle geliyor. Oyuncu da o karede meslek ekranına bakmıyor; önce
+/// bekleyen işi kapatıyor.
+///
+/// **Kanca da bu yüzden `onPreAge`** (Paket CR'nin ayrımı): `onYear`
+/// yılın olayı henüz cevaplanmadan çalışıyor, yani orada
+/// `hasPendingEvent` neredeyse her zaman doluydu ve bu süzgeç hiçbir
+/// kare bırakmıyordu. `onPreAge` bütün bekleyen işler kapandıktan
+/// sonra, yaş almadan önce çalışır — oyuncunun ekranlara baktığı an.
+bool _sessizKare(GameState s) =>
+    !s.hasPendingEvent &&
+    !s.hasPendingCrisis &&
+    !s.hasPendingTrial &&
+    !s.hasPendingInterview &&
+    !s.hasPendingWedding &&
+    !s.hasPendingRace &&
+    !s.hasPendingLicenseExam &&
+    !s.education.awaitingTrackChoice &&
+    !s.deceased;
+
 /// "Üniversiteye gitmedim" demiş, lise mezunu, üniversite kaydı olmayan
 /// bir kare **arar**. Kurulmaz.
 GameState? _kararVermisAra({int enAzYas = 24, int tohumSayisi = 25}) {
@@ -54,9 +78,10 @@ GameState? _kararVermisAra({int enAzYas = 24, int tohumSayisi = 25}) {
       playBotLife(
         archetype: a,
         seed: 51000 + a.index * 811 + i * 37,
-        onYear: (GameState s) {
+        onPreAge: (GameState s) {
           if (bulunan != null) return;
           if (s.player.age >= enAzYas &&
+              _sessizKare(s) &&
               s.storyFlags.contains(EducationPath.universiteyeGitmediFlag) &&
               s.education.finished &&
               s.education.universityProgramId == null &&
@@ -103,6 +128,12 @@ void main() {
 
   test('§2 kararı vermemiş oyuncuda iki yüklem de doğru', () {
     // Lise yeni bitmiş, karar henüz verilmemiş bir kare ara.
+    //
+    // **Kanca bilerek `onYear`** (§1/§4'ten farklı): karar bekliyor
+    // olmak bir **kilittir** ve bot onu yaş almadan önce kapatıyor,
+    // yani `onPreAge` karelerinde hiç görünmüyor. Bu test ekran
+    // sürmüyor, yalnızca iki yüklemi karşılaştırıyor; bekleyen olayın
+    // açık olması sorun değil.
     GameState? yeniMezun;
     for (final PlayerArchetype a in PlayerArchetype.values) {
       for (int i = 0; i < 15 && yeniMezun == null; i++) {
@@ -132,7 +163,7 @@ void main() {
         playBotLife(
           archetype: a,
           seed: 51000 + a.index * 811 + i * 37,
-          onYear: (GameState s) {
+          onPreAge: (GameState s) {
             if (kayitli == null && s.education.isUniversityStudent) {
               kayitli = s;
             }
@@ -171,10 +202,27 @@ void main() {
     await tester.tap(find.byKey(const Key('tab_okul_meslek')));
     await tester.pumpAndSettle();
 
-    // ISIRMA DENEMESİ: eski hâlde bu satır yoktu (kapı karar kilidine
-    // bağlıydı ve kilit "gitmedim" izini okuyor).
+    // **Kaydırma gerekiyor (Paket DE'de öğrenildi).** Meslek ekranı
+    // uzun ve liste tembel kuruluyor: aranan kare çalışan ya da
+    // işletme sahibi bir oyuncuysa satır görüş alanının altına düşüyor
+    // ve `find.byKey` onu bulamıyor. Paket DE 22 olay ekleyip zar
+    // akışını kaydırınca aranan kare değişti ve bu test o yüzden
+    // kırmızıya döndü — iddia doğruydu, **arama yöntemi** eksikti.
+    final Finder satir = find.byKey(const Key('career_universiteye_basvur'));
+    if (satir.evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        satir,
+        300,
+        scrollable: find.byType(Scrollable).first,
+        maxScrolls: 60,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // ISIRMA DENEMESİ: eski hâlde bu satır hiç kurulmuyordu (kapı
+    // karar kilidine bağlıydı ve kilit "gitmedim" izini okuyor).
     expect(
-      find.byKey(const Key('career_universiteye_basvur')),
+      satir,
       findsOneWidget,
       reason: 'Kararı vermiş oyuncu üniversite başvuru yolunu görmüyor; '
           'kapı yine karar kilidine bağlanmış.',
@@ -182,6 +230,12 @@ void main() {
     // Önceki düzeltme yerinde: bayat "Mezuniyet sonrası" çerçevesi
     // kararı vermiş oyuncuya gösterilmiyor.
     expect(find.text('Mezuniyet sonrası'), findsNothing);
+    // Yüklem de doğrudan denetlenir: ekran kaydırmasından bağımsız.
+    expect(EducationPath.canApplyToUniversity(controller.state!), isTrue);
+    expect(
+      EducationPath.needsAfterSchoolChoice(controller.state!),
+      isFalse,
+    );
 
     // Satır gerçekten başvuru ekranını açıyor ve bölüm listesi geliyor.
     //

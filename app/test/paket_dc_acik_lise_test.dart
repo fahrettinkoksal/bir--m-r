@@ -48,6 +48,30 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
 
+/// Ekranın gerçekten açılabildiği **sessiz** kare mi?
+///
+/// Paket DE'de öğrenildi: aranan karede bekleyen bir iş varsa (kriz,
+/// duruşma, mülakat, düğün, yarış, ehliyet sınavı ya da lise alanı
+/// seçimi) uygulama bir alt sayfa açıyor ve sekme düğmesi tıklanamıyor
+/// hâle geliyor. Oyuncu da o karede meslek ekranına bakmıyor; önce
+/// bekleyen işi kapatıyor.
+///
+/// **Kanca da bu yüzden `onPreAge`** (Paket CR'nin ayrımı): `onYear`
+/// yılın olayı henüz cevaplanmadan çalışıyor, yani orada
+/// `hasPendingEvent` neredeyse her zaman doluydu ve bu süzgeç hiçbir
+/// kare bırakmıyordu. `onPreAge` bütün bekleyen işler kapandıktan
+/// sonra, yaş almadan önce çalışır — oyuncunun ekranlara baktığı an.
+bool _sessizKare(GameState s) =>
+    !s.hasPendingEvent &&
+    !s.hasPendingCrisis &&
+    !s.hasPendingTrial &&
+    !s.hasPendingInterview &&
+    !s.hasPendingWedding &&
+    !s.hasPendingRace &&
+    !s.hasPendingLicenseExam &&
+    !s.education.awaitingTrackChoice &&
+    !s.deceased;
+
 /// Diplomasız, öğrenci olmayan bir yetişkin durumu **arar**.
 ///
 /// Kurulmaz: bot hayatları taranır ve ilk uyan kare alınır. Kapı
@@ -59,9 +83,10 @@ GameState? _diplomasizYetiskinAra({int enAzYas = 25, int tohumSayisi = 60}) {
       playBotLife(
         archetype: a,
         seed: 31000 + a.index * 977 + i * 31,
-        onYear: (GameState s) {
+        onPreAge: (GameState s) {
           if (bulunan != null) return;
           if (s.player.age >= enAzYas &&
+              _sessizKare(s) &&
               !s.education.finished &&
               !s.education.universityFinished &&
               !s.education.isStudent) {

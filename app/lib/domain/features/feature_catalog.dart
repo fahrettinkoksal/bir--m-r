@@ -320,6 +320,23 @@ enum FeatureId {
       'app/lib/domain/education/open_high_school.dart',
       'app/test/paket_dc_acik_lise_test.dart',
     ],
+  ),
+
+  okulOncesiYillar(
+    saveKey: 'okul_oncesi_yillar',
+    title: 'Okul öncesi yıllar',
+    lostWhenOff:
+        '3-6 yaşın kendine ait 22 olayı çıkmaz: misafir önünde şiir, '
+        'duvara çizgi, sokakta top, pazarda kaybolmak, bayram harçlığı, '
+        'büyüklerde kalmak, yazı köyde geçirmek, düğün, ilk bisiklet, '
+        'okulun önünden geçmek ve altı karşılık olayı. O yıllar Paket DE '
+        'öncesi gibi geçer — Paket BM ve CX içeriği yerinde kalır, '
+        'yalnızca bu havuz susar.',
+    paket: 'Paket DE — okul öncesi yıllar',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_preschool.dart',
+      'app/test/paket_de_okul_oncesi_test.dart',
+    ],
   );
 
   const FeatureId({

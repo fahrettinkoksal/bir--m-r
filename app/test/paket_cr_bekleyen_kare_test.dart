@@ -57,7 +57,20 @@ typedef _Huni = ({
   int preAgeDurusmaKaresi,
 });
 
-_Huni _olc({int adet = 25}) {
+// **Kohort Paket DE'de büyütüldü (11 Ekim 2026).** Eski hâli 25×10 =
+// 250 hayattı ve "içeriden geçen" tabanı 10'du. Ölçüm gösterdi ki
+// içeriden geçme oranı ~%3,7, yani 250 hayatta **beklenen değer ~9**:
+// taban beklenen değerin üstündeydi ve her zar kaymasında düşmeye
+// hazırdı. Paket DE 22 olay ekleyip zar akışını kaydırdığında da düştü
+// (7 çıktı). Taban **düşürülmedi**, kohort büyütüldü:
+//
+// | kohort | suç | duruşma | içeride | denetim |
+// |---|---|---|---|---|
+// | 250 hayat | 98 | 52 | **7** | 7 |
+// | **600 hayat** | 239 | 128 | **22** | 22 |
+//
+// Tabanlar artık ölçümün belirgin altında.
+_Huni _olc({int adet = 60}) {
   int suc = 0;
   int durusma = 0;
   int iceride = 0;
@@ -132,16 +145,17 @@ void main() {
 
   test('suç hunisi: yol ulaşılabilir ve kademeleri yaşanıyor', () {
     final _Huni h = _huni;
-    // Ölçüm (250 hayat): 119 suç · 57 duruşma · 21 içeride · 21
-    // denetim. Tabanlar belirgin altında; biri sıfıra düşerse suç
-    // içeriği oyuncuya ulaşamıyor demektir.
-    expect(h.sucIsleyen, greaterThanOrEqualTo(80),
+    // Ölçüm (600 hayat, Paket DE'de tazelendi): 239 suç · 128 duruşma ·
+    // 22 içeride · 22 denetim. Tabanlar belirgin altında; biri sıfıra
+    // düşerse suç içeriği oyuncuya ulaşamıyor demektir. Kohortun neden
+    // 250'den 600'e çıktığı yukarıda `_olc` başlığında yazılı.
+    expect(h.sucIsleyen, greaterThanOrEqualTo(180),
         reason: 'suç işleyen hayat az: ${h.sucIsleyen}');
-    expect(h.durusmaGoren, greaterThanOrEqualTo(30),
+    expect(h.durusmaGoren, greaterThanOrEqualTo(80),
         reason: 'duruşma gören hayat az: ${h.durusmaGoren}');
-    expect(h.iceride, greaterThanOrEqualTo(10),
+    expect(h.iceride, greaterThanOrEqualTo(12),
         reason: 'içeriden geçen hayat az: ${h.iceride}');
-    expect(h.denetim, greaterThanOrEqualTo(10),
+    expect(h.denetim, greaterThanOrEqualTo(12),
         reason: 'denetim dönemi gören hayat az: ${h.denetim}');
     // Huni daralarak ilerler: her aşama öncekinden küçük olmalı.
     expect(h.durusmaGoren, lessThanOrEqualTo(h.sucIsleyen));

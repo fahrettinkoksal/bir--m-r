@@ -19,6 +19,7 @@ import 'event_pool_friend_circle.dart';
 import 'event_pool_late_years.dart';
 import 'event_pool_widowhood.dart';
 import 'event_pool_neighbour.dart';
+import 'event_pool_preschool.dart';
 import 'event_pool_threshold_years.dart';
 import 'event_pool_traces.dart';
 import 'event_pool_echo.dart';
@@ -1782,4 +1783,10 @@ const List<GameEvent> kEventPool = <GameEvent>[
   ...kTraceEchoEvents,
   ...kFriendCircleEvents,
   ...kElderSupportEvents,
+
+  // Okul öncesi yıllar: 3-6 (Paket DE). Ölçüldü (160 hayat): 0-2'yi
+  // Paket CX doldurduktan sonra en ince bant bu kaldı — yıl başına
+  // 1,04 olay ve yalnızca 55 farklı olay, ilkokulun yarısından az.
+  // Modül anahtarı `FeatureId.okulOncesiYillar`.
+  ...kPreschoolEvents,
 ];
