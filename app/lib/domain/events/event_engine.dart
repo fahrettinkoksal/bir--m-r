@@ -7,6 +7,7 @@ import '../law/legal_engine.dart';
 import '../features/feature_catalog.dart';
 import '../features/feature_events.dart';
 import '../models/criminal_record.dart';
+import '../models/marriage.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -405,6 +406,19 @@ class EventEngine {
         state.elderSupport.yearsAlone < req.minElderAloneYears) {
       return false;
     }
+    // Dulluk kapısı (Paket CS): kayıttan okunur, uydurulmaz.
+    //
+    // Boşanma ile dulluk oyunda **ayrı** iki durumdur
+    // (`MarriageStatus.bosandi` / `.dul`), bu yüzden kapı yalnızca
+    // dulluğa bakar. Tekrar evlenen oyuncuda yürürlükteki kayıt yeni
+    // evlilik olduğu için bu olaylar kendiliğinden susar.
+    if (req.requiresWidowed || req.minWidowYears > 0 ||
+        req.maxWidowYears != null) {
+      final int? yil = _widowYears(state);
+      if (yil == null) return false;
+      if (yil < req.minWidowYears) return false;
+      if (req.maxWidowYears != null && yil > req.maxWidowYears!) return false;
+    }
     // Ün gerektiren olaylar: kitle gerçekten oluşmadan çıkmaz.
     if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
       return false;
@@ -683,9 +697,13 @@ class EventEngine {
     return ActiveEvent(
       eventId: event.id,
       category: event.category,
-      text: _fillPet(
-        _fillTrip(
-          _fill(event.text, person, state.player.age),
+      text: _fillLateSpouse(
+        _fillPet(
+          _fillTrip(
+            _fill(event.text, person, state.player.age),
+            state,
+            event,
+          ),
           state,
           event,
         ),
@@ -697,7 +715,11 @@ class EventEngine {
       choices: List<EventChoice>.unmodifiable(<EventChoice>[
         for (final EventChoice c in event.choices)
           if (c.label.contains('{'))
-            c.withLabel(_fill(c.label, person, state.player.age))
+            c.withLabel(_fillLateSpouse(
+              _fill(c.label, person, state.player.age),
+              state,
+              event,
+            ))
           else
             c,
       ]),
@@ -755,6 +777,38 @@ class EventEngine {
     final TripRecord? gezi = Travel.memorableTrip(state);
     if (gezi == null) return text;
     return text.replaceAll('{sehir}', gezi.city);
+  }
+
+  /// Dul kalındıktan bu yana geçen yıl; dul değilse `null` (Paket CS).
+  ///
+  /// `endedAtAge` yazılmamışsa sayı uydurulmaz: kapı kapalı kalır.
+  static int? _widowYears(GameState state) {
+    final Marriage? kayit = state.marriage;
+    if (kayit == null || kayit.status != MarriageStatus.dul) return null;
+    final int? bitis = kayit.endedAtAge;
+    if (bitis == null) return null;
+    final int yil = state.player.age - bitis;
+    return yil < 0 ? null : yil;
+  }
+
+  /// Dulluk olaylarında `{es}` yer tutucusunu kayıttaki eşin **gerçek**
+  /// adıyla doldurur (Paket CS).
+  ///
+  /// Kişi çözümü vefat etmiş kimseyi olayın karşı tarafı yapmaz; bu
+  /// yüzden ad buradan, evlilik kaydından gelir. Kayıt ya da kişi
+  /// okunamıyorsa metin **değiştirilmez**; havuzdaki her metin `{es}`
+  /// olmadan da tam cümle kurar.
+  static String _fillLateSpouse(
+    String text,
+    GameState state,
+    GameEvent event,
+  ) {
+    if (!event.requirement.requiresWidowed) return text;
+    final Marriage? kayit = state.marriage;
+    if (kayit == null || kayit.status != MarriageStatus.dul) return text;
+    final Person? es = state.personById(kayit.spouseId);
+    if (es == null) return text;
+    return text.replaceAll('{es}', es.firstName);
   }
 
   /// Metindeki yer tutucuları **gerçekten var olan** kişiyle doldurur.
@@ -871,8 +925,12 @@ class EventEngine {
     final GameEvent? katalog = _eventById(active.eventId);
     String resultText = _fill(choice.resultText, person, working.player.age);
     if (katalog != null) {
-      resultText = _fillPet(
-        _fillTrip(resultText, state, katalog),
+      resultText = _fillLateSpouse(
+        _fillPet(
+          _fillTrip(resultText, state, katalog),
+          state,
+          katalog,
+        ),
         state,
         katalog,
       );

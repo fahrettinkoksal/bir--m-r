@@ -17,6 +17,7 @@ import 'event_pool_early_years.dart';
 import 'event_pool_home.dart';
 import 'event_pool_friend_circle.dart';
 import 'event_pool_late_years.dart';
+import 'event_pool_widowhood.dart';
 import 'event_pool_neighbour.dart';
 import 'event_pool_threshold_years.dart';
 import 'event_pool_echo.dart';
@@ -1771,6 +1772,10 @@ const List<GameEvent> kEventPool = <GameEvent>[
   // olaydan yalnızca 11'i o yaşlara aitti; bant aç değildi ama içerik
   // yaşa ait değildi. Modül anahtarı `FeatureId.sonYillar`.
   ...kLateYearsEvents,
+
+  // Dulluk (Paket CS): 250 hayatta 502 yıl dul olarak oynanıyordu ve
+  // o yılların tek olayı yoktu. Modül anahtarı `FeatureId.dulluk`.
+  ...kWidowhoodEvents,
   ...kFriendCircleEvents,
   ...kElderSupportEvents,
 ];

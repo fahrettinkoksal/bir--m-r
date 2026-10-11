@@ -8122,3 +8122,109 @@ ve yeni bekçi.
 
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
+
+## Paket CS — dulluk: 502 yıl oynanıyordu, tek olayı yoktu (11 Ekim 2026)
+
+`docs/EKSIKLER.md` §3.6'nın kalan maddesi kapandı. 26 Eylül 2026'daki
+not doğruydu — dulluk ile boşanma oyunda **ayrı** iki durum, ekran
+metinleri ayrı, `settleWidowhood` bağı `eskiEs`'e düşürmüyor — ama
+maddenin kalanı açık kalmıştı: *"hâlâ yok: dulluğun kendine ait olay
+havuzu (anma, yıl dönümü, eşin ailesiyle bağın sürmesi)."*
+
+### Önce ölçüldü (250 bot hayatı, dört arketip)
+
+| ölçülen | sayı |
+|---|---|
+| dul kalan hayat | 43 / 250 (%17,2) |
+| dul kalma yaşı | en küçük 38 · medyan 68 · en büyük 87 |
+| dul geçen yıl | en az 0 · medyan 10 · en çok 39 |
+| **toplam dul yılı** | **502** |
+| dulken görülen olay türü | 212 |
+| bunlardan dulluğa ait olan | **0** |
+
+Oyuncular 502 yılı eşini kaybetmiş olarak oynuyordu ve o yılların tek
+satırı yoktu: 70 yaşında eşini kaybetmiş oyuncu 40 yaşında evli
+oyuncuyla **aynı** havuzu çekiyordu — en çok çıkanlar
+`komsu_apartman_karari`, `orta_teknoloji_gerisi`, `sabah_yuruyusu`.
+Kodda hiçbir `EventRequirement` `MarriageStatus.dul` okumuyordu: kapı
+da yoktu, havuz da.
+
+### Ne yazıldı
+
+- **Kapı** (`EventRequirement`): `requiresWidowed`, `minWidowYears`,
+  `maxWidowYears`. Üçü de kayıttan hesaplanır
+  (`marriage.status` + `marriage.endedAtAge`); yeni alan, yeni ekran,
+  yeni sayaç yok. Boşanmışa çıkmaz, tekrar evlenince susar.
+- **Havuz** (`event_pool_widowhood.dart`, 20 olay): ilk yılın
+  sessizliği ve tek sofra, dolabın öteki tarafı, üstüne kalan evraklar,
+  komşunun tenceresi · evlilik yıl dönümü, kitabın arasındaki el
+  yazısı, torunun "anlatır mısın" sorusu, eşin ailesinin telefonu,
+  eşinin eski dostu, yarım kalan uğraşın devralınması, o taraftan
+  kimsenin kalmaması · iki fincan alışkanlığı, hatırlayan son kişi
+  olmak, "hiç yeniden düşünmedin mi" sorusu · ve beş izin beş karşılığı.
+- **`{es}` yer tutucusu** (`EventEngine._fillLateSpouse`): kişi çözümü
+  vefat etmiş kimseyi olayın karşı tarafı yapmaz — bu doğru kural
+  bozulmadı; ad evlilik kaydından okunur. Ad okunamazsa cümle yine
+  tamdır, bekçi bunu her metin için denetliyor.
+- **Modül:** `FeatureId.dulluk` (fail-closed, `docs/FEATURE_FLAGS.md`).
+
+### Havuzdan sonra (aynı 250 hayat, aynı tohumlar)
+
+Dul kalan 43 hayatın **29'u (%67)** en az bir dulluk olayı görüyor;
+556 dul yılında toplam **60** dulluk olayı çıktı, 16 tekil olay.
+
+### Çıkmayan üç olay — sebepleri ayrı ayrı ölçüldü
+
+Paket CK'nın dersi: "görülmedi" ulaşılamazlık ölçütü değil.
+
+| olay | sebep | sınıf |
+|---|---|---|
+| `dul_kayin_telefonu` | dullukta kayını **yaşayan** kare 56/397 (%14); ağırlık 4 ile 250 hayatta beklenen görülme 0,7 | OYUN — ağırlık 12'ye alındı |
+| `dul_kayin_kapida` | zincirin ilk halkası çıkmadığı için izi hiç konmadı | aynı kökün sonucu |
+| `dul_odanin_kapisi` | izi koyan seçeneği (`birak`, keyif −2) bot hiç seçmiyor; `birkac` (+2) kazanıyor | **BOT** |
+
+**Kayın ölçümü (250 hayat).** Evlilik sürerken kayınvalide/kayınpederi
+yaşayan kare 2818/5112 (**%55**), dullukta 56/397 (**%14**, 43 hayatın
+12'si). Sebep tasarım hatası değil kuşak farkı: kayınlar oyuncudan bir
+kuşak büyük olduğu için eşten de önce gidiyorlar. Koşul
+**gevşetilmedi** — olay hâlâ yalnızca kayını gerçekten yaşayan
+oyuncuya çıkıyor. Yaygın durumun kendi olayı yazıldı:
+`dul_o_taraftan_kimse` ("eşinin tarafından arayan kimse kalmadı").
+
+### Bekçi
+
+`app/test/paket_cs_dulluk_test.dart` (6 test): kapı dul olmayan tek bir
+karede bile açılmıyor (boşanmış kareler de ölçümde var) · yıl penceresi
+gerçekten süzüyor · havuz oyuncuya ulaşıyor · botun seçmediği iki yol
+elle kurulan izle uçtan uca işliyor ve vefat etmiş kayın zinciri
+açmıyor · modül kapalıyken aday yok · her metin `{es}` olmadan da tam
+cümle · karşılığı olmayan iz yok.
+
+**Isırma denemesi:** kapı devre dışı bırakıldığında §1 kırmızıya düştü
+— dul olmayan karelerde **68.339** dulluk olayı aday oldu.
+
+### Depo çapındaki iki bekçi kendi testimi yakaladı
+
+Tam süit, Paket CS'nin ilk halini **iki yerden** kırdı ve ikisi de
+haklıydı:
+
+1. `paket_ar_hikaye_izi_test.dart` — "hiçbir yerin okumadığı iz sayısı
+   artmıyor". Beş karşılık olayı kendi "kapandı" izini bırakıyordu
+   (`dul_oda_acildi`, `dul_verilen_esya_goruldu`, `dul_anma_surdu`,
+   `dul_kayin_ailesi_geldi`, `dul_is_tuttu`) ve sayı 22'den **27**'ye
+   çıkıyordu. Benim kendi bekçim (§6) bunları "hikâyenin sonu" diye
+   **muaf tutuyordu** — yani kendi yazdığım istisna, depo kuralını
+   deliyordu. Muafiyet kaldırıldı ve izler artık **yazılmıyor**:
+   olayların tekrar çıkmasını `seenEventIds` zaten engelliyor, izin bir
+   işi yoktu. Sayı 22'ye döndü.
+2. `text_consistency_test.dart` — "bilinmeyen yer tutucu yok".
+   `{es}` merkezi listeye eklenmemişti. Eklendi; listede olmayan bir
+   yer tutucu ekranda ham çıkabilirdi.
+
+**Testin kendi iki kusuru düzeltildi:** §3 tek tohumun şansına
+bağlıydı (90001'de 3+ yıllık dul kare yoktu) → kare artık 60 tohum
+taranarak **aranıyor**; §4'ün tabanı ölçümün üstündeydi (47 ve 51
+ölçüldü, taban >50 yazılmıştı) → ölçülen iki değerin de altına alındı.
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.

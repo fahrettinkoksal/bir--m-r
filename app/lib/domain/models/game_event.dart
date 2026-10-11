@@ -49,6 +49,9 @@ class EventRequirement {
     this.requiresFriendCircle = false,
     this.minElderSupportYears = 0,
     this.minElderAloneYears = 0,
+    this.requiresWidowed = false,
+    this.minWidowYears = 0,
+    this.maxWidowYears,
     this.requiredLicenses = const <String>{},
     this.requiresEmployed = false,
     this.requiresTenant = false,
@@ -108,6 +111,31 @@ class EventRequirement {
 
   /// Oyuncunun **hiç aracı olmaması** gerekiyor mu? (D-085)
   final bool forbidsVehicle;
+
+  /// Olay yalnızca **eşini kaybetmiş** oyuncuya çıkar (Paket CS).
+  ///
+  /// Evlilik kaydının durumu `MarriageStatus.dul` olmalı. Boşanmış
+  /// oyuncuya çıkmaz: boşanma ile dulluk oyunda ayrı iki durumdur ve
+  /// aynı metni paylaşmazlar. Tekrar evlenen oyuncuda da çıkmaz, çünkü
+  /// yürürlükteki kayıt artık yeni evliliktir.
+  ///
+  /// Metindeki `{es}` yer tutucusu kayıttaki eşin **gerçek** adıyla
+  /// doldurulur (`EventEngine._fillLateSpouse`). Kişi çözümü bu olaya
+  /// kişi vermez — vefat etmiş biri olayın "karşı tarafı" olamaz; ad
+  /// yalnızca anlatıda geçer.
+  final bool requiresWidowed;
+
+  /// Dul kalındıktan sonra en az kaç yıl geçmiş olmalı (Paket CS).
+  ///
+  /// Kayıttan okunur: `oyuncunun yaşı - marriage.endedAtAge`. Kaybın
+  /// ilk yılı ile yirminci yılı aynı şeyi anlatmaz; havuz bu sayıyla
+  /// üç döneme ayrılır.
+  final int minWidowYears;
+
+  /// Dul kalındıktan sonra en çok kaç yıl geçmiş olabilir (Paket CS).
+  ///
+  /// `null` ise üst sınır yoktur. İlk yılın olayları bununla kapatılır.
+  final int? maxWidowYears;
 
   /// Olay yalnızca bu okul kulübünde **aktif** üyeliği olan oyuncuya
   /// çıkar (Paket AU).

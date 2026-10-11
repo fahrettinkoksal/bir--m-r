@@ -425,6 +425,11 @@ void main() {
         '{hayvan}',
         '{tur}',
         '{sehir}',
+        // Dulluk olaylarında vefat eden eşin adı (Paket CS). Kişi
+        // çözümü vefat etmiş kimseyi olayın karşı tarafı yapmaz; ad
+        // evlilik kaydından doldurulur
+        // (`EventEngine._fillLateSpouse`).
+        '{es}',
       };
       for (final GameEvent e in kEventPool) {
         final List<String> hepsi = <String>[

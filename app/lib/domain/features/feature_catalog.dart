@@ -272,6 +272,23 @@ enum FeatureId {
     removableFiles: <String>[
       'app/test/paket_cn_cocuk_hastaligi_test.dart',
     ],
+  ),
+
+  /// Paket CS — dulluğun kendi yılları.
+  dulluk(
+    saveKey: 'dulluk',
+    title: 'Dulluk yılları',
+    lostWhenOff:
+        'Eşini kaybettikten sonraki yılların kendine ait olayı çıkmaz: '
+        'ne ilk yılın sessizliği, ne yıl dönümü, ne eşin ailesiyle '
+        'süren bağ. Dul kalmanın kendisi yerinde kalır — evlilik kaydı '
+        'yine "dul" olur, miras ve ekranlar değişmez; yalnızca o '
+        'yılların anlatısı susar. Tekrar evlenmek de yerinde kalır.',
+    paket: 'Paket CS — dulluk',
+    removableFiles: <String>[
+      'app/lib/data/event_pool_widowhood.dart',
+      'app/test/paket_cs_dulluk_test.dart',
+    ],
   );
 
   const FeatureId({

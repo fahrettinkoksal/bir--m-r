@@ -551,6 +551,35 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yakın çocuğun bağ ortancası tam olarak bu, Q-205). Bekçi artık
   etkisi ölçülebilen kareyi arıyor ve o karelerin **sayısına** da bir
   taban koyuyor: tavan her kareyi yutmaya başlarsa test bunu söyler.
+- **Paket CS.** Bir durum oyunda **ayrı** olarak modellenmişse, o
+  durumun kendi içeriği de olmalı. Dulluk ile boşanma ayrı iki
+  `MarriageStatus` değeriydi, ekran metinleri bile ayrıydı — ama hiçbir
+  `EventRequirement` `MarriageStatus.dul` okumuyordu. Sonuç: 250
+  hayatta **502 yıl** dul olarak oynanıyordu ve o yılların tek satırı
+  yoktu; oyuncu 70 yaşında eşini kaybetmiş haldeyken 40 yaşında evli
+  oyuncunun havuzunu çekiyordu. "Model ayırıyor" ile "oyun ayırıyor"
+  aynı şey değil; ikincisi ölçülerek görülür.
+- **Paket CS.** Zincirin ilk halkası ne kadar nadir, onu **halka
+  yazılmadan** ölç. Kayın ailesi olayı yaşayan kayın istiyordu; o koşul
+  evlilik sürerken karelerin %55'inde tutuyor ama dullukta %14'üne
+  düşüyor (kayınlar bir kuşak büyük, eşten de önce gidiyorlar). Ağırlık
+  4 ile beklenen görülme 0,7'ydi ve zincirin ikinci halkası da onunla
+  birlikte ölü doğdu. Çözüm koşulu gevşetmek değil: ağırlığı ölçüme
+  göre ayarlamak ve **yaygın durumun** (o taraftan kimsenin kalmaması)
+  kendi olayını yazmak.
+- **Paket CS.** Bekçinin tabanını tek kohorttan okuma. Dul kare sayısı
+  40 `family` hayatında 47, 80 karışık arketip hayatında 51 çıktı —
+  arketip bileşimi sayıyı doğrudan değiştiriyor. Taban "ölçüm bu
+  durumu gerçekten gördü mü" sorusunu yanıtlamalı, kohortun şansını
+  değil; iki ölçümün de altına konur.
+- **Paket CS.** Kendi bekçine istisna yazıyorsan dur: depo çapındaki
+  bir kural o istisnayı reddediyor olabilir. Beş karşılık olayına
+  "kapandı" izi koymuş, kendi testimde bunları "hikâyenin sonu" diye
+  muaf tutmuştum. `paket_ar_hikaye_izi_test.dart` muafiyeti tanımadı:
+  okunmayan iz sayısı 22'den 27'ye çıkıyordu. Doğru cevap muafiyeti
+  genişletmek değil, **izi hiç yazmamaktı** — tekrar çıkmayı
+  `seenEventIds` zaten engelliyordu, izin bir işi yoktu. Eski ve dar
+  bir çıta, yeni ve geniş bir istisnadan güçlüdür.
 
 ## Pano
 

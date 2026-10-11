@@ -329,15 +329,52 @@ Hobi **sayısı** dardı: 4 hobi. **Genişletildi (D-152): 12 hobi.**
 > `lib/ui/widgets/pet_detail_sheet.dart` sağlık, yakınlık, birlikte geçen
 > yıllar ve kayıp geçmişini gösteriyor.
 
-### 3.6 "Vefat eden eş" — **bu tespit yanlıştı**
+### 3.6 "Vefat eden eş" — **tespit yanlıştı, eksiği Paket CS kapattı**
 > **Düzeltme (26 Eylül 2026):** Kodu okuyunca görüldü ki dul kalmak ile
 > boşanmak **ayrı** durumlar: `MarriageStatus.dul` ile
 > `MarriageStatus.bosandi` ayrı değerler, ekran metinleri ayrı
 > (`_marriageLabel`), ve `settleWidowhood` bağı `eskiEs`'e **düşürmüyor**
 > — vefat eden eş `es` olarak kalıyor. Yalnızca boşanma `eskiEs` yazıyor.
 
-**Hâlâ yok:** dulluğun kendine ait olay havuzu (anma, yıldönümü, eşin
-ailesiyle bağın sürmesi).
+**Kapandı — Paket CS (11 Ekim 2026).** Maddenin kalanı da bitti:
+dulluğun artık kendi havuzu var (`event_pool_widowhood.dart`, 20 olay)
+ve kapı kayıttan okunuyor (`requiresWidowed`, `minWidowYears`,
+`maxWidowYears`).
+
+**Önce ölçüldü (250 bot hayatı, dört arketip):**
+
+| ölçülen | sayı |
+|---|---|
+| dul kalan hayat | 43 / 250 (%17,2) |
+| dul kalma yaşı | en küçük 38 · medyan 68 · en büyük 87 |
+| dul geçen yıl | en az 0 · medyan 10 · en çok 39 |
+| **toplam dul yılı** | **502** |
+| dulken görülen olay türü | 212 |
+| bunlardan dulluğa ait olan | **0** |
+
+Yani oyuncular 502 yılı eşini kaybetmiş olarak oynuyordu ve o yılların
+tek satırı yoktu: 70 yaşında eşini kaybetmiş oyuncu 40 yaşında evli
+oyuncuyla aynı havuzu çekiyordu (`komsu_apartman_karari`,
+`orta_teknoloji_gerisi`, `sabah_yuruyusu`). Kodda hiçbir
+`EventRequirement` `MarriageStatus.dul` okumuyordu.
+
+**Havuzdan sonra (aynı tohumlar):** dul kalan 43 hayatın 29'u (%67) en
+az bir dulluk olayı görüyor, 556 dul yılında toplam 60 olay çıktı.
+
+**Eşin ailesi — ölçülen gerçek.** Madde "eşin ailesiyle bağın sürmesi"
+istiyordu; ölçüm bunun neden kendiliğinden olmadığını gösterdi:
+evlilik sürerken kayınvalide/kayınpederi **yaşayan** kare 2818/5112
+(%55) iken dullukta 56/397'ye (%14, 43 hayatın 12'si) düşüyor —
+kayınlar oyuncudan bir kuşak büyük olduğu için eşten de önce
+gidiyorlar. Koşul **gevşetilmedi**: olay hâlâ yalnızca kayını gerçekten
+yaşayan oyuncuya çıkıyor, yalnız ağırlığı 4'ten 12'ye alındı (ağırlık 4
+ile 250 hayatta beklenen görülme 0,7'ydi ve gerçekten 0 çıktı). Yaygın
+durumun — o taraftan kimsenin kalmaması — kendi olayı yazıldı:
+`dul_o_taraftan_kimse`.
+
+**Dulluk kilitli bir son değil:** tekrar evlenmek yerinde kalır ve
+havuzu kendiliğinden kapatır, çünkü yürürlükteki kayıt artık yeni
+evliliktir. Modül: `FeatureId.dulluk`.
 
 ### 3.7 Çoklu kişiyle aktivite — **eklendi (D-133)**
 > **Düzeltme (26 Eylül 2026):** Kapandı.
