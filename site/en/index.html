@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bir Ömür — a life simulation, birth to death</title>
+<meta name="description" content="Bir Ömür is a deep life simulation: play one life from birth to death. School, 55 professions, family and generations, a market with regimes, a business of your own, rental income, law and health — all of it connected. Open beta; PC, mobile and Apple are the target.">
+<link rel="canonical" href="https://biromur.com/en/">
+<link rel="alternate" hreflang="tr" href="https://biromur.com/">
+<link rel="alternate" hreflang="en" href="https://biromur.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://biromur.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bir Ömür — a life simulation, birth to death">
+<meta property="og:description" content="One life, from birth to death. School, work, family, money, business, law and health all feed each other; one decision per year. A deep life simulation, open beta.">
+<meta property="og:url" content="https://biromur.com/en/">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://biromur.com/assets/og-biromur.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="ust">
+  <div class="sarmal">
+    <a class="marka" href="/en/">Bir <span>Ömür</span></a>
+    <nav class="dil" aria-label="Language">
+      <a href="/" lang="tr">Türkçe</a>
+      <a href="/en/" aria-current="true" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="sarmal kahraman">
+    <span class="etiket">Open beta · in development</span>
+    <h1>One life, end to end.</h1>
+
+    <p class="giris">
+      You don't get to pick the family you're born into. After that it's one
+      decision a year: school, work, money, love, health, sometimes a
+      courtroom. Seventy years later, what's left is the sum of what you
+      chose.
+    </p>
+
+    <p class="giris giris-kanca">
+      The three lives below start from the same baby: the same parents, the
+      same city, the same year. One ends at 56, another runs to 86. The only
+      thing that changed is the decisions — the game wrote the rest.
+    </p>
+
+    <div class="hayat-sekmeler" role="group" aria-label="Which life">
+      <button type="button" class="hayat-sekme" data-sekme="0" aria-pressed="false">
+        <b>ended at 56</b><span>Sport and hobbies</span>
+      </button>
+      <button type="button" class="hayat-sekme etkin" data-sekme="1" aria-pressed="true">
+        <b>ended at 78</b><span>Family</span>
+      </button>
+      <button type="button" class="hayat-sekme" data-sekme="2" aria-pressed="false">
+        <b>ended at 86</b><span>Easy-going</span>
+      </button>
+    </div>
+    <div class="hayat" id="play" data-hayat data-goster>
+      <div class="hayat-ust">
+        <div class="hayat-kim">
+          <p class="hayat-isim">İlhan Özkan</p>
+          <p class="hayat-nere">
+            <span class="hayat-cip">Van</span>
+            <span class="hayat-cip" data-okul>Not in school yet</span>
+            <span class="hayat-cip hayat-cip-is" data-is hidden></span>
+          </p>
+        </div>
+        <p class="hayat-yas"><b data-yas>0</b><span>years old</span></p>
+      </div>
+
+      <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
+
+      <div class="hayat-govde">
+        <div class="hayat-statlar">
+        <div class="hayat-stat">
+          <span>Happiness</span>
+          <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
+          <em data-deger="0">77</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Health</span>
+          <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
+          <em data-deger="1">74</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Intelligence</span>
+          <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
+          <em data-deger="2">56</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Charisma</span>
+          <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
+          <em data-deger="3">53</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Looks</span>
+          <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
+          <em data-deger="4">36</em>
+        </div>
+          <p class="hayat-para">Wallet <b data-cuzdan>₺0</b></p>
+        </div>
+
+        <div class="hayat-defter" data-defter tabindex="0" role="log">
+          <div class="hayat-yil">
+            <p class="hayat-yil-bas">Age 0</p>
+            <ul>
+            <li class="onemli">You were born in the city of Van. You were named İlhan Özkan.</li>
+            <li>Your mother Sevgi and your father Onur live together.</li>
+            <li>You are an only child.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hayat-kumanda">
+        <button type="button" class="hayat-dugme" data-yasal>Age Up</button>
+        <button type="button" class="hayat-yan" data-oto aria-pressed="false">Play automatically</button>
+        <button type="button" class="hayat-yan" data-bastan>Restart</button>
+        <span class="hayat-sayac" data-sayac><b data-sira>1</b> / 79 years</span>
+      </div>
+    </div>
+    <p class="hayat-kaynak">
+      The game's own engine played all three: a test bot made the decisions,
+      the game produced the events and the text. Same seed, same birth — one
+      ends at 56 after a long illness, one leaves four children and nine
+      grandchildren at 78, one runs to 86. Not one line was written for this
+      site; the three full logs come to 2,764 lines, and at most three per
+      year made it here. The game is in Turkish; these lines are translated
+      from its own output.
+    </p>
+    <div class="giris-ikili">
+      <p class="giris">
+      Bir Ömür ("a lifetime") is a deep life simulation: school, work,
+      family, money, health, law, hobbies, generations. All of it inside one
+      life, and all of it reading the rest. The track you pick at school
+      decides which jobs you can take; your health decides whether you can
+      keep one; a court decision decides whether your salary arrives. What
+      you choose at twenty finds you at forty.
+      </p>
+      <p class="giris">
+      Its world isn't built from invented numbers: the economy, wages and
+      prices are anchored — by measurement — to Turkey today. The events,
+      texts and rules were written from scratch for this game; not one line
+      was carried over from another. The game is in Turkish; this page is
+      the English summary.
+      </p>
+    </div>
+
+
+    <p class="durum-notu">
+      The game isn't in any store yet; it is shared with communities as an
+      open beta. Three platforms are the target: PC, mobile and Apple. Every
+      number below was measured from today's repository.
+    </p>
+  </div>
+
+
+  <section id="game">
+    <div class="sarmal">
+      <h2 class="baslik">What's in it</h2>
+      <p class="alt-baslik">
+        One year, one "age up" button. Behind it, systems that talk to each
+        other: a choice in one of them finds you in another, years later.
+      </p>
+      <div class="ekranlar" data-goster>
+        <figure class="ekran">
+          <img src="/assets/ekran-hayat.webp" width="480" height="1013" decoding="async"
+               alt="The main screen: character summary and five stat bars on top, the life diary below, the Age Up button at the bottom.">
+          <figcaption>The main screen: who you are on top, what happened below.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-olay.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="An event window: waking in the middle of the night, with two choices.">
+          <figcaption>An event. The year doesn't move until you answer.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-iliskiler.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="The relationships screen: mother, father and siblings under a core-family heading.">
+          <figcaption>Relationships: core family, wider family, romantic ties.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-okul.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="The school screen: stage, class, grade average and the exam-year card.">
+          <figcaption>School: stage, grade average and the exam year.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-varliklar.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="The belongings screen: wallet, where you live and the items you own.">
+          <figcaption>Belongings: wallet, items, where you live.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-aktiviteler.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="The activities menu: spend time together, life goals, barber, gym, health centre.">
+          <figcaption>Activities: nine venues, 39 actions.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-kisi.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="A person card: age, occupation, mood and closeness bars, with actions and their result below.">
+          <figcaption>A person's card: mood, closeness, and actions whose result you see.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-karanlik.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="The same main screen in dark mode.">
+          <figcaption>Dark mode: the same screen at night.</figcaption>
+        </figure>
+      </div>
+      <p class="durum-notu">
+        These are the app's own screens, captured from the real interface —
+        not photographs of a phone.
+      </p>
+
+      <figure class="sema" data-goster>
+  <div class="sema-kaydir">
+  <svg viewBox="0 0 735 185" role="img" aria-label="The yearly loop: pending windows are answered, choices are made, the age up button is pressed, the engine runs the year; then the next year begins.">
+    <defs>
+      <marker id="e1-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas" points="0,1 10,5 0,9"/>
+      </marker>
+      <marker id="e1-ok-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas-donus" points="0,1 10,5 0,9"/>
+      </marker>
+    </defs>
+    <rect class="s-kutu" x="10" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad" x="75" y="68" text-anchor="middle">Pending</text>
+    <text class="s-alt" x="75" y="85" text-anchor="middle">event · crisis · trial</text>
+    <rect class="s-kutu" x="205" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad" x="270" y="68" text-anchor="middle">Your choices</text>
+    <text class="s-alt" x="270" y="85" text-anchor="middle">school · work · people</text>
+    <rect class="s-kutu-vurgu" x="400" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad s-ad-vurgu" x="465" y="68" text-anchor="middle">Age up</text>
+    <text class="s-alt" x="465" y="85" text-anchor="middle">one button</text>
+    <rect class="s-kutu" x="595" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad" x="660" y="68" text-anchor="middle">The year runs</text>
+    <text class="s-alt" x="660" y="85" text-anchor="middle">salary · costs · health</text>
+    <line class="s-ok" x1="142" y1="73" x2="201" y2="73" marker-end="url(#e1-ok)"/>
+    <text class="s-etiket" x="171.5" y="62" text-anchor="middle">answer</text>
+    <line class="s-ok" x1="337" y1="73" x2="396" y2="73" marker-end="url(#e1-ok)"/>
+    <text class="s-etiket" x="366.5" y="62" text-anchor="middle">decide</text>
+    <line class="s-ok" x1="532" y1="73" x2="591" y2="73" marker-end="url(#e1-ok)"/>
+    <text class="s-etiket" x="561.5" y="62" text-anchor="middle">press</text>
+    <path class="s-ok-donus" d="M 660 102 V 160 H 75 V 102" marker-end="url(#e1-ok-d)"/>
+    <text class="s-etiket-donus" x="367" y="152" text-anchor="middle">next year</text>
+  </svg>
+  </div>
+  <figcaption>The game moves one year at a time. A pending window has to be answered first — ageing up is blocked in five separate states. Once the year is processed, everything that happened is written into the life log, line by line.</figcaption>
+      </figure>
+      <div class="izgara" data-goster>
+        <div class="kart">
+          <h3>School and work</h3>
+          <p>Ten school stages from primary to university, 20 university programmes, 13 school clubs. 55 professions, with interviews, raises, promotions, mastery and retirement.</p>
+        </div>
+        <div class="kart">
+          <h3>Family</h3>
+          <p>Parents, siblings, step-family. Marriage, a family plan, pregnancy, grandchildren. You sit down with your child's homework, hand out pocket money, set rules — and when a generation ends, the game can continue as your child.</p>
+        </div>
+        <div class="kart">
+          <h3>Money</h3>
+          <p>Cost of living, two banks and loans, a property and vehicle market across 22 cities, rental income with real tenants, an investment portfolio and a business of your own from 14 types.</p>
+        </div>
+        <div class="kart">
+          <h3>Health</h3>
+          <p>Five stats that decline with age, six chronic conditions, eight crises, check-ups and cosmetic work. Upkeep measurably pays off.</p>
+        </div>
+        <div class="kart">
+          <h3>Law</h3>
+          <p>Eleven offences in eight categories, three tiers of lawyer. Investigation, bail, trial, prison and probation. In detention no salary arrives and seniority freezes.</p>
+        </div>
+        <div class="kart">
+          <h3>Life</h3>
+          <p>Hobbies, sport, books, social media, pets, travel, life goals and 461 events — all of it below.</p>
+        </div>
+      </div>
+      <figure class="sema" data-goster>
+  <div class="sema-kaydir">
+  <svg viewBox="0 0 720 310" role="img" aria-label="How the systems interlock: school gives work a diploma, health gives work a threshold, law blocks salary during detention; work feeds money, money feeds family and bail, and bail leads back into law.">
+    <defs>
+      <marker id="e2-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas" points="0,1 10,5 0,9"/>
+      </marker>
+      <marker id="e2-ok-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas-donus" points="0,1 10,5 0,9"/>
+      </marker>
+    </defs>
+    <rect class="s-kutu" x="20" y="20" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="95" y="44" text-anchor="middle">School</text>
+    <text class="s-alt" x="95" y="61" text-anchor="middle">exams, tracks</text>
+    <rect class="s-kutu" x="20" y="125" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="95" y="149" text-anchor="middle">Health</text>
+    <text class="s-alt" x="95" y="166" text-anchor="middle">stats, crises</text>
+    <rect class="s-kutu" x="20" y="230" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="95" y="254" text-anchor="middle">Law</text>
+    <text class="s-alt" x="95" y="271" text-anchor="middle">trial, prison</text>
+    <rect class="s-kutu" x="275" y="125" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="350" y="149" text-anchor="middle">Work</text>
+    <text class="s-alt" x="350" y="166" text-anchor="middle">55 professions</text>
+    <rect class="s-kutu" x="530" y="125" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="605" y="149" text-anchor="middle">Money</text>
+    <text class="s-alt" x="605" y="166" text-anchor="middle">salary, loans</text>
+    <rect class="s-kutu" x="530" y="20" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="605" y="44" text-anchor="middle">Family</text>
+    <text class="s-alt" x="605" y="61" text-anchor="middle">spouse, kids, estate</text>
+    <path class="s-ok" d="M 170 45 H 350 V 121" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="258" y="38" text-anchor="middle">diploma</text>
+    <line class="s-ok" x1="170" y1="150" x2="271" y2="150" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="220" y="142" text-anchor="middle">health threshold</text>
+    <path class="s-ok" d="M 170 255 H 350 V 179" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="258" y="248" text-anchor="middle">no salary in detention</text>
+    <line class="s-ok" x1="425" y1="150" x2="526" y2="150" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="475" y="142" text-anchor="middle">salary</text>
+    <line class="s-ok" x1="580" y1="125" x2="580" y2="74" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="572" y="102" text-anchor="end">support</text>
+    <line class="s-ok" x1="630" y1="70" x2="630" y2="121" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="638" y="102" text-anchor="start">inheritance</text>
+    <path class="s-ok" d="M 605 175 V 292 H 95 V 284" marker-end="url(#e2-ok)"/>
+    <text class="s-etiket" x="350" y="285" text-anchor="middle">bail, lawyer</text>
+  </svg>
+  </div>
+  <figcaption>These are not separate menus. The track you pick at school decides which jobs you can enter, your health decides which you can keep; get detained and the salary stops, while bail comes out of your savings. Money → law → work → money: the loop closes, and a choice finds you years later.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="parenting">
+    <div class="sarmal">
+      <h2 class="baslik">Becoming a parent</h2>
+      <p class="alt-baslik">
+        Your own first eighteen years are full: school stages, a teacher's
+        name, classmates, pocket money, clubs. We wanted the same once you
+        become a parent. A child is not a notification line; they are
+        someone with a record of their own, growing up.
+      </p>
+      <div class="ebeveyn" data-goster>
+        <figure class="ekran">
+          <img src="/assets/ekran-ebeveynlik.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="A child's card: stage, school and savings rows, mood and closeness bars, then buttons for spending time, talking, giving a gift, helping with homework, pocket money, signing up for a hobby and setting a rule.">
+          <figcaption>A ten-year-old's card. The "Guidance" heading is there but the button is not: the reason is written instead — he is still too young for those conversations.</figcaption>
+        </figure>
+        <ul class="duz">
+          <li><b>A baby on the way</b> <span>— A pending birth shows in three places at once: the character header, the top of the life log and the Relationships screen. The baby arrives at the next age-up. The game never promises what it cannot keep: if the other parent is no longer alive, it does not say "will be born".</span></li>
+          <li><b>Family plan</b> <span>— You talk it over with your spouse or partner and decide: we are trying, not for now, or we haven't discussed it. The decision is recorded and brought back when you are alone together. <b>There is no "have a child" button</b> — a child is a possibility, not a guarantee.</span></li>
+          <li><b>Things only a parent can do</b> <span>— Sit down with the homework, give pocket money, sign them up for a hobby, set a rule. Each one changes the child's <b>own</b> record: intelligence, savings, interests. Pocket money leaves your wallet and lands in theirs; at eighteen, that balance decides where they start.</span></li>
+          <li><b>Age stages</b> <span>— Baby, child, teenager, adult. What you can do changes with the stage: a baby's card never shows homework or rules, and you do not set rules for a grown child. A teenager can refuse.</span></li>
+          <li><b>The child's year</b> <span>— When the year ends, the child gets a summary too: what happened, and what your effort changed. The numbers come from the difference between the record at the start of the year and today — measured, not guessed.</span></li>
+        </ul>
+      </div>
+      <p class="durum-notu">
+        Rules are not popular: the child's mood drops and some distance
+        creeps in. What you get back is a lower chance of trouble at school
+        for a while — not a guarantee, and it does nothing at all with a
+        child you have grown apart from. All of this was measured across
+        500 family lifetimes; the rates come out of the game's own records
+        rather than being written by hand.
+      </p>
+    </div>
+  </section>
+
+  <section id="depth">
+    <div class="sarmal">
+      <h2 class="baslik">Under the surface</h2>
+      <p class="alt-baslik">
+        A few buttons on screen. Underneath, engines that run in order every year. Everything below is in the game and working today.
+      </p>
+      <ul class="duz" data-goster>
+        <li><b>Market regime</b> <span>— Assets don't roll dice separately. The year has a regime — flat, normal, strong, crisis — and two hidden parameters: inflation pressure and market confidence. Those produce risk appetite and demand for safety; shares and funds answer to the first, gold and currency to the second, each with its own weight. In a crisis year gold can hold a portfolio while shares fall — but no two crises play out the same.</span></li>
+        <li><b>Fictional companies</b> <span>— Twelve companies across ten sectors carry hidden indicators that move year to year. A good company can stay good for years, a bad one can recover; management quality changes slowly and softens bad news. Company news isn't a random headline — it comes out of that state.</span></li>
+        <li><b>A business of your own</b> <span>— 14 business types in three scales. Price, staff, upkeep, advertising and reputation are each managed separately; demand is computed from price elasticity against the market average. 102 business events: inspections, disasters, staff trouble, an ad that lands.</span></li>
+        <li><b>Property and rent</b> <span>— Rent comes from the city coefficient and the flat's condition, not from a catalogue price. The tenant has an occupation, a payment history and a contract; deposit, vacancy, move-out and a maintenance ledger are all kept. A flat in Istanbul and one in Amasya do not earn the same rent.</span></li>
+      </ul>
+      <details class="devami">
+        <summary><b>Six more</b>
+          <span>housing and rent · banking and debt · law · health · family and generations · careers</span></summary>
+        <ul class="duz">
+          <li><b>Banks and debt</b> <span>— Two banks, different rates and different approval strictness. An application is genuinely assessed; the answer is not a dice roll. Miss an instalment and the debt grows with interest — the wallet never goes negative, the debt accumulates.</span></li>
+          <li><b>Law</b> <span>— Eleven offence types in eight categories, three tiers of lawyer. Investigation, bail, trial, prison and probation each run separately. In detention no salary arrives and seniority freezes — but the job doesn't end, it waits for you.</span></li>
+          <li><b>Health</b> <span>— Six chronic conditions, eight health crises, a check-up report across six body systems. Each of the five stats has its own ageing curve; sport, the barber, books and courses measurably slow the decline. At critical health, ageing up locks: you have to decide first.</span></li>
+          <li><b>Family and generations</b> <span>— Step- and half-siblings, in-laws, grandchildren, bloodlines. Pregnancy is a process: a protection choice, an age-dependent chance, twins, fertility treatment. A divorce splits what was bought during the marriage; what came before it, plus inheritance and gifts, stays personal property. Custody, alimony, elder care and inheritance each have their own rules. When a generation ends, the game continues as your child.</span></li>
+          <li><b>The early years</b> <span>— 31 events for infancy and the years before school: household decisions, the neighbourhood, the first errand to the corner shop, street games, the first day of nursery, holiday pocket money, sibling jealousy. Four of them come back years later — the child who had the training wheels taken off rides at the front, the one who saved breaks the piggy bank, the one who learned letters early reads aloud in class.</span></li>
+          <li><b>The threshold years</b> <span>— 29 events for ages 16 to 20: exam prep, the preference list, results night, graduation, apprenticeship, a driving licence, the first job application, sharing a first salary with the household, moving out, a friend group scattering. Four come back years later; the school group ends up around one table again.</span></li>
+          <li><b>The home you live in</b> <span>— moving into your own place no longer makes life go quiet: the boiler dies mid-winter, the roof leaks, mould creeps into the bathroom, the building votes on a fee rise, the upstairs flat drags furniture at midnight, the flat next door goes up for sale. 28 events; seven hand your own earlier choice back years later — the patched boiler returns, the postponed roof costs twice as much, the insurance you bought pays off.</span></li>
+          <li><b>Neighbours</b> <span>— the building is no longer just text, it is a door: move into your own place or a rental and you get to know one to three neighbours. They have names, they age, you carry their shopping bags, a covered pot arrives at your door, you talk about the midnight noise, you end up on the same side at the building meeting. 12 events; four hand your own earlier choice back years later. Moving ends the neighbourhood, but if you were close they stay as friends.</span></li>
+          <li><b>Furnishing your home</b> <span>— a home is no longer an empty box: a fridge, washing machine, oven, bedroom set, sofa and dining table make it liveable; a television, air conditioner, dishwasher, rug, curtains and bookcase add the comfort. 18 items in a new "Home and living" store. The "state of your home" screen shows at a glance what is done and what is missing; furniture wears down over the years and needs servicing. When you move, your furniture comes with you.</span></li>
+          <li><b>Your team's story</b> <span>— join a school team or take up a hobby and the game remembers: the first training session, climbing the squad, friction with the coach, the tournament and the clash between a match and an exam now actually come up. What you are in the middle of no longer gets lost in the general event pool.</span></li>
+          <li><b>The last years</b> <span>— life after 65 tells its own story: the first Monday with nowhere to be, building a daily routine, the man who sits on the same park bench every day, pausing on the stairs for the first time, mixing up four pill boxes, a grandchild asking "what was here when you were small?", teaching a young person your trade, a standing arrangement with a neighbour to open the curtains each morning, the sapling you planted, a caller claiming to be from your bank. 31 events; six of them bring your own trace back years later — a grandchild finds the notebook you wrote, the young person you gave half an hour to opens their own place and comes to your door, the sapling you planted gives shade.</span></li>
+          <li><b>The library</b> <span>— the shelf now lasts a lifetime: 39 books across nine kinds (children&#39;s, adventure, novel, science, classic, poetry, crime, history, memoir). Childhood books close as you grow up, and new ones open in your thirties and forties. Reading advances the "reading" pursuit through five stages, from eager to master — and that is the door to the writer profession. Books are grouped by kind, with the ones you have finished at the bottom. Every title and author belongs to the game.</span></li>
+          <li><b>Insurance</b> <span>— the defensive side of money: you can take out health and home policies. You pay a yearly premium, and when a bad year comes the part above the deductible is covered. It is not an investment; for a player without savings it makes the life-saving treatment affordable.</span></li>
+          <li><b>Friend circle</b> <span>— friendship is no longer one at a time: once you have three close friends you can form a circle. Its name comes from where your life is at that moment (school, university, work or neighbourhood circle), and how long you have been together stays on the record. You go out with the circle; whoever can make it that day comes along. Nine events: who organises it, the bill arriving at the table, the member nobody has seen for months, two friends falling out, a newcomer at the table, a photograph from years ago. Three of them bring your own decision back years later. A member who dies or falls out leaves the circle, and below three people the circle disperses — the record is kept.</span></li>
+          <li><b>Who is there in old age</b> <span>— caring for an ageing parent was in the game; the reverse was not. After 70, in a year when your health is down, the game asks who is there this year and opens three doors: lean on your family (your spouse or an adult child is there that year — closeness grows, the load sits on them), pay for the care yourself (the money really leaves your pocket, and children who can afford it cover part of the bill), or get through the year without leaning on anyone. One decision a year. If nobody can be there, the card says so plainly: this is where the family you built shows up most. The years you were supported, the years you managed alone and the amounts paid all stay on the record.</span></li>
+          <li><b>Your own look</b> <span>— dark mode is now your call: follow the device, stay light, or keep it dark. The choice is stored with your save.</span></li>
+          <li><b>Trim it to taste</b> <span>— Features added later can each be switched off in settings. A module you turn off never appears in the game, the rest keeps working exactly as before, and the same seed still plays out the same way. Each row says what you lose by turning it off.</span></li>
+          <li><b>Career</b> <span>— 55 professions, a pool of 167 interview questions. Mastery and reputation build up over years; a hobby you kept for years earns a second chance at interview and a head start in mastery. The first two days of sick leave are unpaid, and long leave makes an employer uneasy.</span></li>
+          <li><b>No back doors</b> <span>— The market advances once per age and the index is written to the save: you cannot re-roll a price by closing the screen, by trading, or by loading an older save. Repeating the same action within one year to farm rewards is closed too, and a person who turned down an invitation stays turned down for that year.</span></li>
+        </ul>
+      </details>
+      <div class="sayilar" style="margin-top:22px" data-goster>
+        <div><b>55</b><small>professions</small></div>
+        <div><b>167</b><small>interview questions</small></div>
+        <div><b>20</b><small>university programmes</small></div>
+        <div><b>14</b><small>business types</small></div>
+        <div><b>102</b><small>business events</small></div>
+        <div><b>12</b><small>fictional companies</small></div>
+        <div><b>22</b><small>cities</small></div>
+        <div><b>79</b><small>item types</small></div>
+        <div><b>57</b><small>shop products</small></div>
+        <div><b>11</b><small>offence types</small></div>
+        <div><b>33</b><small>gifts</small></div>
+        <div><b>461</b><small>events</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="life">
+    <div class="sarmal">
+      <h2 class="baslik">The ordinary life</h2>
+      <p class="alt-baslik">
+        A life isn't only school, work and money. The book you read, the instrument you played for years, the cat you kept, the city you moved to — those are in the game too. None of them is a one-off button: they accrue over years and pay off later.
+      </p>
+      <figure class="sema" data-goster>
+  <div class="sema-kaydir">
+  <svg viewBox="0 0 735 222" role="img" aria-label="How a hobby works: a book finished in the library, a course and a gym session all feed the same hobby experience; experience raises the stage; the stage leaves a permanent diary memory and gives a career synergy advantage. Drop it for years and the share shrinks, but it is never erased.">
+    <defs>
+      <marker id="e4-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas" points="0,1 10,5 0,9"/>
+      </marker>
+      <marker id="e4-ok-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas-donus" points="0,1 10,5 0,9"/>
+      </marker>
+    </defs>
+    <rect class="s-kutu" x="8" y="46" width="140" height="98" rx="10"/>
+    <text class="s-ad" x="78" y="70" text-anchor="middle">What you do</text>
+    <text class="s-alt" x="78" y="89" text-anchor="middle">a book in the library</text>
+    <text class="s-alt" x="78" y="105" text-anchor="middle">course · workshop</text>
+    <text class="s-alt" x="78" y="121" text-anchor="middle">gym session</text>
+    <rect class="s-kutu" x="196" y="66" width="140" height="58" rx="10"/>
+    <text class="s-ad" x="266" y="90" text-anchor="middle">Hobby experience</text>
+    <text class="s-alt" x="266" y="107" text-anchor="middle">accrues year by year</text>
+    <rect class="s-kutu-vurgu" x="384" y="66" width="140" height="58" rx="10"/>
+    <text class="s-ad s-ad-vurgu" x="454" y="90" text-anchor="middle">Stage</text>
+    <text class="s-alt" x="454" y="107" text-anchor="middle">Keen → Master</text>
+    <rect class="s-kutu" x="572" y="10" width="155" height="58" rx="10"/>
+    <text class="s-ad" x="649.5" y="34" text-anchor="middle">Life diary</text>
+    <text class="s-alt" x="649.5" y="51" text-anchor="middle">a permanent memory</text>
+    <rect class="s-kutu" x="572" y="122" width="155" height="58" rx="10"/>
+    <text class="s-ad" x="649.5" y="146" text-anchor="middle">Career synergy</text>
+    <text class="s-alt" x="649.5" y="163" text-anchor="middle">a second chance at interview</text>
+    <line class="s-ok" x1="150" y1="95" x2="192" y2="95" marker-end="url(#e4-ok)"/>
+    <text class="s-etiket" x="171" y="85" text-anchor="middle">counts</text>
+    <line class="s-ok" x1="338" y1="95" x2="380" y2="95" marker-end="url(#e4-ok)"/>
+    <text class="s-etiket" x="359" y="85" text-anchor="middle">threshold</text>
+    <line class="s-ok" x1="526" y1="95" x2="568" y2="45" marker-end="url(#e4-ok)"/>
+    <text class="s-etiket" x="545" y="62" text-anchor="middle">memory</text>
+    <line class="s-ok" x1="526" y1="95" x2="568" y2="145" marker-end="url(#e4-ok)"/>
+    <text class="s-etiket" x="545" y="137" text-anchor="middle">advantage</text>
+    <path class="s-ok-donus" d="M 454 124 V 205 H 266 V 124" marker-end="url(#e4-ok-d)"/>
+    <text class="s-etiket-donus" x="360" y="197" text-anchor="middle">drop it and the share shrinks</text>
+  </svg>
+  </div>
+  <figcaption>Hobbies have no button of their own. A book finished in the library, a course you attended and a session at the gym all feed the same hobby; each of the five stages leaves a line in the life diary. Someone who wrote for years gets a second chance at a writing interview — drop it and the share shrinks, but the history is never erased.</figcaption>
+      </figure>
+      <div class="izgara" data-goster>
+        <div class="kart">
+          <h3>Hobbies</h3>
+          <p>12 lasting hobbies — music, painting, reading, sport, cooking, photography, dance, chess, writing, gardening, languages, software. Each has five stages: Keen, Curious, Regular, Devoted, Master.</p>
+        </div>
+        <div class="kart">
+          <h3>Reading</h3>
+          <p>22 books in five genres, read page by page. Titles and authors are written for this game; no copyrighted text is used. Finishing a book raises intelligence, and a regular reader's mind erodes more slowly with age.</p>
+        </div>
+        <div class="kart">
+          <h3>Sport</h3>
+          <p>Running, weights, stretching. Six martial arts across 58 ranks, with their own tournament circuits. Plus a professional football career from the school team to retirement — never played at school, and that door stays shut.</p>
+        </div>
+        <div class="kart">
+          <h3>Courses and clubs</h3>
+          <p>39 actions across nine venues: courses, the library, the gym, the barber, a health centre, cosmetic clinics, entertainment. 13 school clubs; the first lessons are free, later ones are paid.</p>
+        </div>
+        <div class="kart">
+          <h3>Pets</h3>
+          <p>Ten species. Lifespans follow the real animal; illness, escape and the vet are all in. When a pet dies, the life diary says so.</p>
+        </div>
+        <div class="kart">
+          <h3>Travel and cities</h3>
+          <p>Six tour packages, plus moving house. Each of 22 cities has its own character: prices, work, schooling and health differ. You can only move to a nearby province.</p>
+        </div>
+        <div class="kart">
+          <h3>Social media and fame</h3>
+          <p>Posts, followers, sponsorships. Past a fame threshold, 14 media opportunities open; ignore it and fame decays. Every brand is fictional.</p>
+        </div>
+        <div class="kart">
+          <h3>Life goals</h3>
+          <p>21 goals in five areas: education, career, money, family, yourself. Tracked year by year on their own screen.</p>
+        </div>
+      </div>
+      <div class="sayilar" style="margin-top:16px" data-goster>
+        <div><b>12</b><small>lasting hobbies, 60 stages</small></div>
+        <div><b>22</b><small>books</small></div>
+        <div><b>39</b><small>activities</small></div>
+        <div><b>21</b><small>life goals</small></div>
+        <div><b>10</b><small>pet species</small></div>
+        <div><b>461</b><small>events</small></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="limits">
+    <div class="sarmal">
+      <h2 class="baslik">What we won't do</h2>
+      <p class="alt-baslik">
+        Life simulation is a genre that gets cheap easily. A few limits were
+        set at the start.
+      </p>
+      <div class="izgara" data-goster>
+        <div class="kart">
+          <h3>No copied content</h3>
+          <p>Events, text and art are written for this game. Nothing is carried over from another title.</p>
+        </div>
+        <div class="kart">
+          <h3>No real names</h3>
+          <p>Companies, banks, vehicle models and celebrities are fictional. No real person or brand is used.</p>
+        </div>
+        <div class="kart">
+          <h3>No how-to</h3>
+          <p>The crime and law system describes consequences. No text describes a usable method.</p>
+        </div>
+        <div class="kart">
+          <h3>Not financial advice</h3>
+          <p>The in-game market is fiction and isn't presented as a real recommendation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="sarmal">
+      <h2 class="baslik">Status</h2>
+      <p class="alt-baslik">Where things actually stand today.</p>
+      <ul class="duz" data-goster>
+        <li><b>Tech</b> <span>— Flutter, one codebase.</span></li>
+        <li><b>Platforms</b> <span>— PC, mobile and Apple; we are aiming at all three. Today an Android and a Windows package are built on every push; the Apple build isn't there yet.</span></li>
+        <li><b>Playable</b> <span>— a life runs end to end: birth, school, work, family, ageing, death and the next generation.</span></li>
+        <li><b>Release</b> <span>— not in any store. The open beta is shared with communities.</span></li>
+        <li><b>Robustness</b> <span>— 3,414 automated tests run on every push; when a bug turns up, the test that catches it is written first.</span></li>
+        <li><b>Next</b> <span>— interface rough edges, content depth and balance decisions. No dates: the beta comes first.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="lifetime">
+    <div class="sarmal">
+      <h2 class="baslik">A lifetime</h2>
+      <p class="alt-baslik">
+        One life is played end to end: you don't choose the family you are born into, and after that it is one decision a year. When a generation ends, the game continues as your child.
+      </p>
+      <div class="zaman" data-goster>
+        <div class="zaman-cizgi" aria-hidden="true"><span class="zaman-dolgu"></span></div>
+        <ol class="zaman-adimlar">
+          <li style="--s:0"><span class="zaman-nokta" aria-hidden="true"></span><b>0</b><small>Born</small></li>
+          <li style="--s:1"><span class="zaman-nokta" aria-hidden="true"></span><b>6</b><small>School</small></li>
+          <li style="--s:2"><span class="zaman-nokta" aria-hidden="true"></span><b>18</b><small>First job</small></li>
+          <li style="--s:3"><span class="zaman-nokta" aria-hidden="true"></span><b>30</b><small>Family</small></li>
+          <li style="--s:4"><span class="zaman-nokta" aria-hidden="true"></span><b>65</b><small>Retirement</small></li>
+          <li style="--s:5"><span class="zaman-nokta" aria-hidden="true"></span><b>—</b><small>The end</small></li>
+        </ol>
+      </div>
+      <p class="durum-notu" style="margin-top:22px">
+        One example life. In the game both the order and the ages change with how you play: one player never gets to retire, another goes back to school at forty.
+      </p>
+    </div>
+  </section>
+
+  <section id="contact" class="iletisim">
+    <div class="sarmal">
+      <h2 class="baslik">Write to us</h2>
+      <p class="alt-baslik">
+        There is a lot more still to come. Write to us with your feedback and
+        with what you would like added: something you found missing, somewhere
+        you got stuck, an idea you have. Same address for beta access or press
+        material.
+      </p>
+      <p><a href="mailto:info@biromur.com">info@biromur.com</a></p>
+
+      <p class="kit">
+        If you are writing about the game or sharing it somewhere, the
+        material is ready: eight of the app's own screens at full
+        resolution, an animated capture of twenty years in twenty frames,
+        the share image and a description in both languages.
+      </p>
+      <p><a class="kit-bag" href="/assets/biromur-basin-kiti.zip" download>Download the press kit — 2.7 MB</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="alt">
+  <div class="sarmal">
+    <span>© 2026 Bir Ömür</span>
+    <span><a href="/" lang="tr">Türkçe</a></span>
+  </div>
+</footer>
+
+<script src="/assets/life.js"></script>
+<script>
+// Kaydırınca belirme + sayan sayılar. Betik çalışmazsa hiçbir şey
+// gizlenmiyor: gizleme kuralı yalnızca html.js varken geçerli.
+(function () {
+  var hedefler = document.querySelectorAll('[data-goster]');
+  if (!hedefler.length) return;
+  var azHareket = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function say(kok) {
+    var kutular = kok.querySelectorAll('.sayilar b');
+    for (var i = 0; i < kutular.length; i++) {
+      (function (kutu) {
+        var metin = kutu.textContent.trim();
+        if (azHareket || !/^[0-9.]+$/.test(metin)) return;
+        var hedef = parseInt(metin.replace(/\./g, ''), 10);
+        if (!hedef || hedef > 100000) return;
+        var adet = 24;
+        var n = 0;
+        // Ne olursa olsun gerçek değer yazılsın: kare hızı kısılsa da
+        // sayı "0"da kalmasın.
+        window.setTimeout(function () { kutu.textContent = metin; }, 1400);
+        function adim() {
+          n++;
+          var o = n / adet;
+          kutu.textContent = Math.round(hedef * (1 - Math.pow(1 - o, 3)))
+            .toLocaleString('tr-TR');
+          if (n < adet) window.setTimeout(adim, 34);
+          else kutu.textContent = metin;
+        }
+        kutu.textContent = '0';
+        window.setTimeout(adim, 34);
+      })(kutular[i]);
+    }
+  }
+
+  function goster(e) {
+    e.classList.add('gorundu');
+    say(e);
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < hedefler.length; i++) goster(hedefler[i]);
+    return;
+  }
+  var gozcu = new IntersectionObserver(function (girisler) {
+    for (var i = 0; i < girisler.length; i++) {
+      if (girisler[i].isIntersecting) {
+        goster(girisler[i].target);
+        gozcu.unobserve(girisler[i].target);
+      }
+    }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  for (var j = 0; j < hedefler.length; j++) gozcu.observe(hedefler[j]);
+
+  // Emniyet: bir aksilik olursa iki buçuk saniye sonra hepsi görünür.
+  window.setTimeout(function () {
+    for (var k = 0; k < hedefler.length; k++) {
+      if (!hedefler[k].classList.contains('gorundu')) goster(hedefler[k]);
+    }
+  }, 2500);
+})();
+
+// Oynanabilir ömür: oyunun kendi tur kayıtlarını yıl yıl gösterir. Üç hayat
+// da aynı tohumdan, aynı doğumdan başlıyor; değişen tek şey kararlar.
+// Yıl 0 HTML'de gömülü olduğu için betik çalışmazsa kart okunur kalır.
+(function () {
+  var veri = window.BIR_OMUR_HAYAT;
+  var kart = document.querySelector('[data-hayat]');
+  if (!veri || !kart || !veri.hayatlar || !veri.hayatlar.length) return;
+
+  var t = veri.t || {};
+  var yerel = t.yerel || 'tr-TR';
+  var defter = kart.querySelector('[data-defter]');
+  var elYas = kart.querySelector('[data-yas]');
+  var elOkul = kart.querySelector('[data-okul]');
+  var elIs = kart.querySelector('[data-is]');
+  var elPara = kart.querySelector('[data-cuzdan]');
+  var elCizgi = kart.querySelector('[data-cizgi]');
+  var elSayac = kart.querySelector('[data-sayac]');
+  var dYas = kart.querySelector('[data-yasal]');
+  var dOto = kart.querySelector('[data-oto]');
+  var sekmeler = document.querySelectorAll('[data-sekme]');
+  var dBastan = kart.querySelector('[data-bastan]');
+  var raylar = kart.querySelectorAll('[data-stat]');
+  var degerler = kart.querySelectorAll('[data-deger]');
+  if (!defter || !dYas || !dOto || !dBastan) return;
+
+  var azHareket = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hangi = Math.min(veri.basla || 0, veri.hayatlar.length - 1);
+  var hayat = veri.hayatlar[hangi];
+  var yillar = hayat.yillar;
+  var sonIndeks = yillar.length - 1;
+  var simdi = 0;
+  var sayac = null;
+  var kendiBasladi = false;
+
+  function sayi(n) {
+    try { return n.toLocaleString(yerel); } catch (e) { return String(n); }
+  }
+
+  function yaz(kalip, deger) {
+    var cikti = kalip || '';
+    for (var anahtar in deger) {
+      if (Object.prototype.hasOwnProperty.call(deger, anahtar)) {
+        cikti = cikti.split('{' + anahtar + '}').join(deger[anahtar]);
+      }
+    }
+    return cikti;
+  }
+
+  // Üst bilgi ve statlar: o yılın gerçek değerleri.
+  function basliklar(i) {
+    var y = yillar[i];
+    elYas.textContent = y.y;
+    elOkul.textContent = y.o;
+    if (y.i) {
+      elIs.textContent = y.i;
+      elIs.hidden = false;
+    } else {
+      elIs.textContent = '';
+      elIs.hidden = true;
+    }
+    elPara.textContent = yaz(t.para || '{n} ₺', { n: sayi(y.p) });
+    elCizgi.style.width = Math.max(1, Math.round((i / sonIndeks) * 100)) + '%';
+    if (elSayac) {
+      elSayac.textContent = yaz(t.sayac || '{sira} / {toplam}', {
+        sira: i + 1, toplam: yillar.length
+      });
+    }
+    for (var k = 0; k < raylar.length; k++) {
+      if (y.s[k] === undefined) continue;
+      raylar[k].style.width = y.s[k] + '%';
+      if (degerler[k]) degerler[k].textContent = y.s[k];
+    }
+  }
+
+  function yilBlogu(y) {
+    var kutu = document.createElement('div');
+    kutu.className = 'hayat-yil yeni';
+    var bas = document.createElement('p');
+    bas.className = 'hayat-yil-bas';
+    bas.textContent = yaz(t.yilBas || '{yas}', { yas: y.y });
+    kutu.appendChild(bas);
+    var liste = document.createElement('ul');
+    for (var i = 0; i < y.g.length; i++) {
+      var satir = document.createElement('li');
+      satir.textContent = y.g[i][0];
+      if (y.g[i][1]) satir.className = 'onemli';
+      if (!azHareket) satir.style.animationDelay = (i * 0.12) + 's';
+      liste.appendChild(satir);
+    }
+    kutu.appendChild(liste);
+    return kutu;
+  }
+
+  function ekle(i) {
+    var eski = defter.querySelector('.hayat-yil.yeni');
+    if (eski) eski.classList.remove('yeni');
+    defter.appendChild(yilBlogu(yillar[i]));
+    // Günlük uzadıkça baştan kırp: sayfa ağırlaşmasın.
+    while (defter.children.length > 36) defter.removeChild(defter.firstChild);
+    defter.scrollTop = defter.scrollHeight;
+  }
+
+  function dur() {
+    if (sayac) {
+      window.clearInterval(sayac);
+      sayac = null;
+    }
+    dOto.setAttribute('aria-pressed', 'false');
+    dOto.textContent = t.oto || '';
+  }
+
+  function basla() {
+    if (sayac || simdi >= sonIndeks) return;
+    sayac = window.setInterval(ilerle, 1500);
+    dOto.setAttribute('aria-pressed', 'true');
+    dOto.textContent = t.dur || '';
+  }
+
+  function bitir() {
+    dur();
+    dYas.disabled = true;
+    if (defter.querySelector('.hayat-son')) return;
+    var sonMu = hangi === veri.hayatlar.length - 1;
+    var kutu = document.createElement('div');
+    kutu.className = 'hayat-son';
+    var bas = document.createElement('p');
+    bas.className = 'hayat-son-bas';
+    bas.textContent = t.sonBas || '';
+    var ozet = document.createElement('p');
+    ozet.textContent = yaz(t.sonOzet, {
+      yil: hayat.olum, cocuk: hayat.cocuk,
+      torun: hayat.torun, unvan: hayat.unvan
+    });
+    var not = document.createElement('p');
+    not.className = 'hayat-son-not';
+    not.textContent = yaz(sonMu ? (t.sonNotSon || t.sonNot) : t.sonNot, {
+      tam: sayi(hayat.tamSatir), satir: hayat.satir
+    });
+    kutu.appendChild(bas);
+    kutu.appendChild(ozet);
+    kutu.appendChild(not);
+    defter.appendChild(kutu);
+    defter.scrollTop = defter.scrollHeight;
+  }
+
+  function ilerle() {
+    if (simdi >= sonIndeks) {
+      bitir();
+      return;
+    }
+    simdi++;
+    basliklar(simdi);
+    ekle(simdi);
+    if (simdi >= sonIndeks) bitir();
+  }
+
+  // Seçili hayatı en baştan kurar: günlük temizlenir, 0 yaş veriden yazılır.
+  function hayatiKur(i) {
+    dur();
+    hangi = ((i % veri.hayatlar.length) + veri.hayatlar.length)
+      % veri.hayatlar.length;
+    hayat = veri.hayatlar[hangi];
+    yillar = hayat.yillar;
+    sonIndeks = yillar.length - 1;
+    simdi = 0;
+    dYas.disabled = false;
+    while (defter.firstChild) defter.removeChild(defter.firstChild);
+    defter.appendChild(yilBlogu(yillar[0]));
+    basliklar(0);
+    defter.scrollTop = 0;
+    for (var s = 0; s < sekmeler.length; s++) {
+      var secili = s === hangi;
+      sekmeler[s].classList.toggle('etkin', secili);
+      sekmeler[s].setAttribute('aria-pressed', secili ? 'true' : 'false');
+    }
+  }
+
+  dYas.addEventListener('click', function () {
+    dur();
+    ilerle();
+  });
+
+  dOto.addEventListener('click', function () {
+    if (sayac) {
+      dur();
+    } else {
+      if (simdi >= sonIndeks) hayatiKur(hangi);
+      basla();
+    }
+  });
+
+  dBastan.addEventListener('click', function () { hayatiKur(hangi); });
+
+  // Sekmeler: hangi hayatın oynadığını seçer, seçilen hayat 0 yaştan başlar.
+  for (var si = 0; si < sekmeler.length; si++) {
+    (function (dugme) {
+      dugme.addEventListener('click', function () {
+        var hedef = parseInt(dugme.getAttribute('data-sekme'), 10);
+        if (isNaN(hedef) || hedef === hangi) return;
+        hayatiKur(hedef);
+        if (!azHareket) basla();
+      });
+    })(sekmeler[si]);
+  }
+
+  hayatiKur(hangi);
+
+  // Kart ekrana girince kendi oynamaya başlar; hareketi azaltan ayar
+  // açıksa beklemez, kullanıcı düğmeye basar.
+  if (!azHareket && 'IntersectionObserver' in window) {
+    var gozcu = new IntersectionObserver(function (girisler) {
+      for (var i = 0; i < girisler.length; i++) {
+        if (girisler[i].isIntersecting && !kendiBasladi) {
+          kendiBasladi = true;
+          basla();
+          gozcu.disconnect();
+        }
+      }
+    }, { threshold: 0.35 });
+    gozcu.observe(kart);
+  }
+})();
+</script>
+</body>
+</html>

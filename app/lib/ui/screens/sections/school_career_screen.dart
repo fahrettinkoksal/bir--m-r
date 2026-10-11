@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/event_pool_exam.dart';
+import '../../../domain/career/craft_mastery.dart';
 import '../../../domain/career/retirement.dart';
 import '../../../domain/education/education_path.dart';
 import '../../../domain/models/education.dart';
@@ -14,10 +15,21 @@ import '../../widgets/person_card.dart';
 import '../../widgets/person_detail_sheet.dart';
 import '../../widgets/interview_sheet.dart';
 import '../../../domain/career/military_service.dart';
+import '../../../domain/economy/business_engine.dart';
+import '../../../domain/models/business.dart';
+import '../../../domain/models/criminal_record.dart';
 import '../../../domain/models/military.dart';
+import 'business_page.dart';
+import 'legal_record_page.dart';
 import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../widgets/track_choice_sheet.dart';
 import 'education_career_pages.dart';
+import '../../../data/school_club_catalog.dart';
+import 'school_clubs_page.dart';
+import 'sports_career_page.dart';
+import '../../../domain/models/school_club_progress.dart';
+import '../../../domain/sports/football_career.dart';
 import '../../../text/turkish_text.dart';
 
 /// Okul / Meslek ana menüsü (NAV-001).
@@ -26,9 +38,20 @@ import '../../../text/turkish_text.dart';
 /// okulda değilken **Meslek**. İçerik küçük panellerle verilir; olmayan
 /// sistem için sahte düğme konmaz.
 class SchoolCareerScreen extends StatelessWidget {
-  const SchoolCareerScreen({super.key, required this.onBack});
+  const SchoolCareerScreen({
+    super.key,
+    required this.onBack,
+    this.openAfterSchool = false,
+  });
 
   final VoidCallback onBack;
+
+  /// Açılır açılmaz **Mezuniyet sonrası** sayfasına git (D-142).
+  ///
+  /// Faho'nun isteği: "bu kendi kendine gelen pop up menü yerine direkt
+  /// okul içerisine atabiliriz". Lise bitince artık pencere açılmıyor;
+  /// oyuncu Okul/Meslek ekranının başvuru sayfasına düşüyor.
+  final bool openAfterSchool;
 
   /// Menünün o anki başlığı; alt gezinme de bu adı kullanır.
   static String labelFor(GameState state) =>
@@ -42,7 +65,11 @@ class SchoolCareerScreen extends StatelessWidget {
     if (egitim.isStudent) {
       return _SchoolView(state: state, onBack: onBack);
     }
-    return _CareerView(state: state, onBack: onBack);
+    return _CareerView(
+      state: state,
+      onBack: onBack,
+      openAfterSchool: openAfterSchool,
+    );
   }
 }
 
@@ -51,7 +78,7 @@ class SchoolCareerScreen extends StatelessWidget {
 ///
 /// Burada yalnızca **okulla ilgili** gruplar bulunur. Arkadaşlık düzeyi ve
 /// özel ilişkiler İlişkiler menüsünden yönetilir.
-enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, liseTercihi }
+enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, kulupler, sporKariyeri }
 
 class _SchoolView extends StatefulWidget {
   const _SchoolView({required this.state, required this.onBack});
@@ -70,9 +97,22 @@ class _SchoolViewState extends State<_SchoolView> {
   String? _sonuc;
 
   void _go(_SchoolPage page) => setState(() {
-        _page = page;
-        _sonuc = null;
-      });
+    _page = page;
+    _sonuc = null;
+  });
+
+  /// Menü satırının alt yazısı: hangi kulüpte hangi roldesin.
+  String _aktifKulupOzeti(GameState state) {
+    final List<SchoolClubProgress> aktif = state.schoolClubs.activeOnes;
+    return aktif.map((SchoolClubProgress p) {
+      final String ad = kSchoolClubs
+          .where((SchoolClub c) => c.id == p.clubId)
+          .map((SchoolClub c) => c.name)
+          .firstOrNull ??
+          'Kulüp';
+      return '$ad — ${p.role.label}';
+    }).join(' · ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,8 +149,10 @@ class _SchoolViewState extends State<_SchoolView> {
           playerAge: state.player.age,
           onBack: () => _go(_SchoolPage.kok),
         );
-      case _SchoolPage.liseTercihi:
-        return TrackChoicePage(onBack: () => _go(_SchoolPage.kok));
+      case _SchoolPage.kulupler:
+        return SchoolClubsPage(onBack: () => _go(_SchoolPage.kok));
+      case _SchoolPage.sporKariyeri:
+        return SportsCareerPage(onBack: () => _go(_SchoolPage.kok));
       case _SchoolPage.kok:
         break;
     }
@@ -126,16 +168,32 @@ class _SchoolViewState extends State<_SchoolView> {
           icon: Icons.school_outlined,
           title: egitim.level?.label ?? 'Okul',
           rows: <({String label, String value})>[
-            (label: 'Sınıf', value: '${egitim.grade}. sınıf'),
+            // Sınıf satırı yalnızca **gerçekten bir sınıf varsa** yazılır.
+            //
+            // **Ölçülmüş hata — ekranda ham `null`.** Satır
+            // `'${egitim.grade}. sınıf'` diye koşulsuz kuruluyordu.
+            // `_SchoolView` hem 1-12. sınıf hem **üniversite**
+            // öğrencisine gösteriliyor (`isStudent = enrolled ||
+            // isUniversityStudent`) ve üniversitede `grade` boş; bot
+            // dökümünde 21 yaşındaki psikoloji öğrencisinin ekranında
+            // **"Sınıf: null. sınıf"** yazıyordu. Komşu satırların
+            // hepsinde zaten `!= null` koruması var; eksik olan tek
+            // satır buydu.
+            //
+            // Aynı sebeple "Son sınıfa kalan" da koşula alındı: o sayı
+            // 12. sınıfa kalan yılı anlatıyor, üniversite öğrencisi için
+            // anlamı yok ("0 yıl" diye görünüyordu).
+            //
+            // Üniversite öğrencisine K-12 kartının gösterilmesi ayrı bir
+            // konu; kararı Faho'ya bırakıldı (Q-198 EKİ).
+            if (egitim.grade != null)
+              (label: 'Sınıf', value: '${egitim.grade}. sınıf'),
             // Not ortalaması yalnızca gerçekten oluştuysa gösterilir
             // (Paket 13); uydurma not yazılmaz.
             if (egitim.gradeAverage != null)
               (label: 'Not ortalaman', value: '${egitim.gradeAverage}'),
             if (egitim.repeatedYears > 0)
-              (
-                label: 'Sınıf tekrarı',
-                value: '${egitim.repeatedYears} kez',
-              ),
+              (label: 'Sınıf tekrarı', value: '${egitim.repeatedYears} kez'),
             if (egitim.scholarshipSinceAge != null)
               (
                 label: 'Burs',
@@ -147,20 +205,18 @@ class _SchoolViewState extends State<_SchoolView> {
               (label: 'Yerleştirme puanı', value: '${egitim.placementScore}'),
             if (egitim.startedAtAge != null)
               (label: 'Başlangıç', value: '${egitim.startedAtAge} yaşında'),
-            (
-              label: 'Son sınıfa kalan',
-              value: '${12 - (egitim.grade ?? 12)} yıl',
-            ),
+            if (egitim.grade != null)
+              (
+                label: 'Son sınıfa kalan',
+                value: '${12 - egitim.grade!} yıl',
+              ),
           ],
         ),
         const SizedBox(height: 12),
         // Sınav yılı ayrı gösterilir (Paket 17): 8. ve 12. sınıf, okul
         // hayatının diğer yıllarından farklı geçer.
         if (ExamYear.isExamGrade(egitim.grade)) ...<Widget>[
-          _ExamYearPanel(
-            grade: egitim.grade!,
-            flags: state.storyFlags,
-          ),
+          _ExamYearPanel(grade: egitim.grade!, flags: state.storyFlags),
           const SizedBox(height: 12),
         ],
         // Ders çalışmak gerçek bir eylem: not ortalamasını ve zekâyı
@@ -168,8 +224,8 @@ class _SchoolViewState extends State<_SchoolView> {
         Builder(
           builder: (BuildContext context) {
             final GameController controller = GameScope.of(context);
-            final InteractionAvailability uygunluk =
-                controller.studyAvailability();
+            final InteractionAvailability uygunluk = controller
+                .studyAvailability();
             if (!uygunluk.isAllowed) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -202,7 +258,7 @@ class _SchoolViewState extends State<_SchoolView> {
             subtitle: 'Yerleştirme puanın: ${egitim.placementScore ?? 0}',
             icon: Icons.alt_route_outlined,
             accent: BirOmurAccents.mor,
-            onTap: () => _go(_SchoolPage.liseTercihi),
+            onTap: () => TrackChoiceSheet.show(context),
           ),
           const SizedBox(height: 10),
         ],
@@ -223,6 +279,34 @@ class _SchoolViewState extends State<_SchoolView> {
           trailingText: '${ogretmenler.length}',
           onTap: () => _go(_SchoolPage.ogretmenler),
         ),
+        const SizedBox(height: 10),
+        // Kulüpler (Paket AV): AU üyelik, rol ve sezon geçmişini kurdu
+        // ama oyuncu hiçbir ekranda göremiyordu.
+        MenuRow(
+          key: const Key('school_clubs_row'),
+          title: 'Kulüpler',
+          subtitle: state.schoolClubs.activeOnes.isEmpty
+              ? 'Okul takımları ve kulüplere katıl'
+              : _aktifKulupOzeti(state),
+          icon: Icons.emoji_events_outlined,
+          accent: BirOmurAccents.yesil,
+          trailingText: '${state.schoolClubs.activeOnes.length}',
+          onTap: () => _go(_SchoolPage.kulupler),
+        ),
+        // Spor Kariyeri yalnızca gerçekten bir futbol geçmişi varsa
+        // görünür: boş sayfaya götüren satır konmaz.
+        if (FootballPath.youthSummary(state).isNotEmpty ||
+            state.footballCareer != null) ...<Widget>[
+          const SizedBox(height: 10),
+          MenuRow(
+            key: const Key('school_sports_career_row'),
+            title: 'Spor Kariyeri',
+            subtitle: 'Futbol geçmişin ve profesyonellik durumu',
+            icon: Icons.sports_soccer_outlined,
+            accent: BirOmurAccents.cini,
+            onTap: () => _go(_SchoolPage.sporKariyeri),
+          ),
+        ],
         if (_sonuc != null) ...<Widget>[
           InfoPanel(icon: Icons.info_outline, text: _sonuc!),
           const SizedBox(height: 10),
@@ -230,7 +314,8 @@ class _SchoolViewState extends State<_SchoolView> {
         const SizedBox(height: 12),
         const InfoPanel(
           icon: Icons.menu_book_outlined,
-          text: 'Okul olayları yaş aldıkça ve gün içinde ilerledikçe '
+          text:
+              'Okul olayları yaş aldıkça ve gün içinde ilerledikçe '
               'karşına çıkar. Arkadaşlık düzeyini İlişkiler bölümünden '
               'takip edebilirsin. Sınav, not ve diploma sistemi henüz '
               'yazılmadı.',
@@ -286,7 +371,8 @@ class _PeoplePage extends StatelessWidget {
           const SizedBox(height: 4),
           const InfoPanel(
             icon: Icons.history,
-            text: 'Kademe değişse de tanıdığın kişiler kaybolmaz; '
+            text:
+                'Kademe değişse de tanıdığın kişiler kaybolmaz; '
                 'güncel sınıfında olmadıkları için ayrı listelenirler.',
           ),
           const SizedBox(height: 10),
@@ -305,13 +391,71 @@ class _PeoplePage extends StatelessWidget {
 }
 
 /// Meslek ekranının alt sayfaları.
-enum _CareerPage { kok, mezuniyetSonrasi, isArama, kariyerGecmisi, askerlik }
+/// Adli Geçmiş menüsünün alt metni: gerçek kayda bakar, uydurmaz.
+String _adliAltMetni(GameState state) {
+  final LegalState hukuk = state.legal;
+  if (hukuk.isImprisoned) {
+    return 'Cezaevindesin · tahliye ${hukuk.releaseAtAge} yaş';
+  }
+  final CriminalCase? acik = hukuk.openCase;
+  if (acik != null) {
+    return '${acik.stage.label} · ${acik.crime?.label ?? 'dosya'}';
+  }
+  // **Denetim dönemi satırda yazar (Paket BV).** Döküm turunda görüldü:
+  // tahliye olan oyuncunun bu satırı yalnızca "Sicilinde bir kayıt var"
+  // diyordu; denetim dönemi ve şehir dışı yasağı bir tık daha
+  // içerideydi. Oyuncunun baktığı yerde durması gereken bir durum
+  // (Paket BR/1 ile aynı ilke).
+  final int? denetim = hukuk.probationUntilAge;
+  if (denetim != null && state.player.age < denetim) {
+    return 'Denetim dönemi · $denetim yaşına kadar';
+  }
+  final int kayit = hukuk.record.length;
+  if (kayit == 0) return 'Adli kaydın temiz';
+  return kayit == 1 ? 'Sicilinde bir kayıt var' : 'Sicilinde $kayit kayıt var';
+}
+
+/// Kendi İşim menüsünün alt metni: gerçek kayda bakar.
+String _isAltMetni(GameState state) {
+  final Business? acik = BusinessEngine.openBusiness(state);
+  if (acik != null) {
+    return '${acik.type?.name ?? 'İşin'} · ${acik.conditionLabel}';
+  }
+  if (state.businesses.isNotEmpty) {
+    final Business son = state.businesses.last;
+    return 'Kapandı: ${son.type?.name ?? ''} '
+        '(${son.endReason?.label ?? ''})';
+  }
+  return 'Sermaye koy, kendi işini kur';
+}
+
+/// prototypeOnly: yarım zamanlı iş için en küçük yaş (D-131).
+///
+/// Katalogdaki en küçük `minAge` ile aynı; ekranda gerekçe yazarken
+/// kullanılır.
+const int _enKucukYarimZamanliYas = 16;
+
+enum _CareerPage {
+  kok,
+  mezuniyetSonrasi,
+  isArama,
+  kariyerGecmisi,
+  askerlik,
+  adliGecmis,
+  kendiIsi,
+  sporKariyeri,
+}
 
 class _CareerView extends StatefulWidget {
-  const _CareerView({required this.state, required this.onBack});
+  const _CareerView({
+    required this.state,
+    required this.onBack,
+    this.openAfterSchool = false,
+  });
 
   final GameState state;
   final VoidCallback onBack;
+  final bool openAfterSchool;
 
   @override
   State<_CareerView> createState() => _CareerViewState();
@@ -321,10 +465,21 @@ class _CareerViewState extends State<_CareerView> {
   _CareerPage _page = _CareerPage.kok;
   String? _sonuc;
 
+  @override
+  void initState() {
+    super.initState();
+    // Lise bitti ve karar bekleniyorsa doğrudan başvuru sayfası açılır
+    // (D-142); oyuncu menüde aramak zorunda kalmaz.
+    if (widget.openAfterSchool &&
+        EducationPath.needsAfterSchoolChoice(widget.state)) {
+      _page = _CareerPage.mezuniyetSonrasi;
+    }
+  }
+
   void _go(_CareerPage page) => setState(() {
-        _page = page;
-        _sonuc = null;
-      });
+    _page = page;
+    _sonuc = null;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -335,17 +490,41 @@ class _CareerViewState extends State<_CareerView> {
     switch (_page) {
       case _CareerPage.askerlik:
         return MilitaryPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.adliGecmis:
+        return LegalRecordPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.kendiIsi:
+        return BusinessPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.mezuniyetSonrasi:
         return AfterSchoolPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.isArama:
         return JobSearchPage(onBack: () => _go(_CareerPage.kok));
       case _CareerPage.kariyerGecmisi:
         return CareerHistoryPage(onBack: () => _go(_CareerPage.kok));
+      case _CareerPage.sporKariyeri:
+        return SportsCareerPage(
+          onBack: () => _go(_CareerPage.kok),
+          backLabel: 'Meslek',
+        );
       case _CareerPage.kok:
         break;
     }
 
-    final bool isAranabilir = egitim.finished || egitim.universityFinished;
+    // Öğrenci de iş arayabilir: yarım zamanlı işler ona açık (D-131).
+    // Tam zamanlı iş kapısı yine liseyi bitirmeye bağlı; bunu
+    // `JobMarket.requirementReason` denetliyor.
+    final bool yarimZamanliCagi =
+        state.player.age >= _enKucukYarimZamanliYas;
+    final bool isAranabilir = egitim.finished ||
+        egitim.universityFinished ||
+        (egitim.isSchoolStudent && yarimZamanliCagi);
+
+    // Başlık boş kalmasın: bu yıl tıklanabilir bir eylem var mı?
+    final bool eylemVar = EducationPath.needsAfterSchoolChoice(state) ||
+        state.hasPendingInterview ||
+        (isAranabilir && !state.career.isRetired) ||
+        (state.career.isEmployed && !state.career.isRetired) ||
+        (!state.career.isRetired &&
+            state.player.age >= Retirement.prototypeOnlyEarlyAge);
 
     return SectionScaffold(
       icon: Icons.work_rounded,
@@ -373,6 +552,12 @@ class _CareerViewState extends State<_CareerView> {
                 label: 'Toplam çalışma',
                 value: '${state.career.totalWorkYears(state.player.age)} yıl',
               ),
+              // İtibar emeklilikte de durur: bir ömrün emeği tek bir
+              // işverene bağlı değildir (D-155).
+              (
+                label: 'İtibar',
+                value: CraftMastery.reputationLabel(state),
+              ),
               (label: 'Cüzdan', value: state.player.walletLabel),
             ],
           )
@@ -386,10 +571,7 @@ class _CareerViewState extends State<_CareerView> {
             rows: <({String label, String value})>[
               if (state.career.title != state.career.label)
                 (label: 'Meslek', value: state.career.label),
-              (
-                label: 'Yıllık maaş',
-                value: trMoney(state.career.yearlySalary),
-              ),
+              (label: 'Yıllık maaş', value: trMoney(state.career.yearlySalary)),
               if (state.career.startedAtAge != null)
                 (
                   label: 'Başlangıç',
@@ -400,6 +582,21 @@ class _CareerViewState extends State<_CareerView> {
                   label: 'Bu işteki süren',
                   value: '${state.career.yearsInJob(state.player.age)} yıl',
                 ),
+              // Ustalık ve itibar (D-155): aynı işte otuz yıl çalışanla
+              // üç yıl çalışan arasındaki fark artık ekranda görünüyor.
+              if (CraftMastery.stageOf(state) != null)
+                (
+                  label: 'Ustalık',
+                  value: CraftMastery.yearsToNextStage(state) == null
+                      ? CraftMastery.stageOf(state)!.label
+                      : '${CraftMastery.stageOf(state)!.label} · '
+                          'sonraki basamağa '
+                          '${CraftMastery.yearsToNextStage(state)} yıl',
+                ),
+              (
+                label: 'İtibar',
+                value: CraftMastery.reputationLabel(state),
+              ),
               // İşin şehri yalnızca gerçekten biliniyorsa yazılır; şehir
               // değişince işe kendiliğinden son verilmez (Q-065).
               if (state.career.jobCity != null)
@@ -450,7 +647,33 @@ class _CareerViewState extends State<_CareerView> {
             ],
           ),
         const SizedBox(height: 12),
-        if (egitim.awaitingAfterSchoolChoice) ...<Widget>[
+        // Bu yıl gerçekten yapılabilecek şeyler tek başlık altında (D-138).
+        if (eylemVar) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Bu yıl yapabileceklerin',
+            accent: BirOmurAccents.mor,
+          ),
+          const SizedBox(height: 8),
+        ],
+        // Satır motorun kapısını okur, çıplak bayrağı değil.
+        //
+        // **Ölçülmüş hata.** Burada `egitim.awaitingAfterSchoolChoice`
+        // vardı. O bayrak "lise bitti, üniversite kaydı yok" demekten
+        // ibaret ve **hiç kapanmıyor**: oyuncu üniversiteye gitmemeye
+        // karar verdikten sonra da, otuzu geçtikten sonra da açık
+        // kalıyor. Bot dökümünde 35 yaşında, 13 yıldır CNC operatörü
+        // olarak çalışan, "Üretim şefi" unvanlı oyuncunun ekranında
+        // satır hâlâ duruyordu: "Mezuniyet sonrası · Üniversiteye
+        // başvur veya iş hayatına gir". 55 ve 70 yaşta da aynı.
+        //
+        // Motor bu durumu doğru biliyor: `needsAfterSchoolChoice` üç
+        // koşula bakıyor (bayrak + yaş ≤ 30 + "üniversiteye gitmedim"
+        // izi yok) ve yıl kilidini ona göre açıyor. Üstelik
+        // `skipUniversity`'nin kendi açıklaması "mezuniyet sonrası
+        // ekranı kapanır" diyor — ekran kapanmıyordu, yalnızca kilit
+        // kalkıyordu. Satır artık aynı kapıdan okuyor; iki yerde iki
+        // ayrı doğru kalmıyor.
+        if (EducationPath.needsAfterSchoolChoice(state)) ...<Widget>[
           MenuRow(
             title: 'Mezuniyet sonrası',
             subtitle: 'Üniversiteye başvur veya iş hayatına gir',
@@ -471,28 +694,14 @@ class _CareerViewState extends State<_CareerView> {
           ),
           const SizedBox(height: 10),
         ],
-        // Askerlik ayrı bir menüdür (Paket 29). Yükümlülük kapanmışsa
-        // da görünür: ne olduğu okunabilmeli.
-        if (state.player.age >= MilitaryService.prototypeOnlyMinAge ||
-            state.military.status != MilitaryStatus.yok) ...<Widget>[
-          MenuRow(
-            key: const Key('career_military_row'),
-            title: 'Askerlik',
-            subtitle: state.military.isCalled
-                ? 'Celbin geldi; bir karar vermen gerekiyor'
-                : state.military.label,
-            icon: Icons.military_tech_outlined,
-            accent: BirOmurAccents.yesil,
-            onTap: () => _go(_CareerPage.askerlik),
-          ),
-          const SizedBox(height: 10),
-        ],
         if (isAranabilir && !state.career.isRetired) ...<Widget>[
           MenuRow(
             title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
             subtitle: state.career.isEmployed
                 ? 'Önce mevcut işinden ayrılman gerekir'
-                : 'Koşullarını sağladığın işler',
+                : egitim.isSchoolStudent
+                    ? 'Okurken yapılabilecek yarım zamanlı işler'
+                    : 'Koşullarını sağladığın işler',
             icon: Icons.work_outline,
             accent: BirOmurAccents.mor,
             onTap: () => _go(_CareerPage.isArama),
@@ -504,8 +713,9 @@ class _CareerViewState extends State<_CareerView> {
         if (state.career.isEmployed && !state.career.isRetired) ...<Widget>[
           Builder(
             builder: (BuildContext context) {
-              final InteractionAvailability zam =
-                  GameScope.of(context).raiseAvailability();
+              final InteractionAvailability zam = GameScope.of(
+                context,
+              ).raiseAvailability();
               if (!zam.isAllowed) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -533,8 +743,9 @@ class _CareerViewState extends State<_CareerView> {
           ),
           Builder(
             builder: (BuildContext context) {
-              final InteractionAvailability terfi =
-                  GameScope.of(context).promotionAvailability();
+              final InteractionAvailability terfi = GameScope.of(
+                context,
+              ).promotionAvailability();
               if (!terfi.isAllowed) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -553,8 +764,9 @@ class _CareerViewState extends State<_CareerView> {
                   icon: Icons.military_tech_outlined,
                   accent: BirOmurAccents.pirinc,
                   onTap: () {
-                    final String? metin =
-                        GameScope.of(context).askForPromotion();
+                    final String? metin = GameScope.of(
+                      context,
+                    ).askForPromotion();
                     setState(() => _sonuc = metin);
                   },
                 ),
@@ -576,7 +788,8 @@ class _CareerViewState extends State<_CareerView> {
               return MenuRow(
                 key: const Key('career_retire_row'),
                 title: erken ? 'Erken emekli ol' : 'Emekli ol',
-                subtitle: 'Yıllık aylığın ${trMoney(aylik)} olur'
+                subtitle:
+                    'Yıllık aylığın ${trMoney(aylik)} olur'
                     '${erken ? ' (erken ayrılış kesintisiyle)' : ''}',
                 icon: Icons.self_improvement_outlined,
                 accent: BirOmurAccents.cini,
@@ -586,6 +799,70 @@ class _CareerViewState extends State<_CareerView> {
                 },
               );
             },
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Kayıtlar ve durum (D-138): geçmişe bakılan satırlar, bu yıl
+        // yapılacak işlerin altında kendi başlığında durur. Eskiden
+        // askerlik, kendi işi ve adli geçmiş "iş ara" ile aynı
+        // kolonda karışıyordu.
+        const MenuGroupTitle(
+          text: 'Kayıtlar ve durum',
+          accent: BirOmurAccents.cini,
+        ),
+        const SizedBox(height: 8),
+        // Askerlik ayrı bir menüdür (Paket 29). Yükümlülük kapanmışsa
+        // da görünür: ne olduğu okunabilmeli.
+        if (state.player.age >= MilitaryService.prototypeOnlyMinAge ||
+            state.military.status != MilitaryStatus.yok) ...<Widget>[
+          MenuRow(
+            key: const Key('career_military_row'),
+            title: 'Askerlik',
+            subtitle: MilitaryService.menuSubtitle(state),
+            icon: Icons.military_tech_outlined,
+            accent: BirOmurAccents.yesil,
+            onTap: () => _go(_CareerPage.askerlik),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Kendi İşim (D-132). Maaşlı işin yanında ikinci bir geçim
+        // yolu; 18 yaşından itibaren görünür.
+        if (state.player.age >= 18 ||
+            state.businesses.isNotEmpty) ...<Widget>[
+          MenuRow(
+            key: const Key('career_business_row'),
+            title: 'Kendi İşim',
+            subtitle: _isAltMetni(state),
+            icon: Icons.storefront_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => _go(_CareerPage.kendiIsi),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Adli Geçmiş (D-128). Sabıkanın oyundaki en somut etkisi iş
+        // başvurusu olduğu için burada durur. Kayıt yoksa da görünür:
+        // "temiz" bilgisi de bilgidir.
+        MenuRow(
+          key: const Key('career_legal_row'),
+          title: 'Adli Geçmiş',
+          subtitle: _adliAltMetni(state),
+          icon: Icons.gavel_outlined,
+          accent: BirOmurAccents.nar,
+          onTap: () => _go(_CareerPage.adliGecmis),
+        ),
+        const SizedBox(height: 10),
+        // Spor Kariyeri (Paket AV): profesyonel futbol bir kJobCatalog
+        // işi değil, kendi yolu var. Satır yalnızca gerçek bir futbol
+        // geçmişi varsa görünür.
+        if (FootballPath.youthSummary(state).isNotEmpty ||
+            state.footballCareer != null) ...<Widget>[
+          MenuRow(
+            key: const Key('career_sports_row'),
+            title: 'Spor Kariyeri',
+            subtitle: 'Futbol geçmişin ve profesyonellik durumu',
+            icon: Icons.sports_soccer_outlined,
+            accent: BirOmurAccents.yesil,
+            onTap: () => _go(_CareerPage.sporKariyeri),
           ),
           const SizedBox(height: 10),
         ],
@@ -623,7 +900,8 @@ class _CareerViewState extends State<_CareerView> {
             icon: Icons.work_outline,
             text: okulOncesi
                 ? 'Okul çağına gelince bu bölüm okul bilgilerini gösterecek.'
-                : 'İş arama liseyi bitirdikten sonra açılır.',
+                : 'Yarım zamanlı iş $_enKucukYarimZamanliYas yaşında, '
+                    'tam zamanlı iş liseyi bitirdikten sonra açılır.',
           ),
       ],
     );
@@ -717,7 +995,6 @@ class _PanelCard extends StatelessWidget {
   }
 }
 
-
 /// Sınav yılı paneli (Paket 17).
 ///
 /// Yalnızca **gerçekten olmuş** şeyleri yazar: sınav yılında olduğunu ve
@@ -766,10 +1043,7 @@ class _ExamYearPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'Sınav yılı',
-                  style: theme.textTheme.titleMedium,
-                ),
+                Text('Sınav yılı', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 3),
                 Text(
                   'Bu yılın sonunda $sinav var. $durum',

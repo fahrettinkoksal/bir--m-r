@@ -75,8 +75,21 @@ void main() {
   // ===================================================================
   group('Üniversite sınav puanı görünür ve saklanır', () {
     test('lise bitince puan bir kez hesaplanıp kaydedilir', () {
-      final GameController c = GameController(random: Random(5));
-      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 5);
+      // Tohum 7 kullanılıyor. Bu ikinci yeniden çıpalama:
+      //
+      // * D-162'de yatırım olayları havuza girince akış kaydı, tohum 5'te
+      //   oyuncu 8 yaşında vefat etti; tohum 6'ya geçildi.
+      // * Paket AC'de 24 piyasa olayı havuza girdi ve akış yeniden kaydı;
+      //   tohum 6'daki oyuncu artık liseyi bitiremiyor.
+      //
+      // Sebebi bilinen bir motor kırılganlığı (EKSIKLER §6):
+      // `EventEngine._pick` yaş kapısından **önce** kişiyi çözüyor, bu
+      // yüzden havuza olay eklemek bütün yaşlarda çekilişi kaydırıyor.
+      // **İddialar gevşetilmedi**, yalnızca tohum değişti. Kalıcı çözüm
+      // yaş kapısını kişi çözmeden önce bakmak; o bir motor değişikliği
+      // olduğu için onay bekliyor.
+      final GameController c = GameController(random: Random(7));
+      c.startNewLife(mode: StartMode.tamamenRastgele, seed: 7);
       advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 13);
       resolvePendingEvents(c);
 
@@ -361,7 +374,66 @@ void main() {
       final InteractionAvailability durum =
           market.applicationAvailability(state, magaza);
       expect(durum.isAllowed, isFalse);
-      expect(durum.reason, contains('seneye'));
+      // D-091: gerekçe artık işin adını ve ne zaman açılacağını yazıyor.
+      expect(durum.reason, contains('gelecek yılı'));
+      expect(durum.reason, contains(magaza.name));
+      // Başka mesleklere başvuru kapanmaz.
+      expect(durum.reason, contains('Başka mesleklere'));
+    });
+
+    test('bir mülakat kaybedince aynı iş o yıl kapanır, diğerleri açık kalır',
+        () {
+      // Faho'nun isteği: "mülakatta başarısız olduysam aynı yıl aynı işe
+      // yeniden başvuramayayım".
+      GameState state = mezun(30);
+      final JobResult r = market.apply(state, magaza, Random(1));
+      expect(r.outcome.applied, isTrue);
+      final InterviewQuestion soru = r.state.pendingInterview!.question!;
+      final int yanlis = (soru.correctIndex + 1) % soru.options.length;
+      state = market.answerInterview(r.state, yanlis).state;
+
+      expect(
+        market.applicationAvailability(state, magaza).isAllowed,
+        isFalse,
+        reason: 'Kaybedilen iş o yıl kapanmalı',
+      );
+
+      // Başka bir iş hâlâ açık olmalı.
+      final List<JobType> digerleri = market
+          .openJobs(state)
+          .where((JobType j) => j.id != magaza.id)
+          .toList(growable: false);
+      expect(digerleri, isNotEmpty);
+      expect(
+        market.applicationAvailability(state, digerleri.first).isAllowed,
+        isTrue,
+        reason: 'Başka mesleklere başvuru kapanmamalı',
+      );
+    });
+
+    test('kilit kapat-aç ile korunur ve yeni yaşta açılır', () {
+      GameState state = mezun(30);
+      final JobResult r = market.apply(state, magaza, Random(2));
+      final InterviewQuestion soru = r.state.pendingInterview!.question!;
+      final int yanlis = (soru.correctIndex + 1) % soru.options.length;
+      state = market.answerInterview(r.state, yanlis).state;
+
+      final GameState geri = decodeGameState(encodeGameState(state));
+      expect(
+        market.applicationAvailability(geri, magaza).isAllowed,
+        isFalse,
+        reason: 'Kilit kayıtta korunmalı',
+      );
+
+      // Yeni yaşta sayaç sıfırlanır.
+      final GameState yeniYas = geri.copyWith(
+        player: geri.player.copyWith(age: geri.player.age + 1),
+        interactionCounts: const <String, int>{},
+      );
+      expect(
+        market.applicationAvailability(yeniYas, magaza).isAllowed,
+        isTrue,
+      );
     });
   });
 

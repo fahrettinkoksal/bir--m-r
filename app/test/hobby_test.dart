@@ -340,12 +340,22 @@ void main() {
     /// Aktivitelerle beslenen hobiler yıllara yayıldığı için sınırsızdır;
     /// "okumak" yalnızca **bitirilen kitaplarla** beslenir ve bitmiş kitap
     /// yeniden okunamaz, yani tavanı kütüphanedeki kitap sayısıdır.
-    int? tavan(HobbyKind hobi) =>
-        hobi == HobbyKind.okuma ? kBookCatalog.length : null;
+    ///
+    /// **Paket CB:** satır sayısı değil **tekil kimlik** sayılır. Katalogda
+    /// üç kimlik iki kez tanımlıydı (22 satır, 19 tekil); ilerleme kaydı
+    /// kimliğe bağlı olduğu için ikinci satır hiç bitirilemiyordu ve bu
+    /// bekçi tavanı 22 sanıyordu.
+    int? tavan(HobbyKind hobi) => hobi == HobbyKind.okuma
+        ? kBookCatalog.map((BookInfo b) => b.id).toSet().length
+        : null;
 
-    test('okuma hobisinin tavanı kütüphanedeki kitap sayısıdır', () {
+    test('okuma hobisinin tavanı tekil kitap sayısıdır', () {
       expect(kBookCatalog, isNotEmpty);
-      expect(tavan(HobbyKind.okuma), kBookCatalog.length);
+      final Set<String> tekil =
+          kBookCatalog.map((BookInfo b) => b.id).toSet();
+      expect(tekil.length, kBookCatalog.length,
+          reason: 'Aynı kimlikten iki kitap var; ikincisi hiç bitirilemez');
+      expect(tavan(HobbyKind.okuma), tekil.length);
     });
 
     test('hiçbir hobi olayı ulaşılamayacak bir basamak istemiyor', () {

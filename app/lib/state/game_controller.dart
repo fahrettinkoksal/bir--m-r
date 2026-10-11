@@ -6,10 +6,27 @@ import 'package:flutter/foundation.dart';
 import '../data/activity_catalog.dart';
 import '../data/education_tracks.dart';
 import '../data/item_catalog.dart';
+import '../data/hobby_catalog.dart';
 import '../data/job_catalog.dart';
+import '../domain/features/feature_catalog.dart';
+import '../domain/career/career_synergy.dart';
+import '../domain/models/combat_career.dart';
+import '../domain/combat/combat_career_engine.dart';
+import '../domain/combat/sport_family_support.dart';
+import '../domain/combat/sport_rivalry.dart';
+import '../domain/combat/sport_school_conflict.dart';
+import '../domain/combat/sport_workload.dart';
+import '../data/school_club_catalog.dart';
+import '../domain/models/school_club_progress.dart';
+import '../domain/sports/football_career.dart';
+import '../domain/sports/football_pro_engine.dart';
+import '../domain/sports/school_club_engine.dart';
 import '../data/save/save_service.dart';
 import '../data/shop_catalog.dart';
 import '../data/social_catalog.dart';
+import '../domain/social/celebrity_engine.dart';
+import '../domain/models/celebrity_contact.dart';
+import '../data/celebrity_catalog.dart';
 import '../data/university_catalog.dart';
 
 import '../domain/generation/generation_continuation.dart';
@@ -18,8 +35,25 @@ import '../domain/generation/life_progression.dart';
 import '../domain/effects/effect_diff.dart';
 import '../domain/events/event_engine.dart';
 import '../domain/models/applied_effect.dart';
+import '../data/finger_catalog.dart';
+import '../domain/models/wealth.dart';
+import '../data/media_catalog.dart';
+import '../domain/social/media_opportunities.dart';
+import '../domain/family/adult_child_support.dart';
+import '../domain/family/child_advice.dart';
+import '../domain/family/child_school_issue.dart';
+import '../domain/family/family_decision.dart';
+import '../domain/family/family_disputes.dart';
+import '../domain/family/in_law_relations.dart';
+import '../domain/models/family_issue.dart';
+import '../domain/generation/parent_divorce.dart';
+import '../domain/interaction/elder_care.dart';
+import '../domain/interaction/elder_support.dart';
+import '../domain/interaction/child_naming.dart';
 import '../domain/interaction/family_interactions.dart';
 import '../domain/activities/activity_engine.dart';
+import '../domain/hobby/course_progress.dart';
+import '../domain/hobby/course_support.dart';
 import '../domain/models/martial_progress.dart';
 import '../domain/activities/martial_arts_engine.dart';
 import '../data/martial_arts_catalog.dart';
@@ -31,10 +65,19 @@ import '../domain/interaction/finger.dart';
 import '../domain/interaction/fertility_treatment.dart';
 import '../domain/career/career_progress.dart';
 import '../domain/career/job_market.dart';
+import '../domain/career/job_requirement.dart';
 import '../domain/career/retirement.dart';
 import '../domain/education/education_path.dart';
 import '../domain/education/school_performance.dart';
 import '../domain/interaction/adoption.dart';
+import '../data/investment_catalog.dart';
+import '../domain/economy/banking.dart';
+import '../domain/economy/investment_engine.dart';
+import '../domain/life/eye_exam.dart';
+import '../domain/life/life_end_choice.dart';
+import '../domain/models/loan.dart';
+import '../domain/models/pending_race.dart';
+import '../text/turkish_text.dart';
 import '../domain/life/notices.dart';
 import '../domain/life/life_verdict.dart';
 import '../domain/life/will.dart';
@@ -43,10 +86,28 @@ import '../domain/interaction/item_actions.dart';
 import '../data/license_catalog.dart';
 import '../domain/casino/blackjack.dart';
 import '../data/health_crisis_catalog.dart';
+import '../data/tour_catalog.dart';
 import '../domain/economy/housing.dart';
+import '../domain/economy/rental_engine.dart';
+import '../domain/economy/property_market.dart';
+import '../domain/economy/used_vehicle_market.dart';
 import '../domain/education/school_transfer.dart';
+import '../domain/law/crew_life.dart';
+import '../domain/life/chronic_engine.dart';
 import '../domain/life/health_crisis_engine.dart';
 import '../domain/models/pending_crisis.dart';
+import '../domain/models/pending_trial.dart';
+import '../domain/models/criminal_record.dart';
+import '../data/lawyer_catalog.dart';
+import '../data/business_catalog.dart';
+import '../data/gift_catalog.dart';
+import '../domain/economy/business_engine.dart';
+import '../domain/economy/business_market.dart';
+import '../domain/interaction/friend_circles.dart';
+import '../domain/interaction/friendship_depth.dart';
+import '../domain/models/business.dart';
+import '../domain/law/legal_engine.dart';
+import '../domain/law/prison_life.dart';
 import '../domain/casino/casino_rules.dart';
 import '../domain/licensing/license_office.dart';
 import '../domain/models/pending_license_exam.dart';
@@ -63,17 +124,24 @@ import '../domain/models/trip.dart';
 import '../domain/social/social_engine.dart';
 import '../data/military_catalog.dart';
 import '../domain/career/military_service.dart';
+import '../domain/interaction/family_planning.dart';
 import '../domain/interaction/intimacy.dart';
 import '../domain/interaction/marriage_engine.dart';
 import '../domain/interaction/parenthood.dart';
 import '../domain/interaction/romance.dart';
 import '../domain/models/game_event.dart';
+import '../data/insurance_catalog.dart';
+import '../domain/economy/insurance.dart';
+import '../domain/models/friend_circle.dart';
+import '../domain/models/insurance_policy.dart';
 import '../domain/models/game_state.dart';
 import '../domain/models/gender.dart';
 import '../domain/models/interaction.dart';
 import '../domain/models/owned_item.dart';
+import '../domain/models/rental.dart';
 import '../domain/models/pending_interview.dart';
 import '../domain/models/person.dart';
+import '../domain/models/pregnancy.dart';
 import '../data/pet_catalog.dart';
 import '../domain/pets/pet_care.dart';
 import '../domain/activities/outing.dart';
@@ -84,8 +152,8 @@ import '../domain/activities/outing.dart';
 /// sistemler eklendiğinde bu sınıfın üzerine modül eklenebilir.
 class GameController extends ChangeNotifier {
   GameController({Random? random, SaveService? saveService})
-      : _random = random ?? Random(),
-        _saveService = saveService;
+    : _random = random ?? Random(),
+      _saveService = saveService;
 
   final Random _random;
   final FamilyInteractions _interactions = const FamilyInteractions();
@@ -93,6 +161,7 @@ class GameController extends ChangeNotifier {
   final Romance _romance = const Romance();
   final MarriageEngine _marriages = const MarriageEngine();
   final Parenthood _parenthood = const Parenthood();
+  final FamilyPlanning _familyPlanning = const FamilyPlanning();
   final ItemActions _items = const ItemActions();
   final EducationPath _education = const EducationPath();
   final JobMarket _jobs = const JobMarket();
@@ -194,12 +263,12 @@ class GameController extends ChangeNotifier {
     final GameState? current = _state;
     if (service == null || current == null || _autoSaveBlocked) return;
     _hasSavedLife = true;
-    _saveChain = _saveChain.then((_) => service.save(current)).catchError(
-      (Object error) {
-        // Kayıt yazılamadıysa oyun durmaz; sorun kullanıcıya bildirilir.
-        _saveProblem = 'Oyun kaydedilemedi: $error';
-      },
-    );
+    _saveChain = _saveChain.then((_) => service.save(current)).catchError((
+      Object error,
+    ) {
+      // Kayıt yazılamadıysa oyun durmaz; sorun kullanıcıya bildirilir.
+      _saveProblem = 'Oyun kaydedilemedi: $error';
+    });
   }
 
   /// Bekleyen kayıt yazmalarının bitmesini bekler.
@@ -239,6 +308,52 @@ class GameController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Hayata kendi kararıyla son verme seçeneği açık mı? (D-084)
+  ///
+  /// Engel yoksa `null`; varsa gerekçe.
+  String? get lifeEndBlockReason {
+    final GameState? state = _state;
+    if (state == null) return 'Etkin bir hayat yok.';
+    return LifeEndChoice.blockReason(
+      age: state.player.age,
+      deceased: state.deceased,
+    );
+  }
+
+  /// Oyuncunun hayatını kendi kararıyla sonlandırır (D-084).
+  ///
+  /// Hayat **olağan ölüm yolundan** tamamlanır: kayıt silinmez, hayat
+  /// özeti ve Geçmiş Hayatlar arşivi çalışır, miras olağan kurallarıyla
+  /// işler. Hiçbir ödül ya da avantaj verilmez.
+  ///
+  /// Engel varsa durum **değişmez** ve gerekçe döner; boş metin başarı
+  /// demektir.
+  String endLifeByChoice() {
+    final GameState? state = _state;
+    if (state == null) return 'Etkin bir hayat yok.';
+    final String? engel = lifeEndBlockReason;
+    if (engel != null) return engel;
+
+    final int yas = state.player.age;
+    _state = state.copyWith(
+      deceased: true,
+      deathAge: yas,
+      deathCause: kLifeEndCause,
+      pendingEvent: null,
+      log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+        ...state.log,
+        LifeLogEntry(
+          age: yas,
+          text: LifeEndChoice.logLine(yas),
+          category: LogCategory.yasDegisimi,
+        ),
+      ]),
+    );
+    _autoSave();
+    notifyListeners();
+    return '';
+  }
+
   /// Kuşak devamında seçilebilecek çocuklar (Paket E3).
   ///
   /// Hayat tamamlanmadıysa veya hayatta çocuk yoksa liste boştur; arayüz
@@ -267,9 +382,7 @@ class GameController extends ChangeNotifier {
     final GameState? yeni = sonuc.state;
     if (yeni == null) return sonuc.blockReason;
 
-    _state = yeni.copyWith(
-      pastLives: List<LifeSummary>.unmodifiable(arsiv),
-    );
+    _state = yeni.copyWith(pastLives: List<LifeSummary>.unmodifiable(arsiv));
     // Yeni kuşak bilinçli bir seçimdir; kayıt yazmak güvenli.
     _autoSaveBlocked = false;
     _saveProblem = null;
@@ -285,11 +398,42 @@ class GameController extends ChangeNotifier {
   /// Oyuncu vefat etti mi? Hayat tamamlanmışsa yaş ilerlemez.
   bool get isDeceased => _state?.deceased ?? false;
 
+  /// Lise alanı seçimi bekliyor mu? (D-094)
+  ///
+  /// Liseye geçildiği yıl alan seçimi **zorunludur**; seçim yapılmadan yaş
+  /// alınamaz. Sessizce varsayılan alan seçilmez, oyuncu karar verir.
+  bool get needsTrackChoice => _state?.education.awaitingTrackChoice ?? false;
+
+  /// Lise bitti, sonraki yol seçimi bekliyor mu? (D-111)
+  ///
+  /// Faho bildirdi: "üni olayında da aynı şekilde ilk önce üni bölümümü
+  /// seçtikten sonra hayatta geri kalan aktivitelere karar vermeliyim".
+  /// Üniversiteye gitmemek de bir karardır ve kilidi açar.
+  bool get needsAfterSchoolChoice {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return EducationPath.needsAfterSchoolChoice(current);
+  }
+
+  /// Yaş almadan önce kapatılması gereken bir eğitim kararı var mı?
+  bool get needsEducationChoice => needsTrackChoice || needsAfterSchoolChoice;
+
   void ageUp() {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return;
     // Hayat tamamlandıysa yaş ilerlemez.
     if (current.deceased) return;
+    // Cevap bekleyen sağlık krizi varken de ilerlemez (Paket AQ).
+    //
+    // Kritik sağlık durumu bu kayıt üzerinden çalışıyor; oyuncu kritik
+    // ekranı görmeden yıl atlayamaz. `advanceOneYear` de aynı kapıyı
+    // ayrıca denetliyor — motor tek başına çağrıldığında da kural
+    // geçerli olsun diye.
+    if (current.hasPendingCrisis) return;
+    // Lise alanı seçilmeden yeni yaşa geçilmez (D-094).
+    if (current.education.awaitingTrackChoice) return;
+    // Lise bittikten sonraki yol seçilmeden de geçilmez (D-111).
+    if (EducationPath.needsAfterSchoolChoice(current)) return;
     _state = LifeProgression(_random).advanceOneYear(current);
     _autoSave();
     notifyListeners();
@@ -316,7 +460,12 @@ class GameController extends ChangeNotifier {
   ///
   /// Genel bir etkileşim kotası yoktur; sınır yalnızca aynı kişiyle aynı
   /// etkinliğin aynı yaştaki **getirisinde** işler (D-026).
-  InteractionOutcome? interact(String personId, InteractionKind kind) {
+  /// [giftId] verilirse hediye **oyuncunun seçtiği** olur (D-134).
+  InteractionOutcome? interact(
+    String personId,
+    InteractionKind kind, {
+    String? giftId,
+  }) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final InteractionResult result = _interactions.perform(
@@ -324,6 +473,7 @@ class GameController extends ChangeNotifier {
       personId: personId,
       kind: kind,
       rng: _random,
+      giftId: giftId,
     );
     // Oyun içi ilerlemeye bağlı olarak aralıklı bir ek olay çıkabilir
     // (D-023, D-024). Gerçek dünya dakikası beklenmez ve bir yaşta en fazla
@@ -341,6 +491,495 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  // =================================================================
+  // Paket AO — aile kararları
+  // =================================================================
+
+  /// §4: ebeveynler ayrıldı ve oyuncuya "kiminle kalacaksın?" soruluyor
+  /// mu?
+  ///
+  /// `ParentDivorce` Paket AO/1'de yazıldı ama hiçbir ekrandan
+  /// ulaşılamıyordu: boşanma oluyor, varsayılan hane kuruluyor, oyuncuya
+  /// hiç sorulmuyordu. Kararın gerçekten oyuncunun olması için kapı
+  /// buradan açılıyor.
+  bool hasParentDivorceChoice() {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return ParentDivorce.isPending(current);
+  }
+
+  // =================================================================
+  // Paket AP §56-§60 — bekleyen aile kararı (tek kapı)
+  // =================================================================
+
+  /// Oyuncunun karşısında bekleyen aile kararı; yoksa `null`.
+  ///
+  /// Yedi motorun hepsi tek bir soru olarak okunuyor; ekran yedi ayrı
+  /// kart yazmak zorunda değil.
+  FamilyDecision? pendingFamilyDecision() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDecisions.pending(current);
+  }
+
+  /// Oyuncu bekleyen aile kararını cevapladı.
+  ActivityOutcome? answerFamilyDecision(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final FamilyDecision? karar = FamilyDecisions.pending(current);
+    if (karar == null) return null;
+    final FamilyDecisionOption? secenek = karar.options
+        .where((FamilyDecisionOption o) => o.response == cevap)
+        .firstOrNull;
+    if (secenek != null && !secenek.isAllowed) {
+      return ActivityOutcome(
+        applied: false,
+        text: secenek.blockedReason!,
+      );
+    }
+    final ({GameState state, String text}) sonuc =
+        FamilyDecisions.answer(current, cevap, _random);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Kişi kartında görünecek aile durumu satırı; yoksa `null` (§59).
+  String? familyStatusLine(Person person) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDecisions.statusLineFor(current, person);
+  }
+
+  // =================================================================
+  // Paket AP §28-§32, §35-§36 — kardeş, bakım ve miras meseleleri
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen kardeş para isteği; yoksa `null`.
+  FamilyIssue? pendingSiblingMoneyAsk() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.pendingSiblingAsk(current);
+  }
+
+  /// Bu cevap neden seçilemiyor; seçilebiliyorsa `null` (D-095).
+  String? siblingMoneyBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.siblingAskBlockReason(current, cevap);
+  }
+
+  /// Oyuncu kardeşin para isteğine cevap verdi.
+  ActivityOutcome? respondSiblingMoneyAsk(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (FamilyDisputes.pendingSiblingAsk(current) == null) return null;
+    final String? engel =
+        FamilyDisputes.siblingAskBlockReason(current, cevap);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text}) sonuc =
+        FamilyDisputes.respondSiblingAsk(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Oyuncu kardeşinden borç ister. **Kardeş her zaman evet demez.**
+  ActivityOutcome? borrowFromSibling(String personId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final String? engel =
+        FamilyDisputes.borrowBlockReason(current, personId);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text, bool accepted}) sonuc =
+        FamilyDisputes.borrowFromSibling(current, personId, _random);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Oyuncuya sorulmayı bekleyen bakım meselesi; yoksa `null`.
+  FamilyIssue? pendingCareDispute() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.pendingCareDispute(current);
+  }
+
+  /// Bu bakım cevabı neden seçilemiyor; seçilebiliyorsa `null`.
+  String? careDisputeBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.careBlockReason(current, cevap);
+  }
+
+  /// Oyuncu bakım meselesinde kararını verdi.
+  ActivityOutcome? respondCareDispute(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (FamilyDisputes.pendingCareDispute(current) == null) return null;
+    final String? engel = FamilyDisputes.careBlockReason(current, cevap);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text}) sonuc =
+        FamilyDisputes.respondCare(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Oyuncuya sorulmayı bekleyen miras anlaşmazlığı; yoksa `null`.
+  FamilyIssue? pendingEstateDispute() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.pendingEstateDispute(current);
+  }
+
+  /// İtiraz edilen tutar.
+  int estateDisputeAmount() {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return FamilyDisputes.contestedAmount(current);
+  }
+
+  /// Bu cevap neden seçilemiyor; seçilebiliyorsa `null`.
+  String? estateDisputeBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FamilyDisputes.estateBlockReason(current, cevap);
+  }
+
+  /// Oyuncu miras anlaşmazlığında kararını verdi.
+  ActivityOutcome? respondEstateDispute(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (FamilyDisputes.pendingEstateDispute(current) == null) return null;
+    final String? engel = FamilyDisputes.estateBlockReason(current, cevap);
+    if (engel != null) return ActivityOutcome(applied: false, text: engel);
+    final ({GameState state, String text}) sonuc =
+        FamilyDisputes.respondEstateDispute(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  // =================================================================
+  // Paket AP §27 — eş ile kendi ailen arasında kalmak
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen aile çatışması; yoksa `null`.
+  FamilyIssue? pendingInLawConflict() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return InLawRelations.pendingConflict(current);
+  }
+
+  /// Oyuncu çatışmada taraf tuttu ya da tutmadı.
+  ///
+  /// Üç cevabın hepsi bir şeye mal olur; bedava seçenek yok (§27).
+  ActivityOutcome? resolveInLawConflict(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (!InLawRelations.isConflictPending(current)) return null;
+    final ({GameState state, String text}) sonuc =
+        InLawRelations.resolveConflict(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  // =================================================================
+  // Paket AP §8-§13 — yetişkin çocuğun para isteği ve eve dönüşü
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen para isteği; yoksa `null`.
+  FamilyIssue? pendingChildMoneyRequest() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return AdultChildSupport.pendingRequest(current);
+  }
+
+  /// Bu cevapta ödenecek tutar.
+  int childMoneyAmount(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return AdultChildSupport.amountFor(current, cevap);
+  }
+
+  /// Bu cevap neden seçilemiyor; seçilebiliyorsa `null` (D-095).
+  String? childMoneyBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return AdultChildSupport.blockReason(current, cevap);
+  }
+
+  /// Oyuncu çocuğunun para isteğine cevap verdi.
+  ///
+  /// Verilen para cüzdandan düşer ve çocuğun kaydına eklenir; toplam
+  /// değişmez (§9).
+  ActivityOutcome? respondChildMoneyRequest(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null || !AdultChildSupport.isPending(current)) return null;
+    final String? engel = AdultChildSupport.blockReason(current, cevap);
+    if (engel != null) {
+      return ActivityOutcome(applied: false, text: engel);
+    }
+    final ({GameState state, String text}) sonuc =
+        AdultChildSupport.respond(current, cevap);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// Eve dönmek isteyen çocuğun meselesi; yoksa `null`.
+  FamilyIssue? pendingChildMoveBack() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return AdultChildSupport.pendingMoveBack(current);
+  }
+
+  /// Oyuncu çocuğun eve dönmesine izin verdi ya da vermedi.
+  ///
+  /// Kabul edilirse çocuk gerçekten haneye girer ve yaşam gideri
+  /// artar (§12): dekoratif bir değişiklik değil.
+  ActivityOutcome? answerChildMoveBack(bool accept) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (AdultChildSupport.pendingMoveBack(current) == null) return null;
+    final ({GameState state, String text}) sonuc =
+        AdultChildSupport.answerMoveBack(current, accept);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  // =================================================================
+  // Paket AP §40-§41 — yetişkin çocuğa akıl vermek
+  // =================================================================
+
+  /// Bu çocuğa akıl verilebilir mi; verilemiyorsa gerekçesi (D-095).
+  String? childAdviceBlockReason(String personId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return ChildAdvice.blockReason(current, personId);
+  }
+
+  /// Oyuncu çocuğuyla oturup hayatı konuşur.
+  ///
+  /// Sonuç söylenmez: karar çocuğun kendisinde kalır (§1, §40). Tavsiye
+  /// yalnızca sonraki yılların ihtimalini biraz kaydırır ve üç yılda
+  /// söner.
+  ActivityOutcome? adviseChild(String personId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final String? engel = ChildAdvice.blockReason(current, personId);
+    if (engel != null) {
+      return ActivityOutcome(applied: false, text: engel);
+    }
+    final ({GameState state, String text}) sonuc =
+        ChildAdvice.advise(current, personId);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  // =================================================================
+  // Paket AP §5-§7 — çocuğun okul meselesi
+  // =================================================================
+
+  /// Oyuncuya sorulmayı bekleyen çocuk okul meselesi; yoksa `null`.
+  ///
+  /// Paket AO'da üç motorun hiçbir ekrandan ulaşılamadığı görülmüştü.
+  /// Bu yüzden kapı motorla aynı pakette açılıyor.
+  FamilyIssue? pendingChildSchoolIssue() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return ChildSchoolIssue.pendingIssue(current);
+  }
+
+  /// Bu seçenek neden seçilemiyor; seçilebiliyorsa `null` (D-095).
+  String? childSchoolBlockReason(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return ChildSchoolIssue.blockReason(current, cevap);
+  }
+
+  /// Oyuncu çocuğunun okul meselesinde kararını verdi.
+  ///
+  /// Karar sonucu **belirlemez** (§1): sonuç bir sonraki yıl açıklanır.
+  ActivityOutcome? chooseChildSchoolResponse(FamilyIssueResponse cevap) {
+    final GameState? current = _state;
+    if (current == null || !ChildSchoolIssue.isPending(current)) return null;
+    final String? engel = ChildSchoolIssue.blockReason(current, cevap);
+    if (engel != null) {
+      return ActivityOutcome(applied: false, text: engel);
+    }
+    final ({GameState state, String text}) sonuc =
+        ChildSchoolIssue.choose(current, cevap, _random);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(applied: true, text: sonuc.text);
+  }
+
+  /// §4: oyuncu hangi ebeveynle kalacağını seçti.
+  ///
+  /// Seçim yapılmazsa oyun kilitlenmez; boşanma anında kurulan
+  /// varsayılan hane geçerli kalır.
+  ActivityOutcome? chooseDivorceHousehold(DivorceHouseholdChoice secim) {
+    final GameState? current = _state;
+    if (current == null || !ParentDivorce.isPending(current)) return null;
+    _state = ParentDivorce.choose(current, secim);
+    _autoSave();
+    notifyListeners();
+    return ActivityOutcome(
+      applied: true,
+      text: secim == DivorceHouseholdChoice.anne
+          ? 'Annenle kalmayı seçtin.'
+          : 'Babanla kalmayı seçtin.',
+    );
+  }
+
+  /// §35: bu kişi için bakım kararı anlamlı mı?
+  bool needsElderCare(Person person) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return ElderCare.needsCare(current, person);
+  }
+
+  /// §35-§36: yaşlı ebeveyn bakımının bu yılki cepten maliyeti ve varsa
+  /// kardeş katkısı. Ekran gerçek sayıyı gösterir, tahmin etmez.
+  ({int cost, int siblingShare, List<String> siblingNames})? elderCareCost() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final int maliyet = ElderCare.yearlyCost();
+    final ({int amount, List<String> names}) katki =
+        ElderCare.siblingContribution(current, maliyet);
+    return (
+      cost: maliyet,
+      siblingShare: katki.amount,
+      siblingNames: katki.names,
+    );
+  }
+
+  /// §35: bakım kararını uygular.
+  ActivityOutcome? decideElderCare(String personId, ElderCareChoice secim) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final Person? kisi = current.personById(personId);
+    if (kisi == null || !ElderCare.needsCare(current, kisi)) return null;
+    final ElderCareResult sonuc = ElderCare.apply(
+      state: current,
+      parent: kisi,
+      choice: secim,
+      rng: _random,
+    );
+    // Para yetmediyse durum değişmez; "yardım ettin" yazılmaz.
+    final bool uygulandi = !identical(sonuc.state, current);
+    if (uygulandi) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return ActivityOutcome(applied: uygulandi, text: sonuc.text);
+  }
+
+  // =====================================================================
+  // Yaşlılıkta bakım (Paket CJ) — `ElderCare`'in oyuncuya dönük tersi
+  // =====================================================================
+
+  /// Oyuncunun bu yıl bakıma ihtiyacı var mı?
+  bool get elderSupportNeeded =>
+      _state != null && ElderSupport.needsSupport(_state!);
+
+  /// Bu yılın kararı verildi mi?
+  bool get elderSupportDecided =>
+      _state != null && ElderSupport.decidedThisYear(_state!);
+
+  /// Yanında olabilecek kişiler; sıra eş, sonra en yakın çocuk.
+  List<Person> get elderSupportHelpers =>
+      _state == null ? const <Person>[] : ElderSupport.helpers(_state!);
+
+  /// Bu yılın bakım masrafı ve gücü yeten çocukların katkısı.
+  ///
+  /// Ekran **gerçek** sayıyı gösterir, tahmin etmez.
+  ({
+    int cost,
+    int childShare,
+    int outOfPocket,
+    List<String> childNames
+  })? elderSupportCost() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({int amount, List<String> names, List<String> ids}) katki =
+        ElderSupport.contribution(current);
+    return (
+      cost: ElderSupport.yearlyCost(),
+      childShare: katki.amount,
+      outOfPocket: ElderSupport.outOfPocket(current),
+      childNames: katki.names,
+    );
+  }
+
+  /// Bu kapı neden kapalı? Engel yoksa boş metin (D-038).
+  String elderSupportBlockReason(ElderSupportChoice choice) => _state == null
+      ? 'Etkin bir hayat yok.'
+      : ElderSupport.blockReason(_state!, choice);
+
+  /// Yaşlılık kararını uygular. Engel varsa durum değişmez.
+  ActivityOutcome? decideElderSupport(
+    ElderSupportChoice choice, {
+    String? helperId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ElderSupportResult sonuc = ElderSupport.apply(
+      state: current,
+      choice: choice,
+      rng: _random,
+      helperId: helperId,
+    );
+    final bool uygulandi = !identical(sonuc.state, current);
+    if (uygulandi) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return ActivityOutcome(applied: uygulandi, text: sonuc.text);
+  }
+
+  /// Bu kişiye şu an **gerçekten alınabilecek** hediyeler (D-134).
+  ///
+  /// Liste cüzdana, kişinin yaşına ve zaten sahip olduğu eşyalara bakar;
+  /// alınamayacak hediye listede görünmez.
+  List<GiftItem> giftOptionsFor(String personId) {
+    final GameState? current = _state;
+    if (current == null) return const <GiftItem>[];
+    final Person? kisi = current.personById(personId);
+    if (kisi == null) return const <GiftItem>[];
+    return _interactions.giftOptions(current, kisi);
+  }
+
+  /// Bu hediye o kişiye nasıl gider? Arayüz **söylemez**; sürpriz kalır.
+  /// Yalnızca testler ve hayat günlüğü için okunabilir.
+  GiftReaction giftReactionPreview(String personId, GiftItem gift) {
+    final GameState? current = _state;
+    final Person? kisi = current?.personById(personId);
+    if (kisi == null) return GiftReaction.idare;
+    return giftReactionFor(
+      gift: gift,
+      relation: kisi.relation,
+      receiverAge: kisi.age,
+    );
   }
 
   /// Etkileşimin şu an mümkün olup olmadığı; arayüz bunu kullanarak
@@ -429,25 +1068,135 @@ class GameController extends ChangeNotifier {
 
   /// Eşyayı satar. Onay arayüzde alınır; burada tek bir satış uygulanır.
   ItemOutcome? sellItem(String itemId) => _runItemAction(
-        (GameState current) => _items.sell(state: current, itemId: itemId),
-      );
+    (GameState current) => _items.sell(state: current, itemId: itemId),
+  );
 
   /// Mağazadan ürün alır.
   /// Mağazadan ürün alır.
   ///
   /// [location] yalnızca konutlarda anlamlıdır: hangi şehirden alındığı
   /// mülk kaydına yazılır (D-043).
-  ItemOutcome? buyProduct(ShopProduct product, {String? location}) =>
+  ItemOutcome? buyProduct(
+    ShopProduct product, {
+    String? location,
+    int? price,
+    int? condition,
+  }) =>
       _runItemAction(
         (GameState current) => _items.buy(
           state: current,
           product: product,
           location: location,
+          price: price,
+          condition: condition,
         ),
+      );
+
+  /// Oyuncunun **yaşadığı ildeki** ev/araç ilanları.
+  ///
+  /// Başka ilin ilanı listeye girmez (Faho'nun kesin kararı). Taşınınca
+  /// havuz kendiliğinden yenilenir.
+  List<PropertyListing> listings(ShopCategory category) {
+    final GameState? current = _state;
+    if (current == null) return const <PropertyListing>[];
+    return PropertyMarket.listingsFor(current, category);
+  }
+
+  /// İlan panosundan satın alır: fiyat ve şehir ilandan gelir.
+  ItemOutcome? buyListing(PropertyListing listing) => buyProduct(
+        listing.product,
+        location: listing.city,
+        price: listing.price,
+      );
+
+  /// Oyuncunun **yaşadığı ildeki** 2. el araç ilanları (D-137).
+  List<UsedVehicleListing> usedVehicleListings() {
+    final GameState? current = _state;
+    if (current == null) return const <UsedVehicleListing>[];
+    return UsedVehicleMarket.listingsFor(current);
+  }
+
+  /// 2. el araç ilanından satın alır.
+  ///
+  /// Fiyat ilandan gelir ve araç **ilanın kondisyonuyla** envantere girer:
+  /// yorgun bir ilan yorgun bir araç demektir.
+  ItemOutcome? buyUsedVehicle(UsedVehicleListing listing) => buyProduct(
+        listing.product,
+        price: listing.price,
+        condition: listing.condition,
       );
 
   /// Eşya işlemlerinin ortak akışı: olay varken çalışmaz, yalnızca durum
   /// gerçekten değiştiyse kaydeder.
+
+  // =====================================================================
+  // Her sonuç ekranda görünür (D-114)
+  // =====================================================================
+
+  /// Aktivite sonucunu **pop-up** bildirime çevirir (D-114).
+  ///
+  /// Faho bildirdi: "TÜM AMA TÜM BİLDİRİMLER POP UP OLMALI ... KULLANICI
+  /// ANLAMALI". Sonuç metni sayfanın içinde küçük bir panelde kalıyordu;
+  /// oyuncu ne olduğunu görmeden başka ekrana geçebiliyordu. Artık her
+  /// uygulanmış eylem kuyruğa bir bildirim koyar.
+  ///
+  /// Etkiler **uydurulmaz**: eylemin öncesi ve sonrası karşılaştırılarak
+  /// hesaplanır, bu yüzden tavana dayanmış bir değer için sahte artış
+  /// yazılamaz (D-074, D-096 ile aynı kural).
+  /// Oyuncunun **anlamlı bir eylemi** ilerleme sayılır (D-125).
+  ///
+  /// Gerçek hata: `progressSinceLastEvent` yalnızca **aile
+  /// etkileşimlerinde** artıyordu. Aktiviteler, iş, sosyal medya, gezi,
+  /// hayvan — hiçbiri saymıyordu. Oysa motor "aynı yaşta ek olay" için
+  /// bu sayaca bakıyor (D-023, D-024). Sonuç: oyuncu bütün yıl aktivite
+  /// yapsa bile ek olay eşiğini hiç geçemiyordu ve **aynı okul yılına
+  /// sığması gereken zincirler** (sınav zinciri) hiçbir zaman
+  /// tamamlanamıyordu.
+  ///
+  /// Sayaç yalnızca durum gerçekten değiştiyse artar; boş tekrar
+  /// ilerleme sayılmaz (aile etkileşimindeki kuralın aynısı).
+  GameState _countProgress(GameState before, GameState after) {
+    if (identical(before, after)) return after;
+    GameState next = after.copyWith(
+      progressSinceLastEvent: after.progressSinceLastEvent + 1,
+    );
+    // İlerleme biriktiyse ek olay **burada** sorulur. Eskiden bu soru
+    // yalnızca aile etkileşiminden sonra soruluyordu; aktivite yapan
+    // oyuncuya hiç sorulmuyordu (D-125).
+    final ActiveEvent? ek = _events.progressEvent(next, _random);
+    if (ek != null) {
+      next = next.copyWith(
+        pendingEvent: ek,
+        extraEventsThisAge: next.extraEventsThisAge + 1,
+      );
+    }
+    return next;
+  }
+
+  GameState _announce(
+    GameState before,
+    GameState after,
+    String text, {
+    String title = 'Sonuç',
+    String tag = 'eylem',
+  }) {
+    if (text.trim().isEmpty) return after;
+    _noticeSeq++;
+    return Notices.enqueue(after, <PendingNotice>[
+      PendingNotice(
+        id: 'aktivite-$tag-${after.player.age}-$_noticeSeq',
+        kind: NoticeKind.aktivite,
+        age: after.player.age,
+        title: title,
+        text: text,
+        effects: diffAppliedEffects(before, after),
+      ),
+    ]);
+  }
+
+  /// Aynı yıl içinde açılan bildirimlerin kimliği çakışmasın diye sayaç.
+  int _noticeSeq = 0;
+
   ItemOutcome? _runItemAction(ItemActionResult Function(GameState) islem) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
@@ -458,7 +1207,13 @@ class GameController extends ChangeNotifier {
       return result.outcome;
     }
 
-    _state = result.state;
+    _state = _announce(
+      current,
+      _countProgress(current, result.state),
+      result.outcome.text,
+      title: 'Eşya',
+      tag: 'esya',
+    );
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -477,8 +1232,8 @@ class GameController extends ChangeNotifier {
 
   /// Lise alanını seçer.
   EducationOutcome? chooseTrack(EducationTrack track) => _runEducation(
-        (GameState current) => _education.chooseTrack(current, track),
-      );
+    (GameState current) => _education.chooseTrack(current, track),
+  );
 
   /// Başvurulabilecek üniversite bölümleri.
   List<UniversityProgram> availablePrograms() {
@@ -495,9 +1250,8 @@ class GameController extends ChangeNotifier {
       );
 
   /// Üniversiteye gitmeyip iş hayatına yönelir.
-  EducationOutcome? skipUniversity() => _runEducation(
-        (GameState current) => _education.skipUniversity(current),
-      );
+  EducationOutcome? skipUniversity() =>
+      _runEducation((GameState current) => _education.skipUniversity(current));
 
   EducationOutcome? _runEducation(EducationResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -552,7 +1306,10 @@ class GameController extends ChangeNotifier {
   void ensureUniversityExamScore() {
     final GameState? current = _state;
     if (current == null) return;
-    final GameState next = _education.ensureUniversityExamScore(current, _random);
+    final GameState next = _education.ensureUniversityExamScore(
+      current,
+      _random,
+    );
     if (identical(next, current)) return;
     _state = next;
     _autoSave();
@@ -564,13 +1321,16 @@ class GameController extends ChangeNotifier {
 
   /// Mülakat sorusunu cevaplar.
   JobOutcome? answerInterview(int optionIndex) => _runJob(
-        (GameState current) =>
-            _jobs.answerInterview(current, optionIndex, _random),
-      );
+    (GameState current) => _jobs.answerInterview(current, optionIndex, _random),
+    // Mülakatın sonucu ve doğru cevabın açıklaması mülakat penceresinde
+    // yazar; üstüne bildirim koymak o açıklamayı kapatır (D-114).
+    announce: false,
+  );
 
   /// Mülakatı yarıda bırakır.
   JobOutcome? cancelInterview() => _runJob(
         (GameState current) => _jobs.cancelInterview(current),
+        announce: false,
       );
 
   /// Başvurunun şu an mümkün olup olmadığı.
@@ -583,9 +1343,8 @@ class GameController extends ChangeNotifier {
   }
 
   /// İşe başvurur.
-  JobOutcome? applyForJob(JobType job) => _runJob(
-        (GameState current) => _jobs.apply(current, job, _random),
-      );
+  JobOutcome? applyForJob(JobType job) =>
+      _runJob((GameState current) => _jobs.apply(current, job, _random));
 
   /// İşten ayrılır.
   JobOutcome? quitJob() => _runJob((GameState current) => _jobs.quit(current));
@@ -637,6 +1396,138 @@ class GameController extends ChangeNotifier {
     return sonuc.text;
   }
 
+  // --- Okul kulüpleri (Paket AV) ---------------------------------------
+  //
+  // Motorun imzaları değiştirilmedi; geri bildirim metni burada üretilir.
+
+  static const SchoolClubEngine _kulupMotoru = SchoolClubEngine();
+
+  /// Bu kulübe şu an katılmanın engeli (yoksa `null`).
+  ///
+  /// Gerekçe metni motordan gelir; ekranda kuru "olmaz" yazılmaz.
+  ClubBlock? clubBlock(SchoolClub club) {
+    final GameState? current = _state;
+    if (current == null) return const ClubBlock('Oyun yüklenmedi.');
+    return _kulupMotoru.blockFor(current, club);
+  }
+
+  /// Kulübe katılmayı dener. Seçmeli kulüpte sonuç kesin değildir.
+  ClubJoinOutcome joinClub(SchoolClub club) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) {
+      return const ClubJoinOutcome(
+        accepted: false,
+        reason: 'Önce ekrandaki olayı sonuçlandır.',
+      );
+    }
+    final ClubJoinOutcome sonuc = _kulupMotoru.join(current, club, _random);
+    final GameState? yeni = sonuc.state;
+    if (sonuc.accepted && yeni != null) {
+      _state = yeni;
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc;
+  }
+
+  /// Bu yıl bu kulüpte antrenman yapılabilir mi?
+  bool canTrainClub(String clubId) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return _kulupMotoru.canTrain(current, clubId);
+  }
+
+  /// Antrenmana gider; beceri değişimini metin olarak döner.
+  ///
+  /// Yılda bir kez (motorun kuralı). Beceri hiç artmazsa bu da dürüstçe
+  /// yazılır; "arttı" diye uydurulmaz.
+  String? trainClub(String clubId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final SchoolClubProgress? once = current.schoolClubs.activeFor(clubId);
+    if (once == null) return null;
+    if (!_kulupMotoru.canTrain(current, clubId)) {
+      return 'Bu yılın antrenmanını yaptın. Gelecek yıl yine çalışabilirsin.';
+    }
+    final GameState sonra = _kulupMotoru.train(current, clubId, _random);
+    final SchoolClubProgress? yeniKayit = sonra.schoolClubs.activeFor(clubId);
+    _state = sonra;
+    _autoSave();
+    notifyListeners();
+    final int fark = (yeniKayit?.skill ?? once.skill) - once.skill;
+    if (fark <= 0) {
+      return 'Çalıştın ama bu antrenman beceriye yansımadı. '
+          'Beceri ${once.skill}.';
+    }
+    return 'Antrenman iyi geçti. Beceri ${once.skill} → '
+        '${yeniKayit?.skill ?? once.skill}.';
+  }
+
+  /// Kulüpten ayrılır. Geçmiş kaydı **silinmez**.
+  void leaveClub(String clubId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return;
+    if (current.schoolClubs.activeFor(clubId) == null) return;
+    _state = _kulupMotoru.leave(current, clubId);
+    _autoSave();
+    notifyListeners();
+  }
+
+  // --- Profesyonel futbol (Paket AY) -----------------------------------
+
+  static const FootballProEngine _futbolMotoru = FootballProEngine();
+
+  /// Profesyonel denemeye şu an girilebilir mi?
+  ///
+  /// Kapı kapalıysa gerekçesi `footballEligibility().reason` içinde.
+  bool canAttemptFootballTrial() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return false;
+    if (current.footballCareer != null) return false;
+    // Deneme yılda bir kez: girildiyse düğme bu yıl kapanır.
+    if (current.footballTrialAge == current.player.age) return false;
+    return FootballPath.evaluate(current).eligible;
+  }
+
+  /// Profesyonel denemeye girer; sonucu gerekçesiyle döner.
+  ///
+  /// Kabul **garanti değildir** — kapı açık olsa bile kadro dolabilir.
+  ({bool accepted, String reason}) attemptFootballTrial() {
+    final GameState? current = _state;
+    if (current == null) {
+      return (accepted: false, reason: 'Oyun yüklenmedi.');
+    }
+    if (current.hasPendingEvent) {
+      return (accepted: false, reason: 'Önce ekrandaki olayı sonuçlandır.');
+    }
+    final ({GameState state, bool accepted, String reason}) sonuc =
+        _futbolMotoru.attemptTrial(current, _random);
+    if (sonuc.accepted) {
+      _state = sonuc.state;
+      _autoSave();
+      notifyListeners();
+    }
+    return (accepted: sonuc.accepted, reason: sonuc.reason);
+  }
+
+  /// Futbolu kendi kararıyla bırakır.
+  void retireFromFootball() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return;
+    final FootballCareer? k = current.footballCareer;
+    if (k == null || !k.active) return;
+    _state = _futbolMotoru.retire(current);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Profesyonel futbol yolunun o anki durumu ve gerekçesi.
+  FootballEligibility? footballEligibility() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return FootballPath.evaluate(current);
+  }
+
   /// Emeklilik şu an mümkün mü?
   InteractionAvailability retirementAvailability() {
     final GameState? current = _state;
@@ -667,32 +1558,41 @@ class GameController extends ChangeNotifier {
 
   /// Zam ister; sonucu metin olarak döner.
   String? askForRaise() => _runCareerRequest(
-        (GameState current) => CareerProgress.askForRaise(current, _random),
-      );
+    (GameState current) => CareerProgress.askForRaise(current, _random),
+  );
 
   /// Terfi ister; sonucu metin olarak döner.
   String? askForPromotion() => _runCareerRequest(
-        (GameState current) =>
-            CareerProgress.askForPromotion(current, _random),
-      );
+    (GameState current) => CareerProgress.askForPromotion(current, _random),
+  );
 
   String? _runCareerRequest(CareerRequestResult Function(GameState) islem) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final CareerRequestResult sonuc = islem(current);
     if (!sonuc.applied) return sonuc.text;
-    _state = sonuc.state;
+    _state = _announce(current, sonuc.state, sonuc.text,
+        title: 'İş yerinden yanıt', tag: 'kariyer');
     _autoSave();
     notifyListeners();
     return sonuc.text;
   }
 
-  JobOutcome? _runJob(JobResult Function(GameState) islem) {
+  JobOutcome? _runJob(
+    JobResult Function(GameState) islem, {
+    /// Sonucu kendi penceresinde gösteren akışlar bildirim istemez.
+    bool announce = true,
+  }) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final JobResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+    // Mülakat penceresi açıldıysa sonucu **o pencere** anlatır; üstüne
+    // bir bildirim daha koymak ekranı kapatır (D-114).
+    _state = (!announce || result.state.hasPendingInterview)
+        ? result.state
+        : _announce(current, result.state, result.outcome.text,
+            title: 'Meslek', tag: 'meslek');
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -724,27 +1624,449 @@ class GameController extends ChangeNotifier {
   /// mutluluğu düşürebilir de; bu yüzden ayrı yoldan geçer (Paket 27).
   /// Yönlendirme tek yerde yapılır ki arayüz hangi eylemin fal olduğunu
   /// bilmek zorunda kalmasın.
-  /// [companion] verilirse eylem **birlikte** yapılır (Paket 41). Ücret ve
-  /// yıllık kota tek yerde kaldığı için birlikte gitmek ikinci kez para
-  /// götürmez.
+  /// [companion] verilirse eylem **birlikte** yapılır (Paket 41).
+  /// [others] ile birden fazla kişi götürülebilir (D-133); ücret kişi
+  /// sayısına göre artar ama yıllık kota tek kalır.
   ActivityOutcome? performActivity(
     ActivityAction action, {
     Person? companion,
-  }) =>
-      _runActivity(
-        (GameState current) => ActivityEngine.isFortune(action)
-            ? _activities.tellFortune(
-                state: current,
-                action: action,
-                rng: _random,
-              )
-            : _activities.perform(
-                state: current,
-                action: action,
-                rng: _random,
-                companion: companion,
-              ),
-      );
+    List<Person> others = const <Person>[],
+  }) => _runActivity(
+    (GameState current) => ActivityEngine.isFortune(action)
+        ? _activities.tellFortune(state: current, action: action, rng: _random)
+        : _activities.perform(
+            state: current,
+            action: action,
+            rng: _random,
+            companion: companion,
+            others: others,
+          ),
+  );
+
+  // =====================================================================
+  // Arkadaş grubu (Paket CI)
+  // =====================================================================
+  //
+  // **Grup yeni bir etkileşim motoru değil.** Buluşma `performActivity`
+  // yolundan geçiyor (Paket X/2'nin çoklu refakatçi desteği): maliyet,
+  // yıllık kota, bağ ve mutluluk tek yerden okunuyor. Burada tutulan
+  // tek şey **kalıcı kimlik** — kimlerle takıldığın ve ne zamandır.
+
+  /// Süren grup; yoksa `null`.
+  FriendCircle? get friendCircle =>
+      _state == null ? null : FriendCircles.activeOf(_state!);
+
+  /// Grubun yaşayan ve küs olmayan üyeleri.
+  List<Person> get friendCircleMembers {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    final FriendCircle? grup = FriendCircles.activeOf(current);
+    if (grup == null) return const <Person>[];
+    return FriendCircles.membersOf(current, grup);
+  }
+
+  /// Gruba çağrılabilecek adaylar (bağa göre azalan sırada).
+  List<Person> get friendCircleCandidates =>
+      _state == null ? const <Person>[] : FriendCircles.eligible(_state!);
+
+  /// Grup kurmaya engel; engel yoksa boş metin.
+  String get friendCircleBlockReason => _state == null
+      ? 'Etkin bir hayat yok.'
+      : FriendCircles.blockReason(_state!);
+
+  /// Grubu kurar.
+  ({bool applied, String message}) formFriendCircle() {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Etkin bir hayat yok.');
+    }
+    final ({GameState state, bool applied, String text}) sonuc =
+        FriendCircles.form(current);
+    if (!sonuc.applied) return (applied: false, message: sonuc.text);
+    // Grup kurmak anlamlı bir ilerlemedir (D-125) ve sonucu pencerede
+    // görünür (D-096: her uygulanmış eylem bildirim bırakır).
+    _state = _countProgress(
+      current,
+      _announce(
+        current,
+        sonuc.state,
+        sonuc.text,
+        title: 'Arkadaş grubu',
+        tag: 'grup',
+      ),
+    );
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.text);
+  }
+
+  /// Grupla buluşur: eylem **aktivite yolundan** uygulanır.
+  ///
+  /// Üye yoksa `null` döner. Buluşma gerçekleştiyse grubun son buluşma
+  /// yaşı kayda girer.
+  ActivityOutcome? meetFriendCircle(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    // **O gün kim gelebiliyorsa onunla.** İlk yazımda bütün üyeler
+    // refakatçi olarak gönderiliyordu ve ölçümde 120 hayatta neredeyse
+    // hiç buluşma olmadı: `Outing.companionAvailability` arkadaşın
+    // bağının **o anda** 45 ve üstü olmasını istiyor, bağ ise her yıl
+    // sönüyor (D-130). Yani grup kuruluyor, bir süre sonra kimse
+    // "gelebilir" sayılmıyor ve buluşma sessizce düşüyordu. Grup kaydı
+    // yerinde kalır; gelen gelir.
+    final List<Person> uyeler = friendCircleMembers
+        .where((Person p) =>
+            Outing.companionAvailability(current, action, p).isAllowed)
+        .toList(growable: false);
+    if (uyeler.isEmpty) return null;
+    final ActivityOutcome? sonuc = performActivity(
+      action,
+      companion: uyeler.first,
+      others: uyeler.skip(1).toList(growable: false),
+    );
+    if (sonuc == null || !sonuc.applied) return sonuc;
+    final GameState? sonra = _state;
+    if (sonra != null) {
+      _state = FriendCircles.markMet(sonra);
+      _autoSave();
+      notifyListeners();
+    }
+    return sonuc;
+  }
+
+  // =====================================================================
+  // Kurs ücreti ve aileden destek (Paket AJ)
+  // =====================================================================
+
+  /// Bu kursun bugünkü durumu: kaçıncı ders, hangi kademe, ne kadar
+  /// ücret, kaç ücretsiz ders kaldı. Kurs değilse `null`.
+  CourseStanding? courseStanding(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CourseProgress.standingFor(current, action);
+  }
+
+  /// Bu kursun beslediği hobinin kariyer avantajları (Paket AK, §15).
+  ///
+  /// Liste meslek kataloğundan türer; hobisi ilerlememişse boş döner.
+  /// Her satır: meslek adı + avantaj sözcüğü. Yüzde gösterilmez (§16).
+  List<({String jobName, String advice, bool isActive})> courseCareerEdges(
+    ActivityAction action,
+  ) {
+    final GameState? current = _state;
+    if (current == null) return const <({String jobName, String advice, bool isActive})>[];
+    final HobbyKind? hobi = hobbyForActivity(action.id);
+    if (hobi == null) return const <({String jobName, String advice, bool isActive})>[];
+
+    final List<({String jobName, String advice, bool isActive})> sonuc =
+        <({String jobName, String advice, bool isActive})>[];
+    for (final JobType meslek in kJobCatalog) {
+      final double pay = CareerSynergyRules.scoreFor(current, meslek);
+      if (pay <= 0) continue;
+      final List<SynergyStanding> baglar =
+          CareerSynergyRules.standingsFor(current, meslek);
+      // Yalnızca BU hobinin beslediği meslekler listelenir.
+      if (!baglar.any((SynergyStanding b) => b.hobby.id == hobi.id)) continue;
+      final SynergyStanding bu =
+          baglar.firstWhere((SynergyStanding b) => b.hobby.id == hobi.id);
+      sonuc.add((
+        jobName: meslek.name,
+        advice: CareerSynergyRules.label(bu.score),
+        isActive: bu.isActive,
+      ));
+    }
+    return sonuc;
+  }
+
+  /// İş ilanında gösterilecek avantaj satırı; avantaj yoksa `null` (§16).
+  String? jobSynergyNote(JobType job) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CareerSynergyRules.applicationNote(current, job);
+  }
+
+  /// Bu kursun götürdüğü meslek yolu satırı; yol yoksa `null` (§13).
+  String? courseLifePath(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CourseProgress.lifePathLabel(current, action);
+  }
+
+  /// Bu kursun ücreti için destek istenebilecek kişiler.
+  ///
+  /// Ebeveyn yoksa liste boş döner: ekranda olmayan bir seçenek
+  /// gösterilmez (§4).
+  List<Person> courseSponsors(ActivityAction action) {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return CourseSupport.sponsorsFor(current)
+        .where((Person p) =>
+            CourseSupport.blockReason(current, action, p).isEmpty)
+        .toList(growable: false);
+  }
+
+  /// Destek istemenin engeli; yoksa boş metin.
+  String courseSupportBlockReason(ActivityAction action, Person person) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return CourseSupport.blockReason(current, action, person);
+  }
+
+  /// Aileden kurs ücreti için destek ister.
+  ///
+  /// Kabul edilirse ücret **ailenin yıllık bütçesinden** düşer ve o
+  /// hobiye kredi olarak yazılır; ders yapılırken harcanır. Para yoktan
+  /// yaratılmaz (§8).
+  CourseSupportOutcome? askFamilyForCourse(
+    ActivityAction action,
+    String personId,
+  ) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final Person? kisi = current.personById(personId);
+    if (kisi == null) return null;
+    final CourseSupportResult sonuc = CourseSupport.ask(
+      state: current,
+      action: action,
+      person: kisi,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = _countProgress(current, sonuc.state);
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Göz muayenesi mini oyununu bitirir (D-076).
+  ///
+  /// Mini oyunun sonucu **sağlığı değiştirmez**: muayene olmanın kendisi
+  /// küçük bir katkıdır, oyuncunun dikkati karakterin gözünü
+  /// iyileştirmez. Bildirimde iki bilgi **ayrı ayrı** yazar: oyuncunun
+  /// tabloda kaç satır okuduğu ve hekimin karakterin gözü hakkında
+  /// söyledikleri.
+  ///
+  /// [correct] tabloda doğru bulunan satır sayısı, [total] satır sayısı.
+  ActivityOutcome? finishEyeExam(
+    ActivityAction action, {
+    required int correct,
+    required int total,
+  }) => _runActivity((GameState current) {
+        final ActivityResult sonuc = _activities.perform(
+          state: current,
+          action: action,
+          rng: _random,
+        );
+        if (!sonuc.outcome.applied) return sonuc;
+
+        final String metin = <String>[
+          EyeExam.scoreText(correct, total),
+          EyeExam.sightNote(
+            age: current.player.age,
+            health: current.player.stats.health,
+          ),
+        ].join('\n\n');
+
+        final GameState bildirimli = Notices.enqueue(
+          sonuc.state,
+          <PendingNotice>[
+            PendingNotice(
+              id: 'goz-${current.player.age}',
+              kind: NoticeKind.saglik,
+              age: current.player.age,
+              title: action.label,
+              text: metin,
+              effects: sonuc.outcome.effects,
+            ),
+          ],
+        );
+
+        return ActivityResult(
+          state: bildirimli,
+          outcome: ActivityOutcome(
+            applied: true,
+            text: metin,
+            effects: sonuc.outcome.effects,
+          ),
+        );
+      });
+
+  // =====================================================================
+  // Banka ve kredi (D-080)
+  // =====================================================================
+
+  /// Şu an açık olan krediler.
+  List<Loan> get activeLoans {
+    final GameState? current = _state;
+    return current == null ? const <Loan>[] : Banking.activeLoans(current);
+  }
+
+  /// Toplam kalan borç.
+  int get totalDebt {
+    final GameState? current = _state;
+    return current == null ? 0 : Banking.totalDebt(current);
+  }
+
+  /// Yıllık taksit yükü.
+  int get annualLoanBurden {
+    final GameState? current = _state;
+    return current == null ? 0 : Banking.annualBurden(current);
+  }
+
+  /// Bir başvurunun sonucunu **uygulamadan** gösterir.
+  ///
+  /// Oyuncu düğmeye basmadan önce ne olacağını görebilsin diye var;
+  /// durumu değiştirmez.
+  LoanDecision previewLoan({
+    required Bank bank,
+    required int amount,
+    required int termYears,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
+  }) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const LoanDecision(approved: false, reason: 'Etkin bir hayat yok.');
+    }
+    return Banking.evaluate(
+      current,
+      bank: bank,
+      amount: amount,
+      termYears: termYears,
+      purpose: purpose,
+    );
+  }
+
+  /// Oyuncunun kredi karnesi (D-108).
+  CreditStanding get creditStanding =>
+      _state == null ? CreditStanding.iyi : Banking.standingOf(_state!);
+
+  /// Kredi başvurusu yapar.
+  ///
+  /// Onaylanmazsa durum **hiç değişmez**; gerekçe döner.
+  LoanDecision? applyForLoan({
+    required Bank bank,
+    required int amount,
+    required int termYears,
+    LoanPurpose purpose = LoanPurpose.ihtiyac,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final ({GameState state, LoanDecision decision}) sonuc = Banking.borrow(
+      current,
+      bank: bank,
+      amount: amount,
+      termYears: termYears,
+      purpose: purpose,
+    );
+    if (!sonuc.decision.approved) return sonuc.decision;
+
+    _state = Notices.enqueue(sonuc.state, <PendingNotice>[
+      PendingNotice(
+        id: 'kredi-${bank.name}-${current.player.age}-${current.loans.length}',
+        kind: NoticeKind.banka,
+        age: current.player.age,
+        title: '${bank.label} kredisi',
+        text: '${sonuc.decision.reason} Cüzdanına '
+            '${trMoney(sonuc.decision.offeredAmount)} geçti. '
+            'Yılda ${trMoney(sonuc.decision.annualPayment)} taksit '
+            'ödeyeceksin; vade $termYears yıl.',
+        money: sonuc.decision.offeredAmount,
+        effects: diffAppliedEffects(current, sonuc.state),
+      ),
+    ]);
+    _autoSave();
+    notifyListeners();
+    return sonuc.decision;
+  }
+
+  // -------------------------------------------------------------------
+  // Yatırımlar (D-162)
+  // -------------------------------------------------------------------
+
+  /// Yatırım ekranı şu an açılabilir mi?
+  InteractionAvailability get investmentAvailability => _state == null
+      ? const InteractionAvailability.blocked('Etkin bir hayat yok.')
+      : InvestmentEngine.availability(_state!);
+
+  /// Alıma engel; engel yoksa boş metin.
+  String investmentBuyBlockReason(InvestmentType type, int amount) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : InvestmentEngine.buyBlockReason(
+              state: _state!,
+              type: type,
+              amount: amount,
+            );
+
+  /// Satışa engel; engel yoksa boş metin.
+  String investmentSellBlockReason(InvestmentType type, int amount) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : InvestmentEngine.sellBlockReason(
+              state: _state!,
+              type: type,
+              amount: amount,
+            );
+
+  /// Yatırım alır. Engel varsa durum değişmez, gerekçe döner.
+  InvestmentOutcome? buyInvestment(String typeId, int amount) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final InvestmentResult sonuc = InvestmentEngine.buy(
+      state: current,
+      typeId: typeId,
+      amount: amount,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Yatırım satar.
+  InvestmentOutcome? sellInvestment(String typeId, int amount) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final InvestmentResult sonuc = InvestmentEngine.sell(
+      state: current,
+      typeId: typeId,
+      amount: amount,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Vadeli hesabı vadesinden önce bozar.
+  InvestmentOutcome? breakTermDeposit(String depositId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final InvestmentResult sonuc = InvestmentEngine.breakTermDeposit(
+      state: current,
+      depositId: depositId,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Krediyi erken kapatır; sonucu anlatan metni döner.
+  String payOffLoan(String loanId) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    final ({GameState state, String message}) sonuc =
+        Banking.payOff(current, loanId);
+    if (identical(sonuc.state, current)) return sonuc.message;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.message;
+  }
 
   /// Bu eyleme şu an gerçekten katılabilecek kişiler (Paket 41).
   List<Person> outingCompanions(ActivityAction action) {
@@ -800,6 +2122,51 @@ class GameController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Oyuncuyu kendiliğinden beğenmiş profiller (D-081).
+  List<FingerProfile> get fingerIncoming =>
+      _state?.fingerIncoming ?? const <FingerProfile>[];
+
+  /// Bu yıl kalan beğeni hakkı.
+  int get fingerLikesLeft {
+    final GameState? current = _state;
+    return current == null ? 0 : Finger.likesLeft(current);
+  }
+
+  /// Bu yıl atılabilecek toplam beğeni.
+  int get fingerLikeLimit {
+    final GameState? current = _state;
+    return current == null ? 0 : Finger.likeLimit(current);
+  }
+
+  bool get hasFingerPremium => _state?.hasFingerPremium ?? false;
+
+  InteractionAvailability get fingerLikeAvailability {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return Finger.likeAvailability(current);
+  }
+
+  InteractionAvailability get fingerPremiumAvailability {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return Finger.premiumAvailability(current);
+  }
+
+  FingerOutcome? buyFingerPremium() =>
+      _runFinger((GameState s) => Finger.buyPremium(s));
+
+  FingerOutcome? saveFingerProfile({
+    required String bio,
+    required List<String> interests,
+  }) =>
+      _runFinger(
+        (GameState s) => Finger.saveProfile(s, bio: bio, interests: interests),
+      );
+
   FingerOutcome? passFingerProfile(String profileId) =>
       _runFinger((GameState s) => Finger.pass(s, profileId, _random));
 
@@ -809,12 +2176,75 @@ class GameController extends ChangeNotifier {
   FingerOutcome? meetFingerMatch(String profileId) =>
       _runFinger((GameState s) => Finger.meet(s, profileId, _random));
 
+  /// Flörtü sevgiliye çevirir (D-107).
+  FingerOutcome? makeRelationshipOfficial(String personId) =>
+      _runFinger((GameState s) => Finger.makeOfficial(s, personId));
+
+  /// Flörtü sevgiliye çevirmenin koşulu, **basmadan önce** (D-112).
+  InteractionAvailability officialAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return Finger.officialAvailability(current, personId);
+  }
+
+  /// Arkadaşa çıkma teklif edilebilir mi? (D-112)
+  InteractionAvailability askOutAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return Finger.askOutAvailability(current, personId);
+  }
+
+  /// Arkadaşa çıkma teklif eder (D-112).
+  FingerOutcome? askOut(String personId) =>
+      _runFinger((GameState s) => Finger.askOut(s, personId, _random));
+
+  /// Oyuncunun Finger'da ne aradığı (D-107).
+  FingerIntent get fingerIntent =>
+      _state?.fingerIntent ?? FingerIntent.belirsiz;
+
+  /// Niyeti değiştirir; sonraki buluşmalarda gerçekten kullanılır.
+  void setFingerIntent(FingerIntent intent) {
+    final GameState? current = _state;
+    if (current == null || current.fingerIntent == intent) return;
+    _state = current.copyWith(fingerIntent: intent);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Ekonomik durum süzgeci; `null` ise süzgeç kapalıdır (D-107).
+  WealthTier? get fingerWealthFilter => _state?.fingerWealthFilter;
+
+  /// Süzgeci değiştirir ve desteyi yeni süzgece göre yeniler.
+  void setFingerWealthFilter(WealthTier? tier) {
+    final GameState? current = _state;
+    if (current == null || current.fingerWealthFilter == tier) return;
+    // Süzgeç değişince eski deste geçersizdir; yeni adaylar üretilir.
+    _state = Finger.ensureDeck(
+      current.copyWith(fingerWealthFilter: tier),
+      _random,
+    );
+    _autoSave();
+    notifyListeners();
+  }
+
   FingerOutcome? _runFinger(FingerResult Function(GameState) islem) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final FingerResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+    // Her kaydırma için pencere açılmaz: beğenmek, geçmek ve profil
+    // düzenlemek kendi ekranında zaten görünür. Bildirim yalnızca
+    // **bir kişiyle ilgili gerçek bir değişim** olduğunda çıkar:
+    // tanışma, flört, sevgili olma (D-114).
+    final GameState fingerSonrasi = _countProgress(current, result.state);
+    _state = result.outcome.person == null
+        ? fingerSonrasi
+        : _announce(current, fingerSonrasi, result.outcome.text,
+            title: 'Finger', tag: 'finger');
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -836,6 +2266,81 @@ class GameController extends ChangeNotifier {
       return const InteractionAvailability.blocked('Oyun başlamadı.');
     }
     return PetCare.adoptionAvailability(current, species);
+  }
+
+  /// Kaydı duran ama artık bakılmayan hayvanlar (D-109).
+  List<Pet> get pastPets =>
+      _state == null ? const <Pet>[] : PetCare.pastPets(_state!);
+
+  /// Bu hayvan başka bir yuvaya verilebilir mi? (D-109)
+  InteractionAvailability petRehomeAvailability(Pet pet) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Oyun başlamadı.');
+    }
+    return PetCare.rehomeAvailability(current, pet);
+  }
+
+  /// Hayvanı başka bir yuvaya verir; sonuç metnini döner (D-109).
+  String? rehomePet(Pet pet) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) sonuc =
+        PetCare.rehome(state: current, petId: pet.id);
+    if (!sonuc.applied) return sonuc.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.text;
+  }
+
+  /// Çevreden gelen teklife karışır (D-161); sonuç metnini döner.
+  String? acceptCrewOffer() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final CrewResult sonuc = CrewLife.accept(current, _random);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
+  }
+
+  /// Çevreden gelen teklifi reddeder (D-161); sonuç metnini döner.
+  String? declineCrewOffer() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final CrewResult sonuc = CrewLife.decline(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
+  }
+
+  /// Çevreden teklif gelebilir mi? (D-161)
+  InteractionAvailability crewOfferAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return CrewLife.offerAvailability(current);
+  }
+
+  /// Bir kronik durumun o yılki takibini yapar (D-153).
+  ///
+  /// Bedel gerçekten düşer; engel varsa gerekçesi döner ve hiçbir şey
+  /// değişmez.
+  String? careForChronic(String typeId) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ChronicCareResult sonuc =
+        ChronicEngine.care(state: current, typeId: typeId);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
   }
 
   /// Hayvan sahiplenir; sonuç metnini döner.
@@ -871,11 +2376,11 @@ class GameController extends ChangeNotifier {
     if (current == null) return null;
     final ({GameState state, bool applied, String text}) sonuc =
         PetCare.interact(
-      state: current,
-      pet: pet,
-      action: action,
-      rng: _random,
-    );
+          state: current,
+          pet: pet,
+          action: action,
+          rng: _random,
+        );
     if (sonuc.applied) {
       _state = sonuc.state;
       _autoSave();
@@ -913,8 +2418,12 @@ class GameController extends ChangeNotifier {
   String? buyLotteryTicket(LotteryDraw draw, TicketShare share) {
     final GameState? current = _state;
     if (current == null) return null;
-    final ({GameState state, bool applied, String text}) sonuc =
-        Lottery.buy(state: current, draw: draw, share: share, rng: _random);
+    final ({GameState state, bool applied, String text}) sonuc = Lottery.buy(
+      state: current,
+      draw: draw,
+      share: share,
+      rng: _random,
+    );
     if (sonuc.applied) {
       _state = sonuc.state;
       _autoSave();
@@ -946,8 +2455,7 @@ class GameController extends ChangeNotifier {
   FamilyOutcome? tryFertilityTreatment() {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
-    final FamilyResult result =
-        FertilityTreatment.attempt(current, _random);
+    final FamilyResult result = FertilityTreatment.attempt(current, _random);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
@@ -984,9 +2492,233 @@ class GameController extends ChangeNotifier {
 
   /// Bir ders alır.
   ActivityOutcome? takeMartialLesson(MartialArt art) => _runActivity(
-        (GameState current) =>
-            _martial.takeLesson(state: current, art: art),
-      );
+    (GameState current) => _martial.takeLesson(state: current, art: art),
+  );
+
+  /// Bu yıl kaç ders daha alınabilir?
+  int martialSeasonLessons(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return _martial.plannedSeasonLessons(current, art);
+  }
+
+  /// Bu yılın derslerini tek seferde alır.
+  ActivityOutcome? takeMartialSeason(MartialArt art) => _runActivity(
+    (GameState current) => _martial.takeSeason(state: current, art: art),
+  );
+
+  // =====================================================================
+  // Profesyonel dövüş/spor kariyeri (Paket AL)
+  // =====================================================================
+
+  /// Spor kariyeri eylemlerinin ortak kaydı: durumu yazar, otomatik
+  /// kaydeder ve ekranı uyandırır.
+  void _commitCombat(GameState next) {
+    _state = _countProgress(_state!, next);
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Bu sanattaki rekabet kariyeri; yoksa `null`.
+  CombatCareer? combatCareer(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CombatCareerEngine.careerFor(current, art.id);
+  }
+
+  /// Şu an müsabakalara çıkılan kariyer; yoksa `null`.
+  CombatCareer? activeCombatCareer() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CombatCareerEngine.activeCareer(current);
+  }
+
+  /// Bu sanatta rekabete başlanabilir mi?
+  InteractionAvailability combatStartAvailability(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return CombatCareerEngine.startAvailability(current, art);
+  }
+
+  /// Rekabete başlar.
+  ActivityOutcome? startCompeting(MartialArt art) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.startCompeting(current, art);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Bekleyen müsabakayı oynar.
+  ({bool applied, String text, bool won})? fightBout(CampChoice camp) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final BoutResult r = CombatCareerEngine.fight(current, camp);
+    if (r.applied) _commitCombat(r.state);
+    return (applied: r.applied, text: r.text, won: r.won);
+  }
+
+  /// Antrenör kalitesini değiştirir.
+  ActivityOutcome? setCombatCoach(int level) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.setCoach(current, level);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Sakatken riski göze alır.
+  ActivityOutcome? pushThroughCombatInjury() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.pushThroughInjury(current, _random);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// Spordan çekilir.
+  ActivityOutcome? retireFromCombat() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final ({GameState state, bool applied, String text}) r =
+        CombatCareerEngine.retire(current, RetirementReason.kendiKarari);
+    if (r.applied) _commitCombat(r.state);
+    return ActivityOutcome(applied: r.applied, text: r.text);
+  }
+
+  /// İş ilanında gösterilecek gereksinim satırları (Paket AM, §18).
+  ///
+  /// Oyuncu bir işe neden giremediğini tahmin etmesin: hangi şart
+  /// tutuyor, hangisi tutmuyor, eksik ne kadar.
+  List<JobRequirement> jobRequirementLines(JobType job) {
+    final GameState? current = _state;
+    if (current == null) return const <JobRequirement>[];
+    return _jobs.requirementLines(current, job);
+  }
+
+  /// Rekabetçi dövüş kariyeri kapısının sağlık durumu — "73 / 80" (§18).
+  String combatHealthGate() {
+    final GameState? current = _state;
+    if (current == null) return '';
+    return CombatCareerEngine.healthGateLabel(current);
+  }
+
+  /// Sağlık şu an müsabakaya çıkmaya yetiyor mu (§5, §18)?
+  bool combatHealthAllowsBout() {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return CombatCareerEngine.canFightHealthWise(current);
+  }
+
+  /// Emeklilik baskısı var mı (yaş, sakatlık, düşen performans)?
+  RetirementReason? combatRetirementPressure() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return CombatCareerEngine.retirementPressure(current);
+  }
+
+  // =====================================================================
+  // Spor kariyeri entegrasyonları (Paket AL/2)
+  // =====================================================================
+
+  /// 18 yaş altı sporcunun spor masrafı için destek istenebilecek
+  /// ebeveynler (§26).
+  ///
+  /// Yaşayan ve kendi parası olan ebeveyn yoksa liste boş döner;
+  /// ekranda sahte seçenek gösterilmez.
+  List<Person> sportSupportSponsors() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    if (current.player.age >= SportFamilySupport.adultAge) {
+      // §5: yetişkin oyuncuda bu ekran hiç görünmez.
+      return const <Person>[];
+    }
+    return SportFamilySupport.sponsorsFor(current);
+  }
+
+  /// Bu masrafın güncel tutarı (₺).
+  int sportExpenseCost(SportExpense expense) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return SportFamilySupport.defaultCost(current, expense);
+  }
+
+  /// Bu masraf için aileden gelmiş, henüz harcanmamış destek (₺).
+  int sportSupportCredit(SportExpense expense) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return SportFamilySupport.creditFor(current, expense);
+  }
+
+  /// Bu ebeveynden bu masraf için destek istemenin engeli; yoksa boş.
+  String sportSupportBlockReason(SportExpense expense, Person person) {
+    final GameState? current = _state;
+    if (current == null) return 'Hayat başlamadı.';
+    return SportFamilySupport.blockReason(
+      state: current,
+      expense: expense,
+      person: person,
+      amount: SportFamilySupport.defaultCost(current, expense),
+    );
+  }
+
+  /// Aileden spor masrafı için destek ister.
+  ActivityOutcome? askSportSupport(SportExpense expense, Person person) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final SportSupportResult r = SportFamilySupport.ask(
+      state: current,
+      expense: expense,
+      person: person,
+      amount: SportFamilySupport.defaultCost(current, expense),
+      rng: _random,
+    );
+    if (r.outcome.applied) _commitCombat(r.state);
+    return ActivityOutcome(
+      applied: r.outcome.applied,
+      text: r.outcome.text,
+    );
+  }
+
+  /// Çözülmeyi bekleyen okul/spor çatışması var mı (§27)?
+  bool hasSchoolSportConflict() {
+    final GameState? current = _state;
+    if (current == null) return false;
+    final CombatCareer? k = CombatCareerEngine.activeCareer(current);
+    if (k == null) return false;
+    return SportSchoolConflict.isPending(current, k);
+  }
+
+  /// Okul/spor çatışmasını çözer.
+  ActivityOutcome? resolveSchoolSportConflict({required bool chooseSport}) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final SchoolConflictResult r = chooseSport
+        ? SportSchoolConflict.chooseSport(current)
+        : SportSchoolConflict.chooseSchool(current);
+    if (r.outcome.applied) _commitCombat(r.state);
+    return ActivityOutcome(
+      applied: r.outcome.applied,
+      text: r.outcome.text,
+    );
+  }
+
+  /// Ekranda gösterilmeye değer rekabetler (§28).
+  List<RivalStanding> sportRivals(CombatCareer career) =>
+      SportRivalry.visibleRivals(career);
+
+  /// Tam/yarım zamanlı işin spor hazırlığına etkisi; yoksa `null` (§29).
+  String? sportWorkloadNote() {
+    final GameState? current = _state;
+    if (current == null) return null;
+    if (CombatCareerEngine.activeCareer(current) == null) return null;
+    return SportWorkload.note(current);
+  }
 
   /// Yaşa uygun kitaplar.
   List<BookInfo> availableBooks() {
@@ -996,21 +2728,56 @@ class GameController extends ChangeNotifier {
   }
 
   /// Kitabı açar.
-  ActivityOutcome? openBook(BookInfo book) => _runActivity(
-        (GameState current) => _activities.openBook(current, book),
-      );
+  ActivityOutcome? openBook(BookInfo book) =>
+      _runActivity((GameState current) => _activities.openBook(current, book));
 
   /// Bir sayfa çevirir.
-  ActivityOutcome? turnBookPage(BookInfo book) => _runActivity(
-        (GameState current) => _activities.turnPage(current, book),
-      );
+  ///
+  /// **Sayfa başına pop-up çıkmaz (D-145).** Faho bildirdi: "her kitap
+  /// okumada neden bildirim atıyor! her sayfada bildirim var saçmalık!!!
+  /// kitabı okumam bittiğinde gelmeli sadece pop-up, zekâ ve mutluluk
+  /// arttı gibi." Sayfa sayacı zaten okuma ekranının üstünde duruyor ve
+  /// kazanç yalnızca kitap bitince veriliyor; ara sayfaların bildirimi
+  /// hiçbir şey anlatmıyordu. Bildirim artık **yalnızca kitap
+  /// bittiğinde** kuyruğa giriyor.
+  ActivityOutcome? turnBookPage(BookInfo book) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+
+    final bool onceBitmisti = current.bookProgress(book.id)?.finished ?? false;
+    final ActivityResult result = _activities.turnPage(current, book);
+    if (!result.outcome.applied) return result.outcome;
+
+    final bool simdiBitti =
+        result.state.bookProgress(book.id)?.finished ?? false;
+    final GameState ilerleyen = _countProgress(current, result.state);
+
+    _state = simdiBitti && !onceBitmisti
+        ? _announce(
+            current,
+            ilerleyen,
+            result.outcome.text,
+            title: 'Kitap bitti',
+            tag: 'kitap',
+          )
+        : ilerleyen;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
 
   ActivityOutcome? _runActivity(ActivityResult Function(GameState) islem) {
     final GameState? current = _state;
     if (current == null || current.hasPendingEvent) return null;
     final ActivityResult result = islem(current);
     if (!result.outcome.applied) return result.outcome;
-    _state = result.state;
+    _state = _announce(
+      current,
+      _countProgress(current, result.state),
+      result.outcome.text,
+      title: 'Aktivite',
+      tag: 'aktivite',
+    );
     _autoSave();
     notifyListeners();
     return result.outcome;
@@ -1049,9 +2816,8 @@ class GameController extends ChangeNotifier {
   }
 
   /// Sosyal medya hesabı açar.
-  SocialOutcome? openSocialAccount(SocialPlatform platform) => _runSocial(
-        (GameState current) => _social.openAccount(current, platform),
-      );
+  SocialOutcome? openSocialAccount(SocialPlatform platform) =>
+      _runSocial((GameState current) => _social.openAccount(current, platform));
 
   // -------------------------------------------------------------------
   // Sponsorluk (Paket 10)
@@ -1128,10 +2894,120 @@ class GameController extends ChangeNotifier {
     return sonuc.outcome;
   }
 
+  /// Tur paketine çıkılabilir mi? (D-083)
+  InteractionAvailability tourAvailability({
+    required TourPackage tour,
+    String? companionId,
+  }) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return Travel.tourAvailability(
+      current,
+      tour: tour,
+      companionId: companionId,
+    );
+  }
+
+  /// Tur paketini satın alır ve tatili yapar (D-083).
+  TripOutcome? takeTour({
+    required TourPackage tour,
+    String? companionId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final TripResult sonuc = Travel.takeTour(
+      current,
+      tour: tour,
+      companionId: companionId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Şu an taşınılabilecek yakın iller (D-083).
+  List<String> relocationTargets() {
+    final GameState? current = _state;
+    return current == null
+        ? const <String>[]
+        : const Housing().relocationTargets(current);
+  }
+
+  /// Başka bir ile (ya da aynı ilde kiralık eve) taşınır (D-083).
+  ///
+  /// Sonucu anlatan metni döner; taşınma gerçekleşmediyse gerekçeyi.
+  String relocate({String? city}) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    if (current.hasPendingEvent) return 'Önce ekrandaki olayı çöz.';
+    final HousingResult sonuc =
+        const Housing().moveToRental(current, city: city);
+    if (!sonuc.outcome.applied) return sonuc.outcome.text;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome.text;
+  }
+
   /// Paylaşım yapar.
   SocialOutcome? postContent(SocialContent content) => _runSocial(
-        (GameState current) => _social.post(current, content, _random),
-      );
+    (GameState current) => _social.post(current, content, _random),
+  );
+
+  // =====================================================================
+  // Ünlülerle temas (Faho'nun isteği)
+  // =====================================================================
+
+  /// Bu platformda temas kurulabilecek ünlüler.
+  List<Celebrity> celebritiesOnPlatform(SocialPlatform platform) =>
+      celebritiesOn(platform);
+
+  /// Bu ünlüyle daha önce kurulmuş temasın kaydı.
+  CelebrityContact? celebrityContact(Celebrity celebrity) =>
+      _state?.contactWith(celebrity.id);
+
+  InteractionAvailability celebrityAvailability(
+    Celebrity celebrity,
+    CelebrityAction action,
+  ) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat yok.');
+    }
+    return CelebrityEngine.availability(current, celebrity, action);
+  }
+
+  /// Karşılık bulma ihtimalinin yüzdesi; oyuncudan gizlenmez.
+  int celebrityChancePercent(Celebrity celebrity, CelebrityAction action) {
+    final GameState? current = _state;
+    if (current == null) return 0;
+    return CelebrityEngine.displayChancePercent(current, celebrity, action);
+  }
+
+  /// Ünlüyle temas kurar.
+  CelebrityResult? contactCelebrity(
+    Celebrity celebrity,
+    CelebrityAction action,
+  ) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final CelebrityResult sonuc = CelebrityEngine.contact(
+      state: current,
+      celebrity: celebrity,
+      action: action,
+      rng: _random,
+    );
+    if (!sonuc.applied) return sonuc;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc;
+  }
 
   SocialOutcome? _runSocial(SocialResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1162,13 +3038,405 @@ class GameController extends ChangeNotifier {
   CrisisOutcome? respondToCrisis(String choiceId) {
     final GameState? current = _state;
     if (current == null || current.pendingCrisis == null) return null;
-    final CrisisResult result =
-        _crises.respond(current, choiceId, _random);
+    final CrisisResult result = _crises.respond(current, choiceId, _random);
     if (!result.outcome.applied) return result.outcome;
     _state = result.state;
     _autoSave();
     notifyListeners();
     return result.outcome;
+  }
+
+  // =====================================================================
+  // Kendi işi (D-132)
+  // =====================================================================
+
+  /// Şu an açık olan iş; yoksa `null`.
+  Business? get openBusiness =>
+      _state == null ? null : BusinessEngine.openBusiness(_state!);
+
+  /// Bütün iş kayıtları (kapananlar dahil; kayıt silinmez).
+  List<Business> get businesses => _state?.businesses ?? const <Business>[];
+
+  /// Bu iş şu an kurulabilir mi?
+  InteractionAvailability businessOpenAvailability(BusinessType tur) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.openAvailability(current, tur);
+  }
+
+  /// İşi kurar. Sermaye peşin gider.
+  BusinessOutcome? openBusinessOf(BusinessType tur) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.open(state: current, tur: tur);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Bu yıl işle ilgilenilebilir mi?
+  InteractionAvailability businessTendAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.tendAvailability(current);
+  }
+
+  /// İşle ilgilenir.
+  BusinessOutcome? tendBusiness() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r = BusinessEngine.tend(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  // ---------------------------------------------------------------------
+  // Paket AE: fiyat, reklam, bakım, personel
+  // ---------------------------------------------------------------------
+
+  /// İşletmenin bölgesindeki ortalama birim fiyat (§3).
+  int businessMarketPrice() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    final BusinessType? tur = is_?.type;
+    if (current == null || tur == null) return 0;
+    return BusinessMarket.averagePrice(current, tur, current.player.age);
+  }
+
+  /// İşletmenin uyguladığı birim fiyat; belirlenmemişse bölge ortalaması.
+  int businessPrice() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    final BusinessType? tur = is_?.type;
+    if (current == null || is_ == null || tur == null) return 0;
+    return BusinessMarket.effectivePrice(current, is_, tur, current.player.age);
+  }
+
+  /// Yazılabilecek fiyat aralığı.
+  ({int min, int max}) businessPriceRange() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    if (current == null || is_ == null) return (min: 1, max: 1);
+    return BusinessEngine.priceRange(current, is_);
+  }
+
+  /// Bu yılın müşteri yoğunluğu tahmini (§30).
+  BusinessDemand? businessDemand() {
+    final GameState? current = _state;
+    final Business? is_ = openBusiness;
+    final BusinessType? tur = is_?.type;
+    if (current == null || is_ == null || tur == null) return null;
+    return BusinessMarket.demand(
+      state: current,
+      business: is_,
+      tur: tur,
+      age: current.player.age,
+      rng: Random(BusinessMarket.seed(current, is_.id, current.player.age)),
+    );
+  }
+
+  /// Fiyatı belirler (§4).
+  BusinessOutcome? setBusinessPrice(int fiyat) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.setPrice(state: current, fiyat: fiyat);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Reklam kampanyasını kurar ya da keser (§8).
+  BusinessOutcome? setBusinessAd(BusinessAd reklam) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.setAd(state: current, reklam: reklam);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Bakım şu an yapılabilir mi?
+  InteractionAvailability businessMaintenanceAvailability() {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.maintenanceAvailability(current);
+  }
+
+  /// Bakımın bu yılki bedeli (₺).
+  int businessMaintenanceCost() {
+    final Business? is_ = openBusiness;
+    if (is_ == null) return 0;
+    return BusinessEngine.maintenanceCost(is_);
+  }
+
+  /// Bakım yaptırır (§10).
+  BusinessOutcome? maintainBusiness() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r = BusinessEngine.doMaintenance(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// Personel hamlesi şu an mümkün mü?
+  InteractionAvailability businessStaffAvailability(StaffAction hamle) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.staffAvailability(current, hamle);
+  }
+
+  /// Personelle ilgilenir (§7).
+  BusinessOutcome? businessStaff(StaffAction hamle) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.staff(state: current, hamle: hamle);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// İşe para yatırmanın şu an mümkün olup olmadığı.
+  InteractionAvailability businessInvestAvailability(int tutar) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return BusinessEngine.investAvailability(current, tutar);
+  }
+
+  /// İşe para yatırır.
+  BusinessOutcome? investInBusiness(int tutar) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r =
+        BusinessEngine.invest(state: current, tutar: tutar);
+    if (!r.outcome.applied) return r.outcome;
+    _state = _countProgress(current, r.state);
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  /// İşi devreder/kapatır. Onay arayüzde alınır.
+  BusinessOutcome? closeBusiness() {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final BusinessResult r = BusinessEngine.close(state: current);
+    if (!r.outcome.applied) return r.outcome;
+    _state = r.state;
+    _autoSave();
+    notifyListeners();
+    return r.outcome;
+  }
+
+  // =====================================================================
+  // Arkadaşlık derinliği (D-130)
+  // =====================================================================
+
+  /// Bu kişiye yakın arkadaşlık teklif edilebilir mi?
+  InteractionAvailability closeFriendAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return FriendshipDepth.closeFriendAvailability(current, personId);
+  }
+
+  /// Yakın arkadaşlık teklif eder. **Kabul garanti değildir.**
+  FriendshipOutcome? proposeCloseFriend(String personId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FriendshipResult sonuc = FriendshipDepth.proposeCloseFriend(
+      state: current,
+      personId: personId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = _countProgress(current, sonuc.state);
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  /// Küs olan biriyle barışılabilir mi?
+  InteractionAvailability makeUpAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    return FriendshipDepth.makeUpAvailability(current, personId);
+  }
+
+  /// Barışma denemesi. **Kabul garanti değildir.**
+  FriendshipOutcome? makeUp(String personId) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final FriendshipResult sonuc = FriendshipDepth.makeUp(
+      state: current,
+      personId: personId,
+      rng: _random,
+    );
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = _countProgress(current, sonuc.state);
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
+  }
+
+  // =====================================================================
+  // Adli süreç (D-128)
+  // =====================================================================
+
+  /// Cevap bekleyen duruşma.
+  PendingTrial? get pendingTrial => _state?.pendingTrial;
+
+  /// Duruşmadaki dosya.
+  CriminalCase? get trialCase {
+    final GameState? current = _state;
+    final PendingTrial? durusma = current?.pendingTrial;
+    if (current == null || durusma == null) return null;
+    return current.legal.caseById(durusma.caseId);
+  }
+
+  /// Bu avukat şu an tutulabilir mi? Gerekçe boşsa tutulabilir (D-063).
+  String lawyerBlockReason(LawyerTier tier) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return LegalEngine.lawyerBlockReason(current, tier);
+  }
+
+  /// Duruşmayı karara bağlar. **Aynı dosya iki kez karara bağlanmaz.**
+  void respondToTrial({
+    required DefenceStance stance,
+    required String lawyerId,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.pendingTrial == null) return;
+    _state = LegalEngine.resolveTrial(
+      state: current,
+      stance: stance,
+      lawyerId: lawyerId,
+      rng: _random,
+    );
+    _autoSave();
+    notifyListeners();
+  }
+
+  /// Oyuncunun adli geçmişi (Adli Geçmiş bölümü için).
+  LegalState get legal => _state?.legal ?? const LegalState();
+
+  // =====================================================================
+  // Kefalet ve cezaevi hayatı (D-139, D-140)
+  // =====================================================================
+
+  /// Kefaleti kendin yatırabilir misin? Gerekçe boşsa yatırabilirsin.
+  String selfBailBlockReason() {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return PrisonLife.selfBailBlockReason(current);
+  }
+
+  /// Kefaleti kendi cüzdanından yatırır.
+  PrisonOutcome? payBailSelf() => _runPrison(
+        (GameState current) => PrisonLife.payBailSelf(current),
+        title: 'Kefalet',
+        tag: 'kefalet',
+      );
+
+  /// Kefaleti isteyebileceğin kişiler.
+  List<Person> bailHelpers() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return PrisonLife.bailHelpers(current);
+  }
+
+  /// Aileden kefaleti ödemesini ister. Sonuç garanti değildir.
+  PrisonOutcome? askFamilyForBail(String personId) => _runPrison(
+        (GameState current) => PrisonLife.askFamilyForBail(
+          state: current,
+          personId: personId,
+          rng: _random,
+        ),
+        title: 'Kefalet',
+        tag: 'kefalet',
+      );
+
+  /// Bu cezaevi eylemi şu an yapılabilir mi? Gerekçe boşsa yapılabilir.
+  String prisonActionBlockReason(PrisonAction action) {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return PrisonLife.blockReason(current, action);
+  }
+
+  /// Bir cezaevi eylemini uygular.
+  PrisonOutcome? doPrisonAction(PrisonAction action) => _runPrison(
+        (GameState current) => PrisonLife.perform(
+          state: current,
+          action: action,
+          rng: _random,
+        ),
+        title: 'Cezaevi',
+        tag: 'cezaevi',
+      );
+
+  /// İçeride tanışılmış kişiler.
+  List<Person> cellmates() {
+    final GameState? current = _state;
+    if (current == null) return const <Person>[];
+    return PrisonLife.cellmates(current);
+  }
+
+  /// Kefalet ve cezaevi eylemlerinin ortak akışı.
+  ///
+  /// Eşya eylemleriyle aynı kural: olay beklerken çalışmaz, yalnızca
+  /// gerçekten uygulanan işlem kaydedilir ve her sonuç bildirime döner.
+  PrisonOutcome? _runPrison(
+    ({GameState state, PrisonOutcome outcome}) Function(GameState) islem, {
+    required String title,
+    required String tag,
+  }) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+
+    final ({GameState state, PrisonOutcome outcome}) sonuc = islem(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+
+    _state = _announce(
+      current,
+      _countProgress(current, sonuc.state),
+      sonuc.outcome.text,
+      title: title,
+      tag: tag,
+    );
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
   }
 
   // =====================================================================
@@ -1184,16 +3452,16 @@ class GameController extends ChangeNotifier {
       _state == null ? ResidenceKind.aileYaninda : Housing.residenceOf(_state!);
 
   /// Oyuncunun yaşadığı şehir.
-  String get currentCity =>
-      _state == null ? '' : Housing.cityOf(_state!);
+  String get currentCity => _state == null ? '' : Housing.cityOf(_state!);
 
   /// Kiraya verilen konutların yıllık toplam geliri.
   int get yearlyRentIncome =>
       _state == null ? 0 : Housing.yearlyRentIncome(_state!);
 
   /// Bu eve taşınmanın engeli; yoksa boş metin.
-  String moveBlockReason(OwnedItem home) =>
-      _state == null ? 'Etkin bir hayat yok.' : _housing.moveBlockReason(_state!, home);
+  String moveBlockReason(OwnedItem home) => _state == null
+      ? 'Etkin bir hayat yok.'
+      : _housing.moveBlockReason(_state!, home);
 
   /// Bu evi kiraya vermenin engeli; yoksa boş metin.
   String rentOutBlockReason(OwnedItem home) => _state == null
@@ -1209,11 +3477,121 @@ class GameController extends ChangeNotifier {
   HousingOutcome? moveBackToFamily() =>
       _runHousing((GameState current) => _housing.moveBackToFamily(current));
 
-  HousingOutcome? rentOutHome(OwnedItem home) =>
-      _runHousing((GameState current) => _housing.rentOut(current, home));
+  // -------------------------------------------------------------------
+  // Kiralama (D-163)
+  // -------------------------------------------------------------------
 
-  HousingOutcome? endLease(OwnedItem home) =>
-      _runHousing((GameState current) => _housing.endLease(current, home));
+  /// Bu konutun kullanım durumu.
+  PropertyUse propertyUse(OwnedItem home) => _state == null
+      ? PropertyUse.bos
+      : RentalEngine.useOf(_state!, home);
+
+  /// Bu konutun bugünkü tahmini değeri (₺).
+  int propertyValue(OwnedItem home) =>
+      _state == null ? 0 : RentalEngine.valueOf(_state!, home);
+
+  /// Tahmini piyasa kirası bandı (yıllık ₺).
+  ({int low, int high}) rentBand(OwnedItem home) => _state == null
+      ? (low: 0, high: 0)
+      : RentalEngine.rentBand(_state!, home);
+
+  /// Bu konutun piyasa yıllık kirası (₺).
+  int marketRent(OwnedItem home) =>
+      _state == null ? 0 : RentalEngine.marketRent(_state!, home);
+
+  /// Bu evin yürüyen sözleşmesi (yoksa null).
+  Lease? leaseOf(OwnedItem home) => _state?.leaseOf(home.id);
+
+  /// Bu evin defteri.
+  PropertyLedger ledgerOf(OwnedItem home) =>
+      _state?.ledgerOf(home.id) ?? PropertyLedger(propertyItemId: home.id);
+
+  /// Bu kirayla başvuran adaylar. **Deterministik**: ekranı kapatıp açmak
+  /// yeni aday üretmez.
+  List<TenantRecord> tenantCandidatesFor(OwnedItem home, int askingRent) =>
+      _state == null
+          ? const <TenantRecord>[]
+          : RentalEngine.candidates(
+              state: _state!,
+              home: home,
+              askingRent: askingRent,
+            );
+
+  /// Bu kirayla kiraya vermeye engel; yoksa boş metin.
+  String rentOutAskBlockReason(OwnedItem home, int askingRent) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : RentalEngine.rentOutBlockReason(
+              state: _state!,
+              home: home,
+              askingRent: askingRent,
+            );
+
+  /// Seçilen adayla sözleşme imzalar.
+  RentalOutcome? signLease({
+    required OwnedItem home,
+    required TenantRecord tenant,
+    required int yearlyRent,
+  }) =>
+      _runRental(
+        (GameState current) => RentalEngine.signLease(
+          state: current,
+          home: home,
+          tenant: tenant,
+          yearlyRent: yearlyRent,
+        ),
+      );
+
+  /// Sözleşmeyi sonlandırır.
+  RentalOutcome? endLease(OwnedItem home) => _runRental(
+        (GameState current) =>
+            RentalEngine.endLease(state: current, propertyItemId: home.id),
+      );
+
+  /// Sözleşmeyi yeni kirayla yeniler.
+  RentalOutcome? renewLease(OwnedItem home, int newYearlyRent) => _runRental(
+        (GameState current) => RentalEngine.renewLease(
+          state: current,
+          propertyItemId: home.id,
+          newYearlyRent: newYearlyRent,
+        ),
+      );
+
+  /// Bakım ya da tadilatın maliyeti (₺).
+  int upkeepCost(OwnedItem home, {required bool major}) => _state == null
+      ? 0
+      : RentalEngine.upkeepCost(_state!, home, major: major);
+
+  /// Bakım/tadilat engeli; yoksa boş metin.
+  String upkeepBlockReason(OwnedItem home, {required bool major}) =>
+      _state == null
+          ? 'Etkin bir hayat yok.'
+          : RentalEngine.upkeepBlockReason(
+              state: _state!,
+              home: home,
+              major: major,
+            );
+
+  /// Bakım (ucuz) ya da tadilat (pahalı) yapar.
+  RentalOutcome? upkeepProperty(OwnedItem home, {required bool major}) =>
+      _runRental(
+        (GameState current) => RentalEngine.upkeep(
+          state: current,
+          home: home,
+          major: major,
+        ),
+      );
+
+  RentalOutcome? _runRental(RentalResult Function(GameState) islem) {
+    final GameState? current = _state;
+    if (current == null || current.hasPendingEvent) return null;
+    final RentalResult result = islem(current);
+    if (!result.outcome.applied) return result.outcome;
+    _state = result.state;
+    _autoSave();
+    notifyListeners();
+    return result.outcome;
+  }
 
   HousingOutcome? _runHousing(HousingResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1226,15 +3604,16 @@ class GameController extends ChangeNotifier {
 
     // Şehir değiştiyse okul ve iş bağları da güncellenir (Paket 3).
     if (next.player.currentCity != current.player.currentCity) {
-      final ({GameState state, String? logText}) nakil =
-          const SchoolTransfer().transferIfNeeded(next, _random);
+      final ({GameState state, String? logText}) nakil = const SchoolTransfer()
+          .transferIfNeeded(next, _random);
       next = nakil.state;
       if (nakil.logText != null) metin = '$metin\n${nakil.logText}';
 
       // Çalışan karakterin işine kendiliğinden son verilmez; yalnızca
       // durum açıkça yazılır (Q-065).
       if (next.career.isInAnotherCity(next.player.currentCity)) {
-        final String isMetni = '${next.career.job?.name ?? 'İşin'} hâlâ '
+        final String isMetni =
+            '${next.career.job?.name ?? 'İşin'} hâlâ '
             '${next.career.jobCity} şehrinde; işine devam ediyorsun.';
         next = next.copyWith(
           log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
@@ -1279,13 +3658,13 @@ class GameController extends ChangeNotifier {
 
   /// Ehliyet başvurusu yapar; ücret bir kez alınır ve sınav açılır.
   LicenseOutcome? applyForLicense(LicenseType type) => _runLicense(
-        (GameState current) => _licenses.apply(current, type, _random),
-      );
+    (GameState current) => _licenses.apply(current, type, _random),
+  );
 
   /// Sınav sorusunu cevaplar.
   LicenseOutcome? answerLicenseExam(int optionIndex) => _runLicense(
-        (GameState current) => _licenses.answer(current, optionIndex),
-      );
+    (GameState current) => _licenses.answer(current, optionIndex),
+  );
 
   /// Sınavdan vazgeçer.
   LicenseOutcome? cancelLicenseExam() =>
@@ -1347,9 +3726,8 @@ class GameController extends ChangeNotifier {
   }
 
   /// Blackjack eli açar.
-  CasinoOutcome? dealBlackjack(int bet) => _runCasino(
-        (GameState current) => _blackjack.deal(current, bet, _random),
-      );
+  CasinoOutcome? dealBlackjack(int bet) =>
+      _runCasino((GameState current) => _blackjack.deal(current, bet, _random));
 
   /// Kart çeker.
   CasinoOutcome? hitBlackjack() =>
@@ -1424,6 +3802,24 @@ class GameController extends ChangeNotifier {
     _autoSave();
     notifyListeners();
     return cikti.result.outcome;
+  }
+
+  /// Bekleyen (sonuçlanmamış) at yarışı bahsi (D-089).
+  PendingRace? get pendingRace => _state?.pendingRace;
+
+  /// Bekleyen bahsi sonuçlandırır (D-089).
+  ///
+  /// Animasyon bitince çağrılır. Bekleyen bahis yoksa hiçbir şey olmaz,
+  /// bu yüzden iki kez çağrılması güvenlidir: çift ödeme oluşmaz.
+  CasinoOutcome? settleRace() {
+    final GameState? current = _state;
+    if (current == null || !current.hasPendingRace) return null;
+    final CasinoResult sonuc = HorseRacing.settle(current);
+    if (!sonuc.outcome.applied) return sonuc.outcome;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc.outcome;
   }
 
   /// At yarışında bahse engel var mı?
@@ -1511,8 +3907,10 @@ class GameController extends ChangeNotifier {
   String? chooseHeir(String childId) {
     final GameState? current = _state;
     if (current == null || current.deceased) return null;
-    final ({GameState state, String text, bool applied}) sonuc =
-        Will.choose(current, childId);
+    final ({GameState state, String text, bool applied}) sonuc = Will.choose(
+      current,
+      childId,
+    );
     if (!sonuc.applied) return sonuc.text;
     _state = sonuc.state;
     _autoSave();
@@ -1524,8 +3922,9 @@ class GameController extends ChangeNotifier {
   String? clearHeir() {
     final GameState? current = _state;
     if (current == null || current.deceased) return null;
-    final ({GameState state, String text, bool applied}) sonuc =
-        Will.clear(current);
+    final ({GameState state, String text, bool applied}) sonuc = Will.clear(
+      current,
+    );
     if (!sonuc.applied) return sonuc.text;
     _state = sonuc.state;
     _autoSave();
@@ -1549,6 +3948,115 @@ class GameController extends ChangeNotifier {
     _state = Notices.dismissFirst(current);
     _autoSave();
     notifyListeners();
+  }
+
+  // -------------------------------------------------------------------
+  // Ün ve Medya Fırsatları (D-103)
+  // -------------------------------------------------------------------
+
+  /// Medya fırsatları bölümü görünür mü? (Ün eşiği)
+  bool get mediaSectionVisible {
+    final GameState? current = _state;
+    return current != null && MediaOpportunities.sectionVisible(current);
+  }
+
+  /// Bu medya işi şu an yapılabilir mi? Yapılamıyorsa sebebi yazılır.
+  InteractionAvailability mediaAvailability(MediaOpportunity job) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Hayat başlamadı.');
+    }
+    return MediaOpportunities.availability(current, job);
+  }
+
+  /// Medya işini kabul eder; sonuç **gerçekten uygulanan** değişimlerdir.
+  MediaResult? acceptMediaJob(MediaOpportunity job) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    final MediaResult sonuc = MediaOpportunities.accept(current, job, _random);
+    if (!sonuc.applied) return sonuc;
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return sonuc;
+  }
+
+  /// Yeni doğan bebeğe isim verilebilir mi? (D-095)
+  bool canNameChild(String childId) {
+    final GameState? current = _state;
+    if (current == null) return false;
+    return ChildNaming.canName(current, childId);
+  }
+
+  /// Yeni doğan bebeğin adını değiştirir (D-095).
+  ///
+  /// Sonuç metni her hâlde döner: ad değiştiyse yeni ad, değişmediyse
+  /// sebebi. Sessizce başarısız olmaz.
+  // =================================================================
+  // Sigorta (Paket CA)
+  // =================================================================
+
+  /// Bu poliçe alınabilir mi? Alınamıyorsa **gerekçe** (D-063).
+  String? insuranceBlockReason(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) return 'Hayat başlamadı.';
+    return Insurance.blockReason(current, kind);
+  }
+
+  /// Yürürlükteki poliçe (yoksa `null`).
+  InsurancePolicy? activePolicy(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) return null;
+    return Insurance.activeOf(current, kind);
+  }
+
+  /// Poliçe başlatır; ilk prim peşin ödenir.
+  ({bool applied, String message}) buyInsurance(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Hayat başlamadı.');
+    }
+    final String? engel = Insurance.blockReason(current, kind);
+    if (engel != null) return (applied: false, message: engel);
+    final ({GameState state, String text}) sonuc =
+        Insurance.buy(current, kind);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.text);
+  }
+
+  /// Poliçeyi iptal eder. Ödenen primler geri gelmez.
+  ({bool applied, String message}) cancelInsurance(InsuranceKind kind) {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Hayat başlamadı.');
+    }
+    if (Insurance.activeOf(current, kind) == null) {
+      return (applied: false, message: '${kind.label} yok.');
+    }
+    final ({GameState state, String text}) sonuc =
+        Insurance.cancel(current, kind);
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.text);
+  }
+
+  ({bool applied, String message}) nameChild(String childId, String name) {
+    final GameState? current = _state;
+    if (current == null) {
+      return (applied: false, message: 'Hayat başlamadı.');
+    }
+    final ({GameState? state, String message}) sonuc =
+        ChildNaming.rename(current, childId, name);
+    if (sonuc.state == null) {
+      return (applied: false, message: sonuc.message);
+    }
+    _state = sonuc.state;
+    _autoSave();
+    notifyListeners();
+    return (applied: true, message: sonuc.message);
   }
 
   /// Bu cenaze seçeneği şu an sunulabilir mi?
@@ -1577,8 +4085,11 @@ class GameController extends ChangeNotifier {
   }) {
     final GameState? current = _state;
     if (current == null || !current.hasNotice) return null;
-    final ({GameState state, String text}) sonuc =
-        Notices.respondToFuneral(current, choice, attendance: attendance);
+    final ({GameState state, String text}) sonuc = Notices.respondToFuneral(
+      current,
+      choice,
+      attendance: attendance,
+    );
     _state = sonuc.state;
     _autoSave();
     notifyListeners();
@@ -1607,12 +4118,8 @@ class GameController extends ChangeNotifier {
   /// kayda girer.
   FamilyOutcome? propose(String personId, {String styleId = 'sade'}) =>
       _runFamily(
-        (GameState current) => _marriages.propose(
-          current,
-          personId,
-          _random,
-          styleId: styleId,
-        ),
+        (GameState current) =>
+            _marriages.propose(current, personId, _random, styleId: styleId),
       );
 
   /// Bekleyen düğünü yapar (Paket 25).
@@ -1620,8 +4127,8 @@ class GameController extends ChangeNotifier {
   /// Teklif kabul edildikten sonra oyuncu cüzdanına göre bir düğün seçer;
   /// evlilik ancak burada kurulur. Bedelsiz seçenek her zaman vardır.
   FamilyOutcome? holdWedding(String styleId) => _runFamily(
-        (GameState current) => _marriages.holdWedding(current, styleId),
-      );
+    (GameState current) => _marriages.holdWedding(current, styleId),
+  );
 
   // =====================================================================
   // Askerlik (Paket 29)
@@ -1657,12 +4164,10 @@ class GameController extends ChangeNotifier {
 
   /// Askerliğe katılır ya da rütbeli yola başvurur.
   MilitaryResult? enlistMilitary(MilitaryTrack track) =>
-      _runMilitary((GameState c) =>
-          MilitaryService.enlist(c, track, _random));
+      _runMilitary((GameState c) => MilitaryService.enlist(c, track, _random));
 
   /// Bedelliyi kendi cebinden öder.
-  MilitaryResult? payBedelli() =>
-      _runMilitary(MilitaryService.payBedelli);
+  MilitaryResult? payBedelli() => _runMilitary(MilitaryService.payBedelli);
 
   /// Askerliği tecil ettirir (Paket 31).
   MilitaryResult? deferMilitary() => _runMilitary(MilitaryService.defer);
@@ -1675,9 +4180,9 @@ class GameController extends ChangeNotifier {
       _runMilitary(MilitaryService.surrender);
 
   /// Bedelli ücretini bir yakından ister.
-  MilitaryResult? askFamilyForBedelli(String personId) =>
-      _runMilitary((GameState c) =>
-          MilitaryService.askFamilyForBedelli(c, personId, _random));
+  MilitaryResult? askFamilyForBedelli(String personId) => _runMilitary(
+    (GameState c) => MilitaryService.askFamilyForBedelli(c, personId, _random),
+  );
 
   MilitaryResult? _runMilitary(MilitaryResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1721,6 +4226,46 @@ class GameController extends ChangeNotifier {
           _random,
         ),
       );
+
+  /// Çiftin çocuk planı; konuşulmamışsa [FamilyPlan.belirsiz]
+  /// (Paket BK/2).
+  FamilyPlan familyPlanWith(String personId) =>
+      _state?.familyPlanFor(personId) ?? FamilyPlan.belirsiz;
+
+  /// Çocuk planını konuşmaya engel var mı? (Paket BK/2)
+  InteractionAvailability familyPlanAvailability(String personId) {
+    final GameState? current = _state;
+    if (current == null) {
+      return const InteractionAvailability.blocked('Etkin bir hayat yok.');
+    }
+    final Person? person = current.personById(personId);
+    if (person == null) {
+      return const InteractionAvailability.blocked('Bu kişi kayıtlarda yok.');
+    }
+    final String engel = _familyPlanning.blockReason(current, person);
+    return engel.isEmpty
+        ? const InteractionAvailability.allowed()
+        : InteractionAvailability.blocked(engel);
+  }
+
+  /// Çiftin çocuk planını yazar (Paket BK/2, Q-201).
+  ///
+  /// **Çocuk getirmez.** Yalnızca niyet kayda girer; gebelik hâlâ
+  /// korunmadan yakınlaşmanın ihtimalidir (Faho'nun Paket 25 kararı).
+  FamilyOutcome? setFamilyPlan(String personId, FamilyPlan plan) =>
+      _runFamily(
+        (GameState current) =>
+            _familyPlanning.setPlan(current, personId, plan),
+      );
+
+  /// Çocuk denemesi: planı "düşünüyoruz" olan çift için açık eylem
+  /// (Paket BK/2).
+  ///
+  /// Arkada **aynı motor** çalışır: korunmadan yakınlaşma. Ayrı bir
+  /// ihtimal, ayrı bir sayaç ya da ayrı bir kural yok; yalnızca
+  /// oyuncunun niyeti tek dokunuşla görünür hâle geliyor.
+  FamilyOutcome? tryForChild(String personId) =>
+      beIntimate(personId, Protection.korunmadan);
 
   /// Evlat edinme başvurusuna engel var mı?
   InteractionAvailability adoptionAvailability() {
@@ -1783,8 +4328,8 @@ class GameController extends ChangeNotifier {
 
   /// Çocuk sahibi olur: kalıcı kimlikli yeni bir kişi kaydı açılır.
   FamilyOutcome? haveChild() => _runFamily(
-        (GameState current) => _parenthood.haveChild(current, _random),
-      );
+    (GameState current) => _parenthood.haveChild(current, _random),
+  );
 
   FamilyOutcome? _runFamily(FamilyResult Function(GameState) islem) {
     final GameState? current = _state;
@@ -1849,12 +4394,12 @@ class GameController extends ChangeNotifier {
         educationLabel: current.education.program == null
             ? current.education.label
             : '${current.education.label} · '
-                '${current.education.program!.name}',
+                  '${current.education.program!.name}',
         careerLabel: current.career.isEmployed
             ? current.career.label
             : current.career.pastJobIds.isEmpty
-                ? 'Çalışmadı'
-                : 'Son iş: ${current.career.label}',
+            ? 'Çalışmadı'
+            : 'Son iş: ${current.career.label}',
         wallet: current.player.wallet,
         itemCount: current.items.length,
         licenseCount: current.licenses.length,
@@ -1885,8 +4430,10 @@ class GameController extends ChangeNotifier {
         case MarriageStatus.evli:
           parcalar.add('Eşi: $ad (${evlilik.marriedAtAge} yaşında evlendi)');
         case MarriageStatus.bosandi:
-          parcalar.add('Eski eşi: $ad '
-              '(${evlilik.marriedAtAge}-${evlilik.endedAtAge} yaş)');
+          parcalar.add(
+            'Eski eşi: $ad '
+            '(${evlilik.marriedAtAge}-${evlilik.endedAtAge} yaş)',
+          );
         case MarriageStatus.dul:
           parcalar.add('Eşi: $ad (${evlilik.endedAtAge} yaşında kaybetti)');
       }
@@ -1908,6 +4455,37 @@ class GameController extends ChangeNotifier {
     _state = current.copyWith(settings: settings);
     _autoSave();
     notifyListeners();
+  }
+
+  /// Modül anahtarı açık mı? (Paket BL)
+  ///
+  /// Hayat yoksa katalog varsayılanı geçerlidir; başlangıç ekranında da
+  /// soru sorulabilsin.
+  bool featureOn(FeatureId id) =>
+      _state?.featureOn(id) ?? FeatureSwitches.defaults.isOn(id);
+
+  /// Modülü aç/kapat ve kaydı tazele (Paket BL).
+  ///
+  /// Anahtar **hayat kaydının içinde** durur: aynı cihazda iki ayrı
+  /// hayat farklı modüllerle oynanabilir ve kayıt geri yüklendiğinde
+  /// oyuncunun seçtiği hâl geri gelir.
+  void setFeature(FeatureId id, bool on) {
+    final GameState? current = _state;
+    if (current == null) return;
+    updateSettings(
+      current.settings.copyWith(
+        features: current.settings.features.toggled(id, on),
+      ),
+    );
+  }
+
+  /// Bütün modülleri katalog varsayılanına döndür.
+  void resetFeatures() {
+    final GameState? current = _state;
+    if (current == null) return;
+    updateSettings(
+      current.settings.copyWith(features: FeatureSwitches.defaults),
+    );
   }
 
   /// Oyuncunun kendi belirlediği yıllık bahis limiti.

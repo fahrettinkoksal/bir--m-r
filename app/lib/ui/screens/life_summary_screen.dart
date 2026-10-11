@@ -8,6 +8,9 @@ import '../../domain/models/life_log.dart';
 import '../../domain/models/owned_item.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/models/person.dart';
+import '../../domain/models/combat_career.dart';
+import '../../domain/sports/football_career.dart';
+import '../../text/turkish_text.dart';
 import '../../state/game_scope.dart';
 import '../widgets/kilim_divider.dart';
 import '../widgets/life_verdict_panel.dart';
@@ -115,9 +118,34 @@ class LifeSummaryScreen extends StatelessWidget {
                   value: state.career.isEmployed
                       ? state.career.label
                       : state.career.pastJobIds.isEmpty
-                          ? 'Çalışmadı'
+                          // Sporcuya "Çalışmadı" yazılmaz (AY/3, AY/5):
+                          // o hayatın emeği sahada ya da ringde geçti.
+                          ? ((state.footballCareer?.proSeasons ?? 0) > 0
+                              ? 'Profesyonel futbolcu'
+                              : _dovusenKariyerler(state).isNotEmpty
+                                  ? 'Dövüş sporcusu'
+                                  : 'Çalışmadı')
                           : 'Son iş: ${state.career.label}',
                 ),
+                // Futbol kariyeri ömür özetinde görünür (Paket AY/3).
+                // Eskiden hiç yazılmıyordu: 15 sezon, 300 maçlık bir
+                // kariyer ömür sonunda yok sayılıyordu.
+                if ((state.footballCareer?.proSeasons ?? 0) > 0)
+                  _Satir(
+                    label: 'Futbol',
+                    value: _futbolOzeti(state.footballCareer!),
+                  ),
+                // Dövüş kariyeri de görünür (Paket AY/5).
+                //
+                // AY/3'te futbol satırını eklediğimde bir tutarsızlık
+                // doğdu: futbolcunun kariyeri ömür sonunda yazılıyor,
+                // kemer kazanmış dövüşçünün yazılmıyordu. Aynı eksiklik
+                // hükümde de vardı ve AY/4'te kapandı.
+                for (final CombatCareer dovus in _dovusenKariyerler(state))
+                  _Satir(
+                    label: _dovusEtiketi(dovus),
+                    value: _dovusOzeti(dovus),
+                  ),
                 _Satir(label: 'Cüzdan', value: state.player.walletLabel),
                 _Satir(label: 'Eşya sayısı', value: '${state.items.length}'),
                 if (state.licenses.isNotEmpty)
@@ -258,4 +286,50 @@ class _Satir extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Ömür özetindeki futbol satırı (Paket AY/3).
+///
+/// İç sayılar (form, itibar, beceri) gösterilmez; oyuncunun hatırlayacağı
+/// şeyler yazılır: kaç sezon, kaç maç, kaç gol, nasıl bitti.
+String _futbolOzeti(FootballCareer k) {
+  final String golKismi = k.position == FootballPosition.kaleci
+      ? ''
+      : ', ${k.totalGoals} gol';
+  final String bitis = k.active
+      ? ' · sürüyor'
+      : k.exitReason == null
+          ? ''
+          : ' · bitiş: ${trLower(k.exitReason!.label)}';
+  return '${k.proSeasons} sezon, ${k.totalAppearances} maç$golKismi'
+      '$bitis';
+}
+
+/// Ömür özetinde yazılacak dövüş kariyerleri (Paket AY/5).
+///
+/// Yalnızca **gerçekten müsabakaya çıkılmış** kariyerler. Lisans alıp
+/// hiç dövüşmemiş bir kayıt ömür özetini şişirmez.
+List<CombatCareer> _dovusenKariyerler(GameState state) => <CombatCareer>[
+      for (final CombatCareer k in state.combatCareers)
+        if (k.amateurWins + k.amateurLosses + k.proWins + k.proLosses > 0) k,
+    ];
+
+/// Satır etiketi: dal adı biliniyorsa onunla yazılır.
+String _dovusEtiketi(CombatCareer k) => k.art?.name ?? 'Dövüş';
+
+/// Dövüş kariyerinin özeti.
+///
+/// İç sayılar (form, itibar, sıralama) gösterilmez; oyuncunun
+/// hatırlayacağı şeyler yazılır: kaç maç, galibiyet, şampiyonluk.
+String _dovusOzeti(CombatCareer k) {
+  final int mac = k.amateurWins + k.amateurLosses + k.proWins + k.proLosses;
+  final int galibiyet = k.amateurWins + k.proWins;
+  final String kemer =
+      k.championships > 0 ? ', ${k.championships} şampiyonluk' : '';
+  final String bitis = k.retiredAtAge == null
+      ? ''
+      : k.retirementReason == null
+          ? ''
+          : ' · bitiş: ${trLower(k.retirementReason!.label)}';
+  return '$mac maç, $galibiyet galibiyet$kemer$bitis';
 }

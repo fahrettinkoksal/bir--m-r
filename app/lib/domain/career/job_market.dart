@@ -1,9 +1,18 @@
+import '../life/stat_floor_effects.dart';
 import 'dart:math';
 
+import '../../data/city_catalog.dart';
 import '../../data/interview_catalog.dart';
+import '../../data/crime_catalog.dart';
 import '../../data/job_catalog.dart';
+import '../law/legal_engine.dart';
+import '../models/criminal_record.dart';
+import '../../data/hobby_catalog.dart';
+import '../../data/license_catalog.dart';
 import '../../data/martial_arts_catalog.dart';
 import '../activities/martial_arts_engine.dart';
+import '../hobby/hobby_tracker.dart';
+import '../models/hobby_progress.dart';
 import '../models/career.dart';
 import '../models/person.dart';
 import 'colleagues.dart';
@@ -13,6 +22,9 @@ import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
 import '../models/pending_interview.dart';
+import '../models/stats.dart';
+import 'career_synergy.dart';
+import 'job_requirement.dart';
 import '../../text/turkish_text.dart';
 
 class JobOutcome {
@@ -56,22 +68,24 @@ class JobResult {
 class JobMarket {
   const JobMarket();
 
-  /// prototypeOnly: koşulları sağlayan bir başvurunun taban kabul olasılığı.
-  static const double prototypeOnlyBaseChance = 0.5;
+  // Not: burada eksiksiz bir "işe alım olasılığı" modeli bildiriliyordu
+  // (taban %50, eğitim payı %25, stat payı %15, tavan %90) ve dördü de
+  // hiç okunmuyordu. İşe alım deterministik: `applicationAvailability`
+  // koşulları denetler, mülakat sorusu doğru cevaplanırsa iş verilir.
+  // Eğitim bir **kapı**dır, olasılık payı değil.
 
-  /// prototypeOnly: uygun eğitim geçmişinin eklediği pay.
-  static const double prototypeOnlyEducationBonus = 0.25;
 
-  /// prototypeOnly: yüksek zekâ/karizmanın eklediği pay.
-  static const double prototypeOnlyStatBonus = 0.15;
-
-  /// prototypeOnly: en yüksek kabul olasılığı; iş asla garanti değildir.
-  static const double prototypeOnlyMaxChance = 0.9;
-
-  /// prototypeOnly: bir yaşta aynı işe yapılabilecek en fazla başvuru.
+  /// prototypeOnly: bir yaşta aynı işe yapılabilecek en fazla başvuru
+  /// (D-091).
   ///
-  /// Mülakat sorularının ezberlenip tekrar denenmesini sınırlar.
-  static const int prototypeOnlyMaxApplicationsPerAge = 2;
+  /// Faho'nun isteği: "bir işin mülakatında başarısız olduysam aynı
+  /// yıl içinde aynı işe yeniden başvuramayayım". Eskiden iki hak
+  /// vardı ve mülakat sorusu ezberlenip ikinci denemede geçilebiliyordu.
+  ///
+  /// Sınır **işe özeldir**: başka mesleklere başvuru kapanmaz. Sayaç
+  /// yaşa aittir, yeni yaşta kendiliğinden sıfırlanır ve kapat-aç ile
+  /// korunur.
+  static const int prototypeOnlyMaxApplicationsPerAge = 1;
 
   /// Oyuncunun **başvurabileceği** işler.
   ///
@@ -82,9 +96,9 @@ class JobMarket {
 
   /// Koşulları sağlanmayan işler ve gerekçeleri (bilgilendirme için).
   Map<JobType, String> lockedJobs(GameState state) => <JobType, String>{
-        for (final JobType job in kJobCatalog)
-          if (!meetsRequirements(state, job)) job: requirementReason(state, job),
-      };
+    for (final JobType job in kJobCatalog)
+      if (!meetsRequirements(state, job)) job: requirementReason(state, job),
+  };
 
   bool meetsRequirements(GameState state, JobType job) =>
       requirementReason(state, job).isEmpty;
@@ -95,9 +109,37 @@ class JobMarket {
     if (state.player.age < job.minAge) {
       return '${job.minAge} yaşından itibaren başvurulabilir.';
     }
-    if (egitim.isSchoolStudent) {
-      return 'Okula devam ederken tam zamanlı işe başvurulmaz.';
+    // Şehrin iş piyasası (D-159): üst bantlardaki meslekler dar
+    // piyasada **hiç bulunmaz**. Gerekçe açıkça yazılır; oyuncu neden
+    // göremediğini anlar ve taşınmanın bir anlamı olur.
+    if (!bandAvailableIn(state.player.currentCity, job.band)) {
+      return '${state.player.currentCity} bu iş için dar bir piyasa; '
+          'böyle bir ilan çıkmıyor. Büyük şehirlerde bulunur.';
     }
+    // İşe **girişte** üst yaş sınırı (D-113). Yalnızca gerçekten sınırı
+    // olan mesleklerde doludur; uydurma sınır konmaz. Sınır yalnızca ilk
+    // girişi bağlar — çalışan biri yaşı geçince işini kaybetmez.
+    final int? ustSinir = job.maxAge;
+    if (ustSinir != null && state.player.age > ustSinir) {
+      final String dayanak = job.maxAgeNote ?? 'Üst yaş sınırı $ustSinir.';
+      return '$dayanak Şu an ${state.player.age} yaşındasın; '
+          'bu işe artık başvuramazsın.';
+    }
+    // Okula devam ederken **tam zamanlı** iş yapılmaz; yarım zamanlı
+    // yapılır (D-131). Faho'nun isteği ve D-126'daki "yaz işi istemek"
+    // olayının gerçek karşılığı.
+    if (egitim.isSchoolStudent && !job.partTime) {
+      return 'Okula devam ederken tam zamanlı işe başvurulmaz. '
+          'Yarım zamanlı işlere başvurabilirsin.';
+    }
+    // Cezaevindeyken iş aranmaz (D-128).
+    if (state.isImprisoned) {
+      return 'Cezaevindeyken işe başvurulmaz.';
+    }
+    // Sabıka kaydı (D-128). Her suç bütün işleri kapatmaz: kural işin
+    // kendi gerçeğine bakar ve gerekçe açıkça yazılır (D-063).
+    final String adliEngel = recordReason(state, job);
+    if (adliEngel.isNotEmpty) return adliEngel;
     switch (job.education) {
       case JobEducation.yok:
         break;
@@ -111,18 +153,61 @@ class JobMarket {
     if (job.tracks.isNotEmpty || job.programs.isNotEmpty) {
       final bool alanUygun =
           egitim.track != null && job.tracks.contains(egitim.track);
-      final bool bolumUygun = egitim.universityFinished &&
+      final bool bolumUygun =
+          egitim.universityFinished &&
           egitim.universityProgramId != null &&
           job.programs.contains(egitim.universityProgramId);
       if (!alanUygun && !bolumUygun) {
         return 'Bu iş için uygun bir eğitim geçmişi gerekiyor.';
       }
     }
-    if (state.player.stats.intelligence < job.minIntelligence) {
-      return 'Bu iş için zekân yeterli görülmüyor.';
+    // Stat şartları (Paket AM, §19). Gerekçeler **sayıyla** yazılıyor:
+    // oyuncu "neden giremiyorum?" diye tahmin yürütmesin, eksiğinin ne
+    // kadar olduğunu görsün.
+    final Stats stat = state.player.stats;
+    if (stat.intelligence < job.minIntelligence) {
+      return 'Bu iş için zekânın en az ${job.minIntelligence} olması '
+          'gerekiyor; şu an ${stat.intelligence}.';
     }
-    if (state.player.stats.charisma < job.minCharisma) {
-      return 'Bu iş için karizman yeterli görülmüyor.';
+    if (stat.charisma < job.minCharisma) {
+      return 'Bu iş için karizmanın en az ${job.minCharisma} olması '
+          'gerekiyor; şu an ${stat.charisma}.';
+    }
+    if (stat.appearance < job.minAppearance) {
+      // Görünüşle girilen tek meslek mankenlik; metin ona göre yazıldı.
+      return 'Ajans seni podyum için uygun bulmadı. Bu kariyer için en az '
+          '${job.minAppearance} dış görünüş gerekiyor; şu an '
+          '${stat.appearance}.';
+    }
+    // Fiziksel yeterlilik (§1). **Yalnızca** işin doğası beden istiyorsa
+    // dolu; ofis ve uzmanlık mesleklerinde `minHealth` 0 olduğu için bu
+    // blok hiç çalışmaz (§11).
+    if (stat.health < job.minHealth) {
+      final String gerekce = job.physicalNote ??
+          'Bu iş fiziksel olarak daha iyi durumda olmanı gerektiriyor.';
+      return '$gerekce Sağlığının en az ${job.minHealth} olması '
+          'gerekiyor; şu an ${stat.health}.';
+    }
+    // Hobiyle açılan meslekler (yazarlık, müzisyenlik): diploma değil,
+    // yıllarca sürdürülmüş gerçek bir uğraş aranır. Kayıt uydurulmaz;
+    // hobi geçmişi gerçekten varsa açılır.
+    final String? hobiId = job.hobbyId;
+    if (hobiId != null) {
+      final HobbyKind? hobi = hobbyById(hobiId);
+      if (hobi == null) return 'Bu iş şu an açık değil.';
+      final HobbyProgress? ilerleme = HobbyTracker.progressOf(state, hobi);
+      if (ilerleme == null || ilerleme.stage < job.minHobbyStage) {
+        return '${hobi.label} uğraşında en az '
+            '"${hobi.stages[job.minHobbyStage].label}" basamağına '
+            'gelmen gerekiyor.';
+      }
+    }
+    // Ehliyet isteyen meslekler (kuryelik): aracı kullanmak işin kendisi.
+    for (final String ehliyet in job.requiredLicenses) {
+      if (!state.hasLicense(ehliyet)) {
+        final LicenseType? tur = licenseTypeById(ehliyet);
+        return '${tur?.label ?? 'Ehliyet'} gerekiyor.';
+      }
     }
     // Dövüş sanatı eğitmenliği (Paket 32): kuşağı/boyu olmayan öğretemez.
     final String? sanatId = job.martialArtId;
@@ -138,6 +223,83 @@ class JobMarket {
     return '';
   }
 
+  /// İş ilanında gösterilecek gereksinim satırları (Paket AM, §18).
+  ///
+  /// Amaç tek: oyuncu "neden giremiyorum?" diye tahmin yürütmesin.
+  /// Yalnızca **bu işin gerçekten koyduğu** şartlar listelenir; şartı
+  /// olmayan stat hiç görünmez. Yaş her işte var, o yüzden hep listede.
+  ///
+  /// Eğitim, şehir, sabıka ve ehliyet gibi metinle daha iyi anlatılan
+  /// şartlar burada değil, [requirementReason] içinde durur.
+  List<JobRequirement> requirementLines(GameState state, JobType job) {
+    final Stats stat = state.player.stats;
+    return <JobRequirement>[
+      JobRequirement(
+        label: 'Yaş',
+        need: 'en az ${job.minAge}',
+        have: '${state.player.age}',
+        met: state.player.age >= job.minAge,
+      ),
+      if (job.minIntelligence > 0)
+        JobRequirement(
+          label: 'Zekâ',
+          need: 'en az ${job.minIntelligence}',
+          have: '${stat.intelligence}',
+          met: stat.intelligence >= job.minIntelligence,
+        ),
+      if (job.minCharisma > 0)
+        JobRequirement(
+          label: 'Karizma',
+          need: 'en az ${job.minCharisma}',
+          have: '${stat.charisma}',
+          met: stat.charisma >= job.minCharisma,
+        ),
+      if (job.minAppearance > 0)
+        JobRequirement(
+          label: 'Dış görünüş',
+          need: 'en az ${job.minAppearance}',
+          have: '${stat.appearance}',
+          met: stat.appearance >= job.minAppearance,
+        ),
+      if (job.minHealth > 0)
+        JobRequirement(
+          label: 'Sağlık',
+          need: 'en az ${job.minHealth}',
+          have: '${stat.health}',
+          met: stat.health >= job.minHealth,
+        ),
+    ];
+  }
+
+  /// Sabıka kaydının bu işe engel olup olmadığı (D-128).
+  ///
+  /// Engel yoksa boş metin döner. Gerekçe **açık yazılır**: hangi kayıt,
+  /// hangi yaşta, neden engel.
+  String recordReason(GameState state, JobType job) {
+    if (job.recordRule == RecordRule.serbest) return '';
+    // Sicil zamanla **başvuruda sayılmaz** hâle gelir (D-161). Kayıt
+    // silinmez; Adli Geçmiş'te hayat boyu durur. Değişen tek şey, yıllar
+    // sonra bir hatanın kapıyı kapatmaya devam etmemesi.
+    final List<CriminalCase> sabika = LegalEngine.activeRecord(state);
+    if (sabika.isEmpty) return '';
+
+    final List<CriminalCase> engelleyen = job.recordRule ==
+            RecordRule.temizGerekir
+        ? sabika
+        : sabika
+            .where(
+              (CriminalCase c) =>
+                  c.crime != null && c.crime!.severity != CrimeSeverity.hafif,
+            )
+            .toList(growable: false);
+    if (engelleyen.isEmpty) return '';
+
+    final CriminalCase ilk = engelleyen.first;
+    final String ad = ilk.crime?.recordLabel ?? 'adli kayıt';
+    return '${job.recordRule.label}: ${ilk.ageAtIncident} yaşındaki '
+        '"$ad" kaydı sicilinde duruyor.';
+  }
+
   InteractionAvailability applicationAvailability(
     GameState state,
     JobType job,
@@ -149,9 +311,12 @@ class JobMarket {
     }
     final String reason = requirementReason(state, job);
     if (reason.isNotEmpty) return InteractionAvailability.blocked(reason);
-    if (_applicationsThisAge(state, job) >= prototypeOnlyMaxApplicationsPerAge) {
-      return const InteractionAvailability.blocked(
-        'Bu yıl bu işe yeterince başvurdun; seneye tekrar dene.',
+    if (_applicationsThisAge(state, job) >=
+        prototypeOnlyMaxApplicationsPerAge) {
+      return InteractionAvailability.blocked(
+        'Bu yıl ${job.name} işine başvurdun ve kabul edilmedin. Yeni bir '
+        'başvuru için gelecek yılı beklemelisin. Başka mesleklere '
+        'başvurabilirsin.',
       );
     }
     if (state.hasPendingInterview) {
@@ -178,17 +343,14 @@ class JobMarket {
   ///
   /// Aynı yaşta daha önce sorulmamış bir soru varsa o tercih edilir;
   /// böylece tekrar başvuruda aynı soru ezberlenmez.
-  InterviewQuestion _pickQuestion(
-    GameState state,
-    JobType job,
-    Random rng,
-  ) {
+  InterviewQuestion _pickQuestion(GameState state, JobType job, Random rng) {
     final List<InterviewQuestion> hepsi = questionsForJob(job.id);
     final List<InterviewQuestion> sorulmamis = hepsi
         .where((InterviewQuestion q) => _questionAskedThisAge(state, q) == 0)
         .toList(growable: false);
-    final List<InterviewQuestion> havuz =
-        sorulmamis.isEmpty ? hepsi : sorulmamis;
+    final List<InterviewQuestion> havuz = sorulmamis.isEmpty
+        ? hepsi
+        : sorulmamis;
     return havuz[rng.nextInt(havuz.length)];
   }
 
@@ -220,11 +382,7 @@ class JobMarket {
           askedAtAge: state.player.age,
         ),
       ),
-      outcome: JobOutcome(
-        applied: true,
-        text: metin,
-        interviewStarted: true,
-      ),
+      outcome: JobOutcome(applied: true, text: metin, interviewStarted: true),
     );
   }
 
@@ -235,11 +393,7 @@ class JobMarket {
   /// Cevap verildikten sonra mülakat kapanır; ikinci kez uygulanamaz.
   /// [rng] verilmezse iş arkadaşları rastgele üretilir; belirli bir sonuç
   /// isteyen çağrılar kendi tohumunu geçirir.
-  JobResult answerInterview(
-    GameState state,
-    int optionIndex, [
-    Random? rng,
-  ]) {
+  JobResult answerInterview(GameState state, int optionIndex, [Random? rng]) {
     final PendingInterview? mulakat = state.pendingInterview;
     if (mulakat == null) {
       return _blocked(state, 'Devam eden bir mülakat yok.');
@@ -266,7 +420,8 @@ class JobMarket {
     // Koşullar cevap anında yeniden denetlenir.
     final String engel = requirementReason(state, job);
     if (engel.isNotEmpty || state.career.isEmployed) {
-      final String metin = '${job.name} başvurun sonuçlanmadı: '
+      final String metin =
+          '${job.name} başvurun sonuçlanmadı: '
           '${state.career.isEmployed ? 'Zaten bir işin var.' : engel}';
       return JobResult(
         state: _log(kapali, metin),
@@ -274,8 +429,28 @@ class JobMarket {
       );
     }
 
-    if (!dogru) {
-      final String metin = '${job.name} mülakatı olumsuz sonuçlandı. '
+    // Hobi sinerjisi (Paket AK, §17). Ayrı bir işe giriş motoru
+    // kurulmadı: mevcut kararın içine kontrollü bir katkı kondu.
+    // Cevabı tutmayan adayın işi bitmiyorsa, sebebi geçmişi — yıllardır
+    // fotoğraf çeken birinin dosyasına bakıyorlar. Garanti değil:
+    // en yüksek sinerjide bile zar atılıyor (tavan
+    // `prototypeOnlyMaxInterviewRescue`).
+    // Karizma mülakatta sayılır (Paket AQ). Mülakatın tek karar noktası
+    // cevabı tutmayan adayın geçmişiyle kurtulmasıydı ve karizma oraya
+    // hiç girmiyordu; artık ölçeklendiriyor. Doğru cevap veren aday
+    // hiçbir karizma bandında reddedilmez.
+    final double ikinciSans =
+        CareerSynergyRules.interviewRescueChance(state, job) *
+            StatFloorEffects.interviewRescueFactor(
+              state.player.stats.charisma,
+            );
+    final bool gecmisKurtardi = !dogru &&
+        ikinciSans > 0 &&
+        (rng ?? Random()).nextDouble() < ikinciSans;
+
+    if (!dogru && !gecmisKurtardi) {
+      final String metin =
+          '${job.name} mülakatı olumsuz sonuçlandı. '
           '"Teşekkür ederiz, sizi arayacağız" dediler.';
       return JobResult(
         state: _log(kapali, metin),
@@ -288,8 +463,14 @@ class JobMarket {
       );
     }
 
-    final String metin = '${job.name} olarak işe alındın. '
-        'İlk maaşın bir yıl sonra cebinde olacak.';
+    final List<SynergyStanding> baglar =
+        CareerSynergyRules.standingsFor(state, job);
+    final String metin = gecmisKurtardi
+        ? '${job.name} mülakatında sorunun cevabı tutmadı. Ama '
+            '${baglar.first.hobby.label.toLowerCase()} geçmişini görünce '
+            '"bu işi zaten yapıyormuşsun" dediler ve seni işe aldılar.'
+        : '${job.name} olarak işe alındın. '
+            'İlk maaşın bir yıl sonra cebinde olacak.';
     final GameState iseAlinmis = kapali.copyWith(
       career: kapali.career.copyWith(
         jobId: job.id,
@@ -304,6 +485,10 @@ class JobMarket {
         milestones: const <CareerMilestone>[],
         lastRaiseAge: null,
         lastPromotionAge: null,
+        // Başlangıç ustalığı (§18): hobide ciddi geçmişi olan işe sıfır
+        // çırak gibi başlamaz. Maaş katalog maaşı olarak kalır; pay
+        // yalnızca ustalık merdivenine işler.
+        synergyHeadStart: CareerSynergyRules.headStartYears(state, job),
       ),
     );
     // İşe girince birkaç iş arkadaşıyla tanışılır; kalıcı kimlikleri olur.
@@ -327,10 +512,7 @@ class JobMarket {
           // olayların önkoşuludur. Daha önce yalnızca bir olay seçeneğiyle
           // bırakılıyordu; normal yoldan işe giren oyuncu bu olayları hiç
           // görmüyordu (Paket 4 ölçümü).
-          storyFlags: <String>{
-            ...kapali.storyFlags,
-            StoryFlags.calismaHayati,
-          },
+          storyFlags: <String>{...kapali.storyFlags, StoryFlags.calismaHayati},
         ),
         metin,
       ),
@@ -364,8 +546,8 @@ class JobMarket {
     final String tamMetin = sonuc.becameFriends.isEmpty
         ? metin
         : '$metin İş arkadaşlarından '
-            '${sonuc.becameFriends.length} kişiyle görüşmeye devam '
-            'ediyorsun.';
+              '${sonuc.becameFriends.length} kişiyle görüşmeye devam '
+              'ediyorsun.';
 
     GameState sonraki = state.copyWith(
       people: sonuc.people,
@@ -386,6 +568,19 @@ class JobMarket {
   /// Yeni yaşa geçerken maaşı **bir kez** öder.
   ///
   /// [CareerState.lastPaidAge] aynı dönemin ikinci kez ödenmesini engeller.
+  ///
+  /// **Tutukluyken maaş ödenmez (Q-199, Faho onayladı 6 Ekim 2026).**
+  /// Hüküm giyen oyuncunun işi zaten bitiyor
+  /// (`LegalEngine._enterPrison`, D-128), ama **tutukluluk** o kuralda
+  /// geçmiyordu: dosya sürerken içeride olan oyuncunun maaşı tam
+  /// yatmaya devam ediyordu. Bot dökümünde bir hayatın günlüğünde
+  /// "Bir yıl daha tutuklu geçti" ile "bir yılın doldu; 631.800 ₺
+  /// cüzdanına girdi" yan yanaydı; 120 hayatta tutuklu geçen 32 yılın
+  /// **27'sinde** oyuncunun işi duruyor ve maaşı akıyordu.
+  ///
+  /// Kural: **iş bitmez, maaş ödenmez, o yıl kıdeme sayılmaz.** Tahliye
+  /// olan oyuncu işine döner; dosya mahkûmiyetle kapanırsa işi o zaman
+  /// biter (D-128). Böylece beraat eden oyuncu işini de kaybetmiş olmaz.
   ({GameState state, String? logText}) paySalaryFor(
     GameState state,
     int newAge,
@@ -397,6 +592,21 @@ class JobMarket {
       return (state: state, logText: null);
     }
 
+    if (state.legal.isDetained) {
+      // Yıl **işlenmiş** sayılır: `lastPaidAge` ilerler ki aynı yıl
+      // ikinci kez buraya girilmesin, `detainedYears` de bir kez artsın.
+      return (
+        state: state.copyWith(
+          career: state.career.copyWith(
+            lastPaidAge: newAge,
+            detainedYears: state.career.detainedYears + 1,
+          ),
+        ),
+        logText: '${state.career.title} işin duruyor ama içeridesin: '
+            'bu yıl maaş yatmadı, kıdemin de ilerlemedi.',
+      );
+    }
+
     return (
       state: state.copyWith(
         player: state.player.copyWith(
@@ -404,24 +614,25 @@ class JobMarket {
         ),
         career: state.career.copyWith(lastPaidAge: newAge),
       ),
-      logText: '${state.career.title} olarak bir yılın doldu; '
+      logText:
+          '${state.career.title} olarak bir yılın doldu; '
           '${trMoney(state.career.yearlySalary)} cüzdanına girdi.',
     );
   }
 
   JobResult _blocked(GameState state, String reason) => JobResult(
-        state: state,
-        outcome: JobOutcome(applied: false, text: reason),
-      );
+    state: state,
+    outcome: JobOutcome(applied: false, text: reason),
+  );
 
   GameState _log(GameState state, String text) => state.copyWith(
-        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-          ...state.log,
-          LifeLogEntry(
-            age: state.player.age,
-            text: text,
-            category: LogCategory.kisisel,
-          ),
-        ]),
-      );
+    log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+      ...state.log,
+      LifeLogEntry(
+        age: state.player.age,
+        text: text,
+        category: LogCategory.kisisel,
+      ),
+    ]),
+  );
 }

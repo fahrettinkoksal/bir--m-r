@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../../data/finger_catalog.dart';
 import '../../../domain/interaction/finger.dart';
+import '../../../domain/models/game_state.dart';
+import '../../../text/turkish_text.dart';
 import '../../../domain/models/finger_profile.dart';
 import '../../../domain/models/interaction.dart';
 import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../theme/bir_omur_theme.dart';
 import '../../widgets/section_scaffold.dart';
+import '../../../domain/models/wealth.dart';
 
 /// "Finger" tanışma uygulaması (Paket 34).
 ///
@@ -50,7 +53,8 @@ class _FingerPageState extends State<FingerPage> {
       icon: Icons.favorite_rounded,
       accent: BirOmurAccents.gul,
       title: 'Finger',
-      subtitle: 'Bu yıl ${kalan < 0 ? 0 : kalan} profile daha bakabilirsin.',
+      subtitle: 'Bu yıl ${kalan < 0 ? 0 : kalan} profile daha bakabilirsin '
+          '· ${controller.fingerLikesLeft} beğeni hakkın var.',
       backLabel: 'Aktiviteler',
       onBack: widget.onBack,
       children: <Widget>[
@@ -58,11 +62,47 @@ class _FingerPageState extends State<FingerPage> {
           icon: Icons.percent_rounded,
           text: 'Beğenilerinin yaklaşık '
               '%${(controller.fingerMatchChance * 100).round()}\'i karşılık '
-              'buluyor. Görünüş ve karizma yükseldikçe bu oran artar. '
-              'Eşleşmek tanışmak değildir: buluşana kadar kimse hayatına '
-              'girmez.',
+              'buluyor. Görünüş, karizma ve **doldurulmuş profil** bu '
+              'oranı yükseltir. Eşleşmek tanışmak değildir: buluşana '
+              'kadar kimse hayatına girmez.',
         ),
         const SizedBox(height: 12),
+        // Kendi profilin (D-081): boş profili kimse beğenmez.
+        _SelfProfileCard(
+          onSaved: (FingerOutcome? o) => setState(() => _sonuc = o),
+        ),
+        const SizedBox(height: 12),
+        // Ne aradığın ve kimleri görmek istediğin (D-107).
+        _IntentCard(onChanged: () => setState(() {})),
+        const SizedBox(height: 12),
+        // Premium (D-081): beğeni hakkını artırır, sınırsız yapmaz.
+        if (!controller.hasFingerPremium) ...<Widget>[
+          _PremiumCard(
+            onBuy: () => setState(
+              () => _sonuc = controller.buyFingerPremium(),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Seni beğenenler: buradan gelen beğeni kesin eşleşir.
+        if (controller.fingerIncoming.isNotEmpty) ...<Widget>[
+          const MenuGroupTitle(
+            text: 'Seni beğenenler',
+            accent: BirOmurAccents.gul,
+          ),
+          for (final FingerProfile p in controller.fingerIncoming) ...<Widget>[
+            _MatchRow(
+              key: Key('incoming_${p.id}'),
+              profile: p,
+              actionLabel: 'Sen de beğen',
+              onMeet: () => setState(
+                () => _sonuc = controller.likeFingerProfile(p.id),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 8),
+        ],
         if (!izin.isAllowed) ...<Widget>[
           InfoPanel(
             icon: Icons.hourglass_bottom_rounded,
@@ -177,6 +217,16 @@ class _ProfileCard extends StatelessWidget {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      // Ne aradığı ve ekonomik durumu gizli değildir
+                      // (D-107); profilde yazar.
+                      Text(
+                        '${profile.intent.label} · ${profile.wealth.label}',
+                        key: Key('finger_intent_${profile.id}'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -235,10 +285,20 @@ class _ProfileCard extends StatelessWidget {
 }
 
 class _MatchRow extends StatelessWidget {
-  const _MatchRow({required this.profile, required this.onMeet});
+  const _MatchRow({
+    super.key,
+    required this.profile,
+    required this.onMeet,
+    this.actionLabel,
+  });
 
   final FingerProfile profile;
   final VoidCallback onMeet;
+
+  /// Düğmenin yazısı; boşsa "Tanış" kullanılır.
+  ///
+  /// "Seni beğenenler" listesinde düğme tanıştırmaz, **beğenir**.
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -276,8 +336,312 @@ class _MatchRow extends StatelessWidget {
             FilledButton.tonal(
               key: Key('finger_tanis_${profile.id}'),
               onPressed: profile.isMet ? null : onMeet,
-              child: Text(profile.isMet ? 'Tanıştın' : 'Tanış'),
+              child: Text(
+                profile.isMet ? 'Tanıştın' : (actionLabel ?? 'Tanış'),
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Oyuncunun kendi Finger profili (D-081).
+///
+/// Faho'nun isteği: "bir finger profili oluşturalım, hobilerimi falan
+/// sorsun, ona göre insanlar da beni beğenebilsin". Profil doldurmadan
+/// kimse oyuncuyu kendiliğinden beğenmez.
+class _SelfProfileCard extends StatefulWidget {
+  const _SelfProfileCard({required this.onSaved});
+
+  final void Function(FingerOutcome?) onSaved;
+
+  @override
+  State<_SelfProfileCard> createState() => _SelfProfileCardState();
+}
+
+class _SelfProfileCardState extends State<_SelfProfileCard> {
+  bool _acik = false;
+  String? _bio;
+  late Set<String> _ilgiler;
+  bool _yuklendi = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final GameState state = controller.state!;
+
+    if (!_yuklendi) {
+      _bio = state.fingerBio;
+      _ilgiler = <String>{...state.fingerInterests};
+      _yuklendi = true;
+    }
+
+    return Container(
+      decoration: panelDecoration(context, radius: 16),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  state.hasFingerProfile ? 'Profilin' : 'Profilin boş',
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              TextButton(
+                key: const Key('finger_profil_ac'),
+                onPressed: () => setState(() => _acik = !_acik),
+                child: Text(_acik ? 'Kapat' : 'Düzenle'),
+              ),
+            ],
+          ),
+          if (!_acik)
+            Text(
+              state.hasFingerProfile
+                  ? '${state.fingerBio ?? ''}\n'
+                      '${state.fingerInterests.join(', ')}'
+                  : 'Profilini doldurmadan kimse seni kendiliğinden '
+                      'beğenmez.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          if (_acik) ...<Widget>[
+            const SizedBox(height: 8),
+            Text('Kendini anlat', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 6),
+            // RadioMenuButton kullanılmıştı; o bir **menü** bileşeni ve
+            // etiketini sınırsız genişlikte yerleştiriyor. Uzun tanıtım
+            // cümleleri satırı 271-325 piksel taşırıyordu (D-088).
+            // Yerine metni saran, kendi satırında duran bir seçim satırı
+            // kondu.
+            for (final String metin in kFingerBios.take(6))
+              _SecimSatiri(
+                key: Key('finger_bio_${kFingerBios.indexOf(metin)}'),
+                secili: _bio == metin,
+                metin: metin,
+                onTap: () => setState(() => _bio = metin),
+              ),
+            const SizedBox(height: 10),
+            Text('İlgi alanların', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: <Widget>[
+                for (final String ilgi in kFingerInterests)
+                  FilterChip(
+                    key: Key('finger_ilgi_$ilgi'),
+                    label: Text(ilgi),
+                    selected: _ilgiler.contains(ilgi),
+                    onSelected: (bool secili) => setState(() {
+                      if (secili) {
+                        _ilgiler.add(ilgi);
+                      } else {
+                        _ilgiler.remove(ilgi);
+                      }
+                    }),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                key: const Key('finger_profil_kaydet'),
+                onPressed: () {
+                  final FingerOutcome? o = controller.saveFingerProfile(
+                    bio: _bio ?? '',
+                    interests: _ilgiler.toList(growable: false),
+                  );
+                  setState(() => _acik = false);
+                  widget.onSaved(o);
+                },
+                child: const Text('Profili kaydet'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Premium üyelik kartı (D-081).
+class _PremiumCard extends StatelessWidget {
+  const _PremiumCard({required this.onBuy});
+
+  final VoidCallback onBuy;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+    final InteractionAvailability izin = controller.fingerPremiumAvailability;
+
+    return Container(
+      decoration: panelDecoration(context, radius: 16),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('Premium üyelik', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          Text(
+            'Yılda $kFingerMaxLikesPerAge beğeni yerine '
+            '$kFingerPremiumLikesPerAge beğeni. '
+            'Ücreti ${trMoney(kFingerPremiumYearlyCost)}, bir yıl geçerli.',
+            style: theme.textTheme.bodySmall,
+          ),
+          if (!izin.isAllowed)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                izin.reason!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.tonal(
+              key: const Key('finger_premium_al'),
+              onPressed: izin.isAllowed ? onBuy : null,
+              child: const Text('Premium al'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Metni saran, tek satıra sıkışmayan seçim satırı (D-088).
+///
+/// Menü bileşenleri (RadioMenuButton, MenuItemButton) etiketlerini
+/// sınırsız genişlikte yerleştirir ve uzun metinle ekranı taşırır. Bu
+/// satır `Expanded` ile sarar, böylece dar telefonda da bozulmaz.
+class _SecimSatiri extends StatelessWidget {
+  const _SecimSatiri({
+    super.key,
+    required this.secili,
+    required this.metin,
+    required this.onTap,
+  });
+
+  final bool secili;
+  final String metin;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(
+              secili
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              size: 18,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(metin, style: theme.textTheme.bodySmall),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Oyuncunun **ne aradığı** ve aday süzgeci (D-107).
+///
+/// Niyet gerçek bir kural değiştirir: buluşmanın sonucu hem buna hem
+/// karşı tarafın niyetine bakar. Süzgeç de gerçektir; kapalıyken bütün
+/// adaylar gösterilir.
+class _IntentCard extends StatelessWidget {
+  const _IntentCard({required this.onChanged});
+
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final GameController controller = GameScope.of(context);
+
+    return Container(
+      key: const Key('finger_intent_card'),
+      decoration: panelDecoration(context, radius: 22),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('Ne arıyorsun?', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 2),
+            Text(
+              'Buluşmanın sonucu hem senin hem karşı tarafın niyetine '
+              'bakar. Tanışmak sevgili olmak demek değildir.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final FingerIntent i in FingerIntent.values)
+              _SecimSatiri(
+                key: Key('finger_intent_${i.name}'),
+                secili: controller.fingerIntent == i,
+                metin: i.label,
+                onTap: () {
+                  controller.setFingerIntent(i);
+                  onChanged();
+                },
+              ),
+            const SizedBox(height: 10),
+            Text('Kimleri göreyim?', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 2),
+            Text(
+              'Süzgeç açıkken yalnızca seçtiğin ekonomik durumdaki '
+              'adaylar gösterilir.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _SecimSatiri(
+              key: const Key('finger_wealth_hepsi'),
+              secili: controller.fingerWealthFilter == null,
+              metin: 'Fark etmez',
+              onTap: () {
+                controller.setFingerWealthFilter(null);
+                onChanged();
+              },
+            ),
+            for (final WealthTier t in WealthTier.values)
+              _SecimSatiri(
+                key: Key('finger_wealth_${t.name}'),
+                secili: controller.fingerWealthFilter == t,
+                metin: t.label,
+                onTap: () {
+                  controller.setFingerWealthFilter(t);
+                  onChanged();
+                },
+              ),
           ],
         ),
       ),

@@ -2,7 +2,14 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
+import 'package:bir_omur/domain/generation/child_progression.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
+import 'package:bir_omur/domain/interaction/family_planning.dart';
+import 'package:bir_omur/domain/interaction/marriage_engine.dart';
+import 'package:bir_omur/domain/interaction/parenthood.dart';
+import 'package:bir_omur/domain/interaction/romance.dart';
+import 'package:bir_omur/domain/life/year_review.dart';
+import 'package:bir_omur/domain/models/pregnancy.dart';
 import 'package:bir_omur/domain/life/life_verdict.dart';
 import 'package:bir_omur/domain/models/career.dart';
 import 'package:bir_omur/domain/models/education.dart';
@@ -14,6 +21,8 @@ import 'package:bir_omur/domain/models/gift_record.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/pending_notice.dart';
 import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/person_development.dart';
+import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/player_character.dart';
@@ -39,6 +48,14 @@ import 'support/test_flow.dart';
 /// BIR_OMUR_SCREENSHOTS=1 flutter test --update-goldens test/golden_screens_test.dart
 /// ```
 const String _kSwitch = 'BIR_OMUR_SCREENSHOTS';
+
+/// Tanıtım animasyonunun kareleri (`test/kare/`). Ayrı anahtar, çünkü 20
+/// kare basıyor ve ekran görüntüsü koşusunu uzatmasının anlamı yok:
+///
+/// ```
+/// BIR_OMUR_KARE=1 flutter test --update-goldens test/golden_screens_test.dart --name "kare dizisi"
+/// ```
+const String _kKareSwitch = 'BIR_OMUR_KARE';
 
 /// Ekran görüntüleri gerçek uygulamaya benzesin diye Flutter'ın kendi
 /// Roboto ve Material Icons dosyaları yüklenir. Aksi halde yazılar tek tip
@@ -97,11 +114,12 @@ Future<void> _loadReadableFont() async {
 
 void main() {
   final bool enabled = Platform.environment[_kSwitch] == '1';
+  final bool kareEnabled = Platform.environment[_kKareSwitch] == '1';
 
   late GameController controller;
 
   setUpAll(() async {
-    if (enabled) await _loadReadableFont();
+    if (enabled || kareEnabled) await _loadReadableFont();
   });
 
   setUp(() {
@@ -175,6 +193,12 @@ void main() {
       // (D-050).
       await answerPendingCrisis(tester, controller);
       await answerPendingNotices(tester, controller);
+      // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111). Bu adım
+      // eksikti: lise alan penceresi açılınca "Yaş Al" hiçbir şey
+      // yapmıyor, döngü 14 yaşında boşa dönüyor ve hayat hiç romantik
+      // yaşa gelmiyordu. Hata mesajı ise "sevgili edinilemedi" diyerek
+      // oyunu suçluyordu.
+      await resolveEducationSheets(tester, controller);
       while (controller.state!.hasPendingEvent) {
         if (controller.state!.deceased) return;
         await answerPendingCrisis(tester, controller);
@@ -193,8 +217,23 @@ void main() {
       }
       if (done()) return;
       if (controller.state!.deceased) return;
+      final int oncekiYas = controller.state!.player.age;
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
+      // Yaş ilerlemediyse ve ekranda bekleyen bir pencere de yoksa, yaş
+      // almayı kilitleyen yeni bir kapı eklenmiş demektir. Sessizce
+      // dönmek testi yanıltıyor: asıl engel yerine "hedefe ulaşılamadı"
+      // yazıyor. Burada doğrudan söylenir.
+      if (controller.state!.player.age == oncekiYas &&
+          !controller.state!.hasPendingEvent &&
+          !controller.state!.hasPendingCrisis &&
+          !controller.state!.deceased &&
+          !controller.needsEducationChoice) {
+        fail('Yaş ilerlemedi ve ekranda bekleyen pencere yok '
+            '(yaş $oncekiYas). "Yaş Al" düğmesini kilitleyen yeni bir '
+            'kapı eklenmiş olabilir; bu yardımcının da onu kapatması '
+            'gerekiyor.');
+      }
     }
   }
 
@@ -298,6 +337,66 @@ void main() {
     await tester.tap(find.text('Vakit Geçir'));
     await tester.pumpAndSettle();
     await shot(tester, '08_etkilesim.png');
+  }, skip: !enabled);
+
+  // Paket BK — ebeveynlik ekranı.
+  //
+  // Durum **motorlarla** kuruluyor: ilişki `Romance`, evlilik
+  // `MarriageEngine`, çocuk `Parenthood`, çocuğun gelişim kaydı
+  // `ChildProgression.ensureRecord` ile açılıyor. Elle yazılan tek şey
+  // çocuğun yaşı: ekran görüntüsü için okul çağında bir çocuk gerekiyor
+  // ve gerçek oyunda o yaşa on yıl yaş alarak varılıyor.
+  testWidgets('ebeveynlik: çocuğun kartı ve eylemleri',
+      (WidgetTester tester) async {
+    await startLife(tester);
+    await ageTo(tester, controller, 38);
+
+    final Random rng = Random(31);
+    GameState s = controller.state!;
+    final ({GameState state, Person partner}) r = const Romance().start(s, rng);
+    s = const MarriageEngine().marry(r.state, r.partner.id).state;
+    s = const Parenthood().haveChild(s, rng, coParentId: r.partner.id).state;
+    s = const FamilyPlanning()
+        .setPlan(s, r.partner.id, FamilyPlan.istiyor)
+        .state;
+
+    // Çocuk okul çağına gelsin. Yaş elle veriliyor, **kaydı motor
+    // açıyor**: `ensureRecord` o yaşa uygun kademeyi, sınıfı ve
+    // değerleri kendisi yazıyor; ekranda uydurma bir kademe çıkmasın.
+    final Person bebek = s.children.single;
+    final Person okulCagi = bebek.copyWith(age: 10, development: null);
+    final PersonDevelopment cocukKaydi =
+        ChildProgression.ensureRecord(okulCagi, rng);
+    s = s.copyWith(
+      people: List<Person>.unmodifiable(<Person>[
+        for (final Person p in s.people)
+          if (p.id == bebek.id)
+            okulCagi.copyWith(
+              development: cocukKaydi,
+              employment: EmploymentStatus.ogrenci,
+              schoolLevel: cocukKaydi.schoolLevel,
+            )
+          else
+            p,
+      ]),
+    );
+    // Yılın başındaki fotoğraf: çocuğun yıl özeti bundan doğuyor.
+    s = s.copyWith(yearMark: YearMark.of(s));
+    controller.debugSetState(s);
+    await tester.pumpAndSettle();
+
+    await openTab(tester, 'iliskiler');
+    await tapMenuRow(tester, 'Çocuklar');
+    await tapMenuRow(tester, controller.state!.children.single.fullName);
+    // Kart uzun: ebeveynlik eylemleri ve akıl verme düğmesi görüş
+    // alanının altında kalıyor. Pencere biraz kaydırılıyor ki ekran
+    // görüntüsü asıl yeniliği göstersin.
+    await tester.drag(
+      find.byType(SingleChildScrollView).last,
+      const Offset(0, -392),
+    );
+    await tester.pumpAndSettle();
+    await shot(tester, '16_ebeveynlik.png');
   }, skip: !enabled);
 
   testWidgets('karanlık mod: ana ekran okunaklı kalır',
@@ -595,4 +694,33 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 5));
     await shot(tester, '15_at_yarisi.png');
   }, skip: !enabled);
+
+  /// Tanıtım animasyonunun kaynağı: tek hayat yıl yıl oynanır ve her yılın
+  /// ana ekranı `test/kare/NN.png` olarak basılır. Kareler depoya girmez;
+  /// `site/assets/biromur-basin-kiti.zip` içindeki animasyon bunlardan
+  /// kuruluyor (yöntem `site/README.md` içinde).
+  testWidgets('kare dizisi', (WidgetTester tester) async {
+    await startLife(tester);
+    for (int adim = 0; adim <= 21; adim++) {
+      await answerPendingCrisis(tester, controller);
+      await answerPendingNotices(tester, controller);
+      await resolveEducationSheets(tester, controller);
+      while (controller.state!.hasPendingEvent) {
+        final ActiveEvent event = controller.state!.pendingEvent!;
+        await tester.tap(find.text(event.choices.first.label));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Devam'));
+        await tester.pumpAndSettle();
+      }
+      final String ad =
+          controller.state!.player.age.toString().padLeft(2, '0');
+      await expectLater(
+        find.byType(BirOmurApp),
+        matchesGoldenFile('kare/$ad.png'),
+      );
+      if (adim == 21 || controller.state!.deceased) break;
+      await tester.tap(find.byKey(const Key('age_up_button')));
+      await tester.pumpAndSettle();
+    }
+  }, skip: !kareEnabled, timeout: const Timeout(Duration(minutes: 10)));
 }

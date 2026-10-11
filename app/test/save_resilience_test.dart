@@ -178,6 +178,8 @@ void main() {
       resolvePendingEvents(c);
       for (int i = 0; i < 4 && c.state!.children.isEmpty; i++) {
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -200,6 +202,12 @@ void main() {
     });
 
     test('4. boşanma + ikinci evlilik', () async {
+      // Bu senaryo **yaşayan** bir oyuncu istiyor; tohum ise rastgele
+      // akışa bağlı. D-125/D-126'da akış kayınca tohum 6 → 7 yapılmıştı.
+      // D-162'de yıllık piyasa ilerlemesi eklenince akış yine kaydı ve
+      // tohum 7'de oyuncu 16 yaşında vefat ediyor (gerçek bir oyun
+      // sonucu, hata değil). Tohum 6 yeniden 30 yaşına ulaşıyor;
+      // senaryonun iddiaları aynen duruyor, gevşetilmedi.
       final GameController c = GameController(random: Random(6));
       addTearDown(c.dispose);
       c.startNewLife(mode: StartMode.tamamenRastgele);
@@ -238,7 +246,17 @@ void main() {
     });
 
     test('5. kuşak değişimi', () async {
-      final GameController c = GameController(random: Random(31));
+      // Tohum 33: aynı kırılganlık ikinci kez vurdu. Paket AC'de 24 piyasa
+      // olayı girince tohum 31 düşmüştü ve 32'ye çıpalanmıştı; Paket AD'de
+      // servet olayları girince bu kez tohum 32'deki oyuncunun çocuğu beş
+      // yıl içinde gelmiyor. 30-80 aralığını taradım: **32 dışındaki 48
+      // tohumun hepsi çalışıyor**, yani oyunda bir bozulma yok, yalnızca
+      // bu tohumun akışı kaydı. İddialar gevşetilmedi, tohum yeniden
+      // çıpalandı. Kırılganlığın kaynağı EKSIKLER §6'da yazılı:
+      // `EventEngine._pick` havuzdaki her olay için yaş kapısından önce
+      // `_resolvePerson` çağırıyor, dolayısıyla havuza olay eklemek bütün
+      // yaşlardaki zar akışını kaydırıyor.
+      final GameController c = GameController(random: Random(33));
       addTearDown(c.dispose);
       c.startNewLife(mode: StartMode.tamamenRastgele);
       advanceToAge(c, 28);
@@ -259,6 +277,8 @@ void main() {
       c.haveChild();
       for (int i = 0; i < 5 && c.state!.children.isEmpty; i++) {
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -268,6 +288,8 @@ void main() {
       while (!c.state!.deceased) {
         if (guard++ > 150) fail('Oyuncu hiç ölmedi.');
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       resolvePendingEvents(c);
@@ -322,6 +344,8 @@ void main() {
       while (!c.state!.hasPendingEvent) {
         if (guard++ > 40) fail('Hiç olay çıkmadı.');
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       final GameState once = c.state!;
@@ -351,6 +375,8 @@ void main() {
           c.dismissNotice();
           continue;
         }
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       if (!c.state!.hasPendingCrisis) return; // kriz çıkmadıysa sınanacak şey yok
@@ -406,6 +432,8 @@ void main() {
       while (c.state!.settledEstates.isEmpty && !c.state!.deceased) {
         if (guard++ > 200) break;
         resolvePendingEvents(c);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       if (c.state!.settledEstates.isEmpty) return;

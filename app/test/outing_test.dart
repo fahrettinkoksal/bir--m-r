@@ -194,10 +194,14 @@ void main() {
   });
 
   group('Birlikte gitmek', () {
-    test('ücret bir kez alınır: yalnız gitmekle aynı', () {
+    test('ücretli aktivitede iki kişilik bilet ödenir', () {
+      // Faho'nun Q-108 kararı bu kuralı **tersine çevirdi**. Eskiden
+      // yoldaşla gitmek yalnız gitmekle aynı parayı tutuyordu; artık
+      // iki kişinin gerçek maliyeti hesaba katılıyor.
       final Person p = kisi(relation: RelationType.es);
       final GameState s = hayat(people: <Person>[p]);
       final ActivityAction a = eylem('sinema');
+      expect(a.cost, greaterThan(0), reason: 'Bu test ücretli aktivite ister');
 
       final GameState yalniz =
           motor.perform(state: s, action: a, rng: Random(1)).state;
@@ -206,7 +210,54 @@ void main() {
           .state;
 
       expect(yalniz.player.wallet, s.player.wallet - a.cost);
-      expect(birlikte.player.wallet, yalniz.player.wallet);
+      expect(birlikte.player.wallet, s.player.wallet - a.cost * 2);
+    });
+
+    test('ücretsiz aktivite yoldaşla da ücretsiz', () {
+      // Sıfırın iki katı da sıfırdır: park gibi ücretsiz aktivite
+      // yoldaşla gidince para istemez.
+      final Person p = kisi(relation: RelationType.es);
+      final GameState s = hayat(people: <Person>[p]);
+      final ActivityAction bedava = kActivityActions.firstWhere(
+        (ActivityAction a) => a.cost == 0 && a.minAge <= s.player.age,
+      );
+      final GameState birlikte = motor
+          .perform(state: s, action: bedava, rng: Random(1), companion: p)
+          .state;
+      expect(birlikte.player.wallet, s.player.wallet);
+    });
+
+    test('ücret iki kez değil, bir kez düşer', () {
+      // İki kişilik olması, aynı ücretin iki kez işlenmesi demek değil:
+      // cüzdandan tek bir kez, iki katı tutarında para çıkar.
+      final Person p = kisi(relation: RelationType.es);
+      final GameState s = hayat(people: <Person>[p]);
+      final ActivityAction a = eylem('sinema');
+      final GameState birlikte = motor
+          .perform(state: s, action: a, rng: Random(1), companion: p)
+          .state;
+      expect(s.player.wallet - birlikte.player.wallet, a.cost * 2);
+    });
+
+    test('parası iki bilete yetmeyen yoldaşla gidemez', () {
+      final Person p = kisi(relation: RelationType.es);
+      final ActivityAction a = eylem('sinema');
+      final GameState dar = hayat(people: <Person>[p], wallet: a.cost);
+      // Tek başına gidebilir...
+      expect(
+        motor.perform(state: dar, action: a, rng: Random(1)).outcome.applied,
+        isTrue,
+      );
+      // ...ama iki kişilik bilete parası yetmez.
+      final ActivityResult r = motor.perform(
+        state: dar,
+        action: a,
+        rng: Random(1),
+        companion: p,
+      );
+      expect(r.outcome.applied, isFalse);
+      expect(r.outcome.text, contains('İki kişilik'));
+      expect(r.state.player.wallet, dar.player.wallet);
     });
 
     test('mutluluk ve bağ gerçekten artar', () {

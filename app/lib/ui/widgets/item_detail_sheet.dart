@@ -169,13 +169,15 @@ class _ItemDetailSheetState extends State<ItemDetailSheet> {
               if (item.isProperty) ...<Widget>[
                 _Row(
                   label: 'Oturum',
-                  value: controller.state!.residenceItemId == item.id
-                      ? 'Bu evde yaşıyorsun'
-                      : item.rentedOut
-                          ? 'Kirada (yılda '
-                              '${trMoney(Housing.yearlyRentOf(item))})'
-                          : 'Boş duruyor',
+                  value: controller.propertyUse(item).label,
                 ),
+                if (controller.leaseOf(item) != null)
+                  _Row(
+                    label: 'Kiracı',
+                    value: '${controller.leaseOf(item)!.tenant.fullName} · '
+                        'aylık '
+                        '${trMoney(controller.leaseOf(item)!.monthlyRent)}',
+                  ),
               ],
               if (item.isVehicle || item.isProperty) ...<Widget>[
                 _Row(label: 'Tür', value: item.type.name),
@@ -418,31 +420,30 @@ class _HousingActionsState extends State<_HousingActions> {
           ],
         ),
         const SizedBox(height: 8),
+        // Kiraya verme akışı **Evlerim** ekranında (D-163): kira bedeli
+        // belirlenir, adaylar gelir, oyuncu kiracıyı seçer. Tek dokunuşla
+        // kiraya vermek kiracıyı da kirayı da görünmez kılıyordu.
         Row(
           children: <Widget>[
             Expanded(
               child: OutlinedButton(
                 key: const Key('home_rent_toggle'),
-                onPressed: guncel.rentedOut
+                onPressed: controller.leaseOf(guncel) != null
                     ? () => setState(() {
                           _sonuc = controller.endLease(guncel)?.text;
                         })
-                    : (kiraEngeli.isEmpty
-                        ? () => setState(() {
-                              _sonuc = controller.rentOutHome(guncel)?.text;
-                            })
-                        : null),
+                    : null,
                 child: Text(
-                  guncel.rentedOut
-                      ? 'Kirayı bitir'
-                      : 'Kiraya ver (yılda '
-                          '${trMoney(Housing.yearlyRentOf(guncel))})',
+                  controller.leaseOf(guncel) != null
+                      ? 'Sözleşmeyi bitir'
+                      : 'Kiraya verme: Varlıklar > Evlerim',
                 ),
               ),
             ),
           ],
         ),
-        if (tasinmaEngeli.isNotEmpty || (kiraEngeli.isNotEmpty && !guncel.rentedOut))
+        if (tasinmaEngeli.isNotEmpty ||
+            (kiraEngeli.isNotEmpty && controller.leaseOf(guncel) == null))
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(

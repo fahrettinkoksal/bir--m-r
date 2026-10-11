@@ -76,9 +76,12 @@ void main() {
   // ===================================================================
   group('Kendi hayat kaydı', () {
     test('yeni doğan çocuğun kendi kaydı ve doğum anı vardır', () {
-      final GameState state = olenOyuncu(cocuklarHayatta: true).copyWith(
+      final GameState state =
+          olenOyuncu(cocuklarHayatta: true, oyuncuSagligi: 70).copyWith(
         deceased: false,
-        player: olenOyuncu().player.copyWith(age: 30, wallet: 500000),
+        player: olenOyuncu(oyuncuSagligi: 70)
+            .player
+            .copyWith(age: 30, wallet: 500000),
       );
       // Gerçek akış: evli oyuncu çocuk sahibi olur.
       final GameState evli = state.copyWith(
@@ -267,9 +270,15 @@ void main() {
   // ===================================================================
   group('Oyun akışı', () {
     test('yaş alınca çocuk büyür ve önemli haber günlüğe girer', () {
-      GameState state = olenOyuncu().copyWith(
+      // Paket AQ: `olenOyuncu` vefat etmiş oyuncunun durumunu kuruyor ve
+      // sağlığı 0. Burada oyuncu **yaşıyor** (deceased: false) ve yaş
+      // alıyor; sağlık 0 ile yaşayan oyuncu artık geçersiz bir durum
+      // (zorunlu kritik sağlık durumu açılır ve yıl ilerlemez). Otuz
+      // yaşındaki ebeveyne yaşayan bir sağlık değeri veriliyor; testin
+      // iddiaları aynen duruyor.
+      GameState state = olenOyuncu(oyuncuSagligi: 70).copyWith(
         deceased: false,
-        player: olenOyuncu().player.copyWith(age: 30),
+        player: olenOyuncu(oyuncuSagligi: 70).player.copyWith(age: 30),
         people: <Person>[cocukKisi(age: 5)],
         marriage: null,
         settledEstates: const <String>{},

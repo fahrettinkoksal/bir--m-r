@@ -1,22 +1,39 @@
+import '../life/critical_health.dart';
 import 'dart:math';
+
+import '../economy/net_worth.dart';
+import '../../data/company_catalog.dart';
+import '../law/legal_engine.dart';
+import '../features/feature_catalog.dart';
+import '../features/feature_events.dart';
+import '../models/criminal_record.dart';
 
 import 'package:flutter/foundation.dart';
 
 import '../../data/event_pool.dart';
+import '../../data/insurance_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../../text/turkish_text.dart';
 import '../generation/random_util.dart';
+import '../interaction/friend_circles.dart';
 import '../interaction/friendship.dart';
 import '../interaction/romance.dart';
+import '../economy/insurance.dart';
+import '../economy/investment_engine.dart';
 import '../models/game_event.dart';
+import '../models/market_state.dart';
 import '../activities/travel.dart';
+import '../economy/housing.dart';
+import '../economy/living_costs.dart';
 import '../models/game_state.dart';
+import '../models/school_club_progress.dart';
 import '../models/hobby_progress.dart';
 import '../hobby/hobby_tracker.dart';
 import '../../data/hobby_catalog.dart';
 import '../../data/pet_catalog.dart';
 import '../models/trip.dart';
 import '../models/life_log.dart';
+import '../economy/financial_strain.dart';
 import '../models/owned_item.dart';
 import '../models/person.dart';
 import '../models/player_character.dart';
@@ -92,6 +109,85 @@ class EventEngine {
   /// için ("o yıl neredeyse kesin çıkar").
   static const double prototypeOnlyPriorityBoost = 120;
 
+  // -----------------------------------------------------------------
+  // Zincir devamı önceliği (Paket AS/2, Q-190/Q-191)
+  // -----------------------------------------------------------------
+  //
+  // Ölçüm (AR/3, 21.307 oyun yılı): yıllık aday havuzunda ortanca **80**
+  // olay ve **268** toplam etkin ağırlık var. Yani ağırlık 4'lük bir
+  // olayın bir yıldaki payı %1,5. Öğretmen zincirinin dört halkası
+  // sırayla ~%4,4 → %7,3 → %28,2 ihtimalle çıkıyor ve bunlar her halkada
+  // doğru kolu seçme ihtimaliyle **çarpılıyor**: 3. halkaya ulaşma
+  // ihtimali kabaca **on binde bir**. Beş olay yazılmıştı; kimse sonunu
+  // görmüyordu.
+  //
+  // Oyuncu bir zincirin ilk halkasını görüp bir kol seçtiğinde ona bir
+  // **söz** verilmiş oluyor. Devamını kuraya bırakmak o sözü tutmamaktır.
+  // Bu yüzden `requiredFlags`'ı karşılanmış olaylar — yani oyuncunun
+  // zaten açtığı devam halkaları — orta güçlü bir katsayı alır.
+
+  /// Oyuncunun **zaten açtığı** devam halkasının ağırlık katsayısı
+  /// (`prototypeOnly`).
+  ///
+  /// Dönüm noktası katsayısının (`prototypeOnlyPriorityBoost` = 120) çok
+  /// altında: havuzu boğmaz ama zinciri de kuraya bırakmaz. Ölçülen
+  /// tabanla ×8, beş yıllık pencerede %7,3'ü ~%45'e, yirmi iki yıllık
+  /// pencerede %28'i ~%90'a çıkarır.
+  ///
+  /// Katsayı yalnızca **iz arayan** olaya uygulanır; ilk halka normal
+  /// ağırlıkta yarışır, yani zincire girme ihtimali değişmez. Tekrar
+  /// sönümü (`prototypeOnlyRepeatWeightDecay`) ve `forbiddenFlags` üstüne
+  /// çalışmaya devam eder: halka bir kez çıkınca havuzdan düşer.
+  static const double prototypeOnlyChainContinuationBoost = 8;
+
+  // -----------------------------------------------------------------
+  // Sürdürülen uğraş önceliği (Paket BX)
+  // -----------------------------------------------------------------
+  //
+  // Ölçüm (150 spor odaklı hayat, zincir hunisi): okul futbol takımının
+  // on iki olayından **sekizi** 1.000 hayatlık denetimde hiç
+  // görülmemişti. Huni şunu gösterdi: üç olay (`antrenor_tartismasi`,
+  // `turnuva`, `ders_catismasi`) hayatların 31/150'sinde **uygun hale
+  // geliyor** ama 150 hayatta toplam **4 kez** çıkıyor. Yani kapı değil,
+  // çekiliş kaybediyor: yıllık havuzda ortanca 80 aday ve ~268 etkin
+  // ağırlık varken (AR/3 ölçümü) ağırlığı 6-7 olan bir olayın payı
+  // %2,5; kulüp üyeliğinin penceresi ise yalnızca 2-4 yıl.
+  //
+  // Paket AS/2 aynı sorunu **zincirler** için çözmüştü: oyuncunun açtığı
+  // devam halkası ×8 alıyor. Kulüp ve hobi olayları da aynı sözün
+  // kapsamındadır — oyuncu takıma girmeyi **seçti** ve o seçimin ömrü
+  // kısa. Fark şu: zincir koşulu bir bayrak, buradaki koşul sürmekte
+  // olan bir **durum**.
+
+  /// prototypeOnly: oyuncunun **şu an sürdürdüğü** kısa pencereli
+  /// uğraşın (okul kulübü, hobi) olaylarına verilen katsayı.
+  ///
+  /// Zincir katsayısının (8) altında, dönüm noktası katsayısının (120)
+  /// çok altında. İki katsayı **çarpılmaz**: en güçlü gerekçe kazanır,
+  /// yoksa bayrağı da kulübü de olan olay ×48 ile havuzu boğardı.
+  static const double prototypeOnlyActivePursuitBoost = 6;
+
+  /// Olay, oyuncunun şu an sürdürdüğü bir uğraşa mı ait?
+  ///
+  /// Anahtar kapalıysa katsayı 1'dir: Paket BX öncesi davranış birebir
+  /// geri gelir (`FeatureId.ugrasOnceligi`).
+  static double _activePursuitBoost(GameState state, GameEvent event) {
+    if (!state.featureOn(FeatureId.ugrasOnceligi)) return 1;
+    final EventRequirement req = event.requirement;
+    final String? kulupId = req.requiresActiveClubId;
+    if (kulupId != null && state.schoolClubs.activeFor(kulupId) != null) {
+      return prototypeOnlyActivePursuitBoost;
+    }
+    final String? hobiId = req.requiredHobbyId;
+    if (hobiId != null) {
+      final HobbyKind? hobi = hobbyById(hobiId);
+      if (hobi != null && HobbyTracker.progressOf(state, hobi) != null) {
+        return prototypeOnlyActivePursuitBoost;
+      }
+    }
+    return 1;
+  }
+
   /// Olayın **bu hayatta kaç kez çıktığına** göre azalan ağırlığı.
   static double prototypeOnlyEffectiveWeight(GameState state, GameEvent event) {
     // Dönüm noktaları bütün havuzun önüne geçer (Paket 21).
@@ -99,12 +195,29 @@ class EventEngine {
         ? 1
         : pow(prototypeOnlyPriorityBoost, event.priority).toDouble();
 
+    // Oyuncunun açtığı devam halkası öne geçer (Paket AS/2).
+    //
+    // Koşul yalnızca "iz arıyor" değil, "istediği izlerin **hepsi**
+    // konmuş": motor zaten bunu süzüyor ama katsayı aday dışı bir
+    // çağrıda da doğru davransın diye burada bir daha bakılıyor.
+    final double zincirKatsayisi =
+        event.requirement.requiredFlags.isNotEmpty &&
+                state.storyFlags.containsAll(event.requirement.requiredFlags)
+            ? prototypeOnlyChainContinuationBoost
+            : 1;
+
+    // Sürdürülen uğraş da öne geçer (Paket BX). İki gerekçe çarpılmaz;
+    // en güçlüsü kazanır.
+    final double zincir =
+        max(zincirKatsayisi, _activePursuitBoost(state, event));
+
     final int gorulme = state.eventSeenCount(event.id);
-    if (gorulme == 0) return event.weight * oncelik;
+    if (gorulme == 0) return event.weight * oncelik * zincir;
     final double oran =
         pow(prototypeOnlyRepeatWeightDecay, gorulme).toDouble();
     return event.weight *
         oncelik *
+        zincir *
         (oran < prototypeOnlyMinWeightRatio
             ? prototypeOnlyMinWeightRatio
             : oran);
@@ -138,14 +251,39 @@ class EventEngine {
   }
 
   /// Uygun olaylar arasından ağırlıklı seçim yapar ve kişisini çözer.
+  ///
+  /// **Zar sözleşmesi (Paket BO).** Bu tarama, havuzda kaç olay olduğundan
+  /// bağımsız olarak zar tüketir. Eskiden tersiydi: kişi çözümü koşul
+  /// denetiminden **önce** yapıldığı için, o yaşta hiç çıkamayacak bir
+  /// olay bile `rng`'yi tüketiyordu. Sonuç: havuza tek bir olay eklemek
+  /// bütün tohumlu ölçümleri kaydırıyordu — bir oturumda beş bekçi testi
+  /// bu yüzden kırıldı. Artık sıra şu:
+  ///
+  /// 1. Ucuz kapılar (modül, görülme, tekrar aralığı) — zar tüketmez.
+  /// 2. Kişiden bağımsız koşullar (`_matches`, `requirePerson: false`) —
+  ///    zar tüketmez.
+  /// 3. Kişi **adayları** (`_eligiblePeople`) — zar tüketmez.
+  /// 4. Ağırlıklı çekiliş — **bir** zar.
+  /// 5. Yalnızca kazanan olayın kişisi (`_pickPerson`) — en çok bir zar.
+  ///
+  /// Yani uygun olmayan olay eklemek akışa hiç dokunmaz; uygun olan
+  /// eklemek yalnızca çekilişi değiştirir.
   ActiveEvent? _pick(GameState state, Random rng) {
     final List<_Candidate> candidates = <_Candidate>[];
     for (final GameEvent event in pool) {
+      // Modül kapısı (Paket BM): kapalı bir içerik modülünün olayı hiç
+      // aday olmaz ve oyunun zarına dokunmaz.
+      if (!FeatureEvents.allowed(state, event.id)) continue;
       if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
       if (!_repeatGapPassed(state, event)) continue;
-      final Person? person = _resolvePerson(state, event, rng);
-      if (!_matches(state, event, person)) continue;
-      candidates.add(_Candidate(event, person));
+      // Koşullar kişiden **önce** denetlenir: 40 yaşın olayı için 7
+      // yaşında kişi aranmaz.
+      if (!_matches(state, event, null, requirePerson: false)) continue;
+      // Kişi adayları zar tüketmeden çıkarılır; **hangisi** olduğu
+      // çekilişi kazanan olay için sonradan seçilir.
+      final List<Person> adaylar = _eligiblePeople(state, event);
+      if (_needsPerson(event.requirement) && adaylar.isEmpty) continue;
+      candidates.add(_Candidate(event, adaylar));
     }
     if (candidates.isEmpty) return null;
 
@@ -156,7 +294,7 @@ class EventEngine {
               prototypeOnlyEffectiveWeight(state, c.event))
           .toList(),
     );
-    return _toActive(state, chosen);
+    return _toActive(state, chosen.event, _pickPerson(chosen.people, rng));
   }
 
   /// Yalnızca ölçüm içindir: olayın kişisiz koşullarını denetler.
@@ -177,27 +315,52 @@ class EventEngine {
   /// soruyu yüzlerce tohumla çekiliş yaparak yanıtlamak yanıltıcıydı:
   /// dönüm noktası ağırlıkları devreye girince (Paket 21) çekilişi hep
   /// aynı olay kazanıyor ve diğerleri "imkânsız" gibi görünüyordu.
+  ///
+  /// **Paket BO'dan sonra zar gerekmiyor:** kişi seçimi uygunluğu
+  /// belirlemiyor, yalnızca aday **varlığı** belirliyor. Bu yüzden sonuç
+  /// artık tohumdan bağımsız. `rng` parametresi eski çağrılar bozulmasın
+  /// diye duruyor ve yok sayılır. Eskiden tohuma bağlıydı ve bu yanlıştı:
+  /// erişilemeyen bir kardeş çekilince, erişilebilir kardeşi olan olay
+  /// "imkânsız" görünüyordu.
   @visibleForTesting
-  Set<String> debugEligibleIds(GameState state, Random rng) {
+  Set<String> debugEligibleIds(GameState state, [Random? rng]) {
     final Set<String> sonuc = <String>{};
     for (final GameEvent event in pool) {
       if (!event.repeatable && state.seenEventIds.contains(event.id)) continue;
       if (!_repeatGapPassed(state, event)) continue;
-      final Person? person = _resolvePerson(state, event, rng);
-      if (!_matches(state, event, person)) continue;
+      if (!_matches(state, event, null, requirePerson: false)) continue;
+      if (_needsPerson(event.requirement) &&
+          _eligiblePeople(state, event).isEmpty) {
+        continue;
+      }
       sonuc.add(event.id);
     }
     return sonuc;
   }
 
   /// Olayın koşullarını denetler. Kişi gerekiyorsa [person] dolu olmalıdır.
-  bool _matches(GameState state, GameEvent event, Person? person) {
+  ///
+  /// [requirePerson] yalnızca `_pick` ve `debugEligibleIds` içindir: orada
+  /// kişi adayları ayrı çıkarıldığı için kişi varlığı burada
+  /// denetlenmez (Paket BO). Dışarıdan çağıran her yol varsayılanı
+  /// kullanır; yani kişi gerektiren olay kişisiz geçemez.
+  bool _matches(GameState state, GameEvent event, Person? person,
+      {bool requirePerson = true}) {
+    // Modül kapısı (Paket BL): kapalı bir içerik modülünün olayı hiç
+    // aday olmaz. Tek yer burasıdır; `_pick`, `canHappen` ve
+    // `debugEligibleIds` üçü de buradan geçer.
+    if (!FeatureEvents.allowed(state, event.id)) return false;
     final EventRequirement req = event.requirement;
     final int age = state.player.age;
 
     if (age < req.minAge || age > req.maxAge) return false;
     // Öğrencilik yaştan değil, eğitim durumundan okunur.
     if (req.requiresSchoolStudent && !state.education.isSchoolStudent) {
+      return false;
+    }
+    // Paket BZ: 1-12 **ya da** üniversite. 18-20 yaş olaylarının kapısı
+    // budur; `requiresSchoolStudent` üniversiteliyi dışarıda bırakıyor.
+    if (req.requiresStudent && !state.education.isStudent) {
       return false;
     }
     final int? grade = state.education.grade;
@@ -209,7 +372,7 @@ class EventEngine {
     }
     // Kişi gerektiren olay, uygun kişi bulunamadıysa elenir: aksi hâlde
     // metindeki yer tutucular boş kalır ve olmayan kişiyle olay çıkar.
-    if (_needsPerson(req) && person == null) return false;
+    if (requirePerson && _needsPerson(req) && person == null) return false;
     if (!state.storyFlags.containsAll(req.requiredFlags)) return false;
     if (req.forbiddenFlags.any(state.storyFlags.contains)) return false;
     if (!state.possessions.containsAll(req.requiredPossessions)) return false;
@@ -226,10 +389,37 @@ class EventEngine {
     if (req.requiresSocialAccount && state.socialAccounts.isEmpty) {
       return false;
     }
+    // Arkadaş grubu (Paket CI): kayıt yürürlükte değilse grup olayı
+    // çıkmaz. Modül kapısı zardan önce zaten geçildi (Paket BM/2).
+    if (req.requiresFriendCircle && FriendCircles.activeOf(state) == null) {
+      return false;
+    }
+    // Yaşlılıkta bakım sayaçları (Paket CM): kaç yıl destek görüldüğü
+    // ve kaç yıl tek başına çevrildiği kayıttan okunur. Modül kapalıysa
+    // bu olaylar zaten aday olmaz (havuz `FeatureEvents` ile bağlı).
+    if (req.minElderSupportYears > 0 &&
+        state.elderSupport.yearsSupported < req.minElderSupportYears) {
+      return false;
+    }
+    if (req.minElderAloneYears > 0 &&
+        state.elderSupport.yearsAlone < req.minElderAloneYears) {
+      return false;
+    }
     // Ün gerektiren olaylar: kitle gerçekten oluşmadan çıkmaz.
     if (req.minFame > 0 && (state.player.fame ?? 0) < req.minFame) {
       return false;
     }
+    // Kulüp olayları yalnızca o kulüpte **aktif** üyeliği olana çıkar
+    // (Paket AU). Kayıttan okunur, uydurulmaz.
+    final String? kulupId = req.requiresActiveClubId;
+    if (kulupId != null) {
+      final SchoolClubProgress? uyelik = state.schoolClubs.activeFor(kulupId);
+      if (uyelik == null) return false;
+      if (uyelik.yearsActive < req.minClubYears) return false;
+      final SquadRole? enAzRol = req.minSquadRole;
+      if (enAzRol != null && uyelik.role.index < enAzRol.index) return false;
+    }
+
     // Hobi olayları yalnızca gerçekten o hobiyle uğraşmış oyuncuya
     // çıkar (Paket 39). Geçmiş kayıttan okunur, uydurulmaz.
     final String? hobiId = req.requiredHobbyId;
@@ -249,20 +439,121 @@ class EventEngine {
     // çıkar (Paket 40). Vefat etmiş ya da hanede olmayan hayvan sayılmaz.
     if (req.requiresLivingPet && _eventPet(state, req) == null) return false;
 
+    // Yatırım kapıları (D-162): portföyü olmayana "hisselerin düştü"
+    // denmez, portföyü olana "hiç yatırım yapmadın" denmez.
+    if (req.requiresPortfolio && state.portfolioValue <= 0) return false;
+    if (req.forbidsPortfolio && state.portfolioValue > 0) return false;
+
+    // **Şirket durumu kapıları (Paket AD, §4).** Olay metni şirketi adıyla
+    // anlatıyorsa, o şirket gerçekten o durumda olmalı. Yoksa oyuncu
+    // sapasağlam bir şirket için konkordato haberi okuyor.
+    final CompanyStatus? gerekenDurum = req.requiresCompanyStatus;
+    if (gerekenDurum != null) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.statusOf(c.id) == gerekenDurum);
+      if (!varMi) return false;
+    }
+    if (req.requiresStrainedCompany) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.vitalsOf(c.id).isStrained);
+      if (!varMi) return false;
+    }
+    // **Servet kapısı (Paket AD, §13, §17).** Zenginin hayatı farklı
+    // hissettirmeli: bazı olaylar ancak belirli servet seviyesinde çıkar.
+    final int? gerekenServet = req.minNetWorth;
+    if (gerekenServet != null && NetWorth.of(state) < gerekenServet) {
+      return false;
+    }
+
+    // **Piyasa hâli kapıları (Paket AD, §6-§7).** Panik olayı sakin bir
+    // yılda çıkmasın; FOMO olayı gerçekten ısınmış piyasada çıksın.
+    if (req.requiresCrisis &&
+        !(state.market.regime == MarketRegime.kriz ||
+            state.market.halts.isNotEmpty)) {
+      return false;
+    }
+    final String? sicakTur = req.requiresHotAsset;
+    if (sicakTur != null &&
+        state.market.heatOf(sicakTur) < req.requiresHotAssetHeat) {
+      return false;
+    }
+    if (req.requiresThrivingCompany) {
+      final bool varMi = state.market.activeBasketCompanies
+          .any((Company c) => state.market.vitalsOf(c.id).isThriving);
+      if (!varMi) return false;
+    }
+
+    // Kiralama kapıları (D-163). Kiracısı olmayana "kiracın aradı"
+    // denmez; boş evi olmayana "ev boş duruyor" denmez.
+    if (req.requiresLetProperty && state.leases.isEmpty) return false;
+    if (req.requiresVacantProperty &&
+        !state.items.any((OwnedItem i) =>
+            i.isProperty &&
+            i.id != state.residenceItemId &&
+            state.leaseOf(i.id) == null)) {
+      return false;
+    }
+
+    // Adli kapılar (D-128). Dosyası olmayana "mahkemeyi bekliyorsun",
+    // sabıkası olmayana "bir de şu kayıt var" denmez. Cezaevindeyken
+    // dışarıdaki hiçbir olay çıkmaz: içerideki hayat ayrıdır.
+    if (state.isImprisoned) return false;
+    if (req.requiresOpenCase && state.legal.openCase == null) return false;
+    if (req.requiresRecord && !state.legal.hasRecord) return false;
+    if (req.requiresReleased) {
+      final bool hicGirmedi = state.legal.cases.every(
+        (CriminalCase c) => c.verdict != Verdict.hapis,
+      );
+      if (hicGirmedi || state.legal.isImprisoned) return false;
+    }
+
     // Emeklilik olayları yalnızca gerçekten emekli olana çıkar.
     if (req.requiresRetired && !state.career.isRetired) return false;
     // İş hayatı olayları yalnızca gerçekten çalışan oyuncuya çıkar.
     if (req.requiresEmployed && !state.career.isEmployed) return false;
+    // Mali durum kapıları (D-092): varlıklı oyuncuya yoksulluk metni,
+    // parasız oyuncuya varlık metni çıkmaz. Durum mutlak bir işaretten
+    // değil, **gerçek hesaptan** okunur.
+    if (req.maxComfort != null || req.minComfort != null) {
+      final FinancialComfort durum = FinancialStrain.comfortOf(state);
+      if (req.maxComfort != null && durum.index > req.maxComfort!.index) {
+        return false;
+      }
+      if (req.minComfort != null && durum.index < req.minComfort!.index) {
+        return false;
+      }
+    }
+
+    // Evi olan oyuncuya "eşin ev istiyor" olayı çıkmaz (D-085).
+    if (req.forbidsProperty &&
+        state.items.any((OwnedItem i) => i.isProperty)) {
+      return false;
+    }
+    if (req.forbidsVehicle &&
+        state.items.any((OwnedItem i) => i.isVehicle)) {
+      return false;
+    }
+    // Kirada oturmayan oyuncuya ev sahibi olayı çıkmaz.
+    if (req.requiresTenant &&
+        LivingCosts.situationOf(state) != LivingSituation.kirada) {
+      return false;
+    }
+    // Kendi evinde oturmayana ev sahipliği olayı çıkmaz (Paket BP).
+    // Mülk sahipliği yetmiyor: oturulan ev kaydından okunur.
+    if (req.requiresOwnedResidence &&
+        Housing.residenceOf(state) != ResidenceKind.kendiEvinde) {
+      return false;
+    }
     if (req.requiresMinYearsInJob > 0 &&
         state.career.yearsInJob(state.player.age) <
             req.requiresMinYearsInJob) {
       return false;
     }
     // Gündelik erişilebilirlik isteyen olaylarda kişi gerçekten
-    // ulaşılabilir olmalı.
-    if (req.requireReachable && person != null && !state.isReachable(person)) {
-      return false;
-    }
+    // ulaşılabilir olmalı. **Bu denetim `_eligiblePeople` içine taşındı**
+    // (Paket BO): burada yapılırsa "erişilemeyen kişi çekildi" diye
+    // elenen olay, erişilebilir bir kardeşi olsa bile çıkmıyordu.
+    // Koşulun yeri seçicidir; eleme değil, aday süzgeci.
     return true;
   }
 
@@ -283,38 +574,80 @@ class EventEngine {
       req.requiresTripMemory ||
       req.personRole != null;
 
-  /// Olayın kişisini seçer; uygun kişi yoksa `null` döner ve olay elenir.
-  Person? _resolvePerson(GameState state, GameEvent event, Random rng) {
+  /// Kazanan olayın kişisini seçer.
+  ///
+  /// Aday yoksa `null`; tek aday varsa zar atılmaz. Zar yalnızca
+  /// **gerçekten seçim varken** tüketilir (Paket BO).
+  static Person? _pickPerson(List<Person> adaylar, Random rng) {
+    if (adaylar.isEmpty) return null;
+    if (adaylar.length == 1) return adaylar.first;
+    return adaylar[rng.nextInt(adaylar.length)];
+  }
+
+  /// Tek kişiyi aday listesine çevirir ve erişilebilirlik süzgecini
+  /// uygular. Kilitli kimlik (hikâye kişisi, gezi arkadaşı) için seçim
+  /// yoktur: kişi erişilemezse olay çıkmaz.
+  static List<Person> _onlyIfUsable(
+    GameState state,
+    EventRequirement req,
+    Person? kisi,
+  ) {
+    if (kisi == null) return const <Person>[];
+    if (req.requireReachable && !state.isReachable(kisi)) {
+      return const <Person>[];
+    }
+    return <Person>[kisi];
+  }
+
+  /// Olayın kişi **adayları**. Boş liste, kişi gerektiren olayın
+  /// elenmesi demektir.
+  ///
+  /// **Zar tüketmez** (Paket BO). Eskiden bu iş `_resolvePerson` içinde
+  /// `rng` ile yapılıyordu ve havuzdaki her olay için çağrıldığı için
+  /// havuz büyüdükçe bütün tohumlu sonuçlar kayıyordu.
+  List<Person> _eligiblePeople(GameState state, GameEvent event) {
     final EventRequirement req = event.requirement;
 
     // Gezi anısı: olayın kişisi, yıllar önce birlikte yola çıktığın
     // kişidir. Gezi yoksa ya da kişi vefat ettiyse olay çıkmaz.
     if (req.requiresTripMemory) {
       final TripRecord? gezi = Travel.memorableTrip(state);
-      if (gezi == null) return null;
-      return state.personById(gezi.companionId!);
+      if (gezi == null) return const <Person>[];
+      return _onlyIfUsable(state, req, state.personById(gezi.companionId!));
     }
 
     // Hikâyede kilitlenmiş kişi: yıllar sonra da aynı kimlik kullanılır.
     final String? role = req.personRole;
     if (role != null) {
       final String? personId = state.storyPeople[role];
-      if (personId == null) return null;
+      if (personId == null) return const <Person>[];
       final Person? person = state.personById(personId);
-      if (person == null || !person.isAlive) return null;
+      if (person == null || !person.isAlive) return const <Person>[];
       if (req.personMinAge != null && person.age < req.personMinAge!) {
-        return null;
+        return const <Person>[];
       }
       if (req.personMaxAge != null && person.age > req.personMaxAge!) {
-        return null;
+        return const <Person>[];
       }
-      return person;
+      return _onlyIfUsable(state, req, person);
     }
 
     if (req.requiresNeglectedRelative) {
       final List<Person> neglected = state.people.where((Person p) {
         if (!p.isAlive) return false;
         if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
+        // **Gerçek hata (D-093):** bu seçici yalnızca hane koşuluna
+        // bakıyordu; `requireOutsideHousehold` ve `requireReachable`
+        // koşullarını yok sayıyordu. Yani "uzaktaki yakınla" kurulan bir
+        // olay, aynı evde yaşayan ya da hiç erişilemeyen biriyle
+        // kurulabiliyordu. Aşağıdaki iki satır o boşluğu kapatır.
+        if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+        if (req.requireReachable && !state.isReachable(p)) return false;
+        // Bağ türü belirtilmişse ona da uyulur.
+        if (req.livingRelations.isNotEmpty &&
+            !req.livingRelations.contains(p.relation)) {
+          return false;
+        }
         final int? last = state.lastInteractionAge[p.id];
         if (last == null) {
           // Hiç temas kurulmamışsa, oyuncunun etkileşim kurabildiği yaştan
@@ -323,49 +656,55 @@ class EventEngine {
         }
         return state.player.age - last >= prototypeOnlyNeglectAgeGap;
       }).toList(growable: false);
-      if (neglected.isEmpty) return null;
-      return neglected[rng.nextInt(neglected.length)];
+      return neglected;
     }
 
-    if (req.livingRelations.isEmpty) return null;
+    if (req.livingRelations.isEmpty) return const <Person>[];
 
     final List<Person> uygun = state.people.where((Person p) {
       if (!p.isAlive) return false;
       if (!req.livingRelations.contains(p.relation)) return false;
       if (req.requireSameHousehold && !p.inPlayerHousehold) return false;
       if (req.requireOutsideHousehold && p.inPlayerHousehold) return false;
+      // **Erişilebilirlik burada süzülür (Paket BO).** D-093 aynı hatayı
+      // "ilgilenilmeyen yakın" seçicisinde kapatmıştı; bu dal açık
+      // kalmıştı. Eskiden erişilemeyen bir kardeş çekilince olay
+      // elenirdi — erişilebilir kardeşi varken bile.
+      if (req.requireReachable && !state.isReachable(p)) return false;
       // Kişinin kendi yaşı: çocuk olayları doğru yaşa bağlanır.
       if (req.personMinAge != null && p.age < req.personMinAge!) return false;
       if (req.personMaxAge != null && p.age > req.personMaxAge!) return false;
       return true;
     }).toList(growable: false);
-    if (uygun.isEmpty) return null;
-    return uygun[rng.nextInt(uygun.length)];
+    return uygun;
   }
 
-  ActiveEvent _toActive(GameState state, _Candidate candidate) {
+  ActiveEvent _toActive(GameState state, GameEvent event, Person? person) {
     return ActiveEvent(
-      eventId: candidate.event.id,
-      category: candidate.event.category,
+      eventId: event.id,
+      category: event.category,
       text: _fillPet(
         _fillTrip(
-          _fill(candidate.event.text, candidate.person, state.player.age),
+          _fill(event.text, person, state.player.age),
           state,
-          candidate.event,
+          event,
         ),
         state,
-        candidate.event,
+        event,
       ),
       // Seçenek etiketlerindeki yer tutucular da doldurulur; ekranda
       // "{kisi}" yazmaz.
       choices: List<EventChoice>.unmodifiable(<EventChoice>[
-        for (final EventChoice c in candidate.event.choices)
+        for (final EventChoice c in event.choices)
           if (c.label.contains('{'))
-            c.withLabel(_fill(c.label, candidate.person, state.player.age))
+            c.withLabel(_fill(c.label, person, state.player.age))
           else
             c,
       ]),
-      personId: candidate.person?.id,
+      personId: person?.id,
+      // Geçmiş bir seçimin ya da kişinin devamıysa işaretlenir.
+      isContinuation: event.requirement.requiredFlags.isNotEmpty ||
+          event.requirement.personRole != null,
     );
   }
 
@@ -485,17 +824,30 @@ class EventEngine {
       }
     }
 
-    final Stats stats = working.player.stats.copyWith(
-      happiness: working.player.stats.happiness + choice.happiness,
-      health: working.player.stats.health + choice.health,
-      intelligence: working.player.stats.intelligence + choice.intelligence,
-      charisma: working.player.stats.charisma + choice.charisma,
-      appearance: working.player.stats.appearance + choice.appearance,
+    final Stats stats = working.player.stats.gain(
+      happiness: choice.happiness,
+      health: choice.health,
+      intelligence: choice.intelligence,
+      charisma: choice.charisma,
+      appearance: choice.appearance,
     );
+    // Sigorta (Paket CA): olay sigortalanabilir bir riske etiketliyse ve
+    // oyuncunun o türde poliçesi varsa **zarar** muafiyet + karşılanmayan
+    // paya iner. Kazanç tarafına dokunulmaz, sigorta cüzdana para
+    // eklemez. Etiketsiz olayda ve poliçesi olmayan oyuncuda satır
+    // birebir eskisi gibi çalışır; zar tüketilmez.
+    final InsuranceKind? risk = _eventById(active.eventId)?.insuredRisk;
+    final ({int paid, int covered, String? note}) sigorta =
+        risk == null || choice.money >= 0
+            ? (paid: choice.money, covered: 0, note: null)
+            : Insurance.settle(working, risk, -choice.money);
+    final int paraEtkisi =
+        risk == null || choice.money >= 0 ? choice.money : -sigorta.paid;
+
     final PlayerCharacter player = working.player.copyWith(
       stats: stats,
       // Cüzdan eksiye düşmez; borç/eksi bakiye kuralları kararlaştırılmadı.
-      wallet: (working.player.wallet + choice.money).clamp(0, 1 << 31),
+      wallet: (working.player.wallet + paraEtkisi).clamp(0, 1 << 31),
     );
 
     // Etki, olayın kişisine; ilişki başlatan seçimde yeni partnere işlenir.
@@ -524,6 +876,12 @@ class EventEngine {
         state,
         katalog,
       );
+    }
+    // Poliçe devreye girdiyse oyuncu bunu görür ve kayıt sayaca işlenir
+    // (Paket CA). Para sessizce azalmaz.
+    if (risk != null && sigorta.covered > 0) {
+      working = Insurance.recordClaim(working, risk, sigorta.covered);
+      resultText = '$resultText\n\n${sigorta.note}';
     }
 
     working = working.copyWith(
@@ -581,13 +939,49 @@ class EventEngine {
       working = romance.end(working, active.personId!, logText: null);
     }
 
+    // Riskli seçimin hukuki tarafı (D-128). Motor kararı kendi verir;
+    // seçim yalnızca süreci başlatır.
+    final String? sucId = choice.crimeId;
+    if (sucId != null) {
+      working = LegalEngine.openCase(working, sucId, rng ?? Random());
+    }
+
+    // Portföy hamlesi (Paket AD, §AD/3). Suç seçiminde olduğu gibi: karar
+    // burada verilmez, ilgili motora devredilir. Hamle başarısız olabilir
+    // (işlem durmuş, para yetmiyor, pozisyon yok) ve bu normaldir.
+    final PortfolioAction? hamle = choice.portfolioAction;
+    if (hamle != null) {
+      working = InvestmentEngine.applyEventAction(
+        working,
+        action: hamle,
+        typeId: choice.portfolioTypeId,
+        share: choice.portfolioShare,
+      );
+    }
+
+    // Seçimin sağlık bedeli acil banda indirdiyse zorunlu kritik durum
+    // **burada** açılır (Paket AQ).
+    //
+    // Yalnızca yaş ilerletme yolunda denetlemek yetmiyordu: ölçümde 500
+    // hayatın 20'sinde olay seçimi sağlığı 0'a indiriyor ve oyuncu yıl
+    // ilerletmeden önce sağlık kazandıran bir aktiviteye gidip durumu
+    // sessizce kapatabiliyordu. Sebep biliniyor: kararın kendisi.
+    working = CriticalHealth.enforce(
+      state: working,
+      age: working.player.age,
+      cause: CriticalHealthCause.karar,
+    );
+
     return working;
   }
 }
 
 class _Candidate {
-  const _Candidate(this.event, this.person);
+  const _Candidate(this.event, this.people);
 
   final GameEvent event;
-  final Person? person;
+
+  /// Olayın kişi adayları. Çekilişi kazanana kadar **hangisi** olduğu
+  /// seçilmez (Paket BO).
+  final List<Person> people;
 }

@@ -21,7 +21,10 @@ import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 const ItemActions actions = ItemActions();
 
@@ -320,8 +323,11 @@ void main() {
     });
 
     test('temizlik ve bakım farklı sonuç üretir', () {
+      // Cüzdan 2026 ölçeğine çekildi: bisikletin değeri 9.000 ₺'den
+      // 28.000 ₺'ye çıktı, bakım ücreti de değere oranlı. Eski 2.000 ₺
+      // artık bakımı karşılamıyordu; iddia aynen duruyor.
       final ({GameState state, OwnedItem item}) kur = withItem(
-        life(14, age: 14, wallet: 2000),
+        life(14, age: 14, wallet: 8000),
         'bisiklet',
         condition: 30,
       );
@@ -334,7 +340,7 @@ void main() {
       );
       final int temizSonrasi = temiz.state.itemById(kur.item.id)!.condition;
       expect(temizSonrasi, 30 + ItemActions.prototypeOnlyCleanGain);
-      expect(temiz.state.player.wallet, 2000,
+      expect(temiz.state.player.wallet, 8000,
           reason: 'Temizlik ücretsizdir');
 
       final ItemActionResult bakim = actions.perform(
@@ -346,7 +352,7 @@ void main() {
       final int bakimSonrasi = bakim.state.itemById(kur.item.id)!.condition;
       expect(bakimSonrasi, greaterThan(temizSonrasi),
           reason: 'Bakım temizlikten daha çok iyileştirir');
-      expect(bakim.state.player.wallet, lessThan(2000),
+      expect(bakim.state.player.wallet, lessThan(8000),
           reason: 'Bakım ücretlidir');
       // Hiçbiri sihirli şekilde sıfırlamaz.
       expect(bakimSonrasi, lessThanOrEqualTo(ItemActions.prototypeOnlyRepairCeiling));
@@ -586,7 +592,11 @@ void main() {
       expect(r.state.possessions, isNot(contains('bisiklet')));
       expect(
         r.outcome.effects.map((AppliedEffect e) => e.text),
-        contains('Cüzdan +$bedel ₺'),
+        // Beklenti biçimli hâle çevrildi: para değişimi artık binlik
+        // ayraçla yazılıyor (`AppliedEffect.text`). Eski hâli ayraçsız
+        // yazımı — yani hatayı — sabitliyordu. İddia gevşemedi, bedel
+        // yine birebir aranıyor.
+        contains('Cüzdan +${trMoney(bedel)}'),
       );
       expect(r.state.log.last.text, contains('satıldı'));
     });
@@ -683,10 +693,29 @@ void main() {
       final String bisikletId = oyun.state!.items.single.id;
       expect(oyun.state!.possessions, contains('bisiklet'));
 
+      // D-125'ten sonra eşya eylemleri de ilerleme sayılıyor; motor
+      // aynı yaşta ek olay sunabiliyor. Gerçek oyuncu o pencereyi
+      // kapatıp devam eder — test de öyle yapar, yoksa bir sonraki
+      // eylem "olay bekliyor" diye reddedilir.
+      void devamEt() {
+        int guard = 0;
+        while (oyun.state!.hasNotice || oyun.state!.hasPendingEvent) {
+          if (guard++ > 20) fail('Pencereler kapanmıyor.');
+          if (oyun.state!.hasNotice) {
+            oyun.dismissNotice();
+            continue;
+          }
+          oyun.chooseEventOption(oyun.state!.pendingEvent!.choices.first.id);
+        }
+      }
+
+      devamEt();
+
       // 2) Bisiklete bindim.
       final ItemOutcome? bindi =
           oyun.performItemAction(bisikletId, ItemActionKind.kullan);
       expect(bindi!.applied, isTrue);
+      devamEt();
       final int kullanimSonrasi = oyun.state!.itemById(bisikletId)!.condition;
       expect(kullanimSonrasi, lessThan(OwnedItem.defaultCondition));
 
@@ -699,6 +728,8 @@ void main() {
       expect(oyun.state!.itemById(bisikletId)!.condition,
           greaterThan(kullanimSonrasi));
 
+      devamEt();
+
       // 4) Zil aldım ve taktım.
       final ShopProduct zil = shopProductByTypeId('bisiklet_zili')!;
       final int cuzdanAlimOnce = oyun.state!.player.wallet;
@@ -707,6 +738,7 @@ void main() {
       final String zilId = oyun.state!.items
           .firstWhere((OwnedItem i) => i.typeId == 'bisiklet_zili')
           .id;
+      devamEt();
       expect(oyun.attachAccessory(bisikletId, zilId)!.applied, isTrue);
       expect(oyun.state!.itemById(bisikletId)!.attachments,
           contains('bisiklet_zili'));
@@ -789,6 +821,8 @@ void main() {
           if (c.state!.hasPendingEvent) {
             c.chooseEventOption(c.state!.pendingEvent!.choices.first.id);
           } else {
+            // Lise alanı seçilmeden yaş atlanmaz (D-094).
+            resolveEducationChoices(c);
             c.ageUp();
           }
           final List<String> ids =

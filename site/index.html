@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bir Ömür — doğumdan ölüme bir hayat simülasyonu</title>
+<meta name="description" content="Bir Ömür, doğumdan ölüme tek bir hayatı oynadığınız derin bir hayat simülasyonu. Okul, 55 meslek, aile ve kuşaklar, piyasa rejimli yatırım, kendi işletmeniz, kira geliri, hukuk ve sağlık — hepsi birbirine bağlı. Açık beta; PC, mobil ve Apple hedefte.">
+<link rel="canonical" href="https://biromur.com/">
+<link rel="alternate" hreflang="tr" href="https://biromur.com/">
+<link rel="alternate" hreflang="en" href="https://biromur.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://biromur.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bir Ömür — doğumdan ölüme bir hayat simülasyonu">
+<meta property="og:description" content="Doğumdan ölüme bir hayat. Okul, meslek, aile, para, işletme, hukuk ve sağlık birbirini besliyor; her yıl bir karar. Derin bir hayat simülasyonu, açık beta.">
+<meta property="og:url" content="https://biromur.com/">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:image" content="https://biromur.com/assets/og-biromur.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header class="ust">
+  <div class="sarmal">
+    <a class="marka" href="/">Bir <span>Ömür</span></a>
+    <nav class="dil" aria-label="Dil">
+      <a href="/" aria-current="true" lang="tr">Türkçe</a>
+      <a href="/en/" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="sarmal kahraman">
+    <span class="etiket">Açık beta · geliştirme sürüyor</span>
+    <h1>Bir hayat, baştan sona.</h1>
+
+    <p class="giris">
+      Doğduğun aileyi seçmiyorsun. Sonrasında her yıl bir karar veriyorsun:
+      okul, iş, para, aşk, sağlık, bazen de mahkeme. Yetmiş yıl sonra geriye
+      kalan şey, verdiğin kararların toplamı oluyor.
+    </p>
+
+    <p class="giris giris-kanca">
+      Aşağıdaki üç hayat aynı bebekten başlıyor: aynı anne baba, aynı şehir,
+      aynı yıl. Biri 56 yaşında bitiyor, biri 86'ya gidiyor. Değişen tek
+      şey kararlar — gerisini oyun yazdı.
+    </p>
+
+    <div class="hayat-sekmeler" role="group" aria-label="Hangi hayat">
+      <button type="button" class="hayat-sekme" data-sekme="0" aria-pressed="false">
+        <b>56 yaşında bitti</b><span>Spor ve hobi</span>
+      </button>
+      <button type="button" class="hayat-sekme etkin" data-sekme="1" aria-pressed="true">
+        <b>78 yaşında bitti</b><span>Aile</span>
+      </button>
+      <button type="button" class="hayat-sekme" data-sekme="2" aria-pressed="false">
+        <b>86 yaşında bitti</b><span>Rahat</span>
+      </button>
+    </div>
+    <div class="hayat" id="oyna" data-hayat data-goster>
+      <div class="hayat-ust">
+        <div class="hayat-kim">
+          <p class="hayat-isim">İlhan Özkan</p>
+          <p class="hayat-nere">
+            <span class="hayat-cip">Van</span>
+            <span class="hayat-cip" data-okul>Okula başlamadı</span>
+            <span class="hayat-cip hayat-cip-is" data-is hidden></span>
+          </p>
+        </div>
+        <p class="hayat-yas"><b data-yas>0</b><span>yaş</span></p>
+      </div>
+
+      <div class="hayat-omur" aria-hidden="true"><i data-cizgi style="width:1%"></i></div>
+
+      <div class="hayat-govde">
+        <div class="hayat-statlar">
+        <div class="hayat-stat">
+          <span>Mutluluk</span>
+          <i class="hayat-ray"><b data-stat="0" style="width:77%"></b></i>
+          <em data-deger="0">77</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Sağlık</span>
+          <i class="hayat-ray"><b data-stat="1" style="width:74%"></b></i>
+          <em data-deger="1">74</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Zekâ</span>
+          <i class="hayat-ray"><b data-stat="2" style="width:56%"></b></i>
+          <em data-deger="2">56</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Karizma</span>
+          <i class="hayat-ray"><b data-stat="3" style="width:53%"></b></i>
+          <em data-deger="3">53</em>
+        </div>
+        <div class="hayat-stat">
+          <span>Görünüş</span>
+          <i class="hayat-ray"><b data-stat="4" style="width:36%"></b></i>
+          <em data-deger="4">36</em>
+        </div>
+          <p class="hayat-para">Cüzdan <b data-cuzdan>0 ₺</b></p>
+        </div>
+
+        <div class="hayat-defter" data-defter tabindex="0" role="log">
+          <div class="hayat-yil">
+            <p class="hayat-yil-bas">0 yaş</p>
+            <ul>
+            <li class="onemli">Van şehrinde dünyaya geldin. Adın İlhan Özkan kondu.</li>
+            <li>Annen Sevgi ile baban Onur birlikte yaşıyor.</li>
+            <li>Ailenin tek çocuğusun.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="hayat-kumanda">
+        <button type="button" class="hayat-dugme" data-yasal>Yaş Al</button>
+        <button type="button" class="hayat-yan" data-oto aria-pressed="false">Otomatik oynat</button>
+        <button type="button" class="hayat-yan" data-bastan>Baştan</button>
+        <span class="hayat-sayac" data-sayac><b data-sira>1</b> / 79 yıl</span>
+      </div>
+    </div>
+    <p class="hayat-kaynak">
+      Üçünü de oyunun motoru oynadı: kararları test botu verdi, olayları ve
+      metinleri oyun üretti. Aynı tohum, aynı doğum — biri 56 yaşında bir
+      hastalıkla bitiyor, biri 78'de dört çocuk ve dokuz torun bırakıyor,
+      biri 86'ya kadar gidiyor. Hiçbir satır bu site için yazılmadı; üçünün
+      tam günlüğü 2.764 satır, buraya yılda en çok üçü girdi.
+    </p>
+    <div class="giris-ikili">
+      <p class="giris">
+      Bir Ömür derin bir hayat simülasyonu: okul, meslek, aile, para,
+      sağlık, hukuk, hobiler, kuşaklar. Hepsi tek bir hayatın içinde ve
+      hepsi birbirine bakıyor. Okulda seçtiğin alan hangi işe
+      girebileceğini belirliyor, sağlığın o işi sürdürüp
+      sürdüremeyeceğini, bir mahkeme kararı maaşının yatıp yatmayacağını.
+      Yirmi yaşında verdiğin karar kırk yaşında karşına çıkıyor.
+      </p>
+      <p class="giris">
+      Dünyası uydurma sayılardan kurulu değil: ekonomi, maaşlar ve fiyatlar
+      ölçülerek bugünün Türkiye'sine çıpalandı. Olaylar, metinler ve
+      kurallar da bu oyun için sıfırdan yazıldı — başka bir oyundan taşınan
+      tek satır yok.
+      </p>
+    </div>
+
+
+    <p class="durum-notu">
+      Oyun mağazalarda değil; açık beta olarak topluluklarda paylaşılıyor.
+      Hedef üç platform: PC, mobil ve Apple. Aşağıdaki her sayı bugünün
+      deposundan ölçüldü.
+    </p>
+  </div>
+
+
+  <section id="oyun">
+    <div class="sarmal">
+      <h2 class="baslik">Oyunda ne var</h2>
+      <p class="alt-baslik">
+        Bir yıl, tek bir "yaş al" düğmesi. Arkasında birbirine bağlı
+        sistemler çalışıyor: birinde verdiğin karar ötekini yıllar sonra
+        buluyor.
+      </p>
+      <div class="ekranlar" data-goster>
+        <figure class="ekran">
+          <img src="/assets/ekran-hayat.webp" width="480" height="1013" decoding="async"
+               alt="Ana ekran: üstte karakter özeti ve beş değer çubuğu, ortada hayat günlüğü, altta Yaş Al düğmesi.">
+          <figcaption>Ana ekran: kim olduğun üstte, başından geçenler altta.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-olay.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Bir olay penceresi: gecenin ortasında uyanma metni ve iki seçenek.">
+          <figcaption>Olay penceresi. Yanıtlamadan yıl ilerlemiyor.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-iliskiler.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="İlişkiler ekranı: çekirdek aile başlığı altında anne, baba ve kardeşler.">
+          <figcaption>İlişkiler: çekirdek aile, geniş aile, romantik bağlar.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-okul.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Okul ekranı: kademe, sınıf, not ortalaması ve sınav yılı kartı.">
+          <figcaption>Okul: kademe, not ortalaması ve sınav yılı.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-varliklar.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Varlıklar ekranı: cüzdan, yaşanan yer ve sahip olunan eşyalar.">
+          <figcaption>Varlıklar: cüzdan, eşyalar, yaşadığın yer.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-aktiviteler.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Aktiviteler menüsü: birlikte vakit geçir, hayat hedefleri, berber, spor salonu, sağlık merkezi.">
+          <figcaption>Aktiviteler: dokuz mekân, 39 eylem.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-kisi.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Kişi kartı: yaş, meslek, keyfi ve yakınlık çubukları, altında eylemler ve sonucu.">
+          <figcaption>Kişi kartı: keyfi, yakınlık ve sonucunu gördüğün eylemler.</figcaption>
+        </figure>
+        <figure class="ekran">
+          <img src="/assets/ekran-karanlik.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Aynı ana ekranın karanlık moddaki hâli.">
+          <figcaption>Karanlık mod: aynı ekran, gece.</figcaption>
+        </figure>
+      </div>
+      <p class="durum-notu">
+        Görüntüler oyunun kendi arayüzünden alındı — telefon fotoğrafı değil,
+        uygulamanın gerçek ekranları.
+      </p>
+
+      <figure class="sema" data-goster>
+  <div class="sema-kaydir">
+  <svg viewBox="0 0 735 185" role="img" aria-label="Bir yılın döngüsü: bekleyen pencereler yanıtlanır, kararlar verilir, Yaş Al düğmesine basılır, motor yılı işler; sonra ertesi yıl baştan başlar.">
+    <defs>
+      <marker id="s1-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas" points="0,1 10,5 0,9"/>
+      </marker>
+      <marker id="s1-ok-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas-donus" points="0,1 10,5 0,9"/>
+      </marker>
+    </defs>
+    <rect class="s-kutu" x="10" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad" x="75" y="68" text-anchor="middle">Bekleyenler</text>
+    <text class="s-alt" x="75" y="85" text-anchor="middle">olay · kriz · duruşma</text>
+    <rect class="s-kutu" x="205" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad" x="270" y="68" text-anchor="middle">Kararların</text>
+    <text class="s-alt" x="270" y="85" text-anchor="middle">okul · iş · ilişki</text>
+    <rect class="s-kutu-vurgu" x="400" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad s-ad-vurgu" x="465" y="68" text-anchor="middle">Yaş Al</text>
+    <text class="s-alt" x="465" y="85" text-anchor="middle">tek düğme</text>
+    <rect class="s-kutu" x="595" y="44" width="130" height="58" rx="10"/>
+    <text class="s-ad" x="660" y="68" text-anchor="middle">Yıl işlenir</text>
+    <text class="s-alt" x="660" y="85" text-anchor="middle">maaş · gider · sağlık</text>
+    <line class="s-ok" x1="142" y1="73" x2="201" y2="73" marker-end="url(#s1-ok)"/>
+    <text class="s-etiket" x="171.5" y="62" text-anchor="middle">yanıtla</text>
+    <line class="s-ok" x1="337" y1="73" x2="396" y2="73" marker-end="url(#s1-ok)"/>
+    <text class="s-etiket" x="366.5" y="62" text-anchor="middle">karar ver</text>
+    <line class="s-ok" x1="532" y1="73" x2="591" y2="73" marker-end="url(#s1-ok)"/>
+    <text class="s-etiket" x="561.5" y="62" text-anchor="middle">bas</text>
+    <path class="s-ok-donus" d="M 660 102 V 160 H 75 V 102" marker-end="url(#s1-ok-d)"/>
+    <text class="s-etiket-donus" x="367" y="152" text-anchor="middle">ertesi yıl</text>
+  </svg>
+  </div>
+  <figcaption>Oyun yıl yıl ilerliyor. Bekleyen bir pencere varsa önce o yanıtlanıyor — yaş almak beş ayrı durumda kilitleniyor. Yıl işlendikten sonra olan her şey hayat günlüğüne tek tek yazılıyor.</figcaption>
+      </figure>
+      <div class="izgara" data-goster>
+        <div class="kart">
+          <h3>Okul ve meslek</h3>
+          <p>İlkokuldan üniversiteye on kademe, 20 üniversite programı, 13 okul kulübü. 55 meslek; mülakat, zam, terfi, ustalık ve emeklilik.</p>
+        </div>
+        <div class="kart">
+          <h3>Aile</h3>
+          <p>Ebeveynler, kardeşler, üvey aile. Evlilik, çocuk planı, gebelik, torun. Çocuğunun ödevine oturuyor, harçlık veriyor, kural koyuyorsun; kuşak bittiğinde oyun çocuğunla devam edebiliyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Para</h3>
+          <p>Geçim gideri, iki banka ve kredi, 22 şehirde ev ve araç pazarı, kiracılı kira geliri, yatırım portföyü ve 14 işletme türünden kendi işin.</p>
+        </div>
+        <div class="kart">
+          <h3>Sağlık</h3>
+          <p>Yaşla düşen beş değer, altı kronik hastalık, sekiz kriz, check-up ve estetik. Bakım ölçülebilir biçimde işe yarıyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Hukuk</h3>
+          <p>Sekiz kategoride 11 suç, üç kademe avukat. Soruşturma, kefalet, duruşma, cezaevi ve denetim dönemi. Tutuklulukta maaş yatmıyor, kıdem donuyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Hayat</h3>
+          <p>Hobiler, spor, kitap, sosyal medya, evcil hayvanlar, seyahat, hayat hedefleri ve 461 olay. Hepsi aşağıda.</p>
+        </div>
+      </div>
+      <figure class="sema" data-goster>
+  <div class="sema-kaydir">
+  <svg viewBox="0 0 720 310" role="img" aria-label="Sistemlerin birbirine bağlanması: okul mesleğe diploma, sağlık mesleğe eşik, hukuk mesleğe tutukluluk kısıtı veriyor; meslek parayı, para aileyi ve kefaleti besliyor, kefalet yeniden hukuka dönüyor.">
+    <defs>
+      <marker id="s2-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas" points="0,1 10,5 0,9"/>
+      </marker>
+      <marker id="s2-ok-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas-donus" points="0,1 10,5 0,9"/>
+      </marker>
+    </defs>
+    <rect class="s-kutu" x="20" y="20" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="95" y="44" text-anchor="middle">Okul</text>
+    <text class="s-alt" x="95" y="61" text-anchor="middle">sınav, alan</text>
+    <rect class="s-kutu" x="20" y="125" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="95" y="149" text-anchor="middle">Sağlık</text>
+    <text class="s-alt" x="95" y="166" text-anchor="middle">stat, kriz</text>
+    <rect class="s-kutu" x="20" y="230" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="95" y="254" text-anchor="middle">Hukuk</text>
+    <text class="s-alt" x="95" y="271" text-anchor="middle">duruşma, cezaevi</text>
+    <rect class="s-kutu" x="275" y="125" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="350" y="149" text-anchor="middle">Meslek</text>
+    <text class="s-alt" x="350" y="166" text-anchor="middle">55 meslek</text>
+    <rect class="s-kutu" x="530" y="125" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="605" y="149" text-anchor="middle">Para</text>
+    <text class="s-alt" x="605" y="166" text-anchor="middle">maaş, kredi, yatırım</text>
+    <rect class="s-kutu" x="530" y="20" width="150" height="50" rx="10"/>
+    <text class="s-ad" x="605" y="44" text-anchor="middle">Aile</text>
+    <text class="s-alt" x="605" y="61" text-anchor="middle">eş, çocuk, miras</text>
+    <path class="s-ok" d="M 170 45 H 350 V 121" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="258" y="38" text-anchor="middle">diploma</text>
+    <line class="s-ok" x1="170" y1="150" x2="271" y2="150" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="220" y="142" text-anchor="middle">sağlık eşiği</text>
+    <path class="s-ok" d="M 170 255 H 350 V 179" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="258" y="248" text-anchor="middle">tutuklulukta maaş yok</text>
+    <line class="s-ok" x1="425" y1="150" x2="526" y2="150" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="475" y="142" text-anchor="middle">maaş</text>
+    <line class="s-ok" x1="580" y1="125" x2="580" y2="74" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="572" y="102" text-anchor="end">destek</text>
+    <line class="s-ok" x1="630" y1="70" x2="630" y2="121" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="638" y="102" text-anchor="start">miras</text>
+    <path class="s-ok" d="M 605 175 V 292 H 95 V 284" marker-end="url(#s2-ok)"/>
+    <text class="s-etiket" x="350" y="285" text-anchor="middle">kefalet, avukat</text>
+  </svg>
+  </div>
+  <figcaption>Sistemler ayrı menüler değil. Okulda seçtiğin alan hangi işe girebileceğini, sağlığın hangi işi sürdürebileceğini belirliyor; tutuklanırsan maaş kesiliyor, kefalet de paradan çıkıyor. Para → hukuk → meslek → para: döngü kapanıyor, bir karar yıllar sonra seni buluyor.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="ebeveynlik">
+    <div class="sarmal">
+      <h2 class="baslik">Ebeveyn olmak</h2>
+      <p class="alt-baslik">
+        Oyuncunun kendi 0–18 yaşı dolu: okul kademesi, öğretmen, sınıf
+        arkadaşı, harçlık, kulüp. Ebeveyn olunca da öyle olsun istedik.
+        Çocuk bir bildirim satırı değil; kendi kaydı olan, büyüyen biri.
+      </p>
+      <div class="ebeveyn" data-goster>
+        <figure class="ekran">
+          <img src="/assets/ekran-ebeveynlik.webp" width="480" height="1013" loading="lazy" decoding="async"
+               alt="Çocuğun kartı: kademe, eğitim ve birikim satırları, keyif ve yakınlık çubukları, ardından Vakit Geçir, Sohbet Et, Hediye Ver, Ödevine Otur, Harçlık Ver, Hobiye Yazdır ve Kural Koy düğmeleri.">
+          <figcaption>On yaşındaki çocuğun kartı. Altta "Yol göstermek" başlığı duruyor ama düğme yok: gerekçesi yazıyor — bu konuşmalar için henüz küçük.</figcaption>
+        </figure>
+        <ul class="duz">
+          <li><b>Bebek yolda</b> <span>— Bekleyen doğum üç yerde birden görünüyor: üst künyede, hayat günlüğünün başında ve İlişkiler ekranında. Bebek bir sonraki yaşta doğuyor. Oyun tutamayacağı sözü vermiyor: diğer ebeveyn hayatta değilse "doğacak" yazmıyor.</span></li>
+          <li><b>Çocuk planı</b> <span>— Eşinle ya da sevgilinle konuşup karar veriyorsun: düşünüyoruz, şimdilik düşünmüyoruz ya da hiç konuşmadınız. Karar kayda giriyor ve baş başa kaldığınızda hatırlatılıyor. <b>"Çocuk yap" düğmesi yok</b> — çocuk bir ihtimal, garanti değil.</span></li>
+          <li><b>Çocuğa özel eylemler</b> <span>— Ödevine otur, harçlık ver, hobiye yazdır, kural koy. Her biri çocuğun <b>kendi</b> kaydını değiştiriyor: zekâsını, birikimini, ilgi alanlarını. Harçlık cüzdanından çıkıp çocuğun birikimine giriyor; 18'ine geldiğinde ekonomik durumunu o birikim belirliyor.</span></li>
+          <li><b>Yaş kademesi</b> <span>— Bebek, çocuk, ergen, yetişkin. Ne yapabileceğin kademeye göre değişiyor: bebeğin kartında ödev ya da kural satırı hiç çıkmıyor, yetişkin çocuğa kural konulmuyor. Ergen "oturmam" diyebiliyor.</span></li>
+          <li><b>Çocuğun yılı</b> <span>— Yıl bittiğinde çocuğun da özeti çıkıyor: bu yıl ne oldu, senin yaptığın ne değiştirdi. Sayılar yılın başındaki kayıtla bugünün farkından geliyor; tahmin değil, ölçüm.</span></li>
+        </ul>
+      </div>
+      <p class="durum-notu">
+        Kural koymak sevilmiyor: çocuğun keyfi düşüyor, araya mesafe
+        giriyor. Karşılığı okul sorununun ihtimalinin bir süre azalması —
+        garanti değil, ve arası kopuk bir çocukta hiç işlemiyor. Bütün bu
+        sistemler 500 aile hayatı oynatılarak ölçüldü; oranlar oyunun
+        kendi kayıtlarından çıkıyor, elle yazılmıyor.
+      </p>
+    </div>
+  </section>
+
+  <section id="derinlik">
+    <div class="sarmal">
+      <h2 class="baslik">Yüzeyin altında</h2>
+      <p class="alt-baslik">
+        Ekranda birkaç düğme var. Altında her yıl sırayla işleyen motorlar çalışıyor. Aşağıdakilerin hepsi oyunun içinde, bugün çalışır durumda.
+      </p>
+      <ul class="duz" data-goster>
+        <li><b>Piyasa rejimi</b> <span>— Her varlık ayrı zar atmıyor. Yılın bir rejimi var — durgun, normal, güçlü, kriz — ve iki gizli parametresi: enflasyon baskısı ile piyasa güveni. Bunlardan risk iştahı ve korunma talebi doğuyor; hisse ile fon birincisine, altın ile döviz ikincisine kendi ağırlığıyla tepki veriyor. Kriz yılında hisse düşerken altın portföyü tutabiliyor, ama her kriz aynı sonucu vermiyor.</span></li>
+        <li><b>Kurgusal şirketler</b> <span>— On sektörde 12 şirketin gizli göstergeleri yıldan yıla yürüyor. İyi şirket yıllarca iyi kalabiliyor, kötüsü toparlanabiliyor; yönetim kalitesi yavaş değişiyor ve kötü haberi yumuşatıyor. Şirket haberleri rastgele manşet değil, bu durumdan doğuyor.</span></li>
+        <li><b>Kendi işletmen</b> <span>— 14 işletme türü, üç ölçek. Fiyat, personel, bakım, reklam ve itibar ayrı ayrı yönetiliyor; talep piyasa ortalamasına göre fiyat esnekliğiyle hesaplanıyor. 102 işletme olayı var: denetim, afet, personel sorunu, tutan reklam.</span></li>
+        <li><b>Konut ve kira</b> <span>— Kira katalog değerinden değil, şehrin katsayısından ve evin durumundan hesaplanıyor. Kiracının mesleği, ödeme geçmişi ve sözleşmesi var; depozito, boşluk dönemi, çıkış ve bakım defteri tutuluyor. İstanbul'daki daire ile Amasya'daki daire aynı kirayı getirmiyor.</span></li>
+      </ul>
+      <details class="devami">
+        <summary><b>Altı başlık daha</b>
+          <span>konut ve kira · banka ve borç · hukuk · sağlık · aile ve kuşaklar · kariyer</span></summary>
+        <ul class="duz">
+          <li><b>Banka ve borç</b> <span>— İki banka, farklı faiz ve farklı onay sıkılığı. Başvuru gerçekten değerlendiriliyor, karar zar atışı değil. Taksit ödenemezse borç faiziyle büyüyor; cüzdan eksiye düşmüyor, borç birikiyor.</span></li>
+          <li><b>Hukuk</b> <span>— Sekiz kategoride 11 suç türü, üç kademe avukat. Soruşturma, kefalet, duruşma, cezaevi ve denetim dönemi ayrı ayrı işliyor. Tutuklulukta maaş yatmıyor ve kıdem donuyor — ama iş bitmiyor, seni bekliyor.</span></li>
+          <li><b>Sağlık</b> <span>— Altı kronik hastalık, sekiz sağlık krizi, altı vücut sistemi için check-up raporu. Beş değerin her birinin kendi yaşlanma eğrisi var; spor, berber, kitap ve kurs bu düşüşü ölçülebilir biçimde yavaşlatıyor. Kritik sağlıkta yaş almak kilitleniyor: önce karar vermen gerekiyor.</span></li>
+          <li><b>Aile ve kuşaklar</b> <span>— Üvey ve yarım kardeş, kayın aile, torun, soy bağı. Gebelik bir süreç: korunma tercihi, yaşa bağlı ihtimal, ikiz, tüp bebek. Boşanmada evlilik içinde satın alınarak edinilen mal paylaşılıyor; evlilikten önceki, miras ve hediye kişisel mal kalıyor. Velayet, nafaka, yaşlı bakımı ve miras ayrı kurallar. Kuşak bittiğinde oyun çocuğunla devam ediyor.</span></li>
+          <li><b>İlk yıllar</b> <span>— Bebeklik ve okul öncesi yılları için 31 olay: hane kararları, mahalle, bakkala ilk gidiş, sokak oyunu, anaokulunun ilk günü, bayram harçlığı, kardeş kıskançlığı. Dördü yıllar sonra geri dönüyor — yan tekerleri söktüren çocuk mahallenin önünde gidiyor, kumbaraya atan kumbarayı kırıyor, harfleri okuldan önce söken sınıfta sesli okuyor.</span></li>
+          <li><b>Eşikteki yıllar</b> <span>— 16-20 yaş için 29 olay: hazırlık kursu, tercih listesi, sonuç gecesi, mezuniyet, çıraklık, ehliyet, ilk iş başvurusu, ilk maaşı evle paylaşmak, evden çıkmak, dağılan arkadaş grubu. Dördü yıllar sonra geri dönüyor; lise grubu yıllar sonra aynı masaya oturuyor.</span></li>
+          <li><b>Oturduğun ev</b> <span>— kendi evine çıkınca hayat sessizleşmiyor: kombi kışın ortasında susuyor, çatı akıyor, banyoda küf çıkıyor, apartman toplantısında aidat oylanıyor, üst kat gece mobilya çekiyor, yandaki daire satılığa çıkıyor. 28 olay; yedisi yıllar sonra kendi kararını önüne koyuyor — yamayla idare edilen kombi geri dönüyor, ertelenen çatının bedeli ikiye katlanıyor, yaptırdığın sigorta işe yarıyor.</span></li>
+          <li><b>Komşular</b> <span>— apartman artık metinde değil, kapıda: kendi evine ya da kiralığa çıkınca bir-üç komşu tanıyorsun. Adları var, yaşlanıyorlar, poşet taşıyorsun, tencere geliyor, gece gelen sesi konuşuyorsun, apartman toplantısında aynı tarafta duruyorsunuz. 12 olay; dördü yıllar sonra kendi kararını geri getiriyor. Taşınınca komşuluk biter ama yakınsanız arkadaş olarak kalıyor.</span></li>
+          <li><b>Evini döşemek</b> <span>— ev artık boş bir kutu değil: buzdolabı, çamaşır makinesi, fırın, yatak odası, koltuk takımı ve yemek masası evin temelini kuruyor; televizyon, klima, bulaşık makinesi, halı, perde ve kitaplık üstüne konforu koyuyor. 18 eşya, yeni "Ev ve yaşam" mağazası. Evinin hâli ekranı neyin tamam neyin eksik olduğunu tek bakışta gösteriyor; eşya yıllar içinde yıpranıyor ve bakım istiyor. Taşındığında eşyan seninle geliyor.</span></li>
+          <li><b>Takımın hikâyesi</b> <span>— okul takımına ya da bir hobiye girdiysen oyun bunu hatırlıyor: ilk antrenman, kadroda yükselme, antrenörle gerginlik, turnuva ve maç-sınav çatışması artık yıllık akışta gerçekten çıkıyor. O yıl içinde olduğun uğraş genel olay havuzuna karışıp kaybolmuyor.</span></li>
+          <li><b>Son yıllar</b> <span>— 65 yaşından sonrası da kendi hikâyesini anlatıyor: gidecek yeri olmayan ilk pazartesi, günün düzenini kurmak, parkta her gün aynı bankta oturan tanıdık, üçüncü katta ilk kez ara vermek, dört ilaç kutusunu karıştırmak, torunun "sen küçükken burada ne vardı?" diye sorması, bir gence mesleğini öğretmek, komşuyla "sabah perdeni aç" düzeni, diktiğin fidan, kendini banka görevlisi gibi tanıtan telefon. 31 olay; altısı yıllar sonra kendi izini geri getiriyor — yazdığın defteri torunun buluyor, yarım saat ayırdığın genç kendi işini açıp kapına geliyor, diktiğin fidan gölge yapıyor.</span></li>
+          <li><b>Kütüphane</b> <span>— raf artık ömür boyu sürüyor: 39 kitap, dokuz tür (çocuk kitabı, macera, roman, bilim, klasik, şiir, polisiye, tarih, anı). Çocukluk kitapları büyüyünce kapanıyor, otuzlu ve kırklı yaşlarda yeni kitaplar açılıyor. Okudukça "okumak" uğraşın ilerliyor: hevesliden ustaya kadar beş basamak var ve yazarlık mesleğinin kapısı buradan açılıyor. Kitaplar türüne göre gruplanıyor, bitirdiklerin en altta duruyor. Bütün adlar ve yazarlar oyuna ait.</span></li>
+          <li><b>Sigorta</b> <span>— paranın savunma tarafı: sağlık ve konut poliçesi yaptırabiliyorsun. Yıllık prim ödüyorsun, kötü bir yıl geldiğinde faturanın muafiyet üstü kısmı karşılanıyor. Kazanç getirmez; parası olmayan oyuncu için hayat kurtaran tedaviyi seçilebilir yapar.</span></li>
+          <li><b>Arkadaş grubu</b> <span>— arkadaşlık artık tek tek değil: üç yakın arkadaşın olduğunda bir grup kurabiliyorsun. Grubun adı hayatının o günkü hâlinden geliyor (okul çevresi, üniversite çevresi, iş çevresi, mahalle çevresi) ve ne zamandan beri bir arada olduğunuz kayıtta duruyor. Grupla birlikte programa çıkıyorsun; o gün kim gelebiliyorsa onunla. Dokuz olay: kim organize edecek, masaya gelen hesap, aylarca görünmeyen üye, iki arkadaşın tartışması, masaya katılan yeni biri, yıllar öncesinden çıkan fotoğraf. Üçü yıllar sonra kendi kararını geri getiriyor. Vefat eden ya da küsen üye gruptan düşüyor, üç kişinin altına inince grup dağılıyor — ve kaydı silinmiyor.</span></li>
+          <li><b>Yaşlılıkta kim yanında</b> <span>— yaşlı anne babasına bakmak oyunda vardı; tersi yoktu. 70 yaşından sonra sağlığın düşen bir yılında "Bu yıl kim yanında?" diye soruluyor ve üç kapı açılıyor: ailene yüklenirsin (eşin ya da yetişkin çocuğun o yıl yanında olur — yakınlık artar, yük onların üstünde kalır), bakım masrafını karşılarsın (para gerçekten cebinden çıkar, gücü yeten çocuklar faturanın bir kısmını üstlenir) ya da kimseye yüklenmeden çevirirsin. Yılda bir karar. Yanında kimse yoksa kart bunu olduğu gibi yazıyor: kurduğun ailenin karşılığı en çok burada görünüyor. Kaç yıl destek gördüğün, kaç yılı kendin çevirdiğin ve ödenen tutarlar kayıtta duruyor.</span></li>
+          <li><b>Kendi görünümün</b> <span>— koyu tema artık senin seçimin: cihazına uy, açıkta kal ya da hep koyu oyna. Seçim kayıtla birlikte duruyor.</span></li>
+          <li><b>Kendine göre kıs</b> <span>— Sonradan eklenen özellikler ayarlardan tek tek kapatılabiliyor. Kapattığın modül oyunda hiç görünmüyor, oyunun geri kalanı aynı şekilde çalışıyor ve hayat aynı tohumda aynı akıyor. Kapatınca neyin kaybolacağı satırın altında yazıyor.</span></li>
+          <li><b>Kariyer</b> <span>— 55 meslek, 167 soruluk mülakat havuzu. Ustalık ve itibar yıllarla birikiyor; yıllarca sürdürdüğün hobi mülakatta ikinci şans ve işe başlarken ustalık yılı getiriyor. Hastalık raporunun ilk iki günü ödenmiyor, uzun rapor işvereni rahatsız ediyor.</span></li>
+          <li><b>Hile kapıları kapalı</b> <span>— Piyasa yaş başına bir kez ilerliyor ve endeks kayda yazılıyor: ekranı kapatıp açarak, al-sat yaparak ya da eski kaydı yükleyerek fiyat yeniden çevrilemiyor. Aynı yıl aynı eylemi tekrarlayıp ödül toplamak da kapalı; davet edilen kişinin reddi yıl içinde sabit kalıyor.</span></li>
+        </ul>
+      </details>
+      <div class="sayilar" style="margin-top:22px" data-goster>
+        <div><b>55</b><small>meslek</small></div>
+        <div><b>167</b><small>mülakat sorusu</small></div>
+        <div><b>20</b><small>üniversite programı</small></div>
+        <div><b>14</b><small>işletme türü</small></div>
+        <div><b>102</b><small>işletme olayı</small></div>
+        <div><b>12</b><small>kurgusal şirket</small></div>
+        <div><b>22</b><small>şehir</small></div>
+        <div><b>79</b><small>eşya türü</small></div>
+        <div><b>57</b><small>mağaza ürünü</small></div>
+        <div><b>11</b><small>suç türü</small></div>
+        <div><b>33</b><small>hediye</small></div>
+        <div><b>461</b><small>olay</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hayat">
+    <div class="sarmal">
+      <h2 class="baslik">Hayatın kendisi</h2>
+      <p class="alt-baslik">
+        Bir hayat yalnızca okul, iş ve paradan oluşmuyor. Okuduğun kitap, yıllarca çaldığın enstrüman, beslediğin kedi, taşındığın şehir — bunlar da oyunda. Hepsi tek seferlik bir düğme değil: yıllar içinde biriken ve sonradan işe yarayan bir iz.
+      </p>
+      <figure class="sema" data-goster>
+  <div class="sema-kaydir">
+  <svg viewBox="0 0 735 222" role="img" aria-label="Hobi mekanizması: kütüphanede bitirilen kitap, kurs ve antrenman aynı hobi deneyimine yazılır; deneyim basamağı yükseltir; basamak hayat günlüğüne kalıcı bir anı ve mesleğe sinerji avantajı verir. Ara verilirse pay azalır ama silinmez.">
+    <defs>
+      <marker id="s4-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas" points="0,1 10,5 0,9"/>
+      </marker>
+      <marker id="s4-ok-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <polygon class="s-ok-bas-donus" points="0,1 10,5 0,9"/>
+      </marker>
+    </defs>
+    <rect class="s-kutu" x="8" y="46" width="140" height="98" rx="10"/>
+    <text class="s-ad" x="78" y="70" text-anchor="middle">Yaptığın şey</text>
+    <text class="s-alt" x="78" y="89" text-anchor="middle">kütüphanede kitap</text>
+    <text class="s-alt" x="78" y="105" text-anchor="middle">kurs · atölye</text>
+    <text class="s-alt" x="78" y="121" text-anchor="middle">salonda antrenman</text>
+    <rect class="s-kutu" x="196" y="66" width="140" height="58" rx="10"/>
+    <text class="s-ad" x="266" y="90" text-anchor="middle">Hobi deneyimi</text>
+    <text class="s-alt" x="266" y="107" text-anchor="middle">yıl yıl birikir</text>
+    <rect class="s-kutu-vurgu" x="384" y="66" width="140" height="58" rx="10"/>
+    <text class="s-ad s-ad-vurgu" x="454" y="90" text-anchor="middle">Basamak</text>
+    <text class="s-alt" x="454" y="107" text-anchor="middle">Hevesli → Usta</text>
+    <rect class="s-kutu" x="572" y="10" width="155" height="58" rx="10"/>
+    <text class="s-ad" x="649.5" y="34" text-anchor="middle">Hayat günlüğü</text>
+    <text class="s-alt" x="649.5" y="51" text-anchor="middle">kalıcı anı satırı</text>
+    <rect class="s-kutu" x="572" y="122" width="155" height="58" rx="10"/>
+    <text class="s-ad" x="649.5" y="146" text-anchor="middle">Meslek sinerjisi</text>
+    <text class="s-alt" x="649.5" y="163" text-anchor="middle">mülakatta ikinci şans</text>
+    <line class="s-ok" x1="150" y1="95" x2="192" y2="95" marker-end="url(#s4-ok)"/>
+    <text class="s-etiket" x="171" y="85" text-anchor="middle">sayılır</text>
+    <line class="s-ok" x1="338" y1="95" x2="380" y2="95" marker-end="url(#s4-ok)"/>
+    <text class="s-etiket" x="359" y="85" text-anchor="middle">eşik</text>
+    <line class="s-ok" x1="526" y1="95" x2="568" y2="45" marker-end="url(#s4-ok)"/>
+    <text class="s-etiket" x="545" y="62" text-anchor="middle">anı</text>
+    <line class="s-ok" x1="526" y1="95" x2="568" y2="145" marker-end="url(#s4-ok)"/>
+    <text class="s-etiket" x="545" y="137" text-anchor="middle">avantaj</text>
+    <path class="s-ok-donus" d="M 454 124 V 205 H 266 V 124" marker-end="url(#s4-ok-d)"/>
+    <text class="s-etiket-donus" x="360" y="197" text-anchor="middle">ara verirsen pay azalır</text>
+  </svg>
+  </div>
+  <figcaption>Hobilerin kendi düğmesi yok. Kütüphanede bitirdiğin kitap, gittiğin kurs ve salondaki antrenman aynı hobiye yazılıyor; beş basamağın her biri hayat günlüğüne bir anı bırakıyor. Yıllarca yazan biri yazarlık mülakatında ikinci şans alıyor — ara verirse payı azalıyor ama geçmişi silinmiyor.</figcaption>
+      </figure>
+      <div class="izgara" data-goster>
+        <div class="kart">
+          <h3>Hobiler</h3>
+          <p>12 kalıcı hobi — müzik, resim, okumak, spor, mutfak, fotoğraf, dans, satranç, yazmak, bahçe, dil, yazılım. Her birinin beş basamağı var: Hevesli, Meraklı, Düzenli, Tutkulu, Usta.</p>
+        </div>
+        <div class="kart">
+          <h3>Kitap okumak</h3>
+          <p>22 kitap, beş tür, sayfa sayfa okunuyor. Başlıklar ve yazarlar oyuna özgü; telifli hiçbir eserin içeriği kullanılmıyor. Kitabı bitirmek zekâ getiriyor, düzenli okuyanın zekâsı ileri yaşta daha yavaş aşınıyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Spor</h3>
+          <p>Koşu, ağırlık, esneme. Altı dövüş sanatı ve 58 kademe, kendi turnuva devreleriyle. Ayrıca okul takımından emekliliğe uzanan bir profesyonel futbol kariyeri: okulda hiç oynamadıysan o kapı açılmıyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Kurslar ve kulüpler</h3>
+          <p>Dokuz mekânda 39 eylem: kurs, kütüphane, spor salonu, berber, sağlık merkezi, estetik, eğlence. Okulda 13 kulüp; ilk dersler ücretsiz, sonrası ücretli.</p>
+        </div>
+        <div class="kart">
+          <h3>Evcil hayvanlar</h3>
+          <p>On tür. Ömürler türün gerçeğine dayanıyor; hastalık, kaçma ve veteriner var. Hayvanın ölümü hayat günlüğüne yazılıyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Seyahat ve şehir</h3>
+          <p>Altı tur paketi ve taşınma. 22 şehrin kendi karakteri var: fiyatlar, iş imkânı, okul ve sağlık aynı değil. Taşınmak yalnızca yakın illere.</p>
+        </div>
+        <div class="kart">
+          <h3>Sosyal medya ve ün</h3>
+          <p>Paylaşım, takipçi, sponsorluk. Ün belli bir eşiği geçince 14 medya fırsatı açılıyor; ilgilenilmezse ün düşüyor. Markaların hepsi kurgusal.</p>
+        </div>
+        <div class="kart">
+          <h3>Hayat hedefleri</h3>
+          <p>Beş alanda 21 hedef: eğitim, kariyer, ekonomi, aile, kendin. Kendi ekranında yıl yıl takip ediliyor.</p>
+        </div>
+      </div>
+      <div class="sayilar" style="margin-top:16px" data-goster>
+        <div><b>12</b><small>kalıcı hobi, 60 basamak</small></div>
+        <div><b>22</b><small>kitap</small></div>
+        <div><b>39</b><small>aktivite</small></div>
+        <div><b>21</b><small>hayat hedefi</small></div>
+        <div><b>10</b><small>evcil hayvan türü</small></div>
+        <div><b>461</b><small>olay</small></div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="ilke">
+    <div class="sarmal">
+      <h2 class="baslik">Neye dokunmuyoruz</h2>
+      <p class="alt-baslik">
+        Hayat simülasyonu kolayca ucuzlaşabilen bir tür. Baştan konmuş
+        birkaç sınır var.
+      </p>
+      <div class="izgara" data-goster>
+        <div class="kart">
+          <h3>Kopya içerik yok</h3>
+          <p>Olaylar, metinler ve görseller bu oyun için yazıldı. Başka bir oyunun içeriği taşınmadı.</p>
+        </div>
+        <div class="kart">
+          <h3>Gerçek isim yok</h3>
+          <p>Şirketler, bankalar, araç modelleri ve ünlüler kurgusal. Gerçek kişi ve marka adı kullanılmıyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Yöntem anlatılmıyor</h3>
+          <p>Suç ve hukuk sistemi sonuçları anlatıyor; hiçbir metin uygulanabilir bir yöntem tarif etmiyor.</p>
+        </div>
+        <div class="kart">
+          <h3>Yatırım tavsiyesi değil</h3>
+          <p>Oyundaki piyasa kurgusaldır. Gerçek bir finansal öneri olarak sunulmuyor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="durum">
+    <div class="sarmal">
+      <h2 class="baslik">Durum</h2>
+      <p class="alt-baslik">Bugün nerede olduğumuzu olduğu gibi yazıyoruz.</p>
+      <ul class="duz" data-goster>
+        <li><b>Teknoloji</b> <span>— Flutter, tek kod tabanı.</span></li>
+        <li><b>Platformlar</b> <span>— PC, mobil ve Apple; üçüne birden çıkarmayı hedefliyoruz. Bugün Android ve Windows paketi her gönderimde derleniyor, Apple sürümü henüz yok.</span></li>
+        <li><b>Oynanabilirlik</b> <span>— oyun baştan sona oynanabiliyor: doğum, okul, meslek, aile, yaşlanma, ölüm ve sonraki kuşak.</span></li>
+        <li><b>Yayın durumu</b> <span>— mağazada değil. Açık beta olarak topluluklarda paylaşılıyor.</span></li>
+        <li><b>Sağlamlık</b> <span>— 3.414 otomatik test her gönderimde çalışıyor; yeni bir hata bulunduğunda önce onu yakalayan test yazılıyor.</span></li>
+        <li><b>Sırada</b> <span>— arayüz pürüzleri, içerik derinliği ve denge kararları. Tarih vermiyoruz; önce betayı olgunlaştırmak istiyoruz.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="omur">
+    <div class="sarmal">
+      <h2 class="baslik">Bir ömür</h2>
+      <p class="alt-baslik">
+        Bir hayat baştan sona oynanıyor: doğduğun aileyi seçmiyorsun, sonrasında her yıl bir karar veriyorsun. Kuşak bittiğinde oyun çocuğunla devam ediyor.
+      </p>
+      <div class="zaman" data-goster>
+        <div class="zaman-cizgi" aria-hidden="true"><span class="zaman-dolgu"></span></div>
+        <ol class="zaman-adimlar">
+          <li style="--s:0"><span class="zaman-nokta" aria-hidden="true"></span><b>0</b><small>Doğum</small></li>
+          <li style="--s:1"><span class="zaman-nokta" aria-hidden="true"></span><b>6</b><small>Okul</small></li>
+          <li style="--s:2"><span class="zaman-nokta" aria-hidden="true"></span><b>18</b><small>İlk iş</small></li>
+          <li style="--s:3"><span class="zaman-nokta" aria-hidden="true"></span><b>30</b><small>Aile</small></li>
+          <li style="--s:4"><span class="zaman-nokta" aria-hidden="true"></span><b>65</b><small>Emeklilik</small></li>
+          <li style="--s:5"><span class="zaman-nokta" aria-hidden="true"></span><b>—</b><small>Son</small></li>
+        </ol>
+      </div>
+      <p class="durum-notu" style="margin-top:22px">
+        Örnek bir hayat. Oyunda sıra da yaşlar da oynayana göre değişiyor: kimi otuzunda emekli olamıyor, kimi kırkında yeniden okula dönüyor.
+      </p>
+    </div>
+  </section>
+
+  <section id="iletisim" class="iletisim">
+    <div class="sarmal">
+      <h2 class="baslik">Bize yaz</h2>
+      <p class="alt-baslik">
+        Oyuna ekleyeceğimiz daha çok özellik var. Geri bildirimlerin ve
+        eklememizi istediklerin için bize yaz: eksik bulduğun şey, oynarken
+        takıldığın yer, aklındaki fikir. Betaya katılmak ya da basın bilgisi
+        istemek için de aynı adres.
+      </p>
+      <p><a href="mailto:info@biromur.com">info@biromur.com</a></p>
+
+      <p class="kit">
+        Oyunu bir yerde paylaşacaksan hazır malzeme var: uygulamanın kendi
+        sekiz ekranı tam çözünürlükte, yirmi yılı yirmi karede gösteren
+        hareketli kayıt, paylaşım görseli ve iki dilde tanıtım metni.
+      </p>
+      <p><a class="kit-bag" href="/assets/biromur-basin-kiti.zip" download>Basın kitini indir — 2,7 MB</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="alt">
+  <div class="sarmal">
+    <span>© 2026 Bir Ömür</span>
+    <span><a href="/en/" lang="en">English</a></span>
+  </div>
+</footer>
+
+<script src="/assets/hayat.js"></script>
+<script>
+// Kaydırınca belirme + sayan sayılar. Betik çalışmazsa hiçbir şey
+// gizlenmiyor: gizleme kuralı yalnızca html.js varken geçerli.
+(function () {
+  var hedefler = document.querySelectorAll('[data-goster]');
+  if (!hedefler.length) return;
+  var azHareket = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function say(kok) {
+    var kutular = kok.querySelectorAll('.sayilar b');
+    for (var i = 0; i < kutular.length; i++) {
+      (function (kutu) {
+        var metin = kutu.textContent.trim();
+        if (azHareket || !/^[0-9.]+$/.test(metin)) return;
+        var hedef = parseInt(metin.replace(/\./g, ''), 10);
+        if (!hedef || hedef > 100000) return;
+        var adet = 24;
+        var n = 0;
+        // Ne olursa olsun gerçek değer yazılsın: kare hızı kısılsa da
+        // sayı "0"da kalmasın.
+        window.setTimeout(function () { kutu.textContent = metin; }, 1400);
+        function adim() {
+          n++;
+          var o = n / adet;
+          kutu.textContent = Math.round(hedef * (1 - Math.pow(1 - o, 3)))
+            .toLocaleString('tr-TR');
+          if (n < adet) window.setTimeout(adim, 34);
+          else kutu.textContent = metin;
+        }
+        kutu.textContent = '0';
+        window.setTimeout(adim, 34);
+      })(kutular[i]);
+    }
+  }
+
+  function goster(e) {
+    e.classList.add('gorundu');
+    say(e);
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    for (var i = 0; i < hedefler.length; i++) goster(hedefler[i]);
+    return;
+  }
+  var gozcu = new IntersectionObserver(function (girisler) {
+    for (var i = 0; i < girisler.length; i++) {
+      if (girisler[i].isIntersecting) {
+        goster(girisler[i].target);
+        gozcu.unobserve(girisler[i].target);
+      }
+    }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  for (var j = 0; j < hedefler.length; j++) gozcu.observe(hedefler[j]);
+
+  // Emniyet: bir aksilik olursa iki buçuk saniye sonra hepsi görünür.
+  window.setTimeout(function () {
+    for (var k = 0; k < hedefler.length; k++) {
+      if (!hedefler[k].classList.contains('gorundu')) goster(hedefler[k]);
+    }
+  }, 2500);
+})();
+
+// Oynanabilir ömür: oyunun kendi tur kayıtlarını yıl yıl gösterir. Üç hayat
+// da aynı tohumdan, aynı doğumdan başlıyor; değişen tek şey kararlar.
+// Yıl 0 HTML'de gömülü olduğu için betik çalışmazsa kart okunur kalır.
+(function () {
+  var veri = window.BIR_OMUR_HAYAT;
+  var kart = document.querySelector('[data-hayat]');
+  if (!veri || !kart || !veri.hayatlar || !veri.hayatlar.length) return;
+
+  var t = veri.t || {};
+  var yerel = t.yerel || 'tr-TR';
+  var defter = kart.querySelector('[data-defter]');
+  var elYas = kart.querySelector('[data-yas]');
+  var elOkul = kart.querySelector('[data-okul]');
+  var elIs = kart.querySelector('[data-is]');
+  var elPara = kart.querySelector('[data-cuzdan]');
+  var elCizgi = kart.querySelector('[data-cizgi]');
+  var elSayac = kart.querySelector('[data-sayac]');
+  var dYas = kart.querySelector('[data-yasal]');
+  var dOto = kart.querySelector('[data-oto]');
+  var sekmeler = document.querySelectorAll('[data-sekme]');
+  var dBastan = kart.querySelector('[data-bastan]');
+  var raylar = kart.querySelectorAll('[data-stat]');
+  var degerler = kart.querySelectorAll('[data-deger]');
+  if (!defter || !dYas || !dOto || !dBastan) return;
+
+  var azHareket = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hangi = Math.min(veri.basla || 0, veri.hayatlar.length - 1);
+  var hayat = veri.hayatlar[hangi];
+  var yillar = hayat.yillar;
+  var sonIndeks = yillar.length - 1;
+  var simdi = 0;
+  var sayac = null;
+  var kendiBasladi = false;
+
+  function sayi(n) {
+    try { return n.toLocaleString(yerel); } catch (e) { return String(n); }
+  }
+
+  function yaz(kalip, deger) {
+    var cikti = kalip || '';
+    for (var anahtar in deger) {
+      if (Object.prototype.hasOwnProperty.call(deger, anahtar)) {
+        cikti = cikti.split('{' + anahtar + '}').join(deger[anahtar]);
+      }
+    }
+    return cikti;
+  }
+
+  // Üst bilgi ve statlar: o yılın gerçek değerleri.
+  function basliklar(i) {
+    var y = yillar[i];
+    elYas.textContent = y.y;
+    elOkul.textContent = y.o;
+    if (y.i) {
+      elIs.textContent = y.i;
+      elIs.hidden = false;
+    } else {
+      elIs.textContent = '';
+      elIs.hidden = true;
+    }
+    elPara.textContent = yaz(t.para || '{n} ₺', { n: sayi(y.p) });
+    elCizgi.style.width = Math.max(1, Math.round((i / sonIndeks) * 100)) + '%';
+    if (elSayac) {
+      elSayac.textContent = yaz(t.sayac || '{sira} / {toplam}', {
+        sira: i + 1, toplam: yillar.length
+      });
+    }
+    for (var k = 0; k < raylar.length; k++) {
+      if (y.s[k] === undefined) continue;
+      raylar[k].style.width = y.s[k] + '%';
+      if (degerler[k]) degerler[k].textContent = y.s[k];
+    }
+  }
+
+  function yilBlogu(y) {
+    var kutu = document.createElement('div');
+    kutu.className = 'hayat-yil yeni';
+    var bas = document.createElement('p');
+    bas.className = 'hayat-yil-bas';
+    bas.textContent = yaz(t.yilBas || '{yas}', { yas: y.y });
+    kutu.appendChild(bas);
+    var liste = document.createElement('ul');
+    for (var i = 0; i < y.g.length; i++) {
+      var satir = document.createElement('li');
+      satir.textContent = y.g[i][0];
+      if (y.g[i][1]) satir.className = 'onemli';
+      if (!azHareket) satir.style.animationDelay = (i * 0.12) + 's';
+      liste.appendChild(satir);
+    }
+    kutu.appendChild(liste);
+    return kutu;
+  }
+
+  function ekle(i) {
+    var eski = defter.querySelector('.hayat-yil.yeni');
+    if (eski) eski.classList.remove('yeni');
+    defter.appendChild(yilBlogu(yillar[i]));
+    // Günlük uzadıkça baştan kırp: sayfa ağırlaşmasın.
+    while (defter.children.length > 36) defter.removeChild(defter.firstChild);
+    defter.scrollTop = defter.scrollHeight;
+  }
+
+  function dur() {
+    if (sayac) {
+      window.clearInterval(sayac);
+      sayac = null;
+    }
+    dOto.setAttribute('aria-pressed', 'false');
+    dOto.textContent = t.oto || '';
+  }
+
+  function basla() {
+    if (sayac || simdi >= sonIndeks) return;
+    sayac = window.setInterval(ilerle, 1500);
+    dOto.setAttribute('aria-pressed', 'true');
+    dOto.textContent = t.dur || '';
+  }
+
+  function bitir() {
+    dur();
+    dYas.disabled = true;
+    if (defter.querySelector('.hayat-son')) return;
+    var sonMu = hangi === veri.hayatlar.length - 1;
+    var kutu = document.createElement('div');
+    kutu.className = 'hayat-son';
+    var bas = document.createElement('p');
+    bas.className = 'hayat-son-bas';
+    bas.textContent = t.sonBas || '';
+    var ozet = document.createElement('p');
+    ozet.textContent = yaz(t.sonOzet, {
+      yil: hayat.olum, cocuk: hayat.cocuk,
+      torun: hayat.torun, unvan: hayat.unvan
+    });
+    var not = document.createElement('p');
+    not.className = 'hayat-son-not';
+    not.textContent = yaz(sonMu ? (t.sonNotSon || t.sonNot) : t.sonNot, {
+      tam: sayi(hayat.tamSatir), satir: hayat.satir
+    });
+    kutu.appendChild(bas);
+    kutu.appendChild(ozet);
+    kutu.appendChild(not);
+    defter.appendChild(kutu);
+    defter.scrollTop = defter.scrollHeight;
+  }
+
+  function ilerle() {
+    if (simdi >= sonIndeks) {
+      bitir();
+      return;
+    }
+    simdi++;
+    basliklar(simdi);
+    ekle(simdi);
+    if (simdi >= sonIndeks) bitir();
+  }
+
+  // Seçili hayatı en baştan kurar: günlük temizlenir, 0 yaş veriden yazılır.
+  function hayatiKur(i) {
+    dur();
+    hangi = ((i % veri.hayatlar.length) + veri.hayatlar.length)
+      % veri.hayatlar.length;
+    hayat = veri.hayatlar[hangi];
+    yillar = hayat.yillar;
+    sonIndeks = yillar.length - 1;
+    simdi = 0;
+    dYas.disabled = false;
+    while (defter.firstChild) defter.removeChild(defter.firstChild);
+    defter.appendChild(yilBlogu(yillar[0]));
+    basliklar(0);
+    defter.scrollTop = 0;
+    for (var s = 0; s < sekmeler.length; s++) {
+      var secili = s === hangi;
+      sekmeler[s].classList.toggle('etkin', secili);
+      sekmeler[s].setAttribute('aria-pressed', secili ? 'true' : 'false');
+    }
+  }
+
+  dYas.addEventListener('click', function () {
+    dur();
+    ilerle();
+  });
+
+  dOto.addEventListener('click', function () {
+    if (sayac) {
+      dur();
+    } else {
+      if (simdi >= sonIndeks) hayatiKur(hangi);
+      basla();
+    }
+  });
+
+  dBastan.addEventListener('click', function () { hayatiKur(hangi); });
+
+  // Sekmeler: hangi hayatın oynadığını seçer, seçilen hayat 0 yaştan başlar.
+  for (var si = 0; si < sekmeler.length; si++) {
+    (function (dugme) {
+      dugme.addEventListener('click', function () {
+        var hedef = parseInt(dugme.getAttribute('data-sekme'), 10);
+        if (isNaN(hedef) || hedef === hangi) return;
+        hayatiKur(hedef);
+        if (!azHareket) basla();
+      });
+    })(sekmeler[si]);
+  }
+
+  hayatiKur(hangi);
+
+  // Kart ekrana girince kendi oynamaya başlar; hareketi azaltan ayar
+  // açıksa beklemez, kullanıcı düğmeye basar.
+  if (!azHareket && 'IntersectionObserver' in window) {
+    var gozcu = new IntersectionObserver(function (girisler) {
+      for (var i = 0; i < girisler.length; i++) {
+        if (girisler[i].isIntersecting && !kendiBasladi) {
+          kendiBasladi = true;
+          basla();
+          gozcu.disconnect();
+        }
+      }
+    }, { threshold: 0.35 });
+    gozcu.observe(kart);
+  }
+})();
+</script>
+</body>
+</html>

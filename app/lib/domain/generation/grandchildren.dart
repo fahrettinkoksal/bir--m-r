@@ -36,18 +36,26 @@ abstract final class Grandchildren {
   /// prototypeOnly: torun doğumunun mutluluk etkisi.
   static const int prototypeOnlyHappiness = 8;
 
-  /// Bu çocuğun kayıtlı torunları.
-  static List<Person> childrenOf(GameState state, String childId) =>
+  /// Bu kişinin kayıtlı çocukları (torun ya da yeğen).
+  static List<Person> childrenOf(
+    GameState state,
+    String parentId, {
+    RelationType childRelation = RelationType.torun,
+  }) =>
       state.people
           .where((Person p) =>
-              p.relation == RelationType.torun &&
-              p.development?.otherParentId == childId)
+              p.relation == childRelation &&
+              p.development?.otherParentId == parentId)
           .toList(growable: false);
 
   /// Oyuncunun bütün torunları (vefat edenler de listede kalır).
-  static List<Person> all(GameState state) => state.people
-      .where((Person p) => p.relation == RelationType.torun)
-      .toList(growable: false);
+  static List<Person> all(
+    GameState state, {
+    RelationType childRelation = RelationType.torun,
+  }) =>
+      state.people
+          .where((Person p) => p.relation == childRelation)
+          .toList(growable: false);
 
   /// Bu yıl bu çocuktan bir torun doğar mı?
   ///
@@ -57,12 +65,36 @@ abstract final class Grandchildren {
     required GameState state,
     required Person child,
     required Random rng,
+  }) =>
+      maybeBornTo(
+        state: state,
+        parent: child,
+        rng: rng,
+        parentRelation: RelationType.cocuk,
+        childRelation: RelationType.torun,
+        idPrefix: 'torun',
+      );
+
+  /// Aynı kural, **başka bir bağ** için (D-158).
+  ///
+  /// Kardeşin çocuğu **yeğen** olarak doğar. Kural tek yerde durur:
+  /// torun ve yeğen için ayrı iki sistem kurulmadı, yalnızca bağ ve
+  /// kimlik öneki değişti.
+  static Person? maybeBornTo({
+    required GameState state,
+    required Person parent,
+    required Random rng,
+    required RelationType parentRelation,
+    required RelationType childRelation,
+    required String idPrefix,
   }) {
+    final Person child = parent;
     if (!child.isAlive) return null;
-    if (child.relation != RelationType.cocuk) return null;
+    if (child.relation != parentRelation) return null;
     if (child.age < prototypeOnlyMinParentAge) return null;
     if (child.age > prototypeOnlyMaxParentAge) return null;
-    if (childrenOf(state, child.id).length >= prototypeOnlyMaxPerChild) {
+    if (childrenOf(state, child.id, childRelation: childRelation).length >=
+        prototypeOnlyMaxPerChild) {
       return null;
     }
     if (!rng.chance(prototypeOnlyChance)) return null;
@@ -71,11 +103,12 @@ abstract final class Grandchildren {
     final Set<String> kullanilan = <String>{
       for (final Person p in state.people) p.id,
     };
-    String id = 'torun-${all(state).length + 1}';
+    final int sayi = all(state, childRelation: childRelation).length + 1;
+    String id = '$idPrefix-$sayi';
     int ek = 0;
     while (kullanilan.contains(id)) {
       ek++;
-      id = 'torun-${all(state).length + 1}-$ek';
+      id = '$idPrefix-$sayi-$ek';
     }
 
     // Özellikler, torunun kendi anne-babasından (yani oyuncunun
@@ -86,16 +119,43 @@ abstract final class Grandchildren {
       second: null,
     );
 
+    // --- Paket AP §49: torunun soy bağı ------------------------------
+    //
+    // Paket AO lineage modelini kurmuştu (`motherId` / `fatherId`) ama
+    // torun doğarken o alanlar boş kalıyordu: torunun yalnızca
+    // `development.otherParentId` içinde bir ebeveyni vardı.
+    //
+    // Paket AP'de gelin/damat gerçek bir kişi oldu, yani torunun **iki**
+    // gerçek ebeveyni var ve ikisi de kayıtta duruyor. Burada yeni bir
+    // torun motoru kurulmuyor (§49: "yeni torun motoru kurma"); var olan
+    // motorun eksik bıraktığı iki alan yazılıyor.
+    //
+    // Hangi alan hangisine yazılacağı ebeveynin cinsiyetinden okunuyor;
+    // eş kaydı yoksa yalnızca bilinen taraf yazılır — uydurma bir
+    // ebeveyn kimliği yazılmaz (§53).
+    final String? esKimligi = child.development?.spousePersonId;
+    final bool ebeveynKadin = child.gender == Gender.kadin;
+    final String? anneId = ebeveynKadin ? child.id : esKimligi;
+    final String? babaId = ebeveynKadin ? esKimligi : child.id;
+
     return Person(
       id: id,
-      firstName: rng.pick(
+      // Paket BV: torunun adı kayıttaki adlardan seçilmez (ölçüm:
+      // çakışma örneklerinin yarısı torundu).
+      firstName: rng.pickFreshName(
         cinsiyet == Gender.kadin ? kadinIsimleri : erkekIsimleri,
+        <String>{
+          state.player.firstName,
+          for (final Person p in state.people) p.firstName,
+        },
       ),
       lastName: child.lastName,
       gender: cinsiyet,
-      relation: RelationType.torun,
+      relation: childRelation,
       age: 0,
       isAlive: true,
+      motherId: anneId,
+      fatherId: babaId,
       // Torun oyuncunun hanesinde yaşamaz; kendi ailesiyle büyür.
       inPlayerHousehold: false,
       employment: EmploymentStatus.cocuk,
@@ -107,7 +167,7 @@ abstract final class Grandchildren {
         // Kendi hayatı izlenir: okulu, mesleği kendi yıllarında oluşur.
         tracksLife: true,
         stats: stats,
-        // Torunun ebeveyni: oyuncunun çocuğu.
+        // Bebeğin ebeveyni: oyuncunun çocuğu ya da kardeşi.
         otherParentId: child.id,
         milestones: const <LifeMilestone>[
           LifeMilestone(age: 0, text: 'Dünyaya geldi.'),

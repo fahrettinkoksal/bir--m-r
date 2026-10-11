@@ -23,12 +23,16 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/life_summary.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/domain/models/rental.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/social/social_engine.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/invariants.dart';
+
+import 'support/test_flow.dart';
+import 'support/corpus_year.dart';
 
 /// Ekrandaki olayı ve krizi kapatarak bir yaş ilerletir.
 void yasAl(GameController controller) {
@@ -49,6 +53,8 @@ void yasAl(GameController controller) {
       controller.state!.pendingEvent!.choices.first.id,
     );
   }
+  // Lise alanı seçilmeden yaş atlanmaz (D-094).
+  resolveEducationChoices(controller);
   controller.ageUp();
   while (controller.state!.hasPendingCrisis) {
     if (guard++ > 60) fail('Kriz kapanmıyor.');
@@ -207,23 +213,63 @@ void main() {
     final OwnedItem kiralik = controller.state!.items.last;
 
     expect(controller.moveInto(oturulan)?.applied, isTrue);
-    expect(controller.rentOutHome(kiralik)?.applied, isTrue);
-    // Oturulan ev kiraya verilemez.
-    expect(controller.rentOutHome(controller.state!.items.first)?.applied,
-        isFalse);
 
-    final int kira = Housing.yearlyRentIncome(controller.state!);
-    expect(kira, greaterThan(0));
+    // D-163: kiraya verme artık kiracı seçmeyi gerektiriyor.
+    final int kira = controller.marketRent(kiralik);
+    final List<TenantRecord> adaylar =
+        controller.tenantCandidatesFor(kiralik, kira);
+    expect(adaylar, isNotEmpty);
+    expect(
+      controller
+          .signLease(
+            home: kiralik,
+            tenant: adaylar.first,
+            yearlyRent: kira,
+          )
+          ?.applied,
+      isTrue,
+    );
+    // Oturulan ev kiraya verilemez.
+    expect(
+      controller.rentOutAskBlockReason(
+        controller.state!.items.first,
+        controller.marketRent(controller.state!.items.first),
+      ),
+      isNotEmpty,
+    );
+
+    final int kiraGeliri = Housing.yearlyRentIncome(controller.state!);
+    expect(kiraGeliri, greaterThan(0));
+    expect(kiraGeliri, kira, reason: 'Sözleşmede yazan kira tahsil edilir');
 
     final int cuzdanOnce = controller.state!.player.wallet;
     final int gider = LivingCosts.yearlyCost(controller.state!);
     yasAl(controller);
     if (controller.state!.deceased) return;
 
-    // Kira bir kez gelir, gider bir kez çıkar (kiracı bulunduysa).
+    // Kira bir kez gelir, gider bir kez çıkar. D-163'ten sonra kalemler
+    // mülk defterinde yazılı olduğu için iddia **daha sıkı**: cüzdan
+    // farkı, defterdeki tahsilat ve mülk gideriyle geçim giderinin
+    // toplamına **tam olarak** eşit olmalı. Böylece iki kez tahsil, iki
+    // kez kesinti ve kayıp kuruş aynı iddiayla yakalanıyor.
+    final int defterKira = controller.state!.propertyLedgers
+        .fold<int>(0, (int t, PropertyLedger l) => t + l.rentCollected);
+    final int defterGider = controller.state!.propertyLedgers
+        .fold<int>(0, (int t, PropertyLedger l) => t + l.maintenanceSpent);
     final int fark = controller.state!.player.wallet - cuzdanOnce;
-    expect(fark, anyOf(<Matcher>[equals(kira - gider), equals(-gider)]),
-        reason: 'Kira veya gider iki kez uygulanmamalı');
+    expect(
+      fark,
+      defterKira - defterGider - gider,
+      reason: 'Kira veya gider iki kez uygulanmamalı',
+    );
+    expect(
+      controller.state!.log
+          .where((dynamic e) =>
+              (e.text as String).contains('Kira gelirin bu yıl'))
+          .length,
+      lessThanOrEqualTo(1),
+      reason: 'Kira yılda bir kez tahsil edilir',
+    );
 
     final SaveService service = SaveService(MemorySaveStore());
     await service.save(controller.state!);
@@ -231,7 +277,8 @@ void main() {
     expect(geri.player.wallet, controller.state!.player.wallet);
     expect(geri.items.length, controller.state!.items.length);
     expect(geri.residenceItemId, controller.state!.residenceItemId);
-    expect(Housing.yearlyRentIncome(geri), kira);
+    expect(Housing.yearlyRentIncome(geri),
+        Housing.yearlyRentIncome(controller.state!));
   });
 
   // ===================================================================
@@ -376,6 +423,8 @@ void main() {
         controller.debugSetState(
           controller.state!.copyWith(pendingEvent: null),
         );
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
 
@@ -712,22 +761,41 @@ void main() {
         final int maas = state.career.job?.yearlySalary ?? 0;
         final int kira = Housing.yearlyRentIncome(state);
         final int gider = LivingCosts.yearlyCost(state);
+        final Set<String> mirasOnce = <String>{...state.settledEstates};
 
-        state = state.copyWith(pendingEvent: null, pendingCrisis: null);
-        state = LifeProgression(rng).advanceOneYear(state);
+        state = advanceCorpusYear(rng, state);
         toplamYas++;
 
-        // Tek yılda gelir, maaş+kira+miras toplamını aşamaz.
+        // Tek yılda gelen para **açıklanabilir** olmalı.
+        //
+        // Eskiden burada "maaş + kira + 5.000.000" diye sabit bir pay
+        // vardı ve o pay mirası temsil ediyordu. Ölçüm gösterdi ki bu
+        // yanlış bir çıpa: varlıklı bir akrabanın mirası tek yılda
+        // 21.000.000 ₺ gelebiliyor (tohum 706, yaş 81 — vefat eden abi).
+        // Eşiği büyütmek de keyfi olurdu; sorulması gereken soru "ne
+        // kadar" değil, "neden" idi.
+        //
+        // Yeni kural daha sıkı: büyük bir artış yalnızca o yıl **yeni
+        // bir miras kapandıysa** kabul edilir. Sebepsiz para çoğalması
+        // yine yakalanır.
         final int artis = state.player.wallet - cuzdanOnce + gider;
-        if (artis > maas + kira + 5000000) {
+        final bool yeniMiras = state.settledEstates
+            .any((String id) => !mirasOnce.contains(id));
+        if (artis > maas + kira + 5000000 && !yeniMiras) {
           sorunlar.add('tohum $seed yaş ${state.player.age}: '
-              'beklenmeyen gelir artışı $artis');
+              'açıklanamayan gelir artışı $artis');
         }
 
-        // Aynı mirasın iki kez dağıtılmadığını doğrula.
-        for (final String id in state.settledEstates) {
-          if (!odenenMiras.add(id)) continue;
+        // Kapanmış miras **geri açılmaz**: bir kez kapandıysa sonraki
+        // yıllarda da kapalı kalmalı, yoksa aynı miras ikinci kez
+        // dağıtılabilirdi.
+        for (final String id in mirasOnce) {
+          if (!state.settledEstates.contains(id)) {
+            sorunlar.add('tohum $seed yaş ${state.player.age}: '
+                'kapanmış miras yeniden açıldı ($id)');
+          }
         }
+        odenenMiras.addAll(state.settledEstates);
 
         sorunlar.addAll(
           checkInvariants(state, where: 'tohum $seed'),

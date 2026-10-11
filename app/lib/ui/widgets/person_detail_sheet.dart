@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../data/gift_catalog.dart';
 import '../../data/item_catalog.dart';
 import '../../data/wedding_catalog.dart';
+import '../../domain/activities/outing.dart';
 import '../../domain/interaction/intimacy.dart';
 
+import '../../domain/activities/activity_engine.dart';
+import '../../domain/economy/household_budget.dart';
+import '../../domain/family/child_rules.dart';
+import '../../domain/family/child_stage.dart';
+import '../../domain/life/year_review.dart';
+import '../../domain/interaction/elder_care.dart';
 import '../../domain/interaction/bond_decay.dart';
 import '../../domain/interaction/marriage_engine.dart';
 import '../../domain/models/game_state.dart';
@@ -15,11 +23,14 @@ import '../../domain/models/person.dart';
 import '../../domain/models/relation.dart';
 import '../../domain/interaction/shared_history.dart';
 import '../theme/bir_omur_theme.dart';
+import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
 import 'effect_chips.dart';
 import 'kilim_divider.dart';
 import '../../domain/models/person_development.dart';
 import '../../text/turkish_text.dart';
+import '../../domain/interaction/finger.dart';
+import '../../domain/interaction/friendship_depth.dart';
 
 /// Kişi ayrıntısı ve aile etkileşimleri.
 ///
@@ -46,11 +57,52 @@ class PersonDetailSheet extends StatefulWidget {
 
 class _PersonDetailSheetState extends State<PersonDetailSheet> {
   InteractionOutcome? _lastOutcome;
+
+  /// Son bakım kararının sonucu (Paket AO §35).
+  ///
+  /// `InteractionOutcome` kullanılmadı: bakım bir `InteractionKind`
+  /// değil, kendi kararı. Sahte bir tür uydurup listeye sokmak yerine
+  /// sonuç burada duruyor.
+  String? _bakimSonucu;
   String? _notice;
 
   void _run(InteractionKind kind) {
+    // Hediye artık rastgele değil: oyuncu seçer (D-134).
+    if (kind == InteractionKind.hediyeVer) {
+      _chooseGift();
+      return;
+    }
     final InteractionOutcome? outcome =
         GameScope.of(context).interact(widget.personId, kind);
+    if (outcome == null) return;
+    setState(() {
+      _lastOutcome = outcome;
+      _notice = null;
+    });
+  }
+
+  /// Hediye seçimi penceresi (D-134).
+  ///
+  /// Listede yalnızca **gerçekten alınabilecek** hediyeler durur; fiyatı
+  /// yanında yazar. Kişinin beğenip beğenmeyeceği **söylenmez** — o
+  /// sürprizdir ve oyuncunun kimi tanıdığını öğrenmesi gerekir.
+  Future<void> _chooseGift() async {
+    final GameController controller = GameScope.of(context);
+    final List<GiftItem> secenekler =
+        controller.giftOptionsFor(widget.personId);
+    if (secenekler.isEmpty) return;
+    final GiftItem? secilen = await showModalBottomSheet<GiftItem>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (BuildContext context) => _GiftSheet(gifts: secenekler),
+    );
+    if (secilen == null || !mounted) return;
+    final InteractionOutcome? outcome = GameScope.of(context).interact(
+      widget.personId,
+      InteractionKind.hediyeVer,
+      giftId: secilen.id,
+    );
     if (outcome == null) return;
     setState(() {
       _lastOutcome = outcome;
@@ -230,11 +282,139 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
     );
   }
 
+  /// Çiftin çocuk planı: niyet artık açık bir eylem (Paket BK/2, Q-201).
+  ///
+  /// Faho'nun Paket 25 kararı yerinde: **"çocuk yap" düğmesi yok**,
+  /// çocuk bir ihtimal. Eksik olan, oyuncunun bu ihtimali isteyip
+  /// istemediğini söyleyebilmesiydi — niyet hiçbir yere yazılmıyordu.
+  /// Plan burada görünür, kayda girer ve korunma penceresinde
+  /// hatırlanır.
+  List<Widget> _familyPlanSection(GameState state, Person person) {
+    final GameController c = GameScope.of(context);
+    if (!c.familyPlanAvailability(widget.personId).isAllowed) {
+      return const <Widget>[];
+    }
+    final ThemeData theme = Theme.of(context);
+    final FamilyPlan plan = c.familyPlanWith(widget.personId);
+    // Bebek yoldaysa "deniyoruz" düğmesi anlamsız: motor o yıl yeni
+    // gebelik hesaplamıyor.
+    final bool bebekYolda = state.isExpecting &&
+        state.pregnancy!.partnerId == widget.personId;
+    return <Widget>[
+      const SizedBox(height: 12),
+      InkWell(
+        key: const Key('person_family_plan_row'),
+        onTap: () => _chooseFamilyPlan(person),
+        borderRadius: BorderRadius.circular(Comic.yaricap),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(14, 11, 14, 11),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(Comic.yaricap),
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                Icons.family_restroom_rounded,
+                size: 19,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Çocuk planı',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      plan.label,
+                      key: const Key('person_family_plan_value'),
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (plan.triesForChild && !bebekYolda) ...<Widget>[
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            key: const Key('person_try_for_child'),
+            onPressed: () => _tryForChild(person),
+            icon: const Icon(Icons.child_friendly_rounded),
+            label: const Text('Çocuk deniyoruz'),
+          ),
+        ),
+      ],
+    ];
+  }
+
+  Future<void> _chooseFamilyPlan(Person person) async {
+    final FamilyPlan? secim = await showModalBottomSheet<FamilyPlan>(
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext context) => _FamilyPlanSheet(
+        person: person,
+        current: GameScope.of(context).familyPlanWith(widget.personId),
+      ),
+    );
+    if (secim == null || !mounted) return;
+    final FamilyOutcome? sonuc =
+        GameScope.of(context).setFamilyPlan(widget.personId, secim);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
+  /// Açık deneme: arkada **aynı** motor çalışır (korunmadan yakınlaşma).
+  void _tryForChild(Person person) {
+    final FamilyOutcome? sonuc =
+        GameScope.of(context).tryForChild(widget.personId);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
+  /// Çocuğa akıl vermek (Paket AP §40, kapısı BK/3'te açıldı).
+  ///
+  /// Motor Paket AP'de yazıldı: soğuma süresi, üç yılda sönen etki,
+  /// yakınlığa bağlı dinlenme. Ama `adviseChild` **hiçbir ekrandan**
+  /// çağrılmıyordu — `haveChild` ile aynı durum (Q-201). Kapı burada.
+  void _adviseChild() {
+    final ActivityOutcome? sonuc =
+        GameScope.of(context).adviseChild(widget.personId);
+    if (sonuc == null) return;
+    setState(() {
+      _lastOutcome = null;
+      _notice = sonuc.text;
+    });
+  }
+
   Future<void> _intimacy(Person person) async {
     final Protection? secim = await showModalBottomSheet<Protection>(
       context: context,
       showDragHandle: true,
-      builder: (BuildContext context) => _ProtectionSheet(person: person),
+      builder: (BuildContext context) => _ProtectionSheet(
+        person: person,
+        plan: GameScope.of(context).familyPlanWith(widget.personId),
+      ),
     );
     if (secim == null || !mounted) return;
     final FamilyOutcome? sonuc =
@@ -262,6 +442,13 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
         availability.isAllowed
             ? GameScope.of(context).availableKindsFor(person)
             : const <InteractionKind>[];
+
+    // Çocuğa akıl verme kapısının gerekçesi (Paket BK/3). Burada
+    // hesaplanıyor: iç içe geçmiş bir koşulun içinde `GameScope` çağırmak
+    // hem okunmuyor hem de çözümleyiciyi zorluyordu.
+    final String? cocukAkilEngeli = person.relation == RelationType.cocuk
+        ? GameScope.of(context).childAdviceBlockReason(widget.personId)
+        : null;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -304,6 +491,14 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
               // onlarda eğitim/birikim satırı gösterilmez.
               if (person.relation == RelationType.cocuk &&
                   person.development != null) ...<Widget>[
+                // Kademe (Paket BK/4): yapılabilen eylemlerin listesi
+                // buna göre değişiyor, o yüzden ekranda yazıyor.
+                // Eşikler D-180'den: 0-3 / 4-12 / 13-17 / 18+.
+                _Row(
+                  key: const Key('person_child_stage'),
+                  label: 'Kademe',
+                  value: ChildStage.of(person.age).label,
+                ),
                 _Row(
                   label: 'Eğitim',
                   value: person.development!.educationLabel,
@@ -360,6 +555,52 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                   ),
                 const SizedBox(height: 10),
               ],
+              // --- Paket BK/5: çocuğun biten yılı -------------------
+              //
+              // Oyuncunun kendi yıl özeti gibi: yılın başındaki
+              // fotoğrafla bugünün farkı. "Senin yaptığın ne işe
+              // yaradı" sorusunun cevabı burada — uydurma değil,
+              // ölçülen fark (`ChildMark`).
+              if (person.relation == RelationType.cocuk) ...<Widget>[
+                ...<Widget>[
+                  for (final ChildYearSummary ozet
+                      in state.lastYearSummary?.children ??
+                          const <ChildYearSummary>[])
+                    if (ozet.childId == widget.personId) ...<Widget>[
+                      const SizedBox(height: 14),
+                      Text(
+                        'Bu yıl (${ozet.age} yaşında)',
+                        key: const Key('person_child_year'),
+                        style: theme.textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: 6),
+                      for (final String an in ozet.milestones)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            an,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      if (ozet.effects.isNotEmpty)
+                        EffectChips(effects: ozet.effects),
+                    ],
+                ],
+              ],
+              // --- Paket BK/3: ebeveynlik ---------------------------
+              //
+              // Evdeki kural kayıtta duruyor ve okul sorununun
+              // ihtimalini düşürüyor; oyuncu bunu bir yerden
+              // görebilmeli (`ChildRules`).
+              if (person.relation == RelationType.cocuk &&
+                  person.isAlive &&
+                  ChildRules.activeFor(state, person))
+                const _Row(
+                  label: 'Evdeki kural',
+                  value: 'Koydun, sözü hâlâ geçiyor',
+                ),
               // Hane bilgisi bağ türünden bağımsızdır (D-014): tanışıklık,
               // arkadaşlık veya akrabalık kimseyi hanene eklemez.
               _Row(
@@ -370,6 +611,48 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                         : 'Ayrı evde yaşıyor')
                     : '—',
               ),
+              // Paket AO §26-§27: velayet düzeni. D-160'tan beri boşanmada
+              // hesaplanıyordu ama yalnızca boşanma metninde ve Evlilik
+              // Geçmişi sayfasında yazıyordu; çocuğun kendi kartında
+              // hiçbir iz yoktu. Oyuncu "çocuğum kiminle yaşıyor" diye
+              // baktığında cevabı burada bulmalı. Kayıt yoksa satır yok:
+              // dev bir velayet sistemi kurulmadı (§25 V1 sınırı).
+              if (state.alimony != null &&
+                  state.alimony!.isActive &&
+                  person.isAlive &&
+                  (person.id == state.alimony!.otherPersonId ||
+                      (person.relation == RelationType.cocuk &&
+                          person.age <
+                              HouseholdBudget.prototypeOnlyChildSupportUntil)))
+                _Row(
+                  label: 'Velayet',
+                  value: state.alimony!.custody.label,
+                ),
+              // Paket AO §39: kişi nerede yaşıyor? Ayrı evdeki bir
+              // akrabanın aynı şehirde mi başka şehirde mi olduğu
+              // hiçbir ekranda yazmıyordu. Kayıt yoksa satır da yok;
+              // uydurulmuyor.
+              if (person.isAlive && person.city != null)
+                _Row(label: 'Yaşadığı şehir', value: person.city!),
+              // Paket AO §14-§15, §39: soy bağı. Üvey mi, yarım mı, öz
+              // mü — bunu etiket söylüyor ama **neden** öyle olduğunu
+              // ancak ortak ebeveyn gösterir. Yalnızca kayıtta duran ve
+              // kişi listesinde gerçekten bulunan ebeveyn yazılır.
+              ...<Widget>[
+                for (final ({String etiket, String? id}) ebeveyn
+                    in <({String etiket, String? id})>[
+                  (etiket: 'Annesi', id: person.motherId),
+                  (etiket: 'Babası', id: person.fatherId),
+                ])
+                  if (ebeveyn.id != null &&
+                      state.personById(ebeveyn.id!) != null)
+                    _Row(
+                      label: ebeveyn.etiket,
+                      value: state.personById(ebeveyn.id!)!.fullName,
+                    )
+                  else if (ebeveyn.id == state.player.id)
+                    _Row(label: ebeveyn.etiket, value: 'Sen'),
+              ],
               // Ortak geçmişiniz (Paket 14): yalnızca kayıtlarda gerçekten
               // duran anlar. Kayıt yoksa bölüm hiç gösterilmez.
               Builder(
@@ -400,6 +683,37 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 },
               ),
               if (person.isAlive) ...<Widget>[
+                const SizedBox(height: 16),
+                // Keyif, yakınlıktan ayrı bir şeydir (D-074): yakınlık
+                // ilişkinin gücü, keyif kişinin şu anki hâlidir. Keyfi
+                // düşük kişi davetleri reddedebilir, bu yüzden oyuncu
+                // bunu görebilmeli.
+                Text('Keyfi', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    key: const Key('person_happiness'),
+                    value: person.happiness / 100,
+                    minHeight: 8,
+                    backgroundColor:
+                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+                if (person.happiness < Outing.prototypeOnlyLowHappiness)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '${person.firstName} bu aralar keyifsiz; '
+                      'davetlerini geri çevirebilir.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 16),
                 Text('Yakınlık', style: theme.textTheme.labelLarge),
                 const SizedBox(height: 6),
@@ -449,6 +763,93 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                 )
               else
                 _Actions(available: available, onSelected: _run),
+              // --- Çocuğa akıl vermek (AP §40-§46, kapı BK/3) --------
+              //
+              // Motor Paket AP'de yazıldı ve testleri de var; ama
+              // `adviseChild` **hiçbir ekrandan** çağrılmıyordu.
+              // `haveChild` ile aynı hata: sistem duruyor, kapı yok.
+              // Koşul sağlanmıyorsa düğme yerine gerekçe yazılır
+              // (D-095) — sahte düğme olmaz.
+              if (person.relation == RelationType.cocuk &&
+                  person.isAlive) ...<Widget>[
+                const SizedBox(height: 16),
+                Text('Yol göstermek', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                if (cocukAkilEngeli == null)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      key: const Key('person_child_advice_button'),
+                      onPressed: _adviseChild,
+                      icon: const Icon(Icons.forum_outlined),
+                      label: const Text('Oturup hayatı konuşun'),
+                    ),
+                  )
+                else
+                  _Note(
+                    key: const Key('person_child_advice_note'),
+                    text: cocukAkilEngeli,
+                  ),
+              ],
+              // --- Yaşlı ebeveyn bakımı (Paket AO §35, §36) ----------
+              //
+              // `ElderCare` Paket AO/1'de yazıldı ama hiçbir ekrandan
+              // ulaşılamıyordu: yaşlanan anne-babaya yapılabilecek tek
+              // şey yine "Sohbet et"ti. Karar burada, kişinin kendi
+              // kartında veriliyor. Bakım ihtiyacı yoksa bölüm hiç
+              // çizilmez — boş başlık gösterilmiyor.
+              if (GameScope.of(context).needsElderCare(person)) ...<Widget>[
+                const SizedBox(height: 16),
+                Text('Bakım', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 6),
+                Builder(
+                  builder: (BuildContext context) {
+                    final ({
+                      int cost,
+                      int siblingShare,
+                      List<String> siblingNames
+                    })? hesap = GameScope.of(context).elderCareCost();
+                    if (hesap == null) return const SizedBox.shrink();
+                    final int cepten =
+                        (hesap.cost - hesap.siblingShare).clamp(0, hesap.cost);
+                    return Text(
+                      hesap.siblingShare > 0
+                          ? 'Bu yılki bakım masrafı ${trMoney(hesap.cost)}. '
+                              '${hesap.siblingNames.join(' ve ')} '
+                              '${trMoney(hesap.siblingShare)} katkı '
+                              'veriyor; sana ${trMoney(cepten)} düşüyor.'
+                          : 'Bu yılki bakım masrafı ${trMoney(hesap.cost)}. '
+                              'Katkı verebilecek kardeşin yok.',
+                      key: const Key('elder_care_cost_note'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: <Widget>[
+                    for (final ElderCareChoice secim in ElderCareChoice.values)
+                      OutlinedButton(
+                        key: Key('elder_care_${secim.name}'),
+                        onPressed: () {
+                          final ActivityOutcome? o = GameScope.of(context)
+                              .decideElderCare(widget.personId, secim);
+                          if (o == null) return;
+                          setState(() => _bakimSonucu = o.text);
+                        },
+                        child: Text(secim.label),
+                      ),
+                  ],
+                ),
+                if (_bakimSonucu != null) ...<Widget>[
+                  const SizedBox(height: 8),
+                  _Note(text: _bakimSonucu!),
+                ],
+              ],
               // Evlilik yalnızca sevgilide sunulur; koşul sağlanmıyorsa
               // düğme yerine gerekçe yazılır (sahte düğme olmaz).
               if (person.isAlive &&
@@ -506,6 +907,8 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     text: 'Baş başa kalmak için: '
                         '${GameScope.of(context).intimacyAvailability(widget.personId).reason}',
                   ),
+                // Niyet açık bir eylem (Paket BK/2).
+                ..._familyPlanSection(state, person),
               ],
 
               // Eşe özel eylemler: çocuk sahibi olmak ve boşanma.
@@ -529,6 +932,8 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     text: 'Baş başa kalmak için: '
                         '${GameScope.of(context).intimacyAvailability(widget.personId).reason}',
                   ),
+                // Niyet açık bir eylem (Paket BK/2).
+                ..._familyPlanSection(state, person),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
@@ -543,6 +948,181 @@ class _PersonDetailSheetState extends State<PersonDetailSheet> {
                     ),
                     child: const Text('Boşan'),
                   ),
+                ),
+              ],
+              // Flörtü sevgiliye çevirmek (D-107): kendiliğinden olmaz,
+              // oyuncu ister ve yakınlık yeterli olmalıdır. Koşul
+              // **basmadan önce** yazar (D-112): Faho "ilerisi yok" dedi,
+              // çünkü gereken yakınlık ancak düğmeye basınca görünüyordu.
+              if (person.isAlive &&
+                  person.relation == RelationType.flort) ...<Widget>[
+                const SizedBox(height: 12),
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).officialAvailability(person.id);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('make_official'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FingerOutcome? o =
+                                        GameScope.of(context)
+                                            .makeRelationshipOfficial(
+                                                person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Sevgili olmayı teklif et'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(
+                            text: uygun.reason ?? 'Şu an mümkün değil.',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Yakın arkadaş olma teklifi (D-130). Ölçüm: hayatların
+              // 34/60'ında hiç arkadaş yoktu, çünkü oyuncunun bir
+              // tanıdığı arkadaş yapmak için düğmesi yoktu.
+              if (person.isAlive && !person.isEstranged) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun = GameScope.of(context)
+                        .closeFriendAvailability(person.id);
+                    // Bu ilişki hiç arkadaşlığa dönüşmüyorsa satır
+                    // kilitli olarak da durmaz.
+                    if (uygun.reason == 'Bu ilişki arkadaşlığa dönüşmez.' ||
+                        uygun.reason == 'Zaten yakın arkadaşsınız.') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('propose_close_friend'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FriendshipOutcome? o =
+                                        GameScope.of(context)
+                                            .proposeCloseFriend(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Yakın arkadaş ol'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(text: uygun.reason ?? 'Şu an mümkün değil.'),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Küslük kalıcı değil (D-130). Kayıt silinmedi; barış
+              // kapısı açık duruyor.
+              if (person.isAlive && person.isEstranged) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).makeUpAvailability(person.id);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('make_up'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FriendshipOutcome? o =
+                                        GameScope.of(context)
+                                            .makeUp(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Barışmayı dene'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(text: uygun.reason ?? 'Şu an mümkün değil.'),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+              // Arkadaşlık bir son değil (D-112). Finger'da tanışılan
+              // herkes flört olmuyor; arkadaş kalan biriyle de zamanla
+              // yol açılabilir.
+              if (person.isAlive &&
+                  person.relation == RelationType.arkadas) ...<Widget>[
+                Builder(
+                  builder: (BuildContext context) {
+                    final InteractionAvailability uygun =
+                        GameScope.of(context).askOutAvailability(person.id);
+                    // Hayatında biri varken bu kapı hiç gösterilmez;
+                    // kilitli bir satır olarak da durmaz.
+                    if (uygun.reason == 'Hayatında zaten biri var.' ||
+                        uygun.reason == 'Bu kişiye çıkma teklif edilemez.') {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            key: const Key('ask_out'),
+                            onPressed: uygun.isAllowed
+                                ? () {
+                                    final FingerOutcome? o =
+                                        GameScope.of(context)
+                                            .askOut(person.id);
+                                    setState(() {
+                                      _notice = o?.text;
+                                      _lastOutcome = null;
+                                    });
+                                  }
+                                : null,
+                            child: const Text('Çıkma teklif et'),
+                          ),
+                        ),
+                        if (!uygun.isAllowed) ...<Widget>[
+                          const SizedBox(height: 6),
+                          _Note(
+                            text: uygun.reason ?? 'Şu an mümkün değil.',
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ],
               // Ayrılma yalnızca gerçekten sevgili olan kişide sunulur;
@@ -701,7 +1281,7 @@ List<LifeMilestone> _sonAnlar(PersonDevelopment dev) {
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.label, required this.value});
+  const _Row({super.key, required this.label, required this.value});
 
   final String label;
   final String value;
@@ -946,9 +1526,14 @@ class _StyleRow extends StatelessWidget {
 /// Metin kapalı ve ölçülüdür; sahne anlatılmaz. Ne kastedildiği
 /// başlıktaki simgeden ve seçeneklerin kendisinden anlaşılır.
 class _ProtectionSheet extends StatelessWidget {
-  const _ProtectionSheet({required this.person});
+  const _ProtectionSheet({required this.person, required this.plan});
 
   final Person person;
+
+  /// Çiftin çocuk planı (Paket BK/2): hangi seçeneğin öne çıkacağını
+  /// **o** belirler. Karar hâlâ oyuncunun; plan yalnızca konuşulanı
+  /// hatırlatır ve ihtimale dokunmaz.
+  final FamilyPlan plan;
 
   @override
   Widget build(BuildContext context) {
@@ -972,6 +1557,16 @@ class _ProtectionSheet extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            if (plan != FamilyPlan.belirsiz) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Konuştuğunuz plan: ${plan.label.toLowerCase()}.',
+                key: const Key('protection_plan_note'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
             const SizedBox(height: 14),
             const KilimDivider(),
             const SizedBox(height: 14),
@@ -999,6 +1594,20 @@ class _ProtectionSheet extends StatelessWidget {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      // Konuşulan planla eşleşen seçenek işaretlenir.
+                      // Düğmenin **rengi** değişmiyor: dolu düğme
+                      // üstünde ipucu yazısının kontrastı ölçülmedi,
+                      // ölçmeden renk değiştirmek yerine satır eklendi.
+                      if (_planEslesiyor(plan, p)) ...<Widget>[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Konuştuğunuz plan bu.',
+                          key: Key('protection_plan_match_${p.name}'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1006,6 +1615,161 @@ class _ProtectionSheet extends StatelessWidget {
               const SizedBox(height: 10),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Konuşulan plan bu korunma seçeneğiyle aynı şeyi mi söylüyor?
+bool _planEslesiyor(FamilyPlan plan, Protection p) => switch (plan) {
+  FamilyPlan.istiyor => p == Protection.korunmadan,
+  FamilyPlan.istemiyor => p == Protection.korunarak,
+  FamilyPlan.belirsiz => false,
+};
+
+/// Çocuk planı seçimi (Paket BK/2, Q-201).
+///
+/// Üç seçenek de her zaman açıktır: "düşünmüyoruz" demek de bir karardır
+/// ve kayda girer. Pencere **çocuk getirmez**; gebelik hâlâ korunmadan
+/// yakınlaşmanın ihtimalidir.
+class _FamilyPlanSheet extends StatelessWidget {
+  const _FamilyPlanSheet({required this.person, required this.current});
+
+  final Person person;
+  final FamilyPlan current;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              '${person.firstName} ile çocuk planı',
+              style: theme.textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Kararınız kayda girer ve baş başa kaldığınızda '
+              'hatırlanır. Plan tek başına çocuk getirmez.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 14),
+            const KilimDivider(),
+            const SizedBox(height: 14),
+            for (final FamilyPlan plan in FamilyPlan.values) ...<Widget>[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: Key('family_plan_${plan.name}'),
+                  onPressed: () => Navigator.of(context).pop(plan),
+                  style: OutlinedButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(plan.label, style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 2),
+                      Text(
+                        plan.description,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (plan == current) ...<Widget>[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Şu anki kararınız.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hediye seçimi listesi (D-134).
+///
+/// Sınıflara göre gruplanır: oyuncu ne aldığını bilsin. Beğeni bilgisi
+/// **gösterilmez**; kimin neyi sevdiğini oyuncu deneyerek öğrenir.
+class _GiftSheet extends StatelessWidget {
+  const _GiftSheet({required this.gifts});
+
+  final List<GiftItem> gifts;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Map<GiftCategory, List<GiftItem>> gruplar =
+        <GiftCategory, List<GiftItem>>{};
+    for (final GiftItem g in gifts) {
+      gruplar.putIfAbsent(g.category, () => <GiftItem>[]).add(g);
+    }
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('Ne alacaksın?', style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 4),
+              Text(
+                'Bedeli cüzdanından çıkar. Beğenip beğenmeyeceğini '
+                'göreceksin.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const KilimDivider(),
+              const SizedBox(height: 10),
+              for (final GiftCategory k in GiftCategory.values)
+                if (gruplar[k] != null) ...<Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 4),
+                    child: Text(
+                      k.label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  for (final GiftItem g in gruplar[k]!)
+                    ListTile(
+                      key: Key('gift_option_${g.id}'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(g.icon),
+                      title: Text(g.name),
+                      trailing: Text(trMoney(g.value)),
+                      onTap: () => Navigator.of(context).pop(g),
+                    ),
+                ],
+            ],
+          ),
         ),
       ),
     );

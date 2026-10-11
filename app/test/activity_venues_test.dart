@@ -2,6 +2,10 @@ import 'dart:math';
 
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/domain/activities/activity_engine.dart';
+import 'package:bir_omur/data/hobby_catalog.dart';
+import 'package:bir_omur/domain/hobby/course_progress.dart';
+import 'package:bir_omur/domain/hobby/hobby_tracker.dart';
+import 'package:bir_omur/domain/models/hobby_progress.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/interaction.dart';
@@ -100,7 +104,14 @@ void main() {
       expect(r.outcome.applied, isTrue);
       expect(r.state.player.wallet, 5000 - a.cost);
       expect(r.state.player.stats.health, greaterThan(50));
-      expect(r.state.log.last.text, contains(a.label));
+      // D-076: check-up artık "tamamlandı" demiyor, ne bulunduğunu
+      // anlatıyor. Günlükte eylemin adı değil, raporun kendisi durur.
+      expect(r.state.log.last.text, contains('Check-up bitti'));
+      expect(r.state.log.last.text, contains('Kalp ve tansiyon'));
+      expect(r.state.log.last.text, contains('Akciğerler'));
+      // Sonuç ayrıca ekran bildirimi olarak kuyruğa girer.
+      expect(r.state.nextNotice, isNotNull);
+      expect(r.state.nextNotice!.title, a.label);
       checkInvariants(r.state);
     });
 
@@ -205,7 +216,14 @@ void main() {
   // Kurslar
   // ===================================================================
   group('Kurslar', () {
-    test('dil kursu zekâyı gerçekten artırır', () {
+    // **Kural Paket AJ ile değişti.** Eskiden her ders katalog fiyatını
+    // alıp katalogdaki statı bir kerede veriyordu. Ölçüm (Paket AI)
+    // kursların sıradan bir hayatta hiç açılamadığını gösterince ilk beş
+    // ders ücretsiz oldu; buna karşılık stat ödülü derse değil
+    // kilometre taşına bağlandı. Test zayıflatılmadı: eski tek iddianın
+    // yerine üç iddia kondu — ilk ders bedava, hobi gerçekten ilerliyor,
+    // beşinci derste ödül geliyor.
+    test('dil kursunun ilk dersi ücretsiz ve hobiyi ilerletiyor', () {
       final GameState taban = hayat(age: 20, wallet: 20000);
       final GameState s = taban.copyWith(
         player: taban.player.copyWith(
@@ -214,12 +232,66 @@ void main() {
       );
       final ActivityAction a = eylem('dil_kursu');
       expect(a.intelligence, greaterThan(0));
+      expect(CourseProgress.standingFor(s, a)!.fee, 0);
 
       final ActivityResult r =
           activities.perform(state: s, action: a, rng: Random(6));
 
-      expect(r.state.player.stats.intelligence, 40 + a.intelligence);
-      expect(r.state.player.wallet, 20000 - a.cost);
+      expect(r.state.player.wallet, 20000,
+          reason: 'Tanışma dersi para almamalı.');
+      expect(r.state.player.stats.intelligence, greaterThan(40),
+          reason: 'Ders hiçbir şey hissettirmemeli demek değil.');
+      expect(r.state.player.stats.intelligence,
+          lessThan(40 + a.intelligence),
+          reason: 'Ama katalogdaki tam ödül her derste verilmemeli.');
+      expect(HobbyTracker.progressOf(r.state, HobbyKind.dil)?.experience, 1,
+          reason: 'Asıl ilerleme hobide.');
+      checkInvariants(r.state);
+    });
+
+    test('dil kursunda beşinci ders kilometre taşı ödülü veriyor', () {
+      final GameState taban = hayat(age: 20, wallet: 20000);
+      final GameState s = taban.copyWith(
+        player: taban.player.copyWith(
+          stats: taban.player.stats.copyWith(intelligence: 40),
+        ),
+        hobbies: <HobbyProgress>[
+          HobbyProgress(
+            hobbyId: HobbyKind.dil.id,
+            startedAtAge: 18,
+            experience: 4,
+            lastPracticedAge: 20,
+          ),
+        ],
+      );
+      final ActivityAction a = eylem('dil_kursu');
+      expect(CourseProgress.standingFor(s, a)!.milestone, 5);
+      final ActivityResult r =
+          activities.perform(state: s, action: a, rng: Random(6));
+      expect(r.state.player.stats.intelligence,
+          greaterThanOrEqualTo(40 + a.intelligence),
+          reason: 'Kilometre taşı katalogdaki ödülü hissettirmeli.');
+      checkInvariants(r.state);
+    });
+
+    test('tanışma bitince kurs ücreti cüzdandan çıkıyor', () {
+      final ActivityAction a = eylem('dil_kursu');
+      final GameState taban = hayat(age: 20, wallet: 200000);
+      final GameState s = taban.copyWith(
+        hobbies: <HobbyProgress>[
+          HobbyProgress(
+            hobbyId: HobbyKind.dil.id,
+            startedAtAge: 15,
+            experience: 7,
+            lastPracticedAge: 20,
+          ),
+        ],
+      );
+      final int ucret = CourseProgress.standingFor(s, a)!.fee;
+      expect(ucret, greaterThan(0));
+      final ActivityResult r =
+          activities.perform(state: s, action: a, rng: Random(6));
+      expect(r.state.player.wallet, 200000 - ucret);
       checkInvariants(r.state);
     });
 
@@ -239,7 +311,9 @@ void main() {
     });
 
     test('yeni yaşta sayaç sıfırlanır, eylem yeniden açılır', () {
-      GameState s = hayat(age: 20, wallet: 20000);
+      // 2026 kalibrasyonu: bilgisayar kursu 3.200 ₺'den 16.000 ₺'ye
+      // çıktı. Cüzdan fixture'ı ölçeğe çekildi; iddia aynen duruyor.
+      GameState s = hayat(age: 20, wallet: 120000);
       final ActivityAction a = eylem('bilgisayar_kursu');
 
       for (int i = 0; i < a.maxPerAge; i++) {

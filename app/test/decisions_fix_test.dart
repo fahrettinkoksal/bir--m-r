@@ -483,12 +483,16 @@ void main() {
         expect(shopProductByTypeId(id)!.minAge, 18, reason: id);
       }
 
-      final List<ShopProduct> onYediYas =
-          shopProductsIn(ShopCategory.aracGalerisi, 17);
-      expect(
-        onYediYas.any((ShopProduct p) => araclar.contains(p.typeId)),
-        isFalse,
-      );
+      // D-079: galeriler ayrıldı; kural **bütün** galeriler için geçerli.
+      for (final ShopCategory galeri
+          in ShopCategory.values.where((ShopCategory c) => c.isVehicle)) {
+        final List<ShopProduct> onYediYas = shopProductsIn(galeri, 17);
+        expect(
+          onYediYas.any((ShopProduct p) => araclar.contains(p.typeId)),
+          isFalse,
+          reason: '${galeri.label} 17 yaşına araç göstermemeli',
+        );
+      }
     });
 
     test('miras yoluyla küçük yaşta araç sahibi olunabilir', () {

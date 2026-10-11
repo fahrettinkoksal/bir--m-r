@@ -616,4 +616,70 @@ void main() {
       expect(s.military.status, MilitaryStatus.tamamlandi);
     });
   });
+
+  // -------------------------------------------------------------------
+  // Yükümlü olmayan oyuncunun ekranda ne gördüğü
+  //
+  // Hata: kadın oyuncunun zorunlu askerliği yok ama kayıttaki ham durum
+  // `MilitaryStatus.yok` kalıyordu ve etiketi "Yapılmadı"ydı. Meslek
+  // menüsünde "Askerlik · Yapılmadı" satırı, yerine getirilmemiş bir
+  // yükümlülük varmış gibi okunuyordu.
+  // -------------------------------------------------------------------
+  group('Yükümlülük görüntüsü', () {
+    test('ham durum etiketi hatayı gösterir', () {
+      final GameState kadin = hayat(cinsiyet: Gender.kadin, age: 22);
+      expect(MilitaryService.isObliged(kadin), isFalse);
+      // Kayıt bilerek değişmiyor; hata yalnızca etiketteydi.
+      expect(kadin.military.status, MilitaryStatus.yok);
+      expect(kadin.military.label, 'Yapılmadı');
+    });
+
+    test('yükümlü olmayana "Yapılmadı" değil "Yükümlü değil" yazılır', () {
+      final GameState kadin = hayat(cinsiyet: Gender.kadin, age: 22);
+      expect(MilitaryService.statusLabel(kadin), 'Yükümlü değil');
+      expect(MilitaryService.menuSubtitle(kadin), contains('Yükümlü değil'));
+      expect(MilitaryService.menuSubtitle(kadin), isNot(contains('Yapılmadı')));
+    });
+
+    test('yükümlü erkekte etiket değişmez', () {
+      final GameState erkek = hayat(age: 22);
+      expect(MilitaryService.isObliged(erkek), isTrue);
+      expect(MilitaryService.statusLabel(erkek), 'Yapılmadı');
+      expect(MilitaryService.menuSubtitle(erkek), 'Yapılmadı');
+    });
+
+    test('celp gelmişse alt yazı celbi söyler', () {
+      GameState s = hayat(age: 19);
+      s = LifeProgression(Random(3)).advanceOneYear(s);
+      if (s.deceased) return;
+      expect(s.military.isCalled, isTrue);
+      expect(MilitaryService.menuSubtitle(s), contains('Celbin geldi'));
+    });
+
+    test('yükümlü olmayan kadın gönüllü subaylığa hâlâ başvurabilir', () {
+      // Düzeltme durumu `yukumluDegil` yapsaydı `status.kapandi` olur ve
+      // gönüllü yol da kapanırdı. Bu test bunu engeller.
+      final GameState kadin = hayat(
+        cinsiyet: Gender.kadin,
+        age: 23,
+        egitim: const EducationState(
+          finished: true,
+          universityFinished: true,
+          startedAtAge: 6,
+        ),
+      );
+      expect(MilitaryService.blockReason(kadin, MilitaryTrack.subay), isEmpty);
+      final MilitaryResult sonuc =
+          MilitaryService.enlist(kadin, MilitaryTrack.subay, Random(1));
+      expect(sonuc.applied, isTrue);
+    });
+
+    test('er yolu yükümlü olmayana kapalıdır ve gerekçesi yazılıdır', () {
+      final GameState kadin = hayat(cinsiyet: Gender.kadin, age: 23);
+      final String engel =
+          MilitaryService.blockReason(kadin, MilitaryTrack.er);
+      expect(engel, isNotEmpty);
+      expect(engel, contains('yükümlülük'));
+    });
+  });
 }

@@ -42,20 +42,26 @@ class Parenthood {
   /// prototypeOnly: bu prototipte en fazla çocuk sayısı.
   static const int prototypeOnlyMaxChildren = 4;
 
-  /// prototypeOnly: evlilik dışı çocuk için gereken asgari yakınlık.
-  ///
-  /// Evlilik zorunlu değildir (D-047); ilişkinin gerçekten yürüdüğü bu
-  /// eşikle aranır.
-  static const int prototypeOnlyUnmarriedMinBond = 60;
+  // Not: evlilik dışı çocuk için bir yakınlık eşiği tutuluyordu ve hiç
+  // okunmuyordu — çünkü eşiğin kendisi Paket 25'te kaldırıldı
+  // (gerekçesi `blockReason` içinde yazılı). Sabit, kaldırılmış kuralı
+  // yürürlükteymiş gibi gösteriyordu.
+
 
   /// prototypeOnly: doğum ve hazırlık masrafı (₺).
-  static const int prototypeOnlyBirthCost = 20000;
+  static const int prototypeOnlyBirthCost = 65000;
 
   /// prototypeOnly: yeni doğan çocuğun yakınlığı.
   static const int prototypeOnlyNewbornBond = 70;
 
   /// prototypeOnly: çocuk sahibi olmanın mutluluk etkisi.
   static const int prototypeOnlyBirthHappiness = 10;
+
+  /// prototypeOnly: ikiz doğum ihtimali.
+  ///
+  /// Türkiye'de ikiz doğum oranı yaklaşık yüzde iki ile üç arasındadır;
+  /// oyunun ölçeği buradan seçildi. Sayı onay bekliyor (Q-154).
+  static const double prototypeOnlyTwinChance = 0.028;
 
   /// prototypeOnly: çocuğun hanenin dışına çıktığı yaş.
   static const int prototypeOnlyLeaveHomeAge = 25;
@@ -68,13 +74,22 @@ class Parenthood {
   /// Evlilik zorunlu değildir (D-047): eş yoksa **hayattaki sevgili**
   /// değerlendirilir. Akraba hiçbir durumda bu listeye girmez; yalnızca
   /// romantik bağlar sayılır.
-  static Person? coParent(GameState state, {String? preferredId}) {
+  static Person? coParent(
+    GameState state, {
+    String? preferredId,
+    bool allowDeceasedCoParent = false,
+  }) {
     // Hamilelik kaydında diğer ebeveyn belliyse **o** kullanılır: bebek
     // bekleme sırasında ayrılık olsa bile başka birinin çocuğu olmaz
     // (Paket 26).
     if (preferredId != null) {
       final Person? kayitli = state.personById(preferredId);
-      if (kayitli != null && kayitli.isAlive) return kayitli;
+      if (kayitli == null) return null;
+      // **Vefat etmiş ebeveyn (Paket BS/1).** Bebeği oyuncu taşıyorsa,
+      // diğer biyolojik ebeveynin vefatı bebeği yok saymaz: kayıt
+      // yerinde duruyor, çocuk o kayda bağlanır. Bu izin **açıkça**
+      // istenir; varsayılan davranış eskisi gibidir.
+      if (kayitli.isAlive || allowDeceasedCoParent) return kayitli;
       return null;
     }
     if (state.isMarried) return state.spouse;
@@ -85,8 +100,17 @@ class Parenthood {
   }
 
   /// Çocuk sahibi olmaya engel; engel yoksa boş metin.
-  String blockReason(GameState state, {String? coParentId}) {
-    final Person? partner = coParent(state, preferredId: coParentId);
+  String blockReason(
+    GameState state, {
+    String? coParentId,
+    bool twin = false,
+    bool allowDeceasedCoParent = false,
+  }) {
+    final Person? partner = coParent(
+      state,
+      preferredId: coParentId,
+      allowDeceasedCoParent: allowDeceasedCoParent,
+    );
     if (partner == null) {
       return 'Çocuk sahibi olmak için eşin ya da sevgilin olmalı.';
     }
@@ -126,7 +150,11 @@ class Parenthood {
           'olabiliyor.';
     }
     // Aynı yıl ikinci bir bebek olmaz: bu yıl doğan çocuk henüz 0 yaşında.
-    if (cocuklar.any((Person p) => p.age == 0)) {
+    //
+    // **İkiz bunun istisnasıdır** (D-151): ikinci bebek aynı doğumun
+    // parçasıdır, ayrı bir gebelik değildir. Kural ancak `twin` açıkça
+    // verildiğinde atlanır; oyuncunun düğmesi bu bayrağı hiç geçmez.
+    if (!twin && cocuklar.any((Person p) => p.age == 0)) {
       return 'Bu yıl bir bebeğiniz oldu; bir sonraki yaşta yeniden '
           'deneyebilirsin.';
     }
@@ -151,8 +179,15 @@ class Parenthood {
     GameState state,
     Random rng, {
     String? coParentId,
+    bool twin = false,
+    bool allowDeceasedCoParent = false,
   }) {
-    final String engel = blockReason(state, coParentId: coParentId);
+    final String engel = blockReason(
+      state,
+      coParentId: coParentId,
+      twin: twin,
+      allowDeceasedCoParent: allowDeceasedCoParent,
+    );
     if (engel.isNotEmpty) {
       return FamilyResult(
         state: state,
@@ -177,7 +212,11 @@ class Parenthood {
     // Soyadı: prototipte çocuk **babanın** soyadını alır. Evlenince eşin
     // soyadının değişip değişmeyeceği ayrı bir tasarım sorusudur (Q-063);
     // kimsenin kaydı bu yüzden değiştirilmez.
-    final Person es = coParent(state, preferredId: coParentId)!;
+    final Person es = coParent(
+      state,
+      preferredId: coParentId,
+      allowDeceasedCoParent: allowDeceasedCoParent,
+    )!;
     final String soyad = state.player.gender == Gender.erkek
         ? state.player.lastName
         : es.lastName;
@@ -216,16 +255,15 @@ class Parenthood {
           second: TraitInheritance.statsOf(esKaydi),
         ),
         milestones: <LifeMilestone>[
-          LifeMilestone(age: 0, text: '$isim dünyaya geldi.'),
+          LifeMilestone(age: 0, text: birthMilestone(isim)),
         ],
         // Diğer biyolojik ebeveyn: evli olunmasa da kayda geçer (D-047).
         otherParentId: esKaydi.id,
       ),
     );
 
-    final String metin = gender == Gender.kadin
-        ? '$isim adında bir kızınız oldu.'
-        : '$isim adında bir oğlunuz oldu.';
+    final String metin =
+        birthSentence(name: isim, gender: gender, twin: twin);
 
     // Masraf **cüzdanda ne varsa o kadar** düşer; borç yazılmaz ve
     // bakiye eksiye inmez (Paket 25).
@@ -240,10 +278,8 @@ class Parenthood {
       ]),
       player: state.player.copyWith(
         wallet: state.player.wallet - odenen,
-        stats: state.player.stats.copyWith(
-          happiness:
-              (state.player.stats.happiness + prototypeOnlyBirthHappiness)
-                  .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyBirthHappiness,
         ),
       ),
       storyFlags: <String>{
@@ -261,6 +297,10 @@ class Parenthood {
               : '$metin Masrafı zor denkleştirdiniz; elinizdeki '
                   '${trMoney(odenen)} gitti.',
           category: LogCategory.aile,
+          // Satır çocuğun kimliğini taşır (Paket CG): adı değiştiğinde
+          // bu satır bulunup tazeleniyor, ayrıca kişi kartındaki
+          // "ortak geçmişiniz" bölümüne de giriyor.
+          personId: cocuk.id,
         ),
       ]),
     );
@@ -270,6 +310,31 @@ class Parenthood {
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }
+
+  /// Doğum cümlesi: tek bebek ya da ikizin ikincisi.
+  ///
+  /// **Tek yerden kurulur (Paket CG).** Bebek oyunun havuzundan bir
+  /// adla doğuyor ve oyuncu o adı değiştirebiliyor
+  /// (`ChildNaming.rename`). Eskiden cümle burada elle yazılıyordu ve
+  /// adı değiştiren taraf günlükteki satırı bulamıyordu: altıncı döküm
+  /// turunda "Nuri adında bir oğlunuz oldu." ile "Bebeğe Kemal adını
+  /// verdin." aynı yılda yan yanaydı. Artık arayan da yazan da aynı
+  /// kalıbı kullanıyor.
+  static String birthSentence({
+    required String name,
+    required Gender gender,
+    required bool twin,
+  }) =>
+      twin
+          ? (gender == Gender.kadin
+              ? 'İkizin diğeri kız oldu: $name.'
+              : 'İkizin diğeri oğlan oldu: $name.')
+          : (gender == Gender.kadin
+              ? '$name adında bir kızınız oldu.'
+              : '$name adında bir oğlunuz oldu.');
+
+  /// Çocuğun kendi kaydındaki doğum kilometre taşı.
+  static String birthMilestone(String name) => '$name dünyaya geldi.';
 
   /// Çocuğun yaşına karşılık gelen okul kademesi.
   ///

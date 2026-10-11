@@ -8,16 +8,26 @@ import '../../../state/game_controller.dart';
 import '../../../state/game_scope.dart';
 import '../../../text/turkish_text.dart';
 import '../../theme/bir_omur_theme.dart';
+import '../../widgets/pet_detail_sheet.dart';
 import '../../widgets/section_scaffold.dart';
 
 /// Evcil hayvanlar sayfası (Paket 40 — Issue #67, 2. kısım).
 ///
-/// Yeni bir ana menü açılmaz; Aktiviteler menüsünün altında bir sayfadır.
-/// Vefat etmiş hayvanlar **listede kalır**, yalnızca etkileşime kapanır.
+/// D-146 ile **İlişkiler** menüsünün altına taşındı: hayvan bir mülk
+/// değil, bir ilişkidir (Faho'nun isteği). Vefat etmiş hayvanlar
+/// **listede kalır**, yalnızca etkileşime kapanır.
 class PetsPage extends StatefulWidget {
-  const PetsPage({super.key, required this.onBack});
+  const PetsPage({
+    super.key,
+    required this.onBack,
+    this.backLabel = 'İlişkiler',
+  });
 
   final VoidCallback onBack;
+
+  /// Geri düğmesinde yazan menü adı. Sayfa D-146 ile İlişkiler altına
+  /// taşındı; parametre, ileride başka bir yerden açılırsa diye duruyor.
+  final String backLabel;
 
   @override
   State<PetsPage> createState() => _PetsPageState();
@@ -29,11 +39,15 @@ class _PetsPageState extends State<PetsPage> {
   @override
   Widget build(BuildContext context) {
     final GameController controller = GameScope.of(context);
-    final List<Pet> hepsi = controller.pets;
-    final List<Pet> yasayan =
-        hepsi.where((Pet p) => p.isAlive).toList(growable: false);
-    final List<Pet> gecmis =
-        hepsi.where((Pet p) => !p.isAlive).toList(growable: false);
+    // Aktif ve geçmiş ayrımı (D-109): şu an bakılanlar, vefat edenler ve
+    // başka yuvaya verilenler ayrı başlıklarda durur.
+    final List<Pet> yasayan = controller.livingPets;
+    final List<Pet> vefat = controller.pets
+        .where((Pet p) => !p.isAlive)
+        .toList(growable: false);
+    final List<Pet> verilen = controller.pets
+        .where((Pet p) => p.isAlive && p.isRehomed)
+        .toList(growable: false);
 
     return SectionScaffold(
       icon: Icons.pets_rounded,
@@ -41,7 +55,7 @@ class _PetsPageState extends State<PetsPage> {
       title: 'Evcil hayvanlar',
       subtitle: 'Cüzdanında ${controller.state!.player.walletLabel} var. '
           'Bakım gideri her yıl bir kez alınır.',
-      backLabel: 'Aktiviteler',
+      backLabel: widget.backLabel,
       onBack: widget.onBack,
       children: <Widget>[
         if (yasayan.isEmpty)
@@ -67,6 +81,13 @@ class _PetsPageState extends State<PetsPage> {
                 final String? metin = controller.petInteract(pet, a);
                 setState(() => _sonuc = metin);
               },
+              rehomeAvailability: controller.petRehomeAvailability(pet),
+              onRehome: () async {
+                final bool? onay = await _rehomeOnayi(context, pet);
+                if (onay != true) return;
+                final String? metin = controller.rehomePet(pet);
+                setState(() => _sonuc = metin);
+              },
             ),
             const SizedBox(height: 12),
           ],
@@ -76,24 +97,40 @@ class _PetsPageState extends State<PetsPage> {
           text: 'Sahiplen',
           accent: BirOmurAccents.yesil,
         ),
-        for (final PetSpecies tur in adoptablePetSpecies) ...<Widget>[
-          _AdoptCard(
-            species: tur,
-            availability: controller.petAdoptionAvailability(tur),
-            onAdopt: (String ad) {
+        const SizedBox(height: 4),
+        // Sahiplenme menüsü gruplara ayrıldı (D-135). Faho'nun isteği:
+        // tek uzun liste yerine kedi/köpek/kuş/egzotik ayrımı. Grup
+        // kapalı başlar; oyuncu ilgilendiği grubu açar.
+        for (final PetGroup grup in adoptablePetGroups) ...<Widget>[
+          _PetGroupTile(
+            group: grup,
+            species: adoptableIn(grup),
+            availabilityFor: controller.petAdoptionAvailability,
+            onAdopt: (PetSpecies tur, String ad) {
               final String? metin = controller.adoptPet(tur, ad);
               setState(() => _sonuc = metin);
             },
           ),
           const SizedBox(height: 10),
         ],
-        if (gecmis.isNotEmpty) ...<Widget>[
+        if (verilen.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 4),
+          const MenuGroupTitle(
+            text: 'Yeni yuvasına gidenler',
+            accent: BirOmurAccents.yesil,
+          ),
+          for (final Pet pet in verilen) ...<Widget>[
+            _MemorialRow(pet: pet),
+            const SizedBox(height: 8),
+          ],
+        ],
+        if (vefat.isNotEmpty) ...<Widget>[
           const SizedBox(height: 4),
           const MenuGroupTitle(
             text: 'Anılarda kalanlar',
             accent: BirOmurAccents.mor,
           ),
-          for (final Pet pet in gecmis) ...<Widget>[
+          for (final Pet pet in vefat) ...<Widget>[
             _MemorialRow(pet: pet),
             const SizedBox(height: 8),
           ],
@@ -107,6 +144,30 @@ class _PetsPageState extends State<PetsPage> {
   }
 }
 
+/// Sahiplendirme kaza eseri seçilmesin diye ayrı onay ister (D-109).
+Future<bool?> _rehomeOnayi(BuildContext context, Pet pet) => showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text('${pet.name} için yeni yuva'),
+        content: Text(
+          '${pet.name} başka bir aileye gidecek. Kaydı silinmez; '
+          '"Yeni yuvasına gidenler" başlığında durur. Bu karar geri '
+          'alınamaz.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            key: const Key('pet_rehome_confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Yeni yuvaya ver'),
+          ),
+        ],
+      ),
+    );
+
 class _PetCard extends StatelessWidget {
   const _PetCard({
     required this.pet,
@@ -114,6 +175,8 @@ class _PetCard extends StatelessWidget {
     required this.availabilityFor,
     required this.timesDone,
     required this.onAction,
+    required this.rehomeAvailability,
+    required this.onRehome,
   });
 
   final Pet pet;
@@ -121,6 +184,11 @@ class _PetCard extends StatelessWidget {
   final InteractionAvailability Function(PetAction) availabilityFor;
   final int Function(PetAction) timesDone;
   final void Function(PetAction) onAction;
+
+  /// Sahiplendirme şu an mümkün mü? (D-109)
+  final InteractionAvailability rehomeAvailability;
+
+  final VoidCallback onRehome;
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +224,15 @@ class _PetCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Kaydın tamamı ayrı pencerede (D-133): sağlık, yakınlık,
+                // kaç yıldır birlikte, kayıp ve vefat geçmişi.
+                IconButton(
+                  key: Key('pet_detail_${pet.id}'),
+                  tooltip: 'Kayıt',
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () =>
+                      PetDetailSheet.show(context, petId: pet.id),
+                ),
               ],
             ),
             const SizedBox(height: 6),
@@ -182,6 +259,25 @@ class _PetCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
+            // Sahiplendirme (D-109): vefat değildir, bir karardır.
+            // Kapalıysa gerekçesi yazar (D-038).
+            const SizedBox(height: 2),
+            if (!rehomeAvailability.isAllowed)
+              Text(
+                rehomeAvailability.reason!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              )
+            else
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton(
+                  key: Key('pet_rehome_${pet.id}'),
+                  onPressed: onRehome,
+                  child: const Text('Yeni bir yuva bul'),
+                ),
+              ),
           ],
         ),
       ),
@@ -312,6 +408,17 @@ class _AdoptCardState extends State<_AdoptCard> {
               ],
             ),
             const SizedBox(height: 6),
+            // Özel izin gerektiren tür açıkça uyarılır (D-082): oyun
+            // bunu sıradan bir tercih gibi sunmaz.
+            if (tur.warning != null) ...<Widget>[
+              Text(
+                tur.warning!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+              const SizedBox(height: 6),
+            ],
             Text(
               'Sahiplenme ${trMoney(tur.adoptionCost)} · yıllık bakım '
               '${trMoney(tur.yearlyCareCost)}',
@@ -368,8 +475,9 @@ class _MemorialRow extends StatelessWidget {
         child: Row(
           children: <Widget>[
             AccentIconTile(
-              icon: Icons.spa_outlined,
-              accent: BirOmurAccents.mor,
+              icon: pet.isRehomed ? Icons.home_outlined : Icons.spa_outlined,
+              accent:
+                  pet.isRehomed ? BirOmurAccents.yesil : BirOmurAccents.mor,
               size: 34,
             ),
             const SizedBox(width: 10),
@@ -379,8 +487,12 @@ class _MemorialRow extends StatelessWidget {
                 children: <Widget>[
                   Text(pet.name, style: theme.textTheme.titleMedium),
                   Text(
-                    '${petSpeciesLabel(pet.species)} · '
-                    '${pet.diedAtAge} yaşında vefat etti',
+                    pet.isRehomed
+                        ? '${petSpeciesLabel(pet.species)} · '
+                            '${pet.rehomedAtPlayerAge} yaşındayken yeni '
+                            'bir yuvaya gitti'
+                        : '${petSpeciesLabel(pet.species)} · '
+                            '${pet.diedAtAge} yaşında vefat etti',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -388,6 +500,74 @@ class _MemorialRow extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Hayvan grubu satırı (D-135).
+///
+/// Katlanır bir başlık: grup açılınca içindeki türler gösterilir. Kapalı
+/// hâlde kaç tür olduğunu ve grubun kısa tanımını yazar.
+class _PetGroupTile extends StatelessWidget {
+  const _PetGroupTile({
+    required this.group,
+    required this.species,
+    required this.availabilityFor,
+    required this.onAdopt,
+  });
+
+  final PetGroup group;
+  final List<PetSpecies> species;
+  final InteractionAvailability Function(PetSpecies) availabilityFor;
+  final void Function(PetSpecies, String) onAdopt;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    // Grupta şu an gerçekten açık olan tür var mı? Varsa rozet gösterilir.
+    final int acik = species
+        .where((PetSpecies s) => availabilityFor(s).isAllowed)
+        .length;
+    return Container(
+      decoration: panelDecoration(context, radius: 18),
+      child: Theme(
+        // ExpansionTile'ın kendi çizgilerini kaldırıp panelin içine
+        // oturtuyoruz; menü sade kalsın.
+        data: theme.copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          key: Key('pet_group_${group.name}'),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+          leading: AccentIconTile(
+            icon: species.first.icon,
+            accent: BirOmurAccents.turuncu,
+            size: 36,
+          ),
+          title: Text(group.label, style: theme.textTheme.titleMedium),
+          subtitle: Text(
+            group.description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: Text(
+            acik == 0 ? '${species.length}' : '$acik/${species.length}',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          children: <Widget>[
+            for (final PetSpecies tur in species) ...<Widget>[
+              _AdoptCard(
+                species: tur,
+                availability: availabilityFor(tur),
+                onAdopt: (String ad) => onAdopt(tur, ad),
+              ),
+              const SizedBox(height: 10),
+            ],
           ],
         ),
       ),

@@ -18,7 +18,28 @@ enum InteractionKind {
   sohbet('Sohbet Et'),
   hediyeVer('Hediye Ver'),
   hediyeIste('Hediye İste'),
-  paraIste('Para İste');
+  paraIste('Para İste'),
+
+  // Paket AO §25: ortak çocuğu olan eski eşle co-parenting.
+  //
+  // Listenin **sonuna** eklendi. Boşanmış iki insanın çocuk yüzünden
+  // konuşmaya devam etmesi gündelik bir yakınlık etkileşimi değildir;
+  // o yüzden mevcut türlerden birine yamanmadı, kendi türü oldu.
+  cocukKonus('Çocuğu Konuş'),
+
+  // Paket BK/3: çocuğa özel eylemler (Q-203).
+  //
+  // Ölçüldü: altı etkileşim türünün **hiçbiri** çocuğa özel değildi;
+  // annene de çocuğuna da aynı liste çıkıyordu. Bunlar o kalıbı kırar.
+  // Hedefleri oyuncunun kendi statları değil, **çocuğun kendi kaydı**:
+  // zekâsı, birikimi, ilgi alanları ve evdeki kural.
+  //
+  // Listenin sonuna eklendi: kayıtta tür adı yazılı olduğu için sıra
+  // değiştirilmez.
+  odevYardim('Ödevine Otur'),
+  harclikVer('Harçlık Ver'),
+  hobiyeYazdir('Hobiye Yazdır'),
+  kuralKoy('Kural Koy');
 
   const InteractionKind(this.label);
 
@@ -26,7 +47,27 @@ enum InteractionKind {
 
   /// Para veya eşya el değiştiren türler.
   bool get transfersResource =>
-      this == hediyeVer || this == hediyeIste || this == paraIste;
+      this == hediyeVer ||
+      this == hediyeIste ||
+      this == paraIste ||
+      this == harclikVer ||
+      this == hobiyeYazdir;
+
+  /// Oyuncunun **verdiği** türler: reddedilmezler.
+  ///
+  /// Hediye vermek baştan reddedilmiyordu (D-020 reddi *isteme* için
+  /// yazdı); harçlık vermek ve hobiye yazdırmak da aynı taraftadır.
+  /// Reddedilebilen çocuk eylemleri ödev ve kuraldır: ergen gerçekten
+  /// "oturmam" diyebilir.
+  bool get playerGives =>
+      this == hediyeVer || this == harclikVer || this == hobiyeYazdir;
+
+  /// Yalnızca oyuncunun kendi çocuğuyla anlamlı olan türler (BK/3).
+  bool get childOnly =>
+      this == odevYardim ||
+      this == harclikVer ||
+      this == hobiyeYazdir ||
+      this == kuralKoy;
 }
 
 /// Bir etkileşimin yapılıp yapılamayacağı ve yapılamıyorsa gerekçesi.

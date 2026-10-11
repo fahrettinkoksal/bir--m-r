@@ -1,6 +1,17 @@
 import 'dart:math';
 
+import '../generation/in_laws.dart';
+
+import '../effects/effect_diff.dart';
+import 'divorce_settlement.dart';
+import '../life/notices.dart';
+import '../economy/investment_engine.dart';
+import '../economy/rental_engine.dart';
+import '../economy/household_budget.dart';
+import '../models/household.dart';
 import '../models/game_state.dart';
+import '../models/owned_item.dart';
+import '../models/pending_notice.dart';
 import '../models/pending_wedding.dart';
 import '../../data/wedding_catalog.dart';
 import '../models/life_log.dart';
@@ -69,28 +80,30 @@ class MarriageEngine {
   static const double prototypeOnlyMinAcceptChance = 0.08;
   static const double prototypeOnlyMaxAcceptChance = 0.95;
 
-  /// prototypeOnly: **artık kullanılmıyor** (Paket 25).
-  ///
-  /// Tek ve sabit bir nikâh masrafı vardı; sevgilisi olan hayatların
-  /// çoğu bu duvara takılıp hiç evlenemiyordu (ölçüm: 44 hayattan 25'i
-  /// teklif verebilecek duruma geliyordu, engel neredeyse hep paraydı).
-  /// Yerine cüzdana göre seçilen düğün geldi (`kWeddingStyles`). Sabit
-  /// alan, eski kayıtlarla ve testlerle uyum için duruyor.
-  @Deprecated('Paket 25: yerine kWeddingStyles geldi.')
-  static const int prototypeOnlyWeddingCost = 60000;
+  // Not: tek ve sabit bir nikâh masrafı (240.000) burada
+  // tutuluyordu. Yorumu "eski kayıtlarla ve testlerle uyum için"
+  // durduğunu söylüyordu; oysa **hiçbir** test ve kod onu
+  // okumuyordu. Masraf Paket 25'ten beri cüzdana göre seçilen
+  // düğünden geliyor (`kWeddingStyles`, 0-380.000).
 
   /// prototypeOnly: boşanmada eşe kalan nakit payı.
   ///
-  /// Eşya ve mülk paylaşımı **yoktur**; nasıl yapılacağı karar kuyruğunda
-  /// (Q-063). Uydurma bir mal paylaşımı uygulanmaz.
+  /// Eşya ve mülk paylaşımı artık **vardır** (D-075): evlilik içinde
+  /// satın alınarak edinilen eşyalar `DivorceSettlement` ile bölünür.
+  /// Nakit payı bu orandadır; nakdin ne kadarının evlilik içinde
+  /// biriktiği izlenmediği için oran olduğu gibi bırakıldı (Q-118).
   static const double prototypeOnlyDivorceShare = 0.25;
 
-  /// prototypeOnly: evlilik ve boşanmanın mutluluk etkisi.
-  static const int prototypeOnlyWeddingHappiness = 12;
+  // Not: düğünün mutluluk payı burada tutuluyordu ve hiç
+  // okunmuyordu; gerçek değer düğün stilinden geliyor
+  // (`WeddingStyle.prototypeOnlyHappiness`, 4-16).
+
+  /// prototypeOnly: boşanmanın mutluluk etkisi.
   static const int prototypeOnlyDivorceHappiness = -15;
 
-  /// prototypeOnly: nikâhta yakınlığa eklenen değer.
-  static const int prototypeOnlyWeddingBond = 10;
+  // Not: nikâhta yakınlığa eklenen değer burada da tutuluyordu ve
+  // hiç okunmuyordu; gerçek değer düğün stilinden geliyor
+  // (`WeddingStyle.prototypeOnlyBond`, 3-12).
 
   /// Bu kişiyle evlenmeye engel; engel yoksa boş metin.
   String marryBlockReason(GameState state, Person person) {
@@ -183,13 +196,9 @@ class MarriageEngine {
       people: List<Person>.unmodifiable(people),
       player: state.player.copyWith(
         wallet: state.player.wallet - stil.prototypeOnlyCost,
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  stil.prototypeOnlyHappiness)
-              .clamp(0, 100),
-          charisma: (state.player.stats.charisma +
-                  stil.prototypeOnlyCharisma)
-              .clamp(0, 100),
+        stats: state.player.stats.gain(
+          happiness: stil.prototypeOnlyHappiness,
+          charisma: stil.prototypeOnlyCharisma,
         ),
         // Ün kapalıysa **açılmaz** (D-027): düğün Ün doğurmaz.
         fame: state.player.fameUnlocked && stil.prototypeOnlyFame > 0
@@ -209,8 +218,22 @@ class MarriageEngine {
       storyFlags: <String>{...state.storyFlags, StoryFlags.evlendi},
     );
 
+    // Paket AO §19-§22: eşin ailesi ve varsa önceki çocuğu **evlilik
+    // kurulurken** hayata girer. "Beş yıl sonra eşinin 12 yaşında çocuğu
+    // olduğunu öğrenmek" saçmalığı böyle engelleniyor.
+    //
+    // Rastgelelik eşin kalıcı kimliğinden türetiliyor: `holdWedding`
+    // dışarıdan `Random` almıyor ve imzası değiştirilmedi. Aynı evlilik
+    // aynı aileyi verir, kayıt/yükleme sonrası değişmez.
+    final GameState aileyle = InLaws.onMarriage(
+      state: next,
+      spouse: partner,
+      age: state.player.age,
+      rng: Random(partner.id.hashCode ^ state.player.age),
+    );
+
     return FamilyResult(
-      state: _log(next, metin, LogCategory.aile),
+      state: _log(aileyle, metin, LogCategory.aile),
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }
@@ -369,10 +392,8 @@ class MarriageEngine {
         people: List<Person>.unmodifiable(people),
         proposalAges: Map<String, int>.unmodifiable(teklifler),
         player: odenmis.player.copyWith(
-          stats: odenmis.player.stats.copyWith(
-            happiness: (odenmis.player.stats.happiness +
-                    stil.prototypeOnlyHappiness)
-                .clamp(0, 100),
+          stats: odenmis.player.stats.gain(
+            happiness: stil.prototypeOnlyHappiness,
           ),
         ),
         pendingWedding: PendingWedding(
@@ -401,9 +422,8 @@ class MarriageEngine {
       people: List<Person>.unmodifiable(people),
       proposalAges: Map<String, int>.unmodifiable(teklifler),
       player: odenmis.player.copyWith(
-        stats: odenmis.player.stats.copyWith(
-          happiness:
-              odenmis.player.stats.happiness + prototypeOnlyRejectHappiness,
+        stats: odenmis.player.stats.gain(
+          happiness: prototypeOnlyRejectHappiness,
         ),
       ),
     );
@@ -422,46 +442,129 @@ class MarriageEngine {
 
   /// Boşanır: eş **aynı kimlikle** eski eş olur.
   ///
-  /// Nakdin bir bölümü eşe kalır; eşya ve mülk paylaşımı uygulanmaz
-  /// (Q-063). Çocuklar oyuncunun hanesinde kalır — velayet kuralları da
-  /// karar kuyruğundadır.
+  /// Nakdin bir bölümü ve evlilik içinde edinilen malların yarısına
+  /// yakını eşe kalır (D-075). Sonuç yalnızca günlüğe yazılmaz, ekranda
+  /// **bildirim** olarak gösterilir. Çocuklar oyuncunun hanesinde kalır;
+  /// velayet kuralları karar kuyruğundadır.
   FamilyResult divorce(GameState state) {
     final String engel = divorceBlockReason(state);
     if (engel.isNotEmpty) return _blocked(state, engel);
 
     final Person spouse = state.spouse!;
-    final int pay =
-        (state.player.wallet * prototypeOnlyDivorceShare).round().clamp(
-              0,
-              state.player.wallet,
-            );
 
-    final List<Person> people = state.people
+    // Mal paylaşımı (D-075): evlilik içinde **satın alınarak** edinilen
+    // eşyalar bölünür; evlilikten önceki, miras ve hediye eşya kişisel
+    // maldır ve paylaşıma girmez.
+    final int evlilikYasi = state.marriage!.marriedAtAge;
+
+    // Yatırım portföyü de paylaşıma girer (D-162): evlilik içinde açılan
+    // pozisyonlar edinilmiş mal sayılır, evlilik öncesi pozisyonlar
+    // kişisel maldır. Parayı yatırıma koymak paylaşımdan kaçmanın yolu
+    // olmamalı.
+    final int evlilikPortfoyu = DivorceSettlement.maritalPortfolio(
+      investments: state.investments,
+      termDeposits: state.termDeposits,
+      marriedAtAge: evlilikYasi,
+    );
+
+    final DivorceSettlement paylasim = DivorceSettlement.compute(
+      items: state.items,
+      marriedAtAge: evlilikYasi,
+      wallet: state.player.wallet,
+      cashShare: prototypeOnlyDivorceShare,
+      maritalPortfolioValue: evlilikPortfoyu,
+    );
+    final int pay = paylasim.cashToSpouse;
+
+    // Cüzdan payı karşılamıyorsa eksik kısım evlilik içinde açılmış
+    // pozisyonlardan **normal satış muhasebesiyle** toplanır; gerçekleşen
+    // kâr/zarar ve geçmiş kaydı oradan yazılır. Cüzdan yine de eksiye
+    // düşmesin diye ödeme sonda eldeki nakitle sınırlanır.
+    final GameState nakde = InvestmentEngine.raiseCashFromPositions(
+      state: state,
+      needed: pay - state.player.wallet,
+      sinceAge: evlilikYasi,
+    );
+    final int odenen = pay < nakde.player.wallet ? pay : nakde.player.wallet;
+    final List<Person> people = nakde.people
         .map((Person p) => p.id == spouse.id
             ? p.copyWith(
                 relation: RelationType.eskiEs,
                 inPlayerHousehold: false,
+                // Eşe geçen eşyalar onun kaydında görünür; kaybolmaz.
+                estate: List<String>.unmodifiable(<String>[
+                  ...p.estate,
+                  for (final OwnedItem i in paylasim.toSpouse) i.type.name,
+                ]),
               )
             : p)
         .toList(growable: false);
 
-    final String metin = pay > 0
-        ? '${spouse.fullName} ile boşandın. Anlaşma gereği ${trMoney(pay)} '
-            'cüzdanından çıktı; kaydı İlişkiler bölümünde eski eş olarak '
-            'kalıyor.'
-        : '${spouse.fullName} ile boşandın. Kaydı İlişkiler bölümünde '
-            'eski eş olarak kalıyor.';
+    // Velayet ve nafaka (D-160). Q-118'de "şimdilik yazılmasın" denmişti;
+    // Faho'nun açık isteğiyle eklendi. Karar **uydurulmaz**: velayet
+    // çocukların yakınlığından, nafaka ödeyen tarafın gerçek gelirinden
+    // hesaplanır. Çocuk yoksa ikisi de yoktur.
+    final Custody velayet = HouseholdBudget.decideCustody(state);
+    final Alimony? nafaka = HouseholdBudget.computeAlimony(
+      state: state,
+      custody: velayet,
+      exSpouseId: spouse.id,
+    );
+    final List<Person> kucukler = HouseholdBudget.minorChildren(state);
 
-    final GameState next = state.copyWith(
-      people: List<Person>.unmodifiable(people),
-      player: state.player.copyWith(
-        wallet: state.player.wallet - pay,
-        stats: state.player.stats.copyWith(
-          happiness: (state.player.stats.happiness +
-                  prototypeOnlyDivorceHappiness)
-              .clamp(0, 100),
+    // Çocuklar eski eşin hanesine geçiyorsa hane bilgisi güncellenir;
+    // **kayıt silinmez**, çocuk İlişkiler'de durmaya devam eder ve
+    // görüşülebilir.
+    final List<Person> velayetliKisiler = velayet == Custody.eskiEste
+        ? people
+            .map((Person p) => kucukler.any((Person c) => c.id == p.id)
+                ? p.copyWith(inPlayerHousehold: false)
+                : p)
+            .toList(growable: false)
+        : people;
+
+    final List<String> satirlar = paylasim.summaryLines(spouse.firstName);
+    final String metin = <String>[
+      '${spouse.fullName} ile boşandın.',
+      if (odenen > 0) 'Anlaşma gereği ${trMoney(odenen)} cüzdanından çıktı.',
+      ...satirlar,
+      if (kucukler.isNotEmpty) 'Velayet: ${velayet.label.toLowerCase()}.',
+      if (nafaka != null)
+        nafaka.playerPays
+            ? 'Yılda ${trMoney(nafaka.yearlyAmount)} nafaka ödeyeceksin.'
+            : 'Yılda ${trMoney(nafaka.yearlyAmount)} nafaka alacaksın.',
+      'Kaydı İlişkiler bölümünde eski eş olarak kalıyor.',
+    ].join(' ');
+
+    // Eşe geçen mülkler **removeItem üzerinden** çıkarılır (D-163): eşya
+    // listesini elle filtrelemek kiradaki evin sözleşmesini geride
+    // bırakıyordu ve oyuncu artık kendisine ait olmayan evden kira
+    // almaya devam ederdi. Kiracısı olan ev el değiştiriyorsa önce
+    // sözleşme kapanır ve depozito iade edilir.
+    GameState devredilmis = nakde;
+    for (final OwnedItem giden in paylasim.toSpouse) {
+      if (devredilmis.leaseOf(giden.id) != null) {
+        final RentalResult kapanis = RentalEngine.endLease(
+          state: devredilmis,
+          propertyItemId: giden.id,
+          reasonText: '${giden.name} eşine geçti; kiracıyla sözleşme '
+              'kapandı.',
+        );
+        if (kapanis.outcome.applied) devredilmis = kapanis.state;
+      }
+      devredilmis = devredilmis.removeItem(giden.id);
+    }
+
+    final GameState next = devredilmis.copyWith(
+      people: List<Person>.unmodifiable(velayetliKisiler),
+      player: devredilmis.player.copyWith(
+        wallet: (devredilmis.player.wallet - odenen)
+            .clamp(0, devredilmis.player.wallet),
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyDivorceHappiness,
         ),
       ),
+      alimony: nafaka,
       marriage: state.marriage!.copyWith(
         status: MarriageStatus.bosandi,
         endedAtAge: state.player.age,
@@ -475,8 +578,31 @@ class MarriageEngine {
       },
     );
 
+    GameState sonDurum = _log(next, metin, LogCategory.aile);
+
+    // Boşanma ekranda bildirilir (D-075): günlüğe satır atmak yetmiyordu.
+    // Satırlar durumun öncesi/sonrası farkından değil, uygulanan
+    // paylaşımdan gelir; yazan her kalem gerçekten el değiştirmiştir.
+    sonDurum = Notices.enqueue(sonDurum, <PendingNotice>[
+      PendingNotice(
+        id: 'bosanma-${spouse.id}-${state.player.age}',
+        kind: NoticeKind.bosanma,
+        age: state.player.age,
+        title: 'Boşandınız',
+        text: metin,
+        personId: spouse.id,
+        money: pay,
+        itemNames: List<String>.unmodifiable(
+          paylasim.toSpouse.map((OwnedItem i) => i.type.name),
+        ),
+        happinessDelta: sonDurum.player.stats.happiness -
+            state.player.stats.happiness,
+        effects: diffAppliedEffects(state, sonDurum),
+      ),
+    ]);
+
     return FamilyResult(
-      state: _log(next, metin, LogCategory.aile),
+      state: sonDurum,
       outcome: FamilyOutcome(applied: true, text: metin),
     );
   }

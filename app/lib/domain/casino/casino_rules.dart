@@ -26,8 +26,8 @@ abstract final class CasinoRules {
   static const double prototypeOnlyWalletShare = 0.05;
 
   /// prototypeOnly: yıllık bahis bütçesinin alt ve üst sınırı.
-  static const int prototypeOnlyMinYearlyBudget = 2000;
-  static const int prototypeOnlyMaxYearlyBudget = 150000;
+  static const int prototypeOnlyMinYearlyBudget = 6000;
+  static const int prototypeOnlyMaxYearlyBudget = 450000;
 
   /// prototypeOnly: tek bahsin yıllık bütçeden alabileceği en büyük pay.
   static const double prototypeOnlyMaxBetShare = 0.2;

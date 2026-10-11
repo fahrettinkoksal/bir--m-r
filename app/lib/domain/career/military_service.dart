@@ -58,7 +58,7 @@ abstract final class MilitaryService {
   static const int prototypeOnlyExemptAge = 41;
 
   /// prototypeOnly: bedelli askerlik ücreti (₺).
-  static const int prototypeOnlyBedelliCost = 280000;
+  static const int prototypeOnlyBedelliCost = 550000;
 
   /// prototypeOnly: kaç kez tecil hakkı var (Paket 31).
   static const int prototypeOnlyMaxDeferrals = 2;
@@ -78,12 +78,12 @@ abstract final class MilitaryService {
   /// iki katı** uygulanır; kendiliğinden başvuran daha azını öder.
   /// Buradaki tutarlar oyunun ekonomisine göre seçildi, gerçek mevzuat
   /// tutarı değildir (Q-099).
-  static const int prototypeOnlyDailyFineSelf = 50;
-  static const int prototypeOnlyDailyFineCaught = 100;
+  static const int prototypeOnlyDailyFineSelf = 180;
+  static const int prototypeOnlyDailyFineCaught = 360;
 
   /// prototypeOnly: bakaya kalanın bedelliye eklenen **ek bedeli**
   /// (kaçtığı her yıl için).
-  static const int prototypeOnlyLateBedelliPerYear = 60000;
+  static const int prototypeOnlyLateBedelliPerYear = 120000;
 
   /// prototypeOnly: aileden bedelli istemek için gereken en az yakınlık.
   static const int prototypeOnlyFamilyMinBond = 55;
@@ -108,8 +108,35 @@ abstract final class MilitaryService {
   /// Bu prototipte zorunluluk erkekler içindir; kadın oyuncu **gönüllü**
   /// olarak rütbeli yollara başvurabilir. Bu bir tasarım sadeleştirmesi
   /// ve Q-097'de sorulmuştur.
-  static bool isObliged(GameState state) =>
-      state.player.gender == Gender.erkek;
+  static bool isObliged(GameState state) => state.player.gender == Gender.erkek;
+
+  /// Ekranda gösterilecek durum etiketi.
+  ///
+  /// Yükümlü olmayan oyuncuda ham durum [MilitaryStatus.yok] kalır ve
+  /// etiketi "Yapılmadı"dır. Bu, kadın oyuncuda **yerine getirilmemiş
+  /// bir yükümlülük** varmış gibi okunuyordu; oysa zorunlu askerliği
+  /// yoktur, dolayısıyla yapılmamış bir şey de yoktur.
+  ///
+  /// Durumun kendisi bilerek değiştirilmez: kayda [MilitaryStatus
+  /// .yukumluDegil] yazmak [MilitaryStatus.kapandi] anlamına geldiği için
+  /// gönüllü subay/astsubay başvurusunu da kapatırdı.
+  static String statusLabel(GameState state) {
+    if (!isObliged(state) && state.military.status == MilitaryStatus.yok) {
+      return 'Yükümlü değil';
+    }
+    return state.military.label;
+  }
+
+  /// Meslek menüsündeki askerlik satırının alt yazısı.
+  static String menuSubtitle(GameState state) {
+    if (state.military.isCalled) {
+      return 'Celbin geldi; bir karar vermen gerekiyor';
+    }
+    if (!isObliged(state) && state.military.status == MilitaryStatus.yok) {
+      return 'Yükümlü değil · gönüllü başvurabilirsin';
+    }
+    return state.military.label;
+  }
 
   /// Yaşı geldi ve yükümlülük hâlâ açık mı?
   ///
@@ -133,8 +160,10 @@ abstract final class MilitaryService {
 
   /// Kalan tecil hakkı.
   static int remainingDeferrals(GameState state) =>
-      (prototypeOnlyMaxDeferrals - state.military.deferralsUsed)
-          .clamp(0, prototypeOnlyMaxDeferrals);
+      (prototypeOnlyMaxDeferrals - state.military.deferralsUsed).clamp(
+        0,
+        prototypeOnlyMaxDeferrals,
+      );
 
   /// Yıllık ilerlemede celbi uygular.
   ///
@@ -145,8 +174,9 @@ abstract final class MilitaryService {
     // Okuyan öğrenci **otomatik** tecil edilir; ama bu sessizce olmaz,
     // ekranda bildirilir (Paket 31).
     if (state.education.isStudent) {
-      final PendingNotice bildirim =
-          Notices.militaryStudentDeferral(playerAge: newAge);
+      final PendingNotice bildirim = Notices.militaryStudentDeferral(
+        playerAge: newAge,
+      );
       if (state.notices.any((PendingNotice n) => n.id == bildirim.id)) {
         return state;
       }
@@ -253,12 +283,14 @@ abstract final class MilitaryService {
       return MilitaryResult(
         state: state,
         applied: false,
-        text: 'Tecil hakkın kalmadı; $prototypeOnlyMaxDeferrals kez '
+        text:
+            'Tecil hakkın kalmadı; $prototypeOnlyMaxDeferrals kez '
             'kullandın.',
       );
     }
     final int bitis = state.player.age + prototypeOnlyDeferralYears;
-    final String metin = 'Askerliğini $prototypeOnlyDeferralYears yıl '
+    final String metin =
+        'Askerliğini $prototypeOnlyDeferralYears yıl '
         'tecil ettirdin; $bitis yaşında yeniden çağrılacaksın.';
     return MilitaryResult(
       state: _log(
@@ -297,7 +329,8 @@ abstract final class MilitaryService {
     if (engel.isNotEmpty) {
       return MilitaryResult(state: state, applied: false, text: engel);
     }
-    const String metin = 'Sevk tarihinde gitmedin; bakaya kaldın. '
+    const String metin =
+        'Sevk tarihinde gitmedin; bakaya kaldın. '
         'Ceza her geçen yıl büyüyor ve yakalanabilirsin.';
     return MilitaryResult(
       state: _log(
@@ -327,16 +360,19 @@ abstract final class MilitaryService {
   /// öder.
   static int prototypeOnlyFineFor(GameState state, {required bool caught}) {
     final int yil = fugitiveYears(state);
-    final int gunluk =
-        caught ? prototypeOnlyDailyFineCaught : prototypeOnlyDailyFineSelf;
+    final int gunluk = caught
+        ? prototypeOnlyDailyFineCaught
+        : prototypeOnlyDailyFineSelf;
     return yil * 365 * gunluk;
   }
 
   /// Bakaya kalanın bu yıl yakalanma ihtimali.
   static double prototypeOnlyCatchChanceFor(GameState state) {
     final int yil = fugitiveYears(state);
-    return (prototypeOnlyCatchChance + yil * prototypeOnlyCatchGrowth)
-        .clamp(0.0, 0.95);
+    return (prototypeOnlyCatchChance + yil * prototypeOnlyCatchGrowth).clamp(
+      0.0,
+      0.95,
+    );
   }
 
   /// Kendiliğinden teslim olur: ceza daha az olur ve yeniden çağrılır.
@@ -350,15 +386,14 @@ abstract final class MilitaryService {
     }
     final int ceza = prototypeOnlyFineFor(state, caught: false);
     final int odenen = ceza.clamp(0, state.player.wallet.clamp(0, 1 << 31));
-    final String metin = 'Kendin başvurdun. İdari para cezan '
+    final String metin =
+        'Kendin başvurdun. İdari para cezan '
         '${trMoney(ceza)}; ${trMoney(odenen)} ödedin. Yeniden '
         'çağrıldın.';
     return MilitaryResult(
       state: _log(
         state.copyWith(
-          player: state.player.copyWith(
-            wallet: state.player.wallet - odenen,
-          ),
+          player: state.player.copyWith(wallet: state.player.wallet - odenen),
           military: state.military.copyWith(
             status: MilitaryStatus.cagrildi,
             fugitiveSinceAge: null,
@@ -393,9 +428,7 @@ abstract final class MilitaryService {
     final int ceza = prototypeOnlyFineFor(state, caught: true);
     final int odenen = ceza.clamp(0, state.player.wallet.clamp(0, 1 << 31));
     final GameState yakalandi = state.copyWith(
-      player: state.player.copyWith(
-        wallet: state.player.wallet - odenen,
-      ),
+      player: state.player.copyWith(wallet: state.player.wallet - odenen),
       military: state.military.copyWith(
         status: MilitaryStatus.cagrildi,
         fugitiveSinceAge: null,
@@ -404,10 +437,7 @@ abstract final class MilitaryService {
       ),
       notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
         ...state.notices,
-        Notices.militaryCaught(
-          playerAge: newAge,
-          fine: odenen,
-        ),
+        Notices.militaryCaught(playerAge: newAge, fine: odenen),
       ]),
     );
     return _log(
@@ -425,8 +455,13 @@ abstract final class MilitaryService {
   static String blockReason(GameState state, MilitaryTrack track) {
     final MilitaryState askerlik = state.military;
     if (askerlik.isServing) return 'Zaten görevdesin.';
-    if (askerlik.status.kapandi) {
-      return 'Askerlik meselen kapandı: ${askerlik.status.label}.';
+    // Faho'nun bildirdiği durum: bedelli ödedikten sonra subaylık ve
+    // astsubaylık da kapanıyordu. Oysa bedelli **yükümlülüğü** kapatır;
+    // meslek olarak askerlik ayrı bir yoldur ve gönüllüdür. Yalnızca
+    // "er olarak yap" kapanır, çünkü kapatılan yükümlülük odur.
+    if (askerlik.status.kapandi && track == MilitaryTrack.er) {
+      return 'Askerlik yükümlülüğün kapandı: ${askerlik.status.label}. '
+          'İstersen subay ya da astsubay olarak başvurabilirsin.';
     }
     // Bakaya kalan da gidip yükümlülüğünü kapatabilir; cezası ayrıca
     // hesaplanır (Paket 31).
@@ -464,9 +499,20 @@ abstract final class MilitaryService {
         : InteractionAvailability.blocked(engel);
   }
 
+  /// prototypeOnly: rütbeli yola kabul ihtimalinin üst sınırı.
+  ///
+  /// Alt sınır **yok** (D-177). Eskiden 0,05 yazılıydı ve hiçbir yolda
+  /// erişilemiyordu: en düşük taban subay yolunun 0,30'u, yani ölçülen
+  /// en kötü durum zaten %30'du. Sıfır olmayan bir taban gerekiyorsa
+  /// yolun kendi tabanı o işi yapıyor; 0,05 yalnızca yanlış bilgi
+  /// veriyordu (D-137 ile aynı desen).
+  static const double prototypeOnlyAcceptCeiling = 0.95;
+
   /// prototypeOnly: rütbeli yola kabul ihtimali.
   ///
-  /// Zekâ ve sağlık yukarı çeker; er yolunda başvuru yoktur.
+  /// Zekâ ve sağlık yukarı çeker; er yolunda başvuru yoktur. En kötü
+  /// durumda bile şans **%30'un altına inmez**: taban yolun kendisinden
+  /// gelir.
   static double prototypeOnlyAcceptChance(
     GameState state,
     MilitaryTrack track,
@@ -474,8 +520,8 @@ abstract final class MilitaryService {
     if (track == MilitaryTrack.er) return 1;
     final double zeka = state.player.stats.intelligence / 100;
     final double saglik = state.player.stats.health / 100;
-    return (track.prototypeOnlyBaseChance + zeka * 0.35 + saglik * 0.20)
-        .clamp(0.05, 0.95);
+    final double ham = track.prototypeOnlyBaseChance + zeka * 0.35 + saglik * 0.20;
+    return ham > prototypeOnlyAcceptCeiling ? prototypeOnlyAcceptCeiling : ham;
   }
 
   /// Askerliğe katılır ya da rütbeli yola başvurur.
@@ -494,7 +540,8 @@ abstract final class MilitaryService {
 
     if (track != MilitaryTrack.er &&
         rng.nextDouble() >= prototypeOnlyAcceptChance(state, track)) {
-      const String metin = 'Başvurun kabul edilmedi. Sınav ve sağlık '
+      const String metin =
+          'Başvurun kabul edilmedi. Sınav ve sağlık '
           'şartlarını bu sefer geçemedin.';
       return MilitaryResult(
         state: _log(state, metin),
@@ -507,7 +554,7 @@ abstract final class MilitaryService {
     final String metin = track == MilitaryTrack.er
         ? 'Askere gittin. ${track.prototypeOnlyYears} yıl sürecek.'
         : '${track.label.replaceAll(' ol', '')} olarak kabul edildin: '
-            '${ilkRutbe.label}.';
+              '${ilkRutbe.label}.';
 
     return MilitaryResult(
       state: _log(
@@ -564,18 +611,18 @@ abstract final class MilitaryService {
       return MilitaryResult(
         state: state,
         applied: false,
-        text: 'Bedelli ücreti ${trMoney(ucret)}; '
+        text:
+            'Bedelli ücreti ${trMoney(ucret)}; '
             'cüzdanında yeterli para yok. Ailenden isteyebilirsin.',
       );
     }
-    final String metin = 'Bedelli askerlik ücretini ödedin: '
+    final String metin =
+        'Bedelli askerlik ücretini ödedin: '
         '${trMoney(ucret)}.';
     return MilitaryResult(
       state: _log(
         state.copyWith(
-          player: state.player.copyWith(
-            wallet: state.player.wallet - ucret,
-          ),
+          player: state.player.copyWith(wallet: state.player.wallet - ucret),
           military: state.military.copyWith(
             status: MilitaryStatus.bedelli,
             finishedAtAge: state.player.age,
@@ -594,22 +641,25 @@ abstract final class MilitaryService {
   /// Uydurma bir hami üretilmez: yalnızca **gerçekten var olan**,
   /// hayatta, varlıklı ve arası iyi olan yakınlar listelenir.
   static List<Person> possiblePayers(GameState state) => state.people
-      .where((Person p) =>
-          p.isAlive &&
-          (p.relation.kanBagi || p.relation == RelationType.es) &&
-          p.bond >= prototypeOnlyFamilyMinBond &&
-          (p.wealth == WealthTier.varlikli ||
-              p.wealth == WealthTier.cokVarlikli))
+      .where(
+        (Person p) =>
+            p.isAlive &&
+            (p.relation.kanBagi || p.relation == RelationType.es) &&
+            p.bond >= prototypeOnlyFamilyMinBond &&
+            (p.wealth == WealthTier.varlikli ||
+                p.wealth == WealthTier.cokVarlikli),
+      )
       .toList(growable: false);
 
   /// prototypeOnly: bu kişinin ödemeyi kabul etme ihtimali.
   static double prototypeOnlyPayChance(Person person) {
     final double yakinlik = ((person.bond - prototypeOnlyFamilyMinBond) / 45)
         .clamp(0.0, 1.0);
-    final double servet =
-        person.wealth == WealthTier.cokVarlikli ? 0.30 : 0.15;
-    return (prototypeOnlyFamilyBaseChance + yakinlik * 0.45 + servet)
-        .clamp(0.05, 0.95);
+    final double servet = person.wealth == WealthTier.cokVarlikli ? 0.30 : 0.15;
+    return (prototypeOnlyFamilyBaseChance + yakinlik * 0.45 + servet).clamp(
+      0.05,
+      0.95,
+    );
   }
 
   /// Bedelli ücretini bir yakından ister.
@@ -637,13 +687,15 @@ abstract final class MilitaryService {
       return MilitaryResult(
         state: state,
         applied: false,
-        text: '${kisi.firstName} bu ücreti karşılayabilecek durumda değil '
+        text:
+            '${kisi.firstName} bu ücreti karşılayabilecek durumda değil '
             've aranız bunu isteyecek kadar yakın değil.',
       );
     }
 
     if (rng.nextDouble() >= prototypeOnlyPayChance(kisi)) {
-      final String metin = '${kisi.firstName} bu sefer yardımcı olamadı. '
+      final String metin =
+          '${kisi.firstName} bu sefer yardımcı olamadı. '
           '"Elim sıkışık" dedi, konu kapandı.';
       return MilitaryResult(
         state: _log(state, metin),
@@ -652,7 +704,8 @@ abstract final class MilitaryService {
       );
     }
 
-    final String metin = '${kisi.firstName} bedelli ücretini ödedi: '
+    final String metin =
+        '${kisi.firstName} bedelli ücretini ödedi: '
         '${trMoney(bedelliCostFor(state))}. Cebinden tek kuruş çıkmadı.';
     return MilitaryResult(
       state: _log(
@@ -688,11 +741,10 @@ abstract final class MilitaryService {
     // Hizmet etkileri her yıl uygulanır.
     GameState next = state.copyWith(
       player: state.player.copyWith(
-        stats: state.player.stats.copyWith(
-          health: state.player.stats.health + prototypeOnlyServiceHealth,
-          charisma: state.player.stats.charisma + prototypeOnlyServiceCharisma,
-          happiness:
-              state.player.stats.happiness + prototypeOnlyServiceHappiness,
+        stats: state.player.stats.gain(
+          health: prototypeOnlyServiceHealth,
+          charisma: prototypeOnlyServiceCharisma,
+          happiness: prototypeOnlyServiceHappiness,
         ),
         // Meslek olarak askerlikte maaş yıllık yatar.
         wallet: state.player.wallet + yol.prototypeOnlySalary,
@@ -704,9 +756,7 @@ abstract final class MilitaryService {
     final MilitaryRank yeniRutbe = yol.ranks[basamak];
     if (yeniRutbe.id != askerlik.rankId) {
       next = _log(
-        next.copyWith(
-          military: next.military.copyWith(rankId: yeniRutbe.id),
-        ),
+        next.copyWith(military: next.military.copyWith(rankId: yeniRutbe.id)),
         '${yeniRutbe.label} oldun.',
       );
     }
@@ -717,7 +767,7 @@ abstract final class MilitaryService {
     final String metin = yol == MilitaryTrack.er
         ? 'Askerliğin bitti, terhis oldun.'
         : '${next.military.rank?.label ?? 'Subay'} olarak görev süren '
-            'tamamlandı.';
+              'tamamlandı.';
     return _log(
       next.copyWith(
         military: next.military.copyWith(
@@ -725,9 +775,8 @@ abstract final class MilitaryService {
           finishedAtAge: newAge,
         ),
         player: next.player.copyWith(
-          stats: next.player.stats.copyWith(
-            happiness:
-                next.player.stats.happiness + prototypeOnlyDischargeHappiness,
+          stats: next.player.stats.gain(
+            happiness: prototypeOnlyDischargeHappiness,
           ),
         ),
         notices: List<PendingNotice>.unmodifiable(<PendingNotice>[
@@ -743,13 +792,13 @@ abstract final class MilitaryService {
   }
 
   static GameState _log(GameState state, String text) => state.copyWith(
-        log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
-          ...state.log,
-          LifeLogEntry(
-            age: state.player.age,
-            text: text,
-            category: LogCategory.kisisel,
-          ),
-        ]),
-      );
+    log: List<LifeLogEntry>.unmodifiable(<LifeLogEntry>[
+      ...state.log,
+      LifeLogEntry(
+        age: state.player.age,
+        text: text,
+        category: LogCategory.kisisel,
+      ),
+    ]),
+  );
 }

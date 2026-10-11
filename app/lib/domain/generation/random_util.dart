@@ -13,6 +13,26 @@ extension RandomHelpers on Random {
 
   T pick<T>(List<T> items) => items[nextInt(items.length)];
 
+  /// Kayıtta **kullanılmayan** bir ad seçer; hepsi kullanılıyorsa
+  /// rastgele döner.
+  ///
+  /// **Paket BV'de ölçüldü.** Kişi üreten yerlerin çoğu (`in_laws`,
+  /// `step_siblings`, `step_parents`, `school_people`) aynı adı
+  /// yakalayıp otuz kez yeniden çekiyordu; **çocuğun eşi** ve **torun**
+  /// bunu yapmıyordu. 300 hayatta çocuğu olan hayatların %12-15'inde
+  /// çocuğun adı hanedeki yaşayan biriyle çakışıyordu ve örneklerin
+  /// tamamı gelin/damat ya da torundu. Günlük soyadsız yazdığı için
+  /// "Deniz okula başladı" satırı kimi anlattığı belirsiz kalıyordu.
+  ///
+  /// Bu, mevcut kalıbın eksik kalmış iki yerine uygulanmasıdır; yeni bir
+  /// kural değildir. Hayat üretimindeki **ebeveyn ve kardeş** adları
+  /// bilerek dışarıda: o soru Q-198 #6'da Faho'nun kararını bekliyor.
+  String pickFreshName(List<String> pool, Set<String> used) {
+    final List<String> bos =
+        pool.where((String ad) => !used.contains(ad)).toList(growable: false);
+    return pick(bos.isEmpty ? pool : bos);
+  }
+
   bool chance(double probability) => nextDouble() < probability;
 
   /// Üçgen dağılımdan tam sayı: uçlar mümkün ama **seyrek**.

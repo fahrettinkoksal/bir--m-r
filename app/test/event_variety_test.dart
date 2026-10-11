@@ -8,9 +8,10 @@ import 'package:bir_omur/domain/events/event_engine.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 /// Olay çeşitliliği (Paket 20).
 ///
@@ -42,15 +43,38 @@ Map<String, int> hayatOyna(int seed, {int maxAge = 95}) {
     while (c.state!.hasNotice) {
       c.dismissNotice();
     }
-    if (c.state!.hasPendingCrisis) {
-      final PendingCrisis k = c.state!.pendingCrisis!;
-      c.respondToCrisis(k.crisis!.choices.first.id);
-    }
+    // **Paket AQ'da düzeltildi: bu satır sonsuz döngü üretiyordu.**
+    //
+    // Eskiden krizin **ilk** seçeneği karşılanabilir mi diye bakılmadan
+    // seçiliyordu. `dusme` gibi krizlerde ilk seçenek para istiyor
+    // (`needsMoney`); parasız oyuncuda yanıt uygulanmıyor ve kriz açık
+    // kalıyor. Paket AQ'dan önce bu sessizce geçiyordu çünkü `ageUp`
+    // bekleyen krizi denetlemiyordu — kriz ekranda asılı kalırken yıl
+    // ilerliyordu. Artık ilerlemiyor, yani dış döngü hiç bitmiyordu:
+    // tam süit bu dosyada takıldı ve CI 45 dakikalık bütçesinde iptal
+    // oldu.
+    //
+    // Gerçek oyuncu da karşılanabilir bir seçenek seçmek zorunda;
+    // yardımcı onu yapıyor. Dış döngüye ayrıca bir koruma kondu: yaş
+    // ilerlemiyorsa hayat biter, test asla kilitlenmez.
+    resolvePendingCrisis(c);
+    // Lise alanı seçilmeden yaş atlanmaz (D-094).
+    resolveEducationChoices(c);
+    final int yasOnce = c.state!.player.age;
     c.ageUp();
+    if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
   }
+  final int sonYas = c.state!.player.age;
   c.dispose();
+  _sonYas = sonYas;
   return gorulen;
 }
+
+/// [hayatOyna] son çağrısının bittiği yaş.
+///
+/// Ömür boyu çeşitlilik iddiası yalnızca **ömrünü yaşayan** hayat için
+/// anlamlı; genç ölen hayatta az olay görülmesi hata değildir.
+int _sonYas = 0;
 
 void main() {
   // ===================================================================
@@ -133,6 +157,8 @@ void main() {
       c.startNewLife(mode: StartMode.tamamenRastgele);
       int guard = 0;
       while (!c.state!.hasPendingEvent && guard++ < 20) {
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(c);
         c.ageUp();
       }
       expect(c.state!.hasPendingEvent, isTrue);
@@ -207,8 +233,17 @@ void main() {
             !r.requiresSocialAccount;
       }).length;
       // Bu paketin amacı, nasıl bir hayat yaşanırsa yaşansın orta yaşın
-      // dolu geçmesi.
-      expect(kosulsuz, greaterThanOrEqualTo(kMidlifeEvents.length - 2));
+      // dolu geçmesi. D-085 ile eşin ev/araba beklentisi eklendi; bunlar
+      // doğaları gereği koşulludur. Kural artık mutlak sayı değil
+      // **oran**: havuzun büyük çoğunluğu koşulsuz kalmalı ki bekâr,
+      // işsiz ve mülksüz bir hayat da dolu geçsin.
+      expect(
+        kosulsuz / kMidlifeEvents.length,
+        greaterThanOrEqualTo(0.75),
+        reason: '$kosulsuz / ${kMidlifeEvents.length} koşulsuz',
+      );
+      // Koşulsuz olayların mutlak sayısı da bir tabanın altına inemez.
+      expect(kosulsuz, greaterThanOrEqualTo(20));
     });
 
     test('iki olay önceki kararı hatırlar', () {
@@ -246,11 +281,42 @@ void main() {
     });
 
     test('bir hayat en az kırk farklı olay gösterir', () {
-      for (int seed = 1; seed <= 4; seed++) {
-        final Map<String, int> gorulen = hayatOyna(seed * 11);
+      // **Ölçülen kırılganlık (Paket BN).** İddia bir **ömür** hakkında:
+      // "bir hayat en az kırk farklı olay gösterir". Dört sabit tohumla
+      // ölçülüyordu ve içerik havuzu değiştikçe zar sırası kayıyor;
+      // tohum 11'in hayatı artık **27 yaşında** vefat ediyor ve 26 olay
+      // görüyor. Yirmi yedi yıl yaşayan birinin kırk olay görmemesi
+      // hata değil — ama ölçüm de boşa çıkmasın: kısa hayat
+      // **yaşadığı yıl başına** çeşitlilikten muaf tutulmuyor.
+      //
+      // Eşik (40) değişmedi; yalnızca iddianın konusu olan hayatlar
+      // seçiliyor.
+      int tamOmur = 0;
+      final List<String> kayit = <String>[];
+      for (int tohum = 11; tohum <= 440 && tamOmur < 4; tohum += 11) {
+        final Map<String, int> gorulen = hayatOyna(tohum);
+        final int yas = _sonYas;
+        kayit.add('tohum $tohum: yaş $yas, ${gorulen.length} farklı olay');
+        if (yas < 60) {
+          // Genç ölen hayat da çeşitli olmalı: yaşadığı her iki yıla en
+          // az bir farklı olay.
+          expect(
+            gorulen.length,
+            greaterThanOrEqualTo(yas ~/ 2),
+            reason: 'Tohum $tohum: $yas yılda yalnızca '
+                '${gorulen.length} farklı olay',
+          );
+          continue;
+        }
+        tamOmur++;
         expect(gorulen.length, greaterThanOrEqualTo(40),
-            reason: 'Tohum ${seed * 11}: yalnızca ${gorulen.length} farklı olay');
+            reason: 'Tohum $tohum: yalnızca ${gorulen.length} farklı olay');
       }
+      // ignore: avoid_print
+      print(kayit.join('\n'));
+      expect(tamOmur, 4,
+          reason: 'Altmış yaşı aşan dört hayat bulunamadı: '
+              '${kayit.join(" | ")}');
     });
   });
 }

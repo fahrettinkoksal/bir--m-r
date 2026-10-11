@@ -120,6 +120,34 @@ class SchoolPeople {
     return ClassRoster(newPeople: yeniler, movedIds: tasinanlar);
   }
 
+  /// Okulun öğretmeni yoksa (vefat ettiyse ya da eski kayıtta hiç
+  /// yazılmadıysa) yerine gelen öğretmen(ler).
+  ///
+  /// **Ölçülen boşluk (Paket BO).** Bir kademede tanınan öğretmen sayısı
+  /// bir (`prototypeOnlyTeacherCount`). O kişi vefat ettiğinde sınıf
+  /// öğretmensiz kalıyor ve yerine kimse gelmiyordu: oyuncu o kademeyi
+  /// bitirene kadar okulunda öğretmen görünmüyordu. Öğretmen 28-58 yaş
+  /// arasında üretiliyor, yıllık ölüm ihtimali binde 1,2-4; altı yılda
+  /// tohum başına yaklaşık %1. Sekiz sabit tohumla koşan bekçi testi
+  /// bunu rastgele yakalıyordu, yani bir kuralı değil kurayı ölçüyordu.
+  ///
+  /// Sınıf arkadaşı üretilmez: yalnızca öğretmen gelir.
+  List<Person> buildReplacementTeacher({
+    required GameState state,
+    required SchoolLevel level,
+    required Random rng,
+    String? city,
+  }) =>
+      _generatePeople(
+        state: state,
+        level: level,
+        schoolId: schoolIdFor(level, city),
+        classId: classIdFor(level, city),
+        classmateCount: 0,
+        rng: rng,
+        city: city,
+      );
+
   /// Bir kişiyi **aynı kimlikle** yeni sınıfa taşır.
   Person moveToClass(Person person, SchoolLevel level, [String? city]) =>
       person.copyWith(

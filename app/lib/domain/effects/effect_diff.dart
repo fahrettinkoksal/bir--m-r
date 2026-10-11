@@ -49,14 +49,26 @@ List<AppliedEffect> diffAppliedEffects(GameState before, GameState after) {
     final Person? onceki = oncekiKisiler[kisi.id];
     if (onceki == null) continue;
     final int fark = kisi.bond - onceki.bond;
-    if (fark == 0) continue;
-    effects.add(
-      AppliedEffect(
-        label: '${kisi.possessiveFor(after.player.age)} '
-            '${kisi.firstName} ile yakınlık',
-        delta: fark,
-      ),
-    );
+    if (fark != 0) {
+      effects.add(
+        AppliedEffect(
+          label: '${kisi.possessiveFor(after.player.age)} '
+              '${kisi.firstName} ile yakınlık',
+          delta: fark,
+        ),
+      );
+    }
+    // Kişinin kendi keyfi (D-074): "bana 5, kızıma 5" gibi bir sonucun
+    // ikinci yarısı burada görünür. Yakınlıktan ayrı bir satırdır.
+    final int keyif = kisi.happiness - onceki.happiness;
+    if (keyif != 0) {
+      effects.add(
+        AppliedEffect(
+          label: '${kisi.firstName} için keyif',
+          delta: keyif,
+        ),
+      );
+    }
   }
 
   // --- Hayata yeni giren kişiler ---------------------------------------

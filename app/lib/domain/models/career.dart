@@ -7,7 +7,12 @@ enum JobEndReason {
   istifa('Kendi isteğiyle ayrıldı'),
   cikarildi('İşten çıkarıldı'),
   emeklilik('Emekli oldu'),
-  kusakDevami('Kuşak devamında bırakıldı');
+  kusakDevami('Kuşak devamında bırakıldı'),
+
+  /// Hapis cezası nedeniyle iş bitti (D-128).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  hapis('Hapis nedeniyle ayrıldı');
 
   const JobEndReason(this.label);
 
@@ -92,6 +97,9 @@ class CareerState {
     this.lastJobLossAge,
     this.retiredAtAge,
     this.pension,
+    this.employerWarnings = 0,
+    this.synergyHeadStart = 0,
+    this.detainedYears = 0,
   });
 
   const CareerState.none() : this();
@@ -117,6 +125,17 @@ class CareerState {
   /// bilgi yalnızca durumu doğru göstermek için tutulur. Şehir değişince
   /// işin ne olacağı kararı kuyrukta (Q-065). Eski kayıtlarda `null`'dır.
   final String? jobCity;
+
+  /// Bu işte **tutukluyken** geçen yıl sayısı (Q-199).
+  ///
+  /// Tutukluluk işi bitirmez ama oyuncu o yıl çalışmaz: maaş ödenmez ve
+  /// o yıl **kıdeme sayılmaz**. Kıdem `yaş - başlangıç` ile hesaplandığı
+  /// için içeride geçen yıllar burada tutulup o hesaptan düşülür;
+  /// `startedAtAge` oynanmaz, çünkü ekran "Başlangıç: 22 yaşında" diye
+  /// onu gösteriyor ve o bilgi doğru kalmalı.
+  ///
+  /// Eski kayıtlarda `0`'dır. Faho onayladı (6 Ekim 2026, Q-199).
+  final int detainedYears;
 
   /// Şu anki işteki görev seviyesi (0 = giriş seviyesi).
   final int level;
@@ -148,6 +167,24 @@ class CareerState {
   /// prototypeOnly: yıllık emekli aylığı (₺).
   final int? pension;
 
+  /// İşverenin uzun ya da üst üste gelen raporlar için verdiği uyarı
+  /// sayısı (D-078).
+  ///
+  /// Uyarı **tek başına** kimseyi işten atmaz; yalnızca işten çıkarılma
+  /// ihtimalini bir miktar artırır. İş değiştiğinde sıfırlanır.
+  final int employerWarnings;
+
+  /// Hobi sinerjisinin **işe başlarken** verdiği ustalık yılı payı
+  /// (Paket AK, §18).
+  ///
+  /// Yıllardır fotoğraf çeken biri Fotoğrafçı olduğunda sıfır çırak
+  /// gibi başlamasın diye var. Yalnızca `CraftMastery` basamağını
+  /// besler: maaşa, zam zamanlamasına, kıdem yılına ve toplam çalışma
+  /// yılına **girmez** — `yearsInJob` ve `totalWorkYears` bu paydan
+  /// etkilenmez. İş değişince sıfırlanır, çünkü yeni işin payı yeniden
+  /// hesaplanır.
+  final int synergyHeadStart;
+
   /// Oyuncu emekli mi?
   bool get isRetired => retiredAtAge != null;
 
@@ -159,7 +196,8 @@ class CareerState {
     for (final JobHistoryEntry e in history) {
       toplam += e.years ?? 0;
     }
-    if (startedAtAge != null) toplam += currentAge - startedAtAge!;
+    // Süren iş: tutuklulukta geçen yıllar çalışma yılı sayılmaz (Q-199).
+    if (startedAtAge != null) toplam += yearsInJob(currentAge);
     return toplam;
   }
 
@@ -179,9 +217,15 @@ class CareerState {
   /// Gerçekten ödenen yıllık maaş.
   int get yearlySalary => salary ?? job?.yearlySalary ?? 0;
 
-  /// Bu işte kaç yıl geçti?
-  int yearsInJob(int currentAge) =>
-      startedAtAge == null ? 0 : currentAge - startedAtAge!;
+  /// Bu işte **çalışarak** kaç yıl geçti?
+  ///
+  /// Tutukluyken geçen yıllar düşülür (Q-199): içeride geçen yıl
+  /// ustalığa, zam hakkına ve terfiye sayılmaz. Tek sıkıştırma noktası
+  /// burasıdır — ustalık, zam, terfi, işten çıkarma, olay koşulu ve
+  /// Meslek ekranı hepsi bu getter'ı okuyor.
+  int yearsInJob(int currentAge) => startedAtAge == null
+      ? 0
+      : (currentAge - startedAtAge! - detainedYears).clamp(0, 120);
 
   /// Kariyer geçmişi: biten kayıtlar + süren iş (varsa en sonda).
   List<JobHistoryEntry> allEntries() => <JobHistoryEntry>[
@@ -215,6 +259,10 @@ class CareerState {
       level: 0,
       salary: null,
       milestones: const <CareerMilestone>[],
+      // Uyarılar işe aittir: yeni iş temiz sayfayla başlar (D-078).
+      employerWarnings: 0,
+      // Sinerji payı da işe aittir: yeni işte yeniden hesaplanır.
+      synergyHeadStart: 0,
       lastRaiseAge: null,
       lastPromotionAge: null,
       pastJobIds: List<String>.unmodifiable(<String>[...pastJobIds, id]),
@@ -260,6 +308,9 @@ class CareerState {
     Object? lastJobLossAge = _unsetCareer,
     Object? retiredAtAge = _unsetCareer,
     Object? pension = _unsetCareer,
+    int? employerWarnings,
+    int? synergyHeadStart,
+    int? detainedYears,
   }) {
     return CareerState(
       jobId: jobId == _unsetCareer ? this.jobId : jobId as String?,
@@ -287,6 +338,9 @@ class CareerState {
           ? this.retiredAtAge
           : retiredAtAge as int?,
       pension: pension == _unsetCareer ? this.pension : pension as int?,
+      employerWarnings: employerWarnings ?? this.employerWarnings,
+      synergyHeadStart: synergyHeadStart ?? this.synergyHeadStart,
+      detainedYears: detainedYears ?? this.detainedYears,
     );
   }
 }

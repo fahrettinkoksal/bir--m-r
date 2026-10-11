@@ -108,6 +108,24 @@ class _EventDialogState extends State<EventDialog> {
                         ],
                       ),
                     ),
+                    // Faho'nun Q-114 kararı: devam olayına büyük bir
+                    // "QUEST" etiketi konmaz ama küçük, doğal bir işaret
+                    // olabilir. Oyuncu bunun yıllar önceki bir seçimin
+                    // devamı olduğunu görebilsin.
+                    if (widget.event.isContinuation) ...<Widget>[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Geçmişten…',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                     const SizedBox(height: 16),

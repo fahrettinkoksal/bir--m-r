@@ -1,3 +1,4 @@
+import '../life/stat_floor_effects.dart';
 import 'dart:math';
 
 import '../../text/turkish_text.dart';
@@ -59,7 +60,7 @@ abstract final class SchoolPerformance {
   static const int prototypeOnlyScholarshipMinGrade = 9;
 
   /// prototypeOnly: yıllık burs tutarı (₺).
-  static const int prototypeOnlyScholarshipAmount = 45000;
+  static const int prototypeOnlyScholarshipAmount = 150000;
 
   /// prototypeOnly: sınıfta kalma eşiği.
   static const int prototypeOnlyFailAverage = 35;
@@ -98,8 +99,18 @@ abstract final class SchoolPerformance {
     required int current,
     required int intelligence,
     required Random rng,
+    int happiness = 100,
   }) {
-    final double kayma = (intelligence - current) * prototypeOnlyDrift;
+    // Mutluluk okul performansına girer (Paket AQ): zekâ zaten
+    // sayılıyordu, mutluluk hiçbir yerin girdisi değildi. Mutsuz
+    // öğrenci zekâsının götürdüğü yere daha yavaş yaklaşır.
+    //
+    // Yalnızca **yukarı** kaymayı yavaşlatır: aşağı kaymayı
+    // hızlandırmaz, yoksa "mutsuzum → notlarım düştü → daha mutsuzum"
+    // sarmalı kurulurdu.
+    final double carpan = StatFloorEffects.motivationFactor(happiness);
+    double kayma = (intelligence - current) * prototypeOnlyDrift;
+    if (kayma > 0) kayma *= carpan;
     final int sans =
         rng.between(-prototypeOnlyYearlyLuck, prototypeOnlyYearlyLuck);
     return (current + kayma.round() + sans).clamp(0, 100);
@@ -148,11 +159,9 @@ abstract final class SchoolPerformance {
         .copyWith(
           education: egitim.copyWith(gradeAverage: yeni),
           player: state.player.copyWith(
-            stats: state.player.stats.copyWith(
-              intelligence: state.player.stats.intelligence +
-                  prototypeOnlyStudyIntelligence,
-              happiness:
-                  state.player.stats.happiness + prototypeOnlyStudyHappiness,
+            stats: state.player.stats.gain(
+              intelligence: prototypeOnlyStudyIntelligence,
+              happiness: prototypeOnlyStudyHappiness,
             ),
           ),
           interactionCounts: Map<String, int>.unmodifiable(<String, int>{

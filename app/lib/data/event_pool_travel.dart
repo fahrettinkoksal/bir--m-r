@@ -19,12 +19,10 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
   GameEvent(
     id: 'gezi_yolda_sohbet',
     category: EventCategory.kisisel,
-    text: 'Dönüş yolunda yanındaki koltuktaki kişi konuşmaya başladı. '
+    text:
+        'Dönüş yolunda yanındaki koltuktaki kişi konuşmaya başladı. '
         'Yolun yarısında hâlâ konuşuyorsunuz.',
-    requirement: EventRequirement(
-      minAge: 16,
-      requiresTripMemory: true,
-    ),
+    requirement: EventRequirement(minAge: 16, requiresTripMemory: true),
     repeatable: true,
     minAgeGap: 6,
     weight: 3,
@@ -32,7 +30,8 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'dinle',
         label: 'Dinle',
-        resultText: 'Bütün hayatını anlattı. İnip ayrıldığınızda adını '
+        resultText:
+            'Bütün hayatını anlattı. İnip ayrıldığınızda adını '
             'sormadığını fark ettin.',
         happiness: 3,
         charisma: 1,
@@ -51,12 +50,10 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
   GameEvent(
     id: 'gezi_anisi',
     category: EventCategory.kisisel,
-    text: 'Bir fotoğraf çıktı ortaya: {kisi} ile {sehir} gezisi. '
+    text:
+        'Bir fotoğraf çıktı ortaya: {kisi} ile {sehir} gezisi. '
         'İkiniz de o gün daha gençsiniz.',
-    requirement: EventRequirement(
-      minAge: 20,
-      requiresTripMemory: true,
-    ),
+    requirement: EventRequirement(minAge: 20, requiresTripMemory: true),
     repeatable: true,
     minAgeGap: 8,
     weight: 4,
@@ -64,7 +61,8 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'goster',
         label: '{kisi} ile birlikte bak',
-        resultText: 'Fotoğrafa birlikte baktınız. {kisi} o gün yediğiniz '
+        resultText:
+            'Fotoğrafa birlikte baktınız. {kisi} o gün yediğiniz '
             'yemeği hatırlıyordu, sen hava durumunu.',
         happiness: 5,
         bond: 8,
@@ -72,7 +70,8 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'kendine_sakla',
         label: 'Bir süre kendin bak',
-        resultText: 'Fotoğrafı yerine koydun. Bazı günler yalnız '
+        resultText:
+            'Fotoğrafı yerine koydun. Bazı günler yalnız '
             'hatırlanmak ister.',
         happiness: 3,
       ),
@@ -83,12 +82,10 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
   GameEvent(
     id: 'gezi_tekrar_istegi',
     category: EventCategory.kisisel,
-    text: '{kisi} bir akşam laf arasında söyledi: "{sehir} iyiydi, bir '
+    text:
+        '{kisi} bir akşam laf arasında söyledi: "{sehir} iyiydi, bir '
         'daha gitsek mi?"',
-    requirement: EventRequirement(
-      minAge: 20,
-      requiresTripMemory: true,
-    ),
+    requirement: EventRequirement(minAge: 20, requiresTripMemory: true),
     repeatable: true,
     minAgeGap: 10,
     weight: 3,
@@ -96,7 +93,8 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'soz_ver',
         label: '"Gideriz" de',
-        resultText: 'Söz verdin. Tarih koymadınız ama ikiniz de bunu '
+        resultText:
+            'Söz verdin. Tarih koymadınız ama ikiniz de bunu '
             'aklınızda tuttunuz.',
         happiness: 4,
         bond: 6,
@@ -104,7 +102,8 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'gulup_gec',
         label: 'Gülüp geç',
-        resultText: 'Konu değişti. Yine de {kisi} o akşam iki kere daha '
+        resultText:
+            'Konu değişti. Yine de {kisi} o akşam iki kere daha '
             'aynı şeyi söyledi.',
         happiness: 2,
       ),
@@ -115,12 +114,10 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
   GameEvent(
     id: 'gezi_para_sikintisi',
     category: EventCategory.kisisel,
-    text: 'Gezide hesap beklediğinden kabarık çıktı. Cüzdana bakıp bir '
+    text:
+        'Gezide hesap beklediğinden kabarık çıktı. Cüzdana bakıp bir '
         'an duraksadın.',
-    requirement: EventRequirement(
-      minAge: 16,
-      requiresTripMemory: true,
-    ),
+    requirement: EventRequirement(minAge: 16, requiresTripMemory: true),
     repeatable: true,
     minAgeGap: 9,
     weight: 2,
@@ -128,7 +125,8 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'idare_et',
         label: 'Kalanla idare et',
-        resultText: 'Dönüş yolunda sadece çay içtin. Anlatınca gülünecek '
+        resultText:
+            'Dönüş yolunda sadece çay içtin. Anlatınca gülünecek '
             'bir hikâye oldu.',
         happiness: 2,
         addFlags: <String>{TravelFlags.gezidePara},
@@ -136,10 +134,11 @@ const List<GameEvent> kTravelEvents = <GameEvent>[
       EventChoice(
         id: 'kisa_kes',
         label: 'Geziyi kısa kes',
-        resultText: 'Bir gün erken döndün. Doğru karardı ama biraz burukluk '
+        resultText:
+            'Bir gün erken döndün. Doğru karardı ama biraz burukluk '
             'bıraktı.',
         happiness: -2,
-        money: 800,
+        money: 2500,
       ),
     ],
   ),

@@ -7,9 +7,10 @@ import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/education.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
-import 'package:bir_omur/domain/models/pending_crisis.dart';
 import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/test_flow.dart';
 
 /// Dönüm noktası önceliği (Paket 21).
 ///
@@ -197,11 +198,16 @@ void main() {
           while (c.state!.hasNotice) {
             c.dismissNotice();
           }
-          if (c.state!.hasPendingCrisis) {
-            final PendingCrisis k = c.state!.pendingCrisis!;
-            c.respondToCrisis(k.crisis!.choices.first.id);
-          }
+          // Karşılanabilir seçenek seçilir (Paket AQ): krizin ilk
+          // seçeneği para isteyebiliyor ve ödenemeyen yanıt krizi açık
+          // bırakıyor. Paket AQ'dan sonra açık kriz yaş almayı
+          // kilitlediği için bu dış döngüyü sonsuza çeviriyordu.
+          resolvePendingCrisis(c);
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(c);
+          final int yasOnce = c.state!.player.age;
           c.ageUp();
+          if (c.state!.player.age == yasOnce && !c.state!.deceased) break;
         }
         if (v8) ulasan8++;
         if (v12) ulasan12++;
@@ -212,9 +218,102 @@ void main() {
 
       expect(ulasan8, greaterThan(0));
       expect(ulasan12, greaterThan(0));
-      // Ölçümde bu oran %38 ve %28'di; öncelikle birlikte herkes görmeli.
-      expect(goren8, ulasan8, reason: '8. sınıfa ulaşan herkes görmeli');
-      expect(goren12, ulasan12, reason: '12. sınıfa ulaşan herkes görmeli');
+
+      // Paket AP notu — iddia **daraltıldı ve bir yerde güçlendirildi**.
+      //
+      // Eskiden burada "ulaşan herkes görür" yazıyordu ve geçiyordu. Ama
+      // motor bunu hiçbir zaman garanti etmedi: `priority` ağırlığı
+      // 120^kademe ile çarpıyor, yani öncelikli olay "neredeyse kesin"
+      // çıkıyor — kesin değil. `event_engine.dart` bunu açıkça böyle
+      // yazıyor.
+      //
+      // Paket AP zar sırasını kaydırdığı için 20 tohumdan birinde
+      // (t=18) sınav olayı kaybetti. Ölçtüm: o hayatta oyuncu 12.
+      // sınıfta **tek yıl** kalıyor (17 yaşında) ve o yıl ağırlıklı
+      // çekiliş priority-0 bir olaya düştü. Yani eski iddia kurayla
+      // geçiyordu.
+      //
+      // Doğru koruma iki parçalı:
+      //
+      // 1. **Mekanizma**, zarla değil kesin: sınav olayının etkin
+      //    ağırlığı, havuzdaki **bütün** priority-0 olayların toplam
+      //    ağırlığının onlarca katı olmalı. Ölçüldü: sınav olayı
+      //    86.400-129.600 bandında, havuzun tamamındaki priority-0
+      //    toplamı 1.738 — yani en düşük sınav olayında bile ~50 kat.
+      //    Gerçek bir yılda rakiplerin çoğu uygun bile olmadığı için
+      //    pay daha da yüksek. Bu "neredeyse kesin"in ölçülebilir hâli
+      //    ve zar sırasından bağımsız. Eşik 40 kat: ölçülen en düşük
+      //    oranın (49,7) altında ama hâlâ ezici.
+      // 2. **Uçtan uca**: ulaşanların ezici çoğunluğu görmeli. Tek bir
+      //    şanssız çekiliş testi kırmasın ama oran da düşmesin.
+      expect(goren8 / ulasan8, greaterThanOrEqualTo(0.9),
+          reason: '8. sınıf: $goren8/$ulasan8');
+      expect(goren12 / ulasan12, greaterThanOrEqualTo(0.9),
+          reason: '12. sınıf: $goren12/$ulasan12');
+    });
+
+    test('sınav olayının ağırlığı penceresindeki rakipleri eziyor', () {
+      // Mekanizma testi: zar yok, çekiliş yok — doğrudan motorun kendi
+      // ağırlık fonksiyonu.
+      //
+      // **Paket BM'de düzeltilen ölçüm hatası.** Bu testin ilk hâli
+      // rakip toplamını **bütün havuz** üzerinden alıyordu: yaş koşulu,
+      // sınıf koşulu, kişi koşulu hiç bakılmadan her priority-0 olay
+      // rakip sayılıyordu. Sonuç, testin adının söylediği şeyi
+      // ("penceresindeki rakipler") ölçmüyordu — sınav 8. sınıfta, yani
+      // 13 yaşında çıkıyor; 0-7 yaş olayları o yıl **çıkamaz** ama
+      // rakip hanesine yazılıyordu.
+      //
+      // Ölçülen sonucu: havuz büyüdükçe pay eriyor ve eşik, içerik
+      // eklenmesini imkânsız hâle getiriyordu. Paket BM'nin ilk yıllar
+      // havuzundan **önce** zaten 40,5'e inmişti (eşik 40); 31 olay
+      // eklenince 39,2'ye düştü. Yani bekçi, oyunun kuralını değil
+      // havuzun büyüklüğünü ölçüyordu. Uçtan uca koruma (yukarıdaki
+      // test: ulaşanların %90'ı sınav olayını görüyor) bu sırada hiç
+      // bozulmadı.
+      //
+      // Düzeltilmiş hâli: rakip kümesi, sınavın **gerçekten yarıştığı**
+      // yılda uygun olan olaylardır (`debugEligibleIds`). Eşik, aynı
+      // yaklaşımla yeniden ölçülüp en düşük oranın altına konuldu.
+      // Soru Faho'ya iletildi: `docs/DESIGN_REVIEW_QUEUE.md` Q-207.
+      const EventEngine motor = EventEngine();
+      final List<String> satirlar = <String>[];
+      // Rakip kümesi hayata göre değişir (kim yaşıyor, hangi şehir,
+      // hangi eşya): tek hayat ölçmek yanıltır. Dört ayrı hayatın **en
+      // kalabalık** rakip kümesi alınır, yani en kötü durum.
+      const List<int> tohumlar = <int>[9, 21, 37, 53];
+      for (final GameEvent sinav in kExamEvents) {
+        final int sinif = sinav.requirement.minGrade ?? 8;
+        double enKotuRakip = 0;
+        double sinavAgirligi = 0;
+        for (final int tohum in tohumlar) {
+          final GameState s =
+              ogrenci(age: sinif + 5, grade: sinif, seed: tohum);
+          final Set<String> uygun = motor.debugEligibleIds(s, Random(tohum));
+          sinavAgirligi = EventEngine.prototypeOnlyEffectiveWeight(s, sinav);
+          double rakipToplami = 0;
+          for (final GameEvent e in kEventPool) {
+            if (e.id == sinav.id) continue;
+            if (e.priority > 0) continue;
+            if (!uygun.contains(e.id)) continue;
+            rakipToplami += EventEngine.prototypeOnlyEffectiveWeight(s, e);
+          }
+          if (rakipToplami > enKotuRakip) enKotuRakip = rakipToplami;
+        }
+        satirlar.add('${sinav.id}: ağırlık ${sinavAgirligi.toStringAsFixed(0)}'
+            ' · en kalabalık yılda uygun rakip toplamı '
+            '${enKotuRakip.toStringAsFixed(0)}'
+            ' · oran ${(sinavAgirligi / enKotuRakip).toStringAsFixed(1)}');
+        // Eşik, ölçülen en düşük oranın altında ama hâlâ anlamlı:
+        // gerçek bir seyrelmeyi (payın üçte birini kaybetmesini)
+        // yakalar. Eski 40 eşiği havuzun büyüklüğünü ölçtüğü için
+        // içerik eklenmesini imkânsız hâle getirmişti.
+        expect(sinavAgirligi, greaterThan(enKotuRakip * 150),
+            reason: '${sinav.id}: ağırlık $sinavAgirligi, en kalabalık '
+                'yılda uygun priority-0 rakiplerin toplamı $enKotuRakip');
+      }
+      // ignore: avoid_print
+      print(satirlar.join('\n'));
     });
   });
 }

@@ -11,6 +11,7 @@ import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/models/book_progress.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/state/game_controller.dart';
+import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const ActivityEngine activities = ActivityEngine();
@@ -43,10 +44,16 @@ void main() {
       expect(r.outcome.applied, isTrue);
       expect(r.state.player.wallet, 1000 - kesim.cost);
       expect(r.state.player.stats.appearance, greaterThan(gorunusOnce));
-      expect(r.state.log.last.text, contains(kesim.label));
+      // D-127: günlük artık "Saç kestir tamamlandı" demiyor, olanı
+      // anlatıyor. Bağ yine sıkı: günlüğe yazılan metin, ekranda
+      // gösterilen sonucun **aynısı** olmalı.
+      expect(r.state.log.last.text, r.outcome.text);
       expect(
         r.outcome.effects.map((dynamic e) => e.text as String),
-        contains('Cüzdan -${kesim.cost} ₺'),
+        // Beklenti biçimli hâle çevrildi: para değişimi artık binlik
+        // ayraçla yazılıyor (`AppliedEffect.text`). İddia gevşemedi,
+        // kesimin bedeli yine birebir aranıyor.
+        contains('Cüzdan -${trMoney(kesim.cost)}'),
       );
     });
 

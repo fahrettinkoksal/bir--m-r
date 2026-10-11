@@ -1,0 +1,335 @@
+# durum	başlık — Bir Ömür paket planı. Panonun görev kaynağı; her paket sonunda güncellenir.
+completed	Kadın oyuncuda askerlik "Yapılmadı" görünmesini düzelt
+completed	Pasif kalan seçimleri denetle ve gerekçelerini göster
+completed	Dövüş sanatı derslerinde tekrar tıklama yükünü azalt
+completed	Sosyal medyaya çapraz ve yıllık takipçi büyümesi ekle
+completed	Meslek kataloğunu genişlet (mankenlik, yazarlık vb.)
+completed	Çok adımlı olay zincirleri ekle
+completed	2026 ekonomi çıpasını merkezi yapıya kur
+completed	Meslek kataloğunu 30-35 işe genişlet ve maaşları kalibre et
+completed	Diğer para değerlerini kategori bazında 2026'ya kalibre et
+completed	Ev/araba ilanlarını yaşanan şehirle filtrele ve şehir fiyat katsayısı ekle
+completed	Q-103..Q-114 kesin kararlarını koda ve belgelere işle
+completed	Paket A: bildirilen beş hatayı düzelt
+completed	Paket B: statlar yaşla düşsün ve bakım gerektirsin
+completed	Paket C: sağlık bildirimleri, mini oyunlar ve estetik
+completed	Paket D: aktivite sonuç bildirimleri ve boşanma bildirimi
+completed	Paket E: mağaza ayrımı ve banka/kredi sistemi
+completed	Paket F: Finger, evcil hayvanlar, seyahat ve vasiyet menüsü
+completed	Paket G: bildirilen gerçek hatalar
+completed	Paket H: lise alan seçimi ve doğumda isim
+completed	Paket I: geri bildirim ve sonuç görünürlüğü
+completed	Paket J: stat sistemi hissedilir olsun
+completed	Paket K: sosyal medya, sponsorluk ve ün
+completed	Paket L: Finger ilişki niyeti ve flört durumu
+completed	Paket M: banka, harçlık ve konut kredisi
+completed	Paket N: evcil hayvan ve aile tepkileri
+completed	Paket Z: simülasyon ölçümleri ve son rapor
+completed	Paket O: bildirilen gerçek hatalar (hayvan bildirimi, çocuk adı, Finger sevgili yolu, okul kilidi)
+completed	Paket Q: sosyal medya — sponsorluk, ün düşüşü, kendiliğinden teklifler
+completed	Paket R: ilgilenilmeyen flört bitsin, torun/çocuk düğünü bildirimi
+completed	Paket S: yaşam gideri gerekçesi ve dökümü
+pending	Paket O: 10 ölü hikâye izini denetle ve sınıflandır
+completed	Paket V/3: kurgusal araç model adları
+completed	Paket V/4: 2. el araç pazarı (ilan detaylı)
+completed	Paket V/5: mağaza menülerini grupla ve stabilleştir
+completed	Paket V/6: kefalet, avukat ve cezaevi arkadaşlıkları
+completed	Paket V/7: üvey anne/baba
+completed	Paket W/1: lise sonrası üniversiteye başvurulamıyor
+completed	Paket X/1: İkiz gebelik
+completed	Paket X/2: Ailece (çoklu kişiyle) aktivite
+completed	Paket X/3: Katalogları genişlet
+completed	Paket Y/1: Kronik hastalık ve sağlık geçmişi
+completed	Paket Y/2: Eşin kendi hayatı
+completed	Paket Y/3: Meslekte ustalık ve itibar
+completed	Paket Y/4: Hayat hedefleri
+completed	Paket Z/1: Araç muayenesi, kaza ve satış
+completed	Paket Z/2: Kardeşin kendi hayatı ve yeğenler
+completed	Paket Z/3: Şehirlerin kendi karakteri
+completed	Paket Z/4: Hane bütçesi, nafaka ve velayet
+completed	Paket Z/5: Çete ve suç V2
+completed	Paket AA/1: Piyasa rejimi ve yatırım kataloğu
+completed	Paket AA/2: Portföy motoru (al/sat, maliyet, vadeli)
+completed	Paket AA/3: Servet, miras ve boşanma entegrasyonu
+completed	Paket AA/4: Yatırımlar ekranı
+completed	Paket AA/5: Piyasa haberi ve yatırım olayları
+completed	Paket AA/6: Ölçüm, kalibrasyon ve belgeler
+completed	Paket AB/1: Kiralama veri modeli ve kayıt
+completed	Paket AB/2: Kira motoru (piyasa bandı, adaylar, tahsilat)
+completed	Paket AB/3: Konut kondisyonu, bakım ve değer değişimi
+completed	Paket AB/4: Evlerim ekranı ve konut detayı
+completed	Paket AB/5: Konut ve kiracı olayları (25-35)
+completed	Paket AB/6: Ölçüm, exploit taraması ve belgeler
+completed	Erken altyapı: PlayerBot arketipleri ve karar mantığı
+completed	Erken altyapı: ürün simülasyonu 10x100 + 500 rastgele hayat
+completed	Erken altyapı: 10 uzun UI smoke hayatı
+completed	Erken altyapı: eski basit ölçümleri etiketle ve belgeleri güncelle
+completed	Teşhis A-C: servet bileşenleri, yaş eğrisi, arketip kırılımı
+completed	Teşhis D-F: karşılaştırmalı senaryolar, gider koruması, miras etkisi
+completed	Teşhis G-L: evlilik hunisi, blocker'lar, tekrar evlenme
+completed	Teşhis M-O: erişilmeyen meslek, işletme ve olaylar
+completed	Teşhis P-Q: botun kendi mekanikliğini eleştir
+completed	Paket AC/0: tekrar evlenme hata düzeltmesi
+completed	Paket AC/1: kurgusal şirketler ve olay katmanı
+completed	Paket AC/2: piyasa rejimi V2 — çok yıllı krizler
+completed	Paket AC/3: zorunlu satış, komisyon ve çeşitlendirme
+completed	Paket AC/4: min-max ve adversarial oyuncu testleri
+completed	Paket AC/5: enflasyon mimari raporu ve belgeler
+completed	Paket AD/0: gerçek tarih ve ekonomi bağımlılığı denetimi
+completed	Paket AD/1: sabit drift'i kaldır — getiri piyasadan doğsun
+completed	Paket AD/2: şirket sağlık modeli
+completed	Paket AD/3: yatırım karar mekanikleri — panik, FOMO, şirket sorunu
+completed	Paket AD/4: kontrolsüz borç hata düzeltmesi
+completed	Paket AD/5: servetin kullanımı — para harcama kanalları denetimi
+completed	Paket AD/6: 10 strateji × 20/40/60 ölçüm ve kalibrasyon
+completed	Paket AE/1: işletme veri modeli — fiyat, itibar, personel, bakım, reklam
+completed	Paket AE/2: talep ve kâr motoru — piyasa ortalaması, elastikiyet, gider
+completed	Paket AE/3: işletme olay motoru — türe özel olaylar, afet, denetim
+completed	Paket AE/4: yatırım önemli olay bildirimleri ve sert düşüş
+completed	Paket AE/5: işletme ekranı ve yıllık rapor
+completed	Paket AE/6: ölçüm — pasif/aktif/girişim+yatırım, fiyat ve reklam exploit
+completed	Paket AF/1: PerfectEntrepreneurBot — oyunu çözmeye çalışan bot
+completed	Paket AF/2: 14 işletmenin ROI tablosu (500+ hayat/işletme)
+completed	Paket AF/3: alt-mekanik abuse taraması (fiyat, reklam, bakım, personel)
+completed	Paket AF/4: maaş + işletme + yatırım fırsat maliyeti
+completed	Paket AF/5: 12 strateji × 1000 hayat ve dominans analizi
+completed	Paket AF/6: teşhis raporu ve çözüm önerileri
+completed	Paket AG/1: pozitif kuyruk — "iş tuttu" olayları ve kalıcı avantaj
+completed	Paket AG/2: serbest yazılımcılık — ortalamayı değil dağılımı düzelt
+completed	Paket AG/3: katalog kalibrasyonu — medyan payback 2,5-6 yıl
+completed	Paket AG/4: reklamın pozitif kuyruğu ve viral kampanya
+completed	Paket AG/5: başarı/başarısızlık hikâyesi bildirimleri
+completed	Paket AG/6: payback dağılımı ölçümü ve strateji karşılaştırması
+completed	Paket AG/7: testler ve rapor
+completed	Paket AH/1: botun kapsamını denetle — hangi sistemler gerçekten kullanılıyor
+completed	Paket AH/2: eksik teşhis alanlarını ekle (test tarafı)
+completed	Paket AH/3: 3000 tam hayat denetim testini yaz ve çalıştır
+completed	Paket AH/4: bulguları OYUN/BOT/NORMAL diye sınıflandır ve raporla
+completed	Paket AI/1: kod tabanlı kesin aksiyon envanteri
+completed	Paket AI/2: AbuseBot — save/load, aynı yıl spam, arbitraj, stat farming
+completed	Paket AJ/1: kurs ilerleme — ücretsiz dersler, ücret aşamaları, ödüller
+completed	Paket AL/1: 18 yaş altı spor masraflarına aile desteği
+completed	Paket AL/2: okul + spor çatışması
+completed	Paket AL/3: spor başarısı → sosyal medya
+completed	Paket AL/4: rivalry ün, sosyal ve rakip ilerlemesi
+completed	Paket AL/5: iş + spor zaman maliyeti
+completed	Paket AL/6: UI, save/load ve hedefli testler
+completed	Paket AL/7: 600 hedefli senaryo, belgeler ve rapor
+completed	Paket AM/1: JobType'a minHealth alanı ve gereksinim kontrolü
+completed	Paket AM/2: manken görünüş 80, sonradan düşüş kovmasın
+completed	Paket AM/3: combat sağlık kademeleri
+completed	Paket AM/4: fiziksel meslek eşikleri ve katalog denetimi
+completed	Paket AM/5: UI gereksinim gösterimi ve başvuru mesajları
+completed	Paket AM/6: hedefli testler, süit, CI ve rapor
+completed	Paket AN/1: tek kanonik ders anahtarı ve hata düzeltmesi
+completed	Paket AN/2: net gelirli ölçüm altyapısı (A/B/C kohortları)
+completed	Paket AN/3: raw etkiyi ayrıştır ve kalibre et
+completed	Paket AN/4: guard testleri ve eski hata testini çevir
+completed	Paket AN/5: Q-184 #1 kapat, süit, CI ve rapor
+completed	Paket AO/1: lineage modeli ve yeni bağ türleri
+completed	Paket AO/2: romantik yasak akrabalık ve miras yorumu
+completed	Paket AO/3: ebeveyn boşanması, hane ve çocuk üzerindeki etki
+completed	Paket AO/4: boşanma sonrası yeniden evlilik, üvey ve yarım kardeş
+completed	Paket AO/5: üvey çocuk ve kayın aile
+completed	Paket AO/6: eski eş co-parenting, velayet ve yaşlı bakımı
+completed	Paket AO/7: aile haberleri, buluşmalar, küslük ve korumalar
+completed	Paket AO/8: UI gruplama, kişi kartı, kuşak devamı ve save/load
+completed	Paket AO/9: hedefli testler, 500 aile hayatı, belgeler ve rapor
+completed	Paket AP/0: mevcut aile sistemlerini denetle (okuma turu)
+completed	Paket AP/1: çocuğun eşi gerçek Person + NPC evlilik modeli
+completed	Paket AP/2: çocuk boşanması, yeniden evlilik, dulluk
+completed	Paket AP/3: FamilyDramaProfile, spam koruması, FamilyThread
+completed	Paket AP/4: okul sorunları, başarılar, tavsiye etkisi
+completed	Paket AP/5: yetişkin çocuk para desteği, eve dönüş, şehir değişimi
+completed	Paket AP/6: gelin/damat, kayın aile olayları, torun soy bağı
+completed	Paket AP/7: kardeş parası, bakım çatışması, küslük, miras, co-parenting
+completed	Paket AP/8: UI — çocuk kartı, eşi, aile sorunu satırı, küslük sebebi
+completed	Paket AP/9: save/load, kuşak devamı, miras, romantik koruma
+completed	Paket AP/10: exploit korumaları, hedefli testler, 500 aile hayatı
+completed	Paket AP/11: Q-188, belgeler, süit, CI ve rapor
+completed	Paket AQ/0: mevcut sağlık sistemlerini denetle ve kök nedeni ölç
+completed	Paket AQ/1: kritik sağlık bantları ve sağlık 0 zorunlu çözümü
+completed	Paket AQ/2: yaş alma blokajı, tek ölüm, save/load
+completed	Paket AQ/3: düşük sağlıkta aktivite/seyahat/estetik/iş etkileri
+completed	Paket AQ/4: mutluluk/karizma/görünüş/zekâ düşük stat etkileri
+completed	Paket AQ/5: UI kritik sağlık göstergesi ve bildirim spam koruması
+completed	Paket AQ/6: testler, 500 hayat ölçümü, build, Q-189, rapor
+completed	Paket AR/1: hikâye izi denetimi — 38 sessiz iz, 13 ölü zincir halkası
+completed	Paket AR/2: ölü halkaları OYUN/BOT/NORMAL sınıflandır ve kırık rol kilitlerini düzelt
+completed	Paket AR/3: teşhisi dört sınıfa çıkar, kura tabanını ölç (Q-191)
+completed	Paket AS/1: "sessiz iz" ölçütünü düzelt — mekanik ile gerçekten sessizi ayır (38 → 6 + 32)
+completed	Paket AS/2: Q-190 ve Q-191 uygula, sessiz izlere 10 yankı olayı yaz (ölü halka 10 → 0)
+completed	Paket AT: 9-12 yaş boşluğuna 20 olay (kapısız içerik 15 → 29)
+completed	Paket AU/1: kulüp kataloğu, kalıcı üyelik kaydı ve gizli atletik yatkınlık
+completed	Paket AU/2: kulüp motoru, seçme (kesin kabul yok) ve futbol uygunluk kapısı
+completed	Paket AU/3: kulüp sezonunu yıl akışına bağla, okul değişimi kancası
+completed	Paket AU/4: 29 kulüp olayı ve üç yeni olay gereksinimi alanı
+completed	Paket AU/5: CI iki kırmızısının kök nedeni — kırılgan kimlik testi ve çift hedef penceresi
+completed	Paket AV: Spor Kariyeri menüsü ve kulüp kartları (UI)
+completed	Paket AW: PlayerBot kulüp seçimi, 500 hayat ölçümü ve okul bitince üyelik hatası
+completed	Paket AY: profesyonel futbol — deneme, sezon, sakatlık, kariyer sonu, kayıt
+completed	Paket AX: kaptanlık (D-134) ve futbol kapısı (D-135) açıldı, beceri darboğazı ölçüldü
+pending	Paket AZ: gerçek 2026-27 lig/kulüp kataloğu (ağ erişimi gerekiyor)
+completed	Paket AX eki: beceri gelişim tabanı onaylandı (D-136), Q-192 eki kapandı
+completed	Paket AY/2: futbol sonrası hayat — Ün bağlantısı, sönümleme ve kariyer sonu metni
+completed	Paket AY/3: futbolu hayatın hükmüne, ömür özetine ve hayat hedeflerine bağla
+completed	Paket AY/4: dövüş rekabetini hükme ekle, doymuş tavanları düzelt
+completed	Paket AY/5: dövüş kariyerini ömür özetine ekle, meslek satırını düzelt
+completed	Q-193 kararlaştırıldı: D-137…D-143 DECISIONS.md'ye işlendi
+completed	Q-192 ana maddeler kararlaştırıldı: D-144, D-145, D-146
+completed	Kalıcı bekçi: GameState alanlarının kodek kapsaması (save_field_coverage_test)
+completed	D-147 ve D-148: kulüp sağlık tabanı ve sporun Ün tavanı onaylandı
+completed	Paket BA/1: 869 onaysız sayıyı tara — ölü sabit, doymuş tavan, dekoratif sınır
+completed	Paket BA/2: 15 ölü sabiti sil, kalıcı bekçiyi ekle (prototype_only_dead_constant_test)
+completed	Paket BA/3: mali kademe sınır hatası (D-092 ihlali) ve işletme tavanı düzeltildi
+completed	Paket BA/4: D-176 kıdem tavanı — D-155 ustalık payı ilk kez çalışıyor
+completed	Paket BA/5: D-177 askerlikte erişilemeyen alt sınır kaldırıldı
+completed	Paket BA/6: Q-195 üç yanlış maddem düzeltildi (kopya sabitler, test okuma yüzeyi)
+completed	Paket BA/7: karar numarası çakışması — kararlarım D-164…D-175'e taşındı
+completed	Paket BB/1: Android derleme engeli ölçüldü, setup script ve belge yazıldı
+completed	Paket BB/2: Q-196 — 27 karar numarasının metni koddan çıkarıldı (onay bekliyor)
+completed	Paket BB/3: tarama kalan alanlara uzatıldı, 34 tavan adayı incelendi
+completed	Paket BC/1: Q-196 — 27 karar DECISIONS.md'ye yazıldı, bekçi listesi boşaldı
+completed	Paket BC/2: D-178 — kulüp seçmesinde sezon tavanı, beceri artık hep sayılıyor
+completed	Paket BD/1: ekran dökümü testi — hayat arayüzden yaşanıyor, beş ekran okunuyor
+completed	Paket BD/2: duruşma penceresi kapanmış rotada çöküyordu, düzeltildi
+completed	Paket BD/3: ölüm cümlesindeki "nedeniyle" eki koşulsuzdu, düzeltildi
+completed	Paket BD/4: hayvan satırının boş durumu bütün kataloğu diziyordu, kısaltıldı
+completed	Paket BD/5: günlük satırı küçük harfle başlıyordu — iki olayda yer tutucu düzeltildi
+completed	Paket BE/1: bot dökümü — dolu hayatın beş ekranı okundu (iş, eş, çocuk, ev)
+completed	Paket BE/2: "Mezuniyet sonrası" satırı hiç kapanmıyordu, motorun kapısına bağlandı
+completed	Paket BE/3: para değişimi binlik ayraçsız yazılıyordu, trNumber uygulandı
+completed	Paket BF/1: döküm altı arketipe çıktı — üniversite, işletme, riskli hayat
+completed	Paket BF/2: ekranda ham null ("Sınıf: null. sınıf") düzeltildi, beş ekran taranıyor
+completed	Paket BG/1: özel durum dökümü — cezaevi, duruşma, kritik sağlık, emeklilik taranarak bulundu
+completed	Q-199: tutukluyken maaş akmaya devam ediyor (hükümlü tarafı doğru çıktı)
+completed	Paket BH/1: D-179 — tutuklulukta maaş yok, kıdem donuyor, iş bitmiyor
+completed	Paket BI/1: dürbünün kör noktası — yıl içi kanca (onPreAge), yeni doğan bebek ekranı okundu
+completed	Paket BI/2: döküm "Hayat" bölümü yanlış sekmeyi basıyordu — ortak anaEkrana yardımcısı
+completed	Paket BI/3: bebekle sohbette okul/soru/korku kapandı, "kendi yaşındayken" yalnızca büyükte
+completed	Q-200 / D-180: sohbete ergen (13-17) kademesi eklendi, dört kademe eşitlendi
+completed	Paket BJ/1: denetim dönemi ve gebelik ekranları okundu, okunmamış ekran kalmadı
+completed	Paket BJ/2: oyuncunun çocuk yolu ölçüldü — 20 çiftin 18'i gebe, 12/12 doğumla kapandı
+completed	Q-202 / BK/1: bekleyen doğum üst künyede, Hayat ve İlişkiler ekranında görünür
+completed	Q-201 / BK/2: çocuk planı açık eylem oldu, bot haveChild() yerine gebelik yolundan geçiyor
+completed	Paket BK/3: çocuğa özel dört eylem (ödev, harçlık, hobi, kural) ve adviseChild kapısı
+completed	Paket BK/4: çocuğun yaş kademesi D-180 eşikleriyle (0-3 / 4-12 / 13-17 / 18+)
+completed	Paket BK/5: çocuğun yıl özeti (ChildMark fotoğrafı, ölçülen fark)
+completed	Paket BK/6: 500 aile hayatı, istismar taraması ve belgeler
+completed	Paket BL/1: modül anahtarı altyapısı (FeatureId kataloğu, kayıt, tek kapı)
+completed	Paket BL/2: Paket BK'nın beş özelliği geriye dönük anahtara bağlandı
+completed	Paket BL/3: Ayarlar → Modüller bölümü (kapatınca ne kaybolur yazılı)
+completed	Paket BL/4: izolasyon ölçümü — her modül kapalı/açık 100 hayat, 13 test
+completed	Paket BL/5: docs/FEATURE_FLAGS.md sözleşmesi ve silme tarifi
+completed	Paket BM: ilk yıllar havuzu — 31 olay (0-7 yaş) ve dört karşılık olayı
+completed	Paket BM: modül kapısı (EventEngine tek nokta) ve 0-7 aday olay ölçümü
+completed	Paket BM: tam süitin üç hatası — etiket yer tutucusu, döküm tohumu, sınav bekçisi
+completed	Paket BN: eşikteki yıllar — 16-20 yaş 29 olay ve dört karşılık
+completed	Paket BN: bant seçimi ölçümle (18'de 34 → 50,6; 19'da 26,5 → 43,5)
+completed	Paket BN: ilişki erişilebilirliği gerilemesi — bandın tanışma kapısı (%52,7 → %62,7)
+completed	Paket BN: iki bekçinin ölçüm yalıtımı (ekonomi ve mekanik, modüller kapalı)
+completed	Paket BO: kişi çözümü koşul denetiminden sonraya alındı (zar sözleşmesi)
+completed	Paket BO: requireReachable aday süzgecine taşındı (D-093 ile aynı hata sınıfı)
+completed	Paket BO: iki blok 400 hayat önce/sonra denge ölçümü (sapma yönü ters döndü)
+completed	Paket BO: zar bağımsızlığı bekçisi — eski motorda kırılıyor, yenisinde geçiyor
+completed	Paket BO: öğretmeni vefat eden sınıfa yeni öğretmen gelir (gerçek boşluk)
+completed	Paket BO: UI smoke takılmayı yutmuyor — duruşma penceresi arayüzden kapanıyor
+completed	Paket BP: oturulan ev kapısı (requiresOwnedResidence) ve 28 olay
+completed	Paket BP: yedi karşılık olayı — bırakılan izlerin hepsi okunuyor
+completed	Paket BP: aday olay sayısı kendi evinde 0'dan 19'a
+completed	Paket BP: bot hatası — alınan eve taşınmıyordu (18/25 → 5/25)
+completed	Paket BQ: görünüm seçimi (sistem/açık/koyu) ayarlarda ve kayıtta
+completed	Paket BQ: tema zorlaması golden kareleri için korundu
+completed	Paket BR/1: ilk eve taşınma hatırlatması (konut alımında, tek cümle)
+completed	Paket BS/0: arkadaşlık hunisi ölçümü — oyun değil bot hatası çıktı
+completed	Paket BS/0: bot tanışıklığa yoğunlaşıyor (arkadaşı olan hayat 58/80 → 78/80)
+completed	Paket BS/0: arkadaşlık hunisi kalıcı taban bekçisine çevrildi (80 hayat)
+completed	Paket BS/0: ekran dökümü ölü kare almıyor, hedefe ulaşan tohumu arıyor
+completed	Paket BS/1: vefat eden ebeveyn bekleyen bebeği yok saymıyor
+completed	Paket BT: 18 ev eşyası ve Ev ve yaşam mağazası
+completed	Paket BT: döşeme seviyesi, yıllık yıpranma ve modül anahtarı
+completed	Paket BT: Evinin hâli ekranı (temel/konfor yuvaları)
+completed	Paket BT: ölçüm — 175/200 hayat evini döşüyor, servet etkisi gürültü
+completed	Paket BU: komsu/eskiKomsu bağ türleri ve ev bağı (homeTie)
+completed	Paket BU: taşınmada komşu devri ve arkadaşlığa dönüşme
+completed	Paket BU: 12 kişi hedefli komşu olayı ve modül anahtarı
+completed	Paket BU: Komşular ekranı ve 20 bekçi testi
+completed	Paket BU: ölçüm — komşu tanıyan hayat 145/200, botun bütçe kısıtı bulundu
+completed	Paket BV: döküm hâle göre kare alıyor (yeni doğan, denetim, gebelik)
+completed	Paket BV: denetim dönemi Okul/Meslek satırında görünüyor
+completed	Paket BV: isim havuzları 20 → 60 ve gelin/damat + torun ad koruması
+completed	Paket BV: ölçüm — aynı adlı iki kişi 283/300 → 106/300
+completed	Paket BV: ad kaymasıyla kırılan 4 bekçi dağılıma ve formüle çevrildi
+completed	Paket BW/0: çakışan tarafı sayan ölçüm — 52/63 çocuk-çocuk çıktı
+completed	Paket BW/0: bot bebeğe oyunun havuzundan ad veriyor (28/99 → 0/99)
+completed	Paket BW/0: sevgili, okul arkadaşı ve tanışıklık ad koruması
+completed	Paket BW/0: üç testli kalıcı bekçi (60 hayat + kalabalık kayıt)
+completed	Paket BX: zincir hunisi ölçüldü — 31 hayatta uygun, 1 kez görülüyor
+completed	Paket BX: sürdürülen uğraşa öncelik (×6) ve ugras_onceligi anahtarı
+completed	Paket BX: bot okul değişince eski kulübüne yeniden yazılıyor
+completed	Paket BX: üç testli bekçi ve belgeler
+completed	Paket BY: kapsam modu (jobCoverage) — varsayılan kapalı ölçüm aracı
+completed	Paket BY: yz_kurye 210 yıl ilanda açıktı, engel botun yaş filtresiydi
+completed	Paket BY: girilemeyen 16 meslek gerekçeye göre öbeklendi
+completed	Paket BY: ehliyet legi ulaşılabilirlik testine eklendi + 3 bekçi
+completed	Paket BZ: kampüs olayları 1-12 kapısındaydı, üniversiteliye çıkmıyordu
+completed	Paket BZ: requiresStudent kapısı ve dört olayın yeniden bağlanması
+completed	Paket BZ: ölçüm — uygun hayat 8 → 81, görülme 0 → 25
+completed	Paket BZ: dört testli bekçi (kaynağı yakalayan tarayıcı dahil)
+completed	Paket BY/1: kapsam modunun iş değiştirme dalı ölü koddu, düzeltildi
+completed	Paket BY/1: ölçüm — 52/55 meslek, hayat başına 2,5 → 14 iş
+completed	Paket BZ/1: iş varsayan iki metin düzeltildi ve bekçiye bağlandı
+completed	Paket CA: sigorta kataloğu, motoru ve modül anahtarı
+completed	Paket CA: sağlık krizi ve dört ev hasarı olayı poliçeden geçiyor
+completed	Paket CA: Sigorta ekranı (döküm, iptal, geçmiş poliçeler)
+completed	Paket CA: ölçüm — primler hasar dağılımına göre kalibre edildi
+completed	Paket CA: 10 testli bekçi ve Q-220 (yaşa göre prim, kasko)
+completed	Paket CB: kütüphanede üç kimlik çakışması (22 satır / 19 tekil)
+completed	Paket CB: okuma merdiveninin tepesi ulaşılamazdı — raf 39 kitaba çıktı
+completed	Paket CB: kütüphane ekranı türe göre gruplandı, bitirdiklerin en alta
+completed	Paket CB: bot kitap okumuyordu — D-125 kesintisi yerinde karşılanıyor
+completed	Paket CB: 11 testli bekçi, iki eski tavan bekçisi sıkılaştırıldı ve Q-221
+completed	Paket CC: 65+ ölçümü — 228 uygun olaydan yalnızca 11'i yaşa ait
+completed	Paket CC: son yıllar havuzu — 25 ana olay, beş başlık
+completed	Paket CC: altı hikâye izi ve altı karşılığı (sessiz iz yok)
+completed	Paket CC: FeatureId.sonYillar anahtarı ve fail-closed kapısı
+completed	Paket CC: 11 testli bekçi, modül izolasyonu ve Q-222
+completed	Paket CC/1: milyarder bekçisi tasarımın hedefine çevrildi (Q-223)
+completed	Paket CD: zincir halkası hunisi ölçümü (izi yazan / iz / uygun / görülen)
+completed	Paket CD: choiceCoverage modu — dal gezme 456'dan 528'e
+completed	Paket CD: EKSIKLER'in "hiç çıkmayan olay" tablosu tazelendi
+completed	Paket CE: altı olayın hunisi — dördünde darboğaz futbol kulübü
+completed	Paket CE: üyelik 3,9 yıl, görülen kulüp olayı 1,6 (havuz 14)
+completed	Paket CE: 3 testli ölçüm bekçisi ve Q-224 (olay garantisi)
+completed	Paket CF: ölen hayvanın yerine yenisi (0/240 -> 44 ve 40)
+completed	Paket CF: tür çeşitliliği ve oyunun ad havuzu; timsah ilk kez gezildi
+pending	Paket BO: motorun zar tüketimi — kişi çözümü koşul denetiminden sonra
+pending	Q-207: sınav ağırlığı bekçisinin yöntemi — onay bekliyor
+pending	Q-195: zam tavanının doyması, askerlik alt sınırı ve dört bağlanmamış mekanik
+pending	Q-196: 27 tanımsız karar numarası (kodda yetki, DECISIONS.md'de yok)
+pending	Q-197: okul kulübü seçmesinde beceri 8. sezondan sonra ölüyor
+pending	Q-198: ekran dökümünden sekiz soru (askerlik yaşı, emeklilik şartı, ad çakışması...)
+pending	Q-198 EKİ 2: üniversite öğrencisi K-12 kartını görüyor, kendi kartı yok
+pending	Q-204: gebelik 55'e kadar açık ama doğum 45'te kapalı — karar bekliyor
+pending	Q-205: çocukla yakınlık medyanı tavanda (100) — karar bekliyor
+completed	Paket CE: kulüp zincirinin derinliği pencereye sığmıyor (ölçüm)
+completed	Paket CF: hayvan sahiplenme aracının üç eksiği
+completed	Paket CF/1: %70 eşiği hiç desteklenmiyordu (gebelik hunisi ölçümü)
+completed	Paket CG: içerideyken taşınma ve bebeğin iki adı
+pending	Q-225: içerideyken hayvanın bakımı ve sağlığı — karar bekliyor
+completed	Paket CH: yaş bandı olay yoğunluğu ölçüldü (boş yıl yok)
+pending	Q-226: ilk üç yıl tek tuşlu ara sahne mi kalsın — karar bekliyor
+completed	Paket CI: arkadaş grubu (kayıt, kurma düğmesi, 9 olay, modül anahtarı)
+pending	Q-227: arkadaş grubunun eşikleri ve seyrekliği — karar bekliyor
+completed	Paket CJ: yaşlılıkta bakım (kim yanında, üç kapı, modül anahtarı)
+pending	Q-228: yaşlılıkta bakımın eşikleri ve çocuğun payı — karar bekliyor
+completed	Paket CK: görülmeyen iki olay (kapı mı seyreklik mi bot mu)
+pending	Q-229: kardeş olayının yaş penceresi ve sabıkalının zenginliği — karar bekliyor
+completed	Paket CL: dökümü yeni kartların üstüne tut (iki kusur)
+completed	Paket CM: yaşlılığın karşılığı — kaydı okuyan altı olay
+completed	Paket CN: çocuk da hastalanır (paylaşılan kural, türetilmiş zar)
+pending	Q-230: çocuk hastalığının kapsamı torun/yeğene genişlesin mi — karar bekliyor
+completed	Paket CO: telefon boyutunda ilk izlenim (açılış ekranı ve taşma bekçisi)
+completed	Paket CP: kapsam botunun dokunmadığı 34 aksiyon (%74,6 → %89,9)
+completed	Paket CQ: kulüpteki yerin adı (rekabetçi olmayanda "Yedek" yazmıyor)
+completed	Paket CR: bekleyen kareler ölçüme görünmüyordu (onPending kancası)
