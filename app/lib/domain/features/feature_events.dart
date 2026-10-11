@@ -9,6 +9,7 @@
 /// tamamen silme tarifi: `docs/FEATURE_FLAGS.md`.
 library;
 
+import '../../data/event_pool_babyhood.dart';
 import '../../data/event_pool_early_years.dart';
 import '../../data/event_pool_home.dart';
 import '../../data/event_pool_elder_support.dart';
@@ -26,7 +27,12 @@ abstract final class FeatureEvents {
   /// aday olmaz.
   static const Map<FeatureId, List<GameEvent>> pools =
       <FeatureId, List<GameEvent>>{
-    FeatureId.ilkYillarOlaylari: kEarlyYearsEvents,
+    // Paket BM'in 31 olayı + Paket CX'in 16 bebeklik olayı: ikisi de
+    // ilk yılların içeriği, tek anahtara bağlı.
+    FeatureId.ilkYillarOlaylari: <GameEvent>[
+      ...kEarlyYearsEvents,
+      ...kBabyhoodEvents,
+    ],
     FeatureId.esiktekiYillar: kThresholdYearsEvents,
     FeatureId.oturulanEv: kHomeEvents,
     FeatureId.komsular: kNeighbourEvents,

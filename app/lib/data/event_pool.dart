@@ -26,6 +26,7 @@ import 'event_pool_elder_support.dart';
 import 'event_pool_family_gathering.dart';
 import 'event_pool_extra.dart';
 import 'event_pool_exam.dart';
+import 'event_pool_babyhood.dart';
 import 'event_pool_infancy.dart';
 import 'event_pool_midlife.dart';
 import 'event_pool_hobby.dart';
@@ -1719,6 +1720,7 @@ const List<GameEvent> kEventPool = <GameEvent>[
 
   // İlk yıllar: 0-4 yaş (Paket 13).
   ...kInfancyEvents,
+  ...kBabyhoodEvents,
   ...kExamEvents,
   ...kMidlifeEvents,
 

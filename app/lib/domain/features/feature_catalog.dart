@@ -96,10 +96,12 @@ enum FeatureId {
     lostWhenOff:
         'Bebeklik ve okul öncesi yıllarında çıkan yeni olaylar kalkar; '
         'ilk yıllar daha sessiz geçer.',
-    paket: 'Paket BM — ilk yıllar',
+    paket: 'Paket BM — ilk yıllar · Paket CX — bebeklik',
     removableFiles: <String>[
       'app/lib/data/event_pool_early_years.dart',
+      'app/lib/data/event_pool_babyhood.dart',
       'app/test/paket_bm_ilk_yillar_test.dart',
+      'app/test/paket_cx_bebeklik_test.dart',
     ],
   ),
 

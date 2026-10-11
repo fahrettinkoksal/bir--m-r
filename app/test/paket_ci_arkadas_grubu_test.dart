@@ -300,7 +300,19 @@ void main() {
   });
 
   group('Paket CI §4 — oyuncunun yolu gerçekten yürünüyor', () {
-    test('120 hayatta grup kuruluyor, buluşuluyor, dağılıyor', () {
+    // Kohort Paket CX'te büyütüldü. Eski hâli arketip başına 12 hayattı
+    // ama **tohumlar arketipler arasında paylaşılıyordu** (7000 + i*13),
+    // yani 120 hayat değil 12 tohum ölçülüyordu. Grup kurmak seyrek bir
+    // olay olduğu için ölçüm tohuma yapışmıştı: Paket CX havuzu zarı
+    // kaydırınca "görülen olay" 5-6'dan 3'e düştü ve eşik patladı.
+    // Ölçüm (Paket CX, ayrık tohum):
+    //   120 hayat, paylaşılan tohum : kuran 3,  görülen 3/9
+    //   120 hayat, ayrık tohum A/B  : kuran 8/6, görülen 3/9 ve 7/9
+    //   300 hayat, iki tohum tabanı : kuran 15/10, görülen 6/9 ve 8/9
+    //   500 hayat, iki tohum tabanı : kuran 22/17, görülen 8/9 ve 8/9
+    // 500 hayatta sayı iki tohum tabanında da aynı yere oturuyor; eşikler
+    // bu yüzden hem **daha sıkı** hem de ölçümün altında.
+    test('500 hayatta grup kuruluyor, buluşuluyor, dağılıyor', () {
       int kuran = 0;
       int bulusan = 0;
       int toplamBulusma = 0;
@@ -309,13 +321,15 @@ void main() {
       final Set<String> gorulen = <String>{};
       final Set<String> grupIds =
           kFriendCircleEvents.map((GameEvent e) => e.id).toSet();
-      for (final PlayerArchetype a in PlayerArchetype.values) {
-        for (int i = 0; i < 12; i++) {
+      for (int ark = 0; ark < PlayerArchetype.values.length; ark++) {
+        final PlayerArchetype a = PlayerArchetype.values[ark];
+        for (int i = 0; i < 50; i++) {
           bool dagilmaGordu = false;
           bool ayrilmaGordu = false;
           final BotLifeResult r = playBotLife(
             archetype: a,
-            seed: 7000 + i * 13,
+            // Tohum arketipe göre de ayrışır: 500 ayrı hayat.
+            seed: 7000 + ark * 1000 + i * 13,
             onPreAge: (GameState s) {
               // Dağılan grup kayıtta kalmalı ve gerekçesi günlükte
               // olmalı: sessiz kayıp yok.
@@ -345,21 +359,22 @@ void main() {
         }
       }
       // ignore: avoid_print
-      print('OLCUM — grup: kuran $kuran/120, buluşan $bulusan '
+      print('OLCUM — grup: kuran $kuran/500, buluşan $bulusan '
           '(toplam $toplamBulusma buluşma), dağılan $dagilan, '
           'ayrılma satırı gören $ayrilmaSatiri, görülen olay '
           '${gorulen.length}/${grupIds.length}');
 
-      // Ölçülen: 8 kuran, 2 buluşan (3 buluşma), 2 dağılan, 5-6 olay.
-      // Eşikler ölçümün altında: amaç kalibrasyon değil, **yolun
-      // kapanmasını** yakalamak (Paket BP dersi).
-      expect(kuran, greaterThanOrEqualTo(3),
-          reason: 'grup 120 hayatta neredeyse hiç kurulmuyor; kapı ya '
+      // Ölçülen (500 hayat, iki tohum tabanı): kuran 17-22,
+      // buluşma 9-10, görülen 8/9. Eşikler ölçümün altında: amaç
+      // kalibrasyon değil, **yolun kapanmasını** yakalamak (Paket BP
+      // dersi). Eski eşikler 3/1/4'tü; kohort büyüdüğü için sıkılaştı.
+      expect(kuran, greaterThanOrEqualTo(8),
+          reason: 'grup 500 hayatta neredeyse hiç kurulmuyor; kapı ya '
               'bot ya oyun tarafında kapanmış');
-      expect(toplamBulusma, greaterThanOrEqualTo(1),
-          reason: 'grupla hiç buluşulmadı; refakatçi kuralı buluşmayı '
-              'yutuyor olabilir (ölçümde tam bu olmuştu)');
-      expect(gorulen.length, greaterThanOrEqualTo(4),
+      expect(toplamBulusma, greaterThanOrEqualTo(3),
+          reason: 'grupla neredeyse hiç buluşulmadı; refakatçi kuralı '
+              'buluşmayı yutuyor olabilir (ölçümde tam bu olmuştu)');
+      expect(gorulen.length, greaterThanOrEqualTo(5),
           reason: 'dokuz grup olayının yalnızca ${gorulen.length} '
               'tanesi görüldü');
     });

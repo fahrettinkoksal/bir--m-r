@@ -637,6 +637,49 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yani sınav asıl korumak istediğim şeyi korumuyordu. Yalnızca o
   sinyalle tutan bir çift eklenince ısırma tuttu. "Yeşil geçti" ile
   "doğru şeyi koruyor" aynı şey değil.
+- **Paket CX.** "Bu bant zayıf" bir tespit değil, ölçülmemiş bir
+  cümledir. §4.1 aylarca "0-5 en zayıf" diyordu; yaş yaş sayınca yaş 0
+  ile yaş 12 arasındaki fark **on kat** çıktı (9 aday / 92 aday). Bantı
+  düzeltmeye başlamadan önce bandın içinde **hangi yıl** açık, onu say.
+- **Paket CX.** İçerik eklemek **çeşitliliği** büyütür, **tempoyu**
+  büyütmez. Motor yılın olayını bir kez çeker; 16 olay yazmak bir
+  hayatta yaş 0'da görülen olay sayısını değiştirmez. Ölçümü yazarken
+  ikisini ayır, yoksa açık kalan soruyu (Q-226) kapattığını sanırsın.
+- **Paket CX.** Kendi bekçim ölü içeriği savunuyordu. §5'i "bu iki
+  karşılık olayı bot hayatında hiç aday olmasın" diye kurmuştum; bot
+  bayrağı yazıyordu, test patladı ve **test haksızdı**. Doğru soru
+  küme bazlı "hiç gelmesin" değil, kare bazlı "izi olmayan karede
+  gelmesin"di. Bir bekçi patladığında ilk şüphelenilecek şey koddan
+  önce bekçinin **sorduğu soru** olmalı.
+- **Paket CX.** Kapı sözleşmesini **oku**, çıkarım yapma.
+  `livingRelations`'ı "bu bağların hepsi hayatta olmalı" sandım; oysa
+  `game_event.dart` "**en az bir** kişi gerekir; olay o kişiyle
+  kurulur" diyor ve bu alanın hemen üstünde yazılı. Yanlış varsayımım
+  bir bekçiyi yanlış kurdu — ama patlaması gerçek bir kusuru ortaya
+  çıkardı: "İki büyükanne" diye başlayan bir metin yazmıştım, kapı ise
+  bir büyükanneyi yetiyordu. **"En az bir" kapısı olan olayın metni
+  kişi ya da sayı varsayamaz**; artık kaynak düzeyinde bekçisi var.
+- **Paket CX.** İçerik eklemenin bedeli yalnız zar kayması değil,
+  **başka paketin oranını** bozmak da olabilir. Havuzu anahtarsız
+  bıraktım; Paket BM'in "modül 0 yaşta aday sayısını ikiye katlar"
+  iddiası, benim olaylarım iki kohortta da sayıldığı için devrildi.
+  Çözüm BM'in bekçisini yeniden yazmak değil, içeriği **ait olduğu
+  anahtara** bağlamaktı (kataloğun `lostWhenOff` metni zaten
+  "bebeklik" diyordu). Kural: Paket BL'den sonra yeni içerik havuzu
+  anahtarsız girmez; emsal BM, BN, BP, BU, CC, CI, CJ, CS.
+- **Paket CX.** Bir ölçüm **tohuma yapışmışsa** eşiği düşürmek yanlış
+  cevaptır. Paket CI §4 arketip başına 12 hayat koşuyordu ama tohumlar
+  arketipler arasında paylaşılıyordu: 120 hayat değil 12 tohum. Grup
+  kurmak seyrek olduğu için herhangi bir zar kayması ölçümü deviriyordu
+  (görülen olay tohuma göre 3 ile 7 arası). Kohortu 500 ayrık tohuma
+  çıkardım, sayı iki tohum tabanında da aynı yere oturdu (8/9) ve
+  eşikleri **sıkılaştırdım**. İnce kohort, gevşek eşikten daha
+  tehlikelidir: yeşil kalır ama hiçbir şey söylemez.
+- **Paket CX.** Bir bulgu, testin görüş alanından **çıkarak** kapanmaz.
+  `infancy_events_test.dart` büyükanne olayımı yakalamıştı; olayı ayrı
+  dosyaya taşıdığımda o test artık onu görmüyordu — yani düzelmiş gibi
+  oldu. Kapsamı kaybetmemek için denetimi kendi bekçimde daha genişine
+  kurdum. Taşınan kod, taşınan sorumluluk demek değil.
 
 ## Pano
 

@@ -430,6 +430,44 @@ temalar onay bekliyor: Q-139.**
 **Hâlâ en zayıf bant 0-5** (24 olay). Bebeklik için daha fazla mı
 yazılmalı, yoksa o yaş hızlı mı geçmeli — Q-139'un 5. sorusu.
 
+> **GÜNCELLEME (11 Ekim 2026, Paket CX).** "0-5 en zayıf" tespiti
+> yaş yaş ölçüldü: 60 bot hayatında her karede motorun **aday** olay
+> kümesi sayıldı (`EventEngine.debugEligibleIds`, `onPreAge`).
+>
+> | Yaş | Aday ortalama | Tekil aday |
+> |---|---|---|
+> | 0 | 8,6 | **9** |
+> | 1 | 14,4 | 16 |
+> | 2 | 17,2 | 20 |
+> | 6 | 30,6 | 39 |
+> | 12 | 52,4 | **92** |
+>
+> Yaş 0, yaş 12'nin **onda biri** kadar içerik görüyordu (9/92 = 0,098).
+> Yeni dosya `event_pool_babyhood.dart` içine **16 olay** yazıldı
+> (`FeatureId.ilkYillarOlaylari` anahtarına bağlı; Paket 13'ün altı
+> olayına dokunulmadı): doğum
+> altını, kime benzediği, ilk banyo, beşik montajı, nüfusa yazdırma,
+> iki büyükanne, kalın giydirme, yaz sıcağı, bebek arabası ve kaldırım,
+> bırakmadığı oyuncak, evin sessizliği, ilk saç kesimi, akrabadan
+> mikrop, yürüme kıyaslaması; artı iki iz okuyan karşılık (çekmecedeki
+> altın 7-18, oyuncağa veda 6-14). Aynı tohumlarla yeniden ölçüm:
+>
+> | Yaş | Aday ortalama | Tekil aday |
+> |---|---|---|
+> | 0 | 8,6 → **19,1** | 9 → **20** |
+> | 1 | 14,4 → **27,9** | 16 → **30** |
+> | 2 | 17,2 → **27,0** | 20 → **30** |
+> | 12 | 52,4 → 52,5 | 92 → 86 |
+>
+> Oran 0,098 → **0,220**. Bu **çeşitlilik**tir, tempo değil: motor yılın
+> olayını yaş alırken yine bir kez çeker, yani bir hayatta yaş 0'da
+> görülen olay sayısı değişmedi; değişen, farklı oynanışlarda farklı
+> şey görme şansı. İlk üç yılın **temposu** hâlâ **Q-226**'nın, "bebeklik
+> uzasın mı kısalsın mı" sorusu hâlâ **Q-139 #5**'in kararıdır; Paket CX
+> ikisini de kapatmaz. Kalıcı bekçi: `test/paket_cx_bebeklik_test.dart`
+> (aday tabanları, 14 olayın hepsinin gerçek karede aday olması, baba
+> hanede değilken beşik olayının aday olmaması, iz kapısı).
+
 ### 4.2 Sunulmayan içerik — yeniden ölçüldü
 
 **Eski kayıt (geçersiz):** "120 hayatta 221 olayın 61'i hiç çıkmadı."

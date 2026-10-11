@@ -8537,3 +8537,152 @@ metin sinyaliyle eşleşir) ve ısırma tuttu: metin sinyali kapalıyken
 
 Bu araç bir **kolaylık**, kapı değil: `scripts/sabit_taramasi.py` gibi
 depo kuralını zorlamaz, kuralı uygulamayı kolaylaştırır.
+
+## Paket CX — bebekliğin on katlık açığı (11 Ekim 2026)
+
+`docs/EKSIKLER.md` §4.1 "hâlâ en zayıf bant 0-5" diyordu ama sayı **yaş
+yaş** değildi. Ölçtüm: 60 bot hayatı, her karede motorun aday olay
+kümesi (`EventEngine.debugEligibleIds`, `onPreAge` kancası).
+
+| Yaş | Aday ortalama | Tekil aday |
+|---|---|---|
+| 0 | 8,6 | **9** |
+| 1 | 14,4 | 16 |
+| 2 | 17,2 | 20 |
+| 6 | 30,6 | 39 |
+| 12 | 52,4 | **92** |
+
+Yaş 0, yaş 12'nin **onda biri** kadar içerik görüyordu (0,098).
+
+**Yapıldı.** Yeni dosya `app/lib/data/event_pool_babyhood.dart` — **16
+olay**: doğum altını (bozdurulsun mu saklanılsın mı), kime benzediği
+tartışması, ilk banyo, beşik montajı, nüfusa yazdırma, kucak sırası,
+kalın giydirme, yaz sıcağı, bebek arabasının kaldırıma sığmaması,
+bırakmadığı oyuncak, evin sessizliği, ilk saç kesimi, akrabadan gelen
+mikrop, yürüme kıyaslaması; artı iki **iz okuyan karşılık** —
+çekmecedeki altın (7-18) ve oyuncağa veda (6-14), iki bayrakla
+(`bebeklik_altin_saklandi`, `bebeklik_vazgecmedigi_oyuncak`).
+
+Paket 13'ün `event_pool_infancy.dart` dosyasına **dokunulmadı**: oradaki
+altı olay oyunun en eski içeriği ve her zaman açık. Dosyanın sesi
+korundu: bu yaşta kararı aile verir, seçimler bebeğin bilinçli tercihi
+gibi yazılmaz.
+
+**Aynı tohumlarla yeniden ölçüm** (ve bekçinin kendi tohumlarıyla):
+
+| Yaş | Önce | Sonra | Bekçi tohumu |
+|---|---|---|---|
+| 0 | 8,6 / 9 | **19,1 / 20** | 19,4 / 20 |
+| 1 | 14,4 / 16 | **27,9 / 30** | 28,3 / 30 |
+| 2 | 17,2 / 20 | **27,0 / 30** | 27,7 / 30 |
+| 12 | 52,4 / 92 | 52,5 / 86 | 52,0 / 91 |
+
+Oran 0,098 → **0,220**.
+
+**Ne değişmedi: tempo.** Motor yılın olayını yaş alırken yine bir kez
+çeker. Bir hayatta yaş 0'da görülen olay **sayısı** aynı; değişen,
+farklı oynanışlarda farklı şey görme şansı — yani çeşitlilik. İlk üç
+yılın temposu **Q-226**'nın, "bebeklik uzasın mı" sorusu **Q-139
+#5**'in kararı; Paket CX ikisini de kapatmaz. İkisine de ek yazıldı.
+
+**Anahtarı ilk turda atlamıştım; süit yakaladı.** Havuzu anahtarsız
+bıraktım ("var olan kataloğun büyümesi" gerekçesiyle) ve
+`paket_bm_ilk_yillar_test.dart` patladı: Paket BM'in iddiası "ilk yıllar
+modülü 0 yaşta aday sayısını **en az ikiye katlar**" idi. Benim
+olaylarım anahtarsız olduğu için **iki kohortta da** sayılıyordu; kapalı
+kohort 3,0'dan 13,5'e çıktı ve oran 1,42'ye düştü. Doğru çözüm BM'in
+bekçisini yeniden yazmak değil, içeriği ait olduğu anahtara bağlamaktı:
+16 olay `FeatureId.ilkYillarOlaylari` kapısına girdi. Kataloğun
+`lostWhenOff` metni zaten "**Bebeklik** ve okul öncesi yıllarında çıkan
+yeni olaylar kalkar" diyordu, yani olaylarım bu anahtarın kendi
+kapsamındaydı. Sonuç: 0 yaşta kapalı **3,0** / açık **19,1** → 6,4 kat;
+BM'in bekçisine **tek satır dokunulmadı.** Ayrıca BL'in silme tarifi
+dürüst kalsın diye yeni dosya ve bekçi `removableFiles`'a yazıldı
+(`event_pool_infancy.dart` silinemez, 0-2'nin eski olayları orada).
+
+**Bebeğin cüzdanı sorusunu denetledim.** Yeni olaylardan dördü para
+yazıyor; 0-1 yaşındaki oyuncunun kesesine para girmesi tuhaf duracak
+diye bütün havuzları taradım. Zaten var olan bir kalıp:
+`event_pool_infancy.dart`'taki `bebek_atesli_gece` (Paket 13) hastane
+seçiminde **-4.500 TL** yazıyor, yani bu yaşta para hareketi ailenin
+harcamasının oyuncunun defterinde görünmesi demek. Yeni sayılar aynı
+ölçekte: nüfusa yazdırma -250, akrabadan mikrop -900, doğum altını
++4.200 (0-1) ve saklanmışsa okul masrafına +9.500 (7-18). Altının
+4.200 → 9.500 değerlenmesi havuzdaki diğer para değerleri gibi **elle
+yazıldı**, merkezi çıpaya bağlı değil; bağlanması gerekir mi diye
+**Q-139 #5 ekinde** soruldu.
+
+**Bekçi:** `app/test/paket_cx_bebeklik_test.dart` — 8 bölüm. Aday
+tabanları (ölçümün altında, hedefin değil), 0/12 oranı, 14 olayın
+**hepsinin** gerçek karede aday olması (ölü içerik yok), bağ kapısının
+kare bazında denetimi, çok bağlı kapıda metnin kişi/sayı varsaymaması,
+iz kapısı, iki bayrağın hem yazılıp hem okunması, anahtar kapalıyken
+sıfır aday.
+
+**Isırma denemesi — dört ayrı mutasyon, dördü de yakalandı:**
+
+1. Havuz CX öncesine döndürüldü → 6 bölümden **5'i** patladı ve eski
+   sayılar birebir geri geldi (8,9 / 14,8 / 17,8; oran 0,097).
+2. `bebek_besik_montaji`'nin `livingRelations` kapısı söküldü →
+   babasız 34 karenin **34'ünde** aday oldu (önce 0).
+3. `bebek_cekmecedeki_altin`'in `requiredFlags` kapısı söküldü →
+   **335** karede izi olmadan aday oldu (önce 0).
+4. Büyükanne olayının hatalı metni geri konuldu → §4b iki kusuru da
+   adıyla saydı ("İki büyükanne" ve "Annenin kucağını seç").
+
+**İki kez kendi testimi düzelttim, bir kez de kendi içeriğimi.**
+
+- §5'i ilk yazışımda "bu iki karşılık bot hayatında hiç aday olmasın"
+  diye kurmuştum — botun altını saklamayacağını varsaymıştım. Patladı:
+  bot saklıyor, bayrak yazılıyor, karşılık gerçekten geliyor
+  (`bebek_oyuncaga_veda` 24 kare, `bebek_cekmecedeki_altin` 6 kare).
+  Yani testim **ölü içeriği savunuyordu**. Küme bazlı "hiç gelmesin"
+  iddiası, kare bazlı "izi olmayan karede gelmesin" denetimine çevrildi.
+- §4'ü `livingRelations`'ı "**hepsi** hayatta olmalı" sanarak yazdım.
+  Sözleşme `game_event.dart`'ta yazılı: "bu bağlardan hayatta **en az
+  bir** kişi gerekir; olay o kişiyle kurulur." Yani denetimim yanlıştı —
+  ama patlaması **gerçek bir kusur** gösterdi (aşağıda). §4 sözleşmeye
+  göre düzeltildi ve ısırabilen iddia tek bağlı kapıya bağlandı
+  (`bebek_besik_montaji` yalnız `baba` istiyor).
+- **Gerçek kusur:** `bebek_buyukanne_cekismesi` metni "**İki**
+  büyükanne" diyordu ve ikinci seçimi "**Annenin** kucağını seç" idi.
+  Kapı ise iki büyükanneden **birinin** hayatta olmasını yetiyor, anneyi
+  hiç istemiyor. Yani tek büyükanneli ya da annesiz karede metin yalan
+  söylüyordu. Metin kişi ve sayı varsaymayacak şekilde yeniden yazıldı
+  ("Kucaktan kucağa dolaştırıldın. Sıranın kimde olduğu konusunda sessiz
+  bir çekişme var."), seçimler de öyle. Kalıcı bekçi §4b: çok bağlı
+  kapıdaki hiçbir metin belirli kişiyi ya da sayıyı anamaz.
+
+**Paket CI'ın ölçümü tohuma yapışmış çıktı (üçüncü patlama).** Süitte
+`paket_ci_arkadas_grubu_test.dart` §4 de kırmızı oldu: dokuz grup
+olayının görüleni 5-6'dan **3**'e düştü, eşik 4'tü. Kök neden benim
+havuzum değil, kohortun kendisi: `seed: 7000 + i * 13` ile **her arketip
+aynı 12 tohumu** kullanıyordu, yani 120 hayat değil 12 tohum
+ölçülüyordu. Ölçtüm:
+
+| Kohort | kuran | görülen olay |
+|---|---|---|
+| 120 hayat, paylaşılan tohum | 3 | 3/9 |
+| 120 hayat, ayrık tohum A | 8 | 3/9 |
+| 120 hayat, ayrık tohum B | 6 | **7/9** |
+| 300 hayat, iki tohum tabanı | 15 / 10 | 6/9 ve 8/9 |
+| 500 hayat, iki tohum tabanı | 22 / 17 | **8/9 ve 8/9** |
+
+Yani eşik 4 **tohum şansıydı**; grup kurmak seyrek olduğu için herhangi
+bir zar kaymasında devriliyordu. Eşiği düşürmek yerine kohortu
+büyüttüm: tohum arketipe göre de ayrışıyor, hayat sayısı 120 → **500**.
+Eşikler bu yüzden **sıkılaştı**: kuran 3 → **8**, buluşma 1 → **3**,
+görülen olay 4 → **5**. Ölçümde çıkan: kuran 22, buluşma 10, görülen
+8/9.
+
+**Dördüncü patlama kendiliğinden kapandı ve bunu susturmak olurdu.**
+`infancy_events_test.dart`'ın "ebeveyni olmayan bebeğe ebeveynli olay
+çıkmaz" testi büyükanne olayımı yakalamıştı. O test `kInfancyEvents`
+üzerinde döndüğü için olay ayrı dosyaya taşınınca testin görüş alanından
+çıktı — yani düzelmiş gibi oldu. Bu bir çözüm değil; kapsamı kendi
+bekçimde **daha genişine** taşıdım: §4 artık `kBabyhoodEvents`'in
+**bütün** bağ kapılarını her karede denetliyor, §4b de metin/kapı
+uyumunu kaynak düzeyinde.
+
+**Tam süit** koşuldu (içerik eklemek bütün hayatların zar akışını
+kaydırır — Paket CN dersi; hedefli küme yetmez).
