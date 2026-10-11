@@ -9439,3 +9439,56 @@ adını yazar.
 **Etkilenen kod:** `app/lib/domain/sports/school_club_engine.dart`,
 `app/lib/ui/screens/sections/school_clubs_page.dart`,
 `app/test/paket_cq_kulup_etiketi_test.dart`.
+
+---
+
+### Q-233 — Dulluğun ilk yılı garanti edilsin mi, zara mı kalsın?
+
+**Durum:** öneri + varsayılan hazır, **kararı bekliyor**. Paket CS
+havuzu yazdı ve çalışıyor; bu soru yalnızca **yoğunluk** hakkında.
+Q-224'ün (kulüp olayı yılda bir garanti edilsin mi) aynı kalıbı.
+
+**Ölçülen tablo (250 bot hayatı, dört arketip).**
+
+| ölçülen | havuzdan önce | havuzdan sonra |
+|---|---|---|
+| dul kalan hayat | 43 / 250 | 43 / 250 |
+| toplam dul yılı | 502 | 556 |
+| dulluğa ait olay | **0** | 60 |
+| en az bir dulluk olayı gören hayat | 0 | **29 / 43 (%67)** |
+
+Yani dul kalan her üç hayattan ikisi artık o yılların kendi
+anlatısını görüyor. Kalan 14 hayat hiç görmüyor — çünkü olaylar genel
+havuzla aynı çekilişte yarışıyor ve dulluk kısa sürebiliyor (medyan 10
+yıl ama en az 0).
+
+**Soru iki ayrı yerde.**
+
+1. **İlk yıl.** `maxWidowYears: 1` ile yazılan beş olay (evin
+   sessizliği, tek sofra, komşunun tenceresi, dolabın öteki tarafı,
+   evraklar) yalnızca iki yıllık bir pencerede yarışıyor. Ölçümde
+   `dul_evin_sessizligi` ve `dul_ilk_tek_sofra` 250 hayatta birer kez
+   çıktı. Eşini kaybeden oyuncunun **o yıl** hiçbir şey okumaması
+   doğru mu?
+2. **Uzun dulluk.** 39 yıl dul yaşayan bir oyuncu var. O yılların
+   kaçında dulluk olayı gelmesi iyi olur — yılda bir mi, beş yılda bir
+   mi, zar ne verirse mi?
+
+**Önerim (ve kod yazılmadı, bu yalnızca öneri).** İlk yıl için
+**tek seferlik bir garanti**: eşini kaybettiği yılın ardından gelen
+ilk yılda, ilk yıl havuzundan bir olay kesin gelsin (`priority`
+değil — o 120 katsayısıyla dönüm noktası mertebesi; ayrı ve küçük bir
+"bir kez garanti" kuralı). Uzun dulluk tarafında **değişiklik
+önermiyorum**: 556 yılda 60 olay, yılda ~%11 — anma yılda bir gelen
+bir tören değil, arada bir çarpan bir şey; bunu artırmak yılları
+törene çevirir.
+
+**Varsayılan (karar gelmezse):** hiçbir garanti eklenmez, bugünkü
+hali kalır — %67 gören hayat oranı ölçülmüş ve belgede yazılıdır.
+Bu, "bir şey yapılmadı" değil **ölçülmüş bir tercihtir**: dulluk
+oyuncuya zorla okutulan bir bölüm olmaz.
+
+**Etkilenen kod:** `app/lib/data/event_pool_widowhood.dart`,
+`app/lib/domain/events/event_engine.dart` (garanti eklenirse),
+`app/test/paket_cs_dulluk_test.dart` §2 tabanları. İlgili:
+**Q-224** (kulüpte aynı soru), **Q-205** (yaşlılıkta bağ tavanı).
