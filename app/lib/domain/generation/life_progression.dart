@@ -91,6 +91,7 @@ import 'school_people.dart';
 import '../../text/turkish_text.dart';
 import '../../data/item_catalog.dart';
 import '../pets/pet_care.dart';
+import '../models/family_issue.dart';
 
 /// **Yaş Al** işleminin durum üzerindeki etkisi (D-018).
 ///
@@ -870,6 +871,29 @@ class LifeProgression {
     // silinmez, miras hâlâ gerçek bir evliliğe dayanır (D-037).
     afterDeaths = const MarriageEngine().settleWidowhood(afterDeaths, newAge);
 
+    // Konusu vefat eden aile meselesi **kapanır** (Paket CT).
+    //
+    // Ölüm kişiyi `people` listesinden silmiyor — kayıt kalır, kişi
+    // vefat etmiş işaretlenir (D-037). Bu doğru kural, açık meseleleri
+    // sessizce ölümsüz yapıyordu: `pendingCareDispute` ve kardeşleri
+    // yalnızca `personById == null` durumunu kapatıyor, o da ancak
+    // oyuncu cevap verince bakılıyor. Sonuç: İlişkiler ekranı iki yıl
+    // önce vefat etmiş anne için "artık tek başına idare edemiyor,
+    // karar vermen gerekiyor" diye kart açmaya devam ediyordu.
+    //
+    // Ölçüldü (200 bot hayatı, 13.908 yıl karesi): vefat etmiş kişinin
+    // açık meselesi bulunan kare **3.251** (%23,4), bu duruma düşen
+    // hayat **140/200**, en uzun açık kalma **80 yıl**. Tür kırılımı:
+    // bakım 2.774 · kayın gerginliği 1.455 · miras 360 · kardeş parası
+    // 282 · çocuk parası 3.
+    //
+    // `FamilyIssueStatus.kapandi`'nin tanımı bu durumu zaten
+    // anlatıyordu — *"Çözülmeden kapandı (kişi vefat etti, mesele
+    // anlamını yitirdi)"* — yalnızca kimse bağlamamıştı. Kayıt
+    // silinmiyor: durum `kapandi` oluyor ve kapanma yaşı yazılıyor,
+    // böylece geçmiş okunur kalıyor.
+    afterDeaths = _closeIssuesOfDeceased(afterDeaths, newAge);
+
     // Miras: yalnızca bu yıl vefat edenler için ve **bir kez**.
     afterDeaths = _settleEstates(afterDeaths, newAge);
 
@@ -1553,6 +1577,28 @@ class LifeProgression {
           return p;
         })
         .toList(growable: false);
+  }
+
+  /// Konusu vefat etmiş **açık** aile meselelerini kapatır (Paket CT).
+  ///
+  /// Mesele silinmez: durumu `kapandi` olur ve kapanma yaşı yazılır.
+  /// Günlüğe satır düşmez — ölümün kendisi aynı yıl zaten yazıldı ve
+  /// her mesele için ikinci bir satır yazmak bildirim yığını olurdu.
+  static GameState _closeIssuesOfDeceased(GameState state, int age) {
+    GameState sonuc = state;
+    for (final FamilyIssue mesele in state.familyIssues) {
+      if (!mesele.isOpen) continue;
+      final Person? kisi = sonuc.personById(mesele.personId);
+      // Kişi kayıttan tamamen düşmüşse de mesele anlamını yitirir;
+      // mevcut cevap yolları bu durumu zaten böyle kapatıyor.
+      if (kisi != null && kisi.isAlive) continue;
+      sonuc = sonuc.updateFamilyIssue(
+        mesele.id,
+        status: FamilyIssueStatus.kapandi,
+        resolvedAtAge: age,
+      );
+    }
+    return sonuc;
   }
 
   /// Bu yıl vefat edenlerin mirasını **bir kez** dağıtır.

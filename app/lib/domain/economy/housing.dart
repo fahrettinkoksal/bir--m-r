@@ -230,7 +230,7 @@ class Housing {
     }
 
     final String metin = sehirDegisiyor
-        ? '$city\'e taşındın; kiralık bir eve yerleştin.'
+        ? '${trDative(city)} taşındın; kiralık bir eve yerleştin.'
         : 'Kiralık bir eve taşındın.';
     final GameState next = state.copyWith(
       player: state.player.copyWith(

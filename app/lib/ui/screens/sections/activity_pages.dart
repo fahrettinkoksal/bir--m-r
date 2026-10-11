@@ -381,7 +381,7 @@ class _ActionCard extends StatelessWidget {
                     OutlinedButton(
                       key: Key('kurs_destek_${action.id}_${kisi.id}'),
                       onPressed: () => onAskFamily!(kisi),
-                      child: Text('${kisi.firstName}\'a sor'),
+                      child: Text('${trDative(kisi.firstName)} sor'),
                     ),
                 ],
               ),

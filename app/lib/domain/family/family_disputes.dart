@@ -9,6 +9,7 @@ import '../models/pending_notice.dart';
 import '../models/person.dart';
 import '../models/person_development.dart';
 import '../models/relation.dart';
+import '../../text/turkish_text.dart';
 
 /// Kardeşle para, yaşlı bakımı ve miras anlaşmazlıkları
 /// (Paket AP §28-§32, §35-§36).
@@ -210,16 +211,17 @@ abstract final class FamilyDisputes {
 
     final String metin = switch (cevap) {
       FamilyIssueResponse.paraVerdi =>
-        '${kardes.firstName}\'e istediği parayı verdin.',
+        '${trDative(kardes.firstName)} istediği parayı verdin.',
       FamilyIssueResponse.destekOldu =>
-        '${kardes.firstName}\'e para vermedin ama iş bulmasına yardım '
+        '${trDative(kardes.firstName)} para vermedin ama iş bulmasına '
+        'yardım '
             'ettin.',
       FamilyIssueResponse.konustu =>
         '${kardes.firstName} ile konuştun; para konusunu açmadın.',
       FamilyIssueResponse.karismadi =>
         '${kardes.firstName}\'in isteğini cevapsız bıraktın.',
       FamilyIssueResponse.reddetti =>
-        '${kardes.firstName}\'e para vermeyeceğini söyledin.',
+        '${trDative(kardes.firstName)} para vermeyeceğini söyledin.',
     };
 
     next = next.updateFamilyIssue(
@@ -248,7 +250,7 @@ abstract final class FamilyDisputes {
     final int? son = state.lastInteractionAge[borrowKey(personId)];
     if (son != null &&
         state.player.age - son < prototypeOnlySiblingCooldown) {
-      return '${kardes.firstName}\'den yakın zamanda borç istedin; '
+      return '${trAblative(kardes.firstName)} yakın zamanda borç istedin; '
           'üst üste olmaz.';
     }
     return null;
@@ -697,7 +699,7 @@ abstract final class FamilyDisputes {
       FamilyIssueResponse.karismadi =>
         '${kardes.firstName}\'in itirazına cevap vermedin.',
       FamilyIssueResponse.reddetti =>
-        '${kardes.firstName}\'e hakkı olmadığını söyledin.',
+        '${trDative(kardes.firstName)} hakkı olmadığını söyledin.',
     };
 
     next = next.updateFamilyIssue(

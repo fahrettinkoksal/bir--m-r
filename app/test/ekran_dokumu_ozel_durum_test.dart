@@ -68,6 +68,7 @@ import 'package:bir_omur/domain/interaction/friend_circles.dart';
 import 'package:bir_omur/domain/interaction/intimacy.dart';
 import 'package:bir_omur/domain/models/game_event.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
+import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:bir_omur/state/game_controller.dart';
@@ -237,6 +238,16 @@ void main() {
     Durum(
       'ARKADAŞ GRUBU',
       (GameState s) => FriendCircles.activeOf(s) != null,
+    ),
+    // Yedinci tur (Paket CT): **dul** oyuncunun ekranları hiçbir
+    // dökümde basılmadı. Paket CS 250 hayatta 502 dul yılı ölçtü ve o
+    // yıllara 20 olay yazdı; ekran tarafı ise hiç okunmadı. Hükümlü
+    // karesi tam bu okumadan üç hata vermişti ("Evde seninle 3 kişi
+    // yaşıyor" diyen künye içerideyken) — dul kare de hane, eş kartı
+    // ve aktivite arkadaşı bakımından aynı riski taşıyor.
+    Durum(
+      'DUL',
+      (GameState s) => s.marriage?.status == MarriageStatus.dul,
     ),
   ];
 

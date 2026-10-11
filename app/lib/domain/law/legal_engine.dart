@@ -750,14 +750,15 @@ abstract final class LegalEngine {
     );
     next = _log(
       next,
-      'Kefalet geri ödendi; parayı ${kisi.firstName}\'a geri verdin.',
+      'Kefalet geri ödendi; parayı ${trDative(kisi.firstName)} geri '
+      'verdin.',
     );
     return _notice(
       next,
       id: 'kefalet-geri-${next.player.age}',
       title: 'Kefalet geri verildi',
       text: 'Duruşmaya çıktın, kefalet geri ödendi. Parayı '
-          '${kisi.firstName}\'a geri verdin.\n\n'
+          '${trDative(kisi.firstName)} geri verdin.\n\n'
           'Kimse bir şey demedi ama not edildi.',
       personId: kisi.id,
     );

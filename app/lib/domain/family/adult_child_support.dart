@@ -11,6 +11,7 @@ import '../models/pending_notice.dart';
 import '../models/person.dart';
 import '../models/person_development.dart';
 import '../models/relation.dart';
+import '../../text/turkish_text.dart';
 
 /// Yetişkin çocuğun para sıkıntısı, eve dönüşü ve şehir değiştirmesi
 /// (Paket AP §8-§13).
@@ -313,13 +314,13 @@ abstract final class AdultChildSupport {
       FamilyIssueResponse.paraVerdi =>
         '${cocuk.firstName}\'in istediği parayı verdin.',
       FamilyIssueResponse.destekOldu =>
-        '${cocuk.firstName}\'e elinden geldiği kadarını verdin.',
+        '${trDative(cocuk.firstName)} elinden geldiği kadarını verdin.',
       FamilyIssueResponse.konustu =>
         '${cocuk.firstName} ile konuştun ama para vermedin.',
       FamilyIssueResponse.karismadi =>
         '${cocuk.firstName}\'in para isteğine cevap vermedin.',
       FamilyIssueResponse.reddetti =>
-        '${cocuk.firstName}\'e para vermeyeceğini söyledin.',
+        '${trDative(cocuk.firstName)} para vermeyeceğini söyledin.',
     };
 
     next = next.updateFamilyIssue(
@@ -414,7 +415,8 @@ abstract final class AdultChildSupport {
               p,
         ]),
       );
-      metin = '${cocuk.firstName}\'e eve dönmesinin olmayacağını söyledin.';
+      metin = '${trDative(cocuk.firstName)} eve dönmesinin olmayacağını '
+          'söyledin.';
     }
 
     next = next.updateFamilyIssue(
@@ -513,7 +515,8 @@ abstract final class AdultChildSupport {
                 p,
           ]),
         );
-        satirlar.add('${cocuk.firstName} işi için $yeni\'ye taşındı.');
+        satirlar.add(
+            '${cocuk.firstName} işi için ${trDative(yeni)} taşındı.');
       }
     }
     return (state: next, logTexts: List<String>.unmodifiable(satirlar));

@@ -27,6 +27,7 @@ import '../models/life_log.dart';
 import '../models/pending_notice.dart';
 import '../models/person.dart';
 import '../models/relation.dart';
+import '../../text/turkish_text.dart';
 
 /// Bir arkadaşlık hamlesinin sonucu.
 class FriendshipOutcome {
@@ -431,11 +432,12 @@ abstract final class FriendshipDepth {
           bond: (kisi.bond - 4).clamp(0, 100),
         );
         final String metin = _sec(rng, <String>[
-          '${kisi.firstName} $yeni\'ye taşındı. "Gel bir ara" dedi, '
+          '${kisi.firstName} ${trDative(yeni)} taşındı. "Gel bir ara" dedi, '
               'ikiniz de bunun kolay olmadığını biliyorsunuz.',
-          '${kisi.firstName} işi gereği $yeni\'ye gitti. Eşyaları '
+          '${kisi.firstName} işi gereği ${trDative(yeni)} gitti. Eşyaları '
               'kamyonete sığmış, veda telefonda kalmış.',
-          '${kisi.firstName} artık $yeni\'de. Haritada bakıp "yakınmış '
+          '${kisi.firstName} artık ${trLocative(yeni)}. Haritada bakıp '
+          '"yakınmış '
               'aslında" dedin, değil.',
         ]);
         return _haber(state, tasinan, metin, newAge, tur.name);

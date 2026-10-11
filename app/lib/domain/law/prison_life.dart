@@ -329,7 +329,7 @@ abstract final class PrisonLife {
       title: 'Kefaletle çıktın',
       text: '$metin\n\n'
           'Yatırılan ${trMoney(kefalet)} teminattır: duruşmaya '
-          'çıktığında geri ödenir ve parayı ${kisi.firstName}\'a geri '
+          'çıktığında geri ödenir ve parayı ${trDative(kisi.firstName)} geri '
           'verirsin.',
       personId: personId,
     );

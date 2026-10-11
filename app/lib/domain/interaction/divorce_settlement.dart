@@ -19,6 +19,7 @@ library;
 
 import '../models/investment.dart';
 import '../models/owned_item.dart';
+import '../../text/turkish_text.dart';
 
 /// Boşanmada varlıkların nasıl bölündüğü.
 class DivorceSettlement {
@@ -155,7 +156,7 @@ class DivorceSettlement {
   List<String> summaryLines(String spouseName) {
     final List<String> satirlar = <String>[];
     for (final OwnedItem i in toSpouse) {
-      satirlar.add('${i.type.name} $spouseName\'a kaldı.');
+      satirlar.add('${i.type.name} ${trDative(spouseName)} kaldı.');
     }
     if (kept.isNotEmpty) {
       final List<String> adlar =

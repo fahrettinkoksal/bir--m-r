@@ -8228,3 +8228,91 @@ taranarak **aranıyor**; §4'ün tabanı ölçümün üstündeydi (47 ve 51
 
 **Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
 oynanmadı.
+
+## Paket CT — dul karesini okumak: iki gerçek hata (11 Ekim 2026)
+
+Paket CS dulluğa 20 olay yazdı ama **ekran** tarafı hiç okunmadı.
+`ekran_dokumu_ozel_durum_test.dart` üç turda sekiz gerçek hata
+bulmuştu ve kalıbı hep aynı: tek tek metin denetleyen testlerin
+göremediğini, ekranın tamamını basan döküm görüyor. Dökümün yedinci
+turuna **DUL** karesi eklendi (120 bot hayatı taranarak bulundu —
+riskli hayat, tohum 15, yaş 53) ve çıktı gözle okununca iki hata
+çıktı. İkisi de dulluğa özel değil; dul karesi **ortaya çıkardı**.
+
+### 1. Vefat etmiş kişinin açık meselesi hiç kapanmıyor
+
+Dul karesinin İlişkiler ekranı:
+
+> **Tülay için bakım**
+> Tülay artık tek başına idare edemiyor. Bu yükü nasıl karşılayacağına
+> karar vermen gerekiyor.
+> `[Bakımı ben üstlenirim]` `[Ücretli bakıma katkı ver]`
+> `[Kardeşlerinle konuş]` `[Üstlenemeyeceğini söyle]`
+
+Aynı ekranın iki satır aşağısı: **"Tülay Can · Anne · vefat etti"**.
+Günlük de doğruluyor: *"Annen Tülay Can uykusunda, sakin bir şekilde
+vefat etti"* — **iki yıl önce**, 51 yaşında.
+
+**Kök neden.** Ölüm kişiyi `people` listesinden silmiyor; kayıt kalıyor
+ve kişi vefat etmiş işaretleniyor (D-037, doğru kural).
+`FamilyDisputes.pendingCareDispute` ve kardeşleri ise yalnızca
+`personById == null` durumunu kapatıyor — o da ancak oyuncu bir cevap
+verdiğinde bakılıyor. Kişi hiç silinmediği için koşul asla tutmuyordu.
+
+**Ölçüm (200 bot hayatı, 13.908 yıl karesi, `onPreAge`):**
+
+| ölçülen | sayı |
+|---|---|
+| ölü-konu meselesi olan kare | **3.251 (%23,4)** |
+| kare × mesele | **4.874** |
+| bu duruma düşen hayat | **140 / 200** |
+| en uzun açık kalma | **80 yıl** |
+
+Tür kırılımı: bakım 2.774 · kayın gerginliği 1.455 · miras 360 ·
+kardeş parası 282 · çocuk parası 3.
+
+**Çözüm.** `FamilyIssueStatus.kapandi`'nin tanımı bu durumu zaten
+anlatıyordu — *"Çözülmeden kapandı (kişi vefat etti, mesele anlamını
+yitirdi)"* — ama kimse bağlamamıştı. Yıllık ilerlemede, ölümler
+işlendikten hemen sonra `_closeIssuesOfDeceased` çalışıyor. Kayıt
+**silinmiyor**: durum `kapandi`, kapanma yaşı yazılı, geçmiş okunur.
+Günlüğe satır düşmüyor — ölüm aynı yıl zaten yazıldı, her mesele için
+ikinci satır bildirim yığını olurdu.
+
+### 2. Türkçe ekler isme göre seçilmiyor
+
+Aynı dökümün günlüğünde: **"Taner artık Malatya'de."** Doğrusu
+"Malatya'da" — son ünlü kalın.
+
+Deseni depo genelinde taradım (roadmap'in ikinci dersi: geniş
+kullanılan bir metin kalıbını tek tek süitten öğrenmek pahalı) ve hata
+tek yerde değildi: ek, kişi ya da şehir adına **sabit** yazılmış
+**19 yer** vardı — `friendship_depth` 3, `family_disputes` 5,
+`adult_child_support` 4, `legal_engine` 2, `prison_life` 1,
+`activity_pages` 1, `divorce_settlement` 1, `housing` 1,
+`child_school_issue` 1. Metin Türkçe isimlerin yarısında doğru,
+yarısında yanlış çıkıyordu:
+
+> "Malatya'ye taşındı" · "Malatya'e taşındın" · "Elif'a sor"
+> "Murat'e para vermedin" · "Elif'a kaldı"
+
+**Çözüm.** `trDative`, `trLocative`, `trAblative`
+(`app/lib/text/turkish_text.dart`). Üçü de büyük/küçük ünlü uyumuna,
+ünsüz benzeşmesine (FıSTıKÇı ŞaHaP → "Sinop'ta") ve yönelme ekindeki
+kaynaştırma y'sine bakıyor ("Malatya'ya"). 19 çağrı yeri bağlandı.
+
+### Bekçi
+
+`app/test/paket_ct_dul_karesi_test.dart` (6 test): 200 hayatta tek bir
+ölü-konu meselesi kalmıyor (ve "kapandı" meselesi gerçekten yazılıyor,
+yani kural çalışıyor ve kayıt silinmiyor) · üç ekin de ünlü uyumu,
+ünsüz benzeşmesi ve kaynaştırma örnekleri · boş girdi çökmüyor ·
+**kaynak taraması**: `lib/` altında değişkene yapışmış sabit ek
+kalmadı, yenisi yazılırsa test kırılır.
+
+**Isırma denemesi:** iki düzeltme de geri alındı. Kural kapalıyken §1
+kırmızı (4.874 kare×mesele), tek bir sabit ek geri gelince kaynak
+taraması o satırı adıyla gösterdi.
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.

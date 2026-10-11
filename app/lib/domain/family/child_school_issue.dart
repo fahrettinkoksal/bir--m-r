@@ -12,6 +12,7 @@ import '../models/person.dart';
 import '../models/person_development.dart';
 import '../models/relation.dart';
 import '../models/stats.dart';
+import '../../text/turkish_text.dart';
 
 /// Oyuncunun okul çağındaki çocuğuyla **gerçekten** yaşadığı sorun ve
 /// oyuncunun verdiği karar (Paket AP §5-§7).
@@ -538,7 +539,7 @@ abstract final class ChildSchoolIssue {
       FamilyIssueResponse.karismadi =>
         '$ad\'in okul meselesine karışmamayı seçtin.',
       FamilyIssueResponse.reddetti =>
-        '$ad\'e bu konuda yardım etmeyeceğini söyledin.',
+        '${trDative(ad)} bu konuda yardım etmeyeceğini söyledin.',
     };
   }
 }

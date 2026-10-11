@@ -287,3 +287,39 @@ Olumlu bir sonucun metni olumsuz bitmez, olumsuz bir sonucunki olumlu.
 
 Bu iki kural `test/language_quality_test.dart` içinde örnekleriyle
 sabitlenmiştir.
+
+---
+
+## 16. Özel ada ek yazma, **türet** (Paket CT)
+
+Türkçede ek, sözcüğün son ünlüsüne ve son ünsüzüne göre değişir. Kişi
+ya da şehir adına ek **sabit** yazmak isimlerin yarısında yanlış çıkar:
+
+| Yanlış | Doğru | Kural |
+|---|---|---|
+| "Malatya'de" | "Malatya**'da**" | son ünlü kalın (a) |
+| "Malatya'ye taşındı" | "Malatya**'ya** taşındı" | ünlüyle bitende kaynaştırma y'si |
+| "Malatya'e taşındın" | "Malatya**'ya** taşındın" | aynı |
+| "Elif'a sor" | "Elif**'e** sor" | son ünlü ince (i) |
+| "Murat'e para vermedin" | "Murat**'a** para vermedin" | son ünlü kalın (a) |
+| "Sinop'da" | "Sinop**'ta**" | sert ünsüzle bitiyor (p) |
+
+Üç işlev bu işi tek yerde toplar (`app/lib/text/turkish_text.dart`):
+
+- `trDative(ad)` — yönelme: "Malatya'ya", "İzmir'e", "Murat'a"
+- `trLocative(ad)` — bulunma: "Malatya'da", "İzmir'de", "Sinop'ta"
+- `trAblative(ad)` — ayrılma: "Malatya'dan", "Uşak'tan", "Gönül'den"
+
+Sert ünsüzler: **f, s, t, k, ç, ş, h, p** ("FıSTıKÇı ŞaHaP"); bunlarla
+biten adda bulunma ve ayrılma ekinin d'si **t** olur.
+
+Sabit metindeki ekler ("Kırkpınar'da", "17.00'de", "Mağaza'dan") bu
+kuralın dışındadır — orada ad değişmiyor, yazım elde doğru yapılır.
+
+Bu kural `test/paket_ct_dul_karesi_test.dart` içinde örnekleriyle
+sabitlenmiştir; aynı dosya `lib/` altını **tarayıp** değişkene yapışmış
+sabit ek kalmadığını da denetler.
+
+**Nereden çıktı.** Ekran dökümünün dul karesi *"Taner artık
+Malatya'de."* bastı. Desen taranınca hata tek yerde değildi: 19 yerde
+ek sabit yazılmıştı.

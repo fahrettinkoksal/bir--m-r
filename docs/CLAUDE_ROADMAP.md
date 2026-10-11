@@ -580,6 +580,22 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   genişletmek değil, **izi hiç yazmamaktı** — tekrar çıkmayı
   `seenEventIds` zaten engelliyordu, izin bir işi yoktu. Eski ve dar
   bir çıta, yeni ve geniş bir istisnadan güçlüdür.
+- **Paket CT.** Yeni bir sistem yazdıktan sonra onun **ekranını** da
+  oku. Paket CS dulluğa 20 olay yazdı, testleri yeşildi; dökümde dul
+  karesini basınca iki hata çıktı ve ikisi de dulluğa ait değildi —
+  dul kare onları **ortaya çıkardı**. Döküm dört turda on gerçek hata
+  buldu; her yeni durum için bir kare eklemek en ucuz denetim.
+- **Paket CT.** "Kayıt silinmez, kişi vefat etmiş işaretlenir" doğru
+  bir kuraldır ama o kuralın **her tüketicisini** düşündürmez. Aile
+  meselesi kapanışı `personById == null` arıyordu; kişi hiç
+  silinmediği için koşul asla tutmadı ve oyun iki yıl önce vefat etmiş
+  anne için bakım kararı sordu. 200 hayatta 3.251 kare, en uzunu 80
+  yıl. "Yok olmaz" ile "anlamını yitirmez" aynı şey değil.
+- **Paket CT.** Bir metin hatası gördüğünde tek satırı düzeltme,
+  **deseni** tara. "Malatya'de" bir yazım hatası gibi görünüyordu;
+  grep 19 yer gösterdi. Türkçe eki ada sabit yazmak isimlerin
+  yarısında yanlış: ek, son ünlüye ve son ünsüze göre değişir. Doğru
+  çözüm tek yerde bir işlev ve onu koruyan bir **kaynak taraması**.
 
 ## Pano
 
