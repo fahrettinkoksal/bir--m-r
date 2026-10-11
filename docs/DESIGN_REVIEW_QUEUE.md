@@ -9492,3 +9492,47 @@ oyuncuya zorla okutulan bir bölüm olmaz.
 `app/lib/domain/events/event_engine.dart` (garanti eklenirse),
 `app/test/paket_cs_dulluk_test.dart` §2 tabanları. İlgili:
 **Q-224** (kulüpte aynı soru), **Q-205** (yaşlılıkta bağ tavanı).
+
+---
+
+### Q-234 — Eşin cenazesi "katkıda bulun" seçimi olmalı mı?
+
+**Durum:** öneri + varsayılan hazır, **kararı bekliyor**. Kod
+değişmedi; bu bir ürün kararı, teknik hata değil.
+
+**Nasıl çıktı.** Paket CT'nin dul karesi dökümünde oyuncunun günlüğü
+şu satırı taşıyordu:
+
+> Orhan için cenazedeydin. **Masraflara katkıda bulunmadın.**
+> Eşin Orhan Kılıç mirasından payına 13.900.000 ₺ düştü.
+
+Yani oyuncu, aynı yıl mirasını aldığı **kendi eşinin** cenazesinde
+"masraflara katkıda bulunmadı". Cenaze bildirimi
+(`lib/domain/life/notices.dart`) bağ türüne bakmıyor: anne, baba,
+kardeş, komşu ve **eş** aynı üç seçeneği görüyor (tam katkı · kısmi
+katkı · katkı yok) ve katkı yoksa cümle böyle kuruluyor.
+
+**Neden tartışmalı.** Türkiye'de uzak bir yakının cenaze masrafına
+katkı vermek gerçekten bir tercih; kendi eşinin cenazesi ise tercih
+değil, oyuncunun kendi işi. "Katkıda bulunmadın" cümlesi orada
+oyuncuyu haksız biçimde cimri gösteriyor. Öte yandan parası
+olmayanın cenaze masrafını karşılayamaması da gerçek bir durum ve
+oyun bunu yok saymamalı.
+
+**Önerim (kod yazılmadı).** Eş — ve belki hanedeki çocuk — için
+seçenek kümesi değişsin: "katkı yok" yerine **"karşılayamadın"**
+olsun ve yalnızca cüzdan yetmiyorsa çıksın; yeten oyuncuda masraf
+otomatik ödensin ve cümle "Cenaze masraflarını sen karşıladın" olsun.
+Böylece hem kimse haksız yere cimri görünmez hem de parasızlık
+görünür kalır. Uzak yakınlarda bugünkü üç seçenek **aynen kalır**.
+
+**Varsayılan (karar gelmezse):** bugünkü hali kalır — bütün bağlar
+aynı üç seçeneği görür. Bu ölçülmüş bir tercihtir: cenaze bildiriminin
+tek bir kuralı var ve bağ türüne göre dallanmıyor; dallandırmak yeni
+bir kural yazmak demek ve o senin kararın.
+
+**Etkilenen kod:** `app/lib/domain/life/notices.dart`
+(`respondToFuneral`, `canChoose`, `amountFor`),
+`app/lib/ui/widgets/notice_sheet.dart`. İlgili: **Q-198** (dulluk ve
+hane metinleri), Paket CS (dulluk havuzu), Paket CT (dul karesi
+dökümü).
