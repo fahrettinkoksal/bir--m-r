@@ -7996,5 +7996,71 @@ Değişen dosyalar yalnızca test tarafında: `test/support/coverage_bot.dart`,
 davranışı aynı; ölçüm aracı artık oyuncunun kapılarının %90'ına
 dokunuyor.
 
+## Paket CQ — kulüpteki yerin adı (11 Ekim 2026)
+
+Paket CE "kulüp zincirinin derinliği pencereye sığmıyor" diye ölçmüş,
+dört futbol olayının ikinci halkalarını **Q-224'e** bırakmıştı. O
+hunideki asıl soru "ilk 11'e kim çıkıyor"du; 150 bot hayatında kulüp
+üyeliklerinin rol dağılımı ölçüldü (321 üyelik):
+
+| Kulüp | Üyelik | İlk 11+ | Puan ortanca (en çok) |
+| --- | --- | --- | --- |
+| `satranc_kulubu` | 44 | 16 | 34 (73) |
+| `halk_oyunlari` | 43 | **0** | 30 (64) |
+| `atletizm` | 35 | 15 | 42 (78) |
+| `muzik_kulubu` | 28 | **0** | 33 (55) |
+| `tiyatro_kulubu` | 26 | **0** | 42 (**73**) |
+| `fotograf_kulubu` | 21 | **0** | 39 (**70**) |
+| `futbol_takimi` | 21 | 6 | 32 (73) |
+
+Rol genelinde ulaşılabilir (321 üyeliğin 83'ü ilk 11 ve üstü). Ama
+**dört kulüpte hiç rol yükselmiyor**, çünkü `SchoolClubEngine` rolü
+yalnızca `club.competitive` olan kulüpte atıyor.
+
+### Bulunan kusur: fotoğraf kulübünde "Yedek"
+
+Kulüp kartı `uyelik.role.label` yazıyordu. Yani fotoğraf kulübünde
+sekiz yıl geçiren oyuncu ekranda **"Yedek"** okuyordu — hem yanlış
+(fotoğraf kulübünde yedek diye bir şey yok) hem yanıltıcı: aynı
+üyeliğin rol puanı 70'e, tiyatroda 73'e çıkıyor. Oyuncu gerçekten
+ilerliyor, ekran bunu söylemiyordu.
+
+### Düzeltme ekran tarafında
+
+`SchoolClubEngine.standingLabel` saf bir fonksiyon: rekabetçi kulüpte
+rolün adını döndürür, rekabetçi olmayanda **aynı rol puanından**
+türeyen bir ad — Yeni üye · Düzenli üye · Çekirdek ekip · Kulübün
+yüzü. Eşikler yeni sayı değil, spor tarafının kesmelerinin aynısı
+(28 · 45 · 62).
+
+**Motor, kayıt ve olay kapıları değişmedi.** `minSquadRole` kullanan
+beş olayın hepsi zaten `requiresActiveClubId` ile rekabetçi bir
+kulübe bağlı; bu dosyanın dördüncü testi o eşleşmeyi bekçiliyor.
+
+**Ölçüm (düzeltmeden sonra, 150 hayat):** rekabetçi olmayan 118
+üyeliğin etiketleri **Yeni üye 58 · Düzenli üye 35 · Çekirdek ekip 20
+· Kulübün yüzü 5**. Dört kademe de kullanılıyor; düzeltmeden önce
+118'inin hepsi "Yedek"ti.
+
+### Bekçi
+
+`app/test/paket_cq_kulup_etiketi_test.dart` (5 test): rekabetçi
+olmayan üyelikte "Yedek" yazmıyor · rekabetçi kulüpte rolün adı aynen
+kalıyor · etiket dört kademeyi de kullanıyor (tabanlar ölçümden) ·
+**kart ekranda** türetilmiş etiketi yazıyor (bulunan kare, çizilen
+metin okunuyor) · `minSquadRole` kullanan her olay kulübe bağlı.
+
+**Isırma denemesi:** `standingLabel` eski davranışa döndürülünce 5
+testin 3'ü kırmızı; rekabetçi kulüp testi ve olay kapısı testi yeşil
+kalıyor (doğru olanı korudukları için).
+
+### Yapmadığım şey
+
+Q-224'teki yoğunluk kararına (üyelik sürerken yılda bir kulüp olayı
+garanti edilsin mi) **dokunmadım**: ne ağırlık büyüttüm ne eşik
+indirdim. Penaltı zincirinin izi hâlâ seyrek — futbol takımına giren
+21 üyelikten 6'sı ilk 11'e çıkıyor, olay o 6 karede çekilişe giriyor
+ve `penaltiKacirdi` izi üç seçenekten birinden doğuyor. Karar Faho'da.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.

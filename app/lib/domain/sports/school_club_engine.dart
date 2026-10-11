@@ -483,6 +483,43 @@ class SchoolClubEngine {
       performance * 20 ~/ 100 +
       charisma * 5 ~/ 100;
 
+  /// Kulüpteki yerin **ekranda yazılacak** adı (Paket CQ).
+  ///
+  /// **Ölçülen kusur.** Kart `uyelik.role.label` yazıyordu ve rol
+  /// yalnızca `club.competitive` olan kulüplerde atanıyor. Sonuç: 150
+  /// bot hayatında fotoğraf (21 üyelik), halk oyunları (43), müzik
+  /// (28) ve tiyatro (26) kulüplerinin **hiçbirinde** rol yükselmiyor,
+  /// kart sekiz yıl boyunca **"Yedek"** yazıyordu — hem yanlış hem
+  /// anlamsız: fotoğraf kulübünde yedek diye bir şey yok. Aynı
+  /// üyeliklerin rol puanı 70'e (tiyatroda 73'e) çıkıyordu, yani
+  /// oyuncu gerçekten ilerliyor ama ekran bunu söylemiyordu.
+  ///
+  /// Düzeltme **ekran tarafında**: motor, kayıt ve olay kapıları
+  /// değişmedi (`minSquadRole` kullanan beş olayın hepsi zaten
+  /// `requiresActiveClubId` ile rekabetçi bir kulübe bağlı). Rekabetçi
+  /// kulüpte eskisi gibi rolün adı yazılır; rekabetçi olmayanda aynı
+  /// puandan türeyen bir ad kullanılır.
+  ///
+  /// Eşikler **yeni sayı değil**: spor tarafındaki kesmelerin
+  /// aynısı (28 · 45 · 62).
+  static String standingLabel({
+    required SchoolClub club,
+    required SchoolClubProgress progress,
+    required int charisma,
+  }) {
+    if (club.competitive) return progress.role.label;
+    final int puan = roleScore(
+      skill: progress.skill,
+      years: progress.yearsActive,
+      performance: progress.performance,
+      charisma: charisma,
+    );
+    if (puan >= 62) return 'Kulübün yüzü';
+    if (puan >= 45) return 'Çekirdek ekip';
+    if (puan >= 28) return 'Düzenli üye';
+    return 'Yeni üye';
+  }
+
   SquadRole _roleFor({
     required int skill,
     required int years,

@@ -75,6 +75,7 @@ class _SchoolClubsPageState extends State<SchoolClubsPage> {
             _AktifKulupKarti(
               uyelik: uyelik,
               kulup: _kulup(uyelik.clubId),
+              charisma: state.player.stats.charisma,
               acik: _acik == uyelik.clubId,
               antrenmanAcik: controller.canTrainClub(uyelik.clubId),
               onAc: () => setState(
@@ -167,6 +168,7 @@ class _AktifKulupKarti extends StatelessWidget {
   const _AktifKulupKarti({
     required this.uyelik,
     required this.kulup,
+    required this.charisma,
     required this.acik,
     required this.antrenmanAcik,
     required this.onAc,
@@ -176,6 +178,9 @@ class _AktifKulupKarti extends StatelessWidget {
 
   final SchoolClubProgress uyelik;
   final SchoolClub? kulup;
+
+  /// Rol puanı karizmayı da sayıyor (Paket CQ'nun etiketi için).
+  final int charisma;
   final bool acik;
   final bool antrenmanAcik;
   final VoidCallback onAc;
@@ -211,7 +216,16 @@ class _AktifKulupKarti extends StatelessWidget {
                         style: theme.textTheme.titleMedium,
                       ),
                       Text(
-                        uyelik.role.label,
+                        // Rekabetçi olmayan kulüpte "Yedek" yazmak
+                        // yanlıştı (Paket CQ); etiket aynı puandan
+                        // türüyor.
+                        c == null
+                            ? uyelik.role.label
+                            : SchoolClubEngine.standingLabel(
+                                club: c,
+                                progress: uyelik,
+                                charisma: charisma,
+                              ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

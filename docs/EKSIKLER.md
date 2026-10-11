@@ -496,6 +496,16 @@ sistemlere hiç girmiyordu ve (b) D-125'teki hata yüzünden oyuncunun
 eylemleri ek olay açmıyordu. İkisi düzeltilince **onu da konuyor**;
 bir gerileme testiyle sabitlendi (`test/paket_op_test.dart`).
 
+> **PAKET CQ ÖLÇÜMÜ (11 Ekim 2026).** Paket CE'nin bıraktığı "ilk 11"
+> sorusu kulüp kırılımıyla ölçüldü (150 hayat, 321 üyelik): rol eşiği
+> genelde ulaşılabilir (83 üyelik ilk 11 ve üstü) ama **dört kulüpte
+> hiç rol yükselmiyor** (`halk_oyunlari`, `muzik_kulubu`,
+> `tiyatro_kulubu`, `fotograf_kulubu`) — rol yalnızca rekabetçi
+> kulüplerde atanıyor. Kart ise her kulüpte rolün adını yazıyordu:
+> fotoğraf kulübünde sekiz yıl **"Yedek"**. Düzeltme ekran tarafında
+> (`SchoolClubEngine.standingLabel`), motor ve olay kapıları
+> değişmedi. Futbol zincirinin seyrekliği Q-224'te duruyor.
+
 ### 4.3 Kataloglar dar
 
 | Katalog | Ölçüldüğünde | **Bugün (D-152)** |

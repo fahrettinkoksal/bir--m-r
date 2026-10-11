@@ -437,6 +437,17 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   2,07 → 5,84 oldu hem ilan edilen beş yılın hepsi kullanılmaya
   başladı. Eşik "güzel görünen" sayı değil, **dağılımın kullanılabilir
   olduğu** nokta.
+- **Paket CQ.** Bir alan **bazı** durumlarda atanıyorsa, ekran onu
+  koşulsuz yazmamalı. Kulüp rolü yalnızca rekabetçi kulüplerde
+  atanıyor; kart ise her kulüpte `role.label` yazıyordu ve fotoğraf
+  kulübünde sekiz yıl "Yedek" görünüyordu. Kusur ne motorda ne
+  veridedir: **eksik koşul ekrandadır.** Benzer kalıbı ararken
+  "bu alan kim tarafından, hangi koşulda yazılıyor?" sorusu yeterdi.
+- **Paket CQ.** Hunide darboğazı yanlış yerde arama. "İlk 11'e çıkan
+  2/150" sayısı rol eşiğini suçlu gösteriyordu; kulüp kırılımı
+  alınınca eşik genelde ulaşılabilir çıktı (321 üyeliğin 83'ü) ve
+  gerçek darboğaz **futbol takımına giren üyelik sayısı** (21) oldu.
+  Kırılımı almadan kök neden yazılmaz.
 - **Paket CP.** Ölçüm aracının **başarı ölçütünü** de sına.
   `endLifeByChoice` başarıda boş metin döndürüyor; kapsam botu "boş
   değilse oldu" sayıyordu, yani aksiyonun başarısını kapsam dışı,
