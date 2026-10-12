@@ -9887,3 +9887,63 @@ olay ağırlıklarını yükseltmek.
 (dört iz, dört karşılık), `app/test/paket_bm_ilk_yillar_test.dart`
 (bekçi artık zarsız: §1 katalog + §2 yapısal aday denetimi).
 İlgili: **Q-190/Q-191** (zincir önceliği), Paket CD, CE, CK, AR/3.
+
+---
+
+### Q-239 — İkiz doğumda masraf iki kez kesiliyor, toplam hiçbir yerde yazmıyor
+
+**Durum:** öneri + varsayılan hazır, **kararı bekliyor.** `prototypeOnlyBirthCost`
+değerine dokunulmadı; bu bir denge kararı.
+
+**Nasıl çıktı.** Paket DI üç okunmamış kareyi bastı; yeni doğan
+karesinde (ikiz doğum) günlük şunu yazıyordu:
+
+```
+Halil adında bir oğlunuz oldu. Doğum masrafı 65.000 ₺ tuttu.
+İkizin diğeri oğlan oldu: Tolga. Doğum masrafı 65.000 ₺ tuttu.
+```
+
+Kod okundu: `life_progression` ikizde `Parenthood.haveChild`'ı **iki
+kez** çağırıyor (D-151, bilinçli: ikinci bebek aynı diğer ebeveynle
+doğar) ve `haveChild` her çağrıda `prototypeOnlyBirthCost` kadar
+tahsil ediyor. Yani ikiz doğum **130.000 ₺**. Her satır tek tek doğru
+ama **toplamı hiçbir yerde yazmıyor**; oyuncu 65.000 ödediğini sanıp
+cüzdanında 130.000 eksik buluyor.
+
+İki ayrı soru var ve karışmasınlar:
+
+**(a) Sayı.** Gerçekte ikiz doğum tek bir hastane olayıdır; iki tam
+doğum masrafı modelleme tercihidir ve hiçbir yerde böyle yazılmamış.
+
+**(b) Metin.** Masrafın toplamı okunmuyor.
+
+**Seçenekler**
+
+1. **(b)'yi düzelt, (a)'ya dokunma (önerim ve varsayılanım).** İkiz
+   satırı toplamı yazar: "İkizin diğeri oğlan oldu: Tolga. İki doğumun
+   masrafı 130.000 ₺ tuttu." Sayı aynı kalır, oyuncu ne ödediğini
+   okur. Bedeli: tek satırlık metin işi, denge değişmez.
+2. **İkiz doğum tek masraf olsun.** `haveChild`'a "aynı doğum" bilgisi
+   geçer ve ikinci çağrı masraf kesmez. Gerçeğe daha yakın. Bedeli:
+   doğum maliyeti ikiz hayatlarda yarıya düşer — AF/AG'nin servet
+   ölçümleri bundan etkilenir (küçük ama ölçülmeli).
+3. **İkinci bebeğe indirimli masraf** (ör. yarısı). Gerçekte de ikinci
+   bebek maliyeti artırır ama iki katına çıkarmaz. Bedeli: yeni bir
+   `prototypeOnly` katsayı ve kalibrasyon.
+4. **Hiçbir şey yapma.** Bedeli: oyuncu her ikiz doğumda sebebini
+   bulamadığı 65.000 ₺'lik bir fark görür.
+
+**Benim görüşüm:** (1) hemen, (2) ayrıca sorulmaya değer. (1) bir
+tutarsızlık düzeltmesidir ve dengeye dokunmaz; ama "ikiz tek doğumdur"
+sorusu (2) ürün kararı ve onayını Faho verir. (4)'ü önermiyorum:
+okunmayan masraf Paket S'in çözdüğü kusurun aynısı.
+
+**Yapmayacağım (onay gelmeden):** `prototypeOnlyBirthCost`'u
+değiştirmek, ikinci doğumun masrafını kaldırmak ya da indirmek,
+`haveChild`'ın imzasına "aynı doğum" bilgisi eklemek.
+
+**Etkilenen kod:** `app/lib/domain/interaction/parenthood.dart`
+(`haveChild`, `prototypeOnlyBirthCost`, `birthSentence`),
+`app/lib/domain/generation/life_progression.dart` (ikiz çağrısı,
+D-151), `app/test/paket_di_okunmayan_kareler_test.dart` (§3 ölçümü
+basıyor). İlgili: D-151 (ikiz gebelik), Paket S (gider dökümü), Q-093.
