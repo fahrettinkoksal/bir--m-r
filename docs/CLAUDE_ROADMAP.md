@@ -1027,6 +1027,37 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   işareti olarak **koşullu** bir cümle seçmek. İşaret sayfanın her
   hâlinde çizilen bir metin olmalı; en güvenlisi başlık ya da sabit
   açıklama satırı.
+- **Paket DP.** Bir engeli **nerede** yazdığın, engelin kendisi kadar
+  ürüne dahil. `applicationAvailability` her iş için ayrı çağrılıyor ve
+  iki engeli işe hiç bakmıyor; o engel varken liste yirmi satırda aynı
+  cümleyi yazıyor ve satırın kendi bilgisi (eğitim kademesi · yaş
+  kapısı) kayboluyordu. İşten bağımsız engel sayfanın başında **bir
+  kez**, işe özel engel satırda yazılır.
+- **Paket DP.** Tekrar bekçisi kurarken "çok tekrar eden metin
+  kötüdür" demek yanlış olurdu: ölçüm düğme etiketlerinin ("Başvur"
+  21, "Şu an olmaz" 11) ve göz muayenesi tablosundaki tek harflerin
+  ("O" 20) meşru biçimde tekrarladığını gösterdi. Ölçüyü **cümleye**
+  (boşluk içeren, nokta/ünlem/soru ile biten metin) daraltınca 28
+  karede yalnızca iki tekrar kaldı: kusur (20) ve meşru olan (4).
+  Tavanı ölçülen meşru değere kurmak, tahmini bir sayıya kurmaktan
+  hem daha sıkı hem daha az kırılgan.
+- **Paket DP.** Aynı kalıbın doğru hâli yanı başındaydı: Dövüş
+  sanatları karesinde altı dal da "para yetmiyor" diyor ama her biri
+  **kendi** ücretiyle (700, 750, 600, 650, 620, 640 ₺). Bir kusuru
+  düzeltmeden önce oyunun aynı sorunu nerede doğru çözdüğüne bakmak,
+  hem düzeltmenin biçimini hem de bekçinin eşiğini verdi.
+- **Paket DP.** "Bu sayfa başka testle okunuyor" kaydı **yanlış
+  değildi**, yetersizdi: ölçtüm, beş testin beşi de ağacı kuruyor ve
+  satıra dokunuyor (`pumpWidget` 1-3, `tester.tap` 4-14). Ama hepsi
+  anahtar ve tek tek cümle denetliyor; kareyi baştan sona okumuyor.
+  Kusur tam o boşlukta duruyordu. Bir iddiayı çürütmek için yanlış
+  olduğunu göstermek gerekmiyor — **neyi ölçmediğini** göstermek
+  yetiyor.
+- **Paket DP.** Bastırmanın kapsamını kaynak kilidiyle savunmak
+  yetmiyor, **ölçmek** gerekiyor: aynı karede 21. kart kendi gerekçesini
+  ("Bu yıl Kuaför işine başvurdun…") yazmaya devam ediyor ve test bunu
+  ekranda arıyor. "Birebir eşitliğe dayanıyor, o yüzden güvenli"
+  argümanı doğruydu ama kanıt değildi.
 
 ## Pano
 

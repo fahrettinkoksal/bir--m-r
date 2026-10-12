@@ -984,6 +984,15 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 > `app/test/paket_dm_bolum_kapsami_test.dart` (30 sayfa · döküm 8 ·
 > başka testle 22).
 >
+> **GÜNCELLEME (Paket DN/DO/DP):** döküm üç paket boyunca genişletildi
+> ve kapsam **30 sayfa · dökümde 25 · başka testle 5** oldu. 25 dosya
+> **28 kare** çiziyor (`activity_pages.dart` tek başına altı sayfa
+> barındırıyor) ve bu 28 karede toplam **sekiz** gerçek kusur çıktı
+> (DM 3, DN 3, DO 1, DP 1).
+> "Başka testle okunuyor" kaydı artık yalnızca beş sayfa için geçerli
+> ve o kayıt da denetleniyor: adı yazılan testin o sayfanın
+> başlıklarından birini gerçekten andığı doğrulanıyor.
+>
 > Yani bu denetimden sonra dokuz ekranın dokuzunun da en az bir test
 > yolu var. **Uyarı:** sınıf adını testlerde aramak zayıf bir vekildir
 > (örn. `SchoolCareerScreen` adı hiç geçmiyor ama ekran

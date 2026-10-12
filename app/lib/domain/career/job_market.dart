@@ -300,14 +300,36 @@ class JobMarket {
         '"$ad" kaydı sicilinde duruyor.';
   }
 
+  /// İşten bağımsız engel cümleleri (Paket DP).
+  ///
+  /// `applicationAvailability` her iş için **ayrı** çağrılıyor; bu iki
+  /// engel ise işe hiç bakmıyor. Engel varken İş ara sayfasındaki her
+  /// kartın altına aynı cümle yazılıyordu: ölçümde 59 yaşındaki bir
+  /// karede 21 iş kartının **20'si** "Devam eden bir mülakatın var."
+  /// cümlesini birebir taşıyordu. Cümleler buradan tek kaynak olarak
+  /// okunuyor ki sayfa onları bir kez yazabilsin.
+  static const String blockedWhileEmployed =
+      'Önce mevcut işinden ayrılman gerekiyor.';
+  static const String blockedWhileInterviewing =
+      'Devam eden bir mülakatın var.';
+
+  /// Başvurunun **işten bağımsız** engeli; engel yoksa boş metin.
+  ///
+  /// Sıra `applicationAvailability` ile aynıdır. Araya giren iki engel
+  /// (bu yıl bu işe başvurmuş olmak, mülakat sorusu yazılmamış olmak)
+  /// işe özeldir ve burada yer almaz.
+  String globalBlockReason(GameState state) {
+    if (state.career.isEmployed) return blockedWhileEmployed;
+    if (state.hasPendingInterview) return blockedWhileInterviewing;
+    return '';
+  }
+
   InteractionAvailability applicationAvailability(
     GameState state,
     JobType job,
   ) {
     if (state.career.isEmployed) {
-      return const InteractionAvailability.blocked(
-        'Önce mevcut işinden ayrılman gerekiyor.',
-      );
+      return const InteractionAvailability.blocked(blockedWhileEmployed);
     }
     final String reason = requirementReason(state, job);
     if (reason.isNotEmpty) return InteractionAvailability.blocked(reason);
@@ -320,9 +342,7 @@ class JobMarket {
       );
     }
     if (state.hasPendingInterview) {
-      return const InteractionAvailability.blocked(
-        'Devam eden bir mülakatın var.',
-      );
+      return const InteractionAvailability.blocked(blockedWhileInterviewing);
     }
     if (questionsForJob(job.id).isEmpty) {
       return const InteractionAvailability.blocked(

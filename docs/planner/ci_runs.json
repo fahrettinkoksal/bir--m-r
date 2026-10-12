@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 648,
+ "total": 650,
  "runs": [
+  {
+   "id": 38237367780,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "3154eef0ab48c1524b5b38b6e5b4c417af3915fd",
+   "status": "in_progress",
+   "conclusion": null,
+   "run_number": 324,
+   "event": "push",
+   "created_at": "2026-10-12T10:36:16Z",
+   "updated_at": "2026-10-12T10:36:21Z",
+   "run_started_at": "2026-10-12T10:36:16Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38237367780",
+   "display_title": "Paket DO: Taşın ekranı taşınma kapısını satırda yazmıyordu"
+  },
+  {
+   "id": 38237367720,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "3154eef0ab48c1524b5b38b6e5b4c417af3915fd",
+   "status": "in_progress",
+   "conclusion": null,
+   "run_number": 327,
+   "event": "push",
+   "created_at": "2026-10-12T10:36:16Z",
+   "updated_at": "2026-10-12T10:36:21Z",
+   "run_started_at": "2026-10-12T10:36:16Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38237367720",
+   "display_title": "Paket DO: Taşın ekranı taşınma kapısını satırda yazmıyordu"
+  },
   {
    "id": 38232152780,
    "name": "Windows test sürümü",

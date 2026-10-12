@@ -10129,3 +10129,115 @@ Tam süit: **3878 geçti, 17 atlandı, 0 hata** (38 dk). `analyze lib test`
 temiz. Paket DN'in CI'ı (`82a7385`) iki işte de yeşil tamamlandı.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DP — aynı cümle yirmi satırda: İş ara karesi (12 Ekim 2026)
+
+Kapsam bekçisi beş sayfanın hâlâ "başka testle okunuyor" kaydıyla
+geçtiğini söylüyordu. O kayıt **başlık düzeyinde** bir iddiadır: adı
+yazılan test sayfanın bir anahtarını veya tek bir cümlesini denetliyor,
+kareyi gözle okumuyor. Ölçtüm: beş testin beşi de ağacı gerçekten
+kuruyor ve satıra dokunuyor (`pumpWidget` 1-3, `tester.tap` 4-14) —
+yani kayıt **yanlış değildi**, yetersizdi. Kusur tam o boşlukta
+duruyordu: anahtarı denetlenen bir sayfanın metni hiç okunmamış
+olabilir. Beşi de döküme alındı; kapsam artık **30 sayfa
+· dökümde 25 dosya (28 kare) · başka testle 5**. Kalan beşi, kendi
+özel widget testiyle çizilen sekme ekranları ve `social_pages.dart`;
+kaydın doğruluğu bekçi tarafından denetleniyor (adı yazılan test o
+sayfanın başlıklarından birini gerçekten anıyor mu).
+
+| kare | yaş | metin | sonuç |
+|---|---|---|---|
+| Kumarhane | 18 | 30 | temiz — bahis bütçesi, alt/üst sınır ve "gerçek para yok" uyarısı yazılı |
+| Ehliyet İşlemleri | 16 | 31 | temiz — ücret, yaş kapısı ve engel satırda |
+| Evcil hayvanlar | 7 | 42 | temiz — 6 kategori, 10 tür, bakım gideri uyarısı |
+| Dövüş sanatları | 18 | 78 | temiz — altı dalın her biri **kendi** ücretini yazıyor |
+| **İş ara** | 59 | 187 | **kusurlu** |
+
+### Kusur: işe ait olmayan gerekçe her kartta
+
+59 yaşındaki oyuncunun mülakatı sürüyordu. Kare 21 iş kartı çiziyor ve
+**20'sinin** altında birebir aynı cümle duruyor:
+
+> **Market reyon görevlisi (yarım zamanlı)** · 132.000 ₺/yıl
+> Raf dizmek, fiyat okutmak, akşamüstü kalabalığı.
+> *Devam eden bir mülakatın var.* · [Başvur]
+>
+> **Kafe garsonu (yarım zamanlı)** · 145.000 ₺/yıl
+> Hafta sonu vardiyası, ayakta geçen altı saat.
+> *Devam eden bir mülakatın var.* · [Başvur]
+>
+> … (aynı cümle 20 kez)
+
+Kök neden `JobMarket.applicationAvailability`ın her iş için **ayrı**
+çağrılması: o işlevin iki engeli (hâlâ çalışıyor olmak, mülakatın
+sürmesi) işe hiç bakmıyor. Kart da gerekçeyi kendi bilgisinin yerine
+yazdığı için satır iki şey birden kaybediyordu: hem sayfa okunmaz hâle
+geliyor hem de o işin eğitim kademesi ile yaş kapısı hiç görünmüyor.
+
+**Ölçüm (28 kare).** Tekrarın hangi karede gerçekten sorun olduğunu
+tahmin etmek yerine saydım. Ölçü **cümle**: boşluk içeren ve
+nokta/ünlem/soru ile biten metin. Düğme ve durum etiketleri sayılmıyor,
+çünkü onların tekrarı normal — "Başvur" 21, "Şu an olmaz" 11, "Şu an
+kapalı" 6, göz muayenesi tablosunda "O" harfi 20 kez çizilir.
+
+| kare | en çok tekrarlanan cümle | kez |
+|---|---|---|
+| İŞ ARA | "Devam eden bir mülakatın var." | **20** |
+| TAŞIN | "Taşınma masrafı 110.000 ₺; cüzdanında yeterli para yok." | 4 |
+| kalan 26 kare | — | 1 |
+
+TAŞIN'daki tekrar meşru: dört şehir satırının her biri **kendi**
+taşınma masrafını yazıyor, tutar aynı olduğu için cümle de aynı çıkıyor
+(Paket DO). Dövüş sanatları karesi aynı kalıbın doğru hâli: altı dalın
+hepsi "para yetmiyor" diyor ama her biri kendi ücretiyle — 700, 750,
+600, 650, 620, 640 ₺ — yani altı farklı cümle.
+
+### Düzeltme
+
+Engel cümleleri `JobMarket` içinde tek kaynağa alındı
+(`blockedWhileEmployed`, `blockedWhileInterviewing`) ve işten bağımsız
+engel `globalBlockReason` ile ayrıca okunabilir oldu.
+`applicationAvailability`ın **sırası değişmedi**: araya giren iki engel
+(bu yıl bu işe başvurmuş olmak, mülakat sorusu yazılmamış olmak) işe
+özeldir ve `globalBlockReason` onları iddia etmiyor.
+
+Sayfa engeli bir kez, en üstte bir bilgi paneli olarak yazıyor; kartın
+gerekçesi onunla **birebir** aynıysa kart kendi satırına dönüyor:
+
+> *Devam eden bir mülakatın var.*
+>
+> **Market reyon görevlisi (yarım zamanlı)** · 132.000 ₺/yıl
+> Raf dizmek, fiyat okutmak, akşamüstü kalabalığı.
+> *Eğitim şartı yok · 16 yaş+* · [Başvur]
+
+Düğme yine kapalı: tekrarı kaldırmak engeli gizlemek değil.
+
+Düzeltmeden sonraki kare ölçüldü: cümle **1** kez yazılıyor, 20 kart
+kendi satırına dönüyor ve o satırlar **altı farklı** değer taşıyor
+("Eğitim şartı yok · 16 yaş+" 7, "· 18 yaş+" 6, "Lise mezunu · 18 yaş+"
+3, "· 17 yaş+" 2, "Lise mezunu · 19 yaş+" 1, "· 20 yaş+" 1) — yani
+satır artık gerçekten o işi anlatıyor. Karar birebir eşitliğe dayandığı
+için işe özel gerekçe gizlenmiyor; aynı karede 21. kart hâlâ kendi
+cümlesini yazıyor: "Bu yıl Kuaför işine başvurdun ve kabul edilmedin.
+Yeni bir başvuru için gelecek yılı beklemelisin. Başka mesleklere
+başvurabilirsin." Bu, kaynak kilidinin yanında **ölçülmüş** bir
+kanıttır: bastırma yalnızca paylaşılan cümleyi kaldırıyor.
+
+### Bekçiler
+
+1. `app/test/ekran_dokumu_bolumler_test.dart` — **28 karenin hepsinde**
+   cümle tekrarı sayılıyor; tavan ölçülen en yüksek meşru değere (4)
+   kuruldu, beşinci tekrar testi düşürür. Tek sayfaya değil dökümün
+   tamamına kondu, çünkü aynı sınıf Paket CL'de bir kez düzeltilmişti.
+2. `app/test/paket_dp_is_ara_tekrari_test.dart` (5 test) — kusurun kök
+   nedeni (açık işlerin 20'si aynı gerekçeyi taşıyor), kaynak kilidi,
+   karede cümlenin **bir** kez çizildiği ve düğmelerin kapalı kaldığı.
+
+**Mutasyonlar (üçü de ısırdı):** (a) kartı eski hâline döndürmek →
+döküm "21× Devam eden bir mülakatın var." diye düşüyor ve §3 düşüyor;
+(b) paneli kaldırmak → cümle hiç yazılmıyor, §3 "0 widget" ile düşüyor
+(yani bekçi hem tekrarı hem **gizlemeyi** yakalıyor); (c) tekrar
+koşulunu `gerekce == sharedReason` yerine yalnızca `isNotEmpty` yapmak →
+§2 düşüyor.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

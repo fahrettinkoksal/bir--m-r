@@ -252,6 +252,46 @@ void main() {
         reason: '${b.ad}: ekranda ayraçsız uzun sayı var; `trNumber` '
             'kullan:\n${ayracsiz.join("\n")}',
       );
+
+      // **Tekrar bekçisi (Paket DP).** Satıra ait olmayan bir gerekçeyi
+      // her satırda yazmak sayfayı okunmaz kılıyor: İŞ ARA karesinde
+      // "Devam eden bir mülakatın var." cümlesi 21 iş kartının
+      // **20'sinde** birebir tekrarlanıyordu. Gerekçe işten bağımsız
+      // olduğu için sayfanın başına tek panel olarak taşındı; kartlar
+      // kendi bilgisine (eğitim kademesi · yaş kapısı) döndü.
+      //
+      // **Ölçüm (12 Ekim 2026, 28 kare):** cümle tekrarı yalnızca iki
+      // karede 1'in üstüne çıkıyordu — İŞ ARA 20 (kusur) ve TAŞIN 4.
+      // TAŞIN'daki tekrar meşru: dört şehir satırının her biri kendi
+      // taşınma masrafını yazıyor, tutar aynı olduğu için cümle de
+      // aynı çıkıyor (Paket DO). Tavan bu yüzden ölçülen en yüksek
+      // **meşru** değere kuruldu; beşinci tekrar düşürür.
+      //
+      // Ölçü **cümle**dir: boşluk içeren ve nokta/ünlem/soru ile biten
+      // metin. Düğme etiketi tekrar eder ("Başvur" 21 kez, "Şu an
+      // olmaz" 11 kez) ve bu normaldir; göz muayenesi tablosundaki tek
+      // harfler de öyle. Bu yüzden tarama etiketleri saymaz.
+      const int tekrarTavani = 4;
+      final Map<String, int> cumleSayimi = <String, int>{};
+      for (final String t in ekran) {
+        if (!t.contains(' ')) continue;
+        if (!t.endsWith('.') && !t.endsWith('!') && !t.endsWith('?')) {
+          continue;
+        }
+        cumleSayimi[t] = (cumleSayimi[t] ?? 0) + 1;
+      }
+      final List<String> cokTekrar = <String>[
+        for (final MapEntry<String, int> e in cumleSayimi.entries)
+          if (e.value > tekrarTavani) '${e.value}× "${e.key}"',
+      ];
+      expect(
+        cokTekrar,
+        isEmpty,
+        reason: '${b.ad}: aynı cümle bu karede $tekrarTavani defadan '
+            'fazla yazılıyor. Satıra ait olmayan bir gerekçeyi her '
+            'satırda yinelemek yerine sayfanın başında bir kez yaz:\n'
+            '${cokTekrar.join("\n")}',
+      );
     });
   }
 }

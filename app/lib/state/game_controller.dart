@@ -1381,6 +1381,16 @@ class GameController extends ChangeNotifier {
     return _jobs.applicationAvailability(current, job);
   }
 
+  /// Başvurunun **işten bağımsız** engeli; engel yoksa boş metin.
+  ///
+  /// Paket DP: İş ara sayfası bu cümleyi her kartın altında tekrar
+  /// etmek yerine bir kez yazsın diye ayrıca okunuyor.
+  String jobApplicationGlobalBlockReason() {
+    final GameState? current = _state;
+    if (current == null) return 'Etkin bir hayat yok.';
+    return _jobs.globalBlockReason(current);
+  }
+
   /// İşe başvurur.
   JobOutcome? applyForJob(JobType job) =>
       _runJob((GameState current) => _jobs.apply(current, job, _random));

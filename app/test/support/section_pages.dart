@@ -9,9 +9,12 @@ library;
 
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/finger_catalog.dart';
+import 'package:bir_omur/data/license_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/lottery_catalog.dart';
 import 'package:bir_omur/domain/career/military_service.dart';
+import 'package:bir_omur/domain/casino/casino_rules.dart';
+import 'package:bir_omur/domain/pets/pet_care.dart';
 import 'package:bir_omur/domain/economy/banking.dart';
 import 'package:bir_omur/domain/economy/furnishing.dart';
 import 'package:bir_omur/domain/features/feature_catalog.dart';
@@ -308,6 +311,67 @@ final List<Bolum> kBolumler = <Bolum>[
     ],
     'Tedavi bir garanti değildir',
   ),
+
+  // ---- Paket DP: kalan kareler --------------------------------------
+  //
+  // DM/DN/DO 23 kare okudu ve 7 kusur çıktı. Bunlar kalan ayrı
+  // sayfalar; kayıt "başka testle okunuyor" diyordu ve o iddia
+  // yanlış değil: beş testin beşi de ağacı kuruyor ve satıra
+  // dokunuyor (`pumpWidget` 1-3, `tester.tap` 4-14). Eksik olan
+  // başka bir şey — o testler **anahtar ve tek tek cümle**
+  // denetliyor, kareyi baştan sona gözle okumuyor. Kusur tam orada
+  // duruyordu.
+  Bolum(
+    'KUMARHANE',
+    'casino_pages.dart',
+    (GameState s) =>
+        s.settings.casinoEnabled &&
+        s.player.age >= CasinoRules.prototypeOnlyMinAge,
+    'tab_aktiviteler',
+    <Finder>[find.text('Kumarhane')],
+    'bu yılki bahis bütçen',
+  ),
+  Bolum(
+    'EHLİYET İŞLEMLERİ',
+    'license_pages.dart',
+    (GameState s) =>
+        s.player.age >= LicenseType.motosiklet.prototypeOnlyMinAge,
+    'tab_aktiviteler',
+    <Finder>[find.text('Ehliyet İşlemleri')],
+    'Sınav kısa bir soruyla yapılır',
+  ),
+  Bolum(
+    'EVCİL HAYVANLAR',
+    'pets_page.dart',
+    (GameState s) =>
+        s.pets.isNotEmpty || s.player.age >= PetCare.prototypeOnlyMinAge,
+    'tab_iliskiler',
+    <Finder>[find.byKey(const Key('relationships_pets_row'))],
+    'Bakım gideri her yıl bir kez alınır',
+  ),
+  Bolum(
+    'İŞ ARA',
+    'education_career_pages.dart',
+    (GameState s) =>
+        !s.education.isStudent &&
+        !s.career.isRetired &&
+        !s.career.isEmployed &&
+        s.player.age >= 18,
+    'tab_okul_meslek',
+    <Finder>[find.text('İş ara')],
+    'Koşullarını sağladığın işlere başvurabilirsin',
+  ),
+  Bolum(
+    'DÖVÜŞ SANATLARI',
+    'martial_arts_page.dart',
+    (GameState s) => s.player.age >= 18,
+    'tab_aktiviteler',
+    <Finder>[
+      find.byKey(const Key('activity_spor')),
+      find.text('Dövüş sanatları'),
+    ],
+    'Ders ucuz, ustalık pahalı',
+  ),
 ];
 
 
@@ -321,11 +385,6 @@ final List<Bolum> kBolumler = <Bolum>[
 const Map<String, String> kBaskaTestle = <String, String>{
   'activities_screen.dart': 'content_reachability_test.dart',
   'assets_screen.dart': 'ekran_dokumu_test.dart',
-  'casino_pages.dart': 'casino_widget_test.dart',
-  'education_career_pages.dart': 'career_widget_test.dart',
-  'license_pages.dart': 'license_widget_test.dart',
-  'martial_arts_page.dart': 'martial_arts_widget_test.dart',
-  'pets_page.dart': 'pet_widget_test.dart',
   'relationships_screen.dart': 'ekran_dokumu_test.dart',
   'school_career_screen.dart': 'after_school_widget_test.dart',
   'social_pages.dart': 'social_widget_test.dart',

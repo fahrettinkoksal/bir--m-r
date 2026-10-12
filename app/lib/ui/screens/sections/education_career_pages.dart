@@ -309,6 +309,12 @@ class _JobSearchPageState extends State<JobSearchPage> {
     final GameState state = controller.state!;
     final List<JobType> acik = controller.openJobs();
     final Map<JobType, String> kapali = controller.lockedJobs();
+    // **Paket DP.** İşten bağımsız bir engel varsa (mülakat sürüyor,
+    // hâlâ çalışıyorsun) kartların hepsi aynı gerekçeyi taşıyor.
+    // Ölçüm: 59 yaşındaki karede 21 iş kartının 20'si "Devam eden bir
+    // mülakatın var." cümlesini birebir yazıyordu. Cümle sayfanın
+    // başında bir kez yazılıyor, satırlar kendi bilgisine dönüyor.
+    final String genelEngel = controller.jobApplicationGlobalBlockReason();
 
     return SectionScaffold(
       icon: Icons.person_search_rounded,
@@ -319,6 +325,14 @@ class _JobSearchPageState extends State<JobSearchPage> {
       backLabel: 'Meslek',
       onBack: widget.onBack,
       children: <Widget>[
+        if (genelEngel.isNotEmpty) ...<Widget>[
+          InfoPanel(
+            key: const Key('is_ara_genel_engel'),
+            icon: Icons.info_outline_rounded,
+            text: genelEngel,
+          ),
+          const SizedBox(height: 10),
+        ],
         if (acik.isEmpty)
           const InfoPanel(
             icon: Icons.work_off_outlined,
@@ -338,6 +352,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
             _JobCard(
               job: job,
               availability: controller.jobApplicationAvailability(job),
+              sharedReason: genelEngel,
               synergyNote: controller.jobSynergyNote(job),
               requirements: controller.jobRequirementLines(job),
               onApply: () async {
@@ -367,6 +382,7 @@ class _JobSearchPageState extends State<JobSearchPage> {
           _JobCard(
             job: job,
             availability: controller.jobApplicationAvailability(job),
+            sharedReason: genelEngel,
             synergyNote: controller.jobSynergyNote(job),
             requirements: controller.jobRequirementLines(job),
             onApply: () async {
@@ -463,12 +479,20 @@ class _JobCard extends StatelessWidget {
     required this.availability,
     required this.onApply,
     required this.requirements,
+    this.sharedReason = '',
     this.synergyNote,
   });
 
   final JobType job;
   final dynamic availability;
   final VoidCallback onApply;
+
+  /// Sayfanın başında **bir kez** yazılmış olan, işten bağımsız engel.
+  ///
+  /// Bu kartın gerekçesi onunla aynıysa satırda tekrarlanmaz; kart
+  /// kendi bilgisini (eğitim kademesi ve yaş kapısı) yazar. Düğme yine
+  /// kapalıdır: tekrarı kaldırmak engeli gizlemek değildir.
+  final String sharedReason;
 
   /// Hobi geçmişinin bu başvuruya kattığı avantaj (Paket AK, §16).
   ///
@@ -483,6 +507,12 @@ class _JobCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool acik = availability.isAllowed as bool;
+    final String gerekce = availability.reason as String? ?? '';
+    // Gerekçe sayfa başındakiyle birebir aynıysa satır kendi bilgisini
+    // yazar (Paket DP).
+    final bool tekrar = gerekce.isNotEmpty &&
+        sharedReason.isNotEmpty &&
+        gerekce == sharedReason;
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -577,9 +607,9 @@ class _JobCard extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    acik
+                    acik || tekrar
                         ? '${job.education.label} · ${job.minAge} yaş+'
-                        : (availability.reason as String? ?? ''),
+                        : gerekce,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
