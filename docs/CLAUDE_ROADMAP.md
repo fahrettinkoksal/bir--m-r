@@ -941,6 +941,17 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   pencere ikisini de bastı: "Mutluluk -15 / Mutluluk -15". Düzeltme
   kaynağı kaldırmak değil **çakışmayı** kaldırmaktı; hangi kaynağın
   dolu olduğu bildirime göre değişiyor.
+- **Paket DK.** Botun dokunmadığı her mekanik aynı zamanda **ölçülmemiş
+  bir ekonomidir.** Piyangonun beklenen getirisi hiç hesaplanmamıştı;
+  katalogdan çıkarmak zar bile gerektirmedi (kasa payı %43,75 ve
+  %46,25 — kusur yok). Oyuncunun dokunabildiği her para kalemi için bu
+  hesap bir satırdır ve kalıcı bekçi olur.
+- **Paket DK.** Kendi dersimi kendi testimde iki kez tekrarladım:
+  (a) `ageUp()` beş kapılı, bildirimleri kapatmak yetmiyor — yaş
+  ilerlemedi ve 25 yılda 24 bilet alındı; (b) "cüzdan arttı mı"
+  iddiası boşa çalışıyordu, çünkü cüzdanı maaş da artırır. Doğru
+  kaynak oyunun **kendi kaydı**ydı. Bir iddia yazdıktan sonra sor:
+  **bu sayı başka hangi sebeple böyle çıkabilir?**
 
 ## Pano
 

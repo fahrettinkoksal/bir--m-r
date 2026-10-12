@@ -9768,3 +9768,52 @@ doğruluyor (`bosanma` 27, `aktivite` 2270); §4 piyango penceresini
 çizip bilet numarasının yazıldığını sabitliyor.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DK — piyangonun ekonomisi ilk kez ölçüldü (12 Ekim 2026)
+
+Paket DJ bot hiç piyango oynamadığını gösterdi; bu da piyangonun
+**ekonomisinin hiç ölçülmediği** anlamına geliyordu. 1/500.000
+ihtimalle 50.000.000 ₺ veren bir kalem, beklenen getirisi bilet
+fiyatını aşıyorsa oyuncuya sonsuz para basar. Bu soru zar gerektirmez.
+
+### Katalogdan hesap (zarsız)
+
+| çekiliş | bilet | beklenen getiri | getiri/fiyat | kasa payı | yılda en çok |
+|---|---|---|---|---|---|
+| Olağan (`aylik`) | 500 ₺ | 281,25 ₺ | 0,5625 | **%43,75** | 12 bilet · 6.000 ₺ |
+| Yılbaşı (`yilbasi`) | 1.200 ₺ | 645,00 ₺ | 0,5375 | **%46,25** | 4 bilet · 4.800 ₺ |
+
+Beklenen yıllık kayıp: olağanda 2.625 ₺, yılbaşında 2.220 ₺ — net
+yıllık asgari ücretin (336.900 ₺) yüzde biri kadar. **Kusur yok:**
+piyango ne zengin ediyor ne iflas ettiriyor, ödeme oranı da gerçek
+piyangoların bandına yakın.
+
+Motor da kataloğu doğru uyguluyor: `_cek` ikramiyeleri en büyükten
+başlayarak kümülatif eşikle yürüyor, `chance => 1 / oneIn`, ikramiye
+`bilet.share.ratio` ile ölçekleniyor (çeyrek bilet çeyrek ikramiye).
+İhtimaller toplamı 0,106; yani biletlerin ~%89'u tutmuyor.
+
+### Gerçek çekiliş ölçümü
+
+Kontrolörle 25 yıl boyunca her yıl tavan kadar bilet alındı: **300
+bilet, 25 çekiliş satırı, 25 yılın 21'inde en az bir bilet tuttu.**
+Beklenen oran 1−0,9¹² = %71,8 (17,9 yıl); ölçülen 21, varyans içinde.
+
+### Kendi testimin iki kusuru — ikisi de kendi derslerimin tekrarı
+
+**1. `ageUp()` beş kapılı.** İlk yazımda yalnızca bildirimleri
+kapatıyordum; bekleyen olay/kriz/seçim kapanmadığı için yaş
+ilerlemedi, yıllık bilet tavanı dolu kaldı ve 25 yılda yalnızca **24**
+bilet alındı. Kapılar `test_flow.dart` yardımcılarıyla kapatıldı.
+
+**2. İddia boşa çalışıyordu.** "Cüzdan arttı mı" diye bakıyordum —
+cüzdanı maaş, kira, temettü de artırır, bu yüzden 25 yılın 25'i
+"kazandı" çıkıyor ve satır hiçbir şey kanıtlamıyordu. **Paket DG'nin
+§7 dersinin aynısı, bu kez kendi testimde.** Doğru kaynak oyunun kendi
+kaydı: çekiliş satırı kaybı "tutmadı" diye yazıyor.
+
+Bekçi: `app/test/paket_dk_piyango_olcumu_test.dart` (4 test). Sayıları
+değiştirmedi; **sabitliyor** — katalog ileride sessizce para basan bir
+kaleme dönüşürse §1 düşer.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
