@@ -10674,6 +10674,26 @@ kartta), Q-249 ("Yerleştirme puanı 35" — ölçek yazmıyor; ölçüm:
 | düzeltilen metin kusuru | 3 |
 | kuyruğa yazılan soru | 4 (Q-247…Q-250) |
 
+### Süit ve CI (doğrulandı)
+
+| koşu | sonuç |
+|---|---|
+| `flutter analyze lib test` | temiz |
+| yerel tam süit (`b1e9373` ağacı) | **3920 geçti · 17 atlandı · 0 düştü** · 38:42 |
+| CI "Analiz, test ve Windows sürümü" (`b1e9373`, koşu 329) | **success** |
+| CI "Analiz, test ve debug APK" (`b1e9373`, koşu 332) | **success** |
+
+**APK cihazda oynanmadı.** CI debug APK'yı derliyor; "derlendi"
+"oynandı" demek değil.
+
+**Araç hatası, bu pakette dördüncüsü (kendi ölçüm aracımda).** Süit
+koşarken ilerlemeyi `grep -E "^0[0-9]:[0-9][0-9] \+[0-9]+"` ile
+okuyordum. O kalıp yalnızca ilk on dakikayı yakalıyor: onuncu dakikadan
+sonra satırlar `10:23 +620` diye başlıyor ve eşleşmiyor. Bu yüzden "37
+dakikada 603 test" diye yanlış bir yavaşlık bildirdim; süit o anda
+`37:29 +3826` idi. Kalıp `^[0-9]+:` olmalı. Dersin aynısı: **aracın
+çıktısını okumadan önce aracın kendisini sına.**
+
 ### Ders
 
 **Bekleme listesi bir bekçi değildir.** DR'nin üç listesi doğru
