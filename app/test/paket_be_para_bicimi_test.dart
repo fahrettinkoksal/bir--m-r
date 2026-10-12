@@ -24,6 +24,8 @@
 // penceresi (`effect_diff.dart`) — yani **parası değişen her olay**.
 library;
 
+import 'dart:io';
+
 import 'package:bir_omur/domain/models/applied_effect.dart';
 import 'package:bir_omur/text/turkish_text.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,5 +76,53 @@ void main() {
       expect(etki, contains('.'),
           reason: '$tutar için ayraç yok: "$etki"');
     }
+  });
+
+  // -------------------------------------------------------------------
+  // Paket DM ile sıkıştırıldı: **kaynak taraması**
+  // -------------------------------------------------------------------
+  //
+  // Bu dosya üç yıl boyunca yalnızca `AppliedEffect.text`'i sınadı ve
+  // kuralı orada tuttu. Paket DM sigorta sayfasını ilk kez okudu ve
+  // ekranda "5000 ₺" buldu: aynı kartın bir üst satırında "Yıllık prim
+  // 5.000 ₺" yazarken. Yani kural vardı, bekçi vardı, ama bekçi
+  // **yalnızca bir çağrı yolunu** tutuyordu.
+  //
+  // Tarama ölçüldü: depoda bu desenden **iki** yer vardı ve ikisi de
+  // aynı dosyadaydı (`insurance.dart`). Birincisini gözle okuma,
+  // ikincisini bu tarama buldu. Muafiyet listesi **yok**: tutar
+  // ekranda ayraçsız yazılmaz.
+  test('kaynakta ham para interpolasyonu yok (Paket DM)', () {
+    final RegExp desen = RegExp(r'\$\{([^{}]{0,80}?)\}\s*₺');
+    const List<String> bicimciler = <String>[
+      'trMoney',
+      'trNumber',
+      'trMoneyShort',
+      'Label',
+      'label',
+    ];
+    final List<String> bulgu = <String>[];
+
+    for (final FileSystemEntity e
+        in Directory('lib').listSync(recursive: true)) {
+      if (e is! File || !e.path.endsWith('.dart')) continue;
+      final List<String> satirlar = e.readAsLinesSync();
+      for (int i = 0; i < satirlar.length; i++) {
+        final String satir = satirlar[i];
+        if (satir.trimLeft().startsWith('//')) continue;
+        for (final RegExpMatch m in desen.allMatches(satir)) {
+          final String ifade = m.group(1)!;
+          if (bicimciler.any((String b) => ifade.contains(b))) continue;
+          bulgu.add('${e.path}:${i + 1} → \${$ifade} ₺');
+        }
+      }
+    }
+
+    expect(
+      bulgu,
+      isEmpty,
+      reason: 'Tutar ekranda ayraçsız yazılıyor; `trMoney` kullan:\n'
+          '${bulgu.join("\n")}',
+    );
   });
 }

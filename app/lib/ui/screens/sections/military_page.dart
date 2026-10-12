@@ -61,7 +61,15 @@ class _MilitaryPageState extends State<MilitaryPage> {
     return SectionScaffold(
       icon: Icons.military_tech_rounded,
       title: 'Askerlik',
-      subtitle: askerlik.label,
+      // **Paket DM.** Burada ham `askerlik.label` yazılıyordu, yani
+      // yükümlü olmayan oyuncuda "Yapılmadı". Aynı sayfanın üç satır
+      // altındaki "Durum" alanı `MilitaryService.statusLabel` okuyup
+      // "Yükümlü değil" diyordu: tek ekranda iki çelişen cümle.
+      // Kadın oyuncunun "Yapılmadı" görmesi daha önce bildirilip
+      // gövde metni, menü alt yazısı ve Durum alanı düzeltilmişti;
+      // **sayfa başlığı atlanmıştı** ve hiçbir test bu başlığı
+      // okumuyordu.
+      subtitle: MilitaryService.statusLabel(state),
       backLabel: 'Meslek',
       accent: BirOmurAccents.yesil,
       onBack: widget.onBack,

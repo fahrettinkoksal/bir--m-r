@@ -970,6 +970,32 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   platformda kalmasıydı — o kategori video platformunu kapsamayan tek
   kategori. Katalog ve bot, ikisi de değiştirilmedi: biri gerçek bir
   kusur değil, öteki bütün ölçümlerin zarını kaydırırdı.
+- **Paket DM.** Bir kapsam denetimi yaparken **neyi saydığını** yaz.
+  Paket DH "dokuz ekranın dokuzunda da test yolu var" dedi; saydığı şey
+  `*_screen.dart` dosyalarıydı ve oyunun içeriğinin çoğu
+  `sections/*_page.dart` içindeydi. Sekiz sayfanın içine hiç kimse
+  girmemişti; girilince üç gerçek kusur çıktı. Denetimin cümlesi
+  "dokuz ekran" değil "dokuz `*_screen.dart` dosyası" olsaydı boşluk
+  o gün görünürdü.
+- **Paket DM.** Kuralı koymak, bekçi yazmak ve **bekçinin bütün çağrı
+  yollarını tutması** üç ayrı iştir. Para biçimi kuralı Paket BE'de
+  konmuş, bekçisi yazılmış, ama bekçi yalnızca `AppliedEffect.text`'i
+  deniyordu; ekranda "5000 ₺" üç paket sonra göründü. Bekçiye kaynak
+  taraması eklendi ve tarama, gözün bulduğu birinciden sonra **ikinci**
+  bir yeri buldu. Bir kural için "bekçisi var" demek yetmez: **kaç
+  yoldan ihlal edilebilir?**
+- **Paket DM.** Bildirilmiş bir hatayı düzeltirken aynı bilginin
+  ekranda **kaç yerde** yazıldığını say. "Kadın oyuncu askerlikte
+  'Yapılmadı' görüyor" hatası düzeltilmişti: gövde metni, menü alt
+  yazısı ve Durum alanı tek kaynağa bağlanmış, **sayfa başlığı**
+  atlanmıştı. Sonuç tek ekranda iki çelişen cümle; ve o başlığı hiçbir
+  test okumuyordu.
+- **Paket DM.** Dökümün "açtım ve okudum" demesi, açtığının **o sayfa
+  olduğu** anlamına gelmiyor. Kapalı bir satıra dokunmak hiçbir şey
+  yapmaz, döküm de eski kareyi basıp "okundu" sayar. Her kare için
+  **yalnızca o sayfada bulunan** bir işaret şart; ilk denemede işaret
+  olarak üst sayfadaki bir cümleyi seçip aynı tuzağa ikinci kez
+  düştüm.
 
 ## Pano
 

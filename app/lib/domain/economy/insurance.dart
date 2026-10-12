@@ -4,6 +4,7 @@ import '../models/insurance_policy.dart';
 import '../models/owned_item.dart';
 import '../features/feature_catalog.dart';
 import 'housing.dart';
+import '../../text/turkish_text.dart';
 
 /// Sigorta motoru (Paket CA).
 ///
@@ -73,8 +74,13 @@ abstract final class Insurance {
       return 'Kasko için bir aracın olması gerekiyor.';
     }
     if (state.player.wallet < t.prototypeOnlyYearlyPremium) {
+      // **Paket DM.** Burada tutar ham sayı olarak basılıyordu:
+      // "5000 ₺". Paket BE para biçimini kurala bağladı
+      // (`paket_be_para_bicimi_test`) ama bu satır hiçbir dökümde
+      // okunmadığı için ayraçsız kalmıştı; aynı kartın bir üst
+      // satırında "Yıllık prim 5.000 ₺" yazıyor.
       return 'İlk primi ödeyecek paran yok '
-          '(${t.prototypeOnlyYearlyPremium} ₺).';
+          '(${trMoney(t.prototypeOnlyYearlyPremium)}).';
     }
     return null;
   }
@@ -102,8 +108,10 @@ abstract final class Insurance {
         ),
         insurance: liste,
       ),
+      // Paket DM: ikinci ham tutar. Gözle okuma birincisini bulmuştu,
+      // bu satırı **kaynak taraması** buldu.
       text: '${t.kind.label} başladı. İlk prim ödendi: '
-          '${t.prototypeOnlyYearlyPremium} ₺.',
+          '${trMoney(t.prototypeOnlyYearlyPremium)}.',
     );
   }
 

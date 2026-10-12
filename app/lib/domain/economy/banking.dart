@@ -134,6 +134,28 @@ abstract final class Banking {
     return CreditStanding.iyi;
   }
 
+  /// Oyuncunun **herhangi** bir kredi geçmişi var mı? (Paket DM)
+  static bool hasCreditHistory(GameState state) => state.loans.isNotEmpty;
+
+  /// Kredi karnesinin ekranda yazılacak gerekçesi (Paket DM).
+  ///
+  /// **Neden işlev.** `CreditStanding.iyi`'nin gerekçesi "Ödemelerin
+  /// düzenli, yükün hafif." Bu cümle hiç kredi almamış oyuncuya da
+  /// yazılıyordu: 18 yaşında, cüzdanı boş, ömründe tek taksit
+  /// ödememiş biri ekranda "ödemelerin düzenli" okuyordu. Yazım
+  /// kuralının 12. maddesi (metin `GameState` ile çelişmez) bunu
+  /// yasaklıyor. Karne **kademesi** değişmedi — kredisi olmayanın
+  /// karnesi hâlâ "İyi" — yalnızca gerekçe cümlesi geçmişi olmayanda
+  /// başka.
+  static String standingReason(GameState state) {
+    final CreditStanding karne = standingOf(state);
+    if (karne == CreditStanding.iyi && !hasCreditHistory(state)) {
+      return 'Henüz kredi geçmişin yok; başvurun ilk kez '
+          'değerlendirilecek.';
+    }
+    return karne.description;
+  }
+
   /// prototypeOnly: kredi çekilebilecek en küçük yaş.
   static const int prototypeOnlyMinAge = 18;
 

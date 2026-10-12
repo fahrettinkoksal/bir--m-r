@@ -973,6 +973,17 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 > | `start_screen.dart` | her dökümde açılıyor |
 > | diğer beşi (life, activities, assets, relationships, school_career) | sekme anahtarlarıyla açılıyor |
 >
+> **DÜZELTME (Paket DM, 12 Ekim 2026):** Bu satırın cümlesi fazla
+> genişti. Denetim dokuz **ekranı** değil dokuz `*_screen.dart`
+> **dosyasını** saymıştı; oyunun içeriğinin büyük bölümü ise
+> `sections/` altındaki `*_page.dart` dosyalarında ve o 26 dosya
+> denetime hiç girmemişti. Ölçüldü: sekizinin başlığı hiçbir testte
+> geçmiyordu (banka, sigorta, hobiler, medya, göz muayenesi, döşeme,
+> evlilik geçmişi, askerlik). Döküm sekizini açtı ve **üç gerçek
+> kusur** çıktı. Kalıcı kapsam cırcırı:
+> `app/test/paket_dm_bolum_kapsami_test.dart` (30 sayfa · döküm 8 ·
+> başka testle 22).
+>
 > Yani bu denetimden sonra dokuz ekranın dokuzunun da en az bir test
 > yolu var. **Uyarı:** sınıf adını testlerde aramak zayıf bir vekildir
 > (örn. `SchoolCareerScreen` adı hiç geçmiyor ama ekran

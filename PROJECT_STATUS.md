@@ -9901,3 +9901,99 @@ Yeni pencere bildirim bütçesini sınadı: `critical_notice_test`'in
 temiz.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DM — bölüm sayfalarının içi ilk kez okundu (12 Ekim 2026)
+
+**Dürbünün kendi kapsamı kör noktaydı.** Paket DH "hangi ekran hiç
+okunmadı?" sorusunu sorup dokuz ekranın dokuzunda da bir test yolu
+bulduğunu yazdı. O denetim `lib/ui/screens/**/*_screen.dart`
+dosyalarını saymıştı; oyunun içeriğinin büyük bölümü ise `sections/`
+altındaki **`*_page.dart`** dosyalarında ve o dosyalar denetimin
+kapsamına **hiç girmemişti**. Paket DJ'nin dersi aynen geçerliydi:
+ölçümün kapsamını da ölç.
+
+### Ölçüm — kaç sayfa okunmuyordu?
+
+`sections/` altındaki 30 dosyanın `SectionScaffold` başlıkları
+çıkarılıp bütün test kaynağında arandı. **Sekizinin** başlığı hiçbir
+testte geçmiyordu:
+
+| sayfa | ne gösteriyor |
+|---|---|
+| `bank_page.dart` | Banka, kredi başvurusu, kredi karnesi |
+| `insurance_page.dart` | Sağlık ve konut poliçesi |
+| `hobbies_page.dart` | Hobilerim |
+| `media_page.dart` | Ün ve Medya Fırsatları |
+| `eye_exam_page.dart` | Göz muayenesi mini oyunu |
+| `furnishing_page.dart` | Evinin hâli (döşeme) |
+| `marriage_history_page.dart` | Evlilik Geçmişi |
+| `military_page.dart` | Askerlik |
+
+Döküm bu sekizini **arayüzden açtı** ve metnini bastı
+(`ekran_dokumu_bolumler_test.dart`). Durumlar kurulmadı, bot
+hayatlarından **bulundu**; sekizinin sekizi de bulundu, "BULUNAMADI"
+kalmadı.
+
+### Çıkan üç gerçek kusur
+
+| # | kusur | kök neden |
+|---|---|---|
+| 1 | Sigorta kartı "İlk primi ödeyecek paran yok (**5000 ₺**)" yazıyordu — aynı kartın bir üst satırında "Yıllık prim 5.000 ₺" | `insurance.dart` tutarı ham interpolasyonla basıyordu. Paket BE kuralı koymuş ve bekçi yazmıştı ama bekçi yalnızca `AppliedEffect.text`'i tutuyordu. |
+| 2 | 18 yaşındaki, cüzdanı boş, ömründe tek taksit ödememiş oyuncu bankada "Kredi durumun: İyi · **Ödemelerin düzenli**, yükün hafif." okuyordu | `CreditStanding.iyi`'nin gerekçesi sabitti; `standingOf` yükü olmayan herkese `iyi` veriyor. Yazım kuralının 12. maddesi (metin `GameState` ile çelişmez) ihlal ediliyordu. |
+| 3 | Askerlik sayfasının başlığı **"Yapılmadı"**, üç satır altındaki Durum alanı **"Yükümlü değil"** diyordu — tek ekranda iki çelişen cümle | Kadın oyuncunun "Yapılmadı" görmesi daha önce bildirilmiş; gövde metni, menü alt yazısı ve Durum alanı `MilitaryService.statusLabel` ile düzeltilmiş ama **sayfa başlığı atlanmıştı** (`subtitle: askerlik.label`). Hiçbir test o başlığı okumuyordu. |
+
+Kademe, oran, süre ve tutar **değişmedi**; üçü de görünürlük/metin
+düzeltmesidir. 2. maddede karne kademesi hâlâ "İyi"; yalnızca gerekçe
+cümlesi geçmişi olmayanda farklı (`Banking.standingReason`).
+
+### Aracın iki yalanı (benim hatam, aynı pakette iki kez)
+
+Döküm ilk turda "GÖZ MUAYENESİ · 52 metin" bastı ve test geçti. Basılan
+kare **Sağlık Merkezi**'ydi: parası olmayan oyuncuda satır "Şu an
+kapalı" olduğu için dokunma hiçbir şey yapmamıştı. İşaret denetimi
+ekleyince ikinci hata çıktı: seçtiğim işaret (`Duvardaki harfler`)
+satırın **üst sayfadaki** tanıtımıydı, yani döküm bir tur daha
+yanılttı. Düzeltme üç parçalı: kapı paraya da bakıyor, yol satırın
+başlığı yerine **eylem düğmesine** dokunuyor, işaret **yalnızca hedef
+sayfada** bulunan bir cümle. Paket CV'nin dersi tekrar yazıldı: araç
+yalan söylemez.
+
+### Ölen bir iddia
+
+Göz muayenesi tablosunda bir satırda iki farklı karakter gördüğümü
+sandım ve raporlayacaktım. Üretici doğru: satır uzunlukları 5-7-9-11-13
+ve her satırda **tam bir** farklı karakter var; gördüğüm ikinci "G"
+sonraki satırın başıydı.
+
+### Bekçiler
+
+- `app/test/ekran_dokumu_bolumler_test.dart` — sekiz sayfayı açar, her
+  birinin gerçekten açıldığını kanıtlar, metnini basar.
+- `app/test/paket_dm_bolum_kapsami_test.dart` (4 test) — **kapsam
+  cırcırı**: `sections/` altına yeni sayfa eklenince ya döküme girer ya
+  da onu çizen testin adı kayda yazılır. Kayıt beyan değil: adı yazılan
+  testin o sayfanın başlığını gerçekten andığı doğrulanır. Ölçüm: 30
+  sayfa · döküm 8 · başka testle 22.
+- `app/test/paket_dm_bolum_metinleri_test.dart` (6 test) — üç kusurun
+  kendisi; durumlar bot hayatlarından bulunuyor.
+- `app/test/paket_be_para_bicimi_test.dart` **sıkıştırıldı**: artık
+  `lib/` içinde ham para interpolasyonu tarıyor. Tarama, gözle okumanın
+  bulduğu birinciden sonra **ikinci** bir yeri buldu (aynı dosyada).
+  Muafiyet listesi **yok**; kalan bulgu 0.
+
+### Bekçi ısırıyor mu? Dört mutasyon, beş düşüş
+
+| mutasyon | düşen |
+|---|---|
+| Sigortada `trMoney`'yi geri al | para taraması **ve** metin testi §3 |
+| Askerlik başlığını ham etikete döndür | §2 kaynak taraması |
+| Banka gerekçesini ham enuma döndür | §1'in ekran taraması |
+| Kapsam kaydından bir sayfayı sil | kapsam cırcırı §1 |
+
+Tam süit: **3854 geçti, 17 atlandı, 0 hata** (37 dk; Paket DL'de 3835
+idi, +19 yeni test). `flutter analyze lib test` temiz. Hiçbir test
+silinmedi veya gevşetildi; `paket_be_para_bicimi_test` **sıkıştırıldı**.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

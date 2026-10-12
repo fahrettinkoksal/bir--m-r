@@ -137,7 +137,9 @@ class _BankPageState extends State<BankPage> {
               ),
               const SizedBox(height: 2),
               Text(
-                karne.description,
+                // Paket DM: gerekçe duruma göre gelir; kredisi
+                // olmayana "ödemelerin düzenli" denmez.
+                Banking.standingReason(state),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
