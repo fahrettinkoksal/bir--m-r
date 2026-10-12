@@ -113,14 +113,39 @@ void main() {
     });
 
     test('kademe geçişinde bir bölüm arkadaş taşınır, kalanı silinmez', () {
-      final GameController c = schoolAged(9);
-      final Set<String> ilkokul = c.state!.currentClassmates
-          .map((Person p) => p.id)
-          .toSet();
-      final String ilkSinif = c.state!.education.classId!;
-
-      advanceToAge(c, LifeProgression.prototypeOnlySchoolStartAge + 4);
-      resolvePendingEvents(c);
+      // **Ölçülen kırılganlık (Paket BM).** Bu test tek bir tohumla
+      // kurulmuş bir hayatı 10 yaşına taşıyordu. İçerik havuzu
+      // değiştikçe zar sırası kayıyor ve o hayat başka bir yerde
+      // ölebiliyor: tohum 9'un çocuğu 9 yaşında hastalıktan öldü,
+      // `advanceToAge` ölümde durdu ve test "kademe geçişi" yerine
+      // ölümü ölçmeye başladı (kademe ilkokulda kaldı).
+      //
+      // Seçim ölçütü yalnızca **hedef yaşa yaşayarak ulaşmak**;
+      // kademenin ortaokul olması hâlâ test ediliyor, yani denetim
+      // boşa çıkmıyor.
+      GameController? bulunan;
+      Set<String> ilkokul = <String>{};
+      String ilkSinif = '';
+      for (final int tohum in <int>[9, 109, 209, 309, 409]) {
+        final GameController deneme = schoolAged(tohum);
+        final Set<String> once = deneme.state!.currentClassmates
+            .map((Person p) => p.id)
+            .toSet();
+        final String sinif = deneme.state!.education.classId!;
+        advanceToAge(deneme, LifeProgression.prototypeOnlySchoolStartAge + 4);
+        resolvePendingEvents(deneme);
+        if (!deneme.state!.deceased &&
+            deneme.state!.player.age >=
+                LifeProgression.prototypeOnlySchoolStartAge + 4) {
+          bulunan = deneme;
+          ilkokul = once;
+          ilkSinif = sinif;
+          break;
+        }
+      }
+      expect(bulunan, isNotNull,
+          reason: '10 yaşına yaşayarak ulaşan bir hayat bulunamadı.');
+      final GameController c = bulunan!;
       final GameState state = c.state!;
 
       expect(state.education.level, SchoolLevel.ortaokul);
@@ -173,6 +198,8 @@ void main() {
         c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 20; i++) {
           resolvePendingEvents(c);
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(c);
           c.ageUp();
           final List<String> ids =
               c.state!.people.map((Person p) => p.id).toList();
@@ -192,6 +219,8 @@ void main() {
         c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
         for (int i = 0; i < 20; i++) {
           resolvePendingEvents(c);
+          // Lise alanı seçilmeden yaş atlanmaz (D-094).
+          resolveEducationChoices(c);
           c.ageUp();
           for (final Person p in c.state!.people) {
             if (p.schoolTie != null) {

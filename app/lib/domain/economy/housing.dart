@@ -1,6 +1,8 @@
+import '../../data/city_neighbours.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
 import '../models/owned_item.dart';
+import '../models/rental.dart';
 import '../models/person.dart';
 import '../../text/turkish_text.dart';
 
@@ -43,13 +45,13 @@ class Housing {
   static const int prototypeOnlyMinAge = 18;
 
   /// prototypeOnly: taşınmanın tek seferlik masrafı (nakliye, depozito).
-  static const int prototypeOnlyMoveCost = 12000;
+  static const int prototypeOnlyMoveCost = 45000;
 
-  /// prototypeOnly: konutun değerinin yıllık kira geliri oranı.
-  static const double prototypeOnlyYearlyRentYield = 0.045;
+  // Not: yıllık kira getirisi (0,045) ve boşluk ihtimali (0,12) burada
+  // tutuluyordu ve hiçbiri okunmuyordu. Kirayı Paket AB'den beri
+  // `RentalEngine` hesaplıyor; onun kendi sayıları var ve getiri oranı
+  // **farklı** (0,042). İki ayrı sayıdan biri sessizce ölüydü.
 
-  /// prototypeOnly: kiracının bulunamadığı, gelirin gelmediği yıl ihtimali.
-  static const double prototypeOnlyVacancyChance = 0.12;
 
   /// Oyuncunun **aile evinde** hayatta bir yetişkin var mı?
   ///
@@ -90,34 +92,58 @@ class Housing {
     return ev?.location ?? state.player.currentCity;
   }
 
-  /// Kiraya verilebilecek konutlar: sahip olunan, oturulmayan evler.
+  /// Kiraya verilebilecek konutlar: sahip olunan, oturulmayan, kiracısı
+  /// olmayan evler.
+  ///
+  /// "Kirada mı" sorusunun cevabı **sözleşmeden** gelir (D-163), eşyanın
+  /// üstündeki eski `rentedOut` bayrağından değil.
   static List<OwnedItem> rentableHomes(GameState state) => state.items
       .where((OwnedItem i) =>
-          i.isProperty && !i.rentedOut && i.id != state.residenceItemId)
+          i.isProperty &&
+          state.leaseOf(i.id) == null &&
+          i.id != state.residenceItemId)
       .toList(growable: false);
 
-  /// Bir konutun yıllık kira geliri.
-  static int yearlyRentOf(OwnedItem home) =>
-      (home.type.baseValue * prototypeOnlyYearlyRentYield).round();
-
-  /// Kiraya verilmiş konutların toplam yıllık kira geliri.
-  static int yearlyRentIncome(GameState state) => state.items
-      .where((OwnedItem i) => i.isProperty && i.rentedOut)
-      .fold(0, (int toplam, OwnedItem i) => toplam + yearlyRentOf(i));
+  /// Kiraya verilmiş konutların toplam yıllık kira geliri (₺).
+  ///
+  /// Sözleşmede **gerçekten yazılı** kira toplanır. Eskiden bu sayı
+  /// katalog değerinden türetiliyordu ve oyuncunun belirlediği kirayı ya da
+  /// şehri hiç görmüyordu.
+  static int yearlyRentIncome(GameState state) => state.leases
+      .fold<int>(0, (int toplam, Lease l) => toplam + l.yearlyRent);
 
   // =====================================================================
   // Taşınma
   // =====================================================================
 
+  /// İçerideyken taşınma işine bakılamaz (Paket CG).
+  ///
+  /// **Nasıl bulundu.** Ekran dökümünün yeni turunda cezaevindeki hayat
+  /// okundu: Varlıklar ekranı "Yaşadığın yer: Ailesinin yanında" diyor
+  /// ve **"Kiralık eve çık" düğmesi açık** duruyordu. Aktivite
+  /// (`activity_engine`), iş (`job_market`) ve işletme
+  /// (`business_engine`) motorları hükümlülüğe bakıyordu; konut motoru
+  /// hiçbir yerde bakmıyordu. Yani oyuncu içeriden ev değiştirebiliyordu.
+  static String imprisonedBlockReason(GameState state) {
+    if (!state.isImprisoned) return '';
+    final int? tahliye = state.legal.releaseAtAge;
+    return tahliye == null
+        ? 'Cezaevindesin; taşınma işine şimdi bakamazsın.'
+        : 'Cezaevindesin; taşınma işine tahliyeden ($tahliye yaş) sonra '
+            'bakabilirsin.';
+  }
+
   /// Bu eve taşınılabilir mi?
   String moveBlockReason(GameState state, OwnedItem home) {
+    final String icerde = imprisonedBlockReason(state);
+    if (icerde.isNotEmpty) return icerde;
     if (!home.isProperty) return 'Burası bir konut değil.';
     if (state.itemById(home.id) == null) return 'Bu mülk artık sende değil.';
     if (state.player.age < prototypeOnlyMinAge) {
       return '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.';
     }
     if (state.residenceItemId == home.id) return 'Zaten burada yaşıyorsun.';
-    if (home.rentedOut) {
+    if (state.leaseOf(home.id) != null) {
       return 'Bu ev kirada; önce kiracıyı çıkarman gerekiyor.';
     }
     if (state.player.wallet < prototypeOnlyMoveCost) {
@@ -154,40 +180,95 @@ class Housing {
     );
   }
 
-  /// Kiraya çıkar (kendi evinden veya aile evinden ayrılır).
-  HousingResult moveToRental(GameState state) {
-    if (state.player.age < prototypeOnlyMinAge) {
-      return _blocked(
-        state,
-        '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.',
-      );
-    }
-    if (residenceOf(state) == ResidenceKind.kirada) {
-      return _blocked(state, 'Zaten kirada yaşıyorsun.');
-    }
-    if (state.player.wallet < prototypeOnlyMoveCost) {
-      return _blocked(
-        state,
-        'Taşınma masrafı ${trMoney(prototypeOnlyMoveCost)}; cüzdanında yeterli para yok.',
-      );
-    }
+  /// prototypeOnly: başka şehre taşınmanın ek masrafı (D-083).
+  ///
+  /// Şehir değiştirmek, aynı şehirde ev değiştirmekten pahalıdır:
+  /// nakliye uzar, iş ve okul düzeni değişir.
+  static const int prototypeOnlyIntercityExtraCost = 65000;
 
-    const String metin = 'Kiralık bir eve taşındın.';
+  /// Oyuncunun şu an taşınabileceği şehirler (D-083).
+  ///
+  /// Faho'nun isteği: "taşınmada yaşadığım ilin yakınındaki iller olsun;
+  /// her taşındığımda yakınındaki iller çıksın". Ülkenin tamamı yerine
+  /// **yaşanan ilin komşuları** listelenir; taşındıkça liste yenilenir.
+  List<String> relocationTargets(GameState state) =>
+      neighboursOf(state.player.currentCity);
+
+  /// Kiraya çıkar (kendi evinden veya aile evinden ayrılır).
+  ///
+  /// [city] verilirse **başka bir şehre** taşınılır; şehir yaşanan ilin
+  /// komşusu olmak zorundadır ve ek masraf alınır.
+  /// Kiralık eve taşınmanın masrafı (Paket DO).
+  ///
+  /// Şehir değişiyorsa taban masrafın üstüne ek masraf biner.
+  int rentalMoveCost(GameState state, {String? city}) =>
+      prototypeOnlyMoveCost +
+      (city != null && city != state.player.currentCity
+          ? prototypeOnlyIntercityExtraCost
+          : 0);
+
+  /// Kiralık eve taşınmanın engeli; yoksa boş dize (Paket DO).
+  ///
+  /// **Neden ayrı işlev.** Kural zaten `moveToRental` içinde vardı ama
+  /// yalnızca **dokunduktan sonra** okunuyordu. Taşın ekranı dört
+  /// şehri ücretsiz ve gerekçesiz satırlar hâlinde diziyordu: cüzdanı
+  /// boş oyuncu dört davet görüp dokunduktan sonra "paran yok"
+  /// öğreniyordu. Oyunun geri kalanı (sağlık merkezi, tüp bebek,
+  /// medya fırsatları) kapıyı satırın kendisinde yazıyor. Sıra ve
+  /// cümleler aynen korundu; `moveToRental` artık bu işlevi okuyor,
+  /// yani tek kaynak.
+  String rentalMoveBlockReason(GameState state, {String? city}) {
+    final String icerde = imprisonedBlockReason(state);
+    if (icerde.isNotEmpty) return icerde;
+    if (state.player.age < prototypeOnlyMinAge) {
+      return '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.';
+    }
+    final bool sehirDegisiyor =
+        city != null && city != state.player.currentCity;
+    if (!sehirDegisiyor && residenceOf(state) == ResidenceKind.kirada) {
+      return 'Zaten kirada yaşıyorsun.';
+    }
+    if (sehirDegisiyor && !areNeighbours(state.player.currentCity, city)) {
+      return '$city buradan taşınılacak kadar yakın değil. Önce aradaki '
+          'bir ile taşınman gerekiyor.';
+    }
+    final int masraf = rentalMoveCost(state, city: city);
+    if (state.player.wallet < masraf) {
+      return 'Taşınma masrafı ${trMoney(masraf)}; cüzdanında yeterli '
+          'para yok.';
+    }
+    return '';
+  }
+
+  HousingResult moveToRental(GameState state, {String? city}) {
+    final String engel = rentalMoveBlockReason(state, city: city);
+    if (engel.isNotEmpty) return _blocked(state, engel);
+
+    final bool sehirDegisiyor =
+        city != null && city != state.player.currentCity;
+    final int masraf = rentalMoveCost(state, city: city);
+
+    final String metin = sehirDegisiyor
+        ? '${trDative(city)} taşındın; kiralık bir eve yerleştin.'
+        : 'Kiralık bir eve taşındın.';
     final GameState next = state.copyWith(
       player: state.player.copyWith(
-        wallet: state.player.wallet - prototypeOnlyMoveCost,
+        wallet: state.player.wallet - masraf,
+        currentCity: sehirDegisiyor ? city : null,
       ),
       residenceItemId: null,
       movedOut: true,
     );
     return HousingResult(
       state: _log(next, metin),
-      outcome: const HousingOutcome(applied: true, text: metin),
+      outcome: HousingOutcome(applied: true, text: metin),
     );
   }
 
   /// Ailesinin yanına döner.
   HousingResult moveBackToFamily(GameState state) {
+    final String icerde = imprisonedBlockReason(state);
+    if (icerde.isNotEmpty) return _blocked(state, icerde);
     if (!hasAdultAtFamilyHome(state)) {
       return _blocked(
         state,
@@ -213,42 +294,19 @@ class Housing {
   // Kiraya verme
   // =====================================================================
 
+  /// Kiraya vermeye engel; engel yoksa boş metin.
+  ///
+  /// Kiraya verme akışının kendisi D-163 ile `RentalEngine`'e taşındı:
+  /// kira bedeli belirlenir, adaylar gelir, oyuncu kiracıyı seçer. Burada
+  /// yalnızca **kapı** duruyor, çünkü taşınma ekranı da aynı kapıya bakar.
   String rentOutBlockReason(GameState state, OwnedItem home) {
     if (!home.isProperty) return 'Burası bir konut değil.';
     if (state.itemById(home.id) == null) return 'Bu mülk artık sende değil.';
-    if (home.rentedOut) return 'Bu ev zaten kirada.';
+    if (state.leaseOf(home.id) != null) return 'Bu evde kiracı var.';
     if (state.residenceItemId == home.id) {
       return 'Oturduğun evi kiraya veremezsin; önce taşınman gerekir.';
     }
     return '';
-  }
-
-  /// Konutu kiraya verir.
-  HousingResult rentOut(GameState state, OwnedItem home) {
-    final String engel = rentOutBlockReason(state, home);
-    if (engel.isNotEmpty) return _blocked(state, engel);
-
-    final int kira = yearlyRentOf(home);
-    final String metin = '${home.name} kiraya verildi; yılda ${trMoney(kira)} kira '
-        'geliri bekleniyor.';
-    final GameState next =
-        state.updateItem(home.copyWith(rentedOut: true));
-    return HousingResult(
-      state: _log(next, metin),
-      outcome: HousingOutcome(applied: true, text: metin),
-    );
-  }
-
-  /// Kiracıyı çıkarır.
-  HousingResult endLease(GameState state, OwnedItem home) {
-    if (!home.rentedOut) return _blocked(state, 'Bu ev kirada değil.');
-    final String metin = '${home.name} için kira sözleşmesi sona erdi.';
-    final GameState next =
-        state.updateItem(home.copyWith(rentedOut: false));
-    return HousingResult(
-      state: _log(next, metin),
-      outcome: HousingOutcome(applied: true, text: metin),
-    );
   }
 
   HousingResult _blocked(GameState state, String reason) => HousingResult(

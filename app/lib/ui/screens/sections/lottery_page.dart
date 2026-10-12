@@ -249,7 +249,9 @@ class _PrizeTable extends StatelessWidget {
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    '1/${p.oneIn}',
+                    // Paket DN: oran "1/500000" diye tek blok
+                    // yazılıyordu.
+                    '1/${trNumber(p.oneIn)}',
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,

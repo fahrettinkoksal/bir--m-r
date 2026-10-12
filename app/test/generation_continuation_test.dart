@@ -8,6 +8,7 @@ import 'package:bir_omur/domain/life/inheritance.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/domain/models/rental.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -219,13 +220,28 @@ void main() {
     });
 
     test('devralınan evde oturulur, kirada olan ev oturulan ev sayılmaz', () {
+      // D-163: "kirada" bilgisi artık sözleşmeden geliyor.
       final GameState eski = olenOyuncu(
         esHayatta: false,
-        items: <OwnedItem>[esya('esya-1', 'kucuk_daire', rentedOut: true)],
-      );
+        items: <OwnedItem>[esya('esya-1', 'kucuk_daire')],
+      ).copyWith(leases: <Lease>[kiraSozlesmesi('esya-1')]);
       final GameState yeni = devamEt(eski, 'cocuk-1');
       expect(yeni.residenceItemId, isNull);
       expect(checkInvariants(yeni, where: 'kiradaki ev'), isEmpty);
+
+      // Kiracı konutla birlikte devrediliyor: "babandan kalan daire hâlâ
+      // kirada." Sözleşme mirasçının yaş ölçeğine çıpalanıyor, geçen yıl
+      // sayısı korunuyor.
+      final Lease? devralinan = yeni.leaseOf('esya-1');
+      expect(devralinan, isNotNull);
+      expect(devralinan!.tenant.id, eski.leaseOf('esya-1')!.tenant.id);
+      expect(devralinan.yearlyRent, eski.leaseOf('esya-1')!.yearlyRent);
+      expect(devralinan.startedAtAge, lessThanOrEqualTo(yeni.player.age));
+      expect(
+        yeni.player.age - devralinan.startedAtAge,
+        eski.player.age - eski.leaseOf('esya-1')!.startedAtAge,
+        reason: 'Oturma süresi korunmalı',
+      );
 
       final GameState eski2 = olenOyuncu(
         esHayatta: false,

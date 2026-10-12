@@ -55,80 +55,73 @@ enum LotteryDraw {
     id: 'aylik',
     label: 'Olağan çekiliş',
     description: 'Yıl içinde bayiden alınan bilet. Küçük ama düzenli umut.',
-    fullTicketPrice: 200, // prototypeOnly
+    fullTicketPrice: 500, // prototypeOnly
     maxTicketsPerAge: 12, // prototypeOnly: ayda bir bilet
     prizes: <LotteryPrize>[
       LotteryPrize(
         label: 'Büyük ikramiye',
         oneIn: 500000,
-        fullTicketAmount: 20000000,
+        fullTicketAmount: 50000000,
       ),
       LotteryPrize(
         label: 'İkinci ikramiye',
         oneIn: 100000,
-        fullTicketAmount: 2000000,
+        fullTicketAmount: 5000000,
       ),
       LotteryPrize(
         label: 'Üçüncü ikramiye',
         oneIn: 20000,
-        fullTicketAmount: 250000,
+        fullTicketAmount: 625000,
       ),
       LotteryPrize(
         label: 'Dördüncü ikramiye',
         oneIn: 2000,
-        fullTicketAmount: 20000,
+        fullTicketAmount: 50000,
       ),
       LotteryPrize(
         label: 'Teselli ikramiyesi',
         oneIn: 200,
-        fullTicketAmount: 2000,
+        fullTicketAmount: 5000,
       ),
-      LotteryPrize(
-        label: 'Amorti',
-        oneIn: 10,
-        fullTicketAmount: 200,
-      ),
+      LotteryPrize(label: 'Amorti', oneIn: 10, fullTicketAmount: 500),
     ],
   ),
 
   yilbasi(
     id: 'yilbasi',
     label: 'Yılbaşı özel çekilişi',
-    description: 'Yılın en büyük ikramiyesi. Herkes bir bilet alır, '
+    description:
+        'Yılın en büyük ikramiyesi. Herkes bir bilet alır, '
         'herkes o geceyi bekler.',
-    fullTicketPrice: 800, // prototypeOnly
+    fullTicketPrice: 1200, // prototypeOnly
     maxTicketsPerAge: 4, // prototypeOnly
     prizes: <LotteryPrize>[
       LotteryPrize(
         label: 'Büyük ikramiye',
         oneIn: 4000000,
-        fullTicketAmount: 800000000,
+        fullTicketAmount: 1200000000,
       ),
       LotteryPrize(
         label: 'İkinci ikramiye',
         oneIn: 800000,
-        fullTicketAmount: 40000000,
+        fullTicketAmount: 60000000,
       ),
       LotteryPrize(
         label: 'Üçüncü ikramiye',
         oneIn: 100000,
-        fullTicketAmount: 4000000,
+        fullTicketAmount: 6000000,
       ),
       LotteryPrize(
         label: 'Dördüncü ikramiye',
         oneIn: 10000,
-        fullTicketAmount: 200000,
+        fullTicketAmount: 300000,
       ),
       LotteryPrize(
         label: 'Teselli ikramiyesi',
         oneIn: 500,
-        fullTicketAmount: 20000,
+        fullTicketAmount: 30000,
       ),
-      LotteryPrize(
-        label: 'Amorti',
-        oneIn: 10,
-        fullTicketAmount: 800,
-      ),
+      LotteryPrize(label: 'Amorti', oneIn: 10, fullTicketAmount: 1200),
     ],
   );
 

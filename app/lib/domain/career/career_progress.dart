@@ -1,7 +1,10 @@
 import 'dart:math';
 
 import '../../data/job_catalog.dart';
+import '../life/sick_leave.dart';
 import '../../text/turkish_text.dart';
+import '../life/stat_floor_effects.dart';
+import 'craft_mastery.dart';
 import '../models/career.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
@@ -58,7 +61,25 @@ abstract final class CareerProgress {
   static const double prototypeOnlyPromotionBaseChance = 0.25;
 
   /// prototypeOnly: işte geçen her yılın eklediği pay.
-  static const double prototypeOnlyYearBonus = 0.05;
+  ///
+  /// **Ölçülmüş hata (D-176):** bu pay 0,05'ti ve kendi tavanı yoktu.
+  /// Taban 0,35 ile birlikte **8. yılda** üst sınırı (0,85) tek başına
+  /// dolduruyordu; o noktadan sonra zekâ, karizma, ustalık, itibar, hobi
+  /// sinerjisi ve iyi sicil — hiçbiri hiçbir şey yapmıyordu. Ustalık
+  /// basamakları Usta 8, Başusta 16, Duayen 28 yıl olduğu için D-155'in
+  /// ustalık/itibar payı tam da işe yaraması gereken basamaklarda ölüydü.
+  /// Payı 0,02'ye indirmek yetmedi (ölçüm: doyma 8. yıldan 16. yıla,
+  /// yani Başusta'ya kaydı), bu yüzden paya **kendi tavanı** da kondu.
+  static const double prototypeOnlyYearBonus = 0.02;
+
+  /// prototypeOnly: kıdemin tek başına ekleyebileceği en fazla pay.
+  ///
+  /// Kıdem bundan sonra **ustalık basamakları ve itibar** üzerinden
+  /// değer kazanmaya devam eder (D-155); ham yıl sayısı sonsuza kadar
+  /// birikmez. Böylece uzun süre kalmak tek başına üst sınırı
+  /// doldurmaz: tavana ulaşmak için stat, ustalık, itibar ya da iyi
+  /// sicil gerekir.
+  static const double prototypeOnlyYearBonusCap = 0.15;
 
   /// prototypeOnly: yüksek zekâ/karizmanın eklediği en fazla pay.
   static const double prototypeOnlyStatBonus = 0.25;
@@ -180,7 +201,8 @@ abstract final class CareerProgress {
     final int yil = career.yearsInJob(state.player.age);
     double sans =
         terfi ? prototypeOnlyPromotionBaseChance : prototypeOnlyRaiseBaseChance;
-    sans += yil * prototypeOnlyYearBonus;
+    sans += (yil * prototypeOnlyYearBonus)
+        .clamp(0.0, prototypeOnlyYearBonusCap);
 
     // Zekâ ve karizmanın ortalaması: iş yerinde hem işini bilmek hem
     // derdini anlatabilmek işe yarar.
@@ -196,8 +218,22 @@ abstract final class CareerProgress {
       sans -= prototypeOnlyBadRecordPenalty;
     }
 
+    // Ustalık ve itibar (D-155): aynı işte yıllarca duran ve iyi iz
+    // bırakan kişinin talebi daha kolay kabul edilir. Yeni bir kayıt
+    // alanı yok; ikisi de mevcut kayıttan türetilir.
+    sans += CraftMastery.requestBonus(state);
+
     // Üst basamaklarda terfi zorlaşır.
     sans -= career.level * 0.08;
+
+    // Mutluluk da işin içine girer (Paket AQ).
+    //
+    // Zekâ ve karizma zaten sayılıyordu; mutluluk hiçbir sistemin
+    // **girdisi** değildi — yalnızca hayat değerlendirmesinde sonuç
+    // olarak görünüyordu. Mutsuz insan işini aynı istekle yapmaz.
+    // Çarpan ölçülü: mutluluk 0 olan karakter işinden atılmıyor, zam ve
+    // terfi talebi biraz daha zor kabul ediliyor.
+    sans *= StatFloorEffects.motivationFactor(state.player.stats.happiness);
 
     return sans.clamp(prototypeOnlyMinChance, prototypeOnlyMaxChance);
   }
@@ -340,7 +376,14 @@ abstract final class CareerProgress {
         newAge - sonKayip < prototypeOnlyLayoffCooldown) {
       return (state: state, logText: null);
     }
-    if (!(rng.nextDouble() < prototypeOnlyLayoffChance)) {
+    // İşveren uyarıları ihtimali artırır ama tek başına kimseyi atmaz
+    // (D-078).
+    // Ustayı kolay göndermezler (D-155); ama küçülme herkese uğrar, o
+    // yüzden çarpanın bir tabanı var.
+    final double sans = (prototypeOnlyLayoffChance +
+            SickLeaves.layoffBonus(career.employerWarnings)) *
+        CraftMastery.layoffFactor(state);
+    if (!(rng.nextDouble() < sans)) {
       return (state: state, logText: null);
     }
 
@@ -375,8 +418,8 @@ abstract final class CareerProgress {
   /// Mutluluğu **gerçekten uygulanabilecek kadar** değiştirir.
   static GameState _happiness(GameState state, int delta) => state.copyWith(
         player: state.player.copyWith(
-          stats: state.player.stats.copyWith(
-            happiness: state.player.stats.happiness + delta,
+          stats: state.player.stats.gain(
+            happiness: delta,
           ),
         ),
       );

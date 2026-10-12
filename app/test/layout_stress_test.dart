@@ -212,8 +212,30 @@ void main() {
     (anahtar: 'activity_fal', ad: 'Fal ve Tarot'),
     (anahtar: 'activity_piyango', ad: 'Piyango'),
     (anahtar: 'activity_finger', ad: 'Finger'),
-    (anahtar: 'activity_hayvan', ad: 'Evcil hayvanlar'),
   ];
+
+  // D-146: evcil hayvanlar sayfası Aktiviteler'den İlişkiler'e taşındı.
+  // Taşma denetimi silinmedi, yalnızca yeni yolundan açılıyor.
+  for (final double genislik in <double>[320, 390]) {
+    testWidgets(
+        'Evcil hayvanlar sayfası ${genislik.toInt()} px / yazı ×1.5 taşmaz',
+        (WidgetTester tester) async {
+      yakala();
+      addTearDown(birak);
+      await hazirla(tester, genislik: genislik, yaziOlcegi: 1.5);
+
+      await tester.tap(find.byKey(const Key('tab_iliskiler')));
+      await tester.pumpAndSettle();
+      await scrollToFinder(
+        tester,
+        find.byKey(const Key('relationships_pets_row')),
+      );
+      await tester.tap(find.byKey(const Key('relationships_pets_row')));
+      await tester.pumpAndSettle();
+      await sonunaKaydir(tester, adim: 18);
+      temiz();
+    });
+  }
 
   for (final double genislik in <double>[320, 390]) {
     for (final ({String anahtar, String ad}) sayfa in altSayfalar) {
@@ -262,14 +284,49 @@ void main() {
     temiz();
   });
 
-  testWidgets('seyahat sayfası 320 px / yazı ×1.5 taşmaz',
+  testWidgets('tatil sayfası 320 px / yazı ×1.5 taşmaz',
       (WidgetTester tester) async {
     yakala();
     addTearDown(birak);
     await hazirla(tester, genislik: 320, yaziOlcegi: 1.5);
     await tester.tap(find.byKey(const Key('tab_aktiviteler')));
     await tester.pumpAndSettle();
-    await tapMenuRow(tester, 'Seyahat');
+    await tapMenuRow(tester, 'Tatil yap');
+    // D-083 ile sayfaya tur paketleri eklendi; liste uzadığı için daha
+    // çok kaydırma gerekiyor.
+    await sonunaKaydir(tester, adim: 34);
+    temiz();
+  });
+
+  // D-088: Finger profil düzenleyicisi dar ekranda taşıyordu; artık
+  // sınanıyor.
+  testWidgets('Finger profil düzenleyici 320 px / yazı ×1.5 taşmaz',
+      (WidgetTester tester) async {
+    yakala();
+    addTearDown(birak);
+    await hazirla(tester, genislik: 320, yaziOlcegi: 1.5);
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Finger');
+    await sonunaKaydir(tester, adim: 12);
+    final Finder ac = find.byKey(const Key('finger_profil_ac'));
+    if (ac.evaluate().isNotEmpty) {
+      await tester.tap(ac.first);
+      await tester.pumpAndSettle();
+      await sonunaKaydir(tester, adim: 30);
+    }
+    temiz();
+  });
+
+  // D-083: taşınma ayrı bir sayfa oldu; o da dar ekranda sınanır.
+  testWidgets('taşınma sayfası 320 px / yazı ×1.5 taşmaz',
+      (WidgetTester tester) async {
+    yakala();
+    addTearDown(birak);
+    await hazirla(tester, genislik: 320, yaziOlcegi: 1.5);
+    await tester.tap(find.byKey(const Key('tab_aktiviteler')));
+    await tester.pumpAndSettle();
+    await tapMenuRow(tester, 'Taşın');
     await sonunaKaydir(tester, adim: 20);
     temiz();
   });
@@ -364,6 +421,8 @@ void main() {
     while (!controller.state!.deceased) {
       if (guard++ > 120) break;
       resolvePendingEvents(controller);
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveEducationChoices(controller);
       controller.ageUp();
     }
     resolvePendingEvents(controller);

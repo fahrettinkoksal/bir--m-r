@@ -14,6 +14,7 @@ import '../models/stats.dart';
 import '../models/wealth.dart';
 import 'random_util.dart';
 import '../../data/pet_catalog.dart';
+import '../life/year_review.dart';
 
 /// Başlangıç modları (D-005).
 enum StartMode {
@@ -320,6 +321,10 @@ class LifeGenerator {
       ),
       // Ün başlangıçta açık değildir (D-027).
       fame: null,
+      // Atletik potansiyel doğumda **gizlice** belirlenir (Paket AU):
+      // oyuncuya sayı gösterilmez, spor yapıldıkça kabaca anlaşılır.
+      // prototypeOnly aralık: statlarla aynı bant.
+      storedAthleticPotential: _rng.between(25, 85),
       // Doğurganlık hayat başında **gizlice** belirlenir; oyuncuya
       // söylenmez, ancak denedikçe anlaşılır (Paket 25).
       infertile: Intimacy.rollPlayerInfertility(_rng),
@@ -347,7 +352,10 @@ class LifeGenerator {
       log: const <LifeLogEntry>[],
     );
 
-    return state.copyWith(log: _birthLog(state));
+    // Yılın başındaki fotoğraf ilk yıldan itibaren durur (D-096); ilk
+    // yaş özeti de gerçek değerlerle üretilsin.
+    final GameState hazir = state.copyWith(log: _birthLog(state));
+    return hazir.copyWith(yearMark: YearMark.of(hazir));
   }
 
   // --------------------------------------------------------------------

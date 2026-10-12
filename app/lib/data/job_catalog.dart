@@ -1,12 +1,46 @@
-/// Meslekler (küçük prototip).
+/// Meslek kataloğu.
 ///
-/// Maaşlar ve koşullar `prototypeOnly`'dir; ekonomi dengesi
-/// kararlaştırılmadı (`docs/DESIGN_REVIEW_QUEUE.md`, Q-048).
+/// Maaşlar **2026 Türkiye alım gücüne** göre kalibre edildi (Faho onayı,
+/// Q-113 ve ekonomi kararı). Her işin bir [SalaryBand] bandı vardır ve
+/// `test/economy_calibration_test.dart` maaşın bandın içinde kaldığını
+/// denetler. Çıpa: net yıllık asgari ücret
+/// [Economy.netYearlyMinimumWage].
+///
+/// **Bant bir gelir sınıfıdır, bir prestij sırası değildir.** Üniversite
+/// isteyen bir meslek (öğretmen) ofis bandında olabilir; bandı belirleyen
+/// eğitim değil, işin getirdiği paradır.
+///
+/// Ayrıntılı eski/yeni karşılaştırması: `docs/ECONOMY_2026.md`.
 library;
 
 import 'package:flutter/foundation.dart';
 
+import '../domain/career/career_synergy.dart';
+import 'economy.dart';
 import 'education_tracks.dart';
+
+/// İşin sabıka kaydına bakışı (D-128).
+///
+/// **Her suç bütün işleri kapatmaz.** Kural işin kendi gerçeğine bakar:
+/// güvenlik ve kamu görevlerinde temiz kayıt aranır, çoğu işte aranmaz.
+enum RecordRule {
+  /// Sabıkaya bakılmaz. Katalogdaki işlerin çoğu böyledir.
+  serbest('Adli kayda bakılmaz'),
+
+  /// **Hiç** sabıka kaydı olmamalı. Polis, memur, güvenlik gibi
+  /// görevler için: 657 sayılı kanun ve 5188 sayılı özel güvenlik
+  /// kanunu belirli suçlardan hüküm giyenlerin bu görevlere
+  /// alınmayacağını söyler.
+  temizGerekir('Adli kaydın temiz olması gerekiyor'),
+
+  /// Yalnızca **orta ve ağır** kayıtlar engeller; hafif bir dosya
+  /// kapıyı kapatmaz.
+  agirEngeller('Ağır bir adli kayıt bu işe engel');
+
+  const RecordRule(this.label);
+
+  final String label;
+}
 
 /// İşin gerektirdiği asgari eğitim.
 enum JobEducation {
@@ -27,13 +61,25 @@ class JobType {
     required this.description,
     required this.minAge,
     required this.yearlySalary,
+    this.maxAge,
+    this.maxAgeNote,
+    required this.band,
     this.education = JobEducation.yok,
     this.tracks = const <EducationTrack>{},
     this.programs = const <String>{},
     this.minIntelligence = 0,
     this.minCharisma = 0,
+    this.minAppearance = 0,
+    this.minHealth = 0,
+    this.physicalNote,
     this.levels = const <String>[],
     this.martialArtId,
+    this.hobbyId,
+    this.minHobbyStage = 0,
+    this.synergies = const <CareerSynergy>[],
+    this.requiredLicenses = const <String>{},
+    this.recordRule = RecordRule.serbest,
+    this.partTime = false,
   });
 
   final String id;
@@ -41,8 +87,31 @@ class JobType {
   final String description;
   final int minAge;
 
-  /// prototypeOnly: bir oyun yılında cüzdana giren tutar (₺).
+  /// İşe **girişte** aranan üst yaş sınırı (D-113).
+  ///
+  /// Yalnızca Türkiye'de gerçekten yasal/idari bir üst sınırı olan
+  /// mesleklerde doludur. Çoğu işte üst sınır **yoktur** ve burası boş
+  /// kalır; oyun uydurma bir sınır koymaz. Sınır yalnızca **ilk girişi**
+  /// bağlar: işe girmiş biri yaşı geçince kovulmaz.
+  final int? maxAge;
+
+  /// Üst sınırın dayanağı; ekranda oyuncuya gösterilir.
+  final String? maxAgeNote;
+
+  /// Bir oyun yılında cüzdana giren giriş seviyesi tutarı
+  /// (₺, 2026 alım gücü).
+  ///
+  /// Terfi ve zamlar bunun üstüne biner; bu, işe **ilk girildiğinde**
+  /// geçerli olan tutardır.
   final int yearlySalary;
+
+  /// İşin gelir sınıfı. Maaş bu bandın dışına çıkamaz.
+  final SalaryBand band;
+
+  /// Giriş maaşının kabaca aylık karşılığı (₺).
+  ///
+  /// Motor yıllık hesapla çalışır; bu yalnızca ekranda gösterilir.
+  int get monthlySalary => Economy.monthlyOf(yearlySalary);
 
   final JobEducation education;
 
@@ -54,6 +123,53 @@ class JobType {
 
   final int minIntelligence;
   final int minCharisma;
+
+  /// prototypeOnly: işe girmek için gereken en az görünüş.
+  ///
+  /// Yalnızca görünüşün mesleğin kendisi olduğu işlerde kullanılır.
+  /// Satış danışmanı ya da resepsiyonist gibi işlerde **bilerek 0**:
+  /// oradaki doğru stat karizmadır (Paket AM, §12).
+  ///
+  /// Bu bir **işe giriş** şartıdır. İşe girdikten sonra görünüş
+  /// düşerse oyuncu kovulmaz (D-064).
+  final int minAppearance;
+
+  /// prototypeOnly: işe girmek için gereken en az sağlık (Paket AM, §1).
+  ///
+  /// **Yalnızca işin doğası gerçekten beden istiyorsa** doldurulur.
+  /// Muhasebecinin, yazılımcının ya da öğretmenin sağlık şartı yoktur
+  /// ve olmayacak (§11): bu alan fiziksel gerçekçilik içindir, "her
+  /// işte bütün statlar yüksek olsun" sistemi değil.
+  ///
+  /// Öneri bandı: hafif fiziksel 45-50, orta 50-60, ağır 60-70. Elit
+  /// sporcu seviyesi (80) yalnızca rekabetçi dövüş kariyerine aittir
+  /// (`CombatCareerEngine`), mesleklere değil.
+  ///
+  /// **ÖLÇÜMLE DARALTILDI.** İlk yazımda kurye (50), depo personeli (55),
+  /// oto tamircisi (50), tesisatçı (50) ve kaynakçı (60) de eşik
+  /// almıştı. Bunlar erişilebilir meslek kataloğunun büyük bir bölümünü
+  /// oluşturuyor ve kapanmaları **oyunun ekonomisini kaydırdı**:
+  /// `paket_ae_calibration_test` ölçümünde `girisim+yatirim`in her
+  /// ölçüde ezdiği strateji sayısı **5/14'ten 9/14'e** çıktı (maaş
+  /// yolları zayıflayınca işletme yolu göreli olarak baskın hâle geldi)
+  /// ve `paket_ag_payback_test`'te terzi atölyesinin dağılımı daraldı.
+  ///
+  /// Brief §10 "her fiziksel işe zorla eşik koyma, gerçekten anlamlı
+  /// değilse 0 bırak" diyor ve toplu denge operasyonunu yasaklıyor. Bu
+  /// yüzden eşik yalnızca brief'in adını verdiği üç kamu mesleğinde
+  /// tutuldu: itfaiyeci 70, polis 65, güvenlik 55. Bunlar gerçek bir
+  /// fiziksel yeterlilik sınavı olan, katalogun küçük bir dilimi.
+  /// Diğerleri Q-185 #2'de Faho'ya bırakıldı.
+  ///
+  /// [minAppearance] gibi bu da bir **giriş** şartıdır; işe girdikten
+  /// sonra sağlık düşerse kovulma olmaz.
+  final int minHealth;
+
+  /// Sağlık şartının mesleğe özel gerekçesi; boşsa genel metin kullanılır.
+  ///
+  /// "İşe uygun değilsin" gibi kuru bir cümle yerine oyuncunun
+  /// anlayacağı doğal bir sebep yazılır (§19).
+  final String? physicalNote;
 
   /// Bu meslekteki görev basamakları (giriş seviyesinden yukarı).
   ///
@@ -67,6 +183,45 @@ class JobType {
   /// Doluysa iş yalnızca o sanatta eğitmenlik basamağına gelmiş oyuncuya
   /// açılır; katalogdaki eşik `MartialArt.instructorFromLevel`'dir.
   final String? martialArtId;
+
+  /// Bu iş bir hobinin birikmesiyle açılıyorsa o hobinin kimliği.
+  ///
+  /// [martialArtId] ile aynı mantık: diplomayla değil, yıllarca
+  /// yapılmış bir uğraşla girilen meslekler içindir. Yazarlık okuma,
+  /// müzisyenlik müzik hobisine bağlıdır.
+  final String? hobbyId;
+
+  /// prototypeOnly: [hobbyId] hobisinde ulaşılmış olması gereken basamak.
+  final int minHobbyStage;
+
+  /// Bu mesleğe **avantaj** sağlayan hobiler (Paket AK).
+  ///
+  /// [hobbyId] sert şarttır; bu liste değildir. Buradaki hobilerin
+  /// hiçbiri işe girmenin önkoşulu olmaz: hobisi olmayan oyuncu aynı
+  /// işe aynı koşullarla başvurur. Sinerji yalnızca mülakatta ikinci
+  /// bir şans, işe başlarken ustalık payı ve süren işte küçük bir
+  /// terfi payı olarak görünür — kurallar
+  /// `domain/career/career_synergy.dart` içinde.
+  final List<CareerSynergy> synergies;
+
+  /// İşe girmek için gereken ehliyetler ([LicenseType.id]).
+  ///
+  /// Kuryelik gibi, aracı kullanmanın işin kendisi olduğu mesleklerde
+  /// aranır. Ehliyetsiz oyuncuya iş açılmaz; gerekçesi yazılır.
+  final Set<String> requiredLicenses;
+
+  /// Bu iş **yarım zamanlı** mı? (D-131)
+  ///
+  /// Yarım zamanlı iş okula devam ederken de yapılabilir; tam zamanlı iş
+  /// yapılamaz. Maaşı düşüktür ve öğrenciyken çalışmanın **bedeli**
+  /// vardır: yıllık zekâ kazancı azalır, sağlık biraz düşer.
+  final bool partTime;
+
+  /// İşin sabıka kaydına bakışı (D-128).
+  ///
+  /// Varsayılan **serbest**'tir: oyun uydurma bir engel koymaz, yalnızca
+  /// gerçekte kayıt aranan işlerde doldurulur.
+  final RecordRule recordRule;
 
   /// Bu meslekte çıkılabilecek en üst basamak.
   int get maxLevel => levels.isEmpty ? 0 : levels.length - 1;
@@ -83,12 +238,16 @@ String jobTitleFor(JobType job, int level) {
 }
 
 const List<JobType> kJobCatalog = <JobType>[
+  // ===================================================================
+  // Hizmet ve giriş seviyesi
+  // ===================================================================
   JobType(
     id: 'magaza_calisani',
     name: 'Mağaza çalışanı',
     description: 'Raf düzeni, kasa ve ayakta geçen uzun saatler.',
     minAge: 16,
-    yearlySalary: 180000, // prototypeOnly
+    yearlySalary: 352000,
+    band: SalaryBand.giris,
     levels: <String>[
       'Mağaza çalışanı',
       'Kıdemli mağaza çalışanı',
@@ -96,24 +255,135 @@ const List<JobType> kJobCatalog = <JobType>[
     ],
   ),
   JobType(
+    id: 'kasiyer',
+    name: 'Kasiyer',
+    description: 'Bant, barkod ve gün sonu sayımı.',
+    minAge: 17,
+    yearlySalary: 340000,
+    band: SalaryBand.giris,
+    levels: <String>['Kasiyer', 'Kıdemli kasiyer', 'Kasa sorumlusu'],
+  ),
+  JobType(
     id: 'garson',
     name: 'Garson',
     description: 'Tepsi, sipariş, akşam vardiyası.',
     minAge: 16,
-    yearlySalary: 165000, // prototypeOnly
+    yearlySalary: 344000,
+    band: SalaryBand.giris,
     minCharisma: 35,
-    levels: <String>[
-      'Garson',
-      'Deneyimli garson',
-      'Servis şefi',
+    levels: <String>['Garson', 'Deneyimli garson', 'Servis şefi'],
+  ),
+  JobType(
+    id: 'kurye',
+    name: 'Kurye',
+    description: 'Trafik, saat baskısı ve her hava koşulu.',
+    minAge: 18,
+    yearlySalary: 378000,
+    band: SalaryBand.giris,
+    requiredLicenses: <String>{'motosiklet_ehliyeti'},
+    levels: <String>['Kurye', 'Kıdemli kurye', 'Dağıtım sorumlusu'],
+  ),
+  JobType(
+    id: 'depo_personeli',
+    name: 'Depo personeli',
+    description: 'Sayım, istif ve sevkiyat.',
+    minAge: 18,
+    yearlySalary: 358000,
+    band: SalaryBand.giris,
+    levels: <String>['Depo personeli', 'Depo kıdemlisi', 'Depo şefi'],
+  ),
+  JobType(
+    id: 'guvenlik',
+    name: 'Güvenlik görevlisi',
+    description: 'Devriye, kamera ve uzun geceler.',
+    minAge: 20,
+    yearlySalary: 392000,
+    band: SalaryBand.giris,
+    education: JobEducation.lise,
+    levels: <String>['Güvenlik görevlisi', 'Vardiya amiri', 'Güvenlik şefi'],
+    recordRule: RecordRule.temizGerekir,
+    synergies: <CareerSynergy>[
+      CareerSynergy('spor', SynergyStrength.orta),
+    ],
+    // §9: sağlık raporu isteniyor ama iş ağır fiziksel değil.
+    minHealth: 55,
+    physicalNote: 'Güvenlik görevliliği için sağlık raporu isteniyor.',
+  ),
+  JobType(
+    id: 'cagri_merkezi',
+    name: 'Çağrı merkezi çalışanı',
+    description: 'Kulaklık, sabır ve arka arkaya gelen çağrılar.',
+    minAge: 18,
+    yearlySalary: 368000,
+    band: SalaryBand.giris,
+    education: JobEducation.lise,
+    minCharisma: 40,
+    levels: <String>['Müşteri temsilcisi', 'Kıdemli temsilci', 'Takım lideri'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.kucuk),
     ],
   ),
+  JobType(
+    id: 'satis_danismani',
+    name: 'Satış danışmanı',
+    description: 'İkna, hedef ve ayın son haftası.',
+    minAge: 18,
+    yearlySalary: 425000,
+    band: SalaryBand.nitelikliHizmet,
+    education: JobEducation.lise,
+    minCharisma: 50,
+    levels: <String>['Satış danışmanı', 'Kıdemli danışman', 'Satış müdürü'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.orta),
+    ],
+  ),
+  JobType(
+    id: 'resepsiyonist',
+    name: 'Resepsiyonist',
+    description: 'Giriş, çıkış, telefon ve hep güler yüz.',
+    minAge: 18,
+    yearlySalary: 410000,
+    band: SalaryBand.nitelikliHizmet,
+    education: JobEducation.lise,
+    minCharisma: 45,
+    levels: <String>['Resepsiyonist', 'Ön büro görevlisi', 'Ön büro şefi'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.guclu),
+    ],
+  ),
+  JobType(
+    id: 'asci',
+    name: 'Aşçı',
+    description: 'Sıcak mutfak, hızlı tempo ve akşama kadar aynı tabak.',
+    minAge: 18,
+    yearlySalary: 470000,
+    band: SalaryBand.nitelikliHizmet,
+    levels: <String>['Aşçı yardımcısı', 'Aşçı', 'Mutfak şefi'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('mutfak', SynergyStrength.guclu),
+    ],
+  ),
+  JobType(
+    id: 'kuafor',
+    name: 'Kuaför',
+    description: 'Makas, ayna ve bütün gün ayakta süren sohbetler.',
+    minAge: 18,
+    yearlySalary: 440000,
+    band: SalaryBand.nitelikliHizmet,
+    minCharisma: 40,
+    levels: <String>['Kuaför çırağı', 'Kuaför', 'Salon sahibi'],
+  ),
+
+  // ===================================================================
+  // Teknik ve ustalık
+  // ===================================================================
   JobType(
     id: 'teknik_servis',
     name: 'Teknik servis çalışanı',
     description: 'Arızalı cihazlar, tornavida ve sabır.',
     minAge: 18,
-    yearlySalary: 260000, // prototypeOnly
+    yearlySalary: 545000,
+    band: SalaryBand.ustaTeknik,
     education: JobEducation.lise,
     tracks: <EducationTrack>{
       EducationTrack.teknikMeslek,
@@ -126,13 +396,362 @@ const List<JobType> kJobCatalog = <JobType>[
       'Kıdemli teknisyen',
       'Servis sorumlusu',
     ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazilim', SynergyStrength.kucuk),
+    ],
   ),
+  JobType(
+    id: 'elektrikci',
+    name: 'Elektrik teknisyeni',
+    description: 'Pano, kablo ve asla acele edilmeyen bir iş.',
+    minAge: 18,
+    yearlySalary: 610000,
+    band: SalaryBand.ustaTeknik,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{
+      EducationTrack.teknikMeslek,
+      EducationTrack.fenBilim,
+    },
+    minIntelligence: 45,
+    levels: <String>[
+      'Elektrik teknisyeni',
+      'Usta elektrikçi',
+      'Şantiye ustabaşı',
+    ],
+  ),
+  JobType(
+    id: 'oto_tamircisi',
+    name: 'Oto tamircisi',
+    description: 'Kaput altı, yağ kokusu ve kulakla teşhis.',
+    minAge: 18,
+    yearlySalary: 585000,
+    band: SalaryBand.ustaTeknik,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{EducationTrack.teknikMeslek},
+    levels: <String>['Oto tamircisi', 'Usta tamirci', 'Servis sahibi'],
+  ),
+  JobType(
+    id: 'tesisatci',
+    name: 'Tesisatçı',
+    description: 'Su, doğalgaz ve gece yarısı gelen telefonlar.',
+    minAge: 18,
+    yearlySalary: 560000,
+    band: SalaryBand.ustaTeknik,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{EducationTrack.teknikMeslek},
+    levels: <String>['Tesisatçı', 'Usta tesisatçı', 'Taşeron'],
+  ),
+  JobType(
+    id: 'kaynakci',
+    name: 'Kaynakçı',
+    description: 'Maske, kıvılcım ve milimetrik dikiş.',
+    minAge: 18,
+    yearlySalary: 640000,
+    band: SalaryBand.ustaTeknik,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{EducationTrack.teknikMeslek},
+    levels: <String>['Kaynakçı', 'Sertifikalı kaynakçı', 'Kaynak ustabaşı'],
+  ),
+  JobType(
+    id: 'cnc_operatoru',
+    name: 'CNC operatörü',
+    description: 'Tezgâh, program ve mikronluk tolerans.',
+    minAge: 19,
+    yearlySalary: 675000,
+    band: SalaryBand.ustaTeknik,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{
+      EducationTrack.teknikMeslek,
+      EducationTrack.bilisim,
+    },
+    minIntelligence: 50,
+    levels: <String>['CNC operatörü', 'Kıdemli operatör', 'Üretim şefi'],
+  ),
+
+  // ===================================================================
+  // Ofis ve finans
+  // ===================================================================
+  JobType(
+    id: 'ofis_personeli',
+    name: 'Ofis personeli',
+    description: 'Evrak, takip ve bitmeyen tablolar.',
+    minAge: 19,
+    yearlySalary: 640000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.lise,
+    levels: <String>['Ofis personeli', 'Kıdemli personel', 'Ofis sorumlusu'],
+  ),
+  JobType(
+    id: 'banka_personeli',
+    name: 'Banka personeli',
+    description: 'Gişe, hedef ve gün sonu kapanışı.',
+    minAge: 22,
+    yearlySalary: 760000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.universite,
+    programs: <String>{'isletme'},
+    minIntelligence: 50,
+    minCharisma: 45,
+    levels: <String>[
+      'Banka personeli',
+      'Müşteri ilişkileri yetkilisi',
+      'Şube müdür yardımcısı',
+    ],
+    recordRule: RecordRule.agirEngeller,
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.kucuk),
+    ],
+  ),
+  JobType(
+    id: 'ik_uzmani',
+    name: 'İnsan kaynakları uzmanı',
+    description: 'Mülakat, bordro ve insanların arasında durmak.',
+    minAge: 22,
+    yearlySalary: 820000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.universite,
+    programs: <String>{'isletme', 'sosyoloji', 'psikoloji'},
+    minCharisma: 55,
+    levels: <String>['İK uzmanı', 'Kıdemli İK uzmanı', 'İK müdürü'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dil', SynergyStrength.kucuk),
+    ],
+  ),
+  JobType(
+    id: 'muhasebeci',
+    name: 'Muhasebeci',
+    description: 'Fatura, beyanname ve ayın son günü bitmeyen mesai.',
+    minAge: 22,
+    yearlySalary: 880000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.universite,
+    programs: <String>{'isletme'},
+    minIntelligence: 55,
+    levels: <String>['Muhasebeci', 'Kıdemli muhasebeci', 'Mali müşavir'],
+  ),
+
+  // ===================================================================
+  // Sağlık
+  // ===================================================================
+  JobType(
+    id: 'hemsire',
+    name: 'Hemşire',
+    description: 'Nöbet, serum ve hastanın yanında geçen uzun saatler.',
+    minAge: 22,
+    yearlySalary: 890000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.universite,
+    programs: <String>{'hemsirelik'},
+    minIntelligence: 55,
+    levels: <String>['Hemşire', 'Kıdemli hemşire', 'Sorumlu hemşire'],
+    recordRule: RecordRule.agirEngeller,
+  ),
+  JobType(
+    id: 'doktor',
+    name: 'Doktor',
+    description: 'Altı yıl okul, sonra nöbet. Kararların geri dönüşü yok.',
+    minAge: 25,
+    yearlySalary: 2150000,
+    band: SalaryBand.yuksekUzmanlik,
+    education: JobEducation.universite,
+    programs: <String>{'tip'},
+    minIntelligence: 75,
+    levels: <String>['Pratisyen hekim', 'Uzman hekim', 'Başhekim yardımcısı'],
+    recordRule: RecordRule.agirEngeller,
+  ),
+  JobType(
+    id: 'psikolog',
+    name: 'Psikolog',
+    description: 'Dinlemek, not almak ve acele etmemek.',
+    minAge: 23,
+    yearlySalary: 950000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.universite,
+    programs: <String>{'psikoloji'},
+    minIntelligence: 60,
+    minCharisma: 50,
+    levels: <String>['Psikolog', 'Uzman psikolog', 'Klinik sorumlusu'],
+  ),
+  JobType(
+    id: 'eczaci',
+    name: 'Eczacı',
+    description: 'Reçete, dozaj ve nöbet gecesi çalan kapı.',
+    minAge: 24,
+    yearlySalary: 1420000,
+    band: SalaryBand.yuksekUzmanlik,
+    education: JobEducation.universite,
+    programs: <String>{'eczacilik'},
+    minIntelligence: 65,
+    levels: <String>['Eczacı', 'Eczane sahibi', 'Birden fazla eczane sahibi'],
+  ),
+
+  // ===================================================================
+  // Mühendislik ve teknoloji
+  // ===================================================================
+  JobType(
+    id: 'yazilim_gelistirici',
+    name: 'Yazılım geliştirici',
+    description: 'Ekran başında çözülen problemler.',
+    minAge: 20,
+    yearlySalary: 1320000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{EducationTrack.bilisim},
+    programs: <String>{'bilgisayar', 'muhendislik'},
+    minIntelligence: 60,
+    levels: <String>[
+      'Yazılım geliştirici',
+      'Kıdemli geliştirici',
+      'Takım lideri',
+    ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazilim', SynergyStrength.guclu),
+    ],
+  ),
+  JobType(
+    id: 'veri_analisti',
+    name: 'Veri analisti',
+    description: 'Tablolar, sorgular ve "bu sayı neden böyle" soruları.',
+    minAge: 22,
+    yearlySalary: 1050000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.universite,
+    programs: <String>{'bilgisayar', 'isletme', 'muhendislik'},
+    minIntelligence: 65,
+    levels: <String>[
+      'Veri analisti',
+      'Kıdemli analist',
+      'Analitik takım lideri',
+    ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazilim', SynergyStrength.orta),
+      CareerSynergy('satranc', SynergyStrength.kucuk),
+    ],
+  ),
+  JobType(
+    id: 'elektrik_muhendisi',
+    name: 'Elektrik-elektronik mühendisi',
+    description: 'Devre, ölçüm ve sahada geçen günler.',
+    minAge: 22,
+    yearlySalary: 1180000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.universite,
+    programs: <String>{'muhendislik'},
+    minIntelligence: 65,
+    levels: <String>['Mühendis', 'Kıdemli mühendis', 'Proje müdürü'],
+  ),
+  JobType(
+    id: 'insaat_muhendisi',
+    name: 'İnşaat mühendisi',
+    description: 'Şantiye, hesap ve imza attığın her metrekare.',
+    minAge: 22,
+    yearlySalary: 1120000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.universite,
+    programs: <String>{'muhendislik'},
+    minIntelligence: 65,
+    levels: <String>['Saha mühendisi', 'Şantiye şefi', 'Proje müdürü'],
+  ),
+  JobType(
+    id: 'makine_muhendisi',
+    name: 'Makine mühendisi',
+    description: 'Tasarım, imalat ve toleransın peşinde koşmak.',
+    minAge: 22,
+    yearlySalary: 1150000,
+    band: SalaryBand.profesyonel,
+    education: JobEducation.universite,
+    programs: <String>{'muhendislik'},
+    minIntelligence: 65,
+    levels: <String>['Makine mühendisi', 'Kıdemli mühendis', 'Teknik müdür'],
+  ),
+
+  // ===================================================================
+  // Kamu ve güvenlik
+  // ===================================================================
+  JobType(
+    id: 'ogretmen',
+    name: 'Öğretmen',
+    description: 'Sınıfın önünde durmak; bir zamanlar sıradaydın.',
+    minAge: 22,
+    yearlySalary: 700000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.universite,
+    programs: <String>{'egitim'},
+    minIntelligence: 50,
+    minCharisma: 40,
+    levels: <String>['Öğretmen', 'Kıdemli öğretmen', 'Zümre başkanı'],
+    recordRule: RecordRule.agirEngeller,
+  ),
+  JobType(
+    id: 'polis',
+    name: 'Polis',
+    description: 'Vardiya, tutanak ve her çağrıda bilinmeyen bir kapı.',
+    minAge: 21,
+    // POMEM ve PMYO giriş sınavlarında üst yaş sınırı 30'dur (sınavın
+    // yapıldığı yılın 1 Ocak'ı esas alınır). Faho bildirdi: "50 yaşında
+    // polis olmaz".
+    maxAge: 30,
+    maxAgeNote: 'Polis alımlarında (POMEM/PMYO) üst yaş sınırı 30.',
+    yearlySalary: 720000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.lise,
+    minIntelligence: 45,
+    levels: <String>['Polis memuru', 'Kıdemli memur', 'Komiser yardımcısı'],
+    recordRule: RecordRule.temizGerekir,
+    synergies: <CareerSynergy>[
+      CareerSynergy('spor', SynergyStrength.kucuk),
+    ],
+    // §7: polis alımlarında fiziksel yeterlilik sınavı var. Ama
+    // polislik profesyonel sporculuk değil — elit sporcu eşiğine (80)
+    // çıkarılmadı.
+    minHealth: 65,
+    physicalNote: 'Polis alımlarında fiziksel yeterlilik sınavı var.',
+  ),
+  JobType(
+    id: 'itfaiyeci',
+    name: 'İtfaiyeci',
+    description: 'Bekleyiş, siren ve geri dönmeyi herkese borçlu olmak.',
+    minAge: 21,
+    // Belediye itfaiye eri alımlarında üst yaş sınırı 30'dur; sebebi
+    // işin gerektirdiği fiziksel parkur.
+    maxAge: 30,
+    maxAgeNote: 'İtfaiye eri alımlarında üst yaş sınırı 30.',
+    yearlySalary: 660000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.lise,
+    levels: <String>['İtfaiye eri', 'Kıdemli er', 'Grup amiri'],
+    recordRule: RecordRule.temizGerekir,
+    synergies: <CareerSynergy>[
+      CareerSynergy('spor', SynergyStrength.orta),
+    ],
+    // §8: itfaiye eri alımının fiziksel parkuru polisten ağır.
+    minHealth: 70,
+    physicalNote: 'İtfaiye alımında geçilmesi gereken bir fiziksel '
+        'yeterlilik parkuru var.',
+  ),
+  JobType(
+    id: 'memur',
+    name: 'Memur',
+    description: 'Evrak, kaşe ve saat sekiz buçuk.',
+    minAge: 20,
+    yearlySalary: 625000,
+    band: SalaryBand.ofisUzmanlik,
+    education: JobEducation.lise,
+    minIntelligence: 45,
+    levels: <String>['Memur', 'Kıdemli memur', 'Şef'],
+    recordRule: RecordRule.temizGerekir,
+  ),
+
+  // ===================================================================
+  // Yaratıcı ve medya (değişken gelirli bant)
+  // ===================================================================
   JobType(
     id: 'ressam_tasarimci',
     name: 'Ressam / tasarımcı',
     description: 'Siparişle çalışan, portföyüyle iş alan bir meslek.',
     minAge: 18,
-    yearlySalary: 300000, // prototypeOnly
+    yearlySalary: 520000,
+    band: SalaryBand.yaraticiDegisken,
     education: JobEducation.lise,
     tracks: <EducationTrack>{
       EducationTrack.guzelSanatlar,
@@ -146,78 +765,156 @@ const List<JobType> kJobCatalog = <JobType>[
       'Deneyimli tasarımcı',
       'Sanat yönetmeni',
     ],
-  ),
-  JobType(
-    id: 'yazilim_gelistirici',
-    name: 'Yazılım geliştirici',
-    description: 'Ekran başında çözülen problemler.',
-    minAge: 20,
-    yearlySalary: 720000, // prototypeOnly
-    education: JobEducation.lise,
-    tracks: <EducationTrack>{EducationTrack.bilisim},
-    programs: <String>{'bilgisayar', 'muhendislik'},
-    minIntelligence: 60,
-    levels: <String>[
-      'Yazılım geliştirici',
-      'Kıdemli geliştirici',
-      'Takım lideri',
+    synergies: <CareerSynergy>[
+      CareerSynergy('resim', SynergyStrength.guclu),
     ],
   ),
   JobType(
-    id: 'ogretmen',
-    name: 'Öğretmen',
-    description: 'Sınıfın önünde durmak; bir zamanlar sıradaydın.',
-    minAge: 22,
-    yearlySalary: 420000, // prototypeOnly
-    education: JobEducation.universite,
-    programs: <String>{'egitim'},
-    minIntelligence: 50,
-    minCharisma: 40,
+    id: 'grafik_tasarimci',
+    name: 'Grafik tasarımcı',
+    description: 'Brief, revizyon ve "biraz daha büyük olsun".',
+    minAge: 19,
+    yearlySalary: 640000,
+    band: SalaryBand.yaraticiDegisken,
+    education: JobEducation.lise,
+    tracks: <EducationTrack>{
+      EducationTrack.tasarim,
+      EducationTrack.guzelSanatlar,
+      EducationTrack.bilisim,
+    },
+    programs: <String>{'guzel_sanatlar', 'iletisim'},
     levels: <String>[
-      'Öğretmen',
-      'Kıdemli öğretmen',
-      'Zümre başkanı',
+      'Grafik tasarımcı',
+      'Kıdemli tasarımcı',
+      'Kreatif direktör',
+    ],
+    synergies: <CareerSynergy>[
+      CareerSynergy('resim', SynergyStrength.guclu),
+    ],
+  ),
+  JobType(
+    id: 'gazeteci',
+    name: 'Gazeteci',
+    description: 'Haber, kaynak ve teyit etmeden yazmamak.',
+    minAge: 22,
+    yearlySalary: 560000,
+    band: SalaryBand.yaraticiDegisken,
+    education: JobEducation.universite,
+    programs: <String>{'iletisim', 'sosyoloji'},
+    minIntelligence: 55,
+    minCharisma: 45,
+    levels: <String>['Muhabir', 'Kıdemli muhabir', 'Editör'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazmak', SynergyStrength.orta),
+      CareerSynergy('fotograf', SynergyStrength.kucuk),
+      CareerSynergy('dil', SynergyStrength.orta),
+    ],
+  ),
+  JobType(
+    id: 'fotografci',
+    name: 'Fotoğrafçı',
+    description: 'Işık, bekleyiş ve binlerce karenin içinden bir tanesi.',
+    minAge: 18,
+    yearlySalary: 480000,
+    band: SalaryBand.yaraticiDegisken,
+    tracks: <EducationTrack>{
+      EducationTrack.guzelSanatlar,
+      EducationTrack.tasarim,
+    },
+    levels: <String>['Fotoğrafçı', 'Deneyimli fotoğrafçı', 'Stüdyo sahibi'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('fotograf', SynergyStrength.guclu),
+    ],
+  ),
+  JobType(
+    id: 'manken',
+    name: 'Manken',
+    description: 'Podyum, ışık ve tek bir kare için geçen uzun saatler.',
+    minAge: 18,
+    yearlySalary: 820000,
+    band: SalaryBand.yaraticiDegisken,
+    // Faho'nun kesin kararı (Paket AM, §2): görünüş **80**. Eskiden 70
+    // idi ve bu, mankenliği ortalama görünüşlü bir karaktere de açık
+    // bırakıyordu. Mesleğin ana sert şartı görünüştür.
+    //
+    // Karizma bilerek 45'te bırakıldı: görünüş duvarı on puan
+    // yükseldiği için karizmayı da yükseltmek ikinci bir gereksiz duvar
+    // olurdu (§2). Mankenlik sadece görünüş değildir, ama asıl kapı
+    // görünüş olsun.
+    minCharisma: 45,
+    minAppearance: 80,
+    levels: <String>['Manken', 'Podyum mankeni', 'Yüzü afişe basılan manken'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('dans', SynergyStrength.kucuk),
+    ],
+  ),
+  JobType(
+    id: 'yazar',
+    name: 'Yazar',
+    description: 'Okuduklarının birikmesiyle başlayan, tek başına yapılan iş.',
+    minAge: 20,
+    yearlySalary: 460000,
+    band: SalaryBand.yaraticiDegisken,
+    minIntelligence: 55,
+    hobbyId: 'okuma',
+    minHobbyStage: 2,
+    levels: <String>['Yazar', 'Kitabı basılan yazar', 'Adı bilinen yazar'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('yazmak', SynergyStrength.guclu),
+      CareerSynergy('okuma', SynergyStrength.orta),
+    ],
+  ),
+  JobType(
+    id: 'muzisyen',
+    name: 'Müzisyen',
+    description: 'Prova, sahne ve çalmayı hiç bırakmamış bir hayat.',
+    minAge: 18,
+    yearlySalary: 440000,
+    band: SalaryBand.yaraticiDegisken,
+    minCharisma: 40,
+    hobbyId: 'muzik',
+    minHobbyStage: 2,
+    levels: <String>['Müzisyen', 'Sahne müzisyeni', 'Kendi grubunun müzisyeni'],
+    synergies: <CareerSynergy>[
+      CareerSynergy('muzik', SynergyStrength.orta),
     ],
   ),
 
-  // --- Dövüş sanatları eğitmenliği (Paket 32) ---------------------------
+  // ===================================================================
+  // Dövüş sanatları eğitmenliği (Paket 32)
   //
-  // Bu üç iş ilan panosunda **sürekli durmaz**: ancak salonda yıllarca
-  // çalışıp basamağı yükselten oyuncuya açılır. Diplomayla değil,
-  // kuşakla/boyla girilir.
+  // İlan panosunda sürekli durmaz: ancak salonda yıllarca çalışıp
+  // basamağı yükselten oyuncuya açılır. Diplomayla değil, kuşakla.
+  // ===================================================================
   JobType(
     id: 'karate_egitmeni',
     name: 'Karate eğitmeni',
-    description: 'Kendi kuşağını aldın; şimdi salonun çocuklarını '
+    description:
+        'Kendi kuşağını aldın; şimdi salonun çocuklarını '
         'çalıştırıyorsun.',
     minAge: 18,
-    yearlySalary: 300000, // prototypeOnly
+    yearlySalary: 455000,
+    band: SalaryBand.nitelikliHizmet,
     martialArtId: 'karate',
-    levels: <String>[
-      'Yardımcı antrenör',
-      'Karate eğitmeni',
-      'Baş eğitmen',
-    ],
+    levels: <String>['Yardımcı antrenör', 'Karate eğitmeni', 'Baş eğitmen'],
   ),
   JobType(
     id: 'kungfu_egitmeni',
     name: 'Kung fu eğitmeni',
     description: 'Formları sen öğrendin, şimdi sen öğretiyorsun.',
     minAge: 18,
-    yearlySalary: 290000, // prototypeOnly
+    yearlySalary: 445000,
+    band: SalaryBand.nitelikliHizmet,
     martialArtId: 'kung_fu',
-    levels: <String>[
-      'Yardımcı antrenör',
-      'Kung fu eğitmeni',
-      'Salon hocası',
-    ],
+    levels: <String>['Yardımcı antrenör', 'Kung fu eğitmeni', 'Salon hocası'],
   ),
   JobType(
     id: 'gures_antrenoru',
     name: 'Güreş antrenörü',
     description: 'Çayırdan sahaya: kıspeti astın, pehlivan yetiştiriyorsun.',
     minAge: 18,
-    yearlySalary: 270000, // prototypeOnly
+    yearlySalary: 430000,
+    band: SalaryBand.nitelikliHizmet,
     martialArtId: 'gures',
     levels: <String>[
       'Çırak antrenör',
@@ -225,8 +922,131 @@ const List<JobType> kJobCatalog = <JobType>[
       'Kulüp baş antrenörü',
     ],
   ),
-];
 
+  JobType(
+    id: 'boks_antrenoru',
+    name: 'Boks antrenörü',
+    description: 'Ringi bıraktın; şimdi köşede sen duruyorsun.',
+    minAge: 18,
+    yearlySalary: 438000,
+    band: SalaryBand.nitelikliHizmet,
+    martialArtId: 'boks',
+    levels: <String>['Yardımcı antrenör', 'Boks antrenörü', 'Kulüp hocası'],
+  ),
+  JobType(
+    id: 'judo_egitmeni',
+    name: 'Judo eğitmeni',
+    description: 'Tatamide önce düşmeyi öğretiyorsun, sonra kalkmayı.',
+    minAge: 18,
+    yearlySalary: 435000,
+    band: SalaryBand.nitelikliHizmet,
+    martialArtId: 'judo',
+    levels: <String>['Yardımcı antrenör', 'Judo eğitmeni', 'Baş eğitmen'],
+  ),
+  JobType(
+    id: 'taekwondo_egitmeni',
+    name: 'Taekwondo eğitmeni',
+    description: 'Poomsae saydırmak, tekme yüksekliğini düzeltmek.',
+    minAge: 18,
+    yearlySalary: 432000,
+    band: SalaryBand.nitelikliHizmet,
+    martialArtId: 'taekwondo',
+    levels: <String>['Yardımcı antrenör', 'Taekwondo eğitmeni', 'Salon hocası'],
+  ),
+
+  // ===================================================================
+  // Yarım zamanlı işler (D-131)
+  //
+  // Okula devam ederken de yapılabilir. Maaş düşüktür ve öğrenciyken
+  // çalışmanın bedeli vardır: zekâ kazancı azalır, sağlık biraz düşer.
+  // "Yaz işi istemek" olayı (D-126) artık gerçek bir kapıya çıkıyor.
+  // ===================================================================
+  JobType(
+    id: 'yz_market_reyon',
+    name: 'Market reyon görevlisi (yarım zamanlı)',
+    description: 'Raf dizmek, fiyat okutmak, akşamüstü kalabalığı.',
+    minAge: 16,
+    yearlySalary: 132000, // prototypeOnly
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Reyon görevlisi', 'Reyon sorumlusu'],
+  ),
+  JobType(
+    id: 'yz_kafe',
+    name: 'Kafe garsonu (yarım zamanlı)',
+    description: 'Hafta sonu vardiyası, ayakta geçen altı saat.',
+    minAge: 16,
+    yearlySalary: 145000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    minCharisma: 20,
+    levels: <String>['Komi', 'Garson'],
+  ),
+  JobType(
+    id: 'yz_kurye',
+    name: 'Motorlu kurye (yarım zamanlı)',
+    description: 'Adres bul, zile bas, yağmurda ıslan.',
+    minAge: 18,
+    yearlySalary: 186000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    requiredLicenses: <String>{'motosiklet_ehliyeti'},
+    levels: <String>['Kurye'],
+  ),
+  JobType(
+    id: 'yz_cagri_merkezi',
+    name: 'Çağrı merkezi (yarım zamanlı)',
+    description: 'Kulaklık, senaryo ve bitmeyen bir sıra.',
+    minAge: 18,
+    yearlySalary: 168000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    minCharisma: 25,
+    levels: <String>['Müşteri temsilcisi', 'Kıdemli temsilci'],
+  ),
+  JobType(
+    id: 'yz_dersane_asistani',
+    name: 'Etüt asistanı (yarım zamanlı)',
+    description: 'Küçüklerin ödevine bakıyorsun; bir kısmını sen de '
+        'yeni öğrendin.',
+    minAge: 17,
+    yearlySalary: 156000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    minIntelligence: 45,
+    levels: <String>['Etüt asistanı', 'Grup sorumlusu'],
+  ),
+  JobType(
+    id: 'yz_kitapci',
+    name: 'Kitapçı tezgâhı (yarım zamanlı)',
+    description: 'Sessiz dükkân, tozlu raflar, arada bir müşteri.',
+    minAge: 16,
+    yearlySalary: 118000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Tezgâhtar'],
+  ),
+  JobType(
+    id: 'yz_hali_saha',
+    name: 'Halı saha görevlisi (yarım zamanlı)',
+    description: 'Saat tut, ışığı aç, forma yıka.',
+    minAge: 16,
+    yearlySalary: 124000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Saha görevlisi'],
+  ),
+  JobType(
+    id: 'yz_sanayi_cirak',
+    name: 'Sanayide çırak (yarım zamanlı)',
+    description: 'Elin yağ kokuyor, usta hâlâ "tut şunu" diyor.',
+    minAge: 16,
+    yearlySalary: 138000,
+    band: SalaryBand.yarimZamanli,
+    partTime: true,
+    levels: <String>['Çırak', 'Kalfa'],
+  ),
+];
 JobType? jobById(String id) {
   for (final JobType j in kJobCatalog) {
     if (j.id == id) return j;

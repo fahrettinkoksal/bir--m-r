@@ -1,14 +1,22 @@
 /// Hayat sonu değerlendirmesi: "nasıl bir hayattı?"
 library;
 
+import '../../text/turkish_text.dart';
+import '../career/craft_mastery.dart';
+import '../economy/net_worth.dart';
 import '../models/book_progress.dart';
 import '../models/career.dart';
+import '../../data/crime_catalog.dart';
+import '../models/business.dart';
+import '../models/criminal_record.dart';
 import '../models/game_state.dart';
 import '../models/gender.dart';
 import '../../data/martial_arts_catalog.dart';
 import '../../data/military_catalog.dart';
 import '../models/marriage.dart';
 import '../models/hobby_progress.dart';
+import '../models/combat_career.dart';
+import '../sports/football_career.dart';
 import '../hobby/hobby_tracker.dart';
 import '../../data/hobby_catalog.dart';
 import '../models/martial_progress.dart';
@@ -101,8 +109,10 @@ class VerdictFirst {
 /// Eşikler ve ağırlıklar `prototypeOnly`'dir: Faho onaylamadan kalıcı
 /// oyun kuralı sayılmaz (`docs/DESIGN_REVIEW_QUEUE.md`, Q-090).
 abstract final class LifeVerdictBuilder {
-  /// Bir eksenin "dolu" sayıldığı eşik.
-  static const int prototypeOnlyStrongThreshold = 65;
+  // Not: bir eksenin "dolu" sayıldığı 65'lik bir eşik tutuluyordu ve
+  // hiçbir yerde okunmuyordu. Hüküm metni eksen puanlarını doğrudan
+  // cümleye çeviriyor (D-096); ayrı bir "dolu eksen" sınıflandırması
+  // ne kullanılıyor ne de bir yer arıyor.
 
   /// Bir eksenin "boş" sayıldığı eşik.
   static const int prototypeOnlyWeakThreshold = 30;
@@ -196,11 +206,14 @@ abstract final class LifeVerdictBuilder {
     puan += (calisilanYil ~/ 2).clamp(0, 34);
     puan += (state.career.level * 5).clamp(0, 18);
     if (state.career.isRetired) puan += 10;
-    if (state.player.wallet >= 250000) {
+    // **Yatırım da paradır** (D-162). Bütün parasını portföye koymuş
+    // oyuncu "cüzdanı boş" diye yoksul sayılmaz.
+    final int eldeki = NetWorth.liquid(state);
+    if (eldeki >= 250000) {
       puan += 16;
-    } else if (state.player.wallet >= 50000) {
+    } else if (eldeki >= 50000) {
       puan += 8;
-    } else if (state.player.wallet > 0) {
+    } else if (eldeki > 0) {
       puan += 3;
     }
     if (state.career.milestones.isNotEmpty) puan += 6;
@@ -210,8 +223,49 @@ abstract final class LifeVerdictBuilder {
     // bir binbaşı ile hiç askere gitmemiş biri aynı sayılıyordu.
     puan += _askerlikPuani(state);
 
+    // Profesyonel futbol da emektir (Paket AY/3).
+    //
+    // **ÖLÇÜLEN HATA:** askerlikle birebir aynı körlük. 15 sezon oynamış,
+    // 300 maç çıkmış, futboldan 35 milyon ₺ kazanmış bir oyuncu bu
+    // eksende **sıfır** alıyordu, çünkü futbol `kJobCatalog` işi değil ve
+    // `career.history` boş kalıyor. Hükme göre o hayat "hiç çalışmamış"
+    // sayılıyordu.
+    puan += _futbolPuani(state);
+
+    // Dövüş **rekabet kariyeri** de emektir (Faho onayladı, 5 Ekim 2026).
+    //
+    // Ayrım önemli: dövüş **eğitimi** zaten sayılıyordu — aşağıdaki
+    // `_dovusPuani` `state.martialArts` basamaklarını okuyup Deneyim
+    // eksenine katkı veriyor. Sayılmayan şey **rekabetin kendisiydi**:
+    // `combatCareers` bu dosyada hiç geçmiyordu, yani maçlar,
+    // şampiyonluklar, ulaşılan kademe ve ringde geçen yıllar Emek
+    // ekseninde **sıfır** ediyordu. Dövüş de `kJobCatalog` işi değil,
+    // `career.history` boş kalıyor; futbolla aynı körlük.
+    puan += _dovusKariyerPuani(state, olumYasi);
+
+    // Meslekte ustalık (D-155): aynı işte otuz yıl çalışmış biri ile üç
+    // yıl çalışmış biri değerlendirmede de aynı sayılmamalı. Basamak
+    // **ulaşıldığı için** sayılır; iş değişmişse en yüksek basamak
+    // geçmişten okunur.
+    puan += (_enYuksekUstalik(state, olumYasi) * prototypeOnlyMasteryPoint)
+        .clamp(0, prototypeOnlyMasteryMax);
+
+    final FootballCareer? futbol = state.footballCareer;
+    final bool futbolVar = futbol != null && futbol.proSeasons > 0;
+    final int dovusMaci = _dovusMacSayisi(state);
+    final bool dovusVar = dovusMaci > 0;
+
     final String not;
-    if (gecmis.isEmpty && state.military.status == MilitaryStatus.tamamlandi) {
+    // Sporcuya "hiç çalışmadın" denmez: o hayatın emeği sahada,
+    // ringde ya da minderde geçti.
+    if (gecmis.isEmpty && futbolVar) {
+      not = '${futbol.proSeasons} sezon profesyonel futbol oynadın; '
+          'futbol dışında bir işte çalışmadın.';
+    } else if (gecmis.isEmpty && dovusVar) {
+      not = '$dovusMaci müsabakaya çıktın; sporun dışında bir işte '
+          'çalışmadın.';
+    } else if (gecmis.isEmpty &&
+        state.military.status == MilitaryStatus.tamamlandi) {
       not = 'Hiçbir işte çalışmadın ama askerliğini tamamladın.';
     } else if (gecmis.isEmpty) {
       not = 'Hiç bir işte çalışmadın.';
@@ -220,12 +274,57 @@ abstract final class LifeVerdictBuilder {
     } else {
       not = '${gecmis.length} işte toplam $calisilanYil yıl çalıştın.';
     }
+    final int ustalik = _enYuksekUstalik(state, olumYasi);
+    String notTam = ustalik >= MasteryStage.usta.index
+        ? '$not Mesleğinde '
+            '${trLower(MasteryStage.values[ustalik].label)} oldun.'
+        : not;
+    // Hem iş hem futbol varsa ikisi birlikte yazılır; futbol bir
+    // dipnot değil, hayatın bir dönemi.
+    if (futbolVar && gecmis.isNotEmpty) {
+      notTam = '$notTam Ayrıca ${futbol.proSeasons} sezon profesyonel '
+          'futbol oynadın.';
+    }
+    // Şampiyonluk bir hayat başarısıdır; hükümde anılmadan geçmez.
+    final int kemer = _sampiyonlukSayisi(state);
+    if (kemer > 0) {
+      notTam = '$notTam Dövüşte $kemer şampiyonluk kazandın.';
+    } else if (dovusVar && gecmis.isNotEmpty) {
+      notTam = '$notTam Ayrıca $dovusMaci müsabakaya çıktın.';
+    }
     return VerdictAxis(
       id: 'emek',
       label: 'Emek',
       value: puan.clamp(0, 100),
-      note: not,
+      note: notTam,
     );
+  }
+
+  /// prototypeOnly: her ustalık basamağının Emek eksenine katkısı.
+  static const int prototypeOnlyMasteryPoint = 4;
+
+  /// prototypeOnly: ustalığın Emek eksenine en fazla katkısı.
+  static const int prototypeOnlyMasteryMax = 16;
+
+  /// Hayat boyunca ulaşılan **en yüksek** ustalık basamağının sırası.
+  ///
+  /// Süren iş ve biten kayıtlar birlikte bakılır; iş değiştirmek kazanılan
+  /// ustalığı silmez, çünkü o yıllar gerçekten yaşandı.
+  static int _enYuksekUstalik(GameState state, int olumYasi) {
+    int enYuksek = 0;
+    for (final JobHistoryEntry e in state.career.history) {
+      final int bitis = e.endedAtAge ?? olumYasi;
+      final int yil = (bitis - e.startedAtAge).clamp(0, 80);
+      final int basamak = CraftMastery.stageForYears(yil).index;
+      if (basamak > enYuksek) enYuksek = basamak;
+    }
+    final int? basla = state.career.startedAtAge;
+    if (basla != null) {
+      final int basamak =
+          CraftMastery.stageForYears((olumYasi - basla).clamp(0, 80)).index;
+      if (basamak > enYuksek) enYuksek = basamak;
+    }
+    return enYuksek;
   }
 
   /// Deneyim: gezdiğin yerler, okuduğun kitaplar, edindiğin şeyler.
@@ -316,6 +415,85 @@ abstract final class LifeVerdictBuilder {
   ///
   /// Yalnızca **gerçekten olmuş** durumlar sayılır: tamamlanan hizmet ve
   /// ulaşılan rütbe. Bedelli ödemek hizmet sayılmaz; kaçmak hiç sayılmaz.
+  /// D-169: profesyonel futbolun Emek eksenine katkısı.
+  ///
+  /// Ölçeği askerlikle aynı mantıkta tutuldu: sahada geçen yıl sayısı
+  /// ağır basar, başarı (maç ve gol) üstüne biner. Tavan var: futbol
+  /// tek başına Emek eksenini doldurmaz, çünkü o eksende okul, iş,
+  /// birikim ve askerlik de var.
+  /// **ÖLÇÜLEN HATA (düzeltildi):** bu sayı 2 iken 15 sezonluk bir
+  /// kariyer (ölçülen medyan) tek başına tavanı dolduruyordu ve maç ile
+  /// gol katkısı hiç görünmüyordu — 300 maçta 200 gol atan ile hiç gol
+  /// atmayan aynı puanı alıyordu. Dövüşte aynı hatayı bulunca futbolda
+  /// da ölçtüm ve buradaydı. Sezon ağırlığı 1'e indirildi.
+  static const int footballSeasonPoint = 1;
+  static const int footballVerdictMax = 30;
+
+  /// D-169: dövüş rekabet kariyerinin Emek eksenine katkısı.
+  ///
+  /// Ölçek futbolla aynı mantıkta: rekabette geçen yıl ağır basar,
+  /// başarı (maç ve şampiyonluk) üstüne biner. **Tavan futbolla aynı
+  /// havuzu paylaşmaz ama o da sınırlı:** iki dalda birden dövüşen
+  /// oyuncu ekseni ikiye katlamasın diye bütün kariyerler toplanıp
+  /// tek tavana vurulur.
+  /// **ÖLÇÜLEN HATA (düzeltildi):** bu sayı 2 iken 16 yıl rekabet eden
+  /// bir dövüşçü tek başına tavanı (30) dolduruyordu; şampiyonluk, maç
+  /// ve kademe hiçbir şey eklemiyordu. Yani başarı dekoratifti. Yıl
+  /// ağırlığı 1'e indirildi: uzun kariyer hâlâ ağır basıyor ama kemer
+  /// kazanmak gerçekten fark yaratıyor.
+  static const int combatYearPoint = 1;
+  static const int combatChampionshipPoint = 5;
+  static const int combatVerdictMax = 30;
+
+  /// Dövüş kariyerlerinin Emek eksenine katkısı (Faho onayı, 5 Ekim).
+  static int _dovusKariyerPuani(GameState state, int olumYasi) {
+    if (state.combatCareers.isEmpty) return 0;
+
+    int puan = 0;
+    for (final CombatCareer k in state.combatCareers) {
+      final int bitis = k.retiredAtAge ?? olumYasi;
+      final int yil = (bitis - k.startedCompetitiveAtAge).clamp(0, 40);
+      puan += yil * combatYearPoint;
+      // Ringe gerçekten çıkmak: lisanslı olup dövüşmemek aynı değil.
+      final int mac = k.amateurWins + k.amateurLosses + k.proWins + k.proLosses;
+      puan += (mac ~/ 8).clamp(0, 8);
+      puan += k.championships * combatChampionshipPoint;
+      // Üst kademeye çıkmak kendi başına bir emek.
+      puan += (k.tier * 2).clamp(0, 6);
+    }
+    return puan.clamp(0, combatVerdictMax);
+  }
+
+  /// Bütün dövüş kariyerlerindeki toplam müsabaka sayısı.
+  static int _dovusMacSayisi(GameState state) {
+    int toplam = 0;
+    for (final CombatCareer k in state.combatCareers) {
+      toplam += k.amateurWins + k.amateurLosses + k.proWins + k.proLosses;
+    }
+    return toplam;
+  }
+
+  /// Bütün dövüş kariyerlerindeki toplam şampiyonluk sayısı.
+  static int _sampiyonlukSayisi(GameState state) {
+    int toplam = 0;
+    for (final CombatCareer k in state.combatCareers) {
+      toplam += k.championships;
+    }
+    return toplam;
+  }
+
+  /// Profesyonel futbol kariyerinin Emek eksenine katkısı (Paket AY/3).
+  static int _futbolPuani(GameState state) {
+    final FootballCareer? k = state.footballCareer;
+    if (k == null || k.proSeasons == 0) return 0;
+
+    int puan = k.proSeasons * footballSeasonPoint;
+    // Sahada gerçekten oynamak: kadroda durup maça çıkmamak aynı değil.
+    puan += (k.totalAppearances ~/ 40).clamp(0, 8);
+    puan += (k.totalGoals ~/ 20).clamp(0, 6);
+    return puan.clamp(0, footballVerdictMax);
+  }
+
   static int _askerlikPuani(GameState state) {
     final MilitaryState a = state.military;
     if (a.status != MilitaryStatus.tamamlandi) return 0;
@@ -389,6 +567,55 @@ abstract final class LifeVerdictBuilder {
         age: ilkIs.startedAtAge,
         text: 'İlk işine girdin: ${ilkIs.title}.',
       ));
+    }
+
+    // Kendi işi (D-132): kurmak da batmak da hayatın somut anı.
+    for (final Business b in state.businesses) {
+      final String ad = b.type?.name ?? 'kendi işini';
+      ilkler.add(VerdictFirst(
+        age: b.startedAtAge,
+        text: '$ad açtın.',
+      ));
+      final int? kapanis = b.closedAtAge;
+      if (kapanis == null) continue;
+      ilkler.add(VerdictFirst(
+        age: kapanis,
+        text: b.endReason == BusinessEndReason.batti
+            ? '$ad battı.'
+            : '$ad devrettin.',
+      ));
+    }
+
+    // Adli geçmiş anılır ama **puanlanmaz** (D-128). "Suç işledi = kötü
+    // insan" gibi bir ahlaki yargı yok; yalnızca somut geçmiş yazılır.
+    for (final CriminalCase dosya in state.legal.cases) {
+      if (dosya.stage != CaseStage.karar) continue;
+      final int? yas = dosya.decidedAtAge;
+      final CrimeType? suc = dosya.crime;
+      if (yas == null || suc == null) continue;
+      switch (dosya.verdict) {
+        case Verdict.hapis:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: '${suc.label} nedeniyle '
+                '${dosya.prisonYears} yıl cezaevinde kaldın.',
+          ));
+        case Verdict.beraat:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: '${suc.label} dosyasından beraat ettin.',
+          ));
+        case Verdict.paraCezasi:
+        case Verdict.erteleme:
+        case Verdict.uyari:
+          ilkler.add(VerdictFirst(
+            age: yas,
+            text: 'Bir ${suc.category.label.toLowerCase()} dosyası '
+                'nedeniyle mahkemeye çıktın.',
+          ));
+        case Verdict.yok:
+          break;
+      }
     }
 
     final TripRecord? ilkGezi = state.trips.isEmpty

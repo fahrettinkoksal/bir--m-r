@@ -19,6 +19,24 @@ class StartScreen extends StatefulWidget {
 class _StartScreenState extends State<StartScreen> {
   bool _busy = false;
 
+  /// Kısa ekranda "Nasıl oynanır" kartı açık mı? (Paket CO)
+  bool _nasilAcik = false;
+
+  /// prototypeOnly: bu yükseklikten kısa ekranlarda açılış ekranı
+  /// **sıkıştırılır**.
+  ///
+  /// **Ölçüm (Paket CO).** Testler 360-400 px *genişlikte* koşuyordu
+  /// ama 3600-14000 px *yükseklikte*; "telefona sığmıyor" sınıfı
+  /// hiçbir testte görünmüyordu. 360x640'lık ekranda (720x1280'lik
+  /// Android tabanı) ölçüldü: "Rastgele bir hayat" düğmesinin alt
+  /// kenarı 630, **"İsmimi ve cinsiyetimi seçeyim" 720** — yani ikinci
+  /// başlangıç modu katlanmanın altında kalıyor ve oyuncu kaydırmadan
+  /// onu hiç görmüyor. 700 px'de de aynı. Sıkıştırılmamış yerleşimde
+  /// ikinci modun alt kenarı **720**; eşik ondan biraz yukarıda (730)
+  /// tutuldu ki 700'lük ekran da sıkıştırılsın, 760'lık ekran zaten
+  /// sığdığı için dokunulmasın.
+  static const double prototypeOnlyShortScreenHeight = 730;
+
   Future<void> _continue() async {
     final GameController controller = GameScope.of(context);
     setState(() => _busy = true);
@@ -86,6 +104,8 @@ class _StartScreenState extends State<StartScreen> {
     final GameController controller = GameScope.of(context);
     final String? sorun = controller.saveProblem;
     final bool devamEdilebilir = controller.hasSavedLife && sorun == null;
+    final bool kisaEkran =
+        MediaQuery.sizeOf(context).height < prototypeOnlyShortScreenHeight;
 
     return Scaffold(
       // Açılış ekranı oyunun kapağıdır: çizim kâğıdı, el yazısıyla
@@ -112,7 +132,15 @@ class _StartScreenState extends State<StartScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                const _NasilOynanir(),
+                // Kısa ekranda kart katlanır: iki başlangıç modunun
+                // ikisi de katlanmanın üstünde kalsın (Paket CO).
+                // Uzun ekranda yerleşim hiç değişmiyor.
+                if (!kisaEkran || _nasilAcik)
+                  const _NasilOynanir()
+                else
+                  _NasilOynanirKatli(
+                    onTap: () => setState(() => _nasilAcik = true),
+                  ),
                 const SizedBox(height: 14),
                 if (!controller.savingEnabled) ...<Widget>[
                   const _SaveProblemNote(
@@ -197,6 +225,49 @@ class _StartScreenState extends State<StartScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Kısa ekranda "Nasıl oynanır" kartının katlanmış hâli (Paket CO).
+///
+/// İçerik silinmiyor: tek dokunuşla aynı kart açılıyor. Amaç, iki
+/// başlangıç modunun da kaydırmadan görünmesi.
+class _NasilOynanirKatli extends StatelessWidget {
+  const _NasilOynanirKatli({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return InkWell(
+      key: const Key('start_how_to_expand'),
+      onTap: onTap,
+      child: ComicCard(
+        tilt: 0.8,
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+        child: Row(
+          children: <Widget>[
+            ComicIconTile(
+              icon: Icons.cake_outlined,
+              accent: BirOmurAccents.nar,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Nasıl oynanır?',
+                style: theme.textTheme.titleSmall,
+              ),
+            ),
+            Icon(
+              Icons.expand_more,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );

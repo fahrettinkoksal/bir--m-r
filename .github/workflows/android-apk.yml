@@ -24,7 +24,33 @@ jobs:
   build:
     name: Analiz, test ve debug APK
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # **Paket AQ'da 45'ten 60'a çıkarıldı.**
+    #
+    # Bu satır bir kez 120'ye çıkarılmıştı ve o gerekçe YANLIŞTI. O
+    # zaman "süit uzadı, bütçe yetmiyor" denmişti; çünkü iptal olan
+    # koşunun logunda tek bir hata yoktu, bütün satırlar yeşildi.
+    #
+    # Gerçek sebep sonradan ölçüldü: logda 06:19 ile 08:12 arasında
+    # **neredeyse iki saat boyunca tek satır çıktı yoktu.** Bu yavaşlık
+    # değil, takılmaydı. Üç test sonsuz döngüye giriyordu
+    # (`end_to_end_test` senaryo 8, `event_catalog_test` tekrar
+    # kalitesi, `health_package_test` hastalık ömrü): hepsi her yıl
+    # bekleyen sağlık krizini silip `advanceOneYear`'ı yeniden
+    # çağırıyordu, Paket AQ ise sağlık 0 iken yaş almayı durdurduğu
+    # için yaş hiç ilerlemiyordu.
+    #
+    # Dart'ın test zaman aşımı bunu yakalayamaz: senkron bir `while`
+    # döngüsü hiç yield etmediği için `Timeout` tetiklenmez. Bu yüzden
+    # savunma `test/support/corpus_year.dart` içinde, döngünün kendi
+    # ilerleme kontrolünde duruyor — yıl ilerlemezse yüksek sesle
+    # patlıyor.
+    #
+    # Döngüler düzeltildikten sonra o üç dosya + yamalanan iki dosya
+    # (100 test) yerelde 31 saniyede bitiyor. Bütçenin 120 kalması bir
+    # sonraki takılmayı iki saat saklardı; 45 ise Paket AQ ile gerçekten
+    # uzayan hayatlara (ortalama ölüm yaşı 64,5 -> 68,0) pay bırakmıyor.
+    # 60, hem pay bırakıyor hem takılmayı erken açığa çıkarıyor.
+    timeout-minutes: 60
 
     defaults:
       run:
@@ -77,7 +103,7 @@ jobs:
           name: bir-omur-debug-apk
           path: app/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
 
       # Derleme patlarsa tanı için ortam bilgisi bırak.
       - name: Hata durumunda ortam bilgisi

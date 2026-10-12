@@ -7,12 +7,14 @@ import 'package:bir_omur/data/save/save_service.dart';
 import 'package:bir_omur/data/save/save_store.dart';
 import 'package:bir_omur/data/shop_catalog.dart';
 import 'package:bir_omur/domain/economy/housing.dart';
+import 'package:bir_omur/domain/economy/rental_engine.dart';
 import 'package:bir_omur/domain/economy/living_costs.dart';
 import 'package:bir_omur/domain/generation/life_generator.dart';
 import 'package:bir_omur/domain/generation/life_progression.dart';
 import 'package:bir_omur/domain/interaction/item_actions.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/domain/models/rental.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -134,7 +136,37 @@ void main() {
   // ===================================================================
   // Kiraya verme ve kira geliri
   // ===================================================================
-  group('Kira geliri (D-043)', () {
+
+  /// Evi kiraya verir: gelen ilk adayla anlaşır.
+  ///
+  /// Aday sayısı Poisson çekildiği için piyasa kirasında bile bazı yıl
+  /// kimse aramaz. Gerçek ev sahibi gibi davranır: rakamı bandın içinde
+  /// biraz oynatarak kiracı bulunana kadar dener. Bulunamazsa test
+  /// **sessizce geçmez**, yüksek sesle düşer.
+  GameState kiralaVer(GameState state, OwnedItem ev) {
+    final int piyasa = RentalEngine.marketRent(state, ev);
+    for (final double oran in <double>[1.0, 0.98, 1.02, 0.95, 1.05, 0.9]) {
+      final int istenen = (piyasa * oran).round();
+      final List<TenantRecord> adaylar = RentalEngine.candidates(
+        state: state,
+        home: ev,
+        askingRent: istenen,
+      );
+      if (adaylar.isEmpty) continue;
+      final RentalResult sonuc = RentalEngine.signLease(
+        state: state,
+        home: ev,
+        tenant: adaylar.first,
+        yearlyRent: istenen,
+      );
+      expect(sonuc.outcome.applied, isTrue, reason: sonuc.outcome.text);
+      return sonuc.state;
+    }
+    fail('Bandın içinde hiçbir rakamda kiracı bulunamadı; talep modeli '
+        'fazla sıkı olabilir.');
+  }
+
+  group('Kira geliri ve kiracı (D-043, D-163)', () {
     test('oturulan ev kiraya verilemez, kiradaki eve taşınılamaz', () {
       final GameState state = evAl(oyuncu(10));
       final OwnedItem ev = state.items.last;
@@ -142,23 +174,38 @@ void main() {
 
       expect(housing.rentOutBlockReason(oturan, oturan.itemById(ev.id)!),
           contains('taşınman'));
-      expect(housing.rentOut(oturan, oturan.itemById(ev.id)!).outcome.applied,
-          isFalse);
+      expect(
+        RentalEngine.rentOutBlockReason(
+          state: oturan,
+          home: oturan.itemById(ev.id)!,
+          askingRent: RentalEngine.marketRent(oturan, ev),
+        ),
+        contains('taşınman'),
+      );
 
       // Kiraya verilmiş eve taşınılamaz.
-      final GameState kiralik = housing.rentOut(state, ev).state;
-      expect(kiralik.itemById(ev.id)!.rentedOut, isTrue);
+      final GameState kiralik = kiralaVer(state, ev);
+      expect(kiralik.leaseOf(ev.id), isNotNull);
       expect(housing.moveInto(kiralik, kiralik.itemById(ev.id)!)
           .outcome
           .applied,
           isFalse);
+      // Aynı eve ikinci kiracı girmez.
+      expect(
+        RentalEngine.rentOutBlockReason(
+          state: kiralik,
+          home: kiralik.itemById(ev.id)!,
+          askingRent: RentalEngine.marketRent(kiralik, ev),
+        ),
+        contains('kiracı'),
+      );
     });
 
     test('kira geliri yılda bir kez cüzdana girer', () {
       final GameState state = evAl(oyuncu(11));
       final OwnedItem ev = state.items.last;
-      final GameState kiralik = housing.rentOut(state, ev).state;
-      final int kira = Housing.yearlyRentOf(ev);
+      final GameState kiralik = kiralaVer(state, ev);
+      final int kira = kiralik.leaseOf(ev.id)!.yearlyRent;
       expect(kira, greaterThan(0));
       expect(Housing.yearlyRentIncome(kiralik), kira);
 
@@ -170,7 +217,7 @@ void main() {
             .advanceOneYear(akan.copyWith(pendingEvent: null));
         final int gelirSatiri = akan.log
             .where((dynamic e) =>
-                (e.text as String).contains('kira geliri aldın'))
+                (e.text as String).contains('Kira gelirin bu yıl'))
             .length;
         expect(gelirSatiri, lessThanOrEqualTo(i + 1),
             reason: 'Kira yılda bir kez ödenir');
@@ -181,8 +228,7 @@ void main() {
 
     test('kira geliri ekonomiye katılır', () {
       final GameState state = evAl(oyuncu(12));
-      final GameState kiralik =
-          housing.rentOut(state, state.items.last).state;
+      final GameState kiralik = kiralaVer(state, state.items.last);
       expect(
         LivingCosts.yearlyIncome(kiralik),
         greaterThan(LivingCosts.yearlyIncome(state)),
@@ -191,19 +237,26 @@ void main() {
 
     test('kira sözleşmesi bitirilebilir', () {
       final GameState state = evAl(oyuncu(13));
-      final GameState kiralik =
-          housing.rentOut(state, state.items.last).state;
-      final HousingResult bitir =
-          housing.endLease(kiralik, kiralik.items.last);
+      final GameState kiralik = kiralaVer(state, state.items.last);
+      final RentalResult bitir = RentalEngine.endLease(
+        state: kiralik,
+        propertyItemId: kiralik.items.last.id,
+      );
       expect(bitir.outcome.applied, isTrue);
-      expect(bitir.state.items.last.rentedOut, isFalse);
+      expect(bitir.state.leaseOf(kiralik.items.last.id), isNull);
       expect(Housing.yearlyRentIncome(bitir.state), 0);
+      // Kiracı çıktıktan sonra gelir devam etmez.
+      final GameState sonra = RentalEngine.advanceYear(
+        state: bitir.state.copyWith(),
+        newAge: bitir.state.player.age + 1,
+        rng: Random(4),
+      ).state;
+      expect(RentalEngine.useOf(sonra, sonra.items.last), PropertyUse.bos);
     });
 
     test('kiradaki ev satılınca gelir durur', () {
       final GameState state = evAl(oyuncu(14));
-      final GameState kiralik =
-          housing.rentOut(state, state.items.last).state;
+      final GameState kiralik = kiralaVer(state, state.items.last);
       final ItemActionResult satis =
           items.sell(state: kiralik, itemId: kiralik.items.last.id);
       expect(satis.outcome.applied, isTrue);
@@ -219,7 +272,7 @@ void main() {
       GameState state = evAl(oyuncu(20), sehir: 'İzmir');
       state = housing.moveInto(state, state.items.last).state;
       state = evAl(state, typeId: 'standart_daire', sehir: 'Bursa');
-      state = housing.rentOut(state, state.items.last).state;
+      state = kiralaVer(state, state.items.last);
 
       final SaveService service = SaveService(MemorySaveStore());
       await service.save(state);
@@ -231,7 +284,14 @@ void main() {
       expect(geri.movedOut, isTrue);
       expect(geri.player.currentCity, 'İzmir');
       expect(Housing.yearlyRentIncome(geri), Housing.yearlyRentIncome(state));
-      expect(geri.items.last.rentedOut, isTrue);
+      // Kayıt kiracıyı da taşır: aynı kişi, aynı kira, aynı depozito.
+      final Lease once = state.leaseOf(state.items.last.id)!;
+      final Lease sonra = geri.leaseOf(geri.items.last.id)!;
+      expect(sonra.tenant.id, once.tenant.id);
+      expect(sonra.tenant.fullName, once.tenant.fullName);
+      expect(sonra.yearlyRent, once.yearlyRent);
+      expect(sonra.deposit, once.deposit);
+      expect(sonra.startedAtAge, once.startedAtAge);
       expect(geri.items.last.location, 'Bursa');
       expect(geri.player.wallet, state.player.wallet,
           reason: 'Yükleme masrafı yeniden kesmemeli');

@@ -115,3 +115,81 @@ String trLower(String input) {
   }
   return buffer.toString();
 }
+
+// =====================================================================
+// Özel ada ek getirmek (Paket CT)
+// =====================================================================
+//
+// **Nereden çıktı.** Ekran dökümünün yedinci turu (dul karesi) şu satırı
+// bastı: *"Taner artık Malatya'de."* Doğrusu "Malatya'da". Deseni depo
+// genelinde taradım ve hata tek yerde değildi: ek, kişi ya da şehir adına
+// **sabit** yazılmış yirmiden fazla yer vardı. Yani metin yarı Türkçe
+// isimde doğru, yarısında yanlış çıkıyordu:
+//
+//   "Malatya'ye taşındı" · "Malatya'e taşındın" · "Elif'a sor"
+//   "Murat'e para vermedin" · "Elif'a kaldı"
+//
+// Bu işlevler o işi tek yerde toplar. Özel ada gelen ek Türkçede
+// **kesme işaretiyle** ayrılır; harf seçimi iki kurala bakar:
+//
+// * **Büyük/küçük ünlü uyumu:** son ünlü a, ı, o, u ise **kalın** (a),
+//   e, i, ö, ü ise **ince** (e).
+// * **Ünsüz benzeşmesi:** sözcük sert ünsüzle bitiyorsa (f, s, t, k, ç,
+//   ş, h, p — "FıSTıKÇı ŞaHaP") bulunma ve ayrılma ekinin d'si **t**
+//   olur: "Sinop'ta", "Uşak'tan".
+// * **Yönelme ekinde kaynaştırma:** ünlüyle biten ada 'ya/'ye gelir:
+//   "Malatya'ya", "Bursa'ya".
+//
+// Ek yapmadan önce ad küçültülmüyor: kesme işaretinden sonrası küçük
+// harf, adın kendisi olduğu gibi kalır.
+
+const String _kalinUnluler = 'aıou';
+const String _inceUnluler = 'eiöü';
+const String _sertUnsuzler = 'fstkçşhp';
+
+/// Adın son ünlüsü kalın mı? Hiç ünlü yoksa kalın sayılır.
+bool _kalin(String ad) {
+  final String kucuk = trLower(ad);
+  for (int i = kucuk.length - 1; i >= 0; i--) {
+    final String ch = kucuk[i];
+    if (_kalinUnluler.contains(ch)) return true;
+    if (_inceUnluler.contains(ch)) return false;
+  }
+  return true;
+}
+
+/// Adın son harfi ünlü mü?
+bool _unluylaBitiyor(String ad) {
+  if (ad.isEmpty) return false;
+  final String son = trLower(ad)[ad.length - 1];
+  return _kalinUnluler.contains(son) || _inceUnluler.contains(son);
+}
+
+/// Adın son harfi sert ünsüz mü?
+bool _sertleBitiyor(String ad) {
+  if (ad.isEmpty) return false;
+  return _sertUnsuzler.contains(trLower(ad)[ad.length - 1]);
+}
+
+/// Özel ada **yönelme** eki: "Malatya'ya", "İzmir'e", "Murat'a".
+///
+/// Ünlüyle biten adda kaynaştırma y'si gelir.
+String trDative(String ad) {
+  if (ad.isEmpty) return ad;
+  final String ek = _kalin(ad) ? 'a' : 'e';
+  return _unluylaBitiyor(ad) ? "$ad'y$ek" : "$ad'$ek";
+}
+
+/// Özel ada **bulunma** eki: "Malatya'da", "İzmir'de", "Sinop'ta".
+String trLocative(String ad) {
+  if (ad.isEmpty) return ad;
+  final String d = _sertleBitiyor(ad) ? 't' : 'd';
+  return "$ad'$d${_kalin(ad) ? 'a' : 'e'}";
+}
+
+/// Özel ada **ayrılma** eki: "Malatya'dan", "İzmir'den", "Uşak'tan".
+String trAblative(String ad) {
+  if (ad.isEmpty) return ad;
+  final String d = _sertleBitiyor(ad) ? 't' : 'd';
+  return "$ad'$d${_kalin(ad) ? 'an' : 'en'}";
+}

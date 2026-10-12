@@ -4,6 +4,7 @@ import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/relation.dart';
+import 'package:bir_omur/domain/models/stats.dart';
 import 'package:bir_omur/domain/models/wealth.dart';
 
 /// Oyun durumunun her an sağlaması gereken tutarlılık kuralları.
@@ -39,6 +40,31 @@ List<String> checkInvariants(GameState state, {String where = ''}) {
   // --- Ekonomi --------------------------------------------------------
   if (state.player.wallet < 0) {
     ekle('cüzdan negatif: ${state.player.wallet}');
+  }
+
+  // --- Sağlık (Paket AQ) ----------------------------------------------
+  //
+  // Değerler 0-100 bandında kalmaya devam ediyor; yeni değişmez şu:
+  // sağlığı 0 olan **yaşayan** oyuncu, çözülmemiş bir kritik sağlık
+  // durumu olmadan var olamaz. "Sağlık 0 ama hayat normal devam ediyor"
+  // artık bir hata.
+  for (final StatEntry deger in state.player.stats.entries) {
+    if (deger.value < 0 || deger.value > 100) {
+      ekle('${deger.label} 0-100 dışında: ${deger.value}');
+    }
+  }
+  //
+  // Koşul "bekleyen **kritik** durum" değil, "bekleyen **herhangi bir**
+  // sağlık krizi": ölçümde ortaya çıktı ki sağlık 0'a indiği yıl ekranda
+  // olağan bir kriz de olabiliyor (tohum 56, yaş 73). O durumda da
+  // oyuncu ilerleyemiyor — `advanceOneYear` ve `ageUp` bekleyen her
+  // krizde duruyor — ve kriz kapanınca `HealthCrisisEngine.respond`
+  // kritik durumu devralıyor. Yani güvence aynı; yanlış olan iddianın
+  // kendisiydi.
+  if (!state.deceased &&
+      state.player.stats.health <= 0 &&
+      state.pendingCrisis == null) {
+    ekle('sağlık 0 ama ne ölüm ne de bekleyen bir sağlık durumu var');
   }
 
   // --- Evlilik --------------------------------------------------------

@@ -62,6 +62,18 @@ abstract final class Mortality {
 
     if (health != null) {
       // 50 sağlık nötr; düşük sağlık riski en çok iki katına çıkarır.
+      //
+      // **Paket AQ'da denetlendi.** Kritik sağlık yolu eklenince bu
+      // çarpanın çifte sayım olup olmadığı soruldu: düşük sağlık hem
+      // yıllık eğriyi yükseltiyor hem de artık kendi görünür ölüm
+      // yolunu taşıyor. Çarpanın üst ucu 1,0'a çekilerek **ölçüldü**:
+      // 200 hayatta ortalama ölüm yaşı 58,4'ten 58,4'e, yani hiç
+      // değişmedi. Asıl sorun bu çarpan değil, hastalık/toparlanma
+      // dişlisiydi (bkz. `SickLeaves.prototypeOnlyRecoveryGapShare`); o
+      // düzeltildikten sonra ortalama ölüm yaşı 66,4 oldu — kritik yol
+      // eklenmeden önceki 66,7 ile aynı bant. Ölçüm bir sorun
+      // göstermediği için onaylı eğriye dokunulmadı; soru Q-189'da
+      // Faho ve ChatGPT'ye bırakıldı.
       final double carpan = (1.5 - health / 100).clamp(0.5, 2.0);
       temel *= carpan;
     }
@@ -72,9 +84,54 @@ abstract final class Mortality {
   static bool diesThisYear(int age, Random rng, {int? health}) =>
       rng.nextDouble() < prototypeOnlyYearlyChance(age, health: health);
 
+  /// "nedeniyle" ekini **almayan** gerekçeler.
+  ///
+  /// Bunlar isim öbeği değil, kendi başına tamam olan zarf öbekleri:
+  /// "uykusunda, sakin bir şekilde **vefat etti**" cümlesi tamdır,
+  /// araya "nedeniyle" girerse bozulur.
+  static const Set<String> kSelfContainedCauses = <String>{
+    'uykusunda, sakin bir şekilde',
+    'uzun bir ömrün ardından',
+  };
+
+  /// `<gerekçe> nedeniyle` kalıbına giren isim öbeği gerekçeler.
+  static const Set<String> kNounPhraseCauses = <String>{
+    'beklenmedik bir rahatsızlık',
+    'ani bir sağlık sorunu',
+    'uzun süren bir hastalık',
+    'sağlık sorunları',
+    'yaşlılığa bağlı nedenler',
+  };
+
+  /// `causeFor`in üretebildiği **bütün** gerekçeler.
+  ///
+  /// Gerileme testi bu listeyi iki kümeyle karşılaştırır: yeni bir
+  /// gerekçe eklenip sınıflandırılmazsa test düşer.
+  static Set<String> get allPrototypeOnlyCauses =>
+      <String>{...kNounPhraseCauses, ...kSelfContainedCauses};
+
+  /// Gerekçeyi cümleye hazır hâle getirir.
+  ///
+  /// **Ölçülmüş hata.** Üç yerde gerekçe doğrudan
+  /// `'$gerekce nedeniyle …'` diye yazılıyordu. Yetmiş yaş üstü
+  /// gerekçelerin ikisi zarf öbeği olduğu için oyuncunun ekranında şu
+  /// cümleler çıkıyordu:
+  ///
+  ///     Babaannen Sevgi Erdoğan uykusunda, sakin bir şekilde nedeniyle
+  ///     vefat etti.
+  ///     70 yaşında uzun bir ömrün ardından nedeniyle hayatını kaybettin.
+  ///
+  /// İkincisi oyunun **son** cümlesi. Hayat dökümü testinde (8/17/30/70
+  /// evreleri) bir hayatta beş kez göründü. Gerekçenin kendisi doğru;
+  /// yanlış olan ekin koşulsuz eklenmesiydi.
+  static String causeClause(String cause) =>
+      kSelfContainedCauses.contains(cause) ? cause : '$cause nedeniyle';
+
   /// Yaşa uygun, kısa ölüm gerekçesi.
   ///
-  /// Ayrıntılı ya da rahatsız edici tasvir kullanılmaz.
+  /// Ayrıntılı ya da rahatsız edici tasvir kullanılmaz. Dönen değer
+  /// cümleye **`causeClause` ile** yerleştirilir; doğrudan "nedeniyle"
+  /// eklenmez.
   static String causeFor(int age, Random rng) {
     final List<String> secenekler;
     if (age < 40) {

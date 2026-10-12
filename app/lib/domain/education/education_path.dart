@@ -316,6 +316,51 @@ class EducationPath {
   /// Üniversiteye gitmeme kararının hikâye izi.
   static const String universiteyeGitmediFlag = 'universiteye_gitmedi';
 
+  /// prototypeOnly: mezuniyet sonrası kararının sorulduğu en büyük yaş
+  /// (D-111).
+  ///
+  /// Kilidin bir sonu olmalı. Ölçümde çıktı: lise bitirip hiçbir karar
+  /// vermemiş eski bir kayıtta kilit **ömür boyu** sürüyordu ve oyuncu
+  /// 85 yaşında hâlâ "üniversite bölümünü seç" penceresiyle
+  /// karşılaşıyordu. Bu yaştan sonra hayat zaten kararını vermiştir;
+  /// soru sorulmaz ve yıl normal akar.
+  static const int prototypeOnlyAfterSchoolMaxAge = 30;
+
+  /// Lise bittikten sonraki yol **hâlâ seçilmeyi bekliyor mu?** (D-111)
+  ///
+  /// `EducationState.awaitingAfterSchoolChoice` yalnızca eğitim kaydına
+  /// bakabildiği için "üniversiteye gitmemeye karar verdim" durumunu
+  /// göremez; o karar bir hikâye izidir. Karar verilmiş bir oyuncuyu
+  /// sonsuza dek bekletmemek için kilit bu yardımcıdan okunur.
+  ///
+  /// Kilit yaşla da sınırlıdır: bkz. [prototypeOnlyAfterSchoolMaxAge].
+  static bool needsAfterSchoolChoice(GameState state) =>
+      state.education.awaitingAfterSchoolChoice &&
+      state.player.age <= prototypeOnlyAfterSchoolMaxAge &&
+      !state.storyFlags.contains(universiteyeGitmediFlag);
+
+  /// Üniversiteye başvurmak **hâlâ mümkün mü?** (Paket DD)
+  ///
+  /// [needsAfterSchoolChoice] "karar bekliyor mu?" sorusunu yanıtlar;
+  /// bu ise "kapı açık mı?" sorusunu. **İkisi aynı soru değil** ve
+  /// karıştırılmaları ölçülmüş bir hataya yol açtı: ekran üniversite
+  /// kapısını karar kilidine bağlıyordu, bu yüzden 18'inde
+  /// "üniversiteye gitmeyeceğim" diyen oyuncu **bir daha hiç**
+  /// başvuramıyordu. 197 hayat 32 yaşında tarandı: 88'inde (%45) o iz
+  /// vardı, lise diploması vardı, üniversite kaydı yoktu — ve
+  /// **88'inin hepsinde** motor en az bir bölüme izin veriyordu
+  /// (`eligibilityReason` izi hiç okumuyor). Her birine 11-13 iş
+  /// "Üniversite mezuniyeti gerekiyor." diye kapalı kalıyordu.
+  ///
+  /// Karar kilidi (`needsAfterSchoolChoice`) ve onun yaş sınırı
+  /// **değişmedi**: kararı vermiş oyuncuya soru sorulmaz, yalnızca
+  /// kapısı kapanmaz. Puanı yetmeyen bölümlerin gerekçesi başvuru
+  /// ekranında bölüm bölüm yazılır (D-063).
+  static bool canApplyToUniversity(GameState state) =>
+      state.education.finished &&
+      !state.education.universityFinished &&
+      state.education.universityProgramId == null;
+
   EducationResult _blocked(GameState state, String reason) => EducationResult(
         state: state,
         outcome: EducationOutcome(applied: false, text: reason),

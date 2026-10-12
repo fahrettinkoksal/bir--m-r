@@ -60,6 +60,12 @@ class SocialAccount {
 
   int get postCount => posts.length;
 
+  /// En son paylaşımın yapıldığı yaş; hiç paylaşım yoksa `null`.
+  ///
+  /// Kayıttan **türetilir**, ayrıca saklanmaz: eski kayıtlar da doğru
+  /// okunur ve kayıt biçimi değişmez.
+  int? get lastPostAge => posts.isEmpty ? null : posts.last.age;
+
   /// Bu yaşta bu platformda yapılan paylaşım sayısı.
   ///
   /// Yıllık paylaşım sınırı **platform başına** işler: Instagram'da sınıra

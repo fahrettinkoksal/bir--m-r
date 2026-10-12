@@ -57,7 +57,7 @@ class Adoption {
   static const int prototypeOnlyMinAge = 21;
 
   /// prototypeOnly: başvuru ve hazırlık masrafı (₺).
-  static const int prototypeOnlyCost = 80000;
+  static const int prototypeOnlyCost = 160000;
 
   /// prototypeOnly: masraftan sonra çocuğun bakımı için gereken birikim.
   ///
@@ -168,8 +168,8 @@ class Adoption {
       people: List<Person>.unmodifiable(<Person>[...state.people, cocuk]),
       player: state.player.copyWith(
         wallet: state.player.wallet - prototypeOnlyCost,
-        stats: state.player.stats.copyWith(
-          happiness: state.player.stats.happiness + prototypeOnlyHappiness,
+        stats: state.player.stats.gain(
+          happiness: prototypeOnlyHappiness,
         ),
       ),
     );

@@ -104,6 +104,13 @@ sıfırlanır mı? Eğitmenlik eşiği (Q-100) ile ilişkisi ne olmalı?
 
 ## 6. Ev ve ev eşyası derinliği
 
+**Durum (10 Ekim 2026): büyük kısmı yapıldı.** Paket BP evin **binasını**
+konuşturdu (28 olay: kombi, çatı, küf, apartman, komşu, dönüşüm). Paket
+BT evin **içini** doldurdu: 18 ev eşyası, "Ev ve yaşam" mağazası, 0-100
+döşeme seviyesi, yıllık yıpranma ve "Evinin hâli" ekranı. Açık kalanlar
+Q-216'da: her evin kendi eşyası (yazlığı ayrı döşemek), ev eşyasının
+mirası, eşyaya bağlı olay havuzu.
+
 **Neden faydalı.** Konut alınıyor, taşınılıyor, kiraya veriliyor; ama ev
 içinde hiçbir şey olmuyor. Eşya envanteri var, evle ilişkisi yok.
 

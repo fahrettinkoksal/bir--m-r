@@ -53,13 +53,22 @@ GameState hesapsiz({int age = 25}) {
   );
 }
 
-/// Kazanç oluşana kadar paylaşım dener.
+/// Gerçekten para kazandıran bir paylaşım üretir.
+///
+/// Sıradan paylaşım artık para kazandırmaz (D-117); tek kazanç yolu
+/// **sponsorluğun paylaşılması**. Bu yüzden yardımcı önce bir sponsorluk
+/// kabul ettirir, sonra o platformda paylaşım yapar.
 SocialResult kazancliPaylasim(GameState state, SocialContent icerik) {
-  for (int i = 0; i < 200; i++) {
-    final SocialResult r = sosyal.post(state, icerik, Random(i));
+  for (int i = 0; i < 300; i++) {
+    final SponsorOffer? teklif = SocialIncome.maybeOffer(state, Random(i));
+    if (teklif == null) continue;
+    if (teklif.platform != icerik.platform) continue;
+    final GameState kabul =
+        sosyal.acceptSponsor(state.copyWith(sponsorOffer: teklif)).state;
+    final SocialResult r = sosyal.post(kabul, icerik, Random(i));
     if (r.outcome.earned > 0) return r;
   }
-  fail('Hiç gelir oluşmadı.');
+  fail('Sponsorlu paylaşımdan gelir oluşmadı.');
 }
 
 void main() {
@@ -102,61 +111,36 @@ void main() {
       expect(SocialIncome.canEarn(s, s.socialAccounts.single), isFalse);
     });
 
-    test('gelir cüzdana gerçekten işlenir ve günlükte açıklanır', () {
+    test('sıradan paylaşım hiç para kazandırmaz (D-117)', () {
+      // Faho bildirdi: "dümdüz yaptığım paylaşımlardan ücret kazanıyorum,
+      // bu olmamalı". Eskiden kazanç garanti değildi ama vardı; artık
+      // **hiç yok**. Para sponsorluktan ve yıllık gelir payından gelir.
       final GameState s = yayinci(wallet: 1000);
-      final SocialResult r = kazancliPaylasim(s, video);
+      for (int i = 0; i < 40; i++) {
+        final SocialResult r = sosyal.post(s, video, Random(i));
+        expect(r.outcome.earned, 0);
+        expect(r.state.player.wallet, s.player.wallet);
+      }
+    });
 
-      expect(r.state.player.wallet, s.player.wallet + r.outcome.earned);
-      expect(
-        r.state.log.any((dynamic e) =>
-            (e.text as String).contains('içerik gelirinden kazandın')),
-        isTrue,
-      );
+    test('kitlesi çok büyük olsa bile paylaşım başına ödeme yok', () {
+      final GameState s = yayinci(followers: 500000, wallet: 0);
+      final SocialResult r = sosyal.post(s, video, Random(4));
+      expect(r.outcome.earned, 0);
+      expect(r.state.player.wallet, 0);
       expect(checkInvariants(r.state), isEmpty);
     });
 
-    test('her paylaşım para kazandırmaz', () {
-      final GameState s = yayinci();
-      int kazandiran = 0;
-      for (int i = 0; i < 40; i++) {
-        final SocialResult r = sosyal.post(s, video, Random(i));
-        if (r.outcome.earned > 0) kazandiran++;
-      }
-      expect(kazandiran, greaterThan(0));
-      expect(kazandiran, lessThan(40), reason: 'Gelir garanti olmamalı');
-    });
-
-    test('gelir takipçi sayısına körü körüne eşit değildir', () {
-      // Aynı tohum, aynı takipçi: sonuç paylaşımın gerçek etkileşimine
-      // bağlı olduğu için tek bir sabit sayı çıkmaz.
-      final GameState s = yayinci();
-      final Set<int> tutarlar = <int>{};
-      for (int i = 0; i < 25; i++) {
-        final SocialResult r = sosyal.post(s, video, Random(i));
-        if (r.outcome.earned > 0) tutarlar.add(r.outcome.earned);
-      }
-      expect(tutarlar.length, greaterThan(1));
-      for (final int t in tutarlar) {
-        expect(t, isNot(s.socialAccounts.single.followers));
-      }
-    });
-
-    test('aynı paylaşımın geliri iki kez ödenmez', () {
-      final GameState s = yayinci(wallet: 0);
-      final SocialResult r = kazancliPaylasim(s, video);
-      final int cuzdan = r.state.player.wallet;
-      final int kazanc = r.outcome.earned;
-
-      // Kayıt turu: kazanç paylaşımın kendi kaydında durur, yeniden
-      // ödenmez.
-      final GameState geri = decodeGameState(encodeGameState(r.state));
-      expect(geri.player.wallet, cuzdan);
-      expect(geri.totalSocialEarnings, kazanc);
-
-      // Yaş almak da eski paylaşımı yeniden ödemez.
+    test('gelir payı yıllıktır ve büyük hesapta cüzdana girer (D-117)', () {
+      // Eşiğin tam üstünde değil, açık ara üstünde: yılın kendiliğinden
+      // değişimi eşiğin altına düşürüp ölçümü bozmasın.
+      final GameState s = yayinci(
+        followers: SocialIncome.prototypeOnlyRevenueShareThreshold * 2,
+        wallet: 0,
+      );
       final GameState sonra =
-          LifeProgression(Random(3)).advanceOneYear(geri);
-      expect(sonra.totalSocialEarnings, kazanc);
+          sosyal.advanceYear(s, s.player.age + 1).state;
+      expect(sonra.player.wallet, greaterThan(0));
     });
 
     test('takipçi kaybettiren paylaşım gelir getirmez', () {
@@ -246,9 +230,11 @@ void main() {
       expect(ret.state.sponsorOffer, isNull);
       expect(ret.state.sponsorDeals, isEmpty);
 
-      // Reddedilen teklif için paylaşımda da ödeme olmaz.
+      // Reddedilen teklif için paylaşımda da ödeme olmaz. Sıradan
+      // paylaşım zaten hiç para kazandırmaz (D-117), o yüzden burada
+      // "az kazandı" değil **hiç kazanmadı** aranıyor.
       final SocialResult paylasim = sosyal.post(ret.state, video, Random(6));
-      expect(paylasim.outcome.earned, lessThan(SocialIncome.prototypeOnlyMaxPerPost));
+      expect(paylasim.outcome.earned, 0);
       expect(paylasim.state.sponsorDeals, isEmpty);
     });
 
@@ -364,13 +350,20 @@ void main() {
     });
 
     test('ün, takipçi ve cüzdan birbirine karışmaz', () {
-      final GameState s = yayinci(followers: 4000, wallet: 12345);
+      // Kitle sponsorluk eşiğinin üstünde: tek gelir yolu sponsorluk
+      // olduğu için (D-117) daha küçük bir hesapla gelir hiç oluşmaz.
+      final GameState s = yayinci(followers: 20000, wallet: 12345);
       final SocialResult r = kazancliPaylasim(s, video);
 
+      // Testin derdi üç sayının birbirine karışmaması. Sponsorlu
+      // paylaşım cüzdanı büyütür; takipçi sayısı ise o paylaşımın kendi
+      // sonucuna göre artabilir de azalabilir de — bu yüzden burada
+      // "arttı" değil, **ayrı sayılar** aranıyor.
       expect(r.state.player.wallet, greaterThan(12345));
-      expect(r.state.totalFollowers, greaterThan(4000));
+      expect(r.state.totalFollowers, isNot(r.state.player.wallet));
       expect(r.state.player.fame, isNotNull);
       expect(r.state.player.fame, isNot(r.state.player.wallet));
+      expect(r.state.player.fame, isNot(r.state.totalFollowers));
     });
 
     test('gelir geçmişi yaş alma ve kayıt turunda korunur', () {

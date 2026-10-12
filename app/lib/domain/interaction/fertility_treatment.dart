@@ -32,7 +32,7 @@ import 'parenthood.dart';
 /// (`docs/DESIGN_REVIEW_QUEUE.md`, Q-103).
 abstract final class FertilityTreatment {
   /// prototypeOnly: bir denemenin ücreti (₺).
-  static const int prototypeOnlyCost = 120000;
+  static const int prototypeOnlyCost = 250000;
 
   /// prototypeOnly: tedaviye başvurmadan önce gereken başarısız deneme.
   ///
@@ -41,6 +41,12 @@ abstract final class FertilityTreatment {
   /// gelebilir" cümlesini görüyor. O cümle artık gerçek bir kapıyı
   /// işaret ediyor.
   static int get prototypeOnlyMinTries => Intimacy.prototypeOnlyWorryAfter;
+
+  /// Hayat boyu yapılabilecek en fazla deneme (Faho'nun Q-103 kararı).
+  ///
+  /// Tedavi hem pahalı hem yıpratıcı; sınırsız denemek hem gerçeğe hem
+  /// oyunun dengesine aykırıydı.
+  static const int maxLifetimeTries = 5;
 
   /// prototypeOnly: bir yılda kaç deneme yapılabilir.
   ///
@@ -65,6 +71,13 @@ abstract final class FertilityTreatment {
 
   /// prototypeOnly: taşıyacak tarafın yaşına göre bir denemenin
   /// canlı doğumla sonuçlanma ihtimali.
+  /// prototypeOnly: taşıyacak tarafın yaşına göre bir denemenin
+  /// canlı doğumla sonuçlanma ihtimali.
+  ///
+  /// Kendi yumurtasıyla tüp bebekte canlı doğum oranı 43-44'ten sonra
+  /// %1-2 bandına iner ve 46'dan sonra neredeyse görülmez. Faho'nun
+  /// "55'e kadar" isteğine uyarak kapı açık bırakıldı ama üst yaşlarda
+  /// oran gerçeğe yakın tutuldu: denemek mümkün, ummak gerçekçi değil.
   static double prototypeOnlySuccessByAge(int womanAge) {
     if (womanAge < 35) return 0.45;
     if (womanAge <= 37) return 0.38;
@@ -72,6 +85,8 @@ abstract final class FertilityTreatment {
     if (womanAge <= 42) return 0.18;
     if (womanAge <= 44) return 0.06;
     if (womanAge <= 46) return 0.02;
+    if (womanAge <= 50) return 0.008;
+    if (womanAge <= 55) return 0.003;
     return 0;
   }
 
@@ -103,6 +118,10 @@ abstract final class FertilityTreatment {
     if (state.unprotectedTries < prototypeOnlyMinTries) {
       return 'Hekim önce bir süre kendiniz denemenizi istiyor. '
           'Sonuç alamazsanız kapı açık.';
+    }
+    if (state.ivfAttempts >= maxLifetimeTries) {
+      return 'Hekim daha fazla deneme önermiyor; $maxLifetimeTries deneme '
+          'yaptınız.';
     }
     if (triesThisAge(state) >= prototypeOnlyTriesPerAge) {
       return 'Bu yıl bir deneme yaptınız; tedavi aylar sürüyor, '
@@ -161,11 +180,8 @@ abstract final class FertilityTreatment {
     final Person partner = Intimacy.partnerOf(state)!;
     final bool basarili = rng.nextDouble() < successChance(state);
 
-    final Stats stats = state.player.stats.copyWith(
-      happiness: state.player.stats.happiness +
-          (basarili
-              ? prototypeOnlySuccessHappiness
-              : prototypeOnlyFailHappiness),
+    final Stats stats = state.player.stats.gain(
+      happiness: (basarili ? prototypeOnlySuccessHappiness : prototypeOnlyFailHappiness),
     );
 
     final List<Person> people = basarili

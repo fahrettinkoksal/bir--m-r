@@ -64,6 +64,7 @@ class EducationState {
     this.repeatedYears = 0,
     this.droppedOut = false,
     this.scholarshipSinceAge,
+    this.openHighSchoolGrade,
   }) : assert(
           !enrolled || grade != null,
           'Okula kayıtlı öğrencinin sınıfı olmalı.',
@@ -139,11 +140,26 @@ class EducationState {
   /// Burs almaya başladığı yaş; hiç almadıysa `null`.
   final int? scholarshipSinceAge;
 
+  /// Açık liseye kayıtlıysa kaçıncı sınıfta (9-12); kayıtlı değilse `null`
+  /// (Paket DC).
+  ///
+  /// **[enrolled]'dan ayrı bir alandır ve bilerek öyledir.** Açık lisenin
+  /// bütün anlamı çalışırken okumaktır; `enrolled` açılsa oyuncu
+  /// [isSchoolStudent] sayılır ve `JobMarket` tam zamanlı işi kapatırdı.
+  /// Yani bu alan okulu bırakana diploma yolu açarken iş hayatına
+  /// dokunmaz.
+  final int? openHighSchoolGrade;
+
   /// Okula (lise veya üniversiteye) devam ediliyor mu?
   bool get isStudent => enrolled || isUniversityStudent;
 
   /// Yalnızca 1-12. sınıf öğrenciliği. Okul olayları buna bakar.
   bool get isSchoolStudent => enrolled;
+
+  /// Açık liseye kayıtlı mı? (Paket DC)
+  ///
+  /// [isSchoolStudent] **değildir**: tam zamanlı iş kapısı buna bakmaz.
+  bool get isOpenHighSchoolStudent => openHighSchoolGrade != null;
 
   bool get isUniversityStudent =>
       universityProgramId != null && !universityFinished;
@@ -180,6 +196,12 @@ class EducationState {
     }
     if (universityFinished) return '${program?.name ?? 'Üniversite'} mezunu';
     if (finished) return 'Liseyi bitirdi';
+    // Açık lise kaydı (Paket DC): okulu bırakmış olmak artık son durum
+    // değil; ekran da öyle göstermez.
+    if (openHighSchoolGrade != null) {
+      return 'Açık lise $openHighSchoolGrade. sınıf';
+    }
+    if (droppedOut) return 'Okulu bıraktı';
     return 'Okula başlamadı';
   }
 
@@ -188,6 +210,7 @@ class EducationState {
     if (enrolled || isUniversityStudent) return label;
     if (universityFinished) return label;
     if (finished) return 'Okul bitti';
+    if (openHighSchoolGrade != null) return 'Açık lise';
     if (age < 6) return 'Okul öncesi';
     return 'Okul dışı';
   }
@@ -209,6 +232,7 @@ class EducationState {
     int? repeatedYears,
     bool? droppedOut,
     Object? scholarshipSinceAge = _unsetEdu,
+    Object? openHighSchoolGrade = _unsetEdu,
   }) {
     return EducationState(
       enrolled: enrolled ?? this.enrolled,
@@ -238,6 +262,9 @@ class EducationState {
       scholarshipSinceAge: scholarshipSinceAge == _unsetEdu
           ? this.scholarshipSinceAge
           : scholarshipSinceAge as int?,
+      openHighSchoolGrade: openHighSchoolGrade == _unsetEdu
+          ? this.openHighSchoolGrade
+          : openHighSchoolGrade as int?,
     );
   }
 
@@ -259,6 +286,8 @@ class EducationState {
         repeatedYears: repeatedYears,
         droppedOut: droppedOut,
         scholarshipSinceAge: scholarshipSinceAge,
+        // Diploma alındıysa açık lise kaydı kapanır; `openHighSchoolGrade`
+        // taşınmaz (Paket DC).
       );
 }
 

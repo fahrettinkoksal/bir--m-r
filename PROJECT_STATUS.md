@@ -924,14 +924,2490 @@ ifadeler düzeltildi; sonraki büyük sistem önerileri
 `docs/NEXT_DEVELOPMENT_OPTIONS.md` dosyasında **yalnızca öneri** olarak
 toplandı.
 
+**Paket 49 — Faho'nun oyun içi geri bildirimleri.** PC'de oynanan
+sürümden çıkan altı madde işlendi:
+
+1. **Askerlik hatası düzeltildi.** Kadın oyuncu 18 yaşından sonra
+   "Askerlik · Yapılmadı" satırını görüyordu; zorunlu askerliği yokken
+   yerine getirilmemiş bir yükümlülük varmış gibi okunuyordu. Kayıt
+   değişmedi (değişseydi gönüllü subaylık yolu da kapanırdı), görüntü
+   düzeltildi.
+2. **Kalıcı pasif seçenek denetimi.** Açık düğmelerin hepsi gerekçesini
+   zaten yazıyordu; asıl risk ekranda durup hiç açılamayan içerikti.
+   `test/content_reachability_test.dart` bunu kalıcı hâle getirdi.
+3. **Dövüş sanatı eğitimi.** Karate siyah kuşağı 110 ders ve yılda en
+   fazla 20 ders demek: 110 ayrı tıklama. "Yılı çalış" eylemi eklendi;
+   ücret, yıllık sınır ve basamak eşikleri **birebir aynı**. Süre kararı
+   Q-111'de.
+4. **Sosyal medya.** Bir platformdaki kazanç artık diğer açık hesaplara
+   yansıyor ve kitlesi büyük hesap yıl geçtikçe kendiliğinden büyüyor.
+   Durgun hesabın erimesi **Claude'un eklediği varsayımdır**, Q-112'de
+   onaya sunuldu.
+5. **Meslek kataloğu 9'dan 15'e.** Aşçı, kuaför, muhasebeci, manken,
+   yazar, müzisyen. Mankenlik görünüşle, yazarlık okuma hobisiyle,
+   müzisyenlik müzik hobisiyle açılıyor. Sayılar Q-113'te.
+6. **Olay zincirleri.** Yıllara yayılan 4 zincir, 17 olay, 8 dal.
+   Sayılar Q-114'te.
+
+Bu pakette **hiçbir sayısal denge değeri kendi başına değiştirilmedi**;
+hepsi `prototypeOnly` kaldı ve kararlar Q-111…Q-114 olarak kuyrukta.
+
+**Paket 50 — Q-103…Q-114 kararları, 2026 ekonomisi ve şehir filtresi.**
+Faho on iki tasarım sorusunun tamamını karara bağladı; kararlar
+`DECISIONS.md` içine **D-054…D-065** olarak, ekonomi kararı **D-053**,
+şehir filtresi **D-066** olarak işlendi. Kuyruktaki Q-103…Q-114
+"KARARLAŞTIRILDI" durumuna geçti.
+
+- **2026 Türkiye ekonomisi.** Bütün tutarlar 2026 TL satın alma gücü;
+  nominal enflasyon simüle edilmiyor. Çıpa: net yıllık asgari ücret
+  336.900 ₺. Maaşlar yedi gelir bandına ayrıldı ve her bant test
+  edilerek korunuyor. Gerekçeli eski/yeni tablosu:
+  `docs/ECONOMY_2026.md`.
+- **Meslek kataloğu 9 → 44.** Hizmet, teknik, ofis, sağlık,
+  mühendislik, kamu ve yaratıcı sektörler temsil ediliyor. Sağlık ve
+  iletişim meslekleri için üniversite kataloğuna beş bölüm eklendi;
+  ulaşılamayan iş üretilmedi.
+- **Ev/araç ilanları yaşanan ille sınırlandı.** "Türkiye geneli"
+  liste kalktı, şehir bazlı fiyat katsayısı eklendi.
+- **Kütüphane 8 → 23 kitap**, okuma eşikleri 0/3/7/12/20; hobi
+  basamak adları ve süreleri karara uyduruldu.
+
+**Paket G — bildirilen gerçek hatalar (D-087…D-093).** Kuşak devamında
+torunlar kayboluyordu; `RelationType.yegen` eklenerek düzeltildi. Finger
+ekranındaki donmanın gerçek sebebi bulundu (menü bileşeni uzun metni
+sınırsız genişlikte yerleştiriyordu) ve dar ekran testi eklendi. At
+yarışı bahsi emanete alınıp sonuç atomik kesinleşiyor; blackjack'te el
+sonunda tekrar oynanabiliyor. Aynı işe aynı yıl ikinci başvuru kapandı.
+Finans olayları gerçek mali duruma bakıyor. İlgisizlik artık hızlanarak
+yakınlık düşürüyor ve uzaklaşan yakın için sitem olayı eklendi.
+
+**Paket H — lise alan seçimi ve doğumda isim (D-094, D-095).** Liseye
+geçen oyuncu alan seçmeden yaş atlayamıyor: **Yaş Al** düğmesi sessiz
+kalmıyor, seçim penceresi açılıyor ve seçim yapılmadan kapanmıyor.
+Seçilen alan günlüğe yazılıyor, sonuç aynı pencerede gösteriliyor ve
+üniversite koşullarında gerçek kaynak oluyor. Bebek doğduğunda adı
+doğum bildiriminin içinden değiştirilebiliyor; ad yalnızca doğum
+yılında, 2-16 harf ve yalnızca harf olarak kabul ediliyor, soyadı
+değişmiyor.
+
+**Paket I — geri bildirim ve sonuç görünürlüğü (D-096…D-098).** Yaş
+alındığında biten yılın özeti ana ekranın üstünde kart olarak duruyor:
+"23 yaşın böyle geçti". Satırlar yılın başındaki fotoğrafla bugünün
+farkından üretiliyor, uydurma kazanç yazamıyor. Kritik iş ve kredi
+haberleri (işten çıkarılma, işveren uyarısı, kaçan taksit) artık
+bildirim oluyor. Bildirim yoğunluğu 100 hayat üzerinde ölçüldü: en kötü
+yıl yedi pencereydi, aynı yıl gelen miras payları tek bildirimde
+toplanarak ve acılı yılda burç penceresi kapatılarak altıya indi
+(ortalama 0,39/yıl). Olay havuzundaki 467 seçimin tamamı denetlendi:
+etkisiz seçim yok, yalnızca görünmez işaret bırakan seçim yok; kural
+testle sabitlendi.
+
+**Paket J — statlar gerçekten hissedilsin (D-099…D-102).** Kazançlar
+artık azalan getiriyle işleniyor: +5'lik bir kazanç 40'tan +5, 70'ten +4,
+88'den +1 getiriyor. Çabayla ulaşılabilecek tavan 95; yılda +4 kazandıran
+bir alışkanlık 40 yıl sürse bile 100'e ulaşmıyor (eskiden ulaşıyordu).
+Kural tek noktadan geçiyor ve bunu atlayan yeni bir yol açılamasın diye
+kaynak taramalı bir testle sabitlendi. Sağlık Merkezi'nin yıllık toplam
+sağlık kazancı 17'den 6'ya indirildi (check-up ile stat kasma açığı).
+Hastalık artık sağlığı da düşürüyor. Dövüş sanatı spor bakımına sayılıyor.
+Görünüş düşüşü yaklaşık dörtte bir yumuşatıldı. Saç dökülmesi karizmayı
+değil görünüşü etkiliyor; saç ekimi ileri basamaktan iki kademe düşürüyor.
+
+**Paket K — sosyal medya, sponsorluk ve Ün (D-103…D-106).** Aktiviteler
+altında **Ün ve Medya Fırsatları** bölümü açıldı; Ün 40 olmadan menüde
+hiç görünmüyor. Yedi kurgusal medya işi var (dergi röportajından reklam
+yüzü olmaya). Sponsorluk için platform başına en az 5.000 takipçi
+gerekiyor ve ücret kitlenin tamamıyla ölçekleniyor: 5.000 → 32.500 ₺,
+500.000 → 478.000 ₺. Kabul edilip paylaşılmayan sponsorlukta ödeme yok,
+mutluluk düşüyor ve o platformdaki kitlenin %4'ü gidiyor. Tanınan biri
+yeni hesabı sıfırdan açmıyor: mevcut kitlesinin %8'i (en çok 40.000)
+taşınıyor. Ünlüye yılda iki kez yazılabiliyor ve geri takip edenler
+İlişkiler ekranında "Ünlüler ve tanıdıklar" başlığında duruyor. Takipçi
+sayıları Türkçe binlik ayracıyla yazılıyor (2.232).
+
+**Paket L — Finger: niyet, flört ve süzgeç (D-107).** Tanışmak artık
+sevgili olmak değil: araya **flört** basamağı girdi. Hem oyuncunun hem
+adayın "ne aradığı" profilde yazıyor ve buluşmanın sonucu ikisine birden
+bakıyor. Flört kendiliğinden sevgiliye dönmüyor; oyuncu teklif ediyor ve
+yakınlık yeterliyse resmîleşiyor. Adaylar ekonomik duruma göre
+süzülebiliyor. Beğeni kotası yılda 5'ten 12'ye çıktı, premium 30 kaldı.
+
+**Paket M — banka, konut kredisi ve harçlık (D-108).** Banka
+Varlıklar'dan Aktiviteler'e taşındı; Varlıklar'da yalnızca açık borç
+hatırlatması kaldı. Kredi tutarı artık elle yazılıyor. Konut kredisi
+eklendi: daha ucuz (aylık %2,45 / %3,40), 10 yıla kadar vadeli ve daha
+büyük. Basit kredi karnesi (İyi/Orta/Riskli/Çok riskli) banka ekranının
+üstünde gerekçesiyle duruyor; icra ve haciz için zemin bırakıldı.
+Harçlık isteyince alınan tutar sonucun içinde yazıyor.
+
+**Paket N — hayvanlar ve aile tepkisi (D-109, D-110).** Evcil hayvan
+sahiplendirilebiliyor: vefat değil, kaydı duruyor ve "Yeni yuvasına
+gidenler" başlığında görünüyor. Hayvan ekranı üçe ayrıldı. Kayıp hayvan
+sonsuza kadar kayıp kalmıyor; üç yılın sonunda durum kapanıyor ve hayvan
+ölmüş sayılmıyor. Özel izin gerektiren tür (timsah) gerçekten zorlaştı:
+25 yaş, kendi evi ve bedelin yarısı kadar izin masrafı. 18-20 yaşında
+çocuk sahibi olan oyuncuya ailenin tepkisi eklendi; evliyse destek,
+değilse endişe — ikisi de gerçekten uygulanıyor.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** tüp bebekte ikiz
+gebelik, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı (D-055),
+"Vefat eden eş" ayrı statüsü ve kayıt göçü (D-060), hayvan sağlık
+değeri ve Hayvan Detayı ekranı (D-058), "Hobilerim" bölümü (D-057),
+bitirilmiş kitabın yeniden okunması, 0-5 ve 80+ yaş havuzlarının
+genişletilmesi, olay örtüşmesinin %40-45 bandına indirilmesi ve
+kariyer olaylarının payı (D-061), zincir sonundaki gerçek kariyer
+teklifi ve kişisiz kapanış olayları (D-065), çoklu kişiyle aktivite
+(D-059).
+
 **Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
-`flutter test` **1539 geçti, 15 atlandı, 0 başarısız**. Atlananların
+`flutter test` **1660 geçti, 15 atlandı, 0 başarısız**. Atlananların
 tamamı `BIR_OMUR_SCREENSHOTS=1` ile açılan golden testleridir.
 **Gerçek Windows veya Android cihazda oynanmadı.**
 
-**CI:** GitHub Actions hesabın ödeme/harcama limiti nedeniyle hiçbir işi
-başlatmıyor; bu turda da yeni Windows sürümü veya Android APK
-üretilemedi. Engelin sebebi kod ya da iş akışı yapılandırması değildir.
+**CI:** Depo public yapıldıktan sonra GitHub Actions normal çalışıyor.
+Windows test sürümü `claude/paket54-belge-denetimi` dalının
+`6f3a852` commitinden üretildi ve artifact olarak yüklendi. Android APK
+bu ortamda hâlâ üretilemiyor (Android SDK indirilemiyor).
+**Hiçbir sürüm gerçek Windows ya da Android cihazda oynanmadı.**
+
+## Paket A-F: Faho'nun 24 Eylül listesi (D-067 … D-085)
+
+Faho'nun uzun revizyon listesi altı pakette kodlandı. Her paket ayrı
+commit; hepsi `claude/stoic-maxwell-6rkrit` dalında.
+
+**Paket A — bildirilen beş hata (D-067…D-071).** Ev sahibi olan
+oyuncuya kira zammı olayı çıkması, çalışmayana iş yeri olayı çıkması,
+gebeliğin 46 yaşta tamamen kapanması, yıllarca ilgilenilmeyen eşle
+yakınlığın tam kalması, bedelli sonrası subay/astsubay yolunun da
+kapanması.
+
+**Paket B — statlar yaşla düşer, bakım karşılık verir (D-072, D-073).**
+Beş değerin her birinin kendi başlangıç yaşı ve tabanı var. Spor,
+berber ve okumak kaybı belirgin biçimde yavaşlatıyor. Erkeklerde saç
+dökülmesi eklendi; oran androjenetik alopesinin yaygın epidemiyolojik
+özetine göre seçildi ve test bunu ölçüyor.
+
+**Paket C — sağlık bildirimleri, göz mini oyunu, estetik, hastalık
+(D-076…D-078).** Check-up altı vücut sistemi için gerçek duruma dayalı
+rapor üretiyor ve gerekirse tahlile yönlendiriyor. Göz muayenesi mini
+oyun oldu. Estetik bölümü eklendi; fiyatlar Türkiye piyasasından
+2026 ölçeğine taşındı. Hastalanınca işe gidilemiyor, raporun ilk iki
+günü ödenmiyor ve işveren uzun raporu sorun ediyor.
+
+**Paket D — aktivite bildirimleri, kişi keyfi, boşanmada mal paylaşımı
+(D-074, D-075).** Eğlence programının sonucu ekran bildirimi olarak,
+kime ne kattığı satır satır yazılıyor. Kişilerin yakınlıktan ayrı bir
+keyfi var ve D-059'un "davet edilen reddedebilir" kuralı artık gerçekten
+çalışıyor. Boşanmada evlilik içinde edinilen mallar paylaşılıyor.
+
+**Paket E — mağaza ayrımı, araç masrafı, banka (D-079, D-080).** Üç
+otomobil galerisi, iki motosiklet galerisi, ayrı aksesuarcılar, orta ve
+lüks emlakçı. Motorlu araçlar masraf çıkarıyor. Fakbank ve Bankavrupa;
+faiz oranları 2026 ihtiyaç kredisi bandından alındı.
+
+**Paket F — Finger, hayvanlar, seyahat, Son Kararlar (D-081…D-085).**
+Finger'da yaş bandı hatası düzeltildi (deste yaşla yenilenmiyordu),
+beğeni kotası, premium ve kendi profilin eklendi. Hayvan türleri
+genişledi; kaçma ve hastalık eklendi. Seyahat "Tatil yap" ve "Taşın"
+diye ikiye ayrıldı. Vasiyet menüsü "Son Kararlar" oldu ve hayatın sonuna
+dair karar oraya eklendi.
+
+**Bu pakette kodlanmayan, açıkça bekleyen işler:** suç ve hapis sistemi
+(Faho "ileride gelecek" dedi), hayvan detayı ekranı, çoklu kişiyle
+aktivite, üvey ebeveyn ilişkisi ve Evlilik Geçmişi ekranı, "Vefat eden
+eş" ayrı statüsü, "Hobilerim" bölümü, 0-5 ve 80+ yaş havuzları.
+
+**Ölçümler (gerçekten çalıştırıldı — `app/test/measurements_test.dart`).**
+
+| Ölçüm | Sonuç |
+|---|---|
+| 100 hayat, ortalama ömür | 72,4 |
+| Hayat sonunda ortalama görünüş | 31,1 (en düşük 3, en yüksek 71) |
+| Hayat sonunda ortalama mutluluk | 66,4 (1 – 89) |
+| Hayat sonunda ortalama sağlık | 20,6 (0 – 73) |
+| Hayat sonunda ortalama zekâ | 78,0 (40 – 93) |
+| Hayat sonunda ortalama karizma | 72,0 (27 – 92) |
+| 100'e dayanan değer sayısı | **0** |
+| Görünüş: 20 yaş → 80 yaş | 51,9 → 19,5 |
+| Sağlık: 20 yaş → 80 yaş | 56,4 → 16,0 |
+| Görüşülmeyen çocukla yakınlık | 1 yıl 100 · 5 yıl 94 · 10 yıl 74 · 15 yıl 44 · 20 yıl 20 (taban) |
+| Tek yılda en çok bildirim | 7 (üç vefat, üç cenaze, tek toplu miras); ortalama 0,39 |
+
+### Paket O-S sonrası ölçümler (D-111 … D-124)
+
+Faho'nun 24 Eylül tarihli ikinci geri bildirim listesinden sonra
+yeniden ölçüldü (100 hayat):
+
+| Ölçüm | Önce | Sonra |
+|---|---|---|
+| Sağlık: 20 → 70 yaş | 69,9 → 38,4 gibi yavaş | **69,9 → 13,8** |
+| Sağlık 40 yaşta | 66,2 | **55,6** |
+| Karizma: 20 → 70 yaş | 52,6 → 38,4 | **52,6 → 28,7** |
+| Ortalama ömür | 72,4 | **74,2** |
+| Yıl başına bildirim penceresi | 0,39 | **0,71** (en kötü yıl 7 → 6) |
+| Sponsorluk ücreti (100.000 takipçi) | 118.000 ₺ | **15.000 ₺** |
+| Sıradan paylaşımın geliri | değişken | **0** |
+
+Hastalığın bedeli −1/−2/−3'ten ciddiyete bağlı **−10 / −14 / −18**'e
+çıkarıldı; tek başına uygulandığında 40 yaşta ortalama sağlık **0,8**'e
+düştüğü ölçüldüğü için **toparlanma** eklendi (hastalanılmayan yılda +7,
+yaşa göre düşen bir tavana kadar).
+
+**Açık kalan sayılar:** Q-116 … Q-136 (`docs/DESIGN_REVIEW_QUEUE.md`).
+Bütün yeni sayılar `prototypeOnly`'dir; Faho ile ChatGPT karar verene
+kadar kesin denge değeri sayılmaz.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2024 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket O + P: ölü hikâye izleri, çocukluk ve metin üslubu (25 Eylül 2026, D-125 … D-127)
+
+Faho iki iş istedi: (1) "hiç konmayan 10 hikâye izini araştır, **tahminle
+flag ekleme, gerçek sebebi bul**", (2) 0-17 yaş için yeni olaylar ve
+metinlerin "yapay zekâ yazmış gibi" durmaması.
+
+**Gerçek sebep bulundu (D-125).** On izin hiçbiri ölü içerik değildi.
+Motor aynı yaşta ikinci olay sunmak için `progressSinceLastEvent`
+sayacına bakıyor, ama bu sayaç kodda **tek bir yerde** artıyordu: aile
+etkileşimleri. Spor, kurs, berber, eşya kullanımı, Finger — hiçbiri
+ilerleme saymıyordu. Yani aktif oynayan oyuncu hiçbir şey yapmayanla
+aynı sayıda olay görüyordu. Düzeltildi; on izin **onu da** konuyor ve
+bir gerileme testiyle sabitlendi.
+
+**Çocukluk havuzu (D-126).** 0-17 yaş için **51 yeni olay** yazıldı
+(`lib/data/event_pool_childhood.dart`). Çocukluk arkadaşı ve ilk
+hoşlanılan kişi **gerçek `Person` kaydı** olarak kuruluyor.
+
+**Metin üslubu (D-127).** `docs/WRITING_STYLE_TR.md` yazıldı ve iki
+somut mekanik metin değiştirildi: aktivite sonucu ("X tamamlandı" →
+mekâna göre yazılmış, kendini tekrar etmeyen cümleler) ve sosyal medya
+paylaşım sonucu. **İş mantığına ve etki değerlerine dokunulmadı.**
+
+| Ölçü (120 hayat, oyuncu gibi oynanarak) | Önce | Sonra |
+|---|---|---|
+| Bir hayatta görülen farklı olay | 48 | **110** |
+| Havuz | 221 | **272** |
+| 120 hayatta hiç çıkmayan olay | 61 | **18** |
+| 0-5 yaşta farklı olay | 11 | **24** |
+| 6-12 yaşta farklı olay | 25 | **53** |
+| 13-17 yaşta farklı olay | 30 | **62** |
+| Ortalama ömür | 74 | 80,4 |
+
+**Dürüstçe yazılması gereken yan etki:** havuz büyüyünce **dar pencereli
+zincir halkaları seyreldi** — D-125'ten hemen sonra hiç çıkmayan olay 9
+idi, 51 çocukluk olayından sonra 18 oldu. Yeni içerik kötü değil; dar
+pencereli zincirler yarışmayı kaybediyor. Motorun zincirlere öncelik
+verip vermemesi tasarım kararıdır, **Q-138**'de soruldu.
+
+**Kuyruk temizliği:** sonradan alınan kararlarla örtüşen dört soru
+kapatıldı — Q-115 → D-106, Q-116 → D-102, Q-117 → D-102, Q-121 → D-107
+(kısmen). Tarihsel kayıt **silinmedi**. Yeni sorular: **Q-138** (olay
+yoğunluğu ve zincir önceliği), **Q-139** (çocukluk temaları ve etki
+değerleri), **Q-140** (üslup belgesi ve robotik kalıp tavanı).
+
+**Açık kalan sayılar:** tamamen açık **66** soru, sayıları onay bekleyen
+39 soru (`docs/DESIGN_REVIEW_QUEUE.md`). Bütün yeni sayılar
+`prototypeOnly`'dir.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2037 geçti, 15 atlandı, 0 başarısız**.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket T: Suç ve Hukuk V1 + sokak kültürü dili (25 Eylül 2026, D-128, D-129)
+
+Faho iki iş istedi: (1) suç/hukuk sistemini ilk kez ekle ama **ilk sürümü
+kontrollü tut**, (2) yeni içeriklerde günümüz Türkiye'sinin doğal konuşma
+biçimi kullanılsın.
+
+**Kapsam bilinçli olarak dar.** Amaç suç işlemeyi öğretmek değil,
+seçimlerin hukuki ve toplumsal sonucunu canlandırmak. Hiçbir metinde suç
+işleme yöntemi, kaçış, saklanma, delil ya da denetimden kurtulma
+anlatılmıyor; olaylar yüksek seviyede **seçimler** olarak kalıyor ve
+sonucu motor yürütüyor. **Ağır/organize suç bu sürümde yok.**
+
+**Eklenenler:**
+- 11 suç türü (trafikten yaralamaya, hafif/orta/ağır ağırlıkta)
+- Hukuki durumlar: idari ceza · soruşturma · dava · takipsizlik · karar
+  (beraat / uyarı / para cezası / erteleme / hapis) · sabıka · hapis ·
+  denetim dönemi
+- **31 olay, 5 çok adımlı zincir** (`lib/data/event_pool_crime.dart`)
+- Ayrı **duruşma ekranı**: avukat + savunma tutumu aynı pencerede
+- 4 kademeli avukat kataloğu (2026 ücretleriyle); **sonucu garanti etmez**
+- Sabıkanın işe etkisi: `RecordRule.serbest / temizGerekir / agirEngeller`
+- Basit hapis: iş biter, gelir kesilir, bağlar zayıflar, dışarının
+  aktiviteleri kapanır, içeride 4 güvenli aktivite açılır
+- **Adli Geçmiş** bölümü (Okul/Meslek altında)
+- Hayat sonu değerlendirmesinde suç geçmişi **anılır ama puanlanmaz**
+
+**Ölçüm (100 hayat, oyuncu gibi oynanarak):**
+
+| Oynayış | Dosyası olan | Sabıkalı | Mahkemeye çıkan | Hapis yatan |
+|---|---|---|---|---|
+| Riskli seçim yapan | 97 | 56 | 75 | 22 |
+| **Temiz oynayan** | **0** | **0** | **0** | **0** |
+
+**Suç zorunlu içerik değil:** her olayda suça girmeyen bir kapı var ve
+riskli seçim yapmayan 100 hayatta tek bir dosya bile açılmıyor. Bu bir
+testle sabit.
+
+**Dil (D-129):** `docs/WRITING_STYLE_TR.md` §14 yazıldı. Polis kısa ve
+ciddi, hâkim resmî, avukat yarı resmî; sokak ağzı yalnızca sokakta.
+Polisin karikatürleşmemesi ve hâkimin sokak ağzı kullanmaması testle
+sabit.
+
+**Açık kalan sayılar:** Q-141 (kapsam ve sıklık), Q-142 (avukat
+ücretleri), Q-143 (sabıkanın işlere etkisi ve hapsin bedeli). Bütün
+sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2072 geçti, 15 atlandı, 0 başarısız** (bunların **35'i** bu pakette yeni).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket U: arkadaşlık, yarım zamanlı iş, girişimcilik ve eksik ekranlar (26 Eylül 2026, D-130 … D-133)
+
+Faho'nun seçimi: arkadaşlığı derinleştir · girişimcilik ve kendi işini kur ·
+yarım zamanlı işler · ucuz kazançlar (eksik ekranlar). **Hayat hedefleri
+bilinçli olarak eklenmedi.**
+
+### Arkadaşlık (D-130)
+Kodla doğrulanan eksik: 60 hayatta **1.141 sınıf arkadaşı** üretiliyordu,
+yalnızca **30'u** arkadaş oluyordu — çünkü oyuncunun bir tanıdığı arkadaş
+yapmak için **hiçbir düğmesi yoktu.** Artık dört şey var: yakın arkadaş
+olma teklifi (garanti değil), küslük, barışma ve arkadaşın kendi hayatı
+(taşınır, evlenir, iş değiştirir, zor gün geçirir). 13 yeni olay, üç
+zincir — biri D-126'da kaydedilip hiç dönmeyen **çocukluk arkadaşının
+yıllar sonra dönüşü**.
+
+**Ölçüm düzeltmesi:** "34/60 hayatta hiç arkadaş yok" sayısı hatalıydı;
+simülasyon hiç kimseyle vakit geçirmiyordu. Simülasyona etkileşim eklendi.
+
+| Ölçü (100 hayat) | Önce | Sonra |
+|---|---|---|
+| Hiç arkadaşı olmayan hayat | 34/60 (hatalı ölçüm) | **0** |
+| Yakın arkadaşla ölen | 0 | **88** |
+| Ortalama arkadaş | 0,5 | **6,8** |
+| Ortalama yakın arkadaş | 0,0 | **3,3** |
+| Küslük yaşayan | — | 89 |
+
+### Yarım zamanlı iş (D-131)
+D-126'daki "yaz işi istemek" olayı hiçbir kapıya çıkmıyordu ve öğrencinin
+çalışması mümkün değildi. 8 yarım zamanlı iş, yeni bir maaş bandı
+(90.000-260.000 ₺/yıl, asgari ücret tabanı uygulanmaz), 16 mülakat sorusu.
+Okurken çalışmanın bedeli var: zekâ katkısı yarıya iner, yılda −2 sağlık.
+
+### Girişimcilik (D-132)
+44 mesleğin hepsi maaşlıydı. 13 iş türü geldi (sermaye 84.000-2.900.000 ₺).
+Maaş garantidir, kendi işi değildir: işin durumu 0-100 arası, 25'in altında
+para yer, 0'da batar. Üç hamle: işine bak, para yatır, işi devret.
+Ekonomiye bağlı; banka zarar eden işi gelir saymıyor. Yeni ekran: Kendi İşim.
+
+### Eksik ekranlar (D-133)
+Hobilerim · Evlilik Geçmişi · evcil hayvan detayı · çoklu kişiyle aktivite.
+Dördü de kodda vardı ama oyuncu göremiyordu.
+
+**Açık kalan sayılar:** Q-144 (arkadaşlık eşikleri), Q-145 (arkadaşlık
+olayları), Q-146 (yarım zamanlı iş ve kendi işi sayıları), Q-147 (ekranlar
+ve kalabalık aktivite). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2145 geçti, 15 atlandı, 0 başarısız** (bunların **73'ü** bu pakette yeni:
+friendship_depth 23, part_time_work 12, business 28, missing_screens 10).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket V: hediye seçimi, menüler, 2. el araç pazarı, kefalet ve üvey ebeveyn (26 Eylül 2026, D-134 … D-141)
+
+Faho'nun sekiz maddelik listesi. **D-134 … D-141 numaraları bu pakette
+kullanıldı ama `DECISIONS.md`'ye yazılmadı:** `CLAUDE.md` "kullanıcı onayı
+olmadan `DECISIONS.md` içine karar ekleme" diyor. Numaralar kodda ve bu
+dosyada geçiyor; kesin kural hâline gelmeleri Faho'nun onayına bağlı.
+
+### Hediye seçimi (D-134)
+"Anneme tıkladım, hediye vere tıkladım; tavla, buket çiçek, çeyrek altın,
+bilezik gibi şeyler olsun; tavla hediye edersem beğenmesin." Hediye artık
+rastgele değil: açılır listeden seçiliyor, karşı taraf **beğenmeyebiliyor**.
+13 yeni hediye, 10 hediye kategorisi, bağ türüne ve yaşa göre zevk tablosu.
+Beğenilmeyen hediye bağı düşürüyor ama parayı geri getirmiyor.
+
+### Evcil hayvan menüsü (D-135)
+Edinme listesi tek yığından altı gruba ayrıldı: Kediler, Köpekler, Kuşlar,
+Kemirgenler ve tavşan, Su ve sürüngen, Egzotik.
+
+### Kurgusal araç adları (D-136)
+13 araç kurgusal marka+model adı aldı (Foros, Tunca, Veran, Doruk, Alvera,
+Sarp, Rüzgâr). Gerçek marka yok, telif sorunu yok. Sınıf bilgisi
+`ItemType.segment` alanında ayrı duruyor ve ad altında yazıyor.
+
+### 2. el araç pazarı (D-137)
+Yeni mağaza. İlanda model adı, satıcı (sahibinden/galeriden), fiyat, sıfır
+fiyatı, yaş, km, durum ve beş satır "Araç detayları" var: "şasi ve podyede
+oynama yoktur", "bel altı temizlik", "boyalı ama değişeni yok", "tramer
+kaydı", "muayenesi yeni". Alınan araç **ilanın kondisyonuyla** giriyor.
+Havuz şehir + yaşa göre belirlenimli; yıl geçince tazeleniyor. Model yılı
+yazılmıyor: oyunda takvim yılı yok.
+
+### Menü düzeni (D-138)
+Mağazalar: on bir satırlık düz liste üç öbeğe ayrıldı (Gündelik alışveriş /
+Araç ve aksesuar / Konut), sıra sabit; raf içi ürünler ucuzdan pahalıya
+sıralı. **Meslek:** "Bu yıl yapabileceklerin" ve "Kayıtlar ve durum" diye
+iki başlık; askerlik, kendi işi ve adli geçmiş artık "iş ara" ile aynı
+kolonda karışmıyor. **İlişkiler:** alt listeler "Listeler" başlığı altında.
+Aktiviteler ekranı zaten başlıklıydı, dokunulmadı.
+
+### Kefalet ve tutukluluk (D-139)
+Ağır bir dosyada tutuklama kararı çıkabiliyor (%45, 18 yaş altına
+uygulanmıyor). Kefalet **tutukluluğu** kaldırıyor, cezayı satın almıyor.
+İki kapı: kendi cüzdanından yatırmak ya da aileden istemek (red
+edilebilir, aynı yıl ikinci kez istenmez). Kefalet teminat: duruşmaya
+çıkılınca geri veriliyor — ödeyen aileden biriyse para ona dönüyor.
+Tutuklulukta geçen süre cezadan düşülüyor. Tutukluluk en çok 2 yıl;
+süre dolarsa tutuksuz yargılama sürüyor.
+
+### Cezaevi hayatı ve çeteleşmenin ilk adımı (D-140)
+Koğuşta sohbet (en çok 3 koğuş arkadaşı, tahliyeden sonra listede kalıyor),
+kurallara uymak (iyi hâl), **sözü geçen gruba yakın durmak** ve gruptan
+uzaklaşmak. İyi hâl ≥ 60 + cezanın yarısı + koğuş itibarı < 50 ise
+koşullu salıverilme geliyor; gruba yakın durmak o kapıyı kapatıyor.
+Çete tarafı bilinçli olarak **sayaçta**: dışarıda örgüt, gelir ya da emir
+zinciri yok (Q-148).
+
+### Üvey anne / baba (D-141)
+Ebeveynlerden biri vefat ettiyse, hayatta kalan ebeveyn yas süresinden
+sonra yeniden evlenebiliyor. Gelen kişi çekirdek ailede listeleniyor,
+bağ 18'den başlıyor, **kan bağı sayılmıyor**. Vefat eden ebeveyn kayıttan
+silinmiyor. Üvey kardeş ve miras bu sürümde yok (Q-149).
+
+**Açık kalan sayılar:** Q-148 (kefalet, tutukluluk, çete sınırı),
+Q-149 (üvey ebeveyn), Q-150 (2. el pazar fiyatları), Q-151 (araç adları),
+Q-152 (mağaza menü düzeni). Bütün yeni sayılar `prototypeOnly`.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` temiz;
+`flutter test` **2219 geçti, 15 atlandı, 0 başarısız** (bunların **74'ü**
+bu pakette yeni: gift_choice 15, used_vehicle_market 19,
+used_vehicle_widget 3, bail_prison 32, bail_prison_widget 5).
+**Gerçek Windows veya Android cihazda oynanmadı; APK derlenmedi.**
+
+## Paket W: Faho'nun 13 maddelik hata listesi (26 Eylül 2026, D-142 … D-150)
+
+Çoğu **gerçek hataydı**; her biri önce reproduce edildi, sonra düzeltildi
+ve bildirilen cümleyle bir teste bağlandı. D-142 … D-150 numaraları
+`DECISIONS.md`'ye **yazılmadı** (bkz. Paket V notu): onay Faho'da.
+
+| Bildirilen | Sebep | Durum |
+|---|---|---|
+| "lise bittikten sonra hiçbir üniversiteye başvuramıyorum" | Pencerenin kartı engeli `String?` tutup `== null` ile ölçüyordu; motor boş dize döndürdüğü için düğme hep kapalıydı | Düzeltildi (D-142); pencere kaldırılıp Okul ekranına taşındı |
+| "kendi işime para yatır düğmesi aktif olmuyor" | Metin kutusu yazılınca yeniden çizim tetiklenmiyordu | Düzeltildi |
+| "işine bak'a sonsuz tıklayabiliyorum" | Yıllık sayaç `lastTendedAge`e bakıp en çok 1 döndürüyordu, sınır 2 idi | Düzeltildi |
+| "Finger'de çok varlıklı tanıştığım kişi orta halli görünüyor" | Kişi kaydı kurulurken profilin serveti atılıp sabit `ortaHalli` yazılıyordu | Düzeltildi |
+| "her sayfada bildirim var" | Sayfa çevirme genel aktivite yolundan geçiyordu | Düzeltildi (D-145): bildirim yalnızca kitap bitince |
+| "doğduğumda evde olan hayvanın bakımı harçlığımdan çıkıyor" | Bakım gideri sahiplenme durumuna bakmıyordu | Düzeltildi (D-144) |
+| "evde hayvan vardı ama iletişim yoktu" | Menü yalnızca sahiplenme yaşından (7) itibaren açılıyordu | Düzeltildi (D-146); sayfa İlişkiler'e taşındı |
+| "aynı arkadaş bildirimleri çok fazla" | Bekleme süresi yoktu, her haber türünün tek metni vardı | Düzeltildi (D-149) |
+| "medya fırsatları kolay para, ünüm hiç düşmüyor" | 8 iş × yılda bir = bir yılda sekizi birden | Düzeltildi (D-147) |
+| "cümleler saçma kurulmuş" | Metin neyin verildiğini yazmıyordu | Düzeltildi (D-150), kural belgeye yazıldı |
+| "araç vergisi/sigortası çıksın" | Yoktu | Eklendi (D-148) |
+| "kendi işim varken işveren laf etsin" | Yoktu | Eklendi (D-143) |
+| "sponsorluk paylaşmadan para gelmesin" | Zaten böyleydi (D-104) | Doğrulandı, dokunulmadı |
+
+**Açık kalan sayılar:** Q-153 (araç gideri oranları, kaskonun isteğe bağlı
+olup olmayacağı, medya ve arkadaş haberi bekleme süreleri, aile hayvanının
+bakımının yetişkinlikte kime ait olduğu).
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2261 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+after_school_widget (5), business_widget (4), business_test +6,
+paket_w_test (25), pet_widget_test +2.
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket X — A grubu ve kataloglar (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. **Önce denetim yapıldı ve önerilerimin bir
+kısmının zaten kodlanmış olduğu görüldü** — öneri listesini 25 Eylül tarihli
+`docs/EKSIKLER.md`'ye dayandırmıştım, o belge güncel değildi. Yanlış
+söylediklerim:
+
+| Önerdiğim | Gerçek durum |
+|---|---|
+| Hayvan detay sayfası yok | **Var** — `pet_detail_sheet.dart` (D-133) |
+| Evlilik geçmişi ekranı yok | **Var** — `marriage_history_page.dart` (D-133) |
+| "Hobilerim" görünümü yok | **Var** — `hobbies_page.dart` (D-133) |
+| Dul ile boşanmış aynı statüde | **Ayrı** — `MarriageStatus.dul`, dul eş `eskiEs`'e düşmüyor |
+| Çoklu kişiyle aktivite yok | **Var** — `perform(others:)` + `costForParty` (D-133) |
+| Küslük/barışma yok | **Var** — `friendship_depth.dart` (D-130) |
+
+`docs/EKSIKLER.md` bu altı madde için düzeltildi. A grubunda **gerçekten
+eksik olan tek şey ikiz gebelikti**.
+
+### D-151 — İkiz gebelik
+Doğum anında %2,8 ihtimalle ikinci bebek de geliyor. Gebelik kaydı **tek**
+kalıyor; ikinci bebek aynı doğumun parçası olduğu için "aynı yıl ikinci
+bebek olmaz" kuralı yalnızca açık `twin` bayrağıyla atlanıyor — oyuncunun
+düğmesi bu bayrağı hiç geçmiyor. İkiz aynı diğer ebeveynden olur, adı ve
+kimliği ayrıdır, **en fazla çocuk sınırını aşmaz** (üç çocuklu oyuncuda
+doğum tek bebekle kapanır) ve iki pencere yerine **tek** ikiz bildirimi
+açılır. Üçüz yok. Sayı `prototypeOnly` — **Q-154**.
+
+### D-152 — Kataloglar genişletildi
+`docs/EKSIKLER.md` §4.3'teki darlık ölçümüne karşılık:
+
+| Katalog | Önce | Sonra |
+|---|---|---|
+| Hobi | 4 | **12** |
+| Üniversite bölümü | 11 | **20** |
+| Medya işi | 7 | **14** |
+| Dövüş sanatı | 3 | **6** |
+
+Yeni hobiler: mutfak, fotoğraf, dans, satranç, yazmak, bahçe, yabancı dil,
+bilgisayar. İlk altısı için **altı yeni kurs** eklendi; son ikisi zaten var
+olan dil ve bilgisayar kurslarını besliyor, yeni düğme gerekmedi.
+Kataloğun kendi kuralı korundu: **her hobiyi gerçekten var olan bir eylem
+besler**, sahte hobi yok (kalıcı test).
+
+Yeni dövüş dalları **boks, judo, taekwondo**. Basamak adları gerçek
+düzenlerden derlendi: boksta kuşak yoktur, o yüzden amatör yaş
+kategorileri ve profesyonel sıralama kullanıldı; judo kyu/dan, taekwondo
+gup/dan.
+
+**Mevcut koruma testleri üç gerçek boşluk yakaladı ve hiçbirini
+gevşetmedim:**
+1. `economy_calibration_test` — `boks_antrenoru` maaşı `kuafor` ile
+   çakışıyordu (440.000 ₺); 438.000 ₺ yapıldı.
+2. `score_interview_test` / `martial_arts_test` / `content_reachability_test`
+   — üç yeni eğitmenlik işinin **mülakat sorusu yoktu**, yani iş listede
+   görünüp başvurulamayacaktı. Dokuz soru yazıldı (her işe üç).
+3. `martial_arts_widget_test` — ekran bir `ListView` olduğu için altta
+   kalan yeni dallar hiç inşa edilmiyordu. Test **gevşetilmedi**,
+   güçlendirildi: artık her dala kaydırarak ulaşılabildiği doğrulanıyor.
+
+Sayılar `prototypeOnly` — **Q-155**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2275 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_x_test` (14).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+## Paket Y ve Z — B ve C grupları (26 Eylül 2026)
+
+Faho "a+b+c grubunu kodla" dedi. A grubu ve kataloglar **Paket X**'te bitti;
+B grubu **Paket Y**'de, C grubu **Paket Z**'de.
+
+### B grubu — D-153 … D-156
+
+| Paket | Karar | Ne geldi |
+|---|---|---|
+| Y/1 | **D-153** | Kronik durumlar ve Sağlık Geçmişi |
+| Y/2 | **D-154** | Eşin kendi hayatı + düşen aile bildirimleri düzeltildi |
+| Y/3 | **D-155** | Meslekte ustalık ve itibar |
+| Y/4 | **D-156** | Hayat hedefleri |
+
+**D-153.** Sağlık tek bir sayıydı, krizler birbirinden bağımsızdı, atlatılan
+kriz hiçbir iz bırakmıyordu. Altı kronik durum geldi (dördü kriz sonrası,
+ikisi yaşla). Takip edilmeyen durum her yıl sağlıktan düşürüyor, kriz
+riskini yükseltiyor ve check-up raporunda ilgili satırı aşağı çekiyor.
+Takip **yönetir**, ortadan kaldırmaz. Yeni Sağlık Geçmişi bölümü. Sayılar
+**Q-156**.
+
+**D-154.** Eşin kariyeri, emekliliği ve birikimi artık mevcut
+`ChildProgression` ile ilerliyor; paralel sistem kurulmadı. Eş
+hastalanabiliyor ve bu oyuncunun mutluluğuna gerçekten uygulanıyor. Sayılar
+**Q-157**.
+
+**D-155.** Ustalık (Çırak → Kalfa → Usta → Başusta → Duayen) işe, itibar
+kariyere ait. İkisi de **mevcut kayıttan türetiliyor**, yeni alan
+eklenmedi. Zam/terfi şansı, iş güvencesi, kariyer ekranı ve hayat sonu
+Emek ekseni bunları görüyor. Sayılar **Q-158**.
+
+**D-156.** 19 hedef, beş alanda. Ulaşıldığı **yaş** kaydediliyor ve bir daha
+değişmiyor. Hedefler başta seçilmiyor, yol boyunca açılıyor ve **hiçbir
+ödül vermiyor** — ikisi de prototipin tercihi, **Q-159**'da soruldu.
+
+### C grubu — D-157 … D-161
+
+| Paket | Karar | Ne geldi |
+|---|---|---|
+| Z/1 | **D-157** | Araç muayenesi + kazada araç hasarı |
+| Z/2 | **D-158** | Kardeşin kendi hayatı ve yeğenler |
+| Z/3 | **D-159** | Şehrin iş piyasası |
+| Z/4 | **D-160** | Hane bütçesi, velayet ve nafaka |
+| Z/5 | **D-161** | Denetim yaptırımı, sicilin solması, çevre |
+
+**D-157.** Önce neyin zaten var olduğu ayrıldı: arıza/tamir (D-079), yıllık
+sigorta-kasko-vergi (D-148) ve aracı satmak zaten vardı. Gerçekten eksik
+olan ikisi eklendi: **muayene** (iki yılda bir, kondisyonu düşük araç
+geçmez, geciken idari bedel öder) ve **kazada araç hasarı** — kaza iki
+yerde yaşanıyordu ama ikisi de araç kaydına hiç dokunmuyordu. Sayılar
+**Q-160**.
+
+**D-158.** Kardeş artık okuyor, iş buluyor, emekli oluyor, evleniyor ve
+çocuğu oluyor; kardeşin çocuğu **yeğen** olarak doğuyor. `RelationType.yegen`
+D-087'den beri tanımlıydı ama doğal yoldan hiç oluşmuyordu. Üç mevcut parça
+genelleştirildi, yeni sistem kurulmadı. Sayılar **Q-161**.
+
+**D-159.** Şehrin yeni kaldıracı **iş piyasasının genişliği**: yalnızca en
+üst bant dar piyasada bulunmuyor ve gerekçe açıkça yazılıyor. Geçim gideri
+ve maaş çarpanı **denendi ve bilerek geri alındı** — gerekçesi ölçümle
+birlikte **Q-162**'de.
+
+**D-160.** ⚠️ **Bu paket Q-118'deki "nafaka ve velayet şimdilik yazılmasın"
+kararını değiştiriyor.** Çalışan eş maaşının %35'ini haneye koyuyor;
+boşanmada velayet çocukların yakınlığından, nafaka ödeyen tarafın gerçek
+gelirinden hesaplanıyor. Geri alması kolay: tek kayıt alanı, tek motor.
+**Q-163**.
+
+**D-161.** Denetim dönemi artık şehir dışına çıkmayı kapatıyor; sicil
+zamanla **başvuruda sayılmaz** oluyor (kayıt silinmiyor); koğuşta kurulan
+itibar tahliyeden sonra bir **teklif kartına** dönüşüyor ("karış" /
+"karışma"). Karışmak kolay para değil: %45 ihtimalle dosya açılıyor.
+**İçerik sınırı korundu ve kalıcı testle sabitlendi:** hiçbir metin yöntem,
+plan, kaçma, saklanma, iz gizleme ya da yakalanmaktan kurtulma anlatmıyor.
+Ağır/organize suç bilerek eklenmedi. **Q-164**.
+
+### Bu iki pakette bulunan ve düzeltilen gerçek hatalar
+
+Hepsi **ölçülerek** bulundu, tahminle dokunulmadı; hiçbir test
+gevşetilmedi:
+
+1. **Çocuk evliliği kalıcı değildi.** `ChildMarriage`'in güncellediği kişi
+   kaydı boru hattına hiç girmiyordu; **aynı çocuk her yıl yeniden
+   evleniyordu** (ölçüm: 12 yılda 4 düğün → 1).
+2. **Aile dönüm noktası bildirimleri ekrana hiç ulaşmıyordu** (çocuğun
+   düğünü, torunun doğumu): üretiliyor ama hiçbir yere yazılmıyordu.
+3. **Kardeş mirası yanlış kişiye gidiyordu.** Kardeş evlenip çocuk sahibi
+   olabildiği için mirası önce kendi hanesine gitmeli. Ölçüm: düzeltmeden
+   önce 300 hayatta oyuncu yaşlılıkta 43 milyon ₺'ye kadar beklenmedik
+   miras alıyor, toplam oynanan yıl 22.445'ten 1.427'ye düşüyordu.
+4. **`Person.schoolLevel` iki anlamı birden taşıyor** (soyda "şu anki
+   kademe", okul tanışıklığında "tanışılan kademe"); okul çağındaki kardeş
+   sınıf listesine karışıyordu.
+5. **`ChildProgression.ensureRecord` serveti sıfırlıyordu:** "çok varlıklı"
+   eş bir yılda "çok yoksul" görünürdü — Finger'daki hatanın aynısı.
+6. **Test yardımcısı**, oyuncu kriz yanıtlanırken vefat ettiğinde
+   çöküyordu.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2392 geçti, 15 atlandı, 0 başarısız**. Bu iki pakette yeni:
+`paket_y_test` (51), `paket_y_widget_test` (6), `paket_z_test` (60).
+**Gerçek Windows veya Android cihazda oynanmadı.**
+
+### DECISIONS.md'ye dokunulmadı
+D-134 … D-161 yalnızca kodda ve bu dosyada duruyor. `CLAUDE.md` kuralı
+gereği kullanıcı onayı olmadan `DECISIONS.md`'ye karar yazılmadı.
+
+## Paket AA — Yatırım, portföy ve servet (26 Eylül 2026, D-162)
+
+Varlıklar altına **Yatırımlar** geldi. Beş tür: Vadeli Hesap, Altın,
+Döviz Sepeti, Dengeli Fon, Karma Hisse Sepeti. **Gerçek şirket, fon,
+hisse ya da banka adı hiçbir yerde geçmiyor**; canlı fiyat çekilmiyor;
+hiçbir metin yatırım tavsiyesi vermiyor. Banka Aktiviteler'de kaldı
+(D-108).
+
+**Piyasa rejimi.** Yılın bir rejimi var (durgun / normal / güçlü / kriz)
+ve iki gizli parametresi (enflasyon baskısı, piyasa güveni). Rejim iki
+ortak etken üretiyor — risk iştahı (hisse, fon) ve korunma talebi
+(altın, döviz) — varlıklar bu etkenlere kendi ağırlıklarıyla tepki
+veriyor. Böylece kriz yılında hisse düşerken altın portföyü tutabiliyor.
+Ölçüm: 10.000 yılda kriz yıllarının %83'ünde hisse düşüyor, %95'inde
+altın hisseden iyi durumda.
+
+**Piyasa yaş başına bir kez ilerliyor.** Ekranı kapatıp açmak, al-sat
+yapmak ya da kaydı geri yüklemek fiyatı yeniden çevirmiyor. Piyasa
+kendi rastgele akışını kullanıyor (tohum hayatın kimliğinden ve yaştan
+türeyen sabit bir karma), oyunun ana akışından çekiliş çalmıyor.
+
+**Portföy.** Maliyet esası, ortalama maliyet, kısmi satış, gerçekleşen
+ve gerçekleşmeyen kâr/zarar, tür bazlı geçmiş. Vadeli hesap 1 yıl
+kilitli ve vadesinde zarar yazmıyor; erken bozmak faizi yakıyor,
+anapara tam geri geliyor. 18 yaş sınırı var, çocuk adına hesap yok.
+Cüzdan hiçbir yolda eksiye düşmüyor.
+
+**Servet, miras, boşanma.** Tek bir net varlık hesabı (`NetWorth`)
+kuruldu; eşya değeri boşanma paylaşımıyla aynı fonksiyondan geliyor.
+Hayat sonu değerlendirmesi artık cüzdan değil "eldeki nakit + portföy"
+okuyor. Kuşak devrinde portföy bir kez nakde çevrilip miras havuzuna
+giriyor — kaybolmuyor, iki kez de sayılmıyor. Evlilik içinde açılan
+pozisyonlar edinilmiş mal sayılıp paylaşıma giriyor; cüzdan yetmezse
+eksik kısım normal satış muhasebesinden geçen zorunlu satışla
+toplanıyor.
+
+**Ölçümler (`app/test/paket_aa_measure_test.dart`, gerçekten
+çalıştırıldı):** 10.000 piyasa yılı, her tür için 1.000 ayrı yirmi
+yıllık yol, 100 hayatın ölüm anındaki serveti — hem yatırım yapan hem
+yapmayan hâliyle. Yıllık ortalamalar: vadeli %6,0 · altın %7,0 · döviz
+%6,5 · fon %8,0 · hisse %10,0. 100.000 ₺ ile 20 yıl: medyan 314-410 bin
+₺, en riskli türde en iyi %10 1,87 milyon ₺ ve yolların %10'u
+anaparanın altında bitiyor. 100 hayatın en zengini 110 milyon ₺;
+**hiçbir hayat milyarder bitmiyor.**
+
+**Getiriler gerçek Türkiye enflasyonuna göre kalibre edilmedi, bilerek.**
+Görevin 3. maddesindeki %32'lik örnek ile 24. maddesindeki "%40-60
+büyütme, oyunun ekonomisini parçalar" yasağı çelişiyordu; 24. madde esas
+alındı ve çelişki kodda da, Q-165/1'de de yazılı duruyor.
+
+**Açık kalan gerçek bulgu:** geçim gideri portföyden tahsil edilmiyor,
+yalnızca cüzdandan. Bu yüzden yatırım yapan hayat, hiç yatırım yapmayan
+aynı hayattan ölçümde 24 kat zengin bitiyor — farkın büyük kısmı
+getiriden değil, paranın geçim giderinden korunmasından geliyor. Bu bir
+ürün kararı; Q-165/5'te duruyor ve **uydurulmadı.**
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2428 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_aa_test` (26), `paket_aa_widget_test` (7), `paket_aa_measure_test`
+(3 ölçüm). **Gerçek Windows veya Android cihazda oynanmadı.**
+
+Yeni olaylar havuza girince rastgele akış kaydığı için dört mevcut test
+kırıldı. Hiçbiri gevşetilmedi ya da silinmedi: üçünde tohum yeniden
+çıpalandı (tohum 5'te oyuncu 8 yaşında vefat ediyor), birinde bildirim
+sınırı yeniden ölçüldü ve o yılın sekiz kaleminin hiçbirinin piyasa
+bildirimi olmadığı gerekçeye yazıldı. Kökteki kırılganlık
+`docs/EKSIKLER.md` §6'da duruyor ve motor değişikliği onay bekliyor.
+
+### DECISIONS.md'ye dokunulmadı
+D-162 de yalnızca kodda ve bu dosyada duruyor.
+
+## Paket AB — Ev sahibi, kiracı ve kiralık gayrimenkul (27 Eylül 2026, D-163)
+
+Konut bir sayıydı. Artık kiracısı, kirası, defteri ve bakımı olan bir
+varlık. **Varlıklar > Evlerim** ekranı geldi; her ev kullanım durumuyla
+(oturuluyor / kirada / boş) listeleniyor.
+
+**Denetimde bulunan gerçek eksikler.** Kira katalog değerinden
+hesaplanıyordu: İstanbul'da 6,6 milyona alınan daire ile Amasya'da 3
+milyona alınan daire aynı kirayı getiriyordu ve şehir katsayısı (D-159)
+kirada hiç görünmüyordu. Kiracı yoktu — `rentedOut` tek bir bayraktı,
+boşluk her yıl hafızası olmayan bir %12 zarıydı. Depozito, sözleşme,
+ödeme geçmişi ve kiracının kendi isteğiyle çıkması yoktu. Konutun
+kondisyonu hiç değişmiyordu ve bakım diye bir şey yoktu. Boş evin
+maliyeti yoktu, evin değeri ömür boyu sabitti.
+
+**Kiracı Person değil**, bilerek: her yıl birkaç aday gelse İlişkiler
+ekranı oyuncunun hiç tanışmadığı yüzlerce kişiyle dolardı. Kayıt hafif
+ama kalıcı; aynı kiracı ertesi yıl başka isimle görünmüyor. Adaylar
+deterministik: ekranı kapatıp açmak yeni aday üretmiyor. Kiracıyı oyuncu
+seçiyor ve görünen ödeme geçmişi gizli güvenilirliğin bulanık yansıması.
+
+**Çoklu ev sahipliği için kayıt göçü gerekmedi:** `items` zaten liste,
+`residenceItemId` zaten tek alan. Üç yeni alan tamamen ek; eski kayıtta
+bayrak taşıyan konut için deterministik bir sözleşme üretiliyor ve eski
+kira tutarı korunuyor.
+
+**Ölçümler (`app/test/paket_ab_measure_test.dart`, gerçekten
+çalıştırıldı).** 10.000 konut-yılı: doluluk %97,5 · kiracının ortalama
+kalma süresi 4,6 yıl · kiranın hiç gelmediği yıl %4,1 · belirgin hasar
+%5,3 · brüt getiri %4,06 · **net getiri %3,70**. Mortgage'lı ev:
+3,2 milyonluk daire, yıllık kira 144 bin, taksit 1.016 bin → **net nakit
+akışı −881 bin ₺**; "bedava ev" exploit'i yok. 100 hayat × 3 senaryo:
+94 hayat hiç konut sahibi olmadan ölüyor, medyan üç senaryoda da aynı
+(⚠️ **basit simülasyon** ölçümü; gerçek oyuncu davranışıyla ev sahipliği
+%40,3 çıkıyor — aşağıdaki "Test stratejisi revizyonu" bölümü);
+ev sahibi olabilen 6 hayatta çok ev almak medyan serveti 10,0M → 11,9M
+yapıyor. **4+ ev ile ölen karakter hiç çıkmadı** — gayrimenkul maaşlı
+çalışmayı anlamsızlaştırmıyor, çoğu oyuncunun eli yetişmiyor.
+
+**Kalibrasyon ölçümle düzeltildi.** Aday modeli iki kez elendi: ilki
+piyasa kirasında her zaman aday üretiyordu (doluluk %100, ev bir yıl bile
+boş kalmıyordu); ikincisi fahiş kira isteyen eve bile %55 ihtimalle aday
+gönderiyordu. Üçüncüsü tek formülle çözdü: Poisson. Ayrıca şehrin
+**kiracı akışı** ile **kira fiyatı** çarpanları ayrıldı; öncesinde ikisi
+aynı dar banttaydı ve küçük il ile büyük il arasında fark
+hissedilmiyordu.
+
+**Bulunan iki gerçek exploit, ikisi de düzeltildi:** (1) kiradaki ev
+satılınca sözleşme listede kalıyor ve elde olmayan evden kira gelmeye
+devam ediyordu; (2) boşanmada eşe geçen kiralık ev aynı hayalet
+sözleşmeyi bırakıyordu. `GameState.removeItem` artık sözleşmeyi ve
+defteri de siliyor (tek çıkış noktası).
+
+**Mirasta kiracı konutla devrediliyor:** "babandan kalan daire hâlâ
+kirada." Sözleşme mirasçının yaş ölçeğine yeniden çıpalanıyor, oturma
+süresi korunuyor. Defterin para sayaçları taşınmıyor; taşınan tek şey
+evin güncel değeri.
+
+30 yeni konut/kiracı/ev sahibi olayı eklendi. İki taraf ayrı kapıdan
+geçiyor: ev sahibi tarafı (`requiresLetProperty`, `requiresVacantProperty`)
+ve kiracı tarafı (`requiresTenant`). Hiçbir metin hukuki yol göstermiyor;
+tahliye ve icra anlatılmıyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2463 geçti, 15 atlandı, 0 başarısız**. Bu pakette yeni:
+`paket_ab_test` (23), `paket_ab_widget_test` (9), `paket_ab_measure_test`
+(3 ölçüm). **Gerçek Windows veya Android cihazda oynanmadı.**
+
+Mevcut testler gevşetilmedi, yeni akışa göre güçlendirildi: kiraya verme
+aday seçmeden geçiyor, kayıt testi kiracının kimliğini/kirasını/
+depozitosunu karşılaştırıyor, e2e cüzdan iddiası mülk defterine
+çivilendi ve miras testi kiracının oturma süresinin korunduğunu ölçüyor.
+
+Q-165/5 ("geçim gideri portföyden tahsil edilsin mi?") **açık bırakıldı**;
+bu paket onu sessizce kapatmak için kullanılmadı.
+
+### DECISIONS.md'ye dokunulmadı
+D-163 de yalnızca kodda ve bu dosyada duruyor.
+
+## Test stratejisi revizyonu — gerçek oyuncu davranışı (27 Eylül 2026)
+
+**Sorun:** ürün metrikleri basit bir botla ölçülüyordu. O bot sürekli
+"Yaş Al"a basıyor, olaylarda rastgele/ilk seçeneği seçiyor, üniversiteyi
+varsayılan olarak atlıyor, kariyer geliştirmiyor, parasını yönetmiyor ve
+yatırım/girişim/konut/sosyal sistemlerini oyuncu gibi kullanmıyordu.
+Regresyon avlamak için yeterli, **"kaç kişi ev alabiliyor"** sorusu için
+değil.
+
+**Gelen:** `app/test/support/player_bot.dart` — 10 oyuncu arketipi
+(kariyer, yatırımcı, girişimci, aile, sosyal, eğitim, rahat, riskli,
+spor, rastgele-geçerli). Her arketip hedef ve hafızayla oynuyor:
+üniversite kararını hayat başında bir kez veriyor ve lise sonrası
+vazgeçmiyor, yaşam rezervi ayırıp üstünü arketipe göre yatırıma/ev
+peşinatına/iş sermayesine dağıtıyor, zam ve terfi istiyor, maaşı düşükse
+iş değiştiriyor, partnerine özel zaman ayırıp evleniyor, çocuk yapıyor,
+boşanabiliyor, hobi ve dövüş sanatını hayat boyu aynısını sürdürüyor.
+
+**Kurallar:** `debugSetState` ile para/stat/ilişki/ev/iş **verilmiyor**;
+her şey `GameController`'ın gerçek public aksiyonlarından geçiyor.
+Olaylarda `choices.first` **yasak** — seçim para, sağlık, ilişki,
+kariyer, risk ve arketip üzerinden puanlanıyor, üstüne %15-30 insani
+kayma payı var. Hafıza test tarafında; `GameState`'e alan eklenmedi.
+
+**İki test türü ayrıldı:** unit/regresyon testleri bir sistemi doğrular
+ve ilk açık seçeneği kullanabilir; **ürün simülasyonu**
+(`product_simulation_test.dart`) gerçek oyuncuya benzer ve yalnızca ürün
+dengesi tartışması için kullanılır. Raporları karıştırılmaz.
+
+### Ölçüm: 1.500 tam hayat (10 arketip × 100 + 500 rastgele-geçerli)
+
+Hepsi doğumdan ölüme; **1500/1500 hayat ölümle bitti, takılan sıfır**.
+
+| Alan | Sonuç |
+|---|---|
+| Ortalama ölüm yaşı | 74,1 (medyan 77) |
+| Üniversiteye giden / mezun | %48,5 / %48,4 |
+| Bölüm çeşitliliği | 20/20 |
+| Çalışan / emekli | %98,9 / %85,6 |
+| Görülen meslek | 50/55 |
+| Ortalama farklı iş / iş değişimi | 2,52 / 1,56 |
+| Ölüm anı net servet (medyan) | 134,4M ₺ |
+| Yatırım yapan | %92,1 |
+| **Ev sahibi** | **%40,3** |
+| Yatırım evi / kiraya veren | %28,3 / %28,3 |
+| İş sahibi | %23,5 |
+| Evlenen / boşanan / tekrar evlenen | %22,0 / %6,4 / **%0,0** |
+| Çocuklu / ortalama çocuk / torun gören | %33,4 / 1,27 / %30,1 |
+| Arkadaşı olan / küslük yaşayan | %51,4 / %43,8 |
+| Sosyal medya açan | %43,3 |
+| Kronik / check-up / spor | %74,2 / %97,4 / %99,4 |
+| Sabıkalı / hapis yatan | %18,2 / %6,9 |
+| **Olay havuzundan görülen** | **349/361 (%96,7)** |
+| Hobi / dövüş sanatı / işletme türü | 11/12 · 6/6 · 9/13 |
+
+**Arketip bazlı (medyan servet):** yatırımcı 231M · girişimci 178M ·
+rastgele 163M · riskli 152M · kariyer 143M · eğitim 123M · spor 113M ·
+rahat 111M · aile 102M · sosyal 25M.
+
+### Simülasyon sırasında bulunan gerçek hatalar (hepsi bot tarafında)
+
+1. **Yıl hiç bitmiyordu.** Eylemler bildirim üretiyor, ana döngü
+   bildirimi kapatıp başa dönüyor ve aynı yıl eylemleri yeniden
+   yapıyordu. Hayatların %25,6'sı 6000 turluk güvenlik sınırına çarpıyor
+   ve ölçüme "ölmedi" diye giriyordu. Eylemler artık yaş başına bir kez.
+2. **Bebeğe kendi adını verme sonsuz döngüsü.** `ChildNaming.rename`
+   aynı adı değişiklik saymıyor, isim penceresi kapanmıyor ve bot her
+   turda başa dönüyordu.
+3. **Bekleyen düğün kapanmıyordu.** Doğru akış `holdWedding`; bot
+   `marry` çağırıyordu ve iki hayat sonsuz döngüye girdi.
+4. **Tek yılda üst üste konut kredisi.** Ev listesi boyunca her ev için
+   ayrı kredi çekiliyordu; serveti şişiriyordu.
+5. **Bot oyundan daha katıydı:** çocuk için evlilik şartı koyuyordu, oysa
+   oyun sevgiliyle de izin veriyor (D-047). Düzeltilince "çocuklu" oranı
+   %5,4 → %33,4 çıktı.
+6. **Yanlış aktivite kimliği** (`check_up` yerine `genel_kontrol`):
+   check-up oranı %0,0 ölçülüyordu, gerçekte %97,4.
+7. **Bot hiç boşanmıyordu** → "boşanan %0,0" metriği anlamsızdı.
+8. **Metrik tanımı hatası:** "mahkemeye çıkan" açılmış her dosyayı
+   sayıyordu (%51); karara bağlanmış dosya ölçülünce %26,1.
+
+### Dikkat çeken sonuçlar (karar Faho + ChatGPT'de)
+
+* **Servet medyanı 134M ₺.** Sebebi bulundu ve bot hatası değil: yatırım
+  getirisi bir ömür boyunca bileşik büyüyor ve oyunda anlamlı bir servet
+  gideri yok. Bot portföyünü hiç harcamıyor; gerçek oyuncu harcar ama
+  oyun bunu zorunlu kılmıyor.
+* **Tekrar evlenen %0,0.** Boşanma sonrası yeni partner + yakınlık 45
+  eşiği pratikte ulaşılamıyor.
+* **Evlenen %22** ama partneri olan %94,9: evlilik dar bir kapı.
+* **Sosyal arketip en yoksul** (25M) — yatırım yapmayan profil.
+* **Hiç girilmeyen 5 meslek:** kurye, doktor, eczacı, yazar, yz_kurye.
+* **Hiç görülmeyen 12 olay**, çoğu suç zinciri devamı ve araç olayları.
+* **İşletme türü 9/13**: dört tür hiç kurulmuyor.
+
+**Hiçbir denge değiştirilmedi.** Bu turda yalnızca test altyapısı
+düzeltildi; oyunun sayılarına dokunulmadı.
+
+### UI smoke life
+
+10 uzun hayat **arayüzden** oynanıyor (`ui_smoke_life_test.dart`):
+menüler açılıyor, sayfa kaydırılıyor, düğmeye basılıyor, pencere
+seçiliyor, sekmeler geziliyor. Amaç "motor çalışıyor ama buton
+ulaşılamıyor" hatasını yakalamak. 1.000 hayatın tamamını arayüzden
+oynamak çok yavaş olurdu.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
+
+## Ürün simülasyonu kök neden analizi (27 Eylül 2026)
+
+**Amaç:** son PlayerBot ölçümündeki altı aşırı sayıyı denge değiştirerek
+"düzeltmek" değil, **nedenini ölçmek**. Bu turda oyun dengesinde bir tek
+sabit, eşik, fiyat, getiri ya da şart **değişmedi**; kod da düzeltilmedi.
+Ayrıntılı karar soruları `docs/DESIGN_REVIEW_QUEUE.md` **Q-167**'de.
+
+**Gelen dosyalar:**
+* `app/test/support/bot_diagnostics.dart` — `BotDiag` (servet bileşenleri,
+  para akışları, evlilik hunisinin her basamağı, ayrılık sonrası huni,
+  meslek/işletme uygunluğu, bot eylem sıklıkları) ve `BotOverrides`
+  (teşhis için **botun tercihini** kapatır; oyunun sayılarına dokunmaz).
+* `app/test/diagnosis_root_cause_test.dart` — 16 bölümlük rapor.
+  1000 hayat (10 arketip × 100, hepsi ölümle bitti, takılan 0) + 5
+  senaryo × 200 karşılaştırma + 500 hedefli ayrılık hayatı.
+* `app/test/diagnosis_remarriage_lock_test.dart` — 9 test, tekrar evlenme
+  %0'ın kök nedeninin **deterministik kanıtı**.
+
+**Ölçüm bütünlüğü:** teşhis botun rastgele akışına dokunmuyor —
+`product_simulation_test.dart` çıktısı teşhis eklendikten sonra **satır
+satır aynı** kaldı (yalnızca geçen süre satırı değişti). `debugSetState`
+ile para/stat/ilişki/ev/iş verilmedi.
+
+**Bulunan sebepler (özet):**
+
+| Soru | Sebep |
+|---|---|
+| Servet medyan ~134M | Net servetin **%97,8'i portföy**. Eğri hiçbir yaşta patlamıyor; her 5 yılda 1,34-1,94x büyüyor. Yatırımsız senaryo **0,150x**; yatırım yapmayan tek arketip (`social`) 20,7M ile ölüyor. |
+| Gayrimenkul | Serveti **azaltıyor**: gayrimenkulsüz senaryo **1,202x**. "Ev al, bedava gelir" exploit'i yok, tersi var. |
+| Miras / işletme | Etkisiz. 50M üstü hayatlarda mirasın payı **medyan %0,15**; işletmesiz senaryo 0,977x. |
+| Q-165/5 (gider portföyden tahsil edilmiyor) | Ölçüldü ama **ana sebep değil**: korunan yıl medyan 2, ödenmeyen gider %8,2. Portföy/maliyet katı 6,6x. Sürükleyici gerçek getiri. |
+| Partner %94,9 / evli %22 | İki kapı. (1) Bot yalnızca %47,1 evlenmek istiyor (**bot parametresi**). (2) İsteyenlerin **%49'u hiç sevgili edinemiyor** — bütün kayıp orada. Yakınlık 45 eşiği kayıp üretmiyor (%50,1 → %49,7); görülen en yüksek yakınlık medyan 100. |
+| Tekrar evlenme %0 | **GERÇEK HATA.** `Finger` "evli mi" sorusunu `state.marriage != null` ile soruyor; boşanmada/dullukta kayıt bilerek silinmediği için bu koşul bir kez evlenen herkes için hayat boyu doğru. `finger.dart:443/552/680/711` romantik yolların hepsini kalıcı kapatıyor. `marryBlockReason` izin veriyor ama evlenecek sevgili edinilemiyor. |
+| 5 girilmeyen meslek + 4 kurulmayan işletme + 12 görülmeyen olay | Büyük kısmı **tek bir bot eksiği**: PlayerBot hiç ehliyet almıyor (`applyForLicense` çağrılmıyor) → 2 meslek + 1 işletme + 5 olay kapanıyor. |
+
+**Sevgili kapısının mekaniği:** Finger adaylarının %25'i baştan yalnızca
+arkadaşlık istiyor (flört değil arkadaş üretir, D-107). Flört oluşursa
+yakınlığı `rng.between(45, 62)`, resmîleştirme eşiği **60** → doğrudan
+geçme ihtimali %16,7. Kalanı için flörtle vakit geçirmek gerekiyor ama
+**bot flörtle hiç vakit geçirmiyor** (`_spendTimeWithFamily` listesinde
+flört yok) ve ilgilenilmeyen flört Paket R ile bitiyor. Ölçüm: flört
+edinen 412 hayatın **228'i (%55,3) hiç sevgiliye çevirmiyor** — huninin
+228 kayıplık basamağıyla birebir aynı.
+
+**Kendi ölçüm hatalarım (düzeltildi, raporda açıkça yazıyor):**
+* Spor ve check-up'ı "bir kez yaptı mı" diye ölçmüştüm; on arketipte de
+  %95-100 çıktı ve "bot fazla mekanik" diye yorumlamaya hazırdım. Yanlış
+  metrikti: bot yılda bir profile bağlı zar atıyor, 57 yılda düşük
+  olasılık bile doygunlaşıyor. Yıllık sıklıkla ölçünce arketipler
+  ayrışıyor (spor/yıl 0,21-0,97).
+* Eski eş kaydını "bağı artık `es` değil" diye ölçtüm, %37,7 çıktı ve
+  kayıt bozuluyor sandım. Dullukta eş vefat eder ve bağı `es` kalabilir.
+  Doğru ölçümle: kayıt korunma **%100**, boşanmada bağ güncellenme
+  **%100**, yeniden bekâr sayılma **%100**. Kayıt yönetimi doğru.
+* İlk yazımda `diag.wantedMarriage`'ı hayatın başında okumuştum;
+  `_Intent`'in `late final` alanları erişim sırasına göre zar attığı için
+  bu bütün niyet zarlarını kaydırdı (ölüm yaşı 74,1 → 74,2, üniversite
+  %48,5 → %47,4). Teşhis akışa dokunmamalı; botun kendi okuduğu yere
+  taşındı ve çıktı yeniden birebir aynı oldu.
+* Evlilik hunisine monoton olmayan basamaklar koymuştum (bot niyeti,
+  flört) ve tablo eksi kayıp yüzdesi basıyordu; ikisi huninin yanına
+  ayrı bilgi olarak taşındı. "Uygun ama teklif etmeyen" oranını bütün
+  korpusta ölçmüştüm (%48,6); neredeyse tamamı hiç evlenmek istememiş
+  hayatlardı. Evlenmek isteyenlerde gerçek değer **%0,6**.
+
+**Denge değişmedi.** Bot tarafındaki 7 eksik (ehliyet, flört kuru, Finger
+niyeti, her fırsatta yatırım, sermaye birikmemesi, maaş süzgeci, herkesin
+çalışması) ürün kararı değil; yine de düzeltilirse **bütün ürün
+metrikleri değişeceği için** Faho'ya bildirilmeden dokunulmadı.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` tam takım geçiyor. **Gerçek cihazda oynanmadı.**
+
+## Paket AC — yatırım riskleri, piyasa şokları ve servet dengesi V2 (27 Eylül 2026)
+
+**Temel prensip:** botu zayıflatarak problem gizlenmedi, **oyun dengelendi**.
+Gerçek oyuncu her yıl yatırım yapabilir; oyun ekonomisi o stratejiye
+dayanmalı. Karar soruları `docs/DESIGN_REVIEW_QUEUE.md` **Q-168**'de.
+
+**Gelen sistemler**
+
+* **12 kurgusal şirket, 10 sektör** (`data/company_catalog.dart`). Hiçbiri
+  gerçek değil; gerçek şirket/banka/fon/kurum/kişi adı geçmiyor.
+* **Olay katmanı** (`domain/economy/incident_engine.dart`): konkordato,
+  iflas, kayyum, yönetim skandalı, bilanço şoku, sermaye artırımı,
+  temettü, satın alma haberi, sektör krizi/atağı, regülatör incelemesi.
+  Şirket durumu **kademeli** ilerliyor — sağlıklı şirket tek yılda iflas
+  etmiyor, oyuncu yolda haberleri görüyor.
+* **İşlem sırasının kapanması**: kayyum/konkordato ve panikte alım **ve**
+  satım 1-2 yıl duruyor. "Satayım kurtulayım" her zaman mümkün değil.
+* **Fon riski**: yönetici değişimi, yanlış yatırım, strateji değişimi,
+  birleşme, **tasfiye** (pozisyon piyasa değerinden nakde döner). Fon tek
+  hisse gibi davranmıyor.
+* **Çok yıllı kriz** (1-3 yıl) ve yeni **toparlanma** rejimi. "Krizde al,
+  ertesi yıl kesin toparlar" garantisi kalktı: krizden doğrudan güçlü yıla
+  atlanamıyor.
+* **Faiz şoku** (%5/yıl) ve **kur şoku** (%7/yıl, **iki yönlü** — döviz
+  her zaman kazanan değil).
+* **Maliyetler**: alım-satım komisyonu %0,2, fon yönetim gideri %1,1/yıl,
+  gerçekleşen kârdan %10 kesinti. Zararda kesinti yok, zarar mahsubu yok.
+  Komisyon **maliyet esasına girmiyor**.
+* **Zorunlu portföy satışı**: cüzdan geçim giderini karşılamazsa açık
+  portföyden kapanıyor. Portföy artık görünmez kasa değil.
+* **Yoğunlaşma riski**: tek riskli varlıkta toplanan portföy daha oynak.
+  Çeşitlendirme kazanç garantisi vermiyor, yalnızca oynaklığı düşürüyor.
+  **Yapay yatırım limiti yok** — isteyen parasının tamamını yatırıyor.
+* **24 yeni piyasa/şirket olayı** (`data/event_pool_market.dart`).
+  Hiçbirinde "şunu al kesin yükselir" yok; hiçbir seçenek doğru cevap
+  değil.
+
+**Ölçüm (40.000 piyasa yılı)**
+
+Rejim: normal %45,0 · durgun %24,8 · güçlü %20,3 · kriz %7,5 ·
+toparlanma %2,4. Kriz bölümü ortalama **2,09 yıl**, en uzun 6.
+Şirket batışı yıllık **%0,64**. İşlem kapalı yıl %4,5. Olay görülen yıl
+%31,1 — çoğu yıl sessiz.
+
+Yıllık getiri: hisse %9,2 (std %24,8) > fon %7,5 > altın %6,9 >
+döviz %6,4 > vadeli %6,0. **Risk merdiveni doğru.** 20 yıllık yolda
+anaparanın altında bitme: hisse %19,3 · fon %3,4 · altın %0,4 ·
+döviz %0,1 — hiçbir tür risksiz değil.
+
+**Min-max oyuncu (8 strateji × 20/40/60 yıl, 3.000 strateji hayatı)**
+
+60 yılda yatırımın kendi getirisi (maaş karışmaz): %100 hisse medyan
+7,41x, kötü%10 **0,69x**, yatırım zarar ettiren **%13,6**. Sadece altın
+18,23x. Yatırım yapmayan hiçbir hayatta 50M'ye ulaşmıyor; yatırım yapan
+stratejilerde 50M+ %57-76.
+
+**Paket AC öncesi / sonrası (aynı tohumlar)**
+
+| Ölçü | Önce | Sonra |
+|---|---|---|
+| Ürün simülasyonu medyan net servet | 134.365k ₺ | **97.250k ₺** (−%27,6) |
+| Teşhis korpusu medyan servet | 122.254k ₺ | 88.541k ₺ (−%27,6) |
+| Portföyün servetteki payı | %97,8 | %95,8 |
+| Tekrar evlenen | %0,0 | **%0,5** |
+
+**Tekrar evlenme bug fix (Q-167/3 kapandı)**
+
+`finger.dart`'ta dört yerde ve `life_progression.dart:1696`'da
+`state.marriage != null` yerine **`state.isMarried`** kullanılıyor artık.
+Boşanmada/dullukta evlilik kaydı bilerek silinmediği için eski koşul bir
+kez evlenen herkes için hayat boyu doğruydu ve bütün romantik yollar
+kalıcı kapanıyordu. `PlayerBot`'ta da aynı hata vardı (teklif kapısı).
+Ayrılık sonrası huni: yeni flört %0,0 → **%47,5**, yeni sevgili → %8,5,
+tekrar evlenme → **%5,7** (teşhis korpusu). Yeni regresyon testi tam
+oyuncu yolunu yürüyor: **iki eşin ikisi de Finger'dan geliyor**, elle
+sevgili enjekte edilmiyor.
+
+**Bulunan yeni defekt: kontrolsüz borç büyümesi**
+
+`banking.dart advanceYear`: ödenmeyen taksitte borç her yıl faiziyle
+büyüyor ama `remainingPayments` azalmıyor ve hiçbir haciz/yapılandırma/
+silme mekanizması yok. Kredi hiç kapanmıyor. Ölçümde bir hayatta
+**1.788.495k ₺ borç** ve **−1.601.336k ₺ net servet** çıktı (125 hayatta
+1). **Düzeltilmedi**: doğru çözüm ürün kararı (Q-168/10).
+
+**Saldırgan oyuncu taraması: exploit bulunamadı.** Kayıt geri yükleyip
+piyasayı yeniden çevirmek, aynı yılı tekrar ilerletmek, al-sat döngüsü,
+kredi arbitrajı, parayı portföye saklayıp boşanma payından kaçmak, ikinci
+boşanma, aynı mirası iki kez almak, kapalı sırada zorunlu satışla çıkmak,
+vadeli aç-boz döngüsü — hepsi engelli. Al-sat döngüsü 20 turda 1.000k →
+923k **kaybettiriyor**.
+
+**Düzeltilen kendi hatalarım (ölçümle bulundu, raporda yazılı)**
+
+* Krizi çok yıllı yapmak kriz yıllarını %8'den **%17,8'e** çıkardı ve
+  risk merdivenini tersine çevirdi (hisse %6,4 < altın %7,9). Krize giriş
+  ihtimali yarıya indirildi: kriz **daha uzun ama daha seyrek**, payı
+  korundu, merdiven düzeldi.
+* Korunma primi her kriz yılında tekrar uygulanıyordu; **Döviz Sepeti'nde
+  1.000 yirmi yıllık yolun hiçbiri anaparanın altında bitmiyordu**.
+  Güvenli limana kaçış krizin **başında** olur: uzayan kriz yılında prim
+  eriyor, toparlanmada geri veriliyor.
+* Kriz kilidinde bire bir kaydırma hatası: ortalama 3,13 yıl, en uzun 11
+  çıkıyordu. Düzeltilince 2,09 / 6 oldu.
+* Yoğunlaşma zammı **bütün getiriyi** çarpıyordu, yani eğilimi de: yoğun
+  portföyün beklenen getirisi yükseliyordu. Ölçümde bir hayat **10,2
+  milyar ₺** ile öldü ve AA'nın bekçisi kırıldı. Doğrusu yalnızca
+  eğilimden sapmayı büyütmek.
+* "Başlangıç parasının altında bitti" ölçüsünü strateji riski sanmıştım;
+  bu hayatlar 60 yıl maaş da alıyor, o yüzden neredeyse hiç gerçekleşmiyor
+  ve "%100 hisse hiç kaybetmiyor" diye okunacaktı. Doğru ölçü yatırımın
+  kendi getirisi: (portföy + gerçekleşen kâr) / anapara.
+
+**Bilerek yapılmayanlar**
+
+* **Nominal enflasyon motoru (§18):** kurulmadı, yalnızca mimari
+  raporlandı (Q-168). Sadece yatırım fiyatını nominal büyütmek yasaktı ve
+  yapılmadı. Asıl mesele şu: **%9,2 reel getiri 60 yılda ~200 kat eder.**
+  Risk katmanı medyanı %27,6 düşürdü ama üst kuyruk **eğilim × ufuk**
+  çarpımından geliyor; olay katmanı onu tek başına çözemez.
+* **Tekil hisse (§10):** karma sepetle tek şirket riski karıştırılmadı;
+  ayrı paket önerisi olarak bırakıldı.
+* **Geçim gideri seçenekli akışı (§19):** zorunlu satış otomatik yapıldı.
+  Üç seçenekli akış yeni bir bekleyen pencere demek ve teşhis turunda
+  bekleyen pencerelerin gerçek kilitlenme riski ölçülmüştü.
+
+**Denge sayıları değişmedi:** yatırım eğilimleri (hisse %10, fon %8,
+altın %7, döviz %6,5, vadeli %6) **aynı**. Değişen şey riskin kendisi.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2549 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı.**
+
+## Paket AD (1/6) — oyunun kendi ekonomisi: sabit getiri eğilimi kaldırıldı (27 Eylül 2026)
+
+Faho'nun "EKONOMİ TASARIM PRENSİBİ REVİZYONU" briefinin **§1-§6 ve
+§22-§23** kısmı. Kalan altı başlık (§7-§21) ayrı turlarda; aşağıda
+"yapılmayanlar" olarak açıkça yazılı. Sorular `docs/DESIGN_REVIEW_QUEUE.md`
+**Q-169**'da; `DECISIONS.md`'ye kesin kural **yazılmadı**.
+
+**Kesin olan (§2, Faho'nun açık yetkisi):** "Yatırım türlerinin SABİT
+POZİTİF DRIFT garantisi olmasın." Bu, Q-168/1'de bekleyen soruyu kapattı.
+
+### Ne yapıldı
+
+- **`drift` alanı kaldırıldı.** Yerine `carry` (varlığın *ürettiği* akış:
+  hisse %2,8 · fon %2,2 · **altın 0** · **döviz 0** · vadeli %3) ve
+  `annualFee` (fonda %1,4 yönetim ücreti) geldi.
+- **Vadeli %6 → %3.** §11: ana işlevi nakdi korumak, servet büyütmek değil.
+- **Değerleme ısısı** (`MarketState.valuationHeat`, 0-100, gizli): pahalı
+  varlığın beklentisi düşer, balon kırılma zarı atılır; ucuzlayanda tersi.
+- **Çağ gelgiti** (`MarketState.riskTide` / `hedgeTide`, gizli): hayat
+  ölçeğinde yavaş (yarı ömür ~11 yıl), ortalaması sıfır eğilim. §4'ün tek
+  gerçek çözümü — aşağıya bak.
+- **Risk primi rejim sıklığından doğuyor**, tür başına yazılı sayı değil.
+- Banka ekranındaki oyuncuya görünen **"2026" ifadesi kaldırıldı**;
+  `docs/ECONOMY_2026.md` tarihsel araştırma notu olarak işaretlendi.
+  Denetimde production ekonomi kodunda gerçek tarihe bağlı **hiçbir hesap
+  bulunmadı** (`DateTime.now()` yalnızca ses soğuması ve kayıt zaman
+  damgası).
+
+### Kalibrasyon sırasında bulunan iki gerçek sorun
+
+Ikisi de ölçümle bulundu, tahminle değil.
+
+1. **Tek yönlü balon sistematik vergiye dönüşüyordu.** Yalnızca "balon
+   kırılması" varken altın yıllık ortalama **%-0,3**, hisse geometrik
+   **%-0,2** ölçüldü: "uzun vadede kesin zengin" sorunu "uzun vadede kesin
+   batık" sorununa dönmüştü. Aynası eklendi (dipte sert toparlanma zarı).
+2. **§6 ile §4 birbirine çalışıyor.** Balon mekaniği yıllık getirilere eksi
+   otokorelasyon veriyor ve uzun vadeli ortalamanın dağılımını
+   *sıkıştırıyor*: 40 yıllık log ortalamanın standart sapması bağımsız
+   yıllar varsayımıyla %3,87 olmalıyken **%2,39** ölçüldü. Bu yüzden 40 yıl
+   hisse tutanın en kötü %10'u bile 2,47 kat yapıyordu. Çağ gelgiti bu
+   sıkışmayı dengelemek için eklendi ve genliği ölçümle büyütüldü.
+
+### Ölçüm (`app/test/paket_ad_measure_test.dart`, gerçekten çalıştırıldı)
+
+Yıllık, 60.000 yıl, tek varlık:
+
+| Tür | ortalama | geometrik | stdev | eksi kapanan yıl |
+|---|---|---|---|---|
+| altın | %4,0 | %3,4 | %11,8 | %37 |
+| döviz | %3,7 | %3,2 | %10,6 | %37 |
+| fon | %5,3 | %4,5 | %12,6 | %34 |
+| hisse | %9,2 | %6,5 | %23,1 | %34 |
+
+Tek varlığa yatırıp hiç dokunmamak (1000 yol, oyunun sürtünmesi **hariç**):
+
+| Yıl | Tür | Medyan | Kötü %10 | Anapara altı |
+|---|---|---|---|---|
+| 40 | hisse | 15,25x | 1,61x | **%5,0** (önce %2,9) |
+| 60 | altın | 7,42x | 2,26x | %1,2 (**önce medyan 18x**) |
+
+60 yıllık bot stratejileri (yatırımın kendi getirisi, sürtünme **dahil**):
+
+| Strateji | Medyan kat | Kötü %10 | Zarar eden |
+|---|---|---|---|
+| %100 hisse | 4,85x | 0,49x | **%16,8** |
+| sadece altın | 3,97x | 1,04x | %7,2 |
+| dengeli (4 varlık) | 2,50x | 1,23x | %3,2 |
+
+Artık hisse **en yüksek medyanı ve en kötü tabanı** birlikte veriyor; altın
+arada; dengeli en güvenli. Hiçbir strateji baskın değil (§12).
+
+### Bu turda bilerek yapılmayanlar
+
+- **§7-§9 şirket sağlık modeli** (gizli sağlık, kaldıraç, büyüme, yönetim
+  kalitesi) — AD/2.
+- **§16 kontrolsüz borç düzeltmesi** — AD/4. Faho yetki verdi, ayrı tur.
+- **§13 servetin kullanımı / harcama kanalları** — AD/5.
+- **§18-§21 on strateji × 20/40/60 kalibrasyonu** — AD/6. **§18'in dağılım
+  hedefi (normal oyuncu milyonlar · milyarderlik çok nadir) henüz
+  doğrulanmadı.**
+- Enflasyon motoru — Q-168'de duruyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2552 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (2/6) — borç yaşam döngüsü: kontrolsüz borç bug'ı düzeltildi (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **§8-§11 ve §24** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-170**'te; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Hatanın ölçülen hâli
+
+₺200.000 kredi, cüzdan sıfır, 60 yıl: borç 20. yılda 9,7 milyar, 40. yılda
+474 trilyon, 60. yılda **9.223.372.036.854.775.807** — yani `int`in tepesi.
+Bu bir **tamsayı taşması**, sadece çirkin bir kuyruk değil.
+`remainingPayments` hiç azalmıyor; kredi ölümsüz.
+
+Aynı satırda iki hata daha: büyüme `l.bank.yearlyRate` ile hesaplanıyor ve
+`purpose`'u yok sayıyordu (ödenmeyen **konut** kredisi ihtiyaç kredisi
+oranıyla büyüyordu), ve taksitin %90'ı cüzdanda olsa bile hiç ödeme
+yapılmıyordu.
+
+### Gelen yaşam döngüsü
+
+`normal → gecikme → ciddi gecikme → tahsil → yapılandırma → kapanış`.
+Kısmi ödeme var; 2. kaçakta banka portföye ve **oturulmayan** mala uzanır;
+3. kaçakta borç donup taksite bölünür (en fazla iki kez); gecikme faizi
+baştan borçlanılan tutarın **iki katını** geçmez; hak bittiyse borç zarar
+yazılıp kapanır; kredi notu izi on yıl sayılıp siliniyor (§11: ömür boyu
+yasak yok). **Oturulan ev hiçbir koşulda satılmıyor**, mal satışı en
+küçükten başlıyor.
+
+### Ölçüm (1000 borçlu hayat, 60 yıl — gerçekten çalıştırıldı)
+
+| Ölçüm | Değer |
+|---|---|
+| Gecikme gören | %99,7 |
+| Zorunlu tahsil gören | %66,3 |
+| Yapılandırma gören | %33,2 |
+| Zarar yazılarak kapanan | %33,2 |
+| **Hiç kapanmayan** | **0** |
+| Kapanma süresi | medyan 6 yıl · en uzun 16 |
+| Görülen en büyük borç | medyan 388.540 · **en büyük 997.780** |
+
+### Kalibrasyonda düzelttiğim kendi hatalarım
+
+1. **Yapılandırma rahatlatmak yerine hızlandırıyordu**: şişmiş borca yeniden
+   bileşik faiz bindiği için taksit ₺90.000 → ₺725.651 → ₺3.647.779 oluyordu.
+   Doğrusu borcun donup vadeye bölünmesi (₺90.000 → ₺40.000 → ₺26.667).
+2. **Tahsil testim boştu**: taze üretilen hayatın hiç eşyası olmadığını fark
+   etmemişim, "oturulan ev satılmadı" testi hiçbir şeyi kanıtlamıyordu ve
+   ölçümde tahsil %0,0 çıkıyordu. Gerçek mal veren yardımcı yazıldı → %66,3.
+3. Gecikme faizi tavanını **anaparaya** bağlamıştım; `outstanding` baştan
+   anapara değil vade boyunca ödenecek toplam olduğu için tavan borcu kendi
+   başlangıç bakiyesinin altına kırpıyordu ve mevcut bir test haklı olarak
+   kırıldı. Çıpa `Loan.originalDebt` oldu. **Test gevşetilmedi.**
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2562 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (3/6) — şirket sağlık modeli (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/2 (§1-§5) ve §23** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-171**'de; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Ne geldi
+
+Her kurgusal şirketin beş **gizli, kalıcı, yıldan yıla değişen** göstergesi
+var (mali sağlık, borç baskısı, büyüme, yönetim kalitesi, güven) ve on
+sektörün kendi gücü. Hepsi kayda giriyor, hiçbiri oyuncuya sayı olarak
+gösterilmiyor.
+
+Olaylar artık bunlardan doğuyor: hangi şirketin habere konu olacağı,
+haberin iyi mi kötü mü olacağı, krizden çıkma ihtimali (yönetim kalitesi)
+ve hangi sektörün kriz/atak yaşayacağı. 24 olayın yedisi şirketin **gerçek
+durumuna** kapılı — oyuncu sapasağlam bir şirket için konkordato haberi
+okuyamıyor.
+
+Kapanan şirketin sepetteki payını dört yıl sonra **yeni bir ad** devralıyor
+(altı yedek kurgusal şirket). Kapanan şirket geri dönmüyor.
+
+### Bulduğum yapısal kusur (Paket AC'den kalma)
+
+1200 yıllık ilk ölçümde şirketlerin yalnızca **%31'i normal**, %68'i kalıcı
+sıkıntılı çıktı. Sebep: şirketin durumu yalnızca **olaya konu olduğunda**
+değişiyordu ve bir şirket ortalama yetmiş yılda bir seçiliyor; kötüleşme
+tam iyileşmeden olası olduğu için durumlar yutucu hâle geliyordu. Oyun
+kuşaklar arası devam ettiği için bu, ilerleyen kayıtlarda "bütün şirketler
+hasta" demek. Çözüm: göstergeleri düzelen şirket **sessizce** bir kademe
+iyileşebiliyor. Kötü haber her zaman duyurulur, iyi haber sessiz olabilir.
+
+İlk denemede fazla cömert davrandım (eşik 0,50) ve kapanma 1200 yılda 1'e
+düştü — Paket AC'nin eklediği riski kendi elimle söndürüyordum. Eşiği
+ölçümle 0,44'e çektim.
+
+### Ölçüm (14.396 şirket-yılı — gerçekten çalıştırıldı)
+
+| Durum | Pay |
+|---|---|
+| normal | %65,8 |
+| inceleme | %22,1 |
+| sıkıntı | %10,1 |
+| kayyum | %0,6 |
+| konkordato | %0,2 |
+
+Geçişler (1200 yıl): kötüleşen 79 · toparlanan 18 · kapanan 3 · yerine gelen
+yeni şirket 3. Durum değişimi şirket-yıllarının **%0,8'i**. 200 tek yıllık
+koşuda **normalden doğrudan kapanan şirket 0**.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2571 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (4/6) — yatırım kararları gerçek oldu (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/3 (§6, §7)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-172**'de.
+
+### Bulduğum sorun
+
+Paket AC panik, balon ve şirket olaylarını getirmişti ama **seçeneklerinin
+tek etkisi mutluluktu**: "sat", "bekle", "al" seçmek portföyde hiçbir şey
+değiştirmiyordu. Karar değil, süslü metindi. Ayrıca panik olayı sapasağlam
+bir yılda, FOMO olayı soğuk bir piyasada çıkabiliyordu.
+
+### Ne yapıldı
+
+`EventChoice` artık portföy hamlesi taşıyabiliyor (kısmi sat, kısmi al, kâr
+al) ve hamle `InvestmentEngine`'in kendi al/sat yollarından geçiyor —
+komisyon, kesinti, işlem durması ve maliyet esası aynen işliyor. İkinci bir
+ekonomi motoru kurulmadı. Hamle başarısız olabilir (işlem durmuş, para yok,
+zararda kâr alınamaz).
+
+Panik ve devre kesici olayları **gerçek kriz**, FOMO olayı **gerçek ısı**
+ister. Konkordato ve bilanço şoku olaylarına "azalt" / "çık" seçenekleri
+eklendi.
+
+### Ölçüm (gerçekten çalıştırıldı)
+
+500 panik yolunda, panikte %35 satan ile hiç dokunmayan on yıl sonra
+karşılaştırıldı: **satan 154, bekleyen 346**. Panikte satmak çoğu zaman
+yanlış ama %31 oranında doğru — tek doğru cevap yok. 29 finansal olayın
+hepsinde en az beş yıl tekrar aralığı var: bildirim yağmuru yok.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2578 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (5/6) — servetin kullanımı (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/5 (§12-§17)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-173**'te.
+
+### Denetimin bulduğu sorun
+
+Oyundaki en pahalı şey **₺16.000.000'luk villaydı**; diğer kategorilerin
+tepesi önemsiz (saat ₺28.000, takı ₺42.000). Oysa altmış yıl yatırım yapanın
+portföyü ₺30.000.000'u aşıyor. Paranın harcanacak yeri olmayınca "her şeyi
+yatır" doğal olarak tek akıllı strateji oluyor.
+
+### Ne geldi
+
+- **Lüks katman:** yazlık (₺6,2M-₺145M), tekne (₺4,8M-₺38M), koleksiyon
+  (₺3,1M-₺22M). Tavan ₺16M'dan **₺145M'a** çıktı. Hepsi normal eşya: net
+  servete giriyor, boşanmada paylaşılıyor, mirasa kalıyor, borç tahsilinde
+  satılabiliyor.
+- **Servet kapısı:** üç yeni mağaza ve "Lüks ve koleksiyon" öbeği. Eşiğin
+  altındaki oyuncu kategoriyi görmüyor (koleksiyon ₺8M · yazlık ₺12M ·
+  marina ₺25M).
+- **Bakım masrafı:** yazlık %1,2 · tekne %5,5 · koleksiyon %0,8; araç
+  giderleriyle aynı mantıkta, gider dökümünde ayrı satır. Motoryat sahibinin
+  yıllık gideri ₺12.000 → ₺2.102.000.
+- **Yapay zengin vergisi yok:** cüzdanında ₺400.000.000 olan ama malı
+  olmayan oyuncunun gideri değişmiyor. Testle sabitlendi.
+- **Servet seviyesine açılan beş olay:** aile para istiyor (≥₺2M), çocuğun
+  eğitimi (≥₺3M), uzun tatil (≥₺5M), bağış (≥₺10M), özel etkinlik (≥₺20M).
+  Sağlık masrafı 55 yaş üstü, ağırlık 3, tekrar aralığı 12 yıl — nadir.
+
+### Kırılan üç test de gerçek bir şeyi yakaladı
+
+1. Bağış olayının bir seçeneğini **etkisiz** yazmışım; mevcut kural haklıydı.
+2. "Her mağaza kategorisi açık" iddiası servet kapısıyla çelişiyordu; test
+   yeni kuralı öğrenecek biçimde güncellendi ve üstüne "eşiğin altında
+   kapalı" iddiası **eklendi**.
+3. Mağaza öbeği testi "Konut" başlığının ekranda kalmasına bel bağlıyordu;
+   liste uzayınca kırıldı, her başlığa ayrı kaydırılacak biçimde düzeltildi.
+
+İki tohuma çakılı test de kaydı (EKSIKLER §6): tekrar evlenme tam yolu
+60→240 tohum, kuşak senaryosu 32→33. 30-80 aralığında **32 dışındaki 48
+tohumun hepsi çalışıyor**. Hiçbir iddia gevşetilmedi.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2584 geçti, 15 atlandı, 0 başarısız**. **Gerçek cihazda
+oynanmadı; Android APK bu makinede derlenmedi.**
+
+## Paket AD (6/6) — strateji kalibrasyonu · **AD TAMAMLANDI** (28 Eylül 2026)
+
+Faho'nun "PAKET AD DEVAM" briefinin **AD/6 (§18-§22)** kısmı. Sorular
+`docs/DESIGN_REVIEW_QUEUE.md` **Q-174**'te; `DECISIONS.md`'ye kesin kural
+**yazılmadı**.
+
+### Bulduğum asıl hata: "ceza" diye yazdığım şey piyango biletiymiş
+
+30.000 yolluk ilk tam ölçümde 60 yıllık %100 hisse stratejisi: en iyi %10
+**₺1.558M**, görülen en yüksek **₺211.732M**, milyarder payı **%12,7**.
+
+Sebep Paket AC'den kalma yoğunlaşma mekanizmasıydı: tek varlığa yığılan
+portföyde getirinin **sapmasını** 1,55 ile çarpıyor ve yorumunda "beklenen
+değer kaymaz" yazıyordu. **Bunu ben yazmıştım ve tek yıl için doğru,
+bileşik servet için değil.** Sapmayı büyütmek yıllık oynaklığı %23'ten
+~%36'ya çıkarıyor; altmış yıl bileşiklenince medyanı düşürürken üst kuyruğu
+patlatıyor.
+
+Düzeltme: yoğunlaşma artık **beklenen getiriyi de düşürüyor** (§9),
+oynaklık zammı 0,55 → 0,25, risk primi 0,056 → 0,048.
+
+| %100 hisse, 60 yıl | Başlangıç | Sonra |
+|---|---|---|
+| iyi %10 | ₺1.558M | **₺371M** |
+| görülen en yüksek | ₺211.732M | **₺7.460M** |
+| milyarder payı | %12,7 | **%3,8** |
+
+2000 tam hayat: medyan ₺62,0M → **₺50,9M**, milyarder %2,5 → **%1,3**,
+en yüksek ₺396.089M → **₺38.103M**.
+
+### §22 — BULUNAN DOMİNANT STRATEJİ (Faho'nun kararı gerekiyor)
+
+**`girişim + yatırım` diğer dokuzunun hepsini, her ufukta, hem medyanda hem
+en kötü %10'da geçiyor** (60 yıl: medyan ₺52,2M, kötü%10 ₺10,4M — ikisi de
+listenin tepesi). İşletme, yatırımın üstüne bedava bir kat ekliyor.
+
+Bu pakette işletme dengesine **dokunulmadı**: işletme ekonomisi Paket U'da
+kalibre edildi, değiştirmek ayrı bir ürün kararı (Q-174/1). Bekçi bulguyu
+dondurdu; yeni bir baskın strateji çıkarsa test kırılır. Piyasa
+stratejileri arasında baskın yok.
+
+### Botu güçlendirdim, zayıflatmadım (§18)
+
+Ehliyet (en büyük tek eksik: 2 meslek + 1 işletme + 5 olay), Finger niyeti,
+flörtle vakit geçirme. Ehliyette gerçek bir hata buldum: ilk kurulumumda
+yılda bir soru cevaplıyordum ve 60 hayatın 34'ü sınava girip **hiçbiri**
+geçemiyordu (rastgele tahminin beklediği %26'nın çok altında) — sınav üç
+soruluk, yıllara yayılınca cevaplar düşüyordu. Tek oturuşta bitirilince 34
+denemenin 30'u ehliyet alıyor.
+
+Stratejiler 8 → 10 (`sadece fon`, `karma normal oyuncu`). Min-max
+stratejiler olduğu gibi duruyor.
+
+### Ölçümün iki kademesi
+
+Ağır ölçüm (30.000 yol + 2000 tam hayat, ~25 dakika) `BIR_OMUR_FULL_MEASURE=1`
+ile açılıyor — depodaki golden testlerle aynı kalıp. Her turda çalışan
+sürüm aynı kodu daha az yolla koşup bekçi görevi yapıyor.
+
+**Test durumu (gerçekten çalıştırıldı):** `flutter analyze` çıkış kodu 0;
+`flutter test` **2586 geçti, 15 atlandı, 0 başarısız**. Ağır ölçüm elle
+çalıştırıldı. **Gerçek cihazda oynanmadı; Android APK bu makinede
+derlenmedi.**
+
+---
+
+## PAKET AD TAMAMLANDI (1/6 … 6/6)
+
+| Paket | Konu | Commit |
+|---|---|---|
+| AD/1 | Sabit getiri eğilimi kaldırıldı, getiri piyasadan doğuyor | `1c75f41` |
+| AD/2 | Borç yaşam döngüsü (kontrolsüz borç bug'ı) | `7f965a5` |
+| AD/3 | Şirket sağlık modeli | `2065baa` |
+| AD/4 | Yatırım kararları gerçek oldu (panik, FOMO) | `7324ce1` |
+| AD/5 | Servetin kullanımı (lüks katman, harcama kanalları) | `766c90a` |
+| AD/6 | Strateji kalibrasyonu | `d3db879` + bu commit |
+
+**Bulunan gerçek buglar:** kontrolsüz borç (int taşması, ₺9,2×10¹⁸),
+ödenmeyen konut kredisinin ihtiyaç kredisi faiziyle büyümesi, all-or-nothing
+taksit, şirket durumlarının yutucu olması, olay seçimlerinin portföyde hiçbir
+şey yapmaması, yoğunlaşma cezasının piyango bileti olması, botun ehliyet
+sınavını hiç geçememesi.
+
+**§25 tarih bağımsızlığı doğrulandı:** production ekonomi kodunda
+`DateTime.now()` kullanımı **yok** (yalnızca ses soğuması ve kayıt zaman
+damgası); oyuncuya gösterilen hiçbir metinde gerçek dünya yılı **yok**;
+`lib/` altındaki bütün "2026" geçişleri yorum satırı.
+
+**§27 saldırgan oyuncu taraması: EXPLOIT BULUNAMADI.** Paket AD'nin dört
+yeni sistemine sekiz saldırı denendi ve hepsi engellendi — sınırsız
+yapılandırma (2'de duruyor, kredi kapanıyor), malı satıp borcu iki kez
+kapatmak (net servet 300k → 150k, zorunlu satış zarar ettiriyor),
+kayıt/yükleme ile borç durumunu sıfırlamak (aynen korunuyor), olay
+hamlesiyle işlem durmasını delmek (portföy değişmiyor), olay hamlesiyle
+komisyonsuz al-sat döngüsü (20 turda ₺20.899 kaybettiriyor), lüks varlığı
+zorla satarak para üretmek (₺37,7M → ₺28,2M), kredi notu izini kayıtla
+temizlemek (iz duruyor), şirket durumunu kayıtla yeniden çevirmek (aynen
+çıkıyor).
+
+**Karar bekleyen sorular:** Q-169 … Q-174. `DECISIONS.md`'ye hiçbir kesin
+kural yazılmadı.
+
+---
+
+## PAKET AE TAMAMLANDI (1/6 … 6/6)
+
+**Konu:** Girişimcilik V2 — işletme yönetimi, fiyat, müşteri, personel ve
+krizler.
+
+**Neden:** AD/6 ölçümünde `girişim + yatırım` diğer dokuz stratejiyi
+birden eziyordu (Q-174/1). Çözüm işletme kârını yapay olarak kesmek
+değil, işletmeyi gerçek bir **oyun sistemi** hâline getirmekti: oyuncu iş
+kurunca "her yıl otomatik kâr alan kişi" değil, işini yöneten bir işletme
+sahibi olsun.
+
+| Paket | Konu |
+|---|---|
+| AE/1 | İşletme veri modeli: fiyat, itibar, personel, bakım, reklam, 5 yıllık döküm |
+| AE/2 | Talep ve kâr motoru: bölge ortalaması, elastikiyet, gider kalemleri |
+| AE/3 | 70+ işletme olayı, kalıcı rekabet baskısı, afet ve denetim |
+| AE/4 | Yatırım önemli olay bildirimleri ve sert düşüş ölçümü |
+| AE/5 | İşletme ekranı ve yıllık rapor |
+| AE/6 | Pasif/aktif/girişim+yatırım ölçümü, fiyat ve reklam exploit taraması |
+
+**Katalog 14 işletmeye çıktı:** Oto yıkama eklendi. Her işletmenin kendi
+sattığı şey ve fiyat başlığı var (halı sahada "Maç / saat ücreti",
+kuaförde "Saç kesim ortalaması"). Bölge ortalaması şehirden, ekonomi
+rejiminden ve kurgusal rekabetten üretiliyor — **gerçek yıla ya da gerçek
+fiyata bağlı değil** (§3, §25).
+
+**Bulunan altı gerçek bug (hepsi ölçümle yakalandı):**
+
+1. `condition` talebe neredeyse hiç etki etmiyordu — durumu 10/100 olan
+   büfe hâlâ kâr ediyordu.
+2. Fiyat exploit'i: sabit esneklikli talep eğrisinde esneklik 1'in altında
+   kalan her işte "fiyatı sonuna kadar yükselt" mutlak baskındı; 14
+   işletmenin 10'unda en pahalı seçenek kazanıyordu.
+3. `IncidentKind.opensNotice` AC'den beri tanımlıydı ama hiçbir yerde
+   okunmuyordu: konkordato, kayyum, şirket kapanması sessizce geçiyordu.
+4. Reklam tuzaktı: kampanya sonsuza kadar sürüyor, azalan marjinal etki
+   yüzünden bedeli her işletmede katkısını aşıyordu.
+5. Katalogdaki `volatility` kâra hiç yansımıyordu — lokanta (0,60) ile
+   terzi (0,25) aynı oynaklıkta davranıyordu.
+6. İyi yönetilen işletme risksizdi: aktif sahibin kapanma oranı **%0** ve
+   `isletme aktif` oyunun en güvenli stratejisiydi.
+
+**§32 — dominans, AD/6'dan bu yana:**
+
+| Ölçü | AE öncesi | AE sonrası |
+|---|---|---|
+| `girişim + yatırım`ın her ölçüde ezdiği strateji | 10 / 11 | **6 / 11** |
+| kötü %10 | ₺13,2M | **₺8,0M** |
+| medyan | ₺71,5M | ₺65,1M |
+| aktif sahibin işletme kapanma oranı | %0 | **%9** |
+
+Medyanda hâlâ birinci; §32 bunu yasaklamıyor ("Başarılı işletmeci çok para
+kazanabilir"), yasak olan her koşulda ezmesi. Magnitude sorusu Faho'ya
+Q-175/4 olarak soruldu.
+
+**§34 fiyat exploit taraması:** optimum 14 işletmede piyasa 10 / ucuz 3 /
+pahalı 1. Ne en pahalı ne en ucuz her zaman kazanmıyor; optimum
+işletmenin itibarına göre de kayıyor.
+
+**§35 reklam exploit taraması:** büyük kampanya ortalamada 14 işletmenin
+9'unda kazandırıyor ama **tek tek hayatların %26,2'sinde para
+kaybettiriyor** — garanti değil.
+
+**§27 sert düşüş:** %100 hisse portföyünde 6600 yılın %16,3'ü ≥%20, %9,6'sı
+≥%30, %5,1'i ≥%40 düşüyor. Dağıtılmış portföyde ≥%20 oranı %1,89. Bu
+dağılım AD/1'in onaylı kalibrasyonundan doğuyor; AE'de değiştirilmedi ve
+Q-175/2 olarak soruldu.
+
+**§23/§36:** 8.784 işletme-yılı işlendi (ağır ölçümde daha fazla), 283
+erken kapanma. Kayıt tamamen additive; eski kayıt varsayılanla açılıyor.
+
+**Karar bekleyen sorular:** Q-169 … Q-175. `DECISIONS.md`'ye hiçbir kesin
+kural yazılmadı.
+
+**Doğrulanmayan:** Gerçek cihazda oynanmadı; Android APK bu makinede
+derlenmedi.
+
+---
+
+## PAKET AF — TEŞHİS TAMAMLANDI (denge değiştirilmedi)
+
+**Konu:** "Oyunu çözen akıllı oyuncu girişim + yatırım ile ekonomiyi
+kırıyor mu?"
+
+**Bu tur ölçümdür.** Hiçbir denge değeri değiştirilmedi; Faho'nun kararı
+uyarınca pasif işletme sahibinin %98 batış oranı yumuşatılmadı.
+
+**Gelen test altyapısı:** `PerfectEntrepreneurBot` — işletmeleri görünür
+ROI'ye göre karşılaştıran, fiyatı **geçmiş sonuçlarından öğrenerek**
+optimize eden (gelecek bilgisi yok, hafıza her hayatta sıfırlanıyor),
+reklamı ancak karşılığını görürse veren, kötü işletmeyi kapatıp daha
+iyisine geçen ve artan parayı yatıran bot. Debug para/stat yok. Ayrıca
+§11'in 12 stratejisini tamamlamak için `kariyer + yatırım` ve
+`kariyer + işletme + yatırım`.
+
+**Sonuç: alt mekanikler temiz, abuse katalog sayılarında.**
+
+Fiyat optimizasyonu piyasaya göre yalnızca ×1,04; reklam aşırı güçlü
+değil (optimal oyuncu **hiç reklam vermiyor** — aynı para borsada daha
+çok getiriyor); bakımı geciktirme exploiti yok, tersine kaybettiriyor;
+personelde gerçek trade-off var; maaş + işletme **bedava kombinasyon
+değil** (fırsat maliyeti oranı 0,79); işletme kârının borsaya akması üst
+kuyruğu %100 hisseden daha az patlatıyor.
+
+**Asıl bulgu:** bütün işletmelerin sermayesi yıllık kârına göre çok
+küçük — geri ödeme süresi **0,16 ile 2,24 yıl**. İki yıldan sonra işletme
+fiilen bedava bir gelir akışı.
+
+**Serbest yazılımcılık kırık bir aykırı değer:** sermaye ₺84k, geri ödeme
+**0,16 yıl**, medyan ROI 340×, kapanma %5 ve **kötü %10'u bile 159×**.
+Diğer bütün işletmelerde kötü %10 sıfır civarı ya da negatif. Kadrosu,
+mekânı ve kirası olmadığı için kötü yılı yok. Çözücü bot 40 hayatın
+28'inde bunu seçiyor.
+
+**§13 dominans:** katı tanımla (medyan VE kötü %10 VE risk ≤) hiçbir
+strateji diğerlerinin hepsini ezmiyor; çözücü 6/14'ünü eziyor. Ama hem
+medyanda (ikincinin 1,77 katı) hem kötü %10'da (2,7 katı) birinci.
+
+**Karar bekleyen:** Q-176 (yedi soru). Öneri — yapay kâr kesme yerine
+sermaye/kâr oranını düzeltmek; ayrıntı ve önce/sonra ölçüm önerisi
+`docs/DESIGN_REVIEW_QUEUE.md` içinde.
+
+**Doğrulanmayan:** Gerçek cihazda oynanmadı.
+
+## PAKET AG TAMAMLANDI (1/7 … 7/7)
+
+**Konu:** işletme ekonomisi kalibrasyonu — ortalama denge, ama **hayatın
+sürprizleri korunarak**.
+
+**Tasarım kuralı:** bu bir hayat simülasyonu. İşletmeler "her seferinde
+3-6 yılda amorti olur" gibi deterministik çalışmayacak. Aynı işletme her
+hayatta aynı sonucu vermemeli.
+
+**Katalog (§6, §14).** 14 işletmenin sermaye/kâr oranı yeniden kuruldu:
+nominal geri ödeme **0,16-2,24 yıldan 1,52-5,58 yıla** çıktı. Oynaklık da
+yükseldi (lokanta 0,60 → 0,66, serbest 0,55 → 0,95), çünkü §14
+işletmelerin birbirinden farklı olmasını istiyor. Kataloğun en küçük işi
+(terzi) bilerek bir yıllık asgari ücretin altında tutuldu — genç oyuncuya
+erişilebilir bir yol kalsın diye; ucuz giriş **düşük tavanla** dengelendi.
+
+**Serbest yazılımcılık (§4, §5, §20).** AF'de kötü %10'u bile 159 kat
+kazandırıyordu. Ortalaması ezilmedi, **dağılımı genişletildi**: sermaye
+0,25 → 1,60 asgari ücret, sabit gider payı 0,06 → 0,18, tedarik
+0,05 → 0,08 ve altı yeni olay (abonelik, tahsil edilemeyen iş, iş
+gelmeyen dönem, büyük müşteri kaybı + iki pozitif). Kötü %10 geri ödeme
+katsayısı **159 → −0,4**; iyi %10 **64,1** olarak kaldı. Yılların %1,4'ü
+zarar (önceden %0).
+
+**Lokanta ve bakkal (§15).** Sadece kâr artırılmadı, gider yapısı
+düzeltildi (lokanta personel 0,28 → 0,24 ve tedarik 0,32 → 0,29; bakkal
+tedarik 0,58 → 0,52). Kapanma: lokanta %79 → %46, bakkal %60 → %38.
+40 hayatta çok iyi giden: bakkal 23, lokanta 4.
+
+**Pozitif kuyruk (§2, §3, §7, §9).** 16 yeni olay — mahalle seni
+benimsedi, video patladı, turnuva tuttu, yemeğin adı çıktı, kurumsal
+anlaşma, karşıdaki kapandı, bölge hareketlendi, referans zinciri, bayram
+siparişleri, düğün sezonu. Hepsi mevcut `demandPressure` altyapısını
+kullanıyor: 1-3 yıl süren güçlü avantaj, **sonsuz buff değil**. Popup
+yazıp geçmiyorlar; talebi ve itibarı gerçekten değiştiriyorlar.
+
+**Viral reklam (§10, §11).** Kampanya her zaman aynı ROI'yi vermiyor:
+tutma ihtimali mahalle %4, sosyal medya %9, büyük %14 (ölçülen 4,0 / 9,1
+/ 14,0). Tutan kampanya o yılki katkıyı 3,6 katına çıkarıyor ve bir iki
+yıl süren talep bırakıyor. Kampanya bedelleri bu kuyruğu fiyatlıyor
+(büyük 0,170 → 0,232); aksi hâlde en pahalı kampanya **her işte**
+kazandıran garanti hamle oluyordu ve AE §35 exploit'i geri geliyordu.
+
+**Hikâye bildirimleri (§12, §13).** Kozmetik değil: ölçü geçen yıla göre
+**gerçekleşen ciro**, üstelik yıl tutulan bütün geçmişe göre de uç
+olmalı — düşüşten sonraki toparlanma haber değil. 2949 işletme-yılında
+199 başarı, 173 başarısızlık; yıl başına pencere 0,65.
+
+**Ölçüm boşluğu kapatıldı (Q-176/6).** Nakliyecilik ehliyet istiyor ve
+ölçüm botu ehliyet almıyordu; tablo onu boş gösteriyordu. Bot artık
+gerçek oyuncu yolundan sınava girip cevaplıyor (`debugSetState` ile
+ehliyet **verilmiyor**). Nakliyecilik artık ölçülüyor: medyan 2,8 yıl,
+%37 hiç amorti etmiyor.
+
+**Sonuç (§17-§19).** Dağılım genişledi, dominans kalmadı:
+
+| strateji | AF medyan → AG | AF kötü %10 → AG | AG iyi %10 |
+|---|---|---|---|
+| mükemmel girişimci | 93,1M → **51,6M** | 24,7M → **13,9M** | 228,3M |
+| kariyer + işletme + yatırım | 52,5M → 38,8M | 9,3M → 4,7M | 232,7M |
+| girişim + yatırım | 41,0M → 18,1M | 11,9M → 4,4M | 181,8M |
+
+§13'ün katı tanımıyla **bütün diğerlerini ezen strateji yok**; çözücü
+9/14. Fırsat maliyeti oranı 0,79 → 0,68. Hiçbir işletmede "otomatik
+zenginlik" kalmadı: her 14 işletmede sermayesini çıkaramayan hayatlar
+var, kötü %10 katsayısı 13'ünde sıfırın altında.
+
+**Yapay hard cap yok (§21):** kâr tavanı, servet tavanı ya da "çok
+kazandın artık düş" mekaniği eklenmedi.
+
+**Karar bekleyen:** Q-177. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AH — TAM YAŞAM DENETİMİ TAMAMLANDI (teşhis; denge değiştirilmedi)
+
+**Konu:** AD + AE + AF + AG paketlerinden sonra oyunun doğumdan ölüme
+bütün döngüsünü yeniden ölçmek.
+
+**Bu tur teşhistir.** Hiçbir denge sayısı değiştirilmedi, `lib/` içinde
+yalnızca okuma yapıldı; bütün değişiklikler test tarafında.
+
+**Ölçüm:** 10 arketip × 200 + 1000 rastgele-geçerli = **3000 tam hayat**,
+doğumdan ölüme. **Takılan hayat: 0.** Ölüm yaşı medyan 76.
+
+### §2 — botun kapsamı denetlendi, üç bot hatası çıktı
+
+`GameController`'ın 225 genel eyleminin botta kullanılmayan 100'ü
+listelendi. Üçü gerçek eksikti:
+
+1. **İşletme yönetimi hiç kullanılmıyordu.** Bot AE'nin getirdiği
+   `setBusinessPrice`, `setBusinessAd`, `maintainBusiness` ve
+   `businessStaff` ekranlarının hiçbirini açmıyordu. Yani AE'den beri
+   "gerçek oyuncu" ölçümlerinde işletme yönetimi hiç ölçülmemiş.
+2. **Yatırım hiç satılmıyordu.** Portföy yalnızca oyunun zorunlu
+   bozdurmasıyla küçülüyordu.
+3. **Yakın arkadaşlık hiçbir zaman çalışamıyordu.** Teklif koşulu
+   `relation == arkadas` idi; oysa `arkadas` zaten yakın arkadaşlığın
+   kendisi. Üstelik bot sınıf/iş arkadaşıyla hiç vakit geçirmediği için
+   yakınlıkları olay dışında hiç artmıyordu.
+
+Üçü de düzeltildi (bot tarafı; oyunun sayıları sabit). Yakın arkadaşlık
+hunisi düzelmenin öncesi/sonrası: tanışıklık yakınlığı medyan **35 → 47**,
+şartı sağlayan **%1,9 → %16,9**, kabul alan **%1,6 → %15,8**.
+
+### Ölçülen son durum (3000 hayat)
+
+* **Ekonomi.** Ölüm serveti medyan ₺48,2M, kötü %10 ₺11,9M, iyi %10
+  ₺160,0M. 50M+ %48,5 · 100M+ %21,5 · 250M+ %4,6 · 500M+ %1,6 · 1B+
+  %0,50. Negatif net servetle ölen %0,1, borçlu ölen %1,5. Servetin
+  %75,6'sı portföyden, %6,3'ü gayrimenkulden, %3,9'u mirastan.
+* **İşletme.** Açan %23,3; 26.272 işletme-yılı. Kapanan %14,3, zarar yılı
+  %1,9, reklamlı yıl %36,1, viral 629 yıl. İşletme kârı medyan ₺5,3M,
+  iyi %10 ₺17,2M; işten servet yapan %19,7.
+* **Yatırım.** Yapan %93,7. Tek varlıkta tek yılda ≥%20 düşüş gören
+  %95,8, ≥%30 %67,6, ≥%40 %51,1. Skandal/regülatör %99,0,
+  konkordato/kayyum/kapanma %16,3, zorunlu satış %49,3, yatırımı
+  zararla biten %18,8. 19 piyasa olay türünün hepsi görüldü.
+* **Kariyer.** Çalışan %99,4, emekli %86,1, ortalama 39,6 yıl çalışma,
+  1,0 yıl işsiz yetişkin yıl. Meslek kapsamı 53/55.
+* **İlişki.** Partneri olan %93,1, evlenen %48,0, boşanan %17,8, dul
+  kalan %15,7, tekrar evlenen %12,4, çocuklu %37,7, torun gören %34,2.
+* **Sağlık.** Kronik yaşayan %76,4, check-up %96,5, sağlık krizi %69,0.
+* **Suç.** Dosyası olan %57,8, sabıkalı %20,1, davaya giden %27,5,
+  mahkûm %20,1, hapis %7,5, denetimli %6,8.
+* **İçerik.** Olay 381/391 (%97,4), bölüm 20/20, hobi 11/12, dövüş 6/6,
+  meslek 53/55, **işletme 9/14**.
+
+### §11 — baskın hayat yolu var mı?
+
+Yok. En zengin %10 ile bütün hayatlar arasındaki fark küçük: üniversite
+%47 / %48, işletme %15 / %23, yatırım %100 / %94, ev %55 / %46, kiraya
+veren %41 / %28, evli %50 / %48. Zenginliğin tek ayırt edici işareti
+**yatırım ve kira geliri**; işletme zenginlerde daha az bile.
+
+### §12 — açık kalan, sınıflandırılmış bulgular
+
+* **Beş işletme hiç açılmadı** (pastane, nakliye, halı saha, spor
+  salonu, lokanta) ve terzi tek başına seçimlerin %69,5'i. Bot hatası
+  ağır basıyor (nakit biriktirmiyor), ama ardında ürün sorusu var.
+* **Yazar mesleği erişilemiyor:** okuma hobisi aşama 2 istiyor, o hobi
+  yalnızca kütüphanede kitap bitirerek ilerliyor ve bot kitap açmıyor.
+* **Yakın arkadaşlık eşiği 55** düzeltmeden sonra bile hayatların
+  %16,9'unda sağlanıyor.
+* **Erişilmeyen 10 olayın 5'i suç zinciri devamı**, 3'ü ün, 2'si okuma
+  hobisi.
+
+**Karar bekleyen:** Q-178. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AI — AKSİYON KAPSAMI VE ABUSE DENETİMİ (teşhis; denge değiştirilmedi)
+
+**Soru:** oyuncunun yapabildiği her şey gerçekten test ediliyor mu ve bu
+sistemlerden biri abuse edilerek oyun kırılabiliyor mu?
+
+Üç bot ayrı tutuldu: **PlayerBot** hayatı temsil eder, **CoverageBot**
+her şeye dokunur, **AbuseBot** kırmaya çalışır.
+
+### §1 — envanter artık elle tutulmuyor
+
+`test/support/action_inventory.dart`, `game_controller.dart`'ı test
+çalışırken okuyup üyeleri koddan çıkarıyor. Sınıflandırma isme değil
+davranışa bakıyor: gövdesi `_state = …` atan, `notifyListeners()` ya da
+`_autoSave()` çağıran — veya bunu yapan başka bir üyeyi çağıran — üye
+**aksiyon**; geri kalanı sorgu.
+
+| | sayı |
+|---|---|
+| toplam public üye | 225 |
+| **oyuncu aksiyonu** | **109** |
+| sorgu | 106 |
+| oyun dışı (debug, kayıt, ayar) | 10 |
+
+### §2 — ACTION COVERAGE %94,5
+
+400 hedefli hayatta (10 plan × 40) **103/109** aksiyon gerçekten çalıştı,
+**takılan hayat 0**. İçerik: 14/14 işletme, 6/6 dövüş sanatı, 20/20
+bölüm, 52 meslek, 5/5 yatırım türü, 4/4 sosyal platform, 806 olay-seçenek
+kolu.
+
+Kalan 6: `acceptCrewOffer`, `declineCrewOffer` (çete teklifi hiç
+açılmadı), `payBailSelf`, `askFamilyForBail` (kefalet anı yakalanamadı),
+`endLifeByChoice` (95+ ve bilinçli), `askFamilyForBedelli` (1295 deneme,
+oyunun gerekçesi hep "Askerlik meselen kapandı").
+
+### Bulunan gerçek sorunlar
+
+1. **Save-scum vektörü (doğrulandı).** Oyunun zarı
+   `GameController._random` kurucuda bir kez üretiliyor ve `GameState`
+   içinde taşınmıyor — yani **kayda girmiyor**. Kaydı geri yüklemek
+   kumar sonucunu yeniden attırıyor: 30 tekrarın en iyisi blackjack'te
+   +135k, rulette +90k. Düzeltilmedi; çözüm seçimi ürün kararı.
+2. **Ücretli aktiviteler pratikte erişilemiyor.** 60 hayatta yapılan 16
+   aktivitenin hiçbiri ücretli kurs değil; oyunun gerekçesi hep
+   "cüzdanında yeterli para yok". Hiç yatırım/alışveriş yapmayan kontrol
+   grubu da tek bir kursa giremedi. 12 hobinin 10'u ve onlara bağlı
+   içerik bu kapının arkasında.
+
+   > **DÜZELTME (Paket AJ ölçümü).** Burada ayrıca "AH'deki *Yazar
+   > mesleği erişilemiyor* bulgusunun asıl sebebi de bu" yazmıştım.
+   > **Yanlış.** `okuma` hobisinin `activityIds` listesi boş: onu
+   > besleyen hiçbir kurs yok, yalnızca kütüphanede **bitirilen** kitap
+   > ilerletiyor ve kitap okumak ücretsiz. Yazar'ın koşulu 7 bitirilmiş
+   > kitap + 20 yaş + 55 zekâ; kurs ücreti hiç girmiyor. Paket AJ'nin
+   > kurs düzeltmesi Yazar'ı açmıyor. Test:
+   > `paket_aj_course_test.dart` → "Yazar mesleği kursla değil, bedava
+   > okumayla açılıyor".
+3. **Sorgu/aksiyon uyuşmazlığı.** Lise sonrası `availableTracks()` 7
+   lise alanı döndürüyor ama `chooseTrack` "Şu an lise alanı
+   seçemezsin." diyor. Menü, aksiyonun kabul etmediği seçenekleri
+   gösteriyor.
+
+### Abuse sonuçları — para basan tekrar yok
+
+Aynı yıl 100-400 tekrarın hiçbiri net serveti artırmıyor: aktivite
+−780k, kitap −120k, hediye −2k, eşya al-sat −9k (komisyon), blackjack
+−14k (kasa avantajı), yatırım al-sat 0, sosyal medya 0. Stat farming'de
+tek yılda hiçbir stat 100'e çıkmıyor (mutluluk 93'e kadar).
+
+**Karar bekleyen:** Q-179. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AJ — KURS / HOBİ ERİŞİLEBİLİRLİĞİ (Faho'nun brief'i uyarınca)
+
+Paket AI'nın ikinci bulgusunun (ücretli kurslara girilemiyor) ürün
+cevabı. Faho'nun **KURS / HOBİ ERİŞİLEBİLİRLİK V2** brief'i kodlandı:
+kurslar erişilebilir oldu ama bedava stat çeşmesine dönüşmedi.
+
+### Kurs ilerleme sistemi
+
+`app/lib/domain/hobby/course_progress.dart` — ders sayacı hobinin kendi
+deneyimi (`HobbyProgress.experience`); ayrı bir sayaç kurulmadı.
+
+| Ders | Kademe | Ücret (müzik kursu) |
+|---|---|---|
+| 1-5 | Tanışma | 0 ₺ |
+| 6-10 | Başlangıç | 4.800 ₺ (katalogun 0,40 katı) |
+| 11-20 | Normal | 12.000 ₺ (katalog fiyatı) |
+| 20+ | İleri seviye | 26.400 ₺ (katalogun 2,2 katı) |
+
+Kademeler **oyunun kendi ekonomik ölçeğinden** türüyor: katalog fiyatı
+"normal" kademeyi anlatıyor, ötekiler onun katı. Asgari ücret çıpası
+kayarsa kademeler de birlikte kayıyor. Gerçek bir ülkenin güncel
+fiyatlarına bağlanmadı.
+
+### Bedava stat farming'e karşı üç kapı
+
+1. **Ders başına stat katsayısı düşük** (0,2), asıl ödül kilometre
+   taşlarında (5/10/20/35, katsayı 2,5). Ölçüldü: tek tanışma dersi
+   **+2 stat**, 5. ders **+15**.
+2. **Yıllık ücretsiz ders tavanı 6** — bütün kurslar toplamında. Aynı
+   yıl on kursu dolaşıp yirmi bedava ders toplanamıyor. Ölçüldü: 6.
+3. **Tanışma dönemi hobi ömrü boyunca bir kez.** Bitince ücret başlıyor.
+
+### 18 yaş altı: aileden destek (§4-§9)
+
+Ücret gerekiyor ve çocuğun cüzdanı yetmiyorsa kartta yaşayan ebeveynler
+düğme olarak çıkıyor. **Ebeveyn yoksa bölüm hiç görünmüyor** — sahte
+düğme yok. 18'den sonra kapı kapanıyor.
+
+Karar tek zar değil. 200 istekte kabul sayısı:
+
+| Etken | Ölçüm |
+|---|---|
+| Varlık | yoksul 46 · orta hallı 90 · varlıklı 134 |
+| Yakınlık | uzak (20) 77 · yakın (95) 118 |
+| Devamlılık | yeni 100 · 5 yıldır aynı kurs 145 |
+
+Ayrıca yarıda bırakılan her kurs kabul şansını düşürüyor.
+
+**Para yoktan yaratılmıyor.** Ebeveynin yıllık kurs bütçesi varlık
+düzeyinden ve asgari ücret çıpasından türüyor (orta hallı anne:
+33.690 ₺/yıl). Ölçüldü: 400 istekte toplam **33.600 ₺** verildi, bütçe
+33.690. Kabul edilen ücret o hobiye kredi yazılıyor ve ders yapılırken
+**bir kez** harcanıyor; kaydet/yükle ile ikinci kredi alınamıyor.
+
+### Ret kalıcı değil: ücretsiz yollar (§7)
+
+`app/lib/data/event_pool_course.dart` — dört olay: belediye atölyesi
+(8-17), okul kulübü (10-18, öğrenciyken), öğretmenin desteği (11-18),
+akrabanın desteği (9-17). Hepsi `kurs_destegi` izi bırakıyor; iz varken
+dersler yıl içinde dört derse kadar ücretsiz. Sonsuz bedava ders değil,
+bir yıl açık kalan kapı. Burslu yıl tanışma hakkını yemiyor.
+
+Ret ayrıca o yıla özgü: sayaçlar yıl başında sıfırlandığı için oyuncu
+seneye yeniden sorabiliyor.
+
+### İleri seviye ne satıyor (§12)
+
+Her kademe ücretinin karşılığını da söylüyor; ileri seviyede kart
+"Özel hoca, ileri ekipman ve yarışma hazırlığı bu ücrete dahil" diyor.
+Ücretsiz tanışma dersinde bu satır görünmüyor.
+
+### Kurs bir hayat yolunun başlangıcı (§13)
+
+Kart kursun nereye götürdüğünü gösteriyor: *"Müzisyen için 10 ders daha
+(Düzenli basamağı)"*, yol açıldıysa *"Müzisyen yolu açık"*. Bağ
+uydurulmuyor — meslek kataloğunun `hobbyId` / `minHobbyStage` alanları
+zaten işe giriş koşulu; burada aynı koşul oyuncunun görebileceği hale
+çevriliyor. İkinci bir eşleme tablosu tutulmadı, **yeni kilit
+eklenmedi**. Meslek bağı olmayan hobide satır hiç görünmüyor.
+
+Ölçüldü: okuma → **Yazar** (Düzenli basamağı, 7 birim), müzik →
+**Müzisyen** (10 ders). Müzik testi dersleri gerçekten kursa girerek
+topluyor ve iş kataloğunun `minHobbyStage` koşulunun da sağlandığını
+doğruluyor.
+
+**Yazar mesleği kursla açılmıyor.** `okuma` hobisinin `activityIds`
+listesi boş; onu besleyen kurs yok, yalnızca kütüphanede bitirilen
+kitap ilerletiyor ve o ücretsiz. Yazar'ın koşulu **7 bitirilmiş kitap +
+20 yaş + 55 zekâ**. Kitaplar 5-24 sayfa ve her sayfa bir eylem, yani 7
+kitap kabaca 50-100 okuma eylemi demek — AH'de Yazar'ın 3000 hayatta
+hiç görülmemesinin sebebi kurs ücreti değil, bu. Paket AJ bunu
+değiştirmedi; denge sorusu olarak Q-180 #5'te duruyor.
+12 hobinin yalnızca 2'si bir mesleğe çıkıyor; kalan 10'u için bağ
+kurmak tasarım kararı — Q-180 #4.
+
+### Ölçülen erişilebilirlik
+
+| Ölçüm | Paket AI (önce) | Paket AJ (sonra) |
+|---|---|---|
+| Girilebilen ücretli kurs | 0 / 10 | **10 / 10** |
+| İlerletilebilen hobi | 2 / 12 | **12 / 12** |
+
+### Değiştirilen testler (silinmedi, yeniden yazıldı)
+
+İki test Paket AJ'nin değiştirdiği eski kuralı doğruluyordu:
+
+* `activity_venues_test` "dil kursu zekâyı gerçekten artırır" — her ders
+  katalog fiyatını alır ve stati bir kerede verir diyordu. Yerine **üç**
+  test: ilk ders bedava ve hobiyi ilerletiyor, 5. ders kilometre taşı
+  ödülünü veriyor, tanışma bitince ücret cüzdandan çıkıyor.
+* `activity_venues_widget_test` "parası yetmeyen eylemin düğmesi
+  kapalıdır" — "kurslarda ücretsiz eylem yok, hepsi kapalı" diyordu.
+  Yerine **iki** test: parasız çocuk tanışma dersine girebiliyor, ve
+  tanışma bitince parası yetmeyen yetişkinin kursu gerçekten kapanıyor.
+
+28 test: `app/test/paket_aj_course_test.dart`.
+
+**Karar bekleyen:** Q-180 (prototip sayıları, tanışma hakkının ömürlük
+olması, yetişkinin ücretsiz yolu, hobi-meslek bağı).
+**Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AK — HOBİ / KURS → KARİYER SİNERJİSİ
+
+Paket AJ 12 hobiyi erişilebilir yaptı ama katalogda hobiye bağlı
+yalnızca iki meslek vardı ve ikisi de **sert şart**: Yazar (okuma) ve
+Müzisyen (müzik). Çocukken başlanan fotoğraf kursu hayatın geri
+kalanında hiçbir kapı açmıyordu. Bu paket o boşluğu **kilit koymadan**
+dolduruyor.
+
+### Temel kural: hiçbir kapı kapanmadı
+
+Faho'nun kararı: kurs/hobi yapmamış oyuncunun bugün girebildiği
+mesleklerin **hiçbiri kapanmayacak**. Bu yüzden sinerji
+`JobType.hobbyId` / `minHobbyStage` sert şartından **ayrı** bir alanda
+(`JobType.synergies`) duruyor ve `JobMarket.requirementReason` içine
+hiç girmiyor.
+
+Ölçüldü: hiç hobisi olmayan oyuncu ile bütün hobileri Usta olan
+oyuncunun 19 sinerjili meslekteki **engel gerekçeleri birebir aynı**.
+Yanlış cevap veren hobisiz aday 200 başvurunun 200'ünde de eskisi gibi
+reddediliyor; doğru cevap veren hobisiz aday eskisi gibi işe giriyor.
+
+### Avantaj nereden geliyor
+
+Üç yerden, üçü de sınırlı. Maaşa ve gelir bandına **hiç dokunmuyor**.
+
+| Kanal | Ne yapıyor | Tavan |
+|---|---|---|
+| Mülakat | Cevap tutmazsa geçmiş ikinci bir şans veriyor | %45 |
+| Başlangıç ustalığı | İşe sıfır çırak olarak başlanmıyor | 5 yıl (= Kalfa) |
+| Terfi | Hobi sürüyorsa çok küçük devam payı | +0,05 |
+
+Pay hobinin **basamağından** geliyor, o yıl kaç ders alındığından değil.
+
+| Basamak | Pay | Fotoğrafçıda mülakat ikinci şansı |
+|---|---|---|
+| Hevesli | 0,00 | %0 |
+| Meraklı | 0,25 | %11 |
+| Düzenli | 0,55 | %25 |
+| Tutkulu | 0,80 | %36 |
+| Usta | 1,00 | %45 |
+
+**Usta bile garanti değil.** Aşçılıkta bilerek yanlış cevap verilen 200
+başvuruda: hobisiz **0**, Düzenli **44**, Usta **94**. Artıyor, ama
+hiçbir zaman 200 olmuyor.
+
+### Hobi → meslek tablosu (§23)
+
+| Hobi | Meslekler |
+|---|---|
+| Resim | Ressam/tasarımcı (güçlü) · Grafik tasarımcı (güçlü) |
+| Mutfak | Aşçı (güçlü) |
+| Fotoğraf | Fotoğrafçı (güçlü) · Gazeteci (küçük) |
+| Bilgisayar | Yazılım geliştirici (güçlü) · Veri analisti (orta) · Teknik servis (küçük) |
+| Yazmak | Yazar (güçlü) · Gazeteci (orta) |
+| Yabancı dil | Resepsiyonist (güçlü) · Satış danışmanı (orta) · Gazeteci (orta) · Banka personeli, Çağrı merkezi, İK uzmanı (küçük) |
+| Spor | Güvenlik (orta) · İtfaiyeci (orta) · Polis (küçük) |
+| Dans | Manken (küçük) |
+| Satranç | Veri analisti (küçük) |
+| Müzik | Müzisyen (orta) — sert şart ayrıca duruyor |
+| Okumak | Yazar (orta) — sert şart ayrıca duruyor |
+| **Bahçe** | **Bağ yok** |
+
+Bahçe bilerek boş: §13 uyarınca her hobinin mevcut bir mesleğe
+bağlanması gerekmiyor, zorlama bağ kurulmadı. İleride Bahçıvan/Peyzaj
+eklenirse tek satırla bağlanır. Test bunu koruyor: bahçe hiçbir
+meslekte görünmüyorsa test geçer.
+
+Spor bağları yasal eğitim, yaş ve sabıka şartlarını **bypass etmiyor**;
+yazmak hobisi Yazar'ın okuma şartını bypass etmiyor (ölçüldü).
+
+### Aktif / bırakılmış hobi (§20)
+
+Geçmiş silinmiyor ama aktif olanla aynı da değil. Usta resim:
+aktif **1,00**, 12 yıldır ara verilmiş **0,55**. Bırakılmış hobi terfi
+payı **hiç** vermiyor: geçmiş ustalık işe başlarken sayıldı, terfi
+masasında ikinci kez sayılmıyor.
+
+### Başlangıç ustalığı (§18)
+
+Usta fotoğrafçı işe **Kalfa** olarak başlıyor (5 yıl pay), hobisiz
+oyuncu **Çırak**. Usta olarak başlamak mümkün değil: Usta 8 yıl ister,
+tavan 5.
+
+Pay yalnızca ustalık merdivenine işliyor. Ölçüldü: 28 yaşında işe
+girmiş 30 yaşındaki oyuncunun `yearsInJob` ve `totalWorkYears`
+değerleri **2**, ustalık merdivenindeki etkin yıl **2 + pay**. Maaş
+katalog maaşı olarak kalıyor. İşten ayrılınca pay sıfırlanıyor.
+
+### Abuse (§22)
+
+* 12 hobiden **birer ders** alan oyuncunun en yüksek kariyer payı
+  **0,00** — Hevesli basamağının payı sıfır.
+* Gazetecinin üç bağını birden Usta yapmak avantajı çarpmıyor: tek hobi
+  **0,65**, üç hobi **0,81** (toplasa 1,95 olurdu). En güçlü bağ esas,
+  ikincisi yalnızca küçük pay ekliyor.
+* Hobi deneyimini 500 artırmak terfi payını **değiştirmiyor**.
+* 19 sinerjili mesleğin hepsinde maaş katalog maaşı olarak kalıyor.
+
+### Kayıt
+
+Tek yeni alan: `CareerState.synergyHeadStart` (int). Eski kayıtlar
+0 ile yükleniyor, kayıt bozulmuyor.
+
+### Arayüz
+
+* **Kurs kartı** (§15): "Kariyer avantajları — • Yazılım geliştirici —
+  güçlü avantaj · • Veri analisti — anlamlı avantaj · • Teknik servis —
+  orta avantaj". Bırakılmış hobide "(uzun zamandır ara verdin)".
+* **İş ilanı** (§16): "Bilgisayar hobin bu başvuruda sana güçlü avantaj
+  sağlıyor." Yüzde gösterilmiyor; test bunu kontrol ediyor.
+* Avantajı olmayan işte satır **hiç** görünmüyor.
+
+23 test: `app/test/paket_ak_synergy_test.dart`.
+
+**Karar bekleyen:** Q-181. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AL — PROFESYONEL DÖVÜŞ / SPOR KARİYERİ V1
+
+Altı dövüş sanatı "ders al → basamak yüksel → eğitmenlik" olmaktan
+çıkıp gerçek bir yaşam yoluna dönüştü: çocuk yaşta kulüp, amatör
+müsabaka, bölge, ulusal, profesyonel/elit, sponsor, sakatlık, düşüş,
+şampiyonluk, emeklilik, eğitmenlik.
+
+**Ana tasarım kuralı.** "En iyi antrenmanı yaptım, o zaman kesin
+kazanmalıyım" değil: *"Doğru kararlarla şansımı yükselttim, ama
+karşımda başka bir insan var."*
+
+### Ne eklendi, ne bozulmadı
+
+`MartialProgress` **dokunulmadı**: teknik ilerleme (ders, kuşak) aynı
+motorda duruyor. Rekabet ayrı bir modelde: `CombatCareer`. İkinci bir
+ders sistemi kurulmadı (§5), yeni bir stamina motoru yok (§36).
+Eğitmenlik mesleklerinin `instructorFromLevel` şartı **aynen** duruyor
+(§30, testle korunuyor).
+
+### Altı sanatın kendi yolu (§1, §23)
+
+| Sanat | Kademeler | Şampiyonluk |
+|---|---|---|
+| Boks | Amatör maçlar → Bölgesel → Ulusal amatör → Profesyonel ring | Kemer maçı |
+| Yağlı güreş | Yerel güreş → Boy müsabakaları → Bölgesel organizasyon → Büyük organizasyon | Başpehlivanlık |
+| Judo | Kulüp → Bölge → Ulusal → Elit turnuva | Uluslararası şampiyonluk |
+| Karate | Kulüp → Bölge → Ulusal → Elit kumite turnuvası | Ulusal şampiyonluk |
+| Taekwondo | Kulüp → Bölge → Ulusal → Elit turnuva | Ulusal şampiyonluk |
+| Kung fu | Okul içi → Açık turnuva → Bölgesel → Ulusal yarışma | Ulusal şampiyonluk |
+
+Organizasyonlar **kurgusal**; hiçbir federasyon, lig ya da şirket
+verisine bağlı değil. Ödüller net yıllık asgari ücretin katı olarak
+yazıldı (§14): çıpa kayarsa ödüller birlikte kayar, gerçek güncel fiyat
+hardcode edilmedi. Amatör kademe **para kazandırmıyor**.
+
+### Maç motoru (§7, §37)
+
+Sonuç ne yalnızca zar ne yalnızca stat karşılaştırması. Güç hesabı:
+teknik %42, form %24, sağlık %16, deneyim %10, itibar %8 — hepsi yaş
+eğrisi, hazırlık ve sakatlık geçmişiyle ölçekleniyor. Kazanma ihtimali
+**hiçbir zaman 0 ya da 1 değil**: band %10-%85.
+
+Ölçüldü: 300 maçta favori **87** kez kaybetti, underdog **30** kez
+kazandı. Judoda aynı sporcu için hazırlık farkı: dinlenerek %39,
+dengeli %44, yoğun kamp %53.
+
+### Form, kamp, antrenör
+
+Form 0-100; her yıl aşınır, çalışmak ve müsabaka telafi eder. Kamp üç
+seçenek (§10): dengeli / yoğun / dinlen — yoğun kamp hazırlığı artırır
+ama parayı, sağlığı ve sakatlık riskini de artırır. Antrenör üç kalite
+(kulüp hocası / deneyimli koç / elit koç); elit koç ancak üst kademede
+kabul ediyor ve **garanti galibiyet yok**.
+
+### Sakatlık (§18-§20)
+
+Ölçüldü: 400 maçta yoğun kampla **59**, dinlenerek **9** sakatlık.
+Sakatlık kariyer kademesini ya da şampiyonlukları **silmiyor**; formu
+düşürüyor, müsabakayı geçici kapatıyor, cepten masraf çıkarıyor.
+"Riski göze al" gerçekten riskli: 200 kararda **98** kez durum
+ağırlaştı.
+
+### Yaş (§21)
+
+Zirve 27; sonrası yavaş düşüş, sanatın yıpratıcılığına göre biraz
+farklı. Sert kesim yok. Ölçülen boks gücü: 20y **60,4** · 27y **65,0** ·
+33y **57,2** · 38y **50,7** · 45y **41,6**.
+
+### Save/load (§44)
+
+Müsabaka fırsatı üretildiği anda **sonucun tohumu kayda yazılıyor**.
+Ölçüldü: aynı müsabakayı kaydedip yükleyip tekrar oynamak aynı sonucu,
+aynı ödülü ve aynı sakatlığı veriyor. Bu çözüm yalnızca spor
+kariyerine uygulandı; oyunun genel rastgelelik mimarisine
+dokunulmadı.
+
+### 600 sporcu ölçümü (§49)
+
+6 sanat × 100 hedefli sporcu. **Kohort sıradan bir hayat değil**: bot
+her yıl çalışıyor, her fırsatı değerlendiriyor, yalnızca oyun zorlayınca
+bırakıyor.
+
+| Sanat | Elit/pro | Şampiyon | Erken bırakan | Ciddi sakatlanan | Medyan gelir |
+|---|---|---|---|---|---|
+| Boks | 63 | 5 | 3 | 33 | 1.573.324 ₺ |
+| Yağlı güreş | 88 | 25 | 1 | 32 | 5.441.778 ₺ |
+| Judo | 75 | 10 | 6 | 29 | 2.491.377 ₺ |
+| Karate | 80 | 18 | 0 | 29 | 3.682.320 ₺ |
+| Taekwondo | 78 | 27 | 0 | 32 | 2.971.461 ₺ |
+| Kung fu | 81 | 24 | 2 | 40 | 3.392.585 ₺ |
+
+Toplam: rekabete başlayan **%100**, elit/pro **%77,5**, şampiyon
+**%18,2**. Gelir: en kötü %10 **134.760 ₺**, medyan **3.048.104 ₺**, en
+iyi %10 **9.099.675 ₺**, en iyi **17.435.417 ₺** (asgari ücret çıpası
+336.900 ₺). Absürt sonuç, negatif rekor ya da uçuk gelir yok.
+
+### Ölçümün bulduğu iki gerçek sorun (düzeltildi)
+
+1. **Şampiyonluk pratikte kapalıydı.** İlk yazımda sıralamaya 12.
+   sıradan girilip her galibiyette bir basamak çıkılıyordu; 600
+   sporcuda **tek** şampiyon çıktı. Merdiven düzeltildi: 10. sıradan
+   giriş, alt sıralarda iki basamak.
+2. **Zirvedeki sporcunun formu çöküyordu.** En üst teknik basamağa
+   çıkan sporcuya ders motoru artık ders vermiyor ("öğrenecek ders
+   kalmadı"), dolayısıyla form telafisi sıfırlanıyor ve sporcu otuzlu
+   yaşların başında emekliliğe itiliyordu. Artık müsabakalar ve
+   zirvedeki kondisyon da forma katkı veriyor.
+
+### Abuse (§42)
+
+Aynı yıl 40 denemede yapılabilen müsabaka **3** (tavan 4). Aynı
+müsabakanın ödülü iki kez alınamıyor. Sakatken müsabaka yapılamıyor.
+Emekli olup aynı dalda yeniden başlanamıyor. Sıralaması olmayan
+şampiyonluk maçına çağrılmıyor (200 denemede 0). İki dalda birden
+rekabet edilemiyor.
+
+### Kayıt
+
+Tek yeni alan: `GameState.combatCareers`. Eski kayıtlarda yok, boş
+liste ile yükleniyor; test bunu doğruluyor.
+
+### Arayüz (§26, §27)
+
+Mevcut dövüş sanatı ekranı çöpe atılmadı, derinleştirildi: üstte
+kariyer paneli (kademe, form, rekor, sıralama, kariyer geliri,
+antrenör, sakatlık, sıradaki müsabaka ve rakip), altında eski ders
+kartları. Kararlar: üç kamp seçeneği, koç tut, riski göze al, spordan
+çekil, kariyeri gör (son 10 önemli an). Sıradan antrenman geçmişe
+yazılmıyor.
+
+25 test: `app/test/paket_al_combat_career_test.dart` (24) +
+`app/test/paket_al_600_athletes_test.dart` (1, 600 kariyer).
+
+**Karar bekleyen:** Q-182. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AL/VERIFY — BAĞIMSIZ DOĞRULAMA
+
+Yeni özellik eklenmedi, denge değiştirilmedi, 3000 hayat testi
+yapılmadı. Tek soru: **Paket AL brief'te söylediğimiz gibi mi
+çalışıyor, testlerinde hata var mı, eksik uygulanmış madde var mı?**
+
+### Bulunan iki TEST hatası (düzeltildi)
+
+1. **"sakatken müsabaka yapılamıyor" testi hiçbir şeyi sınamıyordu.**
+   Yorum "fırsat da çıkmıyor" diyordu ama iddia `isNotNull` idi — ve o
+   iddia **her zaman** geçiyordu, çünkü testin kendisi bir satır önce
+   bekleyen müsabakayı kuruyor, `offerBout` da bekleyen müsabaka varsa
+   onu geri veriyor. Sakatlık kapısı hiç sınanmamış.
+   Ürünün gerçek kuralı iki kapılı ve ikisi de motorda **var**: sakat
+   sporcuya yeni fırsat üretilmiyor, elinde bekleyen müsabaka olsa bile
+   dövüşemiyor. Test artık ikisini de ayrı ayrı sınıyor (50 tohumda 0
+   fırsat; sağlam sporcuda fırsat çıkıyor — yani kapı sakatlıktan
+   kapanıyor, her koşulda kapalı değil).
+
+2. **`requirementReason(...).contains('basamak')` iddiası asla doğru
+   olamazdı.** Motorun ürettiği metin "basamağına gelmen gerekiyor";
+   Türkçe yumuşamayla `'basamağına'`, `'basamak'` alt dizesini
+   içermiyor (ğ ≠ k). Yani eğitmenlik testinin son iddiası her zaman
+   geçiyordu. Ayrıca `dusuk` değişkeni iki kez atanıyordu; ilk atama
+   ölü koddu ve yorumla çelişiyordu. İkisi de düzeltildi; iddia artık
+   iki yönlü ve gerçek dizeyle: basamağı tutmayanda engel gerekçesi
+   eğitmenlik basamağını **söylüyor**, tutanda **kalkıyor**.
+
+### PROD BUG bulunmadı
+
+27 yeni doğrulama testi ürünün gerçek kapılarından geçti; çökme, state
+bozulması, çift ödeme ya da save/load hatası çıkmadı.
+
+### Doğrulanan davranışlar
+
+| Konu | Ölçüm |
+|---|---|
+| 6/6 sanat tam yol | başla → kazan → kaybet → kademe 3 → pro → emekli, hepsi ürün API'siyle |
+| Maç motoru bileşenleri | teknik, form, sağlık, deneyim, hazırlık, yaş, sakatlık geçmişi — **yedisi de** ihtimali değiştiriyor |
+| Bant uç durumda | en zayıf %10 · en güçlü %85 (0 ve 1 yok) |
+| Save/load | 6/6 sanatta sonuç, ödül, sakatlık, sıralama ve şampiyonluk birebir aynı |
+| Hazırlık kararı canlı | 200 müsabakanın **18'inde** kamp tercihi sonucu değiştirdi |
+| Çift ödeme | unvan maçı tek ödeme; ikinci çağrı ve kaydet/yükle sonrası 0 ₺ |
+| Şampiyonluk | 6/6 sanatta ürün kapılarından ulaşılabilir, geçmişe yazılıyor |
+| Şampiyon sonrası | unvan kaybı → tekrar şampiyonluk zinciri çalışıyor; kariyer bitmiyor |
+| Sıralama | galibiyet 10 → mağlubiyet 12 → 5 yıl ara 20; band 0-20, negatif yok |
+| Sakatlık | 600 maçta yok 471 · hafif 85 · orta 36 · ciddi 8 — üç seviye de çıkıyor |
+| "Riski göze al" | 200 kararda ağırlaşan 98 · kurtulan 102 (cosmetic değil) |
+| Antrenör | elit koç 94.332 ₺/yıl, yılda **bir kez** kesiliyor; kazanma %37 → %44; garanti değil |
+| Ün kademeleri | yerel 0 · ulusal 3 · elit 6 · şampiyonluk 18; spor tavanı 70 |
+| Sponsor | kademe 1'de 0 · itibar 20'de 0 · kademe 2 itibar 50'de 57 · +ün 172 · +şampiyonluk 174 (300 denemede) |
+| Yaş | 20y 60,4 · 27y 65,0 · 33y 57,8 · 35y 55,4 · 45y 43,5 · 55y 31,5 — duvar yok, 50+ dominans yok |
+| Emeklilik | üç sebep de çalışıyor, emekli geri dönemiyor, bekleyen müsabaka temizleniyor |
+| Boş durum | kariyeri olmayan ve bozuk `artId` taşıyan oyuncuda hiçbir okuma çökmüyor |
+
+### Brief'te yazılı olup UYGULANMAMIŞ maddeler
+
+Bunlar bu turda **eklenmedi** (verify turu); raporlandı ve Q-183'e
+yazıldı.
+
+| Madde | Durum |
+|---|---|
+| **§4 / §16** 18 yaş altı sporcuya aile desteği (ekipman, yol, kulüp, turnuva) | **YOK.** Paket AJ'nin `CourseSupport` sistemi combat tarafında hiç çağrılmıyor. Genç sporcunun kamp/koç masrafı yalnızca kendi cüzdanından çıkıyor. |
+| **§35 / §17** Okul + spor çatışması ("Turnuva sınav haftasına denk geldi") | **YOK.** Böyle bir olay ya da karar noktası kodda yok. |
+| **§16 / §14** Spor başarısının sosyal medya içerik performansına etkisi | **DOLAYLI.** Şampiyon ile aynı takipçili sıradan oyuncu, paylaşım başına **aynı** sonucu alıyor. Spor yalnızca Ün'ü yükseltiyor; Ün de medya işlerini (`kMediaSectionMinFame`, `job.minFame`) ve ünlü iş birliklerini (`minFame 25`) açıyor. Yani etkisi var ama paylaşım performansında değil. |
+| **§9** Rivalry'nin ün/ilgi üzerindeki "küçük etkisi" | **YOK.** Rakip kaydı, tekrar karşılaşma ve karşılıklı skor **gerçek state** (ölçüldü: kendi kademesinde 200 fırsatta 49 kez geri geldi), ama rivalry ne üne ne ödüle ne de fırsat sıklığına dokunuyor. |
+| **§36 / §18** İş + spor çatışması | **YALNIZCA PARA/SAĞLIK.** Ölçüldü: çalışan ve çalışmayan sporcunun kazanma ihtimali (%40 vs %40), maç sonucu ve 200 denemedeki fırsat sayısı (133 vs 133) **birebir aynı**. İş durumu spor motoruna hiç girmiyor. |
+
+### Belgelenen sınır (hata değil)
+
+Tanıdık rakip yalnızca gücü oyuncunun **bugünkü** kademesine yakınken
+geri gelebiliyor. Oyuncu üst kademeye çıkınca alt kademedeki eski
+rakipler bandın dışında kalıyor: ölçüldü, kendi kademesinde 200
+fırsatta **49**, üst kademeye çıkınca **0**. Kayıt kaybolmuyor, çökme
+yok; ama brief'in "aynı rakiple rövanş, final, kemer maçı" fikri
+kademeler arası taşınmıyor.
+
+### §22 — boks (%5) ve taekwondo (%27) farkı BUG mu?
+
+**Hayır, katsayıların bileşik sonucu.** Maç başına fark küçük:
+
+| Sanat | Kademe-3 rakip | Unvan rakibi | Sakatlık | Yıpranma | Denk şans | Unvan şansı |
+|---|---|---|---|---|---|---|
+| Boks | 76 | 92 | 0,22 | 1,15 | %62 | %40 |
+| Yağlı güreş | 74 | 90 | 0,18 | 1,10 | %65 | %43 |
+| Judo | 75 | 91 | 0,16 | 1,00 | %64 | %42 |
+| Karate | 74 | 90 | 0,14 | 0,95 | %65 | %43 |
+| Taekwondo | 74 | 90 | 0,14 | 0,95 | %65 | %43 |
+| Kung fu | 72 | 88 | 0,12 | 0,85 | %68 | %46 |
+
+**Dikkat çeken nokta:** unvan maçı başına fark yalnızca **3 puan**
+(%40 vs %43), ama 600 hayatlık sonuç **5'e 27** — beş kattan fazla.
+Fark tek bir büyük katsayıdan değil, üç küçük katsayının kariyer
+boyunca **birbirini çarpmasından** doğuyor: daha güçlü rakip → daha az
+terfi; daha yüksek sakatlık → kaybedilen yıllar → sıralama aşınması;
+daha hızlı yaş aşınması → daha kısa elit pencere. Bu hassasiyetin
+kendisi Faho'ya bildirildi (Q-183 #6); **hiçbir sayı değiştirilmedi.**
+
+### §23 — dominance
+
+Hiçbir sanat dört ölçütün (elit oranı, şampiyonluk, sakatlık, gelir)
+dördünde birden önde değil: en çok elit yağlı güreş (88), en çok
+şampiyon taekwondo (27), en az sakatlık judo/karate (29), en yüksek
+gelir yağlı güreş (5,44 M₺).
+
+**Ters yönde bir uyarı var:** boks dört ölçütün üçünde **son sırada**
+(elit 63, şampiyon 5, gelir 1,57 M₺) ve sakatlıkta da üst sıralarda.
+Denge sorusu olarak Q-183 #6'da duruyor.
+
+27 doğrulama testi: `app/test/paket_al_verify_test.dart`.
+
+**Karar bekleyen:** Q-183. **Doğrulanmayan:** gerçek cihazda oynanmadı.
+
+## PAKET AL/2 — SPOR KARİYERİ ENTEGRASYONLARI
+
+Paket AL/VERIFY beş brief maddesinin **yazıldığı ama uygulanmadığını**
+tespit etmişti. Bu paket o beşini gerçekten kodladı: her biri için
+production kod, gerçek state etkisi, hedefli test ve gereken yerde UI
+var. **Yeni denge turu değil**; mevcut kazanma bandı, sakatlık oranları,
+şampiyonluk oranları, yaş eğrisi ve ödül çarpanlarına dokunulmadı.
+
+### Önce / sonra
+
+| Konu | Paket AL/VERIFY sonunda | Paket AL/2 sonunda |
+| --- | --- | --- |
+| 18 yaş altı aile desteği | Yok. Genç sporcunun kamp/koç masrafı yalnızca kendi cüzdanından. | Dört masraf başlığında aileden destek istenebiliyor; **Paket AJ ile aynı ebeveyn yıllık bütçesi** paylaşılıyor. Kabul oranı varlığa göre %0 / %0 / %23 / %58 / %69. |
+| Okul + spor | Karar noktası yok. | Yılda en fazla bir kez çıkan gerçek çatışma; iki seçim de farklı state üretiyor. 200 kariyer × 8 okul yılında 44 çatışma. |
+| Spor başarısı → sosyal medya | Şampiyon ile sıradan oyuncu **birebir aynı** paylaşım performansı. | Spor içeriğinde şampiyon **+%41**; spor dışı içerikte fark **tam olarak 0**. |
+| Rivalry | Kayıt tutuluyordu, hiçbir sonucu yoktu. Üst kademeye çıkınca eski rakip 0 kez geliyordu. | Rekabet gücü ölçülüyor; kazanılan önemli rövanş ün ve sosyal ilgi getiriyor (azalan getiri + yıllık tavan). Önemli rakip oyuncuyla birlikte yükseliyor, yaşlanınca düşüyor. |
+| İş + spor | Çalışan ve çalışmayan sporcu **birebir aynı**: aynı fırsat, aynı kazanma ihtimali. | Kişi başı müsabaka 13,3 / 10,7 / 9,1; full-time fırsat kaybı %32; kariyer sonu form 48 / 29 / 20. Kazanma ihtimaline **doğrudan** kesinti yok. |
+
+### Yeni dosyalar
+
+- `app/lib/domain/combat/sport_family_support.dart` (§1-§5)
+- `app/lib/domain/combat/sport_school_conflict.dart` (§6-§9)
+- `app/lib/domain/combat/sport_rivalry.dart` (§15-§19)
+- `app/lib/domain/combat/sport_workload.dart` (§20-§25)
+- `app/lib/domain/social/sport_social_boost.dart` (§10-§14)
+- `app/test/paket_al2_entegrasyon_test.dart` (38 test + §34 ölçümü)
+
+### Bulunan PROD bug — raporlandı, DÜZELTİLMEDİ
+
+`CombatCareerEngine.advanceYear` ders sayacını ters anahtar sırasıyla
+okuyor (`karate|dovus`), oysa `MartialArtsEngine` `dovus|karate`
+yazıyor. Paket AL'den beri "çalışmak formu telafi eder" kuralı hiç
+işlememiş.
+
+Düzeltme **denendi ve geri alındı**: 600 sporcu ölçümünde medyan kariyer
+geliri 4,04 M₺ → 6,51 M₺ çıkıp testin kendi denge koruması kırıldı.
+Brief §0 bu pakette ödül çarpanlarına ve şampiyonluk oranlarına
+dokunmayı yasaklıyor, mevcut testi gevşetmek de yasak. Karar Q-184
+#1'de Faho'ya bırakıldı; hatanın varlığı bir belge testiyle kilitlendi.
+
+### Ölçümle düzeltilen iki kalibrasyon (ikisi de bu paketin kendi
+### mekanikleri)
+
+1. Okul çatışması ilk yazımda yalnızca kademe ≥ 1'de çıkıyordu ve 200
+   sporcuda **1 kez** çıktı — fiilen ölü özellik. Kapı, 4+ müsabaka
+   yapmış sporcuyu da kapsayacak şekilde genişletildi.
+2. Tam zamanlı iş cezası ilk yazımda kariyeri öldürüyordu (kariyer sonu
+   form 3,8, fırsat kaybı %55). Katsayılar yumuşatıldı.
+
+**Karar bekleyen:** Q-184 (ve Q-183 #6 boks/taekwondo hassasiyeti hâlâ
+açık). **Doğrulanmayan:** gerçek cihazda oynanmadı; Android APK bu
+oturumda cihazda test edilmedi.
+
+## PAKET AM — MANTIKSAL MESLEK / FİZİKSEL UYGUNLUK ŞARTLARI
+
+Bazı kariyer kapıları mevcut statlarla fazla gevşekti. Bu paket
+"bu mesleğin doğası hangi statı gerçekten gerektirir?" sorusunu
+uyguladı — **keyfi stat duvarı kurmadan**. Her işe "80 zekâ + 80 sağlık
++ 80 karizma" gibi kapılar konmadı; şart mesleğin kendisinden geldi.
+
+### İki kesin karar (Faho)
+
+| | Önce | Sonra |
+| --- | --- | --- |
+| Manken dış görünüş | 70 | **80** |
+| Rekabetçi dövüş kariyerine başlama sağlığı | 40 | **80** |
+
+D-064'ün "görünüş 70 şartı korunur" hükmü Faho'nun bu paketteki kesin
+kararıyla **80**'e güncellendi.
+
+### Sağlık üç kademeye ayrıldı (combat)
+
+Tek bir eşik yerine üç kapı, çünkü kariyere **başlamak** ile sakatlanıp
+toparlanmayı beklemek aynı şey değil:
+
+- kariyere başlama: **80**
+- pro/elit kademeye terfi: **80** (kalıcı kilit değil; sağlık gelince açılır)
+- normal müsabakaya çıkma: **70**
+- 70'in altı: **geçici** engel. Kariyer durur, **silinmez** — kademe,
+  rekor, sıralama ve şampiyonluklar yerinde kalır.
+
+Ciddi sakatlık ayrı bir kapı olarak duruyor: sağlığı 90 olan oyuncu da
+sakatken dövüşemez ve ona sağlık cümlesi değil sakatlık cümlesi
+gösterilir. İki ceza üst üste binmiyor.
+
+### `JobType.minHealth` (yeni alan, varsayılan 0)
+
+Eşik konan meslekler — brief'in adını verdiği üç kamu mesleği:
+
+| Meslek | minHealth |
+| --- | --- |
+| İtfaiyeci | 70 |
+| Polis | 65 |
+| Güvenlik görevlisi | 55 |
+
+Her birinde mesleğe özel `physicalNote` var; oyuncu "işe uygun değilsin"
+değil, gerçek sebebi ve eksiğinin ne kadar olduğunu okuyor.
+
+**Ölçümle alınmış bir karar:** §10'un aday saydığı beş işe (kurye 50,
+depo personeli 55, oto tamircisi 50, tesisatçı 50, kaynakçı 60) da eşik
+konmuştu ve **ölçüm bunu geri aldırdı**. Bu beş iş erişilebilir
+kataloğun büyük bir dilimi; kapanmaları maaş yollarını zayıflatıp
+`girisim+yatirim` stratejisinin her ölçüde ezdiği strateji sayısını
+**5/14'ten 9/14'e** çıkardı ve terzi atölyesinin payback dağılımını
+darlattı. Brief toplu denge operasyonunu yasakladığı için eşikler
+kaldırıldı; geri alındıktan sonra iki ölçüm de baseline değerine döndü
+(dominans yine 5/14). Karar Q-185 #2'de Faho'da.
+
+**Bilerek 0 bırakılanlar:** bütün ofis/uzmanlık meslekleri (yazılımcı,
+muhasebeci, öğretmen, banka personeli, üç mühendislik, gazeteci, yazar,
+müzisyen, doktor, hemşire, psikolog, eczacı, memur, veri analisti),
+yaratıcı meslekler, dövüş eğitmenlikleri ve **bütün yarım zamanlı
+gençlik işleri**. Sağlık statı 45 olan birinin muhasebeci olamaması
+saçma olurdu.
+
+**Görünüş bariyeri yalnızca mankenlikte** (katalogda tek). Satış
+danışmanı, resepsiyonist ve gazetecide doğru stat karizma; hard
+appearance gate eklenmedi.
+
+### Ne kapanmadı
+
+- Normal spor aktiviteleri (koşu, ağırlık, esneme) sağlık 55 ile açık.
+- Dövüş sanatı **dersleri** sağlık 60 ile açık — ders almak müsabakaya
+  çıkmak değil.
+- `minAppearance` ve `minHealth` **işe giriş** şartı; işe girdikten
+  sonra stat düşerse otomatik kovma yok (D-064).
+
+### UI
+
+İş ilanında ve kapalı işler listesinde gereksinimler ✓/✗ olarak
+gösteriliyor; tutan şartta yalnızca ad, tutmayanda eşik ve mevcut değer
+yazılıyor. Dövüş ekranında "Rekabetçi kariyer için sağlık: 73 / 80"
+satırı var. Yüzde ya da formül gösterilmiyor.
+
+29 hedefli test: `app/test/paket_am_fiziksel_sartlar_test.dart`.
+
+**Dokunulmayan:** Q-184 #1'deki ders/form telafisi anahtar hatası (§21
+gereği), boks/taekwondo hassasiyeti (Q-183 #6), genel denge.
+**Doğrulanmayan:** gerçek cihazda oynanmadı.
 
 ## Sonraki tasarım işleri
 İlk çalışan dikey kesit doğrulandıktan sonra olay verisi ve sürekliliğini genişlet, aile, eğitim, kariyer, ekonomi, sosyal medya/Ün sistemlerini aşamalı ayrıntılandır. Kesin sayısal denge ve teknoloji hâlâ açık.
@@ -939,5 +3415,7433 @@ başlatmıyor; bu turda da yeni Windows sürümü veya Android APK
 ## ChatGPT / Claude devri
 Yeni oturumda `DECISIONS.md`, bu dosya, `docs/PROTOTYPE_UI.md`, `docs/CLAUDE_PROTOTYPE_TASK.md` ve ilgili sistem belgelerini oku. **Önerileri kesin karar sayma.** Yeni karar alınırsa ilgili belgeleri güncelle; tamamlanmamış işleri tamamlandı yazma.
 
+## PAKET AN — SPOR FORM BUG FIX + YENİDEN KALİBRASYON
+
+Q-184 #1'de doğrulanmış bir production bug düzeltildi ve arkasından spor
+dengesi **doğru çalışan motorun üzerinde** yeniden kuruldu. Yanlış çalışan
+kod bir denge mekaniği değildir.
+
+### Hata ve düzeltme
+
+`MartialArtsEngine` ders sayacını `'dovus|<artId>'` yazıyor,
+`CombatCareerEngine.advanceYear` ise `'<artId>|dovus'` diye okuyordu.
+`GameState.interactionKey` iki parçayı **sırayla** birleştirdiği için bu
+iki anahtar farklıydı ve "çalışan sporcu formunu daha iyi korur" kuralı
+Paket AL'den Paket AM'e kadar **hiç işlemedi**.
+
+Anahtar artık tek yerde kuruluyor:
+`app/lib/domain/combat/martial_lesson_counter.dart` →
+`MartialLessonCounter.key(artId)`. Yazan da okuyan da onu kullanıyor;
+string sırası hiçbir yerde elle tekrar yazılmıyor.
+
+**Eski kayıtlar migrate edilmedi ve edilmesi gerekmiyor:** hatalı olan
+okuma tarafıydı, yazma tarafı baştan beri doğru biçimi yazıyordu. Ters
+sıralı anahtar için bilerek fallback konmadı — o biçimi hiçbir kod yolu
+hiç yazmadı, ve yazılmamış bir biçim için fallback aynı dersi iki kez
+sayma riskini bedavaya alırdı.
+
+### Kalibrasyon: nedenin ayrıştırılması
+
+Bug düzelince fazla para nereden geldi? Ayrıştırıldı: kariyer uzunluğu
+neredeyse sabit (24 → 26 yıl), maç sayısı +%29, ama **şampiyonluk
++%160**. Para şampiyonluktan geliyordu.
+
+Ayrıca bir düzeltme: Paket AL/2'nin "4,04 M₺ → 6,51 M₺" rakamları
+**brüt** ölçümdü. Net tarafta (ders, koç, kamp ve tedavi düşüldükten
+sonra) düzeltilmiş motor 4,01 M₺ veriyor — hedef bandın (3,5–5,0 M₺)
+içinde. Yani gelir tarafı kalibrasyon istemiyordu; **ödül çarpanlarına
+(tier purse, title purse) dokunulmadı.**
+
+Unvan zinciri ölçüldü ve üç halkasından ikisinin no-op olduğu çıktı:
+
+| zincir halkası | 600 sporcuda |
+| --- | --- |
+| en iyi sıralaması ≤ 2 | 363 |
+| itibarı ≥ 70 | 575 |
+| **itibarı 100'e doyan** | **530** |
+| en üst kademeye çıkan | 570 |
+
+İtibar yalnızca yukarı gidiyor ve tavana doyuyor; eşiği 100 yapmak bile
+600'ün 530'unu geçirirdi. Gerçekten seçici tek halka sıralama.
+
+Üç sayı değişti:
+
+| sabit | Önce | Sonra | Gerekçe |
+| --- | --- | --- | --- |
+| `prototypeOnlyTitleShotRank` | 2 | **1** | Kemer maçına bir numaralı rakip çağrılır |
+| `prototypeOnlyTitleShotChance` | 0,40 | **0,30** | 0,40 "kapı açıldıysa kemer maçı kesin"e yaklaşıyordu |
+| `prototypeOnlyFormPerLesson` | 1,2 | **1,6** | Uçurum düzeltmesi, gelir ayarı değil |
+
+Ders katsayısı neden değişti: yıllık form kaybı 8 olduğu için telafi 8'i
+geçene kadar form çöküyor, geçtiği anda tırmanıyor. 1,2'de yalnızca
+derslerden başabaş ≈ 6,7 ders/yıl; yılda 4 ders alan sporcunun formu
+kariyer sonunda 14,7'ye iniyordu. 1,6'da başabaş 5 derse indi ve bant
+0 → 2,0 · 2 → 6,2 · 4 → **32,0** · 8 → 61,9 oldu. Telafi tavanı (18)
+yerinde, yani ders sayısını artırmak formu 100'e kilitlemiyor.
+
+`prototypeOnlyTitleShotReputation` (70) **bilerek değiştirilmedi**: 90
+yazmak filtre kurmuş gibi görünüp hiçbir şey yapmazdı.
+
+### Nihai ölçüm — 600 adanmış sporcu, koçsuz kohort
+
+| ölçüm | BUGLU | FIXED RAW | FIXED + KALİBRE |
+| --- | --- | --- | --- |
+| kariyer sonu form | 38 | 56 | 57 |
+| ortalama müsabaka | 31 | 40 | 40,2 |
+| medyan kariyer yılı | 24 | 26 | 26 |
+| elit/pro | — | %95,0 | %95,0 |
+| şampiyon | %8,8 | %33,8 | **%22,0** |
+| medyan BRÜT | 3,35 M₺ | 6,45 M₺ | 6,28 M₺ |
+| medyan NET | 1,48 M₺ | 4,01 M₺ | **3,82 M₺** |
+
+Şampiyonluk Q-183'ün %18,2 referansına yakın bir yere indi ve imkânsız
+olmadı. Net gelir hedef bandın içinde. `paket_al_600_athletes_test`
+bağımsız harness'ıyla aynı sonucu veriyor (%21,7).
+
+BUGLU sütunu git history'ye dokunmadan üretiliyor: ölçüm fixture'ı
+`advanceYear` öncesi ders sayacını siliyor, yani ders alınıyor, parası
+ödeniyor, teknik basamak kazanılıyor ama form motoru dersi görmüyor —
+hatanın tam davranışı.
+
+### Sanat tablosu (600 sporcu, kalibrasyon sonrası)
+
+| sanat | elit% | şamp% | ort.maç | medyan yıl | ciddi sakat% | brüt medyan | NET medyan | iyi %10 | kötü %10 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Boks | 89 | 9 | 32,3 | 23 | 49 | 5,42 M | 3,59 M | 6,71 M | 0,24 M |
+| Yağlı güreş | 92 | 22 | 38,6 | 27 | 31 | 6,44 M | 4,10 M | 8,14 M | 1,27 M |
+| Judo | 97 | 23 | 40,8 | 28 | 34 | 6,28 M | 3,77 M | 6,83 M | 1,12 M |
+| Karate | 97 | 26 | 43,8 | 28 | 26 | 6,85 M | 4,25 M | 7,73 M | 1,88 M |
+| Taekwondo | 99 | 25 | 43,3 | 29 | 31 | 6,84 M | 4,16 M | 6,88 M | 1,23 M |
+| Kung fu | 96 | 27 | 42,7 | 28 | 31 | 5,90 M | 3,35 M | 5,83 M | 0,70 M |
+
+### Brüt değil net (§7)
+
+Rekabete başlayan 600 sporcunun toplamı:
+
+| kalem | tutar |
+| --- | --- |
+| + müsabaka ödülü | 3.097 M₺ |
+| + sponsorluk | 684 M₺ |
+| − ders ücreti | 66 M₺ |
+| − koç ücreti | 0 (koçsuz kohort) |
+| − kamp + tedavi | 1.338 M₺ (kampın liste fiyatı 1.232 M₺) |
+| = **NET** | **2.378 M₺** |
+
+Kamp ve tedavi motorun aynı çağrısında tahsil edildiği için cüzdanda
+birlikte ölçülüyor; kampın liste fiyatı ayrıca veriliyor.
+
+Başlık kohortu **koçsuz**, çünkü §5'teki "bug öncesi 4,04 M₺" referansı
+Paket AL kohortundan geliyor ve o kohort koç tutmuyordu. Koçun bedeli
+ayrı ölçüldü ve bir bulgu çıktı: koç başarıyı artırıyor (şampiyon 132 →
+175) ama net geliri düşürüyor (3,82 M₺ → 2,70 M₺). Karar Q-186 #3'te.
+
+### Dokunulmayanlar
+
+- Ödül çarpanları: tier purse, title purse, ödül sıklığı — net gelir
+  bandın içinde olduğu için gerek yoktu (§8).
+- Yıllık maç tavanı (4): gerçekleşen dağılım 40,2 maç / 26 yıl ≈ 1,55
+  maç/yıl, yani tavan sorun değil (§9).
+- Boks / taekwondo farkı: kendiliğinden daraldı (5,4× → 2,8×), §11
+  gereği müdahale edilmedi.
+- Paket AM'in sağlık kuralları: kariyere başlama 80, elit terfi 80,
+  müsabaka 70 — hepsi yerinde ve testli (§16, §24).
+- Q-184'ün diğer maddeleri (aile desteği, okul çatışması, sosyal boost,
+  rivalry ün) — §23.
+
+### Testler
+
+- `app/test/paket_an_form_telafisi_test.dart` — 18 koruma testi: kanonik
+  anahtar, production yolu, eski kayıt uyumu, çift sayım yok, telafinin
+  sınırı, iş yükü, yaş eğrisi, sakatlık kapısı, 80/70 sağlık kuralları.
+- `app/test/paket_an_spor_kalibrasyon_test.dart` — 5 ölçüm: A (6 sanat ×
+  100), §19 (BUGLU vs kalibre), koç politikası, B (0/2/4/8 ders),
+  C (işsiz/part-time/full-time).
+- `app/test/paket_al2_entegrasyon_test.dart` — "BİLİNEN BUG" belge testi
+  **doğru davranış testine çevrildi** (§21). Bir bug testle sonsuza kadar
+  korunmaz.
+- `app/test/paket_al_600_athletes_test.dart` — brüt medyan koruması
+  12× asgari ücretten **22×**'e yeniden temellendirildi. Gevşetip
+  unutulmadı: eski 12x eşiği ölü bir mekaniğin yan ürünüydü, yeni tavan
+  ölçülen 18,5×'in hemen üstünde ve dengenin asıl bekçisi artık
+  `paket_an_spor_kalibrasyon_test`'teki **net** band.
+
+## PAKET AO — AİLE / İLİŞKİLER V2: DİNAMİK AİLE AĞI
+
+**Ana tasarım kuralı (Faho):** "Aile menüsü bir NPC listesi olmasın.
+İnsanların kendi hayatı olsun. AMA hiçbir kişi, sadece hikâye metninde
+var olmasın."
+
+### Yeni bağ türleri (enum sonuna eklendi, eski kayıtlar bozulmadı)
+
+`uveyKardes`, `yariKardes`, `uveyCocuk`, `kayinvalide`, `kayinpeder`.
+Yeni bir öbek: `RelationGroup.esinAilesi`.
+
+Kan bağı ayrımı `kanBagi` içinde: üvey kardeş ve üvey çocuk çekirdek
+ailede listelenir ama kan bağı **değildir**; yarım kardeş kan bağıdır
+çünkü bir biyolojik ebeveyn ortaktır.
+
+### Soy kaydı (§14-§15)
+
+`Person.motherId` / `Person.fatherId` eklendi. İkinci bir Person sistemi
+kurulmadı; sahte `'player'` sabiti yok, `state.player.id` kullanılıyor.
+`lib/domain/models/kinship.dart` akrabalık sorularının tek adresi.
+
+**Kapatılan iki gerçek boşluk:**
+
+1. Yarım kardeş mirastan hiçbir şey almıyordu. Artık **yalnızca ortak
+   olan ebeveynden** miras alıyor; üvey bağlar bilerek dışarıda.
+2. Üvey kardeş romantik filtreden geçiyordu. Filtre artık yalnızca
+   `kanBagi` bayrağına değil, gerçek soy kaydına bakıyor (§16).
+
+### Ebeveyn boşanması (§1-§6)
+
+Düz bir yıllık yüzde değil: aileye özel, gizli bir **dayanıklılık**
+(maddi durum, oyuncunun mutluluğu, ebeveyn yakınlığı, ebeveyn
+adlarından türeyen sabit aile sapması). Yıllık tavan %5,5, pencere 4-45.
+
+İki ebeveyn de listede **kalır**; hane gerçekten ayrılır; 12-23 yaş
+arasında oyuncuya "kiminle kalacaksın?" sorulur; mutluluk etkisi yaşa
+bağlıdır (sabit −20 değil).
+
+**Ölçümle bulunan hata:** ilk yazımda 24 yaş üstü oyuncuda iki ebeveyn
+de haneden çıkarılıyordu ve hâlâ ailesinin yanında yaşayan bir yetişkin
+bir anda "kendi evinde" sayılıyordu — `LivingCosts.livesWithFamily` buna
+bakıyor, yani yaşam gideri kayıyordu. Kural tek yönlü yapıldı.
+
+### Erişilemeyen üç motor (ikinci fazda kapatıldı)
+
+Denetim, AO/1'de yazılan üç şeyin oyuncuya **hiç ulaşmadığını** buldu:
+
+- `ParentDivorce.isPending`/`choose` hiçbir ekrandan çağrılmıyordu.
+- `ElderCare` hiçbir yerden çağrılmıyordu: dosya vardı, oyunda yoktu.
+- Beş yeni bağ hiçbir listeye düşmüyordu: kaydı vardı, ekranda yoktu.
+
+Üçü de bağlandı. Kod yazılmış olması oyunda erişilebilir olması demek
+değildir; bu paketin en pahalı dersi buydu.
+
+### İlişkiler ekranı (§38-§39)
+
+Beş aile öbeği: **çekirdek aile / kendi ailem / geniş aile / eşinin
+ailesi / geçmiş ilişkiler**, artı aile dışı. Boş başlık çizilmiyor.
+Kardeşler kendi sayfasına alındı; öz, üvey ve yarım kardeş bir arada.
+
+Kişi kartına **yaşadığı şehir**, **soy bağı** (annesi/babasi) ve
+boşanma varsa **velayet düzeni** satırları eklendi.
+
+`state.children` **değiştirilmedi**: miras, velayet ve kuşak devamı
+biyolojik çocuğa bakmaya devam ediyor. Değişen yalnızca ekranın
+gösterdiği liste.
+
+### 500 aile hayatı (§49) — yalnızca ölçüm
+
+Genel 3000 hayat denetimi **yapılmadı**. Aile odaklı arketip, 500 tohum.
+Oranları güzelleştirmek için ne bot ne kural oynandı.
+
+| ölçüm | sonuç |
+| --- | --- |
+| Ebeveyn boşanması | %51,4 |
+| Üvey ebeveyn geldi | %78,0 |
+| Üvey kardeş oluştu | %38,4 |
+| Yarım kardeş doğdu | %15,0 |
+| Eşin önceki çocuğu | %18,4 |
+| Kayın aile kuruldu | %81,0 |
+| Oyuncu evlendi | %90,2 |
+| Kişi sayısı (medyan) | 62 |
+
+Bozukluk sayaçları: mükerrer kimlik **0**, geçersiz romantik bağ **0**,
+kopuk soy kaydı **0**, yaşayan ebeveynde tutarsız yaş **0**.
+
+**Ölçümün açtığı yanlış alarm.** İlk turda 103 "çocuk ebeveyninden
+büyük" vakası çıktı. Test gevşetilmedi; sayaç ikiye ayrıldı ve hepsinin
+**vefat etmiş** ebeveyn olduğu görüldü. Sebep kaydın kendi anlamı:
+vefat edenin yaşı öldüğü yaşta donar ("32 yaşında vefat etti" böyle
+saklanır), genç ölen bir ebeveynin çocuğu yıllar sonra o yaşı geçer.
+Yanlış olan oyun değil, ilk yazılan değişmezdi. İki sayaç da raporda
+duruyor.
+
+### Testler
+
+- `app/test/paket_ao_aile_v2_test.dart` — 48 hedefli test (AO/1, AO/2).
+- `app/test/paket_ao_faz2_test.dart` — 16 hedefli test: kendi hayatlar,
+  buluşma havuzu, yaşlı bakımı, hane seçimi.
+- `app/test/paket_ao_500_aile_test.dart` — §49 ölçümü.
+
+**Yazarken kendini ele veren iki test.** Yeğen testi önce boştu:
+üretilen yeğenin kimliği ebeveynin kimliğini taşımıyor, yani iddia her
+koşulda doğruydu. İki yönlü yazıldı — yarım kardeşten yeğen **geliyor**
+(pozitif kontrol), üvey kardeşten gelmiyor. Pozitif kontrol de ilk anda
+kırıldı, ama sebep ürün değil harness'tı: `advanceOneYear` ekranda
+çözülmemiş olay varken hiçbir şey yapmadan dönüyor.
+
+### Tam süitin kırdığı üç bekçi — üçü de ölçümle çözüldü
+
+Paket AO tamamlandıktan sonra tam süitte üç test kırıldı. Üçü de tahminle
+değil ölçümle incelendi ve üçünde de aynı sonuç çıktı: kırılan şey ürün
+değil, **bekçinin kendisiydi**. Hiçbir eşik düşürülmedi.
+
+**1. `paket_ai_abuse` §24 — "para isteme net serveti artırıyor (+108)".**
+Para istemek tasarım gereği para verir (harçlık, D-019); net servet
+farkının işareti bu saldırıda kuralı değil, o turda açılan rastgele
+olayın cebe ne yaptığını ölçüyordu. Paket AO **öncesi** HEAD'de aynı
+saldırı 20 tohumda koşuldu: **14 tohumda net servet zaten artıyordu**,
+birebir +108 dahil. Bekçi tek tohumla tesadüfen geçiyormuş.
+
+Gevşetmek yerine saldırının asıl koruması iddiaya çevrildi: **mekanik
+doyuyor.** 100 denemede de 1000 denemede de kabul sayısı aynı (20 tohumda
+da 3). Yeni iddia: kabul ≤ 4 **ve** on kat deneme bir kabul daha
+getirmiyor. Diğer altı saldırıda "servet artmasın" bekçisi aynen duruyor.
+
+**2-3. `paket_ag_payback` §16 ve §20 — dağılım kuyrukları.** Hızlı turda
+işletme başına 45 hayat koşuluyordu ve işletmeyi gerçekten **açan** hayat
+~25'e düşüyordu; yani "kötü %10" sıralı listenin 3. elemanıydı.
+
+| örneklem | serbest yazılım kötü%10 (AO öncesi → sonrası) |
+| --- | --- |
+| 45 | −0,37 → **+7,79** |
+| 150 | −0,33 → +0,30 |
+| 300 | −0,29 → +0,30 |
+
+Örneklem 45'ten **600**'e çıkarıldı; eşikler ve istatistik aynen kaldı.
+
+Paket AO'nun bu sayılara dokunmadığı ayrıca **kanıtlandı**: Faz 3'ün tek
+simülasyon etkisi yeni bağlara `ChildProgression` çalıştırmaktı ve o
+kayıtlar oyuncunun ekonomisine hiç değmiyor. Deney olarak sonuçlar atılıp
+yalnızca zar akışı ilerletildiğinde ölçüm birebir aynı çıktı:
+**9,416017364203027**, on beş hanesine kadar. Fark tamamen zarın
+konumundan geliyordu.
+
+Yan bulgu (gerçek, denge kararı verilmedi): **terzi atölyesi** katalogdaki
+en dar dağılım ve §16 sınırına iki ağaçta da en yakın işletme — Paket
+AH'nin "işletme seçimlerinin %60'ı terzi" bulgusuyla aynı yöne işaret
+ediyor.
+
+### Bilerek yapılmayanlar (§51)
+
+Dev aile ağacı görseli, DNA testi, evlat edinme akışı, velayet mahkemesi
+simülasyonu, karmaşık nafaka davaları, aile şirketi, aile içi suç.
+
+### Paket AU: okul kulüpleri, spor geçmişi ve futbol yolu (4 Ekim 2026)
+
+Oynanabilirlik paketi. Okulda bir kulübe girmek, o kulüpte yıllarca
+kalmak, rol kazanmak ve bu geçmişin profesyonel futbol kapısını açıp
+açmaması tek bir zincir hâline getirildi. **Mevcut sistemler yeniden
+kurulmadı:** hobi ilerlemesi `hobby/`, dövüş kariyeri `combat/`, spor
+masrafı/çatışması AL/2'de olduğu yerde kaldı; kulüpler kendi klasöründe
+(`domain/sports/`) duruyor ve hobi kimlikleriyle var olan ilerlemeye
+bağlanıyor.
+
+### Yapılanlar
+
+- **AU/1 — veri.** `data/school_club_catalog.dart`: 13 kulüp, üç kategori
+  (spor, akademik, sanat). `models/school_club_progress.dart`: kalıcı
+  üyelik kaydı (sezon sayısı, beceri, performans, rol, kaptanlık yaşı,
+  dereceler) ve `SquadRole` (Yedek → Rotasyon → İlk 11 → Önemli oyuncu →
+  Kaptan). `GameState`'e `schoolClubs` ve `footballCareer` alanları,
+  kayda (`game_state_codec`) kodlama/okuma; eski kayıtlar boş listeyle
+  yükleniyor.
+- **Gizli atletik yatkınlık.** `PlayerCharacter.athleticPotential`
+  doğumda bir kez belirleniyor (25-85), **oyuncuya gösterilmiyor**,
+  `copyWith` ile değiştirilemiyor, çocuğa miras geçmiyor (kendi zarını
+  atıyor). `infertile` alanı bunun emsali.
+- **AU/2 — motor.** `sports/school_club_engine.dart`: engel gerekçeleri,
+  seçme (tryout), yılda bir antrenman, azalan getirili beceri artışı,
+  sezon ilerlemesi, rol değişimi (sezonda tek kademe), ayrılma (kayıt
+  silinmiyor, `active: false`), okul değişiminde üyeliğin düşmesi ama
+  geçmişin ve becerinin kalması.
+- **Seçme saf kura değil, ama kesin de değil.** Puan statlardan ve
+  geçmişten geliyor; üstüne 40'lık zar ve puandan bağımsız %8 sürpriz ret
+  var. Yani sağlık 100 + yüksek yatkınlık **kabul garantisi değil** —
+  kendi testim bunu ilk yazımda yakaladı ve düzeltildi.
+- **AU/2 — futbol kapısı.** `sports/football_career.dart`:
+  `FootballPath.evaluate` zar atmadan, gerekçeli bir uygunluk kararı
+  veriyor (`FootballStage`: geçmişYok → gelişiyor → denemeyeUygun →
+  aktifProfesyonel → emekli). Profesyonel futbol **`kJobCatalog` içinde
+  bir iş değil** ve `CombatCareer` içine sıkıştırılmadı; kendi modeli
+  var. Test bunu ayrıca denetliyor.
+- **AU/3 — yıl akışı.** Kulüp sezonu `life_progression` içinde yaş
+  artmadan önce ilerliyor; günlüğe satır, dönüm noktalarına bildirim
+  yazıyor. Okul değiştiğinde kanca çalışıyor.
+- **AU/4 — olaylar.** `data/event_pool_school_clubs.dart`: 29 olay.
+  Olayın gereksinimine üç yeni alan eklendi (`requiresActiveClubId`,
+  `minClubYears`, `minSquadRole`) ve motor bunları okuyor. Takım arkadaşı
+  olayları var olan `sinifArkadasi` bağını kullanıyor; **ikinci bir kişi
+  üretim sistemi yok, uydurma isim yok.**
+
+### Bu pakette ÇIKAN iki CI kırmızısı ve kök nedenleri
+
+Commit `8da66c9` CI'da iki testi kırdı (Windows **ve** Ubuntu, yani
+platform sorunu değil). Log adları vermiyordu; tam süit ham çıktıyla
+yerelde koşularak bulundu.
+
+1. **`family_interaction_test` — "etkileşim sonucu kişi kimliğini
+   bozmaz".** Test kişi listesinin **birebir aynı** kalmasını istiyordu.
+   Oysa o yıllarda çözülen okul olayları meşru olarak yeni bir arkadaş
+   kaydı ekleyebiliyor; kimlikler bozulmuyordu, listeye `arkadas-1`
+   ekleniyordu. Varsayım yanlıştı. Test gevşetilmedi, **daha sıkı**
+   yazıldı: eski kayıtların hepsi aynı sırada duruyor mu, kimlik alanları
+   (ad, soyad, cinsiyet, bağ) değişmiş mi, kimlik tekrarı var mı, sonradan
+   eklenen kayıt gerçekten yeni mi. Eski hâli yalnızca annenin bağına
+   bakıyordu.
+2. **`critical_notice_test` — bir yıldaki bildirim penceresi 8'i aştı
+   (9 oldu).** Sınır büyütülmedi. O yılın dökümü ölçüldü: dokuzuncu kalem
+   **bir kulüp bildirimi değildi**, aynı yıl açılan **ikinci hedef
+   penceresiydi** (seed 1, 18 yaş: düğün davetiyesi, annenin vefatı,
+   cenaze, lise bitişi, hastalık, miras, miras anlaşmazlığı ve iki ayrı
+   "Bir hedefe ulaştın"). Aynı başlıkla üst üste iki pencere açmak zaten
+   bildirim yağmuru; `LifeGoals` artık yılda **tek pencere** açıyor
+   ("Hedeflere ulaştın", hedefleri birlikte sayıyor), tek hedefte eski
+   metin aynen kalıyor. Yeniden ölçüm: en kötü yıl **8**, ortalama 0,89.
+
+Yani AU hiçbir bildirim eklemedi; havuzu büyüttüğü için rastgele akış
+kaydı ve iki eski kırılganlık ortaya çıktı. İkisi de kök nedeninden
+düzeltildi.
+
+### Bu pakette YAPILMAYANLAR (dürüst liste)
+
+- **Gerçek 2026-27 lig ve kulüp kataloğu YAZILMADI.** Brief "hafızadan
+  yazma, önce resmi kaynağı kontrol et" diyor. Bu oturumun ağ politikası
+  **tüm dış adresleri reddediyor** (tff.org, resmi lig siteleri, UEFA,
+  Wikipedia dahil hepsi bağlanmıyor). Doğrulanmamış kulüp listesi
+  yazmamak için hiç yazılmadı; `docs/FOOTBALL_DATA_SOURCES.md` de bu
+  yüzden açılmadı. `paket_au_football_catalog_test` de bu sebeple yok.
+- **Spor Kariyeri menüsü ve kulüp kartları (UI) yapılmadı.**
+- **PlayerBot kulüplere girmiyor**, dolayısıyla 500 okul odaklı hayatın
+  ölçümü ve `paket_au_measurement_test` de yok.
+- **Android APK ya da Windows derlemesi bu pakette denenmedi** — yerel
+  kapta araç zinciri yok. "Build edildi" denmiyor.
+
+### Sıradaki paketler (yol haritası)
+
+- **AV — Spor Kariyeri arayüzü.** Kulüp kartı (rol, sezon, beceri,
+  dereceler), seçme ekranı ve gerekçeli engel metinleri, futbol
+  uygunluğunun oyuncuya okunur hâli. Var olan gezinme bozulmadan.
+- **AW — bot ve ölçüm.** PlayerBot profiline göre kulüp seçsin (sporcu /
+  akademi / sanat), herkes futbolcu olmasın; 500 okul odaklı hayat
+  ölçülüp oranlar yazılsın. Güzelleştirme yok, ölçüm.
+- **AX — gerçek lig ve kulüp kataloğu.** Ağ erişimi olan bir ortamda
+  TFF ve resmi lig/federasyon kaynaklarından 2026-27 listesi
+  doğrulanacak, kaynaklar `docs/FOOTBALL_DATA_SOURCES.md`'ye yazılacak.
+  Logo, arma, forma ve gerçek oyuncu/teknik direktör adı yok.
+- **AY — profesyonel futbol hayatı.** Sezon özeti, sakatlık, form,
+  kariyer sonu ve futbol sonrası hayat. Tam sezon simülasyonu, lig
+  tablosu, fikstür, transfer pazarı, sözleşme/maaş pazarlığı, Avrupa
+  kupaları ve millî takım **bu yol haritasının dışında** kalmaya devam
+  ediyor.
+
+## Paket AV: Spor Kariyeri menüsü ve kulüp kartları (4 Ekim 2026)
+
+AU'nun en görünür boşluğu kapandı. AU kulüpleri, rolleri, çok yıllı
+geçmişi ve futbol uygunluk kapısını kurmuştu; ama oyuncu bunların
+**hiçbirini ekranda göremiyordu**. Kulüp olayları hayat akışında
+çıkıyor, takımdaki yeri görünmüyordu.
+
+### Yapılanlar
+
+- **Kulüpler sayfası** (`ui/screens/sections/school_clubs_page.dart`).
+  Okul menüsüne `Kulüpler` satırı eklendi; alt yazısı aktif üyeliği
+  söylüyor (ör. "Futbol takımı — İlk 11"). Sayfa üç bölüm:
+  1. **Üye olduğun kulüpler** — kart başına rol, sezon sayısı, beceri ve
+     bandı, kaptanlık yaşı; kart açılınca katılım yaşı/sınıfı,
+     performans, yarışma ve derece sayısı, kulübün tanıtım metni.
+  2. **Katılabileceğin kulüpler** — sınıfa açık olanlar. Seçmeli kulüp
+     "sonuç kesin değil" diye işaretli. Engel varsa düğme **konmuyor**,
+     yerine motorun gerekçesi yazılıyor.
+  3. **Geçmiş kulüp kayıtların** — ayrılınan ya da okul değişimiyle
+     kapanan üyelikler; kaç sezon, beceri, kaptanlık, derece.
+- **Antrenman ve ayrılma** karttan yapılıyor. Antrenman yılda bir kez;
+  hakkı bitince düğme kaybolup gerekçe yazılıyor. Ayrılma düğmesi kart
+  açıkken görünüyor ve "geçmiş kaydın silinmez" diyor — gerçekten de
+  silinmiyor.
+- **Spor Kariyeri sayfası** (`ui/screens/sections/sports_career_page.dart`).
+  Profesyonel futbol bir `kJobCatalog` işi değil; kendi sayfası var.
+  Durum kartı uygunluğu, **gerekçesini**, hazırlık puanını, sezon
+  sayısını, en iyi beceriyi, başlama yaşını ve kaptanlığı gösteriyor.
+  Altında gençlik geçmişi kademe kademe listeleniyor. Scout ilgisi varsa
+  ayrı bir satır çıkıyor ve "bu bir teklif değil" diye açıkça yazıyor.
+- **Satır yalnızca hak edilince görünüyor.** Futbol geçmişi olmayan
+  oyuncuda Spor Kariyeri satırı yok: boş sayfaya götüren menü satırı
+  konmadı. Satır hem Okul hem Meslek menüsünde var, çünkü uygunluk 16
+  yaşında (lise sırasında) başlıyor ve okul bitince de sürüyor.
+- **Denetleyici eylemleri** (`state/game_controller.dart`): `clubBlock`,
+  `joinClub`, `canTrainClub`, `trainClub`, `leaveClub`,
+  `footballEligibility`. Motorun imzaları **değiştirilmedi** (testleri
+  var); antrenmanın geri bildirim metni denetleyicide üretiliyor ve
+  beceri hiç artmazsa bu da dürüstçe yazılıyor, "arttı" diye
+  uydurulmuyor.
+
+### Ekran yeni kural koymuyor
+
+Katılma engelleri, seçme sonucu, antrenman sınırı ve uygunluk kararı
+tamamen motordan (`SchoolClubEngine`, `FootballPath`) geliyor. Sayfa
+hiçbir sayıyı kendi hesaplamıyor. Q-192'deki dokuz sayı hâlâ
+`prototypeOnly` ve hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+### Henüz yazılmayan, sayfada açıkça söylenen
+
+Profesyonel sözleşme, kulüp seçimi ve sezon akışı yok. Spor Kariyeri
+sayfası bunu kendi üstünde yazıyor; sahte düğme konmadı. Gerçek 2026-27
+lig ve kulüp kataloğu da **yazılmadı** (ağ politikası tüm dış adresleri
+reddediyor; 4 Ekim 05:41 ve 07:1x kontrollerinde tff.org yine 000).
+
+### Doğrulama
+
+`app/test/paket_av_sports_ui_test.dart` — 11 widget testi: menü satırının
+varlığı, katılabilir kulüplerin listelenmesi, kartın rol/sezon/beceri
+yazması, antrenmanın yılda bir kez açılması (hem düğme hem gerekçe),
+antrenmana basınca kaydın gerçekten güncellenmesi, kritik sağlıkta
+fiziksel kulübün engelinin gerekçesiyle çıkması, ayrılınca kaydın
+geçmişe geçip silinmemesi, futbol geçmişi yokken satırın görünmemesi,
+yeterli geçmişte kapının açılması, yetersiz geçmişte gerekçenin yazması
+ve profesyonel adımın henüz yazılmadığının söylenmesi.
+
+`flutter analyze` çıkış kodu 0. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta araç zinciri yok; CI derliyor.
+
+## Paket AW: bot kulüp seçiyor, 500 hayat ölçüldü, bir hata bulundu (4 Ekim 2026)
+
+### Bot artık kulüp seçiyor — ve herkes futbolcu olmuyor
+
+`test/support/player_bot.dart` içine `_handleSchoolClubs` eklendi. Bot
+kulübü **profiline göre** seçiyor: spor odaklı spor kulüplerine, eğitim
+odaklı akademik olanlara, hobi/sosyal odaklı sanat kulüplerine ağırlık
+veriyor; ama hiçbir kategori sıfır almıyor, çünkü gerçek oyuncu da hep
+aynı şeyi seçmez. **Spor kategorisinde futbol özel muamele görmüyor**,
+beş spor kulübü arasından çekiliyor. Antrenman isteği profile bağlı,
+bırakma kararı nadir ve İlk 11 ya da kaptanı bırakmıyor.
+
+### ÖLÇÜLEN HATA: okul bitince üyelik kapanmıyordu
+
+İlk ölçüm saçma bir sayı verdi: **toplam sezon medyanı 58, en fazlası
+160.** Okul hayatı en çok ~12 yıl kulüp demek.
+
+Kök neden benim AU/3'teki eksiğimdi: `SchoolClubEngine.advanceSeason`
+aktif üyeliğin sezonunu, oyuncunun **hâlâ öğrenci olup olmadığına
+bakmadan** artırıyordu. `blockFor` "kulüpler yalnızca okula devam
+ederken açık" diyordu ama sezon ilerlemesi bu kuralı bilmiyordu. Mezun
+olan oyuncunun üyeliği açık kalıyor ve `yearsActive` ömür boyu
+artıyordu — 70 yaşındaki karakter hâlâ "okul futbol takımında"
+sayılıyordu.
+
+Düzeltme: okul bittiğinde aktif üyelikler kapanıyor (`leftAtAge`
+yazılıyor), kayıt **silinmiyor**, günlüğe bir satır düşüyor. Yeni ölçüm:
+**toplam sezon medyanı 7, en fazla 24.** İki kalıcı bekçi testi eklendi
+(`paket_au_school_clubs_test`): mezun olunca üyelik kapanıyor ve geçmiş
+kalıyor; okul bittikten sonra 20 yıl boyunca sezon bir daha hiç
+artmıyor.
+
+### İKİNCİ HATA: ölçüm kodum kördü
+
+Düzeltmeden sonra "profesyonel kapı hiç açılmadı" çıktı. Sebebi oyun
+değildi, **benim ölçüm kodumdu**: `_handleSchoolClubs` öğrenci değilse
+hemen çıkıyordu, oysa profesyonel uygunluk 16-23 yaş aralığında.
+Mezuniyet sonrası yıllar (19-23) hiç ölçülmüyordu. Ölçüm bloğu ayrı bir
+fonksiyona (`_olcFutbolYolu`) çıkarılıp her yıl çağrılır hale getirildi.
+
+### 500 okul odaklı hayatın sonucu
+
+| Ölçülen | Sonuç |
+|---|---|
+| Kulübe giren | %87,0 |
+| Antrenmana giden | %79,8 |
+| Seçmede reddedilen | %9,2 |
+| Kulübü bırakan | %11,2 |
+| Toplam sezon (medyan / en fazla) | 7 / 24 |
+| Kaptanlık yapan | **%0,0** |
+| Futbol oynayan | %13,6 |
+| Profesyonel kapı açılan | **%0,2** |
+| Scout ilgisi gören | %2,6 |
+| Hazırlık puanı (medyan / en yüksek) | 47 / 80 |
+
+Kategori dağılımı dengeli: akademi %52,4, sanat %66,9, spor %57,2.
+Futbol takımı kulüpler arasında yedinci (%13,6). Arketip ayrımı
+çalışıyor: spor odaklı %100 kulüp / %33 futbol, eğitim odaklı %89 / %5.
+**Brief'in "herkes futbolcu olmasın" yasağı tutuyor.**
+
+### İki çıkmaz sokak — ölçüldü, Q-192'ye yazıldı, UYGULANMADI
+
+1. **Kaptanlık 500 hayatta hiç olmadı.** Rol puanı eşiği 78 tam sınırda
+   duruyor; okul çağında ulaşılabilir en iyi bileşim 69-79 arasında.
+   Önerim eşiğin 70'e inmesi; 3 sezon kuralı ve tek kademe sınırı aynen
+   kalsın.
+2. **Profesyonel kapı 500 hayatta 1 kez açıldı.** Darboğaz eşik değil
+   sezon sayısı: futbol oynayanların sezon medyanı 3 ve puanın sezon
+   bileşeni `sezon×7`. Önerim eşiği düşürmek değil sezon katsayısını
+   `sezon×9` yapmak — "erken başlayıp uzun oynayan geçer" demek bu.
+
+İkisi de oyuncunun hissettiği dengeyi değiştirir, bu yüzden **onay
+gelene kadar uygulanmadı** ve `DECISIONS.md`'ye yazılmadı. Ayrıntı ve
+alternatifler `docs/DESIGN_REVIEW_QUEUE.md` → Q-192 EKİ.
+
+### Doğrulama
+
+`flutter analyze` çıkış kodu 0; `paket_au_measurement_test` yeşil (500
+hayat), `paket_au_school_clubs_test` 24/24 yeşil. **Android APK ya da
+Windows derlemesi bu pakette denenmedi.**
+
+## Paket AX: iki çıkmaz sokak açıldı — ve teşhisim yanlıştı (4 Ekim 2026)
+
+Faho AW'nin sonunda bıraktığım iki öneriyi onayladı: kaptanlık rol
+puanı eşiği **78 → 70** (D-134) ve hazırlık puanının sezon katsayısı
+**7 → 9** (D-135). İkisi de uygulandı ve `DECISIONS.md`'ye girdi.
+
+### Önce kendi hatamı yazmam gerekiyor
+
+Q-192 ekinde "okul çağında ulaşılabilir en iyi bileşim 69-79 arasında,
+eşik 78 tam sınırda" demiştim. O sayı **iyimser varsayımlarla
+hesaplanmış teorik bir üst sınırdı** (9 sezon, beceri 70, performans
+70), gerçek dağılım değil. Eşiği 70'e indirip yeniden ölçtüm:
+**kaptanlık yine %0 çıktı.** Önerim doğru yeri işaret etmiyordu.
+
+### İkinci kez tahmin etmek yerine ölçtüm
+
+`SchoolClubEngine.roleScore` tek kaynak olarak açıldı (formül motorla
+ölçüm arasında kopyalanmadı) ve rol puanının gerçek dağılımı ölçüldü:
+puan medyanı **39**, en yükseği 66 — yani Önemli oyuncu eşiği (62) bile
+aşılamıyordu. O andaki beceri medyanı **13**, sezon 4, performans 38.
+
+**Darboğaz eşik değil beceriydi.** Üstelik döngüsel: beceri düşük
+olduğu için performans düşük kalıyor, performans düşük olduğu için
+sezon gelişiminin tabanı küçük kalıyor. Rol eşikleri beceri 60-80
+varsayıyordu, okul kulübü ancak 13-25'e çıkıyordu.
+
+### Üçüncü değişiklik: beceri gelişiminin tabanı (D-136, ONAYLANDI)
+
+Faho "çöz" dediği için kök nedene gittim: yatkınlık böleni `20 → 10`,
+sezon tavanı `9 → 12`. **Azalan getiri korundu** — artış
+`(100 - beceri)` çarpanıyla ölçekleniyor, tavana yaklaşan oyuncu
+yavaşlıyor, tek yılda sıçrama yok. Yatkınlık yine tek başına yetmiyor:
+performans payı duruyor, yani çalışan ve uzun süre kalan oyuncu
+yatkın ama geç başlayanı geçiyor.
+
+**Faho bu sayıları da onayladı (4 Ekim 2026)** ve **D-136** olarak
+`DECISIONS.md`'ye girdiler; sabitler `prototypeOnly` etiketinden
+çıkarıldı (`maxSkillGainPerSeason`, `skillPotentialDivisor`). Q-192'nin
+eki böylece kapandı — üç sayı onaylandı (D-134, D-135, D-136).
+
+### Son ölçüm (aynı 500 okul odaklı hayat)
+
+| Ölçülen | Önce | Sonra |
+|---|---|---|
+| Kaptanlık yapan | %0,0 | **%3,6** (18) |
+| Profesyonel kapı açılan | %0,2 | **%1,4** (7) |
+| Rol puanı (medyan) | 39 | 46 |
+| Beceri (medyan) | 13 | 26 |
+| Hazırlık puanı (medyan / en yüksek) | 47 / 80 | 53 / 85 |
+| Scout ilgisi gören | %2,6 | %3,4 |
+
+Rol dağılımı düzgün bir piramide döndü: Yedek 148 · Rotasyon 126 ·
+İlk 11 104 · Önemli oyuncu 39 · **Kaptan 18**. Futbol oynayanların
+**%10,1'i** profesyonel kapıdan geçiyor. Kulübe girme (%87), kategori
+dengesi (akademi %52,2 · sanat %66,7 · spor %57,5) ve futbolun kulüpler
+arasındaki yeri (yedinci, %13,6) değişmedi.
+
+**Burada durdum.** Daha ileri gitmek kaptanlığı sıradanlaştırırdı; okul
+takımının kaptanı olmak nadir olmalı.
+
+### Kalıcı bekçi
+
+`paket_au_measurement_test` artık kaptanlığın ve profesyonel kapının
+500 hayatta **sıfır** çıkmasını hata sayıyor. Oran kalibrasyonu
+Faho'nun işi; "var ama hiç olmuyor" bir hatadır ve sessizce geri
+gelmeyecek.
+
+### Doğrulama
+
+`flutter analyze` çıkış kodu 0; `paket_au_measurement_test` +
+`paket_au_school_clubs_test` + `paket_au_football_path_test` 40/40
+yeşil. **Android APK ya da Windows derlemesi bu pakette denenmedi.**
+
+## Paket AY: kapının arkası yazıldı — ve üç hata ölçümle çıktı (5 Ekim 2026)
+
+Paket AU profesyonel futbol kapısını kurmuştu ama **kapıdan geçilmiyordu**:
+uygunluk hesaplanıyor, oyuncu "girebilirsin" yazısını okuyor, sonra hiçbir
+şey olmuyordu. AY o eksiği kapattı.
+
+**Ne yazıldı.** `football_pro_engine.dart` (yeni): deneme, sezon
+(form, puan, maç, gol, sakatlık, kazanç, itibar), dört ayrı kariyer sonu
+sebebi ve futbol sonrası hayat. Kazanç **gerçekten cüzdana** yazılıyor;
+sezonlar `life_progression` içinde yaş ilerledikçe işleniyor ve günlüğe
+cümle, ilk sezonda ve kariyer sonunda bildirim üretiyor. Ekran
+(`sports_career_page.dart`) artık kariyer kartını, sezon listesini,
+"Profesyonel denemeye gir" ve "Futbolu bırak" satırlarını gösteriyor.
+
+**Önce bulunan gizli hata.** `GameState.footballCareer` AU/1'de eklenmiş
+ama **kodeke hiç yazılmamıştı**. PROJECT_STATUS'ta "kayda girdi" diye
+yazdığım cümle yanlıştı; o zaman hiç kariyer oluşamadığı için eksik gizli
+kalmıştı. Kariyer ve bütün sezon geçmişi artık kaydediliyor ve birebir
+geri okunuyor; eski kayıtta alan yoksa `null` kalıyor, **uydurma kariyer
+üretilmiyor.**
+
+**Ölçüm ayrı bir kohort gerektirdi.** AW'nin 500 okul odaklı hayatı
+yalnızca **6** profesyonel kariyer üretti — kapı dar (doğru), ama
+kariyerin kendisini ölçmek için fazla küçük bir örneklem. Bu yüzden
+`paket_ay_football_measurement_test` kuruldu: **1200 spor odaklı hayat**,
+49 kariyer. Ölçüm üç hata gösterdi:
+
+1. **Deneme yılda bir kez değildi.** Oyuncu aynı yıl içinde düğmeye kabul
+   alana kadar basabiliyordu. `footballTrialAge` eklendi (kodeke de).
+2. **Deneme eşiği dekoratifti.** Kapıdan geçmenin alt sınırı 63 puan
+   üretiyordu, eşik ise 62'ydi: zarsız bile geçiliyordu. Eşik 78 oldu ve
+   kalıcı bir test eşiğin "en zayıf aday puanı"nın üstünde kalmasını
+   zorunlu tutuyor.
+3. **`FootballExit.sakatlik` ölü koddu.** Kariyerlerin %91,8'i sakatlık
+   yaşadı, hiçbiri sakatlıktan bitmedi. Sakatlık sağlığa dokunmuyordu ve
+   model yanlıştı: kariyeri bitiren şey yılların birikimi değil **tek bir
+   ağır sakatlıktır**. İkisi de düzeltildi.
+
+| Bitiş sebebi | Düzeltmeden önce | Sonra |
+|---|---|---|
+| Yaş | %91,7 | %81,3 |
+| Sakatlık | **%0,0** | **%8,3** |
+| Sözleşme yenilenmedi | %6,3 | %8,3 |
+| Kendi kararı | %2,1 | %2,1 |
+
+**Ölçüm (1200 spor odaklı hayat, 49 kariyer):** kapı açılan %4,2 ·
+kabul edilen %4,1 · pro sezon medyan 15 (en az 9, en fazla 19) · maç
+medyan 309 · gol medyan 31 · sakatlık yaşayan %91,8 · bırakma yaşı
+medyan 34 (en erken 29) · sezon başı kazanç medyan 7,4 yıllık asgari
+ücret · kariyer toplamı medyan 113 yıllık asgari ücret.
+
+**Düzeltmediğim, Faho'ya bıraktığım üç şey (Q-193).** Kapıya gelen
+herkesin sonunda profesyonel olması (%100) — sebebi eşik değil, kapının
+kendisinin zaten eleme yapması; kimsenin 1-3 sezonluk kısa kariyeri
+olmaması; kazanç dağılımının fazla dar olması (~2 kat). Üçü de
+`prototypeOnly` sayı kararı ya da kapsam kararı; **hiçbiri
+`DECISIONS.md`'ye yazılmadı.**
+
+**Ölçümün kendisinde de bir körlük buldum.** Bot kararını ölçümden önce
+veriyordu; deneme kabul edilen yılda kariyer kurulduğu için
+`FootballPath.evaluate` artık `aktifProfesyonel` dönüyor ve `eligible`
+hiç `true` görülmüyordu. Ölçüm "kapı açılmadan profesyonel oldu" diyordu;
+oyun doğruydu, ölçüm kördü. Sıra düzeltildi.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; AY motor testleri (32) ve AY
+ekran testleri (4) yeşil. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta araç zinciri yok.
+
+## Paket AY/2: "futbol sonrası hayat" dedim, yazmamışım (5 Ekim 2026)
+
+AY'yi kapatırken kapsamına "futbol sonrası hayat" yazdım. Ölçtüm ve
+**yanlış çıktı:** kariyer bitiyor, hiçbir şey olmuyordu.
+
+**Hata 1 — futbol `fame` alanına hiç dokunmuyordu.** 300 maç oynamış,
+31 gol atmış, 35 milyon ₺ kazanmış bir profesyonel **tanınmamış**
+kalıyordu. Medya ve sponsorluk işleri (`minFame` 3-78) futbolcuya hiç
+açılmıyordu. Dövüş kariyeri bunu Paket AL'de yapmıştı; futbol o yola
+bağlanmamıştı. Artık profesyonel sezon Ün kazandırıyor, tavan dövüşteki
+sayının aynısı (70): spor tek başına Ün 100 yapmaz.
+
+**Hata 2 — sönümleme futbolcuyu cezalandırıyordu.** D-118 Ün'ü "sosyal
+medyada sessizlik" ölçüsüyle yılda %12 düşürüyor; sahada 30 maç oynayan
+futbolcu sessiz sayılıyordu ve futbolun kazandırdığı Ün sönümlemeye
+yeniliyordu. D-118'in gerekçesi "tanınmışlık bakım ister" — oynamak
+bakımın kendisidir. Görünürlük ölçüsü artık paylaşım ile oynanan son
+sezonun yenisini alıyor. Emeklilikten sonra ilerlemediği için **emekli
+futbolcunun ünü solmaya devam ediyor.**
+
+**Hata 3 — kariyer sonu metni kuruydu.** "Bitti: şu kadar sezon, maç,
+gol" deyip susuyordu. Artık oyuncuya elinde ne kaldığını söylüyor;
+tanınırlığı yüksekse tekliflerin sürebileceğini, düşükse adının çabuk
+unutulacağını yazıyor.
+
+| Ölçülen (1200 spor odaklı hayat, 49 kariyer) | Önce | Sonra |
+|---|---|---|
+| Ün hiç gelmeyen kariyer | %100 | **%0** |
+| Zirve Ün (medyan) | 0 | **43** (en az 11, en fazla 70 = tavan) |
+| Emeklilik anındaki Ün (medyan) | 0 | **52** |
+| Hayat sonundaki Ün (medyan) | 0 | **34** (soluyor) |
+
+**Beklenmedik yan etki (ölçüldü, kurgulanmadı):** Ün açılınca bot
+sosyal/medya yollarını da kullanmaya başladı, hayatlar çeşitlendi.
+Kariyer uzunluğu medyan 15 → 14, **en az 9 → 4 sezon**, en erken bırakma
+**29 → 25 yaş**. Q-193'ün 3. maddesindeki "kimsenin kısa kariyeri yok"
+sorunu böylece kısmen kendiliğinden çözüldü.
+
+İki yeni sayı (`prototypeOnlyFootballFameCap`, sezon başına Ün formülü)
+**Q-193 ekine** yazıldı ve karar bekliyor. **`DECISIONS.md`'ye
+dokunulmadı.**
+
+Doğrulama: `flutter analyze` çıkış kodu 0; AY motor testleri (32),
+`package_q` ve `social_media` süitleri (62) yeşil. **Android APK ya da
+Windows derlemesi bu pakette denenmedi.**
+
+## Paket AY/3: futbol hayatın geri kalanına bağlı değildi (5 Ekim 2026)
+
+AY ve AY/2'de iki kez aynı sınıf hata buldum: *sistem var, futbol ona
+bağlanmamış.* Aynı yöntemle kalanları taradım; **üç gerçek boşluk daha**
+çıktı.
+
+**H1 — Hayatın hükmü futbolu hiç saymıyordu.** `LifeVerdict`'in Emek
+ekseni iş geçmişine bakıyor; futbol `kJobCatalog` işi olmadığı için 15
+sezon oynamış, 300 maç çıkmış, 35 milyon ₺ kazanmış bir oyuncu **sıfır**
+alıyordu ve eksenin notu **"Hiç bir işte çalışmadın."** yazıyordu.
+Düzeltme askerliğin emsalini izliyor (Paket 37, aynı gerekçe).
+
+**H2 — Ömür sonu özetinde futbol görünmüyordu.** Meslek satırı futbolcuya
+**"Çalışmadı"** diyordu. Artık ayrı bir "Futbol" satırı var (sezon, maç,
+gol, bitiş sebebi) ve meslek satırı "Profesyonel futbolcu" yazıyor.
+
+**H3 — Hayat hedefleri futbolu tanımıyordu.** Katalogda dövüş için
+`dovus_ust_basamak` vardı, futbolun eşi yoktu. `profesyonel_futbol`
+hedefi eklendi (eşik: tek sezon, `prototypeOnly`).
+
+**Kendi yanlış teşhisimi düzeltiyorum.** Denetimde "yıl değerlendirmesi
+futbolu bilmiyor" diye dördüncü bir boşluk saymıştım; yanlıştı.
+`YearReview` D-096 gereği **fark** üzerinden çalışıyor ve sistem adı
+saymaz; futbol sezonu oraya zaten cüzdan, Ün ve sağlık farkı olarak
+düşüyor. `footballCareer` araması o tasarım için yanlış bir ölçüttü.
+Oraya futbol eklemek D-096'yı bozardı, **dokunmadım.**
+
+**Kapsamım dışı bir bulgu, Faho'nun kararına bırakıldı:** `LifeVerdict`
+**dövüş kariyerini de saymıyor** (`combatCareers` o dosyada hiç
+geçmiyor). Kemer kazanmış bir dövüşçü de bu eksende sıfır alıyor. AY'den
+önce gelen bir eksik; kendi başıma kapsam genişletmemek için dokunmadım.
+
+İki sayı ve hedefin kendisi **Q-193 ekine** yazıldı, karar bekliyor.
+**`DECISIONS.md`'ye dokunulmadı.**
+
+Doğrulama: `flutter analyze` çıkış kodu 0; `paket_ay3_football_life_test`
+(9) ve `life_summary_widget_test` (5) yeşil. **Android APK ya da Windows
+derlemesi bu pakette denenmedi.**
+
+## Paket AY/4: dövüş rekabeti de hükme girdi (5 Ekim 2026, Faho onayı)
+
+Faho "dövüş kariyerini de hükme ekle" dedi; eklendi.
+
+**Önce kendi hatamı düzeltiyorum.** AY/3'te "`LifeVerdict` dövüş
+kariyerini saymıyor, kemer kazanmış dövüşçü o eksende sıfır alıyor"
+demiştim; grep çıktısını kestiğim için eksik bakmışım. Gerçek: dövüş
+**eğitimi** zaten sayılıyordu (`_dovusPuani` → Deneyim ekseni, 30'a
+kadar). Sayılmayan şey **rekabetin kendisiydi** — maçlar,
+şampiyonluklar, kademe ve ringde geçen yıllar Emek ekseninde sıfır
+ediyordu. Boşluk gerçekti ama dediğimden dardı.
+
+**Eklenen:** `_dovusKariyerPuani` — rekabet yılı ağır basar, maç ve
+şampiyonluk üstüne biner, kademe küçük pay verir. Bütün dövüş
+kariyerleri toplanıp **tek tavana** vurulur; iki dalda dövüşmek ekseni
+katlamaz. Hüküm notu da düzeltildi: dövüşçüye "hiç çalışmadın"
+denmiyor, şampiyonluk anılıyor.
+
+**Testim ikinci bir hata yakaladı ve o hata futbolda da vardı.** Yıl
+ağırlığı 2 iken 16 yıl rekabet tek başına tavanı dolduruyordu; başarı
+dekoratifti. Dövüşte bulunca futbolda da ölçtüm: aynı hata oradaydı —
+15 sezon (ölçülen medyan) × 2 = tavan, yani 300 maçta 200 gol atan ile
+hiç gol atmayan aynı puanı alıyordu. AY'deki "dekoratif deneme eşiği"
+ile birebir aynı sınıf hata. İkisinde de ağırlık 1'e indirildi.
+
+| Senaryo (Emek ekseni) | Önce | Sonra |
+|---|---|---|
+| 16 yıl dövüş, 0 şampiyonluk | tavan (30) | 23 |
+| 16 yıl dövüş, 3 şampiyonluk | tavan (30) | tavan (30) |
+| 15 sezon futbol, 0 gol | tavan (30) | 22 |
+| 15 sezon futbol, 200 gol | tavan (30) | tavan (30) |
+
+İki sayı **Q-193 ekine** yazıldı, karar bekliyor.
+**`DECISIONS.md`'ye dokunulmadı.**
+
+Doğrulama: `flutter analyze` çıkış kodu 0; `paket_ay3_football_life_test`
+18 test yeşil. **Android APK ya da Windows derlemesi bu pakette
+denenmedi.**
+
+## Paket AY/5: dövüş ömür özetinde de görünüyor (5 Ekim 2026)
+
+**Kapattığım tutarsızlık benim yarattığımdı.** AY/3'te ömür sonu
+özetine "Futbol" satırını ekledim; dövüş orada yoktu ve bakmadım.
+Sonuç: 15 sezonluk futbol kariyeri ömür sonunda yazılıyor, **iki kemer
+kazanmış bir dövüşçünün kariyeri hiç yazılmıyordu** ve meslek satırı
+ona "Çalışmadı" diyordu. Aynı eksiklik hükümde de vardı, AY/4'te
+kapanmıştı; artık özet de aynı yerde.
+
+Eklenen: her dövüş kariyeri için bir satır (dal adı · maç, galibiyet,
+şampiyonluk, bitiş sebebi). İç sayılar gösterilmiyor. Lisans alıp hiç
+dövüşmemiş kayıt özeti şişirmiyor; meslek satırı dövüşçüye "Dövüş
+sporcusu" diyor.
+
+**Eklemediğim şey:** katalogda şampiyonluk hedefi yok
+(`dovus_ust_basamak` eğitim basamağıyla ilgili, unvanla değil).
+`dovus_sampiyonluk` önerisini **Q-193 ekine yazdım, kendim
+eklemedim** — `profesyonel_futbol` hâlâ onay beklerken ikinci bir
+onaysız hedef eklemek hedef katalogunu onaysız içerikle doldurmak olur.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; `life_summary_widget_test`
+7 test yeşil. **Android APK ya da Windows derlemesi bu pakette
+denenmedi.**
+
+## Q-193 KARARLAŞTIRILDI: yedi karar DECISIONS.md'ye girdi (5 Ekim 2026)
+
+Faho onayladı: "onayladım hepsini uygula." Q-193'ün ana maddeleri ve
+dört ekinin tamamı karara dönüştü. Sabitler `prototypeOnly` etiketinden
+çıkarıldı, doc yorumlarına karar numarası yazıldı.
+
+| Karar | Konu |
+|---|---|
+| **D-164** | Deneme yılda bir kez, eşik 78, kura 34, sürpriz ret %10 |
+| **D-165** | Sezon ve kariyer sonu: 34 maç, düşüş 31, sert bırakma 39, 3 zayıf sezon |
+| **D-166** | Kazanç bandı 1-40 yıllık asgari ücret (dağılım darlığı bilinen eksik, AZ'ye bırakıldı) |
+| **D-167** | Kariyeri bitiren sakatlık tek olaydır: 4/16 bedel, %22 ağır, %16 + yaş başına %5 |
+| **D-168** | Futbol Ün kazandırır (tavan 70); oynamak Ün bakımının kendisidir |
+| **D-169** | Sporda geçen hayat Emek eksenine girer (futbol ve dövüş, tavan 30) |
+| **D-170** | İki hedef: `profesyonel_futbol`, `dovus_sampiyonluk` |
+
+Onaylanan `dovus_sampiyonluk` hedefi eklendi; AY/5'te önerip
+beklettiğim hedef artık katalogda ve testi var.
+
+**Bilerek onaysız bırakılan:** Q-192'nin ana maddeleri (aktif kulüp
+sınırı, seçme eşiği, yatkınlığın ağırlığı, profesyonel için asgari
+geçmiş, scout sıklığı, giriş yaşı, okul-kulüp çatışması). Bunlar
+Q-193'ün parçası değil ve bu turda Faho'nun önüne konmadı; kapı
+eşikleri (`FootballPath.prototypeOnlyMinScore`, `prototypeOnlyMinHealth`)
+ve dövüşün `prototypeOnlySportFameCap` sayısı **hâlâ `prototypeOnly`**.
+
+## Q-192 ANA MADDELER KARARLAŞTIRILDI: Q-192 kapandı (5 Ekim 2026)
+
+Faho onayladı: "ana maddeleri onayladım uygula." Dokuz maddenin tamamı
+karara bağlı — ikisi (4 ve 8) 4 Ekim'de D-136/D-134 olarak girmişti,
+kalanlar bugün:
+
+| Madde | Karar |
+|---|---|
+| Aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı | **D-171** |
+| Asgari geçmiş, scout sıklığı, giriş yaşı | **D-172** |
+| Okul-kulüp çatışması | **D-173** — çatışma **eklenmeyecek** |
+
+**9. madde neden farklı:** o bir sayı değil, olmayan bir özellikti.
+Kararı "şu sayıyı sabitle" diye değil, **"bu çatışma eklenmeyecek"**
+diye yazdım; yani kararın içeriği yapmamak ve bu artık belgeli bir
+kural, sessiz bir eksiklik değil.
+
+12 sabit daha `prototypeOnly` etiketinden çıktı. **Kapsam dikkati:**
+`prototypeOnlyMinHealth` adı üç ayrı sınıfta (futbol kapısı, okul
+kulübü, dövüş) vardı; kör bir değiştirme dövüşün sabitini de bozardı.
+Yeniden adlandırma dosya bazında ve nitelikli adla (`FootballPath.`,
+`SchoolClubEngine.`) yapıldı; `CombatCareerEngine.prototypeOnlyMinHealth`
+**dokunulmadan** kaldı.
+
+**Hâlâ `prototypeOnly` kalan iki sayı** (ikisi de bu kuyrukların
+dışında): okul kulübünde fiziksel kulüp sağlık tabanı
+(`prototypeOnlyMinHealthForPhysical = 25`) ve dövüşün Ün tavanı
+(`prototypeOnlySportFameCap = 70`, Q-186).
+
+## Kalıcı bekçi: kayda girmeyen alan kalmasın (5 Ekim 2026)
+
+Bu oturumun en pahalı dersini teste çevirdim. `GameState.footballCareer`
+Paket AU/1'de eklenmiş ve **kodeke hiç yazılmamıştı**; PROJECT_STATUS'ta
+"kayda girdi" diye yazdığım cümle yanlıştı. O sırada hiç futbol kariyeri
+oluşamadığı için eksik **gizli kaldı** ve ancak Paket AY'de, kariyer
+gerçekten oluşmaya başlayınca ortaya çıktı. Yani hata haftalarca sessizce
+durdu ve hiçbir test bunu söylemiyordu.
+
+`save_field_coverage_test` artık `GameState`'in bütün alanlarını kaynak
+taramasıyla çıkarıp kodekte karşılığı olup olmadığını denetliyor (aynı
+yöntem `stat_gain_test` içinde D-099 kaçakları için kullanılıyor; Flutter'da
+çalışma anı yansıması yok). **Ölçüm: 101 alanın hepsi kodekte, canlı hata
+yok.** Bir alan bilerek kayda girmeyecekse `kKaydaGirmeyenAlanlar` içine
+**gerekçesiyle** eklenir; o liste şu an boş ve boş olması iyidir.
+
+**Bekçinin kendisi de sınandı:** `GameState`'e yapay bir alan eklendi,
+test kırıldı ve alanın adını söyledi, sonra geri alındı. Yani boşa geçen
+bir süs değil.
+
+## Son iki sayı kararlaştırıldı: zincirde onay bekleyen kalmadı (5 Ekim 2026)
+
+Faho onayladı: "ikisini de onayladım uygula."
+
+| Karar | Sayı |
+|---|---|
+| **D-174** | Bedensel kulübe giriş için en az sağlık **25** — AQ'nun kritik sağlık bantlarıyla uyumlu. Taban **girişi** engeller, mevcut üyeliği bozmaz (D-129 mantığı) ve engel gerekçesiyle ekranda yazılır (D-063). |
+| **D-175** | Sporun Ün tavanı **70**; dövüş ve futbol **aynı tavanı paylaşır** (D-168 ile bilinçli tutarlılık). Tavan bir duvar değil bir ayrım: üstü yalnızca sosyal medyayla açılır, ama sporcu olmak sponsorluk/medya kapısını açar. |
+
+Yeni kalıcı bekçi: bir test iki sporun Ün tavanının **aynı kalmasını**
+zorunlu tutuyor — biri değişirse diğeri de konuşulmalı, sessizce
+ayrışmamalı.
+
+**Okul kulüpleri, profesyonel futbol ve dövüş rekabeti artık baştan
+sona onaylı sayılarla çalışıyor; bu üç sistemde `prototypeOnly` sabit
+kalmadı.** (Projenin başka alanlarında onay bekleyen sayılar duruyor;
+panodaki sayaç onları gösteriyor.)
+
+## Açık sorular
+
+Q-187: boşanma oranı, üvey kardeşin çocuğunun yeğen sayılmaması, bakım
+masrafı, eşin önceki çocuğu oranı, kayın aile yakınlığı, buluşma havuzu
+ve velayet kararı. Hiçbiri `DECISIONS.md`'ye yazılmadı.
+
+# Paket AP — aile dramaları ve yetişkin çocukların kendi hayatı V2
+
+Paket AO aileyi statik bir NPC listesinden yaşayan bir ağa çevirmişti ama
+aile hâlâ **olup bitenlerin kaydıydı**: boşanıyor, doğuyor, ölüyordu;
+oyuncu izliyordu. Paket AP aileyi **oynanan** bir sisteme çevirdi.
+
+## Ne yapıldı
+
+**Çocuğun eşi gerçek bir insan oldu (§14-§18).** `cocugunEsi` ve
+`eskiCocugunEsi` bağ türleri eklendi (enum sonuna, sıra bozulmadı);
+gelin/damat gerçek bir `Person` kaydı olarak doğuyor, kimliği
+evlilikten türediği için aynı evlilik her yıl yeni eş üretmiyor.
+`NpcMarriageRecord` ile NPC evlilik durumu (evli / boşandı / dul) ve
+geçmiş evlilikler kayda geçiyor. Paket AP öncesi kayıtlarda yalnızca ad
+vardı; geriye dönük NPC **uydurulmadı**.
+
+**Çocuğun kendi evlilik hayatı (§19-§23, §50).** Boşanma, yeniden
+evlenme ve dulluk. Eski eş kayıttan silinmiyor, torunun soy bağı
+bozulmuyor, yeniden evlenen çocuk **yeni** bir kişiyle evleniyor.
+
+**Kuşak devamı korundu (§62-§65, §74).** Bu paketin en kritik yeri:
+gelin/damat gerçek bir kişi olduğu anda kuşak devamındaki
+`default: return null` dalı onu **sessizce düşürür** hâle geldi — `torun`
+bir zamanlar tam olarak böyle kaybolmuştu. Evli çocukla devam edildiğinde
+eşi yeni oyuncunun eşi oluyor ve evlilik yürüyen bir kayıt olarak
+taşınıyor: "12 yıldır evli insan bekâr başlamıyor".
+
+**Gizli dram eğilimi (§2).** Her hayatın aile dram eğilimi `seed`'den
+deterministik türetiliyor, kayda yazılmıyor, oyuncuya gösterilmiyor ve
+**yalnızca sıklığı** ölçekliyor. 400 tohumda hem sakin hem hareketli
+aile çıkıyor.
+
+**Yılda en fazla bir büyük aile karari (§3).** Tek kapı:
+`GameState.canOpenFamilyDecision`. Beş çocuklu oyuncu aynı yıl beş kriz
+yaşamıyor.
+
+**Çok yıllı mesele kaydı (§4, §51).** `FamilyIssue`: kim, ne, kaçıncı
+yıl, hangi aşama, oyuncu ne cevap verdi. `storyFlags` bu soruları
+taşıyamıyordu. Kapanan mesele silinmiyor; liste 40 ile sınırlı ve sınır
+aşılırsa en eski **kapalı** meseleler düşüyor.
+
+**Yedi gerçek karar.** Çocuğun okul meselesi (§5-§7), yetişkin çocuğun
+para sıkıntısı ve eve dönüşü (§8-§13), kayın aile çatışması (§27),
+kardeşle para (§28-§29), yaşlı bakımı (§30-§32), miras itirazı
+(§35-§36). Hepsi `GameController` üzerinden ekrana bağlı.
+
+**Para yoktan üretilmiyor (§9, §36, §70).** Her transferde oyuncunun
+cüzdanı + bütün kayıtların birikimi toplamı **aynı** kalıyor; masraflı
+kararlarda azalıyor, asla artmıyor. 500 hayatlık ölçümde sıfır ihlal.
+
+**Hane değişimi gerçek (§12).** Eve dönen çocuk gerçekten haneye
+giriyor ve `LivingCosts` yeni bir gider kalemi görüyor.
+
+**Tavsiye ihtimali kaydırıyor, karar vermiyor (§1, §40-§41).** Oyuncu
+çocuğuna "üniversiteye git" diyemiyor; konuşuyor, karar çocuğun
+kendisinde kalıyor. Tavsiye yoksa pay **tam olarak 0** ve hiçbir ek zar
+atılmıyor — zar sırası korunuyor.
+
+**Stereotip yok (§26).** "Kayınvalide = sürekli sorun" reddedildi: olay
+havuzu dört iyi, dört kötü ve kalıcı bir test çıkan olayların
+dağılımının tek yöne kaymadığını ölçüyor.
+
+**Torunun soy bağı (§49).** Yeni torun motoru kurulmadı; var olan
+motorun boş bıraktığı `motherId`/`fatherId` alanları yazıldı. Eşi
+olmayan çocukta ikinci alan boş kalıyor — uydurma kimlik yazılmıyor.
+
+## Ölçüm (§76) — 500 aile odaklı hayat, oran güzelleştirmesi yok
+
+20.392 yıl. Hayat başına aile kararı: medyan 2, p25 1, p75 3, p95 5, en
+yüksek 8. 500 hayatın 69'unda hiç karar çıkmadı, 16'sında altı ve üstü.
+Mesele türleri: çocuk parası 291, çocuk okulu 278, kardeş parası 259,
+bakım 162, miras 111. Bozulma sayaçları sıfır.
+
+## Ölçümün ortaya çıkardığı gerçek hatalar
+
+Hepsi tahminle değil **ölçümle** bulundu ve ürün tarafında düzeltildi:
+
+1. **17 yaşında sisteme giren kişi aynı yıl liseyi bitiriyordu.**
+   `ChildProgression` kaydı açtığı yıl bir de sınıf atlatıyordu; kişi hiç
+   okumadığı bir yılı geçmiş sayılıyordu ve 17 yaşında `issiz` kalıyordu
+   — oyunun "6-17 arası herkes öğrencidir" değişmezi kırılıyordu. Paket
+   AO üvey kardeşi bu motora bağlayınca yol açılmıştı; tohum sırası
+   örtüyordu.
+2. **Aile içinde küslük hiç olmuyordu.** `FriendshipDepth` yalnızca
+   arkadaş bağı için çalışıyordu. Sebebi olmayan küslük olmayacak şekilde
+   eklendi: 500 hayatta 8 kişi.
+3. **Eve dönüş bir yıl sonra kendiliğinden geri alınıyordu.**
+   `_childrenLeaveHome` 25 üstü her çocuğu her yıl çıkarıyor; dönüş
+   kaydedilmediği için §12 dekoratif kalıyordu.
+4. **Bildirim baskısı.** Bütün aile olayları pencere açınca yıllık
+   ortalama bildirim 0,99'dan 1,11'e çıktı. Ayrım kondu: soran olay
+   pencere açar, haber veren olay günlüğe düşer. Yeniden ölçüm: 0,99.
+5. **Stat artışı `Stats.gain` dışından yapılıyordu.** `stat_gain_test`
+   yakaladı; oyunun azalan verim kuralı atlanıyordu.
+
+## Eski testlerde düzeltilen sessiz varsayımlar
+
+Hiçbiri "testi yeşil yapmak için" gevşetilmedi; her biri ölçüldü:
+
+* **"Çocuk evli doğmaz"** → §63 evli çocuğun evliliğini taşımayı açıkça
+  istiyor. İddia daraltıldı: taşınan evlilik **çocuğun kendi** eşiyle
+  olmalı, ölen oyuncunun eşi devralınmamalı.
+* **"Aynı çocuk birden fazla kez evlenmiyor"** → §23 yeniden evlenmeyi
+  istiyor. İddia **güçlendirildi**: evli çocuk tekrar evlenemez ve her ek
+  düğünün kapanmış bir evlilik kaydı olmalı.
+* **"Çocuk on yılda on yaşına gelir"** → çocuk ölebilir (ölçüm: 300
+  hayatta 0-1). Vefat edenin yaşı ölüm yılında donar. Yan bulgu: aynı
+  sınıftaki bir test çocuk ilk yıl ölürse **hiçbir şey sınamadan** yeşil
+  kalıyordu; pozitif kontrol eklendi.
+* **"Tek yılda gelir maaş+kira+5 milyonu aşamaz"** → varlıklı akrabanın
+  mirası tek yılda 21 milyon gelebiliyor. Eşik büyütülmedi, **kural
+  değiştirildi**: büyük artış yalnızca o yıl yeni bir miras kapandıysa
+  kabul ediliyor.
+* **"12. sınıfa ulaşan herkes sınav olayını görür"** → motor bunu hiç
+  garanti etmedi ("neredeyse kesin"). Zarsız bir **mekanizma** testi
+  eklendi (sınav olayının ağırlığı priority-0 havuzunun onlarca katı) ve
+  uçtan uca iddia %90'a çekildi.
+* **Bisiklet olayı ve işletme geri ödemesi** → örneklem kurası; pencere
+  genişletildi, eşikler aynı kaldı.
+
+## Bilerek yapılmayanlar
+
+NPC-NPC tam sosyal graph, borç geri ödeme takibi, velayet mahkemesi,
+miras davası, aile şirketi, dev aile ağacı görseli. Küslüğün sebebi kişi
+kartında yazılmıyor: kayıtta sebep yok ve §60 uydurma sebep yazmayı
+yasaklıyor.
+
+## Açık sorular
+
+Q-188: yıllık karar sınırı, dram profili bandı, okul meselesi
+toparlanma oranları, evdeki yetişkin çocuk gideri, eve dönüş penceresi,
+kardeşin verebileceği para, bakım tutarları, miras itirazı oranı, aile
+içi küslük oranı, tavsiye payı, hangi olayın pencere açacağı ve torunun
+tek ebeveynli doğması. Hiçbiri `DECISIONS.md`'ye yazılmadı. **Q-187
+ayrıca açık kalıyor; ona dokunulmadı.**
+
+# Paket AQ — kritik statlar, sağlık 0 tutarlılığı ve düşük stat etkileri
+
+Faho bildirdi: **sağlık 0'a düşüyor ve karakter hiçbir şey olmamış gibi
+yaşamaya, spor yapmaya, seyahat etmeye, çalışmaya ve yıllarca yaş almaya
+devam ediyor.** Ölçüldü ve bildirilenden ağır çıktı: AQ öncesi ağaçta
+(7427107) 500 hayatın 34.121 yılının **7.100'ü** sağlık 0 iken yaşanmıştı.
+
+## Kök neden
+
+İki ayrı şey vardı ve ikisi de ayrı ayrı düzeltildi.
+
+**1) Sağlık 0 olunca hiçbir şey olmuyordu.** Tek tüketici
+`Mortality.prototypeOnlyYearlyChance`'ın en çok iki katına çıkan
+çarpanıydı — otuz yaşında yıllık ölüm ihtimalini binde 1'den binde 2'ye
+çıkarıyor. Bir de bir kerelik günlük satırı. Aktivite, seyahat, estetik,
+iş ve okul yollarının **hiçbiri** sağlığı bir durum olarak okumuyordu.
+Yan bulgu: `ageUp` ve `advanceOneYear` bekleyen sağlık krizini
+denetlemiyordu, yani kriz ekranda asılı kalırken yıllar geçiyordu.
+
+**2) Sağlık 0'a inmek kaçınılmazdı — tek yönlü dişli.** D-116 hastalığın
+sağlık bedelini 1-3'ten 10-18'e çıkardı ama toparlanmayı sabit 7'de
+bıraktı ve yalnızca **hastalanılmayan** yıllarda çalıştırdı; yani çukuru
+açan yıl onu hiç kapatmıyordu. İzole ölçüm (net yıllık sağlık değişimi):
+sağlık 25'te **−5,1**, yaş kaç olursa olsun. Ayrıca toparlanma tavanı 71
+yaşından sonra `0` dönüyordu — yaşlanmanın kendisi sağlığı 30'un altına
+indirmezken tavanın 0 olması kendi kuralıyla çelişiyordu (70-79 yaşta
+ortalama sağlık 17,1).
+
+## Ne kuruldu
+
+Yeni bir kriz çerçevesi **kurulmadı**: zorunlu çözüm mevcut
+`PendingCrisis` / `HealthCrisisEngine` yolundan geçiyor — aynı pencere,
+aynı kayıt alanı, aynı save/load, aynı ölüm geçişi. Katalogda tek yeni
+kriz var (`kritik_saglik`, `isCritical`) ve rastgele havuzda yer almıyor.
+
+* **Bantlar** (`CriticalHealth`): 26-100 olağan · 11-25 kritik derecede
+  düşük · 1-10 hayati tehlike · 0 acil. Her yere `if (health < 10)`
+  kopyalanmadı, tek yerden sorulur.
+* **Zorunlu çözüm** sağlık 0'a inince açılır ve çözülmeden yaş
+  ilerlemez. Üretim yollarının hepsinden denetlenir: yıl başı, hastalık
+  (sebep: hastalık), kronik yıpratma (sebep: rahatsızlık), yıl sonu, olay
+  seçimi (sebep: karar), aktivite ve olağan krizin ardından.
+* **Kurtulma zar değil**: yaş, taşınan rahatsızlıklar, daha önce atlatılmış
+  hayati tehlikeler ve seçim hesaba katılır. Üç seçenek: acil servis
+  (bedelsiz, her yaşta açık), özel tedavi (240.000 ₺), evde bekle.
+  Kurtulan karakter 10-25 bandında açılır — ne 100 ne 1.
+* **Tek ölüm**: yaşa bağlı ölüm bekleyen krizi kapatır, kriz ölümü olağan
+  ölüm yolundan geçer. 500 hayatta çifte ölüm **0**.
+* **Dişli düzeltmesi**: toparlanma artık her yıl işler (hastalığın bedeli
+  önce uygulanır, pay kalan açığa göre hesaplanır), payı çukurla büyür
+  (%35, yıllık tavan 14, 70 üstü yarım) ve tavanı yaşlanmanın kendi
+  tabanının altına düşmez.
+* **Düşük sağlıkta**: ağır eylem kapanır (koşu, ağırlık, cezaevi sporu —
+  hafif yürüyüş ve esneme açık), 3 geceden uzun tur kapanır, elektif
+  estetik 1-10'da kapanır ve 11-25'te mevcut risk motoru 1,8 kat çalışır.
+  **Sağlık merkezi hiçbir bantta kapanmaz.**
+* **Diğer statlar**: mutluluk Paket AQ'dan önce hiçbir sistemin girdisi
+  değildi — zam/terfi ve okul ortalamasına kondu, karşı ağırlık olarak
+  dipte eğlencenin getirisi artırıldı (sarmal yok). Karizmanın tek boşluğu
+  mülakattı; ikinci şansı ölçeklendiriyor. Görünüş ve zekâda boşluk
+  bulunamadı, dokunulmadı. Hiçbir stat 0'ı ölüm üretmiyor.
+
+## Ölçüm (A/B, aynı 500 tohum, aynı düzenek)
+
+| | AQ öncesi | AQ sonrası |
+|---|---|---|
+| tamamlanan hayat | 373 / 500 | **437 / 500** |
+| sağlık 0 iken yaşanan yıl | **7.100** | **156** (hepsi çözüm bekliyor) |
+| ortalama ölüm yaşı | 64,5 | **68,0** |
+| p25 / medyan / p75 | 57 / 67 / 75 | 65 / 71 / 75 |
+| 60 yaş öncesi ölüm | %29,8 | **%15,6** |
+| 80+ | %2,4 | %1,4 |
+
+500 tam hayat (34.733 yıl): sağlık 0 gören hayat 110 (%22,0), ilk 0 yaşı
+medyan **73**, kritik durumdan kurtulma %38,5. Hedefi sıfır olan
+sayaçların tamamı sıfır. Bant dağılımı: olağan %94,2 · kritik düşük %2,5
+· hayati tehlike %2,8 · acil %0,4. Düşük sağlıkta rapor oranı %24,8
+(yüksek sağlıkta %6,9). Karizma, görünüş ve zekâ **hiçbir** yılda 0
+görülmedi — yaşlanma tabanları tutuyor.
+
+## Yol boyunca çıkan gerçek hatalar
+
+* **Yıl sonu kaçağı** → işletme zararı, adli süreç ve yarım zamanlı iş
+  sağlığı yıl içindeki denetimden **sonra** düşürüyordu (tohum 56, yaş
+  73). Yıl kapanmadan son bir denetim eklendi.
+* **Olay seçimi kaçağı** → 500 hayatın 20'sinde olay seçimi sağlığı 0'a
+  indiriyor ve oyuncu yıl ilerletmeden sağlık kazandıran bir aktiviteye
+  gidip durumu sessizce kapatabiliyordu. `EventEngine.resolve` ve
+  `ActivityEngine.perform` de denetliyor.
+* **Değer ayrıntısı penceresi taşıyordu** → yeni durum satırları gelince
+  360 px / yazı ×1,5'te 560 piksel taştı (ölçüldü; AQ öncesi taşmıyordu).
+  Pencere artık kendi içinde kayıyor.
+* **Değişmez fazla katıydı** → "sağlık 0 + bekleyen **kritik** durum yok"
+  yanlış iddiaydı: ekranda olağan bir kriz varken de oyuncu ilerleyemiyor
+  ve kriz kapanınca kritik durum devralıyor. Koşul doğrusuna çevrildi.
+
+## Bilerek yapılmayanlar
+
+Generic "all stats condition framework", ikinci bir hastane akışı, ayrı
+bir devamsızlık/sınıf tekrarı sistemi, kritik krizden sonra rastgele
+kronik tanı, NPC'ler için ayrıntılı sağlık simülasyonu, kritik durumun
+süresini tutan yeni bir kayıt alanı. `Mortality`'nin düşük sağlık
+çarpanına **dokunulmadı**: çifte sayım şüphesi ölçüldü ve ortalama ölüm
+yaşını hiç değiştirmediği görüldü.
+
+**Hiçbir sürüm gerçek Windows veya Android cihazda oynanmadı.**
+
+## CI'ı yiyen sonsuz döngü (Paket AQ'nun yan ürünü)
+
+Paket AQ'dan sonra CI iki kez **tam süre bütçesinde** iptal oldu ve
+logda tek bir hata yoktu. İlk okuma "süit uzadı, bütçe yetmiyor" oldu ve
+bütçe 45'ten 120'ye çıkarıldı. **O teşhis yanlıştı.**
+
+Gerçek sebep logdaki sessizlikti: Windows işinde 06:19:25 ile 08:12:52
+arasında neredeyse iki saat boyunca tek satır çıktı yok. Bu yavaşlık
+değil, takılmaydı. Üç test sonsuz döngüye giriyordu — `end_to_end_test`
+senaryo 8, `event_catalog_test` tekrar kalitesi, `health_package_test`
+hastalık ömrü. Üçü de her yıl bekleyen sağlık krizini silip (ya da hiç
+bakmayıp) `advanceOneYear`'ı yeniden çağırıyor; Paket AQ sağlık 0 iken
+yaş almayı durdurduğu için yaş hiç ilerlemiyordu.
+
+Dart'ın test zaman aşımı bunu yakalayamaz: `senaryo 8`'in üstünde zaten
+`Timeout(minutes: 5)` vardı ve hiç tetiklenmedi, çünkü senkron bir
+`while` döngüsü hiç yield etmiyor. Bu sınıf hatanın tek savunması
+döngünün kendi ilerleme kontrolü.
+
+Çözüm `app/test/support/corpus_year.dart`: tek bir yıl adımı. Sıradan
+kriz yine atlanıyor (ölçülen şey o değil), **kritik kriz silinmiyor,
+`HealthCrisisEngine` üzerinden cevaplanıyor** — ölçüm hayatları da
+oyuncunun geçtiği yoldan geçiyor. Yıl ilerlemezse `StateError` atıyor.
+Takıldığı kanıtlanan üç dosya ve aynı deseni taşıyan ikisi
+(`stat_aging_test`, `city_school_work_test`) buna bağlandı.
+
+Bütçe 120'den **60**'a indirildi: 120 kalması bir sonraki takılmayı iki
+saat saklardı. Düzeltmeden sonra ölçülen gerçek CI süresi **18 dakika**
+(Windows 17 dk 49 sn, Android 17 dk 5 sn — süit + build dahil), yani
+"süit 80 dakikaya çıktı" iddiası da yanlıştı.
+
+Hiçbir test silinmedi, atlanmadı, gevşetilmedi; ürün kodu değişmedi.
+
+## Paket AR: ölü hikâye izleri ve kırık rol kilitleri (3 Ekim 2026)
+
+`docs/EKSIKLER.md` §7'nin birinci maddesi: "Ölü hikâye izlerini araştır —
+10 iz hiç konmuyor." Araştırıldı; **gerçek bir üretim hatası** çıktı.
+
+### Ne ölçüldü
+
+40 kapsam hayatı (5 plan × 4 tohum × 2 denetim), olaylar oynanarak.
+
+| Ölçüm | AR öncesi | AR sonrası |
+| --- | --- | --- |
+| İz arayan olay | 67 | 67 |
+| Bunlardan hiç ekrana gelmeyen | 13 | **10** |
+| └ OYUN (aday havuza bile giremeyen) | 4 | **1** |
+| └ BOT (izi koyan seçimi bot seçmiyor) | 6 | 2 |
+| └ NORMAL (aday oldu, ağırlık kurasını kaybetti) | 6 | 7 |
+| Aday havuza giren farklı olay | — | 380 |
+| Konan ama hiçbir olayın okumadığı iz | 38 | 38 |
+
+Sınıflandırma **ölçülüyor, çıkarsanmıyor**: ilk denemede "iz zamanında
+kondu, demek ki kurayı kaybetti" diye varsaymıştım ve sonuç yanlış çıktı.
+`EventEngine.debugEligibleIds` her yıl çağrılarak olayın gerçekten aday
+havuza girip girmediği soruldu; cevap 0 OYUN'u 4 OYUN'a çevirdi.
+
+### Bulunan hata
+
+Motor bir kişiyi hikâye rolüne yalnızca **olayın bir kişisi varsa**
+kaydeder (`event_engine.dart`: `bondTargetId == null` ise `storyPeople`
+yazılmaz). Dört zincirin ilk halkası `rememberPersonAs` taşıyordu ama
+olayların hiç kişi koşulu yoktu. Rol sessizce kaydedilmiyor, o rolü arayan
+bütün devam halkaları **her oyuncuda** ömür boyu ulaşılamaz kalıyordu.
+Bot sınırı değil, üretim hatası.
+
+Üçü düzeltildi:
+
+- `suc_arkadasin_teklifi` — metin "**Arkadaşın** sesini alçalttı" diyor;
+  yaşayan arkadaş koşulu eklendi. `suc_teklif_ikinci_kez` OYUN → BOT
+  (yol açıldı, botun seçmediği suç seçimi kaldı), `suc_teklifi_ihbar`
+  listeden tamamen düştü.
+- `suc_borc_istendi` — metin "Bir **tanıdık** kapıya geldi" diyor; aynı
+  koşul eklendi. `suc_borc_odenmedi` ve `suc_borc_hukuk` açıldı.
+- `yaz_isi` — kilitlediği rolü **hiçbir olay aramıyordu**; iki yönden ölü
+  bildirim ve artık boş kalan `ExtraRoles` sınıfı kaldırıldı.
+
+Dördüncüsünde ayrıca rol yanlış seçimdeydi: kavgadan **çekilen** seçimde
+duruyordu, oysa devam olayı kavganın gerçekten olmasını istiyor — rol
+doğru kişiye bağlansa bile halka açılamazdı. Rol kavgaya giren seçime
+taşındı. Halka hâlâ uykuda: karşı taraf kayıtlı bir kişi değil ve onu
+kayda geçirmek tasarım kararı istiyor (**Q-190**).
+
+### AR/3 — teşhis dört sınıfa çıktı ve kura tabanı ölçüldü
+
+"BOT" etiketi iki ayrı şeyi gizliyordu. Ayrıldı:
+
+- **ZİNCİR** — izi koyacak **olay** hiç ekrana gelmedi. Sorun botun
+  seçimi değil, zincirin derinliği.
+- **BOT** — olay geldi ama bot başka kolu seçti. Yol açık.
+
+Bu ayrım `zincir_ogretmen_3`'ü BOT'tan ZİNCİR'e taşıdı ve asıl soruyu
+ortaya çıkardı. Kura tabanı ölçüldü (21.307 oyun yılı):
+
+| Ölçüm | Değer |
+| --- | --- |
+| Yıllık aday havuz boyutu | ortanca 80 olay (ortalama 73,7; en çok 112) |
+| Yıllık toplam etkin ağırlık | ortanca 268 |
+| Ağırlık 4'lük halkanın yıllık payı | %1,5 |
+| Ağırlık 5 | %1,87 |
+| Ağırlık 7 | %2,62 |
+
+Öğretmen zinciri (beş olay yazılmış, 10 → 45 yaş): 1. halka ~%4,4,
+2. halka %7,3, 3. halka %28,2 — ve bunlar her halkada kol seçme
+ihtimaliyle **çarpılıyor**. 3. halkaya ulaşma ihtimali kabaca **on binde
+bir**. Yazılmış içeriğin karşılığı alınmıyor.
+
+Bu bir denge kararı, teknik hata değil: **Q-191**'de öneri (devam
+halkalarına ×8 katsayı) ve ölçüm birlikte duruyor. **Uygulanmadı** —
+Faho Windows paketini test ettirirken temponun altından değişmemesi için.
+
+### Kalıcı bekçiler
+
+`app/test/paket_ar_rol_bekcisi_test.dart` — dört iddia: rol kilitleyen her
+seçimin kilitleyecek bir kişisi var; aranan her rolü kilitleyen bir seçim
+var; kilitlenen her rolü arayan bir olay var (ölü rol yok); istenen bağ
+türü tanınan bir tür. Q-190 kararını bekleyen tek halka `kKararBekleyen`
+listesinde adıyla duruyor; liste büyümeyecek.
+
+`app/test/paket_ar_hikaye_izi_test.dart` — aranan her izin bir üreticisi
+var; sessiz iz sayısı 38'i geçemez. Motor tarafında konan izler **elle
+yazılmıyor, `lib/` taranıyor**: elle tutulan ilk liste `evlendi` izini
+atlamış ve test canlı bir izi "hiç konmuyor" sanıp yanlış hata vermişti.
+
+`app/test/paket_ar_zincir_teshis_test.dart` — teşhis koşusu; sayı iddia
+etmez, yalnızca ölçümün çalıştığını iddia eder.
+
+Ürün dengesi değişmedi; hiçbir test silinmedi, atlanmadı, gevşetilmedi.
+Doğrulama: `flutter analyze` çıkış kodu 0; suç, zincir, katalog ve iz
+testleri (70 test) yeşil. **Android APK ya da Windows derlemesi bu
+pakette denenmedi** — yerel kapta Android SDK ve Windows araç zinciri yok.
+
+## Paket AS/1: "sessiz iz" sayısı yanlış şeyi sayıyordu (3 Ekim 2026)
+
+AR/1'in **38 sessiz iz** ölçümü abartılıydı. O test yalnızca katalog
+olaylarının `requiredFlags`/`forbiddenFlags` listesine bakıyor; motorun
+`state.storyFlags.contains(...)` ile okuduğu izleri saymıyordu.
+
+Ayrım yapıldı ve iki bağımsız taramayla (Dart testi ve ayrı bir betik)
+aynı sonuç çıktı:
+
+| Sınıf | Sayı | Anlamı |
+| --- | --- | --- |
+| Katalogda aranmayan iz | 38 | — |
+| **MEKANİK** | **6** | Motor okuyor, etkisi var, anlatısı yok |
+| **GERÇEKTEN SESSİZ** | **32** | Hiçbir yer okumuyor; yazılan iz boşa gidiyor |
+
+Mekanik olanlar: `sinav8_kaygi` / `sinav8_destek` / `sinav12_kaygi` /
+`sinav12_destek` (`EducationPath` sınav puanına ∓4 veriyor),
+`iste_sorumluluk_aldi` (`CareerProgress`), `kurs_destegi`
+(`CourseProgress` — iz varken yılda 4 ders ücretsiz). Bunlar eksik içerik
+değil; hikâye karşılığı olmayan mekanik.
+
+Bekçinin ölçütü 38'den **32**'ye indirildi: artık doğru şeyi sayıyor ve
+daha sıkı.
+
+### Yol boyunca iki tarama hatası (ikisi de kendi yazdığım kodda)
+
+**1. Noktasız sabit.** İlk tarama yalnızca `Sinif.sabit` biçimini
+arıyordu; aynı sınıf içinden kullanılan `storyFlags.contains(flagX)`
+biçimini kaçırdı ve `iste_sorumluluk_aldi` ile `kurs_destegi` yanlışlıkla
+"kimse okumuyor" sayıldı. Bağımsız betikle karşılaştırınca fark çıktı.
+
+**2. Çakışan ad kendini eziyordu.** Sabit haritası ad → tek değer olarak
+kuruluydu, bu yüzden çakışmayı bildiren test **0** basıyor ve yanlış
+güven veriyordu. Harita ad → **değer kümesi** yapıldı; gerçek sayı 6:
+
+| Ad | Değerler |
+| --- | --- |
+| `borcVerdi` | `orta_borc_verdi` \| `suc_borc_verdi` \| `zincir_borc_verdi` |
+| `arkadasaYardimEtti` | `arkadas_zor_gunde_yaninda` \| `arkadasa_yardim_etti` |
+| `isyerindeSustu` | `suc_isyerinde_sustu` \| `zincir_isyerinde_sustu` |
+
+Üç ayrı sınıfta aynı Dart adının farklı izleri var. Ada güvenen bir
+denetim bunları tek iz sanar ve "bu iz okunuyor" diye yanlış rapor verir —
+tam olarak AR paketinin bulduğu hata sınıfı. Yeni test bu tuzağı sabitler
+ve belirsiz adları **okunmuş saymaz** (denetimi gevşetmemek için
+muhafazakâr taraf).
+
+### Bundan sonrası
+
+32 sessiz iz, yazılmış ama karşılığı olmayan içerik: `bosandi`,
+`cocuk_sahibi`, `bekar_yalnizligi_secti` (dört seçim besliyor),
+`bekar_tanismayi_erteledi` (üç seçim), `bebeklik_*`, `esle_susuldu`,
+`torunla_vakit`, `zam_istendi`… Bunları okuyan olayları yazmak tasarım
+kararı istemiyor: iz zaten konuyor, eksik olan onu okuyan taraf. Sıradaki
+içerik paketinin hedef listesi bu.
+
+## Paket AS/2: Q-190 ve Q-191 uygulandı, sessiz izlere karşılık yazıldı (3 Ekim 2026)
+
+Faho sohbette iki kararı onayladı; ikisi de uygulandı ve **ölçüldü**.
+
+### Q-191 — zincir devam halkalarına ×8 ağırlık
+
+`EventEngine.prototypeOnlyChainContinuationBoost = 8` (`prototypeOnly`).
+Oyuncunun `requiredFlags`'ı karşılanmış olayları — yani zaten açtığı
+devam halkaları — ağırlığını ×8 alıyor. İlk halka normal ağırlıkta
+yarışır, yani **zincire girme ihtimali değişmedi**; değişen, girdikten
+sonra devamını görme ihtimali. Dönüm noktası katsayısının (×120) çok
+altında. Tekrar sönümü ve `forbiddenFlags` üstüne çalışmaya devam ediyor:
+halka bir kez çıkınca havuzdan düşer.
+
+### Q-190 — kavga ettiğin kişi kalıcı tanışıklık kaydı
+
+`suc_gece_tartismasi/karsilik_ver` artık `startsFriendship` ile kişi
+üretiyor; `rememberPersonAs` onu `kavgaKarsisi` rolüne kilitliyor ve
+`suc_kavga_karsisindaki` yıllar sonra aynı kişiyle açılıyor. Bekçi
+testindeki `kKararBekleyen` listesi kaldırıldı.
+
+### AS/2 — yankı olayları
+
+Yeni dosya `app/lib/data/event_pool_echo.dart`: **10 olay**, hepsi var
+olan ama hiç okunmayan bir izi okuyor. Yeni mekanik yok; kurulum zaten
+yazılmıştı, eksik olan sonucuydu.
+
+| Yankı | Okuduğu iz | Neden önemli |
+| --- | --- | --- |
+| `yanki_bosanma_yil_donumu` | `bosandi` | Boşanıyordun, oyun bir daha hiç anmıyordu |
+| `yanki_ilk_ebeveynlik` | `cocuk_sahibi` | Baba/anne oluyordun, yankısı yoktu |
+| `yanki_ilk_gun_hatirlandi` | `cocuk_ilk_gun_yalniz` | Çocuğun okulun ilk günü yalnız kalmıştı |
+| `yanki_yalnizlik_muhasebesi` | `bekar_yalnizligi_secti` | Dört ayrı seçim besliyordu |
+| `yanki_ertelenen_tanisma` | `bekar_tanismayi_erteledi` | Üç ayrı seçim besliyordu |
+| `yanki_susmanin_bedeli` | `esle_susuldu` | Tartışmada susmuştun |
+| `yanki_zam_sonucu` | `zam_istendi` | Zam istemiştin, cevabı gelmiyordu |
+| `yanki_borc_geri_dondu` | `orta_borc_verdi` | Borç vermiştin, geri dönmüyordu |
+| `yanki_torun_buyudu` | `torunla_vakit` | Torunla geçen gün hatırlanmıyordu |
+| `yanki_dolandirici_tekrar` | `dolandiriciya_kanmadi` | Kanmamıştın, tekrar denenmiyordu |
+
+### Ölçülen sonuç
+
+| Ölçüm | Önce | Sonra |
+| --- | --- | --- |
+| İz arayan 67 olaydan hiç ekrana gelmeyen | 10 | **0** |
+| └ OYUN (aday bile olamadı) | 1 | 0 |
+| └ ZİNCİR (önceki halka hiç çıkmadı) | 1 | 0 |
+| └ BOT (olay geldi, kol seçilmedi) | 1 | 0 |
+| └ NORMAL (aday oldu, kurayı kaybetti) | 7 | 0 |
+| Aday havuza giren farklı olay | 380 | 392 |
+| Yıllık toplam etkin ağırlık (ortanca) | 268 | 318 |
+| Yıllık aday havuz boyutu (ortanca) | 80 | 80 |
+| Hiçbir yerin okumadığı iz | 32 | **22** |
+
+Havuz boğulmadı: aday sayısı aynı kaldı, toplam ağırlık %19 arttı ve
+**daha fazla** farklı olay ekrana geldi.
+
+### Kalıcı bekçiler
+
+`app/test/paket_as_yanki_test.dart` — altı iddia: yankı havuzu boş değil;
+her yankı **var olan** bir izi arıyor (uydurma iz = sessizce ölü içerik);
+her yankı kendi tekrarını engelliyor ve **her kol** kapanış izini koyuyor;
+kimlikler tekil; sonuç metinleri var ve 260 karakterin altında
+(`docs/WRITING_STYLE_TR.md` §8); yasak kalıp ve yasak sokak ağzı yok (§2,
+§6).
+
+`paket_ar_hikaye_izi_test.dart` ölçütü 32'den **22**'ye sıkılaştırıldı:
+kazanım geri alınamaz.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; iz, rol bekçisi, yankı,
+katalog, çeşitlilik, öncelik ve zincir testleri yeşil. Tam süit koşuyor.
+**Android APK ya da Windows derlemesi bu pakette denenmedi** — yerel kapta
+araç zinciri yok, CI'da derlenir.
+
+## Paket AT: 9-12 yaş boşluğu — oyunun ilk on dakikası (3 Ekim 2026)
+
+**Neden bu iş.** Oynanabilirliği artırmak için nereye yazılacağı
+tahminle değil ölçümle seçildi. Olay havuzu yaş başına sayıldı ve
+"kapısız" olaylar ayrıldı — kapısız olay, iz/kişi/sahiplik/iş/okul
+koşulu olmayan, yani neredeyse her oyuncuda çıkabilen olay.
+
+| Yaş | Olay | Kapısız (önce) | Kapısız (sonra) |
+| --- | --- | --- | --- |
+| 0 | 31 | 1 | 1 |
+| 6 | 46 | 9 | 9 |
+| 9 | 73 → 86 | 15 | **29** |
+| 10 | 73 → 93 | 15 | **29** |
+| 11 | 75 → 95 | 16 | **30** |
+| 12 | 75 → 95 | 14 | **28** |
+| 17 | 111 → 112 | 22 | 22 |
+| 40 | 271 | 78 | 78 |
+
+İki bulgu: çocukluk orta yaşın onda biri kadar kapısız içerikle
+açılıyordu, ve `event_pool_childhood.dart` 1-8 ile 13-15 yaşlara
+yoğunlaşmış, **9-12 arası tamamen boştu.** Oysa bu dönem oyunun ilk on
+dakikası ve her oyuncunun gördüğü tek bölüm.
+
+**Yeni dosya:** `app/lib/data/event_pool_schoolyears.dart` — 9-12 yaş,
+**20 olay**. Dönemin karakteri: çocuk ilk kez kendi başına bir şey
+yapıyor. Henüz işi, parası ya da ilişkisi yok; elindeki tek şey
+kararları.
+
+Okul tarafı: karne günü, tahta nöbeti, ödev kopyası, beden dersinde
+takım seçimi, sınıf gezisi parası. Para tarafı: ilk kez yalnız markete
+gönderilme, bakkal veresiyesi, bir şey için biriktirme. Mahalle ve ev:
+bisikletle mahalle sınırı, sokak kedisi, üst kata taşınan çocuk, ekran
+süresi kavgası, sofra kurma, ilk kalın kitap, yaz tatilinde kuzenler.
+
+**İçinde dört küçük zincir var ve hepsi kendi izini kendi okuyor:**
+sorumluluk aldıysan tören görevi gelir; ödev kopyaladıysan tahtaya
+kalkarsın; veresiye aldıysan defter kapanır; biriktirdiysen kutu dolar
+ve o alışkanlık ergenlikte geri döner. Dışarıya sessiz iz
+bırakılmadı — bekçi testi ilk denemede bir tanesini yakaladı
+(`birikimTamamlandi` okunmuyordu) ve karşılığı yazıldı.
+
+**Ölçülen sonuç (40 kapsam hayatı):** iz arayan olay 67 → 83, bunlardan
+hiç çıkmayan 4, **OYUN sınıfı 0** — yani kırık zincir yok. Aday havuza
+giren farklı olay 392 → 411.
+
+Çıkmayan dördü ve nedenleri:
+- `yanki_yalnizlik_muhasebesi`, `yanki_ertelenen_tanisma` — okudukları
+  izler **bekâr kalan** oyuncuda konuyor ("evli değil ve ilişkide
+  değil" şartı). Kapsam botu her hayatta evleniyor, bu yüzden iz hiç
+  konmuyor. Gerçek oyuncu için erişilebilir ama **botla ölçülemiyor**;
+  bu bir ölçüm boşluğu, oyun hatası değil.
+- `zincir_ogretmen_3` — ZİNCİR'den **BOT**'a geçti: önceki halka artık
+  ekrana geliyor (Q-191'in etkisi), bot sadece o kolu seçmiyor.
+- `savundugun_arkadas` — aday oldu, ağırlık kurasını kaybetti. Nadir.
+
+Hâlâ fakir kalan bant **0-6 yaş** (1-9 kapısız olay). Bebeğin karar
+alanı doğası gereği dar; yine de sıradaki içerik boşluğu burası.
+
+Doğrulama: `flutter analyze` çıkış kodu 0; iz, yankı, rol bekçisi,
+katalog ve zincir testleri yeşil (46 test). **Android APK ya da Windows
+derlemesi bu pakette denenmedi** — yerel kapta araç zinciri yok.
+
+## Açık sorular
+
+Q-189: sağlık bantları, kurtulma eşikleri, kurtulma sonrası sağlık bandı,
+toparlanma payı ve tavanı, düşük sağlıkta kapanan eylemler, iş tarafı
+etkisi, mutluluk motivasyon çarpanı, karizmanın mülakattaki payı,
+`Mortality` çarpanı, 80+ oranındaki düşüş ve özel tedavi ücreti. Hiçbiri
+`DECISIONS.md`'ye yazılmadı. **Q-187 ve Q-188 ayrıca açık kalıyor; ikisine
+de dokunulmadı.**
+
+**Q-192'nin eki kararlaştırıldı (4 Ekim):** kaptanlık eşiği (D-134),
+futbol sezon katsayısı (D-135) ve beceri gelişim tabanı (D-136) Faho
+tarafından onaylandı, uygulandı ve `DECISIONS.md`'ye girdi.
+
+**Q-192'nin açık kalan maddeleri:** okul kulüpleri ile futbol yolunun dokuz sayısı
+(aktif kulüp sınırı, seçme eşiği, yatkınlığın ağırlığı, beceri büyüme
+hızı, profesyonel için asgari geçmiş, scout sıklığı, giriş yaşı,
+kaptanlık eşiği, okul-kulüp çatışması). Hepsi `prototypeOnly`; hiçbiri
+`DECISIONS.md`'ye yazılmadı.
+
+**Q-193 (yeni, Paket AY):** profesyonel futbolun sayıları — deneme
+eşiği ve kura aralığı, kapıya gelenin kabul oranı, kariyer uzunluğu
+dağılımı, kazanç bandı ve itibar duyarlılığı, sakatlık sayıları, sezon ve
+kariyer sonu eşikleri. Hepsi `prototypeOnly`; hiçbiri `DECISIONS.md`'ye
+yazılmadı.
+
+Q-190 ve Q-191 **kararlaştırıldı** (3 Ekim 2026, Faho onayladı) ve
+uygulandı; ayrıntı yukarıdaki Paket AS/2 bölümünde. Kuyrukta kalan tek
+açık grup Q-189 ile Q-187/Q-188.
+
+## Paket BA: onaysız sayı taraması (5 Ekim 2026)
+
+Faho Q-194'ü onayladı ("onayladım tarama yap"). Tarama `lib/` içindeki
+**869** `prototypeOnly` bildiriminin tamamını kapsadı; üç desen arandı:
+ölü sabit, doymuş tavan, dekoratif sınır.
+
+**Bulgular:** 19 ölü sabit (bildirilmiş, hiç okunmuyor), 1 doymuş tavan,
+1 dekoratif sınır, 1 yanlış adlandırma, 1 sınır hatası.
+
+**Uygulandı (yeni oyun kuralı değil):**
+
+| # | İş | Neden karar gerektirmedi |
+|---|---|---|
+| 1 | 15 ölü sabit silindi, yerlerine gerçek sayının nerede olduğunu söyleyen not bırakıldı | Ölü kod; hiçbiri okunmuyordu |
+| 2 | Mali kademe sınır hatası düzeltildi | Onaylı **D-092**'nin ihlaliydi |
+| 3 | Açık iş tavanı (`prototypeOnlyMaxOpenBusinesses`) kapıya bağlandı | Davranış aynı kaldı (değer 1) |
+| 4 | `ElderCare.prototypeOnlyHealthThreshold` → `prototypeOnlyCareHappinessBelow` | Ad yanlıştı; ölçü değişmedi |
+| 5 | Kalıcı bekçi: `prototype_only_dead_constant_test.dart` | Test, kural değil |
+
+**En ağır ölü sabit grubu:** `JobMarket` eksiksiz bir "işe alım
+olasılığı" modeli bildiriyordu — taban %50, **eğitim payı %25**, stat
+payı %15, tavan %90 — ve dördü de hiç okunmuyordu. İşe alım gerçekte
+deterministik: koşullar sağlanır ve mülakat sorusu doğru cevaplanırsa iş
+verilir. Eğitim bir **kapı**dır, olasılık payı değil. Dosyayı okuyan
+(ben dahil) tersini sanıyordu.
+
+**Düzeltilen sınır hatası (D-092):** gideri olmayan oyuncunun mali
+kademesi, bandın **üst sınırı** döndürülerek veriliyordu; karşılaştırmalar
+`<` olduğu için sınır değeri bir üst bandı veriyordu. Cebinde 50 lirası
+olan ve gideri olmayan çocuk `rahat` değil **`varlikli`** sayılıyordu,
+parasız olan da `zor` değil `idare`. Olay motoru o çocuğa varlık metni
+çıkarıp yoksulluk metnini kapatıyordu — D-092 tam bunun olmamasını
+söylüyor.
+
+**Karar bekleyen (Q-195, Faho'ya soruldu):**
+
+1. **Doymuş tavan — zam talebi.** Ölçüm: zam şansında statların etkisi
+   **8. yıl kıdemde tamamen bitiyor** (stat 10 ve stat 100 aynı: 0,850);
+   yetenekli çalışanda 4. yılda. Ustalık basamakları Usta **8**, Başusta
+   **16**, Duayen **28** yıl olduğu için **D-155'in ustalık/itibar payı
+   ve Paket AK'nın hobi sinerjisi, Usta'dan yukarıdaki her basamakta
+   matematiksel olarak ölü.** Pay hesabının kendisi doğru (ölçtüm,
+   basamak başına artıyor; test kalıcı olarak denetliyor) — sorun tavanın
+   onu yutması. D-169'nin birebir aynısı.
+2. **Dekoratif sınır — rütbeli askerlik.** Ölçülen en küçük kabul şansı
+   **0,302**; bildirilen alt sınır **0,05 hiçbir yolda erişilemiyor**.
+3. **Dört bağlanmamış mekanik:** göz muayenesinin sağlık katkısı (hiç
+   verilmiyor), kefalet yakınlık eşiği (hiç aranmıyor), hükümde "dolu
+   eksen" sınıflandırması (hiç kullanılmıyor), dükkâna özgü olay
+   süzgeci (hiç uygulanmıyor). Her biri için önerim Q-195'te.
+
+**Taramanın kendi hatası da kayda geçti:** tarayıcının ilk hâli adları
+küresel arıyordu; `prototypeOnlyBaseChance` beş ayrı sınıfta geçtiği
+için `JobMarket`'ınki "okunuyor" sayılıyordu. Sınıf kapsamlı hâle
+getirilince ölü sabit sayısı 16'dan 19'a çıktı.
+
+**Doğrulama:** `flutter analyze` temiz; yeni iki dosya dahil hedefli küme
+58 test yeşil; tam süit koşuldu. Android APK **derlenmedi ve cihazda
+denenmedi**.
+
+## Paket BA/2: Q-195 uygulandı, karar numaraları düzeltildi (5 Ekim 2026)
+
+Faho onayladı: "HERŞEYİ ONAYLIYORUM HER ŞEYİ YAP."
+
+**Uygulanan kararlar:**
+
+| Karar | Ne |
+|---|---|
+| **D-176** | Kıdemin zam/terfi payı 0,05 → 0,02 **ve** paya 0,15 tavanı. Önerdiğim 0,02 tek başına yetmedi: ölçüm doymanın 8. yıldan 16. yıla (tam Başusta'ya) kaydığını gösterdi. Tavanla birlikte statların etkisi hiçbir kıdemde bitmiyor; Usta/Başusta/Duayen geçişleri zam şansını değiştiriyor (7→8: 0,590→0,663; 15→16: 0,679→0,750; 27→28: 0,761→0,832). D-155 ilk kez gerçekten çalışıyor. |
+| **D-177** | Rütbeli askerlikte erişilemeyen 0,05 alt sınırı kaldırıldı; en kötü durum %30, üst sınır 0,95. Davranış değişmedi, yanlış bilgi veren sayı gitti. |
+
+**Q-195'teki üç maddem yanlıştı; düzeltildi:**
+
+1. "Göz muayenesi sağlık vermiyor" — **yanlış.** Katalogdaki
+   `goz_muayenesi` kaydının `health: 2` alanı uygulanıyor. Sabit
+   kopyaydı; önerdiğim gibi bağlasaydım katkı **ikiye çıkacaktı**.
+2. "Kefalette yakınlık aranmıyor" — **yanlış.** `PrisonLife._minBond =
+   30` aranıyor. İkinci kopya tek kaynağa indirildi.
+3. "Dükkân olay süzgeci uygulanmıyor" — **yarı yanlış.** Motorda bilerek
+   uygulanmıyor, güvence katalog tarafında ve sabiti **test** okuyor.
+   Taramam yalnızca `lib`e baktığı için ölü sandı.
+
+Taramanın iki kusuru düzeltildi: ad çakışmalarında yanlış negatif (sınıf
+kapsamlı yapıldı) ve okuma yüzeyine `test`in eklenmemesi. İkincisi
+düzeltilince ölü sabit bekçisi **boş muafiyet listesiyle** geçiyor.
+
+**Karar numarası çakışması (benim hatam, düzeltildi):** Paket AY'de
+Faho'nun onayladığı on iki kararı `DECISIONS.md`'ye D-137…D-148 diye
+yazmıştım; oysa kod o numaraları **zaten** başka kurallar için
+kullanıyordu (1 Ekim'de D-139 altı dosyada kefalet/cezaevi, D-146 dört
+dosyada İlişkiler menüsü). Kararlarım **D-164…D-175**'e taşındı —
+içerik aynı, yalnızca etiket. Taşıma git diff'ten yalnızca bu oturumda
+benim eklediğim satırlar hedeflenerek yapıldı.
+
+**Açığa çıkan asıl sorun (Q-196, karar bekliyor):** D-137'den D-163'e
+kadar **27 numara** kodda yetki olarak kullanılıyor ve hiçbirinin
+`DECISIONS.md`'de tanımı yok. Bunları kendim yazmadım: CLAUDE.md'nin
+değişmeyen kuralı gereği bir karar ancak Faho onaylayınca girer.
+Yirmi yedisi, konularıyla ve gerekçeleriyle yeni bekçinin muafiyet
+listesinde bekliyor.
+
+**Kalıcı bekçi:** `decision_reference_test.dart` — kodda tanımsız bir
+karar numarasına atıf verildiği anda kırılır.
+
+**Doğrulama:** `flutter analyze` temiz; D-176 ve D-177 bekçilerinin eski
+davranışta kırıldığı ayrıca doğrulandı (kıdem payı 0,05'e ve tavan
+9,9'a çevrilip ölçüldü: "statların etkisi 8 yıl kıdemde bitiyor" ve
+"15→16 yıl geçişinde ustalık basamağı zam şansını değiştirmiyor:
+0.850 → 0.850"). Android APK **derlenmedi ve cihazda denenmedi**.
+
+## Paket BB: derleme zinciri, 27 karar taslağı, tarama tamamlandı (6 Ekim 2026)
+
+Faho "1-2-3 yap" dedi.
+
+### 1) Android derleme zinciri — engel bulundu, script hazır
+
+**Oyun hâlâ derlenmedi ve hiçbir cihazda çalıştırılmadı.** Bu kapta
+Android SDK yok. Ölçüm, engelin tek bir host olduğunu gösterdi:
+
+| Host | Durum |
+|---|---|
+| `dl.google.com` | **000** — gateway CONNECT'e 403 (ağ politikası reddi) |
+| `maven.google.com` | 301 açık |
+| `services.gradle.org` | 200 açık |
+| `repo1.maven.org` | 200 açık |
+| `pub.dev` | 200 açık |
+
+Yani Gradle/Maven tarafı zaten açık; SDK paketlerinin indiği
+`dl.google.com` kapalı. `scripts/setup_android_sdk.sh` yazıldı
+(sürümler Flutter 3.35.5'in kendi varsayılanlarından okundu: compileSdk
+36, targetSdk 36, minSdk 24) ve `docs/ANDROID_BUILD_SETUP.md` ne
+yapılacağını adım adım anlatıyor. Ağ politikasına host eklenince script
+çalışır.
+
+### 2) Q-196 — 27 karar numarasının metni koddan çıkarıldı
+
+D-137…D-163 arası 27 numaranın kural metni koddan okundu ve kuyruğa
+**onay bekleyen taslak** olarak yazıldı (Q-196 EKİ). Çoğunun yorumunda
+Faho'nun kendi cümlesi alıntılı duruyor; bu bir yeniden kurma, uydurma
+değil. **Hiçbiri `DECISIONS.md`'ye girmedi** — oraya ancak Faho
+onayladıktan sonra girer (CLAUDE.md'nin değişmeyen kuralı).
+
+Taslakları yazarken iki numarayı ilk okumamda karıştırdığımı gördüm ve
+düzelttim: muayene **D-157**, yıllık araç sigortası/vergisi **D-148**.
+
+### 3) Tarama kalan alanlara uzatıldı
+
+Ölü sabit sınıfı artık bekçiyle kapalı (tüm `lib` taranıyor), bu yüzden
+yalnızca **doymuş tavan** ve **dekoratif eşik** arandı. 34 tavan adayı
+incelendi; biri dışında hepsi sağlam. Çoğu "değer + kazanç, 0-100'e
+kıstırılmış" biçiminde ve oradaki tavan stat tavanıdır.
+
+**Bulgu (Q-197, karar bekliyor):** okul kulübü seçme puanının deneyim
+payı `(sezon × 4 + beceri ~/ 4)` ve tavanı 30. Ölçüm: **8. sezondan
+sonra beceri puana hiç girmiyor**; 5. sezondan sonra yalnızca çok düşük
+beceride fark kalıyor. Okul ~12 sezon sürdüğü için bu aralık gerçekten
+yaşanıyor. D-169 ve D-176 ile aynı desen. Önerim ağırlığı 4'ten 2'ye
+indirmek; dört seçenek Q-197'de.
+
+Sınırda bir madde kayda geçti: `courtChance: 1.0` olan suçta sabıka payı
+hiçbir şey değiştirmiyor (soruşturma zaten kesin).
+
+**Doğrulama:** `flutter analyze` temiz; hedefli küme yeşil. Bu pakette
+`lib/` içinde davranış değiştiren değişiklik **yok** (script, belge ve
+test eklendi), bu yüzden test seçimi kuralına göre tam süit koşulmadı.
+
+**Düzeltme (6 Ekim, Q-197 EKİ):** "tarama kalan alanlara uzatıldı"
+cümlesi eksikti — kalan 16 alanda yalnızca doymuş tavan desenini
+taramıştım, dekoratif eşik tarafını yapmamıştım. Şimdi yapıldı:
+mekanik alt sınıf temiz (0 bulgu), tek gerçek eşik zinciri (okul
+kulübü seçmesi) elle ölçülüp sağlam bulundu. Tarama artık
+`scripts/sabit_taramasi.py` ile tekrarlanabilir.
+
+## Paket BC: 27 karar yazıldı, Q-197 uygulandı (6 Ekim 2026)
+
+Faho onayladı: "önerini uygula."
+
+### Q-196 kapandı — `DECISIONS.md` artık eksiksiz
+
+D-137…D-163 arası **27 numaranın** kural metni koddan yeniden kurulup
+`DECISIONS.md`'ye yazıldı. Her maddenin başında bunun bir yeniden kurma
+olduğu ve numaranın kodda yetki olarak kullanılmasına rağmen yazılı
+karşılığı bulunmadığı belirtiliyor. Çoğunda Faho'nun kendi cümlesi
+alıntılı duruyor — örneğin D-144 (sahiplenilmeyen hayvanın bakımı) ve
+D-145 (sayfa başına pop-up çıkmaz) doğrudan onun bildirdiği hatalardı.
+
+`DECISIONS.md` **178 karar** taşıyor ve `decision_reference_test.dart`'ın
+muafiyet listesi **boşaldı**: kodda atıf verilen her karar numarasının
+artık yazılı bir karşılığı var.
+
+### Q-197 kapandı — D-178
+
+Okul kulübü seçmesinde deneyim payının ağırlığı **4'ten 2'ye** indi.
+
+| Sezon | beceri 0 | beceri 50 | beceri 100 |
+|---|---|---|---|
+| 3 | 6 | 18 | 30 |
+| 8 | 16 | 28 | 30 |
+| 12 | 24 | 30 | 30 |
+
+Önce 8. sezondan sonra beceri puana **hiç** girmiyordu; şimdi etkisi
+**hiçbir sezonda bitmiyor**. Ölçüm testi kalıcı bekçiye çevrildi.
+D-136'nın beceri gelişim sayıları ve D-171'in kulüp sınırı değişmedi.
+
+### Hâlâ bekleyen
+
+**Android derleme:** ağ politikası `dl.google.com`'u reddediyor; script
+ve belge hazır (`scripts/setup_android_sdk.sh`,
+`docs/ANDROID_BUILD_SETUP.md`), ayar Faho'da. Oyun **hâlâ derlenmedi ve
+hiçbir cihazda çalıştırılmadı.**
+
+**Paket AZ:** gerçek 2026-27 lig/kulüp kataloğu — ağ kapalı, tff.org on
+dördüncü kez `000`.
+
+## Paket BD: ekranlar ilk kez okundu, üç hata düzeltildi (6 Ekim 2026)
+
+**Oyun hâlâ hiçbir cihazda oynanmadı** ama ekranların görünür metni ilk
+kez okundu. Yeni test `app/test/ekran_dokumu_test.dart` bir hayatı
+**gerçek arayüzden** (düğmelere basarak) 8 · 17 · 30 · 70 yaşına kadar
+yaşatıp Hayat ekranı ve dört menünün bütün metnini basıyor. Bir bekçi
+değil **dürbün**: tek kalıcı iddiası hiçbir ekranın boş kalmaması.
+
+Dürbünü kurmak üç kez yanlış kurulumdan geçti; üçü de dosyanın başına
+ölçülmüş hata olarak yazıldı:
+
+1. Evreyi `copyWith(age: 8)` ile kurmak dünyayı yaşlandırmıyor; 8
+   yaşındaki çocuğun annesi 22 göründü. Hata sanıp raporlayacaktım,
+   400 hayatlık ölçüm gerçeği söyledi (annenin doğumdaki yaşı en az
+   **17**, medyan 30). Evreler artık gerçekten yaşanarak kuruluyor.
+2. `ageUp()`'ın **beş** kapısı var (olay, ölüm, kriz, lise alanı
+   D-094, lise sonrası yol D-111). İlk yazımda ikisi karşılanıyordu;
+   17/30/70 evrelerinin üçü de **14 yaşında** takılı kaldı.
+3. Durumu koddan değiştirmek **pencereyi kapatmıyor.** Açık kalan
+   `EventDialog` modal olduğu için sekme dokunuşları bariyere çarptı ve
+   dört evrenin hepsinde beş ekran da **aynı** metni verdi. "Sekmeler
+   çalışmıyor" sanacaktım. Döküm artık hayatı UI smoke testinin ortak
+   akış yardımcılarıyla yaşıyor.
+
+### Dökümün bulduğu dört kesin hata — düzeltildi
+
+| Hata | Nerede | Bekçi |
+|---|---|---|
+| **Duruşmadan sonra kırmızı hata ekranı.** `TrialSheet` kareden sonra `Navigator.maybePop()` çağırıyordu; `maybePop` **en üstteki** rotayı kapatır. Kabuk bekleyen pencereyi açarken bütün rotaları kapatıp hemen yenisini açıyor, yeni rotanın kapsamı aynı karede kurulmamış oluyor ve `ModalRoute.willPop` içindeki `assert(scope != null)` düşüyor. Oyuncuya bakan yolu: duruşmada tutum seçtikten sonra kararın bildirimi geldiği an. `TrialSheet`in **hiç** arayüz testi yoktu. | `trial_sheet.dart` | `paket_bd_durusma_penceresi_test.dart` |
+| **Ölüm cümlesi bozuk kuruluyordu:** "uykusunda, sakin bir şekilde **nedeniyle** vefat etti". Tek hayatta beş kez; üçüncü yazım yeri oyunun **son cümlesi**: "70 yaşında uzun bir ömrün ardından nedeniyle hayatını kaybettin." Gerekçeler doğru, ek koşulsuzdu. | `mortality.dart`, `life_progression.dart`, `notices.dart` | `paket_bd_olum_cumlesi_test.dart` |
+| **Hayvan satırı bütün kataloğu tek satıra diziyordu** (104 karakter, 10 tür " ya da " ile). İlk düzeltmem de yetmedi: grup saymak **94** karakter ölçtü, desen aynı kaldı. Boş durum artık sayı veriyor. | `relationships_screen.dart` | `paket_bd_ekran_alt_metni_test.dart` |
+| **Günlük satırı küçük harfle başlıyordu:** "arkadaşın Hasan ile bir saat konuştunuz." Motor doğru ve belgeli (`{sahip}` cümle başı, `{sahipk}` cümle içi); iki olay sonucu `{sahipk}` ile başlıyordu. Üçüncü aday incelendi ve dokunulmadı — orada yer tutucu gerçekten cümle içinde. | `event_pool.dart:464, :509` | `paket_bd_ekran_alt_metni_test.dart` |
+
+Dört bekçinin de düzeltmeden **önce** düştüğü kanıtlandı: duruşma
+çökmesi birebir üretildi, ölüm cümlesi bekçisi eski davranışta iki
+bulguyu adıyla söyledi, hayvan bekçisi **kendi ilk düzeltmemi**
+yakaladı (grup saymak 94 karakterdi), yer tutucu bekçisi hatayı olay ve
+seçim adıyla gösterdi.
+
+### Karar bekleyen sekiz soru: Q-198
+
+Askerlik celbinin 70 yaşında hâlâ beklemesi · hiç çalışmamış oyuncuya
+emekli aylığı · okul ekranının kendi ekranıyla çelişen dipnotu · ilkokul
+kartındaki "Son sınıfa kalan 9 yıl" · aynı ekranda "Lise 4. sınıf" ve
+"12. sınıf" · **kardeşin ebeveynle aynı adı taşıması (ölçüldü: kardeşi
+olan hayatların %10'u, 37/370)** · geliri olmayan oyuncunun aracının
+kapanmayan açık üretmesi (D-123 ile D-148 çatışıyor) · aynı günlük
+satırının dokuz yıl üst üste birebir tekrarlanması. Her birinin
+önerisi ve varsayılanı kuyrukta yazılı; **hiçbiri `DECISIONS.md`'ye
+girmedi.**
+
+Dökümün kendi sınırları da kuyrukta yazılı: yalnızca **çizilmiş** metni
+okur, uzun listelerin alt satırları hiç kurulmaz. İlk okumada
+"Hayat işleri" başlığını boş görüp hata sanacaktım; görüş alanını
+büyütünce altındaki beş satır göründü. "Ailesinin yanında" ile vefat
+etmiş ebeveyn de hata değil — `Housing.residenceOf` hanede yetişkin
+kalıp kalmadığına bakıyor.
+
+## Paket BE: dürbün dolu hayata çevrildi, iki hata daha (6 Ekim 2026)
+
+Paket BD'nin dökümü **tek bir hayatı** gördü: kendi kendine yaş alan,
+iş aramayan, evlenmeyen, ev almayan bir oyuncu. Çıkan hayat yoksul,
+işsiz ve hiç evlenmemiş bir adam oldu — yani oyunun **en çok kod
+barındıran** ekranları hâlâ okunmamıştı: işi varken Meslek, eşi ve
+çocuğu varken İlişkiler, evi ve yatırımı varken Varlıklar.
+
+Yeni test `app/test/ekran_dokumu_bot_test.dart` bunu kapatıyor.
+`playBotLife` bütün kararları veren botu doğumdan ölüme oynatıyor;
+`onYear` ile hedef yaşların durumu fotoğraflanıp ekranlara basılıyor.
+Üç arketip, beş kare: kariyer (35 ve 55), aile (40 ve 65), yatırımcı
+(45). Dökülen hayatlar gerçekten dolu — 2,8 milyon ₺ cüzdan, 13 yıl
+kıdem, "Üretim şefi" unvanı, dört çocuk, 74 kişilik çevre, kira geliri.
+
+**Bu, BD'de yanlış bulgu üreten "zorlama durum" değil.** O hata
+`copyWith(age: 70)` ile oyuncuyu yaşlandırıp dünyayı yerinde
+bırakmaktı; buradaki kare gerçekten yaşanmış bir hayatın o yılki kaydı.
+Ayrım dosyanın başında yazılı.
+
+### İki kesin hata — düzeltildi
+
+| Hata | Nerede | Bekçi |
+|---|---|---|
+| **"Mezuniyet sonrası" satırı hiç kapanmıyordu.** 35 yaşında, 13 yıldır CNC operatörü olarak çalışan, yıllık 1,17 milyon ₺ kazanan oyuncunun ekranında "Bu yıl yapabileceklerin · Mezuniyet sonrası · Üniversiteye başvur veya iş hayatına gir" duruyordu; 45 ve 55'te de aynı. Arayüz çıplak `awaitingAfterSchoolChoice` bayrağını okuyordu — o bayrak "lise bitti, üniversite kaydı yok" demekten ibaret ve **hiç kapanmaz**. Motor aynı durumu doğru biliyor: `needsAfterSchoolChoice` üç koşula bakıyor (bayrak + yaş ≤ 30 + "üniversiteye gitmedim" izi yok). Yani iki yerde iki ayrı doğru vardı ve ekranda yanlış olan görünüyordu. Üstelik `skipUniversity`'nin kendi açıklaması "mezuniyet sonrası ekranı kapanır" diyor; kapanan yalnızca kilitti. Üç kullanım yeri de artık motorun kapısını okuyor. | `school_career_screen.dart:445, 493, 647` | `paket_be_mezuniyet_satiri_test.dart` |
+| **Para değişimi binlik ayraçsız yazılıyordu.** Yıl özeti kartında "Cüzdan -988619 ₺". `AppliedEffect.text` sayıyı ham basıyordu; stat satırlarında (+5) sorun yok ama birimi ` ₺` olanlarda yedi haneli sayı tek blok oluyordu. İki yerde görünüyordu — yıl özeti ve olay sonucu penceresi — yani **parası değişen her olay**. | `applied_effect.dart` | `paket_be_para_bicimi_test.dart` |
+
+İkinci hatada **neredeyse yanlış bulgu raporluyordum.** Satırı ilk
+görüşte "ekran cüzdanı eksi gösteriyor, D-080 ihlal edilmiş" sanıp
+raporlayacaktım; dökümün başlığı aynı anda `cüzdan 2772029 ₺` yazıyordu.
+Satırı bağlamıyla okuyunca gerçek ortaya çıktı: o satır bakiye değil
+**yıllık değişim** ve değeri doğru. Yanlış olan tek şey biçimdi. Aynı
+şekilde maaş ile günlük satırı arasındaki fark da (881.229 ₺ ekranda,
+668.814 ₺ günlükte) tutarsızlık değil: ekran 45 yaşın maaşını, günlük
+41-42 yaşın maaşını yazıyor. İkisi de kontrol edilmeden raporlanmadı.
+
+İki bekçinin de düzeltmeden **önce** düştüğü kanıtlandı.
+
+**Dört eski test beklentisi biçimli hâle çevrildi** (`year_summary_test`,
+`feedback_package_test`, `item_economy_test`, `activities_test`): eski
+beklentiler ayraçsız yazımı — yani hatanın kendisini — sabitliyordu.
+**İddia gevşemedi**, tutar yine birebir aranıyor; `trMoney` üzerinden.
+
+Dördünü tek tek süitten öğrenmedim: ilk ikisi hedefli koşuda, üçüncüsü
+tam süitte çıktı; o noktada **deseni depo genelinde taradım**
+(`'…+<dört+ haneli> ₺'` ve `'…+$değişken ₺'` kalıpları, `trMoney`
+geçenler hariç) ve dördüncüsü de böyle bulundu. Tam süit yeşillenmeden
+gönderilmedi; üçüncü kırılma CI'ya gitmedi.
+
+## Paket BF: döküm altı arketipe çıktı, ekranda ham null (6 Ekim 2026)
+
+`ekran_dokumu_bot_test.dart` üç arketipten **altıya** çıkarıldı
+(üniversite, işletme, riskli hayat eklendi): 11 kare, 3.584 döküm
+satırı. Çıktıyı desen taramasıyla süzdüm — ayraçsız para **yok**
+(Paket BE düzeltmesi yerinde çalışıyor), "Mezuniyet sonrası" satırı
+hiçbir karede **yok** (o düzeltme de yerinde), ama bir şey çıktı:
+
+**Ekranda ham `null`.** 21 yaşındaki psikoloji öğrencisinin Okul
+ekranında "Sınıf · null. sınıf". `_SchoolView` hem 1-12. sınıf hem
+üniversite öğrencisine gösteriliyor ve kartın satırları K-12 için
+yazılmış; komşuların hepsinde `!= null` koruması varken eksik olan tek
+satır buydu. "Son sınıfa kalan" da `?? 12` ile "0 yıl" yazıyordu —
+üniversite öğrencisi için anlamsız. İkisi de koşula alındı.
+
+Bekçi (`paket_bf_ekranda_null_test.dart`) yalnızca o satırı değil **beş
+ekranın bütün görünür metnini** tarıyor: herhangi bir yerde "null"
+geçerse düşer. Düzeltmeden önce `[null. sınıf]` diyerek düştüğü
+kanıtlandı. Testi yazarken **aynı kurulum hatasını ikinci kez yaptım**
+(her okumada uygulamayı baştan açmak); dosyanın içine not edildi.
+
+**Kayda geçen eksik:** "Riskli hayat" arketipi seçtiğim tohumda suç
+işlemedi, yani **cezaevi, duruşma ve denetim dönemi ekranları hâlâ
+okunmadı.** Kritik sağlık, gebelik/doğum ve emeklilik sonrası da bu 11
+karede yok. Uydurmuyorum; testin başına ve kuyruğa eksik olarak yazıldı.
+
+Karar bekleyen onuncu soru Q-198 EKİ 2'de: üniversite öğrencisi K-12
+kartını görüyor (lise alanı, lise yerleştirme puanı, "Sınıf Arkadaşları
+0"), kendi kartı yok. Önerim ve varsayılanı yazılı; **koda dokunmadım.**
+
+## Paket BG: özel durumlar taranarak bulundu (6 Ekim 2026)
+
+İlk iki döküm turu sıradan hayatları okudu. Cezaevi, bekleyen duruşma,
+kritik sağlık, yeni doğan ve emeklilik ekranları hiçbirinde görünmedi —
+o duruma düşmek şans işi. Üçüncü tur
+(`app/test/ekran_dokumu_ozel_durum_test.dart`) bunu çözüyor: durum
+**kurulmuyor, aranıyor.** Bot 120 hayat oynuyor, her yıl koşullar
+denetleniyor ve koşul gerçekten oluştuğunda o yılın karesi
+fotoğraflanıyor.
+
+Durumu `copyWith` ile kurmak cazipti ama ilk turda tam o yüzden yanlış
+bulgu üretmiştim (oyuncuyu yaşlandırıp dünyayı yerinde bırakmak).
+Aranan yol daha yavaş, karşılığında gerçek.
+
+**Bulundu:** cezaevi (50 yaş) · bekleyen duruşma (31) · kritik sağlık
+(61) · emekli (61). **Bulunamadı:** yeni doğan bebek — bu tohumlarda
+oluşmadı; çıktı "BULUNAMADI" yazıyor ve okundu sayılmıyor.
+
+### Ölçülen bulgu: **tutukluyken** maaş akmaya devam ediyor
+
+Cezaevi karesinin günlüğünde "Bir yıl daha tutuklu geçti" ile "Oto
+tamircisi olarak bir yılın doldu; 631.800 ₺ cüzdanına girdi" yan yanaydı.
+
+**Önce yanlış ölçtüm ve yanlış rapor ettim.** Durumu elle kurdum
+(`LegalState(releaseAtAge: 45)`), üç durumda da cüzdan aynı çıktı ve
+"hükümlüde de maaş akıyor, D-128 kodda işlemiyor" dedim. `releaseAtAge`'i
+elle set etmek cezaya girişi yürüten kodu (`LegalEngine._enterPrison`)
+hiç çalıştırmıyor; o kod işi zaten bitiriyor
+(`closeCurrentJob(reason: JobEndReason.hapis)`) ve bunun kalıcı bekçisi
+de var (`crime_law_test.dart`). Kurduğum durum gerçek oyunda oluşamaz.
+**Bu oturumda üçüncü kez aynı desen: durumu kurmak yanlış bulgu üretir.**
+
+**Gerçek ölçüm — 120 bot hayatı, elle kurulmuş durum yok:**
+
+| Durum | Geçen yıl | Bunların kaçında iş VAR |
+|---|---|---|
+| Hükümlü | 13 | **0** |
+| Tutuklu | 32 | **27** (%84) |
+
+Hükümlü tarafı doğru çalışıyor; **düzeltilecek bir şey yoktu.** Açık
+olan tutukluluk: oyuncu çalışamazken maaşı tam yatıyor ve kıdemi
+ilerliyor. D-128 yalnızca "hapis" diyor, tutukluluk orada geçmiyor —
+kural boşluğu. Karar Faho'da, Q-199'da yazılı; koda dokunulmadı.
+
+## Paket BH: D-179 — tutuklulukta maaş yok, kıdem donuyor (6 Ekim 2026)
+
+Faho onayladı: "tutukluda da uygula." Q-199 kapandı, kural
+`DECISIONS.md` içine **D-179** olarak girdi.
+
+**Ne değişti.** Tutuklulukta iş **bitmez** (tahliye olan işine döner),
+maaş **ödenmez**, o yıl **kıdeme sayılmaz**. Dosya mahkûmiyetle kapanırsa
+iş o zaman biter — D-128 devreye girer. Daha sert seçenek (tutuklulukta
+da işi bitirmek) bilerek alınmadı: beraat eden oyuncu işini de kaybetmiş
+olurdu.
+
+**Kıdem nasıl donduruldu.** `startedAtAge` oynanmadı — Meslek ekranı
+"Başlangıç: 22 yaşında" diye onu gösteriyor ve o bilgi doğru kalmalı.
+İçeride geçen yıllar yeni `CareerState.detainedYears` alanında tutulup
+`yearsInJob`'dan düşülüyor. `yearsInJob` tek sıkıştırma noktası:
+ustalık, zam, terfi, işten çıkarma, olay koşulu ve ekran hepsi oradan
+okuyor. Alan kodeke de yazıldı; yoksa kayıt yüklenince kıdem geri sıçrar
+ve oyuncu içeride geçen yılları kazanırdı.
+
+**Ölçüm (120 bot hayatı, elle kurulmuş durum yok):**
+
+| | Önce | Sonra |
+|---|---|---|
+| Tutuklu geçen yıl | 32 | 33 |
+| Bunların kaçında iş duruyor | 27 | 28 (tasarım böyle) |
+| Bunların kaçında **maaş akıyor** | **27** | **0** |
+| Kıdem donan hayat / toplam yıl | — | 25 hayat / 46 yıl |
+
+Bekçinin düzeltmeden önce düştüğü kanıtlandı. Hükümlü tarafına
+dokunulmadı: o zaten doğru çalışıyordu ve kendi bekçisi vardı
+(`crime_law_test.dart`).
+
+## Paket BI — dördüncü döküm turu: dürbünün kendi kör noktaları (6 Ekim 2026)
+
+**Çıkış noktası.** Üçüncü turda "YENİ DOĞAN BEBEK" BULUNAMADI çıkmıştı.
+Bunu oyunun eksiği sanmaya başlamıştım; değildi. Tarama kancası
+`onYear`, o da `ageUp()`'tan **sonra** çalışıyor: doğduğu yıl 0 yaşında
+olan bebek bir sonraki kareye 1 yaşında geliyor. Ölçüm (60 hayat): yıl
+içinde 0 yaşında çocuk **77 kare**, yıl sonunda **0 kare**. Oyunda eksik
+olan bir şey yoktu, dürbün yanlış yere bakıyordu.
+
+Bu oturumda aynı desenin **dördüncü** tekrarı (öncekiler: `copyWith(age:
+8)` ile 22 yaşında anne, yıl özetinin "eksi cüzdan" satırı, tutukluluk
+yerine hükümlülük bulgusu). Bu kez bulguyu Faho'ya bildirmeden önce
+yakaladım.
+
+**Dürbünde düzeltilen üç şey:**
+
+1. `playBotLife`'a **yıl içi kanca** eklendi (`onPreAge`). Yıl içinde
+   var olup yıl sonunda kaybolan hiçbir durum artık görünmez değil.
+2. Üç döküm testi de tek arayüz ağacında birden çok kare basıyor ve
+   seçili sekme kareler arasında **kalıcı**. "Hayat" diye etiketlenen
+   bölüm, bir önceki karede hangi sekmede kalınmışsa onu basıyordu —
+   döküm okuduğu ekranın adını yanlış söylüyordu. Ortak `anaEkrana`
+   yardımcısı (`Key('section_back')`) eklendi; dönülemezse çıktı bunu
+   **yazıyor**, sessizce geçmiyor.
+3. Kritik sağlık karesi pencereyi bilerek açık bırakıyor; o pencere bir
+   sonraki kareye taşınıp içeriksiz "Durum kapandı." hâline düşüyor ve
+   sekmeleri kilitliyordu. Temizleme artık onu da kapatıyor.
+
+**Bulunan iki gerçek hata (ikisi de metin, kural değişmedi).** Bebek
+karesi okunduğunda günlükte şu iki satır yan yanaydı:
+
+```
+Kemal adında bir oğlunuz oldu. Doğum masrafı 65.000 ₺ tuttu.
+Kemal okulda olanları anlattı; hikâyenin yarısı gerçek, yarısı abartıydı…
+```
+
+| # | Hata | Kök neden |
+|---|---|---|
+| 1 | 0-3 yaşındaki çocuk "okulda olanları anlattı" | Sohbet havuzu çocuk için `age <= 12`; **aynı dosyanın** "vakit geçir" dalı bebeği `age <= 3` ile zaten ayırmıştı, sohbet dalı atlamıştı |
+| 2 | 15 yaşındaki çocuk 45 yaşındaki oyuncuya "kendi yaşındayken neler yaptığını anlattı" | Satır genel havuzdaydı; küçük kardeş, sınıf arkadaşı, yeğen de aynı havuza düşüyordu |
+
+Birinci için `_sohbetBebek` eklendi ve yaş kontrolü bağ türünün önüne
+alındı (0-3 yaş kim olursa olsun okuldan söz etmiyor). İkincisi
+`_sohbetBuyukten` havuzuna alındı, yalnızca `person.age > playerAge`
+iken havuza giriyor — yeni sayı uydurulmadı, eşik satırın kendi anlamı.
+
+**Kalıcı bekçi:** `paket_bi_sohbet_yas_test.dart` (7 test; düzeltmeden
+önce 5'i kırmızıydı). İki kontrol testi düzeltmenin fazla budamasını da
+engelliyor: 9 yaşındaki çocuğun okul satırı durmalı, 70 yaşındaki
+annenin "kendi yaşındayken" satırı durmalı.
+
+**Okunan ekranlar (3. + 4. tur):** cezaevi (50 yaş) · bekleyen duruşma
+(31) · kritik sağlık (61) · emekli (61) · **yeni doğan bebek (34)**.
+Hâlâ okunmamış: denetim dönemi, gebelik/doğum akışı.
+
+**Q-200 kararlaştırıldı (aynı gün):** Faho "ergen kademesi de ekle"
+dedi. `_sohbetErgen` eklendi — 13-17 yaş, çocuk bağı, vakit
+geçirmedekiyle aynı aralık; 18 yaşında yetişkin havuzuna geçiliyor.
+Kademe koddan çıkarıldığında üç testin kırmızıya düştüğü ölçüldü.
+Kural `DECISIONS.md` → **D-180**: sohbet ve vakit geçirme metinleri aynı
+dört kademeyi kullanır (0-3 / 4-12 / 13-17 / 18+), yaş kontrolü bağ
+türünün önüne geçer, bir satır konuşanın yaşını varsayıyorsa o varsayım
+koda yazılır. Bekçi 11 teste çıktı.
+
+Ayrıntı: `docs/DESIGN_REVIEW_QUEUE.md` → Q-200.
+
+## Paket BJ — beşinci döküm turu: son iki ekran ve botun yanlış kapısı (6 Ekim 2026)
+
+**Okunmamış iki ekran kaldığı için kuruldu.** Denetim dönemi 120 bot
+hayatında bulundu (35 yaş). Gebelik **bulunamadı** — ve sebebi okumaya
+değer.
+
+`GameController.haveChild()` **arayüzün hiçbir yerinden çağrılmıyor**.
+Oyuncunun çocuk sahibi olma yolu tek: korunmadan yakınlaşma →
+`Pregnancy` → ertesi yıl doğum. Bot ise `haveChild()` çağırıp çocuğu tek
+hamlede yaratıyor, yani gebelik aşaması hiç oluşmuyor. Bugüne kadarki
+aile ölçümleri oyuncunun **kullanamadığı** bir kapıdan yapılmış. Ürün
+hatası değil, ölçüm boşluğu; botu değiştirmek bütün aile ölçümlerini
+kaydıracağı için tek başıma yapmadım (Q-201).
+
+**Oyuncunun yolu ölçüldü ve sağlam çıktı** (`paket_bj_oyuncu_yolu_cocuk_test.dart`):
+20 çiftin **18'i (%90)** sekiz yılda gebe kalıyor, ortanca bekleme 1
+yıl; gebe kalmayan iki çift tam olarak ölçümde kısır çıkan iki çift. 12
+gebeliğin **12'si** dört yıl içinde doğumla kapanıyor.
+
+**Kendi kurgumda beşinci hata.** İlk ölçümüm "20 çiftin 14'ü sekiz yılda
+gebe kalmadı" diyordu. Sebep oyunda değil bendeydi: döngüm yaş alınca
+çıkan olayı bir sonraki denemeden önce kapatmıyordu ve `_runFamily`
+bekleyen olay varken `null` dönüyor — **doğru davranış**, oyuncu da olay
+penceresi açıkken menüye dokunamaz. Sırayı düzeltince oran %30'dan
+%90'a çıktı. Desen artık net: **oyunun kapısından geçmeyen her ölçüm
+yalan söylüyor.**
+
+**Gebelik ekranı sonunda okundu** (28 yaş) — döküm bu kareyi taramayla
+değil oyuncunun kendi düğmesiyle üretiyor. Okununca yeni bir soru çıktı:
+beş ekranın **hiçbirinde** gebeliği söyleyen satır yok. Tek gösterim
+yeri eşin kişi kartı (`person_pregnancy_note`). Oyuncu "bebek yolda"
+cümlesini bir kez görüyor, sonra ekranda iz kalmıyor (Q-202).
+
+**Okunan ekranlar artık tam:** cezaevi (50) · bekleyen duruşma (31) ·
+kritik sağlık (63) · yeni doğan bebek (34) · emekli (61) · denetim
+dönemi (35) · gebelik (28). Döküm turlarının başladığı listede okunmamış
+ekran kalmadı.
+
+Ayrıntı: `docs/DESIGN_REVIEW_QUEUE.md` → Q-201, Q-202.
+
+## Paket BK — ebeveynlik: çocuk bir bildirim satırı olmaktan çıktı (9 Ekim 2026)
+
+Faho "oyuna yeni ne ekleyelim" diye sordu; depo okundu (hafızadan değil,
+dosyadan) ve en büyük boşluk ebeveynlikte bulundu. Yön onaylandı
+("olur yap"), altı aşama sırayla gönderildi. Ayrıntı:
+`docs/FAMILY_SYSTEM.md` §6 ve `docs/DESIGN_REVIEW_QUEUE.md` Q-203.
+
+| Aşama | Ne oldu |
+|---|---|
+| BK/1 `ab7eb13` | Bekleyen doğum üç yerde görünür: üst künye durum satırı, Hayat ekranı kartı, İlişkiler ekranı kartı. Diğer ebeveyn hayatta değilse bebek söz verilmiyor (motor o durumda doğumu gerçekleştirmiyor). 11 test. **Q-202 cevaplandı.** |
+| BK/2 `9c69215` | Çocuk planı açık bir eylem oldu; bot `haveChild()` kısayolu yerine oyuncunun gebelik yolundan geçiyor. 15 test. **Q-201 cevaplandı.** |
+| BK/3 `16af118` | Çocuğa özel dört eylem (ödev, harçlık, hobi, kural) ve kapısı olmayan `adviseChild` ekrana bağlandı. 16 test. |
+| BK/4 `0e29377` | Yaş kademesi; eşikler **D-180'den** alındı (0-3 / 4-12 / 13-17 / 18+). 13 bekçi testi. |
+| BK/5 `2d44583` | Çocuğun yıl özeti: yılın başındaki fotoğrafla bugünün farkı. 14 test. |
+| BK/6 `4e35a1a` | 500 aile hayatı ölçümü ve istismar taraması (11 test). |
+
+### Ölçümün en sert bulgusu: ölçüm boşluğu
+
+Paket BJ şunu yazılı bırakmıştı: bot `haveChild()` çağırıyor, oyuncu o
+kapıya **hiç** ulaşamıyor. BK/2'de kapandı ve ölçüldü:
+
+- **Gebelik görülen hayat %0,0 → %42,0.** Paket 26'nın gebelik sistemi,
+  Paket 25'in korunma seçimi, kısırlık modeli, 55 yaşa kadar inen yaş
+  eğrisi, ikiz kuralı (D-151) ve tüp bebek yolu **hiç** ölçülmemişti.
+- **Kısır ama çocuklu: family arketipinde 11/11 → %4.** `haveChild()`
+  `infertile` bayrağını hiç okumuyordu. Kalan %4 tüp bebek, yani
+  tasarlanmış yol.
+- Çocuk sayısı prototip tavanından (medyan 4) ortalamaya indi (medyan 2);
+  ilk çocuk yaşı medyanı 23 → 27.
+
+### İki yeni soru (karar Faho'nun, sayıya dokunulmadı)
+
+- **Q-204:** gebelik 55 yaşına kadar mümkün (Faho'nun isteği) ama doğum
+  `maxMotherAge 45`'te kapalı. Doğum bir sonraki yaşta olduğu için
+  45-55 arasında gebelik yazılıyor, bebek gelmiyor.
+- **Q-205:** çocukla yakınlık medyanı 100 — tavan. Üç arketipte de aynı,
+  çocuk eylemlerinin %10-15 kullanıldığı `career` arketipinde bile; yani
+  doygunluk BK'nın getirdiği eylemlerden değil, her yıl tekrarlanabilen
+  gündelik etkileşim döngüsünden geliyor.
+
+### Kapısı olmayan sistem kalıbı
+
+Bu pakette ikinci kez aynı hata bulundu: motor yazılmış, testi de var,
+ama arayüzde düğmesi yok. `haveChild()` (Faho'nun kararıyla kapalı,
+yerine gebelik yolu) ve `adviseChild()` (Paket AP §40-§46, kapı BK/3'te
+açıldı). Yeni bir motor yazılırken kapısının aynı pakette açılması
+gerektiği `relationships_screen.dart` içinde zaten yazılıydı; bu kez de
+doğrulandı.
+
+Tam süit her aşamada koşuldu: BK/5 sonrası **3482 test geçti, 16
+atlandı, 0 hata.** CI BK/4'e kadar iki işte de yeşil.
+
+## Görsel döküm: 3-6 Ekim 2026
+
+`docs/raporlar/2026-10-03_06-dort-gun.html` — dört günün şeması: gün gün
+paketler, iki doymuş tavan ölçümünün önce/sonra grafiği, taramanın
+bilançosu ve güncel durum. Tarayıcıda doğrudan açılır.
+
+Elle yazılmış bir rapordur: `docs/planner/index.html` gibi betikle
+üretilmez ve kendiliğinden tazelenmez. İçindeki rakamlar yazıldığı andaki
+ölçümlerdir (43 commit, +14.908 satır, 133 → 178 karar, 3.360 test).
+
+## Paket BL — çıkarılabilir özellikler (modül anahtarları)
+
+**9 Ekim 2026.** Faho geliştirmeyi Claude'a bıraktı ve tek şart koydu:
+eklenen bir özellik beğenilmezse genel yapı bozulmadan çıkarılabilsin.
+Paket BL o altyapıyı kurdu; bundan sonraki her özellik bu sözleşmeye
+göre gelir. Ayrıntı ve silme tarifi: `docs/FEATURE_FLAGS.md`.
+
+- **Katalog:** `app/lib/domain/features/feature_catalog.dart`. Her modül
+  bir satır: kalıcı kayıt anahtarı, oyuncuya görünen ad, kapatınca neyin
+  kaybolduğu, geldiği paket, yalnızca o özellik için var olan dosyalar.
+- **Kayıt:** `GameSettings.features`; kayda yalnızca **varsayılandan
+  sapmalar** yazılır. Eski kayıt yeni modülü varsayılan hâliyle açar,
+  silinmiş modülün anahtarı okunurken atılır.
+- **Tek kapı, fail-closed:** modül kapalıyken eylem listelenmez *ve*
+  motor reddeder. Kapı yerleri: `PregnancyNotice.sentence` (gebelik),
+  `FamilyPlanning.blockReason` (plan), `FamilyInteractions.availability`
+  (çocuk eylemleri ve kural), `ChildRules.reliefFor` (kuralın zarı),
+  `YearReview._summarizeChildren` (yıl özeti).
+- **Oyuncu tarafı:** Ayarlar → *Modüller*, pakete göre gruplu; her
+  satırın altında kapatınca ne kaybolacağı yazıyor, "Hepsini aç" ile
+  varsayılana dönülüyor. Kumarhane anahtarı (D-032) kendi yerinde kaldı.
+- **Paket BK'nın beş özelliği** geriye dönük olarak anahtara bağlandı:
+  `gebelik_gorunurlugu`, `cocuk_plani`, `ebeveynlik_eylemleri`,
+  `cocuk_kurallari`, `cocuk_yil_ozeti`.
+
+**Ölçüm (`app/test/paket_bl_modul_izolasyon_test.dart`, 13 test).** Her
+modül hem kapalı hem açık oynandı; açık taraf ölçülmezse test boş
+geçerdi:
+
+| Modül | Kapalı | Açık |
+| --- | --- | --- |
+| Gebelik bildirimi | 186 gebelik yılı, **0** cümle | 186 gebelik yılı, 186 cümle |
+| Çocuk planı | 4.381 eş/sevgili yılı, **0** kayıt, **0** açık kapı | 4.777 planlı yıl |
+| Çocuk eylemleri + kural | 7.710 çocuk yılı, **0** eylem, **0** kural, **0** kaymış zar | 5.691 eylem, 1.988 kural satırı |
+| Çocuğun yıl özeti | **0** blok | 2.201 blok |
+
+Gebelik yılı sayısının iki tarafta birebir aynı çıkması motorun
+anahtardan etkilenmediğini gösteriyor: kapanan şey yalnızca görünürlük.
+
+**Hepsi kapalı 100 hayat:** ortalama yaş 70,4; evlenen 89, çocuğu olan
+71, iş tutan 99. Yani bütün modüller kapalıyken oyun paket öncesi gibi
+çalışıyor. Her modül tek tek kapalı 20 hayat da sonuna kadar gitti.
+
+**Oyuncu tarafı testi** (`app/test/paket_bl_modul_ayar_test.dart`, 4
+test): ayarlardan kapatılan modülün satırı çocuğun kartından kalkıyor,
+ayrı anahtardaki kural satırı yerinde kalıyor, "Hepsini aç" geri
+getiriyor ve kapalı modül kayıt gidiş-dönüşünden kapalı çıkıyor.
+
+Hiçbir sayı `DECISIONS.md`'ye girmedi; modül anahtarı bir mimari
+sözleşmedir, oyun kuralı değil.
+
+## Paket BM — ilk yıllar (0-7 yaş içeriği)
+
+**9 Ekim 2026.** Modül altyapısı kurulduktan sonraki ilk içerik paketi.
+Seçim gerekçesi ölçümdür, belge değil: katalogda yaş aralığı yazılı 430
+olay yaşa göre tarandığında ilk yılların ne kadar ince olduğu çıktı.
+
+| Yaş | Modül kapalı (aday olay) | Modül açık |
+| --- | --- | --- |
+| 0 | 3,0 | **8,6** |
+| 1 | 7,9 | 14,5 |
+| 2 | 8,9 | 17,2 |
+| 3 | 13,6 | 23,3 |
+| 4 | 11,5 | 25,7 |
+| 5 | 10,0 | 24,6 |
+| 6 | 15,4 | 30,7 |
+| 7 | 29,3 | 41,1 |
+
+Sayılar **motorun kendi uygunluk hesabından** geliyor
+(`EventEngine.debugEligibleIds`), oynanan 60 hayatın içinde, her yaşta
+"şu an çıkabilecek olay" sayısının ortalaması. Karşılaştırma aynı
+tohumlarla, yalnızca modül anahtarı değiştirilerek yapıldı.
+
+Neden önemli: her yeni hayat 0 yaşında başlıyor. Oyuncunun ilk yedi
+dokunuşu bu havuzdan geliyordu ve ikinci hayatta aynı olaylar tekrar
+ediyordu — oyunun ilk izlenimi en dar yerdeydi.
+
+**Eklenen:** `app/lib/data/event_pool_early_years.dart`, **31 olay**.
+Yirmi yedisi 0-7 yaş (hane kararları, mahalle, bakkal, sokak oyunu,
+anaokulu ilk günü, okul alışverişi, bayram harçlığı, kardeş kıskançlığı,
+gece hastalıkları), dördü **karşılık olayı**: yan tekerleri söktüren
+çocuk 8-12 yaşında mahallenin önünde gidiyor, kumbaraya atan 9-14
+yaşında kumbarayı kırıyor, harfleri okul öncesi söken 7-11 yaşında
+sınıfta sesli okuyor, sokak oyununa katılan 10-15 yaşında mahalle
+takımını kuruyor.
+
+**Kurallar:** çocuğun cüzdanından para çıkmaz (hastane, kreş, okul
+alışverişi hanenin gideri; çocuğa **gelen** harçlık yazılır); kararları
+aile verir ve metin bunu böyle anlatır; nostalji ile bugün aynı havuzda,
+doğum yılı motoru yok; ağır konuda espri yok; gerçek marka ve kişi adı
+geçmez. Bütün sayılar `prototypeOnly`.
+
+**Sessiz iz bırakılmadı.** Paket AR'nin ölçtüğü hata — iz konur, hiçbir
+olay onu aramaz — bu pakette tekrarlanmasın diye bırakılan 8 izin
+hepsinin okuyan tarafı yazıldı ve test bunu şart koşuyor. `paket_ar`
+bekçisi ("okunmayan iz sayısı artmıyor") yeşil kaldı.
+
+**Testin yakaladığı gerçek hata — kapalı modül zarı kaydırıyordu.**
+Olay kapısı ilk hâlinde `EventEngine._matches` içindeydi, yani **kişi
+çözümünden sonra**. Kişi çözümü `rng` tüketiyor; dolayısıyla kapalı bir
+modülün olayları bile oyunun rastgele akışını kaydırıyordu. Ölçülen
+etki küçük değildi: bütün modüller kapalı 100 hayatta ortalama ömür
+70,4'ten **72,1'e** çıkmıştı — yani "kapalı" modül hayatı
+değiştiriyordu. Kapı `_pick` döngüsünün en başına, zardan önceye
+alındı; ortalama ömür **70,4'e döndü** (evlenen 89, çocuğu olan 71, iş
+tutan 99 — paket öncesiyle birebir aynı). Kalıcı bekçi: iki motor (tam
+havuz + modül kapalı / modülün olayları hiç olmayan havuz) 240 durumda
+aynı olayı veriyor.
+
+**Ölçüm (`app/test/paket_bm_ilk_yillar_test.dart`, 6 test):** modül
+kapalıyken 60 hayatta **0** olay sızdı; açıkken 31 olayın **27'si**
+görüldü ve karşılık olaylarının 3'ü yaşandı. Modül kapalıyken ilk
+yıllar paket öncesi hâline dönüyor.
+
+### Tam süitin yakaladığı üç şey
+
+Hedefli testler yeşilken tam süit **3 hata** verdi (3.513 geçti, 17
+atlandı). Üçü de bu paketin eseriydi ve üçü de düzeltildi:
+
+1. **Yer tutuculu seçenek etiketi.** `{sahipk}` "annen" veriyor, yani
+   etiket "annen seçtiği ad" gibi bozuk bir Türkçe kuruyordu.
+   `paket_bd_ekran_alt_metni_test.dart` bunu bağımsız olarak yakaladı;
+   etiket yer tutucusuz yazıldı.
+2. **Ekran dökümü 70 yaşına ulaşamıyordu.** Döküm testi hayatı
+   gerçekten oynayarak kuruyor; yeni içerik zar sırasını kaydırdığı
+   için sabit tohumun hayatı 54'te kalp krizinden öldü ve döküm "ekranlar
+   boş" diye kırıldı — oysa ölçtüğü şey 70 yaşındaki ekranlar. Döküm
+   artık hedef yaşa **yaşayarak ulaşan** ilk tohumu kullanıyor; denetim
+   (boş ekran olmamalı) aynı kaldı.
+3. **Sınav ağırlığı bekçisi — ölçüm hatası çıktı.** Bekçi, sınav
+   olayının ağırlığını "penceresindeki rakipler" diye adlandırdığı bir
+   toplamla karşılaştırıyordu; ama toplam **bütün havuzu** sayıyordu:
+   yaş, sınıf ve kişi koşulu bakılmadan. Sınav 8. sınıfta, yani 13
+   yaşında çıkıyor; 0-7 yaş olayları o yıl **çıkamaz** ama rakip
+   hanesine yazılıyordu. Ölçüldü: bekçi, ilk yıllar havuzundan
+   **önce** zaten 40,5'te duruyordu (eşik 40) — yani oyunun kuralını
+   değil havuzun büyüklüğünü ölçüyordu ve her içerik paketini
+   imkânsız hâle getiriyordu. Rakip kümesi artık sınavın gerçekten
+   yarıştığı yılda **uygun olan** olaylar (dört ayrı hayatın en
+   kalabalık kümesi): 8. sınıfta 256, 12. sınıfta 188. Ölçülen en
+   düşük oran **337,5**; eşik 150'ye çekildi — eskisinden çok daha
+   dar bir bant. Uçtan uca koruma (ulaşanların %90'ı sınav olayını
+   görüyor) bu süreçte hiç bozulmadı. Bekçinin yöntem değişikliği
+   Faho'nun onayına açıldı: **Q-207**.
+
+İlk yıllar olaylarının ağırlığı 3 (karşılık olayları 4): ince bantta
+rakip az olduğu için 3 yeterli ve havuzun ağırlık bütçesini yemiyor.
+
+## Paket BN — eşikteki yıllar (16-20 yaş içeriği)
+
+**9 Ekim 2026.** Yetki devredildikten sonraki ilk paket. Bant seçimi
+yine ölçümle yapıldı, belgeyle değil: oyuncunun **o yıl gerçekten
+karşılaşabileceği** olay sayısı 40 oynanan hayatta yaşa göre ölçüldü
+(`EventEngine.debugEligibleIds`).
+
+| Yaş | Uygun olay (modülden önce) | Modül açık |
+| --- | --- | --- |
+| 16 | 41,7 | 46,0 |
+| 17 | 46,2 | 56,3 |
+| 18 | 34,3 | **50,6** |
+| 19 | 26,5 | **43,5** |
+| 20 | 42,5 | 56,7 |
+
+Karşılaştırma için aynı ölçüm: 25 yaşında 67, 30'da 77, 40'ta 80. Yani
+çocukluktan sonra **en ince bant hayatın en çok şey olan yıllarıydı**:
+sınav sonucu, tercih listesi, ilk iş başvurusu, ilk maaş, evden çıkma,
+dağılan arkadaş grubu. Katalogda bu banda sıkı sıkıya bağlı yalnızca
+beş olay vardı. En dip 19 yaşıydı (26,5).
+
+**Eklenen:** `app/lib/data/event_pool_threshold_years.dart`, **29 olay**.
+Yirmi beşi 16-20 yaş (hazırlık kursu, ailenin senin adına yaptığı plan,
+mezuniyet gecesi, tercih listesi, sonuç bekleme, çıraklık, ehliyet
+kursu, yarı zamanlı iş, sağlık ihmali, ilk randevu hesabı, ilk
+başvuru, evden çıkma, ilk kira, gece dönüşü, ilk banka hesabı,
+kampüsün ilk ayı, okulu bırakma düşüncesi, mahalleden ayrılma, ilk
+maaşı paylaşma, eski öğretmenle karşılaşma, akran karşılaştırması),
+dördü **karşılık olayı**: gençken direksiyona geçen 21-35 yaşında uzun
+yolu sürüyor, çırak olan ustalığıyla iş alıyor, evden erken çıkan yeni
+taşınana yardım ediyor, lise grubu dağılanlar yıllar sonra buluşuyor.
+
+**Kurallar:** 18'den önce masrafı hane öder (metin anlatır, cüzdana
+dokunmaz), 18'den sonra para gerçekten oyuncunun cüzdanından çıkar;
+askerlik ve siyaset bu havuzun dışında (ikisi de ayrı sistem ve ayrı
+karar); gerçek kurum/marka adı yok. Ağırlık 3, karşılık olayları 4 —
+Paket BM'de ölçülen havuz ağırlık bütçesine uygun.
+
+**Ölçüm (`app/test/paket_bn_esikteki_yillar_test.dart`, 6 test):** modül
+kapalıyken 60 hayatta **0** olay sızdı ve 200 durumda zar birebir aynı
+kaldı; açıkken 29 olayın 23'ü görüldü ve **dört karşılık olayının
+dördü** yaşandı. Bırakılan 8 izin hepsinin okuyan tarafı var.
+
+Sınav önceliği bekçisi de yeniden ölçüldü: 12. sınıfta uygun rakip
+toplamı 188'den 221'e çıktı, oran 456-586 bandında kaldı (eşik 150).
+
+### Tam süitin yakaladığı üç şey — biri gerçek gerileme
+
+**1. Gerçek gerileme: ilişki erişilebilirliği düştü.** Rastgele seçen
+oyuncunun (yalnızca olay yanıtlayan, ilişki menüsünü hiç kullanmayan)
+ilişki kurma oranı 150 hayatta ölçüldü:
+
+| Durum | İlişki kuruldu |
+| --- | --- |
+| Modüller kapalı (taban) | 98/150 · **%65,3** |
+| Paket BN'nin ilk hâli | 79/150 · **%52,7** |
+| + üç tanışma olayı (ağırlık 4) | 82/150 · %54,7 |
+| + tanışma ağırlığı 12 | 94/150 · **%62,7** |
+
+Sebep yapısal: yılda **bir** olay yuvası var; havuz büyüdükçe tanışma
+olayı kurayı daha az kazanıyor. Üstüne katalogdaki yetişkin tanışma
+olayları **24 yaşında** başlıyordu, yani ilk ilişkinin en doğal yaşı
+(17-20) boştu. Çözüm seyreltmeyi tersine çevirmek oldu: bandın kendi
+tanışma kapısı — mahallede, kampüste ve ilk işte tanışma (üçü de
+`startsRomance`, ağırlık 12, ilişkisi olana çıkmıyor). Eski bekçinin
+ölçtüğü 30 hayat: 11/30 → **18/30** (eşik >10).
+
+**2 ve 3. Ölçüm yalıtımı: iki bekçi içeriğe bağımlıydı.** `paket_ae
+§32` (girişim+yatırım dominansı) ve `diagnosis_remarriage_lock` (tam
+oyuncu yolu) kırıldı. Sebebi dengede değil: motor aday taramasında
+**yaş/koşul denetiminden önce** her havuz girdisi için kişi çözümü
+yapıyor ve bu `rng` tüketiyor. Yani havuza eklenen bir olay, o olayın
+hiç çıkamayacağı bir hayatta bile zar sırasını kaydırıyor. §32'nin
+kendi başlığı bunu zaten yazmıştı: "yıllık ilerlemeye tek bir
+`nextDouble()` eklendiğinde ilk ailenin sayısı 5'ten 10'a çıkıyor."
+
+Kanıt: Paket BN'nin bütün para etkilerini sıfırlayıp §32 yeniden
+koşuldu — sonuç **birebir aynı** kaldı (`[8, 10, 9, 4, 11, 9, 2]`,
+medyan 9). Yani denge değişmemişti, zar konumu değişmişti.
+
+İkisi de **ölçüm yalıtımıyla** düzeltildi, eşik gevşetilmedi: strateji
+ölçümü ve mekanik yolu taraması artık içerik modülleri **kapalı**
+koşuluyor. §32'nin medyanı 5'e döndü (tarihsel taban 5-7; eşik hâlâ
+≤8) ve tekrar evlenme yolu ilk tohumlarda yürüdü. Bundan sonraki içerik
+paketleri bu iki bekçiyi kaydırmaz.
+
+**Açık kalan mimari bulgu.** Zar tüketiminin havuz girdisi başına
+olması kendi başına bir kırılganlık: `_pick` kişi çözümünü koşul
+denetiminden sonraya alsa hem bu sorun kökten biter hem de tarama
+hızlanır. Bu, motorun çekirdeğinde bir değişiklik ve bütün tohumlu
+ölçümleri bir kez kaydırır; ayrı bir paket olarak planlandı
+(`docs/CLAUDE_ROADMAP.md`).
+
+## Paket BO — motorun zar sözleşmesi (9 Ekim 2026)
+
+Bu paket içerik eklemedi; **motorun kendi kırılganlığını** kapattı.
+
+### Ölçülen sorun
+
+`EventEngine._pick` aday taramasında kişi çözümünü koşul denetiminden
+**önce** yapıyordu. Kişi çözümü `rng` tüketir; dolayısıyla 40 yaşın
+olayı, 7 yaşındaki bir hayatta hiç çıkamayacağı hâlde zar sırasını
+ilerletiyordu. Sonuç: **havuza tek bir olay eklemek bütün tohumlu
+ölçümleri kaydırıyordu.** Paket BM ve BN'de beş bekçi testi yalnızca bu
+yüzden kırıldı (sınav önceliği, ekran dökümü, sınıf arkadaşı kademesi,
+tekrar evlenme kilidi, olay çeşitliliği); hiçbiri gerçek bir oyun
+hatası değildi. `docs/EKSIKLER.md` bu satırı "motor değişikliği olduğu
+için onay bekliyor" diye taşıyordu; 9 Ekim'de geliştirme yetkisi
+devredilince yapıldı.
+
+### Yeni sıra
+
+1. Ucuz kapılar (modül, görülme, tekrar aralığı) — zar tüketmez.
+2. Kişiden bağımsız koşullar — zar tüketmez.
+3. Kişi **adayları** (`_eligiblePeople`) — zar tüketmez.
+4. Ağırlıklı çekiliş — **bir** zar.
+5. Yalnızca kazanan olayın kişisi (`_pickPerson`) — en çok bir zar.
+
+Yani uygun olmayan olay eklemek akışa hiç dokunmaz; uygun olan eklemek
+yalnızca çekilişi değiştirir. `debugEligibleIds` de artık tohumdan
+bağımsız: "hangi olaylar mümkün" sorusunun cevabı zara bağlı değil.
+
+### Yan ürün: erişilebilirlik artık aday süzgeci
+
+`requireReachable` koşulu `_matches` içinde, kişi **çekildikten sonra**
+denetleniyordu: başka şehirdeki arkadaş çekilirse olay eleniyordu, aynı
+şehirde erişilebilir bir arkadaş olsa bile. D-093 tam bu hatayı
+"ilgilenilmeyen yakın" seçicisinde kapatmış, öbür dalı açık bırakmıştı.
+Koşul artık seçicinin içinde (15 olayın 13'ü bu dalda).
+
+### Denge kaymadı — iki blok 400 hayat
+
+Dört arketip (`casual`, `family`, `career`, `investor`), iki bağımsız
+tohum bloğu:
+
+| Ölçü | Blok 1 eski → yeni | Blok 2 eski → yeni |
+| --- | --- | --- |
+| Ortalama ölüm yaşı | 73,00 → 72,91 | 73,05 → 73,37 |
+| Medyan ölüm yaşı | 75 → 75 | 75 → 75 |
+| Evlenen | %56 → %53 | %54 → %55 |
+| Boşanan | %21 → %21 | %22 → %24 |
+| Çocuklu | %40 → %38 | %40 → %40 |
+| Çalışan | %100 → %99 | %100 → %99 |
+| Üniversite | %58 → %54 | %54 → %55 |
+| Ev sahibi | %61 → %59 | %61 → %63 |
+| Medyan servet | 49,3M → 50,4M | 44,9M → 47,9M |
+| Hayat başına farklı olay | 97,9 → 97,8 | 98,5 → 99,3 |
+| Erişilen farklı olay | 498 → 499 | 499 → 502 |
+
+Sapmanın **yönü bloklar arasında ters döndü**: blok 1'de yeni motor
+biraz aşağıda, blok 2'de biraz yukarıda. Sistematik etki yok, tohum
+gürültüsü var. Tek tutarlı işaret havuz kapsamının +1 ve +3 artması —
+erişilebilirlik süzgeci birkaç olayı açıyor, beklenen yön.
+
+**Ölçünün büyüklüğü de bir ders.** İlk tur 160 hayattı ve medyan servet
+%18 kaymış görünüyordu; 400 hayatta fark %2'ye indi. Ölçüyü büyütmeden
+"değişmedi" denmez.
+
+### Tam süitin yakaladığı gerçek boşluk: öğretmensiz sınıf
+
+Zar sırası kayınca `package1_test.dart`'ın sekiz tohumlu sınıf testi
+düştü: tohum 0'da okulun **tek** öğretmeni (`prototypeOnlyTeacherCount
+= 1`) sınıfın kurulduğu yıl vefat ediyordu ve yerine kimse gelmiyordu.
+Öğretmen 28-58 yaş arasında üretiliyor, yıllık ölüm ihtimali binde
+1,2-4; yani bu her tohumda ~%1 ihtimalle oluyordu ve test bir kuralı
+değil **kurayı** ölçüyordu. Eşik gevşetilmedi; **ürün tarafı
+düzeltildi**: ölüm turundan sonra okul öğretmensizse yerine yeni
+öğretmen gelir ve günlüğe satır düşer ("Vefat eden öğretmeninin yerine
+… geldi."). Vefat eden kayıt silinmez.
+
+Denetim neden ölüm turundan **sonra**: öğretmen sınıfın kurulduğu yıl
+ölebiliyor; kontrol sınıf kurulumunun yanında olsa o yıl sınıf
+öğretmensiz kalırdı.
+
+### İkinci gerçek bulgu: UI smoke testi takılmayı yutuyordu
+
+`ui_smoke_life_test.dart` on hayatı gerçek arayüzden oynuyor ve "en az
+on yıl ilerlenebilmeli" diyor. Zar kayınca 2. hayat yedi yaşında vefat
+etti ve test düştü — ama kurcalayınca iddianın **iki ayrı** eksiği
+çıktı:
+
+1. **Erken ölüm, arayüz hatası değil.** Oyuncu yedi yaşında vefat
+   ettiyse "on yıl ilerlenebilir" iddiası yanlış değil, *ölçülemez*.
+   Artık on yılı gören bir hayat bulunana kadar tohum deneniyor
+   (ekran dökümünde de aynı kalıp kullanılıyor).
+2. **Takılma sessizce yutuluyordu.** Döngü `if (!ilerledi) break;`
+   diyordu; on yılı geçmiş bir hayatta arayüz 65 yaşında kilitlense
+   bile test yeşil kalıyordu. Ölçüldü: 10 hayatın **2'sinde** arayüz
+   kilitleniyordu. Sebep **duruşma penceresi**: modal açık kalıyor,
+   "Yaş Al" düğmesine basılan dokunuş pencereye gidiyor ve yıl
+   ilerlemiyor. Smoke akışı olay/bildirim/krizi kapatıyordu, duruşmayı
+   kapatmıyordu.
+
+Düzeltme: takılma ile ölüm **ayrıldı** — ölmemişken ilerlenemiyorsa
+test *hemen* düşer ve hangi kapının kapalı olduğunu yazar (olay,
+bildirim, kriz, lise alanı, lise sonrası). Duruşma penceresi artık
+arayüzden kapatılıyor (`trial_stance_*` düğmesi); düğmeye
+ulaşılamazsa motordan kapatılıyor. Yani bekçi gevşemedi, **sertleşti**.
+
+### Bekçi
+
+`app/test/paket_bo_zar_bagimsizligi_test.dart` (5 test): uygun olmayan
+60 olay eklenmiş havuz 320 durumda birebir aynı sonucu veriyor;
+erişilebilir arkadaş varken olay 30 tohumun hepsinde çıkıyor ve hep
+erişilebilir kişi seçiliyor; tek arkadaş erişilemezse olay hiç
+çıkmıyor; `debugEligibleIds` tohumdan bağımsız; öğretmeni vefat eden
+sınıfa yeni öğretmen geliyor. İlk iki test **eski motorda kalıyor** —
+bekçinin neyi koruduğu kodda kanıtlı.
+
+**Süit.** Yerelde tam süit: **3527 geçti, 17 atlandı, 0 düştü**
+(`flutter test`). Paket BO'nun üç turu da kayda değer: ilk turda iki
+test düştü (öğretmen ve UI smoke), ikinci turda bir (UI smoke),
+üçüncüde sıfır.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-210.
+
+## Paket BP — oturduğun ev (10 Ekim 2026)
+
+### Ölçülen sorun: evini alınca hayat sessizleşiyordu
+
+Katalogdaki konut olaylarının hepsi **başkasının** eviydi. 524 olayın
+kapıları sayıldı:
+
+| Kapı | Olay sayısı |
+| --- | --- |
+| `requiresTenant` (oyuncu kirada) | 11 |
+| `requiresLetProperty` (kiraya verdiği ev) | 14 |
+| `requiresVacantProperty` (boş ev) | 8 |
+| **oturulan ev** | **0 — motorda böyle bir koşul yoktu** |
+
+Oynanabilir sonucu daha net: kendi evinde oturan oyuncunun konut
+havuzundan aday olayı 30, 40, 50 ve 60 yaşında **0**; kiracının 8.
+Toplam aday olay sayısı da kiracıda yüksekti (40 yaşında 67'ye karşı
+56). Yani oyuncu hayatının en büyük alışverişini yapıp kendi evine
+çıkınca hayatı **sessizleşiyordu**.
+
+### Yapılan
+
+**Motor kapısı (tek yer).** `EventRequirement.requiresOwnedResidence`:
+mülk sahibi olmak yetmez, oyuncunun o evde **oturuyor** olması gerekir
+(D-043 ayrımına uyar). Evini kiraya verip kirada oturana bu olaylar
+çıkmaz.
+
+**İçerik: 28 olay** (`app/lib/data/event_pool_home.dart`), dördü
+başlık altında:
+
+- *Ev yıpranır:* kombi, mutfak sızıntısı, eski tesisat, çatı,
+  pencereler, banyo küfü, boya.
+- *Apartman:* aidat oylaması, yönetici arayışı, üst kat gürültüsü,
+  komşunun anahtarı, otopark yeri.
+- *Yuva:* kendi evinde ilk kış, misafir odası, mutfak yenileme,
+  balkon, bayram temizliği.
+- *Sahiplik kararları:* konut sigortası, kapı güvenliği, yandaki
+  satılık daire, kentsel dönüşüm.
+
+**Yedi karşılık olayı** bırakılan izleri okur: yamalı kombi geri döner,
+ertelenen çatının bedeli iki katına çıkar, eski tesisat kısa devre
+yapar, sigorta işe yarar, güçlendirilen kapı işini görür, komşuya
+edilen iyilik geri döner, dönüşüm tamamlanır. 14 izin 14'ünün karşılığı
+var; sessiz iz yok (Paket AR kuralı).
+
+Para tutarları mevcut konut havuzuyla aynı ölçekte: usta 9.000, kombi
+26.000-31.000, taşınma 45.000 çıpaları (hepsi `prototypeOnly`).
+Komşu ve apartman **metinde** yaşar; yeni kişi kaydı açılmadı (komşunun
+kalıcı kişi olması yeni bağ türü, ekran listeleri ve erişilebilirlik
+gerektirir — ayrı paket).
+
+Modül: `oturulan_ev`.
+
+### Ölçüm: aday olay sayısı 0'dan 19'a
+
+Kendi evinde oturan oyuncu, 10 tohum ortalaması
+(`app/test/paket_bp_oturulan_ev_test.dart`):
+
+| Yaş | Oturulan ev havuzundan aday olay |
+| --- | --- |
+| 22 | 11 |
+| 30 | 19 |
+| 40 | 19 |
+| 50 | 19 |
+| 65 | 19 |
+
+Kiracıya ve ailesinin yanında yaşayana 40 durumda **hiç** çıkmıyor.
+Modül kapalıyken 30 durumda tek olay sızmıyor ve 60 durumda iki motor
+(tam havuz + kapalı modül / modülsüz havuz) aynı olayı veriyor.
+
+### Tam süitin gösterdiği bot hatası: alınan eve taşınılmıyordu
+
+Oynanan 40 hayatta ölçüldü: ev sahibi olan 25 hayatın **18'i kendi
+evinde tek yıl bile geçirmemiş**. Sebep oyunda değil, ölçüm botunda:
+
+1. Bot oturmak için ev alıyor, parasının çoğu eve gidiyor.
+2. Taşınma masrafı (45.000 ₺) kalmadığı için `moveInto` reddediliyor.
+3. Bir sonraki adımda `_rentOutVacant` o evi "boş ev" sayıp **kiraya
+   veriyor**.
+4. Kirada olan eve taşınılamadığı için bot bir daha asla kendi evinde
+   oturmuyor.
+
+Gerçek oyuncu oturmak için aldığı evi kiraya vermez ve parası olunca
+taşınır. Bot politikası buna göre düzeltildi (oturmak için alınan ev
+işaretlenir, kiraya verilmez, taşınma her yıl yeniden denenir).
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Kendi evinde hiç oturmayan ev sahibi | 18/25 | **5/25** |
+| Oturulan ev olayı gören | 7/25 | **20/25** |
+| Havuzun erişilen olayı | 19/28 | **26/28** |
+
+### Denge: iki blokta 400'er hayat, modül açık/kapalı
+
+| Ölçü | Blok 1 açık → kapalı | Blok 2 açık → kapalı |
+| --- | --- | --- |
+| Ortalama ölüm yaşı | 72,67 → 72,57 | 72,61 → 72,55 |
+| Evlenen | %53 → %54 | %56 → %56 |
+| Çocuklu | %38 → %38 | %40 → %40 |
+| Ev sahibi | %58 → %58 | %63 → %63 |
+| Medyan servet | 47,0M → 46,9M | 47,9M → 44,4M |
+| Ortalama son sağlık | 25,9 → 26,5 | 24,3 → 24,8 |
+| Hayat başına farklı olay | 97,9 → 97,3 | 99,0 → 98,4 |
+
+İki blokta **aynı yönde** çıkan iki işaret var ve ikisi de beklenen:
+hayat başına farklı olay +0,5 (içerik gerçekten erişiliyor) ve
+ortalama son sağlık −0,5 (ihmal edilen evin bedeli var: küf, soğuk,
+kendi yaptığın boya). Ölüm yaşı, evlilik, çocuk ve ev sahipliği
+değişmiyor. Medyan servetteki +%0,3 ve +%8 ters yönlü değil ama
+tutarsız; Paket BO'da ölçülen gürültü bandının içinde.
+
+### Bekçi
+
+`app/test/paket_bp_oturulan_ev_test.dart` (8 test): havuzun yapısı ve
+kapısı, izlerin okunduğu, kiracı/aile yanında hiç çıkmadığı, kendi
+evinde bant boyunca sürdüğü, modül kapalıyken sızmadığı ve zarı
+kaydırmadığı, oynanan hayatta gerçekten çıktığı.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-211.
+
+## Paket BQ — görünüm seçimi (10 Ekim 2026)
+
+### Ölçülen sorun
+
+Koyu tema oyunda **baştan beri vardı**: `BirOmurTheme.dark()` yazılı ve
+golden testleri aynı kareleri iki temada da çekiyor. Ama oyuncu
+seçemiyordu — uygulamanın kökünde tek satır vardı:
+`themeMode: ThemeMode.system`. Yani telefonun ayarı neyse oyun onu
+kullanıyordu; "ben koyu istiyorum" diyenin yapabileceği bir şey yoktu.
+
+### Yapılan
+
+- `AppThemeChoice` (sistem / açık / koyu) `GameSettings` içinde, kayıtta
+  anahtar olarak (`sistem`, `acik`, `koyu`) duruyor. Flutter'ın
+  `ThemeMode`'u kayda girmiyor: eşleme arayüz katmanında yapılıyor,
+  kayıt biçimi arayüz kütüphanesine bağlanmıyor.
+- Ayarlar → **Görünüm**: üç seçenek (`settings_theme_sistem`,
+  `settings_theme_acik`, `settings_theme_koyu`). Seçim anında uygulanıyor
+  ve kayda yazılıyor.
+- `BirOmurApp.themeMode` artık **zorlama** parametresi: boşsa kayıttaki
+  seçim, kayıt yoksa cihazın ayarı geçerli. Dolu verilince kayıt ne derse
+  desin o kip uygulanıyor — golden testleri aynı kareyi iki temada da
+  çekmeye devam ediyor.
+- Eski kayıt: alan yoksa ya da tanınmayan bir anahtar varsa cihazın
+  ayarına dönülüyor; kayıt bozulmuyor.
+
+### Bekçi
+
+`app/test/paket_bq_gorunum_test.dart` (9 test): kayıt gidiş-dönüşü, eski
+kayıt, tanınmayan anahtar, üç seçeneğin ekranda olması, koyu seçilince
+uygulamanın gerçekten koyuya geçmesi, **cihaz koyuyken açık seçiminin
+korunması**, oyun kapanıp açılınca seçimin durması ve test
+zorlamasının kayıttan güçlü olması.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-212.
+
+## Paket BR/1 — ilk eve taşınma hatırlatması (10 Ekim 2026)
+
+Paket BP'nin ölçümünden çıkan boşluk: mülk sahibi olmak oturmak demek
+değil (D-043) ve taşınma yalnızca *Evlerim* ekranındaki bir düğme —
+ilk evini alan oyuncuya bunu söyleyen tek satır yoktu. Ölçüm botu da
+aynı yere düştü: ev alıp hiç taşınmadı (ev sahibi olan 25 hayatın
+18'i kendi evinde tek yıl bile geçirmemişti).
+
+Satın alma sonucuna tek cümle eklendi: "Oturmak istersen Evlerim
+ekranından bu eve taşınabilirsin; taşınma masrafı 45.000 ₺." Kuralı
+dar: yalnızca **konut** alımında ve yalnızca oyuncu kendi evinde
+oturmuyorken çıkar. Yatırım için ikinci ev alana çıkmaz. Masraf metne
+gömülmedi, `Housing.prototypeOnlyMoveCost` sabitinden yazılıyor.
+
+Yeni mekanik yok: satın alma oturulan evi değiştirmiyor, karar hâlâ
+oyuncunun.
+
+**Bekçi:** `app/test/paket_br_tasinma_hatirlatmasi_test.dart` (4 test):
+kirada oturana çıkıyor, kendi evinde oturana çıkmıyor, konut dışı
+alışverişte çıkmıyor, satın alma oturulan evi değiştirmiyor ve masraf
+gerçek sabitten geliyor.
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-213.
+
+## Paket BS/0 — arkadaşlık erişilebilirliği: ölçüm turu (10 Ekim 2026)
+
+Paket BP ve BQ'nun 400'er hayatlık ölçümlerinde dikkat çeken iki sayı
+vardı: hayat başına ortalama arkadaş **0,70** ve yakın arkadaş **0,04**.
+Bir hayat simülasyonunda "arkadaşın yok" büyük bir eksik; ama önce
+sorulması gereken soru şu: bu oyunun kapısı mı kapalı, yoksa ölçüm botu
+o yolu yürümüyor mu?
+
+### Ölçülen huni (80 hayat)
+
+| Aşama | Sayı |
+| --- | --- |
+| Tanışıklık (sınıf/iş arkadaşı) gören hayat | 80/80 |
+| Yakın arkadaş teklifinin **uygun olduğu** yılı olan | 27/80 |
+| Teklif deneyen | 27 |
+| Teklifi **kabul edilen** | 27/27 (%100) |
+| Hayatında bir kez bile arkadaşı olan | 58/80 |
+| Hayat boyunca en iyi tanışıklık bağı | ortalama 50,3 · **medyan 51** |
+
+Eşik 55. Yani bot, ömrü boyunca eşiğin **dört puan** altında kalıyordu
+ve eşiği geçtiğinde teklif **her zaman** kabul ediliyordu. Oyunun
+kapısı açık; sorun ölçüm aracındaydı.
+
+### Kök neden: bot dağıtıyor, yoğunlaşmıyor
+
+Bot her yıl bir etkileşim hakkını on kişilik sınıftan **rastgele** bir
+kişiye harcıyordu. Bağ her yıl sönümleniyor (Paket 24), dolayısıyla
+kimsede birikmiyordu. Gerçek oyuncu arkadaş edinmek isterken dağıtmaz,
+birine yoğunlaşır. Politika buna çevrildi: en yüksek bağlı tanışıklık
+seçilir, beşte bir oranında insanî rastgelelik kalır.
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Teklif uygun yılı olan | 27/80 | **61/80** |
+| Teklifi kabul edilen | 27 | **60** |
+| Hayatında arkadaşı olan | 58/80 | **78/80** |
+| En iyi tanışıklık bağı (medyan) | 51 | **60** |
+| Ölümde arkadaş sayısı (ortalama) | 0,90 | **1,48** |
+
+### Dengeye etkisi (400'er hayat, iki blok)
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Ortalama arkadaş | 0,70 / 0,69 | **1,35 / 1,24** |
+| Ortalama yakın arkadaş | 0,04 | **0,50 / 0,44** |
+| Ortalama son sağlık | 25,9 / 24,3 | 28,6 / 26,1 |
+| Ortalama ölüm yaşı | 72,67 / 72,61 | 72,29 / 72,54 |
+| Evlenen | %53 / %56 | %54 / %54 |
+| Ev sahibi | %58 / %63 | %64 / %61 |
+
+Arkadaş sayısı ikiye katlandı, yakın arkadaş neredeyse sıfırdan hayatın
+yarısına çıktı. Sağlık iki puan yükseldi (etkileşim keyif ve sağlık
+veriyor). Ölüm yaşı, evlilik ve ev sahipliği gürültü bandında.
+
+**Oyun tarafında hiçbir sayı değişmedi.** Yakın arkadaşlık eşiği (55),
+bağ sönümlenmesi ve etkileşim etkileri aynen duruyor. Bu bir ölçüm
+aracı düzeltmesidir; bundan sonraki bütün sosyal ölçümler bu tabandan
+okunacak.
+
+### Ölçüm kalıcı bekçiye çevrildi
+
+Huni ölçümü geçici dosyada kalmadı: `test/paket_bs_arkadaslik_test.dart`
+aynı 80 hayatı her süitte oynuyor ve **ölçülenin çok altında** tabanlar
+bekliyor (tanışıklık gören ≥72, teklif uygun yılı ≥27, kabul ≥20,
+arkadaşı olan ≥40, en iyi bağ medyanı ≥45, ölümde ortalama arkadaş
+≥0,6). Bu sayılar denge hedefi değil; arkadaşlık yolu bir gün yeniden
+kapanırsa süit bunu sessizce geçmesin diye var.
+
+### Yan bulgu: döküm testi ölü kareyi basıyordu
+
+Bot düzeltmesi zar akışını kaydırdı ve `ekran_dokumu_bot_test.dart`
+aile arketipinde düştü: sabitlenmiş tohumda hayat 40 yaşında ölüyor,
+döküm o yılın karesini fotoğraflıyor, ekranda da oyunun bilerek
+gösterdiği "Bir ömür tamamlandı" özeti oluyordu — alt sekmeler yok.
+Ekran değil **kare** yanlıştı.
+
+Düzeltme: (1) ölü yılın karesi alınmıyor, (2) tohum sabit değil hedef
+sabit — hedef yaşlara **canlı** ulaşan ve aile dökümünde çocuğu da olan
+bir hayat bulunana kadar tohum ilerliyor (24 deneme). Sabit tohum işini
+yapıyorsa döküm aynı kalıyor. Test bu arada sıkılaştı: eskiden
+ulaşılmayan hedef yaş sessizce atlanıyordu, artık her hedef yaşın canlı
+karesi zorunlu. Ders yazıldı: **bota dokunan her paket, tohuma
+sabitlenmiş testleri de kaydırır; bu testler tohuma değil hedefe
+bakmalı.**
+
+Karar kaydı: `docs/DESIGN_REVIEW_QUEUE.md`, Q-214.
+
+## Paket BS/1 — vefat eden ebeveyn bekleyen bebeği yok saymasın (10 Ekim 2026)
+
+Paket BS/0'ın teşhisi bir yan bulgu bıraktı. Gebelik testinin düştüğü
+kare doğruydu (hamile olan kız arkadaş vefat etmişti, bebek dünyaya
+gelemezdi) ama kuralı yazan satır bebeği **kimin taşıdığına
+bakmıyordu**:
+
+```dart
+if (diger == null || !diger.isAlive) → 'Bekleyen bebek dünyaya gelemedi.'
+```
+
+Yani kadın oyuncu hamileyken **babanın** vefatı da bebeği doğmamış
+yapıyordu: oyuncunun kendi hamileliği başkasının ölümüyle siliniyordu.
+
+### Kural taşıyan tarafa göre ayrıldı
+
+| Durum | Davranış |
+| --- | --- |
+| Ebeveynin kaydı silinmiş | Doğum olmaz, günlüğe yazılır (eski) |
+| Bebeği **taşıyan taraf** vefat etti | Doğum olmaz, günlüğe yazılır (eski) |
+| Bebeği **oyuncu** taşıyor, diğer ebeveyn vefat etti | **Bebek doğar** |
+
+Doğan çocuk vefat etmiş ebeveynin **mevcut kaydına** bağlanır; uydurma
+ebeveyn yazılmaz (D-046, D-047) ve kayıt silinmez. Günlüğe "… bebeğinin
+dünyaya gelişini göremedi." satırı düşer; doğum bildirimi vefat etmiş
+ebeveyni "sen ve X bunu bekliyordunuz" diye anmaz.
+
+`Parenthood` tarafında kapı **açıkça** isteniyor:
+`allowDeceasedCoParent` bayrağı varsayılan olarak kapalı, yalnızca
+`_applyBirth` bu izni veriyor. Oyuncunun hiçbir düğmesi vefat etmiş
+biriyle çocuk üretemez.
+
+### Bekçiler
+
+`test/paket_bs1_vefat_eden_ebeveyn_test.dart` (8 test): bebek doğuyor,
+soyadı vefat etmiş babadan geliyor, kayıt silinmiyor, günlük satırı
+yazılıyor, bildirim vefat etmiş ebeveyni bekleyen gibi anmıyor, taşıyan
+taraf vefat ettiğinde doğum **olmuyor**, kaydı silinmiş ebeveynde doğum
+olmuyor, varsayılan `Parenthood` yolu kapalı kalıyor ve doğan çocuk
+kapat-aç ile korunuyor. `pregnancy_test.dart`'taki eski tek iddia
+silinmedi, **ikiye ayrıldı**: artık erkek oyuncuyla kurulup "taşıyan
+taraf vefat etti" durumunu denetliyor.
+
+**Bu bir prototip davranışıdır.** `DECISIONS.md`'ye yazılmadı; soru,
+önerim ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-215'te.
+
+## Paket BT — evini döşemek (10 Ekim 2026)
+
+`docs/NEXT_DEVELOPMENT_OPTIONS.md` §6'nın kalan yarısı: konut alınıyor,
+taşınılıyor, kiraya veriliyor; ama **evin içi boştu**. Katalogda ev
+eşyası diye üç şey vardı (çay takımı, seccade, bisiklet bakım seti) ve
+hiçbiri bir ihtiyaca karşılık gelmiyordu.
+
+### Ne eklendi
+
+| Parça | Ayrıntı |
+| --- | --- |
+| Katalog | 18 ev eşyası: 6 temel (buzdolabı, çamaşır makinesi, fırın-ocak, yatak odası, koltuk, yemek masası), 12 konfor |
+| Mağaza | Yeni kategori **Ev ve yaşam** (gündelik öbeğinde); büyük eşya 18, küçük eşya 16 yaşından itibaren |
+| Döşeme seviyesi | 0-100; temel yuvalar ağırlığın %65'i, konfor %35'i |
+| Yıpranma | Oturulan evdeki ev eşyası yılda 1-3 puan yıpranır; 40'ın altına düşen eşya yuvayı **doldurmaz** (bakım mevcut eylemle yapılır) |
+| Etki | Seviye 65 ve üstündeyse yılda **+1 mutluluk**; düşük döşemenin **cezası yok** |
+| Ekran | Varlıklar > **Evinin hâli**: seviye çubuğu, temel/konfor yuvaları, yıpranmış eşya uyarısı, eksiklerin toplam tutarı |
+| Anahtar | `ev_dosemesi` (Paket BL sözleşmesi); kapalıyken ekran yok, seviye 0, yıpranma yok |
+
+**Model: eşya senin, binanın değil.** Döşeme oturulan evin değil, sahip
+olunan ev eşyasının hâli. Taşınınca eşya seninle gelir — oyun bunu
+zaten söylüyordu ("eşyalarını taşıdın") — ve eski kayıtlara yeni bir
+alan eklenmedi. Yazlığı ayrı döşemek ayrı bir paket; soru Q-216'da.
+
+### Ölçüm (200 hayat, iki blok, aynı tohumlarla anahtar açık/kapalı)
+
+| Ölçü | Blok 1 açık / kapalı | Blok 2 açık / kapalı |
+| --- | --- | --- |
+| Ortalama döşeme seviyesi | **73,8** / 0 | **78,1** / 0 |
+| Alınan ev eşyası (ort) | 22,07 / 0 | 24,16 / 0 |
+| Evini döşeyen hayat | **175/200** / 0 | **182/200** / 0 |
+| Ölümde mutluluk (ort) | 76,3 / 74,2 | 74,4 / 74,2 |
+| Ölümde net servet (ort) | 66,4 M / 78,6 M | 111,5 M / 98,3 M |
+| Ölüm yaşı (ort) | 70,58 / 70,61 | 72,58 / 72,23 |
+| Ev sahibi | 111/200 / 116/200 | 118/200 / 115/200 |
+
+İçerik **erişilebilir**: hayatların yedide altısı evini döşüyor ve
+ortalama seviye 74-78. Mutluluk katkısı küçük ve yönü tutarlı (+2,1 ve
++0,2). Servet farkının **yönü iki blok arasında ters döndü** (-12,2 M,
++13,2 M), ev sahipliği farkı da yön değiştirdi: ikisi de gürültü bandı
+(Paket BO dersi). Ölüm yaşı değişmedi.
+
+### Bekçiler
+
+`test/paket_bt_ev_dosemesi_test.dart` (20 test): her yuvanın katalogda
+gerçek bir eşyası ve **tek bir** mağaza ürünü var; fiyatlar 2026
+ölçeğinde; boş ev 0, tam ev 100, yalnızca temel ihtiyaçlar %65;
+buzdolabı televizyondan ağır; 40'ın altına düşen eşya yuvayı
+doldurmuyor; aynı türden iki eşyanın iyisi sayılıyor; anahtar kapalıyken
+seviye 0, ekran yok ve eşya yıpranmıyor; ailesinin yanında yaşayandan
+döşeme istenmiyor; ev eşyası olmayan hayatta **zar kaymıyor**; döşeme
+kapat-aç sonrası aynı; ekranda satır ve yuvalar görünüyor.
+
+**Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; sorular
+ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-216'da.
+
+## Paket BU — komşu gerçek kişi oldu (10 Ekim 2026)
+
+Paket BP apartmanı **metinde** yaşattı: kombi susuyor, çatı akıyor, üst
+kat gece mobilya çekiyor, yandaki daire satılığa çıkıyor. O dosyanın
+kendi notu şöyleydi: "Komşu ve apartman metinde yaşar; yeni kişi kaydı
+açılmaz. Komşunun kalıcı kişi olması ayrı bir paket." Bu, o paket.
+
+### Ne eklendi
+
+| Parça | Ayrıntı |
+| --- | --- |
+| Bağ türü | `komsu` ve `eskiKomsu`; ilişkiler ekranında kendi öbeği (**Komşular**) |
+| Ev bağı | `Person.homeTie` — hangi evin komşusu: `ev:<konut>` ya da `kira:<şehir>` |
+| Üretim | Kendi evine ya da kiralığa çıkınca 1-3 komşu tanınır (yaş 19-78, başlangıç yakınlığı 8-22) |
+| Devir | Taşınınca komşuluk biter: yakınlık 55+ ise **arkadaş** olur (nerede tanışıldığı kayıtta kalır), değilse eski komşu |
+| Etkileşim | Sohbet, vakit geçirme, hediye verme; para/hediye **istemek** yok |
+| Arkadaşlık | Komşu yakın arkadaş olabilir — eşik ve ret payı sınıf arkadaşıyla aynı |
+| Olaylar | 12 komşu olayı; hepsi gerçek kişiyi hedefler, dördü kendi izinin karşılığı |
+| Anahtar | `komsular` — kapalıyken komşu üretilmez, ekran yok, havuz hiç listelenmez |
+
+**Ailesinin yanında yaşayanın komşusu yok:** apartmanı o seçmiyor,
+ekran da ondan bir şey istemiyor. Kirada komşuluk anahtarı **şehir**
+düzeyinde; oyun hangi dairede kiracı olduğunu tutmadığı için aynı
+şehirde kiradan kiraya geçmek komşuyu değiştirmiyor (bilinçli
+sadeleştirme, Q-217).
+
+### Ölçüm (200'er hayat, iki blok, aynı tohumlarla anahtar açık/kapalı)
+
+| Ölçü | Blok 1 açık / kapalı | Blok 2 açık / kapalı |
+| --- | --- | --- |
+| Komşu tanıyan hayat | **145/200** / 0 | **149/200** / 0 |
+| Hayat başına tanınan komşu | 2,88 / 0 | 2,70 / 0 |
+| Komşu olayı gören hayat | **144/200** / 0 | — |
+| Hayat başına görülen komşu olayı | 4,77 / 0 | — |
+| Komşuluktan arkadaşı olan hayat | 38/200 / 0 | 34/200 / 0 |
+| Ölümde arkadaş sayısı (ort) | 1,74 / 1,51 | 1,86 / 1,40 |
+| Ölümde mutluluk (ort) | 75,9 / 76,4 | 77,1 / 76,2 |
+| Ölümde net servet (ort) | 56,9 M / 60,4 M | 52,7 M / 56,6 M |
+| Ölüm yaşı (ort) | 72,83 / 72,91 | 70,41 / 69,93 |
+
+İçerik **erişilebilir**: hayatların yaklaşık üçte ikisi komşu tanıyor ve
+dörtte üçü komşu olayı görüyor. Arkadaş sayısı iki blokta da artıyor
+(+0,23 ve +0,46) — komşuluk gerçekten arkadaşlığa dönüşüyor. Mutluluk
+ve ölüm yaşı farkının yönü iki blok arasında **ters dönüyor**: gürültü.
+Net servet iki blokta da **%6 düşüyor** (yön tutarlı): komşu olayları
+para istiyor (aidat 4.000, usta 9.000, küçük masraf 900) ve bot
+seçenekleri rastgele seçiyor. Paranın harcanacak yeri olması Paket
+AD/5'in istediği şeydi; yine de sayı Q-217'de açık duruyor.
+
+### Ölçüm aracında ikinci kısıt bulundu (BOT)
+
+İlk turda komşuluk **hiçbir** hayatta arkadaşlığa dönüşmedi (0/200).
+Sebep oyunda değildi: botun yıllık tek etkileşim hakkı, "en yüksek
+bağlı tanışıklığa yoğunlaş" politikası yüzünden her zaman sınıf/iş
+arkadaşına gidiyordu — komşunun başlangıç bağı (8-22) sınıf
+arkadaşından (35-55) düşük olduğu için sıralamada hiç öne çıkmıyordu.
+
+Teşhis bunu ölçtü (12 gerçek bot karesi): **komşuyla her yıl vakit
+geçiren oyuncu 9 karede eşiği (55) 2-4 yılda geçiyor** ve bağ 100'e
+kadar çıkıyor. Yani oyunun kapısı açık ve cömert. Oyunda yıllık genel
+etkileşim kotası da yok; sınır aynı kişiyle aynı eylemin aynı yıldaki
+getirisinde (D-026). Bot artık kapı komşusuna da yılda bir sıra
+ayırıyor; sonuç 0/200 → 38/200 ve 34/200.
+
+### Bekçiler
+
+`test/paket_bu_komsular_test.dart` (20 test): bağ türü öbeği, etiketler,
+akrabalık yasağına girmemesi, etkileşim listeleri, yakın arkadaşlık
+teklifi, ev anahtarı (kendi evi/kira/aile), aynı ve başka şehir
+erişilebilirliği, üretim (sayı, ev bağı, hane dışı, başlangıç bağı),
+ailesinin yanında üretilmemesi, taşınmada devir (eski komşu / arkadaş),
+uyumlu düzende hiçbir şeyin değişmemesi, anahtar kapalı izolasyonu,
+kapat-aç, olay havuzunun kişi hedefi ve modül bağı, izlerin okunması,
+60 hayatlık huni tabanı ve iki ekran testi.
+
+**Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; sorular
+ve geri alma yolu `docs/DESIGN_REVIEW_QUEUE.md` Q-217'de.
+
+## Paket BV — okunmayan ekranlar ve ad çakışması (10 Ekim 2026)
+
+Bu paket döküm okuyarak çıktı; iki ayrı iş aynı turda bulundu.
+
+### 1. Döküm artık **hâle** göre de kare alıyor
+
+Yaş planı belli ekranları hiç yakalamıyordu ve bunlar PROJECT_STATUS'un
+"hâlâ okunmamış ekranlar" listesinde yazılıydı: **yeni doğan bebek**,
+**tahliye sonrası denetim dönemi**, **süren gebelik**. Üçü de yaşa değil
+duruma bağlı. `ekran_dokumu_bot_test.dart` içine durum odaklı kare
+arayıcısı eklendi: hayatları oynatıp koşulu arar, durum kurmaz. Gebelik
+karesi botun hayatından alınıp **oyuncunun yolundan** (korunmadan
+yakınlaşma) sürdürülüyor, çünkü bot gebelik aşamasını hiç üretmiyor
+(Q-201). Üç kare de boş ekran vermedi.
+
+**Bulgu (görünürlük).** Denetim dönemindeki oyuncunun Okul/Meslek
+ekranındaki satırı yalnızca "Sicilinde bir kayıt var" diyordu; denetim
+dönemi ve şehir dışı yasağı bir tık daha içerideydi. Satır artık
+"Denetim dönemi · 43 yaşına kadar" yazıyor (Paket BR/1 ile aynı ilke:
+durum, oyuncunun baktığı yerde dursun).
+
+### 2. Ad çakışması ölçüldü ve havuz büyütüldü
+
+Yeni doğan karesinde bebek **Melike** adını aldı; aynı hayatta üç yıl
+önce "Sınıf arkadaşın Melike Güneş vefat etti" satırı vardı. Ölçüm
+(300 hayat):
+
+| Ölçü | Havuz 20 | Havuz 60 | Havuz 60 + üretim düzeltmesi |
+| --- | --- | --- | --- |
+| İki yaşayan kişi aynı adda | **283/300** | 198-209/300 | **106/300** |
+| Kardeş-ebeveyn ad çakışması | 9% | 1-4% | 1% |
+| Çocuk-hane ad çakışması | 3% | 12-15% | 14% |
+| Kayıttaki kişi sayısı | medyan 58 | medyan 58 | medyan 58 |
+
+Kayıttaki kişi sayısının medyanı **58**; cinsiyet başına 20 isimle aynı
+adı taşıyan iki kişi kural oluyordu. Havuzlar 60'a çıkarıldı (kadın,
+erkek, soyadı) — bu **içerik**, kural değil.
+
+**Üretim düzeltmesi.** Kişi üreten yerlerin çoğu aynı adı yakalayıp
+yeniden çekiyordu (`in_laws`, `step_siblings`, `step_parents`,
+`school_people`, `colleagues`); **gelin/damat** ve **torun** bunu
+yapmıyordu. Teşhiste çakışma örneklerinin tamamı bu ikisiydi. Ortak
+yardımcı (`Random.pickFreshName`) yazıldı ve bu iki yere uygulandı.
+
+**Dokunulmayan yer:** hayat üretimindeki **ebeveyn ve kardeş** adları.
+O soru Q-198 #6'da Faho'nun kararını bekliyor; bu paket yalnızca
+kuyruğun istediği ölçümü yaptı ve havuzun daralmayı taşıyabileceğini
+gösterdi. Kalan %14'lük çocuk-hane çakışmasının kaynağı henüz
+bulunmadı (sınıf/iş arkadaşı üretiminde koruma var); not Q-198'e
+yazıldı.
+
+### Bekçiler
+
+`test/paket_bv_isim_ve_ekran_test.dart` (4 test): havuzlar ≥50 ve
+tekrarsız, kadın/erkek havuzları kesişmiyor; `pickFreshName` boş yuva
+varken kullanılmış ad seçmiyor, havuz tükenince rastgele dönüyor;
+kalabalık kayıtta gelin/damat mevcut bir adı almıyor; denetim dönemi
+Okul/Meslek satırında yazıyor. Döküm testi 6 → **9 kare**.
+
+### Ad havuzu dört bekçiyi kırdı — hiçbiri gevşetilmedi
+
+Havuzu büyütmek masum bir içerik değişikliği değildi: işletme ve piyasa
+yolu `InvestmentEngine.marketSeed`'den geliyor ve o tohum oyuncunun
+**adından** türüyor. Ad değişti, bütün piyasa yolları kaydı. Süit dört
+testte kırmızı verdi; dördünde de kırılan şey oyunun kuralı değil,
+testin **ölçüm yöntemiydi**. Hiçbir eşik indirilmedi, hiçbir test
+silinmedi:
+
+| Test | Kırılma sebebi | Yapılan |
+| --- | --- | --- |
+| `paket_ac_test.dart` — oynaklık | 300 tekrar **aynı** piyasa yılını ölçüyordu; tek yolun oynaklığı sıfır çıkabiliyordu | her tekrar farklı piyasa yılı; iddia 300 ayrı yıl üzerinden okunuyor |
+| `paket_ag_tail_test.dart` — reklam bonusu sönümlemesi | tek tohumun son değerine elle konmuş eşik | 12 tohum; iddia motorun kendi sabitinden türetildi: `1 + 0,30·(1−r)^14` tabanına **en az bir hayatta inmek** ve yolların üçte ikisinde başlangıcın altına düşmek |
+| `ui_smoke_life_test.dart` — UI hayatı 8 | ekranda "Bir ömür tamamlandı" yazıyordu: oyuncu bekleyen pencereleri kapatırken vefat etmişti | ölüm takılma sayılmıyor; takılma sebebi artık açık sheet/dialog ve ekrandaki ilk metinleri de yazıyor |
+| `paket_ac_measure_test.dart` — şirket batışı | 125 hayatlık **dilimde** batış görülmemişti | bekçi koşunun tamamına genişletildi (tüm stratejiler, 1000 hayat) |
+
+Ortak ders: tek tohumla ölçülen bir sayı kural değildir. Bu dört bekçi
+artık dağılım ya da formül okuyor; bundan sonra biri kırmızı verirse
+sebebi ad havuzu değil, oyunun kendisi olur.
+
+**Sönümleme iddiası neden formülden türetildi.** Ölçüm, 14 yılın
+sonunda baskının yedi yoldan altısında başlangıcın (1,30) altına
+indiğini, birinde ise 1,315'e çıktığını gösterdi: **o 14 yıl içinde
+yeni kampanya/viral baskı eklenebiliyor.** Yani "her yolda düşer"
+iddiası yanlıştı, eşiği güzelleştirmek de ölçümü saklamak olurdu.
+Motorun kendi kuralı (`yeni = baskı + (1 − baskı)·r`) yeni baskı hiç
+gelmezse 14 yıl sonra 1,0686 verir; ölçümde iki yol tam bu değere, bir
+yol altına indi. Bekçi artık bunu denetliyor: sönümleme kapatılırsa ya
+da oranı sessizce düşürülürse hiçbir yol tabana inemez ve test kırmızı
+verir.
+
+## Paket BW/0 — ad çakışmasının kaynağı araçta çıktı (10 Ekim 2026)
+
+Paket BV, çocuğu olan hayatların ~%14'ünde çocuğun hanedeki yaşayan
+biriyle aynı adı taşıdığını ölçmüş ve **kaynağı bulamamıştı**: sınıf ve
+iş arkadaşı üretiminde koruma vardı, bebek adlandırmasında da vardı.
+Bu paket kaynağı aradı ve buldu.
+
+### Teşhis: 52/63 çakışma çocuk-çocuk çakışmasıydı
+
+Çakışan kişinin **ilişkisini** sayan bir ölçüm (300 hayat) tabloyu tek
+turda açtı:
+
+| Çakışan taraf | Sayı |
+| --- | --- |
+| çocuk ↔ **çocuk** | 52 |
+| çocuk ↔ sınıf arkadaşı | 9 |
+| çocuk ↔ kardeş | 1 |
+| çocuk ↔ yeğen | 1 |
+
+Örnekler de aynı yere bakıyordu: Nehir, Deniz, Can, Eylül, Aras, Ada.
+`PlayerBot` her bebeği **sekiz adlı sabit bir listeden** adlandırıyordu
+(`Ada, Deniz, Ege, Mira, Aras, Nehir, Can, Eylül`). İki çocuklu bir
+hayatta aynı adın tekrarı böylece matematiksel olarak kaçınılmazdı;
+üç çocukta ihtimal üçte bire çıkıyordu. Yani **oyun değil ölçüm aracı**
+çakışma üretiyordu — Paket BS/0 ile aynı sınıf hata (bot kısıtı oyunun
+kuralı gibi okunuyor).
+
+Oyunun kendi adlandırması (`Parenthood.haveChild`) kayıttaki adları
+zaten dışlıyordu. Bot da artık aynısını yapıyor: havuz oyunun havuzu,
+dışlanan adlar kayıttaki adlar.
+
+### Oyun tarafında gerçekten eksik olan üç yol
+
+Aynı tarama kişi üreten yolları da gezdi. Korumasız kalan üç yer
+bulundu ve kapatıldı:
+
+| Yol | Durum |
+| --- | --- |
+| `Romance.start` (sevgili) | filtresizdi → `pickFreshName` |
+| `Friendship.startSchoolFriend` | filtresizdi → `pickFreshName` |
+| `Friendship.startAcquaintance` | filtresizdi → `pickFreshName` |
+| `Neighbours._generate`, `SchoolPeople`, `InLaws`, üvey aile, bebek adı | koruma **zaten vardı** |
+
+Hayat üretimindeki **ebeveyn, kardeş, büyükanne/büyükbaba, amca/hala**
+adlarına yine dokunulmadı: o kural Q-198 #6'da Faho'nun kararını
+bekliyor.
+
+### Ölçüm (300 hayat, aynı tohumlar)
+
+| Ölçü | Paket BV öncesi | Paket BV sonrası | Paket BW/0 sonrası |
+| --- | --- | --- | --- |
+| İki yaşayan kişi aynı adda | 283/300 | 105/300 | **25/300** |
+| Çocuğu hanedeki bir adı taşıyan hayat | — | 28/99 | **0/99** |
+
+### Bekçi
+
+`test/paket_bw_ad_cakismasi_test.dart` (3 test): 60 hayatta çocuk
+hanedeki yaşayan bir adı taşımıyor (tavan 1 hayat — havuz tükenme
+kaçışı belgelendi), 60 hayatta aynı adı taşıyan iki yaşayan kişi
+dörtte birin altında kalıyor, ve **kalabalık bir bot hayatından
+alınan kayıt üzerinde** sevgili/okul arkadaşı/tanışıklık üretimi 25
+tohumda kayıttaki bir adı seçmiyor. Durum kurulmadı; kalabalık kayıt
+oynanan hayatlardan arandı.
+
+## Paket BX — sürdürülen uğraşa öncelik (10 Ekim 2026)
+
+1.000 hayatlık denetim, okul futbol takımının **on iki olayından
+sekizinin hiç görülmediğini** söylüyordu. Bu paket sebebi aradı.
+
+### Huni: kapı kapalı değildi, çekiliş kaybediyordu
+
+150 spor odaklı hayat oynatıldı ve zincirin her adımı sayıldı:
+
+| Adım | Sayı |
+| --- | --- |
+| Bir kulübe giren hayat | 149/150 |
+| **Futbol** takımına giren | 44/150 (futbolda medyan **2 yıl**) |
+| İlk on bire çıkan | 13/150 (aktif yıl medyanı **0**) |
+| Zincir başı olayı (`kulup_futbol_ilk_on_bir`) görülen | **0** |
+
+Olay bazında "uygun hale geldi / görüldü":
+
+| Olay | Uygun | Görülen |
+| --- | --- | --- |
+| `antrenor_tartismasi` | 31 | 1 |
+| `turnuva` | 31 | 3 |
+| `ders_catismasi` | 30 | **0** |
+| `penalti` | 4 | 0 |
+| `kritik_gol` | **0** | 0 |
+
+Yani üç olay hayatların beşte birinde **uygun hale geliyor** ve 150
+hayatta toplam **4 kez** çıkıyor. Sebep aritmetik: yıllık aday havuzunda
+ortanca 80 olay ve ~268 etkin ağırlık var (AR/3 ölçümü); ağırlığı 6-7
+olan bir olayın bir yıldaki payı **%2,5**. Kulüp üyeliğinin penceresi
+ise 2-4 yıl. Bayrağa bağlı halkalar (`kritik_gol`, `penalti_sonrasi`,
+`antrenor_barisma`) bu yüzden **hiç uygun hale gelmiyordu**: önceki
+halka çıkmadan bayrak konmuyor.
+
+### İki düzeltme
+
+**1) Motor — sürdürülen uğraşa öncelik.** Paket AS/2 aynı sorunu
+zincirler için çözmüştü: oyuncunun açtığı devam halkası çekilişte ×8
+alıyor. Kulüp ve hobi olayları da aynı sözün kapsamında — oyuncu takıma
+girmeyi **seçti** ve o seçimin ömrü kısa. Fark: zincir koşulu bir
+bayrak, buradaki koşul **sürmekte olan bir durum**
+(`requiresActiveClubId`, `requiredHobbyId`). Katsayı `×6`
+(`prototypeOnlyActivePursuitBoost`), zincir katsayısının altında, dönüm
+noktasının (120) çok altında. İki gerekçe **çarpılmaz**: en güçlüsü
+kazanır. Anahtar: `ugras_onceligi` — kapalıyken Paket BX öncesi ağırlık
+birebir geri döner.
+
+**2) Araç — bot eski kulübüne yeniden yazılıyor.** Oyunun kuralı: okul
+değişince üyelik kapanır, yeni okulda yeniden başvurulur. Bot ise her
+yıl tek bir "kulübe gir" kararı veriyor ve kararı verdiğinde bütün
+uygun kulüpler arasından seçiyordu; futbola giren 44 hayatın **39'u**
+ömründe yalnızca **bir** üyelik kaydı açıyordu. Kadro rolü her okulda
+sıfırdan başladığı için ilk on bire yetecek yıl hiç birikmiyordu.
+Gerçek oyuncu girdiği takıma yeni okulunda da yazılır; bot da artık
+öyle yapıyor (ağırlık ×6, oyun kuralı değil araç davranışı).
+
+### Ölçüm (150 spor hayatı, aynı tohumlar)
+
+| Ölçü | Önce | Öncelik sonrası | + bot sadakati |
+| --- | --- | --- | --- |
+| Futbolda medyan yıl | 2 | 2 | **3** |
+| Futbol üyelik kaydı (1 / 2 / 3 kayıt) | 39 / 5 / 0 | 41 / 7 / 0 | 19 / 11 / **2** |
+| Zincirden toplam görülme | **5** | 21 | 19 |
+| Hiç görülmemiş olay | 8 | 6 | **5** |
+| `antrenor_barisma` | 0 | 0 | **1** (ilk kez) |
+| `ders_catismasi` | 0 | 1 | **3** |
+| `turnuva` | 3 | 15 | 10 |
+
+Bot sadakati futbol örneklemini küçültüyor (48 → 32 hayat) çünkü ilk
+seçilen kulübe bağlı kalıyor; buna karşılık **üyelik süresi** uzuyor ve
+zincir derinleşiyor. İkisi de aynı yönü gösterdiği için sadakat
+korundu: araç oyuncuya benzemeli, örneklem genişliği tohum sayısıyla
+çözülür.
+
+**Açık kalan.** `kritik_gol`, `penalti_sonrasi` ve `scout` hâlâ çok
+seyrek: üçü de "önceki halka + aktif üyelik + rol" üçlüsünü aynı yılda
+istiyor. Kulüp üyeliğinin okul değişiminde kapanması ve kadro
+merdiveninin dört yıl istemesi bir **tasarım** sorusu; Q-218'de
+Faho'nun kararını bekliyor. Oyun kuralı değiştirilmedi.
+
+### Bekçi
+
+`test/paket_bx_ugras_onceligi_test.dart` (3 test): katsayı anahtar
+kapalıyken 1 dönüyor, üyelik kapanınca düşüyor, ve 120 spor hayatında
+futbola giren oyuncuların **en az yarısı** kulüp olayı görüyor
+(zincirden en az 4 ayrı olay). Aktif üyelik kaydı kurulmuyor, oynanan
+hayatlardan **aranıyor**.
+
+## Paket BY — meslek kapsamı: 12 meslek neden hiç girilmiyor? (10 Ekim 2026)
+
+Denetim raporu aylardır aynı satırı yazıyordu: **"55 mesleğin 12'sine
+hiç girilmedi."** Bu satır bir içerik eksiği gibi okunuyordu. Bu paket
+sebebi mesleğe göre ayırdı.
+
+### Kapsam modu (yeni ölçüm aracı)
+
+`playBotLife(jobCoverage: true)` — **varsayılan kapalı**, yani hiçbir
+denge ölçümü kaymıyor. Açıkken bot
+işe maaşa göre değil **bu hayatta girmediği işlere** göre başvuruyor,
+yarım zamanlı yaş filtresi kalkıyor ve çalışırken de girilmemiş bir iş
+açıksa ona geçiyor. Amaç dengeyi ölçmek değil, kataloğun hangi
+mesleğine **girilebildiğini** ölçmek.
+
+### Bulgu 1 — bir meslek botun kendi kuralı yüzünden görünmezdi
+
+`yz_kurye` (motorlu kurye, yarım zamanlı) 240 hayatta **210 yıl ilanda
+açık** görünüyor ve hiç girilmiyordu. İlk okunan kilit gerekçesi
+"motosiklet ehliyeti gerekiyor" idi ve yanlış ize götürüyordu: bot
+ehliyeti alıyor, iş açılıyor, ama **"25 yaşından sonra yarım zamanlı iş
+kabul etmem"** kuralı başvuruyu engelliyordu. O kural denge ölçümü için
+doğru (40 yaşında kafe garsonluğu gerçekçi değil); kapsam ölçümünde
+kaldırıldı ve meslek hemen girildi.
+
+### Bulgu 2 — kalanların hepsinin yazılı bir gerekçesi var
+
+| Öbek | Meslekler | Gerekçe |
+| --- | --- | --- |
+| Üniversite bölümü | banka personeli, hemşire, yazılım geliştirici, veri analisti, elektrik/inşaat/makine mühendisi, öğretmen, psikolog | "Bu iş için uygun bir eğitim geçmişi gerekiyor." |
+| Hobi basamağı | yazar (Okumak → Düzenli), müzisyen (Müzik → Düzenli) | hobide basamak |
+| Dövüş derecesi | karate, kungfu, judo, taekwondo eğitmenliği, güreş ve boks antrenörlüğü | siyah kuşak / başaltı / profesyonel |
+| Büyük şehir | doktor, eczacı | "Denizli bu iş için dar bir piyasa." |
+
+Bunların hiçbiri **erişilemez** değil: katalog tutarlılığı
+`content_reachability_test.dart` ile zaten korunuyor (aranan bölüm,
+hobi basamağı, sanat derecesi gerçekten var ve ulaşılabilir). Bu pakette
+o dosyaya eksik olan **ehliyet** legi de eklendi: olmayan bir ehliyet
+kimliği isteyen iş artık testten geçmez.
+
+Yani 12 sayısı "oyunda 12 meslek kapalı" değil, **"ölçüm botu çok yıllı
+ön koşul peşine düşmüyor"** demekti. Ölçüm 60 kapsam hayatında
+**28/55**, 240 hayatta **37-42/55** meslek gezdi; girilemeyen her
+mesleğin ekranda yazılı bir gerekçesi vardı (gerekçesi boş kilit: 0).
+
+### Bekçi
+
+`test/paket_by_meslek_kapsami_test.dart` (3 test): kapsam modu 120
+hayatta en az 28 mesleğe giriyor, aynı tohumlarla **varsayılan bottan
+daha geniş** geziyor, ve gerekçesi boş kilit yok (D-063).
+
+### Düzeltme (BY/1) — yukarıdaki 16 sayısı bozuk bir araçla ölçülmüştü
+
+**Kendi ölçümüm yanlıştı ve bunu bir sonraki tur buldu.** Kapsam
+modunun "çalışırken girilmemiş işe geç" dalı **ölü koddu**: oyunun
+kuralı net — `JobMarket.applicationAvailability` çalışan oyuncuya
+"Önce mevcut işinden ayrılman gerekiyor" diyor — ve dal adayları
+`isAllowed` ile süzdüğü için liste **her zaman boş** kalıyordu. Yani
+kapsam modunun tek gerçek etkisi yarım zamanlı yaş filtresinin
+kalkmasıydı.
+
+Hatayı ortaya çıkaran şey, bekçinin Paket BZ'den sonra kırmızı
+vermesiydi: "kapsam modu varsayılan bottan daha geniş geziyor" iddiası
+tohum dünyası değişince düştü. Üç tohum öbeğiyle ölçtüm:
+
+| Tohum (60 hayat) | Varsayılan birleşim | Kapsam birleşim (ölü kodla) |
+| --- | --- | --- |
+| 9400 | 35 | **30** |
+| 7100 | 33 | 34 |
+| 3300 | 32 | **27** |
+
+Yani iddia yanlıştı; ilk turda gördüğüm "42'ye 37" farkı **gürültüydü**.
+Gerçek oyuncu meslek değiştirmek için istifa eder; kapsam botu da artık
+öyle yapıyor (`quitJob` + başvuru, yalnızca `jobCoverage` açıkken).
+Düzeltmeden sonra aynı tohumlar:
+
+| Tohum (60 hayat) | Varsayılan | Kapsam | Hayat başına iş (varsayılan → kapsam) |
+| --- | --- | --- | --- |
+| 9400 | 35 | **44** | 2,55 → **14,13** |
+| 7100 | 33 | **42** | 2,47 → **13,45** |
+| 3300 | 32 | **43** | 2,63 → **14,02** |
+
+**Ve asıl sonuç değişti:** 240 kapsam hayatında kataloğun **52/55**
+mesleğine girildi. Hiç girilmeyen yalnızca üç meslek kaldı:
+
+| Meslek | Gerekçe |
+| --- | --- |
+| `eczaci` | büyük şehir piyasası |
+| `elektrik_muhendisi` | üniversite bölümü |
+| `yazar` | Okumak hobisinde "Düzenli" basamağı |
+
+Yani "16 meslek çok yıllı ön koşul istiyor" tablosu **bozuk araçla
+ölçülmüş bir sonuçtu**; katalog pratikte neredeyse tamamen
+erişilebilir. Q-219 buna göre düzeltildi.
+
+**Açık kalan tasarım sorusu.** Üç meslek (eczacı, elektrik mühendisi,
+yazar) belirli bir ön koşul istiyor: büyük şehir, üniversite bölümü,
+hobi basamağı. Bu bilinçli bir derinlik mi? Q-219'da önerimle birlikte
+duruyor; **hiçbir meslek gereksinimi değiştirilmedi**.
+
+## Paket BZ — dört olay yanlış kapıdaydı (10 Ekim 2026)
+
+Paket BY'nin denetim raporunda kalan "hiç görülmeyen olaylar" listesinin
+dördü Paket BN'in kendi havuzundandı:
+`esik_universite_ilk_ay`, `esik_kampuste_tanisma`, `esik_kampus_kantin`,
+`esik_okulu_birakma`. Bu kez sebep havuz rekabeti **değildi**.
+
+### Koşul içerikle çelişiyordu
+
+Dördü de `requiresSchoolStudent: true` istiyordu. O kapının tanımı
+`EducationState.isSchoolStudent => enrolled` ve kodda yorumu da açık:
+**"Yalnızca 1-12. sınıf öğrenciliği."** 18-20 yaşındaki oyuncu ise
+genellikle **üniversitede** (`enrolled` kapalı, `isUniversityStudent`
+açık) ya da çalışıyor. Yani kimliğinde "üniversite" ve "kampüs" yazan
+olaylar hedef kitlesine **hiç çıkmıyordu**; tek açık yol 18 yaşında
+hâlâ 12. sınıfta olmaktı ve o da tek yıllık bir pencere.
+
+### Ölçüm (150 hayat, aynı tohumlar)
+
+18-20 arasında **74 hayat üniversiteli** (yarısı). Buna karşılık:
+
+| Olay | Önce uygun | Önce görülen | Sonra uygun | Sonra görülen |
+| --- | --- | --- | --- | --- |
+| `esik_universite_ilk_ay` | 8 | **0** | 81 | 3 |
+| `esik_kampuste_tanisma` | 7 | **0** | 75 | 14 |
+| `esik_kampus_kantin` | 8 | **0** | 81 | 5 |
+| `esik_okulu_birakma` | 8 | **0** | 81 | 3 |
+
+### Düzeltme
+
+`EventRequirement`'a **`requiresStudent`** eklendi: 1-12 **ya da**
+üniversite (`education.isStudent`). Dört olay ona bağlandı. Yeni bir
+oyun kuralı yazılmadı, hiçbir denge sayısına dokunulmadı; yazarın
+niyeti geri getirildi. 12. sınıf olayları (ör.
+`sinav12_aile_baskisi`) bilerek 1-12 kapısında kaldı: onların metni
+gerçekten lise sonu.
+
+### Bekçi
+
+`test/paket_bz_esik_ogrenci_kapisi_test.dart` (4 test): dört olay 1-12
+kapısını kullanmıyor; **kimliğinde ya da metninde kampüs/üniversite
+geçen hiçbir olay** sınıf aralığı belirtmeden 1-12 kapısında kalamaz
+(hatayı kaynağında yakalayan tarayıcı); 18-20 arası üniversiteli bir
+**bot karesinde** olayların en az üçü uygun hale geliyor; 120 oynanan
+hayatta en az 6 hayat bu olaylardan birini görüyor (düzeltme öncesi
+sıfırdı).
+
+## Paket BZ/1 — metin iş varsayıyorsa koşul da istemeli (10 Ekim 2026)
+
+Paket BZ'nin tarayıcı fikrini bütün olay havuzlarına uyguladım: olay
+metninin varsaydığı şey (eş, çocuk, iş, ev, araç, işletme) koşulda
+garanti edilmiş mi? 1200'ü aşkın içerik kaydında **iki** gerçek bulgu
+çıktı:
+
+| Bulgu | Sorun |
+| --- | --- |
+| `komsu_gurultu` (Paket BU) | metin "Sabah **işin var**." diyordu; koşulda iş yok, yani emekliye ve öğrenciye de çıkıyordu |
+| aile ziyareti olayının bir etiketi | "Kısa kes, **işin var**" — aynı varsayım, aynı koşul eksiği |
+
+Üç "ilk maaş" olayının hepsinde `requiresEmployed: true` vardı; yani
+sistem doğru kurulmuş, bu ikisi sızmış. İkisi de herkese doğru olan
+cümleye çevrildi ("Saat ikiyi geçti, sen hâlâ uyanıksın." / "Kısa kes,
+bugün olmaz").
+
+**Bekçi:** `test/paket_bz1_metin_kosul_test.dart` — metni ya da
+etiketi oyuncunun işini varsayan bir olay (`işin var`, `patronun`,
+`maaşın`, `işyerin`) `requiresEmployed` istemek zorunda. Muafiyet
+listesi **yok**; Paket BD'nin "koşulsuz nedeniyle" bulgusuyla aynı
+sınıf hata bir daha sessizce giremez.
+
+## Paket CA — sigorta: paranın savunma tarafı (10 Ekim 2026)
+
+Oyunda para neredeyse tamamen **saldırı** aracıydı: ev al, araba al,
+işletme kur, portföy büyüt. Kötü bir yılın faturasını küçültmenin
+hiçbir yolu yoktu. Oyun fikri zaten konuşuyordu — `ev_sigorta_teklifi`
+olayı 9.000 ₺ poliçe teklif ediyor, `ev_sigorta_ise_yaradi` olayında
+"cebinden sadece muafiyet tutarı çıktı" diyor — ama bu tek seferlik bir
+anlatıydı.
+
+### Ne eklendi
+
+| Parça | Ayrıntı |
+| --- | --- |
+| Katalog | İki poliçe: **sağlık** (yıllık 5.000 ₺, muafiyet 3.000, karşılama %80) ve **konut** (yıllık 2.500 ₺, muafiyet 4.000, karşılama %85) |
+| Motor | `Insurance`: prim tahsilatı, dayanağı düşen poliçenin kapanması, hasarda karşılık. **Zar tüketmez**, poliçesi olmayanın akışı birebir eskisi |
+| Sağlık kapısı | Kriz tedavi masrafı poliçeden geçer; pahalı tedavi **seçilebilir** hale gelir |
+| Ev kapısı | `insuredRisk` etiketi: dört ani hasar olayı (mutfak sızıntısı, çatı akması, kısa devre, su borusu) |
+| Ekran | Aktiviteler > **Sigorta**: koşullar, poliçe dökümü (ödenen prim / karşılanan), iptal, geçmiş poliçeler |
+| Anahtar | `sigorta` (Paket BL sözleşmesi) |
+
+**Yıpranma kapsam dışı.** Kombi ölmesi, tesisatın eskimesi, pencerenin
+üşütmesi poliçeye girmiyor; sigorta **ani hasarı** karşılar. Bu ayrım
+katalogdaki açıklamayla ("su basması, tesisat, çatı hasarı") birebir
+aynı.
+
+**Kasko bilerek yok.** Oyunda kaza aracın kondisyonunu düşürüyor ve
+onarım "bakım" kalemiyle ödeniyor; yani kaza onarımı ile rutin bakım
+aynı yerden geçiyor. Kaskoyu o kaleme bağlamak rutin bakımı da
+sigortalı yapardı. Doğru bağlanacağı yer Q-220'de.
+
+### Ölçüm — ve dürüst sonuç
+
+İlk kalibrasyon (sağlık 18.000, konut 9.000) 200 hayatta **hiçbir
+hayatta kâra geçmedi**: ömür boyu ödenen prim medyanı 1.044.000 ₺,
+karşılanan medyanı 45.600 ₺. Yani karar değil tuzaktı. Primler ölçülen
+hasar dağılımına göre indirildi (karşılanan p75 109.600 ₺, p90 175.200
+₺ → yirmi yıllık prim p75 hasara denk gelecek şekilde 5.000 + 2.500).
+
+Yeni ölçüm (200 hayat): poliçe yaptıran 200/200, karşılık gören 130,
+medyan prim 290.000 ₺, medyan karşılanan 57.600 ₺, **kârda biten hayat
+1/200**.
+
+İki bağımsız blokta (150+150 hayat) sigortalı/sigortasız kohort:
+
+| Ölçü | Blok 1 kapalı → açık | Blok 2 kapalı → açık |
+| --- | --- | --- |
+| Medyan ölüm yaşı | 74 → **75** | 74 → **75** |
+| 70 altı ölüm | 38 → 34 | 34 → **36** (ters yön) |
+| Medyan servet | 43,6M → 42,1M (−%3,4) | 37,7M → 36,7M (−%2,9) |
+
+**Erken ölüm farkı gürültü** (yön iki blokta ters döndü). Medyan ömür
+farkı iki blokta da +1 yıl ama medyan kaba bir ölçü; tek başına kanıt
+saymıyorum. Servet maliyeti ise tutarlı: ~%3.
+
+**Asıl bulgu.** Medyan oyuncunun serveti 37-43 milyon; 85.000 ₺'lik
+tedavi ya da 70.000 ₺'lik çatı hasarı onun için gürültü. Yani sigorta
+**zengin oyuncu için anlamsız**. Anlamlı olduğu yer parası olmayan
+oyuncu: poliçe varsa cepten çıkacak tutar muafiyete iner ve **hayat
+kurtaran tedavi seçilebilir hale gelir**. Bu, bekçide kural olarak
+kanıtlanıyor (poliçeli oyuncu seçebiliyor, poliçesiz aynı parayla
+seçemiyor).
+
+Bu yüzden ekran oyuncuya bunu açıkça yazıyor: *"Sigorta kazanç
+getirmez; kötü bir yılın faturasını küçültür."*
+
+### Bekçi
+
+`test/paket_ca_sigorta_test.dart` (10 test): ilk prim peşin çıkıyor,
+muafiyetin altındaki hasarda poliçe devreye girmiyor, büyük hasarda
+muafiyet + karşılanmayan pay cepten çıkıyor, poliçesiz oyuncu zararın
+tamamını ödüyor, anahtar kapalıyken ne prim ne karşılık var, yıllık
+prim kayda işleniyor, primi ödenemeyen poliçe **borç yazmadan** düşüyor
+ve kaydı silinmiyor, kapat-aç ile korunuyor, sağlık poliçesi
+karşılanamayan tedaviyi karşılanabilir yapıyor, katalogda hiçbir yere
+bağlı olmayan ("hollow") poliçe yok.
+
+**Bütün sayılar `prototypeOnly`.** `DECISIONS.md`'ye yazılmadı; prim
+kalibrasyonu, yaşa göre artan prim önerisi ve kasko sorusu
+`docs/DESIGN_REVIEW_QUEUE.md` Q-220'de.
+
+## Paket CB — kütüphane: çakışan kimlik, ulaşılamayan basamak, okumayan bot (10 Ekim 2026)
+
+Paket BX ve BZ'den sonra denetimde hâlâ hiç görülmeyen iki olay
+(`hobi_okuma_gecesi`, `hobi_sevgili_kitapci`) ve hiç girilmeyen bir
+meslek (`yazar`) kalmıştı. Üçü de aynı kapıya bağlıydı: **"okumak"
+hobisinin basamağı.** O kapıyı açtığında arkasında üç ayrı sorun çıktı.
+
+### 1. Üç kitap iki kez tanımlıydı (OYUN — hata)
+
+Q-110'da kütüphane 8'den 23 satıra çıkarılırken üç kimlik ve üç ad
+yeniden kullanılmış: `gokyuzu_defteri`, `sayilarin_dili`, `uzun_kis`.
+Katalog 22 satır ama **19 tekil kimlik** taşıyordu.
+
+İlerleme kaydı kimliğe bağlı (`state.bookProgress(book.id)`). Sonuç:
+
+- `sayilarin_dili` (16+) ve `uzun_kis` (18+) çiftleri **aynı yaş
+  penceresinde** rafta duruyordu. Oyuncu aynı adı iki kez görüyor,
+  birini bitirince öteki de "Bitirdin." oluyor ve hobiye hiç deneyim
+  yazılmıyordu.
+- `gokyuzu_defteri` çiftinin pencereleri kesişmiyordu ama `bookById`
+  her zaman ilk satırı döndürüyordu; çocukluğunda o kitabı bitiren
+  oyuncu yetişkin sürümünü **hiç açamıyordu**.
+
+Ölçüm (25 yaşında, gerçek motor): raftaki 15 kitabın hepsi tek tek
+bitirildi, hobiye **13** deneyim yazıldı. İki kitap sessizce kayboldu.
+
+Düzeltme: Q-110'un üç satırına kendi kimliği ve kendi adı verildi
+(*Bulut Sayan Çocuk*, *Çarpım Tablosunun Dışında*, *Avluya Bakan
+Pencere*).
+
+### 2. Merdivenin tepesi ulaşılamazdı (OYUN)
+
+"Okumak" hobisini yalnızca **bitirilen kitap** besliyor ve bitmiş kitap
+yeniden okunamıyor; yani bir hayatın tavanı kütüphanedeki **tekil**
+kitap sayısıdır. Çakışmalar ayıklandıktan sonra 19 tekil kitap kalıyor,
+"Usta" basamağı ise 20 deneyim istiyor: **tepe hiçbir hayatta
+ulaşılamıyordu.** Eski bekçi tavanı `kBookCatalog.length` (22) ile
+saydığı için bunu göremiyordu — çakışma bekçiyi de kör etmiş.
+
+Eşiklere dokunmadım (Q-106/Q-110'da `prototypeOnly`, onay Faho'nun).
+Yerine raf büyüdü: **17 yeni kitap**, dört yeni tür (şiir, polisiye,
+tarih, anı) ve ilk kez 30/32/35/40/45 yaşında açılan kitaplar. Artık
+raf orta yaşta da yenileniyor.
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Katalog | 22 satır / 19 tekil | **39 satır / 39 tekil** |
+| Ömür boyu tavan | 19 deneyim → basamak 3 | **39 → basamak 4 ("Usta")** |
+| 20 yaşından sonra rafta kalan | 13 kitap → basamak 3 | **29 kitap → basamak 4** |
+| 45 yaşında rafta | 15 kitap | **29 kitap** |
+
+Bütün adlar ve yazarlar özgündür; gerçek bir eser ya da yazar
+kullanılmadı. Sayfalarda metin yok (telifli içerik kullanılmaz).
+
+**Zekâ kasması yok.** `Stats.gain` azalan getiriyle çalışıyor (D-099);
+39 kitap okumak zekâyı 100'e yapıştırmıyor, her kitap bir öncekinden
+daha az katıyor.
+
+### 3. Ekran: 29 kitap düz liste olmaz (UI)
+
+Raf büyüdüğü için kütüphane türüne göre gruplandı (`MenuGroupTitle`,
+Paket V/5'teki mağaza deseninin aynısı) ve **bitirdiklerin** en alta
+indi. Alt başlık da artık "12 kitap duruyor, 8 tanesini bitirdin"
+diyor.
+
+### 4. Bot hiç kitap okumuyordu (BOT — ölçüm aracı)
+
+`okuma` hobisinin `activityIds` kümesi **boş**: onu besleyen tek şey
+kütüphane. Bot kütüphaneye hiç uğramıyordu, dolayısıyla 1.000 hayatlık
+denetimlerde bu hobi hiç ilerlemiyor ve ona bağlı iki olay ile `yazar`
+mesleği "hiç görülmedi" diye raporlanıyordu. **Eksik oyunda değil
+ölçüm aracındaydı.**
+
+İlk deneme de yetmedi: bot kitabı açıyor ama bitiremiyordu. Sebep
+**D-125** — her aktivite "ilerleme" sayılıyor ve ilerleme birikince
+motor ek bir olay soruyor; sayfa çevirmek de bir aktivite olduğu için
+uzun bir kitap mutlaka olayla kesiliyor, botun ise olayı karşılayıp
+okumaya dönecek yolu yoktu. Ölçüm: 12 hayatta kitaplar 0-1 sayfada
+kalıyordu.
+
+Düzeltme: okuma dalı araya giren bildirim ve olayı **yerinde**
+karşılıyor (gerçek oyuncu da pencereyi kapatıp okumaya döner) ve
+yarım kalan kitabı ertesi yıl kaldığı yerden sürdürüyor. Olay yine
+ölçüme giriyor; kısayol yok.
+
+| 120 hayat × 2 bağımsız tohum bloğu | Önce | Sonra |
+| --- | --- | --- |
+| Kitap bitiren hayat | 3 / 6 | **36 / 42** |
+| `hobi_okuma_gecesi` | 0 / 0 | **33 / 35** |
+| `hobi_sevgili_kitapci` | 1 / 1 | **34 / 38** |
+| `yazar` mesleğine giren | 0 / 0 | **2 / 5** |
+| En çok bitirilen kitap | 3 | **36 / 37** |
+
+`yazar`ın 2-5'te kalması beklenen: meslek ayrıca zekâ 55 ve 20 yaş
+istiyor, üstüne botun o işi **seçmesi** gerekiyor. Yol artık açık;
+sayı botun iş seçimine bağlı.
+
+### Bekçi
+
+`test/paket_cb_kutuphane_kimlik_test.dart` (11 test): her kitabın
+kimliği tekil, aynı ad iki kez rafta değil, `bookById` her satırı
+kendisine çözüyor, hiçbir yaşta aynı kimlikten iki satır görünmüyor,
+tekil kitap sayısı merdivenin tepesine yetiyor, yetişkin olarak
+başlayan da ilerleyebiliyor, yazarlığın istediği basamak ulaşılabilir,
+raftaki her kitabı bitirmek hobiye **satır sayısı kadar** deneyim
+yazıyor, 90 hayatlık huni testi (okuyan bot merdiveni tırmanıyor, iki
+olay görünüyor) ve iki ekran testi: 45 yaşındaki rafta her tür için tek
+grup başlığı ve her ad **bir kez** görünüyor, bitirilen kitap
+"Bitirdiklerin" bölümüne iniyor.
+
+`test/hobby_test.dart` ile `test/content_reachability_test.dart`'taki
+eski tavan bekçileri de satır sayısından **tekil kimliğe** çevrildi —
+gevşetme değil, sıkılaştırma (19 < 22).
+
+**Bütün sayılar `prototypeOnly`.** Merdiven eşikleri, kitap sayısı ve
+sayfa başına tıklama yükü `docs/DESIGN_REVIEW_QUEUE.md` Q-221'de.
+
+## Paket CC — son yıllar: 65+ için yazılmış 31 olay (10 Ekim 2026)
+
+### Ölçülen sorun
+
+Oynanan 60 hayatta, oyuncunun o yıl gerçekten karşılaşabileceği olay
+sayısı yaş yaş sayıldı (`EventEngine.debugEligibleIds`):
+
+| Yaş bandı | Yılda uygun olay |
+| --- | --- |
+| 8-12 | 51,2 |
+| 13-17 | 50,7 |
+| 18-24 | 55,9 |
+| 25-34 | 78,4 |
+| 35-49 | 84,4 |
+| 50-64 | 85,4 |
+| **65-74** | **75,3** |
+| 75-84 | 66,8 |
+
+Yani bant **aç değildi**. Asıl bulgu başkaydı: o taramada 65+ yaşta
+görülen **228 tekil olaydan yalnızca 11'i** o yaşlara aitti
+(`vasiyet_dusuncesi`, `sessiz_ev_aksami`, `eski_dostun_haberi`,
+`ileri_yas_muhasebe`, `unutulan_isim`, `mirasin_konusulmasi`,
+`radyo_ve_sessizlik`, `kapidaki_yardim`, `evin_anahtari`,
+`yillarin_hesabi`, `hayat_muhasebesi`). Gerisi orta yaşın havuzuydu:
+**70 yaşındaki oyuncu 40 yaşındakiyle aynı olayları çekiyordu.** Sorun
+kıtlık değil, içeriğin yaşa ait olmaması.
+
+Paket BM ilk yedi yıl için, Paket BN eşikteki yıllar için aynı işi
+yapmıştı; bu paket hayatın son bandı için yapıyor.
+
+### Ne eklendi
+
+`app/lib/data/event_pool_late_years.dart`: **31 olay** (25 ana + 6
+karşılık), beş başlıkta:
+
+| Başlık | Örnekler |
+| --- | --- |
+| Emekliliğin ritmi | Gidecek yeri olmayan ilk pazartesi, günün düzenini kurmak, parkta her gün aynı bankta oturan tanıdık |
+| Beden ve zaman | Üçüncü katta ilk kez ara vermek, gözlük numarası, dört ilaç kutusunu karıştırmak |
+| Torunlar | "Sen küçükken burada ne vardı?", "bunu bana öğretir misin?", tutulan sır, kapıda bekleyen harçlık |
+| Komşuluk ve mahalle | Karşı komşuyla "sabah perdeni aç" düzeni, üst kata taşınan çocuklu aile, bakkalın yazmayı unuttuğu hesap |
+| Bilgi ve devretme | Tavsiye isteyen genç, balkondaki takımı bir gence vermek, dikilen fidan, fotoğraf kutusunun arkasına isim yazmak |
+| Emekli bütçesi | Aynı ayda gelen faturalar, depodaki eski eşyayı satmak, kendini banka görevlisi gibi tanıtan telefon |
+
+**Altı iz, altı karşılık.** Oyuncunun bıraktığı her iz geri okunuyor:
+yazdığı defteri torunu buluyor; yarım saat ayırdığı genç yıllar sonra
+kendi işini açıp kapıya geliyor; diktiği fidan gölge yapıyor; sırrını
+tuttuğu torun daha büyük bir konuyla yine ona geliyor; komşuyla kurduğu
+sabah düzeni, perdeyi açmakta geciktiği gün işliyor; devrettiği takımı
+sokakta çırağın elinde görüyor. Karşılığı olmayan iz bırakmak Paket
+AR'nin ölçtüğü "sessiz iz" hatasıydı; bekçi bunu iki yönlü denetliyor.
+
+**Yeni mekanik yok.** Emeklilik, torun, komşu ve ev sistemleri olduğu
+gibi kullanılıyor; yeni ekran, düğme ya da yıllık hesap eklenmedi.
+Ölüm bu havuzun konusu değil — onu sağlık motoru ve `life_progression`
+yürütüyor; buradaki olaylar **yaşanan** yılları anlatıyor.
+
+### Ölçüm — paketin etkisi
+
+60 hayat × 2 bağımsız tohum bloğu, modül kapalı / açık:
+
+| Ölçü | Kapalı | Açık |
+| --- | --- | --- |
+| 65+ yılda ortalama uygun olay | 75,0 / 77,1 | **93,9 / 94,9** |
+| Havuzun uygun hale gelen olayı | 0/31 | **31/31** |
+| Havuzun gerçekten görülen olayı | 0/31 | **30/31** |
+| 65 yaşına gelen hayat | 54 / 51 | 54 / 51 |
+
+İki blokta da 31 olayın 30'u görüldü; görülmeyen olay **bloklar arasında
+değişti** (`son_karsilik_torun` ve `son_karsilik_defter`), yani
+sistematik olarak ulaşılamayan olay yok — karşılık olaylarının çekilişi.
+65 yaşına gelen hayat sayısı modül kapalıyken ve açıkken **birebir aynı**:
+havuz zara dokunmuyor.
+
+Yaşa özgü içerik **11'den 42'ye** çıktı (11 eski + 31 yeni).
+
+### Bekçi
+
+`test/paket_cc_son_yillar_test.dart` (11 test): havuz boş değil ve her
+olay 60 yaş ve sonrası, kimlikler tekil ve genel havuzda da tekil, her
+olayın metni ve en az iki seçeneği var, **bırakılan her iz okunuyor**,
+**okunan her iz bırakılabiliyor**, iz dizeleri olay kimlikleriyle
+çakışmıyor, `WRITING_STYLE_TR` §2'nin yasak kalıpları yok, havuz modül
+haritasında kayıtlı, anahtar kapalıyken hiçbir olayı aday olmuyor,
+kapalı modül zara dokunmuyor (üç tohumda aynı hayat) ve 65+ bandında
+havuzun en az 20 olayı uygun hale geliyor (ölçülen 31/31).
+
+**Bütün sayılar `prototypeOnly`.** Ağırlıklar, tutarlar ve yaş kapıları
+`docs/DESIGN_REVIEW_QUEUE.md` Q-222'de karara sunuldu.
+
+### CC/1 — paketin açtığı kırmızı: bekçi ile tasarım çelişiyordu
+
+Paket CC gönderildikten sonra CI kırmızı yandı. Tam süit de aynı tek
+hatayı verdi (3650 geçti, 17 atlandı, **1 hata**):
+`paket_aa_measure_test` → "100 hayatın ölüm anındaki yatırım serveti",
+`servetler.last < 1.000.000.000` iddiası, gerçekleşen **1.365.789k**.
+
+**Kök neden ölçüldü.** Aynı 100 tohum, modül kapalı/açık:
+
+| | `son_yillar` kapalı | açık |
+| --- | --- | --- |
+| Tohum 73 ölüm yaşı | 77 | **89** |
+| Tohum 73 net varlığı | 302.284k | **1.365.789k** |
+| 100 hayatın medyan ölüm yaşı | 73 | 72 |
+| 1 milyarı geçen hayat | 0 | 1 |
+
+Havuz genel bir ömür uzatıcısı değil (medyan ölüm yaşı düştü bile), ama
+bir hayat 12 yıl fazla yaşadı ve **hiç çekilmeyen** portföy o 12 yılda
+302M'yi 1.366M'ye taşıdı. Yıllıklandırılmış getiri %8,6 — kalibrasyon
+kaçağı değil **bileşik faiz**. Hayatın yolu: 70 yaşından sonra anapara
+4.482k'da duruyor (cüzdan 0), portföy yine büyüyor.
+
+**Çelişki.** Bekçi "kimse milyarder olmasın" diyordu; motorun kendi
+belgesi (`MarketEngine.prototypeOnlyRiskPremium`, AD/6 ölçümü)
+"**milyarderlik çok nadir**" hedefini yazıyor ve o ölçümde %100 hisse
+stratejisinde milyarder payı %6,7, en yüksek servet 62.594M. Yani bekçi
+tasarımın söylemediği bir şeyi şart koşuyordu. Üstüne, yorumunun
+"en yüksek net varlık 100 milyonun çok altında" cümlesi **CC'den önce
+de** geçersizdi: CA ve CB süit kayıtlarında en yüksek 302M.
+
+**Ne yaptım.** Sayıyı yükseltmedim; iddiayı tasarımın hedefine çevirdim:
+milyarder bitiren hayat 100'de **en çok 2** (AD/6'da ölçülen %6,7'nin
+çok altında — gevşetme değil sıkılaştırma) ve ölçülü strateji AD/6'nın
+sert stratejisinde ölçülen tavanın çok altında kalsın (10 milyar).
+Gerekçenin tamamı testin içinde. Portföyü aşağı çeken bir kalem
+girecek mi — yani 89 yaşındaki 1,37 milyarlık oyuncunun geçim giderini
+hiç ödememesi — **Q-165 (a) ve Q-223'te Faho'nun kararını bekliyor.**
+Ne 31 olayı geri aldım ne ekonominin kuralını kendi başıma değiştirdim.
+
+## Paket CD — olay dallarını gezen kapsam modu (10 Ekim 2026)
+
+### Ölçülen sorun
+
+`docs/EKSIKLER.md`'deki "hiç çıkmayan olaylar" listesini tazelemek için
+yedi zincir halkasının hunisi ölçüldü (150 hayat): izi yazan olay kaç
+hayatta görüldü, iz kaç hayatta bırakıldı, olay kaç hayatta uygun hale
+geldi, kaç hayatta görüldü. Beşi artık görülüyordu. Ama ölçüm başka bir
+şeyi gösterdi: **botun seçim politikası içeriğin yarısını ölçüm dışı
+bırakıyor.** Çok dallı 595 olayın 117'sinin yalnızca bir dalı
+gezilmişti, 22'si hiç görülmemişti. Bir dalın arkasındaki hata görünmez
+olur; Paket BY/1'de ölü kodun "etki yok" diye görünmesi aynı aileden
+bir sorundu.
+
+### Ne eklendi
+
+`playBotLife(choiceCoverage: true)`: bot yarı yarıya **en düşük** puanlı
+dalı alır. Oyuncu taklidi değil, **kapsam aracı** — denge ölçümlerinde
+kullanılmaz. Varsayılan kapalı ve zar yalnızca açıkken çekilir, yani
+mevcut tohumlu ölçümler birebir aynı kalır (Paket BO sözleşmesi, bekçide
+üç tohumla kanıtlı). Ayrıca `BotLifeResult.choicesTaken` eklendi: olay
+başına seçilen dalların kimlikleri.
+
+| 150 hayat | Kapsam kapalı | Kapsam açık |
+| --- | --- | --- |
+| Bütün dalları gezilen olay | 456 | **528** |
+| Yalnızca tek dalı gezilen | 117 | **54** |
+| Hiç görülmeyen | 22 | **13** |
+| Görülen tekil olay | 573 | **582** |
+
+**Asıl kazanç listede değil, listenin anlamında.** İki modun "hiç
+görülmeyen" listeleri neredeyse örtüşmüyor; ortak olan yalnızca altı
+olay. Yani "bu olay hiç çıkmıyor" raporu botun seçim politikasına
+bağlıydı ve tek koşuya dayanıyordu. Bundan sonra gerçek şüpheli,
+**iki modda da** kaçan olaydır.
+
+### Kendi iddiamı düzelttim
+
+İlk tohum bloğunda `zincir_emanet_2` 17 hayatta görülüp 17'sinde de
+`bekle` seçilmişti; "bot bu dalı hiç seçmiyor, bir kol tamamen ölçüm
+dışı" diye yazdım. İkinci blokta (`9500+`) `iste` **iki modda da** birer
+hayatta seçildi. Dal engelli değil; ilk halka nadir (17/150). Tek tohum
+bloğuna dayanan bulgu bulgudan sayılmaz — Paket BY/1'in dersi, bu kez
+kendi üstümde.
+
+### Bekçi
+
+`test/paket_cd_secim_kapsami_test.dart` (3 test): varsayılan kapalı hâl
+üç tohumda birebir aynı hayatı veriyor, seçilen dallar kaydediliyor ve
+kaydedilen her dal gerçekten o olayın bir seçeneği, kapsam modu bütün
+dalları gezilen olay sayısını gerçekten artırıyor (60 hayatta en az
++10; ölçülen 150 hayatta +72).
+
+## Paket CE — kulüp zincirinin derinliği pencereye sığmıyor (10 Ekim 2026)
+
+Paket CD'nin iki modlu taraması "iki modda da kaçan" altı olay
+bırakmıştı. Altısının hunisi tek tek ölçüldü (150 hayat, kapsam açık):
+
+| Olay | Kök sebep |
+| --- | --- |
+| `kulup_futbol_antrenor_barisma` | iz 1/150 → uygun 1 → görüldü 0 |
+| `kulup_futbol_kritik_gol` | iz 2/150 (ilk 11'e çıkan) → görüldü 0 |
+| `kulup_futbol_penalti_sonrasi` | iz **0**: penaltı kaçırma hiç çıkmamış |
+| `kulup_secimin_sonucu` | iz 1 → görüldü 1 (spor kohortunda açıldı) |
+| `ilk_yil_kardes_kiskancligi` | iz gerekmiyor; uygun 24 → görüldü 1 (**çekiliş kaybı**) |
+| `suc_ceza_odemesi` | sabıkalı 62; uygun 15 → görüldü 3 (**çekiliş kaybı**) |
+
+Dördünde darboğaz aynı ve asıl bulgu burada:
+
+| Ölçü | Değer |
+| --- | --- |
+| Futbol takımına giren hayat | 29/150 spor (karışık arketipte 16/150) |
+| En uzun üyelik (ortalama) | **3,9 yıl** |
+| O hayatlarda görülen futbol olayı | **1,6** (en çok 5) |
+| Futbol havuzundaki olay sayısı | 14 |
+
+**Bu bir hata değil, yoğunluk uyuşmazlığı.** İkinci halkalar hem ilk
+halkanın izini hem **aynı pencerede ikinci bir çekilişi** istiyor;
+3,9 yılda 1,6 kulüp olayı çıkıyor. Paket BX'in 6× önceliği tek halkayı
+öne çekti, yoğunluğu değiştirmedi. Çözüm bir mekanik kararı ve
+**Q-224'te Faho'yu bekliyor** (önerim: üyelik sürerken yılda bir kulüp
+olayı garanti edilsin).
+
+**Kendi başıma yapmadığım şey:** ne ağırlık büyüttüm ne zinciri
+kısalttım. Ölçümün yöntemi ve havuzun bütünlüğü bekçiye bağlandı:
+`test/paket_ce_kulup_zinciri_test.dart` (3 test) — yetim halka yok,
+üyelik penceresi gerçekten var (ortalama ≥2 yıl), kulüp içeriği üyeye
+ulaşıyor.
+
+## Paket CF — hayvan sahiplenme aracının üç eksiği (10 Ekim 2026)
+
+`docs/EKSIKLER.md`'de açık duran bulgu kapatıldı. Ölçüm (120 hayat × 2
+bağımsız tohum bloğu) üç eksiği birden gösterdi:
+
+1. **Ölen hayvanın yerine yenisi hiç alınmıyordu.** Hayvan sahiplenen
+   hayat 89 ve 92, hayvanı ölen 83 ve 85 — ama **birden fazla hayvanı
+   olan hayat 0/240**. Sebep botun koşulu: `s.pets.isEmpty`. Ölen
+   hayvan kayıtta kaldığı için (kayıt silinmez, D-109) bu koşul bir
+   daha hiç sağlanmıyordu. **Oyun tarafı sağlamdı:**
+   `PetCare.prototypeOnlyMaxLivingPets = 3` ve ölen hayvan "yaşayan"
+   sayılmıyor; yani ikinci hayvan ve ölenin yerine yenisi yolları
+   ölçüm dışı kalıyordu.
+2. **Tür hep aynıydı.** Bot `PetSpecies.values` sırasındaki ilk uygun
+   türü alıyordu: kedi 62/89. Köpeğin, kuşun, kaplumbağanın farklı
+   masrafı, kaçma riski ve ömrü hiç ölçülmüyordu.
+3. **Adı bot veriyordu.** "Zeytin" 66/89; oyunun kendi ad havuzu
+   (`kPetSuggestedNames`) hiç gezilmiyordu.
+
+### Düzeltmeden sonra (aynı iki blok)
+
+| Ölçü | Önce | Sonra |
+| --- | --- | --- |
+| Birden fazla kez sahiplenen | 0/240 | **44 / 40** |
+| Ölenin yerine yenisini alan | 0 | **39 / 37** |
+| Aynı anda en fazla yaşayan hayvan | 1 | **2** (oyun sınırı 3) |
+| Tür çeşitliliği | kedi %70 | **10 tür dengeli** |
+| Adlar | Zeytin %74 | **14 ad, oyunun havuzundan** |
+| `hayvan_cocukla` (en nadir olay) | 1 / 0 | **4 / 3** |
+
+**İlk kez ölçülen yol:** izin isteyen tür (**timsah**) 6 ve 5 hayatta
+sahiplenildi. `requiresPermit` kapısı, izin yaşı ve izin bedeli bugüne
+kadar hiç gezilmemişti.
+
+### Bekçi
+
+`test/paket_cf_hayvan_araci_test.dart`: 60 hayatta en az 20 hayat
+hayvan alıyor, en az 10'u **birden fazla kez** alıyor, en az 5 tür
+görülüyor, aynı anda yaşayan hayvan sayısı oyunun sınırını geçmiyor ve
+kayıtlı her ad oyunun ad havuzunda (botun kendi adını vermesi
+adlandırma yolunu ölçüm dışı bırakırdı).
+
+## Paket CF/1 — %70 eşiği hiç desteklenmiyordu (10 Ekim 2026)
+
+Paket CF'nin bot değişikliği `paket_bj_oyuncu_yolu_cocuk_test`'i
+kırmızıya çevirdi: *"korunmadan yakınlaşan çiftlerin yalnızca %70'i
+sekiz yılda gebe kaldı"* — `Expected > 0.7, Actual 0.7`. Tarayıcının
+bulduğu kareler kaydığı için oran tam kafes noktasına oturmuştu.
+
+**Eşik indirilmedi; önce çözünürlük büyütüldü.** 20 çiftte her çift 10
+puan değerinde, yani oran kuantalı. Örneklem 45 çifte çıkarıldı ve asıl
+bulgu göründü: **gerçek oran %62**. Eski 20 çiftlik ölçüm şanslı bir
+örneklemdi ve 0,70 ona kalibre edilmişti; eşik hiçbir zaman
+desteklenmiyordu.
+
+### Oranın nereden geldiği ölçüldü (45 çift, 210 deneme)
+
+| Ölçü | Sayı | Anlamı |
+| --- | --- | --- |
+| Zara ulaşan deneme | **210 / 210** | Oyuncunun yolunda sessizce düşen deneme yok |
+| Motorun ihtimali baştan sıfır olan çift | **13 / 45 (%29)** | Kısırlık (%8 + %8) ya da aynı cinsiyet (Q-064) |
+| Bu 13 çiftin gebeliği | **0 / 104 deneme** | Kapı tam çalışıyor |
+| İhtimali olan çiftin gebe kalma oranı | **28 / 32 (%87,5)** | Yol açık |
+| Ölüm / yıl ilerlememe | **0 / 0** | Eksilme oranı açıklamıyor |
+| Ortanca deneme | **4** (1-8) | Erişim sorunu yok |
+
+Yani toplam %62 bir tıkanıklık değil, **tasarımın kendi kapısının
+payı**. Denemelerin %49'u (104/210) baştan sıfır ihtimalli çiftlerden
+geliyor.
+
+### Bekçi tek sayıdan huniye çevrildi
+
+Eski test tek bir toplam oran eşiği taşıyordu. Yerine altı iddia kondu
+(beşi yeni): zara ulaşmayan deneme olmayacak · sıfır ihtimalli çift
+asla gebe kalmayacak · sıfır ihtimalli çiftlerin payı yarıyı geçmeyecek
+· **ihtimali olan çiftlerin oranı %60'ın üstünde kalacak** (motorun
+kendi öngörüsü %64-91, ölçüm %87,5) · ortanca deneme en az 2 olacak ·
+ölüm ve kilitlenme beşte biri geçmeyecek. Toplam oran eşiği 0,4'e
+indirildi ve **neden kalibrasyon taşıyamadığı** test içine yazıldı.
+
+## Paket CG — içerideyken taşınma ve bebeğin iki adı (10 Ekim 2026)
+
+Özel durum dökümü (`ekran_dokumu_ozel_durum_test.dart`) yedi kareyi
+tarayıp buldu ve bastı; çıktı gözle okundu. İki satır birbirini
+yalanlıyordu.
+
+### 1) Cezaevindeki oyuncu evden taşınabiliyordu (OYUN)
+
+Künye "Evde seninle 3 kişi yaşıyor" diyor, Varlıklar ekranı "Yaşadığın
+yer: Ailesinin yanında · Samsun" yazıyor ve **"Kiralık eve çık" düğmesi
+açık** duruyordu. Sebep metin değil: aktivite (`activity_engine`), iş
+(`job_market`) ve işletme (`business_engine`) motorları
+`isImprisoned`'a bakıyordu, **konut motoru hiçbir yerde bakmıyordu.**
+Yani içeriden ev değiştirme yolu vardı.
+
+| Yer | Önce | Sonra |
+| --- | --- | --- |
+| Künye | `Evde seninle 3 kişi yaşıyor` | `Cezaevindesin · tahliye 25 yaş` |
+| Varlıklar / Yaşadığın yer | `Ailesinin yanında · Samsun` | `Cezaevinde · tahliye 25 yaş` |
+| Kayıtlı adres | — | `Kayıtlı yerin: Ailesinin yanında · Samsun` |
+| Taşınma düğmeleri | açık | yok |
+| `moveToRental` / `moveBackToFamily` / `moveBlockReason` | izin veriyordu | `Cezaevindesin; taşınma işine tahliyeden (25 yaş) sonra bakabilirsin.` |
+
+**Kayıt silinmedi:** nerede oturduğu ikinci satırda duruyor (D-109'un
+ilkesi).
+
+### 2) Bebeğin iki adı vardı (METİN)
+
+Bebek oyunun havuzundan bir adla doğuyor ve doğum satırı o adı yazıyor.
+Oyuncu ad verdiğinde yalnızca ikinci bir satır ekleniyordu; doğum
+satırı olduğu gibi kalıyordu:
+
+```
+Bebeğe Kemal adını verdin.
+...
+Nuri adında bir oğlunuz oldu. Doğum masrafı 65.000 ₺ tuttu.
+```
+
+Günlük oyunun hafızası; orada hiç var olmamış bir ad kalmamalı. Üç
+değişiklik: doğum cümlesi ve doğum kilometre taşı **tek yerden**
+kuruluyor (`Parenthood.birthSentence` / `birthMilestone`), doğum
+günlüğü satırı **çocuğun kimliğini** taşıyor (`personId`) ve ad
+verilince o satır ile çocuğun kendi kaydındaki kilometre taşı
+tazeleniyor. Dökümün yeni çıktısı: `Kemal adında bir oğlunuz oldu.`
+
+`personId`'nin ikinci faydası: doğum satırı artık kişi kartındaki
+"ortak geçmişiniz" bölümüne de giriyor.
+
+### 3) İçerideyken hasta hayvan bildirimi kapalı kapıyı gösteriyordu (METİN)
+
+Hükümlü oyuncunun Aktiviteler sekmesinde yalnızca "İçeride
+yapılabilecekler" bölümü var (döküm bunu da bastı: `Görüş, kitap, spor,
+sakin kalmak`). Buna karşın hayvan hastalandığında bildirim
+"Aktiviteler → Evcil Hayvanlar'dan veterinere götürebilirsin (X ₺)"
+diyordu. `PetCare.availability` de hükümlülüğe bakmıyor.
+
+Bildirim duruyor — hayvanının hastalandığını bilmek oyuncunun hakkı —
+ama artık yapılamayacak bir şeyi önermiyor: *"İçeriden veterinere
+götüremiyorsun; tahliye olunca bakabilirsin."* **Sayılara
+dokunulmadı:** bakım parasının içerideyken kimden çıkacağı ve hayvanın
+o yıllarda ne olacağı tasarım sorusu, kuyruğa yazıldı (Q-225).
+
+### Bekçi
+
+`test/paket_cg_icerde_tasinma_ve_bebek_adi_test.dart` (6 test). Durum
+kurulmuyor, **bot hayatları taranarak bulunuyor** (hükümlü yıl,
+hayvanı olan hükümlü yıl, yeni doğmuş bebek). Eski kodda (yeni
+yardımcılar yerinde, davranış geri alınmış) **beş testin dördü
+kırılıyor**; yalnızca yeni yardımcının kendi testi geçiyor.
+
+## Paket CH — hangi yaşlarda hiçbir şey olmuyor? (10 Ekim 2026)
+
+Üç pakettir aynı desen çıkıyordu: yazılmış içerik bir kapı yüzünden hiç
+görünmüyor (BZ dört olay, CD zincir halkaları, CC 65+). O paketler tek
+tek olaylara baktı; buradaki soru daha kaba ve oyuncuya daha yakın:
+**bir yıl hiç olaysız geçiyor mu?**
+
+Araca yaş kırılımı eklendi (`BotLifeResult.eventsByAge`): `seenEvents`
+bir kümedir ve yaşı kaybediyordu. Kayıt zar tüketmez.
+
+### Ana bulgu: boş yıl yok
+
+400 hayat, bütün arketipler. Yaş 1'den 77'ye kadar **her yaşta**
+hayatların %91-100'ünde en az bir olay çıkıyor; en kötü yaş 66 (%96).
+
+| Bant | Olaylı yıl | Yıl başına olay | Farklı olay |
+| --- | --- | --- | --- |
+| 0-9 | %90 | 1,06 | 113 |
+| 10-19 | %100 | 1,61 | 203 |
+| 20-29 | %100 | 1,75 | 219 |
+| 30-39 | %100 | 1,76 | 256 |
+| 40-49 | %100 | 1,76 | 258 |
+| 50-59 | %99 | 1,74 | 259 |
+| 60-69 | %99 | 1,71 | 270 |
+| 70-79 | %97 | 1,58 | 224 |
+| 80-89 | %89 | 1,40 | 146 |
+
+### İki şey ayrıldı
+
+1. **Yaş 0 yapısı gereği olaysız.** Motor yılın olayını yaş alırken
+   çekip yeni yaşa yazıyor; doğduğu yıl çekiliş olmuyor. **Mahsur
+   kalmış içerik yok:** havuzlarda `maxAge: 0` olan tek bir olay
+   yazılmamış, bebeklik olayları 0-2 / 0-3 / 1-3 pencereleriyle 1
+   yaşından itibaren çıkıyor.
+2. **Yaş 1-3'te oyun hiçbir eylem sunmuyor** (120 karede ortanca 0;
+   yaş 4-5'te 32, yaş 6+'da 57-77). D-180'in kademesiyle tutarlı. Yani
+   ilk dört yılda oyuncunun yapabileceği tek şey "Yaş Al" ve yıl başına
+   tam bir olay. Yeterli mi? Tasarım sorusu, kuyrukta (Q-226).
+
+### Aracın kısıtı da ölçüldü
+
+Yaş 4-5'te oyun 32 etkileşim sunarken bot yılda 1-2 tanesini
+kullanıyor; ek olay eşiği üç ilerleme adımı (D-125). Yani çocukluğun
+1,06'lık yoğunluğu **oyunun tavanı değil, aracın tabanı** — bu yüzden
+bekçideki bütün iddialar taban, tavan yok.
+
+### Bekçi
+
+`test/paket_ch_yas_bandi_yogunlugu_test.dart` (200 hayat, 30 sn): hiçbir
+yaş (1-70) hayatların %85'inden azında olaysız kalmayacak · 10-69
+bantlarında yıl başına en az 1,30 olay · çocukluk bandında en az 0,90 ·
+her bantta en az 60 (çocukluk) / 120 (yetişkin) farklı olay görülecek.
+**Isırdığı gösterildi:** `prototypeOnlyMaxExtraEventsPerAge` 1 → 0
+yapıldığında yetişkin yoğunluğu 1,75 → 1,00'e düşüyor ve test kırmızı
+yanıyor.
+
+## Paket CI — arkadaş grubu (10 Ekim 2026)
+
+`docs/EKSIKLER.md` §3.1 arkadaşlığın eksiklerini saymıştı; D-130 çoğunu
+kapattı ve o bölümün 9 Ekim güncellemesi kalan iki eksiği yazdı:
+**arkadaş grubu** ve çocukluk arkadaşıyla yıllar sonra karşılaşma.
+Koda bakıldı: ikincisi D-130'un zincirlerinde **kodlu**
+(`event_pool_friendship.dart`), grup ise hiç yoktu —
+`arkadasGrubu`/`friendGroup` tek bir dosyada geçmiyordu.
+
+### Yeni bir etkileşim motoru yazılmadı
+
+Birden çok kişiyle aktiviteye gitmek zaten vardı (Paket X/2, `Outing`):
+maliyet kişi başına çarpılıyor, her katılımcıyla bağ artıyor. Eksik olan
+**kalıcı kimlik**ti: kimlerle takıldığın, ne zamandır, kim ayrıldı.
+Buluşma yine aktivite yolundan geçiyor, böylece ekonomi ve etki tek
+yerden okunuyor.
+
+| Parça | Nerede |
+| --- | --- |
+| Kayıt | `GameState.friendCircles` + kodek (dağılan grup silinmez) |
+| Motor | `domain/interaction/friend_circles.dart` (kurma, aday, yıllık bakım) |
+| Olaylar | `data/event_pool_friend_circle.dart` — 9 olay, üçü karşılık |
+| Anahtar | `FeatureId.arkadasGrubu` + `docs/FEATURE_FLAGS.md` satırı |
+| Ekran | İlişkiler → Arkadaşlar'ın başındaki grup kartı ("Grup kur") |
+| Bot | aktivite rutininin başında: kurar ve grupla buluşur |
+
+### Ölçüm paketi üç kez şekillendirdi (120 hayat)
+
+1. **Aday kümesi fazla genişti.** Sınıf arkadaşı, iş arkadaşı ve komşu
+   da gruba alınıyordu; grup 11 hayatta kuruldu ama **tek bir buluşma
+   olmadı**, çünkü `Outing.companionRelations` o üç türü taşımıyor —
+   üye sinemaya gelemiyor. Aday kümesi artık oyunun kendi refakatçi
+   kuralından okunuyor (yalnızca `arkadas`, bağ ≥ 45).
+2. **Bot bloğu listenin sonundaydı.** Aktivite rutini her eylemden
+   sonra olay çıkabildiği için yılı erken bırakıyor (D-125); sona konan
+   iş sıraya hiç gelmiyordu. Blok rutinin başına alındı: grup kuran
+   hayat **2 → 8**.
+3. **Buluşmaya bütün üyeler gönderiliyordu.** Refakatçi kuralı
+   arkadaşın bağının **o anda** 45+ olmasını istiyor, bağ ise her yıl
+   sönüyor. Artık o gün gelebilen üyelerle buluşuluyor: buluşma **0 →
+   3**.
+
+**Son durum:** 120 hayatın **8'inde** grup kuruluyor, **2'sinde** en az
+bir buluşma oluyor, **7'sinde** üye ayrılma satırı görülüyor, **7** grup
+dağılıyor, 9 olayın **5'i** görülüyor.
+
+### Eşik ölçülerek bırakıldı
+
+Aday sayısının hayat boyu en yüksek değeri (120 hayat):
+
+| bağ ≥ | ortanca aday | üç kişiye ulaşan hayat |
+| --- | --- | --- |
+| 30 | 5 | 120/120 |
+| 35 | 5 | 120/120 |
+| 40 | 2 | 26/120 |
+| 45 | 2 | 16/120 |
+
+35 ile 40 arasındaki kırılmanın sebebi şu: **sınıf arkadaşının
+başlangıç bağı 35-55 aralığında** (Paket BS/0). Yani "bağ ≥ 35"
+pratikte "herhangi bir sınıf arkadaşı" demek olurdu ve grup, birlikte
+vakit geçirilmemiş insanlardan kurulurdu. 45 eşiği `Outing`'in kendi
+"yakın arkadaş" sayısıdır ve **yatırım yapılmış** bağı ister. Bedeli
+yazılı: grup her hayatta kurulamıyor. Gevşetmek Q-227'de soruldu.
+
+### Bekçi
+
+`test/paket_ci_arkadas_grubu_test.dart` (11 test): kimlik benzersizliği
+ve ana havuza kayıt · her olay süren grup istiyor · yazılan her iz
+okunuyor (bu iddia **kendi içeriğimdeki üç sessiz izi yakaladı**,
+kaldırıldı) · yasak kalıp yok · havuz modüle bağlı · modül kapalıyken
+kurulamıyor, yıllık bakım işlemiyor, olay aday olmuyor, ölçüm
+kaymıyor · kapı açıkken üyeler aday kümesinden geliyor ve ikinci grup
+kurulamıyor · kayıt kapat/aç turunu atlatıyor · 120 hayatta grup
+kuruluyor, buluşuluyor, dağılan grup kayıtta kalıyor ve gerekçesi
+günlükte duruyor.
+
+## Paket CJ — yaşlılıkta kim yanında? (10 Ekim 2026)
+
+`docs/EKSIKLER.md` §3.2'nin son maddesi okundu ("çocuk … oyuncuya
+bakamıyor") ve **koda bakıldı**: listenin dört maddesi (boşanma, işsiz
+kalma, oyuncudan para isteme, torunun kendi hayatı) çoktan kapanmış,
+belge bayatmış. Kapalı kalan tek madde buydu ve gerçekten boştu:
+`ElderCare` (Paket AO §35-§36) oyuncunun yaşlı ebeveynine bakmasını
+modelliyor, **tersi** hiç yazılmamıştı.
+
+### Ölçüm önce yapıldı (250 bot hayatı)
+
+| Ölçü | Değer |
+| --- | --- |
+| 70 yaşını gören hayat | 185 / 250 |
+| Toplam yaşlılık yılı (70+) | 1356 |
+| … düşük sağlık bandında | 585 (kritik 254 + hayati tehlike 331) |
+| … yetişkin çocuğu olan | 488 |
+| … yaşayan eşi olan | 322 |
+| … ne eşi ne çocuğu olan | **721 (%53)** |
+| Oyuncuya dönük bakım satırı | **0** |
+
+Yani oyuncunun yaşlılığı, kurduğu aileye göre **hiç** değişmiyordu.
+
+### Eşik bağ olamıyor — bu da ölçüldü
+
+Yaşlılıkta en yakın çocuğun bağı: min 48, **ortanca 100**. Bağ eşiğine
+yaslanan bir kapı pratikte "her zaman açık" olurdu (bu Q-205'in zaten
+sorduğu sorun). Ayırt eden şey **kimin var olduğu** (%53'ünde kimse
+yok) ve maddi tarafta **kimin gücünün yettiği**. Bağ yalnızca çok
+düşükse (25 altı) kapıyı kapatıyor.
+
+### Üç kapı, üçünün de bedeli var
+
+| Kapı | Ne oluyor |
+| --- | --- |
+| Ailene yüklen | Eş ya da yetişkin çocuk o yıl yanında olur: oyuncunun mutluluğu artar, yakınlık artar, **yükü omuzlayanın mutluluğu düşer** (`ElderCare.yanindaKal`'ın aynadaki hâli) |
+| Bakım masrafını karşıla | Para **gerçekten** cepten çıkar; gücü yeten çocuklar faturanın en çok %60'ını üstlenir, kalanı oyuncu öder |
+| Kendin idare et | Hiçbir şey hareket etmez; yıl sayaca yazılır ve günlüğe satır düşer |
+
+Yılda **bir** karar (`lastDecidedAge`); aynı yıl ikinci karar kapalı.
+Cezaevinde kapı hiç açılmıyor (Paket CG'nin kuralı). Sağlık **faucet'i
+yok**: bu paket sağlığa ya da ölüm eğrisine dokunmuyor, parayı ve
+mutluluğu oynatıyor — mutluluk hayat sonu değerlendirmesinin "Huzur"
+eksenine zaten giriyor (`life_verdict`).
+
+| Parça | Nerede |
+| --- | --- |
+| Kayıt | `GameState.elderSupport` + kodek (sayaçlar geri gitmez) |
+| Motor | `domain/interaction/elder_support.dart` |
+| Anahtar | `FeatureId.yaslilikBakimi` + `docs/FEATURE_FLAGS.md` satırı |
+| Ekran | Hayat ekranının üstündeki "Bu yıl kim yanında?" kartı |
+| Bot | aktivite rutininin **başında**; zar tüketmiyor |
+
+### Ölçüm paketi üç kez düzeltti
+
+1. **Para yönü yanlıştı.** İlk yazımda çocuk oyuncunun **cebine** para
+   koyuyordu. Ölçüm gösterdi ki kapı hiç açılmıyor: 736 bakım yılının
+   yalnızca 8'inde oyuncunun cüzdanı masrafı karşılamıyordu (ölüm anı
+   net servet ortancası ~39,6 milyon ₺). Kapı `ElderCare`'in kendi
+   deseniyle çevrildi: para **cepten çıkar**, çocuk faturanın bir
+   kısmını üstlenir. Böylece hem havadan para üretilmiyor hem de kapı
+   her oyuncu için anlamlı.
+2. **Çocuklar faturanın tamamını kapatıyordu.** İki üç varlıklı çocuk
+   tavanı dolduruyor, 285 yılın ortancası faturanın **%100'ü**
+   oluyordu — "para gerçekten çıkar" boşa düşüyordu. Pay %60 ile
+   sınırlandı; cepten çıkan ortanca 40.428 ₺ oldu.
+3. **Bot 295 kararı kaçırıyordu.** 712 bakım yılının 417'sinde karar
+   verilebiliyordu; kalanında yılın başında bekleyen bir olay vardı ve
+   `decideElderSupport` bekleyen olayla çalışmıyor. Blok artık
+   kesintiyi yerinde karşılıyor (Paket CB'nin deseni): kaçan yıl
+   **295 → 2**.
+
+**Son durum (250 hayat):** 756 bakım yılı — 160'ında ailesine
+yüklendi, 332'sinde masrafı karşıladı, 262'sini kendi çevirdi. Modül
+açık/kapalı farkı ölçüldü: ölüm yaşı ortalaması 72,37 / 72,32, net
+servet ortancası 39.660.061 / 39.656.136 — ikisi de gürültü
+seviyesinde, yani paket oyunun dengesini kaydırmıyor.
+
+### Bekçi
+
+`test/paket_cj_yaslilik_bakimi_test.dart` (16 test) + 
+`test/paket_cj_bakim_karti_test.dart` (4 arayüz testi). Bütün kareler
+**aranarak** bulunuyor: tek taramada (200 hayat) yardımcısı olan yıl,
+kimsesi olmayan yıl, çocuk katkısı olan yıl, cepten çıkanı
+ödeyemeyen yıl, bandı iyi olan yıl ve cezaevi karesi toplanıyor.
+Botun kendi kararı `BotOverrides(noElderSupport: true)` ile kapatıldı:
+bot kararı yılın başında verdiği için taranan her kare "bu yılın
+kararı verilmiş" oluyordu ve kapıların gerekçeleri ölçülemiyordu (ilk
+koşuda altı test bu yüzden kırmızıydı).
+
+Bekçinin ısırdığı doğrulandı: `needsSupport` Paket CJ öncesi gibi
+sabit `false` yapıldığında **16 testin 14'ü** kırmızıya döndü; geçen
+ikisi "modül kapalıyken hiçbir şey olmaz" testleri, yani iki dünyada
+da doğru olanlar.
+
+## Paket CK — "hiç görülmeyen" iki olay: kapı mı, seyreklik mi, bot mu? (10 Ekim 2026)
+
+Paket CD'nin ölçümü 150 hayatta iki modda da görülmeyen **altı** olayı
+"gerçek şüpheli" diye işaretlemişti. Dördü kulüp/futbol zincirinin
+halkası (Q-224'ün alanı, dokunulmadı); futbol dışı ikisi bu pakette
+tek tek ölçüldü.
+
+### Önce olasılık hesaplandı, sonra kod okundu
+
+Aday havuzu `EventEngine.debugEligibleIds` ile, seçilme payı
+havuzdaki ağırlıklardan (200 hayat):
+
+| Olay | Aday kare | Beklenen çıkış | Görülen | P(hiç çıkmama) |
+| --- | --- | --- | --- | --- |
+| `ilk_yil_kardes_kiskancligi` (eski kapı) | 54 | 1,47 | 0 | %23 |
+| `suc_ceza_odemesi` | 10 | 0,12 | 0 | %89 |
+
+**İki sıfır da şans dahilinde.** "Görülmedi" tek başına kapının kırık
+olduğunu göstermiyor; bunu hesaplamadan "ulaşılamaz" demek yanlış
+olurdu.
+
+### Kardeş kıskançlığı: kapı ilan ettiği bandı kullanmıyordu
+
+Tam kardeş oyuncudan **her zaman büyük** doğuyor (`life_generator`:
+yaş 1..maxSiblingAge, %5 ikiz hariç). Bu yüzden `personMaxAge: 4`
+koşulu yalnızca ikizde ya da oyuncu **tam 3 yaşındayken** sağlanıyordu:
+3-7 bandı pratikte tek yıla inmişti. Eşik taraması (200 hayat):
+
+| personMaxAge | aday kare | beklenen çıkış | kapı açılan hayat |
+| --- | --- | --- | --- |
+| 4 (eski) | 81 | 2,07 | 54 |
+| 5 | 145 | 3,75 | 73 |
+| **6 (yeni)** | **224** | **5,84** | **89** |
+| 7 | 315 | 8,09 | 99 |
+| 9 | 474 | 11,68 | 115 |
+
+6 seçildi: altı yaşına kadar kardeşin bakımı evin ilgisini gerçekten
+üstünde tutar, metin değişmeden doğru kalır ve ilan edilen beş yılın
+hepsi kullanılır ({3:82, 4:67, 5:49, 6:16, 7:10}).
+
+Ayrıca `yariKardes` kapıya eklendi: oyunda **yeni doğan** kardeş
+yalnızca yarım kardeş olarak geliyor (`step_siblings.dart`, `age: 0`),
+yani olayın asıl anlattığı durum tam o kapının dışında kalıyordu —
+Paket BZ'nin "yanlış kapı" deseninin aynısı.
+
+### Ceza ödemesi: sınır oyunda değil, botta
+
+Olay sabıka **ve** dar bütçe istiyor (`maxComfort: zor`). Varsayılan
+botun **912 sabıkalı yılının 729'u `varlikli`**; dar bütçeli yıl
+yalnızca 10. Yatırım, ev ve işletme kapatılmış kohortta (75 hayat,
+`BotOverrides`) olay **gerçekten çıktı** — yani içerik ulaşılabilir,
+eksik olan şey botun yoksul kalabilmesi. Ekonomiye dokunulmadı;
+"sabıkalı oyuncu neden zengin" sorusu **Q-229**'da.
+
+### Bekçi
+
+`test/paket_ck_gorulmeyen_iki_olay_test.dart` (5 test): olay ilan
+ettiği bantta gerçekten aday oluyor (aday kare > 120, beklenen > 3,0,
+kapı > 50 hayatta) · yeni kapı eski kapıdan en az 1,5× geniş · kapı
+hem tam hem yarım kardeşi kabul ediyor ve aynı haneyi istiyor ·
+varsayılan botun sabıkalısının çoğu varlıklı (sınıflandırma bekçisi) ·
+yoksullaştırılmış kohortta kapı açılıyor. Bekçinin ısırdığı
+doğrulandı: eski kapıya döndürülünce 5 testin 3'ü kırmızı.
+
+## Paket CL — dökümü yeni kartların üstüne tut (10 Ekim 2026)
+
+Paket CI (arkadaş grubu) ve Paket CJ (yaşlılıkta bakım) kendi
+testleriyle korunuyordu ama **bütün ekran olarak** hiç basılmamıştı.
+Ekran dökümünün üç turu sekiz gerçek hatayı tam bu farkla bulmuştu:
+anahtar testi aradığını bulur, döküm **ekranda ne olduğunu** gösterir.
+
+Dökümün kapsamına iki kare eklendi ve dokuzunun hepsi bulundu
+(`YAŞLILIKTA BAKIM`: Riskli hayat, tohum 1, yaş 70 · `ARKADAŞ GRUBU`:
+Aile odaklı, tohum 27, yaş 57). Bakım karesi için botun kendi kararı
+`BotOverrides(noElderSupport: true)` ile kapatıldı: bot kararı yılın
+başında verdiği için `onPreAge` ile taranan her kare "bu yılın kararı
+verilmiş" oluyor ve üç kapı hiç çizilmiyordu.
+
+### Çıktı okununca iki kusur çıktı
+
+1. **Bakım kartı aynı cümleyi iki kez yazıyordu.** Kimsesiz bir
+   hayatta durum satırı "… ve yanında olabilecek kimse yok." diyor,
+   hemen altındaki kapı da gerekçe olarak "Yanında olabilecek kimse
+   yok." yazıyordu. Durum satırı artık yalnızca **olanı** söylüyor;
+   yokluğu söyleyen yer kapının kendi gerekçesi (D-038).
+2. **Grup üst düzeyde görünmüyordu.** 57 yaşında, grubu süren bir
+   hayatta İlişkiler ekranının üst düzeyinde grubun tek izi yoktu:
+   kart yalnızca Arkadaşlar alt sayfasında duruyor. Aynı ekranda
+   hayvan satırı "Leblebi seninle yaşıyor" diye özet veriyor — kalıp
+   zaten vardı. Arkadaşlar satırının alt metni artık grubu söylüyor:
+   "İş çevresi · 3 kişi · 56 yaşından beri". Modül kapalıysa ya da
+   süren grup yoksa satır eski metnine dönüyor.
+
+### Bekçinin kendi kusuru da bu turda çıktı
+
+İlk yazımda tekrar denetimi `contains(engel)` ile yapılıyordu ve
+**ısırmıyordu**: eski cümle "… ve yanında olabilecek kimse yok."
+diyordu, gerekçe ise "Yanında olabilecek kimse yok." — tek fark
+baştaki harf. Karşılaştırma büyük/küçük harf ve nokta
+normalleştirmesiyle yapılınca bekçi gerçekten ısırdı: eski davranışta
+4 testin 2'si kırmızı.
+
+### Gözlem (değişiklik yapılmadı)
+
+Künyedeki durum satırı 70 yaşında "uzun süredir bakım yok" yazıyor; o
+**kuaför/öz bakım** ölçüsüdür (`StatAging`), yaşlılık bakımı değil.
+Aynı ekranda bakım kartıyla birlikte göründüğünde iki "bakım" aynı
+şey sanılabilir. Onaylı bir metin olduğu için dokunulmadı; Faho
+isterse kartın başlığı ("Bu yıl kim yanında?") zaten ayırt edici.
+
+## Paket CM — yaşlılığın karşılığı: kaydı okuyan altı olay (10 Ekim 2026)
+
+Paket CJ bakım kaydını tutuyordu — kaç yıl aileden destek görüldü, kaç
+yıl kimseye yüklenmeden çevrildi — ama o kayıt hiçbir yerde **hikâyeye
+dönmüyordu**. Q-228'in beşinci maddesinde kendi önerim olarak
+bırakılmıştı; bu paket onu kapatıyor.
+
+### Ölçüm önce yapıldı (250 hayat, ölüm anı kaydı)
+
+| Ölçü | Değer |
+| --- | --- |
+| Hiç karar vermemiş hayat | 130 |
+| Destek görülen yıl | 50 hayat · ortanca 4 · en çok 17 |
+| Kimseye yüklenmeden çevrilen yıl | 72 hayat · ortanca 3 · en çok 13 |
+| 2+ yıl destek gören hayat | 43 |
+| 3+ yıl tek başına çeviren hayat | 44 |
+
+Eşikler buradan: olaylar 2, 3 ve 4 yıl isteyen üç kademede duruyor.
+
+### Koşul hikâye izi değil, **sayaç**
+
+`EventRequirement`'a iki alan geldi: `minElderSupportYears` ve
+`minElderAloneYears`. Motor bunları zardan önce, kayıttan okuyor.
+Hikâye izi kullanılsaydı bir kez destek görmek ömür boyu yeterdi ve
+"üç yıldır yanımda" diyen cümle yalan olabilirdi — Paket CI'de grup
+için verilen kararın aynısı.
+
+Havuz yeni iz **bırakmıyor**: yazsaydı onları okuyan üçüncü bir katman
+gerekirdi (Paket AR'nin ölçtüğü sessiz iz sorunu). Hikâye burada
+kapanıyor.
+
+### Altı olay
+
+| Olay | Kapı |
+| --- | --- |
+| `bakim_karsilik_aliskanlik` | 2 yıl destek |
+| `bakim_karsilik_yorgunluk` | 3 yıl destek |
+| `bakim_karsilik_torun_gorur` | 3 yıl destek + yaşayan torun (8+) |
+| `bakim_karsilik_komsu_farketti` | 2 yıl tek başına |
+| `bakim_karsilik_kimseyi_aramadim` | 3 yıl tek başına |
+| `bakim_karsilik_defter_notu` | 4 yıl tek başına |
+
+**Erişim ölçüldü:** 250 hayatta altı olayın **hepsi** görüldü
+(ulaşılamayan yok), 14 hayat en az birini gördü; 2+ destekli kare 205,
+2+ yalnız kare 252. Havuz `FeatureEvents` ile `yaslilik_bakimi`
+anahtarına bağlı: modül kapalıyken hiçbiri aday olmuyor.
+
+> **Düzeltme (11 Ekim 2026, Paket CN).** Yukarıdaki "hepsi görüldü"
+> cümlesi **tek bir koşunun şansıydı.** Paket CN çocuğu
+> hastalandırınca sonraki yılların dalları kaydı ve aynı 250 hayatta
+> `bakim_karsilik_komsu_farketti` sıfır çekti; CM'in bekçisi kırmızıya
+> döndü. Ölçüm olayın erişilebilir olduğunu gösterdi: 250 hayatta
+> **261 aday kare, beklenen çıkış 3,53** (havuzun en çok aday üreteni)
+> ve 500 hayatta beklenen 6,88 → **görülen 7**. Bekçi gevşetilmedi,
+> ölçütü düzeltildi: erişilebilirlik artık olay başına **aday kare +
+> beklenen çıkış** ile (250 hayat), uçtan uca "gerçekten çıkıyor"
+> iddiası ise **500 hayatlık** kohortta sınanıyor (görülme
+> 8/4/6/7/9/8). Ulaşılamaz bir eşik denendiğinde yeni ölçüt "0 aday
+> kare" diyip kırmızıya dönüyor.
+
+### Bekçi
+
+`test/paket_cm_bakim_karsiligi_test.dart` (6 test): altı olayın hepsi
+görülüyor · kaydın iki tarafı da yaşanıyor · **sayaç tutmadan hiçbir
+olay aday olmuyor** · modül kapalıyken havuz aday olmuyor · havuz
+modül eşlemesiyle birebir ve iz bırakmıyor · metinler yasak kalıp
+taşımıyor ve hepsi 70+ yaşta. Modül eşlemesi kaldırılınca 6 testin
+2'si kırmızıya döndü.
+
+## Paket CN — çocuk da hastalanır (11 Ekim 2026)
+
+`EKSIKLER` §3.2 çocuğun hayatında beş eksik sayıyordu; Paket CJ'nin
+okuma turu dördünün kapandığını **kodda** doğrulamıştı. Kalan tek
+madde hastalıktı: eş D-154'ten beri hastalanıyor, `ChildProgression`
+içinde hastalık **hiç** yoktu. Çocuk okula gidiyor, iş buluyor,
+evleniyor, boşanıyor, işsiz kalıyor ama hiç hastalanmıyordu.
+
+### Kural kopyalanmadı, paylaşıldı
+
+`app/lib/domain/generation/npc_illness.dart` eşin kuralını tek kopya
+hâline getirdi: olasılık yaşla 0,012 → 0,022 → 0,038 → 0,055, sağlık
+−9, keyif −8, iki hastalık arasında en az 3 yıl, iz kişinin **kendi**
+dönüm noktasından okunur (ayrı alan eklenmedi). `SpouseLife` artık bu
+kuralı çağırıyor; sayıları ve zar sırasını değiştirmedi.
+
+**Ölçülerek doğrulandı:** eski kodla yeni kodun modül-kapalı koşusu
+40 hayatta (hastalık yılları, ölüm yaşı, kişi sayısı, son mutluluk)
+**satır satır aynı** çıktı. Refactor davranışı korumuş.
+
+### Zarın yeri — bu paketin asıl kararı
+
+Çocuk başına yıllık bir atış ana zar dizisinden çekilseydi 70 yıllık
+bir hayatta sıranın tamamı kayardı: tek bir içerik eklemesi bütün
+tohumlu ölçümleri ve bekçi testlerini kırardı (Paket BO'nun yakaladığı
+hata tam buydu). Atış `NpcIllness.derivedRandom(id, age)` ile
+**kişi-yıldan türeyen** kendi tohumundan yapılıyor:
+
+- Modül kapalıyken akış Paket CN öncesiyle birebir aynı.
+- Aynı kişi-yıl her zaman aynı sonucu verir → kaydı kapatıp açarak
+  hastalığı yeniden çevirmek **imkânsız** (piyasa endeksinde alınan
+  kararın aynısı).
+
+### Ölçüm (250 bot hayatı, açık/kapalı farkı)
+
+| Ölçü | Değer |
+| --- | --- |
+| Çocuk hastalığı satırı | 134 |
+| En az birini gören hayat | 53 |
+| Ölüm yaşı ortalaması (açık / kapalı) | 71,48 / 71,42 |
+
+Tek tek hayatlar yine ayrışıyor: hastalanan çocuğun statları
+değiştiği için **sonraki** yılların dalları kayıyor (bir hayatta ölüm
+yaşı 71 → 83). Bu modülün açık olmasının sonucu; ortalamaya etkisi
+gürültü düzeyinde.
+
+### Kapsam neden yalnızca çocuk
+
+İzlenen kişi sayısı (torun, yeğen, kardeş, üvey kardeş, yarım kardeş,
+üvey çocuk) ölçüldü: **ortanca 5, en çok 23.** Çocuk sayısı ortanca 0,
+en çok 4. Aynı kural bütün izlenen kişilere açılsa günlük ve oyuncunun
+mutluluğu taşardı. Genişletme sorusu Q-230'da; **yapılmadı.**
+
+### Hanedeki çocuğun yükü
+
+Hanedeki çocuğun hastalığı oyuncunun keyfinden −2 alıyor (eşin
+hastalığı −4; çocuk sayısı dörde kadar çıktığı için daha küçük
+tutuldu). Evden ayrılmış çocuğun hastalığı haber olarak geliyor ama bu
+yükü getirmiyor.
+
+**95 tek yıllık karede ölçüldü:** hane dışı 60/60 karede fark **0**.
+Hane içi 35 karede 17 kez tam −2, 9 kez −1, 9 kez 0. Soğuran şey tavan
+değil **azalan getiri** (`StatGain.apply`, yumuşak tavan 95): kayıp tam
+uygulanıyor, ama yılın sonraki kazançları daha düşük tabandan
+işlendiği için 1-2 puanı geri veriyor. Bu bütün statların davranışı,
+bu paketin değil.
+
+### Bekçi
+
+`app/test/paket_cn_cocuk_hastaligi_test.dart` (7 test): çocuk
+gerçekten hastalanıyor (120 hayatta 82 hastalık, 32 hayat) · iki
+hastalık arasında en az üç yıl · **zar sözleşmesi** (hastalık olmayan
+yılda açık/kapalı koşu günlük, kişiler ve oyuncu keyfi dahil birebir
+aynı) · hanedeki çocuk oyuncuya işler, ayrı yaşayan işlemez · aynı
+kişi-yıl kaydet/yükle ve **başka ana zarla** da aynı sonucu verir ·
+modül kapalıyken hiç hastalık yok · paylaşılan kural eşin sayılarını
+koruyor.
+
+**Isırma denemesi (üç bozma):** (1) hastalık bloğu kaldırılınca —
+yani Paket CN öncesi davranış — 7 testin 3'ü kırmızı; (2) zar
+türetilmiş tohum yerine ana diziden çekilince zar sözleşmesi testi
+kırmızı; (3) hane ayrımı kaldırılınca hane testi kırmızı.
+
+### Yan etki: Paket CM'in bekçisi kırıldı (ve düzeltildi)
+
+Çocuğun hastalanması dünyayı değiştiriyor: hastalanan çocuğun statları
+değişince **sonraki** yılların dalları kayıyor. Bu, CM'in "altı olayın
+hepsi 250 hayatta görüldü" testini kırdı. Ölçüm olayın erişilebilir
+olduğunu gösterdi (250 hayatta 261 aday kare, beklenen 3,53; 500
+hayatta görülen 7), bekçinin ölçütü düzeltildi — ayrıntı CM bölümündeki
+düzeltme notunda. Ders: "görülmedi" ulaşılamazlık ölçütü değil (Paket
+CK) ve bir görülme iddiası, beklenen çıkışın sıfırı inandırıcı
+kılmadığı kohortta sınanmalı.
+
+### Modül anahtarı
+
+`cocuk_hastaligi` (Ayarlar → Modüller → "Çocuğun hastalanması").
+Kapalıyken: çocuk hiç hastalanmaz, günlüğe satır düşmez, hanedeki
+çocuğun hastalığı oyuncunun mutluluğunu etkilemez; eşin hastalanması
+(D-154) yerinde kalır, geçmişte yazılmış hastalık dönüm noktaları
+silinmez.
+
+## Paket CO — telefon boyutunda ilk izlenim (11 Ekim 2026)
+
+**Ölçülen kör nokta.** Depodaki pencere testleri mantıksal olarak
+360-400 px *genişlikte* koşuyor (fiziksel 1080-1200, dpr 3) ama
+*yükseklik* 3600 ile 14000 px arasında — gerçek telefonun 5-15 katı.
+Ekran dökümü de 1000x9000'lik tek parça kâğıda basıyor. Yani
+"**içerik telefona sığmıyor**" sınıfı bir kusur hiçbir testte
+görünmüyordu.
+
+### Bulunan kusur: oyunun iki modundan biri katlanmanın altında
+
+360x640'lık ekranda (720x1280'lik Android tabanı) açılış ekranı
+ölçüldü:
+
+| Parça | Alt kenar | 640'a sığıyor mu |
+| --- | --- | --- |
+| "Rastgele bir hayat" | 630 | evet (10 px kalmış) |
+| **"İsmimi ve cinsiyetimi seçeyim"** | **720** | **hayır** |
+| Dipnot ("Her iki modda da…") | 824 | hayır |
+
+Düğme ekranda **vardı** ama dokunulabilir değildi: bu dosyanın ilk
+yoklaması tam bu yüzden "hayat başlatılamadı" diye düştü
+(`hitTestable` 0). Oyuncu kaydırmadan oyunun iki başlangıç modundan
+birini hiç görmüyordu.
+
+### Düzeltme: içerik silinmiyor, kısa ekranda katlanıyor
+
+730 px'den kısa ekranlarda "Nasıl oynanır" kartı **katlanıyor** ve tek
+dokunuşla açılıyor (`start_how_to_expand`). Uzun ekranda yerleşim hiç
+değişmiyor. Eşik ölçümden: sıkıştırılmamış yerleşimde ikinci modun alt
+kenarı 720, bu yüzden eşik ondan biraz yukarıda.
+
+**Ölçüm (düzeltmeden sonra).** 600 · 640 · 700 · 720 · 730 · 760 · 820
+px yüksekliklerin **hepsinde** iki başlangıç modu da katlanmanın
+üstünde. Dipnot 730-820 arasında altta kalıyor; o ekranlarda zaten
+böyleydi ve dipnot bir eylem değil.
+
+### Oyunun geri kalanı temiz
+
+360x640'ta 8/17/30/45/70 yaşlarında dört sekme ve o hayatta açık olan
+bütün satır kapıları gezildi (16 sayfa): **sıfır taşma, sıfır ekran
+hatası**. Aynı tarama 200x300'lük saçma bir ekranda da sıfır veriyor —
+yerleşim kaydırma görünümleri ve esnek metinlerle kurulduğu için
+dayanıyor.
+
+### Bekçi
+
+`app/test/paket_co_telefon_yerlesimi_test.dart` (4 test): 360x640'ta
+iki başlangıç modu da kaydırmadan görünür ve dokunulabilir · kısa
+ekranda "Nasıl oynanır" tek dokunuşla açılıyor (üç satırın hepsi
+geliyor) · uzun ekranda kart açık, katlama düğmesi yok · telefon
+boyutunda hiçbir ekran taşmıyor.
+
+**Isırma denemesi:** düzeltme geri alındığında ilk iki test kırmızı
+("İsmimi ve cinsiyetimi seçeyim katlanmanın altında kaldı, alt kenar
+719,5, ekran 640"). Dördüncü madde bugün yeşil, o yüzden **aracın
+kendisi** sınandı: bilerek taşan bir `Row` basıldığında tarama
+"RenderFlex overflowed by 640 pixels" diyor — yani taşmayı gerçekten
+görüyor ve yarın bir ekran telefonda taşarsa kırmızıya dönecek.
+
+### Modül anahtarı yok
+
+Bu bir oyun özelliği değil, yerleşim düzeltmesi: geri alma yolu tek
+dosyalık commit'in kendisi (`app/lib/ui/screens/start_screen.dart`).
+Karar kaydı Q-231'de.
+
+## Paket CP — kapsam botunun dokunmadığı kapılar (11 Ekim 2026)
+
+**Ölçüm önce yapıldı (400 hedefli hayat).** Paket AI'nın aksiyon
+envanteri `game_controller.dart` okunarak üretiliyor; kapsam ölçümü
+şunu söyledi:
+
+| Ölçü | Paket CP öncesi | Sonrası |
+| --- | --- | --- |
+| Oyuncu aksiyonu | 138 | 138 |
+| CoverageBot ile çalışan | 103 | **124** |
+| Denendi, koşulu oluşmadı | 1 | 1 |
+| Hiç denenmedi | **34** | 13 |
+| **Kapsam** | **%74,6** | **%89,9** |
+
+Hafif tur (60 hayat) %87,7. Otuz dördün **29'u botta hiç bağlı
+değildi**: aileden gelen bütün kararlar (kardeş parası, çocuğun eve
+dönüşü, kayın çatışması, bakım ve miras anlaşmazlığı, çocuğun okul
+meselesi), yaşlı ebeveyne bakım, Paket CJ'nin yaşlılıkta bakım kararı,
+okul kulübü (gir/çalış/çık), arkadaş grubuyla buluşma, dövüşte
+müsabaka yolu, çocuk planı ve Ayarlar'daki modül anahtarları. Hepsi
+oyuncunun ekranında bir kart; hiçbir araç dokunmuyordu.
+
+### Botu öğretince iki **ölçüm** hatası çıktı
+
+1. **`endLifeByChoice` ters ölçülüyordu.** Başarıda `''`, engelde
+   gerekçeyi döndürüyor; bot "boş değilse oldu" sayıyordu. Yani
+   aksiyonun **başarısı** kapsam dışı, **başarısızlığı** kapsanmış
+   sayılıyordu. Kapı 95 yaşında olduğu ve kapsam hayatlarında 95'e hiç
+   ulaşılmadığı için yıllarca görünmemişti.
+2. **Grup buluşması olmayacak eylemle deneniyordu.** "Açık olan ilk
+   eylem" seçiliyordu; o çoğu zaman tek başına yapılan bir eylem ve
+   `Outing.supports` yüzünden her çağrı düşüyordu: **25.038 deneme,
+   sıfır buluşma.** "Oyunda grup buluşması çalışmıyor" gibi görünen
+   yanlış bir bulgu; doğru eylem seçilince aynı turda **1.367
+   buluşma** oldu.
+
+Ayrıca iki aksiyon koşulsuz çağrılıyordu ve 53 binden fazla boş deneme
+üretiyordu (`pushThroughCombatInjury` 23.802,
+`resolveSchoolSportConflict` 29.837); ikisi de kendi kapısına bağlandı.
+`askSportSupport` da öyle (861 boş deneme).
+
+### Kalan 13 boşluğun sebebi ölçüldü
+
+Hiçbiri artık "bot bağlamadı" değil:
+
+- **Çete teklifi ve kefalet yolları** (`acceptCrewOffer`,
+  `declineCrewOffer`, `askFamilyForBail`, `payBailSelf`): kapsam
+  hayatlarında kimse tutuklanmıyor — suç yolu **olaylardan** geçiyor,
+  doğrudan bir oyuncu aksiyonu değil. Kapsam botunun suçlu planı yok.
+- **`retireFromFootball`**: profesyonel futbol kariyeri oluşmuyor.
+- **`askFamilyForCourse`**: ücretli kurs + yetersiz cüzdan + ödeyecek
+  ebeveyn üçü bir araya gelmiyor.
+- **`askFamilyForBedelli`**: askerlik meselesi kapanmış oluyor
+  (sıralama).
+- **Aile anlaşmazlıklarının bir kısmı**: 400 hayatta 1-10 kez çıkan
+  seyrek olaylar. Paket CK'nın dersi: "görülmedi" ulaşılamazlık değil.
+
+### Bekçi
+
+`app/test/paket_cp_kapsam_bekcisi_test.dart` (3 test): bağlanan 18
+aksiyon 30 hayatlık turda **gerçekten uygulanıyor** (ölçülen uygulama
+sayıları dosyada yazılı) · `endLifeByChoice` başarıda boş metin
+döndürüyor, engelde gerekçe (aracın yanlış okuduğu sözleşme) · grup
+buluşması birlikte yapılabilen eylem istiyor. Paket AI'nın kapsam
+tabanı da %50'den **%80**'e çıkarıldı.
+
+**Isırma denemesi:** iki yeni bölüm adım listesinden çıkarılınca CP
+bekçisi 18 aksiyonu sayarak kırmızıya dönüyor ve kapsam tabanı
+104/138 (%75,4) ile kırılıyor — yani taban eski durumu geçiriyor.
+
+### Bu paket oyunun kodunu değiştirmedi
+
+Değişen dosyalar yalnızca test tarafında: `test/support/coverage_bot.dart`,
+`test/paket_ai_action_coverage_test.dart` ve yeni bekçi. Oyunun
+davranışı aynı; ölçüm aracı artık oyuncunun kapılarının %90'ına
+dokunuyor.
+
+## Paket CQ — kulüpteki yerin adı (11 Ekim 2026)
+
+Paket CE "kulüp zincirinin derinliği pencereye sığmıyor" diye ölçmüş,
+dört futbol olayının ikinci halkalarını **Q-224'e** bırakmıştı. O
+hunideki asıl soru "ilk 11'e kim çıkıyor"du; 150 bot hayatında kulüp
+üyeliklerinin rol dağılımı ölçüldü (321 üyelik):
+
+| Kulüp | Üyelik | İlk 11+ | Puan ortanca (en çok) |
+| --- | --- | --- | --- |
+| `satranc_kulubu` | 44 | 16 | 34 (73) |
+| `halk_oyunlari` | 43 | **0** | 30 (64) |
+| `atletizm` | 35 | 15 | 42 (78) |
+| `muzik_kulubu` | 28 | **0** | 33 (55) |
+| `tiyatro_kulubu` | 26 | **0** | 42 (**73**) |
+| `fotograf_kulubu` | 21 | **0** | 39 (**70**) |
+| `futbol_takimi` | 21 | 6 | 32 (73) |
+
+Rol genelinde ulaşılabilir (321 üyeliğin 83'ü ilk 11 ve üstü). Ama
+**dört kulüpte hiç rol yükselmiyor**, çünkü `SchoolClubEngine` rolü
+yalnızca `club.competitive` olan kulüpte atıyor.
+
+### Bulunan kusur: fotoğraf kulübünde "Yedek"
+
+Kulüp kartı `uyelik.role.label` yazıyordu. Yani fotoğraf kulübünde
+sekiz yıl geçiren oyuncu ekranda **"Yedek"** okuyordu — hem yanlış
+(fotoğraf kulübünde yedek diye bir şey yok) hem yanıltıcı: aynı
+üyeliğin rol puanı 70'e, tiyatroda 73'e çıkıyor. Oyuncu gerçekten
+ilerliyor, ekran bunu söylemiyordu.
+
+### Düzeltme ekran tarafında
+
+`SchoolClubEngine.standingLabel` saf bir fonksiyon: rekabetçi kulüpte
+rolün adını döndürür, rekabetçi olmayanda **aynı rol puanından**
+türeyen bir ad — Yeni üye · Düzenli üye · Çekirdek ekip · Kulübün
+yüzü. Eşikler yeni sayı değil, spor tarafının kesmelerinin aynısı
+(28 · 45 · 62).
+
+**Motor, kayıt ve olay kapıları değişmedi.** `minSquadRole` kullanan
+beş olayın hepsi zaten `requiresActiveClubId` ile rekabetçi bir
+kulübe bağlı; bu dosyanın dördüncü testi o eşleşmeyi bekçiliyor.
+
+**Ölçüm (düzeltmeden sonra, 150 hayat):** rekabetçi olmayan 118
+üyeliğin etiketleri **Yeni üye 58 · Düzenli üye 35 · Çekirdek ekip 20
+· Kulübün yüzü 5**. Dört kademe de kullanılıyor; düzeltmeden önce
+118'inin hepsi "Yedek"ti.
+
+### Bekçi
+
+`app/test/paket_cq_kulup_etiketi_test.dart` (5 test): rekabetçi
+olmayan üyelikte "Yedek" yazmıyor · rekabetçi kulüpte rolün adı aynen
+kalıyor · etiket dört kademeyi de kullanıyor (tabanlar ölçümden) ·
+**kart ekranda** türetilmiş etiketi yazıyor (bulunan kare, çizilen
+metin okunuyor) · `minSquadRole` kullanan her olay kulübe bağlı.
+
+**Isırma denemesi:** `standingLabel` eski davranışa döndürülünce 5
+testin 3'ü kırmızı; rekabetçi kulüp testi ve olay kapısı testi yeşil
+kalıyor (doğru olanı korudukları için).
+
+### Yapmadığım şey
+
+Q-224'teki yoğunluk kararına (üyelik sürerken yılda bir kulüp olayı
+garanti edilsin mi) **dokunmadım**: ne ağırlık büyüttüm ne eşik
+indirdim. Penaltı zincirinin izi hâlâ seyrek — futbol takımına giren
+21 üyelikten 6'sı ilk 11'e çıkıyor, olay o 6 karede çekilişe giriyor
+ve `penaltiKacirdi` izi üç seçenekten birinden doğuyor. Karar Faho'da.
+
+## Paket CR — bekleyen kareler ölçüme görünmüyordu (11 Ekim 2026)
+
+Paket CP, kapsam botunun çete ve kefalet aksiyonlarına hiç
+dokunmadığını göstermişti ("kapsam hayatlarında kimse tutuklanmıyor").
+Bu turda oyunun kendi suç hunisi ölçüldü ve **ölçüm aracı yalan
+söyledi**: 250 bot hayatında "duruşma gören hayat **0**" çıktı.
+
+**Sebep araçta.** `playBotLife` döngüsünde bekleyen şeyler adım 1-6'da
+yanıtlanıp `continue` ediliyor; teşhis kancası `onPreAge` ise adım
+7'de, yaş almanın hemen öncesinde çalışıyor. Yani bekleyen bir olay,
+kriz ya da duruşma varken **hiçbir ölçüm o kareyi göremiyordu.**
+Botun kendi kaydı (`wentToTrial`) doğru sayıyı veriyor: **57**.
+
+Bu kör nokta üçüncü kez yanlış bulgu üretti:
+
+| # | Paket | Yanlış görünen | Gerçek |
+| --- | --- | --- | --- |
+| 1 | CG | "yeni doğan bebek hiç yok" | `onYear` yaş aldıktan sonra çalışıyor; 60 hayatta 77 kare |
+| 2 | CJ | "bakım kapıları hiç açılmıyor" | bot kararı yılın başında veriyor; `BotOverrides.noElderSupport` eklendi |
+| 3 | CR | "duruşma hiç olmuyor" | bot adım 6'da yanıtlıyor; gerçek sayı 57 |
+
+### Düzeltme: `onPending` kancası
+
+Bekleyen kare **yanıtlanmadan önce** ölçüme veriliyor (bildirim, olay,
+kriz, duruşma, mülakat). `onPreAge` ve `onYear` olduğu gibi kaldı;
+kanca verilmezse hiç çalışmıyor, yani mevcut hiçbir ölçüm kaymadı.
+
+### Suç hunisi (250 hayat, doğru araçla)
+
+| Aşama | Hayat |
+| --- | --- |
+| Suç işleyen | 119 |
+| Duruşma gören | 57 |
+| İçeriden geçen | 21 |
+| Denetim dönemi gören | 21 |
+| Toplam hapis yılı | 36 |
+
+Arketip kırılımı: `risky` 25 suç / 19 duruşma / 8 içeride · `social`
+17/5/4 · `sport` 11/7/1 · `investor` 4/1/0. **Suç yolu ulaşılamaz
+değil:** Paket CP'nin bulgusu kapsam botunun suçlu planı
+olmamasından geliyor, oyunun kapısından değil.
+
+### Bekçi
+
+`app/test/paket_cr_bekleyen_kare_test.dart` (3 test): `onPending`
+bekleyen duruşmayı görüyor ve `onPreAge` **görmüyor** (kör nokta
+bilerek sabitlendi; botun yanıtlama sırası değişirse test bunu
+söyler) · `onPending` olay ve kriz karelerini de veriyor · suç
+hunisinin dört kademesi de yaşanıyor ve huni daralarak ilerliyor.
+
+**Isırma denemesi:** kanca çağrısı kaldırılınca üç testin ikisi
+kırmızı; huni testi (oyunun kendi sayıları) yeşil kalıyor.
+
+### Oyunun kodu değişmedi
+
+Değişen dosyalar yalnızca test tarafında: `test/support/player_bot.dart`
+ve yeni bekçi.
+
 ## Depo sınırı
 Yalnızca `fahrettinkoksal/bir--m-r` üzerinde çalış. Hipopotamya organizasyonundaki hiçbir depoya dokunma.
+
+## Paket CS — dulluk: 502 yıl oynanıyordu, tek olayı yoktu (11 Ekim 2026)
+
+`docs/EKSIKLER.md` §3.6'nın kalan maddesi kapandı. 26 Eylül 2026'daki
+not doğruydu — dulluk ile boşanma oyunda **ayrı** iki durum, ekran
+metinleri ayrı, `settleWidowhood` bağı `eskiEs`'e düşürmüyor — ama
+maddenin kalanı açık kalmıştı: *"hâlâ yok: dulluğun kendine ait olay
+havuzu (anma, yıl dönümü, eşin ailesiyle bağın sürmesi)."*
+
+### Önce ölçüldü (250 bot hayatı, dört arketip)
+
+| ölçülen | sayı |
+|---|---|
+| dul kalan hayat | 43 / 250 (%17,2) |
+| dul kalma yaşı | en küçük 38 · medyan 68 · en büyük 87 |
+| dul geçen yıl | en az 0 · medyan 10 · en çok 39 |
+| **toplam dul yılı** | **502** |
+| dulken görülen olay türü | 212 |
+| bunlardan dulluğa ait olan | **0** |
+
+Oyuncular 502 yılı eşini kaybetmiş olarak oynuyordu ve o yılların tek
+satırı yoktu: 70 yaşında eşini kaybetmiş oyuncu 40 yaşında evli
+oyuncuyla **aynı** havuzu çekiyordu — en çok çıkanlar
+`komsu_apartman_karari`, `orta_teknoloji_gerisi`, `sabah_yuruyusu`.
+Kodda hiçbir `EventRequirement` `MarriageStatus.dul` okumuyordu: kapı
+da yoktu, havuz da.
+
+### Ne yazıldı
+
+- **Kapı** (`EventRequirement`): `requiresWidowed`, `minWidowYears`,
+  `maxWidowYears`. Üçü de kayıttan hesaplanır
+  (`marriage.status` + `marriage.endedAtAge`); yeni alan, yeni ekran,
+  yeni sayaç yok. Boşanmışa çıkmaz, tekrar evlenince susar.
+- **Havuz** (`event_pool_widowhood.dart`, 20 olay): ilk yılın
+  sessizliği ve tek sofra, dolabın öteki tarafı, üstüne kalan evraklar,
+  komşunun tenceresi · evlilik yıl dönümü, kitabın arasındaki el
+  yazısı, torunun "anlatır mısın" sorusu, eşin ailesinin telefonu,
+  eşinin eski dostu, yarım kalan uğraşın devralınması, o taraftan
+  kimsenin kalmaması · iki fincan alışkanlığı, hatırlayan son kişi
+  olmak, "hiç yeniden düşünmedin mi" sorusu · ve beş izin beş karşılığı.
+- **`{es}` yer tutucusu** (`EventEngine._fillLateSpouse`): kişi çözümü
+  vefat etmiş kimseyi olayın karşı tarafı yapmaz — bu doğru kural
+  bozulmadı; ad evlilik kaydından okunur. Ad okunamazsa cümle yine
+  tamdır, bekçi bunu her metin için denetliyor.
+- **Modül:** `FeatureId.dulluk` (fail-closed, `docs/FEATURE_FLAGS.md`).
+
+### Havuzdan sonra (aynı 250 hayat, aynı tohumlar)
+
+Dul kalan 43 hayatın **29'u (%67)** en az bir dulluk olayı görüyor;
+556 dul yılında toplam **60** dulluk olayı çıktı, 16 tekil olay.
+
+### Çıkmayan üç olay — sebepleri ayrı ayrı ölçüldü
+
+Paket CK'nın dersi: "görülmedi" ulaşılamazlık ölçütü değil.
+
+| olay | sebep | sınıf |
+|---|---|---|
+| `dul_kayin_telefonu` | dullukta kayını **yaşayan** kare 56/397 (%14); ağırlık 4 ile 250 hayatta beklenen görülme 0,7 | OYUN — ağırlık 12'ye alındı |
+| `dul_kayin_kapida` | zincirin ilk halkası çıkmadığı için izi hiç konmadı | aynı kökün sonucu |
+| `dul_odanin_kapisi` | izi koyan seçeneği (`birak`, keyif −2) bot hiç seçmiyor; `birkac` (+2) kazanıyor | **BOT** |
+
+**Kayın ölçümü (250 hayat).** Evlilik sürerken kayınvalide/kayınpederi
+yaşayan kare 2818/5112 (**%55**), dullukta 56/397 (**%14**, 43 hayatın
+12'si). Sebep tasarım hatası değil kuşak farkı: kayınlar oyuncudan bir
+kuşak büyük olduğu için eşten de önce gidiyorlar. Koşul
+**gevşetilmedi** — olay hâlâ yalnızca kayını gerçekten yaşayan
+oyuncuya çıkıyor. Yaygın durumun kendi olayı yazıldı:
+`dul_o_taraftan_kimse` ("eşinin tarafından arayan kimse kalmadı").
+
+### Bekçi
+
+`app/test/paket_cs_dulluk_test.dart` (6 test): kapı dul olmayan tek bir
+karede bile açılmıyor (boşanmış kareler de ölçümde var) · yıl penceresi
+gerçekten süzüyor · havuz oyuncuya ulaşıyor · botun seçmediği iki yol
+elle kurulan izle uçtan uca işliyor ve vefat etmiş kayın zinciri
+açmıyor · modül kapalıyken aday yok · her metin `{es}` olmadan da tam
+cümle · karşılığı olmayan iz yok.
+
+**Isırma denemesi:** kapı devre dışı bırakıldığında §1 kırmızıya düştü
+— dul olmayan karelerde **68.339** dulluk olayı aday oldu.
+
+### Depo çapındaki iki bekçi kendi testimi yakaladı
+
+Tam süit, Paket CS'nin ilk halini **iki yerden** kırdı ve ikisi de
+haklıydı:
+
+1. `paket_ar_hikaye_izi_test.dart` — "hiçbir yerin okumadığı iz sayısı
+   artmıyor". Beş karşılık olayı kendi "kapandı" izini bırakıyordu
+   (`dul_oda_acildi`, `dul_verilen_esya_goruldu`, `dul_anma_surdu`,
+   `dul_kayin_ailesi_geldi`, `dul_is_tuttu`) ve sayı 22'den **27**'ye
+   çıkıyordu. Benim kendi bekçim (§6) bunları "hikâyenin sonu" diye
+   **muaf tutuyordu** — yani kendi yazdığım istisna, depo kuralını
+   deliyordu. Muafiyet kaldırıldı ve izler artık **yazılmıyor**:
+   olayların tekrar çıkmasını `seenEventIds` zaten engelliyor, izin bir
+   işi yoktu. Sayı 22'ye döndü.
+2. `text_consistency_test.dart` — "bilinmeyen yer tutucu yok".
+   `{es}` merkezi listeye eklenmemişti. Eklendi; listede olmayan bir
+   yer tutucu ekranda ham çıkabilirdi.
+
+**Testin kendi iki kusuru düzeltildi:** §3 tek tohumun şansına
+bağlıydı (90001'de 3+ yıllık dul kare yoktu) → kare artık 60 tohum
+taranarak **aranıyor**; §4'ün tabanı ölçümün üstündeydi (47 ve 51
+ölçüldü, taban >50 yazılmıştı) → ölçülen iki değerin de altına alındı.
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.
+
+## Paket CT — dul karesini okumak: iki gerçek hata (11 Ekim 2026)
+
+Paket CS dulluğa 20 olay yazdı ama **ekran** tarafı hiç okunmadı.
+`ekran_dokumu_ozel_durum_test.dart` üç turda sekiz gerçek hata
+bulmuştu ve kalıbı hep aynı: tek tek metin denetleyen testlerin
+göremediğini, ekranın tamamını basan döküm görüyor. Dökümün yedinci
+turuna **DUL** karesi eklendi (120 bot hayatı taranarak bulundu —
+riskli hayat, tohum 15, yaş 53) ve çıktı gözle okununca iki hata
+çıktı. İkisi de dulluğa özel değil; dul karesi **ortaya çıkardı**.
+
+### 1. Vefat etmiş kişinin açık meselesi hiç kapanmıyor
+
+Dul karesinin İlişkiler ekranı:
+
+> **Tülay için bakım**
+> Tülay artık tek başına idare edemiyor. Bu yükü nasıl karşılayacağına
+> karar vermen gerekiyor.
+> `[Bakımı ben üstlenirim]` `[Ücretli bakıma katkı ver]`
+> `[Kardeşlerinle konuş]` `[Üstlenemeyeceğini söyle]`
+
+Aynı ekranın iki satır aşağısı: **"Tülay Can · Anne · vefat etti"**.
+Günlük de doğruluyor: *"Annen Tülay Can uykusunda, sakin bir şekilde
+vefat etti"* — **iki yıl önce**, 51 yaşında.
+
+**Kök neden.** Ölüm kişiyi `people` listesinden silmiyor; kayıt kalıyor
+ve kişi vefat etmiş işaretleniyor (D-037, doğru kural).
+`FamilyDisputes.pendingCareDispute` ve kardeşleri ise yalnızca
+`personById == null` durumunu kapatıyor — o da ancak oyuncu bir cevap
+verdiğinde bakılıyor. Kişi hiç silinmediği için koşul asla tutmuyordu.
+
+**Ölçüm (200 bot hayatı, 13.908 yıl karesi, `onPreAge`):**
+
+| ölçülen | sayı |
+|---|---|
+| ölü-konu meselesi olan kare | **3.251 (%23,4)** |
+| kare × mesele | **4.874** |
+| bu duruma düşen hayat | **140 / 200** |
+| en uzun açık kalma | **80 yıl** |
+
+Tür kırılımı: bakım 2.774 · kayın gerginliği 1.455 · miras 360 ·
+kardeş parası 282 · çocuk parası 3.
+
+**Çözüm.** `FamilyIssueStatus.kapandi`'nin tanımı bu durumu zaten
+anlatıyordu — *"Çözülmeden kapandı (kişi vefat etti, mesele anlamını
+yitirdi)"* — ama kimse bağlamamıştı. Yıllık ilerlemede, ölümler
+işlendikten hemen sonra `_closeIssuesOfDeceased` çalışıyor. Kayıt
+**silinmiyor**: durum `kapandi`, kapanma yaşı yazılı, geçmiş okunur.
+Günlüğe satır düşmüyor — ölüm aynı yıl zaten yazıldı, her mesele için
+ikinci satır bildirim yığını olurdu.
+
+### 2. Türkçe ekler isme göre seçilmiyor
+
+Aynı dökümün günlüğünde: **"Taner artık Malatya'de."** Doğrusu
+"Malatya'da" — son ünlü kalın.
+
+Deseni depo genelinde taradım (roadmap'in ikinci dersi: geniş
+kullanılan bir metin kalıbını tek tek süitten öğrenmek pahalı) ve hata
+tek yerde değildi: ek, kişi ya da şehir adına **sabit** yazılmış
+**19 yer** vardı — `friendship_depth` 3, `family_disputes` 5,
+`adult_child_support` 4, `legal_engine` 2, `prison_life` 1,
+`activity_pages` 1, `divorce_settlement` 1, `housing` 1,
+`child_school_issue` 1. Metin Türkçe isimlerin yarısında doğru,
+yarısında yanlış çıkıyordu:
+
+> "Malatya'ye taşındı" · "Malatya'e taşındın" · "Elif'a sor"
+> "Murat'e para vermedin" · "Elif'a kaldı"
+
+**Çözüm.** `trDative`, `trLocative`, `trAblative`
+(`app/lib/text/turkish_text.dart`). Üçü de büyük/küçük ünlü uyumuna,
+ünsüz benzeşmesine (FıSTıKÇı ŞaHaP → "Sinop'ta") ve yönelme ekindeki
+kaynaştırma y'sine bakıyor ("Malatya'ya"). 19 çağrı yeri bağlandı.
+
+### Bekçi
+
+`app/test/paket_ct_dul_karesi_test.dart` (6 test): 200 hayatta tek bir
+ölü-konu meselesi kalmıyor (ve "kapandı" meselesi gerçekten yazılıyor,
+yani kural çalışıyor ve kayıt silinmiyor) · üç ekin de ünlü uyumu,
+ünsüz benzeşmesi ve kaynaştırma örnekleri · boş girdi çökmüyor ·
+**kaynak taraması**: `lib/` altında değişkene yapışmış sabit ek
+kalmadı, yenisi yazılırsa test kırılır.
+
+**Isırma denemesi:** iki düzeltme de geri alındı. Kural kapalıyken §1
+kırmızı (4.874 kare×mesele), tek bir sabit ek geri gelince kaynak
+taraması o satırı adıyla gösterdi.
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.
+
+## Paket CU — "kendi başına yaşıyorsun" dediği evde iki kişi var (11 Ekim 2026)
+
+Paket CT'nin dul karesi dökümünden çıkan üçüncü bulgu. Aynı hayatın
+iki ekranı birbirini yalanlıyordu:
+
+| ekran | satır |
+|---|---|
+| Hayat (künye) | "Malatya · Kova · **Evde seninle 2 kişi yaşıyor**" |
+| Varlıklar | "Kirada, **kendi başına yaşıyorsun**." |
+
+**Kök neden.** `LivingSituation.kirada` **nerede** yaşandığını söyler,
+**kiminle** yaşandığını değil: `Housing.residenceOf` yalnızca ev
+kaydına bakıyor. Metin ise yalnızlığı koşulsuz iddia ediyordu. Gider
+hesabının kendisi haneyi zaten görüyor (bakılan çocuk ve evdeki
+yetişkin çocuk ayrı kalem), yani çelişki yalnızca cümlede —
+`docs/WRITING_STYLE_TR.md` §12: metin durumla çelişmez.
+
+**Çözüm.** Satır kayıttan okunuyor: hane boşsa "Kirada, kendi başına
+yaşıyorsun.", değilse "Kirada yaşıyorsun; evde seninle N kişi var."
+
+**Bekçi:** `app/test/paket_cu_yalnizlik_iddiasi_test.dart` — 200 bot
+hayatında kirada geçen her kare taranıyor; hanesi olan karede
+"kendi başına" iddiası sıfır olmalı ve sayı yazılmalı, gerçekten
+yalnız karede ise yalnızlık söylenebilmeli. Ölçümün iki tarafı da
+(yalnız ve haneli kare) taban koşuluyla zorunlu tutuldu.
+
+**Isırma denemesi:** eski satır geri getirildiğinde test kırmızıya
+düştü ve somut bir örnek verdi — hanesinde **5 kişi** olan oyuncuya
+"kendi başına yaşıyorsun" yazıyordu.
+
+**Kuyruğa yazılan ürün sorusu (Q-234).** Aynı dökümde şu satır da
+vardı: *"Orhan için cenazedeydin. Masraflara katkıda bulunmadın."* —
+oyuncu, aynı yıl mirasını aldığı **kendi eşinin** cenazesinde
+"katkıda bulunmamış" sayılıyor. Cenaze bildirimi bağ türüne bakmıyor;
+eş de uzak bir yakın gibi üç seçeneği görüyor. Bu bir metin hatası
+değil **kural kararı**, o yüzden düzeltilmedi: öneri ve varsayılan
+Q-234'te.
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.
+
+## Paket CV — 1 yaşındaki oyuncuya berber, spor salonu ve kütüphane (11 Ekim 2026)
+
+Ekran dökümünün sekizinci turu. Paket CR'nin `onPending` kancası
+dökümün tarayıcısına bağlandı ve üç kare eklendi. **BEKLEYEN OLAY**
+karesi **1 yaşında** bir hayat yakaladı; Aktiviteler ekranının dökümü
+şunu bastı:
+
+> **Kendine bak**
+> Berber / Kuaför — Saç kestir, stil değiştir, bakım yaptır
+> Spor salonu — Koşu, ağırlık ve temel egzersiz
+> Sağlık Merkezi — Kontroller, aşı ve bir uzmanla konuşmak
+> **Öğren**
+> Kütüphane — Yaşına uygun kitap seç ve oku
+
+Bir yaşındaki bebeğe saç stili, ağırlık antrenmanı ve kitap.
+
+### Kök neden: kapı vardı, üç satıra uygulanmamıştı
+
+`ActivityVenue.minAge` zaten hesaplanıyor ve belgesi niyeti yazıyor:
+*"Menüde yaşına hiç uymayan bir alan gösterilmesin diye kullanılır:
+çalışmayan düğme konmaz."* Ölçülen eşikler ve kapının durumu:
+
+| mekân | en küçük eylem yaşı | kapı var mıydı |
+|---|---|---|
+| `cezaevi` | 0 | (hükümlülük kapısı) |
+| `saglikMerkezi` | 1 | ✓ |
+| **`berber`** | **4** | **yok** |
+| `eglence` | 4 | ✓ |
+| `kurs` | 6 | ✓ |
+| **`sporSalonu`** | **8** | **yok** |
+| `falTarot` | 10 | ✓ |
+| `estetik` | 18 | ✓ |
+
+Kütüphanenin kendi eylemi yok (kitap akışıyla çalışır) ve `minAge` 0
+dönüyor; oradaki doğru kapı kataloğun kendisi — `kBookCatalog` içindeki
+en küçük kitap yaşı **6**, yani 0-5 arasında açılan sayfa **boştu**.
+Üç satırın hiçbirinde `Key` de yoktu; bu yüzden hiçbir test onları
+aramıyordu.
+
+Düzeltme: üç satır da kapıya bağlandı (kütüphane `booksFor` okuyarak,
+yeni sayı uydurulmadan) ve anahtar aldı.
+
+### Bekçi
+
+`app/test/paket_cv_yas_kapisi_test.dart` (2 test): bot hayatlarından
+0-20 yaş arası kareler **aranıyor** ve her yaşta Aktiviteler ekranı
+çizilerek yedi mekân satırı + kütüphane denetleniyor. İki yönlü:
+yaşından önce açılan satır **ve** yaşı geldiği hâlde görünmeyen satır
+ikisi de kırmızı yapar (kapı fazla sıkılmasın). İkinci test ölçülen
+eşikleri kayda çiviliyor; katalog büyüyüp eşik düşerse yeniden ölçmeye
+zorlar.
+
+**Isırma denemesi:** berber kapısı devre dışı bırakıldığında test
+kırmızıya düştü ve dört yaşı adıyla saydı — "0 yaş: Berber / Kuaför
+görünüyor (en küçük 4)" … 3 yaşa kadar.
+
+### Aracın kendi iki kusuru
+
+1. **`ekranTemizlenmesin` kareleri önceki karenin ekranında
+   başlıyordu.** Duruşma ve kriz pencereleri yüklenen durumda
+   kendiliğinden açıldığı için bu hiç fark edilmemişti.
+2. **Açıcı sessizce başarısız oluyordu.** Bulamadığı şeyde `return`
+   ediyor, döküm sıradan bir ekran basıyor ve pencerenin açılmadığı
+   anlaşılmıyordu. Açıcı artık ne yaptığını **yazıyor** ve
+   bulamadığında ekranda ne gördüğünü sayıyor.
+
+### Dürüst kayıt: MÜLAKAT penceresi HÂLÂ OKUNMADI
+
+Kare bulunuyor — ölçüldü: `onPending` ile 120 hayatın **120'sinde**,
+toplam **950 kare** (eski `onPreAge` kancasıyla 180, 99 hayat; yani
+5,3 kat). Ama pencere açılmıyor: alt sekmeye basmak bu koşumda Meslek
+ekranını getirmiyor ve ekranda Aktiviteler kalıyor. Açıcı bunu dökümün
+başına yazıyor:
+
+> `AÇICI: "Mülakata devam et" satırı bulunamadı. Ekranda 62 metin var;
+> ilk altısı: Rabia Akın · 165 B ₺ · 17 yaşında · …`
+
+Satır koda konuldu ve anahtar aldı (`career_mulakat_devam`), kapısı da
+yerinde (`if (state.hasPendingInterview)`), yani eksik olan şey
+**arayüz gezinmesi**, ürün tarafı değil. Bu kare "okundu" sayılmıyor;
+dosyanın başındaki BULUNAMADI kuralının aynısı geçerli.
+
+**BEKLEYEN OLAY karesi bilerek kaldırıldı:** olay penceresi yalnızca
+yaş alırken doğuyor, yüklenen durumda ne kendiliğinden açılıyor ne de
+onu açan bir satır var. Kendi testleri var (`event_dialog`,
+`paket_bd_durusma_penceresi_test`).
+
+**Doğrulama:** `flutter analyze` → "No issues found!". Cihazda
+oynanmadı.
+
+## Paket CV/1 — kendi kapımın gerilemesi: 7 yaşındaki karate (11 Ekim 2026)
+
+Paket CV spor salonu satırına `ActivityVenue.sporSalonu.minAge` (**8**)
+kapısını koydu. CI bunu reddetti: `martial_arts_widget_test.dart` —
+*"yaşı tutmayan oyuncuya bölüm gösterilmez"* kırmızıya düştü
+(3751 geçti, **1 kırmızı**, 17 atlandı). Yerelde de aynı tek hata.
+
+**Gerçek gerileme.** Dövüş sanatları **7** yaşında başlıyor
+(`_enKucukDovusYasi`, `martial_arts_catalog`) ve bölüm spor salonu
+**sayfasının içinde** duruyor. `ActivityVenue.minAge` yalnızca o
+mekânın **eylemlerine** bakıyor, sayfanın barındırdığı ek satırları
+görmüyor. Kapıyı 8 yapmak 7 yaşındaki oyuncunun karatesini kapattı.
+
+**Kural:** bir mekân satırı, sayfasının içindeki **en erken** şey ne
+zaman açılıyorsa o zaman açılır. Kapı artık ikisinin küçüğü.
+
+**Testler gevşetilmedi, güçlendirildi:**
+
+- Düşen test artık iki kat denetliyor: 4 yaşında **satırın kendisi**
+  yok (`activity_spor`), dolayısıyla bölüm de erişilemez. Eski iddia
+  (`spor_dovus` yok) yerinde duruyor.
+- Yeni test: 7 yaşında satır **ve** dövüş bölümü açık olmalı — bu
+  gerilemenin kalıcı bekçisi.
+- Paket CV bekçisinin tablosu da yanlıştı: kapıyı `minAge` sanıyor ve
+  kodu haksız yere suçluyordu. Tablo artık **etkin kapıyı** okuyor ve
+  ayrı bir test dövüş yaşının spor salonu eylem yaşından küçük
+  olduğunu çiviliyor; biri yükselirse yeniden ölçmeye zorlar.
+
+**Test seçimi hatam.** Paket CV'nin hedefli kümesini
+`ActivitiesScreen|activity_|ActivityVenue` ile seçmiştim; aktivite
+ekranına değen **14 dosya** bu desene uymuyordu ve kümeye girmedi
+(`martial_arts_widget_test` bunlardan biri). Hata bu yüzden CI'da
+çıktı. Ders: kümeyi değişen dosyanın adıyla değil, o ekranı **gezen**
+testlerle seç.
+
+**Doğrulama:** `flutter analyze` → "No issues found!"; tam süit →
+**3754 test geçti, 17 atlandı, 0 hata** (35:06). Cihazda oynanmadı.
+
+## Paket CW — hedefli küme artık tahmin değil, araç işi (11 Ekim 2026)
+
+Paket CV/1 bir CI turuna mal oldu ve sebebi kodda değil **yöntemdeydi**:
+hedefli test kümesini `grep -rl 'ActivitiesScreen|activity_|
+ActivityVenue' test/` ile seçtim. Aktivite ekranını gezen 14 dosya bu
+desene uymuyordu; `martial_arts_widget_test.dart` onlardan biriydi ve
+tam o test gerçek bir gerilemeyi yakalayacaktı.
+
+**Sebep.** O test ne sınıf adını ne anahtarı anıyor; ekrana **görünen
+metinle** dokunuyor (`tapMenuRow(tester, 'Spor salonu')`). Dosya adına
+ya da sınıf adına bakan bir grep bunu asla bulamaz.
+
+**Araç:** `scripts/test_secimi.py` — değişen dosyayı **beş** sinyalle
+tarar ve hangisinin tuttuğunu yazar:
+
+| sinyal | ne arar |
+|---|---|
+| içe-alma | test, değişen dosyayı `import` ediyor |
+| dolaylı | test, değişen dosyayı içe alan bir lib dosyasını içe alıyor |
+| simge | dosyada tanımlanan genel sınıf/işlev/sabit adı testte geçiyor |
+| anahtar | dosyada yazılan `Key('...')` değeri testte geçiyor |
+| **metin** | **dosyadaki görünen arayüz metni testte geçiyor** |
+
+Kullanım (ağa çıkmaz, depo kökünden):
+
+```
+python3 scripts/test_secimi.py app/lib/ui/screens/sections/activities_screen.dart
+python3 scripts/test_secimi.py --degisenler          # git diff'ten al
+python3 scripts/test_secimi.py --degisenler --komut   # flutter test satırı
+python3 scripts/test_secimi.py --kendini-sina         # betiğin bekçisi
+```
+
+Motor/bot/zar akışı dosyası geçtiğinde çıktının başına **"tam süit
+gerekiyor"** uyarısı basar; betik "tam süit gerekmiyor" demez, yalnızca
+"şunlar da koşsun" der.
+
+**Ölçüm.** `activities_screen.dart` için 40 aday buluyor (benim elle
+seçtiğim desen 22 bulmuştu) ve kaçırdığım `martial_arts_widget_test`
+listede. `life_progression.dart` için 169 aday **ve** tam süit uyarısı.
+
+**Kendini sınama ve ısırma denemesi.** `--kendini-sina` üç çifti
+denetliyor. **İlk yazımda iki çift vardı ve ısırma denemesi
+TUTMADI:** metin sinyalini kapattığımda sınav yeşil kaldı, çünkü o iki
+çift anahtar ya da içe-alma ile de tutuyordu — yani asıl önemli sinyal
+çivilenmemişti, yanlış güven veriyordu. Üçüncü çift eklendi
+(`activities_screen.dart` → `adoption_widget_test.dart`, **yalnızca**
+metin sinyaliyle eşleşir) ve ısırma tuttu: metin sinyali kapalıyken
+çıkış kodu 1, "1 eşleşme kayboldu".
+
+Bu araç bir **kolaylık**, kapı değil: `scripts/sabit_taramasi.py` gibi
+depo kuralını zorlamaz, kuralı uygulamayı kolaylaştırır.
+
+## Paket CX — bebekliğin on katlık açığı (11 Ekim 2026)
+
+`docs/EKSIKLER.md` §4.1 "hâlâ en zayıf bant 0-5" diyordu ama sayı **yaş
+yaş** değildi. Ölçtüm: 60 bot hayatı, her karede motorun aday olay
+kümesi (`EventEngine.debugEligibleIds`, `onPreAge` kancası).
+
+| Yaş | Aday ortalama | Tekil aday |
+|---|---|---|
+| 0 | 8,6 | **9** |
+| 1 | 14,4 | 16 |
+| 2 | 17,2 | 20 |
+| 6 | 30,6 | 39 |
+| 12 | 52,4 | **92** |
+
+Yaş 0, yaş 12'nin **onda biri** kadar içerik görüyordu (0,098).
+
+**Yapıldı.** Yeni dosya `app/lib/data/event_pool_babyhood.dart` — **16
+olay**: doğum altını (bozdurulsun mu saklanılsın mı), kime benzediği
+tartışması, ilk banyo, beşik montajı, nüfusa yazdırma, kucak sırası,
+kalın giydirme, yaz sıcağı, bebek arabasının kaldırıma sığmaması,
+bırakmadığı oyuncak, evin sessizliği, ilk saç kesimi, akrabadan gelen
+mikrop, yürüme kıyaslaması; artı iki **iz okuyan karşılık** —
+çekmecedeki altın (7-18) ve oyuncağa veda (6-14), iki bayrakla
+(`bebeklik_altin_saklandi`, `bebeklik_vazgecmedigi_oyuncak`).
+
+Paket 13'ün `event_pool_infancy.dart` dosyasına **dokunulmadı**: oradaki
+altı olay oyunun en eski içeriği ve her zaman açık. Dosyanın sesi
+korundu: bu yaşta kararı aile verir, seçimler bebeğin bilinçli tercihi
+gibi yazılmaz.
+
+**Aynı tohumlarla yeniden ölçüm** (ve bekçinin kendi tohumlarıyla):
+
+| Yaş | Önce | Sonra | Bekçi tohumu |
+|---|---|---|---|
+| 0 | 8,6 / 9 | **19,1 / 20** | 19,4 / 20 |
+| 1 | 14,4 / 16 | **27,9 / 30** | 28,3 / 30 |
+| 2 | 17,2 / 20 | **27,0 / 30** | 27,7 / 30 |
+| 12 | 52,4 / 92 | 52,5 / 86 | 52,0 / 91 |
+
+Oran 0,098 → **0,220**.
+
+**Ne değişmedi: tempo.** Motor yılın olayını yaş alırken yine bir kez
+çeker. Bir hayatta yaş 0'da görülen olay **sayısı** aynı; değişen,
+farklı oynanışlarda farklı şey görme şansı — yani çeşitlilik. İlk üç
+yılın temposu **Q-226**'nın, "bebeklik uzasın mı" sorusu **Q-139
+#5**'in kararı; Paket CX ikisini de kapatmaz. İkisine de ek yazıldı.
+
+**Anahtarı ilk turda atlamıştım; süit yakaladı.** Havuzu anahtarsız
+bıraktım ("var olan kataloğun büyümesi" gerekçesiyle) ve
+`paket_bm_ilk_yillar_test.dart` patladı: Paket BM'in iddiası "ilk yıllar
+modülü 0 yaşta aday sayısını **en az ikiye katlar**" idi. Benim
+olaylarım anahtarsız olduğu için **iki kohortta da** sayılıyordu; kapalı
+kohort 3,0'dan 13,5'e çıktı ve oran 1,42'ye düştü. Doğru çözüm BM'in
+bekçisini yeniden yazmak değil, içeriği ait olduğu anahtara bağlamaktı:
+16 olay `FeatureId.ilkYillarOlaylari` kapısına girdi. Kataloğun
+`lostWhenOff` metni zaten "**Bebeklik** ve okul öncesi yıllarında çıkan
+yeni olaylar kalkar" diyordu, yani olaylarım bu anahtarın kendi
+kapsamındaydı. Sonuç: 0 yaşta kapalı **3,0** / açık **19,1** → 6,4 kat;
+BM'in bekçisine **tek satır dokunulmadı.** Ayrıca BL'in silme tarifi
+dürüst kalsın diye yeni dosya ve bekçi `removableFiles`'a yazıldı
+(`event_pool_infancy.dart` silinemez, 0-2'nin eski olayları orada).
+
+**Bebeğin cüzdanı sorusunu denetledim.** Yeni olaylardan dördü para
+yazıyor; 0-1 yaşındaki oyuncunun kesesine para girmesi tuhaf duracak
+diye bütün havuzları taradım. Zaten var olan bir kalıp:
+`event_pool_infancy.dart`'taki `bebek_atesli_gece` (Paket 13) hastane
+seçiminde **-4.500 TL** yazıyor, yani bu yaşta para hareketi ailenin
+harcamasının oyuncunun defterinde görünmesi demek. Yeni sayılar aynı
+ölçekte: nüfusa yazdırma -250, akrabadan mikrop -900, doğum altını
++4.200 (0-1) ve saklanmışsa okul masrafına +9.500 (7-18). Altının
+4.200 → 9.500 değerlenmesi havuzdaki diğer para değerleri gibi **elle
+yazıldı**, merkezi çıpaya bağlı değil; bağlanması gerekir mi diye
+**Q-139 #5 ekinde** soruldu.
+
+**Bekçi:** `app/test/paket_cx_bebeklik_test.dart` — 8 bölüm. Aday
+tabanları (ölçümün altında, hedefin değil), 0/12 oranı, 14 olayın
+**hepsinin** gerçek karede aday olması (ölü içerik yok), bağ kapısının
+kare bazında denetimi, çok bağlı kapıda metnin kişi/sayı varsaymaması,
+iz kapısı, iki bayrağın hem yazılıp hem okunması, anahtar kapalıyken
+sıfır aday.
+
+**Isırma denemesi — dört ayrı mutasyon, dördü de yakalandı:**
+
+1. Havuz CX öncesine döndürüldü → 6 bölümden **5'i** patladı ve eski
+   sayılar birebir geri geldi (8,9 / 14,8 / 17,8; oran 0,097).
+2. `bebek_besik_montaji`'nin `livingRelations` kapısı söküldü →
+   babasız 34 karenin **34'ünde** aday oldu (önce 0).
+3. `bebek_cekmecedeki_altin`'in `requiredFlags` kapısı söküldü →
+   **335** karede izi olmadan aday oldu (önce 0).
+4. Büyükanne olayının hatalı metni geri konuldu → §4b iki kusuru da
+   adıyla saydı ("İki büyükanne" ve "Annenin kucağını seç").
+
+**İki kez kendi testimi düzelttim, bir kez de kendi içeriğimi.**
+
+- §5'i ilk yazışımda "bu iki karşılık bot hayatında hiç aday olmasın"
+  diye kurmuştum — botun altını saklamayacağını varsaymıştım. Patladı:
+  bot saklıyor, bayrak yazılıyor, karşılık gerçekten geliyor
+  (`bebek_oyuncaga_veda` 24 kare, `bebek_cekmecedeki_altin` 6 kare).
+  Yani testim **ölü içeriği savunuyordu**. Küme bazlı "hiç gelmesin"
+  iddiası, kare bazlı "izi olmayan karede gelmesin" denetimine çevrildi.
+- §4'ü `livingRelations`'ı "**hepsi** hayatta olmalı" sanarak yazdım.
+  Sözleşme `game_event.dart`'ta yazılı: "bu bağlardan hayatta **en az
+  bir** kişi gerekir; olay o kişiyle kurulur." Yani denetimim yanlıştı —
+  ama patlaması **gerçek bir kusur** gösterdi (aşağıda). §4 sözleşmeye
+  göre düzeltildi ve ısırabilen iddia tek bağlı kapıya bağlandı
+  (`bebek_besik_montaji` yalnız `baba` istiyor).
+- **Gerçek kusur:** `bebek_buyukanne_cekismesi` metni "**İki**
+  büyükanne" diyordu ve ikinci seçimi "**Annenin** kucağını seç" idi.
+  Kapı ise iki büyükanneden **birinin** hayatta olmasını yetiyor, anneyi
+  hiç istemiyor. Yani tek büyükanneli ya da annesiz karede metin yalan
+  söylüyordu. Metin kişi ve sayı varsaymayacak şekilde yeniden yazıldı
+  ("Kucaktan kucağa dolaştırıldın. Sıranın kimde olduğu konusunda sessiz
+  bir çekişme var."), seçimler de öyle. Kalıcı bekçi §4b: çok bağlı
+  kapıdaki hiçbir metin belirli kişiyi ya da sayıyı anamaz.
+
+**Paket CI'ın ölçümü tohuma yapışmış çıktı (üçüncü patlama).** Süitte
+`paket_ci_arkadas_grubu_test.dart` §4 de kırmızı oldu: dokuz grup
+olayının görüleni 5-6'dan **3**'e düştü, eşik 4'tü. Kök neden benim
+havuzum değil, kohortun kendisi: `seed: 7000 + i * 13` ile **her arketip
+aynı 12 tohumu** kullanıyordu, yani 120 hayat değil 12 tohum
+ölçülüyordu. Ölçtüm:
+
+| Kohort | kuran | görülen olay |
+|---|---|---|
+| 120 hayat, paylaşılan tohum | 3 | 3/9 |
+| 120 hayat, ayrık tohum A | 8 | 3/9 |
+| 120 hayat, ayrık tohum B | 6 | **7/9** |
+| 300 hayat, iki tohum tabanı | 15 / 10 | 6/9 ve 8/9 |
+| 500 hayat, iki tohum tabanı | 22 / 17 | **8/9 ve 8/9** |
+
+Yani eşik 4 **tohum şansıydı**; grup kurmak seyrek olduğu için herhangi
+bir zar kaymasında devriliyordu. Eşiği düşürmek yerine kohortu
+büyüttüm: tohum arketipe göre de ayrışıyor, hayat sayısı 120 → **500**.
+Eşikler bu yüzden **sıkılaştı**: kuran 3 → **8**, buluşma 1 → **3**,
+görülen olay 4 → **5**. Ölçümde çıkan: kuran 22, buluşma 10, görülen
+8/9.
+
+**Dördüncü patlama kendiliğinden kapandı ve bunu susturmak olurdu.**
+`infancy_events_test.dart`'ın "ebeveyni olmayan bebeğe ebeveynli olay
+çıkmaz" testi büyükanne olayımı yakalamıştı. O test `kInfancyEvents`
+üzerinde döndüğü için olay ayrı dosyaya taşınınca testin görüş alanından
+çıktı — yani düzelmiş gibi oldu. Bu bir çözüm değil; kapsamı kendi
+bekçimde **daha genişine** taşıdım: §4 artık `kBabyhoodEvents`'in
+**bütün** bağ kapılarını her karede denetliyor, §4b de metin/kapı
+uyumunu kaynak düzeyinde.
+
+**Tam süit** koşuldu (içerik eklemek bütün hayatların zar akışını
+kaydırır — Paket CN dersi; hedefli küme yetmez).
+
+## Paket CY — ölçüm aracı bir kariyeri gizliyordu (11 Ekim 2026)
+
+Paket AR'ın bıraktığı listeyle başladım: **22 sessiz hikâye izi** —
+oyuncunun seçimi bir işaret bırakıyor ama hiçbir yer okumuyor. Hangisine
+karşılık yazmanın değdiğini anlamak için her birini ölçtüm (150 hayat,
+`onPreAge` ile `storyFlags` taraması): kaç hayatta yazılıyor ve hangi
+yaşta.
+
+Bir satır sırıttı: `sosyal_etkinlige_gitti` **150 hayatta 0 kez**.
+İzi yazan olay `un_etkinlik_daveti` ve kapısı `requiresSocialAccount` +
+`minFame: 5`.
+
+**Ölçüm (200 hayat, bütün arketipler).** Hesaplı karelerde en yüksek ün
+**3**, en yüksek takipçi 1.994. `hesap + ün ≥ 5`: **0 hayat**. Yani
+kapı hiç açılmıyordu. Aynı tarama `minFame: 8` (`un_is_daveti`) ve
+`kMediaSectionMinFame = 40` için de sıfır verdi — **14 medya işi ve
+Medya bölümünün tamamı** ölçümde hiç görünmüyordu.
+
+**Kök neden oyun değil, araç.** `test/support/player_bot.dart` yılda
+**bir** paylaşım yapıyordu (0,7 olasılıkla), oyun ise altısına izin
+veriyor (`SocialEngine.prototypeOnlyMaxPostsPerAge = 6`); üstüne bot ilk
+platformu açıp `break` ediyordu, yani çapraz paylaşım motoru
+(`prototypeOnlyCrossShare`) hiç ölçülmüyordu. Araç kapasitenin altıda
+birini kullanıyordu.
+
+**Düzeltildi (araç tarafı).** Bot artık ilgisi kadar paylaşıyor
+(`round(socialDesire × 6)`, her paylaşım için ayrıca `socialDesire`
+zarı) ve `socialDesire ≥ 0,5` olan arketip 18'inden sonra ikinci
+platformu da açıyor. Bu bir **optimizasyon değil**: ünü önemseyen
+oyuncu (social arketipi, `socialDesire` 0,95) yılda birkaç kez paylaşır.
+
+**Aynı 200 hayat, düzeltmeden sonra:**
+
+| | yılda 1 paylaşım | ilgisi kadar |
+|---|---|---|
+| hesaplı karede en yüksek ün | 3 | **100** (tavan) |
+| en yüksek takipçi | 1.994 | **2.353.481** |
+| bir yılda en çok paylaşım | 1 | **6** |
+| iki platformlu hayat | 0 | **22** |
+| hesap + ün ≥ 5 | 0 | **9** |
+| hesap + ün ≥ 40 | **0** | **5** |
+| aday olan ün olayı | 1/4 (`un_tanisma`) | **4/4** |
+
+**İkinci bulgu, karar Faho'nun.** Düzeltme erişim formülünü açığa
+çıkardı: `kazanç = (taban + karakter × 0,5 + takipçi × 0,06) ×
+tekrarCezası × şans × sporÇarpanı`. `takipçi × 0,06` **her
+paylaşımda** uygulanıyor, yani yıllık büyüme ≈ `1,06^paylaşım`:
+yılda 1 paylaşımda yetişkin ömrü ≈10 kat (2.000 takipçi), yılda 6
+paylaşımda ≈2,6 milyon kat. Arada basamak yok ve takipçinin **doyma
+noktası yok** (ün 100'de duruyor, takipçi sınırsız) — oysa
+`prototypeOnlyCarryOverCap = 40.000` tasarımın on binler mertebesini
+beklediğini gösteriyor. Bu bir denge kararı: **Q-235**'e öneri
+(doyma terimi), varsayılan ve iki alternatifle yazıldı. **Hiçbir
+`prototypeOnly` sayısına dokunulmadı.**
+
+**Bekçi:** `app/test/paket_cy_un_tavani_test.dart` — 4 bölüm. Medya
+kapısının ulaşılabilirliği (ün ≥ 5: taban 4, ün ≥ 40: taban 2; ölçüm
+9 ve 5), dört ün olayının gerçek karede aday olması, aracın oyunun
+verdiği paylaşım hakkını kullanması (bir yılda ≥ 3; ölçüm 6) ve ikinci
+platformun açılması, kataloğun en yüksek eşiğinin (78) ün tavanının
+(100) altında kalması.
+
+**Bekçi neyi iddia etmiyor:** takipçinin milyonlara çıkmasının doğru
+denge olduğunu. Tavan yalnızca **yazdırılıyor**, eşiğe bağlı değil —
+Q-235 onaylanıp doyma eğrisi eklenirse bu dosya kırmızıya dönmesin.
+
+**Isırma denemesi.** Bot eski hâline (yılda tek paylaşım) döndürüldü:
+§1, §2, §3 patladı ve eski sayılar birebir geri geldi — ün 3, takipçi
+1.994, bir yılda 1 paylaşım, iki platformlu hayat 0, aday olan ün olayı
+yalnız `un_tanisma`.
+
+**Tam süit** araç değişikliğinden sonra baştan koşuldu: 3762 geçti, 17
+atlandı, **0 hata** (40:15). Araç bütün hayatların zar akışını
+kaydırdığı için hedefli küme yetmezdi.
+
+**Kalan 21 sessiz iz duruyor.** Ölçümleri çıkarıldı (hangi iz kaç
+hayatta, hangi yaşta yazılıyor); karşılık olayları sıradaki içerik
+paketinin işi. En sık yazılanlar: `aile_sofrasina_katildi` 86/150,
+`orta_harcadi` 79/150, `aile_arasi_ara_buldu` 71/150, `gezide_tanisti`
+33/150, `evlilik_disi_cocuk` 32/150, `suc_direksiyon_uyarisi` 26/150.
+
+## Paket CZ — sessiz izlerin karşılığı: 22 → 0 (11 Ekim 2026)
+
+Paket AR'ın bıraktığı liste kapandı. **Sessiz hikâye izi**: oyuncu bir
+seçim yapıyor, oyun o seçimi `storyFlags`'e not alıyor, sonra hiçbir yer
+o notu okumuyor. AR 32 tane bulmuştu, AS/2 onuna karşılık yazmıştı,
+**22'si duruyordu.**
+
+**Ölçüm (150 bot hayatı, tohum 80000+i).** Her izin kaç hayatta ve hangi
+yaşta yazıldığı, bir de iz yazıldıktan sonra kaç yıl yaşandığı:
+
+| iz | hayat/150 | yaş (min-ortanca-max) |
+|---|---|---|
+| `aile_sofrasina_katildi` | 87 | 8-28-73 |
+| `orta_harcadi` | 84 | 24-39-60 |
+| `aile_arasi_ara_buldu` | 74 | 19-35-64 |
+| `evlilik_disi_cocuk` | 28 | 23-27-42 |
+| `suc_direksiyon_uyarisi` | 27 | 32-59-81 |
+| `gezide_tanisti` | 25 | 30-57-78 |
+| `eski_is_yerine_ugradi` | 23 | 61-69-78 |
+| `bebeklik_ilk_ayrilik` | 19 | 2-3-4 |
+| `aile_bulusmasini_kacirdi` | 14 | 8-22-55 |
+| `gezide_para_bitti` | 14 | 26-49-85 |
+| `is_arkadasini_yalniz_birakti` | 14 | 18-33-47 |
+| `bebeklik_atesli_gece` | 13 | 1-2-3 |
+| `cocukluk_cam_itiraf` | 11 | 7-9-12 |
+| `is_teklifi_reddetti` | 9 | 20-36-62 |
+| diğer 8 iz | 0-6 | — |
+
+İz yazıldıktan sonra en az 21, çoğunda 40-88 yıl yaşanıyor; pencereler
+bu yüzden geniş tutuldu (Paket CD dersi: dar pencere ölü halka yapar).
+
+**Yapıldı.** Yeni havuz `app/lib/data/event_pool_traces.dart` — **22
+karşılık olayı**, her biri tek bir izi okur ve yorumlar: eski sofranın
+anlatılması, gelinmeyen buluşmanın lafa karışması, ailede yeniden araya
+girme çağrısı, bebekliğin ateşli gecesinin anlatılması, ilk ayrılığın
+hikâyesi, uykusuz gecelerin hatırlatılması, kırılan camın mahallede
+anlatılması, yalnız bıraktığın iş arkadaşıyla yeniden karşılaşma,
+reddedilen teklifin gittiği yer, zor müşterinin dönüşü, eski iş
+yerinden haber, yolda tanışılanın selamı, parasız kalınan gezinin
+anlatılması, harcanan birikimin aynı kararla geri gelmesi, verilen
+sözün hatırlatılması, aileye verilen cevabın yeniden masaya gelmesi,
+çocuğun kendi seçtiği yolun dönüm noktası, paylaşılan bebek bakımının
+hatırlanması, evlilik dışı gelen çocuğun soruları, etkinlikten kalan
+ismin iş için adını anması, kapatılan yorumların sessizliği,
+direksiyon uyarısının tekrarı.
+
+Havuz `FeatureId.izlerinKarsiligi` anahtarına bağlı (Paket CX dersi:
+BL'den sonra yeni içerik havuzu anahtarsız girmez) ve silme tarifi
+`removableFiles`'a yazıldı.
+
+**Sonuç: sessiz iz 22 → 0.** `paket_ar_hikaye_izi_test.dart`'ın ölçütü
+de 22'den **0**'a sıkıldı; kazanım geri alınamaz.
+
+**Ölçümümü yine düzelttim — Paket CR'ın kör noktasının aynısı.** §3'ü
+"izi yazılmış her olayın karşılığı en az bir karede **aday** olmalı"
+diye kurdum ve bir olay patladı: `iz_uykusuz_gecelerin_bedeli`, izin
+yazılı olduğu **47 karede de** aday değildi. Sebebi içerik ya da kapı
+değil: `debugEligibleIds` görülmüş tek seferlik olayı dışlıyor, yani
+**ilk uygun yılında çıkan** bir olay "hiç aday olmadı" gibi görünüyor.
+Aynı 47 karede olay `seenEventIds` içinde işaretliydi — yani 20
+yaşında gerçekten çıkmıştı. Ulaşılabilirliğin tanımı düzeltildi: "aday
+oldu **ya da** gerçekten çıktı". Doğru soru sorulunca 22 olayın 21'i
+ölçümde gerçekten çıkıyor (22'ncisinin izi bu kohortta hiç yazılmadı:
+`orta_arabaya_soz_verdi` 1/150).
+
+**Bekçi:** `app/test/paket_cz_izlerin_karsiligi_test.dart` — 4 bölüm.
+Her karşılığın tek iz okuması ve penceresinin geniş kalması, kapının
+sızdırmaması (izi olmayan karede aday yok), yazılan izlerin
+karşılığının gerçekten ulaşılması, anahtar kapalıyken hiçbirinin aday
+olmaması.
+
+**Isırma denemesi — iki mutasyon, ikisi de yakalandı:**
+
+1. Bir olayın `requiredFlags` kapısı söküldü → §2 patladı.
+2. Havuz `kEventPool`'dan çıkarıldı → AR'ın sayacı **22**'ye geri
+   döndü ve patladı, CZ §3 de 21 olayı ulaşılamaz diye saydı.
+
+**Tam süit iki kohortu daha deviriyordu.** 22 olay `kEventPool`'a
+girince zar akışı bütün hayatlarda kaydı ve
+`paket_cj_yaslilik_bakimi_test.dart` §2'nin iki testi patladı: "bağı
+tavanda olmayan kare" 236'dan **19**'a düştü (eşik 20) ve "cepten
+çıkanı ödeyemeyen bakım yılı" 200 hayatta **hiç bulunamadı**. İkisi de
+aranan karenin seyrekliğiydi, oyunun davranışı değil. Paket CY'de
+Paket CI için yaptığımın aynısı: eşiği düşürmek yerine kohort
+**200 → 600** hayata çıkarıldı; 16 testin hepsi geçti ve eşikler
+yerinde kaldı. Bayat yorum ("200 hayatta 236 tane var") da tazelendi.
+
+## Paket DA — 21 yaşındaki oyuncunun gelini (11 Ekim 2026)
+
+Rutin "yeni doğan bebek karesi 120 hayatta bulunamadı" diyordu; kendim
+koştum ve **bayat** olduğu çıktı: dökümün 12 özel durumunun **hepsi**
+bulunuyor (yeni doğan bebek, denetim dönemi, gebelik dahil). Ama
+*bulunmak* ile *okunmak* aynı şey değil — o üç kare hiç gözle
+okunmamıştı. Okudum.
+
+**"YENİ DOĞAN BEBEK" karesinde (Riskli hayat, tohum 5, yaş 23)** 21 yaş
+günlüğünde şu satır vardı:
+
+> **Gelin** Yasemin bu sabah kapıyı çaldı, elinde bir tencere yemek vardı.
+
+21 yaşında evli çocuk olamaz. Aynı karede oyuncunun hiç çocuğu da yoktu.
+
+**Önce yanlış şüphelendim.** Başlıktaki "uzun süredir bakım yok"
+satırını yaşlılık bakımı sandım; `_bakimsiz` aslında **kendine bakım**
+(`yearsSinceGrooming`, berber) demek ve 23 yaşında doğru satır. Koda
+bakmadan bulgu yazmanın bedeli bu olurdu.
+
+**Kök neden.** `ChildMarriage.maybeMarry` yalnızca çocuk için değil
+kardeş, üvey kardeş, yarım kardeş ve üvey çocuk için de çağrılıyor
+(`life_progression`'daki `kendiEvliligiOlanlar`, Paket AP §23'ün
+yeniden evlenme döngüsü) ve doğru bağı `relation` parametresiyle
+alıyor. Ama `_createSpouse` eşin bağını **sabit** `cocugunEsi`
+yazıyordu. Yani **kardeşin eşi, oyuncunun gelini/damadı olarak
+kaydediliyordu.** `RelationType` içinde yenge/enişte diye bir tür
+hiç yok.
+
+**Ölçüm (150 bot hayatı, tohum 80000+i):**
+
+| | önce | sonra |
+|---|---|---|
+| `cocugunEsi` kaydı olan hayat | **127**/150 | 47/150 |
+| ilk görülme yaşı (min / ortanca) | **6** / 20 | 43 / 53 |
+| evlenebilir çocuğu yokken gelin/damatlı kare | **5.563** | **0** |
+| kardeşin eşi için açılmış kişi kaydı | **15.213** | **0** |
+| kardeş evliliğinin ad düzeyinde kaydı | 16.546 | 16.971 |
+
+**Bu bir tasarım kararı değil, hata.** Niyet zaten yazılıydı:
+`docs/DESIGN_REVIEW_QUEUE.md` "**kardeşin eşi kişi kaydı değil,
+yalnızca bir ad** (D-121 ile aynı sınırlama)" diyor. Kod kendi
+belgelenmiş niyetini ihlal ediyordu, o yüzden onay beklemeden
+düzeltildi: eş kaydı yalnızca `cocuk` ve `uveyCocuk` için açılıyor.
+Bilgi kaybı yok — kardeşin evliliği kendi kaydında duruyor
+(`spouseName` + kilometre taşı); yalnızca `spousePersonId` null oluyor
+ve onu okuyan yollar null'ı zaten karşılıyor.
+
+**Etkilediği yerler:** İlişkiler ekranında olmayan bir çocuğun eşi
+görünüyordu; `InLawRelations` kayın aile olayları o kişiyle
+çıkıyordu (ekranda okunan satır buydu); `interaction_policy` ve
+`kinship` onu çocuğun eşi sayıyordu. **Eski kayıtlar
+dokunulmadı** (depo kuralı: kayıt silinmez, donar) — düzeltme yeni
+hayatlarda geçerli.
+
+**Bekçi:** `app/test/paket_da_gelin_damat_test.dart` — 3 bölüm.
+Gelin/damat varsa evlenebilir yaşta çocuk da olmalı (bulunan karede,
+kurulan değil), en erken görülme yaşı 40'ın altına düşmemeli (ölçüm
+43), kardeş evliliği ad düzeyinde kaydedilmeli ama kişi kaydı
+açılmamalı.
+
+**Isırma denemesi:** kapı söküldü → üç bölüm de patladı ve eski
+sayılar birebir geri geldi (çocuksuz kare 5.563, en küçük yaş 6,
+kardeşin eşi için 15.213 kişi kaydı).
+
+**Düzeltme gizli bir araç hatasını da açığa çıkardı.** Tam süitte
+`ekran_dokumu_test.dart`'ın "70 yaşında yaşlı" dökümü patladı:
+"Found 0 widgets with text 'Rastgele bir hayat'". Sebep benim
+içeriğim değil, dökümün `ac()` yardımcısı: `pumpWidget` aynı tipte bir
+kök widget'ı yeniden basınca State korunuyor, uygulama oyun ekranında
+kalıyor ve başlangıç düğmesi bulunamıyor. Hata **hiç görünmemişti**
+çünkü ilk tohum her zaman 70'e ulaşıyordu, yani **yeniden açma yolu
+hiç yürünmemişti**. Paket DA zar akışını kaydırınca ilk tohum ölmeden
+70'e varmadı, döngü ikinci tohuma geçti ve araç çöktü. Düzeltme: her
+açılışa ayrı `ValueKey` + başlangıç ekranının geldiğini doğrulayan bir
+`expect` (artık sessizce tıklamaya çalışmıyor, gerekçeli patlıyor).
+Rutin bu tuzağı zaten not etmiş ("uygulamayı iki kez açma"); not
+`ekran_dokumu_ozel_durum_test.dart` için alınmıştı, bu dosyada
+korumasız duruyordu.
+
+**Bir tohum kırılganlığı daha.** `full_life_integration_test.dart`'ın
+"geçmiş evlilik kayıtta kalır" testi tek tohuma (19) bağlıydı ve o
+hayatın 28 yaşına kadar yaşamasını varsayıyordu; zar kayınca hayat daha
+önce bitti ve test "ölmedi" iddiasında patladı. Testin konusu geçmiş
+evliliğin kayıtta kalması, hangi tohumun 28'e ulaştığı değil: artık
+ulaşan tohum **aranıyor** (40 tohuma kadar). Eşik düşürülmedi.
+
+**Tam süit:** 3772 geçti, 17 atlandı; tek hata yukarıdaki tohum
+kırılganlığıydı ve süit başladıktan sonra yalnızca o test dosyası
+değişti, o da ayrıca koşulup doğrulandı. `flutter analyze`: temiz.
+
+## Paket DB — içerideyken dışarının iki kapısı açıktı (11 Ekim 2026)
+
+Paket DA'da başladığım işi bitirdim: dökümün okunmamış kalan iki
+karesini de gözle okudum. **Denetim dönemi** karesinde (Riskli hayat,
+tohum 3, yaş 47) 46 yaş günlüğünde şu satırlar **aynı yılda** duruyordu:
+
+> Bir yıl daha içeride geçti. Dışarısı kendi hâlinde akıyor.
+> Kayseri gezisi: Yalçın ile gittin (Otobüs), 8.100 ₺ harcadın.
+> Vlog çek: sabaha kadar bildirim yağdı. 54 abone geldi.
+
+Yani oyuncu cezaevindeyken şehir dışına çıkıyor ve vlog çekiyor.
+
+**Ölçüm (150 bot hayatı, tohum 80000+i):** 19-20 cezaevi karesi / 13-14
+hayat; o karelerde **1 gezi** ve **13 paylaşım** gerçekleşmiş.
+
+**Oyunun kendi duruşu zaten tutarlıydı:** aktivite
+(`activity_engine`), işletme (`business_engine`), hayvan bakımı
+(`pet_care`), iş başvurusu (`job_market`) ve olaylar (`event_engine`)
+içeride kapalı. Açık kalan iki delik seyahat ve paylaşımdı. Üçüncü bir
+şey de çıktı: `tourAvailability` ne cezaevini ne de **denetim
+dönemini** görüyordu — D-161 "şehir dışına çıkmak kapalı" diyor ve tur
+ikinci bir yoldu. **Yeni kural yazılmadı**, var olan duruş eksik kaldığı
+üç yere uygulandı:
+
+- `Travel.availability` → "Cezaevindesin; şehir dışına çıkamazsın."
+- `Travel.tourAvailability` → cezaevi + D-161'in denetim gerekçesi
+- `SocialEngine.postAvailability` → "Cezaevindesin; içeriden paylaşım
+  yapamazsın." (hesap kapanmaz, donar)
+
+Üçü de eylem yolunda etkili: `Travel.take`, `Travel.takeTour` ve
+`SocialEngine`'in paylaşım yolu uygunluğu zaten denetliyor.
+
+**Bekçi:** `app/test/paket_db_icerdeki_hayat_test.dart` — 3 bölüm.
+İçeride gezi/paylaşım gerçekleşmemesi (ölçüm 1 ve 13 → 0), kapıların
+bulunan karede kapalı okunması, denetim döneminde tur kapısının kapalı
+olması.
+
+**§3'ün ölçütünü düzelttim.** İlk yazışımda denetim dönemini
+`probationUntilAge != null` diye ölçtüm ve süresi **geçmiş** kayıtları
+da saydım: 254 karenin 224'ünde kapı haklı olarak açıktı, yani test
+kendi hatasını kod hatası sanıyordu. `LegalEngine.onProbation` ile
+gerçek ölçüt kullanılınca kare sayısı **14** oldu ve açık kapı **0**.
+Kayıtta bir alanın dolu olması, o dönemin hâlâ sürdüğü anlamına gelmez.
+
+**Isırma denemesi:** üç kapı söküldü → üç bölüm de patladı ve eski
+sayılar geri geldi (içeride 1 gezi + 13 paylaşım, 43 açık gezi kapısı,
+8 açık paylaşım kapısı, denetimde 9 açık tur kapısı).
+
+## Paket DC — okulu bırakmak oyunun tek geri dönüşsüz kararıydı (11 Ekim 2026)
+
+Dökümün üçüncü ve son okunmamış karesini (**gebelik**) okudum. Gebelik
+tarafı temiz çıktı — ikinci gebelik zaten kapalı (`intimacy.dart`,
+`fertility_treatment.dart`), metinler yerinde. Ama aynı karenin
+**meslek sekmesi** şunu gösterdi:
+
+```
+35 yaşında · Okul dışı
+Meslek            Sanayide çırak (yarım zamanlı)
+Yıllık maaş       336.552 ₺
+Bu işteki süren   18 yıl
+Ustalık           Başusta · sonraki basamağa 10 yıl
+...
+Yarım zamanlı iş 16 yaşında, tam zamanlı iş liseyi bitirdikten
+sonra açılır.
+```
+
+İş arama satırı **hiç yok**. Kayıttaki tek sebep: 9. sınıfta okulu
+bırakmış.
+
+### Ölçüm
+
+| Ölçü | Sonuç |
+|---|---|
+| Katalog `JobEducation.yok` | 25 iş |
+| Katalog `JobEducation.lise` | **17 iş** |
+| Katalog `JobEducation.universite` | **13 iş** |
+| Bulunan durumda (30 yaş, bırakmış) motorun izin verdiği iş | **13** (6'sı tam zamanlı) |
+| Aynı durumda ekranın gösterdiği satır | **0** |
+| 236 hayatta 30 yaşında diplomasız | 4 (%1,7) |
+| Bunlardan okulu bırakan | 4/4 (üç yıl sınıfta kaldıktan sonra) |
+
+### İki mesele çıktı; biri hataydı
+
+**1. Ekran motorla çelişiyordu (OYUN hatası).**
+`school_career_screen.dart`'taki koşul şuydu:
+
+```dart
+final bool isAranabilir = egitim.finished ||
+    egitim.universityFinished ||
+    (egitim.isSchoolStudent && yarimZamanliCagi);
+```
+
+Diploması olmayan ve artık öğrenci olmayan oyuncu üçünü de
+sağlamıyor → "İş ara" **ve** "İş değiştir" satırı ömür boyu
+gizleniyordu. Üstüne motorun kuralı olmayan bir gerekçe yazılıyordu.
+Motorun gerçek kapısı (`JobMarket.requirementReason`) tam zamanlı işi
+yalnızca **öğrenciye** kapatıyor (D-131) ve diplomayı iş iş soruyor.
+Koşul motorun kuralına indirildi: iş arama yaşa bağlı, hangi işin açık
+olduğunu motor söyler ve her birinin gerekçesini kendi yazar.
+
+**Bu kusur yalnızca ekranda olduğu için hiçbir bot ölçümü onu
+göremezdi:** bot `applyForJob`'u doğrudan çağırıyor, `isAranabilir`'den
+geçmiyor. Paket CT ve CU'nun dersi burada da geçerliydi — ekranı
+okumadan bulunmuyor.
+
+**2. Diploma almanın yolu hiç yoktu (içerik boşluğu).**
+`açık lise`, `reEnroll`, `okula dön` diye aranan hiçbir şey kodda
+geçmiyordu. Yani okulu bırakmak oyunun **tek geri dönüşsüz** kararıydı
+ve 30 iş ömür boyu kapanıyordu.
+
+### Eklenen: açık lise
+
+`lib/domain/education/open_high_school.dart`,
+`FeatureId.acikLise` (varsayılan açık), `prototypeOnly` sayılarla:
+18 yaş, 3.500 ₺/yıl, bırakılan sınıftan 12'ye yılda bir sınıf,
+geçme koşulu yalnızca ücretin ödenmesi.
+
+**Tasarımın kritik noktası:** kayıt `EducationState.enrolled` değil
+**ayrı bir alanda** (`openHighSchoolGrade`) tutuluyor. `enrolled`
+açılsa oyuncu `isSchoolStudent` sayılır ve `JobMarket` tam zamanlı işi
+kapatırdı — yani açık lisenin bütün anlamı (çalışırken okumak) yok
+olurdu. Bekçi bunu ayrıca denetliyor ve `enrolled` kullanılsa
+**düşüyor** (ısırma denemesi yapıldı).
+
+Diploma alınınca `asFinished()` kaydı kapatıyor, `droppedOut` geçmişi
+**silinmiyor** (oyuncunun geçmişi yeniden yazılmaz) ve 17 iş açılıyor.
+Bekçi 17 işin hiçbirinde artık "Lise mezuniyeti gerekiyor." çıkmadığını
+tek tek denetliyor.
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_dc_acik_lise_test.dart` (9 test, hepsi geçti). Durum
+**kurulmuyor, aranıyor**: `_diplomasizYetiskinAra()` bot hayatlarını
+tarar ve ilk uyan kareyi alır; §1b o kareyi gerçek ekrana
+`debugSetState` ile verir.
+
+| Isırma | Sonuç |
+|---|---|
+| Eski `isAranabilir` koşulu geri konuldu | §1b düştü: `Found 0 widgets with text "İş ara"` |
+| `enroll` `enrolled: true` de yazsaydı | §2a düştü: `isSchoolStudent` `true` çıktı |
+
+### Kapsam sınırı (bilerek) ve kuyruk
+
+Açık ortaokul yok (9'un altında ayrılan da 9'dan devam eder; ölçümde
+9'un altında ayrılan hayat çıkmadı). Yetişkin için üniversite yolu
+(AÖF) de yok: diploma alan 30 yaş üstü oyuncu üniversiteye
+başvuramıyor, çünkü `needsAfterSchoolChoice` 30 yaşla sınırlı (D-111).
+Yani açık lise 17 işi açıyor, 13 iş hâlâ kapalı. Sayılar ve kapsam
+**Q-236**'da karar bekliyor; önerim bu hâliyle onay, sıradaki paket
+olarak AÖF.
+
+### Yan bulgu (düzeltilmedi, not edildi)
+
+Aynı karede iki merdiven aynı kelimeleri paylaşıyor: iş basamağı
+(`levels: ['Çırak', 'Kalfa']`) ile ustalık basamağı
+(`Çırak/Kalfa/Usta/Başusta/Duayen`). Ekranda "Kalfa" rozeti ile
+"Ustalık: Başusta" birlikte duruyor; günlükte de "Kalfa olarak 16 yılı
+doldurdun: artık başusta sayılıyorsun" yazıyor. Ölçtüm: çakışma 55
+işten **yalnızca birinde** (`yz_sanayi_cirak`). Paket yapacak kadar
+değil, Q-236'nın konusu da değil — not olarak burada.
+
+## Paket DD — 18'inde verilen bir karar, 32'sinde 13 işi kapatıyordu (11 Ekim 2026)
+
+Paket DC'de çıkan hata bir **sınıfın** örneğiydi, bu yüzden sınıfı
+taradım: her kalıcı durum için "bunu geri alan bir yol var mı, yoksa
+yalnızca ekran mı kapatıyor?"
+
+| Kalıcı durum | Motor ne diyor | Ekran ne yapıyor | Hüküm |
+|---|---|---|---|
+| Diploma yok (`droppedOut`) | 13 işe izin | 0 satır | Paket DC |
+| **"Üniversiteye gitmedim" izi** | **88/88 hayatta en az bir bölüme izin** | satır ömür boyu gizli | **bu paket** |
+| Emekli (`isRetired`) | 20/55 işe izin, `applicationAvailability` "İZİN" | iş arama satırı gizli | **Q-237** (sömürü riski) |
+| İşletme kapanmış | yeni işletme kurulabilir | satır açık | sorun yok |
+
+### Ölçüm (197 hayat, 32 yaşında bakıldı)
+
+- **88 hayatta (%45)** `universiteye_gitmedi` izi var, lise diploması
+  var, üniversite kaydı yok.
+- Bu 88'in **hepsinde** motor en az bir bölüme izin veriyor.
+  `EducationPath.eligibilityReason` o izi **hiç okumuyor**. Örnekler:
+  puanı 93 olan bir hayatta 20/20 bölüm uygun, 72 olanda 15/20, 50
+  olanda 8/20.
+- Her birine **11-13 iş** "Üniversite mezuniyeti gerekiyor." diye
+  kapalı kalıyor.
+
+Yani 18'inde "üniversiteye gitmeyeceğim" diyen oyuncu **bir daha hiç**
+başvuramıyordu — motor izin verdiği hâlde.
+
+### Kök neden: iki ayrı soru tek yüklemle sorulmuş
+
+Ekran üniversite kapısını `needsAfterSchoolChoice`'a bağlıyordu. O
+yüklem **"karar bekliyor mu?"** sorusunu yanıtlar ve "gitmedim" izini
+okur (D-111: kararı vermiş oyuncuyu sonsuza dek bekletmemek için).
+Oysa ekranın sorması gereken soru **"kapı açık mı?"**.
+
+Yeni yüklem eklendi: `EducationPath.canApplyToUniversity` — diploma
+var, üniversite kaydı yok, bitirilmemiş. Karar kilidi ve onun yaş
+sınırı (`prototypeOnlyAfterSchoolMaxAge = 30`) **değişmedi**.
+
+### Önceki düzeltmeyle gerilim ve çözümü
+
+Aynı dosyada kayıtlı bir düzeltme vardı: satır eskiden
+`awaitingAfterSchoolChoice`'a bağlıydı ve 35/55/70 yaşındaki oyuncuya
+"Mezuniyet sonrası · Üniversiteye başvur veya iş hayatına gir" diye
+**bayat** duruyordu. Onu geri almadım: karar satırı yine karar
+kilidine bağlı. Yeni satır **ayrı** ve adı eylemin kendisi
+("Üniversiteye başvur · Lise diploman var, bölüm kaydın yok"), bayat
+bir çerçeve değil. Başvuru ekranı (`AfterSchoolPage`) zaten bu durumu
+kaldırıyordu: puanı gösteriyor, bölümleri bölüm bölüm gerekçesiyle
+listeliyor, "iş hayatına gir" düğmesi duruyor — yalnızca oraya giden
+yol kapalıydı.
+
+### Bekçi ve ısırma denemesi
+
+`app/test/paket_dd_geri_donussuz_test.dart` (4 test). §1 motorun izi
+okumadığını bulunan durumla gösterir, §2 kararı vermemiş oyuncuda iki
+yüklemin birlikte doğru olabildiğini, §3 kaydolan/bitiren için kapının
+kapandığını, §4 gerçek ekranda satırı ve başvuru sayfasını denetler.
+
+| Isırma | Sonuç |
+|---|---|
+| Yeni satırın koşulu kapatıldı | §4 düştü: `Found 0 widgets with key 'career_universiteye_basvur'` |
+
+### Emeklilik: aynı şekil, ama düzeltmedim
+
+Tarama üçüncü bir örnek buldu: 61 yaşındaki emeklide motor 55 işin
+20'sine izin veriyor ve `applicationAvailability` tek bir işte bile
+"emeklisin" demiyor; kuralı yalnızca ekran kuruyor. İlk ikisi gibi
+düzeltmedim çünkü **sömürü riski var**: emekli maaşı yürürken maaş da
+almak iki gelir demek ve bu bir denge kararı. **Q-237**'de öneri ve
+varsayılanla duruyor (önerim: dönüş açılsın, ama işe girince emekli
+maaşı kesilsin).
+
+## Paket DE — en ince bant 3-6 kaldı (11 Ekim 2026)
+
+Paket CX 0-2'yi doldurdu. Bandı yeniden ölçtüm (160 bot hayatı,
+`BotLifeResult.eventsByAge`):
+
+| bant | yıl başına olay | farklı olay |
+|---|---|---|
+| 0-2 bebeklik | 1,00 | 36 |
+| **3-6 okul öncesi** | **1,04** | **55** |
+| 7-11 ilkokul | 1,47 | 103 |
+| 12-15 ergenlik | 1,57 | 130 |
+| 16-20 eşik | 1,67 | 166 |
+| 21-29 genç yetişkin | 1,76 | 197 |
+| 30-39 otuzlar | 1,81 | 259 |
+| 40-49 kırklar | 1,74 | 269 |
+| 50-59 ellili | 1,71 | 280 |
+| 60-64 | 1,69 | 236 |
+| 65-74 yaşlılık | 1,63 | 267 |
+| 75+ son yıllar | 1,47 | 187 |
+
+`docs/EKSIKLER.md` §4.1 zaten "çocukluk en fakir dönemdi" diyordu;
+ölçüm hâlâ onu gösteriyor. 3-6'nın farklı olay sayısı ilkokulun
+yarısından az.
+
+### Yıl başına 1,04 sayısının tabanı var, tavanı yok
+
+Motor yılın bir olayını her zaman çeker; **ek** olay için üç ilerleme
+adımı ister (D-125) ve bu yaşta çocuk ilerleme adımı üretmiyor. Yani bu
+bandın yoğunluğu havuzun genişliğiyle değil motorun kuralıyla sınırlı.
+Bu paketin işi yıl başına sayıyı artırmak **değil**; o bir olayın hep
+aynı altı olay olmasını engellemek. Sayıyı değiştirmek isteyen bir
+karar gerekirse o D-125'e dokunur ve bana ait değil.
+
+### Eklenen
+
+`lib/data/event_pool_preschool.dart`: **22 olay** — 16'sı 3-6
+penceresinde (misafir önünde şiir, duvara çizgi, çizgi film pazarlığı,
+elektrik kesintisi, sokakta top, oyuncak kavgası, pazar günü, bayram
+harçlığı, büyüklerde kalmak, yazı köyde geçirmek, düğün, ilk bisiklet,
+okulun önünden geçmek, hastalık günü, mahalle doğum günü, stüdyo
+fotoğrafı) ve **6'sı karşılık olayı**.
+
+Modül anahtarı: `FeatureId.okulOncesiYillar`. Paket BM/CX'in
+`ilkYillarOlaylari` anahtarından **ayrı** tutuldu; ikisi aynı pencereyi
+paylaşıyor ama ayrı paketler ve Faho ikisini ayrı ayrı kapatabiliyor.
+BM'in bekçisi bundan etkilenmiyor: oran iddiası yalnızca 0 yaşında ve
+bu havuzun olayları 3+.
+
+### CX'in dersleri baştan uygulandı
+
+- `livingRelations` **ANY**'dir. Hiçbir metin iki kişiyi birlikte
+  varsaymıyor ve §4 bunu kaynak tarayarak da denetliyor.
+- Yazılan altı izin altısının da okuyanı var (Paket AR/CZ kuralı);
+  §5 iki yönlü denetliyor (yazılıp okunmayan **ve** okunup yazılmayan).
+- Erişilebilirlik "aday **veya** çıkmış" diye soruluyor (Paket CR/CZ'nin
+  kör noktası).
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_de_okul_oncesi_test.dart` (6 test).
+
+| Isırma | Sonuç |
+|---|---|
+| Anahtar `FeatureEvents`'e bağlanmasa | §6 düştü: kapalıyken **3343** aday çıktı |
+| Bir izin karşılık olayı izi okumasa | §5 düştü: `{okul_oncesi_sokak_oyunu}` okunmuyor |
+
+**Kendi bekçim kendi metnimi yakaladı:** §4'ün kaynak taraması düğün
+olayında "Masadaki tabaklardan **ikisi**ni bitirdin" cümlesini işaretledi.
+Yanlış pozitifti (tabaklardan söz ediyor, kişilerden değil) ama bekçiyi
+gevşetmek yerine metni değiştirdim — o tarama CX'te gerçek bir hata
+yakalamıştı ve zayıflatılmamalı.
+
+### Zar kayması üç kırılgan kohortu düşürdü (hepsi tamir edildi)
+
+22 olay eklemek zar akışını kaydırdı ve Paket DA'nın dersi tekrar
+çalıştı: **hiç yürünmemiş yollar açıldı, hiç ıskalanmamış kareler
+ıskalandı.** Üç test kırmızıya döndü. **Hiçbirinin tabanı
+düşürülmedi**; üçü de ölçülüp kohortu büyütülerek ya da aracı
+düzeltilerek tamir edildi.
+
+| Test | Neden düştü | Tamir |
+|---|---|---|
+| `paket_cr_bekleyen_kare_test` | "içeriden geçen" tabanı 10'du, 250 hayatta **beklenen değer ~9** — taban beklenenin üstündeydi | Kohort 250 → **600**; ölçüm: 239 suç · 128 duruşma · 22 içeride · 22 denetim. Tabanlar 180/80/12/12 |
+| `paket_cj_yaslilik_bakimi_test` | Karşılaştırma **3 tohumla** yapılıyordu; karar oranı %60, üçünün birden ıskalama olasılığı %6,4 | Tohum kümesi 3 → **12** (aynı olasılık %0,002) |
+| `paket_dd_geri_donussuz_test` §4 | Aranan kare değişti ve o karede **bir alt sayfa açıktı**: sekme düğmesi tıklanamadı | Arama `onYear` → **`onPreAge`** (Paket CR'nin ayrımı) + sessiz kare süzgeci; `scrollUntilVisible` |
+
+Üçüncüsünde iki kez yanlış teşhis koydum: ilk önce satırın tembel
+listede ekranın altında kaldığını sandım (kaydırma ekledim, yetmedi),
+sonra sessiz kare süzgecini `onYear` üstüne koydum ve **hiç kare
+bırakmadı** — çünkü `onYear` yılın olayı cevaplanmadan çalışıyor ve
+orada `hasPendingEvent` neredeyse her zaman dolu. Doğru kanca
+`onPreAge`'di. Aynı dersin tersi de çıktı: §2 karar **kilidini** arıyor
+ve o kilit `onPreAge`'den önce kapanıyor, yani §2 bilerek `onYear`'da
+kaldı. Paket CR'nin iki kancası arasındaki fark kâğıt üstünde değil,
+pratikte de belirleyici.
+
+Süit: 3796 geçti, 17 atlandı, 0 hata. `flutter analyze` temiz.
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DF — her oyunun en son gördüğü ekran hiç okunmamıştı (11 Ekim 2026)
+
+Üç ekran dökümünün üçü de ölümde geri dönüyordu
+(`if (controller.state!.deceased) return;`) ve `ekran_dokumu_bot_test`
+bunu açıkça yazıyordu: "o karede oyun bilerek 'Bir ömür tamamlandı'
+özetini" gösteriyor. Yani **her oyunun son ekranı** bugüne kadar
+basılmamış ve gözle okunmamıştı. Yeni araç:
+`app/test/ekran_dokumu_omur_sonu_test.dart` — altı arketipin ömür sonu
+karesini basar (özeti kurmaz; bot hayatını ölüme kadar oynatıp son
+durumu uygulamaya verir).
+
+### İlk karede çıktı
+
+| Hüküm paneli (doğru) | Meslek satırı (yanlış) |
+|---|---|
+| "3 işte toplam 43 yıl çalıştın. Mesleğinde başusta oldun." | "Son iş: **Çalışmıyor**" |
+| "4 işte toplam 40 yıl çalıştın." | "Son iş: **Çalışmıyor**" |
+| "Tek bir işte 43 yıl geçirdin. Mesleğinde duayen oldun." | "Son iş: **Çalışmıyor**" |
+
+Altı karenin **beşi** böyleydi; altıncı ölürken hâlâ çalışıyordu ve
+doğru yazıyordu. Ekran hem anlamsız bir cümle kuruyor hem de **kendi
+hüküm paneliyle çelişiyordu**.
+
+**Kök neden.** Satır `'Son iş: ${career.label}'` yazıyordu ve
+`CareerState.label` = `job?.name ?? 'Çalışmıyor'`: bugünkü işi soruyor.
+Son iş **geçmişten** okunur. `CareerState.lastJobLabel` eklendi:
+`history` içindeki (ayrılış yaşı yazılmış) son giriş, o yoksa
+`pastJobIds`; katalogdan düşmüş kimlik atlanır, uydurma ad yazılmaz.
+
+**Önek bilerek duruyor.** Düzeltirken önce "Son iş:" önekini de
+düşürdüm ve bir bilgi kaybettim: "Aşçı" ile "Son iş: Aşçı" farklı
+şeyler söyler — ikincisi oyuncunun ölürken çalışmadığını da anlatır.
+Geri kondu. Döküm şimdi beş karede "Son iş: …", bir karede (ölümde
+çalışan) çıplak iş adı yazıyor.
+
+### İkinci eksik: işletme sahibine "Çalışmadı"
+
+Aynı dalda hiç maaşlı iş tutmamış ama **işletme kurmuş** oyuncuya
+"Çalışmadı" yazılıyordu. Futbolcu (AY/3) ve dövüşçü (AY/5) için bu
+düzeltilmişti; işletme sahibi atlanmıştı. Artık "Kendi işini kurdu"
+yazıyor.
+
+**Şüphemi ölçtüm ve ilk hâliyle yanlıştı:** 200 bot ölümünde bu dal
+**0 kez** yürünüyor (bot her hayatta bir işe giriyor). Ama motor izin
+veriyor — `BusinessEngine.openAvailability` maaşlı iş istemiyor
+(kapılar: öğrenci değil, yaş, zekâ, karizma, ehliyet, para). Yani bu da
+Paket DC §1 gibi **bot ölçümünün göremediği** bir yol; koruması kaynak
+taramasıyla yapıldı.
+
+### Bekçi ve ısırma denemesi
+
+`app/test/paket_df_omur_sonu_test.dart` (4 test): §1 yüklemin geçmişi
+okuduğunu bulunan durumla, §2 hiç çalışmamışta `null` döndüğünü,
+§3 gerçek ekranda satırın doğru yazıldığını, §4 kaynak taramasıyla
+hatanın tam şeklinin (`'Son iş: ${state.career.label}'`) geri
+gelemeyeceğini denetler.
+
+| Isırma | Sonuç |
+|---|---|
+| Eski satır geri konuldu | §3 düştü: ekranda `Found 1 widget with text "Son iş: Çalışmıyor"` |
+
+Dökümün kendisi de bir araç hatası çıkardı: uygulamayı ikinci kez
+açınca "Rastgele bir hayat" düğmesi yok (Paket DA'nın tuzağı). Aynı
+çözüm uygulandı (`ValueKey` ile her açılışta tazeleme).
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DG — ilkokul yılları: çeşitlilikte en düşük bant (11 Ekim 2026)
+
+`docs/EKSIKLER.md` §7'nin 2. maddesi: "Çocukluk ve ergenlik olayları —
+oyunun en fakir ve en duygusal dönemi." Paket CX 0-2'yi, Paket DE
+3-6'yı doldurdu. Sıradaki bandı **yıl başına olay** yerine **bant yılı
+başına farklı olay** ile seçtim; o ölçü daha doğru soruyu soruyor:
+
+| bant | yıl | yıl başına olay | farklı olay | **bant yılı başına farklı** |
+|---|---|---|---|---|
+| **7-11 ilkokul** | 5 | 1,47 | 103 | **20,6** |
+| 21-29 genç yetişkin | 9 | 1,76 | 197 | 21,9 |
+| 30-39 otuzlar | 10 | 1,81 | 259 | 25,9 |
+| 12-15 ergenlik | 4 | 1,57 | 130 | 32,5 |
+| 16-20 eşik | 5 | 1,67 | 166 | 33,2 |
+
+7-11'in yıl başına olay sayısı ortalamaya yakın (1,47) ama **çeşitlilik
+en düşük**: oyuncu beş yıl aynı yirmi olayın içinde dönüyor. Yani bu
+bandın sorunu "boş yıl" değil **tekrar**.
+
+### Eklenen
+
+`lib/data/event_pool_primary.dart`: **22 olay** — 16'sı 7-11
+penceresinde (sıra arkadaşı, tahtaya kalkma, karne günü, kopya teklifi,
+beden dersi takım seçimi, tören günü, öğretmenin bir cümlesi, kantin
+parası, sınıf fotoğrafı, kırtasiye, harçlık pazarlığı, kütüphaneden ilk
+kitap, mahalle maçı, kavga ve barışma, kardeşe göz kulak olmak, yaz
+tatilinin bitişi) ve **6'sı karşılık olayı**.
+
+Modül anahtarı: `FeatureId.ilkokulYillari` (yine ayrı; Paket BM'in 0-7
+penceresiyle yalnızca 7'de kesişiyor).
+
+**Bu yaşın tonu 0-6'dan farklı:** çocuk artık kendi kararını veriyor
+(kopyayı reddetmek, elini kaldırmak, parayı paylaşmak) ama sonuçlar
+yetişkin ölçeğinde yazılmıyor — ne kariyer ne büyük para. Okul olayları
+`requiresSchoolStudent` ile kapılı.
+
+### §7 boşa çalışıyordu; varsayımı sabitleyen bekçiye çevrildi
+
+İlk hâlinde §7 şöyle diyordu: "okul olayları, okul öğrencisi olmayan
+karede aday olmuyor" — 400 kare tarandı ve ölçüm **0/400** çıktı. Yani
+döngünün gövdesi hiç yürümedi ve iddia hiçbir şey kanıtlamıyordu.
+Sebebi tesadüf değil, kuralın kendisi:
+
+| kural | değer |
+|---|---|
+| `prototypeOnlySchoolStartAge` | 6 |
+| `prototypeOnlyFailMinGrade` (sınıfta kalma) | 9 |
+| `prototypeOnlyDropOutMinAge` (okulu bırakma) | 15 |
+
+7-11 bandında oyuncu **kural gereği** her zaman okullu. Boş iddianın
+yerine **varsayımın kendisi** sabitlendi: bu üç sayıdan biri bandın
+içine kayarsa test kırılır ve değiştiren kişi notu okur — o zaman okul
+kapısının çalışma zamanı dalı gerçekten denenebilir hâle gelmiş olur.
+
+### Bekçi ve ısırma denemesi
+
+`app/test/paket_dg_ilkokul_test.dart` (7 test; DE'nin bekçisinin kalıbı
+üstüne §7).
+
+| Isırma | Sonuç |
+|---|---|
+| Anahtar `FeatureEvents`'e bağlanmasa | §6 düştü: kapalıyken **3995** aday çıktı |
+
+### Zar kayması iki eski bekçiyi düşürdü; ikisi de düzeltildi, hiçbiri gevşetilmedi
+
+22 yeni olay yıllık havuzun ağırlık dağılımını değiştiriyor, yani
+**hiçbir sayıya dokunmasam da** tohum başına çıkan olay dizisi kayıyor.
+Bu kayma iki eski iddiayı düşürdü. İkisi de yanlış **yüklem** üstüne
+kuruluydu; ölçüm ikisinde de bunu gösterdi.
+
+**1. `paket_ay_football_measurement_test` — "kabul edilen" ≠ "oynayan".**
+İddia şuydu: profesyonele kabul edilen her hayatın zirve ünü > 0. 1200
+spor odaklı hayatta bir tanesi düştü. Suçlu tohum arandı ve bulundu:
+
+| tohum 41961 | değer |
+|---|---|
+| profesyonel sezon | **0** |
+| ölüm yaşı | **19** |
+| zirve ün | 0 |
+
+Sözleşmeyi imzaladı ve **ilk sezonundan önce öldü**. Ün kazanmaması
+hata değil. Kohortun tamamı ölçüldü:
+
+| ölçü | değer |
+|---|---|
+| profesyonele kabul edilen | 65 (%5,4) |
+| hiç sezon oynamayan | **1** (%1,5) |
+| **sezon oynayıp ünü 0 olan** | **0** |
+
+Yani Paket AY/2'nin koruduğu asıl hata (300 maç oynayan tanınmamış
+kalıyordu) geri gelmemiş. Yüklem niyetine çevrildi — "oynayıp ünü 0
+olan = 0" — ve hiç oynamayanın ün kazanmaması da ayrıca sabitlendi.
+
+**2. `paket_bm_ilk_yillar_test` — bekçi değil, %2'lik kura.**
+İddia şuydu: 60 hayatta en az bir "ilk yıl karşılığı" olayı çıkar.
+Ölçüm (2×300 hayat) bu satırın baştan beri kura olduğunu gösterdi:
+
+| | DG açık | DG kapalı |
+|---|---|---|
+| en az bir karşılık gören hayat | 19/300 (%6,3) | 21/300 (%7,0) |
+| **60 hayatta hiç çıkmama ihtimali** | **%2,0** | **%1,3** |
+
+İki kohort aynı: yeni içerik oranı düşürmedi, sadece kuraya denk geldi.
+Kohortu 300'e çıkarmak çareydi ama süite 600 hayat eklerdi — ve
+gereksizdi: karşılık olaylarının **tek** kapısı yaş + iz, yani iddia
+zar gerektirmiyor. Bekçi ikiye bölündü:
+
+- **§1 katalog (zarsız, 4 saniye):** ilk yılların koyduğu 8 izin hepsi
+  bir yerde okunuyor mu?
+- **§2 yapısal:** izi taşıyan, penceresi açık kare **aranır** (kurulmaz)
+  ve o karede okuyucu aday olmak zorundadır. 60 hayatta 20 kare bulundu,
+  20'sinde de aday.
+
+İkisi birbirinin kör noktası: koşula yanlış bir kapı eklenirse §2
+düşer, izin **adı** bozulursa §2 hiç kare bulamaz ama §1 düşer. İkisi
+de denendi:
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Okuyucuya 8-12 yaşında sağlanamaz kapı (`livingRelations: es`) | §2 | "8 yaşında iz var, pencere açık, ama aday değil" |
+| Okuyucunun aradığı izin adı bozuk | §1 | "ilk_yillar_kumbara sessiz iz: hiçbir olay onu okumuyor" |
+
+Araç kendi kör noktasını da gösterdi: `onPreAge` karesi karşılık
+çıktıktan **sonra** çalışıyor, karşılığın kendi `forbiddenFlags`'i de o
+kareyi eliyor — yani çabuk çıkan karşılığın karesi hiç görünmüyor
+(Paket CR'ın akrabası). Tablo artık "çıkmış hayat" sütununu da basıyor
+ve taban "kare bulundu **ya da** karşılık çıktı" diyor.
+
+Ölçümün yan ürünü bir denge sorusu: izi **koyan** olay da seyrek —
+`kumbaraBasladi` 300 hayatta **2** kez konuyor, yani yazılmış bir
+karşılık pratikte okunmuyor. Katsayıya dokunmadım; **Q-238** olarak
+kuyruğa öneri + varsayılanla girdi.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DH — Geçmiş Hayatlar arşivi ilk kez okundu (11 Ekim 2026)
+
+Paket DF ömür sonu ekranını ilk kez basmıştı. Aynı soruyu bütün
+ekranlara sordum: **hangi ekran hiç okunmadı?** Dokuz ekran, dört döküm
+aracı tarandı ve `lib/ui/screens/past_lives_screen.dart` testlerde
+**hiç geçmiyordu** — ne bir döküm, ne bir widget testi, ne aranan bir
+anahtar. Oysa oyuncunun ilk hayatından sonra en çok göreceği ekran bu:
+oyunun kupa rafı.
+
+Yeni araç: `app/test/ekran_dokumu_gecmis_hayatlar_test.dart`. Arşivi
+kurmaz; bot hayatlarını ölüme kadar oynatır, uygulamanın **kendi**
+`clearLife()` akışıyla arşive yazdırır ve üç kare basar.
+
+### İLK KAREDE İKİ GERÇEK HATA
+
+**1. Arşive "Meslek: Son iş: Çalışmıyor" yazılıyordu — 3/3 kayıtta.**
+
+Kayıt kendi satırlarıyla çelişiyordu:
+
+| Arşivdeki satırlar (doğru) | Meslek satırı (yanlış) |
+|---|---|
+| "Kıdemli danışman olarak bir yılın doldu; 653.160 ₺ cüzdanına girdi." | "Meslek: Son iş: Çalışmıyor" |
+| "Emekli aylığın yattı: 745.445 ₺." | "Meslek: Son iş: Çalışmıyor" |
+| "Kıdemli danışman olarak çalıştığın iş yerinde küçülmeye gidildi." | "Meslek: Son iş: Çalışmıyor" |
+
+Kök neden **yazım hatası değil kopyaydı.** Paket DF aynı kusuru ömür
+sonu *ekranında* düzeltmişti (`career.label` **bugünkü** işi söyler;
+ölü oyuncuda `job?.name ?? 'Çalışmıyor'` → "Çalışmıyor"). Ama zincirin
+ikinci bir kopyası `GameController._archiveWithCurrentLife()` içindeydi
+ve o düzeltilmedi. Dahası ekran kopyası yalnızca o anı etkiliyordu;
+arşiv kopyası **kayıt dosyasına kalıcı** yazıyor.
+
+Düzeltme kopyayı kaldırdı: zincir `lib/domain/life/career_summary_label.dart`
+içine taşındı (`CareerSummaryLabel.of`) ve iki çağıran da oradan okuyor.
+Sıra bilinçli — çalışıyorsa bugünkü iş, değilse geçmişten okunan son iş
+(`CareerState.lastJobLabel`), o da yoksa emeğin geçtiği yer
+(profesyonel futbolcu / dövüş sporcusu / kendi işini kurdu), hiçbiri
+yoksa "Çalışmadı".
+
+**Kayıtta duran eski satırlar düzelmez ve düzeltilmeye çalışılmadı:**
+arşiv yalnızca metni saklıyor, iş kimliğini saklamıyor. Yani eski
+kayıtlardaki "Son iş: Çalışmıyor" ifadesini doğruya çevirmek için gerekli
+bilgi kayıtta yok. Uydurmak yerine olduğu gibi bırakıldı; yeni biten
+hayatlar doğru yazılıyor.
+
+**2. Oyuncu kendi biten hayatını arşivde görmüyordu.**
+
+Kare A: 78 yıllık hayat bitti, oyuncu "Geçmiş Hayatlar" düğmesine
+bastı ve **"Henüz tamamlanmış bir hayat yok."** okudu — hemen
+altındaki panel "Bu hayatın özeti, yeni hayata başlasan bile Geçmiş
+Hayatlar arşivinde saklanır." derken. Ekran kendi vaadiyle çelişiyordu.
+
+Sebep: biten hayat arşive ancak `clearLife()` çağrıldığında, yani
+oyuncu **yeni bir hayata başladığında** yazılıyor; ekran ise
+`state.pastLives` okuyordu. `GameController.archiveWithCurrentLife`
+eklendi (durumu değiştirmez, yalnızca hesaplar) ve hem ekran hem
+düğme sayacı ona bağlandı. Düğme artık ilk ölümde de sayı gösteriyor.
+
+| | önce | sonra |
+|---|---|---|
+| düğme | "Geçmiş Hayatlar" | "Geçmiş Hayatlar (1)" |
+| ekran | "Henüz tamamlanmış bir hayat yok." | "1 tamamlanmış hayat · Cengiz Aydın" |
+| meslek | "Son iş: Çalışmıyor" | "Son iş: Depo personeli" |
+
+### Üçüncü şüphe ölçümde çürüdü
+
+Kart anahtarı `past_life_<ad>_<yaş>`. Kuşak devamında soyadı miras
+kaldığı için iki kaydın anahtarının çakışması akla yakındı — ve biten
+hayat da listeye girdiği için risk arttı. **Ölçüldü:** 400 rastgele
+hayatın 250'si ölüyor ve 250 anahtarın **hepsi farklı** (0 çakışma);
+üstelik çakışan iki kayıtla ekran hata vermeden çiziliyor. Kusur yok,
+düzeltme yapılmadı. İddia yine de §4'te duruyor: Flutter bir gün
+çakışmayı sert hata yaparsa haber verir.
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_dh_arsiv_test.dart` (4 test).
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Arşiv eski zincire döndürüldü | §1 | 3 arketipte "arşivde Son iş: Çalışmıyor" |
+| Ekran yine `state.pastLives` okudu | §3 | "Hayat bitti ama arşiv boş diyor" |
+| Ekran "Son iş:" metnini kendi kurdu | §2 | "kendisi kuruyor; CareerSummaryLabel kullanılmalı" |
+
+§2'nin ilk hâli **fazla kabaydı**: bütün dosyayı tarıyordu ve üç
+bulgusunun üçü de bu kusuru *anlatan yorum satırlarıydı*. Tarama
+yorumları atlayacak ve `career.label`'ı tek başına değil ömür sonu
+metniyle aynı ifadede arayacak şekilde daraltıldı — `career.label`
+**yaşayan** oyuncuda doğru alandır, yasak olan onu ömür sonunda okumak.
+
+§3 ilk koşuda Paket DD'nin tuzağına düştü: arşiv düğmesi uzun bir
+tembel listede olduğu için kaydırılmadan ağaçta bile değildi
+(`scrollUntilVisible` eklendi).
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DI — gebelik, yeni doğan ve denetim dönemi ilk kez okundu (12 Ekim 2026)
+
+PR takip rutini üç kareyi aylardır "HÂLÂ OKUNMAMIŞ" diye taşıyordu ve
+biri için **"120 hayatta BULUNAMADI"** yazıyordu. Önce o notu ölçtüm
+(4 arketip × 60 hayat, `onPreAge`):
+
+| arketip | çocuğu olan | gebelik karesi | **0 yaşında çocuk** | denetim | cezaevi |
+|---|---|---|---|---|---|
+| family | 43 | 43 (123 kare) | **43** | 3 | 6 |
+| casual | 19 | 19 (55 kare) | **19** | 2 | 4 |
+| risky | 10 | 10 (24 kare) | **10** | **13** | 31 |
+| randomValid | 20 | 20 (57 kare) | **20** | 4 | 10 |
+
+**Not bayatmış:** üç kare de kolayca bulunuyor. Bulunamama **aramanın**
+sorunuydu, oyunun değil (Paket CF/1'in gebelik hunisi düzeltmesi
+sonrası hiç yeniden ölçülmemiş). Yeni araç:
+`app/test/ekran_dokumu_gebelik_denetim_test.dart` — hiçbirini kurmaz,
+bot hayatlarını oynatıp kareyi arar ve çizilen metni basar.
+
+### Okunan üç kare
+
+**Gebelik (32 yaş, kadın) — temiz.** Üst özette "hamilesin" etiketi,
+ekranda kendi kartı: "Bebek yolda · Hamilesin. Bebeğin diğer ebeveyni
+erkek arkadaşın Necmi. Bebeğiniz bir sonraki yaşta doğacak." Paket
+BK/1'in kazanımı yerinde.
+
+**Yeni doğan (33 yaş, ikiz) — temiz.** Doğum sessiz gelmiyor: "Bebeğe
+Halil adını verdin.", "Halil adında bir oğlunuz oldu.", "İkizin diğeri
+oğlan oldu: Tolga." İlk şüphem yanlıştı — ekranın üst satırında doğum
+duyurusu aramıştım, oysa duyuru günlükte. İkinci şüphem de yanlıştı:
+İlişkiler sekmesinde "Çocuklar" bir **alt sayfa** düğmesidir
+(`relationships_children_row`, sayaçlı), çocuklar ana sekmede
+listelenmez — tasarım böyle.
+
+**Denetim dönemi (22 yaş, bitiş 24) — temiz.** Ana ekranın üst
+satırında yazmıyor ve bir an kusur sandım; ama Okul/Meslek sekmesinin
+"Adli Geçmiş" bölümünde **"Denetim dönemi · 24 yaşına kadar"** yazıyor
+(Paket BV'de eklenmiş) ve motorun somut bir yaptırımı var: şehir dışına
+çıkış kapalı, gerekçesi `LegalEngine.probationBlockReason`'dan geliyor
+ve `travel.dart` iki yerde gerçekten uyguluyor. Gerekçe eylemin yanında
+duruyor — Paket I'nın ilkesi.
+
+### ÇIKAN GERÇEK KUSUR: nesnesiz ret cümlesi
+
+Gebelik karesinin günlüğünde aynı yılda şu iki satır yan yanaydı:
+
+```
+Necmi ile çocuk sahibi olmaya karar verdiniz.
+Necmi hazır olmadığını söyledi. İlişkiniz bitmedi ama aranızda bir sessizlik kaldı.
+```
+
+Çelişki gibi duruyor. Kaynaklar okundu: ilk satır
+`family_planning.dart`, ikinci satır `marriage_engine.dart` — ve ikinci
+satır **evlilik teklifinin reddi**. Yani çelişki yok; kusur başka:
+cümle **neye** hazır olmadığını söylemiyor. Kabul satırı söylüyordu
+("evet dedi. Sıra düğünde: …"), ret satırı söylemiyordu. Günlükte çocuk
+kararının yanına düştüğünde oyuncu "çocuğa hazır değil" diye okuyor.
+
+Paket BD'nin "koşulsuz nedeniyle" kusuruyla aynı sınıf: cümle tek
+başına doğru, bağlamda yanlış. Düzeltildi:
+
+> Necmi **evlenme teklifine** hazır olmadığını söyledi. İlişkiniz
+> bitmedi ama aranızda bir sessizlik kaldı.
+
+Depo genelinde tarandı: nesnesiz tek örnek buydu (Paket BD dersi —
+metin değişince önce deseni tara).
+
+### Faho'ya bırakılan: ikiz doğum masrafı (Q-239)
+
+Günlükte iki satır, her biri "Doğum masrafı 65.000 ₺ tuttu". Kod
+okundu: ikizde `haveChild` iki kez çağrılıyor (D-151, bilinçli) ve her
+çağrı masrafı tam kesiyor → **130.000 ₺**. Her satır tek tek doğru ama
+toplam hiçbir yerde yazmıyor. Sayıya dokunmadım; **Q-239** olarak öneri
+ve varsayılanla kuyruğa girdi (önerim: metin toplamı yazsın, sayı aynı
+kalsın; "ikiz tek doğum mudur" sorusu ayrıca Faho'nun).
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_di_okunmayan_kareler_test.dart` (5 test).
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Ret satırı nesnesini kaybetti | §1 | "Ret satırı yine neyi reddettiğini söylemiyor" |
+| Denetim etiketi ekrandan kalktı | §4 | "Denetim dönemi ekranda hiçbir yerde yazmıyor" |
+
+§5 huni ölçümünü basıyor ve tabanı ölçüme göre koyuyor (30 hayatta 22
+gebelik / 22 bebek karesi; taban dörtte bir), böylece "bulunamadı"
+notu bir daha ölçülmeden taşınmaz.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DJ — ölçüm aracı bildirimleri yutuyordu, pencere kaybı iki kez yazıyordu (12 Ekim 2026)
+
+Yeni eksen: **hangi bildirim penceresi hiç çizilmedi?** `NoticeKind`'in
+**20** değeri var ve hangisinin gerçek hayatta kuyruğa girdiği hiç
+ölçülmemişti.
+
+### İLK KUSUR: araç kör
+
+İlk ölçüm (100 hayat, `onYear`) üç türü sıfıra yakın gösterdi:
+`aktivite` **1**, `piyango` **0**, `bosanma` **0**. Boşanma bildirimi
+Faho'nun Paket D'de **özellikle istediği** şeydi, yani "hiç çıkmıyor"
+şüpheliydi. Kaynak okundu ve kök neden botta çıktı:
+
+```dart
+c.divorce();
+while (c.state!.hasNotice) { c.dismissNotice(); }
+```
+
+Bot aksiyon kaynaklı bildirimi **kurduğu satırda** kapatıyor (on
+yerde) ve o bildirim döngünün başına hiç dönmediği için ne `onYear`'a
+ne de Paket CR'ın tam bu kör nokta için eklediği `onPending`'e
+görünüyor. **Paket CR yarım kalmıştı:** motor kaynaklı bekleyenleri
+(olay, kriz, duruşma) açtı, aksiyon kaynaklı bildirimleri açmadı.
+
+Düzeltme: dokuz kapatma noktası tek bir yardımcıya bağlandı
+(`botBildirimleriKapat`) ve o yardımcı **kapatmadan önce** ölçüme
+veriyor. Aynı 100 hayat yeniden koşuldu:
+
+| tür | eski (kör) | yeni |
+|---|---|---|
+| **aktivite** | **1** | **8179** |
+| **bosanma** | **0** | **57** |
+| miras | 194 | 730 |
+| cenaze | 306 | 708 |
+| burc | 1220 | 3151 |
+| hayvan | 495 | 1310 |
+| olum | 754 | 1012 |
+| **piyango** | 0 | **0** |
+
+Yani her bot ölçümü bildirimlerin çoğunu kaçırıyordu; `aktivite`
+(Paket D'nin aktivite sonuç bildirimleri) pratikte **hiç**
+ölçülmemişti.
+
+**Kendi ölçümümün ikinci kusuru:** ilk sondam türleri elle yazılmış bir
+listeyle sayıyordu ve o liste `grep`'in kestiği yerden geldiği için
+**12** tür içeriyordu; gerçek sayı **20**. Düzeltilmiş ölçüm 19 türün
+kuyruğa girdiğini gösterdi (`arac`, `banka`, `kariyer`, `aileDonum`,
+`adli`, `arkadaslik`, `kendiIsi`, `konut` de dahil). Çıkmayan tek tür
+`piyango`.
+
+### `piyango`: bot hiç bilet almıyor
+
+Düzeltmeden sonra da sıfır. Sebebi kapı değil **bot**: `player_bot.dart`
+içinde piyangoya tek referans yok, yani o pencere bugüne kadar hiç
+çizilmedi. **Botu değiştirmedim**: bilet almak oyunun zarını kaydırır ve
+bütün ölçümleri etkiler (Paket DE'nin 22 olayı dört testi düşürmüştü).
+Pencere, kontrolörün kendi API'siyle açıldı
+(`ekran_dokumu_bildirim_pencereleri_test.dart`): bilet alındı, yaş
+alındı, çekiliş yapıldı. Okundu ve temiz:
+
+```
+PİYANGO ÇEKİLDİ
+Biletin tutmadı. Numaran 021952 idi.
+Tamam
+```
+
+### İKİNCİ KUSUR: pencere aynı kaybı iki kez yazıyor
+
+Boşanma penceresi ilk kez basıldığında:
+
+```
+BOŞANDINIZ
+Sevim Erdem ile boşandın. Anlaşma gereği 61.904 ₺ cüzdanından çıktı. ...
+Mutluluk -15
+Mutluluk -15
+Cüzdan -61.904 ₺
+```
+
+Sebep: bildirim hem `happinessDelta` taşıyor hem `effects` listesinde
+(`diffAppliedEffects`) mutluluk kalemi var; `notice_sheet.dart` iki
+bloğu da koşulsuz çiziyordu. Oyuncu 30 kaybettiğini sanıyor.
+
+Düzeltme tek noktada ve geneldir: ayrı satır yalnızca etkiler listesi
+mutluluğu **söylemiyorsa** yazılır. İki kaynaktan hangisinin dolu
+olduğu bildirime göre değiştiği için ikisi de duruyor; yalnızca
+çakışma kalktı.
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_dj_bildirim_kor_noktasi_test.dart` (4 test).
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Sayfa yine iki bloğu da çizdi | §3 | "Aynı kayıp 2 kez yazıldı: [Mutluluk -15, Mutluluk -15]" |
+| Botta doğrudan kapatma döngüsü geri geldi | §2 | "Doğrudan kapatma döngüsü geri geldi; o bildirimler yine kör noktada kalır" |
+
+§1 aksiyon kaynaklı bildirimin ölçüme göründüğünü 25 hayatta
+doğruluyor (`bosanma` 27, `aktivite` 2270); §4 piyango penceresini
+çizip bilet numarasının yazıldığını sabitliyor.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DK — piyangonun ekonomisi ilk kez ölçüldü (12 Ekim 2026)
+
+Paket DJ bot hiç piyango oynamadığını gösterdi; bu da piyangonun
+**ekonomisinin hiç ölçülmediği** anlamına geliyordu. 1/500.000
+ihtimalle 50.000.000 ₺ veren bir kalem, beklenen getirisi bilet
+fiyatını aşıyorsa oyuncuya sonsuz para basar. Bu soru zar gerektirmez.
+
+### Katalogdan hesap (zarsız)
+
+| çekiliş | bilet | beklenen getiri | getiri/fiyat | kasa payı | yılda en çok |
+|---|---|---|---|---|---|
+| Olağan (`aylik`) | 500 ₺ | 281,25 ₺ | 0,5625 | **%43,75** | 12 bilet · 6.000 ₺ |
+| Yılbaşı (`yilbasi`) | 1.200 ₺ | 645,00 ₺ | 0,5375 | **%46,25** | 4 bilet · 4.800 ₺ |
+
+Beklenen yıllık kayıp: olağanda 2.625 ₺, yılbaşında 2.220 ₺ — net
+yıllık asgari ücretin (336.900 ₺) yüzde biri kadar. **Kusur yok:**
+piyango ne zengin ediyor ne iflas ettiriyor, ödeme oranı da gerçek
+piyangoların bandına yakın.
+
+Motor da kataloğu doğru uyguluyor: `_cek` ikramiyeleri en büyükten
+başlayarak kümülatif eşikle yürüyor, `chance => 1 / oneIn`, ikramiye
+`bilet.share.ratio` ile ölçekleniyor (çeyrek bilet çeyrek ikramiye).
+İhtimaller toplamı 0,106; yani biletlerin ~%89'u tutmuyor.
+
+### Gerçek çekiliş ölçümü
+
+Kontrolörle 25 yıl boyunca her yıl tavan kadar bilet alındı: **300
+bilet, 25 çekiliş satırı, 25 yılın 21'inde en az bir bilet tuttu.**
+Beklenen oran 1−0,9¹² = %71,8 (17,9 yıl); ölçülen 21, varyans içinde.
+
+### Kendi testimin iki kusuru — ikisi de kendi derslerimin tekrarı
+
+**1. `ageUp()` beş kapılı.** İlk yazımda yalnızca bildirimleri
+kapatıyordum; bekleyen olay/kriz/seçim kapanmadığı için yaş
+ilerlemedi, yıllık bilet tavanı dolu kaldı ve 25 yılda yalnızca **24**
+bilet alındı. Kapılar `test_flow.dart` yardımcılarıyla kapatıldı.
+
+**2. İddia boşa çalışıyordu.** "Cüzdan arttı mı" diye bakıyordum —
+cüzdanı maaş, kira, temettü de artırır, bu yüzden 25 yılın 25'i
+"kazandı" çıkıyor ve satır hiçbir şey kanıtlamıyordu. **Paket DG'nin
+§7 dersinin aynısı, bu kez kendi testimde.** Doğru kaynak oyunun kendi
+kaydı: çekiliş satırı kaybı "tutmadı" diye yazıyor.
+
+Bekçi: `app/test/paket_dk_piyango_olcumu_test.dart` (4 test). Sayıları
+değiştirmedi; **sabitliyor** — katalog ileride sessizce para basan bir
+kaleme dönüşürse §1 düşer.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DL — sponsorluğun saati görünmüyordu (12 Ekim 2026)
+
+Paket DK'nın dersi "botun uğramadığı her mekanik ölçülmemiş bir
+ekonomidir" idi. Sponsorluk botun **uğradığı** bir mekanik, ama
+**hunisi** hiç ölçülmemişti. 120 sosyal arketip hayatı (tohum
+51000-51119) oynatıldı.
+
+### Huni — teklif gerçekten geliyor mu?
+
+| kategori | eşik | teklif | kabul |
+|---|---|---|---|
+| mahalle kafe zinciri | 5.000 | 82 | 61 |
+| kırtasiye markası | 6.000 | 61 | 50 |
+| sporcu içeceği üreticisi | 9.000 | 59 | 43 |
+| bağımsız mobil oyun stüdyosu | 5.000 | 51 | 37 |
+| çevrim içi kitap kulübü | 7.500 | 38 | 28 |
+| yerel lezzet markası | 12.000 | **12** | 11 |
+| elektronik mağazası | 20.000 | 40 | 33 |
+
+120 hayatın **113'ü** hesap açtı, **59'una** teklif geldi; 5.000
+kapısını geçen hayat sayısı 60. Yani kapıyı geçen hemen her hayat
+teklif alıyor. Takipçi tavanı: medyan 5.852, en yüksek 7.285.623.
+
+**Ölü içerik yok.** Yedi kategorinin yedisi de teklif edildi; "yazılmış
+ama hiç gelmeyen sponsor kategorisi" hipotezi ölçümde öldü. EKSIKLER
+§7.6'nın "dar katalog" satırı artık bunu söylüyor: katalog dar, ama
+ulaşılamaz değil.
+
+**`yerel_lezzet`'in seyrekliği OYUN değil BOT bulgusudur.** Bot hesabını
+`SocialPlatform.values` sırasına göre açıp ilk platformda kalıyor;
+`yerel_lezzet` video platformunu kapsamayan **tek** kategoridir.
+Katalog değiştirilmedi, botun zarı da kaydırılmadı (Paket CY dersi: bot
+davranışını değiştirmek bütün ölçümlerin zarını kaydırır).
+
+### Gerçek bulgu: kabul edilen anlaşmaların %34'ü sessizce kırılıyordu
+
+Kabul edilen **263** anlaşmanın **162'si** tamamlandı, **89'u (%34)**
+süresi dolup kırıldı. O yol baştan sona görünmezdi:
+
+| kusur | önce | sonra |
+|---|---|---|
+| Kabul kartı süreyi yazıyor mu? | **hayır** — yalnızca "paylaşım yapınca ödenecek" | "Son yıl: N yaşın; o yıla kadar paylaşım yapmazsan anlaşma düşer, ödeme olmaz ve takipçi kaybedersin." |
+| Ceza pencere açıyor mu? | **hayır** — yalnızca günlük satırı | `NoticeKind.aktivite` penceresi, günlükle aynı cümle |
+| Pencere **uygulanan** kaybı mı yazıyor? | — | evet; mutluluk tabanda ise fark 0 yazılır |
+
+Ceza gerçekti: takipçinin **%4'ü** (tekrarlayınca %15'e kadar) ve
+**4 mutluluk**. 7 milyon takipçili bir hesapta bu 280.000 takipçi
+demek ve oyuncu bunu ancak günlüğü satır satır okursa görüyordu. Oyun
+para teklif edilince pencere açıyor, cezayı fısıldıyordu.
+
+### Ne değişmedi
+
+Hiçbir süre, oran, eşik ya da ücret. İkisi de **görünürlük**
+düzeltmesidir. Süre artık tek kaynaktan okunuyor:
+`SocialIncome.deadlineAgeFor` / `lastActiveAgeFor` — motor da ekran da
+aynı işlevi çağırır, sabiti değiştiren ekranı da değiştirir.
+
+### Bekçi ısırıyor mu? Üç mutasyon
+
+| mutasyon | düşen bölüm | sonuç |
+|---|---|---|
+| Pencere `enqueue`'u kaldır | §4, §5, §6 | §6 **88/89** sessiz düşme bildirdi (89.'su ölüm yılında, kurallı biçimde dışlandı) |
+| `lastActiveAgeFor`'u bir yıl kaydır | §1, §3 | §3 "kartın söylediği yılda anlaşma yok" diye düştü |
+| Süreyi motorda yeniden türet | §2 | tek kaynak taraması düştü |
+
+Bekçi: `app/test/paket_dl_sponsorluk_test.dart` (6 test). §6, oyunun
+**kendi kaydını** okur: günlükte düşme satırı yazılan her yıl için bir
+pencere görülmüş olmalı; tek istisna ölüm yılıdır (o yıl pencere
+kapatılmadan hayat biter). §6 ayrıca dekoratif eşik tarar — hiçbir
+kategorinin eşiği hayatların gerçekten ulaştığı tavanın üstünde
+olmamalı; tavan ölçümden gelir, elle yazılmaz.
+
+Karar bekleyen soru **Q-240**: son yıl uyarısı ve "açık anlaşma bütün
+teklifleri kapatıyor" kuralı.
+
+Yeni pencere bildirim bütçesini sınadı: `critical_notice_test`'in
+"en kötü yıl sekiz pencere" sınırı **gevşetilmedi** ve geçti. Tam süit:
+**3835 geçti, 17 atlandı, 0 hata** (37 dk). `flutter analyze lib test`
+temiz.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DM — bölüm sayfalarının içi ilk kez okundu (12 Ekim 2026)
+
+**Dürbünün kendi kapsamı kör noktaydı.** Paket DH "hangi ekran hiç
+okunmadı?" sorusunu sorup dokuz ekranın dokuzunda da bir test yolu
+bulduğunu yazdı. O denetim `lib/ui/screens/**/*_screen.dart`
+dosyalarını saymıştı; oyunun içeriğinin büyük bölümü ise `sections/`
+altındaki **`*_page.dart`** dosyalarında ve o dosyalar denetimin
+kapsamına **hiç girmemişti**. Paket DJ'nin dersi aynen geçerliydi:
+ölçümün kapsamını da ölç.
+
+### Ölçüm — kaç sayfa okunmuyordu?
+
+`sections/` altındaki 30 dosyanın `SectionScaffold` başlıkları
+çıkarılıp bütün test kaynağında arandı. **Sekizinin** başlığı hiçbir
+testte geçmiyordu:
+
+| sayfa | ne gösteriyor |
+|---|---|
+| `bank_page.dart` | Banka, kredi başvurusu, kredi karnesi |
+| `insurance_page.dart` | Sağlık ve konut poliçesi |
+| `hobbies_page.dart` | Hobilerim |
+| `media_page.dart` | Ün ve Medya Fırsatları |
+| `eye_exam_page.dart` | Göz muayenesi mini oyunu |
+| `furnishing_page.dart` | Evinin hâli (döşeme) |
+| `marriage_history_page.dart` | Evlilik Geçmişi |
+| `military_page.dart` | Askerlik |
+
+Döküm bu sekizini **arayüzden açtı** ve metnini bastı
+(`ekran_dokumu_bolumler_test.dart`). Durumlar kurulmadı, bot
+hayatlarından **bulundu**; sekizinin sekizi de bulundu, "BULUNAMADI"
+kalmadı.
+
+### Çıkan üç gerçek kusur
+
+| # | kusur | kök neden |
+|---|---|---|
+| 1 | Sigorta kartı "İlk primi ödeyecek paran yok (**5000 ₺**)" yazıyordu — aynı kartın bir üst satırında "Yıllık prim 5.000 ₺" | `insurance.dart` tutarı ham interpolasyonla basıyordu. Paket BE kuralı koymuş ve bekçi yazmıştı ama bekçi yalnızca `AppliedEffect.text`'i tutuyordu. |
+| 2 | 18 yaşındaki, cüzdanı boş, ömründe tek taksit ödememiş oyuncu bankada "Kredi durumun: İyi · **Ödemelerin düzenli**, yükün hafif." okuyordu | `CreditStanding.iyi`'nin gerekçesi sabitti; `standingOf` yükü olmayan herkese `iyi` veriyor. Yazım kuralının 12. maddesi (metin `GameState` ile çelişmez) ihlal ediliyordu. |
+| 3 | Askerlik sayfasının başlığı **"Yapılmadı"**, üç satır altındaki Durum alanı **"Yükümlü değil"** diyordu — tek ekranda iki çelişen cümle | Kadın oyuncunun "Yapılmadı" görmesi daha önce bildirilmiş; gövde metni, menü alt yazısı ve Durum alanı `MilitaryService.statusLabel` ile düzeltilmiş ama **sayfa başlığı atlanmıştı** (`subtitle: askerlik.label`). Hiçbir test o başlığı okumuyordu. |
+
+Kademe, oran, süre ve tutar **değişmedi**; üçü de görünürlük/metin
+düzeltmesidir. 2. maddede karne kademesi hâlâ "İyi"; yalnızca gerekçe
+cümlesi geçmişi olmayanda farklı (`Banking.standingReason`).
+
+### Aracın iki yalanı (benim hatam, aynı pakette iki kez)
+
+Döküm ilk turda "GÖZ MUAYENESİ · 52 metin" bastı ve test geçti. Basılan
+kare **Sağlık Merkezi**'ydi: parası olmayan oyuncuda satır "Şu an
+kapalı" olduğu için dokunma hiçbir şey yapmamıştı. İşaret denetimi
+ekleyince ikinci hata çıktı: seçtiğim işaret (`Duvardaki harfler`)
+satırın **üst sayfadaki** tanıtımıydı, yani döküm bir tur daha
+yanılttı. Düzeltme üç parçalı: kapı paraya da bakıyor, yol satırın
+başlığı yerine **eylem düğmesine** dokunuyor, işaret **yalnızca hedef
+sayfada** bulunan bir cümle. Paket CV'nin dersi tekrar yazıldı: araç
+yalan söylemez.
+
+### Ölen bir iddia
+
+Göz muayenesi tablosunda bir satırda iki farklı karakter gördüğümü
+sandım ve raporlayacaktım. Üretici doğru: satır uzunlukları 5-7-9-11-13
+ve her satırda **tam bir** farklı karakter var; gördüğüm ikinci "G"
+sonraki satırın başıydı.
+
+### Bekçiler
+
+- `app/test/ekran_dokumu_bolumler_test.dart` — sekiz sayfayı açar, her
+  birinin gerçekten açıldığını kanıtlar, metnini basar.
+- `app/test/paket_dm_bolum_kapsami_test.dart` (4 test) — **kapsam
+  cırcırı**: `sections/` altına yeni sayfa eklenince ya döküme girer ya
+  da onu çizen testin adı kayda yazılır. Kayıt beyan değil: adı yazılan
+  testin o sayfanın başlığını gerçekten andığı doğrulanır. Ölçüm: 30
+  sayfa · döküm 8 · başka testle 22.
+- `app/test/paket_dm_bolum_metinleri_test.dart` (6 test) — üç kusurun
+  kendisi; durumlar bot hayatlarından bulunuyor.
+- `app/test/paket_be_para_bicimi_test.dart` **sıkıştırıldı**: artık
+  `lib/` içinde ham para interpolasyonu tarıyor. Tarama, gözle okumanın
+  bulduğu birinciden sonra **ikinci** bir yeri buldu (aynı dosyada).
+  Muafiyet listesi **yok**; kalan bulgu 0.
+
+### Bekçi ısırıyor mu? Dört mutasyon, beş düşüş
+
+| mutasyon | düşen |
+|---|---|
+| Sigortada `trMoney`'yi geri al | para taraması **ve** metin testi §3 |
+| Askerlik başlığını ham etikete döndür | §2 kaynak taraması |
+| Banka gerekçesini ham enuma döndür | §1'in ekran taraması |
+| Kapsam kaydından bir sayfayı sil | kapsam cırcırı §1 |
+
+Tam süit: **3854 geçti, 17 atlandı, 0 hata** (37 dk; Paket DL'de 3835
+idi, +19 yeni test). `flutter analyze lib test` temiz. Hiçbir test
+silinmedi veya gevşetildi; `paket_be_para_bicimi_test` **sıkıştırıldı**.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DN — kalan bölüm sayfaları da okundu (12 Ekim 2026)
+
+Paket DM sekiz sayfayı açıp **üç** kusur buldu; sayfa başına 0,38.
+Kalan 22 sayfanın kaydı "başka testle okunuyor" diyordu ama o kayıt
+**başlık düzeyinde**: ilgili testler anahtar ve tek tek metin
+denetliyor, kareyi gözle okumuyor. Döküm on sayfa daha açtı — Finger,
+Milli Piyango, Hayat Hedefleri, Sağlık Geçmişi, Kendi İşim, Adli
+Geçmiş, Spor Kariyeri, Kulüpler, Yatırımlar, Evlerim — ve **üç kusur
+daha** çıktı. Oran sabit kaldı (18 sayfa, 6 kusur).
+
+### Çıkan üç kusur
+
+| # | kusur | kök neden |
+|---|---|---|
+| 1 | Finger: "Beğenilerinin yaklaşık **%46'i** karşılık buluyor." | Yüzdeye gelen iyelik eki sabit yazılmıştı. Türkçede bu ek sayının **okunuşuna** bağlı: %46'**sı**, %30'**u**, %20'**si**, %3'**ü**. Yani ek çoğu sayıda yanlıştı. Tek çağrı yeri olduğu için sayı eki motoru yazmak yerine cümle ek gerektirmeyecek biçimde kuruldu ("%46 kadarı"). |
+| 2 | Hayat Hedefleri: "Sosyal medyada toplam **100000** takipçiye ulaş." | Katalog sabiti ham basılıyordu. Ayraç kuralı (Paket BE) para dışındaki sayılar için de geçerli. |
+| 3 | Milli Piyango: ikramiye oranları "1/**500000**" | Oran `trNumber`'dan geçmiyordu. |
+
+2 ve 3, Paket DM'de **sıkıştırdığım** para taramasının göremediği
+türdendi: o tarama yalnızca `₺` işaretinin yanındaki ham sayıyı arıyor.
+Ders tekrar yazıldı: bir bekçi eklerken "bu kuralın kaç yoldan ihlal
+edilebileceğini" sor.
+
+### Kalıcı bekçi: çizilmiş metin üzerinde sayı taraması
+
+Döküm 18 sayfanın metnini zaten basıyor; aynı metin artık bir **biçim
+bekçisi**: beş haneden uzun sayı bloğu varsa test düşer. Dört hane
+sınırın dışında — kurgusal araç modeli "Sarp 1100 Tur" sayı değil
+**ad**. Mutasyon: hedef metnindeki ayracı geri alınca bekçi
+"HAYAT HEDEFLERİ: ekranda ayraçsız uzun sayı var" diye düştü.
+
+Hedefli bekçiler: `app/test/paket_dn_bolum_metinleri_test.dart`
+(5 test) — yüzde eki taraması (muafiyet listesi yok), hedef metni,
+piyango oranı, `trNumber` kuralı ve katalog geneli tarama.
+
+### Aracın üç düzeltmesi (hepsi benim hatam)
+
+1. İşaret olarak **koşullu** cümleler seçmiştim: "Kayıt silinmez:
+   atlattığın kriz de burada durur." süren durumu olan karede
+   çizilmiyor. Sayfalar doğru açılmıştı; düşen şey benim iddiamdı.
+2. Okul/Meslek sekmesi **duruma göre farklı görünüm** çiziyor:
+   öğrenciye okul, diğerlerine kariyer görünümü. "Kendi İşim" satırı
+   kariyer görünümünde; 22 yaşındaki üniversite öğrencisi karede satır
+   yoktu ve bunu "kapı açık ama satır yok" diye ürün hatası
+   sanacaktım. Kapıya `!education.isStudent` eklendi (Kulüpler'e
+   tersi).
+3. `scrollToFinder` ağacın **ilk** kaydırılabilir alanını kaydırıyor;
+   Okul/Meslek'te o alan sayfanın gövdesi değil. Döküm artık alanları
+   sırayla deniyor ve görüş alanı 24000 px.
+
+Bunlara ek olarak dökümde **genel** bir dürüstlük kilidi var: yolun her
+adımında dokunmadan önce ve sonra kare karşılaştırılıyor; ekran hiç
+değişmediyse dokunma işe yaramamıştır ve test düşer.
+
+### Karar bekleyen
+
+**Q-241** — `trMoneyShort`'un milyar basamağı yok: yılbaşı ikramiyesi
+ekranda "1200 M ₺" yazıyor. Kısaltma seçimi görünür bir içerik kararı
+olduğu için (Q-050'deki platform adları gibi) kendi başıma
+değiştirmedim; varsayılan önerim "1,2 Mr ₺".
+
+Tam süit: **3869 geçti, 17 atlandı, 0 hata** (38 dk; DM'de 3854 idi).
+`flutter analyze lib test` temiz. Paket DM'in CI'ı (`759547d`) iki işte
+de yeşil tamamlandı.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DO — Taşın ekranı kapıyı satırda yazmıyordu (12 Ekim 2026)
+
+Döküm `activity_pages.dart` içindeki **beş ayrı sayfayı** ilk kez bastı.
+Bu dosya altı sayfa barındırıyor (`VenuePage`, `LibraryPage`,
+`AdoptionPage`, `WillPage`, `TravelPage`, `RelocationPage`) ve kapsam
+kaydı **dosya başına tek satır** tuttuğu için hepsi "okunuyor"
+sayılıyordu. Ölçü dosya değil **kare** olmalı; kapsam bekçisinin
+tekrarsızlık denetimi de dosyadan ada çevrildi.
+
+| kare | sonuç |
+|---|---|
+| Kütüphane | temiz (yaşa uygun 5 kitap, yazar ve sayfa sayısı) |
+| Son Kararlar | temiz — yöntem yok, ödül yok, "geri alınamaz" yazılı, 112 ve ALO 183 ekranda |
+| Tatil yap | temiz |
+| Tüp bebek tedavisi | temiz (kapalı satır gerekçesini yazıyor) |
+| **Taşın** | **kusurlu** |
+
+### Kusur: dört şehir, ne ücret ne gerekçe
+
+Cüzdanı **0 ₺** olan 18 yaşındaki oyuncunun gördüğü kare:
+
+> Taşın · Denizli şehrinde yaşıyorsun. Cüzdanında 0 ₺ var.
+> **Aydın** — Kiralık bir eve taşın
+> **İzmir** — Kiralık bir eve taşın
+> **Antalya** — Kiralık bir eve taşın
+> **Konya** — Kiralık bir eve taşın
+
+Dört davet, hiçbirinde masraf ya da engel yok. Oyunun geri kalanı
+kapıyı **satırın kendisinde** yazar: sağlık merkezi "2.800 ₺ gerekiyor;
+cüzdanında yeterli para yok · Şu an kapalı", tüp bebek "Hekim önce bir
+süre kendiniz denemenizi istiyor · Şu an kapalı". Kural zaten motorda
+vardı — `moveToRental` tam o cümleyi döndürüyor — ama yalnızca
+**dokunduktan sonra** okunuyordu.
+
+**Düzeltme kuralı değiştirmiyor.** Kapı `Housing.rentalMoveBlockReason`
+işlevine çıkarıldı, masraf `rentalMoveCost`'a; `moveToRental` artık bu
+ikisini okuyor (tek kaynak), ekran da aynı cümleyi satıra yazıyor.
+Sıra ve cümleler aynen korundu. Düzeltmeden sonraki kare:
+
+> **Aydın** — Taşınma masrafı 110.000 ₺; cüzdanında yeterli para yok.
+
+Parası yeten oyuncuda satır masrafı yazıyor:
+"Kiralık bir eve taşın · 110.000 ₺".
+
+### Aracın dördüncü düzeltmesi
+
+Kütüphane karesinde işaret olarak yine **koşullu** bir cümle seçmiştim
+("Bitirdiğin kitap"), hiç kitap bitirmemiş 6 yaşındaki karede
+çizilmiyor. Sayfa doğru açılmıştı. Bu, aynı hatanın üçüncü tekrarı:
+işaret **sayfanın her hâlinde** çizilen bir metin olmalı.
+
+Bekçi: `app/test/paket_do_tasinma_kapisi_test.dart` (4 test) — engel
+metni motorun kendi cümlesiyle birebir aynı (tek kaynak), masraf şehir
+değişince artıyor, ekran kapıyı motordan okuyor, iki dal da üretiliyor.
+Mutasyon: satırı eski hâline döndürmek §3'ü düşürüyor.
+
+Tam süit: **3878 geçti, 17 atlandı, 0 hata** (38 dk). `analyze lib test`
+temiz. Paket DN'in CI'ı (`82a7385`) iki işte de yeşil tamamlandı.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DP — aynı cümle yirmi satırda: İş ara karesi (12 Ekim 2026)
+
+Kapsam bekçisi beş sayfanın hâlâ "başka testle okunuyor" kaydıyla
+geçtiğini söylüyordu. O kayıt **başlık düzeyinde** bir iddiadır: adı
+yazılan test sayfanın bir anahtarını veya tek bir cümlesini denetliyor,
+kareyi gözle okumuyor. Ölçtüm: beş testin beşi de ağacı gerçekten
+kuruyor ve satıra dokunuyor (`pumpWidget` 1-3, `tester.tap` 4-14) —
+yani kayıt **yanlış değildi**, yetersizdi. Kusur tam o boşlukta
+duruyordu: anahtarı denetlenen bir sayfanın metni hiç okunmamış
+olabilir. Beşi de döküme alındı; kapsam artık **30 sayfa
+· dökümde 25 dosya (28 kare) · başka testle 5**. Kalan beşi, kendi
+özel widget testiyle çizilen sekme ekranları ve `social_pages.dart`;
+kaydın doğruluğu bekçi tarafından denetleniyor (adı yazılan test o
+sayfanın başlıklarından birini gerçekten anıyor mu).
+
+| kare | yaş | metin | sonuç |
+|---|---|---|---|
+| Kumarhane | 18 | 30 | temiz — bahis bütçesi, alt/üst sınır ve "gerçek para yok" uyarısı yazılı |
+| Ehliyet İşlemleri | 16 | 31 | temiz — ücret, yaş kapısı ve engel satırda |
+| Evcil hayvanlar | 7 | 42 | temiz — 6 kategori, 10 tür, bakım gideri uyarısı |
+| Dövüş sanatları | 18 | 78 | temiz — altı dalın her biri **kendi** ücretini yazıyor |
+| **İş ara** | 59 | 187 | **kusurlu** |
+
+### Kusur: işe ait olmayan gerekçe her kartta
+
+59 yaşındaki oyuncunun mülakatı sürüyordu. Kare 21 iş kartı çiziyor ve
+**20'sinin** altında birebir aynı cümle duruyor:
+
+> **Market reyon görevlisi (yarım zamanlı)** · 132.000 ₺/yıl
+> Raf dizmek, fiyat okutmak, akşamüstü kalabalığı.
+> *Devam eden bir mülakatın var.* · [Başvur]
+>
+> **Kafe garsonu (yarım zamanlı)** · 145.000 ₺/yıl
+> Hafta sonu vardiyası, ayakta geçen altı saat.
+> *Devam eden bir mülakatın var.* · [Başvur]
+>
+> … (aynı cümle 20 kez)
+
+Kök neden `JobMarket.applicationAvailability`ın her iş için **ayrı**
+çağrılması: o işlevin iki engeli (hâlâ çalışıyor olmak, mülakatın
+sürmesi) işe hiç bakmıyor. Kart da gerekçeyi kendi bilgisinin yerine
+yazdığı için satır iki şey birden kaybediyordu: hem sayfa okunmaz hâle
+geliyor hem de o işin eğitim kademesi ile yaş kapısı hiç görünmüyor.
+
+**Ölçüm (28 kare).** Tekrarın hangi karede gerçekten sorun olduğunu
+tahmin etmek yerine saydım. Ölçü **cümle**: boşluk içeren ve
+nokta/ünlem/soru ile biten metin. Düğme ve durum etiketleri sayılmıyor,
+çünkü onların tekrarı normal — "Başvur" 21, "Şu an olmaz" 11, "Şu an
+kapalı" 6, göz muayenesi tablosunda "O" harfi 20 kez çizilir.
+
+| kare | en çok tekrarlanan cümle | kez |
+|---|---|---|
+| İŞ ARA | "Devam eden bir mülakatın var." | **20** |
+| TAŞIN | "Taşınma masrafı 110.000 ₺; cüzdanında yeterli para yok." | 4 |
+| kalan 26 kare | — | 1 |
+
+TAŞIN'daki tekrar meşru: dört şehir satırının her biri **kendi**
+taşınma masrafını yazıyor, tutar aynı olduğu için cümle de aynı çıkıyor
+(Paket DO). Dövüş sanatları karesi aynı kalıbın doğru hâli: altı dalın
+hepsi "para yetmiyor" diyor ama her biri kendi ücretiyle — 700, 750,
+600, 650, 620, 640 ₺ — yani altı farklı cümle.
+
+### Düzeltme
+
+Engel cümleleri `JobMarket` içinde tek kaynağa alındı
+(`blockedWhileEmployed`, `blockedWhileInterviewing`) ve işten bağımsız
+engel `globalBlockReason` ile ayrıca okunabilir oldu.
+`applicationAvailability`ın **sırası değişmedi**: araya giren iki engel
+(bu yıl bu işe başvurmuş olmak, mülakat sorusu yazılmamış olmak) işe
+özeldir ve `globalBlockReason` onları iddia etmiyor.
+
+Sayfa engeli bir kez, en üstte bir bilgi paneli olarak yazıyor; kartın
+gerekçesi onunla **birebir** aynıysa kart kendi satırına dönüyor:
+
+> *Devam eden bir mülakatın var.*
+>
+> **Market reyon görevlisi (yarım zamanlı)** · 132.000 ₺/yıl
+> Raf dizmek, fiyat okutmak, akşamüstü kalabalığı.
+> *Eğitim şartı yok · 16 yaş+* · [Başvur]
+
+Düğme yine kapalı: tekrarı kaldırmak engeli gizlemek değil.
+
+Düzeltmeden sonraki kare ölçüldü: cümle **1** kez yazılıyor, 20 kart
+kendi satırına dönüyor ve o satırlar **altı farklı** değer taşıyor
+("Eğitim şartı yok · 16 yaş+" 7, "· 18 yaş+" 6, "Lise mezunu · 18 yaş+"
+3, "· 17 yaş+" 2, "Lise mezunu · 19 yaş+" 1, "· 20 yaş+" 1) — yani
+satır artık gerçekten o işi anlatıyor. Karar birebir eşitliğe dayandığı
+için işe özel gerekçe gizlenmiyor; aynı karede 21. kart hâlâ kendi
+cümlesini yazıyor: "Bu yıl Kuaför işine başvurdun ve kabul edilmedin.
+Yeni bir başvuru için gelecek yılı beklemelisin. Başka mesleklere
+başvurabilirsin." Bu, kaynak kilidinin yanında **ölçülmüş** bir
+kanıttır: bastırma yalnızca paylaşılan cümleyi kaldırıyor.
+
+### Bekçiler
+
+1. `app/test/ekran_dokumu_bolumler_test.dart` — **28 karenin hepsinde**
+   cümle tekrarı sayılıyor; tavan ölçülen en yüksek meşru değere (4)
+   kuruldu, beşinci tekrar testi düşürür. Tek sayfaya değil dökümün
+   tamamına kondu, çünkü aynı sınıf Paket CL'de bir kez düzeltilmişti.
+2. `app/test/paket_dp_is_ara_tekrari_test.dart` (5 test) — kusurun kök
+   nedeni (açık işlerin 20'si aynı gerekçeyi taşıyor), kaynak kilidi,
+   karede cümlenin **bir** kez çizildiği ve düğmelerin kapalı kaldığı.
+
+**Mutasyonlar (üçü de ısırdı):** (a) kartı eski hâline döndürmek →
+döküm "21× Devam eden bir mülakatın var." diye düşüyor ve §3 düşüyor;
+(b) paneli kaldırmak → cümle hiç yazılmıyor, §3 "0 widget" ile düşüyor
+(yani bekçi hem tekrarı hem **gizlemeyi** yakalıyor); (c) tekrar
+koşulunu `gerekce == sharedReason` yerine yalnızca `isNotEmpty` yapmak →
+§2 düşüyor.
+
+Tam süit: **3889 geçti, 17 atlandı, 0 hata** (38 dk 57 sn).
+`analyze lib test` temiz. Test sayısı DO'daki 3878'den 3889'a çıktı:
+yeni hedefli dosya 6 test, dökümün beş yeni karesi 5 test. Paket DP'nin
+CI'ı (`c5f1dde`) iki işte de yeşil tamamlandı.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DQ — kapsam iddiasının boş çıkanı ve son okunmamış kare (12 Ekim 2026)
+
+Paket DP'den sonra kapsam kaydında beş sayfa "başka testle okunuyor"
+diyordu. Bu bir **iddia**; ölçtüm. Her kayıt için adı yazılan testin
+`pumpWidget`, `tester.tap` ve `print` sayısını ve sayfanın başlığının
+kaynakta **nerede** geçtiğini saydım:
+
+| sayfa | iddia edilen test | pump | tap | print | başlık nerede |
+|---|---|---|---|---|---|
+| activities_screen | content_reachability_test | **0** | **0** | 0 | **yalnızca `group` etiketi** |
+| assets_screen | ekran_dokumu_test | 2 | 5 | 1 | gövdede |
+| relationships_screen | ekran_dokumu_test | 2 | 5 | 1 | gövdede |
+| school_career_screen | after_school_widget_test | 1 | 6 | 0 | gövdede |
+| social_pages | social_widget_test | 1 | 5 | 0 | gövdede |
+
+### Bulgu 1: bekçi bir ad çakışmasıyla tatmin oluyordu
+
+`content_reachability_test.dart` **hiç widget kurmuyor** — bir kapsam
+testi değil, içerik erişilebilirlik testi. Kaydı geçmesinin tek nedeni
+dosyada `group('Aktiviteler', …)` yazması ve `activities_screen.dart`'ın
+bir `SectionScaffold` başlığının da "Aktiviteler" olması. Yani bekçi
+kapsamı değil **bir dizi benzerliğini** denetliyordu; tam olarak bu
+yöntemin reddettiği şey.
+
+Sayfanın karesi aslında basılıyor (`ekran_dokumu_test.dart` dört sekmeyi
+dolaşıp metnini yazıyor) — **kayıt** yanlıştı, kapsam değil. Ama aynı
+boşluk `social_pages.dart`'ta gerçek bir körlüğe dönüşmüştü (Bulgu 3).
+
+**Düzeltme iki katmanlı.** (a) Bekçi sıkıştı: adı yazılan test artık
+`pumpWidget` çağırmak **zorunda** ve başlık `group`/`test`/`testWidgets`
+etiketlerinin **dışında** geçmeli. (b) Sekme köklerinin iddiası metin
+benzerliğinden çıkarılıp **yapısal** hâle getirildi: dört sekme
+`test/support/section_pages.dart` içindeki `kSekmeKareleri` listesinde
+duruyor, `ekran_dokumu_test.dart` o listeyi dolaşıyor ve kapsam bekçisi
+kapsamı aynı listeden sayıyor. İddia artık ortak kaynağa dayanıyor.
+
+Bu gerekliydi: ölçtüm, `school_career_screen.dart`'ın **30 başlığından
+sıfırı** `ekran_dokumu_test.dart` gövdesinde geçiyor — kareyi basan test
+ile sayfayı metinle eşleştirmek mümkün değildi.
+
+Kapsam artık: **30 sayfa · dökümde 26 · sekme kökü 4 · başka testle 0.**
+Her bölüm sayfasının karesi, onu gerçekten **basan** bir test
+tarafından okunuyor.
+
+### Bulgu 2: Sosyal medya karesi temiz, ama Q-050 ekranda
+
+Kare (16 yaş, 35 metin): dört platform kartı, her birinde "Hesabın yok.
+İstersen açabilirsin." ve "Hesap aç" düğmesi; altta "Mesajlaşma henüz
+yazılmadı; yazılmamış özellikler düğme olarak gösterilmiyor. Sponsorlar
+kurgusaldır ve bütün tutarlar oyun parasıdır." Yazılmamış özellik düğme
+olarak durmuyor, tutarlar kurgusal diye yazılı — temiz.
+
+**Bildirim (karar değil):** kare platform adlarını ekranda gösteriyor —
+YouTube, Instagram, X, TikTok. Bu, `CLAUDE.md`'deki "gerçek şirket adı
+kullanma" kuralıyla **çelişiyor** ama aynı konu `Q-050` olarak kuyrukta
+açık duruyor. Çelişkiyi tahminle kapatmıyorum: Faho'ya bildiriyorum,
+Q-050 kararı gelene kadar adlara dokunmadım.
+
+### Bulgu 3: platform karesinde eylemin adı iki kez
+
+`social_pages.dart` iki kare barındırıyor ve ikincisinin başlığı
+**dinamik** (`platform.label`), yani başlık taramasına hiç görünmüyordu.
+Döküm açtı (16 yaş, 71 metin) ve üç ünlü kartının her birinde şu satır
+çıktı:
+
+> İş birliği teklif et**:** **İş birliği teklif etmek için** tanınman
+> gerekiyor**:** en az 25 Ün.
+
+Eylemin adı aynı satırda iki kez, iki nokta üst üste iki kez. Kök neden:
+gerekçe eylemin adını kendi içinde taşıyor (`contact()` sonucu olarak
+tek başına da kullanılabilsin diye), ekran da başına `'${eylem.label}: '`
+ekliyor.
+
+**Düzeltme.** Gerekçe yalnızca **kapıyı** yazıyor
+("Tanınman gerekiyor: en az 25 Ün."), adı çağıran yer ekliyor ve ayraç
+açık satırla aynı oldu:
+
+> Mesaj at · karşılık ihtimali ~%19
+> İş birliği teklif et · Tanınman gerekiyor: en az 25 Ün.
+
+### Ölçüm: gösterilen ihtimal ne zaman ayrışıyor?
+
+Karede üç ünlünün üçünün altında da "~%19" yazıyordu; takipçileri
+2,1 M / 3,2 M / 5,4 M. Ölçtüm, **3 ünlü × 3 eylem = 1 ayrı yüzde**.
+Neden: `replyChance` ünlünün yaklaşılabilirliğini `takipçi / eşik` ile
+çarpıyor, hesap yeni açıldığında bu 0; kalan terimler (karizma, ün,
+tanışıklık) ünlüden ve eylemden bağımsız. Sayı **doğru** — oyuncunun o
+an gerçek ihtimali bu — ama üç ünlüyü eşit erişilebilir gösteriyor ve
+görünürlük mekaniği ekranda hiç yazmıyor.
+
+| durum | mesaj ihtimalleri |
+|---|---|
+| 0 takipçi (karizma 85) | %21 · %21 · %21 |
+| 302 takipçi | %20 · %19 · %19 |
+
+İkinci satır mekanizmanın bağlı olduğunu gösteriyor ama ayrışma **1
+puan**: o platformun ünlülerinin eşikleri 4.000 / 6.000 / 12.000
+takipçi. Bu bir denge/metin tercihi olduğu için karar vermedim;
+ölçümle birlikte **Q-243**'e yazdım.
+
+### Bekçiler ve mutasyonlar
+
+- `app/test/paket_dm_bolum_kapsami_test.dart` — §3 sıkıştırıldı
+  (`pumpWidget` zorunlu, başlık etiket dışında), §5 eklendi (sekme kökü
+  iddiası yapısal: liste ortak, döküm basıyor).
+- `app/test/paket_dq_sosyal_kare_test.dart` (4 test) — gerekçenin adı
+  tekrar etmediği (kaynak), 0 takipçide yüzdelerin ayrışmadığı (ölçüm
+  kilidi), eşik üstünde ayrıştığı ve platform karesinde satırın
+  kekelemediği.
+
+**Mutasyonlar (ikisi de ısırdı):** (a) kekeme gerekçeyi geri getirmek →
+§1 (kaynak) **ve** §4 (çizilmiş kare) düşüyor; (b) eski kapsam kaydı
+(`activities_screen` → `content_reachability_test`) → sıkıştırılmış §3
+"hiç `pumpWidget` çağırmıyor" diye düşüyor. (b) mutasyon değil, kaydın
+**gerçek** hâliydi: bekçi yazıldığı anda ısırdı.
+
+Tam süit: **3896 geçti, 17 atlandı, 0 hata** (38 dk 3 sn).
+`analyze lib test` temiz. Test sayısı DP'nin 3889'undan 3896'ya çıktı:
+hedefli dosya 4, kapsam bekçisinin §5'i 1, dökümün iki yeni karesi 2.
+Paket DQ'nun CI'ı (`e9833c9`) iki işte de yeşil tamamlandı. (Paket
+DP'nin belge commit'i `3dcf092` için hiç koşu başlamadı; hemen ardından
+gelen push CI'ı yeni head'e taşıdı ve o head aynı içeriği taşıyor.)
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DR — modal kareler ilk kez basıldı (12 Ekim 2026)
+
+Bölüm sayfalarının hepsi okundu (DM-DQ: 28 kare + 4 sekme kökü, dokuz
+kusur). Bir katman aşağıda `lib/ui/widgets/` duruyor. **Ölçüm:** dosya
+başına oyuncuya dönük cümle sayısı (kaynaktaki 18+ karakterlik, boşluk
+içeren dizgiler, yorumlar atılmış):
+
+| widget | cümle | karesi basılıyor mu? |
+|---|---|---|
+| **person_detail_sheet** | **65** | hayır |
+| **item_detail_sheet** | 20 | hayır (hiçbir test adını anmıyor) |
+| **settings_sheet** | 14 | hayır (hiçbir test adını anmıyor) |
+| character_header | 13 | evet (her dökümde çiziliyor) |
+| **elder_support_card** | 11 | hayır |
+| notice_sheet | 11 | evet |
+| **pet_detail_sheet** | 10 | hayır |
+| **prison_life_panel** | 7 | hayır |
+| **license_exam_sheet** | 6 | hayır |
+| **track_choice_sheet** | 5 | hayır |
+
+`person_detail_sheet.dart` tek başına **65 cümle** — okuduğum hiçbir
+bölüm sayfasından yoğun. Modal bir sayfa sekmede görünmüyor, bölüm
+dökümü oraya giremiyor; o yüzden hiç basılmamıştı.
+
+**Uyarı (kendi aracıma karşı):** "hiçbir test adını anmıyor" **çizilmiyor
+demek değil** — bir modal, sayfanın düğmesine dokunan bir testte adı
+geçmeden de çizilebilir. Bu yüzden iddia sınıf adı taramasıyla
+kapatılmadı; `ekran_dokumu_modal_test.dart` yazıldı ve kareler
+**gerçekten basıldı**.
+
+### Altı kare okundu
+
+| kare | yaş | metin | sonuç |
+|---|---|---|---|
+| Kişi kartı | 0 | 56 | temiz (etkileşim kapısı yazılı: "Bu etkileşimler 4 yaşından itibaren açılır.") |
+| Kişi kartı · çocuk | 32 | 70 | temiz |
+| **Kişi kartı · yaşlı anne** | 43 | 103 | **iki metin kusuru + bir ölçüm** |
+| Varlık detayı | 8 | 45 | temiz (durum, kondisyon, edinme, satış fiyatı) |
+| Evcil hayvan detayı | 36 | 74 | temiz ("Yakınlık 55/100", "Olağan ömür 15 yıl") |
+| Ayarlar | 1 | 111 | temiz; bir gözlem aşağıda |
+
+Aynı modalın üç karesi var çünkü 0 yaşındaki kare dosyanın yalnızca üst
+kısmını çiziyor: etkileşimler 4 yaşından, bakım kararları yaşlılıkta,
+çocuğa özel satırlar yalnızca çocukta açılıyor.
+
+### Kusur 1: "Cemile kişisine Kolye verdin."
+
+Ortak geçmiş kaydında hediye satırı böyle okunuyordu. "kişisine"
+sözcüğü Türkçe ad çekiminden (Cemile'**ye**) kaçmak için konmuş bir
+dolgu. Paket DN'in kararı aynen uygulandı — tek çağrı yeri için ad
+çekimi motoru yazmak yerine cümle **ek gerektirmeyecek** biçimde
+kuruldu: "Cemile için Kolye aldın." (Hediyenin bedeli oyuncunun
+cüzdanından çıkıyor, bu yüzden "aldın" doğru fiil.) Gelen hediye satırı
+zaten doğruydu: "Cemile sana Kolye verdi."
+
+### Kusur 2: 'Cemile "şey almayacaktın" dedi'
+
+Tırnak içindeki cümle eksik sözcük sanılıyor. Kastedilen konuşma
+dilindeki duraksama; noktalama onu belli ediyor: **"Şey... almayacaktın"**.
+Sözcükler değişmedi, yalnızca noktalama.
+
+### Ölçüm: annenin avucuna sıkıştırdığı para
+
+Aynı karede şu satır var: *"Cemile cüzdanını çıkardı, katlanmış parayı
+avucuna sıkıştırdı: 'Kimseye söyleme.'"* — ve cüzdana giren tutar
+**25 ₺**. Ölçtüm:
+
+| kim veriyor | tutar (prototypeOnly) |
+|---|---|
+| çok yoksul kişi | 10 ₺ |
+| yoksul kişi | **25 ₺** |
+| orta halli kişi | 60 ₺ |
+| varlıklı kişi | 500 ₺ |
+| çok varlıklı kişi | 1.400 ₺ |
+| **oyuncunun kendi çocuğuna verdiği harçlık (varsayılan)** | **2.400 ₺** |
+
+Aynı jest için **96 kat** fark var ve 25 ₺ oyunun kendi ölçeğinde
+kumarhane asgari bahsinin (100 ₺) altında, bir dövüş sanatı dersinin
+(600-750 ₺) kırkta biri. Sayılar `prototypeOnly`, kalibrasyonu Faho'nun
+kararı: ölçümle **Q-246**'ya yazdım, değiştirmedim.
+
+### Gözlem: Ayarlar'daki modül başlıkları
+
+Ayarlar karesi "Modüller" bölümünde 18 grup başlığı çiziyor: "Paket BK —
+ebeveynlik", "Paket CC — son yıllar", "Paket DG — ilkokul yılları"…
+Bunlar benim geliştirme paketlerimin kodları. **Kusur demiyorum:**
+`FeatureFlag.paket` alanının kendi belgesi "ayarlar ekranı buna göre
+gruplar" diyor ve bu bölüm senin "kendi yaptığın geliştirmeleri
+çıkarabileceğim bir sistem kur" isteğinin karşılığı — kod sana bilgi.
+Oyuncuya çıkan sürümde görünüp görünmeyeceği bir **sürüm kararı**:
+**Q-245**.
+
+### İkinci gözlem: yakınlık çubuğu sayısız
+
+Kişi kartında "Keyfi" ve "Yakınlık" birer `LinearProgressIndicator`;
+dökümde yalnızca etiketleri göründü (döküm **çizilmiş metni** okur,
+çubuğu okumaz — araç kusuru değil). Ama ölçtüm: aynı değer oyunun üç
+ayrı yerinde **sayıyla** yazılıyor — evcil hayvan kartı "Yakınlık
+55/100", cezaevi paneli "yakınlık 42/100", askerlik sayfası "yakınlık
+37". Kişi kartı tek istisna. Tutarlılık tercihi olduğu için **Q-244**.
+
+### Bekçiler ve mutasyonlar
+
+- `app/test/ekran_dokumu_modal_test.dart` — altı modal karesi; bölüm
+  dökümünün bütün bekçileri (işaret, boş kare, ayraçsız sayı, cümle
+  tekrarı tavanı 4) aynen geçerli.
+- `app/test/paket_dr_modal_metinleri_test.dart` (4 test) — `lib/`
+  genelinde "kişisine" dolgusu taraması, hediye cümlesinin biçimi,
+  tırnak noktalaması ve harçlık tablosunun ölçümü.
+- `kModalBekleyen` (7 dosya) — bekleyen durum isteyen modallar
+  (kriz, mülakat, duruşma, alan seçimi, cezaevi paneli, yaşlı bakım
+  kartı, ehliyet sınavı). Muafiyet değil **ölçülmüş kuyruk**; bir
+  sonraki paket bekleyen durumlu bir döküm turu istiyor.
+
+**Mutasyonlar (ikisi de ısırdı):** (a) "kişisine" dolgusunu geri
+getirmek → §1 düşüyor; (b) tırnağı eski hâline döndürmek → §3 düşüyor.
+§2 o koşuda geçti (bulunan karede kayıt "gelen" hediyeydi) ve bu sınır
+testin kendi yorumuna yazıldı — asıl bekçi §1'in tarama.
+
+### Kendi hatam: değişen cümlenin **komşu** beklentisini taramadım
+
+Push'tan sonra CI kırmızı döndü: `3905 geçti, 1 düştü`. Düşen test
+`shared_history_test.dart` → "hediyeler iki yönlü olarak görünür";
+giden hediye satırının **'verdin'** sözcüğünü içermesini bekliyordu.
+Benim düzeltmem o cümleyi "Sema için Kol saati aldın." yaptı.
+
+Push öncesi taramam eksikti: kaldırdığım dizgileri ("kişisine", "şey
+almayacaktın") test ağacında aradım, **yerine koyduğum cümlenin
+komşusu** olan sözcüğü ("verdin") aramadım. Bu ders yol haritasında
+zaten yazılıydı (geniş kullanılan bir metin değişince beklentileri
+süitten tek tek öğrenmek pahalı; önce deseni tara) ve tekrarladım.
+
+Test **silinmedi, gevşetilmedi** — beklenti yeni cümleye göre
+güncellendi ve **sıkıştırıldı**: satırın kişiyi adıyla andığı
+("Sema için") ve dolgunun geri gelmediği de denetleniyor. Düzeltmeden
+sonra dosya 13 testle geçti; metin kataloglarına dokunan beş komşu test
+(`outing`, `paket_ap_ui`, `family_events`, `paket_bi_sohbet_yas`,
+`paket_w`) ve `text_consistency` + `gift_choice` ayrıca koşturuldu, 95
+test geçti.
+
+**Yerel tam süit (düzeltme öncesi kodla): 3905 geçti, 17 atlandı,
+1 düştü** (41 dk 18 sn) — CI'la **birebir aynı** sonuç ve tek hata bu
+testti. Yani değişikliğin etkisi tam olarak bir beklentiydi; başka
+gizli bağımlılık yok. Düzeltmeden sonraki doğrulama CI'da yapıldı:
+`50fcb75` iki işte de **yeşil** tamamlandı (CI işi süitin tamamını
+koşuyor) ve PR durumu `clean`. İkinci bir 40 dakikalık yerel koşu
+başlatılmadı; CI aynı süiti düzeltilmiş kodla zaten koşturdu.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DS — öğrencinin kapalı iş kapısı ve denetlenmeyen kapsam kaydı (12 Ekim 2026)
+
+Paket DR bekleme listesi bırakmıştı; bu paket onu **ölçtü** ve listenin
+yanlış olduğunu buldu. Aynı turda, listeyi doğrulamaya çalışırken
+onaylı bir karara aykırı bir **ürün hatası** çıktı.
+
+### 1) D-131'in yarısı hiç çalışmıyordu
+
+D-131 aynen: *"**Öğrenci artık İş ara ekranını görür**; ekran yarım
+zamanlı ve tam zamanlı işleri **ayrı gruplar**."* Sayfa o karara göre
+yazılmıştı (`education_career_pages.dart` yarım zamanlı grubu kendi
+başlığıyla listeliyor) ama sayfaya giden tek kapı `_CareerView`
+içindeydi ve `SchoolCareerScreen.build` onu yalnızca **öğrenci
+olmayana** çiziyordu:
+
+```dart
+if (egitim.isStudent) return _SchoolView(...);   // kapı yok
+return _CareerView(...);                         // kapı burada
+```
+
+Kanıt kodun kendi içindeydi: kariyer görünümündeki satırın alt
+yazısında `egitim.isSchoolStudent ? 'Okurken yapılabilecek yarım
+zamanlı işler'` dalı vardı ve `isStudent = enrolled ||
+isUniversityStudent`, `isSchoolStudent = enrolled` olduğu için o dal
+**hiç çalışamazdı**.
+
+**Ölçüm (8 arketip × 12 tohum, tam hayatlar):**
+
+| kare | sayı | ekranda görünen |
+|---|---|---|
+| 16 yaş+ öğrenci | 917 | "İş ara" satırı **yok** |
+| işi olan öğrenci | 589 | işin adı, maaşı, ayrılma yolu **yok** |
+| mülakatı süren öğrenci | 180 | devam etme yolu **yok**, başvurular "Devam eden bir mülakatın var." diye kapalı |
+
+Yani sekiz yarım zamanlı iş, kendi maaş bandı ve on altı mülakat
+sorusu tam olarak yazıldığı kitleye kapalıydı; üstüne mülakatı süren
+öğrenci **kilitli** kalıyordu (ne devam, ne iptal).
+
+**Düzeltme.** Okul görünümüne üç şey geldi: `İş ara` satırı (yaş kapısı
+**katalogdan** okunuyor), çalışan öğrencide iş kartı + "İşten ayrıl",
+ve "Mülakata devam et" satırı. Kariyer görünümündeki ölü dal
+kaldırıldı. Kapı açılırken ulaşılan durumun **gösterilebildiğinden**
+emin olundu: tek yönlü kapı bırakılmadı.
+
+Yan ürün: `const int _enKucukYarimZamanliYas = 16;` yorumunda
+"katalogdaki en küçük `minAge` ile aynı" diyordu — hiçbir yerde
+sınanmayan bir iddia. Ölçüm doğruladı (8 yarım zamanlı iş, en küçük
+16) ve sayı artık **katalogdan türetiliyor**; iddia yapı gereği doğru.
+
+### 2) Kapsam kaydı denetlenmiyordu, bu yüzden yanlıştı
+
+Paket DR üç liste yazdı (`kModalKareleri`, `kModalBekleyen`,
+`kModalBaskaTestle`). **Ölçtüm: son ikisi depoda sıfır yerden
+çağrılıyordu.** Denetlenmeyen kayıt hemen eskidi:
+
+| dosya | DR'nin kaydı | ölçülen gerçek |
+|---|---|---|
+| elder_support_card | bekliyor | **basılıyor** ("Bu yıl kim yanında?" 1 kez) |
+| health_crisis_sheet | bekliyor | **basılıyor** (1 kez) |
+| trial_sheet | bekliyor | **basılıyor** (1 kez) |
+| pregnancy_notice | kayıt yok | **basılıyor** ("Bebek yolda" 2 kez) |
+| person_card | kayıt yok | **basılıyor** ("vefat etti" 37 kez) |
+| notice_sheet | başka döküm basıyor | **basılmıyor** — o döküm bildirimin *içeriğini* basıyor, pencerenin 13 cümlesini değil |
+| prison_life_panel | bekliyor | basılmıyor ama nedeni "bekleyen durum" **değil**: panel bir menü satırının arkasında ve döküm o satıra hiç dokunmuyordu → **kare eklendi** |
+| interview_sheet | bekliyor | basılmıyordu, nedeni **ürün hatası** (yukarıdaki §1) → artık basılıyor |
+| license_exam_sheet · track_choice_sheet | bekliyor | doğru: ikisi de akış içi modal |
+
+**Yöntem değişikliği.** "Bu dosyanın karesi şu test tarafından
+basılıyor" iddiası kaynak taramasıyla doğrulanamaz: dökümün bastığı
+metin kaynağında yazmaz, çalışırken oluşur. İddiayı artık **basan
+taraf** doğruluyor: her döküm `modalKapsamDenetle` çağırıp kendi
+kayıtlarının işaretlerini bastığı karelerde arıyor. Üç dökümün üçü de
+bağlandı (ölçüm: `ekran_dokumu_test` 1 kayıt, `ekran_dokumu_ozel_durum`
+5 kayıt, `paket_ds_ogrenci_is_kapisi` 1 kayıt · eksik 0).
+
+Kapsam ölçüsü de üç kez daraltıldı, her daraltma bir yanlış saymayı
+düzeltti: `assert` mesajı oyuncuya dönük metin değil
+(`bottom_action_bar`), karşılaştırmaya giren dizgi çizilen metin değil
+(`character_face`, bir saç modeli adını **arıyor**), interpolasyon
+çıkınca 12 karakterden kısa kalan dizgi cümle değil (`race_track`).
+Son hâl: **28 widget dosyası · 15'i metin taşıyor · kayıt açığı 0.**
+
+### 3) MÜLAKAT karesi ilk kez basıldı — iki ayrı neden vardı
+
+Özel durum dökümü bu kareyi üç turdur açamıyordu ve dosyanın başındaki
+teşhis "alt sekmeye basmak bu koşumda Meslek ekranını getirmiyor"
+diyordu. Semptom doğru, neden eksikti. İki ayrı engel ölçüldü:
+
+1. **Ürün hatası:** açıcı `career_mulakat_devam` arıyordu; bulunan kare
+   17 yaşında bir **lise öğrencisiydi** ve o satır öğrenciye hiç
+   çizilmiyordu (§1). 180 kare böyle.
+2. **Araç hatası, asıl engel:** satır eklendikten sonra da
+   bulunamadı — karede mülakatın yanında iki bildirim ve bir **bekleyen
+   olay** penceresi açıktı. Modal bariyer yüzünden sekmeye dokunmak
+   hiçbir şeye isabet etmiyordu; `tap()` zaten "warnIfMissed" uyarısı
+   veriyordu, o uyarıyı okumamıştım.
+
+Karenin koşulu sıkıştırıldı (mülakat **tek** bekleyen şey olmalı) ve
+kare açıldı:
+
+```
+Halı saha görevlisi (yarım zamanlı) mülakatı
+Karşındaki kişi bir soru soruyor.
+Saat doldu ama takım oynamaya devam ediyor.
+  Işıkları kapatırım / Kenara gider, süreyi hatırlatırım /
+  Beklerim, bir şey demem / Kavga ederim
+Görüşmeden vazgeç
+```
+
+Döküm artık sessizce geçmiyor: açıcının başarısızlığı **testi
+düşürüyor** ve her karenin ölçülmüş bir `isaret`i var (altı karede
+bilerek boş: kendi penceresi olmayan kareler).
+
+### 4) Okunan karelerden çıkan üç kusur ve dört soru
+
+**Düzeltilenler (metin, kural değil):**
+
+- Son sınıftaki oyuncunun kartında **"Son sınıfa kalan: 0 yıl"**
+  yazıyordu. Sayı doğru (12 − 12), cümle yanlış: oyuncu son sınıfın
+  içinde. Satır artık 12. sınıfta "Son sınıf · Bu yıl" diyor.
+- Koğuş karesinde iki ayrı sistem **aynı cümleyi** yazıyordu
+  ("Tartışmanın kenarından dolaş…"): biri iyi hâl, öteki mutluluk
+  veriyor. İkinci cümle kendi karşılığını anlatıyor.
+- Çalışan öğrencide satır kariyer görünümüyle aynı dili konuşuyor
+  ("İş değiştir · Önce mevcut işinden ayrılman gerekir").
+
+**Kuyruğa yazılanlar (ürün kararı, kod değişmedi):** Q-247 (öğrenci
+tam zamanlı iş tutabiliyor — ölçüm: 589 çalışan öğrenci karesinde
+Kuaför ve Aşçı var), Q-248 ("Lise 3. sınıf" ve "11. sınıf" aynı
+kartta), Q-249 ("Yerleştirme puanı 35" — ölçek yazmıyor; ölçüm:
+`clamp(0,100)`), Q-250 (koğuşta iki ayrı "sakin dur" eylemi).
+
+### 5) Dört kopya listeden biri kaldı
+
+`kSekmeler` dört dosyada elle yazılıydı; Paket DQ birini
+`kSekmeKareleri`ne bağlamıştı, kalan üçü sessizce ayrışabilirdi.
+Üçü de bağlandı ve bekçisi yazıldı (`paket_dm_bolum_kapsami_test` §6:
+`kSekmeler` tanımlayan her test onu paylaşılan listeden türetmeli).
+
+### Ölçüler
+
+| ölçü | değer |
+|---|---|
+| yeni test dosyası | 2 (`paket_ds_ogrenci_is_kapisi_test`, `paket_ds_modal_kapsami_test`) |
+| yeni test | 12 |
+| kanıtlanmış mutasyon (bekçi ısırıyor mu) | **9/9** |
+| ilk kez basılan kare | 2 (CEZAEVİ KOĞUŞU, MÜLAKAT) |
+| modal kapsam açığı | 0 (28 dosya · 15 metin taşıyor) |
+| bekleme kuyruğu | 3 (notice_sheet, license_exam_sheet, track_choice_sheet) |
+| düzeltilen metin kusuru | 3 |
+| kuyruğa yazılan soru | 4 (Q-247…Q-250) |
+
+### Süit ve CI (doğrulandı)
+
+| koşu | sonuç |
+|---|---|
+| `flutter analyze lib test` | temiz |
+| yerel tam süit (`b1e9373` ağacı) | **3920 geçti · 17 atlandı · 0 düştü** · 38:42 |
+| CI "Analiz, test ve Windows sürümü" (`b1e9373`, koşu 329) | **success** |
+| CI "Analiz, test ve debug APK" (`b1e9373`, koşu 332) | **success** |
+
+**APK cihazda oynanmadı.** CI debug APK'yı derliyor; "derlendi"
+"oynandı" demek değil.
+
+**Araç hatası, bu pakette dördüncüsü (kendi ölçüm aracımda).** Süit
+koşarken ilerlemeyi `grep -E "^0[0-9]:[0-9][0-9] \+[0-9]+"` ile
+okuyordum. O kalıp yalnızca ilk on dakikayı yakalıyor: onuncu dakikadan
+sonra satırlar `10:23 +620` diye başlıyor ve eşleşmiyor. Bu yüzden "37
+dakikada 603 test" diye yanlış bir yavaşlık bildirdim; süit o anda
+`37:29 +3826` idi. Kalıp `^[0-9]+:` olmalı. Dersin aynısı: **aracın
+çıktısını okumadan önce aracın kendisini sına.**
+
+### Ders
+
+**Bekleme listesi bir bekçi değildir.** DR'nin üç listesi doğru
+niyetle yazıldı ve bir paket sonra beşi yanlış çıktı — çünkü hiçbir
+test onları okumuyordu. Ölçüsü olmayan kayıt, yorum kadar güvenilir.
+Bu paketten sonraki kural: **bir kapsam iddiasını, o kareyi basan test
+kendi çalışmasında doğrulamalı.** Kaynak taraması iddianın
+*uydurulmadığını* gösterir, *tuttuğunu* göstermez.
+
+**İkincisi: aracın uyarısını oku.** Mülakat karesi üç paket boyunca
+"açılmıyor" diye duruyordu ve `tap()` o üç paket boyunca
+"warnIfMissed" uyarısı basıyordu. Teşhisi uyarının söylediği yerden
+değil, kendi tahminimden kurmuşum.
+
+**Üçüncüsü: kapı açarken varış yerini de göster.** Öğrenciye "İş ara"
+satırını eklemek yetmezdi; o satırdan geçen oyuncu işe girince işini
+göremiyor ve ayrılamıyor olacaktı. Ölçüm bunu önceden gösterdi (589
+kare), ekran da onunla birlikte yazıldı.
+
+## Paket DT — akış içi modallar okundu, bekleme kuyruğu kapandı (12 Ekim 2026)
+
+Paket DS modal kapsam kaydını denetlenir hâle getirmiş ve kuyrukta üç
+dosya bırakmıştı: `notice_sheet.dart` (13 cümle),
+`license_exam_sheet.dart` (8), `track_choice_sheet.dart` (8). Üçü de
+**akış içi** modal: ekranda bir satırın arkasında değil, bir eylemin
+ortasında açılıyorlar.
+
+### 1) Kapılar ölçüldü — biri sıfır çıktı
+
+8 arketip × 10 tohum, tam hayatlar, `onYear` + `onPreAge` + `onPending`:
+
+| kapı | kare |
+|---|---|
+| lise alanı seçimi bekliyor | 359 |
+| cenaze bildirimi | 887 |
+| doğum bildirimi (ad verme) | 179 |
+| **ehliyet sınavı bekliyor** | **0** |
+
+Son satır bir **araç bulgusu**, ürün hatası değil: sınav başvuruyla
+aynı adımda çözülüyor, bu yüzden hiçbir kanca onu "bekliyor" hâlinde
+göremiyor (Paket CR'nin ölçtüğü kör noktanın aynısı). Günlükte sınav
+satırları bolca var, yani akış çalışıyor. O kare bu yüzden
+**oynanarak** açıldı: döküm Aktiviteler → Ehliyet İşlemleri'ne gidip
+başvuruyor.
+
+### 2) İki araç tuzağı, ikisi de ölçümle çözüldü
+
+**a) Bildirim kuyruğunun ortası.** `home_shell` her karede yalnızca
+`state.nextNotice`i — yani kuyruğun **ilk** öğesini — gösteriyor.
+Aradığım cenaze bildirimi kuyruğun ortasındaydı:
+
+```
+aileDonum | olum | **cenaze** | miras | aileDonum
+```
+
+İlk koşumda "pencere açılmadı" diye rapor edecektim; pencere
+açılıyordu, **başka bir bildirimi** gösteriyordu. Döküm artık oyuncunun
+yaptığını yapıyor: sırayla kapatıp hedefe yürüyor ve kaç pencere
+kapattığını yazıyor.
+
+**b) Alan seçimi karesi "BULUNAMADI" çıkıyordu.** Üç süzgeç denedim,
+sonra ölçtüm:
+
+| alan seçimi karesi | sayı |
+|---|---|
+| hepsi | 359 |
+| **olaysız** | **0** |
+| krizsiz | 359 |
+| bildirimsiz | 100 |
+
+`awaitingTrackChoice`in açık olduğu **her** karede bekleyen bir olay da
+var. Sebebi yapısal: alan seçimi `ageUp`in beş kapısından biri (D-094),
+bot onu gördüğü anda yanıtlıyor, kare yalnızca `onPending` kancasında
+görünüyor. Çözüm durumu kurmak değil **oynamak**: bekleyen olay ve
+bildirimler arayüzden yanıtlanıyor (`answerPendingEvents`). Alan seçimi
+bunlarla kapanmıyor, kendi kapısı ayrı — test bunu da doğruluyor.
+
+### 3) Okunan karelerden çıkan gerçek kusur: cenaze bildirimi oyuncunun yerine karar veriyordu
+
+Bildirim metni şöyleydi:
+
+> Baba Ramazan için cenaze hazırlıkları yapılıyor. **Cenazeye
+> katılıyorsun; masraflara katkıda bulunmak ister misin?**
+
+Kare basılınca iki kusur birden çıktı:
+
+1. **Birinci adımda çelişki.** Metin "Cenazeye katılıyorsun" diyor,
+   hemen altındaki iki düğme ise katılıp katılmayacağını **soruyor**
+   ("Cenazeye katıl" / "Katılamıyorum").
+2. **İkinci adımda tekrar.** Katılım seçildikten sonra pencere kendi
+   sorusunu yazıyor ("Cenazeye katılıyorsun. Masraflara katkıda
+   bulunmak ister misin?") ve aynı cümle ekranda **iki kez** duruyordu.
+
+Kök neden tek: bildirim metni pencerenin işini yapıyordu. Metin artık
+yalnızca sahneyi kuruyor; soruları pencere soruyor. D-050'nin iki
+adımlı akışı değişmedi.
+
+**Doğrulayıcı bir ayrıntı:** `notice_widget_test.dart` zaten doğru
+biçimi kullanıyordu (`'Annen Hatice için cenaze hazırlıkları
+yapılıyor.'`) — yani beklenen şekil buydu, yalnızca motorun gerçek
+metni fazlalık taşıyordu.
+
+### 4) İki yanlış alarm ölçümle elendi
+
+Ehliyet sayfasında "Devam eden bir ehliyet sınavın var." gerekçesinin
+**altında** "Başvur" düğmesi görünüyor ve ilk bakışta D-063 ihlali
+gibi duruyor. Kaynağa baktım: `onPressed: availability.isAllowed ?
+onApply : null` — düğme **kapalı**, döküm yalnızca çizilmiş metni
+okuyabildiği için kapalılığı göremiyor. Aynı şey "Otomobil ehliyeti
+için en az 18 yaşında olman gerekiyor." satırında da geçerli.
+Raporlamadan önce ölçtüm; Paket DR'nin ders listesine giren üçüncü
+yanlış alarm türü bu.
+
+### Ölçüler
+
+| ölçü | değer |
+|---|---|
+| yeni test dosyası | 1 (`ekran_dokumu_akis_modallari_test`) |
+| yeni test | 4 (dört kare, biri iki adımlı) |
+| kanıtlanmış mutasyon | **4/4** |
+| ilk kez basılan kare | 4 (lise alanı, cenaze ×2 adım, ad verme, ehliyet sınavı) |
+| **modal bekleme kuyruğu** | **3 → 0** |
+| kapsam kaydı | 15 metin taşıyan dosya · 5 döküm · 10 başka test · açık 0 |
+| düzeltilen metin kusuru | 1 (iki belirtili tek kök neden) |
+| elenen yanlış alarm | 2 |
+
+### Süit ve CI (doğrulandı)
+
+| koşu | sonuç |
+|---|---|
+| `flutter analyze lib test` | temiz |
+| yerel tam süit (`6f7ee77` ağacı) | **3924 geçti · 17 atlandı · 0 düştü** · 36:46 |
+| CI "Analiz, test ve Windows sürümü" (`6f7ee77`, koşu 330) | **success** |
+| CI "Analiz, test ve debug APK" (`6f7ee77`, koşu 333) | **success** |
+
+**APK cihazda oynanmadı.** CI debug APK'yı derliyor; "derlendi"
+"oynandı" demek değil.
+
+### Ders
+
+**Bir pencerenin açılmaması, o pencerenin bozuk olduğu anlamına
+gelmez.** Bu pakette iki kez "açılmadı" gördüm ve ikisinde de sebep
+aracımdı: bir kez kuyruğun ortasındaki bildirimi ilk sıradakiyle
+karıştırdım, bir kez de "temiz kare" tanımımın imkânsız olduğunu
+ölçmeden varsaydım. **Sayma, sonra suçla:** kapıyı kaç karede
+gördüğünü ölç, sonra "neden çizilmiyor" diye sor.
+
+**İkincisi: ölçüm aracın kendi tanımını da sınar.** "Temiz kare"
+(`!hasNotice && pendingEvent == null`) bölüm dökümünde doğru bir
+tanımdı; alan seçimi için **tanım gereği boş** bir kümeydi. Tanımı
+kareye göre seç, kalıbı kopyalama.

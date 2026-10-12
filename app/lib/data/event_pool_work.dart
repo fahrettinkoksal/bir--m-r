@@ -23,7 +23,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'is_arkadasina_yardim',
     category: EventCategory.yetiskinlik,
-    text: '{kisi} bugün yetişemeyeceği bir işin altında kalmış. Kimseye bir '
+    text:
+        '{kisi} bugün yetişemeyeceği bir işin altında kalmış. Kimseye bir '
         'şey söylemiyor ama masasındaki yığın büyüyor.',
     requirement: EventRequirement(
       minAge: 16,
@@ -36,7 +37,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'yardim',
         label: 'Kendi işini bırakıp yardım et',
-        resultText: 'Akşam ikiniz de geç çıktınız. {kisi} çıkarken '
+        resultText:
+            'Akşam ikiniz de geç çıktınız. {kisi} çıkarken '
             '"bunu unutmam" dedi, sen omuz silktin.',
         happiness: 3,
         bond: 12,
@@ -49,7 +51,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'kendi_isin',
         label: 'Kendi işine bak',
-        resultText: 'Başını kaldırmadan çalıştın. {kisi} o akşam yalnız '
+        resultText:
+            'Başını kaldırmadan çalıştın. {kisi} o akşam yalnız '
             'kaldı; ertesi gün selamı kısa sürdü.',
         bond: -6,
         addFlags: <String>{WorkFlags.isArkadasiniYalniz},
@@ -61,7 +64,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'is_arkadasi_karsilik',
     category: EventCategory.yetiskinlik,
-    text: 'Yıllar önce yardım ettiğin {kisi} şimdi senin için bir iyilik '
+    text:
+        'Yıllar önce yardım ettiğin {kisi} şimdi senin için bir iyilik '
         'yapabilecek yerde. Kimsenin duymayacağı bir anda soruyor: '
         '"Bir şeye ihtiyacın var mı?"',
     requirement: EventRequirement(
@@ -76,7 +80,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'destek_iste',
         label: 'Yöneticiye senden söz etmesini iste',
-        resultText: '{kisi} sözünü tuttu. Toplantıda adın geçti; bu kadarı '
+        resultText:
+            '{kisi} sözünü tuttu. Toplantıda adın geçti; bu kadarı '
             'bile insanın sırtını dikleştiriyor.',
         happiness: 5,
         charisma: 2,
@@ -85,7 +90,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'gerek_yok',
         label: '"Gerek yok, kendi işim kendi işim"',
-        resultText: 'Gülüp geçtin. {kisi} ısrar etmedi ama teklifin '
+        resultText:
+            'Gülüp geçtin. {kisi} ısrar etmedi ama teklifin '
             'kendisi bile iyi geldi.',
         happiness: 3,
         bond: 4,
@@ -97,12 +103,10 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'zor_musteri',
     category: EventCategory.yetiskinlik,
-    text: 'Karşındaki kişi sesini yükseltti. Ortalık sessizleşti; herkes '
+    text:
+        'Karşındaki kişi sesini yükseltti. Ortalık sessizleşti; herkes '
         'ne yapacağına bakıyor.',
-    requirement: EventRequirement(
-      minAge: 16,
-      requiresEmployed: true,
-    ),
+    requirement: EventRequirement(minAge: 16, requiresEmployed: true),
     repeatable: true,
     minAgeGap: 6,
     weight: 5,
@@ -110,7 +114,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'sakin',
         label: 'Sesini yükseltmeden çöz',
-        resultText: 'Adam sonunda sustu, sen de kendi sesini hiç '
+        resultText:
+            'Adam sonunda sustu, sen de kendi sesini hiç '
             'yükseltmedin. Yan masadan biri başparmağını kaldırdı.',
         happiness: 2,
         charisma: 3,
@@ -119,7 +124,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'sert',
         label: 'Sert karşılık ver',
-        resultText: 'Tartışma büyüdü. Haklıydın ama akşam eve giderken '
+        resultText:
+            'Tartışma büyüdü. Haklıydın ama akşam eve giderken '
             'hâlâ elin titriyordu.',
         happiness: -3,
         addFlags: <String>{WorkFlags.zorMusteriSert},
@@ -127,7 +133,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'cagir',
         label: 'Yöneticiyi çağır',
-        resultText: 'Sorunu devrettin. Çözüldü; yine de "ben halledemedim" '
+        resultText:
+            'Sorunu devrettin. Çözüldü; yine de "ben halledemedim" '
             'duygusu bir süre kaldı.',
         happiness: -1,
       ),
@@ -138,7 +145,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'sakinligin_hatirlandi',
     category: EventCategory.yetiskinlik,
-    text: 'Yeni gelen biri sana bakıp soruyor: "Sinirlenen birine nasıl '
+    text:
+        'Yeni gelen biri sana bakıp soruyor: "Sinirlenen birine nasıl '
         'davranıyorsun?" Yıllar önceki o günü hatırlıyorsun.',
     requirement: EventRequirement(
       minAge: 24,
@@ -152,7 +160,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'anlat',
         label: 'Öğrendiğini anlat',
-        resultText: 'Anlattın. Bir şeyi anlatabiliyor olmak, onu gerçekten '
+        resultText:
+            'Anlattın. Bir şeyi anlatabiliyor olmak, onu gerçekten '
             'öğrendiğini gösteriyor.',
         happiness: 4,
         charisma: 2,
@@ -161,7 +170,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'kisa',
         label: '"Alışırsın" deyip geç',
-        resultText: 'Kısa kestin. Soruyu soran biraz bekleyip masasına '
+        resultText:
+            'Kısa kestin. Soruyu soran biraz bekleyip masasına '
             'döndü.',
         happiness: -1,
       ),
@@ -172,7 +182,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'iste_sorumluluk',
     category: EventCategory.yetiskinlik,
-    text: 'Kimsenin istemediği bir iş masaya kondu: zor, görünmeyen ve '
+    text:
+        'Kimsenin istemediği bir iş masaya kondu: zor, görünmeyen ve '
         'uzun. "Gönüllü var mı?" diye soruldu.',
     requirement: EventRequirement(
       minAge: 17,
@@ -186,7 +197,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'ustlen',
         label: 'Üstlen',
-        resultText: 'Aylar sürdü. Bitince kimse alkışlamadı ama senin '
+        resultText:
+            'Aylar sürdü. Bitince kimse alkışlamadı ama senin '
             'adın o işle birlikte anılmaya başladı.',
         happiness: 2,
         intelligence: 2,
@@ -196,7 +208,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'sessiz',
         label: 'Sessiz kal',
-        resultText: 'Başını eğdin, iş başkasına gitti. Rahat bir yıl '
+        resultText:
+            'Başını eğdin, iş başkasına gitti. Rahat bir yıl '
             'geçirdin.',
         happiness: 2,
       ),
@@ -220,7 +233,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'soyle',
         label: 'Açıkça söyle, ek süre iste',
-        resultText: 'Söyledin. Hoş karşılanmadı ama "haber vermen iyi '
+        resultText:
+            'Söyledin. Hoş karşılanmadı ama "haber vermen iyi '
             'oldu" dediler.',
         happiness: -1,
         charisma: 2,
@@ -229,7 +243,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'gizle',
         label: 'Bitmiş gibi göster',
-        resultText: 'O gün kurtardın. Eksik, birkaç hafta sonra başkasının '
+        resultText:
+            'O gün kurtardın. Eksik, birkaç hafta sonra başkasının '
             'masasında patladı.',
         happiness: -2,
         addFlags: <String>{CareerProgress.flagIsiSavsakladi},
@@ -241,7 +256,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'zam_gorusmesi',
     category: EventCategory.yetiskinlik,
-    text: 'Yöneticin kapıyı kapatıp oturdu: "Yılsonu değerlendirmesi. '
+    text:
+        'Yöneticin kapıyı kapatıp oturdu: "Yılsonu değerlendirmesi. '
         'Sen ne düşünüyorsun?"',
     requirement: EventRequirement(
       minAge: 18,
@@ -255,16 +271,18 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'rakam_soyle',
         label: 'Beklediğin rakamı söyle',
-        resultText: 'Rakamı duyunca kaşını kaldırdı, sonra not aldı. '
+        resultText:
+            'Rakamı duyunca kaşını kaldırdı, sonra not aldı. '
             '"Bakacağız" dedi — bu kez gerçekten bakacak gibiydi.',
         happiness: 2,
         charisma: 2,
-        money: 12000,
+        money: 36000,
       ),
       EventChoice(
         id: 'size_birakiyorum',
         label: '"Uygun gördüğünüz gibi"',
-        resultText: 'Konu kapandı. Kendi payına düşeni istemediğin bir '
+        resultText:
+            'Konu kapandı. Kendi payına düşeni istemediğin bir '
             'toplantıydı.',
         happiness: -2,
       ),
@@ -275,7 +293,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
   GameEvent(
     id: 'baska_is_teklifi',
     category: EventCategory.yetiskinlik,
-    text: 'Tanımadığın biri arıyor: başka bir yerde senin yaptığın işe '
+    text:
+        'Tanımadığın biri arıyor: başka bir yerde senin yaptığın işe '
         'benzer bir kadro açılmış. "Bir konuşalım" diyor.',
     requirement: EventRequirement(
       minAge: 20,
@@ -289,7 +308,8 @@ const List<GameEvent> kWorkEvents = <GameEvent>[
       EventChoice(
         id: 'dinle',
         label: 'En azından dinle',
-        resultText: 'Dinledin. Gitmedin ama kendi işinin değerini bir '
+        resultText:
+            'Dinledin. Gitmedin ama kendi işinin değerini bir '
             'kere daha ölçmüş oldun.',
         happiness: 2,
         charisma: 1,

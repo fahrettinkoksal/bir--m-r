@@ -1,9 +1,16 @@
 import 'dart:math';
 
 import '../../data/health_crisis_catalog.dart';
+import '../../data/insurance_catalog.dart';
+import '../economy/insurance.dart';
 import '../models/game_state.dart';
 import '../models/life_log.dart';
+import '../../domain/economy/vehicle_trouble.dart';
+import '../models/health_history.dart';
+import '../models/owned_item.dart';
 import '../models/pending_crisis.dart';
+import 'chronic_engine.dart';
+import 'critical_health.dart';
 
 /// Bir krize verilen yanıtın sonucu.
 class CrisisOutcome {
@@ -78,8 +85,12 @@ class HealthCrisisEngine {
     final int? son = state.lastCrisisAge;
     if (son != null && age - son < prototypeOnlyMinAgeGap) return null;
 
+    // Taşınan kronik durumlar riski yükseltir (D-153). Çarpan tavanlıdır;
+    // üç durum taşıyan oyuncunun her yıl krize girmesi oyunu cezaya
+    // çevirirdi.
     final double sans =
-        prototypeOnlyCrisisChance(age, state.player.stats.health);
+        prototypeOnlyCrisisChance(age, state.player.stats.health) *
+            ChronicEngine.crisisRiskFactor(state);
     if (rng.nextDouble() >= sans) return null;
 
     final List<HealthCrisis> uygun = crisesForAge(age);
@@ -102,8 +113,14 @@ class HealthCrisisEngine {
       );
 
   /// Bu seçenek şu an seçilebilir mi?
+  ///
+  /// Paket CA: sağlık poliçesi varsa oyuncunun cebinden çıkacak tutar
+  /// **muafiyet + karşılanmayan pay** kadardır; pahalı tedaviyi
+  /// karşılayabilir hâle gelir. Poliçe yoksa kural birebir eskisi.
   bool canChoose(GameState state, CrisisChoice choice) =>
-      !choice.needsMoney || state.player.wallet >= choice.cost;
+      !choice.needsMoney ||
+      state.player.wallet >=
+          Insurance.settle(state, InsuranceKind.saglik, choice.cost).paid;
 
   /// Krize yanıt verir.
   ///
@@ -134,21 +151,37 @@ class HealthCrisisEngine {
       return _blocked(state, 'Bu seçenek için cüzdanında yeterli para yok.');
     }
 
-    final int bedel = secim.cost.clamp(0, state.player.wallet);
-    final double sansEsigi =
-        (kriz.baseSurvival + secim.survivalBonus).clamp(0.05, 0.99);
+    // Sağlık sigortası (Paket CA): poliçe varsa tedavi masrafının
+    // muafiyet üstü kısmı karşılanır. Sigorta cüzdana para **eklemez**,
+    // yalnızca bu yılın masrafını azaltır; poliçe yoksa satır birebir
+    // eskisi gibi çalışır ve zar tüketilmez.
+    final ({int paid, int covered, String? note}) sigorta =
+        Insurance.settle(state, InsuranceKind.saglik, secim.cost);
+    final int bedel = sigorta.paid.clamp(0, state.player.wallet);
+    // Kritik sağlık krizinde (Paket AQ) atlatma ihtimali katalogdan
+    // gelmez: yaş, taşınan rahatsızlıklar ve daha önce kaç kez aynı
+    // eşiğe gelindiği hesaba katılır. Rastgele bir yarı yarıya zar yok.
+    final double sansEsigi = kriz.isCritical
+        ? CriticalHealth.survivalChance(state: state, choice: secim)
+        : (kriz.baseSurvival + secim.survivalBonus).clamp(0.05, 0.99);
     final bool atlatti = rng.nextDouble() < sansEsigi;
 
     GameState next = state.copyWith(
       pendingCrisis: null,
       player: state.player.copyWith(wallet: state.player.wallet - bedel),
     );
+    // Karşılık poliçe kaydına işlenir: "bu poliçe kâra geçti mi" sorusu
+    // ekranda uydurmadan yanıtlanabilsin.
+    next = Insurance.recordClaim(next, InsuranceKind.saglik, sigorta.covered);
 
     if (!atlatti) {
       // Hayat, olağan ölüm yolundan tamamlanır; kayıtlar silinmez.
-      final String gerekce = kriz.kind == CrisisKind.kaza
-          ? 'geçirdiği kaza'
-          : 'yakalandığı hastalık';
+      final String gerekce = kriz.isCritical
+          // Sebep kayıtta varsa yazılır; yoksa uydurulmaz.
+          ? CriticalHealth.deathCauseFor(bekleyen)
+          : kriz.kind == CrisisKind.kaza
+              ? 'geçirdiği kaza'
+              : 'yakalandığı hastalık';
       final String metin =
           '${state.player.age} yaşında $gerekce nedeniyle hayatını kaybettin.';
       next = next.copyWith(
@@ -171,19 +204,119 @@ class HealthCrisisEngine {
       );
     }
 
-    next = next.copyWith(
-      player: next.player.copyWith(
-        stats: next.player.stats.copyWith(
-          health:
-              (next.player.stats.health + secim.healthChange).clamp(0, 100),
+    if (kriz.isCritical) {
+      // Kurtulan karakter ne 100 sağlıkla ne 1 sağlıkla kalır: düşük ama
+      // oynanabilir bir bantta açılır (`CriticalHealth`). Değer `gain`
+      // ile yazılır, D-099 ihlal edilmez.
+      final int hedef =
+          CriticalHealth.recoveredHealth(state: next, choice: secim);
+      next = next.copyWith(
+        player: next.player.copyWith(
+          stats: next.player.stats.gain(
+            health: hedef - next.player.stats.health,
+          ),
         ),
+        // Bant düzeldiği için uyarı bayrakları yeniden konuşabilir.
+        healthDangerWarned: false,
+      );
+      // Uzun süre işe gidemeyen çalışanın durumu iş yerinde konuşulur.
+      // Yeni bir devamsızlık sistemi kurulmadı: mevcut işveren uyarısı
+      // (D-078) kullanılıyor ve uyarı tek başına kimseyi işten atmıyor.
+      if (next.career.isEmployed) {
+        next = next.copyWith(
+          career: next.career.copyWith(
+            employerWarnings: next.career.employerWarnings + 1,
+          ),
+        );
+      }
+    } else {
+      next = next.copyWith(
+        player: next.player.copyWith(
+          stats: next.player.stats.gain(
+            health: secim.healthChange,
+          ),
+        ),
+      );
+    }
+
+    // Trafik kazasında araç da hasar görür (D-157). Kaza zaten iki yerde
+    // yaşanıyordu ama araç kaydına hiç dokunulmuyordu.
+    if (kriz.id == 'trafik_kazasi') {
+      final ({List<OwnedItem> items, String? text}) hasar =
+          VehicleTroubles.damageInAccident(next.items);
+      if (hasar.text != null) {
+        next = _log(
+          next.copyWith(
+            items: List<OwnedItem>.unmodifiable(hasar.items),
+          ),
+          hasar.text!,
+        );
+      }
+    }
+
+    // Atlatılan kriz **iz bırakır** (D-153): kalıcı bir rahatsızlık
+    // kalabilir ve kriz her hâlde sağlık geçmişine yazılır. Önceden
+    // yalnızca son krizin yaşı tutuluyordu.
+    final ({GameState state, String? typeId}) kronik =
+        ChronicEngine.afterCrisis(
+      state: next,
+      crisisId: kriz.id,
+      age: state.player.age,
+      rng: rng,
+    );
+    next = kronik.state.copyWith(
+      healthHistory: List<HealthHistoryEntry>.unmodifiable(
+        <HealthHistoryEntry>[
+          ...kronik.state.healthHistory,
+          HealthHistoryEntry(
+            crisisId: kriz.id,
+            age: state.player.age,
+            choiceId: secim.id,
+            chronicTypeId: kronik.typeId,
+          ),
+        ],
       ),
     );
+
+    // Küçük yaştaki oyuncuya yetişkin tedavi metni kopyalanmaz.
+    final String sonucMetni = kriz.isCritical
+        ? CriticalHealth.resultTextFor(state: next, choice: secim)
+        : secim.resultText;
+
+    final String izli = kronik.typeId == null
+        ? sonucMetni
+        : '$sonucMetni Ama bu bir iz bıraktı.';
+    // Poliçe devreye girdiyse oyuncu bunu **görür**: para sessizce
+    // azalmaz (D-063 ile aynı ilke).
+    final String? sigortaNotu = sigorta.note;
+    final String metin =
+        sigortaNotu == null ? izli : '$izli\n\n$sigortaNotu';
+
+    next = _log(next, sonucMetni);
+
+    // Hayati tehlikenin oyuncunun hayatından silinmemesi için iz kalır
+    // (§: "hayati tehlike atlattı" kaybolmasın). Okul/iş tarafındaki
+    // somut sonuç da buradan yazılır.
+    if (kriz.isCritical) {
+      final String? iz = CriticalHealth.afterEffectLine(next);
+      if (iz != null) next = _log(next, iz);
+    }
+
+    // Olağan krizi atlatan oyuncunun sağlığı acil banda indiyse zorunlu
+    // çözüm **aynı anda** açılır; "atlattı ama sağlığı 0" diye sessiz
+    // bir durum kalmaz. Kritik krizin kendisi için bu çağrı etkisizdir:
+    // kurtulma sağlığı acil bandın üstüne çıkarıyor.
+    next = CriticalHealth.enforce(
+      state: next,
+      age: next.player.age,
+      cause: CriticalHealthCause.kriz,
+    );
+
     return CrisisResult(
-      state: _log(next, secim.resultText),
+      state: next,
       outcome: CrisisOutcome(
         applied: true,
-        text: secim.resultText,
+        text: metin,
         cost: bedel,
       ),
     );

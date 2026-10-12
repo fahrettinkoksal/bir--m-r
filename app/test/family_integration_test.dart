@@ -106,9 +106,30 @@ void main() {
     expect(checkInvariants(state, where: 'başlangıç'), isEmpty);
 
     // 1) Evlilik: aynı kimlik, yeni kişi yok.
-    final int kisiSayisi = state.people.length;
+    final Set<String> evlilikOncesi = <String>{
+      for (final Person p in state.people) p.id,
+    };
     state = evlilik.marry(state, baslangic.partner.id).state;
-    expect(state.people.length, kisiSayisi, reason: 'İkinci NPC üretilmemeli');
+    // Paket AO §21: evlilikte eşin ailesi de hayata girebiliyor, o yüzden
+    // toplam sayı sabit değil. Kural aynı ve daha güçlü doğrulanıyor:
+    // tek eş, aynı kimlik, eklenenler yalnızca kayın aile / üvey çocuk.
+    expect(
+      state.people.where((Person p) => p.relation == RelationType.es).length,
+      1,
+      reason: 'Eş için ikinci NPC üretilmemeli',
+    );
+    for (final Person p in state.people) {
+      if (evlilikOncesi.contains(p.id)) continue;
+      expect(
+        <RelationType>[
+          RelationType.kayinvalide,
+          RelationType.kayinpeder,
+          RelationType.uveyCocuk,
+        ],
+        contains(p.relation),
+        reason: 'Evlilikte beklenmeyen kişi eklendi: ${p.relation}',
+      );
+    }
     expect(state.isMarried, isTrue);
     expect(state.spouse!.inPlayerHousehold, isTrue);
     expect(checkInvariants(state, where: 'evlilik'), isEmpty);
@@ -136,8 +157,27 @@ void main() {
     state = yillarIlerlet(state, rng, 10, nerede: 'on yıl');
     if (!state.deceased) {
       expect(state.player.age, oyuncuYasi + 10);
-      expect(state.personById(cocukId)!.age, cocukYasi + 10);
-      expect(state.personById(cocukId)!.inPlayerHousehold, isTrue);
+      // Çocuk ölebilir: bu nadir ama oyunun gerçek bir sonucu. Ölçüm:
+      // bir bebeğin ilk on yılda vefat etme oranı 300 hayatta 0-1 (yani
+      // binde birkaç). Test eskiden bunu sessizce yok sayıyordu ve
+      // "çocuk on yılda on yaşına gelir" diyordu; tohum sırası değişip
+      // o nadir sonuç çıkınca kırıldı.
+      //
+      // Doğru kural şu ve test artık onu sınıyor: yaşayan kişi yıl
+      // başına bir yaşlanır, vefat eden kişinin yaşı **ölüm yılında
+      // donar** (aynı kural Paket AO'da ölçülerek saptanmıştı).
+      final Person cocuk = state.personById(cocukId)!;
+      if (cocuk.isAlive) {
+        expect(cocuk.age, cocukYasi + 10);
+        expect(cocuk.inPlayerHousehold, isTrue);
+      } else {
+        expect(cocuk.age, lessThanOrEqualTo(cocukYasi + 10),
+            reason: 'Vefat edenin yaşı ölümden sonra ilerlemez.');
+        expect(cocuk.age, greaterThanOrEqualTo(cocukYasi),
+            reason: 'Yaş geriye gitmez.');
+      }
+      // Kayıt her iki durumda da silinmez.
+      expect(state.personById(cocukId), isNotNull);
       // Eş hâlâ eş; ilişkiler listesinden kaybolmadı.
       expect(state.personById(state.marriage!.spouseId), isNotNull);
     }
@@ -270,23 +310,39 @@ void main() {
 
   group('Çocuklar ve hane', () {
     test('çocuk yıllar boyunca doğru yaşlanır ve ilişkilerde kalır', () {
-      final Random rng = Random(77);
-      final ({GameState state, Person partner}) v = sevgiliyle(106, age: 25);
-      GameState state = evlilik.marry(v.state, v.partner.id).state;
-      state = ebeveynlik.haveChild(state, rng).state;
-      final String id = state.children.single.id;
+      // Çocuk vefat ederse döngü kırılıyor — bu doğru, ölüm oyunun
+      // gerçek bir sonucu. Ama o zaman test **hiçbir şey sınamamış**
+      // olabilir: çocuk ilk yıl ölürse döngü hemen biter ve test sessizce
+      // yeşil kalır. Bu yüzden kaç yıl gerçekten doğrulandığı sayılıyor
+      // ve en az bir hayatın on yılı tamamlaması isteniyor.
+      int enUzunDogrulama = 0;
+      for (final int tohum in <int>[106, 206, 306, 406]) {
+        final Random rng = Random(77 + tohum);
+        final ({GameState state, Person partner}) v =
+            sevgiliyle(tohum, age: 25);
+        GameState state = evlilik.marry(v.state, v.partner.id).state;
+        state = ebeveynlik.haveChild(state, rng).state;
+        final String id = state.children.single.id;
 
-      for (int i = 1; i <= 20 && !state.deceased; i++) {
-        state = yilIlerlet(state, rng, nerede: 'çocuk $i. yıl');
-        final Person cocuk = state.personById(id)!;
-        if (!cocuk.isAlive) break;
-        expect(cocuk.age, i, reason: 'Çocuk yılda bir yaş almalı');
-        expect(state.children.map((Person p) => p.id), contains(id),
-            reason: 'Çocuk ilişkiler listesinden kaybolmamalı');
-        if (cocuk.age < Parenthood.prototypeOnlyLeaveHomeAge) {
-          expect(cocuk.inPlayerHousehold, isTrue);
+        int dogrulanan = 0;
+        for (int i = 1; i <= 20 && !state.deceased; i++) {
+          state = yilIlerlet(state, rng, nerede: 'çocuk $i. yıl');
+          final Person cocuk = state.personById(id)!;
+          if (!cocuk.isAlive) break;
+          expect(cocuk.age, i, reason: 'Çocuk yılda bir yaş almalı');
+          expect(state.children.map((Person p) => p.id), contains(id),
+              reason: 'Çocuk ilişkiler listesinden kaybolmamalı');
+          if (cocuk.age < Parenthood.prototypeOnlyLeaveHomeAge) {
+            expect(cocuk.inPlayerHousehold, isTrue);
+          }
+          dogrulanan = i;
         }
+        if (dogrulanan > enUzunDogrulama) enUzunDogrulama = dogrulanan;
+        if (enUzunDogrulama >= 10) break;
       }
+      expect(enUzunDogrulama, greaterThanOrEqualTo(10),
+          reason: 'Hiçbir hayatta çocuk on yıl boyunca izlenemedi; '
+              'test boşa dönmüş olurdu.');
     });
 
     test('çocuk gideri yılda bir kez kesilir', () {

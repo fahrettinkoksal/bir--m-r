@@ -20,7 +20,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
   GameEvent(
     id: 'un_tanisma',
     category: EventCategory.kisisel,
-    text: 'Paylaşımlarını takip eden biri mesaj attı: aynı şehirdeymişsiniz, '
+    text:
+        'Paylaşımlarını takip eden biri mesaj attı: aynı şehirdeymişsiniz, '
         'bir kahve içmeyi teklif ediyor.',
     requirement: EventRequirement(
       minAge: 16,
@@ -34,7 +35,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
       EventChoice(
         id: 'bulus',
         label: 'Buluş',
-        resultText: 'Kahve uzun sürdü. İnternette tanıdığın biri, artık '
+        resultText:
+            'Kahve uzun sürdü. İnternette tanıdığın biri, artık '
             'gerçekten tanıdığın biri.',
         happiness: 4,
         charisma: 2,
@@ -43,7 +45,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
       EventChoice(
         id: 'kibarca_reddet',
         label: 'Kibarca reddet',
-        resultText: 'Teşekkür edip kapattın. Herkesle tanışmak zorunda '
+        resultText:
+            'Teşekkür edip kapattın. Herkesle tanışmak zorunda '
             'değilsin.',
         happiness: 1,
       ),
@@ -54,7 +57,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
   GameEvent(
     id: 'un_etkinlik_daveti',
     category: EventCategory.kisisel,
-    text: 'Küçük bir etkinliğe davet edildin: içerik üreten birkaç kişi '
+    text:
+        'Küçük bir etkinliğe davet edildin: içerik üreten birkaç kişi '
         'bir araya geliyor, senin de gelmeni istiyorlar.',
     requirement: EventRequirement(
       minAge: 16,
@@ -68,7 +72,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
       EventChoice(
         id: 'git',
         label: 'Git',
-        resultText: 'Salon küçüktü, kalabalık samimiydi. Birkaç isim '
+        resultText:
+            'Salon küçüktü, kalabalık samimiydi. Birkaç isim '
             'aklında kaldı; onların da senin adın.',
         happiness: 5,
         charisma: 3,
@@ -87,7 +92,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
   GameEvent(
     id: 'un_is_daveti',
     category: EventCategory.kisisel,
-    text: 'Bir yerden ulaştılar: içerik işinden anladığın için küçük bir '
+    text:
+        'Bir yerden ulaştılar: içerik işinden anladığın için küçük bir '
         'proje teklif ediyorlar. Büyük bir şey değil ama ciddi.',
     requirement: EventRequirement(
       minAge: 18,
@@ -101,10 +107,11 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
       EventChoice(
         id: 'kabul',
         label: 'Kabul et',
-        resultText: 'Birkaç hafta uğraştın, teslim ettin. Ödeme beklediğin '
+        resultText:
+            'Birkaç hafta uğraştın, teslim ettin. Ödeme beklediğin '
             'kadar değildi ama zamanında geldi.',
         happiness: 3,
-        money: 18000,
+        money: 55000,
         intelligence: 1,
       ),
       EventChoice(
@@ -120,7 +127,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
   GameEvent(
     id: 'un_yorumlar',
     category: EventCategory.kisisel,
-    text: 'Son paylaşımının altı karıştı. Birkaç kişi ağır konuşuyor, '
+    text:
+        'Son paylaşımının altı karıştı. Birkaç kişi ağır konuşuyor, '
         'birkaç kişi seni savunuyor.',
     requirement: EventRequirement(
       minAge: 16,
@@ -134,14 +142,16 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
       EventChoice(
         id: 'cevap_verme',
         label: 'Cevap verme',
-        resultText: 'Telefonu kapattın. Ertesi sabah kimse o tartışmayı '
+        resultText:
+            'Telefonu kapattın. Ertesi sabah kimse o tartışmayı '
             'hatırlamıyordu.',
         happiness: 1,
       ),
       EventChoice(
         id: 'kapat',
         label: 'Yorumları kapat',
-        resultText: 'Kapattın. Sessizlik iyi geldi ama bir şeyler de '
+        resultText:
+            'Kapattın. Sessizlik iyi geldi ama bir şeyler de '
             'eksildi.',
         happiness: -1,
         addFlags: <String>{SocialFlags.yorumlariKapatti},
@@ -149,7 +159,8 @@ const List<GameEvent> kSocialFameEvents = <GameEvent>[
       EventChoice(
         id: 'acikla',
         label: 'Kısa bir açıklama yaz',
-        resultText: 'Açıkladın. Bir kısmı anladı, bir kısmı anlamadı; '
+        resultText:
+            'Açıkladın. Bir kısmı anladı, bir kısmı anlamadı; '
             'ikisi de olacaktı.',
         happiness: 2,
         charisma: 2,

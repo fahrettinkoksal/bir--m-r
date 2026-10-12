@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'applied_effect.dart';
+
 /// Bildirim türü (D-050).
 enum NoticeKind {
   /// Yakın birinin vefatı.
@@ -29,6 +31,52 @@ enum NoticeKind {
 
   /// Evcil hayvanın vefatı (Paket 40).
   hayvan,
+
+  /// Birlikte yapılan bir program ve kime ne kattığı (D-074).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  aktivite,
+
+  /// Boşanma ve mal paylaşımı (D-075).
+  bosanma,
+
+  /// Sağlık işleminin sonucu: muayene, aşı, tahlil, kontrol (D-076).
+  saglik,
+
+  /// Araç arızası ve tamir masrafı (D-079).
+  arac,
+
+  /// Banka kredisi: onay, ret ve taksit (D-080).
+  banka,
+
+  /// İşle ilgili kritik haber: işten çıkarılma, işveren uyarısı (D-097).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  kariyer,
+
+  /// Ailedeki dönüm noktası: çocuğun evlenmesi, torunun doğması (D-121).
+  ///
+  /// `dogum`dan ayrıdır: doğum bildiriminde bebeğe isim verilir, burada
+  /// verilmez. Yeni değerler **listenin sonuna** eklenir.
+  aileDonum,
+
+  /// Adli süreç: soruşturma, mahkeme kararı, tahliye (D-128).
+  adli,
+
+  /// Arkadaşlık: yakın arkadaş olma, küslük, barışma, arkadaştan haber
+  /// (D-130).
+  ///
+  arkadaslik,
+
+  /// Kendi işi: açılış, yıl sonu, zarar, batma, devir (D-132).
+  ///
+  /// Yeni değerler **listenin sonuna** eklenir; eski kayıtlar bozulmasın.
+  kendiIsi,
+
+  /// Kiraya verilen evle ilgili gerçekten anlatılacak bir şey (D-163):
+  /// kira ödenmedi, kiracı çıktı, büyük hasar, yeni kiracı. Normal
+  /// tahsilat bildirim açmaz, yıl özetinde görünür.
+  konut,
 }
 
 /// Oyuncuya **açıkça gösterilmesi gereken** önemli bir haber (D-050).
@@ -50,6 +98,7 @@ class PendingNotice {
     this.itemNames = const <String>[],
     this.happinessDelta = 0,
     this.funeralCost = 0,
+    this.effects = const <AppliedEffect>[],
   });
 
   /// Bildirimin benzersiz kimliği (ör. `olum-anne-1`).
@@ -81,4 +130,13 @@ class PendingNotice {
 
   /// Cenaze bildiriminde önerilen katkı tutarı.
   final int funeralCost;
+
+  /// Bildirimde satır satır gösterilecek **gerçekten uygulanmış**
+  /// değişimler.
+  ///
+  /// Durumun öncesi ile sonrası karşılaştırılarak üretilir
+  /// (`diffAppliedEffects`), bu yüzden burada gerçekleşmemiş bir kazanç
+  /// yazamaz. "Bana 5, kızıma 5" gibi bir sonucun iki satırı da buradan
+  /// gelir.
+  final List<AppliedEffect> effects;
 }

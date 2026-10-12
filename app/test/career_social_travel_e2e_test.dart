@@ -122,18 +122,17 @@ void main() {
       player: s.player.copyWith(age: s.player.age + 1),
     );
 
-    // --- İçerik üretir ve gelir elde eder ----------------------------
+    // --- İçerik üretir; sıradan paylaşım para kazandırmaz (D-117) ----
     final SocialContent icerik = contentsFor(SocialPlatform.video).first;
-    int kazanc = 0;
-    for (int i = 0; i < 200 && kazanc == 0; i++) {
-      final SocialResult r = sosyal.post(s, icerik, Random(i));
-      if (r.outcome.earned > 0) {
-        kazanc = r.outcome.earned;
-        s = r.state;
-      }
-    }
-    expect(kazanc, greaterThan(0));
-    expect(s.totalSocialEarnings, kazanc);
+    final SocialResult duzPaylasim = sosyal.post(s, icerik, Random(1));
+    expect(duzPaylasim.outcome.applied, isTrue);
+    expect(
+      duzPaylasim.outcome.earned,
+      0,
+      reason: 'Dümdüz paylaşım ücret kazandırmaz (D-117)',
+    );
+    s = duzPaylasim.state;
+    expect(s.totalSocialEarnings, 0);
 
     // --- Sponsorluk kabul eder ve paylaşımını yapar ------------------
     SponsorOffer? teklif;

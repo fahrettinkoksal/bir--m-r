@@ -87,9 +87,17 @@ class Friendship {
       lastName = rng.pick(soyisimler);
     }
 
+    // Paket BW/0: yeni arkadaş kayıttaki bir adı taşımaz (okul kişisi
+    // üretimi bunu zaten yapıyordu, bu yol yapmıyordu).
     final Person friend = Person(
       id: _nextId(state),
-      firstName: rng.pick(gender == Gender.kadin ? kadinIsimleri : erkekIsimleri),
+      firstName: rng.pickFreshName(
+        gender == Gender.kadin ? kadinIsimleri : erkekIsimleri,
+        <String>{
+          state.player.firstName,
+          for (final Person p in state.people) p.firstName,
+        },
+      ),
       lastName: lastName,
       gender: gender,
       relation: RelationType.arkadas,
@@ -131,8 +139,14 @@ class Friendship {
 
     final Person friend = Person(
       id: _nextId(state),
-      firstName:
-          rng.pick(gender == Gender.kadin ? kadinIsimleri : erkekIsimleri),
+      // Paket BW/0: tanışıklık da kayıttaki adları dışlar.
+      firstName: rng.pickFreshName(
+        gender == Gender.kadin ? kadinIsimleri : erkekIsimleri,
+        <String>{
+          state.player.firstName,
+          for (final Person p in state.people) p.firstName,
+        },
+      ),
       lastName: lastName,
       gender: gender,
       relation: RelationType.arkadas,

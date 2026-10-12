@@ -166,14 +166,35 @@ void main() {
       expect(s.people.length, once);
     });
 
-    test('bekârsa tanışılan kişi sevgili olur', () {
-      final GameState s = eslesmisHayat();
+    test('bekârsa tanışılan kişi flört olur, sevgili olmaz (D-107)', () {
+      GameState s = eslesmisHayat();
+      // Niyet "arkadaşlık" değilse buluşma flörtle sonuçlanır.
+      s = s.copyWith(fingerIntent: FingerIntent.ciddi);
+      s = s.copyWith(
+        fingerMatches: s.fingerMatches
+            .map((FingerProfile p) => FingerProfile(
+                  id: p.id,
+                  firstName: p.firstName,
+                  lastName: p.lastName,
+                  gender: p.gender,
+                  age: p.age,
+                  city: p.city,
+                  bio: p.bio,
+                  interests: p.interests,
+                  occupation: p.occupation,
+                  intent: FingerIntent.ciddi,
+                  wealth: p.wealth,
+                  matchedAtAge: p.matchedAtAge,
+                  metPersonId: p.metPersonId,
+                ))
+            .toList(growable: false),
+      );
       final FingerResult r =
           Finger.meet(s, s.fingerMatches.first.id, Random(2));
 
       expect(r.outcome.applied, isTrue);
       expect(r.outcome.person, isNotNull);
-      expect(r.outcome.person!.relation, RelationType.sevgili);
+      expect(r.outcome.person!.relation, RelationType.flort);
       expect(r.state.people.length, s.people.length + 1);
       expect(r.state.fingerMatches.first.isMet, isTrue);
       expect(r.state.log.last.text, contains('Finger'));
@@ -181,8 +202,24 @@ void main() {
 
     test('sevgilisi olan biri eşleşmeyle yeni sevgili edinmez', () {
       GameState s = eslesmisHayat();
-      // Önce biriyle tanışıp sevgili ol.
-      s = Finger.meet(s, s.fingerMatches.first.id, Random(3)).state;
+      // Önce biriyle tanışıp flört ol, sonra sevgili yap.
+      final FingerResult ilk =
+          Finger.meet(s, s.fingerMatches.first.id, Random(3));
+      s = ilk.state;
+      if (ilk.outcome.person!.relation == RelationType.flort) {
+        s = s.copyWith(
+          people: s.people
+              .map((Person p) => p.id == ilk.outcome.person!.id
+                  ? p.copyWith(relation: RelationType.sevgili, bond: 70)
+                  : p)
+              .toList(growable: false),
+        );
+      }
+      // D-081 ile bir yılda atılabilecek beğeni sayısı sınırlandı.
+      // Bu test tanışma kuralını sınıyor, beğeni kotasını değil; bu
+      // yüzden ikinci eşleşmeyi kurmak için premium üyelik kullanılır
+      // (oyunda da açık olan yol).
+      s = s.copyWith(fingerPremiumUntilAge: s.player.age);
       // Sonra ikinci bir eşleşme kur.
       for (int seed = 0; seed < 200 && s.fingerMatches.length < 2; seed++) {
         s = Finger.like(s, s.fingerDeck.first.id, Random(seed)).state;

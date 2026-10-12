@@ -21,7 +21,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'emeklilik_ilk_sabah',
     category: EventCategory.yetiskinlik,
-    text: 'Alarm kurmadığın ilk sabah. Uyandın ve hiçbir yere '
+    text:
+        'Alarm kurmadığın ilk sabah. Uyandın ve hiçbir yere '
         'yetişmen gerekmediğini fark ettin.',
     requirement: EventRequirement(
       minAge: Retirement.prototypeOnlyEarlyAge,
@@ -32,7 +33,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'rutin_kur',
         label: 'Kendine yeni bir düzen kur',
-        resultText: 'Sabah yürüyüşü, öğleden sonra bahçe. Düzen insanı '
+        resultText:
+            'Sabah yürüyüşü, öğleden sonra bahçe. Düzen insanı '
             'ayakta tutuyor.',
         happiness: 5,
         health: 2,
@@ -41,7 +43,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'akisina_birak',
         label: 'Akışına bırak',
-        resultText: 'Günler birbirine karıştı. Bazıları çok uzun, bazıları '
+        resultText:
+            'Günler birbirine karıştı. Bazıları çok uzun, bazıları '
             'hiç yaşanmamış gibi geçti.',
         happiness: 1,
       ),
@@ -52,7 +55,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'eski_is_yeri',
     category: EventCategory.yetiskinlik,
-    text: 'Yolun eski iş yerinin önünden geçiyor. İçeride tanımadığın '
+    text:
+        'Yolun eski iş yerinin önünden geçiyor. İçeride tanımadığın '
         'insanlar çalışıyor.',
     requirement: EventRequirement(
       minAge: Retirement.prototypeOnlyEarlyAge,
@@ -65,7 +69,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'ugra',
         label: 'Uğra, bir çay iç',
-        resultText: 'Seni hatırlayan iki kişi kalmış. Çay içtiniz; '
+        resultText:
+            'Seni hatırlayan iki kişi kalmış. Çay içtiniz; '
             '"burası sensiz farklı" dediler, inanmadın ama iyi geldi.',
         happiness: 4,
         addFlags: <String>{ElderFlags.eskiIsYeri},
@@ -73,7 +78,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'gecip_git',
         label: 'Geçip git',
-        resultText: 'Durmadın. Bazı kapılar bir kez kapanır ve bu kötü bir '
+        resultText:
+            'Durmadın. Bazı kapılar bir kez kapanır ve bu kötü bir '
             'şey değildir.',
         happiness: 2,
       ),
@@ -97,7 +103,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'oyun',
         label: 'Bütün gün oyun oyna',
-        resultText: 'Dizlerin ağrıdı ama {kisi} akşam giderken sarıldı. '
+        resultText:
+            'Dizlerin ağrıdı ama {kisi} akşam giderken sarıldı. '
             'Ağrıya değdi.',
         happiness: 7,
         health: -1,
@@ -107,7 +114,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'anlat',
         label: 'Eski hikâyeler anlat',
-        resultText: '{kisi} bazılarını anlamadı, bazılarını iki kere '
+        resultText:
+            '{kisi} bazılarını anlamadı, bazılarını iki kere '
             'dinlemek istedi. Anlatmak da bir tür miras.',
         happiness: 6,
         bond: 8,
@@ -119,7 +127,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'torun_buyudu',
     category: EventCategory.aile,
-    text: '{kisi} geçen sefer gördüğünden bir baş uzamış. Sana bir şey '
+    text:
+        '{kisi} geçen sefer gördüğünden bir baş uzamış. Sana bir şey '
         'anlatmak için sabırsız.',
     requirement: EventRequirement(
       minAge: 50,
@@ -133,7 +142,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'dinle',
         label: 'Sonuna kadar dinle',
-        resultText: 'Yarısını anlamadın ama {kisi} anlatırken gözlerinin '
+        resultText:
+            'Yarısını anlamadın ama {kisi} anlatırken gözlerinin '
             'parladığını gördün.',
         happiness: 5,
         bond: 8,
@@ -141,7 +151,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'ogut',
         label: 'Bir öğüt ver',
-        resultText: 'Verdiğin öğüt tutulur mu bilinmez. Sana da bir zamanlar '
+        resultText:
+            'Verdiğin öğüt tutulur mu bilinmez. Sana da bir zamanlar '
             'aynısını söylemişlerdi.',
         happiness: 3,
         bond: 3,
@@ -153,7 +164,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'ileri_yas_kontrol',
     category: EventCategory.kisisel,
-    text: 'Yıllık kontrol zamanı. Gitmek zorunda değilsin ama randevu '
+    text:
+        'Yıllık kontrol zamanı. Gitmek zorunda değilsin ama randevu '
         'duruyor.',
     requirement: EventRequirement(minAge: 55),
     repeatable: true,
@@ -163,11 +175,12 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'git',
         label: 'Randevuya git',
-        resultText: 'Birkaç tahlil, birkaç öneri. Ciddi bir şey çıkmadı; '
+        resultText:
+            'Birkaç tahlil, birkaç öneri. Ciddi bir şey çıkmadı; '
             'yine de bilmek rahatlattı.',
         happiness: 3,
         health: 4,
-        money: -2500,
+        money: -8000,
       ),
       EventChoice(
         id: 'erteleme',
@@ -183,7 +196,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'ileri_yas_mahalle',
     category: EventCategory.mahalle,
-    text: 'Parkta her sabah aynı saatte oturan birkaç kişi var. Bugün '
+    text:
+        'Parkta her sabah aynı saatte oturan birkaç kişi var. Bugün '
         'sana yer açtılar.',
     requirement: EventRequirement(minAge: 60),
     repeatable: true,
@@ -193,7 +207,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'otur',
         label: 'Otur, tanış',
-        resultText: 'Adlarını ikinci günde öğrendin. Artık senin de bir '
+        resultText:
+            'Adlarını ikinci günde öğrendin. Artık senin de bir '
             'sabah düzenin var.',
         happiness: 5,
         charisma: 2,
@@ -213,7 +228,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'ileri_yas_muhasebe',
     category: EventCategory.kisisel,
-    text: 'Akşam sessizliğinde aklından bütün bir ömür geçti: yaptıkların, '
+    text:
+        'Akşam sessizliğinde aklından bütün bir ömür geçti: yaptıkların, '
         'yapmadıkların.',
     requirement: EventRequirement(minAge: 65),
     repeatable: true,
@@ -223,7 +239,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'yaz',
         label: 'Bir şeyler yaz',
-        resultText: 'Birkaç sayfa yazdın. Kimse okumayacak olsa bile '
+        resultText:
+            'Birkaç sayfa yazdın. Kimse okumayacak olsa bile '
             'yazılmış olması bir şey değiştirdi.',
         happiness: 5,
         intelligence: 1,
@@ -231,7 +248,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'ara',
         label: 'Birini ara',
-        resultText: 'Uzun zamandır aramadığın birini aradın. Konuşma kısa '
+        resultText:
+            'Uzun zamandır aramadığın birini aradın. Konuşma kısa '
             'sürdü ama ikiniz de sevindiniz.',
         happiness: 6,
       ),
@@ -242,7 +260,8 @@ const List<GameEvent> kElderEvents = <GameEvent>[
   GameEvent(
     id: 'emeklilikte_ugras',
     category: EventCategory.yetiskinlik,
-    text: 'Bir tanıdık, bildiğin işten küçük bir yardım istedi. Para '
+    text:
+        'Bir tanıdık, bildiğin işten küçük bir yardım istedi. Para '
         'değil, sadece birkaç gün.',
     requirement: EventRequirement(
       minAge: Retirement.prototypeOnlyEarlyAge,
@@ -256,15 +275,17 @@ const List<GameEvent> kElderEvents = <GameEvent>[
       EventChoice(
         id: 'yardim_et',
         label: 'Yardım et',
-        resultText: 'Elinin hâlâ o işi bildiğini görmek iyi geldi. '
+        resultText:
+            'Elinin hâlâ o işi bildiğini görmek iyi geldi. '
             'Karşılığında ısrarla bir zarf bıraktılar.',
         happiness: 5,
-        money: 6000,
+        money: 18000,
       ),
       EventChoice(
         id: 'artik_yok',
         label: '"Ben o defteri kapattım"',
-        resultText: 'Nazikçe reddettin. Kapattığın defteri açmamak da bir '
+        resultText:
+            'Nazikçe reddettin. Kapattığın defteri açmamak da bir '
             'olgunluk.',
         happiness: 3,
       ),

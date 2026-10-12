@@ -4,6 +4,8 @@ import 'package:bir_omur/domain/models/gender.dart';
 import 'package:bir_omur/domain/models/life_log.dart';
 import 'package:bir_omur/domain/models/marriage.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/data/tenant_catalog.dart';
+import 'package:bir_omur/domain/models/rental.dart';
 import 'package:bir_omur/domain/models/parental_status.dart';
 import 'package:bir_omur/domain/models/person.dart';
 import 'package:bir_omur/domain/models/player_character.dart';
@@ -66,6 +68,13 @@ GameState olenOyuncu({
   int wallet = 400000,
   List<OwnedItem> items = const <OwnedItem>[],
   bool bosanmis = false,
+  // Paket AQ: bu düzenek **vefat etmiş** oyuncunun durumunu kuruyor ve
+  // sağlığı o yüzden 0. Bazı testler aynı aileyi kullanıp oyuncuyu
+  // `deceased: false` ile yaşatıyor; sağlık 0 ile yaşayan oyuncu artık
+  // geçersiz bir durum (zorunlu kritik sağlık durumu açılır ve yaş
+  // ilerlemez), bu yüzden o testler yaşayan bir sağlık değeri veriyor.
+  // Varsayılan 0: mevcut çağıranların davranışı değişmiyor.
+  int oyuncuSagligi = 0,
 }) {
   final List<Person> people = <Person>[
     kisi(
@@ -130,10 +139,10 @@ GameState olenOyuncu({
       gender: oyuncuCinsiyeti,
       age: olumYasi,
       birthCity: 'Ankara',
-      stats: const Stats(
+      stats: Stats(
         appearance: 50,
         happiness: 50,
-        health: 0,
+        health: oyuncuSagligi,
         intelligence: 50,
         charisma: 50,
       ),
@@ -174,3 +183,16 @@ OwnedItem esya(String id, String typeId, {bool rentedOut = false}) => OwnedItem(
       rentedOut: rentedOut,
     );
 
+/// Kiradaki bir konut için sözleşme üretir (D-163).
+///
+/// "Bu ev kirada" bilgisinin tek kaynağı sözleşme. Eşyanın üstündeki eski
+/// `rentedOut` bayrağı yalnızca eski kayıtları açmak için duruyor, o da
+/// yükleme sırasında sözleşmeye çevriliyor.
+Lease kiraSozlesmesi(String itemId, {int startedAtAge = 60}) => Lease(
+      propertyItemId: itemId,
+      tenant: migratedTenantFor(itemId),
+      yearlyRent: 120000,
+      deposit: 10000,
+      startedAtAge: startedAtAge,
+      onTimeYears: 4,
+    );

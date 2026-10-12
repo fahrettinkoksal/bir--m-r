@@ -218,7 +218,12 @@ void main() {
     });
 
     test('yaş alınca aynı etkinlik yeniden fayda verir', () {
-      final GameController controller = livingController(seed: 5, age: 8);
+      // Tohum 6 kullanılıyor: D-162'de yatırım olayları havuza girince
+      // rastgele akış kaydı ve tohum 5'te oyuncu 8 yaşında vefat ediyor
+      // (gerçek bir oyun sonucu, hata değil). Senaryo **yaşayan** bir
+      // öğrenci istiyor; iddialar gevşetilmedi, yalnızca tohum yeniden
+      // çıpalandı.
+      final GameController controller = livingController(seed: 6, age: 8);
       final Person anne = motherOf(controller);
       for (int i = 0; i < 6; i++) {
         resolvePendingEvents(controller);
@@ -230,6 +235,8 @@ void main() {
         greaterThan(0),
       );
 
+      // Lise alanı seçilmeden yaş atlanmaz (D-094).
+      resolveEducationChoices(controller);
       controller.ageUp();
       resolvePendingEvents(controller);
       expect(controller.state!.interactionCounts, isEmpty,
@@ -258,6 +265,8 @@ void main() {
           controller.interact(anne.id, InteractionKind.sohbet);
         }
         resolvePendingEvents(controller);
+        // Lise alanı seçilmeden yaş atlanmaz (D-094).
+        resolveEducationChoices(controller);
         controller.ageUp();
       }
       resolvePendingEvents(controller);
@@ -441,10 +450,18 @@ void main() {
       }
     });
 
+    // Ölçülen değişmez: etkileşim ve olay çözümü var olan kişi kayıtlarını
+    // BOZMAZ. Bu test eskiden listenin birebir aynı kalmasını istiyordu; o
+    // varsayım yanlıştı, çünkü bu yıllarda çözülen okul olayları meşru olarak
+    // yeni bir arkadaş kaydı ekleyebiliyor (Friendship). Olay havuzu büyüdükçe
+    // seed 5'in akışı kaydı ve test kırmızıya döndü. Yeni hâli kimlik
+    // korumasını daha sıkı ölçüyor: eski kayıtların hepsi aynı sırada duruyor,
+    // kimlik alanları (ad, soyad, cinsiyet, bağ) değişmiyor, kimlik
+    // tekrarlanmıyor. Eklenen yeni kişi listenin sonuna geliyor.
     test('etkileşim sonucu kişi kimliğini bozmaz', () {
       final GameController controller = livingController(seed: 5, age: 8);
-      final List<String> ids =
-          controller.state!.people.map((Person p) => p.id).toList();
+      final List<Person> once = controller.state!.people.toList();
+      final List<String> ids = once.map((Person p) => p.id).toList();
       final Person anne = motherOf(controller);
       for (int i = 0; i < 6; i++) {
         resolvePendingEvents(controller);
@@ -453,8 +470,31 @@ void main() {
         controller.interact(anne.id, InteractionKind.sohbet);
       }
       resolvePendingEvents(controller);
-      expect(controller.state!.people.map((Person p) => p.id).toList(), ids);
+      final List<Person> sonra = controller.state!.people.toList();
+      final List<String> sonraIds = sonra.map((Person p) => p.id).toList();
+
+      // Hiçbir eski kayıt düşmedi, sırası değişmedi.
+      expect(sonraIds.take(ids.length).toList(), ids);
+      // Kimlik tekrarı yok.
+      expect(sonraIds.toSet().length, sonraIds.length);
+      // Eski kayıtların kimlik alanları aynen duruyor.
+      for (final Person eski in once) {
+        final Person? yeni = controller.state!.personById(eski.id);
+        expect(yeni, isNotNull, reason: '${eski.id} kaydı kayboldu');
+        expect(yeni!.firstName, eski.firstName, reason: '${eski.id} adı değişti');
+        expect(yeni.lastName, eski.lastName, reason: '${eski.id} soyadı değişti');
+        expect(yeni.gender, eski.gender,
+            reason: '${eski.id} cinsiyeti değişti');
+        expect(yeni.relation, eski.relation, reason: '${eski.id} bağı değişti');
+      }
       expect(controller.state!.personById(anne.id)!.relation, RelationType.anne);
+
+      // Sonradan eklenen kayıt varsa gerçekten yeni bir kişi olmalı, eski bir
+      // kaydın kopyası değil.
+      for (final String yeniId in sonraIds.skip(ids.length)) {
+        expect(ids.contains(yeniId), isFalse);
+        expect(controller.state!.personById(yeniId), isNotNull);
+      }
     });
   });
 }

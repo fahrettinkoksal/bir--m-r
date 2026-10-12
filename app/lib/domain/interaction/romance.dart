@@ -70,9 +70,19 @@ class Romance {
     final EmploymentStatus employment =
         age <= 22 ? EmploymentStatus.ogrenci : EmploymentStatus.calisiyor;
 
+    // Paket BW/0: tanışılan kişi kayıttaki bir adı taşımaz. Oyunun
+    // kendi doğum adlandırması bunu zaten yapıyordu; sevgili üretimi
+    // filtresiz çekiyordu ve kalabalık kayıtta "oğlumla sevgilim aynı
+    // ad" çıkıyordu. Havuz tükenirse yine rastgele ad gelir.
     final Person partner = Person(
       id: _nextId(state),
-      firstName: rng.pick(gender == Gender.kadin ? kadinIsimleri : erkekIsimleri),
+      firstName: rng.pickFreshName(
+        gender == Gender.kadin ? kadinIsimleri : erkekIsimleri,
+        <String>{
+          state.player.firstName,
+          for (final Person p in state.people) p.firstName,
+        },
+      ),
       lastName: lastName,
       gender: gender,
       relation: RelationType.sevgili,

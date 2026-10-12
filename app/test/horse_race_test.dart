@@ -1,3 +1,4 @@
+import 'package:bir_omur/data/save/game_state_codec.dart';
 import 'dart:math';
 
 import 'package:bir_omur/app.dart';
@@ -120,7 +121,21 @@ void main() {
       for (int seed = 0; seed < 60; seed++) {
         final ({CasinoResult result, RaceResult? race}) c =
             HorseRacing.placeBet(s, kadro, 1, bahis, Random(seed));
-        final int fark = c.result.state.player.wallet - s.player.wallet;
+
+        // D-089: bahis yatırıldığı anda **yalnızca bahis** çıkar; ödeme
+        // koşu bitene kadar bekler. Bu, Faho'nun bildirdiği "kazanç
+        // animasyon bitmeden cüzdana giriyor" hatasının düzeltmesi.
+        expect(
+          c.result.state.player.wallet,
+          s.player.wallet - bahis,
+          reason: 'Ödeme sonuçlanmadan cüzdana girmemeli',
+        );
+        expect(c.result.state.hasPendingRace, isTrue);
+
+        final CasinoResult kesin = HorseRacing.settle(c.result.state);
+        final int fark = kesin.state.player.wallet - s.player.wallet;
+        expect(kesin.state.hasPendingRace, isFalse);
+
         if (c.race!.winnerLane == 1) {
           final int beklenen = (bahis * kadro.first.odds).round() - bahis;
           expect(fark, beklenen);
@@ -260,6 +275,78 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 5));
       expect(controller.lastRace, isNotNull);
       expect(controller.state!.player.wallet, isNot(once));
+    });
+  });
+
+  group('Sonuç kesinleşmesi (D-089)', () {
+    test('iki kez sonuçlandırmak çift ödeme yapmaz', () {
+      final List<RaceHorse> kadro = HorseRacing.buildField(Random(3));
+      final GameState s = kumarbaz(wallet: 100000);
+      final GameState bahisli =
+          HorseRacing.placeBet(s, kadro, 1, 1000, Random(11)).result.state;
+
+      final CasinoResult ilk = HorseRacing.settle(bahisli);
+      expect(ilk.outcome.applied, isTrue);
+      final int cuzdan = ilk.state.player.wallet;
+
+      // Animasyon yarıda kapatılıp ekran yeniden açılsa da ikinci kez
+      // sonuçlandırmak hiçbir şey değiştirmez.
+      final CasinoResult ikinci = HorseRacing.settle(ilk.state);
+      expect(ikinci.outcome.applied, isFalse);
+      expect(ikinci.state.player.wallet, cuzdan);
+    });
+
+    test('bekleyen bahis varken yeni bahis oynanamaz', () {
+      final List<RaceHorse> kadro = HorseRacing.buildField(Random(4));
+      final GameState s = kumarbaz(wallet: 100000);
+      final GameState bahisli =
+          HorseRacing.placeBet(s, kadro, 1, 1000, Random(12)).result.state;
+
+      final ({CasinoResult result, RaceResult? race}) ikinci =
+          HorseRacing.placeBet(bahisli, kadro, 2, 1000, Random(13));
+      expect(ikinci.result.outcome.applied, isFalse);
+      expect(ikinci.result.state.player.wallet, bahisli.player.wallet);
+    });
+
+    test('bekleyen bahis kapat-aç ile korunur ve bir kez ödenir', () {
+      final List<RaceHorse> kadro = HorseRacing.buildField(Random(5));
+      final GameState s = kumarbaz(wallet: 100000);
+      final ({CasinoResult result, RaceResult? race}) oynanan =
+          HorseRacing.placeBet(s, kadro, 1, 1000, Random(14));
+      expect(oynanan.result.outcome.applied, isTrue,
+          reason: oynanan.result.outcome.text);
+      final GameState bahisli = oynanan.result.state;
+
+      final GameState geri = decodeGameState(encodeGameState(bahisli));
+      expect(geri.hasPendingRace, isTrue);
+      expect(geri.pendingRace!.bet, 1000);
+      expect(geri.player.wallet, bahisli.player.wallet);
+
+      final CasinoResult kesin = HorseRacing.settle(geri);
+      expect(kesin.outcome.applied, isTrue);
+      expect(kesin.state.hasPendingRace, isFalse);
+      // Toplam değişim: kayıpsa -bahis, kazançsa net kazanç.
+      final int fark = kesin.state.player.wallet - s.player.wallet;
+      expect(fark, geri.pendingRace!.net);
+    });
+
+    test('bahis yatırıldığı anda günlüğe sonuç yazılmaz', () {
+      final List<RaceHorse> kadro = HorseRacing.buildField(Random(6));
+      final GameState s = kumarbaz(wallet: 100000);
+      final GameState bahisli =
+          HorseRacing.placeBet(s, kadro, 1, 1000, Random(15)).result.state;
+      expect(bahisli.log.length, s.log.length,
+          reason: 'Sonuç belli olmadan günlüğe yazılmamalı');
+
+      final CasinoResult kesin = HorseRacing.settle(bahisli);
+      expect(kesin.state.log.length, s.log.length + 1);
+    });
+
+    test('sonuçlanacak bahis yokken sonuçlandırmak durumu değiştirmez', () {
+      final GameState s = kumarbaz(wallet: 100000);
+      final CasinoResult r = HorseRacing.settle(s);
+      expect(r.outcome.applied, isFalse);
+      expect(r.state.player.wallet, s.player.wallet);
     });
   });
 }

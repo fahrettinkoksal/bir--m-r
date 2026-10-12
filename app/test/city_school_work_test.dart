@@ -20,6 +20,7 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/invariants.dart';
+import 'support/corpus_year.dart';
 
 const ItemActions esyalar = ItemActions();
 
@@ -27,9 +28,9 @@ const ItemActions esyalar = ItemActions();
 GameState ogrenci(int seed, {int age = 15, int wallet = 6000000}) {
   GameState state =
       LifeGenerator.seeded(seed).generate(mode: StartMode.tamamenRastgele);
-  final LifeProgression ilerle = LifeProgression(Random(seed));
+  final Random rng = Random(seed);
   while (state.player.age < age && !state.deceased) {
-    state = ilerle.advanceOneYear(state.copyWith(pendingEvent: null));
+    state = advanceCorpusYear(rng, state);
   }
   state = state.copyWith(
     player: state.player.copyWith(wallet: wallet),

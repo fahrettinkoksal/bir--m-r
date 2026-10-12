@@ -132,9 +132,17 @@ void main() {
       );
     });
 
-    test('diğer ebeveyn vefat ederse doğum olmaz ama günlüğe yazılır', () {
-      final ({GameState state, Person partner}) v = cift();
+    test('bebeği taşıyan taraf vefat ederse doğum olmaz ama günlüğe '
+        'yazılır', () {
+      // **Taşıyan taraf (Paket BS/1).** Bu iddia erkek oyuncuyla
+      // kurulur: hamile olan partnerdir, vefat eden de o. Bebek
+      // dünyaya gelemez. Kadın oyuncunun bebeğini babanın vefatı
+      // engellemez; o kural `paket_bs1_vefat_eden_ebeveyn_test.dart`
+      // içinde. Eskiden tek satır iki durumu birlikte kapatıyordu.
+      final ({GameState state, Person partner}) v =
+          cift(oyuncuCinsiyeti: Gender.erkek);
       final GameState hamile = hamileKal(v.state, v.partner.id);
+      expect(hamile.pregnancy!.expecting, ExpectingParty.partner);
       final GameState olu = hamile.copyWith(
         people: hamile.people
             .map((Person p) =>

@@ -72,7 +72,20 @@ void main() {
         expect(simdi, lessThanOrEqualTo(onceki), reason: '$yas yaşında');
         onceki = simdi;
       }
-      expect(FertilityTreatment.prototypeOnlySuccessByAge(50), 0);
+      // Faho'nun isteğiyle kapı 55'e kadar açık; ama 50'de oran binde
+      // bir bandına iner ve 56'da tamamen kapanır. Denemek mümkün,
+      // ummak gerçekçi değil.
+      expect(
+        FertilityTreatment.prototypeOnlySuccessByAge(50),
+        greaterThan(0),
+        reason: '55e kadar kapı açık olmalı',
+      );
+      expect(
+        FertilityTreatment.prototypeOnlySuccessByAge(50),
+        lessThan(0.02),
+        reason: 'Ama gerçekçi biçimde çok düşük olmalı',
+      );
+      expect(FertilityTreatment.prototypeOnlySuccessByAge(56), 0);
     });
 
     test('hiçbir yaşta garanti değildir', () {
@@ -156,8 +169,22 @@ void main() {
     });
 
     test('çok ileri yaşta hekim tedaviyi önermiyor', () {
+      // Sınır 46'dan 55'e taşındı (Faho'nun isteği); kapının kapandığı
+      // yaş da onunla birlikte yukarı kaydı.
+      final GameState s = cift(age: 60, partnerAge: 58);
+      expect(
+        FertilityTreatment.blockReason(s),
+        contains('sonuç vermeyeceğini'),
+      );
+    });
+
+    test('55 yaşına kadar tedavi kapısı açık', () {
       final GameState s = cift(age: 55, partnerAge: 52);
-      expect(FertilityTreatment.blockReason(s), contains('sonuç vermeyeceğini'));
+      expect(
+        FertilityTreatment.blockReason(s),
+        isNot(contains('sonuç vermeyeceğini')),
+        reason: 'Faho: 55e kadar denenebilsin',
+      );
     });
   });
 

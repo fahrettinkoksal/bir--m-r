@@ -14,7 +14,12 @@ import 'package:flutter/material.dart';
 enum SocialPlatform {
   video('YouTube', 'Video', Icons.play_circle_outline),
   foto('Instagram', 'Fotoğraf', Icons.photo_camera_outlined),
-  mikroblog('X', 'Kısa yazı', Icons.tag_outlined);
+  mikroblog('X', 'Kısa yazı', Icons.tag_outlined),
+
+  // Faho'nun isteği. Enum **sonuna** eklendi: eski kayıtlar platformu
+  // adıyla sakladığı için (`_enumByName`) yeni değer eski kayıtları
+  // bozmaz, kayıt sürümü değişmedi.
+  kisaVideo('TikTok', 'Kısa video', Icons.music_note_outlined);
 
   const SocialPlatform(this.label, this.contentWord, this.icon);
 
@@ -27,8 +32,9 @@ enum SocialPlatform {
   final IconData icon;
 
   /// Takipçi sayısının okunaklı adı.
-  String get audienceWord =>
-      this == SocialPlatform.video ? 'abone' : 'takipçi';
+  ///
+  /// Yalnızca video platformunda "abone" denir; kalanında "takipçi".
+  String get audienceWord => this == SocialPlatform.video ? 'abone' : 'takipçi';
 }
 
 /// Paylaşılabilecek bir içerik türü.
@@ -45,6 +51,7 @@ class SocialContent {
     this.appearanceWeight = 0.0,
     this.riskOfLoss = 0.15,
     this.fameWeight = 1.0,
+    this.sportRelevance = 0.0,
   });
 
   final String id;
@@ -65,6 +72,15 @@ class SocialContent {
 
   /// prototypeOnly: üne katkı ağırlığı.
   final double fameWeight;
+
+  /// prototypeOnly: içeriğin spor başarısına yakınlığı (0-1).
+  ///
+  /// Paket AL/2, §11. Sporcunun ringde kazandığı ad yalnızca **bu**
+  /// içeriklerde işe yarar: kendini ve gününü gösteren biçimler.
+  /// Yemek tarifi ya da bilgi içeriğinde 0'dır; şampiyon olmak tarifi
+  /// daha çok izletmez. Yeni bir içerik türü eklenmedi, mevcut
+  /// kataloğa yalnızca bu etiket yazıldı.
+  final double sportRelevance;
 }
 
 const List<SocialContent> kSocialContents = <SocialContent>[
@@ -87,6 +103,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     charismaWeight: 0.5,
     appearanceWeight: 0.2,
     riskOfLoss: 0.18,
+    sportRelevance: 1.0,
   ),
   SocialContent(
     id: 'oyun_videosu',
@@ -119,6 +136,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     charismaWeight: 0.35,
     appearanceWeight: 0.45,
     riskOfLoss: 0.12,
+    sportRelevance: 0.7,
   ),
   SocialContent(
     id: 'hikaye',
@@ -130,6 +148,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     appearanceWeight: 0.3,
     riskOfLoss: 0.08,
     fameWeight: 0.6,
+    sportRelevance: 0.5,
   ),
   SocialContent(
     id: 'kisa_video',
@@ -140,6 +159,7 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     charismaWeight: 0.5,
     appearanceWeight: 0.25,
     riskOfLoss: 0.16,
+    sportRelevance: 0.8,
   ),
 
   // --- Mikroblog ----------------------------------------------------------
@@ -172,6 +192,53 @@ const List<SocialContent> kSocialContents = <SocialContent>[
     intelligenceWeight: 0.5,
     riskOfLoss: 0.08,
     fameWeight: 1.1,
+  ),
+
+  // --- Kısa video (TikTok) -----------------------------------------------
+  //
+  // Bu platformun karakteri şu: erişim tavanı yüksek ama oynak. Tek bir
+  // içerik beklenmedik biçimde tutabilir, aynı içerik ertesi gün hiç
+  // görülmeyebilir. Bu yüzden taban erişim diğer platformlardan yüksek,
+  // takipçi kaybettirme riski de yüksek tutuldu.
+  SocialContent(
+    id: 'dans_akimi',
+    platform: SocialPlatform.kisaVideo,
+    label: 'Akımdaki dansı çek',
+    description: 'Herkesin yaptığı şeyi sen de yap; tutarsa çok tutar.',
+    baseReach: 48,
+    charismaWeight: 0.45,
+    appearanceWeight: 0.35,
+    riskOfLoss: 0.22,
+  ),
+  SocialContent(
+    id: 'sokak_roportaji',
+    platform: SocialPlatform.kisaVideo,
+    label: 'Sokak röportajı çek',
+    description: 'Mikrofonu uzat, gerisi karşındakine kalmış.',
+    baseReach: 42,
+    charismaWeight: 0.6,
+    riskOfLoss: 0.2,
+  ),
+  SocialContent(
+    id: 'yemek_tarifi_videosu',
+    platform: SocialPlatform.kisaVideo,
+    label: 'Hızlı tarif videosu çek',
+    description: 'Kırk saniyede bir yemek; kesme bol, sabır az.',
+    baseReach: 38,
+    charismaWeight: 0.3,
+    intelligenceWeight: 0.2,
+    riskOfLoss: 0.14,
+  ),
+  SocialContent(
+    id: 'bilgi_kirintisi',
+    platform: SocialPlatform.kisaVideo,
+    label: 'Kısa bilgi videosu çek',
+    description: 'Tek bir şeyi, tek bir nefeste anlat.',
+    baseReach: 33,
+    charismaWeight: 0.25,
+    intelligenceWeight: 0.45,
+    riskOfLoss: 0.12,
+    fameWeight: 1.15,
   ),
 ];
 

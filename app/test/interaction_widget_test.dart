@@ -105,8 +105,6 @@ void main() {
     await ageTo(tester, controller, 8);
 
     final Person anne = motherOf();
-    final Person baba = controller.state!.people
-        .firstWhere((Person p) => p.relation == RelationType.baba);
 
     int kabulSayisi = 0;
     // Sayaca en az üç tekrar işlenene kadar denenir. Sabit deneme sayısı,
@@ -132,12 +130,36 @@ void main() {
       reason: 'Tekrarlar sayaca işlenmeli',
     );
 
-    // Babayla ilk etkileşim hâlâ açık ve tam faydalı.
-    final InteractionOutcome babaIlk =
-        controller.interact(baba.id, InteractionKind.vakitGecir)!;
+    // **Başka biriyle** ilk etkileşim hâlâ açık ve tam faydalı.
+    //
+    // Kişi sabit seçilmiyor: tekrarlar sırasında araya giren olaylar
+    // yüzünden belirli bir aile üyesi (ör. baba) bu sırada vefat
+    // edebiliyor ve test "hayatta değil" diye düşüyordu. Sınanan şey
+    // kişinin kim olduğu değil, **annenin sayacının başkasını
+    // kilitlemediği**: hayatta olan ve sayacı sıfır olan ilk kişi
+    // seçilir.
+    final Person digeri = controller.state!.people.firstWhere(
+      (Person p) =>
+          p.id != anne.id &&
+          p.isAlive &&
+          controller.state!
+                  .interactionCount(p.id, InteractionKind.vakitGecir.name) ==
+              0 &&
+          controller
+              .availableKindsFor(p)
+              .contains(InteractionKind.vakitGecir),
+      orElse: () => fail('Etkileşime açık başka kimse kalmadı'),
+    );
+    final InteractionOutcome digeriIlk =
+        controller.interact(digeri.id, InteractionKind.vakitGecir)!;
     await answerPendingEvents(tester, controller);
-    expect(babaIlk.accepted, isTrue);
-    expect(babaIlk.bondDelta, greaterThan(0));
+    expect(
+      digeriIlk.accepted,
+      isTrue,
+      reason: '${digeri.firstName} ile ilk etkileşim annenin sayacından '
+          'etkilenmemeli',
+    );
+    expect(digeriIlk.bondDelta, greaterThan(0));
 
     await openMother(tester);
     expect(find.text('Vakit Geçir'), findsOneWidget,

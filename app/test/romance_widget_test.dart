@@ -48,8 +48,12 @@ void main() {
       if (partnerOf(RelationType.sevgili) != null) return true;
       // Hayat bu tohumda kriz yüzünden erken bitebilir.
       if (controller.state!.deceased) return false;
+      // Eğitim kararı verilmeden yaş atlanmaz (D-094, D-111): karar
+      // penceresi açıkken "Yaş Al" düğmesi zaten basılamaz.
+      await resolveEducationSheets(tester, controller);
       await tester.tap(find.byKey(const Key('age_up_button')));
       await tester.pumpAndSettle();
+      await resolveEducationSheets(tester, controller);
     }
     return true;
   }
@@ -97,6 +101,20 @@ void main() {
 
     // İlişkiler → Romantik bağlar alt menüsünde sevgili statüsüyle görünür.
     await tester.tap(find.byKey(const Key('tab_iliskiler')));
+    await tester.pumpAndSettle();
+    // Paket AP §56: İlişkiler ekranının başına bekleyen aile kararı
+    // kartı geldi. Liste tembel kuruluyor, yani başa eklenen her içerik
+    // alttaki satırların **hiç inşa edilmemesine** yol açıyor. Ölçüldü:
+    // bu hayatta bir miras anlaşmazlığı kartı açılıyor ve "Romantik
+    // bağlar" satırı ekranın dışında kalıyor.
+    //
+    // İddia gevşetilmedi: satır yine **tam olarak bir kez** bulunmak
+    // zorunda; yalnızca listeye kaydırılıyor.
+    await tester.scrollUntilVisible(
+      find.text('Romantik bağlar'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.text('Romantik bağlar'), findsOneWidget);
 
