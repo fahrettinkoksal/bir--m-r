@@ -10820,6 +10820,18 @@ yanlış alarm türü bu.
 | düzeltilen metin kusuru | 1 (iki belirtili tek kök neden) |
 | elenen yanlış alarm | 2 |
 
+### Süit ve CI (doğrulandı)
+
+| koşu | sonuç |
+|---|---|
+| `flutter analyze lib test` | temiz |
+| yerel tam süit (`6f7ee77` ağacı) | **3924 geçti · 17 atlandı · 0 düştü** · 36:46 |
+| CI "Analiz, test ve Windows sürümü" (`6f7ee77`, koşu 330) | **success** |
+| CI "Analiz, test ve debug APK" (`6f7ee77`, koşu 333) | **success** |
+
+**APK cihazda oynanmadı.** CI debug APK'yı derliyor; "derlendi"
+"oynandı" demek değil.
+
 ### Ders
 
 **Bir pencerenin açılmaması, o pencerenin bozuk olduğu anlamına
