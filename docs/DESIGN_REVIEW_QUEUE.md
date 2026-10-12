@@ -10174,3 +10174,139 @@ eşik), `app/lib/ui/screens/sections/social_pages.dart`
 (`_CelebrityCard`), `app/test/paket_dq_sosyal_kare_test.dart` (ölçüm
 kilidi). İlgili: Q-050 (platform adları), Q-235 (takipçi eğrisi),
 D-104, Paket DP (tekrar bekçisi), Paket DO (kapıyı satırda yazmak).
+
+---
+
+### Q-244 — Kişi kartında yakınlık ve keyif sayısız; oyunun geri kalanı sayı yazıyor
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Paket DR kişi kartının karesini ilk kez bastı. "Keyfi"
+ve "Yakınlık" birer çubuk (`LinearProgressIndicator`); etiket var, sayı
+yok. Döküm yalnızca çizilmiş **metni** okuduğu için ikisi değersiz
+göründü — araç kusuru, kaynağa bakıp doğruladım. Ama aynı bakış gerçek
+bir tutarsızlık ölçtü: **aynı değer** oyunun üç ayrı yerinde sayıyla
+yazılıyor.
+
+| yer | nasıl görünüyor |
+|---|---|
+| Evcil hayvan kartı | "Yakınlık **55/100**" |
+| Cezaevi paneli | "Koğuş arkadaşı · yakınlık **42/100**" |
+| Askerlik sayfası | "… · yakınlık **37**" |
+| **Kişi kartı** | yalnızca çubuk |
+
+Kişi kartı oyuncunun ilişkileri yönettiği **ana** yer; yakınlık orada
+sayıyla görünmüyor. Oyuncu 61 ile 75'i ayırt edemiyor, oysa hediye ve
+para isteme kapıları yakınlık eşiğine bakıyor (en az 25).
+
+| seçenek | ekranda | bedeli |
+|---|---|---|
+| **1. Çubuğun yanına sayı** | "Yakınlık **61**/100" + çubuk | Tutarlılık sağlanır, eşik anlaşılır. Dar ekranda bir satır daha. |
+| 2. Yalnızca çubuk kalsın, öteki üç yerden sayı kalksın | her yerde çubuk | Tutarlı ama bilgi kaybı; cezaevi/askerlik satırları zaten metin, çubuk eklemek o sayfaları büyütür. |
+| 3. Bugünkü hâl | kişi kartı çubuk, ötekiler sayı | En az değişiklik, tutarsızlık kalır. |
+
+**Önerim ve varsayılanım: (1).** Çubuk kalsın (bir bakışta okunuyor),
+sayı yanına gelsin; evcil hayvan kartındaki kalıbın aynısı.
+
+**Yapmayacağım (onay gelmeden):** çubukları kaldırmak, yakınlık
+eşiklerini değiştirmek, öteki üç yerdeki sayıyı silmek.
+
+**Etkilenen kod:** `app/lib/ui/widgets/person_detail_sheet.dart`
+(`person_happiness` çubuğu ve yakınlık çubuğu),
+`app/test/ekran_dokumu_modal_test.dart` (kare bekçisi). İlgili: D-020
+(etkileşim kapıları), Paket AO §35, Q-227.
+
+---
+
+### Q-245 — Ayarlar'daki modül başlıkları geliştirme paketi kodlarını yazıyor
+
+**Durum:** sürüm kararı, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Paket DR Ayarlar karesini ilk kez bastı (111 metin).
+"Modüller" bölümü 18 grup başlığı çiziyor ve hepsi şu kalıpta:
+
+> **Paket BK — ebeveynlik** · Gebelik bildirimi · Açık.
+> **Paket CC — son yıllar** · Son yıllar · Açık.
+> **Paket DG — ilkokul yılları** · İlkokul yılları · Açık.
+
+**Kusur demiyorum.** `FeatureFlag.paket` alanının kendi belgesi
+"ayarlar ekranı buna göre gruplar" diyor ve bu bölüm senin isteğinin
+karşılığı: "kendi yaptığın geliştirmeleri çıkarabileceğim bir sistem
+kur." Paket kodu **sana** bilgi veriyor — hangi paketin ne getirdiğini
+tek ekranda görüyorsun. Oyuncuya ise bir şey söylemiyor.
+
+| seçenek | ekranda | bedeli |
+|---|---|---|
+| **1. Prototipte kalsın, sürümde gizlensin** | bugünkü hâl + sürümde yalnızca "Ebeveynlik", "Son yıllar"… | Senin panon bozulmaz, oyuncuya çıkan sürüm temiz olur. Bir "geliştirici görünümü" anahtarı gerekir. |
+| 2. Şimdi oyuncu diline çevir | "Ebeveynlik", "İlk yıllar" | Ekran hemen temizlenir; sen paket eşlemesini `docs/FEATURE_FLAGS.md`'den okursun. |
+| 3. İkisi birden | "Ebeveynlik · Paket BK" | Tek satırda iki bilgi; dar ekranda uzun. |
+| 4. Bugünkü hâl | "Paket BK — ebeveynlik" | Değişiklik yok. |
+
+**Önerim ve varsayılanım: (1).** Prototip boyunca paket kodu kalsın —
+senin kontrol panon o. Sürüm kararı geldiğinde başlıklar oyuncu diline
+çevrilsin; eşleme belgede zaten duruyor.
+
+**Yapmayacağım (onay gelmeden):** başlıkları değiştirmek, `paket`
+alanını kaldırmak, Modüller bölümünü saklamak.
+
+**Etkilenen kod:** `app/lib/domain/features/feature_catalog.dart`
+(`paket` alanı, 18 grup), `app/lib/ui/widgets/settings_sheet.dart`
+(gruplama), `docs/FEATURE_FLAGS.md`. İlgili: Paket BL/3, BL/5.
+
+---
+
+### Q-246 — Annenin avucuna sıkıştırdığı 25 ₺ ile oyuncunun verdiği 2.400 ₺
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi**
+(sayılar `prototypeOnly`).
+
+**Nasıl çıktı.** Paket DR kişi kartının 43 yaşındaki karesini bastı.
+Ortak geçmişte şu satır var:
+
+> 25 yaşında — Cemile cüzdanını çıkardı, katlanmış parayı avucuna
+> sıkıştırdı: "Kimseye söyleme." Cüzdanına **25 ₺** girdi.
+
+Cümle önemli bir jesti anlatıyor; tutar oyunun kendi ölçeğinde çok
+küçük. **Ölçüm:**
+
+| kim veriyor | tutar (prototypeOnly) |
+|---|---|
+| çok yoksul kişi | 10 ₺ |
+| **yoksul kişi** | **25 ₺** |
+| orta halli kişi | 60 ₺ |
+| varlıklı kişi | 500 ₺ |
+| çok varlıklı kişi | 1.400 ₺ |
+| **oyuncunun kendi çocuğuna verdiği harçlık (varsayılan)** | **2.400 ₺** |
+
+Aynı jest için **96 kat** fark var. Oyunun kendi çıpaları: kumarhane
+asgari bahis 100 ₺, dövüş sanatı dersi 600-750 ₺, motosiklet ehliyet
+sınavı 4.000 ₺, yıllık hayvan bakımı 18.000 ₺, yarım zamanlı iş
+132.000 ₺/yıl. 25 ₺ bu ölçekte "bir simit".
+
+**Not:** tablo "kişinin servetinin oyuncuya geçmesi değildir, yalnızca
+verebileceği küçük miktarı belirler" diye yazılmış — yani küçük olması
+**kasıtlı**. Soru miktarın küçük olup olmaması değil, 2026 çıpasına göre
+**ne kadar** küçük olacağı.
+
+| seçenek | yoksul kişi verir | bedeli |
+|---|---|---|
+| **1. Çocuk harçlığıyla aynı ölçeğe çek** | ~400-600 ₺ | Cümlenin ağırlığı tutara denk düşer. Para isteme bir gelir kanalına dönüşmemeli; yıllık sınır ve yakınlık eşiği zaten var (D-020, Paket AI/2 istismar taraması tekrar koşmalı). |
+| 2. Yalnızca metni küçült | "birkaç kuruş" diye yaz | Sayıya dokunulmaz, çelişki kalkar; ama 25 ₺ oyunun ekonomisinde yine görünmez kalır. |
+| 3. Oranı servete bağla | kişinin servetinin binde biri | Zengin akrabada doğal büyür; `prototypeOnly` tabloyu kaldırır, yeni bir istismar yüzeyi açar. |
+| 4. Bugünkü hâl | 25 ₺ | Değişiklik yok. |
+
+**Önerim ve varsayılanım: (1).** Tablo 2026 çıpasına çekilsin
+(yoksul ~400 ₺ bandı), sonra `paket_ai` istismar taraması ve 500 hayat
+ölçümü yeniden koşsun; para isteme yıllık kaç kez açık, ne kadar
+birikiyor diye bakılsın.
+
+**Yapmayacağım (onay gelmeden):** tabloyu değiştirmek, yakınlık
+eşiğini veya yıllık hakkı gevşetmek, metni yeniden yazmak.
+
+**Etkilenen kod:**
+`app/lib/domain/interaction/family_interactions.dart`
+(`prototypeOnlyAllowanceByWealth`, `prototypeOnlyAllowanceDefault`,
+`prototypeOnlyAskMinBond`), `app/lib/data/interaction_texts.dart`
+(`_paraIsteKabul`), `app/test/paket_dr_modal_metinleri_test.dart` §4
+(ölçüm kilidi). İlgili: Paket 7 ve 9 (2026 ekonomi çıpası), D-020,
+Paket AI/2 (istismar), Q-155.
