@@ -10310,3 +10310,198 @@ eşiğini veya yıllık hakkı gevşetmek, metni yeniden yazmak.
 (`_paraIsteKabul`), `app/test/paket_dr_modal_metinleri_test.dart` §4
 (ölçüm kilidi). İlgili: Paket 7 ve 9 (2026 ekonomi çıpası), D-020,
 Paket AI/2 (istismar), Q-155.
+
+### Q-247 — Lise öğrencisi tam zamanlı iş tutabiliyor
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Paket DS, D-131'in *"Öğrenci artık İş ara ekranını
+görür"* kararını uygularken motorun ne izin verdiğini ölçtü. Bot
+taraması (8 arketip × 12 tohum, tam hayatlar):
+
+| ölçüm | sayı |
+|---|---|
+| 16 yaş+ öğrenci karesi | 917 |
+| **işi olan öğrenci karesi** | **589** |
+| mülakatı süren öğrenci karesi | 180 |
+
+İşi olan öğrencilerin tuttuğu işler: *Sanayide çırak (yarım zamanlı) ·
+Halı saha görevlisi (yarım zamanlı) · Kafe garsonu (yarım zamanlı) ·
+Etüt asistanı (yarım zamanlı) · **Kuaför** · Kitapçı tezgâhı (yarım
+zamanlı) · Market reyon görevlisi (yarım zamanlı) · **Aşçı***.
+
+Son ikisi **tam zamanlı** işler. Yani motor, okula devam eden bir
+oyuncunun tam zamanlı bir işte çalışmasına izin veriyor;
+`JobMarket.requirementReason` yaşa, eğitime, ehliyete, sabıkaya,
+şehre ve sağlığa bakıyor ama **öğrencilik durumuna bakmıyor**.
+
+Bu, Paket DS'nin açtığı kapıyla birlikte artık **ekranda da** görünür
+hâle geliyor: D-131 sayfanın yarım zamanlı ve tam zamanlı işleri ayrı
+gruplamasını istiyor, yani kararın kendisi öğrencinin tam zamanlı iş
+listesini de görmesini öngörüyor. Soru listenin görünmesi değil,
+**başvurunun açık kalıp kalmayacağı.**
+
+Basılan kare (20 yaşında İktisat 3. sınıf öğrencisi, 202 metin) bunu
+doğruladı: "Yarım zamanlı" grubunun altında **"Tam zamanlı"** grubu da
+açık duruyor ve düğmeleri çalışıyor — *Mağaza çalışanı 352.000 ₺/yıl ·
+Eğitim şartı yok · 16 yaş+ · **Başvur***. Yarım zamanlı işin en
+iyisi 168.000 ₺/yıl; yani tam zamanlı seçenek öğrenciye **iki kattan
+fazla** maaş veriyor ve hiçbir bedeli yok.
+
+Yeni satırın alt yazısı bu ölçümle düzeltildi: ilk yazdığımda "Okurken
+yapılabilecek yarım zamanlı işler" diyordu (kariyer görünümündeki ölü
+dalın cümlesi) ve sayfa basılınca yanlış olduğu görüldü. Satır artık
+sayfanın gerçekten gösterdiğini söylüyor: "Yarım zamanlı ve tam
+zamanlı işler ayrı gruplarda".
+
+| seçenek | ne olur | bedeli |
+|---|---|---|
+| **1. Tam zamanlı iş öğrenciye kapanır, gerekçesi yazılır** | "Okurken tam zamanlı çalışamazsın." · liste yine görünür, düğme kapalı | D-131'in iki grubu korunur, oyuncu neyi bekleyeceğini görür. 589 karenin bir kısmı (Kuaför/Aşçı) artık oluşmaz; bot kararları ve 500 hayat ölçümü yeniden koşmalı. |
+| 2. Okulu bırakma sorusuna bağlanır | tam zamanlı başvuru "okulu bırakacaksın, emin misin?" diye sorar | En gerçekçisi ve en zengini; geri dönüşsüz karar listesine girer (Paket DD) ve açık lise yolu (Paket DC) zaten var. En pahalı seçenek. |
+| 3. Okul başarısına bedel yazılır | çalışan öğrencinin not ortalaması ve zekâ kazancı düşer | Yasak yok, bedel var. Spor + okul çatışmasının kalıbı hazır (AL/2 §6-§9). Ölçüm gerektirir: bedel ne kadar? |
+| 4. Bugünkü hâl | öğrenci her işi tutabilir | Değişiklik yok; "yarım zamanlı" ayrımı yalnızca bir etiket kalır. |
+
+**Önerim ve varsayılanım: (3) + (1) birlikte, sırayla.** Önce (1):
+tam zamanlı başvuru okurken kapanır ve gerekçesi `JobMarket`'in kendi
+diliyle yazılır — çünkü bugün ekranda hiçbir şey söylemiyor ve D-131
+iki grubu ayırmayı zaten istiyor. (3) ayrı bir pakete kalsın: çalışan
+öğrencinin okul bedeli ölçülerek yazılır. (2) güzel ama geri dönüşsüz
+karar; onu Faho ayrıca karara bağlasın.
+
+**Yapmayacağım (onay gelmeden):** `JobMarket`'e öğrencilik kapısı
+eklemek, yarım zamanlı dışındaki işleri filtrelemek, not ortalamasına
+bedel yazmak.
+
+**Etkilenen kod:** `app/lib/domain/career/job_market.dart`
+(`requirementReason`, `applicationAvailability`),
+`app/lib/data/job_catalog.dart` (`partTime`),
+`app/lib/ui/screens/sections/education_career_pages.dart`
+(`JobSearchPage` grupları), `app/lib/ui/screens/sections/school_career_screen.dart`
+(Paket DS'nin yeni satırı), `app/test/paket_ds_ogrenci_is_kapisi_test.dart`
+§1 (ölçüm). İlgili: D-131, D-063, Paket DC, Paket DD, AL/2 §6-§9.
+
+### Q-248 — Aynı kartta iki sınıf numarası: "Lise 3. sınıf" ve "11. sınıf"
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Paket DS okul karesini çalışan öğrenciyle birlikte
+bastı. Kart şöyle okunuyor:
+
+> **Okul**
+> Lise 3. sınıf · Genel akademik eğitim
+> **Lise**
+> Sınıf · **11. sınıf**
+> Not ortalaman · 71
+
+Üst satır "Lise 3", alt satır "11. sınıf" diyor. İkisi de doğru ve
+Türkçede ikisi de kullanılıyor (lise 3 = 11. sınıf), ama **aynı kartta
+yan yana** duruyorlar ve oyuncu iki ayrı sayı görüyor. Karenin
+tamamında başka bir yerde de "Son sınıfa kalan 1 yıl" var; o da üçüncü
+bir sayma biçimi.
+
+| seçenek | kart ne der | bedeli |
+|---|---|---|
+| **1. Tek biçim: 9-12 numaralandırması** | başlık "Lise · 11. sınıf", satır "Sınıf · 11. sınıf" (satır kalkar) | Resmî biçim, sınav yılı mantığıyla (8 ve 12) tutarlı. `EducationState.label` değişir; save/load etkilenmez ama birçok testin beklediği metin değişir. |
+| 2. Tek biçim: lise 1-4 | başlık "Lise 3. sınıf", satır "Sınıf · Lise 3" | Konuşma diline yakın; ama 12. sınıf = "lise 4" ve sınav yılı anlatımı karışır. |
+| 3. İkisi birlikte, açıkça bağlanır | "Lise 3. sınıf (11. sınıf)" bir kez yazılır | Hiçbir bilgi kaybolmaz, tekrar kalkar. En ucuz. |
+| 4. Bugünkü hâl | iki sayı yan yana | Değişiklik yok. |
+
+**Önerim ve varsayılanım: (3).** Tek satıra indirip parantezle
+bağlamak hem tekrarı kaldırır hem iki alışkanlığı da karşılar; (1)
+daha temiz ama metin kıran bir değişiklik ve bu paketin işi değil.
+
+**Yapmayacağım (onay gelmeden):** `EducationState.label`ı ya da kart
+satırlarını yeniden yazmak.
+
+**Etkilenen kod:**
+`app/lib/domain/models/education.dart` (`label`, `grade`),
+`app/lib/ui/screens/sections/school_career_screen.dart` (okul kartı).
+İlgili: Q-198 EKİ (üniversite öğrencisine K-12 kartı), Paket DS.
+
+### Q-249 — "Yerleştirme puanı 35" — ölçeği ekranda yazmıyor
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Aynı karede şu satır var:
+
+> Yerleştirme puanı · **35**
+
+Ölçüm: `EducationPath.placementScore` sonucu `clamp(0, 100)`, yani
+sayı yüz üzerinden. Üç ayrı karede 35, 37 ve 76 görüldü. Ekranda
+ölçek yazmıyor; oyuncu 35'in iyi mi kötü mü olduğunu ancak lise alanı
+seçimi ekranında (`track_choice_sheet`, `minScore` eşikleri)
+anlayabiliyor — o da ayrı bir pencere ve puan seçildikten sonra bir
+daha görünmüyor.
+
+Komşu satır "Not ortalaman · 71" aynı ölçekte ama orada alışkanlık
+yardımcı oluyor (okul notu yüz üzerinden). "Yerleştirme puanı" için
+böyle bir alışkanlık yok; gerçek LGS puanları 100-500 bandında.
+
+| seçenek | satır ne der | bedeli |
+|---|---|---|
+| **1. Ölçeği yaz** | "Yerleştirme puanı · 35 / 100" | Tek satırlık değişiklik, hiçbir sayı değişmez. Oyunun geri kalanı da "/100" yazan satırlar taşıyor (iyi hâl, koğuş itibarı). |
+| 2. Bandı yaz | "Yerleştirme puanı · 35 (düşük)" | Oyuncuya yorum verir; bant eşikleri `minScore` tablosundan türetilir, yeni bir sayı uydurulmaz. |
+| 3. Açık alanları yaz | "Yerleştirme puanı · 35 · 3 alan açık" | Puanın **sonucunu** söyler; en bilgilendirici, en uzun satır. |
+| 4. Bugünkü hâl | çıplak sayı | Değişiklik yok. |
+
+**Önerim ve varsayılanım: (1).** En ucuz ve en dürüst: ölçek yazılır,
+yorum yapılmaz. (2) ve (3) güzel ama bant adları ve "açık alan" sayısı
+birer ürün kararı; onları Faho isterse ayrıca seçer.
+
+**Yapmayacağım (onay gelmeden):** satırı yeniden yazmak, bant adı
+uydurmak, `placementScore` ölçeğini değiştirmek.
+
+**Etkilenen kod:**
+`app/lib/ui/screens/sections/school_career_screen.dart` (okul kartı),
+`app/lib/domain/education/education_path.dart` (`placementScore`,
+`tracksFor`, `minScore`). İlgili: Q-244 (sayı mı çubuk mu), Paket DS.
+
+### Q-250 — Koğuşta iki ayrı "sakin dur" eylemi var
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Yapı değişmedi**
+(yalnızca çakışan cümle düzeltildi, Paket DS).
+
+**Nasıl çıktı.** Paket DS `prison_life_panel.dart` karesini modal
+dökümüne ekledi; panel ilk kez çizildi (35 yaşında hükümlü, 53 metin).
+Ekranda iki satır yan yana duruyordu:
+
+> **Kurallara uy, sakin dur** — Tartışmanın kenarından dolaşırsın.
+> İyi hâl dosyana yazılır.
+> …
+> **Sakin kal** · Ücretsiz — Tartışmanın kenarından dolaş. En zor
+> olanı bu.
+
+İki ayrı sistem, iki ayrı karşılık, **aynı cümle**:
+
+| satır | sistem | karşılığı |
+|---|---|---|
+| Kurallara uy, sakin dur | `PrisonAction.iyiHalGoster` | iyi hâl (koşullu salıverilmeyi yaklaştırır) |
+| Sakin kal | `ActivityAction('cezaevi_sakin')` | mutluluk +2, karizma +1, yılda 3 kez |
+
+Cümleyi düzelttim (ikinci satır artık kendi karşılığını anlatıyor:
+"Gürültünün dışında bir köşe. Kafan biraz dinlenir."), bekçisini de
+yazdım (`paket_ds_ogrenci_is_kapisi_test.dart` §3b: iki sistem 20
+karakterlik ortak parça taşıyamaz). **Ama yapının kendisi bir ürün
+kararı:** oyuncu aynı ekranda neredeyse aynı adı taşıyan iki eyleme
+bakıyor ve hangisinin iyi hâl yazdığını ancak açıklamayı okuyarak
+anlıyor.
+
+| seçenek | ne olur | bedeli |
+|---|---|---|
+| **1. Aktivite satırı kalkar, koğuş eylemi kalır** | tek "sakin dur", karşılığı iyi hâl + biraz mutluluk | En sade ekran. `cezaevi_sakin` aktivitesi silinir; o aktiviteyi sayan ölçümler (CoverageBot, Paket CP) ve yıllık 3 hak kaybolur. |
+| 2. İkisi kalır, adları ayrışır | "Kurallara uy" (iyi hâl) · "Kendine çekil" (mutluluk) | En ucuz; iki karşılık da korunur. Ekranda yine iki benzer satır olur ama karışmaz. |
+| 3. Aktivite satırı iyi hâl de verir | tek karşılık iki yerden gelir | Oyuncu hangisini seçerse kazanır; iyi hâl kalibrasyonu bozulur (Paket DB ölçtü), istismar yüzeyi açar. |
+| 4. Bugünkü hâl (cümle düzeltilmiş) | iki satır, iki karşılık, ayrı cümleler | Değişiklik yok; Paket DS'nin bıraktığı hâl. |
+
+**Önerim ve varsayılanım: (2).** Adları ayırmak hem ekranı
+okunur yapar hem iki karşılığı korur; (1) daha sade ama yazılmış bir
+aktiviteyi ve onun yıllık hakkını siler, o da ayrı bir ölçüm ister.
+
+**Yapmayacağım (onay gelmeden):** aktivite satırını silmek,
+etiketleri değiştirmek, iyi hâl kazancını başka bir eyleme bağlamak.
+
+**Etkilenen kod:** `app/lib/data/activity_catalog.dart`
+(`cezaevi_sakin`), `app/lib/domain/law/prison_life.dart`
+(`PrisonAction.iyiHalGoster`), `app/lib/ui/widgets/prison_life_panel.dart`,
+`app/test/paket_ds_ogrenci_is_kapisi_test.dart` §3b (bekçi).
+İlgili: D-140, Paket DB, Paket CP.
