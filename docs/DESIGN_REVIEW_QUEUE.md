@@ -9947,3 +9947,70 @@ değiştirmek, ikinci doğumun masrafını kaldırmak ya da indirmek,
 `app/lib/domain/generation/life_progression.dart` (ikiz çağrısı,
 D-151), `app/test/paket_di_okunmayan_kareler_test.dart` (§3 ölçümü
 basıyor). İlgili: D-151 (ikiz gebelik), Paket S (gider dökümü), Q-093.
+
+---
+
+### Q-240 — Sponsorluk süresi: son yıl uyarısı ve açık anlaşmanın bütün teklifleri kapatması
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi**
+(Paket DL yalnızca süreyi ekrana yazdı ve cezaya pencere açtı).
+
+**Nasıl çıktı.** Paket DL sponsorluk hunisini ilk kez ölçtü: 120 sosyal
+arketip hayatında kabul edilen **263** anlaşmanın **162'si** tamamlandı,
+**89'u (%34)** süresi dolup kırıldı. Kırılmanın bedeli gerçek —
+takipçinin %4'ü (tekrarlayınca %15'e kadar) ve 4 mutluluk. Paket DL iki
+görünürlük kusurunu düzeltti (kart artık son yılı yazıyor, ceza artık
+pencere açıyor) ama iki **ürün** sorusu açık kaldı.
+
+#### Soru 1 — Son yıl uyarısı olsun mu?
+
+Bugün oyuncu şunu görüyor: kabul yılında kart "Son yıl: N yaşın" diyor,
+sonra o yıl gelip geçerse ceza penceresi açılıyor. **Arada bir
+hatırlatma yok.** Yükümlülüğü unutan oyuncu için kart ekranın içinde
+(Aktiviteler → Sosyal medya) duruyor; Hayat ekranında iz yok.
+
+| seçenek | ne olur | bedeli |
+|---|---|---|
+| **1. Son yılda bir hatırlatma penceresi** | "Bu yıl paylaşım yapmazsan … anlaşması düşecek." | Bildirim bütçesine yılda +1 pencere. Ölçülen en kötü yıl **8** pencere (`critical_notice_test`); sponsorluk ancak hesabı olan oyuncuda çıkar, yine de sınır sınanmalı. |
+| **2. Hayat ekranında sessiz satır** | Pencere açmaz, yıl özetinde/durum satırında görünür | Daha az gürültü, daha az görünür. Paket DD'nin "satır ömür boyu gizli" kusuru bunun tersiydi. |
+| **3. Hiçbir şey** | Bugünkü durum | Kart yalnızca ilgili ekrana girildiğinde okunur. |
+
+**Önerim ve varsayılanım: (1).** Ceza gerçek ve geri alınamaz; süresi
+olan bir yükümlülüğün son yılında uyarmak oyunun başka yerlerinde
+(muayene, duruşma, askerlik celbi) tutulan çizgiyle aynı. Pencere
+bütçesi ölçülmeden eklenmemeli, bu yüzden onay gelirse ilk iş
+`critical_notice_test`'i sosyal arketiple genişletmek.
+
+#### Soru 2 — Açık anlaşma iki yıl boyunca bütün teklifleri kapatıyor
+
+`SocialIncome.maybeOffer` açık bir anlaşma varken `null` dönüyor. Yani
+kabul edip paylaşmayan oyuncu, **kendi ihmaliyle** sponsorluk kanalını
+iki yıl kapatıyor; ölçümde kırılan 89 anlaşmanın her biri bu kadar
+süreyle yeni teklifi de engelledi.
+
+| seçenek | ne olur | bedeli |
+|---|---|---|
+| **1. Bugünkü kural** | tek seferde tek yükümlülük | Gerçekçi ve sömürüye kapalı; ihmal iki kat cezalanıyor (ceza + kapanan kanal). |
+| **2. Platform başına bir anlaşma** | YouTube'da açık anlaşma Instagram teklifini engellemez | Daha akıcı; aynı yıl birden çok ücret alınabilir, `audienceFatigue` (D-119) bunu dengeliyor ama ölçülmeli. |
+| **3. Açık anlaşma sayısına üst sınır (ör. 2)** | Ortası | Yeni bir `prototypeOnly` sayı. |
+
+**Önerim ve varsayılanım: (1) kalsın.** Kanalın kapanması bir hata
+değil, ihmalin ikinci sonucu; ve Paket DL'den sonra oyuncu hem süreyi
+hem cezayı görüyor, yani bilgisizce cezalanmıyor. (2) ölçüm gerektirir:
+dört platformda dört eş zamanlı sponsorluk sosyal medya gelirini
+belirgin biçimde yukarı çeker ve bu AF/AG'nin servet ölçümlerine
+dokunur.
+
+**Yapmayacağım (onay gelmeden):** `prototypeOnlyDealDeadline`'ı
+değiştirmek, `prototypeOnlyBrokenDealFollowerLoss` veya
+`prototypeOnlyBrokenDealHappiness`'e dokunmak, `maybeOffer`'ın tek
+anlaşma kuralını gevşetmek, son yıl için yeni bildirim eklemek.
+
+**Etkilenen kod:** `app/lib/domain/social/social_income.dart`
+(`prototypeOnlyDealDeadline`, `deadlineAgeFor`, `lastActiveAgeFor`,
+`maybeOffer`, `brokenDealLoss`),
+`app/lib/domain/social/social_engine.dart` (`expireDeals`),
+`app/lib/ui/screens/sections/social_pages.dart` (açık anlaşma kartı),
+`app/test/paket_dl_sponsorluk_test.dart` (ölçüm ve bekçi). İlgili:
+D-104 (sponsorluk eşiği ve sözünü tutmama bedeli), D-119 (kitle
+yorgunluğu), Q-050 (sosyal medya dengesi), Q-235 (takipçi eğrisi).
