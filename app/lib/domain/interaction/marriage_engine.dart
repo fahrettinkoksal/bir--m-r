@@ -408,8 +408,18 @@ class MarriageEngine {
     }
 
     // Ret: ilişki bitmez, kayıt silinmez.
-    final String metin = '${partner.firstName} hazır olmadığını söyledi. '
-        'İlişkiniz bitmedi ama aranızda bir sessizlik kaldı.';
+    //
+    // **Neye hazır olmadığı yazılmalı (Paket DI).** Metin eskiden
+    // "hazır olmadığını söyledi" diyordu, nesnesiz. Günlükte aynı yılın
+    // "… ile çocuk sahibi olmaya karar verdiniz." satırının yanına
+    // düştüğünde okuyan, çocuğa hazır olmadığını anlıyordu — oysa bu
+    // reddedilen şey **evlenme teklifi**. Kabul satırı ("evet dedi.
+    // Sıra düğünde…") neyin kabul edildiğini söylüyordu; ret satırı
+    // söylemiyordu. Paket BD'nin "koşulsuz nedeniyle" kusuruyla aynı
+    // sınıf: cümle tek başına doğru, bağlamda yanlış okunuyor.
+    final String metin = '${partner.firstName} evlenme teklifine hazır '
+        'olmadığını söyledi. İlişkiniz bitmedi ama aranızda bir '
+        'sessizlik kaldı.';
     final List<Person> people = odenmis.people
         .map((Person p) => p.id == personId
             ? p.copyWith(

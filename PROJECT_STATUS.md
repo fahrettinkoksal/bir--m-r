@@ -9575,3 +9575,94 @@ tembel listede olduğu için kaydırılmadan ağaçta bile değildi
 (`scrollUntilVisible` eklendi).
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DI — gebelik, yeni doğan ve denetim dönemi ilk kez okundu (12 Ekim 2026)
+
+PR takip rutini üç kareyi aylardır "HÂLÂ OKUNMAMIŞ" diye taşıyordu ve
+biri için **"120 hayatta BULUNAMADI"** yazıyordu. Önce o notu ölçtüm
+(4 arketip × 60 hayat, `onPreAge`):
+
+| arketip | çocuğu olan | gebelik karesi | **0 yaşında çocuk** | denetim | cezaevi |
+|---|---|---|---|---|---|
+| family | 43 | 43 (123 kare) | **43** | 3 | 6 |
+| casual | 19 | 19 (55 kare) | **19** | 2 | 4 |
+| risky | 10 | 10 (24 kare) | **10** | **13** | 31 |
+| randomValid | 20 | 20 (57 kare) | **20** | 4 | 10 |
+
+**Not bayatmış:** üç kare de kolayca bulunuyor. Bulunamama **aramanın**
+sorunuydu, oyunun değil (Paket CF/1'in gebelik hunisi düzeltmesi
+sonrası hiç yeniden ölçülmemiş). Yeni araç:
+`app/test/ekran_dokumu_gebelik_denetim_test.dart` — hiçbirini kurmaz,
+bot hayatlarını oynatıp kareyi arar ve çizilen metni basar.
+
+### Okunan üç kare
+
+**Gebelik (32 yaş, kadın) — temiz.** Üst özette "hamilesin" etiketi,
+ekranda kendi kartı: "Bebek yolda · Hamilesin. Bebeğin diğer ebeveyni
+erkek arkadaşın Necmi. Bebeğiniz bir sonraki yaşta doğacak." Paket
+BK/1'in kazanımı yerinde.
+
+**Yeni doğan (33 yaş, ikiz) — temiz.** Doğum sessiz gelmiyor: "Bebeğe
+Halil adını verdin.", "Halil adında bir oğlunuz oldu.", "İkizin diğeri
+oğlan oldu: Tolga." İlk şüphem yanlıştı — ekranın üst satırında doğum
+duyurusu aramıştım, oysa duyuru günlükte. İkinci şüphem de yanlıştı:
+İlişkiler sekmesinde "Çocuklar" bir **alt sayfa** düğmesidir
+(`relationships_children_row`, sayaçlı), çocuklar ana sekmede
+listelenmez — tasarım böyle.
+
+**Denetim dönemi (22 yaş, bitiş 24) — temiz.** Ana ekranın üst
+satırında yazmıyor ve bir an kusur sandım; ama Okul/Meslek sekmesinin
+"Adli Geçmiş" bölümünde **"Denetim dönemi · 24 yaşına kadar"** yazıyor
+(Paket BV'de eklenmiş) ve motorun somut bir yaptırımı var: şehir dışına
+çıkış kapalı, gerekçesi `LegalEngine.probationBlockReason`'dan geliyor
+ve `travel.dart` iki yerde gerçekten uyguluyor. Gerekçe eylemin yanında
+duruyor — Paket I'nın ilkesi.
+
+### ÇIKAN GERÇEK KUSUR: nesnesiz ret cümlesi
+
+Gebelik karesinin günlüğünde aynı yılda şu iki satır yan yanaydı:
+
+```
+Necmi ile çocuk sahibi olmaya karar verdiniz.
+Necmi hazır olmadığını söyledi. İlişkiniz bitmedi ama aranızda bir sessizlik kaldı.
+```
+
+Çelişki gibi duruyor. Kaynaklar okundu: ilk satır
+`family_planning.dart`, ikinci satır `marriage_engine.dart` — ve ikinci
+satır **evlilik teklifinin reddi**. Yani çelişki yok; kusur başka:
+cümle **neye** hazır olmadığını söylemiyor. Kabul satırı söylüyordu
+("evet dedi. Sıra düğünde: …"), ret satırı söylemiyordu. Günlükte çocuk
+kararının yanına düştüğünde oyuncu "çocuğa hazır değil" diye okuyor.
+
+Paket BD'nin "koşulsuz nedeniyle" kusuruyla aynı sınıf: cümle tek
+başına doğru, bağlamda yanlış. Düzeltildi:
+
+> Necmi **evlenme teklifine** hazır olmadığını söyledi. İlişkiniz
+> bitmedi ama aranızda bir sessizlik kaldı.
+
+Depo genelinde tarandı: nesnesiz tek örnek buydu (Paket BD dersi —
+metin değişince önce deseni tara).
+
+### Faho'ya bırakılan: ikiz doğum masrafı (Q-239)
+
+Günlükte iki satır, her biri "Doğum masrafı 65.000 ₺ tuttu". Kod
+okundu: ikizde `haveChild` iki kez çağrılıyor (D-151, bilinçli) ve her
+çağrı masrafı tam kesiyor → **130.000 ₺**. Her satır tek tek doğru ama
+toplam hiçbir yerde yazmıyor. Sayıya dokunmadım; **Q-239** olarak öneri
+ve varsayılanla kuyruğa girdi (önerim: metin toplamı yazsın, sayı aynı
+kalsın; "ikiz tek doğum mudur" sorusu ayrıca Faho'nun).
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_di_okunmayan_kareler_test.dart` (5 test).
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Ret satırı nesnesini kaybetti | §1 | "Ret satırı yine neyi reddettiğini söylemiyor" |
+| Denetim etiketi ekrandan kalktı | §4 | "Denetim dönemi ekranda hiçbir yerde yazmıyor" |
+
+§5 huni ölçümünü basıyor ve tabanı ölçüme göre koyuyor (30 hayatta 22
+gebelik / 22 bebek karesi; taban dörtte bir), böylece "bulunamadı"
+notu bir daha ölçülmeden taşınmaz.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

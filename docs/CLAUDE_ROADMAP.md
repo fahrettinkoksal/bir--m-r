@@ -907,6 +907,23 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yorumlardı. Kural koda dairdir; gerekçeyi yazmak yasak değil. Aynı
   derste ikinci yarı: yasaklanan şey alanın kendisi değil, onu **yanlış
   bağlamda** okumak (`career.label` yaşayan oyuncuda doğru alandır).
+- **Paket DI.** Belgede taşınan "bulunamadı" notunun tarihi vardır:
+  rutin aylarca "yeni doğan bebek 120 hayatta BULUNAMADI" diye taşıdı,
+  ölçtüm ve `family` arketipinde 60 hayatın **43'ü** bebek karesi
+  gösterdi. Arada Paket CF/1 gebelik hunisini düzeltmişti ve kimse
+  notu yeniden ölçmemişti. Bir "yok" iddiası, ölçüldüğü günün
+  iddiasıdır.
+- **Paket DI.** Çelişki gibi duran iki günlük satırı farklı
+  motorlardan gelebilir; kaynağı okumadan "çelişki" demek yanlış
+  teşhistir. Burada gerçek kusur çelişki değil **nesnesiz cümle**
+  çıktı: ret satırı neyin reddedildiğini söylemiyordu ve yanındaki
+  satır yüzünden yanlış okunuyordu. Kabul satırı söylüyordu — asimetri
+  kusurun kendisiydi.
+- **Paket DI.** "Ekranda yazmıyor" demeden önce **nereye yazması
+  gerektiğini** sor. Denetim dönemi ana ekranın üst satırında yoktu ve
+  kusur sandım; gerekçe eylemin yanındaydı (Okul/Meslek → Adli
+  Geçmiş), yani Paket I'nın ilkesine uygun. Üç şüphenin üçü de böyle
+  çürüdü; paketin tek gerçek kusuru dördüncüsüydü.
 
 ## Pano
 
