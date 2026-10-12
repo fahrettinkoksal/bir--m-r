@@ -107,7 +107,16 @@ void main() {
       expect(anlar, hasLength(2));
       expect(anlar.first.age, 8);
       expect(anlar.first.text, contains('sana'));
-      expect(anlar.last.text, contains('verdin'));
+      // **Paket DR.** Giden hediyenin cümlesi değişti: eski metin
+      // "Sema kişisine Kol saati verdin." diye okunuyordu ve
+      // "kişisine" Türkçe ad çekiminden kaçmak için konmuş bir
+      // dolguydu (modal dökümünde gözle okundu). Yeni cümle
+      // "Sema için Kol saati aldın." İddia gevşemedi, **sıkıştı**:
+      // satırın kişiyi adıyla andığı ve dolgunun geri gelmediği de
+      // denetleniyor.
+      expect(anlar.last.text, contains('Sema için'));
+      expect(anlar.last.text, contains('aldın'));
+      expect(anlar.last.text.contains('kişisine'), isFalse);
       expect(anlar.every((SharedMoment m) =>
           m.kind == SharedMomentKind.hediye), isTrue);
     });

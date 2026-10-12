@@ -10491,4 +10491,25 @@ getirmek → §1 düşüyor; (b) tırnağı eski hâline döndürmek → §3 dü
 §2 o koşuda geçti (bulunan karede kayıt "gelen" hediyeydi) ve bu sınır
 testin kendi yorumuna yazıldı — asıl bekçi §1'in tarama.
 
+### Kendi hatam: değişen cümlenin **komşu** beklentisini taramadım
+
+Push'tan sonra CI kırmızı döndü: `3905 geçti, 1 düştü`. Düşen test
+`shared_history_test.dart` → "hediyeler iki yönlü olarak görünür";
+giden hediye satırının **'verdin'** sözcüğünü içermesini bekliyordu.
+Benim düzeltmem o cümleyi "Sema için Kol saati aldın." yaptı.
+
+Push öncesi taramam eksikti: kaldırdığım dizgileri ("kişisine", "şey
+almayacaktın") test ağacında aradım, **yerine koyduğum cümlenin
+komşusu** olan sözcüğü ("verdin") aramadım. Bu ders yol haritasında
+zaten yazılıydı (geniş kullanılan bir metin değişince beklentileri
+süitten tek tek öğrenmek pahalı; önce deseni tara) ve tekrarladım.
+
+Test **silinmedi, gevşetilmedi** — beklenti yeni cümleye göre
+güncellendi ve **sıkıştırıldı**: satırın kişiyi adıyla andığı
+("Sema için") ve dolgunun geri gelmediği de denetleniyor. Düzeltmeden
+sonra dosya 13 testle geçti; metin kataloglarına dokunan beş komşu test
+(`outing`, `paket_ap_ui`, `family_events`, `paket_bi_sohbet_yas`,
+`paket_w`) ve `text_consistency` + `gift_choice` ayrıca koşturuldu, 95
+test geçti.
+
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.

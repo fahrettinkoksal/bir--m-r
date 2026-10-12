@@ -1098,6 +1098,13 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   okuyor. Kaynağa bakmadan rapor etsem dördüncü yanlış bulgu olurdu.
   Ama aynı bakış gerçek bir tutarsızlık ölçtü: aynı değer üç ayrı yerde
   sayıyla yazılıyor, kişi kartında yazılmıyor (Q-244).
+- **Paket DR (kendi hatam, ikinci kez).** Bir cümleyi değiştirirken
+  **kaldırdığım** dizgiyi test ağacında aradım, **yerine koyduğumun
+  komşusunu** aramadım: `shared_history_test` giden hediye satırında
+  "verdin" bekliyordu ve CI'da düştü. Doğru tarama "eski metni kim
+  anıyor?" değil, **"bu satırın hangi sözcüğüne bir test dayanıyor?"**
+  sorusudur; değişen cümlenin bütün belirgin sözcüklerini (fiil dahil)
+  tara. Beklenti güncellenirken gevşetilmedi, sıkıştırıldı.
 - **Paket DQ.** Doğru bir sayı yanlış bir izlenim verebilir. Platform
   karesinde üç ünlünün üçü de "~%19" gösteriyordu ve sayı **doğruydu**;
   görünürlük terimi takipçi/eşik ile çarpıldığı için yeni hesapta sıfır
