@@ -10371,3 +10371,124 @@ DP'nin belge commit'i `3dcf092` için hiç koşu başlamadı; hemen ardından
 gelen push CI'ı yeni head'e taşıdı ve o head aynı içeriği taşıyor.)
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DR — modal kareler ilk kez basıldı (12 Ekim 2026)
+
+Bölüm sayfalarının hepsi okundu (DM-DQ: 28 kare + 4 sekme kökü, dokuz
+kusur). Bir katman aşağıda `lib/ui/widgets/` duruyor. **Ölçüm:** dosya
+başına oyuncuya dönük cümle sayısı (kaynaktaki 18+ karakterlik, boşluk
+içeren dizgiler, yorumlar atılmış):
+
+| widget | cümle | karesi basılıyor mu? |
+|---|---|---|
+| **person_detail_sheet** | **65** | hayır |
+| **item_detail_sheet** | 20 | hayır (hiçbir test adını anmıyor) |
+| **settings_sheet** | 14 | hayır (hiçbir test adını anmıyor) |
+| character_header | 13 | evet (her dökümde çiziliyor) |
+| **elder_support_card** | 11 | hayır |
+| notice_sheet | 11 | evet |
+| **pet_detail_sheet** | 10 | hayır |
+| **prison_life_panel** | 7 | hayır |
+| **license_exam_sheet** | 6 | hayır |
+| **track_choice_sheet** | 5 | hayır |
+
+`person_detail_sheet.dart` tek başına **65 cümle** — okuduğum hiçbir
+bölüm sayfasından yoğun. Modal bir sayfa sekmede görünmüyor, bölüm
+dökümü oraya giremiyor; o yüzden hiç basılmamıştı.
+
+**Uyarı (kendi aracıma karşı):** "hiçbir test adını anmıyor" **çizilmiyor
+demek değil** — bir modal, sayfanın düğmesine dokunan bir testte adı
+geçmeden de çizilebilir. Bu yüzden iddia sınıf adı taramasıyla
+kapatılmadı; `ekran_dokumu_modal_test.dart` yazıldı ve kareler
+**gerçekten basıldı**.
+
+### Altı kare okundu
+
+| kare | yaş | metin | sonuç |
+|---|---|---|---|
+| Kişi kartı | 0 | 56 | temiz (etkileşim kapısı yazılı: "Bu etkileşimler 4 yaşından itibaren açılır.") |
+| Kişi kartı · çocuk | 32 | 70 | temiz |
+| **Kişi kartı · yaşlı anne** | 43 | 103 | **iki metin kusuru + bir ölçüm** |
+| Varlık detayı | 8 | 45 | temiz (durum, kondisyon, edinme, satış fiyatı) |
+| Evcil hayvan detayı | 36 | 74 | temiz ("Yakınlık 55/100", "Olağan ömür 15 yıl") |
+| Ayarlar | 1 | 111 | temiz; bir gözlem aşağıda |
+
+Aynı modalın üç karesi var çünkü 0 yaşındaki kare dosyanın yalnızca üst
+kısmını çiziyor: etkileşimler 4 yaşından, bakım kararları yaşlılıkta,
+çocuğa özel satırlar yalnızca çocukta açılıyor.
+
+### Kusur 1: "Cemile kişisine Kolye verdin."
+
+Ortak geçmiş kaydında hediye satırı böyle okunuyordu. "kişisine"
+sözcüğü Türkçe ad çekiminden (Cemile'**ye**) kaçmak için konmuş bir
+dolgu. Paket DN'in kararı aynen uygulandı — tek çağrı yeri için ad
+çekimi motoru yazmak yerine cümle **ek gerektirmeyecek** biçimde
+kuruldu: "Cemile için Kolye aldın." (Hediyenin bedeli oyuncunun
+cüzdanından çıkıyor, bu yüzden "aldın" doğru fiil.) Gelen hediye satırı
+zaten doğruydu: "Cemile sana Kolye verdi."
+
+### Kusur 2: 'Cemile "şey almayacaktın" dedi'
+
+Tırnak içindeki cümle eksik sözcük sanılıyor. Kastedilen konuşma
+dilindeki duraksama; noktalama onu belli ediyor: **"Şey... almayacaktın"**.
+Sözcükler değişmedi, yalnızca noktalama.
+
+### Ölçüm: annenin avucuna sıkıştırdığı para
+
+Aynı karede şu satır var: *"Cemile cüzdanını çıkardı, katlanmış parayı
+avucuna sıkıştırdı: 'Kimseye söyleme.'"* — ve cüzdana giren tutar
+**25 ₺**. Ölçtüm:
+
+| kim veriyor | tutar (prototypeOnly) |
+|---|---|
+| çok yoksul kişi | 10 ₺ |
+| yoksul kişi | **25 ₺** |
+| orta halli kişi | 60 ₺ |
+| varlıklı kişi | 500 ₺ |
+| çok varlıklı kişi | 1.400 ₺ |
+| **oyuncunun kendi çocuğuna verdiği harçlık (varsayılan)** | **2.400 ₺** |
+
+Aynı jest için **96 kat** fark var ve 25 ₺ oyunun kendi ölçeğinde
+kumarhane asgari bahsinin (100 ₺) altında, bir dövüş sanatı dersinin
+(600-750 ₺) kırkta biri. Sayılar `prototypeOnly`, kalibrasyonu Faho'nun
+kararı: ölçümle **Q-246**'ya yazdım, değiştirmedim.
+
+### Gözlem: Ayarlar'daki modül başlıkları
+
+Ayarlar karesi "Modüller" bölümünde 18 grup başlığı çiziyor: "Paket BK —
+ebeveynlik", "Paket CC — son yıllar", "Paket DG — ilkokul yılları"…
+Bunlar benim geliştirme paketlerimin kodları. **Kusur demiyorum:**
+`FeatureFlag.paket` alanının kendi belgesi "ayarlar ekranı buna göre
+gruplar" diyor ve bu bölüm senin "kendi yaptığın geliştirmeleri
+çıkarabileceğim bir sistem kur" isteğinin karşılığı — kod sana bilgi.
+Oyuncuya çıkan sürümde görünüp görünmeyeceği bir **sürüm kararı**:
+**Q-245**.
+
+### İkinci gözlem: yakınlık çubuğu sayısız
+
+Kişi kartında "Keyfi" ve "Yakınlık" birer `LinearProgressIndicator`;
+dökümde yalnızca etiketleri göründü (döküm **çizilmiş metni** okur,
+çubuğu okumaz — araç kusuru değil). Ama ölçtüm: aynı değer oyunun üç
+ayrı yerinde **sayıyla** yazılıyor — evcil hayvan kartı "Yakınlık
+55/100", cezaevi paneli "yakınlık 42/100", askerlik sayfası "yakınlık
+37". Kişi kartı tek istisna. Tutarlılık tercihi olduğu için **Q-244**.
+
+### Bekçiler ve mutasyonlar
+
+- `app/test/ekran_dokumu_modal_test.dart` — altı modal karesi; bölüm
+  dökümünün bütün bekçileri (işaret, boş kare, ayraçsız sayı, cümle
+  tekrarı tavanı 4) aynen geçerli.
+- `app/test/paket_dr_modal_metinleri_test.dart` (4 test) — `lib/`
+  genelinde "kişisine" dolgusu taraması, hediye cümlesinin biçimi,
+  tırnak noktalaması ve harçlık tablosunun ölçümü.
+- `kModalBekleyen` (7 dosya) — bekleyen durum isteyen modallar
+  (kriz, mülakat, duruşma, alan seçimi, cezaevi paneli, yaşlı bakım
+  kartı, ehliyet sınavı). Muafiyet değil **ölçülmüş kuyruk**; bir
+  sonraki paket bekleyen durumlu bir döküm turu istiyor.
+
+**Mutasyonlar (ikisi de ısırdı):** (a) "kişisine" dolgusunu geri
+getirmek → §1 düşüyor; (b) tırnağı eski hâline döndürmek → §3 düşüyor.
+§2 o koşuda geçti (bulunan karede kayıt "gelen" hediyeydi) ve bu sınır
+testin kendi yorumuna yazıldı — asıl bekçi §1'in tarama.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

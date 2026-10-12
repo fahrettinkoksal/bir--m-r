@@ -21,6 +21,9 @@ import 'package:bir_omur/domain/economy/furnishing.dart';
 import 'package:bir_omur/domain/features/feature_catalog.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/military.dart';
+import 'package:bir_omur/domain/models/person.dart';
+import 'package:bir_omur/domain/models/relation.dart';
+import 'package:bir_omur/ui/widgets/person_card.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/school_club_progress.dart';
 import 'package:bir_omur/domain/activities/travel.dart';
@@ -443,6 +446,133 @@ final List<Bolum> kBolumler = <Bolum>[
 ];
 
 
+
+/// **Paket DR — modal ve panel kareleri.**
+///
+/// Bölüm sayfalarının hepsi okundu (Paket DM-DQ). Bir katman aşağıda
+/// `lib/ui/widgets/` duruyor ve oyuncuya dönük metnin önemli bir kısmı
+/// orada: ölçtüm, dosya başına cümle sayısı (kaynaktaki 18+ karakterlik
+/// ve boşluk içeren dizgiler, yorumlar atılmış):
+///
+///   person_detail_sheet 65 · item_detail_sheet 20 · settings_sheet 14 ·
+///   character_header 13 · elder_support_card 11 · notice_sheet 11 ·
+///   pet_detail_sheet 10 · prison_life_panel 7 · license_exam_sheet 6 ·
+///   track_choice_sheet 5
+///
+/// Bunların karesi **hiç basılmamıştı**: modal bir sayfa sekmeden
+/// görünmüyor, bölüm dökümü oraya giremiyor. `notice_sheet` ve
+/// `character_header` istisna (başka döküm basıyor).
+///
+/// Bu liste `ekran_dokumu_modal_test.dart` tarafından dolaşılıyor.
+/// `Bolum` kaydının aynısı kullanılıyor; `dosya` alanı burada
+/// `lib/ui/widgets/` altındaki dosyayı gösteriyor.
+final List<Bolum> kModalKareleri = <Bolum>[
+  Bolum(
+    'KİŞİ KARTI',
+    'person_detail_sheet.dart',
+    (GameState s) => s.people.any(
+      (Person p) =>
+          p.relation == RelationType.anne || p.relation == RelationType.baba,
+    ),
+    'tab_iliskiler',
+    <Finder>[find.byType(PersonCard)],
+    'Cinsiyet',
+  ),
+  // **Aynı modalın üç karesi.** 0 yaşındaki kare `person_detail_sheet`in
+  // yalnızca üst kısmını çiziyor: etkileşimler 4 yaşından itibaren
+  // açılıyor, bakım kararları yaşlılıkta, çocuğa özel satırlar yalnızca
+  // çocukta. Dosyanın 65 cümlesini okumak için üç ayrı kapı gerekiyor.
+  Bolum(
+    'KİŞİ KARTI · ÇOCUK',
+    'person_detail_sheet.dart',
+    (GameState s) => s.people.any(
+      (Person p) => p.relation == RelationType.cocuk && p.age >= 4 && p.isAlive,
+    ),
+    'tab_iliskiler',
+    <Finder>[
+      find.byKey(const Key('relationships_children_row')),
+      find.byType(PersonCard),
+    ],
+    'Cinsiyet',
+  ),
+  Bolum(
+    'KİŞİ KARTI · YAŞLI ANNE',
+    'person_detail_sheet.dart',
+    (GameState s) => s.people.any(
+      (Person p) =>
+          p.relation == RelationType.anne && p.age >= 70 && p.isAlive,
+    ),
+    'tab_iliskiler',
+    <Finder>[find.byType(PersonCard)],
+    'Cinsiyet',
+  ),
+  Bolum(
+    'VARLIK DETAYI',
+    'item_detail_sheet.dart',
+    (GameState s) => s.items.isNotEmpty,
+    'tab_varliklar',
+    <Finder>[
+      find.byWidgetPredicate(
+        (Widget w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('varlik_'),
+        description: 'varlık satırı',
+      ),
+    ],
+    'Edinildiği yaş',
+  ),
+  Bolum(
+    'EVCİL HAYVAN DETAYI',
+    'pet_detail_sheet.dart',
+    (GameState s) => s.pets.isNotEmpty,
+    'tab_iliskiler',
+    <Finder>[
+      find.byKey(const Key('relationships_pets_row')),
+      find.byWidgetPredicate(
+        (Widget w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('pet_detail_'),
+        description: 'hayvan satırı',
+      ),
+    ],
+    'Olağan ömür',
+  ),
+  Bolum(
+    'AYARLAR',
+    'settings_sheet.dart',
+    (GameState s) => s.player.age >= 1,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('open_settings'))],
+    'Görünüm',
+  ),
+];
+
+/// Metin taşıyan ama karesi **henüz** basılmayan modal/panel dosyaları.
+///
+/// Bu bir muafiyet listesi değil **ölçülmüş bir kuyruk**: her biri
+/// bekleyen bir durum istiyor (kriz, mülakat, duruşma, alan seçimi) ve
+/// bölüm dökümünün aradığı "temiz kare" tanımı gereği o durumlar
+/// dışarıda bırakılıyor (Paket CG/CR dersi). Bir sonraki pakette
+/// bekleyen durumlu bir döküm turu gerekiyor. Liste yalnızca **küçülür**;
+/// yeni bir metin taşıyan widget eklenirse bekçi düşer.
+const List<String> kModalBekleyen = <String>[
+  'elder_support_card.dart', // 11 cümle · Hayat ekranında, yaşlılık kapısı
+  'health_crisis_sheet.dart', // 4 · bekleyen kriz
+  'interview_sheet.dart', // 3 · bekleyen mülakat
+  'license_exam_sheet.dart', // 6 · sınav akışı
+  'prison_life_panel.dart', // 7 · cezaevi karesi (Paket DB ölçtü, basmadı)
+  'track_choice_sheet.dart', // 5 · lise alan seçimi (bekleyen karar)
+  'trial_sheet.dart', // 4 · duruşma (bekleyen kriz)
+];
+
+/// Karesi **başka bir döküm** tarafından basılan modal/panel dosyaları.
+///
+/// İddia denetleniyor: adı yazılan test hem `pumpWidget` çağırıyor hem
+/// `print` ediyor (Paket DQ'nun sıkıştırdığı kural).
+const Map<String, String> kModalBaskaTestle = <String, String>{
+  'notice_sheet.dart': 'ekran_dokumu_bildirim_pencereleri_test.dart',
+  'character_header.dart': 'ekran_dokumu_test.dart',
+};
 
 /// Dökümün dışındaki sayfalar ve **onları çizen** test.
 ///

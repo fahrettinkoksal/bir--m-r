@@ -443,7 +443,11 @@ String giftReactionText({
       final List<String> secenekler = <String>[
         '$ad paketi açtı, bir an durdu. "Bunu nereden bildin?"',
         '$ad hediyeyi elinde çevirdi çevirdi. Yüzü güldü.',
-        '$ad "şey almayacaktın" dedi ama bırakmadı elinden.',
+        // Paket DR: tırnak içindeki cümle dökümde "şey almayacaktın"
+        // diye okunuyordu; eksik sözcük sanılıyor. Kastedilen konuşma
+        // dilindeki duraksama ("Şey... almayacaktın") ve noktalama
+        // onu belli ediyor. Sözcükler değişmedi.
+        '$ad "Şey... almayacaktın" dedi ama bırakmadı elinden.',
       ];
       return secenekler[gift.name.length % secenekler.length];
     case GiftReaction.idare:

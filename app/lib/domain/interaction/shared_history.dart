@@ -136,7 +136,15 @@ abstract final class SharedHistory {
           age: g.age,
           text: ondan
               ? '${person.firstName} sana $ad verdi.'
-              : '${person.firstName} kişisine $ad verdin.',
+              // **Paket DQ/DR.** Eski metin "Cemile kişisine Kolye
+              // verdin." diye okunuyordu: "kişisine" sözcüğü Türkçe
+              // ad çekiminden (Cemile'ye) kaçmak için konmuş bir
+              // dolgu. Paket DN'in kararı aynen geçerli — tek çağrı
+              // yeri için ad çekimi motoru yazmak yerine cümle ek
+              // gerektirmeyecek biçimde kuruldu. Hediyenin bedeli
+              // oyuncunun cüzdanından çıkıyor, bu yüzden "aldın"
+              // doğru fiil.
+              : '${person.firstName} için $ad aldın.',
           kind: SharedMomentKind.hediye,
         ),
       );

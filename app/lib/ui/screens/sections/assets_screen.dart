@@ -804,6 +804,10 @@ class _ItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Card(
+      // Döküm anahtarı (Paket DR): `ItemDetailSheet` 20 cümle taşıyor ve
+      // karesi hiç basılmamıştı; satırın ayırt edici bir işareti yoktu.
+      // Evcil hayvan satırı aynı kalıbı kullanıyor (`pet_detail_<id>`).
+      key: Key('varlik_${item.id}'),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),

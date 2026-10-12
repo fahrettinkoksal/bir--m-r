@@ -1077,6 +1077,27 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   satır), eylemin adını **kendi içine** koymak satırda kekemeliğe yol
   açıyor: "İş birliği teklif et: İş birliği teklif etmek için…".
   Gerekçe yalnızca kapıyı yazar; adı çağıran yer ekler.
+- **Paket DR.** Kapsam sorusunu bir katman aşağıda sormak gerekiyordu:
+  bölüm sayfalarının hepsi okunduktan sonra `lib/ui/widgets/` kaldı ve
+  oyuncuya dönük metnin önemli kısmı oradaydı —
+  `person_detail_sheet.dart` tek başına **65 cümle**, okuduğum hiçbir
+  bölüm sayfasından yoğun. Modal bir sayfa sekmede görünmüyor, bu yüzden
+  dökümün erişemediği bir bölge kalmış.
+- **Paket DR.** "Hiçbir test adını anmıyor" ile "çizilmiyor" aynı şey
+  değil: bir modal, düğmesine dokunan bir testte adı geçmeden de
+  çizilebilir. Sınıf adı taraması yine bir vekildi (DQ'nun dersi);
+  iddia kareyi **gerçekten basarak** kapatıldı.
+- **Paket DR.** Aynı dosyanın bir karesi dosyayı okumuş saymıyor.
+  Kişi kartının 0 yaşındaki karesi 56 metin bastı ve "temiz" göründü;
+  etkileşimler 4 yaşından, bakım yaşlılıkta, çocuğa özel satırlar
+  yalnızca çocukta açılıyor. İki kusur ancak **43 yaşındaki** karede
+  (103 metin) göründü. Yoğun bir modal için birden çok kapı gerekiyor.
+- **Paket DR.** Çizilmeyen şeyi kusur sanmamak için aracın ne okuduğunu
+  bilmek gerekiyor: "Keyfi" ve "Yakınlık" etiketleri değersiz göründü,
+  çünkü değer bir `LinearProgressIndicator` ve döküm yalnızca metni
+  okuyor. Kaynağa bakmadan rapor etsem dördüncü yanlış bulgu olurdu.
+  Ama aynı bakış gerçek bir tutarsızlık ölçtü: aynı değer üç ayrı yerde
+  sayıyla yazılıyor, kişi kartında yazılmıyor (Q-244).
 - **Paket DQ.** Doğru bir sayı yanlış bir izlenim verebilir. Platform
   karesinde üç ünlünün üçü de "~%19" gösteriyordu ve sayı **doğruydu**;
   görünürlük terimi takipçi/eşik ile çarpıldığı için yeni hesapta sıfır
