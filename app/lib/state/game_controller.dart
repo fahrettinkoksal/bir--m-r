@@ -74,6 +74,7 @@ import '../domain/interaction/adoption.dart';
 import '../data/investment_catalog.dart';
 import '../domain/economy/banking.dart';
 import '../domain/economy/investment_engine.dart';
+import '../domain/life/career_summary_label.dart';
 import '../domain/life/eye_exam.dart';
 import '../domain/life/life_end_choice.dart';
 import '../domain/models/loan.dart';
@@ -4410,6 +4411,18 @@ class GameController extends ChangeNotifier {
   /// Aktif hayat yokken taşınan arşiv.
   List<LifeSummary>? _pendingArchive;
 
+  /// Biten hayatın özetini **de** içeren arşiv (Paket DH).
+  ///
+  /// `pastLives` yalnızca önceki hayatları verir: biten hayat arşive
+  /// ancak [clearLife] çağrıldığında, yani oyuncu yeni bir hayata
+  /// başladığında yazılır. Geçmiş Hayatlar ekranı bu yüzden ömür sonu
+  /// karesinde **"Henüz tamamlanmış bir hayat yok."** diyordu — hemen
+  /// altındaki panel "Bu hayatın özeti ... arşivde saklanır" derken
+  /// (Paket DH dökümü, Kare A). Ekran artık bu listeyi okur.
+  ///
+  /// Durumu değiştirmez; yalnızca hesaplar.
+  List<LifeSummary> get archiveWithCurrentLife => _archiveWithCurrentLife();
+
   /// Mevcut hayat tamamlandıysa özetini arşive ekleyip listeyi döndürür.
   List<LifeSummary> _archiveWithCurrentLife() {
     final GameState? current = _state;
@@ -4433,11 +4446,11 @@ class GameController extends ChangeNotifier {
             ? current.education.label
             : '${current.education.label} · '
                   '${current.education.program!.name}',
-        careerLabel: current.career.isEmployed
-            ? current.career.label
-            : current.career.pastJobIds.isEmpty
-            ? 'Çalışmadı'
-            : 'Son iş: ${current.career.label}',
+        // **Paket DH.** Eskiden burada zincirin ikinci bir kopyası
+        // vardı ve `career.label` okuyordu; ölü oyuncuda o alan
+        // "Çalışmıyor" döndüğü için arşive "Son iş: Çalışmıyor"
+        // yazılıyordu — kayıt dosyasına kalıcı olarak. Tek kaynak:
+        careerLabel: CareerSummaryLabel.of(current),
         wallet: current.player.wallet,
         itemCount: current.items.length,
         licenseCount: current.licenses.length,

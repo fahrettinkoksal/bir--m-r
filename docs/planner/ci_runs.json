@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 632,
+ "total": 634,
  "runs": [
+  {
+   "id": 38184838653,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "e8b6a05f0bf1ccd58fca982e4ebd61c7eebca427",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 319,
+   "event": "push",
+   "created_at": "2026-10-11T23:35:13Z",
+   "updated_at": "2026-10-12T00:09:51Z",
+   "run_started_at": "2026-10-11T23:35:13Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38184838653",
+   "display_title": "Kuyruk: Q-238 — zincirin girişi darboğaz (kumbara izi 300 hayatta 2)"
+  },
+  {
+   "id": 38184838576,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "e8b6a05f0bf1ccd58fca982e4ebd61c7eebca427",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 316,
+   "event": "push",
+   "created_at": "2026-10-11T23:35:13Z",
+   "updated_at": "2026-10-12T00:10:53Z",
+   "run_started_at": "2026-10-11T23:35:13Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38184838576",
+   "display_title": "Kuyruk: Q-238 — zincirin girişi darboğaz (kumbara izi 300 hayatta 2)"
+  },
   {
    "id": 38179307404,
    "name": "Windows test sürümü",

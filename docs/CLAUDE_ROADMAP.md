@@ -890,6 +890,23 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   yeşil kalır. Bu yüzden yapısal bekçinin yanına zarsız bir **katalog**
   denetimi kondu (her iz okunuyor mu). İki bölüm birbirinin kör
   noktasıdır; her ikisi de ayrı mutasyonla denendi.
+- **Paket DH.** Bir kusuru düzeltirken sor: **bu zincirin ikinci bir
+  kopyası var mı?** Paket DF ömür sonu ekranındaki "Son iş: Çalışmıyor"
+  hatasını düzeltti; aynı zincirin kopyası arşivi yazan kontrolördeydi
+  ve orada kaldı — hem de kayıt dosyasına **kalıcı** yazarak. Düzeltme
+  artık kopyayı kaldırıyor: zincir tek dosyada, iki çağıran oradan
+  okuyor. Kök neden yazım hatası değil çoğaltmaydı.
+- **Paket DH.** "Hangi ekran hiç okunmadı?" sorusu tükenmedi: dokuz
+  ekranı dört döküm aracıyla karşılaştırınca Geçmiş Hayatlar ekranının
+  testlerde **hiç** geçmediği çıktı ve ilk karede iki gerçek hata
+  verdi. Ekranın kendi metniyle çelişmesi en ucuz kusur işaretidir —
+  panel "arşivde saklanır" derken ekran "henüz tamamlanmış bir hayat
+  yok" diyordu.
+- **Paket DH.** Kaynak taraması yazarken **yorumları atla**: ilk hâli
+  bütün dosyayı okuyordu ve üç bulgusunun üçü de kusuru *anlatan*
+  yorumlardı. Kural koda dairdir; gerekçeyi yazmak yasak değil. Aynı
+  derste ikinci yarı: yasaklanan şey alanın kendisi değil, onu **yanlış
+  bağlamda** okumak (`career.label` yaşayan oyuncuda doğru alandır).
 
 ## Pano
 

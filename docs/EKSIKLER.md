@@ -960,6 +960,27 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 
 ---
 
+> **TAZELENDİ — Paket DH ekran kapsamı denetimi (11 Ekim 2026).**
+> "Hangi ekran hiç okunmadı?" sorusu dokuz ekranın tamamına soruldu.
+> Yöntem: `lib/ui/screens/**/*_screen.dart` listesi ile dört döküm
+> aracının gerçekten açtığı kareler karşılaştırıldı.
+>
+> | ekran | durum |
+> |---|---|
+> | `past_lives_screen.dart` | **hiç açılmamış** → Paket DH, iki gerçek hata |
+> | `life_summary_screen.dart` | Paket DF'te ilk kez açıldı, bir gerçek hata |
+> | `creation_screen.dart` | açılıyor (`navigation_widget_test`, `paket_co`) |
+> | `start_screen.dart` | her dökümde açılıyor |
+> | diğer beşi (life, activities, assets, relationships, school_career) | sekme anahtarlarıyla açılıyor |
+>
+> Yani bu denetimden sonra dokuz ekranın dokuzunun da en az bir test
+> yolu var. **Uyarı:** sınıf adını testlerde aramak zayıf bir vekildir
+> (örn. `SchoolCareerScreen` adı hiç geçmiyor ama ekran
+> `Key('tab_okul_meslek')` ile bolca test ediliyor); ölçü, açılan kare
+> olmalı. Ekranın açılması içeriğinin **okunduğu** anlamına da gelmez:
+> DF ve DH'nin bulduğu kusurlar ekran açıldıktan sonra metni gözle
+> okunduğu için çıktı.
+
 ## 7. Claude'un önceliklendirme önerisi
 
 **Bu bir öneridir; sıralamayı Faho ile ChatGPT verir (Q-137).**

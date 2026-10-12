@@ -9479,3 +9479,99 @@ karşılık pratikte okunmuyor. Katsayıya dokunmadım; **Q-238** olarak
 kuyruğa öneri + varsayılanla girdi.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DH — Geçmiş Hayatlar arşivi ilk kez okundu (11 Ekim 2026)
+
+Paket DF ömür sonu ekranını ilk kez basmıştı. Aynı soruyu bütün
+ekranlara sordum: **hangi ekran hiç okunmadı?** Dokuz ekran, dört döküm
+aracı tarandı ve `lib/ui/screens/past_lives_screen.dart` testlerde
+**hiç geçmiyordu** — ne bir döküm, ne bir widget testi, ne aranan bir
+anahtar. Oysa oyuncunun ilk hayatından sonra en çok göreceği ekran bu:
+oyunun kupa rafı.
+
+Yeni araç: `app/test/ekran_dokumu_gecmis_hayatlar_test.dart`. Arşivi
+kurmaz; bot hayatlarını ölüme kadar oynatır, uygulamanın **kendi**
+`clearLife()` akışıyla arşive yazdırır ve üç kare basar.
+
+### İLK KAREDE İKİ GERÇEK HATA
+
+**1. Arşive "Meslek: Son iş: Çalışmıyor" yazılıyordu — 3/3 kayıtta.**
+
+Kayıt kendi satırlarıyla çelişiyordu:
+
+| Arşivdeki satırlar (doğru) | Meslek satırı (yanlış) |
+|---|---|
+| "Kıdemli danışman olarak bir yılın doldu; 653.160 ₺ cüzdanına girdi." | "Meslek: Son iş: Çalışmıyor" |
+| "Emekli aylığın yattı: 745.445 ₺." | "Meslek: Son iş: Çalışmıyor" |
+| "Kıdemli danışman olarak çalıştığın iş yerinde küçülmeye gidildi." | "Meslek: Son iş: Çalışmıyor" |
+
+Kök neden **yazım hatası değil kopyaydı.** Paket DF aynı kusuru ömür
+sonu *ekranında* düzeltmişti (`career.label` **bugünkü** işi söyler;
+ölü oyuncuda `job?.name ?? 'Çalışmıyor'` → "Çalışmıyor"). Ama zincirin
+ikinci bir kopyası `GameController._archiveWithCurrentLife()` içindeydi
+ve o düzeltilmedi. Dahası ekran kopyası yalnızca o anı etkiliyordu;
+arşiv kopyası **kayıt dosyasına kalıcı** yazıyor.
+
+Düzeltme kopyayı kaldırdı: zincir `lib/domain/life/career_summary_label.dart`
+içine taşındı (`CareerSummaryLabel.of`) ve iki çağıran da oradan okuyor.
+Sıra bilinçli — çalışıyorsa bugünkü iş, değilse geçmişten okunan son iş
+(`CareerState.lastJobLabel`), o da yoksa emeğin geçtiği yer
+(profesyonel futbolcu / dövüş sporcusu / kendi işini kurdu), hiçbiri
+yoksa "Çalışmadı".
+
+**Kayıtta duran eski satırlar düzelmez ve düzeltilmeye çalışılmadı:**
+arşiv yalnızca metni saklıyor, iş kimliğini saklamıyor. Yani eski
+kayıtlardaki "Son iş: Çalışmıyor" ifadesini doğruya çevirmek için gerekli
+bilgi kayıtta yok. Uydurmak yerine olduğu gibi bırakıldı; yeni biten
+hayatlar doğru yazılıyor.
+
+**2. Oyuncu kendi biten hayatını arşivde görmüyordu.**
+
+Kare A: 78 yıllık hayat bitti, oyuncu "Geçmiş Hayatlar" düğmesine
+bastı ve **"Henüz tamamlanmış bir hayat yok."** okudu — hemen
+altındaki panel "Bu hayatın özeti, yeni hayata başlasan bile Geçmiş
+Hayatlar arşivinde saklanır." derken. Ekran kendi vaadiyle çelişiyordu.
+
+Sebep: biten hayat arşive ancak `clearLife()` çağrıldığında, yani
+oyuncu **yeni bir hayata başladığında** yazılıyor; ekran ise
+`state.pastLives` okuyordu. `GameController.archiveWithCurrentLife`
+eklendi (durumu değiştirmez, yalnızca hesaplar) ve hem ekran hem
+düğme sayacı ona bağlandı. Düğme artık ilk ölümde de sayı gösteriyor.
+
+| | önce | sonra |
+|---|---|---|
+| düğme | "Geçmiş Hayatlar" | "Geçmiş Hayatlar (1)" |
+| ekran | "Henüz tamamlanmış bir hayat yok." | "1 tamamlanmış hayat · Cengiz Aydın" |
+| meslek | "Son iş: Çalışmıyor" | "Son iş: Depo personeli" |
+
+### Üçüncü şüphe ölçümde çürüdü
+
+Kart anahtarı `past_life_<ad>_<yaş>`. Kuşak devamında soyadı miras
+kaldığı için iki kaydın anahtarının çakışması akla yakındı — ve biten
+hayat da listeye girdiği için risk arttı. **Ölçüldü:** 400 rastgele
+hayatın 250'si ölüyor ve 250 anahtarın **hepsi farklı** (0 çakışma);
+üstelik çakışan iki kayıtla ekran hata vermeden çiziliyor. Kusur yok,
+düzeltme yapılmadı. İddia yine de §4'te duruyor: Flutter bir gün
+çakışmayı sert hata yaparsa haber verir.
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_dh_arsiv_test.dart` (4 test).
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Arşiv eski zincire döndürüldü | §1 | 3 arketipte "arşivde Son iş: Çalışmıyor" |
+| Ekran yine `state.pastLives` okudu | §3 | "Hayat bitti ama arşiv boş diyor" |
+| Ekran "Son iş:" metnini kendi kurdu | §2 | "kendisi kuruyor; CareerSummaryLabel kullanılmalı" |
+
+§2'nin ilk hâli **fazla kabaydı**: bütün dosyayı tarıyordu ve üç
+bulgusunun üçü de bu kusuru *anlatan yorum satırlarıydı*. Tarama
+yorumları atlayacak ve `career.label`'ı tek başına değil ömür sonu
+metniyle aynı ifadede arayacak şekilde daraltıldı — `career.label`
+**yaşayan** oyuncuda doğru alandır, yasak olan onu ömür sonunda okumak.
+
+§3 ilk koşuda Paket DD'nin tuzağına düştü: arşiv düğmesi uzun bir
+tembel listede olduğu için kaydırılmadan ağaçta bile değildi
+(`scrollUntilVisible` eklendi).
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

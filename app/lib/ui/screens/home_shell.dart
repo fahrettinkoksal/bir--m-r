@@ -311,8 +311,10 @@ class _HomeShellState extends State<HomeShell> {
       return Scaffold(
         body: SafeArea(
           child: _archiveVisible
+              // Biten hayat da listede (Paket DH): `state.pastLives`
+              // onu henüz içermiyor.
               ? PastLivesScreen(
-                  lives: state.pastLives,
+                  lives: GameScope.of(context).archiveWithCurrentLife,
                   backLabel: 'Hayat özeti',
                   onBack: () => setState(() => _archiveVisible = false),
                 )

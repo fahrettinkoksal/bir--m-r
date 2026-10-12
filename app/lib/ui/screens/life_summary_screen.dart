@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/generation/generation_continuation.dart';
+import '../../domain/life/career_summary_label.dart';
 import '../../domain/life/life_verdict.dart';
 import '../../domain/life/will.dart';
 import '../../domain/models/game_state.dart';
@@ -121,22 +122,11 @@ class LifeSummaryScreen extends StatelessWidget {
                 // aynı ekranın hüküm paneli doğruyu söylüyordu
                 // ("3 işte toplam 43 yıl çalıştın"). Son iş artık
                 // geçmişten okunuyor (`CareerState.lastJobLabel`).
+                // **Paket DH.** Aynı zincir arşivde de yazılıydı ve
+                // orada düzeltilmemişti; artık tek kaynak var.
                 _Satir(
                   label: 'Meslek',
-                  value: state.career.isEmployed
-                      ? state.career.label
-                      : (_sonIs(state) ??
-                          // Sporcuya ve kendi işini kurmuş olana
-                          // "Çalışmadı" yazılmaz (AY/3, AY/5 ve DF):
-                          // o hayatın emeği sahada, ringde ya da
-                          // kendi dükkânında geçti.
-                          ((state.footballCareer?.proSeasons ?? 0) > 0
-                              ? 'Profesyonel futbolcu'
-                              : _dovusenKariyerler(state).isNotEmpty
-                                  ? 'Dövüş sporcusu'
-                                  : state.businesses.isNotEmpty
-                                      ? 'Kendi işini kurdu'
-                                      : 'Çalışmadı')),
+                  value: CareerSummaryLabel.of(state),
                 ),
                 // Futbol kariyeri ömür özetinde görünür (Paket AY/3).
                 // Eskiden hiç yazılmıyordu: 15 sezon, 300 maçlık bir
@@ -249,10 +239,13 @@ class LifeSummaryScreen extends StatelessWidget {
           child: OutlinedButton(
             key: const Key('life_summary_archive'),
             onPressed: onShowArchive,
+            // Sayı, ekranın göstereceği liste ile aynı olmalı: biten
+            // hayat da sayılır (Paket DH). Eskiden ilk ölümde düğme
+            // sayısız görünüp ekran "Henüz tamamlanmış bir hayat yok."
+            // diyordu.
             child: Text(
-              state.pastLives.isEmpty
-                  ? 'Geçmiş Hayatlar'
-                  : 'Geçmiş Hayatlar (${state.pastLives.length})',
+              'Geçmiş Hayatlar '
+              '(${GameScope.of(context).archiveWithCurrentLife.length})',
             ),
           ),
         ),
@@ -265,16 +258,6 @@ class LifeSummaryScreen extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Ömürde çalışılmış son işin özet satırı; hiç çalışılmadıysa `null`.
-///
-/// Önek **bilerek duruyor**: "Aşçı" ile "Son iş: Aşçı" farklı şeyler
-/// söyler — ikincisi oyuncunun ölürken çalışmadığını da anlatır
-/// (Paket DF).
-String? _sonIs(GameState state) {
-  final String? ad = state.career.lastJobLabel;
-  return ad == null ? null : 'Son iş: $ad';
 }
 
 class _Satir extends StatelessWidget {

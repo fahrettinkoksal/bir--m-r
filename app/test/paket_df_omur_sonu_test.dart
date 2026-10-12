@@ -154,18 +154,32 @@ void main() {
   });
 
   test('§4 kaynak taraması: "Son iş" satırı bir daha label okumasın', () {
+    // **Paket DH'de hedef dosya değişti, iddia değişmedi.** Zincir
+    // artık ekranda değil `CareerSummaryLabel` içinde: DH, aynı
+    // kusurun ikinci bir kopyasını arşivi yazan kontrolörde buldu
+    // (arşive üç hayatın üçünde de "Son iş: Çalışmıyor" yazılmıştı,
+    // hem de kayıt dosyasına kalıcı olarak) ve kökün yazım hatası
+    // değil **çoğaltma** olduğunu gösterdi. Tarama o yüzden tek
+    // kaynağa bakıyor; kopyanın geri gelmesini de Paket DH'nin §2'si
+    // ayrıca yasaklıyor.
     final File dosya =
-        File('lib/ui/screens/life_summary_screen.dart');
-    expect(dosya.existsSync(), isTrue);
+        File('lib/domain/life/career_summary_label.dart');
+    expect(dosya.existsSync(), isTrue,
+        reason: 'Meslek satırının tek kaynağı silinmiş.');
     final String kaynak = dosya.readAsStringSync();
 
     // Hatanın tam şekli: "Son iş" metnine `career.label` enterpolasyonu.
-    expect(
-      kaynak.contains(r"'Son iş: ${state.career.label}'"),
-      isFalse,
-      reason: 'Hata geri geldi: "Son iş" satırı yine bugünkü işi '
-          'okuyor. Son iş geçmişten okunur (lastJobLabel).',
-    );
+    for (final String bicim in <String>[
+      r"'Son iş: ${state.career.label}'",
+      r"'Son iş: ${current.career.label}'",
+    ]) {
+      expect(
+        kaynak.contains(bicim),
+        isFalse,
+        reason: 'Hata geri geldi: "Son iş" satırı yine bugünkü işi '
+            'okuyor. Son iş geçmişten okunur (lastJobLabel).',
+      );
+    }
     // İşletme sahibi dalı duruyor mu? (Bot bu yolu yürümüyor; ölçüm
     // 200 ölümde 0. Bu yüzden korumasını kaynak taraması yapıyor.)
     expect(
@@ -175,5 +189,16 @@ void main() {
           'olabilir; AY/3 ve AY/5 ile aynı eksiklik.',
     );
     expect(kaynak.contains('lastJobLabel'), isTrue);
+
+    // Ekran ve kontrolör o zinciri yeniden yazmıyor olmalı; bu
+    // iddianın tamamı Paket DH §2'de, burada yalnızca çağrı duruyor.
+    for (final String yol in <String>[
+      'lib/ui/screens/life_summary_screen.dart',
+      'lib/state/game_controller.dart',
+    ]) {
+      expect(File(yol).readAsStringSync().contains('CareerSummaryLabel.of'),
+          isTrue,
+          reason: '$yol tek kaynağı çağırmıyor.');
+    }
   });
 }
