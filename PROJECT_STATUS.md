@@ -10512,4 +10512,12 @@ sonra dosya 13 testle geçti; metin kataloglarına dokunan beş komşu test
 `paket_w`) ve `text_consistency` + `gift_choice` ayrıca koşturuldu, 95
 test geçti.
 
+**Yerel tam süit (düzeltme öncesi kodla): 3905 geçti, 17 atlandı,
+1 düştü** (41 dk 18 sn) — CI'la **birebir aynı** sonuç ve tek hata bu
+testti. Yani değişikliğin etkisi tam olarak bir beklentiydi; başka
+gizli bağımlılık yok. Düzeltmeden sonraki doğrulama CI'da yapıldı:
+`50fcb75` iki işte de **yeşil** tamamlandı (CI işi süitin tamamını
+koşuyor) ve PR durumu `clean`. İkinci bir 40 dakikalık yerel koşu
+başlatılmadı; CI aynı süiti düzeltilmiş kodla zaten koşturdu.
+
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
