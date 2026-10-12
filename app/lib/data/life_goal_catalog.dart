@@ -29,6 +29,7 @@ import '../domain/models/combat_career.dart';
 import '../domain/models/person.dart';
 import 'hobby_catalog.dart';
 import 'martial_arts_catalog.dart';
+import '../text/turkish_text.dart';
 
 /// Hedefin hangi alana ait olduğu.
 enum GoalArea {
@@ -254,7 +255,11 @@ final List<LifeGoal> kLifeGoals = <LifeGoal>[
     id: 'takipci',
     label: 'Kitlen olsun',
     description:
-        'Sosyal medyada toplam $kGoalFollowers takipçiye ulaş.',
+        // Paket DN: ekranda "100000" yazıyordu. Ayraç kuralı
+        // (Paket BE) para dışındaki sayılar için de geçerli; döküm bu
+        // satırı Hayat Hedefleri karesinde okudu.
+        'Sosyal medyada toplam ${trNumber(kGoalFollowers)} takipçiye '
+        'ulaş.',
     area: GoalArea.kendin,
     reached: (GameState s) => s.totalFollowers >= kGoalFollowers,
   ),

@@ -39,7 +39,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
 import 'support/section_pages.dart';
-import 'support/test_flow.dart';
 
 /// Taranan kareler; bir kez doldurulur, bütün testler aynı kümeyi okur.
 final Map<String, GameState> _kareler = <String, GameState>{};
@@ -60,6 +59,8 @@ void _tara() {
     PlayerArchetype.social,
     PlayerArchetype.investor,
     PlayerArchetype.sport,
+    PlayerArchetype.entrepreneur,
+    PlayerArchetype.risky,
   ];
   for (final PlayerArchetype a in arketipler) {
     for (int tohum = 0; tohum < 40; tohum++) {
@@ -106,11 +107,49 @@ void main() {
     return out;
   }
 
+  /// Hedefi görünür kılar; **her** kaydırılabilir alanı dener.
+  ///
+  /// `scrollToFinder` ağacın **ilk** `Scrollable`'ını kaydırıyor. Okul
+  /// / Meslek sekmesinde o ilk alan sayfanın gövdesi değil; "Kendi
+  /// İşim" satırı 24000 px görüş alanıyla bile kurulmuyor ve
+  /// `scrollUntilVisible` "No element" atıyordu. Döküm bu yüzden
+  /// alanları sırayla deniyor.
+  Future<bool> kaydir(WidgetTester tester, Finder hedef) async {
+    if (hedef.evaluate().isNotEmpty) {
+      await tester.ensureVisible(hedef.first);
+      await tester.pumpAndSettle();
+      return true;
+    }
+    final int alanSayisi = find.byType(Scrollable).evaluate().length;
+    for (int i = 0; i < alanSayisi; i++) {
+      try {
+        await tester.scrollUntilVisible(
+          hedef,
+          240,
+          scrollable: find.byType(Scrollable).at(i),
+          maxScrolls: 60,
+        );
+        await tester.pumpAndSettle();
+        if (hedef.evaluate().isNotEmpty) return true;
+      } on StateError {
+        // Bu alan hedefi taşımıyor; sıradakini dene.
+        continue;
+      }
+    }
+    return hedef.evaluate().isNotEmpty;
+  }
+
   Future<void> ac(WidgetTester tester, GameState durum) async {
     if (!acildi) {
       // Görüş alanı bilerek telefon ölçüsünden yüksek: döküm yalnızca
       // **çizilmiş** metni okur (bkz. ekran_dokumu_test.dart).
-      tester.view.physicalSize = const Size(1200, 14000);
+      // **24000 px (Paket DN).** 14000 ile Okul/Meslek sekmesi
+      // işletmesi olan oyuncuda sonuna kadar kurulmuyordu: "Kendi
+      // İşim" satırı listenin dışında kalıyor ve `scrollUntilVisible`
+      // "No element" atıyordu. Bu bir yerleşim testi değil döküm;
+      // amacı metnin tamamını görmek (yerleşimi gerçek ölçüde
+      // `ui_smoke_life_test.dart` sınıyor).
+      tester.view.physicalSize = const Size(1200, 24000);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -146,16 +185,30 @@ void main() {
       // demez; nerede takıldığını yazar ve düşer.
       for (int i = 0; i < b.yol.length; i++) {
         final Finder hedef = b.yol[i];
-        await scrollToFinder(tester, hedef);
+        final bool goruldu = await kaydir(tester, hedef);
         expect(
-          hedef,
-          findsAtLeastNWidgets(1),
+          goruldu,
+          isTrue,
           reason: '${b.ad}: yolun ${i + 1}. adımı ekranda bulunamadı. '
               'Kapı açık (${durum.player.age} yaşındaki kare) ama satır '
               'yok — bu bir kapı/satır tutarsızlığıdır.',
         );
+        // **Dokunmanın işe yaradığı genel olarak denetlenir.** Kapalı
+        // bir satıra dokunmak hiçbir şey yapmaz ve döküm eski kareyi
+        // basıp "okudum" sayar (Paket DM'de tam bu oldu). Kare
+        // değişmediyse yol kırılmıştır; işaret denetimi bunun
+        // üstüne ikinci bir kilittir.
+        final List<String> onceki = metinler(tester);
         await tester.tap(hedef.first);
         await tester.pumpAndSettle();
+        final List<String> sonraki = metinler(tester);
+        expect(
+          sonraki.join('|') == onceki.join('|'),
+          isFalse,
+          reason: '${b.ad}: yolun ${i + 1}. adımına dokunuldu ama ekran '
+              'hiç değişmedi. Satır kapalı olabilir; kapıyı daralt ya '
+              'da eylem düğmesine dokun.',
+        );
       }
 
       final List<String> ekran = metinler(tester);
@@ -179,6 +232,25 @@ void main() {
         ekran.length,
         greaterThan(3),
         reason: '${b.ad} sayfası neredeyse boş çizildi.',
+      );
+
+      // **Ayraçsız sayı taraması (Paket DN).** Döküm 18 sayfanın
+      // metnini zaten basıyor; aynı metin bir biçim bekçisi olarak da
+      // okunabilir. Beş haneden uzun bir sayı bloğu ekranda ayraç
+      // beklediğimiz bir sayıdır. Ölçüldü: bu tarama iki gerçek yer
+      // buldu — Hayat Hedefleri'nde "100000 takipçiye ulaş" ve
+      // piyango oranlarında "1/500000". Dört hane sınırın dışında
+      // bırakıldı: kurgusal araç modeli "Sarp 1100 Tur" gibi adlar
+      // sayı değil **ad**.
+      final RegExp uzunSayi = RegExp(r'\d{5,}');
+      final List<String> ayracsiz = ekran
+          .where((String t) => uzunSayi.hasMatch(t))
+          .toList(growable: false);
+      expect(
+        ayracsiz,
+        isEmpty,
+        reason: '${b.ad}: ekranda ayraçsız uzun sayı var; `trNumber` '
+            'kullan:\n${ayracsiz.join("\n")}',
       );
     });
   }

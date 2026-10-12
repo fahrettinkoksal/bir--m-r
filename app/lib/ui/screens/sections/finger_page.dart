@@ -60,8 +60,14 @@ class _FingerPageState extends State<FingerPage> {
       children: <Widget>[
         InfoPanel(
           icon: Icons.percent_rounded,
+          // **Paket DN.** Buradaki ek sabitti: "%46'i". Türkçede
+          // yüzdeye gelen iyelik eki sayının **okunuşuna** bağlıdır
+          // (%46'sı, %30'u, %20'si, %3'ü). Tek çağrı yeri için sayı
+          // eki motoru yazmak yerine cümle eki gerektirmeyecek
+          // biçimde kuruldu.
           text: 'Beğenilerinin yaklaşık '
-              '%${(controller.fingerMatchChance * 100).round()}\'i karşılık '
+              '%${(controller.fingerMatchChance * 100).round()} kadarı '
+              'karşılık '
               'buluyor. Görünüş, karizma ve **doldurulmuş profil** bu '
               'oranı yükseltir. Eşleşmek tanışmak değildir: buluşana '
               'kadar kimse hayatına girmez.',

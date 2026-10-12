@@ -996,6 +996,23 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   **yalnızca o sayfada bulunan** bir işaret şart; ilk denemede işaret
   olarak üst sayfadaki bir cümleyi seçip aynı tuzağa ikinci kez
   düştüm.
+- **Paket DN.** Bir bekçi eklerken "bu kuralın kaç yoldan ihlal
+  edilebileceğini" sor. Paket DM'de para taramasını `₺` işaretinin
+  yanındaki ham sayıya bağladım; ertesi paket aynı kuralın **para
+  olmayan** iki ihlalini buldu ("100000 takipçi", "1/500000"). Kalıcı
+  çözüm kaynak değil **çizilmiş metin** oldu: döküm zaten 18 sayfanın
+  metnini basıyor, aynı metinde uzun sayı aramak bir satır.
+- **Paket DN.** Sayıya Türkçe ek getiren metin, sayının **okunuşunu**
+  bilmek zorundadır. "%46'i" sabit ekle yazılmıştı; doğrusu "%46'sı",
+  "%30'u", "%20'si". Tek çağrı yeri için morfoloji motoru yazmak
+  yerine cümleyi ek gerektirmeyecek biçimde kurmak doğru ölçü; bekçi
+  deseni yasaklıyor, böylece ikinci çağrı yeri ortaya çıkarsa kararı
+  yeniden verebiliriz.
+- **Paket DN.** Sekmenin içeriği duruma göre **başka bir ekran**
+  olabilir. Okul/Meslek öğrenciye okul, diğerlerine kariyer görünümü
+  çiziyor; satırın kendi kapısı açıkken satır yine ekranda olmayabilir.
+  "Kapı açık ama satır yok" bulgusunu ürün hatası diye raporlamadan
+  önce **hangi görünümün çizildiğini** sor.
 
 ## Pano
 

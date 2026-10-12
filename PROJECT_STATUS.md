@@ -9997,3 +9997,72 @@ idi, +19 yeni test). `flutter analyze lib test` temiz. Hiçbir test
 silinmedi veya gevşetildi; `paket_be_para_bicimi_test` **sıkıştırıldı**.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DN — kalan bölüm sayfaları da okundu (12 Ekim 2026)
+
+Paket DM sekiz sayfayı açıp **üç** kusur buldu; sayfa başına 0,38.
+Kalan 22 sayfanın kaydı "başka testle okunuyor" diyordu ama o kayıt
+**başlık düzeyinde**: ilgili testler anahtar ve tek tek metin
+denetliyor, kareyi gözle okumuyor. Döküm on sayfa daha açtı — Finger,
+Milli Piyango, Hayat Hedefleri, Sağlık Geçmişi, Kendi İşim, Adli
+Geçmiş, Spor Kariyeri, Kulüpler, Yatırımlar, Evlerim — ve **üç kusur
+daha** çıktı. Oran sabit kaldı (18 sayfa, 6 kusur).
+
+### Çıkan üç kusur
+
+| # | kusur | kök neden |
+|---|---|---|
+| 1 | Finger: "Beğenilerinin yaklaşık **%46'i** karşılık buluyor." | Yüzdeye gelen iyelik eki sabit yazılmıştı. Türkçede bu ek sayının **okunuşuna** bağlı: %46'**sı**, %30'**u**, %20'**si**, %3'**ü**. Yani ek çoğu sayıda yanlıştı. Tek çağrı yeri olduğu için sayı eki motoru yazmak yerine cümle ek gerektirmeyecek biçimde kuruldu ("%46 kadarı"). |
+| 2 | Hayat Hedefleri: "Sosyal medyada toplam **100000** takipçiye ulaş." | Katalog sabiti ham basılıyordu. Ayraç kuralı (Paket BE) para dışındaki sayılar için de geçerli. |
+| 3 | Milli Piyango: ikramiye oranları "1/**500000**" | Oran `trNumber`'dan geçmiyordu. |
+
+2 ve 3, Paket DM'de **sıkıştırdığım** para taramasının göremediği
+türdendi: o tarama yalnızca `₺` işaretinin yanındaki ham sayıyı arıyor.
+Ders tekrar yazıldı: bir bekçi eklerken "bu kuralın kaç yoldan ihlal
+edilebileceğini" sor.
+
+### Kalıcı bekçi: çizilmiş metin üzerinde sayı taraması
+
+Döküm 18 sayfanın metnini zaten basıyor; aynı metin artık bir **biçim
+bekçisi**: beş haneden uzun sayı bloğu varsa test düşer. Dört hane
+sınırın dışında — kurgusal araç modeli "Sarp 1100 Tur" sayı değil
+**ad**. Mutasyon: hedef metnindeki ayracı geri alınca bekçi
+"HAYAT HEDEFLERİ: ekranda ayraçsız uzun sayı var" diye düştü.
+
+Hedefli bekçiler: `app/test/paket_dn_bolum_metinleri_test.dart`
+(5 test) — yüzde eki taraması (muafiyet listesi yok), hedef metni,
+piyango oranı, `trNumber` kuralı ve katalog geneli tarama.
+
+### Aracın üç düzeltmesi (hepsi benim hatam)
+
+1. İşaret olarak **koşullu** cümleler seçmiştim: "Kayıt silinmez:
+   atlattığın kriz de burada durur." süren durumu olan karede
+   çizilmiyor. Sayfalar doğru açılmıştı; düşen şey benim iddiamdı.
+2. Okul/Meslek sekmesi **duruma göre farklı görünüm** çiziyor:
+   öğrenciye okul, diğerlerine kariyer görünümü. "Kendi İşim" satırı
+   kariyer görünümünde; 22 yaşındaki üniversite öğrencisi karede satır
+   yoktu ve bunu "kapı açık ama satır yok" diye ürün hatası
+   sanacaktım. Kapıya `!education.isStudent` eklendi (Kulüpler'e
+   tersi).
+3. `scrollToFinder` ağacın **ilk** kaydırılabilir alanını kaydırıyor;
+   Okul/Meslek'te o alan sayfanın gövdesi değil. Döküm artık alanları
+   sırayla deniyor ve görüş alanı 24000 px.
+
+Bunlara ek olarak dökümde **genel** bir dürüstlük kilidi var: yolun her
+adımında dokunmadan önce ve sonra kare karşılaştırılıyor; ekran hiç
+değişmediyse dokunma işe yaramamıştır ve test düşer.
+
+### Karar bekleyen
+
+**Q-241** — `trMoneyShort`'un milyar basamağı yok: yılbaşı ikramiyesi
+ekranda "1200 M ₺" yazıyor. Kısaltma seçimi görünür bir içerik kararı
+olduğu için (Q-050'deki platform adları gibi) kendi başıma
+değiştirmedim; varsayılan önerim "1,2 Mr ₺".
+
+Tam süit: **3869 geçti, 17 atlandı, 0 hata** (38 dk; DM'de 3854 idi).
+`flutter analyze lib test` temiz. Paket DM'in CI'ı (`759547d`) iki işte
+de yeşil tamamlandı.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

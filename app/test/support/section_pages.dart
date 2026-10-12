@@ -7,12 +7,17 @@
 // tek yerde durmazsa ikisi sessizce ayrışır.
 library;
 
+import 'package:bir_omur/data/finger_catalog.dart';
+import 'package:bir_omur/data/investment_catalog.dart';
+import 'package:bir_omur/data/lottery_catalog.dart';
 import 'package:bir_omur/domain/career/military_service.dart';
 import 'package:bir_omur/domain/economy/banking.dart';
 import 'package:bir_omur/domain/economy/furnishing.dart';
 import 'package:bir_omur/domain/features/feature_catalog.dart';
 import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/military.dart';
+import 'package:bir_omur/domain/models/owned_item.dart';
+import 'package:bir_omur/domain/models/school_club_progress.dart';
 import 'package:bir_omur/domain/social/media_opportunities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -128,14 +133,124 @@ final List<Bolum> kBolumler = <Bolum>[
   Bolum(
     'ASKERLİK',
     'military_page.dart',
+    // **Sekme içeriği duruma göre değişiyor (Paket DN).**
+    // `SchoolCareerScreen` öğrenciye okul görünümünü, diğerlerine
+    // kariyer görünümünü çiziyor. Bu satırlar kariyer görünümünde;
+    // satırın kendi kapısı açık olsa bile öğrenci karede ekranda
+    // yoklar. İlk yazımda bunu atlamıştım ve "kapı açık ama satır
+    // yok" diye bir ürün hatası sanacaktım.
     (GameState s) =>
-        s.player.age >= MilitaryService.prototypeOnlyMinAge ||
-        s.military.status != MilitaryStatus.yok,
+        !s.education.isStudent &&
+        (s.player.age >= MilitaryService.prototypeOnlyMinAge ||
+            s.military.status != MilitaryStatus.yok),
     'tab_okul_meslek',
     <Finder>[find.byKey(const Key('career_military_row'))],
     'Katılma yolları',
   ),
+
+  // ---- Paket DN: kalan sayfalar ------------------------------------
+  //
+  // Paket DM sekiz sayfayı açıp **üç** gerçek kusur buldu; oran sayfa
+  // başına 0,38. Kalan 22 sayfanın "başka testle okunuyor" kaydı
+  // başlık düzeyindeydi: o testler anahtar ve tek tek metin
+  // denetliyor, kareyi gözle okumuyor. Bu on sayfa aynı yöntemle
+  // açıldı.
+  Bolum(
+    'FINGER',
+    'finger_page.dart',
+    (GameState s) => s.player.age >= kFingerMinAge,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('activity_finger'))],
+    'profile daha bakabilirsin',
+  ),
+  Bolum(
+    'MİLLİ PİYANGO',
+    'lottery_page.dart',
+    (GameState s) =>
+        s.settings.casinoEnabled && s.player.age >= kLotteryMinAge,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('activity_piyango'))],
+    'Çekiliş yıl sonunda yapılır.',
+  ),
+  Bolum(
+    'HAYAT HEDEFLERİ',
+    'life_goals_page.dart',
+    (GameState s) => s.player.age >= 25,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('aktivite_hedefler'))],
+    'hedefe ulaştın',
+  ),
+  Bolum(
+    'SAĞLIK GEÇMİŞİ',
+    'health_history_page.dart',
+    (GameState s) =>
+        s.chronicConditions.isNotEmpty || s.healthHistory.isNotEmpty,
+    'tab_aktiviteler',
+    <Finder>[
+      find.byKey(const Key('activity_saglik')),
+      find.byKey(const Key('saglik_gecmis')),
+    ],
+    // İlk işaretim ("Kayıt silinmez: atlattığın kriz de burada
+    // durur.") koşullu bir cümleydi ve süren durumu olan karede
+    // çizilmiyordu; sayfa doğru açılmıştı. Kare değişimi denetimi
+    // gezinmeyi zaten kanıtlıyor, işaret sayfanın başlığı olabilir.
+    'Sağlık Geçmişi',
+  ),
+  Bolum(
+    'KENDİ İŞİM',
+    'business_page.dart',
+    (GameState s) => !s.education.isStudent && s.businesses.isNotEmpty,
+    'tab_okul_meslek',
+    <Finder>[find.byKey(const Key('career_business_row'))],
+    'Kendi İşim',
+  ),
+  Bolum(
+    'ADLİ GEÇMİŞ',
+    'legal_record_page.dart',
+    (GameState s) => !s.education.isStudent && s.player.age >= 18,
+    'tab_okul_meslek',
+    <Finder>[find.byKey(const Key('career_legal_row'))],
+    // Aynı hata: o cümle yalnızca kaydı olan oyuncuda çiziliyor,
+    // temiz kayıtta "Adli kaydın temiz." yazıyor.
+    'Adli Geçmiş',
+  ),
+  Bolum(
+    'SPOR KARİYERİ',
+    'sports_career_page.dart',
+    (GameState s) => !s.education.isStudent && s.footballCareer != null,
+    'tab_okul_meslek',
+    <Finder>[find.byKey(const Key('career_sports_row'))],
+    'Spor Kariyeri',
+  ),
+  Bolum(
+    'KULÜPLER',
+    'school_clubs_page.dart',
+    // Kulüpler okul görünümünde: kapı **öğrenci** olmayı gerektirir.
+    (GameState s) =>
+        s.education.isStudent && s.schoolClubs.activeOnes.isNotEmpty,
+    'tab_okul_meslek',
+    <Finder>[find.byKey(const Key('school_clubs_row'))],
+    'Kulüpler',
+  ),
+  Bolum(
+    'YATIRIMLAR',
+    'investments_page.dart',
+    (GameState s) =>
+        s.player.age >= kInvestmentMinAge && s.portfolioValue > 0,
+    'tab_varliklar',
+    <Finder>[find.text('Yatırımlar')],
+    'Yatırımlar',
+  ),
+  Bolum(
+    'EVLERİM',
+    'properties_page.dart',
+    (GameState s) => s.items.any((OwnedItem i) => i.isProperty),
+    'tab_varliklar',
+    <Finder>[find.text('Evlerim')],
+    'Evlerim',
+  ),
 ];
+
 
 /// Dökümün dışındaki sayfalar ve **onları çizen** test.
 ///
@@ -147,23 +262,13 @@ const Map<String, String> kBaskaTestle = <String, String>{
   'activities_screen.dart': 'content_reachability_test.dart',
   'activity_pages.dart': 'activities_test.dart',
   'assets_screen.dart': 'ekran_dokumu_test.dart',
-  'business_page.dart': 'business_widget_test.dart',
   'casino_pages.dart': 'casino_widget_test.dart',
   'education_career_pages.dart': 'career_widget_test.dart',
   'fertility_page.dart': 'fertility_widget_test.dart',
-  'finger_page.dart': 'finger_test.dart',
-  'health_history_page.dart': 'paket_y_widget_test.dart',
-  'investments_page.dart': 'paket_aa_widget_test.dart',
-  'legal_record_page.dart': 'bail_prison_widget_test.dart',
   'license_pages.dart': 'license_widget_test.dart',
-  'life_goals_page.dart': 'paket_y_widget_test.dart',
-  'lottery_page.dart': 'lottery_widget_test.dart',
   'martial_arts_page.dart': 'martial_arts_widget_test.dart',
   'pets_page.dart': 'pet_widget_test.dart',
-  'properties_page.dart': 'paket_ab_widget_test.dart',
   'relationships_screen.dart': 'ekran_dokumu_test.dart',
   'school_career_screen.dart': 'after_school_widget_test.dart',
-  'school_clubs_page.dart': 'paket_av_sports_ui_test.dart',
   'social_pages.dart': 'social_widget_test.dart',
-  'sports_career_page.dart': 'paket_av_sports_ui_test.dart',
 };
