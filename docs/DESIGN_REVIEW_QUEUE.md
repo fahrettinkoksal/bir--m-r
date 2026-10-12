@@ -10106,3 +10106,71 @@ sayfasına taşımak, mülakat sürerken başvuruyu açmak.
 `app/test/paket_dp_is_ara_tekrari_test.dart` (bekçi). İlgili: Paket DM
 §2 (başlık/durum çelişkisi), Paket DO (kapıyı satırda yazmak), Q-198
 (tekrar şikâyeti), D-091 (yılda tek başvuru).
+
+---
+
+### Q-243 — Ünlüye yazma ihtimali yeni hesapta üç ünlüde de aynı görünüyor
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi**
+(aynı pakette düzelttiğim kekeme satır ayrı bir işti; bu madde sayıya
+ve metne dair bir **tercih**).
+
+**Nasıl çıktı.** Paket DQ platform karesini ilk kez açtı (16 yaş, 71
+metin). Üç ünlü kartı var ve üçünün altında da aynı sayı yazıyor:
+
+> **Emre Sancaklı** · Spor · 2.100.000 abone
+> Mesaj at · karşılık ihtimali ~%19
+> **Kaan Delioğlu** · İçerik üreticiliği · 3.200.000 abone
+> Mesaj at · karşılık ihtimali ~%19
+> **İlkay Seringül** · Oyunculuk · 5.400.000 abone
+> Mesaj at · karşılık ihtimali ~%19
+
+**Sayı yanlış değil.** `replyChance` ünlünün yaklaşılabilirliğini
+`takipçi / eşik` görünürlük terimiyle çarpıyor; hesap yeni açıldığında
+bu çarpan 0 oluyor ve geriye ünlüden **ve eylemden** bağımsız terimler
+kalıyor (karizma %25, ün %30, tanışıklık). Yani oyuncunun o anki
+gerçek ihtimali budur.
+
+**Ölçüm (Paket DQ):**
+
+| durum | 3 ünlü × 3 eylem → ayrı yüzde | mesaj ihtimalleri |
+|---|---|---|
+| 0 takipçi (karizma 85) | **1** | %21 · %21 · %21 |
+| 302 takipçi | 2 | %20 · %19 · %19 |
+
+Eşikler 4.000 / 6.000 / 12.000 takipçi olduğu için 302 takipçide
+ayrışma **1 puan**. Oyuncunun gördüğü tablo: üç ünlü eşit erişilebilir
+ve kitlenin bu işte bir rolü olduğu ekranda hiç yazmıyor.
+
+| seçenek | ekranda | bedeli |
+|---|---|---|
+| **1. Satır kitleyi de söylesin** | "Mesaj at · karşılık ihtimali ~%19 · kitlen büyüdükçe artar" | Mekanik görünür olur, eşik sayısı sızmaz. Tek satır, tek dal. |
+| 2. Eşiği açıkça yaz | "…· seni fark etmeye ~12.000 aboneden sonra başlar" | En öğretici; ama eşikler `prototypeOnly` ve sayıyı ekrana yazmak onları yarı kalıcı kurala çevirir. |
+| 3. Kitle eşiğin çok altındayken yüzdeyi hiç yazma | "Mesaj at · kitlen henüz çok küçük" | Yanlış kesinlik duygusu biter; oyuncu sayısal geri bildirim kaybeder. |
+| 4. Bugünkü hâl | üç ünlüde de aynı yüzde | Doğru ama yanıltıcı; en az değişiklik. |
+
+**Önerim ve varsayılanım: (1).** Sayı kalsın (oyuncu gerçek ihtimali
+görsün) ama yanına **nedenini** yazalım; eşiğin kendisini ekrana
+yazmayalım, çünkü `prototypeOnly` sayılar onay beklerken ekranda kural
+gibi görünmesin.
+
+**İkinci yarı (aynı aile).** Ün 25'in altındayken "İş birliği teklif et
+· Tanınman gerekiyor: en az 25 Ün." satırı **her ünlü kartında**
+yazılıyor (ölçüldü: 3 kez). Engel ünlüden bağımsız; Paket DP'nin İş ara
+karesinde aynı sınıf 20 kez tekrarlıyordu ve sayfa başına tek panele
+taşınmıştı. Burada 3 tekrar, dökümün ölçülmüş tekrar tavanının (4)
+altında kaldığı için bekçi susuyor. Önerim: **(1) ile birlikte**
+yapılırsa iş birliği kapısı da platform sayfasının başında bir kez
+yazılsın; tek başına bir paket açmaya değmez.
+
+**Yapmayacağım (onay gelmeden):** `replyChance` ağırlıklarını veya
+eşikleri değiştirmek, yüzdeyi ekrandan kaldırmak, eşik sayısını
+oyuncuya yazmak, ünlü kataloğunu genişletmek.
+
+**Etkilenen kod:** `app/lib/domain/social/celebrity_engine.dart`
+(`replyChance`, `displayChancePercent`, ağırlıklar),
+`app/lib/data/celebrity_catalog.dart` (11 ünlü, yaklaşılabilirlik ve
+eşik), `app/lib/ui/screens/sections/social_pages.dart`
+(`_CelebrityCard`), `app/test/paket_dq_sosyal_kare_test.dart` (ölçüm
+kilidi). İlgili: Q-050 (platform adları), Q-235 (takipçi eğrisi),
+D-104, Paket DP (tekrar bekçisi), Paket DO (kapıyı satırda yazmak).
