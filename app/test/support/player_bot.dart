@@ -850,6 +850,8 @@ BotLifeResult playBotLife({
 }) {
   final BotProfile profile = kBotProfiles[archetype]!;
   final GameController c = GameController(random: Random(seed));
+  // Aksiyon kaynaklı bildirimler de ölçüme görünsün (Paket DJ).
+  _calisanOnPending = onPending;
   c.startNewLife(mode: StartMode.tamamenRastgele, seed: seed);
   if (!features.allDefault) {
     c.debugSetState(
@@ -1091,6 +1093,7 @@ BotLifeResult playBotLife({
   _collectFinalMetrics(c, sonuc);
   _collectDiagAtDeath(c, diag);
   c.dispose();
+  _calisanOnPending = null;
   return sonuc;
 }
 
@@ -1637,9 +1640,7 @@ void _finishExam(GameController c, Random rng) {
     if (sinav == null) return;
     final int secenek = sinav.currentQuestion?.options.length ?? 3;
     c.answerLicenseExam(rng.nextInt(secenek));
-    while (c.state!.hasNotice) {
-      c.dismissNotice();
-    }
+    botBildirimleriKapat(c);
     // Bekleyen olay cevabı düşürüyorsa döngüyü kırmak gerekiyor.
     if (c.state!.hasPendingEvent) return;
   }
@@ -1674,9 +1675,7 @@ void _handleLicense(
     if (!c.licenseAvailability(t).isAllowed) continue;
     intent.licenseAttemptAge = s.player.age;
     c.applyForLicense(t);
-    while (c.state!.hasNotice) {
-      c.dismissNotice();
-    }
+    botBildirimleriKapat(c);
     if (c.pendingLicenseExam != null) _finishExam(c, rng);
     sonuc.diag.licenseAttempts++;
     if (c.hasLicense(t)) sonuc.diag.licensesEarned++;
@@ -2400,9 +2399,7 @@ void _handleRelationships(
         if (acik.isNotEmpty) {
           sonuc.diag.interactions++;
           c.interact(p.id, acik[rng.nextInt(acik.length)]);
-          while (c.state!.hasNotice) {
-            c.dismissNotice();
-          }
+          botBildirimleriKapat(c);
           if (c.state!.hasPendingEvent) return;
         }
       }
@@ -2425,9 +2422,7 @@ void _handleRelationships(
         if (acik.isNotEmpty) {
           sonuc.diag.interactions++;
           c.interact(p.id, acik[rng.nextInt(acik.length)]);
-          while (c.state!.hasNotice) {
-            c.dismissNotice();
-          }
+          botBildirimleriKapat(c);
           if (c.state!.hasPendingEvent) return;
         }
       }
@@ -2463,9 +2458,7 @@ void _handleRelationships(
     if (rng.nextDouble() < sans &&
         c.divorceAvailability().isAllowed) {
       c.divorce();
-      while (c.state!.hasNotice) {
-        c.dismissNotice();
-      }
+      botBildirimleriKapat(c);
       return;
     }
   }
@@ -2502,9 +2495,7 @@ void _handleRelationships(
         rng.nextDouble() < 0.6 &&
         c.intimacyAvailability(esSevgili.id).isAllowed) {
       c.tryForChild(esSevgili.id);
-      while (c.state!.hasNotice) {
-        c.dismissNotice();
-      }
+      botBildirimleriKapat(c);
       if (c.state!.hasPendingEvent) return;
     }
   }
@@ -2659,9 +2650,7 @@ void _spendTimeWithFamily(
     if (c.childAdviceBlockReason(cocuk.id) != null) continue;
     if (rng.nextDouble() >= profile.familyDesire) continue;
     c.adviseChild(cocuk.id);
-    while (c.state!.hasNotice) {
-      c.dismissNotice();
-    }
+    botBildirimleriKapat(c);
     if (c.state!.hasPendingEvent) return;
   }
 
@@ -2674,9 +2663,7 @@ void _spendTimeWithFamily(
     if (acik.isEmpty) continue;
     sonuc.diag.interactions++;
     c.interact(kisi.id, acik[rng.nextInt(acik.length)]);
-    while (c.state!.hasNotice) {
-      c.dismissNotice();
-    }
+    botBildirimleriKapat(c);
     if (c.state!.hasPendingEvent) return;
   }
 }
@@ -3014,9 +3001,7 @@ void _handleActivities(
   if (s.player.age < 7) return;
 
   bool kesildiMi() {
-    while (c.state!.hasNotice) {
-      c.dismissNotice();
-    }
+    botBildirimleriKapat(c);
     return c.state!.hasPendingEvent;
   }
 
@@ -3568,4 +3553,31 @@ String _botChildName(GameState state, Person baby, Random rng) {
   // değişiklik saymaz, bot da sonucu ne olursa olsun ilerler.
   if (bos.isEmpty) return baby.firstName;
   return bos[rng.nextInt(bos.length)];
+}
+
+/// Koşan `playBotLife`'ın `onPending` kancası (Paket DJ).
+///
+/// **Neden dosya düzeyinde.** Paket CR `onPending`'i ekledi ve motor
+/// kaynaklı bekleyenleri (olay, kriz, duruşma) ölçüme açtı. Ama botun
+/// **kendi aksiyonları** bildirimi kurup aynı satırda kapatıyordu —
+/// `c.divorce(); while (hasNotice) dismissNotice();` gibi on yerde.
+/// O bildirimler döngünün başına hiç dönmediği için `onPending`'e de
+/// görünmüyordu: 100 hayatlık ölçümde `NoticeKind.bosanma` **0** çıktı,
+/// oysa boşanma gerçekten oluyor ve bildirimi kuruluyor. Kancayı her
+/// yardımcıya parametre olarak geçirmek sekiz imzayı değiştirirdi;
+/// testler tek iş parçacığında koştuğu için çalışan hayatın kancası
+/// burada tutuluyor ve hayat bitince temizleniyor.
+void Function(GameState state)? _calisanOnPending;
+
+/// Bekleyen bildirimleri kapatır — **kapatmadan önce ölçüme verir.**
+///
+/// Aksiyon kaynaklı bildirimleri kapatan her yer bunu çağırır; doğrudan
+/// `dismissNotice` döngüsü yazılırsa o bildirim yine kör noktada kalır
+/// (bekçisi: `paket_dj_bildirim_kor_noktasi_test.dart`).
+void botBildirimleriKapat(GameController c) {
+  while (c.state!.hasNotice) {
+    final void Function(GameState state)? kanca = _calisanOnPending;
+    if (kanca != null) kanca(c.state!);
+    c.dismissNotice();
+  }
 }

@@ -924,6 +924,23 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   kusur sandım; gerekçe eylemin yanındaydı (Okul/Meslek → Adli
   Geçmiş), yani Paket I'nın ilkesine uygun. Üç şüphenin üçü de böyle
   çürüdü; paketin tek gerçek kusuru dördüncüsüydü.
+- **Paket DJ.** Bir ölçüm "sıfır" diyorsa önce **aracı** sorgula. Üç
+  bildirim türü sıfıra yakın çıktı; biri Faho'nun özellikle istediği
+  boşanma bildirimiydi. Kök neden oyunda değil botta: aksiyon kaynaklı
+  bildirimi kurduğu satırda kapatıyordu, o yüzden `onYear`'a da Paket
+  CR'ın eklediği `onPending`'e de görünmüyordu. Düzeltmeden sonra
+  `aktivite` 1'den **8179**'a çıktı. Paket CR aynı kör noktayı yarım
+  kapatmış: motor kaynaklı bekleyenleri açtı, aksiyon kaynaklı
+  bildirimleri açmadı.
+- **Paket DJ.** Ölçümün **kapsamını** da ölç: ilk sondam türleri elle
+  yazılmış bir listeyle sayıyordu ve o liste `grep`'in kestiği yerden
+  geldiği için 20 türün 12'sini içeriyordu. Enum'u programla okumak
+  bir satırdı; elle liste yazmak sekiz türü sessizce dışarıda bıraktı.
+- **Paket DJ.** Aynı değeri iki kaynaktan çizen ekran onu iki kez
+  yazar. Bildirim hem `happinessDelta` hem `effects` taşıyordu ve
+  pencere ikisini de bastı: "Mutluluk -15 / Mutluluk -15". Düzeltme
+  kaynağı kaldırmak değil **çakışmayı** kaldırmaktı; hangi kaynağın
+  dolu olduğu bildirime göre değişiyor.
 
 ## Pano
 

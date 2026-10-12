@@ -9666,3 +9666,105 @@ gebelik / 22 bebek karesi; taban dörtte bir), böylece "bulunamadı"
 notu bir daha ölçülmeden taşınmaz.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DJ — ölçüm aracı bildirimleri yutuyordu, pencere kaybı iki kez yazıyordu (12 Ekim 2026)
+
+Yeni eksen: **hangi bildirim penceresi hiç çizilmedi?** `NoticeKind`'in
+**20** değeri var ve hangisinin gerçek hayatta kuyruğa girdiği hiç
+ölçülmemişti.
+
+### İLK KUSUR: araç kör
+
+İlk ölçüm (100 hayat, `onYear`) üç türü sıfıra yakın gösterdi:
+`aktivite` **1**, `piyango` **0**, `bosanma` **0**. Boşanma bildirimi
+Faho'nun Paket D'de **özellikle istediği** şeydi, yani "hiç çıkmıyor"
+şüpheliydi. Kaynak okundu ve kök neden botta çıktı:
+
+```dart
+c.divorce();
+while (c.state!.hasNotice) { c.dismissNotice(); }
+```
+
+Bot aksiyon kaynaklı bildirimi **kurduğu satırda** kapatıyor (on
+yerde) ve o bildirim döngünün başına hiç dönmediği için ne `onYear`'a
+ne de Paket CR'ın tam bu kör nokta için eklediği `onPending`'e
+görünüyor. **Paket CR yarım kalmıştı:** motor kaynaklı bekleyenleri
+(olay, kriz, duruşma) açtı, aksiyon kaynaklı bildirimleri açmadı.
+
+Düzeltme: dokuz kapatma noktası tek bir yardımcıya bağlandı
+(`botBildirimleriKapat`) ve o yardımcı **kapatmadan önce** ölçüme
+veriyor. Aynı 100 hayat yeniden koşuldu:
+
+| tür | eski (kör) | yeni |
+|---|---|---|
+| **aktivite** | **1** | **8179** |
+| **bosanma** | **0** | **57** |
+| miras | 194 | 730 |
+| cenaze | 306 | 708 |
+| burc | 1220 | 3151 |
+| hayvan | 495 | 1310 |
+| olum | 754 | 1012 |
+| **piyango** | 0 | **0** |
+
+Yani her bot ölçümü bildirimlerin çoğunu kaçırıyordu; `aktivite`
+(Paket D'nin aktivite sonuç bildirimleri) pratikte **hiç**
+ölçülmemişti.
+
+**Kendi ölçümümün ikinci kusuru:** ilk sondam türleri elle yazılmış bir
+listeyle sayıyordu ve o liste `grep`'in kestiği yerden geldiği için
+**12** tür içeriyordu; gerçek sayı **20**. Düzeltilmiş ölçüm 19 türün
+kuyruğa girdiğini gösterdi (`arac`, `banka`, `kariyer`, `aileDonum`,
+`adli`, `arkadaslik`, `kendiIsi`, `konut` de dahil). Çıkmayan tek tür
+`piyango`.
+
+### `piyango`: bot hiç bilet almıyor
+
+Düzeltmeden sonra da sıfır. Sebebi kapı değil **bot**: `player_bot.dart`
+içinde piyangoya tek referans yok, yani o pencere bugüne kadar hiç
+çizilmedi. **Botu değiştirmedim**: bilet almak oyunun zarını kaydırır ve
+bütün ölçümleri etkiler (Paket DE'nin 22 olayı dört testi düşürmüştü).
+Pencere, kontrolörün kendi API'siyle açıldı
+(`ekran_dokumu_bildirim_pencereleri_test.dart`): bilet alındı, yaş
+alındı, çekiliş yapıldı. Okundu ve temiz:
+
+```
+PİYANGO ÇEKİLDİ
+Biletin tutmadı. Numaran 021952 idi.
+Tamam
+```
+
+### İKİNCİ KUSUR: pencere aynı kaybı iki kez yazıyor
+
+Boşanma penceresi ilk kez basıldığında:
+
+```
+BOŞANDINIZ
+Sevim Erdem ile boşandın. Anlaşma gereği 61.904 ₺ cüzdanından çıktı. ...
+Mutluluk -15
+Mutluluk -15
+Cüzdan -61.904 ₺
+```
+
+Sebep: bildirim hem `happinessDelta` taşıyor hem `effects` listesinde
+(`diffAppliedEffects`) mutluluk kalemi var; `notice_sheet.dart` iki
+bloğu da koşulsuz çiziyordu. Oyuncu 30 kaybettiğini sanıyor.
+
+Düzeltme tek noktada ve geneldir: ayrı satır yalnızca etkiler listesi
+mutluluğu **söylemiyorsa** yazılır. İki kaynaktan hangisinin dolu
+olduğu bildirime göre değiştiği için ikisi de duruyor; yalnızca
+çakışma kalktı.
+
+### Bekçi ve ısırma denemeleri
+
+`app/test/paket_dj_bildirim_kor_noktasi_test.dart` (4 test).
+
+| Isırma | Yakalayan | Sonuç |
+|---|---|---|
+| Sayfa yine iki bloğu da çizdi | §3 | "Aynı kayıp 2 kez yazıldı: [Mutluluk -15, Mutluluk -15]" |
+| Botta doğrudan kapatma döngüsü geri geldi | §2 | "Doğrudan kapatma döngüsü geri geldi; o bildirimler yine kör noktada kalır" |
+
+§1 aksiyon kaynaklı bildirimin ölçüme göründüğünü 25 hayatta
+doğruluyor (`bosanma` 27, `aktivite` 2270); §4 piyango penceresini
+çizip bilet numarasının yazıldığını sabitliyor.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

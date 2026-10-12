@@ -5,6 +5,7 @@ import '../sound/sound_service.dart';
 
 import '../../domain/life/notices.dart';
 import '../../domain/interaction/child_naming.dart';
+import '../../domain/models/applied_effect.dart';
 import '../../domain/models/pending_notice.dart';
 import '../../state/game_controller.dart';
 import '../../state/game_scope.dart';
@@ -190,7 +191,27 @@ class _NoticeSheetState extends State<NoticeSheet> {
                       style: theme.textTheme.bodyLarge,
                     ),
                     // Etki yalnızca gerçekten uygulandıysa yazılır.
-                    if (_sonuc == null && notice.happinessDelta < 0) ...<Widget>[
+                    //
+                    // **Aynı kayıp iki kez yazılmasın (Paket DJ).**
+                    // Boşanma penceresi ilk kez basıldığında şu çıktı:
+                    //
+                    //     BOŞANDINIZ
+                    //     Sevim Erdem ile boşandın. ...
+                    //     Mutluluk -15
+                    //     Mutluluk -15
+                    //     Cüzdan -61.904 ₺
+                    //
+                    // Sebep: bildirim hem `happinessDelta` taşıyor hem
+                    // de `effects` listesinde (`diffAppliedEffects`)
+                    // mutluluk kalemi var; sayfa ikisini de çiziyordu.
+                    // Oyuncu 30 kaybettiğini sanıyor. Ayrı satır artık
+                    // yalnızca etkiler listesi mutluluğu **söylemiyorsa**
+                    // yazılır; iki kaynaktan hangisinin dolu olduğu
+                    // bildirime göre değişiyor, o yüzden ikisi de duruyor.
+                    if (_sonuc == null &&
+                        notice.happinessDelta < 0 &&
+                        !notice.effects
+                            .any((AppliedEffect e) => e.label == 'Mutluluk')) ...<Widget>[
                       const SizedBox(height: 12),
                       Text(
                         'Mutluluk ${notice.happinessDelta}',
