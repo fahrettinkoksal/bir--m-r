@@ -1058,6 +1058,31 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   ("Bu yıl Kuaför işine başvurdun…") yazmaya devam ediyor ve test bunu
   ekranda arıyor. "Birebir eşitliğe dayanıyor, o yüzden güvenli"
   argümanı doğruydu ama kanıt değildi.
+- **Paket DQ.** Bir bekçi, ölçtüğü şeyin **ne kadarını** ölçtüğünü de
+  söylemeli. "Bu sayfa başka testle okunuyor" kaydı, adı yazılan testin
+  sayfanın bir başlığını anmasına bakıyordu; bir kayıt bu sınavı
+  yalnızca `group('Aktiviteler')` **etiketi** sayesinde geçiyordu ve o
+  test hiç widget kurmuyor. Dizi benzerliği kapsam kanıtı değildir.
+- **Paket DQ.** Metin eşleştirmesi bir vekildir ve sınırına gelince
+  bırakılmalı: kareyi gerçekten basan testin gövdesinde
+  `school_career_screen.dart`'ın **30 başlığından sıfırı** geçmiyor.
+  Çözüm daha akıllı bir desen değil, **ortak kaynak**: sekme listesi
+  artık tek yerde duruyor, döküm onu dolaşıyor, kapsam bekçisi kapsamı
+  ondan sayıyor. İddia yapıya dayanınca vekile gerek kalmıyor.
+- **Paket DQ.** Bir dosyanın bir kaydı olması, **içindeki her karenin**
+  kaydı olduğu anlamına gelmiyor. `social_pages.dart` iki sayfa
+  barındırıyor; ikincisinin başlığı dinamik (`platform.label`) olduğu
+  için başlık taramasına hiç görünmüyordu ve kusur tam orada duruyordu.
+- **Paket DQ.** Gerekçe metni iki yerde kullanılıyorsa (sonuç mesajı ve
+  satır), eylemin adını **kendi içine** koymak satırda kekemeliğe yol
+  açıyor: "İş birliği teklif et: İş birliği teklif etmek için…".
+  Gerekçe yalnızca kapıyı yazar; adı çağıran yer ekler.
+- **Paket DQ.** Doğru bir sayı yanlış bir izlenim verebilir. Platform
+  karesinde üç ünlünün üçü de "~%19" gösteriyordu ve sayı **doğruydu**;
+  görünürlük terimi takipçi/eşik ile çarpıldığı için yeni hesapta sıfır
+  oluyor ve geriye ünlüden bağımsız terimler kalıyor. Ölçüm olmadan bunu
+  "ekran yanlış hesaplıyor" diye raporlayacaktım; ölçümle birlikte doğru
+  yere, kuyruğa (Q-243) gitti.
 
 ## Pano
 

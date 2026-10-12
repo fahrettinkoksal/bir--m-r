@@ -44,8 +44,14 @@ void main() {
       for (final Bolum b in kBolumler) b.dosya,
     };
     final List<String> kapsamsiz = <String>[];
+    final Set<String> sekmeKokleri = <String>{
+      for (final SekmeKaresi k in kSekmeKareleri) k.dosya,
+    };
     for (final String d in dosyalar) {
       if (dokumde.contains(d)) continue;
+      // Sekme kökleri: `ekran_dokumu_test.dart` aynı listeyi dolaşıp
+      // metnini basıyor (Paket DQ, §5 bunu denetler).
+      if (sekmeKokleri.contains(d)) continue;
       if (kBaskaTestle.containsKey(d)) continue;
       kapsamsiz.add(d);
     }
@@ -63,7 +69,8 @@ void main() {
     );
     // ignore: avoid_print
     print('BÖLÜM KAPSAMI: ${dosyalar.length} sayfa · '
-        'döküm ${dokumde.length} · başka testle ${kBaskaTestle.length}');
+        'döküm ${dokumde.length} · sekme kökü ${sekmeKokleri.length} · '
+        'başka testle ${kBaskaTestle.length}');
   });
 
   test('§2 kayıt gerçek dosyaları gösterir', () {
@@ -89,11 +96,45 @@ void main() {
   });
 
   test('§3 "başka testle okunuyor" iddiası denetlenir', () {
+    // **Paket DQ — iddia neden sıkıştırıldı.** Beş kaydın beşini
+    // ölçtüm: `pumpWidget`, `tester.tap` ve `print` sayıları ile
+    // başlığın kaynakta **nerede** geçtiği. Sonuç:
+    //
+    //   sayfa                      test                          pump tap print
+    //   activities_screen          content_reachability_test        0   0    0
+    //   assets_screen              ekran_dokumu_test                2   5    1
+    //   relationships_screen       ekran_dokumu_test                2   5    1
+    //   school_career_screen       after_school_widget_test         1   6    0
+    //   social_pages               social_widget_test               1   5    0
+    //
+    // `content_reachability_test.dart` **hiç widget kurmuyor**; bu
+    // iddiayı yalnızca `group('Aktiviteler')` adıyla geçiyordu. Yani
+    // bekçi bir ad çakışmasıyla tatmin oluyordu — tam olarak bu
+    // yöntemin reddettiği şey. İki ek koşul geldi:
+    //
+    // 1. Adı yazılan test **ağacı kurmalı** (`pumpWidget`).
+    // 2. Başlık, `group`/`test`/`testWidgets` **etiketi dışında**
+    //    geçmeli.
+    //
+    // (`social_pages.dart` artık kayıtta değil: dökümün kendisi iki
+    // karesini basıyor.)
     final List<String> sorunlar = <String>[];
     for (final MapEntry<String, String> e in kBaskaTestle.entries) {
       final File t = File('test/${e.value}');
       if (!t.existsSync()) continue; // §2 bunu ayrıca bildiriyor.
       final String kaynak = t.readAsStringSync();
+      if (!kaynak.contains('pumpWidget')) {
+        sorunlar.add('${e.key}: ${e.value} hiç `pumpWidget` çağırmıyor, '
+            'yani o sayfayı **çizmiyor**. Kayıt yanlış ya da sayfa '
+            'döküme girmeli.');
+        continue;
+      }
+      // Etiket metinlerini boşalt: `group('Aktiviteler', …)` bir
+      // kapsam kanıtı değildir.
+      final String govde = kaynak.replaceAll(
+        RegExp(r"(group|test|testWidgets)\(\s*'[^']*'"),
+        r"$1('')",
+      );
       final List<String> bas = basliklar(e.key);
       if (bas.isEmpty) {
         // Başlığı dinamik olan sayfa (ör. `widget.action.label`); bu
@@ -103,10 +144,11 @@ void main() {
             'doğrulanamıyor — döküme ekle.');
         continue;
       }
-      if (!bas.any((String b) => kaynak.contains("'$b'"))) {
+      if (!bas.any((String b) => govde.contains("'$b'"))) {
         sorunlar.add('${e.key}: ${e.value} bu sayfanın başlıklarından '
-            'hiçbirini anmıyor (${bas.join(" · ")}). Kayıt yanlış ya da '
-            'test artık o kareyi çizmiyor.');
+            'hiçbirini **gövdesinde** anmıyor (${bas.join(" · ")}). '
+            'Kayıt yanlış, test artık o kareyi çizmiyor ya da ad '
+            'yalnızca bir `group`/`test` etiketinde geçiyor.');
       }
     }
     expect(sorunlar, isEmpty, reason: sorunlar.join('\n'));
@@ -135,5 +177,41 @@ void main() {
           reason: '${b.ad}: işaret, sayfayı ayırt edemeyecek kadar kısa.');
       expect(b.yol, isNotEmpty, reason: '${b.ad}: yol boş.');
     }
+  });
+
+  test('§5 sekme kökü iddiası yapısal (Paket DQ)', () {
+    // Dört sekme kökünün karesi `ekran_dokumu_test.dart` tarafından
+    // basılıyor. Bu iddia **metin benzerliğiyle** tutulamaz: o testin
+    // gövdesinde bu sayfaların hiçbir `SectionScaffold` başlığı
+    // geçmiyor (ölçtüm: `school_career_screen.dart`'ın 30 başlığından
+    // sıfırı). Bunun yerine iki taraf **aynı listeyi** okuyor.
+    final List<String> dosyalar = bolumDosyalari();
+    for (final SekmeKaresi k in kSekmeKareleri) {
+      expect(dosyalar, contains(k.dosya),
+          reason: '${k.ad}: kayıt var olmayan bir dosyayı gösteriyor '
+              '(${k.dosya}).');
+      expect(k.sekme.startsWith('tab_'), isTrue,
+          reason: '${k.ad}: sekme anahtarı `tab_` ile başlamıyor.');
+    }
+
+    final File dokum = File('test/ekran_dokumu_test.dart');
+    expect(dokum.existsSync(), isTrue);
+    final String kaynak = dokum.readAsStringSync();
+    expect(
+      kaynak,
+      contains('kSekmeKareleri'),
+      reason: 'Döküm artık paylaşılan listeyi okumuyor; kapsam iddiası '
+          'yapısal olmaktan çıktı.',
+    );
+    expect(kaynak, contains('pumpWidget'));
+    expect(
+      kaynak,
+      contains('print('),
+      reason: 'Sekme kökü iddiası "kare basılıyor" demek; basmayan bir '
+          'test bu iddiayı taşıyamaz.',
+    );
+    // ignore: avoid_print
+    print('SEKME KÖKÜ: ${kSekmeKareleri.length} kare · '
+        'ekran_dokumu_test.dart basıyor');
   });
 }

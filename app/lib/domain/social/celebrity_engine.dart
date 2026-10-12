@@ -155,8 +155,13 @@ abstract final class CelebrityEngine {
     if (action == CelebrityAction.isBirligi) {
       final int un = state.player.fame ?? 0;
       if (un < prototypeOnlyCollabMinFame) {
-        return 'İş birliği teklif etmek için tanınman gerekiyor: '
-            'en az $prototypeOnlyCollabMinFame Ün.';
+        // **Paket DQ.** Gerekçe eylemin adını **tekrar etmez**: ekran
+        // satırı zaten "İş birliği teklif et · …" diye başlıyor ve
+        // dökümde satır şöyle okunuyordu — "İş birliği teklif et: İş
+        // birliği teklif etmek için tanınman gerekiyor: en az 25 Ün."
+        // Gerekçe yalnızca **kapıyı** yazar; eylemin adını çağıran yer
+        // ekler.
+        return 'Tanınman gerekiyor: en az $prototypeOnlyCollabMinFame Ün.';
       }
       final CelebrityContact? temas = state.contactWith(celebrity.id);
       if (temas == null || !temas.replied) {

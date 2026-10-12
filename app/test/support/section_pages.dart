@@ -9,6 +9,7 @@ library;
 
 import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/finger_catalog.dart';
+import 'package:bir_omur/data/social_catalog.dart';
 import 'package:bir_omur/data/license_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/lottery_catalog.dart';
@@ -30,6 +31,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Dökümü alınan bir bölüm sayfası.
+/// Sekme kökü: `ekran_dokumu_test.dart` her birini açıp **metnini
+/// basıyor**.
+///
+/// **Neden burada (Paket DQ).** Bu dört sayfanın kapsam iddiası
+/// `kBaskaTestle` kaydında metin benzerliğiyle tutuluyordu ve biri
+/// (`activities_screen.dart` → `content_reachability_test.dart`)
+/// yalnızca bir `group('Aktiviteler')` **etiketi** sayesinde geçiyordu;
+/// o test hiç widget kurmuyor. Liste artık iki yerden **aynı kaynak**
+/// olarak okunuyor: döküm onu dolaşıp kareyi basıyor, kapsam bekçisi de
+/// kapsamı ondan sayıyor. İddia ad çakışmasına değil yapıya dayanıyor.
+class SekmeKaresi {
+  const SekmeKaresi(this.sekme, this.ad, this.dosya);
+
+  /// Sekme anahtarı (`Key('tab_…')`).
+  final String sekme;
+
+  /// Dökümde görünen ad.
+  final String ad;
+
+  /// `lib/ui/screens/sections/` altındaki dosya adı.
+  final String dosya;
+}
+
+/// Dökümün dolaştığı sekme kökleri.
+const List<SekmeKaresi> kSekmeKareleri = <SekmeKaresi>[
+  SekmeKaresi('tab_okul_meslek', 'Okul / Meslek', 'school_career_screen.dart'),
+  SekmeKaresi('tab_varliklar', 'Varlıklar', 'assets_screen.dart'),
+  SekmeKaresi('tab_iliskiler', 'İlişkiler', 'relationships_screen.dart'),
+  SekmeKaresi('tab_aktiviteler', 'Aktiviteler', 'activities_screen.dart'),
+];
+
 class Bolum {
   const Bolum(
     this.ad,
@@ -372,6 +404,42 @@ final List<Bolum> kBolumler = <Bolum>[
     ],
     'Ders ucuz, ustalık pahalı',
   ),
+
+  // ---- Paket DQ: son okunmamış kare ---------------------------------
+  //
+  // `social_pages.dart` kaydı `social_widget_test.dart`'ı gösteriyordu
+  // ve o test sayfaya **giriyor** (pumpWidget 1, tap 5) ama kareyi
+  // basmıyor (print 0). Ölçüldü: beş kayıttan yalnızca ikisi (döküm
+  // basan `ekran_dokumu_test.dart`) kareyi gerçekten yazıyor. Dosya iki
+  // kare barındırıyor ve ikincisinin başlığı **dinamik**
+  // (`platform.label`), yani başlık taramasına hiç görünmüyordu.
+  Bolum(
+    'SOSYAL MEDYA',
+    'social_pages.dart',
+    (GameState s) => s.player.age >= kSocialMinAge,
+    'tab_aktiviteler',
+    <Finder>[find.text('Sosyal medya')],
+    'Mesajlaşma henüz yazılmadı',
+  ),
+  Bolum(
+    'SOSYAL PLATFORM',
+    'social_pages.dart',
+    (GameState s) =>
+        s.player.age >= kSocialMinAge && s.socialAccounts.isNotEmpty,
+    'tab_aktiviteler',
+    <Finder>[
+      find.text('Sosyal medya'),
+      // Anahtar yalnızca **hesabı olan** platform kartında var; kapalı
+      // kartı tıklamak kareyi değiştirmez ve araç yanlış sayfayı basar.
+      find.byWidgetPredicate(
+        (Widget w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('sosyal_platform_'),
+        description: 'hesabı olan platform kartı',
+      ),
+    ],
+    'bu yıl kalan:',
+  ),
 ];
 
 
@@ -383,9 +451,4 @@ final List<Bolum> kBolumler = <Bolum>[
 /// başlıklarından en az birini gerçekten andığını da doğrular. Böylece
 /// kayıt "okunuyor" diye yazıp okumayan bir satır taşıyamaz.
 const Map<String, String> kBaskaTestle = <String, String>{
-  'activities_screen.dart': 'content_reachability_test.dart',
-  'assets_screen.dart': 'ekran_dokumu_test.dart',
-  'relationships_screen.dart': 'ekran_dokumu_test.dart',
-  'school_career_screen.dart': 'after_school_widget_test.dart',
-  'social_pages.dart': 'social_widget_test.dart',
 };

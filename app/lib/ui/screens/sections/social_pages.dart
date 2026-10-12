@@ -186,6 +186,12 @@ class _PlatformCard extends StatelessWidget {
     final bool hesapVar = account != null;
 
     return Card(
+      // Döküm anahtarı (Paket DQ): bu sayfanın karesi hiç basılmamıştı
+      // ve platform sayfasına girilebilen kartın ayırt edici bir işareti
+      // yoktu. Anahtar yalnızca **girilebilir** karta konuyor; hesabı
+      // olmayan kartı dökümün tıklaması kareyi değiştirmez ve araç
+      // sessizce yanlış sayfayı basar (Paket DM dersi).
+      key: hesapVar ? Key('sosyal_platform_${platform.name}') : null,
       child: InkWell(
         onTap: hesapVar ? onEnter : null,
         borderRadius: BorderRadius.circular(20),
@@ -565,7 +571,11 @@ class _CelebrityCard extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 6),
                       child: Text(
-                        '${eylem.label}: ${uygunluk.reason}',
+                        // Açık satırla aynı ayraç (Paket DQ): "Mesaj at
+                        // · karşılık ihtimali ~%19" ile "İş birliği
+                        // teklif et · Tanınman gerekiyor: en az 25 Ün."
+                        // aynı kalıpta okunuyor.
+                        '${eylem.label} · ${uygunluk.reason}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),

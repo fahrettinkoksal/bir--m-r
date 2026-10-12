@@ -984,6 +984,19 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 > `app/test/paket_dm_bolum_kapsami_test.dart` (30 sayfa · döküm 8 ·
 > başka testle 22).
 >
+> **GÜNCELLEME (Paket DQ):** kapsam kaydının kendisi ölçüldü. Beş
+> "başka testle okunuyor" iddiasının biri (`activities_screen.dart` →
+> `content_reachability_test.dart`) **hiç widget kurmayan** bir testi
+> gösteriyordu ve bekçiyi yalnızca bir `group('Aktiviteler')` etiketi
+> sayesinde geçiyordu; yalnızca ikisi kareyi gerçekten basıyordu.
+> Bekçi sıkıştırıldı (`pumpWidget` zorunlu, başlık etiket dışında) ve
+> sekme köklerinin iddiası **yapısal** hâle getirildi (ortak
+> `kSekmeKareleri` listesi). `social_pages.dart` döküme alındı: iki
+> karesi vardı, ikincisinin başlığı dinamik olduğu için taramaya hiç
+> görünmüyordu ve orada bir metin kusuru duruyordu. Kapsam bugün
+> **30 sayfa · dökümde 26 · sekme kökü 4 · başka testle 0**; dokuz
+> gerçek kusur (DM 3, DN 3, DO 1, DP 1, DQ 1).
+>
 > **GÜNCELLEME (Paket DN/DO/DP):** döküm üç paket boyunca genişletildi
 > ve kapsam **30 sayfa · dökümde 25 · başka testle 5** oldu. 25 dosya
 > **28 kare** çiziyor (`activity_pages.dart` tek başına altı sayfa

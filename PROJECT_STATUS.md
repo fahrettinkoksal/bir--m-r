@@ -10246,3 +10246,121 @@ yeni hedefli dosya 6 test, dökümün beş yeni karesi 5 test. Paket DP'nin
 CI'ı (`c5f1dde`) iki işte de yeşil tamamlandı.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DQ — kapsam iddiasının boş çıkanı ve son okunmamış kare (12 Ekim 2026)
+
+Paket DP'den sonra kapsam kaydında beş sayfa "başka testle okunuyor"
+diyordu. Bu bir **iddia**; ölçtüm. Her kayıt için adı yazılan testin
+`pumpWidget`, `tester.tap` ve `print` sayısını ve sayfanın başlığının
+kaynakta **nerede** geçtiğini saydım:
+
+| sayfa | iddia edilen test | pump | tap | print | başlık nerede |
+|---|---|---|---|---|---|
+| activities_screen | content_reachability_test | **0** | **0** | 0 | **yalnızca `group` etiketi** |
+| assets_screen | ekran_dokumu_test | 2 | 5 | 1 | gövdede |
+| relationships_screen | ekran_dokumu_test | 2 | 5 | 1 | gövdede |
+| school_career_screen | after_school_widget_test | 1 | 6 | 0 | gövdede |
+| social_pages | social_widget_test | 1 | 5 | 0 | gövdede |
+
+### Bulgu 1: bekçi bir ad çakışmasıyla tatmin oluyordu
+
+`content_reachability_test.dart` **hiç widget kurmuyor** — bir kapsam
+testi değil, içerik erişilebilirlik testi. Kaydı geçmesinin tek nedeni
+dosyada `group('Aktiviteler', …)` yazması ve `activities_screen.dart`'ın
+bir `SectionScaffold` başlığının da "Aktiviteler" olması. Yani bekçi
+kapsamı değil **bir dizi benzerliğini** denetliyordu; tam olarak bu
+yöntemin reddettiği şey.
+
+Sayfanın karesi aslında basılıyor (`ekran_dokumu_test.dart` dört sekmeyi
+dolaşıp metnini yazıyor) — **kayıt** yanlıştı, kapsam değil. Ama aynı
+boşluk `social_pages.dart`'ta gerçek bir körlüğe dönüşmüştü (Bulgu 3).
+
+**Düzeltme iki katmanlı.** (a) Bekçi sıkıştı: adı yazılan test artık
+`pumpWidget` çağırmak **zorunda** ve başlık `group`/`test`/`testWidgets`
+etiketlerinin **dışında** geçmeli. (b) Sekme köklerinin iddiası metin
+benzerliğinden çıkarılıp **yapısal** hâle getirildi: dört sekme
+`test/support/section_pages.dart` içindeki `kSekmeKareleri` listesinde
+duruyor, `ekran_dokumu_test.dart` o listeyi dolaşıyor ve kapsam bekçisi
+kapsamı aynı listeden sayıyor. İddia artık ortak kaynağa dayanıyor.
+
+Bu gerekliydi: ölçtüm, `school_career_screen.dart`'ın **30 başlığından
+sıfırı** `ekran_dokumu_test.dart` gövdesinde geçiyor — kareyi basan test
+ile sayfayı metinle eşleştirmek mümkün değildi.
+
+Kapsam artık: **30 sayfa · dökümde 26 · sekme kökü 4 · başka testle 0.**
+Her bölüm sayfasının karesi, onu gerçekten **basan** bir test
+tarafından okunuyor.
+
+### Bulgu 2: Sosyal medya karesi temiz, ama Q-050 ekranda
+
+Kare (16 yaş, 35 metin): dört platform kartı, her birinde "Hesabın yok.
+İstersen açabilirsin." ve "Hesap aç" düğmesi; altta "Mesajlaşma henüz
+yazılmadı; yazılmamış özellikler düğme olarak gösterilmiyor. Sponsorlar
+kurgusaldır ve bütün tutarlar oyun parasıdır." Yazılmamış özellik düğme
+olarak durmuyor, tutarlar kurgusal diye yazılı — temiz.
+
+**Bildirim (karar değil):** kare platform adlarını ekranda gösteriyor —
+YouTube, Instagram, X, TikTok. Bu, `CLAUDE.md`'deki "gerçek şirket adı
+kullanma" kuralıyla **çelişiyor** ama aynı konu `Q-050` olarak kuyrukta
+açık duruyor. Çelişkiyi tahminle kapatmıyorum: Faho'ya bildiriyorum,
+Q-050 kararı gelene kadar adlara dokunmadım.
+
+### Bulgu 3: platform karesinde eylemin adı iki kez
+
+`social_pages.dart` iki kare barındırıyor ve ikincisinin başlığı
+**dinamik** (`platform.label`), yani başlık taramasına hiç görünmüyordu.
+Döküm açtı (16 yaş, 71 metin) ve üç ünlü kartının her birinde şu satır
+çıktı:
+
+> İş birliği teklif et**:** **İş birliği teklif etmek için** tanınman
+> gerekiyor**:** en az 25 Ün.
+
+Eylemin adı aynı satırda iki kez, iki nokta üst üste iki kez. Kök neden:
+gerekçe eylemin adını kendi içinde taşıyor (`contact()` sonucu olarak
+tek başına da kullanılabilsin diye), ekran da başına `'${eylem.label}: '`
+ekliyor.
+
+**Düzeltme.** Gerekçe yalnızca **kapıyı** yazıyor
+("Tanınman gerekiyor: en az 25 Ün."), adı çağıran yer ekliyor ve ayraç
+açık satırla aynı oldu:
+
+> Mesaj at · karşılık ihtimali ~%19
+> İş birliği teklif et · Tanınman gerekiyor: en az 25 Ün.
+
+### Ölçüm: gösterilen ihtimal ne zaman ayrışıyor?
+
+Karede üç ünlünün üçünün altında da "~%19" yazıyordu; takipçileri
+2,1 M / 3,2 M / 5,4 M. Ölçtüm, **3 ünlü × 3 eylem = 1 ayrı yüzde**.
+Neden: `replyChance` ünlünün yaklaşılabilirliğini `takipçi / eşik` ile
+çarpıyor, hesap yeni açıldığında bu 0; kalan terimler (karizma, ün,
+tanışıklık) ünlüden ve eylemden bağımsız. Sayı **doğru** — oyuncunun o
+an gerçek ihtimali bu — ama üç ünlüyü eşit erişilebilir gösteriyor ve
+görünürlük mekaniği ekranda hiç yazmıyor.
+
+| durum | mesaj ihtimalleri |
+|---|---|
+| 0 takipçi (karizma 85) | %21 · %21 · %21 |
+| 302 takipçi | %20 · %19 · %19 |
+
+İkinci satır mekanizmanın bağlı olduğunu gösteriyor ama ayrışma **1
+puan**: o platformun ünlülerinin eşikleri 4.000 / 6.000 / 12.000
+takipçi. Bu bir denge/metin tercihi olduğu için karar vermedim;
+ölçümle birlikte **Q-243**'e yazdım.
+
+### Bekçiler ve mutasyonlar
+
+- `app/test/paket_dm_bolum_kapsami_test.dart` — §3 sıkıştırıldı
+  (`pumpWidget` zorunlu, başlık etiket dışında), §5 eklendi (sekme kökü
+  iddiası yapısal: liste ortak, döküm basıyor).
+- `app/test/paket_dq_sosyal_kare_test.dart` (4 test) — gerekçenin adı
+  tekrar etmediği (kaynak), 0 takipçide yüzdelerin ayrışmadığı (ölçüm
+  kilidi), eşik üstünde ayrıştığı ve platform karesinde satırın
+  kekelemediği.
+
+**Mutasyonlar (ikisi de ısırdı):** (a) kekeme gerekçeyi geri getirmek →
+§1 (kaynak) **ve** §4 (çizilmiş kare) düşüyor; (b) eski kapsam kaydı
+(`activities_screen` → `content_reachability_test`) → sıkıştırılmış §3
+"hiç `pumpWidget` çağırmıyor" diye düşüyor. (b) mutasyon değil, kaydın
+**gerçek** hâliydi: bekçi yazıldığı anda ısırdı.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

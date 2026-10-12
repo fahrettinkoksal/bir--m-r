@@ -45,6 +45,7 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/section_pages.dart';
 import 'support/test_flow.dart';
 
 /// Alt çubuktaki **dört** menü, ekrandaki sırasıyla (NAV-001).
@@ -55,12 +56,13 @@ import 'support/test_flow.dart';
 /// `tab_hayat` anahtarını arıyordum; döküm "sekme yok" dedi — ürün hatası
 /// değil, benim yanlış varsayımımdı. Hayat ekranı artık hiçbir sekmeye
 /// dokunmadan, en başta dökülüyor.
-const List<(String, String)> kSekmeler = <(String, String)>[
-  ('tab_okul_meslek', 'Okul / Meslek'),
-  ('tab_varliklar', 'Varlıklar'),
-  ('tab_iliskiler', 'İlişkiler'),
-  ('tab_aktiviteler', 'Aktiviteler'),
-];
+/// **Paket DQ.** Liste artık burada değil: sekme kökleri
+/// `test/support/section_pages.dart` içindeki `kSekmeKareleri`nden
+/// okunuyor. Kapsam bekçisi de aynı listeyi okuyor, böylece "bu dört
+/// sayfanın karesi basılıyor" iddiası metin benzerliğine değil **aynı
+/// kaynağa** dayanıyor (eski kayıt, hiç widget kurmayan bir testi
+/// `group` etiketi yüzünden kapsam sayıyordu).
+const List<SekmeKaresi> kSekmeler = kSekmeKareleri;
 
 void main() {
   late GameController controller;
@@ -261,7 +263,9 @@ void main() {
       }
       if (hayat.length < 3) bosEkranlar.add('Hayat');
 
-      for (final (String anahtar, String ad) in kSekmeler) {
+      for (final SekmeKaresi kare in kSekmeler) {
+        final String anahtar = kare.sekme;
+        final String ad = kare.ad;
         final Finder sekme = find.byKey(Key(anahtar));
         if (sekme.evaluate().isEmpty) {
           rapor.writeln('\n--- $ad --- (SEKME YOK)');
