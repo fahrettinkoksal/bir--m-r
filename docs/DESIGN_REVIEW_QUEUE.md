@@ -10053,3 +10053,56 @@ kısaltma harflerini değiştirmek, piyango ikramiyesini küçültmek.
 `_kisalt`), `app/test/paket_be_para_bicimi_test.dart` (biçim bekçisi),
 `app/lib/ui/screens/sections/lottery_page.dart` (ikramiye satırı).
 İlgili: Paket BE (para biçimi kuralı), Paket CO (taşma), D-039.
+
+---
+
+### Q-242 — İş ara sayfasının alt başlığı, engel varken de "başvurabilirsin" diyor
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Paket DP İş ara karesini ilk kez açtı ve oradaki gerçek
+kusuru (aynı cümlenin 20 kartta tekrarlanması) düzeltti. Düzeltmeden
+sonra kare şöyle:
+
+> **İş ara**
+> Koşullarını sağladığın işlere başvurabilirsin.
+> *Devam eden bir mülakatın var.*
+> **Market reyon görevlisi (yarım zamanlı)** · 132.000 ₺/yıl …
+
+Üst satır "başvurabilirsin" diyor, hemen altındaki panel "şu an
+başvuramazsın" diyor. İkisi de doğru — biri sayfanın ne olduğunu, öteki
+o anın durumunu anlatıyor — ama üst üste okunduğunda çelişiyor.
+
+**Neden kendi başıma değiştirmedim.** Paket DM'de buna benzeyen bir
+kusuru doğrudan düzeltmiştim: askerlik sayfasının başlığı "Yapılmadı"
+yazarken üç satır altı "Yükümlü değil" diyordu. O **aynı olgu
+hakkında** iki farklı şey söylüyordu, yani teknik hataydı. Burada
+cümleler farklı şeylerden bahsediyor; hangisinin öne çıkacağı bir
+**metin tercihi**. Alt başlık oyunun her sayfasında aynı rolü oynadığı
+için (sayfanın ne olduğunu söylemek) tek sayfada rol değiştirmek
+sessizce verilecek bir karar değil.
+
+| seçenek | ekranda | bedeli |
+|---|---|---|
+| **1. Alt başlık durumu okusun** | "Mülakatın sürdüğü için şimdilik yeni başvuru yapamazsın." (engel varken) | Çelişki biter, bilgi en üstte. Alt başlığın rolü bu sayfada "durum" olur; panel gereksizleşir ve kaldırılır. Üç dallı bir metin (çalışıyor / mülakat sürüyor / normal). |
+| 2. Bugünkü hâl (panel + genel alt başlık) | iki satır yan yana | Çelişki görünür ama bilgi kaybı yok; en az değişiklik. |
+| 3. Panel yönlendirsin | "Devam eden bir mülakatın var. Meslek sayfasındaki 'Mülakata devam et' satırından sürdürebilirsin." | Oyuncuyu çözüme götürür (o satır gerçekten var). Panel uzar; dar ekranda iki satır olur. |
+
+**Önerim ve varsayılanım: (1) + (3) birlikte.** Alt başlık engeli
+yazsın, panel de nereden sürdürüleceğini söylesin; böylece oyuncu hem
+neden başvuramadığını hem ne yapacağını tek ekranda görür. Onay
+gelirse Paket CO'nun taşma bekçisini uzun cümleyle koşturmak ilk iş.
+
+**Yapmayacağım (onay gelmeden):** alt başlığı değiştirmek, panele
+yönlendirme cümlesi eklemek, "Mülakata devam et" satırını İş ara
+sayfasına taşımak, mülakat sürerken başvuruyu açmak.
+
+**Etkilenen kod:**
+`app/lib/ui/screens/sections/education_career_pages.dart`
+(`JobSearchPage` alt başlığı ve `is_ara_genel_engel` paneli),
+`app/lib/domain/career/job_market.dart` (`globalBlockReason`),
+`app/lib/ui/screens/sections/school_career_screen.dart`
+(`career_mulakat_devam` satırı),
+`app/test/paket_dp_is_ara_tekrari_test.dart` (bekçi). İlgili: Paket DM
+§2 (başlık/durum çelişkisi), Paket DO (kapıyı satırda yazmak), Q-198
+(tekrar şikâyeti), D-091 (yılda tek başvuru).
