@@ -198,36 +198,55 @@ class Housing {
   ///
   /// [city] verilirse **başka bir şehre** taşınılır; şehir yaşanan ilin
   /// komşusu olmak zorundadır ve ek masraf alınır.
-  HousingResult moveToRental(GameState state, {String? city}) {
+  /// Kiralık eve taşınmanın masrafı (Paket DO).
+  ///
+  /// Şehir değişiyorsa taban masrafın üstüne ek masraf biner.
+  int rentalMoveCost(GameState state, {String? city}) =>
+      prototypeOnlyMoveCost +
+      (city != null && city != state.player.currentCity
+          ? prototypeOnlyIntercityExtraCost
+          : 0);
+
+  /// Kiralık eve taşınmanın engeli; yoksa boş dize (Paket DO).
+  ///
+  /// **Neden ayrı işlev.** Kural zaten `moveToRental` içinde vardı ama
+  /// yalnızca **dokunduktan sonra** okunuyordu. Taşın ekranı dört
+  /// şehri ücretsiz ve gerekçesiz satırlar hâlinde diziyordu: cüzdanı
+  /// boş oyuncu dört davet görüp dokunduktan sonra "paran yok"
+  /// öğreniyordu. Oyunun geri kalanı (sağlık merkezi, tüp bebek,
+  /// medya fırsatları) kapıyı satırın kendisinde yazıyor. Sıra ve
+  /// cümleler aynen korundu; `moveToRental` artık bu işlevi okuyor,
+  /// yani tek kaynak.
+  String rentalMoveBlockReason(GameState state, {String? city}) {
     final String icerde = imprisonedBlockReason(state);
-    if (icerde.isNotEmpty) return _blocked(state, icerde);
+    if (icerde.isNotEmpty) return icerde;
     if (state.player.age < prototypeOnlyMinAge) {
-      return _blocked(
-        state,
-        '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.',
-      );
+      return '$prototypeOnlyMinAge yaşından itibaren taşınabilirsin.';
     }
     final bool sehirDegisiyor =
         city != null && city != state.player.currentCity;
     if (!sehirDegisiyor && residenceOf(state) == ResidenceKind.kirada) {
-      return _blocked(state, 'Zaten kirada yaşıyorsun.');
+      return 'Zaten kirada yaşıyorsun.';
     }
     if (sehirDegisiyor && !areNeighbours(state.player.currentCity, city)) {
-      return _blocked(
-        state,
-        '$city buradan taşınılacak kadar yakın değil. Önce aradaki bir '
-        'ile taşınman gerekiyor.',
-      );
+      return '$city buradan taşınılacak kadar yakın değil. Önce aradaki '
+          'bir ile taşınman gerekiyor.';
     }
-
-    final int masraf = prototypeOnlyMoveCost +
-        (sehirDegisiyor ? prototypeOnlyIntercityExtraCost : 0);
+    final int masraf = rentalMoveCost(state, city: city);
     if (state.player.wallet < masraf) {
-      return _blocked(
-        state,
-        'Taşınma masrafı ${trMoney(masraf)}; cüzdanında yeterli para yok.',
-      );
+      return 'Taşınma masrafı ${trMoney(masraf)}; cüzdanında yeterli '
+          'para yok.';
     }
+    return '';
+  }
+
+  HousingResult moveToRental(GameState state, {String? city}) {
+    final String engel = rentalMoveBlockReason(state, city: city);
+    if (engel.isNotEmpty) return _blocked(state, engel);
+
+    final bool sehirDegisiyor =
+        city != null && city != state.player.currentCity;
+    final int masraf = rentalMoveCost(state, city: city);
 
     final String metin = sehirDegisiyor
         ? '${trDative(city)} taşındın; kiralık bir eve yerleştin.'

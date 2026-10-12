@@ -113,13 +113,16 @@ void main() {
   });
 
   test('§4 döküm kaydı tekrarsız', () {
-    final List<String> dosyalar = <String>[
-      for (final Bolum b in kBolumler) b.dosya,
+    // **Paket DO.** Ölçü dosya değil **kare**: `activity_pages.dart`
+    // altı ayrı sayfa barındırıyor, hepsinin kendi karesi var. Bu
+    // yüzden tekrarsızlık dosyada değil **adda** aranıyor.
+    final List<String> adlar = <String>[
+      for (final Bolum b in kBolumler) b.ad,
     ];
     expect(
-      dosyalar.toSet().length,
-      dosyalar.length,
-      reason: 'Aynı sayfa döküm listesinde iki kez: $dosyalar',
+      adlar.toSet().length,
+      adlar.length,
+      reason: 'Aynı kare döküm listesinde iki kez: $adlar',
     );
     for (final Bolum b in kBolumler) {
       expect(

@@ -7,6 +7,7 @@
 // tek yerde durmazsa ikisi sessizce ayrışır.
 library;
 
+import 'package:bir_omur/data/activity_catalog.dart';
 import 'package:bir_omur/data/finger_catalog.dart';
 import 'package:bir_omur/data/investment_catalog.dart';
 import 'package:bir_omur/data/lottery_catalog.dart';
@@ -18,6 +19,9 @@ import 'package:bir_omur/domain/models/game_state.dart';
 import 'package:bir_omur/domain/models/military.dart';
 import 'package:bir_omur/domain/models/owned_item.dart';
 import 'package:bir_omur/domain/models/school_club_progress.dart';
+import 'package:bir_omur/domain/activities/travel.dart';
+import 'package:bir_omur/domain/interaction/intimacy.dart';
+import 'package:bir_omur/domain/interaction/parenthood.dart';
 import 'package:bir_omur/domain/social/media_opportunities.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -249,7 +253,63 @@ final List<Bolum> kBolumler = <Bolum>[
     <Finder>[find.text('Evlerim')],
     'Evlerim',
   ),
+
+  // ---- Paket DO: `activity_pages.dart` içindeki ayrı sayfalar ------
+  //
+  // Bu dosya altı ayrı sayfa barındırıyor (`VenuePage`, `LibraryPage`,
+  // `AdoptionPage`, `WillPage`, `TravelPage`, `RelocationPage`) ve
+  // hiçbirinin metni dökümde basılmamıştı. Kayıt dosya başına tek
+  // satır tuttuğu için bu sayfalar "okunuyor" sayılıyordu; ölçü dosya
+  // değil **kare** olmalı.
+  Bolum(
+    'KÜTÜPHANE',
+    'activity_pages.dart',
+    (GameState s) => booksFor(s.player.age).isNotEmpty,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('activity_kutuphane'))],
+    // İlk işaretim ("Bitirdiğin kitap") yine koşulluydu: hiç kitap
+    // bitirmemiş 6 yaşındaki karede çizilmiyor.
+    'Yaşına uygun',
+  ),
+  Bolum(
+    'SON KARARLAR',
+    'activity_pages.dart',
+    (GameState s) => s.livingChildren.isNotEmpty,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('activity_son_kararlar'))],
+    'Mirasçı seçimi ve hayatının sonuna dair kararlar',
+  ),
+  Bolum(
+    'TATİL YAP',
+    'activity_pages.dart',
+    (GameState s) => s.player.age >= Travel.prototypeOnlyMinAge,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('activity_tatil'))],
+    'Tatil, taşınma değildir',
+  ),
+  Bolum(
+    'TAŞIN',
+    'activity_pages.dart',
+    (GameState s) => s.player.age >= 18,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('activity_tasin'))],
+    'şehrinde yaşıyorsun',
+  ),
+  Bolum(
+    'TÜP BEBEK TEDAVİSİ',
+    'fertility_page.dart',
+    (GameState s) =>
+        Intimacy.partnerOf(s) != null &&
+        s.player.age >= Parenthood.prototypeOnlyMinAge,
+    'tab_aktiviteler',
+    <Finder>[
+      find.byKey(const Key('activity_saglik')),
+      find.byKey(const Key('saglik_tup_bebek')),
+    ],
+    'Tedavi bir garanti değildir',
+  ),
 ];
+
 
 
 /// Dökümün dışındaki sayfalar ve **onları çizen** test.
@@ -260,11 +320,9 @@ final List<Bolum> kBolumler = <Bolum>[
 /// kayıt "okunuyor" diye yazıp okumayan bir satır taşıyamaz.
 const Map<String, String> kBaskaTestle = <String, String>{
   'activities_screen.dart': 'content_reachability_test.dart',
-  'activity_pages.dart': 'activities_test.dart',
   'assets_screen.dart': 'ekran_dokumu_test.dart',
   'casino_pages.dart': 'casino_widget_test.dart',
   'education_career_pages.dart': 'career_widget_test.dart',
-  'fertility_page.dart': 'fertility_widget_test.dart',
   'license_pages.dart': 'license_widget_test.dart',
   'martial_arts_page.dart': 'martial_arts_widget_test.dart',
   'pets_page.dart': 'pet_widget_test.dart',

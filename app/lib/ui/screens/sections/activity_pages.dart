@@ -1588,27 +1588,51 @@ class _RelocationPageState extends State<RelocationPage> {
             text: 'Bu şehir için yakın il kaydı yok.',
           )
         else
+          // **Paket DO.** Bu satırlar ne masrafı ne engeli yazıyordu:
+          // cüzdanı boş oyuncu dört davet görüyor, dokunduktan sonra
+          // "paran yok" öğreniyordu. Oyunun geri kalanı kapıyı
+          // satırın kendisinde yazar (sağlık merkezi, tüp bebek,
+          // medya). Gerekçe motorun kendi cümlesidir
+          // (`Housing.rentalMoveBlockReason`), ekran kendi metnini
+          // uydurmaz.
           for (final String sehir in hedefler) ...<Widget>[
-            MenuRow(
-              key: Key('relocate_$sehir'),
-              title: sehir,
-              subtitle: 'Kiralık bir eve taşın',
-              icon: Icons.location_city_outlined,
-              accent: BirOmurAccents.mavi,
-              onTap: () => setState(
-                () => _sonuc = controller.relocate(city: sehir),
-              ),
+            Builder(
+              builder: (BuildContext context) {
+                final String engel = controller.relocateBlockReason(
+                  city: sehir,
+                );
+                final int masraf = controller.relocateCost(city: sehir);
+                return MenuRow(
+                  key: Key('relocate_$sehir'),
+                  title: sehir,
+                  subtitle: engel.isEmpty
+                      ? 'Kiralık bir eve taşın · ${trMoney(masraf)}'
+                      : engel,
+                  icon: Icons.location_city_outlined,
+                  accent: BirOmurAccents.mavi,
+                  onTap: () => setState(
+                    () => _sonuc = controller.relocate(city: sehir),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 8),
           ],
         const SizedBox(height: 14),
-        MenuRow(
-          key: const Key('relocate_same_city'),
-          title: 'Aynı ilde kiralık eve taşın',
-          subtitle: trMoney(Housing.prototypeOnlyMoveCost),
-          icon: Icons.home_work_outlined,
-          accent: BirOmurAccents.yesil,
-          onTap: () => setState(() => _sonuc = controller.relocate()),
+        Builder(
+          builder: (BuildContext context) {
+            final String engel = controller.relocateBlockReason();
+            return MenuRow(
+              key: const Key('relocate_same_city'),
+              title: 'Aynı ilde kiralık eve taşın',
+              subtitle: engel.isEmpty
+                  ? trMoney(controller.relocateCost())
+                  : engel,
+              icon: Icons.home_work_outlined,
+              accent: BirOmurAccents.yesil,
+              onTap: () => setState(() => _sonuc = controller.relocate()),
+            );
+          },
         ),
         if (_sonuc != null) ...<Widget>[
           const SizedBox(height: 14),

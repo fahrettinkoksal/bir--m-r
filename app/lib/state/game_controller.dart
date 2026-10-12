@@ -3502,6 +3502,16 @@ class GameController extends ChangeNotifier {
       ? 'Etkin bir hayat yok.'
       : _housing.moveBlockReason(_state!, home);
 
+  /// Kiralık eve taşınmanın engeli; yoksa boş metin (Paket DO).
+  String relocateBlockReason({String? city}) => _state == null
+      ? 'Etkin bir hayat yok.'
+      : _housing.rentalMoveBlockReason(_state!, city: city);
+
+  /// Kiralık eve taşınmanın masrafı (Paket DO).
+  int relocateCost({String? city}) => _state == null
+      ? 0
+      : _housing.rentalMoveCost(_state!, city: city);
+
   /// Bu evi kiraya vermenin engeli; yoksa boş metin.
   String rentOutBlockReason(OwnedItem home) => _state == null
       ? 'Etkin bir hayat yok.'

@@ -1013,6 +1013,20 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   çiziyor; satırın kendi kapısı açıkken satır yine ekranda olmayabilir.
   "Kapı açık ama satır yok" bulgusunu ürün hatası diye raporlamadan
   önce **hangi görünümün çizildiğini** sor.
+- **Paket DO.** Kapsam kaydının birimi **dosya değil kare** olmalı.
+  `activity_pages.dart` altı ayrı sayfa barındırıyor; kayıt dosya
+  başına tek satır tuttuğu için beş sayfa "okunuyor" sayılıp hiç
+  basılmamıştı. Biri (Taşın) gerçek bir kusur taşıyordu.
+- **Paket DO.** Motorun doğru cümleyi **bilmesi** yetmez; o cümlenin
+  oyuncuya **ne zaman** gösterildiği de kuralın parçasıdır.
+  `moveToRental` "cüzdanında yeterli para yok" diyordu ama yalnızca
+  dokunduktan sonra; ekran dört şehri bedava davet gibi diziyordu.
+  Kapıyı işleve çıkarıp satıra taşımak kuralı değiştirmedi, **yerini**
+  değiştirdi.
+- **Paket DO.** Aynı araç hatasını üç pakette üç kez yaptım: döküm
+  işareti olarak **koşullu** bir cümle seçmek. İşaret sayfanın her
+  hâlinde çizilen bir metin olmalı; en güvenlisi başlık ya da sabit
+  açıklama satırı.
 
 ## Pano
 

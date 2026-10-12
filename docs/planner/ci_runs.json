@@ -1,7 +1,37 @@
 {
  "repo": "fahrettinkoksal/bir--m-r",
- "total": 646,
+ "total": 648,
  "runs": [
+  {
+   "id": 38232152780,
+   "name": "Windows test sürümü",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "82a7385a7a3cce6c61a9318f1e9c643422449fec",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 323,
+   "event": "push",
+   "created_at": "2026-10-12T09:47:28Z",
+   "updated_at": "2026-10-12T10:24:23Z",
+   "run_started_at": "2026-10-12T09:47:28Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38232152780",
+   "display_title": "Kuyruk: Q-241 — kısa para biçiminin milyar basamağı yok"
+  },
+  {
+   "id": 38232152517,
+   "name": "Android debug APK",
+   "head_branch": "claude/stoic-maxwell-6rkrit",
+   "head_sha": "82a7385a7a3cce6c61a9318f1e9c643422449fec",
+   "status": "completed",
+   "conclusion": "success",
+   "run_number": 326,
+   "event": "push",
+   "created_at": "2026-10-12T09:47:28Z",
+   "updated_at": "2026-10-12T10:16:27Z",
+   "run_started_at": "2026-10-12T09:47:28Z",
+   "html_url": "https://github.com/fahrettinkoksal/bir--m-r/actions/runs/38232152517",
+   "display_title": "Kuyruk: Q-241 — kısa para biçiminin milyar basamağı yok"
+  },
   {
    "id": 38226239810,
    "name": "Windows test sürümü",

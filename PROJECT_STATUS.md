@@ -10066,3 +10066,66 @@ Tam süit: **3869 geçti, 17 atlandı, 0 hata** (38 dk; DM'de 3854 idi).
 de yeşil tamamlandı.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DO — Taşın ekranı kapıyı satırda yazmıyordu (12 Ekim 2026)
+
+Döküm `activity_pages.dart` içindeki **beş ayrı sayfayı** ilk kez bastı.
+Bu dosya altı sayfa barındırıyor (`VenuePage`, `LibraryPage`,
+`AdoptionPage`, `WillPage`, `TravelPage`, `RelocationPage`) ve kapsam
+kaydı **dosya başına tek satır** tuttuğu için hepsi "okunuyor"
+sayılıyordu. Ölçü dosya değil **kare** olmalı; kapsam bekçisinin
+tekrarsızlık denetimi de dosyadan ada çevrildi.
+
+| kare | sonuç |
+|---|---|
+| Kütüphane | temiz (yaşa uygun 5 kitap, yazar ve sayfa sayısı) |
+| Son Kararlar | temiz — yöntem yok, ödül yok, "geri alınamaz" yazılı, 112 ve ALO 183 ekranda |
+| Tatil yap | temiz |
+| Tüp bebek tedavisi | temiz (kapalı satır gerekçesini yazıyor) |
+| **Taşın** | **kusurlu** |
+
+### Kusur: dört şehir, ne ücret ne gerekçe
+
+Cüzdanı **0 ₺** olan 18 yaşındaki oyuncunun gördüğü kare:
+
+> Taşın · Denizli şehrinde yaşıyorsun. Cüzdanında 0 ₺ var.
+> **Aydın** — Kiralık bir eve taşın
+> **İzmir** — Kiralık bir eve taşın
+> **Antalya** — Kiralık bir eve taşın
+> **Konya** — Kiralık bir eve taşın
+
+Dört davet, hiçbirinde masraf ya da engel yok. Oyunun geri kalanı
+kapıyı **satırın kendisinde** yazar: sağlık merkezi "2.800 ₺ gerekiyor;
+cüzdanında yeterli para yok · Şu an kapalı", tüp bebek "Hekim önce bir
+süre kendiniz denemenizi istiyor · Şu an kapalı". Kural zaten motorda
+vardı — `moveToRental` tam o cümleyi döndürüyor — ama yalnızca
+**dokunduktan sonra** okunuyordu.
+
+**Düzeltme kuralı değiştirmiyor.** Kapı `Housing.rentalMoveBlockReason`
+işlevine çıkarıldı, masraf `rentalMoveCost`'a; `moveToRental` artık bu
+ikisini okuyor (tek kaynak), ekran da aynı cümleyi satıra yazıyor.
+Sıra ve cümleler aynen korundu. Düzeltmeden sonraki kare:
+
+> **Aydın** — Taşınma masrafı 110.000 ₺; cüzdanında yeterli para yok.
+
+Parası yeten oyuncuda satır masrafı yazıyor:
+"Kiralık bir eve taşın · 110.000 ₺".
+
+### Aracın dördüncü düzeltmesi
+
+Kütüphane karesinde işaret olarak yine **koşullu** bir cümle seçmiştim
+("Bitirdiğin kitap"), hiç kitap bitirmemiş 6 yaşındaki karede
+çizilmiyor. Sayfa doğru açılmıştı. Bu, aynı hatanın üçüncü tekrarı:
+işaret **sayfanın her hâlinde** çizilen bir metin olmalı.
+
+Bekçi: `app/test/paket_do_tasinma_kapisi_test.dart` (4 test) — engel
+metni motorun kendi cümlesiyle birebir aynı (tek kaynak), masraf şehir
+değişince artıyor, ekran kapıyı motordan okuyor, iki dal da üretiliyor.
+Mutasyon: satırı eski hâline döndürmek §3'ü düşürüyor.
+
+Tam süit: **3878 geçti, 17 atlandı, 0 hata** (38 dk). `analyze lib test`
+temiz. Paket DN'in CI'ı (`82a7385`) iki işte de yeşil tamamlandı.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.
