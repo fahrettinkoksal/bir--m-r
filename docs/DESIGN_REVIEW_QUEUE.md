@@ -10014,3 +10014,42 @@ anlaşma kuralını gevşetmek, son yıl için yeni bildirim eklemek.
 `app/test/paket_dl_sponsorluk_test.dart` (ölçüm ve bekçi). İlgili:
 D-104 (sponsorluk eşiği ve sözünü tutmama bedeli), D-119 (kitle
 yorgunluğu), Q-050 (sosyal medya dengesi), Q-235 (takipçi eğrisi).
+
+---
+
+### Q-241 — Kısa para biçiminin milyar basamağı yok: "1200 M ₺"
+
+**Durum:** öneri hazır, Faho'nun kararını bekliyor. **Kod değişmedi.**
+
+**Nasıl çıktı.** Paket DN Milli Piyango sayfasını ilk kez açıp gözle
+okudu. Yılbaşı çekilişinin büyük ikramiyesi ekranda şöyle yazıyor:
+
+> Büyük ikramiye: **1200 M ₺** (tam bilete)
+
+Aynı sayfada küçük tutarlar "50,0 M ₺", "625 B ₺", "5.000 ₺" biçiminde.
+`trMoneyShort` üç basamak tanıyor: bin altı (tam tutar), **B** (bin) ve
+**M** (milyon). Milyar yok, bu yüzden 1.200.000.000 ₺ dört haneli bir
+milyon oluyor.
+
+**Bu bir hata değil, eksik basamak.** Sayı doğru ve okunabilir; yalnızca
+oyunun kendi biçim çizgisine (iki anlamlı hane) uymuyor. Kısaltma seçimi
+görünür bir **içerik** kararı olduğu için — Q-050'deki platform adları
+gibi — kendi başıma değiştirmedim.
+
+| seçenek | ekranda | bedeli |
+|---|---|---|
+| **1. Mr basamağı ekle** | "1,2 Mr ₺" | `trMoneyShort`'a bir dal; milyarı aşan her ekran değişir (cüzdan, servet, ikramiye). Türkçe finans metinlerinde "Mr" yaygın. |
+| 2. "milyar" sözcüğü | "1,2 milyar ₺" | Daha açık, daha uzun; dar kartlarda taşma riski (`paket_co` taşma bekçisi var). |
+| 3. Bugünkü durum | "1200 M ₺" | Tutarlı değil ama yanlış da değil. |
+
+**Önerim ve varsayılanım: (1).** "B / M / Mr" dizisi oyunun kendi
+kalıbını sürdürür ve tek dosyada tek dala sığar. Onay gelirse ilk iş
+taşma bekçisini (Paket CO) milyarlık tutarla koşturmak.
+
+**Yapmayacağım (onay gelmeden):** `trMoneyShort`'a basamak eklemek,
+kısaltma harflerini değiştirmek, piyango ikramiyesini küçültmek.
+
+**Etkilenen kod:** `app/lib/text/turkish_text.dart` (`trMoneyShort`,
+`_kisalt`), `app/test/paket_be_para_bicimi_test.dart` (biçim bekçisi),
+`app/lib/ui/screens/sections/lottery_page.dart` (ikramiye satırı).
+İlgili: Paket BE (para biçimi kuralı), Paket CO (taşma), D-039.
