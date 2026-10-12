@@ -76,15 +76,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
+import 'support/section_pages.dart';
 import 'support/test_flow.dart';
 
 /// Alt çubuktaki dört menü (NAV-001); Hayat varsayılan ekran.
-const List<(String, String)> kSekmeler = <(String, String)>[
-  ('tab_okul_meslek', 'Okul / Meslek'),
-  ('tab_varliklar', 'Varlıklar'),
-  ('tab_iliskiler', 'İlişkiler'),
-  ('tab_aktiviteler', 'Aktiviteler'),
-];
+///
+/// **Paket DS: dördüncü kopya kaldırıldı.** Aynı liste dört dosyada
+/// elle yazılıydı (`ekran_dokumu_test`, `ekran_dokumu_bot_test`,
+/// `ekran_dokumu_ozel_durum_test`, `paket_co_telefon_yerlesimi_test`).
+/// Paket DQ birinci kopyayı `kSekmeKareleri`ne bağlamıştı; kalanlar
+/// sessizce ayrışabilirdi — yeni bir sekme eklenince üç döküm onu
+/// basmaz, kimse de fark etmez. Tek kaynak `support/section_pages.dart`.
+const List<SekmeKaresi> kSekmeler = kSekmeKareleri;
 
 /// Mülakat penceresini açar: Okul/Meslek sekmesine gidip satıra basar.
 ///
@@ -93,13 +96,59 @@ const List<(String, String)> kSekmeler = <(String, String)>[
 /// açılmadığı anlaşılmıyordu. Araç yalan söylememeli: ne yaptığını
 /// yazıyor, dökümün başına basılıyor.
 Future<String> _mulakatiAc(WidgetTester tester) async {
+  // **ÖLÇÜLEN İKİNCİ ENGEL (Paket DS).** Kare `bekleyen: true` ile
+  // aranıyor; bulunan durumda mülakatın **yanında** başka bir bildirim
+  // de bekliyor olabiliyor ve `debugSetState` onu pencere olarak
+  // açıyor (Paket CG tuzağı). Açık bildirim penceresi modal bir
+  // bariyer: alt sekmeye dokunmak **hiçbir şeye** isabet etmiyor
+  // (`tap()` "warnIfMissed" uyarısı veriyordu) ve açıcı "satır yok"
+  // diyordu. Satır vardı; dokunma ekrana ulaşmıyordu.
+  //
+  // Mülakatı yanıtlamak yok: yalnızca **önünü kapatan bildirim**
+  // kapatılıyor. Mülakat penceresi `notice_close` taşımaz, o yüzden
+  // bu döngü mülakata dokunamaz.
+  int kapatilan = 0;
+  for (int i = 0; i < 6; i++) {
+    final Finder kapat = find.byKey(const Key('notice_close'));
+    if (kapat.evaluate().isEmpty) break;
+    await tester.tap(kapat.first, warnIfMissed: false);
+    await tester.pumpAndSettle();
+    kapatilan++;
+  }
+  final String kapatmaNotu =
+      kapatilan == 0 ? '' : ' ($kapatilan bildirim penceresi kapatıldı)';
+
   final Finder sekme = find.byKey(const Key('tab_okul_meslek'));
   if (sekme.evaluate().isEmpty) {
-    return 'AÇICI: Okul/Meslek sekmesi ekranda yok — pencere açılamadı.';
+    return 'AÇICI: Okul/Meslek sekmesi ekranda yok — pencere '
+        'açılamadı.$kapatmaNotu';
   }
   await tester.tap(sekme);
   await tester.pumpAndSettle();
-  final Finder satir = find.byKey(const Key('career_mulakat_devam'));
+  // **İKİ AYRI NEDEN VARDI (Paket DS); ikisi de ölçüldü.**
+  //
+  // 1. **Ürün hatası.** Açıcı yalnızca `career_mulakat_devam` arıyordu
+  //    ve bulunan kare 17 yaşında bir **lise öğrencisiydi**. O satır
+  //    yalnızca kariyer görünümünde vardı; `SchoolCareerScreen`
+  //    öğrenciye `_SchoolView` çiziyor ve orada mülakata devam etme
+  //    yolu **hiç yoktu** — D-131'in "Öğrenci artık İş ara ekranını
+  //    görür" kararına rağmen. Bot taramasında 180 kare böyle
+  //    (`paket_ds_ogrenci_is_kapisi_test.dart` §1). Satır eklendi;
+  //    açıcı artık iki anahtarı da deniyor.
+  // 2. **Araç hatası, ayrı ve asıl engel.** Satır eklendikten sonra da
+  //    bulunamadı: karede mülakatın yanında iki bildirim ve bir
+  //    bekleyen olay penceresi açıktı. Modal bariyer yüzünden alt
+  //    sekmeye dokunmak hiçbir şeye isabet etmiyordu (`tap()` zaten
+  //    "warnIfMissed" uyarısı veriyordu; o uyarıyı okumamıştım).
+  //    Karenin koşulu sıkıştırıldı: mülakat tek bekleyen şey olmalı.
+  //
+  // Dosyanın başındaki eski teşhis ("alt sekmeye basmak bu koşumda
+  // Meslek ekranını getirmiyor") semptomu doğru söylüyordu, nedenini
+  // bilmiyordu.
+  Finder satir = find.byKey(const Key('career_mulakat_devam'));
+  if (satir.evaluate().isEmpty) {
+    satir = find.byKey(const Key('school_mulakat_devam'));
+  }
   if (satir.evaluate().isEmpty) {
     // **Suçu satıra atmadan önce nerede olduğunu söyle.** İlk yazımda
     // bu dal "Okul/Meslek açıldı ama satır yok" diyordu; oysa sekmeye
@@ -110,13 +159,13 @@ Future<String> _mulakatiAc(WidgetTester tester) async {
         if ((w.data ?? w.textSpan?.toPlainText())?.trim().isNotEmpty ?? false)
           (w.data ?? w.textSpan!.toPlainText()).trim(),
     ];
-    return 'AÇICI: "Mülakata devam et" satırı bulunamadı. '
+    return 'AÇICI: "Mülakata devam et" satırı bulunamadı.$kapatmaNotu '
         'Ekranda ${ekran.length} metin var; ilk altısı: '
         '${ekran.take(6).join(" · ")}';
   }
   await tester.tap(satir);
   await tester.pumpAndSettle();
-  return 'AÇICI: mülakat penceresi satıra basılarak açıldı.';
+  return 'AÇICI: mülakat penceresi satıra basılarak açıldı.$kapatmaNotu';
 }
 
 /// Aranan özel durum.
@@ -128,6 +177,7 @@ class Durum {
     this.yilIci = false,
     this.bekleyen = false,
     this.acici,
+    this.isaret = '',
   });
 
   final String ad;
@@ -160,16 +210,38 @@ class Durum {
   /// açılıyor; mülakat gibi bir satıra dokunarak açılanlar için bu
   /// gerekiyor. `null` ise ek bir şey yapılmaz.
   final Future<String> Function(WidgetTester tester)? acici;
+
+  /// Karenin **gerçekten o kare olduğunu** kanıtlayan metin.
+  ///
+  /// **Neden eklendi (Paket DS).** Bu döküm bir kareyi "ÖZEL DURUM ·
+  /// MÜLAKAT" diye başlıklandırıp altına sıradan bir okul ekranı
+  /// basıyordu; pencere açılmamıştı ve bunu yalnızca açıcının notu
+  /// söylüyordu — test geçiyordu. Bölüm ve modal dökümlerinde bu
+  /// bekçi zaten vardı (`Bolum.isaret`), burada yoktu.
+  ///
+  /// Boş bırakılabilir ve altı karede bilerek boş: YENİ DOĞAN BEBEK,
+  /// EMEKLİ, DENETİM DÖNEMİ, ARKADAŞ GRUBU, DUL ve GEÇİM SIKINTISI
+  /// **ayrı bir pencere değil**, sıradan ekranın o durumdaki hâli;
+  /// kimliklerini `kosul` ve künye satırı taşıyor. İşaret, kendi
+  /// penceresi ya da kendi kartı olan kareler için var.
+  final String isaret;
 }
 
 void main() {
   late GameController controller;
-  bool acildi = false;
+  bool olcuAyarlandi = false;
+  final List<GameController> acilanlar = <GameController>[];
   setUp(() {
     controller = GameController(random: Random(31));
-    acildi = false;
+    olcuAyarlandi = false;
+    acilanlar.clear();
   });
-  tearDown(() => controller.dispose());
+  tearDown(() {
+    for (final GameController c in acilanlar) {
+      c.dispose();
+    }
+    acilanlar.clear();
+  });
 
   List<String> metinler(WidgetTester tester) {
     final List<String> out = <String>[];
@@ -182,18 +254,44 @@ void main() {
     return out;
   }
 
+  /// Kareyi **kendi uygulama örneğiyle** açar.
+  ///
+  /// **Paket DS — neden her karede yeniden.** Eskiden tek örnek bütün
+  /// kareler için kullanılıyordu (`acildi` bayrağı) ve önceki karenin
+  /// açık penceresi sonrakine sızıyordu. Ölçüldü: dört pencereli
+  /// kareden üçü işaretini çiziyor (duruşma "Sıra sende", kriz "Ne
+  /// yapacağına sen karar veriyorsun.", yaşlı bakım "Bu yıl kim
+  /// yanında?"), **mülakat çizmiyordu**: MÜLAKAT karesi ana ekrana
+  /// dönemiyor ("ANA EKRANA DÖNÜLEMEDİ"), sekmeye basmak işe yaramıyor
+  /// ve kare mülakat penceresi yerine Hayat ekranını basıyordu. Döküm
+  /// bunu kendi çıktısında **yazıyor** ama test geçiyordu; `isaret`
+  /// denetimi artık düşürüyor.
+  ///
+  /// Yeni örnek açmak "Rastgele bir hayat" düğmesini de geri getiriyor
+  /// (eski tuzak: ikinci `pumpWidget`'ta o düğme yoktu — çünkü aynı
+  /// kontrolcü hâlâ bir hayat taşıyordu).
   Future<void> ac(WidgetTester tester, GameState durum) async {
-    if (!acildi) {
+    if (!olcuAyarlandi) {
       tester.view.physicalSize = const Size(1200, 14000);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(BirOmurApp(controller: controller));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Rastgele bir hayat'));
-      await tester.pumpAndSettle();
-      acildi = true;
+      olcuAyarlandi = true;
     }
+    // **Ağacı gerçekten söküyoruz.** `pumpWidget` aynı tipte bir
+    // köke ikinci kez çağrıldığında Flutter State'i **koruyor**
+    // (`didUpdateWidget`), yani uygulama yeniden başlamıyor ve
+    // "Rastgele bir hayat" düğmesi gelmiyor — eski kayıtlarda
+    // "uygulamayı iki kez açma" tuzağı diye geçen şey tam olarak bu.
+    // Araya boş bir kök koymak ağacı söküyor.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    controller = GameController(random: Random(31));
+    acilanlar.add(controller);
+    await tester.pumpWidget(BirOmurApp(controller: controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rastgele bir hayat'));
+    await tester.pumpAndSettle();
     controller.debugSetState(durum);
     await tester.pumpAndSettle();
   }
@@ -251,11 +349,13 @@ void main() {
   const int tohumSayisi = 40;
 
   final List<Durum> aranan = <Durum>[
-    Durum('CEZAEVİ', (GameState s) => s.isImprisoned),
+    Durum('CEZAEVİ', (GameState s) => s.isImprisoned,
+        isaret: 'Cezaevindesin'),
     Durum('BEKLEYEN DURUŞMA', (GameState s) => s.hasPendingTrial,
-        ekranTemizlenmesin: true),
+        ekranTemizlenmesin: true, isaret: 'Avukat sonucu garanti etmez'),
     Durum('KRİTİK SAĞLIK', (GameState s) => s.hasPendingCrisis,
-        ekranTemizlenmesin: true),
+        ekranTemizlenmesin: true,
+        isaret: 'Ne yapacağına sen karar veriyorsun.'),
     Durum(
       'YENİ DOĞAN BEBEK',
       (GameState s) => s.people.any((Person p) =>
@@ -271,7 +371,8 @@ void main() {
       (GameState s) => s.legal.probationUntilAge != null,
       yilIci: true,
     ),
-    Durum('GEBELİK', (GameState s) => s.isExpecting, yilIci: true),
+    Durum('GEBELİK', (GameState s) => s.isExpecting,
+        yilIci: true, isaret: 'Bebek yolda'),
     // Altıncı tur (Paket CL): bu oturumda yazılan iki kart hiçbir
     // dökümde **bütün ekran** olarak çizilmemişti. Kendi testleri
     // anahtar ve metin denetliyor; döküm ise ekranın tamamını basıyor
@@ -287,6 +388,7 @@ void main() {
       (GameState s) =>
           ElderSupport.needsSupport(s) && !ElderSupport.decidedThisYear(s),
       yilIci: true,
+      isaret: 'Bu yıl kim yanında?',
     ),
     Durum(
       'ARKADAŞ GRUBU',
@@ -325,12 +427,21 @@ void main() {
     // demek. Aynı dürüstlük kuralı dosyanın başındaki BULUNAMADI
     // kuralıyla aynı: bulunamamak ürün hatası değil, ama okundu da
     // sayılmaz.
+    // **Koşul Paket DS'de sıkıştırıldı.** `hasPendingInterview` tek
+    // başına yeterli değildi: bulunan karede mülakatın yanında iki
+    // bildirim ve bir **bekleyen olay** da duruyordu (lise son sınavı
+    // seçimi, üç seçenekli). Olay penceresi modal bir bariyer ve
+    // `notice_close` taşımıyor; alt sekmeye dokunmak hiçbir şeye
+    // isabet etmiyordu. Mülakatın **tek** bekleyen şey olduğu kare
+    // aranıyor; başkasını kapatmak dökümün bastığı durumu değiştirir.
     Durum(
       'MÜLAKAT',
-      (GameState s) => s.hasPendingInterview,
+      (GameState s) =>
+          s.hasPendingInterview && s.pendingEvent == null && !s.hasNotice,
       bekleyen: true,
       ekranTemizlenmesin: true,
       acici: _mulakatiAc,
+      isaret: 'Karşındaki kişi bir soru soruyor.',
     ),
     // **BEKLEYEN OLAY karesi bilerek yok.** Olay penceresi yalnızca yaş
     // alırken doğuyor; yüklenen bir durumda ne kendiliğinden açılıyor
@@ -350,6 +461,9 @@ void main() {
     // 1) Durumları ara. Her durum için **ilk** bulunan kare saklanır.
     final Map<String, (GameState durum, int seed, PlayerArchetype a)> kareler =
         <String, (GameState, int, PlayerArchetype)>{};
+    /// Bütün karelerin basılan metni; modal kapsam kaydı bunun üzerinde
+    /// denetleniyor (Paket DS).
+    final List<String> basilanTumMetinler = <String>[];
     int taranan = 0;
     for (final PlayerArchetype arketip in arketipler) {
       for (int seed = 1; seed <= tohumSayisi; seed++) {
@@ -527,8 +641,10 @@ void main() {
             'bölümü başka bir ekran olabilir.');
       }
       // Kendiliğinden açılmayan pencereyi açan adım (Paket CV).
+      String aciciNotu = '';
       if (d.acici != null) {
-        dokum.writeln('\n${await d.acici!(tester)}');
+        aciciNotu = await d.acici!(tester);
+        dokum.writeln('\n$aciciNotu');
       }
       final List<String> hayat = metinler(tester);
       dokum.writeln('\n--- Hayat / açık pencere --- (${hayat.length} metin)');
@@ -540,7 +656,9 @@ void main() {
       // kalır; o durumlarda sekme gezilmez (bu bir ürün hatası değil,
       // bilerek konmuş bir kilit).
       if (!d.ekranTemizlenmesin) {
-        for (final (String anahtar, String ad) in kSekmeler) {
+        for (final SekmeKaresi kare in kSekmeler) {
+          final String anahtar = kare.sekme;
+          final String ad = kare.ad;
           final Finder sekme = find.byKey(Key(anahtar));
           if (sekme.evaluate().isEmpty) {
             dokum.writeln('\n--- $ad --- (SEKME YOK)');
@@ -557,6 +675,35 @@ void main() {
       }
       // ignore: avoid_print
       print(dokum);
+      basilanTumMetinler.addAll(dokum.toString().split('\n'));
+
+      // **Açıcı sessizce başarısız olmaz, artık düşer (Paket DS).**
+      // Daha önce not dökümün başına yazılıyordu ve test geçiyordu;
+      // "MÜLAKAT" başlığı altında sıradan bir okul ekranı basıldı,
+      // kimse görmedi. Açıcının başarısızlığı ya ürün hatasıdır (o
+      // satır yok) ya araç hatasıdır — ikisi de bildirilmeli.
+      if (d.acici != null) {
+        expect(
+          aciciNotu.contains('bulunamadı') ||
+              aciciNotu.contains('açılamadı'),
+          isFalse,
+          reason: '${d.ad}: pencere açılamadı → $aciciNotu\n'
+              'Yukarıdaki dökümü oku: kare bulundu ama basılan şey o '
+              'kare değil.',
+        );
+      }
+
+      // **İşaret denetimi (Paket DS).** Kare kendi penceresini ya da
+      // kartını taşıyorsa, o metin ekranda **gerçekten** olmalı.
+      if (d.isaret.isNotEmpty) {
+        expect(
+          dokum.toString().contains(d.isaret),
+          isTrue,
+          reason: '${d.ad}: beklenen işaret ("${d.isaret}") bu karede '
+              'hiç çizilmedi. Döküm başka bir ekranı "${d.ad}" diye '
+              'başlıklandırıyor olabilir — yukarıdaki çıktıyı oku.',
+        );
+      }
 
       // Kalıcı denetim: ekranda ham `null` görünmez (Paket BF).
       final List<String> kotu =
@@ -569,5 +716,13 @@ void main() {
     expect(kareler, isNotEmpty,
         reason: '$taranan hayatta aranan beş durumdan hiçbiri oluşmadı; '
             'ya tarama bozuk ya koşullar yanlış yazılmış.');
+
+    // **Modal kapsam kaydı bu dökümün üzerine kurulu (Paket DS).**
+    // `kModalBaskaTestle` beş widget dosyası için "karesi bu döküm
+    // tarafından basılıyor" diyor; iddiayı basan taraf doğruluyor.
+    modalKapsamDenetle(
+      'ekran_dokumu_ozel_durum_test.dart',
+      basilanTumMetinler,
+    );
   });
 }

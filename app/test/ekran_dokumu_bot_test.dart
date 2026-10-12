@@ -51,15 +51,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/player_bot.dart';
+import 'support/section_pages.dart';
 import 'support/test_flow.dart';
 
 /// Alt çubuktaki dört menü (NAV-001); Hayat varsayılan ekran.
-const List<(String, String)> kSekmeler = <(String, String)>[
-  ('tab_okul_meslek', 'Okul / Meslek'),
-  ('tab_varliklar', 'Varlıklar'),
-  ('tab_iliskiler', 'İlişkiler'),
-  ('tab_aktiviteler', 'Aktiviteler'),
-];
+///
+/// **Paket DS: dördüncü kopya kaldırıldı.** Aynı liste dört dosyada
+/// elle yazılıydı (`ekran_dokumu_test`, `ekran_dokumu_bot_test`,
+/// `ekran_dokumu_ozel_durum_test`, `paket_co_telefon_yerlesimi_test`).
+/// Paket DQ birinci kopyayı `kSekmeKareleri`ne bağlamıştı; kalanlar
+/// sessizce ayrışabilirdi — yeni bir sekme eklenince üç döküm onu
+/// basmaz, kimse de fark etmez. Tek kaynak `support/section_pages.dart`.
+const List<SekmeKaresi> kSekmeler = kSekmeKareleri;
 
 void main() {
   late GameController controller;
@@ -236,7 +239,9 @@ void main() {
     }
     if (hayat.length < 3) bos.add('Hayat');
 
-    for (final (String anahtar, String ad) in kSekmeler) {
+    for (final SekmeKaresi kare in kSekmeler) {
+          final String anahtar = kare.sekme;
+          final String ad = kare.ad;
       final Finder sekme = find.byKey(Key(anahtar));
       if (sekme.evaluate().isEmpty) {
         rapor.writeln('\n--- $ad --- (SEKME YOK)');

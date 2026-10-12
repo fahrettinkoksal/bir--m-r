@@ -214,4 +214,36 @@ void main() {
     print('SEKME KÖKÜ: ${kSekmeKareleri.length} kare · '
         'ekran_dokumu_test.dart basıyor');
   });
+
+  test('§6 sekme listesinin tek kaynağı var (Paket DS)', () {
+    // **Ölçülen dağınıklık.** Aynı dört sekme dört dosyada elle
+    // yazılıydı: `ekran_dokumu_test`, `ekran_dokumu_bot_test`,
+    // `ekran_dokumu_ozel_durum_test` ve
+    // `paket_co_telefon_yerlesimi_test`. Paket DQ birincisini
+    // `kSekmeKareleri`ne bağlamıştı; kalan üçü sessizce ayrışabilirdi
+    // — beşinci bir sekme eklenince üç döküm onu basmaz ve kimse fark
+    // etmez. Bekçi: `kSekmeler` tanımlayan her test onu paylaşılan
+    // listeden **türetmeli**.
+    final List<String> sorunlar = <String>[];
+    for (final FileSystemEntity e in Directory('test').listSync()) {
+      if (e is! File || !e.path.endsWith('_test.dart')) continue;
+      final String kaynak = e.readAsStringSync();
+      final RegExpMatch? bildirim = RegExp(
+        r'^(?:const|final)\s+List<[^>]+>\s+kSekmeler\s*=\s*([^;]*);',
+        multiLine: true,
+      ).firstMatch(kaynak);
+      if (bildirim == null) continue;
+      final String govde = bildirim.group(1)!;
+      if (!govde.contains('kSekmeKareleri')) {
+        sorunlar.add('${e.uri.pathSegments.last}: `kSekmeler` elle '
+            'yazılmış. `support/section_pages.dart` içindeki '
+            '`kSekmeKareleri` listesinden türet; yoksa yeni bir sekme '
+            'eklendiğinde bu test onu hiç basmaz.');
+      }
+    }
+    expect(sorunlar, isEmpty, reason: sorunlar.join('\n'));
+    // ignore: avoid_print
+    print('SEKME LİSTESİ: tek kaynak (kSekmeKareleri) · '
+        '${kSekmeKareleri.length} sekme');
+  });
 }

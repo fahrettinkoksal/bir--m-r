@@ -48,14 +48,16 @@ import 'package:bir_omur/state/game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/section_pages.dart';
 import 'support/test_flow.dart';
 
 /// Oyunun dört sekmesi (NAV-001: `tab_hayat` yoktur).
-const List<String> kSekmeler = <String>[
-  'tab_okul_meslek',
-  'tab_varliklar',
-  'tab_iliskiler',
-  'tab_aktiviteler',
+///
+/// **Paket DS: kopya kaldırıldı.** Anahtarlar `kSekmeKareleri`den
+/// okunuyor; yeni bir sekme eklenince telefon yerleşimi denetimi de
+/// kendiliğinden onu da ölçer.
+final List<String> kSekmeler = <String>[
+  for (final SekmeKaresi k in kSekmeKareleri) k.sekme,
 ];
 
 /// Sekme sayfalarındaki alt sayfa kapıları.

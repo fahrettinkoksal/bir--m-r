@@ -263,6 +263,12 @@ void main() {
       }
       if (hayat.length < 3) bosEkranlar.add('Hayat');
 
+      // **Modal kapsam kaydı (Paket DS).** `character_header.dart`
+      // kendi karesi olmayan bir widget: her ekranın tepesinde
+      // duruyor ve 10 cümle taşıyor. Kayıt "bu döküm basıyor" diyor;
+      // iddiayı basan taraf doğruluyor.
+      modalKapsamDenetle('ekran_dokumu_test.dart', hayat);
+
       for (final SekmeKaresi kare in kSekmeler) {
         final String anahtar = kare.sekme;
         final String ad = kare.ad;

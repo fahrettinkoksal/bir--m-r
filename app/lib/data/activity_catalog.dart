@@ -724,7 +724,16 @@ const List<ActivityAction> kActivityActions = <ActivityAction>[
     id: 'cezaevi_sakin',
     venue: ActivityVenue.cezaevi,
     label: 'Sakin kal',
-    description: 'Tartışmanın kenarından dolaş. En zor olanı bu.',
+    // **Paket DS: aynı cümle iki satırda yazıyordu.** Koğuş karesi ilk
+    // kez basıldığında bu satır ile `PrisonAction.iyiHalGoster`
+    // ("Kurallara uy, sakin dur") yan yana duruyordu ve ikisinin de
+    // açıklaması "Tartışmanın kenarından dolaş…" diye başlıyordu.
+    // İki ayrı sistem, iki ayrı karşılık: bu satır mutluluk ve
+    // karizma veriyor, öteki **iyi hâl** dosyasına yazılıyor. Cümle
+    // artık kendi karşılığını anlatıyor; mekanik adı uydurulmuyor.
+    // Yapının kendisi (iki ayrı "sakin dur" eylemi) Faho'nun kararına
+    // bırakıldı (Q-250).
+    description: 'Gürültünün dışında bir köşe. Kafan biraz dinlenir.',
     icon: Icons.self_improvement_rounded,
     happiness: 2,
     charisma: 1,

@@ -545,34 +545,182 @@ final List<Bolum> kModalKareleri = <Bolum>[
     <Finder>[find.byKey(const Key('open_settings'))],
     'Görünüm',
   ),
+  // **Paket DS.** `prison_life_panel.dart` (7 cümle) "bekleyen durum
+  // istiyor" diye bekleme listesinde duruyordu. Ölçüm başka bir şey
+  // söyledi: kapı bekleyen bir şey değil, `isImprisoned`; panel
+  // Aktiviteler sekmesindeki **bir satırın arkasında** duruyor
+  // (`aktivite_cezaevi`). Özel durum dökümü o satırı **basıyor** ama
+  // hiç **dokunmuyor**; bu yüzden panelin kendisi hiç çizilmedi.
+  // Kayıt yanlış değil, eksikti: liste bekleme değil kapı sorunuydu.
+  Bolum(
+    'CEZAEVİ KOĞUŞU',
+    'prison_life_panel.dart',
+    (GameState s) => s.isImprisoned,
+    'tab_aktiviteler',
+    <Finder>[find.byKey(const Key('aktivite_cezaevi'))],
+    'Koğuş hayatı',
+  ),
 ];
 
 /// Metin taşıyan ama karesi **henüz** basılmayan modal/panel dosyaları.
 ///
-/// Bu bir muafiyet listesi değil **ölçülmüş bir kuyruk**: her biri
-/// bekleyen bir durum istiyor (kriz, mülakat, duruşma, alan seçimi) ve
-/// bölüm dökümünün aradığı "temiz kare" tanımı gereği o durumlar
-/// dışarıda bırakılıyor (Paket CG/CR dersi). Bir sonraki pakette
-/// bekleyen durumlu bir döküm turu gerekiyor. Liste yalnızca **küçülür**;
-/// yeni bir metin taşıyan widget eklenirse bekçi düşer.
+/// **Paket DS — liste yanlıştı ve kimse denetlemiyordu.** Paket DR bu
+/// üç kaydı yazdı ama hiçbir test onları okumuyordu (ölçtüm:
+/// `kModalBekleyen` ve `kModalBaskaTestle` depoda **sıfır** yerden
+/// çağrılıyordu). Denetlenmeyen kayıt hemen eskidi: yedi "bekleyen"
+/// dosyadan beşi aslında basılıyordu ya da basılabiliyordu.
+///
+/// Ölçüm (`ekran_dokumu_ozel_durum_test.dart` çıktısında her dosyanın
+/// kendi cümlesi arandı):
+///
+///   elder_support_card   "Bu yıl kim yanında?"                1 kez
+///   health_crisis_sheet  "Ne yapacağına sen karar veriyorsun." 1 kez
+///   trial_sheet          "Avukat sonucu garanti etmez"         1 kez
+///   pregnancy_notice     "Bebek yolda"                         2 kez
+///   person_card          "vefat etti"                         37 kez
+///   interview_sheet      "Karşındaki kişi bir soru soruyor."   0 kez
+///   prison_life_panel    "Koğuş hayatı"                        0 kez
+///   license_exam_sheet   "Geçmek için en az"                   0 kez
+///   track_choice_sheet   "seçtiğin alan eğitim"                0 kez
+///
+/// Mülakat karesinin neden basılmadığı da ölçüldü ve **ürün hatası**
+/// çıktı: dökümün açıcısı `career_mulakat_devam` satırını arıyordu, o
+/// satır yalnızca kariyer görünümünde vardı ve bulunan kare 17
+/// yaşındaki bir **lise öğrencisiydi**. Öğrencinin mülakata devam etme
+/// yolu hiç yoktu (Paket DS, `school_career_screen.dart`). Satır
+/// eklendi, açıcı iki anahtarı da deniyor, kare artık basılıyor.
+///
+/// Kalan iki dosya gerçekten bekliyor ve ikisi de **akış içi** modal:
+/// ekranda bir satırın arkasında değil, bir eylemin ortasında
+/// açılıyorlar. Liste yalnızca **küçülür**; yeni bir metin taşıyan
+/// widget eklenirse `paket_ds_modal_kapsami_test.dart` düşer.
 const List<String> kModalBekleyen = <String>[
-  'elder_support_card.dart', // 11 cümle · Hayat ekranında, yaşlılık kapısı
-  'health_crisis_sheet.dart', // 4 · bekleyen kriz
-  'interview_sheet.dart', // 3 · bekleyen mülakat
-  'license_exam_sheet.dart', // 6 · sınav akışı
-  'prison_life_panel.dart', // 7 · cezaevi karesi (Paket DB ölçtü, basmadı)
-  'track_choice_sheet.dart', // 5 · lise alan seçimi (bekleyen karar)
-  'trial_sheet.dart', // 4 · duruşma (bekleyen kriz)
+  // 13 cümle · **DR'nin kaydı yanlıştı.** "Başka döküm basıyor"
+  // deniyordu; ölçtüm: `ekran_dokumu_bildirim_pencereleri_test.dart`
+  // bildirim penceresini çiziyor ama bastığı metin bildirimin
+  // **içeriği** ("Biletin tutmadı. Numaran 021952 idi."), pencerenin
+  // kendi cümleleri değil. Pencerenin 13 cümlesi cenaze seçenekleri ve
+  // bebeğe ad verme dallarında duruyor ve o dallar üç dökümün
+  // hiçbirinde çizilmedi (ölçüm: "Cenazeye katıl" 0, "Bebeğin adını
+  // sen koyabilirsin" 0).
+  'notice_sheet.dart',
+  // 8 cümle · ehliyet sınavı akışının ortasında açılıyor: Aktiviteler →
+  // Ehliyet → sınava gir. Dökümün tek adımlı yol kalıbına girmiyor.
+  'license_exam_sheet.dart',
+  // 8 cümle · ortaokul bitince gelen **bekleyen karar**; temiz kare
+  // tanımı gereği (Paket CG/CR) bölüm dökümü o kareyi dışarıda
+  // bırakıyor.
+  'track_choice_sheet.dart',
 ];
 
-/// Karesi **başka bir döküm** tarafından basılan modal/panel dosyaları.
+/// Karesi **başka bir döküm** tarafından basılan modal/panel dosyası.
 ///
-/// İddia denetleniyor: adı yazılan test hem `pumpWidget` çağırıyor hem
-/// `print` ediyor (Paket DQ'nun sıkıştırdığı kural).
-const Map<String, String> kModalBaskaTestle = <String, String>{
-  'notice_sheet.dart': 'ekran_dokumu_bildirim_pencereleri_test.dart',
-  'character_header.dart': 'ekran_dokumu_test.dart',
-};
+/// **İddia nasıl denetleniyor (Paket DS).** Üç halka da ölçülüyor:
+///
+/// 1. `isaret` o widget'ın **kendi kaynağında** geçiyor mu (kayıt
+///    uydurma değil mi),
+/// 2. adı yazılan test var mı, `pumpWidget` ve `print` çağırıyor mu
+///    (kareyi gerçekten çiziyor ve basıyor mu),
+/// 3. `isaret` o testin **kaynağında** bir ölçü olarak duruyor mu
+///    (yani o test kareyi bastığını kendi iddia ediyor mu).
+///
+/// Üçüncü halka Paket DQ'nun dersinden geliyor: metin benzerliği bir
+/// kapsam kanıtı değil. Özel durum dökümünde bu ölçüler `Durum`
+/// kayıtlarının `isaret` alanı olarak duruyor ve o test kendi karesini
+/// onlara göre denetliyor.
+class ModalKaydi {
+  const ModalKaydi(this.dosya, this.test, this.isaret);
+
+  /// `lib/ui/widgets/` altındaki dosya adı.
+  final String dosya;
+
+  /// `app/test/` altındaki, kareyi basan test dosyası.
+  final String test;
+
+  /// O dosyanın kendi kaynağındaki, **çizilen** metin.
+  final String isaret;
+}
+
+const List<ModalKaydi> kModalBaskaTestle = <ModalKaydi>[
+  ModalKaydi(
+    'character_header.dart',
+    'ekran_dokumu_test.dart',
+    'Evde seninle',
+  ),
+  ModalKaydi(
+    'elder_support_card.dart',
+    'ekran_dokumu_ozel_durum_test.dart',
+    'Bu yıl kim yanında?',
+  ),
+  ModalKaydi(
+    'health_crisis_sheet.dart',
+    'ekran_dokumu_ozel_durum_test.dart',
+    'Ne yapacağına sen karar veriyorsun.',
+  ),
+  ModalKaydi(
+    'trial_sheet.dart',
+    'ekran_dokumu_ozel_durum_test.dart',
+    'Avukat sonucu garanti etmez',
+  ),
+  ModalKaydi(
+    'pregnancy_notice.dart',
+    'ekran_dokumu_ozel_durum_test.dart',
+    'Bebek yolda',
+  ),
+  ModalKaydi(
+    'person_card.dart',
+    'ekran_dokumu_ozel_durum_test.dart',
+    'vefat etti',
+  ),
+  // Paket DS'nin kendi testi: öğrencinin mülakat penceresini açıyor ve
+  // basıyor. Özel durum dökümü de artık basıyor ama asıl kanıt burada:
+  // o test pencerenin başlığını ve cümlesini ölçü olarak tutuyor.
+  ModalKaydi(
+    'interview_sheet.dart',
+    'paket_ds_ogrenci_is_kapisi_test.dart',
+    'Karşındaki kişi bir soru soruyor.',
+  ),
+];
+
+/// Kaydı **çalışma zamanında** doğrular: basılan karelerde işaret var mı?
+///
+/// **Neden böyle (Paket DS).** "Bu dosyanın karesi şu test tarafından
+/// basılıyor" cümlesi kaynak taramasıyla doğrulanamıyor: dökümün
+/// bastığı metin kaynağında yazmaz, çalışırken oluşur. Paket DR'nin iki
+/// kaydının ikisi de bu yüzden yanlıştı ve kimse görmedi
+/// (`notice_sheet.dart` için "başka döküm basıyor" deniyordu; o döküm
+/// bildirimin içeriğini basıyor, pencerenin cümlelerini değil).
+///
+/// Çözüm: kaydı **iddia eden** değil **basan** test doğruluyor. Her
+/// döküm bastığı bütün metinleri toplayıp bu işlevi çağırıyor; işlev
+/// kendisine ait kayıtları süzüp işaretleri arıyor. Kayıt eskirse o
+/// dökümün kendisi düşer.
+void modalKapsamDenetle(String testDosyasi, Iterable<String> basilan) {
+  final List<ModalKaydi> benim = <ModalKaydi>[
+    for (final ModalKaydi k in kModalBaskaTestle)
+      if (k.test == testDosyasi) k,
+  ];
+  if (benim.isEmpty) return;
+  final String hepsi = basilan.join('\n');
+  final List<String> eksik = <String>[
+    for (final ModalKaydi k in benim)
+      if (!hepsi.contains(k.isaret)) '${k.dosya} → "${k.isaret}"',
+  ];
+  // ignore: avoid_print
+  print('MODAL KAPSAM ($testDosyasi): ${benim.length} kayıt · '
+      'eksik ${eksik.length}');
+  expect(
+    eksik,
+    isEmpty,
+    reason: 'Bu dosyaların karesi "$testDosyasi tarafından basılıyor" '
+        'diye kayıtlı ama bu koşuda işaretleri hiç çizilmedi:\n'
+        '${eksik.join("\n")}\n\n'
+        'Ya kayıt eskidi (işaret değişti, kare artık basılmıyor) ya da '
+        'döküm o kareyi kaybetti. Kaydı `kModalBaskaTestle` içinde '
+        'düzelt ya da dosyayı `kModalBekleyen` kuyruğuna al — ölçmeden '
+        '"okunuyor" yazma.',
+  );
+}
 
 /// Dökümün dışındaki sayfalar ve **onları çizen** test.
 ///

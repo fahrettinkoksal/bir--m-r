@@ -10521,3 +10521,174 @@ koşuyor) ve PR durumu `clean`. İkinci bir 40 dakikalık yerel koşu
 başlatılmadı; CI aynı süiti düzeltilmiş kodla zaten koşturdu.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+## Paket DS — öğrencinin kapalı iş kapısı ve denetlenmeyen kapsam kaydı (12 Ekim 2026)
+
+Paket DR bekleme listesi bırakmıştı; bu paket onu **ölçtü** ve listenin
+yanlış olduğunu buldu. Aynı turda, listeyi doğrulamaya çalışırken
+onaylı bir karara aykırı bir **ürün hatası** çıktı.
+
+### 1) D-131'in yarısı hiç çalışmıyordu
+
+D-131 aynen: *"**Öğrenci artık İş ara ekranını görür**; ekran yarım
+zamanlı ve tam zamanlı işleri **ayrı gruplar**."* Sayfa o karara göre
+yazılmıştı (`education_career_pages.dart` yarım zamanlı grubu kendi
+başlığıyla listeliyor) ama sayfaya giden tek kapı `_CareerView`
+içindeydi ve `SchoolCareerScreen.build` onu yalnızca **öğrenci
+olmayana** çiziyordu:
+
+```dart
+if (egitim.isStudent) return _SchoolView(...);   // kapı yok
+return _CareerView(...);                         // kapı burada
+```
+
+Kanıt kodun kendi içindeydi: kariyer görünümündeki satırın alt
+yazısında `egitim.isSchoolStudent ? 'Okurken yapılabilecek yarım
+zamanlı işler'` dalı vardı ve `isStudent = enrolled ||
+isUniversityStudent`, `isSchoolStudent = enrolled` olduğu için o dal
+**hiç çalışamazdı**.
+
+**Ölçüm (8 arketip × 12 tohum, tam hayatlar):**
+
+| kare | sayı | ekranda görünen |
+|---|---|---|
+| 16 yaş+ öğrenci | 917 | "İş ara" satırı **yok** |
+| işi olan öğrenci | 589 | işin adı, maaşı, ayrılma yolu **yok** |
+| mülakatı süren öğrenci | 180 | devam etme yolu **yok**, başvurular "Devam eden bir mülakatın var." diye kapalı |
+
+Yani sekiz yarım zamanlı iş, kendi maaş bandı ve on altı mülakat
+sorusu tam olarak yazıldığı kitleye kapalıydı; üstüne mülakatı süren
+öğrenci **kilitli** kalıyordu (ne devam, ne iptal).
+
+**Düzeltme.** Okul görünümüne üç şey geldi: `İş ara` satırı (yaş kapısı
+**katalogdan** okunuyor), çalışan öğrencide iş kartı + "İşten ayrıl",
+ve "Mülakata devam et" satırı. Kariyer görünümündeki ölü dal
+kaldırıldı. Kapı açılırken ulaşılan durumun **gösterilebildiğinden**
+emin olundu: tek yönlü kapı bırakılmadı.
+
+Yan ürün: `const int _enKucukYarimZamanliYas = 16;` yorumunda
+"katalogdaki en küçük `minAge` ile aynı" diyordu — hiçbir yerde
+sınanmayan bir iddia. Ölçüm doğruladı (8 yarım zamanlı iş, en küçük
+16) ve sayı artık **katalogdan türetiliyor**; iddia yapı gereği doğru.
+
+### 2) Kapsam kaydı denetlenmiyordu, bu yüzden yanlıştı
+
+Paket DR üç liste yazdı (`kModalKareleri`, `kModalBekleyen`,
+`kModalBaskaTestle`). **Ölçtüm: son ikisi depoda sıfır yerden
+çağrılıyordu.** Denetlenmeyen kayıt hemen eskidi:
+
+| dosya | DR'nin kaydı | ölçülen gerçek |
+|---|---|---|
+| elder_support_card | bekliyor | **basılıyor** ("Bu yıl kim yanında?" 1 kez) |
+| health_crisis_sheet | bekliyor | **basılıyor** (1 kez) |
+| trial_sheet | bekliyor | **basılıyor** (1 kez) |
+| pregnancy_notice | kayıt yok | **basılıyor** ("Bebek yolda" 2 kez) |
+| person_card | kayıt yok | **basılıyor** ("vefat etti" 37 kez) |
+| notice_sheet | başka döküm basıyor | **basılmıyor** — o döküm bildirimin *içeriğini* basıyor, pencerenin 13 cümlesini değil |
+| prison_life_panel | bekliyor | basılmıyor ama nedeni "bekleyen durum" **değil**: panel bir menü satırının arkasında ve döküm o satıra hiç dokunmuyordu → **kare eklendi** |
+| interview_sheet | bekliyor | basılmıyordu, nedeni **ürün hatası** (yukarıdaki §1) → artık basılıyor |
+| license_exam_sheet · track_choice_sheet | bekliyor | doğru: ikisi de akış içi modal |
+
+**Yöntem değişikliği.** "Bu dosyanın karesi şu test tarafından
+basılıyor" iddiası kaynak taramasıyla doğrulanamaz: dökümün bastığı
+metin kaynağında yazmaz, çalışırken oluşur. İddiayı artık **basan
+taraf** doğruluyor: her döküm `modalKapsamDenetle` çağırıp kendi
+kayıtlarının işaretlerini bastığı karelerde arıyor. Üç dökümün üçü de
+bağlandı (ölçüm: `ekran_dokumu_test` 1 kayıt, `ekran_dokumu_ozel_durum`
+5 kayıt, `paket_ds_ogrenci_is_kapisi` 1 kayıt · eksik 0).
+
+Kapsam ölçüsü de üç kez daraltıldı, her daraltma bir yanlış saymayı
+düzeltti: `assert` mesajı oyuncuya dönük metin değil
+(`bottom_action_bar`), karşılaştırmaya giren dizgi çizilen metin değil
+(`character_face`, bir saç modeli adını **arıyor**), interpolasyon
+çıkınca 12 karakterden kısa kalan dizgi cümle değil (`race_track`).
+Son hâl: **28 widget dosyası · 15'i metin taşıyor · kayıt açığı 0.**
+
+### 3) MÜLAKAT karesi ilk kez basıldı — iki ayrı neden vardı
+
+Özel durum dökümü bu kareyi üç turdur açamıyordu ve dosyanın başındaki
+teşhis "alt sekmeye basmak bu koşumda Meslek ekranını getirmiyor"
+diyordu. Semptom doğru, neden eksikti. İki ayrı engel ölçüldü:
+
+1. **Ürün hatası:** açıcı `career_mulakat_devam` arıyordu; bulunan kare
+   17 yaşında bir **lise öğrencisiydi** ve o satır öğrenciye hiç
+   çizilmiyordu (§1). 180 kare böyle.
+2. **Araç hatası, asıl engel:** satır eklendikten sonra da
+   bulunamadı — karede mülakatın yanında iki bildirim ve bir **bekleyen
+   olay** penceresi açıktı. Modal bariyer yüzünden sekmeye dokunmak
+   hiçbir şeye isabet etmiyordu; `tap()` zaten "warnIfMissed" uyarısı
+   veriyordu, o uyarıyı okumamıştım.
+
+Karenin koşulu sıkıştırıldı (mülakat **tek** bekleyen şey olmalı) ve
+kare açıldı:
+
+```
+Halı saha görevlisi (yarım zamanlı) mülakatı
+Karşındaki kişi bir soru soruyor.
+Saat doldu ama takım oynamaya devam ediyor.
+  Işıkları kapatırım / Kenara gider, süreyi hatırlatırım /
+  Beklerim, bir şey demem / Kavga ederim
+Görüşmeden vazgeç
+```
+
+Döküm artık sessizce geçmiyor: açıcının başarısızlığı **testi
+düşürüyor** ve her karenin ölçülmüş bir `isaret`i var (altı karede
+bilerek boş: kendi penceresi olmayan kareler).
+
+### 4) Okunan karelerden çıkan üç kusur ve dört soru
+
+**Düzeltilenler (metin, kural değil):**
+
+- Son sınıftaki oyuncunun kartında **"Son sınıfa kalan: 0 yıl"**
+  yazıyordu. Sayı doğru (12 − 12), cümle yanlış: oyuncu son sınıfın
+  içinde. Satır artık 12. sınıfta "Son sınıf · Bu yıl" diyor.
+- Koğuş karesinde iki ayrı sistem **aynı cümleyi** yazıyordu
+  ("Tartışmanın kenarından dolaş…"): biri iyi hâl, öteki mutluluk
+  veriyor. İkinci cümle kendi karşılığını anlatıyor.
+- Çalışan öğrencide satır kariyer görünümüyle aynı dili konuşuyor
+  ("İş değiştir · Önce mevcut işinden ayrılman gerekir").
+
+**Kuyruğa yazılanlar (ürün kararı, kod değişmedi):** Q-247 (öğrenci
+tam zamanlı iş tutabiliyor — ölçüm: 589 çalışan öğrenci karesinde
+Kuaför ve Aşçı var), Q-248 ("Lise 3. sınıf" ve "11. sınıf" aynı
+kartta), Q-249 ("Yerleştirme puanı 35" — ölçek yazmıyor; ölçüm:
+`clamp(0,100)`), Q-250 (koğuşta iki ayrı "sakin dur" eylemi).
+
+### 5) Dört kopya listeden biri kaldı
+
+`kSekmeler` dört dosyada elle yazılıydı; Paket DQ birini
+`kSekmeKareleri`ne bağlamıştı, kalan üçü sessizce ayrışabilirdi.
+Üçü de bağlandı ve bekçisi yazıldı (`paket_dm_bolum_kapsami_test` §6:
+`kSekmeler` tanımlayan her test onu paylaşılan listeden türetmeli).
+
+### Ölçüler
+
+| ölçü | değer |
+|---|---|
+| yeni test dosyası | 2 (`paket_ds_ogrenci_is_kapisi_test`, `paket_ds_modal_kapsami_test`) |
+| yeni test | 12 |
+| kanıtlanmış mutasyon (bekçi ısırıyor mu) | **9/9** |
+| ilk kez basılan kare | 2 (CEZAEVİ KOĞUŞU, MÜLAKAT) |
+| modal kapsam açığı | 0 (28 dosya · 15 metin taşıyor) |
+| bekleme kuyruğu | 3 (notice_sheet, license_exam_sheet, track_choice_sheet) |
+| düzeltilen metin kusuru | 3 |
+| kuyruğa yazılan soru | 4 (Q-247…Q-250) |
+
+### Ders
+
+**Bekleme listesi bir bekçi değildir.** DR'nin üç listesi doğru
+niyetle yazıldı ve bir paket sonra beşi yanlış çıktı — çünkü hiçbir
+test onları okumuyordu. Ölçüsü olmayan kayıt, yorum kadar güvenilir.
+Bu paketten sonraki kural: **bir kapsam iddiasını, o kareyi basan test
+kendi çalışmasında doğrulamalı.** Kaynak taraması iddianın
+*uydurulmadığını* gösterir, *tuttuğunu* göstermez.
+
+**İkincisi: aracın uyarısını oku.** Mülakat karesi üç paket boyunca
+"açılmıyor" diye duruyordu ve `tap()` o üç paket boyunca
+"warnIfMissed" uyarısı basıyordu. Teşhisi uyarının söylediği yerden
+değil, kendi tahminimden kurmuşum.
+
+**Üçüncüsü: kapı açarken varış yerini de göster.** Öğrenciye "İş ara"
+satırını eklemek yetmezdi; o satırdan geçen oyuncu işe girince işini
+göremiyor ve ayrılamıyor olacaktı. Ölçüm bunu önceden gösterdi (589
+kare), ekran da onunla birlikte yazıldı.

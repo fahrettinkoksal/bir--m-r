@@ -1006,6 +1006,30 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 > ve o kayıt da denetleniyor: adı yazılan testin o sayfanın
 > başlıklarından birini gerçekten andığı doğrulanıyor.
 >
+> **GÜNCELLEME (Paket DR/DS):** denetim bir katman aşağıya,
+> `lib/ui/widgets/` altına indi. Ölçüm: **28 dosya · 15'i oyuncuya
+> dönük metin taşıyor** (`person_detail_sheet` tek başına 77 cümle).
+> DR altı modal karesi açtı; DS kalanları ölçtü ve DR'nin bekleme
+> listesinin **yanlış** olduğunu buldu — yedi "bekleyen" dosyadan
+> beşi aslında basılıyordu, "başka döküm basıyor" denen
+> `notice_sheet.dart` ise basılmıyordu (o döküm bildirimin
+> *içeriğini* basıyor, pencerenin 13 cümlesini değil). Neden kimse
+> görmedi: o iki liste depoda **sıfır** yerden çağrılıyordu.
+>
+> DS iki kare daha açtı (CEZAEVİ KOĞUŞU — panel bir menü satırının
+> arkasındaydı; MÜLAKAT — hem ürün hem araç hatası vardı) ve kaydı
+> **çalışma zamanında** denetlenir hâle getirdi: her döküm
+> `modalKapsamDenetle` çağırıp kendi kayıtlarının işaretlerini bastığı
+> karelerde arıyor. Bugünkü modal kapsamı: **kayıt açığı 0 · bekleme
+> kuyruğu 3** (notice_sheet, license_exam_sheet, track_choice_sheet —
+> üçü de akış içi ya da dal içi modal). Bekçi:
+> `app/test/paket_ds_modal_kapsami_test.dart`.
+>
+> Ölçünün kendisi de üç kez daraltıldı, her daraltma bir yanlış
+> saymayı düzeltti: `assert` mesajı oyuncuya dönük metin değil,
+> karşılaştırmaya giren dizgi çizilen metin değil, interpolasyon
+> çıkınca 12 karakterden kısa kalan dizgi cümle değil.
+>
 > Yani bu denetimden sonra dokuz ekranın dokuzunun da en az bir test
 > yolu var. **Uyarı:** sınıf adını testlerde aramak zayıf bir vekildir
 > (örn. `SchoolCareerScreen` adı hiç geçmiyor ama ekran

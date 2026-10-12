@@ -26,6 +26,7 @@ import 'military_page.dart';
 import '../../widgets/section_scaffold.dart';
 import '../../widgets/track_choice_sheet.dart';
 import 'education_career_pages.dart';
+import '../../../data/job_catalog.dart';
 import '../../../data/school_club_catalog.dart';
 import 'school_clubs_page.dart';
 import 'sports_career_page.dart';
@@ -79,7 +80,21 @@ class SchoolCareerScreen extends StatelessWidget {
 ///
 /// Burada yalnızca **okulla ilgili** gruplar bulunur. Arkadaşlık düzeyi ve
 /// özel ilişkiler İlişkiler menüsünden yönetilir.
-enum _SchoolPage { kok, sinifArkadaslari, ogretmenler, kulupler, sporKariyeri }
+enum _SchoolPage {
+  kok,
+  sinifArkadaslari,
+  ogretmenler,
+  kulupler,
+  sporKariyeri,
+  // **Paket DS.** D-131 "Öğrenci artık İş ara ekranını görür" diyor ama
+  // `JobSearchPage` yalnızca `_CareerView` içinden açılıyordu ve o
+  // görünüm yalnızca **öğrenci olmayana** çiziliyor. Yani yarım zamanlı
+  // iş sistemi (8 iş, kendi maaş bandı, iki mülakat sorusu) tam olarak
+  // yazıldığı kitleye kapalıydı. Kanıt kodun kendisinde duruyordu:
+  // kariyer görünümündeki satırın alt yazısı "Okurken yapılabilecek
+  // yarım zamanlı işler" dalını taşıyor ve o dal hiç çalışamıyordu.
+  isArama,
+}
 
 class _SchoolView extends StatefulWidget {
   const _SchoolView({required this.state, required this.onBack});
@@ -97,9 +112,19 @@ class _SchoolViewState extends State<_SchoolView> {
   /// Son eylemin ekranda gösterilen sonucu (ders çalışma gibi).
   String? _sonuc;
 
+  /// İşten ayrılmanın sonucu; **düğmenin hemen altında** gösterilir.
+  ///
+  /// `_sonuc` ile birleştirilmedi (Paket DS): o panel sayfanın altında,
+  /// altı menü satırının ardında duruyor. İşten ayrılma düğmesi ise
+  /// kartın yanında, sayfanın tepesinde. Tek alan kullanılsa oyuncu
+  /// dokunduğu yerde hiçbir karşılık görmez, cümle iki ekran aşağıda
+  /// kalır. Geri bildirim dokunulan yerde durur (D-063'ün ruhu).
+  String? _isSonucu;
+
   void _go(_SchoolPage page) => setState(() {
     _page = page;
     _sonuc = null;
+    _isSonucu = null;
   });
 
   /// Menü satırının alt yazısı: hangi kulüpte hangi roldesin.
@@ -150,6 +175,8 @@ class _SchoolViewState extends State<_SchoolView> {
           playerAge: state.player.age,
           onBack: () => _go(_SchoolPage.kok),
         );
+      case _SchoolPage.isArama:
+        return JobSearchPage(onBack: () => _go(_SchoolPage.kok));
       case _SchoolPage.kulupler:
         return SchoolClubsPage(onBack: () => _go(_SchoolPage.kok));
       case _SchoolPage.sporKariyeri:
@@ -206,11 +233,19 @@ class _SchoolViewState extends State<_SchoolView> {
               (label: 'Yerleştirme puanı', value: '${egitim.placementScore}'),
             if (egitim.startedAtAge != null)
               (label: 'Başlangıç', value: '${egitim.startedAtAge} yaşında'),
-            if (egitim.grade != null)
+            // **Son sınıftaki oyuncuda satır kendini yiyordu (Paket
+            // DS).** Mülakat karesi ilk kez basıldığında 12. sınıf
+            // öğrencisinin kartında "Son sınıfa kalan: 0 yıl"
+            // yazıyordu. Sayı doğru (12 - 12), cümle yanlış: oyuncu
+            // son sınıfın **içinde**. Satır o yıl kalan yılı değil
+            // bulunduğu yeri söylüyor.
+            if (egitim.grade != null && egitim.grade! < 12)
               (
                 label: 'Son sınıfa kalan',
                 value: '${12 - egitim.grade!} yıl',
-              ),
+              )
+            else if (egitim.grade == 12)
+              (label: 'Son sınıf', value: 'Bu yıl'),
           ],
         ),
         const SizedBox(height: 12),
@@ -219,6 +254,108 @@ class _SchoolViewState extends State<_SchoolView> {
         if (ExamYear.isExamGrade(egitim.grade)) ...<Widget>[
           _ExamYearPanel(grade: egitim.grade!, flags: state.storyFlags),
           const SizedBox(height: 12),
+        ],
+        // --- Paket DS: öğrencinin işi ---------------------------------
+        //
+        // Öğrenci iş bulduğunda bu ekran işten hiç söz etmiyordu: ne
+        // işin adı, ne maaşı, ne de ayrılma yolu. Kariyer görünümünde
+        // üçünün hepsi var ama o görünüm öğrenciye çizilmiyor. "İş ara"
+        // satırını açarken ulaştığı durumu gösteremeyen bir ekran
+        // bırakmak olmaz; kart kariyer görünümünün özetlenmiş hâli.
+        if (state.career.isEmployed) ...<Widget>[
+          _PanelCard(
+            key: const Key('school_is_karti'),
+            icon: Icons.badge_outlined,
+            accent: BirOmurAccents.mor,
+            title: state.career.title,
+            rows: <({String label, String value})>[
+              if (state.career.title != state.career.label)
+                (label: 'Meslek', value: state.career.label),
+              (
+                label: 'Yıllık maaş',
+                value: trMoney(state.career.yearlySalary),
+              ),
+              if (state.career.startedAtAge != null)
+                (
+                  label: 'Başlangıç',
+                  value: '${state.career.startedAtAge} yaşında',
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const Key('school_isten_ayril'),
+              onPressed: () {
+                final String? metin = GameScope.of(context).quitJob()?.text;
+                setState(() => _isSonucu = metin);
+              },
+              child: const Text('İşten ayrıl'),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (_isSonucu != null) ...<Widget>[
+          InfoPanel(
+            key: const Key('school_is_sonucu'),
+            icon: Icons.info_outline,
+            text: _isSonucu!,
+          ),
+          const SizedBox(height: 12),
+        ],
+        // --- Paket DS: öğrencinin iş kapısı ---------------------------
+        //
+        // D-131: "Öğrenci artık İş ara ekranını görür; ekran yarım
+        // zamanlı ve tam zamanlı işleri ayrı gruplar." Bu satır yoktu;
+        // `JobSearchPage` yalnızca kariyer görünümünden açılıyordu ve o
+        // görünüm öğrenciye hiç çizilmiyor. Sekiz yarım zamanlı iş,
+        // kendi maaş bandı ve on altı mülakat sorusu yazıldığı kitleye
+        // ulaşmıyordu.
+        //
+        // Yaş kapısı kataloğun kendisinden okunuyor (sihirli sayı yok):
+        // en küçük yarım zamanlı iş yaşı. Öncesinde satır menüde hiç
+        // görünmez — sosyal medya satırının kalıbı (16 yaş).
+        if (state.player.age >= _enKucukYarimZamanliYas) ...<Widget>[
+          MenuRow(
+            key: const Key('school_is_ara_row'),
+            title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
+            // Çalışan oyuncuda gerekçe kariyer görünümüyle aynı cümle:
+            // `JobMarket.blockedWhileEmployed` (Paket DP) sayfanın
+            // içinde de aynı şeyi yazıyor.
+            // **Alt yazı ölçümle düzeltildi.** İlk yazdığımda kariyer
+            // görünümündeki ölü dalın cümlesini aldım ("Okurken
+            // yapılabilecek yarım zamanlı işler"). Sayfa basılınca
+            // yanlış olduğu görüldü: 20 yaşındaki öğrencinin ekranında
+            // "Tam zamanlı" grubu da açık ve düğmeleri çalışıyor
+            // (Mağaza çalışanı 352.000 ₺/yıl, 16 yaş+). Satır artık
+            // sayfanın gerçekten gösterdiğini söylüyor; motorun
+            // öğrenciye tam zamanlı iş vermesi **ayrı bir soru** ve
+            // kuyrukta (Q-247).
+            subtitle: state.career.isEmployed
+                ? 'Önce mevcut işinden ayrılman gerekir'
+                : 'Yarım zamanlı ve tam zamanlı işler ayrı gruplarda',
+            icon: Icons.work_outline,
+            accent: BirOmurAccents.mor,
+            onTap: () => _go(_SchoolPage.isArama),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Cevap bekleyen mülakat: kariyer görünümünde bu satır vardı,
+        // okul görünümünde yoktu. Öğrenci mülakatı sürerken ne devam
+        // edebiliyor ne iptal edebiliyordu; üstüne `applicationAvailability`
+        // bütün başvuruları "Devam eden bir mülakatın var." diye
+        // kapatıyordu (Paket DP'nin ölçtüğü engel).
+        if (state.hasPendingInterview) ...<Widget>[
+          MenuRow(
+            key: const Key('school_mulakat_devam'),
+            title: 'Mülakata devam et',
+            subtitle: state.pendingInterview?.job?.name ?? '',
+            icon: Icons.record_voice_over_outlined,
+            accent: BirOmurAccents.pirinc,
+            onTap: () => InterviewSheet.show(context),
+          ),
+          const SizedBox(height: 10),
         ],
         // Ders çalışmak gerçek bir eylem: not ortalamasını ve zekâyı
         // değiştirir, biraz da yorar (Paket 13).
@@ -430,11 +567,18 @@ String _isAltMetni(GameState state) {
   return 'Sermaye koy, kendi işini kur';
 }
 
-/// prototypeOnly: yarım zamanlı iş için en küçük yaş (D-131).
+/// Yarım zamanlı iş için en küçük yaş; **katalogdan okunur** (D-131).
 ///
-/// Katalogdaki en küçük `minAge` ile aynı; ekranda gerekçe yazarken
-/// kullanılır.
-const int _enKucukYarimZamanliYas = 16;
+/// Paket DS öncesinde burada `const int ... = 16` yazıyordu ve yorumu
+/// "katalogdaki en küçük `minAge` ile aynı" diyordu — hiçbir yerde
+/// sınanmayan bir iddia. Ölçüm: sekiz yarım zamanlı işin en küçüğü 16
+/// (kurye ve çağrı merkezi 18, etüt asistanı 17). Sayı artık tekrar
+/// yazılmıyor; katalog değişirse hem kapı hem ekrandaki gerekçe
+/// kendiliğinden kayar.
+int get _enKucukYarimZamanliYas => kJobCatalog
+    .where((JobType j) => j.partTime)
+    .map((JobType j) => j.minAge)
+    .reduce((int a, int b) => a < b ? a : b);
 
 enum _CareerPage {
   kok,
@@ -818,11 +962,17 @@ class _CareerViewState extends State<_CareerView> {
         if (isAranabilir && !state.career.isRetired) ...<Widget>[
           MenuRow(
             title: state.career.isEmployed ? 'İş değiştir' : 'İş ara',
+            // Üçüncü bir dal vardı: `egitim.isSchoolStudent` ise
+            // "Okurken yapılabilecek yarım zamanlı işler". O dal hiç
+            // çalışmıyordu — `_CareerView` yalnızca
+            // `!state.education.isStudent` iken çiziliyor ve
+            // `isStudent = enrolled || isUniversityStudent`, yani
+            // `isSchoolStudent = enrolled` burada daima false. Ölü dal
+            // kaldırıldı; cümlenin asıl yeri okul görünümündeki yeni
+            // "İş ara" satırı (Paket DS).
             subtitle: state.career.isEmployed
                 ? 'Önce mevcut işinden ayrılman gerekir'
-                : egitim.isSchoolStudent
-                    ? 'Okurken yapılabilecek yarım zamanlı işler'
-                    : 'Koşullarını sağladığın işler',
+                : 'Koşullarını sağladığın işler',
             icon: Icons.work_outline,
             accent: BirOmurAccents.mor,
             onTap: () => _go(_CareerPage.isArama),
@@ -1055,6 +1205,7 @@ class _PanelCard extends StatelessWidget {
     required this.title,
     required this.rows,
     this.accent = BirOmurAccents.mavi,
+    super.key,
   });
 
   final IconData icon;

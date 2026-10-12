@@ -1112,6 +1112,34 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   "ekran yanlış hesaplıyor" diye raporlayacaktım; ölçümle birlikte doğru
   yere, kuyruğa (Q-243) gitti.
 
+- **Paket DS.** **Bekleme listesi bir bekçi değildir.** Paket DR üç
+  kapsam listesi yazdı (`kModalKareleri`, `kModalBekleyen`,
+  `kModalBaskaTestle`); bir paket sonra ölçtüm ve son ikisi depoda
+  **sıfır** yerden çağrılıyordu. Denetlenmeyen kayıt hemen eskidi:
+  yedi "bekleyen" dosyadan beşi aslında basılıyordu, "başka döküm
+  basıyor" denen dosya ise basılmıyordu. Kural: bir kapsam iddiasını,
+  o kareyi **basan test** kendi çalışmasında doğrulamalı
+  (`modalKapsamDenetle`). Kaynak taraması iddianın *uydurulmadığını*
+  gösterir, *tuttuğunu* göstermez.
+- **Paket DS (kendi hatam, üçüncü kez).** MÜLAKAT karesi üç paket
+  boyunca "açılmıyor" diye duruyordu ve teşhisi kendi tahminimden
+  kurmuşum ("alt sekmeye basmak Meslek ekranını getirmiyor"). Oysa
+  `tester.tap()` o üç paket boyunca **"warnIfMissed" uyarısı**
+  basıyordu: dokunma hiçbir şeye isabet etmiyordu, çünkü önünde bir
+  modal bariyer vardı. **Aracın kendi uyarısını oku;** tahminle
+  teşhis kurmak, ölçmeden rapor etmenin başka bir biçimi.
+- **Paket DS.** Aynı karede iki ayrı neden olabilir ve biri ötekini
+  gizler. Mülakat penceresinin açılmamasının **ürün** tarafı da vardı
+  (öğrenciye o satır hiç çizilmiyordu — D-131'in yarısı çalışmıyordu,
+  180 kare) **araç** tarafı da (modal bariyer). Birincisini bulunca
+  "tamam, neden buydu" diye kapatacaktım; kapatmadım çünkü bekçi hâlâ
+  düşüyordu. **Bekçiyi, kendi teşhisini doğruladığında değil, kare
+  gerçekten basıldığında kapat.**
+- **Paket DS.** Kapı açarken **varış yerini de göster.** Öğrenciye "İş
+  ara" satırı eklemek yetmezdi: o satırdan geçip işe giren oyuncu
+  işini göremeyecek ve ayrılamayacaktı (ölçüm: 589 çalışan öğrenci
+  karesi). Tek yönlü kapı bırakmak, kapıyı hiç açmamaktan daha kötü.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,
