@@ -34,6 +34,24 @@ abstract final class SocialIncome {
   /// prototypeOnly: kabul edilen sponsorluğun tamamlanması için süre (yıl).
   static const int prototypeOnlyDealDeadline = 2;
 
+  /// Anlaşmanın **düşeceği** yaş (Paket DL).
+  ///
+  /// **Neden işlev.** Süre sabiti üç yerde okunuyor: motor anlaşmayı
+  /// düşürürken, ekran oyuncuya son yılı yazarken ve testler ikisinin
+  /// aynı yılı söylediğini doğrularken. Paket DL'den önce ekran süreyi
+  /// hiç yazmıyordu; oyuncu kabul ediyor, iki yıl sonra habersiz
+  /// takipçi kaybediyordu. Sayı artık tek yerden gelir; sabiti
+  /// değiştiren ekranı da değiştirir.
+  static int deadlineAgeFor(SponsorDeal deal) =>
+      deal.acceptedAtAge + prototypeOnlyDealDeadline;
+
+  /// Paylaşımın **hâlâ sayıldığı son** yaş.
+  ///
+  /// Motor yaş [deadlineAgeFor]'a geldiğinde anlaşmayı yıl geçerken
+  /// düşürür; o yıl oyuncu artık paylaşım yapamaz. Bu yüzden ekranda
+  /// yazılan son yıl bir eksiğidir.
+  static int lastActiveAgeFor(SponsorDeal deal) => deadlineAgeFor(deal) - 1;
+
   /// prototypeOnly: sponsorluk ücretinin takipçi başına payı (₺).
   ///
   /// Eskiden ücret, kategorinin eşiğini **aşan** takipçi başına 3,2 ₺

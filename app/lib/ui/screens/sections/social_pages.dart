@@ -99,13 +99,22 @@ class _SocialMediaPageState extends State<SocialMediaPage> {
           const SizedBox(height: 12),
         ],
         // Kabul edilmiş ama paylaşımı yapılmamış sponsorluklar.
+        //
+        // **Paket DL.** Kart süreyi hiç yazmıyordu. Motor anlaşmayı
+        // `SocialIncome.prototypeOnlyDealDeadline` yıl sonra düşürüyor,
+        // takipçinin %4'ünü siliyor ve 4 mutluluk alıyor; oyuncu bunu
+        // ancak ceza kesildikten sonra günlükte görüyordu. Son yıl
+        // artık kartta yazılı ve sayı sabitin kendisinden geliyor.
         for (final SponsorDeal deal in controller.openSponsorDeals) ...<Widget>[
           InfoPanel(
             icon: Icons.assignment_turned_in_outlined,
             text:
                 '${trUpperFirst(deal.label)} sponsorluğunu kabul ettin. '
                 'Ücret (${trMoney(deal.fee)}), ${deal.platform.label} '
-                'üzerinde bir paylaşım yapınca ödenecek.',
+                'üzerinde bir paylaşım yapınca ödenecek. '
+                'Son yıl: ${SocialIncome.lastActiveAgeFor(deal)} yaşın; '
+                'o yıla kadar paylaşım yapmazsan anlaşma düşer, ödeme '
+                'olmaz ve takipçi kaybedersin.',
           ),
           const SizedBox(height: 12),
         ],

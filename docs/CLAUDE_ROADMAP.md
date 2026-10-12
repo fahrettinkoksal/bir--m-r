@@ -952,6 +952,24 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   iddiası boşa çalışıyordu, çünkü cüzdanı maaş da artırır. Doğru
   kaynak oyunun **kendi kaydı**ydı. Bir iddia yazdıktan sonra sor:
   **bu sayı başka hangi sebeple böyle çıkabilir?**
+- **Paket DL.** Oyun **ödülü** bildirim penceresiyle duyurup **cezayı**
+  yalnızca günlüğe yazıyorsa o ceza oyuncu için yoktur. Sponsorluk
+  teklifi pencere açıyordu; kabul edip paylaşmamanın bedeli (takipçinin
+  %4'ü + 4 mutluluk) açmıyordu ve 120 hayatta kırılan 89 anlaşmanın
+  88'i sessizce geçti. Yeni soru: bu mekaniğin **cezası** nerede
+  yazılı, ödülüyle aynı yerde mi?
+- **Paket DL.** Süresi olan her yükümlülük süresini **ekranda** söylemek
+  zorundadır. Motor iki yıl sayıyordu, kart yalnızca "paylaşım yapınca
+  ödenecek" diyordu: oyuncunun elindeki bilgiyle ceza arasında iki yıl
+  vardı. Sayıyı tek bir işleve (`deadlineAgeFor`) bağlamak, "ekranda
+  yazan yıl ile motorun düşürdüğü yıl aynı mı?" sorusunu da test
+  edilebilir yaptı — bir yıl kaydırma mutasyonu iki bölümü düşürüyor.
+- **Paket DL.** Katalog seyrekliğini oyuna yazmadan önce **aracı** sor.
+  `yerel_lezzet` 12 teklifle en seyrek kategoriydi; sebep eşiği değil,
+  botun hesabını `SocialPlatform.values` sırasına göre açıp ilk
+  platformda kalmasıydı — o kategori video platformunu kapsamayan tek
+  kategori. Katalog ve bot, ikisi de değiştirilmedi: biri gerçek bir
+  kusur değil, öteki bütün ölçümlerin zarını kaydırırdı.
 
 ## Pano
 

@@ -9817,3 +9817,87 @@ değiştirmedi; **sabitliyor** — katalog ileride sessizce para basan bir
 kaleme dönüşürse §1 düşer.
 
 Android APK derlenmedi ve hiçbir cihazda oynanmadı.
+
+---
+
+## Paket DL — sponsorluğun saati görünmüyordu (12 Ekim 2026)
+
+Paket DK'nın dersi "botun uğramadığı her mekanik ölçülmemiş bir
+ekonomidir" idi. Sponsorluk botun **uğradığı** bir mekanik, ama
+**hunisi** hiç ölçülmemişti. 120 sosyal arketip hayatı (tohum
+51000-51119) oynatıldı.
+
+### Huni — teklif gerçekten geliyor mu?
+
+| kategori | eşik | teklif | kabul |
+|---|---|---|---|
+| mahalle kafe zinciri | 5.000 | 82 | 61 |
+| kırtasiye markası | 6.000 | 61 | 50 |
+| sporcu içeceği üreticisi | 9.000 | 59 | 43 |
+| bağımsız mobil oyun stüdyosu | 5.000 | 51 | 37 |
+| çevrim içi kitap kulübü | 7.500 | 38 | 28 |
+| yerel lezzet markası | 12.000 | **12** | 11 |
+| elektronik mağazası | 20.000 | 40 | 33 |
+
+120 hayatın **113'ü** hesap açtı, **59'una** teklif geldi; 5.000
+kapısını geçen hayat sayısı 60. Yani kapıyı geçen hemen her hayat
+teklif alıyor. Takipçi tavanı: medyan 5.852, en yüksek 7.285.623.
+
+**Ölü içerik yok.** Yedi kategorinin yedisi de teklif edildi; "yazılmış
+ama hiç gelmeyen sponsor kategorisi" hipotezi ölçümde öldü. EKSIKLER
+§7.6'nın "dar katalog" satırı artık bunu söylüyor: katalog dar, ama
+ulaşılamaz değil.
+
+**`yerel_lezzet`'in seyrekliği OYUN değil BOT bulgusudur.** Bot hesabını
+`SocialPlatform.values` sırasına göre açıp ilk platformda kalıyor;
+`yerel_lezzet` video platformunu kapsamayan **tek** kategoridir.
+Katalog değiştirilmedi, botun zarı da kaydırılmadı (Paket CY dersi: bot
+davranışını değiştirmek bütün ölçümlerin zarını kaydırır).
+
+### Gerçek bulgu: kabul edilen anlaşmaların %34'ü sessizce kırılıyordu
+
+Kabul edilen **263** anlaşmanın **162'si** tamamlandı, **89'u (%34)**
+süresi dolup kırıldı. O yol baştan sona görünmezdi:
+
+| kusur | önce | sonra |
+|---|---|---|
+| Kabul kartı süreyi yazıyor mu? | **hayır** — yalnızca "paylaşım yapınca ödenecek" | "Son yıl: N yaşın; o yıla kadar paylaşım yapmazsan anlaşma düşer, ödeme olmaz ve takipçi kaybedersin." |
+| Ceza pencere açıyor mu? | **hayır** — yalnızca günlük satırı | `NoticeKind.aktivite` penceresi, günlükle aynı cümle |
+| Pencere **uygulanan** kaybı mı yazıyor? | — | evet; mutluluk tabanda ise fark 0 yazılır |
+
+Ceza gerçekti: takipçinin **%4'ü** (tekrarlayınca %15'e kadar) ve
+**4 mutluluk**. 7 milyon takipçili bir hesapta bu 280.000 takipçi
+demek ve oyuncu bunu ancak günlüğü satır satır okursa görüyordu. Oyun
+para teklif edilince pencere açıyor, cezayı fısıldıyordu.
+
+### Ne değişmedi
+
+Hiçbir süre, oran, eşik ya da ücret. İkisi de **görünürlük**
+düzeltmesidir. Süre artık tek kaynaktan okunuyor:
+`SocialIncome.deadlineAgeFor` / `lastActiveAgeFor` — motor da ekran da
+aynı işlevi çağırır, sabiti değiştiren ekranı da değiştirir.
+
+### Bekçi ısırıyor mu? Üç mutasyon
+
+| mutasyon | düşen bölüm | sonuç |
+|---|---|---|
+| Pencere `enqueue`'u kaldır | §4, §5, §6 | §6 **88/89** sessiz düşme bildirdi (89.'su ölüm yılında, kurallı biçimde dışlandı) |
+| `lastActiveAgeFor`'u bir yıl kaydır | §1, §3 | §3 "kartın söylediği yılda anlaşma yok" diye düştü |
+| Süreyi motorda yeniden türet | §2 | tek kaynak taraması düştü |
+
+Bekçi: `app/test/paket_dl_sponsorluk_test.dart` (6 test). §6, oyunun
+**kendi kaydını** okur: günlükte düşme satırı yazılan her yıl için bir
+pencere görülmüş olmalı; tek istisna ölüm yılıdır (o yıl pencere
+kapatılmadan hayat biter). §6 ayrıca dekoratif eşik tarar — hiçbir
+kategorinin eşiği hayatların gerçekten ulaştığı tavanın üstünde
+olmamalı; tavan ölçümden gelir, elle yazılmaz.
+
+Karar bekleyen soru **Q-240**: son yıl uyarısı ve "açık anlaşma bütün
+teklifleri kapatıyor" kuralı.
+
+Yeni pencere bildirim bütçesini sınadı: `critical_notice_test`'in
+"en kötü yıl sekiz pencere" sınırı **gevşetilmedi** ve geçti. Tam süit:
+**3835 geçti, 17 atlandı, 0 hata** (37 dk). `flutter analyze lib test`
+temiz.
+
+Android APK derlenmedi ve hiçbir cihazda oynanmadı.

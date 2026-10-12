@@ -6,8 +6,10 @@ import '../models/applied_effect.dart';
 import '../models/game_state.dart';
 import '../models/interaction.dart';
 import '../models/life_log.dart';
+import '../models/pending_notice.dart';
 import '../models/social_account.dart';
 import '../models/sponsorship.dart';
+import '../life/notices.dart';
 import 'social_income.dart';
 import 'sport_social_boost.dart';
 import '../../text/turkish_text.dart';
@@ -457,6 +459,14 @@ class SocialEngine {
   ///
   /// Yapılmayan paylaşım için **ödeme yapılmaz**; yükümlülük sessizce
   /// silinmez, "süresi doldu" olarak kapanır.
+  ///
+  /// **Paket DL — ceza artık pencere açar.** Teklifin kendisi bildirim
+  /// penceresi açıyordu, cezası açmıyordu: oyuncu takipçisinin %4'ünü
+  /// ve 4 mutluluk kaybediyor, bunu yalnızca günlüğü okuyorsa
+  /// görüyordu. 120 sosyal hayatta kabul edilen 263 anlaşmanın 89'u
+  /// (%34) bu sessiz yoldan düştü. Pencere metni günlük satırının
+  /// aynısıdır ve **yalnızca gerçekten uygulanan** mutluluk farkını
+  /// taşır.
   ({GameState state, List<String> logTexts}) expireDeals(
     GameState state,
     int newAge,
@@ -466,10 +476,7 @@ class SocialEngine {
     final List<SponsorDeal> guncel = state.sponsorDeals
         .map((SponsorDeal d) {
           if (!d.isOpen) return d;
-          if (newAge - d.acceptedAtAge <
-              SocialIncome.prototypeOnlyDealDeadline) {
-            return d;
-          }
+          if (newAge < SocialIncome.deadlineAgeFor(d)) return d;
           dusen.add(d);
           return d.copyWith(expired: true);
         })
@@ -494,6 +501,7 @@ class SocialEngine {
           d.platform: -kayip,
         });
       }
+      final int mutlulukOnce = sonraki.player.stats.happiness;
       sonraki = sonraki.copyWith(
         player: sonraki.player.copyWith(
           stats: sonraki.player.stats.gain(
@@ -501,14 +509,25 @@ class SocialEngine {
           ),
         ),
       );
-      satirlar.add(
-        kayip > 0
-            ? '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
+      final int mutlulukFarki =
+          sonraki.player.stats.happiness - mutlulukOnce;
+      final String satir = kayip > 0
+          ? '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
                 'düştü, ödeme olmadı ve konu kitlene yansıdı: '
                 '${trNumber(kayip)} ${d.platform.audienceWord} kaybettin.'
-            : '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
-                'düştü ve ödeme olmadı.',
-      );
+          : '${d.label} sponsorluğu için paylaşım yapmadın; anlaşma '
+                'düştü ve ödeme olmadı.';
+      satirlar.add(satir);
+      sonraki = Notices.enqueue(sonraki, <PendingNotice>[
+        PendingNotice(
+          id: 'sponsor-dusen-$newAge-${d.id}',
+          kind: NoticeKind.aktivite,
+          age: newAge,
+          title: 'Sponsorluk düştü',
+          text: satir,
+          happinessDelta: mutlulukFarki,
+        ),
+      ]);
     }
 
     return (state: sonraki, logTexts: satirlar);

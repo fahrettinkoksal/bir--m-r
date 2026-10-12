@@ -1014,6 +1014,18 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
    eskimişti (11 Ekim 2026'da düzeltildi):** hobi kataloğu D-152'de
    12'ye çıktı, §4.3 tablosu bunu zaten yazıyordu. Kalan dar
    kataloglar sponsor kategorisi (7) ve evcil hayvan (10).
+
+   > **Paket DL ölçümü (12 Ekim 2026) — sponsor kategorisi dar ama
+   > ÖLÜ DEĞİL.** "Dar katalog" ile "ulaşılamaz katalog" ayrı şeylerdir
+   > ve bu satır hangisi olduğunu söylemiyordu. 120 sosyal arketip
+   > hayatında yedi kategorinin **yedisi** de teklif edildi (82 · 61 ·
+   > 59 · 51 · 38 · 12 · 40 teklif). En seyrek olan `yerel_lezzet`'in
+   > sebebi eşiği değil **ölçüm aracı**: bot hesabını
+   > `SocialPlatform.values` sırasına göre açıp ilk platformda kalıyor,
+   > `yerel_lezzet` ise video platformunu kapsamayan tek kategori.
+   > Yani kataloğu genişletmek bir **içerik** işidir, bir hata
+   > düzeltmesi değil. Kalıcı bekçi dekoratif eşiği de tarıyor:
+   > `app/test/paket_dl_sponsorluk_test.dart` §6.
 7. ~~Hediye seçimi, menü düzeni, 2. el araç pazarı, kefalet ve cezaevi
    hayatı, üvey ebeveyn~~ **Yapıldı (D-134 … D-141).** Çetenin dışarı
    taşması (Q-148), üvey kardeş ve miras (Q-149) duruyor.
