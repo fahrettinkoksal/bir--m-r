@@ -254,14 +254,18 @@ void main() {
     // Paket DS'de ölçülen hâli: iki dosya. Kuyruk büyüyorsa ya yeni
     // bir metin taşıyan widget okunmadan eklendi ya da basılan bir
     // kare kaybedildi — ikisi de bildirilmeli.
+    // Paket DT'de kuyruk **boşaldı**: üç akış içi modalın da karesi
+    // basıldı. Tavan artık sıfır; bir dosya okunmadan buraya
+    // atılamaz.
     expect(
-      kModalBekleyen.length,
-      lessThanOrEqualTo(3),
-      reason: 'Bekleme kuyruğu büyümüş: ${kModalBekleyen.join(", ")}\n'
-          'Paket DS ölçümünde üç dosya vardı (notice_sheet, '
-          'license_exam_sheet, track_choice_sheet). Yeni bir dosya '
-          'okunmadan kuyruğa atılıyorsa kareyi yaz; basılan bir kare '
-          'kaybedildiyse nedenini bul.',
+      kModalBekleyen,
+      isEmpty,
+      reason: 'Bekleme kuyruğu yeniden doldu: '
+          '${kModalBekleyen.join(", ")}\n'
+          'Paket DT bu kuyruğu boşalttı. Yeni bir metin taşıyan widget '
+          'okunmadan kuyruğa atılıyorsa kareyi yaz (§1 zaten kapsam '
+          'açığını bildirir); basılan bir kare kaybedildiyse nedenini '
+          'bul.',
     );
     // ignore: avoid_print
     print('BEKLEME KUYRUĞU: ${kModalBekleyen.length} dosya · '

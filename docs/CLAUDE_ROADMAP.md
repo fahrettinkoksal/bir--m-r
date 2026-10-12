@@ -1140,6 +1140,28 @@ Her paket sonunda buraya tek satır: bir sonraki paket aynı duvara
   işini göremeyecek ve ayrılamayacaktı (ölçüm: 589 çalışan öğrenci
   karesi). Tek yönlü kapı bırakmak, kapıyı hiç açmamaktan daha kötü.
 
+- **Paket DT.** **Bir pencerenin açılmaması, o pencerenin bozuk olduğu
+  anlamına gelmez.** Bu pakette iki kez "açılmadı" gördüm, ikisinde de
+  sebep aracımdı: (1) `home_shell` kuyruğun **ilk** bildirimini
+  gösteriyor, aradığım cenaze bildirimi ortadaydı — pencere açılıyordu,
+  başka bir şeyi yazıyordu; (2) "temiz kare" süzgecimle aradığım alan
+  seçimi karesi **tanım gereği boş** bir kümeydi (359 karenin
+  **sıfırı** olaysız). Kural: **önce say, sonra suçla.** Kapıyı kaç
+  karede gördüğünü ölç, sonra "neden çizilmiyor" diye sor.
+- **Paket DT.** Ölçüm aracın kendi **tanımını** da sınar. "Temiz kare"
+  (`!hasNotice && pendingEvent == null`) bölüm dökümünde doğru bir
+  tanımdı; `awaitingTrackChoice` için imkânsız bir tanımdı, çünkü o
+  kapı `ageUp`in kapılarından biri ve yalnızca yılın başındaki
+  bekleyenler yanıtlanmamışken açık. **Tanımı kareye göre seç, kalıbı
+  kopyalama.**
+- **Paket DT.** Durumu kurmanın alternatifi onu beklemek değil,
+  **oynamaktır.** Ehliyet sınavı karesi bot taramasında 0 kez görünüyor
+  (başvuruyla aynı adımda çözülüyor) ve alan seçimi karesi hep bekleyen
+  bir olayla birlikte geliyor. İkisi de `copyWith` ile kurulmadı:
+  döküm arayüzden başvurdu ve bekleyenleri oyuncunun yaptığı gibi
+  yanıtladı. Üretilmiş durum, kurulmuş durumdan her zaman daha
+  güvenilir.
+
 ## Pano
 
 Güncel ilerleme: `docs/planner/index.html` (betikle üretilir,

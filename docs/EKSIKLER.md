@@ -1030,6 +1030,18 @@ Bu tek başına bir eksiktir: oyunun neredeyse bütün sayısal dengesi
 > karşılaştırmaya giren dizgi çizilen metin değil, interpolasyon
 > çıkınca 12 karakterden kısa kalan dizgi cümle değil.
 >
+> **GÜNCELLEME (Paket DT): modal bekleme kuyruğu kapandı (3 → 0).**
+> Kalan üç dosya "akış içi" modaldı — bir satırın arkasında değil bir
+> eylemin ortasında açılıyorlar. Dördü de basıldı: lise alanı seçimi
+> (bekleyen olay arayüzden yanıtlanarak), cenaze bildirimi (kuyruğun
+> ortasına yürünerek, iki adım ayrı ayrı), bebeğe ad verme, ehliyet
+> sınavı (**oynanarak** — kapı bot taramasında 0 kare çıkıyor, çünkü
+> sınav başvuruyla aynı adımda çözülüyor). Bir gerçek kusur çıktı:
+> cenaze bildiriminin metni, düğmeler henüz sorarken "Cenazeye
+> katılıyorsun" diyor ve ikinci adımda aynı soruyu ikinci kez
+> yazdırıyordu. Bugünkü kapsam: **15 metin taşıyan widget · 5 döküm ·
+> 10 başka test · açık 0 · kuyruk 0.**
+>
 > Yani bu denetimden sonra dokuz ekranın dokuzunun da en az bir test
 > yolu var. **Uyarı:** sınıf adını testlerde aramak zayıf bir vekildir
 > (örn. `SchoolCareerScreen` adı hiç geçmiyor ama ekran

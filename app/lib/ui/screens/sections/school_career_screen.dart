@@ -392,6 +392,10 @@ class _SchoolViewState extends State<_SchoolView> {
         // Lise alanı seçimi bekliyorsa en üstte durur.
         if (egitim.awaitingTrackChoice) ...<Widget>[
           MenuRow(
+            // Anahtar Paket DT'de eklendi: komşu satırların hepsinde
+            // var ve bu satır dökümün `track_choice_sheet` karesine
+            // giden tek kapı.
+            key: const Key('school_track_choice_row'),
             title: 'Lise alanını seç',
             subtitle: 'Yerleştirme puanın: ${egitim.placementScore ?? 0}',
             icon: Icons.alt_route_outlined,

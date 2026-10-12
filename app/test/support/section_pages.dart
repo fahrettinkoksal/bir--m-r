@@ -564,54 +564,17 @@ final List<Bolum> kModalKareleri = <Bolum>[
 
 /// Metin taşıyan ama karesi **henüz** basılmayan modal/panel dosyaları.
 ///
-/// **Paket DS — liste yanlıştı ve kimse denetlemiyordu.** Paket DR bu
-/// üç kaydı yazdı ama hiçbir test onları okumuyordu (ölçtüm:
-/// `kModalBekleyen` ve `kModalBaskaTestle` depoda **sıfır** yerden
-/// çağrılıyordu). Denetlenmeyen kayıt hemen eskidi: yedi "bekleyen"
-/// dosyadan beşi aslında basılıyordu ya da basılabiliyordu.
+/// **Paket DT'de boşaldı.** Paket DS bu listeyi ölçüp üçe indirmişti
+/// (`notice_sheet`, `license_exam_sheet`, `track_choice_sheet`); üçü de
+/// "akış içi" modaldı, yani ekranda bir satırın arkasında değil bir
+/// eylemin ortasında açılıyorlardı. Paket DT üçünün de karesini bastı
+/// (`ekran_dokumu_akis_modallari_test.dart`) ve bir gerçek metin kusuru
+/// çıkardı: cenaze bildirimi oyuncunun yerine karar veriyordu.
 ///
-/// Ölçüm (`ekran_dokumu_ozel_durum_test.dart` çıktısında her dosyanın
-/// kendi cümlesi arandı):
-///
-///   elder_support_card   "Bu yıl kim yanında?"                1 kez
-///   health_crisis_sheet  "Ne yapacağına sen karar veriyorsun." 1 kez
-///   trial_sheet          "Avukat sonucu garanti etmez"         1 kez
-///   pregnancy_notice     "Bebek yolda"                         2 kez
-///   person_card          "vefat etti"                         37 kez
-///   interview_sheet      "Karşındaki kişi bir soru soruyor."   0 kez
-///   prison_life_panel    "Koğuş hayatı"                        0 kez
-///   license_exam_sheet   "Geçmek için en az"                   0 kez
-///   track_choice_sheet   "seçtiğin alan eğitim"                0 kez
-///
-/// Mülakat karesinin neden basılmadığı da ölçüldü ve **ürün hatası**
-/// çıktı: dökümün açıcısı `career_mulakat_devam` satırını arıyordu, o
-/// satır yalnızca kariyer görünümünde vardı ve bulunan kare 17
-/// yaşındaki bir **lise öğrencisiydi**. Öğrencinin mülakata devam etme
-/// yolu hiç yoktu (Paket DS, `school_career_screen.dart`). Satır
-/// eklendi, açıcı iki anahtarı da deniyor, kare artık basılıyor.
-///
-/// Kalan iki dosya gerçekten bekliyor ve ikisi de **akış içi** modal:
-/// ekranda bir satırın arkasında değil, bir eylemin ortasında
-/// açılıyorlar. Liste yalnızca **küçülür**; yeni bir metin taşıyan
-/// widget eklenirse `paket_ds_modal_kapsami_test.dart` düşer.
-const List<String> kModalBekleyen = <String>[
-  // 13 cümle · **DR'nin kaydı yanlıştı.** "Başka döküm basıyor"
-  // deniyordu; ölçtüm: `ekran_dokumu_bildirim_pencereleri_test.dart`
-  // bildirim penceresini çiziyor ama bastığı metin bildirimin
-  // **içeriği** ("Biletin tutmadı. Numaran 021952 idi."), pencerenin
-  // kendi cümleleri değil. Pencerenin 13 cümlesi cenaze seçenekleri ve
-  // bebeğe ad verme dallarında duruyor ve o dallar üç dökümün
-  // hiçbirinde çizilmedi (ölçüm: "Cenazeye katıl" 0, "Bebeğin adını
-  // sen koyabilirsin" 0).
-  'notice_sheet.dart',
-  // 8 cümle · ehliyet sınavı akışının ortasında açılıyor: Aktiviteler →
-  // Ehliyet → sınava gir. Dökümün tek adımlı yol kalıbına girmiyor.
-  'license_exam_sheet.dart',
-  // 8 cümle · ortaokul bitince gelen **bekleyen karar**; temiz kare
-  // tanımı gereği (Paket CG/CR) bölüm dökümü o kareyi dışarıda
-  // bırakıyor.
-  'track_choice_sheet.dart',
-];
+/// Liste yalnızca **küçülür**: yeni bir metin taşıyan widget eklenirse
+/// `paket_ds_modal_kapsami_test.dart` §1 kapsam açığını bildirir, §5 de
+/// kuyruğun boş kaldığını denetler — kare yazılmadan buraya atılamaz.
+const List<String> kModalBekleyen = <String>[];
 
 /// Karesi **başka bir döküm** tarafından basılan modal/panel dosyası.
 ///
@@ -679,6 +642,32 @@ const List<ModalKaydi> kModalBaskaTestle = <ModalKaydi>[
     'interview_sheet.dart',
     'paket_ds_ogrenci_is_kapisi_test.dart',
     'Karşındaki kişi bir soru soruyor.',
+  ),
+  // --- Paket DT: akış içi modallar ---------------------------------
+  //
+  // Üçü de bir eylemin ortasında açılıyor. Kapıları ölçüldü (8 arketip
+  // × 10 tohum): alan seçimi 359 kare, cenaze bildirimi 887, doğum
+  // bildirimi 179, ehliyet sınavı **0** — son satır araç bulgusu,
+  // sınav başvuruyla aynı adımda çözülüyor, bu yüzden o kare
+  // **oynanarak** açılıyor.
+  //
+  // `notice_sheet.dart`ın işareti ad verme dalından: DS'nin ölçtüğü
+  // yanlış kayıt tam buydu — bildirim dökümü pencerenin kendi
+  // cümlelerini değil bildirimin içeriğini basıyordu.
+  ModalKaydi(
+    'notice_sheet.dart',
+    'ekran_dokumu_akis_modallari_test.dart',
+    'Bebeğin adını sen koyabilirsin.',
+  ),
+  ModalKaydi(
+    'track_choice_sheet.dart',
+    'ekran_dokumu_akis_modallari_test.dart',
+    'devam edemezsin: seçtiğin alan eğitim',
+  ),
+  ModalKaydi(
+    'license_exam_sheet.dart',
+    'ekran_dokumu_akis_modallari_test.dart',
+    'Geçmek için en az',
   ),
 ];
 

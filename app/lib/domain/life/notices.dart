@@ -146,8 +146,28 @@ abstract final class Notices {
       age: playerAge,
       personId: person.id,
       title: 'Cenaze masrafları',
-      text: '$bag ${person.firstName} için cenaze hazırlıkları yapılıyor. '
-          'Cenazeye katılıyorsun; masraflara katkıda bulunmak ister misin?',
+      // **Bildirim yalnızca sahneyi kurar; soruları pencere sorar
+      // (Paket DT).** Buradaki metin eskiden şöyleydi:
+      //
+      //   "… cenaze hazırlıkları yapılıyor. Cenazeye katılıyorsun;
+      //    masraflara katkıda bulunmak ister misin?"
+      //
+      // Kare ilk kez basıldığında iki kusur birden çıktı:
+      //
+      // 1. **Birinci adımda çelişki.** Metin "Cenazeye katılıyorsun"
+      //    diyor, hemen altındaki iki düğme ise katılıp katılmayacağını
+      //    **soruyor** ("Cenazeye katıl" / "Katılamıyorum"). Oyuncu
+      //    henüz seçmemişken cümle onun yerine karar vermiş oluyordu.
+      // 2. **İkinci adımda tekrar.** Katılım seçildikten sonra pencere
+      //    kendi sorusunu yazıyor ("Cenazeye katılıyorsun. Masraflara
+      //    katkıda bulunmak ister misin?") ve aynı cümle ekranda iki
+      //    kez duruyordu.
+      //
+      // Kök neden tek: bildirim metni pencerenin işini yapıyordu.
+      // `notice_widget_test.dart` zaten doğru biçimi kullanıyordu
+      // ("Annen Hatice için cenaze hazırlıkları yapılıyor."), yani
+      // beklenen şekil buydu. D-050'nin iki adımlı akışı değişmedi.
+      text: '$bag ${person.firstName} için cenaze hazırlıkları yapılıyor.',
       funeralCost: prototypeOnlyFuneralCost,
     );
   }

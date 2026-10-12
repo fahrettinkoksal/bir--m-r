@@ -647,6 +647,9 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         if (state.player.age >=
             LicenseType.motosiklet.prototypeOnlyMinAge) ...<Widget>[
           MenuRow(
+            // Anahtar Paket DT'de eklendi: `license_exam_sheet`
+            // karesine giden tek kapı bu satır.
+            key: const Key('aktivite_ehliyet'),
             title: 'Ehliyet İşlemleri',
             subtitle: state.hasPendingLicenseExam
                 ? 'Devam eden bir sınavın var'

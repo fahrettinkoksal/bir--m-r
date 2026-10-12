@@ -10712,3 +10712,124 @@ değil, kendi tahminimden kurmuşum.
 satırını eklemek yetmezdi; o satırdan geçen oyuncu işe girince işini
 göremiyor ve ayrılamıyor olacaktı. Ölçüm bunu önceden gösterdi (589
 kare), ekran da onunla birlikte yazıldı.
+
+## Paket DT — akış içi modallar okundu, bekleme kuyruğu kapandı (12 Ekim 2026)
+
+Paket DS modal kapsam kaydını denetlenir hâle getirmiş ve kuyrukta üç
+dosya bırakmıştı: `notice_sheet.dart` (13 cümle),
+`license_exam_sheet.dart` (8), `track_choice_sheet.dart` (8). Üçü de
+**akış içi** modal: ekranda bir satırın arkasında değil, bir eylemin
+ortasında açılıyorlar.
+
+### 1) Kapılar ölçüldü — biri sıfır çıktı
+
+8 arketip × 10 tohum, tam hayatlar, `onYear` + `onPreAge` + `onPending`:
+
+| kapı | kare |
+|---|---|
+| lise alanı seçimi bekliyor | 359 |
+| cenaze bildirimi | 887 |
+| doğum bildirimi (ad verme) | 179 |
+| **ehliyet sınavı bekliyor** | **0** |
+
+Son satır bir **araç bulgusu**, ürün hatası değil: sınav başvuruyla
+aynı adımda çözülüyor, bu yüzden hiçbir kanca onu "bekliyor" hâlinde
+göremiyor (Paket CR'nin ölçtüğü kör noktanın aynısı). Günlükte sınav
+satırları bolca var, yani akış çalışıyor. O kare bu yüzden
+**oynanarak** açıldı: döküm Aktiviteler → Ehliyet İşlemleri'ne gidip
+başvuruyor.
+
+### 2) İki araç tuzağı, ikisi de ölçümle çözüldü
+
+**a) Bildirim kuyruğunun ortası.** `home_shell` her karede yalnızca
+`state.nextNotice`i — yani kuyruğun **ilk** öğesini — gösteriyor.
+Aradığım cenaze bildirimi kuyruğun ortasındaydı:
+
+```
+aileDonum | olum | **cenaze** | miras | aileDonum
+```
+
+İlk koşumda "pencere açılmadı" diye rapor edecektim; pencere
+açılıyordu, **başka bir bildirimi** gösteriyordu. Döküm artık oyuncunun
+yaptığını yapıyor: sırayla kapatıp hedefe yürüyor ve kaç pencere
+kapattığını yazıyor.
+
+**b) Alan seçimi karesi "BULUNAMADI" çıkıyordu.** Üç süzgeç denedim,
+sonra ölçtüm:
+
+| alan seçimi karesi | sayı |
+|---|---|
+| hepsi | 359 |
+| **olaysız** | **0** |
+| krizsiz | 359 |
+| bildirimsiz | 100 |
+
+`awaitingTrackChoice`in açık olduğu **her** karede bekleyen bir olay da
+var. Sebebi yapısal: alan seçimi `ageUp`in beş kapısından biri (D-094),
+bot onu gördüğü anda yanıtlıyor, kare yalnızca `onPending` kancasında
+görünüyor. Çözüm durumu kurmak değil **oynamak**: bekleyen olay ve
+bildirimler arayüzden yanıtlanıyor (`answerPendingEvents`). Alan seçimi
+bunlarla kapanmıyor, kendi kapısı ayrı — test bunu da doğruluyor.
+
+### 3) Okunan karelerden çıkan gerçek kusur: cenaze bildirimi oyuncunun yerine karar veriyordu
+
+Bildirim metni şöyleydi:
+
+> Baba Ramazan için cenaze hazırlıkları yapılıyor. **Cenazeye
+> katılıyorsun; masraflara katkıda bulunmak ister misin?**
+
+Kare basılınca iki kusur birden çıktı:
+
+1. **Birinci adımda çelişki.** Metin "Cenazeye katılıyorsun" diyor,
+   hemen altındaki iki düğme ise katılıp katılmayacağını **soruyor**
+   ("Cenazeye katıl" / "Katılamıyorum").
+2. **İkinci adımda tekrar.** Katılım seçildikten sonra pencere kendi
+   sorusunu yazıyor ("Cenazeye katılıyorsun. Masraflara katkıda
+   bulunmak ister misin?") ve aynı cümle ekranda **iki kez** duruyordu.
+
+Kök neden tek: bildirim metni pencerenin işini yapıyordu. Metin artık
+yalnızca sahneyi kuruyor; soruları pencere soruyor. D-050'nin iki
+adımlı akışı değişmedi.
+
+**Doğrulayıcı bir ayrıntı:** `notice_widget_test.dart` zaten doğru
+biçimi kullanıyordu (`'Annen Hatice için cenaze hazırlıkları
+yapılıyor.'`) — yani beklenen şekil buydu, yalnızca motorun gerçek
+metni fazlalık taşıyordu.
+
+### 4) İki yanlış alarm ölçümle elendi
+
+Ehliyet sayfasında "Devam eden bir ehliyet sınavın var." gerekçesinin
+**altında** "Başvur" düğmesi görünüyor ve ilk bakışta D-063 ihlali
+gibi duruyor. Kaynağa baktım: `onPressed: availability.isAllowed ?
+onApply : null` — düğme **kapalı**, döküm yalnızca çizilmiş metni
+okuyabildiği için kapalılığı göremiyor. Aynı şey "Otomobil ehliyeti
+için en az 18 yaşında olman gerekiyor." satırında da geçerli.
+Raporlamadan önce ölçtüm; Paket DR'nin ders listesine giren üçüncü
+yanlış alarm türü bu.
+
+### Ölçüler
+
+| ölçü | değer |
+|---|---|
+| yeni test dosyası | 1 (`ekran_dokumu_akis_modallari_test`) |
+| yeni test | 4 (dört kare, biri iki adımlı) |
+| kanıtlanmış mutasyon | **4/4** |
+| ilk kez basılan kare | 4 (lise alanı, cenaze ×2 adım, ad verme, ehliyet sınavı) |
+| **modal bekleme kuyruğu** | **3 → 0** |
+| kapsam kaydı | 15 metin taşıyan dosya · 5 döküm · 10 başka test · açık 0 |
+| düzeltilen metin kusuru | 1 (iki belirtili tek kök neden) |
+| elenen yanlış alarm | 2 |
+
+### Ders
+
+**Bir pencerenin açılmaması, o pencerenin bozuk olduğu anlamına
+gelmez.** Bu pakette iki kez "açılmadı" gördüm ve ikisinde de sebep
+aracımdı: bir kez kuyruğun ortasındaki bildirimi ilk sıradakiyle
+karıştırdım, bir kez de "temiz kare" tanımımın imkânsız olduğunu
+ölçmeden varsaydım. **Sayma, sonra suçla:** kapıyı kaç karede
+gördüğünü ölç, sonra "neden çizilmiyor" diye sor.
+
+**İkincisi: ölçüm aracın kendi tanımını da sınar.** "Temiz kare"
+(`!hasNotice && pendingEvent == null`) bölüm dökümünde doğru bir
+tanımdı; alan seçimi için **tanım gereği boş** bir kümeydi. Tanımı
+kareye göre seç, kalıbı kopyalama.
